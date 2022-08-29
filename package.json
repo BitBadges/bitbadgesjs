@@ -1,14 +1,13 @@
 {
-  "name": "@tharsis/evmosjs",
-  "version": "0.1.0",
+  "name": "bitbadgesjs",
+  "version": "0.0.1",
   "main": "index.js",
-  "license": "MIT",
   "private": "false",
   "publishConfig": {
     "access": "public"
   },
-  "author": "Guillermo Paoletti <guillermo.paoletti@gmail.com>",
-  "repository": "https://github.com/tharsis/evmosjs",
+  "author": "Guillermo Paoletti <guillermo.paoletti@gmail.com>, Trevor Miller <trevormil@comcast.net>",
+  "repository": "https://github.com/bitbadges/bitbadgesjs",
   "workspaces": {
     "packages": [
       "packages/*"
