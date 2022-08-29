@@ -1,0 +1,44 @@
+syntax = "proto3";
+package trevormil.bitbadgeschain.badges;
+
+import "google/protobuf/any.proto";
+import "badges/ranges.proto";
+import "badges/uris.proto";
+
+option go_package = "github.com/trevormil/bitbadgeschain/x/badges/types";
+
+// BitBadge defines a badge type. Think of this like the smart contract definition.
+message BitBadge {
+    // id defines the unique identifier of the Badge classification, similar to the contract address of ERC721
+    // starts at 0 and increments by 1 each badge
+    uint64 id = 1;
+  
+    // uri object for the badge uri and subasset uris stored off chain. Stored in a special UriObject that attemtps to save space and avoid reused plaintext storage such as http:// and duplicate text for uri and subasset uris
+    // data returned should corresponds to the Badge standard defined.
+    UriObject uri = 2;
+
+    // these bytes can be used to store anything on-chain about the badge. This can be updatable or not depending on the permissions set.
+    // Max 256 bytes allowed
+    bytes arbitraryBytes = 3;
+    
+    // manager address of the class; can have special permissions; is used as the reserve address for the assets
+    uint64 manager = 4;
+    
+    //Store permissions packed in a uint where the bits correspond to permissions from left to right; leading zeroes are applied and any future additions will be appended to the right. See types/permissions.go
+    uint64 permissions = 5;
+
+    //FreezeRanges defines what addresses are frozen or unfrozen. If permissions.FrozenByDefault is false, this is used for frozen addresses. If true, this is used for unfrozen addresses.
+    repeated IdRange freezeRanges = 10;
+
+    // Starts at 0. Each subasset created will incrementally have an increasing ID #. Can't overflow.
+    uint64 nextSubassetId = 12;
+
+    //Subasset supplys are stored if the subasset supply != default. Balance => SubbadgeIdRange map  
+    repeated BalanceObject subassetSupplys = 13;
+    
+    //Default subasset supply. If == 0, we assume == 1.
+    uint64 defaultSubassetSupply = 14;
+
+    //Defines what standard this badge should implement. Must obey the rules of that standard.
+    uint64 standard = 15;
+}

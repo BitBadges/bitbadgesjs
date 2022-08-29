@@ -1,0 +1,18 @@
+syntax = "proto3";
+package trevormil.bitbadgeschain.badges;
+
+// this line is used by starport scaffolding # proto/tx/import
+
+option go_package = "github.com/trevormil/bitbadgeschain/x/badges/types";
+
+//Id ranges define a range of IDs from start to end. Can be used for subbadgeIds, nonces, addresses anything. If end == 0, we assume end == start. Start must be >= end.
+message IdRange {
+    uint64 start = 1;
+    uint64 end = 2;
+}
+
+//Defines a balance object. The specified balance holds for all ids specified within the id ranges array.
+message BalanceObject {
+    uint64 balance = 1;
+    repeated IdRange id_ranges = 2;
+}
