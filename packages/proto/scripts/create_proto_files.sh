@@ -17,3 +17,6 @@ protoc \
 --ts_out=$DEST_TS \
 --proto_path=$I \
 $(find $(PWD)/proto -iname "*.proto")
+
+# TODO: make this automatic
+# sudo protoc --plugin=protoc-gen-ts=$(which protoc-gen-ts) --ts_out=./src/proto --proto_path=./proto $(find ./proto -iname "*.proto") or ./proto/... ./proto/.../...
