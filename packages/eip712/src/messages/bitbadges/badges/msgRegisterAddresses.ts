@@ -4,10 +4,7 @@ const RegisterAddressesMsgValueType = [
 ]
 
 export const MSG_REGISTER_ADDRESSES_TYPES = {
-  // Amount: AmountType,
-  // Fee: FeeType,
   MsgValue: RegisterAddressesMsgValueType,
-  // StandardTxn: StandardRegisterAddressTxn,
 }
 
 export function createMsgRegisterAddresses(

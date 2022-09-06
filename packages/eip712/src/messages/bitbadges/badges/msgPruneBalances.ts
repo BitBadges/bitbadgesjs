@@ -5,10 +5,7 @@ const PruneBalancesMsgValueType = [
 ]
 
 export const MSG_PRUNE_BALANCES_TYPES = {
-  // Amount: AmountType,
-  // Fee: FeeType,
   MsgValue: PruneBalancesMsgValueType,
-  // StandardTxn: StandardRegisterAddressTxn,
 }
 
 export function createMsgPruneBalances(
