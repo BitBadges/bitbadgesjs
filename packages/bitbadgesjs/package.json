@@ -1,18 +1,15 @@
 {
-  "name": "bitbadgesjs-proto",
-  "description": "Protobuf files for BitBadges.",
-  "version": "0.0.27",
+  "name": "bitbadgesjs",
+  "description": "JS and TS libs for BitBadges",
+  "version": "0.0.3",
   "license": "MIT",
-  "eslintIgnore": [
-    "src/proto/**/*.ts"
-  ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist"
   ],
   "_moduleAliases": {
-    "~proto": "dist"
+    "~bitbadgesjs": "dist"
   },
   "scripts": {
     "postinstall": "shx mkdir -p dist && link-module-alias",
@@ -29,12 +26,13 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
-    "@types/google-protobuf": "^3.15.5",
+    "bitbadgesjs-address-converter": "^0.0.2",
+    "bitbadgesjs-eip712": "^0.0.27",
+    "bitbadgesjs-proto": "^0.0.27",
+    "bitbadgesjs-provider": "^0.0.1",
+    "bitbadgesjs-transactions": "^0.0.34",
     "@types/node": "^17.0.21",
-    "google-protobuf": "^3.19.4",
     "link-module-alias": "^1.2.0",
-    "protoc-gen-ts": "^0.8.5",
-    "sha3": "^2.1.4",
     "shx": "^0.3.4"
   }
 }

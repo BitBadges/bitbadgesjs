@@ -19,4 +19,5 @@ protoc \
 $(find $(PWD)/proto -iname "*.proto")
 
 # TODO: make this automatic
-# sudo protoc --plugin=protoc-gen-ts=$(which protoc-gen-ts) --ts_out=./src/proto --proto_path=./proto $(find ./proto -iname "*.proto") or ./proto/... ./proto/.../...
+# You can use this for individual files. Note that anything with an rpc like a Msg Service or Query Service needs to be commented out beforehand
+# sudo protoc --plugin=protoc-gen-ts=$(which protoc-gen-ts) --ts_out=./src/proto --proto_path=./proto ./proto/path_to_file.proto

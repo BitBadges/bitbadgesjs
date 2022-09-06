@@ -1,3 +1,7 @@
+# BitBadgesJS EIP712
+
+This library was forked from EvmosJS. Replace @tharsis/evmosjs with bitbadgesjs-eip712
+
 # EIP712
 
 EIP712 transactions creator.

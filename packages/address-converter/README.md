@@ -1,3 +1,7 @@
+# BitBadgesJS EIP712
+
+This library was forked from EvmosJS. Replace @tharsis/address-converter with bitbadgesjs-address-converter
+
 # Address converter
 
 A simple converter between `ETH` address and `Ethermint`/`evmos` addresses.
