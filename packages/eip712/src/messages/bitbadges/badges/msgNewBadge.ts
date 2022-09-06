@@ -1,4 +1,4 @@
-import { IdRange, ID_RANGE_TYPE, UriObject, URI_OBJECT_TYPE } from './utils'
+import { IdRange, ID_RANGE_TYPE, UriObject, URI_OBJECT_TYPE } from './typeUtils'
 
 const NewBadgeMsgValueType = [
   { name: 'creator', type: 'string' },

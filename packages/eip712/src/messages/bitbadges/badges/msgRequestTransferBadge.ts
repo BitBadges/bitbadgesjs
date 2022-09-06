@@ -1,4 +1,4 @@
-import { IdRange, ID_RANGE_TYPE } from './utils'
+import { IdRange, ID_RANGE_TYPE } from './typeUtils'
 
 const MsgRequestTransferBadgeValueType = [
   { name: 'creator', type: 'string' },
