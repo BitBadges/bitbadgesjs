@@ -1,4 +1,4 @@
-import { protoTxNamespace } from '@tharsis/proto'
+import { protoTxNamespace } from 'bitbadgesjs-proto'
 
 export interface EIPToSign {
   types: object

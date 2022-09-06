@@ -7,7 +7,7 @@ import {
   MsgWithdrawDelegatorRewardProtoInterface,
   createTransaction,
   createTransactionWithMultipleMessages,
-} from '@tharsis/proto'
+} from 'bitbadgesjs-proto'
 
 import {
   createEIP712,
@@ -26,7 +26,7 @@ import {
   MsgWithdrawDelegatorRewardInterface,
   MSG_WITHDRAW_VALIDATOR_COMMISSION_TYPES,
   createMsgWithdrawValidatorCommission,
-} from '@tharsis/eip712'
+} from 'bitbadgesjs-eip712'
 
 import { Chain, Fee, Sender } from './common'
 

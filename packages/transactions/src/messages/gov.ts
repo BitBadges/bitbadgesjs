@@ -1,7 +1,7 @@
 import {
   createMsgVote as protoCreateMsgVote,
   createTransaction,
-} from '@tharsis/proto'
+} from 'bitbadgesjs-proto'
 
 import {
   createEIP712,
@@ -10,7 +10,7 @@ import {
   generateTypes,
   createMsgVote,
   MSG_VOTE_TYPES,
-} from '@tharsis/eip712'
+} from 'bitbadgesjs-eip712'
 
 import { Chain, Fee, Sender } from './common'
 

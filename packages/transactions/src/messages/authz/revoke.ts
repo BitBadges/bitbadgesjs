@@ -2,7 +2,7 @@ import {
   createTransaction,
   createMsgRevoke,
   RevokeMessages,
-} from '@tharsis/proto'
+} from 'bitbadgesjs-proto'
 
 import { Chain, Fee, Sender } from '../common'
 

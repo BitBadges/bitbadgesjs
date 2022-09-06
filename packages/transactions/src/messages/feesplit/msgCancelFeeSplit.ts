@@ -1,7 +1,7 @@
 import {
   createMsgCancelFeeSplit as protoMsgCancelFeeSplit,
   createTransaction,
-} from '@tharsis/proto'
+} from 'bitbadgesjs-proto'
 
 import {
   createEIP712,
@@ -10,7 +10,7 @@ import {
   generateTypes,
   createMsgCancelFeeSplit,
   MSG_CANCEL_FEE_SPLIT_TYPES,
-} from '@tharsis/eip712'
+} from 'bitbadgesjs-eip712'
 
 import { Chain, Fee, Sender } from '../common'
 

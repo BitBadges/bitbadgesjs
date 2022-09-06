@@ -1,5 +1,5 @@
 import {
-  createMsgSend as protoMsgSend,
+  createMsgRegisterAddresses as protoMsgRegisterAddresses,
   createTransaction,
 } from 'bitbadgesjs-proto'
 
@@ -8,24 +8,23 @@ import {
   generateFee,
   generateMessage,
   generateTypes,
-  createMsgSend,
-  MSG_SEND_TYPES,
+  createMsgRegisterAddresses,
+  MSG_REGISTER_ADDRESSES_TYPES,
 } from 'bitbadgesjs-eip712'
 
-import { Chain, Fee, Sender } from './common'
+import { Chain, Fee, Sender } from '../common'
 
-export interface MessageSendParams {
-  destinationAddress: string
-  amount: string
-  denom: string
+export interface MessageMsgRegisterAddresses {
+  creator: string
+  addressesToRegister: string[]
 }
 
-export function createMessageSend(
+export function createTxMsgRegisterAddresses(
   chain: Chain,
   sender: Sender,
   fee: Fee,
   memo: string,
-  params: MessageSendParams,
+  params: MessageMsgRegisterAddresses,
 ) {
   // EIP712
   const feeObject = generateFee(
@@ -34,13 +33,14 @@ export function createMessageSend(
     fee.gas,
     sender.accountAddress,
   )
-  const types = generateTypes(MSG_SEND_TYPES)
-  const msg = createMsgSend(
-    params.amount,
-    params.denom,
-    sender.accountAddress,
-    params.destinationAddress,
+  const types = generateTypes(MSG_REGISTER_ADDRESSES_TYPES)
+
+  console.log('PARAMS', params)
+  const msg = createMsgRegisterAddresses(
+    params.creator,
+    params.addressesToRegister,
   )
+  console.log('EIP712 MSG', msg)
   const messages = generateMessage(
     sender.accountNumber.toString(),
     sender.sequence.toString(),
@@ -52,15 +52,14 @@ export function createMessageSend(
   const eipToSign = createEIP712(types, chain.chainId, messages)
 
   // Cosmos
-  const msgSend = protoMsgSend(
-    sender.accountAddress,
-    params.destinationAddress,
-    params.amount,
-    params.denom,
+  console.log('PARAMS', params)
+  const msgCosmos = protoMsgRegisterAddresses(
+    params.creator,
+    params.addressesToRegister,
   )
-  console.log('COSMOS MSG', msgSend)
+  console.log('COSMOS MSG', msgCosmos)
   const tx = createTransaction(
-    msgSend,
+    msgCosmos,
     memo,
     fee.amount,
     fee.denom,
