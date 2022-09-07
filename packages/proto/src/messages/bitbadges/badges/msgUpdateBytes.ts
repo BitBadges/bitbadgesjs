@@ -5,7 +5,7 @@ export function createMsgUpdateBytes(
   badgeId: number,
   newBytes: Uint8Array,
 ) {
-  const message = new tx.trevormil.bitbadgeschain.badges.MsgUpdateBytes({
+  const message = new tx.bitbadges.bitbadgeschain.badges.MsgUpdateBytes({
     creator,
     badgeId,
     newBytes,
@@ -13,6 +13,6 @@ export function createMsgUpdateBytes(
 
   return {
     message,
-    path: 'trevormil.bitbadgeschain.badges.MsgUpdateBytes',
+    path: 'bitbadges.bitbadgeschain.badges.MsgUpdateBytes',
   }
 }

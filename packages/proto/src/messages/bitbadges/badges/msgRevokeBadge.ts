@@ -6,9 +6,9 @@ export function createMsgRevokeBadge(
   addresses: number[],
   amounts: number[],
   badgeId: number,
-  subbadgeRanges: ranges.trevormil.bitbadgeschain.badges.IdRange[],
+  subbadgeRanges: ranges.bitbadges.bitbadgeschain.badges.IdRange[],
 ) {
-  const message = new tx.trevormil.bitbadgeschain.badges.MsgRevokeBadge({
+  const message = new tx.bitbadges.bitbadgeschain.badges.MsgRevokeBadge({
     creator,
     addresses,
     amounts,
@@ -18,6 +18,6 @@ export function createMsgRevokeBadge(
 
   return {
     message,
-    path: 'trevormil.bitbadgeschain.badges.MsgRevokeBadge',
+    path: 'bitbadges.bitbadgeschain.badges.MsgRevokeBadge',
   }
 }

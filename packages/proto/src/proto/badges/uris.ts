@@ -7,14 +7,14 @@
  * git: https://github.com/thesayyn/protoc-gen-ts */
 import * as dependency_1 from "./ranges";
 import * as pb_1 from "google-protobuf";
-export namespace trevormil.bitbadgeschain.badges {
+export namespace bitbadges.bitbadgeschain.badges {
     export class UriObject extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
             decodeScheme?: number;
             scheme?: number;
             uri?: Uint8Array;
-            idxRangeToRemove?: dependency_1.trevormil.bitbadgeschain.badges.IdRange;
+            idxRangeToRemove?: dependency_1.bitbadges.bitbadgeschain.badges.IdRange;
             insertSubassetBytesIdx?: number;
             bytesToInsert?: Uint8Array;
             insertIdIdx?: number;
@@ -64,9 +64,9 @@ export namespace trevormil.bitbadgeschain.badges {
             pb_1.Message.setField(this, 3, value);
         }
         get idxRangeToRemove() {
-            return pb_1.Message.getWrapperField(this, dependency_1.trevormil.bitbadgeschain.badges.IdRange, 4) as dependency_1.trevormil.bitbadgeschain.badges.IdRange;
+            return pb_1.Message.getWrapperField(this, dependency_1.bitbadges.bitbadgeschain.badges.IdRange, 4) as dependency_1.bitbadges.bitbadgeschain.badges.IdRange;
         }
-        set idxRangeToRemove(value: dependency_1.trevormil.bitbadgeschain.badges.IdRange) {
+        set idxRangeToRemove(value: dependency_1.bitbadges.bitbadgeschain.badges.IdRange) {
             pb_1.Message.setWrapperField(this, 4, value);
         }
         get has_idxRangeToRemove() {
@@ -94,7 +94,7 @@ export namespace trevormil.bitbadgeschain.badges {
             decodeScheme?: number;
             scheme?: number;
             uri?: Uint8Array;
-            idxRangeToRemove?: ReturnType<typeof dependency_1.trevormil.bitbadgeschain.badges.IdRange.prototype.toObject>;
+            idxRangeToRemove?: ReturnType<typeof dependency_1.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>;
             insertSubassetBytesIdx?: number;
             bytesToInsert?: Uint8Array;
             insertIdIdx?: number;
@@ -110,7 +110,7 @@ export namespace trevormil.bitbadgeschain.badges {
                 message.uri = data.uri;
             }
             if (data.idxRangeToRemove != null) {
-                message.idxRangeToRemove = dependency_1.trevormil.bitbadgeschain.badges.IdRange.fromObject(data.idxRangeToRemove);
+                message.idxRangeToRemove = dependency_1.bitbadges.bitbadgeschain.badges.IdRange.fromObject(data.idxRangeToRemove);
             }
             if (data.insertSubassetBytesIdx != null) {
                 message.insertSubassetBytesIdx = data.insertSubassetBytesIdx;
@@ -128,7 +128,7 @@ export namespace trevormil.bitbadgeschain.badges {
                 decodeScheme?: number;
                 scheme?: number;
                 uri?: Uint8Array;
-                idxRangeToRemove?: ReturnType<typeof dependency_1.trevormil.bitbadgeschain.badges.IdRange.prototype.toObject>;
+                idxRangeToRemove?: ReturnType<typeof dependency_1.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>;
                 insertSubassetBytesIdx?: number;
                 bytesToInsert?: Uint8Array;
                 insertIdIdx?: number;
@@ -193,7 +193,7 @@ export namespace trevormil.bitbadgeschain.badges {
                         message.uri = reader.readBytes();
                         break;
                     case 4:
-                        reader.readMessage(message.idxRangeToRemove, () => message.idxRangeToRemove = dependency_1.trevormil.bitbadgeschain.badges.IdRange.deserialize(reader));
+                        reader.readMessage(message.idxRangeToRemove, () => message.idxRangeToRemove = dependency_1.bitbadges.bitbadgeschain.badges.IdRange.deserialize(reader));
                         break;
                     case 5:
                         message.insertSubassetBytesIdx = reader.readUint64();

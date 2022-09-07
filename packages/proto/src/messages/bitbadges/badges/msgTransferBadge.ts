@@ -7,11 +7,11 @@ export function createMsgTransferBadge(
   toAddresses: number[],
   amounts: number[],
   badgeId: number,
-  subbadgeRanges: ranges.trevormil.bitbadgeschain.badges.IdRange[],
+  subbadgeRanges: ranges.bitbadges.bitbadgeschain.badges.IdRange[],
   expirationTime: number,
   cantCancelBeforeTime: number,
 ) {
-  const message = new tx.trevormil.bitbadgeschain.badges.MsgTransferBadge({
+  const message = new tx.bitbadges.bitbadgeschain.badges.MsgTransferBadge({
     creator,
     from,
     toAddresses,
@@ -24,6 +24,6 @@ export function createMsgTransferBadge(
 
   return {
     message,
-    path: 'trevormil.bitbadgeschain.badges.MsgTransferBadge',
+    path: 'bitbadges.bitbadgeschain.badges.MsgTransferBadge',
   }
 }

@@ -3,11 +3,11 @@ import * as ranges from '../../../proto/badges/ranges'
 
 export function createMsgFreezeAddress(
   creator: string,
-  addressRanges: ranges.trevormil.bitbadgeschain.badges.IdRange[],
+  addressRanges: ranges.bitbadges.bitbadgeschain.badges.IdRange[],
   badgeId: number,
   add: boolean,
 ) {
-  const message = new tx.trevormil.bitbadgeschain.badges.MsgFreezeAddress({
+  const message = new tx.bitbadges.bitbadgeschain.badges.MsgFreezeAddress({
     creator,
     addressRanges,
     badgeId,
@@ -15,6 +15,6 @@ export function createMsgFreezeAddress(
   })
   return {
     message,
-    path: 'trevormil.bitbadgeschain.badges.MsgFreezeAddress',
+    path: 'bitbadges.bitbadgeschain.badges.MsgFreezeAddress',
   }
 }

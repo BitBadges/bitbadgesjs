@@ -6,7 +6,7 @@ export function createMsgRequestTransferManager(
   add: boolean,
 ) {
   const message =
-    new tx.trevormil.bitbadgeschain.badges.MsgRequestTransferManager({
+    new tx.bitbadges.bitbadgeschain.badges.MsgRequestTransferManager({
       creator,
       badgeId,
       add,
@@ -14,6 +14,6 @@ export function createMsgRequestTransferManager(
 
   return {
     message,
-    path: 'trevormil.bitbadgeschain.badges.MsgRequestTransferManager',
+    path: 'bitbadges.bitbadgeschain.badges.MsgRequestTransferManager',
   }
 }

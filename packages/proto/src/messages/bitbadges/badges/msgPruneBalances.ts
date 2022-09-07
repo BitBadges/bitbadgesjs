@@ -5,7 +5,7 @@ export function createMsgPruneBalances(
   badgeIds: number[],
   addresses: number[],
 ) {
-  const message = new badges.trevormil.bitbadgeschain.badges.MsgPruneBalances({
+  const message = new badges.bitbadges.bitbadgeschain.badges.MsgPruneBalances({
     creator,
     badgeIds,
     addresses,
@@ -13,6 +13,6 @@ export function createMsgPruneBalances(
 
   return {
     message,
-    path: 'trevormil.bitbadgeschain.badges.MsgPruneBalances',
+    path: 'bitbadges.bitbadgeschain.badges.MsgPruneBalances',
   }
 }

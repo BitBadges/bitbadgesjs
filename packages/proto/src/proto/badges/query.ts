@@ -12,7 +12,7 @@ import * as dependency_4 from "./params";
 import * as dependency_5 from "./badges";
 import * as dependency_6 from "./balances";
 import * as pb_1 from "google-protobuf";
-export namespace trevormil.bitbadgeschain.badges {
+export namespace bitbadges.bitbadgeschain.badges {
     export class QueryParamsRequest extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {}) {
@@ -56,7 +56,7 @@ export namespace trevormil.bitbadgeschain.badges {
     export class QueryParamsResponse extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
-            params?: dependency_4.trevormil.bitbadgeschain.badges.Params;
+            params?: dependency_4.bitbadges.bitbadgeschain.badges.Params;
         }) {
             super();
             pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
@@ -67,26 +67,26 @@ export namespace trevormil.bitbadgeschain.badges {
             }
         }
         get params() {
-            return pb_1.Message.getWrapperField(this, dependency_4.trevormil.bitbadgeschain.badges.Params, 1) as dependency_4.trevormil.bitbadgeschain.badges.Params;
+            return pb_1.Message.getWrapperField(this, dependency_4.bitbadges.bitbadgeschain.badges.Params, 1) as dependency_4.bitbadges.bitbadgeschain.badges.Params;
         }
-        set params(value: dependency_4.trevormil.bitbadgeschain.badges.Params) {
+        set params(value: dependency_4.bitbadges.bitbadgeschain.badges.Params) {
             pb_1.Message.setWrapperField(this, 1, value);
         }
         get has_params() {
             return pb_1.Message.getField(this, 1) != null;
         }
         static fromObject(data: {
-            params?: ReturnType<typeof dependency_4.trevormil.bitbadgeschain.badges.Params.prototype.toObject>;
+            params?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.Params.prototype.toObject>;
         }): QueryParamsResponse {
             const message = new QueryParamsResponse({});
             if (data.params != null) {
-                message.params = dependency_4.trevormil.bitbadgeschain.badges.Params.fromObject(data.params);
+                message.params = dependency_4.bitbadges.bitbadgeschain.badges.Params.fromObject(data.params);
             }
             return message;
         }
         toObject() {
             const data: {
-                params?: ReturnType<typeof dependency_4.trevormil.bitbadgeschain.badges.Params.prototype.toObject>;
+                params?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.Params.prototype.toObject>;
             } = {};
             if (this.params != null) {
                 data.params = this.params.toObject();
@@ -109,7 +109,7 @@ export namespace trevormil.bitbadgeschain.badges {
                     break;
                 switch (reader.getFieldNumber()) {
                     case 1:
-                        reader.readMessage(message.params, () => message.params = dependency_4.trevormil.bitbadgeschain.badges.Params.deserialize(reader));
+                        reader.readMessage(message.params, () => message.params = dependency_4.bitbadges.bitbadgeschain.badges.Params.deserialize(reader));
                         break;
                     default: reader.skipField();
                 }
@@ -193,7 +193,7 @@ export namespace trevormil.bitbadgeschain.badges {
     export class QueryGetBadgeResponse extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
-            badge?: dependency_5.trevormil.bitbadgeschain.badges.BitBadge;
+            badge?: dependency_5.bitbadges.bitbadgeschain.badges.BitBadge;
         }) {
             super();
             pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
@@ -204,26 +204,26 @@ export namespace trevormil.bitbadgeschain.badges {
             }
         }
         get badge() {
-            return pb_1.Message.getWrapperField(this, dependency_5.trevormil.bitbadgeschain.badges.BitBadge, 1) as dependency_5.trevormil.bitbadgeschain.badges.BitBadge;
+            return pb_1.Message.getWrapperField(this, dependency_5.bitbadges.bitbadgeschain.badges.BitBadge, 1) as dependency_5.bitbadges.bitbadgeschain.badges.BitBadge;
         }
-        set badge(value: dependency_5.trevormil.bitbadgeschain.badges.BitBadge) {
+        set badge(value: dependency_5.bitbadges.bitbadgeschain.badges.BitBadge) {
             pb_1.Message.setWrapperField(this, 1, value);
         }
         get has_badge() {
             return pb_1.Message.getField(this, 1) != null;
         }
         static fromObject(data: {
-            badge?: ReturnType<typeof dependency_5.trevormil.bitbadgeschain.badges.BitBadge.prototype.toObject>;
+            badge?: ReturnType<typeof dependency_5.bitbadges.bitbadgeschain.badges.BitBadge.prototype.toObject>;
         }): QueryGetBadgeResponse {
             const message = new QueryGetBadgeResponse({});
             if (data.badge != null) {
-                message.badge = dependency_5.trevormil.bitbadgeschain.badges.BitBadge.fromObject(data.badge);
+                message.badge = dependency_5.bitbadges.bitbadgeschain.badges.BitBadge.fromObject(data.badge);
             }
             return message;
         }
         toObject() {
             const data: {
-                badge?: ReturnType<typeof dependency_5.trevormil.bitbadgeschain.badges.BitBadge.prototype.toObject>;
+                badge?: ReturnType<typeof dependency_5.bitbadges.bitbadgeschain.badges.BitBadge.prototype.toObject>;
             } = {};
             if (this.badge != null) {
                 data.badge = this.badge.toObject();
@@ -246,7 +246,7 @@ export namespace trevormil.bitbadgeschain.badges {
                     break;
                 switch (reader.getFieldNumber()) {
                     case 1:
-                        reader.readMessage(message.badge, () => message.badge = dependency_5.trevormil.bitbadgeschain.badges.BitBadge.deserialize(reader));
+                        reader.readMessage(message.badge, () => message.badge = dependency_5.bitbadges.bitbadgeschain.badges.BitBadge.deserialize(reader));
                         break;
                     default: reader.skipField();
                 }
@@ -353,7 +353,7 @@ export namespace trevormil.bitbadgeschain.badges {
     export class QueryGetBalanceResponse extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
-            balanceInfo?: dependency_6.trevormil.bitbadgeschain.badges.UserBalanceInfo;
+            balanceInfo?: dependency_6.bitbadges.bitbadgeschain.badges.UserBalanceInfo;
         }) {
             super();
             pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
@@ -364,26 +364,26 @@ export namespace trevormil.bitbadgeschain.badges {
             }
         }
         get balanceInfo() {
-            return pb_1.Message.getWrapperField(this, dependency_6.trevormil.bitbadgeschain.badges.UserBalanceInfo, 1) as dependency_6.trevormil.bitbadgeschain.badges.UserBalanceInfo;
+            return pb_1.Message.getWrapperField(this, dependency_6.bitbadges.bitbadgeschain.badges.UserBalanceInfo, 1) as dependency_6.bitbadges.bitbadgeschain.badges.UserBalanceInfo;
         }
-        set balanceInfo(value: dependency_6.trevormil.bitbadgeschain.badges.UserBalanceInfo) {
+        set balanceInfo(value: dependency_6.bitbadges.bitbadgeschain.badges.UserBalanceInfo) {
             pb_1.Message.setWrapperField(this, 1, value);
         }
         get has_balanceInfo() {
             return pb_1.Message.getField(this, 1) != null;
         }
         static fromObject(data: {
-            balanceInfo?: ReturnType<typeof dependency_6.trevormil.bitbadgeschain.badges.UserBalanceInfo.prototype.toObject>;
+            balanceInfo?: ReturnType<typeof dependency_6.bitbadges.bitbadgeschain.badges.UserBalanceInfo.prototype.toObject>;
         }): QueryGetBalanceResponse {
             const message = new QueryGetBalanceResponse({});
             if (data.balanceInfo != null) {
-                message.balanceInfo = dependency_6.trevormil.bitbadgeschain.badges.UserBalanceInfo.fromObject(data.balanceInfo);
+                message.balanceInfo = dependency_6.bitbadges.bitbadgeschain.badges.UserBalanceInfo.fromObject(data.balanceInfo);
             }
             return message;
         }
         toObject() {
             const data: {
-                balanceInfo?: ReturnType<typeof dependency_6.trevormil.bitbadgeschain.badges.UserBalanceInfo.prototype.toObject>;
+                balanceInfo?: ReturnType<typeof dependency_6.bitbadges.bitbadgeschain.badges.UserBalanceInfo.prototype.toObject>;
             } = {};
             if (this.balanceInfo != null) {
                 data.balanceInfo = this.balanceInfo.toObject();
@@ -406,7 +406,7 @@ export namespace trevormil.bitbadgeschain.badges {
                     break;
                 switch (reader.getFieldNumber()) {
                     case 1:
-                        reader.readMessage(message.balanceInfo, () => message.balanceInfo = dependency_6.trevormil.bitbadgeschain.badges.UserBalanceInfo.deserialize(reader));
+                        reader.readMessage(message.balanceInfo, () => message.balanceInfo = dependency_6.bitbadges.bitbadgeschain.badges.UserBalanceInfo.deserialize(reader));
                         break;
                     default: reader.skipField();
                 }

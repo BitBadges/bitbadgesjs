@@ -5,13 +5,13 @@ export function createMsgRegisterAddresses(
   addressesToRegister: string[],
 ) {
   const message =
-    new badges.trevormil.bitbadgeschain.badges.MsgRegisterAddresses({
+    new badges.bitbadges.bitbadgeschain.badges.MsgRegisterAddresses({
       creator,
       addressesToRegister,
     })
 
   return {
     message,
-    path: 'trevormil.bitbadgeschain.badges.MsgRegisterAddresses',
+    path: 'bitbadges.bitbadgeschain.badges.MsgRegisterAddresses',
   }
 }

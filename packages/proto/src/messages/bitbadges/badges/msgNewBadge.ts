@@ -4,16 +4,16 @@ import * as uri from '../../../proto/badges/uris'
 
 export function createMsgNewBadge(
   creator: string,
-  uri: uri.trevormil.bitbadgeschain.badges.UriObject,
+  uri: uri.bitbadges.bitbadgeschain.badges.UriObject,
   arbitraryBytes: Uint8Array,
   permissions: number,
   defaultSubassetSupply: number,
-  freezeAddressRanges: ranges.trevormil.bitbadgeschain.badges.IdRange[],
+  freezeAddressRanges: ranges.bitbadges.bitbadgeschain.badges.IdRange[],
   standard: number,
   subassetSupplys: number[],
   subassetAmountsToCreate: number[],
 ) {
-  const message = new tx.trevormil.bitbadgeschain.badges.MsgNewBadge({
+  const message = new tx.bitbadges.bitbadgeschain.badges.MsgNewBadge({
     creator,
     uri,
     arbitraryBytes,
@@ -27,6 +27,6 @@ export function createMsgNewBadge(
 
   return {
     message,
-    path: 'trevormil.bitbadgeschain.badges.MsgNewBadge',
+    path: 'bitbadges.bitbadgeschain.badges.MsgNewBadge',
   }
 }

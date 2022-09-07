@@ -8,16 +8,16 @@
 import * as dependency_1 from "./ranges";
 import * as dependency_2 from "./uris";
 import * as pb_1 from "google-protobuf";
-export namespace trevormil.bitbadgeschain.badges {
+export namespace bitbadges.bitbadgeschain.badges {
     export class MsgNewBadge extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
             creator?: string;
-            uri?: dependency_2.trevormil.bitbadgeschain.badges.UriObject;
+            uri?: dependency_2.bitbadges.bitbadgeschain.badges.UriObject;
             permissions?: number;
             arbitraryBytes?: Uint8Array;
             defaultSubassetSupply?: number;
-            freezeAddressRanges?: dependency_1.trevormil.bitbadgeschain.badges.IdRange[];
+            freezeAddressRanges?: dependency_1.bitbadges.bitbadgeschain.badges.IdRange[];
             standard?: number;
             subassetSupplys?: number[];
             subassetAmountsToCreate?: number[];
@@ -61,9 +61,9 @@ export namespace trevormil.bitbadgeschain.badges {
             pb_1.Message.setField(this, 1, value);
         }
         get uri() {
-            return pb_1.Message.getWrapperField(this, dependency_2.trevormil.bitbadgeschain.badges.UriObject, 2) as dependency_2.trevormil.bitbadgeschain.badges.UriObject;
+            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UriObject, 2) as dependency_2.bitbadges.bitbadgeschain.badges.UriObject;
         }
-        set uri(value: dependency_2.trevormil.bitbadgeschain.badges.UriObject) {
+        set uri(value: dependency_2.bitbadges.bitbadgeschain.badges.UriObject) {
             pb_1.Message.setWrapperField(this, 2, value);
         }
         get has_uri() {
@@ -88,9 +88,9 @@ export namespace trevormil.bitbadgeschain.badges {
             pb_1.Message.setField(this, 6, value);
         }
         get freezeAddressRanges() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_1.trevormil.bitbadgeschain.badges.IdRange, 9) as dependency_1.trevormil.bitbadgeschain.badges.IdRange[];
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_1.bitbadges.bitbadgeschain.badges.IdRange, 9) as dependency_1.bitbadges.bitbadgeschain.badges.IdRange[];
         }
-        set freezeAddressRanges(value: dependency_1.trevormil.bitbadgeschain.badges.IdRange[]) {
+        set freezeAddressRanges(value: dependency_1.bitbadges.bitbadgeschain.badges.IdRange[]) {
             pb_1.Message.setRepeatedWrapperField(this, 9, value);
         }
         get standard() {
@@ -113,11 +113,11 @@ export namespace trevormil.bitbadgeschain.badges {
         }
         static fromObject(data: {
             creator?: string;
-            uri?: ReturnType<typeof dependency_2.trevormil.bitbadgeschain.badges.UriObject.prototype.toObject>;
+            uri?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UriObject.prototype.toObject>;
             permissions?: number;
             arbitraryBytes?: Uint8Array;
             defaultSubassetSupply?: number;
-            freezeAddressRanges?: ReturnType<typeof dependency_1.trevormil.bitbadgeschain.badges.IdRange.prototype.toObject>[];
+            freezeAddressRanges?: ReturnType<typeof dependency_1.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>[];
             standard?: number;
             subassetSupplys?: number[];
             subassetAmountsToCreate?: number[];
@@ -127,7 +127,7 @@ export namespace trevormil.bitbadgeschain.badges {
                 message.creator = data.creator;
             }
             if (data.uri != null) {
-                message.uri = dependency_2.trevormil.bitbadgeschain.badges.UriObject.fromObject(data.uri);
+                message.uri = dependency_2.bitbadges.bitbadgeschain.badges.UriObject.fromObject(data.uri);
             }
             if (data.permissions != null) {
                 message.permissions = data.permissions;
@@ -139,7 +139,7 @@ export namespace trevormil.bitbadgeschain.badges {
                 message.defaultSubassetSupply = data.defaultSubassetSupply;
             }
             if (data.freezeAddressRanges != null) {
-                message.freezeAddressRanges = data.freezeAddressRanges.map(item => dependency_1.trevormil.bitbadgeschain.badges.IdRange.fromObject(item));
+                message.freezeAddressRanges = data.freezeAddressRanges.map(item => dependency_1.bitbadges.bitbadgeschain.badges.IdRange.fromObject(item));
             }
             if (data.standard != null) {
                 message.standard = data.standard;
@@ -155,11 +155,11 @@ export namespace trevormil.bitbadgeschain.badges {
         toObject() {
             const data: {
                 creator?: string;
-                uri?: ReturnType<typeof dependency_2.trevormil.bitbadgeschain.badges.UriObject.prototype.toObject>;
+                uri?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UriObject.prototype.toObject>;
                 permissions?: number;
                 arbitraryBytes?: Uint8Array;
                 defaultSubassetSupply?: number;
-                freezeAddressRanges?: ReturnType<typeof dependency_1.trevormil.bitbadgeschain.badges.IdRange.prototype.toObject>[];
+                freezeAddressRanges?: ReturnType<typeof dependency_1.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>[];
                 standard?: number;
                 subassetSupplys?: number[];
                 subassetAmountsToCreate?: number[];
@@ -180,7 +180,7 @@ export namespace trevormil.bitbadgeschain.badges {
                 data.defaultSubassetSupply = this.defaultSubassetSupply;
             }
             if (this.freezeAddressRanges != null) {
-                data.freezeAddressRanges = this.freezeAddressRanges.map((item: dependency_1.trevormil.bitbadgeschain.badges.IdRange) => item.toObject());
+                data.freezeAddressRanges = this.freezeAddressRanges.map((item: dependency_1.bitbadges.bitbadgeschain.badges.IdRange) => item.toObject());
             }
             if (this.standard != null) {
                 data.standard = this.standard;
@@ -208,7 +208,7 @@ export namespace trevormil.bitbadgeschain.badges {
             if (this.defaultSubassetSupply != 0)
                 writer.writeUint64(6, this.defaultSubassetSupply);
             if (this.freezeAddressRanges.length)
-                writer.writeRepeatedMessage(9, this.freezeAddressRanges, (item: dependency_1.trevormil.bitbadgeschain.badges.IdRange) => item.serialize(writer));
+                writer.writeRepeatedMessage(9, this.freezeAddressRanges, (item: dependency_1.bitbadges.bitbadgeschain.badges.IdRange) => item.serialize(writer));
             if (this.standard != 0)
                 writer.writeUint64(10, this.standard);
             if (this.subassetSupplys.length)
@@ -228,7 +228,7 @@ export namespace trevormil.bitbadgeschain.badges {
                         message.creator = reader.readString();
                         break;
                     case 2:
-                        reader.readMessage(message.uri, () => message.uri = dependency_2.trevormil.bitbadgeschain.badges.UriObject.deserialize(reader));
+                        reader.readMessage(message.uri, () => message.uri = dependency_2.bitbadges.bitbadgeschain.badges.UriObject.deserialize(reader));
                         break;
                     case 4:
                         message.permissions = reader.readUint64();
@@ -240,7 +240,7 @@ export namespace trevormil.bitbadgeschain.badges {
                         message.defaultSubassetSupply = reader.readUint64();
                         break;
                     case 9:
-                        reader.readMessage(message.freezeAddressRanges, () => pb_1.Message.addToRepeatedWrapperField(message, 9, dependency_1.trevormil.bitbadgeschain.badges.IdRange.deserialize(reader), dependency_1.trevormil.bitbadgeschain.badges.IdRange));
+                        reader.readMessage(message.freezeAddressRanges, () => pb_1.Message.addToRepeatedWrapperField(message, 9, dependency_1.bitbadges.bitbadgeschain.badges.IdRange.deserialize(reader), dependency_1.bitbadges.bitbadgeschain.badges.IdRange));
                         break;
                     case 10:
                         message.standard = reader.readUint64();
@@ -541,7 +541,7 @@ export namespace trevormil.bitbadgeschain.badges {
             toAddresses?: number[];
             amounts?: number[];
             badgeId?: number;
-            subbadgeRanges?: dependency_1.trevormil.bitbadgeschain.badges.IdRange[];
+            subbadgeRanges?: dependency_1.bitbadges.bitbadgeschain.badges.IdRange[];
             expiration_time?: number;
             cantCancelBeforeTime?: number;
         }) {
@@ -605,9 +605,9 @@ export namespace trevormil.bitbadgeschain.badges {
             pb_1.Message.setField(this, 5, value);
         }
         get subbadgeRanges() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_1.trevormil.bitbadgeschain.badges.IdRange, 6) as dependency_1.trevormil.bitbadgeschain.badges.IdRange[];
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_1.bitbadges.bitbadgeschain.badges.IdRange, 6) as dependency_1.bitbadges.bitbadgeschain.badges.IdRange[];
         }
-        set subbadgeRanges(value: dependency_1.trevormil.bitbadgeschain.badges.IdRange[]) {
+        set subbadgeRanges(value: dependency_1.bitbadges.bitbadgeschain.badges.IdRange[]) {
             pb_1.Message.setRepeatedWrapperField(this, 6, value);
         }
         get expiration_time() {
@@ -628,7 +628,7 @@ export namespace trevormil.bitbadgeschain.badges {
             toAddresses?: number[];
             amounts?: number[];
             badgeId?: number;
-            subbadgeRanges?: ReturnType<typeof dependency_1.trevormil.bitbadgeschain.badges.IdRange.prototype.toObject>[];
+            subbadgeRanges?: ReturnType<typeof dependency_1.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>[];
             expiration_time?: number;
             cantCancelBeforeTime?: number;
         }): MsgTransferBadge {
@@ -649,7 +649,7 @@ export namespace trevormil.bitbadgeschain.badges {
                 message.badgeId = data.badgeId;
             }
             if (data.subbadgeRanges != null) {
-                message.subbadgeRanges = data.subbadgeRanges.map(item => dependency_1.trevormil.bitbadgeschain.badges.IdRange.fromObject(item));
+                message.subbadgeRanges = data.subbadgeRanges.map(item => dependency_1.bitbadges.bitbadgeschain.badges.IdRange.fromObject(item));
             }
             if (data.expiration_time != null) {
                 message.expiration_time = data.expiration_time;
@@ -666,7 +666,7 @@ export namespace trevormil.bitbadgeschain.badges {
                 toAddresses?: number[];
                 amounts?: number[];
                 badgeId?: number;
-                subbadgeRanges?: ReturnType<typeof dependency_1.trevormil.bitbadgeschain.badges.IdRange.prototype.toObject>[];
+                subbadgeRanges?: ReturnType<typeof dependency_1.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>[];
                 expiration_time?: number;
                 cantCancelBeforeTime?: number;
             } = {};
@@ -686,7 +686,7 @@ export namespace trevormil.bitbadgeschain.badges {
                 data.badgeId = this.badgeId;
             }
             if (this.subbadgeRanges != null) {
-                data.subbadgeRanges = this.subbadgeRanges.map((item: dependency_1.trevormil.bitbadgeschain.badges.IdRange) => item.toObject());
+                data.subbadgeRanges = this.subbadgeRanges.map((item: dependency_1.bitbadges.bitbadgeschain.badges.IdRange) => item.toObject());
             }
             if (this.expiration_time != null) {
                 data.expiration_time = this.expiration_time;
@@ -711,7 +711,7 @@ export namespace trevormil.bitbadgeschain.badges {
             if (this.badgeId != 0)
                 writer.writeUint64(5, this.badgeId);
             if (this.subbadgeRanges.length)
-                writer.writeRepeatedMessage(6, this.subbadgeRanges, (item: dependency_1.trevormil.bitbadgeschain.badges.IdRange) => item.serialize(writer));
+                writer.writeRepeatedMessage(6, this.subbadgeRanges, (item: dependency_1.bitbadges.bitbadgeschain.badges.IdRange) => item.serialize(writer));
             if (this.expiration_time != 0)
                 writer.writeUint64(7, this.expiration_time);
             if (this.cantCancelBeforeTime != 0)
@@ -741,7 +741,7 @@ export namespace trevormil.bitbadgeschain.badges {
                         message.badgeId = reader.readUint64();
                         break;
                     case 6:
-                        reader.readMessage(message.subbadgeRanges, () => pb_1.Message.addToRepeatedWrapperField(message, 6, dependency_1.trevormil.bitbadgeschain.badges.IdRange.deserialize(reader), dependency_1.trevormil.bitbadgeschain.badges.IdRange));
+                        reader.readMessage(message.subbadgeRanges, () => pb_1.Message.addToRepeatedWrapperField(message, 6, dependency_1.bitbadges.bitbadgeschain.badges.IdRange.deserialize(reader), dependency_1.bitbadges.bitbadgeschain.badges.IdRange));
                         break;
                     case 7:
                         message.expiration_time = reader.readUint64();
@@ -808,7 +808,7 @@ export namespace trevormil.bitbadgeschain.badges {
             from?: number;
             amount?: number;
             badgeId?: number;
-            subbadgeRanges?: dependency_1.trevormil.bitbadgeschain.badges.IdRange[];
+            subbadgeRanges?: dependency_1.bitbadges.bitbadgeschain.badges.IdRange[];
             expiration_time?: number;
             cantCancelBeforeTime?: number;
         }) {
@@ -863,9 +863,9 @@ export namespace trevormil.bitbadgeschain.badges {
             pb_1.Message.setField(this, 5, value);
         }
         get subbadgeRanges() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_1.trevormil.bitbadgeschain.badges.IdRange, 6) as dependency_1.trevormil.bitbadgeschain.badges.IdRange[];
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_1.bitbadges.bitbadgeschain.badges.IdRange, 6) as dependency_1.bitbadges.bitbadgeschain.badges.IdRange[];
         }
-        set subbadgeRanges(value: dependency_1.trevormil.bitbadgeschain.badges.IdRange[]) {
+        set subbadgeRanges(value: dependency_1.bitbadges.bitbadgeschain.badges.IdRange[]) {
             pb_1.Message.setRepeatedWrapperField(this, 6, value);
         }
         get expiration_time() {
@@ -885,7 +885,7 @@ export namespace trevormil.bitbadgeschain.badges {
             from?: number;
             amount?: number;
             badgeId?: number;
-            subbadgeRanges?: ReturnType<typeof dependency_1.trevormil.bitbadgeschain.badges.IdRange.prototype.toObject>[];
+            subbadgeRanges?: ReturnType<typeof dependency_1.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>[];
             expiration_time?: number;
             cantCancelBeforeTime?: number;
         }): MsgRequestTransferBadge {
@@ -903,7 +903,7 @@ export namespace trevormil.bitbadgeschain.badges {
                 message.badgeId = data.badgeId;
             }
             if (data.subbadgeRanges != null) {
-                message.subbadgeRanges = data.subbadgeRanges.map(item => dependency_1.trevormil.bitbadgeschain.badges.IdRange.fromObject(item));
+                message.subbadgeRanges = data.subbadgeRanges.map(item => dependency_1.bitbadges.bitbadgeschain.badges.IdRange.fromObject(item));
             }
             if (data.expiration_time != null) {
                 message.expiration_time = data.expiration_time;
@@ -919,7 +919,7 @@ export namespace trevormil.bitbadgeschain.badges {
                 from?: number;
                 amount?: number;
                 badgeId?: number;
-                subbadgeRanges?: ReturnType<typeof dependency_1.trevormil.bitbadgeschain.badges.IdRange.prototype.toObject>[];
+                subbadgeRanges?: ReturnType<typeof dependency_1.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>[];
                 expiration_time?: number;
                 cantCancelBeforeTime?: number;
             } = {};
@@ -936,7 +936,7 @@ export namespace trevormil.bitbadgeschain.badges {
                 data.badgeId = this.badgeId;
             }
             if (this.subbadgeRanges != null) {
-                data.subbadgeRanges = this.subbadgeRanges.map((item: dependency_1.trevormil.bitbadgeschain.badges.IdRange) => item.toObject());
+                data.subbadgeRanges = this.subbadgeRanges.map((item: dependency_1.bitbadges.bitbadgeschain.badges.IdRange) => item.toObject());
             }
             if (this.expiration_time != null) {
                 data.expiration_time = this.expiration_time;
@@ -959,7 +959,7 @@ export namespace trevormil.bitbadgeschain.badges {
             if (this.badgeId != 0)
                 writer.writeUint64(5, this.badgeId);
             if (this.subbadgeRanges.length)
-                writer.writeRepeatedMessage(6, this.subbadgeRanges, (item: dependency_1.trevormil.bitbadgeschain.badges.IdRange) => item.serialize(writer));
+                writer.writeRepeatedMessage(6, this.subbadgeRanges, (item: dependency_1.bitbadges.bitbadgeschain.badges.IdRange) => item.serialize(writer));
             if (this.expiration_time != 0)
                 writer.writeUint64(7, this.expiration_time);
             if (this.cantCancelBeforeTime != 0)
@@ -986,7 +986,7 @@ export namespace trevormil.bitbadgeschain.badges {
                         message.badgeId = reader.readUint64();
                         break;
                     case 6:
-                        reader.readMessage(message.subbadgeRanges, () => pb_1.Message.addToRepeatedWrapperField(message, 6, dependency_1.trevormil.bitbadgeschain.badges.IdRange.deserialize(reader), dependency_1.trevormil.bitbadgeschain.badges.IdRange));
+                        reader.readMessage(message.subbadgeRanges, () => pb_1.Message.addToRepeatedWrapperField(message, 6, dependency_1.bitbadges.bitbadgeschain.badges.IdRange.deserialize(reader), dependency_1.bitbadges.bitbadgeschain.badges.IdRange));
                         break;
                     case 7:
                         message.expiration_time = reader.readUint64();
@@ -1052,7 +1052,7 @@ export namespace trevormil.bitbadgeschain.badges {
             creator?: string;
             accept?: boolean;
             badgeId?: number;
-            nonceRanges?: dependency_1.trevormil.bitbadgeschain.badges.IdRange[];
+            nonceRanges?: dependency_1.bitbadges.bitbadgeschain.badges.IdRange[];
             forcefulAccept?: boolean;
         }) {
             super();
@@ -1094,9 +1094,9 @@ export namespace trevormil.bitbadgeschain.badges {
             pb_1.Message.setField(this, 3, value);
         }
         get nonceRanges() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_1.trevormil.bitbadgeschain.badges.IdRange, 4) as dependency_1.trevormil.bitbadgeschain.badges.IdRange[];
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_1.bitbadges.bitbadgeschain.badges.IdRange, 4) as dependency_1.bitbadges.bitbadgeschain.badges.IdRange[];
         }
-        set nonceRanges(value: dependency_1.trevormil.bitbadgeschain.badges.IdRange[]) {
+        set nonceRanges(value: dependency_1.bitbadges.bitbadgeschain.badges.IdRange[]) {
             pb_1.Message.setRepeatedWrapperField(this, 4, value);
         }
         get forcefulAccept() {
@@ -1109,7 +1109,7 @@ export namespace trevormil.bitbadgeschain.badges {
             creator?: string;
             accept?: boolean;
             badgeId?: number;
-            nonceRanges?: ReturnType<typeof dependency_1.trevormil.bitbadgeschain.badges.IdRange.prototype.toObject>[];
+            nonceRanges?: ReturnType<typeof dependency_1.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>[];
             forcefulAccept?: boolean;
         }): MsgHandlePendingTransfer {
             const message = new MsgHandlePendingTransfer({});
@@ -1123,7 +1123,7 @@ export namespace trevormil.bitbadgeschain.badges {
                 message.badgeId = data.badgeId;
             }
             if (data.nonceRanges != null) {
-                message.nonceRanges = data.nonceRanges.map(item => dependency_1.trevormil.bitbadgeschain.badges.IdRange.fromObject(item));
+                message.nonceRanges = data.nonceRanges.map(item => dependency_1.bitbadges.bitbadgeschain.badges.IdRange.fromObject(item));
             }
             if (data.forcefulAccept != null) {
                 message.forcefulAccept = data.forcefulAccept;
@@ -1135,7 +1135,7 @@ export namespace trevormil.bitbadgeschain.badges {
                 creator?: string;
                 accept?: boolean;
                 badgeId?: number;
-                nonceRanges?: ReturnType<typeof dependency_1.trevormil.bitbadgeschain.badges.IdRange.prototype.toObject>[];
+                nonceRanges?: ReturnType<typeof dependency_1.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>[];
                 forcefulAccept?: boolean;
             } = {};
             if (this.creator != null) {
@@ -1148,7 +1148,7 @@ export namespace trevormil.bitbadgeschain.badges {
                 data.badgeId = this.badgeId;
             }
             if (this.nonceRanges != null) {
-                data.nonceRanges = this.nonceRanges.map((item: dependency_1.trevormil.bitbadgeschain.badges.IdRange) => item.toObject());
+                data.nonceRanges = this.nonceRanges.map((item: dependency_1.bitbadges.bitbadgeschain.badges.IdRange) => item.toObject());
             }
             if (this.forcefulAccept != null) {
                 data.forcefulAccept = this.forcefulAccept;
@@ -1166,7 +1166,7 @@ export namespace trevormil.bitbadgeschain.badges {
             if (this.badgeId != 0)
                 writer.writeUint64(3, this.badgeId);
             if (this.nonceRanges.length)
-                writer.writeRepeatedMessage(4, this.nonceRanges, (item: dependency_1.trevormil.bitbadgeschain.badges.IdRange) => item.serialize(writer));
+                writer.writeRepeatedMessage(4, this.nonceRanges, (item: dependency_1.bitbadges.bitbadgeschain.badges.IdRange) => item.serialize(writer));
             if (this.forcefulAccept != false)
                 writer.writeBool(5, this.forcefulAccept);
             if (!w)
@@ -1188,7 +1188,7 @@ export namespace trevormil.bitbadgeschain.badges {
                         message.badgeId = reader.readUint64();
                         break;
                     case 4:
-                        reader.readMessage(message.nonceRanges, () => pb_1.Message.addToRepeatedWrapperField(message, 4, dependency_1.trevormil.bitbadgeschain.badges.IdRange.deserialize(reader), dependency_1.trevormil.bitbadgeschain.badges.IdRange));
+                        reader.readMessage(message.nonceRanges, () => pb_1.Message.addToRepeatedWrapperField(message, 4, dependency_1.bitbadges.bitbadgeschain.badges.IdRange.deserialize(reader), dependency_1.bitbadges.bitbadgeschain.badges.IdRange));
                         break;
                     case 5:
                         message.forcefulAccept = reader.readBool();
@@ -1252,7 +1252,7 @@ export namespace trevormil.bitbadgeschain.badges {
             amount?: number;
             address?: number;
             badgeId?: number;
-            subbadgeRanges?: dependency_1.trevormil.bitbadgeschain.badges.IdRange[];
+            subbadgeRanges?: dependency_1.bitbadges.bitbadgeschain.badges.IdRange[];
         }) {
             super();
             pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [5], this.#one_of_decls);
@@ -1299,9 +1299,9 @@ export namespace trevormil.bitbadgeschain.badges {
             pb_1.Message.setField(this, 4, value);
         }
         get subbadgeRanges() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_1.trevormil.bitbadgeschain.badges.IdRange, 5) as dependency_1.trevormil.bitbadgeschain.badges.IdRange[];
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_1.bitbadges.bitbadgeschain.badges.IdRange, 5) as dependency_1.bitbadges.bitbadgeschain.badges.IdRange[];
         }
-        set subbadgeRanges(value: dependency_1.trevormil.bitbadgeschain.badges.IdRange[]) {
+        set subbadgeRanges(value: dependency_1.bitbadges.bitbadgeschain.badges.IdRange[]) {
             pb_1.Message.setRepeatedWrapperField(this, 5, value);
         }
         static fromObject(data: {
@@ -1309,7 +1309,7 @@ export namespace trevormil.bitbadgeschain.badges {
             amount?: number;
             address?: number;
             badgeId?: number;
-            subbadgeRanges?: ReturnType<typeof dependency_1.trevormil.bitbadgeschain.badges.IdRange.prototype.toObject>[];
+            subbadgeRanges?: ReturnType<typeof dependency_1.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>[];
         }): MsgSetApproval {
             const message = new MsgSetApproval({});
             if (data.creator != null) {
@@ -1325,7 +1325,7 @@ export namespace trevormil.bitbadgeschain.badges {
                 message.badgeId = data.badgeId;
             }
             if (data.subbadgeRanges != null) {
-                message.subbadgeRanges = data.subbadgeRanges.map(item => dependency_1.trevormil.bitbadgeschain.badges.IdRange.fromObject(item));
+                message.subbadgeRanges = data.subbadgeRanges.map(item => dependency_1.bitbadges.bitbadgeschain.badges.IdRange.fromObject(item));
             }
             return message;
         }
@@ -1335,7 +1335,7 @@ export namespace trevormil.bitbadgeschain.badges {
                 amount?: number;
                 address?: number;
                 badgeId?: number;
-                subbadgeRanges?: ReturnType<typeof dependency_1.trevormil.bitbadgeschain.badges.IdRange.prototype.toObject>[];
+                subbadgeRanges?: ReturnType<typeof dependency_1.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>[];
             } = {};
             if (this.creator != null) {
                 data.creator = this.creator;
@@ -1350,7 +1350,7 @@ export namespace trevormil.bitbadgeschain.badges {
                 data.badgeId = this.badgeId;
             }
             if (this.subbadgeRanges != null) {
-                data.subbadgeRanges = this.subbadgeRanges.map((item: dependency_1.trevormil.bitbadgeschain.badges.IdRange) => item.toObject());
+                data.subbadgeRanges = this.subbadgeRanges.map((item: dependency_1.bitbadges.bitbadgeschain.badges.IdRange) => item.toObject());
             }
             return data;
         }
@@ -1367,7 +1367,7 @@ export namespace trevormil.bitbadgeschain.badges {
             if (this.badgeId != 0)
                 writer.writeUint64(4, this.badgeId);
             if (this.subbadgeRanges.length)
-                writer.writeRepeatedMessage(5, this.subbadgeRanges, (item: dependency_1.trevormil.bitbadgeschain.badges.IdRange) => item.serialize(writer));
+                writer.writeRepeatedMessage(5, this.subbadgeRanges, (item: dependency_1.bitbadges.bitbadgeschain.badges.IdRange) => item.serialize(writer));
             if (!w)
                 return writer.getResultBuffer();
         }
@@ -1390,7 +1390,7 @@ export namespace trevormil.bitbadgeschain.badges {
                         message.badgeId = reader.readUint64();
                         break;
                     case 5:
-                        reader.readMessage(message.subbadgeRanges, () => pb_1.Message.addToRepeatedWrapperField(message, 5, dependency_1.trevormil.bitbadgeschain.badges.IdRange.deserialize(reader), dependency_1.trevormil.bitbadgeschain.badges.IdRange));
+                        reader.readMessage(message.subbadgeRanges, () => pb_1.Message.addToRepeatedWrapperField(message, 5, dependency_1.bitbadges.bitbadgeschain.badges.IdRange.deserialize(reader), dependency_1.bitbadges.bitbadgeschain.badges.IdRange));
                         break;
                     default: reader.skipField();
                 }
@@ -1451,7 +1451,7 @@ export namespace trevormil.bitbadgeschain.badges {
             addresses?: number[];
             amounts?: number[];
             badgeId?: number;
-            subbadgeRanges?: dependency_1.trevormil.bitbadgeschain.badges.IdRange[];
+            subbadgeRanges?: dependency_1.bitbadges.bitbadgeschain.badges.IdRange[];
         }) {
             super();
             pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [2, 3, 5], this.#one_of_decls);
@@ -1498,9 +1498,9 @@ export namespace trevormil.bitbadgeschain.badges {
             pb_1.Message.setField(this, 4, value);
         }
         get subbadgeRanges() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_1.trevormil.bitbadgeschain.badges.IdRange, 5) as dependency_1.trevormil.bitbadgeschain.badges.IdRange[];
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_1.bitbadges.bitbadgeschain.badges.IdRange, 5) as dependency_1.bitbadges.bitbadgeschain.badges.IdRange[];
         }
-        set subbadgeRanges(value: dependency_1.trevormil.bitbadgeschain.badges.IdRange[]) {
+        set subbadgeRanges(value: dependency_1.bitbadges.bitbadgeschain.badges.IdRange[]) {
             pb_1.Message.setRepeatedWrapperField(this, 5, value);
         }
         static fromObject(data: {
@@ -1508,7 +1508,7 @@ export namespace trevormil.bitbadgeschain.badges {
             addresses?: number[];
             amounts?: number[];
             badgeId?: number;
-            subbadgeRanges?: ReturnType<typeof dependency_1.trevormil.bitbadgeschain.badges.IdRange.prototype.toObject>[];
+            subbadgeRanges?: ReturnType<typeof dependency_1.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>[];
         }): MsgRevokeBadge {
             const message = new MsgRevokeBadge({});
             if (data.creator != null) {
@@ -1524,7 +1524,7 @@ export namespace trevormil.bitbadgeschain.badges {
                 message.badgeId = data.badgeId;
             }
             if (data.subbadgeRanges != null) {
-                message.subbadgeRanges = data.subbadgeRanges.map(item => dependency_1.trevormil.bitbadgeschain.badges.IdRange.fromObject(item));
+                message.subbadgeRanges = data.subbadgeRanges.map(item => dependency_1.bitbadges.bitbadgeschain.badges.IdRange.fromObject(item));
             }
             return message;
         }
@@ -1534,7 +1534,7 @@ export namespace trevormil.bitbadgeschain.badges {
                 addresses?: number[];
                 amounts?: number[];
                 badgeId?: number;
-                subbadgeRanges?: ReturnType<typeof dependency_1.trevormil.bitbadgeschain.badges.IdRange.prototype.toObject>[];
+                subbadgeRanges?: ReturnType<typeof dependency_1.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>[];
             } = {};
             if (this.creator != null) {
                 data.creator = this.creator;
@@ -1549,7 +1549,7 @@ export namespace trevormil.bitbadgeschain.badges {
                 data.badgeId = this.badgeId;
             }
             if (this.subbadgeRanges != null) {
-                data.subbadgeRanges = this.subbadgeRanges.map((item: dependency_1.trevormil.bitbadgeschain.badges.IdRange) => item.toObject());
+                data.subbadgeRanges = this.subbadgeRanges.map((item: dependency_1.bitbadges.bitbadgeschain.badges.IdRange) => item.toObject());
             }
             return data;
         }
@@ -1566,7 +1566,7 @@ export namespace trevormil.bitbadgeschain.badges {
             if (this.badgeId != 0)
                 writer.writeUint64(4, this.badgeId);
             if (this.subbadgeRanges.length)
-                writer.writeRepeatedMessage(5, this.subbadgeRanges, (item: dependency_1.trevormil.bitbadgeschain.badges.IdRange) => item.serialize(writer));
+                writer.writeRepeatedMessage(5, this.subbadgeRanges, (item: dependency_1.bitbadges.bitbadgeschain.badges.IdRange) => item.serialize(writer));
             if (!w)
                 return writer.getResultBuffer();
         }
@@ -1589,7 +1589,7 @@ export namespace trevormil.bitbadgeschain.badges {
                         message.badgeId = reader.readUint64();
                         break;
                     case 5:
-                        reader.readMessage(message.subbadgeRanges, () => pb_1.Message.addToRepeatedWrapperField(message, 5, dependency_1.trevormil.bitbadgeschain.badges.IdRange.deserialize(reader), dependency_1.trevormil.bitbadgeschain.badges.IdRange));
+                        reader.readMessage(message.subbadgeRanges, () => pb_1.Message.addToRepeatedWrapperField(message, 5, dependency_1.bitbadges.bitbadgeschain.badges.IdRange.deserialize(reader), dependency_1.bitbadges.bitbadgeschain.badges.IdRange));
                         break;
                     default: reader.skipField();
                 }
@@ -1647,7 +1647,7 @@ export namespace trevormil.bitbadgeschain.badges {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
             creator?: string;
-            addressRanges?: dependency_1.trevormil.bitbadgeschain.badges.IdRange[];
+            addressRanges?: dependency_1.bitbadges.bitbadgeschain.badges.IdRange[];
             badgeId?: number;
             add?: boolean;
         }) {
@@ -1675,9 +1675,9 @@ export namespace trevormil.bitbadgeschain.badges {
             pb_1.Message.setField(this, 1, value);
         }
         get addressRanges() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_1.trevormil.bitbadgeschain.badges.IdRange, 2) as dependency_1.trevormil.bitbadgeschain.badges.IdRange[];
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_1.bitbadges.bitbadgeschain.badges.IdRange, 2) as dependency_1.bitbadges.bitbadgeschain.badges.IdRange[];
         }
-        set addressRanges(value: dependency_1.trevormil.bitbadgeschain.badges.IdRange[]) {
+        set addressRanges(value: dependency_1.bitbadges.bitbadgeschain.badges.IdRange[]) {
             pb_1.Message.setRepeatedWrapperField(this, 2, value);
         }
         get badgeId() {
@@ -1694,7 +1694,7 @@ export namespace trevormil.bitbadgeschain.badges {
         }
         static fromObject(data: {
             creator?: string;
-            addressRanges?: ReturnType<typeof dependency_1.trevormil.bitbadgeschain.badges.IdRange.prototype.toObject>[];
+            addressRanges?: ReturnType<typeof dependency_1.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>[];
             badgeId?: number;
             add?: boolean;
         }): MsgFreezeAddress {
@@ -1703,7 +1703,7 @@ export namespace trevormil.bitbadgeschain.badges {
                 message.creator = data.creator;
             }
             if (data.addressRanges != null) {
-                message.addressRanges = data.addressRanges.map(item => dependency_1.trevormil.bitbadgeschain.badges.IdRange.fromObject(item));
+                message.addressRanges = data.addressRanges.map(item => dependency_1.bitbadges.bitbadgeschain.badges.IdRange.fromObject(item));
             }
             if (data.badgeId != null) {
                 message.badgeId = data.badgeId;
@@ -1716,7 +1716,7 @@ export namespace trevormil.bitbadgeschain.badges {
         toObject() {
             const data: {
                 creator?: string;
-                addressRanges?: ReturnType<typeof dependency_1.trevormil.bitbadgeschain.badges.IdRange.prototype.toObject>[];
+                addressRanges?: ReturnType<typeof dependency_1.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>[];
                 badgeId?: number;
                 add?: boolean;
             } = {};
@@ -1724,7 +1724,7 @@ export namespace trevormil.bitbadgeschain.badges {
                 data.creator = this.creator;
             }
             if (this.addressRanges != null) {
-                data.addressRanges = this.addressRanges.map((item: dependency_1.trevormil.bitbadgeschain.badges.IdRange) => item.toObject());
+                data.addressRanges = this.addressRanges.map((item: dependency_1.bitbadges.bitbadgeschain.badges.IdRange) => item.toObject());
             }
             if (this.badgeId != null) {
                 data.badgeId = this.badgeId;
@@ -1741,7 +1741,7 @@ export namespace trevormil.bitbadgeschain.badges {
             if (this.creator.length)
                 writer.writeString(1, this.creator);
             if (this.addressRanges.length)
-                writer.writeRepeatedMessage(2, this.addressRanges, (item: dependency_1.trevormil.bitbadgeschain.badges.IdRange) => item.serialize(writer));
+                writer.writeRepeatedMessage(2, this.addressRanges, (item: dependency_1.bitbadges.bitbadgeschain.badges.IdRange) => item.serialize(writer));
             if (this.badgeId != 0)
                 writer.writeUint64(3, this.badgeId);
             if (this.add != false)
@@ -1759,7 +1759,7 @@ export namespace trevormil.bitbadgeschain.badges {
                         message.creator = reader.readString();
                         break;
                     case 2:
-                        reader.readMessage(message.addressRanges, () => pb_1.Message.addToRepeatedWrapperField(message, 2, dependency_1.trevormil.bitbadgeschain.badges.IdRange.deserialize(reader), dependency_1.trevormil.bitbadgeschain.badges.IdRange));
+                        reader.readMessage(message.addressRanges, () => pb_1.Message.addToRepeatedWrapperField(message, 2, dependency_1.bitbadges.bitbadgeschain.badges.IdRange.deserialize(reader), dependency_1.bitbadges.bitbadgeschain.badges.IdRange));
                         break;
                     case 3:
                         message.badgeId = reader.readUint64();
@@ -1824,7 +1824,7 @@ export namespace trevormil.bitbadgeschain.badges {
         constructor(data?: any[] | {
             creator?: string;
             badgeId?: number;
-            uri?: dependency_2.trevormil.bitbadgeschain.badges.UriObject;
+            uri?: dependency_2.bitbadges.bitbadgeschain.badges.UriObject;
         }) {
             super();
             pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
@@ -1853,9 +1853,9 @@ export namespace trevormil.bitbadgeschain.badges {
             pb_1.Message.setField(this, 2, value);
         }
         get uri() {
-            return pb_1.Message.getWrapperField(this, dependency_2.trevormil.bitbadgeschain.badges.UriObject, 3) as dependency_2.trevormil.bitbadgeschain.badges.UriObject;
+            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UriObject, 3) as dependency_2.bitbadges.bitbadgeschain.badges.UriObject;
         }
-        set uri(value: dependency_2.trevormil.bitbadgeschain.badges.UriObject) {
+        set uri(value: dependency_2.bitbadges.bitbadgeschain.badges.UriObject) {
             pb_1.Message.setWrapperField(this, 3, value);
         }
         get has_uri() {
@@ -1864,7 +1864,7 @@ export namespace trevormil.bitbadgeschain.badges {
         static fromObject(data: {
             creator?: string;
             badgeId?: number;
-            uri?: ReturnType<typeof dependency_2.trevormil.bitbadgeschain.badges.UriObject.prototype.toObject>;
+            uri?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UriObject.prototype.toObject>;
         }): MsgUpdateUris {
             const message = new MsgUpdateUris({});
             if (data.creator != null) {
@@ -1874,7 +1874,7 @@ export namespace trevormil.bitbadgeschain.badges {
                 message.badgeId = data.badgeId;
             }
             if (data.uri != null) {
-                message.uri = dependency_2.trevormil.bitbadgeschain.badges.UriObject.fromObject(data.uri);
+                message.uri = dependency_2.bitbadges.bitbadgeschain.badges.UriObject.fromObject(data.uri);
             }
             return message;
         }
@@ -1882,7 +1882,7 @@ export namespace trevormil.bitbadgeschain.badges {
             const data: {
                 creator?: string;
                 badgeId?: number;
-                uri?: ReturnType<typeof dependency_2.trevormil.bitbadgeschain.badges.UriObject.prototype.toObject>;
+                uri?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UriObject.prototype.toObject>;
             } = {};
             if (this.creator != null) {
                 data.creator = this.creator;
@@ -1921,7 +1921,7 @@ export namespace trevormil.bitbadgeschain.badges {
                         message.badgeId = reader.readUint64();
                         break;
                     case 3:
-                        reader.readMessage(message.uri, () => message.uri = dependency_2.trevormil.bitbadgeschain.badges.UriObject.deserialize(reader));
+                        reader.readMessage(message.uri, () => message.uri = dependency_2.bitbadges.bitbadgeschain.badges.UriObject.deserialize(reader));
                         break;
                     default: reader.skipField();
                 }
@@ -2963,7 +2963,7 @@ export namespace trevormil.bitbadgeschain.badges {
     export class MsgRegisterAddressesResponse extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
-            registeredAddressNumbers?: dependency_1.trevormil.bitbadgeschain.badges.IdRange;
+            registeredAddressNumbers?: dependency_1.bitbadges.bitbadgeschain.badges.IdRange;
         }) {
             super();
             pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
@@ -2974,26 +2974,26 @@ export namespace trevormil.bitbadgeschain.badges {
             }
         }
         get registeredAddressNumbers() {
-            return pb_1.Message.getWrapperField(this, dependency_1.trevormil.bitbadgeschain.badges.IdRange, 1) as dependency_1.trevormil.bitbadgeschain.badges.IdRange;
+            return pb_1.Message.getWrapperField(this, dependency_1.bitbadges.bitbadgeschain.badges.IdRange, 1) as dependency_1.bitbadges.bitbadgeschain.badges.IdRange;
         }
-        set registeredAddressNumbers(value: dependency_1.trevormil.bitbadgeschain.badges.IdRange) {
+        set registeredAddressNumbers(value: dependency_1.bitbadges.bitbadgeschain.badges.IdRange) {
             pb_1.Message.setWrapperField(this, 1, value);
         }
         get has_registeredAddressNumbers() {
             return pb_1.Message.getField(this, 1) != null;
         }
         static fromObject(data: {
-            registeredAddressNumbers?: ReturnType<typeof dependency_1.trevormil.bitbadgeschain.badges.IdRange.prototype.toObject>;
+            registeredAddressNumbers?: ReturnType<typeof dependency_1.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>;
         }): MsgRegisterAddressesResponse {
             const message = new MsgRegisterAddressesResponse({});
             if (data.registeredAddressNumbers != null) {
-                message.registeredAddressNumbers = dependency_1.trevormil.bitbadgeschain.badges.IdRange.fromObject(data.registeredAddressNumbers);
+                message.registeredAddressNumbers = dependency_1.bitbadges.bitbadgeschain.badges.IdRange.fromObject(data.registeredAddressNumbers);
             }
             return message;
         }
         toObject() {
             const data: {
-                registeredAddressNumbers?: ReturnType<typeof dependency_1.trevormil.bitbadgeschain.badges.IdRange.prototype.toObject>;
+                registeredAddressNumbers?: ReturnType<typeof dependency_1.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>;
             } = {};
             if (this.registeredAddressNumbers != null) {
                 data.registeredAddressNumbers = this.registeredAddressNumbers.toObject();
@@ -3016,7 +3016,7 @@ export namespace trevormil.bitbadgeschain.badges {
                     break;
                 switch (reader.getFieldNumber()) {
                     case 1:
-                        reader.readMessage(message.registeredAddressNumbers, () => message.registeredAddressNumbers = dependency_1.trevormil.bitbadgeschain.badges.IdRange.deserialize(reader));
+                        reader.readMessage(message.registeredAddressNumbers, () => message.registeredAddressNumbers = dependency_1.bitbadges.bitbadgeschain.badges.IdRange.deserialize(reader));
                         break;
                     default: reader.skipField();
                 }

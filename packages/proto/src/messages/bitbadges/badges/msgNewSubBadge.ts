@@ -6,7 +6,7 @@ export function createMsgNewSubBadge(
   supplys: number[],
   amountsToCreate: number[],
 ) {
-  const message = new badges.trevormil.bitbadgeschain.badges.MsgNewSubBadge({
+  const message = new badges.bitbadges.bitbadgeschain.badges.MsgNewSubBadge({
     creator,
     badgeId,
     supplys,
@@ -14,6 +14,6 @@ export function createMsgNewSubBadge(
   })
   return {
     message,
-    path: 'trevormil.bitbadgeschain.badges.MsgNewSubBadge',
+    path: 'bitbadges.bitbadgeschain.badges.MsgNewSubBadge',
   }
 }

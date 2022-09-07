@@ -10,14 +10,14 @@ import * as dependency_2 from "./params";
 import * as dependency_3 from "./badges";
 import * as dependency_4 from "./balances";
 import * as pb_1 from "google-protobuf";
-export namespace trevormil.bitbadgeschain.badges {
+export namespace bitbadges.bitbadgeschain.badges {
     export class GenesisState extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
-            params?: dependency_2.trevormil.bitbadgeschain.badges.Params;
+            params?: dependency_2.bitbadges.bitbadgeschain.badges.Params;
             port_id?: string;
-            badges?: dependency_3.trevormil.bitbadgeschain.badges.BitBadge[];
-            balances?: dependency_4.trevormil.bitbadgeschain.badges.UserBalanceInfo[];
+            badges?: dependency_3.bitbadges.bitbadgeschain.badges.BitBadge[];
+            balances?: dependency_4.bitbadges.bitbadgeschain.badges.UserBalanceInfo[];
             balance_ids?: string[];
             nextBadgeId?: number;
         }) {
@@ -45,9 +45,9 @@ export namespace trevormil.bitbadgeschain.badges {
             }
         }
         get params() {
-            return pb_1.Message.getWrapperField(this, dependency_2.trevormil.bitbadgeschain.badges.Params, 1) as dependency_2.trevormil.bitbadgeschain.badges.Params;
+            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.Params, 1) as dependency_2.bitbadges.bitbadgeschain.badges.Params;
         }
-        set params(value: dependency_2.trevormil.bitbadgeschain.badges.Params) {
+        set params(value: dependency_2.bitbadges.bitbadgeschain.badges.Params) {
             pb_1.Message.setWrapperField(this, 1, value);
         }
         get has_params() {
@@ -60,15 +60,15 @@ export namespace trevormil.bitbadgeschain.badges {
             pb_1.Message.setField(this, 2, value);
         }
         get badges() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_3.trevormil.bitbadgeschain.badges.BitBadge, 3) as dependency_3.trevormil.bitbadgeschain.badges.BitBadge[];
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_3.bitbadges.bitbadgeschain.badges.BitBadge, 3) as dependency_3.bitbadges.bitbadgeschain.badges.BitBadge[];
         }
-        set badges(value: dependency_3.trevormil.bitbadgeschain.badges.BitBadge[]) {
+        set badges(value: dependency_3.bitbadges.bitbadgeschain.badges.BitBadge[]) {
             pb_1.Message.setRepeatedWrapperField(this, 3, value);
         }
         get balances() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.trevormil.bitbadgeschain.badges.UserBalanceInfo, 4) as dependency_4.trevormil.bitbadgeschain.badges.UserBalanceInfo[];
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.bitbadges.bitbadgeschain.badges.UserBalanceInfo, 4) as dependency_4.bitbadges.bitbadgeschain.badges.UserBalanceInfo[];
         }
-        set balances(value: dependency_4.trevormil.bitbadgeschain.badges.UserBalanceInfo[]) {
+        set balances(value: dependency_4.bitbadges.bitbadgeschain.badges.UserBalanceInfo[]) {
             pb_1.Message.setRepeatedWrapperField(this, 4, value);
         }
         get balance_ids() {
@@ -84,25 +84,25 @@ export namespace trevormil.bitbadgeschain.badges {
             pb_1.Message.setField(this, 6, value);
         }
         static fromObject(data: {
-            params?: ReturnType<typeof dependency_2.trevormil.bitbadgeschain.badges.Params.prototype.toObject>;
+            params?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.Params.prototype.toObject>;
             port_id?: string;
-            badges?: ReturnType<typeof dependency_3.trevormil.bitbadgeschain.badges.BitBadge.prototype.toObject>[];
-            balances?: ReturnType<typeof dependency_4.trevormil.bitbadgeschain.badges.UserBalanceInfo.prototype.toObject>[];
+            badges?: ReturnType<typeof dependency_3.bitbadges.bitbadgeschain.badges.BitBadge.prototype.toObject>[];
+            balances?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UserBalanceInfo.prototype.toObject>[];
             balance_ids?: string[];
             nextBadgeId?: number;
         }): GenesisState {
             const message = new GenesisState({});
             if (data.params != null) {
-                message.params = dependency_2.trevormil.bitbadgeschain.badges.Params.fromObject(data.params);
+                message.params = dependency_2.bitbadges.bitbadgeschain.badges.Params.fromObject(data.params);
             }
             if (data.port_id != null) {
                 message.port_id = data.port_id;
             }
             if (data.badges != null) {
-                message.badges = data.badges.map(item => dependency_3.trevormil.bitbadgeschain.badges.BitBadge.fromObject(item));
+                message.badges = data.badges.map(item => dependency_3.bitbadges.bitbadgeschain.badges.BitBadge.fromObject(item));
             }
             if (data.balances != null) {
-                message.balances = data.balances.map(item => dependency_4.trevormil.bitbadgeschain.badges.UserBalanceInfo.fromObject(item));
+                message.balances = data.balances.map(item => dependency_4.bitbadges.bitbadgeschain.badges.UserBalanceInfo.fromObject(item));
             }
             if (data.balance_ids != null) {
                 message.balance_ids = data.balance_ids;
@@ -114,10 +114,10 @@ export namespace trevormil.bitbadgeschain.badges {
         }
         toObject() {
             const data: {
-                params?: ReturnType<typeof dependency_2.trevormil.bitbadgeschain.badges.Params.prototype.toObject>;
+                params?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.Params.prototype.toObject>;
                 port_id?: string;
-                badges?: ReturnType<typeof dependency_3.trevormil.bitbadgeschain.badges.BitBadge.prototype.toObject>[];
-                balances?: ReturnType<typeof dependency_4.trevormil.bitbadgeschain.badges.UserBalanceInfo.prototype.toObject>[];
+                badges?: ReturnType<typeof dependency_3.bitbadges.bitbadgeschain.badges.BitBadge.prototype.toObject>[];
+                balances?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UserBalanceInfo.prototype.toObject>[];
                 balance_ids?: string[];
                 nextBadgeId?: number;
             } = {};
@@ -128,10 +128,10 @@ export namespace trevormil.bitbadgeschain.badges {
                 data.port_id = this.port_id;
             }
             if (this.badges != null) {
-                data.badges = this.badges.map((item: dependency_3.trevormil.bitbadgeschain.badges.BitBadge) => item.toObject());
+                data.badges = this.badges.map((item: dependency_3.bitbadges.bitbadgeschain.badges.BitBadge) => item.toObject());
             }
             if (this.balances != null) {
-                data.balances = this.balances.map((item: dependency_4.trevormil.bitbadgeschain.badges.UserBalanceInfo) => item.toObject());
+                data.balances = this.balances.map((item: dependency_4.bitbadges.bitbadgeschain.badges.UserBalanceInfo) => item.toObject());
             }
             if (this.balance_ids != null) {
                 data.balance_ids = this.balance_ids;
@@ -150,9 +150,9 @@ export namespace trevormil.bitbadgeschain.badges {
             if (this.port_id.length)
                 writer.writeString(2, this.port_id);
             if (this.badges.length)
-                writer.writeRepeatedMessage(3, this.badges, (item: dependency_3.trevormil.bitbadgeschain.badges.BitBadge) => item.serialize(writer));
+                writer.writeRepeatedMessage(3, this.badges, (item: dependency_3.bitbadges.bitbadgeschain.badges.BitBadge) => item.serialize(writer));
             if (this.balances.length)
-                writer.writeRepeatedMessage(4, this.balances, (item: dependency_4.trevormil.bitbadgeschain.badges.UserBalanceInfo) => item.serialize(writer));
+                writer.writeRepeatedMessage(4, this.balances, (item: dependency_4.bitbadges.bitbadgeschain.badges.UserBalanceInfo) => item.serialize(writer));
             if (this.balance_ids.length)
                 writer.writeRepeatedString(5, this.balance_ids);
             if (this.nextBadgeId != 0)
@@ -167,16 +167,16 @@ export namespace trevormil.bitbadgeschain.badges {
                     break;
                 switch (reader.getFieldNumber()) {
                     case 1:
-                        reader.readMessage(message.params, () => message.params = dependency_2.trevormil.bitbadgeschain.badges.Params.deserialize(reader));
+                        reader.readMessage(message.params, () => message.params = dependency_2.bitbadges.bitbadgeschain.badges.Params.deserialize(reader));
                         break;
                     case 2:
                         message.port_id = reader.readString();
                         break;
                     case 3:
-                        reader.readMessage(message.badges, () => pb_1.Message.addToRepeatedWrapperField(message, 3, dependency_3.trevormil.bitbadgeschain.badges.BitBadge.deserialize(reader), dependency_3.trevormil.bitbadgeschain.badges.BitBadge));
+                        reader.readMessage(message.badges, () => pb_1.Message.addToRepeatedWrapperField(message, 3, dependency_3.bitbadges.bitbadgeschain.badges.BitBadge.deserialize(reader), dependency_3.bitbadges.bitbadgeschain.badges.BitBadge));
                         break;
                     case 4:
-                        reader.readMessage(message.balances, () => pb_1.Message.addToRepeatedWrapperField(message, 4, dependency_4.trevormil.bitbadgeschain.badges.UserBalanceInfo.deserialize(reader), dependency_4.trevormil.bitbadgeschain.badges.UserBalanceInfo));
+                        reader.readMessage(message.balances, () => pb_1.Message.addToRepeatedWrapperField(message, 4, dependency_4.bitbadges.bitbadgeschain.badges.UserBalanceInfo.deserialize(reader), dependency_4.bitbadges.bitbadgeschain.badges.UserBalanceInfo));
                         break;
                     case 5:
                         pb_1.Message.addToRepeatedField(message, 5, reader.readString());

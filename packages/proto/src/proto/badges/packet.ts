@@ -6,7 +6,7 @@
  * source: badges/packet.proto
  * git: https://github.com/thesayyn/protoc-gen-ts */
 import * as pb_1 from "google-protobuf";
-export namespace trevormil.bitbadgeschain.badges {
+export namespace bitbadges.bitbadgeschain.badges {
     export class BadgesPacketData extends pb_1.Message {
         #one_of_decls: number[][] = [[1]];
         constructor(data?: any[] | ({} & (({

@@ -10,11 +10,11 @@ import * as dependency_2 from "./params";
 import * as dependency_3 from "./badges";
 import * as dependency_4 from "./ranges";
 import * as pb_1 from "google-protobuf";
-export namespace trevormil.bitbadgeschain.badges {
+export namespace bitbadges.bitbadgeschain.badges {
     export class UserBalanceInfo extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
-            balanceAmounts?: dependency_4.trevormil.bitbadgeschain.badges.BalanceObject[];
+            balanceAmounts?: dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject[];
             pendingNonce?: number;
             pending?: PendingTransfer[];
             approvals?: Approval[];
@@ -37,9 +37,9 @@ export namespace trevormil.bitbadgeschain.badges {
             }
         }
         get balanceAmounts() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.trevormil.bitbadgeschain.badges.BalanceObject, 2) as dependency_4.trevormil.bitbadgeschain.badges.BalanceObject[];
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject, 2) as dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject[];
         }
-        set balanceAmounts(value: dependency_4.trevormil.bitbadgeschain.badges.BalanceObject[]) {
+        set balanceAmounts(value: dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject[]) {
             pb_1.Message.setRepeatedWrapperField(this, 2, value);
         }
         get pendingNonce() {
@@ -61,14 +61,14 @@ export namespace trevormil.bitbadgeschain.badges {
             pb_1.Message.setRepeatedWrapperField(this, 5, value);
         }
         static fromObject(data: {
-            balanceAmounts?: ReturnType<typeof dependency_4.trevormil.bitbadgeschain.badges.BalanceObject.prototype.toObject>[];
+            balanceAmounts?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject.prototype.toObject>[];
             pendingNonce?: number;
             pending?: ReturnType<typeof PendingTransfer.prototype.toObject>[];
             approvals?: ReturnType<typeof Approval.prototype.toObject>[];
         }): UserBalanceInfo {
             const message = new UserBalanceInfo({});
             if (data.balanceAmounts != null) {
-                message.balanceAmounts = data.balanceAmounts.map(item => dependency_4.trevormil.bitbadgeschain.badges.BalanceObject.fromObject(item));
+                message.balanceAmounts = data.balanceAmounts.map(item => dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject.fromObject(item));
             }
             if (data.pendingNonce != null) {
                 message.pendingNonce = data.pendingNonce;
@@ -83,13 +83,13 @@ export namespace trevormil.bitbadgeschain.badges {
         }
         toObject() {
             const data: {
-                balanceAmounts?: ReturnType<typeof dependency_4.trevormil.bitbadgeschain.badges.BalanceObject.prototype.toObject>[];
+                balanceAmounts?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject.prototype.toObject>[];
                 pendingNonce?: number;
                 pending?: ReturnType<typeof PendingTransfer.prototype.toObject>[];
                 approvals?: ReturnType<typeof Approval.prototype.toObject>[];
             } = {};
             if (this.balanceAmounts != null) {
-                data.balanceAmounts = this.balanceAmounts.map((item: dependency_4.trevormil.bitbadgeschain.badges.BalanceObject) => item.toObject());
+                data.balanceAmounts = this.balanceAmounts.map((item: dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject) => item.toObject());
             }
             if (this.pendingNonce != null) {
                 data.pendingNonce = this.pendingNonce;
@@ -107,7 +107,7 @@ export namespace trevormil.bitbadgeschain.badges {
         serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
             const writer = w || new pb_1.BinaryWriter();
             if (this.balanceAmounts.length)
-                writer.writeRepeatedMessage(2, this.balanceAmounts, (item: dependency_4.trevormil.bitbadgeschain.badges.BalanceObject) => item.serialize(writer));
+                writer.writeRepeatedMessage(2, this.balanceAmounts, (item: dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject) => item.serialize(writer));
             if (this.pendingNonce != 0)
                 writer.writeUint64(3, this.pendingNonce);
             if (this.pending.length)
@@ -124,7 +124,7 @@ export namespace trevormil.bitbadgeschain.badges {
                     break;
                 switch (reader.getFieldNumber()) {
                     case 2:
-                        reader.readMessage(message.balanceAmounts, () => pb_1.Message.addToRepeatedWrapperField(message, 2, dependency_4.trevormil.bitbadgeschain.badges.BalanceObject.deserialize(reader), dependency_4.trevormil.bitbadgeschain.badges.BalanceObject));
+                        reader.readMessage(message.balanceAmounts, () => pb_1.Message.addToRepeatedWrapperField(message, 2, dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject.deserialize(reader), dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject));
                         break;
                     case 3:
                         message.pendingNonce = reader.readUint64();
@@ -151,7 +151,7 @@ export namespace trevormil.bitbadgeschain.badges {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
             address?: number;
-            approvalAmounts?: dependency_4.trevormil.bitbadgeschain.badges.BalanceObject[];
+            approvalAmounts?: dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject[];
         }) {
             super();
             pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [2], this.#one_of_decls);
@@ -171,34 +171,34 @@ export namespace trevormil.bitbadgeschain.badges {
             pb_1.Message.setField(this, 1, value);
         }
         get approvalAmounts() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.trevormil.bitbadgeschain.badges.BalanceObject, 2) as dependency_4.trevormil.bitbadgeschain.badges.BalanceObject[];
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject, 2) as dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject[];
         }
-        set approvalAmounts(value: dependency_4.trevormil.bitbadgeschain.badges.BalanceObject[]) {
+        set approvalAmounts(value: dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject[]) {
             pb_1.Message.setRepeatedWrapperField(this, 2, value);
         }
         static fromObject(data: {
             address?: number;
-            approvalAmounts?: ReturnType<typeof dependency_4.trevormil.bitbadgeschain.badges.BalanceObject.prototype.toObject>[];
+            approvalAmounts?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject.prototype.toObject>[];
         }): Approval {
             const message = new Approval({});
             if (data.address != null) {
                 message.address = data.address;
             }
             if (data.approvalAmounts != null) {
-                message.approvalAmounts = data.approvalAmounts.map(item => dependency_4.trevormil.bitbadgeschain.badges.BalanceObject.fromObject(item));
+                message.approvalAmounts = data.approvalAmounts.map(item => dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject.fromObject(item));
             }
             return message;
         }
         toObject() {
             const data: {
                 address?: number;
-                approvalAmounts?: ReturnType<typeof dependency_4.trevormil.bitbadgeschain.badges.BalanceObject.prototype.toObject>[];
+                approvalAmounts?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject.prototype.toObject>[];
             } = {};
             if (this.address != null) {
                 data.address = this.address;
             }
             if (this.approvalAmounts != null) {
-                data.approvalAmounts = this.approvalAmounts.map((item: dependency_4.trevormil.bitbadgeschain.badges.BalanceObject) => item.toObject());
+                data.approvalAmounts = this.approvalAmounts.map((item: dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject) => item.toObject());
             }
             return data;
         }
@@ -209,7 +209,7 @@ export namespace trevormil.bitbadgeschain.badges {
             if (this.address != 0)
                 writer.writeUint64(1, this.address);
             if (this.approvalAmounts.length)
-                writer.writeRepeatedMessage(2, this.approvalAmounts, (item: dependency_4.trevormil.bitbadgeschain.badges.BalanceObject) => item.serialize(writer));
+                writer.writeRepeatedMessage(2, this.approvalAmounts, (item: dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject) => item.serialize(writer));
             if (!w)
                 return writer.getResultBuffer();
         }
@@ -223,7 +223,7 @@ export namespace trevormil.bitbadgeschain.badges {
                         message.address = reader.readUint64();
                         break;
                     case 2:
-                        reader.readMessage(message.approvalAmounts, () => pb_1.Message.addToRepeatedWrapperField(message, 2, dependency_4.trevormil.bitbadgeschain.badges.BalanceObject.deserialize(reader), dependency_4.trevormil.bitbadgeschain.badges.BalanceObject));
+                        reader.readMessage(message.approvalAmounts, () => pb_1.Message.addToRepeatedWrapperField(message, 2, dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject.deserialize(reader), dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject));
                         break;
                     default: reader.skipField();
                 }
@@ -240,7 +240,7 @@ export namespace trevormil.bitbadgeschain.badges {
     export class PendingTransfer extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
-            subbadgeRange?: dependency_4.trevormil.bitbadgeschain.badges.IdRange;
+            subbadgeRange?: dependency_4.bitbadges.bitbadgeschain.badges.IdRange;
             thisPendingNonce?: number;
             otherPendingNonce?: number;
             amount?: number;
@@ -291,9 +291,9 @@ export namespace trevormil.bitbadgeschain.badges {
             }
         }
         get subbadgeRange() {
-            return pb_1.Message.getWrapperField(this, dependency_4.trevormil.bitbadgeschain.badges.IdRange, 1) as dependency_4.trevormil.bitbadgeschain.badges.IdRange;
+            return pb_1.Message.getWrapperField(this, dependency_4.bitbadges.bitbadgeschain.badges.IdRange, 1) as dependency_4.bitbadges.bitbadgeschain.badges.IdRange;
         }
-        set subbadgeRange(value: dependency_4.trevormil.bitbadgeschain.badges.IdRange) {
+        set subbadgeRange(value: dependency_4.bitbadges.bitbadgeschain.badges.IdRange) {
             pb_1.Message.setWrapperField(this, 1, value);
         }
         get has_subbadgeRange() {
@@ -360,7 +360,7 @@ export namespace trevormil.bitbadgeschain.badges {
             pb_1.Message.setField(this, 12, value);
         }
         static fromObject(data: {
-            subbadgeRange?: ReturnType<typeof dependency_4.trevormil.bitbadgeschain.badges.IdRange.prototype.toObject>;
+            subbadgeRange?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>;
             thisPendingNonce?: number;
             otherPendingNonce?: number;
             amount?: number;
@@ -374,7 +374,7 @@ export namespace trevormil.bitbadgeschain.badges {
         }): PendingTransfer {
             const message = new PendingTransfer({});
             if (data.subbadgeRange != null) {
-                message.subbadgeRange = dependency_4.trevormil.bitbadgeschain.badges.IdRange.fromObject(data.subbadgeRange);
+                message.subbadgeRange = dependency_4.bitbadges.bitbadgeschain.badges.IdRange.fromObject(data.subbadgeRange);
             }
             if (data.thisPendingNonce != null) {
                 message.thisPendingNonce = data.thisPendingNonce;
@@ -410,7 +410,7 @@ export namespace trevormil.bitbadgeschain.badges {
         }
         toObject() {
             const data: {
-                subbadgeRange?: ReturnType<typeof dependency_4.trevormil.bitbadgeschain.badges.IdRange.prototype.toObject>;
+                subbadgeRange?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>;
                 thisPendingNonce?: number;
                 otherPendingNonce?: number;
                 amount?: number;
@@ -493,7 +493,7 @@ export namespace trevormil.bitbadgeschain.badges {
                     break;
                 switch (reader.getFieldNumber()) {
                     case 1:
-                        reader.readMessage(message.subbadgeRange, () => message.subbadgeRange = dependency_4.trevormil.bitbadgeschain.badges.IdRange.deserialize(reader));
+                        reader.readMessage(message.subbadgeRange, () => message.subbadgeRange = dependency_4.bitbadges.bitbadgeschain.badges.IdRange.deserialize(reader));
                         break;
                     case 2:
                         message.thisPendingNonce = reader.readUint64();

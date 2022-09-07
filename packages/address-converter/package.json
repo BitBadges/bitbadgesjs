@@ -1,7 +1,7 @@
 {
   "name": "bitbadgesjs-address-converter",
   "description": "Address converter, convert ETH address to Ethermint/evmos/cosmos/bitbadges addresses.",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

@@ -5,11 +5,11 @@ export function createMsgHandlePendingTransfer(
   creator: string,
   accept: boolean,
   badgeId: number,
-  nonceRanges: ranges.trevormil.bitbadgeschain.badges.IdRange[],
+  nonceRanges: ranges.bitbadges.bitbadgeschain.badges.IdRange[],
   forcefulAccept: boolean,
 ) {
   const message =
-    new tx.trevormil.bitbadgeschain.badges.MsgHandlePendingTransfer({
+    new tx.bitbadges.bitbadgeschain.badges.MsgHandlePendingTransfer({
       creator,
       accept,
       badgeId,
@@ -18,6 +18,6 @@ export function createMsgHandlePendingTransfer(
     })
   return {
     message,
-    path: 'trevormil.bitbadgeschain.badges.MsgHandlePendingTransfer',
+    path: 'bitbadges.bitbadgeschain.badges.MsgHandlePendingTransfer',
   }
 }

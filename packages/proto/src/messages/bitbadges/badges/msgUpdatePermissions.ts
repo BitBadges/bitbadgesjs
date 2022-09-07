@@ -5,7 +5,7 @@ export function createMsgUpdatePermissions(
   badgeId: number,
   permissions: number,
 ) {
-  const message = new tx.trevormil.bitbadgeschain.badges.MsgUpdatePermissions({
+  const message = new tx.bitbadges.bitbadgeschain.badges.MsgUpdatePermissions({
     creator,
     badgeId,
     permissions,
@@ -13,6 +13,6 @@ export function createMsgUpdatePermissions(
 
   return {
     message,
-    path: 'trevormil.bitbadgeschain.badges.MsgUpdatePermissions',
+    path: 'bitbadges.bitbadgeschain.badges.MsgUpdatePermissions',
   }
 }

@@ -6,12 +6,12 @@ export function createMsgRequestTransferBadge(
   from: number,
   amount: number,
   badgeId: number,
-  subbadgeRanges: ranges.trevormil.bitbadgeschain.badges.IdRange[],
+  subbadgeRanges: ranges.bitbadges.bitbadgeschain.badges.IdRange[],
   expirationTime: number,
   cantCancelBeforeTime: number,
 ) {
   const message =
-    new tx.trevormil.bitbadgeschain.badges.MsgRequestTransferBadge({
+    new tx.bitbadges.bitbadgeschain.badges.MsgRequestTransferBadge({
       creator,
       from,
       amount,
@@ -23,6 +23,6 @@ export function createMsgRequestTransferBadge(
 
   return {
     message,
-    path: 'trevormil.bitbadgeschain.badges.MsgRequestTransferBadge',
+    path: 'bitbadges.bitbadgeschain.badges.MsgRequestTransferBadge',
   }
 }

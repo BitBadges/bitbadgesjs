@@ -1,11 +1,11 @@
 syntax = "proto3";
-package trevormil.bitbadgeschain.badges;
+package bitbadges.bitbadgeschain.badges;
 
 // this line is used by starport scaffolding # proto/tx/import
 import "badges/ranges.proto";
 import "badges/uris.proto";
 
-option go_package = "github.com/trevormil/bitbadgeschain/x/badges/types";
+option go_package = "github.com/bitbadges/bitbadgeschain/x/badges/types";
 
 // Msg defines the Msg service.
 service Msg {
@@ -32,18 +32,18 @@ service Msg {
 
 message MsgNewBadge {
     // See badges.proto for more details about these MsgNewBadge fields. Defines the badge details. Leave unneeded fields empty.
-    string creator = 1; 
+    string creator = 1;
     UriObject uri = 2;
     uint64 permissions = 4;
     bytes arbitraryBytes = 5;
     uint64 defaultSubassetSupply = 6;
     repeated IdRange freezeAddressRanges = 9;
-    uint64 standard = 10; 
+    uint64 standard = 10;
 
     //Subasset supplys and amounts to create must be same length. For each idx, we create amounts[idx] subbadges each with a supply of supplys[idx].
     //If supply[idx] == 0, we assume default supply. amountsToCreate[idx] can't equal 0.
     repeated uint64 subassetSupplys = 7;
-    repeated uint64 subassetAmountsToCreate = 8;    
+    repeated uint64 subassetAmountsToCreate = 8;
 }
 
 message MsgNewBadgeResponse {
@@ -165,7 +165,7 @@ message MsgTransferManager {
 message MsgTransferManagerResponse {
 }
 
-//Add / remove request for manager to be transferred. 
+//Add / remove request for manager to be transferred.
 message MsgRequestTransferManager {
   string creator = 1;
   uint64 badgeId = 2;

@@ -3470,7 +3470,7 @@
   "resolved" "https://registry.npmjs.org/binary-extensions/-/binary-extensions-2.2.0.tgz"
   "version" "2.2.0"
 
-"bitbadgesjs-address-converter@file:/home/trevormil/cosmos/bitbadgesjs/packages/address-converter":
+"bitbadgesjs-address-converter@file:/home/bitbadges/cosmos/bitbadgesjs/packages/address-converter":
   "resolved" "file:packages/address-converter"
   "version" "0.0.1"
   dependencies:
@@ -3479,14 +3479,14 @@
     "link-module-alias" "^1.2.0"
     "shx" "^0.3.4"
 
-"bitbadgesjs-eip712@^0.0.24", "bitbadgesjs-eip712@file:/home/trevormil/cosmos/bitbadgesjs/packages/eip712":
+"bitbadgesjs-eip712@^0.0.24", "bitbadgesjs-eip712@file:/home/bitbadges/cosmos/bitbadgesjs/packages/eip712":
   "resolved" "file:packages/eip712"
   "version" "0.0.24"
   dependencies:
     "link-module-alias" "^1.2.0"
     "shx" "^0.3.4"
 
-"bitbadgesjs-proto@^0.0.25", "bitbadgesjs-proto@file:/home/trevormil/cosmos/bitbadgesjs/packages/proto":
+"bitbadgesjs-proto@^0.0.25", "bitbadgesjs-proto@file:/home/bitbadges/cosmos/bitbadgesjs/packages/proto":
   "resolved" "file:packages/proto"
   "version" "0.0.25"
   dependencies:
@@ -3498,7 +3498,7 @@
     "sha3" "^2.1.4"
     "shx" "^0.3.4"
 
-"bitbadgesjs-provider@file:/home/trevormil/cosmos/bitbadgesjs/packages/provider":
+"bitbadgesjs-provider@file:/home/bitbadges/cosmos/bitbadgesjs/packages/provider":
   "resolved" "file:packages/provider"
   "version" "0.0.1"
   dependencies:
@@ -3506,7 +3506,7 @@
     "link-module-alias" "^1.2.0"
     "shx" "^0.3.4"
 
-"bitbadgesjs-transactions@file:/home/trevormil/cosmos/bitbadgesjs/packages/transactions":
+"bitbadgesjs-transactions@file:/home/bitbadges/cosmos/bitbadgesjs/packages/transactions":
   "resolved" "file:packages/transactions"
   "version" "0.0.31"
   dependencies:
@@ -4972,7 +4972,7 @@
   "resolved" "https://registry.npmjs.org/eventemitter3/-/eventemitter3-4.0.7.tgz"
   "version" "4.0.7"
 
-"evmosjs@file:/home/trevormil/cosmos/bitbadgesjs/packages/evmosjs":
+"evmosjs@file:/home/bitbadges/cosmos/bitbadgesjs/packages/evmosjs":
   "resolved" "file:packages/evmosjs"
   "version" "0.2.9"
   dependencies:

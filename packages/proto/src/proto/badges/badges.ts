@@ -9,18 +9,18 @@ import * as dependency_1 from "./../google/protobuf/any";
 import * as dependency_2 from "./ranges";
 import * as dependency_3 from "./uris";
 import * as pb_1 from "google-protobuf";
-export namespace trevormil.bitbadgeschain.badges {
+export namespace bitbadges.bitbadgeschain.badges {
     export class BitBadge extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
             id?: number;
-            uri?: dependency_3.trevormil.bitbadgeschain.badges.UriObject;
+            uri?: dependency_3.bitbadges.bitbadgeschain.badges.UriObject;
             arbitraryBytes?: Uint8Array;
             manager?: number;
             permissions?: number;
-            freezeRanges?: dependency_2.trevormil.bitbadgeschain.badges.IdRange[];
+            freezeRanges?: dependency_2.bitbadges.bitbadgeschain.badges.IdRange[];
             nextSubassetId?: number;
-            subassetSupplys?: dependency_2.trevormil.bitbadgeschain.badges.BalanceObject[];
+            subassetSupplys?: dependency_2.bitbadges.bitbadgeschain.badges.BalanceObject[];
             defaultSubassetSupply?: number;
             standard?: number;
         }) {
@@ -66,9 +66,9 @@ export namespace trevormil.bitbadgeschain.badges {
             pb_1.Message.setField(this, 1, value);
         }
         get uri() {
-            return pb_1.Message.getWrapperField(this, dependency_3.trevormil.bitbadgeschain.badges.UriObject, 2) as dependency_3.trevormil.bitbadgeschain.badges.UriObject;
+            return pb_1.Message.getWrapperField(this, dependency_3.bitbadges.bitbadgeschain.badges.UriObject, 2) as dependency_3.bitbadges.bitbadgeschain.badges.UriObject;
         }
-        set uri(value: dependency_3.trevormil.bitbadgeschain.badges.UriObject) {
+        set uri(value: dependency_3.bitbadges.bitbadgeschain.badges.UriObject) {
             pb_1.Message.setWrapperField(this, 2, value);
         }
         get has_uri() {
@@ -93,9 +93,9 @@ export namespace trevormil.bitbadgeschain.badges {
             pb_1.Message.setField(this, 5, value);
         }
         get freezeRanges() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_2.trevormil.bitbadgeschain.badges.IdRange, 10) as dependency_2.trevormil.bitbadgeschain.badges.IdRange[];
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.IdRange, 10) as dependency_2.bitbadges.bitbadgeschain.badges.IdRange[];
         }
-        set freezeRanges(value: dependency_2.trevormil.bitbadgeschain.badges.IdRange[]) {
+        set freezeRanges(value: dependency_2.bitbadges.bitbadgeschain.badges.IdRange[]) {
             pb_1.Message.setRepeatedWrapperField(this, 10, value);
         }
         get nextSubassetId() {
@@ -105,9 +105,9 @@ export namespace trevormil.bitbadgeschain.badges {
             pb_1.Message.setField(this, 12, value);
         }
         get subassetSupplys() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_2.trevormil.bitbadgeschain.badges.BalanceObject, 13) as dependency_2.trevormil.bitbadgeschain.badges.BalanceObject[];
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.BalanceObject, 13) as dependency_2.bitbadges.bitbadgeschain.badges.BalanceObject[];
         }
-        set subassetSupplys(value: dependency_2.trevormil.bitbadgeschain.badges.BalanceObject[]) {
+        set subassetSupplys(value: dependency_2.bitbadges.bitbadgeschain.badges.BalanceObject[]) {
             pb_1.Message.setRepeatedWrapperField(this, 13, value);
         }
         get defaultSubassetSupply() {
@@ -124,13 +124,13 @@ export namespace trevormil.bitbadgeschain.badges {
         }
         static fromObject(data: {
             id?: number;
-            uri?: ReturnType<typeof dependency_3.trevormil.bitbadgeschain.badges.UriObject.prototype.toObject>;
+            uri?: ReturnType<typeof dependency_3.bitbadges.bitbadgeschain.badges.UriObject.prototype.toObject>;
             arbitraryBytes?: Uint8Array;
             manager?: number;
             permissions?: number;
-            freezeRanges?: ReturnType<typeof dependency_2.trevormil.bitbadgeschain.badges.IdRange.prototype.toObject>[];
+            freezeRanges?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>[];
             nextSubassetId?: number;
-            subassetSupplys?: ReturnType<typeof dependency_2.trevormil.bitbadgeschain.badges.BalanceObject.prototype.toObject>[];
+            subassetSupplys?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.BalanceObject.prototype.toObject>[];
             defaultSubassetSupply?: number;
             standard?: number;
         }): BitBadge {
@@ -139,7 +139,7 @@ export namespace trevormil.bitbadgeschain.badges {
                 message.id = data.id;
             }
             if (data.uri != null) {
-                message.uri = dependency_3.trevormil.bitbadgeschain.badges.UriObject.fromObject(data.uri);
+                message.uri = dependency_3.bitbadges.bitbadgeschain.badges.UriObject.fromObject(data.uri);
             }
             if (data.arbitraryBytes != null) {
                 message.arbitraryBytes = data.arbitraryBytes;
@@ -151,13 +151,13 @@ export namespace trevormil.bitbadgeschain.badges {
                 message.permissions = data.permissions;
             }
             if (data.freezeRanges != null) {
-                message.freezeRanges = data.freezeRanges.map(item => dependency_2.trevormil.bitbadgeschain.badges.IdRange.fromObject(item));
+                message.freezeRanges = data.freezeRanges.map(item => dependency_2.bitbadges.bitbadgeschain.badges.IdRange.fromObject(item));
             }
             if (data.nextSubassetId != null) {
                 message.nextSubassetId = data.nextSubassetId;
             }
             if (data.subassetSupplys != null) {
-                message.subassetSupplys = data.subassetSupplys.map(item => dependency_2.trevormil.bitbadgeschain.badges.BalanceObject.fromObject(item));
+                message.subassetSupplys = data.subassetSupplys.map(item => dependency_2.bitbadges.bitbadgeschain.badges.BalanceObject.fromObject(item));
             }
             if (data.defaultSubassetSupply != null) {
                 message.defaultSubassetSupply = data.defaultSubassetSupply;
@@ -170,13 +170,13 @@ export namespace trevormil.bitbadgeschain.badges {
         toObject() {
             const data: {
                 id?: number;
-                uri?: ReturnType<typeof dependency_3.trevormil.bitbadgeschain.badges.UriObject.prototype.toObject>;
+                uri?: ReturnType<typeof dependency_3.bitbadges.bitbadgeschain.badges.UriObject.prototype.toObject>;
                 arbitraryBytes?: Uint8Array;
                 manager?: number;
                 permissions?: number;
-                freezeRanges?: ReturnType<typeof dependency_2.trevormil.bitbadgeschain.badges.IdRange.prototype.toObject>[];
+                freezeRanges?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>[];
                 nextSubassetId?: number;
-                subassetSupplys?: ReturnType<typeof dependency_2.trevormil.bitbadgeschain.badges.BalanceObject.prototype.toObject>[];
+                subassetSupplys?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.BalanceObject.prototype.toObject>[];
                 defaultSubassetSupply?: number;
                 standard?: number;
             } = {};
@@ -196,13 +196,13 @@ export namespace trevormil.bitbadgeschain.badges {
                 data.permissions = this.permissions;
             }
             if (this.freezeRanges != null) {
-                data.freezeRanges = this.freezeRanges.map((item: dependency_2.trevormil.bitbadgeschain.badges.IdRange) => item.toObject());
+                data.freezeRanges = this.freezeRanges.map((item: dependency_2.bitbadges.bitbadgeschain.badges.IdRange) => item.toObject());
             }
             if (this.nextSubassetId != null) {
                 data.nextSubassetId = this.nextSubassetId;
             }
             if (this.subassetSupplys != null) {
-                data.subassetSupplys = this.subassetSupplys.map((item: dependency_2.trevormil.bitbadgeschain.badges.BalanceObject) => item.toObject());
+                data.subassetSupplys = this.subassetSupplys.map((item: dependency_2.bitbadges.bitbadgeschain.badges.BalanceObject) => item.toObject());
             }
             if (this.defaultSubassetSupply != null) {
                 data.defaultSubassetSupply = this.defaultSubassetSupply;
@@ -227,11 +227,11 @@ export namespace trevormil.bitbadgeschain.badges {
             if (this.permissions != 0)
                 writer.writeUint64(5, this.permissions);
             if (this.freezeRanges.length)
-                writer.writeRepeatedMessage(10, this.freezeRanges, (item: dependency_2.trevormil.bitbadgeschain.badges.IdRange) => item.serialize(writer));
+                writer.writeRepeatedMessage(10, this.freezeRanges, (item: dependency_2.bitbadges.bitbadgeschain.badges.IdRange) => item.serialize(writer));
             if (this.nextSubassetId != 0)
                 writer.writeUint64(12, this.nextSubassetId);
             if (this.subassetSupplys.length)
-                writer.writeRepeatedMessage(13, this.subassetSupplys, (item: dependency_2.trevormil.bitbadgeschain.badges.BalanceObject) => item.serialize(writer));
+                writer.writeRepeatedMessage(13, this.subassetSupplys, (item: dependency_2.bitbadges.bitbadgeschain.badges.BalanceObject) => item.serialize(writer));
             if (this.defaultSubassetSupply != 0)
                 writer.writeUint64(14, this.defaultSubassetSupply);
             if (this.standard != 0)
@@ -249,7 +249,7 @@ export namespace trevormil.bitbadgeschain.badges {
                         message.id = reader.readUint64();
                         break;
                     case 2:
-                        reader.readMessage(message.uri, () => message.uri = dependency_3.trevormil.bitbadgeschain.badges.UriObject.deserialize(reader));
+                        reader.readMessage(message.uri, () => message.uri = dependency_3.bitbadges.bitbadgeschain.badges.UriObject.deserialize(reader));
                         break;
                     case 3:
                         message.arbitraryBytes = reader.readBytes();
@@ -261,13 +261,13 @@ export namespace trevormil.bitbadgeschain.badges {
                         message.permissions = reader.readUint64();
                         break;
                     case 10:
-                        reader.readMessage(message.freezeRanges, () => pb_1.Message.addToRepeatedWrapperField(message, 10, dependency_2.trevormil.bitbadgeschain.badges.IdRange.deserialize(reader), dependency_2.trevormil.bitbadgeschain.badges.IdRange));
+                        reader.readMessage(message.freezeRanges, () => pb_1.Message.addToRepeatedWrapperField(message, 10, dependency_2.bitbadges.bitbadgeschain.badges.IdRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.IdRange));
                         break;
                     case 12:
                         message.nextSubassetId = reader.readUint64();
                         break;
                     case 13:
-                        reader.readMessage(message.subassetSupplys, () => pb_1.Message.addToRepeatedWrapperField(message, 13, dependency_2.trevormil.bitbadgeschain.badges.BalanceObject.deserialize(reader), dependency_2.trevormil.bitbadgeschain.badges.BalanceObject));
+                        reader.readMessage(message.subassetSupplys, () => pb_1.Message.addToRepeatedWrapperField(message, 13, dependency_2.bitbadges.bitbadgeschain.badges.BalanceObject.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.BalanceObject));
                         break;
                     case 14:
                         message.defaultSubassetSupply = reader.readUint64();
