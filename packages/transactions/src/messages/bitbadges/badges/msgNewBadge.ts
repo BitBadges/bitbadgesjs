@@ -1,0 +1,97 @@
+import {
+  createMsgNewBadge as protoMsgNewBadge,
+  createTransaction,
+} from 'bitbadgesjs-proto'
+
+import {
+  createEIP712,
+  generateFee,
+  generateMessage,
+  generateTypes,
+  createMsgNewBadge,
+  MSG_NEW_BADGE_TYPES,
+} from 'bitbadgesjs-eip712'
+
+import { Chain, Fee, Sender } from '../../common'
+import { IdRange, UriObject } from './typeUtils'
+
+export interface MessageMsgNewBadge {
+  creator: string
+  uri: UriObject
+  arbitraryBytes: Uint8Array
+  permissions: number
+  defaultSubassetSupply: number
+  freezeAddressRanges: IdRange[]
+  standard: number
+  subassetSupplys: number[]
+  subassetAmountsToCreate: number[]
+}
+
+export function createTxMsgNewBadge(
+  chain: Chain,
+  sender: Sender,
+  fee: Fee,
+  memo: string,
+  params: MessageMsgNewBadge,
+) {
+  // EIP712
+  const feeObject = generateFee(
+    fee.amount,
+    fee.denom,
+    fee.gas,
+    sender.accountAddress,
+  )
+  const types = generateTypes(MSG_NEW_BADGE_TYPES)
+
+  const msg = createMsgNewBadge(
+    params.creator,
+    params.uri,
+    params.arbitraryBytes,
+    params.permissions,
+    params.defaultSubassetSupply,
+    params.freezeAddressRanges,
+    params.standard,
+    params.subassetSupplys,
+    params.subassetAmountsToCreate,
+  )
+  const messages = generateMessage(
+    sender.accountNumber.toString(),
+    sender.sequence.toString(),
+    chain.cosmosChainId,
+    memo,
+    feeObject,
+    msg,
+  )
+  const eipToSign = createEIP712(types, chain.chainId, messages)
+
+  // Cosmos
+  const msgCosmos = protoMsgNewBadge(
+    params.creator,
+    params.uri,
+    params.arbitraryBytes,
+    params.permissions,
+    params.defaultSubassetSupply,
+    params.freezeAddressRanges,
+    params.standard,
+    params.subassetSupplys,
+    params.subassetAmountsToCreate,
+  )
+  const tx = createTransaction(
+    msgCosmos,
+    memo,
+    fee.amount,
+    fee.denom,
+    parseInt(fee.gas, 10),
+    'ethsecp256',
+    sender.pubkey,
+    sender.sequence,
+    sender.accountNumber,
+    chain.cosmosChainId,
+  )
+
+  return {
+    signDirect: tx.signDirect,
+    legacyAmino: tx.legacyAmino,
+    eipToSign,
+  }
+}

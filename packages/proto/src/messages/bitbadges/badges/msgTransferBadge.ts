@@ -1,5 +1,6 @@
 import * as tx from '../../../proto/badges/tx'
 import * as ranges from '../../../proto/badges/ranges'
+import { IdRange } from './typeUtils'
 
 export function createMsgTransferBadge(
   creator: string,
@@ -7,17 +8,24 @@ export function createMsgTransferBadge(
   toAddresses: number[],
   amounts: number[],
   badgeId: number,
-  subbadgeRanges: ranges.bitbadges.bitbadgeschain.badges.IdRange[],
+  subbadgeRanges: IdRange[],
   expirationTime: number,
   cantCancelBeforeTime: number,
 ) {
+  const wrappedRanges: ranges.bitbadges.bitbadgeschain.badges.IdRange[] = []
+  for (const range of subbadgeRanges) {
+    wrappedRanges.push(
+      new ranges.bitbadges.bitbadgeschain.badges.IdRange(range),
+    )
+  }
+
   const message = new tx.bitbadges.bitbadgeschain.badges.MsgTransferBadge({
     creator,
     from,
     toAddresses,
     amounts,
     badgeId,
-    subbadgeRanges,
+    subbadgeRanges: wrappedRanges,
     expiration_time: expirationTime,
     cantCancelBeforeTime,
   })

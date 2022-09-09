@@ -1,15 +1,23 @@
 import * as tx from '../../../proto/badges/tx'
 import * as ranges from '../../../proto/badges/ranges'
+import { IdRange } from './typeUtils'
 
 export function createMsgFreezeAddress(
   creator: string,
-  addressRanges: ranges.bitbadges.bitbadgeschain.badges.IdRange[],
+  addressRanges: IdRange[],
   badgeId: number,
   add: boolean,
 ) {
+  const wrappedRanges: ranges.bitbadges.bitbadgeschain.badges.IdRange[] = []
+  for (const range of addressRanges) {
+    wrappedRanges.push(
+      new ranges.bitbadges.bitbadgeschain.badges.IdRange(range),
+    )
+  }
+
   const message = new tx.bitbadges.bitbadgeschain.badges.MsgFreezeAddress({
     creator,
-    addressRanges,
+    addressRanges: wrappedRanges,
     badgeId,
     add,
   })
