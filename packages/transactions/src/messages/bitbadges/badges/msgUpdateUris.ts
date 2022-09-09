@@ -12,6 +12,8 @@ import {
   MSG_UPDATE_URIS_TYPES,
 } from 'bitbadgesjs-eip712'
 
+import { getDefaultDomainWithChainId } from '../../domain'
+
 import { Chain, Fee, Sender } from '../../common'
 import { UriObject } from './typeUtils'
 
@@ -27,6 +29,7 @@ export function createTxMsgUpdateUris(
   fee: Fee,
   memo: string,
   params: MessageMsgUpdateUris,
+  domain?: object,
 ) {
   // EIP712
   const feeObject = generateFee(
@@ -46,7 +49,11 @@ export function createTxMsgUpdateUris(
     feeObject,
     msg,
   )
-  const eipToSign = createEIP712(types, chain.chainId, messages)
+  let domainObj = domain
+  if (!domain) {
+    domainObj = getDefaultDomainWithChainId(chain.chainId)
+  }
+  const eipToSign = createEIP712(types, messages, domainObj)
 
   // Cosmos
   const msgCosmos = protoMsgUpdateUris(

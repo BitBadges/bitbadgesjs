@@ -14,6 +14,8 @@ import {
 
 import { Chain, Fee, Sender } from '../../common'
 
+import { getDefaultDomainWithChainId } from '../../domain'
+
 /* eslint-disable camelcase */
 export interface MessageMsgConvertERC20 {
   contract_address: string
@@ -28,6 +30,7 @@ export function createTxMsgConvertERC20(
   fee: Fee,
   memo: string,
   params: MessageMsgConvertERC20,
+  domain?: object,
 ) {
   // EIP712
   const feeObject = generateFee(
@@ -52,7 +55,11 @@ export function createTxMsgConvertERC20(
     feeObject,
     msg,
   )
-  const eipToSign = createEIP712(types, chain.chainId, messages)
+  let domainObj = domain
+  if (!domain) {
+    domainObj = getDefaultDomainWithChainId(chain.chainId)
+  }
+  const eipToSign = createEIP712(types, messages, domainObj)
 
   // Cosmos
   const msgCosmos = protoMsgConvertERC20(

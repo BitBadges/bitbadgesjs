@@ -30,6 +30,8 @@ import {
 
 import { Chain, Fee, Sender } from '../common'
 
+import { getDefaultDomainWithChainId } from '../domain'
+
 export interface MsgDelegateParams {
   validatorAddress: string
   amount: string
@@ -42,6 +44,7 @@ export function createTxMsgDelegate(
   fee: Fee,
   memo: string,
   params: MsgDelegateParams,
+  domain?: object,
 ) {
   // EIP712
   const feeObject = generateFee(
@@ -65,7 +68,11 @@ export function createTxMsgDelegate(
     feeObject,
     msg,
   )
-  const eipToSign = createEIP712(types, chain.chainId, messages)
+  let domainObj = domain
+  if (!domain) {
+    domainObj = getDefaultDomainWithChainId(chain.chainId)
+  }
+  const eipToSign = createEIP712(types, messages, domainObj)
 
   // Cosmos
   const protoMessage = protoMsgDelegate(
@@ -107,6 +114,7 @@ export function createTxMsgBeginRedelegate(
   fee: Fee,
   memo: string,
   params: MsgBeginRedelegateParams,
+  domain?: object,
 ) {
   // EIP712
   const feeObject = generateFee(
@@ -131,7 +139,11 @@ export function createTxMsgBeginRedelegate(
     feeObject,
     msg,
   )
-  const eipToSign = createEIP712(types, chain.chainId, messages)
+  let domainObj = domain
+  if (!domain) {
+    domainObj = getDefaultDomainWithChainId(chain.chainId)
+  }
+  const eipToSign = createEIP712(types, messages, domainObj)
 
   // Cosmos
   const protoMessage = protoMsgBeginRedelegate(
@@ -173,6 +185,7 @@ export function createTxMsgUndelegate(
   fee: Fee,
   memo: string,
   params: MsgUndelegateParams,
+  domain?: object,
 ) {
   // EIP712
   const feeObject = generateFee(
@@ -196,7 +209,11 @@ export function createTxMsgUndelegate(
     feeObject,
     msg,
   )
-  const eipToSign = createEIP712(types, chain.chainId, messages)
+  let domainObj = domain
+  if (!domain) {
+    domainObj = getDefaultDomainWithChainId(chain.chainId)
+  }
+  const eipToSign = createEIP712(types, messages, domainObj)
 
   // Cosmos
   const protoMessage = protoMsgUndelegate(
@@ -235,6 +252,7 @@ export function createTxMsgWithdrawDelegatorReward(
   fee: Fee,
   memo: string,
   params: MsgWithdrawDelegatorRewardParams,
+  domain?: object,
 ) {
   // EIP712
   const feeObject = generateFee(
@@ -256,7 +274,11 @@ export function createTxMsgWithdrawDelegatorReward(
     feeObject,
     msg,
   )
-  const eipToSign = createEIP712(types, chain.chainId, messages)
+  let domainObj = domain
+  if (!domain) {
+    domainObj = getDefaultDomainWithChainId(chain.chainId)
+  }
+  const eipToSign = createEIP712(types, messages, domainObj)
 
   // Cosmos
   const protoMessage = protoeMsgWithdrawDelegatorReward(
@@ -294,6 +316,7 @@ export function createTxMsgMultipleWithdrawDelegatorReward(
   fee: Fee,
   memo: string,
   params: MsgMultipleWithdrawDelegatorRewardParams,
+  domain?: object,
 ) {
   // EIP712
   const feeObject = generateFee(
@@ -325,7 +348,11 @@ export function createTxMsgMultipleWithdrawDelegatorReward(
     feeObject,
     msgs,
   )
-  const eipToSign = createEIP712(types, chain.chainId, messages)
+  let domainObj = domain
+  if (!domain) {
+    domainObj = getDefaultDomainWithChainId(chain.chainId)
+  }
+  const eipToSign = createEIP712(types, messages, domainObj)
 
   // Cosmos
   const tx = createTransactionWithMultipleMessages(
@@ -358,6 +385,7 @@ export function createTxMsgWithdrawValidatorCommission(
   fee: Fee,
   memo: string,
   params: MsgWithdrawValidatorCommissionParams,
+  domain?: object,
 ) {
   // EIP712
   const feeObject = generateFee(
@@ -376,7 +404,11 @@ export function createTxMsgWithdrawValidatorCommission(
     feeObject,
     msg,
   )
-  const eipToSign = createEIP712(types, chain.chainId, messages)
+  let domainObj = domain
+  if (!domain) {
+    domainObj = getDefaultDomainWithChainId(chain.chainId)
+  }
+  const eipToSign = createEIP712(types, messages, domainObj)
 
   // Cosmos
   const protoMessage = protoMsgWithdrawValidatorCommission(

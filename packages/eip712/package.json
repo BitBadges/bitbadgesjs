@@ -1,7 +1,7 @@
 {
   "name": "bitbadgesjs-eip712",
   "description": "EIP712 transaction creator for EVMOS, BitBadges, and Cosmos-SDK.",
-  "version": "0.0.29",
+  "version": "0.0.30",
   "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

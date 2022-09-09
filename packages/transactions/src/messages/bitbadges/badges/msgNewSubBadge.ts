@@ -12,6 +12,8 @@ import {
   MSG_NEW_SUB_BADGE_TYPES,
 } from 'bitbadgesjs-eip712'
 
+import { getDefaultDomainWithChainId } from '../../domain'
+
 import { Chain, Fee, Sender } from '../../common'
 
 export interface MessageMsgNewSubBadge {
@@ -27,6 +29,7 @@ export function createTxMsgNewSubBadge(
   fee: Fee,
   memo: string,
   params: MessageMsgNewSubBadge,
+  domain?: object,
 ) {
   // EIP712
   const feeObject = generateFee(
@@ -51,7 +54,11 @@ export function createTxMsgNewSubBadge(
     feeObject,
     msg,
   )
-  const eipToSign = createEIP712(types, chain.chainId, messages)
+  let domainObj = domain
+  if (!domain) {
+    domainObj = getDefaultDomainWithChainId(chain.chainId)
+  }
+  const eipToSign = createEIP712(types, messages, domainObj)
 
   // Cosmos
   const msgCosmos = protoMsgNewSubBadge(

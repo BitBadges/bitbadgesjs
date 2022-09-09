@@ -1,14 +1,8 @@
-export function createEIP712(types: object, chainId: number, message: object) {
+export function createEIP712(types: object, message: object, domain?: object) {
   return {
     types,
     primaryType: 'Tx',
-    domain: {
-      name: 'Cosmos Web3',
-      version: '1.0.0',
-      chainId,
-      verifyingContract: 'cosmos',
-      salt: '0',
-    },
+    domain,
     message,
   }
 }

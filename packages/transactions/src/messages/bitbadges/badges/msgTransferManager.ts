@@ -12,6 +12,8 @@ import {
   MSG_TRANSFER_MANAGER_TYPES,
 } from 'bitbadgesjs-eip712'
 
+import { getDefaultDomainWithChainId } from '../../domain'
+
 import { Chain, Fee, Sender } from '../../common'
 
 export interface MessageMsgTransferManager {
@@ -26,6 +28,7 @@ export function createTxMsgTransferManager(
   fee: Fee,
   memo: string,
   params: MessageMsgTransferManager,
+  domain?: object,
 ) {
   // EIP712
   const feeObject = generateFee(
@@ -49,7 +52,12 @@ export function createTxMsgTransferManager(
     feeObject,
     msg,
   )
-  const eipToSign = createEIP712(types, chain.chainId, messages)
+
+  let domainObj = domain
+  if (!domain) {
+    domainObj = getDefaultDomainWithChainId(chain.chainId)
+  }
+  const eipToSign = createEIP712(types, messages, domainObj)
 
   // Cosmos
   const msgCosmos = protoMsgTransferManager(

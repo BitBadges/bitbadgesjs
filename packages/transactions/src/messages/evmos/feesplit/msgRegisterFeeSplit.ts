@@ -14,6 +14,8 @@ import {
 
 import { Chain, Fee, Sender } from '../../common'
 
+import { getDefaultDomainWithChainId } from '../../domain'
+
 export interface MessageMsgRegisterFeeSplit {
   contractAddress: string
   deployerAddress: string
@@ -27,6 +29,7 @@ export function createTxMsgRegisterFeeSplit(
   fee: Fee,
   memo: string,
   params: MessageMsgRegisterFeeSplit,
+  domain?: object,
 ) {
   // EIP712
   const feeObject = generateFee(
@@ -51,7 +54,11 @@ export function createTxMsgRegisterFeeSplit(
     feeObject,
     msg,
   )
-  const eipToSign = createEIP712(types, chain.chainId, messages)
+  let domainObj = domain
+  if (!domain) {
+    domainObj = getDefaultDomainWithChainId(chain.chainId)
+  }
+  const eipToSign = createEIP712(types, messages, domainObj)
 
   // Cosmos
   const msgCosmos = protoMsgRegisterFeeSplit(
