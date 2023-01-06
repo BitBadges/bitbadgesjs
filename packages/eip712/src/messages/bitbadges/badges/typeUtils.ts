@@ -6,21 +6,41 @@ export interface IdRange {
 export interface UriObject {
   decodeScheme?: number
   scheme?: number
-  uri: Uint8Array
+  uri: string
   idxRangeToRemove?: IdRange
   insertSubassetBytesIdx?: number
-  bytesToInsert?: Uint8Array
+  bytesToInsert?: string
   insertIdIdx?: number
 }
+
+export interface BalanceObject {
+  balance: number
+  idRanges: IdRange[]
+}
+
+export interface WhitelistMintInfo {
+  addresses: number[]
+  balanceAmounts: BalanceObject[]
+}
+
+export const BALANCE_OBJECT_TYPE = [
+  { name: 'balance', type: 'uint64' },
+  { name: 'idRanges', type: 'IdRange[]' },
+]
+
+export const WHITELIST_MINT_INFO_TYPE = [
+  { name: 'addresses', type: 'uint64[]' },
+  { name: 'balanceAmounts', type: 'BalanceObject[]' },
+]
 
 // IMPORTANT: Note that when including this, you must also include the IdRange type in your types.
 export const URI_OBJECT_TYPE = [
   { name: 'decodeScheme', type: 'uint64' },
   { name: 'scheme', type: 'uint64' },
-  { name: 'uri', type: 'bytes' },
+  { name: 'uri', type: 'string' },
   { name: 'idxRangeToRemove', type: 'IdRange' },
   { name: 'insertSubassetBytesIdx', type: 'uint64' },
-  { name: 'bytesToInsert', type: 'bytes' },
+  { name: 'bytesToInsert', type: 'string' },
   { name: 'insertIdIdx', type: 'uint64' },
 ]
 

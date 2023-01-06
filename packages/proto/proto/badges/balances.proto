@@ -9,6 +9,11 @@ import "badges/ranges.proto";
 
 option go_package = "github.com/bitbadges/bitbadgeschain/x/badges/types";
 
+message WhitelistMintInfo {
+    repeated uint64 addresses = 1;
+    repeated BalanceObject balanceAmounts = 2;
+}
+
 //Defines a user balance object for a badge w/ the user's balances, nonce, pending transfers, and approvals. All subbadge IDs for a badge are handled within this object.
 message UserBalanceInfo {
     repeated BalanceObject balanceAmounts = 2; //The user's balance for each subbadge.
@@ -23,11 +28,11 @@ message Approval {
     repeated BalanceObject approvalAmounts = 2; //approval balances for every subbadgeId
 }
 
-//Defines a pending transfer object for two addresses. A pending transfer will be stored in both parties' balance objects.
+//Defines a pending transfer object for two addresses. A pending transfer will be stored in both parties' balance objects. 
 message PendingTransfer {
     IdRange subbadgeRange = 1;
     uint64 thisPendingNonce = 2; //This pending nonce is the nonce of the account for which this transfer is stored. Other is the other party's. Will be swapped for the other party's stored pending transfer.
-    uint64 otherPendingNonce = 3;
+    uint64 otherPendingNonce = 3; 
     uint64 amount = 4;
     bool sent = 5; //Sent defines who initiated this pending transfer
     uint64 to = 6;

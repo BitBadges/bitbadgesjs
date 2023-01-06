@@ -7,6 +7,7 @@
  * git: https://github.com/thesayyn/protoc-gen-ts */
 import * as dependency_1 from "./ranges";
 import * as dependency_2 from "./uris";
+import * as dependency_3 from "./balances";
 import * as pb_1 from "google-protobuf";
 export namespace bitbadges.bitbadgeschain.badges {
     export class MsgNewBadge extends pb_1.Message {
@@ -15,15 +16,16 @@ export namespace bitbadges.bitbadgeschain.badges {
             creator?: string;
             uri?: dependency_2.bitbadges.bitbadgeschain.badges.UriObject;
             permissions?: number;
-            arbitraryBytes?: Uint8Array;
+            arbitraryBytes?: string;
             defaultSubassetSupply?: number;
             freezeAddressRanges?: dependency_1.bitbadges.bitbadgeschain.badges.IdRange[];
             standard?: number;
             subassetSupplys?: number[];
             subassetAmountsToCreate?: number[];
+            whitelistedRecipients?: dependency_3.bitbadges.bitbadgeschain.badges.WhitelistMintInfo[];
         }) {
             super();
-            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [9, 7, 8], this.#one_of_decls);
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [9, 7, 8, 11], this.#one_of_decls);
             if (!Array.isArray(data) && typeof data == "object") {
                 if ("creator" in data && data.creator != undefined) {
                     this.creator = data.creator;
@@ -52,6 +54,9 @@ export namespace bitbadges.bitbadgeschain.badges {
                 if ("subassetAmountsToCreate" in data && data.subassetAmountsToCreate != undefined) {
                     this.subassetAmountsToCreate = data.subassetAmountsToCreate;
                 }
+                if ("whitelistedRecipients" in data && data.whitelistedRecipients != undefined) {
+                    this.whitelistedRecipients = data.whitelistedRecipients;
+                }
             }
         }
         get creator() {
@@ -76,9 +81,9 @@ export namespace bitbadges.bitbadgeschain.badges {
             pb_1.Message.setField(this, 4, value);
         }
         get arbitraryBytes() {
-            return pb_1.Message.getFieldWithDefault(this, 5, new Uint8Array()) as Uint8Array;
+            return pb_1.Message.getFieldWithDefault(this, 5, "") as string;
         }
-        set arbitraryBytes(value: Uint8Array) {
+        set arbitraryBytes(value: string) {
             pb_1.Message.setField(this, 5, value);
         }
         get defaultSubassetSupply() {
@@ -111,16 +116,23 @@ export namespace bitbadges.bitbadgeschain.badges {
         set subassetAmountsToCreate(value: number[]) {
             pb_1.Message.setField(this, 8, value);
         }
+        get whitelistedRecipients() {
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_3.bitbadges.bitbadgeschain.badges.WhitelistMintInfo, 11) as dependency_3.bitbadges.bitbadgeschain.badges.WhitelistMintInfo[];
+        }
+        set whitelistedRecipients(value: dependency_3.bitbadges.bitbadgeschain.badges.WhitelistMintInfo[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 11, value);
+        }
         static fromObject(data: {
             creator?: string;
             uri?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UriObject.prototype.toObject>;
             permissions?: number;
-            arbitraryBytes?: Uint8Array;
+            arbitraryBytes?: string;
             defaultSubassetSupply?: number;
             freezeAddressRanges?: ReturnType<typeof dependency_1.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>[];
             standard?: number;
             subassetSupplys?: number[];
             subassetAmountsToCreate?: number[];
+            whitelistedRecipients?: ReturnType<typeof dependency_3.bitbadges.bitbadgeschain.badges.WhitelistMintInfo.prototype.toObject>[];
         }): MsgNewBadge {
             const message = new MsgNewBadge({});
             if (data.creator != null) {
@@ -150,6 +162,9 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (data.subassetAmountsToCreate != null) {
                 message.subassetAmountsToCreate = data.subassetAmountsToCreate;
             }
+            if (data.whitelistedRecipients != null) {
+                message.whitelistedRecipients = data.whitelistedRecipients.map(item => dependency_3.bitbadges.bitbadgeschain.badges.WhitelistMintInfo.fromObject(item));
+            }
             return message;
         }
         toObject() {
@@ -157,12 +172,13 @@ export namespace bitbadges.bitbadgeschain.badges {
                 creator?: string;
                 uri?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UriObject.prototype.toObject>;
                 permissions?: number;
-                arbitraryBytes?: Uint8Array;
+                arbitraryBytes?: string;
                 defaultSubassetSupply?: number;
                 freezeAddressRanges?: ReturnType<typeof dependency_1.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>[];
                 standard?: number;
                 subassetSupplys?: number[];
                 subassetAmountsToCreate?: number[];
+                whitelistedRecipients?: ReturnType<typeof dependency_3.bitbadges.bitbadgeschain.badges.WhitelistMintInfo.prototype.toObject>[];
             } = {};
             if (this.creator != null) {
                 data.creator = this.creator;
@@ -191,6 +207,9 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (this.subassetAmountsToCreate != null) {
                 data.subassetAmountsToCreate = this.subassetAmountsToCreate;
             }
+            if (this.whitelistedRecipients != null) {
+                data.whitelistedRecipients = this.whitelistedRecipients.map((item: dependency_3.bitbadges.bitbadgeschain.badges.WhitelistMintInfo) => item.toObject());
+            }
             return data;
         }
         serialize(): Uint8Array;
@@ -204,7 +223,7 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (this.permissions != 0)
                 writer.writeUint64(4, this.permissions);
             if (this.arbitraryBytes.length)
-                writer.writeBytes(5, this.arbitraryBytes);
+                writer.writeString(5, this.arbitraryBytes);
             if (this.defaultSubassetSupply != 0)
                 writer.writeUint64(6, this.defaultSubassetSupply);
             if (this.freezeAddressRanges.length)
@@ -215,6 +234,8 @@ export namespace bitbadges.bitbadgeschain.badges {
                 writer.writePackedUint64(7, this.subassetSupplys);
             if (this.subassetAmountsToCreate.length)
                 writer.writePackedUint64(8, this.subassetAmountsToCreate);
+            if (this.whitelistedRecipients.length)
+                writer.writeRepeatedMessage(11, this.whitelistedRecipients, (item: dependency_3.bitbadges.bitbadgeschain.badges.WhitelistMintInfo) => item.serialize(writer));
             if (!w)
                 return writer.getResultBuffer();
         }
@@ -234,7 +255,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                         message.permissions = reader.readUint64();
                         break;
                     case 5:
-                        message.arbitraryBytes = reader.readBytes();
+                        message.arbitraryBytes = reader.readString();
                         break;
                     case 6:
                         message.defaultSubassetSupply = reader.readUint64();
@@ -250,6 +271,9 @@ export namespace bitbadges.bitbadgeschain.badges {
                         break;
                     case 8:
                         message.subassetAmountsToCreate = reader.readPackedUint64();
+                        break;
+                    case 11:
+                        reader.readMessage(message.whitelistedRecipients, () => pb_1.Message.addToRepeatedWrapperField(message, 11, dependency_3.bitbadges.bitbadgeschain.badges.WhitelistMintInfo.deserialize(reader), dependency_3.bitbadges.bitbadgeschain.badges.WhitelistMintInfo));
                         break;
                     default: reader.skipField();
                 }
@@ -542,7 +566,7 @@ export namespace bitbadges.bitbadgeschain.badges {
             amounts?: number[];
             badgeId?: number;
             subbadgeRanges?: dependency_1.bitbadges.bitbadgeschain.badges.IdRange[];
-            expiration_time?: number;
+            expirationTime?: number;
             cantCancelBeforeTime?: number;
         }) {
             super();
@@ -566,8 +590,8 @@ export namespace bitbadges.bitbadgeschain.badges {
                 if ("subbadgeRanges" in data && data.subbadgeRanges != undefined) {
                     this.subbadgeRanges = data.subbadgeRanges;
                 }
-                if ("expiration_time" in data && data.expiration_time != undefined) {
-                    this.expiration_time = data.expiration_time;
+                if ("expirationTime" in data && data.expirationTime != undefined) {
+                    this.expirationTime = data.expirationTime;
                 }
                 if ("cantCancelBeforeTime" in data && data.cantCancelBeforeTime != undefined) {
                     this.cantCancelBeforeTime = data.cantCancelBeforeTime;
@@ -610,10 +634,10 @@ export namespace bitbadges.bitbadgeschain.badges {
         set subbadgeRanges(value: dependency_1.bitbadges.bitbadgeschain.badges.IdRange[]) {
             pb_1.Message.setRepeatedWrapperField(this, 6, value);
         }
-        get expiration_time() {
+        get expirationTime() {
             return pb_1.Message.getFieldWithDefault(this, 7, 0) as number;
         }
-        set expiration_time(value: number) {
+        set expirationTime(value: number) {
             pb_1.Message.setField(this, 7, value);
         }
         get cantCancelBeforeTime() {
@@ -629,7 +653,7 @@ export namespace bitbadges.bitbadgeschain.badges {
             amounts?: number[];
             badgeId?: number;
             subbadgeRanges?: ReturnType<typeof dependency_1.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>[];
-            expiration_time?: number;
+            expirationTime?: number;
             cantCancelBeforeTime?: number;
         }): MsgTransferBadge {
             const message = new MsgTransferBadge({});
@@ -651,8 +675,8 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (data.subbadgeRanges != null) {
                 message.subbadgeRanges = data.subbadgeRanges.map(item => dependency_1.bitbadges.bitbadgeschain.badges.IdRange.fromObject(item));
             }
-            if (data.expiration_time != null) {
-                message.expiration_time = data.expiration_time;
+            if (data.expirationTime != null) {
+                message.expirationTime = data.expirationTime;
             }
             if (data.cantCancelBeforeTime != null) {
                 message.cantCancelBeforeTime = data.cantCancelBeforeTime;
@@ -667,7 +691,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                 amounts?: number[];
                 badgeId?: number;
                 subbadgeRanges?: ReturnType<typeof dependency_1.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>[];
-                expiration_time?: number;
+                expirationTime?: number;
                 cantCancelBeforeTime?: number;
             } = {};
             if (this.creator != null) {
@@ -688,8 +712,8 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (this.subbadgeRanges != null) {
                 data.subbadgeRanges = this.subbadgeRanges.map((item: dependency_1.bitbadges.bitbadgeschain.badges.IdRange) => item.toObject());
             }
-            if (this.expiration_time != null) {
-                data.expiration_time = this.expiration_time;
+            if (this.expirationTime != null) {
+                data.expirationTime = this.expirationTime;
             }
             if (this.cantCancelBeforeTime != null) {
                 data.cantCancelBeforeTime = this.cantCancelBeforeTime;
@@ -712,8 +736,8 @@ export namespace bitbadges.bitbadgeschain.badges {
                 writer.writeUint64(5, this.badgeId);
             if (this.subbadgeRanges.length)
                 writer.writeRepeatedMessage(6, this.subbadgeRanges, (item: dependency_1.bitbadges.bitbadgeschain.badges.IdRange) => item.serialize(writer));
-            if (this.expiration_time != 0)
-                writer.writeUint64(7, this.expiration_time);
+            if (this.expirationTime != 0)
+                writer.writeUint64(7, this.expirationTime);
             if (this.cantCancelBeforeTime != 0)
                 writer.writeUint64(8, this.cantCancelBeforeTime);
             if (!w)
@@ -744,7 +768,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                         reader.readMessage(message.subbadgeRanges, () => pb_1.Message.addToRepeatedWrapperField(message, 6, dependency_1.bitbadges.bitbadgeschain.badges.IdRange.deserialize(reader), dependency_1.bitbadges.bitbadgeschain.badges.IdRange));
                         break;
                     case 7:
-                        message.expiration_time = reader.readUint64();
+                        message.expirationTime = reader.readUint64();
                         break;
                     case 8:
                         message.cantCancelBeforeTime = reader.readUint64();
@@ -809,7 +833,7 @@ export namespace bitbadges.bitbadgeschain.badges {
             amount?: number;
             badgeId?: number;
             subbadgeRanges?: dependency_1.bitbadges.bitbadgeschain.badges.IdRange[];
-            expiration_time?: number;
+            expirationTime?: number;
             cantCancelBeforeTime?: number;
         }) {
             super();
@@ -830,8 +854,8 @@ export namespace bitbadges.bitbadgeschain.badges {
                 if ("subbadgeRanges" in data && data.subbadgeRanges != undefined) {
                     this.subbadgeRanges = data.subbadgeRanges;
                 }
-                if ("expiration_time" in data && data.expiration_time != undefined) {
-                    this.expiration_time = data.expiration_time;
+                if ("expirationTime" in data && data.expirationTime != undefined) {
+                    this.expirationTime = data.expirationTime;
                 }
                 if ("cantCancelBeforeTime" in data && data.cantCancelBeforeTime != undefined) {
                     this.cantCancelBeforeTime = data.cantCancelBeforeTime;
@@ -868,10 +892,10 @@ export namespace bitbadges.bitbadgeschain.badges {
         set subbadgeRanges(value: dependency_1.bitbadges.bitbadgeschain.badges.IdRange[]) {
             pb_1.Message.setRepeatedWrapperField(this, 6, value);
         }
-        get expiration_time() {
+        get expirationTime() {
             return pb_1.Message.getFieldWithDefault(this, 7, 0) as number;
         }
-        set expiration_time(value: number) {
+        set expirationTime(value: number) {
             pb_1.Message.setField(this, 7, value);
         }
         get cantCancelBeforeTime() {
@@ -886,7 +910,7 @@ export namespace bitbadges.bitbadgeschain.badges {
             amount?: number;
             badgeId?: number;
             subbadgeRanges?: ReturnType<typeof dependency_1.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>[];
-            expiration_time?: number;
+            expirationTime?: number;
             cantCancelBeforeTime?: number;
         }): MsgRequestTransferBadge {
             const message = new MsgRequestTransferBadge({});
@@ -905,8 +929,8 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (data.subbadgeRanges != null) {
                 message.subbadgeRanges = data.subbadgeRanges.map(item => dependency_1.bitbadges.bitbadgeschain.badges.IdRange.fromObject(item));
             }
-            if (data.expiration_time != null) {
-                message.expiration_time = data.expiration_time;
+            if (data.expirationTime != null) {
+                message.expirationTime = data.expirationTime;
             }
             if (data.cantCancelBeforeTime != null) {
                 message.cantCancelBeforeTime = data.cantCancelBeforeTime;
@@ -920,7 +944,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                 amount?: number;
                 badgeId?: number;
                 subbadgeRanges?: ReturnType<typeof dependency_1.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>[];
-                expiration_time?: number;
+                expirationTime?: number;
                 cantCancelBeforeTime?: number;
             } = {};
             if (this.creator != null) {
@@ -938,8 +962,8 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (this.subbadgeRanges != null) {
                 data.subbadgeRanges = this.subbadgeRanges.map((item: dependency_1.bitbadges.bitbadgeschain.badges.IdRange) => item.toObject());
             }
-            if (this.expiration_time != null) {
-                data.expiration_time = this.expiration_time;
+            if (this.expirationTime != null) {
+                data.expirationTime = this.expirationTime;
             }
             if (this.cantCancelBeforeTime != null) {
                 data.cantCancelBeforeTime = this.cantCancelBeforeTime;
@@ -960,8 +984,8 @@ export namespace bitbadges.bitbadgeschain.badges {
                 writer.writeUint64(5, this.badgeId);
             if (this.subbadgeRanges.length)
                 writer.writeRepeatedMessage(6, this.subbadgeRanges, (item: dependency_1.bitbadges.bitbadgeschain.badges.IdRange) => item.serialize(writer));
-            if (this.expiration_time != 0)
-                writer.writeUint64(7, this.expiration_time);
+            if (this.expirationTime != 0)
+                writer.writeUint64(7, this.expirationTime);
             if (this.cantCancelBeforeTime != 0)
                 writer.writeUint64(8, this.cantCancelBeforeTime);
             if (!w)
@@ -989,7 +1013,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                         reader.readMessage(message.subbadgeRanges, () => pb_1.Message.addToRepeatedWrapperField(message, 6, dependency_1.bitbadges.bitbadgeschain.badges.IdRange.deserialize(reader), dependency_1.bitbadges.bitbadgeschain.badges.IdRange));
                         break;
                     case 7:
-                        message.expiration_time = reader.readUint64();
+                        message.expirationTime = reader.readUint64();
                         break;
                     case 8:
                         message.cantCancelBeforeTime = reader.readUint64();
@@ -2722,7 +2746,7 @@ export namespace bitbadges.bitbadgeschain.badges {
         constructor(data?: any[] | {
             creator?: string;
             badgeId?: number;
-            newBytes?: Uint8Array;
+            newBytes?: string;
         }) {
             super();
             pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
@@ -2751,15 +2775,15 @@ export namespace bitbadges.bitbadgeschain.badges {
             pb_1.Message.setField(this, 2, value);
         }
         get newBytes() {
-            return pb_1.Message.getFieldWithDefault(this, 3, new Uint8Array()) as Uint8Array;
+            return pb_1.Message.getFieldWithDefault(this, 3, "") as string;
         }
-        set newBytes(value: Uint8Array) {
+        set newBytes(value: string) {
             pb_1.Message.setField(this, 3, value);
         }
         static fromObject(data: {
             creator?: string;
             badgeId?: number;
-            newBytes?: Uint8Array;
+            newBytes?: string;
         }): MsgUpdateBytes {
             const message = new MsgUpdateBytes({});
             if (data.creator != null) {
@@ -2777,7 +2801,7 @@ export namespace bitbadges.bitbadgeschain.badges {
             const data: {
                 creator?: string;
                 badgeId?: number;
-                newBytes?: Uint8Array;
+                newBytes?: string;
             } = {};
             if (this.creator != null) {
                 data.creator = this.creator;
@@ -2799,7 +2823,7 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (this.badgeId != 0)
                 writer.writeUint64(2, this.badgeId);
             if (this.newBytes.length)
-                writer.writeBytes(3, this.newBytes);
+                writer.writeString(3, this.newBytes);
             if (!w)
                 return writer.getResultBuffer();
         }
@@ -2816,7 +2840,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                         message.badgeId = reader.readUint64();
                         break;
                     case 3:
-                        message.newBytes = reader.readBytes();
+                        message.newBytes = reader.readString();
                         break;
                     default: reader.skipField();
                 }

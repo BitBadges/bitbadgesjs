@@ -6,9 +6,19 @@ export interface IdRange {
 export interface UriObject {
   decodeScheme?: number
   scheme?: number
-  uri: Uint8Array
+  uri: string
   idxRangeToRemove?: IdRange
   insertSubassetBytesIdx?: number
-  bytesToInsert?: Uint8Array
+  bytesToInsert?: string
   insertIdIdx?: number
+}
+
+export interface BalanceObject {
+  balance: number
+  idRanges: IdRange[]
+}
+
+export interface WhitelistMintInfo {
+  addresses: number[]
+  balanceAmounts: BalanceObject[]
 }

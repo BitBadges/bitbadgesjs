@@ -13,10 +13,10 @@ export namespace bitbadges.bitbadgeschain.badges {
         constructor(data?: any[] | {
             decodeScheme?: number;
             scheme?: number;
-            uri?: Uint8Array;
+            uri?: string;
             idxRangeToRemove?: dependency_1.bitbadges.bitbadgeschain.badges.IdRange;
             insertSubassetBytesIdx?: number;
-            bytesToInsert?: Uint8Array;
+            bytesToInsert?: string;
             insertIdIdx?: number;
         }) {
             super();
@@ -58,9 +58,9 @@ export namespace bitbadges.bitbadgeschain.badges {
             pb_1.Message.setField(this, 2, value);
         }
         get uri() {
-            return pb_1.Message.getFieldWithDefault(this, 3, new Uint8Array()) as Uint8Array;
+            return pb_1.Message.getFieldWithDefault(this, 3, "") as string;
         }
-        set uri(value: Uint8Array) {
+        set uri(value: string) {
             pb_1.Message.setField(this, 3, value);
         }
         get idxRangeToRemove() {
@@ -79,9 +79,9 @@ export namespace bitbadges.bitbadgeschain.badges {
             pb_1.Message.setField(this, 5, value);
         }
         get bytesToInsert() {
-            return pb_1.Message.getFieldWithDefault(this, 6, new Uint8Array()) as Uint8Array;
+            return pb_1.Message.getFieldWithDefault(this, 6, "") as string;
         }
-        set bytesToInsert(value: Uint8Array) {
+        set bytesToInsert(value: string) {
             pb_1.Message.setField(this, 6, value);
         }
         get insertIdIdx() {
@@ -93,10 +93,10 @@ export namespace bitbadges.bitbadgeschain.badges {
         static fromObject(data: {
             decodeScheme?: number;
             scheme?: number;
-            uri?: Uint8Array;
+            uri?: string;
             idxRangeToRemove?: ReturnType<typeof dependency_1.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>;
             insertSubassetBytesIdx?: number;
-            bytesToInsert?: Uint8Array;
+            bytesToInsert?: string;
             insertIdIdx?: number;
         }): UriObject {
             const message = new UriObject({});
@@ -127,10 +127,10 @@ export namespace bitbadges.bitbadgeschain.badges {
             const data: {
                 decodeScheme?: number;
                 scheme?: number;
-                uri?: Uint8Array;
+                uri?: string;
                 idxRangeToRemove?: ReturnType<typeof dependency_1.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>;
                 insertSubassetBytesIdx?: number;
-                bytesToInsert?: Uint8Array;
+                bytesToInsert?: string;
                 insertIdIdx?: number;
             } = {};
             if (this.decodeScheme != null) {
@@ -165,13 +165,13 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (this.scheme != 0)
                 writer.writeUint64(2, this.scheme);
             if (this.uri.length)
-                writer.writeBytes(3, this.uri);
+                writer.writeString(3, this.uri);
             if (this.has_idxRangeToRemove)
                 writer.writeMessage(4, this.idxRangeToRemove, () => this.idxRangeToRemove.serialize(writer));
             if (this.insertSubassetBytesIdx != 0)
                 writer.writeUint64(5, this.insertSubassetBytesIdx);
             if (this.bytesToInsert.length)
-                writer.writeBytes(6, this.bytesToInsert);
+                writer.writeString(6, this.bytesToInsert);
             if (this.insertIdIdx != 0)
                 writer.writeUint64(7, this.insertIdIdx);
             if (!w)
@@ -190,7 +190,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                         message.scheme = reader.readUint64();
                         break;
                     case 3:
-                        message.uri = reader.readBytes();
+                        message.uri = reader.readString();
                         break;
                     case 4:
                         reader.readMessage(message.idxRangeToRemove, () => message.idxRangeToRemove = dependency_1.bitbadges.bitbadgeschain.badges.IdRange.deserialize(reader));
@@ -199,7 +199,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                         message.insertSubassetBytesIdx = reader.readUint64();
                         break;
                     case 6:
-                        message.bytesToInsert = reader.readBytes();
+                        message.bytesToInsert = reader.readString();
                         break;
                     case 7:
                         message.insertIdIdx = reader.readUint64();

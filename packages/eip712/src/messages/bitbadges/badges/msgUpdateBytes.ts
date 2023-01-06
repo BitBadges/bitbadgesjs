@@ -1,7 +1,7 @@
 const MsgUpdateBytesValueType = [
   { name: 'creator', type: 'string' },
   { name: 'badgeId', type: 'uint64' },
-  { name: 'newBytes', type: 'bytes' },
+  { name: 'newBytes', type: 'string' },
 ]
 
 export const MSG_UPDATE_BYTES_TYPES = {
@@ -11,7 +11,7 @@ export const MSG_UPDATE_BYTES_TYPES = {
 export function createMsgUpdateBytes(
   creator: string,
   badgeId: number,
-  newBytes: Uint8Array,
+  newBytes: string,
 ) {
   return {
     type: 'badges/UpdateBytes',

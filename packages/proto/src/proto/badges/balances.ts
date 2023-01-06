@@ -11,6 +11,96 @@ import * as dependency_3 from "./badges";
 import * as dependency_4 from "./ranges";
 import * as pb_1 from "google-protobuf";
 export namespace bitbadges.bitbadgeschain.badges {
+    export class WhitelistMintInfo extends pb_1.Message {
+        #one_of_decls: number[][] = [];
+        constructor(data?: any[] | {
+            addresses?: number[];
+            balanceAmounts?: dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject[];
+        }) {
+            super();
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1, 2], this.#one_of_decls);
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("addresses" in data && data.addresses != undefined) {
+                    this.addresses = data.addresses;
+                }
+                if ("balanceAmounts" in data && data.balanceAmounts != undefined) {
+                    this.balanceAmounts = data.balanceAmounts;
+                }
+            }
+        }
+        get addresses() {
+            return pb_1.Message.getFieldWithDefault(this, 1, []) as number[];
+        }
+        set addresses(value: number[]) {
+            pb_1.Message.setField(this, 1, value);
+        }
+        get balanceAmounts() {
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject, 2) as dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject[];
+        }
+        set balanceAmounts(value: dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 2, value);
+        }
+        static fromObject(data: {
+            addresses?: number[];
+            balanceAmounts?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject.prototype.toObject>[];
+        }): WhitelistMintInfo {
+            const message = new WhitelistMintInfo({});
+            if (data.addresses != null) {
+                message.addresses = data.addresses;
+            }
+            if (data.balanceAmounts != null) {
+                message.balanceAmounts = data.balanceAmounts.map(item => dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject.fromObject(item));
+            }
+            return message;
+        }
+        toObject() {
+            const data: {
+                addresses?: number[];
+                balanceAmounts?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject.prototype.toObject>[];
+            } = {};
+            if (this.addresses != null) {
+                data.addresses = this.addresses;
+            }
+            if (this.balanceAmounts != null) {
+                data.balanceAmounts = this.balanceAmounts.map((item: dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject) => item.toObject());
+            }
+            return data;
+        }
+        serialize(): Uint8Array;
+        serialize(w: pb_1.BinaryWriter): void;
+        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+            const writer = w || new pb_1.BinaryWriter();
+            if (this.addresses.length)
+                writer.writePackedUint64(1, this.addresses);
+            if (this.balanceAmounts.length)
+                writer.writeRepeatedMessage(2, this.balanceAmounts, (item: dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject) => item.serialize(writer));
+            if (!w)
+                return writer.getResultBuffer();
+        }
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): WhitelistMintInfo {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new WhitelistMintInfo();
+            while (reader.nextField()) {
+                if (reader.isEndGroup())
+                    break;
+                switch (reader.getFieldNumber()) {
+                    case 1:
+                        message.addresses = reader.readPackedUint64();
+                        break;
+                    case 2:
+                        reader.readMessage(message.balanceAmounts, () => pb_1.Message.addToRepeatedWrapperField(message, 2, dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject.deserialize(reader), dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject));
+                        break;
+                    default: reader.skipField();
+                }
+            }
+            return message;
+        }
+        serializeBinary(): Uint8Array {
+            return this.serialize();
+        }
+        static deserializeBinary(bytes: Uint8Array): WhitelistMintInfo {
+            return WhitelistMintInfo.deserialize(bytes);
+        }
+    }
     export class UserBalanceInfo extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {

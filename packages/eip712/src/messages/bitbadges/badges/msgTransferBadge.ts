@@ -7,7 +7,7 @@ const MsgTransferBadgeValueType = [
   { name: 'amounts', type: 'uint64[]' },
   { name: 'badgeId', type: 'uint64' },
   { name: 'subbadgeRanges', type: 'IdRange[]' },
-  { name: 'expiration_time', type: 'uint64' },
+  { name: 'expirationTime', type: 'uint64' },
   { name: 'cantCancelBeforeTime', type: 'uint64' },
 ]
 
@@ -35,7 +35,7 @@ export function createMsgTransferBadge(
       amounts,
       badgeId,
       subbadgeRanges,
-      expiration_time: expirationTime,
+      expirationTime,
       cantCancelBeforeTime,
     },
   }

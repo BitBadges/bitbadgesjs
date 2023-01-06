@@ -15,18 +15,19 @@ import {
 import { getDefaultDomainWithChainId } from '../../domain'
 
 import { Chain, Fee, Sender } from '../../common'
-import { IdRange, UriObject } from './typeUtils'
+import { IdRange, UriObject, WhitelistMintInfo } from './typeUtils'
 
 export interface MessageMsgNewBadge {
   creator: string
   uri: UriObject
-  arbitraryBytes: Uint8Array
+  arbitraryBytes: string
   permissions: number
   defaultSubassetSupply: number
   freezeAddressRanges: IdRange[]
   standard: number
   subassetSupplys: number[]
   subassetAmountsToCreate: number[]
+  whitelistedRecipients: WhitelistMintInfo[]
 }
 
 export function createTxMsgNewBadge(
@@ -56,6 +57,7 @@ export function createTxMsgNewBadge(
     params.standard,
     params.subassetSupplys,
     params.subassetAmountsToCreate,
+    params.whitelistedRecipients,
   )
   const messages = generateMessage(
     sender.accountNumber.toString(),
@@ -82,6 +84,7 @@ export function createTxMsgNewBadge(
     params.standard,
     params.subassetSupplys,
     params.subassetAmountsToCreate,
+    params.whitelistedRecipients,
   )
   const tx = createTransaction(
     msgCosmos,

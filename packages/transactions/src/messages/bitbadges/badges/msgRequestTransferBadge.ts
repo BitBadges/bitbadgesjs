@@ -25,7 +25,7 @@ export interface MessageMsgRequestTransferBadge {
     amount: number;
     badgeId: number;
     subbadgeRanges: IdRange[];
-    expiration_time: number;
+    expirationTime: number;
     cantCancelBeforeTime: number;
 }
 
@@ -52,7 +52,7 @@ export function createTxMsgRequestTransferBadge(
         params.amount,
         params.badgeId,
         params.subbadgeRanges,
-        params.expiration_time,
+        params.expirationTime,
         params.cantCancelBeforeTime,
     )
     const messages = generateMessage(
@@ -76,7 +76,7 @@ export function createTxMsgRequestTransferBadge(
         params.amount,
         params.badgeId,
         params.subbadgeRanges,
-        params.expiration_time,
+        params.expirationTime,
         params.cantCancelBeforeTime,
     )
     const tx = createTransaction(

@@ -25,7 +25,7 @@ export function createMsgRequestTransferBadge(
       amount,
       badgeId,
       subbadgeRanges: wrappedRanges,
-      expiration_time: expirationTime,
+      expirationTime,
       cantCancelBeforeTime,
     })
 

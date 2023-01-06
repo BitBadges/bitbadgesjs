@@ -1,21 +1,31 @@
 #!/bin/bash
 MYFOLDER=$(pwd)
 
-# Ethermint
-mkdir -p proto
-cd /tmp
-git clone https://github.com/tharsis/ethermint/
-cd ethermint/
-cp -r ./proto/* $MYFOLDER/proto
-cp -r ./third_party/proto/* $MYFOLDER/proto
-cd /tmp
-rm -rf ethermint
+# # Ethermint
+# mkdir -p proto
+# cd /tmp
+# git clone https://github.com/tharsis/ethermint/
+# cd ethermint/
+# cp -r ./proto/* $MYFOLDER/proto
+# cp -r ./third_party/proto/* $MYFOLDER/proto
+# cd /tmp
+# rm -rf ethermint
+
+# # Evmos
+# cd /tmp
+# git clone https://github.com/tharsis/evmos/
+# cd evmos/
+# cp -r ./proto/* $MYFOLDER/proto
+# cp -r ./third_party/proto/* $MYFOLDER/proto
+# cd /tmp
+# rm -rf evmos
+
 
 # Evmos
 cd /tmp
-git clone https://github.com/tharsis/evmos/
-cd evmos/
+git clone https://github.com/bitbadges/bitbadgeschain/
+cd bitbadgeschain/
 cp -r ./proto/* $MYFOLDER/proto
-cp -r ./third_party/proto/* $MYFOLDER/proto
+# cp -r ./third_party/proto/* $MYFOLDER/proto
 cd /tmp
-rm -rf evmos
+rm -rf bitbadgeschain

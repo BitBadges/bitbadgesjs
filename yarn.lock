@@ -2722,16 +2722,6 @@
   dependencies:
     "@sinonjs/commons" "^1.7.0"
 
-"@tharsis/address-converter@^0.1.8":
-  "integrity" "sha512-z7zdNczV8RIzBNxzIzRFhC5ujiQ3Lt04At9rooo2pL6QONDDMMLxsqH3o28ie80k5DXSXaMJ6gffATeehxwAkw=="
-  "resolved" "https://registry.npmjs.org/@tharsis/address-converter/-/address-converter-0.1.8.tgz"
-  "version" "0.1.8"
-  dependencies:
-    "bech32" "^2.0.0"
-    "crypto-addr-codec" "^0.1.7"
-    "link-module-alias" "^1.2.0"
-    "shx" "^0.3.4"
-
 "@tharsis/eip712@^0.2.4":
   "integrity" "sha512-tn3zghCpsar2ZDsF8d7eBAfr+Toeqd9uOxFTa8LlCyewXmXE18mPMyoLeNDYX0jU7kTO0TTV9RQf0uNCahzQHA=="
   "resolved" "https://registry.npmjs.org/@tharsis/eip712/-/eip712-0.2.4.tgz"
@@ -2750,26 +2740,6 @@
     "google-protobuf" "^3.19.4"
     "link-module-alias" "^1.2.0"
     "sha3" "^2.1.4"
-    "shx" "^0.3.4"
-
-"@tharsis/provider@^0.2.4":
-  "integrity" "sha512-gAVKhQfeDmcdp4nCFPfuR0BZkbPaqozMG7wL5gLo+KhuzzeIs4VZvUt4gFCZph1dvsqPy2KLU+4h2/eiWroeMA=="
-  "resolved" "https://registry.npmjs.org/@tharsis/provider/-/provider-0.2.4.tgz"
-  "version" "0.2.4"
-  dependencies:
-    "@types/node" "^17.0.21"
-    "link-module-alias" "^1.2.0"
-    "shx" "^0.3.4"
-
-"@tharsis/transactions@^0.2.6":
-  "integrity" "sha512-RHDYaLYvDL4UvKveN08vppsRyjTOnJ2eSBBCXmSyRBbeEVXOBG83qhoECx9nrcs3gXzEL5pqU3PUe3p+3hzfDQ=="
-  "resolved" "https://registry.npmjs.org/@tharsis/transactions/-/transactions-0.2.6.tgz"
-  "version" "0.2.6"
-  dependencies:
-    "@tharsis/eip712" "^0.2.4"
-    "@tharsis/proto" "^0.1.20"
-    "@types/node" "^17.0.21"
-    "link-module-alias" "^1.2.0"
     "shx" "^0.3.4"
 
 "@tootallnate/once@1":
@@ -3470,25 +3440,25 @@
   "resolved" "https://registry.npmjs.org/binary-extensions/-/binary-extensions-2.2.0.tgz"
   "version" "2.2.0"
 
-"bitbadgesjs-address-converter@file:/home/bitbadges/cosmos/bitbadgesjs/packages/address-converter":
+"bitbadgesjs-address-converter@file:/home/trevormil/cosmos/bitbadgesjs/packages/address-converter":
   "resolved" "file:packages/address-converter"
-  "version" "0.0.1"
+  "version" "0.0.3"
   dependencies:
     "bech32" "^2.0.0"
     "crypto-addr-codec" "^0.1.7"
     "link-module-alias" "^1.2.0"
     "shx" "^0.3.4"
 
-"bitbadgesjs-eip712@^0.0.24", "bitbadgesjs-eip712@file:/home/bitbadges/cosmos/bitbadgesjs/packages/eip712":
+"bitbadgesjs-eip712@^0.0.37", "bitbadgesjs-eip712@file:/home/trevormil/cosmos/bitbadgesjs/packages/eip712":
   "resolved" "file:packages/eip712"
-  "version" "0.0.24"
+  "version" "0.0.37"
   dependencies:
     "link-module-alias" "^1.2.0"
     "shx" "^0.3.4"
 
-"bitbadgesjs-proto@^0.0.25", "bitbadgesjs-proto@file:/home/bitbadges/cosmos/bitbadgesjs/packages/proto":
+"bitbadgesjs-proto@^0.0.39", "bitbadgesjs-proto@file:/home/trevormil/cosmos/bitbadgesjs/packages/proto":
   "resolved" "file:packages/proto"
-  "version" "0.0.25"
+  "version" "0.0.39"
   dependencies:
     "@types/google-protobuf" "^3.15.5"
     "@types/node" "^17.0.21"
@@ -3498,21 +3468,21 @@
     "sha3" "^2.1.4"
     "shx" "^0.3.4"
 
-"bitbadgesjs-provider@file:/home/bitbadges/cosmos/bitbadgesjs/packages/provider":
+"bitbadgesjs-provider@file:/home/trevormil/cosmos/bitbadgesjs/packages/provider":
   "resolved" "file:packages/provider"
-  "version" "0.0.1"
+  "version" "0.0.3"
   dependencies:
     "@types/node" "^17.0.21"
     "link-module-alias" "^1.2.0"
     "shx" "^0.3.4"
 
-"bitbadgesjs-transactions@file:/home/bitbadges/cosmos/bitbadgesjs/packages/transactions":
+"bitbadgesjs-transactions@file:/home/trevormil/cosmos/bitbadgesjs/packages/transactions":
   "resolved" "file:packages/transactions"
-  "version" "0.0.31"
+  "version" "0.0.53"
   dependencies:
     "@types/node" "^17.0.21"
-    "bitbadgesjs-eip712" "^0.0.22"
-    "bitbadgesjs-proto" "^0.0.24"
+    "bitbadgesjs-eip712" "^0.0.37"
+    "bitbadgesjs-proto" "^0.0.39"
     "link-module-alias" "^1.2.0"
     "shx" "^0.3.4"
 
@@ -4971,19 +4941,6 @@
   "integrity" "sha512-8guHBZCwKnFhYdHr2ysuRWErTwhoN2X8XELRlrRwpmfeY2jjuUN4taQMsULKUVo1K4DvZl+0pgfyoysHxvmvEw=="
   "resolved" "https://registry.npmjs.org/eventemitter3/-/eventemitter3-4.0.7.tgz"
   "version" "4.0.7"
-
-"evmosjs@file:/home/bitbadges/cosmos/bitbadgesjs/packages/evmosjs":
-  "resolved" "file:packages/evmosjs"
-  "version" "0.2.9"
-  dependencies:
-    "@tharsis/address-converter" "^0.1.8"
-    "@tharsis/eip712" "^0.2.4"
-    "@tharsis/proto" "^0.1.20"
-    "@tharsis/provider" "^0.2.4"
-    "@tharsis/transactions" "^0.2.6"
-    "@types/node" "^17.0.21"
-    "link-module-alias" "^1.2.0"
-    "shx" "^0.3.4"
 
 "evp_bytestokey@^1.0.3":
   "integrity" "sha512-/f2Go4TognH/KvCISP7OUsHn85hT9nUkxxA9BEWxFn+Oj9o8ZNLm/40hdlgSLyuOimsrTKLUMEorQexp/aPQeA=="

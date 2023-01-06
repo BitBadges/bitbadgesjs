@@ -15,7 +15,7 @@ export namespace bitbadges.bitbadgeschain.badges {
         constructor(data?: any[] | {
             id?: number;
             uri?: dependency_3.bitbadges.bitbadgeschain.badges.UriObject;
-            arbitraryBytes?: Uint8Array;
+            arbitraryBytes?: string;
             manager?: number;
             permissions?: number;
             freezeRanges?: dependency_2.bitbadges.bitbadgeschain.badges.IdRange[];
@@ -75,9 +75,9 @@ export namespace bitbadges.bitbadgeschain.badges {
             return pb_1.Message.getField(this, 2) != null;
         }
         get arbitraryBytes() {
-            return pb_1.Message.getFieldWithDefault(this, 3, new Uint8Array()) as Uint8Array;
+            return pb_1.Message.getFieldWithDefault(this, 3, "") as string;
         }
-        set arbitraryBytes(value: Uint8Array) {
+        set arbitraryBytes(value: string) {
             pb_1.Message.setField(this, 3, value);
         }
         get manager() {
@@ -125,7 +125,7 @@ export namespace bitbadges.bitbadgeschain.badges {
         static fromObject(data: {
             id?: number;
             uri?: ReturnType<typeof dependency_3.bitbadges.bitbadgeschain.badges.UriObject.prototype.toObject>;
-            arbitraryBytes?: Uint8Array;
+            arbitraryBytes?: string;
             manager?: number;
             permissions?: number;
             freezeRanges?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>[];
@@ -171,7 +171,7 @@ export namespace bitbadges.bitbadgeschain.badges {
             const data: {
                 id?: number;
                 uri?: ReturnType<typeof dependency_3.bitbadges.bitbadgeschain.badges.UriObject.prototype.toObject>;
-                arbitraryBytes?: Uint8Array;
+                arbitraryBytes?: string;
                 manager?: number;
                 permissions?: number;
                 freezeRanges?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>[];
@@ -221,7 +221,7 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (this.has_uri)
                 writer.writeMessage(2, this.uri, () => this.uri.serialize(writer));
             if (this.arbitraryBytes.length)
-                writer.writeBytes(3, this.arbitraryBytes);
+                writer.writeString(3, this.arbitraryBytes);
             if (this.manager != 0)
                 writer.writeUint64(4, this.manager);
             if (this.permissions != 0)
@@ -252,7 +252,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                         reader.readMessage(message.uri, () => message.uri = dependency_3.bitbadges.bitbadgeschain.badges.UriObject.deserialize(reader));
                         break;
                     case 3:
-                        message.arbitraryBytes = reader.readBytes();
+                        message.arbitraryBytes = reader.readString();
                         break;
                     case 4:
                         message.manager = reader.readUint64();

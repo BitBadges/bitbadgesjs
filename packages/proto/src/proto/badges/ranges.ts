@@ -101,7 +101,7 @@ export namespace bitbadges.bitbadgeschain.badges {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
             balance?: number;
-            id_ranges?: IdRange[];
+            idRanges?: IdRange[];
         }) {
             super();
             pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [2], this.#one_of_decls);
@@ -109,8 +109,8 @@ export namespace bitbadges.bitbadgeschain.badges {
                 if ("balance" in data && data.balance != undefined) {
                     this.balance = data.balance;
                 }
-                if ("id_ranges" in data && data.id_ranges != undefined) {
-                    this.id_ranges = data.id_ranges;
+                if ("idRanges" in data && data.idRanges != undefined) {
+                    this.idRanges = data.idRanges;
                 }
             }
         }
@@ -120,35 +120,35 @@ export namespace bitbadges.bitbadgeschain.badges {
         set balance(value: number) {
             pb_1.Message.setField(this, 1, value);
         }
-        get id_ranges() {
+        get idRanges() {
             return pb_1.Message.getRepeatedWrapperField(this, IdRange, 2) as IdRange[];
         }
-        set id_ranges(value: IdRange[]) {
+        set idRanges(value: IdRange[]) {
             pb_1.Message.setRepeatedWrapperField(this, 2, value);
         }
         static fromObject(data: {
             balance?: number;
-            id_ranges?: ReturnType<typeof IdRange.prototype.toObject>[];
+            idRanges?: ReturnType<typeof IdRange.prototype.toObject>[];
         }): BalanceObject {
             const message = new BalanceObject({});
             if (data.balance != null) {
                 message.balance = data.balance;
             }
-            if (data.id_ranges != null) {
-                message.id_ranges = data.id_ranges.map(item => IdRange.fromObject(item));
+            if (data.idRanges != null) {
+                message.idRanges = data.idRanges.map(item => IdRange.fromObject(item));
             }
             return message;
         }
         toObject() {
             const data: {
                 balance?: number;
-                id_ranges?: ReturnType<typeof IdRange.prototype.toObject>[];
+                idRanges?: ReturnType<typeof IdRange.prototype.toObject>[];
             } = {};
             if (this.balance != null) {
                 data.balance = this.balance;
             }
-            if (this.id_ranges != null) {
-                data.id_ranges = this.id_ranges.map((item: IdRange) => item.toObject());
+            if (this.idRanges != null) {
+                data.idRanges = this.idRanges.map((item: IdRange) => item.toObject());
             }
             return data;
         }
@@ -158,8 +158,8 @@ export namespace bitbadges.bitbadgeschain.badges {
             const writer = w || new pb_1.BinaryWriter();
             if (this.balance != 0)
                 writer.writeUint64(1, this.balance);
-            if (this.id_ranges.length)
-                writer.writeRepeatedMessage(2, this.id_ranges, (item: IdRange) => item.serialize(writer));
+            if (this.idRanges.length)
+                writer.writeRepeatedMessage(2, this.idRanges, (item: IdRange) => item.serialize(writer));
             if (!w)
                 return writer.getResultBuffer();
         }
@@ -173,7 +173,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                         message.balance = reader.readUint64();
                         break;
                     case 2:
-                        reader.readMessage(message.id_ranges, () => pb_1.Message.addToRepeatedWrapperField(message, 2, IdRange.deserialize(reader), IdRange));
+                        reader.readMessage(message.idRanges, () => pb_1.Message.addToRepeatedWrapperField(message, 2, IdRange.deserialize(reader), IdRange));
                         break;
                     default: reader.skipField();
                 }

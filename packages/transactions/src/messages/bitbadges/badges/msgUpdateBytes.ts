@@ -19,7 +19,7 @@ import { Chain, Fee, Sender } from '../../common'
 export interface MessageMsgUpdateBytes {
   creator: string
   badgeId: number
-  newBytes: Uint8Array
+  newBytes: string
 }
 
 export function createTxMsgUpdateBytes(
