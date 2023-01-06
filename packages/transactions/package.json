@@ -1,44 +1,44 @@
 {
-  "name": "bitbadgesjs-transactions",
-  "description": "Transactions generator for BitBadges and EVMOS",
-  "version": "0.0.52",
-  "license": "MIT",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "files": [
-    "dist"
-  ],
-  "_moduleAliases": {
-    "~transactions": "dist"
-  },
-  "scripts": {
-    "postinstall": "shx mkdir -p dist && link-module-alias",
-    "build": "tsc --build tsconfig.build.json && link-module-alias",
-    "build:watch": "tsc --build -w tsconfig.build.json && link-module-alias",
-    "clean": "tsc --build tsconfig.build.json --clean  && shx rm -rf coverage *.log junit.xml dist && jest --clearCache",
-    "test": "jest",
-    "test:unit": "jest test/unit",
-    "test:integration": "jest test/unit",
-    "test:watch": "jest --watch",
-    "test:ci": "jest --coverage --ci --reporters='jest-junit'",
-    "coverage": "jest --coverage",
-    "dev": "ts-node-dev -r tsconfig-paths/register src/index.ts",
-    "start": "node dist/index.js"
-  },
-  "dependencies": {
-    "@types/node": "^17.0.21",
-    "bitbadgesjs-eip712": "^0.0.36",
-    "bitbadgesjs-proto": "^0.0.38",
-    "link-module-alias": "^1.2.0",
-    "shx": "^0.3.4"
-  },
-  "devDependencies": {
-    "@babel/core": "^7.18.2",
-    "@babel/preset-env": "^7.18.2",
-    "@babel/preset-typescript": "^7.17.12",
-    "@metamask/eth-sig-util": "^4.0.1",
-    "ethers": "^5.6.8",
-    "ethers-eip712": "^0.2.0",
-    "keccak": "^3.0.2"
-  }
+    "name": "bitbadgesjs-transactions",
+    "description": "Transactions generator for BitBadges and EVMOS",
+    "version": "0.0.53",
+    "license": "MIT",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "files": [
+        "dist"
+    ],
+    "_moduleAliases": {
+        "~transactions": "dist"
+    },
+    "scripts": {
+        "postinstall": "shx mkdir -p dist && link-module-alias",
+        "build": "tsc --build tsconfig.build.json && link-module-alias",
+        "build:watch": "tsc --build -w tsconfig.build.json && link-module-alias",
+        "clean": "tsc --build tsconfig.build.json --clean  && shx rm -rf coverage *.log junit.xml dist && jest --clearCache",
+        "test": "jest",
+        "test:unit": "jest test/unit",
+        "test:integration": "jest test/unit",
+        "test:watch": "jest --watch",
+        "test:ci": "jest --coverage --ci --reporters='jest-junit'",
+        "coverage": "jest --coverage",
+        "dev": "ts-node-dev -r tsconfig-paths/register src/index.ts",
+        "start": "node dist/index.js"
+    },
+    "dependencies": {
+        "@types/node": "^17.0.21",
+        "bitbadgesjs-eip712": "^0.0.37",
+        "bitbadgesjs-proto": "^0.0.39",
+        "link-module-alias": "^1.2.0",
+        "shx": "^0.3.4"
+    },
+    "devDependencies": {
+        "@babel/core": "^7.18.2",
+        "@babel/preset-env": "^7.18.2",
+        "@babel/preset-typescript": "^7.17.12",
+        "@metamask/eth-sig-util": "^4.0.1",
+        "ethers": "^5.6.8",
+        "ethers-eip712": "^0.2.0",
+        "keccak": "^3.0.2"
+    }
 }
