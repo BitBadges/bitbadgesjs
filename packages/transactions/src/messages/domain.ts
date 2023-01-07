@@ -1,6 +1,6 @@
 export function getDefaultDomainWithChainId(chainId: number) {
   return {
-    name: 'Cosmos Web3',
+    name: 'BitBadges',
     version: '1.0.0',
     chainId,
     verifyingContract: 'cosmos',
