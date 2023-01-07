@@ -62,7 +62,7 @@ describe('msgSend tests', () => {
     expect(msg.eipToSign).toStrictEqual({
       domain: {
         chainId: 9000,
-        name: 'Cosmos Web3',
+        name: 'BitBadges',
         salt: '0',
         verifyingContract: 'cosmos',
         version: '1.0.0',

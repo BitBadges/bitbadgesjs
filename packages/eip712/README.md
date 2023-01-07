@@ -154,7 +154,7 @@ console.log(complete)
   },
   "primaryType": "Tx",
   "domain": {
-    "name": "Cosmos Web3",
+    "name": "BitBadges",
     "version": "1.0.0",
     "chainId": 9000,
     "verifyingContract": "cosmos",

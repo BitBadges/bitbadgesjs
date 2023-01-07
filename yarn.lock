@@ -3478,11 +3478,11 @@
 
 "bitbadgesjs-transactions@file:/home/trevormil/cosmos/bitbadgesjs/packages/transactions":
   "resolved" "file:packages/transactions"
-  "version" "0.0.55"
+  "version" "0.0.56"
   dependencies:
     "@types/node" "^17.0.21"
-    "bitbadgesjs-eip712" "^0.0.38"
-    "bitbadgesjs-proto" "^0.0.40"
+    "bitbadgesjs-eip712" "^0.0.39"
+    "bitbadgesjs-proto" "^0.0.41"
     "link-module-alias" "^1.2.0"
     "shx" "^0.3.4"
 
