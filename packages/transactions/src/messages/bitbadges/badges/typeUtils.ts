@@ -22,3 +22,8 @@ export interface WhitelistMintInfo {
   addresses: number[]
   balanceAmounts: BalanceObject[]
 }
+
+export interface SubassetSupplyAndAmount {
+  amount: number
+  supply: number
+}

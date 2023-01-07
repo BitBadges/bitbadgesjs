@@ -4,6 +4,7 @@ import * as uri from '../../../proto/badges/uris'
 import * as balances from '../../../proto/badges/balances'
 import {
   IdRange,
+  SubassetSupplyAndAmount,
   UriObject,
   UriObjectWithIdRanges,
   WhitelistMintInfo,
@@ -17,14 +18,21 @@ export function createMsgNewBadge(
   defaultSubassetSupply: number,
   freezeAddressRanges: IdRange[],
   standard: number,
-  subassetSupplys: number[],
-  subassetAmountsToCreate: number[],
+  subassetSupplysAndAmounts: SubassetSupplyAndAmount[],
   whitelistedRecipients: WhitelistMintInfo[],
 ) {
   const wrappedRanges: ranges.bitbadges.bitbadgeschain.badges.IdRange[] = []
   for (const range of freezeAddressRanges) {
     wrappedRanges.push(
       new ranges.bitbadges.bitbadgeschain.badges.IdRange(range),
+    )
+  }
+
+  const wrappedSupplys: tx.bitbadges.bitbadgeschain.badges.SubassetSupplyAndAmount[] =
+    []
+  for (const supplyObj of subassetSupplysAndAmounts) {
+    wrappedSupplys.push(
+      new tx.bitbadges.bitbadgeschain.badges.SubassetSupplyAndAmount(supplyObj),
     )
   }
 
@@ -82,8 +90,7 @@ export function createMsgNewBadge(
     defaultSubassetSupply,
     freezeAddressRanges: wrappedRanges,
     standard,
-    subassetSupplys,
-    subassetAmountsToCreate,
+    subassetSupplysAndAmounts: wrappedSupplys,
     whitelistedRecipients: wrappedWhitelistedRecipients,
   })
 

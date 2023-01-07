@@ -10,6 +10,96 @@ import * as dependency_2 from "./uris";
 import * as dependency_3 from "./balances";
 import * as pb_1 from "google-protobuf";
 export namespace bitbadges.bitbadgeschain.badges {
+    export class SubassetSupplyAndAmount extends pb_1.Message {
+        #one_of_decls: number[][] = [];
+        constructor(data?: any[] | {
+            supply?: number;
+            amount?: number;
+        }) {
+            super();
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("supply" in data && data.supply != undefined) {
+                    this.supply = data.supply;
+                }
+                if ("amount" in data && data.amount != undefined) {
+                    this.amount = data.amount;
+                }
+            }
+        }
+        get supply() {
+            return pb_1.Message.getFieldWithDefault(this, 1, 0) as number;
+        }
+        set supply(value: number) {
+            pb_1.Message.setField(this, 1, value);
+        }
+        get amount() {
+            return pb_1.Message.getFieldWithDefault(this, 2, 0) as number;
+        }
+        set amount(value: number) {
+            pb_1.Message.setField(this, 2, value);
+        }
+        static fromObject(data: {
+            supply?: number;
+            amount?: number;
+        }): SubassetSupplyAndAmount {
+            const message = new SubassetSupplyAndAmount({});
+            if (data.supply != null) {
+                message.supply = data.supply;
+            }
+            if (data.amount != null) {
+                message.amount = data.amount;
+            }
+            return message;
+        }
+        toObject() {
+            const data: {
+                supply?: number;
+                amount?: number;
+            } = {};
+            if (this.supply != null) {
+                data.supply = this.supply;
+            }
+            if (this.amount != null) {
+                data.amount = this.amount;
+            }
+            return data;
+        }
+        serialize(): Uint8Array;
+        serialize(w: pb_1.BinaryWriter): void;
+        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+            const writer = w || new pb_1.BinaryWriter();
+            if (this.supply != 0)
+                writer.writeUint64(1, this.supply);
+            if (this.amount != 0)
+                writer.writeUint64(2, this.amount);
+            if (!w)
+                return writer.getResultBuffer();
+        }
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): SubassetSupplyAndAmount {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new SubassetSupplyAndAmount();
+            while (reader.nextField()) {
+                if (reader.isEndGroup())
+                    break;
+                switch (reader.getFieldNumber()) {
+                    case 1:
+                        message.supply = reader.readUint64();
+                        break;
+                    case 2:
+                        message.amount = reader.readUint64();
+                        break;
+                    default: reader.skipField();
+                }
+            }
+            return message;
+        }
+        serializeBinary(): Uint8Array {
+            return this.serialize();
+        }
+        static deserializeBinary(bytes: Uint8Array): SubassetSupplyAndAmount {
+            return SubassetSupplyAndAmount.deserialize(bytes);
+        }
+    }
     export class MsgNewBadge extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
@@ -20,12 +110,11 @@ export namespace bitbadges.bitbadgeschain.badges {
             defaultSubassetSupply?: number;
             freezeAddressRanges?: dependency_1.bitbadges.bitbadgeschain.badges.IdRange[];
             standard?: number;
-            subassetSupplys?: number[];
-            subassetAmountsToCreate?: number[];
+            subassetSupplysAndAmounts?: SubassetSupplyAndAmount[];
             whitelistedRecipients?: dependency_3.bitbadges.bitbadgeschain.badges.WhitelistMintInfo[];
         }) {
             super();
-            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [9, 7, 8, 11], this.#one_of_decls);
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [9, 7, 11], this.#one_of_decls);
             if (!Array.isArray(data) && typeof data == "object") {
                 if ("creator" in data && data.creator != undefined) {
                     this.creator = data.creator;
@@ -48,11 +137,8 @@ export namespace bitbadges.bitbadgeschain.badges {
                 if ("standard" in data && data.standard != undefined) {
                     this.standard = data.standard;
                 }
-                if ("subassetSupplys" in data && data.subassetSupplys != undefined) {
-                    this.subassetSupplys = data.subassetSupplys;
-                }
-                if ("subassetAmountsToCreate" in data && data.subassetAmountsToCreate != undefined) {
-                    this.subassetAmountsToCreate = data.subassetAmountsToCreate;
+                if ("subassetSupplysAndAmounts" in data && data.subassetSupplysAndAmounts != undefined) {
+                    this.subassetSupplysAndAmounts = data.subassetSupplysAndAmounts;
                 }
                 if ("whitelistedRecipients" in data && data.whitelistedRecipients != undefined) {
                     this.whitelistedRecipients = data.whitelistedRecipients;
@@ -104,17 +190,11 @@ export namespace bitbadges.bitbadgeschain.badges {
         set standard(value: number) {
             pb_1.Message.setField(this, 10, value);
         }
-        get subassetSupplys() {
-            return pb_1.Message.getFieldWithDefault(this, 7, []) as number[];
+        get subassetSupplysAndAmounts() {
+            return pb_1.Message.getRepeatedWrapperField(this, SubassetSupplyAndAmount, 7) as SubassetSupplyAndAmount[];
         }
-        set subassetSupplys(value: number[]) {
-            pb_1.Message.setField(this, 7, value);
-        }
-        get subassetAmountsToCreate() {
-            return pb_1.Message.getFieldWithDefault(this, 8, []) as number[];
-        }
-        set subassetAmountsToCreate(value: number[]) {
-            pb_1.Message.setField(this, 8, value);
+        set subassetSupplysAndAmounts(value: SubassetSupplyAndAmount[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 7, value);
         }
         get whitelistedRecipients() {
             return pb_1.Message.getRepeatedWrapperField(this, dependency_3.bitbadges.bitbadgeschain.badges.WhitelistMintInfo, 11) as dependency_3.bitbadges.bitbadgeschain.badges.WhitelistMintInfo[];
@@ -130,8 +210,7 @@ export namespace bitbadges.bitbadgeschain.badges {
             defaultSubassetSupply?: number;
             freezeAddressRanges?: ReturnType<typeof dependency_1.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>[];
             standard?: number;
-            subassetSupplys?: number[];
-            subassetAmountsToCreate?: number[];
+            subassetSupplysAndAmounts?: ReturnType<typeof SubassetSupplyAndAmount.prototype.toObject>[];
             whitelistedRecipients?: ReturnType<typeof dependency_3.bitbadges.bitbadgeschain.badges.WhitelistMintInfo.prototype.toObject>[];
         }): MsgNewBadge {
             const message = new MsgNewBadge({});
@@ -156,11 +235,8 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (data.standard != null) {
                 message.standard = data.standard;
             }
-            if (data.subassetSupplys != null) {
-                message.subassetSupplys = data.subassetSupplys;
-            }
-            if (data.subassetAmountsToCreate != null) {
-                message.subassetAmountsToCreate = data.subassetAmountsToCreate;
+            if (data.subassetSupplysAndAmounts != null) {
+                message.subassetSupplysAndAmounts = data.subassetSupplysAndAmounts.map(item => SubassetSupplyAndAmount.fromObject(item));
             }
             if (data.whitelistedRecipients != null) {
                 message.whitelistedRecipients = data.whitelistedRecipients.map(item => dependency_3.bitbadges.bitbadgeschain.badges.WhitelistMintInfo.fromObject(item));
@@ -176,8 +252,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                 defaultSubassetSupply?: number;
                 freezeAddressRanges?: ReturnType<typeof dependency_1.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>[];
                 standard?: number;
-                subassetSupplys?: number[];
-                subassetAmountsToCreate?: number[];
+                subassetSupplysAndAmounts?: ReturnType<typeof SubassetSupplyAndAmount.prototype.toObject>[];
                 whitelistedRecipients?: ReturnType<typeof dependency_3.bitbadges.bitbadgeschain.badges.WhitelistMintInfo.prototype.toObject>[];
             } = {};
             if (this.creator != null) {
@@ -201,11 +276,8 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (this.standard != null) {
                 data.standard = this.standard;
             }
-            if (this.subassetSupplys != null) {
-                data.subassetSupplys = this.subassetSupplys;
-            }
-            if (this.subassetAmountsToCreate != null) {
-                data.subassetAmountsToCreate = this.subassetAmountsToCreate;
+            if (this.subassetSupplysAndAmounts != null) {
+                data.subassetSupplysAndAmounts = this.subassetSupplysAndAmounts.map((item: SubassetSupplyAndAmount) => item.toObject());
             }
             if (this.whitelistedRecipients != null) {
                 data.whitelistedRecipients = this.whitelistedRecipients.map((item: dependency_3.bitbadges.bitbadgeschain.badges.WhitelistMintInfo) => item.toObject());
@@ -230,10 +302,8 @@ export namespace bitbadges.bitbadgeschain.badges {
                 writer.writeRepeatedMessage(9, this.freezeAddressRanges, (item: dependency_1.bitbadges.bitbadgeschain.badges.IdRange) => item.serialize(writer));
             if (this.standard != 0)
                 writer.writeUint64(10, this.standard);
-            if (this.subassetSupplys.length)
-                writer.writePackedUint64(7, this.subassetSupplys);
-            if (this.subassetAmountsToCreate.length)
-                writer.writePackedUint64(8, this.subassetAmountsToCreate);
+            if (this.subassetSupplysAndAmounts.length)
+                writer.writeRepeatedMessage(7, this.subassetSupplysAndAmounts, (item: SubassetSupplyAndAmount) => item.serialize(writer));
             if (this.whitelistedRecipients.length)
                 writer.writeRepeatedMessage(11, this.whitelistedRecipients, (item: dependency_3.bitbadges.bitbadgeschain.badges.WhitelistMintInfo) => item.serialize(writer));
             if (!w)
@@ -267,10 +337,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                         message.standard = reader.readUint64();
                         break;
                     case 7:
-                        message.subassetSupplys = reader.readPackedUint64();
-                        break;
-                    case 8:
-                        message.subassetAmountsToCreate = reader.readPackedUint64();
+                        reader.readMessage(message.subassetSupplysAndAmounts, () => pb_1.Message.addToRepeatedWrapperField(message, 7, SubassetSupplyAndAmount.deserialize(reader), SubassetSupplyAndAmount));
                         break;
                     case 11:
                         reader.readMessage(message.whitelistedRecipients, () => pb_1.Message.addToRepeatedWrapperField(message, 11, dependency_3.bitbadges.bitbadgeschain.badges.WhitelistMintInfo.deserialize(reader), dependency_3.bitbadges.bitbadgeschain.badges.WhitelistMintInfo));
@@ -359,11 +426,10 @@ export namespace bitbadges.bitbadgeschain.badges {
         constructor(data?: any[] | {
             creator?: string;
             badgeId?: number;
-            supplys?: number[];
-            amountsToCreate?: number[];
+            subassetSupplysAndAmounts?: SubassetSupplyAndAmount[];
         }) {
             super();
-            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [3, 4], this.#one_of_decls);
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [7], this.#one_of_decls);
             if (!Array.isArray(data) && typeof data == "object") {
                 if ("creator" in data && data.creator != undefined) {
                     this.creator = data.creator;
@@ -371,11 +437,8 @@ export namespace bitbadges.bitbadgeschain.badges {
                 if ("badgeId" in data && data.badgeId != undefined) {
                     this.badgeId = data.badgeId;
                 }
-                if ("supplys" in data && data.supplys != undefined) {
-                    this.supplys = data.supplys;
-                }
-                if ("amountsToCreate" in data && data.amountsToCreate != undefined) {
-                    this.amountsToCreate = data.amountsToCreate;
+                if ("subassetSupplysAndAmounts" in data && data.subassetSupplysAndAmounts != undefined) {
+                    this.subassetSupplysAndAmounts = data.subassetSupplysAndAmounts;
                 }
             }
         }
@@ -391,23 +454,16 @@ export namespace bitbadges.bitbadgeschain.badges {
         set badgeId(value: number) {
             pb_1.Message.setField(this, 2, value);
         }
-        get supplys() {
-            return pb_1.Message.getFieldWithDefault(this, 3, []) as number[];
+        get subassetSupplysAndAmounts() {
+            return pb_1.Message.getRepeatedWrapperField(this, SubassetSupplyAndAmount, 7) as SubassetSupplyAndAmount[];
         }
-        set supplys(value: number[]) {
-            pb_1.Message.setField(this, 3, value);
-        }
-        get amountsToCreate() {
-            return pb_1.Message.getFieldWithDefault(this, 4, []) as number[];
-        }
-        set amountsToCreate(value: number[]) {
-            pb_1.Message.setField(this, 4, value);
+        set subassetSupplysAndAmounts(value: SubassetSupplyAndAmount[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 7, value);
         }
         static fromObject(data: {
             creator?: string;
             badgeId?: number;
-            supplys?: number[];
-            amountsToCreate?: number[];
+            subassetSupplysAndAmounts?: ReturnType<typeof SubassetSupplyAndAmount.prototype.toObject>[];
         }): MsgNewSubBadge {
             const message = new MsgNewSubBadge({});
             if (data.creator != null) {
@@ -416,11 +472,8 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (data.badgeId != null) {
                 message.badgeId = data.badgeId;
             }
-            if (data.supplys != null) {
-                message.supplys = data.supplys;
-            }
-            if (data.amountsToCreate != null) {
-                message.amountsToCreate = data.amountsToCreate;
+            if (data.subassetSupplysAndAmounts != null) {
+                message.subassetSupplysAndAmounts = data.subassetSupplysAndAmounts.map(item => SubassetSupplyAndAmount.fromObject(item));
             }
             return message;
         }
@@ -428,8 +481,7 @@ export namespace bitbadges.bitbadgeschain.badges {
             const data: {
                 creator?: string;
                 badgeId?: number;
-                supplys?: number[];
-                amountsToCreate?: number[];
+                subassetSupplysAndAmounts?: ReturnType<typeof SubassetSupplyAndAmount.prototype.toObject>[];
             } = {};
             if (this.creator != null) {
                 data.creator = this.creator;
@@ -437,11 +489,8 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (this.badgeId != null) {
                 data.badgeId = this.badgeId;
             }
-            if (this.supplys != null) {
-                data.supplys = this.supplys;
-            }
-            if (this.amountsToCreate != null) {
-                data.amountsToCreate = this.amountsToCreate;
+            if (this.subassetSupplysAndAmounts != null) {
+                data.subassetSupplysAndAmounts = this.subassetSupplysAndAmounts.map((item: SubassetSupplyAndAmount) => item.toObject());
             }
             return data;
         }
@@ -453,10 +502,8 @@ export namespace bitbadges.bitbadgeschain.badges {
                 writer.writeString(1, this.creator);
             if (this.badgeId != 0)
                 writer.writeUint64(2, this.badgeId);
-            if (this.supplys.length)
-                writer.writePackedUint64(3, this.supplys);
-            if (this.amountsToCreate.length)
-                writer.writePackedUint64(4, this.amountsToCreate);
+            if (this.subassetSupplysAndAmounts.length)
+                writer.writeRepeatedMessage(7, this.subassetSupplysAndAmounts, (item: SubassetSupplyAndAmount) => item.serialize(writer));
             if (!w)
                 return writer.getResultBuffer();
         }
@@ -472,11 +519,8 @@ export namespace bitbadges.bitbadgeschain.badges {
                     case 2:
                         message.badgeId = reader.readUint64();
                         break;
-                    case 3:
-                        message.supplys = reader.readPackedUint64();
-                        break;
-                    case 4:
-                        message.amountsToCreate = reader.readPackedUint64();
+                    case 7:
+                        reader.readMessage(message.subassetSupplysAndAmounts, () => pb_1.Message.addToRepeatedWrapperField(message, 7, SubassetSupplyAndAmount.deserialize(reader), SubassetSupplyAndAmount));
                         break;
                     default: reader.skipField();
                 }

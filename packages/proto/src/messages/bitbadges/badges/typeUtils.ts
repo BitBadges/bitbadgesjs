@@ -5,6 +5,11 @@ export interface IdRange {
   end?: number
 }
 
+export interface SubassetSupplyAndAmount {
+  amount: number
+  supply: number
+}
+
 export interface UriObject {
   decodeScheme?: number
   scheme?: number

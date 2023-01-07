@@ -15,12 +15,12 @@ import {
 import { getDefaultDomainWithChainId } from '../../domain'
 
 import { Chain, Fee, Sender } from '../../common'
+import { SubassetSupplyAndAmount } from './typeUtils'
 
 export interface MessageMsgNewSubBadge {
   creator: string
   badgeId: number
-  supplys: number[]
-  amountsToCreate: number[]
+  subassetSupplysAndAmounts: SubassetSupplyAndAmount[]
 }
 
 export function createTxMsgNewSubBadge(
@@ -43,8 +43,7 @@ export function createTxMsgNewSubBadge(
   const msg = createMsgNewSubBadge(
     params.creator,
     params.badgeId,
-    params.supplys,
-    params.amountsToCreate,
+    params.subassetSupplysAndAmounts,
   )
   const messages = generateMessage(
     sender.accountNumber.toString(),
@@ -64,8 +63,7 @@ export function createTxMsgNewSubBadge(
   const msgCosmos = protoMsgNewSubBadge(
     params.creator,
     params.badgeId,
-    params.supplys,
-    params.amountsToCreate,
+    params.subassetSupplysAndAmounts,
   )
   const tx = createTransaction(
     msgCosmos,

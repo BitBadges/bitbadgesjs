@@ -2,6 +2,8 @@ import {
   BALANCE_OBJECT_TYPE,
   IdRange,
   ID_RANGE_TYPE,
+  SubassetAmountAndSupply,
+  SUBASSET_AMOUNT_AND_SUPPLY_TYPE,
   UriObject,
   URI_OBJECT_TYPE,
   WhitelistMintInfo,
@@ -16,8 +18,7 @@ const NewBadgeMsgValueType = [
   { name: 'defaultSubassetSupply', type: 'uint64' },
   { name: 'freezeAddressRanges', type: 'IdRange[]' },
   { name: 'standard', type: 'uint64' },
-  { name: 'subassetSupplys', type: 'uint64[]' },
-  { name: 'subassetAmountsToCreate', type: 'uint64[]' },
+  { name: 'subassetSupplysAndAmounts', type: 'SubassetAmountAndSupply[]' },
   { name: 'whitelistedRecipients', type: 'WhitelistMintInfo[]' },
 ]
 
@@ -27,6 +28,7 @@ export const MSG_NEW_BADGE_TYPES = {
   MsgValue: NewBadgeMsgValueType,
   WhitelistMintInfo: WHITELIST_MINT_INFO_TYPE,
   BalanceObject: BALANCE_OBJECT_TYPE,
+  SubassetAmountAndSupply: SUBASSET_AMOUNT_AND_SUPPLY_TYPE,
 }
 
 export function createMsgNewBadge(
@@ -37,8 +39,7 @@ export function createMsgNewBadge(
   defaultSubassetSupply: number,
   freezeAddressRanges: IdRange[],
   standard: number,
-  subassetSupplys: number[],
-  subassetAmountsToCreate: number[],
+  subassetSupplysAndAmounts: SubassetAmountAndSupply[],
   whitelistedRecipients: WhitelistMintInfo[],
 ) {
   return {
@@ -51,8 +52,7 @@ export function createMsgNewBadge(
       defaultSubassetSupply,
       freezeAddressRanges,
       standard,
-      subassetSupplys,
-      subassetAmountsToCreate,
+      subassetSupplysAndAmounts,
       whitelistedRecipients,
     },
   }

@@ -3,6 +3,11 @@ export interface IdRange {
   end?: number
 }
 
+export interface SubassetAmountAndSupply {
+  amount: number
+  supply: number
+}
+
 export interface UriObject {
   decodeScheme?: number
   scheme?: number
@@ -47,4 +52,9 @@ export const URI_OBJECT_TYPE = [
 export const ID_RANGE_TYPE = [
   { name: 'start', type: 'uint64' },
   { name: 'end', type: 'uint64' },
+]
+
+export const SUBASSET_AMOUNT_AND_SUPPLY_TYPE = [
+  { name: 'supply', type: 'uint64' },
+  { name: 'amount', type: 'uint64' },
 ]
