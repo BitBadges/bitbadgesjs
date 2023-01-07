@@ -19,10 +19,9 @@ import { IdRange } from './typeUtils'
 
 export interface MessageMsgHandlePendingTransfer {
   creator: string
-  accept: boolean
+  actions: number[]
   badgeId: number
   nonceRanges: IdRange[]
-  forcefulAccept: boolean
 }
 
 export function createTxMsgHandlePendingTransfer(
@@ -44,10 +43,9 @@ export function createTxMsgHandlePendingTransfer(
 
   const msg = createMsgHandlePendingTransfer(
     params.creator,
-    params.accept,
+    params.actions,
     params.badgeId,
     params.nonceRanges,
-    params.forcefulAccept,
   )
   const messages = generateMessage(
     sender.accountNumber.toString(),
@@ -66,10 +64,9 @@ export function createTxMsgHandlePendingTransfer(
   // Cosmos
   const msgCosmos = protoMsgHandlePendingTransfer(
     params.creator,
-    params.accept,
+    params.actions,
     params.badgeId,
     params.nonceRanges,
-    params.forcefulAccept,
   )
   const tx = createTransaction(
     msgCosmos,

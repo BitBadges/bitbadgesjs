@@ -2,10 +2,9 @@ import { IdRange, ID_RANGE_TYPE } from './typeUtils'
 
 const MsgHandlePendingTransferValueType = [
   { name: 'creator', type: 'string' },
-  { name: 'accept', type: 'bool' },
+  { name: 'actions', type: 'uint64[]' },
   { name: 'badgeId', type: 'uint64' },
   { name: 'nonceRanges', type: 'IdRange[]' },
-  { name: 'forcefulAccept', type: 'bool' },
 ]
 
 export const MSG_HANDLE_PENDING_TRANSFER_TYPES = {
@@ -15,19 +14,17 @@ export const MSG_HANDLE_PENDING_TRANSFER_TYPES = {
 
 export function createMsgHandlePendingTransfer(
   creator: string,
-  accept: boolean,
+  actions: number[],
   badgeId: number,
   nonceRanges: IdRange[],
-  forcefulAccept: boolean,
 ) {
   return {
     type: 'badges/HandlePendingTransfer',
     value: {
       creator,
-      accept,
+      actions,
       badgeId,
       nonceRanges,
-      forcefulAccept,
     },
   }
 }

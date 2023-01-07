@@ -1,7 +1,7 @@
 {
     "name": "bitbadgesjs-transactions",
     "description": "Transactions generator for BitBadges and EVMOS",
-    "version": "0.0.54",
+    "version": "0.0.55",
     "license": "MIT",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
@@ -27,8 +27,8 @@
     },
     "dependencies": {
         "@types/node": "^17.0.21",
-        "bitbadgesjs-eip712": "^0.0.38",
-        "bitbadgesjs-proto": "^0.0.40",
+        "bitbadgesjs-eip712": "^0.0.39",
+        "bitbadgesjs-proto": "^0.0.41",
         "link-module-alias": "^1.2.0",
         "shx": "^0.3.4"
     },

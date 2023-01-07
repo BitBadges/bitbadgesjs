@@ -4,10 +4,9 @@ import { IdRange } from './typeUtils'
 
 export function createMsgHandlePendingTransfer(
   creator: string,
-  accept: boolean,
+  actions: number[],
   badgeId: number,
   nonceRanges: IdRange[],
-  forcefulAccept: boolean,
 ) {
   const wrappedRanges: ranges.bitbadges.bitbadgeschain.badges.IdRange[] = []
   for (const range of nonceRanges) {
@@ -19,10 +18,9 @@ export function createMsgHandlePendingTransfer(
   const message =
     new tx.bitbadges.bitbadgeschain.badges.MsgHandlePendingTransfer({
       creator,
-      accept,
+      actions,
       badgeId,
       nonceRanges: wrappedRanges,
-      forcefulAccept,
     })
   return {
     message,

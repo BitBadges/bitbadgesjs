@@ -1118,28 +1118,24 @@ export namespace bitbadges.bitbadgeschain.badges {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
             creator?: string;
-            accept?: boolean;
+            actions?: number[];
             badgeId?: number;
             nonceRanges?: dependency_1.bitbadges.bitbadgeschain.badges.IdRange[];
-            forcefulAccept?: boolean;
         }) {
             super();
-            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [4], this.#one_of_decls);
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [2, 4], this.#one_of_decls);
             if (!Array.isArray(data) && typeof data == "object") {
                 if ("creator" in data && data.creator != undefined) {
                     this.creator = data.creator;
                 }
-                if ("accept" in data && data.accept != undefined) {
-                    this.accept = data.accept;
+                if ("actions" in data && data.actions != undefined) {
+                    this.actions = data.actions;
                 }
                 if ("badgeId" in data && data.badgeId != undefined) {
                     this.badgeId = data.badgeId;
                 }
                 if ("nonceRanges" in data && data.nonceRanges != undefined) {
                     this.nonceRanges = data.nonceRanges;
-                }
-                if ("forcefulAccept" in data && data.forcefulAccept != undefined) {
-                    this.forcefulAccept = data.forcefulAccept;
                 }
             }
         }
@@ -1149,10 +1145,10 @@ export namespace bitbadges.bitbadgeschain.badges {
         set creator(value: string) {
             pb_1.Message.setField(this, 1, value);
         }
-        get accept() {
-            return pb_1.Message.getFieldWithDefault(this, 2, false) as boolean;
+        get actions() {
+            return pb_1.Message.getFieldWithDefault(this, 2, []) as number[];
         }
-        set accept(value: boolean) {
+        set actions(value: number[]) {
             pb_1.Message.setField(this, 2, value);
         }
         get badgeId() {
@@ -1167,25 +1163,18 @@ export namespace bitbadges.bitbadgeschain.badges {
         set nonceRanges(value: dependency_1.bitbadges.bitbadgeschain.badges.IdRange[]) {
             pb_1.Message.setRepeatedWrapperField(this, 4, value);
         }
-        get forcefulAccept() {
-            return pb_1.Message.getFieldWithDefault(this, 5, false) as boolean;
-        }
-        set forcefulAccept(value: boolean) {
-            pb_1.Message.setField(this, 5, value);
-        }
         static fromObject(data: {
             creator?: string;
-            accept?: boolean;
+            actions?: number[];
             badgeId?: number;
             nonceRanges?: ReturnType<typeof dependency_1.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>[];
-            forcefulAccept?: boolean;
         }): MsgHandlePendingTransfer {
             const message = new MsgHandlePendingTransfer({});
             if (data.creator != null) {
                 message.creator = data.creator;
             }
-            if (data.accept != null) {
-                message.accept = data.accept;
+            if (data.actions != null) {
+                message.actions = data.actions;
             }
             if (data.badgeId != null) {
                 message.badgeId = data.badgeId;
@@ -1193,33 +1182,26 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (data.nonceRanges != null) {
                 message.nonceRanges = data.nonceRanges.map(item => dependency_1.bitbadges.bitbadgeschain.badges.IdRange.fromObject(item));
             }
-            if (data.forcefulAccept != null) {
-                message.forcefulAccept = data.forcefulAccept;
-            }
             return message;
         }
         toObject() {
             const data: {
                 creator?: string;
-                accept?: boolean;
+                actions?: number[];
                 badgeId?: number;
                 nonceRanges?: ReturnType<typeof dependency_1.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>[];
-                forcefulAccept?: boolean;
             } = {};
             if (this.creator != null) {
                 data.creator = this.creator;
             }
-            if (this.accept != null) {
-                data.accept = this.accept;
+            if (this.actions != null) {
+                data.actions = this.actions;
             }
             if (this.badgeId != null) {
                 data.badgeId = this.badgeId;
             }
             if (this.nonceRanges != null) {
                 data.nonceRanges = this.nonceRanges.map((item: dependency_1.bitbadges.bitbadgeschain.badges.IdRange) => item.toObject());
-            }
-            if (this.forcefulAccept != null) {
-                data.forcefulAccept = this.forcefulAccept;
             }
             return data;
         }
@@ -1229,14 +1211,12 @@ export namespace bitbadges.bitbadgeschain.badges {
             const writer = w || new pb_1.BinaryWriter();
             if (this.creator.length)
                 writer.writeString(1, this.creator);
-            if (this.accept != false)
-                writer.writeBool(2, this.accept);
+            if (this.actions.length)
+                writer.writePackedUint64(2, this.actions);
             if (this.badgeId != 0)
                 writer.writeUint64(3, this.badgeId);
             if (this.nonceRanges.length)
                 writer.writeRepeatedMessage(4, this.nonceRanges, (item: dependency_1.bitbadges.bitbadgeschain.badges.IdRange) => item.serialize(writer));
-            if (this.forcefulAccept != false)
-                writer.writeBool(5, this.forcefulAccept);
             if (!w)
                 return writer.getResultBuffer();
         }
@@ -1250,16 +1230,13 @@ export namespace bitbadges.bitbadgeschain.badges {
                         message.creator = reader.readString();
                         break;
                     case 2:
-                        message.accept = reader.readBool();
+                        message.actions = reader.readPackedUint64();
                         break;
                     case 3:
                         message.badgeId = reader.readUint64();
                         break;
                     case 4:
                         reader.readMessage(message.nonceRanges, () => pb_1.Message.addToRepeatedWrapperField(message, 4, dependency_1.bitbadges.bitbadgeschain.badges.IdRange.deserialize(reader), dependency_1.bitbadges.bitbadgeschain.badges.IdRange));
-                        break;
-                    case 5:
-                        message.forcefulAccept = reader.readBool();
                         break;
                     default: reader.skipField();
                 }
