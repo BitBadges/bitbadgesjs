@@ -15,14 +15,13 @@ import {
 import { getDefaultDomainWithChainId } from '../../domain'
 
 import { Chain, Fee, Sender } from '../../common'
-import { IdRange } from './typeUtils'
+import { Balance } from './typeUtils'
 
 export interface MessageMsgSetApproval {
   creator: string
-  amount: number
+  collectionId: number
   address: number
-  badgeId: number
-  subbadgeRanges: IdRange[]
+  balances: Balance[]
 }
 
 export function createTxMsgSetApproval(
@@ -44,10 +43,9 @@ export function createTxMsgSetApproval(
 
   const msg = createMsgSetApproval(
     params.creator,
-    params.amount,
     params.address,
-    params.badgeId,
-    params.subbadgeRanges,
+    params.collectionId,
+    params.balances,
   )
   const messages = generateMessage(
     sender.accountNumber.toString(),
@@ -66,10 +64,9 @@ export function createTxMsgSetApproval(
   // Cosmos
   const msgCosmos = protoMsgSetApproval(
     params.creator,
-    params.amount,
     params.address,
-    params.badgeId,
-    params.subbadgeRanges,
+    params.collectionId,
+    params.balances,
   )
   const tx = createTransaction(
     msgCosmos,

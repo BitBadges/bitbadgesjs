@@ -1,5 +1,5 @@
 import {
-  createMsgFreezeAddress as protoMsgFreezeAddress,
+  createMsgMintBadge as protoMsgMintBadge,
   createTransaction,
 } from 'bitbadgesjs-proto'
 
@@ -8,28 +8,29 @@ import {
   generateFee,
   generateMessage,
   generateTypes,
-  createMsgFreezeAddress,
-  MSG_FREEZE_ADDRESS_TYPES,
+  createMsgMintBadge,
+  MSG_MINT_BADGE_TYPES,
 } from 'bitbadgesjs-eip712'
 
 import { getDefaultDomainWithChainId } from '../../domain'
 
 import { Chain, Fee, Sender } from '../../common'
-import { IdRange } from './typeUtils'
+import { BadgeSupplyAndAmount, Claims, Transfers } from './typeUtils'
 
-export interface MessageMsgFreezeAddress {
+export interface MessageMsgMintBadge {
   creator: string
-  badgeId: number
-  addressRanges: IdRange[]
-  add: boolean
+  collectionId: number
+  badgeSupplys: BadgeSupplyAndAmount[]
+  transfers: Transfers[]
+  claims: Claims[]
 }
 
-export function createTxMsgFreezeAddress(
+export function createTxMsgMintBadge(
   chain: Chain,
   sender: Sender,
   fee: Fee,
   memo: string,
-  params: MessageMsgFreezeAddress,
+  params: MessageMsgMintBadge,
   domain?: object,
 ) {
   // EIP712
@@ -39,13 +40,14 @@ export function createTxMsgFreezeAddress(
     fee.gas,
     sender.accountAddress,
   )
-  const types = generateTypes(MSG_FREEZE_ADDRESS_TYPES)
+  const types = generateTypes(MSG_MINT_BADGE_TYPES)
 
-  const msg = createMsgFreezeAddress(
+  const msg = createMsgMintBadge(
     params.creator,
-    params.addressRanges,
-    params.badgeId,
-    params.add,
+    params.collectionId,
+    params.badgeSupplys,
+    params.transfers,
+    params.claims,
   )
   const messages = generateMessage(
     sender.accountNumber.toString(),
@@ -62,11 +64,12 @@ export function createTxMsgFreezeAddress(
   const eipToSign = createEIP712(types, messages, domainObj)
 
   // Cosmos
-  const msgCosmos = protoMsgFreezeAddress(
+  const msgCosmos = protoMsgMintBadge(
     params.creator,
-    params.addressRanges,
-    params.badgeId,
-    params.add,
+    params.collectionId,
+    params.badgeSupplys,
+    params.transfers,
+    params.claims,
   )
   const tx = createTransaction(
     msgCosmos,

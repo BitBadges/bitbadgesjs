@@ -1,42 +1,37 @@
-import { IdRange, ID_RANGE_TYPE } from './typeUtils'
+import {
+  BALANCE_TYPES,
+  ID_RANGE_TYPES,
+  Transfers,
+  TRANSFERS_TYPES,
+} from './typeUtils'
 
 const MsgTransferBadgeValueType = [
   { name: 'creator', type: 'string' },
   { name: 'from', type: 'uint64' },
-  { name: 'toAddresses', type: 'uint64[]' },
-  { name: 'amounts', type: 'uint64[]' },
-  { name: 'badgeId', type: 'uint64' },
-  { name: 'subbadgeRanges', type: 'IdRange[]' },
-  { name: 'expirationTime', type: 'uint64' },
-  { name: 'cantCancelBeforeTime', type: 'uint64' },
+  { name: 'transfers', type: 'Transfers[]' },
+  { name: 'collectionId', type: 'uint64' },
 ]
 
 export const MSG_TRANSFER_BADGE_TYPES = {
-  IdRange: ID_RANGE_TYPE,
+  IdRange: ID_RANGE_TYPES,
   MsgValue: MsgTransferBadgeValueType,
+  Balance: BALANCE_TYPES,
+  Transfers: TRANSFERS_TYPES,
 }
 
 export function createMsgTransferBadge(
   creator: string,
   from: number,
-  toAddresses: number[],
-  amounts: number[],
-  badgeId: number,
-  subbadgeRanges: IdRange[],
-  expirationTime: number,
-  cantCancelBeforeTime: number,
+  collectionId: number,
+  transfers: Transfers[],
 ) {
   return {
     type: 'badges/TransferBadge',
     value: {
       creator,
       from,
-      toAddresses,
-      amounts,
-      badgeId,
-      subbadgeRanges,
-      expirationTime,
-      cantCancelBeforeTime,
+      transfers,
+      collectionId,
     },
   }
 }

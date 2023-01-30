@@ -7,62 +7,61 @@
  * git: https://github.com/thesayyn/protoc-gen-ts */
 import * as dependency_1 from "./../gogoproto/gogo";
 import * as dependency_2 from "./params";
-import * as dependency_3 from "./badges";
-import * as dependency_4 from "./ranges";
+import * as dependency_3 from "./ranges";
 import * as pb_1 from "google-protobuf";
 export namespace bitbadges.bitbadgeschain.badges {
-    export class WhitelistMintInfo extends pb_1.Message {
+    export class Balance extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
-            addresses?: number[];
-            balanceAmounts?: dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject[];
+            balance?: number;
+            badgeIds?: dependency_3.bitbadges.bitbadgeschain.badges.IdRange[];
         }) {
             super();
-            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1, 2], this.#one_of_decls);
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [2], this.#one_of_decls);
             if (!Array.isArray(data) && typeof data == "object") {
-                if ("addresses" in data && data.addresses != undefined) {
-                    this.addresses = data.addresses;
+                if ("balance" in data && data.balance != undefined) {
+                    this.balance = data.balance;
                 }
-                if ("balanceAmounts" in data && data.balanceAmounts != undefined) {
-                    this.balanceAmounts = data.balanceAmounts;
+                if ("badgeIds" in data && data.badgeIds != undefined) {
+                    this.badgeIds = data.badgeIds;
                 }
             }
         }
-        get addresses() {
-            return pb_1.Message.getFieldWithDefault(this, 1, []) as number[];
+        get balance() {
+            return pb_1.Message.getFieldWithDefault(this, 1, 0) as number;
         }
-        set addresses(value: number[]) {
+        set balance(value: number) {
             pb_1.Message.setField(this, 1, value);
         }
-        get balanceAmounts() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject, 2) as dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject[];
+        get badgeIds() {
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_3.bitbadges.bitbadgeschain.badges.IdRange, 2) as dependency_3.bitbadges.bitbadgeschain.badges.IdRange[];
         }
-        set balanceAmounts(value: dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject[]) {
+        set badgeIds(value: dependency_3.bitbadges.bitbadgeschain.badges.IdRange[]) {
             pb_1.Message.setRepeatedWrapperField(this, 2, value);
         }
         static fromObject(data: {
-            addresses?: number[];
-            balanceAmounts?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject.prototype.toObject>[];
-        }): WhitelistMintInfo {
-            const message = new WhitelistMintInfo({});
-            if (data.addresses != null) {
-                message.addresses = data.addresses;
+            balance?: number;
+            badgeIds?: ReturnType<typeof dependency_3.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>[];
+        }): Balance {
+            const message = new Balance({});
+            if (data.balance != null) {
+                message.balance = data.balance;
             }
-            if (data.balanceAmounts != null) {
-                message.balanceAmounts = data.balanceAmounts.map(item => dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject.fromObject(item));
+            if (data.badgeIds != null) {
+                message.badgeIds = data.badgeIds.map(item => dependency_3.bitbadges.bitbadgeschain.badges.IdRange.fromObject(item));
             }
             return message;
         }
         toObject() {
             const data: {
-                addresses?: number[];
-                balanceAmounts?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject.prototype.toObject>[];
+                balance?: number;
+                badgeIds?: ReturnType<typeof dependency_3.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>[];
             } = {};
-            if (this.addresses != null) {
-                data.addresses = this.addresses;
+            if (this.balance != null) {
+                data.balance = this.balance;
             }
-            if (this.balanceAmounts != null) {
-                data.balanceAmounts = this.balanceAmounts.map((item: dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject) => item.toObject());
+            if (this.badgeIds != null) {
+                data.badgeIds = this.badgeIds.map((item: dependency_3.bitbadges.bitbadgeschain.badges.IdRange) => item.toObject());
             }
             return data;
         }
@@ -70,24 +69,24 @@ export namespace bitbadges.bitbadgeschain.badges {
         serialize(w: pb_1.BinaryWriter): void;
         serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
             const writer = w || new pb_1.BinaryWriter();
-            if (this.addresses.length)
-                writer.writePackedUint64(1, this.addresses);
-            if (this.balanceAmounts.length)
-                writer.writeRepeatedMessage(2, this.balanceAmounts, (item: dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject) => item.serialize(writer));
+            if (this.balance != 0)
+                writer.writeUint64(1, this.balance);
+            if (this.badgeIds.length)
+                writer.writeRepeatedMessage(2, this.badgeIds, (item: dependency_3.bitbadges.bitbadgeschain.badges.IdRange) => item.serialize(writer));
             if (!w)
                 return writer.getResultBuffer();
         }
-        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): WhitelistMintInfo {
-            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new WhitelistMintInfo();
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): Balance {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new Balance();
             while (reader.nextField()) {
                 if (reader.isEndGroup())
                     break;
                 switch (reader.getFieldNumber()) {
                     case 1:
-                        message.addresses = reader.readPackedUint64();
+                        message.balance = reader.readUint64();
                         break;
                     case 2:
-                        reader.readMessage(message.balanceAmounts, () => pb_1.Message.addToRepeatedWrapperField(message, 2, dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject.deserialize(reader), dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject));
+                        reader.readMessage(message.badgeIds, () => pb_1.Message.addToRepeatedWrapperField(message, 2, dependency_3.bitbadges.bitbadgeschain.badges.IdRange.deserialize(reader), dependency_3.bitbadges.bitbadgeschain.badges.IdRange));
                         break;
                     default: reader.skipField();
                 }
@@ -97,74 +96,46 @@ export namespace bitbadges.bitbadgeschain.badges {
         serializeBinary(): Uint8Array {
             return this.serialize();
         }
-        static deserializeBinary(bytes: Uint8Array): WhitelistMintInfo {
-            return WhitelistMintInfo.deserialize(bytes);
+        static deserializeBinary(bytes: Uint8Array): Balance {
+            return Balance.deserialize(bytes);
         }
     }
-    export class UserBalanceInfo extends pb_1.Message {
+    export class UserBalance extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
-            balanceAmounts?: dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject[];
-            pendingNonce?: number;
-            pending?: PendingTransfer[];
+            balances?: Balance[];
             approvals?: Approval[];
         }) {
             super();
-            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [2, 4, 5], this.#one_of_decls);
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1, 2], this.#one_of_decls);
             if (!Array.isArray(data) && typeof data == "object") {
-                if ("balanceAmounts" in data && data.balanceAmounts != undefined) {
-                    this.balanceAmounts = data.balanceAmounts;
-                }
-                if ("pendingNonce" in data && data.pendingNonce != undefined) {
-                    this.pendingNonce = data.pendingNonce;
-                }
-                if ("pending" in data && data.pending != undefined) {
-                    this.pending = data.pending;
+                if ("balances" in data && data.balances != undefined) {
+                    this.balances = data.balances;
                 }
                 if ("approvals" in data && data.approvals != undefined) {
                     this.approvals = data.approvals;
                 }
             }
         }
-        get balanceAmounts() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject, 2) as dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject[];
+        get balances() {
+            return pb_1.Message.getRepeatedWrapperField(this, Balance, 1) as Balance[];
         }
-        set balanceAmounts(value: dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject[]) {
-            pb_1.Message.setRepeatedWrapperField(this, 2, value);
-        }
-        get pendingNonce() {
-            return pb_1.Message.getFieldWithDefault(this, 3, 0) as number;
-        }
-        set pendingNonce(value: number) {
-            pb_1.Message.setField(this, 3, value);
-        }
-        get pending() {
-            return pb_1.Message.getRepeatedWrapperField(this, PendingTransfer, 4) as PendingTransfer[];
-        }
-        set pending(value: PendingTransfer[]) {
-            pb_1.Message.setRepeatedWrapperField(this, 4, value);
+        set balances(value: Balance[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 1, value);
         }
         get approvals() {
-            return pb_1.Message.getRepeatedWrapperField(this, Approval, 5) as Approval[];
+            return pb_1.Message.getRepeatedWrapperField(this, Approval, 2) as Approval[];
         }
         set approvals(value: Approval[]) {
-            pb_1.Message.setRepeatedWrapperField(this, 5, value);
+            pb_1.Message.setRepeatedWrapperField(this, 2, value);
         }
         static fromObject(data: {
-            balanceAmounts?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject.prototype.toObject>[];
-            pendingNonce?: number;
-            pending?: ReturnType<typeof PendingTransfer.prototype.toObject>[];
+            balances?: ReturnType<typeof Balance.prototype.toObject>[];
             approvals?: ReturnType<typeof Approval.prototype.toObject>[];
-        }): UserBalanceInfo {
-            const message = new UserBalanceInfo({});
-            if (data.balanceAmounts != null) {
-                message.balanceAmounts = data.balanceAmounts.map(item => dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject.fromObject(item));
-            }
-            if (data.pendingNonce != null) {
-                message.pendingNonce = data.pendingNonce;
-            }
-            if (data.pending != null) {
-                message.pending = data.pending.map(item => PendingTransfer.fromObject(item));
+        }): UserBalance {
+            const message = new UserBalance({});
+            if (data.balances != null) {
+                message.balances = data.balances.map(item => Balance.fromObject(item));
             }
             if (data.approvals != null) {
                 message.approvals = data.approvals.map(item => Approval.fromObject(item));
@@ -173,19 +144,11 @@ export namespace bitbadges.bitbadgeschain.badges {
         }
         toObject() {
             const data: {
-                balanceAmounts?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject.prototype.toObject>[];
-                pendingNonce?: number;
-                pending?: ReturnType<typeof PendingTransfer.prototype.toObject>[];
+                balances?: ReturnType<typeof Balance.prototype.toObject>[];
                 approvals?: ReturnType<typeof Approval.prototype.toObject>[];
             } = {};
-            if (this.balanceAmounts != null) {
-                data.balanceAmounts = this.balanceAmounts.map((item: dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject) => item.toObject());
-            }
-            if (this.pendingNonce != null) {
-                data.pendingNonce = this.pendingNonce;
-            }
-            if (this.pending != null) {
-                data.pending = this.pending.map((item: PendingTransfer) => item.toObject());
+            if (this.balances != null) {
+                data.balances = this.balances.map((item: Balance) => item.toObject());
             }
             if (this.approvals != null) {
                 data.approvals = this.approvals.map((item: Approval) => item.toObject());
@@ -196,34 +159,24 @@ export namespace bitbadges.bitbadgeschain.badges {
         serialize(w: pb_1.BinaryWriter): void;
         serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
             const writer = w || new pb_1.BinaryWriter();
-            if (this.balanceAmounts.length)
-                writer.writeRepeatedMessage(2, this.balanceAmounts, (item: dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject) => item.serialize(writer));
-            if (this.pendingNonce != 0)
-                writer.writeUint64(3, this.pendingNonce);
-            if (this.pending.length)
-                writer.writeRepeatedMessage(4, this.pending, (item: PendingTransfer) => item.serialize(writer));
+            if (this.balances.length)
+                writer.writeRepeatedMessage(1, this.balances, (item: Balance) => item.serialize(writer));
             if (this.approvals.length)
-                writer.writeRepeatedMessage(5, this.approvals, (item: Approval) => item.serialize(writer));
+                writer.writeRepeatedMessage(2, this.approvals, (item: Approval) => item.serialize(writer));
             if (!w)
                 return writer.getResultBuffer();
         }
-        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): UserBalanceInfo {
-            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new UserBalanceInfo();
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): UserBalance {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new UserBalance();
             while (reader.nextField()) {
                 if (reader.isEndGroup())
                     break;
                 switch (reader.getFieldNumber()) {
+                    case 1:
+                        reader.readMessage(message.balances, () => pb_1.Message.addToRepeatedWrapperField(message, 1, Balance.deserialize(reader), Balance));
+                        break;
                     case 2:
-                        reader.readMessage(message.balanceAmounts, () => pb_1.Message.addToRepeatedWrapperField(message, 2, dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject.deserialize(reader), dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject));
-                        break;
-                    case 3:
-                        message.pendingNonce = reader.readUint64();
-                        break;
-                    case 4:
-                        reader.readMessage(message.pending, () => pb_1.Message.addToRepeatedWrapperField(message, 4, PendingTransfer.deserialize(reader), PendingTransfer));
-                        break;
-                    case 5:
-                        reader.readMessage(message.approvals, () => pb_1.Message.addToRepeatedWrapperField(message, 5, Approval.deserialize(reader), Approval));
+                        reader.readMessage(message.approvals, () => pb_1.Message.addToRepeatedWrapperField(message, 2, Approval.deserialize(reader), Approval));
                         break;
                     default: reader.skipField();
                 }
@@ -233,15 +186,15 @@ export namespace bitbadges.bitbadgeschain.badges {
         serializeBinary(): Uint8Array {
             return this.serialize();
         }
-        static deserializeBinary(bytes: Uint8Array): UserBalanceInfo {
-            return UserBalanceInfo.deserialize(bytes);
+        static deserializeBinary(bytes: Uint8Array): UserBalance {
+            return UserBalance.deserialize(bytes);
         }
     }
     export class Approval extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
             address?: number;
-            approvalAmounts?: dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject[];
+            balances?: Balance[];
         }) {
             super();
             pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [2], this.#one_of_decls);
@@ -249,8 +202,8 @@ export namespace bitbadges.bitbadgeschain.badges {
                 if ("address" in data && data.address != undefined) {
                     this.address = data.address;
                 }
-                if ("approvalAmounts" in data && data.approvalAmounts != undefined) {
-                    this.approvalAmounts = data.approvalAmounts;
+                if ("balances" in data && data.balances != undefined) {
+                    this.balances = data.balances;
                 }
             }
         }
@@ -260,35 +213,35 @@ export namespace bitbadges.bitbadgeschain.badges {
         set address(value: number) {
             pb_1.Message.setField(this, 1, value);
         }
-        get approvalAmounts() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject, 2) as dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject[];
+        get balances() {
+            return pb_1.Message.getRepeatedWrapperField(this, Balance, 2) as Balance[];
         }
-        set approvalAmounts(value: dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject[]) {
+        set balances(value: Balance[]) {
             pb_1.Message.setRepeatedWrapperField(this, 2, value);
         }
         static fromObject(data: {
             address?: number;
-            approvalAmounts?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject.prototype.toObject>[];
+            balances?: ReturnType<typeof Balance.prototype.toObject>[];
         }): Approval {
             const message = new Approval({});
             if (data.address != null) {
                 message.address = data.address;
             }
-            if (data.approvalAmounts != null) {
-                message.approvalAmounts = data.approvalAmounts.map(item => dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject.fromObject(item));
+            if (data.balances != null) {
+                message.balances = data.balances.map(item => Balance.fromObject(item));
             }
             return message;
         }
         toObject() {
             const data: {
                 address?: number;
-                approvalAmounts?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject.prototype.toObject>[];
+                balances?: ReturnType<typeof Balance.prototype.toObject>[];
             } = {};
             if (this.address != null) {
                 data.address = this.address;
             }
-            if (this.approvalAmounts != null) {
-                data.approvalAmounts = this.approvalAmounts.map((item: dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject) => item.toObject());
+            if (this.balances != null) {
+                data.balances = this.balances.map((item: Balance) => item.toObject());
             }
             return data;
         }
@@ -298,8 +251,8 @@ export namespace bitbadges.bitbadgeschain.badges {
             const writer = w || new pb_1.BinaryWriter();
             if (this.address != 0)
                 writer.writeUint64(1, this.address);
-            if (this.approvalAmounts.length)
-                writer.writeRepeatedMessage(2, this.approvalAmounts, (item: dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject) => item.serialize(writer));
+            if (this.balances.length)
+                writer.writeRepeatedMessage(2, this.balances, (item: Balance) => item.serialize(writer));
             if (!w)
                 return writer.getResultBuffer();
         }
@@ -313,7 +266,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                         message.address = reader.readUint64();
                         break;
                     case 2:
-                        reader.readMessage(message.approvalAmounts, () => pb_1.Message.addToRepeatedWrapperField(message, 2, dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject.deserialize(reader), dependency_4.bitbadges.bitbadgeschain.badges.BalanceObject));
+                        reader.readMessage(message.balances, () => pb_1.Message.addToRepeatedWrapperField(message, 2, Balance.deserialize(reader), Balance));
                         break;
                     default: reader.skipField();
                 }
@@ -325,306 +278,6 @@ export namespace bitbadges.bitbadgeschain.badges {
         }
         static deserializeBinary(bytes: Uint8Array): Approval {
             return Approval.deserialize(bytes);
-        }
-    }
-    export class PendingTransfer extends pb_1.Message {
-        #one_of_decls: number[][] = [];
-        constructor(data?: any[] | {
-            subbadgeRange?: dependency_4.bitbadges.bitbadgeschain.badges.IdRange;
-            thisPendingNonce?: number;
-            otherPendingNonce?: number;
-            amount?: number;
-            sent?: boolean;
-            to?: number;
-            from?: number;
-            approvedBy?: number;
-            markedAsAccepted?: boolean;
-            expirationTime?: number;
-            cantCancelBeforeTime?: number;
-        }) {
-            super();
-            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
-            if (!Array.isArray(data) && typeof data == "object") {
-                if ("subbadgeRange" in data && data.subbadgeRange != undefined) {
-                    this.subbadgeRange = data.subbadgeRange;
-                }
-                if ("thisPendingNonce" in data && data.thisPendingNonce != undefined) {
-                    this.thisPendingNonce = data.thisPendingNonce;
-                }
-                if ("otherPendingNonce" in data && data.otherPendingNonce != undefined) {
-                    this.otherPendingNonce = data.otherPendingNonce;
-                }
-                if ("amount" in data && data.amount != undefined) {
-                    this.amount = data.amount;
-                }
-                if ("sent" in data && data.sent != undefined) {
-                    this.sent = data.sent;
-                }
-                if ("to" in data && data.to != undefined) {
-                    this.to = data.to;
-                }
-                if ("from" in data && data.from != undefined) {
-                    this.from = data.from;
-                }
-                if ("approvedBy" in data && data.approvedBy != undefined) {
-                    this.approvedBy = data.approvedBy;
-                }
-                if ("markedAsAccepted" in data && data.markedAsAccepted != undefined) {
-                    this.markedAsAccepted = data.markedAsAccepted;
-                }
-                if ("expirationTime" in data && data.expirationTime != undefined) {
-                    this.expirationTime = data.expirationTime;
-                }
-                if ("cantCancelBeforeTime" in data && data.cantCancelBeforeTime != undefined) {
-                    this.cantCancelBeforeTime = data.cantCancelBeforeTime;
-                }
-            }
-        }
-        get subbadgeRange() {
-            return pb_1.Message.getWrapperField(this, dependency_4.bitbadges.bitbadgeschain.badges.IdRange, 1) as dependency_4.bitbadges.bitbadgeschain.badges.IdRange;
-        }
-        set subbadgeRange(value: dependency_4.bitbadges.bitbadgeschain.badges.IdRange) {
-            pb_1.Message.setWrapperField(this, 1, value);
-        }
-        get has_subbadgeRange() {
-            return pb_1.Message.getField(this, 1) != null;
-        }
-        get thisPendingNonce() {
-            return pb_1.Message.getFieldWithDefault(this, 2, 0) as number;
-        }
-        set thisPendingNonce(value: number) {
-            pb_1.Message.setField(this, 2, value);
-        }
-        get otherPendingNonce() {
-            return pb_1.Message.getFieldWithDefault(this, 3, 0) as number;
-        }
-        set otherPendingNonce(value: number) {
-            pb_1.Message.setField(this, 3, value);
-        }
-        get amount() {
-            return pb_1.Message.getFieldWithDefault(this, 4, 0) as number;
-        }
-        set amount(value: number) {
-            pb_1.Message.setField(this, 4, value);
-        }
-        get sent() {
-            return pb_1.Message.getFieldWithDefault(this, 5, false) as boolean;
-        }
-        set sent(value: boolean) {
-            pb_1.Message.setField(this, 5, value);
-        }
-        get to() {
-            return pb_1.Message.getFieldWithDefault(this, 6, 0) as number;
-        }
-        set to(value: number) {
-            pb_1.Message.setField(this, 6, value);
-        }
-        get from() {
-            return pb_1.Message.getFieldWithDefault(this, 7, 0) as number;
-        }
-        set from(value: number) {
-            pb_1.Message.setField(this, 7, value);
-        }
-        get approvedBy() {
-            return pb_1.Message.getFieldWithDefault(this, 9, 0) as number;
-        }
-        set approvedBy(value: number) {
-            pb_1.Message.setField(this, 9, value);
-        }
-        get markedAsAccepted() {
-            return pb_1.Message.getFieldWithDefault(this, 10, false) as boolean;
-        }
-        set markedAsAccepted(value: boolean) {
-            pb_1.Message.setField(this, 10, value);
-        }
-        get expirationTime() {
-            return pb_1.Message.getFieldWithDefault(this, 11, 0) as number;
-        }
-        set expirationTime(value: number) {
-            pb_1.Message.setField(this, 11, value);
-        }
-        get cantCancelBeforeTime() {
-            return pb_1.Message.getFieldWithDefault(this, 12, 0) as number;
-        }
-        set cantCancelBeforeTime(value: number) {
-            pb_1.Message.setField(this, 12, value);
-        }
-        static fromObject(data: {
-            subbadgeRange?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>;
-            thisPendingNonce?: number;
-            otherPendingNonce?: number;
-            amount?: number;
-            sent?: boolean;
-            to?: number;
-            from?: number;
-            approvedBy?: number;
-            markedAsAccepted?: boolean;
-            expirationTime?: number;
-            cantCancelBeforeTime?: number;
-        }): PendingTransfer {
-            const message = new PendingTransfer({});
-            if (data.subbadgeRange != null) {
-                message.subbadgeRange = dependency_4.bitbadges.bitbadgeschain.badges.IdRange.fromObject(data.subbadgeRange);
-            }
-            if (data.thisPendingNonce != null) {
-                message.thisPendingNonce = data.thisPendingNonce;
-            }
-            if (data.otherPendingNonce != null) {
-                message.otherPendingNonce = data.otherPendingNonce;
-            }
-            if (data.amount != null) {
-                message.amount = data.amount;
-            }
-            if (data.sent != null) {
-                message.sent = data.sent;
-            }
-            if (data.to != null) {
-                message.to = data.to;
-            }
-            if (data.from != null) {
-                message.from = data.from;
-            }
-            if (data.approvedBy != null) {
-                message.approvedBy = data.approvedBy;
-            }
-            if (data.markedAsAccepted != null) {
-                message.markedAsAccepted = data.markedAsAccepted;
-            }
-            if (data.expirationTime != null) {
-                message.expirationTime = data.expirationTime;
-            }
-            if (data.cantCancelBeforeTime != null) {
-                message.cantCancelBeforeTime = data.cantCancelBeforeTime;
-            }
-            return message;
-        }
-        toObject() {
-            const data: {
-                subbadgeRange?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>;
-                thisPendingNonce?: number;
-                otherPendingNonce?: number;
-                amount?: number;
-                sent?: boolean;
-                to?: number;
-                from?: number;
-                approvedBy?: number;
-                markedAsAccepted?: boolean;
-                expirationTime?: number;
-                cantCancelBeforeTime?: number;
-            } = {};
-            if (this.subbadgeRange != null) {
-                data.subbadgeRange = this.subbadgeRange.toObject();
-            }
-            if (this.thisPendingNonce != null) {
-                data.thisPendingNonce = this.thisPendingNonce;
-            }
-            if (this.otherPendingNonce != null) {
-                data.otherPendingNonce = this.otherPendingNonce;
-            }
-            if (this.amount != null) {
-                data.amount = this.amount;
-            }
-            if (this.sent != null) {
-                data.sent = this.sent;
-            }
-            if (this.to != null) {
-                data.to = this.to;
-            }
-            if (this.from != null) {
-                data.from = this.from;
-            }
-            if (this.approvedBy != null) {
-                data.approvedBy = this.approvedBy;
-            }
-            if (this.markedAsAccepted != null) {
-                data.markedAsAccepted = this.markedAsAccepted;
-            }
-            if (this.expirationTime != null) {
-                data.expirationTime = this.expirationTime;
-            }
-            if (this.cantCancelBeforeTime != null) {
-                data.cantCancelBeforeTime = this.cantCancelBeforeTime;
-            }
-            return data;
-        }
-        serialize(): Uint8Array;
-        serialize(w: pb_1.BinaryWriter): void;
-        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-            const writer = w || new pb_1.BinaryWriter();
-            if (this.has_subbadgeRange)
-                writer.writeMessage(1, this.subbadgeRange, () => this.subbadgeRange.serialize(writer));
-            if (this.thisPendingNonce != 0)
-                writer.writeUint64(2, this.thisPendingNonce);
-            if (this.otherPendingNonce != 0)
-                writer.writeUint64(3, this.otherPendingNonce);
-            if (this.amount != 0)
-                writer.writeUint64(4, this.amount);
-            if (this.sent != false)
-                writer.writeBool(5, this.sent);
-            if (this.to != 0)
-                writer.writeUint64(6, this.to);
-            if (this.from != 0)
-                writer.writeUint64(7, this.from);
-            if (this.approvedBy != 0)
-                writer.writeUint64(9, this.approvedBy);
-            if (this.markedAsAccepted != false)
-                writer.writeBool(10, this.markedAsAccepted);
-            if (this.expirationTime != 0)
-                writer.writeUint64(11, this.expirationTime);
-            if (this.cantCancelBeforeTime != 0)
-                writer.writeUint64(12, this.cantCancelBeforeTime);
-            if (!w)
-                return writer.getResultBuffer();
-        }
-        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): PendingTransfer {
-            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new PendingTransfer();
-            while (reader.nextField()) {
-                if (reader.isEndGroup())
-                    break;
-                switch (reader.getFieldNumber()) {
-                    case 1:
-                        reader.readMessage(message.subbadgeRange, () => message.subbadgeRange = dependency_4.bitbadges.bitbadgeschain.badges.IdRange.deserialize(reader));
-                        break;
-                    case 2:
-                        message.thisPendingNonce = reader.readUint64();
-                        break;
-                    case 3:
-                        message.otherPendingNonce = reader.readUint64();
-                        break;
-                    case 4:
-                        message.amount = reader.readUint64();
-                        break;
-                    case 5:
-                        message.sent = reader.readBool();
-                        break;
-                    case 6:
-                        message.to = reader.readUint64();
-                        break;
-                    case 7:
-                        message.from = reader.readUint64();
-                        break;
-                    case 9:
-                        message.approvedBy = reader.readUint64();
-                        break;
-                    case 10:
-                        message.markedAsAccepted = reader.readBool();
-                        break;
-                    case 11:
-                        message.expirationTime = reader.readUint64();
-                        break;
-                    case 12:
-                        message.cantCancelBeforeTime = reader.readUint64();
-                        break;
-                    default: reader.skipField();
-                }
-            }
-            return message;
-        }
-        serializeBinary(): Uint8Array {
-            return this.serialize();
-        }
-        static deserializeBinary(bytes: Uint8Array): PendingTransfer {
-            return PendingTransfer.deserialize(bytes);
         }
     }
 }

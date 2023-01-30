@@ -1,5 +1,5 @@
 import {
-  createMsgHandlePendingTransfer as protoMsgHandlePendingTransfer,
+  createMsgNewCollection as protoMsgNewCollection,
   createTransaction,
 } from 'bitbadgesjs-proto'
 
@@ -8,28 +8,40 @@ import {
   generateFee,
   generateMessage,
   generateTypes,
-  createMsgHandlePendingTransfer,
-  MSG_HANDLE_PENDING_TRANSFER_TYPES,
+  createMsgNewCollection,
+  MSG_NEW_COLLECTION_TYPES,
 } from 'bitbadgesjs-eip712'
 
 import { getDefaultDomainWithChainId } from '../../domain'
 
 import { Chain, Fee, Sender } from '../../common'
-import { IdRange } from './typeUtils'
+import {
+  BadgeSupplyAndAmount,
+  Claims,
+  TransferMapping,
+  Transfers,
+} from './typeUtils'
 
-export interface MessageMsgHandlePendingTransfer {
+export interface MessageMsgNewCollection {
   creator: string
-  actions: number[]
-  badgeId: number
-  nonceRanges: IdRange[]
+  collectionUri: string
+  badgeUri: string
+  permissions: number
+  bytes: string
+  disallowedTransfers: TransferMapping[]
+  managerApprovedTransfers: TransferMapping[]
+  standard: number
+  badgeSupplys: BadgeSupplyAndAmount[]
+  transfers: Transfers[]
+  claims: Claims[]
 }
 
-export function createTxMsgHandlePendingTransfer(
+export function createTxMsgNewCollection(
   chain: Chain,
   sender: Sender,
   fee: Fee,
   memo: string,
-  params: MessageMsgHandlePendingTransfer,
+  params: MessageMsgNewCollection,
   domain?: object,
 ) {
   // EIP712
@@ -39,13 +51,21 @@ export function createTxMsgHandlePendingTransfer(
     fee.gas,
     sender.accountAddress,
   )
-  const types = generateTypes(MSG_HANDLE_PENDING_TRANSFER_TYPES)
+  const types = generateTypes(MSG_NEW_COLLECTION_TYPES)
 
-  const msg = createMsgHandlePendingTransfer(
+  const msg = createMsgNewCollection(
     params.creator,
-    params.actions,
-    params.badgeId,
-    params.nonceRanges,
+    params.collectionUri,
+    params.badgeUri,
+    params.bytes,
+    params.permissions,
+    params.disallowedTransfers,
+    params.managerApprovedTransfers,
+    params.standard,
+
+    params.badgeSupplys,
+    params.transfers,
+    params.claims,
   )
   const messages = generateMessage(
     sender.accountNumber.toString(),
@@ -62,11 +82,19 @@ export function createTxMsgHandlePendingTransfer(
   const eipToSign = createEIP712(types, messages, domainObj)
 
   // Cosmos
-  const msgCosmos = protoMsgHandlePendingTransfer(
+  const msgCosmos = protoMsgNewCollection(
     params.creator,
-    params.actions,
-    params.badgeId,
-    params.nonceRanges,
+    params.collectionUri,
+    params.badgeUri,
+    params.bytes,
+    params.permissions,
+    params.disallowedTransfers,
+    params.managerApprovedTransfers,
+    params.standard,
+
+    params.badgeSupplys,
+    params.transfers,
+    params.claims,
   )
   const tx = createTransaction(
     msgCosmos,

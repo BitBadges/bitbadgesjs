@@ -18,7 +18,7 @@ import { Chain, Fee, Sender } from '../../common'
 
 export interface MessageMsgTransferManager {
   creator: string
-  badgeId: number
+  collectionId: number
   address: number
 }
 
@@ -41,7 +41,7 @@ export function createTxMsgTransferManager(
 
   const msg = createMsgTransferManager(
     params.creator,
-    params.badgeId,
+    params.collectionId,
     params.address,
   )
   const messages = generateMessage(
@@ -62,7 +62,7 @@ export function createTxMsgTransferManager(
   // Cosmos
   const msgCosmos = protoMsgTransferManager(
     params.creator,
-    params.badgeId,
+    params.collectionId,
     params.address,
   )
   const tx = createTransaction(

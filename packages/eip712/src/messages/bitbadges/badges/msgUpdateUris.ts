@@ -1,27 +1,27 @@
-import { UriObject, URI_OBJECT_TYPE } from './typeUtils'
-
 const MsgUpdateUrisValueType = [
   { name: 'creator', type: 'string' },
-  { name: 'badgeId', type: 'uint64' },
-  { name: 'uri', type: 'UriObject' },
+  { name: 'collectionId', type: 'uint64' },
+  { name: 'collectionUri', type: 'string' },
+  { name: 'badgeUri', type: 'string' },
 ]
 
 export const MSG_UPDATE_URIS_TYPES = {
-  UriObject: URI_OBJECT_TYPE,
   MsgValue: MsgUpdateUrisValueType,
 }
 
 export function createMsgUpdateUris(
   creator: string,
-  badgeId: number,
-  uri: UriObject,
+  collectionId: number,
+  collectionUri: string,
+  badgeUri: string,
 ) {
   return {
     type: 'badges/UpdateUris',
     value: {
       creator,
-      badgeId,
-      uri,
+      collectionId,
+      collectionUri,
+      badgeUri,
     },
   }
 }

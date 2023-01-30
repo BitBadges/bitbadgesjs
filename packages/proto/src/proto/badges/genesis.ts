@@ -16,10 +16,11 @@ export namespace bitbadges.bitbadgeschain.badges {
         constructor(data?: any[] | {
             params?: dependency_2.bitbadges.bitbadgeschain.badges.Params;
             port_id?: string;
-            badges?: dependency_3.bitbadges.bitbadgeschain.badges.BitBadge[];
-            balances?: dependency_4.bitbadges.bitbadgeschain.badges.UserBalanceInfo[];
+            collections?: dependency_3.bitbadges.bitbadgeschain.badges.BadgeCollection[];
+            balances?: dependency_4.bitbadges.bitbadgeschain.badges.UserBalance[];
             balance_ids?: string[];
-            nextBadgeId?: number;
+            nextCollectionId?: number;
+            nextClaimId?: number;
         }) {
             super();
             pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [3, 4, 5], this.#one_of_decls);
@@ -30,8 +31,8 @@ export namespace bitbadges.bitbadgeschain.badges {
                 if ("port_id" in data && data.port_id != undefined) {
                     this.port_id = data.port_id;
                 }
-                if ("badges" in data && data.badges != undefined) {
-                    this.badges = data.badges;
+                if ("collections" in data && data.collections != undefined) {
+                    this.collections = data.collections;
                 }
                 if ("balances" in data && data.balances != undefined) {
                     this.balances = data.balances;
@@ -39,8 +40,11 @@ export namespace bitbadges.bitbadgeschain.badges {
                 if ("balance_ids" in data && data.balance_ids != undefined) {
                     this.balance_ids = data.balance_ids;
                 }
-                if ("nextBadgeId" in data && data.nextBadgeId != undefined) {
-                    this.nextBadgeId = data.nextBadgeId;
+                if ("nextCollectionId" in data && data.nextCollectionId != undefined) {
+                    this.nextCollectionId = data.nextCollectionId;
+                }
+                if ("nextClaimId" in data && data.nextClaimId != undefined) {
+                    this.nextClaimId = data.nextClaimId;
                 }
             }
         }
@@ -59,16 +63,16 @@ export namespace bitbadges.bitbadgeschain.badges {
         set port_id(value: string) {
             pb_1.Message.setField(this, 2, value);
         }
-        get badges() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_3.bitbadges.bitbadgeschain.badges.BitBadge, 3) as dependency_3.bitbadges.bitbadgeschain.badges.BitBadge[];
+        get collections() {
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_3.bitbadges.bitbadgeschain.badges.BadgeCollection, 3) as dependency_3.bitbadges.bitbadgeschain.badges.BadgeCollection[];
         }
-        set badges(value: dependency_3.bitbadges.bitbadgeschain.badges.BitBadge[]) {
+        set collections(value: dependency_3.bitbadges.bitbadgeschain.badges.BadgeCollection[]) {
             pb_1.Message.setRepeatedWrapperField(this, 3, value);
         }
         get balances() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.bitbadges.bitbadgeschain.badges.UserBalanceInfo, 4) as dependency_4.bitbadges.bitbadgeschain.badges.UserBalanceInfo[];
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.bitbadges.bitbadgeschain.badges.UserBalance, 4) as dependency_4.bitbadges.bitbadgeschain.badges.UserBalance[];
         }
-        set balances(value: dependency_4.bitbadges.bitbadgeschain.badges.UserBalanceInfo[]) {
+        set balances(value: dependency_4.bitbadges.bitbadgeschain.badges.UserBalance[]) {
             pb_1.Message.setRepeatedWrapperField(this, 4, value);
         }
         get balance_ids() {
@@ -77,19 +81,26 @@ export namespace bitbadges.bitbadgeschain.badges {
         set balance_ids(value: string[]) {
             pb_1.Message.setField(this, 5, value);
         }
-        get nextBadgeId() {
+        get nextCollectionId() {
             return pb_1.Message.getFieldWithDefault(this, 6, 0) as number;
         }
-        set nextBadgeId(value: number) {
+        set nextCollectionId(value: number) {
             pb_1.Message.setField(this, 6, value);
+        }
+        get nextClaimId() {
+            return pb_1.Message.getFieldWithDefault(this, 7, 0) as number;
+        }
+        set nextClaimId(value: number) {
+            pb_1.Message.setField(this, 7, value);
         }
         static fromObject(data: {
             params?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.Params.prototype.toObject>;
             port_id?: string;
-            badges?: ReturnType<typeof dependency_3.bitbadges.bitbadgeschain.badges.BitBadge.prototype.toObject>[];
-            balances?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UserBalanceInfo.prototype.toObject>[];
+            collections?: ReturnType<typeof dependency_3.bitbadges.bitbadgeschain.badges.BadgeCollection.prototype.toObject>[];
+            balances?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UserBalance.prototype.toObject>[];
             balance_ids?: string[];
-            nextBadgeId?: number;
+            nextCollectionId?: number;
+            nextClaimId?: number;
         }): GenesisState {
             const message = new GenesisState({});
             if (data.params != null) {
@@ -98,17 +109,20 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (data.port_id != null) {
                 message.port_id = data.port_id;
             }
-            if (data.badges != null) {
-                message.badges = data.badges.map(item => dependency_3.bitbadges.bitbadgeschain.badges.BitBadge.fromObject(item));
+            if (data.collections != null) {
+                message.collections = data.collections.map(item => dependency_3.bitbadges.bitbadgeschain.badges.BadgeCollection.fromObject(item));
             }
             if (data.balances != null) {
-                message.balances = data.balances.map(item => dependency_4.bitbadges.bitbadgeschain.badges.UserBalanceInfo.fromObject(item));
+                message.balances = data.balances.map(item => dependency_4.bitbadges.bitbadgeschain.badges.UserBalance.fromObject(item));
             }
             if (data.balance_ids != null) {
                 message.balance_ids = data.balance_ids;
             }
-            if (data.nextBadgeId != null) {
-                message.nextBadgeId = data.nextBadgeId;
+            if (data.nextCollectionId != null) {
+                message.nextCollectionId = data.nextCollectionId;
+            }
+            if (data.nextClaimId != null) {
+                message.nextClaimId = data.nextClaimId;
             }
             return message;
         }
@@ -116,10 +130,11 @@ export namespace bitbadges.bitbadgeschain.badges {
             const data: {
                 params?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.Params.prototype.toObject>;
                 port_id?: string;
-                badges?: ReturnType<typeof dependency_3.bitbadges.bitbadgeschain.badges.BitBadge.prototype.toObject>[];
-                balances?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UserBalanceInfo.prototype.toObject>[];
+                collections?: ReturnType<typeof dependency_3.bitbadges.bitbadgeschain.badges.BadgeCollection.prototype.toObject>[];
+                balances?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UserBalance.prototype.toObject>[];
                 balance_ids?: string[];
-                nextBadgeId?: number;
+                nextCollectionId?: number;
+                nextClaimId?: number;
             } = {};
             if (this.params != null) {
                 data.params = this.params.toObject();
@@ -127,17 +142,20 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (this.port_id != null) {
                 data.port_id = this.port_id;
             }
-            if (this.badges != null) {
-                data.badges = this.badges.map((item: dependency_3.bitbadges.bitbadgeschain.badges.BitBadge) => item.toObject());
+            if (this.collections != null) {
+                data.collections = this.collections.map((item: dependency_3.bitbadges.bitbadgeschain.badges.BadgeCollection) => item.toObject());
             }
             if (this.balances != null) {
-                data.balances = this.balances.map((item: dependency_4.bitbadges.bitbadgeschain.badges.UserBalanceInfo) => item.toObject());
+                data.balances = this.balances.map((item: dependency_4.bitbadges.bitbadgeschain.badges.UserBalance) => item.toObject());
             }
             if (this.balance_ids != null) {
                 data.balance_ids = this.balance_ids;
             }
-            if (this.nextBadgeId != null) {
-                data.nextBadgeId = this.nextBadgeId;
+            if (this.nextCollectionId != null) {
+                data.nextCollectionId = this.nextCollectionId;
+            }
+            if (this.nextClaimId != null) {
+                data.nextClaimId = this.nextClaimId;
             }
             return data;
         }
@@ -149,14 +167,16 @@ export namespace bitbadges.bitbadgeschain.badges {
                 writer.writeMessage(1, this.params, () => this.params.serialize(writer));
             if (this.port_id.length)
                 writer.writeString(2, this.port_id);
-            if (this.badges.length)
-                writer.writeRepeatedMessage(3, this.badges, (item: dependency_3.bitbadges.bitbadgeschain.badges.BitBadge) => item.serialize(writer));
+            if (this.collections.length)
+                writer.writeRepeatedMessage(3, this.collections, (item: dependency_3.bitbadges.bitbadgeschain.badges.BadgeCollection) => item.serialize(writer));
             if (this.balances.length)
-                writer.writeRepeatedMessage(4, this.balances, (item: dependency_4.bitbadges.bitbadgeschain.badges.UserBalanceInfo) => item.serialize(writer));
+                writer.writeRepeatedMessage(4, this.balances, (item: dependency_4.bitbadges.bitbadgeschain.badges.UserBalance) => item.serialize(writer));
             if (this.balance_ids.length)
                 writer.writeRepeatedString(5, this.balance_ids);
-            if (this.nextBadgeId != 0)
-                writer.writeUint64(6, this.nextBadgeId);
+            if (this.nextCollectionId != 0)
+                writer.writeUint64(6, this.nextCollectionId);
+            if (this.nextClaimId != 0)
+                writer.writeUint64(7, this.nextClaimId);
             if (!w)
                 return writer.getResultBuffer();
         }
@@ -173,16 +193,19 @@ export namespace bitbadges.bitbadgeschain.badges {
                         message.port_id = reader.readString();
                         break;
                     case 3:
-                        reader.readMessage(message.badges, () => pb_1.Message.addToRepeatedWrapperField(message, 3, dependency_3.bitbadges.bitbadgeschain.badges.BitBadge.deserialize(reader), dependency_3.bitbadges.bitbadgeschain.badges.BitBadge));
+                        reader.readMessage(message.collections, () => pb_1.Message.addToRepeatedWrapperField(message, 3, dependency_3.bitbadges.bitbadgeschain.badges.BadgeCollection.deserialize(reader), dependency_3.bitbadges.bitbadgeschain.badges.BadgeCollection));
                         break;
                     case 4:
-                        reader.readMessage(message.balances, () => pb_1.Message.addToRepeatedWrapperField(message, 4, dependency_4.bitbadges.bitbadgeschain.badges.UserBalanceInfo.deserialize(reader), dependency_4.bitbadges.bitbadgeschain.badges.UserBalanceInfo));
+                        reader.readMessage(message.balances, () => pb_1.Message.addToRepeatedWrapperField(message, 4, dependency_4.bitbadges.bitbadgeschain.badges.UserBalance.deserialize(reader), dependency_4.bitbadges.bitbadgeschain.badges.UserBalance));
                         break;
                     case 5:
                         pb_1.Message.addToRepeatedField(message, 5, reader.readString());
                         break;
                     case 6:
-                        message.nextBadgeId = reader.readUint64();
+                        message.nextCollectionId = reader.readUint64();
+                        break;
+                    case 7:
+                        message.nextClaimId = reader.readUint64();
                         break;
                     default: reader.skipField();
                 }

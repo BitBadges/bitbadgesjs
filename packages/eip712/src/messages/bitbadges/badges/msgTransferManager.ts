@@ -1,6 +1,6 @@
 const MsgTransferManagerValueType = [
   { name: 'creator', type: 'string' },
-  { name: 'badgeId', type: 'uint64' },
+  { name: 'collectionId', type: 'uint64' },
   { name: 'address', type: 'uint64' },
 ]
 
@@ -10,14 +10,14 @@ export const MSG_TRANSFER_MANAGER_TYPES = {
 
 export function createMsgTransferManager(
   creator: string,
-  badgeId: number,
+  collectionId: number,
   address: number,
 ) {
   return {
     type: 'badges/TransferManager',
     value: {
       creator,
-      badgeId,
+      collectionId,
       address,
     },
   }

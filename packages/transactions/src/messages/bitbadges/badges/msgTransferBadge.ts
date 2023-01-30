@@ -17,17 +17,13 @@ import {
 import { getDefaultDomainWithChainId } from '../../domain'
 
 import { Chain, Fee, Sender } from '../../common'
-import { IdRange } from './typeUtils'
+import { IdRange, Transfers } from './typeUtils'
 
 export interface MessageMsgTransferBadge {
     creator: string;
     from: number;
-    toAddresses: number[];
-    amounts: number[];
-    badgeId: number;
-    subbadgeRanges: IdRange[];
-    expirationTime: number;
-    cantCancelBeforeTime: number;
+    collectionId: number;
+    transfers: Transfers[];
 }
 
 export function createTxMsgTransferBadge(
@@ -50,12 +46,8 @@ export function createTxMsgTransferBadge(
     const msg = createMsgTransferBadge(
         params.creator,
         params.from,
-        params.toAddresses,
-        params.amounts,
-        params.badgeId,
-        params.subbadgeRanges,
-        params.expirationTime,
-        params.cantCancelBeforeTime,
+        params.collectionId,
+        params.transfers,
     )
     const messages = generateMessage(
         sender.accountNumber.toString(),
@@ -75,12 +67,8 @@ export function createTxMsgTransferBadge(
     const msgCosmos = protoMsgTransferBadge(
         params.creator,
         params.from,
-        params.toAddresses,
-        params.amounts,
-        params.badgeId,
-        params.subbadgeRanges,
-        params.expirationTime,
-        params.cantCancelBeforeTime,
+        params.collectionId,
+        params.transfers,
     )
     const tx = createTransaction(
         msgCosmos,

@@ -1,33 +1,18 @@
 import * as tx from '../../../proto/badges/tx'
-import * as ranges from '../../../proto/badges/ranges'
-import { IdRange } from './typeUtils'
+
+import { Transfers, getWrappedTransfers } from './typeUtils'
 
 export function createMsgTransferBadge(
   creator: string,
   from: number,
-  toAddresses: number[],
-  amounts: number[],
-  badgeId: number,
-  subbadgeRanges: IdRange[],
-  expirationTime: number,
-  cantCancelBeforeTime: number,
+  collectionId: number,
+  transfers: Transfers[],
 ) {
-  const wrappedRanges: ranges.bitbadges.bitbadgeschain.badges.IdRange[] = []
-  for (const range of subbadgeRanges) {
-    wrappedRanges.push(
-      new ranges.bitbadges.bitbadgeschain.badges.IdRange(range),
-    )
-  }
-
   const message = new tx.bitbadges.bitbadgeschain.badges.MsgTransferBadge({
     creator,
+    collectionId,
     from,
-    toAddresses,
-    amounts,
-    badgeId,
-    subbadgeRanges: wrappedRanges,
-    expirationTime,
-    cantCancelBeforeTime,
+    transfers: getWrappedTransfers(transfers),
   })
 
   return {

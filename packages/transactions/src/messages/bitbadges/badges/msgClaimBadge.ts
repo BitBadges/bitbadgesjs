@@ -1,5 +1,5 @@
 import {
-  createMsgPruneBalances as protoMsgPruneBalances,
+  createMsgClaimBadge as protoMsgClaimBadge,
   createTransaction,
 } from 'bitbadgesjs-proto'
 
@@ -8,26 +8,28 @@ import {
   generateFee,
   generateMessage,
   generateTypes,
-  createMsgPruneBalances,
-  MSG_PRUNE_BALANCES_TYPES,
+  createMsgClaimBadge,
+  MSG_CLAIM_BADGE_TYPES,
 } from 'bitbadgesjs-eip712'
 
 import { getDefaultDomainWithChainId } from '../../domain'
 
 import { Chain, Fee, Sender } from '../../common'
+import { Proof } from './typeUtils'
 
-export interface MessageMsgPruneBalances {
+export interface MessageMsgClaimBadge {
   creator: string
-  badgeIds: number[]
-  addresses: number[]
+  collectionId: number
+  claimId: number
+  proof: Proof
 }
 
-export function createTxMsgPruneBalances(
+export function createTxMsgClaimBadge(
   chain: Chain,
   sender: Sender,
   fee: Fee,
   memo: string,
-  params: MessageMsgPruneBalances,
+  params: MessageMsgClaimBadge,
   domain?: object,
 ) {
   // EIP712
@@ -37,15 +39,14 @@ export function createTxMsgPruneBalances(
     fee.gas,
     sender.accountAddress,
   )
-  const types = generateTypes(MSG_PRUNE_BALANCES_TYPES)
+  const types = generateTypes(MSG_CLAIM_BADGE_TYPES)
 
-  console.log('PARAMS', params)
-  const msg = createMsgPruneBalances(
+  const msg = createMsgClaimBadge(
     params.creator,
-    params.badgeIds,
-    params.addresses,
+    params.claimId,
+    params.collectionId,
+    params.proof,
   )
-  console.log('EIP712 MSG', msg)
   const messages = generateMessage(
     sender.accountNumber.toString(),
     sender.sequence.toString(),
@@ -61,13 +62,12 @@ export function createTxMsgPruneBalances(
   const eipToSign = createEIP712(types, messages, domainObj)
 
   // Cosmos
-  console.log('PARAMS', params)
-  const msgCosmos = protoMsgPruneBalances(
+  const msgCosmos = protoMsgClaimBadge(
     params.creator,
-    params.badgeIds,
-    params.addresses,
+    params.claimId,
+    params.collectionId,
+    params.proof,
   )
-  console.log('COSMOS MSG', msgCosmos)
   const tx = createTransaction(
     msgCosmos,
     memo,

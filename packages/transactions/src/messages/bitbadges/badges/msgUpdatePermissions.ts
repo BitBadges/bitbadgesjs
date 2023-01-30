@@ -18,7 +18,7 @@ import { Chain, Fee, Sender } from '../../common'
 
 export interface MessageMsgUpdatePermissions {
   creator: string
-  badgeId: number
+  collectionId: number
   permissions: number
 }
 
@@ -41,7 +41,7 @@ export function createTxMsgUpdatePermissions(
 
   const msg = createMsgUpdatePermissions(
     params.creator,
-    params.badgeId,
+    params.collectionId,
     params.permissions,
   )
   const messages = generateMessage(
@@ -61,7 +61,7 @@ export function createTxMsgUpdatePermissions(
   // Cosmos
   const msgCosmos = protoMsgUpdatePermissions(
     params.creator,
-    params.badgeId,
+    params.collectionId,
     params.permissions,
   )
   const tx = createTransaction(

@@ -1,33 +1,31 @@
-import { IdRange, ID_RANGE_TYPE } from './typeUtils'
+import { Balance, BALANCE_TYPES, ID_RANGE_TYPES } from './typeUtils'
 
 const MsgSetApprovalValueType = [
   { name: 'creator', type: 'string' },
-  { name: 'amount', type: 'uint64' },
   { name: 'address', type: 'uint64' },
-  { name: 'badgeId', type: 'uint64' },
-  { name: 'subbadgeRanges', type: 'IdRange[]' },
+  { name: 'collectionId', type: 'uint64' },
+  { name: 'balances', type: 'Balance[]' },
 ]
 
 export const MSG_SET_APPROVAL_TYPES = {
-  IdRange: ID_RANGE_TYPE,
+  IdRange: ID_RANGE_TYPES,
+  Balance: BALANCE_TYPES,
   MsgValue: MsgSetApprovalValueType,
 }
 
 export function createMsgSetApproval(
   creator: string,
-  amount: number,
   address: number,
-  badgeId: number,
-  subbadgeRanges: IdRange[],
+  collectionId: number,
+  balances: Balance[],
 ) {
   return {
     type: 'badges/SetApproval',
     value: {
       creator,
-      amount,
       address,
-      badgeId,
-      subbadgeRanges,
+      collectionId,
+      balances,
     },
   }
 }

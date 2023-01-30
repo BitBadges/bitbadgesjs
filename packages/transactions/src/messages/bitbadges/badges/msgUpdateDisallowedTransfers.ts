@@ -1,5 +1,5 @@
 import {
-  createMsgSelfDestructBadge as protoMsgSelfDestructBadge,
+  createMsgUpdateDisallowedTransfers as protoMsgUpdateDisallowedTransfers,
   createTransaction,
 } from 'bitbadgesjs-proto'
 
@@ -8,25 +8,27 @@ import {
   generateFee,
   generateMessage,
   generateTypes,
-  createMsgSelfDestructBadge,
-  MSG_SELF_DESTRUCT_BADGE_TYPES,
+  createMsgUpdateDisallowedTransfers,
+  MSG_UPDATE_DISALLOWED_TRANSFERS_TYPES,
 } from 'bitbadgesjs-eip712'
 
 import { getDefaultDomainWithChainId } from '../../domain'
 
 import { Chain, Fee, Sender } from '../../common'
+import { TransferMapping } from './typeUtils'
 
-export interface MessageMsgSelfDestructBadge {
+export interface MessageMsgUpdateDisallowedTransfers {
   creator: string
-  badgeId: number
+  collectionId: number
+  disallowedTransfers: TransferMapping[]
 }
 
-export function createTxMsgSelfDestructBadge(
+export function createTxMsgUpdateDisallowedTransfers(
   chain: Chain,
   sender: Sender,
   fee: Fee,
   memo: string,
-  params: MessageMsgSelfDestructBadge,
+  params: MessageMsgUpdateDisallowedTransfers,
   domain?: object,
 ) {
   // EIP712
@@ -36,9 +38,13 @@ export function createTxMsgSelfDestructBadge(
     fee.gas,
     sender.accountAddress,
   )
-  const types = generateTypes(MSG_SELF_DESTRUCT_BADGE_TYPES)
+  const types = generateTypes(MSG_UPDATE_DISALLOWED_TRANSFERS_TYPES)
 
-  const msg = createMsgSelfDestructBadge(params.creator, params.badgeId)
+  const msg = createMsgUpdateDisallowedTransfers(
+    params.creator,
+    params.collectionId,
+    params.disallowedTransfers,
+  )
   const messages = generateMessage(
     sender.accountNumber.toString(),
     sender.sequence.toString(),
@@ -54,7 +60,11 @@ export function createTxMsgSelfDestructBadge(
   const eipToSign = createEIP712(types, messages, domainObj)
 
   // Cosmos
-  const msgCosmos = protoMsgSelfDestructBadge(params.creator, params.badgeId)
+  const msgCosmos = protoMsgUpdateDisallowedTransfers(
+    params.creator,
+    params.collectionId,
+    params.disallowedTransfers,
+  )
   const tx = createTransaction(
     msgCosmos,
     memo,

@@ -7,6 +7,11 @@
  * git: https://github.com/thesayyn/protoc-gen-ts */
 import * as pb_1 from "google-protobuf";
 export namespace bitbadges.bitbadgeschain.badges {
+    export enum AddressOptions {
+        None = 0,
+        IncludeManager = 1,
+        ExcludeManager = 2
+    }
     export class IdRange extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
@@ -97,58 +102,58 @@ export namespace bitbadges.bitbadgeschain.badges {
             return IdRange.deserialize(bytes);
         }
     }
-    export class BalanceObject extends pb_1.Message {
+    export class Addresses extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
-            balance?: number;
-            idRanges?: IdRange[];
+            accountNums?: IdRange[];
+            options?: number;
         }) {
             super();
-            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [2], this.#one_of_decls);
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1], this.#one_of_decls);
             if (!Array.isArray(data) && typeof data == "object") {
-                if ("balance" in data && data.balance != undefined) {
-                    this.balance = data.balance;
+                if ("accountNums" in data && data.accountNums != undefined) {
+                    this.accountNums = data.accountNums;
                 }
-                if ("idRanges" in data && data.idRanges != undefined) {
-                    this.idRanges = data.idRanges;
+                if ("options" in data && data.options != undefined) {
+                    this.options = data.options;
                 }
             }
         }
-        get balance() {
-            return pb_1.Message.getFieldWithDefault(this, 1, 0) as number;
+        get accountNums() {
+            return pb_1.Message.getRepeatedWrapperField(this, IdRange, 1) as IdRange[];
         }
-        set balance(value: number) {
-            pb_1.Message.setField(this, 1, value);
+        set accountNums(value: IdRange[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 1, value);
         }
-        get idRanges() {
-            return pb_1.Message.getRepeatedWrapperField(this, IdRange, 2) as IdRange[];
+        get options() {
+            return pb_1.Message.getFieldWithDefault(this, 2, 0) as number;
         }
-        set idRanges(value: IdRange[]) {
-            pb_1.Message.setRepeatedWrapperField(this, 2, value);
+        set options(value: number) {
+            pb_1.Message.setField(this, 2, value);
         }
         static fromObject(data: {
-            balance?: number;
-            idRanges?: ReturnType<typeof IdRange.prototype.toObject>[];
-        }): BalanceObject {
-            const message = new BalanceObject({});
-            if (data.balance != null) {
-                message.balance = data.balance;
+            accountNums?: ReturnType<typeof IdRange.prototype.toObject>[];
+            options?: number;
+        }): Addresses {
+            const message = new Addresses({});
+            if (data.accountNums != null) {
+                message.accountNums = data.accountNums.map(item => IdRange.fromObject(item));
             }
-            if (data.idRanges != null) {
-                message.idRanges = data.idRanges.map(item => IdRange.fromObject(item));
+            if (data.options != null) {
+                message.options = data.options;
             }
             return message;
         }
         toObject() {
             const data: {
-                balance?: number;
-                idRanges?: ReturnType<typeof IdRange.prototype.toObject>[];
+                accountNums?: ReturnType<typeof IdRange.prototype.toObject>[];
+                options?: number;
             } = {};
-            if (this.balance != null) {
-                data.balance = this.balance;
+            if (this.accountNums != null) {
+                data.accountNums = this.accountNums.map((item: IdRange) => item.toObject());
             }
-            if (this.idRanges != null) {
-                data.idRanges = this.idRanges.map((item: IdRange) => item.toObject());
+            if (this.options != null) {
+                data.options = this.options;
             }
             return data;
         }
@@ -156,24 +161,24 @@ export namespace bitbadges.bitbadgeschain.badges {
         serialize(w: pb_1.BinaryWriter): void;
         serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
             const writer = w || new pb_1.BinaryWriter();
-            if (this.balance != 0)
-                writer.writeUint64(1, this.balance);
-            if (this.idRanges.length)
-                writer.writeRepeatedMessage(2, this.idRanges, (item: IdRange) => item.serialize(writer));
+            if (this.accountNums.length)
+                writer.writeRepeatedMessage(1, this.accountNums, (item: IdRange) => item.serialize(writer));
+            if (this.options != 0)
+                writer.writeUint64(2, this.options);
             if (!w)
                 return writer.getResultBuffer();
         }
-        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): BalanceObject {
-            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new BalanceObject();
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): Addresses {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new Addresses();
             while (reader.nextField()) {
                 if (reader.isEndGroup())
                     break;
                 switch (reader.getFieldNumber()) {
                     case 1:
-                        message.balance = reader.readUint64();
+                        reader.readMessage(message.accountNums, () => pb_1.Message.addToRepeatedWrapperField(message, 1, IdRange.deserialize(reader), IdRange));
                         break;
                     case 2:
-                        reader.readMessage(message.idRanges, () => pb_1.Message.addToRepeatedWrapperField(message, 2, IdRange.deserialize(reader), IdRange));
+                        message.options = reader.readUint64();
                         break;
                     default: reader.skipField();
                 }
@@ -183,8 +188,104 @@ export namespace bitbadges.bitbadgeschain.badges {
         serializeBinary(): Uint8Array {
             return this.serialize();
         }
-        static deserializeBinary(bytes: Uint8Array): BalanceObject {
-            return BalanceObject.deserialize(bytes);
+        static deserializeBinary(bytes: Uint8Array): Addresses {
+            return Addresses.deserialize(bytes);
+        }
+    }
+    export class TransferMapping extends pb_1.Message {
+        #one_of_decls: number[][] = [];
+        constructor(data?: any[] | {
+            from?: Addresses;
+            to?: Addresses;
+        }) {
+            super();
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("from" in data && data.from != undefined) {
+                    this.from = data.from;
+                }
+                if ("to" in data && data.to != undefined) {
+                    this.to = data.to;
+                }
+            }
+        }
+        get from() {
+            return pb_1.Message.getWrapperField(this, Addresses, 1) as Addresses;
+        }
+        set from(value: Addresses) {
+            pb_1.Message.setWrapperField(this, 1, value);
+        }
+        get has_from() {
+            return pb_1.Message.getField(this, 1) != null;
+        }
+        get to() {
+            return pb_1.Message.getWrapperField(this, Addresses, 2) as Addresses;
+        }
+        set to(value: Addresses) {
+            pb_1.Message.setWrapperField(this, 2, value);
+        }
+        get has_to() {
+            return pb_1.Message.getField(this, 2) != null;
+        }
+        static fromObject(data: {
+            from?: ReturnType<typeof Addresses.prototype.toObject>;
+            to?: ReturnType<typeof Addresses.prototype.toObject>;
+        }): TransferMapping {
+            const message = new TransferMapping({});
+            if (data.from != null) {
+                message.from = Addresses.fromObject(data.from);
+            }
+            if (data.to != null) {
+                message.to = Addresses.fromObject(data.to);
+            }
+            return message;
+        }
+        toObject() {
+            const data: {
+                from?: ReturnType<typeof Addresses.prototype.toObject>;
+                to?: ReturnType<typeof Addresses.prototype.toObject>;
+            } = {};
+            if (this.from != null) {
+                data.from = this.from.toObject();
+            }
+            if (this.to != null) {
+                data.to = this.to.toObject();
+            }
+            return data;
+        }
+        serialize(): Uint8Array;
+        serialize(w: pb_1.BinaryWriter): void;
+        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+            const writer = w || new pb_1.BinaryWriter();
+            if (this.has_from)
+                writer.writeMessage(1, this.from, () => this.from.serialize(writer));
+            if (this.has_to)
+                writer.writeMessage(2, this.to, () => this.to.serialize(writer));
+            if (!w)
+                return writer.getResultBuffer();
+        }
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): TransferMapping {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new TransferMapping();
+            while (reader.nextField()) {
+                if (reader.isEndGroup())
+                    break;
+                switch (reader.getFieldNumber()) {
+                    case 1:
+                        reader.readMessage(message.from, () => message.from = Addresses.deserialize(reader));
+                        break;
+                    case 2:
+                        reader.readMessage(message.to, () => message.to = Addresses.deserialize(reader));
+                        break;
+                    default: reader.skipField();
+                }
+            }
+            return message;
+        }
+        serializeBinary(): Uint8Array {
+            return this.serialize();
+        }
+        static deserializeBinary(bytes: Uint8Array): TransferMapping {
+            return TransferMapping.deserialize(bytes);
         }
     }
 }

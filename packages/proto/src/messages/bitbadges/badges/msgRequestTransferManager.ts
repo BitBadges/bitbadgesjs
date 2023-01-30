@@ -2,14 +2,14 @@ import * as tx from '../../../proto/badges/tx'
 
 export function createMsgRequestTransferManager(
   creator: string,
-  badgeId: number,
-  add: boolean,
+  collectionId: number,
+  addRequest: boolean,
 ) {
   const message =
     new tx.bitbadges.bitbadgeschain.badges.MsgRequestTransferManager({
       creator,
-      badgeId,
-      add,
+      collectionId,
+      addRequest,
     })
 
   return {

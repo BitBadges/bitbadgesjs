@@ -18,8 +18,8 @@ import { Chain, Fee, Sender } from '../../common'
 
 export interface MessageMsgRequestTransferManager {
   creator: string
-  badgeId: number
-  add: boolean
+  collectionId: number
+  addRequest: boolean
 }
 
 export function createTxMsgRequestTransferManager(
@@ -41,8 +41,8 @@ export function createTxMsgRequestTransferManager(
 
   const msg = createMsgRequestTransferManager(
     params.creator,
-    params.badgeId,
-    params.add,
+    params.collectionId,
+    params.addRequest,
   )
   const messages = generateMessage(
     sender.accountNumber.toString(),
@@ -61,8 +61,8 @@ export function createTxMsgRequestTransferManager(
   // Cosmos
   const msgCosmos = protoMsgRequestTransferManager(
     params.creator,
-    params.badgeId,
-    params.add,
+    params.collectionId,
+    params.addRequest,
   )
   const tx = createTransaction(
     msgCosmos,

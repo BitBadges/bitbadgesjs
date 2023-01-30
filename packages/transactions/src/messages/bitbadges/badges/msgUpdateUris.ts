@@ -15,12 +15,12 @@ import {
 import { getDefaultDomainWithChainId } from '../../domain'
 
 import { Chain, Fee, Sender } from '../../common'
-import { UriObject } from './typeUtils'
 
 export interface MessageMsgUpdateUris {
   creator: string
-  badgeId: number
-  uri: UriObject
+  collectionId: number
+  collectionUri: string
+  badgeUri: string
 }
 
 export function createTxMsgUpdateUris(
@@ -40,7 +40,12 @@ export function createTxMsgUpdateUris(
   )
   const types = generateTypes(MSG_UPDATE_URIS_TYPES)
 
-  const msg = createMsgUpdateUris(params.creator, params.badgeId, params.uri)
+  const msg = createMsgUpdateUris(
+    params.creator,
+    params.collectionId,
+    params.collectionUri,
+    params.badgeUri,
+  )
   const messages = generateMessage(
     sender.accountNumber.toString(),
     sender.sequence.toString(),
@@ -58,8 +63,9 @@ export function createTxMsgUpdateUris(
   // Cosmos
   const msgCosmos = protoMsgUpdateUris(
     params.creator,
-    params.badgeId,
-    params.uri,
+    params.collectionId,
+    params.collectionUri,
+    params.badgeUri,
   )
   const tx = createTransaction(
     msgCosmos,

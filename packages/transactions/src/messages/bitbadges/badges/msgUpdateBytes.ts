@@ -18,7 +18,7 @@ import { Chain, Fee, Sender } from '../../common'
 
 export interface MessageMsgUpdateBytes {
   creator: string
-  badgeId: number
+  collectionId: number
   newBytes: string
 }
 
@@ -41,7 +41,7 @@ export function createTxMsgUpdateBytes(
 
   const msg = createMsgUpdateBytes(
     params.creator,
-    params.badgeId,
+    params.collectionId,
     params.newBytes,
   )
   const messages = generateMessage(
@@ -61,7 +61,7 @@ export function createTxMsgUpdateBytes(
   // Cosmos
   const msgCosmos = protoMsgUpdateBytes(
     params.creator,
-    params.badgeId,
+    params.collectionId,
     params.newBytes,
   )
   const tx = createTransaction(
