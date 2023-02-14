@@ -39,13 +39,13 @@ export interface Claims {
   timeRange: IdRange
 }
 
-interface ProofItem {
+interface ClaimProofItem {
   aunt: string
   onRight: boolean
 }
 
-export interface Proof {
-  aunts: ProofItem[]
+export interface ClaimProof {
+  aunts: ClaimProofItem[]
   leaf: string
 }
 
@@ -90,12 +90,12 @@ export const CLAIMS_TYPES = [
   { name: 'timeRange', type: 'IdRange' },
 ]
 
-export const PROOF_TYPES = [
-  { name: 'aunts', type: 'ProofItem[]' },
+export const CLAIM_PROOF_TYPES = [
+  { name: 'aunts', type: 'ClaimProofItem[]' },
   { name: 'leaf', type: 'string' },
 ]
 
-export const PROOF_ITEM_TYPES = [
+export const CLAIM_PROOF_ITEM_TYPES = [
   { name: 'aunt', type: 'string' },
   { name: 'onRight', type: 'bool' },
 ]

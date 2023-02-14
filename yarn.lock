@@ -3449,15 +3449,15 @@ binary-extensions@^2.0.0:
     link-module-alias "^1.2.0"
     shx "^0.3.4"
 
-bitbadgesjs-eip712@^0.0.49, "bitbadgesjs-eip712@file:/home/trevormil/cosmos/bitbadgesjs/packages/eip712":
-  version "0.0.49"
+bitbadgesjs-eip712@^0.0.51, "bitbadgesjs-eip712@file:/home/trevormil/cosmos/bitbadgesjs/packages/eip712":
+  version "0.0.51"
   resolved "file:packages/eip712"
   dependencies:
     link-module-alias "^1.2.0"
     shx "^0.3.4"
 
-bitbadgesjs-proto@^0.0.47, "bitbadgesjs-proto@file:/home/trevormil/cosmos/bitbadgesjs/packages/proto":
-  version "0.0.47"
+bitbadgesjs-proto@^0.0.48, "bitbadgesjs-proto@file:/home/trevormil/cosmos/bitbadgesjs/packages/proto":
+  version "0.0.52"
   resolved "file:packages/proto"
   dependencies:
     "@types/google-protobuf" "^3.15.5"
@@ -3477,12 +3477,12 @@ bitbadgesjs-proto@^0.0.47, "bitbadgesjs-proto@file:/home/trevormil/cosmos/bitbad
     shx "^0.3.4"
 
 "bitbadgesjs-transactions@file:/home/trevormil/cosmos/bitbadgesjs/packages/transactions":
-  version "0.0.62"
+  version "0.0.64"
   resolved "file:packages/transactions"
   dependencies:
     "@types/node" "^17.0.21"
-    bitbadgesjs-eip712 "^0.0.49"
-    bitbadgesjs-proto "^0.0.47"
+    bitbadgesjs-eip712 "^0.0.51"
+    bitbadgesjs-proto "^0.0.48"
     link-module-alias "^1.2.0"
     shx "^0.3.4"
 

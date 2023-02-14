@@ -1,11 +1,11 @@
 import * as badges from '../../../proto/badges/tx'
-import { getWrappedProof, Proof } from './typeUtils'
+import { getWrappedProof, ClaimProof } from './typeUtils'
 
 export function createMsgClaimBadge(
   creator: string,
   claimId: number,
   collectionId: number,
-  proof: Proof,
+  proof: ClaimProof,
 ) {
   const message = new badges.bitbadges.bitbadgeschain.badges.MsgClaimBadge({
     creator,

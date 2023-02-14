@@ -44,13 +44,13 @@ export interface Claims {
   timeRange: IdRange
 }
 
-interface ProofItem {
+interface ClaimProofItem {
   aunt: string
   onRight: boolean
 }
 
-export interface Proof {
-  aunts: ProofItem[]
+export interface ClaimProof {
+  aunts: ClaimProofItem[]
   leaf: string
 }
 
@@ -82,19 +82,19 @@ export function getWrappedBalances(balanceArr: Balance[]) {
   return formattedBalances
 }
 
-export function getWrappedProof(proof: Proof) {
-  const wrappedAunts: tx.bitbadges.bitbadgeschain.badges.ProofItem[] = []
+export function getWrappedProof(proof: ClaimProof) {
+  const wrappedAunts: tx.bitbadges.bitbadgeschain.badges.ClaimProofItem[] = []
   for (const aunt of proof.aunts) {
     wrappedAunts.push(
-      new tx.bitbadges.bitbadgeschain.badges.ProofItem({
+      new tx.bitbadges.bitbadgeschain.badges.ClaimProofItem({
         aunt: aunt.aunt,
         onRight: aunt.onRight,
       }),
     )
   }
 
-  const wrappedProof: tx.bitbadges.bitbadgeschain.badges.Proof =
-    new tx.bitbadges.bitbadgeschain.badges.Proof({
+  const wrappedProof: tx.bitbadges.bitbadgeschain.badges.ClaimProof =
+    new tx.bitbadges.bitbadgeschain.badges.ClaimProof({
       aunts: wrappedAunts,
       leaf: proof.leaf,
     })

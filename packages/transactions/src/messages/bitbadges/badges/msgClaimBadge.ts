@@ -15,13 +15,13 @@ import {
 import { getDefaultDomainWithChainId } from '../../domain'
 
 import { Chain, Fee, Sender } from '../../common'
-import { Proof } from './typeUtils'
+import { ClaimProof } from './typeUtils'
 
 export interface MessageMsgClaimBadge {
   creator: string
   collectionId: number
   claimId: number
-  proof: Proof
+  proof: ClaimProof
 }
 
 export function createTxMsgClaimBadge(

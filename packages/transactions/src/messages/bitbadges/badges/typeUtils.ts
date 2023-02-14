@@ -39,12 +39,12 @@ export interface Claims {
   timeRange: IdRange
 }
 
-interface ProofItem {
+interface ClaimProofItem {
   aunt: string
   onRight: boolean
 }
 
-export interface Proof {
-  aunts: ProofItem[]
+export interface ClaimProof {
+  aunts: ClaimProofItem[]
   leaf: string
 }

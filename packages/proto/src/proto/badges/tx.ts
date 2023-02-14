@@ -2233,7 +2233,7 @@ export namespace bitbadges.bitbadgeschain.badges {
             return MsgRegisterAddressesResponse.deserialize(bytes);
         }
     }
-    export class ProofItem extends pb_1.Message {
+    export class ClaimProofItem extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
             aunt?: string;
@@ -2265,8 +2265,8 @@ export namespace bitbadges.bitbadgeschain.badges {
         static fromObject(data: {
             aunt?: string;
             onRight?: boolean;
-        }): ProofItem {
-            const message = new ProofItem({});
+        }): ClaimProofItem {
+            const message = new ClaimProofItem({});
             if (data.aunt != null) {
                 message.aunt = data.aunt;
             }
@@ -2299,8 +2299,8 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (!w)
                 return writer.getResultBuffer();
         }
-        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): ProofItem {
-            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new ProofItem();
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): ClaimProofItem {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new ClaimProofItem();
             while (reader.nextField()) {
                 if (reader.isEndGroup())
                     break;
@@ -2319,25 +2319,21 @@ export namespace bitbadges.bitbadgeschain.badges {
         serializeBinary(): Uint8Array {
             return this.serialize();
         }
-        static deserializeBinary(bytes: Uint8Array): ProofItem {
-            return ProofItem.deserialize(bytes);
+        static deserializeBinary(bytes: Uint8Array): ClaimProofItem {
+            return ClaimProofItem.deserialize(bytes);
         }
     }
-    export class Proof extends pb_1.Message {
+    export class ClaimProof extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
             leaf?: string;
-            isLeafHashed?: boolean;
-            aunts?: ProofItem[];
+            aunts?: ClaimProofItem[];
         }) {
             super();
-            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [3], this.#one_of_decls);
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [2], this.#one_of_decls);
             if (!Array.isArray(data) && typeof data == "object") {
                 if ("leaf" in data && data.leaf != undefined) {
                     this.leaf = data.leaf;
-                }
-                if ("isLeafHashed" in data && data.isLeafHashed != undefined) {
-                    this.isLeafHashed = data.isLeafHashed;
                 }
                 if ("aunts" in data && data.aunts != undefined) {
                     this.aunts = data.aunts;
@@ -2350,49 +2346,35 @@ export namespace bitbadges.bitbadgeschain.badges {
         set leaf(value: string) {
             pb_1.Message.setField(this, 1, value);
         }
-        get isLeafHashed() {
-            return pb_1.Message.getFieldWithDefault(this, 2, false) as boolean;
-        }
-        set isLeafHashed(value: boolean) {
-            pb_1.Message.setField(this, 2, value);
-        }
         get aunts() {
-            return pb_1.Message.getRepeatedWrapperField(this, ProofItem, 3) as ProofItem[];
+            return pb_1.Message.getRepeatedWrapperField(this, ClaimProofItem, 2) as ClaimProofItem[];
         }
-        set aunts(value: ProofItem[]) {
-            pb_1.Message.setRepeatedWrapperField(this, 3, value);
+        set aunts(value: ClaimProofItem[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 2, value);
         }
         static fromObject(data: {
             leaf?: string;
-            isLeafHashed?: boolean;
-            aunts?: ReturnType<typeof ProofItem.prototype.toObject>[];
-        }): Proof {
-            const message = new Proof({});
+            aunts?: ReturnType<typeof ClaimProofItem.prototype.toObject>[];
+        }): ClaimProof {
+            const message = new ClaimProof({});
             if (data.leaf != null) {
                 message.leaf = data.leaf;
             }
-            if (data.isLeafHashed != null) {
-                message.isLeafHashed = data.isLeafHashed;
-            }
             if (data.aunts != null) {
-                message.aunts = data.aunts.map(item => ProofItem.fromObject(item));
+                message.aunts = data.aunts.map(item => ClaimProofItem.fromObject(item));
             }
             return message;
         }
         toObject() {
             const data: {
                 leaf?: string;
-                isLeafHashed?: boolean;
-                aunts?: ReturnType<typeof ProofItem.prototype.toObject>[];
+                aunts?: ReturnType<typeof ClaimProofItem.prototype.toObject>[];
             } = {};
             if (this.leaf != null) {
                 data.leaf = this.leaf;
             }
-            if (this.isLeafHashed != null) {
-                data.isLeafHashed = this.isLeafHashed;
-            }
             if (this.aunts != null) {
-                data.aunts = this.aunts.map((item: ProofItem) => item.toObject());
+                data.aunts = this.aunts.map((item: ClaimProofItem) => item.toObject());
             }
             return data;
         }
@@ -2402,15 +2384,13 @@ export namespace bitbadges.bitbadgeschain.badges {
             const writer = w || new pb_1.BinaryWriter();
             if (this.leaf.length)
                 writer.writeString(1, this.leaf);
-            if (this.isLeafHashed != false)
-                writer.writeBool(2, this.isLeafHashed);
             if (this.aunts.length)
-                writer.writeRepeatedMessage(3, this.aunts, (item: ProofItem) => item.serialize(writer));
+                writer.writeRepeatedMessage(2, this.aunts, (item: ClaimProofItem) => item.serialize(writer));
             if (!w)
                 return writer.getResultBuffer();
         }
-        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): Proof {
-            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new Proof();
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): ClaimProof {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new ClaimProof();
             while (reader.nextField()) {
                 if (reader.isEndGroup())
                     break;
@@ -2419,10 +2399,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                         message.leaf = reader.readString();
                         break;
                     case 2:
-                        message.isLeafHashed = reader.readBool();
-                        break;
-                    case 3:
-                        reader.readMessage(message.aunts, () => pb_1.Message.addToRepeatedWrapperField(message, 3, ProofItem.deserialize(reader), ProofItem));
+                        reader.readMessage(message.aunts, () => pb_1.Message.addToRepeatedWrapperField(message, 2, ClaimProofItem.deserialize(reader), ClaimProofItem));
                         break;
                     default: reader.skipField();
                 }
@@ -2432,8 +2409,8 @@ export namespace bitbadges.bitbadgeschain.badges {
         serializeBinary(): Uint8Array {
             return this.serialize();
         }
-        static deserializeBinary(bytes: Uint8Array): Proof {
-            return Proof.deserialize(bytes);
+        static deserializeBinary(bytes: Uint8Array): ClaimProof {
+            return ClaimProof.deserialize(bytes);
         }
     }
     export class MsgClaimBadge extends pb_1.Message {
@@ -2442,7 +2419,7 @@ export namespace bitbadges.bitbadgeschain.badges {
             creator?: string;
             claimId?: number;
             collectionId?: number;
-            proof?: Proof;
+            proof?: ClaimProof;
         }) {
             super();
             pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
@@ -2480,9 +2457,9 @@ export namespace bitbadges.bitbadgeschain.badges {
             pb_1.Message.setField(this, 3, value);
         }
         get proof() {
-            return pb_1.Message.getWrapperField(this, Proof, 4) as Proof;
+            return pb_1.Message.getWrapperField(this, ClaimProof, 4) as ClaimProof;
         }
-        set proof(value: Proof) {
+        set proof(value: ClaimProof) {
             pb_1.Message.setWrapperField(this, 4, value);
         }
         get has_proof() {
@@ -2492,7 +2469,7 @@ export namespace bitbadges.bitbadgeschain.badges {
             creator?: string;
             claimId?: number;
             collectionId?: number;
-            proof?: ReturnType<typeof Proof.prototype.toObject>;
+            proof?: ReturnType<typeof ClaimProof.prototype.toObject>;
         }): MsgClaimBadge {
             const message = new MsgClaimBadge({});
             if (data.creator != null) {
@@ -2505,7 +2482,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                 message.collectionId = data.collectionId;
             }
             if (data.proof != null) {
-                message.proof = Proof.fromObject(data.proof);
+                message.proof = ClaimProof.fromObject(data.proof);
             }
             return message;
         }
@@ -2514,7 +2491,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                 creator?: string;
                 claimId?: number;
                 collectionId?: number;
-                proof?: ReturnType<typeof Proof.prototype.toObject>;
+                proof?: ReturnType<typeof ClaimProof.prototype.toObject>;
             } = {};
             if (this.creator != null) {
                 data.creator = this.creator;
@@ -2561,7 +2538,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                         message.collectionId = reader.readUint64();
                         break;
                     case 4:
-                        reader.readMessage(message.proof, () => message.proof = Proof.deserialize(reader));
+                        reader.readMessage(message.proof, () => message.proof = ClaimProof.deserialize(reader));
                         break;
                     default: reader.skipField();
                 }
