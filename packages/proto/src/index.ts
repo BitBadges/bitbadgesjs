@@ -16,6 +16,7 @@ export * from './messages/bitbadges/badges/msgRequestTransferManager'
 export * from './messages/bitbadges/badges/msgNewCollection'
 export * from './messages/bitbadges/badges/msgSetApproval'
 export * from './messages/bitbadges/badges/msgUpdateDisallowedTransfers'
+export * from './messages/bitbadges/badges/msgDeleteCollection'
 
 export * from './messages/bitbadges/badges/msgClaimBadge'
 export * from './messages/cosmos-sdk/ibcMsgTransfer'

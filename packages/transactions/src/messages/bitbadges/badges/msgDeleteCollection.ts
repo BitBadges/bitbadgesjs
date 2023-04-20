@@ -1,35 +1,32 @@
 import {
-    createMsgUpdateUris as protoMsgUpdateUris,
     createTransaction,
+    createMsgDeleteCollection as protoMsgDeleteCollection,
 } from 'bitbadgesjs-proto'
 
 import {
+    MSG_DELETE_COLLECTION_TYPES,
     createEIP712,
+    createMsgDeleteCollection,
     generateFee,
     generateMessage,
     generateTypes,
-    createMsgUpdateUris,
-    MSG_UPDATE_URIS_TYPES,
 } from 'bitbadgesjs-eip712'
 
 import { getDefaultDomainWithChainId } from '../../domain'
 
 import { Chain, Fee, Sender } from '../../common'
-import { BadgeUri } from './typeUtils'
 
-export interface MessageMsgUpdateUris {
+export interface MessageMsgDeleteCollection {
     creator: string
     collectionId: number
-    collectionUri: string
-    badgeUris: BadgeUri[]
 }
 
-export function createTxMsgUpdateUris(
+export function createTxMsgDeleteCollection(
     chain: Chain,
     sender: Sender,
     fee: Fee,
     memo: string,
-    params: MessageMsgUpdateUris,
+    params: MessageMsgDeleteCollection,
     domain?: object,
 ) {
     // EIP712
@@ -39,13 +36,11 @@ export function createTxMsgUpdateUris(
         fee.gas,
         sender.accountAddress,
     )
-    const types = generateTypes(MSG_UPDATE_URIS_TYPES)
+    const types = generateTypes(MSG_DELETE_COLLECTION_TYPES)
 
-    const msg = createMsgUpdateUris(
+    const msg = createMsgDeleteCollection(
         params.creator,
         params.collectionId,
-        params.collectionUri,
-        params.badgeUris,
     )
     const messages = generateMessage(
         sender.accountNumber.toString(),
@@ -62,11 +57,9 @@ export function createTxMsgUpdateUris(
     const eipToSign = createEIP712(types, messages, domainObj)
 
     // Cosmos
-    const msgCosmos = protoMsgUpdateUris(
+    const msgCosmos = protoMsgDeleteCollection(
         params.creator,
         params.collectionId,
-        params.collectionUri,
-        params.badgeUris,
     )
     const tx = createTransaction(
         msgCosmos,

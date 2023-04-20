@@ -17,40 +17,48 @@ export namespace bitbadges.bitbadgeschain.badges {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
             balances?: dependency_1.bitbadges.bitbadgeschain.badges.Balance[];
-            type?: number;
-            data?: string;
-            amountPerClaim?: number;
-            badgeIds?: dependency_2.bitbadges.bitbadgeschain.badges.IdRange[];
+            codeRoot?: string;
+            whitelistRoot?: string;
             incrementIdsBy?: number;
+            amount?: number;
+            badgeIds?: dependency_2.bitbadges.bitbadgeschain.badges.IdRange[];
+            restrictOptions?: number;
             uri?: string;
             timeRange?: dependency_2.bitbadges.bitbadgeschain.badges.IdRange;
+            expectedMerkleProofLength?: number;
         }) {
             super();
-            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1, 5], this.#one_of_decls);
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1, 6], this.#one_of_decls);
             if (!Array.isArray(data) && typeof data == "object") {
                 if ("balances" in data && data.balances != undefined) {
                     this.balances = data.balances;
                 }
-                if ("type" in data && data.type != undefined) {
-                    this.type = data.type;
+                if ("codeRoot" in data && data.codeRoot != undefined) {
+                    this.codeRoot = data.codeRoot;
                 }
-                if ("data" in data && data.data != undefined) {
-                    this.data = data.data;
+                if ("whitelistRoot" in data && data.whitelistRoot != undefined) {
+                    this.whitelistRoot = data.whitelistRoot;
                 }
-                if ("amountPerClaim" in data && data.amountPerClaim != undefined) {
-                    this.amountPerClaim = data.amountPerClaim;
+                if ("incrementIdsBy" in data && data.incrementIdsBy != undefined) {
+                    this.incrementIdsBy = data.incrementIdsBy;
+                }
+                if ("amount" in data && data.amount != undefined) {
+                    this.amount = data.amount;
                 }
                 if ("badgeIds" in data && data.badgeIds != undefined) {
                     this.badgeIds = data.badgeIds;
                 }
-                if ("incrementIdsBy" in data && data.incrementIdsBy != undefined) {
-                    this.incrementIdsBy = data.incrementIdsBy;
+                if ("restrictOptions" in data && data.restrictOptions != undefined) {
+                    this.restrictOptions = data.restrictOptions;
                 }
                 if ("uri" in data && data.uri != undefined) {
                     this.uri = data.uri;
                 }
                 if ("timeRange" in data && data.timeRange != undefined) {
                     this.timeRange = data.timeRange;
+                }
+                if ("expectedMerkleProofLength" in data && data.expectedMerkleProofLength != undefined) {
+                    this.expectedMerkleProofLength = data.expectedMerkleProofLength;
                 }
             }
         }
@@ -60,79 +68,96 @@ export namespace bitbadges.bitbadgeschain.badges {
         set balances(value: dependency_1.bitbadges.bitbadgeschain.badges.Balance[]) {
             pb_1.Message.setRepeatedWrapperField(this, 1, value);
         }
-        get type() {
-            return pb_1.Message.getFieldWithDefault(this, 2, 0) as number;
+        get codeRoot() {
+            return pb_1.Message.getFieldWithDefault(this, 2, "") as string;
         }
-        set type(value: number) {
+        set codeRoot(value: string) {
             pb_1.Message.setField(this, 2, value);
         }
-        get data() {
+        get whitelistRoot() {
             return pb_1.Message.getFieldWithDefault(this, 3, "") as string;
         }
-        set data(value: string) {
+        set whitelistRoot(value: string) {
             pb_1.Message.setField(this, 3, value);
         }
-        get amountPerClaim() {
+        get incrementIdsBy() {
             return pb_1.Message.getFieldWithDefault(this, 4, 0) as number;
         }
-        set amountPerClaim(value: number) {
+        set incrementIdsBy(value: number) {
             pb_1.Message.setField(this, 4, value);
         }
+        get amount() {
+            return pb_1.Message.getFieldWithDefault(this, 5, 0) as number;
+        }
+        set amount(value: number) {
+            pb_1.Message.setField(this, 5, value);
+        }
         get badgeIds() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.IdRange, 5) as dependency_2.bitbadges.bitbadgeschain.badges.IdRange[];
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.IdRange, 6) as dependency_2.bitbadges.bitbadgeschain.badges.IdRange[];
         }
         set badgeIds(value: dependency_2.bitbadges.bitbadgeschain.badges.IdRange[]) {
-            pb_1.Message.setRepeatedWrapperField(this, 5, value);
+            pb_1.Message.setRepeatedWrapperField(this, 6, value);
         }
-        get incrementIdsBy() {
-            return pb_1.Message.getFieldWithDefault(this, 6, 0) as number;
+        get restrictOptions() {
+            return pb_1.Message.getFieldWithDefault(this, 7, 0) as number;
         }
-        set incrementIdsBy(value: number) {
-            pb_1.Message.setField(this, 6, value);
-        }
-        get uri() {
-            return pb_1.Message.getFieldWithDefault(this, 7, "") as string;
-        }
-        set uri(value: string) {
+        set restrictOptions(value: number) {
             pb_1.Message.setField(this, 7, value);
         }
+        get uri() {
+            return pb_1.Message.getFieldWithDefault(this, 8, "") as string;
+        }
+        set uri(value: string) {
+            pb_1.Message.setField(this, 8, value);
+        }
         get timeRange() {
-            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.IdRange, 8) as dependency_2.bitbadges.bitbadgeschain.badges.IdRange;
+            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.IdRange, 9) as dependency_2.bitbadges.bitbadgeschain.badges.IdRange;
         }
         set timeRange(value: dependency_2.bitbadges.bitbadgeschain.badges.IdRange) {
-            pb_1.Message.setWrapperField(this, 8, value);
+            pb_1.Message.setWrapperField(this, 9, value);
         }
         get has_timeRange() {
-            return pb_1.Message.getField(this, 8) != null;
+            return pb_1.Message.getField(this, 9) != null;
+        }
+        get expectedMerkleProofLength() {
+            return pb_1.Message.getFieldWithDefault(this, 10, 0) as number;
+        }
+        set expectedMerkleProofLength(value: number) {
+            pb_1.Message.setField(this, 10, value);
         }
         static fromObject(data: {
             balances?: ReturnType<typeof dependency_1.bitbadges.bitbadgeschain.badges.Balance.prototype.toObject>[];
-            type?: number;
-            data?: string;
-            amountPerClaim?: number;
-            badgeIds?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>[];
+            codeRoot?: string;
+            whitelistRoot?: string;
             incrementIdsBy?: number;
+            amount?: number;
+            badgeIds?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>[];
+            restrictOptions?: number;
             uri?: string;
             timeRange?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>;
+            expectedMerkleProofLength?: number;
         }): Claim {
             const message = new Claim({});
             if (data.balances != null) {
                 message.balances = data.balances.map(item => dependency_1.bitbadges.bitbadgeschain.badges.Balance.fromObject(item));
             }
-            if (data.type != null) {
-                message.type = data.type;
+            if (data.codeRoot != null) {
+                message.codeRoot = data.codeRoot;
             }
-            if (data.data != null) {
-                message.data = data.data;
+            if (data.whitelistRoot != null) {
+                message.whitelistRoot = data.whitelistRoot;
             }
-            if (data.amountPerClaim != null) {
-                message.amountPerClaim = data.amountPerClaim;
+            if (data.incrementIdsBy != null) {
+                message.incrementIdsBy = data.incrementIdsBy;
+            }
+            if (data.amount != null) {
+                message.amount = data.amount;
             }
             if (data.badgeIds != null) {
                 message.badgeIds = data.badgeIds.map(item => dependency_2.bitbadges.bitbadgeschain.badges.IdRange.fromObject(item));
             }
-            if (data.incrementIdsBy != null) {
-                message.incrementIdsBy = data.incrementIdsBy;
+            if (data.restrictOptions != null) {
+                message.restrictOptions = data.restrictOptions;
             }
             if (data.uri != null) {
                 message.uri = data.uri;
@@ -140,42 +165,53 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (data.timeRange != null) {
                 message.timeRange = dependency_2.bitbadges.bitbadgeschain.badges.IdRange.fromObject(data.timeRange);
             }
+            if (data.expectedMerkleProofLength != null) {
+                message.expectedMerkleProofLength = data.expectedMerkleProofLength;
+            }
             return message;
         }
         toObject() {
             const data: {
                 balances?: ReturnType<typeof dependency_1.bitbadges.bitbadgeschain.badges.Balance.prototype.toObject>[];
-                type?: number;
-                data?: string;
-                amountPerClaim?: number;
-                badgeIds?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>[];
+                codeRoot?: string;
+                whitelistRoot?: string;
                 incrementIdsBy?: number;
+                amount?: number;
+                badgeIds?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>[];
+                restrictOptions?: number;
                 uri?: string;
                 timeRange?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>;
+                expectedMerkleProofLength?: number;
             } = {};
             if (this.balances != null) {
                 data.balances = this.balances.map((item: dependency_1.bitbadges.bitbadgeschain.badges.Balance) => item.toObject());
             }
-            if (this.type != null) {
-                data.type = this.type;
+            if (this.codeRoot != null) {
+                data.codeRoot = this.codeRoot;
             }
-            if (this.data != null) {
-                data.data = this.data;
+            if (this.whitelistRoot != null) {
+                data.whitelistRoot = this.whitelistRoot;
             }
-            if (this.amountPerClaim != null) {
-                data.amountPerClaim = this.amountPerClaim;
+            if (this.incrementIdsBy != null) {
+                data.incrementIdsBy = this.incrementIdsBy;
+            }
+            if (this.amount != null) {
+                data.amount = this.amount;
             }
             if (this.badgeIds != null) {
                 data.badgeIds = this.badgeIds.map((item: dependency_2.bitbadges.bitbadgeschain.badges.IdRange) => item.toObject());
             }
-            if (this.incrementIdsBy != null) {
-                data.incrementIdsBy = this.incrementIdsBy;
+            if (this.restrictOptions != null) {
+                data.restrictOptions = this.restrictOptions;
             }
             if (this.uri != null) {
                 data.uri = this.uri;
             }
             if (this.timeRange != null) {
                 data.timeRange = this.timeRange.toObject();
+            }
+            if (this.expectedMerkleProofLength != null) {
+                data.expectedMerkleProofLength = this.expectedMerkleProofLength;
             }
             return data;
         }
@@ -185,20 +221,24 @@ export namespace bitbadges.bitbadgeschain.badges {
             const writer = w || new pb_1.BinaryWriter();
             if (this.balances.length)
                 writer.writeRepeatedMessage(1, this.balances, (item: dependency_1.bitbadges.bitbadgeschain.badges.Balance) => item.serialize(writer));
-            if (this.type != 0)
-                writer.writeUint64(2, this.type);
-            if (this.data.length)
-                writer.writeString(3, this.data);
-            if (this.amountPerClaim != 0)
-                writer.writeUint64(4, this.amountPerClaim);
-            if (this.badgeIds.length)
-                writer.writeRepeatedMessage(5, this.badgeIds, (item: dependency_2.bitbadges.bitbadgeschain.badges.IdRange) => item.serialize(writer));
+            if (this.codeRoot.length)
+                writer.writeString(2, this.codeRoot);
+            if (this.whitelistRoot.length)
+                writer.writeString(3, this.whitelistRoot);
             if (this.incrementIdsBy != 0)
-                writer.writeUint64(6, this.incrementIdsBy);
+                writer.writeUint64(4, this.incrementIdsBy);
+            if (this.amount != 0)
+                writer.writeUint64(5, this.amount);
+            if (this.badgeIds.length)
+                writer.writeRepeatedMessage(6, this.badgeIds, (item: dependency_2.bitbadges.bitbadgeschain.badges.IdRange) => item.serialize(writer));
+            if (this.restrictOptions != 0)
+                writer.writeUint64(7, this.restrictOptions);
             if (this.uri.length)
-                writer.writeString(7, this.uri);
+                writer.writeString(8, this.uri);
             if (this.has_timeRange)
-                writer.writeMessage(8, this.timeRange, () => this.timeRange.serialize(writer));
+                writer.writeMessage(9, this.timeRange, () => this.timeRange.serialize(writer));
+            if (this.expectedMerkleProofLength != 0)
+                writer.writeUint64(10, this.expectedMerkleProofLength);
             if (!w)
                 return writer.getResultBuffer();
         }
@@ -212,25 +252,31 @@ export namespace bitbadges.bitbadgeschain.badges {
                         reader.readMessage(message.balances, () => pb_1.Message.addToRepeatedWrapperField(message, 1, dependency_1.bitbadges.bitbadgeschain.badges.Balance.deserialize(reader), dependency_1.bitbadges.bitbadgeschain.badges.Balance));
                         break;
                     case 2:
-                        message.type = reader.readUint64();
+                        message.codeRoot = reader.readString();
                         break;
                     case 3:
-                        message.data = reader.readString();
+                        message.whitelistRoot = reader.readString();
                         break;
                     case 4:
-                        message.amountPerClaim = reader.readUint64();
-                        break;
-                    case 5:
-                        reader.readMessage(message.badgeIds, () => pb_1.Message.addToRepeatedWrapperField(message, 5, dependency_2.bitbadges.bitbadgeschain.badges.IdRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.IdRange));
-                        break;
-                    case 6:
                         message.incrementIdsBy = reader.readUint64();
                         break;
+                    case 5:
+                        message.amount = reader.readUint64();
+                        break;
+                    case 6:
+                        reader.readMessage(message.badgeIds, () => pb_1.Message.addToRepeatedWrapperField(message, 6, dependency_2.bitbadges.bitbadgeschain.badges.IdRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.IdRange));
+                        break;
                     case 7:
-                        message.uri = reader.readString();
+                        message.restrictOptions = reader.readUint64();
                         break;
                     case 8:
+                        message.uri = reader.readString();
+                        break;
+                    case 9:
                         reader.readMessage(message.timeRange, () => message.timeRange = dependency_2.bitbadges.bitbadgeschain.badges.IdRange.deserialize(reader));
+                        break;
+                    case 10:
+                        message.expectedMerkleProofLength = reader.readUint64();
                         break;
                     default: reader.skipField();
                 }

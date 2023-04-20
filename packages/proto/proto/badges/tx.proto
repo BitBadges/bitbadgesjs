@@ -5,6 +5,7 @@ package bitbadges.bitbadgeschain.badges;
 import "badges/ranges.proto";
 import "badges/balances.proto";
 import "badges/claims.proto";
+import "badges/badges.proto";
 
 option go_package = "github.com/bitbadges/bitbadgeschain/x/badges/types";
 
@@ -45,7 +46,7 @@ message MsgNewCollection {
     // See badges.proto for more details about these MsgNewBadge fields. Defines the badge details. Leave unneeded fields empty.
     string creator = 1;
     string collectionUri = 2;
-    string badgeUri = 3;
+    repeated BadgeUri badgeUris = 3;
 
     uint64 permissions = 4;
     string bytes = 5;
@@ -70,6 +71,8 @@ message MsgMintBadge {
     repeated BadgeSupplyAndAmount badgeSupplys = 3;
     repeated Transfers transfers = 4;
     repeated Claim claims = 5;
+    string collectionUri = 6;
+    repeated BadgeUri badgeUris = 7;
 }
 
 message MsgMintBadgeResponse {
@@ -111,7 +114,7 @@ message MsgUpdateUris {
   string creator = 1;
   uint64 collectionId = 2;
   string collectionUri = 3;
-  string badgeUri = 4;
+  repeated BadgeUri badgeUris = 4;
 }
 
 message MsgUpdateUrisResponse {
@@ -173,7 +176,7 @@ message ClaimProofItem {
 
 //Consistent with tendermint/crypto merkle tree
 message ClaimProof {
-    string leaf = 1; //Formatted with CODE-ADDRESS-AMOUNT-STARTID-ENDID-AMOUNT-STARTID-ENDID-...
+    string leaf = 1;
     repeated ClaimProofItem aunts = 2;
 }
 
@@ -181,9 +184,18 @@ message MsgClaimBadge {
     string creator = 1;
     uint64 claimId = 2;
     uint64 collectionId = 3;
-    ClaimProof proof = 4; //Only used for Merkle trees
+    ClaimProof whitelistProof = 4;
+    ClaimProof codeProof = 5;
 }
 
 message MsgClaimBadgeResponse {}
+
+message MsgDeleteCollection {
+    string creator = 1;
+    uint64 collectionId = 2;
+  }
+
+  message MsgDeleteCollectionResponse {
+  }
 
 // this line is used by starport scaffolding # proto/tx/message

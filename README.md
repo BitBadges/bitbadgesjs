@@ -1,8 +1,8 @@
-# evmosjs
+# cosmosjs
 
-[![Total alerts](https://img.shields.io/lgtm/alerts/g/tharsis/evmosjs.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/tharsis/evmosjs/alerts/) [![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/tharsis/evmosjs.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/tharsis/evmosjs/context:javascript)
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/tharsis/cosmosjs.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/tharsis/cosmosjs/alerts/) [![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/tharsis/cosmosjs.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/tharsis/cosmosjs/context:javascript)
 
-JS and TS libs for Evmos
+JS and TS libs for Cosmos
 
 ## Example
 
@@ -12,14 +12,14 @@ Get the account number, sequence and pubkey from an address.
 NOTE: if the address had not sent any transaction to the blockchain, the pubkey value are going to be empty.
 
 ```ts
-import { ethToEvmos } from '@tharsis/address-converter'
-import { generateEndpointAccount } from '@tharsis/provider'
+import { ethToCosmos } from 'bitbadgesjs-address-converter'
+import { generateEndpointAccount } from 'bitbadgesjs-provider'
 
-const sender = 'evmos1...'
+const sender = 'cosmos1...'
 let destination = '0x....'
 // The address must be bech32 encoded
 if (destination.split('0x').length == 2) {
-  destination = ethToEvmos(destination)
+  destination = ethToCosmos(destination)
 }
 
 // Query the node
@@ -36,7 +36,7 @@ let addrRawData = await fetch(
 
 let addrData = await addRawData.json()
 
-// Response format at @tharsis/provider/rest/account/AccountResponse
+// Response format at bitbadgesjs-provider/rest/account/AccountResponse
 /*
   account: {
     '@type': string
@@ -59,15 +59,15 @@ let addrData = await addRawData.json()
 The transaction can be signed using EIP712 on Metamask and SignDirect on Keplr.
 
 ```ts
-import { createMessageSend } from '@tharsis/transactions'
+import { createMessageSend } from 'bitbadgesjs-transactions'
 
 const chain = {
   chainId: 9000,
-  cosmosChainId: 'evmos_9000-1',
+  cosmosChainId: 'bitbadges_1-1',
 }
 
 const sender = {
-  accountAddress: 'ethm1tfegf50n5xl0hd5cxfzjca3ylsfpg0fned5gqm',
+  accountAddress: 'cosmos....',
   sequence: 1,
   accountNumber: 9,
   pubkey: 'AgTw+4v0daIrxsNSW4FcQ+IoingPseFwHO1DnssyoOqZ',
@@ -75,16 +75,16 @@ const sender = {
 
 const fee = {
   amount: '20',
-  denom: 'aevmos',
+  denom: 'badge',
   gas: '200000',
 }
 
 const memo = ''
 
 const params = {
-  destinationAddress: 'evmos1pmk2r32ssqwps42y3c9d4clqlca403yd9wymgr',
+  destinationAddress: 'cosmos1pmk2r32ssqwps42y3c9d4clqlca403yd9wymgr',
   amount: '1',
-  denom: 'aevmos',
+  denom: 'badge',
 }
 
 const msg = createMessageSend(chain, sender, fee, memo, params)
@@ -96,19 +96,19 @@ const msg = createMessageSend(chain, sender, fee, memo, params)
 
 ### Signing with Metamask
 
-After creating the transaction we need to send the payload to metamask so it can be signed. With that signature we are going to add a Web3Extension to the Cosmos Transactions and broadcast it to the Evmos node.
+After creating the transaction we need to send the payload to metamask so it can be signed. With that signature we are going to add a Web3Extension to the Cosmos Transactions and broadcast it to the Cosmos node.
 
 ```ts
 // Follow the previous step to generate the msg object
-import { evmosToEth } from '@tharsis/address-converter'
+import { cosmosToEth } from 'bitbadgesjs-address-converter'
 import {
   generateEndpointBroadcast,
   generatePostBodyBroadcast,
-} from '@tharsis/provider'
+} from 'bitbadgesjs-provider'
 import {
   createTxRawEIP712,
   signatureToWeb3Extension,
-} from '@tharsis/transactions'
+} from 'bitbadgesjs-transactions'
 
 // Init Metamask
 await window.ethereum.enable()
@@ -116,7 +116,7 @@ await window.ethereum.enable()
 // Request the signature
 let signature = await window.ethereum.request({
   method: 'eth_signTypedData_v4',
-  params: [evmosToEth(sender.accountAddress), JSON.stringify(msg.eipToSign)],
+  params: [cosmosToEth(sender.accountAddress), JSON.stringify(msg.eipToSign)],
 })
 
 // The chain and sender objects are the same as the previous example
@@ -147,11 +147,11 @@ let response = await broadcastPost.json()
 
 ```ts
 // Follow the previous step to generate the msg object
-import { createTxRaw } from '@tharsis/proto'
+import { createTxRaw } from 'bitbadgesjs-proto'
 import {
   generateEndpointBroadcast,
   generatePostBodyBroadcast,
-} from '@tharsis/provider'
+} from 'bitbadgesjs-provider'
 
 let sign = await window?.keplr?.signDirect(
   chain.cosmosChainId,

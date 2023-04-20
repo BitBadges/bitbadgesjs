@@ -11,12 +11,102 @@ import * as dependency_3 from "./balances";
 import * as dependency_4 from "./claims";
 import * as pb_1 from "google-protobuf";
 export namespace bitbadges.bitbadgeschain.badges {
+    export class BadgeUri extends pb_1.Message {
+        #one_of_decls: number[][] = [];
+        constructor(data?: any[] | {
+            uri?: string;
+            badgeIds?: dependency_2.bitbadges.bitbadgeschain.badges.IdRange[];
+        }) {
+            super();
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [2], this.#one_of_decls);
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("uri" in data && data.uri != undefined) {
+                    this.uri = data.uri;
+                }
+                if ("badgeIds" in data && data.badgeIds != undefined) {
+                    this.badgeIds = data.badgeIds;
+                }
+            }
+        }
+        get uri() {
+            return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
+        }
+        set uri(value: string) {
+            pb_1.Message.setField(this, 1, value);
+        }
+        get badgeIds() {
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.IdRange, 2) as dependency_2.bitbadges.bitbadgeschain.badges.IdRange[];
+        }
+        set badgeIds(value: dependency_2.bitbadges.bitbadgeschain.badges.IdRange[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 2, value);
+        }
+        static fromObject(data: {
+            uri?: string;
+            badgeIds?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>[];
+        }): BadgeUri {
+            const message = new BadgeUri({});
+            if (data.uri != null) {
+                message.uri = data.uri;
+            }
+            if (data.badgeIds != null) {
+                message.badgeIds = data.badgeIds.map(item => dependency_2.bitbadges.bitbadgeschain.badges.IdRange.fromObject(item));
+            }
+            return message;
+        }
+        toObject() {
+            const data: {
+                uri?: string;
+                badgeIds?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>[];
+            } = {};
+            if (this.uri != null) {
+                data.uri = this.uri;
+            }
+            if (this.badgeIds != null) {
+                data.badgeIds = this.badgeIds.map((item: dependency_2.bitbadges.bitbadgeschain.badges.IdRange) => item.toObject());
+            }
+            return data;
+        }
+        serialize(): Uint8Array;
+        serialize(w: pb_1.BinaryWriter): void;
+        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+            const writer = w || new pb_1.BinaryWriter();
+            if (this.uri.length)
+                writer.writeString(1, this.uri);
+            if (this.badgeIds.length)
+                writer.writeRepeatedMessage(2, this.badgeIds, (item: dependency_2.bitbadges.bitbadgeschain.badges.IdRange) => item.serialize(writer));
+            if (!w)
+                return writer.getResultBuffer();
+        }
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): BadgeUri {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new BadgeUri();
+            while (reader.nextField()) {
+                if (reader.isEndGroup())
+                    break;
+                switch (reader.getFieldNumber()) {
+                    case 1:
+                        message.uri = reader.readString();
+                        break;
+                    case 2:
+                        reader.readMessage(message.badgeIds, () => pb_1.Message.addToRepeatedWrapperField(message, 2, dependency_2.bitbadges.bitbadgeschain.badges.IdRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.IdRange));
+                        break;
+                    default: reader.skipField();
+                }
+            }
+            return message;
+        }
+        serializeBinary(): Uint8Array {
+            return this.serialize();
+        }
+        static deserializeBinary(bytes: Uint8Array): BadgeUri {
+            return BadgeUri.deserialize(bytes);
+        }
+    }
     export class BadgeCollection extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
             collectionId?: number;
             collectionUri?: string;
-            badgeUri?: string;
+            badgeUris?: BadgeUri[];
             bytes?: string;
             manager?: number;
             permissions?: number;
@@ -29,7 +119,7 @@ export namespace bitbadges.bitbadgeschain.badges {
             standard?: number;
         }) {
             super();
-            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [7, 8, 10, 11, 12], this.#one_of_decls);
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [3, 7, 8, 10, 11, 12], this.#one_of_decls);
             if (!Array.isArray(data) && typeof data == "object") {
                 if ("collectionId" in data && data.collectionId != undefined) {
                     this.collectionId = data.collectionId;
@@ -37,8 +127,8 @@ export namespace bitbadges.bitbadgeschain.badges {
                 if ("collectionUri" in data && data.collectionUri != undefined) {
                     this.collectionUri = data.collectionUri;
                 }
-                if ("badgeUri" in data && data.badgeUri != undefined) {
-                    this.badgeUri = data.badgeUri;
+                if ("badgeUris" in data && data.badgeUris != undefined) {
+                    this.badgeUris = data.badgeUris;
                 }
                 if ("bytes" in data && data.bytes != undefined) {
                     this.bytes = data.bytes;
@@ -84,11 +174,11 @@ export namespace bitbadges.bitbadgeschain.badges {
         set collectionUri(value: string) {
             pb_1.Message.setField(this, 2, value);
         }
-        get badgeUri() {
-            return pb_1.Message.getFieldWithDefault(this, 3, "") as string;
+        get badgeUris() {
+            return pb_1.Message.getRepeatedWrapperField(this, BadgeUri, 3) as BadgeUri[];
         }
-        set badgeUri(value: string) {
-            pb_1.Message.setField(this, 3, value);
+        set badgeUris(value: BadgeUri[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 3, value);
         }
         get bytes() {
             return pb_1.Message.getFieldWithDefault(this, 4, "") as string;
@@ -153,7 +243,7 @@ export namespace bitbadges.bitbadgeschain.badges {
         static fromObject(data: {
             collectionId?: number;
             collectionUri?: string;
-            badgeUri?: string;
+            badgeUris?: ReturnType<typeof BadgeUri.prototype.toObject>[];
             bytes?: string;
             manager?: number;
             permissions?: number;
@@ -172,8 +262,8 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (data.collectionUri != null) {
                 message.collectionUri = data.collectionUri;
             }
-            if (data.badgeUri != null) {
-                message.badgeUri = data.badgeUri;
+            if (data.badgeUris != null) {
+                message.badgeUris = data.badgeUris.map(item => BadgeUri.fromObject(item));
             }
             if (data.bytes != null) {
                 message.bytes = data.bytes;
@@ -211,7 +301,7 @@ export namespace bitbadges.bitbadgeschain.badges {
             const data: {
                 collectionId?: number;
                 collectionUri?: string;
-                badgeUri?: string;
+                badgeUris?: ReturnType<typeof BadgeUri.prototype.toObject>[];
                 bytes?: string;
                 manager?: number;
                 permissions?: number;
@@ -229,8 +319,8 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (this.collectionUri != null) {
                 data.collectionUri = this.collectionUri;
             }
-            if (this.badgeUri != null) {
-                data.badgeUri = this.badgeUri;
+            if (this.badgeUris != null) {
+                data.badgeUris = this.badgeUris.map((item: BadgeUri) => item.toObject());
             }
             if (this.bytes != null) {
                 data.bytes = this.bytes;
@@ -272,8 +362,8 @@ export namespace bitbadges.bitbadgeschain.badges {
                 writer.writeUint64(1, this.collectionId);
             if (this.collectionUri.length)
                 writer.writeString(2, this.collectionUri);
-            if (this.badgeUri.length)
-                writer.writeString(3, this.badgeUri);
+            if (this.badgeUris.length)
+                writer.writeRepeatedMessage(3, this.badgeUris, (item: BadgeUri) => item.serialize(writer));
             if (this.bytes.length)
                 writer.writeString(4, this.bytes);
             if (this.manager != 0)
@@ -310,7 +400,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                         message.collectionUri = reader.readString();
                         break;
                     case 3:
-                        message.badgeUri = reader.readString();
+                        reader.readMessage(message.badgeUris, () => pb_1.Message.addToRepeatedWrapperField(message, 3, BadgeUri.deserialize(reader), BadgeUri));
                         break;
                     case 4:
                         message.bytes = reader.readString();

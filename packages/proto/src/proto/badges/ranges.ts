@@ -105,24 +105,24 @@ export namespace bitbadges.bitbadgeschain.badges {
     export class Addresses extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
-            accountNums?: IdRange[];
+            accountIds?: IdRange[];
             options?: number;
         }) {
             super();
             pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1], this.#one_of_decls);
             if (!Array.isArray(data) && typeof data == "object") {
-                if ("accountNums" in data && data.accountNums != undefined) {
-                    this.accountNums = data.accountNums;
+                if ("accountIds" in data && data.accountIds != undefined) {
+                    this.accountIds = data.accountIds;
                 }
                 if ("options" in data && data.options != undefined) {
                     this.options = data.options;
                 }
             }
         }
-        get accountNums() {
+        get accountIds() {
             return pb_1.Message.getRepeatedWrapperField(this, IdRange, 1) as IdRange[];
         }
-        set accountNums(value: IdRange[]) {
+        set accountIds(value: IdRange[]) {
             pb_1.Message.setRepeatedWrapperField(this, 1, value);
         }
         get options() {
@@ -132,12 +132,12 @@ export namespace bitbadges.bitbadgeschain.badges {
             pb_1.Message.setField(this, 2, value);
         }
         static fromObject(data: {
-            accountNums?: ReturnType<typeof IdRange.prototype.toObject>[];
+            accountIds?: ReturnType<typeof IdRange.prototype.toObject>[];
             options?: number;
         }): Addresses {
             const message = new Addresses({});
-            if (data.accountNums != null) {
-                message.accountNums = data.accountNums.map(item => IdRange.fromObject(item));
+            if (data.accountIds != null) {
+                message.accountIds = data.accountIds.map(item => IdRange.fromObject(item));
             }
             if (data.options != null) {
                 message.options = data.options;
@@ -146,11 +146,11 @@ export namespace bitbadges.bitbadgeschain.badges {
         }
         toObject() {
             const data: {
-                accountNums?: ReturnType<typeof IdRange.prototype.toObject>[];
+                accountIds?: ReturnType<typeof IdRange.prototype.toObject>[];
                 options?: number;
             } = {};
-            if (this.accountNums != null) {
-                data.accountNums = this.accountNums.map((item: IdRange) => item.toObject());
+            if (this.accountIds != null) {
+                data.accountIds = this.accountIds.map((item: IdRange) => item.toObject());
             }
             if (this.options != null) {
                 data.options = this.options;
@@ -161,8 +161,8 @@ export namespace bitbadges.bitbadgeschain.badges {
         serialize(w: pb_1.BinaryWriter): void;
         serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
             const writer = w || new pb_1.BinaryWriter();
-            if (this.accountNums.length)
-                writer.writeRepeatedMessage(1, this.accountNums, (item: IdRange) => item.serialize(writer));
+            if (this.accountIds.length)
+                writer.writeRepeatedMessage(1, this.accountIds, (item: IdRange) => item.serialize(writer));
             if (this.options != 0)
                 writer.writeUint64(2, this.options);
             if (!w)
@@ -175,7 +175,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                     break;
                 switch (reader.getFieldNumber()) {
                     case 1:
-                        reader.readMessage(message.accountNums, () => pb_1.Message.addToRepeatedWrapperField(message, 1, IdRange.deserialize(reader), IdRange));
+                        reader.readMessage(message.accountIds, () => pb_1.Message.addToRepeatedWrapperField(message, 1, IdRange.deserialize(reader), IdRange));
                         break;
                     case 2:
                         message.options = reader.readUint64();
