@@ -1,8 +1,49 @@
-# cosmosjs
+# bitbadgesjs
 
-[![Total alerts](https://img.shields.io/lgtm/alerts/g/tharsis/cosmosjs.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/tharsis/cosmosjs/alerts/) [![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/tharsis/cosmosjs.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/tharsis/cosmosjs/context:javascript)
+The BitBadges SDK is a JavaScript library that provides all the tools and functions needed for you to interact with the BitBadges API, blockchain, indexer, or build your own frontend.
 
-JS and TS libs for Cosmos
+
+There are currently five libraries that make up the SDK (address-converter, proto, provider, transactions, utils) that can be installed via:
+```bash
+npm install bitbadgesjs-address-converter
+npm install bitbadgesjs-transactions
+npm install bitbadgesjs-provider
+npm install bitbadges-sdk
+npm install bitbadgesjs-proto
+```
+
+bitbadgesjs-utils is a library which provides miscellaneous functionality to help you interact with the BitBadges API and indexer, such as types, managing metadata requests, logic with ID ranges and balances, etc.
+```ts
+const idRangesOverlap = checkIfIdRangesOverlap(balances[0].badgeIds);
+const metadata = updateMetadataMap(metadata, currentMetadata, { start: badgeId, end: badgeId }, uri);
+```
+
+address-converter allows you to switch between equivalent addresses
+```ts
+const cosmosAddress = ethToCosmos(address);
+const ethAddress = cosmosToEth(cosmosAddress);
+```
+
+transactions exports the functions to create blockchain transactions in the BitBadges Msg formats. See Broadcasting Txs for more info and tutorials.
+```ts
+const updateUrisMsg: MessageMsgUpdateUris = {
+    creator: chain.cosmosAddress,
+    collectionId: collectionId,
+    collectionUri: collectionUri,
+    badgeUris: badgeUris
+}
+const txMsg = createTxMsgUpdateUris(
+    txDetails.chain,
+    txDetails.sender,
+    txDetails.fee,
+    txDetails.memo,
+    msg
+)
+```
+
+proto exports the Protocol Buffer types. You will typically not need this, unless you plan to interact with the blockchain at a more technical level. The transaction types from the proto library are used in the transactions library.
+
+provider exports functions for broadcasting transactions and interacting with the blockchain. See below for how to use.
 
 ## Example
 
@@ -186,7 +227,6 @@ if (sign !== undefined) {
 }
 ```
 
-## TODO
-
-- Add docs and examples to all the packages.
-- Add more cosmos messages
+## Acknowledgements
+This project was forked from [EvmosJS](https://github.com/evmos/evmosjs) and adapted for the BitBadges blockchain.
+We would like to thank the Evmos team for their work and for making this project possible.
