@@ -3660,6 +3660,16 @@ binary-extensions@^2.0.0:
   resolved "https://registry.npmjs.org/binary-extensions/-/binary-extensions-2.2.0.tgz"
   integrity sha512-jDctJ/IVQbZoJykoeHbhXpOlNBqGNcwXJKJog42E5HDPUwQTSdjCHdihjj0DlnheQ7blbT6dHOafNAiS8ooQKA==
 
+bitbadgesjs-address-converter@^0.0.2:
+  version "0.0.2"
+  resolved "https://registry.npmjs.org/bitbadgesjs-address-converter/-/bitbadgesjs-address-converter-0.0.2.tgz"
+  integrity sha512-i76/K0MQLxDrZ7yTE13JV3rrezXAbOLV+VV7PDCYUnHAJX0QlJEYBLljeili23Tardn0EEAXzzXAAplM3aaL5g==
+  dependencies:
+    bech32 "^2.0.0"
+    crypto-addr-codec "^0.1.7"
+    link-module-alias "^1.2.0"
+    shx "^0.3.4"
+
 bitbadgesjs-address-converter@^0.0.3, "bitbadgesjs-address-converter@file:/home/trevormil/cosmos/bitbadgesjs/packages/address-converter":
   version "0.0.3"
   resolved "file:packages/address-converter"
@@ -3669,11 +3679,32 @@ bitbadgesjs-address-converter@^0.0.3, "bitbadgesjs-address-converter@file:/home/
     link-module-alias "^1.2.0"
     shx "^0.3.4"
 
+bitbadgesjs-eip712@^0.0.27:
+  version "0.0.27"
+  resolved "https://registry.npmjs.org/bitbadgesjs-eip712/-/bitbadgesjs-eip712-0.0.27.tgz"
+  integrity sha512-ar7f8BD2ai1TEgaIH68rMcY8ZKw52rvhJcVHaDuzgEkf0sBcv8E+sEaZVKlMKwJLcgulRz+2wxj86vZ+GOwkwQ==
+  dependencies:
+    link-module-alias "^1.2.0"
+    shx "^0.3.4"
+
 bitbadgesjs-eip712@^0.0.62, "bitbadgesjs-eip712@file:/home/trevormil/cosmos/bitbadgesjs/packages/eip712":
   version "0.0.62"
   resolved "file:packages/eip712"
   dependencies:
     link-module-alias "^1.2.0"
+    shx "^0.3.4"
+
+bitbadgesjs-proto@^0.0.27:
+  version "0.0.27"
+  resolved "https://registry.npmjs.org/bitbadgesjs-proto/-/bitbadgesjs-proto-0.0.27.tgz"
+  integrity sha512-9HhvG0UCo3tGTWKlXGd/UabS18DMyu1fjAkYN1IKDgOBn2UNTMj1MjCPu5NEaWaJh8oSc+kQyY+Suj13VdeEsg==
+  dependencies:
+    "@types/google-protobuf" "^3.15.5"
+    "@types/node" "^17.0.21"
+    google-protobuf "^3.19.4"
+    link-module-alias "^1.2.0"
+    protoc-gen-ts "^0.8.5"
+    sha3 "^2.1.4"
     shx "^0.3.4"
 
 bitbadgesjs-proto@^0.0.64, "bitbadgesjs-proto@file:/home/trevormil/cosmos/bitbadgesjs/packages/proto":
@@ -3688,11 +3719,31 @@ bitbadgesjs-proto@^0.0.64, "bitbadgesjs-proto@file:/home/trevormil/cosmos/bitbad
     sha3 "^2.1.4"
     shx "^0.3.4"
 
+bitbadgesjs-provider@^0.0.1:
+  version "0.0.1"
+  resolved "https://registry.npmjs.org/bitbadgesjs-provider/-/bitbadgesjs-provider-0.0.1.tgz"
+  integrity sha512-7/NpPYqlfIy5eGnLm9uG1TXHkjA8jvTQnEakXBvNCxKSD1KP8uAzAmgcFphm4o11UU9G2U4OonrLvsWEHVpOtg==
+  dependencies:
+    "@types/node" "^17.0.21"
+    link-module-alias "^1.2.0"
+    shx "^0.3.4"
+
 "bitbadgesjs-provider@file:/home/trevormil/cosmos/bitbadgesjs/packages/provider":
   version "0.0.3"
   resolved "file:packages/provider"
   dependencies:
     "@types/node" "^17.0.21"
+    link-module-alias "^1.2.0"
+    shx "^0.3.4"
+
+bitbadgesjs-transactions@^0.0.34:
+  version "0.0.34"
+  resolved "https://registry.npmjs.org/bitbadgesjs-transactions/-/bitbadgesjs-transactions-0.0.34.tgz"
+  integrity sha512-lyJaBWBqd9ustV3+1DiHVDF3r4aVQvpTIZIhdhNRApcDC9EGhmsFMbVD9U5E3ZlvYYsIB+/xYZuCRVoyP4zr4g==
+  dependencies:
+    "@types/node" "^17.0.21"
+    bitbadgesjs-eip712 "^0.0.27"
+    bitbadgesjs-proto "^0.0.27"
     link-module-alias "^1.2.0"
     shx "^0.3.4"
 
@@ -3717,7 +3768,7 @@ bitbadgesjs-transactions@^0.0.75:
     link-module-alias "^1.2.0"
     shx "^0.3.4"
 
-"bitbadgesjs-utils@file:/home/trevormil/cosmos/bitbadgesjs/packages/utils":
+bitbadgesjs-utils@^1.0.0, "bitbadgesjs-utils@file:/home/trevormil/cosmos/bitbadgesjs/packages/utils":
   version "1.0.0"
   resolved "file:packages/utils"
   dependencies:
@@ -3727,6 +3778,19 @@ bitbadgesjs-transactions@^0.0.75:
     ethers "^5.7.0"
     merkletreejs "^0.3.9"
     nano "^10.1.2"
+
+"bitbadgesjs@file:/home/trevormil/cosmos/bitbadgesjs/packages/bitbadgesjs":
+  version "0.0.4"
+  resolved "file:packages/bitbadgesjs"
+  dependencies:
+    "@types/node" "^17.0.21"
+    bitbadgesjs-address-converter "^0.0.2"
+    bitbadgesjs-eip712 "^0.0.27"
+    bitbadgesjs-proto "^0.0.27"
+    bitbadgesjs-provider "^0.0.1"
+    bitbadgesjs-transactions "^0.0.34"
+    link-module-alias "^1.2.0"
+    shx "^0.3.4"
 
 bl@^4.0.3, bl@^4.1.0:
   version "4.1.0"

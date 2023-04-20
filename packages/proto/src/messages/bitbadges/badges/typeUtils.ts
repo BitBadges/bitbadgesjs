@@ -4,14 +4,16 @@ import * as claims from '../../../proto/badges/claims'
 import * as balances from '../../../proto/badges/balances'
 import * as badges from '../../../proto/badges/badges'
 
-export interface BadgeUri {
-    uri: string
-    badgeIds: IdRange[]
-}
+
 
 export interface IdRange {
     start: number
     end: number
+}
+
+export interface BadgeUri {
+    uri: string
+    badgeIds: IdRange[]
 }
 
 export interface BadgeSupplyAndAmount {

@@ -26,12 +26,13 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
+    "@types/node": "^17.0.21",
     "bitbadgesjs-address-converter": "^0.0.2",
     "bitbadgesjs-eip712": "^0.0.27",
     "bitbadgesjs-proto": "^0.0.27",
     "bitbadgesjs-provider": "^0.0.1",
     "bitbadgesjs-transactions": "^0.0.34",
-    "@types/node": "^17.0.21",
+    "bitbadgesjs-utils": "^1.0.0",
     "link-module-alias": "^1.2.0",
     "shx": "^0.3.4"
   }
