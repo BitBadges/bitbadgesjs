@@ -28,3 +28,4 @@ export * from './messages/bitbadges/badges/msgClaimBadge'
 export * from './messages/bitbadges/badges/msgDeleteCollection'
 
 export * from './messages/bitbadges/wasmx/msgExecuteContractCompat'
+export * from './messages/bitbadges/badges/typeUtils'

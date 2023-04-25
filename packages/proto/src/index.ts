@@ -35,3 +35,4 @@ export * as auth from './proto/cosmos/auth/v1beta1/auth'
 export * from './proto/ethermint/crypto/v1/ethsecp256k1/keys'
 
 export * from './messages/bitbadges/wasmx/msgExecuteContractCompat'
+export * from './messages/bitbadges/badges/typeUtils'

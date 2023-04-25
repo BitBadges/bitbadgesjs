@@ -46,7 +46,7 @@ export interface Claims {
     expectedMerkleProofLength: number
 }
 
-interface ClaimProofItem {
+export interface ClaimProofItem {
     aunt: string
     onRight: boolean
 }
