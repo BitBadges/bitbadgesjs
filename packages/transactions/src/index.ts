@@ -26,3 +26,5 @@ export * from './messages/bitbadges/badges/msgUpdatePermissions'
 export * from './messages/bitbadges/badges/msgUpdateUris'
 export * from './messages/bitbadges/badges/msgClaimBadge'
 export * from './messages/bitbadges/badges/msgDeleteCollection'
+
+export * from './messages/bitbadges/wasmx/msgExecuteContractCompat'

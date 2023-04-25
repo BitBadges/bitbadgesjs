@@ -1,33 +1,34 @@
 import {
-  createMsgSend as protoMsgSend,
   createTransaction,
+  createMsgExecuteContractCompat as protoMsgExecuteContractCompat,
 } from 'bitbadgesjs-proto'
 
 import {
+  MSG_EXECUTE_CONTRACT_COMPAT_TYPES,
   createEIP712,
+  createMsgExecuteContractCompat,
   generateFee,
   generateMessage,
   generateTypes,
-  createMsgSend,
-  MSG_SEND_TYPES,
 } from 'bitbadgesjs-eip712'
 
-import { getDefaultDomainWithChainId } from './domain'
+import { getDefaultDomainWithChainId } from '../../domain'
 
-import { Chain, Fee, Sender } from './common'
+import { Chain, Fee, Sender } from '../../common'
 
-export interface MessageSendParams {
-  destinationAddress: string
-  amount: string
-  denom: string
+export interface MessageMsgExecuteContractCompat {
+  sender: string
+  contract: string
+  msg: string
+  funds: string
 }
 
-export function createMessageSend(
+export function createTxMsgExecuteContractCompat(
   chain: Chain,
   sender: Sender,
   fee: Fee,
   memo: string,
-  params: MessageSendParams,
+  params: MessageMsgExecuteContractCompat,
   domain?: object,
 ) {
   // EIP712
@@ -37,12 +38,13 @@ export function createMessageSend(
     fee.gas,
     sender.accountAddress,
   )
-  const types = generateTypes(MSG_SEND_TYPES)
-  const msg = createMsgSend(
-    params.amount,
-    params.denom,
-    sender.accountAddress,
-    params.destinationAddress,
+  const types = generateTypes(MSG_EXECUTE_CONTRACT_COMPAT_TYPES)
+
+  const msg = createMsgExecuteContractCompat(
+    params.sender,
+    params.contract,
+    params.msg,
+    params.funds,
   )
   const messages = generateMessage(
     sender.accountNumber.toString(),
@@ -59,15 +61,14 @@ export function createMessageSend(
   const eipToSign = createEIP712(types, messages, domainObj)
 
   // Cosmos
-  const msgSend = protoMsgSend(
-    sender.accountAddress,
-    params.destinationAddress,
-    params.amount,
-    params.denom,
+  const msgCosmos = protoMsgExecuteContractCompat(
+    params.sender,
+    params.contract,
+    params.msg,
+    params.funds,
   )
-
   const tx = createTransaction(
-    msgSend,
+    msgCosmos,
     memo,
     fee.amount,
     fee.denom,

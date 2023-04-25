@@ -11,6 +11,7 @@ export function signatureToWeb3Extension(
   if (temp.length === 2) {
     ;[, signature] = temp
   }
+
   return createWeb3Extension(
     chain.chainId,
     sender.accountAddress,

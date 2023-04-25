@@ -33,3 +33,5 @@ export * from './proto/badges/query'
 export * as query from './proto/cosmos/auth/v1beta1/query'
 export * as auth from './proto/cosmos/auth/v1beta1/auth'
 export * from './proto/ethermint/crypto/v1/ethsecp256k1/keys'
+
+export * from './messages/bitbadges/wasmx/msgExecuteContractCompat'
