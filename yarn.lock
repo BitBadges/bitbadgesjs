@@ -3692,8 +3692,8 @@ bitbadgesjs-eip712@^0.0.27:
     link-module-alias "^1.2.0"
     shx "^0.3.4"
 
-bitbadgesjs-eip712@^0.0.62, bitbadgesjs-eip712@^0.0.72, "bitbadgesjs-eip712@file:/home/trevormil/cosmos/bitbadgesjs/packages/eip712":
-  version "0.0.72"
+bitbadgesjs-eip712@^0.0.62, bitbadgesjs-eip712@^0.0.73, "bitbadgesjs-eip712@file:/home/trevormil/cosmos/bitbadgesjs/packages/eip712":
+  version "0.0.73"
   resolved "file:packages/eip712"
   dependencies:
     ethers "^6.3.0"
@@ -3765,17 +3765,17 @@ bitbadgesjs-transactions@^0.0.75:
     shx "^0.3.4"
 
 "bitbadgesjs-transactions@file:/home/trevormil/cosmos/bitbadgesjs/packages/transactions":
-  version "0.0.88"
+  version "0.0.90"
   resolved "file:packages/transactions"
   dependencies:
     "@types/node" "^17.0.21"
     bitbadgesjs-eip712 "^0.0.72"
-    bitbadgesjs-proto "^0.0.69"
+    bitbadgesjs-proto "^0.0.70"
     link-module-alias "^1.2.0"
     shx "^0.3.4"
 
 bitbadgesjs-utils@^1.0.0, "bitbadgesjs-utils@file:/home/trevormil/cosmos/bitbadgesjs/packages/utils":
-  version "1.0.3"
+  version "1.0.5"
   resolved "file:packages/utils"
   dependencies:
     "@cosmjs/stargate" "^0.30.1"

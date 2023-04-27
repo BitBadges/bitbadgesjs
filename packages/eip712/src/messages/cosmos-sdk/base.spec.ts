@@ -44,8 +44,8 @@ describe('base tests', () => {
         { name: 'name', type: 'string' },
         { name: 'version', type: 'string' },
         { name: 'chainId', type: 'uint256' },
-        { name: 'verifyingContract', type: 'string' },
-        { name: 'salt', type: 'string' },
+        { name: 'verifyingContract', type: 'address' },
+        { name: 'salt', type: 'bytes32' },
       ],
       Tx: [
         { name: 'account_number', type: 'string' },
@@ -187,8 +187,8 @@ describe('base tests', () => {
           { name: 'name', type: 'string' },
           { name: 'version', type: 'string' },
           { name: 'chainId', type: 'uint256' },
-          { name: 'verifyingContract', type: 'string' },
-          { name: 'salt', type: 'string' },
+          { name: 'verifyingContract', type: 'address' },
+          { name: 'salt', type: 'bytes32' },
         ],
         Tx: [
           { name: 'account_number', type: 'string' },

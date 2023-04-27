@@ -60,11 +60,11 @@ console.log(complete)
       },
       {
         "name": "verifyingContract",
-        "type": "string"
+        "type": "address"
       },
       {
         "name": "salt",
-        "type": "string"
+        "type": "bytes32"
       }
     ],
     "Tx": [
