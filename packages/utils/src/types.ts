@@ -103,6 +103,7 @@ export interface BitBadgeCollection {
     badgeMetadata: BadgeMetadataMap,
     activity: TransferActivityItem[],
     announcements: AnnouncementActivityItem[],
+    reviews: ReviewActivityItem[],
     usedClaims: {
         [claimId: string]: {
             codes: {
@@ -116,6 +117,7 @@ export interface BitBadgeCollection {
     };
     originalClaims: ClaimItem[];
     managerRequests: number[];
+    userList: string[];
     balances: BalancesMap,
     createdBlock: number;
 }
@@ -179,11 +181,13 @@ export interface BitBadgesUserInfo {
     chain: string,
     address: string,
     name?: string
+    resolvedName?: string
     avatar?: string
     discord?: string
     twitter?: string
     github?: string
     telegram?: string
+
 }
 
 export interface LatestBlockStatus {
@@ -244,6 +248,7 @@ export interface StoredBadgeCollection {
     managerRequests: number[];
     balances: BalancesMap;
     createdBlock: number;
+    userList: string[];
 }
 
 export interface ActivityItem {
@@ -251,18 +256,28 @@ export interface ActivityItem {
     users: IdRange[];
     timestamp: number;
     block: number;
-    collectionId: number;
+
+}
+
+export interface ReviewActivityItem extends ActivityItem {
+    review: string;
+    stars: number;
+    from: number;
+    collectionId?: number;
+    accountNumber?: number;
 }
 
 export interface AnnouncementActivityItem extends ActivityItem {
     announcement: string;
     from: number;
+    collectionId: number;
 }
 
 export interface TransferActivityItem extends ActivityItem {
     to: number[];
     from: (number | 'Mint')[];
     balances: Balance[];
+    collectionId: number;
 }
 
 export interface CollectionMap {
@@ -271,6 +286,7 @@ export interface CollectionMap {
         pagination: {
             activity: PaginationInfo
             announcements: PaginationInfo
+            reviews: PaginationInfo
         },
     } | undefined
 }

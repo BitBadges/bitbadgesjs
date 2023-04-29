@@ -55,16 +55,13 @@ export function createCollectionFromMsgNewCollection(
         newUnmintedSupplys = newUnmintedBalance.balances;
     }
 
-
-
-
     //Calculate the unmintedBalances
     let unmintedBalances: UserBalance = {
         balances: newUnmintedSupplys,
         approvals: [],
     };
 
-    
+
     unmintedBalances = getBalanceAfterTransfers(unmintedBalances, msgNewCollection.transfers);
 
     const claimsRes = getClaimsFromClaimItems(unmintedBalances, claimItems);
@@ -94,9 +91,11 @@ export function createCollectionFromMsgNewCollection(
         maxSupplys: newMaxSupplys,
         balances: {}, //Balances are currently not supported for simulated previews
         createdBlock: existingCollection?.createdBlock ? existingCollection.createdBlock : -1,
-        standard: existingCollection?.standard ? existingCollection.standard : 0,
+        standard: existingCollection?.standard ? existingCollection.standard : msgNewCollection.standard,
         activity: existingCollection?.activity ? existingCollection.activity : [],
         announcements: existingCollection?.announcements ? existingCollection.announcements : [],
+        userList: existingCollection?.userList ? existingCollection.userList : [],
+        reviews: existingCollection?.reviews ? existingCollection.reviews : [],
     }
 
     return badgeCollection;
@@ -260,7 +259,7 @@ export function getMaxBatchId(collection: BitBadgeCollection) {
 
 
 
-//Iterates through the current badge metadata and puts in any new requests for badges that are displayed but have missing metadata 
+//Iterates through the current badge metadata and puts in any new requests for badges that are displayed but have missing metadata
 export function updateMetadataForBadgeIdsFromIndexerIfAbsent(badgeIdsToDisplay: number[], collection: BitBadgeCollection) {
     //Find the batchIdxs that we need to request metadata for
     let metadataBatchIdxs: number[] = [];
