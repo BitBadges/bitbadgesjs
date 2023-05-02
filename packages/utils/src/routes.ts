@@ -1,5 +1,5 @@
 import { AccountDocument, MetadataDocument } from "./db";
-import { AnnouncementActivityItem, BalancesMap, BitBadgeCollection, CosmosAccountInformation, PaginationInfo, TransferActivityItem, UserBalance } from "./types";
+import { AnnouncementActivityItem, BalancesMap, BitBadgeCollection, CosmosAccountInformation, PaginationInfo, ReviewActivityItem, TransferActivityItem, UserBalance } from "./types";
 
 export const GetAccountRoute = (bech32address: string) => {
     return `/api/v0/user/${bech32address}/address`;
@@ -33,8 +33,8 @@ export const GetOwnersRoute = (collectionId: number, badgeId: number) => {
     return `/api/v0/collection/${collectionId}/${badgeId}/owners`;
 }
 
-export const GetPortfolioRoute = (accountNumber: number) => {
-    return `/api/v0/user/${accountNumber}/portfolio`
+export const GetPortfolioRoute = (cosmosAddr: string) => {
+    return `/api/v0/user/${cosmosAddr}/portfolio`
 }
 
 export const GetMetadataRoute = (collectionId: number) => {
@@ -79,10 +79,12 @@ export interface GetPortfolioResponse {
     managing: BitBadgeCollection[],
     activity: TransferActivityItem[],
     announcements: AnnouncementActivityItem[],
+    reviews: ReviewActivityItem[],
     pagination: {
         userActivity: PaginationInfo,
         announcements: PaginationInfo,
         collected: PaginationInfo,
+        reviews: PaginationInfo,
     }
 }
 

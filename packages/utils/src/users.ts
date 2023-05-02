@@ -15,5 +15,6 @@ export function convertToBitBadgesUserInfo(
         twitter: accountInfo.twitter,
         github: accountInfo.github,
         telegram: accountInfo.telegram,
+        readme: accountInfo.readme,
     };
 }
