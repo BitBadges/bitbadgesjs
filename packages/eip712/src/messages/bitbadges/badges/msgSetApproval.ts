@@ -1,4 +1,5 @@
-import { Balance, BALANCE_TYPES, ID_RANGE_TYPES } from './typeUtils'
+import { Balance } from 'bitbadgesjs-proto'
+import { BALANCE_TYPES, ID_RANGE_TYPES } from './eip712HelperTypes'
 
 const MsgSetApprovalValueType = [
   { name: 'creator', type: 'string' },

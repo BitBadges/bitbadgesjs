@@ -1,6 +1,7 @@
 import {
   createMsgUpdateDisallowedTransfers as protoMsgUpdateDisallowedTransfers,
   createTransaction,
+  TransferMapping
 } from 'bitbadgesjs-proto'
 
 import {
@@ -15,7 +16,6 @@ import {
 import { getDefaultDomainWithChainId } from '../../domain'
 
 import { Chain, Fee, Sender } from '../../common'
-import { TransferMapping } from './typeUtils'
 
 export interface MessageMsgUpdateDisallowedTransfers {
   creator: string

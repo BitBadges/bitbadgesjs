@@ -1,9 +1,9 @@
 import {
   BALANCE_TYPES,
   ID_RANGE_TYPES,
-  Transfers,
   TRANSFERS_TYPES,
-} from './typeUtils'
+} from './eip712HelperTypes'
+import {  Transfers } from 'bitbadgesjs-proto'
 
 const MsgTransferBadgeValueType = [
   { name: 'creator', type: 'string' },

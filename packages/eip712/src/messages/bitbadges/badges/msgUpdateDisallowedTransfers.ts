@@ -1,9 +1,10 @@
 import {
   ADDRESSES_TYPES,
   ID_RANGE_TYPES,
-  TransferMapping,
   TRANSFER_MAPPING_TYPES,
-} from './typeUtils'
+} from './eip712HelperTypes'
+
+import { TransferMapping } from 'bitbadgesjs-proto'
 
 const MsgUpdateDisallowedTransfersValueType = [
   { name: 'creator', type: 'string' },

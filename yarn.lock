@@ -3692,10 +3692,11 @@ bitbadgesjs-eip712@^0.0.27:
     link-module-alias "^1.2.0"
     shx "^0.3.4"
 
-bitbadgesjs-eip712@^0.0.62, bitbadgesjs-eip712@^0.0.73, "bitbadgesjs-eip712@file:/home/trevormil/cosmos/bitbadgesjs/packages/eip712":
-  version "0.0.73"
+bitbadgesjs-eip712@^0.0.74, "bitbadgesjs-eip712@file:/home/trevormil/cosmos/bitbadgesjs/packages/eip712":
+  version "0.0.74"
   resolved "file:packages/eip712"
   dependencies:
+    bitbadgesjs-proto "^0.0.70"
     ethers "^6.3.0"
     link-module-alias "^1.2.0"
     shx "^0.3.4"
@@ -3713,8 +3714,21 @@ bitbadgesjs-proto@^0.0.27:
     sha3 "^2.1.4"
     shx "^0.3.4"
 
-bitbadgesjs-proto@^0.0.64, bitbadgesjs-proto@^0.0.70, "bitbadgesjs-proto@file:/home/trevormil/cosmos/bitbadgesjs/packages/proto":
+bitbadgesjs-proto@^0.0.70:
   version "0.0.70"
+  resolved "https://registry.npmjs.org/bitbadgesjs-proto/-/bitbadgesjs-proto-0.0.70.tgz"
+  integrity sha512-4PoU/1NJWmRZXoQm5w/cqPY+d/NadfbZQkAqbQfxs7VJ6vkYQOEWBlHJ0ScFSlxzWGoLeDxNW35nHAEXukDCcg==
+  dependencies:
+    "@types/google-protobuf" "^3.15.5"
+    "@types/node" "^17.0.21"
+    google-protobuf "^3.19.4"
+    link-module-alias "^1.2.0"
+    protoc-gen-ts "^0.8.5"
+    sha3 "^2.1.4"
+    shx "^0.3.4"
+
+bitbadgesjs-proto@^0.0.71, "bitbadgesjs-proto@file:/home/trevormil/cosmos/bitbadgesjs/packages/proto":
+  version "0.0.71"
   resolved "file:packages/proto"
   dependencies:
     "@types/google-protobuf" "^3.15.5"
@@ -3753,34 +3767,23 @@ bitbadgesjs-transactions@^0.0.34:
     link-module-alias "^1.2.0"
     shx "^0.3.4"
 
-bitbadgesjs-transactions@^0.0.75:
-  version "0.0.75"
-  resolved "https://registry.npmjs.org/bitbadgesjs-transactions/-/bitbadgesjs-transactions-0.0.75.tgz"
-  integrity sha512-XrARhrj8+WKjlT10HIDD/vEIg0t6yYP4nWjKR4j2r0gTNHb0uSdBUhqKE0wX4QRDnRdH7kySEp2NdI7CHzdiHw==
-  dependencies:
-    "@types/node" "^17.0.21"
-    bitbadgesjs-eip712 "^0.0.62"
-    bitbadgesjs-proto "^0.0.64"
-    link-module-alias "^1.2.0"
-    shx "^0.3.4"
-
-"bitbadgesjs-transactions@file:/home/trevormil/cosmos/bitbadgesjs/packages/transactions":
-  version "0.0.91"
+bitbadgesjs-transactions@^0.0.92, "bitbadgesjs-transactions@file:/home/trevormil/cosmos/bitbadgesjs/packages/transactions":
+  version "0.0.92"
   resolved "file:packages/transactions"
   dependencies:
     "@types/node" "^17.0.21"
-    bitbadgesjs-eip712 "^0.0.73"
-    bitbadgesjs-proto "^0.0.70"
+    bitbadgesjs-eip712 "^0.0.74"
+    bitbadgesjs-proto "^0.0.71"
     link-module-alias "^1.2.0"
     shx "^0.3.4"
 
 bitbadgesjs-utils@^1.0.0, "bitbadgesjs-utils@file:/home/trevormil/cosmos/bitbadgesjs/packages/utils":
-  version "1.0.9"
+  version "1.0.20"
   resolved "file:packages/utils"
   dependencies:
     "@cosmjs/stargate" "^0.30.1"
     bitbadgesjs-address-converter "^0.0.3"
-    bitbadgesjs-transactions "^0.0.75"
+    bitbadgesjs-transactions "^0.0.91"
     ethers "^5.7.0"
     merkletreejs "^0.3.9"
     nano "^10.1.2"

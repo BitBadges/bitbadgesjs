@@ -1,4 +1,3 @@
-
 const DeleteCollectionMsgValueType = [
     { name: 'creator', type: 'string' },
     { name: 'collectionId', type: 'uint64' },

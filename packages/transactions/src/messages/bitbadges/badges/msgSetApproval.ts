@@ -1,6 +1,7 @@
 import {
   createMsgSetApproval as protoMsgSetApproval,
   createTransaction,
+  Balance
 } from 'bitbadgesjs-proto'
 
 import {
@@ -15,7 +16,6 @@ import {
 import { getDefaultDomainWithChainId } from '../../domain'
 
 import { Chain, Fee, Sender } from '../../common'
-import { Balance } from './typeUtils'
 
 export interface MessageMsgSetApproval {
   creator: string
