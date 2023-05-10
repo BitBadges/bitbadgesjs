@@ -1,20 +1,23 @@
 import { Permissions } from "./types/permissions";
 
-export const NUM_PERMISSIONS = 6;
+export const NUM_PERMISSIONS = 7;
 
+export const CanUpdateBalancesUriDigit = 7
 export const CanDeleteDigit = 6
 export const CanUpdateBytesDigit = 5
 export const CanManagerBeTransferredDigit = 4
-export const CanUpdateUrisDigit = 3
+export const CanUpdateMetadataUrisDigit = 3
 export const CanCreateMoreBadgesDigit = 2
-export const CanUpdateDisallowedDigit = 1
+export const CanUpdateAllowedDigit = 1
 
 /**
  * Returns the uint value for the permissions.
  *
- * On the blockchain, permissions are mapped to a uint64 where each bit
- * represents a permission. This function returns the uint64 value for the
- * given permissions.
+ * On the blockchain, permissions are mapped to a uint where each bit
+ * represents a permission. This function returns the uint value for the
+ * given permissions as a bigint.
+ *
+ * @param {Permissions} permissions - The permissions to convert to a number value
  */
 export function GetPermissionNumberValue(permissions: Permissions) {
   let permissionNumber = 0;
@@ -28,17 +31,20 @@ export function GetPermissionNumberValue(permissions: Permissions) {
       case CanManagerBeTransferredDigit:
         permissionValue = permissions.CanManagerBeTransferred;
         break;
-      case CanUpdateUrisDigit:
-        permissionValue = permissions.CanUpdateUris;
+      case CanUpdateMetadataUrisDigit:
+        permissionValue = permissions.CanUpdateMetadataUris;
         break;
       case CanCreateMoreBadgesDigit:
         permissionValue = permissions.CanCreateMoreBadges;
         break;
-      case CanUpdateDisallowedDigit:
-        permissionValue = permissions.CanUpdateDisallowed;
+      case CanUpdateAllowedDigit:
+        permissionValue = permissions.CanUpdateAllowed;
         break;
       case CanDeleteDigit:
         permissionValue = permissions.CanDelete;
+        break;
+      case CanUpdateBalancesUriDigit:
+        permissionValue = permissions.CanUpdateBalancesUri;
         break;
       default:
         break;
@@ -47,15 +53,19 @@ export function GetPermissionNumberValue(permissions: Permissions) {
       permissionNumber += 2 ** (permissionDigit - 1);
     }
   }
-  return permissionNumber;
+  return BigInt(permissionNumber);
 }
 
 /**
  * Validates the permissions leading zeroes are correct.
+ *
+ * All non-important bits not corresponding to a permission should be 0.
+ *
+ * @param {bigint} permissions - The permissions to validate
  */
-export function ValidatePermissionsLeadingZeroes(permissions: number) {
-  let tempPermissions = permissions >> NUM_PERMISSIONS;
-  if (tempPermissions != 0) {
+export function ValidatePermissionsLeadingZeroes(permissions: bigint) {
+  let tempPermissions = permissions >> BigInt(NUM_PERMISSIONS);
+  if (tempPermissions != 0n) {
     throw 'Invalid permissions: Leading Zeroes';
   }
 }
@@ -65,8 +75,11 @@ export function ValidatePermissionsLeadingZeroes(permissions: number) {
  *
  * The new permissions are valid if leading zeroes are correct
  * and any permission that was previously locked is not being turned back on.
+ *
+ * @param {bigint} oldPermissions - The old permissions
+ * @param {bigint} newPermissions - The new permissions
  */
-export function ValidatePermissionsUpdate(oldPermissions: number, newPermissions: number) {
+export function ValidatePermissionsUpdate(oldPermissions: bigint, newPermissions: bigint) {
   try {
     ValidatePermissionsLeadingZeroes(oldPermissions);
     ValidatePermissionsLeadingZeroes(newPermissions);
@@ -81,12 +94,12 @@ export function ValidatePermissionsUpdate(oldPermissions: number, newPermissions
     throw 'Invalid permissions: Updating CanUpdateBytes is locked';
   }
 
-  if (!oldFlags.CanUpdateUris && newFlags.CanUpdateUris) {
-    throw 'Invalid permissions: Updating CanUpdateUris is locked';
+  if (!oldFlags.CanUpdateMetadataUris && newFlags.CanUpdateMetadataUris) {
+    throw 'Invalid permissions: Updating CanUpdateMetadataUris is locked';
   }
 
-  if (!oldFlags.CanUpdateDisallowed && newFlags.CanUpdateDisallowed) {
-    throw 'Invalid permissions: Updating CanUpdateDisallowed is locked';
+  if (!oldFlags.CanUpdateAllowed && newFlags.CanUpdateAllowed) {
+    throw 'Invalid permissions: Updating CanUpdateAllowed is locked';
   }
 
   if (!oldFlags.CanCreateMoreBadges && newFlags.CanCreateMoreBadges) {
@@ -100,33 +113,40 @@ export function ValidatePermissionsUpdate(oldPermissions: number, newPermissions
   if (!oldFlags.CanDelete && newFlags.CanDelete) {
     throw 'Invalid permissions: Updating CanDelete is locked';
   }
+
+  if (!oldFlags.CanUpdateBalancesUri && newFlags.CanUpdateBalancesUri) {
+    throw 'Invalid permissions: Updating CanUpdateBalancesUri is locked';
+  }
 }
 
 /**
  * Sets the permissions digit to the given value.
  *
- * Note there are no validity checks done here.
- *
- * We recommend first checking your action is a valid update via ValidatePermissionsUpdate
+ * Note there are no validity checks done here. We recommend first checking your action is a valid update via ValidatePermissionsUpdate
  * before calling this function.
  *
- * e.g. UpdatePermissions(0, CanUpdateBytesDigit, true) => 16
+ * @example
+ * UpdatePermissions(0, CanUpdateBytesDigit, true) => 16
+ *
+ * @param {bigint} currPermissions - The current permissions
+ * @param {number} permissionDigit - The permission digit to update (use the constants exported such as CanUpdateBytesDigit, etc)
+ * @param {boolean} value - The value to set the permission digit to
  */
-export function UpdatePermissions(currPermissions: number, permissionDigit: number, value: boolean) {
+export function UpdatePermissions(currPermissions: bigint, permissionDigit: number, value: boolean) {
   if (permissionDigit > NUM_PERMISSIONS || permissionDigit <= 0) {
     throw 'Invalid permission digit';
   }
 
   let mask = 1 << (permissionDigit - 1);
-  let masked_n = currPermissions & mask;
-  let bit = masked_n >> (permissionDigit - 1);
-  let bit_as_bool = bit == 1;
+  let masked_n = currPermissions & BigInt(mask);
+  let bit = masked_n >> BigInt(permissionDigit - 1);
+  let bit_as_bool = bit == 1n;
 
   if (value != bit_as_bool) {
     if (bit_as_bool) {
-      currPermissions -= 2 ** (permissionDigit - 1);
+      currPermissions -= BigInt(2 ** (permissionDigit - 1));
     } else {
-      currPermissions += 2 ** (permissionDigit - 1);
+      currPermissions += BigInt(2 ** (permissionDigit - 1));
     }
   }
 
@@ -136,15 +156,15 @@ export function UpdatePermissions(currPermissions: number, permissionDigit: numb
 /**
  * Gets the permissions struct from the corresponding uint number value.
  *
- * Note it assumes the permissions number provided is valid
+ * @param {bigint} permissions - The permissions to convert to a struct
  */
-export function GetPermissions(permissions: number) {
+export function GetPermissions(permissions: bigint) {
   let permissionFlags: any = {};
   for (let i = 0; i <= NUM_PERMISSIONS; i++) {
     let mask = 1 << i;
-    let masked_n = permissions & mask;
-    let bit = masked_n >> i;
-    let bit_as_bool = bit == 1;
+    let masked_n = permissions & BigInt(mask);
+    let bit = masked_n >> BigInt(i);
+    let bit_as_bool = bit == 1n;
     switch (i + 1) {
       case CanUpdateBytesDigit:
         permissionFlags.CanUpdateBytes = bit_as_bool;
@@ -152,17 +172,20 @@ export function GetPermissions(permissions: number) {
       case CanManagerBeTransferredDigit:
         permissionFlags.CanManagerBeTransferred = bit_as_bool;
         break;
-      case CanUpdateUrisDigit:
-        permissionFlags.CanUpdateUris = bit_as_bool;
+      case CanUpdateMetadataUrisDigit:
+        permissionFlags.CanUpdateMetadataUris = bit_as_bool;
         break;
       case CanCreateMoreBadgesDigit:
         permissionFlags.CanCreateMoreBadges = bit_as_bool;
         break;
-      case CanUpdateDisallowedDigit:
-        permissionFlags.CanUpdateDisallowed = bit_as_bool;
+      case CanUpdateAllowedDigit:
+        permissionFlags.CanUpdateAllowed = bit_as_bool;
         break;
       case CanDeleteDigit:
         permissionFlags.CanDelete = bit_as_bool;
+        break;
+      case CanUpdateBalancesUriDigit:
+        permissionFlags.CanUpdateBalancesUri = bit_as_bool;
         break;
       default:
         break;

@@ -21,10 +21,17 @@ import { MetadataMap } from "./types/types";
  * setMetadataPropertyForAllMapEntries - sets a specific (key, value) pair for all metadata entries in the metadata map
  */
 
+
+
 /**
  * Update the metadataMap with the given metadata and badgeIds fetched from the given uri.
  *
  * Note that this function does not mutate the metadataMap, but instead returns a new one.
+ *
+ * @param {MetadataMap} currMetadataMap - The current metadata map
+ * @param {Metadata} metadata - The metadata to update the map with
+ * @param {IdRange} badgeIds - The badge IDs that correspond to the metadata
+ * @param {string} uri - The URI that the metadata was fetched from
  */
 export const updateMetadataMap = (currMetadataMap: MetadataMap, metadata: Metadata, badgeIds: IdRange, uri: string) => {
   let currentMetadata = metadata;
@@ -90,8 +97,13 @@ export const updateMetadataMap = (currMetadataMap: MetadataMap, metadata: Metada
  * Returns the { metadata, uri, badgeIds } metadata object from the MetadataMap for a specific badgeId.
  *
  * If the badgeId does not exist in the MetadataMap, returns undefined.
+ *
+ * @param {bigint} badgeId - The badge ID to search for
+ * @param {MetadataMap} metadataMap - The metadata map to search in
+ *
+ * @returns {MetadataMapObj | undefined} - The metadata object for the badgeId, or undefined if it does not exist
  */
-export function getMetadataMapObjForBadgeId(badgeId: number, metadataMap: MetadataMap) {
+export function getMetadataMapObjForBadgeId(badgeId: bigint, metadataMap: MetadataMap) {
   let currentMetadata = undefined;
   for (const val of Object.values(metadataMap)) {
     if (!val) continue; //For TS
@@ -109,57 +121,67 @@ export function getMetadataMapObjForBadgeId(badgeId: number, metadataMap: Metada
  * Returns the metadata from the MetadataMap for a specific badgeId.
  *
  * If the badgeId does not exist in the MetadataMap, returns undefined.
+ *
+ * @param {bigint} badgeId - The badge ID to search for
+ * @param {MetadataMap} metadataMap - The metadata map to search in
+ *
+ * @returns {Metadata | undefined} - The metadata for the badgeId, or undefined if it does not exist
  */
-export function getMetadataForBadgeId(badgeId: number, metadataMap: MetadataMap) {
+export function getMetadataForBadgeId(badgeId: bigint, metadataMap: MetadataMap) {
   return getMetadataMapObjForBadgeId(badgeId, metadataMap)?.metadata;
 }
 
+export function bigIntMin(a: bigint, b: bigint): bigint {
+  return a > b ? b : a;
+}
+
+
 /**
- * For each badgeId in badgeIds, populates the metadata map with the given key value pair.
+ * For each badgeId in badgeIds, populates the metadata map with the given key, value JSON property pair.
  *
- * If metadataToSet is provided, we are overwriting all metadata for the badgeIds (i.e. setting metadata for all badgeIds to metadataToSet).
- * Note you can also just use updateMetadataMap for this.
+ * If you want to update the entire metadata (not just a specific key value pair), use updateMetadataMap instead.
  *
- * Otherwise, we are updating a specific key value pair within each badge's existing metadata.
+ * This is typically used when customizing or creating a badge.
  *
- * For example, if we want to set all badges to have "name" = "test", we can call setMetadataPropertyForAllMapEntries(metadataMap, badgeIds, uri, "name", "test")
+ * @example
+ * Use this function to set the "name" property of all badges to "test" via setMetadataPropertyForAllMapEntries(metadataMap, badgeIds, uri, "name", "test")
  *
- * This is typically used when customizing or creating a badge. If this is the case, you can set the uri to "Manual" for now.
+ * @param {MetadataMap} metadataMap - The metadata map to update
+ * @param {IdRange[]} badgeIds - The badge IDs to update
+ * @param {string} uri - The URI that the metadata was fetched from (can use a placeholder like "Manual" and update it later)
+ * @param {string} key - The key to update
+ * @param {any} value - The value to update
  */
-export const setMetadataPropertyForAllMapEntries = (metadataMap: MetadataMap, badgeIds: IdRange[], uri: string, key: string, value: any, metadataToSet?: Metadata) => {
+export const setMetadataPropertyForAllMapEntries = (metadataMap: MetadataMap, badgeIds: IdRange[], uri: string, key: string, value: any) => {
   for (const badgeIdRange of badgeIds) {
-    //If we are overwriting all metadata, we can just update the metadata map for all badge IDs to metadataToSet
-    if (metadataToSet) {
-      metadataMap = updateMetadataMap(metadataMap, metadataToSet, badgeIdRange, uri ?? 'Manual');
-    } else {
-      //Otherwise, we are updating a specific key value pair for each
-      for (let id = badgeIdRange.start; id <= badgeIdRange.end; id++) {
-        let newMetadata = {} as Metadata;
-        const values = Object.values(metadataMap);
-        const idRangeToUpdate = { start: id, end: id };
 
-        for (let i = 0; i < values.length; i++) {
-          const val = values[i];
-          if (!val) continue; //For TS
+    //Otherwise, we are updating a specific key value pair for each
+    for (let id = badgeIdRange.start; id <= badgeIdRange.end; id++) {
+      let newMetadata = {} as Metadata;
+      const values = Object.values(metadataMap);
+      const idRangeToUpdate = { start: id, end: id };
 
-          //Find the idx where id is in the badgeIds array
-          const [idx, found] = searchIdRangesForId(id, val.badgeIds)
-          if (found) {
-            //If multiple sequential badge IDs have the same metadata and are in the ranges we want to update,
-            //we can batch update all these together
-            const foundIdRange = val.badgeIds[idx];
-            const endIdToUpdate = Math.min(foundIdRange.end, badgeIdRange.end);
-            idRangeToUpdate.end = endIdToUpdate;
+      for (let i = 0; i < values.length; i++) {
+        const val = values[i];
+        if (!val) continue; //For TS
 
-            id = endIdToUpdate; //Set id to the end of the range we are updating so we can skip to the next range (will be incremented by 1 at the end of the loop)
+        //Find the idx where id is in the badgeIds array
+        const [idx, found] = searchIdRangesForId(id, val.badgeIds)
+        if (found) {
+          //If multiple sequential badge IDs have the same metadata and are in the ranges we want to update,
+          //we can batch update all these together
+          const foundIdRange = val.badgeIds[idx];
+          const endIdToUpdate = bigIntMin(foundIdRange.end, badgeIdRange.end);
+          idRangeToUpdate.end = endIdToUpdate;
 
-            newMetadata = { ...val.metadata, [key]: value };
-            break;
-          }
+          id = endIdToUpdate; //Set id to the end of the range we are updating so we can skip to the next range (will be incremented by 1 at the end of the loop)
+
+          newMetadata = { ...val.metadata, [key]: value };
+          break;
         }
-
-        metadataMap = updateMetadataMap(metadataMap, newMetadata, idRangeToUpdate, uri ?? 'Manual');
       }
+
+      metadataMap = updateMetadataMap(metadataMap, newMetadata, idRangeToUpdate, uri ?? 'Manual');
     }
   }
 

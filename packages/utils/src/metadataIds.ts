@@ -4,34 +4,47 @@ import { BitBadgeCollection } from "./types/api";
 
 /**
  * This is the logic we use to deterministically compute the metadataId for a collection in our indexer.
+ * This function returns the metadata ID for a specific badge ID. -1 if not found
  *
- * We linearly iterate over BadgeUris which is a list of { uri, badgeIds } objects.
- *
- * If uri has "{id}" in it, we store each badge ID in badgeIds with its own unique metadataId and replace "{id}"" with the badge ID.
- * For example, { uri : "...{id}..", badgeIds: [{start: 1, end: 3}, {start: 5, end: 5}] } will be given four separate metadataIds.
- *
- * If uri does not have "{id}" in it, we store all badge IDs in badgeIds with the same metadataId.
- *
- * Batch 0 = collectionMetadata
- * Batch 1 = metadata for 1st badge(s)
- * Batch 2 = metadata for 2nd badge(s)
+ * @example
+ * Metadata ID 0 = collectionMetadata (reserved)
+ * Metadata ID 1 = metadata ID for 1st badge(s)
+ * Metadata ID 2 = metadata ID for 2nd badge(s)
  * And so on
  *
- * This function returns the metadata ID for a specific badge ID. -1 if not found
+ * @param {bigint} badgeId - The badge ID to get the metadata ID for
+ * @param {BadgeUri[]} badgeUris - The badge URIs for the collection
+ *
+ * @remarks
+ * The metadataId for the metadata document is calculated deterministically from badgeUris field
+ * metadataId == 0 - collection metadata
+ * metadataId > 0 - badge metadata
+ *
+ * Pseudocode for calculating metadataId:
+ * metadataId = 1
+ * for each badgeUri in badgeUris: //Linear iteration
+ *  if badgeUri.uri.contains("{id}"):
+ *    for each id in badgeUri.badgeIds:
+ *      fetch metadata from badgeUri.uri.replace("{id}", id)
+ *      store metadata in database with metadataId = metadataId and badgeIds = [{start: id, end: id}]
+ *  else:
+ *   fetch metadata from badgeUri.uri
+ *   store metadata in database with metadataId = metadataId and badgeIds = badgeUri.badgeIds
+ *  metadataId++
 */
-export const getMetadataIdForBadgeId = (badgeId: number, badgeUris: BadgeUri[]) => {
-  let batchIdx = 1;
+export const getMetadataIdForBadgeId = (badgeId: bigint, badgeUris: BadgeUri[]) => {
+  let batchIdx = 1n;
 
   for (const badgeUri of badgeUris) {
     if (badgeUri.uri.includes("{id}")) {
       const [idx, found] = searchIdRangesForId(badgeId, badgeUri.badgeIds);
       if (found) {
         const badgeIdRange = badgeUri.badgeIds[idx];
-        return batchIdx + badgeId - Number(badgeIdRange.start);
+        return batchIdx + badgeId - badgeIdRange.start;
       }
 
       for (const badgeIdRange of badgeUri.badgeIds) {
-        batchIdx += Number(badgeIdRange.end) - Number(badgeIdRange.start) + 1;
+        batchIdx += badgeIdRange.end - badgeIdRange.start + 1n;
       }
     } else {
       const [_idx, found] = searchIdRangesForId(badgeId, badgeUri.badgeIds);
@@ -47,15 +60,17 @@ export const getMetadataIdForBadgeId = (badgeId: number, badgeUris: BadgeUri[]) 
 
 /**
  * This returns the max metadataId for a collection
+ *
+ * @param {BitBadgeCollection} collection - The collection to get the max metadata ID for
 */
 export function getMaxMetadataId(collection: BitBadgeCollection) {
-  let metadataId = 1; // Start at 1 because batch 0 is reserved for collection metadata
+  let metadataId = 1n; // Start at 1 because batch 0 is reserved for collection metadata
 
   for (const badgeUri of collection.badgeUris) {
     // If the URI contains {id}, each badge ID will belong to its own private batch
     if (badgeUri.uri.includes("{id}")) {
       for (const badgeIdRange of badgeUri.badgeIds) {
-        metadataId += Number(badgeIdRange.end) - Number(badgeIdRange.start) + 1;
+        metadataId += badgeIdRange.end - badgeIdRange.start + 1n;
       }
     } else {
       metadataId++;

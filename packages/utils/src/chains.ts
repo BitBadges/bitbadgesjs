@@ -6,15 +6,15 @@ import { BitBadgesUserInfo } from "./types/api";
 
 export const MINT_ACCOUNT: BitBadgesUserInfo = {
   cosmosAddress: 'Mint',
-  accountNumber: -1,
+  accountNumber: -1n,
   address: 'Mint',
   chain: SupportedChain.COSMOS,
   collected: [],
   activity: [],
   announcements: [],
   reviews: [],
-  seenActivity: 0,
-  createdAt: 0,
+  seenActivity: 0n,
+  createdAt: 0n,
   pagination: {
     activity: {
       bookmark: '',
@@ -37,15 +37,15 @@ export const MINT_ACCOUNT: BitBadgesUserInfo = {
 
 export const BLANK_USER_INFO: BitBadgesUserInfo = {
   cosmosAddress: '',
-  accountNumber: -1,
+  accountNumber: -1n,
   address: '',
   chain: SupportedChain.UNKNOWN,
   collected: [],
   activity: [],
   announcements: [],
   reviews: [],
-  seenActivity: 0,
-  createdAt: 0,
+  seenActivity: 0n,
+  createdAt: 0n,
   pagination: {
     activity: {
       bookmark: '',
@@ -68,8 +68,9 @@ export const BLANK_USER_INFO: BitBadgesUserInfo = {
 
 /**
  * Converts an address from a supported chain to a cosmos address
- *
  * If we are unable to convert the address, we return an empty string
+ *
+ * @param {string} address - The address to convert
  */
 export function convertToCosmosAddress(address: string) {
   let bech32Address = '';
@@ -87,6 +88,8 @@ export function convertToCosmosAddress(address: string) {
 
 /**
  * Goes through the list of supported chains and returns the chain that the address belongs to.
+ *
+ * @param {string} address - The address to check
  */
 export function getChainForAddress(address: string) {
   try {
@@ -110,6 +113,8 @@ export function getChainForAddress(address: string) {
 
 /**
  * Gets an abbreviated display address
+ *
+ * @param {string} address - The address to abbreviate
  */
 export function getAbbreviatedAddress(address: string) {
   let isMintAddress = address === MINT_ACCOUNT.address;
@@ -125,6 +130,9 @@ export function getAbbreviatedAddress(address: string) {
  * Checks if an address is validly formatted.
  *
  * If chain is not provided, we will try to determine the chain from the address.
+ *
+ * @param {string} address - The address to check
+ * @param {string} chain - The chain to check the address against (optional)
  */
 export function isAddressValid(address: string, chain?: string) {
   let isValidAddress = true;

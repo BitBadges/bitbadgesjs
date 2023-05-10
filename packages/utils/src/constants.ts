@@ -2,10 +2,6 @@ import { Metadata } from './types/metadata'
 
 export const METADATA_PAGE_LIMIT = 100
 
-export const MAX_DATE_TIMESTAMP = 8640000000000000 / 1000
-
-export const GO_MAX_UINT_64 = 1000000000000000 // TODO: match with go value
-
 // Note: betanet will turn into testnet upon mainnet launch, so these are the same
 export const BETANET_CHAIN_DETAILS = {
   chainId: 1, // Ethereum mainnet
