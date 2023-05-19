@@ -18,8 +18,8 @@ import { Chain, Fee, Sender } from '../../common'
 
 export interface MessageMsgTransferManager {
   creator: string
-  collectionId: number
-  address: number
+  collectionId: bigint
+  address: string
 }
 
 export function createTxMsgTransferManager(

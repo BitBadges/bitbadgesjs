@@ -19,9 +19,10 @@ import { Chain, Fee, Sender } from '../../common'
 
 export interface MessageMsgUpdateUris {
   creator: string
-  collectionId: number
+  collectionId: bigint
   collectionUri: string
   badgeUris: BadgeUri[]
+  balancesUri: string
 }
 
 export function createTxMsgUpdateUris(
@@ -46,6 +47,7 @@ export function createTxMsgUpdateUris(
     params.collectionId,
     params.collectionUri,
     params.badgeUris,
+    params.balancesUri,
   )
   const messages = generateMessage(
     sender.accountNumber.toString(),
@@ -67,6 +69,7 @@ export function createTxMsgUpdateUris(
     params.collectionId,
     params.collectionUri,
     params.badgeUris,
+    params.balancesUri,
   )
   const tx = createTransaction(
     msgCosmos,

@@ -9,6 +9,7 @@ import * as dependency_1 from "./../gogoproto/gogo";
 import * as dependency_2 from "./params";
 import * as dependency_3 from "./badges";
 import * as dependency_4 from "./balances";
+import * as dependency_5 from "./claims";
 import * as pb_1 from "google-protobuf";
 export namespace bitbadges.bitbadgeschain.badges {
     export class GenesisState extends pb_1.Message {
@@ -17,13 +18,15 @@ export namespace bitbadges.bitbadgeschain.badges {
             params?: dependency_2.bitbadges.bitbadgeschain.badges.Params;
             port_id?: string;
             collections?: dependency_3.bitbadges.bitbadgeschain.badges.BadgeCollection[];
-            balances?: dependency_4.bitbadges.bitbadgeschain.badges.UserBalance[];
-            balance_ids?: string[];
-            nextCollectionId?: number;
-            nextClaimId?: number;
+            balances?: dependency_4.bitbadges.bitbadgeschain.badges.UserBalanceStore[];
+            balanceStoreKeys?: string[];
+            claims?: dependency_5.bitbadges.bitbadgeschain.badges.Claim[];
+            claimStoreKeys?: string[];
+            nextCollectionId?: string;
+            nextClaimId?: string;
         }) {
             super();
-            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [3, 4, 5], this.#one_of_decls);
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [3, 4, 5, 6, 7], this.#one_of_decls);
             if (!Array.isArray(data) && typeof data == "object") {
                 if ("params" in data && data.params != undefined) {
                     this.params = data.params;
@@ -37,8 +40,14 @@ export namespace bitbadges.bitbadgeschain.badges {
                 if ("balances" in data && data.balances != undefined) {
                     this.balances = data.balances;
                 }
-                if ("balance_ids" in data && data.balance_ids != undefined) {
-                    this.balance_ids = data.balance_ids;
+                if ("balanceStoreKeys" in data && data.balanceStoreKeys != undefined) {
+                    this.balanceStoreKeys = data.balanceStoreKeys;
+                }
+                if ("claims" in data && data.claims != undefined) {
+                    this.claims = data.claims;
+                }
+                if ("claimStoreKeys" in data && data.claimStoreKeys != undefined) {
+                    this.claimStoreKeys = data.claimStoreKeys;
                 }
                 if ("nextCollectionId" in data && data.nextCollectionId != undefined) {
                     this.nextCollectionId = data.nextCollectionId;
@@ -70,37 +79,51 @@ export namespace bitbadges.bitbadgeschain.badges {
             pb_1.Message.setRepeatedWrapperField(this, 3, value);
         }
         get balances() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.bitbadges.bitbadgeschain.badges.UserBalance, 4) as dependency_4.bitbadges.bitbadgeschain.badges.UserBalance[];
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.bitbadges.bitbadgeschain.badges.UserBalanceStore, 4) as dependency_4.bitbadges.bitbadgeschain.badges.UserBalanceStore[];
         }
-        set balances(value: dependency_4.bitbadges.bitbadgeschain.badges.UserBalance[]) {
+        set balances(value: dependency_4.bitbadges.bitbadgeschain.badges.UserBalanceStore[]) {
             pb_1.Message.setRepeatedWrapperField(this, 4, value);
         }
-        get balance_ids() {
+        get balanceStoreKeys() {
             return pb_1.Message.getFieldWithDefault(this, 5, []) as string[];
         }
-        set balance_ids(value: string[]) {
+        set balanceStoreKeys(value: string[]) {
             pb_1.Message.setField(this, 5, value);
         }
-        get nextCollectionId() {
-            return pb_1.Message.getFieldWithDefault(this, 6, 0) as number;
+        get claims() {
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_5.bitbadges.bitbadgeschain.badges.Claim, 6) as dependency_5.bitbadges.bitbadgeschain.badges.Claim[];
         }
-        set nextCollectionId(value: number) {
-            pb_1.Message.setField(this, 6, value);
+        set claims(value: dependency_5.bitbadges.bitbadgeschain.badges.Claim[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 6, value);
+        }
+        get claimStoreKeys() {
+            return pb_1.Message.getFieldWithDefault(this, 7, []) as string[];
+        }
+        set claimStoreKeys(value: string[]) {
+            pb_1.Message.setField(this, 7, value);
+        }
+        get nextCollectionId() {
+            return pb_1.Message.getFieldWithDefault(this, 8, "") as string;
+        }
+        set nextCollectionId(value: string) {
+            pb_1.Message.setField(this, 8, value);
         }
         get nextClaimId() {
-            return pb_1.Message.getFieldWithDefault(this, 7, 0) as number;
+            return pb_1.Message.getFieldWithDefault(this, 9, "") as string;
         }
-        set nextClaimId(value: number) {
-            pb_1.Message.setField(this, 7, value);
+        set nextClaimId(value: string) {
+            pb_1.Message.setField(this, 9, value);
         }
         static fromObject(data: {
             params?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.Params.prototype.toObject>;
             port_id?: string;
             collections?: ReturnType<typeof dependency_3.bitbadges.bitbadgeschain.badges.BadgeCollection.prototype.toObject>[];
-            balances?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UserBalance.prototype.toObject>[];
-            balance_ids?: string[];
-            nextCollectionId?: number;
-            nextClaimId?: number;
+            balances?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UserBalanceStore.prototype.toObject>[];
+            balanceStoreKeys?: string[];
+            claims?: ReturnType<typeof dependency_5.bitbadges.bitbadgeschain.badges.Claim.prototype.toObject>[];
+            claimStoreKeys?: string[];
+            nextCollectionId?: string;
+            nextClaimId?: string;
         }): GenesisState {
             const message = new GenesisState({});
             if (data.params != null) {
@@ -113,10 +136,16 @@ export namespace bitbadges.bitbadgeschain.badges {
                 message.collections = data.collections.map(item => dependency_3.bitbadges.bitbadgeschain.badges.BadgeCollection.fromObject(item));
             }
             if (data.balances != null) {
-                message.balances = data.balances.map(item => dependency_4.bitbadges.bitbadgeschain.badges.UserBalance.fromObject(item));
+                message.balances = data.balances.map(item => dependency_4.bitbadges.bitbadgeschain.badges.UserBalanceStore.fromObject(item));
             }
-            if (data.balance_ids != null) {
-                message.balance_ids = data.balance_ids;
+            if (data.balanceStoreKeys != null) {
+                message.balanceStoreKeys = data.balanceStoreKeys;
+            }
+            if (data.claims != null) {
+                message.claims = data.claims.map(item => dependency_5.bitbadges.bitbadgeschain.badges.Claim.fromObject(item));
+            }
+            if (data.claimStoreKeys != null) {
+                message.claimStoreKeys = data.claimStoreKeys;
             }
             if (data.nextCollectionId != null) {
                 message.nextCollectionId = data.nextCollectionId;
@@ -131,10 +160,12 @@ export namespace bitbadges.bitbadgeschain.badges {
                 params?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.Params.prototype.toObject>;
                 port_id?: string;
                 collections?: ReturnType<typeof dependency_3.bitbadges.bitbadgeschain.badges.BadgeCollection.prototype.toObject>[];
-                balances?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UserBalance.prototype.toObject>[];
-                balance_ids?: string[];
-                nextCollectionId?: number;
-                nextClaimId?: number;
+                balances?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UserBalanceStore.prototype.toObject>[];
+                balanceStoreKeys?: string[];
+                claims?: ReturnType<typeof dependency_5.bitbadges.bitbadgeschain.badges.Claim.prototype.toObject>[];
+                claimStoreKeys?: string[];
+                nextCollectionId?: string;
+                nextClaimId?: string;
             } = {};
             if (this.params != null) {
                 data.params = this.params.toObject();
@@ -146,10 +177,16 @@ export namespace bitbadges.bitbadgeschain.badges {
                 data.collections = this.collections.map((item: dependency_3.bitbadges.bitbadgeschain.badges.BadgeCollection) => item.toObject());
             }
             if (this.balances != null) {
-                data.balances = this.balances.map((item: dependency_4.bitbadges.bitbadgeschain.badges.UserBalance) => item.toObject());
+                data.balances = this.balances.map((item: dependency_4.bitbadges.bitbadgeschain.badges.UserBalanceStore) => item.toObject());
             }
-            if (this.balance_ids != null) {
-                data.balance_ids = this.balance_ids;
+            if (this.balanceStoreKeys != null) {
+                data.balanceStoreKeys = this.balanceStoreKeys;
+            }
+            if (this.claims != null) {
+                data.claims = this.claims.map((item: dependency_5.bitbadges.bitbadgeschain.badges.Claim) => item.toObject());
+            }
+            if (this.claimStoreKeys != null) {
+                data.claimStoreKeys = this.claimStoreKeys;
             }
             if (this.nextCollectionId != null) {
                 data.nextCollectionId = this.nextCollectionId;
@@ -170,13 +207,17 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (this.collections.length)
                 writer.writeRepeatedMessage(3, this.collections, (item: dependency_3.bitbadges.bitbadgeschain.badges.BadgeCollection) => item.serialize(writer));
             if (this.balances.length)
-                writer.writeRepeatedMessage(4, this.balances, (item: dependency_4.bitbadges.bitbadgeschain.badges.UserBalance) => item.serialize(writer));
-            if (this.balance_ids.length)
-                writer.writeRepeatedString(5, this.balance_ids);
-            if (this.nextCollectionId != 0)
-                writer.writeUint64(6, this.nextCollectionId);
-            if (this.nextClaimId != 0)
-                writer.writeUint64(7, this.nextClaimId);
+                writer.writeRepeatedMessage(4, this.balances, (item: dependency_4.bitbadges.bitbadgeschain.badges.UserBalanceStore) => item.serialize(writer));
+            if (this.balanceStoreKeys.length)
+                writer.writeRepeatedString(5, this.balanceStoreKeys);
+            if (this.claims.length)
+                writer.writeRepeatedMessage(6, this.claims, (item: dependency_5.bitbadges.bitbadgeschain.badges.Claim) => item.serialize(writer));
+            if (this.claimStoreKeys.length)
+                writer.writeRepeatedString(7, this.claimStoreKeys);
+            if (this.nextCollectionId.length)
+                writer.writeString(8, this.nextCollectionId);
+            if (this.nextClaimId.length)
+                writer.writeString(9, this.nextClaimId);
             if (!w)
                 return writer.getResultBuffer();
         }
@@ -196,16 +237,22 @@ export namespace bitbadges.bitbadgeschain.badges {
                         reader.readMessage(message.collections, () => pb_1.Message.addToRepeatedWrapperField(message, 3, dependency_3.bitbadges.bitbadgeschain.badges.BadgeCollection.deserialize(reader), dependency_3.bitbadges.bitbadgeschain.badges.BadgeCollection));
                         break;
                     case 4:
-                        reader.readMessage(message.balances, () => pb_1.Message.addToRepeatedWrapperField(message, 4, dependency_4.bitbadges.bitbadgeschain.badges.UserBalance.deserialize(reader), dependency_4.bitbadges.bitbadgeschain.badges.UserBalance));
+                        reader.readMessage(message.balances, () => pb_1.Message.addToRepeatedWrapperField(message, 4, dependency_4.bitbadges.bitbadgeschain.badges.UserBalanceStore.deserialize(reader), dependency_4.bitbadges.bitbadgeschain.badges.UserBalanceStore));
                         break;
                     case 5:
                         pb_1.Message.addToRepeatedField(message, 5, reader.readString());
                         break;
                     case 6:
-                        message.nextCollectionId = reader.readUint64();
+                        reader.readMessage(message.claims, () => pb_1.Message.addToRepeatedWrapperField(message, 6, dependency_5.bitbadges.bitbadgeschain.badges.Claim.deserialize(reader), dependency_5.bitbadges.bitbadgeschain.badges.Claim));
                         break;
                     case 7:
-                        message.nextClaimId = reader.readUint64();
+                        pb_1.Message.addToRepeatedField(message, 7, reader.readString());
+                        break;
+                    case 8:
+                        message.nextCollectionId = reader.readString();
+                        break;
+                    case 9:
+                        message.nextClaimId = reader.readString();
                         break;
                     default: reader.skipField();
                 }

@@ -1,22 +1,20 @@
 import * as badges from '../../../proto/badges/tx'
-import { getWrappedProof, ClaimProof } from './typeUtils'
+import { ChallengeSolution, getWrappedSolutions } from './typeUtils'
 
 export function createMsgClaimBadge(
-    creator: string,
-    claimId: number,
-    collectionId: number,
-    whitelistProof: ClaimProof,
-    codeProof: ClaimProof,
+  creator: string,
+  claimId: bigint,
+  collectionId: bigint,
+  solutions: ChallengeSolution[],
 ) {
-    const message = new badges.bitbadges.bitbadgeschain.badges.MsgClaimBadge({
-        creator,
-        collectionId,
-        claimId,
-        whitelistProof: getWrappedProof(whitelistProof),
-        codeProof: getWrappedProof(codeProof),
-    })
-    return {
-        message,
-        path: 'bitbadges.bitbadgeschain.badges.MsgClaimBadge',
-    }
+  const message = new badges.bitbadges.bitbadgeschain.badges.MsgClaimBadge({
+    creator,
+    collectionId: collectionId.toString(),
+    claimId: claimId.toString(),
+    solutions: getWrappedSolutions(solutions),
+  })
+  return {
+    message,
+    path: 'bitbadges.bitbadgeschain.badges.MsgClaimBadge',
+  }
 }

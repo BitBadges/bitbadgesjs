@@ -5,6 +5,7 @@
  * compiler version: 3.6.1
  * source: badges/ranges.proto
  * git: https://github.com/thesayyn/protoc-gen-ts */
+import * as dependency_1 from "./../gogoproto/gogo";
 import * as pb_1 from "google-protobuf";
 export namespace bitbadges.bitbadgeschain.badges {
     export enum AddressOptions {
@@ -15,8 +16,8 @@ export namespace bitbadges.bitbadgeschain.badges {
     export class IdRange extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
-            start?: number;
-            end?: number;
+            start?: string;
+            end?: string;
         }) {
             super();
             pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
@@ -30,20 +31,20 @@ export namespace bitbadges.bitbadgeschain.badges {
             }
         }
         get start() {
-            return pb_1.Message.getFieldWithDefault(this, 1, 0) as number;
+            return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
         }
-        set start(value: number) {
+        set start(value: string) {
             pb_1.Message.setField(this, 1, value);
         }
         get end() {
-            return pb_1.Message.getFieldWithDefault(this, 2, 0) as number;
+            return pb_1.Message.getFieldWithDefault(this, 2, "") as string;
         }
-        set end(value: number) {
+        set end(value: string) {
             pb_1.Message.setField(this, 2, value);
         }
         static fromObject(data: {
-            start?: number;
-            end?: number;
+            start?: string;
+            end?: string;
         }): IdRange {
             const message = new IdRange({});
             if (data.start != null) {
@@ -56,8 +57,8 @@ export namespace bitbadges.bitbadgeschain.badges {
         }
         toObject() {
             const data: {
-                start?: number;
-                end?: number;
+                start?: string;
+                end?: string;
             } = {};
             if (this.start != null) {
                 data.start = this.start;
@@ -71,10 +72,10 @@ export namespace bitbadges.bitbadgeschain.badges {
         serialize(w: pb_1.BinaryWriter): void;
         serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
             const writer = w || new pb_1.BinaryWriter();
-            if (this.start != 0)
-                writer.writeUint64(1, this.start);
-            if (this.end != 0)
-                writer.writeUint64(2, this.end);
+            if (this.start.length)
+                writer.writeString(1, this.start);
+            if (this.end.length)
+                writer.writeString(2, this.end);
             if (!w)
                 return writer.getResultBuffer();
         }
@@ -85,10 +86,10 @@ export namespace bitbadges.bitbadgeschain.badges {
                     break;
                 switch (reader.getFieldNumber()) {
                     case 1:
-                        message.start = reader.readUint64();
+                        message.start = reader.readString();
                         break;
                     case 2:
-                        message.end = reader.readUint64();
+                        message.end = reader.readString();
                         break;
                     default: reader.skipField();
                 }
@@ -102,58 +103,76 @@ export namespace bitbadges.bitbadgeschain.badges {
             return IdRange.deserialize(bytes);
         }
     }
-    export class Addresses extends pb_1.Message {
+    export class AddressesMapping extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
-            accountIds?: IdRange[];
-            options?: number;
+            addresses?: string[];
+            includeOnlySpecified?: boolean;
+            managerOptions?: string;
         }) {
             super();
             pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1], this.#one_of_decls);
             if (!Array.isArray(data) && typeof data == "object") {
-                if ("accountIds" in data && data.accountIds != undefined) {
-                    this.accountIds = data.accountIds;
+                if ("addresses" in data && data.addresses != undefined) {
+                    this.addresses = data.addresses;
                 }
-                if ("options" in data && data.options != undefined) {
-                    this.options = data.options;
+                if ("includeOnlySpecified" in data && data.includeOnlySpecified != undefined) {
+                    this.includeOnlySpecified = data.includeOnlySpecified;
+                }
+                if ("managerOptions" in data && data.managerOptions != undefined) {
+                    this.managerOptions = data.managerOptions;
                 }
             }
         }
-        get accountIds() {
-            return pb_1.Message.getRepeatedWrapperField(this, IdRange, 1) as IdRange[];
+        get addresses() {
+            return pb_1.Message.getFieldWithDefault(this, 1, []) as string[];
         }
-        set accountIds(value: IdRange[]) {
-            pb_1.Message.setRepeatedWrapperField(this, 1, value);
+        set addresses(value: string[]) {
+            pb_1.Message.setField(this, 1, value);
         }
-        get options() {
-            return pb_1.Message.getFieldWithDefault(this, 2, 0) as number;
+        get includeOnlySpecified() {
+            return pb_1.Message.getFieldWithDefault(this, 2, false) as boolean;
         }
-        set options(value: number) {
+        set includeOnlySpecified(value: boolean) {
             pb_1.Message.setField(this, 2, value);
         }
+        get managerOptions() {
+            return pb_1.Message.getFieldWithDefault(this, 3, "") as string;
+        }
+        set managerOptions(value: string) {
+            pb_1.Message.setField(this, 3, value);
+        }
         static fromObject(data: {
-            accountIds?: ReturnType<typeof IdRange.prototype.toObject>[];
-            options?: number;
-        }): Addresses {
-            const message = new Addresses({});
-            if (data.accountIds != null) {
-                message.accountIds = data.accountIds.map(item => IdRange.fromObject(item));
+            addresses?: string[];
+            includeOnlySpecified?: boolean;
+            managerOptions?: string;
+        }): AddressesMapping {
+            const message = new AddressesMapping({});
+            if (data.addresses != null) {
+                message.addresses = data.addresses;
             }
-            if (data.options != null) {
-                message.options = data.options;
+            if (data.includeOnlySpecified != null) {
+                message.includeOnlySpecified = data.includeOnlySpecified;
+            }
+            if (data.managerOptions != null) {
+                message.managerOptions = data.managerOptions;
             }
             return message;
         }
         toObject() {
             const data: {
-                accountIds?: ReturnType<typeof IdRange.prototype.toObject>[];
-                options?: number;
+                addresses?: string[];
+                includeOnlySpecified?: boolean;
+                managerOptions?: string;
             } = {};
-            if (this.accountIds != null) {
-                data.accountIds = this.accountIds.map((item: IdRange) => item.toObject());
+            if (this.addresses != null) {
+                data.addresses = this.addresses;
             }
-            if (this.options != null) {
-                data.options = this.options;
+            if (this.includeOnlySpecified != null) {
+                data.includeOnlySpecified = this.includeOnlySpecified;
+            }
+            if (this.managerOptions != null) {
+                data.managerOptions = this.managerOptions;
             }
             return data;
         }
@@ -161,24 +180,29 @@ export namespace bitbadges.bitbadgeschain.badges {
         serialize(w: pb_1.BinaryWriter): void;
         serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
             const writer = w || new pb_1.BinaryWriter();
-            if (this.accountIds.length)
-                writer.writeRepeatedMessage(1, this.accountIds, (item: IdRange) => item.serialize(writer));
-            if (this.options != 0)
-                writer.writeUint64(2, this.options);
+            if (this.addresses.length)
+                writer.writeRepeatedString(1, this.addresses);
+            if (this.includeOnlySpecified != false)
+                writer.writeBool(2, this.includeOnlySpecified);
+            if (this.managerOptions.length)
+                writer.writeString(3, this.managerOptions);
             if (!w)
                 return writer.getResultBuffer();
         }
-        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): Addresses {
-            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new Addresses();
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): AddressesMapping {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new AddressesMapping();
             while (reader.nextField()) {
                 if (reader.isEndGroup())
                     break;
                 switch (reader.getFieldNumber()) {
                     case 1:
-                        reader.readMessage(message.accountIds, () => pb_1.Message.addToRepeatedWrapperField(message, 1, IdRange.deserialize(reader), IdRange));
+                        pb_1.Message.addToRepeatedField(message, 1, reader.readString());
                         break;
                     case 2:
-                        message.options = reader.readUint64();
+                        message.includeOnlySpecified = reader.readBool();
+                        break;
+                    case 3:
+                        message.managerOptions = reader.readString();
                         break;
                     default: reader.skipField();
                 }
@@ -188,15 +212,15 @@ export namespace bitbadges.bitbadgeschain.badges {
         serializeBinary(): Uint8Array {
             return this.serialize();
         }
-        static deserializeBinary(bytes: Uint8Array): Addresses {
-            return Addresses.deserialize(bytes);
+        static deserializeBinary(bytes: Uint8Array): AddressesMapping {
+            return AddressesMapping.deserialize(bytes);
         }
     }
     export class TransferMapping extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
-            from?: Addresses;
-            to?: Addresses;
+            from?: AddressesMapping;
+            to?: AddressesMapping;
         }) {
             super();
             pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
@@ -210,40 +234,40 @@ export namespace bitbadges.bitbadgeschain.badges {
             }
         }
         get from() {
-            return pb_1.Message.getWrapperField(this, Addresses, 1) as Addresses;
+            return pb_1.Message.getWrapperField(this, AddressesMapping, 1) as AddressesMapping;
         }
-        set from(value: Addresses) {
+        set from(value: AddressesMapping) {
             pb_1.Message.setWrapperField(this, 1, value);
         }
         get has_from() {
             return pb_1.Message.getField(this, 1) != null;
         }
         get to() {
-            return pb_1.Message.getWrapperField(this, Addresses, 2) as Addresses;
+            return pb_1.Message.getWrapperField(this, AddressesMapping, 2) as AddressesMapping;
         }
-        set to(value: Addresses) {
+        set to(value: AddressesMapping) {
             pb_1.Message.setWrapperField(this, 2, value);
         }
         get has_to() {
             return pb_1.Message.getField(this, 2) != null;
         }
         static fromObject(data: {
-            from?: ReturnType<typeof Addresses.prototype.toObject>;
-            to?: ReturnType<typeof Addresses.prototype.toObject>;
+            from?: ReturnType<typeof AddressesMapping.prototype.toObject>;
+            to?: ReturnType<typeof AddressesMapping.prototype.toObject>;
         }): TransferMapping {
             const message = new TransferMapping({});
             if (data.from != null) {
-                message.from = Addresses.fromObject(data.from);
+                message.from = AddressesMapping.fromObject(data.from);
             }
             if (data.to != null) {
-                message.to = Addresses.fromObject(data.to);
+                message.to = AddressesMapping.fromObject(data.to);
             }
             return message;
         }
         toObject() {
             const data: {
-                from?: ReturnType<typeof Addresses.prototype.toObject>;
-                to?: ReturnType<typeof Addresses.prototype.toObject>;
+                from?: ReturnType<typeof AddressesMapping.prototype.toObject>;
+                to?: ReturnType<typeof AddressesMapping.prototype.toObject>;
             } = {};
             if (this.from != null) {
                 data.from = this.from.toObject();
@@ -271,10 +295,10 @@ export namespace bitbadges.bitbadgeschain.badges {
                     break;
                 switch (reader.getFieldNumber()) {
                     case 1:
-                        reader.readMessage(message.from, () => message.from = Addresses.deserialize(reader));
+                        reader.readMessage(message.from, () => message.from = AddressesMapping.deserialize(reader));
                         break;
                     case 2:
-                        reader.readMessage(message.to, () => message.to = Addresses.deserialize(reader));
+                        reader.readMessage(message.to, () => message.to = AddressesMapping.deserialize(reader));
                         break;
                     default: reader.skipField();
                 }

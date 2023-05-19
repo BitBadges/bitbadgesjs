@@ -8,42 +8,50 @@ export const TRANSFER_MAPPING_TYPES = [
   { name: 'to', type: 'Addresses' },
 ]
 
-export const ADDRESSES_TYPES = [
-  { name: 'accountIds', type: 'IdRange[]' },
-  { name: 'options', type: 'uint64' },
+export const ADDRESSES_MAPPING_TYPES = [
+  { name: 'addresses', type: 'string[]' },
+  { name: 'includeOnlySpecified', type: 'bool' },
+  { name: 'managerOptions', type: 'string' },
 ]
 
 export const ID_RANGE_TYPES = [
-  { name: 'start', type: 'uint64' },
-  { name: 'end', type: 'uint64' },
+  { name: 'start', type: 'string' },
+  { name: 'end', type: 'string' },
 ]
 
 export const BALANCE_TYPES = [
-  { name: 'balance', type: 'uint64' },
+  { name: 'amount', type: 'string' },
   { name: 'badgeIds', type: 'IdRange[]' },
 ]
 
 export const BADGE_SUPPLY_AND_AMOUNT_TYPES = [
-  { name: 'supply', type: 'uint64' },
-  { name: 'amount', type: 'uint64' },
+  { name: 'supply', type: 'string' },
+  { name: 'amount', type: 'string' },
 ]
 
 export const TRANSFERS_TYPES = [
-  { name: 'toAddresses', type: 'uint64[]' },
+  { name: 'toAddresses', type: 'string[]' },
   { name: 'balances', type: 'Balance[]' },
 ]
 
+export const CHALLENGE_SOLUTION_TYPES = [
+  { name: 'proof', type: 'ClaimProof' },
+]
+
+export const CHALLENGE_TYPES = [
+  { name: 'root', type: 'string' },
+  { name: 'expectedProofLength', type: 'string' },
+  { name: 'useCreatorAddressAsLeaf', type: 'bool' },
+]
+
 export const CLAIMS_TYPES = [
-  { name: 'balances', type: 'Balance[]' },
-  { name: 'codeRoot', type: 'string' },
-  { name: 'whitelistRoot', type: 'string' },
-  { name: 'incrementIdsBy', type: 'uint64' },
-  { name: 'amount', type: 'uint64' },
-  { name: 'badgeIds', type: 'IdRange[]' },
-  { name: 'restrictOptions', type: 'uint64' },
-  { name: 'uri', type: 'string' },
+  { name: 'undistributedBalances', type: 'Balance[]' },
   { name: 'timeRange', type: 'IdRange' },
-  { name: 'expectedMerkleProofLength', type: 'uint64' },
+  { name: 'uri', type: 'string' },
+  { name: 'numClaimsPerAddress', type: 'string' },
+  { name: 'incrementIdsBy', type: 'string' },
+  { name: 'currentClaimAmounts', type: 'Balance[]' },
+  { name: 'challenges', type: 'Challenge[]' },
 ]
 
 export const CLAIM_PROOF_TYPES = [

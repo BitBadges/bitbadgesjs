@@ -1,14 +1,14 @@
-import { BadgeUri, Balance, Challenge, Claim, IdRange, TransferMapping, UserBalance } from "bitbadgesjs-proto";
+import { BadgeUri, Balance, Challenge, ChallengeBase, Claim, ClaimBase, IdRange, TransferMapping, UserBalance, UserBalanceBase, convertFromApproval, convertFromBalance, convertFromIdRange, convertToApproval, convertToBalance, convertToIdRange, s_Challenge, s_Claim, s_UserBalance } from "bitbadgesjs-proto";
 import { Metadata } from "./metadata";
 import { Permissions } from "./permissions";
 import MerkleTree from "merkletreejs";
 import { SupportedChain } from "./types";
 
 /**
- * CollectionDocument is the type of document stored in the collections database (see documentation for more info)
+ * CollectionBase is the type of document stored in the collections database (see documentation for more info)
  *
- * @typedef {Object} CollectionDocument
- * @property {bigint} collectionId - The collection ID
+ * @typedef {Object} CollectionBase
+ * @property {bigint | string} collectionId - The collection ID
  * @property {string} collectionUri - The URI of the collection
  * @property {BadgeUri[]} badgeUris - The list of badge URIs for this collection and their respective badge IDs
  * @property {string} balancesUri - The URI of the balances for this collection (only used for off-chain balances)
@@ -17,16 +17,16 @@ import { SupportedChain } from "./types";
  * @property {Permissions} permissions - The permissions of the manager of this collection
  * @property {TransferMapping[]} allowedTransfers - The list of allowed transfers for this collection
  * @property {TransferMapping[]} managerApprovedTransfers - The list of manager approved transfers for this collection
- * @property {bigint} nextBadgeId - The next badge ID to be minted for this collection
- * @property {bigint} nextClaimId - The next claim ID to be minted for this collection
+ * @property {bigint | string} nextBadgeId - The next badge ID to be minted for this collection
+ * @property {bigint | string} nextClaimId - The next claim ID to be minted for this collection
  * @property {Balance[]} unmintedSupplys - The list of unminted supplies for this collection
  * @property {Balance[]} maxSupplys - The list of max supplies for this collection
- * @property {bigint} standard - The standard of this collection
+ * @property {bigint | string} standard - The standard of this collection
  * @property {Challenge[]} managerRequests - The list of manager requests for this collection
- * @property {bigint} createdBlock - The block number when this collection was created
+ * @property {bigint | string} createdBlock - The block number when this collection was created
  */
-export interface CollectionDocument {
-  collectionId: bigint;
+export interface CollectionBase {
+  collectionId: bigint | string;
   collectionUri: string;
   badgeUris: BadgeUri[];
   balancesUri: string;
@@ -35,25 +35,64 @@ export interface CollectionDocument {
   permissions: Permissions;
   allowedTransfers: TransferMapping[];
   managerApprovedTransfers: TransferMapping[];
-  nextBadgeId: bigint;
-  nextClaimId: bigint;
+  nextBadgeId: bigint | string;
+  nextClaimId: bigint | string;
   unmintedSupplys: Balance[];
   maxSupplys: Balance[];
+  standard: bigint | string;
+  managerRequests: string[];
+  createdBlock: bigint | string;
+}
+
+export interface s_Collection extends CollectionBase {
+  collectionId: string;
+  nextBadgeId: string;
+  nextClaimId: string;
+  standard: string;
+  createdBlock: string;
+}
+
+export interface Collection extends CollectionBase {
+  collectionId: bigint;
+  nextBadgeId: bigint;
+  nextClaimId: bigint;
   standard: bigint;
-  managerRequests: bigint[];
   createdBlock: bigint;
 }
 
+export function convertToCollection(s_item: s_Collection): Collection {
+  return {
+    ...s_item,
+    collectionId: BigInt(s_item.collectionId),
+    nextBadgeId: BigInt(s_item.nextBadgeId),
+    nextClaimId: BigInt(s_item.nextClaimId),
+    standard: BigInt(s_item.standard),
+    createdBlock: BigInt(s_item.createdBlock),
+  }
+}
+
+export function convertFromCollection(item: Collection): s_Collection {
+  return {
+    ...item,
+    collectionId: item.collectionId.toString(),
+    nextBadgeId: item.nextBadgeId.toString(),
+    nextClaimId: item.nextClaimId.toString(),
+    standard: item.standard.toString(),
+    createdBlock: item.createdBlock.toString(),
+  }
+}
+
+
 /**
- * AccountDocument is the type of document stored in the accounts database
+ * AccountBase is the type of document stored in the accounts database
  *
- * @typedef {Object} AccountDocument
+ * @typedef {Object} AccountBase
  * @property {string} cosmosAddress - The Cosmos address of the account
- * @property {bigint} accountNumber - The account number of the account
+ * @property {bigint | string} accountNumber - The account number of the account
  * @property {string} address - The native chain's address of the account
  * @property {SupportedChain} chain - The native chain of the account
- * @property {bigint} seenActivity - The timestamp of the last activity seen for this account (milliseconds since epoch)
- * @property {bigint} createdAt - The timestamp of when this account was created (milliseconds since epoch)
+ * @property {bigint | string} seenActivity - The timestamp of the last activity seen for this account (milliseconds since epoch)
+ * @property {bigint | string} createdAt - The timestamp of when this account was created (milliseconds since epoch)
  *
  * @property {string} username - The username of the account
  * @property {string} discord - The Discord username of the account
@@ -67,15 +106,15 @@ export interface CollectionDocument {
  * Other information like resolvedName, avatar, balance, etc are to be loaded dynamically each time the account is fetched
  *
  * @see
- * See BitBadgesUserInfo
+ * See UserInfo
  */
-export interface AccountDocument {
+export interface AccountBase {
   cosmosAddress: string,
-  accountNumber: bigint;
+  accountNumber: bigint | string;
   chain: SupportedChain,
   address: string,
-  seenActivity?: bigint;
-  createdAt?: bigint;
+  seenActivity?: bigint | string;
+  createdAt?: bigint | string;
 
   //Profile customization
   username?: string
@@ -86,15 +125,45 @@ export interface AccountDocument {
   readme?: string
 }
 
+export interface Account extends AccountBase {
+  accountNumber: bigint;
+  seenActivity?: bigint;
+  createdAt?: bigint;
+}
+
+export interface s_Account extends AccountBase {
+  accountNumber: string;
+  seenActivity?: string;
+  createdAt?: string;
+}
+
+export function convertToAccount(s_item: s_Account): Account {
+  return {
+    ...s_item,
+    accountNumber: BigInt(s_item.accountNumber),
+    seenActivity: s_item.seenActivity ? BigInt(s_item.seenActivity) : undefined,
+    createdAt: s_item.createdAt ? BigInt(s_item.createdAt) : undefined,
+  }
+}
+
+export function convertFromAccount(item: Account): s_Account {
+  return {
+    ...item,
+    accountNumber: item.accountNumber.toString(),
+    seenActivity: item.seenActivity ? item.seenActivity.toString() : undefined,
+    createdAt: item.createdAt ? item.createdAt.toString() : undefined,
+  }
+}
+
 /**
  * Metadata document stored in the metadata database
  * Partitioned database by collection ID (e.g. 1-0, 1-1, and so on represent the metadata documents for collection 1)
  *
- * @typedef {Object} MetadataDocument
+ * @typedef {Object} MetadataDocBase
  * @property {Metadata} metadata - The metadata object
  * @property {IdRange[]} badgeIds - The range of badge IDs that this metadata document is responsible for
  * @property {boolean} isCollection - True if this is a collection metadata document
- * @property {bigint} metadataId - The metadata ID for the document. The id for the metadata document is calculated deterministically from badgeUris field (see metadata.ts).
+ * @property {bigint | string} metadataId - The metadata ID for the document. The id for the metadata document is calculated deterministically from badgeUris field (see metadata.ts).
  * @property {string} uri - The URI of the metadata
  *
  *
@@ -115,12 +184,50 @@ export interface AccountDocument {
  *   store metadata in database with metadataId = metadataId and badgeIds = badgeUri.badgeIds
  *  metadataId++
  */
-export interface MetadataDocument {
+export interface MetadataDocBase {
   metadata: Metadata
   badgeIds: IdRange[]
   isCollection: boolean
-  metadataId: bigint
+  metadataId: bigint | string
   uri: string
+}
+
+/**
+ * MetadataDoc fields
+ *
+ * @typedef {Object} MetadataDoc
+ * @extends MetadataDocBase
+ *
+ * @see MetadataDocBase
+ */
+export interface MetadataDoc extends MetadataDocBase {
+  metadataId: bigint
+}
+
+/**
+ * s_MetadataDoc fields. Has strings instead of bigints.
+ *
+ * @typedef {Object} s_MetadataDoc
+ * @extends MetadataDocBase
+ *
+ * @see MetadataDocBase
+ */
+export interface s_MetadataDoc extends MetadataDocBase {
+  metadataId: string
+}
+
+export function convertToMetadataDoc(s_item: s_MetadataDoc): MetadataDoc {
+  return {
+    ...s_item,
+    metadataId: BigInt(s_item.metadataId),
+  }
+}
+
+export function convertFromMetadataDoc(item: MetadataDoc): s_MetadataDoc {
+  return {
+    ...item,
+    metadataId: item.metadataId.toString(),
+  }
 }
 
 /** STATUS TYPES **/
@@ -128,49 +235,112 @@ export interface IndexerStatus {
   status: DbStatus
 }
 
-export interface LatestBlockStatus {
-  height: bigint
+/**
+ * QueueItemBase represents an item in the queue
+ *
+ * @typedef {Object} QueueItemBase
+ * @property {bigint | string} startMetadataId - The starting metadata ID for this queue item (doesn't change).
+ * @property {bigint | string} currentMetadataId - The current metadata ID for this queue item (increments as each ID is processed).
+ * @property {string} uri - The URI of the metadata to be fetched. If {id} is present, it will be replaced with each individual ID in badgeIds
+ * @property {bigint | string} collectionId - The collection ID of the metadata to be fetched
+ * @property {boolean} collection - True if this is a collection metadata
+ * @property {IdRange[]} badgeIds - The range of badge IDs that this queue item should fetch
+ * @property {bigint | string} numCalls - The number of times this queue item has been called
+ * @property {bigint | string} specificId - The specific badge ID to be fetched (used if you only want to fetch a specific badge ID)
+ * @property {boolean} purge - True if we should purge excess metadata documents from the database
+ */
+export interface QueueItemBase {
+  startMetadataId: bigint | string,
+  currentMetadataId: bigint | string | 'collection',
+  uri: string,
+  collectionId: bigint | string,
+  collection: boolean,
+  badgeIds: IdRange[],
+  numCalls: bigint | string,
+  specificId?: bigint | string,
+  purge?: boolean
 }
 
 /**
  * QueueItem represents an item in the queue
  *
  * @typedef {Object} QueueItem
- * @property {bigint} startMetadataId - The starting metadata ID for this queue item (doesn't change).
- * @property {bigint} currentMetadataId - The current metadata ID for this queue item (increments as each ID is processed).
- * @property {string} uri - The URI of the metadata to be fetched. If {id} is present, it will be replaced with each individual ID in badgeIds
- * @property {bigint} collectionId - The collection ID of the metadata to be fetched
- * @property {boolean} collection - True if this is a collection metadata
- * @property {IdRange[]} badgeIds - The range of badge IDs that this queue item should fetch
- * @property {bigint} numCalls - The number of times this queue item has been called
- * @property {bigint} specificId - The specific badge ID to be fetched (used if you only want to fetch a specific badge ID)
- * @property {boolean} purge - True if we should purge excess metadata documents from the database
+ * @extends QueueItemBase
+ *
+ * @see QueueItemBase
  */
-export interface QueueItem {
+export interface QueueItem extends QueueItemBase {
   startMetadataId: bigint,
   currentMetadataId: bigint | 'collection',
-  uri: string,
   collectionId: bigint,
-  collection: boolean,
-  badgeIds: IdRange[],
-  numCalls: bigint,
-  specificId?: bigint,
-  purge?: boolean
+  numCalls: bigint
+  specificId?: bigint
 }
 
+/**
+ * s_QueueItem represents an item in the queue
+ *
+ * Has strings instead of bigints
+ *
+ * @typedef {Object} s_QueueItem
+ * @extends QueueItemBase
+ *
+ * @see QueueItemBase
+ */
+export interface s_QueueItem extends QueueItemBase {
+  startMetadataId: string,
+  currentMetadataId: string | 'collection',
+  collectionId: string,
+  numCalls: string
+  specificId?: string
+}
+
+export function convertToQueueItem(s_item: s_QueueItem): QueueItem {
+  return {
+    ...s_item,
+    startMetadataId: BigInt(s_item.startMetadataId),
+    currentMetadataId: s_item.currentMetadataId === 'collection' ? s_item.currentMetadataId : BigInt(s_item.currentMetadataId),
+    collectionId: BigInt(s_item.collectionId),
+    numCalls: BigInt(s_item.numCalls),
+    specificId: s_item.specificId ? BigInt(s_item.specificId) : undefined,
+  }
+}
+
+export function convertFromQueueItem(item: QueueItem): s_QueueItem {
+  return {
+    ...item,
+    startMetadataId: item.startMetadataId.toString(),
+    currentMetadataId: item.currentMetadataId === 'collection' ? item.currentMetadataId : item.currentMetadataId.toString(),
+    collectionId: item.collectionId.toString(),
+    numCalls: item.numCalls.toString(),
+    specificId: item.specificId ? item.specificId.toString() : undefined,
+  }
+}
 
 /**
  * DbStatus represents the status document stored in the database
  *
- * @typedef {Object} DbStatus
+ * @typedef {Object} DbStatusBase
  * @property {LatestBlockStatus} block - The latest synced block status (i.e. height)
- * @property {bigint} nextCollectionId - The next collection ID to be used
+ * @property {bigint | string} nextCollectionId - The next collection ID to be used
  * @property {QueueItem[]} queue - The queue of metadata to be fetched / handled
- * @property {bigint} gasPrice - The current gas price based on the average of the lastXGasPrices
- * @property {bigint[]} lastXGasPrices - The last X gas prices
+ * @property {bigint | string} gasPrice - The current gas price based on the average of the lastXGasPrices
+ * @property {(bigint | string)[]} lastXGasPrices - The last X gas prices
  */
-export interface DbStatus {
-  block: LatestBlockStatus;
+export interface DbStatusBase {
+  block: {
+    height: bigint | string
+  };
+  nextCollectionId: bigint | string;
+  queue: QueueItemBase[],
+  gasPrice: bigint | string;
+  lastXGasPrices: (bigint | string)[];
+}
+
+export interface DbStatus extends DbStatusBase {
+  block: {
+    height: bigint
+  };
   nextCollectionId: bigint;
   queue: QueueItem[],
   gasPrice: bigint;
@@ -178,14 +348,77 @@ export interface DbStatus {
 }
 
 /**
- * BalanceDocument is the type of document stored in the balances database
+ * s_DbStatus represents the status document stored in the database
+ *
+ * Has strings instead of bigints
+ *
+ * @typedef {Object} s_DbStatus
+ * @extends DbStatusBase
+ *
+ * @see DbStatusBase
+ */
+export interface s_DbStatus extends DbStatusBase {
+  block: {
+    height: string
+  };
+  nextCollectionId: string;
+  queue: s_QueueItem[],
+  gasPrice: string;
+  lastXGasPrices: string[];
+}
+
+export function convertToDbStatus(s_status: s_DbStatus): DbStatus {
+  return {
+    ...s_status,
+    block: {
+      height: BigInt(s_status.block.height),
+    },
+    nextCollectionId: BigInt(s_status.nextCollectionId),
+    queue: s_status.queue.map(convertToQueueItem),
+    gasPrice: BigInt(s_status.gasPrice),
+    lastXGasPrices: s_status.lastXGasPrices.map(BigInt),
+  }
+}
+
+export function convertFromDbStatus(status: DbStatus): s_DbStatus {
+  return {
+    ...status,
+    block: {
+      height: status.block.height.toString(),
+    },
+    nextCollectionId: status.nextCollectionId.toString(),
+    queue: status.queue.map(convertFromQueueItem),
+    gasPrice: status.gasPrice.toString(),
+    lastXGasPrices: status.lastXGasPrices.map((price) => price.toString()),
+  }
+}
+
+
+/**
+ * BalanceDocumentBase is the type of document stored in the balances database
  * Partitioned database by cosmosAddress (e.g. 1-cosmosx..., 1-cosmosy..., and so on represent the balances documents for collection 1 and user with cosmos address x and y respectively)
+ *
+ * @typedef {Object} BalanceDocumentBase
+ * @extends {UserBalanceBase}
+ *
+ * @property {bigint | string} collectionId - The collection ID
+ * @property {string} cosmosAddress - The Cosmos address of the user
+ */
+export interface BalanceDocumentBase extends UserBalanceBase {
+  collectionId: bigint | string;
+  cosmosAddress: string;
+}
+
+/**
+ * BalanceDocument is the type of document stored in the balances database
+ *
+ * Has bigints instead of strings
  *
  * @typedef {Object} BalanceDocument
  * @extends {UserBalance}
+ * @extends {BalanceDocumentBase}
  *
- * @property {bigint} collectionId - The collection ID
- * @property {string} cosmosAddress - The Cosmos address of the user
+ * @see BalanceDocumentBase
  */
 export interface BalanceDocument extends UserBalance {
   collectionId: bigint;
@@ -193,58 +426,159 @@ export interface BalanceDocument extends UserBalance {
 }
 
 /**
- * TODO: rework this
+ * s_BalanceDocument is the type of document stored in the balances database
+ *
+ * Has strings instead of bigints
+ *
+ * @typedef {Object} s_BalanceDocument
+ * @extends {UserBalance}
+ * @extends {s_BalanceDocument}
+ *
+ * @see BalanceDocumentBase
+ */
+export interface s_BalanceDocument extends s_UserBalance {
+  collectionId: string;
+  cosmosAddress: string;
+}
+
+export function convertToBalanceDocument(s_doc: s_BalanceDocument): BalanceDocument {
+  return {
+    ...s_doc,
+    collectionId: BigInt(s_doc.collectionId),
+    balances: s_doc.balances.map(convertToBalance),
+    approvals: s_doc.approvals.map(convertToApproval),
+  }
+}
+
+export function convertFromBalanceDocument(doc: BalanceDocument): s_BalanceDocument {
+  return {
+    ...doc,
+    collectionId: doc.collectionId.toString(),
+    balances: doc.balances.map(convertFromBalance),
+    approvals: doc.approvals.map(convertFromApproval),
+  }
+}
+
+
+/**
+ * TODO: rework this (including bigints)
  */
 export interface PasswordDocument {
   password: string
   codes: string[]
 
-  currCode: bigint
+  currCode: bigint | string
   claimedUsers: {
-    [cosmosAddress: string]: bigint
+    [cosmosAddress: string]: bigint | string
   }
 
   cid: string
   docClaimedByCollection: boolean
-  claimId: bigint
-  collectionId: bigint
+  claimId: bigint | string
+  collectionId: bigint | string
 }
 
 /**
- * ChallengesWithDetails represents a challenge for a claim with additional specified details.
+ * ChallengeWithDetailsBase represents a challenge for a claim with additional specified details.
  * The base Challenge is what is stored on-chain, but this is the full challenge with additional details.
  *
- * @typedef {Object} ChallengesWithDetails
+ * @typedef {Object} ChallengeWithDetailsBase
  * @extends {Challenge}
  *
  * @property {string[]} leaves - The leaves of the Merkle tree
  * @property {boolean} areLeavesHashed - True if the leaves are hashed
- * @property {bigint[]} usedLeafIndices - The indices of the leaves that have been used
+ * @property {(bigint | string)[]} usedLeafIndices - The indices of the leaves that have been used
  * @property {MerkleTree} tree - The Merkle tree
- * @property {bigint} numLeaves - The number of leaves in the Merkle tree. This takes priority over leaves.length if defined (used for buffer time between leaf generation and leaf length select)
+ * @property {bigint | string} numLeaves - The number of leaves in the Merkle tree. This takes priority over leaves.length if defined (used for buffer time between leaf generation and leaf length select)
  */
-export interface ChallengesWithDetails extends Challenge {
+export interface ChallengeWithDetailsBase extends ChallengeBase {
   leaves: string[]
   areLeavesHashed: boolean
-  usedLeafIndices: bigint[]
+  usedLeafIndices: (bigint | string)[]
   tree?: MerkleTree
 
+  numLeaves?: bigint | string;
+}
+
+/**
+ * ChallengeWithDetails represents a challenge for a claim with additional specified details.
+ *
+ * Has bigints instead of strings
+ *
+ * @typedef {Object} ChallengeWithDetails
+ * @extends {ChallengeWithDetailsBase}
+ *
+ * @see ChallengeWithDetailsBase
+ */
+export interface ChallengeWithDetails extends Challenge {
+  leaves: string[]
+  areLeavesHashed: boolean
+  tree?: MerkleTree
+
+  usedLeafIndices: bigint[]
   numLeaves?: bigint;
+}
+
+export interface s_ChallengeWithDetails extends s_Challenge {
+  leaves: string[]
+  areLeavesHashed: boolean
+  tree?: MerkleTree
+
+  usedLeafIndices: string[]
+  numLeaves?: string;
+}
+
+export function convertToChallengeWithDetails(s_challenge: s_ChallengeWithDetails): ChallengeWithDetails {
+  return {
+    ...s_challenge,
+    usedLeafIndices: s_challenge.usedLeafIndices.map(BigInt),
+    numLeaves: s_challenge.numLeaves ? BigInt(s_challenge.numLeaves) : undefined,
+    expectedProofLength: BigInt(s_challenge.expectedProofLength),
+  }
+}
+
+export function convertFromChallengeWithDetails(challenge: ChallengeWithDetails): s_ChallengeWithDetails {
+  return {
+    ...challenge,
+    usedLeafIndices: challenge.usedLeafIndices.map((index) => index.toString()),
+    numLeaves: challenge.numLeaves ? challenge.numLeaves.toString() : undefined,
+    expectedProofLength: challenge.expectedProofLength.toString(),
+  }
+}
+
+/**
+ * ClaimDocumentBase is the type of document stored in the claims database
+ * partitioned database by collection ID (e.g. 1-1, 1-2, and so on represent the claims collection 1 for claims with ID 1, 2, etc)
+ *
+ * @typedef {Object} ClaimDocumentBase
+ * @extends {ClaimWithDetails}
+ *
+ * @property {bigint | string} collectionId - The collection ID
+ * @property {bigint | string} claimId - The claim ID
+ * @property {bigint | string} totalClaimsProcessed - The total number of claims processed for this collection
+ * @property {{[cosmosAddress: string]: bigint | string}} claimsPerAddressCount - A running count for the number of claims processed for each address
+ * @property {ChallengeWithDetails[]} challenges - The list of challenges for this claim (with extra helper details)
+ * @property {boolean} failedToFetch - True if the claim failed to fetch the URI and inserted blank values
+ */
+export interface ClaimDocumentBase extends ClaimWithDetails {
+  collectionId: bigint | string;
+  claimId: bigint | string;
+  totalClaimsProcessed: bigint | string;
+  claimsPerAddressCount: {
+    [cosmosAddress: string]: bigint | string;
+  },
+  failedToFetch?: boolean;
 }
 
 /**
  * ClaimDocument is the type of document stored in the claims database
- * partitioned database by collection ID (e.g. 1-1, 1-2, and so on represent the claims collection 1 for claims with ID 1, 2, etc)
+ *
+ * Has bigints instead of strings
  *
  * @typedef {Object} ClaimDocument
  * @extends {ClaimWithDetails}
  *
- * @property {bigint} collectionId - The collection ID
- * @property {bigint} claimId - The claim ID
- * @property {bigint} totalClaimsProcessed - The total number of claims processed for this collection
- * @property {{[cosmosAddress: string]: bigint}} claimsPerAddressCount - A running count for the number of claims processed for each address
- * @property {ChallengesWithDetails[]} challenges - The list of challenges for this claim (with extra helper details)
- * @property {boolean} failedToFetch - True if the claim failed to fetch the URI and inserted blank values
+ * @see ClaimDocumentBase
  */
 export interface ClaimDocument extends ClaimWithDetails {
   collectionId: bigint;
@@ -256,18 +590,79 @@ export interface ClaimDocument extends ClaimWithDetails {
   failedToFetch?: boolean;
 }
 
+export interface s_ClaimDocument extends s_ClaimWithDetails {
+  collectionId: string;
+  claimId: string;
+  totalClaimsProcessed: string;
+  claimsPerAddressCount: {
+    [cosmosAddress: string]: string;
+  },
+  failedToFetch?: boolean;
+}
+
+export function convertToClaimDocument(s_doc: s_ClaimDocument): ClaimDocument {
+  return {
+    ...s_doc,
+    collectionId: BigInt(s_doc.collectionId),
+    claimId: BigInt(s_doc.claimId),
+    totalClaimsProcessed: BigInt(s_doc.totalClaimsProcessed),
+    claimsPerAddressCount: Object.fromEntries(Object.entries(s_doc.claimsPerAddressCount).map(([key, value]) => [key, BigInt(value)])),
+    challenges: s_doc.challenges.map(convertToChallengeWithDetails),
+    undistributedBalances: s_doc.undistributedBalances.map(convertToBalance),
+    numClaimsPerAddress: BigInt(s_doc.numClaimsPerAddress),
+    incrementIdsBy: BigInt(s_doc.incrementIdsBy),
+    currentClaimAmounts: s_doc.currentClaimAmounts.map(convertToBalance),
+    timeRange: convertToIdRange(s_doc.timeRange),
+  }
+}
+
+export function convertFromClaimDocument(doc: ClaimDocument): s_ClaimDocument {
+  return {
+    ...doc,
+    collectionId: doc.collectionId.toString(),
+    claimId: doc.claimId.toString(),
+    totalClaimsProcessed: doc.totalClaimsProcessed.toString(),
+    claimsPerAddressCount: Object.fromEntries(Object.entries(doc.claimsPerAddressCount).map(([key, value]) => [key, value.toString()])),
+    challenges: doc.challenges.map(convertFromChallengeWithDetails),
+    undistributedBalances: doc.undistributedBalances.map(convertFromBalance),
+    numClaimsPerAddress: doc.numClaimsPerAddress.toString(),
+    incrementIdsBy: doc.incrementIdsBy.toString(),
+    currentClaimAmounts: doc.currentClaimAmounts.map(convertFromBalance),
+    timeRange: convertFromIdRange(doc.timeRange),
+  }
+}
+
 /**
  * Extends a base Claim with additional details.
  * The base Claim is what is stored on-chain, but this is the full claim with additional details stored in the indexer.
  *
- * @typedef {Object} ClaimWithDetails
+ * @typedef {Object} ClaimWithDetailsBase
  * @extends {Claim}
  *
  * @property {string} name - The name of the claim
  * @property {string} description - The description of the claim. This describes how to earn and claim the badge.
  * @property {boolean} hasPassword - True if the claim has a password
  * @property {string} password - The password of the claim (if it has one)
- * @property {ChallengesWithDetails[]} challenges - The list of challenges for this claim (with extra helper details)
+ * @property {ChallengeWithDetails[]} challenges - The list of challenges for this claim (with extra helper details)
+ */
+export interface ClaimWithDetailsBase extends ClaimBase {
+  name: string;
+  description: string;
+  hasPassword: boolean;
+  password?: string;
+
+  challenges: ChallengeWithDetailsBase[];
+}
+
+/**
+ * Extends a base Claim with additional details.
+ *
+ * Has bigints instead of strings
+ *
+ * @typedef {Object} ClaimWithDetails
+ * @extends {ClaimWithDetailsBase}
+ *
+ * @see ClaimWithDetailsBase
  */
 export interface ClaimWithDetails extends Claim {
   name: string;
@@ -275,5 +670,47 @@ export interface ClaimWithDetails extends Claim {
   hasPassword: boolean;
   password?: string;
 
-  challenges: ChallengesWithDetails[];
+  challenges: ChallengeWithDetails[];
+}
+
+/**
+ * Extends a base Claim with additional details.
+ *
+ * Has strings instead of bigints
+ * @typedef {Object} s_ClaimWithDetails
+ * @extends {ClaimWithDetailsBase}
+ *
+ * @see ClaimWithDetailsBase
+ */
+export interface s_ClaimWithDetails extends s_Claim {
+  name: string;
+  description: string;
+  hasPassword: boolean;
+  password?: string;
+
+  challenges: s_ChallengeWithDetails[];
+}
+
+export function convertToClaimWithDetails(s_claim: s_ClaimWithDetails): ClaimWithDetails {
+  return {
+    ...s_claim,
+    challenges: s_claim.challenges.map(convertToChallengeWithDetails),
+    undistributedBalances: s_claim.undistributedBalances.map(convertToBalance),
+    numClaimsPerAddress: BigInt(s_claim.numClaimsPerAddress),
+    incrementIdsBy: BigInt(s_claim.incrementIdsBy),
+    currentClaimAmounts: s_claim.currentClaimAmounts.map(convertToBalance),
+    timeRange: convertToIdRange(s_claim.timeRange),
+  }
+}
+
+export function convertFromClaimWithDetails(claim: ClaimWithDetails): s_ClaimWithDetails {
+  return {
+    ...claim,
+    challenges: claim.challenges.map(convertFromChallengeWithDetails),
+    undistributedBalances: claim.undistributedBalances.map(convertFromBalance),
+    numClaimsPerAddress: claim.numClaimsPerAddress.toString(),
+    incrementIdsBy: claim.incrementIdsBy.toString(),
+    currentClaimAmounts: claim.currentClaimAmounts.map(convertFromBalance),
+    timeRange: convertFromIdRange(claim.timeRange),
+  }
 }

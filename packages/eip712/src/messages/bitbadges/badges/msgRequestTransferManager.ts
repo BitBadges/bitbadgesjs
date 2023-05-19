@@ -1,6 +1,6 @@
 const MsgRequestTransferManagerValueType = [
   { name: 'creator', type: 'string' },
-  { name: 'collectionId', type: 'uint64' },
+  { name: 'collectionId', type: 'string' },
   { name: 'addRequest', type: 'bool' },
 ]
 
@@ -10,14 +10,14 @@ export const MSG_REQUEST_TRANSFER_MANAGER_TYPES = {
 
 export function createMsgRequestTransferManager(
   creator: string,
-  collectionId: number,
+  collectionId: bigint,
   addRequest: boolean,
 ) {
   return {
     type: 'badges/RequestTransferManager',
     value: {
       creator,
-      collectionId,
+      collectionId: collectionId.toString(),
       addRequest,
     },
   }

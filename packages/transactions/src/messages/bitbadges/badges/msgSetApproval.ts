@@ -19,8 +19,8 @@ import { Chain, Fee, Sender } from '../../common'
 
 export interface MessageMsgSetApproval {
   creator: string
-  collectionId: number
-  address: number
+  collectionId: bigint
+  address: string
   balances: Balance[]
 }
 
@@ -64,8 +64,8 @@ export function createTxMsgSetApproval(
   // Cosmos
   const msgCosmos = protoMsgSetApproval(
     params.creator,
-    params.address,
     params.collectionId,
+    params.address,
     params.balances,
   )
   const tx = createTransaction(

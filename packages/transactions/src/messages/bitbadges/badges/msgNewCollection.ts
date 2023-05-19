@@ -3,9 +3,9 @@ import {
   createTransaction,
   BadgeSupplyAndAmount,
   BadgeUri,
-  Claims,
+  Claim,
   TransferMapping,
-  Transfers,
+  Transfer,
 } from 'bitbadgesjs-proto'
 
 import {
@@ -25,14 +25,15 @@ export interface MessageMsgNewCollection {
   creator: string
   collectionUri: string
   badgeUris: BadgeUri[],
-  permissions: number
+  balancesUri: string,
+  permissions: bigint
   bytes: string
-  disallowedTransfers: TransferMapping[]
+  allowedTransfers: TransferMapping[]
   managerApprovedTransfers: TransferMapping[]
-  standard: number
+  standard: bigint
   badgeSupplys: BadgeSupplyAndAmount[]
-  transfers: Transfers[]
-  claims: Claims[]
+  transfers: Transfer[]
+  claims: Claim[]
 }
 
 export function createTxMsgNewCollection(
@@ -56,12 +57,12 @@ export function createTxMsgNewCollection(
     params.creator,
     params.collectionUri,
     params.badgeUris,
+    params.balancesUri,
     params.bytes,
     params.permissions,
-    params.disallowedTransfers,
+    params.allowedTransfers,
     params.managerApprovedTransfers,
     params.standard,
-
     params.badgeSupplys,
     params.transfers,
     params.claims,
@@ -86,8 +87,9 @@ export function createTxMsgNewCollection(
     params.collectionUri,
     params.badgeUris,
     params.bytes,
+    params.balancesUri,
     params.permissions,
-    params.disallowedTransfers,
+    params.allowedTransfers,
     params.managerApprovedTransfers,
     params.standard,
 

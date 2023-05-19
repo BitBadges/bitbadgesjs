@@ -3,15 +3,17 @@ import { BadgeUri, getWrappedBadgeUris } from './typeUtils'
 
 export function createMsgUpdateUris(
   creator: string,
-  collectionId: number,
+  collectionId: bigint,
   collectionUri: string,
   badgeUris: BadgeUri[],
+  balancesUri: string
 ) {
   const message = new tx.bitbadges.bitbadgeschain.badges.MsgUpdateUris({
     creator,
-    collectionId,
+    collectionId: collectionId.toString(),
     collectionUri,
     badgeUris: getWrappedBadgeUris(badgeUris),
+    balancesUri,
   })
 
   return {

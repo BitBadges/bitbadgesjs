@@ -1,16 +1,16 @@
 import * as tx from '../../../proto/badges/tx'
 
-import { Transfers, getWrappedTransfers } from './typeUtils'
+import { Transfer, getWrappedTransfers } from './typeUtils'
 
 export function createMsgTransferBadge(
   creator: string,
-  from: number,
-  collectionId: number,
-  transfers: Transfers[],
+  from: string,
+  collectionId: bigint,
+  transfers: Transfer[],
 ) {
   const message = new tx.bitbadges.bitbadgeschain.badges.MsgTransferBadge({
     creator,
-    collectionId,
+    collectionId: collectionId.toString(),
     from,
     transfers: getWrappedTransfers(transfers),
   })

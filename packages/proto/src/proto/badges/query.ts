@@ -127,37 +127,37 @@ export namespace bitbadges.bitbadgeschain.badges {
     export class QueryGetCollectionRequest extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
-            id?: number;
+            collectionId?: string;
         }) {
             super();
             pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
             if (!Array.isArray(data) && typeof data == "object") {
-                if ("id" in data && data.id != undefined) {
-                    this.id = data.id;
+                if ("collectionId" in data && data.collectionId != undefined) {
+                    this.collectionId = data.collectionId;
                 }
             }
         }
-        get id() {
-            return pb_1.Message.getFieldWithDefault(this, 1, 0) as number;
+        get collectionId() {
+            return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
         }
-        set id(value: number) {
+        set collectionId(value: string) {
             pb_1.Message.setField(this, 1, value);
         }
         static fromObject(data: {
-            id?: number;
+            collectionId?: string;
         }): QueryGetCollectionRequest {
             const message = new QueryGetCollectionRequest({});
-            if (data.id != null) {
-                message.id = data.id;
+            if (data.collectionId != null) {
+                message.collectionId = data.collectionId;
             }
             return message;
         }
         toObject() {
             const data: {
-                id?: number;
+                collectionId?: string;
             } = {};
-            if (this.id != null) {
-                data.id = this.id;
+            if (this.collectionId != null) {
+                data.collectionId = this.collectionId;
             }
             return data;
         }
@@ -165,8 +165,8 @@ export namespace bitbadges.bitbadgeschain.badges {
         serialize(w: pb_1.BinaryWriter): void;
         serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
             const writer = w || new pb_1.BinaryWriter();
-            if (this.id != 0)
-                writer.writeUint64(1, this.id);
+            if (this.collectionId.length)
+                writer.writeString(1, this.collectionId);
             if (!w)
                 return writer.getResultBuffer();
         }
@@ -177,7 +177,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                     break;
                 switch (reader.getFieldNumber()) {
                     case 1:
-                        message.id = reader.readUint64();
+                        message.collectionId = reader.readString();
                         break;
                     default: reader.skipField();
                 }
@@ -261,10 +261,170 @@ export namespace bitbadges.bitbadgeschain.badges {
             return QueryGetCollectionResponse.deserialize(bytes);
         }
     }
+    export class QueryGetClaimRequest extends pb_1.Message {
+        #one_of_decls: number[][] = [];
+        constructor(data?: any[] | {
+            collectionId?: string;
+            claimId?: string;
+        }) {
+            super();
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("collectionId" in data && data.collectionId != undefined) {
+                    this.collectionId = data.collectionId;
+                }
+                if ("claimId" in data && data.claimId != undefined) {
+                    this.claimId = data.claimId;
+                }
+            }
+        }
+        get collectionId() {
+            return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
+        }
+        set collectionId(value: string) {
+            pb_1.Message.setField(this, 1, value);
+        }
+        get claimId() {
+            return pb_1.Message.getFieldWithDefault(this, 2, "") as string;
+        }
+        set claimId(value: string) {
+            pb_1.Message.setField(this, 2, value);
+        }
+        static fromObject(data: {
+            collectionId?: string;
+            claimId?: string;
+        }): QueryGetClaimRequest {
+            const message = new QueryGetClaimRequest({});
+            if (data.collectionId != null) {
+                message.collectionId = data.collectionId;
+            }
+            if (data.claimId != null) {
+                message.claimId = data.claimId;
+            }
+            return message;
+        }
+        toObject() {
+            const data: {
+                collectionId?: string;
+                claimId?: string;
+            } = {};
+            if (this.collectionId != null) {
+                data.collectionId = this.collectionId;
+            }
+            if (this.claimId != null) {
+                data.claimId = this.claimId;
+            }
+            return data;
+        }
+        serialize(): Uint8Array;
+        serialize(w: pb_1.BinaryWriter): void;
+        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+            const writer = w || new pb_1.BinaryWriter();
+            if (this.collectionId.length)
+                writer.writeString(1, this.collectionId);
+            if (this.claimId.length)
+                writer.writeString(2, this.claimId);
+            if (!w)
+                return writer.getResultBuffer();
+        }
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): QueryGetClaimRequest {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new QueryGetClaimRequest();
+            while (reader.nextField()) {
+                if (reader.isEndGroup())
+                    break;
+                switch (reader.getFieldNumber()) {
+                    case 1:
+                        message.collectionId = reader.readString();
+                        break;
+                    case 2:
+                        message.claimId = reader.readString();
+                        break;
+                    default: reader.skipField();
+                }
+            }
+            return message;
+        }
+        serializeBinary(): Uint8Array {
+            return this.serialize();
+        }
+        static deserializeBinary(bytes: Uint8Array): QueryGetClaimRequest {
+            return QueryGetClaimRequest.deserialize(bytes);
+        }
+    }
+    export class QueryGetClaimResponse extends pb_1.Message {
+        #one_of_decls: number[][] = [];
+        constructor(data?: any[] | {
+            claim?: dependency_7.bitbadges.bitbadgeschain.badges.Claim;
+        }) {
+            super();
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("claim" in data && data.claim != undefined) {
+                    this.claim = data.claim;
+                }
+            }
+        }
+        get claim() {
+            return pb_1.Message.getWrapperField(this, dependency_7.bitbadges.bitbadgeschain.badges.Claim, 1) as dependency_7.bitbadges.bitbadgeschain.badges.Claim;
+        }
+        set claim(value: dependency_7.bitbadges.bitbadgeschain.badges.Claim) {
+            pb_1.Message.setWrapperField(this, 1, value);
+        }
+        get has_claim() {
+            return pb_1.Message.getField(this, 1) != null;
+        }
+        static fromObject(data: {
+            claim?: ReturnType<typeof dependency_7.bitbadges.bitbadgeschain.badges.Claim.prototype.toObject>;
+        }): QueryGetClaimResponse {
+            const message = new QueryGetClaimResponse({});
+            if (data.claim != null) {
+                message.claim = dependency_7.bitbadges.bitbadgeschain.badges.Claim.fromObject(data.claim);
+            }
+            return message;
+        }
+        toObject() {
+            const data: {
+                claim?: ReturnType<typeof dependency_7.bitbadges.bitbadgeschain.badges.Claim.prototype.toObject>;
+            } = {};
+            if (this.claim != null) {
+                data.claim = this.claim.toObject();
+            }
+            return data;
+        }
+        serialize(): Uint8Array;
+        serialize(w: pb_1.BinaryWriter): void;
+        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+            const writer = w || new pb_1.BinaryWriter();
+            if (this.has_claim)
+                writer.writeMessage(1, this.claim, () => this.claim.serialize(writer));
+            if (!w)
+                return writer.getResultBuffer();
+        }
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): QueryGetClaimResponse {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new QueryGetClaimResponse();
+            while (reader.nextField()) {
+                if (reader.isEndGroup())
+                    break;
+                switch (reader.getFieldNumber()) {
+                    case 1:
+                        reader.readMessage(message.claim, () => message.claim = dependency_7.bitbadges.bitbadgeschain.badges.Claim.deserialize(reader));
+                        break;
+                    default: reader.skipField();
+                }
+            }
+            return message;
+        }
+        serializeBinary(): Uint8Array {
+            return this.serialize();
+        }
+        static deserializeBinary(bytes: Uint8Array): QueryGetClaimResponse {
+            return QueryGetClaimResponse.deserialize(bytes);
+        }
+    }
     export class QueryGetAddressByIdRequest extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
-            id?: number;
+            id?: string;
         }) {
             super();
             pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
@@ -275,13 +435,13 @@ export namespace bitbadges.bitbadgeschain.badges {
             }
         }
         get id() {
-            return pb_1.Message.getFieldWithDefault(this, 1, 0) as number;
+            return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
         }
-        set id(value: number) {
+        set id(value: string) {
             pb_1.Message.setField(this, 1, value);
         }
         static fromObject(data: {
-            id?: number;
+            id?: string;
         }): QueryGetAddressByIdRequest {
             const message = new QueryGetAddressByIdRequest({});
             if (data.id != null) {
@@ -291,7 +451,7 @@ export namespace bitbadges.bitbadgeschain.badges {
         }
         toObject() {
             const data: {
-                id?: number;
+                id?: string;
             } = {};
             if (this.id != null) {
                 data.id = this.id;
@@ -302,8 +462,8 @@ export namespace bitbadges.bitbadgeschain.badges {
         serialize(w: pb_1.BinaryWriter): void;
         serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
             const writer = w || new pb_1.BinaryWriter();
-            if (this.id != 0)
-                writer.writeUint64(1, this.id);
+            if (this.id.length)
+                writer.writeString(1, this.id);
             if (!w)
                 return writer.getResultBuffer();
         }
@@ -314,7 +474,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                     break;
                 switch (reader.getFieldNumber()) {
                     case 1:
-                        message.id = reader.readUint64();
+                        message.id = reader.readString();
                         break;
                     default: reader.skipField();
                 }
@@ -398,39 +558,39 @@ export namespace bitbadges.bitbadgeschain.badges {
     export class QueryGetBalanceRequest extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
-            badgeId?: number;
-            address?: number;
+            collectionId?: string;
+            address?: string;
         }) {
             super();
             pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
             if (!Array.isArray(data) && typeof data == "object") {
-                if ("badgeId" in data && data.badgeId != undefined) {
-                    this.badgeId = data.badgeId;
+                if ("collectionId" in data && data.collectionId != undefined) {
+                    this.collectionId = data.collectionId;
                 }
                 if ("address" in data && data.address != undefined) {
                     this.address = data.address;
                 }
             }
         }
-        get badgeId() {
-            return pb_1.Message.getFieldWithDefault(this, 1, 0) as number;
+        get collectionId() {
+            return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
         }
-        set badgeId(value: number) {
+        set collectionId(value: string) {
             pb_1.Message.setField(this, 1, value);
         }
         get address() {
-            return pb_1.Message.getFieldWithDefault(this, 2, 0) as number;
+            return pb_1.Message.getFieldWithDefault(this, 2, "") as string;
         }
-        set address(value: number) {
+        set address(value: string) {
             pb_1.Message.setField(this, 2, value);
         }
         static fromObject(data: {
-            badgeId?: number;
-            address?: number;
+            collectionId?: string;
+            address?: string;
         }): QueryGetBalanceRequest {
             const message = new QueryGetBalanceRequest({});
-            if (data.badgeId != null) {
-                message.badgeId = data.badgeId;
+            if (data.collectionId != null) {
+                message.collectionId = data.collectionId;
             }
             if (data.address != null) {
                 message.address = data.address;
@@ -439,11 +599,11 @@ export namespace bitbadges.bitbadgeschain.badges {
         }
         toObject() {
             const data: {
-                badgeId?: number;
-                address?: number;
+                collectionId?: string;
+                address?: string;
             } = {};
-            if (this.badgeId != null) {
-                data.badgeId = this.badgeId;
+            if (this.collectionId != null) {
+                data.collectionId = this.collectionId;
             }
             if (this.address != null) {
                 data.address = this.address;
@@ -454,10 +614,10 @@ export namespace bitbadges.bitbadgeschain.badges {
         serialize(w: pb_1.BinaryWriter): void;
         serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
             const writer = w || new pb_1.BinaryWriter();
-            if (this.badgeId != 0)
-                writer.writeUint64(1, this.badgeId);
-            if (this.address != 0)
-                writer.writeUint64(2, this.address);
+            if (this.collectionId.length)
+                writer.writeString(1, this.collectionId);
+            if (this.address.length)
+                writer.writeString(2, this.address);
             if (!w)
                 return writer.getResultBuffer();
         }
@@ -468,10 +628,10 @@ export namespace bitbadges.bitbadgeschain.badges {
                     break;
                 switch (reader.getFieldNumber()) {
                     case 1:
-                        message.badgeId = reader.readUint64();
+                        message.collectionId = reader.readString();
                         break;
                     case 2:
-                        message.address = reader.readUint64();
+                        message.address = reader.readString();
                         break;
                     default: reader.skipField();
                 }
@@ -488,7 +648,7 @@ export namespace bitbadges.bitbadgeschain.badges {
     export class QueryGetBalanceResponse extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
-            balance?: dependency_6.bitbadges.bitbadgeschain.badges.UserBalance;
+            balance?: dependency_6.bitbadges.bitbadgeschain.badges.UserBalanceStore;
         }) {
             super();
             pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
@@ -499,26 +659,26 @@ export namespace bitbadges.bitbadgeschain.badges {
             }
         }
         get balance() {
-            return pb_1.Message.getWrapperField(this, dependency_6.bitbadges.bitbadgeschain.badges.UserBalance, 1) as dependency_6.bitbadges.bitbadgeschain.badges.UserBalance;
+            return pb_1.Message.getWrapperField(this, dependency_6.bitbadges.bitbadgeschain.badges.UserBalanceStore, 1) as dependency_6.bitbadges.bitbadgeschain.badges.UserBalanceStore;
         }
-        set balance(value: dependency_6.bitbadges.bitbadgeschain.badges.UserBalance) {
+        set balance(value: dependency_6.bitbadges.bitbadgeschain.badges.UserBalanceStore) {
             pb_1.Message.setWrapperField(this, 1, value);
         }
         get has_balance() {
             return pb_1.Message.getField(this, 1) != null;
         }
         static fromObject(data: {
-            balance?: ReturnType<typeof dependency_6.bitbadges.bitbadgeschain.badges.UserBalance.prototype.toObject>;
+            balance?: ReturnType<typeof dependency_6.bitbadges.bitbadgeschain.badges.UserBalanceStore.prototype.toObject>;
         }): QueryGetBalanceResponse {
             const message = new QueryGetBalanceResponse({});
             if (data.balance != null) {
-                message.balance = dependency_6.bitbadges.bitbadgeschain.badges.UserBalance.fromObject(data.balance);
+                message.balance = dependency_6.bitbadges.bitbadgeschain.badges.UserBalanceStore.fromObject(data.balance);
             }
             return message;
         }
         toObject() {
             const data: {
-                balance?: ReturnType<typeof dependency_6.bitbadges.bitbadgeschain.badges.UserBalance.prototype.toObject>;
+                balance?: ReturnType<typeof dependency_6.bitbadges.bitbadgeschain.badges.UserBalanceStore.prototype.toObject>;
             } = {};
             if (this.balance != null) {
                 data.balance = this.balance.toObject();
@@ -541,7 +701,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                     break;
                 switch (reader.getFieldNumber()) {
                     case 1:
-                        reader.readMessage(message.balance, () => message.balance = dependency_6.bitbadges.bitbadgeschain.badges.UserBalance.deserialize(reader));
+                        reader.readMessage(message.balance, () => message.balance = dependency_6.bitbadges.bitbadgeschain.badges.UserBalanceStore.deserialize(reader));
                         break;
                     default: reader.skipField();
                 }
@@ -558,8 +718,8 @@ export namespace bitbadges.bitbadgeschain.badges {
     export class QueryIsClaimDataUsedRequest extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
-            collectionId?: number;
-            claimId?: number;
+            collectionId?: string;
+            claimId?: string;
             claimData?: string;
         }) {
             super();
@@ -577,15 +737,15 @@ export namespace bitbadges.bitbadgeschain.badges {
             }
         }
         get collectionId() {
-            return pb_1.Message.getFieldWithDefault(this, 1, 0) as number;
+            return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
         }
-        set collectionId(value: number) {
+        set collectionId(value: string) {
             pb_1.Message.setField(this, 1, value);
         }
         get claimId() {
-            return pb_1.Message.getFieldWithDefault(this, 2, 0) as number;
+            return pb_1.Message.getFieldWithDefault(this, 2, "") as string;
         }
-        set claimId(value: number) {
+        set claimId(value: string) {
             pb_1.Message.setField(this, 2, value);
         }
         get claimData() {
@@ -595,8 +755,8 @@ export namespace bitbadges.bitbadgeschain.badges {
             pb_1.Message.setField(this, 3, value);
         }
         static fromObject(data: {
-            collectionId?: number;
-            claimId?: number;
+            collectionId?: string;
+            claimId?: string;
             claimData?: string;
         }): QueryIsClaimDataUsedRequest {
             const message = new QueryIsClaimDataUsedRequest({});
@@ -613,8 +773,8 @@ export namespace bitbadges.bitbadgeschain.badges {
         }
         toObject() {
             const data: {
-                collectionId?: number;
-                claimId?: number;
+                collectionId?: string;
+                claimId?: string;
                 claimData?: string;
             } = {};
             if (this.collectionId != null) {
@@ -632,10 +792,10 @@ export namespace bitbadges.bitbadgeschain.badges {
         serialize(w: pb_1.BinaryWriter): void;
         serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
             const writer = w || new pb_1.BinaryWriter();
-            if (this.collectionId != 0)
-                writer.writeUint64(1, this.collectionId);
-            if (this.claimId != 0)
-                writer.writeUint64(2, this.claimId);
+            if (this.collectionId.length)
+                writer.writeString(1, this.collectionId);
+            if (this.claimId.length)
+                writer.writeString(2, this.claimId);
             if (this.claimData.length)
                 writer.writeString(3, this.claimData);
             if (!w)
@@ -648,10 +808,10 @@ export namespace bitbadges.bitbadgeschain.badges {
                     break;
                 switch (reader.getFieldNumber()) {
                     case 1:
-                        message.collectionId = reader.readUint64();
+                        message.collectionId = reader.readString();
                         break;
                     case 2:
-                        message.claimId = reader.readUint64();
+                        message.claimId = reader.readString();
                         break;
                     case 3:
                         message.claimData = reader.readString();

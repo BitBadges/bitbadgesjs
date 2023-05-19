@@ -2,12 +2,12 @@ import * as tx from '../../../proto/badges/tx'
 
 export function createMsgTransferManager(
   creator: string,
-  collectionId: number,
-  address: number,
+  collectionId: bigint,
+  address: string,
 ) {
   const message = new tx.bitbadges.bitbadgeschain.badges.MsgTransferManager({
     creator,
-    collectionId,
+    collectionId: collectionId.toString(),
     address,
   })
 

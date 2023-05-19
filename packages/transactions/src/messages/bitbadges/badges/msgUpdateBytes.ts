@@ -18,8 +18,8 @@ import { Chain, Fee, Sender } from '../../common'
 
 export interface MessageMsgUpdateBytes {
   creator: string
-  collectionId: number
-  newBytes: string
+  collectionId: bigint
+  bytes: string
 }
 
 export function createTxMsgUpdateBytes(
@@ -42,7 +42,7 @@ export function createTxMsgUpdateBytes(
   const msg = createMsgUpdateBytes(
     params.creator,
     params.collectionId,
-    params.newBytes,
+    params.bytes,
   )
   const messages = generateMessage(
     sender.accountNumber.toString(),
@@ -62,7 +62,7 @@ export function createTxMsgUpdateBytes(
   const msgCosmos = protoMsgUpdateBytes(
     params.creator,
     params.collectionId,
-    params.newBytes,
+    params.bytes,
   )
   const tx = createTransaction(
     msgCosmos,

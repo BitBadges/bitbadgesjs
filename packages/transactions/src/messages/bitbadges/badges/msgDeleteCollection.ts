@@ -18,7 +18,7 @@ import { Chain, Fee, Sender } from '../../common'
 
 export interface MessageMsgDeleteCollection {
   creator: string
-  collectionId: number
+  collectionId: bigint
 }
 
 export function createTxMsgDeleteCollection(

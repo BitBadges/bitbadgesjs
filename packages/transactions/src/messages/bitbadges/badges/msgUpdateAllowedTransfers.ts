@@ -1,6 +1,7 @@
 import {
-  createMsgRegisterAddresses as protoMsgRegisterAddresses,
+  createMsgUpdateAllowedTransfers as protoMsgUpdateAllowedTransfers,
   createTransaction,
+  TransferMapping
 } from 'bitbadgesjs-proto'
 
 import {
@@ -8,25 +9,26 @@ import {
   generateFee,
   generateMessage,
   generateTypes,
-  createMsgRegisterAddresses,
-  MSG_REGISTER_ADDRESSES_TYPES,
+  createMsgUpdateAllowedTransfers,
+  MSG_UPDATE_ALLOWED_TRANSFERS_TYPES,
 } from 'bitbadgesjs-eip712'
 
 import { getDefaultDomainWithChainId } from '../../domain'
 
 import { Chain, Fee, Sender } from '../../common'
 
-export interface MessageMsgRegisterAddresses {
+export interface MessageMsgUpdateAllowedTransfers {
   creator: string
-  addressesToRegister: string[]
+  collectionId: bigint
+  allowedTransfers: TransferMapping[]
 }
 
-export function createTxMsgRegisterAddresses(
+export function createTxMsgUpdateAllowedTransfers(
   chain: Chain,
   sender: Sender,
   fee: Fee,
   memo: string,
-  params: MessageMsgRegisterAddresses,
+  params: MessageMsgUpdateAllowedTransfers,
   domain?: object,
 ) {
   // EIP712
@@ -36,14 +38,13 @@ export function createTxMsgRegisterAddresses(
     fee.gas,
     sender.accountAddress,
   )
-  const types = generateTypes(MSG_REGISTER_ADDRESSES_TYPES)
+  const types = generateTypes(MSG_UPDATE_ALLOWED_TRANSFERS_TYPES)
 
-  console.log('PARAMS', params)
-  const msg = createMsgRegisterAddresses(
+  const msg = createMsgUpdateAllowedTransfers(
     params.creator,
-    params.addressesToRegister,
+    params.collectionId,
+    params.allowedTransfers,
   )
-  console.log('EIP712 MSG', msg)
   const messages = generateMessage(
     sender.accountNumber.toString(),
     sender.sequence.toString(),
@@ -59,12 +60,11 @@ export function createTxMsgRegisterAddresses(
   const eipToSign = createEIP712(types, messages, domainObj)
 
   // Cosmos
-  console.log('PARAMS', params)
-  const msgCosmos = protoMsgRegisterAddresses(
+  const msgCosmos = protoMsgUpdateAllowedTransfers(
     params.creator,
-    params.addressesToRegister,
+    params.collectionId,
+    params.allowedTransfers,
   )
-  console.log('COSMOS MSG', msgCosmos)
   const tx = createTransaction(
     msgCosmos,
     memo,

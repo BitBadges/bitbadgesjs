@@ -1,4 +1,4 @@
-import { CollectionDocument, AccountDocument, MetadataDocument, BalanceDocument, ClaimDocument } from "./db";
+import { Collection, Account, MetadataDoc, BalanceDocument, ClaimDocument } from "./db";
 import { ActivityItem } from "./activity";
 import Nano from "nano";
 
@@ -29,7 +29,7 @@ export interface DocsCache {
  * @typedef {Object} CollectionDocs
  */
 export interface CollectionDocs {
-  [id: string]: (CollectionDocument & Nano.DocumentGetResponse) | { _id: string };
+  [id: string]: (Collection & Nano.DocumentGetResponse) | { _id: string };
 }
 
 /**
@@ -38,7 +38,7 @@ export interface CollectionDocs {
  * @typedef {Object} AccountDocs
  */
 export interface AccountDocs {
-  [cosmosAddress: string]: (AccountDocument & Nano.DocumentGetResponse) | { _id: string };
+  [cosmosAddress: string]: (Account & Nano.DocumentGetResponse) | { _id: string };
 }
 
 //Partitioned by collectionId-metadataId
@@ -50,7 +50,7 @@ export interface AccountDocs {
  * @typedef {Object} MetadataDocs
  */
 export interface MetadataDocs {
-  [partitionedId: string]: (MetadataDocument & Nano.DocumentGetResponse) | { _id: string };
+  [partitionedId: string]: (MetadataDoc & Nano.DocumentGetResponse) | { _id: string };
 }
 
 /**

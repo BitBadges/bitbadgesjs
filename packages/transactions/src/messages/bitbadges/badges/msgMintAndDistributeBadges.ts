@@ -1,7 +1,7 @@
 import {
-  createMsgUpdateDisallowedTransfers as protoMsgUpdateDisallowedTransfers,
+  createMsgMintAndDistributeBadges as protoMsgMintAndDistributeBadges,
   createTransaction,
-  TransferMapping
+  BadgeSupplyAndAmount, BadgeUri, Claim, Transfer
 } from 'bitbadgesjs-proto'
 
 import {
@@ -9,26 +9,31 @@ import {
   generateFee,
   generateMessage,
   generateTypes,
-  createMsgUpdateDisallowedTransfers,
-  MSG_UPDATE_DISALLOWED_TRANSFERS_TYPES,
+  createMsgMintAndDistributeBadges,
+  MSG_MINT_BADGE_TYPES,
 } from 'bitbadgesjs-eip712'
 
 import { getDefaultDomainWithChainId } from '../../domain'
 
 import { Chain, Fee, Sender } from '../../common'
 
-export interface MessageMsgUpdateDisallowedTransfers {
+export interface MessageMsgMintAndDistributeBadges {
   creator: string
-  collectionId: number
-  disallowedTransfers: TransferMapping[]
+  collectionId: bigint
+  badgeSupplys: BadgeSupplyAndAmount[]
+  transfers: Transfer[]
+  claims: Claim[]
+  collectionUri: string
+  badgeUris: BadgeUri[]
+  balancesUri: string
 }
 
-export function createTxMsgUpdateDisallowedTransfers(
+export function createTxMsgMintAndDistributeBadges(
   chain: Chain,
   sender: Sender,
   fee: Fee,
   memo: string,
-  params: MessageMsgUpdateDisallowedTransfers,
+  params: MessageMsgMintAndDistributeBadges,
   domain?: object,
 ) {
   // EIP712
@@ -38,12 +43,17 @@ export function createTxMsgUpdateDisallowedTransfers(
     fee.gas,
     sender.accountAddress,
   )
-  const types = generateTypes(MSG_UPDATE_DISALLOWED_TRANSFERS_TYPES)
+  const types = generateTypes(MSG_MINT_BADGE_TYPES)
 
-  const msg = createMsgUpdateDisallowedTransfers(
+  const msg = createMsgMintAndDistributeBadges(
     params.creator,
     params.collectionId,
-    params.disallowedTransfers,
+    params.badgeSupplys,
+    params.transfers,
+    params.claims,
+    params.collectionUri,
+    params.badgeUris,
+    params.balancesUri,
   )
   const messages = generateMessage(
     sender.accountNumber.toString(),
@@ -60,10 +70,15 @@ export function createTxMsgUpdateDisallowedTransfers(
   const eipToSign = createEIP712(types, messages, domainObj)
 
   // Cosmos
-  const msgCosmos = protoMsgUpdateDisallowedTransfers(
+  const msgCosmos = protoMsgMintAndDistributeBadges(
     params.creator,
     params.collectionId,
-    params.disallowedTransfers,
+    params.badgeSupplys,
+    params.transfers,
+    params.claims,
+    params.collectionUri,
+    params.badgeUris,
+    params.balancesUri,
   )
   const tx = createTransaction(
     msgCosmos,

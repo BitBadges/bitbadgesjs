@@ -1,21 +1,21 @@
 const DeleteCollectionMsgValueType = [
-    { name: 'creator', type: 'string' },
-    { name: 'collectionId', type: 'uint64' },
+  { name: 'creator', type: 'string' },
+  { name: 'collectionId', type: 'string' },
 ]
 
 export const MSG_DELETE_COLLECTION_TYPES = {
-    MsgValue: DeleteCollectionMsgValueType,
+  MsgValue: DeleteCollectionMsgValueType,
 }
 
 export function createMsgDeleteCollection(
-    creator: string,
-    collectionId: number,
+  creator: string,
+  collectionId: bigint,
 ) {
-    return {
-        type: 'badges/DeleteCollection',
-        value: {
-            creator,
-            collectionId,
-        },
-    }
+  return {
+    type: 'badges/DeleteCollection',
+    value: {
+      creator,
+      collectionId: collectionId.toString(),
+    },
+  }
 }

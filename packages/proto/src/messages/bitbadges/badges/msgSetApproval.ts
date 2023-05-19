@@ -3,14 +3,14 @@ import { Balance, getWrappedBalances } from './typeUtils'
 
 export function createMsgSetApproval(
   creator: string,
-  collectionId: number,
-  address: number,
+  collectionId: bigint,
+  address: string,
   balances: Balance[],
 ) {
   const message = new tx.bitbadges.bitbadgeschain.badges.MsgSetApproval({
     creator,
     address,
-    collectionId,
+    collectionId: collectionId.toString(),
     balances: getWrappedBalances(balances),
   })
 

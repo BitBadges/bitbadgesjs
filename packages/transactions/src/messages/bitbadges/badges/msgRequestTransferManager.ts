@@ -18,7 +18,7 @@ import { Chain, Fee, Sender } from '../../common'
 
 export interface MessageMsgRequestTransferManager {
   creator: string
-  collectionId: number
+  collectionId: bigint
   addRequest: boolean
 }
 

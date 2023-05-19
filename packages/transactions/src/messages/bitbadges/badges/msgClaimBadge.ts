@@ -1,16 +1,16 @@
 import {
-  createMsgClaimBadge as protoMsgClaimBadge,
+  ChallengeSolution,
   createTransaction,
-  ClaimProof
+  createMsgClaimBadge as protoMsgClaimBadge
 } from 'bitbadgesjs-proto'
 
 import {
+  MSG_CLAIM_BADGE_TYPES,
   createEIP712,
+  createMsgClaimBadge,
   generateFee,
   generateMessage,
   generateTypes,
-  createMsgClaimBadge,
-  MSG_CLAIM_BADGE_TYPES,
 } from 'bitbadgesjs-eip712'
 
 import { getDefaultDomainWithChainId } from '../../domain'
@@ -19,10 +19,9 @@ import { Chain, Fee, Sender } from '../../common'
 
 export interface MessageMsgClaimBadge {
   creator: string
-  collectionId: number
-  claimId: number
-  whitelistProof: ClaimProof
-  codeProof: ClaimProof
+  collectionId: bigint
+  claimId: bigint
+  solutions: ChallengeSolution[]
 }
 
 export function createTxMsgClaimBadge(
@@ -46,8 +45,7 @@ export function createTxMsgClaimBadge(
     params.creator,
     params.claimId,
     params.collectionId,
-    params.whitelistProof,
-    params.codeProof,
+    params.solutions,
   )
   const messages = generateMessage(
     sender.accountNumber.toString(),
@@ -68,9 +66,9 @@ export function createTxMsgClaimBadge(
     params.creator,
     params.claimId,
     params.collectionId,
-    params.whitelistProof,
-    params.codeProof,
+    params.solutions,
   )
+
   const tx = createTransaction(
     msgCosmos,
     memo,

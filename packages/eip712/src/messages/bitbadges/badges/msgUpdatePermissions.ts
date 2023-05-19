@@ -1,7 +1,7 @@
 const MsgUpdatePermissionsValueType = [
   { name: 'creator', type: 'string' },
-  { name: 'collectionId', type: 'uint64' },
-  { name: 'permissions', type: 'uint64' },
+  { name: 'collectionId', type: 'string' },
+  { name: 'permissions', type: 'string' },
 ]
 
 export const MSG_UPDATE_PERMISSIONS_TYPES = {
@@ -10,15 +10,15 @@ export const MSG_UPDATE_PERMISSIONS_TYPES = {
 
 export function createMsgUpdatePermissions(
   creator: string,
-  collectionId: number,
-  permissions: number,
+  collectionId: bigint,
+  permissions: bigint,
 ) {
   return {
     type: 'badges/UpdatePermissions',
     value: {
       creator,
-      collectionId,
-      permissions,
+      collectionId: collectionId.toString(),
+      permissions: permissions.toString(),
     },
   }
 }

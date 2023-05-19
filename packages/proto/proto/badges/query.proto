@@ -12,33 +12,42 @@ import "badges/claims.proto";
 
 option go_package = "github.com/bitbadges/bitbadgeschain/x/badges/types";
 
-// Query defines the gRPC querier service.
-service Query {
-    // Parameters queries the parameters of the module.
-    rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
-        option (google.api.http).get = "/bitbadges/bitbadgeschain/badges/params";
-    }
 
-    // Queries a list of GetBadge items.
-	rpc GetCollection(QueryGetCollectionRequest) returns (QueryGetCollectionResponse) {
-		option (google.api.http).get = "/bitbadges/bitbadgeschain/badges/get_collection/{id}";
-	}
+// // Query defines the gRPC querier service.
+// service Query {
+//   // Parameters queries the parameters of the module.
+//   rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+//       option (google.api.http).get = "/bitbadges/bitbadgeschain/badges/params";
+//   }
 
-	rpc IsClaimDataUsed(QueryIsClaimDataUsedRequest) returns (QueryIsClaimDataUsedResponse) {
-		option (google.api.http).get = "/bitbadges/bitbadgeschain/badges/is_claim_data_used/{collectionId}/{claimId}/{claimData}";
-	}
+//     // Queries a badge collection by ID.
+// 	rpc GetCollection(QueryGetCollectionRequest) returns (QueryGetCollectionResponse) {
+// 		option (google.api.http).get = "/bitbadges/bitbadgeschain/badges/get_collection/{collectionId}";
+// 	}
 
-    // Queries a list of GetBalance items.
-	rpc GetBalance(QueryGetBalanceRequest) returns (QueryGetBalanceResponse) {
-		option (google.api.http).get = "/bitbadges/bitbadgeschain/badges/get_balance/{badgeId}/{address}";
-	}
+//   // Queries a claim by collection ID and claim ID.
+// 	rpc GetClaim(QueryGetClaimRequest) returns (QueryGetClaimResponse) {
+// 		option (google.api.http).get = "/bitbadges/bitbadgeschain/badges/get_claim/{collectionId}/{claimId}";
+// 	}
 
-    // Queries an address by its account number.
-	rpc GetAddressById(QueryGetAddressByIdRequest) returns (QueryGetAddressByIdResponse) {
-		option (google.api.http).get = "/bitbadges/bitbadgeschain/badges/get_address_by_id/{id}";
-	}
-// this line is used by starport scaffolding # 2
-}
+//   // Has a specific claim been used?
+// 	rpc IsClaimDataUsed(QueryIsClaimDataUsedRequest) returns (QueryIsClaimDataUsedResponse) {
+// 		option (google.api.http).get = "/bitbadges/bitbadgeschain/badges/is_claim_data_used/{collectionId}/{claimId}/{claimData}";
+// 	}
+
+//   // Queries an addresses balance for a badge collection, specified by its ID.
+// 	rpc GetBalance(QueryGetBalanceRequest) returns (QueryGetBalanceResponse) {
+// 		option (google.api.http).get = "/bitbadges/bitbadgeschain/badges/get_balance/{collectionId}/{address}";
+// 	}
+
+//   // Queries an address by its account number.
+// 	rpc GetAddressById(QueryGetAddressByIdRequest) returns (QueryGetAddressByIdResponse) {
+// 		option (google.api.http).get = "/bitbadges/bitbadgeschain/badges/get_address_by_id/{id}";
+// 	}
+
+
+//   // this line is used by starport scaffolding # 2
+// }
 
 // QueryParamsRequest is request type for the Query/Params RPC method.
 message QueryParamsRequest {}
@@ -50,33 +59,69 @@ message QueryParamsResponse {
 }
 
 message QueryGetCollectionRequest {
-  uint64 id = 1;
+  string collectionId = 1  [
+      (gogoproto.customtype) = "Uint",
+      (gogoproto.nullable) = false
+    ];
 }
 
 message QueryGetCollectionResponse {
   BadgeCollection collection = 1;
 }
 
+message QueryGetClaimRequest {
+  string collectionId = 1  [
+      (gogoproto.customtype) = "Uint",
+      (gogoproto.nullable) = false
+
+    ];
+  string claimId = 2  [
+      (gogoproto.customtype) = "Uint",
+      (gogoproto.nullable) = false
+
+    ];
+}
+
+message QueryGetClaimResponse {
+  Claim claim = 1;
+}
+
 message QueryGetAddressByIdRequest {
-    uint64 id = 1;
+  string id = 1  [
+      (gogoproto.customtype) = "Uint",
+      (gogoproto.nullable) = false
+
+    ];
 }
 
 message QueryGetAddressByIdResponse {
-    string address = 1;
+  string address = 1;
 }
 
 message QueryGetBalanceRequest {
-  uint64 badgeId = 1;
-  uint64 address = 2;
+  string collectionId = 1  [
+      (gogoproto.customtype) = "Uint",
+      (gogoproto.nullable) = false
+
+    ];
+  string address = 2;
 }
 
 message QueryGetBalanceResponse {
-  UserBalance balance = 1;
+  UserBalanceStore balance = 1;
 }
 
 message QueryIsClaimDataUsedRequest {
-    uint64 collectionId = 1;
-    uint64 claimId = 2;
+    string collectionId = 1  [
+      (gogoproto.customtype) = "Uint",
+      (gogoproto.nullable) = false
+
+    ];
+    string claimId = 2  [
+      (gogoproto.customtype) = "Uint",
+      (gogoproto.nullable) = false
+
+    ];
     string claimData = 3;
 }
 

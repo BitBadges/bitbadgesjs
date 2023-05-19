@@ -21,8 +21,8 @@ import { Chain, Fee, Sender } from '../../common'
 
 export interface MessageMsgTransferBadge {
   creator: string;
-  from: number;
-  collectionId: number;
+  from: string;
+  collectionId: bigint;
   transfers: Transfers[];
 }
 

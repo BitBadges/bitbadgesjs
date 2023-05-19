@@ -18,8 +18,8 @@ import { Chain, Fee, Sender } from '../../common'
 
 export interface MessageMsgUpdatePermissions {
   creator: string
-  collectionId: number
-  permissions: number
+  collectionId: bigint
+  permissions: bigint
 }
 
 export function createTxMsgUpdatePermissions(

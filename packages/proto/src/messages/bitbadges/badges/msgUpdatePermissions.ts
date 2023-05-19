@@ -2,13 +2,13 @@ import * as tx from '../../../proto/badges/tx'
 
 export function createMsgUpdatePermissions(
   creator: string,
-  collectionId: number,
-  permissions: number,
+  collectionId: bigint,
+  permissions: bigint,
 ) {
   const message = new tx.bitbadges.bitbadgeschain.badges.MsgUpdatePermissions({
     creator,
-    collectionId,
-    permissions,
+    collectionId: collectionId.toString(),
+    permissions: permissions.toString(),
   })
 
   return {
