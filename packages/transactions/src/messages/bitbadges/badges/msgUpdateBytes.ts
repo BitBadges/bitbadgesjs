@@ -2,6 +2,7 @@ import {
   createMsgUpdateBytes as protoMsgUpdateBytes,
   createTransaction,
 } from 'bitbadgesjs-proto'
+import * as badges from 'bitbadgesjs-proto/dist/proto/badges/tx'
 
 import {
   createEIP712,
@@ -20,6 +21,16 @@ export interface MessageMsgUpdateBytes {
   creator: string
   collectionId: bigint
   bytes: string
+}
+
+export function convertFromProtoToMsgUpdateBytes(
+  protoMsg: badges.bitbadges.bitbadgeschain.badges.MsgUpdateBytes,
+): MessageMsgUpdateBytes {
+  return {
+    creator: protoMsg.creator,
+    collectionId: BigInt(protoMsg.collectionId),
+    bytes: protoMsg.bytes,
+  }
 }
 
 export function createTxMsgUpdateBytes(

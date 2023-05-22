@@ -3,8 +3,9 @@
 import {
   createMsgTransferBadge as protoMsgTransferBadge,
   createTransaction,
-  IdRange, Transfers
+  IdRange, Transfers, convertToTransfer
 } from 'bitbadgesjs-proto'
+import * as badges from 'bitbadgesjs-proto/dist/proto/badges/tx'
 
 import {
   createEIP712,
@@ -24,6 +25,17 @@ export interface MessageMsgTransferBadge {
   from: string;
   collectionId: bigint;
   transfers: Transfers[];
+}
+
+export function convertFromProtoToMsgTransferBadge(
+  msg: badges.bitbadges.bitbadgeschain.badges.MsgTransferBadge,
+): MessageMsgTransferBadge {
+  return {
+    creator: msg.creator,
+    from: msg.from,
+    collectionId: BigInt(msg.collectionId),
+    transfers: msg.transfers.map(convertToTransfer),
+  }
 }
 
 export function createTxMsgTransferBadge(

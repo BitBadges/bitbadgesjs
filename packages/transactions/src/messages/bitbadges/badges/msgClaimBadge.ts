@@ -1,8 +1,10 @@
 import {
   ChallengeSolution,
   createTransaction,
-  createMsgClaimBadge as protoMsgClaimBadge
+  createMsgClaimBadge as protoMsgClaimBadge,
 } from 'bitbadgesjs-proto'
+
+import * as badges from 'bitbadgesjs-proto/dist/proto/badges/tx'
 
 import {
   MSG_CLAIM_BADGE_TYPES,
@@ -22,6 +24,17 @@ export interface MessageMsgClaimBadge {
   collectionId: bigint
   claimId: bigint
   solutions: ChallengeSolution[]
+}
+
+export function convertFromProtoToMsgClaimBadge(
+  msg: badges.bitbadges.bitbadgeschain.badges.MsgClaimBadge,
+): MessageMsgClaimBadge {
+  return {
+    creator: msg.creator,
+    collectionId: BigInt(msg.collectionId),
+    claimId: BigInt(msg.claimId),
+    solutions: msg.solutions
+  }
 }
 
 export function createTxMsgClaimBadge(

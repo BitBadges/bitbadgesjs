@@ -6,7 +6,13 @@ import {
   Claim,
   TransferMapping,
   Transfer,
+  convertToBadgeSupplyAndAmount,
+  convertToBadgeUri,
+  convertToClaim,
+  convertToTransfer,
+  convertToTransferMapping,
 } from 'bitbadgesjs-proto'
+import * as badges from 'bitbadgesjs-proto/dist/proto/badges/tx'
 
 import {
   createEIP712,
@@ -34,6 +40,25 @@ export interface MessageMsgNewCollection {
   badgeSupplys: BadgeSupplyAndAmount[]
   transfers: Transfer[]
   claims: Claim[]
+}
+
+export function convertFromProtoToMsgNewCollection(
+  msg: badges.bitbadges.bitbadgeschain.badges.MsgNewCollection,
+): MessageMsgNewCollection {
+  return {
+    creator: msg.creator,
+    collectionUri: msg.collectionUri,
+    badgeUris: msg.badgeUris.map(convertToBadgeUri),
+    balancesUri: msg.balancesUri,
+    permissions: BigInt(msg.permissions),
+    bytes: msg.bytes,
+    allowedTransfers: msg.allowedTransfers.map(convertToTransferMapping),
+    managerApprovedTransfers: msg.managerApprovedTransfers.map(convertToTransferMapping),
+    standard: BigInt(msg.standard),
+    badgeSupplys: msg.badgeSupplys.map(convertToBadgeSupplyAndAmount),
+    transfers: msg.transfers.map(convertToTransfer),
+    claims: msg.claims.map(convertToClaim),
+  }
 }
 
 export function createTxMsgNewCollection(

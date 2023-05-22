@@ -6,9 +6,10 @@ import { BitBadgesUserInfo, s_BitBadgesUserInfo } from "./types/api";
 
 export const MINT_ACCOUNT: BitBadgesUserInfo = {
   cosmosAddress: 'Mint',
-  accountNumber: -1n,
   address: 'Mint',
   chain: SupportedChain.COSMOS,
+  publicKey: '',
+  sequence: 0n,
   collected: [],
   activity: [],
   announcements: [],
@@ -37,9 +38,10 @@ export const MINT_ACCOUNT: BitBadgesUserInfo = {
 
 export const s_MINT_ACCOUNT: s_BitBadgesUserInfo = {
   cosmosAddress: 'Mint',
-  accountNumber: "-1",
   address: 'Mint',
   chain: SupportedChain.COSMOS,
+  publicKey: '',
+  sequence: "0",
   collected: [],
   activity: [],
   announcements: [],
@@ -68,9 +70,10 @@ export const s_MINT_ACCOUNT: s_BitBadgesUserInfo = {
 
 export const s_BLANK_USER_INFO: s_BitBadgesUserInfo = {
   cosmosAddress: '',
-  accountNumber: "-1",
   address: '',
   chain: SupportedChain.UNKNOWN,
+  publicKey: '',
+  sequence: "0",
   collected: [],
   activity: [],
   announcements: [],
@@ -96,6 +99,40 @@ export const s_BLANK_USER_INFO: s_BitBadgesUserInfo = {
     },
   }
 }
+
+export const BLANK_USER_INFO: BitBadgesUserInfo = {
+  cosmosAddress: '',
+  address: '',
+  chain: SupportedChain.UNKNOWN,
+  publicKey: '',
+  sequence: 0n,
+  collected: [],
+  activity: [],
+  announcements: [],
+  reviews: [],
+  seenActivity: 0n,
+  createdAt: 0n,
+  pagination: {
+    activity: {
+      bookmark: '',
+      hasMore: false
+    },
+    announcements: {
+      bookmark: '',
+      hasMore: false
+    },
+    collected: {
+      bookmark: '',
+      hasMore: false
+    },
+    reviews: {
+      bookmark: '',
+      hasMore: false
+    },
+  }
+}
+
+
 
 /**
  * Converts an address from a supported chain to a cosmos address

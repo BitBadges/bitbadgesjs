@@ -1,8 +1,10 @@
 import {
   createMsgSetApproval as protoMsgSetApproval,
   createTransaction,
-  Balance
+  Balance,
+  convertToBalance
 } from 'bitbadgesjs-proto'
+import * as badges from 'bitbadgesjs-proto/dist/proto/badges/tx'
 
 import {
   createEIP712,
@@ -22,6 +24,17 @@ export interface MessageMsgSetApproval {
   collectionId: bigint
   address: string
   balances: Balance[]
+}
+
+export function convertFromProtoToMessageMsgSetApproval(
+  msg: badges.bitbadges.bitbadgeschain.badges.MsgSetApproval,
+): MessageMsgSetApproval {
+  return {
+    creator: msg.creator,
+    collectionId: BigInt(msg.collectionId),
+    address: msg.address,
+    balances: msg.balances.map(convertToBalance)
+  }
 }
 
 export function createTxMsgSetApproval(

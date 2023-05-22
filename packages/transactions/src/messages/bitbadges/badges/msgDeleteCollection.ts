@@ -15,10 +15,20 @@ import {
 import { getDefaultDomainWithChainId } from '../../domain'
 
 import { Chain, Fee, Sender } from '../../common'
+import * as badges from 'bitbadgesjs-proto/dist/proto/badges/tx'
 
 export interface MessageMsgDeleteCollection {
   creator: string
   collectionId: bigint
+}
+
+export function convertFromProtoToMsgDeleteCollection(
+  msg: badges.bitbadges.bitbadgeschain.badges.MsgDeleteCollection,
+): MessageMsgDeleteCollection {
+  return {
+    creator: msg.creator,
+    collectionId: BigInt(msg.collectionId),
+  }
 }
 
 export function createTxMsgDeleteCollection(

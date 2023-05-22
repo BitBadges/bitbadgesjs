@@ -1,8 +1,10 @@
 import {
   createMsgUpdateUris as protoMsgUpdateUris,
   createTransaction,
-  BadgeUri
+  BadgeUri,
+  convertToBadgeUri
 } from 'bitbadgesjs-proto'
+import * as badges from 'bitbadgesjs-proto/dist/proto/badges/tx'
 
 import {
   createEIP712,
@@ -23,6 +25,18 @@ export interface MessageMsgUpdateUris {
   collectionUri: string
   badgeUris: BadgeUri[]
   balancesUri: string
+}
+
+export function convertFromProtoToMsgUpdateUris(
+  msg: badges.bitbadges.bitbadgeschain.badges.MsgUpdateUris,
+): MessageMsgUpdateUris {
+  return {
+    creator: msg.creator,
+    collectionId: BigInt(msg.collectionId),
+    collectionUri: msg.collectionUri,
+    badgeUris: msg.badgeUris.map(convertToBadgeUri),
+    balancesUri: msg.balancesUri,
+  }
 }
 
 export function createTxMsgUpdateUris(

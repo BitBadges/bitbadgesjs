@@ -2,6 +2,7 @@ import {
   createMsgUpdatePermissions as protoMsgUpdatePermissions,
   createTransaction,
 } from 'bitbadgesjs-proto'
+import * as badges from 'bitbadgesjs-proto/dist/proto/badges/tx'
 
 import {
   createEIP712,
@@ -20,6 +21,16 @@ export interface MessageMsgUpdatePermissions {
   creator: string
   collectionId: bigint
   permissions: bigint
+}
+
+export function convertFromProtoToMsgUpdatePermissions(
+  protoMsg: badges.bitbadges.bitbadgeschain.badges.MsgUpdatePermissions,
+): MessageMsgUpdatePermissions {
+  return {
+    creator: protoMsg.creator,
+    collectionId: BigInt(protoMsg.collectionId),
+    permissions: BigInt(protoMsg.permissions),
+  }
 }
 
 export function createTxMsgUpdatePermissions(

@@ -2,6 +2,7 @@ import {
   createMsgRequestTransferManager as protoMsgRequestTransferManager,
   createTransaction,
 } from 'bitbadgesjs-proto'
+import * as badges from 'bitbadgesjs-proto/dist/proto/badges/tx'
 
 import {
   createEIP712,
@@ -20,6 +21,16 @@ export interface MessageMsgRequestTransferManager {
   creator: string
   collectionId: bigint
   addRequest: boolean
+}
+
+export function convertFromProtoToMsgRequestTransferManager(
+  proto: badges.bitbadges.bitbadgeschain.badges.MsgRequestTransferManager,
+): MessageMsgRequestTransferManager {
+  return {
+    creator: proto.creator,
+    collectionId: BigInt(proto.collectionId),
+    addRequest: proto.addRequest,
+  }
 }
 
 export function createTxMsgRequestTransferManager(

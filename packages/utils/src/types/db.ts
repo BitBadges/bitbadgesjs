@@ -1,7 +1,7 @@
 import { BadgeUri, Balance, Challenge, ChallengeBase, Claim, ClaimBase, IdRange, TransferMapping, UserBalance, UserBalanceBase, convertFromApproval, convertFromBalance, convertFromIdRange, convertToApproval, convertToBalance, convertToIdRange, s_Challenge, s_Claim, s_UserBalance } from "bitbadgesjs-proto";
+import MerkleTree from "merkletreejs";
 import { Metadata } from "./metadata";
 import { Permissions } from "./permissions";
-import MerkleTree from "merkletreejs";
 import { SupportedChain } from "./types";
 
 /**
@@ -84,13 +84,48 @@ export function convertFromCollection(item: Collection): s_Collection {
 
 
 /**
- * AccountBase is the type of document stored in the accounts database
+* The chain will return a similar structure but with a pub_key object and account_number field (see CosmosAccountResponse from bitbadgesjs-utils)
+*
+* Here, we clean up the response to return a more conventional object for our purposes.
+*/
+
+
+export interface AccountBase {
+  publicKey: string
+  // sequence: bigint | string //We will add sequence support in the future
+  chain: SupportedChain
+  cosmosAddress: string
+  address: string
+}
+
+export interface Account extends AccountBase {
+  // sequence: bigint
+}
+
+export interface s_Account extends AccountBase {
+  // sequence: string
+}
+
+export function convertToAccount(s_item: s_Account): Account {
+  return {
+    ...s_item,
+    // sequence: BigInt(s_item.sequence),
+  }
+}
+
+export function convertFromAccount(item: Account): s_Account {
+  return {
+    ...item,
+    // sequence: item.sequence.toString(),
+  }
+}
+
+
+
+/**
+ * ProfileBase is the type of document stored in the profile database
  *
- * @typedef {Object} AccountBase
- * @property {string} cosmosAddress - The Cosmos address of the account
- * @property {bigint | string} accountNumber - The account number of the account
- * @property {string} address - The native chain's address of the account
- * @property {SupportedChain} chain - The native chain of the account
+ * @typedef {Object} ProfileBase
  * @property {bigint | string} seenActivity - The timestamp of the last activity seen for this account (milliseconds since epoch)
  * @property {bigint | string} createdAt - The timestamp of when this account was created (milliseconds since epoch)
  *
@@ -108,11 +143,7 @@ export function convertFromCollection(item: Collection): s_Collection {
  * @see
  * See UserInfo
  */
-export interface AccountBase {
-  cosmosAddress: string,
-  accountNumber: bigint | string;
-  chain: SupportedChain,
-  address: string,
+export interface ProfileBase {
   seenActivity?: bigint | string;
   createdAt?: bigint | string;
 
@@ -125,31 +156,27 @@ export interface AccountBase {
   readme?: string
 }
 
-export interface Account extends AccountBase {
-  accountNumber: bigint;
+export interface Profile extends ProfileBase {
   seenActivity?: bigint;
   createdAt?: bigint;
 }
 
-export interface s_Account extends AccountBase {
-  accountNumber: string;
+export interface s_Profile extends ProfileBase {
   seenActivity?: string;
   createdAt?: string;
 }
 
-export function convertToAccount(s_item: s_Account): Account {
+export function convertToProfile(s_item: s_Profile): Profile {
   return {
     ...s_item,
-    accountNumber: BigInt(s_item.accountNumber),
     seenActivity: s_item.seenActivity ? BigInt(s_item.seenActivity) : undefined,
     createdAt: s_item.createdAt ? BigInt(s_item.createdAt) : undefined,
   }
 }
 
-export function convertFromAccount(item: Account): s_Account {
+export function convertFromProfile(item: Profile): s_Profile {
   return {
     ...item,
-    accountNumber: item.accountNumber.toString(),
     seenActivity: item.seenActivity ? item.seenActivity.toString() : undefined,
     createdAt: item.createdAt ? item.createdAt.toString() : undefined,
   }
@@ -460,10 +487,7 @@ export function convertFromBalanceDocument(doc: BalanceDocument): s_BalanceDocum
 }
 
 
-/**
- * TODO: rework this (including bigints)
- */
-export interface PasswordDocument {
+export interface PasswordDocumentBase {
   password: string
   codes: string[]
 
@@ -478,6 +502,85 @@ export interface PasswordDocument {
   collectionId: bigint | string
 }
 
+export interface PasswordDocument extends PasswordDocumentBase {
+  currCode: bigint
+  claimedUsers: {
+    [cosmosAddress: string]: bigint
+  }
+  claimId: bigint
+  collectionId: bigint
+}
+
+export interface s_PasswordDocument extends PasswordDocumentBase {
+  currCode: string
+  claimedUsers: {
+    [cosmosAddress: string]: string
+  }
+  claimId: string
+  collectionId: string
+}
+
+export function convertToPasswordDocument(s_doc: s_PasswordDocument): PasswordDocument {
+  return {
+    ...s_doc,
+    currCode: BigInt(s_doc.currCode),
+    claimedUsers: Object.entries(s_doc.claimedUsers).reduce((acc, [key, value]) => {
+      acc[key] = BigInt(value)
+      return acc
+    }, {} as { [cosmosAddress: string]: bigint }),
+    claimId: BigInt(s_doc.claimId),
+    collectionId: BigInt(s_doc.collectionId),
+  }
+}
+
+export function convertFromPasswordDocument(doc: PasswordDocument): s_PasswordDocument {
+  return {
+    ...doc,
+
+    currCode: doc.currCode.toString(),
+    claimedUsers: Object.entries(doc.claimedUsers).reduce((acc, [key, value]) => {
+      acc[key] = value.toString()
+      return acc
+    }, {} as { [cosmosAddress: string]: string }),
+    claimId: doc.claimId.toString(),
+    collectionId: doc.collectionId.toString(),
+  }
+}
+
+/**
+ * LeavesDetails represents details about the leaves of a claims tree.
+ * This is used as helpers for storing leaves and for UI purposes.
+ *
+ * This is used to check if an entered claim value is valid. If the leaves are hashed, then the value entered by the user will be hashed before being checked against the provided leaf values.
+ * If the leaves are not hashed, then the value entered by the user will be checked directly against the provided leaf values.
+ *
+ * IMPORTANT: The leaf values here are to be publicly stored on IPFS, so they should not contain any sensitive information (i.e. codes, passwords, etc.)
+ * Only use this with the non-hashed option when the values do not contain any sensitive information (i.e. a public whitelist of addresses).
+ *
+ * @example Codes
+ * 1. Generate N codes privately
+ * 2. Hash each code
+ * 3. Store the hashed codes publicly on IPFS via this struct
+ * 4. When a user enters a code, we hash it and check if it matches any of the hashed codes. This way, the codes are never stored publicly on IPFS and only known by the generator of the codes.
+ *
+ * @example Whitelist
+ * For storing a public whitelist of addresses (with useCreatorAddressAsLeaf = true), hashing complicates everything because the whitelist can be stored publicly.
+ * 1. Generate N whitelist addresses
+ * 2. Store the addresses publicly on IPFS via this struct
+ * 3. When a user enters an address, we check if it matches any of the addresses.
+ *
+ *
+ * @typedef {Object} LeavesDetails
+ *
+ * @property {string[]} leaves - The values of the leaves
+ * @property {boolean} isHashed - True if the leaves are hashed
+ *
+ */
+export interface LeavesDetails {
+  leaves: string[]
+  isHashed: boolean
+}
+
 /**
  * ChallengeWithDetailsBase represents a challenge for a claim with additional specified details.
  * The base Challenge is what is stored on-chain, but this is the full challenge with additional details.
@@ -485,15 +588,14 @@ export interface PasswordDocument {
  * @typedef {Object} ChallengeWithDetailsBase
  * @extends {Challenge}
  *
- * @property {string[]} leaves - The leaves of the Merkle tree
+ * @property {LeavesDetails} leaves - The leaves of the Merkle tree with accompanying details
  * @property {boolean} areLeavesHashed - True if the leaves are hashed
  * @property {(bigint | string)[]} usedLeafIndices - The indices of the leaves that have been used
  * @property {MerkleTree} tree - The Merkle tree
  * @property {bigint | string} numLeaves - The number of leaves in the Merkle tree. This takes priority over leaves.length if defined (used for buffer time between leaf generation and leaf length select)
  */
 export interface ChallengeWithDetailsBase extends ChallengeBase {
-  leaves: string[]
-  areLeavesHashed: boolean
+  leavesDetails: LeavesDetails
   usedLeafIndices: (bigint | string)[]
   tree?: MerkleTree
 
@@ -511,8 +613,7 @@ export interface ChallengeWithDetailsBase extends ChallengeBase {
  * @see ChallengeWithDetailsBase
  */
 export interface ChallengeWithDetails extends Challenge {
-  leaves: string[]
-  areLeavesHashed: boolean
+  leavesDetails: LeavesDetails
   tree?: MerkleTree
 
   usedLeafIndices: bigint[]
@@ -520,8 +621,7 @@ export interface ChallengeWithDetails extends Challenge {
 }
 
 export interface s_ChallengeWithDetails extends s_Challenge {
-  leaves: string[]
-  areLeavesHashed: boolean
+  leavesDetails: LeavesDetails
   tree?: MerkleTree
 
   usedLeafIndices: string[]

@@ -1,6 +1,6 @@
 {
   "name": "bitbadgesjs-utils",
-  "version": "1.0.44",
+  "version": "1.0.56",
   "description": "",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

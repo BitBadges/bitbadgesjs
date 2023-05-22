@@ -1,9 +1,9 @@
 import { s_UserBalance } from "bitbadgesjs-proto"
 import nano from "nano"
 import { AnnouncementActivityItem, AnnouncementActivityItemBase, convertFromAnnouncementActivityItem, convertFromReviewActivityItem, convertFromTransferActivityItem, convertToAnnouncementActivityItem, convertToReviewActivityItem, convertToTransferActivityItem, ReviewActivityItem, ReviewActivityItemBase, s_AnnouncementActivityItem, s_ReviewActivityItem, s_TransferActivityItem, TransferActivityItem, TransferActivityItemBase } from "./activity"
-import { Account, AccountBase, BalanceDocument, BalanceDocumentBase, ClaimDocument, Collection, convertFromBalanceDocument, convertFromClaimDocument, convertToBalanceDocument, convertToClaimDocument, s_Account, s_BalanceDocument, s_ClaimDocument, s_Collection, s_MetadataDoc } from "./db"
+import { Profile, ProfileBase, BalanceDocument, BalanceDocumentBase, ClaimDocument, Collection, convertFromBalanceDocument, convertFromClaimDocument, convertToBalanceDocument, convertToClaimDocument, s_Profile, s_BalanceDocument, s_ClaimDocument, s_Collection, s_MetadataDoc } from "./db"
 import { Metadata } from "./metadata"
-import { MetadataMap } from "./types"
+import { MetadataMap, SupportedChain } from "./types"
 
 
 /**
@@ -69,7 +69,7 @@ export function convertFromCoin(item: Coin): s_Coin {
  * BitBadgesUserInfo is the type for accounts returned by the BitBadges API
  *
  * @typedef {Object} BitBadgesUserInfoBase
- * @extends {AccountBase}
+ * @extends {ProfileBase}
  *
  * @property {string} [resolvedName] - The resolved name of the account (e.g. ENS name).
  * @property {string} [avatar] - The avatar of the account.
@@ -87,7 +87,13 @@ export function convertFromCoin(item: Coin): s_Coin {
  *
  * For typical fetches, collected, activity, announcements, and reviews will be empty arrays and are to be loaded as needed (pagination will be set to hasMore == true).
  */
-export interface BitBadgesUserInfoBase extends AccountBase {
+export interface BitBadgesUserInfoBase extends ProfileBase {
+  cosmosAddress: string,
+  chain: SupportedChain,
+  address: string,
+  publicKey: string,
+  sequence?: bigint | string,
+
   resolvedName?: string
   avatar?: string
 
@@ -130,7 +136,14 @@ export interface BitBadgesUserInfoBase extends AccountBase {
  *
  * For typical fetches, collected, activity, announcements, and reviews will be empty arrays and are to be loaded as needed (pagination will be set to hasMore == true).
  */
-export interface BitBadgesUserInfo extends Account {
+export interface BitBadgesUserInfo extends Profile {
+  //These are the same as the Account type. Make sure they are consistent
+  cosmosAddress: string,
+  chain: SupportedChain,
+  address: string,
+  publicKey: string,
+  sequence?: bigint,
+
   resolvedName?: string
   avatar?: string
 
@@ -154,8 +167,11 @@ export interface BitBadgesUserInfo extends Account {
  * s_BitBadgesUserInfo is the type for accounts returned by the BitBadges API
  *
  * @typedef {Object} s_BitBadgesUserInfo
- * @extends {s_Account}
+ * @extends {s_Profile}
  *
+ * @property {string} cosmosAddress - The Cosmos address of the account
+ * @property {string} address - The native chain's address of the account
+ * @property {SupportedChain} chain - The native chain of the account
  * @property {string} [resolvedName] - The resolved name of the account (e.g. ENS name).
  * @property {string} [avatar] - The avatar of the account.
  * @property {s_Coin} [balance] - The balance of the account ($BADGE).
@@ -172,7 +188,13 @@ export interface BitBadgesUserInfo extends Account {
  *
  * For typical fetches, collected, activity, announcements, and reviews will be empty arrays and are to be loaded as needed (pagination will be set to hasMore == true).
  */
-export interface s_BitBadgesUserInfo extends s_Account {
+export interface s_BitBadgesUserInfo extends s_Profile {
+  cosmosAddress: string,
+  chain: SupportedChain,
+  address: string,
+  publicKey: string,
+  sequence?: string,
+
   resolvedName?: string
   avatar?: string
 
@@ -195,12 +217,12 @@ export interface s_BitBadgesUserInfo extends s_Account {
 export function convertToBitBadgesUserInfo(s_item: s_BitBadgesUserInfo): BitBadgesUserInfo {
   return {
     ...s_item,
+    sequence: s_item.sequence ? BigInt(s_item.sequence) : undefined,
     balance: s_item.balance ? convertToCoin(s_item.balance) : undefined,
     collected: s_item.collected.map(convertToBalanceDocument),
     activity: s_item.activity.map(convertToTransferActivityItem),
     announcements: s_item.announcements.map(convertToAnnouncementActivityItem),
     reviews: s_item.reviews.map(convertToReviewActivityItem),
-    accountNumber: BigInt(s_item.accountNumber),
     createdAt: s_item.createdAt ? BigInt(s_item.createdAt) : undefined,
     seenActivity: s_item.seenActivity ? BigInt(s_item.seenActivity) : undefined,
   }
@@ -209,12 +231,12 @@ export function convertToBitBadgesUserInfo(s_item: s_BitBadgesUserInfo): BitBadg
 export function convertFromBitBadgesUserInfo(item: BitBadgesUserInfo): s_BitBadgesUserInfo {
   return {
     ...item,
+    sequence: item.sequence ? item.sequence.toString() : undefined,
     balance: item.balance ? convertFromCoin(item.balance) : undefined,
     collected: item.collected.map(convertFromBalanceDocument),
     activity: item.activity.map(convertFromTransferActivityItem),
     announcements: item.announcements.map(convertFromAnnouncementActivityItem),
     reviews: item.reviews.map(convertFromReviewActivityItem),
-    accountNumber: item.accountNumber.toString(),
     createdAt: item.createdAt ? item.createdAt.toString() : undefined,
     seenActivity: item.seenActivity ? item.seenActivity.toString() : undefined,
   }

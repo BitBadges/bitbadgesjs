@@ -1,16 +1,21 @@
 import {
-  createMsgMintAndDistributeBadges as protoMsgMintAndDistributeBadges,
+  BadgeSupplyAndAmount, BadgeUri, Claim, Transfer,
+  convertToBadgeSupplyAndAmount,
+  convertToBadgeUri,
+  convertToClaim,
+  convertToTransfer,
   createTransaction,
-  BadgeSupplyAndAmount, BadgeUri, Claim, Transfer
+  createMsgMintAndDistributeBadges as protoMsgMintAndDistributeBadges
 } from 'bitbadgesjs-proto'
+import * as badges from 'bitbadgesjs-proto/dist/proto/badges/tx'
 
 import {
+  MSG_MINT_BADGE_TYPES,
   createEIP712,
+  createMsgMintAndDistributeBadges,
   generateFee,
   generateMessage,
   generateTypes,
-  createMsgMintAndDistributeBadges,
-  MSG_MINT_BADGE_TYPES,
 } from 'bitbadgesjs-eip712'
 
 import { getDefaultDomainWithChainId } from '../../domain'
@@ -26,6 +31,21 @@ export interface MessageMsgMintAndDistributeBadges {
   collectionUri: string
   badgeUris: BadgeUri[]
   balancesUri: string
+}
+
+export function convertFromProtoToMsgMintAndDistributeBadges(
+  msg: badges.bitbadges.bitbadgeschain.badges.MsgMintAndDistributeBadges,
+): MessageMsgMintAndDistributeBadges {
+  return {
+    creator: msg.creator,
+    collectionId: BigInt(msg.collectionId),
+    badgeSupplys: msg.badgeSupplys.map(convertToBadgeSupplyAndAmount),
+    transfers: msg.transfers.map(convertToTransfer),
+    claims: msg.claims.map(convertToClaim),
+    collectionUri: msg.collectionUri,
+    badgeUris: msg.badgeUris.map(convertToBadgeUri),
+    balancesUri: msg.balancesUri
+  }
 }
 
 export function createTxMsgMintAndDistributeBadges(

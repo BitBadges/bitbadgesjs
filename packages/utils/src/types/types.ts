@@ -33,7 +33,7 @@ export interface MetadataMap {
 export enum SupportedChain {
   ETH = 'Ethereum',
   COSMOS = 'Cosmos',
-  UNKNOWN = 'Unknown'
+  UNKNOWN = 'Unknown' //If unknown address, we don't officially know the chain yet. For now, we assume it's Ethereum
 }
 
 export enum TransactionStatus {

@@ -1,8 +1,10 @@
 import {
   createMsgUpdateAllowedTransfers as protoMsgUpdateAllowedTransfers,
   createTransaction,
-  TransferMapping
+  TransferMapping,
+  convertToTransferMapping
 } from 'bitbadgesjs-proto'
+import * as badges from 'bitbadgesjs-proto/dist/proto/badges/tx'
 
 import {
   createEIP712,
@@ -21,6 +23,16 @@ export interface MessageMsgUpdateAllowedTransfers {
   creator: string
   collectionId: bigint
   allowedTransfers: TransferMapping[]
+}
+
+export function convertFromProtoToMsgUpdateAllowedTransfers(
+  proto: badges.bitbadges.bitbadgeschain.badges.MsgUpdateAllowedTransfers,
+): MessageMsgUpdateAllowedTransfers {
+  return {
+    creator: proto.creator,
+    collectionId: BigInt(proto.collectionId),
+    allowedTransfers: proto.allowedTransfers.map(convertToTransferMapping),
+  }
 }
 
 export function createTxMsgUpdateAllowedTransfers(
