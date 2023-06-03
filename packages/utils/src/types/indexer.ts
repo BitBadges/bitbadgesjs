@@ -1,6 +1,6 @@
-import { Collection, Account, MetadataDoc, BalanceDocument, ClaimDocument } from "./db";
-import { ActivityItem } from "./activity";
 import Nano from "nano";
+import { ActivityItem } from "./activity";
+import { Account, BalanceDocument, ClaimDocument, Collection, QueueItem, RefreshDocument } from "./db";
 
 /**
  * DocsCache is used by the indexer to cache documents in memory to avoid having to fetch and write to the database each time.
@@ -9,18 +9,19 @@ import Nano from "nano";
  * @typedef {Object} DocsCache
  * @property {AccountDocs} accounts - The accounts cache.
  * @property {CollectionDocs} collections - The collections cache.
- * @property {MetadataDocs} metadata - The metadata cache.
  * @property {BalanceDocs} balances - The balances cache.
  * @property {ClaimDocs} claims - The claims cache.
  * @property {ActivityItem[]} activityToAdd - The activity documents to add to the database.
+ * @property {QueueItem[]} queueDocsToAdd - The queue documents to add to the database.
  */
 export interface DocsCache {
   accounts: AccountDocs;
   collections: CollectionDocs;
-  metadata: MetadataDocs;
   balances: BalanceDocs;
   claims: ClaimDocs;
-  activityToAdd: ActivityItem[]
+  refreshes: RefreshDocs;
+  queueDocsToAdd: QueueItem[];
+  activityToAdd: ActivityItem[];
 }
 
 /**
@@ -32,6 +33,10 @@ export interface CollectionDocs {
   [id: string]: (Collection & Nano.DocumentGetResponse) | { _id: string };
 }
 
+export interface RefreshDocs {
+  [id: string]: (RefreshDocument & Nano.DocumentGetResponse) | { _id: string };
+}
+
 /**
  * AccountDocs is a map of cosmosAddress to account documents.
  *
@@ -39,18 +44,6 @@ export interface CollectionDocs {
  */
 export interface AccountDocs {
   [cosmosAddress: string]: (Account & Nano.DocumentGetResponse) | { _id: string };
-}
-
-//Partitioned by collectionId-metadataId
-
-/**
- * MetadataDocs is a map of partitionedId to metadata documents.
- * The partitionedId is the collectionId and the metadataId joined by a dash (e.g. "1-1").
- *
- * @typedef {Object} MetadataDocs
- */
-export interface MetadataDocs {
-  [partitionedId: string]: (MetadataDoc & Nano.DocumentGetResponse) | { _id: string };
 }
 
 /**

@@ -1,7 +1,7 @@
 import { s_UserBalance } from "bitbadgesjs-proto"
 import nano from "nano"
 import { AnnouncementActivityItem, AnnouncementActivityItemBase, convertFromAnnouncementActivityItem, convertFromReviewActivityItem, convertFromTransferActivityItem, convertToAnnouncementActivityItem, convertToReviewActivityItem, convertToTransferActivityItem, ReviewActivityItem, ReviewActivityItemBase, s_AnnouncementActivityItem, s_ReviewActivityItem, s_TransferActivityItem, TransferActivityItem, TransferActivityItemBase } from "./activity"
-import { Profile, ProfileBase, BalanceDocument, BalanceDocumentBase, ClaimDocument, Collection, convertFromBalanceDocument, convertFromClaimDocument, convertToBalanceDocument, convertToClaimDocument, s_Profile, s_BalanceDocument, s_ClaimDocument, s_Collection, s_MetadataDoc } from "./db"
+import { BalanceDocument, BalanceDocumentBase, ClaimInfo, Collection, convertFromBalanceDocument, convertFromClaimInfo, convertToBalanceDocument, convertToClaimInfo, Profile, ProfileBase, s_BalanceDocument, s_ClaimDocument, s_Collection, s_MetadataDoc, s_Profile } from "./db"
 import { Metadata } from "./metadata"
 import { MetadataMap, SupportedChain } from "./types"
 
@@ -275,7 +275,7 @@ export interface BitBadgeCollection extends Collection {
   announcements: AnnouncementActivityItem[],
   reviews: ReviewActivityItem[],
   balances: BalanceDocument[],
-  claims: ClaimDocument[],
+  claims: ClaimInfo[],
 }
 
 /**
@@ -307,7 +307,7 @@ export function convertToBitBadgeCollection(s_item: s_BitBadgeCollection): BitBa
     announcements: s_item.announcements.map(convertToAnnouncementActivityItem),
     reviews: s_item.reviews.map(convertToReviewActivityItem),
     balances: s_item.balances.map(convertToBalanceDocument),
-    claims: s_item.claims.map(convertToClaimDocument),
+    claims: s_item.claims.map(convertToClaimInfo),
     collectionId: BigInt(s_item.collectionId),
     nextBadgeId: BigInt(s_item.nextBadgeId),
     nextClaimId: BigInt(s_item.nextClaimId),
@@ -324,7 +324,7 @@ export function convertFromBitBadgeCollection(item: BitBadgeCollection): s_BitBa
     announcements: item.announcements.map(convertFromAnnouncementActivityItem),
     reviews: item.reviews.map(convertFromReviewActivityItem),
     balances: item.balances.map(convertFromBalanceDocument),
-    claims: item.claims.map(convertFromClaimDocument),
+    claims: item.claims.map(convertFromClaimInfo),
     collectionId: item.collectionId.toString(),
     nextBadgeId: item.nextBadgeId.toString(),
     nextClaimId: item.nextClaimId.toString(),

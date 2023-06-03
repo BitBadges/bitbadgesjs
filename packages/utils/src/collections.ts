@@ -6,7 +6,7 @@ import { GetPermissionNumberValue, GetPermissions } from "./permissions";
 import { BitBadgeCollection, BitBadgesUserInfo } from "./types/api";
 import { Metadata } from "./types/metadata";
 import { MetadataMap } from "./types/types";
-import { ClaimWithDetails } from "./types/db";
+import { ClaimDetails } from "./types/db";
 import { TransferWithIncrements } from "./types/transfers";
 
 /**
@@ -26,11 +26,11 @@ export function getIdRangesForAllBadgeIdsInCollection(collection: BitBadgeCollec
  * Extends the base MessageMsgNewCollection to include the distribution details for the new badges (transfers / claims)
  *
  * @typedef {Object} MessageMsgNewCollectionWithClaimDetails
- * @property {ClaimWithDetails[]} claims - The claims that will be added to the collection, extended to be ClaimWithDetails
+ * @property {ClaimDetails[]} claims - The claims that will be added to the collection, extended to be ClaimDetails
  * @property {TransferWithIncrements[]} transfers - The transfers that will be added to the collection, extended to be TransferWithIncrements
  */
 export interface MessageMsgNewCollectionWithClaimDetails extends MessageMsgNewCollection {
-  claims: ClaimWithDetails[];
+  details: ClaimDetails[];
   transfers: TransferWithIncrements[];
 }
 
@@ -93,7 +93,9 @@ export function simulateCollectionAfterMsgNewCollection(
         claimId: existingCollection?.nextClaimId ? existingCollection.nextClaimId + BigInt(idx) : BigInt(idx + 1),
         collectionId: existingCollection?.collectionId ? existingCollection.collectionId : 0n,
         totalClaimsProcessed: 0n,
-        claimsPerAddressCount: {}
+        claimsPerAddressCount: {},
+        usedLeafIndices: [...claim.challenges.map(() => [])],
+        details: msg.details[idx],
       }
     })
   ];
@@ -128,11 +130,11 @@ export function simulateCollectionAfterMsgNewCollection(
  * Extends the base MessageMsgMintAndDistributeBadges to include the distribution details for the new badges (transfers / claims)
  *
  * @typedef {Object} MessageMsgMintAndDistributeBadgesWithClaimDetails
- * @property {ClaimWithDetails[]} claims - The claims that will be added to the collection, extended to be ClaimWithDetails
+ * @property {ClaimDetails[]} claims - The claims that will be added to the collection, extended to be ClaimDetails
  * @property {TransferWithIncrements[]} transfers - The transfers that will be added to the collection, extended to be TransferWithIncrements
  */
 export interface MessageMsgMintAndDistributeBadgesWithClaimDetails extends MessageMsgMintAndDistributeBadges {
-  claims: ClaimWithDetails[];
+  details: ClaimDetails[];
   transfers: TransferWithIncrements[];
 }
 
@@ -191,6 +193,7 @@ export function simulateCollectionAfterMsgUpdateUris(
     badgeSupplys: [],
     transfers: [],
     claims: [],
+    details: [],
   }
 
   return simulateCollectionAfterMsgNewCollection(msgNewCollectionWithEmptyValues, newCollectionMetadata, newBadgeMetadata, txSender, existingCollection);
@@ -225,6 +228,7 @@ export function simulateCollectionAfterMsgUpdateAllowedTransfers(
     collectionUri: existingCollection?.collectionUri ? existingCollection.collectionUri : '',
     badgeUris: existingCollection?.badgeUris ? existingCollection.badgeUris : [],
     balancesUri: existingCollection?.balancesUri ? existingCollection.balancesUri : '',
+    details: [],
   }
 
   return simulateCollectionAfterMsgNewCollection(msgNewCollectionWithEmptyValues, newCollectionMetadata, newBadgeMetadata, txSender, existingCollection);

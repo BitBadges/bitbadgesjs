@@ -15,7 +15,7 @@ import { IdRange } from "bitbadgesjs-proto";
  * @property {string} [externalUrl] - The external URL of the badge or badge collection.
  * @property {string[]} [tags] - The tags of the badge or badge collection.
  */
-export interface Metadata {
+export interface MetadataBase {
   name: string;
   description: string;
   image: string;
@@ -26,3 +26,7 @@ export interface Metadata {
   externalUrl?: string;
   tags?: string[];
 }
+
+export interface Metadata extends MetadataBase { }
+
+export interface s_Metadata extends MetadataBase { }
