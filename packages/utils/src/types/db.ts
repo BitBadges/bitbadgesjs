@@ -1,4 +1,4 @@
-import { BadgeUri, Balance, Claim, IdRange, TransferMapping, UserBalance, UserBalanceBase, convertFromApproval, convertFromBalance, convertFromChallenge, convertFromIdRange, convertToApproval, convertToBalance, convertToChallenge, convertToIdRange, s_Claim, s_UserBalance } from "bitbadgesjs-proto";
+import { BadgeUri, Balance, Claim, TransferMapping, UserBalance, UserBalanceBase, convertFromApproval, convertFromBalance, convertFromChallenge, convertFromIdRange, convertToApproval, convertToBalance, convertToChallenge, convertToIdRange, s_Claim, s_UserBalance } from "bitbadgesjs-proto";
 import MerkleTree from "merkletreejs";
 import { Metadata, MetadataBase, s_Metadata } from "./metadata";
 import { Permissions } from "./permissions";

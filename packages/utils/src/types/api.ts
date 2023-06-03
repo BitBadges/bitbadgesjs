@@ -1,8 +1,8 @@
 import { s_UserBalance } from "bitbadgesjs-proto"
 import nano from "nano"
 import { AnnouncementActivityItem, AnnouncementActivityItemBase, convertFromAnnouncementActivityItem, convertFromReviewActivityItem, convertFromTransferActivityItem, convertToAnnouncementActivityItem, convertToReviewActivityItem, convertToTransferActivityItem, ReviewActivityItem, ReviewActivityItemBase, s_AnnouncementActivityItem, s_ReviewActivityItem, s_TransferActivityItem, TransferActivityItem, TransferActivityItemBase } from "./activity"
-import { BalanceDocument, BalanceDocumentBase, ClaimInfo, Collection, convertFromBalanceDocument, convertFromClaimInfo, convertToBalanceDocument, convertToClaimInfo, Profile, ProfileBase, s_BalanceDocument, s_ClaimDocument, s_Collection, s_MetadataDoc, s_Profile } from "./db"
-import { Metadata } from "./metadata"
+import { BalanceDocument, BalanceDocumentBase, ClaimInfo, Collection, convertFromBalanceDocument, convertFromClaimInfo, convertToBalanceDocument, convertToClaimInfo, Profile, ProfileBase, s_BalanceDocument, s_ClaimDocument, s_Collection, s_Profile } from "./db"
+import { Metadata, s_Metadata } from "./metadata"
 import { MetadataMap, SupportedChain } from "./types"
 
 
@@ -400,7 +400,7 @@ export interface GetPortfolioResponse {
 
 export interface SearchResponse {
   accounts: s_BitBadgesUserInfo[],
-  collections: (s_MetadataDoc & nano.DocumentGetResponse)[],
+  collections: (s_Metadata & nano.DocumentGetResponse)[],
 }
 
 
