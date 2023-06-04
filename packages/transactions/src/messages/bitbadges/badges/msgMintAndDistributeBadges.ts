@@ -1,9 +1,12 @@
 import {
-  BadgeSupplyAndAmount, BadgeUri, Claim, Transfer,
-  convertToBadgeSupplyAndAmount,
-  convertToBadgeUri,
-  convertToClaim,
-  convertToTransfer,
+  BadgeSupplyAndAmountWithType,
+  BadgeUriWithType,
+  ClaimWithType, NumberType,
+  TransferWithType,
+  convertBadgeSupplyAndAmount,
+  convertBadgeUri,
+  convertClaim,
+  convertTransfer,
   createTransaction,
   createMsgMintAndDistributeBadges as protoMsgMintAndDistributeBadges
 } from 'bitbadgesjs-proto'
@@ -24,12 +27,12 @@ import { Chain, Fee, Sender } from '../../common'
 
 export interface MessageMsgMintAndDistributeBadges {
   creator: string
-  collectionId: bigint
-  badgeSupplys: BadgeSupplyAndAmount[]
-  transfers: Transfer[]
-  claims: Claim[]
+  collectionId: NumberType
+  badgeSupplys: BadgeSupplyAndAmountWithType<NumberType>[]
+  transfers: TransferWithType<NumberType>[]
+  claims: ClaimWithType<NumberType>[]
   collectionUri: string
-  badgeUris: BadgeUri[]
+  badgeUris: BadgeUriWithType<NumberType>[]
   balancesUri: string
 }
 
@@ -39,11 +42,11 @@ export function convertFromProtoToMsgMintAndDistributeBadges(
   return {
     creator: msg.creator,
     collectionId: BigInt(msg.collectionId),
-    badgeSupplys: msg.badgeSupplys.map(convertToBadgeSupplyAndAmount),
-    transfers: msg.transfers.map(convertToTransfer),
-    claims: msg.claims.map(convertToClaim),
+    badgeSupplys: msg.badgeSupplys.map((x) => convertBadgeSupplyAndAmount(x, BigInt)),
+    transfers: msg.transfers.map((x) => convertTransfer(x, BigInt)),
+    claims: msg.claims.map((x) => convertClaim(x, BigInt)),
     collectionUri: msg.collectionUri,
-    badgeUris: msg.badgeUris.map(convertToBadgeUri),
+    badgeUris: msg.badgeUris.map((x) => convertBadgeUri(x, BigInt)),
     balancesUri: msg.balancesUri
   }
 }

@@ -1,18 +1,19 @@
 import {
-  createMsgUpdateUris as protoMsgUpdateUris,
+  BadgeUriWithType,
+  NumberType,
+  convertBadgeUri,
   createTransaction,
-  BadgeUri,
-  convertToBadgeUri
+  createMsgUpdateUris as protoMsgUpdateUris
 } from 'bitbadgesjs-proto'
 import * as badges from 'bitbadgesjs-proto/dist/proto/badges/tx'
 
 import {
+  MSG_UPDATE_URIS_TYPES,
   createEIP712,
+  createMsgUpdateUris,
   generateFee,
   generateMessage,
   generateTypes,
-  createMsgUpdateUris,
-  MSG_UPDATE_URIS_TYPES,
 } from 'bitbadgesjs-eip712'
 
 import { getDefaultDomainWithChainId } from '../../domain'
@@ -21,9 +22,9 @@ import { Chain, Fee, Sender } from '../../common'
 
 export interface MessageMsgUpdateUris {
   creator: string
-  collectionId: bigint
+  collectionId: NumberType
   collectionUri: string
-  badgeUris: BadgeUri[]
+  badgeUris: BadgeUriWithType<NumberType>[]
   balancesUri: string
 }
 
@@ -34,7 +35,7 @@ export function convertFromProtoToMsgUpdateUris(
     creator: msg.creator,
     collectionId: BigInt(msg.collectionId),
     collectionUri: msg.collectionUri,
-    badgeUris: msg.badgeUris.map(convertToBadgeUri),
+    badgeUris: msg.badgeUris.map((x) => convertBadgeUri(x, BigInt)),
     balancesUri: msg.balancesUri,
   }
 }

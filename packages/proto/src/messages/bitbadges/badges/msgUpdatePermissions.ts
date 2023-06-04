@@ -1,9 +1,10 @@
 import * as tx from '../../../proto/badges/tx'
+import { NumberType } from './string-numbers'
 
-export function createMsgUpdatePermissions(
+export function createMsgUpdatePermissions<T extends NumberType>(
   creator: string,
-  collectionId: bigint,
-  permissions: bigint,
+  collectionId: T,
+  permissions: T,
 ) {
   const message = new tx.bitbadges.bitbadgeschain.badges.MsgUpdatePermissions({
     creator,

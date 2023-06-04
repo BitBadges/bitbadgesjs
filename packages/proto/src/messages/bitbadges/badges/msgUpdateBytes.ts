@@ -1,8 +1,9 @@
 import * as tx from '../../../proto/badges/tx'
+import { NumberType } from './string-numbers'
 
-export function createMsgUpdateBytes(
+export function createMsgUpdateBytes<T extends NumberType>(
   creator: string,
-  collectionId: bigint,
+  collectionId: T,
   bytes: string,
 ) {
   const message = new tx.bitbadges.bitbadgeschain.badges.MsgUpdateBytes({

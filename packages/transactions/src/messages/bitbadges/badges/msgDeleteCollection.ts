@@ -1,4 +1,5 @@
 import {
+  NumberType,
   createTransaction,
   createMsgDeleteCollection as protoMsgDeleteCollection,
 } from 'bitbadgesjs-proto'
@@ -19,7 +20,7 @@ import * as badges from 'bitbadgesjs-proto/dist/proto/badges/tx'
 
 export interface MessageMsgDeleteCollection {
   creator: string
-  collectionId: bigint
+  collectionId: NumberType
 }
 
 export function convertFromProtoToMsgDeleteCollection(

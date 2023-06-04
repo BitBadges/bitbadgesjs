@@ -1,7 +1,7 @@
 import { COSMOS, ethToCosmos } from "bitbadgesjs-address-converter";
 import { SupportedChain } from "./types/types";
 import { ethers } from "ethers";
-import { BitBadgesUserInfo, s_BitBadgesUserInfo } from "./types/api";
+import { BitBadgesUserInfo, s_BitBadgesUserInfo } from "./types/users";
 
 
 export const MINT_ACCOUNT: BitBadgesUserInfo = {
@@ -140,7 +140,7 @@ export const BLANK_USER_INFO: BitBadgesUserInfo = {
  *
  * @param {string} address - The address to convert
  */
-export function convertToCosmosAddress(address: string) {
+export function convertFromS_CosmosAddress(address: string) {
   let bech32Address = '';
   try {
     COSMOS.decoder(address);

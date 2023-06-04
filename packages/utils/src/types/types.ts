@@ -1,6 +1,7 @@
-import { IdRange, UserBalance } from "bitbadgesjs-proto";
-import { BitBadgesUserInfo, CollectionResponse } from "./api";
-import { Metadata } from "./metadata";
+import { IdRangeWithType, NumberType, StringNumber, UserBalanceWithType, convertIdRange, convertUserBalance } from "bitbadgesjs-proto";
+import { CollectionResponse } from "./api";
+import { MetadataWithType, convertMetadata } from "./metadata";
+import { BitBadgesUserInfoWithType, convertBitBadgesUserInfo } from "./users";
 
 /**
  * Many of the core types are loaded from the bitbadgesjs-proto package.
@@ -14,22 +15,83 @@ export interface CollectionMap {
   [collectionId: string]: CollectionResponse | undefined
 }
 
-export interface AccountMap {
-  [cosmosAddress: string]: BitBadgesUserInfo | undefined;
+/**
+ * AccountMap is used to store the user information by address.
+ *
+ * @typedef {Object} AccountMapWithType
+ */
+export interface AccountMapWithType<T extends NumberType> {
+  [cosmosAddress: string]: BitBadgesUserInfoWithType<T> | undefined;
 }
 
-export interface BalancesMap {
-  [cosmosAddress: string]: UserBalance | undefined;
+export type AccountMap = AccountMapWithType<bigint>;
+export type s_AccountMap = AccountMapWithType<string>;
+export type n_AccountMap = AccountMapWithType<number>;
+export type d_AccountMap = AccountMapWithType<StringNumber>;
+
+export function convertAccountMap<T extends NumberType, U extends NumberType>(item: AccountMapWithType<T>, convertFunction: (item: T) => U): AccountMapWithType<U> {
+  return Object.fromEntries(Object.entries(item).map(([key, value]) => {
+    return [key, value ? convertBitBadgesUserInfo(value, convertFunction) : undefined];
+  }));
 }
 
-export interface MetadataMap {
+
+/**
+ * BalanceMap is used to store the balances of users by address.
+ *
+ * @typedef {Object} BalanceMapWithType
+ */
+export interface BalancesMapWithType<T extends NumberType> {
+  [cosmosAddress: string]: UserBalanceWithType<T> | undefined;
+}
+
+export type BalancesMap = BalancesMapWithType<bigint>;
+export type s_BalancesMap = BalancesMapWithType<string>;
+export type n_BalancesMap = BalancesMapWithType<number>;
+export type d_BalancesMap = BalancesMapWithType<StringNumber>;
+
+export function convertBalancesMap<T extends NumberType, U extends NumberType>(item: BalancesMapWithType<T>, convertFunction: (item: T) => U): BalancesMapWithType<U> {
+  return Object.fromEntries(Object.entries(item).map(([key, value]) => {
+    return [key, value ? convertUserBalance(value, convertFunction) : undefined];
+  }));
+}
+
+/**
+ * MetadataMap is used to store the metadata of badges by metadataId.
+ *
+ * @typedef {Object} MetadataMapWithType
+ */
+export interface MetadataMapWithType<T extends NumberType> {
   [metadataId: string]: {
-    badgeIds: IdRange[],
-    metadata: Metadata,
+    badgeIds: IdRangeWithType<T>[],
+    metadata: MetadataWithType<T>,
     uri: string
   } | undefined;
 }
 
+export type MetadataMap = MetadataMapWithType<bigint>;
+export type s_MetadataMap = MetadataMapWithType<string>;
+export type n_MetadataMap = MetadataMapWithType<number>;
+export type d_MetadataMap = MetadataMapWithType<StringNumber>;
+
+export function convertMetadataMap<T extends NumberType, U extends NumberType>(item: MetadataMapWithType<T>, convertFunction: (item: T) => U): MetadataMapWithType<U> {
+  return Object.fromEntries(Object.entries(item).map(([key, value]) => {
+    return [key, value ? {
+      badgeIds: value.badgeIds.map((badgeId) => convertIdRange(badgeId, convertFunction)),
+      metadata: convertMetadata(value.metadata, convertFunction),
+      uri: value.uri
+    } : undefined];
+  }));
+}
+
+/**
+ * SupportedChain is an enum of all the supported chains.
+ * Currently, we only support Ethereum and Cosmos.
+ *
+ * Has an UNKNOWN value for when we don't know the chain yet.
+ *
+ * @typedef {string} SupportedChain
+ */
 export enum SupportedChain {
   ETH = 'Ethereum',
   COSMOS = 'Cosmos',

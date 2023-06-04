@@ -3,18 +3,19 @@ import { MessageMsgMintAndDistributeBadges, MessageMsgNewCollection, MessageMsgU
 import { addBalancesForIdRanges } from "./balances";
 import { getBalancesAfterTransfers } from "./distribution";
 import { GetPermissionNumberValue, GetPermissions } from "./permissions";
-import { BitBadgeCollection, BitBadgesUserInfo } from "./types/api";
 import { Metadata } from "./types/metadata";
 import { MetadataMap } from "./types/types";
 import { ClaimDetails } from "./types/db";
 import { TransferWithIncrements } from "./types/transfers";
+import { BitBadgesCollection } from "./types/collections";
+import { BitBadgesUserInfo } from "./types/users";
 
 /**
  * Returns an IdRange[] of length 1 that covers all badgeIds in the collection.
  *
  * { start: 1, end: nextBadgeId - 1 }
  */
-export function getIdRangesForAllBadgeIdsInCollection(collection: BitBadgeCollection) {
+export function getIdRangesForAllBadgeIdsInCollection(collection: BitBadgesCollection) {
   const range: IdRange = {
     start: 1n,
     end: collection.nextBadgeId - 1n,
@@ -41,14 +42,14 @@ export interface MessageMsgNewCollectionWithClaimDetails extends MessageMsgNewCo
  * @param {Metadata} newCollectionMetadata - The metadata for the new collection
  * @param {MetadataMap} newBadgeMetadata - The metadata for the new badges
  * @param {BitBadgesUserInfo} txSender - The user who is sending the MsgNewCollection
- * @param {BitBadgeCollection} existingCollection - The existing collection, if it exists
+ * @param {BitBadgesCollection} existingCollection - The existing collection, if it exists
  */
 export function simulateCollectionAfterMsgNewCollection(
   msg: MessageMsgNewCollectionWithClaimDetails,
   newCollectionMetadata: Metadata,
   newBadgeMetadata: MetadataMap,
   txSender: BitBadgesUserInfo,
-  existingCollection?: BitBadgeCollection,
+  existingCollection?: BitBadgesCollection,
 ) {
   let nextBadgeId = existingCollection?.nextBadgeId ? existingCollection.nextBadgeId : 1n;
 
@@ -99,7 +100,7 @@ export function simulateCollectionAfterMsgNewCollection(
       }
     })
   ];
-  const badgeCollection: BitBadgeCollection = {
+  const badgeCollection: BitBadgesCollection = {
     ...msg,
     collectionId: existingCollection?.collectionId ? existingCollection.collectionId : 0n,
     manager: existingCollection?.manager ? existingCollection.manager : txSender.cosmosAddress,
@@ -146,14 +147,14 @@ export interface MessageMsgMintAndDistributeBadgesWithClaimDetails extends Messa
  * @param {Metadata} newCollectionMetadata - The metadata for the new collection
  * @param {MetadataMap} newBadgeMetadata - The metadata for the new badges
  * @param {BitBadgesUserInfo} txSender - The user who is sending the MsgMintAndDistributeBadges
- * @param {BitBadgeCollection} existingCollection - The existing collection, if it exists
+ * @param {BitBadgesCollection} existingCollection - The existing collection, if it exists
  */
 export function simulateCollectionAfterMsgMintAndDistributeBadges(
   msg: MessageMsgMintAndDistributeBadgesWithClaimDetails,
   newCollectionMetadata: Metadata,
   newBadgeMetadata: MetadataMap,
   txSender: BitBadgesUserInfo,
-  existingCollection?: BitBadgeCollection
+  existingCollection?: BitBadgesCollection
 ) {
   const msgNewCollectionWithEmptyValues: MessageMsgNewCollectionWithClaimDetails = {
     ...msg,
@@ -174,14 +175,14 @@ export function simulateCollectionAfterMsgMintAndDistributeBadges(
  * @param {Metadata} newCollectionMetadata - The metadata for the new collection
  * @param {MetadataMap} newBadgeMetadata - The metadata for the new badges
  * @param {BitBadgesUserInfo} txSender - The user who is sending the MsgUpdateUris
- * @param {BitBadgeCollection} existingCollection - The existing collection, if it exists
+ * @param {BitBadgesCollection} existingCollection - The existing collection, if it exists
  */
 export function simulateCollectionAfterMsgUpdateUris(
   msg: MessageMsgUpdateUris,
   newCollectionMetadata: Metadata,
   newBadgeMetadata: MetadataMap,
   txSender: BitBadgesUserInfo,
-  existingCollection?: BitBadgeCollection
+  existingCollection?: BitBadgesCollection
 ) {
   const msgNewCollectionWithEmptyValues: MessageMsgNewCollectionWithClaimDetails = {
     ...msg,
@@ -207,14 +208,14 @@ export function simulateCollectionAfterMsgUpdateUris(
  * @param {Metadata} newCollectionMetadata - The metadata for the new collection
  * @param {MetadataMap} newBadgeMetadata - The metadata for the new badges
  * @param {BitBadgesUserInfo} txSender - The user who is sending the MsgUpdateAllowedTransfers
- * @param {BitBadgeCollection} existingCollection - The existing collection, if it exists
+ * @param {BitBadgesCollection} existingCollection - The existing collection, if it exists
  */
 export function simulateCollectionAfterMsgUpdateAllowedTransfers(
   msg: MessageMsgUpdateAllowedTransfers,
   newCollectionMetadata: Metadata,
   newBadgeMetadata: MetadataMap,
   txSender: BitBadgesUserInfo,
-  existingCollection?: BitBadgeCollection
+  existingCollection?: BitBadgesCollection
 ) {
   const msgNewCollectionWithEmptyValues: MessageMsgNewCollectionWithClaimDetails = {
     ...msg,

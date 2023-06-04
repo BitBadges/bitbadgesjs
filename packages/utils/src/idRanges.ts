@@ -210,12 +210,14 @@ export function getIdxToInsertForNewId(id: bigint, targetIds: IdRange[]) {
  * Merges the previous or next range, if overlap exists.
  *
  * @param {IdRange[]} targetIds - The list of IdRanges to insert to
- * @param {number} insertedAtIdx - The index where the new ID was inserted
+ * @param {bigint | string | number} insertedAtIdx - The index where the new ID was inserted
  *
  * @example
  * [{ start: 10, end: 20 }, { start: 21, end: 40 }] would be merged into [{ start: 10, end: 40 }]
  */
-export function mergePrevOrNextIfPossible(targetIds: IdRange[], insertedAtIdx: number) {
+export function mergePrevOrNextIfPossible(targetIds: IdRange[], _insertedAtIdx: bigint | number | string) {
+  const insertedAtIdx = Number(_insertedAtIdx);
+
   //Handle cases where we need to merge with the previous or next range
   let needToMergeWithPrev = false;
   let needToMergeWithNext = false;

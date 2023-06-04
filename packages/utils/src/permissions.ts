@@ -128,11 +128,14 @@ export function ValidatePermissionsUpdate(oldPermissions: bigint, newPermissions
  * @example
  * UpdatePermissions(0, CanUpdateBytesDigit, true) => 16
  *
- * @param {bigint} currPermissions - The current permissions
- * @param {number} permissionDigit - The permission digit to update (use the constants exported such as CanUpdateBytesDigit, etc)
+ * @param {bigint} _currPermissions - The current permissions
+ * @param {bigint | string | number} _permissionDigit - The permission digit to update (use the constants exported such as CanUpdateBytesDigit, etc)
  * @param {boolean} value - The value to set the permission digit to
  */
-export function UpdatePermissions(currPermissions: bigint, permissionDigit: number, value: boolean) {
+export function UpdatePermissions(_currPermissions: bigint | string | number, _permissionDigit: bigint | string | number, value: boolean) {
+  let currPermissions = BigInt(_currPermissions);
+  const permissionDigit = Number(_permissionDigit);
+
   if (permissionDigit > NUM_PERMISSIONS || permissionDigit <= 0) {
     throw 'Invalid permission digit';
   }

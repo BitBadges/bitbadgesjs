@@ -10,7 +10,10 @@ BigInt.prototype.toJSON = function () {
 
 export * from './collections';
 export * from './types/db';
+export * from './types/coin';
 export * from './types/permissions';
+export * from './types/users';
+export * from './types/collections';
 export * from './types/activity';
 export * from './types/api';
 export * from './types/indexer';

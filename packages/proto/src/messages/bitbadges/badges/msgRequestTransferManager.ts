@@ -1,8 +1,9 @@
 import * as tx from '../../../proto/badges/tx'
+import { NumberType } from './string-numbers'
 
-export function createMsgRequestTransferManager(
+export function createMsgRequestTransferManager<T extends NumberType>(
   creator: string,
-  collectionId: bigint,
+  collectionId: T,
   addRequest: boolean,
 ) {
   const message =

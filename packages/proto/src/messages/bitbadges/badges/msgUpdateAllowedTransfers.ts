@@ -1,16 +1,17 @@
 import * as tx from '../../../proto/badges/tx'
-import { getWrappedTransferMappings, TransferMapping } from './typeUtils'
+import { NumberType } from './string-numbers'
+import { convertToProtoTransferMappings, TransferMappingWithType } from './typeUtils'
 
-export function createMsgUpdateAllowedTransfers(
+export function createMsgUpdateAllowedTransfers<T extends NumberType>(
   creator: string,
-  collectionId: bigint,
-  allowedTransfers: TransferMapping[],
+  collectionId: T,
+  allowedTransfers: TransferMappingWithType<T>[],
 ) {
   const message =
     new tx.bitbadges.bitbadgeschain.badges.MsgUpdateAllowedTransfers({
       creator,
       collectionId: collectionId.toString(),
-      allowedTransfers: getWrappedTransferMappings(allowedTransfers),
+      allowedTransfers: convertToProtoTransferMappings(allowedTransfers),
     })
   return {
     message,

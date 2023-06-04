@@ -3,7 +3,8 @@
 import {
   createMsgTransferBadge as protoMsgTransferBadge,
   createTransaction,
-  IdRange, Transfers, convertToTransfer
+  IdRange, Transfer, n_Transfer, s_Transfer,
+  NumberType, TransferWithType
 } from 'bitbadgesjs-proto'
 import * as badges from 'bitbadgesjs-proto/dist/proto/badges/tx'
 
@@ -23,8 +24,8 @@ import { Chain, Fee, Sender } from '../../common'
 export interface MessageMsgTransferBadge {
   creator: string;
   from: string;
-  collectionId: bigint;
-  transfers: Transfers[];
+  collectionId: NumberType;
+  transfers: TransferWithType<NumberType>[];
 }
 
 export function convertFromProtoToMsgTransferBadge(
@@ -34,7 +35,7 @@ export function convertFromProtoToMsgTransferBadge(
     creator: msg.creator,
     from: msg.from,
     collectionId: BigInt(msg.collectionId),
-    transfers: msg.transfers.map(convertToTransfer),
+    transfers: msg.transfers.map((x) => convertTransfer(x, BigInt)),
   }
 }
 

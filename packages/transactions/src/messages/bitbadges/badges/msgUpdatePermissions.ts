@@ -1,6 +1,7 @@
 import {
   createMsgUpdatePermissions as protoMsgUpdatePermissions,
   createTransaction,
+  NumberType,
 } from 'bitbadgesjs-proto'
 import * as badges from 'bitbadgesjs-proto/dist/proto/badges/tx'
 
@@ -19,8 +20,8 @@ import { Chain, Fee, Sender } from '../../common'
 
 export interface MessageMsgUpdatePermissions {
   creator: string
-  collectionId: bigint
-  permissions: bigint
+  collectionId: NumberType
+  permissions: NumberType
 }
 
 export function convertFromProtoToMsgUpdatePermissions(

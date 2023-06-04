@@ -1,33 +1,34 @@
 import * as badges from '../../../proto/badges/tx'
+import { NumberType } from './string-numbers'
 import {
-  BadgeSupplyAndAmount,
-  BadgeUri,
-  Claim,
-  getWrappedBadgeSupplysAndAmounts,
-  getWrappedBadgeUris,
-  getWrappedClaims,
-  getWrappedTransfers,
-  Transfer,
+  BadgeSupplyAndAmountWithType,
+  BadgeUriWithType,
+  ClaimWithType,
+  convertToProtoBadgeSupplysAndAmounts,
+  convertToProtoBadgeUris,
+  convertToProtoClaims,
+  convertToProtoTransfers,
+  TransferWithType
 } from './typeUtils'
 
-export function createMsgMintAndDistributeBadges(
+export function createMsgMintAndDistributeBadges<T extends NumberType>(
   creator: string,
-  collectionId: bigint,
-  badgeSupplys: BadgeSupplyAndAmount[],
-  transfers: Transfer[],
-  claims: Claim[],
+  collectionId: T,
+  badgeSupplys: BadgeSupplyAndAmountWithType<T>[],
+  transfers: TransferWithType<T>[],
+  claims: ClaimWithType<T>[],
   collectionUri: string,
-  badgeUris: BadgeUri[],
+  badgeUris: BadgeUriWithType<T>[],
   balancesUri: string
 ) {
   const message = new badges.bitbadges.bitbadgeschain.badges.MsgMintAndDistributeBadges({
     creator,
     collectionId: collectionId.toString(),
-    transfers: getWrappedTransfers(transfers),
-    claims: getWrappedClaims(claims),
-    badgeSupplys: getWrappedBadgeSupplysAndAmounts(badgeSupplys),
+    transfers: convertToProtoTransfers(transfers),
+    claims: convertToProtoClaims(claims),
+    badgeSupplys: convertToProtoBadgeSupplysAndAmounts(badgeSupplys),
     collectionUri,
-    badgeUris: getWrappedBadgeUris(badgeUris),
+    badgeUris: convertToProtoBadgeUris(badgeUris),
     balancesUri,
   })
   return {

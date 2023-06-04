@@ -1,6 +1,7 @@
 import {
   createMsgUpdateBytes as protoMsgUpdateBytes,
   createTransaction,
+  NumberType,
 } from 'bitbadgesjs-proto'
 import * as badges from 'bitbadgesjs-proto/dist/proto/badges/tx'
 
@@ -19,7 +20,7 @@ import { Chain, Fee, Sender } from '../../common'
 
 export interface MessageMsgUpdateBytes {
   creator: string
-  collectionId: bigint
+  collectionId: NumberType
   bytes: string
 }
 

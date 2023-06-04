@@ -1,3 +1,5 @@
+import { NumberType } from "bitbadgesjs-proto"
+
 const MsgUpdatePermissionsValueType = [
   { name: 'creator', type: 'string' },
   { name: 'collectionId', type: 'string' },
@@ -8,10 +10,10 @@ export const MSG_UPDATE_PERMISSIONS_TYPES = {
   MsgValue: MsgUpdatePermissionsValueType,
 }
 
-export function createMsgUpdatePermissions(
+export function createMsgUpdatePermissions<T extends NumberType>(
   creator: string,
-  collectionId: bigint,
-  permissions: bigint,
+  collectionId: T,
+  permissions: T,
 ) {
   return {
     type: 'badges/UpdatePermissions',

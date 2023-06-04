@@ -1,6 +1,6 @@
 import Nano from "nano";
 import { ActivityItem } from "./activity";
-import { Account, BalanceDocument, ClaimDocument, Collection, QueueItem, RefreshDocument } from "./db";
+import { AccountDoc, BalanceDoc, ClaimDoc, CollectionDoc, QueueDoc, RefreshDoc } from "./db";
 
 /**
  * DocsCache is used by the indexer to cache documents in memory to avoid having to fetch and write to the database each time.
@@ -12,7 +12,7 @@ import { Account, BalanceDocument, ClaimDocument, Collection, QueueItem, Refresh
  * @property {BalanceDocs} balances - The balances cache.
  * @property {ClaimDocs} claims - The claims cache.
  * @property {ActivityItem[]} activityToAdd - The activity documents to add to the database.
- * @property {QueueItem[]} queueDocsToAdd - The queue documents to add to the database.
+ * @property {QueueDoc[]} queueDocsToAdd - The queue documents to add to the database.
  */
 export interface DocsCache {
   accounts: AccountDocs;
@@ -20,7 +20,7 @@ export interface DocsCache {
   balances: BalanceDocs;
   claims: ClaimDocs;
   refreshes: RefreshDocs;
-  queueDocsToAdd: QueueItem[];
+  queueDocsToAdd: QueueDoc[];
   activityToAdd: ActivityItem[];
 }
 
@@ -30,11 +30,11 @@ export interface DocsCache {
  * @typedef {Object} CollectionDocs
  */
 export interface CollectionDocs {
-  [id: string]: (Collection & Nano.DocumentGetResponse) | { _id: string };
+  [id: string]: (CollectionDoc & Nano.DocumentGetResponse) | { _id: string };
 }
 
 export interface RefreshDocs {
-  [id: string]: (RefreshDocument & Nano.DocumentGetResponse) | { _id: string };
+  [id: string]: (RefreshDoc & Nano.DocumentGetResponse) | { _id: string };
 }
 
 /**
@@ -43,7 +43,7 @@ export interface RefreshDocs {
  * @typedef {Object} AccountDocs
  */
 export interface AccountDocs {
-  [cosmosAddress: string]: (Account & Nano.DocumentGetResponse) | { _id: string };
+  [cosmosAddress: string]: (AccountDoc & Nano.DocumentGetResponse) | { _id: string };
 }
 
 /**
@@ -53,7 +53,7 @@ export interface AccountDocs {
  * @typedef {Object} BalanceDocs
  */
 export interface BalanceDocs {
-  [partitionedId: string]: (BalanceDocument & Nano.DocumentGetResponse) | (BalanceDocument & { _id: string });
+  [partitionedId: string]: (BalanceDoc & Nano.DocumentGetResponse) | (BalanceDoc & { _id: string });
 }
 
 /**
@@ -63,5 +63,5 @@ export interface BalanceDocs {
  * @typedef {Object} ClaimDocs
  */
 export interface ClaimDocs {
-  [partitionedId: string]: (ClaimDocument & Nano.DocumentGetResponse) | { _id: string };
+  [partitionedId: string]: (ClaimDoc & Nano.DocumentGetResponse) | { _id: string };
 }

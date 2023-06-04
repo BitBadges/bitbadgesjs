@@ -1,26 +1,27 @@
 import {
-  createMsgNewCollection as protoMsgNewCollection,
+  BadgeSupplyAndAmountWithType,
+  BadgeUriWithType,
+  ClaimWithType,
+  NumberType,
+  TransferMappingWithType,
+  TransferWithType,
+  convertBadgeSupplyAndAmount,
+  convertBadgeUri,
+  convertClaim,
+  convertTransfer,
+  convertTransferMapping,
   createTransaction,
-  BadgeSupplyAndAmount,
-  BadgeUri,
-  Claim,
-  TransferMapping,
-  Transfer,
-  convertToBadgeSupplyAndAmount,
-  convertToBadgeUri,
-  convertToClaim,
-  convertToTransfer,
-  convertToTransferMapping,
+  createMsgNewCollection as protoMsgNewCollection
 } from 'bitbadgesjs-proto'
 import * as badges from 'bitbadgesjs-proto/dist/proto/badges/tx'
 
 import {
+  MSG_NEW_COLLECTION_TYPES,
   createEIP712,
+  createMsgNewCollection,
   generateFee,
   generateMessage,
   generateTypes,
-  createMsgNewCollection,
-  MSG_NEW_COLLECTION_TYPES,
 } from 'bitbadgesjs-eip712'
 
 import { getDefaultDomainWithChainId } from '../../domain'
@@ -30,16 +31,16 @@ import { Chain, Fee, Sender } from '../../common'
 export interface MessageMsgNewCollection {
   creator: string
   collectionUri: string
-  badgeUris: BadgeUri[],
+  badgeUris: BadgeUriWithType<NumberType>[]
   balancesUri: string,
-  permissions: bigint
+  permissions: NumberType
   bytes: string
-  allowedTransfers: TransferMapping[]
-  managerApprovedTransfers: TransferMapping[]
-  standard: bigint
-  badgeSupplys: BadgeSupplyAndAmount[]
-  transfers: Transfer[]
-  claims: Claim[]
+  allowedTransfers: TransferMappingWithType<NumberType>[]
+  managerApprovedTransfers: TransferMappingWithType<NumberType>[]
+  standard: NumberType
+  badgeSupplys: BadgeSupplyAndAmountWithType<NumberType>[]
+  transfers: TransferWithType<NumberType>[]
+  claims: ClaimWithType<NumberType>[]
 }
 
 export function convertFromProtoToMsgNewCollection(
@@ -48,16 +49,16 @@ export function convertFromProtoToMsgNewCollection(
   return {
     creator: msg.creator,
     collectionUri: msg.collectionUri,
-    badgeUris: msg.badgeUris.map(convertToBadgeUri),
+    badgeUris: msg.badgeUris.map((x) => convertBadgeUri(x, BigInt)),
     balancesUri: msg.balancesUri,
     permissions: BigInt(msg.permissions),
     bytes: msg.bytes,
-    allowedTransfers: msg.allowedTransfers.map(convertToTransferMapping),
-    managerApprovedTransfers: msg.managerApprovedTransfers.map(convertToTransferMapping),
+    allowedTransfers: msg.allowedTransfers.map(x => convertTransferMapping(x, BigInt)),
+    managerApprovedTransfers: msg.managerApprovedTransfers.map(x => convertTransferMapping(x, BigInt)),
     standard: BigInt(msg.standard),
-    badgeSupplys: msg.badgeSupplys.map(convertToBadgeSupplyAndAmount),
-    transfers: msg.transfers.map(convertToTransfer),
-    claims: msg.claims.map(convertToClaim),
+    badgeSupplys: msg.badgeSupplys.map(x => convertBadgeSupplyAndAmount(x, BigInt)),
+    transfers: msg.transfers.map(x => convertTransfer(x, BigInt)),
+    claims: msg.claims.map(x => convertClaim(x, BigInt))
   }
 }
 

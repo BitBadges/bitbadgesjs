@@ -1,6 +1,6 @@
 import { BadgeUri } from "bitbadgesjs-proto";
 import { searchIdRangesForId } from "./idRanges";
-import { BitBadgeCollection } from "./types/api";
+import { BitBadgesCollection } from "./types/collections";
 
 /**
  * This is the logic we use to deterministically compute the metadataId for a collection in our indexer.
@@ -61,9 +61,9 @@ export const getMetadataIdForBadgeId = (badgeId: bigint, badgeUris: BadgeUri[]) 
 /**
  * This returns the max metadataId for a collection
  *
- * @param {BitBadgeCollection} collection - The collection to get the max metadata ID for
+ * @param {BitBadgesCollection} collection - The collection to get the max metadata ID for
 */
-export function getMaxMetadataId(collection: BitBadgeCollection) {
+export function getMaxMetadataId(collection: BitBadgesCollection) {
   let metadataId = 1n; // Start at 1 because batch 0 is reserved for collection metadata
 
   for (const badgeUri of collection.badgeUris) {

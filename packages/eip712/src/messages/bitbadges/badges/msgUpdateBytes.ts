@@ -1,3 +1,5 @@
+import { NumberType } from "bitbadgesjs-proto"
+
 const MsgUpdateBytesValueType = [
   { name: 'creator', type: 'string' },
   { name: 'collectionId', type: 'string' },
@@ -8,9 +10,9 @@ export const MSG_UPDATE_BYTES_TYPES = {
   MsgValue: MsgUpdateBytesValueType,
 }
 
-export function createMsgUpdateBytes(
+export function createMsgUpdateBytes<T extends NumberType>(
   creator: string,
-  collectionId: bigint,
+  collectionId: T,
   bytes: string,
 ) {
   return {

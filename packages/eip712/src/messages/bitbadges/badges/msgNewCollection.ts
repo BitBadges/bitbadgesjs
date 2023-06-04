@@ -10,7 +10,7 @@ import {
   TRANSFER_MAPPING_TYPES,
 } from './eip712HelperTypes'
 
-import { BadgeSupplyAndAmount, BadgeUri, Claim, Transfer, TransferMapping, getWrappedBadgeSupplysAndAmounts, getWrappedBadgeUris, getWrappedClaims, getWrappedTransferMappings, getWrappedTransfers } from 'bitbadgesjs-proto'
+import { BadgeSupplyAndAmountWithType, BadgeUriWithType, ClaimWithType, NumberType, TransferMappingWithType, TransferWithType, convertToProtoBadgeSupplysAndAmounts, convertToProtoBadgeUris, convertToProtoClaims, convertToProtoTransferMappings, convertToProtoTransfers } from 'bitbadgesjs-proto'
 
 const NewCollectionMsgValueType = [
   { name: 'creator', type: 'string' },
@@ -40,35 +40,35 @@ export const MSG_NEW_COLLECTION_TYPES = {
   Challenge: CHALLENGE_TYPES
 }
 
-export function createMsgNewCollection(
+export function createMsgNewCollection<T extends NumberType>(
   creator: string,
   collectionUri: string,
-  badgeUris: BadgeUri[],
+  badgeUris: BadgeUriWithType<T>[],
   balancesUri: string,
   bytes: string,
-  permissions: bigint,
-  allowedTransfers: TransferMapping[],
-  managerApprovedTransfers: TransferMapping[],
-  standard: bigint,
-  badgeSupplys: BadgeSupplyAndAmount[],
-  transfers: Transfer[],
-  claims: Claim[],
+  permissions: T,
+  allowedTransfers: TransferMappingWithType<T>[],
+  managerApprovedTransfers: TransferMappingWithType<T>[],
+  standard: T,
+  badgeSupplys: BadgeSupplyAndAmountWithType<T>[],
+  transfers: TransferWithType<T>[],
+  claims: ClaimWithType<T>[],
 ) {
   return {
     type: 'badges/NewCollection',
     value: {
       creator,
       collectionUri,
-      badgeUris: getWrappedBadgeUris(badgeUris).map((s) => s.toObject()),
+      badgeUris: convertToProtoBadgeUris(badgeUris).map((s) => s.toObject()),
       balancesUri,
       bytes,
       permissions: permissions.toString(),
-      allowedTransfers: getWrappedTransferMappings(allowedTransfers).map((s) => s.toObject()),
-      managerApprovedTransfers: getWrappedTransferMappings(managerApprovedTransfers).map((s) => s.toObject()),
+      allowedTransfers: convertToProtoTransferMappings(allowedTransfers).map((s) => s.toObject()),
+      managerApprovedTransfers: convertToProtoTransferMappings(managerApprovedTransfers).map((s) => s.toObject()),
       standard: standard.toString(),
-      badgeSupplys: getWrappedBadgeSupplysAndAmounts(badgeSupplys).map((s) => s.toObject()),
-      transfers: getWrappedTransfers(transfers).map((s) => s.toObject()),
-      claims: getWrappedClaims(claims).map((s) => s.toObject()),
+      badgeSupplys: convertToProtoBadgeSupplysAndAmounts(badgeSupplys).map((s) => s.toObject()),
+      transfers: convertToProtoTransfers(transfers).map((s) => s.toObject()),
+      claims: convertToProtoClaims(claims).map((s) => s.toObject()),
     },
   }
 }

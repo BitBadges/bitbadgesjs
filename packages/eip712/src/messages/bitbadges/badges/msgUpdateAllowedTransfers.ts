@@ -4,7 +4,7 @@ import {
   TRANSFER_MAPPING_TYPES,
 } from './eip712HelperTypes'
 
-import { TransferMapping, getWrappedTransferMappings } from 'bitbadgesjs-proto'
+import { NumberType, TransferMappingWithType, convertToProtoTransferMappings } from 'bitbadgesjs-proto'
 
 const MsgUpdateAllowedTransfersValueType = [
   { name: 'creator', type: 'string' },
@@ -19,17 +19,17 @@ export const MSG_UPDATE_ALLOWED_TRANSFERS_TYPES = {
   AddressesMapping: ADDRESSES_MAPPING_TYPES,
 }
 
-export function createMsgUpdateAllowedTransfers(
+export function createMsgUpdateAllowedTransfers<T extends NumberType>(
   creator: string,
-  collectionId: bigint,
-  allowedTransfers: TransferMapping[],
+  collectionId: T,
+  allowedTransfers: TransferMappingWithType<T>[],
 ) {
   return {
     type: 'badges/UpdateAllowedTransfers',
     value: {
       creator,
       collectionId: collectionId.toString(),
-      allowedTransfers: getWrappedTransferMappings(allowedTransfers).map((s) => s.toObject()),
+      allowedTransfers: convertToProtoTransferMappings(allowedTransfers).map((s) => s.toObject()),
     },
   }
 }

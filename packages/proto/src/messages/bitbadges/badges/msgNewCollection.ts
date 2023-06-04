@@ -1,46 +1,47 @@
 import * as tx from '../../../proto/badges/tx'
+import { NumberType } from './string-numbers'
 import {
-  BadgeSupplyAndAmount,
-  BadgeUri,
-  Claim,
-  getWrappedBadgeSupplysAndAmounts,
-  getWrappedBadgeUris,
-  getWrappedClaims,
-  getWrappedTransferMappings,
-  getWrappedTransfers,
-  TransferMapping,
-  Transfer,
+  BadgeSupplyAndAmountWithType,
+  BadgeUriWithType,
+  ClaimWithType,
+  TransferMappingWithType,
+  TransferWithType,
+  convertToProtoBadgeSupplysAndAmounts,
+  convertToProtoBadgeUris,
+  convertToProtoClaims,
+  convertToProtoTransferMappings,
+  convertToProtoTransfers
 } from './typeUtils'
 
-export function createMsgNewCollection(
+export function createMsgNewCollection<T extends NumberType>(
   creator: string,
   collectionUri: string,
-  badgeUris: BadgeUri[],
+  badgeUris: BadgeUriWithType<T>[],
   balancesUri: string,
   bytes: string,
-  permissions: bigint,
-  allowedTransfers: TransferMapping[],
-  managerApprovedTransfers: TransferMapping[],
-  standard: bigint,
-  badgeSupplys: BadgeSupplyAndAmount[],
-  transfers: Transfer[],
-  claims: Claim[],
+  permissions: T,
+  allowedTransfers: TransferMappingWithType<T>[],
+  managerApprovedTransfers: TransferMappingWithType<T>[],
+  standard: T,
+  badgeSupplys: BadgeSupplyAndAmountWithType<T>[],
+  transfers: TransferWithType<T>[],
+  claims: ClaimWithType<T>[],
 ) {
   const message = new tx.bitbadges.bitbadgeschain.badges.MsgNewCollection({
     creator,
     collectionUri,
-    badgeUris: getWrappedBadgeUris(badgeUris),
+    badgeUris: convertToProtoBadgeUris(badgeUris),
     balancesUri,
     bytes,
     permissions: permissions.toString(),
-    allowedTransfers: getWrappedTransferMappings(allowedTransfers),
-    managerApprovedTransfers: getWrappedTransferMappings(
+    allowedTransfers: convertToProtoTransferMappings(allowedTransfers),
+    managerApprovedTransfers: convertToProtoTransferMappings(
       managerApprovedTransfers,
     ),
     standard: standard.toString(),
-    badgeSupplys: getWrappedBadgeSupplysAndAmounts(badgeSupplys),
-    transfers: getWrappedTransfers(transfers),
-    claims: getWrappedClaims(claims),
+    badgeSupplys: convertToProtoBadgeSupplysAndAmounts(badgeSupplys),
+    transfers: convertToProtoTransfers(transfers),
+    claims: convertToProtoClaims(claims),
   })
 
   return {

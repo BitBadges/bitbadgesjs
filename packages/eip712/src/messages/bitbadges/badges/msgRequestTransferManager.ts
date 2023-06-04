@@ -1,3 +1,5 @@
+import { NumberType } from "bitbadgesjs-proto"
+
 const MsgRequestTransferManagerValueType = [
   { name: 'creator', type: 'string' },
   { name: 'collectionId', type: 'string' },
@@ -8,9 +10,9 @@ export const MSG_REQUEST_TRANSFER_MANAGER_TYPES = {
   MsgValue: MsgRequestTransferManagerValueType,
 }
 
-export function createMsgRequestTransferManager(
+export function createMsgRequestTransferManager<T extends NumberType>(
   creator: string,
-  collectionId: bigint,
+  collectionId: T,
   addRequest: boolean,
 ) {
   return {

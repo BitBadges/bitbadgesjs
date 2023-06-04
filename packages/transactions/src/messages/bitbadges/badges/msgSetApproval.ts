@@ -1,18 +1,19 @@
 import {
-  createMsgSetApproval as protoMsgSetApproval,
+  BalanceWithType,
+  NumberType,
+  convertBalance,
   createTransaction,
-  Balance,
-  convertToBalance
+  createMsgSetApproval as protoMsgSetApproval
 } from 'bitbadgesjs-proto'
 import * as badges from 'bitbadgesjs-proto/dist/proto/badges/tx'
 
 import {
+  MSG_SET_APPROVAL_TYPES,
   createEIP712,
+  createMsgSetApproval,
   generateFee,
   generateMessage,
   generateTypes,
-  createMsgSetApproval,
-  MSG_SET_APPROVAL_TYPES,
 } from 'bitbadgesjs-eip712'
 
 import { getDefaultDomainWithChainId } from '../../domain'
@@ -21,9 +22,9 @@ import { Chain, Fee, Sender } from '../../common'
 
 export interface MessageMsgSetApproval {
   creator: string
-  collectionId: bigint
+  collectionId: NumberType
   address: string
-  balances: Balance[]
+  balances: BalanceWithType<NumberType>[]
 }
 
 export function convertFromProtoToMessageMsgSetApproval(
@@ -33,7 +34,7 @@ export function convertFromProtoToMessageMsgSetApproval(
     creator: msg.creator,
     collectionId: BigInt(msg.collectionId),
     address: msg.address,
-    balances: msg.balances.map(convertToBalance)
+    balances: msg.balances.map((x) => convertBalance(x, BigInt)),
   }
 }
 

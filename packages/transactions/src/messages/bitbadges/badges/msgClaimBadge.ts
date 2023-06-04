@@ -1,5 +1,6 @@
 import {
   ChallengeSolution,
+  NumberType,
   createTransaction,
   createMsgClaimBadge as protoMsgClaimBadge,
 } from 'bitbadgesjs-proto'
@@ -21,8 +22,8 @@ import { Chain, Fee, Sender } from '../../common'
 
 export interface MessageMsgClaimBadge {
   creator: string
-  collectionId: bigint
-  claimId: bigint
+  collectionId: NumberType
+  claimId: NumberType
   solutions: ChallengeSolution[]
 }
 

@@ -1,8 +1,9 @@
 import * as tx from '../../../proto/badges/tx'
+import { NumberType } from './string-numbers'
 
-export function createMsgTransferManager(
+export function createMsgTransferManager<T extends NumberType>(
   creator: string,
-  collectionId: bigint,
+  collectionId: T,
   address: string,
 ) {
   const message = new tx.bitbadges.bitbadgeschain.badges.MsgTransferManager({

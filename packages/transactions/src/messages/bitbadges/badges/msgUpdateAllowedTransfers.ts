@@ -1,8 +1,9 @@
 import {
   createMsgUpdateAllowedTransfers as protoMsgUpdateAllowedTransfers,
   createTransaction,
-  TransferMapping,
-  convertToTransferMapping
+  convertTransferMapping,
+  NumberType,
+  TransferMappingWithType,
 } from 'bitbadgesjs-proto'
 import * as badges from 'bitbadgesjs-proto/dist/proto/badges/tx'
 
@@ -21,8 +22,8 @@ import { Chain, Fee, Sender } from '../../common'
 
 export interface MessageMsgUpdateAllowedTransfers {
   creator: string
-  collectionId: bigint
-  allowedTransfers: TransferMapping[]
+  collectionId: NumberType
+  allowedTransfers: TransferMappingWithType<NumberType>[]
 }
 
 export function convertFromProtoToMsgUpdateAllowedTransfers(
@@ -31,7 +32,7 @@ export function convertFromProtoToMsgUpdateAllowedTransfers(
   return {
     creator: proto.creator,
     collectionId: BigInt(proto.collectionId),
-    allowedTransfers: proto.allowedTransfers.map(convertToTransferMapping),
+    allowedTransfers: proto.allowedTransfers.map(x => convertTransferMapping(x, BigInt)),
   }
 }
 
