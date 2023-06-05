@@ -305,11 +305,14 @@ export function convertBalanceDoc<T extends NumberType, U extends NumberType>(it
  * @property {boolean} docClaimedByCollection - True if the password document is claimed by the collection
  * @property {NumberType} claimId - The claim ID of the password document
  * @property {NumberType} collectionId - The collection ID of the password document
+ * @property {NumberType} challengeId - The challenge ID of the password document
+ * @property {boolean} isHashed - True if the codes / password are already hashed
  *
  */
 export interface PasswordDoc<T extends NumberType> {
   password: string
   codes: string[]
+  isHashed: boolean
 
   currCode: T
   claimedUsers: {
@@ -320,6 +323,7 @@ export interface PasswordDoc<T extends NumberType> {
   docClaimedByCollection: boolean
   claimId: T
   collectionId: T
+  challengeId: T
 }
 
 export type b_PasswordDoc = PasswordDoc<bigint>
@@ -337,6 +341,7 @@ export function convertPasswordDoc<T extends NumberType, U extends NumberType>(i
     }, {}),
     claimId: convertFunction(item.claimId),
     collectionId: convertFunction(item.collectionId),
+    challengeId: convertFunction(item.challengeId),
   })
 }
 

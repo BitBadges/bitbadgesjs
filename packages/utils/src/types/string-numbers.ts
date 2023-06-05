@@ -1,17 +1,10 @@
-export type NumberType = bigint | number | StringNumber | string;
+export type NumberType = bigint | number | string;
+export type StringNumber = string | number;
 
-//Non string number types
-export type JSNumber = bigint | number;
-
-export function convertNumberType<T extends NumberType, U extends NumberType>(item: T): U {
-  if (typeof item === 'bigint') {
-    return BigInt(item) as U;
-  } else if (typeof item === 'number') {
-    return Number(item) as U;
-  } else {
-    return item.toString() as U;
-  }
-}
+export const BigIntify = (item: NumberType) => numberify(item, StringNumberStorageOptions.String);
+export const StringNumberify = (item: NumberType) => numberify(item, StringNumberStorageOptions.String);
+export const Numberify = (item: NumberType) => numberify(item, StringNumberStorageOptions.Number);
+export const NumberifyIfPossible = (item: NumberType) => numberify(item, StringNumberStorageOptions.NumberIfPossible);
 
 /**
  * Struct to represent a numeric value as both a string and a JavaScript number.
@@ -25,18 +18,8 @@ export function convertNumberType<T extends NumberType, U extends NumberType>(it
  *
  * By default, we will attempt to store the value in the database as a JavaScript number if possible (for CouchDB compatibility).
  * If not, we will store it as a string. For queries, we need to handle both cases which can be done by checking the $type field with Mango.
- *
- * @typedef {Object} StringNumber
- * @property {string} s - The string representation of the number.
- * @property {number} n - The number representation of the number.
- *
- * @example
- * const item: StringNumber = {
- *    s: '1000000',
- *    n: 1000000,
- * }
  */
-export type StringNumber = string | number;
+// export interface StringNumber DEPRECATED in favor of native primitive types. Use NumberType and numberify() instead.
 
 export enum StringNumberStorageOptions {
   String = 'String',
@@ -44,7 +27,7 @@ export enum StringNumberStorageOptions {
   NumberIfPossible = 'NumberIfPossible',
 }
 
-export function toStringNumber(_item: bigint | string | number, options?: StringNumberStorageOptions): StringNumber {
+export function numberify(_item: bigint | string | number, options?: StringNumberStorageOptions): NumberType {
   const item = BigInt(_item);
   if (options === StringNumberStorageOptions.String) {
     return item.toString();

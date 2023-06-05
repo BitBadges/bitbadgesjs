@@ -1,7 +1,7 @@
 import { IdRange, NumberType, StringNumber, UserBalance, convertIdRange, convertUserBalance } from "bitbadgesjs-proto";
-import { CollectionResponse } from "./api";
 import { Metadata, convertMetadata } from "./metadata";
 import { BitBadgesUserInfo, convertBitBadgesUserInfo } from "./users";
+import { BitBadgesCollection, convertBitBadgesCollection } from "./collections";
 
 /**
  * Many of the core types are loaded from the bitbadgesjs-proto package.
@@ -11,8 +11,19 @@ import { BitBadgesUserInfo, convertBitBadgesUserInfo } from "./users";
 /*
   Used by the frontend for dynamically fetching data from the DB as needed
 */
-export interface CollectionMap {
-  [collectionId: string]: CollectionResponse | undefined
+export interface CollectionMap<T extends NumberType> {
+  [collectionId: string]: BitBadgesCollection<T> | undefined
+}
+
+export type b_CollectionMap = CollectionMap<bigint>;
+export type s_CollectionMap = CollectionMap<string>;
+export type n_CollectionMap = CollectionMap<number>;
+export type d_CollectionMap = CollectionMap<StringNumber>;
+
+export function convertCollectionMap<T extends NumberType, U extends NumberType>(item: CollectionMap<T>, convertFunction: (item: T) => U): CollectionMap<U> {
+  return Object.fromEntries(Object.entries(item).map(([key, value]) => {
+    return [key, value ? convertBitBadgesCollection(value, convertFunction) : undefined];
+  }));
 }
 
 /**

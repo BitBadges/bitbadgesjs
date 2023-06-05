@@ -17,6 +17,7 @@ export * from './types/collections';
 export * from './types/activity';
 export * from './types/api';
 export * from './types/indexer';
+export * from './types/string-numbers';
 export * from './types/metadata';
 export * from './types/routes';
 export * from './types/types';
