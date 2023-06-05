@@ -1,17 +1,17 @@
-import { Balance, Transfer } from "bitbadgesjs-proto";
+import { b_Balance, b_Transfer } from "bitbadgesjs-proto";
 import { subtractBalancesForIdRanges } from "./balances";
-import { TransferWithIncrements } from "./types/transfers";
+import { b_TransferWithIncrements } from "./types/transfers";
 
 
 /**
- * Converts a TransferWithIncrements[] to a Transfer[].
+ * Converts a b_TransferWithIncrements[] to a b_Transfer[].
  *
  * Note that if there are N increments, this will create N transfers.
  *
- * @param {TransferWithIncrements[]} transfersWithIncrements - The list of transfers with increments.
+ * @param {b_TransferWithIncrements[]} transfersWithIncrements - The list of transfers with increments.
  */
-export const getTransfersFromTransfersWithIncrements = (transfersWithIncrements: TransferWithIncrements[]) => {
-  const transfers: Transfer[] = [];
+export const getTransfersFromTransfersWithIncrements = (transfersWithIncrements: b_TransferWithIncrements[]) => {
+  const transfers: b_Transfer[] = [];
   for (const transferExtended of transfersWithIncrements) {
     const { toAddressesLength, incrementIdsBy, ...transfer } = transferExtended;
     const length = toAddressesLength ? Number(toAddressesLength) : transfer.toAddresses.length;
@@ -44,14 +44,14 @@ export const getTransfersFromTransfersWithIncrements = (transfersWithIncrements:
 /**
  * Returns the post balance after a transfer of x(amountToTransfer * numRecipients) from startBadgeId to endBadgeId
  *
- * @param {Balance[]} balance - The balance to subtract from.
+ * @param {b_Balance[]} balance - The balance to subtract from.
  * @param {bigint} startBadgeId - The start badge ID to subtract from.
  * @param {bigint} endBadgeId - The end badge ID to subtract from.
  * @param {bigint} amountToTransfer - The amount to subtract.
  * @param {bigint} numRecipients - The number of recipients to subtract from.
  */
-export const getBalanceAfterTransfer = (balance: Balance[], startBadgeId: bigint, endBadgeId: bigint, amountToTransfer: bigint, numRecipients: bigint) => {
-  const balanceCopy: Balance[] = JSON.parse(JSON.stringify(balance)); //need a deep copy of the balance to not mess up calculations
+export const getBalanceAfterTransfer = (balance: b_Balance[], startBadgeId: bigint, endBadgeId: bigint, amountToTransfer: bigint, numRecipients: bigint) => {
+  const balanceCopy: b_Balance[] = JSON.parse(JSON.stringify(balance)); //need a deep copy of the balance to not mess up calculations
 
   const newBalance = subtractBalancesForIdRanges({
     balances: balanceCopy,
@@ -61,13 +61,13 @@ export const getBalanceAfterTransfer = (balance: Balance[], startBadgeId: bigint
 }
 
 /**
- * Returns the balance after a set of TransferWithIncrements[].
+ * Returns the balance after a set of b_TransferWithIncrements[].
  *
- * @param {Balance[]} startBalance - The balance to subtract from.
- * @param {TransferWithIncrements[]} transfers - The transfers that are being sent.
+ * @param {b_Balance[]} startBalance - The balance to subtract from.
+ * @param {b_TransferWithIncrements[]} transfers - The transfers that are being sent.
  */
-export const getBalancesAfterTransfers = (startBalance: Balance[], transfers: TransferWithIncrements[]) => {
-  let endBalances: Balance[] = JSON.parse(JSON.stringify(startBalance)); //need a deep copy of the balance to not mess up calculations
+export const getBalancesAfterTransfers = (startBalance: b_Balance[], transfers: b_TransferWithIncrements[]) => {
+  let endBalances: b_Balance[] = JSON.parse(JSON.stringify(startBalance)); //need a deep copy of the balance to not mess up calculations
   for (const transfer of transfers) {
     for (const balance of transfer.balances) {
 
@@ -142,7 +142,7 @@ export const getBalancesAfterTransfers = (startBalance: Balance[], transfers: Tr
 //       //Else, we calculate the claim details
 //       if (maxNumClaims > 0) {
 //         //Create a transfers array for compatibility with getBalanceAfterTransfers
-//         const transfers: TransferWithIncrements[] = [
+//         const transfers: b_TransferWithIncrements[] = [
 //           {
 //             toAddresses: [],
 //             toAddressesLength: maxNumClaims,

@@ -16,7 +16,7 @@ import { Chain, Fee, Sender } from '../common'
 
 import { getDefaultDomainWithChainId } from '../domain'
 
-export interface MessageMsgVote {
+export interface MsgVote {
   proposalId: number
   option: number
 }
@@ -26,7 +26,7 @@ export function createTxMsgVote(
   sender: Sender,
   fee: Fee,
   memo: string,
-  params: MessageMsgVote,
+  params: MsgVote,
   domain?: object,
 ) {
   // EIP712

@@ -1,4 +1,4 @@
-import { BadgeSupplyAndAmountWithType, BadgeUriWithType, ClaimWithType, NumberType, TransferWithType, convertToProtoBadgeSupplysAndAmounts, convertToProtoBadgeUris, convertToProtoClaims, convertToProtoTransfers } from 'bitbadgesjs-proto'
+import { BadgeSupplyAndAmount, BadgeUri, Claim, NumberType, Transfer, convertToProtoBadgeSupplysAndAmounts, convertToProtoBadgeUris, convertToProtoClaims, convertToProtoTransfers } from 'bitbadgesjs-proto'
 import {
   BADGE_SUPPLY_AND_AMOUNT_TYPES,
   BADGE_URI_TYPES,
@@ -34,11 +34,11 @@ export const MSG_MINT_BADGE_TYPES = {
 export function createMsgMintAndDistributeBadges<T extends NumberType>(
   creator: string,
   collectionId: T,
-  badgeSupplys: BadgeSupplyAndAmountWithType<T>[],
-  transfers: TransferWithType<T>[],
-  claims: ClaimWithType<T>[],
+  badgeSupplys: BadgeSupplyAndAmount<T>[],
+  transfers: Transfer<T>[],
+  claims: Claim<T>[],
   collectionUri: string,
-  badgeUris: BadgeUriWithType<T>[],
+  badgeUris: BadgeUri<T>[],
   balancesUri: string,
 ) {
   return {

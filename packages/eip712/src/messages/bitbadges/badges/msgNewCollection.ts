@@ -10,7 +10,7 @@ import {
   TRANSFER_MAPPING_TYPES,
 } from './eip712HelperTypes'
 
-import { BadgeSupplyAndAmountWithType, BadgeUriWithType, ClaimWithType, NumberType, TransferMappingWithType, TransferWithType, convertToProtoBadgeSupplysAndAmounts, convertToProtoBadgeUris, convertToProtoClaims, convertToProtoTransferMappings, convertToProtoTransfers } from 'bitbadgesjs-proto'
+import { BadgeSupplyAndAmount, BadgeUri, Claim, NumberType, TransferMapping, Transfer, convertToProtoBadgeSupplysAndAmounts, convertToProtoBadgeUris, convertToProtoClaims, convertToProtoTransferMappings, convertToProtoTransfers } from 'bitbadgesjs-proto'
 
 const NewCollectionMsgValueType = [
   { name: 'creator', type: 'string' },
@@ -43,16 +43,16 @@ export const MSG_NEW_COLLECTION_TYPES = {
 export function createMsgNewCollection<T extends NumberType>(
   creator: string,
   collectionUri: string,
-  badgeUris: BadgeUriWithType<T>[],
+  badgeUris: BadgeUri<T>[],
   balancesUri: string,
   bytes: string,
   permissions: T,
-  allowedTransfers: TransferMappingWithType<T>[],
-  managerApprovedTransfers: TransferMappingWithType<T>[],
+  allowedTransfers: TransferMapping<T>[],
+  managerApprovedTransfers: TransferMapping<T>[],
   standard: T,
-  badgeSupplys: BadgeSupplyAndAmountWithType<T>[],
-  transfers: TransferWithType<T>[],
-  claims: ClaimWithType<T>[],
+  badgeSupplys: BadgeSupplyAndAmount<T>[],
+  transfers: Transfer<T>[],
+  claims: Claim<T>[],
 ) {
   return {
     type: 'badges/NewCollection',

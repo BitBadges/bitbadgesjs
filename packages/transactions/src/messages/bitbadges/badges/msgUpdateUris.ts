@@ -1,6 +1,7 @@
 import {
-  BadgeUriWithType,
+  BadgeUri,
   NumberType,
+  StringNumber,
   convertBadgeUri,
   createTransaction,
   createMsgUpdateUris as protoMsgUpdateUris
@@ -20,17 +21,33 @@ import { getDefaultDomainWithChainId } from '../../domain'
 
 import { Chain, Fee, Sender } from '../../common'
 
-export interface MessageMsgUpdateUris {
+export interface MsgUpdateUris<T extends NumberType> {
   creator: string
-  collectionId: NumberType
+  collectionId: T
   collectionUri: string
-  badgeUris: BadgeUriWithType<NumberType>[]
+  badgeUris: BadgeUri<T>[]
   balancesUri: string
+}
+
+export type b_MsgUpdateUris = MsgUpdateUris<bigint>
+export type s_MsgUpdateUris = MsgUpdateUris<string>
+export type n_MsgUpdateUris = MsgUpdateUris<number>
+export type d_MsgUpdateUris = MsgUpdateUris<StringNumber>
+
+export function convertMsgUpdateUris<T extends NumberType, U extends NumberType>(
+  msg: MsgUpdateUris<T>,
+  convertFunction: (item: T) => U
+): MsgUpdateUris<U> {
+  return {
+    ...msg,
+    collectionId: convertFunction(msg.collectionId),
+    badgeUris: msg.badgeUris.map((x) => convertBadgeUri(x, convertFunction)),
+  }
 }
 
 export function convertFromProtoToMsgUpdateUris(
   msg: badges.bitbadges.bitbadgeschain.badges.MsgUpdateUris,
-): MessageMsgUpdateUris {
+): b_MsgUpdateUris {
   return {
     creator: msg.creator,
     collectionId: BigInt(msg.collectionId),
@@ -40,12 +57,12 @@ export function convertFromProtoToMsgUpdateUris(
   }
 }
 
-export function createTxMsgUpdateUris(
+export function createTxMsgUpdateUris<T extends NumberType>(
   chain: Chain,
   sender: Sender,
   fee: Fee,
   memo: string,
-  params: MessageMsgUpdateUris,
+  params: MsgUpdateUris<T>,
   domain?: object,
 ) {
   // EIP712

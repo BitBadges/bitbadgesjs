@@ -1,12 +1,12 @@
 import * as tx from '../../../proto/badges/tx'
 import { NumberType } from './string-numbers'
-import { BadgeUriWithType, convertToProtoBadgeUris } from './typeUtils'
+import { BadgeUri, convertToProtoBadgeUris } from './typeUtils'
 
 export function createMsgUpdateUris<T extends NumberType>(
   creator: string,
   collectionId: T,
   collectionUri: string,
-  badgeUris: BadgeUriWithType<T>[],
+  badgeUris: BadgeUri<T>[],
   balancesUri: string
 ) {
   const message = new tx.bitbadges.bitbadgeschain.badges.MsgUpdateUris({

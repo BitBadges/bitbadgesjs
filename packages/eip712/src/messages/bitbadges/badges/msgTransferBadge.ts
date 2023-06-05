@@ -1,4 +1,4 @@
-import { NumberType, TransferWithType, convertToProtoTransfers } from 'bitbadgesjs-proto'
+import { NumberType, Transfer, convertToProtoTransfers } from 'bitbadgesjs-proto'
 import {
   BALANCE_TYPES,
   ID_RANGE_TYPES,
@@ -23,7 +23,7 @@ export function createMsgTransferBadge<T extends NumberType>(
   creator: string,
   from: string,
   collectionId: T,
-  transfers: TransferWithType<T>[],
+  transfers: Transfer<T>[],
 ) {
   return {
     type: 'badges/TransferBadge',

@@ -4,7 +4,8 @@ import {
   createMsgTransferBadge as protoMsgTransferBadge,
   createTransaction,
   IdRange, Transfer, n_Transfer, s_Transfer,
-  NumberType, TransferWithType
+  NumberType, Transfer,
+  StringNumber
 } from 'bitbadgesjs-proto'
 import * as badges from 'bitbadgesjs-proto/dist/proto/badges/tx'
 
@@ -21,16 +22,33 @@ import { getDefaultDomainWithChainId } from '../../domain'
 
 import { Chain, Fee, Sender } from '../../common'
 
-export interface MessageMsgTransferBadge {
+export interface MsgTransferBadge<T extends NumberType> {
   creator: string;
   from: string;
-  collectionId: NumberType;
-  transfers: TransferWithType<NumberType>[];
+  collectionId: T;
+  transfers: Transfer<T>[];
 }
+
+export type b_MsgTransferBadge = MsgTransferBadge<bigint>
+export type s_MsgTransferBadge = MsgTransferBadge<string>
+export type n_MsgTransferBadge = MsgTransferBadge<number>
+export type d_MsgTransferBadge = MsgTransferBadge<StringNumber>
+
+export function convertMsgTransferBadge<T extends NumberType, U extends NumberType>(
+  msg: MsgTransferBadge<T>,
+  convertFunction: (item: T) => U
+): MsgTransferBadge<U> {
+  return {
+    ...msg,
+    collectionId: convertFunction(msg.collectionId),
+    transfers: msg.transfers.map((x) => convertTransfer(x, convertFunction)),
+  }
+}
+
 
 export function convertFromProtoToMsgTransferBadge(
   msg: badges.bitbadges.bitbadgeschain.badges.MsgTransferBadge,
-): MessageMsgTransferBadge {
+): b_MsgTransferBadge {
   return {
     creator: msg.creator,
     from: msg.from,
@@ -39,12 +57,12 @@ export function convertFromProtoToMsgTransferBadge(
   }
 }
 
-export function createTxMsgTransferBadge(
+export function createTxMsgTransferBadge<T extends NumberType>(
   chain: Chain,
   sender: Sender,
   fee: Fee,
   memo: string,
-  params: MessageMsgTransferBadge,
+  params: MsgTransferBadge<T>,
   domain?: object,
 ) {
   // EIP712

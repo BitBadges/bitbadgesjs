@@ -1,3 +1,5 @@
+import { NumberType } from "bitbadgesjs-proto"
+
 export const MSG_SEND_TYPES = {
   MsgValue: [
     { name: 'from_address', type: 'string' },
@@ -11,7 +13,7 @@ export const MSG_SEND_TYPES = {
 }
 
 export function createMsgSend(
-  amount: string,
+  amount: NumberType,
   denom: string,
   fromAddress: string,
   toAddress: string,
@@ -21,7 +23,7 @@ export function createMsgSend(
     value: {
       amount: [
         {
-          amount,
+          amount: amount.toString(),
           denom,
         },
       ],

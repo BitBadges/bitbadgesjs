@@ -1,6 +1,7 @@
 import {
-  BalanceWithType,
+  Balance,
   NumberType,
+  StringNumber,
   convertBalance,
   createTransaction,
   createMsgSetApproval as protoMsgSetApproval
@@ -20,16 +21,32 @@ import { getDefaultDomainWithChainId } from '../../domain'
 
 import { Chain, Fee, Sender } from '../../common'
 
-export interface MessageMsgSetApproval {
+export interface MsgSetApproval<T extends NumberType> {
   creator: string
-  collectionId: NumberType
+  collectionId: T
   address: string
-  balances: BalanceWithType<NumberType>[]
+  balances: Balance<T>[]
 }
 
-export function convertFromProtoToMessageMsgSetApproval(
+export type b_MsgSetApproval = MsgSetApproval<bigint>
+export type s_MsgSetApproval = MsgSetApproval<string>
+export type n_MsgSetApproval = MsgSetApproval<number>
+export type d_MsgSetApproval = MsgSetApproval<StringNumber>
+
+export function convertMsgSetApproval<T extends NumberType, U extends NumberType>(
+  msg: MsgSetApproval<T>,
+  convertFunction: (item: T) => U
+): MsgSetApproval<U> {
+  return {
+    ...msg,
+    collectionId: convertFunction(msg.collectionId),
+    balances: msg.balances.map((x) => convertBalance(x, convertFunction)),
+  }
+}
+
+export function convertFromProtoToMsgSetApproval(
   msg: badges.bitbadges.bitbadgeschain.badges.MsgSetApproval,
-): MessageMsgSetApproval {
+): b_MsgSetApproval {
   return {
     creator: msg.creator,
     collectionId: BigInt(msg.collectionId),
@@ -38,12 +55,12 @@ export function convertFromProtoToMessageMsgSetApproval(
   }
 }
 
-export function createTxMsgSetApproval(
+export function createTxMsgSetApproval<T extends NumberType>(
   chain: Chain,
   sender: Sender,
   fee: Fee,
   memo: string,
-  params: MessageMsgSetApproval,
+  params: MsgSetApproval<T>,
   domain?: object,
 ) {
   // EIP712

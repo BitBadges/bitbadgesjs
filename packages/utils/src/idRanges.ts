@@ -1,4 +1,4 @@
-import { IdRange } from "bitbadgesjs-proto";
+import { b_IdRange } from "bitbadgesjs-proto";
 
 /**
  * Sorts and merges a list of IdRanges. If ranges overlap, they are merged.
@@ -6,12 +6,12 @@ import { IdRange } from "bitbadgesjs-proto";
  * @example
  * [{start: 1, end: 3}, {start: 2, end: 4}] => [{start: 1, end: 4}]
  *
- * @param {IdRange[]} idRanges - The list of IdRanges to sort and merge.
+ * @param {b_IdRange[]} idRanges - The list of IdRanges to sort and merge.
  *
  * @remarks
  * Returns a new array but also does modify the original.
  */
-export function sortIdRangesAndMergeIfNecessary(idRanges: IdRange[]) {
+export function sortIdRangesAndMergeIfNecessary(idRanges: b_IdRange[]) {
   //Insertion sort in order of range.Start. If two have same range.Start, sort by range.End.
   for (let i = 1; i < idRanges.length; i++) {
     const idRange = idRanges[i];
@@ -47,16 +47,16 @@ function createIdRange(start: bigint, end: bigint) {
 /**
  * Given a range of Ids to remove, remove them from a target rangeObject.
  *
- * @param {IdRange} rangeToRemove - The range of Ids to remove
- * @param {IdRange} rangeObject - The range of Ids to remove from
+ * @param {b_IdRange} rangeToRemove - The range of Ids to remove
+ * @param {b_IdRange} rangeObject - The range of Ids to remove from
  *
  * @remarks
  * Can return an empty array, or an array of 1 or 2 IdRanges.
  *
  */
-export function removeIdsFromIdRange(rangeToRemove: IdRange, rangeObject: IdRange) {
+export function removeIdsFromIdRange(rangeToRemove: b_IdRange, rangeObject: b_IdRange) {
   let idxsToRemove = rangeToRemove;
-  let newIdRanges: IdRange[] = [];
+  let newIdRanges: b_IdRange[] = [];
 
 
   if (idxsToRemove.start > rangeObject.start && idxsToRemove.end < rangeObject.end) {
@@ -84,9 +84,9 @@ export function removeIdsFromIdRange(rangeToRemove: IdRange, rangeObject: IdRang
  * Search ID ranges for a specific ID. Return (idx, true) if found. And (-1, false) if not.
  *
  * @param {bigint} id - The ID to search for
- * @param {IdRange[]} idRanges - The list of IdRanges to search
+ * @param {b_IdRange[]} idRanges - The list of IdRanges to search
  */
-export function searchIdRangesForId(id: bigint, idRanges: IdRange[]): [number, boolean] {
+export function searchIdRangesForId(id: bigint, idRanges: b_IdRange[]): [number, boolean] {
   idRanges = sortIdRangesAndMergeIfNecessary(idRanges) // Just in case
 
   //Binary search because ID ranges will be sorted
@@ -108,16 +108,16 @@ export function searchIdRangesForId(id: bigint, idRanges: IdRange[]): [number, b
 
 /**
  * Searches a set of ranges to find what indexes a specific ID range overlaps.
- * Returns overlapping idxs as a IdRange, true if found.
- * And empty IdRange, false if not.
+ * Returns overlapping idxs as a b_IdRange, true if found.
+ * And empty b_IdRange, false if not.
  *
- * @param {IdRange} targetRange - The range to search for
- * @param {IdRange[]} targetIdRanges - The list of IdRanges to search
+ * @param {b_IdRange} targetRange - The range to search for
+ * @param {b_IdRange[]} targetIdRanges - The list of IdRanges to search
  *
  * @remarks
  * Returned range is inclusive (i.e. end idx also overlaps)
  */
-export function getIdxSpanForRange(targetRange: IdRange, targetIdRanges: IdRange[]): [{ start: number, end: number }, boolean] {
+export function getIdxSpanForRange(targetRange: b_IdRange, targetIdRanges: b_IdRange[]): [{ start: number, end: number }, boolean] {
   //its search for start, if found set to that
   //if not found, set to insertIdx + 0 (because we already incremented by 1)
   //if end is found, set to that
@@ -154,9 +154,9 @@ export function getIdxSpanForRange(targetRange: IdRange, targetIdRanges: IdRange
  * [{ start: 10, end: 20 }, { start: 30, end: 40 }] and inserting id 25 would return index 1
  *
  * @param {bigint} id - The ID to add
- * @param {IdRange[]} targetIds - The list of IdRanges to insert to
+ * @param {b_IdRange[]} targetIds - The list of IdRanges to insert to
  */
-export function getIdxToInsertForNewId(id: bigint, targetIds: IdRange[]) {
+export function getIdxToInsertForNewId(id: bigint, targetIds: b_IdRange[]) {
   targetIds = sortIdRangesAndMergeIfNecessary(targetIds) // Just in case
 
   const [_, found] = searchIdRangesForId(id, targetIds)
@@ -209,13 +209,13 @@ export function getIdxToInsertForNewId(id: bigint, targetIds: IdRange[]) {
 /**
  * Merges the previous or next range, if overlap exists.
  *
- * @param {IdRange[]} targetIds - The list of IdRanges to insert to
+ * @param {b_IdRange[]} targetIds - The list of IdRanges to insert to
  * @param {bigint | string | number} insertedAtIdx - The index where the new ID was inserted
  *
  * @example
  * [{ start: 10, end: 20 }, { start: 21, end: 40 }] would be merged into [{ start: 10, end: 40 }]
  */
-export function mergePrevOrNextIfPossible(targetIds: IdRange[], _insertedAtIdx: bigint | number | string) {
+export function mergePrevOrNextIfPossible(targetIds: b_IdRange[], _insertedAtIdx: bigint | number | string) {
   const insertedAtIdx = Number(_insertedAtIdx);
 
   //Handle cases where we need to merge with the previous or next range
@@ -251,7 +251,7 @@ export function mergePrevOrNextIfPossible(targetIds: IdRange[], _insertedAtIdx: 
     }
   }
 
-  let mergedIds = [] as IdRange[];
+  let mergedIds = [] as b_IdRange[];
   // 4 Cases: Need to merge with both, just next, just prev, or neither
   if (needToMergeWithPrev && needToMergeWithNext) {
     mergedIds = mergedIds.concat(ids.slice(0, insertedAtIdx - 1));
@@ -275,15 +275,15 @@ export function mergePrevOrNextIfPossible(targetIds: IdRange[], _insertedAtIdx: 
 /**
  * Insert a range into its correct position.
  *
- * @param {IdRange} rangeToAdd - The range to insert
- * @param {IdRange[]} targetIds - The list of IdRanges to insert to
+ * @param {b_IdRange} rangeToAdd - The range to insert
+ * @param {b_IdRange[]} targetIds - The list of IdRanges to insert to
  *
  * @remarks
  * IMPORTANT: Assumes range is already deleted and not present at all, so we only search for where start fits in.
  */
-export function insertRangeToIdRanges(rangeToAdd: IdRange, targetIds: IdRange[]) {
+export function insertRangeToIdRanges(rangeToAdd: b_IdRange, targetIds: b_IdRange[]) {
   let ids = targetIds;
-  let newIds = [] as IdRange[];
+  let newIds = [] as b_IdRange[];
   let insertIdAtIdx = 0;
   rangeToAdd = rangeToAdd;
   let lastRange = ids[ids.length - 1];
@@ -315,9 +315,9 @@ export function insertRangeToIdRanges(rangeToAdd: IdRange, targetIds: IdRange[])
  * @remarks
  * Overlap here is considered inclusive, so [1, 10] and [10, 20] would be considered overlapping. [1, 10] and [11, 20] would not be considered overlapping.
  *
- * @param {IdRange[]} idRanges - The list of IdRanges to check
+ * @param {b_IdRange[]} idRanges - The list of IdRanges to check
  */
-export function checkIfIdRangesOverlap(idRanges: IdRange[]) {
+export function checkIfIdRangesOverlap(idRanges: b_IdRange[]) {
   return idRanges.some(({ start, end }, i) => {
     const start1 = start;
     const end1 = end

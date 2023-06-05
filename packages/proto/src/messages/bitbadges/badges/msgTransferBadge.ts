@@ -1,13 +1,13 @@
 import * as tx from '../../../proto/badges/tx'
 import { NumberType } from './string-numbers'
 
-import { TransferWithType, convertToProtoTransfers } from './typeUtils'
+import { Transfer, convertToProtoTransfers } from './typeUtils'
 
 export function createMsgTransferBadge<T extends NumberType>(
   creator: string,
   from: string,
   collectionId: T,
-  transfers: TransferWithType<T>[],
+  transfers: Transfer<T>[],
 ) {
   const message = new tx.bitbadges.bitbadgeschain.badges.MsgTransferBadge({
     creator,

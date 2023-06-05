@@ -1,4 +1,4 @@
-import { BalanceWithType, NumberType, convertToProtoBalances } from 'bitbadgesjs-proto'
+import { Balance, NumberType, convertToProtoBalances } from 'bitbadgesjs-proto'
 import { BALANCE_TYPES, ID_RANGE_TYPES } from './eip712HelperTypes'
 
 const MsgSetApprovalValueType = [
@@ -18,7 +18,7 @@ export function createMsgSetApproval<T extends NumberType>(
   creator: string,
   address: string,
   collectionId: T,
-  balances: BalanceWithType<T>[]
+  balances: Balance<T>[]
 ) {
   return {
     type: 'badges/SetApproval',

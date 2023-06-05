@@ -3,7 +3,8 @@ import {
   createTransaction,
   convertTransferMapping,
   NumberType,
-  TransferMappingWithType,
+  TransferMapping,
+  StringNumber,
 } from 'bitbadgesjs-proto'
 import * as badges from 'bitbadgesjs-proto/dist/proto/badges/tx'
 
@@ -20,15 +21,31 @@ import { getDefaultDomainWithChainId } from '../../domain'
 
 import { Chain, Fee, Sender } from '../../common'
 
-export interface MessageMsgUpdateAllowedTransfers {
+export interface MsgUpdateAllowedTransfers<T extends NumberType> {
   creator: string
-  collectionId: NumberType
-  allowedTransfers: TransferMappingWithType<NumberType>[]
+  collectionId: T
+  allowedTransfers: TransferMapping<T>[]
+}
+
+export type b_MsgUpdateAllowedTransfers = MsgUpdateAllowedTransfers<bigint>
+export type s_MsgUpdateAllowedTransfers = MsgUpdateAllowedTransfers<string>
+export type n_MsgUpdateAllowedTransfers = MsgUpdateAllowedTransfers<number>
+export type d_MsgUpdateAllowedTransfers = MsgUpdateAllowedTransfers<StringNumber>
+
+export function convertMsgUpdateAllowedTransfers<T extends NumberType, U extends NumberType>(
+  msg: MsgUpdateAllowedTransfers<T>,
+  convertFunction: (item: T) => U
+): MsgUpdateAllowedTransfers<U> {
+  return {
+    ...msg,
+    collectionId: convertFunction(msg.collectionId),
+    allowedTransfers: msg.allowedTransfers.map(x => convertTransferMapping(x, convertFunction)),
+  }
 }
 
 export function convertFromProtoToMsgUpdateAllowedTransfers(
   proto: badges.bitbadges.bitbadgeschain.badges.MsgUpdateAllowedTransfers,
-): MessageMsgUpdateAllowedTransfers {
+): b_MsgUpdateAllowedTransfers {
   return {
     creator: proto.creator,
     collectionId: BigInt(proto.collectionId),
@@ -36,12 +53,12 @@ export function convertFromProtoToMsgUpdateAllowedTransfers(
   }
 }
 
-export function createTxMsgUpdateAllowedTransfers(
+export function createTxMsgUpdateAllowedTransfers<T extends NumberType>(
   chain: Chain,
   sender: Sender,
   fee: Fee,
   memo: string,
-  params: MessageMsgUpdateAllowedTransfers,
+  params: MsgUpdateAllowedTransfers<T>,
   domain?: object,
 ) {
   // EIP712

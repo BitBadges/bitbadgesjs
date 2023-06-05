@@ -1,11 +1,11 @@
 import * as tx from '../../../proto/badges/tx'
 import { NumberType } from './string-numbers'
-import { convertToProtoTransferMappings, TransferMappingWithType } from './typeUtils'
+import { convertToProtoTransferMappings, TransferMapping } from './typeUtils'
 
 export function createMsgUpdateAllowedTransfers<T extends NumberType>(
   creator: string,
   collectionId: T,
-  allowedTransfers: TransferMappingWithType<T>[],
+  allowedTransfers: TransferMapping<T>[],
 ) {
   const message =
     new tx.bitbadges.bitbadgeschain.badges.MsgUpdateAllowedTransfers({

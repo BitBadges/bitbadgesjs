@@ -5,53 +5,57 @@ import * as ranges from '../../../proto/badges/ranges'
 import * as tx from '../../../proto/badges/tx'
 import { NumberType, StringNumber } from './string-numbers'
 
+function deepCopy<T>(obj: T): T {
+  return JSON.parse(JSON.stringify(obj))
+}
+
 /**
  * UserBalance item that serves as the base type for all UserBalance items.
  *
- * @typedef {Object} UserBalanceWithType
- * @property {BalanceWithType[]} balances - The balances of the user.
- * @property {ApprovalWithType[]} approvals - The approvals of the user.
+ * @typedef {Object} UserBalance
+ * @property {Balance[]} balances - The balances of the user.
+ * @property {Approval[]} approvals - The approvals of the user.
  */
-export interface UserBalanceWithType<T extends NumberType> {
-  balances: BalanceWithType<T>[];
-  approvals: ApprovalWithType<T>[];
+export interface UserBalance<T extends NumberType> {
+  balances: Balance<T>[];
+  approvals: Approval<T>[];
 }
 
-export type UserBalance = UserBalanceWithType<bigint>;
-export type s_UserBalance = UserBalanceWithType<string>;
-export type n_UserBalance = UserBalanceWithType<number>;
-export type d_UserBalance = UserBalanceWithType<StringNumber>;
+export type b_UserBalance = UserBalance<bigint>;
+export type s_UserBalance = UserBalance<string>;
+export type n_UserBalance = UserBalance<number>;
+export type d_UserBalance = UserBalance<StringNumber>;
 
-export function convertUserBalance<T extends NumberType, U extends NumberType>(balance: UserBalanceWithType<T>, convertFunction: (item: T) => U): UserBalanceWithType<U> {
-  return {
+export function convertUserBalance<T extends NumberType, U extends NumberType>(balance: UserBalance<T>, convertFunction: (item: T) => U): UserBalance<U> {
+  return deepCopy({
     ...balance,
     balances: balance.balances.map((b) => convertBalance(b, convertFunction)),
     approvals: balance.approvals.map((a) => convertApproval(a, convertFunction))
-  }
+  })
 }
 
 /**
  * Approval item that serves as the base type for all Approval items.
  *
- * @typedef {Object} ApprovalWithType
+ * @typedef {Object} Approval
  * @property {string} address - The address of the user.
- * @property {BalanceWithType[]} balances - The approval balances for the address.
+ * @property {Balance[]} balances - The approval balances for the address.
  */
-export interface ApprovalWithType<T extends NumberType> {
+export interface Approval<T extends NumberType> {
   address: string;
-  balances: BalanceWithType<T>[];
+  balances: Balance<T>[];
 }
 
-export type Approval = ApprovalWithType<bigint>;
-export type s_Approval = ApprovalWithType<string>;
-export type n_Approval = ApprovalWithType<number>;
-export type d_Approval = ApprovalWithType<StringNumber>;
+export type b_Approval = Approval<bigint>;
+export type s_Approval = Approval<string>;
+export type n_Approval = Approval<number>;
+export type d_Approval = Approval<StringNumber>;
 
-export function convertApproval<T extends NumberType, U extends NumberType>(approval: ApprovalWithType<T>, convertFunction: (item: T) => U): ApprovalWithType<U> {
-  return {
+export function convertApproval<T extends NumberType, U extends NumberType>(approval: Approval<T>, convertFunction: (item: T) => U): Approval<U> {
+  return deepCopy({
     ...approval,
     balances: approval.balances.map((b) => convertBalance(b, convertFunction))
-  }
+  })
 }
 
 /**
@@ -59,102 +63,102 @@ export function convertApproval<T extends NumberType, U extends NumberType>(appr
  *
  * This is typically used to represent a range of badge IDs.
  *
- * @typedef {Object} IdRangeWithType
+ * @typedef {Object} IdRange
  * @property {NumberType} start - The start of the range.
  * @property {NumberType} end - The end of the range.
  */
-export interface IdRangeWithType<T extends NumberType> {
+export interface IdRange<T extends NumberType> {
   start: T;
   end: T;
 }
 
-export type IdRange = IdRangeWithType<bigint>;
-export type s_IdRange = IdRangeWithType<string>;
-export type n_IdRange = IdRangeWithType<number>;
-export type d_IdRange = IdRangeWithType<StringNumber>;
+export type b_IdRange = IdRange<bigint>;
+export type s_IdRange = IdRange<string>;
+export type n_IdRange = IdRange<number>;
+export type d_IdRange = IdRange<StringNumber>;
 
-export function convertIdRange<T extends NumberType, U extends NumberType>(range: IdRangeWithType<T>, convertFunction: (item: T) => U): IdRangeWithType<U> {
-  return {
+export function convertIdRange<T extends NumberType, U extends NumberType>(range: IdRange<T>, convertFunction: (item: T) => U): IdRange<U> {
+  return deepCopy({
     ...range,
     start: convertFunction(range.start),
     end: convertFunction(range.end)
-  }
+  })
 }
 
 /**
  * BadgeUris are used to represent a URI and a range of badge IDs.
  * If the URI has {id} in it, then the {id} will be replaced with the badge ID.
  *
- * @typedef {Object} BadgeUriWithType
+ * @typedef {Object} BadgeUri
  * @property {string} uri - The URI of the badge.
- * @property {IdRangeWithType[]} badgeIds - The badge IDs corresponding to the URI.
+ * @property {IdRange[]} badgeIds - The badge IDs corresponding to the URI.
  */
-export interface BadgeUriWithType<T extends NumberType> {
+export interface BadgeUri<T extends NumberType> {
   uri: string;
-  badgeIds: IdRangeWithType<T>[]
+  badgeIds: IdRange<T>[]
 }
 
-export type BadgeUri = BadgeUriWithType<bigint>;
-export type s_BadgeUri = BadgeUriWithType<string>;
-export type n_BadgeUri = BadgeUriWithType<number>;
-export type d_BadgeUri = BadgeUriWithType<StringNumber>;
+export type b_BadgeUri = BadgeUri<bigint>;
+export type s_BadgeUri = BadgeUri<string>;
+export type n_BadgeUri = BadgeUri<number>;
+export type d_BadgeUri = BadgeUri<StringNumber>;
 
-export function convertBadgeUri<T extends NumberType, U extends NumberType>(uri: BadgeUriWithType<T>, convertFunction: (item: T) => U): BadgeUriWithType<U> {
-  return {
+export function convertBadgeUri<T extends NumberType, U extends NumberType>(uri: BadgeUri<T>, convertFunction: (item: T) => U): BadgeUri<U> {
+  return deepCopy({
     ...uri,
     badgeIds: uri.badgeIds.map((b) => convertIdRange(b, convertFunction))
-  }
+  })
 }
 
 /**
  * BadgeSupplyAndAmounts are used to represent the amount of a badge to be minted.
  * We create xAMOUNT badges with a supply of xSUPPLY.
  *
- * @typedef {Object} BadgeSupplyAndAmountWithType
+ * @typedef {Object} BadgeSupplyAndAmount
  * @property {NumberType} amount - The number of badgea to be minted.
  * @property {NumberType} supply - The supply of the badgea to be minted.
  */
-export interface BadgeSupplyAndAmountWithType<T extends NumberType> {
+export interface BadgeSupplyAndAmount<T extends NumberType> {
   amount: T;
   supply: T;
 }
 
-export type BadgeSupplyAndAmount = BadgeSupplyAndAmountWithType<bigint>;
-export type s_BadgeSupplyAndAmount = BadgeSupplyAndAmountWithType<string>;
-export type n_BadgeSupplyAndAmount = BadgeSupplyAndAmountWithType<number>;
-export type d_BadgeSupplyAndAmount = BadgeSupplyAndAmountWithType<StringNumber>;
+export type b_BadgeSupplyAndAmount = BadgeSupplyAndAmount<bigint>;
+export type s_BadgeSupplyAndAmount = BadgeSupplyAndAmount<string>;
+export type n_BadgeSupplyAndAmount = BadgeSupplyAndAmount<number>;
+export type d_BadgeSupplyAndAmount = BadgeSupplyAndAmount<StringNumber>;
 
-export function convertBadgeSupplyAndAmount<T extends NumberType, U extends NumberType>(supplyAndAmount: BadgeSupplyAndAmountWithType<T>, convertFunction: (item: T) => U): BadgeSupplyAndAmountWithType<U> {
-  return {
+export function convertBadgeSupplyAndAmount<T extends NumberType, U extends NumberType>(supplyAndAmount: BadgeSupplyAndAmount<T>, convertFunction: (item: T) => U): BadgeSupplyAndAmount<U> {
+  return deepCopy({
     ...supplyAndAmount,
     amount: convertFunction(supplyAndAmount.amount),
     supply: convertFunction(supplyAndAmount.supply)
-  }
+  })
 }
 
 /**
- * BalanceWithType is used to represent a balance of a badge.
+ * Balance is used to represent a balance of a badge.
  *
- * @typedef {Object} BalanceWithType
+ * @typedef {Object} Balance
  * @property {NumberType} amount - The amount or balance of the badge.
- * @property {IdRangeWithType[]} badgeIds - The badge IDs corresponding to the balance.
+ * @property {IdRange[]} badgeIds - The badge IDs corresponding to the balance.
  */
-export interface BalanceWithType<T extends NumberType> {
+export interface Balance<T extends NumberType> {
   amount: T;
-  badgeIds: IdRangeWithType<T>[]
+  badgeIds: IdRange<T>[]
 }
 
-export type Balance = BalanceWithType<bigint>;
-export type s_Balance = BalanceWithType<string>;
-export type n_Balance = BalanceWithType<number>;
-export type d_Balance = BalanceWithType<StringNumber>;
+export type b_Balance = Balance<bigint>;
+export type s_Balance = Balance<string>;
+export type n_Balance = Balance<number>;
+export type d_Balance = Balance<StringNumber>;
 
-export function convertBalance<T extends NumberType, U extends NumberType>(balance: BalanceWithType<T>, convertFunction: (item: T) => U): BalanceWithType<U> {
-  return {
+export function convertBalance<T extends NumberType, U extends NumberType>(balance: Balance<T>, convertFunction: (item: T) => U): Balance<U> {
+  return deepCopy({
     ...balance,
     amount: convertFunction(balance.amount),
     badgeIds: balance.badgeIds.map((b) => convertIdRange(b, convertFunction))
-  }
+  })
 }
 
 /**
@@ -165,133 +169,133 @@ export function convertBalance<T extends NumberType, U extends NumberType>(balan
  * Can also specify managerOptions to include or exclude the manager. This is because the manager address is dynamic and
  * can change, so we need to be able to include or exclude it dynamically as well.
  *
- * @typedef {Object} AddressesMappingWithType
+ * @typedef {Object} AddressesMapping
  * @property {string[]} addresses - The addresses in the list.
  * @property {boolean} includeOnlySpecified - Whether to include only the addresses in the list or all addresses except the ones in the list.
  * @property {NumberType} managerOptions - The manager options for the addresses mapping. 0 = do nothing. 1 = include manager. 2 = exclude manager.
  */
-export interface AddressesMappingWithType<T extends NumberType> {
+export interface AddressesMapping<T extends NumberType> {
   addresses: string[]
   includeOnlySpecified: boolean
   managerOptions: T;
 }
 
-export type AddressesMapping = AddressesMappingWithType<bigint>;
-export type s_AddressesMapping = AddressesMappingWithType<string>;
-export type n_AddressesMapping = AddressesMappingWithType<number>;
-export type d_AddressesMapping = AddressesMappingWithType<StringNumber>;
+export type b_AddressesMapping = AddressesMapping<bigint>;
+export type s_AddressesMapping = AddressesMapping<string>;
+export type n_AddressesMapping = AddressesMapping<number>;
+export type d_AddressesMapping = AddressesMapping<StringNumber>;
 
-export function convertAddressesMapping<T extends NumberType, U extends NumberType>(mapping: AddressesMappingWithType<T>, convertFunction: (item: T) => U): AddressesMappingWithType<U> {
-  return {
+export function convertAddressesMapping<T extends NumberType, U extends NumberType>(mapping: AddressesMapping<T>, convertFunction: (item: T) => U): AddressesMapping<U> {
+  return deepCopy({
     ...mapping,
     managerOptions: convertFunction(mapping.managerOptions)
-  }
+  })
 }
 
 /**
  * This is used to represent a mapping of addresses for a transfer from a set of "from" addresses to a set of "to" addresses.
  *
- * @typedef {Object} TransferMappingWithType
- * @property {AddressesMappingWithType} to - The "to" addresses mapping.
- * @property {AddressesMappingWithType} from - The "from" addresses mapping.
+ * @typedef {Object} TransferMapping
+ * @property {AddressesMapping} to - The "to" addresses mapping.
+ * @property {AddressesMapping} from - The "from" addresses mapping.
  */
-export interface TransferMappingWithType<T extends NumberType> {
-  to: AddressesMappingWithType<T>
-  from: AddressesMappingWithType<T>
+export interface TransferMapping<T extends NumberType> {
+  to: AddressesMapping<T>
+  from: AddressesMapping<T>
 }
 
-export type TransferMapping = TransferMappingWithType<bigint>;
-export type s_TransferMapping = TransferMappingWithType<string>;
-export type n_TransferMapping = TransferMappingWithType<number>;
-export type d_TransferMapping = TransferMappingWithType<StringNumber>;
+export type b_TransferMapping = TransferMapping<bigint>;
+export type s_TransferMapping = TransferMapping<string>;
+export type n_TransferMapping = TransferMapping<number>;
+export type d_TransferMapping = TransferMapping<StringNumber>;
 
-export function convertTransferMapping<T extends NumberType, U extends NumberType>(mapping: TransferMappingWithType<T>, convertFunction: (item: T) => U): TransferMappingWithType<U> {
-  return {
+export function convertTransferMapping<T extends NumberType, U extends NumberType>(mapping: TransferMapping<T>, convertFunction: (item: T) => U): TransferMapping<U> {
+  return deepCopy({
     ...mapping,
     to: convertAddressesMapping(mapping.to, convertFunction),
     from: convertAddressesMapping(mapping.from, convertFunction)
-  }
+  })
 }
 
 /**
- * TransferWithType is used to represent a transfer of badges.
+ * Transfer is used to represent a transfer of badges.
  *
- * @typedef {Object} TransferWithType
+ * @typedef {Object} Transfer
  * @property {string[]} toAddresses - The addresses to transfer to.
- * @property {BalanceWithType[]} balances - The balances to transfer.
+ * @property {Balance[]} balances - The balances to transfer.
  */
-export interface TransferWithType<T extends NumberType> {
+export interface Transfer<T extends NumberType> {
   toAddresses: string[]
-  balances: BalanceWithType<T>[]
+  balances: Balance<T>[]
 }
 
-export type Transfer = TransferWithType<bigint>;
-export type s_Transfer = TransferWithType<string>;
-export type n_Transfer = TransferWithType<number>;
-export type d_Transfer = TransferWithType<StringNumber>;
+export type b_Transfer = Transfer<bigint>;
+export type s_Transfer = Transfer<string>;
+export type n_Transfer = Transfer<number>;
+export type d_Transfer = Transfer<StringNumber>;
 
-export function convertTransfer<T extends NumberType, U extends NumberType>(transfer: TransferWithType<T>, convertFunction: (item: T) => U): TransferWithType<U> {
-  return {
+export function convertTransfer<T extends NumberType, U extends NumberType>(transfer: Transfer<T>, convertFunction: (item: T) => U): Transfer<U> {
+  return deepCopy({
     ...transfer,
     balances: transfer.balances.map((b) => convertBalance(b, convertFunction))
-  }
+  })
 }
 
 /**
- * ChallengeWithType represents a challenge for a claim. For a user to claim a badge, they must provide a solution for all challenges.
+ * Challenge represents a challenge for a claim. For a user to claim a badge, they must provide a solution for all challenges.
  *
- * @typedef {Object} ChallengeWithType
+ * @typedef {Object} Challenge
  * @property {string} root - The root of the Merkle tree for the challenge.
  * @property {NumberType} expectedProofLength - The expected length of the proof for the challenge. IMPORTANT to prevent preimage attacks.
  * @property {boolean} useCreatorAddressAsLeaf - Whether to use the creator address as the leaf for the challenge.
  */
-export interface ChallengeWithType<T extends NumberType> {
+export interface Challenge<T extends NumberType> {
   expectedProofLength: T;
   root: string
   useCreatorAddressAsLeaf: boolean
 }
 
-export type Challenge = ChallengeWithType<bigint>;
-export type s_Challenge = ChallengeWithType<string>;
-export type n_Challenge = ChallengeWithType<number>;
-export type d_Challenge = ChallengeWithType<StringNumber>;
+export type b_Challenge = Challenge<bigint>;
+export type s_Challenge = Challenge<string>;
+export type n_Challenge = Challenge<number>;
+export type d_Challenge = Challenge<StringNumber>;
 
-export function convertChallenge<T extends NumberType, U extends NumberType>(challenge: ChallengeWithType<T>, convertFunction: (item: T) => U): ChallengeWithType<U> {
-  return {
+export function convertChallenge<T extends NumberType, U extends NumberType>(challenge: Challenge<T>, convertFunction: (item: T) => U): Challenge<U> {
+  return deepCopy({
     ...challenge,
     expectedProofLength: convertFunction(challenge.expectedProofLength)
-  }
+  })
 }
 
 /**
  * Represents a claim for a badge.
  *
- * @typedef {Object} ClaimWithType
- * @property {BalanceWithType[]} undistributedBalances - The undistributed balances for the claim.
- * @property {IdRangeWithType} timeRange - The time range where users can claim the badge.
+ * @typedef {Object} Claim
+ * @property {Balance[]} undistributedBalances - The undistributed balances for the claim.
+ * @property {IdRange} timeRange - The time range where users can claim the badge.
  * @property {string} uri - The URI of the badge, providing extra accompanying details.
  * @property {NumberType} numClaimsPerAddress - The maximum number of claims per address.
  * @property {NumberType} incrementIdsBy - The amount to increment the claim IDs in currentClaimAmounts by after each claim.
- * @property {BalanceWithType[]} currentClaimAmounts - A counter of the current amounts for the current (next) claim.
- * @property {ChallengeWithType[]} challenges - The challenges for the claim. For a user to claim a badge, they must provide a solution for all challenges.
+ * @property {Balance[]} currentClaimAmounts - A counter of the current amounts for the current (next) claim.
+ * @property {Challenge[]} challenges - The challenges for the claim. For a user to claim a badge, they must provide a solution for all challenges.
  */
-export interface ClaimWithType<T extends NumberType> {
-  undistributedBalances: BalanceWithType<T>[]
-  timeRange: IdRangeWithType<T>
+export interface Claim<T extends NumberType> {
+  undistributedBalances: Balance<T>[]
+  timeRange: IdRange<T>
   numClaimsPerAddress: T;
   incrementIdsBy: T;
-  currentClaimAmounts: BalanceWithType<T>[]
-  challenges: ChallengeWithType<T>[]
+  currentClaimAmounts: Balance<T>[]
+  challenges: Challenge<T>[]
   uri: string
 }
 
-export type Claim = ClaimWithType<bigint>;
-export type s_Claim = ClaimWithType<string>;
-export type n_Claim = ClaimWithType<number>;
-export type d_Claim = ClaimWithType<StringNumber>;
+export type b_Claim = Claim<bigint>;
+export type s_Claim = Claim<string>;
+export type n_Claim = Claim<number>;
+export type d_Claim = Claim<StringNumber>;
 
-export function convertClaim<T extends NumberType, U extends NumberType>(claim: ClaimWithType<T>, convertFunction: (item: T) => U): ClaimWithType<U> {
-  return {
+export function convertClaim<T extends NumberType, U extends NumberType>(claim: Claim<T>, convertFunction: (item: T) => U): Claim<U> {
+  return deepCopy({
     ...claim,
     undistributedBalances: claim.undistributedBalances.map((b) => convertBalance(b, convertFunction)),
     timeRange: convertIdRange(claim.timeRange, convertFunction),
@@ -299,7 +303,7 @@ export function convertClaim<T extends NumberType, U extends NumberType>(claim: 
     incrementIdsBy: convertFunction(claim.incrementIdsBy),
     currentClaimAmounts: claim.currentClaimAmounts.map((b) => convertBalance(b, convertFunction)),
     challenges: claim.challenges.map((c) => convertChallenge(c, convertFunction))
-  }
+  })
 }
 
 /**
@@ -336,7 +340,7 @@ export interface ClaimProof {
   leaf: string
 }
 
-export function convertToProtoBadgeIds<T extends NumberType>(badgeIds: IdRangeWithType<T>[]): ranges.bitbadges.bitbadgeschain.badges.IdRange[] {
+export function convertToProtoBadgeIds<T extends NumberType>(badgeIds: IdRange<T>[]): ranges.bitbadges.bitbadgeschain.badges.IdRange[] {
   const wrappedBadgeIds: ranges.bitbadges.bitbadgeschain.badges.IdRange[] = []
   for (const range of badgeIds) {
     wrappedBadgeIds.push(
@@ -350,7 +354,7 @@ export function convertToProtoBadgeIds<T extends NumberType>(badgeIds: IdRangeWi
   return wrappedBadgeIds
 }
 
-export function convertToProtoBadgeUris<T extends NumberType>(badgeUris: BadgeUriWithType<T>[]): badges.bitbadges.bitbadgeschain.badges.BadgeUri[] {
+export function convertToProtoBadgeUris<T extends NumberType>(badgeUris: BadgeUri<T>[]): badges.bitbadges.bitbadgeschain.badges.BadgeUri[] {
   const wrappedBadgeUris: badges.bitbadges.bitbadgeschain.badges.BadgeUri[] = [];
   for (const badgeUri of badgeUris) {
     wrappedBadgeUris.push(
@@ -365,7 +369,7 @@ export function convertToProtoBadgeUris<T extends NumberType>(badgeUris: BadgeUr
 }
 
 
-export function convertToProtoBalances<T extends NumberType>(balanceArr: BalanceWithType<T>[]): balances.bitbadges.bitbadgeschain.badges.Balance[] {
+export function convertToProtoBalances<T extends NumberType>(balanceArr: Balance<T>[]): balances.bitbadges.bitbadgeschain.badges.Balance[] {
   const formattedBalances: balances.bitbadges.bitbadgeschain.badges.Balance[] =
     []
 
@@ -413,7 +417,7 @@ export function convertToProtoSolutions(solutions: ChallengeSolution[]) {
   return wrappedSolutions
 }
 
-export function convertToProtoTransfers<T extends NumberType>(transfers: TransferWithType<T>[]): tx.bitbadges.bitbadgeschain.badges.Transfer[] {
+export function convertToProtoTransfers<T extends NumberType>(transfers: Transfer<T>[]): tx.bitbadges.bitbadgeschain.badges.Transfer[] {
   const wrappedTransfers: tx.bitbadges.bitbadgeschain.badges.Transfer[] = []
   for (const transfer of transfers) {
     const formattedBalances = convertToProtoBalances(transfer.balances)
@@ -429,7 +433,7 @@ export function convertToProtoTransfers<T extends NumberType>(transfers: Transfe
 }
 
 
-export function convertToProtoClaims<T extends NumberType>(claimsArr: ClaimWithType<T>[]): claims.bitbadges.bitbadgeschain.badges.Claim[] {
+export function convertToProtoClaims<T extends NumberType>(claimsArr: Claim<T>[]): claims.bitbadges.bitbadgeschain.badges.Claim[] {
   const formattedClaims: claims.bitbadges.bitbadgeschain.badges.Claim[] = []
   for (const claim of claimsArr) {
     formattedClaims.push(
@@ -457,7 +461,7 @@ export function convertToProtoClaims<T extends NumberType>(claimsArr: ClaimWithT
   return formattedClaims
 }
 
-export function convertToProtoBadgeSupplysAndAmounts<T extends NumberType>(badgeSupplys: BadgeSupplyAndAmountWithType<T>[]): tx.bitbadges.bitbadgeschain.badges.BadgeSupplyAndAmount[] {
+export function convertToProtoBadgeSupplysAndAmounts<T extends NumberType>(badgeSupplys: BadgeSupplyAndAmount<T>[]): tx.bitbadges.bitbadgeschain.badges.BadgeSupplyAndAmount[] {
   const wrappedSupplys: tx.bitbadges.bitbadgeschain.badges.BadgeSupplyAndAmount[] =
     []
   for (const supplyObj of badgeSupplys) {
@@ -471,7 +475,7 @@ export function convertToProtoBadgeSupplysAndAmounts<T extends NumberType>(badge
   return wrappedSupplys
 }
 
-export function convertToProtoTransferMappings<T extends NumberType>(transferMappingsArr: TransferMappingWithType<T>[]): ranges.bitbadges.bitbadgeschain.badges.TransferMapping[] {
+export function convertToProtoTransferMappings<T extends NumberType>(transferMappingsArr: TransferMapping<T>[]): ranges.bitbadges.bitbadgeschain.badges.TransferMapping[] {
   const wrappedTransferMappings: ranges.bitbadges.bitbadgeschain.badges.TransferMapping[] =
     []
   for (const transferMapping of transferMappingsArr) {

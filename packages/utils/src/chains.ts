@@ -1,10 +1,10 @@
 import { COSMOS, ethToCosmos } from "bitbadgesjs-address-converter";
 import { SupportedChain } from "./types/types";
 import { ethers } from "ethers";
-import { BitBadgesUserInfo, s_BitBadgesUserInfo } from "./types/users";
+import { b_BitBadgesUserInfo, s_BitBadgesUserInfo } from "./types/users";
 
 
-export const MINT_ACCOUNT: BitBadgesUserInfo = {
+export const MINT_ACCOUNT: b_BitBadgesUserInfo = {
   cosmosAddress: 'Mint',
   address: 'Mint',
   chain: SupportedChain.COSMOS,
@@ -100,7 +100,7 @@ export const s_BLANK_USER_INFO: s_BitBadgesUserInfo = {
   }
 }
 
-export const BLANK_USER_INFO: BitBadgesUserInfo = {
+export const BLANK_USER_INFO: b_BitBadgesUserInfo = {
   cosmosAddress: '',
   address: '',
   chain: SupportedChain.UNKNOWN,

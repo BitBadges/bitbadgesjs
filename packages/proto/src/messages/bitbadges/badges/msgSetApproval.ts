@@ -1,12 +1,12 @@
 import * as tx from '../../../proto/badges/tx'
 import { NumberType } from './string-numbers'
-import { BalanceWithType, convertToProtoBalances } from './typeUtils'
+import { Balance, convertToProtoBalances } from './typeUtils'
 
 export function createMsgSetApproval<T extends NumberType>(
   creator: string,
   collectionId: T,
   address: string,
-  balances: BalanceWithType<T>[]
+  balances: Balance<T>[]
 ) {
   const message = new tx.bitbadges.bitbadgeschain.badges.MsgSetApproval({
     creator,

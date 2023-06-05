@@ -16,7 +16,7 @@ import { getDefaultDomainWithChainId } from '../../domain'
 
 import { Chain, Fee, Sender } from '../../common'
 
-export interface MessageMsgExecuteContractCompat {
+export interface MsgExecuteContractCompat {
   sender: string
   contract: string
   msg: string
@@ -28,7 +28,7 @@ export function createTxMsgExecuteContractCompat(
   sender: Sender,
   fee: Fee,
   memo: string,
-  params: MessageMsgExecuteContractCompat,
+  params: MsgExecuteContractCompat,
   domain?: object,
 ) {
   // EIP712

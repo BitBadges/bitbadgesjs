@@ -1,6 +1,7 @@
 import {
   ChallengeSolution,
   NumberType,
+  StringNumber,
   createTransaction,
   createMsgClaimBadge as protoMsgClaimBadge,
 } from 'bitbadgesjs-proto'
@@ -20,16 +21,32 @@ import { getDefaultDomainWithChainId } from '../../domain'
 
 import { Chain, Fee, Sender } from '../../common'
 
-export interface MessageMsgClaimBadge {
+export interface MsgClaimBadge<T extends NumberType> {
   creator: string
-  collectionId: NumberType
-  claimId: NumberType
+  collectionId: T
+  claimId: T
   solutions: ChallengeSolution[]
+}
+
+export type b_MsgClaimBadge = MsgClaimBadge<bigint>
+export type s_MsgClaimBadge = MsgClaimBadge<string>
+export type n_MsgClaimBadge = MsgClaimBadge<number>
+export type d_MsgClaimBadge = MsgClaimBadge<StringNumber>
+
+export function convertMsgClaimBadge<T extends NumberType, U extends NumberType>(
+  msg: MsgClaimBadge<T>,
+  convertFunction: (item: T) => U
+): MsgClaimBadge<U> {
+  return {
+    ...msg,
+    collectionId: convertFunction(msg.collectionId),
+    claimId: convertFunction(msg.claimId),
+  }
 }
 
 export function convertFromProtoToMsgClaimBadge(
   msg: badges.bitbadges.bitbadgeschain.badges.MsgClaimBadge,
-): MessageMsgClaimBadge {
+): b_MsgClaimBadge {
   return {
     creator: msg.creator,
     collectionId: BigInt(msg.collectionId),
@@ -38,12 +55,12 @@ export function convertFromProtoToMsgClaimBadge(
   }
 }
 
-export function createTxMsgClaimBadge(
+export function createTxMsgClaimBadge<T extends NumberType>(
   chain: Chain,
   sender: Sender,
   fee: Fee,
   memo: string,
-  params: MessageMsgClaimBadge,
+  params: MsgClaimBadge<T>,
   domain?: object,
 ) {
   // EIP712

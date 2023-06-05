@@ -1,6 +1,6 @@
-import { BadgeUri } from "bitbadgesjs-proto";
+import { b_BadgeUri } from "bitbadgesjs-proto";
 import { searchIdRangesForId } from "./idRanges";
-import { BitBadgesCollection } from "./types/collections";
+import { b_BitBadgesCollection } from "./types/collections";
 
 /**
  * This is the logic we use to deterministically compute the metadataId for a collection in our indexer.
@@ -13,7 +13,7 @@ import { BitBadgesCollection } from "./types/collections";
  * And so on
  *
  * @param {bigint} badgeId - The badge ID to get the metadata ID for
- * @param {BadgeUri[]} badgeUris - The badge URIs for the collection
+ * @param {b_BadgeUri[]} badgeUris - The badge URIs for the collection
  *
  * @remarks
  * The metadataId for the metadata document is calculated deterministically from badgeUris field
@@ -32,7 +32,7 @@ import { BitBadgesCollection } from "./types/collections";
  *   store metadata in database with metadataId = metadataId and badgeIds = badgeUri.badgeIds
  *  metadataId++
 */
-export const getMetadataIdForBadgeId = (badgeId: bigint, badgeUris: BadgeUri[]) => {
+export const getMetadataIdForBadgeId = (badgeId: bigint, badgeUris: b_BadgeUri[]) => {
   let batchIdx = 1n;
 
   for (const badgeUri of badgeUris) {
@@ -61,9 +61,9 @@ export const getMetadataIdForBadgeId = (badgeId: bigint, badgeUris: BadgeUri[]) 
 /**
  * This returns the max metadataId for a collection
  *
- * @param {BitBadgesCollection} collection - The collection to get the max metadata ID for
+ * @param {b_BitBadgesCollection} collection - The collection to get the max metadata ID for
 */
-export function getMaxMetadataId(collection: BitBadgesCollection) {
+export function getMaxMetadataId(collection: b_BitBadgesCollection) {
   let metadataId = 1n; // Start at 1 because batch 0 is reserved for collection metadata
 
   for (const badgeUri of collection.badgeUris) {
@@ -81,7 +81,7 @@ export function getMaxMetadataId(collection: BitBadgesCollection) {
 }
 
 
-export function getUrisForMetadataIds(metadataIds: bigint[], collectionUri: string, badgeUris: BadgeUri[]) {
+export function getUrisForMetadataIds(metadataIds: bigint[], collectionUri: string, badgeUris: b_BadgeUri[]) {
   let uris: string[] = [];
   if (metadataIds.find((id) => id === 0n)) {
     uris.push(collectionUri);
@@ -111,7 +111,7 @@ export function getUrisForMetadataIds(metadataIds: bigint[], collectionUri: stri
   return uris;
 }
 
-export function getBadgeIdsForMetadataId(metadataId: bigint, badgeUris: BadgeUri[]) {
+export function getBadgeIdsForMetadataId(metadataId: bigint, badgeUris: b_BadgeUri[]) {
   let batchIdx = 1n;
 
   for (const badgeUri of badgeUris) {

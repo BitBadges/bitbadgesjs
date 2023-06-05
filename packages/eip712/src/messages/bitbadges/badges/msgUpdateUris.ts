@@ -1,4 +1,4 @@
-import { BadgeUriWithType, NumberType, convertToProtoBadgeUris } from 'bitbadgesjs-proto'
+import { BadgeUri, NumberType, convertToProtoBadgeUris } from 'bitbadgesjs-proto'
 import { BADGE_URI_TYPES, ID_RANGE_TYPES } from "./eip712HelperTypes"
 
 const MsgUpdateUrisValueType = [
@@ -19,7 +19,7 @@ export function createMsgUpdateUris<T extends NumberType>(
   creator: string,
   collectionId: T,
   collectionUri: string,
-  badgeUris: BadgeUriWithType<T>[],
+  badgeUris: BadgeUri<T>[],
   balancesUri: string,
 ) {
   return {

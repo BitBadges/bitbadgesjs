@@ -1,24 +1,24 @@
 import * as badges from '../../../proto/badges/tx'
 import { NumberType } from './string-numbers'
 import {
-  BadgeSupplyAndAmountWithType,
-  BadgeUriWithType,
-  ClaimWithType,
+  BadgeSupplyAndAmount,
+  BadgeUri,
+  Claim,
   convertToProtoBadgeSupplysAndAmounts,
   convertToProtoBadgeUris,
   convertToProtoClaims,
   convertToProtoTransfers,
-  TransferWithType
+  Transfer
 } from './typeUtils'
 
 export function createMsgMintAndDistributeBadges<T extends NumberType>(
   creator: string,
   collectionId: T,
-  badgeSupplys: BadgeSupplyAndAmountWithType<T>[],
-  transfers: TransferWithType<T>[],
-  claims: ClaimWithType<T>[],
+  badgeSupplys: BadgeSupplyAndAmount<T>[],
+  transfers: Transfer<T>[],
+  claims: Claim<T>[],
   collectionUri: string,
-  badgeUris: BadgeUriWithType<T>[],
+  badgeUris: BadgeUri<T>[],
   balancesUri: string
 ) {
   const message = new badges.bitbadges.bitbadgeschain.badges.MsgMintAndDistributeBadges({

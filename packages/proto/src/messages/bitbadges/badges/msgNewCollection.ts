@@ -1,11 +1,11 @@
 import * as tx from '../../../proto/badges/tx'
 import { NumberType } from './string-numbers'
 import {
-  BadgeSupplyAndAmountWithType,
-  BadgeUriWithType,
-  ClaimWithType,
-  TransferMappingWithType,
-  TransferWithType,
+  BadgeSupplyAndAmount,
+  BadgeUri,
+  Claim,
+  TransferMapping,
+  Transfer,
   convertToProtoBadgeSupplysAndAmounts,
   convertToProtoBadgeUris,
   convertToProtoClaims,
@@ -16,16 +16,16 @@ import {
 export function createMsgNewCollection<T extends NumberType>(
   creator: string,
   collectionUri: string,
-  badgeUris: BadgeUriWithType<T>[],
+  badgeUris: BadgeUri<T>[],
   balancesUri: string,
   bytes: string,
   permissions: T,
-  allowedTransfers: TransferMappingWithType<T>[],
-  managerApprovedTransfers: TransferMappingWithType<T>[],
+  allowedTransfers: TransferMapping<T>[],
+  managerApprovedTransfers: TransferMapping<T>[],
   standard: T,
-  badgeSupplys: BadgeSupplyAndAmountWithType<T>[],
-  transfers: TransferWithType<T>[],
-  claims: ClaimWithType<T>[],
+  badgeSupplys: BadgeSupplyAndAmount<T>[],
+  transfers: Transfer<T>[],
+  claims: Claim<T>[],
 ) {
   const message = new tx.bitbadges.bitbadgeschain.badges.MsgNewCollection({
     creator,

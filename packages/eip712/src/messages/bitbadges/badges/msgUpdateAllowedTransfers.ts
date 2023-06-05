@@ -4,7 +4,7 @@ import {
   TRANSFER_MAPPING_TYPES,
 } from './eip712HelperTypes'
 
-import { NumberType, TransferMappingWithType, convertToProtoTransferMappings } from 'bitbadgesjs-proto'
+import { NumberType, TransferMapping, convertToProtoTransferMappings } from 'bitbadgesjs-proto'
 
 const MsgUpdateAllowedTransfersValueType = [
   { name: 'creator', type: 'string' },
@@ -22,7 +22,7 @@ export const MSG_UPDATE_ALLOWED_TRANSFERS_TYPES = {
 export function createMsgUpdateAllowedTransfers<T extends NumberType>(
   creator: string,
   collectionId: T,
-  allowedTransfers: TransferMappingWithType<T>[],
+  allowedTransfers: TransferMapping<T>[],
 ) {
   return {
     type: 'badges/UpdateAllowedTransfers',

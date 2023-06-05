@@ -1,8 +1,9 @@
 import {
-  BadgeSupplyAndAmountWithType,
-  BadgeUriWithType,
-  ClaimWithType, NumberType,
-  TransferWithType,
+  BadgeSupplyAndAmount,
+  BadgeUri,
+  Claim, NumberType,
+  StringNumber,
+  Transfer,
   convertBadgeSupplyAndAmount,
   convertBadgeUri,
   convertClaim,
@@ -25,20 +26,39 @@ import { getDefaultDomainWithChainId } from '../../domain'
 
 import { Chain, Fee, Sender } from '../../common'
 
-export interface MessageMsgMintAndDistributeBadges {
+export interface MsgMintAndDistributeBadges<T extends NumberType> {
   creator: string
-  collectionId: NumberType
-  badgeSupplys: BadgeSupplyAndAmountWithType<NumberType>[]
-  transfers: TransferWithType<NumberType>[]
-  claims: ClaimWithType<NumberType>[]
+  collectionId: T
+  badgeSupplys: BadgeSupplyAndAmount<T>[]
+  transfers: Transfer<T>[]
+  claims: Claim<T>[]
   collectionUri: string
-  badgeUris: BadgeUriWithType<NumberType>[]
+  badgeUris: BadgeUri<T>[]
   balancesUri: string
+}
+
+export type b_MsgMintAndDistributeBadges = MsgMintAndDistributeBadges<bigint>
+export type s_MsgMintAndDistributeBadges = MsgMintAndDistributeBadges<string>
+export type n_MsgMintAndDistributeBadges = MsgMintAndDistributeBadges<number>
+export type d_MsgMintAndDistributeBadges = MsgMintAndDistributeBadges<StringNumber>
+
+export function convertMsgMintAndDistributeBadges<T extends NumberType, U extends NumberType>(
+  msg: MsgMintAndDistributeBadges<T>,
+  convertFunction: (item: T) => U
+): MsgMintAndDistributeBadges<U> {
+  return {
+    ...msg,
+    collectionId: convertFunction(msg.collectionId),
+    badgeSupplys: msg.badgeSupplys.map((x) => convertBadgeSupplyAndAmount(x, convertFunction)),
+    transfers: msg.transfers.map((x) => convertTransfer(x, convertFunction)),
+    claims: msg.claims.map((x) => convertClaim(x, convertFunction)),
+    badgeUris: msg.badgeUris.map((x) => convertBadgeUri(x, convertFunction)),
+  }
 }
 
 export function convertFromProtoToMsgMintAndDistributeBadges(
   msg: badges.bitbadges.bitbadgeschain.badges.MsgMintAndDistributeBadges,
-): MessageMsgMintAndDistributeBadges {
+): b_MsgMintAndDistributeBadges {
   return {
     creator: msg.creator,
     collectionId: BigInt(msg.collectionId),
@@ -51,12 +71,12 @@ export function convertFromProtoToMsgMintAndDistributeBadges(
   }
 }
 
-export function createTxMsgMintAndDistributeBadges(
+export function createTxMsgMintAndDistributeBadges<T extends NumberType>(
   chain: Chain,
   sender: Sender,
   fee: Fee,
   memo: string,
-  params: MessageMsgMintAndDistributeBadges,
+  params: MsgMintAndDistributeBadges<T>,
   domain?: object,
 ) {
   // EIP712

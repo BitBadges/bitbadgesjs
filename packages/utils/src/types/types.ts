@@ -1,7 +1,7 @@
-import { IdRangeWithType, NumberType, StringNumber, UserBalanceWithType, convertIdRange, convertUserBalance } from "bitbadgesjs-proto";
+import { IdRange, NumberType, StringNumber, UserBalance, convertIdRange, convertUserBalance } from "bitbadgesjs-proto";
 import { CollectionResponse } from "./api";
-import { MetadataWithType, convertMetadata } from "./metadata";
-import { BitBadgesUserInfoWithType, convertBitBadgesUserInfo } from "./users";
+import { Metadata, convertMetadata } from "./metadata";
+import { BitBadgesUserInfo, convertBitBadgesUserInfo } from "./users";
 
 /**
  * Many of the core types are loaded from the bitbadgesjs-proto package.
@@ -18,18 +18,18 @@ export interface CollectionMap {
 /**
  * AccountMap is used to store the user information by address.
  *
- * @typedef {Object} AccountMapWithType
+ * @typedef {Object} AccountMap
  */
-export interface AccountMapWithType<T extends NumberType> {
-  [cosmosAddress: string]: BitBadgesUserInfoWithType<T> | undefined;
+export interface AccountMap<T extends NumberType> {
+  [cosmosAddress: string]: BitBadgesUserInfo<T> | undefined;
 }
 
-export type AccountMap = AccountMapWithType<bigint>;
-export type s_AccountMap = AccountMapWithType<string>;
-export type n_AccountMap = AccountMapWithType<number>;
-export type d_AccountMap = AccountMapWithType<StringNumber>;
+export type b_AccountMap = AccountMap<bigint>;
+export type s_AccountMap = AccountMap<string>;
+export type n_AccountMap = AccountMap<number>;
+export type d_AccountMap = AccountMap<StringNumber>;
 
-export function convertAccountMap<T extends NumberType, U extends NumberType>(item: AccountMapWithType<T>, convertFunction: (item: T) => U): AccountMapWithType<U> {
+export function convertAccountMap<T extends NumberType, U extends NumberType>(item: AccountMap<T>, convertFunction: (item: T) => U): AccountMap<U> {
   return Object.fromEntries(Object.entries(item).map(([key, value]) => {
     return [key, value ? convertBitBadgesUserInfo(value, convertFunction) : undefined];
   }));
@@ -39,18 +39,18 @@ export function convertAccountMap<T extends NumberType, U extends NumberType>(it
 /**
  * BalanceMap is used to store the balances of users by address.
  *
- * @typedef {Object} BalanceMapWithType
+ * @typedef {Object} BalanceMap
  */
-export interface BalancesMapWithType<T extends NumberType> {
-  [cosmosAddress: string]: UserBalanceWithType<T> | undefined;
+export interface BalancesMap<T extends NumberType> {
+  [cosmosAddress: string]: UserBalance<T> | undefined;
 }
 
-export type BalancesMap = BalancesMapWithType<bigint>;
-export type s_BalancesMap = BalancesMapWithType<string>;
-export type n_BalancesMap = BalancesMapWithType<number>;
-export type d_BalancesMap = BalancesMapWithType<StringNumber>;
+export type b_BalancesMap = BalancesMap<bigint>;
+export type s_BalancesMap = BalancesMap<string>;
+export type n_BalancesMap = BalancesMap<number>;
+export type d_BalancesMap = BalancesMap<StringNumber>;
 
-export function convertBalancesMap<T extends NumberType, U extends NumberType>(item: BalancesMapWithType<T>, convertFunction: (item: T) => U): BalancesMapWithType<U> {
+export function convertBalancesMap<T extends NumberType, U extends NumberType>(item: BalancesMap<T>, convertFunction: (item: T) => U): BalancesMap<U> {
   return Object.fromEntries(Object.entries(item).map(([key, value]) => {
     return [key, value ? convertUserBalance(value, convertFunction) : undefined];
   }));
@@ -59,22 +59,22 @@ export function convertBalancesMap<T extends NumberType, U extends NumberType>(i
 /**
  * MetadataMap is used to store the metadata of badges by metadataId.
  *
- * @typedef {Object} MetadataMapWithType
+ * @typedef {Object} MetadataMap
  */
-export interface MetadataMapWithType<T extends NumberType> {
+export interface MetadataMap<T extends NumberType> {
   [metadataId: string]: {
-    badgeIds: IdRangeWithType<T>[],
-    metadata: MetadataWithType<T>,
+    badgeIds: IdRange<T>[],
+    metadata: Metadata<T>,
     uri: string
   } | undefined;
 }
 
-export type MetadataMap = MetadataMapWithType<bigint>;
-export type s_MetadataMap = MetadataMapWithType<string>;
-export type n_MetadataMap = MetadataMapWithType<number>;
-export type d_MetadataMap = MetadataMapWithType<StringNumber>;
+export type b_MetadataMap = MetadataMap<bigint>;
+export type s_MetadataMap = MetadataMap<string>;
+export type n_MetadataMap = MetadataMap<number>;
+export type d_MetadataMap = MetadataMap<StringNumber>;
 
-export function convertMetadataMap<T extends NumberType, U extends NumberType>(item: MetadataMapWithType<T>, convertFunction: (item: T) => U): MetadataMapWithType<U> {
+export function convertMetadataMap<T extends NumberType, U extends NumberType>(item: MetadataMap<T>, convertFunction: (item: T) => U): MetadataMap<U> {
   return Object.fromEntries(Object.entries(item).map(([key, value]) => {
     return [key, value ? {
       badgeIds: value.badgeIds.map((badgeId) => convertIdRange(badgeId, convertFunction)),

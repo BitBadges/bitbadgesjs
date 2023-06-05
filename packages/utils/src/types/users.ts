@@ -1,18 +1,19 @@
 import { NumberType, StringNumber } from "bitbadgesjs-proto"
-import { AnnouncementActivityItemWithType, ReviewActivityItemWithType, TransferActivityItemWithType, convertAnnouncementActivityItem, convertReviewActivityItem, convertTransferActivityItem } from "./activity"
+import { AnnouncementActivityItem, ReviewActivityItem, TransferActivityItem, convertAnnouncementActivityItem, convertReviewActivityItem, convertTransferActivityItem } from "./activity"
 import { PaginationInfo } from "./api"
-import { AccountDocWithType, BalanceDocWithType, ProfileDocWithType, convertAccountDoc, convertBalanceDoc, convertProfileDoc } from "./db"
+import { AccountDoc, BalanceDoc, ProfileDoc, convertAccountDoc, convertBalanceDoc, convertProfileDoc } from "./db"
+import { deepCopy } from "./utils"
 
 /**
  * BitBadgesUserInfo is the type for accounts returned by the BitBadges API. It includes all information about an account.
  *
- * @typedef {Object} BitBadgesUserInfoWithType
- * @extends {ProfileDocWithType}
- * @extends {AccountDocWithType}
+ * @typedef {Object} BitBadgesUserInfo
+ * @extends {ProfileDoc}
+ * @extends {AccountDoc}
  *
  * @property {string} [resolvedName] - The resolved name of the account (e.g. ENS name).
  * @property {string} [avatar] - The avatar of the account.
- * @property {CoinWithType} [balance] - The balance of the account ($BADGE).
+ * @property {Coin} [balance] - The balance of the account ($BADGE).
  * @property {boolean} [airdropped] - Indicates whether the account has claimed their airdrop.
  * @property {BalanceDoc[]} collected - A list of badges that the account has collected. Paginated and fetches and needed.
  * @property {TransferActivityItem[]} activity - A list of transfer activity items for the account. Paginated and fetches and needed.
@@ -26,17 +27,17 @@ import { AccountDocWithType, BalanceDocWithType, ProfileDocWithType, convertAcco
  *
  * For typical fetches, collected, activity, announcements, and reviews will be empty arrays and are to be loaded as needed (pagination will be set to hasMore == true).
  */
-export interface BitBadgesUserInfoWithType<T extends NumberType> extends ProfileDocWithType<T>, AccountDocWithType<T> {
+export interface BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T>, AccountDoc<T> {
   resolvedName?: string
   avatar?: string
 
   airdropped?: boolean
 
   //Dynamically loaded as needed
-  collected: BalanceDocWithType<T>[],
-  activity: TransferActivityItemWithType<T>[],
-  announcements: AnnouncementActivityItemWithType<T>[],
-  reviews: ReviewActivityItemWithType<T>[],
+  collected: BalanceDoc<T>[],
+  activity: TransferActivityItem<T>[],
+  announcements: AnnouncementActivityItem<T>[],
+  reviews: ReviewActivityItem<T>[],
   pagination: {
     activity: PaginationInfo,
     announcements: PaginationInfo,
@@ -45,13 +46,13 @@ export interface BitBadgesUserInfoWithType<T extends NumberType> extends Profile
   },
 }
 
-export type BitBadgesUserInfo = BitBadgesUserInfoWithType<bigint>
-export type s_BitBadgesUserInfo = BitBadgesUserInfoWithType<string>
-export type n_BitBadgesUserInfo = BitBadgesUserInfoWithType<number>
-export type d_BitBadgesUserInfo = BitBadgesUserInfoWithType<StringNumber>
+export type b_BitBadgesUserInfo = BitBadgesUserInfo<bigint>
+export type s_BitBadgesUserInfo = BitBadgesUserInfo<string>
+export type n_BitBadgesUserInfo = BitBadgesUserInfo<number>
+export type d_BitBadgesUserInfo = BitBadgesUserInfo<StringNumber>
 
-export function convertBitBadgesUserInfo<T extends NumberType, U extends NumberType>(item: BitBadgesUserInfoWithType<T>, convertFunction: (item: T) => U): BitBadgesUserInfoWithType<U> {
-  return {
+export function convertBitBadgesUserInfo<T extends NumberType, U extends NumberType>(item: BitBadgesUserInfo<T>, convertFunction: (item: T) => U): BitBadgesUserInfo<U> {
+  return deepCopy({
     ...convertProfileDoc(item, convertFunction),
     ...convertAccountDoc(item, convertFunction),
     resolvedName: item.resolvedName,
@@ -67,5 +68,5 @@ export function convertBitBadgesUserInfo<T extends NumberType, U extends NumberT
       collected: item.pagination.collected,
       reviews: item.pagination.reviews,
     }
-  }
+  })
 }

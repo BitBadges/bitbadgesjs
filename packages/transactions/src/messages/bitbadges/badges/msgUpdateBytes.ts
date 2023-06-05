@@ -2,6 +2,7 @@ import {
   createMsgUpdateBytes as protoMsgUpdateBytes,
   createTransaction,
   NumberType,
+  StringNumber,
 } from 'bitbadgesjs-proto'
 import * as badges from 'bitbadgesjs-proto/dist/proto/badges/tx'
 
@@ -18,15 +19,30 @@ import { getDefaultDomainWithChainId } from '../../domain'
 
 import { Chain, Fee, Sender } from '../../common'
 
-export interface MessageMsgUpdateBytes {
+export interface MsgUpdateBytes<T extends NumberType> {
   creator: string
-  collectionId: NumberType
+  collectionId: T
   bytes: string
+}
+
+export type b_MsgUpdateBytes = MsgUpdateBytes<bigint>
+export type s_MsgUpdateBytes = MsgUpdateBytes<string>
+export type n_MsgUpdateBytes = MsgUpdateBytes<number>
+export type d_MsgUpdateBytes = MsgUpdateBytes<StringNumber>
+
+export function convertMsgUpdateBytes<T extends NumberType, U extends NumberType>(
+  msg: MsgUpdateBytes<T>,
+  convertFunction: (item: T) => U
+): MsgUpdateBytes<U> {
+  return {
+    ...msg,
+    collectionId: convertFunction(msg.collectionId),
+  }
 }
 
 export function convertFromProtoToMsgUpdateBytes(
   protoMsg: badges.bitbadges.bitbadgeschain.badges.MsgUpdateBytes,
-): MessageMsgUpdateBytes {
+): b_MsgUpdateBytes {
   return {
     creator: protoMsg.creator,
     collectionId: BigInt(protoMsg.collectionId),
@@ -34,12 +50,12 @@ export function convertFromProtoToMsgUpdateBytes(
   }
 }
 
-export function createTxMsgUpdateBytes(
+export function createTxMsgUpdateBytes<T extends NumberType>(
   chain: Chain,
   sender: Sender,
   fee: Fee,
   memo: string,
-  params: MessageMsgUpdateBytes,
+  params: MsgUpdateBytes<T>,
   domain?: object,
 ) {
   // EIP712

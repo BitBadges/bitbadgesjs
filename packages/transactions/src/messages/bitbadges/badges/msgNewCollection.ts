@@ -1,10 +1,11 @@
 import {
-  BadgeSupplyAndAmountWithType,
-  BadgeUriWithType,
-  ClaimWithType,
+  BadgeSupplyAndAmount,
+  BadgeUri,
+  Claim,
   NumberType,
-  TransferMappingWithType,
-  TransferWithType,
+  StringNumber,
+  TransferMapping,
+  Transfer,
   convertBadgeSupplyAndAmount,
   convertBadgeUri,
   convertClaim,
@@ -28,24 +29,49 @@ import { getDefaultDomainWithChainId } from '../../domain'
 
 import { Chain, Fee, Sender } from '../../common'
 
-export interface MessageMsgNewCollection {
+export interface MsgNewCollection<T extends NumberType> {
   creator: string
   collectionUri: string
-  badgeUris: BadgeUriWithType<NumberType>[]
+  badgeUris: BadgeUri<T>[]
   balancesUri: string,
-  permissions: NumberType
+  permissions: T
   bytes: string
-  allowedTransfers: TransferMappingWithType<NumberType>[]
-  managerApprovedTransfers: TransferMappingWithType<NumberType>[]
-  standard: NumberType
-  badgeSupplys: BadgeSupplyAndAmountWithType<NumberType>[]
-  transfers: TransferWithType<NumberType>[]
-  claims: ClaimWithType<NumberType>[]
+  allowedTransfers: TransferMapping<T>[]
+  managerApprovedTransfers: TransferMapping<T>[]
+  standard: T
+  badgeSupplys: BadgeSupplyAndAmount<T>[]
+  transfers: Transfer<T>[]
+  claims: Claim<T>[]
+}
+
+export type b_MsgNewCollection = MsgNewCollection<bigint>
+export type s_MsgNewCollection = MsgNewCollection<string>
+export type n_MsgNewCollection = MsgNewCollection<number>
+export type d_MsgNewCollection = MsgNewCollection<StringNumber>
+
+export function convertMsgNewCollection<T extends NumberType, U extends NumberType>(
+  msg: MsgNewCollection<T>,
+  convertFunction: (item: T) => U
+): MsgNewCollection<U> {
+  return {
+    ...msg,
+    collectionUri: msg.collectionUri,
+    badgeUris: msg.badgeUris.map((x) => convertBadgeUri(x, convertFunction)),
+    balancesUri: msg.balancesUri,
+    permissions: convertFunction(msg.permissions),
+    bytes: msg.bytes,
+    allowedTransfers: msg.allowedTransfers.map((x) => convertTransferMapping(x, convertFunction)),
+    managerApprovedTransfers: msg.managerApprovedTransfers.map((x) => convertTransferMapping(x, convertFunction)),
+    standard: convertFunction(msg.standard),
+    badgeSupplys: msg.badgeSupplys.map((x) => convertBadgeSupplyAndAmount(x, convertFunction)),
+    transfers: msg.transfers.map((x) => convertTransfer(x, convertFunction)),
+    claims: msg.claims.map((x) => convertClaim(x, convertFunction)),
+  }
 }
 
 export function convertFromProtoToMsgNewCollection(
   msg: badges.bitbadges.bitbadgeschain.badges.MsgNewCollection,
-): MessageMsgNewCollection {
+): b_MsgNewCollection {
   return {
     creator: msg.creator,
     collectionUri: msg.collectionUri,
@@ -62,12 +88,12 @@ export function convertFromProtoToMsgNewCollection(
   }
 }
 
-export function createTxMsgNewCollection(
+export function createTxMsgNewCollection<T extends NumberType>(
   chain: Chain,
   sender: Sender,
   fee: Fee,
   memo: string,
-  params: MessageMsgNewCollection,
+  params: MsgNewCollection<T>,
   domain?: object,
 ) {
   // EIP712

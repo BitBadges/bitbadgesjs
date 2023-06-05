@@ -1,5 +1,15 @@
 export type NumberType = bigint | number | string;
 
+export function convertNumberType<T extends NumberType, U extends NumberType>(item: T): U {
+  if (typeof item === 'bigint') {
+    return BigInt(item) as U;
+  } else if (typeof item === 'number') {
+    return Number(item) as U;
+  } else {
+    return item.toString() as U;
+  }
+}
+
 /**
  * Struct to represent a numeric value as both a string and a JavaScript number.
  * This is what we will store in the CouchDB database to avoid precision issues with JavaScript numbers.
