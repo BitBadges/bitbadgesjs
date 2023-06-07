@@ -1,4 +1,4 @@
-import { NumberType, StringNumber } from "./string-numbers";
+import { NumberType } from "./string-numbers";
 import { deepCopy } from "./utils";
 
 /**
@@ -12,11 +12,6 @@ export interface CosmosCoin<T extends NumberType> {
   amount: T,
   denom: string,
 }
-
-export type b_CosmosCoin = CosmosCoin<bigint>;
-export type s_CosmosCoin = CosmosCoin<string>;
-export type n_CosmosCoin = CosmosCoin<number>;
-export type d_CosmosCoin = CosmosCoin<StringNumber>;
 
 export function convertCosmosCoin<T extends NumberType, U extends NumberType>(item: CosmosCoin<T>, convertFunction: (item: T) => U): CosmosCoin<U> {
   return deepCopy({

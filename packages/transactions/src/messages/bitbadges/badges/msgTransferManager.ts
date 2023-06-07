@@ -1,18 +1,17 @@
 import {
-  createMsgTransferManager as protoMsgTransferManager,
-  createTransaction,
   NumberType,
-  StringNumber,
+  createTransaction,
+  createMsgTransferManager as protoMsgTransferManager
 } from 'bitbadgesjs-proto'
 import * as badges from 'bitbadgesjs-proto/dist/proto/badges/tx'
 
 import {
+  MSG_TRANSFER_MANAGER_TYPES,
   createEIP712,
+  createMsgTransferManager,
   generateFee,
   generateMessage,
   generateTypes,
-  createMsgTransferManager,
-  MSG_TRANSFER_MANAGER_TYPES,
 } from 'bitbadgesjs-eip712'
 
 import { getDefaultDomainWithChainId } from '../../domain'
@@ -24,11 +23,6 @@ export interface MsgTransferManager<T extends NumberType> {
   collectionId: T
   address: string
 }
-
-export type b_MsgTransferManager = MsgTransferManager<bigint>
-export type s_MsgTransferManager = MsgTransferManager<string>
-export type n_MsgTransferManager = MsgTransferManager<number>
-export type d_MsgTransferManager = MsgTransferManager<StringNumber>
 
 export function convertMsgTransferManager<T extends NumberType, U extends NumberType>(
   msg: MsgTransferManager<T>,
@@ -42,7 +36,7 @@ export function convertMsgTransferManager<T extends NumberType, U extends Number
 
 export function convertFromProtoToMsgTransferManager(
   proto: badges.bitbadges.bitbadgeschain.badges.MsgTransferManager,
-): b_MsgTransferManager {
+): MsgTransferManager<bigint> {
   return {
     creator: proto.creator,
     collectionId: BigInt(proto.collectionId),

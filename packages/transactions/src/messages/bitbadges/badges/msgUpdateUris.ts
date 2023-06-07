@@ -1,7 +1,6 @@
 import {
   BadgeUri,
   NumberType,
-  StringNumber,
   convertBadgeUri,
   createTransaction,
   createMsgUpdateUris as protoMsgUpdateUris
@@ -29,11 +28,6 @@ export interface MsgUpdateUris<T extends NumberType> {
   balancesUri: string
 }
 
-export type b_MsgUpdateUris = MsgUpdateUris<bigint>
-export type s_MsgUpdateUris = MsgUpdateUris<string>
-export type n_MsgUpdateUris = MsgUpdateUris<number>
-export type d_MsgUpdateUris = MsgUpdateUris<StringNumber>
-
 export function convertMsgUpdateUris<T extends NumberType, U extends NumberType>(
   msg: MsgUpdateUris<T>,
   convertFunction: (item: T) => U
@@ -47,7 +41,7 @@ export function convertMsgUpdateUris<T extends NumberType, U extends NumberType>
 
 export function convertFromProtoToMsgUpdateUris(
   msg: badges.bitbadges.bitbadgeschain.badges.MsgUpdateUris,
-): b_MsgUpdateUris {
+): MsgUpdateUris<bigint> {
   return {
     creator: msg.creator,
     collectionId: BigInt(msg.collectionId),

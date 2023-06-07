@@ -12,7 +12,6 @@ export function safeAddUints(a: bigint, b: bigint) {
   return result;
 }
 
-
 /**
  * Safe subtracts two uints and returns an error if the result is invalid.
  *

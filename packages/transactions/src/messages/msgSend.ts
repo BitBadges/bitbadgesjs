@@ -2,7 +2,7 @@ import {
   createMsgSend as protoMsgSend,
   createTransaction,
   NumberType,
-  StringNumber,
+  JSPrimitiveNumberType,
 } from 'bitbadgesjs-proto'
 
 import {
@@ -27,7 +27,7 @@ export interface MsgSend<T extends NumberType> {
 export type b_MsgSend = MsgSend<bigint>
 export type s_MsgSend = MsgSend<string>
 export type n_MsgSend = MsgSend<number>
-export type d_MsgSend = MsgSend<StringNumber>
+export type d_MsgSend = MsgSend<JSPrimitiveNumberType>
 
 export function createTxMsgSend<T extends NumberType>(
   chain: Chain,

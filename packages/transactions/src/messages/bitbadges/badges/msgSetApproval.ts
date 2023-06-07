@@ -1,7 +1,6 @@
 import {
   Balance,
   NumberType,
-  StringNumber,
   convertBalance,
   createTransaction,
   createMsgSetApproval as protoMsgSetApproval
@@ -28,11 +27,6 @@ export interface MsgSetApproval<T extends NumberType> {
   balances: Balance<T>[]
 }
 
-export type b_MsgSetApproval = MsgSetApproval<bigint>
-export type s_MsgSetApproval = MsgSetApproval<string>
-export type n_MsgSetApproval = MsgSetApproval<number>
-export type d_MsgSetApproval = MsgSetApproval<StringNumber>
-
 export function convertMsgSetApproval<T extends NumberType, U extends NumberType>(
   msg: MsgSetApproval<T>,
   convertFunction: (item: T) => U
@@ -46,7 +40,7 @@ export function convertMsgSetApproval<T extends NumberType, U extends NumberType
 
 export function convertFromProtoToMsgSetApproval(
   msg: badges.bitbadges.bitbadgeschain.badges.MsgSetApproval,
-): b_MsgSetApproval {
+): MsgSetApproval<bigint> {
   return {
     creator: msg.creator,
     collectionId: BigInt(msg.collectionId),

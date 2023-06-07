@@ -3,7 +3,7 @@ import * as balances from '../../../proto/badges/balances'
 import * as claims from '../../../proto/badges/claims'
 import * as ranges from '../../../proto/badges/ranges'
 import * as tx from '../../../proto/badges/tx'
-import { NumberType, StringNumber } from './string-numbers'
+import { NumberType } from './string-numbers'
 
 function deepCopy<T>(obj: T): T {
   return JSON.parse(JSON.stringify(obj))
@@ -20,11 +20,6 @@ export interface UserBalance<T extends NumberType> {
   balances: Balance<T>[];
   approvals: Approval<T>[];
 }
-
-export type b_UserBalance = UserBalance<bigint>;
-export type s_UserBalance = UserBalance<string>;
-export type n_UserBalance = UserBalance<number>;
-export type d_UserBalance = UserBalance<StringNumber>;
 
 export function convertUserBalance<T extends NumberType, U extends NumberType>(balance: UserBalance<T>, convertFunction: (item: T) => U): UserBalance<U> {
   return deepCopy({
@@ -45,11 +40,6 @@ export interface Approval<T extends NumberType> {
   address: string;
   balances: Balance<T>[];
 }
-
-export type b_Approval = Approval<bigint>;
-export type s_Approval = Approval<string>;
-export type n_Approval = Approval<number>;
-export type d_Approval = Approval<StringNumber>;
 
 export function convertApproval<T extends NumberType, U extends NumberType>(approval: Approval<T>, convertFunction: (item: T) => U): Approval<U> {
   return deepCopy({
@@ -72,11 +62,6 @@ export interface IdRange<T extends NumberType> {
   end: T;
 }
 
-export type b_IdRange = IdRange<bigint>;
-export type s_IdRange = IdRange<string>;
-export type n_IdRange = IdRange<number>;
-export type d_IdRange = IdRange<StringNumber>;
-
 export function convertIdRange<T extends NumberType, U extends NumberType>(range: IdRange<T>, convertFunction: (item: T) => U): IdRange<U> {
   return deepCopy({
     ...range,
@@ -98,11 +83,6 @@ export interface BadgeUri<T extends NumberType> {
   badgeIds: IdRange<T>[]
 }
 
-export type b_BadgeUri = BadgeUri<bigint>;
-export type s_BadgeUri = BadgeUri<string>;
-export type n_BadgeUri = BadgeUri<number>;
-export type d_BadgeUri = BadgeUri<StringNumber>;
-
 export function convertBadgeUri<T extends NumberType, U extends NumberType>(uri: BadgeUri<T>, convertFunction: (item: T) => U): BadgeUri<U> {
   return deepCopy({
     ...uri,
@@ -123,11 +103,6 @@ export interface BadgeSupplyAndAmount<T extends NumberType> {
   supply: T;
 }
 
-export type b_BadgeSupplyAndAmount = BadgeSupplyAndAmount<bigint>;
-export type s_BadgeSupplyAndAmount = BadgeSupplyAndAmount<string>;
-export type n_BadgeSupplyAndAmount = BadgeSupplyAndAmount<number>;
-export type d_BadgeSupplyAndAmount = BadgeSupplyAndAmount<StringNumber>;
-
 export function convertBadgeSupplyAndAmount<T extends NumberType, U extends NumberType>(supplyAndAmount: BadgeSupplyAndAmount<T>, convertFunction: (item: T) => U): BadgeSupplyAndAmount<U> {
   return deepCopy({
     ...supplyAndAmount,
@@ -147,11 +122,6 @@ export interface Balance<T extends NumberType> {
   amount: T;
   badgeIds: IdRange<T>[]
 }
-
-export type b_Balance = Balance<bigint>;
-export type s_Balance = Balance<string>;
-export type n_Balance = Balance<number>;
-export type d_Balance = Balance<StringNumber>;
 
 export function convertBalance<T extends NumberType, U extends NumberType>(balance: Balance<T>, convertFunction: (item: T) => U): Balance<U> {
   return deepCopy({
@@ -180,11 +150,6 @@ export interface AddressesMapping<T extends NumberType> {
   managerOptions: T;
 }
 
-export type b_AddressesMapping = AddressesMapping<bigint>;
-export type s_AddressesMapping = AddressesMapping<string>;
-export type n_AddressesMapping = AddressesMapping<number>;
-export type d_AddressesMapping = AddressesMapping<StringNumber>;
-
 export function convertAddressesMapping<T extends NumberType, U extends NumberType>(mapping: AddressesMapping<T>, convertFunction: (item: T) => U): AddressesMapping<U> {
   return deepCopy({
     ...mapping,
@@ -203,11 +168,6 @@ export interface TransferMapping<T extends NumberType> {
   to: AddressesMapping<T>
   from: AddressesMapping<T>
 }
-
-export type b_TransferMapping = TransferMapping<bigint>;
-export type s_TransferMapping = TransferMapping<string>;
-export type n_TransferMapping = TransferMapping<number>;
-export type d_TransferMapping = TransferMapping<StringNumber>;
 
 export function convertTransferMapping<T extends NumberType, U extends NumberType>(mapping: TransferMapping<T>, convertFunction: (item: T) => U): TransferMapping<U> {
   return deepCopy({
@@ -229,11 +189,6 @@ export interface Transfer<T extends NumberType> {
   balances: Balance<T>[]
 }
 
-export type b_Transfer = Transfer<bigint>;
-export type s_Transfer = Transfer<string>;
-export type n_Transfer = Transfer<number>;
-export type d_Transfer = Transfer<StringNumber>;
-
 export function convertTransfer<T extends NumberType, U extends NumberType>(transfer: Transfer<T>, convertFunction: (item: T) => U): Transfer<U> {
   return deepCopy({
     ...transfer,
@@ -254,11 +209,6 @@ export interface Challenge<T extends NumberType> {
   root: string
   useCreatorAddressAsLeaf: boolean
 }
-
-export type b_Challenge = Challenge<bigint>;
-export type s_Challenge = Challenge<string>;
-export type n_Challenge = Challenge<number>;
-export type d_Challenge = Challenge<StringNumber>;
 
 export function convertChallenge<T extends NumberType, U extends NumberType>(challenge: Challenge<T>, convertFunction: (item: T) => U): Challenge<U> {
   return deepCopy({
@@ -288,11 +238,6 @@ export interface Claim<T extends NumberType> {
   challenges: Challenge<T>[]
   uri: string
 }
-
-export type b_Claim = Claim<bigint>;
-export type s_Claim = Claim<string>;
-export type n_Claim = Claim<number>;
-export type d_Claim = Claim<StringNumber>;
 
 export function convertClaim<T extends NumberType, U extends NumberType>(claim: Claim<T>, convertFunction: (item: T) => U): Claim<U> {
   return deepCopy({

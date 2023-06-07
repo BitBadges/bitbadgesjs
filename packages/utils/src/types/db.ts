@@ -3,14 +3,26 @@ import MerkleTree from "merkletreejs";
 import { CosmosCoin, convertCosmosCoin } from "./coin";
 import { Metadata, convertMetadata } from "./metadata";
 import { Permissions } from "./permissions";
-import { NumberType, StringNumber } from "./string-numbers";
-import { SupportedChain } from "./types";
+import { NumberType } from "./string-numbers";
+import { BalancesMap, SupportedChain, convertBalancesMap } from "./types";
 import { deepCopy } from "./utils";
+import { DocsCache } from "./indexer";
+import nano from "nano";
+
+export interface DeletableDocument {
+  _deleted?: boolean
+}
+
+export interface CouchDBDetailsExcluded {
+  _id?: undefined,
+  _rev?: undefined,
+  _deleted?: undefined
+}
 
 /**
- * CollectionDoc is the type of document stored in the collections database (see documentation for more info)
+ * CollectionInfoBase is the type of document stored in the collections database (see documentation for more info)
  *
- * @typedef {Object} CollectionDoc
+ * @typedef {Object} CollectionInfoBase
  * @property {NumberType} collectionId - The collection ID
  * @property {string} collectionUri - The URI of the collection
  * @property {BadgeUri[]} badgeUris - The list of badge URIs for this collection and their respective badge IDs
@@ -28,7 +40,7 @@ import { deepCopy } from "./utils";
  * @property {Challenge[]} managerRequests - The list of manager requests for this collection
  * @property {NumberType} createdBlock - The block number when this collection was created
  */
-export interface CollectionDoc<T extends NumberType> {
+export interface CollectionInfoBase<T extends NumberType> {
   collectionId: T;
   collectionUri: string;
   badgeUris: BadgeUri<T>[];
@@ -46,11 +58,8 @@ export interface CollectionDoc<T extends NumberType> {
   managerRequests: string[];
   createdBlock: T;
 }
-
-export type b_CollectionDoc = CollectionDoc<bigint>;
-export type s_CollectionDoc = CollectionDoc<string>;
-export type n_CollectionDoc = CollectionDoc<number>;
-export type d_CollectionDoc = CollectionDoc<StringNumber>;
+export type CollectionDoc<T extends NumberType> = CollectionInfoBase<T> & nano.Document & DeletableDocument;
+export type CollectionInfo<T extends NumberType> = CollectionInfoBase<T> & CouchDBDetailsExcluded;
 
 export function convertCollectionDoc<T extends NumberType, U extends NumberType>(item: CollectionDoc<T>, convertFunction: (item: T) => U): CollectionDoc<U> {
   return deepCopy({
@@ -69,11 +78,11 @@ export function convertCollectionDoc<T extends NumberType, U extends NumberType>
 }
 
 /**
- * AccountDoc represents the account details stored on the blockchain for an address.
+ * AccountInfoBase represents the account details stored on the blockchain for an address.
  * Everything in here should be deterministic and maintained by the blockchain (as opposed to profile).
  * We update this only upon new TXs that update the fields such as a name change or sequence change.
  *
- * @typedef {Object} AccountDoc
+ * @typedef {Object} AccountInfoBase
  * @property {string} publicKey - The public key of the account
  * @property {NumberType} sequence - The sequence of the account. Note we currently do not store sequence in the DB (it is dynamically fetched).
  * @property {SupportedChain} chain - The chain of the account
@@ -81,9 +90,9 @@ export function convertCollectionDoc<T extends NumberType, U extends NumberType>
  * @property {string} address - The address of the account
  * @property {string} [username] - The username of the account (from x/nameservice)
  */
-export interface AccountDoc<T extends NumberType> {
+export interface AccountInfoBase<T extends NumberType> {
   publicKey: string
-  // sequence: bigint | StringNumber //We will add sequence support in the future
+  // sequence: bigint | JSPrimitiveNumberType //We will add sequence support in the future
   chain: SupportedChain
   cosmosAddress: string
   address: string
@@ -91,11 +100,8 @@ export interface AccountDoc<T extends NumberType> {
   sequence?: T
   balance?: CosmosCoin<T>
 }
-
-export type b_AccountDoc = AccountDoc<bigint>
-export type s_AccountDoc = AccountDoc<string>
-export type n_AccountDoc = AccountDoc<number>
-export type d_AccountDoc = AccountDoc<StringNumber>
+export type AccountDoc<T extends NumberType> = AccountInfoBase<T> & nano.Document & DeletableDocument;
+export type AccountInfo<T extends NumberType> = AccountInfoBase<T> & CouchDBDetailsExcluded;
 
 export function convertAccountDoc<T extends NumberType, U extends NumberType>(item: AccountDoc<T>, convertFunction: (item: T) => U): AccountDoc<U> {
   return deepCopy({
@@ -106,10 +112,10 @@ export function convertAccountDoc<T extends NumberType, U extends NumberType>(it
 }
 
 /**
- * ProfileDoc is the type of document stored in the profile database.
+ * ProfileInfoBase is the type of document stored in the profile database.
  * This is used for customizable profile info (not stored on the blockchain).
  *
- * @typedef {Object} ProfileDoc
+ * @typedef {Object} ProfileInfoBase
  * @property {NumberType} seenActivity - The timestamp of the last activity seen for this account (milliseconds since epoch)
  * @property {NumberType} createdAt - The timestamp of when this account was created (milliseconds since epoch)
  *
@@ -125,7 +131,7 @@ export function convertAccountDoc<T extends NumberType, U extends NumberType>(it
  * @see
  * See UserInfo
  */
-export interface ProfileDoc<T extends NumberType> {
+export interface ProfileInfoBase<T extends NumberType> {
   seenActivity?: T;
   createdAt?: T;
 
@@ -136,11 +142,8 @@ export interface ProfileDoc<T extends NumberType> {
   telegram?: string
   readme?: string
 }
-
-export type b_ProfileDoc = ProfileDoc<bigint>
-export type s_ProfileDoc = ProfileDoc<string>
-export type n_ProfileDoc = ProfileDoc<number>
-export type d_ProfileDoc = ProfileDoc<StringNumber>
+export type ProfileDoc<T extends NumberType> = ProfileInfoBase<T> & nano.Document & DeletableDocument;
+export type ProfileInfo<T extends NumberType> = ProfileInfoBase<T> & CouchDBDetailsExcluded;
 
 export function convertProfileDoc<T extends NumberType, U extends NumberType>(item: ProfileDoc<T>, convertFunction: (item: T) => U): ProfileDoc<U> {
   return deepCopy({
@@ -152,13 +155,13 @@ export function convertProfileDoc<T extends NumberType, U extends NumberType>(it
 
 /** STATUS TYPES **/
 export interface IndexerStatus {
-  status: b_DbStatus
+  status: StatusDoc<bigint>
 }
 
 /**
- * QueueDoc represents an item in the queue
+ * QueueInfoBase represents an item in the queue
  *
- * @typedef {Object} QueueDoc
+ * @typedef {Object} QueueInfoBase
  * @property {string} uri - The URI of the metadata to be fetched. If {id} is present, it will be replaced with each individual ID in badgeIds
  * @property {NumberType} collectionId - The collection ID of the metadata to be fetched
  * @property {NumberType} loadBalanceId - The load balance ID of the metadata to be fetched. Only the node with the same load balance ID will fetch this metadata
@@ -168,7 +171,7 @@ export interface IndexerStatus {
  * @property {string} [error] - The error message if this metadata failed to be fetched
  * @property {NumberType} [deletedAt] - The timestamp of when this document was deleted (milliseconds since epoch)
  */
-export interface QueueDoc<T extends NumberType> {
+export interface QueueInfoBase<T extends NumberType> {
   uri: string,
   collectionId: T,
   loadBalanceId: T
@@ -177,12 +180,9 @@ export interface QueueDoc<T extends NumberType> {
   lastFetchedAt?: T
   error?: string
   deletedAt?: T
-}
-
-export type b_QueueDoc = QueueDoc<bigint>
-export type s_QueueDoc = QueueDoc<string>
-export type n_QueueDoc = QueueDoc<number>
-export type d_QueueDoc = QueueDoc<StringNumber>
+};
+export type QueueDoc<T extends NumberType> = QueueInfoBase<T> & nano.Document & DeletableDocument;
+export type QueueInfo<T extends NumberType> = QueueInfoBase<T> & CouchDBDetailsExcluded;
 
 export function convertQueueDoc<T extends NumberType, U extends NumberType>(item: QueueDoc<T>, convertFunction: (item: T) => U): QueueDoc<U> {
   return deepCopy({
@@ -210,11 +210,6 @@ export interface LatestBlockStatus<T extends NumberType> {
   timestamp: T
 }
 
-export type b_LatestBlockStatus = LatestBlockStatus<bigint>
-export type s_LatestBlockStatus = LatestBlockStatus<string>
-export type n_LatestBlockStatus = LatestBlockStatus<number>
-export type d_LatestBlockStatus = LatestBlockStatus<StringNumber>
-
 export function convertLatestBlockStatus<T extends NumberType, U extends NumberType>(item: LatestBlockStatus<T>, convertFunction: (item: T) => U): LatestBlockStatus<U> {
   return deepCopy({
     ...item,
@@ -225,28 +220,25 @@ export function convertLatestBlockStatus<T extends NumberType, U extends NumberT
 }
 
 /**
- * DbStatus represents the status document stored in the database
+ * StatusDoc represents the status document stored in the database
  *
- * @typedef {Object} DbStatus
+ * @typedef {Object} StatusDoc
  * @property {LatestBlockStatus} block - The latest synced block status (i.e. height, txIndex, timestamp)
  * @property {NumberType} nextCollectionId - The next collection ID to be used
  * @property {QueueDoc[]} queue - The queue of metadata to be fetched / handled
  * @property {NumberType} gasPrice - The current gas price based on the average of the lastXGasPrices
  * @property {(NumberType)[]} lastXGasPrices - The last X gas prices
  */
-export interface DbStatus<T extends NumberType> {
+export interface StatusInfoBase<T extends NumberType> {
   block: LatestBlockStatus<T>
   nextCollectionId: T;
   gasPrice: T;
   lastXGasPrices: (T)[];
 }
+export type StatusDoc<T extends NumberType> = StatusInfoBase<T> & nano.Document & DeletableDocument;
+export type StatusInfo<T extends NumberType> = StatusInfoBase<T> & CouchDBDetailsExcluded;
 
-export type b_DbStatus = DbStatus<bigint>
-export type s_DbStatus = DbStatus<string>
-export type n_DbStatus = DbStatus<number>
-export type d_DbStatus = DbStatus<StringNumber>
-
-export function convertDbStatus<T extends NumberType, U extends NumberType>(item: DbStatus<T>, convertFunction: (item: T) => U): DbStatus<U> {
+export function convertStatusDoc<T extends NumberType, U extends NumberType>(item: StatusDoc<T>, convertFunction: (item: T) => U): StatusDoc<U> {
   return deepCopy({
     ...item,
     block: convertLatestBlockStatus(item.block, convertFunction),
@@ -257,16 +249,16 @@ export function convertDbStatus<T extends NumberType, U extends NumberType>(item
 }
 
 /**
- * BalanceDoc is the type of document stored in the balances database
+ * BalanceInfoBase is the type of document stored in the balances database
  * Partitioned database by cosmosAddress (e.g. 1-cosmosx..., 1-cosmosy..., and so on represent the balances documents for collection 1 and user with cosmos address x and y respectively)
  *
- * @typedef {Object} BalanceDoc
+ * @typedef {Object} BalanceInfoBase
  * @extends {UserBalance}
  *
  * @property {NumberType} collectionId - The collection ID
  * @property {string} cosmosAddress - The Cosmos address of the user
  */
-export interface BalanceDoc<T extends NumberType> extends UserBalance<T> {
+export interface BalanceInfoBase<T extends NumberType> extends UserBalance<T> {
   collectionId: T;
   cosmosAddress: string;
   onChain: boolean;
@@ -276,11 +268,8 @@ export interface BalanceDoc<T extends NumberType> extends UserBalance<T> {
   fetchedAt?: T, //Date.now()
   isPermanent?: boolean
 }
-
-export type b_BalanceDoc = BalanceDoc<bigint>
-export type s_BalanceDoc = BalanceDoc<string>
-export type n_BalanceDoc = BalanceDoc<number>
-export type d_BalanceDoc = BalanceDoc<StringNumber>
+export type BalanceDoc<T extends NumberType> = BalanceInfoBase<T> & nano.Document & DeletableDocument;
+export type BalanceInfo<T extends NumberType> = BalanceInfoBase<T> & CouchDBDetailsExcluded;
 
 export function convertBalanceDoc<T extends NumberType, U extends NumberType>(item: BalanceDoc<T>, convertFunction: (item: T) => U): BalanceDoc<U> {
   return deepCopy({
@@ -293,9 +282,9 @@ export function convertBalanceDoc<T extends NumberType, U extends NumberType>(it
 
 
 /**
- * PasswordDoc represents a document for a password or code-based claim.
+ * PasswordInfoBase represents a document for a password or code-based claim.
  *
- * @typedef {Object} PasswordDoc
+ * @typedef {Object} PasswordInfoBase
  * @property {string} password - The password or code
  * @property {string[]} codes - The list of codes
  *
@@ -309,7 +298,7 @@ export function convertBalanceDoc<T extends NumberType, U extends NumberType>(it
  * @property {boolean} isHashed - True if the codes / password are already hashed
  *
  */
-export interface PasswordDoc<T extends NumberType> {
+export interface PasswordInfoBase<T extends NumberType> {
   password: string
   codes: string[]
   isHashed: boolean
@@ -325,11 +314,8 @@ export interface PasswordDoc<T extends NumberType> {
   collectionId: T
   challengeId: T
 }
-
-export type b_PasswordDoc = PasswordDoc<bigint>
-export type s_PasswordDoc = PasswordDoc<string>
-export type n_PasswordDoc = PasswordDoc<number>
-export type d_PasswordDoc = PasswordDoc<StringNumber>
+export type PasswordDoc<T extends NumberType> = PasswordInfoBase<T> & nano.Document & DeletableDocument;
+export type PasswordInfo<T extends NumberType> = PasswordInfoBase<T> & CouchDBDetailsExcluded;
 
 export function convertPasswordDoc<T extends NumberType, U extends NumberType>(item: PasswordDoc<T>, convertFunction: (item: T) => U): PasswordDoc<U> {
   return deepCopy({
@@ -399,11 +385,6 @@ export interface ChallengeDetails<T extends NumberType> {
   numLeaves?: T;
 }
 
-export type b_ChallengeDetails = ChallengeDetails<bigint>
-export type s_ChallengeDetails = ChallengeDetails<string>
-export type n_ChallengeDetails = ChallengeDetails<number>
-export type d_ChallengeDetails = ChallengeDetails<StringNumber>
-
 export function convertChallengeDetails<T extends NumberType, U extends NumberType>(item: ChallengeDetails<T>, convertFunction: (item: T) => U): ChallengeDetails<U> {
   return deepCopy({
     ...item,
@@ -412,10 +393,10 @@ export function convertChallengeDetails<T extends NumberType, U extends NumberTy
 }
 
 /**
- * ClaimDoc is the type of document stored in the claims database
+ * ClaimInfoBase is the type of document stored in the claims database
  * partitioned database by collection ID (e.g. 1-1, 1-2, and so on represent the claims collection 1 for claims with ID 1, 2, etc)
  *
- * @typedef {Object} ClaimDoc
+ * @typedef {Object} ClaimInfoBase
  * @extends {Claim}
  *
  * @property {NumberType} collectionId - The collection ID
@@ -424,7 +405,7 @@ export function convertChallengeDetails<T extends NumberType, U extends NumberTy
  * @property {{[cosmosAddress: string]: number}} claimsPerAddressCount - A running count for the number of claims processed for each address
  * @property {(number)[][]} usedLeafIndices - The used leaf indices for each challenge. A leaf index is the leaf location in Merkle tree
  */
-export interface ClaimDoc<T extends NumberType> extends Claim<T> {
+export interface ClaimInfoBase<T extends NumberType> extends Claim<T> {
   collectionId: T;
   claimId: T;
   totalClaimsProcessed: T;
@@ -433,11 +414,8 @@ export interface ClaimDoc<T extends NumberType> extends Claim<T> {
   },
   usedLeafIndices: (T)[][]; //2D array of used leaf indices by challenge index
 }
-
-export type b_ClaimDoc = ClaimDoc<bigint>
-export type s_ClaimDoc = ClaimDoc<string>
-export type n_ClaimDoc = ClaimDoc<number>
-export type d_ClaimDoc = ClaimDoc<StringNumber>
+export type ClaimDoc<T extends NumberType> = ClaimInfoBase<T> & nano.Document & DeletableDocument;
+export type ClaimInfo<T extends NumberType> = ClaimInfoBase<T> & CouchDBDetailsExcluded;
 
 export function convertClaimDoc<T extends NumberType, U extends NumberType>(item: ClaimDoc<T>, convertFunction: (item: T) => U): ClaimDoc<U> {
   return deepCopy({
@@ -455,27 +433,24 @@ export function convertClaimDoc<T extends NumberType, U extends NumberType>(item
 }
 
 /**
- * ClaimInfo extends claims and provides additional details.
+ * ClaimInfoWithDetails extends claims and provides additional details.
  *
- * @typedef {Object} ClaimInfo
+ * @typedef {Object} ClaimInfoWithDetails
  * @extends {ClaimDoc}
  *
  * @property {ClaimDetails} details - The details of the claim
  */
-export interface ClaimInfo<T extends NumberType> extends ClaimDoc<T> {
-  details: ClaimDetails<T>
+export interface ClaimInfoWithDetails<T extends NumberType> extends ClaimInfoBase<T> {
+  details?: ClaimDetails<T>
 }
 
-export type b_ClaimInfo = ClaimInfo<bigint>
-export type s_ClaimInfo = ClaimInfo<string>
-export type n_ClaimInfo = ClaimInfo<number>
-export type d_ClaimInfo = ClaimInfo<StringNumber>
-
-export function convertClaimInfo<T extends NumberType, U extends NumberType>(item: ClaimInfo<T>, convertFunction: (item: T) => U): ClaimInfo<U> {
+export function convertClaimInfoWithDetails<T extends NumberType, U extends NumberType>(item: ClaimInfoWithDetails<T>, convertFunction: (item: T) => U): ClaimInfoWithDetails<U> {
   return deepCopy({
     ...item,
-    ...convertClaimDoc(item, convertFunction),
-    details: convertClaimDetails(item.details, convertFunction),
+    ...convertClaimDoc({ ...item, _id: '', _rev: '' }, convertFunction),
+    details: item.details ? convertClaimDetails(item.details, convertFunction) : undefined,
+    _id: undefined,
+    _rev: undefined,
   })
 }
 
@@ -500,11 +475,6 @@ export interface ClaimDetails<T extends NumberType> {
   challengeDetails: ChallengeDetails<T>[];
 }
 
-export type b_ClaimDetails = ClaimDetails<bigint>
-export type s_ClaimDetails = ClaimDetails<string>
-export type n_ClaimDetails = ClaimDetails<number>
-export type d_ClaimDetails = ClaimDetails<StringNumber>
-
 export function convertClaimDetails<T extends NumberType, U extends NumberType>(item: ClaimDetails<T>, convertFunction: (item: T) => U): ClaimDetails<U> {
   return deepCopy({
     ...item,
@@ -513,51 +483,79 @@ export function convertClaimDetails<T extends NumberType, U extends NumberType>(
 }
 
 /**
- * FetchDoc is the type of document stored in the fetch database
+ * FetchInfoBase is the type of document stored in the fetch database
  *
  * This represents the returned JSON value from fetching a URI.
  *
- * @typedef {Object} FetchDoc
+ * @typedef {Object} FetchInfoBase
  * @property {Metadata | ClaimDetails} content - The content of the fetch document. Note that we store balances in BALANCES_DB and not here to avoid double storage.
  * @property {NumberType} fetchedAt - The time the document was fetched
  * @property {'Claim' | 'Metadata' | 'Balances'} db - The type of content fetched. This is used for querying purposes
  * @property {boolean} isPermanent - True if the document is permanent (i.e. fetched from a permanent URI like IPFS)
  * @property {string} uri - The URI of the document
  */
-export interface FetchDoc<T extends NumberType> {
-  content?: Metadata<T> | ClaimDetails<T>
+export interface FetchInfoBase<T extends NumberType> {
+  content?: Metadata<T> | ClaimDetails<T> | BalancesMap<T>
   fetchedAt: T, //Date.now()
   db: 'Claim' | 'Metadata' | 'Balances'
   isPermanent: boolean
 }
-
-export type b_FetchDoc = FetchDoc<bigint>
-export type s_FetchDoc = FetchDoc<string>
-export type n_FetchDoc = FetchDoc<number>
-export type d_FetchDoc = FetchDoc<StringNumber>
+export type FetchDoc<T extends NumberType> = FetchInfoBase<T> & nano.Document & DeletableDocument;
+export type FetchInfo<T extends NumberType> = FetchInfoBase<T> & CouchDBDetailsExcluded;
 
 export function convertFetchDoc<T extends NumberType, U extends NumberType>(item: FetchDoc<T>, convertFunction: (item: T) => U): FetchDoc<U> {
   return deepCopy({
     ...item,
-    content: item.db === 'Metadata' ? convertMetadata(item.content as Metadata<T>, convertFunction) : item.db === 'Claim' ? convertClaimDetails(item.content as ClaimDetails<T>, convertFunction) : undefined,
+    content: item.db === 'Metadata' ? convertMetadata(item.content as Metadata<T>, convertFunction) : item.db === 'Claim' ? convertClaimDetails(item.content as ClaimDetails<T>, convertFunction) : convertBalancesMap(item.content as BalancesMap<T>, convertFunction),
     fetchedAt: convertFunction(item.fetchedAt),
   })
 }
 
-export interface RefreshDoc<T extends NumberType> {
+export interface RefreshInfoBase<T extends NumberType> {
   collectionId: T
   refreshRequestTime: T
 }
-
-export type b_RefreshDoc = RefreshDoc<bigint>
-export type s_RefreshDoc = RefreshDoc<string>
-export type n_RefreshDoc = RefreshDoc<number>
-export type d_RefreshDoc = RefreshDoc<StringNumber>
+export type RefreshDoc<T extends NumberType> = RefreshInfoBase<T> & nano.Document & DeletableDocument;
+export type RefreshInfo<T extends NumberType> = RefreshInfoBase<T> & CouchDBDetailsExcluded;
 
 export function convertRefreshDoc<T extends NumberType, U extends NumberType>(item: RefreshDoc<T>, convertFunction: (item: T) => U): RefreshDoc<U> {
   return deepCopy({
     ...item,
     collectionId: convertFunction(item.collectionId),
     refreshRequestTime: convertFunction(item.refreshRequestTime),
+  })
+}
+
+export interface ErrorDoc {
+  error: string
+  function: string
+  docs?: DocsCache
+}
+
+export interface AirdropInfoBase<T extends NumberType> {
+  airdropped: boolean
+  timestamp: T
+  hash?: string
+}
+export type AirdropDoc<T extends NumberType> = AirdropInfoBase<T> & nano.Document & DeletableDocument;
+export type AirdropInfo<T extends NumberType> = AirdropInfoBase<T> & CouchDBDetailsExcluded;
+
+export function convertAirdropDoc<T extends NumberType, U extends NumberType>(item: AirdropDoc<T>, convertFunction: (item: T) => U): AirdropDoc<U> {
+  return deepCopy({
+    ...item,
+    timestamp: convertFunction(item.timestamp),
+  })
+}
+
+export interface IPFSTotalsInfoBase<T extends NumberType> {
+  kbUploaded: T
+}
+export type IPFSTotalsDoc<T extends NumberType> = IPFSTotalsInfoBase<T> & nano.Document & DeletableDocument;
+export type IPFSTotalsInfo<T extends NumberType> = IPFSTotalsInfoBase<T> & CouchDBDetailsExcluded;
+
+export function convertIPFSTotalsDoc<T extends NumberType, U extends NumberType>(item: IPFSTotalsDoc<T>, convertFunction: (item: T) => U): IPFSTotalsDoc<U> {
+  return deepCopy({
+    ...item,
+    kbUploaded: convertFunction(item.kbUploaded),
   })
 }

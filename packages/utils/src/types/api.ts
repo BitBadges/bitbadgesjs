@@ -1,12 +1,13 @@
 import { DeliverTxResponse } from "@cosmjs/stargate"
 import { ChallengeParams } from "blockin"
-import { AnnouncementActivityItem, ReviewActivityItem, TransferActivityItem } from "./activity"
+import { AnnouncementInfo, ReviewInfo, TransferActivityInfo } from "./activity"
 import { BitBadgesCollection } from "./collections"
-import { BalanceDoc, DbStatus, LeavesDetails } from "./db"
+import { BalanceInfo, LeavesDetails, StatusInfo } from "./db"
 import { Metadata } from "./metadata"
+import { JSPrimitiveNumberType } from "./string-numbers"
 import { BalancesMap, MetadataMap, SupportedChain } from "./types"
 import { BitBadgesUserInfo } from "./users"
-import { NumberType } from "bitbadgesjs-proto"
+import { BroadcastPostBody } from "bitbadgesjs-provider"
 
 /**
  * If an error occurs, the response will be an ErrorResponse.
@@ -22,11 +23,13 @@ export interface ErrorResponse {
   error?: any;
   //UX-friendly error message that can be displayed to the user. Always present if error.
   message: string;
+  //Authentication error. Present if the user is not authenticated.
+  unauthorized?: boolean;
 }
 
 export interface GetStatusRouteRequestBody { }
 export interface GetStatusRouteSuccessResponse {
-  status: DbStatus<string>;
+  status: StatusInfo<string>;
 }
 export type GetStatusRouteResponse = ErrorResponse | GetStatusRouteSuccessResponse;
 
@@ -38,14 +41,25 @@ export interface GetSearchRouteSuccessResponse {
 }
 export type GetSearchRouteResponse = ErrorResponse | GetSearchRouteSuccessResponse;
 
-export interface GetCollectionBatchRouteRequestBody { }
+export interface GetCollectionBatchRouteRequestBody {
+  collectionIds: JSPrimitiveNumberType[],
+  startMetadataIds: JSPrimitiveNumberType[],
+}
 export interface GetCollectionBatchRouteSuccessResponse {
-  collections: BitBadgesCollection<string>[],
+  collections: BitBadgesCollection<string>[]
 }
 export type GetCollectionBatchRouteResponse = ErrorResponse | GetCollectionBatchRouteSuccessResponse;
 
-export interface GetCollectionByIdRouteSuccessResponse {
-  startMetadataId?: NumberType,
+export interface CollectionResponsePagination {
+  activity: PaginationInfo
+  announcements: PaginationInfo
+  reviews: PaginationInfo,
+  balances: PaginationInfo,
+  claims: PaginationInfo,
+}
+
+export interface GetCollectionByIdRouteRequestBody {
+  startMetadataId?: JSPrimitiveNumberType,
   activityBookmark?: string,
   announcementsBookmark?: string,
   reviewsBookmark?: string,
@@ -54,13 +68,6 @@ export interface GetCollectionByIdRouteSuccessResponse {
 }
 export interface GetCollectionRouteSuccessResponse {
   collection: BitBadgesCollection<string>,
-  pagination: {
-    activity: PaginationInfo
-    announcements: PaginationInfo
-    reviews: PaginationInfo,
-    balances: PaginationInfo,
-    claims: PaginationInfo,
-  },
 }
 export type GetCollectionQueryRouteResponse = ErrorResponse | GetCollectionRouteSuccessResponse;
 
@@ -68,22 +75,22 @@ export interface GetOwnersForCollectionRouteRequestBody {
   bookmark?: string,
 }
 export interface GetOwnersForCollectionRouteSuccessResponse {
-  balances: BalanceDoc<string>[],
+  balances: BalanceInfo<string>[],
 }
 export type GetOwnersForCollectionRouteResponse = ErrorResponse | GetOwnersForCollectionRouteSuccessResponse;
 
 export interface GetMetadataForCollectionRouteRequestBody {
-  startMetadataId?: NumberType,
+  startMetadataId?: JSPrimitiveNumberType,
 }
 export interface GetMetadataForCollectionRouteSuccessResponse {
-  collectionMetadata: Metadata<string>,
-  badgeMetadata: MetadataMap<string>,
+  collectionMetadata?: Metadata<string>,
+  badgeMetadata?: MetadataMap<string>,
 }
 export type GetMetadataForCollectionRouteResponse = ErrorResponse | GetMetadataForCollectionRouteSuccessResponse;
 
 export interface GetBadgeBalanceRouteRequestBody { }
 export interface GetBadgeBalanceRouteSuccessResponse {
-  balance: BalanceDoc<string>,
+  balance: BalanceInfo<string>,
 }
 export type GetBadgeBalanceRouteResponse = ErrorResponse | GetBadgeBalanceRouteSuccessResponse;
 
@@ -91,7 +98,7 @@ export interface GetBadgeActivityRouteRequestBody {
   bookmark?: string,
 }
 export interface GetBadgeActivityRouteSuccessResponse {
-  activity: TransferActivityItem<string>[],
+  activity: TransferActivityInfo<string>[],
   pagination: {
     activity: PaginationInfo
   },
@@ -127,7 +134,7 @@ export type AddAnnouncementRouteResponse = ErrorResponse | AddAnnouncementRouteS
 
 export interface AddReviewForCollectionRouteRequestBody {
   review: string, //1 to 2048 characters
-  stars: NumberType, //1 to 5
+  stars: JSPrimitiveNumberType, //1 to 5
 }
 export interface AddReviewForCollectionRouteSuccessResponse {
   success: boolean
@@ -152,13 +159,14 @@ export interface GetPortfolioInfoRouteRequestBody {
   announcementsBookmark?: string,
   reviewsBookmark?: string,
   balancesBookmark?: string,
+  collectedBookmark?: string,
 }
 
 export interface GetPortfolioInfoRouteSuccessResponse {
-  collected: BalanceDoc<string>[],
-  activity: TransferActivityItem<string>[],
-  announcements: AnnouncementActivityItem<string>[],
-  reviews: ReviewActivityItem<string>[],
+  collected: BalanceInfo<string>[],
+  activity: TransferActivityInfo<string>[],
+  announcements: AnnouncementInfo<string>[],
+  reviews: ReviewInfo<string>[],
   pagination: {
     activity: PaginationInfo,
     announcements: PaginationInfo,
@@ -173,8 +181,8 @@ export interface GetActivityRouteRequestBody {
   announcementsBookmark?: string,
 }
 export interface GetActivityForUserRouteSuccessResponse {
-  activity: TransferActivityItem<string>[],
-  announcements: AnnouncementActivityItem<string>[],
+  activity: TransferActivityInfo<string>[],
+  announcements: AnnouncementInfo<string>[],
   pagination: {
     activity: PaginationInfo,
     announcements: PaginationInfo,
@@ -184,7 +192,7 @@ export type GetActivityForUserRouteResponse = ErrorResponse | GetActivityForUser
 
 export interface AddReviewForUserRouteRequestBody {
   review: string, //1 to 2048 characters
-  stars: NumberType, //1 to 5
+  stars: JSPrimitiveNumberType, //1 to 5
 }
 export interface AddReviewForUserRouteSuccessResponse {
   success: boolean
@@ -196,7 +204,7 @@ export interface UpdateAccountInfoRouteRequestBody {
   twitter?: string,
   github?: string,
   telegram?: string,
-  seenActivity?: NumberType,
+  seenActivity?: JSPrimitiveNumberType,
   readme?: string,
 }
 export interface UpdateAccountInfoRouteSuccessResponse {
@@ -205,9 +213,9 @@ export interface UpdateAccountInfoRouteSuccessResponse {
 export type UpdateAccountInfoRouteResponse = ErrorResponse | UpdateAccountInfoRouteSuccessResponse;
 
 export interface AddMetadataToIpfsRouteRequestBody {
-  collectionMetadata?: Metadata<string>,
-  badgeMetadata?: MetadataMap<string>,
-  balances?: BalancesMap<string>,
+  collectionMetadata?: Metadata<JSPrimitiveNumberType>,
+  badgeMetadata?: MetadataMap<JSPrimitiveNumberType>,
+  balances?: BalancesMap<JSPrimitiveNumberType>,
 }
 export interface AddMetadataToIpfsRouteSuccessResponse {
   cid: string,
@@ -215,7 +223,7 @@ export interface AddMetadataToIpfsRouteSuccessResponse {
 }
 export type AddMetadataToIpfsRouteResponse = ErrorResponse | AddMetadataToIpfsRouteSuccessResponse;
 
-export interface AddClaimToIpfsRouteSuccessResponse {
+export interface AddClaimToIpfsRouteRequestBody {
   name: string,
   description: string,
   leavesDetails: LeavesDetails,
@@ -230,7 +238,7 @@ export type AddClaimToIpfsRouteResponse = ErrorResponse | AddClaimToIpfsRouteSuc
 export interface GetChallengeRouteRequestBody {
   chain: SupportedChain,
   address: string,
-  hours?: NumberType,
+  hours?: JSPrimitiveNumberType,
 }
 export interface GetChallengeRouteSuccessResponse {
   nonce: string,
@@ -262,17 +270,13 @@ export interface GetBrowseCollectionsRouteSuccessResponse {
 }
 export type GetBrowseCollectionsRouteResponse = ErrorResponse | GetBrowseCollectionsRouteSuccessResponse;
 
-export interface BroadcastTxRouteRequestBody {
-  //TODO: Raw TX Bytes
-}
+export type BroadcastTxRouteRequestBody = BroadcastPostBody;
 export interface BroadcastTxRouteSuccessResponse {
   //TODO:`
 }
 export type BroadcastTxRouteResponse = ErrorResponse | BroadcastTxRouteSuccessResponse;
 
-export interface SimulateTxRouteRequestBody {
-  //TODO: Raw TX Bytes
-}
+export type SimulateTxRouteRequestBody = BroadcastPostBody;
 export interface SimulateTxRouteSuccessResponse {
   //TODO:
 }
@@ -286,6 +290,7 @@ export interface FetchMetadataDirectlyRouteSuccessResponse {
 }
 export type FetchMetadataDirectlyRouteResponse = ErrorResponse | FetchMetadataDirectlyRouteSuccessResponse;
 
+export type SendTokensFromFaucetRouteRequestBody = {};
 export type SendTokensFromFaucetRouteResponse = DeliverTxResponse | ErrorResponse;
 
 /**

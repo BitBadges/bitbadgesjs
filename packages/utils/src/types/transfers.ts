@@ -1,4 +1,4 @@
-import { StringNumber, Transfer, convertTransfer } from "bitbadgesjs-proto";
+import { Transfer, convertTransfer } from "bitbadgesjs-proto";
 import { NumberType } from "./string-numbers";
 import { deepCopy } from "./utils";
 
@@ -24,11 +24,6 @@ export interface TransferWithIncrements<T extends NumberType> extends Transfer<T
   toAddressesLength?: T; //This takes priority over toAddresses.length (used when you don't have exact addresses but have a length (i.e. number of codes))
   incrementIdsBy?: T;
 }
-
-export type b_TransferWithIncrements = TransferWithIncrements<bigint>;
-export type s_TransferWithIncrements = TransferWithIncrements<string>;
-export type n_TransferWithIncrements = TransferWithIncrements<number>;
-export type d_TransferWithIncrements = TransferWithIncrements<StringNumber>;
 
 export function convertTransferWithIncrements<T extends NumberType, U extends NumberType>(item: TransferWithIncrements<T>, convertFunction: (item: T) => U): TransferWithIncrements<U> {
   return deepCopy({

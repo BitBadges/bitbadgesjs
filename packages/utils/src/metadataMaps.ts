@@ -1,10 +1,10 @@
-import { b_IdRange } from "bitbadgesjs-proto";
+import { IdRange } from "bitbadgesjs-proto";
 import { insertRangeToIdRanges, removeIdsFromIdRange, searchIdRangesForId } from "./idRanges";
-import { b_Metadata } from "./types/metadata";
-import { b_MetadataMap } from "./types/types";
+import { Metadata } from "./types/metadata";
+import { MetadataMap } from "./types/types";
 
 /**
- * To keep track of metadata for badges and load it dynamically, we store it in a map: b_MetadataMap.
+ * To keep track of metadata for badges and load it dynamically, we store it in a map: MetadataMap<bigint>.
  *
  * The keys are the metadataId (see metadataIds for how these are calculated).
  * The values are { metadata, uri, badgeIds } where this object represents the metadata fetched by a uri
@@ -28,12 +28,12 @@ import { b_MetadataMap } from "./types/types";
  *
  * Note that this function does not mutate the metadataMap, but instead returns a new one.
  *
- * @param {b_MetadataMap} currMetadataMap - The current metadata map
- * @param {b_Metadata} metadata - The metadata to update the map with
- * @param {b_IdRange} badgeIds - The badge IDs that correspond to the metadata
+ * @param {MetadataMap<bigint>} currMetadataMap - The current metadata map
+ * @param {Metadata<bigint>} metadata - The metadata to update the map with
+ * @param {IdRange<bigint>} badgeIds - The badge IDs that correspond to the metadata
  * @param {string} uri - The URI that the metadata was fetched from
  */
-export const updateMetadataMap = (currMetadataMap: b_MetadataMap, metadata: b_Metadata, badgeIds: b_IdRange, uri: string) => {
+export const updateMetadataMap = (currMetadataMap: MetadataMap<bigint>, metadata: Metadata<bigint>, badgeIds: IdRange<bigint>, uri: string) => {
   let currentMetadata = metadata;
 
   let keys = Object.keys(currMetadataMap);
@@ -94,16 +94,16 @@ export const updateMetadataMap = (currMetadataMap: b_MetadataMap, metadata: b_Me
 
 
 /**
- * Returns the { metadata, uri, badgeIds } metadata object from the MetadataMap for a specific badgeId.
+ * Returns the { metadata, uri, badgeIds } metadata object from the MetadataMap<bigint> for a specific badgeId.
  *
- * If the badgeId does not exist in the MetadataMap, returns undefined.
+ * If the badgeId does not exist in the MetadataMap<bigint>, returns undefined.
  *
  * @param {bigint} badgeId - The badge ID to search for
- * @param {b_MetadataMap} metadataMap - The metadata map to search in
+ * @param {MetadataMap<bigint>} metadataMap - The metadata map to search in
  *
- * @returns {b_MetadataMapObj | undefined} - The metadata object for the badgeId, or undefined if it does not exist
+ * @returns {MetadataMapObj | undefined} - The metadata object for the badgeId, or undefined if it does not exist
  */
-export function getMetadataMapObjForBadgeId(badgeId: bigint, metadataMap: b_MetadataMap) {
+export function getMetadataMapObjForBadgeId(badgeId: bigint, metadataMap: MetadataMap<bigint>) {
   let currentMetadata = undefined;
   for (const val of Object.values(metadataMap)) {
     if (!val) continue; //For TS
@@ -118,16 +118,16 @@ export function getMetadataMapObjForBadgeId(badgeId: bigint, metadataMap: b_Meta
 }
 
 /**
- * Returns the metadata from the MetadataMap for a specific badgeId.
+ * Returns the metadata from the MetadataMap<bigint> for a specific badgeId.
  *
- * If the badgeId does not exist in the MetadataMap, returns undefined.
+ * If the badgeId does not exist in the MetadataMap<bigint>, returns undefined.
  *
  * @param {bigint} badgeId - The badge ID to search for
- * @param {b_MetadataMap} metadataMap - The metadata map to search in
+ * @param {MetadataMap<bigint>} metadataMap - The metadata map to search in
  *
- * @returns {Metadata | undefined} - The metadata for the badgeId, or undefined if it does not exist
+ * @returns {Metadata<bigint> | undefined} - The metadata for the badgeId, or undefined if it does not exist
  */
-export function getMetadataForBadgeId(badgeId: bigint, metadataMap: b_MetadataMap) {
+export function getMetadataForBadgeId(badgeId: bigint, metadataMap: MetadataMap<bigint>) {
   return getMetadataMapObjForBadgeId(badgeId, metadataMap)?.metadata;
 }
 
@@ -146,18 +146,18 @@ export function bigIntMin(a: bigint, b: bigint): bigint {
  * @example
  * Use this function to set the "name" property of all badges to "test" via setMetadataPropertyForAllMapEntries(metadataMap, badgeIds, uri, "name", "test")
  *
- * @param {b_MetadataMap} metadataMap - The metadata map to update
- * @param {b_IdRange[]} badgeIds - The badge IDs to update
+ * @param {MetadataMap<bigint>} metadataMap - The metadata map to update
+ * @param {IdRange<bigint>[]} badgeIds - The badge IDs to update
  * @param {string} uri - The URI that the metadata was fetched from (can use a placeholder like "Manual" and update it later)
  * @param {string} key - The key to update
  * @param {any} value - The value to update
  */
-export const setMetadataPropertyForAllMapEntries = (metadataMap: b_MetadataMap, badgeIds: b_IdRange[], uri: string, key: string, value: any) => {
+export const setMetadataPropertyForAllMapEntries = (metadataMap: MetadataMap<bigint>, badgeIds: IdRange<bigint>[], uri: string, key: string, value: any) => {
   for (const badgeIdRange of badgeIds) {
 
     //Otherwise, we are updating a specific key value pair for each
     for (let id = badgeIdRange.start; id <= badgeIdRange.end; id++) {
-      let newMetadata = {} as b_Metadata;
+      let newMetadata = {} as Metadata<bigint>;
       const values = Object.values(metadataMap);
       const idRangeToUpdate = { start: id, end: id };
 

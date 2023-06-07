@@ -1,8 +1,7 @@
 import {
   NumberType,
-  StringNumber,
   createTransaction,
-  createMsgDeleteCollection as protoMsgDeleteCollection,
+  createMsgDeleteCollection as protoMsgDeleteCollection
 } from 'bitbadgesjs-proto'
 
 import {
@@ -16,18 +15,13 @@ import {
 
 import { getDefaultDomainWithChainId } from '../../domain'
 
-import { Chain, Fee, Sender } from '../../common'
 import * as badges from 'bitbadgesjs-proto/dist/proto/badges/tx'
+import { Chain, Fee, Sender } from '../../common'
 
 export interface MsgDeleteCollection<T extends NumberType> {
   creator: string
   collectionId: T
 }
-
-export type b_MsgDeleteCollection = MsgDeleteCollection<bigint>
-export type s_MsgDeleteCollection = MsgDeleteCollection<string>
-export type n_MsgDeleteCollection = MsgDeleteCollection<number>
-export type d_MsgDeleteCollection = MsgDeleteCollection<StringNumber>
 
 export function convertMsgDeleteCollection<T extends NumberType, U extends NumberType>(
   msg: MsgDeleteCollection<T>,
@@ -41,7 +35,7 @@ export function convertMsgDeleteCollection<T extends NumberType, U extends Numbe
 
 export function convertFromProtoToMsgDeleteCollection(
   msg: badges.bitbadges.bitbadgeschain.badges.MsgDeleteCollection,
-): b_MsgDeleteCollection {
+): MsgDeleteCollection<bigint> {
   return {
     creator: msg.creator,
     collectionId: BigInt(msg.collectionId),

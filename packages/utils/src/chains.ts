@@ -1,10 +1,10 @@
 import { COSMOS, ethToCosmos } from "bitbadgesjs-address-converter";
 import { SupportedChain } from "./types/types";
 import { ethers } from "ethers";
-import { b_BitBadgesUserInfo, s_BitBadgesUserInfo } from "./types/users";
+import { BitBadgesUserInfo, convertBitBadgesUserInfo } from "./types/users";
 
 
-export const MINT_ACCOUNT: b_BitBadgesUserInfo = {
+export const MINT_ACCOUNT: BitBadgesUserInfo<bigint> = {
   cosmosAddress: 'Mint',
   address: 'Mint',
   chain: SupportedChain.COSMOS,
@@ -36,71 +36,8 @@ export const MINT_ACCOUNT: b_BitBadgesUserInfo = {
   }
 }
 
-export const s_MINT_ACCOUNT: s_BitBadgesUserInfo = {
-  cosmosAddress: 'Mint',
-  address: 'Mint',
-  chain: SupportedChain.COSMOS,
-  publicKey: '',
-  sequence: "0",
-  collected: [],
-  activity: [],
-  announcements: [],
-  reviews: [],
-  seenActivity: "0",
-  createdAt: "0",
-  pagination: {
-    activity: {
-      bookmark: '',
-      hasMore: false
-    },
-    announcements: {
-      bookmark: '',
-      hasMore: false
-    },
-    collected: {
-      bookmark: '',
-      hasMore: false
-    },
-    reviews: {
-      bookmark: '',
-      hasMore: false
-    },
-  }
-}
 
-export const s_BLANK_USER_INFO: s_BitBadgesUserInfo = {
-  cosmosAddress: '',
-  address: '',
-  chain: SupportedChain.UNKNOWN,
-  publicKey: '',
-  sequence: "0",
-  collected: [],
-  activity: [],
-  announcements: [],
-  reviews: [],
-  seenActivity: "0",
-  createdAt: "0",
-  pagination: {
-    activity: {
-      bookmark: '',
-      hasMore: false
-    },
-    announcements: {
-      bookmark: '',
-      hasMore: false
-    },
-    collected: {
-      bookmark: '',
-      hasMore: false
-    },
-    reviews: {
-      bookmark: '',
-      hasMore: false
-    },
-  }
-}
-
-export const BLANK_USER_INFO: b_BitBadgesUserInfo = {
+export const BLANK_USER_INFO: BitBadgesUserInfo<bigint> = {
   cosmosAddress: '',
   address: '',
   chain: SupportedChain.UNKNOWN,
@@ -131,6 +68,11 @@ export const BLANK_USER_INFO: b_BitBadgesUserInfo = {
     },
   }
 }
+
+
+export const s_MINT_ACCOUNT: BitBadgesUserInfo<string> = convertBitBadgesUserInfo(JSON.parse(JSON.stringify(MINT_ACCOUNT)), (x) => x.toString());
+
+export const s_BLANK_USER_INFO: BitBadgesUserInfo<string> = convertBitBadgesUserInfo(JSON.parse(JSON.stringify(BLANK_USER_INFO)), (x) => x.toString());
 
 
 
@@ -140,7 +82,7 @@ export const BLANK_USER_INFO: b_BitBadgesUserInfo = {
  *
  * @param {string} address - The address to convert
  */
-export function convertFromS_CosmosAddress(address: string) {
+export function convertToCosmosAddress(address: string) {
   let bech32Address = '';
   try {
     COSMOS.decoder(address);

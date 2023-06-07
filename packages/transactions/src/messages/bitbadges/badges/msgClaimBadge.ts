@@ -1,9 +1,8 @@
 import {
   ChallengeSolution,
   NumberType,
-  StringNumber,
   createTransaction,
-  createMsgClaimBadge as protoMsgClaimBadge,
+  createMsgClaimBadge as protoMsgClaimBadge
 } from 'bitbadgesjs-proto'
 
 import * as badges from 'bitbadgesjs-proto/dist/proto/badges/tx'
@@ -28,11 +27,6 @@ export interface MsgClaimBadge<T extends NumberType> {
   solutions: ChallengeSolution[]
 }
 
-export type b_MsgClaimBadge = MsgClaimBadge<bigint>
-export type s_MsgClaimBadge = MsgClaimBadge<string>
-export type n_MsgClaimBadge = MsgClaimBadge<number>
-export type d_MsgClaimBadge = MsgClaimBadge<StringNumber>
-
 export function convertMsgClaimBadge<T extends NumberType, U extends NumberType>(
   msg: MsgClaimBadge<T>,
   convertFunction: (item: T) => U
@@ -46,7 +40,7 @@ export function convertMsgClaimBadge<T extends NumberType, U extends NumberType>
 
 export function convertFromProtoToMsgClaimBadge(
   msg: badges.bitbadges.bitbadgeschain.badges.MsgClaimBadge,
-): b_MsgClaimBadge {
+): MsgClaimBadge<bigint> {
   return {
     creator: msg.creator,
     collectionId: BigInt(msg.collectionId),

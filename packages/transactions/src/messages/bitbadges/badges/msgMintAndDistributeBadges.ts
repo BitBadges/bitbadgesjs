@@ -2,7 +2,6 @@ import {
   BadgeSupplyAndAmount,
   BadgeUri,
   Claim, NumberType,
-  StringNumber,
   Transfer,
   convertBadgeSupplyAndAmount,
   convertBadgeUri,
@@ -37,11 +36,6 @@ export interface MsgMintAndDistributeBadges<T extends NumberType> {
   balancesUri: string
 }
 
-export type b_MsgMintAndDistributeBadges = MsgMintAndDistributeBadges<bigint>
-export type s_MsgMintAndDistributeBadges = MsgMintAndDistributeBadges<string>
-export type n_MsgMintAndDistributeBadges = MsgMintAndDistributeBadges<number>
-export type d_MsgMintAndDistributeBadges = MsgMintAndDistributeBadges<StringNumber>
-
 export function convertMsgMintAndDistributeBadges<T extends NumberType, U extends NumberType>(
   msg: MsgMintAndDistributeBadges<T>,
   convertFunction: (item: T) => U
@@ -58,7 +52,7 @@ export function convertMsgMintAndDistributeBadges<T extends NumberType, U extend
 
 export function convertFromProtoToMsgMintAndDistributeBadges(
   msg: badges.bitbadges.bitbadgeschain.badges.MsgMintAndDistributeBadges,
-): b_MsgMintAndDistributeBadges {
+): MsgMintAndDistributeBadges<bigint> {
   return {
     creator: msg.creator,
     collectionId: BigInt(msg.collectionId),

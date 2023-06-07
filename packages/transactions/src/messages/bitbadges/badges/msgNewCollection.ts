@@ -3,9 +3,8 @@ import {
   BadgeUri,
   Claim,
   NumberType,
-  StringNumber,
-  TransferMapping,
   Transfer,
+  TransferMapping,
   convertBadgeSupplyAndAmount,
   convertBadgeUri,
   convertClaim,
@@ -44,11 +43,6 @@ export interface MsgNewCollection<T extends NumberType> {
   claims: Claim<T>[]
 }
 
-export type b_MsgNewCollection = MsgNewCollection<bigint>
-export type s_MsgNewCollection = MsgNewCollection<string>
-export type n_MsgNewCollection = MsgNewCollection<number>
-export type d_MsgNewCollection = MsgNewCollection<StringNumber>
-
 export function convertMsgNewCollection<T extends NumberType, U extends NumberType>(
   msg: MsgNewCollection<T>,
   convertFunction: (item: T) => U
@@ -71,7 +65,7 @@ export function convertMsgNewCollection<T extends NumberType, U extends NumberTy
 
 export function convertFromProtoToMsgNewCollection(
   msg: badges.bitbadges.bitbadgeschain.badges.MsgNewCollection,
-): b_MsgNewCollection {
+): MsgNewCollection<bigint> {
   return {
     creator: msg.creator,
     collectionUri: msg.collectionUri,

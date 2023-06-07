@@ -1,20 +1,19 @@
 import {
-  createMsgUpdateAllowedTransfers as protoMsgUpdateAllowedTransfers,
-  createTransaction,
-  convertTransferMapping,
   NumberType,
   TransferMapping,
-  StringNumber,
+  convertTransferMapping,
+  createTransaction,
+  createMsgUpdateAllowedTransfers as protoMsgUpdateAllowedTransfers
 } from 'bitbadgesjs-proto'
 import * as badges from 'bitbadgesjs-proto/dist/proto/badges/tx'
 
 import {
+  MSG_UPDATE_ALLOWED_TRANSFERS_TYPES,
   createEIP712,
+  createMsgUpdateAllowedTransfers,
   generateFee,
   generateMessage,
   generateTypes,
-  createMsgUpdateAllowedTransfers,
-  MSG_UPDATE_ALLOWED_TRANSFERS_TYPES,
 } from 'bitbadgesjs-eip712'
 
 import { getDefaultDomainWithChainId } from '../../domain'
@@ -26,11 +25,6 @@ export interface MsgUpdateAllowedTransfers<T extends NumberType> {
   collectionId: T
   allowedTransfers: TransferMapping<T>[]
 }
-
-export type b_MsgUpdateAllowedTransfers = MsgUpdateAllowedTransfers<bigint>
-export type s_MsgUpdateAllowedTransfers = MsgUpdateAllowedTransfers<string>
-export type n_MsgUpdateAllowedTransfers = MsgUpdateAllowedTransfers<number>
-export type d_MsgUpdateAllowedTransfers = MsgUpdateAllowedTransfers<StringNumber>
 
 export function convertMsgUpdateAllowedTransfers<T extends NumberType, U extends NumberType>(
   msg: MsgUpdateAllowedTransfers<T>,
@@ -45,7 +39,7 @@ export function convertMsgUpdateAllowedTransfers<T extends NumberType, U extends
 
 export function convertFromProtoToMsgUpdateAllowedTransfers(
   proto: badges.bitbadges.bitbadgeschain.badges.MsgUpdateAllowedTransfers,
-): b_MsgUpdateAllowedTransfers {
+): MsgUpdateAllowedTransfers<bigint> {
   return {
     creator: proto.creator,
     collectionId: BigInt(proto.collectionId),

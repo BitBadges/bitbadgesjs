@@ -1,6 +1,8 @@
 import Nano from "nano";
-import { b_ActivityItem } from "./activity";
-import { b_AccountDoc, b_BalanceDoc, b_ClaimDoc, b_CollectionDoc, b_QueueDoc, b_RefreshDoc } from "./db";
+import { TransferActivityInfoBase } from "./activity";
+import { AccountDoc, BalanceDoc, ClaimDoc, CollectionDoc, QueueInfoBase, RefreshDoc } from "./db";
+
+export type BlankDocument = Nano.Document; // Alias for Nano.Document to make it clear that this is a blank document and has no other details.
 
 /**
  * DocsCache is used by the indexer to cache documents in memory to avoid having to fetch and write to the database each time.
@@ -11,8 +13,8 @@ import { b_AccountDoc, b_BalanceDoc, b_ClaimDoc, b_CollectionDoc, b_QueueDoc, b_
  * @property {CollectionDocs} collections - The collections cache.
  * @property {BalanceDocs} balances - The balances cache.
  * @property {ClaimDocs} claims - The claims cache.
- * @property {b_ActivityItem[]} activityToAdd - The activity documents to add to the database.
- * @property {QueueDoc[]} queueDocsToAdd - The queue documents to add to the database.
+ * @property {ActivityInfoBase[]} activityToAdd - The activity documents to add to the database.
+ * @property {QueueInfoBase[]} queueDocsToAdd - The queue documents to add to the database.
  */
 export interface DocsCache {
   accounts: AccountDocs;
@@ -20,8 +22,8 @@ export interface DocsCache {
   balances: BalanceDocs;
   claims: ClaimDocs;
   refreshes: RefreshDocs;
-  queueDocsToAdd: b_QueueDoc[];
-  activityToAdd: b_ActivityItem[];
+  queueDocsToAdd: (QueueInfoBase<bigint> & Nano.MaybeIdentifiedDocument)[];
+  activityToAdd: (TransferActivityInfoBase<bigint> & Nano.MaybeIdentifiedDocument)[]
 }
 
 /**
@@ -30,11 +32,11 @@ export interface DocsCache {
  * @typedef {Object} CollectionDocs
  */
 export interface CollectionDocs {
-  [id: string]: (b_CollectionDoc & Nano.DocumentGetResponse) | { _id: string };
+  [id: string]: (CollectionDoc<bigint>) | undefined;
 }
 
 export interface RefreshDocs {
-  [id: string]: (b_RefreshDoc & Nano.DocumentGetResponse) | { _id: string };
+  [id: string]: (RefreshDoc<bigint>) | undefined;
 }
 
 /**
@@ -43,7 +45,7 @@ export interface RefreshDocs {
  * @typedef {Object} AccountDocs
  */
 export interface AccountDocs {
-  [cosmosAddress: string]: (b_AccountDoc & Nano.DocumentGetResponse) | { _id: string };
+  [cosmosAddress: string]: (AccountDoc<bigint>) | undefined;
 }
 
 /**
@@ -53,7 +55,7 @@ export interface AccountDocs {
  * @typedef {Object} BalanceDocs
  */
 export interface BalanceDocs {
-  [partitionedId: string]: (b_BalanceDoc & Nano.DocumentGetResponse) | (b_BalanceDoc & { _id: string });
+  [partitionedId: string]: (BalanceDoc<bigint>); //Note no undefined here because we auto-supply an empty balance doc w/ balance = 0 if missing
 }
 
 /**
@@ -63,5 +65,5 @@ export interface BalanceDocs {
  * @typedef {Object} ClaimDocs
  */
 export interface ClaimDocs {
-  [partitionedId: string]: (b_ClaimDoc & Nano.DocumentGetResponse) | { _id: string };
+  [partitionedId: string]: (ClaimDoc<bigint>) | undefined;
 }

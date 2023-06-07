@@ -1,22 +1,22 @@
-import { b_IdRange } from "bitbadgesjs-proto";
-import { b_MsgMintAndDistributeBadges, b_MsgNewCollection, b_MsgUpdateAllowedTransfers, b_MsgUpdateUris } from "bitbadgesjs-transactions";
+import { IdRange } from "bitbadgesjs-proto";
+import { MsgMintAndDistributeBadges, MsgNewCollection, MsgUpdateAllowedTransfers, MsgUpdateUris } from "bitbadgesjs-transactions";
 import { addBalancesForIdRanges } from "./balances";
 import { getBalancesAfterTransfers } from "./distribution";
 import { GetPermissionNumberValue, GetPermissions } from "./permissions";
-import { b_Metadata } from "./types/metadata";
-import { b_MetadataMap } from "./types/types";
-import { b_ClaimDetails } from "./types/db";
-import { b_TransferWithIncrements } from "./types/transfers";
-import { b_BitBadgesCollection } from "./types/collections";
-import { b_BitBadgesUserInfo } from "./types/users";
+import { Metadata } from "./types/metadata";
+import { MetadataMap } from "./types/types";
+import { ClaimDetails } from "./types/db";
+import { TransferWithIncrements } from "./types/transfers";
+import { BitBadgesCollection } from "./types/collections";
+import { BitBadgesUserInfo } from "./types/users";
 
 /**
- * Returns an b_IdRange[] of length 1 that covers all badgeIds in the collection.
+ * Returns an IdRange[] of length 1 that covers all badgeIds in the collection.
  *
  * { start: 1, end: nextBadgeId - 1 }
  */
-export function getIdRangesForAllBadgeIdsInCollection(collection: b_BitBadgesCollection) {
-  const range: b_IdRange = {
+export function getIdRangesForAllBadgeIdsInCollection(collection: BitBadgesCollection<bigint>) {
+  const range: IdRange<bigint> = {
     start: 1n,
     end: collection.nextBadgeId - 1n,
   }
@@ -24,32 +24,32 @@ export function getIdRangesForAllBadgeIdsInCollection(collection: b_BitBadgesCol
 }
 
 /**
- * Extends the base b_MsgNewCollection to include the distribution details for the new badges (transfers / claims)
+ * Extends the base MsgNewCollection<bigint> to include the distribution details for the new badges (transfers / claims)
  *
  * @typedef {Object} MsgNewCollectionWithClaimDetails
- * @property {b_ClaimDetails[]} claims - The claims that will be added to the collection, extended to be ClaimDetails
- * @property {b_TransferWithIncrements[]} transfers - The transfers that will be added to the collection, extended to be TransferWithIncrements
+ * @property {ClaimDetails<bigint>[]} claims - The claims that will be added to the collection, extended to be ClaimDetails<bigint>
+ * @property {TransferWithIncrements<bigint>[]} transfers - The transfers that will be added to the collection, extended to be TransferWithIncrements<bigint>
  */
-export interface MsgNewCollectionWithClaimDetails extends b_MsgNewCollection {
-  details: b_ClaimDetails[];
-  transfers: b_TransferWithIncrements[];
+export interface MsgNewCollectionWithClaimDetails extends MsgNewCollection<bigint> {
+  details: ClaimDetails<bigint>[];
+  transfers: TransferWithIncrements<bigint>[];
 }
 
 /**
  * Simulate what the collection will look like after the new Msg is to be processed.
  *
- * @param {MsgNewCollectionWithClaimDetails} msg - The b_MsgNewCollection to simulate
- * @param {b_Metadata} newCollectionMetadata - The metadata for the new collection
- * @param {b_MetadataMap} newBadgeMetadata - The metadata for the new badges
- * @param {b_BitBadgesUserInfo} txSender - The user who is sending the b_MsgNewCollection
- * @param {b_BitBadgesCollection} existingCollection - The existing collection, if it exists
+ * @param {MsgNewCollectionWithClaimDetails} msg - The MsgNewCollection<bigint> to simulate
+ * @param {Metadata<bigint>} newCollectionMetadata - The metadata for the new collection
+ * @param {MetadataMap<bigint>} newBadgeMetadata - The metadata for the new badges
+ * @param {BitBadgesUserInfo<bigint>} txSender - The user who is sending the MsgNewCollection<bigint>
+ * @param {BitBadgesCollection<bigint>} existingCollection - The existing collection, if it exists
  */
 export function simulateCollectionAfterMsgNewCollection(
   msg: MsgNewCollectionWithClaimDetails,
-  newCollectionMetadata: b_Metadata,
-  newBadgeMetadata: b_MetadataMap,
-  txSender: b_BitBadgesUserInfo,
-  existingCollection?: b_BitBadgesCollection,
+  newCollectionMetadata: Metadata<bigint>,
+  newBadgeMetadata: MetadataMap<bigint>,
+  txSender: BitBadgesUserInfo<bigint>,
+  existingCollection?: BitBadgesCollection<bigint>,
 ) {
   let nextBadgeId = existingCollection?.nextBadgeId ? existingCollection.nextBadgeId : 1n;
 
@@ -102,7 +102,7 @@ export function simulateCollectionAfterMsgNewCollection(
       }
     })
   ];
-  const badgeCollection: b_BitBadgesCollection = {
+  const badgeCollection: BitBadgesCollection<bigint> = {
     ...msg,
     collectionId: existingCollection?.collectionId ? existingCollection.collectionId : 0n,
     manager: existingCollection?.manager ? existingCollection.manager : txSender.cosmosAddress,
@@ -124,39 +124,61 @@ export function simulateCollectionAfterMsgNewCollection(
     activity: existingCollection?.activity ? existingCollection.activity : [],
     announcements: existingCollection?.announcements ? existingCollection.announcements : [],
     reviews: existingCollection?.reviews ? existingCollection.reviews : [],
+    pagination: {
+      activity: {
+        bookmark: '',
+        hasMore: true
+      },
+      announcements: {
+        bookmark: '',
+        hasMore: true
+      },
+      balances: {
+        bookmark: '',
+        hasMore: true
+      },
+      reviews: {
+        bookmark: '',
+        hasMore: true
+      },
+      claims: {
+        bookmark: '',
+        hasMore: true
+      },
+    }
   }
 
   return badgeCollection;
 }
 
 /**
- * Extends the base b_MsgMintAndDistributeBadges to include the distribution details for the new badges (transfers / claims)
+ * Extends the base MsgMintAndDistributeBadges<bigint> to include the distribution details for the new badges (transfers / claims)
  *
  * @typedef {Object} MsgMintAndDistributeBadgesWithClaimDetails
- * @property {b_ClaimDetails[]} claims - The claims that will be added to the collection, extended to be ClaimDetails
- * @property {b_TransferWithIncrements[]} transfers - The transfers that will be added to the collection, extended to be TransferWithIncrements
+ * @property {ClaimDetails<bigint>[]} claims - The claims that will be added to the collection, extended to be ClaimDetails<bigint>
+ * @property {TransferWithIncrements<bigint>[]} transfers - The transfers that will be added to the collection, extended to be TransferWithIncrements<bigint>
  */
-export interface MsgMintAndDistributeBadgesWithClaimDetails extends b_MsgMintAndDistributeBadges {
-  details: b_ClaimDetails[];
-  transfers: b_TransferWithIncrements[];
+export interface MsgMintAndDistributeBadgesWithClaimDetails extends MsgMintAndDistributeBadges<bigint> {
+  details: ClaimDetails<bigint>[];
+  transfers: TransferWithIncrements<bigint>[];
 }
 
 
 /**
  * Simulate what the collection will look like after the new Msg is to be processed.
  *
- * @param {MsgMintAndDistributeBadgesWithClaimDetails} msg - The b_MsgMintAndDistributeBadges to simulate
- * @param {b_Metadata} newCollectionMetadata - The metadata for the new collection
- * @param {b_MetadataMap} newBadgeMetadata - The metadata for the new badges
- * @param {b_BitBadgesUserInfo} txSender - The user who is sending the b_MsgMintAndDistributeBadges
- * @param {b_BitBadgesCollection} existingCollection - The existing collection, if it exists
+ * @param {MsgMintAndDistributeBadgesWithClaimDetails} msg - The MsgMintAndDistributeBadges<bigint> to simulate
+ * @param {Metadata<bigint>} newCollectionMetadata - The metadata for the new collection
+ * @param {MetadataMap<bigint>} newBadgeMetadata - The metadata for the new badges
+ * @param {BitBadgesUserInfo<bigint>} txSender - The user who is sending the MsgMintAndDistributeBadges<bigint>
+ * @param {BitBadgesCollection<bigint>} existingCollection - The existing collection, if it exists
  */
 export function simulateCollectionAfterMsgMintAndDistributeBadges(
   msg: MsgMintAndDistributeBadgesWithClaimDetails,
-  newCollectionMetadata: b_Metadata,
-  newBadgeMetadata: b_MetadataMap,
-  txSender: b_BitBadgesUserInfo,
-  existingCollection?: b_BitBadgesCollection
+  newCollectionMetadata: Metadata<bigint>,
+  newBadgeMetadata: MetadataMap<bigint>,
+  txSender: BitBadgesUserInfo<bigint>,
+  existingCollection?: BitBadgesCollection<bigint>
 ) {
   const msgNewCollectionWithEmptyValues: MsgNewCollectionWithClaimDetails = {
     ...msg,
@@ -173,18 +195,18 @@ export function simulateCollectionAfterMsgMintAndDistributeBadges(
 /**
  * Simulate what the collection will look like after the new Msg is to be processed.
  *
- * @param {b_MsgUpdateUris} msg - The b_MsgUpdateUris to simulate
- * @param {b_Metadata} newCollectionMetadata - The metadata for the new collection
- * @param {b_MetadataMap} newBadgeMetadata - The metadata for the new badges
- * @param {b_BitBadgesUserInfo} txSender - The user who is sending the b_MsgUpdateUris
- * @param {b_BitBadgesCollection} existingCollection - The existing collection, if it exists
+ * @param {MsgUpdateUris<bigint>} msg - The MsgUpdateUris<bigint> to simulate
+ * @param {Metadata<bigint>} newCollectionMetadata - The metadata for the new collection
+ * @param {MetadataMap<bigint>} newBadgeMetadata - The metadata for the new badges
+ * @param {BitBadgesUserInfo<bigint>} txSender - The user who is sending the MsgUpdateUris<bigint>
+ * @param {BitBadgesCollection<bigint>} existingCollection - The existing collection, if it exists
  */
 export function simulateCollectionAfterMsgUpdateUris(
-  msg: b_MsgUpdateUris,
-  newCollectionMetadata: b_Metadata,
-  newBadgeMetadata: b_MetadataMap,
-  txSender: b_BitBadgesUserInfo,
-  existingCollection?: b_BitBadgesCollection
+  msg: MsgUpdateUris<bigint>,
+  newCollectionMetadata: Metadata<bigint>,
+  newBadgeMetadata: MetadataMap<bigint>,
+  txSender: BitBadgesUserInfo<bigint>,
+  existingCollection?: BitBadgesCollection<bigint>
 ) {
   const msgNewCollectionWithEmptyValues: MsgNewCollectionWithClaimDetails = {
     ...msg,
@@ -206,18 +228,18 @@ export function simulateCollectionAfterMsgUpdateUris(
 /**
  * Simulate what the collection will look like after the new Msg is to be processed.
  *
- * @param {b_MsgUpdateAllowedTransfers} msg - The b_MsgUpdateAllowedTransfers to simulate
- * @param {b_Metadata} newCollectionMetadata - The metadata for the new collection
- * @param {b_MetadataMap} newBadgeMetadata - The metadata for the new badges
- * @param {b_BitBadgesUserInfo} txSender - The user who is sending the b_MsgUpdateAllowedTransfers
- * @param {b_BitBadgesCollection} existingCollection - The existing collection, if it exists
+ * @param {MsgUpdateAllowedTransfers} msg - The MsgUpdateAllowedTransfers to simulate
+ * @param {Metadata<bigint>} newCollectionMetadata - The metadata for the new collection
+ * @param {MetadataMap<bigint>} newBadgeMetadata - The metadata for the new badges
+ * @param {BitBadgesUserInfo<bigint>} txSender - The user who is sending the MsgUpdateAllowedTransfers
+ * @param {BitBadgesCollection<bigint>} existingCollection - The existing collection, if it exists
  */
 export function simulateCollectionAfterMsgUpdateAllowedTransfers(
-  msg: b_MsgUpdateAllowedTransfers,
-  newCollectionMetadata: b_Metadata,
-  newBadgeMetadata: b_MetadataMap,
-  txSender: b_BitBadgesUserInfo,
-  existingCollection?: b_BitBadgesCollection
+  msg: MsgUpdateAllowedTransfers<bigint>,
+  newCollectionMetadata: Metadata<bigint>,
+  newBadgeMetadata: MetadataMap<bigint>,
+  txSender: BitBadgesUserInfo<bigint>,
+  existingCollection?: BitBadgesCollection<bigint>
 ) {
   const msgNewCollectionWithEmptyValues: MsgNewCollectionWithClaimDetails = {
     ...msg,

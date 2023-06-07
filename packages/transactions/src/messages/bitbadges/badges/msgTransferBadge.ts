@@ -5,7 +5,7 @@ import {
   createTransaction,
   IdRange, Transfer, n_Transfer, s_Transfer,
   NumberType, Transfer,
-  StringNumber
+  JSPrimitiveNumberType
 } from 'bitbadgesjs-proto'
 import * as badges from 'bitbadgesjs-proto/dist/proto/badges/tx'
 
@@ -29,11 +29,6 @@ export interface MsgTransferBadge<T extends NumberType> {
   transfers: Transfer<T>[];
 }
 
-export type b_MsgTransferBadge = MsgTransferBadge<bigint>
-export type s_MsgTransferBadge = MsgTransferBadge<string>
-export type n_MsgTransferBadge = MsgTransferBadge<number>
-export type d_MsgTransferBadge = MsgTransferBadge<StringNumber>
-
 export function convertMsgTransferBadge<T extends NumberType, U extends NumberType>(
   msg: MsgTransferBadge<T>,
   convertFunction: (item: T) => U
@@ -48,7 +43,7 @@ export function convertMsgTransferBadge<T extends NumberType, U extends NumberTy
 
 export function convertFromProtoToMsgTransferBadge(
   msg: badges.bitbadges.bitbadgeschain.badges.MsgTransferBadge,
-): b_MsgTransferBadge {
+): MsgTransferBadge<bigint> {
   return {
     creator: msg.creator,
     from: msg.from,

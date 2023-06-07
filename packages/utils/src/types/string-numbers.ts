@@ -1,10 +1,10 @@
-export type NumberType = bigint | number | string;
-export type StringNumber = string | number;
+export type NumberType = bigint | number | string | boolean;
+export type JSPrimitiveNumberType = string | number | boolean;
 
-export const BigIntify = (item: NumberType) => numberify(item, StringNumberStorageOptions.String);
-export const StringNumberify = (item: NumberType) => numberify(item, StringNumberStorageOptions.String);
-export const Numberify = (item: NumberType) => numberify(item, StringNumberStorageOptions.Number);
-export const NumberifyIfPossible = (item: NumberType) => numberify(item, StringNumberStorageOptions.NumberIfPossible);
+export const BigIntify = (item: NumberType) => numberify(item, StringNumberStorageOptions.String) as bigint;
+export const Stringify = (item: NumberType) => numberify(item, StringNumberStorageOptions.String) as string;
+export const Numberify = (item: NumberType) => numberify(item, StringNumberStorageOptions.Number) as number;
+export const NumberifyIfPossible = (item: NumberType) => numberify(item, StringNumberStorageOptions.NumberIfPossible) as number | string;
 
 /**
  * Struct to represent a numeric value as both a string and a JavaScript number.
@@ -19,7 +19,7 @@ export const NumberifyIfPossible = (item: NumberType) => numberify(item, StringN
  * By default, we will attempt to store the value in the database as a JavaScript number if possible (for CouchDB compatibility).
  * If not, we will store it as a string. For queries, we need to handle both cases which can be done by checking the $type field with Mango.
  */
-// export interface StringNumber DEPRECATED in favor of native primitive types. Use NumberType and numberify() instead.
+// export interface JSPrimitiveNumberType DEPRECATED in favor of native primitive types. Use NumberType and numberify() instead.
 
 export enum StringNumberStorageOptions {
   String = 'String',
@@ -27,7 +27,7 @@ export enum StringNumberStorageOptions {
   NumberIfPossible = 'NumberIfPossible',
 }
 
-export function numberify(_item: bigint | string | number, options?: StringNumberStorageOptions): NumberType {
+export function numberify(_item: NumberType, options?: StringNumberStorageOptions): NumberType {
   const item = BigInt(_item);
   if (options === StringNumberStorageOptions.String) {
     return item.toString();

@@ -1,18 +1,17 @@
 import {
-  createMsgRequestTransferManager as protoMsgRequestTransferManager,
-  createTransaction,
   NumberType,
-  StringNumber,
+  createTransaction,
+  createMsgRequestTransferManager as protoMsgRequestTransferManager
 } from 'bitbadgesjs-proto'
 import * as badges from 'bitbadgesjs-proto/dist/proto/badges/tx'
 
 import {
+  MSG_REQUEST_TRANSFER_MANAGER_TYPES,
   createEIP712,
+  createMsgRequestTransferManager,
   generateFee,
   generateMessage,
   generateTypes,
-  createMsgRequestTransferManager,
-  MSG_REQUEST_TRANSFER_MANAGER_TYPES,
 } from 'bitbadgesjs-eip712'
 
 import { getDefaultDomainWithChainId } from '../../domain'
@@ -24,11 +23,6 @@ export interface MsgRequestTransferManager<T extends NumberType> {
   collectionId: T
   addRequest: boolean
 }
-
-export type b_MsgRequestTransferManager = MsgRequestTransferManager<bigint>
-export type s_MsgRequestTransferManager = MsgRequestTransferManager<string>
-export type n_MsgRequestTransferManager = MsgRequestTransferManager<number>
-export type d_MsgRequestTransferManager = MsgRequestTransferManager<StringNumber>
 
 export function convertMsgRequestTransferManager<T extends NumberType, U extends NumberType>(
   msg: MsgRequestTransferManager<T>,
@@ -43,7 +37,7 @@ export function convertMsgRequestTransferManager<T extends NumberType, U extends
 
 export function convertFromProtoToMsgRequestTransferManager(
   proto: badges.bitbadges.bitbadgeschain.badges.MsgRequestTransferManager,
-): b_MsgRequestTransferManager {
+): MsgRequestTransferManager<bigint> {
   return {
     creator: proto.creator,
     collectionId: BigInt(proto.collectionId),

@@ -1,17 +1,17 @@
-import { b_Balance, b_Transfer } from "bitbadgesjs-proto";
+import { Balance, Transfer } from "bitbadgesjs-proto";
 import { subtractBalancesForIdRanges } from "./balances";
-import { b_TransferWithIncrements } from "./types/transfers";
+import { TransferWithIncrements } from "./types/transfers";
 
 
 /**
- * Converts a b_TransferWithIncrements[] to a b_Transfer[].
+ * Converts a TransferWithIncrements<bigint>[] to a Transfer<bigint>[].
  *
  * Note that if there are N increments, this will create N transfers.
  *
- * @param {b_TransferWithIncrements[]} transfersWithIncrements - The list of transfers with increments.
+ * @param {TransferWithIncrements<bigint>[]} transfersWithIncrements - The list of transfers with increments.
  */
-export const getTransfersFromTransfersWithIncrements = (transfersWithIncrements: b_TransferWithIncrements[]) => {
-  const transfers: b_Transfer[] = [];
+export const getTransfersFromTransfersWithIncrements = (transfersWithIncrements: TransferWithIncrements<bigint>[]) => {
+  const transfers: Transfer<bigint>[] = [];
   for (const transferExtended of transfersWithIncrements) {
     const { toAddressesLength, incrementIdsBy, ...transfer } = transferExtended;
     const length = toAddressesLength ? Number(toAddressesLength) : transfer.toAddresses.length;
@@ -44,14 +44,14 @@ export const getTransfersFromTransfersWithIncrements = (transfersWithIncrements:
 /**
  * Returns the post balance after a transfer of x(amountToTransfer * numRecipients) from startBadgeId to endBadgeId
  *
- * @param {b_Balance[]} balance - The balance to subtract from.
+ * @param {Balance<bigint>[]} balance - The balance to subtract from.
  * @param {bigint} startBadgeId - The start badge ID to subtract from.
  * @param {bigint} endBadgeId - The end badge ID to subtract from.
  * @param {bigint} amountToTransfer - The amount to subtract.
  * @param {bigint} numRecipients - The number of recipients to subtract from.
  */
-export const getBalanceAfterTransfer = (balance: b_Balance[], startBadgeId: bigint, endBadgeId: bigint, amountToTransfer: bigint, numRecipients: bigint) => {
-  const balanceCopy: b_Balance[] = JSON.parse(JSON.stringify(balance)); //need a deep copy of the balance to not mess up calculations
+export const getBalanceAfterTransfer = (balance: Balance<bigint>[], startBadgeId: bigint, endBadgeId: bigint, amountToTransfer: bigint, numRecipients: bigint) => {
+  const balanceCopy: Balance<bigint>[] = JSON.parse(JSON.stringify(balance)); //need a deep copy of the balance to not mess up calculations
 
   const newBalance = subtractBalancesForIdRanges({
     balances: balanceCopy,
@@ -61,13 +61,13 @@ export const getBalanceAfterTransfer = (balance: b_Balance[], startBadgeId: bigi
 }
 
 /**
- * Returns the balance after a set of b_TransferWithIncrements[].
+ * Returns the balance after a set of TransferWithIncrements<bigint>[].
  *
- * @param {b_Balance[]} startBalance - The balance to subtract from.
- * @param {b_TransferWithIncrements[]} transfers - The transfers that are being sent.
+ * @param {Balance<bigint>[]} startBalance - The balance to subtract from.
+ * @param {TransferWithIncrements<bigint>[]} transfers - The transfers that are being sent.
  */
-export const getBalancesAfterTransfers = (startBalance: b_Balance[], transfers: b_TransferWithIncrements[]) => {
-  let endBalances: b_Balance[] = JSON.parse(JSON.stringify(startBalance)); //need a deep copy of the balance to not mess up calculations
+export const getBalancesAfterTransfers = (startBalance: Balance<bigint>[], transfers: TransferWithIncrements<bigint>[]) => {
+  let endBalances: Balance<bigint>[] = JSON.parse(JSON.stringify(startBalance)); //need a deep copy of the balance to not mess up calculations
   for (const transfer of transfers) {
     for (const balance of transfer.balances) {
 
@@ -98,128 +98,3 @@ export const getBalancesAfterTransfers = (startBalance: b_Balance[], transfers: 
 
   return endBalances;
 }
-
-
-
-// //From the DistributionItem created in the TxTimeline, we convert all these DistributionItem into a Claims[]
-// //Only used if we are sending via claims and not sending directly (i.e. manualSend = false)
-// export const getClaimsFromDistributionItem = (balance: UserBalance, DistributionItem: DistributionItem[], collectionId: number, startClaimId: number) => {
-
-//   //We maintain two balances:
-//   //claimBalance is the max lbalance for each claim (max amount of badges that can be claimed based on parameters)
-//   //undistributedBalance is the total undistributed balance (balance minus the sum of all claimBalances)
-//   let undistributedBalance = JSON.parse(JSON.stringify(balance));
-//   const claims: Claim[] = [];
-//   const storedClaims: ClaimWithDetails[] = [];
-//   for (const distributionDetail of DistributionItem) {
-//     if (distributionDetail.distributionMethod === DistributionMethod.DirectTransfer) continue;
-
-//     let claimBalance = JSON.parse(JSON.stringify(undistributedBalance));
-//     let maxNumClaims = 0;
-
-//     const codesLength = distributionDetail.numCodes ? distributionDetail.numCodes : distributionDetail.codes.length;
-//     const addressesLength = distributionDetail.addresses.length;
-
-//     if (distributionDetail.limitOnePerAddress) {
-
-
-//       //Calculate maxNumClaims based on the restrictOptions parameter
-//       if (distributionDetail.restrictOptions === 0) {
-//         maxNumClaims = codesLength; //No restrictions per address, so max is number of codes
-//       } else if (distributionDetail.restrictOptions === 1 || distributionDetail.restrictOptions === 2) {
-//         //1 = each whitelist index can only be used once
-//         //2 = each address can only claim once
-//         if (codesLength > 0 && addressesLength > 0) {
-//           maxNumClaims = Math.min(codesLength, addressesLength);
-//         } else if (codesLength > 0) {
-//           maxNumClaims = codesLength;
-//         } else if (addressesLength > 0) {
-//           maxNumClaims = addressesLength;
-//         }
-//       }
-
-//       //If maxNumClaims is still 0, then it is unlimited claims
-//       //Else, we calculate the claim details
-//       if (maxNumClaims > 0) {
-//         //Create a transfers array for compatibility with getBalanceAfterTransfers
-//         const transfers: b_TransferWithIncrements[] = [
-//           {
-//             toAddresses: [],
-//             toAddressesLength: maxNumClaims,
-//             balances: [
-//               {
-//                 badgeIds: distributionDetail.badgeIds,
-//                 amount: distributionDetail.amount
-//               }
-//             ],
-//             incrementIdsBy: distributionDetail.incrementIdsBy,
-//           }
-//         ];
-
-//         //For all possible claims, deduct from undistributedBalance
-//         undistributedBalance.balances = getBalanceAfterTransfers(undistributedBalance, transfers).balances;
-
-//         //Set claimBalance to what was just deducted in the line above
-//         for (const balanceObj of undistributedBalance.balances) {
-//           for (const badgeId of balanceObj.badgeIds) {
-//             const newBalance = getBalanceAfterTransfer(claimBalance, badgeId.start, badgeId.end, balanceObj.balance, 1);
-//             claimBalance.balances = newBalance.balances;
-//           }
-//         }
-//       } else {
-//         //If maxNumClaims is 0, then it is unlimited claims, so we set it to the entire undistributedBalance
-//         claimBalance = undistributedBalance;
-//         undistributedBalance = {
-//           balances: [],
-//           approvals: [],
-//         }
-//       }
-
-//       claims.push({
-//         balances: claimBalance.balances,
-//         codeRoot: distributionDetail.codeRoot,
-//         whitelistRoot: distributionDetail.whitelistRoot,
-//         uri: distributionDetail.uri,
-//         timeRange: distributionDetail.timeRange,
-//         limitOnePerAddress: distributionDetail.limitOnePerAddress,
-//         amount: distributionDetail.amount,
-//         badgeIds: distributionDetail.badgeIds,
-//         incrementIdsBy: distributionDetail.incrementIdsBy,
-//         expectedCodeProofLength: distributionDetail.codeTree ? distributionDetail.codeTree.getLayerCount() - 1 : 0,
-//       })
-
-//       storedClaims.push({
-
-//         balances: claimBalance.balances,
-//         codeRoot: distributionDetail.codeRoot,
-//         whitelistRoot: distributionDetail.whitelistRoot,
-//         uri: distributionDetail.uri,
-//         timeRange: distributionDetail.timeRange,
-//         limitOnePerAddress: distributionDetail.limitOnePerAddress,
-//         amount: distributionDetail.amount,
-//         badgeIds: distributionDetail.badgeIds,
-//         incrementIdsBy: distributionDetail.incrementIdsBy,
-//         expectedCodeProofLength: distributionDetail.codeTree ? distributionDetail.codeTree.getLayerCount() - 1 : 0,
-//         addresses: distributionDetail.addresses,
-//         hashedCodes: distributionDetail.hashedCodes,
-//         name: distributionDetail.name ? distributionDetail.name : '',
-//         description: distributionDetail.description ? distributionDetail.description : '',
-//         hasPassword: distributionDetail.hasPassword ? distributionDetail.hasPassword : false,
-//         usedClaims: {
-//           codes: {},
-//           addresses: {},
-//           numUsed: 0,
-//         },
-//         collectionId,
-//         claimId: startClaimId,
-//       })
-
-//       startClaimId++;
-//     }
-
-//     return {
-//       undistributedBalance,
-//       claims,
-//       storedClaims,
-//     }
-//   }

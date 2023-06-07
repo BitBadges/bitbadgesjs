@@ -1,14 +1,14 @@
-import { b_IdRange } from "bitbadgesjs-proto";
+import { IdRange } from "bitbadgesjs-proto";
 import { METADATA_PAGE_LIMIT } from "./constants";
 import { sortIdRangesAndMergeIfNecessary } from "./idRanges";
 import { bigIntMin, getMetadataForBadgeId } from "./metadataMaps";
 import { getMetadataIdForBadgeId } from "./metadataIds";
-import { b_BitBadgesCollection } from "./types/collections";
+import { BitBadgesCollection } from "./types/collections";
 
 /**
  * For a multicollection display, return the badges to be shown on a specific page.
  *
- * @param {{ collection: b_BitBadgesCollection, badgeIds: b_IdRange[] }[]} collectionObjectsToDisplay - The collections to display.
+ * @param {{ collection: BitBadgesCollection<bigint>, badgeIds: IdRange<bigint>[] }[]} collectionObjectsToDisplay - The collections to display.
  * @param {bigint | string | number} _pageNumber - The page number of the display
  * @param {bigint | string | number} _pageSize - The page size of the display
  *
@@ -18,8 +18,8 @@ import { b_BitBadgesCollection } from "./types/collections";
  */
 export function getBadgesToDisplay(
   collectionObjectsToDisplay: {
-    collection: b_BitBadgesCollection,
-    badgeIds: b_IdRange[]
+    collection: BitBadgesCollection<bigint>,
+    badgeIds: IdRange<bigint>[]
   }[] = [],
   _pageNumber: bigint | string | number,
   _pageSize: bigint | string | number,
@@ -28,7 +28,7 @@ export function getBadgesToDisplay(
   const pageSize = BigInt(_pageSize);
 
   const startIdxNum = BigInt((pageNumber - 1n) * pageSize);
-  const badgeIdsToDisplay: { collection: b_BitBadgesCollection, badgeIds: b_IdRange[] }[] = [];
+  const badgeIdsToDisplay: { collection: BitBadgesCollection<bigint>, badgeIds: IdRange<bigint>[] }[] = [];
 
   let currIdx = 0n;
   let numEntriesLeftToHandle = pageSize;
@@ -46,7 +46,7 @@ export function getBadgesToDisplay(
         }
 
         //Iterate through the range and add badgeIds to the array, until we have added enough
-        const badgeIdsToDisplayIds: b_IdRange[] = [];
+        const badgeIdsToDisplayIds: IdRange<bigint>[] = [];
         if (numEntriesLeftToHandle > 0) {
           const endBadgeId = bigIntMin(currBadgeId + numEntriesLeftToHandle - 1n, range.end);
           badgeIdsToDisplayIds.push({ start: currBadgeId, end: endBadgeId });
@@ -80,10 +80,10 @@ export function getBadgesToDisplay(
  *
  * Assumes that badgeIdsToDisplay has no overlapping ranges.
  *
- * @param {b_IdRange[]} _badgeIdsToDisplay - The badgeIds to display
- * @param {b_BitBadgesCollection} collection - The collection details
+ * @param {IdRange<bigint>[]} _badgeIdsToDisplay - The badgeIds to display
+ * @param {BitBadgesCollection<bigint>} collection - The collection details
  */
-export function getMetadataIdsToFetch(_badgeIdsToDisplay: b_IdRange[], collection: b_BitBadgesCollection) {
+export function getMetadataIdsToFetch(_badgeIdsToDisplay: IdRange<bigint>[], collection: BitBadgesCollection<bigint>) {
   const badgeIdsToDisplay = sortIdRangesAndMergeIfNecessary(_badgeIdsToDisplay);
 
   const metadataIds: bigint[] = [];

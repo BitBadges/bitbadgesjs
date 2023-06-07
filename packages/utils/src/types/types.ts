@@ -1,7 +1,7 @@
-import { IdRange, NumberType, StringNumber, UserBalance, convertIdRange, convertUserBalance } from "bitbadgesjs-proto";
+import { IdRange, NumberType, UserBalance, convertIdRange, convertUserBalance } from "bitbadgesjs-proto";
+import { BitBadgesCollection, convertBitBadgesCollection } from "./collections";
 import { Metadata, convertMetadata } from "./metadata";
 import { BitBadgesUserInfo, convertBitBadgesUserInfo } from "./users";
-import { BitBadgesCollection, convertBitBadgesCollection } from "./collections";
 
 /**
  * Many of the core types are loaded from the bitbadgesjs-proto package.
@@ -14,11 +14,6 @@ import { BitBadgesCollection, convertBitBadgesCollection } from "./collections";
 export interface CollectionMap<T extends NumberType> {
   [collectionId: string]: BitBadgesCollection<T> | undefined
 }
-
-export type b_CollectionMap = CollectionMap<bigint>;
-export type s_CollectionMap = CollectionMap<string>;
-export type n_CollectionMap = CollectionMap<number>;
-export type d_CollectionMap = CollectionMap<StringNumber>;
 
 export function convertCollectionMap<T extends NumberType, U extends NumberType>(item: CollectionMap<T>, convertFunction: (item: T) => U): CollectionMap<U> {
   return Object.fromEntries(Object.entries(item).map(([key, value]) => {
@@ -35,11 +30,6 @@ export interface AccountMap<T extends NumberType> {
   [cosmosAddress: string]: BitBadgesUserInfo<T> | undefined;
 }
 
-export type b_AccountMap = AccountMap<bigint>;
-export type s_AccountMap = AccountMap<string>;
-export type n_AccountMap = AccountMap<number>;
-export type d_AccountMap = AccountMap<StringNumber>;
-
 export function convertAccountMap<T extends NumberType, U extends NumberType>(item: AccountMap<T>, convertFunction: (item: T) => U): AccountMap<U> {
   return Object.fromEntries(Object.entries(item).map(([key, value]) => {
     return [key, value ? convertBitBadgesUserInfo(value, convertFunction) : undefined];
@@ -55,11 +45,6 @@ export function convertAccountMap<T extends NumberType, U extends NumberType>(it
 export interface BalancesMap<T extends NumberType> {
   [cosmosAddress: string]: UserBalance<T> | undefined;
 }
-
-export type b_BalancesMap = BalancesMap<bigint>;
-export type s_BalancesMap = BalancesMap<string>;
-export type n_BalancesMap = BalancesMap<number>;
-export type d_BalancesMap = BalancesMap<StringNumber>;
 
 export function convertBalancesMap<T extends NumberType, U extends NumberType>(item: BalancesMap<T>, convertFunction: (item: T) => U): BalancesMap<U> {
   return Object.fromEntries(Object.entries(item).map(([key, value]) => {
@@ -79,11 +64,6 @@ export interface MetadataMap<T extends NumberType> {
     uri: string
   } | undefined;
 }
-
-export type b_MetadataMap = MetadataMap<bigint>;
-export type s_MetadataMap = MetadataMap<string>;
-export type n_MetadataMap = MetadataMap<number>;
-export type d_MetadataMap = MetadataMap<StringNumber>;
 
 export function convertMetadataMap<T extends NumberType, U extends NumberType>(item: MetadataMap<T>, convertFunction: (item: T) => U): MetadataMap<U> {
   return Object.fromEntries(Object.entries(item).map(([key, value]) => {
