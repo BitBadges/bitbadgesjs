@@ -6,9 +6,29 @@ import * as tx from '../../../proto/badges/tx'
 import { NumberType } from './string-numbers'
 
 function deepCopy<T>(obj: T): T {
-  return JSON.parse(JSON.stringify(obj))
+  return deepCopyWithBigInts(obj);
 }
 
+function deepCopyWithBigInts<T>(obj: T): T {
+  if (typeof obj !== 'object' || obj === null) {
+    // Base case: return primitive values as-is
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    // Create a deep copy of an array
+    return obj.map((item) => deepCopyWithBigInts(item)) as unknown as T;
+  }
+
+  // Create a deep copy of an object
+  const copiedObj = {} as T;
+  for (const key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      copiedObj[key] = deepCopyWithBigInts(obj[key]);
+    }
+  }
+  return copiedObj;
+}
 /**
  * UserBalance item that serves as the base type for all UserBalance items.
  *

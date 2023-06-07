@@ -1,4 +1,5 @@
 import { AddressesMapping, TransferMapping } from "bitbadgesjs-proto";
+import { deepCopy } from "./types/utils";
 
 //TODO: Handle the cases with IncludeManager = true and 'Mint'
 
@@ -23,7 +24,7 @@ export const isTransferMappingFull = (transfersMapping: TransferMapping<bigint>[
  * Only the Mint account is allowed to transfer out.
  */
 export const getNonTransferableTransferMapping = () => {
-  const mapping: TransferMapping<bigint> = JSON.parse(JSON.stringify(AllAddressesTransferMapping));
+  const mapping: TransferMapping<bigint> = deepCopy(AllAddressesTransferMapping);
   mapping.to.includeOnlySpecified = true;
   mapping.to.addresses = ['Mint'];
 
@@ -35,7 +36,7 @@ export const getNonTransferableTransferMapping = () => {
  * Returns the TransferMapping<bigint>[] corresponding to a transferable collection.
  */
 export const getTransferableTransferMapping = () => {
-  const mapping: TransferMapping<bigint> = JSON.parse(JSON.stringify(AllAddressesTransferMapping));
+  const mapping: TransferMapping<bigint> = deepCopy(AllAddressesTransferMapping);
   const allowedTransfers: TransferMapping<bigint>[] = [mapping]
   return allowedTransfers;
 }
@@ -62,7 +63,7 @@ export const AllAddressesTransferMapping: TransferMapping<bigint> = Object.freez
  * Checks if a specific account is in the given address mapping.
  */
 export const isAccountInAddressMapping = (_addressesMapping: AddressesMapping<bigint>, addressToCheck: string, managerAddress?: string) => {
-  const addressesMapping: AddressesMapping<bigint> = JSON.parse(JSON.stringify(_addressesMapping));
+  const addressesMapping: AddressesMapping<bigint> = deepCopy(_addressesMapping);
   let isApproved = false;
 
   if (addressesMapping.managerOptions == 2n && managerAddress) {

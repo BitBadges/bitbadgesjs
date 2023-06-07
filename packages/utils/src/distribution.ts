@@ -1,6 +1,7 @@
 import { Balance, Transfer } from "bitbadgesjs-proto";
 import { subtractBalancesForIdRanges } from "./balances";
 import { TransferWithIncrements } from "./types/transfers";
+import { deepCopy } from "./types/utils";
 
 
 /**
@@ -19,11 +20,11 @@ export const getTransfersFromTransfersWithIncrements = (transfersWithIncrements:
     //If badges are incremented, we create N unique transfers (one to each address).
     //Else, we can create one transfer with N addresses
     if (incrementIdsBy) {
-      const currBalances = JSON.parse(JSON.stringify(transfer.balances))
+      const currBalances = deepCopy(transfer.balances)
       for (let i = 0; i < length; i++) {
         transfers.push({
           toAddresses: [transfer.toAddresses[i]],
-          balances: JSON.parse(JSON.stringify(currBalances)),
+          balances: deepCopy(currBalances),
         })
 
         for (let j = 0; j < currBalances.length; j++) {
@@ -51,7 +52,7 @@ export const getTransfersFromTransfersWithIncrements = (transfersWithIncrements:
  * @param {bigint} numRecipients - The number of recipients to subtract from.
  */
 export const getBalanceAfterTransfer = (balance: Balance<bigint>[], startBadgeId: bigint, endBadgeId: bigint, amountToTransfer: bigint, numRecipients: bigint) => {
-  const balanceCopy: Balance<bigint>[] = JSON.parse(JSON.stringify(balance)); //need a deep copy of the balance to not mess up calculations
+  const balanceCopy: Balance<bigint>[] = deepCopy(balance); //need a deep copy of the balance to not mess up calculations
 
   const newBalance = subtractBalancesForIdRanges({
     balances: balanceCopy,
@@ -67,7 +68,7 @@ export const getBalanceAfterTransfer = (balance: Balance<bigint>[], startBadgeId
  * @param {TransferWithIncrements<bigint>[]} transfers - The transfers that are being sent.
  */
 export const getBalancesAfterTransfers = (startBalance: Balance<bigint>[], transfers: TransferWithIncrements<bigint>[]) => {
-  let endBalances: Balance<bigint>[] = JSON.parse(JSON.stringify(startBalance)); //need a deep copy of the balance to not mess up calculations
+  let endBalances: Balance<bigint>[] = deepCopy(startBalance); //need a deep copy of the balance to not mess up calculations
   for (const transfer of transfers) {
     for (const balance of transfer.balances) {
 
@@ -75,7 +76,7 @@ export const getBalancesAfterTransfers = (startBalance: Balance<bigint>[], trans
       const _numRecipients = transfer.toAddressesLength ? transfer.toAddressesLength : transfer.toAddresses ? transfer.toAddresses.length : 0;
       const numRecipients = BigInt(_numRecipients);
 
-      const badgeIds = JSON.parse(JSON.stringify(balance.badgeIds));
+      const badgeIds = deepCopy(balance.badgeIds);
 
       //If incrementIdsBy is not set, then we are not incrementing badgeIds and we can just batch calculate the balance
       if (!transfer.incrementIdsBy) {
@@ -88,8 +89,8 @@ export const getBalancesAfterTransfers = (startBalance: Balance<bigint>[], trans
         for (let i = 0; i < numRecipients; i++) {
           for (const badgeId of badgeIds) {
             endBalances = getBalanceAfterTransfer(endBalances, badgeId.start, badgeId.end, balance.amount, 1n);
-            badgeId.start += transfer.incrementIdsBy || 0;
-            badgeId.end += transfer.incrementIdsBy || 0;
+            badgeId.start += transfer.incrementIdsBy || 0n;
+            badgeId.end += transfer.incrementIdsBy || 0n;
           }
         }
       }

@@ -9,6 +9,7 @@ import { ClaimDetails } from "./types/db";
 import { TransferWithIncrements } from "./types/transfers";
 import { BitBadgesCollection } from "./types/collections";
 import { BitBadgesUserInfo } from "./types/users";
+import { deepCopy } from "./types/utils";
 
 /**
  * Returns an IdRange[] of length 1 that covers all badgeIds in the collection.
@@ -54,8 +55,8 @@ export function simulateCollectionAfterMsgNewCollection(
   let nextBadgeId = existingCollection?.nextBadgeId ? existingCollection.nextBadgeId : 1n;
 
   //Calculate the amounts and supplys of badges (existing + new)
-  let newMaxSupplys = existingCollection?.maxSupplys ? JSON.parse(JSON.stringify(existingCollection.maxSupplys)) : [];
-  let newUnmintedSupplys = existingCollection?.unmintedSupplys ? JSON.parse(JSON.stringify(existingCollection.unmintedSupplys)) : [];
+  let newMaxSupplys = existingCollection?.maxSupplys ? deepCopy(existingCollection.maxSupplys) : [];
+  let newUnmintedSupplys = existingCollection?.unmintedSupplys ? deepCopy(existingCollection.unmintedSupplys) : [];
 
   for (const supplyObj of msg.badgeSupplys) {
     const amount = BigInt(supplyObj.amount);

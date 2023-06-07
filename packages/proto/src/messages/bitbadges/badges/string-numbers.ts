@@ -1,7 +1,7 @@
 export type NumberType = bigint | number | string | boolean;
 export type JSPrimitiveNumberType = string | number | boolean;
 
-export const BigIntify = (item: NumberType) => numberify(item, StringNumberStorageOptions.String) as bigint;
+export const BigIntify = (item: NumberType) => numberify(item, StringNumberStorageOptions.BigInt) as bigint;
 export const Stringify = (item: NumberType) => numberify(item, StringNumberStorageOptions.String) as string;
 export const Numberify = (item: NumberType) => numberify(item, StringNumberStorageOptions.Number) as number;
 export const NumberifyIfPossible = (item: NumberType) => numberify(item, StringNumberStorageOptions.NumberIfPossible) as number | string;
@@ -23,6 +23,7 @@ export const NumberifyIfPossible = (item: NumberType) => numberify(item, StringN
 
 export enum StringNumberStorageOptions {
   String = 'String',
+  BigInt = 'BigInt',
   Number = 'Number',
   NumberIfPossible = 'NumberIfPossible',
 }
@@ -33,6 +34,8 @@ export function numberify(_item: NumberType, options?: StringNumberStorageOption
     return item.toString();
   } else if (options === StringNumberStorageOptions.Number) {
     return Number(item);
+  } else if (options === StringNumberStorageOptions.BigInt) {
+    return BigInt(item);
   }
 
   if (item >= Number.MAX_SAFE_INTEGER) {

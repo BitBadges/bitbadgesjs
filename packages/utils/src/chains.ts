@@ -2,6 +2,7 @@ import { COSMOS, ethToCosmos } from "bitbadgesjs-address-converter";
 import { SupportedChain } from "./types/types";
 import { ethers } from "ethers";
 import { BitBadgesUserInfo, convertBitBadgesUserInfo } from "./types/users";
+import { Stringify } from "bitbadgesjs-proto";
 
 
 export const MINT_ACCOUNT: BitBadgesUserInfo<bigint> = {
@@ -70,9 +71,9 @@ export const BLANK_USER_INFO: BitBadgesUserInfo<bigint> = {
 }
 
 
-export const s_MINT_ACCOUNT: BitBadgesUserInfo<string> = convertBitBadgesUserInfo(JSON.parse(JSON.stringify(MINT_ACCOUNT)), (x) => x.toString());
+export const s_MINT_ACCOUNT: BitBadgesUserInfo<string> = convertBitBadgesUserInfo(MINT_ACCOUNT, Stringify);
 
-export const s_BLANK_USER_INFO: BitBadgesUserInfo<string> = convertBitBadgesUserInfo(JSON.parse(JSON.stringify(BLANK_USER_INFO)), (x) => x.toString());
+export const s_BLANK_USER_INFO: BitBadgesUserInfo<string> = convertBitBadgesUserInfo(BLANK_USER_INFO, Stringify);
 
 
 
