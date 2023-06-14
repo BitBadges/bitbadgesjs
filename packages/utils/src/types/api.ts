@@ -1,13 +1,15 @@
 import { DeliverTxResponse } from "@cosmjs/stargate"
+import { IdRange } from "bitbadgesjs-proto"
 import { BroadcastPostBody } from "bitbadgesjs-provider"
 import { ChallengeParams } from "blockin"
-import { TransferActivityInfo } from "./activity"
-import { BitBadgesCollection } from "./collections"
-import { BalanceInfo, LeavesDetails, StatusInfo } from "./db"
-import { Metadata } from "./metadata"
-import { JSPrimitiveNumberType } from "./string-numbers"
-import { BalancesMap, MetadataMap, SupportedChain } from "./types"
-import { BitBadgesUserInfo } from "./users"
+import { TransferActivityInfo, convertTransferActivityInfo } from "./activity"
+import { BadgeMetadataDetails, BitBadgesCollection, convertBadgeMetadataDetails, convertBitBadgesCollection } from "./collections"
+import { BalanceInfo, ChallengeDetails, StatusInfo, convertBalanceInfo, convertStatusInfo } from "./db"
+import { Metadata, convertMetadata } from "./metadata"
+import { NumberType } from "./string-numbers"
+import { OffChainBalancesMap } from "./transfers"
+import { SupportedChain } from "./types"
+import { BitBadgesUserInfo, convertBitBadgesUserInfo } from "./users"
 
 /**
  * If an error occurs, the response will be an ErrorResponse.
@@ -28,251 +30,410 @@ export interface ErrorResponse {
 }
 
 export interface GetStatusRouteRequestBody { }
-export interface GetStatusRouteSuccessResponse {
-  status: StatusInfo<string>;
+export interface GetStatusRouteSuccessResponse<T extends NumberType> {
+  status: StatusInfo<T>;
 }
-export type GetStatusRouteResponse = ErrorResponse | GetStatusRouteSuccessResponse;
+export type GetStatusRouteResponse<T extends NumberType> = ErrorResponse | GetStatusRouteSuccessResponse<T>;
+export function convertGetStatusRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetStatusRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetStatusRouteSuccessResponse<U> {
+  return {
+    status: convertStatusInfo(item.status, convertFunction),
+  }
+}
 
 
 export interface GetSearchRouteRequestBody { }
-export interface GetSearchRouteSuccessResponse {
-  collections: BitBadgesCollection<string>[],
-  accounts: BitBadgesUserInfo<string>[],
+export interface GetSearchRouteSuccessResponse<T extends NumberType> {
+  collections: BitBadgesCollection<T>[],
+  accounts: BitBadgesUserInfo<T>[],
 }
-export type GetSearchRouteResponse = ErrorResponse | GetSearchRouteSuccessResponse;
+export type GetSearchRouteResponse<T extends NumberType> = ErrorResponse | GetSearchRouteSuccessResponse<T>;
+export function convertGetSearchRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetSearchRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetSearchRouteSuccessResponse<U> {
+  return {
+    collections: item.collections.map((collection) => convertBitBadgesCollection(collection, convertFunction)),
+    accounts: item.accounts.map((account) => convertBitBadgesUserInfo(account, convertFunction)),
+  }
+}
+
+export interface MetadataFetchOptions {
+  doNotFetchCollectionMetadata?: boolean,
+  metadataIds?: NumberType[] | IdRange<NumberType>[],
+  uris?: string[],
+  badgeIds?: NumberType[] | IdRange<NumberType>[],
+}
+
+export type CollectionViewKey = 'latestActivity' | 'latestAnnouncements' | 'latestReviews' | 'owners' | 'claimsById';
+
+export interface GetAdditionalCollectionDetailsRequestBody {
+  viewsToFetch?: {
+    viewKey: CollectionViewKey,
+    bookmark: string
+  }[],
+  claimIdsToFetch?: NumberType[],
+  //customQueries?: { db: string, selector: any, key: string }[],
+  //TODO: we can add fully custom queries here (i.e. supply own Mango selector)
+}
+
+export interface GetMetadataForCollectionRequestBody {
+  metadataToFetch?: MetadataFetchOptions,
+}
 
 export interface GetCollectionBatchRouteRequestBody {
-  collectionIds: JSPrimitiveNumberType[],
-  startMetadataIds?: JSPrimitiveNumberType[],
+  collectionsToFetch: ({ collectionId: NumberType } & GetMetadataForCollectionRequestBody & GetAdditionalCollectionDetailsRequestBody)[],
 }
-export interface GetCollectionBatchRouteSuccessResponse {
-  collections: BitBadgesCollection<string>[]
+export interface GetCollectionBatchRouteSuccessResponse<T extends NumberType> {
+  collections: BitBadgesCollection<T>[]
 }
-export type GetCollectionBatchRouteResponse = ErrorResponse | GetCollectionBatchRouteSuccessResponse;
-
-export interface CollectionResponsePagination {
-  activity: PaginationInfo
-  announcements: PaginationInfo
-  reviews: PaginationInfo,
-  balances: PaginationInfo,
-  claims: PaginationInfo,
+export type GetCollectionBatchRouteResponse<T extends NumberType> = ErrorResponse | GetCollectionBatchRouteSuccessResponse<T>;
+export function convertGetCollectionBatchRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetCollectionBatchRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetCollectionBatchRouteSuccessResponse<U> {
+  return {
+    collections: item.collections.map((collection) => convertBitBadgesCollection(collection, convertFunction)),
+  }
 }
 
-export interface GetCollectionByIdRouteRequestBody {
-  startMetadataId?: JSPrimitiveNumberType,
-  activityBookmark?: string,
-  announcementsBookmark?: string,
-  reviewsBookmark?: string,
-  balancesBookmark?: string,
-  claimsBookmark?: string,
+export interface GetCollectionByIdRouteRequestBody extends GetAdditionalCollectionDetailsRequestBody, GetMetadataForCollectionRequestBody { }
+export interface GetCollectionRouteSuccessResponse<T extends NumberType> {
+  collection: BitBadgesCollection<T>,
 }
-export interface GetCollectionRouteSuccessResponse {
-  collection: BitBadgesCollection<string>,
+export type GetCollectionRouteResponse<T extends NumberType> = ErrorResponse | GetCollectionRouteSuccessResponse<T>;
+export function convertGetCollectionRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetCollectionRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetCollectionRouteSuccessResponse<U> {
+  return {
+    collection: convertBitBadgesCollection(item.collection, convertFunction),
+  }
 }
-export type GetCollectionRouteResponse = ErrorResponse | GetCollectionRouteSuccessResponse;
 
 export interface GetOwnersForBadgeRouteRequestBody {
   bookmark?: string,
 }
-export interface GetOwnersForBadgeRouteSuccessResponse {
-  balances: BalanceInfo<string>[],
+export interface GetOwnersForBadgeRouteSuccessResponse<T extends NumberType> {
+  owners: BalanceInfo<T>[],
+  pagination: PaginationInfo,
 }
-export type GetOwnersForBadgeRouteResponse = ErrorResponse | GetOwnersForBadgeRouteSuccessResponse;
+export type GetOwnersForBadgeRouteResponse<T extends NumberType> = ErrorResponse | GetOwnersForBadgeRouteSuccessResponse<T>;
+export function convertGetOwnersForBadgeRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetOwnersForBadgeRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetOwnersForBadgeRouteSuccessResponse<U> {
+  return {
+    owners: item.owners.map((balance) => convertBalanceInfo(balance, convertFunction)),
+    pagination: item.pagination,
+  }
+}
 
 export interface GetMetadataForCollectionRouteRequestBody {
-  startMetadataId?: JSPrimitiveNumberType,
+  metadataToFetch: MetadataFetchOptions,
 }
-export interface GetMetadataForCollectionRouteSuccessResponse {
-  collectionMetadata?: Metadata<string>,
-  badgeMetadata?: MetadataMap<string>,
+export interface GetMetadataForCollectionRouteSuccessResponse<T extends NumberType> {
+  collectionMetadata?: Metadata<T>,
+  badgeMetadata?: BadgeMetadataDetails<T>[],
 }
-export type GetMetadataForCollectionRouteResponse = ErrorResponse | GetMetadataForCollectionRouteSuccessResponse;
+export type GetMetadataForCollectionRouteResponse<T extends NumberType> = ErrorResponse | GetMetadataForCollectionRouteSuccessResponse<T>;
+export function convertGetMetadataForCollectionRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetMetadataForCollectionRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetMetadataForCollectionRouteSuccessResponse<U> {
+  return {
+    collectionMetadata: item.collectionMetadata ? convertMetadata(item.collectionMetadata, convertFunction) : undefined,
+    badgeMetadata: item.badgeMetadata ? item.badgeMetadata.map(x => convertBadgeMetadataDetails(x, convertFunction)) : undefined,
+  }
+}
 
 export interface GetBadgeBalanceByAddressRouteRequestBody { }
-export interface GetBadgeBalanceByAddressRouteSuccessResponse {
-  balance: BalanceInfo<string>,
+export interface GetBadgeBalanceByAddressRouteSuccessResponse<T extends NumberType> {
+  balance: BalanceInfo<T>,
 }
-export type GetBadgeBalanceByAddressRouteResponse = ErrorResponse | GetBadgeBalanceByAddressRouteSuccessResponse;
+export type GetBadgeBalanceByAddressRouteResponse<T extends NumberType> = ErrorResponse | GetBadgeBalanceByAddressRouteSuccessResponse<T>;
+export function convertGetBadgeBalanceByAddressRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetBadgeBalanceByAddressRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetBadgeBalanceByAddressRouteSuccessResponse<U> {
+  return {
+    balance: convertBalanceInfo(item.balance, convertFunction),
+  }
+}
 
 export interface GetBadgeActivityRouteRequestBody {
   bookmark?: string,
 }
-export interface GetBadgeActivityRouteSuccessResponse {
-  activity: TransferActivityInfo<string>[],
-  pagination: {
-    activity: PaginationInfo
-  },
+export interface GetBadgeActivityRouteSuccessResponse<T extends NumberType> {
+  activity: TransferActivityInfo<T>[],
+  pagination: PaginationInfo,
 }
-export type GetBadgeActivityRouteResponse = ErrorResponse | GetBadgeActivityRouteSuccessResponse;
+export type GetBadgeActivityRouteResponse<T extends NumberType> = ErrorResponse | GetBadgeActivityRouteSuccessResponse<T>;
+export function convertGetBadgeActivityRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetBadgeActivityRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetBadgeActivityRouteSuccessResponse<U> {
+  return {
+    activity: item.activity.map((activityItem) => convertTransferActivityInfo(activityItem, convertFunction)),
+    pagination: item.pagination,
+  }
+}
 
 export interface RefreshMetadataRouteRequestBody { }
-export interface RefreshMetadataRouteSuccessResponse {
+export interface RefreshMetadataRouteSuccessResponse<T extends NumberType> {
   successMessage: string,
 }
-export type RefreshMetadataRouteResponse = ErrorResponse | RefreshMetadataRouteSuccessResponse;
-
-export interface RefreshBadgeMetadataRouteRequestBody { }
-export interface GetAllCodesAndPasswordsRouteSuccessResponse {
-  codes: string[][],
-  passwords: string[],
+export type RefreshMetadataRouteResponse<T extends NumberType> = ErrorResponse | RefreshMetadataRouteSuccessResponse<T>;
+export function convertRefreshMetadataRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: RefreshMetadataRouteSuccessResponse<T>, convertFunction: (item: T) => U): RefreshMetadataRouteSuccessResponse<U> {
+  return { ...item };
 }
-export type GetAllCodesAndPasswordsRouteResponse = ErrorResponse | GetAllCodesAndPasswordsRouteSuccessResponse;
+
+export interface GetAllCodesAndPasswordsRouteRequestBody { }
+export interface GetAllCodesAndPasswordsRouteSuccessResponse<T extends NumberType> {
+  codes: string[][][],
+  passwords: string[][],
+}
+export type GetAllCodesAndPasswordsRouteResponse<T extends NumberType> = ErrorResponse | GetAllCodesAndPasswordsRouteSuccessResponse<T>;
+export function convertGetAllCodesAndPasswordsRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetAllCodesAndPasswordsRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetAllCodesAndPasswordsRouteSuccessResponse<U> {
+  return { ...item };
+}
 
 export interface GetClaimCodeViaPasswordRouteRequestBody { }
-export interface GetClaimCodeViaPasswordRouteSuccessResponse {
+export interface GetClaimCodeViaPasswordRouteSuccessResponse<T extends NumberType> {
   code: string,
 }
-export type GetClaimCodeViaPasswordRouteResponse = ErrorResponse | GetClaimCodeViaPasswordRouteSuccessResponse;
+export type GetClaimCodeViaPasswordRouteResponse<T extends NumberType> = ErrorResponse | GetClaimCodeViaPasswordRouteSuccessResponse<T>;
+export function convertGetClaimCodeViaPasswordRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetClaimCodeViaPasswordRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetClaimCodeViaPasswordRouteSuccessResponse<U> {
+  return { ...item };
+}
 
 export interface AddAnnouncementRouteRequestBody {
   announcement: string, //1 to 2048 characters
 }
-export interface AddAnnouncementRouteSuccessResponse {
+export interface AddAnnouncementRouteSuccessResponse<T extends NumberType> {
   success: boolean
 }
-export type AddAnnouncementRouteResponse = ErrorResponse | AddAnnouncementRouteSuccessResponse;
+export type AddAnnouncementRouteResponse<T extends NumberType> = ErrorResponse | AddAnnouncementRouteSuccessResponse<T>;
+export function convertAddAnnouncementRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: AddAnnouncementRouteSuccessResponse<T>, convertFunction: (item: T) => U): AddAnnouncementRouteSuccessResponse<U> {
+  return { ...item };
+}
 
 export interface AddReviewForCollectionRouteRequestBody {
   review: string, //1 to 2048 characters
-  stars: JSPrimitiveNumberType, //1 to 5
+  stars: NumberType, //1 to 5
 }
-export interface AddReviewForCollectionRouteSuccessResponse {
+export interface AddReviewForCollectionRouteSuccessResponse<T extends NumberType> {
   success: boolean
 }
-export type AddReviewForCollectionRouteResponse = ErrorResponse | AddReviewForCollectionRouteSuccessResponse;
+export type AddReviewForCollectionRouteResponse<T extends NumberType> = ErrorResponse | AddReviewForCollectionRouteSuccessResponse<T>;
+export function convertAddReviewForCollectionRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: AddReviewForCollectionRouteSuccessResponse<T>, convertFunction: (item: T) => U): AddReviewForCollectionRouteSuccessResponse<U> {
+  return { ...item };
+}
 
-export interface GetAccountsByAddressRouteRequestBody {
-  addresses: string[],
+export type AccountViewKey = 'latestActivity' | 'latestAnnouncements' | 'latestReviews' | 'badgesCollected';
+
+export interface GetAccountsRouteRequestBody {
+  accountsToFetch: {
+    address?: string,
+    username?: string,
+    fetchSequence?: boolean,
+    fetchBalance?: boolean,
+    viewsToFetch?: {
+      viewKey: AccountViewKey,
+      bookmark: string,
+      // mangoQuerySelector?: nano.MangoSelector
+      // TODO: Allow users to specify their own mango query selector here. For now, we map the viewKey to a mango query selector.
+    }[],
+  }[],
 }
-export interface GetAccountsByAddressRouteSuccessResponse {
-  accounts: BitBadgesUserInfo<string>[],
+
+export interface GetAccountsRouteSuccessResponse<T extends NumberType> {
+  accounts: BitBadgesUserInfo<T>[],
 }
-export type GetAccountsByAddressRouteResponse = ErrorResponse | GetAccountsByAddressRouteSuccessResponse;
+export type GetAccountsRouteResponse<T extends NumberType> = ErrorResponse | GetAccountsRouteSuccessResponse<T>;
+export function convertGetAccountsRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetAccountsRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetAccountsRouteSuccessResponse<U> {
+  return {
+    accounts: item.accounts.map((account) => convertBitBadgesUserInfo(account, convertFunction)),
+  }
+}
 
 export interface GetAccountRouteRequestBody {
-  fetchFromBlockchain?: boolean,
-  activityBookmark?: string,
-  announcementsBookmark?: string,
-  reviewsBookmark?: string,
-  balancesBookmark?: string,
-  collectedBookmark?: string,
+  fetchSequence?: boolean,
+  fetchBalance?: boolean,
+  viewsToFetch?: {
+    viewKey: AccountViewKey,
+    bookmark: string
+  }[],
+  //customQueries?: { db: string, selector: any, key: string }[],
+  //TODO: we can add fully custom queries here (i.e. supply own Mango selector)
 }
-export type GetAccountRouteSuccessResponse = BitBadgesUserInfo<string>;
-export type GetAccountRouteResponse = ErrorResponse | GetAccountRouteSuccessResponse;
+export type GetAccountRouteSuccessResponse<T extends NumberType> = BitBadgesUserInfo<T>;
+export type GetAccountRouteResponse<T extends NumberType> = ErrorResponse | GetAccountRouteSuccessResponse<T>;
+export function convertGetAccountRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetAccountRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetAccountRouteSuccessResponse<U> {
+  return convertBitBadgesUserInfo(item, convertFunction);
+}
 
 export interface AddReviewForUserRouteRequestBody {
   review: string, //1 to 2048 characters
-  stars: JSPrimitiveNumberType, //1 to 5
+  stars: NumberType, //1 to 5
 }
-export interface AddReviewForUserRouteSuccessResponse {
+export interface AddReviewForUserRouteSuccessResponse<T extends NumberType> {
   success: boolean
 }
-export type AddReviewForUserRouteResponse = ErrorResponse | AddReviewForUserRouteSuccessResponse;
+export type AddReviewForUserRouteResponse<T extends NumberType> = ErrorResponse | AddReviewForUserRouteSuccessResponse<T>;
+export function convertAddReviewForUserRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: AddReviewForUserRouteSuccessResponse<T>, convertFunction: (item: T) => U): AddReviewForUserRouteSuccessResponse<U> {
+  return { ...item };
+}
 
 export interface UpdateAccountInfoRouteRequestBody {
   discord?: string,
   twitter?: string,
   github?: string,
   telegram?: string,
-  seenActivity?: JSPrimitiveNumberType,
+  seenActivity?: NumberType,
   readme?: string,
 }
-export interface UpdateAccountInfoRouteSuccessResponse {
+export interface UpdateAccountInfoRouteSuccessResponse<T extends NumberType> {
   success: boolean
 }
-export type UpdateAccountInfoRouteResponse = ErrorResponse | UpdateAccountInfoRouteSuccessResponse;
+export type UpdateAccountInfoRouteResponse<T extends NumberType> = ErrorResponse | UpdateAccountInfoRouteSuccessResponse<T>;
+export function convertUpdateAccountInfoRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: UpdateAccountInfoRouteSuccessResponse<T>, convertFunction: (item: T) => U): UpdateAccountInfoRouteSuccessResponse<U> {
+  return { ...item };
+}
+
+export interface AddBalancesToIpfsRouteRequestBody {
+  balances: OffChainBalancesMap<NumberType>,
+}
+export interface AddBalancesToIpfsRouteSuccessResponse<T extends NumberType> {
+  result: {
+    cid: string,
+    path: string,
+  }
+}
+export type AddBalancesToIpfsRouteResponse<T extends NumberType> = ErrorResponse | AddBalancesToIpfsRouteSuccessResponse<T>;
+export function convertAddBalancesToIpfsRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: AddBalancesToIpfsRouteSuccessResponse<T>, convertFunction: (item: T) => U): AddBalancesToIpfsRouteSuccessResponse<U> {
+  return { ...item };
+}
 
 export interface AddMetadataToIpfsRouteRequestBody {
-  collectionMetadata?: Metadata<JSPrimitiveNumberType>,
-  badgeMetadata?: MetadataMap<JSPrimitiveNumberType>,
-  balances?: BalancesMap<JSPrimitiveNumberType>,
+  collectionMetadata?: Metadata<NumberType>,
+  badgeMetadata?: BadgeMetadataDetails<NumberType>[] | Metadata<NumberType>[],
 }
-export interface AddMetadataToIpfsRouteSuccessResponse {
-  cid: string,
-  path: string,
+export interface AddMetadataToIpfsRouteSuccessResponse<T extends NumberType> {
+  collectionMetadataResult?: {
+    cid: string,
+    path: string,
+  },
+  badgeMetadataResults: {
+    cid: string,
+    path: string,
+  }[],
+  allResults: {
+    cid: string,
+    path: string,
+  }[]
 }
-export type AddMetadataToIpfsRouteResponse = ErrorResponse | AddMetadataToIpfsRouteSuccessResponse;
+export type AddMetadataToIpfsRouteResponse<T extends NumberType> = ErrorResponse | AddMetadataToIpfsRouteSuccessResponse<T>;
+export function convertAddMetadataToIpfsRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: AddMetadataToIpfsRouteSuccessResponse<T>, convertFunction: (item: T) => U): AddMetadataToIpfsRouteSuccessResponse<U> {
+  return { ...item };
+}
 
 export interface AddClaimToIpfsRouteRequestBody {
   name: string,
   description: string,
-  leavesDetails: LeavesDetails,
-  password?: string
+  challengeDetails?: ChallengeDetails<NumberType>[],
 }
-export interface AddClaimToIpfsRouteSuccessResponse {
-  cid: string,
-  path: string,
+export interface AddClaimToIpfsRouteSuccessResponse<T extends NumberType> {
+  result: {
+    cid: string,
+    path: string,
+  }
 }
-export type AddClaimToIpfsRouteResponse = ErrorResponse | AddClaimToIpfsRouteSuccessResponse;
+export type AddClaimToIpfsRouteResponse<T extends NumberType> = ErrorResponse | AddClaimToIpfsRouteSuccessResponse<T>;
+export function convertAddClaimToIpfsRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: AddClaimToIpfsRouteSuccessResponse<T>, convertFunction: (item: T) => U): AddClaimToIpfsRouteSuccessResponse<U> {
+  return { ...item };
+}
 
 export interface GetSignInChallengeRouteRequestBody {
   chain: SupportedChain,
   address: string,
-  hours?: JSPrimitiveNumberType,
+  hours?: NumberType,
 }
-export interface GetSignInChallengeRouteSuccessResponse {
+export interface GetSignInChallengeRouteSuccessResponse<T extends NumberType> {
   nonce: string,
   params: ChallengeParams,
   blockinMessage: string,
 }
-export type GetSignInChallengeRouteResponse = ErrorResponse | GetSignInChallengeRouteSuccessResponse;
+export type GetSignInChallengeRouteResponse<T extends NumberType> = ErrorResponse | GetSignInChallengeRouteSuccessResponse<T>;
+export function convertGetSignInChallengeRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetSignInChallengeRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetSignInChallengeRouteSuccessResponse<U> {
+  return { ...item };
+}
 
 export interface VerifySignInRouteRequestBody {
   chain: SupportedChain,
   originalBytes: any
   signatureBytes: any
 }
-export interface VerifySignInRouteSuccessResponse {
+export interface VerifySignInRouteSuccessResponse<T extends NumberType> {
   success: boolean,
   successMessage: string,
 }
-export type VerifySignInRouteResponse = ErrorResponse | VerifySignInRouteSuccessResponse;
+export type VerifySignInRouteResponse<T extends NumberType> = ErrorResponse | VerifySignInRouteSuccessResponse<T>;
+export function convertVerifySignInRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: VerifySignInRouteSuccessResponse<T>, convertFunction: (item: T) => U): VerifySignInRouteSuccessResponse<U> {
+  return { ...item };
+}
 
 export interface SignOutRequestBody { }
-export interface SignOutSuccessResponse {
+export interface SignOutSuccessResponse<T extends NumberType> {
   success: boolean,
 }
-export type SignOutResponse = ErrorResponse | SignOutSuccessResponse;
+export type SignOutResponse<T extends NumberType> = ErrorResponse | SignOutSuccessResponse<T>;
+export function convertSignOutSuccessResponse<T extends NumberType, U extends NumberType>(item: SignOutSuccessResponse<T>, convertFunction: (item: T) => U): SignOutSuccessResponse<U> {
+  return { ...item };
+}
 
 export interface GetBrowseCollectionsRouteRequestBody { }
-export interface GetBrowseCollectionsRouteSuccessResponse {
-  [category: string]: BitBadgesCollection<string>[],
+export interface GetBrowseCollectionsRouteSuccessResponse<T extends NumberType> {
+  [category: string]: BitBadgesCollection<T>[],
 }
-export type GetBrowseCollectionsRouteResponse = ErrorResponse | GetBrowseCollectionsRouteSuccessResponse;
+export type GetBrowseCollectionsRouteResponse<T extends NumberType> = ErrorResponse | GetBrowseCollectionsRouteSuccessResponse<T>;
+export function convertGetBrowseCollectionsRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetBrowseCollectionsRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetBrowseCollectionsRouteSuccessResponse<U> {
+  return Object.fromEntries(Object.entries(item).map(([key, value]) => {
+    return [key, value.map((collection) => convertBitBadgesCollection(collection, convertFunction))];
+  }));
+}
 
 export type BroadcastTxRouteRequestBody = BroadcastPostBody;
-export interface BroadcastTxRouteSuccessResponse {
-  //TODO:`
+// export interface BroadcastTxRouteSuccessResponse<T extends NumberType> {
+//   //TODO:`
+// }
+
+export type BroadcastTxRouteSuccessResponse<T extends NumberType> = any;
+export type BroadcastTxRouteResponse<T extends NumberType> = ErrorResponse | BroadcastTxRouteSuccessResponse<T>;
+export function convertBroadcastTxRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: BroadcastTxRouteSuccessResponse<T>, convertFunction: (item: T) => U): BroadcastTxRouteSuccessResponse<U> {
+  return { ...item };
 }
-export type BroadcastTxRouteResponse = ErrorResponse | BroadcastTxRouteSuccessResponse;
 
 export type SimulateTxRouteRequestBody = BroadcastPostBody;
-export interface SimulateTxRouteSuccessResponse {
-  //TODO:
+// export interface SimulateTxRouteSuccessResponse<T extends NumberType> {
+//   //TODO:
+// }
+export type SimulateTxRouteSuccessResponse<T extends NumberType> = any;
+
+export type SimulateTxRouteResponse<T extends NumberType> = ErrorResponse | SimulateTxRouteSuccessResponse<T>;
+export function convertSimulateTxRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: SimulateTxRouteSuccessResponse<T>, convertFunction: (item: T) => U): SimulateTxRouteSuccessResponse<U> {
+  return { ...item };
 }
-export type SimulateTxRouteResponse = ErrorResponse | SimulateTxRouteSuccessResponse;
 
 export interface FetchMetadataDirectlyRouteRequestBody {
   uri: string,
 }
-export interface FetchMetadataDirectlyRouteSuccessResponse {
-  metadata: Metadata<string>,
+export interface FetchMetadataDirectlyRouteSuccessResponse<T extends NumberType> {
+  metadata: Metadata<T>,
 }
-export type FetchMetadataDirectlyRouteResponse = ErrorResponse | FetchMetadataDirectlyRouteSuccessResponse;
+export type FetchMetadataDirectlyRouteResponse<T extends NumberType> = ErrorResponse | FetchMetadataDirectlyRouteSuccessResponse<T>;
+export function convertFetchMetadataDirectlyRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: FetchMetadataDirectlyRouteSuccessResponse<T>, convertFunction: (item: T) => U): FetchMetadataDirectlyRouteSuccessResponse<U> {
+  return {
+    metadata: convertMetadata(item.metadata, convertFunction),
+  }
+}
 
 export type GetTokensFromFaucetRouteRequestBody = {};
-export type GetTokensFromFaucetRouteResponse = DeliverTxResponse | ErrorResponse;
-export type GetTokensFromFaucetRouteSuccessResponse = DeliverTxResponse;
+export type GetTokensFromFaucetRouteResponse<T extends NumberType> = DeliverTxResponse | ErrorResponse;
+export type GetTokensFromFaucetRouteSuccessResponse<T extends NumberType> = DeliverTxResponse;
+export function convertGetTokensFromFaucetRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetTokensFromFaucetRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetTokensFromFaucetRouteSuccessResponse<U> {
+  return { ...item };
+}
 
 /**
  * Type for CouchDB pagination information.
  * @typedef {Object} PaginationInfo
  * @property {string} bookmark - The bookmark to be used to fetch the next X documents. Initially, bookmark should be '' (empty string) to fetch the first X documents. Each time the next X documents are fetched, the bookmark should be updated to the bookmark returned by the previous fetch.
  * @property {boolean} hasMore - Indicates whether there are more documents to be fetched. Once hasMore is false, all documents have been fetched.
+ * @property {number} [total] - The total number of documents in this view. This is only returned for the first fetch (when bookmark is empty string). It is not returned for subsequent fetches.
  */
 export interface PaginationInfo {
   bookmark: string,
   hasMore: boolean,
+  total?: number,
 }
 
 /**

@@ -1,8 +1,74 @@
-import { Balance, Transfer } from "bitbadgesjs-proto";
-import { subtractBalancesForIdRanges } from "./balances";
-import { TransferWithIncrements } from "./types/transfers";
+import { Balance, Transfer, UserBalance } from "bitbadgesjs-proto";
+import { addBalancesForIdRanges, subtractBalancesForIdRanges } from "./balances";
+import { OffChainBalancesMap, TransferWithIncrements } from "./types/transfers";
 import { deepCopy } from "./types/utils";
 
+/**
+ * Given some transfers (potentially incremented), return the balance map to store for a collection with off-chain balances.
+ *
+ * @param {TransferWithIncrements<bigint>[]} transfers - The transfers to process.
+ */
+export const createBalanceMapForOffChainBalances = async (transfers: TransferWithIncrements<bigint>[]) => {
+  const balanceMap: OffChainBalancesMap<bigint> = {};
+
+  //Calculate new balances of the toAddresses
+  for (let idx = 0; idx < transfers.length; idx++) {
+    const transfer = transfers[idx];
+    for (let j = 0; j < transfer.toAddresses.length; j++) {
+      const address = transfer.toAddresses[j];
+
+      //currBalance is used as a Balance[] type to be compatible with addBalancesForIdRanges
+      const currBalances = balanceMap[address] ? balanceMap[address] : [];
+
+      for (const transferBalanceObj of transfer.balances) {
+        balanceMap[address] = addBalancesForIdRanges({ balances: currBalances, approvals: [] }, transferBalanceObj.badgeIds, transferBalanceObj.amount).balances;
+      }
+    }
+  }
+
+  return balanceMap;
+}
+
+/**
+ * Gets the balances to be transferred for a given transfer with increments.
+ * @example
+ * For a transfer with balances: [{ badgeIds: [{ start: 1n, end: 1n }], amount: 1n }], incrementIdsBy: 1n, toAddressesLength: 1000
+ * We return [{ badgeIds: [{ start: 1n, end: 1000n }], amount: 1n }] because we transfer x1 badge to 1000 addresses
+ * and increment the badgeIds by 1 each time.
+ *
+ * @param {TransferWithIncrements<bigint>[]} transfers - The list of transfers with increments.
+ * @returns {UserBalance<bigint>} The balances to be transferred.
+ */
+export const getAllBalancesToBeTransferred = (transfers: TransferWithIncrements<bigint>[]) => {
+  let startBalance: UserBalance<bigint> = { balances: [], approvals: [] };
+  for (const transfer of transfers) {
+    for (const balance of transfer.balances) {
+
+      //toAddressesLength takes priority
+      const _numRecipients = transfer.toAddressesLength ? transfer.toAddressesLength : transfer.toAddresses ? transfer.toAddresses.length : 0;
+      const numRecipients = BigInt(_numRecipients);
+
+      const badgeIds = deepCopy(balance.badgeIds);
+
+      //If incrementIdsBy is not set, then we are not incrementing badgeIds and we can just batch calculate the balance
+      if (!transfer.incrementIdsBy) {
+        startBalance = addBalancesForIdRanges(startBalance, badgeIds, balance.amount * numRecipients);
+      } else {
+        //If incrementIdsBy is set, then we need to increment the badgeIds after each transfer
+        //TODO: This is not efficient, we should be able to LeetCode optimize this somehow. Imagine a claim with 100000000 possible claims.
+        for (let i = 0; i < numRecipients; i++) {
+          startBalance = addBalancesForIdRanges(startBalance, badgeIds, balance.amount);
+          for (const badgeId of badgeIds) {
+            badgeId.start += transfer.incrementIdsBy || 0n;
+            badgeId.end += transfer.incrementIdsBy || 0n;
+          }
+        }
+      }
+    }
+  }
+
+  return startBalance;
+}
 
 /**
  * Converts a TransferWithIncrements<bigint>[] to a Transfer<bigint>[].

@@ -1,6 +1,5 @@
-import { IdRange, NumberType, UserBalance, convertIdRange, convertUserBalance } from "bitbadgesjs-proto";
+import { NumberType, UserBalance, convertUserBalance } from "bitbadgesjs-proto";
 import { BitBadgesCollection, convertBitBadgesCollection } from "./collections";
-import { Metadata, convertMetadata } from "./metadata";
 import { BitBadgesUserInfo, convertBitBadgesUserInfo } from "./users";
 
 /**
@@ -53,29 +52,6 @@ export function convertBalancesMap<T extends NumberType, U extends NumberType>(i
 }
 
 /**
- * MetadataMap is used to store the metadata of badges by metadataId.
- *
- * @typedef {Object} MetadataMap
- */
-export interface MetadataMap<T extends NumberType> {
-  [metadataId: string]: {
-    badgeIds: IdRange<T>[],
-    metadata: Metadata<T>,
-    uri: string
-  } | undefined;
-}
-
-export function convertMetadataMap<T extends NumberType, U extends NumberType>(item: MetadataMap<T>, convertFunction: (item: T) => U): MetadataMap<U> {
-  return Object.fromEntries(Object.entries(item).map(([key, value]) => {
-    return [key, value ? {
-      badgeIds: value.badgeIds.map((badgeId) => convertIdRange(badgeId, convertFunction)),
-      metadata: convertMetadata(value.metadata, convertFunction),
-      uri: value.uri
-    } : undefined];
-  }));
-}
-
-/**
  * SupportedChain is an enum of all the supported chains.
  * Currently, we only support Ethereum and Cosmos.
  *
@@ -116,6 +92,7 @@ export enum DistributionMethod {
   Unminted = 'Unminted',
   JSON = 'JSON',
   DirectTransfer = 'Direct Transfer',
+  OffChainBalances = 'Off-Chain Balances'
 }
 
 /**

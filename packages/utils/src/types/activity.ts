@@ -1,8 +1,8 @@
 import { Balance, convertBalance } from "bitbadgesjs-proto";
 import { NumberType } from "./string-numbers";
-import { deepCopy } from "./utils";
+import { deepCopy, getCouchDBDetails, removeCouchDBDetails } from "./utils";
 import nano from "nano";
-import { CouchDBDetailsExcluded, DeletableDocument } from "./db";
+import { Identified, DeletableDocument } from "./db";
 
 export type ReviewMethod = 'Review';
 export type TransferMethod = 'Transfer' | 'Mint' | 'Claim';
@@ -16,20 +16,26 @@ export type ActivityMethod = ReviewMethod | TransferMethod | AnnouncementMethod;
  * @property {NumberType} timestamp - The timestamp of the activity.
  * @property {NumberType} block - The block number of the activity.
  */
-
 export interface ActivityInfoBase<T extends NumberType> {
   method: ActivityMethod;
   timestamp: T;
   block: T;
 }
 export type ActivityDoc<T extends NumberType> = ActivityInfoBase<T> & nano.Document & DeletableDocument;
-export type ActivityInfo<T extends NumberType> = ActivityInfoBase<T> & CouchDBDetailsExcluded;
+export type ActivityInfo<T extends NumberType> = ActivityInfoBase<T> & Identified;
 
-export function convertActivityDoc<T extends NumberType, U extends NumberType>(item: ActivityDoc<T>, convertFunction: (item: T) => U): ActivityDoc<U> {
+export function convertActivityInfo<T extends NumberType, U extends NumberType>(item: ActivityInfo<T>, convertFunction: (item: T) => U): ActivityInfo<U> {
   return deepCopy({
     ...item,
     timestamp: convertFunction(item.timestamp),
     block: convertFunction(item.block)
+  })
+}
+
+export function convertActivityDoc<T extends NumberType, U extends NumberType>(item: ActivityDoc<T>, convertFunction: (item: T) => U): ActivityDoc<U> {
+  return deepCopy({
+    ...getCouchDBDetails(item),
+    ...convertActivityInfo(removeCouchDBDetails(item), convertFunction)
   })
 }
 
@@ -55,15 +61,22 @@ export interface ReviewInfoBase<T extends NumberType> extends ActivityInfoBase<T
   reviewedAddress?: string;
 }
 export type ReviewDoc<T extends NumberType> = ReviewInfoBase<T> & nano.Document & DeletableDocument;
-export type ReviewInfo<T extends NumberType> = ReviewInfoBase<T> & CouchDBDetailsExcluded;
+export type ReviewInfo<T extends NumberType> = ReviewInfoBase<T> & Identified;
 
-export function convertReviewDoc<T extends NumberType, U extends NumberType>(item: ReviewDoc<T>, convertFunction: (item: T) => U): ReviewDoc<U> {
+export function convertReviewInfo<T extends NumberType, U extends NumberType>(item: ReviewInfo<T>, convertFunction: (item: T) => U): ReviewInfo<U> {
   return deepCopy({
     ...item,
-    ...convertActivityDoc(item, convertFunction),
+    ...convertActivityInfo(item, convertFunction),
     method: item.method,
     stars: convertFunction(item.stars),
     collectionId: item.collectionId ? convertFunction(item.collectionId) : undefined
+  })
+}
+
+export function convertReviewDoc<T extends NumberType, U extends NumberType>(item: ReviewDoc<T>, convertFunction: (item: T) => U): ReviewDoc<U> {
+  return deepCopy({
+    ...getCouchDBDetails(item),
+    ...convertReviewInfo(removeCouchDBDetails(item), convertFunction)
   })
 }
 
@@ -84,12 +97,19 @@ export interface AnnouncementInfoBase<T extends NumberType> extends ActivityInfo
   collectionId: T;
 }
 export type AnnouncementDoc<T extends NumberType> = AnnouncementInfoBase<T> & nano.Document & DeletableDocument;
-export type AnnouncementInfo<T extends NumberType> = AnnouncementInfoBase<T> & CouchDBDetailsExcluded;
+export type AnnouncementInfo<T extends NumberType> = AnnouncementInfoBase<T> & Identified;
 
 export function convertAnnouncementDoc<T extends NumberType, U extends NumberType>(item: AnnouncementDoc<T>, convertFunction: (item: T) => U): AnnouncementDoc<U> {
   return deepCopy({
+    ...getCouchDBDetails(item),
+    ...convertAnnouncementInfo(removeCouchDBDetails(item), convertFunction)
+  })
+}
+
+export function convertAnnouncementInfo<T extends NumberType, U extends NumberType>(item: AnnouncementInfo<T>, convertFunction: (item: T) => U): AnnouncementInfo<U> {
+  return deepCopy({
     ...item,
-    ...convertActivityDoc(item, convertFunction),
+    ...convertActivityInfo(item, convertFunction),
     method: item.method,
     collectionId: convertFunction(item.collectionId)
   })
@@ -114,12 +134,19 @@ export interface TransferActivityInfoBase<T extends NumberType> extends Activity
   claimId?: T;
 }
 export type TransferActivityDoc<T extends NumberType> = TransferActivityInfoBase<T> & nano.Document & DeletableDocument;
-export type TransferActivityInfo<T extends NumberType> = TransferActivityInfoBase<T> & CouchDBDetailsExcluded;
+export type TransferActivityInfo<T extends NumberType> = TransferActivityInfoBase<T> & Identified;
 
 export function convertTransferActivityDoc<T extends NumberType, U extends NumberType>(item: TransferActivityDoc<T>, convertFunction: (item: T) => U): TransferActivityDoc<U> {
   return deepCopy({
+    ...getCouchDBDetails(item),
+    ...convertTransferActivityInfo(removeCouchDBDetails(item), convertFunction)
+  })
+}
+
+export function convertTransferActivityInfo<T extends NumberType, U extends NumberType>(item: TransferActivityInfo<T>, convertFunction: (item: T) => U): TransferActivityInfo<U> {
+  return deepCopy({
     ...item,
-    ...convertActivityDoc(item, convertFunction),
+    ...convertActivityInfo(item, convertFunction),
     method: item.method,
     balances: item.balances.map((x) => convertBalance(x, convertFunction)),
     collectionId: convertFunction(item.collectionId),

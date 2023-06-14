@@ -20,8 +20,9 @@ export const GetClaimCodeViaPasswordRoute = (collectionId: NumberType, claimId: 
 export const AddAnnouncementRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/addAnnouncement`;
 export const AddReviewForCollectionRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/addReview`;
 
+
 //User
-export const GetAccountsByAddressRoute = () => "/api/v0/user/batch";
+export const GetAccountsRoute = () => "/api/v0/user/batch";
 export const GetAccountRoute = (addressOrUsername: string) => `/api/v0/user/${addressOrUsername}`;
 export const AddReviewForUserRoute = (addressOrUsername: string) => `/api/v0/user/${addressOrUsername}/addReview`;
 export const UpdateAccountInfoRoute = () => "/api/v0/user/updateAccount";
@@ -29,6 +30,7 @@ export const UpdateAccountInfoRoute = () => "/api/v0/user/updateAccount";
 //IPFS
 export const AddMetadataToIpfsRoute = () => "/api/v0/addMetadataToIpfs";
 export const AddClaimToIpfsRoute = () => "/api/v0/addClaimToIpfs";
+export const AddBalancesToIpfsRoute = () => "/api/v0/addBalancesToIpfs";
 
 //Blockin Auth
 export const GetSignInChallengeRoute = () => "/api/v0/auth/getChallenge";

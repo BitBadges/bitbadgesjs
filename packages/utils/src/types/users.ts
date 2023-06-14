@@ -1,7 +1,7 @@
 import { NumberType } from "bitbadgesjs-proto"
-import { AnnouncementInfo, ReviewInfo, TransferActivityInfo, convertAnnouncementDoc, convertReviewDoc, convertTransferActivityDoc } from "./activity"
+import { AnnouncementInfo, ReviewInfo, TransferActivityInfo, convertAnnouncementInfo, convertReviewInfo, convertTransferActivityInfo } from "./activity"
 import { PaginationInfo } from "./api"
-import { AccountInfoBase, BalanceInfo, CouchDBDetailsExcluded, ProfileInfoBase, convertAccountDoc, convertBalanceDoc, convertProfileDoc } from "./db"
+import { AccountInfoBase, BalanceInfo, Identified, ProfileInfoBase, convertAccountInfo, convertBalanceInfo, convertProfileInfo } from "./db"
 import { deepCopy, removeCouchDBDetails } from "./utils"
 
 /**
@@ -15,7 +15,7 @@ import { deepCopy, removeCouchDBDetails } from "./utils"
  * @property {string} [avatar] - The avatar of the account.
  * @property {Coin} [balance] - The balance of the account ($BADGE).
  * @property {boolean} [airdropped] - Indicates whether the account has claimed their airdrop.
- * @property {BalanceDoc[]} collected - A list of badges that the account has collected. Paginated and fetches and needed.
+ * @property {BalanceDoc[]} collected - A list of badges that the account has collected. Paginated and fetches as needed.
  * @property {TransferActivityDoc[]} activity - A list of transfer activity items for the account. Paginated and fetches and needed.
  * @property {AnnouncementDoc[]} announcements - A list of announcement activity items for the account. Paginated and fetches and needed.
  * @property {ReviewDoc[]} reviews - A list of review activity items for the account. Paginated and fetches and needed.
@@ -27,7 +27,7 @@ import { deepCopy, removeCouchDBDetails } from "./utils"
  *
  * For typical fetches, collected, activity, announcements, and reviews will be empty arrays and are to be loaded as needed (pagination will be set to hasMore == true).
  */
-export interface BitBadgesUserInfo<T extends NumberType> extends ProfileInfoBase<T>, AccountInfoBase<T>, CouchDBDetailsExcluded {
+export interface BitBadgesUserInfo<T extends NumberType> extends ProfileInfoBase<T>, AccountInfoBase<T>, Identified {
   resolvedName?: string
   avatar?: string
 
@@ -38,31 +38,30 @@ export interface BitBadgesUserInfo<T extends NumberType> extends ProfileInfoBase
   activity: TransferActivityInfo<T>[],
   announcements: AnnouncementInfo<T>[],
   reviews: ReviewInfo<T>[],
-  pagination: {
-    activity: PaginationInfo,
-    announcements: PaginationInfo,
-    collected: PaginationInfo,
-    reviews: PaginationInfo,
-  },
+
+  views: {
+    [viewKey: string]: {
+      ids: string[],
+      type: string,
+      pagination: PaginationInfo,
+    } | undefined
+  }
 }
 
 export function convertBitBadgesUserInfo<T extends NumberType, U extends NumberType>(item: BitBadgesUserInfo<T>, convertFunction: (item: T) => U): BitBadgesUserInfo<U> {
   const converted = deepCopy({
-    ...convertProfileDoc({ ...item, _id: '', _rev: '' }, convertFunction),
-    ...convertAccountDoc({ ...item, _id: '', _rev: '' }, convertFunction),
+    ...convertProfileInfo({ ...item, _id: '' }, convertFunction),
+    ...convertAccountInfo({ ...item, _id: '' }, convertFunction),
     resolvedName: item.resolvedName,
     avatar: item.avatar,
     airdropped: item.airdropped,
-    collected: item.collected.map((balance) => convertBalanceDoc({ ...balance, _id: '', _rev: '' }, convertFunction)).map(x => removeCouchDBDetails(x)),
-    activity: item.activity.map((activityItem) => convertTransferActivityDoc({ ...activityItem, _id: '', _rev: '' }, convertFunction)).map(x => removeCouchDBDetails(x)),
-    announcements: item.announcements.map((activityItem) => convertAnnouncementDoc({ ...activityItem, _id: '', _rev: '' }, convertFunction)).map(x => removeCouchDBDetails(x)),
-    reviews: item.reviews.map((activityItem) => convertReviewDoc({ ...activityItem, _id: '', _rev: '' }, convertFunction)).map(x => removeCouchDBDetails(x)),
-    pagination: {
-      activity: item.pagination.activity,
-      announcements: item.pagination.announcements,
-      collected: item.pagination.collected,
-      reviews: item.pagination.reviews,
-    },
+    collected: item.collected.map((balance) => convertBalanceInfo(balance, convertFunction)).map(x => removeCouchDBDetails(x)),
+    activity: item.activity.map((activityItem) => convertTransferActivityInfo(activityItem, convertFunction)).map(x => removeCouchDBDetails(x)),
+    announcements: item.announcements.map((activityItem) => convertAnnouncementInfo(activityItem, convertFunction)).map(x => removeCouchDBDetails(x)),
+    reviews: item.reviews.map((activityItem) => convertReviewInfo(activityItem, convertFunction)).map(x => removeCouchDBDetails(x)),
+    views: item.views,
+    _rev: undefined,
+    _deleted: undefined,
   })
 
   return removeCouchDBDetails(converted);

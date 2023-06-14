@@ -1,6 +1,19 @@
-import { Transfer, convertTransfer } from "bitbadgesjs-proto";
+import { Balance, Transfer, convertBalance, convertTransfer } from "bitbadgesjs-proto";
 import { NumberType } from "./string-numbers";
 import { deepCopy } from "./utils";
+
+export interface OffChainBalancesMap<T extends NumberType> {
+  [cosmosAddress: string]: Balance<T>[]
+}
+
+export function convertOffChainBalancesMap<T extends NumberType, U extends NumberType>(item: OffChainBalancesMap<T>, convertFunction: (item: T) => U): OffChainBalancesMap<U> {
+  const newMap: OffChainBalancesMap<U> = {};
+  for (const [key, value] of Object.entries(item)) {
+    newMap[key] = value.map((balance) => convertBalance(balance, convertFunction));
+  }
+
+  return newMap;
+}
 
 /**
  * TransferWithIncrements is a type that is used to better handle batch transfers, potentially with incremented badgeIDs.

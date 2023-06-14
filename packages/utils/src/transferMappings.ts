@@ -94,7 +94,7 @@ export const isAccountInAddressMapping = (_addressesMapping: AddressesMapping<bi
  * @param {string} managerAddress - The manager address to use for the transfer mapping.
  */
 export const getValidTransfersForTransferMapping = (mapping: TransferMapping<bigint>[], fromAddressToCheck: string, toAddresses: string[], managerAddress: string) => {
-  const matchingAddresses: any[] = [];
+  const matchingAddresses = [];
   for (const address of toAddresses) {
     for (const transfer of mapping) {
       const fromIsApproved = isAccountInAddressMapping(transfer.from, fromAddressToCheck, managerAddress);

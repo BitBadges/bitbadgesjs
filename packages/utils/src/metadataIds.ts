@@ -59,6 +59,53 @@ export const getMetadataIdForBadgeId = (badgeId: bigint, badgeUris: BadgeUri<big
   return -1;
 }
 
+export const getMetadataIdForUri = (uri: string, badgeUris: BadgeUri<bigint>[]) => {
+  let batchIdx = 1n;
+
+  for (const badgeUri of badgeUris) {
+    if (badgeUri.uri.includes("{id}")) {
+      if (badgeUri.uri === uri) {
+        return batchIdx;
+      }
+
+      //Check if uri has a number value that replaces {id}
+
+      //Check if everythin up to {id} is the same
+      const uriPrefix = badgeUri.uri.split("{id}")[0];
+      const numSubstringIdxStart = uriPrefix.length;
+      if (uri.startsWith(uriPrefix)) {
+        //Check if everything after {id} is the same
+        const uriSuffix = badgeUri.uri.split("{id}")[1];
+        const numSubstringIdxEnd = uri.length - uriSuffix.length;
+        if (uri.endsWith(uriSuffix)) {
+          //Check if the number value is within the range of badgeIds
+          const numSubstring = uri.substring(numSubstringIdxStart, numSubstringIdxEnd);
+          const num = BigInt(numSubstring);
+
+          for (const badgeIdRange of badgeUri.badgeIds) {
+            if (num >= badgeIdRange.start && num <= badgeIdRange.end) {
+              return batchIdx + num - badgeIdRange.start;
+            }
+
+            batchIdx += badgeIdRange.end - badgeIdRange.start + 1n;
+          }
+        }
+      } else {
+        for (const badgeIdRange of badgeUri.badgeIds) {
+          batchIdx += badgeIdRange.end - badgeIdRange.start + 1n;
+        }
+      }
+    } else {
+      if (badgeUri.uri === uri) {
+        return batchIdx;
+      }
+      batchIdx++;
+    }
+  }
+
+  return -1;
+}
+
 /**
  * This returns the max metadataId for a collection
  *

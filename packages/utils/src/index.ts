@@ -30,7 +30,7 @@ export * from './idRanges';
 export * from './constants';
 export * from './transferMappings';
 export * from './permissions';
-export * from './metadataMaps';
+export * from './badgeMetadata';
 export * from './metadataIds';
 export * from './display';
 export * from './approvals';

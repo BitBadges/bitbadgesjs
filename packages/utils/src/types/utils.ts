@@ -1,4 +1,5 @@
-import { CouchDBDetailsExcluded } from "./db"
+import nano from "nano";
+import { Identified, DeletableDocument } from "./db"
 
 export function deepCopy<T>(obj: T): T {
   return deepCopyWithBigInts(obj);
@@ -26,6 +27,10 @@ function deepCopyWithBigInts<T>(obj: T): T {
 }
 
 
-export function removeCouchDBDetails<T extends Object>(x: T): T & CouchDBDetailsExcluded {
-  return { ...x, _id: undefined, _rev: undefined, _deleted: undefined }
+export function removeCouchDBDetails<T extends Object & { _id: string }>(x: T): T & Identified {
+  return { ...x, _rev: undefined, _deleted: undefined }
+}
+
+export function getCouchDBDetails<T extends nano.Document & DeletableDocument>(x: T): nano.Document & DeletableDocument {
+  return { _id: x._id, _rev: x._rev, _deleted: x._deleted }
 }

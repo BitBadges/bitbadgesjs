@@ -14,8 +14,12 @@ import { deepCopy } from "./utils";
  * @property {string} [category] - The category of the badge or badge collection (e.g. "Education", "Attendance").
  * @property {string} [externalUrl] - The external URL of the badge or badge collection.
  * @property {string[]} [tags] - The tags of the badge or badge collection.
+ *
+ * @property {boolean} [_isUpdating] - Field used to indicate whether the metadata is in the refresh queue or not (being updated). Do not set this field manually. It will be set by the SDK / API.
  */
 export interface Metadata<T extends NumberType> {
+  _isUpdating?: boolean;
+
   name: string;
   description: string;
   image: string;
