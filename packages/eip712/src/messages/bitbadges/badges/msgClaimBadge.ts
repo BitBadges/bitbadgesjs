@@ -3,7 +3,7 @@ import {
   CLAIM_PROOF_ITEM_TYPES,
   CHALLENGE_SOLUTION_TYPES,
 } from './eip712HelperTypes'
-import { ChallengeSolution, getWrappedSolutions } from 'bitbadgesjs-proto';
+import { ChallengeSolution, NumberType, convertToProtoSolutions } from 'bitbadgesjs-proto';
 
 const ClaimBadgeMsgValueType = [
   { name: 'creator', type: 'string' },
@@ -19,10 +19,10 @@ export const MSG_CLAIM_BADGE_TYPES = {
   ChallengeSolution: CHALLENGE_SOLUTION_TYPES
 }
 
-export function createMsgClaimBadge(
+export function createMsgClaimBadge<T extends NumberType>(
   creator: string,
-  claimId: bigint,
-  collectionId: bigint,
+  claimId: T,
+  collectionId: T,
   solutions: ChallengeSolution[],
 ) {
   return {
@@ -31,7 +31,7 @@ export function createMsgClaimBadge(
       creator,
       collectionId: collectionId.toString(),
       claimId: claimId.toString(),
-      solutions: getWrappedSolutions(solutions).map((s) => s.toObject()),
+      solutions: convertToProtoSolutions(solutions).map((s) => s.toObject()),
     },
   }
 }

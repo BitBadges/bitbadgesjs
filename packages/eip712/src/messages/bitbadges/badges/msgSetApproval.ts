@@ -1,5 +1,5 @@
-import { Balance, getWrappedBalances } from 'bitbadgesjs-proto'
-import { BALANCE_TYPES, UINT_RANGE_TYPES } from './eip712HelperTypes'
+import { Balance, NumberType, convertToProtoBalances } from 'bitbadgesjs-proto'
+import { BALANCE_TYPES, ID_RANGE_TYPES } from './eip712HelperTypes'
 
 const MsgSetApprovalValueType = [
   { name: 'creator', type: 'string' },
@@ -14,11 +14,11 @@ export const MSG_SET_APPROVAL_TYPES = {
   MsgValue: MsgSetApprovalValueType,
 }
 
-export function createMsgSetApproval(
+export function createMsgSetApproval<T extends NumberType>(
   creator: string,
   address: string,
-  collectionId: bigint,
-  balances: Balance[],
+  collectionId: T,
+  balances: Balance<T>[]
 ) {
   return {
     type: 'badges/SetApproval',
@@ -26,7 +26,7 @@ export function createMsgSetApproval(
       creator,
       address,
       collectionId: collectionId.toString(),
-      balances: getWrappedBalances(balances).map((s) => s.toObject()),
+      balances: convertToProtoBalances(balances).map((s) => s.toObject()),
     },
   }
 }

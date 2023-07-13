@@ -1,342 +1,445 @@
-import { s_UserBalance } from "bitbadgesjs-proto"
-import nano from "nano"
-import { AnnouncementActivityItem, AnnouncementActivityItemBase, convertFromAnnouncementActivityItem, convertFromReviewActivityItem, convertFromTransferActivityItem, convertToAnnouncementActivityItem, convertToReviewActivityItem, convertToTransferActivityItem, ReviewActivityItem, ReviewActivityItemBase, s_AnnouncementActivityItem, s_ReviewActivityItem, s_TransferActivityItem, TransferActivityItem, TransferActivityItemBase } from "./activity"
-import { Profile, ProfileBase, BalanceDocument, BalanceDocumentBase, ClaimDocument, Collection, convertFromBalanceDocument, convertFromClaimDocument, convertToBalanceDocument, convertToClaimDocument, s_Profile, s_BalanceDocument, s_ClaimDocument, s_Collection, s_MetadataDoc } from "./db"
-import { Metadata } from "./metadata"
-import { MetadataMap, SupportedChain } from "./types"
+import { DeliverTxResponse } from "@cosmjs/stargate"
+import { IdRange } from "bitbadgesjs-proto"
+import { BroadcastPostBody } from "bitbadgesjs-provider"
+import { ChallengeParams } from "blockin"
+import { TransferActivityInfo, convertTransferActivityInfo } from "./activity"
+import { BadgeMetadataDetails, BitBadgesCollection, convertBadgeMetadataDetails, convertBitBadgesCollection } from "./collections"
+import { BalanceInfo, ChallengeDetails, StatusInfo, convertBalanceInfo, convertStatusInfo } from "./db"
+import { Metadata, convertMetadata } from "./metadata"
+import { NumberType } from "./string-numbers"
+import { OffChainBalancesMap } from "./transfers"
+import { SupportedChain } from "./types"
+import { BitBadgesUserInfo, convertBitBadgesUserInfo } from "./users"
 
+/**
+ * If an error occurs, the response will be an ErrorResponse.
+ *
+ * 400 - Bad Request (e.g. invalid request body)
+ * 401 - Unauthorized (e.g. invalid session cookie; must sign in with Blockin)
+ * 500 - Internal Server Error
+ *
+ * @typedef {Object} ErrorResponse
+ */
+export interface ErrorResponse {
+  //Serialized error object for debugging purposes. Advanced users can use this to debug issues.
+  error?: any;
+  //UX-friendly error message that can be displayed to the user. Always present if error.
+  message: string;
+  //Authentication error. Present if the user is not authenticated.
+  unauthorized?: boolean;
+}
+
+export interface GetStatusRouteRequestBody { }
+export interface GetStatusRouteSuccessResponse<T extends NumberType> {
+  status: StatusInfo<T>;
+}
+export type GetStatusRouteResponse<T extends NumberType> = ErrorResponse | GetStatusRouteSuccessResponse<T>;
+export function convertGetStatusRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetStatusRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetStatusRouteSuccessResponse<U> {
+  return {
+    status: convertStatusInfo(item.status, convertFunction),
+  }
+}
+
+
+export interface GetSearchRouteRequestBody { }
+export interface GetSearchRouteSuccessResponse<T extends NumberType> {
+  collections: BitBadgesCollection<T>[],
+  accounts: BitBadgesUserInfo<T>[],
+}
+export type GetSearchRouteResponse<T extends NumberType> = ErrorResponse | GetSearchRouteSuccessResponse<T>;
+export function convertGetSearchRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetSearchRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetSearchRouteSuccessResponse<U> {
+  return {
+    collections: item.collections.map((collection) => convertBitBadgesCollection(collection, convertFunction)),
+    accounts: item.accounts.map((account) => convertBitBadgesUserInfo(account, convertFunction)),
+  }
+}
+
+export interface MetadataFetchOptions {
+  doNotFetchCollectionMetadata?: boolean,
+  metadataIds?: NumberType[] | IdRange<NumberType>[],
+  uris?: string[],
+  badgeIds?: NumberType[] | IdRange<NumberType>[],
+}
+
+export type CollectionViewKey = 'latestActivity' | 'latestAnnouncements' | 'latestReviews' | 'owners' | 'claimsById';
+
+export interface GetAdditionalCollectionDetailsRequestBody {
+  viewsToFetch?: {
+    viewKey: CollectionViewKey,
+    bookmark: string
+  }[],
+  claimIdsToFetch?: NumberType[],
+  //customQueries?: { db: string, selector: any, key: string }[],
+  //TODO: we can add fully custom queries here (i.e. supply own Mango selector)
+}
+
+export interface GetMetadataForCollectionRequestBody {
+  metadataToFetch?: MetadataFetchOptions,
+}
+
+export interface GetCollectionBatchRouteRequestBody {
+  collectionsToFetch: ({ collectionId: NumberType } & GetMetadataForCollectionRequestBody & GetAdditionalCollectionDetailsRequestBody)[],
+}
+export interface GetCollectionBatchRouteSuccessResponse<T extends NumberType> {
+  collections: BitBadgesCollection<T>[]
+}
+export type GetCollectionBatchRouteResponse<T extends NumberType> = ErrorResponse | GetCollectionBatchRouteSuccessResponse<T>;
+export function convertGetCollectionBatchRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetCollectionBatchRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetCollectionBatchRouteSuccessResponse<U> {
+  return {
+    collections: item.collections.map((collection) => convertBitBadgesCollection(collection, convertFunction)),
+  }
+}
+
+export interface GetCollectionByIdRouteRequestBody extends GetAdditionalCollectionDetailsRequestBody, GetMetadataForCollectionRequestBody { }
+export interface GetCollectionRouteSuccessResponse<T extends NumberType> {
+  collection: BitBadgesCollection<T>,
+}
+export type GetCollectionRouteResponse<T extends NumberType> = ErrorResponse | GetCollectionRouteSuccessResponse<T>;
+export function convertGetCollectionRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetCollectionRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetCollectionRouteSuccessResponse<U> {
+  return {
+    collection: convertBitBadgesCollection(item.collection, convertFunction),
+  }
+}
+
+export interface GetOwnersForBadgeRouteRequestBody {
+  bookmark?: string,
+}
+export interface GetOwnersForBadgeRouteSuccessResponse<T extends NumberType> {
+  owners: BalanceInfo<T>[],
+  pagination: PaginationInfo,
+}
+export type GetOwnersForBadgeRouteResponse<T extends NumberType> = ErrorResponse | GetOwnersForBadgeRouteSuccessResponse<T>;
+export function convertGetOwnersForBadgeRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetOwnersForBadgeRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetOwnersForBadgeRouteSuccessResponse<U> {
+  return {
+    owners: item.owners.map((balance) => convertBalanceInfo(balance, convertFunction)),
+    pagination: item.pagination,
+  }
+}
+
+export interface GetMetadataForCollectionRouteRequestBody {
+  metadataToFetch: MetadataFetchOptions,
+}
+export interface GetMetadataForCollectionRouteSuccessResponse<T extends NumberType> {
+  collectionMetadata?: Metadata<T>,
+  badgeMetadata?: BadgeMetadataDetails<T>[],
+}
+export type GetMetadataForCollectionRouteResponse<T extends NumberType> = ErrorResponse | GetMetadataForCollectionRouteSuccessResponse<T>;
+export function convertGetMetadataForCollectionRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetMetadataForCollectionRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetMetadataForCollectionRouteSuccessResponse<U> {
+  return {
+    collectionMetadata: item.collectionMetadata ? convertMetadata(item.collectionMetadata, convertFunction) : undefined,
+    badgeMetadata: item.badgeMetadata ? item.badgeMetadata.map(x => convertBadgeMetadataDetails(x, convertFunction)) : undefined,
+  }
+}
+
+export interface GetBadgeBalanceByAddressRouteRequestBody { }
+export interface GetBadgeBalanceByAddressRouteSuccessResponse<T extends NumberType> {
+  balance: BalanceInfo<T>,
+}
+export type GetBadgeBalanceByAddressRouteResponse<T extends NumberType> = ErrorResponse | GetBadgeBalanceByAddressRouteSuccessResponse<T>;
+export function convertGetBadgeBalanceByAddressRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetBadgeBalanceByAddressRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetBadgeBalanceByAddressRouteSuccessResponse<U> {
+  return {
+    balance: convertBalanceInfo(item.balance, convertFunction),
+  }
+}
+
+export interface GetBadgeActivityRouteRequestBody {
+  bookmark?: string,
+}
+export interface GetBadgeActivityRouteSuccessResponse<T extends NumberType> {
+  activity: TransferActivityInfo<T>[],
+  pagination: PaginationInfo,
+}
+export type GetBadgeActivityRouteResponse<T extends NumberType> = ErrorResponse | GetBadgeActivityRouteSuccessResponse<T>;
+export function convertGetBadgeActivityRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetBadgeActivityRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetBadgeActivityRouteSuccessResponse<U> {
+  return {
+    activity: item.activity.map((activityItem) => convertTransferActivityInfo(activityItem, convertFunction)),
+    pagination: item.pagination,
+  }
+}
+
+export interface RefreshMetadataRouteRequestBody { }
+export interface RefreshMetadataRouteSuccessResponse<T extends NumberType> {
+  successMessage: string,
+}
+export type RefreshMetadataRouteResponse<T extends NumberType> = ErrorResponse | RefreshMetadataRouteSuccessResponse<T>;
+export function convertRefreshMetadataRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: RefreshMetadataRouteSuccessResponse<T>, convertFunction: (item: T) => U): RefreshMetadataRouteSuccessResponse<U> {
+  return { ...item };
+}
+
+export interface GetAllCodesAndPasswordsRouteRequestBody { }
+export interface GetAllCodesAndPasswordsRouteSuccessResponse<T extends NumberType> {
+  codes: string[][][],
+  passwords: string[][],
+}
+export type GetAllCodesAndPasswordsRouteResponse<T extends NumberType> = ErrorResponse | GetAllCodesAndPasswordsRouteSuccessResponse<T>;
+export function convertGetAllCodesAndPasswordsRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetAllCodesAndPasswordsRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetAllCodesAndPasswordsRouteSuccessResponse<U> {
+  return { ...item };
+}
+
+export interface GetClaimCodeViaPasswordRouteRequestBody { }
+export interface GetClaimCodeViaPasswordRouteSuccessResponse<T extends NumberType> {
+  code: string,
+}
+export type GetClaimCodeViaPasswordRouteResponse<T extends NumberType> = ErrorResponse | GetClaimCodeViaPasswordRouteSuccessResponse<T>;
+export function convertGetClaimCodeViaPasswordRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetClaimCodeViaPasswordRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetClaimCodeViaPasswordRouteSuccessResponse<U> {
+  return { ...item };
+}
+
+export interface AddAnnouncementRouteRequestBody {
+  announcement: string, //1 to 2048 characters
+}
+export interface AddAnnouncementRouteSuccessResponse<T extends NumberType> {
+  success: boolean
+}
+export type AddAnnouncementRouteResponse<T extends NumberType> = ErrorResponse | AddAnnouncementRouteSuccessResponse<T>;
+export function convertAddAnnouncementRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: AddAnnouncementRouteSuccessResponse<T>, convertFunction: (item: T) => U): AddAnnouncementRouteSuccessResponse<U> {
+  return { ...item };
+}
+
+export interface AddReviewForCollectionRouteRequestBody {
+  review: string, //1 to 2048 characters
+  stars: NumberType, //1 to 5
+}
+export interface AddReviewForCollectionRouteSuccessResponse<T extends NumberType> {
+  success: boolean
+}
+export type AddReviewForCollectionRouteResponse<T extends NumberType> = ErrorResponse | AddReviewForCollectionRouteSuccessResponse<T>;
+export function convertAddReviewForCollectionRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: AddReviewForCollectionRouteSuccessResponse<T>, convertFunction: (item: T) => U): AddReviewForCollectionRouteSuccessResponse<U> {
+  return { ...item };
+}
+
+export type AccountViewKey = 'latestActivity' | 'latestAnnouncements' | 'latestReviews' | 'badgesCollected';
+
+export interface GetAccountsRouteRequestBody {
+  accountsToFetch: {
+    address?: string,
+    username?: string,
+    fetchSequence?: boolean,
+    fetchBalance?: boolean,
+    viewsToFetch?: {
+      viewKey: AccountViewKey,
+      bookmark: string,
+      // mangoQuerySelector?: nano.MangoSelector
+      // TODO: Allow users to specify their own mango query selector here. For now, we map the viewKey to a mango query selector.
+    }[],
+  }[],
+}
+
+export interface GetAccountsRouteSuccessResponse<T extends NumberType> {
+  accounts: BitBadgesUserInfo<T>[],
+}
+export type GetAccountsRouteResponse<T extends NumberType> = ErrorResponse | GetAccountsRouteSuccessResponse<T>;
+export function convertGetAccountsRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetAccountsRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetAccountsRouteSuccessResponse<U> {
+  return {
+    accounts: item.accounts.map((account) => convertBitBadgesUserInfo(account, convertFunction)),
+  }
+}
+
+export interface GetAccountRouteRequestBody {
+  fetchSequence?: boolean,
+  fetchBalance?: boolean,
+  viewsToFetch?: {
+    viewKey: AccountViewKey,
+    bookmark: string
+  }[],
+  //customQueries?: { db: string, selector: any, key: string }[],
+  //TODO: we can add fully custom queries here (i.e. supply own Mango selector)
+}
+export type GetAccountRouteSuccessResponse<T extends NumberType> = BitBadgesUserInfo<T>;
+export type GetAccountRouteResponse<T extends NumberType> = ErrorResponse | GetAccountRouteSuccessResponse<T>;
+export function convertGetAccountRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetAccountRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetAccountRouteSuccessResponse<U> {
+  return convertBitBadgesUserInfo(item, convertFunction);
+}
+
+export interface AddReviewForUserRouteRequestBody {
+  review: string, //1 to 2048 characters
+  stars: NumberType, //1 to 5
+}
+export interface AddReviewForUserRouteSuccessResponse<T extends NumberType> {
+  success: boolean
+}
+export type AddReviewForUserRouteResponse<T extends NumberType> = ErrorResponse | AddReviewForUserRouteSuccessResponse<T>;
+export function convertAddReviewForUserRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: AddReviewForUserRouteSuccessResponse<T>, convertFunction: (item: T) => U): AddReviewForUserRouteSuccessResponse<U> {
+  return { ...item };
+}
+
+export interface UpdateAccountInfoRouteRequestBody {
+  discord?: string,
+  twitter?: string,
+  github?: string,
+  telegram?: string,
+  seenActivity?: NumberType,
+  readme?: string,
+}
+export interface UpdateAccountInfoRouteSuccessResponse<T extends NumberType> {
+  success: boolean
+}
+export type UpdateAccountInfoRouteResponse<T extends NumberType> = ErrorResponse | UpdateAccountInfoRouteSuccessResponse<T>;
+export function convertUpdateAccountInfoRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: UpdateAccountInfoRouteSuccessResponse<T>, convertFunction: (item: T) => U): UpdateAccountInfoRouteSuccessResponse<U> {
+  return { ...item };
+}
+
+export interface AddBalancesToIpfsRouteRequestBody {
+  balances: OffChainBalancesMap<NumberType>,
+}
+export interface AddBalancesToIpfsRouteSuccessResponse<T extends NumberType> {
+  result: {
+    cid: string,
+    path: string,
+  }
+}
+export type AddBalancesToIpfsRouteResponse<T extends NumberType> = ErrorResponse | AddBalancesToIpfsRouteSuccessResponse<T>;
+export function convertAddBalancesToIpfsRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: AddBalancesToIpfsRouteSuccessResponse<T>, convertFunction: (item: T) => U): AddBalancesToIpfsRouteSuccessResponse<U> {
+  return { ...item };
+}
+
+export interface AddMetadataToIpfsRouteRequestBody {
+  collectionMetadata?: Metadata<NumberType>,
+  badgeMetadata?: BadgeMetadataDetails<NumberType>[] | Metadata<NumberType>[],
+}
+export interface AddMetadataToIpfsRouteSuccessResponse<T extends NumberType> {
+  collectionMetadataResult?: {
+    cid: string,
+    path: string,
+  },
+  badgeMetadataResults: {
+    cid: string,
+    path: string,
+  }[],
+  allResults: {
+    cid: string,
+    path: string,
+  }[]
+}
+export type AddMetadataToIpfsRouteResponse<T extends NumberType> = ErrorResponse | AddMetadataToIpfsRouteSuccessResponse<T>;
+export function convertAddMetadataToIpfsRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: AddMetadataToIpfsRouteSuccessResponse<T>, convertFunction: (item: T) => U): AddMetadataToIpfsRouteSuccessResponse<U> {
+  return { ...item };
+}
+
+export interface AddClaimToIpfsRouteRequestBody {
+  name: string,
+  description: string,
+  challengeDetails?: ChallengeDetails<NumberType>[],
+}
+export interface AddClaimToIpfsRouteSuccessResponse<T extends NumberType> {
+  result: {
+    cid: string,
+    path: string,
+  }
+}
+export type AddClaimToIpfsRouteResponse<T extends NumberType> = ErrorResponse | AddClaimToIpfsRouteSuccessResponse<T>;
+export function convertAddClaimToIpfsRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: AddClaimToIpfsRouteSuccessResponse<T>, convertFunction: (item: T) => U): AddClaimToIpfsRouteSuccessResponse<U> {
+  return { ...item };
+}
+
+export interface GetSignInChallengeRouteRequestBody {
+  chain: SupportedChain,
+  address: string,
+  hours?: NumberType,
+}
+export interface GetSignInChallengeRouteSuccessResponse<T extends NumberType> {
+  nonce: string,
+  params: ChallengeParams,
+  blockinMessage: string,
+}
+export type GetSignInChallengeRouteResponse<T extends NumberType> = ErrorResponse | GetSignInChallengeRouteSuccessResponse<T>;
+export function convertGetSignInChallengeRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetSignInChallengeRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetSignInChallengeRouteSuccessResponse<U> {
+  return { ...item };
+}
+
+export interface VerifySignInRouteRequestBody {
+  chain: SupportedChain,
+  originalBytes: any
+  signatureBytes: any
+}
+export interface VerifySignInRouteSuccessResponse<T extends NumberType> {
+  success: boolean,
+  successMessage: string,
+}
+export type VerifySignInRouteResponse<T extends NumberType> = ErrorResponse | VerifySignInRouteSuccessResponse<T>;
+export function convertVerifySignInRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: VerifySignInRouteSuccessResponse<T>, convertFunction: (item: T) => U): VerifySignInRouteSuccessResponse<U> {
+  return { ...item };
+}
+
+export interface SignOutRequestBody { }
+export interface SignOutSuccessResponse<T extends NumberType> {
+  success: boolean,
+}
+export type SignOutResponse<T extends NumberType> = ErrorResponse | SignOutSuccessResponse<T>;
+export function convertSignOutSuccessResponse<T extends NumberType, U extends NumberType>(item: SignOutSuccessResponse<T>, convertFunction: (item: T) => U): SignOutSuccessResponse<U> {
+  return { ...item };
+}
+
+export interface GetBrowseCollectionsRouteRequestBody { }
+export interface GetBrowseCollectionsRouteSuccessResponse<T extends NumberType> {
+  [category: string]: BitBadgesCollection<T>[],
+}
+export type GetBrowseCollectionsRouteResponse<T extends NumberType> = ErrorResponse | GetBrowseCollectionsRouteSuccessResponse<T>;
+export function convertGetBrowseCollectionsRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetBrowseCollectionsRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetBrowseCollectionsRouteSuccessResponse<U> {
+  return Object.fromEntries(Object.entries(item).map(([key, value]) => {
+    return [key, value.map((collection) => convertBitBadgesCollection(collection, convertFunction))];
+  }));
+}
+
+export type BroadcastTxRouteRequestBody = BroadcastPostBody;
+// export interface BroadcastTxRouteSuccessResponse<T extends NumberType> {
+//   //TODO:`
+// }
+
+export type BroadcastTxRouteSuccessResponse<T extends NumberType> = any;
+export type BroadcastTxRouteResponse<T extends NumberType> = ErrorResponse | BroadcastTxRouteSuccessResponse<T>;
+export function convertBroadcastTxRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: BroadcastTxRouteSuccessResponse<T>, convertFunction: (item: T) => U): BroadcastTxRouteSuccessResponse<U> {
+  return { ...item };
+}
+
+export type SimulateTxRouteRequestBody = BroadcastPostBody;
+// export interface SimulateTxRouteSuccessResponse<T extends NumberType> {
+//   //TODO:
+// }
+export type SimulateTxRouteSuccessResponse<T extends NumberType> = any;
+
+export type SimulateTxRouteResponse<T extends NumberType> = ErrorResponse | SimulateTxRouteSuccessResponse<T>;
+export function convertSimulateTxRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: SimulateTxRouteSuccessResponse<T>, convertFunction: (item: T) => U): SimulateTxRouteSuccessResponse<U> {
+  return { ...item };
+}
+
+export interface FetchMetadataDirectlyRouteRequestBody {
+  uri: string,
+}
+export interface FetchMetadataDirectlyRouteSuccessResponse<T extends NumberType> {
+  metadata: Metadata<T>,
+}
+export type FetchMetadataDirectlyRouteResponse<T extends NumberType> = ErrorResponse | FetchMetadataDirectlyRouteSuccessResponse<T>;
+export function convertFetchMetadataDirectlyRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: FetchMetadataDirectlyRouteSuccessResponse<T>, convertFunction: (item: T) => U): FetchMetadataDirectlyRouteSuccessResponse<U> {
+  return {
+    metadata: convertMetadata(item.metadata, convertFunction),
+  }
+}
+
+export type GetTokensFromFaucetRouteRequestBody = {};
+export type GetTokensFromFaucetRouteResponse<T extends NumberType> = DeliverTxResponse | ErrorResponse;
+export type GetTokensFromFaucetRouteSuccessResponse<T extends NumberType> = DeliverTxResponse;
+export function convertGetTokensFromFaucetRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetTokensFromFaucetRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetTokensFromFaucetRouteSuccessResponse<U> {
+  return { ...item };
+}
 
 /**
  * Type for CouchDB pagination information.
  * @typedef {Object} PaginationInfo
  * @property {string} bookmark - The bookmark to be used to fetch the next X documents. Initially, bookmark should be '' (empty string) to fetch the first X documents. Each time the next X documents are fetched, the bookmark should be updated to the bookmark returned by the previous fetch.
  * @property {boolean} hasMore - Indicates whether there are more documents to be fetched. Once hasMore is false, all documents have been fetched.
+ * @property {number} [total] - The total number of documents in this view. This is only returned for the first fetch (when bookmark is empty string). It is not returned for subsequent fetches.
  */
 export interface PaginationInfo {
   bookmark: string,
   hasMore: boolean,
-}
-
-/**
- * Type for Cosmos SDK Coin information with support for bigint amounts (e.g. { amount: 1000000, denom: 'badge' }).
- *
- * @typedef {Object} CoinBase
- * @property {bigint | string} amount - The amount of the coin.
- * @property {string} denom - The denomination of the coin.
- */
-export interface CoinBase {
-  amount: bigint | string,
-  denom: string,
-}
-
-/**
- * Type for Cosmos SDK Coin information with support for bigint amounts (e.g. { amount: 1000000, denom: 'badge' }).
- * @typedef {Object} Coin
- * @extends {CoinBase}
- *
- * @see CoinBase
- */
-export interface Coin extends CoinBase {
-  amount: bigint,
-}
-
-/**
- * Type for Cosmos SDK Coin information with support for bigint amounts (e.g. { amount: 1000000, denom: 'badge' }).
- * @typedef {Object} s_Coin
- * @extends {CoinBase}
- *
- * @see CoinBase
- */
-export interface s_Coin extends CoinBase {
-  amount: string,
-}
-
-export function convertToCoin(s_item: s_Coin): Coin {
-  return {
-    ...s_item,
-    amount: BigInt(s_item.amount),
-  }
-}
-
-export function convertFromCoin(item: Coin): s_Coin {
-  return {
-    ...item,
-    amount: item.amount.toString(),
-  }
-}
-
-/**
- * BitBadgesUserInfo is the type for accounts returned by the BitBadges API
- *
- * @typedef {Object} BitBadgesUserInfoBase
- * @extends {ProfileBase}
- *
- * @property {string} [resolvedName] - The resolved name of the account (e.g. ENS name).
- * @property {string} [avatar] - The avatar of the account.
- * @property {CoinBase} [balance] - The balance of the account ($BADGE).
- * @property {boolean} [airdropped] - Indicates whether the account has claimed their airdrop.
- * @property {BalanceDocument[]} collected - A list of badges that the account has collected.
- * @property {TransferActivityItem[]} activity - A list of transfer activity items for the account.
- * @property {AnnouncementActivityItem[]} announcements - A list of announcement activity items for the account.
- * @property {ReviewActivityItem[]} reviews - A list of review activity items for the account.
- * @property {PaginationInfo} pagination - Pagination information for each of the profile information.
- *
- * @remarks
- * collected, activity, announcements, and reviews are profile information that is dynamically loaded as needed from the API.
- * The pagination object holds the bookmark and hasMore information for each of collected, activity, announcements, and reviews.
- *
- * For typical fetches, collected, activity, announcements, and reviews will be empty arrays and are to be loaded as needed (pagination will be set to hasMore == true).
- */
-export interface BitBadgesUserInfoBase extends ProfileBase {
-  cosmosAddress: string,
-  chain: SupportedChain,
-  address: string,
-  publicKey: string,
-  sequence?: bigint | string,
-
-  resolvedName?: string
-  avatar?: string
-
-  balance?: CoinBase
-  airdropped?: boolean
-
-  //Dynamically loaded as needed
-  collected: BalanceDocumentBase[],
-  activity: TransferActivityItemBase[],
-  announcements: AnnouncementActivityItemBase[],
-  reviews: ReviewActivityItemBase[],
-  pagination: {
-    activity: PaginationInfo,
-    announcements: PaginationInfo,
-    collected: PaginationInfo,
-    reviews: PaginationInfo,
-  },
-}
-
-
-/**
- * BitBadgesUserInfo is the type for accounts returned by the BitBadges API
- *
- * @typedef {Object} BitBadgesUserInfo
- * @extends {Account}
- *
- * @property {string} [resolvedName] - The resolved name of the account (e.g. ENS name).
- * @property {string} [avatar] - The avatar of the account.
- * @property {Coin} [balance] - The balance of the account ($BADGE).
- * @property {boolean} [airdropped] - Indicates whether the account has claimed their airdrop.
- * @property {BalanceDocument[]} collected - A list of badges that the account has collected.
- * @property {TransferActivityItem[]} activity - A list of transfer activity items for the account.
- * @property {AnnouncementActivityItem[]} announcements - A list of announcement activity items for the account.
- * @property {ReviewActivityItem[]} reviews - A list of review activity items for the account.
- * @property {PaginationInfo} pagination - Pagination information for each of the profile information.
- *
- * @remarks
- * collected, activity, announcements, and reviews are profile information that is dynamically loaded as needed from the API.
- * The pagination object holds the bookmark and hasMore information for each of collected, activity, announcements, and reviews.
- *
- * For typical fetches, collected, activity, announcements, and reviews will be empty arrays and are to be loaded as needed (pagination will be set to hasMore == true).
- */
-export interface BitBadgesUserInfo extends Profile {
-  //These are the same as the Account type. Make sure they are consistent
-  cosmosAddress: string,
-  chain: SupportedChain,
-  address: string,
-  publicKey: string,
-  sequence?: bigint,
-
-  resolvedName?: string
-  avatar?: string
-
-  balance?: Coin
-  airdropped?: boolean
-
-  //Dynamically loaded as needed
-  collected: BalanceDocument[],
-  activity: TransferActivityItem[],
-  announcements: AnnouncementActivityItem[],
-  reviews: ReviewActivityItem[],
-  pagination: {
-    activity: PaginationInfo,
-    announcements: PaginationInfo,
-    collected: PaginationInfo,
-    reviews: PaginationInfo,
-  },
-}
-
-/**
- * s_BitBadgesUserInfo is the type for accounts returned by the BitBadges API
- *
- * @typedef {Object} s_BitBadgesUserInfo
- * @extends {s_Profile}
- *
- * @property {string} cosmosAddress - The Cosmos address of the account
- * @property {string} address - The native chain's address of the account
- * @property {SupportedChain} chain - The native chain of the account
- * @property {string} [resolvedName] - The resolved name of the account (e.g. ENS name).
- * @property {string} [avatar] - The avatar of the account.
- * @property {s_Coin} [balance] - The balance of the account ($BADGE).
- * @property {boolean} [airdropped] - Indicates whether the account has claimed their airdrop.
- * @property {BalanceDocument[]} collected - A list of badges that the account has collected.
- * @property {TransferActivityItem[]} activity - A list of transfer activity items for the account.
- * @property {AnnouncementActivityItem[]} announcements - A list of announcement activity items for the account.
- * @property {ReviewActivityItem[]} reviews - A list of review activity items for the account.
- * @property {PaginationInfo} pagination - Pagination information for each of the profile information.
- *
- * @remarks
- * collected, activity, announcements, and reviews are profile information that is dynamically loaded as needed from the API.
- * The pagination object holds the bookmark and hasMore information for each of collected, activity, announcements, and reviews.
- *
- * For typical fetches, collected, activity, announcements, and reviews will be empty arrays and are to be loaded as needed (pagination will be set to hasMore == true).
- */
-export interface s_BitBadgesUserInfo extends s_Profile {
-  cosmosAddress: string,
-  chain: SupportedChain,
-  address: string,
-  publicKey: string,
-  sequence?: string,
-
-  resolvedName?: string
-  avatar?: string
-
-  balance?: s_Coin
-  airdropped?: boolean
-
-  //Dynamically loaded as needed
-  collected: s_BalanceDocument[],
-  activity: s_TransferActivityItem[],
-  announcements: s_AnnouncementActivityItem[],
-  reviews: s_ReviewActivityItem[],
-  pagination: {
-    activity: PaginationInfo,
-    announcements: PaginationInfo,
-    collected: PaginationInfo,
-    reviews: PaginationInfo,
-  },
-}
-
-export function convertToBitBadgesUserInfo(s_item: s_BitBadgesUserInfo): BitBadgesUserInfo {
-  return {
-    ...s_item,
-    sequence: s_item.sequence ? BigInt(s_item.sequence) : undefined,
-    balance: s_item.balance ? convertToCoin(s_item.balance) : undefined,
-    collected: s_item.collected.map(convertToBalanceDocument),
-    activity: s_item.activity.map(convertToTransferActivityItem),
-    announcements: s_item.announcements.map(convertToAnnouncementActivityItem),
-    reviews: s_item.reviews.map(convertToReviewActivityItem),
-    createdAt: s_item.createdAt ? BigInt(s_item.createdAt) : undefined,
-    seenActivity: s_item.seenActivity ? BigInt(s_item.seenActivity) : undefined,
-  }
-}
-
-export function convertFromBitBadgesUserInfo(item: BitBadgesUserInfo): s_BitBadgesUserInfo {
-  return {
-    ...item,
-    sequence: item.sequence ? item.sequence.toString() : undefined,
-    balance: item.balance ? convertFromCoin(item.balance) : undefined,
-    collected: item.collected.map(convertFromBalanceDocument),
-    activity: item.activity.map(convertFromTransferActivityItem),
-    announcements: item.announcements.map(convertFromAnnouncementActivityItem),
-    reviews: item.reviews.map(convertFromReviewActivityItem),
-    createdAt: item.createdAt ? item.createdAt.toString() : undefined,
-    seenActivity: item.seenActivity ? item.seenActivity.toString() : undefined,
-  }
-}
-
-/**
- * BitBadgeCollection is the type of document for collections returned by the BitBadges API
- *
- * @typedef {Object} BitBadgeCollection
- * @extends {Collection} The base collection document
- *
- * @property {BitBadgesUserInfo} managerInfo - The account information of the manager of this collection
- * @property {Metadata} collectionMetadata - The metadata of this collection
- * @property {MetadataMap} badgeMetadata - The metadata of each badge in this collection stored in a map
- * @property {TransferActivityItem[]} activity - The transfer activity of this collection
- * @property {AnnouncementActivityItem[]} announcements - The announcement activity of this collection
- * @property {ReviewActivityItem[]} reviews - The review activity of this collection
- * @property {BalanceDocument[]} balances - The badge balances of this collection
- * @property {ClaimDocument[]} claims - The claims of this collection
- *
- * @remarks
- * Note that the collectionMetadata, badgeMetadata, activity, announcements, reviews, claims, and balances fields are
- * dynamically fetched from the DB as needed. They may be empty or missing information when the collection is first fetched.
- * You are responsible for fetching the missing information as needed from the corresponding API routes.
- *
- * @see
- * Use updateMetadataMap to update the metadata fields.
- */
-export interface BitBadgeCollection extends Collection {
-  managerInfo: BitBadgesUserInfo;
-
-  //The following are to be fetched dynamically and as needed from the DB
-  collectionMetadata: Metadata,
-  badgeMetadata: MetadataMap,
-  activity: TransferActivityItem[],
-  announcements: AnnouncementActivityItem[],
-  reviews: ReviewActivityItem[],
-  balances: BalanceDocument[],
-  claims: ClaimDocument[],
-}
-
-/**
- * s_BitBadgeCollection is the type of document for collections returned by the BitBadges API
- *
- * @typedef {Object} s_BitBadgeCollection
- * @extends {s_Collection} The base collection document
- *
- * @see {BitBadgeCollection}
- */
-export interface s_BitBadgeCollection extends s_Collection {
-  managerInfo: s_BitBadgesUserInfo;
-
-  //The following are to be fetched dynamically and as needed from the DB
-  collectionMetadata: Metadata,
-  badgeMetadata: MetadataMap,
-  activity: s_TransferActivityItem[],
-  announcements: s_AnnouncementActivityItem[],
-  reviews: s_ReviewActivityItem[],
-  balances: s_BalanceDocument[],
-  claims: s_ClaimDocument[],
-}
-
-export function convertToBitBadgeCollection(s_item: s_BitBadgeCollection): BitBadgeCollection {
-  return {
-    ...s_item,
-    managerInfo: convertToBitBadgesUserInfo(s_item.managerInfo),
-    activity: s_item.activity.map(convertToTransferActivityItem),
-    announcements: s_item.announcements.map(convertToAnnouncementActivityItem),
-    reviews: s_item.reviews.map(convertToReviewActivityItem),
-    balances: s_item.balances.map(convertToBalanceDocument),
-    claims: s_item.claims.map(convertToClaimDocument),
-    collectionId: BigInt(s_item.collectionId),
-    nextBadgeId: BigInt(s_item.nextBadgeId),
-    nextClaimId: BigInt(s_item.nextClaimId),
-    standard: BigInt(s_item.standard),
-    createdBlock: BigInt(s_item.createdBlock),
-  }
-}
-
-export function convertFromBitBadgeCollection(item: BitBadgeCollection): s_BitBadgeCollection {
-  return {
-    ...item,
-    managerInfo: convertFromBitBadgesUserInfo(item.managerInfo),
-    activity: item.activity.map(convertFromTransferActivityItem),
-    announcements: item.announcements.map(convertFromAnnouncementActivityItem),
-    reviews: item.reviews.map(convertFromReviewActivityItem),
-    balances: item.balances.map(convertFromBalanceDocument),
-    claims: item.claims.map(convertFromClaimDocument),
-    collectionId: item.collectionId.toString(),
-    nextBadgeId: item.nextBadgeId.toString(),
-    nextClaimId: item.nextClaimId.toString(),
-    standard: item.standard.toString(),
-    createdBlock: item.createdBlock.toString(),
-  }
+  total?: number,
 }
 
 /**
  * Information returned by the REST API getAccount route
  *
- * Note this should be converted into Account or BitBadgesUserInfo before being returned by the BitBadges API for consistency
+ * Note this should be converted into AccountDoc or BitBadgesUserInfo before being returned by the BitBadges API for consistency
  */
 export interface CosmosAccountResponse {
   account_number: number;
@@ -345,66 +448,4 @@ export interface CosmosAccountResponse {
     key: string;
   }
   address: string;
-}
-
-/**
- * The following are API response types returned by the BitBadges API. See documentationfor more details.
- *
- * TODO: Make this complete and handle all API routes
- */
-
-export interface CollectionResponse {
-  collection: s_BitBadgeCollection,
-  pagination: {
-    activity: PaginationInfo
-    announcements: PaginationInfo
-    reviews: PaginationInfo,
-    balances: PaginationInfo,
-    claims: PaginationInfo,
-  },
-}
-
-export interface GetCollectionResponse extends CollectionResponse {
-  error?: any;
-}
-
-export interface GetAccountResponse {
-  error?: any;
-  accountInfo?: s_BitBadgesUserInfo;
-}
-
-export interface GetBadgeBalanceResponse {
-  error?: any;
-  balance?: s_UserBalance;
-}
-
-export interface GetOwnersResponse {
-  owners: number[],
-  balances: {
-    [cosmosAddress: string]: s_UserBalance | undefined;
-  }
-}
-
-export interface GetPortfolioResponse {
-  collected: s_BalanceDocument[],
-  activity: s_TransferActivityItem[],
-  announcements: s_AnnouncementActivityItem[],
-  reviews: s_ReviewActivityItem[],
-  pagination: {
-    userActivity: PaginationInfo,
-    announcements: PaginationInfo,
-    collected: PaginationInfo,
-    reviews: PaginationInfo,
-  }
-}
-
-export interface SearchResponse {
-  accounts: s_BitBadgesUserInfo[],
-  collections: (s_MetadataDoc & nano.DocumentGetResponse)[],
-}
-
-
-export interface GetBalanceResponse {
-  error?: any;
-  balance?: s_UserBalance;
 }

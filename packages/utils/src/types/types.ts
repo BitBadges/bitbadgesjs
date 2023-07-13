@@ -1,6 +1,6 @@
-import { UintRange, UserBalance } from "bitbadgesjs-proto";
-import { BitBadgesUserInfo, CollectionResponse } from "./api";
-import { Metadata } from "./metadata";
+import { NumberType, UserBalance, convertUserBalance } from "bitbadgesjs-proto";
+import { BitBadgesCollection, convertBitBadgesCollection } from "./collections";
+import { BitBadgesUserInfo, convertBitBadgesUserInfo } from "./users";
 
 /**
  * Many of the core types are loaded from the bitbadgesjs-proto package.
@@ -10,26 +10,55 @@ import { Metadata } from "./metadata";
 /*
   Used by the frontend for dynamically fetching data from the DB as needed
 */
-export interface CollectionMap {
-  [collectionId: string]: CollectionResponse | undefined
+export interface CollectionMap<T extends NumberType> {
+  [collectionId: string]: BitBadgesCollection<T> | undefined
 }
 
-export interface AccountMap {
-  [cosmosAddress: string]: BitBadgesUserInfo | undefined;
+export function convertCollectionMap<T extends NumberType, U extends NumberType>(item: CollectionMap<T>, convertFunction: (item: T) => U): CollectionMap<U> {
+  return Object.fromEntries(Object.entries(item).map(([key, value]) => {
+    return [key, value ? convertBitBadgesCollection(value, convertFunction) : undefined];
+  }));
 }
 
-export interface BalancesMap {
-  [cosmosAddress: string]: UserBalance | undefined;
+/**
+ * AccountMap is used to store the user information by address.
+ *
+ * @typedef {Object} AccountMap
+ */
+export interface AccountMap<T extends NumberType> {
+  [cosmosAddress: string]: BitBadgesUserInfo<T> | undefined;
 }
 
-export interface MetadataMap {
-  [metadataId: string]: {
-    badgeIds: UintRange[],
-    metadata: Metadata,
-    uri: string
-  } | undefined;
+export function convertAccountMap<T extends NumberType, U extends NumberType>(item: AccountMap<T>, convertFunction: (item: T) => U): AccountMap<U> {
+  return Object.fromEntries(Object.entries(item).map(([key, value]) => {
+    return [key, value ? convertBitBadgesUserInfo(value, convertFunction) : undefined];
+  }));
 }
 
+
+/**
+ * BalanceMap is used to store the balances of users by address.
+ *
+ * @typedef {Object} BalanceMap
+ */
+export interface BalancesMap<T extends NumberType> {
+  [cosmosAddress: string]: UserBalance<T> | undefined;
+}
+
+export function convertBalancesMap<T extends NumberType, U extends NumberType>(item: BalancesMap<T>, convertFunction: (item: T) => U): BalancesMap<U> {
+  return Object.fromEntries(Object.entries(item).map(([key, value]) => {
+    return [key, value ? convertUserBalance(value, convertFunction) : undefined];
+  }));
+}
+
+/**
+ * SupportedChain is an enum of all the supported chains.
+ * Currently, we only support Ethereum and Cosmos.
+ *
+ * Has an UNKNOWN value for when we don't know the chain yet.
+ *
+ * @typedef {string} SupportedChain
+ */
 export enum SupportedChain {
   ETH = 'Ethereum',
   COSMOS = 'Cosmos',
@@ -63,6 +92,7 @@ export enum DistributionMethod {
   Unminted = 'Unminted',
   JSON = 'JSON',
   DirectTransfer = 'Direct Transfer',
+  OffChainBalances = 'Off-Chain Balances'
 }
 
 /**

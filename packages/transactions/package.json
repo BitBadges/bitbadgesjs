@@ -1,7 +1,7 @@
 {
   "name": "bitbadgesjs-transactions",
   "description": "Transactions generator for BitBadges and EVMOS",
-  "version": "0.0.102",
+  "version": "0.0.113",
   "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -12,9 +12,9 @@
     "~transactions": "dist"
   },
   "scripts": {
-    "postinstall": "shx mkdir -p dist && link-module-alias",
-    "build": "tsc --build tsconfig.build.json && link-module-alias",
-    "build:watch": "tsc --build -w tsconfig.build.json && link-module-alias",
+    "postinstall": "shx mkdir -p dist",
+    "build": "tsc --build tsconfig.build.json",
+    "build:watch": "tsc --build -w tsconfig.build.json",
     "clean": "tsc --build tsconfig.build.json --clean  && shx rm -rf coverage *.log junit.xml dist && jest --clearCache",
     "test": "jest",
     "test:unit": "jest test/unit",
@@ -27,9 +27,6 @@
   },
   "dependencies": {
     "@types/node": "^17.0.21",
-    "bitbadgesjs-eip712": "^0.0.83",
-    "bitbadgesjs-proto": "^0.0.83",
-    "link-module-alias": "^1.2.0",
     "shx": "^0.3.4"
   },
   "devDependencies": {

@@ -1,9 +1,12 @@
 import {
-  BadgeSupplyAndAmount, BadgeUri, Claim, Transfer,
-  convertToBadgeSupplyAndAmount,
-  convertToBadgeUri,
-  convertToClaim,
-  convertToTransfer,
+  BadgeSupplyAndAmount,
+  BadgeUri,
+  Claim, NumberType,
+  Transfer,
+  convertBadgeSupplyAndAmount,
+  convertBadgeUri,
+  convertClaim,
+  convertTransfer,
   createTransaction,
   createMsgMintAndDistributeBadges as protoMsgMintAndDistributeBadges
 } from 'bitbadgesjs-proto'
@@ -22,38 +25,52 @@ import { getDefaultDomainWithChainId } from '../../domain'
 
 import { Chain, Fee, Sender } from '../../common'
 
-export interface MessageMsgMintAndDistributeBadges {
+export interface MsgMintAndDistributeBadges<T extends NumberType> {
   creator: string
-  collectionId: bigint
-  badgeSupplys: BadgeSupplyAndAmount[]
-  transfers: Transfer[]
-  claims: Claim[]
+  collectionId: T
+  badgeSupplys: BadgeSupplyAndAmount<T>[]
+  transfers: Transfer<T>[]
+  claims: Claim<T>[]
   collectionUri: string
-  badgeUris: BadgeUri[]
+  badgeUris: BadgeUri<T>[]
   balancesUri: string
+}
+
+export function convertMsgMintAndDistributeBadges<T extends NumberType, U extends NumberType>(
+  msg: MsgMintAndDistributeBadges<T>,
+  convertFunction: (item: T) => U
+): MsgMintAndDistributeBadges<U> {
+  return {
+    ...msg,
+    collectionId: convertFunction(msg.collectionId),
+    badgeSupplys: msg.badgeSupplys.map((x) => convertBadgeSupplyAndAmount(x, convertFunction)),
+    transfers: msg.transfers.map((x) => convertTransfer(x, convertFunction)),
+    claims: msg.claims.map((x) => convertClaim(x, convertFunction)),
+    badgeUris: msg.badgeUris.map((x) => convertBadgeUri(x, convertFunction)),
+  }
 }
 
 export function convertFromProtoToMsgMintAndDistributeBadges(
   msg: badges.bitbadges.bitbadgeschain.badges.MsgMintAndDistributeBadges,
-): MessageMsgMintAndDistributeBadges {
+): MsgMintAndDistributeBadges<bigint> {
   return {
     creator: msg.creator,
     collectionId: BigInt(msg.collectionId),
-    badgeSupplys: msg.badgeSupplys.map(convertToBadgeSupplyAndAmount),
-    transfers: msg.transfers.map(convertToTransfer),
-    claims: msg.claims.map(convertToClaim),
+    badgeSupplys: msg.badgeSupplys.map((x) => convertBadgeSupplyAndAmount(x, BigInt)),
+    transfers: msg.transfers.map((x) => convertTransfer(x, BigInt)),
+    claims: msg.claims.map((x) => convertClaim(x, BigInt)),
     collectionUri: msg.collectionUri,
-    badgeUris: msg.badgeUris.map(convertToBadgeUri),
+    badgeUris: msg.badgeUris.map((x) => convertBadgeUri(x, BigInt)),
     balancesUri: msg.balancesUri
   }
 }
 
-export function createTxMsgMintAndDistributeBadges(
+export function createTxMsgMintAndDistributeBadges<T extends NumberType>(
   chain: Chain,
   sender: Sender,
   fee: Fee,
   memo: string,
-  params: MessageMsgMintAndDistributeBadges,
+  params: MsgMintAndDistributeBadges<T>,
   domain?: object,
 ) {
   // EIP712

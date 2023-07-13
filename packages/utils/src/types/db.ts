@@ -1,14 +1,30 @@
-import { BadgeUri, Balance, Challenge, ChallengeBase, Claim, ClaimBase, UintRange, TransferMapping, UserBalance, UserBalanceBase, convertFromApproval, convertFromBalance, convertFromUintRange, convertToApproval, convertToBalance, convertToUintRange, s_Challenge, s_Claim, s_UserBalance } from "bitbadgesjs-proto";
+import { BadgeUri, Balance, Claim, TransferMapping, UserBalance, convertBadgeUri, convertBalance, convertClaim, convertTransferMapping, convertUserBalance } from "bitbadgesjs-proto";
 import MerkleTree from "merkletreejs";
-import { Metadata } from "./metadata";
+import { CosmosCoin, convertCosmosCoin } from "./coin";
+import { Metadata, convertMetadata } from "./metadata";
 import { Permissions } from "./permissions";
+import { NumberType } from "./string-numbers";
 import { SupportedChain } from "./types";
+import { deepCopy, getCouchDBDetails, removeCouchDBDetails } from "./utils";
+import { DocsCache } from "./indexer";
+import nano from "nano";
+import { OffChainBalancesMap, convertOffChainBalancesMap } from "./transfers";
+
+export interface DeletableDocument {
+  _deleted?: boolean
+}
+
+export interface Identified {
+  _id: string,
+  _rev?: undefined,
+  _deleted?: undefined
+}
 
 /**
- * CollectionBase is the type of document stored in the collections database (see documentation for more info)
+ * CollectionInfoBase is the type of document stored in the collections database (see documentation for more info)
  *
- * @typedef {Object} CollectionBase
- * @property {bigint | string} collectionId - The collection ID
+ * @typedef {Object} CollectionInfoBase
+ * @property {NumberType} collectionId - The collection ID
  * @property {string} collectionUri - The URI of the collection
  * @property {BadgeUri[]} badgeUris - The list of badge URIs for this collection and their respective badge IDs
  * @property {string} balancesUri - The URI of the balances for this collection (only used for off-chain balances)
@@ -17,125 +33,114 @@ import { SupportedChain } from "./types";
  * @property {Permissions} permissions - The permissions of the manager of this collection
  * @property {TransferMapping[]} allowedTransfers - The list of allowed transfers for this collection
  * @property {TransferMapping[]} managerApprovedTransfers - The list of manager approved transfers for this collection
- * @property {bigint | string} nextBadgeId - The next badge ID to be minted for this collection
- * @property {bigint | string} nextClaimId - The next claim ID to be minted for this collection
+ * @property {NumberType} nextBadgeId - The next badge ID to be minted for this collection
+ * @property {NumberType} nextClaimId - The next claim ID to be minted for this collection
  * @property {Balance[]} unmintedSupplys - The list of unminted supplies for this collection
  * @property {Balance[]} maxSupplys - The list of max supplies for this collection
- * @property {bigint | string} standard - The standard of this collection
+ * @property {NumberType} standard - The standard of this collection
  * @property {Challenge[]} managerRequests - The list of manager requests for this collection
- * @property {bigint | string} createdBlock - The block number when this collection was created
+ * @property {NumberType} createdBlock - The block number when this collection was created
  */
-export interface CollectionBase {
-  collectionId: bigint | string;
+export interface CollectionInfoBase<T extends NumberType> {
+  collectionId: T;
   collectionUri: string;
-  badgeUris: BadgeUri[];
+  badgeUris: BadgeUri<T>[];
   balancesUri: string;
   bytes: string;
   manager: string;
   permissions: Permissions;
-  allowedTransfers: TransferMapping[];
-  managerApprovedTransfers: TransferMapping[];
-  nextBadgeId: bigint | string;
-  nextClaimId: bigint | string;
-  unmintedSupplys: Balance[];
-  maxSupplys: Balance[];
-  standard: bigint | string;
+  allowedTransfers: TransferMapping<T>[];
+  managerApprovedTransfers: TransferMapping<T>[];
+  nextBadgeId: T;
+  nextClaimId: T;
+  unmintedSupplys: Balance<T>[];
+  maxSupplys: Balance<T>[];
+  standard: T;
   managerRequests: string[];
-  createdBlock: bigint | string;
+  createdBlock: T;
 }
+export type CollectionDoc<T extends NumberType> = CollectionInfoBase<T> & nano.Document & DeletableDocument;
+export type CollectionInfo<T extends NumberType> = CollectionInfoBase<T> & Identified;
 
-export interface s_Collection extends CollectionBase {
-  collectionId: string;
-  nextBadgeId: string;
-  nextClaimId: string;
-  standard: string;
-  createdBlock: string;
-}
-
-export interface Collection extends CollectionBase {
-  collectionId: bigint;
-  nextBadgeId: bigint;
-  nextClaimId: bigint;
-  standard: bigint;
-  createdBlock: bigint;
-}
-
-export function convertToCollection(s_item: s_Collection): Collection {
-  return {
-    ...s_item,
-    collectionId: BigInt(s_item.collectionId),
-    nextBadgeId: BigInt(s_item.nextBadgeId),
-    nextClaimId: BigInt(s_item.nextClaimId),
-    standard: BigInt(s_item.standard),
-    createdBlock: BigInt(s_item.createdBlock),
-  }
-}
-
-export function convertFromCollection(item: Collection): s_Collection {
-  return {
+export function convertCollectionInfo<T extends NumberType, U extends NumberType>(item: CollectionInfo<T>, convertFunction: (item: T) => U): CollectionInfo<U> {
+  return deepCopy({
     ...item,
-    collectionId: item.collectionId.toString(),
-    nextBadgeId: item.nextBadgeId.toString(),
-    nextClaimId: item.nextClaimId.toString(),
-    standard: item.standard.toString(),
-    createdBlock: item.createdBlock.toString(),
-  }
+    collectionId: convertFunction(item.collectionId),
+    badgeUris: item.badgeUris.map((badgeUri) => convertBadgeUri(badgeUri, convertFunction)),
+    allowedTransfers: item.allowedTransfers.map((transferMapping) => convertTransferMapping(transferMapping, convertFunction)),
+    managerApprovedTransfers: item.managerApprovedTransfers.map((transferMapping) => convertTransferMapping(transferMapping, convertFunction)),
+    nextBadgeId: convertFunction(item.nextBadgeId),
+    nextClaimId: convertFunction(item.nextClaimId),
+    unmintedSupplys: item.unmintedSupplys.map((balance) => convertBalance(balance, convertFunction)),
+    maxSupplys: item.maxSupplys.map((balance) => convertBalance(balance, convertFunction)),
+    standard: convertFunction(item.standard),
+    createdBlock: convertFunction(item.createdBlock),
+  })
 }
 
+export function convertCollectionDoc<T extends NumberType, U extends NumberType>(item: CollectionDoc<T>, convertFunction: (item: T) => U): CollectionDoc<U> {
+  return deepCopy({
+    ...getCouchDBDetails(item),
+    ...convertCollectionInfo(removeCouchDBDetails(item), convertFunction),
+  })
+}
 
 /**
-* The chain will return a similar structure but with a pub_key object and account_number field (see CosmosAccountResponse from bitbadgesjs-utils)
-*
-* Here, we clean up the response to return a more conventional object for our purposes.
-*/
-
-
-export interface AccountBase {
+ * AccountInfoBase represents the account details stored on the blockchain for an address.
+ * Everything in here should be deterministic and maintained by the blockchain (as opposed to profile).
+ * We update this only upon new TXs that update the fields such as a name change or sequence change.
+ *
+ * @typedef {Object} AccountInfoBase
+ * @property {string} publicKey - The public key of the account
+ * @property {NumberType} sequence - The sequence of the account. Note we currently do not store sequence in the DB (it is dynamically fetched).
+ * @property {SupportedChain} chain - The chain of the account
+ * @property {string} cosmosAddress - The Cosmos address of the account
+ * @property {string} address - The address of the account
+ * @property {string} [username] - The username of the account (from x/nameservice)
+ */
+export interface AccountInfoBase<T extends NumberType> {
   publicKey: string
-  // sequence: bigint | string //We will add sequence support in the future
+  // sequence: bigint | JSPrimitiveNumberType //We will add sequence support in the future
   chain: SupportedChain
   cosmosAddress: string
   address: string
+  accountNumber: T
+  username?: string //from x/nameservice
+  sequence?: T
+  balance?: CosmosCoin<T>
 }
+export type AccountDoc<T extends NumberType> = AccountInfoBase<T> & nano.Document & DeletableDocument;
+export type AccountInfo<T extends NumberType> = AccountInfoBase<T> & Identified;
 
-export interface Account extends AccountBase {
-  // sequence: bigint
-}
-
-export interface s_Account extends AccountBase {
-  // sequence: string
-}
-
-export function convertToAccount(s_item: s_Account): Account {
-  return {
-    ...s_item,
-    // sequence: BigInt(s_item.sequence),
-  }
-}
-
-export function convertFromAccount(item: Account): s_Account {
-  return {
+export function convertAccountInfo<T extends NumberType, U extends NumberType>(item: AccountInfo<T>, convertFunction: (item: T) => U): AccountInfo<U> {
+  return deepCopy({
     ...item,
-    // sequence: item.sequence.toString(),
-  }
+    accountNumber: convertFunction(item.accountNumber),
+    sequence: item.sequence ? convertFunction(item.sequence) : undefined,
+    balance: item.balance ? convertCosmosCoin(item.balance, convertFunction) : undefined
+  })
 }
 
-
+export function convertAccountDoc<T extends NumberType, U extends NumberType>(item: AccountDoc<T>, convertFunction: (item: T) => U): AccountDoc<U> {
+  return deepCopy({
+    ...getCouchDBDetails(item),
+    ...convertAccountInfo(removeCouchDBDetails(item), convertFunction),
+  })
+}
 
 /**
- * ProfileBase is the type of document stored in the profile database
+ * ProfileInfoBase is the type of document stored in the profile database.
+ * This is used for customizable profile info (not stored on the blockchain).
  *
- * @typedef {Object} ProfileBase
- * @property {bigint | string} seenActivity - The timestamp of the last activity seen for this account (milliseconds since epoch)
- * @property {bigint | string} createdAt - The timestamp of when this account was created (milliseconds since epoch)
+ * @typedef {Object} ProfileInfoBase
+ * @property {NumberType} seenActivity - The timestamp of the last activity seen for this account (milliseconds since epoch)
+ * @property {NumberType} createdAt - The timestamp of when this account was created (milliseconds since epoch)
  *
- * @property {string} username - The username of the account
  * @property {string} discord - The Discord username of the account
  * @property {string} twitter - The Twitter username of the account
  * @property {string} github - The GitHub username of the account
  * @property {string} telegram - The Telegram username of the account
  * @property {string} readme - The readme of the account
- *
  *
  * @remarks
  * Other information like resolvedName, avatar, balance, etc are to be loaded dynamically each time the account is fetched
@@ -143,408 +148,228 @@ export function convertFromAccount(item: Account): s_Account {
  * @see
  * See UserInfo
  */
-export interface ProfileBase {
-  seenActivity?: bigint | string;
-  createdAt?: bigint | string;
+export interface ProfileInfoBase<T extends NumberType> {
+  seenActivity?: T;
+  createdAt?: T;
 
-  //Profile customization
-  username?: string
+  //ProfileDoc customization
   discord?: string
   twitter?: string
   github?: string
   telegram?: string
   readme?: string
 }
+export type ProfileDoc<T extends NumberType> = ProfileInfoBase<T> & nano.Document & DeletableDocument;
+export type ProfileInfo<T extends NumberType> = ProfileInfoBase<T> & Identified;
 
-export interface Profile extends ProfileBase {
-  seenActivity?: bigint;
-  createdAt?: bigint;
-}
-
-export interface s_Profile extends ProfileBase {
-  seenActivity?: string;
-  createdAt?: string;
-}
-
-export function convertToProfile(s_item: s_Profile): Profile {
-  return {
-    ...s_item,
-    seenActivity: s_item.seenActivity ? BigInt(s_item.seenActivity) : undefined,
-    createdAt: s_item.createdAt ? BigInt(s_item.createdAt) : undefined,
-  }
-}
-
-export function convertFromProfile(item: Profile): s_Profile {
-  return {
+export function convertProfileInfo<T extends NumberType, U extends NumberType>(item: ProfileInfo<T>, convertFunction: (item: T) => U): ProfileInfo<U> {
+  return deepCopy({
     ...item,
-    seenActivity: item.seenActivity ? item.seenActivity.toString() : undefined,
-    createdAt: item.createdAt ? item.createdAt.toString() : undefined,
-  }
+    seenActivity: item.seenActivity ? convertFunction(item.seenActivity) : undefined,
+    createdAt: item.createdAt ? convertFunction(item.createdAt) : undefined,
+  })
 }
 
-/**
- * Metadata document stored in the metadata database
- * Partitioned database by collection ID (e.g. 1-0, 1-1, and so on represent the metadata documents for collection 1)
- *
- * @typedef {Object} MetadataDocBase
- * @property {Metadata} metadata - The metadata object
- * @property {UintRange[]} badgeIds - The range of badge IDs that this metadata document is responsible for
- * @property {boolean} isCollection - True if this is a collection metadata document
- * @property {bigint | string} metadataId - The metadata ID for the document. The id for the metadata document is calculated deterministically from badgeUris field (see metadata.ts).
- * @property {string} uri - The URI of the metadata
- *
- *
- * @remarks
- * The metadataId for the metadata document is calculated deterministically from badgeUris field (see metadata.ts).
- * metadataId == 0 - collection metadata
- * metadataId > 0 - badge metadata
- *
- * Pseudocode for calculating metadataId:
- * metadataId = 1
- * for each badgeUri in badgeUris: //Linear iteration
- *  if badgeUri.uri.contains("{id}"):
- *    for each id in badgeUri.badgeIds:
- *      fetch metadata from badgeUri.uri.replace("{id}", id)
- *      store metadata in database with metadataId = metadataId and badgeIds = [{start: id, end: id}]
- *  else:
- *   fetch metadata from badgeUri.uri
- *   store metadata in database with metadataId = metadataId and badgeIds = badgeUri.badgeIds
- *  metadataId++
- */
-export interface MetadataDocBase {
-  metadata: Metadata
-  badgeIds: UintRange[]
-  isCollection: boolean
-  metadataId: bigint | string
-  uri: string
-}
-
-/**
- * MetadataDoc fields
- *
- * @typedef {Object} MetadataDoc
- * @extends MetadataDocBase
- *
- * @see MetadataDocBase
- */
-export interface MetadataDoc extends MetadataDocBase {
-  metadataId: bigint
-}
-
-/**
- * s_MetadataDoc fields. Has strings instead of bigints.
- *
- * @typedef {Object} s_MetadataDoc
- * @extends MetadataDocBase
- *
- * @see MetadataDocBase
- */
-export interface s_MetadataDoc extends MetadataDocBase {
-  metadataId: string
-}
-
-export function convertToMetadataDoc(s_item: s_MetadataDoc): MetadataDoc {
-  return {
-    ...s_item,
-    metadataId: BigInt(s_item.metadataId),
-  }
-}
-
-export function convertFromMetadataDoc(item: MetadataDoc): s_MetadataDoc {
-  return {
-    ...item,
-    metadataId: item.metadataId.toString(),
-  }
+export function convertProfileDoc<T extends NumberType, U extends NumberType>(item: ProfileDoc<T>, convertFunction: (item: T) => U): ProfileDoc<U> {
+  return deepCopy({
+    ...getCouchDBDetails(item),
+    ...convertProfileInfo(removeCouchDBDetails(item), convertFunction),
+  })
 }
 
 /** STATUS TYPES **/
 export interface IndexerStatus {
-  status: DbStatus
+  status: StatusDoc<bigint>
 }
 
 /**
- * QueueItemBase represents an item in the queue
+ * QueueInfoBase represents an item in the queue
  *
- * @typedef {Object} QueueItemBase
- * @property {bigint | string} startMetadataId - The starting metadata ID for this queue item (doesn't change).
- * @property {bigint | string} currentMetadataId - The current metadata ID for this queue item (increments as each ID is processed).
+ * @typedef {Object} QueueInfoBase
  * @property {string} uri - The URI of the metadata to be fetched. If {id} is present, it will be replaced with each individual ID in badgeIds
- * @property {bigint | string} collectionId - The collection ID of the metadata to be fetched
- * @property {boolean} collection - True if this is a collection metadata
- * @property {UintRange[]} badgeIds - The range of badge IDs that this queue item should fetch
- * @property {bigint | string} numCalls - The number of times this queue item has been called
- * @property {bigint | string} specificId - The specific badge ID to be fetched (used if you only want to fetch a specific badge ID)
- * @property {boolean} purge - True if we should purge excess metadata documents from the database
+ * @property {NumberType} collectionId - The collection ID of the metadata to be fetched
+ * @property {NumberType} loadBalanceId - The load balance ID of the metadata to be fetched. Only the node with the same load balance ID will fetch this metadata
+ * @property {NumberType} refreshRequestTime - The timestamp of when this metadata was requested to be refreshed (milliseconds since epoch)
+ * @property {NumberType} numRetries - The number of times this metadata has been tried to be fetched but failed
+ * @property {NumberType} [lastFetchedAt] - The timestamp of when this metadata was last fetched (milliseconds since epoch)
+ * @property {string} [error] - The error message if this metadata failed to be fetched
+ * @property {NumberType} [deletedAt] - The timestamp of when this document was deleted (milliseconds since epoch)
  */
-export interface QueueItemBase {
-  startMetadataId: bigint | string,
-  currentMetadataId: bigint | string | 'collection',
+export interface QueueInfoBase<T extends NumberType> {
   uri: string,
-  collectionId: bigint | string,
-  collection: boolean,
-  badgeIds: UintRange[],
-  numCalls: bigint | string,
-  specificId?: bigint | string,
-  purge?: boolean
-}
+  collectionId: T,
+  loadBalanceId: T
+  refreshRequestTime: T
+  numRetries: T
+  lastFetchedAt?: T
+  error?: string
+  deletedAt?: T
+};
+export type QueueDoc<T extends NumberType> = QueueInfoBase<T> & nano.Document & DeletableDocument;
+export type QueueInfo<T extends NumberType> = QueueInfoBase<T> & Identified;
 
-/**
- * QueueItem represents an item in the queue
- *
- * @typedef {Object} QueueItem
- * @extends QueueItemBase
- *
- * @see QueueItemBase
- */
-export interface QueueItem extends QueueItemBase {
-  startMetadataId: bigint,
-  currentMetadataId: bigint | 'collection',
-  collectionId: bigint,
-  numCalls: bigint
-  specificId?: bigint
-}
-
-/**
- * s_QueueItem represents an item in the queue
- *
- * Has strings instead of bigints
- *
- * @typedef {Object} s_QueueItem
- * @extends QueueItemBase
- *
- * @see QueueItemBase
- */
-export interface s_QueueItem extends QueueItemBase {
-  startMetadataId: string,
-  currentMetadataId: string | 'collection',
-  collectionId: string,
-  numCalls: string
-  specificId?: string
-}
-
-export function convertToQueueItem(s_item: s_QueueItem): QueueItem {
-  return {
-    ...s_item,
-    startMetadataId: BigInt(s_item.startMetadataId),
-    currentMetadataId: s_item.currentMetadataId === 'collection' ? s_item.currentMetadataId : BigInt(s_item.currentMetadataId),
-    collectionId: BigInt(s_item.collectionId),
-    numCalls: BigInt(s_item.numCalls),
-    specificId: s_item.specificId ? BigInt(s_item.specificId) : undefined,
-  }
-}
-
-export function convertFromQueueItem(item: QueueItem): s_QueueItem {
-  return {
+export function convertQueueItem<T extends NumberType, U extends NumberType>(item: QueueInfo<T>, convertFunction: (item: T) => U): QueueInfo<U> {
+  return deepCopy({
     ...item,
-    startMetadataId: item.startMetadataId.toString(),
-    currentMetadataId: item.currentMetadataId === 'collection' ? item.currentMetadataId : item.currentMetadataId.toString(),
-    collectionId: item.collectionId.toString(),
-    numCalls: item.numCalls.toString(),
-    specificId: item.specificId ? item.specificId.toString() : undefined,
-  }
+    collectionId: convertFunction(item.collectionId),
+    loadBalanceId: convertFunction(item.loadBalanceId),
+    refreshRequestTime: convertFunction(item.refreshRequestTime),
+    numRetries: convertFunction(item.numRetries),
+    lastFetchedAt: item.lastFetchedAt ? convertFunction(item.lastFetchedAt) : undefined,
+    deletedAt: item.deletedAt ? convertFunction(item.deletedAt) : undefined,
+  })
+}
+
+export function convertQueueDoc<T extends NumberType, U extends NumberType>(item: QueueDoc<T>, convertFunction: (item: T) => U): QueueDoc<U> {
+  return deepCopy({
+    ...getCouchDBDetails(item),
+    ...convertQueueItem(removeCouchDBDetails(item), convertFunction),
+  })
 }
 
 /**
- * DbStatus represents the status document stored in the database
+ * LatestBlockStatus represents the latest block status
  *
- * @typedef {Object} DbStatusBase
- * @property {LatestBlockStatus} block - The latest synced block status (i.e. height)
- * @property {bigint | string} nextCollectionId - The next collection ID to be used
- * @property {QueueItem[]} queue - The queue of metadata to be fetched / handled
- * @property {bigint | string} gasPrice - The current gas price based on the average of the lastXGasPrices
- * @property {(bigint | string)[]} lastXGasPrices - The last X gas prices
+ * @typedef {Object} LatestBlockStatus
+ * @property {NumberType} height - The height of the latest block
+ * @property {NumberType} txIndex - The transaction index of the latest block
+ * @property {NumberType} timestamp - The timestamp of the latest block (milliseconds since epoch)
  */
-export interface DbStatusBase {
-  block: {
-    height: bigint | string
-  };
-  nextCollectionId: bigint | string;
-  queue: QueueItemBase[],
-  gasPrice: bigint | string;
-  lastXGasPrices: (bigint | string)[];
+export interface LatestBlockStatus<T extends NumberType> {
+  height: T
+  txIndex: T
+  timestamp: T
 }
 
-export interface DbStatus extends DbStatusBase {
-  block: {
-    height: bigint
-  };
-  nextCollectionId: bigint;
-  queue: QueueItem[],
-  gasPrice: bigint;
-  lastXGasPrices: bigint[];
+export function convertLatestBlockStatus<T extends NumberType, U extends NumberType>(item: LatestBlockStatus<T>, convertFunction: (item: T) => U): LatestBlockStatus<U> {
+  return deepCopy({
+    ...item,
+    height: convertFunction(item.height),
+    txIndex: convertFunction(item.txIndex),
+    timestamp: convertFunction(item.timestamp),
+  })
 }
 
 /**
- * s_DbStatus represents the status document stored in the database
+ * StatusDoc represents the status document stored in the database
  *
- * Has strings instead of bigints
- *
- * @typedef {Object} s_DbStatus
- * @extends DbStatusBase
- *
- * @see DbStatusBase
+ * @typedef {Object} StatusDoc
+ * @property {LatestBlockStatus} block - The latest synced block status (i.e. height, txIndex, timestamp)
+ * @property {NumberType} nextCollectionId - The next collection ID to be used
+ * @property {QueueDoc[]} queue - The queue of metadata to be fetched / handled
+ * @property {NumberType} gasPrice - The current gas price based on the average of the lastXGasPrices
+ * @property {(NumberType)[]} lastXGasPrices - The last X gas prices
  */
-export interface s_DbStatus extends DbStatusBase {
-  block: {
-    height: string
-  };
-  nextCollectionId: string;
-  queue: s_QueueItem[],
-  gasPrice: string;
-  lastXGasPrices: string[];
+export interface StatusInfoBase<T extends NumberType> {
+  block: LatestBlockStatus<T>
+  nextCollectionId: T;
+  gasPrice: T;
+  lastXGasPrices: (T)[];
+}
+export type StatusDoc<T extends NumberType> = StatusInfoBase<T> & nano.Document & DeletableDocument;
+export type StatusInfo<T extends NumberType> = StatusInfoBase<T> & Identified;
+
+export function convertStatusInfo<T extends NumberType, U extends NumberType>(item: StatusInfo<T>, convertFunction: (item: T) => U): StatusInfo<U> {
+  return deepCopy({
+    ...item,
+    block: convertLatestBlockStatus(item.block, convertFunction),
+    nextCollectionId: convertFunction(item.nextCollectionId),
+    gasPrice: convertFunction(item.gasPrice),
+    lastXGasPrices: item.lastXGasPrices.map(convertFunction),
+  })
 }
 
-export function convertToDbStatus(s_status: s_DbStatus): DbStatus {
-  return {
-    ...s_status,
-    block: {
-      height: BigInt(s_status.block.height),
-    },
-    nextCollectionId: BigInt(s_status.nextCollectionId),
-    queue: s_status.queue.map(convertToQueueItem),
-    gasPrice: BigInt(s_status.gasPrice),
-    lastXGasPrices: s_status.lastXGasPrices.map(BigInt),
-  }
+export function convertStatusDoc<T extends NumberType, U extends NumberType>(item: StatusDoc<T>, convertFunction: (item: T) => U): StatusDoc<U> {
+  return deepCopy({
+    ...getCouchDBDetails(item),
+    ...convertStatusInfo(removeCouchDBDetails(item), convertFunction),
+  })
 }
-
-export function convertFromDbStatus(status: DbStatus): s_DbStatus {
-  return {
-    ...status,
-    block: {
-      height: status.block.height.toString(),
-    },
-    nextCollectionId: status.nextCollectionId.toString(),
-    queue: status.queue.map(convertFromQueueItem),
-    gasPrice: status.gasPrice.toString(),
-    lastXGasPrices: status.lastXGasPrices.map((price) => price.toString()),
-  }
-}
-
 
 /**
- * BalanceDocumentBase is the type of document stored in the balances database
+ * BalanceInfoBase is the type of document stored in the balances database
  * Partitioned database by cosmosAddress (e.g. 1-cosmosx..., 1-cosmosy..., and so on represent the balances documents for collection 1 and user with cosmos address x and y respectively)
  *
- * @typedef {Object} BalanceDocumentBase
- * @extends {UserBalanceBase}
+ * @typedef {Object} BalanceInfoBase
+ * @extends {UserBalance}
  *
- * @property {bigint | string} collectionId - The collection ID
+ * @property {NumberType} collectionId - The collection ID
  * @property {string} cosmosAddress - The Cosmos address of the user
  */
-export interface BalanceDocumentBase extends UserBalanceBase {
-  collectionId: bigint | string;
+export interface BalanceInfoBase<T extends NumberType> extends UserBalance<T> {
+  collectionId: T;
   cosmosAddress: string;
+  onChain: boolean;
+
+  //used if off-chain balances
+  uri?: string,
+  fetchedAt?: T, //Date.now()
+  isPermanent?: boolean
+}
+export type BalanceDoc<T extends NumberType> = BalanceInfoBase<T> & nano.Document & DeletableDocument;
+export type BalanceInfo<T extends NumberType> = BalanceInfoBase<T> & Identified;
+
+export function convertBalanceInfo<T extends NumberType, U extends NumberType>(item: BalanceInfo<T>, convertFunction: (item: T) => U): BalanceInfo<U> {
+  return deepCopy({
+    ...item,
+    ...convertUserBalance(item, convertFunction),
+    collectionId: convertFunction(item.collectionId),
+    fetchedAt: item.fetchedAt ? convertFunction(item.fetchedAt) : undefined,
+  })
+}
+
+export function convertBalanceDoc<T extends NumberType, U extends NumberType>(item: BalanceDoc<T>, convertFunction: (item: T) => U): BalanceDoc<U> {
+  return deepCopy({
+    ...getCouchDBDetails(item),
+    ...convertBalanceInfo(removeCouchDBDetails(item), convertFunction),
+  })
 }
 
 /**
- * BalanceDocument is the type of document stored in the balances database
+ * PasswordInfoBase represents a document for a password or code-based claim.
  *
- * Has bigints instead of strings
+ * @typedef {Object} PasswordInfoBase
+ * @property {string} password - The password or code
+ * @property {string[]} codes - The list of codes
  *
- * @typedef {Object} BalanceDocument
- * @extends {UserBalance}
- * @extends {BalanceDocumentBase}
+ * @property {NumberType} currCode - The current code idx
+ * @property {{[cosmosAddress: string]: NumberType}} claimedUsers - The list of users that have claimed this password
+ * @property {string} cid - The CID of the password document
+ * @property {boolean} docClaimedByCollection - True if the password document is claimed by the collection
+ * @property {NumberType} claimId - The claim ID of the password document
+ * @property {NumberType} collectionId - The collection ID of the password document
+ * @property {NumberType} challengeId - The challenge ID of the password document
+ * @property {boolean} isHashed - True if the codes / password are already hashed
  *
- * @see BalanceDocumentBase
  */
-export interface BalanceDocument extends UserBalance {
-  collectionId: bigint;
-  cosmosAddress: string;
-}
+export interface PasswordInfoBase<T extends NumberType> {
 
-/**
- * s_BalanceDocument is the type of document stored in the balances database
- *
- * Has strings instead of bigints
- *
- * @typedef {Object} s_BalanceDocument
- * @extends {UserBalance}
- * @extends {s_BalanceDocument}
- *
- * @see BalanceDocumentBase
- */
-export interface s_BalanceDocument extends s_UserBalance {
-  collectionId: string;
-  cosmosAddress: string;
-}
-
-export function convertToBalanceDocument(s_doc: s_BalanceDocument): BalanceDocument {
-  return {
-    ...s_doc,
-    collectionId: BigInt(s_doc.collectionId),
-    balances: s_doc.balances.map(convertToBalance),
-    approvals: s_doc.approvals.map(convertToApproval),
-  }
-}
-
-export function convertFromBalanceDocument(doc: BalanceDocument): s_BalanceDocument {
-  return {
-    ...doc,
-    collectionId: doc.collectionId.toString(),
-    balances: doc.balances.map(convertFromBalance),
-    approvals: doc.approvals.map(convertFromApproval),
-  }
-}
-
-
-export interface PasswordDocumentBase {
-  password: string
-  codes: string[]
-
-  currCode: bigint | string
-  claimedUsers: {
-    [cosmosAddress: string]: bigint | string
-  }
 
   cid: string
   docClaimedByCollection: boolean
-  claimId: bigint | string
-  collectionId: bigint | string
+  claimId: T
+  collectionId: T
+  challengeDetails: ChallengeDetails<T>[];
+  challengeId: T
+}
+export type PasswordDoc<T extends NumberType> = PasswordInfoBase<T> & nano.Document & DeletableDocument;
+export type PasswordInfo<T extends NumberType> = PasswordInfoBase<T> & Identified;
+
+export function convertPasswordInfo<T extends NumberType, U extends NumberType>(item: PasswordInfo<T>, convertFunction: (item: T) => U): PasswordInfo<U> {
+  return deepCopy({
+    ...item,
+    claimId: convertFunction(item.claimId),
+    collectionId: convertFunction(item.collectionId),
+    challengeId: convertFunction(item.challengeId),
+    challengeDetails: item.challengeDetails.map((challengeDetails) => convertChallengeDetails(challengeDetails, convertFunction)),
+  })
 }
 
-export interface PasswordDocument extends PasswordDocumentBase {
-  currCode: bigint
-  claimedUsers: {
-    [cosmosAddress: string]: bigint
-  }
-  claimId: bigint
-  collectionId: bigint
-}
-
-export interface s_PasswordDocument extends PasswordDocumentBase {
-  currCode: string
-  claimedUsers: {
-    [cosmosAddress: string]: string
-  }
-  claimId: string
-  collectionId: string
-}
-
-export function convertToPasswordDocument(s_doc: s_PasswordDocument): PasswordDocument {
-  return {
-    ...s_doc,
-    currCode: BigInt(s_doc.currCode),
-    claimedUsers: Object.entries(s_doc.claimedUsers).reduce((acc, [key, value]) => {
-      acc[key] = BigInt(value)
-      return acc
-    }, {} as { [cosmosAddress: string]: bigint }),
-    claimId: BigInt(s_doc.claimId),
-    collectionId: BigInt(s_doc.collectionId),
-  }
-}
-
-export function convertFromPasswordDocument(doc: PasswordDocument): s_PasswordDocument {
-  return {
-    ...doc,
-
-    currCode: doc.currCode.toString(),
-    claimedUsers: Object.entries(doc.claimedUsers).reduce((acc, [key, value]) => {
-      acc[key] = value.toString()
-      return acc
-    }, {} as { [cosmosAddress: string]: string }),
-    claimId: doc.claimId.toString(),
-    collectionId: doc.collectionId.toString(),
-  }
+export function convertPasswordDoc<T extends NumberType, U extends NumberType>(item: PasswordDoc<T>, convertFunction: (item: T) => U): PasswordDoc<U> {
+  return deepCopy({
+    ...getCouchDBDetails(item),
+    ...convertPasswordInfo(removeCouchDBDetails(item), convertFunction),
+  })
 }
 
 /**
@@ -574,243 +399,256 @@ export function convertFromPasswordDocument(doc: PasswordDocument): s_PasswordDo
  *
  * @property {string[]} leaves - The values of the leaves
  * @property {boolean} isHashed - True if the leaves are hashed
- *
+ * @property {string[]} preimages - The preimages of the leaves (only used if isHashed = true). Oftentimes, this is used for secret codes so shoul dnot be present when user-facing.
  */
 export interface LeavesDetails {
   leaves: string[]
   isHashed: boolean
+
+  preimages?: string[];
 }
 
 /**
- * ChallengeWithDetailsBase represents a challenge for a claim with additional specified details.
+ * ChallengeDetails represents a challenge for a claim with additional specified details.
  * The base Challenge is what is stored on-chain, but this is the full challenge with additional details.
  *
- * @typedef {Object} ChallengeWithDetailsBase
+ * @typedef {Object} ChallengeDetails
  * @extends {Challenge}
  *
  * @property {LeavesDetails} leaves - The leaves of the Merkle tree with accompanying details
  * @property {boolean} areLeavesHashed - True if the leaves are hashed
- * @property {(bigint | string)[]} usedLeafIndices - The indices of the leaves that have been used
+ * @property {(number)[]} usedLeafIndices - The indices of the leaves that have been used
  * @property {MerkleTree} tree - The Merkle tree
- * @property {bigint | string} numLeaves - The number of leaves in the Merkle tree. This takes priority over leaves.length if defined (used for buffer time between leaf generation and leaf length select)
+ * @property {NumberType} numLeaves - The number of leaves in the Merkle tree. This takes priority over leaves.length if defined (used for buffer time between leaf generation and leaf length select)
  */
-export interface ChallengeWithDetailsBase extends ChallengeBase {
+export interface ChallengeDetails<T extends NumberType> {
   leavesDetails: LeavesDetails
-  usedLeafIndices: (bigint | string)[]
   tree?: MerkleTree
 
-  numLeaves?: bigint | string;
+  numLeaves?: T;
+  currCode?: T;
+
+  claimedUsers?: {
+    [cosmosAddress: string]: T
+  }
+
+  hasPassword?: boolean
+  password?: string
+}
+
+export function convertChallengeDetails<T extends NumberType, U extends NumberType>(item: ChallengeDetails<T>, convertFunction: (item: T) => U): ChallengeDetails<U> {
+  const claimedUsers = item.claimedUsers;
+  return deepCopy({
+    ...item,
+    numLeaves: item.numLeaves ? convertFunction(item.numLeaves) : undefined,
+    currCode: item.currCode ? convertFunction(item.currCode) : undefined,
+    claimedUsers: claimedUsers ? Object.keys(claimedUsers).reduce((acc, cosmosAddress) => {
+      acc[cosmosAddress] = convertFunction(claimedUsers[cosmosAddress])
+      return acc
+    }, {}) : undefined,
+  })
 }
 
 /**
- * ChallengeWithDetails represents a challenge for a claim with additional specified details.
- *
- * Has bigints instead of strings
- *
- * @typedef {Object} ChallengeWithDetails
- * @extends {ChallengeWithDetailsBase}
- *
- * @see ChallengeWithDetailsBase
- */
-export interface ChallengeWithDetails extends Challenge {
-  leavesDetails: LeavesDetails
-  tree?: MerkleTree
-
-  usedLeafIndices: bigint[]
-  numLeaves?: bigint;
-}
-
-export interface s_ChallengeWithDetails extends s_Challenge {
-  leavesDetails: LeavesDetails
-  tree?: MerkleTree
-
-  usedLeafIndices: string[]
-  numLeaves?: string;
-}
-
-export function convertToChallengeWithDetails(s_challenge: s_ChallengeWithDetails): ChallengeWithDetails {
-  return {
-    ...s_challenge,
-    usedLeafIndices: s_challenge.usedLeafIndices.map(BigInt),
-    numLeaves: s_challenge.numLeaves ? BigInt(s_challenge.numLeaves) : undefined,
-    expectedProofLength: BigInt(s_challenge.expectedProofLength),
-  }
-}
-
-export function convertFromChallengeWithDetails(challenge: ChallengeWithDetails): s_ChallengeWithDetails {
-  return {
-    ...challenge,
-    usedLeafIndices: challenge.usedLeafIndices.map((index) => index.toString()),
-    numLeaves: challenge.numLeaves ? challenge.numLeaves.toString() : undefined,
-    expectedProofLength: challenge.expectedProofLength.toString(),
-  }
-}
-
-/**
- * ClaimDocumentBase is the type of document stored in the claims database
+ * ClaimInfoBase is the type of document stored in the claims database
  * partitioned database by collection ID (e.g. 1-1, 1-2, and so on represent the claims collection 1 for claims with ID 1, 2, etc)
  *
- * @typedef {Object} ClaimDocumentBase
- * @extends {ClaimWithDetails}
+ * @typedef {Object} ClaimInfoBase
+ * @extends {Claim}
  *
- * @property {bigint | string} collectionId - The collection ID
- * @property {bigint | string} claimId - The claim ID
- * @property {bigint | string} totalClaimsProcessed - The total number of claims processed for this collection
- * @property {{[cosmosAddress: string]: bigint | string}} claimsPerAddressCount - A running count for the number of claims processed for each address
- * @property {ChallengeWithDetails[]} challenges - The list of challenges for this claim (with extra helper details)
- * @property {boolean} failedToFetch - True if the claim failed to fetch the URI and inserted blank values
+ * @property {NumberType} collectionId - The collection ID
+ * @property {NumberType} claimId - The claim ID
+ * @property {NumberType} totalClaimsProcessed - The total number of claims processed for this collection
+ * @property {{[cosmosAddress: string]: number}} claimsPerAddressCount - A running count for the number of claims processed for each address
+ * @property {(number)[][]} usedLeafIndices - The used leaf indices for each challenge. A leaf index is the leaf location in Merkle tree
  */
-export interface ClaimDocumentBase extends ClaimWithDetails {
-  collectionId: bigint | string;
-  claimId: bigint | string;
-  totalClaimsProcessed: bigint | string;
+export interface ClaimInfoBase<T extends NumberType> extends Claim<T> {
+  collectionId: T;
+  claimId: T;
+  totalClaimsProcessed: T;
   claimsPerAddressCount: {
-    [cosmosAddress: string]: bigint | string;
+    [cosmosAddress: string]: T;
   },
-  failedToFetch?: boolean;
+  usedLeaves: string[][]; //2D array of used leaves by challenge index
+  usedLeafIndices: (T)[][]; //2D array of used leaf indices by challenge index
+}
+export type ClaimDoc<T extends NumberType> = ClaimInfoBase<T> & nano.Document & DeletableDocument;
+export type ClaimInfo<T extends NumberType> = ClaimInfoBase<T> & Identified;
+
+export function convertClaimInfo<T extends NumberType, U extends NumberType>(item: ClaimInfo<T>, convertFunction: (item: T) => U): ClaimInfo<U> {
+  return deepCopy({
+    ...item,
+    ...convertClaim(item, convertFunction),
+    collectionId: convertFunction(item.collectionId),
+    claimId: convertFunction(item.claimId),
+    totalClaimsProcessed: convertFunction(item.totalClaimsProcessed),
+    claimsPerAddressCount: Object.keys(item.claimsPerAddressCount).reduce((acc, cosmosAddress) => {
+      acc[cosmosAddress] = convertFunction(item.claimsPerAddressCount[cosmosAddress])
+      return acc
+    }, {}),
+    usedLeafIndices: item.usedLeafIndices.map((usedLeafIndices) => usedLeafIndices.map(convertFunction)),
+  })
+}
+
+export function convertClaimDoc<T extends NumberType, U extends NumberType>(item: ClaimDoc<T>, convertFunction: (item: T) => U): ClaimDoc<U> {
+  return deepCopy({
+    ...getCouchDBDetails(item),
+    ...convertClaimInfo(removeCouchDBDetails(item), convertFunction),
+  })
 }
 
 /**
- * ClaimDocument is the type of document stored in the claims database
+ * ClaimInfoWithDetails extends claims and provides additional details.
  *
- * Has bigints instead of strings
+ * @typedef {Object} ClaimInfoWithDetails
+ * @extends {ClaimDoc}
  *
- * @typedef {Object} ClaimDocument
- * @extends {ClaimWithDetails}
- *
- * @see ClaimDocumentBase
+ * @property {ClaimDetails} details - The details of the claim
  */
-export interface ClaimDocument extends ClaimWithDetails {
-  collectionId: bigint;
-  claimId: bigint;
-  totalClaimsProcessed: bigint;
-  claimsPerAddressCount: {
-    [cosmosAddress: string]: bigint;
-  },
-  failedToFetch?: boolean;
+export interface ClaimInfoWithDetails<T extends NumberType> extends ClaimInfo<T> {
+  details?: ClaimDetails<T>
 }
 
-export interface s_ClaimDocument extends s_ClaimWithDetails {
-  collectionId: string;
-  claimId: string;
-  totalClaimsProcessed: string;
-  claimsPerAddressCount: {
-    [cosmosAddress: string]: string;
-  },
-  failedToFetch?: boolean;
-}
-
-export function convertToClaimDocument(s_doc: s_ClaimDocument): ClaimDocument {
-  return {
-    ...s_doc,
-    collectionId: BigInt(s_doc.collectionId),
-    claimId: BigInt(s_doc.claimId),
-    totalClaimsProcessed: BigInt(s_doc.totalClaimsProcessed),
-    claimsPerAddressCount: Object.fromEntries(Object.entries(s_doc.claimsPerAddressCount).map(([key, value]) => [key, BigInt(value)])),
-    challenges: s_doc.challenges.map(convertToChallengeWithDetails),
-    undistributedBalances: s_doc.undistributedBalances.map(convertToBalance),
-    numClaimsPerAddress: BigInt(s_doc.numClaimsPerAddress),
-    incrementIdsBy: BigInt(s_doc.incrementIdsBy),
-    currentClaimAmounts: s_doc.currentClaimAmounts.map(convertToBalance),
-    timeRange: convertToUintRange(s_doc.timeRange),
-  }
-}
-
-export function convertFromClaimDocument(doc: ClaimDocument): s_ClaimDocument {
-  return {
-    ...doc,
-    collectionId: doc.collectionId.toString(),
-    claimId: doc.claimId.toString(),
-    totalClaimsProcessed: doc.totalClaimsProcessed.toString(),
-    claimsPerAddressCount: Object.fromEntries(Object.entries(doc.claimsPerAddressCount).map(([key, value]) => [key, value.toString()])),
-    challenges: doc.challenges.map(convertFromChallengeWithDetails),
-    undistributedBalances: doc.undistributedBalances.map(convertFromBalance),
-    numClaimsPerAddress: doc.numClaimsPerAddress.toString(),
-    incrementIdsBy: doc.incrementIdsBy.toString(),
-    currentClaimAmounts: doc.currentClaimAmounts.map(convertFromBalance),
-    timeRange: convertFromUintRange(doc.timeRange),
-  }
+export function convertClaimInfoWithDetails<T extends NumberType, U extends NumberType>(item: ClaimInfoWithDetails<T>, convertFunction: (item: T) => U): ClaimInfoWithDetails<U> {
+  return deepCopy({
+    ...item,
+    ...convertClaimInfo(item, convertFunction),
+    details: item.details ? convertClaimDetails(item.details, convertFunction) : undefined,
+    _rev: undefined,
+  })
 }
 
 /**
  * Extends a base Claim with additional details.
  * The base Claim is what is stored on-chain, but this is the full claim with additional details stored in the indexer.
  *
- * @typedef {Object} ClaimWithDetailsBase
- * @extends {Claim}
+ * @typedef {Object} ClaimDetails
  *
  * @property {string} name - The name of the claim
  * @property {string} description - The description of the claim. This describes how to earn and claim the badge.
  * @property {boolean} hasPassword - True if the claim has a password
  * @property {string} password - The password of the claim (if it has one)
- * @property {ChallengeWithDetails[]} challenges - The list of challenges for this claim (with extra helper details)
+ * @property {ChallengeDetails[]} challenges - The list of challenges for this claim (with extra helper details)
  */
-export interface ClaimWithDetailsBase extends ClaimBase {
+export interface ClaimDetails<T extends NumberType> {
   name: string;
   description: string;
   hasPassword: boolean;
   password?: string;
 
-  challenges: ChallengeWithDetailsBase[];
+  challengeDetails: ChallengeDetails<T>[];
+}
+
+export function convertClaimDetails<T extends NumberType, U extends NumberType>(item: ClaimDetails<T>, convertFunction: (item: T) => U): ClaimDetails<U> {
+  return deepCopy({
+    ...item,
+    challengeDetails: item.challengeDetails.map((challengeDetails) => convertChallengeDetails(challengeDetails, convertFunction)),
+  })
 }
 
 /**
- * Extends a base Claim with additional details.
+ * FetchInfoBase is the type of document stored in the fetch database
  *
- * Has bigints instead of strings
+ * This represents the returned JSON value from fetching a URI.
  *
- * @typedef {Object} ClaimWithDetails
- * @extends {ClaimWithDetailsBase}
- *
- * @see ClaimWithDetailsBase
+ * @typedef {Object} FetchInfoBase
+ * @property {Metadata | ClaimDetails} content - The content of the fetch document. Note that we store balances in BALANCES_DB and not here to avoid double storage.
+ * @property {NumberType} fetchedAt - The time the document was fetched
+ * @property {'Claim' | 'Metadata' | 'Balances'} db - The type of content fetched. This is used for querying purposes
+ * @property {boolean} isPermanent - True if the document is permanent (i.e. fetched from a permanent URI like IPFS)
+ * @property {string} uri - The URI of the document
  */
-export interface ClaimWithDetails extends Claim {
-  name: string;
-  description: string;
-  hasPassword: boolean;
-  password?: string;
+export interface FetchInfoBase<T extends NumberType> {
+  content?: Metadata<T> | ClaimDetails<T> | OffChainBalancesMap<T>
+  fetchedAt: T, //Date.now()
+  db: 'Claim' | 'Metadata' | 'Balances'
+  isPermanent: boolean
+}
+export type FetchDoc<T extends NumberType> = FetchInfoBase<T> & nano.Document & DeletableDocument;
+export type FetchInfo<T extends NumberType> = FetchInfoBase<T> & Identified;
 
-  challenges: ChallengeWithDetails[];
+export function convertFetchInfo<T extends NumberType, U extends NumberType>(item: FetchInfo<T>, convertFunction: (item: T) => U): FetchInfo<U> {
+  return deepCopy({
+    ...item,
+    content: item.db === 'Metadata' ? convertMetadata(item.content as Metadata<T>, convertFunction) : item.db === 'Claim' ? convertClaimDetails(item.content as ClaimDetails<T>, convertFunction) : convertOffChainBalancesMap(item.content as OffChainBalancesMap<T>, convertFunction),
+    fetchedAt: convertFunction(item.fetchedAt),
+  })
 }
 
-/**
- * Extends a base Claim with additional details.
- *
- * Has strings instead of bigints
- * @typedef {Object} s_ClaimWithDetails
- * @extends {ClaimWithDetailsBase}
- *
- * @see ClaimWithDetailsBase
- */
-export interface s_ClaimWithDetails extends s_Claim {
-  name: string;
-  description: string;
-  hasPassword: boolean;
-  password?: string;
 
-  challenges: s_ChallengeWithDetails[];
+export function convertFetchDoc<T extends NumberType, U extends NumberType>(item: FetchDoc<T>, convertFunction: (item: T) => U): FetchDoc<U> {
+  return deepCopy({
+    ...getCouchDBDetails(item),
+    ...convertFetchInfo(removeCouchDBDetails(item), convertFunction),
+  })
 }
 
-export function convertToClaimWithDetails(s_claim: s_ClaimWithDetails): ClaimWithDetails {
-  return {
-    ...s_claim,
-    challenges: s_claim.challenges.map(convertToChallengeWithDetails),
-    undistributedBalances: s_claim.undistributedBalances.map(convertToBalance),
-    numClaimsPerAddress: BigInt(s_claim.numClaimsPerAddress),
-    incrementIdsBy: BigInt(s_claim.incrementIdsBy),
-    currentClaimAmounts: s_claim.currentClaimAmounts.map(convertToBalance),
-    timeRange: convertToUintRange(s_claim.timeRange),
-  }
+export interface RefreshInfoBase<T extends NumberType> {
+  collectionId: T
+  refreshRequestTime: T
+}
+export type RefreshDoc<T extends NumberType> = RefreshInfoBase<T> & nano.Document & DeletableDocument;
+export type RefreshInfo<T extends NumberType> = RefreshInfoBase<T> & Identified;
+
+export function convertRefreshInfo<T extends NumberType, U extends NumberType>(item: RefreshInfo<T>, convertFunction: (item: T) => U): RefreshInfo<U> {
+  return deepCopy({
+    ...item,
+    collectionId: convertFunction(item.collectionId),
+    refreshRequestTime: convertFunction(item.refreshRequestTime),
+  })
 }
 
-export function convertFromClaimWithDetails(claim: ClaimWithDetails): s_ClaimWithDetails {
-  return {
-    ...claim,
-    challenges: claim.challenges.map(convertFromChallengeWithDetails),
-    undistributedBalances: claim.undistributedBalances.map(convertFromBalance),
-    numClaimsPerAddress: claim.numClaimsPerAddress.toString(),
-    incrementIdsBy: claim.incrementIdsBy.toString(),
-    currentClaimAmounts: claim.currentClaimAmounts.map(convertFromBalance),
-    timeRange: convertFromUintRange(claim.timeRange),
-  }
+export function convertRefreshDoc<T extends NumberType, U extends NumberType>(item: RefreshDoc<T>, convertFunction: (item: T) => U): RefreshDoc<U> {
+  return deepCopy({
+    ...getCouchDBDetails(item),
+    ...convertRefreshInfo(removeCouchDBDetails(item), convertFunction),
+  })
+}
+
+export interface ErrorDoc {
+  error: string
+  function: string
+  docs?: DocsCache
+}
+
+export interface AirdropInfoBase<T extends NumberType> {
+  airdropped: boolean
+  timestamp: T
+  hash?: string
+}
+export type AirdropDoc<T extends NumberType> = AirdropInfoBase<T> & nano.Document & DeletableDocument;
+export type AirdropInfo<T extends NumberType> = AirdropInfoBase<T> & Identified;
+
+export function convertAirdropInfo<T extends NumberType, U extends NumberType>(item: AirdropInfo<T>, convertFunction: (item: T) => U): AirdropInfo<U> {
+  return deepCopy({
+    ...item,
+    timestamp: convertFunction(item.timestamp),
+  })
+}
+
+export function convertAirdropDoc<T extends NumberType, U extends NumberType>(item: AirdropDoc<T>, convertFunction: (item: T) => U): AirdropDoc<U> {
+  return deepCopy({
+    ...getCouchDBDetails(item),
+    ...convertAirdropInfo(removeCouchDBDetails(item), convertFunction),
+  })
+}
+
+export interface IPFSTotalsInfoBase<T extends NumberType> {
+  kbUploaded: T
+}
+export type IPFSTotalsDoc<T extends NumberType> = IPFSTotalsInfoBase<T> & nano.Document & DeletableDocument;
+export type IPFSTotalsInfo<T extends NumberType> = IPFSTotalsInfoBase<T> & Identified;
+
+export function convertIPFSTotalsInfo<T extends NumberType, U extends NumberType>(item: IPFSTotalsInfo<T>, convertFunction: (item: T) => U): IPFSTotalsInfo<U> {
+  return deepCopy({
+    ...item,
+    kbUploaded: convertFunction(item.kbUploaded),
+  })
+}
+
+export function convertIPFSTotalsDoc<T extends NumberType, U extends NumberType>(item: IPFSTotalsDoc<T>, convertFunction: (item: T) => U): IPFSTotalsDoc<U> {
+  return deepCopy({
+    ...getCouchDBDetails(item),
+    ...convertIPFSTotalsInfo(removeCouchDBDetails(item), convertFunction),
+  })
 }

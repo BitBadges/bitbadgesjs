@@ -1,9 +1,9 @@
+import { NumberType, Transfer, convertToProtoTransfers } from 'bitbadgesjs-proto'
 import {
   BALANCE_TYPES,
   UINT_RANGE_TYPES,
   TRANSFERS_TYPES,
 } from './eip712HelperTypes'
-import { Transfer, getWrappedTransfers } from 'bitbadgesjs-proto'
 
 const MsgTransferBadgeValueType = [
   { name: 'creator', type: 'string' },
@@ -19,18 +19,18 @@ export const MSG_TRANSFER_BADGE_TYPES = {
   Transfer: TRANSFERS_TYPES,
 }
 
-export function createMsgTransferBadge(
+export function createMsgTransferBadge<T extends NumberType>(
   creator: string,
   from: string,
-  collectionId: bigint,
-  transfers: Transfer[],
+  collectionId: T,
+  transfers: Transfer<T>[],
 ) {
   return {
     type: 'badges/TransferBadge',
     value: {
       creator,
       from,
-      transfers: getWrappedTransfers(transfers).map((s) => s.toObject()),
+      transfers: convertToProtoTransfers(transfers).map((s) => s.toObject()),
       collectionId: collectionId.toString(),
     },
   }

@@ -1,275 +1,155 @@
-import { Balance, BalanceBase, convertFromBalance, convertToBalance, s_Balance } from "bitbadgesjs-proto";
+import { Balance, convertBalance } from "bitbadgesjs-proto";
+import { NumberType } from "./string-numbers";
+import { deepCopy, getCouchDBDetails, removeCouchDBDetails } from "./utils";
+import nano from "nano";
+import { Identified, DeletableDocument } from "./db";
+
+export type ReviewMethod = 'Review';
+export type TransferMethod = 'Transfer' | 'Mint' | 'Claim';
+export type AnnouncementMethod = 'Announcement';
+export type ActivityMethod = ReviewMethod | TransferMethod | AnnouncementMethod;
 
 /**
  * Activity item that serves as the base type for all activity items.
- * @typedef {Object} ActivityItemBase
- * @property {string} method - The type of activity (e.g. "Review", "Transfer", "Announcement", "Mint", "Claim").
- * @property {bigint | string} timestamp - The timestamp of the activity (in milliseconds since the UNIX epoch (Date.now())).
- * @property {bigint | string} block - The block number of the activity.
+ * @typedef {Object} ActivityInfoBase
+ * @property {ActivityMethod} method - The type of activity (e.g. "Review", "Transfer", "Announcement", "Mint", "Claim").
+ * @property {NumberType} timestamp - The timestamp of the activity.
+ * @property {NumberType} block - The block number of the activity.
  */
-export interface ActivityItemBase {
-  method: string;
-  timestamp: bigint | string;
-  block: bigint | string;
+export interface ActivityInfoBase<T extends NumberType> {
+  method: ActivityMethod;
+  timestamp: T;
+  block: T;
 }
+export type ActivityDoc<T extends NumberType> = ActivityInfoBase<T> & nano.Document & DeletableDocument;
+export type ActivityInfo<T extends NumberType> = ActivityInfoBase<T> & Identified;
 
-/**
- * Activity item that serves as the base type for all activity items.
- * @typedef {Object} ActivityItem
- * @extends ActivityItemBase
- */
-export interface ActivityItem extends ActivityItemBase {
-  timestamp: bigint;
-  block: bigint;
-}
-
-/**
- * Activity item that serves as the base type for all activity items.
- * @typedef {Object} s_ActivityItem
- * @extends ActivityItemBase
- */
-export interface s_ActivityItem extends ActivityItemBase {
-  timestamp: string;
-  block: string;
-}
-
-/**
- * Function that converts from s_ActivityItem to ActivityItem.
- */
-export function convertToActivityItem(s_item: s_ActivityItem): ActivityItem {
-  return {
-    ...s_item,
-    timestamp: BigInt(s_item.timestamp),
-    block: BigInt(s_item.block)
-  }
-}
-
-/**
- * Function that converts from ActivityItem to s_ActivityItem.
- */
-export function convertFromActivityItem(item: ActivityItem): s_ActivityItem {
-  return {
+export function convertActivityInfo<T extends NumberType, U extends NumberType>(item: ActivityInfo<T>, convertFunction: (item: T) => U): ActivityInfo<U> {
+  return deepCopy({
     ...item,
-    timestamp: item.timestamp.toString(),
-    block: item.block.toString()
-  }
+    timestamp: convertFunction(item.timestamp),
+    block: convertFunction(item.block)
+  })
 }
 
+export function convertActivityDoc<T extends NumberType, U extends NumberType>(item: ActivityDoc<T>, convertFunction: (item: T) => U): ActivityDoc<U> {
+  return deepCopy({
+    ...getCouchDBDetails(item),
+    ...convertActivityInfo(removeCouchDBDetails(item), convertFunction)
+  })
+}
 
 /**
- * Type for review activity items that extends the base ActivityItem interface.
- * @typedef {Object} ReviewActivityItemBase
- * @extends ActivityItemBase
+ * Type for review activity items that extends the base ActivityDoc interface.
+ * @typedef {Object} ReviewInfoBase
+ * @extends ActivityInfoBase
  *
- * @property {string} method - The type of activity, which is always "Review".
+ * @property {ReviewMethod} method - The type of activity, which will always be "Review".
  * @property {string} review - The review text (max 2048 characters).
- * @property {bigint | string} stars - The number of stars given (1-5).
+ * @property {NumberType} stars - The number of stars given (1-5).
  * @property {string} from - The cosmos address of the user who gave the review.
- * @property {bigint | string} [collectionId] - The collection ID of the collection that was reviewed.
+ * @property {NumberType} [collectionId] - The collection ID of the collection that was reviewed.
  * @property {string} [reviewedAddress] - The cosmos address of the user who gave the review.
  */
-export interface ReviewActivityItemBase extends ActivityItemBase {
+
+export interface ReviewInfoBase<T extends NumberType> extends ActivityInfoBase<T> {
+  method: ReviewMethod;
   review: string;
-  stars: bigint | string;
+  stars: T;
   from: string;
-  collectionId?: bigint | string;
+  collectionId?: T;
   reviewedAddress?: string;
 }
+export type ReviewDoc<T extends NumberType> = ReviewInfoBase<T> & nano.Document & DeletableDocument;
+export type ReviewInfo<T extends NumberType> = ReviewInfoBase<T> & Identified;
 
-/**
- * Type for review activity items that extends the base ActivityItem interface.
- *
- * @typedef {Object} ReviewActivityItem
- * @extends ReviewActivityItemBase
- *
- * @see ReviewActivityItemBase
- */
-export interface ReviewActivityItem extends ActivityItem {
-  review: string;
-  from: string;
-  reviewedAddress?: string;
-
-  collectionId?: bigint;
-  stars: bigint;
-}
-
-/**
- * Type for review activity items that extends the base ActivityItem interface.
- *
- * @typedef {Object} s_ReviewActivityItem
- * @extends ReviewActivityItemBase
- *
- * @see ReviewActivityItemBase
- */
-export interface s_ReviewActivityItem extends s_ActivityItem {
-  review: string;
-  from: string;
-  reviewedAddress?: string;
-
-  collectionId?: string;
-  stars: string;
-}
-
-/**
- * Function that converts from s_ReviewActivityItem to ReviewActivityItem.
- */
-export function convertToReviewActivityItem(s_item: s_ReviewActivityItem): ReviewActivityItem {
-  return {
-    ...s_item,
-    stars: BigInt(s_item.stars),
-    collectionId: s_item.collectionId ? BigInt(s_item.collectionId) : undefined,
-    timestamp: BigInt(s_item.timestamp),
-    block: BigInt(s_item.block)
-  }
-}
-/**
- * Function that converts from ReviewActivityItem to s_ReviewActivityItem.
- */
-export function convertFromReviewActivityItem(item: ReviewActivityItem): s_ReviewActivityItem {
-  return {
+export function convertReviewInfo<T extends NumberType, U extends NumberType>(item: ReviewInfo<T>, convertFunction: (item: T) => U): ReviewInfo<U> {
+  return deepCopy({
     ...item,
-    stars: item.stars.toString(),
-    collectionId: item.collectionId ? item.collectionId.toString() : undefined,
-    timestamp: item.timestamp.toString(),
-    block: item.block.toString()
-  }
+    ...convertActivityInfo(item, convertFunction),
+    method: item.method,
+    stars: convertFunction(item.stars),
+    collectionId: item.collectionId ? convertFunction(item.collectionId) : undefined
+  })
 }
 
+export function convertReviewDoc<T extends NumberType, U extends NumberType>(item: ReviewDoc<T>, convertFunction: (item: T) => U): ReviewDoc<U> {
+  return deepCopy({
+    ...getCouchDBDetails(item),
+    ...convertReviewInfo(removeCouchDBDetails(item), convertFunction)
+  })
+}
 
 /**
- * Type for announcement activity items that extends the base ActivityItem interface.
- * @typedef {Object} AnnouncementActivityItemBase
- * @extends ActivityItemBase
+ * Type for announcement activity items that extends the base ActivityDoc interface.
+ * @typedef {Object} AnnouncementInfoBase
+ * @extends ActivityInfoBase
  *
- * @property {string} method - The type of activity, which is always "Announcement".
+ * @property {AnnouncementMethod} method - The type of activity, which is always "Announcement".
  * @property {string} announcement - The announcement text (max 2048 characters).
  * @property {string} from - The cosmos address of the user who made the announcement.
- * @property {bigint | string} collectionId - The collection ID of the collection that was announced.
+ * @property {NumberType} collectionId - The collection ID of the collection that was announced.
  */
-export interface AnnouncementActivityItemBase extends ActivityItemBase {
+export interface AnnouncementInfoBase<T extends NumberType> extends ActivityInfoBase<T> {
+  method: AnnouncementMethod;
   announcement: string;
   from: string;
-  collectionId: bigint | string;
+  collectionId: T;
+}
+export type AnnouncementDoc<T extends NumberType> = AnnouncementInfoBase<T> & nano.Document & DeletableDocument;
+export type AnnouncementInfo<T extends NumberType> = AnnouncementInfoBase<T> & Identified;
+
+export function convertAnnouncementDoc<T extends NumberType, U extends NumberType>(item: AnnouncementDoc<T>, convertFunction: (item: T) => U): AnnouncementDoc<U> {
+  return deepCopy({
+    ...getCouchDBDetails(item),
+    ...convertAnnouncementInfo(removeCouchDBDetails(item), convertFunction)
+  })
 }
 
-/**
- * Type for announcement activity items that extends the base ActivityItem interface.
- * @typedef {Object} AnnouncementActivityItem
- * @extends AnnouncementActivityItemBase
- *
- * @see AnnouncementActivityItemBase
- */
-export interface AnnouncementActivityItem extends ActivityItem {
-  announcement: string;
-  from: string;
-  collectionId: bigint;
-}
-
-/**
- * Type for announcement activity items that extends the base ActivityItem interface.
- * @typedef {Object} s_AnnouncementActivityItem
- * @extends AnnouncementActivityItemBase
- *
- * @see AnnouncementActivityItemBase
- */
-export interface s_AnnouncementActivityItem extends s_ActivityItem {
-  announcement: string;
-  from: string;
-  collectionId: string;
-}
-
-/**
- * Function that converts from s_AnnouncementActivityItem to AnnouncementActivityItem.
- */
-export function convertToAnnouncementActivityItem(s_item: s_AnnouncementActivityItem): AnnouncementActivityItem {
-  return {
-    ...s_item,
-    collectionId: BigInt(s_item.collectionId),
-    timestamp: BigInt(s_item.timestamp),
-    block: BigInt(s_item.block)
-  }
-}
-
-/**
- * Function that converts from AnnouncementActivityItem to s_AnnouncementActivityItem.
- */
-export function convertFromAnnouncementActivityItem(item: AnnouncementActivityItem): s_AnnouncementActivityItem {
-  return {
+export function convertAnnouncementInfo<T extends NumberType, U extends NumberType>(item: AnnouncementInfo<T>, convertFunction: (item: T) => U): AnnouncementInfo<U> {
+  return deepCopy({
     ...item,
-    collectionId: item.collectionId.toString(),
-    timestamp: item.timestamp.toString(),
-    block: item.block.toString()
-  }
+    ...convertActivityInfo(item, convertFunction),
+    method: item.method,
+    collectionId: convertFunction(item.collectionId)
+  })
 }
 
 /**
- * Type for transfer activity items that extends the base ActivityItem interface.
- * @typedef {Object} TransferActivityItemBase
+ * Type for transfer activity items that extends the base ActivityDoc interface.
+ * @typedef {Object} TransferActivityInfoBase
  * @property {string[]} to - The list of account numbers that received the transfer.
  * @property {(string | 'Mint')[]} from - The list of account numbers that sent the transfer ('Mint' is used as a special address when minting or claiming).
  * @property {Balance[]} balances - The list of balances and badge IDs that were transferred.
- * @property {bigint | string} collectionId - The collection ID of the collection that was transferred.
- * @property {bigint | string} [claimId] - The claim ID of the claim (if method = "Claim").
- * @property {string} method - The type of activity, which can be "Transfer", "Mint", or "Claim".
+ * @property {NumberType} collectionId - The collection ID of the collection that was transferred.
+ * @property {NumberType} [claimId] - The claim ID of the claim (if method = "Claim").
+ * @property {TransferMethod} method - The type of activity, which can be "Transfer", "Mint", or "Claim".
  */
-export interface TransferActivityItemBase extends ActivityItemBase {
+export interface TransferActivityInfoBase<T extends NumberType> extends ActivityInfoBase<T> {
+  method: TransferMethod;
   to: string[];
   from: (string | 'Mint')[];
-  balances: BalanceBase[];
-  collectionId: bigint | string;
-  claimId?: bigint | string;
+  balances: Balance<T>[];
+  collectionId: T;
+  claimId?: T;
+}
+export type TransferActivityDoc<T extends NumberType> = TransferActivityInfoBase<T> & nano.Document & DeletableDocument;
+export type TransferActivityInfo<T extends NumberType> = TransferActivityInfoBase<T> & Identified;
+
+export function convertTransferActivityDoc<T extends NumberType, U extends NumberType>(item: TransferActivityDoc<T>, convertFunction: (item: T) => U): TransferActivityDoc<U> {
+  return deepCopy({
+    ...getCouchDBDetails(item),
+    ...convertTransferActivityInfo(removeCouchDBDetails(item), convertFunction)
+  })
 }
 
-/**
- * Type for transfer activity items that extends the base ActivityItem interface.
- *
- * @typedef {Object} s_TransferActivityItem
- * @extends TransferActivityItemBase
- *
- * @see TransferActivityItemBase
- */
-export interface s_TransferActivityItem extends s_ActivityItem {
-  to: string[];
-  from: (string | 'Mint')[];
-  collectionId: string;
-  claimId?: string;
-  balances: s_Balance[];
-}
-
-/**
- * Type for transfer activity items that extends the base ActivityItem interface.
- *
- * @typedef {Object} TransferActivityItem
- * @extends TransferActivityItemBase
- *
- * @see TransferActivityItemBase
- */
-export interface TransferActivityItem extends ActivityItem {
-  to: string[];
-  from: (string | 'Mint')[];
-  collectionId: bigint;
-  claimId?: bigint;
-  balances: Balance[];
-}
-
-export function convertToTransferActivityItem(s_item: s_TransferActivityItem): TransferActivityItem {
-  return {
-    ...s_item,
-    collectionId: BigInt(s_item.collectionId),
-    claimId: s_item.claimId ? BigInt(s_item.claimId) : undefined,
-    balances: s_item.balances.map(b => convertToBalance(b)),
-    timestamp: BigInt(s_item.timestamp),
-    block: BigInt(s_item.block)
-  }
-}
-
-export function convertFromTransferActivityItem(item: TransferActivityItem): s_TransferActivityItem {
-  return {
+export function convertTransferActivityInfo<T extends NumberType, U extends NumberType>(item: TransferActivityInfo<T>, convertFunction: (item: T) => U): TransferActivityInfo<U> {
+  return deepCopy({
     ...item,
-    collectionId: item.collectionId.toString(),
-    claimId: item.claimId ? item.claimId.toString() : undefined,
-    balances: item.balances.map(b => convertFromBalance(b)),
-    timestamp: item.timestamp.toString(),
-    block: item.block.toString()
-  }
+    ...convertActivityInfo(item, convertFunction),
+    method: item.method,
+    balances: item.balances.map((x) => convertBalance(x, convertFunction)),
+    collectionId: convertFunction(item.collectionId),
+    claimId: item.claimId ? convertFunction(item.claimId) : undefined
+  })
 }

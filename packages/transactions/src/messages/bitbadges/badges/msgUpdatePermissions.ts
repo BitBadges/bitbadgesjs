@@ -1,31 +1,43 @@
 import {
-  createMsgUpdatePermissions as protoMsgUpdatePermissions,
+  NumberType,
   createTransaction,
+  createMsgUpdatePermissions as protoMsgUpdatePermissions
 } from 'bitbadgesjs-proto'
 import * as badges from 'bitbadgesjs-proto/dist/proto/badges/tx'
 
 import {
+  MSG_UPDATE_PERMISSIONS_TYPES,
   createEIP712,
+  createMsgUpdatePermissions,
   generateFee,
   generateMessage,
   generateTypes,
-  createMsgUpdatePermissions,
-  MSG_UPDATE_PERMISSIONS_TYPES,
 } from 'bitbadgesjs-eip712'
 
 import { getDefaultDomainWithChainId } from '../../domain'
 
 import { Chain, Fee, Sender } from '../../common'
 
-export interface MessageMsgUpdatePermissions {
+export interface MsgUpdatePermissions<T extends NumberType> {
   creator: string
-  collectionId: bigint
-  permissions: bigint
+  collectionId: T
+  permissions: T
+}
+
+export function convertMsgUpdatePermissions<T extends NumberType, U extends NumberType>(
+  msg: MsgUpdatePermissions<T>,
+  convertFunction: (item: T) => U
+): MsgUpdatePermissions<U> {
+  return {
+    ...msg,
+    collectionId: convertFunction(msg.collectionId),
+    permissions: convertFunction(msg.permissions),
+  }
 }
 
 export function convertFromProtoToMsgUpdatePermissions(
   protoMsg: badges.bitbadges.bitbadgeschain.badges.MsgUpdatePermissions,
-): MessageMsgUpdatePermissions {
+): MsgUpdatePermissions<bigint> {
   return {
     creator: protoMsg.creator,
     collectionId: BigInt(protoMsg.collectionId),
@@ -33,12 +45,12 @@ export function convertFromProtoToMsgUpdatePermissions(
   }
 }
 
-export function createTxMsgUpdatePermissions(
+export function createTxMsgUpdatePermissions<T extends NumberType>(
   chain: Chain,
   sender: Sender,
   fee: Fee,
   memo: string,
-  params: MessageMsgUpdatePermissions,
+  params: MsgUpdatePermissions<T>,
   domain?: object,
 ) {
   // EIP712

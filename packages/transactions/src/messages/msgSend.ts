@@ -1,6 +1,8 @@
 import {
   createMsgSend as protoMsgSend,
   createTransaction,
+  NumberType,
+  JSPrimitiveNumberType,
 } from 'bitbadgesjs-proto'
 
 import {
@@ -16,18 +18,23 @@ import { getDefaultDomainWithChainId } from './domain'
 
 import { Chain, Fee, Sender } from './common'
 
-export interface MessageSendParams {
+export interface MsgSend<T extends NumberType> {
   destinationAddress: string
-  amount: string
+  amount: T
   denom: string
 }
 
-export function createMessageSend(
+export type b_MsgSend = MsgSend<bigint>
+export type s_MsgSend = MsgSend<string>
+export type n_MsgSend = MsgSend<number>
+export type d_MsgSend = MsgSend<JSPrimitiveNumberType>
+
+export function createTxMsgSend<T extends NumberType>(
   chain: Chain,
   sender: Sender,
   fee: Fee,
   memo: string,
-  params: MessageSendParams,
+  params: MsgSend<T>,
   domain?: object,
 ) {
   // EIP712

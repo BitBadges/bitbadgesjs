@@ -1,72 +1,93 @@
 import {
-  createMsgNewCollection as protoMsgNewCollection,
-  createTransaction,
   BadgeSupplyAndAmount,
   BadgeUri,
   Claim,
-  TransferMapping,
+  NumberType,
   Transfer,
-  convertToBadgeSupplyAndAmount,
-  convertToBadgeUri,
-  convertToClaim,
-  convertToTransfer,
-  convertToTransferMapping,
+  TransferMapping,
+  convertBadgeSupplyAndAmount,
+  convertBadgeUri,
+  convertClaim,
+  convertTransfer,
+  convertTransferMapping,
+  createTransaction,
+  createMsgNewCollection as protoMsgNewCollection
 } from 'bitbadgesjs-proto'
 import * as badges from 'bitbadgesjs-proto/dist/proto/badges/tx'
 
 import {
+  MSG_NEW_COLLECTION_TYPES,
   createEIP712,
+  createMsgNewCollection,
   generateFee,
   generateMessage,
   generateTypes,
-  createMsgNewCollection,
-  MSG_NEW_COLLECTION_TYPES,
 } from 'bitbadgesjs-eip712'
 
 import { getDefaultDomainWithChainId } from '../../domain'
 
 import { Chain, Fee, Sender } from '../../common'
 
-export interface MessageMsgNewCollection {
+export interface MsgNewCollection<T extends NumberType> {
   creator: string
   collectionUri: string
-  badgeUris: BadgeUri[],
+  badgeUris: BadgeUri<T>[]
   balancesUri: string,
-  permissions: bigint
+  permissions: T
   bytes: string
-  allowedTransfers: TransferMapping[]
-  managerApprovedTransfers: TransferMapping[]
-  standard: bigint
-  badgeSupplys: BadgeSupplyAndAmount[]
-  transfers: Transfer[]
-  claims: Claim[]
+  allowedTransfers: TransferMapping<T>[]
+  managerApprovedTransfers: TransferMapping<T>[]
+  standard: T
+  badgeSupplys: BadgeSupplyAndAmount<T>[]
+  transfers: Transfer<T>[]
+  claims: Claim<T>[]
+}
+
+export function convertMsgNewCollection<T extends NumberType, U extends NumberType>(
+  msg: MsgNewCollection<T>,
+  convertFunction: (item: T) => U
+): MsgNewCollection<U> {
+  return {
+    ...msg,
+    collectionUri: msg.collectionUri,
+    badgeUris: msg.badgeUris.map((x) => convertBadgeUri(x, convertFunction)),
+    balancesUri: msg.balancesUri,
+    permissions: convertFunction(msg.permissions),
+    bytes: msg.bytes,
+    allowedTransfers: msg.allowedTransfers.map((x) => convertTransferMapping(x, convertFunction)),
+    managerApprovedTransfers: msg.managerApprovedTransfers.map((x) => convertTransferMapping(x, convertFunction)),
+    standard: convertFunction(msg.standard),
+    badgeSupplys: msg.badgeSupplys.map((x) => convertBadgeSupplyAndAmount(x, convertFunction)),
+    transfers: msg.transfers.map((x) => convertTransfer(x, convertFunction)),
+    claims: msg.claims.map((x) => convertClaim(x, convertFunction)),
+  }
 }
 
 export function convertFromProtoToMsgNewCollection(
   msg: badges.bitbadges.bitbadgeschain.badges.MsgNewCollection,
-): MessageMsgNewCollection {
+): MsgNewCollection<bigint> {
   return {
     creator: msg.creator,
     collectionUri: msg.collectionUri,
-    badgeUris: msg.badgeUris.map(convertToBadgeUri),
+    badgeUris: msg.badgeUris.map((x) => convertBadgeUri(x, BigInt)),
     balancesUri: msg.balancesUri,
     permissions: BigInt(msg.permissions),
     bytes: msg.bytes,
-    allowedTransfers: msg.allowedTransfers.map(convertToTransferMapping),
-    managerApprovedTransfers: msg.managerApprovedTransfers.map(convertToTransferMapping),
+    allowedTransfers: msg.allowedTransfers.map(x => convertTransferMapping(x, BigInt)),
+    managerApprovedTransfers: msg.managerApprovedTransfers.map(x => convertTransferMapping(x, BigInt)),
     standard: BigInt(msg.standard),
-    badgeSupplys: msg.badgeSupplys.map(convertToBadgeSupplyAndAmount),
-    transfers: msg.transfers.map(convertToTransfer),
-    claims: msg.claims.map(convertToClaim),
+    badgeSupplys: msg.badgeSupplys.map(x => convertBadgeSupplyAndAmount(x, BigInt)),
+    transfers: msg.transfers.map(x => convertTransfer(x, BigInt)),
+    claims: msg.claims.map(x => convertClaim(x, BigInt))
   }
 }
 
-export function createTxMsgNewCollection(
+export function createTxMsgNewCollection<T extends NumberType>(
   chain: Chain,
   sender: Sender,
   fee: Fee,
   memo: string,
-  params: MessageMsgNewCollection,
+  params: MsgNewCollection<T>,
   domain?: object,
 ) {
   // EIP712

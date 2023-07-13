@@ -6,7 +6,7 @@ import { safeAddUints, safeSubtractUints } from "./math";
  * Creates a blank balance object with empty balances and approvals
  */
 export const getBlankBalance = () => {
-  const blankBalance: UserBalance = {
+  const blankBalance: UserBalance<bigint> = {
     balances: [],
     approvals: [],
   }
@@ -19,7 +19,7 @@ export const getBlankBalance = () => {
  * @param id - The ID to search for.
  * @param balances - The set of balances to search.
  */
-export const getBalanceForId = (id: bigint, balances: Balance[]) => {
+export const getBalanceForId = (id: bigint, balances: Balance<bigint>[]) => {
   for (const balance of balances) {
     const [_idx, found] = searchUintRangesForId(id, balance.badgeIds);
     if (found) {
@@ -39,7 +39,7 @@ export const getBalanceForId = (id: bigint, balances: Balance[]) => {
  * @remarks
  * Updates the balances object directly and returns it. Does not create a new object.
  */
-export function updateBalancesForUintRanges(ranges: UintRange[], newAmount: bigint, balances: Balance[]) {
+export function updateBalancesForIdRanges(ranges: IdRange<bigint>[], newAmount: bigint, balances: Balance<bigint>[]) {
   //Can maybe optimize this in the future by doing this all in one loop instead of deleting then setting
   ranges = sortUintRangesAndMergeIfNecessary(ranges)
   balances = deleteBalanceForUintRanges(ranges, balances)
@@ -51,7 +51,7 @@ export function updateBalancesForUintRanges(ranges: UintRange[], newAmount: bigi
 /**
  * Gets the balances for specified ID ranges.
  *
- * Returns a new Balance[] where only the specified ID ranges and their balances are included.
+ * Returns a new Balance<bigint>[] where only the specified ID ranges and their balances are included.
  * Sets balance amount == 0 objects for IDs that are not found.
  *
  * @param badgeIds - The ID ranges to search for.
@@ -60,10 +60,10 @@ export function updateBalancesForUintRanges(ranges: UintRange[], newAmount: bigi
  * @remarks
  * Returns a new object but also modifies the original.
  */
-export function getBalancesForUintRanges(badgeIds: UintRange[], currentUserBalances: Balance[]) {
-  let balanceObjectsForSpecifiedRanges: Balance[] = []
-  badgeIds = sortUintRangesAndMergeIfNecessary(badgeIds)
-  let uintRangesNotFound = badgeIds
+export function getBalancesForIdRanges(badgeIds: IdRange<bigint>[], currentUserBalances: Balance<bigint>[]) {
+  let balanceObjectsForSpecifiedRanges: Balance<bigint>[] = []
+  badgeIds = sortIdRangesAndMergeIfNecessary(badgeIds)
+  let idRangesNotFound = badgeIds
 
   for (let userBalanceObj of currentUserBalances) {
     //For each specified range, search the current userBalanceObj's UintRanges to see if there is any overlap.
@@ -77,8 +77,8 @@ export function getBalancesForUintRanges(badgeIds: UintRange[], currentUserBalan
         let newUintRanges = userBalanceObj.badgeIds.slice(idxSpan.start, idxSpan.end + 1)
 
         //Remove everything before the start of the range. Only need to remove from idx 0 since it is sorted.
-        if (uintRange.start > 0 && newUintRanges.length > 0) {
-          let everythingBefore: UintRange = {
+        if (idRange.start > 0 && newIdRanges.length > 0) {
+          let everythingBefore: IdRange<bigint> = {
             start: 0n,
             end: uintRange.start - 1n,
           }
@@ -92,9 +92,9 @@ export function getBalancesForUintRanges(badgeIds: UintRange[], currentUserBalan
         if (newUintRanges.length > 0) {
           const rangeToTrim = newUintRanges[newUintRanges.length - 1];
 
-          if (uintRange.end < rangeToTrim.end) {
-            let everythingAfter: UintRange = {
-              start: uintRange.end + 1n,
+          if (idRange.end < rangeToTrim.end) {
+            let everythingAfter: IdRange<bigint> = {
+              start: idRange.end + 1n,
               end: rangeToTrim.end,
             }
 
@@ -104,10 +104,10 @@ export function getBalancesForUintRanges(badgeIds: UintRange[], currentUserBalan
           }
         }
 
-        for (let newUintRange of newUintRanges) {
-          let newNotFoundRanges: UintRange[] = []
-          for (let uintRangeNotFound of uintRangesNotFound) {
-            newNotFoundRanges = newNotFoundRanges.concat(removeIdsFromUintRange(newUintRange, uintRangeNotFound))
+        for (let newIdRange of newIdRanges) {
+          let newNotFoundRanges: IdRange<bigint>[] = []
+          for (let idRangeNotFound of idRangesNotFound) {
+            newNotFoundRanges = newNotFoundRanges.concat(removeIdsFromIdRange(newIdRange, idRangeNotFound))
           }
           uintRangesNotFound = newNotFoundRanges
         }
@@ -118,8 +118,8 @@ export function getBalancesForUintRanges(badgeIds: UintRange[], currentUserBalan
   }
 
   //Update balance objects with IDs where balance == 0
-  if (uintRangesNotFound.length > 0) {
-    let updatedBalances: Balance[] = []
+  if (idRangesNotFound.length > 0) {
+    let updatedBalances: Balance<bigint>[] = []
     updatedBalances.push({
       amount: 0n,
       badgeIds: uintRangesNotFound,
@@ -139,8 +139,8 @@ export function getBalancesForUintRanges(badgeIds: UintRange[], currentUserBalan
  * @param ranges - The ID ranges to update.
  * @param balanceToAdd - The balance to add.
  */
-export function addBalancesForUintRanges(userBalanceInfo: UserBalance, ranges: UintRange[], balanceToAdd: bigint) {
-  let currBalances = getBalancesForUintRanges(ranges, userBalanceInfo.balances);
+export function addBalancesForIdRanges(userBalanceInfo: UserBalance<bigint>, ranges: IdRange<bigint>[], balanceToAdd: bigint) {
+  let currBalances = getBalancesForIdRanges(ranges, userBalanceInfo.balances);
 
   for (let currBalanceObj of currBalances) {
     let newBalance = safeAddUints(currBalanceObj.amount, balanceToAdd);
@@ -160,8 +160,8 @@ export function addBalancesForUintRanges(userBalanceInfo: UserBalance, ranges: U
  * @remarks
  * Will throw an error if the resulting balance is negative.
  */
-export function subtractBalancesForUintRanges(userBalanceInfo: UserBalance, ranges: UintRange[], balanceToRemove: bigint) {
-  let currBalances = getBalancesForUintRanges(ranges, userBalanceInfo.balances);
+export function subtractBalancesForIdRanges(userBalanceInfo: UserBalance<bigint>, ranges: IdRange<bigint>[], balanceToRemove: bigint) {
+  let currBalances = getBalancesForIdRanges(ranges, userBalanceInfo.balances);
   for (let currBalanceObj of currBalances) {
     let newBalance = safeSubtractUints(currBalanceObj.amount, balanceToRemove);
     userBalanceInfo.balances = updateBalancesForUintRanges(currBalanceObj.badgeIds, newBalance, userBalanceInfo.balances);
@@ -176,8 +176,8 @@ export function subtractBalancesForUintRanges(userBalanceInfo: UserBalance, rang
  * @param balanceObjects - The balance objects to update.
  * @param ranges - The ID ranges to update.
  */
-export function deleteBalanceForUintRanges(ranges: UintRange[], balanceObjects: Balance[]) {
-  let newBalances: Balance[] = [];
+export function deleteBalanceForIdRanges(ranges: IdRange<bigint>[], balanceObjects: Balance<bigint>[]) {
+  let newBalances: Balance<bigint>[] = [];
   for (let balanceObj of balanceObjects) {
     for (let rangeToDelete of ranges) {
       let currRanges = balanceObj.badgeIds;
@@ -218,14 +218,14 @@ export function deleteBalanceForUintRanges(ranges: UintRange[], balanceObjects: 
  * @remarks
  * Assumes balance does not exist already. If it does, it may cause unexpected behavior.
  */
-export function setBalanceForUintRanges(ranges: UintRange[], amount: bigint, balanceObjects: Balance[]) {
+export function setBalanceForIdRanges(ranges: IdRange<bigint>[], amount: bigint, balanceObjects: Balance<bigint>[]) {
   if (amount === 0n) {
     return balanceObjects;
   }
 
   let [idx, found] = searchBalances(amount, balanceObjects);
 
-  let newBalances: Balance[] = [];
+  let newBalances: Balance<bigint>[] = [];
   if (!found) {
     //We don't have an existing object with such a balance
     newBalances = newBalances.concat(balanceObjects.slice(0, idx));
@@ -255,7 +255,7 @@ export function setBalanceForUintRanges(ranges: UintRange[], amount: bigint, bal
  *
  * @remarks Assumes balance objects are sorted.
  */
-export function searchBalances(targetAmount: bigint, balanceObjects: Balance[]) {
+export function searchBalances(targetAmount: bigint, balanceObjects: Balance<bigint>[]) {
   // Balances will be sorted, so we can binary search to get the targetIdx.
   let balanceLow = 0;
   let balanceHigh = balanceObjects.length - 1;

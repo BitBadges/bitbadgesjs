@@ -1,13 +1,13 @@
+import { BadgeSupplyAndAmount, BadgeUri, Claim, NumberType, Transfer, convertToProtoBadgeSupplysAndAmounts, convertToProtoBadgeUris, convertToProtoClaims, convertToProtoTransfers } from 'bitbadgesjs-proto'
 import {
   BADGE_SUPPLY_AND_AMOUNT_TYPES,
-  CLAIMS_TYPES,
-  UINT_RANGE_TYPES,
-  BALANCE_TYPES,
-  TRANSFERS_TYPES,
   BADGE_URI_TYPES,
+  BALANCE_TYPES,
   CHALLENGE_TYPES,
+  CLAIMS_TYPES,
+  ID_RANGE_TYPES,
+  TRANSFERS_TYPES,
 } from './eip712HelperTypes'
-import { BadgeSupplyAndAmount, BadgeUri, Claim, Transfer, getWrappedBadgeSupplysAndAmounts, getWrappedBadgeUris, getWrappedClaims, getWrappedTransfers } from 'bitbadgesjs-proto'
 
 const MintAndDistributeBadgesMsgValueType = [
   { name: 'creator', type: 'string' },
@@ -31,14 +31,14 @@ export const MSG_MINT_BADGE_TYPES = {
   Challenge: CHALLENGE_TYPES
 }
 
-export function createMsgMintAndDistributeBadges(
+export function createMsgMintAndDistributeBadges<T extends NumberType>(
   creator: string,
-  collectionId: bigint,
-  badgeSupplys: BadgeSupplyAndAmount[],
-  transfers: Transfer[],
-  claims: Claim[],
+  collectionId: T,
+  badgeSupplys: BadgeSupplyAndAmount<T>[],
+  transfers: Transfer<T>[],
+  claims: Claim<T>[],
   collectionUri: string,
-  badgeUris: BadgeUri[],
+  badgeUris: BadgeUri<T>[],
   balancesUri: string,
 ) {
   return {
@@ -46,11 +46,11 @@ export function createMsgMintAndDistributeBadges(
     value: {
       creator,
       collectionId: collectionId.toString(),
-      badgeSupplys: getWrappedBadgeSupplysAndAmounts(badgeSupplys).map((s) => s.toObject()),
-      transfers: getWrappedTransfers(transfers).map((s) => s.toObject()),
-      claims: getWrappedClaims(claims).map((s) => s.toObject()),
+      badgeSupplys: convertToProtoBadgeSupplysAndAmounts(badgeSupplys).map((s) => s.toObject()),
+      transfers: convertToProtoTransfers(transfers).map((s) => s.toObject()),
+      claims: convertToProtoClaims(claims).map((s) => s.toObject()),
       collectionUri,
-      badgeUris: getWrappedBadgeUris(badgeUris).map((s) => s.toObject()),
+      badgeUris: convertToProtoBadgeUris(badgeUris).map((s) => s.toObject()),
       balancesUri,
     },
   }

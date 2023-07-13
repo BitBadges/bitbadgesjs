@@ -1,5 +1,5 @@
-import { UintRange } from "bitbadgesjs-proto";
-
+import { IdRange, NumberType, convertIdRange } from "bitbadgesjs-proto";
+import { deepCopy } from "./utils";
 
 /**
  * Metadata is the information about badges and badge collections that is not stored on the blockchain.
@@ -14,15 +14,26 @@ import { UintRange } from "bitbadgesjs-proto";
  * @property {string} [category] - The category of the badge or badge collection (e.g. "Education", "Attendance").
  * @property {string} [externalUrl] - The external URL of the badge or badge collection.
  * @property {string[]} [tags] - The tags of the badge or badge collection.
+ *
+ * @property {boolean} [_isUpdating] - Field used to indicate whether the metadata is in the refresh queue or not (being updated). Do not set this field manually. It will be set by the SDK / API.
  */
-export interface Metadata {
+export interface Metadata<T extends NumberType> {
+  _isUpdating?: boolean;
+
   name: string;
   description: string;
   image: string;
   creator?: string;
-  validFrom?: UintRange; //start time in milliseconds to end time in milliseconds
+  validFrom?: IdRange<T>;
   color?: string;
   category?: string;
   externalUrl?: string;
   tags?: string[];
+}
+
+export function convertMetadata<T extends NumberType, U extends NumberType>(item: Metadata<T>, convertFunction: (item: T) => U): Metadata<U> {
+  return deepCopy({
+    ...item,
+    validFrom: item.validFrom ? convertIdRange(item.validFrom, convertFunction) : undefined,
+  })
 }

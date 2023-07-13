@@ -1,17 +1,19 @@
 import * as tx from '../../../proto/badges/tx'
-import { Transfer } from './typeutils/typeUtils'
-import { getWrappedTransfers } from './typeutils/wrappers'
+import { NumberType } from './string-numbers'
 
+import { Transfer, convertToProtoTransfers } from './typeUtils'
 
-export function createMsgTransferBadges(
+export function createMsgTransferBadge<T extends NumberType>(
   creator: string,
-  collectionId: bigint,
-  transfers: Transfer[],
+  from: string,
+  collectionId: T,
+  transfers: Transfer<T>[],
 ) {
   const message = new tx.bitbadges.bitbadgeschain.badges.MsgTransferBadges({
     creator,
     collectionId: collectionId.toString(),
-    transfers: getWrappedTransfers(transfers),
+    from,
+    transfers: convertToProtoTransfers(transfers),
   })
 
   return {

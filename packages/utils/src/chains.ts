@@ -1,14 +1,17 @@
 import { COSMOS, ethToCosmos } from "bitbadgesjs-address-converter";
 import { SupportedChain } from "./types/types";
 import { ethers } from "ethers";
-import { BitBadgesUserInfo, s_BitBadgesUserInfo } from "./types/api";
+import { BitBadgesUserInfo, convertBitBadgesUserInfo } from "./types/users";
+import { Stringify } from "bitbadgesjs-proto";
 
 
-export const MINT_ACCOUNT: BitBadgesUserInfo = {
+export const MINT_ACCOUNT: BitBadgesUserInfo<bigint> = {
+  _id: 'Mint',
   cosmosAddress: 'Mint',
   address: 'Mint',
   chain: SupportedChain.COSMOS,
   publicKey: '',
+  accountNumber: -1n,
   sequence: 0n,
   collected: [],
   activity: [],
@@ -16,123 +19,31 @@ export const MINT_ACCOUNT: BitBadgesUserInfo = {
   reviews: [],
   seenActivity: 0n,
   createdAt: 0n,
-  pagination: {
-    activity: {
-      bookmark: '',
-      hasMore: false
-    },
-    announcements: {
-      bookmark: '',
-      hasMore: false
-    },
-    collected: {
-      bookmark: '',
-      hasMore: false
-    },
-    reviews: {
-      bookmark: '',
-      hasMore: false
-    },
-  }
+  views: {},
 }
 
-export const s_MINT_ACCOUNT: s_BitBadgesUserInfo = {
-  cosmosAddress: 'Mint',
-  address: 'Mint',
-  chain: SupportedChain.COSMOS,
-  publicKey: '',
-  sequence: "0",
-  collected: [],
-  activity: [],
-  announcements: [],
-  reviews: [],
-  seenActivity: "0",
-  createdAt: "0",
-  pagination: {
-    activity: {
-      bookmark: '',
-      hasMore: false
-    },
-    announcements: {
-      bookmark: '',
-      hasMore: false
-    },
-    collected: {
-      bookmark: '',
-      hasMore: false
-    },
-    reviews: {
-      bookmark: '',
-      hasMore: false
-    },
-  }
-}
 
-export const s_BLANK_USER_INFO: s_BitBadgesUserInfo = {
-  cosmosAddress: '',
-  address: '',
-  chain: SupportedChain.UNKNOWN,
-  publicKey: '',
-  sequence: "0",
-  collected: [],
-  activity: [],
-  announcements: [],
-  reviews: [],
-  seenActivity: "0",
-  createdAt: "0",
-  pagination: {
-    activity: {
-      bookmark: '',
-      hasMore: false
-    },
-    announcements: {
-      bookmark: '',
-      hasMore: false
-    },
-    collected: {
-      bookmark: '',
-      hasMore: false
-    },
-    reviews: {
-      bookmark: '',
-      hasMore: false
-    },
-  }
-}
-
-export const BLANK_USER_INFO: BitBadgesUserInfo = {
+export const BLANK_USER_INFO: BitBadgesUserInfo<bigint> = {
+  _id: '',
   cosmosAddress: '',
   address: '',
   chain: SupportedChain.UNKNOWN,
   publicKey: '',
   sequence: 0n,
+  accountNumber: -1n,
   collected: [],
   activity: [],
   announcements: [],
   reviews: [],
   seenActivity: 0n,
   createdAt: 0n,
-  pagination: {
-    activity: {
-      bookmark: '',
-      hasMore: false
-    },
-    announcements: {
-      bookmark: '',
-      hasMore: false
-    },
-    collected: {
-      bookmark: '',
-      hasMore: false
-    },
-    reviews: {
-      bookmark: '',
-      hasMore: false
-    },
-  }
+  views: {},
 }
 
 
+export const s_MINT_ACCOUNT: BitBadgesUserInfo<string> = convertBitBadgesUserInfo(MINT_ACCOUNT, Stringify);
+
+export const s_BLANK_USER_INFO: BitBadgesUserInfo<string> = convertBitBadgesUserInfo(BLANK_USER_INFO, Stringify);
 
 /**
  * Converts an address from a supported chain to a cosmos address
