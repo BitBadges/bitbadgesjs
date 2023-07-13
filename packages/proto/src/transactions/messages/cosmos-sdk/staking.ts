@@ -26,7 +26,7 @@ import {
   MsgWithdrawDelegatorRewardInterface,
   MSG_WITHDRAW_VALIDATOR_COMMISSION_TYPES,
   createEIP712MsgWithdrawValidatorCommission,
-} from '../../../eip712'
+} from '../../../'
 
 import { Chain, Fee, Sender } from '../common'
 

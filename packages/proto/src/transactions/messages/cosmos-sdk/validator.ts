@@ -10,7 +10,7 @@ import {
   generateTypes,
   MSG_EDIT_VALIDATOR_TYPES,
   createEIP712MsgEditValidator,
-} from '../../../eip712'
+} from '../../../'
 
 import { Chain, Fee, Sender } from '../common'
 

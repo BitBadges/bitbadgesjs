@@ -1,11 +1,18 @@
 
 import { AddressMapping, createMsgCreateAddressMappings as protoMsgCreateAddressMappings } from "../../../../";
-import { MSG_CREATE_ADDRESS_MAPPING_TYPES, createEIP712, createEIP712MsgCreateAddressMappings, generateFee, generateMessage, generateTypes } from "../../../../eip712"
-import { createTransaction } from "../../../transaction"
+import { MSG_CREATE_ADDRESS_MAPPING_TYPES, createEIP712, createEIP712MsgCreateAddressMappings, generateFee, generateMessage, generateTypes } from "../../../../"
+import { createTransaction } from "../../transaction"
 import { Chain, Fee, Sender } from "../../common"
 import { getDefaultDomainWithChainId } from "../../domain"
 
-
+/**
+ * MsgCreateAddressMappings defines a CreateAddressMappings message.
+ * AddressMappings must be validly formatted and have a unique ID not used before. Note that some such as ("Mint", "Manager", etc) are reserved.
+ *
+ * @typedef {Object} MsgCreateAddressMappings
+ * @property {string} creator - The creator of the transaction.
+ * @property {AddressMapping[]} addressMappings - The address mappings to create.
+ */
 export interface MsgCreateAddressMappings {
   creator: string;
   addressMappings: AddressMapping[];

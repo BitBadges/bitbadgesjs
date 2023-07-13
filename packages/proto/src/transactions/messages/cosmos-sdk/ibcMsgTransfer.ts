@@ -10,7 +10,7 @@ import {
   generateTypes,
   createEIP712IBCMsgTransfer,
   IBC_MSG_TRANSFER_TYPES,
-} from '../../../eip712'
+} from '../../../'
 
 import { Chain, Fee, Sender } from '../common'
 

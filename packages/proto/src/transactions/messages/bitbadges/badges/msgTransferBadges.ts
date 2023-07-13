@@ -1,12 +1,28 @@
 import * as badges from '../../../../proto/badges/tx'
 
 import { NumberType, Transfer, convertTransfer, createMsgTransferBadges as protoMsgTransferBadges } from '../../../../'
-import { MSG_TRANSFER_BADGES_TYPES, createEIP712, createEIP712MsgTransferBadges, generateFee, generateMessage, generateTypes } from "../../../../eip712"
-import { createTransaction } from "../../../transaction"
+import { MSG_TRANSFER_BADGES_TYPES, createEIP712, createEIP712MsgTransferBadges, generateFee, generateMessage, generateTypes } from "../../../../"
+import { createTransaction } from "../../transaction"
 import { Chain, Fee, Sender } from "../../common"
 import { getDefaultDomainWithChainId } from "../../domain"
 
 
+/**
+ * MsgTransferBadges represents a message to transfer badges from one user to another.
+ * For a transfer to be successful, the transfer has to satisfy the following conditions:
+ * - Be approved on the collection level
+ * - Be approved by the recipient's incoming transfers (if not forcefully overriden by the collection)
+ * - Be approved by the sender's outgoing transfers (if not forcefully overriden by the collection)
+ * - The sender must have enough badges to transfer
+ * - All restrictions and challenges for each approval must be satisfied (merkle challenges, approved amounts, max num transfers, ...)
+ *
+ * Note that the transfer transaction is atomic, meaning that either all transfers succeed or all fail.
+ *
+ * @typedef
+ * @property {string} creator - The creator of the transaction.
+ * @property {T} collectionId - The ID of the collection to transfer badges from.
+ * @property {Transfer<T>[]} transfers - The transfers to perform.
+ */
 export interface MsgTransferBadges<T extends NumberType> {
   creator: string;
   collectionId: T;

@@ -12,7 +12,7 @@ import {
   generateTypes,
   createEIP712MsgSend,
   MSG_SEND_TYPES,
-} from '../../eip712'
+} from '../../'
 
 import { getDefaultDomainWithChainId } from './domain'
 

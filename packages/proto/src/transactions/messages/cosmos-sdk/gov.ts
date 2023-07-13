@@ -10,7 +10,7 @@ import {
   generateTypes,
   createEIP712MsgVote,
   MSG_VOTE_TYPES,
-} from '../../../eip712'
+} from '../../../'
 
 import { Chain, Fee, Sender } from '../common'
 

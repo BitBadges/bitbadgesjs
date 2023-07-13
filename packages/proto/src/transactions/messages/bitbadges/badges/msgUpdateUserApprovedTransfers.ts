@@ -1,7 +1,7 @@
 import * as badges from '../../../../proto/badges/tx'
 
-import { generateFee, generateTypes, MSG_UPDATE_USER_APPROVED_TRANSFERS_TYPES, generateMessage, createEIP712, createEIP712MsgUpdateUserApprovedTransfers } from "../../../../eip712"
-import { createTransaction } from "../../../transaction"
+import { generateFee, generateTypes, MSG_UPDATE_USER_APPROVED_TRANSFERS_TYPES, generateMessage, createEIP712, createEIP712MsgUpdateUserApprovedTransfers } from "../../../../"
+import { createTransaction } from "../../transaction"
 import { Chain, Sender, Fee } from "../../common"
 import { getDefaultDomainWithChainId } from "../../domain"
 import { NumberType, UserApprovedIncomingTransferTimeline, UserApprovedOutgoingTransferTimeline, UserPermissions, convertUserApprovedIncomingTransferTimeline, convertUserApprovedOutgoingTransferTimeline, convertUserPermissions, createMsgUpdateUserApprovedTransfers as protoMsgUpdateUserApprovedTransfers } from '../../../../'

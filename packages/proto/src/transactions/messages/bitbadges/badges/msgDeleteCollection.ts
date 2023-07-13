@@ -1,13 +1,22 @@
 import * as badges from '../../../../proto/badges/tx'
 
 import { NumberType, createMsgDeleteCollection as protoMsgDeleteCollection } from '../../../../'
-import { MSG_DELETE_COLLECTION_TYPES, createEIP712, createEIP712MsgDeleteCollection, generateFee, generateMessage, generateTypes } from "../../../../eip712"
-import { createTransaction } from "../../../transaction"
+import { MSG_DELETE_COLLECTION_TYPES, createEIP712, createEIP712MsgDeleteCollection, generateFee, generateMessage, generateTypes } from "../../../../"
+import { createTransaction } from "../../transaction"
 import { Chain, Fee, Sender } from "../../common"
 import { getDefaultDomainWithChainId } from "../../domain"
 
-
-
+/**
+ * MsgDeleteCollection represents the message for deleting a collection. Once deleted, the collection cannot be recovered.
+ *
+ * Note that the collection can be archived instead of deleted, which will prevent any transactions but not delete the collection from the storage.
+ *
+ * Only executable by the manager. Must have adequate permissions.
+ *
+ * @typedef {Object} MsgDeleteCollection
+ * @property {string} creator - The creator of the transaction.
+ * @property {T} collectionId - The ID of the collection to delete.
+ */
 export interface MsgDeleteCollection<T extends NumberType> {
   creator: string
   collectionId: T

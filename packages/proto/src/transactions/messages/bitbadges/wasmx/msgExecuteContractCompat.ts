@@ -1,7 +1,7 @@
 
 import { createMsgExecuteContractCompat } from "../../../../";
-import { MSG_EXECUTE_CONTRACT_COMPAT_TYPES, createEIP712, createEIP712MsgExecuteContractCompat, generateFee, generateMessage, generateTypes } from "../../../../eip712";
-import { createTransaction } from "../../../transaction";
+import { MSG_EXECUTE_CONTRACT_COMPAT_TYPES, createEIP712, createEIP712MsgExecuteContractCompat, generateFee, generateMessage, generateTypes } from "../../../../";
+import { createTransaction } from "../../transaction";
 import { Chain, Fee, Sender } from "../../common";
 import { getDefaultDomainWithChainId } from "../../domain";
 
