@@ -3,12 +3,13 @@ import * as metadata from '../../../../proto/badges/metadata';
 import * as permissions from '../../../../proto/badges/permissions';
 import * as timelines from '../../../../proto/badges/timelines';
 import * as transfers from '../../../../proto/badges/transfers';
+import { NumberType } from '../string-numbers';
 import { UserApprovedIncomingTransferTimeline, UserApprovedOutgoingTransferTimeline } from "./approvedTransfers";
 import { BalancesActionPermission, CollectionApprovedTransferPermission, CollectionPermissions, TimedUpdatePermission, TimedUpdateWithBadgeIdsPermission, UserPermissions } from "./permissions";
-import { BadgeMetadata, Balance, CollectionApprovedTransferTimeline, MerkleProof, Transfer, UintRange } from "./typeUtils";
+import { BadgeMetadata, BadgeMetadataTimeline, Balance, CollectionApprovedTransferTimeline, CollectionMetadataTimeline, ContractAddressTimeline, CustomDataTimeline, InheritedBalancesTimeline, IsArchivedTimeline, ManagerTimeline, MerkleProof, OffChainBalancesMetadataTimeline, StandardsTimeline, Transfer, UintRange } from "./typeUtils";
 
 
-export function getWrappedBadgeIds(badgeIds: UintRange[]) {
+export function getWrappedBadgeIds<T extends NumberType>(badgeIds: UintRange<T>[]) {
   const wrappedBadgeIds: balances.bitbadges.bitbadgeschain.badges.UintRange[] = []
   for (const range of badgeIds) {
     wrappedBadgeIds.push(
@@ -22,7 +23,7 @@ export function getWrappedBadgeIds(badgeIds: UintRange[]) {
   return wrappedBadgeIds
 }
 
-export function getWrappedBadgeMetadata(badgeUris: BadgeMetadata[]) {
+export function getWrappedBadgeMetadata<T extends NumberType>(badgeUris: BadgeMetadata<T>[]) {
   const wrappedBadgeMetadatas: metadata.bitbadges.bitbadgeschain.badges.BadgeMetadata[] = [];
   for (const badgeUri of badgeUris) {
     wrappedBadgeMetadatas.push(
@@ -38,7 +39,7 @@ export function getWrappedBadgeMetadata(badgeUris: BadgeMetadata[]) {
 }
 
 
-export function getWrappedBalances(balanceArr: Balance[]) {
+export function getWrappedBalances<T extends NumberType>(balanceArr: Balance<T>[]) {
   const formattedBalances: balances.bitbadges.bitbadgeschain.badges.Balance[] =
     []
 
@@ -76,7 +77,7 @@ export function getWrappedProof(proof: MerkleProof) {
   return wrappedProof
 }
 
-export function getWrappedTransfers(transfersArr: Transfer[]) {
+export function getWrappedTransfers<T extends NumberType>(transfersArr: Transfer<T>[]) {
   const wrappedTransfers: transfers.bitbadges.bitbadgeschain.badges.Transfer[] = []
   for (const transfer of transfersArr) {
     const formattedBalances = getWrappedBalances(transfer.balances)
@@ -93,7 +94,7 @@ export function getWrappedTransfers(transfersArr: Transfer[]) {
   return wrappedTransfers
 }
 
-const getWrappedTimedUpdatePermission = (permissionsArr: TimedUpdatePermission[]) => {
+export function getWrappedTimedUpdatePermission<T extends NumberType>(permissionsArr: TimedUpdatePermission<T>[]) {
   return permissionsArr.map((canArchiveCollection) => {
     return new permissions.bitbadges.bitbadgeschain.badges.TimedUpdatePermission({
       ...canArchiveCollection,
@@ -115,7 +116,7 @@ const getWrappedTimedUpdatePermission = (permissionsArr: TimedUpdatePermission[]
   })
 }
 
-export const getWrappedTimedUpdateWithBadgeIdsPermission = (permissionsArr: TimedUpdateWithBadgeIdsPermission[]) => {
+export function getWrappedTimedUpdateWithBadgeIdsPermission<T extends NumberType>(permissionsArr: TimedUpdateWithBadgeIdsPermission<T>[]) {
   return permissionsArr.map((canArchiveCollection) => {
     return new permissions.bitbadges.bitbadgeschain.badges.TimedUpdateWithBadgeIdsPermission({
       ...canArchiveCollection,
@@ -139,7 +140,7 @@ export const getWrappedTimedUpdateWithBadgeIdsPermission = (permissionsArr: Time
   })
 }
 
-export const getWrappedBalancesActionPermission = (permissionsArr: BalancesActionPermission[]) => {
+export function getWrappedBalancesActionPermission<T extends NumberType>(permissionsArr: BalancesActionPermission<T>[]) {
   return permissionsArr.map((canArchiveCollection) => {
     return new permissions.bitbadges.bitbadgeschain.badges.BalancesActionPermission({
       ...canArchiveCollection,
@@ -163,7 +164,7 @@ export const getWrappedBalancesActionPermission = (permissionsArr: BalancesActio
   })
 }
 
-export const getWrappedCollectionApprovedTransferPermission = (permissionsArr: CollectionApprovedTransferPermission[]) => {
+export function getWrappedCollectionApprovedTransferPermission<T extends NumberType>(permissionsArr: CollectionApprovedTransferPermission<T>[]) {
   return permissionsArr.map((canArchiveCollection) => {
     return new permissions.bitbadges.bitbadgeschain.badges.CollectionApprovedTransferPermission({
       ...canArchiveCollection,
@@ -196,7 +197,7 @@ export const getWrappedCollectionApprovedTransferPermission = (permissionsArr: C
 
 
 
-export const getWrappedCollectionPermissions = (collectionPermissions: CollectionPermissions) => {
+export function getWrappedCollectionPermissions<T extends NumberType>(collectionPermissions: CollectionPermissions<T>) {
   return new permissions.bitbadges.bitbadgeschain.badges.CollectionPermissions({
     ...collectionPermissions,
     canDeleteCollection: collectionPermissions.canDeleteCollection.map((canDeleteCollection) => {
@@ -231,7 +232,7 @@ export const getWrappedCollectionPermissions = (collectionPermissions: Collectio
 }
 
 
-export const getWrappedUserPermissions = (userPermissions: UserPermissions) => {
+export function getWrappedUserPermissions<T extends NumberType>(userPermissions: UserPermissions<T>) {
   return new permissions.bitbadges.bitbadgeschain.badges.UserPermissions({
     ...userPermissions,
     canUpdateApprovedIncomingTransfers: userPermissions.canUpdateApprovedIncomingTransfers.map((canUpdateApprovedIncomingTransfer) => {
@@ -291,7 +292,7 @@ export const getWrappedUserPermissions = (userPermissions: UserPermissions) => {
   })
 }
 
-export const getWrappedOutgoingTransfersTimeline = (approvedOutgoingTransfersTimeline: UserApprovedOutgoingTransferTimeline[]) => {
+export function getWrappedOutgoingTransfersTimeline<T extends NumberType>(approvedOutgoingTransfersTimeline: UserApprovedOutgoingTransferTimeline<T>[]) {
   return approvedOutgoingTransfersTimeline.map((transfer) => new transfers.bitbadges.bitbadgeschain.badges.UserApprovedOutgoingTransferTimeline({
     timelineTimes: getWrappedBadgeIds(transfer.timelineTimes),
     approvedOutgoingTransfers: transfer.approvedOutgoingTransfers.map((outgoingTransfer) => new transfers.bitbadges.bitbadgeschain.badges.UserApprovedOutgoingTransfer({
@@ -300,7 +301,14 @@ export const getWrappedOutgoingTransfersTimeline = (approvedOutgoingTransfersTim
       badgeIds: getWrappedBadgeIds(outgoingTransfer.badgeIds),
       ownedTimes: getWrappedBadgeIds(outgoingTransfer.ownedTimes),
       allowedCombinations: outgoingTransfer.allowedCombinations.map((allowedCombination) => {
-        return new transfers.bitbadges.bitbadgeschain.badges.IsUserOutgoingTransferAllowed({ ...allowedCombination })
+        return new transfers.bitbadges.bitbadgeschain.badges.IsUserOutgoingTransferAllowed({
+          ...allowedCombination,
+          toMappingOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.toMappingOptions }),
+          initiatedByMappingOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.initiatedByMappingOptions }),
+          transferTimesOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.transferTimesOptions }),
+          badgeIdsOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.badgeIdsOptions }),
+          ownedTimesOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.ownedTimesOptions }),
+        })
       }),
       approvalDetails: outgoingTransfer.approvalDetails.map((approvalDetail) => {
         return new transfers.bitbadges.bitbadgeschain.badges.OutgoingApprovalDetails({
@@ -358,7 +366,7 @@ export const getWrappedOutgoingTransfersTimeline = (approvedOutgoingTransfersTim
   }))
 }
 
-export const getWrappedIncomingTransfersTimeline = (approvedIncomingTransfersTimeline: UserApprovedIncomingTransferTimeline[]) => {
+export function getWrappedIncomingTransfersTimeline<T extends NumberType>(approvedIncomingTransfersTimeline: UserApprovedIncomingTransferTimeline<T>[]) {
   return approvedIncomingTransfersTimeline.map((transfer) => new transfers.bitbadges.bitbadgeschain.badges.UserApprovedIncomingTransferTimeline({
     timelineTimes: getWrappedBadgeIds(transfer.timelineTimes),
     approvedIncomingTransfers: transfer.approvedIncomingTransfers.map((outgoingTransfer) => new transfers.bitbadges.bitbadgeschain.badges.UserApprovedIncomingTransfer({
@@ -367,7 +375,14 @@ export const getWrappedIncomingTransfersTimeline = (approvedIncomingTransfersTim
       badgeIds: getWrappedBadgeIds(outgoingTransfer.badgeIds),
       ownedTimes: getWrappedBadgeIds(outgoingTransfer.ownedTimes),
       allowedCombinations: outgoingTransfer.allowedCombinations.map((allowedCombination) => {
-        return new transfers.bitbadges.bitbadgeschain.badges.IsUserIncomingTransferAllowed({ ...allowedCombination })
+        return new transfers.bitbadges.bitbadgeschain.badges.IsUserIncomingTransferAllowed({
+          ...allowedCombination,
+          fromMappingOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.fromMappingOptions }),
+          initiatedByMappingOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.initiatedByMappingOptions }),
+          transferTimesOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.transferTimesOptions }),
+          badgeIdsOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.badgeIdsOptions }),
+          ownedTimesOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.ownedTimesOptions }),
+        })
       }),
       approvalDetails: outgoingTransfer.approvalDetails.map((approvalDetail) => {
         return new transfers.bitbadges.bitbadgeschain.badges.IncomingApprovalDetails({
@@ -427,7 +442,7 @@ export const getWrappedIncomingTransfersTimeline = (approvedIncomingTransfersTim
 
 
 
-export const getWrappedCollectionApprovedTransfersTimeline = (collectionApprovedTransfersTimeline: CollectionApprovedTransferTimeline[]) => {
+export function getWrappedCollectionApprovedTransfersTimeline<T extends NumberType>(collectionApprovedTransfersTimeline: CollectionApprovedTransferTimeline<T>[]) {
   return collectionApprovedTransfersTimeline.map((transfer) => new timelines.bitbadges.bitbadgeschain.badges.CollectionApprovedTransferTimeline({
     timelineTimes: getWrappedBadgeIds(transfer.timelineTimes),
     collectionApprovedTransfers: transfer.collectionApprovedTransfers.map((outgoingTransfer) => new transfers.bitbadges.bitbadgeschain.badges.CollectionApprovedTransfer({
@@ -436,7 +451,15 @@ export const getWrappedCollectionApprovedTransfersTimeline = (collectionApproved
       badgeIds: getWrappedBadgeIds(outgoingTransfer.badgeIds),
       ownedTimes: getWrappedBadgeIds(outgoingTransfer.ownedTimes),
       allowedCombinations: outgoingTransfer.allowedCombinations.map((allowedCombination) => {
-        return new transfers.bitbadges.bitbadgeschain.badges.IsCollectionTransferAllowed({ ...allowedCombination })
+        return new transfers.bitbadges.bitbadgeschain.badges.IsCollectionTransferAllowed({
+          ...allowedCombination,
+          fromMappingOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.fromMappingOptions }),
+          toMappingOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.toMappingOptions }),
+          initiatedByMappingOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.initiatedByMappingOptions }),
+          transferTimesOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.transferTimesOptions }),
+          badgeIdsOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.badgeIdsOptions }),
+          ownedTimesOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.ownedTimesOptions }),
+        })
       }),
       approvalDetails: outgoingTransfer.approvalDetails.map((approvalDetail) => {
         return new transfers.bitbadges.bitbadgeschain.badges.ApprovalDetails({
@@ -491,5 +514,79 @@ export const getWrappedCollectionApprovedTransfersTimeline = (collectionApproved
         })
       }),
     })),
+  }))
+}
+
+
+export function getWrappedManagerTimeline(managerTimeline: ManagerTimeline<NumberType>[]) {
+  return managerTimeline.map((managerTimeline) => new timelines.bitbadges.bitbadgeschain.badges.ManagerTimeline({
+    ...managerTimeline,
+    timelineTimes: getWrappedBadgeIds(managerTimeline.timelineTimes),
+  }))
+}
+
+export function getWrappedCollectionMetadataTimeline(collectionMetadataTimeline: CollectionMetadataTimeline<NumberType>[]) {
+  return collectionMetadataTimeline.map((collectionMetadataTimeline) => new timelines.bitbadges.bitbadgeschain.badges.CollectionMetadataTimeline({
+    ...collectionMetadataTimeline,
+    timelineTimes: getWrappedBadgeIds(collectionMetadataTimeline.timelineTimes),
+    collectionMetadata: new metadata.bitbadges.bitbadgeschain.badges.CollectionMetadata({ ...collectionMetadataTimeline.collectionMetadata }),
+  }))
+}
+
+export const getWrappedBadgeMetadataTimeline = (badgeMetadataTimeline: BadgeMetadataTimeline<NumberType>[]) => badgeMetadataTimeline.map((badgeMetadataTimeline) => new timelines.bitbadges.bitbadgeschain.badges.BadgeMetadataTimeline({
+  ...badgeMetadataTimeline,
+  timelineTimes: getWrappedBadgeIds(badgeMetadataTimeline.timelineTimes),
+  badgeMetadata: badgeMetadataTimeline.badgeMetadata.map((badgeMetadata) => new metadata.bitbadges.bitbadgeschain.badges.BadgeMetadata({
+    ...badgeMetadata,
+    badgeIds: getWrappedBadgeIds(badgeMetadata.badgeIds),
+  })),
+}))
+
+export function getWrappedOffChainBalancesMetadataTimeline(offChainBalancesMetadataTimeline: OffChainBalancesMetadataTimeline<NumberType>[]) {
+  return offChainBalancesMetadataTimeline.map((offChainBalancesMetadataTimeline) => new timelines.bitbadges.bitbadgeschain.badges.OffChainBalancesMetadataTimeline({
+    ...offChainBalancesMetadataTimeline,
+    timelineTimes: getWrappedBadgeIds(offChainBalancesMetadataTimeline.timelineTimes),
+    offChainBalancesMetadata: new metadata.bitbadges.bitbadgeschain.badges.OffChainBalancesMetadata({ ...offChainBalancesMetadataTimeline.offChainBalancesMetadata }),
+  }))
+}
+
+export function getWrappedCustomDataTimeline(customDataTimeline: CustomDataTimeline<NumberType>[]) {
+  return customDataTimeline.map((customDataTimeline) => new timelines.bitbadges.bitbadgeschain.badges.CustomDataTimeline({
+    ...customDataTimeline,
+    timelineTimes: getWrappedBadgeIds(customDataTimeline.timelineTimes),
+  }))
+}
+
+export function getWrappedInheritedBalancesTimeline(inheritedBalancesTimeline: InheritedBalancesTimeline<NumberType>[]) {
+  return inheritedBalancesTimeline.map((inheritedBalancesTimeline) => new timelines.bitbadges.bitbadgeschain.badges.InheritedBalancesTimeline({
+    ...inheritedBalancesTimeline,
+    timelineTimes: getWrappedBadgeIds(inheritedBalancesTimeline.timelineTimes),
+    inheritedBalances: inheritedBalancesTimeline.inheritedBalances.map((inheritedBalance) => new balances.bitbadges.bitbadgeschain.badges.InheritedBalance({
+      ...inheritedBalance,
+      badgeIds: getWrappedBadgeIds(inheritedBalance.badgeIds),
+      parentBadgeIds: getWrappedBadgeIds(inheritedBalance.parentBadgeIds),
+      parentCollectionId: inheritedBalance.parentCollectionId.toString(),
+    })),
+  }))
+}
+
+export function getWrappedStandardsTimeline(standardsTimeline: StandardsTimeline<NumberType>[]) {
+  return standardsTimeline.map((standardsTimeline) => new timelines.bitbadges.bitbadgeschain.badges.StandardsTimeline({
+    ...standardsTimeline,
+    timelineTimes: getWrappedBadgeIds(standardsTimeline.timelineTimes),
+  }))
+}
+
+export function getWrappedContractAddressTimeline(contractAddressTimeline: ContractAddressTimeline<NumberType>[]) {
+  return contractAddressTimeline.map((contractAddressTimeline) => new timelines.bitbadges.bitbadgeschain.badges.ContractAddressTimeline({
+    ...contractAddressTimeline,
+    timelineTimes: getWrappedBadgeIds(contractAddressTimeline.timelineTimes),
+  }))
+}
+
+export function getWrappedIsArchivedTimeline(isArchivedTimeline: IsArchivedTimeline<NumberType>[]) {
+  return isArchivedTimeline.map((isArchivedTimeline) => new timelines.bitbadges.bitbadgeschain.badges.IsArchivedTimeline({
+    ...isArchivedTimeline,
+    timelineTimes: getWrappedBadgeIds(isArchivedTimeline.timelineTimes),
   }))
 }

@@ -1,43 +1,42 @@
-import * as balances from '../../../proto/badges/balances'
-import * as metadata from '../../../proto/badges/metadata'
-import * as timelines from '../../../proto/badges/timelines'
 import * as tx from '../../../proto/badges/tx'
+import { NumberType } from './string-numbers'
 import { UserApprovedIncomingTransferTimeline, UserApprovedOutgoingTransferTimeline } from './typeutils/approvedTransfers'
 import { CollectionPermissions, UserPermissions } from './typeutils/permissions'
 import { BadgeMetadataTimeline, Balance, CollectionApprovedTransferTimeline, CollectionMetadataTimeline, ContractAddressTimeline, CustomDataTimeline, InheritedBalancesTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadataTimeline, StandardsTimeline } from './typeutils/typeUtils'
-import { getWrappedBadgeIds, getWrappedBalances, getWrappedCollectionApprovedTransfersTimeline, getWrappedCollectionPermissions, getWrappedIncomingTransfersTimeline, getWrappedOutgoingTransfersTimeline, getWrappedUserPermissions } from './typeutils/wrappers'
+import { getWrappedBadgeMetadataTimeline, getWrappedBalances, getWrappedCollectionApprovedTransfersTimeline, getWrappedCollectionMetadataTimeline, getWrappedCollectionPermissions, getWrappedContractAddressTimeline, getWrappedCustomDataTimeline, getWrappedIncomingTransfersTimeline, getWrappedInheritedBalancesTimeline, getWrappedIsArchivedTimeline, getWrappedManagerTimeline, getWrappedOffChainBalancesMetadataTimeline, getWrappedOutgoingTransfersTimeline, getWrappedStandardsTimeline, getWrappedUserPermissions } from './typeutils/wrappers'
 
 
-export function createMsgUpdateCollection(
+
+export function createMsgUpdateCollection<T extends NumberType>(
   creator: string,
-  collectionId: bigint,
+  collectionId: T,
   balancesType: string,
-  defaultApprovedOutgoingTransfersTimeline: UserApprovedOutgoingTransferTimeline[],
-  defaultApprovedIncomingTransfersTimeline: UserApprovedIncomingTransferTimeline[],
-  defaultUserPermissions: UserPermissions,
-  badgesToCreate: Balance[],
+  defaultApprovedOutgoingTransfersTimeline: UserApprovedOutgoingTransferTimeline<T>[],
+  defaultApprovedIncomingTransfersTimeline: UserApprovedIncomingTransferTimeline<T>[],
+  defaultUserPermissions: UserPermissions<T>,
+  badgesToCreate: Balance<T>[],
   updateCollectionPermissions: boolean,
-  collectionPermissions: CollectionPermissions,
+  collectionPermissions: CollectionPermissions<T>,
   updateManagerTimeline: boolean,
-  managerTimeline: ManagerTimeline[],
+  managerTimeline: ManagerTimeline<T>[],
   updateCollectionMetadataTimeline: boolean,
-  collectionMetadataTimeline: CollectionMetadataTimeline[],
+  collectionMetadataTimeline: CollectionMetadataTimeline<T>[],
   updateBadgeMetadataTimeline: boolean,
-  badgeMetadataTimeline: BadgeMetadataTimeline[],
+  badgeMetadataTimeline: BadgeMetadataTimeline<T>[],
   updateOffChainBalancesMetadataTimeline: boolean,
-  offChainBalancesMetadataTimeline: OffChainBalancesMetadataTimeline[],
+  offChainBalancesMetadataTimeline: OffChainBalancesMetadataTimeline<T>[],
   updateCustomDataTimeline: boolean,
-  customDataTimeline: CustomDataTimeline[],
+  customDataTimeline: CustomDataTimeline<T>[],
   updateInheritedBalancesTimeline: boolean,
-  inheritedBalancesTimeline: InheritedBalancesTimeline[],
+  inheritedBalancesTimeline: InheritedBalancesTimeline<T>[],
   updateCollectionApprovedTransfersTimeline: boolean,
-  collectionApprovedTransfersTimeline: CollectionApprovedTransferTimeline[],
+  collectionApprovedTransfersTimeline: CollectionApprovedTransferTimeline<T>[],
   updateStandardsTimeline: boolean,
-  standardsTimeline: StandardsTimeline[],
+  standardsTimeline: StandardsTimeline<T>[],
   updateContractAddressTimeline: boolean,
-  contractAddressTimeline: ContractAddressTimeline[],
+  contractAddressTimeline: ContractAddressTimeline<T>[],
   updateIsArchivedTimeline: boolean,
-  isArchivedTimeline: IsArchivedTimeline[],
+  isArchivedTimeline: IsArchivedTimeline<T>[],
 ) {
   const message = new tx.bitbadges.bitbadgeschain.badges.MsgUpdateCollection({
     creator,
@@ -50,64 +49,25 @@ export function createMsgUpdateCollection(
     updateCollectionPermissions,
     collectionPermissions: getWrappedCollectionPermissions(collectionPermissions),
     updateManagerTimeline,
-    managerTimeline: managerTimeline.map((managerTimeline) => new timelines.bitbadges.bitbadgeschain.badges.ManagerTimeline({
-      ...managerTimeline,
-      timelineTimes: getWrappedBadgeIds(managerTimeline.timelineTimes),
-    })),
+    managerTimeline: getWrappedManagerTimeline(managerTimeline),
     updateCollectionMetadataTimeline,
-    collectionMetadataTimeline: collectionMetadataTimeline.map((collectionMetadataTimeline) => new timelines.bitbadges.bitbadgeschain.badges.CollectionMetadataTimeline({
-      ...collectionMetadataTimeline,
-      timelineTimes: getWrappedBadgeIds(collectionMetadataTimeline.timelineTimes),
-      collectionMetadata: new metadata.bitbadges.bitbadgeschain.badges.CollectionMetadata({ ...collectionMetadataTimeline.collectionMetadata }),
-    })),
+    collectionMetadataTimeline: getWrappedCollectionMetadataTimeline(collectionMetadataTimeline),
     updateBadgeMetadataTimeline,
-    badgeMetadataTimeline: badgeMetadataTimeline.map((badgeMetadataTimeline) => new timelines.bitbadges.bitbadgeschain.badges.BadgeMetadataTimeline({
-      ...badgeMetadataTimeline,
-      timelineTimes: getWrappedBadgeIds(badgeMetadataTimeline.timelineTimes),
-      badgeMetadata: badgeMetadataTimeline.badgeMetadata.map((badgeMetadata) => new metadata.bitbadges.bitbadgeschain.badges.BadgeMetadata({
-        ...badgeMetadata,
-        badgeIds: getWrappedBadgeIds(badgeMetadata.badgeIds),
-      })),
-    })),
+    badgeMetadataTimeline: getWrappedBadgeMetadataTimeline(badgeMetadataTimeline),
     updateOffChainBalancesMetadataTimeline,
-    offChainBalancesMetadataTimeline: offChainBalancesMetadataTimeline.map((offChainBalancesMetadataTimeline) => new timelines.bitbadges.bitbadgeschain.badges.OffChainBalancesMetadataTimeline({
-      ...offChainBalancesMetadataTimeline,
-      timelineTimes: getWrappedBadgeIds(offChainBalancesMetadataTimeline.timelineTimes),
-      offChainBalancesMetadata: new metadata.bitbadges.bitbadgeschain.badges.OffChainBalancesMetadata({ ...offChainBalancesMetadataTimeline.offChainBalancesMetadata }),
-    })),
+    offChainBalancesMetadataTimeline: getWrappedOffChainBalancesMetadataTimeline(offChainBalancesMetadataTimeline),
     updateCustomDataTimeline,
-    customDataTimeline: customDataTimeline.map((customDataTimeline) => new timelines.bitbadges.bitbadgeschain.badges.CustomDataTimeline({
-      ...customDataTimeline,
-      timelineTimes: getWrappedBadgeIds(customDataTimeline.timelineTimes),
-    })),
+    customDataTimeline: getWrappedCustomDataTimeline(customDataTimeline),
     updateInheritedBalancesTimeline,
-    inheritedBalancesTimeline: inheritedBalancesTimeline.map((inheritedBalancesTimeline) => new timelines.bitbadges.bitbadgeschain.badges.InheritedBalancesTimeline({
-      ...inheritedBalancesTimeline,
-      timelineTimes: getWrappedBadgeIds(inheritedBalancesTimeline.timelineTimes),
-      inheritedBalances: inheritedBalancesTimeline.inheritedBalances.map((inheritedBalance) => new balances.bitbadges.bitbadgeschain.badges.InheritedBalance({
-        ...inheritedBalance,
-        badgeIds: getWrappedBadgeIds(inheritedBalance.badgeIds),
-        parentBadgeIds: getWrappedBadgeIds(inheritedBalance.parentBadgeIds),
-        parentCollectionId: inheritedBalance.parentCollectionId.toString(),
-      })),
-    })),
+    inheritedBalancesTimeline: getWrappedInheritedBalancesTimeline(inheritedBalancesTimeline),
     updateCollectionApprovedTransfersTimeline,
     collectionApprovedTransfersTimeline: getWrappedCollectionApprovedTransfersTimeline(collectionApprovedTransfersTimeline),
     updateStandardsTimeline,
-    standardsTimeline: standardsTimeline.map((standardsTimeline) => new timelines.bitbadges.bitbadgeschain.badges.StandardsTimeline({
-      ...standardsTimeline,
-      timelineTimes: getWrappedBadgeIds(standardsTimeline.timelineTimes),
-    })),
+    standardsTimeline: getWrappedStandardsTimeline(standardsTimeline),
     updateContractAddressTimeline,
-    contractAddressTimeline: contractAddressTimeline.map((contractAddressTimeline) => new timelines.bitbadges.bitbadgeschain.badges.ContractAddressTimeline({
-      ...contractAddressTimeline,
-      timelineTimes: getWrappedBadgeIds(contractAddressTimeline.timelineTimes),
-    })),
+    contractAddressTimeline: getWrappedContractAddressTimeline(contractAddressTimeline),
     updateIsArchivedTimeline,
-    isArchivedTimeline: isArchivedTimeline.map((isArchivedTimeline) => new timelines.bitbadges.bitbadgeschain.badges.IsArchivedTimeline({
-      ...isArchivedTimeline,
-      timelineTimes: getWrappedBadgeIds(isArchivedTimeline.timelineTimes),
-    })),
+    isArchivedTimeline: getWrappedIsArchivedTimeline(isArchivedTimeline),
   })
 
   return {

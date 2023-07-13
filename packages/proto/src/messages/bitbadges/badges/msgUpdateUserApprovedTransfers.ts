@@ -1,17 +1,18 @@
 import * as tx from '../../../proto/badges/tx'
+import { NumberType } from './string-numbers'
 import { UserApprovedIncomingTransferTimeline, UserApprovedOutgoingTransferTimeline } from './typeutils/approvedTransfers'
 import { UserPermissions } from './typeutils/permissions'
 import { getWrappedOutgoingTransfersTimeline, getWrappedIncomingTransfersTimeline, getWrappedUserPermissions } from './typeutils/wrappers'
 
-export function createMsgUpdateUserApprovedTransfers(
+export function createMsgUpdateUserApprovedTransfers<T extends NumberType>(
   creator: string,
-  collectionId: bigint,
+  collectionId: T,
   updateApprovedOutgoingTransfersTimeline: boolean,
-  approvedOutgoingTransfersTimeline: UserApprovedOutgoingTransferTimeline[],
+  approvedOutgoingTransfersTimeline: UserApprovedOutgoingTransferTimeline<T>[],
   updateApprovedIncomingTransfersTimeline: boolean,
-  approvedIncomingTransfersTimeline: UserApprovedIncomingTransferTimeline[],
+  approvedIncomingTransfersTimeline: UserApprovedIncomingTransferTimeline<T>[],
   updateUserPermissions: boolean,
-  userPermissions: UserPermissions,
+  userPermissions: UserPermissions<T>,
 ) {
   const message =
     new tx.bitbadges.bitbadgeschain.badges.MsgUpdateUserApprovedTransfers({

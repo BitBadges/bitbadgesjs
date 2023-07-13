@@ -1,5 +1,5 @@
-import * as badges from '../../../proto/badges/tx'
 import * as mapping from '../../../proto/badges/address_mappings'
+import * as badges from '../../../proto/badges/tx'
 import { AddressMapping } from './typeutils/typeUtils'
 
 export function createMsgCreateAddressMappings(

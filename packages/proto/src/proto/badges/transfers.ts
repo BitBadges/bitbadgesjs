@@ -515,65 +515,80 @@ export namespace bitbadges.bitbadgeschain.badges {
   export class IsUserOutgoingTransferAllowed extends pb_1.Message {
     #one_of_decls: number[][] = [];
     constructor(data?: any[] | {
-      invertTo?: boolean;
-      invertInitiatedBy?: boolean;
-      invertTransferTimes?: boolean;
-      invertBadgeIds?: boolean;
-      invertOwnedTimes?: boolean;
+      toMappingOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+      initiatedByMappingOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+      transferTimesOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+      badgeIdsOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+      ownedTimesOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
       isAllowed?: boolean;
     }) {
       super();
       pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
       if (!Array.isArray(data) && typeof data == "object") {
-        if ("invertTo" in data && data.invertTo != undefined) {
-          this.invertTo = data.invertTo;
+        if ("toMappingOptions" in data && data.toMappingOptions != undefined) {
+          this.toMappingOptions = data.toMappingOptions;
         }
-        if ("invertInitiatedBy" in data && data.invertInitiatedBy != undefined) {
-          this.invertInitiatedBy = data.invertInitiatedBy;
+        if ("initiatedByMappingOptions" in data && data.initiatedByMappingOptions != undefined) {
+          this.initiatedByMappingOptions = data.initiatedByMappingOptions;
         }
-        if ("invertTransferTimes" in data && data.invertTransferTimes != undefined) {
-          this.invertTransferTimes = data.invertTransferTimes;
+        if ("transferTimesOptions" in data && data.transferTimesOptions != undefined) {
+          this.transferTimesOptions = data.transferTimesOptions;
         }
-        if ("invertBadgeIds" in data && data.invertBadgeIds != undefined) {
-          this.invertBadgeIds = data.invertBadgeIds;
+        if ("badgeIdsOptions" in data && data.badgeIdsOptions != undefined) {
+          this.badgeIdsOptions = data.badgeIdsOptions;
         }
-        if ("invertOwnedTimes" in data && data.invertOwnedTimes != undefined) {
-          this.invertOwnedTimes = data.invertOwnedTimes;
+        if ("ownedTimesOptions" in data && data.ownedTimesOptions != undefined) {
+          this.ownedTimesOptions = data.ownedTimesOptions;
         }
         if ("isAllowed" in data && data.isAllowed != undefined) {
           this.isAllowed = data.isAllowed;
         }
       }
     }
-    get invertTo() {
-      return pb_1.Message.getFieldWithDefault(this, 2, false) as boolean;
+    get toMappingOptions() {
+      return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 2) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
     }
-    set invertTo(value: boolean) {
-      pb_1.Message.setField(this, 2, value);
+    set toMappingOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
+      pb_1.Message.setWrapperField(this, 2, value);
     }
-    get invertInitiatedBy() {
-      return pb_1.Message.getFieldWithDefault(this, 3, false) as boolean;
+    get has_toMappingOptions() {
+      return pb_1.Message.getField(this, 2) != null;
     }
-    set invertInitiatedBy(value: boolean) {
-      pb_1.Message.setField(this, 3, value);
+    get initiatedByMappingOptions() {
+      return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 3) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
     }
-    get invertTransferTimes() {
-      return pb_1.Message.getFieldWithDefault(this, 4, false) as boolean;
+    set initiatedByMappingOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
+      pb_1.Message.setWrapperField(this, 3, value);
     }
-    set invertTransferTimes(value: boolean) {
-      pb_1.Message.setField(this, 4, value);
+    get has_initiatedByMappingOptions() {
+      return pb_1.Message.getField(this, 3) != null;
     }
-    get invertBadgeIds() {
-      return pb_1.Message.getFieldWithDefault(this, 5, false) as boolean;
+    get transferTimesOptions() {
+      return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 4) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
     }
-    set invertBadgeIds(value: boolean) {
-      pb_1.Message.setField(this, 5, value);
+    set transferTimesOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
+      pb_1.Message.setWrapperField(this, 4, value);
     }
-    get invertOwnedTimes() {
-      return pb_1.Message.getFieldWithDefault(this, 6, false) as boolean;
+    get has_transferTimesOptions() {
+      return pb_1.Message.getField(this, 4) != null;
     }
-    set invertOwnedTimes(value: boolean) {
-      pb_1.Message.setField(this, 6, value);
+    get badgeIdsOptions() {
+      return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 5) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+    }
+    set badgeIdsOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
+      pb_1.Message.setWrapperField(this, 5, value);
+    }
+    get has_badgeIdsOptions() {
+      return pb_1.Message.getField(this, 5) != null;
+    }
+    get ownedTimesOptions() {
+      return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 6) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+    }
+    set ownedTimesOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
+      pb_1.Message.setWrapperField(this, 6, value);
+    }
+    get has_ownedTimesOptions() {
+      return pb_1.Message.getField(this, 6) != null;
     }
     get isAllowed() {
       return pb_1.Message.getFieldWithDefault(this, 7, false) as boolean;
@@ -582,28 +597,28 @@ export namespace bitbadges.bitbadgeschain.badges {
       pb_1.Message.setField(this, 7, value);
     }
     static fromObject(data: {
-      invertTo?: boolean;
-      invertInitiatedBy?: boolean;
-      invertTransferTimes?: boolean;
-      invertBadgeIds?: boolean;
-      invertOwnedTimes?: boolean;
+      toMappingOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+      initiatedByMappingOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+      transferTimesOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+      badgeIdsOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+      ownedTimesOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
       isAllowed?: boolean;
     }): IsUserOutgoingTransferAllowed {
       const message = new IsUserOutgoingTransferAllowed({});
-      if (data.invertTo != null) {
-        message.invertTo = data.invertTo;
+      if (data.toMappingOptions != null) {
+        message.toMappingOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.toMappingOptions);
       }
-      if (data.invertInitiatedBy != null) {
-        message.invertInitiatedBy = data.invertInitiatedBy;
+      if (data.initiatedByMappingOptions != null) {
+        message.initiatedByMappingOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.initiatedByMappingOptions);
       }
-      if (data.invertTransferTimes != null) {
-        message.invertTransferTimes = data.invertTransferTimes;
+      if (data.transferTimesOptions != null) {
+        message.transferTimesOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.transferTimesOptions);
       }
-      if (data.invertBadgeIds != null) {
-        message.invertBadgeIds = data.invertBadgeIds;
+      if (data.badgeIdsOptions != null) {
+        message.badgeIdsOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.badgeIdsOptions);
       }
-      if (data.invertOwnedTimes != null) {
-        message.invertOwnedTimes = data.invertOwnedTimes;
+      if (data.ownedTimesOptions != null) {
+        message.ownedTimesOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.ownedTimesOptions);
       }
       if (data.isAllowed != null) {
         message.isAllowed = data.isAllowed;
@@ -612,27 +627,27 @@ export namespace bitbadges.bitbadgeschain.badges {
     }
     toObject() {
       const data: {
-        invertTo?: boolean;
-        invertInitiatedBy?: boolean;
-        invertTransferTimes?: boolean;
-        invertBadgeIds?: boolean;
-        invertOwnedTimes?: boolean;
+        toMappingOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+        initiatedByMappingOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+        transferTimesOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+        badgeIdsOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+        ownedTimesOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
         isAllowed?: boolean;
       } = {};
-      if (this.invertTo != null) {
-        data.invertTo = this.invertTo;
+      if (this.toMappingOptions != null) {
+        data.toMappingOptions = this.toMappingOptions.toObject();
       }
-      if (this.invertInitiatedBy != null) {
-        data.invertInitiatedBy = this.invertInitiatedBy;
+      if (this.initiatedByMappingOptions != null) {
+        data.initiatedByMappingOptions = this.initiatedByMappingOptions.toObject();
       }
-      if (this.invertTransferTimes != null) {
-        data.invertTransferTimes = this.invertTransferTimes;
+      if (this.transferTimesOptions != null) {
+        data.transferTimesOptions = this.transferTimesOptions.toObject();
       }
-      if (this.invertBadgeIds != null) {
-        data.invertBadgeIds = this.invertBadgeIds;
+      if (this.badgeIdsOptions != null) {
+        data.badgeIdsOptions = this.badgeIdsOptions.toObject();
       }
-      if (this.invertOwnedTimes != null) {
-        data.invertOwnedTimes = this.invertOwnedTimes;
+      if (this.ownedTimesOptions != null) {
+        data.ownedTimesOptions = this.ownedTimesOptions.toObject();
       }
       if (this.isAllowed != null) {
         data.isAllowed = this.isAllowed;
@@ -643,16 +658,16 @@ export namespace bitbadges.bitbadgeschain.badges {
     serialize(w: pb_1.BinaryWriter): void;
     serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
       const writer = w || new pb_1.BinaryWriter();
-      if (this.invertTo != false)
-        writer.writeBool(2, this.invertTo);
-      if (this.invertInitiatedBy != false)
-        writer.writeBool(3, this.invertInitiatedBy);
-      if (this.invertTransferTimes != false)
-        writer.writeBool(4, this.invertTransferTimes);
-      if (this.invertBadgeIds != false)
-        writer.writeBool(5, this.invertBadgeIds);
-      if (this.invertOwnedTimes != false)
-        writer.writeBool(6, this.invertOwnedTimes);
+      if (this.has_toMappingOptions)
+        writer.writeMessage(2, this.toMappingOptions, () => this.toMappingOptions.serialize(writer));
+      if (this.has_initiatedByMappingOptions)
+        writer.writeMessage(3, this.initiatedByMappingOptions, () => this.initiatedByMappingOptions.serialize(writer));
+      if (this.has_transferTimesOptions)
+        writer.writeMessage(4, this.transferTimesOptions, () => this.transferTimesOptions.serialize(writer));
+      if (this.has_badgeIdsOptions)
+        writer.writeMessage(5, this.badgeIdsOptions, () => this.badgeIdsOptions.serialize(writer));
+      if (this.has_ownedTimesOptions)
+        writer.writeMessage(6, this.ownedTimesOptions, () => this.ownedTimesOptions.serialize(writer));
       if (this.isAllowed != false)
         writer.writeBool(7, this.isAllowed);
       if (!w)
@@ -665,19 +680,19 @@ export namespace bitbadges.bitbadgeschain.badges {
           break;
         switch (reader.getFieldNumber()) {
           case 2:
-            message.invertTo = reader.readBool();
+            reader.readMessage(message.toMappingOptions, () => message.toMappingOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
             break;
           case 3:
-            message.invertInitiatedBy = reader.readBool();
+            reader.readMessage(message.initiatedByMappingOptions, () => message.initiatedByMappingOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
             break;
           case 4:
-            message.invertTransferTimes = reader.readBool();
+            reader.readMessage(message.transferTimesOptions, () => message.transferTimesOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
             break;
           case 5:
-            message.invertBadgeIds = reader.readBool();
+            reader.readMessage(message.badgeIdsOptions, () => message.badgeIdsOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
             break;
           case 6:
-            message.invertOwnedTimes = reader.readBool();
+            reader.readMessage(message.ownedTimesOptions, () => message.ownedTimesOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
             break;
           case 7:
             message.isAllowed = reader.readBool();
@@ -697,65 +712,80 @@ export namespace bitbadges.bitbadgeschain.badges {
   export class IsUserIncomingTransferAllowed extends pb_1.Message {
     #one_of_decls: number[][] = [];
     constructor(data?: any[] | {
-      invertFrom?: boolean;
-      invertInitiatedBy?: boolean;
-      invertTransferTimes?: boolean;
-      invertBadgeIds?: boolean;
-      invertOwnedTimes?: boolean;
+      fromMappingOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+      initiatedByMappingOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+      transferTimesOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+      badgeIdsOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+      ownedTimesOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
       isAllowed?: boolean;
     }) {
       super();
       pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
       if (!Array.isArray(data) && typeof data == "object") {
-        if ("invertFrom" in data && data.invertFrom != undefined) {
-          this.invertFrom = data.invertFrom;
+        if ("fromMappingOptions" in data && data.fromMappingOptions != undefined) {
+          this.fromMappingOptions = data.fromMappingOptions;
         }
-        if ("invertInitiatedBy" in data && data.invertInitiatedBy != undefined) {
-          this.invertInitiatedBy = data.invertInitiatedBy;
+        if ("initiatedByMappingOptions" in data && data.initiatedByMappingOptions != undefined) {
+          this.initiatedByMappingOptions = data.initiatedByMappingOptions;
         }
-        if ("invertTransferTimes" in data && data.invertTransferTimes != undefined) {
-          this.invertTransferTimes = data.invertTransferTimes;
+        if ("transferTimesOptions" in data && data.transferTimesOptions != undefined) {
+          this.transferTimesOptions = data.transferTimesOptions;
         }
-        if ("invertBadgeIds" in data && data.invertBadgeIds != undefined) {
-          this.invertBadgeIds = data.invertBadgeIds;
+        if ("badgeIdsOptions" in data && data.badgeIdsOptions != undefined) {
+          this.badgeIdsOptions = data.badgeIdsOptions;
         }
-        if ("invertOwnedTimes" in data && data.invertOwnedTimes != undefined) {
-          this.invertOwnedTimes = data.invertOwnedTimes;
+        if ("ownedTimesOptions" in data && data.ownedTimesOptions != undefined) {
+          this.ownedTimesOptions = data.ownedTimesOptions;
         }
         if ("isAllowed" in data && data.isAllowed != undefined) {
           this.isAllowed = data.isAllowed;
         }
       }
     }
-    get invertFrom() {
-      return pb_1.Message.getFieldWithDefault(this, 2, false) as boolean;
+    get fromMappingOptions() {
+      return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 2) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
     }
-    set invertFrom(value: boolean) {
-      pb_1.Message.setField(this, 2, value);
+    set fromMappingOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
+      pb_1.Message.setWrapperField(this, 2, value);
     }
-    get invertInitiatedBy() {
-      return pb_1.Message.getFieldWithDefault(this, 3, false) as boolean;
+    get has_fromMappingOptions() {
+      return pb_1.Message.getField(this, 2) != null;
     }
-    set invertInitiatedBy(value: boolean) {
-      pb_1.Message.setField(this, 3, value);
+    get initiatedByMappingOptions() {
+      return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 3) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
     }
-    get invertTransferTimes() {
-      return pb_1.Message.getFieldWithDefault(this, 4, false) as boolean;
+    set initiatedByMappingOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
+      pb_1.Message.setWrapperField(this, 3, value);
     }
-    set invertTransferTimes(value: boolean) {
-      pb_1.Message.setField(this, 4, value);
+    get has_initiatedByMappingOptions() {
+      return pb_1.Message.getField(this, 3) != null;
     }
-    get invertBadgeIds() {
-      return pb_1.Message.getFieldWithDefault(this, 5, false) as boolean;
+    get transferTimesOptions() {
+      return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 4) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
     }
-    set invertBadgeIds(value: boolean) {
-      pb_1.Message.setField(this, 5, value);
+    set transferTimesOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
+      pb_1.Message.setWrapperField(this, 4, value);
     }
-    get invertOwnedTimes() {
-      return pb_1.Message.getFieldWithDefault(this, 6, false) as boolean;
+    get has_transferTimesOptions() {
+      return pb_1.Message.getField(this, 4) != null;
     }
-    set invertOwnedTimes(value: boolean) {
-      pb_1.Message.setField(this, 6, value);
+    get badgeIdsOptions() {
+      return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 5) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+    }
+    set badgeIdsOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
+      pb_1.Message.setWrapperField(this, 5, value);
+    }
+    get has_badgeIdsOptions() {
+      return pb_1.Message.getField(this, 5) != null;
+    }
+    get ownedTimesOptions() {
+      return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 6) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+    }
+    set ownedTimesOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
+      pb_1.Message.setWrapperField(this, 6, value);
+    }
+    get has_ownedTimesOptions() {
+      return pb_1.Message.getField(this, 6) != null;
     }
     get isAllowed() {
       return pb_1.Message.getFieldWithDefault(this, 7, false) as boolean;
@@ -764,28 +794,28 @@ export namespace bitbadges.bitbadgeschain.badges {
       pb_1.Message.setField(this, 7, value);
     }
     static fromObject(data: {
-      invertFrom?: boolean;
-      invertInitiatedBy?: boolean;
-      invertTransferTimes?: boolean;
-      invertBadgeIds?: boolean;
-      invertOwnedTimes?: boolean;
+      fromMappingOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+      initiatedByMappingOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+      transferTimesOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+      badgeIdsOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+      ownedTimesOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
       isAllowed?: boolean;
     }): IsUserIncomingTransferAllowed {
       const message = new IsUserIncomingTransferAllowed({});
-      if (data.invertFrom != null) {
-        message.invertFrom = data.invertFrom;
+      if (data.fromMappingOptions != null) {
+        message.fromMappingOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.fromMappingOptions);
       }
-      if (data.invertInitiatedBy != null) {
-        message.invertInitiatedBy = data.invertInitiatedBy;
+      if (data.initiatedByMappingOptions != null) {
+        message.initiatedByMappingOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.initiatedByMappingOptions);
       }
-      if (data.invertTransferTimes != null) {
-        message.invertTransferTimes = data.invertTransferTimes;
+      if (data.transferTimesOptions != null) {
+        message.transferTimesOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.transferTimesOptions);
       }
-      if (data.invertBadgeIds != null) {
-        message.invertBadgeIds = data.invertBadgeIds;
+      if (data.badgeIdsOptions != null) {
+        message.badgeIdsOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.badgeIdsOptions);
       }
-      if (data.invertOwnedTimes != null) {
-        message.invertOwnedTimes = data.invertOwnedTimes;
+      if (data.ownedTimesOptions != null) {
+        message.ownedTimesOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.ownedTimesOptions);
       }
       if (data.isAllowed != null) {
         message.isAllowed = data.isAllowed;
@@ -794,27 +824,27 @@ export namespace bitbadges.bitbadgeschain.badges {
     }
     toObject() {
       const data: {
-        invertFrom?: boolean;
-        invertInitiatedBy?: boolean;
-        invertTransferTimes?: boolean;
-        invertBadgeIds?: boolean;
-        invertOwnedTimes?: boolean;
+        fromMappingOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+        initiatedByMappingOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+        transferTimesOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+        badgeIdsOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+        ownedTimesOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
         isAllowed?: boolean;
       } = {};
-      if (this.invertFrom != null) {
-        data.invertFrom = this.invertFrom;
+      if (this.fromMappingOptions != null) {
+        data.fromMappingOptions = this.fromMappingOptions.toObject();
       }
-      if (this.invertInitiatedBy != null) {
-        data.invertInitiatedBy = this.invertInitiatedBy;
+      if (this.initiatedByMappingOptions != null) {
+        data.initiatedByMappingOptions = this.initiatedByMappingOptions.toObject();
       }
-      if (this.invertTransferTimes != null) {
-        data.invertTransferTimes = this.invertTransferTimes;
+      if (this.transferTimesOptions != null) {
+        data.transferTimesOptions = this.transferTimesOptions.toObject();
       }
-      if (this.invertBadgeIds != null) {
-        data.invertBadgeIds = this.invertBadgeIds;
+      if (this.badgeIdsOptions != null) {
+        data.badgeIdsOptions = this.badgeIdsOptions.toObject();
       }
-      if (this.invertOwnedTimes != null) {
-        data.invertOwnedTimes = this.invertOwnedTimes;
+      if (this.ownedTimesOptions != null) {
+        data.ownedTimesOptions = this.ownedTimesOptions.toObject();
       }
       if (this.isAllowed != null) {
         data.isAllowed = this.isAllowed;
@@ -825,16 +855,16 @@ export namespace bitbadges.bitbadgeschain.badges {
     serialize(w: pb_1.BinaryWriter): void;
     serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
       const writer = w || new pb_1.BinaryWriter();
-      if (this.invertFrom != false)
-        writer.writeBool(2, this.invertFrom);
-      if (this.invertInitiatedBy != false)
-        writer.writeBool(3, this.invertInitiatedBy);
-      if (this.invertTransferTimes != false)
-        writer.writeBool(4, this.invertTransferTimes);
-      if (this.invertBadgeIds != false)
-        writer.writeBool(5, this.invertBadgeIds);
-      if (this.invertOwnedTimes != false)
-        writer.writeBool(6, this.invertOwnedTimes);
+      if (this.has_fromMappingOptions)
+        writer.writeMessage(2, this.fromMappingOptions, () => this.fromMappingOptions.serialize(writer));
+      if (this.has_initiatedByMappingOptions)
+        writer.writeMessage(3, this.initiatedByMappingOptions, () => this.initiatedByMappingOptions.serialize(writer));
+      if (this.has_transferTimesOptions)
+        writer.writeMessage(4, this.transferTimesOptions, () => this.transferTimesOptions.serialize(writer));
+      if (this.has_badgeIdsOptions)
+        writer.writeMessage(5, this.badgeIdsOptions, () => this.badgeIdsOptions.serialize(writer));
+      if (this.has_ownedTimesOptions)
+        writer.writeMessage(6, this.ownedTimesOptions, () => this.ownedTimesOptions.serialize(writer));
       if (this.isAllowed != false)
         writer.writeBool(7, this.isAllowed);
       if (!w)
@@ -847,19 +877,19 @@ export namespace bitbadges.bitbadgeschain.badges {
           break;
         switch (reader.getFieldNumber()) {
           case 2:
-            message.invertFrom = reader.readBool();
+            reader.readMessage(message.fromMappingOptions, () => message.fromMappingOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
             break;
           case 3:
-            message.invertInitiatedBy = reader.readBool();
+            reader.readMessage(message.initiatedByMappingOptions, () => message.initiatedByMappingOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
             break;
           case 4:
-            message.invertTransferTimes = reader.readBool();
+            reader.readMessage(message.transferTimesOptions, () => message.transferTimesOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
             break;
           case 5:
-            message.invertBadgeIds = reader.readBool();
+            reader.readMessage(message.badgeIdsOptions, () => message.badgeIdsOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
             break;
           case 6:
-            message.invertOwnedTimes = reader.readBool();
+            reader.readMessage(message.ownedTimesOptions, () => message.ownedTimesOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
             break;
           case 7:
             message.isAllowed = reader.readBool();
@@ -1289,75 +1319,93 @@ export namespace bitbadges.bitbadgeschain.badges {
   export class IsCollectionTransferAllowed extends pb_1.Message {
     #one_of_decls: number[][] = [];
     constructor(data?: any[] | {
-      invertFrom?: boolean;
-      invertTo?: boolean;
-      invertInitiatedBy?: boolean;
-      invertTransferTimes?: boolean;
-      invertBadgeIds?: boolean;
-      invertOwnedTimes?: boolean;
+      fromMappingOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+      toMappingOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+      initiatedByMappingOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+      transferTimesOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+      badgeIdsOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+      ownedTimesOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
       isAllowed?: boolean;
     }) {
       super();
       pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
       if (!Array.isArray(data) && typeof data == "object") {
-        if ("invertFrom" in data && data.invertFrom != undefined) {
-          this.invertFrom = data.invertFrom;
+        if ("fromMappingOptions" in data && data.fromMappingOptions != undefined) {
+          this.fromMappingOptions = data.fromMappingOptions;
         }
-        if ("invertTo" in data && data.invertTo != undefined) {
-          this.invertTo = data.invertTo;
+        if ("toMappingOptions" in data && data.toMappingOptions != undefined) {
+          this.toMappingOptions = data.toMappingOptions;
         }
-        if ("invertInitiatedBy" in data && data.invertInitiatedBy != undefined) {
-          this.invertInitiatedBy = data.invertInitiatedBy;
+        if ("initiatedByMappingOptions" in data && data.initiatedByMappingOptions != undefined) {
+          this.initiatedByMappingOptions = data.initiatedByMappingOptions;
         }
-        if ("invertTransferTimes" in data && data.invertTransferTimes != undefined) {
-          this.invertTransferTimes = data.invertTransferTimes;
+        if ("transferTimesOptions" in data && data.transferTimesOptions != undefined) {
+          this.transferTimesOptions = data.transferTimesOptions;
         }
-        if ("invertBadgeIds" in data && data.invertBadgeIds != undefined) {
-          this.invertBadgeIds = data.invertBadgeIds;
+        if ("badgeIdsOptions" in data && data.badgeIdsOptions != undefined) {
+          this.badgeIdsOptions = data.badgeIdsOptions;
         }
-        if ("invertOwnedTimes" in data && data.invertOwnedTimes != undefined) {
-          this.invertOwnedTimes = data.invertOwnedTimes;
+        if ("ownedTimesOptions" in data && data.ownedTimesOptions != undefined) {
+          this.ownedTimesOptions = data.ownedTimesOptions;
         }
         if ("isAllowed" in data && data.isAllowed != undefined) {
           this.isAllowed = data.isAllowed;
         }
       }
     }
-    get invertFrom() {
-      return pb_1.Message.getFieldWithDefault(this, 1, false) as boolean;
+    get fromMappingOptions() {
+      return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 1) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
     }
-    set invertFrom(value: boolean) {
-      pb_1.Message.setField(this, 1, value);
+    set fromMappingOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
+      pb_1.Message.setWrapperField(this, 1, value);
     }
-    get invertTo() {
-      return pb_1.Message.getFieldWithDefault(this, 2, false) as boolean;
+    get has_fromMappingOptions() {
+      return pb_1.Message.getField(this, 1) != null;
     }
-    set invertTo(value: boolean) {
-      pb_1.Message.setField(this, 2, value);
+    get toMappingOptions() {
+      return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 2) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
     }
-    get invertInitiatedBy() {
-      return pb_1.Message.getFieldWithDefault(this, 3, false) as boolean;
+    set toMappingOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
+      pb_1.Message.setWrapperField(this, 2, value);
     }
-    set invertInitiatedBy(value: boolean) {
-      pb_1.Message.setField(this, 3, value);
+    get has_toMappingOptions() {
+      return pb_1.Message.getField(this, 2) != null;
     }
-    get invertTransferTimes() {
-      return pb_1.Message.getFieldWithDefault(this, 4, false) as boolean;
+    get initiatedByMappingOptions() {
+      return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 3) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
     }
-    set invertTransferTimes(value: boolean) {
-      pb_1.Message.setField(this, 4, value);
+    set initiatedByMappingOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
+      pb_1.Message.setWrapperField(this, 3, value);
     }
-    get invertBadgeIds() {
-      return pb_1.Message.getFieldWithDefault(this, 5, false) as boolean;
+    get has_initiatedByMappingOptions() {
+      return pb_1.Message.getField(this, 3) != null;
     }
-    set invertBadgeIds(value: boolean) {
-      pb_1.Message.setField(this, 5, value);
+    get transferTimesOptions() {
+      return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 4) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
     }
-    get invertOwnedTimes() {
-      return pb_1.Message.getFieldWithDefault(this, 6, false) as boolean;
+    set transferTimesOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
+      pb_1.Message.setWrapperField(this, 4, value);
     }
-    set invertOwnedTimes(value: boolean) {
-      pb_1.Message.setField(this, 6, value);
+    get has_transferTimesOptions() {
+      return pb_1.Message.getField(this, 4) != null;
+    }
+    get badgeIdsOptions() {
+      return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 5) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+    }
+    set badgeIdsOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
+      pb_1.Message.setWrapperField(this, 5, value);
+    }
+    get has_badgeIdsOptions() {
+      return pb_1.Message.getField(this, 5) != null;
+    }
+    get ownedTimesOptions() {
+      return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 6) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+    }
+    set ownedTimesOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
+      pb_1.Message.setWrapperField(this, 6, value);
+    }
+    get has_ownedTimesOptions() {
+      return pb_1.Message.getField(this, 6) != null;
     }
     get isAllowed() {
       return pb_1.Message.getFieldWithDefault(this, 7, false) as boolean;
@@ -1366,32 +1414,32 @@ export namespace bitbadges.bitbadgeschain.badges {
       pb_1.Message.setField(this, 7, value);
     }
     static fromObject(data: {
-      invertFrom?: boolean;
-      invertTo?: boolean;
-      invertInitiatedBy?: boolean;
-      invertTransferTimes?: boolean;
-      invertBadgeIds?: boolean;
-      invertOwnedTimes?: boolean;
+      fromMappingOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+      toMappingOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+      initiatedByMappingOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+      transferTimesOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+      badgeIdsOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+      ownedTimesOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
       isAllowed?: boolean;
     }): IsCollectionTransferAllowed {
       const message = new IsCollectionTransferAllowed({});
-      if (data.invertFrom != null) {
-        message.invertFrom = data.invertFrom;
+      if (data.fromMappingOptions != null) {
+        message.fromMappingOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.fromMappingOptions);
       }
-      if (data.invertTo != null) {
-        message.invertTo = data.invertTo;
+      if (data.toMappingOptions != null) {
+        message.toMappingOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.toMappingOptions);
       }
-      if (data.invertInitiatedBy != null) {
-        message.invertInitiatedBy = data.invertInitiatedBy;
+      if (data.initiatedByMappingOptions != null) {
+        message.initiatedByMappingOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.initiatedByMappingOptions);
       }
-      if (data.invertTransferTimes != null) {
-        message.invertTransferTimes = data.invertTransferTimes;
+      if (data.transferTimesOptions != null) {
+        message.transferTimesOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.transferTimesOptions);
       }
-      if (data.invertBadgeIds != null) {
-        message.invertBadgeIds = data.invertBadgeIds;
+      if (data.badgeIdsOptions != null) {
+        message.badgeIdsOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.badgeIdsOptions);
       }
-      if (data.invertOwnedTimes != null) {
-        message.invertOwnedTimes = data.invertOwnedTimes;
+      if (data.ownedTimesOptions != null) {
+        message.ownedTimesOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.ownedTimesOptions);
       }
       if (data.isAllowed != null) {
         message.isAllowed = data.isAllowed;
@@ -1400,31 +1448,31 @@ export namespace bitbadges.bitbadgeschain.badges {
     }
     toObject() {
       const data: {
-        invertFrom?: boolean;
-        invertTo?: boolean;
-        invertInitiatedBy?: boolean;
-        invertTransferTimes?: boolean;
-        invertBadgeIds?: boolean;
-        invertOwnedTimes?: boolean;
+        fromMappingOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+        toMappingOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+        initiatedByMappingOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+        transferTimesOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+        badgeIdsOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+        ownedTimesOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
         isAllowed?: boolean;
       } = {};
-      if (this.invertFrom != null) {
-        data.invertFrom = this.invertFrom;
+      if (this.fromMappingOptions != null) {
+        data.fromMappingOptions = this.fromMappingOptions.toObject();
       }
-      if (this.invertTo != null) {
-        data.invertTo = this.invertTo;
+      if (this.toMappingOptions != null) {
+        data.toMappingOptions = this.toMappingOptions.toObject();
       }
-      if (this.invertInitiatedBy != null) {
-        data.invertInitiatedBy = this.invertInitiatedBy;
+      if (this.initiatedByMappingOptions != null) {
+        data.initiatedByMappingOptions = this.initiatedByMappingOptions.toObject();
       }
-      if (this.invertTransferTimes != null) {
-        data.invertTransferTimes = this.invertTransferTimes;
+      if (this.transferTimesOptions != null) {
+        data.transferTimesOptions = this.transferTimesOptions.toObject();
       }
-      if (this.invertBadgeIds != null) {
-        data.invertBadgeIds = this.invertBadgeIds;
+      if (this.badgeIdsOptions != null) {
+        data.badgeIdsOptions = this.badgeIdsOptions.toObject();
       }
-      if (this.invertOwnedTimes != null) {
-        data.invertOwnedTimes = this.invertOwnedTimes;
+      if (this.ownedTimesOptions != null) {
+        data.ownedTimesOptions = this.ownedTimesOptions.toObject();
       }
       if (this.isAllowed != null) {
         data.isAllowed = this.isAllowed;
@@ -1435,18 +1483,18 @@ export namespace bitbadges.bitbadgeschain.badges {
     serialize(w: pb_1.BinaryWriter): void;
     serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
       const writer = w || new pb_1.BinaryWriter();
-      if (this.invertFrom != false)
-        writer.writeBool(1, this.invertFrom);
-      if (this.invertTo != false)
-        writer.writeBool(2, this.invertTo);
-      if (this.invertInitiatedBy != false)
-        writer.writeBool(3, this.invertInitiatedBy);
-      if (this.invertTransferTimes != false)
-        writer.writeBool(4, this.invertTransferTimes);
-      if (this.invertBadgeIds != false)
-        writer.writeBool(5, this.invertBadgeIds);
-      if (this.invertOwnedTimes != false)
-        writer.writeBool(6, this.invertOwnedTimes);
+      if (this.has_fromMappingOptions)
+        writer.writeMessage(1, this.fromMappingOptions, () => this.fromMappingOptions.serialize(writer));
+      if (this.has_toMappingOptions)
+        writer.writeMessage(2, this.toMappingOptions, () => this.toMappingOptions.serialize(writer));
+      if (this.has_initiatedByMappingOptions)
+        writer.writeMessage(3, this.initiatedByMappingOptions, () => this.initiatedByMappingOptions.serialize(writer));
+      if (this.has_transferTimesOptions)
+        writer.writeMessage(4, this.transferTimesOptions, () => this.transferTimesOptions.serialize(writer));
+      if (this.has_badgeIdsOptions)
+        writer.writeMessage(5, this.badgeIdsOptions, () => this.badgeIdsOptions.serialize(writer));
+      if (this.has_ownedTimesOptions)
+        writer.writeMessage(6, this.ownedTimesOptions, () => this.ownedTimesOptions.serialize(writer));
       if (this.isAllowed != false)
         writer.writeBool(7, this.isAllowed);
       if (!w)
@@ -1459,22 +1507,22 @@ export namespace bitbadges.bitbadgeschain.badges {
           break;
         switch (reader.getFieldNumber()) {
           case 1:
-            message.invertFrom = reader.readBool();
+            reader.readMessage(message.fromMappingOptions, () => message.fromMappingOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
             break;
           case 2:
-            message.invertTo = reader.readBool();
+            reader.readMessage(message.toMappingOptions, () => message.toMappingOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
             break;
           case 3:
-            message.invertInitiatedBy = reader.readBool();
+            reader.readMessage(message.initiatedByMappingOptions, () => message.initiatedByMappingOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
             break;
           case 4:
-            message.invertTransferTimes = reader.readBool();
+            reader.readMessage(message.transferTimesOptions, () => message.transferTimesOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
             break;
           case 5:
-            message.invertBadgeIds = reader.readBool();
+            reader.readMessage(message.badgeIdsOptions, () => message.badgeIdsOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
             break;
           case 6:
-            message.invertOwnedTimes = reader.readBool();
+            reader.readMessage(message.ownedTimesOptions, () => message.ownedTimesOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
             break;
           case 7:
             message.isAllowed = reader.readBool();

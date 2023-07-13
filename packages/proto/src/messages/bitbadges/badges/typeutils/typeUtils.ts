@@ -1,266 +1,233 @@
-import { UserApprovedOutgoingTransferTimelineBase, UserApprovedIncomingTransferTimelineBase, UserApprovedOutgoingTransferTimeline, UserApprovedIncomingTransferTimeline, s_UserApprovedOutgoingTransferTimeline, s_UserApprovedIncomingTransferTimeline, convertToUserApprovedOutgoingTransferTimeline, convertToUserApprovedIncomingTransferTimeline, convertFromUserApprovedOutgoingTransferTimeline, convertFromUserApprovedIncomingTransferTimeline, CollectionApprovedTransfer, CollectionApprovedTransferBase, convertFromCollectionApprovedTransfer, convertToCollectionApprovedTransfer, s_CollectionApprovedTransfer } from "./approvedTransfers";
-import { UserPermissionsBase, UserPermissions, s_UserPermissions, convertToUserPermissions, convertFromUserPermissions } from "./permissions";
+import { NumberType } from "../string-numbers";
+import { CollectionApprovedTransfer, UserApprovedIncomingTransferTimeline, UserApprovedOutgoingTransferTimeline, convertCollectionApprovedTransfer, convertUserApprovedIncomingTransferTimeline, convertUserApprovedOutgoingTransferTimeline } from "./approvedTransfers";
+import { UserPermissions, convertUserPermissions } from "./permissions";
 
-export interface UserBalanceBase {
-  balances: BalanceBase[];
-  approvedOutgoingTransfersTimeline: UserApprovedOutgoingTransferTimelineBase[];
-  approvedIncomingTransfersTimeline: UserApprovedIncomingTransferTimelineBase[];
-  userPermissions: UserPermissionsBase;
+export function deepCopy<T>(obj: T): T {
+  return deepCopyWithBigInts(obj);
 }
 
-export interface UserBalance extends UserBalanceBase {
-  balances: Balance[];
-  approvedOutgoingTransfersTimeline: UserApprovedOutgoingTransferTimeline[];
-  approvedIncomingTransfersTimeline: UserApprovedIncomingTransferTimeline[];
-  userPermissions: UserPermissions;
-}
-
-export interface s_UserBalance extends UserBalanceBase {
-  balances: s_Balance[];
-  approvedOutgoingTransfersTimeline: s_UserApprovedOutgoingTransferTimeline[];
-  approvedIncomingTransfersTimeline: s_UserApprovedIncomingTransferTimeline[];
-  userPermissions: s_UserPermissions;
-}
-
-export function convertToUserBalance(s_balance: s_UserBalance): UserBalance {
-  return {
-    ...s_balance,
-    balances: s_balance.balances.map(convertToBalance),
-    approvedOutgoingTransfersTimeline: s_balance.approvedOutgoingTransfersTimeline.map(convertToUserApprovedOutgoingTransferTimeline),
-    approvedIncomingTransfersTimeline: s_balance.approvedIncomingTransfersTimeline.map(convertToUserApprovedIncomingTransferTimeline),
-    userPermissions: convertToUserPermissions(s_balance.userPermissions)
+function deepCopyWithBigInts<T>(obj: T): T {
+  if (typeof obj !== 'object' || obj === null) {
+    // <T> case: return primitive values as-is
+    return obj;
   }
+
+  if (Array.isArray(obj)) {
+    // Create a deep copy of an array
+    return obj.map((item) => deepCopyWithBigInts(item)) as unknown as T;
+  }
+
+  // Create a deep copy of an object
+  const copiedObj = {} as T;
+  for (const key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      copiedObj[key] = deepCopyWithBigInts(obj[key]);
+    }
+  }
+  return copiedObj;
 }
 
-export function convertFromUserBalance(balance: UserBalance): s_UserBalance {
-  return {
+/**
+ * UserBalance represents the balance of a user and all their approved transfers / permissions.
+ *
+ * @typedef {Object} UserBalance
+ * @property {Balance[]} balances - The balances of the user.
+ * @property {UserApprovedOutgoingTransferTimeline[]} approvedOutgoingTransfersTimeline - The approved outgoing transfers of the user.
+ * @property {UserApprovedIncomingTransferTimeline[]} approvedIncomingTransfersTimeline - The approved incoming transfers of the user.
+ * @property {UserPermissions} userPermissions - The permissions of the user to update their incoming / outgoing approvals.
+ */
+export interface UserBalance<T extends NumberType> {
+  balances: Balance<T>[];
+  approvedOutgoingTransfersTimeline: UserApprovedOutgoingTransferTimeline<T>[];
+  approvedIncomingTransfersTimeline: UserApprovedIncomingTransferTimeline<T>[];
+  userPermissions: UserPermissions<T>;
+}
+
+export function convertUserBalance<T extends NumberType, U extends NumberType>(balance: UserBalance<T>, convertFunction: (item: T) => U): UserBalance<U> {
+  return deepCopy({
     ...balance,
-    balances: balance.balances.map(convertFromBalance),
-    approvedOutgoingTransfersTimeline: balance.approvedOutgoingTransfersTimeline.map(convertFromUserApprovedOutgoingTransferTimeline),
-    approvedIncomingTransfersTimeline: balance.approvedIncomingTransfersTimeline.map(convertFromUserApprovedIncomingTransferTimeline),
-    userPermissions: convertFromUserPermissions(balance.userPermissions)
-  }
+    balances: balance.balances.map((b) => convertBalance(b, convertFunction)),
+    approvedOutgoingTransfersTimeline: balance.approvedOutgoingTransfersTimeline.map((t) => convertUserApprovedOutgoingTransferTimeline(t, convertFunction)),
+    approvedIncomingTransfersTimeline: balance.approvedIncomingTransfersTimeline.map((t) => convertUserApprovedIncomingTransferTimeline(t, convertFunction)),
+    userPermissions: convertUserPermissions(balance.userPermissions, convertFunction)
+  })
 }
 
-export interface UintRangeBase {
-  start: bigint | string;
-  end: bigint | string;
+/**
+ * UintRanges are used to represent a range of numbers from some start ID to some end ID, inclusive.
+ *
+ * This is typically used to represent a range of badge IDs or time ranges.
+ *
+ * @typedef {Object} UintRange
+ * @property {NumberType} start - The start of the range.
+ * @property {NumberType} end - The end of the range.
+ */
+export interface UintRange<T extends NumberType> {
+  start: T;
+  end: T;
 }
 
-export interface UintRange extends UintRangeBase {
-  start: bigint;
-  end: bigint;
-}
-
-export interface s_UintRange extends UintRangeBase {
-  start: string;
-  end: string;
-}
-
-export function convertToUintRange(s_range: s_UintRange): UintRange {
-  return {
-    ...s_range,
-    start: BigInt(s_range.start),
-    end: BigInt(s_range.end)
-  }
-}
-
-export function convertFromUintRange(range: UintRange): s_UintRange {
-  return {
+export function convertUintRange<T extends NumberType, U extends NumberType>(range: UintRange<T>, convertFunction: (item: T) => U): UintRange<U> {
+  return deepCopy({
     ...range,
-    start: range.start.toString(),
-    end: range.end.toString()
-  }
+    start: convertFunction(range.start),
+    end: convertFunction(range.end)
+  })
 }
 
-export interface BadgeMetadataBase {
+
+/**
+ * BadgeMetadata are used to represent the metadata of badges via a URI and a range of badge IDs.
+ *
+ * We take first-match only for the badge IDs. If a badge ID is in multiple BadgeMetadata, we take the first time
+ * it is found in a linear search.
+ *
+ * @typedef {Object} BadgeMetadata
+ * @property {string} uri - The URI where to fetch the badge metadata from.
+ * @property {UintRange[]} badgeIds - The badge IDs corresponding to the URI.
+ * @property {string} customData - Arbitrary custom data that can be stored on-chain
+ */
+export interface BadgeMetadata<T extends NumberType> {
   uri: string
   customData: string
-  badgeIds: UintRangeBase[]
+  badgeIds: UintRange<T>[]
 }
 
-export interface BadgeMetadata extends BadgeMetadataBase {
-  badgeIds: UintRange[]
-}
-
-export interface s_BadgeMetadata extends BadgeMetadataBase {
-  badgeIds: s_UintRange[]
-}
-
-export function convertToBadgeMetadata(s_uri: s_BadgeMetadata): BadgeMetadata {
-  return {
-    ...s_uri,
-    badgeIds: s_uri.badgeIds.map(convertToUintRange)
-  }
-}
-
-export function convertFromBadgeMetadata(uri: BadgeMetadata): s_BadgeMetadata {
-  return {
+export function convertBadgeMetadata<T extends NumberType, U extends NumberType>(uri: BadgeMetadata<T>, convertFunction: (item: T) => U): BadgeMetadata<U> {
+  return deepCopy({
     ...uri,
-    badgeIds: uri.badgeIds.map(convertFromUintRange)
-  }
+    badgeIds: uri.badgeIds.map((b) => convertUintRange(b, convertFunction))
+  })
 }
 
-export interface CollectionMetadataBase {
-  uri: string
-  customData: string
-}
-
-export interface CollectionMetadata extends CollectionMetadataBase { }
-
-export interface s_CollectionMetadata extends CollectionMetadataBase { }
-
-export function convertToCollectionMetadata(s_uri: s_CollectionMetadata): CollectionMetadata {
-  return {
-    ...s_uri,
-  }
-}
-
-export function convertFromCollectionMetadata(uri: CollectionMetadata): s_CollectionMetadata {
-  return {
-    ...uri,
-  }
-}
-
-export interface OffChainBalancesMetadataBase {
+/**
+ * CollectionMetadata represents the metadata of the collection
+ *
+ * @typedef {Object} CollectionMetadata
+ * @property {string} uri - The URI where to fetch the collection metadata from.
+ * @property {string} customData - Arbitrary custom data that can be stored on-chain
+ */
+export interface CollectionMetadata {
   uri: string
   customData: string
 }
 
-export interface OffChainBalancesMetadata extends OffChainBalancesMetadataBase { }
+// export function convertCollectionMetadata<T extends NumberType, U extends NumberType>(uri: CollectionMetadata<T>, convertFunction: (item: T) => U): CollectionMetadata<U> {
+//   return deepCopy({
+//     ...uri,
+//   })
+// }
 
-export interface s_OffChainBalancesMetadata extends OffChainBalancesMetadataBase { }
-
-export function convertToOffChainBalancesMetadata(s_uri: s_OffChainBalancesMetadata): OffChainBalancesMetadata {
-  return {
-    ...s_uri,
-  }
+/**
+ * OffChainBalancesMetadata represents the metadata of the off-chain balances
+ *
+ * @typedef {Object} OffChainBalancesMetadata
+ * @property {string} uri - The URI where to fetch the off-chain balances metadata from.
+ * @property {string} customData - Arbitrary custom data that can be stored on-chain
+ */
+export interface OffChainBalancesMetadata {
+  uri: string
+  customData: string
 }
 
-export function convertFromOffChainBalancesMetadata(uri: OffChainBalancesMetadata): s_OffChainBalancesMetadata {
-  return {
-    ...uri,
-  }
+// export function convertOffChainBalancesMetadata<T extends NumberType, U extends NumberType>(uri: OffChainBalancesMetadata, convertFunction: (item: T) => U): OffChainBalancesMetadata<U> {
+//   return deepCopy({
+//     ...uri,
+//   })
+// }
+
+/**
+ * MustOwnBadges are used to represent a challenge for an approved transfer where a user
+ * must own min-max (amountRange) of the badges (badgeIds) from a specific collection (collectionId)
+ * to be able to transfer the badges.
+ *
+ * @typedef {Object} MustOwnBadges
+ * @property {NumberType} collectionId - The collection ID of the badges to own.
+ * @property {UintRange} amountRange - The min/max acceptable amount of badges that must be owned (can be any values, including 0-0).
+ * @property {UintRange[]} ownedTimes - The range of the times that the badges must be owned.
+ * @property {UintRange[]} badgeIds - The range of the badge IDs that must be owned.
+ */
+export interface MustOwnBadges<T extends NumberType> {
+  collectionId: T;
+
+  amountRange: UintRange<T>;
+  ownedTimes: UintRange<T>[];
+  badgeIds: UintRange<T>[];
 }
 
-export interface MustOwnBadgesBase {
-  collectionId: bigint | string;
-
-  amountRange: UintRangeBase;
-  ownedTimes: UintRangeBase[];
-  badgeIds: UintRangeBase[];
+export function convertMustOwnBadges<T extends NumberType, U extends NumberType>(mustOwn: MustOwnBadges<T>, convertFunction: (item: T) => U): MustOwnBadges<U> {
+  return deepCopy({
+    ...mustOwn,
+    collectionId: convertFunction(mustOwn.collectionId),
+    amountRange: convertUintRange(mustOwn.amountRange, convertFunction),
+    ownedTimes: mustOwn.ownedTimes.map((b) => convertUintRange(b, convertFunction)),
+    badgeIds: mustOwn.badgeIds.map((b) => convertUintRange(b, convertFunction))
+  })
 }
 
-export interface s_MustOwnBadges extends MustOwnBadgesBase {
-  collectionId: string;
-
-  amountRange: s_UintRange;
-  ownedTimes: s_UintRange[];
-  badgeIds: s_UintRange[];
+/**
+ * InheritedBalance represents a balance that is inherited from a parent collection.
+ * Only used for collections with inherited balance type.
+ *
+ * Note that the number of badgeIDs specified in the parentBadgeIds must equal one or match the number of badgeIDs specified in the badgeIds.
+ * If the number of badgeIDs specified in the parentBadgeIds equals one, then all badgeIds will inherit the balance from the single parent badge ID.
+ * If the number of badgeIDs specified in the parentBadgeIds matches the number of badgeIDs specified in the badgeIds, then each badgeId will inherit the balance from the corresponding parent badge ID.
+ *
+ * @typedef {Object} InheritedBalance
+ * @property {NumberType} parentCollectionId - The parent collection ID of the inherited balance.
+ * @property {UintRange[]} parentBadgeIds - The parent badge IDs of the inherited balance.
+ * @property {UintRange[]} badgeIds - The badge IDs of the inherited balance.
+ *
+ */
+export interface InheritedBalance<T extends NumberType> {
+  badgeIds: UintRange<T>[];
+  parentCollectionId: T;
+  parentBadgeIds: UintRange<T>[];
 }
 
-export interface MustOwnBadges extends MustOwnBadgesBase {
-  collectionId: bigint;
-
-  amountRange: UintRange;
-  ownedTimes: UintRange[];
-  badgeIds: UintRange[];
+export function convertInheritedBalance<T extends NumberType, U extends NumberType>(inheritedBalance: InheritedBalance<T>, convertFunction: (item: T) => U): InheritedBalance<U> {
+  return deepCopy({
+    ...inheritedBalance,
+    badgeIds: inheritedBalance.badgeIds.map((b) => convertUintRange(b, convertFunction)),
+    parentCollectionId: convertFunction(inheritedBalance.parentCollectionId),
+    parentBadgeIds: inheritedBalance.parentBadgeIds.map((b) => convertUintRange(b, convertFunction))
+  })
 }
 
-export function convertToMustOwnBadges(s_badges: s_MustOwnBadges): MustOwnBadges {
-  return {
-    ...s_badges,
-    collectionId: BigInt(s_badges.collectionId),
-    amountRange: convertToUintRange(s_badges.amountRange),
-    ownedTimes: s_badges.ownedTimes.map(convertToUintRange),
-    badgeIds: s_badges.badgeIds.map(convertToUintRange)
-  }
+/**
+ * Balance is used to represent a balance of a badge.
+ *
+ * @typedef {Object} Balance
+ * @property {NumberType} amount - The amount or balance of the owned badge.
+ * @property {UintRange[]} badgeIds - The badge IDs corresponding to the balance.
+ * @property {UintRange[]} ownedTimes - The times that the badge is owned from.
+ */
+export interface Balance<T extends NumberType> {
+  amount: T;
+  badgeIds: UintRange<T>[]
+  ownedTimes: UintRange<T>[]
 }
 
-export function convertFromMustOwnBadges(badgesRange: MustOwnBadges): s_MustOwnBadges {
-  return {
-    ...badgesRange,
-    collectionId: badgesRange.collectionId.toString(),
-    amountRange: convertFromUintRange(badgesRange.amountRange),
-    ownedTimes: badgesRange.ownedTimes.map(convertFromUintRange),
-    badgeIds: badgesRange.badgeIds.map(convertFromUintRange)
-  }
-}
-
-export interface InheritedBalanceBase {
-  badgeIds: UintRangeBase[];
-  parentCollectionId: bigint | string;
-  parentBadgeIds: UintRangeBase[];
-}
-
-export interface InheritedBalance extends InheritedBalanceBase {
-  badgeIds: UintRange[];
-  parentCollectionId: bigint;
-  parentBadgeIds: UintRange[];
-}
-
-export interface s_InheritedBalance extends InheritedBalanceBase {
-  badgeIds: s_UintRange[];
-  parentCollectionId: string;
-  parentBadgeIds: s_UintRange[];
-}
-
-export function convertToInheritedBalance(s_balance: s_InheritedBalance): InheritedBalance {
-  return {
-    ...s_balance,
-    badgeIds: s_balance.badgeIds.map(convertToUintRange),
-    parentCollectionId: BigInt(s_balance.parentCollectionId),
-    parentBadgeIds: s_balance.parentBadgeIds.map(convertToUintRange)
-  }
-}
-
-export function convertFromInheritedBalance(balance: InheritedBalance): s_InheritedBalance {
-  return {
+export function convertBalance<T extends NumberType, U extends NumberType>(balance: Balance<T>, convertFunction: (item: T) => U): Balance<U> {
+  return deepCopy({
     ...balance,
-    badgeIds: balance.badgeIds.map(convertFromUintRange),
-    parentCollectionId: balance.parentCollectionId.toString(),
-    parentBadgeIds: balance.parentBadgeIds.map(convertFromUintRange)
-  }
+    amount: convertFunction(balance.amount),
+    badgeIds: balance.badgeIds.map((b) => convertUintRange(b, convertFunction)),
+    ownedTimes: balance.ownedTimes.map((b) => convertUintRange(b, convertFunction))
+  })
 }
 
-
-export interface BalanceBase {
-  amount: bigint | string;
-  badgeIds: UintRangeBase[]
-  ownedTimes: UintRangeBase[]
-}
-
-export interface Balance extends BalanceBase {
-  amount: bigint;
-  badgeIds: UintRange[];
-  ownedTimes: UintRange[];
-}
-
-export interface s_Balance extends BalanceBase {
-  amount: string;
-  badgeIds: s_UintRange[];
-  ownedTimes: s_UintRange[];
-}
-
-export function convertToBalance(s_balance: s_Balance): Balance {
-  return {
-    ...s_balance,
-    amount: BigInt(s_balance.amount),
-    badgeIds: s_balance.badgeIds.map(convertToUintRange),
-    ownedTimes: s_balance.ownedTimes.map(convertToUintRange)
-  }
-}
-
-export function convertFromBalance(balance: Balance): s_Balance {
-  return {
-    ...balance,
-    amount: balance.amount.toString(),
-    badgeIds: balance.badgeIds.map(convertFromUintRange),
-    ownedTimes: balance.ownedTimes.map(convertFromUintRange)
-  }
-}
-
-export interface AddressMappingBase {
+/**
+ * AddressMappings represent a list of addresses.
+ *
+ * @typedef {Object} AddressMapping
+ * @property {string} mappingId - The ID of the address mapping.
+ * @property {string[]} addresses - The addresses of the address mapping.
+ * @property {boolean} includeAddresses - Whether or not to include ONLY the addresses or include all EXCEPT the addresses.
+ * @property {string} uri - The URI where to fetch the address mapping metadata from.
+ * @property {string} customData - Arbitrary custom data that can be stored on-chain.
+ */
+export interface AddressMapping {
   mappingId: string;
 
   addresses: string[];
@@ -270,115 +237,96 @@ export interface AddressMappingBase {
   customData: string;
 }
 
-export interface AddressMapping extends AddressMappingBase {
-}
-
-export interface s_AddressMapping extends AddressMappingBase {
-}
-
-export function convertToAddressMapping(s_mapping: s_AddressMapping): AddressMapping {
-  return {
-    ...s_mapping,
-  }
-}
-
-export function convertFromAddressMapping(mapping: AddressMapping): s_AddressMapping {
-  return {
-    ...mapping,
-  }
-}
+// export function convertAddressMapping<T extends NumberType, U extends NumberType>(addressMapping: AddressMapping<T>, convertFunction: (item: T) => U): AddressMapping<U> {
+//   return deepCopy({
+//     ...addressMapping,
+//     mappingId: addressMapping.mappingId,
+//     addresses: addressMapping.addresses,
+//     includeAddresses: addressMapping.includeAddresses,
+//     uri: addressMapping.uri,
+//     customData: addressMapping.customData
+//   })
+// }
 
 
-
-export interface TransferBase {
+/**
+ * Transfer is used to represent a transfer of badges.
+ *
+ * @typedef {Object} Transfer
+ * @property {string} from - The address to transfer from.
+ * @property {string[]} toAddresses - The addresses to transfer to.
+ * @property {Balance[]} balances - The balances to transfer.
+ * @property {ApprovalIdDetails} precalculateFromApproval - If specified, we will precalculate from this approval and override the balances. This can only be used when the specified approval has predeterminedBalances set.
+ * @property {MerkleProof[]} merkleProofs - The merkle proofs that satisfy the mkerkle challenges in the approvals. If the transfer deducts from multiple approvals, we check all the merkle proofs and assert at least one is valid for every challenge.
+ * @property {string} memo - Arbitrary memo for the transfer.
+ */
+export interface Transfer<T extends NumberType> {
   from: string
   toAddresses: string[]
-  balances: BalanceBase[]
-  precalculateFromApproval: ApprovalIdDetailsBase
+  balances: Balance<T>[]
+  precalculateFromApproval: ApprovalIdDetails
   merkleProofs: MerkleProof[]
   memo: string
 }
 
-export interface Transfer extends TransferBase {
-  balances: Balance[]
-  precalculateFromApproval: ApprovalIdDetails
-  merkleProofs: MerkleProof[]
-}
-
-export interface s_Transfer extends TransferBase {
-  balances: s_Balance[]
-  precalculateFromApproval: s_ApprovalIdDetails
-  merkleProofs: MerkleProof[]
-}
-
-export function convertToTransfer(s_transfer: s_Transfer): Transfer {
-  return {
-    ...s_transfer,
-    balances: s_transfer.balances.map(convertToBalance),
-    precalculateFromApproval: convertToApprovalIdDetails(s_transfer.precalculateFromApproval),
-  }
-}
-
-export function convertFromTransfer(transfer: Transfer): s_Transfer {
-  return {
+export function convertTransfer<T extends NumberType, U extends NumberType>(transfer: Transfer<T>, convertFunction: (item: T) => U): Transfer<U> {
+  return deepCopy({
     ...transfer,
-    balances: transfer.balances.map(convertFromBalance),
-    precalculateFromApproval: convertFromApprovalIdDetails(transfer.precalculateFromApproval),
-  }
+    from: transfer.from,
+    toAddresses: transfer.toAddresses,
+    balances: transfer.balances.map((b) => convertBalance(b, convertFunction)),
+    // precalculateFromApproval: convertApprovalIdDetails(transfer.precalculateFromApproval, convertFunction),
+    merkleProofs: transfer.merkleProofs,
+    memo: transfer.memo
+  })
 }
 
-export interface ApprovalIdDetailsBase {
+/**
+ * ApprovalIdDetails is used to represent an exact approval.
+ *
+ * @typedef {Object} ApprovalIdDetails
+ * @property {string} approvalId - The approval ID of the approval.
+ * @property {string} approvalLevel - The approval level of the approval "collection", "incoming", or "outgoing".
+ * @property {string} address - The address of the approval to check. Leave "" if collection-level.
+ */
+export interface ApprovalIdDetails {
   approvalId: string
   approvalLevel: string
   address: string
 }
 
-export interface ApprovalIdDetails extends ApprovalIdDetailsBase {
-}
+// export function convertApprovalIdDetails<T extends NumberType, U extends NumberType>(approvalIdDetails: ApprovalIdDetails<T>, convertFunction: (item: T) => U): ApprovalIdDetails<U> {
+//   return deepCopy({
+//     ...approvalIdDetails,
+//   })
+// }
 
-export interface s_ApprovalIdDetails extends ApprovalIdDetailsBase { }
-
-export function convertToApprovalIdDetails(s_approvalIdDetails: s_ApprovalIdDetails): ApprovalIdDetails {
-  return {
-    ...s_approvalIdDetails,
-  }
-}
-
-export function convertFromApprovalIdDetails(approvalIdDetails: ApprovalIdDetails): s_ApprovalIdDetails {
-  return {
-    ...approvalIdDetails,
-  }
-}
-
-export interface MerkleChallengeBase {
+/**
+ * MerkleChallenge is used to represent a merkle challenge for an approval.
+ *
+ * @typedef {Object} MerkleChallenge
+ * @property {string} root - The root of the merkle tree.
+ * @property {NumberType} expectedProofLength - The expected proof length of the merkle proof.
+ * @property {boolean} useCreatorAddressAsLeaf - Whether or not to override any leaf value and use the creator address as the leaf. Used for whitelist trees.
+ * @property {boolean} maxOneUsePerLeaf - Whether or not to enforce only one use per leaf. Used to prevent replay attacks.
+ * @property {boolean} useLeafIndexForTransferOrder - Whether or not to use the leaf index for the transfer order for the predeterminedBalances.
+ *                                                    If so, the leaf index 0 will be the leftmost leaf of the valid proof layer (i.e. the one that corresponds to expectedProofLength).
+ * @property {string} challengeId - The challenge ID of the merkle challenge.
+ */
+export interface MerkleChallenge<T extends NumberType> {
   root: string
-  expectedProofLength: bigint | string;
+  expectedProofLength: T;
   useCreatorAddressAsLeaf: boolean
   maxOneUsePerLeaf: boolean
   useLeafIndexForTransferOrder: boolean
   challengeId: string
 }
 
-export interface MerkleChallenge extends MerkleChallengeBase {
-  expectedProofLength: bigint;
-}
-
-export interface s_MerkleChallenge extends MerkleChallengeBase {
-  expectedProofLength: string;
-}
-
-export function convertToMerkleChallenge(s_challenge: s_MerkleChallenge): MerkleChallenge {
-  return {
-    ...s_challenge,
-    expectedProofLength: BigInt(s_challenge.expectedProofLength)
-  }
-}
-
-export function convertFromMerkleChallenge(challenge: MerkleChallenge): s_MerkleChallenge {
-  return {
-    ...challenge,
-    expectedProofLength: challenge.expectedProofLength.toString()
-  }
+export function convertMerkleChallenge<T extends NumberType, U extends NumberType>(merkleChallenge: MerkleChallenge<T>, convertFunction: (item: T) => U): MerkleChallenge<U> {
+  return deepCopy({
+    ...merkleChallenge,
+    expectedProofLength: convertFunction(merkleChallenge.expectedProofLength),
+  })
 }
 
 export interface MerklePathItem {
@@ -391,293 +339,201 @@ export interface MerkleProof {
   leaf: string
 }
 
-export interface ManagerTimelineBase {
+/**
+ * ManagerTimeline represents the value of the manager over time
+ *
+ * @typedef {Object} ManagerTimeline
+ * @property {string} manager - The manager of the collection.
+ * @property {UintRange[]} timelineTimes - The times of the manager.
+ */
+export interface ManagerTimeline<T extends NumberType> {
   manager: string
-  timelineTimes: UintRangeBase[]
+  timelineTimes: UintRange<T>[]
 }
 
-export interface ManagerTimeline extends ManagerTimelineBase {
-  timelineTimes: UintRange[]
+export function convertManagerTimeline<T extends NumberType, U extends NumberType>(managerTimeline: ManagerTimeline<T>, convertFunction: (item: T) => U): ManagerTimeline<U> {
+  return deepCopy({
+    ...managerTimeline,
+    manager: managerTimeline.manager,
+    timelineTimes: managerTimeline.timelineTimes.map((b) => convertUintRange(b, convertFunction))
+  })
 }
 
-export interface s_ManagerTimeline extends ManagerTimelineBase {
-  timelineTimes: s_UintRange[]
-}
-
-export function convertToManagerTimeline(s_timeline: s_ManagerTimeline): ManagerTimeline {
-  return {
-    ...s_timeline,
-    timelineTimes: s_timeline.timelineTimes.map(convertToUintRange)
-  }
-}
-
-export function convertFromManagerTimeline(timeline: ManagerTimeline): s_ManagerTimeline {
-  return {
-    ...timeline,
-    timelineTimes: timeline.timelineTimes.map(convertFromUintRange)
-  }
-}
-
-export interface CollectionMetadataTimelineBase {
-  collectionMetadata: CollectionMetadataBase
-  timelineTimes: UintRangeBase[]
-}
-
-export interface CollectionMetadataTimeline extends CollectionMetadataTimelineBase {
-  timelineTimes: UintRange[]
+/**
+ * CollectionMetadataTimeline represents the value of the collection metadata over time
+ *
+ * @typedef {Object} CollectionMetadataTimeline
+ * @property {CollectionMetadata} collectionMetadata - The collection metadata.
+ * @property {UintRange[]} timelineTimes - The times of the collection metadata.
+ */
+export interface CollectionMetadataTimeline<T extends NumberType> {
   collectionMetadata: CollectionMetadata
+  timelineTimes: UintRange<T>[]
 }
 
-export interface s_CollectionMetadataTimeline extends CollectionMetadataTimelineBase {
-  timelineTimes: s_UintRange[]
-  collectionMetadata: s_CollectionMetadata
+export function convertCollectionMetadataTimeline<T extends NumberType, U extends NumberType>(collectionMetadataTimeline: CollectionMetadataTimeline<T>, convertFunction: (item: T) => U): CollectionMetadataTimeline<U> {
+  return deepCopy({
+    ...collectionMetadataTimeline,
+    // collectionMetadata: convertCollectionMetadata(collectionMetadataTimeline.collectionMetadata, convertFunction),
+    timelineTimes: collectionMetadataTimeline.timelineTimes.map((b) => convertUintRange(b, convertFunction))
+  })
 }
 
-export function convertToCollectionMetadataTimeline(s_timeline: s_CollectionMetadataTimeline): CollectionMetadataTimeline {
-  return {
-    ...s_timeline,
-    timelineTimes: s_timeline.timelineTimes.map(convertToUintRange),
-    collectionMetadata: convertToCollectionMetadata(s_timeline.collectionMetadata)
-  }
+/**
+ * BadgeMetadataTimeline represents the value of the badge metadata over time
+ *
+ * @typedef {Object} BadgeMetadataTimeline
+ * @property {BadgeMetadata} badgeMetadata - The badge metadata.
+ * @property {UintRange[]} timelineTimes - The times of the badge metadata.
+ */
+export interface BadgeMetadataTimeline<T extends NumberType> {
+  badgeMetadata: BadgeMetadata<T>[]
+  timelineTimes: UintRange<T>[]
+}
+export function convertBadgeMetadataTimeline<T extends NumberType, U extends NumberType>(badgeMetadataTimeline: BadgeMetadataTimeline<T>, convertFunction: (item: T) => U): BadgeMetadataTimeline<U> {
+  return deepCopy({
+    ...badgeMetadataTimeline,
+    badgeMetadata: badgeMetadataTimeline.badgeMetadata.map((b) => convertBadgeMetadata(b, convertFunction)),
+    timelineTimes: badgeMetadataTimeline.timelineTimes.map((b) => convertUintRange(b, convertFunction))
+  })
 }
 
-export function convertFromCollectionMetadataTimeline(timeline: CollectionMetadataTimeline): s_CollectionMetadataTimeline {
-  return {
-    ...timeline,
-    timelineTimes: timeline.timelineTimes.map(convertFromUintRange),
-    collectionMetadata: convertFromCollectionMetadata(timeline.collectionMetadata)
-  }
-}
-
-export interface BadgeMetadataTimelineBase {
-  badgeMetadata: BadgeMetadataBase[]
-  timelineTimes: UintRangeBase[]
-}
-
-export interface BadgeMetadataTimeline extends BadgeMetadataTimelineBase {
-  timelineTimes: UintRange[]
-  badgeMetadata: BadgeMetadata[]
-}
-
-export interface s_BadgeMetadataTimeline extends BadgeMetadataTimelineBase {
-  timelineTimes: s_UintRange[]
-  badgeMetadata: s_BadgeMetadata[]
-}
-
-export function convertToBadgeMetadataTimeline(s_timeline: s_BadgeMetadataTimeline): BadgeMetadataTimeline {
-  return {
-    ...s_timeline,
-    timelineTimes: s_timeline.timelineTimes.map(convertToUintRange),
-    badgeMetadata: s_timeline.badgeMetadata.map(convertToBadgeMetadata)
-  }
-}
-
-export function convertFromBadgeMetadataTimeline(timeline: BadgeMetadataTimeline): s_BadgeMetadataTimeline {
-  return {
-    ...timeline,
-    timelineTimes: timeline.timelineTimes.map(convertFromUintRange),
-    badgeMetadata: timeline.badgeMetadata.map(convertFromBadgeMetadata)
-  }
-}
-
-export interface OffChainBalancesMetadataTimelineBase {
-  offChainBalancesMetadata: OffChainBalancesMetadataBase
-  timelineTimes: UintRangeBase[]
-}
-
-export interface OffChainBalancesMetadataTimeline extends OffChainBalancesMetadataTimelineBase {
-  timelineTimes: UintRange[]
+/**
+ * OffChainBalancesMetadataTimeline represents the value of the off-chain balances metadata over time
+ *
+ * @typedef {Object} OffChainBalancesMetadataTimeline
+ * @property {OffChainBalancesMetadata} offChainBalancesMetadata - The off-chain balances metadata.
+ * @property {UintRange[]} timelineTimes - The times of the off-chain balances metadata.
+ *
+ */
+export interface OffChainBalancesMetadataTimeline<T extends NumberType> {
   offChainBalancesMetadata: OffChainBalancesMetadata
+  timelineTimes: UintRange<T>[]
+}
+export function convertOffChainBalancesMetadataTimeline<T extends NumberType, U extends NumberType>(offChainBalancesMetadataTimeline: OffChainBalancesMetadataTimeline<T>, convertFunction: (item: T) => U): OffChainBalancesMetadataTimeline<U> {
+  return deepCopy({
+    ...offChainBalancesMetadataTimeline,
+    // offChainBalancesMetadata: convertOffChainBalancesMetadata(offChainBalancesMetadataTimeline.offChainBalancesMetadata, convertFunction),
+    timelineTimes: offChainBalancesMetadataTimeline.timelineTimes.map((b) => convertUintRange(b, convertFunction))
+  })
 }
 
-export interface s_OffChainBalancesMetadataTimeline extends OffChainBalancesMetadataTimelineBase {
-  timelineTimes: s_UintRange[]
-  offChainBalancesMetadata: s_OffChainBalancesMetadata
-}
 
-export function convertToOffChainBalancesMetadataTimeline(s_timeline: s_OffChainBalancesMetadataTimeline): OffChainBalancesMetadataTimeline {
-  return {
-    ...s_timeline,
-    timelineTimes: s_timeline.timelineTimes.map(convertToUintRange),
-    offChainBalancesMetadata: convertToOffChainBalancesMetadata(s_timeline.offChainBalancesMetadata)
-  }
-}
-
-export function convertFromOffChainBalancesMetadataTimeline(timeline: OffChainBalancesMetadataTimeline): s_OffChainBalancesMetadataTimeline {
-  return {
-    ...timeline,
-    timelineTimes: timeline.timelineTimes.map(convertFromUintRange),
-    offChainBalancesMetadata: convertFromOffChainBalancesMetadata(timeline.offChainBalancesMetadata)
-  }
-}
-
-export interface CustomDataTimelineBase {
+/**
+ * CustomDataTimeline represents the value of some arbitrary custom data over time
+ *
+ * @typedef {Object} CustomDataTimeline
+ * @property {string} customData - Arbitrary custom data.
+ * @property {UintRange[]} timelineTimes - The times of the custom data.
+ */
+export interface CustomDataTimeline<T extends NumberType> {
   customData: string
-  timelineTimes: UintRangeBase[]
+  timelineTimes: UintRange<T>[]
+}
+export function convertCustomDataTimeline<T extends NumberType, U extends NumberType>(customDataTimeline: CustomDataTimeline<T>, convertFunction: (item: T) => U): CustomDataTimeline<U> {
+  return deepCopy({
+    ...customDataTimeline,
+    customData: customDataTimeline.customData,
+    timelineTimes: customDataTimeline.timelineTimes.map((b) => convertUintRange(b, convertFunction))
+  })
 }
 
-export interface CustomDataTimeline extends CustomDataTimelineBase {
-  timelineTimes: UintRange[]
+/**
+ * InheritedBalancesTimeline represents the value of the inherited balances over time. Only used for inherited balance collections.
+ *
+ * @typedef {Object} InheritedBalancesTimeline
+ * @property {InheritedBalance[]} inheritedBalances - The inherited balances.
+ *
+ * @property {UintRange[]} timelineTimes - The times of the inherited balances.
+ */
+export interface InheritedBalancesTimeline<T extends NumberType> {
+  inheritedBalances: InheritedBalance<T>[]
+  timelineTimes: UintRange<T>[]
+}
+export function convertInheritedBalancesTimeline<T extends NumberType, U extends NumberType>(inheritedBalancesTimeline: InheritedBalancesTimeline<T>, convertFunction: (item: T) => U): InheritedBalancesTimeline<U> {
+  return deepCopy({
+    ...inheritedBalancesTimeline,
+    inheritedBalances: inheritedBalancesTimeline.inheritedBalances.map((b) => convertInheritedBalance(b, convertFunction)),
+    timelineTimes: inheritedBalancesTimeline.timelineTimes.map((b) => convertUintRange(b, convertFunction))
+  })
 }
 
-export interface s_CustomDataTimeline extends CustomDataTimelineBase {
-  timelineTimes: s_UintRange[]
-}
-
-export function convertToCustomDataTimeline(s_timeline: s_CustomDataTimeline): CustomDataTimeline {
-  return {
-    ...s_timeline,
-    timelineTimes: s_timeline.timelineTimes.map(convertToUintRange)
-  }
-}
-
-export function convertFromCustomDataTimeline(timeline: CustomDataTimeline): s_CustomDataTimeline {
-  return {
-    ...timeline,
-    timelineTimes: timeline.timelineTimes.map(convertFromUintRange)
-  }
-}
-
-export interface InheritedBalancesTimelineBase {
-  inheritedBalances: InheritedBalanceBase[]
-  timelineTimes: UintRangeBase[]
-}
-
-export interface InheritedBalancesTimeline extends InheritedBalancesTimelineBase {
-  timelineTimes: UintRange[]
-  inheritedBalances: InheritedBalance[]
-}
-
-export interface s_InheritedBalancesTimeline extends InheritedBalancesTimelineBase {
-  timelineTimes: s_UintRange[]
-  inheritedBalances: s_InheritedBalance[]
-}
-
-export function convertToInheritedBalancesTimeline(s_timeline: s_InheritedBalancesTimeline): InheritedBalancesTimeline {
-  return {
-    ...s_timeline,
-    timelineTimes: s_timeline.timelineTimes.map(convertToUintRange),
-    inheritedBalances: s_timeline.inheritedBalances.map(convertToInheritedBalance)
-  }
-}
-
-export function convertFromInheritedBalancesTimeline(timeline: InheritedBalancesTimeline): s_InheritedBalancesTimeline {
-  return {
-    ...timeline,
-    timelineTimes: timeline.timelineTimes.map(convertFromUintRange),
-    inheritedBalances: timeline.inheritedBalances.map(convertFromInheritedBalance)
-  }
-}
-
-export interface StandardsTimelineBase {
+/**
+ * StandardsTimeline represents the value of the standards over time
+ *
+ * @typedef {Object} StandardsTimeline
+ * @property {string[]} standards - The standards.
+ * @property {UintRange[]} timelineTimes - The times of the standards.
+ *
+ */
+export interface StandardsTimeline<T extends NumberType> {
   standards: string[]
-  timelineTimes: UintRangeBase[]
+  timelineTimes: UintRange<T>[]
+}
+export function convertStandardsTimeline<T extends NumberType, U extends NumberType>(standardsTimeline: StandardsTimeline<T>, convertFunction: (item: T) => U): StandardsTimeline<U> {
+  return deepCopy({
+    ...standardsTimeline,
+    standards: standardsTimeline.standards,
+    timelineTimes: standardsTimeline.timelineTimes.map((b) => convertUintRange(b, convertFunction))
+  })
 }
 
-export interface StandardsTimeline extends StandardsTimelineBase {
-  timelineTimes: UintRange[]
-}
-
-export interface s_StandardsTimeline extends StandardsTimelineBase {
-  timelineTimes: s_UintRange[]
-}
-
-export function convertToStandardsTimeline(s_timeline: s_StandardsTimeline): StandardsTimeline {
-  return {
-    ...s_timeline,
-    timelineTimes: s_timeline.timelineTimes.map(convertToUintRange)
-  }
-}
-
-export function convertFromStandardsTimeline(timeline: StandardsTimeline): s_StandardsTimeline {
-  return {
-    ...timeline,
-    timelineTimes: timeline.timelineTimes.map(convertFromUintRange)
-  }
-}
-
-export interface ContractAddressTimelineBase {
+/**
+ * ContractAddressTimeline represents the value of the contract address over time
+ *
+ * @typedef {Object} ContractAddressTimeline
+ * @property {string} contractAddress - The contract address.
+ * @property {UintRange[]} timelineTimes - The times of the contract address.
+ */
+export interface ContractAddressTimeline<T extends NumberType> {
   contractAddress: string
-  timelineTimes: UintRangeBase[]
+  timelineTimes: UintRange<T>[]
 }
 
-export interface ContractAddressTimeline extends ContractAddressTimelineBase {
-  timelineTimes: UintRange[]
+export function convertContractAddressTimeline<T extends NumberType, U extends NumberType>(contractAddressTimeline: ContractAddressTimeline<T>, convertFunction: (item: T) => U): ContractAddressTimeline<U> {
+  return deepCopy({
+    ...contractAddressTimeline,
+    contractAddress: contractAddressTimeline.contractAddress,
+    timelineTimes: contractAddressTimeline.timelineTimes.map((b) => convertUintRange(b, convertFunction))
+  })
 }
 
-export interface s_ContractAddressTimeline extends ContractAddressTimelineBase {
-  timelineTimes: s_UintRange[]
-}
-
-export function convertToContractAddressTimeline(s_timeline: s_ContractAddressTimeline): ContractAddressTimeline {
-  return {
-    ...s_timeline,
-    timelineTimes: s_timeline.timelineTimes.map(convertToUintRange)
-  }
-
-}
-
-export function convertFromContractAddressTimeline(timeline: ContractAddressTimeline): s_ContractAddressTimeline {
-  return {
-    ...timeline,
-    timelineTimes: timeline.timelineTimes.map(convertFromUintRange)
-  }
-}
-
-export interface IsArchivedTimelineBase {
+/**
+ * IsArchivedTimeline represents the value of isArchived over time
+ *
+ * @typedef {Object} IsArchivedTimeline
+ * @property {boolean} isArchived - The isArchived.
+ * @property {UintRange[]} timelineTimes - The times of the isArchived.
+ */
+export interface IsArchivedTimeline<T extends NumberType> {
   isArchived: boolean
-  timelineTimes: UintRangeBase[]
+  timelineTimes: UintRange<T>[]
 }
 
-export interface IsArchivedTimeline extends IsArchivedTimelineBase {
-  timelineTimes: UintRange[]
+export function convertIsArchivedTimeline<T extends NumberType, U extends NumberType>(isArchivedTimeline: IsArchivedTimeline<T>, convertFunction: (item: T) => U): IsArchivedTimeline<U> {
+  return deepCopy({
+    ...isArchivedTimeline,
+    isArchived: isArchivedTimeline.isArchived,
+    timelineTimes: isArchivedTimeline.timelineTimes.map((b) => convertUintRange(b, convertFunction))
+  })
 }
 
-export interface s_IsArchivedTimeline extends IsArchivedTimelineBase {
-  timelineTimes: s_UintRange[]
+/**
+ * CollectionApprovedTransferTimeline represents the value of the collection approved transfers over time
+ *
+ * @typedef {Object} CollectionApprovedTransferTimeline
+ * @property {CollectionApprovedTransfer[]} collectionApprovedTransfers - The collection approved transfers.
+ * @property {UintRange[]} timelineTimes - The times of the collection approved transfers.
+ */
+export interface CollectionApprovedTransferTimeline<T extends NumberType> {
+  collectionApprovedTransfers: CollectionApprovedTransfer<T>[]
+  timelineTimes: UintRange<T>[]
 }
 
-export function convertToIsArchivedTimeline(s_timeline: s_IsArchivedTimeline): IsArchivedTimeline {
-  return {
-    ...s_timeline,
-    timelineTimes: s_timeline.timelineTimes.map(convertToUintRange)
-  }
-}
-
-export function convertFromIsArchivedTimeline(timeline: IsArchivedTimeline): s_IsArchivedTimeline {
-  return {
-    ...timeline,
-    timelineTimes: timeline.timelineTimes.map(convertFromUintRange)
-  }
-}
-
-export interface CollectionApprovedTransferTimelineBase {
-  collectionApprovedTransfers: CollectionApprovedTransferBase[]
-  timelineTimes: UintRangeBase[]
-}
-
-export interface CollectionApprovedTransferTimeline extends CollectionApprovedTransferTimelineBase {
-  timelineTimes: UintRange[]
-  collectionApprovedTransfers: CollectionApprovedTransfer[]
-}
-
-export interface s_CollectionApprovedTransferTimeline extends CollectionApprovedTransferTimelineBase {
-  timelineTimes: s_UintRange[]
-  collectionApprovedTransfers: s_CollectionApprovedTransfer[]
-}
-
-export function convertToCollectionApprovedTransferTimeline(s_timeline: s_CollectionApprovedTransferTimeline): CollectionApprovedTransferTimeline {
-  return {
-    ...s_timeline,
-    timelineTimes: s_timeline.timelineTimes.map(convertToUintRange),
-    collectionApprovedTransfers: s_timeline.collectionApprovedTransfers.map(convertToCollectionApprovedTransfer)
-  }
-}
-
-export function convertFromCollectionApprovedTransferTimeline(timeline: CollectionApprovedTransferTimeline): s_CollectionApprovedTransferTimeline {
-  return {
-    ...timeline,
-    timelineTimes: timeline.timelineTimes.map(convertFromUintRange),
-    collectionApprovedTransfers: timeline.collectionApprovedTransfers.map(convertFromCollectionApprovedTransfer)
-  }
+export function convertCollectionApprovedTransferTimeline<T extends NumberType, U extends NumberType>(collectionApprovedTransferTimeline: CollectionApprovedTransferTimeline<T>, convertFunction: (item: T) => U): CollectionApprovedTransferTimeline<U> {
+  return deepCopy({
+    ...collectionApprovedTransferTimeline,
+    collectionApprovedTransfers: collectionApprovedTransferTimeline.collectionApprovedTransfers.map((b) => convertCollectionApprovedTransfer(b, convertFunction)),
+    timelineTimes: collectionApprovedTransferTimeline.timelineTimes.map((b) => convertUintRange(b, convertFunction))
+  })
 }
