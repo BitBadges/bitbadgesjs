@@ -6,9 +6,10 @@ import "google/api/annotations.proto";
 import "cosmos/base/query/v1beta1/pagination.proto";
 import "badges/params.proto";
 // this line is used by starport scaffolding # 1
-import "badges/badges.proto";
+import "badges/collections.proto";
 import "badges/balances.proto";
-import "badges/claims.proto";
+import "badges/transfers.proto";
+import "badges/address_mappings.proto";
 
 option go_package = "github.com/bitbadges/bitbadgeschain/x/badges/types";
 
@@ -20,31 +21,27 @@ option go_package = "github.com/bitbadges/bitbadgeschain/x/badges/types";
 //       option (google.api.http).get = "/bitbadges/bitbadgeschain/badges/params";
 //   }
 
-//     // Queries a badge collection by ID.
+//   // Queries a badge collection by ID.
 // 	rpc GetCollection(QueryGetCollectionRequest) returns (QueryGetCollectionResponse) {
 // 		option (google.api.http).get = "/bitbadges/bitbadgeschain/badges/get_collection/{collectionId}";
 // 	}
 
-//   // Queries a claim by collection ID and claim ID.
-// 	rpc GetClaim(QueryGetClaimRequest) returns (QueryGetClaimResponse) {
-// 		option (google.api.http).get = "/bitbadges/bitbadgeschain/badges/get_claim/{collectionId}/{claimId}";
-// 	}
+//   rpc GetAddressMapping(QueryGetAddressMappingRequest) returns (QueryGetAddressMappingResponse) {
+//     option (google.api.http).get = "/bitbadges/bitbadgeschain/badges/get_address_mapping/{mappingId}";
+//   }
 
-//   // Has a specific claim been used?
-// 	rpc IsClaimDataUsed(QueryIsClaimDataUsedRequest) returns (QueryIsClaimDataUsedResponse) {
-// 		option (google.api.http).get = "/bitbadges/bitbadgeschain/badges/is_claim_data_used/{collectionId}/{claimId}/{claimData}";
-// 	}
+//   rpc GetApprovalsTracker(QueryGetApprovalsTrackerRequest) returns (QueryGetApprovalsTrackerResponse) {
+//     option (google.api.http).get = "/bitbadges/bitbadgeschain/badges/get_approvals_tracker/{collectionId}/{approvalLevel}/{address}/{approvalId}/{trackerType}";
+//   }
+
+//   rpc GetNumUsedForMerkleChallenge(QueryGetNumUsedForMerkleChallengeRequest) returns (QueryGetNumUsedForMerkleChallengeResponse) {
+//     option (google.api.http).get = "/bitbadges/bitbadgeschain/badges/get_num_used_for_challenge/{collectionId}/{approvalLevel}/{address}/{challengeId}/{leafIndex}";
+//   }
 
 //   // Queries an addresses balance for a badge collection, specified by its ID.
 // 	rpc GetBalance(QueryGetBalanceRequest) returns (QueryGetBalanceResponse) {
 // 		option (google.api.http).get = "/bitbadges/bitbadgeschain/badges/get_balance/{collectionId}/{address}";
 // 	}
-
-//   // Queries an address by its account number.
-// 	rpc GetAddressById(QueryGetAddressByIdRequest) returns (QueryGetAddressByIdResponse) {
-// 		option (google.api.http).get = "/bitbadges/bitbadgeschain/badges/get_address_by_id/{id}";
-// 	}
-
 
 //   // this line is used by starport scaffolding # 2
 // }
@@ -69,41 +66,8 @@ message QueryGetCollectionResponse {
   BadgeCollection collection = 1;
 }
 
-message QueryGetClaimRequest {
-  string collectionId = 1  [
-      (gogoproto.customtype) = "Uint",
-      (gogoproto.nullable) = false
-
-    ];
-  string claimId = 2  [
-      (gogoproto.customtype) = "Uint",
-      (gogoproto.nullable) = false
-
-    ];
-}
-
-message QueryGetClaimResponse {
-  Claim claim = 1;
-}
-
-message QueryGetAddressByIdRequest {
-  string id = 1  [
-      (gogoproto.customtype) = "Uint",
-      (gogoproto.nullable) = false
-
-    ];
-}
-
-message QueryGetAddressByIdResponse {
-  string address = 1;
-}
-
 message QueryGetBalanceRequest {
-  string collectionId = 1  [
-      (gogoproto.customtype) = "Uint",
-      (gogoproto.nullable) = false
-
-    ];
+  string collectionId = 1  [(gogoproto.customtype) = "Uint", (gogoproto.nullable) = false];
   string address = 2;
 }
 
@@ -111,21 +75,35 @@ message QueryGetBalanceResponse {
   UserBalanceStore balance = 1;
 }
 
-message QueryIsClaimDataUsedRequest {
-    string collectionId = 1  [
-      (gogoproto.customtype) = "Uint",
-      (gogoproto.nullable) = false
-
-    ];
-    string claimId = 2  [
-      (gogoproto.customtype) = "Uint",
-      (gogoproto.nullable) = false
-
-    ];
-    string claimData = 3;
+message QueryGetAddressMappingRequest {
+  string mappingId = 1 ;
 }
 
-message QueryIsClaimDataUsedResponse {
-    bool used = 1;
+message QueryGetAddressMappingResponse {
+  AddressMapping mapping = 1;
+}
+
+message QueryGetApprovalsTrackerRequest {
+  string collectionId = 5 [(gogoproto.customtype) = "Uint", (gogoproto.nullable) = false];
+  string approvalLevel = 2; //"collection" or "incoming" or "outgoing"
+  string address = 3; //if approvalLevel is "collection", leave blank
+  string approvalId = 1;
+  string trackerType = 4;; //"overall", "to", "from", "initiatedBy"
+}
+
+message QueryGetApprovalsTrackerResponse {
+  ApprovalsTracker tracker = 1;
+}
+
+message QueryGetNumUsedForMerkleChallengeRequest {
+  string collectionId = 1 [(gogoproto.customtype) = "Uint", (gogoproto.nullable) = false];
+  string approvalLevel = 2; //"collection" or "incoming" or "outgoing"
+  string address = 3; //if approvalLevel is "collection", leave blank
+  string challengeId = 4;
+  string leafIndex = 5 [(gogoproto.customtype) = "Uint", (gogoproto.nullable) = false];
+}
+
+message QueryGetNumUsedForMerkleChallengeResponse {
+  string numUsed = 1 [(gogoproto.customtype) = "Uint", (gogoproto.nullable) = false];
 }
 // this line is used by starport scaffolding # 3

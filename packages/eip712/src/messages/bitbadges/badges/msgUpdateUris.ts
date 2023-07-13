@@ -1,5 +1,5 @@
 import { BadgeUri, getWrappedBadgeUris } from 'bitbadgesjs-proto'
-import { BADGE_URI_TYPES, ID_RANGE_TYPES } from "./eip712HelperTypes"
+import { BADGE_URI_TYPES, UINT_RANGE_TYPES } from "./eip712HelperTypes"
 
 const MsgUpdateUrisValueType = [
   { name: 'creator', type: 'string' },
@@ -12,7 +12,7 @@ const MsgUpdateUrisValueType = [
 export const MSG_UPDATE_URIS_TYPES = {
   MsgValue: MsgUpdateUrisValueType,
   BadgeUri: BADGE_URI_TYPES,
-  IdRange: ID_RANGE_TYPES,
+  UintRange: UINT_RANGE_TYPES,
 }
 
 export function createMsgUpdateUris(

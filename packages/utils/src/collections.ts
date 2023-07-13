@@ -1,6 +1,6 @@
-import { IdRange } from "bitbadgesjs-proto";
+import { UintRange } from "bitbadgesjs-proto";
 import { MessageMsgMintAndDistributeBadges, MessageMsgNewCollection, MessageMsgUpdateAllowedTransfers, MessageMsgUpdateUris } from "bitbadgesjs-transactions";
-import { addBalancesForIdRanges } from "./balances";
+import { addBalancesForUintRanges } from "./balances";
 import { getBalancesAfterTransfers } from "./distribution";
 import { GetPermissionNumberValue, GetPermissions } from "./permissions";
 import { BitBadgeCollection, BitBadgesUserInfo } from "./types/api";
@@ -10,12 +10,12 @@ import { ClaimWithDetails } from "./types/db";
 import { TransferWithIncrements } from "./types/transfers";
 
 /**
- * Returns an IdRange[] of length 1 that covers all badgeIds in the collection.
+ * Returns an UintRange[] of length 1 that covers all badgeIds in the collection.
  *
  * { start: 1, end: nextBadgeId - 1 }
  */
-export function getIdRangesForAllBadgeIdsInCollection(collection: BitBadgeCollection) {
-  const range: IdRange = {
+export function getUintRangesForAllBadgeIdsInCollection(collection: BitBadgeCollection) {
+  const range: UintRange = {
     start: 1n,
     end: collection.nextBadgeId - 1n,
   }
@@ -59,13 +59,13 @@ export function simulateCollectionAfterMsgNewCollection(
   for (const supplyObj of msg.badgeSupplys) {
     nextBadgeId += supplyObj.amount;
 
-    const newMaxBalance = addBalancesForIdRanges({ approvals: [], balances: newMaxSupplys }, [{
+    const newMaxBalance = addBalancesForUintRanges({ approvals: [], balances: newMaxSupplys }, [{
       start: nextBadgeId - supplyObj.amount,
       end: nextBadgeId - 1n,
     }], supplyObj.supply);
     newMaxSupplys = newMaxBalance.balances;
 
-    const newUnmintedBalance = addBalancesForIdRanges({ approvals: [], balances: newUnmintedSupplys }, [{
+    const newUnmintedBalance = addBalancesForUintRanges({ approvals: [], balances: newUnmintedSupplys }, [{
       start: nextBadgeId - supplyObj.amount,
       end: nextBadgeId - 1n,
     }], supplyObj.supply);

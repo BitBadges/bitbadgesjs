@@ -1,5 +1,5 @@
 import { BadgeUri } from "bitbadgesjs-proto";
-import { searchIdRangesForId } from "./idRanges";
+import { searchUintRangesForId } from "./uintRanges";
 import { BitBadgeCollection } from "./types/api";
 
 /**
@@ -37,17 +37,17 @@ export const getMetadataIdForBadgeId = (badgeId: bigint, badgeUris: BadgeUri[]) 
 
   for (const badgeUri of badgeUris) {
     if (badgeUri.uri.includes("{id}")) {
-      const [idx, found] = searchIdRangesForId(badgeId, badgeUri.badgeIds);
+      const [idx, found] = searchUintRangesForId(badgeId, badgeUri.badgeIds);
       if (found) {
-        const badgeIdRange = badgeUri.badgeIds[idx];
-        return batchIdx + badgeId - badgeIdRange.start;
+        const badgeUintRange = badgeUri.badgeIds[idx];
+        return batchIdx + badgeId - badgeUintRange.start;
       }
 
-      for (const badgeIdRange of badgeUri.badgeIds) {
-        batchIdx += badgeIdRange.end - badgeIdRange.start + 1n;
+      for (const badgeUintRange of badgeUri.badgeIds) {
+        batchIdx += badgeUintRange.end - badgeUintRange.start + 1n;
       }
     } else {
-      const [_idx, found] = searchIdRangesForId(badgeId, badgeUri.badgeIds);
+      const [_idx, found] = searchUintRangesForId(badgeId, badgeUri.badgeIds);
       if (found) {
         return batchIdx;
       }
@@ -69,8 +69,8 @@ export function getMaxMetadataId(collection: BitBadgeCollection) {
   for (const badgeUri of collection.badgeUris) {
     // If the URI contains {id}, each badge ID will belong to its own private batch
     if (badgeUri.uri.includes("{id}")) {
-      for (const badgeIdRange of badgeUri.badgeIds) {
-        metadataId += badgeIdRange.end - badgeIdRange.start + 1n;
+      for (const badgeUintRange of badgeUri.badgeIds) {
+        metadataId += badgeUintRange.end - badgeUintRange.start + 1n;
       }
     } else {
       metadataId++;

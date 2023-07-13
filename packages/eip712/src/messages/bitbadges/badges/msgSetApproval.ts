@@ -1,5 +1,5 @@
 import { Balance, getWrappedBalances } from 'bitbadgesjs-proto'
-import { BALANCE_TYPES, ID_RANGE_TYPES } from './eip712HelperTypes'
+import { BALANCE_TYPES, UINT_RANGE_TYPES } from './eip712HelperTypes'
 
 const MsgSetApprovalValueType = [
   { name: 'creator', type: 'string' },
@@ -9,7 +9,7 @@ const MsgSetApprovalValueType = [
 ]
 
 export const MSG_SET_APPROVAL_TYPES = {
-  IdRange: ID_RANGE_TYPES,
+  UintRange: UINT_RANGE_TYPES,
   Balance: BALANCE_TYPES,
   MsgValue: MsgSetApprovalValueType,
 }

@@ -1,6 +1,6 @@
 import {
   BALANCE_TYPES,
-  ID_RANGE_TYPES,
+  UINT_RANGE_TYPES,
   TRANSFERS_TYPES,
 } from './eip712HelperTypes'
 import { Transfer, getWrappedTransfers } from 'bitbadgesjs-proto'
@@ -13,7 +13,7 @@ const MsgTransferBadgeValueType = [
 ]
 
 export const MSG_TRANSFER_BADGE_TYPES = {
-  IdRange: ID_RANGE_TYPES,
+  UintRange: UINT_RANGE_TYPES,
   MsgValue: MsgTransferBadgeValueType,
   Balance: BALANCE_TYPES,
   Transfer: TRANSFERS_TYPES,

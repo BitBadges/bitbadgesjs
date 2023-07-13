@@ -1,5 +1,5 @@
 import { UserBalance, Balance } from "bitbadgesjs-proto";
-import { getBalancesForIdRanges } from "./balances";
+import { getBalancesForUintRanges } from "./balances";
 
 /**
  * Checks if a user has enough approval balances for a transfer on behalf of another user.
@@ -18,7 +18,7 @@ export function checkIfApproved(fromBalance: UserBalance, txSender: string, tran
   } else {
     //check if we have enough balance for each badge
     for (const balance of transferredBadges) {
-      const approvalBalances = getBalancesForIdRanges(balance.badgeIds, approval?.balances || []);
+      const approvalBalances = getBalancesForUintRanges(balance.badgeIds, approval?.balances || []);
 
       if (approvalBalances.length === 0) {
         isApproved = false;

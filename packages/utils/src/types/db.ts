@@ -1,4 +1,4 @@
-import { BadgeUri, Balance, Challenge, ChallengeBase, Claim, ClaimBase, IdRange, TransferMapping, UserBalance, UserBalanceBase, convertFromApproval, convertFromBalance, convertFromIdRange, convertToApproval, convertToBalance, convertToIdRange, s_Challenge, s_Claim, s_UserBalance } from "bitbadgesjs-proto";
+import { BadgeUri, Balance, Challenge, ChallengeBase, Claim, ClaimBase, UintRange, TransferMapping, UserBalance, UserBalanceBase, convertFromApproval, convertFromBalance, convertFromUintRange, convertToApproval, convertToBalance, convertToUintRange, s_Challenge, s_Claim, s_UserBalance } from "bitbadgesjs-proto";
 import MerkleTree from "merkletreejs";
 import { Metadata } from "./metadata";
 import { Permissions } from "./permissions";
@@ -188,7 +188,7 @@ export function convertFromProfile(item: Profile): s_Profile {
  *
  * @typedef {Object} MetadataDocBase
  * @property {Metadata} metadata - The metadata object
- * @property {IdRange[]} badgeIds - The range of badge IDs that this metadata document is responsible for
+ * @property {UintRange[]} badgeIds - The range of badge IDs that this metadata document is responsible for
  * @property {boolean} isCollection - True if this is a collection metadata document
  * @property {bigint | string} metadataId - The metadata ID for the document. The id for the metadata document is calculated deterministically from badgeUris field (see metadata.ts).
  * @property {string} uri - The URI of the metadata
@@ -213,7 +213,7 @@ export function convertFromProfile(item: Profile): s_Profile {
  */
 export interface MetadataDocBase {
   metadata: Metadata
-  badgeIds: IdRange[]
+  badgeIds: UintRange[]
   isCollection: boolean
   metadataId: bigint | string
   uri: string
@@ -271,7 +271,7 @@ export interface IndexerStatus {
  * @property {string} uri - The URI of the metadata to be fetched. If {id} is present, it will be replaced with each individual ID in badgeIds
  * @property {bigint | string} collectionId - The collection ID of the metadata to be fetched
  * @property {boolean} collection - True if this is a collection metadata
- * @property {IdRange[]} badgeIds - The range of badge IDs that this queue item should fetch
+ * @property {UintRange[]} badgeIds - The range of badge IDs that this queue item should fetch
  * @property {bigint | string} numCalls - The number of times this queue item has been called
  * @property {bigint | string} specificId - The specific badge ID to be fetched (used if you only want to fetch a specific badge ID)
  * @property {boolean} purge - True if we should purge excess metadata documents from the database
@@ -282,7 +282,7 @@ export interface QueueItemBase {
   uri: string,
   collectionId: bigint | string,
   collection: boolean,
-  badgeIds: IdRange[],
+  badgeIds: UintRange[],
   numCalls: bigint | string,
   specificId?: bigint | string,
   purge?: boolean
@@ -712,7 +712,7 @@ export function convertToClaimDocument(s_doc: s_ClaimDocument): ClaimDocument {
     numClaimsPerAddress: BigInt(s_doc.numClaimsPerAddress),
     incrementIdsBy: BigInt(s_doc.incrementIdsBy),
     currentClaimAmounts: s_doc.currentClaimAmounts.map(convertToBalance),
-    timeRange: convertToIdRange(s_doc.timeRange),
+    timeRange: convertToUintRange(s_doc.timeRange),
   }
 }
 
@@ -728,7 +728,7 @@ export function convertFromClaimDocument(doc: ClaimDocument): s_ClaimDocument {
     numClaimsPerAddress: doc.numClaimsPerAddress.toString(),
     incrementIdsBy: doc.incrementIdsBy.toString(),
     currentClaimAmounts: doc.currentClaimAmounts.map(convertFromBalance),
-    timeRange: convertFromIdRange(doc.timeRange),
+    timeRange: convertFromUintRange(doc.timeRange),
   }
 }
 
@@ -799,7 +799,7 @@ export function convertToClaimWithDetails(s_claim: s_ClaimWithDetails): ClaimWit
     numClaimsPerAddress: BigInt(s_claim.numClaimsPerAddress),
     incrementIdsBy: BigInt(s_claim.incrementIdsBy),
     currentClaimAmounts: s_claim.currentClaimAmounts.map(convertToBalance),
-    timeRange: convertToIdRange(s_claim.timeRange),
+    timeRange: convertToUintRange(s_claim.timeRange),
   }
 }
 
@@ -811,6 +811,6 @@ export function convertFromClaimWithDetails(claim: ClaimWithDetails): s_ClaimWit
     numClaimsPerAddress: claim.numClaimsPerAddress.toString(),
     incrementIdsBy: claim.incrementIdsBy.toString(),
     currentClaimAmounts: claim.currentClaimAmounts.map(convertFromBalance),
-    timeRange: convertFromIdRange(claim.timeRange),
+    timeRange: convertFromUintRange(claim.timeRange),
   }
 }

@@ -9,890 +9,1009 @@ import * as dependency_1 from "./../gogoproto/gogo";
 import * as dependency_2 from "./../google/api/annotations";
 import * as dependency_3 from "./../cosmos/base/query/v1beta1/pagination";
 import * as dependency_4 from "./params";
-import * as dependency_5 from "./badges";
+import * as dependency_5 from "./collections";
 import * as dependency_6 from "./balances";
-import * as dependency_7 from "./claims";
+import * as dependency_7 from "./transfers";
+import * as dependency_8 from "./address_mappings";
 import * as pb_1 from "google-protobuf";
 export namespace bitbadges.bitbadgeschain.badges {
-    export class QueryParamsRequest extends pb_1.Message {
-        #one_of_decls: number[][] = [];
-        constructor(data?: any[] | {}) {
-            super();
-            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
-            if (!Array.isArray(data) && typeof data == "object") { }
-        }
-        static fromObject(data: {}): QueryParamsRequest {
-            const message = new QueryParamsRequest({});
-            return message;
-        }
-        toObject() {
-            const data: {} = {};
-            return data;
-        }
-        serialize(): Uint8Array;
-        serialize(w: pb_1.BinaryWriter): void;
-        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-            const writer = w || new pb_1.BinaryWriter();
-            if (!w)
-                return writer.getResultBuffer();
-        }
-        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): QueryParamsRequest {
-            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new QueryParamsRequest();
-            while (reader.nextField()) {
-                if (reader.isEndGroup())
-                    break;
-                switch (reader.getFieldNumber()) {
-                    default: reader.skipField();
-                }
-            }
-            return message;
-        }
-        serializeBinary(): Uint8Array {
-            return this.serialize();
-        }
-        static deserializeBinary(bytes: Uint8Array): QueryParamsRequest {
-            return QueryParamsRequest.deserialize(bytes);
-        }
+  export class QueryParamsRequest extends pb_1.Message {
+    #one_of_decls: number[][] = [];
+    constructor(data?: any[] | {}) {
+      super();
+      pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+      if (!Array.isArray(data) && typeof data == "object") { }
     }
-    export class QueryParamsResponse extends pb_1.Message {
-        #one_of_decls: number[][] = [];
-        constructor(data?: any[] | {
-            params?: dependency_4.bitbadges.bitbadgeschain.badges.Params;
-        }) {
-            super();
-            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
-            if (!Array.isArray(data) && typeof data == "object") {
-                if ("params" in data && data.params != undefined) {
-                    this.params = data.params;
-                }
-            }
-        }
-        get params() {
-            return pb_1.Message.getWrapperField(this, dependency_4.bitbadges.bitbadgeschain.badges.Params, 1) as dependency_4.bitbadges.bitbadgeschain.badges.Params;
-        }
-        set params(value: dependency_4.bitbadges.bitbadgeschain.badges.Params) {
-            pb_1.Message.setWrapperField(this, 1, value);
-        }
-        get has_params() {
-            return pb_1.Message.getField(this, 1) != null;
-        }
-        static fromObject(data: {
-            params?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.Params.prototype.toObject>;
-        }): QueryParamsResponse {
-            const message = new QueryParamsResponse({});
-            if (data.params != null) {
-                message.params = dependency_4.bitbadges.bitbadgeschain.badges.Params.fromObject(data.params);
-            }
-            return message;
-        }
-        toObject() {
-            const data: {
-                params?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.Params.prototype.toObject>;
-            } = {};
-            if (this.params != null) {
-                data.params = this.params.toObject();
-            }
-            return data;
-        }
-        serialize(): Uint8Array;
-        serialize(w: pb_1.BinaryWriter): void;
-        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-            const writer = w || new pb_1.BinaryWriter();
-            if (this.has_params)
-                writer.writeMessage(1, this.params, () => this.params.serialize(writer));
-            if (!w)
-                return writer.getResultBuffer();
-        }
-        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): QueryParamsResponse {
-            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new QueryParamsResponse();
-            while (reader.nextField()) {
-                if (reader.isEndGroup())
-                    break;
-                switch (reader.getFieldNumber()) {
-                    case 1:
-                        reader.readMessage(message.params, () => message.params = dependency_4.bitbadges.bitbadgeschain.badges.Params.deserialize(reader));
-                        break;
-                    default: reader.skipField();
-                }
-            }
-            return message;
-        }
-        serializeBinary(): Uint8Array {
-            return this.serialize();
-        }
-        static deserializeBinary(bytes: Uint8Array): QueryParamsResponse {
-            return QueryParamsResponse.deserialize(bytes);
-        }
+    static fromObject(data: {}): QueryParamsRequest {
+      const message = new QueryParamsRequest({});
+      return message;
     }
-    export class QueryGetCollectionRequest extends pb_1.Message {
-        #one_of_decls: number[][] = [];
-        constructor(data?: any[] | {
-            collectionId?: string;
-        }) {
-            super();
-            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
-            if (!Array.isArray(data) && typeof data == "object") {
-                if ("collectionId" in data && data.collectionId != undefined) {
-                    this.collectionId = data.collectionId;
-                }
-            }
-        }
-        get collectionId() {
-            return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
-        }
-        set collectionId(value: string) {
-            pb_1.Message.setField(this, 1, value);
-        }
-        static fromObject(data: {
-            collectionId?: string;
-        }): QueryGetCollectionRequest {
-            const message = new QueryGetCollectionRequest({});
-            if (data.collectionId != null) {
-                message.collectionId = data.collectionId;
-            }
-            return message;
-        }
-        toObject() {
-            const data: {
-                collectionId?: string;
-            } = {};
-            if (this.collectionId != null) {
-                data.collectionId = this.collectionId;
-            }
-            return data;
-        }
-        serialize(): Uint8Array;
-        serialize(w: pb_1.BinaryWriter): void;
-        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-            const writer = w || new pb_1.BinaryWriter();
-            if (this.collectionId.length)
-                writer.writeString(1, this.collectionId);
-            if (!w)
-                return writer.getResultBuffer();
-        }
-        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): QueryGetCollectionRequest {
-            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new QueryGetCollectionRequest();
-            while (reader.nextField()) {
-                if (reader.isEndGroup())
-                    break;
-                switch (reader.getFieldNumber()) {
-                    case 1:
-                        message.collectionId = reader.readString();
-                        break;
-                    default: reader.skipField();
-                }
-            }
-            return message;
-        }
-        serializeBinary(): Uint8Array {
-            return this.serialize();
-        }
-        static deserializeBinary(bytes: Uint8Array): QueryGetCollectionRequest {
-            return QueryGetCollectionRequest.deserialize(bytes);
-        }
+    toObject() {
+      const data: {} = {};
+      return data;
     }
-    export class QueryGetCollectionResponse extends pb_1.Message {
-        #one_of_decls: number[][] = [];
-        constructor(data?: any[] | {
-            collection?: dependency_5.bitbadges.bitbadgeschain.badges.BadgeCollection;
-        }) {
-            super();
-            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
-            if (!Array.isArray(data) && typeof data == "object") {
-                if ("collection" in data && data.collection != undefined) {
-                    this.collection = data.collection;
-                }
-            }
-        }
-        get collection() {
-            return pb_1.Message.getWrapperField(this, dependency_5.bitbadges.bitbadgeschain.badges.BadgeCollection, 1) as dependency_5.bitbadges.bitbadgeschain.badges.BadgeCollection;
-        }
-        set collection(value: dependency_5.bitbadges.bitbadgeschain.badges.BadgeCollection) {
-            pb_1.Message.setWrapperField(this, 1, value);
-        }
-        get has_collection() {
-            return pb_1.Message.getField(this, 1) != null;
-        }
-        static fromObject(data: {
-            collection?: ReturnType<typeof dependency_5.bitbadges.bitbadgeschain.badges.BadgeCollection.prototype.toObject>;
-        }): QueryGetCollectionResponse {
-            const message = new QueryGetCollectionResponse({});
-            if (data.collection != null) {
-                message.collection = dependency_5.bitbadges.bitbadgeschain.badges.BadgeCollection.fromObject(data.collection);
-            }
-            return message;
-        }
-        toObject() {
-            const data: {
-                collection?: ReturnType<typeof dependency_5.bitbadges.bitbadgeschain.badges.BadgeCollection.prototype.toObject>;
-            } = {};
-            if (this.collection != null) {
-                data.collection = this.collection.toObject();
-            }
-            return data;
-        }
-        serialize(): Uint8Array;
-        serialize(w: pb_1.BinaryWriter): void;
-        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-            const writer = w || new pb_1.BinaryWriter();
-            if (this.has_collection)
-                writer.writeMessage(1, this.collection, () => this.collection.serialize(writer));
-            if (!w)
-                return writer.getResultBuffer();
-        }
-        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): QueryGetCollectionResponse {
-            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new QueryGetCollectionResponse();
-            while (reader.nextField()) {
-                if (reader.isEndGroup())
-                    break;
-                switch (reader.getFieldNumber()) {
-                    case 1:
-                        reader.readMessage(message.collection, () => message.collection = dependency_5.bitbadges.bitbadgeschain.badges.BadgeCollection.deserialize(reader));
-                        break;
-                    default: reader.skipField();
-                }
-            }
-            return message;
-        }
-        serializeBinary(): Uint8Array {
-            return this.serialize();
-        }
-        static deserializeBinary(bytes: Uint8Array): QueryGetCollectionResponse {
-            return QueryGetCollectionResponse.deserialize(bytes);
-        }
+    serialize(): Uint8Array;
+    serialize(w: pb_1.BinaryWriter): void;
+    serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+      const writer = w || new pb_1.BinaryWriter();
+      if (!w)
+        return writer.getResultBuffer();
     }
-    export class QueryGetClaimRequest extends pb_1.Message {
-        #one_of_decls: number[][] = [];
-        constructor(data?: any[] | {
-            collectionId?: string;
-            claimId?: string;
-        }) {
-            super();
-            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
-            if (!Array.isArray(data) && typeof data == "object") {
-                if ("collectionId" in data && data.collectionId != undefined) {
-                    this.collectionId = data.collectionId;
-                }
-                if ("claimId" in data && data.claimId != undefined) {
-                    this.claimId = data.claimId;
-                }
-            }
+    static deserialize(bytes: Uint8Array | pb_1.BinaryReader): QueryParamsRequest {
+      const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new QueryParamsRequest();
+      while (reader.nextField()) {
+        if (reader.isEndGroup())
+          break;
+        switch (reader.getFieldNumber()) {
+          default: reader.skipField();
         }
-        get collectionId() {
-            return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
-        }
-        set collectionId(value: string) {
-            pb_1.Message.setField(this, 1, value);
-        }
-        get claimId() {
-            return pb_1.Message.getFieldWithDefault(this, 2, "") as string;
-        }
-        set claimId(value: string) {
-            pb_1.Message.setField(this, 2, value);
-        }
-        static fromObject(data: {
-            collectionId?: string;
-            claimId?: string;
-        }): QueryGetClaimRequest {
-            const message = new QueryGetClaimRequest({});
-            if (data.collectionId != null) {
-                message.collectionId = data.collectionId;
-            }
-            if (data.claimId != null) {
-                message.claimId = data.claimId;
-            }
-            return message;
-        }
-        toObject() {
-            const data: {
-                collectionId?: string;
-                claimId?: string;
-            } = {};
-            if (this.collectionId != null) {
-                data.collectionId = this.collectionId;
-            }
-            if (this.claimId != null) {
-                data.claimId = this.claimId;
-            }
-            return data;
-        }
-        serialize(): Uint8Array;
-        serialize(w: pb_1.BinaryWriter): void;
-        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-            const writer = w || new pb_1.BinaryWriter();
-            if (this.collectionId.length)
-                writer.writeString(1, this.collectionId);
-            if (this.claimId.length)
-                writer.writeString(2, this.claimId);
-            if (!w)
-                return writer.getResultBuffer();
-        }
-        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): QueryGetClaimRequest {
-            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new QueryGetClaimRequest();
-            while (reader.nextField()) {
-                if (reader.isEndGroup())
-                    break;
-                switch (reader.getFieldNumber()) {
-                    case 1:
-                        message.collectionId = reader.readString();
-                        break;
-                    case 2:
-                        message.claimId = reader.readString();
-                        break;
-                    default: reader.skipField();
-                }
-            }
-            return message;
-        }
-        serializeBinary(): Uint8Array {
-            return this.serialize();
-        }
-        static deserializeBinary(bytes: Uint8Array): QueryGetClaimRequest {
-            return QueryGetClaimRequest.deserialize(bytes);
-        }
+      }
+      return message;
     }
-    export class QueryGetClaimResponse extends pb_1.Message {
-        #one_of_decls: number[][] = [];
-        constructor(data?: any[] | {
-            claim?: dependency_7.bitbadges.bitbadgeschain.badges.Claim;
-        }) {
-            super();
-            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
-            if (!Array.isArray(data) && typeof data == "object") {
-                if ("claim" in data && data.claim != undefined) {
-                    this.claim = data.claim;
-                }
-            }
-        }
-        get claim() {
-            return pb_1.Message.getWrapperField(this, dependency_7.bitbadges.bitbadgeschain.badges.Claim, 1) as dependency_7.bitbadges.bitbadgeschain.badges.Claim;
-        }
-        set claim(value: dependency_7.bitbadges.bitbadgeschain.badges.Claim) {
-            pb_1.Message.setWrapperField(this, 1, value);
-        }
-        get has_claim() {
-            return pb_1.Message.getField(this, 1) != null;
-        }
-        static fromObject(data: {
-            claim?: ReturnType<typeof dependency_7.bitbadges.bitbadgeschain.badges.Claim.prototype.toObject>;
-        }): QueryGetClaimResponse {
-            const message = new QueryGetClaimResponse({});
-            if (data.claim != null) {
-                message.claim = dependency_7.bitbadges.bitbadgeschain.badges.Claim.fromObject(data.claim);
-            }
-            return message;
-        }
-        toObject() {
-            const data: {
-                claim?: ReturnType<typeof dependency_7.bitbadges.bitbadgeschain.badges.Claim.prototype.toObject>;
-            } = {};
-            if (this.claim != null) {
-                data.claim = this.claim.toObject();
-            }
-            return data;
-        }
-        serialize(): Uint8Array;
-        serialize(w: pb_1.BinaryWriter): void;
-        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-            const writer = w || new pb_1.BinaryWriter();
-            if (this.has_claim)
-                writer.writeMessage(1, this.claim, () => this.claim.serialize(writer));
-            if (!w)
-                return writer.getResultBuffer();
-        }
-        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): QueryGetClaimResponse {
-            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new QueryGetClaimResponse();
-            while (reader.nextField()) {
-                if (reader.isEndGroup())
-                    break;
-                switch (reader.getFieldNumber()) {
-                    case 1:
-                        reader.readMessage(message.claim, () => message.claim = dependency_7.bitbadges.bitbadgeschain.badges.Claim.deserialize(reader));
-                        break;
-                    default: reader.skipField();
-                }
-            }
-            return message;
-        }
-        serializeBinary(): Uint8Array {
-            return this.serialize();
-        }
-        static deserializeBinary(bytes: Uint8Array): QueryGetClaimResponse {
-            return QueryGetClaimResponse.deserialize(bytes);
-        }
+    serializeBinary(): Uint8Array {
+      return this.serialize();
     }
-    export class QueryGetAddressByIdRequest extends pb_1.Message {
-        #one_of_decls: number[][] = [];
-        constructor(data?: any[] | {
-            id?: string;
-        }) {
-            super();
-            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
-            if (!Array.isArray(data) && typeof data == "object") {
-                if ("id" in data && data.id != undefined) {
-                    this.id = data.id;
-                }
-            }
-        }
-        get id() {
-            return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
-        }
-        set id(value: string) {
-            pb_1.Message.setField(this, 1, value);
-        }
-        static fromObject(data: {
-            id?: string;
-        }): QueryGetAddressByIdRequest {
-            const message = new QueryGetAddressByIdRequest({});
-            if (data.id != null) {
-                message.id = data.id;
-            }
-            return message;
-        }
-        toObject() {
-            const data: {
-                id?: string;
-            } = {};
-            if (this.id != null) {
-                data.id = this.id;
-            }
-            return data;
-        }
-        serialize(): Uint8Array;
-        serialize(w: pb_1.BinaryWriter): void;
-        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-            const writer = w || new pb_1.BinaryWriter();
-            if (this.id.length)
-                writer.writeString(1, this.id);
-            if (!w)
-                return writer.getResultBuffer();
-        }
-        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): QueryGetAddressByIdRequest {
-            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new QueryGetAddressByIdRequest();
-            while (reader.nextField()) {
-                if (reader.isEndGroup())
-                    break;
-                switch (reader.getFieldNumber()) {
-                    case 1:
-                        message.id = reader.readString();
-                        break;
-                    default: reader.skipField();
-                }
-            }
-            return message;
-        }
-        serializeBinary(): Uint8Array {
-            return this.serialize();
-        }
-        static deserializeBinary(bytes: Uint8Array): QueryGetAddressByIdRequest {
-            return QueryGetAddressByIdRequest.deserialize(bytes);
-        }
+    static deserializeBinary(bytes: Uint8Array): QueryParamsRequest {
+      return QueryParamsRequest.deserialize(bytes);
     }
-    export class QueryGetAddressByIdResponse extends pb_1.Message {
-        #one_of_decls: number[][] = [];
-        constructor(data?: any[] | {
-            address?: string;
-        }) {
-            super();
-            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
-            if (!Array.isArray(data) && typeof data == "object") {
-                if ("address" in data && data.address != undefined) {
-                    this.address = data.address;
-                }
-            }
+  }
+  export class QueryParamsResponse extends pb_1.Message {
+    #one_of_decls: number[][] = [];
+    constructor(data?: any[] | {
+      params?: dependency_4.bitbadges.bitbadgeschain.badges.Params;
+    }) {
+      super();
+      pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+      if (!Array.isArray(data) && typeof data == "object") {
+        if ("params" in data && data.params != undefined) {
+          this.params = data.params;
         }
-        get address() {
-            return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
-        }
-        set address(value: string) {
-            pb_1.Message.setField(this, 1, value);
-        }
-        static fromObject(data: {
-            address?: string;
-        }): QueryGetAddressByIdResponse {
-            const message = new QueryGetAddressByIdResponse({});
-            if (data.address != null) {
-                message.address = data.address;
-            }
-            return message;
-        }
-        toObject() {
-            const data: {
-                address?: string;
-            } = {};
-            if (this.address != null) {
-                data.address = this.address;
-            }
-            return data;
-        }
-        serialize(): Uint8Array;
-        serialize(w: pb_1.BinaryWriter): void;
-        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-            const writer = w || new pb_1.BinaryWriter();
-            if (this.address.length)
-                writer.writeString(1, this.address);
-            if (!w)
-                return writer.getResultBuffer();
-        }
-        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): QueryGetAddressByIdResponse {
-            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new QueryGetAddressByIdResponse();
-            while (reader.nextField()) {
-                if (reader.isEndGroup())
-                    break;
-                switch (reader.getFieldNumber()) {
-                    case 1:
-                        message.address = reader.readString();
-                        break;
-                    default: reader.skipField();
-                }
-            }
-            return message;
-        }
-        serializeBinary(): Uint8Array {
-            return this.serialize();
-        }
-        static deserializeBinary(bytes: Uint8Array): QueryGetAddressByIdResponse {
-            return QueryGetAddressByIdResponse.deserialize(bytes);
-        }
+      }
     }
-    export class QueryGetBalanceRequest extends pb_1.Message {
-        #one_of_decls: number[][] = [];
-        constructor(data?: any[] | {
-            collectionId?: string;
-            address?: string;
-        }) {
-            super();
-            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
-            if (!Array.isArray(data) && typeof data == "object") {
-                if ("collectionId" in data && data.collectionId != undefined) {
-                    this.collectionId = data.collectionId;
-                }
-                if ("address" in data && data.address != undefined) {
-                    this.address = data.address;
-                }
-            }
-        }
-        get collectionId() {
-            return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
-        }
-        set collectionId(value: string) {
-            pb_1.Message.setField(this, 1, value);
-        }
-        get address() {
-            return pb_1.Message.getFieldWithDefault(this, 2, "") as string;
-        }
-        set address(value: string) {
-            pb_1.Message.setField(this, 2, value);
-        }
-        static fromObject(data: {
-            collectionId?: string;
-            address?: string;
-        }): QueryGetBalanceRequest {
-            const message = new QueryGetBalanceRequest({});
-            if (data.collectionId != null) {
-                message.collectionId = data.collectionId;
-            }
-            if (data.address != null) {
-                message.address = data.address;
-            }
-            return message;
-        }
-        toObject() {
-            const data: {
-                collectionId?: string;
-                address?: string;
-            } = {};
-            if (this.collectionId != null) {
-                data.collectionId = this.collectionId;
-            }
-            if (this.address != null) {
-                data.address = this.address;
-            }
-            return data;
-        }
-        serialize(): Uint8Array;
-        serialize(w: pb_1.BinaryWriter): void;
-        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-            const writer = w || new pb_1.BinaryWriter();
-            if (this.collectionId.length)
-                writer.writeString(1, this.collectionId);
-            if (this.address.length)
-                writer.writeString(2, this.address);
-            if (!w)
-                return writer.getResultBuffer();
-        }
-        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): QueryGetBalanceRequest {
-            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new QueryGetBalanceRequest();
-            while (reader.nextField()) {
-                if (reader.isEndGroup())
-                    break;
-                switch (reader.getFieldNumber()) {
-                    case 1:
-                        message.collectionId = reader.readString();
-                        break;
-                    case 2:
-                        message.address = reader.readString();
-                        break;
-                    default: reader.skipField();
-                }
-            }
-            return message;
-        }
-        serializeBinary(): Uint8Array {
-            return this.serialize();
-        }
-        static deserializeBinary(bytes: Uint8Array): QueryGetBalanceRequest {
-            return QueryGetBalanceRequest.deserialize(bytes);
-        }
+    get params() {
+      return pb_1.Message.getWrapperField(this, dependency_4.bitbadges.bitbadgeschain.badges.Params, 1) as dependency_4.bitbadges.bitbadgeschain.badges.Params;
     }
-    export class QueryGetBalanceResponse extends pb_1.Message {
-        #one_of_decls: number[][] = [];
-        constructor(data?: any[] | {
-            balance?: dependency_6.bitbadges.bitbadgeschain.badges.UserBalanceStore;
-        }) {
-            super();
-            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
-            if (!Array.isArray(data) && typeof data == "object") {
-                if ("balance" in data && data.balance != undefined) {
-                    this.balance = data.balance;
-                }
-            }
-        }
-        get balance() {
-            return pb_1.Message.getWrapperField(this, dependency_6.bitbadges.bitbadgeschain.badges.UserBalanceStore, 1) as dependency_6.bitbadges.bitbadgeschain.badges.UserBalanceStore;
-        }
-        set balance(value: dependency_6.bitbadges.bitbadgeschain.badges.UserBalanceStore) {
-            pb_1.Message.setWrapperField(this, 1, value);
-        }
-        get has_balance() {
-            return pb_1.Message.getField(this, 1) != null;
-        }
-        static fromObject(data: {
-            balance?: ReturnType<typeof dependency_6.bitbadges.bitbadgeschain.badges.UserBalanceStore.prototype.toObject>;
-        }): QueryGetBalanceResponse {
-            const message = new QueryGetBalanceResponse({});
-            if (data.balance != null) {
-                message.balance = dependency_6.bitbadges.bitbadgeschain.badges.UserBalanceStore.fromObject(data.balance);
-            }
-            return message;
-        }
-        toObject() {
-            const data: {
-                balance?: ReturnType<typeof dependency_6.bitbadges.bitbadgeschain.badges.UserBalanceStore.prototype.toObject>;
-            } = {};
-            if (this.balance != null) {
-                data.balance = this.balance.toObject();
-            }
-            return data;
-        }
-        serialize(): Uint8Array;
-        serialize(w: pb_1.BinaryWriter): void;
-        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-            const writer = w || new pb_1.BinaryWriter();
-            if (this.has_balance)
-                writer.writeMessage(1, this.balance, () => this.balance.serialize(writer));
-            if (!w)
-                return writer.getResultBuffer();
-        }
-        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): QueryGetBalanceResponse {
-            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new QueryGetBalanceResponse();
-            while (reader.nextField()) {
-                if (reader.isEndGroup())
-                    break;
-                switch (reader.getFieldNumber()) {
-                    case 1:
-                        reader.readMessage(message.balance, () => message.balance = dependency_6.bitbadges.bitbadgeschain.badges.UserBalanceStore.deserialize(reader));
-                        break;
-                    default: reader.skipField();
-                }
-            }
-            return message;
-        }
-        serializeBinary(): Uint8Array {
-            return this.serialize();
-        }
-        static deserializeBinary(bytes: Uint8Array): QueryGetBalanceResponse {
-            return QueryGetBalanceResponse.deserialize(bytes);
-        }
+    set params(value: dependency_4.bitbadges.bitbadgeschain.badges.Params) {
+      pb_1.Message.setWrapperField(this, 1, value);
     }
-    export class QueryIsClaimDataUsedRequest extends pb_1.Message {
-        #one_of_decls: number[][] = [];
-        constructor(data?: any[] | {
-            collectionId?: string;
-            claimId?: string;
-            claimData?: string;
-        }) {
-            super();
-            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
-            if (!Array.isArray(data) && typeof data == "object") {
-                if ("collectionId" in data && data.collectionId != undefined) {
-                    this.collectionId = data.collectionId;
-                }
-                if ("claimId" in data && data.claimId != undefined) {
-                    this.claimId = data.claimId;
-                }
-                if ("claimData" in data && data.claimData != undefined) {
-                    this.claimData = data.claimData;
-                }
-            }
-        }
-        get collectionId() {
-            return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
-        }
-        set collectionId(value: string) {
-            pb_1.Message.setField(this, 1, value);
-        }
-        get claimId() {
-            return pb_1.Message.getFieldWithDefault(this, 2, "") as string;
-        }
-        set claimId(value: string) {
-            pb_1.Message.setField(this, 2, value);
-        }
-        get claimData() {
-            return pb_1.Message.getFieldWithDefault(this, 3, "") as string;
-        }
-        set claimData(value: string) {
-            pb_1.Message.setField(this, 3, value);
-        }
-        static fromObject(data: {
-            collectionId?: string;
-            claimId?: string;
-            claimData?: string;
-        }): QueryIsClaimDataUsedRequest {
-            const message = new QueryIsClaimDataUsedRequest({});
-            if (data.collectionId != null) {
-                message.collectionId = data.collectionId;
-            }
-            if (data.claimId != null) {
-                message.claimId = data.claimId;
-            }
-            if (data.claimData != null) {
-                message.claimData = data.claimData;
-            }
-            return message;
-        }
-        toObject() {
-            const data: {
-                collectionId?: string;
-                claimId?: string;
-                claimData?: string;
-            } = {};
-            if (this.collectionId != null) {
-                data.collectionId = this.collectionId;
-            }
-            if (this.claimId != null) {
-                data.claimId = this.claimId;
-            }
-            if (this.claimData != null) {
-                data.claimData = this.claimData;
-            }
-            return data;
-        }
-        serialize(): Uint8Array;
-        serialize(w: pb_1.BinaryWriter): void;
-        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-            const writer = w || new pb_1.BinaryWriter();
-            if (this.collectionId.length)
-                writer.writeString(1, this.collectionId);
-            if (this.claimId.length)
-                writer.writeString(2, this.claimId);
-            if (this.claimData.length)
-                writer.writeString(3, this.claimData);
-            if (!w)
-                return writer.getResultBuffer();
-        }
-        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): QueryIsClaimDataUsedRequest {
-            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new QueryIsClaimDataUsedRequest();
-            while (reader.nextField()) {
-                if (reader.isEndGroup())
-                    break;
-                switch (reader.getFieldNumber()) {
-                    case 1:
-                        message.collectionId = reader.readString();
-                        break;
-                    case 2:
-                        message.claimId = reader.readString();
-                        break;
-                    case 3:
-                        message.claimData = reader.readString();
-                        break;
-                    default: reader.skipField();
-                }
-            }
-            return message;
-        }
-        serializeBinary(): Uint8Array {
-            return this.serialize();
-        }
-        static deserializeBinary(bytes: Uint8Array): QueryIsClaimDataUsedRequest {
-            return QueryIsClaimDataUsedRequest.deserialize(bytes);
-        }
+    get has_params() {
+      return pb_1.Message.getField(this, 1) != null;
     }
-    export class QueryIsClaimDataUsedResponse extends pb_1.Message {
-        #one_of_decls: number[][] = [];
-        constructor(data?: any[] | {
-            used?: boolean;
-        }) {
-            super();
-            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
-            if (!Array.isArray(data) && typeof data == "object") {
-                if ("used" in data && data.used != undefined) {
-                    this.used = data.used;
-                }
-            }
-        }
-        get used() {
-            return pb_1.Message.getFieldWithDefault(this, 1, false) as boolean;
-        }
-        set used(value: boolean) {
-            pb_1.Message.setField(this, 1, value);
-        }
-        static fromObject(data: {
-            used?: boolean;
-        }): QueryIsClaimDataUsedResponse {
-            const message = new QueryIsClaimDataUsedResponse({});
-            if (data.used != null) {
-                message.used = data.used;
-            }
-            return message;
-        }
-        toObject() {
-            const data: {
-                used?: boolean;
-            } = {};
-            if (this.used != null) {
-                data.used = this.used;
-            }
-            return data;
-        }
-        serialize(): Uint8Array;
-        serialize(w: pb_1.BinaryWriter): void;
-        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-            const writer = w || new pb_1.BinaryWriter();
-            if (this.used != false)
-                writer.writeBool(1, this.used);
-            if (!w)
-                return writer.getResultBuffer();
-        }
-        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): QueryIsClaimDataUsedResponse {
-            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new QueryIsClaimDataUsedResponse();
-            while (reader.nextField()) {
-                if (reader.isEndGroup())
-                    break;
-                switch (reader.getFieldNumber()) {
-                    case 1:
-                        message.used = reader.readBool();
-                        break;
-                    default: reader.skipField();
-                }
-            }
-            return message;
-        }
-        serializeBinary(): Uint8Array {
-            return this.serialize();
-        }
-        static deserializeBinary(bytes: Uint8Array): QueryIsClaimDataUsedResponse {
-            return QueryIsClaimDataUsedResponse.deserialize(bytes);
-        }
+    static fromObject(data: {
+      params?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.Params.prototype.toObject>;
+    }): QueryParamsResponse {
+      const message = new QueryParamsResponse({});
+      if (data.params != null) {
+        message.params = dependency_4.bitbadges.bitbadgeschain.badges.Params.fromObject(data.params);
+      }
+      return message;
     }
+    toObject() {
+      const data: {
+        params?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.Params.prototype.toObject>;
+      } = {};
+      if (this.params != null) {
+        data.params = this.params.toObject();
+      }
+      return data;
+    }
+    serialize(): Uint8Array;
+    serialize(w: pb_1.BinaryWriter): void;
+    serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+      const writer = w || new pb_1.BinaryWriter();
+      if (this.has_params)
+        writer.writeMessage(1, this.params, () => this.params.serialize(writer));
+      if (!w)
+        return writer.getResultBuffer();
+    }
+    static deserialize(bytes: Uint8Array | pb_1.BinaryReader): QueryParamsResponse {
+      const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new QueryParamsResponse();
+      while (reader.nextField()) {
+        if (reader.isEndGroup())
+          break;
+        switch (reader.getFieldNumber()) {
+          case 1:
+            reader.readMessage(message.params, () => message.params = dependency_4.bitbadges.bitbadgeschain.badges.Params.deserialize(reader));
+            break;
+          default: reader.skipField();
+        }
+      }
+      return message;
+    }
+    serializeBinary(): Uint8Array {
+      return this.serialize();
+    }
+    static deserializeBinary(bytes: Uint8Array): QueryParamsResponse {
+      return QueryParamsResponse.deserialize(bytes);
+    }
+  }
+  export class QueryGetCollectionRequest extends pb_1.Message {
+    #one_of_decls: number[][] = [];
+    constructor(data?: any[] | {
+      collectionId?: string;
+    }) {
+      super();
+      pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+      if (!Array.isArray(data) && typeof data == "object") {
+        if ("collectionId" in data && data.collectionId != undefined) {
+          this.collectionId = data.collectionId;
+        }
+      }
+    }
+    get collectionId() {
+      return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
+    }
+    set collectionId(value: string) {
+      pb_1.Message.setField(this, 1, value);
+    }
+    static fromObject(data: {
+      collectionId?: string;
+    }): QueryGetCollectionRequest {
+      const message = new QueryGetCollectionRequest({});
+      if (data.collectionId != null) {
+        message.collectionId = data.collectionId;
+      }
+      return message;
+    }
+    toObject() {
+      const data: {
+        collectionId?: string;
+      } = {};
+      if (this.collectionId != null) {
+        data.collectionId = this.collectionId;
+      }
+      return data;
+    }
+    serialize(): Uint8Array;
+    serialize(w: pb_1.BinaryWriter): void;
+    serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+      const writer = w || new pb_1.BinaryWriter();
+      if (this.collectionId.length)
+        writer.writeString(1, this.collectionId);
+      if (!w)
+        return writer.getResultBuffer();
+    }
+    static deserialize(bytes: Uint8Array | pb_1.BinaryReader): QueryGetCollectionRequest {
+      const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new QueryGetCollectionRequest();
+      while (reader.nextField()) {
+        if (reader.isEndGroup())
+          break;
+        switch (reader.getFieldNumber()) {
+          case 1:
+            message.collectionId = reader.readString();
+            break;
+          default: reader.skipField();
+        }
+      }
+      return message;
+    }
+    serializeBinary(): Uint8Array {
+      return this.serialize();
+    }
+    static deserializeBinary(bytes: Uint8Array): QueryGetCollectionRequest {
+      return QueryGetCollectionRequest.deserialize(bytes);
+    }
+  }
+  export class QueryGetCollectionResponse extends pb_1.Message {
+    #one_of_decls: number[][] = [];
+    constructor(data?: any[] | {
+      collection?: dependency_5.bitbadges.bitbadgeschain.badges.BadgeCollection;
+    }) {
+      super();
+      pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+      if (!Array.isArray(data) && typeof data == "object") {
+        if ("collection" in data && data.collection != undefined) {
+          this.collection = data.collection;
+        }
+      }
+    }
+    get collection() {
+      return pb_1.Message.getWrapperField(this, dependency_5.bitbadges.bitbadgeschain.badges.BadgeCollection, 1) as dependency_5.bitbadges.bitbadgeschain.badges.BadgeCollection;
+    }
+    set collection(value: dependency_5.bitbadges.bitbadgeschain.badges.BadgeCollection) {
+      pb_1.Message.setWrapperField(this, 1, value);
+    }
+    get has_collection() {
+      return pb_1.Message.getField(this, 1) != null;
+    }
+    static fromObject(data: {
+      collection?: ReturnType<typeof dependency_5.bitbadges.bitbadgeschain.badges.BadgeCollection.prototype.toObject>;
+    }): QueryGetCollectionResponse {
+      const message = new QueryGetCollectionResponse({});
+      if (data.collection != null) {
+        message.collection = dependency_5.bitbadges.bitbadgeschain.badges.BadgeCollection.fromObject(data.collection);
+      }
+      return message;
+    }
+    toObject() {
+      const data: {
+        collection?: ReturnType<typeof dependency_5.bitbadges.bitbadgeschain.badges.BadgeCollection.prototype.toObject>;
+      } = {};
+      if (this.collection != null) {
+        data.collection = this.collection.toObject();
+      }
+      return data;
+    }
+    serialize(): Uint8Array;
+    serialize(w: pb_1.BinaryWriter): void;
+    serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+      const writer = w || new pb_1.BinaryWriter();
+      if (this.has_collection)
+        writer.writeMessage(1, this.collection, () => this.collection.serialize(writer));
+      if (!w)
+        return writer.getResultBuffer();
+    }
+    static deserialize(bytes: Uint8Array | pb_1.BinaryReader): QueryGetCollectionResponse {
+      const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new QueryGetCollectionResponse();
+      while (reader.nextField()) {
+        if (reader.isEndGroup())
+          break;
+        switch (reader.getFieldNumber()) {
+          case 1:
+            reader.readMessage(message.collection, () => message.collection = dependency_5.bitbadges.bitbadgeschain.badges.BadgeCollection.deserialize(reader));
+            break;
+          default: reader.skipField();
+        }
+      }
+      return message;
+    }
+    serializeBinary(): Uint8Array {
+      return this.serialize();
+    }
+    static deserializeBinary(bytes: Uint8Array): QueryGetCollectionResponse {
+      return QueryGetCollectionResponse.deserialize(bytes);
+    }
+  }
+  export class QueryGetBalanceRequest extends pb_1.Message {
+    #one_of_decls: number[][] = [];
+    constructor(data?: any[] | {
+      collectionId?: string;
+      address?: string;
+    }) {
+      super();
+      pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+      if (!Array.isArray(data) && typeof data == "object") {
+        if ("collectionId" in data && data.collectionId != undefined) {
+          this.collectionId = data.collectionId;
+        }
+        if ("address" in data && data.address != undefined) {
+          this.address = data.address;
+        }
+      }
+    }
+    get collectionId() {
+      return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
+    }
+    set collectionId(value: string) {
+      pb_1.Message.setField(this, 1, value);
+    }
+    get address() {
+      return pb_1.Message.getFieldWithDefault(this, 2, "") as string;
+    }
+    set address(value: string) {
+      pb_1.Message.setField(this, 2, value);
+    }
+    static fromObject(data: {
+      collectionId?: string;
+      address?: string;
+    }): QueryGetBalanceRequest {
+      const message = new QueryGetBalanceRequest({});
+      if (data.collectionId != null) {
+        message.collectionId = data.collectionId;
+      }
+      if (data.address != null) {
+        message.address = data.address;
+      }
+      return message;
+    }
+    toObject() {
+      const data: {
+        collectionId?: string;
+        address?: string;
+      } = {};
+      if (this.collectionId != null) {
+        data.collectionId = this.collectionId;
+      }
+      if (this.address != null) {
+        data.address = this.address;
+      }
+      return data;
+    }
+    serialize(): Uint8Array;
+    serialize(w: pb_1.BinaryWriter): void;
+    serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+      const writer = w || new pb_1.BinaryWriter();
+      if (this.collectionId.length)
+        writer.writeString(1, this.collectionId);
+      if (this.address.length)
+        writer.writeString(2, this.address);
+      if (!w)
+        return writer.getResultBuffer();
+    }
+    static deserialize(bytes: Uint8Array | pb_1.BinaryReader): QueryGetBalanceRequest {
+      const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new QueryGetBalanceRequest();
+      while (reader.nextField()) {
+        if (reader.isEndGroup())
+          break;
+        switch (reader.getFieldNumber()) {
+          case 1:
+            message.collectionId = reader.readString();
+            break;
+          case 2:
+            message.address = reader.readString();
+            break;
+          default: reader.skipField();
+        }
+      }
+      return message;
+    }
+    serializeBinary(): Uint8Array {
+      return this.serialize();
+    }
+    static deserializeBinary(bytes: Uint8Array): QueryGetBalanceRequest {
+      return QueryGetBalanceRequest.deserialize(bytes);
+    }
+  }
+  export class QueryGetBalanceResponse extends pb_1.Message {
+    #one_of_decls: number[][] = [];
+    constructor(data?: any[] | {
+      balance?: dependency_7.bitbadges.bitbadgeschain.badges.UserBalanceStore;
+    }) {
+      super();
+      pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+      if (!Array.isArray(data) && typeof data == "object") {
+        if ("balance" in data && data.balance != undefined) {
+          this.balance = data.balance;
+        }
+      }
+    }
+    get balance() {
+      return pb_1.Message.getWrapperField(this, dependency_7.bitbadges.bitbadgeschain.badges.UserBalanceStore, 1) as dependency_7.bitbadges.bitbadgeschain.badges.UserBalanceStore;
+    }
+    set balance(value: dependency_7.bitbadges.bitbadgeschain.badges.UserBalanceStore) {
+      pb_1.Message.setWrapperField(this, 1, value);
+    }
+    get has_balance() {
+      return pb_1.Message.getField(this, 1) != null;
+    }
+    static fromObject(data: {
+      balance?: ReturnType<typeof dependency_7.bitbadges.bitbadgeschain.badges.UserBalanceStore.prototype.toObject>;
+    }): QueryGetBalanceResponse {
+      const message = new QueryGetBalanceResponse({});
+      if (data.balance != null) {
+        message.balance = dependency_7.bitbadges.bitbadgeschain.badges.UserBalanceStore.fromObject(data.balance);
+      }
+      return message;
+    }
+    toObject() {
+      const data: {
+        balance?: ReturnType<typeof dependency_7.bitbadges.bitbadgeschain.badges.UserBalanceStore.prototype.toObject>;
+      } = {};
+      if (this.balance != null) {
+        data.balance = this.balance.toObject();
+      }
+      return data;
+    }
+    serialize(): Uint8Array;
+    serialize(w: pb_1.BinaryWriter): void;
+    serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+      const writer = w || new pb_1.BinaryWriter();
+      if (this.has_balance)
+        writer.writeMessage(1, this.balance, () => this.balance.serialize(writer));
+      if (!w)
+        return writer.getResultBuffer();
+    }
+    static deserialize(bytes: Uint8Array | pb_1.BinaryReader): QueryGetBalanceResponse {
+      const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new QueryGetBalanceResponse();
+      while (reader.nextField()) {
+        if (reader.isEndGroup())
+          break;
+        switch (reader.getFieldNumber()) {
+          case 1:
+            reader.readMessage(message.balance, () => message.balance = dependency_7.bitbadges.bitbadgeschain.badges.UserBalanceStore.deserialize(reader));
+            break;
+          default: reader.skipField();
+        }
+      }
+      return message;
+    }
+    serializeBinary(): Uint8Array {
+      return this.serialize();
+    }
+    static deserializeBinary(bytes: Uint8Array): QueryGetBalanceResponse {
+      return QueryGetBalanceResponse.deserialize(bytes);
+    }
+  }
+  export class QueryGetAddressMappingRequest extends pb_1.Message {
+    #one_of_decls: number[][] = [];
+    constructor(data?: any[] | {
+      mappingId?: string;
+    }) {
+      super();
+      pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+      if (!Array.isArray(data) && typeof data == "object") {
+        if ("mappingId" in data && data.mappingId != undefined) {
+          this.mappingId = data.mappingId;
+        }
+      }
+    }
+    get mappingId() {
+      return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
+    }
+    set mappingId(value: string) {
+      pb_1.Message.setField(this, 1, value);
+    }
+    static fromObject(data: {
+      mappingId?: string;
+    }): QueryGetAddressMappingRequest {
+      const message = new QueryGetAddressMappingRequest({});
+      if (data.mappingId != null) {
+        message.mappingId = data.mappingId;
+      }
+      return message;
+    }
+    toObject() {
+      const data: {
+        mappingId?: string;
+      } = {};
+      if (this.mappingId != null) {
+        data.mappingId = this.mappingId;
+      }
+      return data;
+    }
+    serialize(): Uint8Array;
+    serialize(w: pb_1.BinaryWriter): void;
+    serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+      const writer = w || new pb_1.BinaryWriter();
+      if (this.mappingId.length)
+        writer.writeString(1, this.mappingId);
+      if (!w)
+        return writer.getResultBuffer();
+    }
+    static deserialize(bytes: Uint8Array | pb_1.BinaryReader): QueryGetAddressMappingRequest {
+      const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new QueryGetAddressMappingRequest();
+      while (reader.nextField()) {
+        if (reader.isEndGroup())
+          break;
+        switch (reader.getFieldNumber()) {
+          case 1:
+            message.mappingId = reader.readString();
+            break;
+          default: reader.skipField();
+        }
+      }
+      return message;
+    }
+    serializeBinary(): Uint8Array {
+      return this.serialize();
+    }
+    static deserializeBinary(bytes: Uint8Array): QueryGetAddressMappingRequest {
+      return QueryGetAddressMappingRequest.deserialize(bytes);
+    }
+  }
+  export class QueryGetAddressMappingResponse extends pb_1.Message {
+    #one_of_decls: number[][] = [];
+    constructor(data?: any[] | {
+      mapping?: dependency_8.bitbadges.bitbadgeschain.badges.AddressMapping;
+    }) {
+      super();
+      pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+      if (!Array.isArray(data) && typeof data == "object") {
+        if ("mapping" in data && data.mapping != undefined) {
+          this.mapping = data.mapping;
+        }
+      }
+    }
+    get mapping() {
+      return pb_1.Message.getWrapperField(this, dependency_8.bitbadges.bitbadgeschain.badges.AddressMapping, 1) as dependency_8.bitbadges.bitbadgeschain.badges.AddressMapping;
+    }
+    set mapping(value: dependency_8.bitbadges.bitbadgeschain.badges.AddressMapping) {
+      pb_1.Message.setWrapperField(this, 1, value);
+    }
+    get has_mapping() {
+      return pb_1.Message.getField(this, 1) != null;
+    }
+    static fromObject(data: {
+      mapping?: ReturnType<typeof dependency_8.bitbadges.bitbadgeschain.badges.AddressMapping.prototype.toObject>;
+    }): QueryGetAddressMappingResponse {
+      const message = new QueryGetAddressMappingResponse({});
+      if (data.mapping != null) {
+        message.mapping = dependency_8.bitbadges.bitbadgeschain.badges.AddressMapping.fromObject(data.mapping);
+      }
+      return message;
+    }
+    toObject() {
+      const data: {
+        mapping?: ReturnType<typeof dependency_8.bitbadges.bitbadgeschain.badges.AddressMapping.prototype.toObject>;
+      } = {};
+      if (this.mapping != null) {
+        data.mapping = this.mapping.toObject();
+      }
+      return data;
+    }
+    serialize(): Uint8Array;
+    serialize(w: pb_1.BinaryWriter): void;
+    serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+      const writer = w || new pb_1.BinaryWriter();
+      if (this.has_mapping)
+        writer.writeMessage(1, this.mapping, () => this.mapping.serialize(writer));
+      if (!w)
+        return writer.getResultBuffer();
+    }
+    static deserialize(bytes: Uint8Array | pb_1.BinaryReader): QueryGetAddressMappingResponse {
+      const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new QueryGetAddressMappingResponse();
+      while (reader.nextField()) {
+        if (reader.isEndGroup())
+          break;
+        switch (reader.getFieldNumber()) {
+          case 1:
+            reader.readMessage(message.mapping, () => message.mapping = dependency_8.bitbadges.bitbadgeschain.badges.AddressMapping.deserialize(reader));
+            break;
+          default: reader.skipField();
+        }
+      }
+      return message;
+    }
+    serializeBinary(): Uint8Array {
+      return this.serialize();
+    }
+    static deserializeBinary(bytes: Uint8Array): QueryGetAddressMappingResponse {
+      return QueryGetAddressMappingResponse.deserialize(bytes);
+    }
+  }
+  export class QueryGetApprovalsTrackerRequest extends pb_1.Message {
+    #one_of_decls: number[][] = [];
+    constructor(data?: any[] | {
+      collectionId?: string;
+      approvalLevel?: string;
+      address?: string;
+      approvalId?: string;
+      trackerType?: string;
+    }) {
+      super();
+      pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+      if (!Array.isArray(data) && typeof data == "object") {
+        if ("collectionId" in data && data.collectionId != undefined) {
+          this.collectionId = data.collectionId;
+        }
+        if ("approvalLevel" in data && data.approvalLevel != undefined) {
+          this.approvalLevel = data.approvalLevel;
+        }
+        if ("address" in data && data.address != undefined) {
+          this.address = data.address;
+        }
+        if ("approvalId" in data && data.approvalId != undefined) {
+          this.approvalId = data.approvalId;
+        }
+        if ("trackerType" in data && data.trackerType != undefined) {
+          this.trackerType = data.trackerType;
+        }
+      }
+    }
+    get collectionId() {
+      return pb_1.Message.getFieldWithDefault(this, 5, "") as string;
+    }
+    set collectionId(value: string) {
+      pb_1.Message.setField(this, 5, value);
+    }
+    get approvalLevel() {
+      return pb_1.Message.getFieldWithDefault(this, 2, "") as string;
+    }
+    set approvalLevel(value: string) {
+      pb_1.Message.setField(this, 2, value);
+    }
+    get address() {
+      return pb_1.Message.getFieldWithDefault(this, 3, "") as string;
+    }
+    set address(value: string) {
+      pb_1.Message.setField(this, 3, value);
+    }
+    get approvalId() {
+      return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
+    }
+    set approvalId(value: string) {
+      pb_1.Message.setField(this, 1, value);
+    }
+    get trackerType() {
+      return pb_1.Message.getFieldWithDefault(this, 4, "") as string;
+    }
+    set trackerType(value: string) {
+      pb_1.Message.setField(this, 4, value);
+    }
+    static fromObject(data: {
+      collectionId?: string;
+      approvalLevel?: string;
+      address?: string;
+      approvalId?: string;
+      trackerType?: string;
+    }): QueryGetApprovalsTrackerRequest {
+      const message = new QueryGetApprovalsTrackerRequest({});
+      if (data.collectionId != null) {
+        message.collectionId = data.collectionId;
+      }
+      if (data.approvalLevel != null) {
+        message.approvalLevel = data.approvalLevel;
+      }
+      if (data.address != null) {
+        message.address = data.address;
+      }
+      if (data.approvalId != null) {
+        message.approvalId = data.approvalId;
+      }
+      if (data.trackerType != null) {
+        message.trackerType = data.trackerType;
+      }
+      return message;
+    }
+    toObject() {
+      const data: {
+        collectionId?: string;
+        approvalLevel?: string;
+        address?: string;
+        approvalId?: string;
+        trackerType?: string;
+      } = {};
+      if (this.collectionId != null) {
+        data.collectionId = this.collectionId;
+      }
+      if (this.approvalLevel != null) {
+        data.approvalLevel = this.approvalLevel;
+      }
+      if (this.address != null) {
+        data.address = this.address;
+      }
+      if (this.approvalId != null) {
+        data.approvalId = this.approvalId;
+      }
+      if (this.trackerType != null) {
+        data.trackerType = this.trackerType;
+      }
+      return data;
+    }
+    serialize(): Uint8Array;
+    serialize(w: pb_1.BinaryWriter): void;
+    serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+      const writer = w || new pb_1.BinaryWriter();
+      if (this.collectionId.length)
+        writer.writeString(5, this.collectionId);
+      if (this.approvalLevel.length)
+        writer.writeString(2, this.approvalLevel);
+      if (this.address.length)
+        writer.writeString(3, this.address);
+      if (this.approvalId.length)
+        writer.writeString(1, this.approvalId);
+      if (this.trackerType.length)
+        writer.writeString(4, this.trackerType);
+      if (!w)
+        return writer.getResultBuffer();
+    }
+    static deserialize(bytes: Uint8Array | pb_1.BinaryReader): QueryGetApprovalsTrackerRequest {
+      const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new QueryGetApprovalsTrackerRequest();
+      while (reader.nextField()) {
+        if (reader.isEndGroup())
+          break;
+        switch (reader.getFieldNumber()) {
+          case 5:
+            message.collectionId = reader.readString();
+            break;
+          case 2:
+            message.approvalLevel = reader.readString();
+            break;
+          case 3:
+            message.address = reader.readString();
+            break;
+          case 1:
+            message.approvalId = reader.readString();
+            break;
+          case 4:
+            message.trackerType = reader.readString();
+            break;
+          default: reader.skipField();
+        }
+      }
+      return message;
+    }
+    serializeBinary(): Uint8Array {
+      return this.serialize();
+    }
+    static deserializeBinary(bytes: Uint8Array): QueryGetApprovalsTrackerRequest {
+      return QueryGetApprovalsTrackerRequest.deserialize(bytes);
+    }
+  }
+  export class QueryGetApprovalsTrackerResponse extends pb_1.Message {
+    #one_of_decls: number[][] = [];
+    constructor(data?: any[] | {
+      tracker?: dependency_7.bitbadges.bitbadgeschain.badges.ApprovalsTracker;
+    }) {
+      super();
+      pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+      if (!Array.isArray(data) && typeof data == "object") {
+        if ("tracker" in data && data.tracker != undefined) {
+          this.tracker = data.tracker;
+        }
+      }
+    }
+    get tracker() {
+      return pb_1.Message.getWrapperField(this, dependency_7.bitbadges.bitbadgeschain.badges.ApprovalsTracker, 1) as dependency_7.bitbadges.bitbadgeschain.badges.ApprovalsTracker;
+    }
+    set tracker(value: dependency_7.bitbadges.bitbadgeschain.badges.ApprovalsTracker) {
+      pb_1.Message.setWrapperField(this, 1, value);
+    }
+    get has_tracker() {
+      return pb_1.Message.getField(this, 1) != null;
+    }
+    static fromObject(data: {
+      tracker?: ReturnType<typeof dependency_7.bitbadges.bitbadgeschain.badges.ApprovalsTracker.prototype.toObject>;
+    }): QueryGetApprovalsTrackerResponse {
+      const message = new QueryGetApprovalsTrackerResponse({});
+      if (data.tracker != null) {
+        message.tracker = dependency_7.bitbadges.bitbadgeschain.badges.ApprovalsTracker.fromObject(data.tracker);
+      }
+      return message;
+    }
+    toObject() {
+      const data: {
+        tracker?: ReturnType<typeof dependency_7.bitbadges.bitbadgeschain.badges.ApprovalsTracker.prototype.toObject>;
+      } = {};
+      if (this.tracker != null) {
+        data.tracker = this.tracker.toObject();
+      }
+      return data;
+    }
+    serialize(): Uint8Array;
+    serialize(w: pb_1.BinaryWriter): void;
+    serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+      const writer = w || new pb_1.BinaryWriter();
+      if (this.has_tracker)
+        writer.writeMessage(1, this.tracker, () => this.tracker.serialize(writer));
+      if (!w)
+        return writer.getResultBuffer();
+    }
+    static deserialize(bytes: Uint8Array | pb_1.BinaryReader): QueryGetApprovalsTrackerResponse {
+      const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new QueryGetApprovalsTrackerResponse();
+      while (reader.nextField()) {
+        if (reader.isEndGroup())
+          break;
+        switch (reader.getFieldNumber()) {
+          case 1:
+            reader.readMessage(message.tracker, () => message.tracker = dependency_7.bitbadges.bitbadgeschain.badges.ApprovalsTracker.deserialize(reader));
+            break;
+          default: reader.skipField();
+        }
+      }
+      return message;
+    }
+    serializeBinary(): Uint8Array {
+      return this.serialize();
+    }
+    static deserializeBinary(bytes: Uint8Array): QueryGetApprovalsTrackerResponse {
+      return QueryGetApprovalsTrackerResponse.deserialize(bytes);
+    }
+  }
+  export class QueryGetNumUsedForMerkleChallengeRequest extends pb_1.Message {
+    #one_of_decls: number[][] = [];
+    constructor(data?: any[] | {
+      collectionId?: string;
+      approvalLevel?: string;
+      address?: string;
+      challengeId?: string;
+      leafIndex?: string;
+    }) {
+      super();
+      pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+      if (!Array.isArray(data) && typeof data == "object") {
+        if ("collectionId" in data && data.collectionId != undefined) {
+          this.collectionId = data.collectionId;
+        }
+        if ("approvalLevel" in data && data.approvalLevel != undefined) {
+          this.approvalLevel = data.approvalLevel;
+        }
+        if ("address" in data && data.address != undefined) {
+          this.address = data.address;
+        }
+        if ("challengeId" in data && data.challengeId != undefined) {
+          this.challengeId = data.challengeId;
+        }
+        if ("leafIndex" in data && data.leafIndex != undefined) {
+          this.leafIndex = data.leafIndex;
+        }
+      }
+    }
+    get collectionId() {
+      return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
+    }
+    set collectionId(value: string) {
+      pb_1.Message.setField(this, 1, value);
+    }
+    get approvalLevel() {
+      return pb_1.Message.getFieldWithDefault(this, 2, "") as string;
+    }
+    set approvalLevel(value: string) {
+      pb_1.Message.setField(this, 2, value);
+    }
+    get address() {
+      return pb_1.Message.getFieldWithDefault(this, 3, "") as string;
+    }
+    set address(value: string) {
+      pb_1.Message.setField(this, 3, value);
+    }
+    get challengeId() {
+      return pb_1.Message.getFieldWithDefault(this, 4, "") as string;
+    }
+    set challengeId(value: string) {
+      pb_1.Message.setField(this, 4, value);
+    }
+    get leafIndex() {
+      return pb_1.Message.getFieldWithDefault(this, 5, "") as string;
+    }
+    set leafIndex(value: string) {
+      pb_1.Message.setField(this, 5, value);
+    }
+    static fromObject(data: {
+      collectionId?: string;
+      approvalLevel?: string;
+      address?: string;
+      challengeId?: string;
+      leafIndex?: string;
+    }): QueryGetNumUsedForMerkleChallengeRequest {
+      const message = new QueryGetNumUsedForMerkleChallengeRequest({});
+      if (data.collectionId != null) {
+        message.collectionId = data.collectionId;
+      }
+      if (data.approvalLevel != null) {
+        message.approvalLevel = data.approvalLevel;
+      }
+      if (data.address != null) {
+        message.address = data.address;
+      }
+      if (data.challengeId != null) {
+        message.challengeId = data.challengeId;
+      }
+      if (data.leafIndex != null) {
+        message.leafIndex = data.leafIndex;
+      }
+      return message;
+    }
+    toObject() {
+      const data: {
+        collectionId?: string;
+        approvalLevel?: string;
+        address?: string;
+        challengeId?: string;
+        leafIndex?: string;
+      } = {};
+      if (this.collectionId != null) {
+        data.collectionId = this.collectionId;
+      }
+      if (this.approvalLevel != null) {
+        data.approvalLevel = this.approvalLevel;
+      }
+      if (this.address != null) {
+        data.address = this.address;
+      }
+      if (this.challengeId != null) {
+        data.challengeId = this.challengeId;
+      }
+      if (this.leafIndex != null) {
+        data.leafIndex = this.leafIndex;
+      }
+      return data;
+    }
+    serialize(): Uint8Array;
+    serialize(w: pb_1.BinaryWriter): void;
+    serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+      const writer = w || new pb_1.BinaryWriter();
+      if (this.collectionId.length)
+        writer.writeString(1, this.collectionId);
+      if (this.approvalLevel.length)
+        writer.writeString(2, this.approvalLevel);
+      if (this.address.length)
+        writer.writeString(3, this.address);
+      if (this.challengeId.length)
+        writer.writeString(4, this.challengeId);
+      if (this.leafIndex.length)
+        writer.writeString(5, this.leafIndex);
+      if (!w)
+        return writer.getResultBuffer();
+    }
+    static deserialize(bytes: Uint8Array | pb_1.BinaryReader): QueryGetNumUsedForMerkleChallengeRequest {
+      const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new QueryGetNumUsedForMerkleChallengeRequest();
+      while (reader.nextField()) {
+        if (reader.isEndGroup())
+          break;
+        switch (reader.getFieldNumber()) {
+          case 1:
+            message.collectionId = reader.readString();
+            break;
+          case 2:
+            message.approvalLevel = reader.readString();
+            break;
+          case 3:
+            message.address = reader.readString();
+            break;
+          case 4:
+            message.challengeId = reader.readString();
+            break;
+          case 5:
+            message.leafIndex = reader.readString();
+            break;
+          default: reader.skipField();
+        }
+      }
+      return message;
+    }
+    serializeBinary(): Uint8Array {
+      return this.serialize();
+    }
+    static deserializeBinary(bytes: Uint8Array): QueryGetNumUsedForMerkleChallengeRequest {
+      return QueryGetNumUsedForMerkleChallengeRequest.deserialize(bytes);
+    }
+  }
+  export class QueryGetNumUsedForMerkleChallengeResponse extends pb_1.Message {
+    #one_of_decls: number[][] = [];
+    constructor(data?: any[] | {
+      numUsed?: string;
+    }) {
+      super();
+      pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+      if (!Array.isArray(data) && typeof data == "object") {
+        if ("numUsed" in data && data.numUsed != undefined) {
+          this.numUsed = data.numUsed;
+        }
+      }
+    }
+    get numUsed() {
+      return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
+    }
+    set numUsed(value: string) {
+      pb_1.Message.setField(this, 1, value);
+    }
+    static fromObject(data: {
+      numUsed?: string;
+    }): QueryGetNumUsedForMerkleChallengeResponse {
+      const message = new QueryGetNumUsedForMerkleChallengeResponse({});
+      if (data.numUsed != null) {
+        message.numUsed = data.numUsed;
+      }
+      return message;
+    }
+    toObject() {
+      const data: {
+        numUsed?: string;
+      } = {};
+      if (this.numUsed != null) {
+        data.numUsed = this.numUsed;
+      }
+      return data;
+    }
+    serialize(): Uint8Array;
+    serialize(w: pb_1.BinaryWriter): void;
+    serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+      const writer = w || new pb_1.BinaryWriter();
+      if (this.numUsed.length)
+        writer.writeString(1, this.numUsed);
+      if (!w)
+        return writer.getResultBuffer();
+    }
+    static deserialize(bytes: Uint8Array | pb_1.BinaryReader): QueryGetNumUsedForMerkleChallengeResponse {
+      const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new QueryGetNumUsedForMerkleChallengeResponse();
+      while (reader.nextField()) {
+        if (reader.isEndGroup())
+          break;
+        switch (reader.getFieldNumber()) {
+          case 1:
+            message.numUsed = reader.readString();
+            break;
+          default: reader.skipField();
+        }
+      }
+      return message;
+    }
+    serializeBinary(): Uint8Array {
+      return this.serialize();
+    }
+    static deserializeBinary(bytes: Uint8Array): QueryGetNumUsedForMerkleChallengeResponse {
+      return QueryGetNumUsedForMerkleChallengeResponse.deserialize(bytes);
+    }
+  }
 }

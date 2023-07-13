@@ -1,6 +1,6 @@
 import {
   ADDRESSES_MAPPING_TYPES,
-  ID_RANGE_TYPES,
+  UINT_RANGE_TYPES,
   TRANSFER_MAPPING_TYPES,
 } from './eip712HelperTypes'
 
@@ -13,7 +13,7 @@ const MsgUpdateAllowedTransfersValueType = [
 ]
 
 export const MSG_UPDATE_ALLOWED_TRANSFERS_TYPES = {
-  IdRange: ID_RANGE_TYPES,
+  UintRange: UINT_RANGE_TYPES,
   MsgValue: MsgUpdateAllowedTransfersValueType,
   TransferMapping: TRANSFER_MAPPING_TYPES,
   AddressesMapping: ADDRESSES_MAPPING_TYPES,

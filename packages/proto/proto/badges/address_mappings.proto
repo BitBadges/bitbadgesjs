@@ -1,0 +1,24 @@
+syntax = "proto3";
+package bitbadges.bitbadgeschain.badges;
+
+import "gogoproto/gogo.proto";
+import "badges/balances.proto";
+
+// this line is used by starport scaffolding # proto/tx/import
+
+option go_package = "github.com/bitbadges/bitbadgeschain/x/badges/types";
+
+// An AddressMapping is a permanent list of addresses that are referenced by a mapping ID.
+// The mapping may include only the specified addresses, or it may include all addresses but
+// the specified addresses (depending on if includeAddresses is true or false).
+//
+// AddressMappings are used for things like whitelists, blacklists, approvals, etc.
+message AddressMapping {
+  string mappingId = 1;
+
+  repeated string addresses = 2;
+  bool includeAddresses = 3;
+
+  string uri = 4;
+  string customData = 5;
+}

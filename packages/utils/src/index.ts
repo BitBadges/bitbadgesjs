@@ -22,7 +22,7 @@ export * from './chains';
 export * from './balances';
 export * from './distribution';
 export * from './balances';
-export * from './idRanges';
+export * from './uintRanges';
 export * from './constants';
 export * from './transferMappings';
 export * from './permissions';

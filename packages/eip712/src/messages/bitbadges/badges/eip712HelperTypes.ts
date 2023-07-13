@@ -1,6 +1,6 @@
 export const BADGE_URI_TYPES = [
   { name: 'uri', type: 'string' },
-  { name: 'badgeIds', type: 'IdRange[]' },
+  { name: 'badgeIds', type: 'UintRange[]' },
 ]
 
 export const TRANSFER_MAPPING_TYPES = [
@@ -14,14 +14,14 @@ export const ADDRESSES_MAPPING_TYPES = [
   { name: 'managerOptions', type: 'string' },
 ]
 
-export const ID_RANGE_TYPES = [
+export const UINT_RANGE_TYPES = [
   { name: 'start', type: 'string' },
   { name: 'end', type: 'string' },
 ]
 
 export const BALANCE_TYPES = [
   { name: 'amount', type: 'string' },
-  { name: 'badgeIds', type: 'IdRange[]' },
+  { name: 'badgeIds', type: 'UintRange[]' },
 ]
 
 export const BADGE_SUPPLY_AND_AMOUNT_TYPES = [
@@ -46,7 +46,7 @@ export const CHALLENGE_TYPES = [
 
 export const CLAIMS_TYPES = [
   { name: 'undistributedBalances', type: 'Balance[]' },
-  { name: 'timeRange', type: 'IdRange' },
+  { name: 'timeRange', type: 'UintRange' },
   { name: 'uri', type: 'string' },
   { name: 'numClaimsPerAddress', type: 'string' },
   { name: 'incrementIdsBy', type: 'string' },

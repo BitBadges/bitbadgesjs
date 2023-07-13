@@ -1,5 +1,5 @@
-import { IdRange } from "bitbadgesjs-proto";
-import { insertRangeToIdRanges, removeIdsFromIdRange, searchIdRangesForId } from "./idRanges";
+import { UintRange } from "bitbadgesjs-proto";
+import { insertRangeToUintRanges, removeIdsFromUintRange, searchUintRangesForId } from "./uintRanges";
 import { Metadata } from "./types/metadata";
 import { MetadataMap } from "./types/types";
 
@@ -30,10 +30,10 @@ import { MetadataMap } from "./types/types";
  *
  * @param {MetadataMap} currMetadataMap - The current metadata map
  * @param {Metadata} metadata - The metadata to update the map with
- * @param {IdRange} badgeIds - The badge IDs that correspond to the metadata
+ * @param {UintRange} badgeIds - The badge IDs that correspond to the metadata
  * @param {string} uri - The URI that the metadata was fetched from
  */
-export const updateMetadataMap = (currMetadataMap: MetadataMap, metadata: Metadata, badgeIds: IdRange, uri: string) => {
+export const updateMetadataMap = (currMetadataMap: MetadataMap, metadata: Metadata, badgeIds: UintRange, uri: string) => {
   let currentMetadata = metadata;
 
   let keys = Object.keys(currMetadataMap);
@@ -48,7 +48,7 @@ export const updateMetadataMap = (currMetadataMap: MetadataMap, metadata: Metada
     if (!val) continue; //For TS
 
     for (let j = 0; j < val.badgeIds.length; j++) {
-      val.badgeIds = [...val.badgeIds.slice(0, j), ...removeIdsFromIdRange({ start: startBadgeId, end: endBadgeId }, val.badgeIds[j]), ...val.badgeIds.slice(j + 1)]
+      val.badgeIds = [...val.badgeIds.slice(0, j), ...removeIdsFromUintRange({ start: startBadgeId, end: endBadgeId }, val.badgeIds[j]), ...val.badgeIds.slice(j + 1)]
     }
   }
 
@@ -60,7 +60,7 @@ export const updateMetadataMap = (currMetadataMap: MetadataMap, metadata: Metada
 
     if (JSON.stringify(val.metadata) === JSON.stringify(currentMetadata)) {
       currMetadataMapExists = true;
-      val.badgeIds = val.badgeIds.length > 0 ? insertRangeToIdRanges({ start: startBadgeId, end: endBadgeId }, val.badgeIds) : [{ start: startBadgeId, end: endBadgeId }];
+      val.badgeIds = val.badgeIds.length > 0 ? insertRangeToUintRanges({ start: startBadgeId, end: endBadgeId }, val.badgeIds) : [{ start: startBadgeId, end: endBadgeId }];
     }
   }
 
@@ -108,7 +108,7 @@ export function getMetadataMapObjForBadgeId(badgeId: bigint, metadataMap: Metada
   for (const val of Object.values(metadataMap)) {
     if (!val) continue; //For TS
 
-    const [_idx, found] = searchIdRangesForId(badgeId, val.badgeIds)
+    const [_idx, found] = searchUintRangesForId(badgeId, val.badgeIds)
     if (found) {
       return val;
     }
@@ -147,32 +147,32 @@ export function bigIntMin(a: bigint, b: bigint): bigint {
  * Use this function to set the "name" property of all badges to "test" via setMetadataPropertyForAllMapEntries(metadataMap, badgeIds, uri, "name", "test")
  *
  * @param {MetadataMap} metadataMap - The metadata map to update
- * @param {IdRange[]} badgeIds - The badge IDs to update
+ * @param {UintRange[]} badgeIds - The badge IDs to update
  * @param {string} uri - The URI that the metadata was fetched from (can use a placeholder like "Manual" and update it later)
  * @param {string} key - The key to update
  * @param {any} value - The value to update
  */
-export const setMetadataPropertyForAllMapEntries = (metadataMap: MetadataMap, badgeIds: IdRange[], uri: string, key: string, value: any) => {
-  for (const badgeIdRange of badgeIds) {
+export const setMetadataPropertyForAllMapEntries = (metadataMap: MetadataMap, badgeIds: UintRange[], uri: string, key: string, value: any) => {
+  for (const badgeUintRange of badgeIds) {
 
     //Otherwise, we are updating a specific key value pair for each
-    for (let id = badgeIdRange.start; id <= badgeIdRange.end; id++) {
+    for (let id = badgeUintRange.start; id <= badgeUintRange.end; id++) {
       let newMetadata = {} as Metadata;
       const values = Object.values(metadataMap);
-      const idRangeToUpdate = { start: id, end: id };
+      const uintRangeToUpdate = { start: id, end: id };
 
       for (let i = 0; i < values.length; i++) {
         const val = values[i];
         if (!val) continue; //For TS
 
         //Find the idx where id is in the badgeIds array
-        const [idx, found] = searchIdRangesForId(id, val.badgeIds)
+        const [idx, found] = searchUintRangesForId(id, val.badgeIds)
         if (found) {
           //If multiple sequential badge IDs have the same metadata and are in the ranges we want to update,
           //we can batch update all these together
-          const foundIdRange = val.badgeIds[idx];
-          const endIdToUpdate = bigIntMin(foundIdRange.end, badgeIdRange.end);
-          idRangeToUpdate.end = endIdToUpdate;
+          const foundUintRange = val.badgeIds[idx];
+          const endIdToUpdate = bigIntMin(foundUintRange.end, badgeUintRange.end);
+          uintRangeToUpdate.end = endIdToUpdate;
 
           id = endIdToUpdate; //Set id to the end of the range we are updating so we can skip to the next range (will be incremented by 1 at the end of the loop)
 
@@ -181,7 +181,7 @@ export const setMetadataPropertyForAllMapEntries = (metadataMap: MetadataMap, ba
         }
       }
 
-      metadataMap = updateMetadataMap(metadataMap, newMetadata, idRangeToUpdate, uri ?? 'Manual');
+      metadataMap = updateMetadataMap(metadataMap, newMetadata, uintRangeToUpdate, uri ?? 'Manual');
     }
   }
 

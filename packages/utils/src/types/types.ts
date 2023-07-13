@@ -1,4 +1,4 @@
-import { IdRange, UserBalance } from "bitbadgesjs-proto";
+import { UintRange, UserBalance } from "bitbadgesjs-proto";
 import { BitBadgesUserInfo, CollectionResponse } from "./api";
 import { Metadata } from "./metadata";
 
@@ -24,7 +24,7 @@ export interface BalancesMap {
 
 export interface MetadataMap {
   [metadataId: string]: {
-    badgeIds: IdRange[],
+    badgeIds: UintRange[],
     metadata: Metadata,
     uri: string
   } | undefined;

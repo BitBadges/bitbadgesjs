@@ -3,7 +3,7 @@
 import {
   createMsgTransferBadge as protoMsgTransferBadge,
   createTransaction,
-  IdRange, Transfers, convertToTransfer
+  UintRange, Transfers, convertToTransfer
 } from 'bitbadgesjs-proto'
 import * as badges from 'bitbadgesjs-proto/dist/proto/badges/tx'
 

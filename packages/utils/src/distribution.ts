@@ -1,5 +1,5 @@
 import { Balance, Transfer } from "bitbadgesjs-proto";
-import { subtractBalancesForIdRanges } from "./balances";
+import { subtractBalancesForUintRanges } from "./balances";
 import { TransferWithIncrements } from "./types/transfers";
 
 
@@ -53,7 +53,7 @@ export const getTransfersFromTransfersWithIncrements = (transfersWithIncrements:
 export const getBalanceAfterTransfer = (balance: Balance[], startBadgeId: bigint, endBadgeId: bigint, amountToTransfer: bigint, numRecipients: bigint) => {
   const balanceCopy: Balance[] = JSON.parse(JSON.stringify(balance)); //need a deep copy of the balance to not mess up calculations
 
-  const newBalance = subtractBalancesForIdRanges({
+  const newBalance = subtractBalancesForUintRanges({
     balances: balanceCopy,
     approvals: [],
   }, [{ start: startBadgeId, end: endBadgeId }], amountToTransfer * numRecipients);
