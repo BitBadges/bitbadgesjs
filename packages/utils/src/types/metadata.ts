@@ -23,17 +23,20 @@ export interface Metadata<T extends NumberType> {
   name: string;
   description: string;
   image: string;
-  creator?: string;
+  time?: IdRange<T>;
   validFrom?: IdRange<T>;
   color?: string;
   category?: string;
   externalUrl?: string;
   tags?: string[];
+  hidden?: boolean;
+  references?: string[];
 }
 
 export function convertMetadata<T extends NumberType, U extends NumberType>(item: Metadata<T>, convertFunction: (item: T) => U): Metadata<U> {
   return deepCopy({
     ...item,
+    time: item.time ? convertIdRange(item.time, convertFunction) : undefined,
     validFrom: item.validFrom ? convertIdRange(item.validFrom, convertFunction) : undefined,
   })
 }
