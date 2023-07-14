@@ -11,7 +11,6 @@ BigInt.prototype.toJSON = function () {
 export * from './collections';
 export * from './types/db';
 export * from './types/coin';
-export * from './types/permissions';
 export * from './types/users';
 export * from './types/collections';
 export * from './types/activity';
@@ -28,10 +27,12 @@ export * from './distribution';
 export * from './balances';
 export * from './uintRanges';
 export * from './constants';
-export * from './transferMappings';
+export * from './addressMappings';
 export * from './permissions';
 export * from './badgeMetadata';
 export * from './metadataIds';
 export * from './display';
-export * from './approvals';
+export * from './approvedTransfers';
 export * from './math';
+export * from './timelines';
+// export * from './overlaps'; //TODO: Clean this up then export it for public use

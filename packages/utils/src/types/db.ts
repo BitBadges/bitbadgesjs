@@ -1,14 +1,13 @@
-import { BadgeUri, Balance, Claim, TransferMapping, UserBalance, convertBadgeUri, convertBalance, convertClaim, convertTransferMapping, convertUserBalance } from "bitbadgesjs-proto";
+import { AddressMapping, ApprovalIdDetails, BadgeMetadataTimeline, Balance, CollectionApprovedTransferTimeline, CollectionMetadataTimeline, CollectionPermissions, ContractAddressTimeline, CustomDataTimeline, InheritedBalancesTimeline, IsArchivedTimeline, ManagerTimeline, MerkleChallenge, OffChainBalancesMetadataTimeline, StandardsTimeline, UserApprovedIncomingTransferTimeline, UserApprovedOutgoingTransferTimeline, UserBalance, UserPermissions, convertBadgeMetadataTimeline, convertBalance, convertCollectionApprovedTransferTimeline, convertCollectionMetadataTimeline, convertCollectionPermissions, convertContractAddressTimeline, convertCustomDataTimeline, convertInheritedBalancesTimeline, convertIsArchivedTimeline, convertManagerTimeline, convertMerkleChallenge, convertOffChainBalancesMetadataTimeline, convertStandardsTimeline, convertUserApprovedIncomingTransferTimeline, convertUserApprovedOutgoingTransferTimeline, convertUserBalance, convertUserPermissions } from "bitbadgesjs-proto";
 import MerkleTree from "merkletreejs";
+import nano from "nano";
 import { CosmosCoin, convertCosmosCoin } from "./coin";
+import { DocsCache } from "./indexer";
 import { Metadata, convertMetadata } from "./metadata";
-import { Permissions } from "./permissions";
 import { NumberType } from "./string-numbers";
+import { OffChainBalancesMap, convertOffChainBalancesMap } from "./transfers";
 import { SupportedChain } from "./types";
 import { deepCopy, getCouchDBDetails, removeCouchDBDetails } from "./utils";
-import { DocsCache } from "./indexer";
-import nano from "nano";
-import { OffChainBalancesMap, convertOffChainBalancesMap } from "./transfers";
 
 export interface DeletableDocument {
   _deleted?: boolean
@@ -25,38 +24,42 @@ export interface Identified {
  *
  * @typedef {Object} CollectionInfoBase
  * @property {NumberType} collectionId - The collection ID
- * @property {string} collectionUri - The URI of the collection
- * @property {BadgeUri[]} badgeUris - The list of badge URIs for this collection and their respective badge IDs
- * @property {string} balancesUri - The URI of the balances for this collection (only used for off-chain balances)
- * @property {string} bytes - An arbitrary string of bytes that can be used to store arbitrary data
- * @property {string} manager - The account address of the manager of this collection
- * @property {Permissions} permissions - The permissions of the manager of this collection
- * @property {TransferMapping[]} allowedTransfers - The list of allowed transfers for this collection
- * @property {TransferMapping[]} managerApprovedTransfers - The list of manager approved transfers for this collection
- * @property {NumberType} nextBadgeId - The next badge ID to be minted for this collection
- * @property {NumberType} nextClaimId - The next claim ID to be minted for this collection
- * @property {Balance[]} unmintedSupplys - The list of unminted supplies for this collection
- * @property {Balance[]} maxSupplys - The list of max supplies for this collection
- * @property {NumberType} standard - The standard of this collection
- * @property {Challenge[]} managerRequests - The list of manager requests for this collection
+ * @property {CollectionMetadataTimeline[]} collectionMetadataTimeline - The collection metadata timeline
+ * @property {BadgeMetadataTimeline[]} badgeMetadataTimeline - The badge metadata timeline
+ * @property {string} balancesType - The type of balances (i.e. "Standard", "Off-Chain", "Inherited")
+ * @property {OffChainBalancesMetadataTimeline[]} offChainBalancesMetadataTimeline - The off-chain balances metadata timeline
+ * @property {InheritedBalancesTimeline[]} inheritedBalancesTimeline - The inherited balances timeline
+ * @property {CustomDataTimeline[]} customDataTimeline - The custom data timeline
+ * @property {ManagerTimeline[]} managerTimeline - The manager timeline
+ * @property {CollectionPermissions} collectionPermissions - The collection permissions
+ * @property {CollectionApprovedTransferTimeline[]} collectionApprovedTransfersTimeline - The collection approved transfers timeline
+ * @property {StandardsTimeline[]} standardsTimeline - The standards timeline
+ * @property {IsArchivedTimeline[]} isArchivedTimeline - The is archived timeline
+ * @property {ContractAddressTimeline[]} contractAddressTimeline - The contract address timeline
+ * @property {UserApprovedOutgoingTransferTimeline[]} defaultUserApprovedOutgoingTransfersTimeline - The default user approved outgoing transfers timeline
+ * @property {UserApprovedIncomingTransferTimeline[]} defaultUserApprovedIncomingTransfersTimeline - The default user approved incoming transfers timeline
+ * @property {UserPermissions} defaultUserPermissions - The default user permissions
+ * @property {string} createdBy - The cosmos address of the user who created this collection
  * @property {NumberType} createdBlock - The block number when this collection was created
  */
 export interface CollectionInfoBase<T extends NumberType> {
   collectionId: T;
-  collectionUri: string;
-  badgeUris: BadgeUri<T>[];
-  balancesUri: string;
-  bytes: string;
-  manager: string;
-  permissions: Permissions;
-  allowedTransfers: TransferMapping<T>[];
-  managerApprovedTransfers: TransferMapping<T>[];
-  nextBadgeId: T;
-  nextClaimId: T;
-  unmintedSupplys: Balance<T>[];
-  maxSupplys: Balance<T>[];
-  standard: T;
-  managerRequests: string[];
+  collectionMetadataTimeline: CollectionMetadataTimeline<T>[];
+  badgeMetadataTimeline: BadgeMetadataTimeline<T>[];
+  balancesType: "Standard" | "Off-Chain" | "Inherited";
+  offChainBalancesMetadataTimeline: OffChainBalancesMetadataTimeline<T>[];
+  inheritedBalancesTimeline: InheritedBalancesTimeline<T>[];
+  customDataTimeline: CustomDataTimeline<T>[];
+  managerTimeline: ManagerTimeline<T>[];
+  collectionPermissions: CollectionPermissions<T>;
+  collectionApprovedTransfersTimeline: CollectionApprovedTransferTimeline<T>[];
+  standardsTimeline: StandardsTimeline<T>[];
+  isArchivedTimeline: IsArchivedTimeline<T>[];
+  contractAddressTimeline: ContractAddressTimeline<T>[];
+  defaultUserApprovedOutgoingTransfersTimeline: UserApprovedOutgoingTransferTimeline<T>[];
+  defaultUserApprovedIncomingTransfersTimeline: UserApprovedIncomingTransferTimeline<T>[];
+  defaultUserPermissions: UserPermissions<T>;
+  createdBy: string;
   createdBlock: T;
 }
 export type CollectionDoc<T extends NumberType> = CollectionInfoBase<T> & nano.Document & DeletableDocument;
@@ -66,14 +69,20 @@ export function convertCollectionInfo<T extends NumberType, U extends NumberType
   return deepCopy({
     ...item,
     collectionId: convertFunction(item.collectionId),
-    badgeUris: item.badgeUris.map((badgeUri) => convertBadgeUri(badgeUri, convertFunction)),
-    allowedTransfers: item.allowedTransfers.map((transferMapping) => convertTransferMapping(transferMapping, convertFunction)),
-    managerApprovedTransfers: item.managerApprovedTransfers.map((transferMapping) => convertTransferMapping(transferMapping, convertFunction)),
-    nextBadgeId: convertFunction(item.nextBadgeId),
-    nextClaimId: convertFunction(item.nextClaimId),
-    unmintedSupplys: item.unmintedSupplys.map((balance) => convertBalance(balance, convertFunction)),
-    maxSupplys: item.maxSupplys.map((balance) => convertBalance(balance, convertFunction)),
-    standard: convertFunction(item.standard),
+    collectionMetadataTimeline: item.collectionMetadataTimeline.map((collectionMetadataTimeline) => convertCollectionMetadataTimeline(collectionMetadataTimeline, convertFunction)),
+    badgeMetadataTimeline: item.badgeMetadataTimeline.map((badgeMetadataTimeline) => convertBadgeMetadataTimeline(badgeMetadataTimeline, convertFunction)),
+    offChainBalancesMetadataTimeline: item.offChainBalancesMetadataTimeline.map((offChainBalancesMetadataTimeline) => convertOffChainBalancesMetadataTimeline(offChainBalancesMetadataTimeline, convertFunction)),
+    inheritedBalancesTimeline: item.inheritedBalancesTimeline.map((inheritedBalancesTimeline) => convertInheritedBalancesTimeline(inheritedBalancesTimeline, convertFunction)),
+    customDataTimeline: item.customDataTimeline.map((customDataTimeline) => convertCustomDataTimeline(customDataTimeline, convertFunction)),
+    managerTimeline: item.managerTimeline.map((managerTimeline) => convertManagerTimeline(managerTimeline, convertFunction)),
+    collectionPermissions: convertCollectionPermissions(item.collectionPermissions, convertFunction),
+    collectionApprovedTransfersTimeline: item.collectionApprovedTransfersTimeline.map((collectionApprovedTransfersTimeline) => convertCollectionApprovedTransferTimeline(collectionApprovedTransfersTimeline, convertFunction)),
+    standardsTimeline: item.standardsTimeline.map((standardsTimeline) => convertStandardsTimeline(standardsTimeline, convertFunction)),
+    isArchivedTimeline: item.isArchivedTimeline.map((isArchivedTimeline) => convertIsArchivedTimeline(isArchivedTimeline, convertFunction)),
+    contractAddressTimeline: item.contractAddressTimeline.map((contractAddressTimeline) => convertContractAddressTimeline(contractAddressTimeline, convertFunction)),
+    defaultUserApprovedOutgoingTransfersTimeline: item.defaultUserApprovedOutgoingTransfersTimeline.map((defaultUserApprovedOutgoingTransfersTimeline) => convertUserApprovedOutgoingTransferTimeline(defaultUserApprovedOutgoingTransfersTimeline, convertFunction)),
+    defaultUserApprovedIncomingTransfersTimeline: item.defaultUserApprovedIncomingTransfersTimeline.map((defaultUserApprovedIncomingTransfersTimeline) => convertUserApprovedIncomingTransferTimeline(defaultUserApprovedIncomingTransfersTimeline, convertFunction)),
+    defaultUserPermissions: convertUserPermissions(item.defaultUserPermissions, convertFunction),
     createdBlock: convertFunction(item.createdBlock),
   })
 }
@@ -84,6 +93,8 @@ export function convertCollectionDoc<T extends NumberType, U extends NumberType>
     ...convertCollectionInfo(removeCouchDBDetails(item), convertFunction),
   })
 }
+
+
 
 /**
  * AccountInfoBase represents the account details stored on the blockchain for an address.
@@ -97,6 +108,7 @@ export function convertCollectionDoc<T extends NumberType, U extends NumberType>
  * @property {string} cosmosAddress - The Cosmos address of the account
  * @property {string} address - The address of the account
  * @property {string} [username] - The username of the account (from x/nameservice)
+ * @property {CosmosCoin} [balance] - The balance of the account ($BADGE gas token balance not a specific badge)
  */
 export interface AccountInfoBase<T extends NumberType> {
   publicKey: string
@@ -287,6 +299,17 @@ export function convertStatusDoc<T extends NumberType, U extends NumberType>(ite
 }
 
 /**
+ * AddressMapping is the type of document stored in the address mappings database.
+ *
+ * Docs are stored by mapping IDs. Note that reserved mappings should be obtained from getReservedAddressMapping.
+ */
+export interface AddressMappingInfoBase extends AddressMapping {
+  createdBy: string
+}
+export type AddressMappingDoc = AddressMappingInfoBase & nano.Document & DeletableDocument;
+export type AddressMappingInfo = AddressMappingInfoBase & Identified;
+
+/**
  * BalanceInfoBase is the type of document stored in the balances database
  * Partitioned database by cosmosAddress (e.g. 1-cosmosx..., 1-cosmosy..., and so on represent the balances documents for collection 1 and user with cosmos address x and y respectively)
  *
@@ -340,17 +363,16 @@ export function convertBalanceDoc<T extends NumberType, U extends NumberType>(it
  * @property {NumberType} collectionId - The collection ID of the password document
  * @property {NumberType} challengeId - The challenge ID of the password document
  * @property {boolean} isHashed - True if the codes / password are already hashed
- *
  */
 export interface PasswordInfoBase<T extends NumberType> {
-
-
   cid: string
   docClaimedByCollection: boolean
-  claimId: T
+  challengeId: string
   collectionId: T
+  challengeLevel: "collection" | "incoming" | "outgoing"
+  address: string //Leave blank if challengeLevel = "collection"
+
   challengeDetails: ChallengeDetails<T>[];
-  challengeId: T
 }
 export type PasswordDoc<T extends NumberType> = PasswordInfoBase<T> & nano.Document & DeletableDocument;
 export type PasswordInfo<T extends NumberType> = PasswordInfoBase<T> & Identified;
@@ -358,9 +380,7 @@ export type PasswordInfo<T extends NumberType> = PasswordInfoBase<T> & Identifie
 export function convertPasswordInfo<T extends NumberType, U extends NumberType>(item: PasswordInfo<T>, convertFunction: (item: T) => U): PasswordInfo<U> {
   return deepCopy({
     ...item,
-    claimId: convertFunction(item.claimId),
     collectionId: convertFunction(item.collectionId),
-    challengeId: convertFunction(item.challengeId),
     challengeDetails: item.challengeDetails.map((challengeDetails) => convertChallengeDetails(challengeDetails, convertFunction)),
   })
 }
@@ -450,11 +470,43 @@ export function convertChallengeDetails<T extends NumberType, U extends NumberTy
 }
 
 /**
- * ClaimInfoBase is the type of document stored in the claims database
+ * ApprovalsTrackerInfoBase is the type of document stored in the approvals tracker database
+ *
+ * @typedef {Object} ApprovalsTrackerInfoBase
+ * @property {NumberType} numTransfers - The number of transfers. Is an incrementing tally.
+ * @property {Balance[]} amounts - A tally of the amounts transferred for this approval.
+ * @property {string} trackerType - The type of tracker (i.e. "overall", "to", "from", "initiatedBy")
+ */
+export interface ApprovalsTrackerInfoBase<T extends NumberType> extends ApprovalIdDetails {
+  trackerType: "overall" | "to" | "from" | "initiatedBy";
+  numTransfers: T;
+  amounts: Balance<T>[];
+}
+
+export type ApprovalsTrackerDoc<T extends NumberType> = ApprovalsTrackerInfoBase<T> & nano.Document & DeletableDocument;
+export type ApprovalsTrackerInfo<T extends NumberType> = ApprovalsTrackerInfoBase<T> & Identified;
+
+export function convertApprovalsTrackerInfo<T extends NumberType, U extends NumberType>(item: ApprovalsTrackerInfo<T>, convertFunction: (item: T) => U): ApprovalsTrackerInfo<U> {
+  return deepCopy({
+    ...item,
+    numTransfers: convertFunction(item.numTransfers),
+    amounts: item.amounts.map((amount) => convertBalance(amount, convertFunction)),
+  })
+}
+
+export function convertApprovalsTrackerDoc<T extends NumberType, U extends NumberType>(item: ApprovalsTrackerDoc<T>, convertFunction: (item: T) => U): ApprovalsTrackerDoc<U> {
+  return deepCopy({
+    ...getCouchDBDetails(item),
+    ...convertApprovalsTrackerInfo(removeCouchDBDetails(item), convertFunction),
+  })
+}
+
+/**
+ * MerkleChallengeInfoBase is the type of document stored in the claims database
  * partitioned database by collection ID (e.g. 1-1, 1-2, and so on represent the claims collection 1 for claims with ID 1, 2, etc)
  *
- * @typedef {Object} ClaimInfoBase
- * @extends {Claim}
+ * @typedef {Object} MerkleChallengeInfoBase
+ * @extends {MerkleChallenge}
  *
  * @property {NumberType} collectionId - The collection ID
  * @property {NumberType} claimId - The claim ID
@@ -462,67 +514,57 @@ export function convertChallengeDetails<T extends NumberType, U extends NumberTy
  * @property {{[cosmosAddress: string]: number}} claimsPerAddressCount - A running count for the number of claims processed for each address
  * @property {(number)[][]} usedLeafIndices - The used leaf indices for each challenge. A leaf index is the leaf location in Merkle tree
  */
-export interface ClaimInfoBase<T extends NumberType> extends Claim<T> {
+export interface MerkleChallengeInfoBase<T extends NumberType> extends MerkleChallenge<T> {
   collectionId: T;
-  claimId: T;
-  totalClaimsProcessed: T;
-  claimsPerAddressCount: {
-    [cosmosAddress: string]: T;
-  },
   usedLeaves: string[][]; //2D array of used leaves by challenge index
   usedLeafIndices: (T)[][]; //2D array of used leaf indices by challenge index
 }
-export type ClaimDoc<T extends NumberType> = ClaimInfoBase<T> & nano.Document & DeletableDocument;
-export type ClaimInfo<T extends NumberType> = ClaimInfoBase<T> & Identified;
+export type MerkleChallengeDoc<T extends NumberType> = MerkleChallengeInfoBase<T> & nano.Document & DeletableDocument;
+export type MerkleChallengeInfo<T extends NumberType> = MerkleChallengeInfoBase<T> & Identified;
 
-export function convertClaimInfo<T extends NumberType, U extends NumberType>(item: ClaimInfo<T>, convertFunction: (item: T) => U): ClaimInfo<U> {
+export function convertMerkleChallengeInfo<T extends NumberType, U extends NumberType>(item: MerkleChallengeInfo<T>, convertFunction: (item: T) => U): MerkleChallengeInfo<U> {
   return deepCopy({
     ...item,
-    ...convertClaim(item, convertFunction),
+    ...convertMerkleChallenge(item, convertFunction),
     collectionId: convertFunction(item.collectionId),
-    claimId: convertFunction(item.claimId),
-    totalClaimsProcessed: convertFunction(item.totalClaimsProcessed),
-    claimsPerAddressCount: Object.keys(item.claimsPerAddressCount).reduce((acc, cosmosAddress) => {
-      acc[cosmosAddress] = convertFunction(item.claimsPerAddressCount[cosmosAddress])
-      return acc
-    }, {}),
     usedLeafIndices: item.usedLeafIndices.map((usedLeafIndices) => usedLeafIndices.map(convertFunction)),
   })
 }
 
-export function convertClaimDoc<T extends NumberType, U extends NumberType>(item: ClaimDoc<T>, convertFunction: (item: T) => U): ClaimDoc<U> {
+export function convertMerkleChallengeDoc<T extends NumberType, U extends NumberType>(item: MerkleChallengeDoc<T>, convertFunction: (item: T) => U): MerkleChallengeDoc<U> {
   return deepCopy({
     ...getCouchDBDetails(item),
-    ...convertClaimInfo(removeCouchDBDetails(item), convertFunction),
+    ...convertMerkleChallengeInfo(removeCouchDBDetails(item), convertFunction),
   })
 }
 
 /**
- * ClaimInfoWithDetails extends claims and provides additional details.
+ * MerkleChallengeInfoWithDetails extends claims and provides additional details.
  *
- * @typedef {Object} ClaimInfoWithDetails
- * @extends {ClaimDoc}
+ * @typedef {Object} MerkleChallengeInfoWithDetails
+ * @extends {MerkleChallengeDoc}
  *
- * @property {ClaimDetails} details - The details of the claim
+ * @property {MerkleChallengeDetails} details - The details of the claim
  */
-export interface ClaimInfoWithDetails<T extends NumberType> extends ClaimInfo<T> {
-  details?: ClaimDetails<T>
+export interface MerkleChallengeInfoWithDetails<T extends NumberType> extends MerkleChallengeInfo<T> {
+  details?: MerkleChallengeDetails<T>
 }
 
-export function convertClaimInfoWithDetails<T extends NumberType, U extends NumberType>(item: ClaimInfoWithDetails<T>, convertFunction: (item: T) => U): ClaimInfoWithDetails<U> {
+export function convertMerkleChallengeInfoWithDetails<T extends NumberType, U extends NumberType>(item: MerkleChallengeInfoWithDetails<T>, convertFunction: (item: T) => U): MerkleChallengeInfoWithDetails<U> {
   return deepCopy({
     ...item,
-    ...convertClaimInfo(item, convertFunction),
-    details: item.details ? convertClaimDetails(item.details, convertFunction) : undefined,
+    ...convertMerkleChallengeInfo(item, convertFunction),
+    details: item.details ? convertMerkleChallengeDetails(item.details, convertFunction) : undefined,
     _rev: undefined,
   })
 }
+
 
 /**
  * Extends a base Claim with additional details.
  * The base Claim is what is stored on-chain, but this is the full claim with additional details stored in the indexer.
  *
- * @typedef {Object} ClaimDetails
+ * @typedef {Object} MerkleChallengeDetails
  *
  * @property {string} name - The name of the claim
  * @property {string} description - The description of the claim. This describes how to earn and claim the badge.
@@ -530,7 +572,7 @@ export function convertClaimInfoWithDetails<T extends NumberType, U extends Numb
  * @property {string} password - The password of the claim (if it has one)
  * @property {ChallengeDetails[]} challenges - The list of challenges for this claim (with extra helper details)
  */
-export interface ClaimDetails<T extends NumberType> {
+export interface MerkleChallengeDetails<T extends NumberType> {
   name: string;
   description: string;
   hasPassword: boolean;
@@ -539,7 +581,7 @@ export interface ClaimDetails<T extends NumberType> {
   challengeDetails: ChallengeDetails<T>[];
 }
 
-export function convertClaimDetails<T extends NumberType, U extends NumberType>(item: ClaimDetails<T>, convertFunction: (item: T) => U): ClaimDetails<U> {
+export function convertMerkleChallengeDetails<T extends NumberType, U extends NumberType>(item: MerkleChallengeDetails<T>, convertFunction: (item: T) => U): MerkleChallengeDetails<U> {
   return deepCopy({
     ...item,
     challengeDetails: item.challengeDetails.map((challengeDetails) => convertChallengeDetails(challengeDetails, convertFunction)),
@@ -552,16 +594,16 @@ export function convertClaimDetails<T extends NumberType, U extends NumberType>(
  * This represents the returned JSON value from fetching a URI.
  *
  * @typedef {Object} FetchInfoBase
- * @property {Metadata | ClaimDetails} content - The content of the fetch document. Note that we store balances in BALANCES_DB and not here to avoid double storage.
+ * @property {Metadata | MerkleChallengeDetails} content - The content of the fetch document. Note that we store balances in BALANCES_DB and not here to avoid double storage.
  * @property {NumberType} fetchedAt - The time the document was fetched
- * @property {'Claim' | 'Metadata' | 'Balances'} db - The type of content fetched. This is used for querying purposes
+ * @property {"MerkleChallenge" | "Metadata" | "Balances"} db - The type of content fetched. This is used for querying purposes
  * @property {boolean} isPermanent - True if the document is permanent (i.e. fetched from a permanent URI like IPFS)
  * @property {string} uri - The URI of the document
  */
 export interface FetchInfoBase<T extends NumberType> {
-  content?: Metadata<T> | ClaimDetails<T> | OffChainBalancesMap<T>
+  content?: Metadata<T> | MerkleChallengeDetails<T> | OffChainBalancesMap<T>
   fetchedAt: T, //Date.now()
-  db: 'Claim' | 'Metadata' | 'Balances'
+  db: 'MerkleChallenge' | 'Metadata' | 'Balances'
   isPermanent: boolean
 }
 export type FetchDoc<T extends NumberType> = FetchInfoBase<T> & nano.Document & DeletableDocument;
@@ -570,7 +612,7 @@ export type FetchInfo<T extends NumberType> = FetchInfoBase<T> & Identified;
 export function convertFetchInfo<T extends NumberType, U extends NumberType>(item: FetchInfo<T>, convertFunction: (item: T) => U): FetchInfo<U> {
   return deepCopy({
     ...item,
-    content: item.db === 'Metadata' ? convertMetadata(item.content as Metadata<T>, convertFunction) : item.db === 'Claim' ? convertClaimDetails(item.content as ClaimDetails<T>, convertFunction) : convertOffChainBalancesMap(item.content as OffChainBalancesMap<T>, convertFunction),
+    content: item.db === 'Metadata' ? convertMetadata(item.content as Metadata<T>, convertFunction) : item.db === 'MerkleChallenge' ? convertMerkleChallengeDetails(item.content as MerkleChallengeDetails<T>, convertFunction) : convertOffChainBalancesMap(item.content as OffChainBalancesMap<T>, convertFunction),
     fetchedAt: convertFunction(item.fetchedAt),
   })
 }

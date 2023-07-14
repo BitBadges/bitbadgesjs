@@ -1,4 +1,4 @@
-import { IdRange, NumberType, convertIdRange } from "bitbadgesjs-proto";
+import { UintRange, NumberType, convertUintRange } from "bitbadgesjs-proto";
 import { deepCopy } from "./utils";
 
 /**
@@ -24,7 +24,7 @@ export interface Metadata<T extends NumberType> {
   description: string;
   image: string;
   creator?: string;
-  validFrom?: IdRange<T>;
+  validFrom?: UintRange<T>;
   color?: string;
   category?: string;
   externalUrl?: string;
@@ -34,6 +34,6 @@ export interface Metadata<T extends NumberType> {
 export function convertMetadata<T extends NumberType, U extends NumberType>(item: Metadata<T>, convertFunction: (item: T) => U): Metadata<U> {
   return deepCopy({
     ...item,
-    validFrom: item.validFrom ? convertIdRange(item.validFrom, convertFunction) : undefined,
+    validFrom: item.validFrom ? convertUintRange(item.validFrom, convertFunction) : undefined,
   })
 }

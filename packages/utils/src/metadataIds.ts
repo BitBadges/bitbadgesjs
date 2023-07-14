@@ -1,7 +1,6 @@
-import { BadgeUri } from "bitbadgesjs-proto";
-import { searchIdRangesForId } from "./idRanges";
-import { BitBadgesCollection } from "./types/collections";
-import { CollectionDoc } from "./types/db";
+import { BadgeMetadata, BadgeMetadataTimeline } from "bitbadgesjs-proto";
+import { getCurrentValueIdxForTimeline } from "./timelines";
+import { searchUintRangesForId } from "./uintRanges";
 
 /**
  * This is the logic we use to deterministically compute the metadataId for a collection in our indexer.
@@ -33,14 +32,14 @@ import { CollectionDoc } from "./types/db";
  *   store metadata in database with metadataId = metadataId and badgeIds = badgeUri.badgeIds
  *  metadataId++
 */
-export const getMetadataIdForBadgeId = (badgeId: bigint, badgeUris: BadgeUri<bigint>[]) => {
+export const getMetadataIdForBadgeId = (badgeId: bigint, badgeUris: BadgeMetadata<bigint>[]) => {
   let batchIdx = 1n;
 
   for (const badgeUri of badgeUris) {
     if (badgeUri.uri.includes("{id}")) {
       const [idx, found] = searchUintRangesForId(badgeId, badgeUri.badgeIds);
       if (found) {
-        const badgeUintRange = badgeUri.badgeIds[idx];
+        const badgeUintRange = badgeUri.badgeIds[Number(idx)];
         return batchIdx + badgeId - badgeUintRange.start;
       }
 
@@ -59,7 +58,7 @@ export const getMetadataIdForBadgeId = (badgeId: bigint, badgeUris: BadgeUri<big
   return -1;
 }
 
-export const getMetadataIdForUri = (uri: string, badgeUris: BadgeUri<bigint>[]) => {
+export const getMetadataIdForUri = (uri: string, badgeUris: BadgeMetadata<bigint>[]) => {
   let batchIdx = 1n;
 
   for (const badgeUri of badgeUris) {
@@ -82,17 +81,17 @@ export const getMetadataIdForUri = (uri: string, badgeUris: BadgeUri<bigint>[]) 
           const numSubstring = uri.substring(numSubstringIdxStart, numSubstringIdxEnd);
           const num = BigInt(numSubstring);
 
-          for (const badgeIdRange of badgeUri.badgeIds) {
-            if (num >= badgeIdRange.start && num <= badgeIdRange.end) {
-              return batchIdx + num - badgeIdRange.start;
+          for (const badgeUintRange of badgeUri.badgeIds) {
+            if (num >= badgeUintRange.start && num <= badgeUintRange.end) {
+              return batchIdx + num - badgeUintRange.start;
             }
 
-            batchIdx += badgeIdRange.end - badgeIdRange.start + 1n;
+            batchIdx += badgeUintRange.end - badgeUintRange.start + 1n;
           }
         }
       } else {
-        for (const badgeIdRange of badgeUri.badgeIds) {
-          batchIdx += badgeIdRange.end - badgeIdRange.start + 1n;
+        for (const badgeUintRange of badgeUri.badgeIds) {
+          batchIdx += badgeUintRange.end - badgeUintRange.start + 1n;
         }
       }
     } else {
@@ -107,14 +106,16 @@ export const getMetadataIdForUri = (uri: string, badgeUris: BadgeUri<bigint>[]) 
 }
 
 /**
- * This returns the max metadataId for a collection
- *
- * @param {BitBadgesCollection<bigint>} collection - The collection to get the max metadata ID for
+ * This returns the max metadataId for a collection based on its badge metadata.
 */
-export function getMaxMetadataId(collection: BitBadgesCollection<bigint> | CollectionDoc<bigint>) {
+export function getMaxMetadataId(badgeUris: BadgeMetadata<bigint>[]) {
+  if (badgeUris.length === 0) {
+    return 0n;
+  }
+
   let metadataId = 1n; // Start at 1 because batch 0 is reserved for collection metadata
 
-  for (const badgeUri of collection.badgeUris) {
+  for (const badgeUri of badgeUris) {
     // If the URI contains {id}, each badge ID will belong to its own private batch
     if (badgeUri.uri.includes("{id}")) {
       for (const badgeUintRange of badgeUri.badgeIds) {
@@ -129,7 +130,7 @@ export function getMaxMetadataId(collection: BitBadgesCollection<bigint> | Colle
 }
 
 
-export function getUrisForMetadataIds(metadataIds: bigint[], collectionUri: string, badgeUris: BadgeUri<bigint>[]) {
+export function getUrisForMetadataIds(metadataIds: bigint[], collectionUri: string, badgeUris: BadgeMetadata<bigint>[]) {
   let uris: string[] = [];
   if (metadataIds.find((id) => id === 0n)) {
     uris.push(collectionUri);
@@ -139,16 +140,16 @@ export function getUrisForMetadataIds(metadataIds: bigint[], collectionUri: stri
 
   for (const badgeUri of badgeUris) {
     if (badgeUri.uri.includes("{id}")) {
-      for (const badgeIdRange of badgeUri.badgeIds) {
+      for (const badgeUintRange of badgeUri.badgeIds) {
         const start = batchIdx;
-        const end = batchIdx + badgeIdRange.end - badgeIdRange.start;
+        const end = batchIdx + badgeUintRange.end - badgeUintRange.start;
         for (const metadataId of metadataIds) {
           if (metadataId >= start && metadataId <= end) {
-            uris.push(badgeUri.uri.replace("{id}", (metadataId - start + badgeIdRange.start).toString()));
+            uris.push(badgeUri.uri.replace("{id}", (metadataId - start + badgeUintRange.start).toString()));
           }
         }
 
-        batchIdx += badgeIdRange.end - badgeIdRange.start + 1n;
+        batchIdx += badgeUintRange.end - badgeUintRange.start + 1n;
       }
     } else {
       uris.push(badgeUri.uri);
@@ -159,20 +160,27 @@ export function getUrisForMetadataIds(metadataIds: bigint[], collectionUri: stri
   return uris;
 }
 
-export function getBadgeIdsForMetadataId(metadataId: bigint, badgeUris: BadgeUri<bigint>[]) {
+export function getBadgeIdsForMetadataId(metadataId: bigint, badgeMetadataTimeline: BadgeMetadataTimeline<bigint>[]) {
+  const currentTimeIdx = getCurrentValueIdxForTimeline(badgeMetadataTimeline);
+  if (currentTimeIdx === -1n) {
+    return [];
+  }
+
+  const badgeUris = badgeMetadataTimeline[Number(currentTimeIdx)].badgeMetadata;
+
   let batchIdx = 1n;
 
   for (const badgeUri of badgeUris) {
     if (badgeUri.uri.includes("{id}")) {
 
-      for (const badgeIdRange of badgeUri.badgeIds) {
+      for (const badgeUintRange of badgeUri.badgeIds) {
         const start = batchIdx;
-        const end = batchIdx + badgeIdRange.end - badgeIdRange.start;
+        const end = batchIdx + badgeUintRange.end - badgeUintRange.start;
         if (metadataId >= start && metadataId <= end) {
-          return [{ start: metadataId - start + badgeIdRange.start, end: metadataId - start + badgeIdRange.start }];
+          return [{ start: metadataId - start + badgeUintRange.start, end: metadataId - start + badgeUintRange.start }];
         }
 
-        batchIdx += badgeIdRange.end - badgeIdRange.start + 1n;
+        batchIdx += badgeUintRange.end - badgeUintRange.start + 1n;
       }
     } else {
       if (metadataId === batchIdx) {

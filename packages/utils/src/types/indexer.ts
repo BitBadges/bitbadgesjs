@@ -1,6 +1,6 @@
 import Nano from "nano";
 import { TransferActivityInfoBase } from "./activity";
-import { AccountDoc, BalanceDoc, ClaimDoc, CollectionDoc, QueueInfoBase, RefreshDoc } from "./db";
+import { AccountDoc, BalanceDoc, MerkleChallengeDoc, CollectionDoc, QueueInfoBase, RefreshDoc, ApprovalsTrackerDoc, AddressMappingDoc } from "./db";
 
 export type BlankDocument = Nano.Document; // Alias for Nano.Document to make it clear that this is a blank document and has no other details.
 
@@ -12,16 +12,21 @@ export type BlankDocument = Nano.Document; // Alias for Nano.Document to make it
  * @property {AccountDocs} accounts - The accounts cache.
  * @property {CollectionDocs} collections - The collections cache.
  * @property {BalanceDocs} balances - The balances cache.
- * @property {ClaimDocs} claims - The claims cache.
+ * @property {MerkleChallengeDocs} claims - The claims cache.
  * @property {ActivityInfoBase[]} activityToAdd - The activity documents to add to the database.
  * @property {QueueInfoBase[]} queueDocsToAdd - The queue documents to add to the database.
+ * @property {RefreshDocs} refreshes - The refreshes cache.
+ * @property {ApprovalsTrackerDocs} approvalsTrackers - The approvals trackers cache.
+ * @property {AddressMappingsDocs} addressMappings - The address mappings cache.
  */
 export interface DocsCache {
   accounts: AccountDocs;
   collections: CollectionDocs;
   balances: BalanceDocs;
-  claims: ClaimDocs;
+  merkleChallenges: MerkleChallengeDocs;
   refreshes: RefreshDocs;
+  approvalsTrackers: ApprovalsTrackerDocs;
+  addressMappings: AddressMappingsDocs;
   queueDocsToAdd: (QueueInfoBase<bigint> & Nano.MaybeIdentifiedDocument)[];
   activityToAdd: (TransferActivityInfoBase<bigint> & Nano.MaybeIdentifiedDocument)[]
 }
@@ -59,11 +64,31 @@ export interface BalanceDocs {
 }
 
 /**
- * ClaimDocs is a map of partitionedId to claim documents.
+ * MerkleChallengeDocs is a map of partitionedId to claim documents.
  * The partitionedId is the collectionId and the claimId joined by a dash (e.g. "1-1").
  *
- * @typedef {Object} ClaimDocs
+ * @typedef {Object} MerkleChallengeDocs
  */
-export interface ClaimDocs {
-  [partitionedId: string]: (ClaimDoc<bigint>) | undefined;
+export interface MerkleChallengeDocs {
+  [partitionedId: string]: (MerkleChallengeDoc<bigint>) | undefined;
+}
+
+/**
+ * ApprovalsTrackerDocs is a map of partitionedId to approvals tracker documents.
+ *
+ * The partitionedId is the collectionId and a random identifier string joined by a dash (e.g. "1-abc123").
+ * Queries should look up by the ApprovalIdDetails, such as $eq approvalId, approvalLevel, and so on.
+ */
+export interface ApprovalsTrackerDocs {
+  [partitionedId: string]: (ApprovalsTrackerDoc<bigint>) | undefined;
+}
+
+/**
+ * AddressMappingsDocs is a map of mappingId to address mapping documents.
+ *
+ * @typedef {Object} AddressMappingsDocs
+ * @property {AddressMappingDoc} [mappingId] - The mapping Id for the mapping.
+ */
+export interface AddressMappingsDocs {
+  [mappingId: string]: (AddressMappingDoc) | undefined;
 }

@@ -20,7 +20,6 @@ export const GetClaimCodeViaPasswordRoute = (collectionId: NumberType, claimId: 
 export const AddAnnouncementRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/addAnnouncement`;
 export const AddReviewForCollectionRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/addReview`;
 
-
 //User
 export const GetAccountsRoute = () => "/api/v0/user/batch";
 export const GetAccountRoute = (addressOrUsername: string) => `/api/v0/user/${addressOrUsername}`;

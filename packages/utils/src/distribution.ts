@@ -1,5 +1,5 @@
-import { Balance, Transfer, UserBalance } from "bitbadgesjs-proto";
-import { addBalancesForIdRanges, subtractBalancesForIdRanges } from "./balances";
+import { Balance, Transfer } from "bitbadgesjs-proto";
+import { addBalance, addBalances, subtractBalances } from "./balances";
 import { OffChainBalancesMap, TransferWithIncrements } from "./types/transfers";
 import { deepCopy } from "./types/utils";
 
@@ -17,12 +17,9 @@ export const createBalanceMapForOffChainBalances = async (transfers: TransferWit
     for (let j = 0; j < transfer.toAddresses.length; j++) {
       const address = transfer.toAddresses[j];
 
-      //currBalance is used as a Balance[] type to be compatible with addBalancesForIdRanges
+      //currBalance is used as a Balance[] type to be compatible with addBalancesForUintRanges
       const currBalances = balanceMap[address] ? balanceMap[address] : [];
-
-      for (const transferBalanceObj of transfer.balances) {
-        balanceMap[address] = addBalancesForIdRanges({ balances: currBalances, approvals: [] }, transferBalanceObj.badgeIds, transferBalanceObj.amount).balances;
-      }
+      balanceMap[address] = addBalances(transfer.balances, currBalances);
     }
   }
 
@@ -37,10 +34,10 @@ export const createBalanceMapForOffChainBalances = async (transfers: TransferWit
  * and increment the badgeIds by 1 each time.
  *
  * @param {TransferWithIncrements<bigint>[]} transfers - The list of transfers with increments.
- * @returns {UserBalance<bigint>} The balances to be transferred.
+ * @returns {Balance<bigint>} The balances to be transferred.
  */
 export const getAllBalancesToBeTransferred = (transfers: TransferWithIncrements<bigint>[]) => {
-  let startBalance: UserBalance<bigint> = { balances: [], approvals: [] };
+  let startBalances: Balance<bigint>[] = [];
   for (const transfer of transfers) {
     for (const balance of transfer.balances) {
 
@@ -49,25 +46,40 @@ export const getAllBalancesToBeTransferred = (transfers: TransferWithIncrements<
       const numRecipients = BigInt(_numRecipients);
 
       const badgeIds = deepCopy(balance.badgeIds);
+      const ownedTimes = deepCopy(balance.ownedTimes);
 
       //If incrementIdsBy is not set, then we are not incrementing badgeIds and we can just batch calculate the balance
-      if (!transfer.incrementIdsBy) {
-        startBalance = addBalancesForIdRanges(startBalance, badgeIds, balance.amount * numRecipients);
+      if (!transfer.incrementBadgeIdsBy && !transfer.incrementOwnedTimesBy) {
+        startBalances = addBalance(startBalances, {
+          amount: balance.amount * numRecipients,
+          badgeIds,
+          ownedTimes,
+        });
       } else {
         //If incrementIdsBy is set, then we need to increment the badgeIds after each transfer
         //TODO: This is not efficient, we should be able to LeetCode optimize this somehow. Imagine a claim with 100000000 possible claims.
         for (let i = 0; i < numRecipients; i++) {
-          startBalance = addBalancesForIdRanges(startBalance, badgeIds, balance.amount);
+          startBalances = addBalance(startBalances, {
+            amount: balance.amount,
+            badgeIds,
+            ownedTimes,
+          });
+
           for (const badgeId of badgeIds) {
-            badgeId.start += transfer.incrementIdsBy || 0n;
-            badgeId.end += transfer.incrementIdsBy || 0n;
+            badgeId.start += transfer.incrementBadgeIdsBy || 0n;
+            badgeId.end += transfer.incrementBadgeIdsBy || 0n;
+          }
+
+          for (const ownedTime of ownedTimes) {
+            ownedTime.start += transfer.incrementOwnedTimesBy || 0n;
+            ownedTime.end += transfer.incrementOwnedTimesBy || 0n;
           }
         }
       }
     }
   }
 
-  return startBalance;
+  return startBalances;
 }
 
 /**
@@ -80,23 +92,33 @@ export const getAllBalancesToBeTransferred = (transfers: TransferWithIncrements<
 export const getTransfersFromTransfersWithIncrements = (transfersWithIncrements: TransferWithIncrements<bigint>[]) => {
   const transfers: Transfer<bigint>[] = [];
   for (const transferExtended of transfersWithIncrements) {
-    const { toAddressesLength, incrementIdsBy, ...transfer } = transferExtended;
+    const { toAddressesLength, incrementBadgeIdsBy, incrementOwnedTimesBy, ...transfer } = transferExtended;
     const length = toAddressesLength ? Number(toAddressesLength) : transfer.toAddresses.length;
 
     //If badges are incremented, we create N unique transfers (one to each address).
     //Else, we can create one transfer with N addresses
-    if (incrementIdsBy) {
+    if (incrementBadgeIdsBy || incrementOwnedTimesBy) {
       const currBalances = deepCopy(transfer.balances)
       for (let i = 0; i < length; i++) {
         transfers.push({
+          ...transfer,
           toAddresses: [transfer.toAddresses[i]],
           balances: deepCopy(currBalances),
         })
 
         for (let j = 0; j < currBalances.length; j++) {
-          for (const badgeId of currBalances[j].badgeIds) {
-            badgeId.start += incrementIdsBy;
-            badgeId.end += incrementIdsBy;
+          if (incrementBadgeIdsBy) {
+            for (const badgeId of currBalances[j].badgeIds) {
+              badgeId.start += incrementBadgeIdsBy;
+              badgeId.end += incrementBadgeIdsBy;
+            }
+          }
+
+          if (incrementOwnedTimesBy) {
+            for (const badgeId of currBalances[j].ownedTimes) {
+              badgeId.start += incrementOwnedTimesBy;
+              badgeId.end += incrementOwnedTimesBy;
+            }
           }
         }
       }
@@ -117,14 +139,18 @@ export const getTransfersFromTransfersWithIncrements = (transfersWithIncrements:
  * @param {bigint} amountToTransfer - The amount to subtract.
  * @param {bigint} numRecipients - The number of recipients to subtract from.
  */
-export const getBalanceAfterTransfer = (balance: Balance<bigint>[], startBadgeId: bigint, endBadgeId: bigint, amountToTransfer: bigint, numRecipients: bigint) => {
+export const getBalanceAfterTransfer = (balance: Balance<bigint>[], startBadgeId: bigint, endBadgeId: bigint, ownedTimeStart: bigint, ownedTimeEnd: bigint, amountToTransfer: bigint, numRecipients: bigint) => {
   const balanceCopy: Balance<bigint>[] = deepCopy(balance); //need a deep copy of the balance to not mess up calculations
 
-  const newBalance = subtractBalancesForUintRanges({
-    balances: balanceCopy,
-    approvals: [],
-  }, [{ start: startBadgeId, end: endBadgeId }], amountToTransfer * numRecipients);
-  return newBalance.balances;
+  const newBalance = subtractBalances([
+    {
+      amount: amountToTransfer * numRecipients,
+      badgeIds: [{ start: startBadgeId, end: endBadgeId }],
+      ownedTimes: [{ start: ownedTimeStart, end: ownedTimeEnd }],
+    }
+  ], balanceCopy)
+
+  return newBalance;
 }
 
 /**
@@ -143,20 +169,33 @@ export const getBalancesAfterTransfers = (startBalance: Balance<bigint>[], trans
       const numRecipients = BigInt(_numRecipients);
 
       const badgeIds = deepCopy(balance.badgeIds);
+      const ownedTimes = deepCopy(balance.ownedTimes);
 
       //If incrementIdsBy is not set, then we are not incrementing badgeIds and we can just batch calculate the balance
-      if (!transfer.incrementIdsBy) {
+      if (!transfer.incrementBadgeIdsBy && !transfer.incrementOwnedTimesBy) {
         for (const badgeId of badgeIds) {
-          endBalances = getBalanceAfterTransfer(endBalances, badgeId.start, badgeId.end, balance.amount, numRecipients);
+          for (const ownedTime of ownedTimes) {
+            endBalances = getBalanceAfterTransfer(endBalances, badgeId.start, badgeId.end, ownedTime.start, ownedTime.end, balance.amount, numRecipients);
+          }
         }
       } else {
         //If incrementIdsBy is set, then we need to increment the badgeIds after each transfer
         //TODO: This is not efficient, we should be able to LeetCode optimize this somehow. Imagine a claim with 100000000 possible claims.
         for (let i = 0; i < numRecipients; i++) {
           for (const badgeId of badgeIds) {
-            endBalances = getBalanceAfterTransfer(endBalances, badgeId.start, badgeId.end, balance.amount, 1n);
-            badgeId.start += transfer.incrementIdsBy || 0n;
-            badgeId.end += transfer.incrementIdsBy || 0n;
+            for (const ownedTime of ownedTimes) {
+              endBalances = getBalanceAfterTransfer(endBalances, badgeId.start, badgeId.end, ownedTime.start, ownedTime.end, balance.amount, 1n);
+            }
+          }
+
+          for (const badgeId of badgeIds) {
+            badgeId.start += transfer.incrementBadgeIdsBy || 0n;
+            badgeId.end += transfer.incrementBadgeIdsBy || 0n;
+          }
+
+          for (const ownedTime of ownedTimes) {
+            ownedTime.start += transfer.incrementOwnedTimesBy || 0n;
+            ownedTime.end += transfer.incrementOwnedTimesBy || 0n;
           }
         }
       }

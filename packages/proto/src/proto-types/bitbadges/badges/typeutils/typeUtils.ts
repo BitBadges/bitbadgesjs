@@ -7,14 +7,14 @@ export function deepCopy<T>(obj: T): T {
 }
 
 function deepCopyWithBigInts<T>(obj: T): T {
-  if (typeof obj !== 'object' || obj === null) {
-    // <T> case: return primitive values as-is
-    return obj;
-  }
-
   if (Array.isArray(obj)) {
     // Create a deep copy of an array
     return obj.map((item) => deepCopyWithBigInts(item)) as unknown as T;
+  }
+
+  if (typeof obj !== 'object' || obj === null) {
+    // <T> case: return primitive values as-is
+    return obj;
   }
 
   // Create a deep copy of an object
@@ -343,6 +343,11 @@ export interface MerkleProof {
   leaf: string
 }
 
+export interface TimelineItem<T extends NumberType> {
+  timelineTimes: UintRange<T>[];
+}
+
+
 /**
  * ManagerTimeline represents the value of the manager over time
  *
@@ -350,9 +355,8 @@ export interface MerkleProof {
  * @property {string} manager - The manager of the collection.
  * @property {UintRange[]} timelineTimes - The times of the manager.
  */
-export interface ManagerTimeline<T extends NumberType> {
+export interface ManagerTimeline<T extends NumberType> extends TimelineItem<T> {
   manager: string
-  timelineTimes: UintRange<T>[]
 }
 
 export function convertManagerTimeline<T extends NumberType, U extends NumberType>(managerTimeline: ManagerTimeline<T>, convertFunction: (item: T) => U): ManagerTimeline<U> {
@@ -370,7 +374,7 @@ export function convertManagerTimeline<T extends NumberType, U extends NumberTyp
  * @property {CollectionMetadata} collectionMetadata - The collection metadata.
  * @property {UintRange[]} timelineTimes - The times of the collection metadata.
  */
-export interface CollectionMetadataTimeline<T extends NumberType> {
+export interface CollectionMetadataTimeline<T extends NumberType> extends TimelineItem<T> {
   collectionMetadata: CollectionMetadata
   timelineTimes: UintRange<T>[]
 }
@@ -390,7 +394,7 @@ export function convertCollectionMetadataTimeline<T extends NumberType, U extend
  * @property {BadgeMetadata} badgeMetadata - The badge metadata.
  * @property {UintRange[]} timelineTimes - The times of the badge metadata.
  */
-export interface BadgeMetadataTimeline<T extends NumberType> {
+export interface BadgeMetadataTimeline<T extends NumberType> extends TimelineItem<T> {
   badgeMetadata: BadgeMetadata<T>[]
   timelineTimes: UintRange<T>[]
 }
@@ -410,7 +414,7 @@ export function convertBadgeMetadataTimeline<T extends NumberType, U extends Num
  * @property {UintRange[]} timelineTimes - The times of the off-chain balances metadata.
  *
  */
-export interface OffChainBalancesMetadataTimeline<T extends NumberType> {
+export interface OffChainBalancesMetadataTimeline<T extends NumberType> extends TimelineItem<T> {
   offChainBalancesMetadata: OffChainBalancesMetadata
   timelineTimes: UintRange<T>[]
 }
@@ -430,7 +434,7 @@ export function convertOffChainBalancesMetadataTimeline<T extends NumberType, U 
  * @property {string} customData - Arbitrary custom data.
  * @property {UintRange[]} timelineTimes - The times of the custom data.
  */
-export interface CustomDataTimeline<T extends NumberType> {
+export interface CustomDataTimeline<T extends NumberType> extends TimelineItem<T> {
   customData: string
   timelineTimes: UintRange<T>[]
 }
@@ -450,7 +454,7 @@ export function convertCustomDataTimeline<T extends NumberType, U extends Number
  *
  * @property {UintRange[]} timelineTimes - The times of the inherited balances.
  */
-export interface InheritedBalancesTimeline<T extends NumberType> {
+export interface InheritedBalancesTimeline<T extends NumberType> extends TimelineItem<T> {
   inheritedBalances: InheritedBalance<T>[]
   timelineTimes: UintRange<T>[]
 }
@@ -470,7 +474,7 @@ export function convertInheritedBalancesTimeline<T extends NumberType, U extends
  * @property {UintRange[]} timelineTimes - The times of the standards.
  *
  */
-export interface StandardsTimeline<T extends NumberType> {
+export interface StandardsTimeline<T extends NumberType> extends TimelineItem<T> {
   standards: string[]
   timelineTimes: UintRange<T>[]
 }
@@ -489,7 +493,7 @@ export function convertStandardsTimeline<T extends NumberType, U extends NumberT
  * @property {string} contractAddress - The contract address.
  * @property {UintRange[]} timelineTimes - The times of the contract address.
  */
-export interface ContractAddressTimeline<T extends NumberType> {
+export interface ContractAddressTimeline<T extends NumberType> extends TimelineItem<T> {
   contractAddress: string
   timelineTimes: UintRange<T>[]
 }
@@ -509,7 +513,7 @@ export function convertContractAddressTimeline<T extends NumberType, U extends N
  * @property {boolean} isArchived - The isArchived.
  * @property {UintRange[]} timelineTimes - The times of the isArchived.
  */
-export interface IsArchivedTimeline<T extends NumberType> {
+export interface IsArchivedTimeline<T extends NumberType> extends TimelineItem<T> {
   isArchived: boolean
   timelineTimes: UintRange<T>[]
 }
@@ -529,7 +533,7 @@ export function convertIsArchivedTimeline<T extends NumberType, U extends Number
  * @property {CollectionApprovedTransfer[]} collectionApprovedTransfers - The collection approved transfers.
  * @property {UintRange[]} timelineTimes - The times of the collection approved transfers.
  */
-export interface CollectionApprovedTransferTimeline<T extends NumberType> {
+export interface CollectionApprovedTransferTimeline<T extends NumberType> extends TimelineItem<T> {
   collectionApprovedTransfers: CollectionApprovedTransfer<T>[]
   timelineTimes: UintRange<T>[]
 }

@@ -1,51 +1,280 @@
-import { Balance, UintRange, UserBalance } from "bitbadgesjs-proto";
-import { getIdxSpanForRange, insertRangeToUintRanges, removeIdsFromUintRange, searchUintRangesForId, sortUintRangesAndMergeIfNecessary } from "./uintRanges";
+import { Balance, UintRange, UserBalance, deepCopy } from "bitbadgesjs-proto";
+import { UniversalPermissionDetails } from "./overlaps";
 import { safeAddUints, safeSubtractUints } from "./math";
+import { getOverlapsAndNonOverlaps } from "./overlaps";
+import { BitBadgesCollection } from "./types/collections";
+import { CollectionInfoBase } from "./types/db";
+import { searchUintRangesForId } from "./uintRanges";
 
 /**
- * Creates a blank balance object with empty balances and approvals
+ * Creates a blank balance object with empty balances and approvals.
+ *
+ * This appends the defaults according to the collection's specified ones. Override this for the "Mint" address (bc it has no approvals).
  */
-export const getBlankBalance = () => {
+export function getBlankBalance(nonMintApproval: boolean, collection?: BitBadgesCollection<bigint> | CollectionInfoBase<bigint>): UserBalance<bigint> {
+  if (nonMintApproval && !collection) {
+    throw new Error("Cannot create a blank balance for a non-mint approval without a collection. Must know default details");
+  }
+
   const blankBalance: UserBalance<bigint> = {
     balances: [],
-    approvals: [],
+    approvedIncomingTransfersTimeline: collection ? collection.defaultUserApprovedIncomingTransfersTimeline : [],
+    approvedOutgoingTransfersTimeline: collection ? collection.defaultUserApprovedOutgoingTransfersTimeline : [],
+    userPermissions: collection ? collection.defaultUserPermissions : {
+      canUpdateApprovedIncomingTransfers: [],
+      canUpdateApprovedOutgoingTransfers: [],
+    },
   }
-  return blankBalance;
+
+  return deepCopy(blankBalance);
 }
 
 /**
- * Find the balance / supply of a specific id within a set of balances.Returns x0 if not found.
+ * Find the balance amount for a specific badge ID at a specific time within a set of balances. Returns x0 if not found.
  *
- * @param id - The ID to search for.
+ * @param id - The Badge ID to search for.
+ * @param time - The time to search for.
  * @param balances - The set of balances to search.
  */
-export const getBalanceForId = (id: bigint, balances: Balance<bigint>[]) => {
+export const getBalanceForIdAndTime = (id: bigint, time: bigint, balances: Balance<bigint>[]) => {
+  let amount = 0n;
   for (const balance of balances) {
     const [_idx, found] = searchUintRangesForId(id, balance.badgeIds);
-    if (found) {
-      return balance.amount;
+    const [_, foundTime] = searchUintRangesForId(time, balance.ownedTimes);
+    if (found && foundTime) {
+      amount += balance.amount;
     }
   }
-  return 0n;
+  return amount;
 }
 
 /**
- * Updates the balance for a specific id from what it currently is to newAmount.
+ * Returns all matching balances for a specific Badge ID.
+ */
+export function getBalancesForId(badgeId: bigint, balances: Balance<bigint>[]) {
+  let matchingBalances: Balance<bigint>[] = [];
+
+  for (let balance of balances) {
+    let [_, found] = searchUintRangesForId(badgeId, balance.badgeIds);
+    if (found) {
+      matchingBalances.push(balance);
+    }
+  }
+
+  return deepCopy(matchingBalances);
+}
+
+/**
+ * Returns all matching balances for a specific time
+ */
+export function getBalancesForTime(time: bigint, balances: Balance<bigint>[]) {
+  let matchingBalances: Balance<bigint>[] = [];
+
+  for (let balance of balances) {
+    let [_, found] = searchUintRangesForId(time, balance.ownedTimes);
+    if (found) {
+      matchingBalances.push(balance);
+    }
+  }
+
+  return deepCopy(matchingBalances);
+}
+
+/**
+ * Filters out all balances with amount == 0.
+ */
+export function filterZeroBalances(balances: Balance<bigint>[]) {
+  let newBalances = [];
+  for (let i = 0; i < balances.length; i++) {
+    let balance = balances[i];
+    if (balance.amount > 0) {
+      newBalances.push(balance);
+    }
+  }
+
+  return newBalances;
+}
+
+/**
+ * Returns true if some balances exceed the specified threshold balances.
+ */
+export function doBalancesExceedThreshold(balances: Balance<bigint>[], thresholdBalances: Balance<bigint>[]) {
+  //Check if we exceed the threshold; will underflow if we do exceed it
+  let thresholdCopy = deepCopyBalances(thresholdBalances);
+
+  try {
+    subtractBalances(balances, thresholdCopy)
+  } catch (e) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Attempts to add a balance to the current amounts. Then, it checks if it exceeds some threshold.
  *
- * @param ranges - The ID ranges to update.
- * @param newAmount - The new amount to set.
+ * Note this function modifies the inputted currTallyBalances
+ */
+export function addBalancesAndCheckIfExceedsThreshold(currTally: Balance<bigint>[], toAdd: Balance<bigint>[], threshold: Balance<bigint>[]) {
+
+  //If we transferAsMuchAsPossible, we need to increment the currTally by all that we can
+  //We then need to return the updated toAdd
+  currTally = addBalances(toAdd, currTally);
+
+  //Check if we exceed the threshold; will underflow if we do exceed it
+  let doExceed = doBalancesExceedThreshold(currTally, threshold);
+  if (doExceed) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Checks if two balances are equal. Flag to check if the balances with zero amounts should be checked as well.
+ */
+export function areBalancesEqual(expected: Balance<bigint>[], actual: Balance<bigint>[], checkZeroBalances: boolean) {
+  expected = deepCopyBalances(expected);
+  actual = deepCopyBalances(actual);
+
+  if (!checkZeroBalances) {
+    expected = filterZeroBalances(expected);
+    actual = filterZeroBalances(actual);
+  }
+
+  try {
+    actual = subtractBalances(expected, actual);
+  } catch (e) {
+    return false;
+  }
+
+  if (actual.length !== 0) {
+    return false;
+  }
+
+  return true;
+}
+
+export function deepCopyBalances(balances: Balance<bigint>[]) {
+  let newBalances = [];
+  for (let i = 0; i < balances.length; i++) {
+    let approval = balances[i];
+    let balanceToAdd: Balance<bigint> = {
+      amount: approval.amount,
+      badgeIds: [],
+      ownedTimes: []
+    };
+
+    for (let j = 0; j < approval.badgeIds.length; j++) {
+      let badgeId = approval.badgeIds[j];
+      balanceToAdd.badgeIds.push({
+        start: badgeId.start,
+        end: badgeId.end
+      });
+    }
+
+    for (let k = 0; k < approval.ownedTimes.length; k++) {
+      let time = approval.ownedTimes[k];
+      balanceToAdd.ownedTimes.push({
+        start: time.start,
+        end: time.end
+      });
+    }
+
+    newBalances.push(balanceToAdd);
+  }
+
+  return newBalances;
+}
+
+/**
+ * Updates the balance for what it currently is to newAmount.
+ *
+ * @param newBalance - The new balance to set.
  * @param balances - The set of balances to update.
  *
  * @remarks
  * Updates the balances object directly and returns it. Does not create a new object.
  */
-export function updateBalancesForIdRanges(ranges: IdRange<bigint>[], newAmount: bigint, balances: Balance<bigint>[]) {
-  //Can maybe optimize this in the future by doing this all in one loop instead of deleting then setting
-  ranges = sortUintRangesAndMergeIfNecessary(ranges)
-  balances = deleteBalanceForUintRanges(ranges, balances)
-  balances = setBalanceForUintRanges(ranges, newAmount, balances)
+export function updateBalances(newBalance: Balance<bigint>, balances: Balance<bigint>[]) {
+  // We do a delete then set. Can maybe optimize in future.
+  balances = deleteBalances(newBalance.badgeIds, newBalance.ownedTimes, balances);
+  balances = setBalance(newBalance, balances);
 
-  return balances
+  return balances;
+}
+
+
+/**
+ * Adds the balanceToAdd to the existing balances.
+ */
+export function addBalance(existingBalances: Balance<bigint>[], balanceToAdd: Balance<bigint>) {
+  const currBalances = getBalancesForIds(balanceToAdd.badgeIds, balanceToAdd.ownedTimes, existingBalances);
+
+  for (let balance of currBalances) {
+    balance.amount = safeAddUints(balance.amount, balanceToAdd.amount);
+
+    existingBalances = updateBalances(balance, existingBalances);
+  }
+
+  return existingBalances;
+}
+
+/**
+ * Adds multiple balances to the existing balances.
+ */
+export function addBalances(balancesToAdd: Balance<bigint>[], balances: Balance<bigint>[]) {
+  for (let balance of balancesToAdd) {
+    balances = addBalance(balances, balance);
+  }
+
+  return balances;
+}
+
+/**
+ * Subtracts the balanceToRemove from the existing balances.
+ *
+ * Throws an error if the balances underflow.
+ */
+export function subtractBalance(balances: Balance<bigint>[], balanceToRemove: Balance<bigint>) {
+  const currBalances = getBalancesForIds(balanceToRemove.badgeIds, balanceToRemove.ownedTimes, balances);
+
+  for (let currBalanceObj of currBalances) {
+    // Use BigInt for safe subtraction
+    currBalanceObj.amount = safeSubtractUints(currBalanceObj.amount, balanceToRemove.amount);
+
+    balances = updateBalances(currBalanceObj, balances);
+  }
+
+  return balances;
+}
+
+/**
+ * Subtracts multiple balances from the existing balances.
+ *
+ * Throws an error if the balances underflow.
+ */
+export function subtractBalances(balancesToSubtract: Balance<bigint>[], balances: Balance<bigint>[]) {
+  for (let balance of balancesToSubtract) {
+    balances = subtractBalance(balances, balance);
+  }
+
+  return balances;
+}
+
+/**
+ * Sets a balance to the existing balances.
+ * IMPORTANT: This does not check if the balance already exists. It assumes it does not. Use the delete functions first if necesary.
+ */
+export function setBalance(newBalance: Balance<bigint>, balances: Balance<bigint>[]) {
+  if (newBalance.amount === 0n) {
+    return balances;
+  }
+
+  balances.push(newBalance);
+
+  return balances;
 }
 
 /**
@@ -60,227 +289,80 @@ export function updateBalancesForIdRanges(ranges: IdRange<bigint>[], newAmount: 
  * @remarks
  * Returns a new object but also modifies the original.
  */
-export function getBalancesForIdRanges(badgeIds: IdRange<bigint>[], currentUserBalances: Balance<bigint>[]) {
-  let balanceObjectsForSpecifiedRanges: Balance<bigint>[] = []
-  badgeIds = sortIdRangesAndMergeIfNecessary(badgeIds)
-  let idRangesNotFound = badgeIds
+export function getBalancesForIds(idRanges: UintRange<bigint>[], times: UintRange<bigint>[], balances: Balance<bigint>[]) {
+  const fetchedBalances: Balance<bigint>[] = [];
 
-  for (let userBalanceObj of currentUserBalances) {
-    //For each specified range, search the current userBalanceObj's UintRanges to see if there is any overlap.
-    //If so, we add the overlapping range and current balance to the new []*types.Balances to be returned.
+  const currPermissionDetails: UniversalPermissionDetails[] = [];
+  for (const balanceObj of balances) {
+    for (const currRange of balanceObj.badgeIds) {
+      for (const currTime of balanceObj.ownedTimes) {
+        currPermissionDetails.push({
+          badgeId: currRange,
+          ownershipTime: currTime,
+          transferTime: { start: BigInt("18446744073709551615"), end: BigInt("18446744073709551615") }, // dummy range
+          timelineTime: { start: BigInt("18446744073709551615"), end: BigInt("18446744073709551615") }, // dummy range
+          toMapping: { addresses: [], includeAddresses: false, mappingId: "", uri: "", customData: "" },
+          fromMapping: { addresses: [], includeAddresses: false, mappingId: "", uri: "", customData: "" },
+          initiatedByMapping: { addresses: [], includeAddresses: false, mappingId: "", uri: "", customData: "" },
+          arbitraryValue: balanceObj.amount,
 
-    for (const uintRange of badgeIds) {
-      const [idxSpan, found] = getIdxSpanForRange(uintRange, userBalanceObj.badgeIds)
-
-      if (found) {
-        //Set newUintRanges to the ranges where there is overlap
-        let newUintRanges = userBalanceObj.badgeIds.slice(idxSpan.start, idxSpan.end + 1)
-
-        //Remove everything before the start of the range. Only need to remove from idx 0 since it is sorted.
-        if (idRange.start > 0 && newIdRanges.length > 0) {
-          let everythingBefore: IdRange<bigint> = {
-            start: 0n,
-            end: uintRange.start - 1n,
-          }
-
-          let uintRangesWithEverythingBeforeRemoved = removeIdsFromUintRange(everythingBefore, newUintRanges[0])
-          uintRangesWithEverythingBeforeRemoved = uintRangesWithEverythingBeforeRemoved.concat(newUintRanges.slice(1))
-          newUintRanges = uintRangesWithEverythingBeforeRemoved
-        }
-
-        //Remove everything after the end of the range. Only need to remove from last idx since it is sorted.
-        if (newUintRanges.length > 0) {
-          const rangeToTrim = newUintRanges[newUintRanges.length - 1];
-
-          if (idRange.end < rangeToTrim.end) {
-            let everythingAfter: IdRange<bigint> = {
-              start: idRange.end + 1n,
-              end: rangeToTrim.end,
-            }
-
-            let uintRangesWithEverythingAfterRemoved = newUintRanges.slice(0, newUintRanges.length - 1)
-            uintRangesWithEverythingAfterRemoved = uintRangesWithEverythingAfterRemoved.concat(removeIdsFromUintRange(everythingAfter, rangeToTrim))
-            newUintRanges = uintRangesWithEverythingAfterRemoved
-          }
-        }
-
-        for (let newIdRange of newIdRanges) {
-          let newNotFoundRanges: IdRange<bigint>[] = []
-          for (let idRangeNotFound of idRangesNotFound) {
-            newNotFoundRanges = newNotFoundRanges.concat(removeIdsFromIdRange(newIdRange, idRangeNotFound))
-          }
-          uintRangesNotFound = newNotFoundRanges
-        }
-
-        balanceObjectsForSpecifiedRanges = updateBalancesForUintRanges(newUintRanges, userBalanceObj.amount, balanceObjectsForSpecifiedRanges)
+          permittedTimes: [],
+          forbiddenTimes: []
+        });
       }
     }
   }
 
-  //Update balance objects with IDs where balance == 0
-  if (idRangesNotFound.length > 0) {
-    let updatedBalances: Balance<bigint>[] = []
-    updatedBalances.push({
-      amount: 0n,
-      badgeIds: uintRangesNotFound,
-    })
-    updatedBalances = updatedBalances.concat(balanceObjectsForSpecifiedRanges)
+  const toFetchPermissionDetails: UniversalPermissionDetails[] = [];
+  for (const rangeToFetch of idRanges) {
+    for (const timeToFetch of times) {
+      toFetchPermissionDetails.push({
+        badgeId: rangeToFetch,
+        ownershipTime: timeToFetch,
+        transferTime: { start: BigInt("18446744073709551615"), end: BigInt("18446744073709551615") }, // dummy range
+        timelineTime: { start: BigInt("18446744073709551615"), end: BigInt("18446744073709551615") }, // dummy range
+        toMapping: { addresses: [], includeAddresses: false, mappingId: "", uri: "", customData: "" },
+        fromMapping: { addresses: [], includeAddresses: false, mappingId: "", uri: "", customData: "" },
+        initiatedByMapping: { addresses: [], includeAddresses: false, mappingId: "", uri: "", customData: "" },
 
-    return updatedBalances
-  } else {
-    return balanceObjectsForSpecifiedRanges
-  }
-}
-
-/**
- * Increments the balance to all ids specified in ranges.
- *
- * @param userBalanceInfo - The user balance info to update.
- * @param ranges - The ID ranges to update.
- * @param balanceToAdd - The balance to add.
- */
-export function addBalancesForIdRanges(userBalanceInfo: UserBalance<bigint>, ranges: IdRange<bigint>[], balanceToAdd: bigint) {
-  let currBalances = getBalancesForIdRanges(ranges, userBalanceInfo.balances);
-
-  for (let currBalanceObj of currBalances) {
-    let newBalance = safeAddUints(currBalanceObj.amount, balanceToAdd);
-    userBalanceInfo.balances = updateBalancesForUintRanges(currBalanceObj.badgeIds, newBalance, userBalanceInfo.balances);
-  }
-
-  return userBalanceInfo
-}
-
-/**
- * Decrements the balance to all ids specified in ranges.
- *
- * @param userBalanceInfo - The user balance info to update.
- * @param ranges - The ID ranges to update.
- * @param balanceToRemove - The balance to remove.
- *
- * @remarks
- * Will throw an error if the resulting balance is negative.
- */
-export function subtractBalancesForIdRanges(userBalanceInfo: UserBalance<bigint>, ranges: IdRange<bigint>[], balanceToRemove: bigint) {
-  let currBalances = getBalancesForIdRanges(ranges, userBalanceInfo.balances);
-  for (let currBalanceObj of currBalances) {
-    let newBalance = safeSubtractUints(currBalanceObj.amount, balanceToRemove);
-    userBalanceInfo.balances = updateBalancesForUintRanges(currBalanceObj.badgeIds, newBalance, userBalanceInfo.balances);
-  }
-
-  return userBalanceInfo;
-}
-
-/**
- * Sets the balance amount to zero for specified ID ranges.
- *
- * @param balanceObjects - The balance objects to update.
- * @param ranges - The ID ranges to update.
- */
-export function deleteBalanceForIdRanges(ranges: IdRange<bigint>[], balanceObjects: Balance<bigint>[]) {
-  let newBalances: Balance<bigint>[] = [];
-  for (let balanceObj of balanceObjects) {
-    for (let rangeToDelete of ranges) {
-      let currRanges = balanceObj.badgeIds;
-
-      let [idxSpan, found] = getIdxSpanForRange(rangeToDelete, currRanges);
-
-      if (found) {
-        if (idxSpan.end == 0) {
-          idxSpan.end = idxSpan.start;
-        }
-
-        //Remove the ids within the rangeToDelete from existing ranges
-        let newUintRanges = currRanges.slice(0, idxSpan.start);
-        for (let i = idxSpan.start; i <= idxSpan.end; i++) {
-          newUintRanges = newUintRanges.concat(removeIdsFromUintRange(rangeToDelete, currRanges[i]));
-        }
-        newUintRanges = newUintRanges.concat(currRanges.slice(idxSpan.end + 1));
-        balanceObj.badgeIds = newUintRanges;
-      }
-    }
-
-    // If we don't have any corresponding IDs, don't store this anymore
-    if (balanceObj.badgeIds.length > 0) {
-      newBalances.push(balanceObj);
+        permittedTimes: [],
+        forbiddenTimes: [],
+        arbitraryValue: 0n,
+      });
     }
   }
 
-  return newBalances
-}
+  const [overlaps, _x, inSecondButNotFirst] = getOverlapsAndNonOverlaps(currPermissionDetails, toFetchPermissionDetails);
+  // For all overlaps, we simply return the amount
+  for (const overlapObject of overlaps) {
+    const overlap = overlapObject.overlap;
+    const amount = BigInt(overlapObject.firstDetails.arbitraryValue);
 
-/**
- * Sets the balance for a specific id. Assumes all badge IDs specified do not exist.
- *
- * @param ranges - The ID ranges to update.
- * @param amount - The balance to set.
- * @param balanceObjects - The balance objects to update.
- *
- * @remarks
- * Assumes balance does not exist already. If it does, it may cause unexpected behavior.
- */
-export function setBalanceForIdRanges(ranges: IdRange<bigint>[], amount: bigint, balanceObjects: Balance<bigint>[]) {
-  if (amount === 0n) {
-    return balanceObjects;
-  }
-
-  let [idx, found] = searchBalances(amount, balanceObjects);
-
-  let newBalances: Balance<bigint>[] = [];
-  if (!found) {
-    //We don't have an existing object with such a balance
-    newBalances = newBalances.concat(balanceObjects.slice(0, idx));
-    newBalances.push({
+    fetchedBalances.push({
       amount: amount,
-      badgeIds: ranges,
+      badgeIds: [overlap.badgeId],
+      ownedTimes: [overlap.ownershipTime],
     });
-    newBalances = newBalances.concat(balanceObjects.slice(idx));
-  } else {
-    newBalances = balanceObjects;
-    for (let rangeToAdd of ranges) {
-      newBalances[idx].badgeIds = insertRangeToUintRanges(rangeToAdd, newBalances[idx].badgeIds);
-    }
-
   }
 
-  return newBalances
+  // For those that were in toFetch but not currBalances, we return amount == 0
+  for (const detail of inSecondButNotFirst) {
+    fetchedBalances.push({
+      amount: 0n,
+      badgeIds: [detail.badgeId],
+      ownedTimes: [detail.ownershipTime],
+    });
+  }
+
+  return fetchedBalances;
 }
 
-
 /**
- * Searches for a target amount in a list of balance objects.
- * Returns [idxFoundAt, true] if found, else [idxToInsertAt, false].
+ * Deletes the balances for specified ID ranges and times.
  *
- * @param targetAmount - The target amount to search for.
- * @param balanceObjects - The balance objects to search.
- *
- * @remarks Assumes balance objects are sorted.
+ * Modifies and returns the original balances object with the deleted balances removed.
  */
-export function searchBalances(targetAmount: bigint, balanceObjects: Balance<bigint>[]) {
-  // Balances will be sorted, so we can binary search to get the targetIdx.
-  let balanceLow = 0;
-  let balanceHigh = balanceObjects.length - 1;
-  let median = 0;
-  let hasEntryWithSameBalance = false;
-  let idx = 0;
-
-  while (balanceLow <= balanceHigh) {
-    median = Math.floor((balanceLow + balanceHigh) / 2);
-    if (balanceObjects[median].amount === targetAmount) {
-      hasEntryWithSameBalance = true;
-      break;
-    } else if (balanceObjects[median].amount > targetAmount) {
-      balanceHigh = median - 1;
-    } else {
-      balanceLow = median + 1;
-    }
-  }
-
-  if (balanceObjects.length != 0) {
-    idx = median + 1
-    if (targetAmount <= balanceObjects[median].amount) {
-      idx = median
-    }
-  }
-
-  return [idx, hasEntryWithSameBalance] as [number, boolean]
+export function deleteBalances(idRanges: UintRange<bigint>[], times: UintRange<bigint>[], balances: Balance<bigint>[]) {
+  const fetchedBalanecs: Balance<bigint>[] = [];
+  return fetchedBalanecs;
 }
