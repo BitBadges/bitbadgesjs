@@ -1,5 +1,5 @@
 import { DeliverTxResponse } from "@cosmjs/stargate"
-import { IdRange } from "bitbadgesjs-proto"
+import { UintRange } from "bitbadgesjs-proto"
 import { BroadcastPostBody } from "bitbadgesjs-provider"
 import { ChallengeParams } from "blockin"
 import { TransferActivityInfo, convertTransferActivityInfo } from "./activity"
@@ -56,9 +56,9 @@ export function convertGetSearchRouteSuccessResponse<T extends NumberType, U ext
 
 export interface MetadataFetchOptions {
   doNotFetchCollectionMetadata?: boolean,
-  metadataIds?: NumberType[] | IdRange<NumberType>[],
+  metadataIds?: NumberType[] | UintRange<NumberType>[],
   uris?: string[],
-  badgeIds?: NumberType[] | IdRange<NumberType>[],
+  badgeIds?: NumberType[] | UintRange<NumberType>[],
 }
 
 export type CollectionViewKey = 'latestActivity' | 'latestAnnouncements' | 'latestReviews' | 'owners' | 'claimsById';

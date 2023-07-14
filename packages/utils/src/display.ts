@@ -1,14 +1,14 @@
-import { IdRange } from "bitbadgesjs-proto";
-import { METADATA_PAGE_LIMIT } from "./constants";
-import { sortIdRangesAndMergeIfNecessary } from "./idRanges";
+import { BadgeMetadata, UintRange } from "bitbadgesjs-proto";
 import { bigIntMin, getMetadataForBadgeId } from "./badgeMetadata";
+import { METADATA_PAGE_LIMIT } from "./constants";
 import { getMetadataIdForBadgeId } from "./metadataIds";
-import { BitBadgesCollection } from "./types/collections";
+import { BadgeMetadataDetails } from "./types/collections";
+import { sortUintRangesAndMergeIfNecessary } from "./uintRanges";
 
 /**
  * For a multicollection display, return the badges to be shown on a specific page.
  *
- * @param {{ collection: bigint, badgeIds: IdRange<bigint>[] }[]} collectionObjectsToDisplay - The collections to display.
+ * @param {{ collection: bigint, badgeIds: UintRange<bigint>[] }[]} collectionObjectsToDisplay - The collections to display.
  * @param {bigint | string | number} _pageNumber - The page number of the display
  * @param {bigint | string | number} _pageSize - The page size of the display
  *
@@ -19,7 +19,7 @@ import { BitBadgesCollection } from "./types/collections";
 export function getBadgesToDisplay(
   collectionObjectsToDisplay: {
     collectionId: bigint,
-    badgeIds: IdRange<bigint>[]
+    badgeIds: UintRange<bigint>[]
   }[] = [],
   _pageNumber: bigint | string | number,
   _pageSize: bigint | string | number,
@@ -28,7 +28,7 @@ export function getBadgesToDisplay(
   const pageSize = BigInt(_pageSize);
 
   const startIdxNum = BigInt((pageNumber - 1n) * pageSize);
-  const badgeIdsToDisplay: { collectionId: bigint, badgeIds: IdRange<bigint>[] }[] = [];
+  const badgeIdsToDisplay: { collectionId: bigint, badgeIds: UintRange<bigint>[] }[] = [];
 
   let currIdx = 0n;
   let numEntriesLeftToHandle = pageSize;
@@ -46,7 +46,7 @@ export function getBadgesToDisplay(
         }
 
         //Iterate through the range and add badgeIds to the array, until we have added enough
-        const badgeIdsToDisplayIds: IdRange<bigint>[] = [];
+        const badgeIdsToDisplayIds: UintRange<bigint>[] = [];
         if (numEntriesLeftToHandle > 0) {
           const endBadgeId = bigIntMin(currBadgeId + numEntriesLeftToHandle - 1n, range.end);
           badgeIdsToDisplayIds.push({ start: currBadgeId, end: endBadgeId });
@@ -54,7 +54,7 @@ export function getBadgesToDisplay(
 
         badgeIdsToDisplay.push({
           collectionId: collectionObj.collectionId,
-          badgeIds: sortIdRangesAndMergeIfNecessary(badgeIdsToDisplayIds)
+          badgeIds: sortUintRangesAndMergeIfNecessary(badgeIdsToDisplayIds)
         });
 
         if (numEntriesLeftToHandle <= 0) break;
@@ -80,18 +80,19 @@ export function getBadgesToDisplay(
  *
  * Assumes that badgeIdsToDisplay has no overlapping ranges.
  *
- * @param {IdRange<bigint>[]} _badgeIdsToDisplay - The badgeIds to display
- * @param {BitBadgesCollection<bigint>} collection - The collection details
+ * @param {UintRange<bigint>[]} _badgeIdsToDisplay - The badgeIds to display
+ * @param {BadgeMetadataDetails<bigint>[]} currBadgeMetadataMap - The current badge metadata map that has been fetched
+ * @param {BadgeMetadata<bigint>[]} badgeMetadata - The badge metadata of the collection
  */
-export function getMetadataIdsToFetch(_badgeIdsToDisplay: IdRange<bigint>[], collection: BitBadgesCollection<bigint>) {
-  const badgeIdsToDisplay = sortIdRangesAndMergeIfNecessary(_badgeIdsToDisplay);
+export function getMetadataIdsToFetch(_badgeIdsToDisplay: UintRange<bigint>[], currBadgeMetadataMap: BadgeMetadataDetails<bigint>[], badgeMetadata: BadgeMetadata<bigint>[]) {
+  const badgeIdsToDisplay = sortUintRangesAndMergeIfNecessary(_badgeIdsToDisplay);
 
   const metadataIds: bigint[] = [];
   const lastMetadataId = -1000000;
   for (let i = 0; i < badgeIdsToDisplay.length; i++) {
     for (let id = badgeIdsToDisplay[i].start; id <= badgeIdsToDisplay[i].end; id++) {
-      if (!getMetadataForBadgeId(id, collection.badgeMetadata)) {
-        const metadataId = getMetadataIdForBadgeId(id, collection.badgeUris);
+      if (!getMetadataForBadgeId(id, currBadgeMetadataMap)) {
+        const metadataId = getMetadataIdForBadgeId(id, badgeMetadata);
         if (metadataId !== -1) {
           // If we have a gap of more than METADATA_PAGE_LIMIT, then we fetch a new batch starting at this metadataId
           if (lastMetadataId + METADATA_PAGE_LIMIT <= metadataId) {

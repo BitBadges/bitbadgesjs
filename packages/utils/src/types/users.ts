@@ -1,7 +1,7 @@
 import { NumberType } from "bitbadgesjs-proto"
 import { AnnouncementInfo, ReviewInfo, TransferActivityInfo, convertAnnouncementInfo, convertReviewInfo, convertTransferActivityInfo } from "./activity"
 import { PaginationInfo } from "./api"
-import { AccountInfoBase, BalanceInfo, Identified, ProfileInfoBase, convertAccountInfo, convertBalanceInfo, convertProfileInfo } from "./db"
+import { AccountInfoBase, ApprovalsTrackerInfo, BalanceInfo, Identified, MerkleChallengeInfoWithDetails, ProfileInfoBase, convertAccountInfo, convertApprovalsTrackerInfo, convertBalanceInfo, convertMerkleChallengeInfoWithDetails, convertProfileInfo } from "./db"
 import { deepCopy, removeCouchDBDetails } from "./utils"
 
 /**
@@ -38,6 +38,8 @@ export interface BitBadgesUserInfo<T extends NumberType> extends ProfileInfoBase
   activity: TransferActivityInfo<T>[],
   announcements: AnnouncementInfo<T>[],
   reviews: ReviewInfo<T>[],
+  merkleChallenges: MerkleChallengeInfoWithDetails<T>[],
+  approvalsTrackers: ApprovalsTrackerInfo<T>[],
 
   views: {
     [viewKey: string]: {
@@ -59,6 +61,8 @@ export function convertBitBadgesUserInfo<T extends NumberType, U extends NumberT
     activity: item.activity.map((activityItem) => convertTransferActivityInfo(activityItem, convertFunction)).map(x => removeCouchDBDetails(x)),
     announcements: item.announcements.map((activityItem) => convertAnnouncementInfo(activityItem, convertFunction)).map(x => removeCouchDBDetails(x)),
     reviews: item.reviews.map((activityItem) => convertReviewInfo(activityItem, convertFunction)).map(x => removeCouchDBDetails(x)),
+    merkleChallenges: item.merkleChallenges.map((challenge) => convertMerkleChallengeInfoWithDetails(challenge, convertFunction)).map(x => removeCouchDBDetails(x)),
+    approvalsTrackers: item.approvalsTrackers.map((tracker) => convertApprovalsTrackerInfo(tracker, convertFunction)).map(x => removeCouchDBDetails(x)),
     views: item.views,
     _rev: undefined,
     _deleted: undefined,

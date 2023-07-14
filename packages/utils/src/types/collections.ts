@@ -1,6 +1,6 @@
-import { IdRange, NumberType, convertIdRange } from "bitbadgesjs-proto";
+import { UintRange, NumberType, convertUintRange } from "bitbadgesjs-proto";
 import { AnnouncementInfo, ReviewInfo, TransferActivityInfo, convertAnnouncementInfo, convertReviewInfo, convertTransferActivityInfo } from "./activity";
-import { BalanceInfo, ClaimInfoWithDetails, CollectionInfoBase, Identified, convertBalanceInfo, convertClaimInfoWithDetails, convertCollectionInfo } from "./db";
+import { BalanceInfo, MerkleChallengeInfoWithDetails, CollectionInfoBase, Identified, convertBalanceInfo, convertMerkleChallengeInfoWithDetails, convertCollectionInfo, ApprovalsTrackerInfo, convertApprovalsTrackerInfo } from "./db";
 import { Metadata, convertMetadata } from "./metadata";
 import { BitBadgesUserInfo, convertBitBadgesUserInfo } from "./users";
 import { deepCopy, removeCouchDBDetails } from "./utils";
@@ -8,16 +8,17 @@ import { PaginationInfo } from "./api";
 
 export interface BadgeMetadataDetails<T extends NumberType> {
   metadataId?: T,
-  badgeIds: IdRange<T>[],
+  badgeIds: UintRange<T>[],
   metadata: Metadata<T>,
   uri?: string
+  customData?: string
 }
 
 export function convertBadgeMetadataDetails<T extends NumberType, U extends NumberType>(item: BadgeMetadataDetails<T>, convertFunction: (item: T) => U): BadgeMetadataDetails<U> {
   return deepCopy({
     ...item,
     metadataId: item.metadataId ? convertFunction(item.metadataId) : undefined,
-    badgeIds: item.badgeIds.map((idRange) => convertIdRange(idRange, convertFunction)),
+    badgeIds: item.badgeIds.map((UintRange) => convertUintRange(UintRange, convertFunction)),
     metadata: convertMetadata(item.metadata, convertFunction),
   })
 }
@@ -29,14 +30,14 @@ export function convertBadgeMetadataDetails<T extends NumberType, U extends Numb
  * @typedef {Object} BitBadgesCollection
  * @extends {CollectionInfoBase} The base collection document
  *
- * @property {BitBadgesUserInfo} managerInfo - The account information of the manager of this collection
+ * @property {BitBadgesUserInfo} managerInfo - The account information of the current manager of this collection
  * @property {Metadata} collectionMetadata - The metadata of this collection
  * @property {Metadata[]} badgeMetadata - The metadata of each badge in this collection stored in a map by metadataId (see how we calculate metadataId in the docs)
  * @property {TransferActivityDoc[]} activity - The transfer activity of this collection
  * @property {AnnouncementDoc[]} announcements - The announcement activity of this collection
  * @property {ReviewDoc[]} reviews - The review activity of this collection
  * @property {BalanceDoc[]} owners - The badge balance documents for owners of this collection
- * @property {ClaimInfo[]} claims - The claims of this collection
+ * @property {MerkleChallengeInfo[]} claims - The claims of this collection
  *
  * @remarks
  * Note that the collectionMetadata, badgeMetadata, activity, announcements, reviews, claims, and balances fields are
@@ -55,7 +56,8 @@ export interface BitBadgesCollection<T extends NumberType> extends CollectionInf
   announcements: AnnouncementInfo<T>[],
   reviews: ReviewInfo<T>[],
   owners: BalanceInfo<T>[],
-  claims: ClaimInfoWithDetails<T>[],
+  merkleChallenges: MerkleChallengeInfoWithDetails<T>[],
+  approvalsTrackers: ApprovalsTrackerInfo<T>[],
 
   views: {
     [viewKey: string]: {
@@ -77,7 +79,8 @@ export function convertBitBadgesCollection<T extends NumberType, U extends Numbe
     announcements: item.announcements.map((activityItem) => convertAnnouncementInfo(activityItem, convertFunction)).map(x => removeCouchDBDetails(x)),
     reviews: item.reviews.map((activityItem) => convertReviewInfo(activityItem, convertFunction)).map(x => removeCouchDBDetails(x)),
     owners: item.owners.map((balance) => convertBalanceInfo(balance, convertFunction)).map(x => removeCouchDBDetails(x)),
-    claims: item.claims.map((claim) => convertClaimInfoWithDetails(claim, convertFunction)),
+    merkleChallenges: item.merkleChallenges.map((merkleChallenge) => convertMerkleChallengeInfoWithDetails(merkleChallenge, convertFunction)).map(x => removeCouchDBDetails(x)),
+    approvalsTrackers: item.approvalsTrackers.map((approvalsTracker) => convertApprovalsTrackerInfo(approvalsTracker, convertFunction)).map(x => removeCouchDBDetails(x)),
     _rev: undefined,
     _deleted: undefined,
   })

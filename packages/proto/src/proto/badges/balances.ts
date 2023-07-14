@@ -7,277 +7,461 @@
  * git: https://github.com/thesayyn/protoc-gen-ts */
 import * as dependency_1 from "./../gogoproto/gogo";
 import * as dependency_2 from "./params";
-import * as dependency_3 from "./ranges";
 import * as pb_1 from "google-protobuf";
 export namespace bitbadges.bitbadgeschain.badges {
-    export class Balance extends pb_1.Message {
-        #one_of_decls: number[][] = [];
-        constructor(data?: any[] | {
-            amount?: string;
-            badgeIds?: dependency_3.bitbadges.bitbadgeschain.badges.IdRange[];
-        }) {
-            super();
-            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [2], this.#one_of_decls);
-            if (!Array.isArray(data) && typeof data == "object") {
-                if ("amount" in data && data.amount != undefined) {
-                    this.amount = data.amount;
-                }
-                if ("badgeIds" in data && data.badgeIds != undefined) {
-                    this.badgeIds = data.badgeIds;
-                }
-            }
+  export class UintRange extends pb_1.Message {
+    #one_of_decls: number[][] = [];
+    constructor(data?: any[] | {
+      start?: string;
+      end?: string;
+    }) {
+      super();
+      pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+      if (!Array.isArray(data) && typeof data == "object") {
+        if ("start" in data && data.start != undefined) {
+          this.start = data.start;
         }
-        get amount() {
-            return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
+        if ("end" in data && data.end != undefined) {
+          this.end = data.end;
         }
-        set amount(value: string) {
-            pb_1.Message.setField(this, 1, value);
-        }
-        get badgeIds() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_3.bitbadges.bitbadgeschain.badges.IdRange, 2) as dependency_3.bitbadges.bitbadgeschain.badges.IdRange[];
-        }
-        set badgeIds(value: dependency_3.bitbadges.bitbadgeschain.badges.IdRange[]) {
-            pb_1.Message.setRepeatedWrapperField(this, 2, value);
-        }
-        static fromObject(data: {
-            amount?: string;
-            badgeIds?: ReturnType<typeof dependency_3.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>[];
-        }): Balance {
-            const message = new Balance({});
-            if (data.amount != null) {
-                message.amount = data.amount;
-            }
-            if (data.badgeIds != null) {
-                message.badgeIds = data.badgeIds.map(item => dependency_3.bitbadges.bitbadgeschain.badges.IdRange.fromObject(item));
-            }
-            return message;
-        }
-        toObject() {
-            const data: {
-                amount?: string;
-                badgeIds?: ReturnType<typeof dependency_3.bitbadges.bitbadgeschain.badges.IdRange.prototype.toObject>[];
-            } = {};
-            if (this.amount != null) {
-                data.amount = this.amount;
-            }
-            if (this.badgeIds != null) {
-                data.badgeIds = this.badgeIds.map((item: dependency_3.bitbadges.bitbadgeschain.badges.IdRange) => item.toObject());
-            }
-            return data;
-        }
-        serialize(): Uint8Array;
-        serialize(w: pb_1.BinaryWriter): void;
-        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-            const writer = w || new pb_1.BinaryWriter();
-            if (this.amount.length)
-                writer.writeString(1, this.amount);
-            if (this.badgeIds.length)
-                writer.writeRepeatedMessage(2, this.badgeIds, (item: dependency_3.bitbadges.bitbadgeschain.badges.IdRange) => item.serialize(writer));
-            if (!w)
-                return writer.getResultBuffer();
-        }
-        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): Balance {
-            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new Balance();
-            while (reader.nextField()) {
-                if (reader.isEndGroup())
-                    break;
-                switch (reader.getFieldNumber()) {
-                    case 1:
-                        message.amount = reader.readString();
-                        break;
-                    case 2:
-                        reader.readMessage(message.badgeIds, () => pb_1.Message.addToRepeatedWrapperField(message, 2, dependency_3.bitbadges.bitbadgeschain.badges.IdRange.deserialize(reader), dependency_3.bitbadges.bitbadgeschain.badges.IdRange));
-                        break;
-                    default: reader.skipField();
-                }
-            }
-            return message;
-        }
-        serializeBinary(): Uint8Array {
-            return this.serialize();
-        }
-        static deserializeBinary(bytes: Uint8Array): Balance {
-            return Balance.deserialize(bytes);
-        }
+      }
     }
-    export class UserBalanceStore extends pb_1.Message {
-        #one_of_decls: number[][] = [];
-        constructor(data?: any[] | {
-            balances?: Balance[];
-            approvals?: Approval[];
-        }) {
-            super();
-            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1, 2], this.#one_of_decls);
-            if (!Array.isArray(data) && typeof data == "object") {
-                if ("balances" in data && data.balances != undefined) {
-                    this.balances = data.balances;
-                }
-                if ("approvals" in data && data.approvals != undefined) {
-                    this.approvals = data.approvals;
-                }
-            }
-        }
-        get balances() {
-            return pb_1.Message.getRepeatedWrapperField(this, Balance, 1) as Balance[];
-        }
-        set balances(value: Balance[]) {
-            pb_1.Message.setRepeatedWrapperField(this, 1, value);
-        }
-        get approvals() {
-            return pb_1.Message.getRepeatedWrapperField(this, Approval, 2) as Approval[];
-        }
-        set approvals(value: Approval[]) {
-            pb_1.Message.setRepeatedWrapperField(this, 2, value);
-        }
-        static fromObject(data: {
-            balances?: ReturnType<typeof Balance.prototype.toObject>[];
-            approvals?: ReturnType<typeof Approval.prototype.toObject>[];
-        }): UserBalanceStore {
-            const message = new UserBalanceStore({});
-            if (data.balances != null) {
-                message.balances = data.balances.map(item => Balance.fromObject(item));
-            }
-            if (data.approvals != null) {
-                message.approvals = data.approvals.map(item => Approval.fromObject(item));
-            }
-            return message;
-        }
-        toObject() {
-            const data: {
-                balances?: ReturnType<typeof Balance.prototype.toObject>[];
-                approvals?: ReturnType<typeof Approval.prototype.toObject>[];
-            } = {};
-            if (this.balances != null) {
-                data.balances = this.balances.map((item: Balance) => item.toObject());
-            }
-            if (this.approvals != null) {
-                data.approvals = this.approvals.map((item: Approval) => item.toObject());
-            }
-            return data;
-        }
-        serialize(): Uint8Array;
-        serialize(w: pb_1.BinaryWriter): void;
-        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-            const writer = w || new pb_1.BinaryWriter();
-            if (this.balances.length)
-                writer.writeRepeatedMessage(1, this.balances, (item: Balance) => item.serialize(writer));
-            if (this.approvals.length)
-                writer.writeRepeatedMessage(2, this.approvals, (item: Approval) => item.serialize(writer));
-            if (!w)
-                return writer.getResultBuffer();
-        }
-        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): UserBalanceStore {
-            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new UserBalanceStore();
-            while (reader.nextField()) {
-                if (reader.isEndGroup())
-                    break;
-                switch (reader.getFieldNumber()) {
-                    case 1:
-                        reader.readMessage(message.balances, () => pb_1.Message.addToRepeatedWrapperField(message, 1, Balance.deserialize(reader), Balance));
-                        break;
-                    case 2:
-                        reader.readMessage(message.approvals, () => pb_1.Message.addToRepeatedWrapperField(message, 2, Approval.deserialize(reader), Approval));
-                        break;
-                    default: reader.skipField();
-                }
-            }
-            return message;
-        }
-        serializeBinary(): Uint8Array {
-            return this.serialize();
-        }
-        static deserializeBinary(bytes: Uint8Array): UserBalanceStore {
-            return UserBalanceStore.deserialize(bytes);
-        }
+    get start() {
+      return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
     }
-    export class Approval extends pb_1.Message {
-        #one_of_decls: number[][] = [];
-        constructor(data?: any[] | {
-            address?: string;
-            balances?: Balance[];
-        }) {
-            super();
-            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [2], this.#one_of_decls);
-            if (!Array.isArray(data) && typeof data == "object") {
-                if ("address" in data && data.address != undefined) {
-                    this.address = data.address;
-                }
-                if ("balances" in data && data.balances != undefined) {
-                    this.balances = data.balances;
-                }
-            }
-        }
-        get address() {
-            return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
-        }
-        set address(value: string) {
-            pb_1.Message.setField(this, 1, value);
-        }
-        get balances() {
-            return pb_1.Message.getRepeatedWrapperField(this, Balance, 2) as Balance[];
-        }
-        set balances(value: Balance[]) {
-            pb_1.Message.setRepeatedWrapperField(this, 2, value);
-        }
-        static fromObject(data: {
-            address?: string;
-            balances?: ReturnType<typeof Balance.prototype.toObject>[];
-        }): Approval {
-            const message = new Approval({});
-            if (data.address != null) {
-                message.address = data.address;
-            }
-            if (data.balances != null) {
-                message.balances = data.balances.map(item => Balance.fromObject(item));
-            }
-            return message;
-        }
-        toObject() {
-            const data: {
-                address?: string;
-                balances?: ReturnType<typeof Balance.prototype.toObject>[];
-            } = {};
-            if (this.address != null) {
-                data.address = this.address;
-            }
-            if (this.balances != null) {
-                data.balances = this.balances.map((item: Balance) => item.toObject());
-            }
-            return data;
-        }
-        serialize(): Uint8Array;
-        serialize(w: pb_1.BinaryWriter): void;
-        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-            const writer = w || new pb_1.BinaryWriter();
-            if (this.address.length)
-                writer.writeString(1, this.address);
-            if (this.balances.length)
-                writer.writeRepeatedMessage(2, this.balances, (item: Balance) => item.serialize(writer));
-            if (!w)
-                return writer.getResultBuffer();
-        }
-        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): Approval {
-            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new Approval();
-            while (reader.nextField()) {
-                if (reader.isEndGroup())
-                    break;
-                switch (reader.getFieldNumber()) {
-                    case 1:
-                        message.address = reader.readString();
-                        break;
-                    case 2:
-                        reader.readMessage(message.balances, () => pb_1.Message.addToRepeatedWrapperField(message, 2, Balance.deserialize(reader), Balance));
-                        break;
-                    default: reader.skipField();
-                }
-            }
-            return message;
-        }
-        serializeBinary(): Uint8Array {
-            return this.serialize();
-        }
-        static deserializeBinary(bytes: Uint8Array): Approval {
-            return Approval.deserialize(bytes);
-        }
+    set start(value: string) {
+      pb_1.Message.setField(this, 1, value);
     }
+    get end() {
+      return pb_1.Message.getFieldWithDefault(this, 2, "") as string;
+    }
+    set end(value: string) {
+      pb_1.Message.setField(this, 2, value);
+    }
+    static fromObject(data: {
+      start?: string;
+      end?: string;
+    }): UintRange {
+      const message = new UintRange({});
+      if (data.start != null) {
+        message.start = data.start;
+      }
+      if (data.end != null) {
+        message.end = data.end;
+      }
+      return message;
+    }
+    toObject() {
+      const data: {
+        start?: string;
+        end?: string;
+      } = {};
+      if (this.start != null) {
+        data.start = this.start;
+      }
+      if (this.end != null) {
+        data.end = this.end;
+      }
+      return data;
+    }
+    serialize(): Uint8Array;
+    serialize(w: pb_1.BinaryWriter): void;
+    serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+      const writer = w || new pb_1.BinaryWriter();
+      if (this.start.length)
+        writer.writeString(1, this.start);
+      if (this.end.length)
+        writer.writeString(2, this.end);
+      if (!w)
+        return writer.getResultBuffer();
+    }
+    static deserialize(bytes: Uint8Array | pb_1.BinaryReader): UintRange {
+      const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new UintRange();
+      while (reader.nextField()) {
+        if (reader.isEndGroup())
+          break;
+        switch (reader.getFieldNumber()) {
+          case 1:
+            message.start = reader.readString();
+            break;
+          case 2:
+            message.end = reader.readString();
+            break;
+          default: reader.skipField();
+        }
+      }
+      return message;
+    }
+    serializeBinary(): Uint8Array {
+      return this.serialize();
+    }
+    static deserializeBinary(bytes: Uint8Array): UintRange {
+      return UintRange.deserialize(bytes);
+    }
+  }
+  export class Balance extends pb_1.Message {
+    #one_of_decls: number[][] = [];
+    constructor(data?: any[] | {
+      amount?: string;
+      ownedTimes?: UintRange[];
+      badgeIds?: UintRange[];
+    }) {
+      super();
+      pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [2, 3], this.#one_of_decls);
+      if (!Array.isArray(data) && typeof data == "object") {
+        if ("amount" in data && data.amount != undefined) {
+          this.amount = data.amount;
+        }
+        if ("ownedTimes" in data && data.ownedTimes != undefined) {
+          this.ownedTimes = data.ownedTimes;
+        }
+        if ("badgeIds" in data && data.badgeIds != undefined) {
+          this.badgeIds = data.badgeIds;
+        }
+      }
+    }
+    get amount() {
+      return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
+    }
+    set amount(value: string) {
+      pb_1.Message.setField(this, 1, value);
+    }
+    get ownedTimes() {
+      return pb_1.Message.getRepeatedWrapperField(this, UintRange, 2) as UintRange[];
+    }
+    set ownedTimes(value: UintRange[]) {
+      pb_1.Message.setRepeatedWrapperField(this, 2, value);
+    }
+    get badgeIds() {
+      return pb_1.Message.getRepeatedWrapperField(this, UintRange, 3) as UintRange[];
+    }
+    set badgeIds(value: UintRange[]) {
+      pb_1.Message.setRepeatedWrapperField(this, 3, value);
+    }
+    static fromObject(data: {
+      amount?: string;
+      ownedTimes?: ReturnType<typeof UintRange.prototype.toObject>[];
+      badgeIds?: ReturnType<typeof UintRange.prototype.toObject>[];
+    }): Balance {
+      const message = new Balance({});
+      if (data.amount != null) {
+        message.amount = data.amount;
+      }
+      if (data.ownedTimes != null) {
+        message.ownedTimes = data.ownedTimes.map(item => UintRange.fromObject(item));
+      }
+      if (data.badgeIds != null) {
+        message.badgeIds = data.badgeIds.map(item => UintRange.fromObject(item));
+      }
+      return message;
+    }
+    toObject() {
+      const data: {
+        amount?: string;
+        ownedTimes?: ReturnType<typeof UintRange.prototype.toObject>[];
+        badgeIds?: ReturnType<typeof UintRange.prototype.toObject>[];
+      } = {};
+      if (this.amount != null) {
+        data.amount = this.amount;
+      }
+      if (this.ownedTimes != null) {
+        data.ownedTimes = this.ownedTimes.map((item: UintRange) => item.toObject());
+      }
+      if (this.badgeIds != null) {
+        data.badgeIds = this.badgeIds.map((item: UintRange) => item.toObject());
+      }
+      return data;
+    }
+    serialize(): Uint8Array;
+    serialize(w: pb_1.BinaryWriter): void;
+    serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+      const writer = w || new pb_1.BinaryWriter();
+      if (this.amount.length)
+        writer.writeString(1, this.amount);
+      if (this.ownedTimes.length)
+        writer.writeRepeatedMessage(2, this.ownedTimes, (item: UintRange) => item.serialize(writer));
+      if (this.badgeIds.length)
+        writer.writeRepeatedMessage(3, this.badgeIds, (item: UintRange) => item.serialize(writer));
+      if (!w)
+        return writer.getResultBuffer();
+    }
+    static deserialize(bytes: Uint8Array | pb_1.BinaryReader): Balance {
+      const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new Balance();
+      while (reader.nextField()) {
+        if (reader.isEndGroup())
+          break;
+        switch (reader.getFieldNumber()) {
+          case 1:
+            message.amount = reader.readString();
+            break;
+          case 2:
+            reader.readMessage(message.ownedTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 2, UintRange.deserialize(reader), UintRange));
+            break;
+          case 3:
+            reader.readMessage(message.badgeIds, () => pb_1.Message.addToRepeatedWrapperField(message, 3, UintRange.deserialize(reader), UintRange));
+            break;
+          default: reader.skipField();
+        }
+      }
+      return message;
+    }
+    serializeBinary(): Uint8Array {
+      return this.serialize();
+    }
+    static deserializeBinary(bytes: Uint8Array): Balance {
+      return Balance.deserialize(bytes);
+    }
+  }
+  export class MustOwnBadges extends pb_1.Message {
+    #one_of_decls: number[][] = [];
+    constructor(data?: any[] | {
+      collectionId?: string;
+      amountRange?: UintRange;
+      ownedTimes?: UintRange[];
+      badgeIds?: UintRange[];
+    }) {
+      super();
+      pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [3, 4], this.#one_of_decls);
+      if (!Array.isArray(data) && typeof data == "object") {
+        if ("collectionId" in data && data.collectionId != undefined) {
+          this.collectionId = data.collectionId;
+        }
+        if ("amountRange" in data && data.amountRange != undefined) {
+          this.amountRange = data.amountRange;
+        }
+        if ("ownedTimes" in data && data.ownedTimes != undefined) {
+          this.ownedTimes = data.ownedTimes;
+        }
+        if ("badgeIds" in data && data.badgeIds != undefined) {
+          this.badgeIds = data.badgeIds;
+        }
+      }
+    }
+    get collectionId() {
+      return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
+    }
+    set collectionId(value: string) {
+      pb_1.Message.setField(this, 1, value);
+    }
+    get amountRange() {
+      return pb_1.Message.getWrapperField(this, UintRange, 2) as UintRange;
+    }
+    set amountRange(value: UintRange) {
+      pb_1.Message.setWrapperField(this, 2, value);
+    }
+    get has_amountRange() {
+      return pb_1.Message.getField(this, 2) != null;
+    }
+    get ownedTimes() {
+      return pb_1.Message.getRepeatedWrapperField(this, UintRange, 3) as UintRange[];
+    }
+    set ownedTimes(value: UintRange[]) {
+      pb_1.Message.setRepeatedWrapperField(this, 3, value);
+    }
+    get badgeIds() {
+      return pb_1.Message.getRepeatedWrapperField(this, UintRange, 4) as UintRange[];
+    }
+    set badgeIds(value: UintRange[]) {
+      pb_1.Message.setRepeatedWrapperField(this, 4, value);
+    }
+    static fromObject(data: {
+      collectionId?: string;
+      amountRange?: ReturnType<typeof UintRange.prototype.toObject>;
+      ownedTimes?: ReturnType<typeof UintRange.prototype.toObject>[];
+      badgeIds?: ReturnType<typeof UintRange.prototype.toObject>[];
+    }): MustOwnBadges {
+      const message = new MustOwnBadges({});
+      if (data.collectionId != null) {
+        message.collectionId = data.collectionId;
+      }
+      if (data.amountRange != null) {
+        message.amountRange = UintRange.fromObject(data.amountRange);
+      }
+      if (data.ownedTimes != null) {
+        message.ownedTimes = data.ownedTimes.map(item => UintRange.fromObject(item));
+      }
+      if (data.badgeIds != null) {
+        message.badgeIds = data.badgeIds.map(item => UintRange.fromObject(item));
+      }
+      return message;
+    }
+    toObject() {
+      const data: {
+        collectionId?: string;
+        amountRange?: ReturnType<typeof UintRange.prototype.toObject>;
+        ownedTimes?: ReturnType<typeof UintRange.prototype.toObject>[];
+        badgeIds?: ReturnType<typeof UintRange.prototype.toObject>[];
+      } = {};
+      if (this.collectionId != null) {
+        data.collectionId = this.collectionId;
+      }
+      if (this.amountRange != null) {
+        data.amountRange = this.amountRange.toObject();
+      }
+      if (this.ownedTimes != null) {
+        data.ownedTimes = this.ownedTimes.map((item: UintRange) => item.toObject());
+      }
+      if (this.badgeIds != null) {
+        data.badgeIds = this.badgeIds.map((item: UintRange) => item.toObject());
+      }
+      return data;
+    }
+    serialize(): Uint8Array;
+    serialize(w: pb_1.BinaryWriter): void;
+    serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+      const writer = w || new pb_1.BinaryWriter();
+      if (this.collectionId.length)
+        writer.writeString(1, this.collectionId);
+      if (this.has_amountRange)
+        writer.writeMessage(2, this.amountRange, () => this.amountRange.serialize(writer));
+      if (this.ownedTimes.length)
+        writer.writeRepeatedMessage(3, this.ownedTimes, (item: UintRange) => item.serialize(writer));
+      if (this.badgeIds.length)
+        writer.writeRepeatedMessage(4, this.badgeIds, (item: UintRange) => item.serialize(writer));
+      if (!w)
+        return writer.getResultBuffer();
+    }
+    static deserialize(bytes: Uint8Array | pb_1.BinaryReader): MustOwnBadges {
+      const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new MustOwnBadges();
+      while (reader.nextField()) {
+        if (reader.isEndGroup())
+          break;
+        switch (reader.getFieldNumber()) {
+          case 1:
+            message.collectionId = reader.readString();
+            break;
+          case 2:
+            reader.readMessage(message.amountRange, () => message.amountRange = UintRange.deserialize(reader));
+            break;
+          case 3:
+            reader.readMessage(message.ownedTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 3, UintRange.deserialize(reader), UintRange));
+            break;
+          case 4:
+            reader.readMessage(message.badgeIds, () => pb_1.Message.addToRepeatedWrapperField(message, 4, UintRange.deserialize(reader), UintRange));
+            break;
+          default: reader.skipField();
+        }
+      }
+      return message;
+    }
+    serializeBinary(): Uint8Array {
+      return this.serialize();
+    }
+    static deserializeBinary(bytes: Uint8Array): MustOwnBadges {
+      return MustOwnBadges.deserialize(bytes);
+    }
+  }
+  export class InheritedBalance extends pb_1.Message {
+    #one_of_decls: number[][] = [];
+    constructor(data?: any[] | {
+      badgeIds?: UintRange[];
+      parentCollectionId?: string;
+      parentBadgeIds?: UintRange[];
+    }) {
+      super();
+      pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1, 3], this.#one_of_decls);
+      if (!Array.isArray(data) && typeof data == "object") {
+        if ("badgeIds" in data && data.badgeIds != undefined) {
+          this.badgeIds = data.badgeIds;
+        }
+        if ("parentCollectionId" in data && data.parentCollectionId != undefined) {
+          this.parentCollectionId = data.parentCollectionId;
+        }
+        if ("parentBadgeIds" in data && data.parentBadgeIds != undefined) {
+          this.parentBadgeIds = data.parentBadgeIds;
+        }
+      }
+    }
+    get badgeIds() {
+      return pb_1.Message.getRepeatedWrapperField(this, UintRange, 1) as UintRange[];
+    }
+    set badgeIds(value: UintRange[]) {
+      pb_1.Message.setRepeatedWrapperField(this, 1, value);
+    }
+    get parentCollectionId() {
+      return pb_1.Message.getFieldWithDefault(this, 2, "") as string;
+    }
+    set parentCollectionId(value: string) {
+      pb_1.Message.setField(this, 2, value);
+    }
+    get parentBadgeIds() {
+      return pb_1.Message.getRepeatedWrapperField(this, UintRange, 3) as UintRange[];
+    }
+    set parentBadgeIds(value: UintRange[]) {
+      pb_1.Message.setRepeatedWrapperField(this, 3, value);
+    }
+    static fromObject(data: {
+      badgeIds?: ReturnType<typeof UintRange.prototype.toObject>[];
+      parentCollectionId?: string;
+      parentBadgeIds?: ReturnType<typeof UintRange.prototype.toObject>[];
+    }): InheritedBalance {
+      const message = new InheritedBalance({});
+      if (data.badgeIds != null) {
+        message.badgeIds = data.badgeIds.map(item => UintRange.fromObject(item));
+      }
+      if (data.parentCollectionId != null) {
+        message.parentCollectionId = data.parentCollectionId;
+      }
+      if (data.parentBadgeIds != null) {
+        message.parentBadgeIds = data.parentBadgeIds.map(item => UintRange.fromObject(item));
+      }
+      return message;
+    }
+    toObject() {
+      const data: {
+        badgeIds?: ReturnType<typeof UintRange.prototype.toObject>[];
+        parentCollectionId?: string;
+        parentBadgeIds?: ReturnType<typeof UintRange.prototype.toObject>[];
+      } = {};
+      if (this.badgeIds != null) {
+        data.badgeIds = this.badgeIds.map((item: UintRange) => item.toObject());
+      }
+      if (this.parentCollectionId != null) {
+        data.parentCollectionId = this.parentCollectionId;
+      }
+      if (this.parentBadgeIds != null) {
+        data.parentBadgeIds = this.parentBadgeIds.map((item: UintRange) => item.toObject());
+      }
+      return data;
+    }
+    serialize(): Uint8Array;
+    serialize(w: pb_1.BinaryWriter): void;
+    serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+      const writer = w || new pb_1.BinaryWriter();
+      if (this.badgeIds.length)
+        writer.writeRepeatedMessage(1, this.badgeIds, (item: UintRange) => item.serialize(writer));
+      if (this.parentCollectionId.length)
+        writer.writeString(2, this.parentCollectionId);
+      if (this.parentBadgeIds.length)
+        writer.writeRepeatedMessage(3, this.parentBadgeIds, (item: UintRange) => item.serialize(writer));
+      if (!w)
+        return writer.getResultBuffer();
+    }
+    static deserialize(bytes: Uint8Array | pb_1.BinaryReader): InheritedBalance {
+      const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new InheritedBalance();
+      while (reader.nextField()) {
+        if (reader.isEndGroup())
+          break;
+        switch (reader.getFieldNumber()) {
+          case 1:
+            reader.readMessage(message.badgeIds, () => pb_1.Message.addToRepeatedWrapperField(message, 1, UintRange.deserialize(reader), UintRange));
+            break;
+          case 2:
+            message.parentCollectionId = reader.readString();
+            break;
+          case 3:
+            reader.readMessage(message.parentBadgeIds, () => pb_1.Message.addToRepeatedWrapperField(message, 3, UintRange.deserialize(reader), UintRange));
+            break;
+          default: reader.skipField();
+        }
+      }
+      return message;
+    }
+    serializeBinary(): Uint8Array {
+      return this.serialize();
+    }
+    static deserializeBinary(bytes: Uint8Array): InheritedBalance {
+      return InheritedBalance.deserialize(bytes);
+    }
+  }
 }

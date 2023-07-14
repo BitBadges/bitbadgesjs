@@ -22,7 +22,8 @@ export function convertOffChainBalancesMap<T extends NumberType, U extends Numbe
  * @extends {Transfer}
  *
  * @property {NumberType} [toAddressesLength] - The number of addresses to send the badges to. This takes priority over toAddresses.length (used when you don't know exact addresses (i.e. you know number of codes)).
- * @property {NumberType} [incrementIdsBy] - The number to increment the badgeIDs by for each transfer.
+ * @property {NumberType} [incrementBadgeIdsBy] - The number to increment the badgeIDs by for each transfer.
+ * @property {NumberType} [incrementOwnedTimesBy] - The number to increment the ownedTimes by for each transfer.
  *
  *
  * @remarks
@@ -35,7 +36,8 @@ export function convertOffChainBalancesMap<T extends NumberType, U extends Numbe
  */
 export interface TransferWithIncrements<T extends NumberType> extends Transfer<T> {
   toAddressesLength?: T; //This takes priority over toAddresses.length (used when you don't have exact addresses but have a length (i.e. number of codes))
-  incrementIdsBy?: T;
+  incrementBadgeIdsBy?: T;
+  incrementOwnedTimesBy?: T;
 }
 
 export function convertTransferWithIncrements<T extends NumberType, U extends NumberType>(item: TransferWithIncrements<T>, convertFunction: (item: T) => U): TransferWithIncrements<U> {
@@ -43,6 +45,7 @@ export function convertTransferWithIncrements<T extends NumberType, U extends Nu
     ...item,
     ...convertTransfer(item, convertFunction),
     toAddressesLength: item.toAddressesLength ? convertFunction(item.toAddressesLength) : undefined,
-    incrementIdsBy: item.incrementIdsBy ? convertFunction(item.incrementIdsBy) : undefined,
+    incrementBadgeIdsBy: item.incrementBadgeIdsBy ? convertFunction(item.incrementBadgeIdsBy) : undefined,
+    incrementOwnedTimesBy: item.incrementOwnedTimesBy ? convertFunction(item.incrementOwnedTimesBy) : undefined,
   })
 }

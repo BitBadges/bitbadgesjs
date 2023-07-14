@@ -1,0 +1,164 @@
+import { AddressMapping } from "bitbadgesjs-proto";
+import { convertToCosmosAddress } from "./chains";
+
+/**
+ * Checks if a specific account is in the given address mapping.
+ */
+export const isInAddressMapping = (addressesMapping: AddressMapping, addressToCheck: string) => {
+  let found = addressesMapping.addresses.includes(addressToCheck);
+
+  if (!addressesMapping.includeAddresses) {
+    found = !found;
+  }
+
+  return found;
+}
+
+/**
+ * Removes all addresses from one address mapping from another. Returns a new mapping.
+ *
+ * Returned mapping has ID "", so if you want to store it on the blockchain, you must set this with a unique ID.
+ */
+export function removeAddressMappingFromAddressMapping(mappingToRemove: AddressMapping, addressMapping: AddressMapping) {
+  let duplicates = [];
+  let inToRemoveButNotMapping = [];
+  let inMappingButNotToRemove = [];
+
+  for (let address of mappingToRemove.addresses) {
+    // Check if address is in addressMapping.addresses
+    let found = addressMapping.addresses.includes(address);
+
+    if (found) {
+      duplicates.push(address);
+    } else {
+      inToRemoveButNotMapping.push(address);
+    }
+  }
+
+  for (let address of addressMapping.addresses) {
+    // Check if address is in mappingToRemove.addresses
+    let found = mappingToRemove.addresses.includes(address);
+
+    if (!found) {
+      inMappingButNotToRemove.push(address);
+    }
+  }
+
+  let removed: AddressMapping = { addresses: [], includeAddresses: false, mappingId: "", uri: "", customData: "" };
+  let remaining: AddressMapping = { addresses: [], includeAddresses: false, mappingId: "", uri: "", customData: "" };
+
+  if (mappingToRemove.includeAddresses && addressMapping.includeAddresses) {
+    // Case 1
+    removed.includeAddresses = true;
+    removed.addresses = duplicates;
+
+    remaining.includeAddresses = true;
+    remaining.addresses = inMappingButNotToRemove;
+  } else if (!mappingToRemove.includeAddresses && addressMapping.includeAddresses) {
+    // Case 2
+    removed.includeAddresses = true;
+    removed.addresses = inMappingButNotToRemove;
+
+    remaining.includeAddresses = true;
+    remaining.addresses = duplicates;
+  } else if (mappingToRemove.includeAddresses && !addressMapping.includeAddresses) {
+    // Case 3
+    removed.includeAddresses = true;
+    removed.addresses = inToRemoveButNotMapping;
+
+    remaining.includeAddresses = false;
+    remaining.addresses = [...inMappingButNotToRemove, ...inToRemoveButNotMapping, ...duplicates];
+  } else if (!mappingToRemove.includeAddresses && !addressMapping.includeAddresses) {
+    // Case 4
+    removed.includeAddresses = false;
+    removed.addresses = [...inMappingButNotToRemove, ...inToRemoveButNotMapping, ...duplicates];
+
+    remaining.includeAddresses = true;
+    remaining.addresses = inToRemoveButNotMapping;
+  }
+
+  return [remaining, removed];
+}
+
+export function isAddressMappingEmpty(mapping: AddressMapping) {
+  return mapping.addresses.length === 0 && mapping.includeAddresses;
+}
+
+export function invertAddressMapping(mapping: AddressMapping) {
+  mapping.includeAddresses = !mapping.includeAddresses;
+  return mapping;
+}
+
+/**
+ * Returns the address mapping for a mapping ID, if it is a reserved ID (i.e. Mint, Manager, All, None, validly formatted address, ...)
+ *
+ * @param {string} addressMappingId - The mapping ID to get the address mapping for
+ * @param {string} managerAddress - The manager address to use for the Manager mapping ID
+ */
+export function getReservedAddressMapping(addressMappingId: string, managerAddress: string): AddressMapping | undefined {
+  let inverted = false;
+  let addressMapping: AddressMapping | undefined = undefined;
+
+  if (addressMappingId[0] === '!') {
+    inverted = true;
+    addressMappingId = addressMappingId.slice(1);
+  }
+
+  if (addressMappingId === 'Mint') {
+    addressMapping = {
+      mappingId: 'Mint',
+      addresses: ['Mint'],
+      includeAddresses: true,
+      uri: '',
+      customData: '',
+    };
+  }
+
+  if (addressMappingId === 'Manager') {
+    addressMapping = {
+      mappingId: 'Manager',
+      addresses: [managerAddress],
+      includeAddresses: true,
+      uri: '',
+      customData: '',
+    };
+  }
+
+  if (addressMappingId === 'All') {
+    addressMapping = {
+      mappingId: 'All',
+      addresses: ['Mint'],
+      includeAddresses: false,
+      uri: '',
+      customData: '',
+    };
+  }
+
+  if (addressMappingId === 'None') {
+    addressMapping = {
+      mappingId: 'None',
+      addresses: [],
+      includeAddresses: true,
+      uri: '',
+      customData: '',
+    };
+  }
+
+  if (convertToCosmosAddress(addressMappingId)) {
+    addressMapping = {
+      mappingId: addressMappingId,
+      addresses: [addressMappingId],
+      includeAddresses: true,
+      uri: '',
+      customData: '',
+    };
+  }
+
+
+
+  if (inverted && addressMapping) {
+    addressMapping.includeAddresses = !addressMapping.includeAddresses;
+  }
+
+  return addressMapping;
+}

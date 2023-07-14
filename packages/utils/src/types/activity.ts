@@ -1,4 +1,4 @@
-import { Balance, convertBalance } from "bitbadgesjs-proto";
+import { ApprovalIdDetails, Balance, convertBalance } from "bitbadgesjs-proto";
 import { NumberType } from "./string-numbers";
 import { deepCopy, getCouchDBDetails, removeCouchDBDetails } from "./utils";
 import nano from "nano";
@@ -131,7 +131,8 @@ export interface TransferActivityInfoBase<T extends NumberType> extends Activity
   from: (string | 'Mint')[];
   balances: Balance<T>[];
   collectionId: T;
-  claimId?: T;
+  memo: string;
+  precalculatedFromApproval: ApprovalIdDetails;
 }
 export type TransferActivityDoc<T extends NumberType> = TransferActivityInfoBase<T> & nano.Document & DeletableDocument;
 export type TransferActivityInfo<T extends NumberType> = TransferActivityInfoBase<T> & Identified;
@@ -150,6 +151,5 @@ export function convertTransferActivityInfo<T extends NumberType, U extends Numb
     method: item.method,
     balances: item.balances.map((x) => convertBalance(x, convertFunction)),
     collectionId: convertFunction(item.collectionId),
-    claimId: item.claimId ? convertFunction(item.claimId) : undefined
   })
 }

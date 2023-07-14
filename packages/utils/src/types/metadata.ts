@@ -1,4 +1,4 @@
-import { IdRange, NumberType, convertIdRange } from "bitbadgesjs-proto";
+import { UintRange, NumberType, convertUintRange } from "bitbadgesjs-proto";
 import { deepCopy } from "./utils";
 
 /**
@@ -9,7 +9,7 @@ import { deepCopy } from "./utils";
  * @property {string} description - The description of the badge or badge collection.
  * @property {string} image - The image of the badge or badge collection.
  * @property {string} [creator] - The creator of the badge or badge collection.
- * @property {IdRange} [validFrom] - The start time in milliseconds to end time in milliseconds of the badge or badge collection.
+ * @property {UintRange} [validFrom] - The start time in milliseconds to end time in milliseconds of the badge or badge collection.
  * @property {string} [color] - The color of the badge or badge collection.
  * @property {string} [category] - The category of the badge or badge collection (e.g. "Education", "Attendance").
  * @property {string} [externalUrl] - The external URL of the badge or badge collection.
@@ -23,8 +23,8 @@ export interface Metadata<T extends NumberType> {
   name: string;
   description: string;
   image: string;
-  time?: IdRange<T>;
-  validFrom?: IdRange<T>;
+  time?: UintRange<T>;
+  validFrom?: UintRange<T>;
   color?: string;
   category?: string;
   externalUrl?: string;
@@ -36,7 +36,7 @@ export interface Metadata<T extends NumberType> {
 export function convertMetadata<T extends NumberType, U extends NumberType>(item: Metadata<T>, convertFunction: (item: T) => U): Metadata<U> {
   return deepCopy({
     ...item,
-    time: item.time ? convertIdRange(item.time, convertFunction) : undefined,
-    validFrom: item.validFrom ? convertIdRange(item.validFrom, convertFunction) : undefined,
+    time: item.time ? convertUintRange(item.time, convertFunction) : undefined,
+    validFrom: item.validFrom ? convertUintRange(item.validFrom, convertFunction) : undefined,
   })
 }
