@@ -291,12 +291,27 @@ export function convertTransfer<T extends NumberType, U extends NumberType>(tran
  * @typedef {Object} ApprovalIdDetails
  * @property {string} approvalId - The approval ID of the approval.
  * @property {string} approvalLevel - The approval level of the approval "collection", "incoming", or "outgoing".
- * @property {string} address - The address of the approval to check. Leave "" if collection-level.
+ * @property {string} address - The address of the approval to check.
  */
 export interface ApprovalIdDetails {
   approvalId: string
   approvalLevel: string
   address: string
+}
+
+export interface ApprovalTrackerIdDetails<T extends NumberType> {
+  collectionId: T
+  approvalLevel: string
+  address: string
+  approvalId: string
+  trackerType: string
+}
+
+export function convertApprovalTrackerIdDetails<T extends NumberType, U extends NumberType>(approvalIdDetails: ApprovalTrackerIdDetails<T>, convertFunction: (item: T) => U): ApprovalTrackerIdDetails<U> {
+  return deepCopy({
+    ...approvalIdDetails,
+    collectionId: convertFunction(approvalIdDetails.collectionId),
+  })
 }
 
 // export function convertApprovalIdDetails<T extends NumberType, U extends NumberType>(approvalIdDetails: ApprovalIdDetails<T>, convertFunction: (item: T) => U): ApprovalIdDetails<U> {

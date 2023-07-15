@@ -1,5 +1,5 @@
 import { DeliverTxResponse } from "@cosmjs/stargate"
-import { UintRange } from "bitbadgesjs-proto"
+import { ApprovalTrackerIdDetails, UintRange } from "bitbadgesjs-proto"
 import { BroadcastPostBody } from "bitbadgesjs-provider"
 import { ChallengeParams } from "blockin"
 import { TransferActivityInfo, convertTransferActivityInfo } from "./activity"
@@ -61,14 +61,15 @@ export interface MetadataFetchOptions {
   badgeIds?: NumberType[] | UintRange<NumberType>[],
 }
 
-export type CollectionViewKey = 'latestActivity' | 'latestAnnouncements' | 'latestReviews' | 'owners' | 'claimsById';
+export type CollectionViewKey = 'latestActivity' | 'latestAnnouncements' | 'latestReviews' | 'owners' | 'merkleChallengesById' | 'approvalsTrackersById';
 
 export interface GetAdditionalCollectionDetailsRequestBody {
   viewsToFetch?: {
     viewKey: CollectionViewKey,
     bookmark: string
   }[],
-  claimIdsToFetch?: NumberType[],
+  merkleChallengeIdsToFetch?: string[],
+  approvalsTrackerIdsToFetch?: ApprovalTrackerIdDetails[],
   //customQueries?: { db: string, selector: any, key: string }[],
   //TODO: we can add fully custom queries here (i.e. supply own Mango selector)
 }
@@ -176,12 +177,12 @@ export function convertGetAllCodesAndPasswordsRouteSuccessResponse<T extends Num
   return { ...item };
 }
 
-export interface GetClaimCodeViaPasswordRouteRequestBody { }
-export interface GetClaimCodeViaPasswordRouteSuccessResponse<T extends NumberType> {
+export interface GetMerkleChallengeCodeViaPasswordRouteRequestBody { }
+export interface GetMerkleChallengeCodeViaPasswordRouteSuccessResponse<T extends NumberType> {
   code: string,
 }
-export type GetClaimCodeViaPasswordRouteResponse<T extends NumberType> = ErrorResponse | GetClaimCodeViaPasswordRouteSuccessResponse<T>;
-export function convertGetClaimCodeViaPasswordRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetClaimCodeViaPasswordRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetClaimCodeViaPasswordRouteSuccessResponse<U> {
+export type GetMerkleChallengeCodeViaPasswordRouteResponse<T extends NumberType> = ErrorResponse | GetMerkleChallengeCodeViaPasswordRouteSuccessResponse<T>;
+export function convertGetMerkleChallengeCodeViaPasswordRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetMerkleChallengeCodeViaPasswordRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetMerkleChallengeCodeViaPasswordRouteSuccessResponse<U> {
   return { ...item };
 }
 
@@ -316,19 +317,19 @@ export function convertAddMetadataToIpfsRouteSuccessResponse<T extends NumberTyp
   return { ...item };
 }
 
-export interface AddClaimToIpfsRouteRequestBody {
+export interface AddMerkleChallengeToIpfsRouteRequestBody {
   name: string,
   description: string,
   challengeDetails?: ChallengeDetails<NumberType>[],
 }
-export interface AddClaimToIpfsRouteSuccessResponse<T extends NumberType> {
+export interface AddMerkleChallengeToIpfsRouteSuccessResponse<T extends NumberType> {
   result: {
     cid: string,
     path: string,
   }
 }
-export type AddClaimToIpfsRouteResponse<T extends NumberType> = ErrorResponse | AddClaimToIpfsRouteSuccessResponse<T>;
-export function convertAddClaimToIpfsRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: AddClaimToIpfsRouteSuccessResponse<T>, convertFunction: (item: T) => U): AddClaimToIpfsRouteSuccessResponse<U> {
+export type AddMerkleChallengeToIpfsRouteResponse<T extends NumberType> = ErrorResponse | AddMerkleChallengeToIpfsRouteSuccessResponse<T>;
+export function convertAddMerkleChallengeToIpfsRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: AddMerkleChallengeToIpfsRouteSuccessResponse<T>, convertFunction: (item: T) => U): AddMerkleChallengeToIpfsRouteSuccessResponse<U> {
   return { ...item };
 }
 

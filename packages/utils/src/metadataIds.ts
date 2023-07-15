@@ -1,5 +1,4 @@
-import { BadgeMetadata, BadgeMetadataTimeline } from "bitbadgesjs-proto";
-import { getCurrentValueIdxForTimeline } from "./timelines";
+import { BadgeMetadata } from "bitbadgesjs-proto";
 import { searchUintRangesForId } from "./uintRanges";
 
 /**
@@ -160,14 +159,7 @@ export function getUrisForMetadataIds(metadataIds: bigint[], collectionUri: stri
   return uris;
 }
 
-export function getBadgeIdsForMetadataId(metadataId: bigint, badgeMetadataTimeline: BadgeMetadataTimeline<bigint>[]) {
-  const currentTimeIdx = getCurrentValueIdxForTimeline(badgeMetadataTimeline);
-  if (currentTimeIdx === -1n) {
-    return [];
-  }
-
-  const badgeUris = badgeMetadataTimeline[Number(currentTimeIdx)].badgeMetadata;
-
+export function getBadgeIdsForMetadataId(metadataId: bigint, badgeUris: BadgeMetadata<bigint>[]) {
   let batchIdx = 1n;
 
   for (const badgeUri of badgeUris) {

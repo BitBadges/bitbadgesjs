@@ -16,7 +16,7 @@ export const GetBadgeActivityRoute = (collectionId: NumberType, badgeId: NumberT
 export const RefreshMetadataRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/refreshMetadata`;
 export const RefreshBadgeMetadataRoute = (collectionId: NumberType, badgeId: NumberType) => `/api/v0/collection/${collectionId.toString()}/${badgeId.toString()}/refreshMetadata`;
 export const GetAllPasswordsAndCodesRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/codes`;
-export const GetClaimCodeViaPasswordRoute = (collectionId: NumberType, claimId: NumberType, password: string) => `/api/v0/collection/${collectionId.toString()}/password/${claimId}/${password}`;
+export const GetMerkleChallengeCodeViaPasswordRoute = (collectionId: NumberType, challengeId: string, password: string) => `/api/v0/collection/${collectionId.toString()}/password/${challengeId}/${password}`;
 export const AddAnnouncementRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/addAnnouncement`;
 export const AddReviewForCollectionRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/addReview`;
 

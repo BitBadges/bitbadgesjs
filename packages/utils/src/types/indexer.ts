@@ -60,7 +60,7 @@ export interface AccountDocs {
  * @typedef {Object} BalanceDocs
  */
 export interface BalanceDocs {
-  [partitionedId: string]: (BalanceDoc<bigint>); //Note no undefined here because we auto-supply an empty balance doc w/ balance = 0 if missing
+  [partitionedId: string]: (BalanceDoc<bigint>) | undefined;
 }
 
 /**

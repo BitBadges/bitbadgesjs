@@ -64,6 +64,8 @@ message MerkleChallenge {
   bool useLeafIndexForTransferOrder = 5;
 
   string challengeId = 6;
+  string uri = 7;
+  string customData = 8;
 }
 
 message IsUserOutgoingTransferAllowed {

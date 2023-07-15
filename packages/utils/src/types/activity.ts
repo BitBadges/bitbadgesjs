@@ -5,7 +5,7 @@ import nano from "nano";
 import { Identified, DeletableDocument } from "./db";
 
 export type ReviewMethod = 'Review';
-export type TransferMethod = 'Transfer' | 'Mint' | 'Claim';
+export type TransferMethod = 'Transfer';
 export type AnnouncementMethod = 'Announcement';
 export type ActivityMethod = ReviewMethod | TransferMethod | AnnouncementMethod;
 
@@ -122,7 +122,6 @@ export function convertAnnouncementInfo<T extends NumberType, U extends NumberTy
  * @property {(string | 'Mint')[]} from - The list of account numbers that sent the transfer ('Mint' is used as a special address when minting or claiming).
  * @property {Balance[]} balances - The list of balances and badge IDs that were transferred.
  * @property {NumberType} collectionId - The collection ID of the collection that was transferred.
- * @property {NumberType} [claimId] - The claim ID of the claim (if method = "Claim").
  * @property {TransferMethod} method - The type of activity, which can be "Transfer", "Mint", or "Claim".
  */
 export interface TransferActivityInfoBase<T extends NumberType> extends ActivityInfoBase<T> {
