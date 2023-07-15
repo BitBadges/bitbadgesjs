@@ -339,6 +339,8 @@ export interface MerkleChallenge<T extends NumberType> {
   maxOneUsePerLeaf: boolean
   useLeafIndexForTransferOrder: boolean
   challengeId: string
+  uri: string
+  customData: string
 }
 
 export function convertMerkleChallenge<T extends NumberType, U extends NumberType>(merkleChallenge: MerkleChallenge<T>, convertFunction: (item: T) => U): MerkleChallenge<U> {
