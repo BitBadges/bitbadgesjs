@@ -174,6 +174,8 @@ export const MERKLE_CHALLENGE_TYPES = [
   { name: 'maxOneUsePerLeaf', type: 'boolean' },
   { name: 'useLeafIndexForTransferOrder', type: 'boolean' },
   { name: 'challengeId', type: 'string' },
+  { name: 'uri', type: 'string' },
+  { name: 'customData', type: 'string' },
 ];
 
 export const PREDETERMINED_BALANCES_TYPES = [

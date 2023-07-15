@@ -339,6 +339,8 @@ export namespace bitbadges.bitbadgeschain.badges {
       maxOneUsePerLeaf?: boolean;
       useLeafIndexForTransferOrder?: boolean;
       challengeId?: string;
+      uri?: string;
+      customData?: string;
     }) {
       super();
       pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
@@ -360,6 +362,12 @@ export namespace bitbadges.bitbadgeschain.badges {
         }
         if ("challengeId" in data && data.challengeId != undefined) {
           this.challengeId = data.challengeId;
+        }
+        if ("uri" in data && data.uri != undefined) {
+          this.uri = data.uri;
+        }
+        if ("customData" in data && data.customData != undefined) {
+          this.customData = data.customData;
         }
       }
     }
@@ -399,6 +407,18 @@ export namespace bitbadges.bitbadgeschain.badges {
     set challengeId(value: string) {
       pb_1.Message.setField(this, 6, value);
     }
+    get uri() {
+      return pb_1.Message.getFieldWithDefault(this, 7, "") as string;
+    }
+    set uri(value: string) {
+      pb_1.Message.setField(this, 7, value);
+    }
+    get customData() {
+      return pb_1.Message.getFieldWithDefault(this, 8, "") as string;
+    }
+    set customData(value: string) {
+      pb_1.Message.setField(this, 8, value);
+    }
     static fromObject(data: {
       root?: string;
       expectedProofLength?: string;
@@ -406,6 +426,8 @@ export namespace bitbadges.bitbadgeschain.badges {
       maxOneUsePerLeaf?: boolean;
       useLeafIndexForTransferOrder?: boolean;
       challengeId?: string;
+      uri?: string;
+      customData?: string;
     }): MerkleChallenge {
       const message = new MerkleChallenge({});
       if (data.root != null) {
@@ -426,6 +448,12 @@ export namespace bitbadges.bitbadgeschain.badges {
       if (data.challengeId != null) {
         message.challengeId = data.challengeId;
       }
+      if (data.uri != null) {
+        message.uri = data.uri;
+      }
+      if (data.customData != null) {
+        message.customData = data.customData;
+      }
       return message;
     }
     toObject() {
@@ -436,6 +464,8 @@ export namespace bitbadges.bitbadgeschain.badges {
         maxOneUsePerLeaf?: boolean;
         useLeafIndexForTransferOrder?: boolean;
         challengeId?: string;
+        uri?: string;
+        customData?: string;
       } = {};
       if (this.root != null) {
         data.root = this.root;
@@ -455,6 +485,12 @@ export namespace bitbadges.bitbadgeschain.badges {
       if (this.challengeId != null) {
         data.challengeId = this.challengeId;
       }
+      if (this.uri != null) {
+        data.uri = this.uri;
+      }
+      if (this.customData != null) {
+        data.customData = this.customData;
+      }
       return data;
     }
     serialize(): Uint8Array;
@@ -473,6 +509,10 @@ export namespace bitbadges.bitbadgeschain.badges {
         writer.writeBool(5, this.useLeafIndexForTransferOrder);
       if (this.challengeId.length)
         writer.writeString(6, this.challengeId);
+      if (this.uri.length)
+        writer.writeString(7, this.uri);
+      if (this.customData.length)
+        writer.writeString(8, this.customData);
       if (!w)
         return writer.getResultBuffer();
     }
@@ -499,6 +539,12 @@ export namespace bitbadges.bitbadgeschain.badges {
             break;
           case 6:
             message.challengeId = reader.readString();
+            break;
+          case 7:
+            message.uri = reader.readString();
+            break;
+          case 8:
+            message.customData = reader.readString();
             break;
           default: reader.skipField();
         }
