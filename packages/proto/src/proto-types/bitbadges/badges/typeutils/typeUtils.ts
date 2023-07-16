@@ -292,11 +292,13 @@ export function convertTransfer<T extends NumberType, U extends NumberType>(tran
  * @property {string} approvalId - The approval ID of the approval.
  * @property {string} approvalLevel - The approval level of the approval "collection", "incoming", or "outgoing".
  * @property {string} address - The address of the approval to check.
+ * @property {string} addressToCheck - The address to check for the approval.
  */
 export interface ApprovalIdDetails {
   approvalId: string
   approvalLevel: string
   address: string
+  addressToCheck: string
 }
 
 export interface ApprovalTrackerIdDetails<T extends NumberType> {
@@ -305,6 +307,7 @@ export interface ApprovalTrackerIdDetails<T extends NumberType> {
   address: string
   approvalId: string
   trackerType: string
+  addressToCheck: string
 }
 
 export function convertApprovalTrackerIdDetails<T extends NumberType, U extends NumberType>(approvalIdDetails: ApprovalTrackerIdDetails<T>, convertFunction: (item: T) => U): ApprovalTrackerIdDetails<U> {

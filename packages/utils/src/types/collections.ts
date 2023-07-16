@@ -1,6 +1,6 @@
-import { UintRange, NumberType, convertUintRange } from "bitbadgesjs-proto";
+import { UintRange, NumberType, convertUintRange, CollectionApprovedTransfer, TimelineItem, ApprovalDetails } from "bitbadgesjs-proto";
 import { AnnouncementInfo, ReviewInfo, TransferActivityInfo, convertAnnouncementInfo, convertReviewInfo, convertTransferActivityInfo } from "./activity";
-import { BalanceInfo, MerkleChallengeInfoWithDetails, CollectionInfoBase, Identified, convertBalanceInfo, convertMerkleChallengeInfoWithDetails, convertCollectionInfo, ApprovalsTrackerInfo, convertApprovalsTrackerInfo } from "./db";
+import { BalanceInfo, CollectionInfoBase, Identified, convertBalanceInfo, convertCollectionInfo, ApprovalsTrackerInfo, convertApprovalsTrackerInfo, MerkleChallengeWithDetails, MerkleChallengeInfo, convertMerkleChallengeInfo } from "./db";
 import { Metadata, convertMetadata } from "./metadata";
 import { BitBadgesUserInfo, convertBitBadgesUserInfo } from "./users";
 import { deepCopy, removeCouchDBDetails } from "./utils";
@@ -21,6 +21,18 @@ export function convertBadgeMetadataDetails<T extends NumberType, U extends Numb
     badgeIds: item.badgeIds.map((UintRange) => convertUintRange(UintRange, convertFunction)),
     metadata: convertMetadata(item.metadata, convertFunction),
   })
+}
+
+export interface ApprovalDetailsWithDetails<T extends NumberType> extends ApprovalDetails<T> {
+  merkleChallenges: MerkleChallengeWithDetails<T>[];
+}
+
+export interface CollectionApprovedTransferWithDetails<T extends NumberType> extends CollectionApprovedTransfer<T> {
+  approvalDetails: ApprovalDetailsWithDetails<T>[];
+}
+
+export interface CollectionApprovedTransferTimelineWithDetails<T extends NumberType> extends TimelineItem<T> {
+  collectionApprovedTransfers: CollectionApprovedTransferWithDetails<T>[]
 }
 
 /**
@@ -48,6 +60,7 @@ export function convertBadgeMetadataDetails<T extends NumberType, U extends Numb
  */
 export interface BitBadgesCollection<T extends NumberType> extends CollectionInfoBase<T>, Identified {
   managerInfo: BitBadgesUserInfo<T>;
+  collectionApprovedTransfersTimeline: CollectionApprovedTransferTimelineWithDetails<T>[];
 
   //The following are to be fetched dynamically and as needed from the DB
   collectionMetadata?: Metadata<T>;
@@ -56,7 +69,7 @@ export interface BitBadgesCollection<T extends NumberType> extends CollectionInf
   announcements: AnnouncementInfo<T>[],
   reviews: ReviewInfo<T>[],
   owners: BalanceInfo<T>[],
-  merkleChallenges: MerkleChallengeInfoWithDetails<T>[],
+  merkleChallenges: MerkleChallengeInfo<T>[],
   approvalsTrackers: ApprovalsTrackerInfo<T>[],
 
   views: {
@@ -79,7 +92,7 @@ export function convertBitBadgesCollection<T extends NumberType, U extends Numbe
     announcements: item.announcements.map((activityItem) => convertAnnouncementInfo(activityItem, convertFunction)).map(x => removeCouchDBDetails(x)),
     reviews: item.reviews.map((activityItem) => convertReviewInfo(activityItem, convertFunction)).map(x => removeCouchDBDetails(x)),
     owners: item.owners.map((balance) => convertBalanceInfo(balance, convertFunction)).map(x => removeCouchDBDetails(x)),
-    merkleChallenges: item.merkleChallenges.map((merkleChallenge) => convertMerkleChallengeInfoWithDetails(merkleChallenge, convertFunction)).map(x => removeCouchDBDetails(x)),
+    merkleChallenges: item.merkleChallenges.map((merkleChallenge) => convertMerkleChallengeInfo(merkleChallenge, convertFunction)).map(x => removeCouchDBDetails(x)),
     approvalsTrackers: item.approvalsTrackers.map((approvalsTracker) => convertApprovalsTrackerInfo(approvalsTracker, convertFunction)).map(x => removeCouchDBDetails(x)),
     _rev: undefined,
     _deleted: undefined,

@@ -61,15 +61,16 @@ export interface MetadataFetchOptions {
   badgeIds?: NumberType[] | UintRange<NumberType>[],
 }
 
-export type CollectionViewKey = 'latestActivity' | 'latestAnnouncements' | 'latestReviews' | 'owners' | 'merkleChallengesById' | 'approvalsTrackersById';
+export type CollectionViewKey = 'latestActivity' | 'latestAnnouncements' | 'latestReviews' | 'owners' | 'merkleChallenges' | 'approvalsTrackers';
 
 export interface GetAdditionalCollectionDetailsRequestBody {
   viewsToFetch?: {
     viewKey: CollectionViewKey,
     bookmark: string
   }[],
+  fetchTotalAndMintBalances?: boolean,
   merkleChallengeIdsToFetch?: string[],
-  approvalsTrackerIdsToFetch?: ApprovalTrackerIdDetails[],
+  approvalsTrackerIdsToFetch?: ApprovalTrackerIdDetails<NumberType>[],
   //customQueries?: { db: string, selector: any, key: string }[],
   //TODO: we can add fully custom queries here (i.e. supply own Mango selector)
 }
@@ -167,10 +168,15 @@ export function convertRefreshMetadataRouteSuccessResponse<T extends NumberType,
   return { ...item };
 }
 
+export interface CodesAndPasswords {
+  cid: string,
+  codes: string[],
+  password: string,
+}
+
 export interface GetAllCodesAndPasswordsRouteRequestBody { }
 export interface GetAllCodesAndPasswordsRouteSuccessResponse<T extends NumberType> {
-  codes: string[][][],
-  passwords: string[][],
+  codesAndPasswords: CodesAndPasswords[],
 }
 export type GetAllCodesAndPasswordsRouteResponse<T extends NumberType> = ErrorResponse | GetAllCodesAndPasswordsRouteSuccessResponse<T>;
 export function convertGetAllCodesAndPasswordsRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetAllCodesAndPasswordsRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetAllCodesAndPasswordsRouteSuccessResponse<U> {
@@ -320,7 +326,7 @@ export function convertAddMetadataToIpfsRouteSuccessResponse<T extends NumberTyp
 export interface AddMerkleChallengeToIpfsRouteRequestBody {
   name: string,
   description: string,
-  challengeDetails?: ChallengeDetails<NumberType>[],
+  challengeDetails?: ChallengeDetails<NumberType>,
 }
 export interface AddMerkleChallengeToIpfsRouteSuccessResponse<T extends NumberType> {
   result: {

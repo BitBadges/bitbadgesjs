@@ -366,13 +366,15 @@ export function convertBalanceDoc<T extends NumberType, U extends NumberType>(it
  */
 export interface PasswordInfoBase<T extends NumberType> {
   cid: string
+  createdBy: string
   docClaimedByCollection: boolean
-  challengeId: string
   collectionId: T
-  challengeLevel: "collection" | "incoming" | "outgoing"
-  address: string //Leave blank if challengeLevel = "collection"
 
-  challengeDetails: ChallengeDetails<T>[];
+  claimedUsers: {
+    [cosmosAddress: string]: T
+  }
+
+  challengeDetails?: ChallengeDetails<T>;
 }
 export type PasswordDoc<T extends NumberType> = PasswordInfoBase<T> & nano.Document & DeletableDocument;
 export type PasswordInfo<T extends NumberType> = PasswordInfoBase<T> & Identified;
@@ -381,7 +383,8 @@ export function convertPasswordInfo<T extends NumberType, U extends NumberType>(
   return deepCopy({
     ...item,
     collectionId: convertFunction(item.collectionId),
-    challengeDetails: item.challengeDetails.map((challengeDetails) => convertChallengeDetails(challengeDetails, convertFunction)),
+    challengeDetails: item.challengeDetails ? convertChallengeDetails(item.challengeDetails, convertFunction) : undefined,
+    claimedUsers: Object.fromEntries(Object.entries(item.claimedUsers).map(([key, value]) => [key, convertFunction(value)])),
   })
 }
 
@@ -448,24 +451,15 @@ export interface ChallengeDetails<T extends NumberType> {
   numLeaves?: T;
   currCode?: T;
 
-  claimedUsers?: {
-    [cosmosAddress: string]: T
-  }
-
   hasPassword?: boolean
   password?: string
 }
 
 export function convertChallengeDetails<T extends NumberType, U extends NumberType>(item: ChallengeDetails<T>, convertFunction: (item: T) => U): ChallengeDetails<U> {
-  const claimedUsers = item.claimedUsers;
   return deepCopy({
     ...item,
     numLeaves: item.numLeaves ? convertFunction(item.numLeaves) : undefined,
     currCode: item.currCode ? convertFunction(item.currCode) : undefined,
-    claimedUsers: claimedUsers ? Object.keys(claimedUsers).reduce((acc, cosmosAddress) => {
-      acc[cosmosAddress] = convertFunction(claimedUsers[cosmosAddress])
-      return acc
-    }, {}) : undefined,
   })
 }
 
@@ -506,7 +500,6 @@ export function convertApprovalsTrackerDoc<T extends NumberType, U extends Numbe
  * partitioned database by collection ID (e.g. 1-1, 1-2, and so on represent the claims collection 1 for claims with ID 1, 2, etc)
  *
  * @typedef {Object} MerkleChallengeInfoBase
- * @extends {MerkleChallenge}
  *
  * @property {NumberType} collectionId - The collection ID
  * @property {NumberType} claimId - The claim ID
@@ -514,18 +507,22 @@ export function convertApprovalsTrackerDoc<T extends NumberType, U extends Numbe
  * @property {{[cosmosAddress: string]: number}} claimsPerAddressCount - A running count for the number of claims processed for each address
  * @property {(number)[][]} usedLeafIndices - The used leaf indices for each challenge. A leaf index is the leaf location in Merkle tree
  */
-export interface MerkleChallengeInfoBase<T extends NumberType> extends MerkleChallenge<T> {
+export interface MerkleChallengeInfoBase<T extends NumberType> {
   collectionId: T;
-  usedLeaves: string[][]; //2D array of used leaves by challenge index
-  usedLeafIndices: (T)[][]; //2D array of used leaf indices by challenge index
+  challengeId: string;
+  challengeLevel: "collection" | "incoming" | "outgoing";
+  challengeForAddress: string; //Leave blank if challengeLevel = "collection"
+
+  usedLeaves: string[][];
+  usedLeafIndices: (T)[][];
 }
+
 export type MerkleChallengeDoc<T extends NumberType> = MerkleChallengeInfoBase<T> & nano.Document & DeletableDocument;
 export type MerkleChallengeInfo<T extends NumberType> = MerkleChallengeInfoBase<T> & Identified;
 
 export function convertMerkleChallengeInfo<T extends NumberType, U extends NumberType>(item: MerkleChallengeInfo<T>, convertFunction: (item: T) => U): MerkleChallengeInfo<U> {
   return deepCopy({
     ...item,
-    ...convertMerkleChallenge(item, convertFunction),
     collectionId: convertFunction(item.collectionId),
     usedLeafIndices: item.usedLeafIndices.map((usedLeafIndices) => usedLeafIndices.map(convertFunction)),
   })
@@ -539,21 +536,21 @@ export function convertMerkleChallengeDoc<T extends NumberType, U extends Number
 }
 
 /**
- * MerkleChallengeInfoWithDetails extends claims and provides additional details.
+ * MerkleChallengeWithDetails extends claims and provides additional details.
  *
- * @typedef {Object} MerkleChallengeInfoWithDetails
+ * @typedef {Object} MerkleChallengeWithDetails
  * @extends {MerkleChallengeDoc}
  *
  * @property {MerkleChallengeDetails} details - The details of the claim
  */
-export interface MerkleChallengeInfoWithDetails<T extends NumberType> extends MerkleChallengeInfo<T> {
+export interface MerkleChallengeWithDetails<T extends NumberType> extends MerkleChallenge<T> {
   details?: MerkleChallengeDetails<T>
 }
 
-export function convertMerkleChallengeInfoWithDetails<T extends NumberType, U extends NumberType>(item: MerkleChallengeInfoWithDetails<T>, convertFunction: (item: T) => U): MerkleChallengeInfoWithDetails<U> {
+export function convertMerkleChallengeWithDetails<T extends NumberType, U extends NumberType>(item: MerkleChallengeWithDetails<T>, convertFunction: (item: T) => U): MerkleChallengeWithDetails<U> {
   return deepCopy({
     ...item,
-    ...convertMerkleChallengeInfo(item, convertFunction),
+    ...convertMerkleChallenge(item, convertFunction),
     details: item.details ? convertMerkleChallengeDetails(item.details, convertFunction) : undefined,
     _rev: undefined,
   })
@@ -578,13 +575,13 @@ export interface MerkleChallengeDetails<T extends NumberType> {
   hasPassword: boolean;
   password?: string;
 
-  challengeDetails: ChallengeDetails<T>[];
+  challengeDetails: ChallengeDetails<T>;
 }
 
 export function convertMerkleChallengeDetails<T extends NumberType, U extends NumberType>(item: MerkleChallengeDetails<T>, convertFunction: (item: T) => U): MerkleChallengeDetails<U> {
   return deepCopy({
     ...item,
-    challengeDetails: item.challengeDetails.map((challengeDetails) => convertChallengeDetails(challengeDetails, convertFunction)),
+    challengeDetails: convertChallengeDetails(item.challengeDetails, convertFunction),
   })
 }
 

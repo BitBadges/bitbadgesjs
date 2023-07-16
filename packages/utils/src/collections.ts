@@ -1,6 +1,7 @@
 import { Balance, UintRange } from "bitbadgesjs-proto";
 import { addBalances, getBlankBalance } from "./balances";
 import { BitBadgesCollection } from "./types/collections";
+import { BalanceInfo } from "./types/db";
 import { deepCopy } from "./types/utils";
 
 /**
@@ -41,11 +42,12 @@ export function getUintRangesForAllBadgeIdsInCollection(collection: BitBadgesCol
  * @property {Balance<bigint>} badgesToCreate - The new badges to create. Will be sent to the "Mint" address, and "Total" will be updated.
  */
 export function incrementMintAndTotalBalances(
-  existingCollection: BitBadgesCollection<bigint>,
+  collectionId: bigint,
+  owners: BalanceInfo<bigint>[],
   badgesToCreate: Balance<bigint>[],
 ) {
-  const totalBalanceStore = existingCollection?.owners.find(x => x.cosmosAddress === "Total");
-  const mintBalanceStore = existingCollection?.owners.find(x => x.cosmosAddress === "Mint");
+  const totalBalanceStore = owners.find(x => x.cosmosAddress === "Total");
+  const mintBalanceStore = owners.find(x => x.cosmosAddress === "Mint");
 
   //Calculate the amounts and supplys of badges (existing + new)
   let newMaxSupplys = totalBalanceStore ? deepCopy(totalBalanceStore) : getBlankBalance(false);
@@ -55,12 +57,12 @@ export function incrementMintAndTotalBalances(
   newUnmintedSupplys.balances = addBalances(badgesToCreate, newUnmintedSupplys.balances);
 
   //Replace "Mint" and "Total" in owners array with new balances
-  const newOwners = existingCollection?.owners.filter(x => x.cosmosAddress !== "Mint" && x.cosmosAddress !== "Total") ?? [];
+  const newOwners: BalanceInfo<bigint>[] = owners.filter(x => x.cosmosAddress !== "Mint" && x.cosmosAddress !== "Total") ?? [];
   newOwners.push({
-    _id: `${existingCollection?.collectionId}:Mint`,
+    _id: `${collectionId.toString()}:Mint`,
     balances: newUnmintedSupplys.balances,
     cosmosAddress: "Mint",
-    collectionId: existingCollection.collectionId,
+    collectionId: collectionId,
     onChain: true,
     approvedOutgoingTransfersTimeline: [],
     approvedIncomingTransfersTimeline: [],
@@ -71,10 +73,10 @@ export function incrementMintAndTotalBalances(
   });
 
   newOwners.push({
-    _id: `${existingCollection?.collectionId}:Total`,
+    _id: `${collectionId.toString()}:Total`,
     balances: newMaxSupplys.balances,
     cosmosAddress: "Total",
-    collectionId: existingCollection.collectionId,
+    collectionId: collectionId,
     onChain: true,
     approvedOutgoingTransfersTimeline: [],
     approvedIncomingTransfersTimeline: [],
@@ -84,11 +86,5 @@ export function incrementMintAndTotalBalances(
     }
   });
 
-
-  const badgeCollection: BitBadgesCollection<bigint> = {
-    ...existingCollection,
-    owners: newOwners,
-  }
-
-  return deepCopy(badgeCollection);
+  return newOwners;
 }
