@@ -21,7 +21,7 @@ MYFOLDER=$(pwd)
 # rm -rf evmos
 
 
-# Evmos
+# BitBadges
 cd /tmp
 git clone https://github.com/bitbadges/bitbadgeschain/
 cd bitbadgeschain/

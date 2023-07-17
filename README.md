@@ -3,19 +3,18 @@
 The BitBadges SDK is a JavaScript library that provides all the tools and functions needed for you to interact with the BitBadges API, blockchain, indexer, or build your own frontend.
 
 
-There are currently five libraries that make up the SDK (address-converter, proto, provider, transactions, utils) that can be installed via:
+There are currently four libraries that make up the SDK (address-converter, proto, provider, utils) that can be installed via:
 ```bash
 npm install bitbadgesjs-address-converter
-npm install bitbadgesjs-transactions
 npm install bitbadgesjs-provider
-npm install bitbadges-sdk
+npm install bitbadgesjs-utils
 npm install bitbadgesjs-proto
 ```
 
-bitbadgesjs-utils is a library which provides miscellaneous functionality to help you interact with the BitBadges API and indexer, such as types, managing metadata requests, logic with ID ranges and balances, etc.
+bitbadgesjs-utils is a library which provides miscellaneous functionality to help you interact with the BitBadges API and indexer, such as types, managing metadata requests, logic with Uint ranges and balances, etc.
 ```ts
-const idRangesOverlap = checkIfIdRangesOverlap(balances[0].badgeIds);
-const metadata = updateMetadataMap(metadata, currentMetadata, { start: badgeId, end: badgeId }, uri);
+const doOverlap = checkIfUintRangesOverlap(...);
+const metadata = updateMetadataMap(....);
 ```
 
 address-converter allows you to switch between equivalent addresses
@@ -24,15 +23,19 @@ const cosmosAddress = ethToCosmos(address);
 const ethAddress = cosmosToEth(cosmosAddress);
 ```
 
-transactions exports the functions to create blockchain transactions in the BitBadges Msg formats. See Broadcasting Txs for more info and tutorials.
+
+proto exports all the types and functions needed for interacting with the BitBadges blockchain, such as transactions, messages, and queries. provider exports functions for broadcasting transactions and interacting with a blockchain node.
+
+bitbadges-proto and bitbadges-provider are typically used together. See Broadcasting Txs on the official documentation for more info and tutorials.
+
 ```ts
-const updateUrisMsg: MessageMsgUpdateUris = {
+const msg: MsgUpdateCollection = {
     creator: chain.cosmosAddress,
     collectionId: collectionId,
     collectionUri: collectionUri,
     badgeUris: badgeUris
 }
-const txMsg = createTxMsgUpdateUris(
+const txMsg = createTxMsgUpdateCollection(
     txDetails.chain,
     txDetails.sender,
     txDetails.fee,
@@ -41,11 +44,10 @@ const txMsg = createTxMsgUpdateUris(
 )
 ```
 
-proto exports the Protocol Buffer types. You will typically not need this, unless you plan to interact with the blockchain at a more technical level. The transaction types from the proto library are used in the transactions library.
-
-provider exports functions for broadcasting transactions and interacting with the blockchain. See below for how to use.
-
 ## Example
+
+See https://docs.bitbadges.io for more documentation (specifically the developer documentation -> Broadcasting and Signing Txs section).
+
 
 ### Get account information
 
@@ -70,7 +72,7 @@ const options = {
 }
 
 let addrRawData = await fetch(
-  `http://127.0.0.1:1317${generateEndpointAccount(sender)}`,
+  `http://127.0.0.1:1317${generateEndpointAccount(sender)}`, //TODO: replace with your node's address
   options,
 )
 // NOTE: the node returns status code 400 if the wallet doesn't exist, catch that error
@@ -102,9 +104,10 @@ The transaction can be signed using EIP712 on Metamask and SignDirect on Keplr.
 ```ts
 import { createMessageSend } from 'bitbadgesjs-transactions'
 
+//See BitBadges developer documentation -> Chain Details for the latest up to date IDs for testnet, betanet, and mainnet.
 const chain = {
-  chainId: 9000,
-  cosmosChainId: 'bitbadges_1-1',
+  chainId: 2,
+  cosmosChainId: 'bitbadges_1-2',
 }
 
 const sender = {
@@ -137,7 +140,7 @@ const msg = createMessageSend(chain, sender, fee, memo, params)
 
 ### Signing with Metamask
 
-After creating the transaction we need to send the payload to metamask so it can be signed. With that signature we are going to add a Web3Extension to the Cosmos Transactions and broadcast it to the Cosmos node.
+After creating the transaction as above, we need to send the payload to metamask so it can be signed. With that signature we are going to add a Web3Extension to the Cosmos Transactions and broadcast it to the Cosmos node.
 
 ```ts
 // Follow the previous step to generate the msg object
@@ -149,7 +152,7 @@ import {
 import {
   createTxRawEIP712,
   signatureToWeb3Extension,
-} from 'bitbadgesjs-transactions'
+} from 'bitbadgesjs-proto'
 
 // Init Metamask
 await window.ethereum.enable()
@@ -178,7 +181,7 @@ const postOptions = {
 }
 
 let broadcastPost = await fetch(
-  `http://localhost:1317${generateEndpointBroadcast()}`,
+  `http://localhost:1317${generateEndpointBroadcast()}`, //TODO: replace with your node's address
   postOptions,
 )
 let response = await broadcastPost.json()
@@ -220,7 +223,7 @@ if (sign !== undefined) {
   }
 
   let broadcastPost = await fetch(
-    `http://localhost:1317${generateEndpointBroadcast()}`,
+    `http://localhost:1317${generateEndpointBroadcast()}`, //TODO: replace with your node's address
     postOptions,
   )
   let response = await broadcastPost.json()
@@ -228,5 +231,9 @@ if (sign !== undefined) {
 ```
 
 ## Acknowledgements
-This project was forked from [EvmosJS](https://github.com/evmos/evmosjs) and adapted for the BitBadges blockchain.
+This project was forked from [evmosjs](https://github.com/evmos/evmosjs) and adapted for the BitBadges blockchain.
 We would like to thank the Evmos team for their work and for making this project possible.
+
+## Other Examples
+Because this was forked from evmosjs, please feel free to refer to their examples in their repository.
+Note you will have to change everything to the BitBadges equivalent (e.g. evmosjs -> bitbadgesjs, evmos -> bitbadges, aevmos -> badge, new chain details, etc).

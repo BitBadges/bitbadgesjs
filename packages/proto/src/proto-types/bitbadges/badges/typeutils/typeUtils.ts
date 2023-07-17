@@ -77,7 +77,7 @@ export function convertUintRange<T extends NumberType, U extends NumberType>(ran
 
 
 /**
- * BadgeMetadata are used to represent the metadata of badges via a URI and a range of badge IDs.
+ * BadgeMetadata is used to represent the metadata for a range of badge IDs. The metadata can be hosted via a URI (via uri) or stored on-chain (via customData).
  *
  * We take first-match only for the badge IDs. If a badge ID is in multiple BadgeMetadata, we take the first time
  * it is found in a linear search.
@@ -260,7 +260,7 @@ export interface AddressMapping {
  * @property {string} from - The address to transfer from.
  * @property {string[]} toAddresses - The addresses to transfer to.
  * @property {Balance[]} balances - The balances to transfer.
- * @property {ApprovalIdDetails} precalculateFromApproval - If specified, we will precalculate from this approval and override the balances. This can only be used when the specified approval has predeterminedBalances set.
+ * @property {PrecalculationDetails} precalculateFromApproval - If specified, we will precalculate from this approval and override the balances. This can only be used when the specified approval has predeterminedBalances set.
  * @property {MerkleProof[]} merkleProofs - The merkle proofs that satisfy the mkerkle challenges in the approvals. If the transfer deducts from multiple approvals, we check all the merkle proofs and assert at least one is valid for every challenge.
  * @property {string} memo - Arbitrary memo for the transfer.
  */
@@ -268,7 +268,7 @@ export interface Transfer<T extends NumberType> {
   from: string
   toAddresses: string[]
   balances: Balance<T>[]
-  precalculateFromApproval: ApprovalIdDetails
+  precalculationDetails: PrecalculationDetails
   merkleProofs: MerkleProof[]
   memo: string
 }
@@ -285,8 +285,14 @@ export function convertTransfer<T extends NumberType, U extends NumberType>(tran
   })
 }
 
+export interface PrecalculationDetails {
+  approvalId: string
+  approvalLevel: string
+  approverAddress: string
+}
+
 /**
- * ApprovalIdDetails is used to represent an exact approval.
+ * ApprovalTrackerIdDetails is used to represent an exact approval.
  *
  * @typedef {Object} ApprovalIdDetails
  * @property {string} approvalId - The approval ID of the approval.
@@ -294,20 +300,13 @@ export function convertTransfer<T extends NumberType, U extends NumberType>(tran
  * @property {string} address - The address of the approval to check.
  * @property {string} addressToCheck - The address to check for the approval.
  */
-export interface ApprovalIdDetails {
-  approvalId: string
-  approvalLevel: string
-  address: string
-  addressToCheck: string
-}
-
 export interface ApprovalTrackerIdDetails<T extends NumberType> {
   collectionId: T
-  approvalLevel: string
-  address: string
+  approvalLevel: "collection" | "incoming" | "outgoing" | ""
+  approverAddress: string
   approvalId: string
-  trackerType: string
-  addressToCheck: string
+  trackerType: "overall" | "to" | "from" | "initiatedBy" | ""
+  approvedAddress: string
 }
 
 export function convertApprovalTrackerIdDetails<T extends NumberType, U extends NumberType>(approvalIdDetails: ApprovalTrackerIdDetails<T>, convertFunction: (item: T) => U): ApprovalTrackerIdDetails<U> {

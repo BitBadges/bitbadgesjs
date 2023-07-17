@@ -87,7 +87,7 @@ export function getWrappedTransfers<T extends NumberType>(transfersArr: Transfer
         ...transfer,
         balances: formattedBalances,
         merkleProofs: transfer.merkleProofs.map(getWrappedProof),
-        precalculateFromApproval: new transfers.bitbadges.bitbadgeschain.badges.ApprovalIdDetails({ ...transfer.precalculateFromApproval }),
+        precalculationDetails: new transfers.bitbadges.bitbadgeschain.badges.PrecalulationDetails({ ...transfer.precalculationDetails }),
       }),
     )
   }

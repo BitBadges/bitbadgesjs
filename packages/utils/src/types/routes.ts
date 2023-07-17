@@ -20,6 +20,15 @@ export const GetMerkleChallengeCodeViaPasswordRoute = (collectionId: NumberType,
 export const AddAnnouncementRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/addAnnouncement`;
 export const AddReviewForCollectionRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/addReview`;
 
+//Address Mappings
+export const GetAddressMappingsRoute = () => "/api/v0/addressMappings";
+
+//Approvals
+export const GetApprovalsRoute = () => "/api/v0/approvals";
+
+//Merkle Challenge Tracker
+export const GetMerkleChallengeTrackerRoute = () => "/api/v0/merkleChallenges";
+
 //User
 export const GetAccountsRoute = () => "/api/v0/user/batch";
 export const GetAccountRoute = (addressOrUsername: string) => `/api/v0/user/${addressOrUsername}`;

@@ -1,3 +1,5 @@
+//NOTE: This file was forked from evmosjs and has not been updated for compatibility with BitBadges.
+
 import { createMessageSend } from './msgSend'
 
 describe('msgSend tests', () => {
@@ -16,7 +18,7 @@ describe('msgSend tests', () => {
 
     const fee = {
       amount: '20',
-      denom: 'aevmos',
+      denom: 'badge',
       gas: '200000',
     }
 
@@ -25,7 +27,7 @@ describe('msgSend tests', () => {
     const params = {
       destinationAddress: 'evmos1pmk2r32ssqwps42y3c9d4clqlca403yd9wymgr',
       amount: '1',
-      denom: 'aevmos',
+      denom: 'badge',
     }
 
     const msg = createMessageSend(chain, sender, fee, memo, params)
@@ -71,7 +73,7 @@ describe('msgSend tests', () => {
         account_number: '9',
         chain_id: 'evmos_9000-1',
         fee: {
-          amount: [{ amount: '20', denom: 'aevmos' }],
+          amount: [{ amount: '20', denom: 'badge' }],
           feePayer: 'ethm1tfegf50n5xl0hd5cxfzjca3ylsfpg0fned5gqm',
           gas: '200000',
         },
@@ -80,7 +82,7 @@ describe('msgSend tests', () => {
           {
             type: 'cosmos-sdk/MsgSend',
             value: {
-              amount: [{ amount: '1', denom: 'aevmos' }],
+              amount: [{ amount: '1', denom: 'badge' }],
               from_address: 'ethm1tfegf50n5xl0hd5cxfzjca3ylsfpg0fned5gqm',
               to_address: 'evmos1pmk2r32ssqwps42y3c9d4clqlca403yd9wymgr',
             },

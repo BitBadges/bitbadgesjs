@@ -96,8 +96,8 @@ export const ethToCosmos = (ethAddress: string) => {
   return COSMOS.encoder(data)
 }
 
-export const cosmosToEth = (evmosAddress: string) => {
-  const data = COSMOS.decoder(evmosAddress)
+export const cosmosToEth = (cosmosAddress: string) => {
+  const data = COSMOS.decoder(cosmosAddress)
   return ETH.encoder(data)
 }
 

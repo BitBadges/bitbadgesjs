@@ -1,3 +1,5 @@
+//NOTE: This file was forked from evmosjs and has not been updated for compatibility with BitBadges.
+
 import { signatureToWeb3Extension } from './web3Extension'
 
 describe('web3Extension tests', () => {

@@ -1,4 +1,4 @@
-import { AddressMapping, ApprovalIdDetails, BadgeMetadataTimeline, Balance, CollectionApprovedTransferTimeline, CollectionMetadataTimeline, CollectionPermissions, ContractAddressTimeline, CustomDataTimeline, InheritedBalancesTimeline, IsArchivedTimeline, ManagerTimeline, MerkleChallenge, OffChainBalancesMetadataTimeline, StandardsTimeline, UserApprovedIncomingTransferTimeline, UserApprovedOutgoingTransferTimeline, UserBalance, UserPermissions, convertBadgeMetadataTimeline, convertBalance, convertCollectionApprovedTransferTimeline, convertCollectionMetadataTimeline, convertCollectionPermissions, convertContractAddressTimeline, convertCustomDataTimeline, convertInheritedBalancesTimeline, convertIsArchivedTimeline, convertManagerTimeline, convertMerkleChallenge, convertOffChainBalancesMetadataTimeline, convertStandardsTimeline, convertUserApprovedIncomingTransferTimeline, convertUserApprovedOutgoingTransferTimeline, convertUserBalance, convertUserPermissions } from "bitbadgesjs-proto";
+import { AddressMapping, ApprovalTrackerIdDetails, BadgeMetadataTimeline, Balance, CollectionApprovedTransferTimeline, CollectionMetadataTimeline, CollectionPermissions, ContractAddressTimeline, CustomDataTimeline, InheritedBalancesTimeline, IsArchivedTimeline, ManagerTimeline, MerkleChallenge, OffChainBalancesMetadataTimeline, StandardsTimeline, UserApprovedIncomingTransferTimeline, UserApprovedOutgoingTransferTimeline, UserBalance, UserPermissions, convertBadgeMetadataTimeline, convertBalance, convertCollectionApprovedTransferTimeline, convertCollectionMetadataTimeline, convertCollectionPermissions, convertContractAddressTimeline, convertCustomDataTimeline, convertInheritedBalancesTimeline, convertIsArchivedTimeline, convertManagerTimeline, convertMerkleChallenge, convertOffChainBalancesMetadataTimeline, convertStandardsTimeline, convertUserApprovedIncomingTransferTimeline, convertUserApprovedOutgoingTransferTimeline, convertUserBalance, convertUserPermissions } from "bitbadgesjs-proto";
 import MerkleTree from "merkletreejs";
 import nano from "nano";
 import { CosmosCoin, convertCosmosCoin } from "./coin";
@@ -471,8 +471,7 @@ export function convertChallengeDetails<T extends NumberType, U extends NumberTy
  * @property {Balance[]} amounts - A tally of the amounts transferred for this approval.
  * @property {string} trackerType - The type of tracker (i.e. "overall", "to", "from", "initiatedBy")
  */
-export interface ApprovalsTrackerInfoBase<T extends NumberType> extends ApprovalIdDetails {
-  trackerType: "overall" | "to" | "from" | "initiatedBy";
+export interface ApprovalsTrackerInfoBase<T extends NumberType> extends ApprovalTrackerIdDetails<T> {
   numTransfers: T;
   amounts: Balance<T>[];
 }
@@ -483,6 +482,7 @@ export type ApprovalsTrackerInfo<T extends NumberType> = ApprovalsTrackerInfoBas
 export function convertApprovalsTrackerInfo<T extends NumberType, U extends NumberType>(item: ApprovalsTrackerInfo<T>, convertFunction: (item: T) => U): ApprovalsTrackerInfo<U> {
   return deepCopy({
     ...item,
+    collectionId: convertFunction(item.collectionId),
     numTransfers: convertFunction(item.numTransfers),
     amounts: item.amounts.map((amount) => convertBalance(amount, convertFunction)),
   })
@@ -510,11 +510,10 @@ export function convertApprovalsTrackerDoc<T extends NumberType, U extends Numbe
 export interface MerkleChallengeInfoBase<T extends NumberType> {
   collectionId: T;
   challengeId: string;
-  challengeLevel: "collection" | "incoming" | "outgoing";
-  challengeForAddress: string; //Leave blank if challengeLevel = "collection"
+  challengeLevel: "collection" | "incoming" | "outgoing" | "";
+  approverAddress: string; //Leave blank if challengeLevel = "collection"
 
-  usedLeaves: string[][];
-  usedLeafIndices: (T)[][];
+  usedLeafIndices: (T)[];
 }
 
 export type MerkleChallengeDoc<T extends NumberType> = MerkleChallengeInfoBase<T> & nano.Document & DeletableDocument;
@@ -524,7 +523,7 @@ export function convertMerkleChallengeInfo<T extends NumberType, U extends Numbe
   return deepCopy({
     ...item,
     collectionId: convertFunction(item.collectionId),
-    usedLeafIndices: item.usedLeafIndices.map((usedLeafIndices) => usedLeafIndices.map(convertFunction)),
+    usedLeafIndices: item.usedLeafIndices.map(convertFunction),
   })
 }
 
@@ -532,6 +531,20 @@ export function convertMerkleChallengeDoc<T extends NumberType, U extends Number
   return deepCopy({
     ...getCouchDBDetails(item),
     ...convertMerkleChallengeInfo(removeCouchDBDetails(item), convertFunction),
+  })
+}
+
+export interface MerkleChallengeIdDetails<T extends NumberType> {
+  collectionId: T;
+  challengeId: string;
+  challengeLevel: "collection" | "incoming" | "outgoing" | "";
+  approverAddress: string; //Leave blank if challengeLevel = "collection"
+}
+
+export function convertMerkleChallengeIdDetails<T extends NumberType, U extends NumberType>(item: MerkleChallengeIdDetails<T>, convertFunction: (item: T) => U): MerkleChallengeIdDetails<U> {
+  return deepCopy({
+    ...item,
+    collectionId: convertFunction(item.collectionId),
   })
 }
 

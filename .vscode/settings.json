@@ -3,9 +3,6 @@
   "files.trimFinalNewlines": true,
   "files.trimTrailingWhitespace": true,
   "editor.renderFinalNewline": "on",
-    "cSpell.words": [
-        "tharsis"
-    ],
     "workbench.colorCustomizations": {
       "activityBar.background": "#09304B",
       "titleBar.activeBackground": "#0D4369",

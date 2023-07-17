@@ -1,3 +1,5 @@
+//NOTE: This file was forked from evmosjs and has not been updated for compatibility with BitBadges.
+
 import { createMsgSend } from '../../src/messages/msgSend'
 
 import {

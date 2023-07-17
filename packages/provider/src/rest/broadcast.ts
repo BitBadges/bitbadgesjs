@@ -1,10 +1,6 @@
 export function generateEndpointBroadcast() {
   return `/cosmos/tx/v1beta1/txs`
 }
-
-// TODO: make a @tharsis/types package and move all the interfaces there
-// So we can use the same types on provider and transaction without importing
-// the complete package to just type the functions
 export interface TxToSend {
   message: {
     serializeBinary: () => Uint8Array

@@ -3,12 +3,10 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-        "evmosjs":["packages/evmosjs"],
-        "@tharsis/address-converter": ["./packages/address-converter/*"],
-        "@tharsis/eip712":["packages/eip712"],
-        "@tharsis/proto":["packages/proto"],
-        "@tharsis/provider":["./packages/provider/*"],
-        "@tharsis/transactions":["./packages/transactions/*"]
+        "bitbadgesjs":["packages/bitbadgesjs"],
+        "bitbadgesjs-address-converter": ["./packages/address-converter/*"],
+        "bitbadgesjs-proto":["packages/proto"],
+        "bitbadgesjs-provider":["./packages/provider/*"],
     }
   }
 }

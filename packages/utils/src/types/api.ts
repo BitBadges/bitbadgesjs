@@ -1,10 +1,10 @@
 import { DeliverTxResponse } from "@cosmjs/stargate"
-import { ApprovalTrackerIdDetails, UintRange } from "bitbadgesjs-proto"
+import { AddressMapping, ApprovalTrackerIdDetails, UintRange } from "bitbadgesjs-proto"
 import { BroadcastPostBody } from "bitbadgesjs-provider"
 import { ChallengeParams } from "blockin"
 import { TransferActivityInfo, convertTransferActivityInfo } from "./activity"
 import { BadgeMetadataDetails, BitBadgesCollection, convertBadgeMetadataDetails, convertBitBadgesCollection } from "./collections"
-import { BalanceInfo, ChallengeDetails, StatusInfo, convertBalanceInfo, convertStatusInfo } from "./db"
+import { ApprovalsTrackerInfo, BalanceInfo, ChallengeDetails, MerkleChallengeIdDetails, MerkleChallengeInfo, StatusInfo, convertApprovalsTrackerInfo, convertBalanceInfo, convertMerkleChallengeInfo, convertStatusInfo } from "./db"
 import { Metadata, convertMetadata } from "./metadata"
 import { NumberType } from "./string-numbers"
 import { OffChainBalancesMap } from "./transfers"
@@ -54,6 +54,15 @@ export function convertGetSearchRouteSuccessResponse<T extends NumberType, U ext
   }
 }
 
+/**
+ * Defines the options for fetching metadata.
+ *
+ * @typedef {Object} MetadataFetchOptions
+ * @property {boolean} [doNotFetchCollectionMetadata] - If true, collection metadata will not be fetched.
+ * @property {NumberType[] | UintRange<NumberType>[]} [metadataIds] - If present, the metadata corresponding to the specified metadata IDs will be fetched. See documentation for how to determine metadata IDs.
+ * @property {string[]} [uris] - If present, the metadata corresponding to the specified URIs will be fetched.
+ * @property {NumberType[] | UintRange<NumberType>[]} [badgeIds] - If present, the metadata corresponding to the specified badge IDs will be fetched.
+ */
 export interface MetadataFetchOptions {
   doNotFetchCollectionMetadata?: boolean,
   metadataIds?: NumberType[] | UintRange<NumberType>[],
@@ -63,6 +72,27 @@ export interface MetadataFetchOptions {
 
 export type CollectionViewKey = 'latestActivity' | 'latestAnnouncements' | 'latestReviews' | 'owners' | 'merkleChallenges' | 'approvalsTrackers';
 
+/**
+ * Defines the options for fetching additional collection details.
+ *
+ * A view is a way of fetching additional details about a collectionm, and these will be queryable in the response via the `views` property.
+ * Each view has a bookmark that is used for pagination and must be supplied to get the next page.
+ * If the bookmark is not supplied, the first page will be returned.
+ *
+ * We support the following views:
+ * - `latestActivity` - Fetches the latest activity for the collection.
+ * - `latestAnnouncements` - Fetches the latest announcements for the collection.
+ * - `latestReviews` - Fetches the latest reviews for the collection.
+ * - `owners` - Fetches the owners of the collection sequentially in random order.
+ * - `merkleChallenges` - Fetches the merkle challenges for the collection in random order.
+ * - `approvalsTrackers` - Fetches the approvals trackers for the collection in random order.
+ *
+ * @typedef {Object} GetAdditionalCollectionDetailsRequestBody
+ * @property {{ viewKey: CollectionViewKey, bookmark: string }[]} [viewsToFetch] - If present, the specified views will be fetched.
+ * @property {boolean} [fetchTotalAndMintBalances] - If true, the total and mint balances will be fetched.
+ * @property {string[]} [merkleChallengeIdsToFetch] - If present, the merkle challenges corresponding to the specified merkle challenge IDs will be fetched.
+ * @property {ApprovalTrackerIdDetails<NumberType>[]} [approvalsTrackerIdsToFetch] - If present, the approvals trackers corresponding to the specified approvals tracker IDs will be fetched.
+ */
 export interface GetAdditionalCollectionDetailsRequestBody {
   viewsToFetch?: {
     viewKey: CollectionViewKey,
@@ -168,6 +198,13 @@ export function convertRefreshMetadataRouteSuccessResponse<T extends NumberType,
   return { ...item };
 }
 
+/**
+ * Type to allow you to specify the codes and passwords for a merkle challenge.
+ *
+ * We only support storing codes and passwords for merkle challenges created by BitBadges via IPFS. The IPFS CID of the merkle challenge is used to identify the merkle challenge.
+ *
+ * Note that we only support storing a set of codes and passwords once per unique CID.
+ */
 export interface CodesAndPasswords {
   cid: string,
   codes: string[],
@@ -217,19 +254,43 @@ export function convertAddReviewForCollectionRouteSuccessResponse<T extends Numb
 
 export type AccountViewKey = 'latestActivity' | 'latestAnnouncements' | 'latestReviews' | 'badgesCollected';
 
-export interface GetAccountsRouteRequestBody {
-  accountsToFetch: {
-    address?: string,
-    username?: string,
-    fetchSequence?: boolean,
-    fetchBalance?: boolean,
-    viewsToFetch?: {
-      viewKey: AccountViewKey,
-      bookmark: string,
-      // mangoQuerySelector?: nano.MangoSelector
-      // TODO: Allow users to specify their own mango query selector here. For now, we map the viewKey to a mango query selector.
-    }[],
+/**
+ * This defines the options for fetching additional account details.
+ *
+ * A view is a way of fetching additional details about an account, and these will be queryable in the response via the `views` property.
+ *
+ * Each view has a bookmark that is used for pagination and must be supplied to get the next page.
+ *
+ * If the bookmark is not supplied, the first page will be returned.
+ *
+ * We support the following views:
+ * - `latestActivity` - Fetches the latest activity for the account.
+ * - `latestAnnouncements` - Fetches the latest announcements for the account.
+ * - `latestReviews` - Fetches the latest reviews for the account.
+ * - `badgesCollected` - Fetches the badges collected by the account sequentially in random order.
+ *
+ * @typedef {Object} AccountFetchDetails
+ *
+ * @property {string} [address] - If present, the account corresponding to the specified address will be fetched. Please only specify one of `address` or `username`.
+ * @property {string} [username] - If present, the account corresponding to the specified username will be fetched. Please only specify one of `address` or `username`.
+ * @property {boolean} [fetchSequence] - If true, the sequence will be fetched from the blockchain.
+ * @property {boolean} [fetchBalance] - If true, the balance will be fetched from the blockchain.
+ */
+export type AccountFetchDetails = {
+  address?: string,
+  username?: string,
+  fetchSequence?: boolean,
+  fetchBalance?: boolean,
+  viewsToFetch?: {
+    viewKey: AccountViewKey,
+    bookmark: string,
+    // mangoQuerySelector?: nano.MangoSelector
+    // TODO: Allow users to specify their own mango query selector here. For now, we map the viewKey to a mango query selector.
   }[],
+}
+
+export interface GetAccountsRouteRequestBody {
+  accountsToFetch: AccountFetchDetails[],
 }
 
 export interface GetAccountsRouteSuccessResponse<T extends NumberType> {
@@ -428,6 +489,53 @@ export type GetTokensFromFaucetRouteResponse<T extends NumberType> = DeliverTxRe
 export type GetTokensFromFaucetRouteSuccessResponse<T extends NumberType> = DeliverTxResponse;
 export function convertGetTokensFromFaucetRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetTokensFromFaucetRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetTokensFromFaucetRouteSuccessResponse<U> {
   return { ...item };
+}
+
+export interface GetAddressMappingsRouteRequestBody {
+  mappingIds: string[],
+  managerAddress?: string,
+}
+
+export interface GetAddressMappingsRouteSuccessResponse<T extends NumberType> {
+  addressMappings: AddressMapping[],
+}
+
+export type GetAddressMappingsRouteResponse<T extends NumberType> = ErrorResponse | GetAddressMappingsRouteSuccessResponse<T>;
+export function convertGetAddressMappingsRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetAddressMappingsRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetAddressMappingsRouteSuccessResponse<U> {
+  return {
+    addressMappings: item.addressMappings,
+  }
+}
+
+
+export interface GetApprovalsRouteRequestBody {
+  approvalTrackerIds: ApprovalTrackerIdDetails<NumberType>[],
+}
+
+export interface GetApprovalsRouteSuccessResponse<T extends NumberType> {
+  approvalTrackers: ApprovalsTrackerInfo<T>[],
+}
+
+export type GetApprovalsRouteResponse<T extends NumberType> = ErrorResponse | GetApprovalsRouteSuccessResponse<T>;
+export function convertGetApprovalsRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetApprovalsRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetApprovalsRouteSuccessResponse<U> {
+  return {
+    approvalTrackers: item.approvalTrackers.map((approvalTracker) => convertApprovalsTrackerInfo(approvalTracker, convertFunction)),
+  }
+}
+
+export interface GetMerkleChallengeTrackersRouteRequestBody {
+  merkleChallengeTrackerIds: MerkleChallengeIdDetails<NumberType>[],
+}
+
+export interface GetMerkleChallengeTrackersRouteSuccessResponse<T extends NumberType> {
+  merkleChallengeTrackers: MerkleChallengeInfo<T>[],
+}
+
+export type GetMerkleChallengeTrackersRouteResponse<T extends NumberType> = ErrorResponse | GetMerkleChallengeTrackersRouteSuccessResponse<T>;
+export function convertGetMerkleChallengeTrackersRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetMerkleChallengeTrackersRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetMerkleChallengeTrackersRouteSuccessResponse<U> {
+  return {
+    merkleChallengeTrackers: item.merkleChallengeTrackers.map((merkleChallenge) => convertMerkleChallengeInfo(merkleChallenge, convertFunction)),
+  }
 }
 
 /**
