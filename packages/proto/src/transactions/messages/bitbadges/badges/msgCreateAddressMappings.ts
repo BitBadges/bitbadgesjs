@@ -5,6 +5,8 @@ import { createTransaction } from "../../transaction"
 import { Chain, Fee, Sender } from "../../common"
 import { getDefaultDomainWithChainId } from "../../domain"
 
+import * as badges from '../../../../proto/badges/tx'
+
 /**
  * MsgCreateAddressMappings defines a CreateAddressMappings message.
  * AddressMappings must be validly formatted and have a unique ID not used before. Note that some such as ("Mint", "Manager", etc) are reserved.
@@ -30,14 +32,14 @@ export interface MsgCreateAddressMappings {
 // }
 
 
-// export function convertFromProtoToMsgCreateAddressMappings(
-//   msg: badges.bitbadges.bitbadgeschain.badges.MsgCreateAddressMappings,
-// ): MsgCreateAddressMappings<bigint> {
-//   return {
-//     creator: msg.creator,
-//     addressMappings: msg.addressMappings,
-//   }
-// }
+export function convertFromProtoToMsgCreateAddressMappings(
+  msg: badges.bitbadges.bitbadgeschain.badges.MsgCreateAddressMappings,
+): MsgCreateAddressMappings {
+  return {
+    creator: msg.creator,
+    addressMappings: msg.addressMappings.map(x => x.toObject() as any),
+  }
+}
 
 export function createTxMsgCreateAddressMappings(
   chain: Chain,

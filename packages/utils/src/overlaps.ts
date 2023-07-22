@@ -4,6 +4,7 @@
 import { AddressMapping, UintRange, ValueOptions } from "bitbadgesjs-proto";
 import { removeAddressMappingFromAddressMapping, isAddressMappingEmpty } from "./addressMappings";
 import { invertUintRanges, removeUintRangeFromUintRange, removeUintsFromUintRange } from "./uintRanges";
+import { deepCopy } from "./types/utils";
 
 //For permissions, we have many types of permissions that are all very similar to each other
 //Here, we abstract all those permissions to a UniversalPermission struct in order to reuse code.
@@ -79,8 +80,8 @@ export interface Overlap {
 
 export function getOverlapsAndNonOverlaps(firstDetails: UniversalPermissionDetails[], secondDetails: UniversalPermissionDetails[]): [Overlap[], UniversalPermissionDetails[], UniversalPermissionDetails[]] {
   // Deep copy
-  let inOldButNotNew = JSON.parse(JSON.stringify(firstDetails));
-  let inNewButNotOld = JSON.parse(JSON.stringify(secondDetails));
+  let inOldButNotNew = deepCopy(firstDetails);
+  let inNewButNotOld = deepCopy(secondDetails);
 
   let allOverlaps: Overlap[] = [];
 
@@ -290,7 +291,7 @@ export function GetUintRangesWithOptions(ranges: UintRange<bigint>[], options: V
   }
 
   if (options.invertDefault) {
-    ranges = invertUintRanges(ranges, BigInt("18446744073709551615"));
+    ranges = invertUintRanges(ranges, 1n, BigInt("18446744073709551615"));
   }
 
   if (options.noValues) {

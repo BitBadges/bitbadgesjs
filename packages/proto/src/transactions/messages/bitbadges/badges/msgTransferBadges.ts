@@ -35,6 +35,7 @@ export function convertMsgTransferBadges<T extends NumberType, U extends NumberT
 ): MsgTransferBadges<U> {
   return {
     ...msg,
+
     collectionId: convertFunction(msg.collectionId),
     transfers: msg.transfers.map((x) => convertTransfer(x, convertFunction)),
   }
@@ -47,11 +48,11 @@ export function convertFromProtoToMsgTransferBadges(
   return {
     creator: msg.creator,
     collectionId: BigInt(msg.collectionId),
-    transfers: msg.transfers.map((x) => convertTransfer(x, BigInt)),
+    transfers: msg.transfers.map((x) => convertTransfer(x.toObject() as any, BigInt)),
   }
 }
 
-export function createTxMsgTransferBadge<T extends NumberType>(
+export function createTxMsgTransferBadges<T extends NumberType>(
   chain: Chain,
   sender: Sender,
   fee: Fee,

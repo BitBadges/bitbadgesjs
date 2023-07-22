@@ -77,7 +77,7 @@ export const updateBadgeMetadata = (currBadgeMetadata: BadgeMetadataDetails<bigi
       const val = currBadgeMetadata[i];
       if (!val) continue; //For TS
 
-      if (JSON.stringify(val.metadata) === JSON.stringify(currentMetadata) && val.uri === newBadgeMetadataDetails.uri && val.metadataId === newBadgeMetadataDetails.metadataId && val.customData === newBadgeMetadataDetails.customData) {
+      if (JSON.stringify(val.metadata) === JSON.stringify(currentMetadata) && val.uri === newBadgeMetadataDetails.uri && val.metadataId === newBadgeMetadataDetails.metadataId && val.customData === newBadgeMetadataDetails.customData && val.toUpdate === newBadgeMetadataDetails.toUpdate) {
         currBadgeMetadataExists = true;
         if (val.badgeIds.length > 0) {
           val.badgeIds = [...val.badgeIds, { start: startBadgeId, end: endBadgeId }];
@@ -103,6 +103,7 @@ export const updateBadgeMetadata = (currBadgeMetadata: BadgeMetadataDetails<bigi
         uri: newBadgeMetadataDetails.uri,
         metadataId: newBadgeMetadataDetails.metadataId,
         customData: newBadgeMetadataDetails.customData,
+        toUpdate: newBadgeMetadataDetails.toUpdate,
       })
     }
   }
@@ -212,6 +213,7 @@ export const setMetadataPropertyForSpecificBadgeIds = (metadataArr: BadgeMetadat
         uri,
         metadataId,
         customData,
+        toUpdate: true,
       });
     }
   }

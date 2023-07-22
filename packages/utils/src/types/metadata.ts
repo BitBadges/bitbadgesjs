@@ -14,6 +14,9 @@ import { deepCopy } from "./utils";
  * @property {string} [category] - The category of the badge or badge collection (e.g. "Education", "Attendance").
  * @property {string} [externalUrl] - The external URL of the badge or badge collection.
  * @property {string[]} [tags] - The tags of the badge or badge collection.
+ * @property {boolean} [hidden] - Whether the badge or badge collection is hidden or not.
+ * @property {string[]} [references] - References to another collection, field, anything.
+ * @property {UintRange[]} [times] - Arbitrary times in milliseconds. For example, use this for event times.
  *
  * @property {boolean} [_isUpdating] - Field used to indicate whether the metadata is in the refresh queue or not (being updated). Do not set this field manually. It will be set by the SDK / API.
  */
@@ -23,8 +26,8 @@ export interface Metadata<T extends NumberType> {
   name: string;
   description: string;
   image: string;
-  time?: UintRange<T>;
-  validFrom?: UintRange<T>;
+  times?: UintRange<T>[];
+  validFrom?: UintRange<T>[];
   color?: string;
   category?: string;
   externalUrl?: string;
@@ -36,7 +39,7 @@ export interface Metadata<T extends NumberType> {
 export function convertMetadata<T extends NumberType, U extends NumberType>(item: Metadata<T>, convertFunction: (item: T) => U): Metadata<U> {
   return deepCopy({
     ...item,
-    time: item.time ? convertUintRange(item.time, convertFunction) : undefined,
-    validFrom: item.validFrom ? convertUintRange(item.validFrom, convertFunction) : undefined,
+    validFrom: item.validFrom ? item.validFrom.map((UintRange) => convertUintRange(UintRange, convertFunction)) : undefined,
+    times: item.times ? item.times.map((UintRange) => convertUintRange(UintRange, convertFunction)) : undefined,
   })
 }

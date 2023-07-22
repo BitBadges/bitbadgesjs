@@ -1,7 +1,7 @@
 export const VALUE_OPTIONS_TYPES = [
-  { name: 'invertDefault', type: 'boolean' },
-  { name: 'allValues', type: 'boolean' },
-  { name: 'noValues', type: 'boolean' },
+  { name: 'invertDefault', type: 'bool' },
+  { name: 'allValues', type: 'bool' },
+  { name: 'noValues', type: 'bool' },
 ];
 
 export const UINT_RANGE_TYPES = [
@@ -17,7 +17,7 @@ export const BALANCE_TYPES = [
 
 export const PROOF_ITEM_TYPES = [
   { name: 'aunt', type: 'string' },
-  { name: 'onRight', type: 'boolean' },
+  { name: 'onRight', type: 'bool' },
 ];
 
 export const PROOF_TYPES = [
@@ -82,7 +82,7 @@ export const USER_APPROVED_OUTGOING_TRANSFER_DEFAULT_VALUES_TYPES = [
 ];
 
 export const USER_APPROVED_OUTGOING_TRANSFER_COMBINATION_TYPES = [
-  { name: 'timelineTimeOptions', type: 'ValueOptions' },
+  { name: 'timelineTimesOptions', type: 'ValueOptions' },
   { name: 'toMappingOptions', type: 'ValueOptions' },
   { name: 'initiatedByMappingOptions', type: 'ValueOptions' },
   { name: 'transferTimesOptions', type: 'ValueOptions' },
@@ -104,7 +104,7 @@ export const USER_APPROVED_INCOMING_TRANSFER_DEFAULT_VALUES_TYPES = [
 ];
 
 export const USER_APPROVED_INCOMING_TRANSFER_COMBINATION_TYPES = [
-  { name: 'timelineTimeOptions', type: 'ValueOptions' },
+  { name: 'timelineTimesOptions', type: 'ValueOptions' },
   { name: 'fromMappingOptions', type: 'ValueOptions' },
   { name: 'initiatedByMappingOptions', type: 'ValueOptions' },
   { name: 'transferTimesOptions', type: 'ValueOptions' },
@@ -121,7 +121,7 @@ export const IS_USER_OUTGOING_TRANSFER_ALLOWED_TYPES = [
   { name: 'transferTimesOptions', type: 'ValueOptions' },
   { name: 'badgeIdsOptions', type: 'ValueOptions' },
   { name: 'ownedTimesOptions', type: 'ValueOptions' },
-  { name: 'isAllowed', type: 'boolean' },
+  { name: 'isAllowed', type: 'bool' },
 ];
 
 export const OUTGOING_APPROVAL_DETAILS_TYPES = [
@@ -133,8 +133,8 @@ export const OUTGOING_APPROVAL_DETAILS_TYPES = [
   { name: 'predeterminedBalances', type: 'PredeterminedBalances' },
   { name: 'approvalAmounts', type: 'ApprovalAmounts' },
   { name: 'maxNumTransfers', type: 'MaxNumTransfers' },
-  { name: 'requireToEqualsInitiatedBy', type: 'boolean' },
-  { name: 'requireToDoesNotEqualInitiatedBy', type: 'boolean' },
+  { name: 'requireToEqualsInitiatedBy', type: 'bool' },
+  { name: 'requireToDoesNotEqualInitiatedBy', type: 'bool' },
 ];
 
 export const IS_USER_INCOMING_TRANSFER_ALLOWED_TYPES = [
@@ -143,7 +143,7 @@ export const IS_USER_INCOMING_TRANSFER_ALLOWED_TYPES = [
   { name: 'transferTimesOptions', type: 'ValueOptions' },
   { name: 'badgeIdsOptions', type: 'ValueOptions' },
   { name: 'ownedTimesOptions', type: 'ValueOptions' },
-  { name: 'isAllowed', type: 'boolean' },
+  { name: 'isAllowed', type: 'bool' },
 ];
 
 export const INCOMING_APPROVAL_DETAILS_TYPES = [
@@ -155,8 +155,8 @@ export const INCOMING_APPROVAL_DETAILS_TYPES = [
   { name: 'predeterminedBalances', type: 'PredeterminedBalances' },
   { name: 'approvalAmounts', type: 'ApprovalAmounts' },
   { name: 'maxNumTransfers', type: 'MaxNumTransfers' },
-  { name: 'requireFromEqualsInitiatedBy', type: 'boolean' },
-  { name: 'requireFromDoesNotEqualInitiatedBy', type: 'boolean' },
+  { name: 'requireFromEqualsInitiatedBy', type: 'bool' },
+  { name: 'requireFromDoesNotEqualInitiatedBy', type: 'bool' },
 ];
 
 export const MUST_OWN_BADGES_TYPES = [
@@ -170,9 +170,9 @@ export const MUST_OWN_BADGES_TYPES = [
 export const MERKLE_CHALLENGE_TYPES = [
   { name: 'root', type: 'string' },
   { name: 'expectedProofLength', type: 'string' },
-  { name: 'useCreatorAddressAsLeaf', type: 'boolean' },
-  { name: 'maxOneUsePerLeaf', type: 'boolean' },
-  { name: 'useLeafIndexForTransferOrder', type: 'boolean' },
+  { name: 'useCreatorAddressAsLeaf', type: 'bool' },
+  { name: 'maxOneUsePerLeaf', type: 'bool' },
+  { name: 'useLeafIndexForTransferOrder', type: 'bool' },
   { name: 'challengeId', type: 'string' },
   { name: 'uri', type: 'string' },
   { name: 'customData', type: 'string' },
@@ -209,11 +209,11 @@ export const INCREMENTED_BALANCES_TYPES = [
 ];
 
 export const PREDETERMINED_ORDER_CALCULATION_METHOD_TYPES = [
-  { name: 'useOverallNumTransfers', type: 'boolean' },
-  { name: 'usePerToAddressNumTransfers', type: 'boolean' },
-  { name: 'usePerFromAddressNumTransfers', type: 'boolean' },
-  { name: 'usePerInitiatedByAddressNumTransfers', type: 'boolean' },
-  { name: 'useMerkleChallengeLeafIndex', type: 'boolean' },
+  { name: 'useOverallNumTransfers', type: 'bool' },
+  { name: 'usePerToAddressNumTransfers', type: 'bool' },
+  { name: 'usePerFromAddressNumTransfers', type: 'bool' },
+  { name: 'usePerInitiatedByAddressNumTransfers', type: 'bool' },
+  { name: 'useMerkleChallengeLeafIndex', type: 'bool' },
 ];
 
 export const COLLECTIONS_PERMISSIONS_TYPES = [
@@ -351,7 +351,7 @@ export const COLLECTION_APPROVED_TRANSFER_PERMISSION_TYPES = [
 
 
 export const COLLECTION_APPROVED_TRANSFER_COMBINATION_TYPES = [
-  { name: 'timelineTimeOptions', type: 'ValueOptions' },
+  { name: 'timelineTimesOptions', type: 'ValueOptions' },
   { name: 'fromMappingOptions', type: 'ValueOptions' },
   { name: 'toMappingOptions', type: 'ValueOptions' },
   { name: 'initiatedByMappingOptions', type: 'ValueOptions' },
@@ -399,7 +399,7 @@ export const ACTION_DEFAULT_VALUES_TYPES = [
 ];
 
 export const TIMED_UPDATE_COMBINATION_TYPES = [
-  { name: 'timelineTimeOptions', type: 'ValueOptions' },
+  { name: 'timelineTimesOptions', type: 'ValueOptions' },
   { name: 'permittedTimesOptions', type: 'ValueOptions' },
   { name: 'forbiddenTimesOptions', type: 'ValueOptions' },
 ];
@@ -411,7 +411,7 @@ export const TIMED_UPDATE_DEFAULT_VALUES_TYPES = [
 ];
 
 export const TIMED_UPDATE_WITH_BADGE_IDS_COMBINATION_TYPES = [
-  { name: 'timelineTimeOptions', type: 'ValueOptions' },
+  { name: 'timelineTimesOptions', type: 'ValueOptions' },
   { name: 'badgeIdsOptions', type: 'ValueOptions' },
   { name: 'permittedTimesOptions', type: 'ValueOptions' },
   { name: 'forbiddenTimesOptions', type: 'ValueOptions' },

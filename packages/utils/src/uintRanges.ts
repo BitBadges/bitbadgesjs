@@ -95,9 +95,9 @@ export function searchUintRangesForId(id: bigint, uintRanges: UintRange<bigint>[
  * @param {UintRange<bigint>[]} uintRanges - The list of UintRanges to invert
  * @param {bigint} maxId - The max ID to invert up to
  */
-export function invertUintRanges(uintRanges: UintRange<bigint>[], maxId: bigint) {
+export function invertUintRanges(uintRanges: UintRange<bigint>[], minId: bigint, maxId: bigint) {
   let ranges = [];
-  ranges.push(createUintRange(0n, maxId));
+  ranges.push(createUintRange(minId, maxId));
 
   for (let i = 0; i < uintRanges.length; i++) {
     let uintRange = uintRanges[i];

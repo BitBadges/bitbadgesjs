@@ -62,7 +62,7 @@ export interface CollectionInfoBase<T extends NumberType> {
   createdBy: string;
   createdBlock: T;
 }
-export type CollectionDoc<T extends NumberType> = CollectionInfoBase<T> & nano.Document & DeletableDocument;
+export type CollectionDoc<T extends NumberType> = CollectionInfoBase<T> & nano.IdentifiedDocument & nano.MaybeRevisionedDocument & DeletableDocument;
 export type CollectionInfo<T extends NumberType> = CollectionInfoBase<T> & Identified;
 
 export function convertCollectionInfo<T extends NumberType, U extends NumberType>(item: CollectionInfo<T>, convertFunction: (item: T) => U): CollectionInfo<U> {
@@ -89,8 +89,8 @@ export function convertCollectionInfo<T extends NumberType, U extends NumberType
 
 export function convertCollectionDoc<T extends NumberType, U extends NumberType>(item: CollectionDoc<T>, convertFunction: (item: T) => U): CollectionDoc<U> {
   return deepCopy({
-    ...getCouchDBDetails(item),
     ...convertCollectionInfo(removeCouchDBDetails(item), convertFunction),
+    ...getCouchDBDetails(item),
   })
 }
 
@@ -121,7 +121,7 @@ export interface AccountInfoBase<T extends NumberType> {
   sequence?: T
   balance?: CosmosCoin<T>
 }
-export type AccountDoc<T extends NumberType> = AccountInfoBase<T> & nano.Document & DeletableDocument;
+export type AccountDoc<T extends NumberType> = AccountInfoBase<T> & nano.IdentifiedDocument & nano.MaybeRevisionedDocument & DeletableDocument;
 export type AccountInfo<T extends NumberType> = AccountInfoBase<T> & Identified;
 
 export function convertAccountInfo<T extends NumberType, U extends NumberType>(item: AccountInfo<T>, convertFunction: (item: T) => U): AccountInfo<U> {
@@ -135,8 +135,8 @@ export function convertAccountInfo<T extends NumberType, U extends NumberType>(i
 
 export function convertAccountDoc<T extends NumberType, U extends NumberType>(item: AccountDoc<T>, convertFunction: (item: T) => U): AccountDoc<U> {
   return deepCopy({
-    ...getCouchDBDetails(item),
     ...convertAccountInfo(removeCouchDBDetails(item), convertFunction),
+    ...getCouchDBDetails(item),
   })
 }
 
@@ -171,7 +171,7 @@ export interface ProfileInfoBase<T extends NumberType> {
   telegram?: string
   readme?: string
 }
-export type ProfileDoc<T extends NumberType> = ProfileInfoBase<T> & nano.Document & DeletableDocument;
+export type ProfileDoc<T extends NumberType> = ProfileInfoBase<T> & nano.IdentifiedDocument & nano.MaybeRevisionedDocument & DeletableDocument;
 export type ProfileInfo<T extends NumberType> = ProfileInfoBase<T> & Identified;
 
 export function convertProfileInfo<T extends NumberType, U extends NumberType>(item: ProfileInfo<T>, convertFunction: (item: T) => U): ProfileInfo<U> {
@@ -184,8 +184,8 @@ export function convertProfileInfo<T extends NumberType, U extends NumberType>(i
 
 export function convertProfileDoc<T extends NumberType, U extends NumberType>(item: ProfileDoc<T>, convertFunction: (item: T) => U): ProfileDoc<U> {
   return deepCopy({
-    ...getCouchDBDetails(item),
     ...convertProfileInfo(removeCouchDBDetails(item), convertFunction),
+    ...getCouchDBDetails(item),
   })
 }
 
@@ -217,7 +217,7 @@ export interface QueueInfoBase<T extends NumberType> {
   error?: string
   deletedAt?: T
 };
-export type QueueDoc<T extends NumberType> = QueueInfoBase<T> & nano.Document & DeletableDocument;
+export type QueueDoc<T extends NumberType> = QueueInfoBase<T> & nano.IdentifiedDocument & nano.MaybeRevisionedDocument & DeletableDocument;
 export type QueueInfo<T extends NumberType> = QueueInfoBase<T> & Identified;
 
 export function convertQueueItem<T extends NumberType, U extends NumberType>(item: QueueInfo<T>, convertFunction: (item: T) => U): QueueInfo<U> {
@@ -234,8 +234,8 @@ export function convertQueueItem<T extends NumberType, U extends NumberType>(ite
 
 export function convertQueueDoc<T extends NumberType, U extends NumberType>(item: QueueDoc<T>, convertFunction: (item: T) => U): QueueDoc<U> {
   return deepCopy({
-    ...getCouchDBDetails(item),
     ...convertQueueItem(removeCouchDBDetails(item), convertFunction),
+    ...getCouchDBDetails(item),
   })
 }
 
@@ -278,7 +278,7 @@ export interface StatusInfoBase<T extends NumberType> {
   gasPrice: T;
   lastXGasPrices: (T)[];
 }
-export type StatusDoc<T extends NumberType> = StatusInfoBase<T> & nano.Document & DeletableDocument;
+export type StatusDoc<T extends NumberType> = StatusInfoBase<T> & nano.IdentifiedDocument & nano.MaybeRevisionedDocument & DeletableDocument;
 export type StatusInfo<T extends NumberType> = StatusInfoBase<T> & Identified;
 
 export function convertStatusInfo<T extends NumberType, U extends NumberType>(item: StatusInfo<T>, convertFunction: (item: T) => U): StatusInfo<U> {
@@ -293,8 +293,8 @@ export function convertStatusInfo<T extends NumberType, U extends NumberType>(it
 
 export function convertStatusDoc<T extends NumberType, U extends NumberType>(item: StatusDoc<T>, convertFunction: (item: T) => U): StatusDoc<U> {
   return deepCopy({
-    ...getCouchDBDetails(item),
     ...convertStatusInfo(removeCouchDBDetails(item), convertFunction),
+    ...getCouchDBDetails(item),
   })
 }
 
@@ -306,7 +306,7 @@ export function convertStatusDoc<T extends NumberType, U extends NumberType>(ite
 export interface AddressMappingInfoBase extends AddressMapping {
   createdBy: string
 }
-export type AddressMappingDoc = AddressMappingInfoBase & nano.Document & DeletableDocument;
+export type AddressMappingDoc = AddressMappingInfoBase & nano.IdentifiedDocument & nano.MaybeRevisionedDocument & DeletableDocument;
 export type AddressMappingInfo = AddressMappingInfoBase & Identified;
 
 /**
@@ -329,7 +329,7 @@ export interface BalanceInfoBase<T extends NumberType> extends UserBalance<T> {
   fetchedAt?: T, //Date.now()
   isPermanent?: boolean
 }
-export type BalanceDoc<T extends NumberType> = BalanceInfoBase<T> & nano.Document & DeletableDocument;
+export type BalanceDoc<T extends NumberType> = BalanceInfoBase<T> & nano.IdentifiedDocument & nano.MaybeRevisionedDocument & DeletableDocument;
 export type BalanceInfo<T extends NumberType> = BalanceInfoBase<T> & Identified;
 
 export function convertBalanceInfo<T extends NumberType, U extends NumberType>(item: BalanceInfo<T>, convertFunction: (item: T) => U): BalanceInfo<U> {
@@ -343,8 +343,8 @@ export function convertBalanceInfo<T extends NumberType, U extends NumberType>(i
 
 export function convertBalanceDoc<T extends NumberType, U extends NumberType>(item: BalanceDoc<T>, convertFunction: (item: T) => U): BalanceDoc<U> {
   return deepCopy({
-    ...getCouchDBDetails(item),
     ...convertBalanceInfo(removeCouchDBDetails(item), convertFunction),
+    ...getCouchDBDetails(item),
   })
 }
 
@@ -376,7 +376,7 @@ export interface PasswordInfoBase<T extends NumberType> {
 
   challengeDetails?: ChallengeDetails<T>;
 }
-export type PasswordDoc<T extends NumberType> = PasswordInfoBase<T> & nano.Document & DeletableDocument;
+export type PasswordDoc<T extends NumberType> = PasswordInfoBase<T> & nano.IdentifiedDocument & nano.MaybeRevisionedDocument & DeletableDocument;
 export type PasswordInfo<T extends NumberType> = PasswordInfoBase<T> & Identified;
 
 export function convertPasswordInfo<T extends NumberType, U extends NumberType>(item: PasswordInfo<T>, convertFunction: (item: T) => U): PasswordInfo<U> {
@@ -390,8 +390,8 @@ export function convertPasswordInfo<T extends NumberType, U extends NumberType>(
 
 export function convertPasswordDoc<T extends NumberType, U extends NumberType>(item: PasswordDoc<T>, convertFunction: (item: T) => U): PasswordDoc<U> {
   return deepCopy({
-    ...getCouchDBDetails(item),
     ...convertPasswordInfo(removeCouchDBDetails(item), convertFunction),
+    ...getCouchDBDetails(item),
   })
 }
 
@@ -476,7 +476,7 @@ export interface ApprovalsTrackerInfoBase<T extends NumberType> extends Approval
   amounts: Balance<T>[];
 }
 
-export type ApprovalsTrackerDoc<T extends NumberType> = ApprovalsTrackerInfoBase<T> & nano.Document & DeletableDocument;
+export type ApprovalsTrackerDoc<T extends NumberType> = ApprovalsTrackerInfoBase<T> & nano.IdentifiedDocument & nano.MaybeRevisionedDocument & DeletableDocument;
 export type ApprovalsTrackerInfo<T extends NumberType> = ApprovalsTrackerInfoBase<T> & Identified;
 
 export function convertApprovalsTrackerInfo<T extends NumberType, U extends NumberType>(item: ApprovalsTrackerInfo<T>, convertFunction: (item: T) => U): ApprovalsTrackerInfo<U> {
@@ -490,8 +490,31 @@ export function convertApprovalsTrackerInfo<T extends NumberType, U extends Numb
 
 export function convertApprovalsTrackerDoc<T extends NumberType, U extends NumberType>(item: ApprovalsTrackerDoc<T>, convertFunction: (item: T) => U): ApprovalsTrackerDoc<U> {
   return deepCopy({
-    ...getCouchDBDetails(item),
     ...convertApprovalsTrackerInfo(removeCouchDBDetails(item), convertFunction),
+    ...getCouchDBDetails(item),
+  })
+}
+
+/**
+ * MerkleChallengeTrackerIdDetails holds the fields used to identify a specific merkle challenge tracker
+ *
+ * @typedef {Object} MerkleChallengeTrackerIdDetails
+ * @property {NumberType} collectionId - The collection ID
+ * @property {string} challengeId - The challenge ID
+ * @property {string} challengeLevel - The challenge level (i.e. "collection", "incoming", "outgoing")
+ * @property {string} approverAddress - The approver address (leave blank if challengeLevel = "collection")
+ */
+export interface MerkleChallengeTrackerIdDetails<T extends NumberType> {
+  collectionId: T;
+  challengeId: string;
+  challengeLevel: "collection" | "incoming" | "outgoing" | "";
+  approverAddress: string; //Leave blank if challengeLevel = "collection"
+}
+
+export function convertMerkleChallengeTrackerIdDetails<T extends NumberType, U extends NumberType>(item: MerkleChallengeTrackerIdDetails<T>, convertFunction: (item: T) => U): MerkleChallengeTrackerIdDetails<U> {
+  return deepCopy({
+    ...item,
+    collectionId: convertFunction(item.collectionId),
   })
 }
 
@@ -516,7 +539,7 @@ export interface MerkleChallengeInfoBase<T extends NumberType> {
   usedLeafIndices: (T)[];
 }
 
-export type MerkleChallengeDoc<T extends NumberType> = MerkleChallengeInfoBase<T> & nano.Document & DeletableDocument;
+export type MerkleChallengeDoc<T extends NumberType> = MerkleChallengeInfoBase<T> & nano.IdentifiedDocument & nano.MaybeRevisionedDocument & DeletableDocument;
 export type MerkleChallengeInfo<T extends NumberType> = MerkleChallengeInfoBase<T> & Identified;
 
 export function convertMerkleChallengeInfo<T extends NumberType, U extends NumberType>(item: MerkleChallengeInfo<T>, convertFunction: (item: T) => U): MerkleChallengeInfo<U> {
@@ -529,8 +552,8 @@ export function convertMerkleChallengeInfo<T extends NumberType, U extends Numbe
 
 export function convertMerkleChallengeDoc<T extends NumberType, U extends NumberType>(item: MerkleChallengeDoc<T>, convertFunction: (item: T) => U): MerkleChallengeDoc<U> {
   return deepCopy({
-    ...getCouchDBDetails(item),
     ...convertMerkleChallengeInfo(removeCouchDBDetails(item), convertFunction),
+    ...getCouchDBDetails(item),
   })
 }
 
@@ -616,13 +639,13 @@ export interface FetchInfoBase<T extends NumberType> {
   db: 'MerkleChallenge' | 'Metadata' | 'Balances'
   isPermanent: boolean
 }
-export type FetchDoc<T extends NumberType> = FetchInfoBase<T> & nano.Document & DeletableDocument;
+export type FetchDoc<T extends NumberType> = FetchInfoBase<T> & nano.IdentifiedDocument & nano.MaybeRevisionedDocument & DeletableDocument;
 export type FetchInfo<T extends NumberType> = FetchInfoBase<T> & Identified;
 
 export function convertFetchInfo<T extends NumberType, U extends NumberType>(item: FetchInfo<T>, convertFunction: (item: T) => U): FetchInfo<U> {
   return deepCopy({
     ...item,
-    content: item.db === 'Metadata' ? convertMetadata(item.content as Metadata<T>, convertFunction) : item.db === 'MerkleChallenge' ? convertMerkleChallengeDetails(item.content as MerkleChallengeDetails<T>, convertFunction) : convertOffChainBalancesMap(item.content as OffChainBalancesMap<T>, convertFunction),
+    content: item.content ? item.db === 'Metadata' ? convertMetadata(item.content as Metadata<T>, convertFunction) : item.db === 'MerkleChallenge' ? convertMerkleChallengeDetails(item.content as MerkleChallengeDetails<T>, convertFunction) : convertOffChainBalancesMap(item.content as OffChainBalancesMap<T>, convertFunction) : undefined,
     fetchedAt: convertFunction(item.fetchedAt),
   })
 }
@@ -630,8 +653,8 @@ export function convertFetchInfo<T extends NumberType, U extends NumberType>(ite
 
 export function convertFetchDoc<T extends NumberType, U extends NumberType>(item: FetchDoc<T>, convertFunction: (item: T) => U): FetchDoc<U> {
   return deepCopy({
-    ...getCouchDBDetails(item),
     ...convertFetchInfo(removeCouchDBDetails(item), convertFunction),
+    ...getCouchDBDetails(item),
   })
 }
 
@@ -639,7 +662,7 @@ export interface RefreshInfoBase<T extends NumberType> {
   collectionId: T
   refreshRequestTime: T
 }
-export type RefreshDoc<T extends NumberType> = RefreshInfoBase<T> & nano.Document & DeletableDocument;
+export type RefreshDoc<T extends NumberType> = RefreshInfoBase<T> & nano.IdentifiedDocument & nano.MaybeRevisionedDocument & DeletableDocument;
 export type RefreshInfo<T extends NumberType> = RefreshInfoBase<T> & Identified;
 
 export function convertRefreshInfo<T extends NumberType, U extends NumberType>(item: RefreshInfo<T>, convertFunction: (item: T) => U): RefreshInfo<U> {
@@ -652,8 +675,8 @@ export function convertRefreshInfo<T extends NumberType, U extends NumberType>(i
 
 export function convertRefreshDoc<T extends NumberType, U extends NumberType>(item: RefreshDoc<T>, convertFunction: (item: T) => U): RefreshDoc<U> {
   return deepCopy({
-    ...getCouchDBDetails(item),
     ...convertRefreshInfo(removeCouchDBDetails(item), convertFunction),
+    ...getCouchDBDetails(item),
   })
 }
 
@@ -668,7 +691,7 @@ export interface AirdropInfoBase<T extends NumberType> {
   timestamp: T
   hash?: string
 }
-export type AirdropDoc<T extends NumberType> = AirdropInfoBase<T> & nano.Document & DeletableDocument;
+export type AirdropDoc<T extends NumberType> = AirdropInfoBase<T> & nano.IdentifiedDocument & nano.MaybeRevisionedDocument & DeletableDocument;
 export type AirdropInfo<T extends NumberType> = AirdropInfoBase<T> & Identified;
 
 export function convertAirdropInfo<T extends NumberType, U extends NumberType>(item: AirdropInfo<T>, convertFunction: (item: T) => U): AirdropInfo<U> {
@@ -680,15 +703,15 @@ export function convertAirdropInfo<T extends NumberType, U extends NumberType>(i
 
 export function convertAirdropDoc<T extends NumberType, U extends NumberType>(item: AirdropDoc<T>, convertFunction: (item: T) => U): AirdropDoc<U> {
   return deepCopy({
-    ...getCouchDBDetails(item),
     ...convertAirdropInfo(removeCouchDBDetails(item), convertFunction),
+    ...getCouchDBDetails(item),
   })
 }
 
 export interface IPFSTotalsInfoBase<T extends NumberType> {
   kbUploaded: T
 }
-export type IPFSTotalsDoc<T extends NumberType> = IPFSTotalsInfoBase<T> & nano.Document & DeletableDocument;
+export type IPFSTotalsDoc<T extends NumberType> = IPFSTotalsInfoBase<T> & nano.IdentifiedDocument & nano.MaybeRevisionedDocument & DeletableDocument;
 export type IPFSTotalsInfo<T extends NumberType> = IPFSTotalsInfoBase<T> & Identified;
 
 export function convertIPFSTotalsInfo<T extends NumberType, U extends NumberType>(item: IPFSTotalsInfo<T>, convertFunction: (item: T) => U): IPFSTotalsInfo<U> {
@@ -700,7 +723,7 @@ export function convertIPFSTotalsInfo<T extends NumberType, U extends NumberType
 
 export function convertIPFSTotalsDoc<T extends NumberType, U extends NumberType>(item: IPFSTotalsDoc<T>, convertFunction: (item: T) => U): IPFSTotalsDoc<U> {
   return deepCopy({
-    ...getCouchDBDetails(item),
     ...convertIPFSTotalsInfo(removeCouchDBDetails(item), convertFunction),
+    ...getCouchDBDetails(item),
   })
 }

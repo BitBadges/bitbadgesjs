@@ -37,7 +37,7 @@ export const UpdateAccountInfoRoute = () => "/api/v0/user/updateAccount";
 
 //IPFS
 export const AddMetadataToIpfsRoute = () => "/api/v0/addMetadataToIpfs";
-export const AddClaimToIpfsRoute = () => "/api/v0/addClaimToIpfs";
+export const AddMerkleChallengeToIpfsRoute = () => "/api/v0/addMerkleChallengeToIpfs";
 export const AddBalancesToIpfsRoute = () => "/api/v0/addBalancesToIpfs";
 
 //Blockin Auth

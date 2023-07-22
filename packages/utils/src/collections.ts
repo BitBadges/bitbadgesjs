@@ -49,13 +49,19 @@ export function incrementMintAndTotalBalances(
   const totalBalanceStore = owners.find(x => x.cosmosAddress === "Total");
   const mintBalanceStore = owners.find(x => x.cosmosAddress === "Mint");
 
+
   //Calculate the amounts and supplys of badges (existing + new)
   let newMaxSupplys = totalBalanceStore ? deepCopy(totalBalanceStore) : getBlankBalance(false);
   let newUnmintedSupplys = mintBalanceStore ? deepCopy(mintBalanceStore) : getBlankBalance(false);
+  const maxSupplys = deepCopy(newMaxSupplys);
+  console.log(maxSupplys);
+  console.log(totalBalanceStore, newMaxSupplys);
+  console.log(JSON.stringify(newMaxSupplys));
 
   newMaxSupplys.balances = addBalances(badgesToCreate, newMaxSupplys.balances);
   newUnmintedSupplys.balances = addBalances(badgesToCreate, newUnmintedSupplys.balances);
 
+  console.log(newMaxSupplys);
   //Replace "Mint" and "Total" in owners array with new balances
   const newOwners: BalanceInfo<bigint>[] = owners.filter(x => x.cosmosAddress !== "Mint" && x.cosmosAddress !== "Total") ?? [];
   newOwners.push({

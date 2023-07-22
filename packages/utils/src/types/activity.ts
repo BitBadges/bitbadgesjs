@@ -21,7 +21,7 @@ export interface ActivityInfoBase<T extends NumberType> {
   timestamp: T;
   block: T;
 }
-export type ActivityDoc<T extends NumberType> = ActivityInfoBase<T> & nano.Document & DeletableDocument;
+export type ActivityDoc<T extends NumberType> = ActivityInfoBase<T> & nano.IdentifiedDocument & nano.MaybeRevisionedDocument & DeletableDocument;
 export type ActivityInfo<T extends NumberType> = ActivityInfoBase<T> & Identified;
 
 export function convertActivityInfo<T extends NumberType, U extends NumberType>(item: ActivityInfo<T>, convertFunction: (item: T) => U): ActivityInfo<U> {
@@ -34,8 +34,8 @@ export function convertActivityInfo<T extends NumberType, U extends NumberType>(
 
 export function convertActivityDoc<T extends NumberType, U extends NumberType>(item: ActivityDoc<T>, convertFunction: (item: T) => U): ActivityDoc<U> {
   return deepCopy({
+    ...convertActivityInfo(removeCouchDBDetails(item), convertFunction),
     ...getCouchDBDetails(item),
-    ...convertActivityInfo(removeCouchDBDetails(item), convertFunction)
   })
 }
 
@@ -60,7 +60,7 @@ export interface ReviewInfoBase<T extends NumberType> extends ActivityInfoBase<T
   collectionId?: T;
   reviewedAddress?: string;
 }
-export type ReviewDoc<T extends NumberType> = ReviewInfoBase<T> & nano.Document & DeletableDocument;
+export type ReviewDoc<T extends NumberType> = ReviewInfoBase<T> & nano.IdentifiedDocument & nano.MaybeRevisionedDocument & DeletableDocument;
 export type ReviewInfo<T extends NumberType> = ReviewInfoBase<T> & Identified;
 
 export function convertReviewInfo<T extends NumberType, U extends NumberType>(item: ReviewInfo<T>, convertFunction: (item: T) => U): ReviewInfo<U> {
@@ -75,8 +75,8 @@ export function convertReviewInfo<T extends NumberType, U extends NumberType>(it
 
 export function convertReviewDoc<T extends NumberType, U extends NumberType>(item: ReviewDoc<T>, convertFunction: (item: T) => U): ReviewDoc<U> {
   return deepCopy({
+    ...convertReviewInfo(removeCouchDBDetails(item), convertFunction),
     ...getCouchDBDetails(item),
-    ...convertReviewInfo(removeCouchDBDetails(item), convertFunction)
   })
 }
 
@@ -96,13 +96,14 @@ export interface AnnouncementInfoBase<T extends NumberType> extends ActivityInfo
   from: string;
   collectionId: T;
 }
-export type AnnouncementDoc<T extends NumberType> = AnnouncementInfoBase<T> & nano.Document & DeletableDocument;
+export type AnnouncementDoc<T extends NumberType> = AnnouncementInfoBase<T> & nano.IdentifiedDocument & nano.MaybeRevisionedDocument & DeletableDocument;
 export type AnnouncementInfo<T extends NumberType> = AnnouncementInfoBase<T> & Identified;
 
 export function convertAnnouncementDoc<T extends NumberType, U extends NumberType>(item: AnnouncementDoc<T>, convertFunction: (item: T) => U): AnnouncementDoc<U> {
   return deepCopy({
+    ...convertAnnouncementInfo(removeCouchDBDetails(item), convertFunction),
     ...getCouchDBDetails(item),
-    ...convertAnnouncementInfo(removeCouchDBDetails(item), convertFunction)
+
   })
 }
 
@@ -119,7 +120,7 @@ export function convertAnnouncementInfo<T extends NumberType, U extends NumberTy
  * Type for transfer activity items that extends the base ActivityDoc interface.
  * @typedef {Object} TransferActivityInfoBase
  * @property {string[]} to - The list of account numbers that received the transfer.
- * @property {(string | 'Mint')[]} from - The list of account numbers that sent the transfer ('Mint' is used as a special address when minting or claiming).
+ * @property {string} from - The list of account numbers that sent the transfer ('Mint' is used as a special address when minting or claiming).
  * @property {Balance[]} balances - The list of balances and badge IDs that were transferred.
  * @property {NumberType} collectionId - The collection ID of the collection that was transferred.
  * @property {TransferMethod} method - The type of activity, which can be "Transfer", "Mint", or "Claim".
@@ -127,19 +128,20 @@ export function convertAnnouncementInfo<T extends NumberType, U extends NumberTy
 export interface TransferActivityInfoBase<T extends NumberType> extends ActivityInfoBase<T> {
   method: TransferMethod;
   to: string[];
-  from: (string | 'Mint')[];
+  from: string;
   balances: Balance<T>[];
   collectionId: T;
   memo: string;
   precalculationDetails: PrecalculationDetails;
 }
-export type TransferActivityDoc<T extends NumberType> = TransferActivityInfoBase<T> & nano.Document & DeletableDocument;
+export type TransferActivityDoc<T extends NumberType> = TransferActivityInfoBase<T> & nano.IdentifiedDocument & nano.MaybeRevisionedDocument & DeletableDocument;
 export type TransferActivityInfo<T extends NumberType> = TransferActivityInfoBase<T> & Identified;
 
 export function convertTransferActivityDoc<T extends NumberType, U extends NumberType>(item: TransferActivityDoc<T>, convertFunction: (item: T) => U): TransferActivityDoc<U> {
   return deepCopy({
+    ...convertTransferActivityInfo(removeCouchDBDetails(item), convertFunction),
     ...getCouchDBDetails(item),
-    ...convertTransferActivityInfo(removeCouchDBDetails(item), convertFunction)
+
   })
 }
 

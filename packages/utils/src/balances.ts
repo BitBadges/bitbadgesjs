@@ -211,6 +211,8 @@ export function updateBalances(newBalance: Balance<bigint>, balances: Balance<bi
  */
 export function addBalance(existingBalances: Balance<bigint>[], balanceToAdd: Balance<bigint>) {
   const currBalances = getBalancesForIds(balanceToAdd.badgeIds, balanceToAdd.ownedTimes, existingBalances);
+  console.log("CURR BALANCES", JSON.stringify(currBalances));
+  console.log(currBalances);
 
   for (let balance of currBalances) {
     balance.amount = safeAddUints(balance.amount, balanceToAdd.amount);
@@ -225,8 +227,11 @@ export function addBalance(existingBalances: Balance<bigint>[], balanceToAdd: Ba
  * Adds multiple balances to the existing balances.
  */
 export function addBalances(balancesToAdd: Balance<bigint>[], balances: Balance<bigint>[]) {
+
   for (let balance of balancesToAdd) {
+    console.log("BEFORE", JSON.stringify(balances));
     balances = addBalance(balances, balance);
+    console.log("AFTER", JSON.stringify(balances));
   }
 
   return balances;
@@ -362,7 +367,57 @@ export function getBalancesForIds(idRanges: UintRange<bigint>[], times: UintRang
  *
  * Modifies and returns the original balances object with the deleted balances removed.
  */
-export function deleteBalances(idRanges: UintRange<bigint>[], times: UintRange<bigint>[], balances: Balance<bigint>[]) {
-  const fetchedBalanecs: Balance<bigint>[] = [];
-  return fetchedBalanecs;
+export function deleteBalances(rangesToDelete: UintRange<bigint>[], timesToDelete: UintRange<bigint>[], balances: Balance<bigint>[]): Balance<bigint>[] {
+  let newBalances: Balance<bigint>[] = [];
+
+  for (let balanceObj of balances) {
+    let currPermissionDetails: UniversalPermissionDetails[] = [];
+    for (let currRange of balanceObj.badgeIds) {
+      for (let currTime of balanceObj.ownedTimes) {
+        currPermissionDetails.push({
+          badgeId: currRange,
+          ownershipTime: currTime,
+          transferTime: { start: BigInt(Number.MAX_SAFE_INTEGER), end: BigInt(Number.MAX_SAFE_INTEGER) }, //dummy range
+          timelineTime: { start: BigInt(Number.MAX_SAFE_INTEGER), end: BigInt(Number.MAX_SAFE_INTEGER) }, //dummy range
+          toMapping: { addresses: [], includeAddresses: false, mappingId: "", uri: "", customData: "" },
+          fromMapping: { addresses: [], includeAddresses: false, mappingId: "", uri: "", customData: "" },
+          initiatedByMapping: { addresses: [], includeAddresses: false, mappingId: "", uri: "", customData: "" },
+
+          permittedTimes: [],
+          forbiddenTimes: [],
+          arbitraryValue: 0n,
+        });
+      }
+    }
+
+    let toDeletePermissionDetails: UniversalPermissionDetails[] = [];
+    for (let rangeToDelete of rangesToDelete) {
+      for (let timeToDelete of timesToDelete) {
+        toDeletePermissionDetails.push({
+          badgeId: rangeToDelete,
+          ownershipTime: timeToDelete,
+          transferTime: { start: BigInt(Number.MAX_SAFE_INTEGER), end: BigInt(Number.MAX_SAFE_INTEGER) }, //dummy range
+          timelineTime: { start: BigInt(Number.MAX_SAFE_INTEGER), end: BigInt(Number.MAX_SAFE_INTEGER) }, //dummy range
+          toMapping: { addresses: [], includeAddresses: false, mappingId: "", uri: "", customData: "" },
+          fromMapping: { addresses: [], includeAddresses: false, mappingId: "", uri: "", customData: "" },
+          initiatedByMapping: { addresses: [], includeAddresses: false, mappingId: "", uri: "", customData: "" },
+
+          permittedTimes: [],
+          forbiddenTimes: [],
+          arbitraryValue: 0n,
+        });
+      }
+    }
+
+    let [_, inOldButNotNew, __] = getOverlapsAndNonOverlaps(currPermissionDetails, toDeletePermissionDetails);
+    for (let remainingBalance of inOldButNotNew) {
+      newBalances.push({
+        amount: balanceObj.amount,
+        badgeIds: [remainingBalance.badgeId],
+        ownedTimes: [remainingBalance.ownershipTime],
+      });
+    }
+  }
+
+  return newBalances;
 }

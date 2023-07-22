@@ -9,8 +9,8 @@ import { sortUintRangesAndMergeIfNecessary } from "./uintRanges";
  * For a multicollection display, return the badges to be shown on a specific page.
  *
  * @param {{ collection: bigint, badgeIds: UintRange<bigint>[] }[]} collectionObjectsToDisplay - The collections to display.
- * @param {bigint | string | number} _pageNumber - The page number of the display
- * @param {bigint | string | number} _pageSize - The page size of the display
+ * @param {number} _pageNumber - The page number of the display
+ * @param {number} _pageSize - The page size of the display
  *
  * Assumes that badgeIds are sorted, merged, and non-overlapping.
  *
@@ -21,8 +21,8 @@ export function getBadgesToDisplay(
     collectionId: bigint,
     badgeIds: UintRange<bigint>[]
   }[] = [],
-  _pageNumber: bigint | string | number,
-  _pageSize: bigint | string | number,
+  _pageNumber: number,
+  _pageSize: number,
 ) {
   const pageNumber = BigInt(_pageNumber);
   const pageSize = BigInt(_pageSize);

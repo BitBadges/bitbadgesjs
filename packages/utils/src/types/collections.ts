@@ -12,6 +12,8 @@ export interface BadgeMetadataDetails<T extends NumberType> {
   metadata: Metadata<T>,
   uri?: string
   customData?: string
+
+  toUpdate?: boolean
 }
 
 export function convertBadgeMetadataDetails<T extends NumberType, U extends NumberType>(item: BadgeMetadataDetails<T>, convertFunction: (item: T) => U): BadgeMetadataDetails<U> {
@@ -50,6 +52,7 @@ export interface CollectionApprovedTransferTimelineWithDetails<T extends NumberT
  * @property {ReviewDoc[]} reviews - The review activity of this collection
  * @property {BalanceDoc[]} owners - The badge balance documents for owners of this collection
  * @property {MerkleChallengeInfo[]} claims - The claims of this collection
+ * @property {ApprovalsTrackerInfo[]} approvalsTrackers - The approvals trackers of this collection
  *
  * @remarks
  * Note that the collectionMetadata, badgeMetadata, activity, announcements, reviews, claims, and balances fields are

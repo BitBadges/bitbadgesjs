@@ -401,7 +401,7 @@ export interface CollectionMetadataTimeline<T extends NumberType> extends Timeli
 export function convertCollectionMetadataTimeline<T extends NumberType, U extends NumberType>(collectionMetadataTimeline: CollectionMetadataTimeline<T>, convertFunction: (item: T) => U): CollectionMetadataTimeline<U> {
   return deepCopy({
     ...collectionMetadataTimeline,
-    // collectionMetadata: convertCollectionMetadata(collectionMetadataTimeline.collectionMetadata, convertFunction),
+    collectionMetadata: collectionMetadataTimeline.collectionMetadata,
     timelineTimes: collectionMetadataTimeline.timelineTimes.map((b) => convertUintRange(b, convertFunction))
   })
 }

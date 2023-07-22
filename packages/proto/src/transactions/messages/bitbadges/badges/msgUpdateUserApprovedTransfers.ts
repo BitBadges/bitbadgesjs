@@ -37,11 +37,11 @@ export function convertFromProtoToMsgUpdateUserApprovedTransfers(
     creator: protoMsg.creator,
     collectionId: BigInt(protoMsg.collectionId),
     updateApprovedOutgoingTransfersTimeline: protoMsg.updateApprovedOutgoingTransfersTimeline,
-    approvedOutgoingTransfersTimeline: protoMsg.approvedOutgoingTransfersTimeline.map(x => convertUserApprovedOutgoingTransferTimeline(x, BigInt)),
+    approvedOutgoingTransfersTimeline: protoMsg.approvedOutgoingTransfersTimeline.map(x => convertUserApprovedOutgoingTransferTimeline(x.toObject() as any, BigInt)),
     updateApprovedIncomingTransfersTimeline: protoMsg.updateApprovedIncomingTransfersTimeline,
-    approvedIncomingTransfersTimeline: protoMsg.approvedIncomingTransfersTimeline.map(x => convertUserApprovedIncomingTransferTimeline(x, BigInt)),
+    approvedIncomingTransfersTimeline: protoMsg.approvedIncomingTransfersTimeline.map(x => convertUserApprovedIncomingTransferTimeline(x.toObject() as any, BigInt)),
     updateUserPermissions: protoMsg.updateUserPermissions,
-    userPermissions: convertUserPermissions(protoMsg.userPermissions, BigInt),
+    userPermissions: convertUserPermissions(protoMsg.userPermissions.toObject() as any, BigInt),
   }
 }
 

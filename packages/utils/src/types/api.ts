@@ -4,7 +4,7 @@ import { BroadcastPostBody } from "bitbadgesjs-provider"
 import { ChallengeParams } from "blockin"
 import { TransferActivityInfo, convertTransferActivityInfo } from "./activity"
 import { BadgeMetadataDetails, BitBadgesCollection, convertBadgeMetadataDetails, convertBitBadgesCollection } from "./collections"
-import { ApprovalsTrackerInfo, BalanceInfo, ChallengeDetails, MerkleChallengeIdDetails, MerkleChallengeInfo, StatusInfo, convertApprovalsTrackerInfo, convertBalanceInfo, convertMerkleChallengeInfo, convertStatusInfo } from "./db"
+import { ApprovalsTrackerInfo, BalanceInfo, ChallengeDetails, MerkleChallengeIdDetails, MerkleChallengeInfo, MerkleChallengeTrackerIdDetails, StatusInfo, convertApprovalsTrackerInfo, convertBalanceInfo, convertMerkleChallengeInfo, convertStatusInfo } from "./db"
 import { Metadata, convertMetadata } from "./metadata"
 import { NumberType } from "./string-numbers"
 import { OffChainBalancesMap } from "./transfers"
@@ -99,7 +99,7 @@ export interface GetAdditionalCollectionDetailsRequestBody {
     bookmark: string
   }[],
   fetchTotalAndMintBalances?: boolean,
-  merkleChallengeIdsToFetch?: string[],
+  merkleChallengeIdsToFetch?: MerkleChallengeTrackerIdDetails<NumberType>[],
   approvalsTrackerIdsToFetch?: ApprovalTrackerIdDetails<NumberType>[],
   //customQueries?: { db: string, selector: any, key: string }[],
   //TODO: we can add fully custom queries here (i.e. supply own Mango selector)
@@ -353,7 +353,7 @@ export interface AddBalancesToIpfsRouteRequestBody {
 export interface AddBalancesToIpfsRouteSuccessResponse<T extends NumberType> {
   result: {
     cid: string,
-    path: string,
+    // path: string,
   }
 }
 export type AddBalancesToIpfsRouteResponse<T extends NumberType> = ErrorResponse | AddBalancesToIpfsRouteSuccessResponse<T>;
@@ -368,15 +368,15 @@ export interface AddMetadataToIpfsRouteRequestBody {
 export interface AddMetadataToIpfsRouteSuccessResponse<T extends NumberType> {
   collectionMetadataResult?: {
     cid: string,
-    path: string,
+    // path: string,
   },
   badgeMetadataResults: {
     cid: string,
-    path: string,
+    // path: string,
   }[],
   allResults: {
     cid: string,
-    path: string,
+    // path: string,
   }[]
 }
 export type AddMetadataToIpfsRouteResponse<T extends NumberType> = ErrorResponse | AddMetadataToIpfsRouteSuccessResponse<T>;
@@ -392,7 +392,7 @@ export interface AddMerkleChallengeToIpfsRouteRequestBody {
 export interface AddMerkleChallengeToIpfsRouteSuccessResponse<T extends NumberType> {
   result: {
     cid: string,
-    path: string,
+    // path: string,
   }
 }
 export type AddMerkleChallengeToIpfsRouteResponse<T extends NumberType> = ErrorResponse | AddMerkleChallengeToIpfsRouteSuccessResponse<T>;
@@ -450,21 +450,65 @@ export function convertGetBrowseCollectionsRouteSuccessResponse<T extends Number
 }
 
 export type BroadcastTxRouteRequestBody = BroadcastPostBody;
-// export interface BroadcastTxRouteSuccessResponse<T extends NumberType> {
-//   //TODO:`
-// }
+export interface BroadcastTxRouteSuccessResponse<T extends NumberType> {
+  tx_response: {
+    code: number,
+    codespace: string,
+    data: string,
+    events: {
+      type: string,
+      attributes: {
+        key: string,
+        value: string,
+        index: boolean,
+      }[]
+    }[],
+    gas_wanted: string,
+    gas_used: string,
+    height: string,
+    info: string,
+    logs: {
+      events: {
+        type: string,
+        attributes: {
+          key: string,
+          value: string,
+          index: boolean,
+        }[]
+      }[],
+    }[],
+    raw_log: string,
+    timestamp: string,
+    tx: object | null,
+    txhash: string,
+  } //TODO: This and simulate response should be exported from an official Cosmos library
+}
 
-export type BroadcastTxRouteSuccessResponse<T extends NumberType> = any;
 export type BroadcastTxRouteResponse<T extends NumberType> = ErrorResponse | BroadcastTxRouteSuccessResponse<T>;
 export function convertBroadcastTxRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: BroadcastTxRouteSuccessResponse<T>, convertFunction: (item: T) => U): BroadcastTxRouteSuccessResponse<U> {
   return { ...item };
 }
 
 export type SimulateTxRouteRequestBody = BroadcastPostBody;
-// export interface SimulateTxRouteSuccessResponse<T extends NumberType> {
-//   //TODO:
-// }
-export type SimulateTxRouteSuccessResponse<T extends NumberType> = any;
+export interface SimulateTxRouteSuccessResponse<T extends NumberType> {
+  gas_info: {
+    gas_used: string,
+    gas_wanted: string,
+  },
+  result: {
+    data: string,
+    log: string,
+    events: {
+      type: string,
+      attributes: {
+        key: string,
+        value: string,
+        index: boolean,
+      }[]
+    }[],
+    msg_responses: any[]
+  }
+}
 
 export type SimulateTxRouteResponse<T extends NumberType> = ErrorResponse | SimulateTxRouteSuccessResponse<T>;
 export function convertSimulateTxRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: SimulateTxRouteSuccessResponse<T>, convertFunction: (item: T) => U): SimulateTxRouteSuccessResponse<U> {

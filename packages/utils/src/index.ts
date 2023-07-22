@@ -35,4 +35,4 @@ export * from './display';
 export * from './approvedTransfers';
 export * from './math';
 export * from './timelines';
-// export * from './overlaps'; //TODO: Clean this up then export it for public use
+export * from './overlaps';
