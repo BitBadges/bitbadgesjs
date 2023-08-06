@@ -219,6 +219,7 @@ export namespace bitbadges.bitbadgeschain.badges {
       amountRange?: UintRange;
       ownershipTimes?: UintRange[];
       badgeIds?: UintRange[];
+      overrideWithCurrentTime?: boolean;
     }) {
       super();
       pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [3, 4], this.#one_of_decls);
@@ -234,6 +235,9 @@ export namespace bitbadges.bitbadgeschain.badges {
         }
         if ("badgeIds" in data && data.badgeIds != undefined) {
           this.badgeIds = data.badgeIds;
+        }
+        if ("overrideWithCurrentTime" in data && data.overrideWithCurrentTime != undefined) {
+          this.overrideWithCurrentTime = data.overrideWithCurrentTime;
         }
       }
     }
@@ -264,11 +268,18 @@ export namespace bitbadges.bitbadgeschain.badges {
     set badgeIds(value: UintRange[]) {
       pb_1.Message.setRepeatedWrapperField(this, 4, value);
     }
+    get overrideWithCurrentTime() {
+      return pb_1.Message.getFieldWithDefault(this, 5, false) as boolean;
+    }
+    set overrideWithCurrentTime(value: boolean) {
+      pb_1.Message.setField(this, 5, value);
+    }
     static fromObject(data: {
       collectionId?: string;
       amountRange?: ReturnType<typeof UintRange.prototype.toObject>;
       ownershipTimes?: ReturnType<typeof UintRange.prototype.toObject>[];
       badgeIds?: ReturnType<typeof UintRange.prototype.toObject>[];
+      overrideWithCurrentTime?: boolean;
     }): MustOwnBadges {
       const message = new MustOwnBadges({});
       if (data.collectionId != null) {
@@ -283,6 +294,9 @@ export namespace bitbadges.bitbadgeschain.badges {
       if (data.badgeIds != null) {
         message.badgeIds = data.badgeIds.map(item => UintRange.fromObject(item));
       }
+      if (data.overrideWithCurrentTime != null) {
+        message.overrideWithCurrentTime = data.overrideWithCurrentTime;
+      }
       return message;
     }
     toObject() {
@@ -291,6 +305,7 @@ export namespace bitbadges.bitbadgeschain.badges {
         amountRange?: ReturnType<typeof UintRange.prototype.toObject>;
         ownershipTimes?: ReturnType<typeof UintRange.prototype.toObject>[];
         badgeIds?: ReturnType<typeof UintRange.prototype.toObject>[];
+        overrideWithCurrentTime?: boolean;
       } = {};
       if (this.collectionId != null) {
         data.collectionId = this.collectionId;
@@ -303,6 +318,9 @@ export namespace bitbadges.bitbadgeschain.badges {
       }
       if (this.badgeIds != null) {
         data.badgeIds = this.badgeIds.map((item: UintRange) => item.toObject());
+      }
+      if (this.overrideWithCurrentTime != null) {
+        data.overrideWithCurrentTime = this.overrideWithCurrentTime;
       }
       return data;
     }
@@ -318,6 +336,8 @@ export namespace bitbadges.bitbadgeschain.badges {
         writer.writeRepeatedMessage(3, this.ownershipTimes, (item: UintRange) => item.serialize(writer));
       if (this.badgeIds.length)
         writer.writeRepeatedMessage(4, this.badgeIds, (item: UintRange) => item.serialize(writer));
+      if (this.overrideWithCurrentTime != false)
+        writer.writeBool(5, this.overrideWithCurrentTime);
       if (!w)
         return writer.getResultBuffer();
     }
@@ -338,6 +358,9 @@ export namespace bitbadges.bitbadgeschain.badges {
             break;
           case 4:
             reader.readMessage(message.badgeIds, () => pb_1.Message.addToRepeatedWrapperField(message, 4, UintRange.deserialize(reader), UintRange));
+            break;
+          case 5:
+            message.overrideWithCurrentTime = reader.readBool();
             break;
           default: reader.skipField();
         }
