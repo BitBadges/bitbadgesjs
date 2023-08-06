@@ -15,10 +15,10 @@ option go_package = "github.com/bitbadges/bitbadgeschain/x/badges/types";
 // The default approved outgoing / incoming transfers are defined by the collection.
 //
 // The outgoing transfers can be used to allow / disallow transfers which are sent from this user.
-// If a transfer has no match, then it is disallowed by default, unless from == initiatedBy (i.e. initiated by this user).
+// If a transfer has no match, then it is disApproved by default, unless from == initiatedBy (i.e. initiated by this user).
 //
 // The incoming transfers can be used to allow / disallow transfers which are sent to this user.
-// If a transfer has no match, then it is disallowed by default, unless to == initiatedBy (i.e. initiated by this user).
+// If a transfer has no match, then it is disApproved by default, unless to == initiatedBy (i.e. initiated by this user).
 //
 // Note that the user approved transfers are only checked if the collection approved transfers do not specify to override
 // the user approved transfers.
@@ -73,8 +73,8 @@ message IsUserOutgoingTransferAllowed {
   ValueOptions initiatedByMappingOptions = 3;
   ValueOptions transferTimesOptions = 4;
   ValueOptions badgeIdsOptions = 5;
-  ValueOptions ownedTimesOptions = 6;
-  bool isAllowed = 7;
+  ValueOptions ownershipTimesOptions = 6;
+  bool isApproved = 7;
 }
 
 message IsUserIncomingTransferAllowed {
@@ -82,8 +82,8 @@ message IsUserIncomingTransferAllowed {
   ValueOptions initiatedByMappingOptions = 3;
   ValueOptions transferTimesOptions = 4;
   ValueOptions badgeIdsOptions = 5;
-  ValueOptions ownedTimesOptions = 6;
-  bool isAllowed = 7;
+  ValueOptions ownershipTimesOptions = 6;
+  bool isApproved = 7;
 }
 
 // UserApprovedOutgoingTransfer defines the rules for the approval of an outgoing transfer from a user.
@@ -93,7 +93,7 @@ message UserApprovedOutgoingTransfer {
   string initiatedByMappingId = 2;
   repeated UintRange transferTimes = 3;
   repeated UintRange badgeIds = 4;
-  repeated UintRange ownedTimes = 16;
+  repeated UintRange ownershipTimes = 16;
 
   repeated IsUserOutgoingTransferAllowed allowedCombinations = 5;
 
@@ -107,7 +107,7 @@ message UserApprovedIncomingTransfer {
   string initiatedByMappingId = 2;
   repeated UintRange transferTimes = 3;
   repeated UintRange badgeIds = 4;
-  repeated UintRange ownedTimes = 16;
+  repeated UintRange ownershipTimes = 16;
   repeated IsUserIncomingTransferAllowed allowedCombinations = 5;
 
   repeated IncomingApprovalDetails approvalDetails = 11;
@@ -119,21 +119,21 @@ message IsCollectionTransferAllowed {
   ValueOptions initiatedByMappingOptions = 3;
   ValueOptions transferTimesOptions = 4;
   ValueOptions badgeIdsOptions = 5;
-  ValueOptions ownedTimesOptions = 6;
-  bool isAllowed = 7;
+  ValueOptions ownershipTimesOptions = 6;
+  bool isApproved = 7;
 }
 
 // CollectionApprovedTransfer defines the rules for the approval of a transfer.
 // Each transfer can be broken down into a (from, to, initiatedBy, transferTime, badgeId) tuple.
 // We check the approvedTransfers for first match of this tuple, using the allowedCombinations. Subsequent matches are ignored.
 //
-// If the first match is disallowed, the transfer is disallowed.
-// If the first match is allowed, then we check the rest of the restrictions. If any restrictions fail, then the transfer is disallowed.
+// If the first match is disApproved, the transfer is disApproved.
+// If the first match is allowed, then we check the rest of the restrictions. If any restrictions fail, then the transfer is disApproved.
 // We do not proceed to the next match.
 //
 // Challenges defines the challenges that must be met with valid solutions for the transfer to be approved.
 //
-// requireTo/From(DoesNot)EqualsInitiatedBy defines whether the to/from address must equal the initiatedBy address or not. If it doesn't, then the transfer is disallowed.
+// requireTo/From(DoesNot)EqualsInitiatedBy defines whether the to/from address must equal the initiatedBy address or not. If it doesn't, then the transfer is disApproved.
 //
 // overallApprovals defines the overall approvals for the transfer (i.e. the running tally of the number of transfers and amounts transferred by all addresses).
 // perAddressApprovals defines the approvals per unique from, to, and/or initiatedBy address.
@@ -141,12 +141,12 @@ message IsCollectionTransferAllowed {
 //
 // IMPORTANT: We track the number of transfers and amounts transferred according to a tracker ID. This is a running tally that increments over time.
 // Whenever a transfer is processed that maps to a specific tracker ID, we increment the number of transfers and amounts transferred.
-// If the number of transfers or amounts transferred exceeds the corresponding overall or per address approvals, then the transfer is disallowed.
+// If the number of transfers or amounts transferred exceeds the corresponding overall or per address approvals, then the transfer is disApproved.
 // Note we only track if overallApprovals or to/from/intiiatedByApprovals is not nil.
 // If you want to reset the tracker tally, update the tracker ID to a new unique tracker ID.
 // Tracker IDs are unique to their timelines. A tracker ID "abc" can be used for the collection, outgoing, and incoming timelines without overlap or overwriting one another.
 //
-// Ex: If overallApprovals maxNumTransfers = 20 and trackerID = "abc", then the first 20 transfers that map to trackerID = "abc" will be approved. The 21st transfer will be disallowed.
+// Ex: If overallApprovals maxNumTransfers = 20 and trackerID = "abc", then the first 20 transfers that map to trackerID = "abc" will be approved. The 21st transfer will be disApproved.
 //
 // IMPORTANT: Be very careful when updating an approved transfer but keeping the same tracker ID.
 // For example, if you change the corresponding badge IDs and the old badge IDs overlap, then the overlapping badge IDs will already have existing tallies.
@@ -167,7 +167,7 @@ message ManualBalances {
 message IncrementedBalances {
   repeated Balance startBalances = 1;
   string incrementBadgeIdsBy = 2 [(gogoproto.customtype) = "Uint", (gogoproto.nullable) = false];
-  string incrementOwnedTimesBy = 3 [(gogoproto.customtype) = "Uint", (gogoproto.nullable) = false];
+  string incrementOwnershipTimesBy = 3 [(gogoproto.customtype) = "Uint", (gogoproto.nullable) = false];
 }
 
 
@@ -264,7 +264,7 @@ message CollectionApprovedTransfer {
   string initiatedByMappingId = 6;
   repeated UintRange transferTimes = 7;
   repeated UintRange badgeIds = 8;
-  repeated UintRange ownedTimes = 9;
+  repeated UintRange ownershipTimes = 9;
 
   repeated IsCollectionTransferAllowed allowedCombinations = 10;
 

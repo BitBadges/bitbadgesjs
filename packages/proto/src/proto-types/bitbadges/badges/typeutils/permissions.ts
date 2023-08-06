@@ -50,7 +50,7 @@ export function convertUserApprovedOutgoingTransferPermission<T extends NumberTy
  * @property {string} initiatedByMappingId - The mapping ID of the initiatedBy addresses of the approved outgoing transfers.
  * @property {UintRange[]} transferTimes - The transfer times of the approved outgoing transfers.
  * @property {UintRange[]} badgeIds - The badge IDs of the approved outgoing transfers.
- * @property {UintRange[]} ownedTimes - The owned times of the approved outgoing transfers.
+ * @property {UintRange[]} ownershipTimes - The owned times of the approved outgoing transfers.
  * @property {UintRange[]} permittedTimes - The permitted times of the approved outgoing transfers.
  * @property {UintRange[]} forbiddenTimes - The forbidden times of the approved outgoing transfers.
  */
@@ -60,7 +60,7 @@ export interface UserApprovedOutgoingTransferDefaultValues<T extends NumberType>
   initiatedByMappingId: string;
   transferTimes: UintRange<T>[];
   badgeIds: UintRange<T>[];
-  ownedTimes: UintRange<T>[];
+  ownershipTimes: UintRange<T>[];
   permittedTimes: UintRange<T>[];
   forbiddenTimes: UintRange<T>[];
 }
@@ -71,7 +71,7 @@ export function convertUserApprovedOutgoingTransferDefaultValues<T extends Numbe
     timelineTimes: values.timelineTimes.map((b) => convertUintRange(b, convertFunction)),
     transferTimes: values.transferTimes.map((b) => convertUintRange(b, convertFunction)),
     badgeIds: values.badgeIds.map((b) => convertUintRange(b, convertFunction)),
-    ownedTimes: values.ownedTimes.map((b) => convertUintRange(b, convertFunction)),
+    ownershipTimes: values.ownershipTimes.map((b) => convertUintRange(b, convertFunction)),
     permittedTimes: values.permittedTimes.map((b) => convertUintRange(b, convertFunction)),
     forbiddenTimes: values.forbiddenTimes.map((b) => convertUintRange(b, convertFunction))
   })
@@ -89,7 +89,7 @@ export interface UserApprovedOutgoingTransferCombination {
   initiatedByMappingOptions: ValueOptions;
   transferTimesOptions: ValueOptions;
   badgeIdsOptions: ValueOptions;
-  ownedTimesOptions: ValueOptions;
+  ownershipTimesOptions: ValueOptions;
   permittedTimesOptions: ValueOptions;
   forbiddenTimesOptions: ValueOptions;
 }
@@ -102,7 +102,7 @@ export interface UserApprovedOutgoingTransferCombination {
 //     // initiatedByMappingOptions: convertValueOptions(combination.initiatedByMappingOptions),
 //     // transferTimesOptions: convertValueOptions(combination.transferTimesOptions),
 //     // badgeIdsOptions: convertValueOptions(combination.badgeIdsOptions),
-//     // ownedTimesOptions: convertValueOptions(combination.ownedTimesOptions),
+//     // ownershipTimesOptions: convertValueOptions(combination.ownershipTimesOptions),
 //     // permittedTimesOptions: convertValueOptions(combination.permittedTimesOptions),
 //     // forbiddenTimesOptions: convertValueOptions(combination.forbiddenTimesOptions)
 //   })
@@ -157,7 +157,7 @@ export function convertUserApprovedIncomingTransferPermission<T extends NumberTy
  * @property {string} initiatedByMappingId - The mapping ID of the initiatedBy addresses of the approved incoming transfers.
  * @property {UintRange[]} transferTimes - The transfer times of the approved incoming transfers.
  * @property {UintRange[]} badgeIds - The badge IDs of the approved incoming transfers.
- * @property {UintRange[]} ownedTimes - The owned times of the approved incoming transfers.
+ * @property {UintRange[]} ownershipTimes - The owned times of the approved incoming transfers.
  * @property {UintRange[]} permittedTimes - The permitted times of the approved incoming transfers.
  * @property {UintRange[]} forbiddenTimes - The forbidden times of the approved incoming transfers.
  */
@@ -167,7 +167,7 @@ export interface UserApprovedIncomingTransferDefaultValues<T extends NumberType>
   initiatedByMappingId: string;
   transferTimes: UintRange<T>[];
   badgeIds: UintRange<T>[];
-  ownedTimes: UintRange<T>[];
+  ownershipTimes: UintRange<T>[];
   permittedTimes: UintRange<T>[];
   forbiddenTimes: UintRange<T>[];
 }
@@ -178,7 +178,7 @@ export function convertUserApprovedIncomingTransferDefaultValues<T extends Numbe
     timelineTimes: values.timelineTimes.map((b) => convertUintRange(b, convertFunction)),
     transferTimes: values.transferTimes.map((b) => convertUintRange(b, convertFunction)),
     badgeIds: values.badgeIds.map((b) => convertUintRange(b, convertFunction)),
-    ownedTimes: values.ownedTimes.map((b) => convertUintRange(b, convertFunction)),
+    ownershipTimes: values.ownershipTimes.map((b) => convertUintRange(b, convertFunction)),
     permittedTimes: values.permittedTimes.map((b) => convertUintRange(b, convertFunction)),
     forbiddenTimes: values.forbiddenTimes.map((b) => convertUintRange(b, convertFunction))
   })
@@ -194,7 +194,7 @@ export function convertUserApprovedIncomingTransferDefaultValues<T extends Numbe
  * @property {ValueOptions} initiatedByMappingOptions - The options for manipulating the initiatedBy mapping ID.
  * @property {ValueOptions} transferTimesOptions - The options for manipulating the transfer times.
  * @property {ValueOptions} badgeIdsOptions - The options for manipulating the badge IDs.
- * @property {ValueOptions} ownedTimesOptions - The options for manipulating the owned times.
+ * @property {ValueOptions} ownershipTimesOptions - The options for manipulating the owned times.
  * @property {ValueOptions} permittedTimesOptions - The options for manipulating the permitted times.
  * @property {ValueOptions} forbiddenTimesOptions - The options for manipulating the forbidden times.
  */
@@ -204,7 +204,7 @@ export interface UserApprovedIncomingTransferCombination {
   initiatedByMappingOptions: ValueOptions;
   transferTimesOptions: ValueOptions;
   badgeIdsOptions: ValueOptions;
-  ownedTimesOptions: ValueOptions;
+  ownershipTimesOptions: ValueOptions;
   permittedTimesOptions: ValueOptions;
   forbiddenTimesOptions: ValueOptions;
 }
@@ -217,7 +217,7 @@ export interface UserApprovedIncomingTransferCombination {
 //     initiatedByMappingOptions: convertValueOptions(combination.initiatedByMappingOptions),
 //     transferTimesOptions: convertValueOptions(combination.transferTimesOptions),
 //     badgeIdsOptions: convertValueOptions(combination.badgeIdsOptions),
-//     ownedTimesOptions: convertValueOptions(combination.ownedTimesOptions),
+//     ownershipTimesOptions: convertValueOptions(combination.ownershipTimesOptions),
 //     permittedTimesOptions: convertValueOptions(combination.permittedTimesOptions),
 //     forbiddenTimesOptions: convertValueOptions(combination.forbiddenTimesOptions)
 //   })
@@ -477,7 +477,7 @@ export interface TimedUpdateWithBadgeIdsPermissionCombination {
 /**
  * BalancesActionPermission represents a permission that allows creating more badges.
  *
- * This permission allows you to define when the permission can be executed and for what badgeIds and ownedTimes the permission can be executed for. Or any combination of these.
+ * This permission allows you to define when the permission can be executed and for what badgeIds and ownershipTimes the permission can be executed for. Or any combination of these.
  *
  * @typedef {Object} BalancesActionPermission
  * @property {BalancesActionPermissionDefaultValues} defaultValues - The default values for the permission.
@@ -501,13 +501,13 @@ export function convertBalancesActionPermission<T extends NumberType, U extends 
  *
  * @typedef {Object} BalancesActionPermissionDefaultValues
  * @property {UintRange[]} badgeIds - The badge IDs that the permission applies to.
- * @property {UintRange[]} ownedTimes - The owned times that the permission applies to.
+ * @property {UintRange[]} ownershipTimes - The owned times that the permission applies to.
  * @property {UintRange[]} permittedTimes - The permitted times of the permission.
  * @property {UintRange[]} forbiddenTimes - The forbidden times of the permission.
  */
 export interface BalancesActionPermissionDefaultValues<T extends NumberType> {
   badgeIds: UintRange<T>[];
-  ownedTimes: UintRange<T>[];
+  ownershipTimes: UintRange<T>[];
   permittedTimes: UintRange<T>[];
   forbiddenTimes: UintRange<T>[];
 }
@@ -516,7 +516,7 @@ export function convertBalancesActionPermissionDefaultValues<T extends NumberTyp
   return deepCopy({
     ...values,
     badgeIds: values.badgeIds.map((b) => convertUintRange(b, convertFunction)),
-    ownedTimes: values.ownedTimes.map((b) => convertUintRange(b, convertFunction)),
+    ownershipTimes: values.ownershipTimes.map((b) => convertUintRange(b, convertFunction)),
     permittedTimes: values.permittedTimes.map((b) => convertUintRange(b, convertFunction)),
     forbiddenTimes: values.forbiddenTimes.map((b) => convertUintRange(b, convertFunction))
   })
@@ -529,13 +529,13 @@ export function convertBalancesActionPermissionDefaultValues<T extends NumberTyp
  *
  * @typedef {Object} BalancesActionPermissionCombination
  * @property {ValueOptions} badgeIdsOptions - The options for manipulating the badge IDs.
- * @property {ValueOptions} ownedTimesOptions - The options for manipulating the owned times.
+ * @property {ValueOptions} ownershipTimesOptions - The options for manipulating the owned times.
  * @property {ValueOptions} permittedTimesOptions - The options for manipulating the permitted times.
  * @property {ValueOptions} forbiddenTimesOptions - The options for manipulating the forbidden times.
  */
 export interface BalancesActionPermissionCombination {
   badgeIdsOptions: ValueOptions;
-  ownedTimesOptions: ValueOptions;
+  ownershipTimesOptions: ValueOptions;
   permittedTimesOptions: ValueOptions;
   forbiddenTimesOptions: ValueOptions;
 }
@@ -544,7 +544,7 @@ export interface BalancesActionPermissionCombination {
 //   return deepCopy({
 //     ...combination,
 //     badgeIdsOptions: convertValueOptions(combination.badgeIdsOptions),
-//     ownedTimesOptions: convertValueOptions(combination.ownedTimesOptions),
+//     ownershipTimesOptions: convertValueOptions(combination.ownershipTimesOptions),
 //     permittedTimesOptions: convertValueOptions(combination.permittedTimesOptions),
 //     forbiddenTimesOptions: convertValueOptions(combination.forbiddenTimesOptions)
 //   })
@@ -553,7 +553,7 @@ export interface BalancesActionPermissionCombination {
 /**
  * CollectionApprovedTransferPermission represents a permission that allows updating the collection approved transfers.
  *
- * This permission allows you to define when the approved transfers can be updated and which combinations of (from, to, initiatedBy, transferTimes, badgeIds, ownedTimes, permittedTimes, forbiddenTimes) can be updated.
+ * This permission allows you to define when the approved transfers can be updated and which combinations of (from, to, initiatedBy, transferTimes, badgeIds, ownershipTimes, permittedTimes, forbiddenTimes) can be updated.
  *
  * @typedef {Object} CollectionApprovedTransferPermission
  * @property {CollectionApprovedTransferPermissionDefaultValues} defaultValues - The default values for the permission.
@@ -582,7 +582,7 @@ export function convertCollectionApprovedTransferPermission<T extends NumberType
  * @property {string} initiatedByMappingId - The mapping ID of the initiatedBy addresses of the approved transfers.
  * @property {UintRange[]} transferTimes - The transfer times of the approved transfers.
  * @property {UintRange[]} badgeIds - The badge IDs of the approved transfers.
- * @property {UintRange[]} ownedTimes - The owned times of the approved transfers.
+ * @property {UintRange[]} ownershipTimes - The owned times of the approved transfers.
  * @property {UintRange[]} permittedTimes - The permitted times of this permission.
  * @property {UintRange[]} forbiddenTimes - The forbidden times of this permission.
  */
@@ -593,7 +593,7 @@ export interface CollectionApprovedTransferPermissionDefaultValues<T extends Num
   initiatedByMappingId: string;
   transferTimes: UintRange<T>[];
   badgeIds: UintRange<T>[];
-  ownedTimes: UintRange<T>[];
+  ownershipTimes: UintRange<T>[];
   permittedTimes: UintRange<T>[];
   forbiddenTimes: UintRange<T>[];
 }
@@ -604,7 +604,7 @@ export function convertCollectionApprovedTransferPermissionDefaultValues<T exten
     timelineTimes: values.timelineTimes.map((b) => convertUintRange(b, convertFunction)),
     transferTimes: values.transferTimes.map((b) => convertUintRange(b, convertFunction)),
     badgeIds: values.badgeIds.map((b) => convertUintRange(b, convertFunction)),
-    ownedTimes: values.ownedTimes.map((b) => convertUintRange(b, convertFunction)),
+    ownershipTimes: values.ownershipTimes.map((b) => convertUintRange(b, convertFunction)),
     permittedTimes: values.permittedTimes.map((b) => convertUintRange(b, convertFunction)),
     forbiddenTimes: values.forbiddenTimes.map((b) => convertUintRange(b, convertFunction))
   })
@@ -622,7 +622,7 @@ export function convertCollectionApprovedTransferPermissionDefaultValues<T exten
  * @property {ValueOptions} initiatedByMappingOptions - The options for manipulating the initiatedBy mapping ID.
  * @property {ValueOptions} transferTimesOptions - The options for manipulating the transfer times.
  * @property {ValueOptions} badgeIdsOptions - The options for manipulating the badge IDs.
- * @property {ValueOptions} ownedTimesOptions - The options for manipulating the owned times.
+ * @property {ValueOptions} ownershipTimesOptions - The options for manipulating the owned times.
  * @property {ValueOptions} permittedTimesOptions - The options for manipulating the permitted times.
  * @property {ValueOptions} forbiddenTimesOptions - The options for manipulating the forbidden times.
  */
@@ -633,7 +633,7 @@ export interface CollectionApprovedTransferPermissionCombination {
   initiatedByMappingOptions: ValueOptions;
   transferTimesOptions: ValueOptions;
   badgeIdsOptions: ValueOptions;
-  ownedTimesOptions: ValueOptions;
+  ownershipTimesOptions: ValueOptions;
   permittedTimesOptions: ValueOptions;
   forbiddenTimesOptions: ValueOptions;
 }
@@ -647,7 +647,7 @@ export interface CollectionApprovedTransferPermissionCombination {
 //     initiatedByMappingOptions: convertValueOptions(combination.initiatedByMappingOptions),
 //     transferTimesOptions: convertValueOptions(combination.transferTimesOptions),
 //     badgeIdsOptions: convertValueOptions(combination.badgeIdsOptions),
-//     ownedTimesOptions: convertValueOptions(combination.ownedTimesOptions),
+//     ownershipTimesOptions: convertValueOptions(combination.ownershipTimesOptions),
 //     permittedTimesOptions: convertValueOptions(combination.permittedTimesOptions),
 //     forbiddenTimesOptions: convertValueOptions(combination.forbiddenTimesOptions)
 //   })

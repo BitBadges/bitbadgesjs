@@ -12,7 +12,7 @@ export const UINT_RANGE_TYPES = [
 export const BALANCE_TYPES = [
   { name: 'amount', type: 'string' },
   { name: 'badgeIds', type: 'UintRange[]' },
-  { name: 'ownedTimes', type: 'UintRange[]' },
+  { name: 'ownershipTimes', type: 'UintRange[]' },
 ];
 
 export const PROOF_ITEM_TYPES = [
@@ -45,7 +45,7 @@ export const USER_APPROVED_OUTGOING_TRANSFER_TYPES = [
   { name: 'initiatedByMappingId', type: 'string' },
   { name: 'transferTimes', type: 'UintRange[]' },
   { name: 'badgeIds', type: 'UintRange[]' },
-  { name: 'ownedTimes', type: 'UintRange[]' },
+  { name: 'ownershipTimes', type: 'UintRange[]' },
   { name: 'allowedCombinations', type: 'IsUserOutgoingTransferAllowed[]' },
   { name: 'approvalDetails', type: 'OutgoingApprovalDetails[]' },
 ];
@@ -55,7 +55,7 @@ export const USER_APPROVED_INCOMING_TRANSFER_TYPES = [
   { name: 'initiatedByMappingId', type: 'string' },
   { name: 'transferTimes', type: 'UintRange[]' },
   { name: 'badgeIds', type: 'UintRange[]' },
-  { name: 'ownedTimes', type: 'UintRange[]' },
+  { name: 'ownershipTimes', type: 'UintRange[]' },
   { name: 'allowedCombinations', type: 'IsUserIncomingTransferAllowed[]' },
   { name: 'approvalDetails', type: 'IncomingApprovalDetails[]' },
 ];
@@ -76,7 +76,7 @@ export const USER_APPROVED_OUTGOING_TRANSFER_DEFAULT_VALUES_TYPES = [
   { name: 'initiatedByMappingId', type: 'string' },
   { name: 'transferTimes', type: 'UintRange[]' },
   { name: 'badgeIds', type: 'UintRange[]' },
-  { name: 'ownedTimes', type: 'UintRange[]' },
+  { name: 'ownershipTimes', type: 'UintRange[]' },
   { name: 'permittedTimes', type: 'UintRange[]' },
   { name: 'forbiddenTimes', type: 'UintRange[]' },
 ];
@@ -87,7 +87,7 @@ export const USER_APPROVED_OUTGOING_TRANSFER_COMBINATION_TYPES = [
   { name: 'initiatedByMappingOptions', type: 'ValueOptions' },
   { name: 'transferTimesOptions', type: 'ValueOptions' },
   { name: 'badgeIdsOptions', type: 'ValueOptions' },
-  { name: 'ownedTimesOptions', type: 'ValueOptions' },
+  { name: 'ownershipTimesOptions', type: 'ValueOptions' },
   { name: 'permittedTimesOptions', type: 'ValueOptions' },
   { name: 'forbiddenTimesOptions', type: 'ValueOptions' },
 ];
@@ -98,7 +98,7 @@ export const USER_APPROVED_INCOMING_TRANSFER_DEFAULT_VALUES_TYPES = [
   { name: 'initiatedByMappingId', type: 'string' },
   { name: 'transferTimes', type: 'UintRange[]' },
   { name: 'badgeIds', type: 'UintRange[]' },
-  { name: 'ownedTimes', type: 'UintRange[]' },
+  { name: 'ownershipTimes', type: 'UintRange[]' },
   { name: 'permittedTimes', type: 'UintRange[]' },
   { name: 'forbiddenTimes', type: 'UintRange[]' },
 ];
@@ -109,7 +109,7 @@ export const USER_APPROVED_INCOMING_TRANSFER_COMBINATION_TYPES = [
   { name: 'initiatedByMappingOptions', type: 'ValueOptions' },
   { name: 'transferTimesOptions', type: 'ValueOptions' },
   { name: 'badgeIdsOptions', type: 'ValueOptions' },
-  { name: 'ownedTimesOptions', type: 'ValueOptions' },
+  { name: 'ownershipTimesOptions', type: 'ValueOptions' },
   { name: 'permittedTimesOptions', type: 'ValueOptions' },
   { name: 'forbiddenTimesOptions', type: 'ValueOptions' },
 ];
@@ -120,8 +120,8 @@ export const IS_USER_OUTGOING_TRANSFER_ALLOWED_TYPES = [
   { name: 'initiatedByMappingOptions', type: 'ValueOptions' },
   { name: 'transferTimesOptions', type: 'ValueOptions' },
   { name: 'badgeIdsOptions', type: 'ValueOptions' },
-  { name: 'ownedTimesOptions', type: 'ValueOptions' },
-  { name: 'isAllowed', type: 'bool' },
+  { name: 'ownershipTimesOptions', type: 'ValueOptions' },
+  { name: 'isApproved', type: 'bool' },
 ];
 
 export const OUTGOING_APPROVAL_DETAILS_TYPES = [
@@ -142,8 +142,8 @@ export const IS_USER_INCOMING_TRANSFER_ALLOWED_TYPES = [
   { name: 'initiatedByMappingOptions', type: 'ValueOptions' },
   { name: 'transferTimesOptions', type: 'ValueOptions' },
   { name: 'badgeIdsOptions', type: 'ValueOptions' },
-  { name: 'ownedTimesOptions', type: 'ValueOptions' },
-  { name: 'isAllowed', type: 'bool' },
+  { name: 'ownershipTimesOptions', type: 'ValueOptions' },
+  { name: 'isApproved', type: 'bool' },
 ];
 
 export const INCOMING_APPROVAL_DETAILS_TYPES = [
@@ -163,7 +163,8 @@ export const MUST_OWN_BADGES_TYPES = [
   { name: 'collectionId', type: 'string' },
   { name: 'amountRange', type: 'UintRange' },
   { name: 'badgeIds', type: 'UintRange[]' },
-  { name: 'ownedTimes', type: 'UintRange[]' },
+  { name: 'ownershipTimes', type: 'UintRange[]' },
+  { name: 'overrideWithCurrentTime', type: 'bool' },
 ];
 
 
@@ -205,7 +206,7 @@ export const MANUAL_BALANCES_TYPES = [
 export const INCREMENTED_BALANCES_TYPES = [
   { name: 'startBalances', type: 'Balance[]' },
   { name: 'incrementBadgeIdsBy', type: 'string' },
-  { name: 'incrementOwnedTimesBy', type: 'string' },
+  { name: 'incrementOwnershipTimesBy', type: 'string' },
 ];
 
 export const PREDETERMINED_ORDER_CALCULATION_METHOD_TYPES = [
@@ -287,7 +288,7 @@ export const COLLECTION_APPROVED_TRANSFER_TYPES = [
   { name: 'initiatedByMappingId', type: 'string' },
   { name: 'transferTimes', type: 'UintRange[]' },
   { name: 'badgeIds', type: 'UintRange[]' },
-  { name: 'ownedTimes', type: 'UintRange[]' },
+  { name: 'ownershipTimes', type: 'UintRange[]' },
   { name: 'allowedCombinations', type: 'IsCollectionTransferAllowed[]' },
   { name: 'approvalDetails', type: 'ApprovalDetails[]' },
 ];
@@ -320,8 +321,8 @@ export const IS_COLLECTION_TRANSFER_ALLOWED_TYPES = [
   { name: 'initiatedByMappingOptions', type: 'ValueOptions' },
   { name: 'transferTimesOptions', type: 'ValueOptions' },
   { name: 'badgeIdsOptions', type: 'ValueOptions' },
-  { name: 'ownedTimesOptions', type: 'ValueOptions' },
-  { name: 'isAllowed', type: 'bool' },
+  { name: 'ownershipTimesOptions', type: 'ValueOptions' },
+  { name: 'isApproved', type: 'bool' },
 ];
 
 export const ACTION_PERMISSION_TYPES = [
@@ -357,7 +358,7 @@ export const COLLECTION_APPROVED_TRANSFER_COMBINATION_TYPES = [
   { name: 'initiatedByMappingOptions', type: 'ValueOptions' },
   { name: 'transferTimesOptions', type: 'ValueOptions' },
   { name: 'badgeIdsOptions', type: 'ValueOptions' },
-  { name: 'ownedTimesOptions', type: 'ValueOptions' },
+  { name: 'ownershipTimesOptions', type: 'ValueOptions' },
   { name: 'permittedTimesOptions', type: 'ValueOptions' },
   { name: 'forbiddenTimesOptions', type: 'ValueOptions' },
 ];
@@ -369,21 +370,21 @@ export const COLLECTION_APPROVED_TRANSFER_DEFAULT_VALUES_TYPES = [
   { name: 'initiatedByMappingId', type: 'string' },
   { name: 'transferTimes', type: 'UintRange[]' },
   { name: 'badgeIds', type: 'UintRange[]' },
-  { name: 'ownedTimes', type: 'UintRange[]' },
+  { name: 'ownershipTimes', type: 'UintRange[]' },
   { name: 'permittedTimes', type: 'UintRange[]' },
   { name: 'forbiddenTimes', type: 'UintRange[]' },
 ];
 
 export const BALANCES_ACTION_COMBINATION_TYPES = [
   { name: 'badgeIdsOptions', type: 'ValueOptions' },
-  { name: 'ownedTimesOptions', type: 'ValueOptions' },
+  { name: 'ownershipTimesOptions', type: 'ValueOptions' },
   { name: 'permittedTimesOptions', type: 'ValueOptions' },
   { name: 'forbiddenTimesOptions', type: 'ValueOptions' },
 ];
 
 export const BALANCES_ACTION_DEFAULT_VALUES_TYPES = [
   { name: 'badgeIds', type: 'UintRange[]' },
-  { name: 'ownedTimes', type: 'UintRange[]' },
+  { name: 'ownershipTimes', type: 'UintRange[]' },
   { name: 'permittedTimes', type: 'UintRange[]' },
   { name: 'forbiddenTimes', type: 'UintRange[]' },
 ];

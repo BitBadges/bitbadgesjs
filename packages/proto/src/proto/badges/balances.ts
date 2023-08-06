@@ -103,7 +103,7 @@ export namespace bitbadges.bitbadgeschain.badges {
     #one_of_decls: number[][] = [];
     constructor(data?: any[] | {
       amount?: string;
-      ownedTimes?: UintRange[];
+      ownershipTimes?: UintRange[];
       badgeIds?: UintRange[];
     }) {
       super();
@@ -112,8 +112,8 @@ export namespace bitbadges.bitbadgeschain.badges {
         if ("amount" in data && data.amount != undefined) {
           this.amount = data.amount;
         }
-        if ("ownedTimes" in data && data.ownedTimes != undefined) {
-          this.ownedTimes = data.ownedTimes;
+        if ("ownershipTimes" in data && data.ownershipTimes != undefined) {
+          this.ownershipTimes = data.ownershipTimes;
         }
         if ("badgeIds" in data && data.badgeIds != undefined) {
           this.badgeIds = data.badgeIds;
@@ -126,10 +126,10 @@ export namespace bitbadges.bitbadgeschain.badges {
     set amount(value: string) {
       pb_1.Message.setField(this, 1, value);
     }
-    get ownedTimes() {
+    get ownershipTimes() {
       return pb_1.Message.getRepeatedWrapperField(this, UintRange, 2) as UintRange[];
     }
-    set ownedTimes(value: UintRange[]) {
+    set ownershipTimes(value: UintRange[]) {
       pb_1.Message.setRepeatedWrapperField(this, 2, value);
     }
     get badgeIds() {
@@ -140,15 +140,15 @@ export namespace bitbadges.bitbadgeschain.badges {
     }
     static fromObject(data: {
       amount?: string;
-      ownedTimes?: ReturnType<typeof UintRange.prototype.toObject>[];
+      ownershipTimes?: ReturnType<typeof UintRange.prototype.toObject>[];
       badgeIds?: ReturnType<typeof UintRange.prototype.toObject>[];
     }): Balance {
       const message = new Balance({});
       if (data.amount != null) {
         message.amount = data.amount;
       }
-      if (data.ownedTimes != null) {
-        message.ownedTimes = data.ownedTimes.map(item => UintRange.fromObject(item));
+      if (data.ownershipTimes != null) {
+        message.ownershipTimes = data.ownershipTimes.map(item => UintRange.fromObject(item));
       }
       if (data.badgeIds != null) {
         message.badgeIds = data.badgeIds.map(item => UintRange.fromObject(item));
@@ -158,14 +158,14 @@ export namespace bitbadges.bitbadgeschain.badges {
     toObject() {
       const data: {
         amount?: string;
-        ownedTimes?: ReturnType<typeof UintRange.prototype.toObject>[];
+        ownershipTimes?: ReturnType<typeof UintRange.prototype.toObject>[];
         badgeIds?: ReturnType<typeof UintRange.prototype.toObject>[];
       } = {};
       if (this.amount != null) {
         data.amount = this.amount;
       }
-      if (this.ownedTimes != null) {
-        data.ownedTimes = this.ownedTimes.map((item: UintRange) => item.toObject());
+      if (this.ownershipTimes != null) {
+        data.ownershipTimes = this.ownershipTimes.map((item: UintRange) => item.toObject());
       }
       if (this.badgeIds != null) {
         data.badgeIds = this.badgeIds.map((item: UintRange) => item.toObject());
@@ -178,8 +178,8 @@ export namespace bitbadges.bitbadgeschain.badges {
       const writer = w || new pb_1.BinaryWriter();
       if (this.amount.length)
         writer.writeString(1, this.amount);
-      if (this.ownedTimes.length)
-        writer.writeRepeatedMessage(2, this.ownedTimes, (item: UintRange) => item.serialize(writer));
+      if (this.ownershipTimes.length)
+        writer.writeRepeatedMessage(2, this.ownershipTimes, (item: UintRange) => item.serialize(writer));
       if (this.badgeIds.length)
         writer.writeRepeatedMessage(3, this.badgeIds, (item: UintRange) => item.serialize(writer));
       if (!w)
@@ -195,7 +195,7 @@ export namespace bitbadges.bitbadgeschain.badges {
             message.amount = reader.readString();
             break;
           case 2:
-            reader.readMessage(message.ownedTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 2, UintRange.deserialize(reader), UintRange));
+            reader.readMessage(message.ownershipTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 2, UintRange.deserialize(reader), UintRange));
             break;
           case 3:
             reader.readMessage(message.badgeIds, () => pb_1.Message.addToRepeatedWrapperField(message, 3, UintRange.deserialize(reader), UintRange));
@@ -217,7 +217,7 @@ export namespace bitbadges.bitbadgeschain.badges {
     constructor(data?: any[] | {
       collectionId?: string;
       amountRange?: UintRange;
-      ownedTimes?: UintRange[];
+      ownershipTimes?: UintRange[];
       badgeIds?: UintRange[];
     }) {
       super();
@@ -229,8 +229,8 @@ export namespace bitbadges.bitbadgeschain.badges {
         if ("amountRange" in data && data.amountRange != undefined) {
           this.amountRange = data.amountRange;
         }
-        if ("ownedTimes" in data && data.ownedTimes != undefined) {
-          this.ownedTimes = data.ownedTimes;
+        if ("ownershipTimes" in data && data.ownershipTimes != undefined) {
+          this.ownershipTimes = data.ownershipTimes;
         }
         if ("badgeIds" in data && data.badgeIds != undefined) {
           this.badgeIds = data.badgeIds;
@@ -252,10 +252,10 @@ export namespace bitbadges.bitbadgeschain.badges {
     get has_amountRange() {
       return pb_1.Message.getField(this, 2) != null;
     }
-    get ownedTimes() {
+    get ownershipTimes() {
       return pb_1.Message.getRepeatedWrapperField(this, UintRange, 3) as UintRange[];
     }
-    set ownedTimes(value: UintRange[]) {
+    set ownershipTimes(value: UintRange[]) {
       pb_1.Message.setRepeatedWrapperField(this, 3, value);
     }
     get badgeIds() {
@@ -267,7 +267,7 @@ export namespace bitbadges.bitbadgeschain.badges {
     static fromObject(data: {
       collectionId?: string;
       amountRange?: ReturnType<typeof UintRange.prototype.toObject>;
-      ownedTimes?: ReturnType<typeof UintRange.prototype.toObject>[];
+      ownershipTimes?: ReturnType<typeof UintRange.prototype.toObject>[];
       badgeIds?: ReturnType<typeof UintRange.prototype.toObject>[];
     }): MustOwnBadges {
       const message = new MustOwnBadges({});
@@ -277,8 +277,8 @@ export namespace bitbadges.bitbadgeschain.badges {
       if (data.amountRange != null) {
         message.amountRange = UintRange.fromObject(data.amountRange);
       }
-      if (data.ownedTimes != null) {
-        message.ownedTimes = data.ownedTimes.map(item => UintRange.fromObject(item));
+      if (data.ownershipTimes != null) {
+        message.ownershipTimes = data.ownershipTimes.map(item => UintRange.fromObject(item));
       }
       if (data.badgeIds != null) {
         message.badgeIds = data.badgeIds.map(item => UintRange.fromObject(item));
@@ -289,7 +289,7 @@ export namespace bitbadges.bitbadgeschain.badges {
       const data: {
         collectionId?: string;
         amountRange?: ReturnType<typeof UintRange.prototype.toObject>;
-        ownedTimes?: ReturnType<typeof UintRange.prototype.toObject>[];
+        ownershipTimes?: ReturnType<typeof UintRange.prototype.toObject>[];
         badgeIds?: ReturnType<typeof UintRange.prototype.toObject>[];
       } = {};
       if (this.collectionId != null) {
@@ -298,8 +298,8 @@ export namespace bitbadges.bitbadgeschain.badges {
       if (this.amountRange != null) {
         data.amountRange = this.amountRange.toObject();
       }
-      if (this.ownedTimes != null) {
-        data.ownedTimes = this.ownedTimes.map((item: UintRange) => item.toObject());
+      if (this.ownershipTimes != null) {
+        data.ownershipTimes = this.ownershipTimes.map((item: UintRange) => item.toObject());
       }
       if (this.badgeIds != null) {
         data.badgeIds = this.badgeIds.map((item: UintRange) => item.toObject());
@@ -314,8 +314,8 @@ export namespace bitbadges.bitbadgeschain.badges {
         writer.writeString(1, this.collectionId);
       if (this.has_amountRange)
         writer.writeMessage(2, this.amountRange, () => this.amountRange.serialize(writer));
-      if (this.ownedTimes.length)
-        writer.writeRepeatedMessage(3, this.ownedTimes, (item: UintRange) => item.serialize(writer));
+      if (this.ownershipTimes.length)
+        writer.writeRepeatedMessage(3, this.ownershipTimes, (item: UintRange) => item.serialize(writer));
       if (this.badgeIds.length)
         writer.writeRepeatedMessage(4, this.badgeIds, (item: UintRange) => item.serialize(writer));
       if (!w)
@@ -334,7 +334,7 @@ export namespace bitbadges.bitbadgeschain.badges {
             reader.readMessage(message.amountRange, () => message.amountRange = UintRange.deserialize(reader));
             break;
           case 3:
-            reader.readMessage(message.ownedTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 3, UintRange.deserialize(reader), UintRange));
+            reader.readMessage(message.ownershipTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 3, UintRange.deserialize(reader), UintRange));
             break;
           case 4:
             reader.readMessage(message.badgeIds, () => pb_1.Message.addToRepeatedWrapperField(message, 4, UintRange.deserialize(reader), UintRange));

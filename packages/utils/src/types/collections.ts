@@ -1,6 +1,6 @@
-import { UintRange, NumberType, convertUintRange, CollectionApprovedTransfer, TimelineItem, ApprovalDetails } from "bitbadgesjs-proto";
+import { UintRange, NumberType, convertUintRange, CollectionApprovedTransfer, TimelineItem, ApprovalDetails, AddressMapping, convertApprovalDetails, convertCollectionApprovedTransfer, CollectionApprovedTransferPermission, convertCollectionPermissions, CollectionPermissions, convertCollectionApprovedTransferPermission, CollectionApprovedTransferPermissionDefaultValues, convertCollectionApprovedTransferPermissionDefaultValues } from "bitbadgesjs-proto";
 import { AnnouncementInfo, ReviewInfo, TransferActivityInfo, convertAnnouncementInfo, convertReviewInfo, convertTransferActivityInfo } from "./activity";
-import { BalanceInfo, CollectionInfoBase, Identified, convertBalanceInfo, convertCollectionInfo, ApprovalsTrackerInfo, convertApprovalsTrackerInfo, MerkleChallengeWithDetails, MerkleChallengeInfo, convertMerkleChallengeInfo } from "./db";
+import { BalanceInfo, CollectionInfoBase, Identified, convertBalanceInfo, convertCollectionInfo, ApprovalsTrackerInfo, convertApprovalsTrackerInfo, MerkleChallengeWithDetails, MerkleChallengeInfo, convertMerkleChallengeInfo, convertMerkleChallengeWithDetails } from "./db";
 import { Metadata, convertMetadata } from "./metadata";
 import { BitBadgesUserInfo, convertBitBadgesUserInfo } from "./users";
 import { deepCopy, removeCouchDBDetails } from "./utils";
@@ -25,17 +25,79 @@ export function convertBadgeMetadataDetails<T extends NumberType, U extends Numb
   })
 }
 
+export interface CollectionApprovedTransferPermissionDefaultValuesWithDetails<T extends NumberType> extends CollectionApprovedTransferPermissionDefaultValues<T> {
+  toMapping: AddressMapping;
+  fromMapping: AddressMapping;
+  initiatedByMapping: AddressMapping;
+}
+
+export interface CollectionApprovedTransferPermissionWithDetails<T extends NumberType> extends CollectionApprovedTransferPermission<T> {
+  defaultValues: CollectionApprovedTransferPermissionDefaultValuesWithDetails<T>;
+}
+
+export function convertCollectionApprovedTransferPermissionWithDetails<T extends NumberType, U extends NumberType>(item: CollectionApprovedTransferPermissionWithDetails<T>, convertFunction: (item: T) => U): CollectionApprovedTransferPermissionWithDetails<U> {
+  return deepCopy({
+    ...item,
+    ...convertCollectionApprovedTransferPermission(item, convertFunction),
+    defaultValues: {
+      ...convertCollectionApprovedTransferPermissionDefaultValues(item.defaultValues, convertFunction),
+      toMapping: item.defaultValues.toMapping,
+      fromMapping: item.defaultValues.fromMapping,
+      initiatedByMapping: item.defaultValues.initiatedByMapping,
+    }
+  })
+}
+
+export interface CollectionPermissionsWithDetails<T extends NumberType> extends CollectionPermissions<T> {
+  canUpdateCollectionApprovedTransfers: CollectionApprovedTransferPermissionWithDetails<T>[];
+}
+
+export function convertCollectionPermissionsWithDetails<T extends NumberType, U extends NumberType>(item: CollectionPermissionsWithDetails<T>, convertFunction: (item: T) => U): CollectionPermissionsWithDetails<U> {
+  return deepCopy({
+    ...item,
+    ...convertCollectionPermissions(item, convertFunction),
+    canUpdateCollectionApprovedTransfers: item.canUpdateCollectionApprovedTransfers.map((canUpdateCollectionApprovedTransfer) => {
+      return {
+        ...canUpdateCollectionApprovedTransfer,
+        ...convertCollectionApprovedTransferPermissionWithDetails(canUpdateCollectionApprovedTransfer, convertFunction),
+      }
+    }),
+  })
+}
+
 export interface ApprovalDetailsWithDetails<T extends NumberType> extends ApprovalDetails<T> {
   merkleChallenges: MerkleChallengeWithDetails<T>[];
 }
 
 export interface CollectionApprovedTransferWithDetails<T extends NumberType> extends CollectionApprovedTransfer<T> {
   approvalDetails: ApprovalDetailsWithDetails<T>[];
+  toMapping: AddressMapping;
+  fromMapping: AddressMapping;
+  initiatedByMapping: AddressMapping;
 }
 
+export function convertCollectionApprovedTransferWithDetails<T extends NumberType, U extends NumberType>(item: CollectionApprovedTransferWithDetails<T>, convertFunction: (item: T) => U): CollectionApprovedTransferWithDetails<U> {
+  return deepCopy({
+    ...item,
+    ...convertCollectionApprovedTransfer(item, convertFunction),
+    approvalDetails: item.approvalDetails.map((approvalDetails) => ({
+      ...convertApprovalDetails(approvalDetails, convertFunction),
+      merkleChallenges: approvalDetails.merkleChallenges.map((merkleChallenge) => convertMerkleChallengeWithDetails(merkleChallenge, convertFunction)),
+    })),
+  })
+}
 export interface CollectionApprovedTransferTimelineWithDetails<T extends NumberType> extends TimelineItem<T> {
   collectionApprovedTransfers: CollectionApprovedTransferWithDetails<T>[]
 }
+
+export function convertCollectionApprovedTransferTimelineWithDetails<T extends NumberType, U extends NumberType>(item: CollectionApprovedTransferTimelineWithDetails<T>, convertFunction: (item: T) => U): CollectionApprovedTransferTimelineWithDetails<U> {
+  return deepCopy({
+    ...item,
+    timelineTimes: item.timelineTimes.map((timelineTime) => convertUintRange(timelineTime, convertFunction)),
+    collectionApprovedTransfers: item.collectionApprovedTransfers.map((collectionApprovedTransfer) => convertCollectionApprovedTransferWithDetails(collectionApprovedTransfer, convertFunction)),
+  })
+}
+
 
 /**
  * BitBadgesCollection is the type for collections returned by the BitBadges API. It extends the base CollectionDoc type
@@ -64,6 +126,7 @@ export interface CollectionApprovedTransferTimelineWithDetails<T extends NumberT
 export interface BitBadgesCollection<T extends NumberType> extends CollectionInfoBase<T>, Identified {
   managerInfo: BitBadgesUserInfo<T>;
   collectionApprovedTransfersTimeline: CollectionApprovedTransferTimelineWithDetails<T>[];
+  collectionPermissions: CollectionPermissionsWithDetails<T>;
 
   //The following are to be fetched dynamically and as needed from the DB
   collectionMetadata?: Metadata<T>;
@@ -88,6 +151,12 @@ export function convertBitBadgesCollection<T extends NumberType, U extends Numbe
   return deepCopy({
     ...item,
     ...convertCollectionInfo(item, convertFunction),
+    collectionApprovedTransfersTimeline: item.collectionApprovedTransfersTimeline.map((timelineItem) => ({
+      ...timelineItem,
+      timelineTimes: timelineItem.timelineTimes.map((timelineTime) => convertUintRange(timelineTime, convertFunction)),
+      collectionApprovedTransfers: timelineItem.collectionApprovedTransfers.map((collectionApprovedTransfer) => convertCollectionApprovedTransferWithDetails(collectionApprovedTransfer, convertFunction)),
+    })),
+    collectionPermissions: convertCollectionPermissionsWithDetails(item.collectionPermissions, convertFunction),
     managerInfo: convertBitBadgesUserInfo(item.managerInfo, convertFunction),
     collectionMetadata: item.collectionMetadata ? convertMetadata(item.collectionMetadata, convertFunction) : undefined,
     badgeMetadata: item.badgeMetadata.map((metadata) => convertBadgeMetadataDetails(metadata, convertFunction)),

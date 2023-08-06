@@ -1,6 +1,0 @@
-
-//TODO:
-
-export function checkIfApproved() {
-
-}

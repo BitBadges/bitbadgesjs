@@ -144,15 +144,18 @@ export interface OffChainBalancesMetadata {
  * @typedef {Object} MustOwnBadges
  * @property {NumberType} collectionId - The collection ID of the badges to own.
  * @property {UintRange} amountRange - The min/max acceptable amount of badges that must be owned (can be any values, including 0-0).
- * @property {UintRange[]} ownedTimes - The range of the times that the badges must be owned.
+ * @property {UintRange[]} ownershipTimes - The range of the times that the badges must be owned.
  * @property {UintRange[]} badgeIds - The range of the badge IDs that must be owned.
+ * @property {boolean} overrideWithCurrentTime - Whether or not to override the ownershipTimes with the current time.
  */
 export interface MustOwnBadges<T extends NumberType> {
   collectionId: T;
 
   amountRange: UintRange<T>;
-  ownedTimes: UintRange<T>[];
+  ownershipTimes: UintRange<T>[];
   badgeIds: UintRange<T>[];
+
+  overrideWithCurrentTime: boolean;
 }
 
 export function convertMustOwnBadges<T extends NumberType, U extends NumberType>(mustOwn: MustOwnBadges<T>, convertFunction: (item: T) => U): MustOwnBadges<U> {
@@ -160,7 +163,7 @@ export function convertMustOwnBadges<T extends NumberType, U extends NumberType>
     ...mustOwn,
     collectionId: convertFunction(mustOwn.collectionId),
     amountRange: convertUintRange(mustOwn.amountRange, convertFunction),
-    ownedTimes: mustOwn.ownedTimes.map((b) => convertUintRange(b, convertFunction)),
+    ownershipTimes: mustOwn.ownershipTimes.map((b) => convertUintRange(b, convertFunction)),
     badgeIds: mustOwn.badgeIds.map((b) => convertUintRange(b, convertFunction))
   })
 }
@@ -200,12 +203,12 @@ export function convertInheritedBalance<T extends NumberType, U extends NumberTy
  * @typedef {Object} Balance
  * @property {NumberType} amount - The amount or balance of the owned badge.
  * @property {UintRange[]} badgeIds - The badge IDs corresponding to the balance.
- * @property {UintRange[]} ownedTimes - The times that the badge is owned from.
+ * @property {UintRange[]} ownershipTimes - The times that the badge is owned from.
  */
 export interface Balance<T extends NumberType> {
   amount: T;
   badgeIds: UintRange<T>[]
-  ownedTimes: UintRange<T>[]
+  ownershipTimes: UintRange<T>[]
 }
 
 export function convertBalance<T extends NumberType, U extends NumberType>(balance: Balance<T>, convertFunction: (item: T) => U): Balance<U> {
@@ -213,7 +216,7 @@ export function convertBalance<T extends NumberType, U extends NumberType>(balan
     ...balance,
     amount: convertFunction(balance.amount),
     badgeIds: balance.badgeIds.map((b) => convertUintRange(b, convertFunction)),
-    ownedTimes: balance.ownedTimes.map((b) => convertUintRange(b, convertFunction))
+    ownershipTimes: balance.ownershipTimes.map((b) => convertUintRange(b, convertFunction))
   })
 }
 

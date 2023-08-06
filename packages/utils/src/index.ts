@@ -32,7 +32,11 @@ export * from './permissions';
 export * from './badgeMetadata';
 export * from './metadataIds';
 export * from './display';
-export * from './approvedTransfers';
+export * from './firstMatches';
 export * from './math';
 export * from './timelines';
 export * from './overlaps';
+export * from './permission_checks';
+export * from './userApprovedTransfers';
+export * from './update_checks'
+export * from './validate_permissions_updates';

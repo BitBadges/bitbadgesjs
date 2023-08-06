@@ -31,7 +31,7 @@ export function convertUserApprovedOutgoingTransferTimeline<T extends NumberType
  * @property {string} initiatedByMappingId - The mapping ID for the user(s) who initiate the transfer.
  * @property {UintRange[]} transferTimes - The times of the transfer transaction.
  * @property {UintRange[]} badgeIds - The badge IDs to be transferred.
- * @property {UintRange[]} ownedTimes - The ownership times of the badges being transferred
+ * @property {UintRange[]} ownershipTimes - The ownership times of the badges being transferred
  * @property {IsUserOutgoingTransferAllowed[]} allowedCombinations - The allowed combinations of the transfer. Here, you can manipulate the default values (invert, all, none) and decide whether that combination is approved or not. Note this is first-match only.
  * @property {OutgoingApprovalDetails[]} approvalDetails - For allowed combinations, we also must check the details of the approval. These represent the restrictions that must be obeyed such as the total amount approved, max num transfers, merkle challenges, must own badges, etc.
  */
@@ -40,7 +40,7 @@ export interface UserApprovedOutgoingTransfer<T extends NumberType> {
   initiatedByMappingId: string;
   transferTimes: UintRange<T>[];
   badgeIds: UintRange<T>[];
-  ownedTimes: UintRange<T>[];
+  ownershipTimes: UintRange<T>[];
   allowedCombinations: IsUserOutgoingTransferAllowed[];
   approvalDetails: OutgoingApprovalDetails<T>[];
 }
@@ -50,7 +50,7 @@ export function convertUserApprovedOutgoingTransfer<T extends NumberType, U exte
     ...transfer,
     transferTimes: transfer.transferTimes.map((b) => convertUintRange(b, convertFunction)),
     badgeIds: transfer.badgeIds.map((b) => convertUintRange(b, convertFunction)),
-    ownedTimes: transfer.ownedTimes.map((b) => convertUintRange(b, convertFunction)),
+    ownershipTimes: transfer.ownershipTimes.map((b) => convertUintRange(b, convertFunction)),
     //allowedCombinations: transfer.allowedCombinations.map((b) => convertIsUserOutgoingTransferAllowed(b, convertFunction)),
     approvalDetails: transfer.approvalDetails.map((b) => convertOutgoingApprovalDetails(b, convertFunction))
   })
@@ -66,16 +66,16 @@ export function convertUserApprovedOutgoingTransfer<T extends NumberType, U exte
  * @property {ValueOptions} initiatedByMappingOptions - The options to manipulate the values for the initiatedByMappingId.
  * @property {ValueOptions} transferTimesOptions - The options to manipulate the values for the transferTimes.
  * @property {ValueOptions} badgeIdsOptions - The options to manipulate the values for the badgeIds.
- * @property {ValueOptions} ownedTimesOptions - The options to manipulate the values for the ownedTimes.
- * @property {boolean} isAllowed - Whether this combination is allowed or not.
+ * @property {ValueOptions} ownershipTimesOptions - The options to manipulate the values for the ownershipTimes.
+ * @property {boolean} isApproved - Whether this combination is allowed or not.
  */
 export interface IsUserOutgoingTransferAllowed {
   toMappingOptions: ValueOptions;
   initiatedByMappingOptions: ValueOptions;
   transferTimesOptions: ValueOptions;
   badgeIdsOptions: ValueOptions;
-  ownedTimesOptions: ValueOptions;
-  isAllowed: boolean;
+  ownershipTimesOptions: ValueOptions;
+  isApproved: boolean;
 }
 
 // export function convertIsUserOutgoingTransferAllowed<T extends NumberType, U extends NumberType>(allowed: IsUserOutgoingTransferAllowed<T>, _convertFunction: (item: T) => U): IsUserOutgoingTransferAllowed<U> {
@@ -130,7 +130,7 @@ export function convertOutgoingApprovalDetails<T extends NumberType, U extends N
  * This allows you to define an approval where Transfer A happens first, then Transfer B, then Transfer C, etc.
  * The order of the transfers is defined by the orderCalculationMethod. The order number 0 represents the first transfer, 1 represents the second transfer, etc.
  *
- * IMPORTANT: if the calculated balances exceed the bounds of the badgeIds or ownedTimes of this approval, then the transfer will fail.
+ * IMPORTANT: if the calculated balances exceed the bounds of the badgeIds or ownershipTimes of this approval, then the transfer will fail.
  *
  * @typedef {Object} PredeterminedBalances
  * @property {ManualBalances[]} manualBalances - Manually define the balances for each transfer. Cannot be used with incrementedBalances. Order number corresponds to the index of the balance in the array.
@@ -179,12 +179,12 @@ export function convertManualBalances<T extends NumberType, U extends NumberType
  *
  * @property {Balance[]} startBalances - The starting balances for each transfer. Order number corresponds to the number of times we increment.
  * @property {T} incrementBadgeIdsBy - The amount to increment the badge IDs by after each transfer.
- * @property {T} incrementOwnedTimesBy - The amount to increment the owned times by after each transfer.
+ * @property {T} incrementOwnershipTimesBy - The amount to increment the owned times by after each transfer.
  */
 export interface IncrementedBalances<T extends NumberType> {
   startBalances: Balance<T>[];
   incrementBadgeIdsBy: T;
-  incrementOwnedTimesBy: T;
+  incrementOwnershipTimesBy: T;
 }
 
 export function convertIncrementedBalances<T extends NumberType, U extends NumberType>(balances: IncrementedBalances<T>, convertFunction: (item: T) => U): IncrementedBalances<U> {
@@ -192,7 +192,7 @@ export function convertIncrementedBalances<T extends NumberType, U extends Numbe
     ...balances,
     startBalances: balances.startBalances.map((b) => convertBalance(b, convertFunction)),
     incrementBadgeIdsBy: convertFunction(balances.incrementBadgeIdsBy),
-    incrementOwnedTimesBy: convertFunction(balances.incrementOwnedTimesBy)
+    incrementOwnershipTimesBy: convertFunction(balances.incrementOwnershipTimesBy)
   })
 }
 
@@ -227,10 +227,10 @@ export interface PredeterminedOrderCalculationMethod {
  * Note that we only track the approval amounts if the approval is defined and not unlimited. Otherwise, we do not track the respective approval amount.
  *
  * @typedef {Object} ApprovalAmounts
- * @property {T} overallApprovalAmount - The overall maximum amount approved for the badgeIDs and ownedTimes. Running tally that includes all transfers that match this approval.
- * @property {T} perToAddressApprovalAmount - The maximum amount approved for the badgeIDs and ownedTimes for each to address. Running tally that includes all transfers from each unique to address that match this approval.
- * @property {T} perFromAddressApprovalAmount - The maximum amount approved for the badgeIDs and ownedTimes for each from address. Running tally that includes all transfers from each unique from address that match this approval.
- * @property {T} perInitiatedByAddressApprovalAmount - The maximum amount approved for the badgeIDs and ownedTimes for each initiated by address. Running tally that includes all transfers from each unique initiated by address that match this approval.
+ * @property {T} overallApprovalAmount - The overall maximum amount approved for the badgeIDs and ownershipTimes. Running tally that includes all transfers that match this approval.
+ * @property {T} perToAddressApprovalAmount - The maximum amount approved for the badgeIDs and ownershipTimes for each to address. Running tally that includes all transfers from each unique to address that match this approval.
+ * @property {T} perFromAddressApprovalAmount - The maximum amount approved for the badgeIDs and ownershipTimes for each from address. Running tally that includes all transfers from each unique from address that match this approval.
+ * @property {T} perInitiatedByAddressApprovalAmount - The maximum amount approved for the badgeIDs and ownershipTimes for each initiated by address. Running tally that includes all transfers from each unique initiated by address that match this approval.
  */
 export interface ApprovalAmounts<T extends NumberType> {
   overallApprovalAmount: T;
@@ -250,16 +250,16 @@ export function convertApprovalAmounts<T extends NumberType, U extends NumberTyp
 }
 
 /**
- * MaxNumTransfers represents the maximum number of transfers for the badge IDs and ownedTimes of this approval.
+ * MaxNumTransfers represents the maximum number of transfers for the badge IDs and ownershipTimes of this approval.
  *
  * Note that we only track the max num transfers if a) the max num transfers here is defined and not unlimited OR b) we need it for calculating the predetermined balances order (i.e. useXYZNumTransfers is set in the PredeterminedOrderCalculationMethod).
  * Otherwise, we do not track the respective number of transfers
  *
  * @typedef {Object} MaxNumTransfers
- * @property {T} overallMaxNumTransfers - The overall maximum number of transfers for the badgeIDs and ownedTimes. Running tally that includes all transfers that match this approval.
- * @property {T} perToAddressMaxNumTransfers - The maximum number of transfers for the badgeIDs and ownedTimes for each to address. Running tally that includes all transfers from each unique to address that match this approval.
- * @property {T} perFromAddressMaxNumTransfers - The maximum number of transfers for the badgeIDs and ownedTimes for each from address. Running tally that includes all transfers from each unique from address that match this approval.
- * @property {T} perInitiatedByAddressMaxNumTransfers - The maximum number of transfers for the badgeIDs and ownedTimes for each initiated by address. Running tally that includes all transfers from each unique initiated by address that match this approval.
+ * @property {T} overallMaxNumTransfers - The overall maximum number of transfers for the badgeIDs and ownershipTimes. Running tally that includes all transfers that match this approval.
+ * @property {T} perToAddressMaxNumTransfers - The maximum number of transfers for the badgeIDs and ownershipTimes for each to address. Running tally that includes all transfers from each unique to address that match this approval.
+ * @property {T} perFromAddressMaxNumTransfers - The maximum number of transfers for the badgeIDs and ownershipTimes for each from address. Running tally that includes all transfers from each unique from address that match this approval.
+ * @property {T} perInitiatedByAddressMaxNumTransfers - The maximum number of transfers for the badgeIDs and ownershipTimes for each initiated by address. Running tally that includes all transfers from each unique initiated by address that match this approval.
  */
 export interface MaxNumTransfers<T extends NumberType> {
   overallMaxNumTransfers: T;
@@ -307,7 +307,7 @@ export function convertUserApprovedIncomingTransferTimeline<T extends NumberType
  * @property {string} initiatedByMappingId - The mapping ID for the user(s) who initiate the transfer.
  * @property {UintRange[]} transferTimes - The times of the transfer transaction.
  * @property {UintRange[]} badgeIds - The badge IDs to be transferred.
- * @property {UintRange[]} ownedTimes - The ownership times of the badges being transferred
+ * @property {UintRange[]} ownershipTimes - The ownership times of the badges being transferred
  * @property {IsUserIncomingTransferAllowed[]} allowedCombinations - The allowed combinations of the transfer. Here, you can manipulate the default values (invert, all, none) and decide whether that combination is approved or not. Note this is first-match only.
  * @property {IncomingApprovalDetails[]} approvalDetails - For allowed combinations, we also must check the details of the approval. These represent the restrictions that must be obeyed such as the total amount approved, max num transfers, merkle challenges, must own badges, etc.
  */
@@ -316,7 +316,7 @@ export interface UserApprovedIncomingTransfer<T extends NumberType> {
   initiatedByMappingId: string;
   transferTimes: UintRange<T>[];
   badgeIds: UintRange<T>[];
-  ownedTimes: UintRange<T>[];
+  ownershipTimes: UintRange<T>[];
   allowedCombinations: IsUserIncomingTransferAllowed[];
   approvalDetails: IncomingApprovalDetails<T>[];
 }
@@ -326,7 +326,7 @@ export function convertUserApprovedIncomingTransfer<T extends NumberType, U exte
     ...transfer,
     transferTimes: transfer.transferTimes.map((b) => convertUintRange(b, convertFunction)),
     badgeIds: transfer.badgeIds.map((b) => convertUintRange(b, convertFunction)),
-    ownedTimes: transfer.ownedTimes.map((b) => convertUintRange(b, convertFunction)),
+    ownershipTimes: transfer.ownershipTimes.map((b) => convertUintRange(b, convertFunction)),
     //allowedCombinations: transfer.allowedCombinations.map((b) => convertIsUserIncomingTransferAllowed(b, convertFunction)),
     approvalDetails: transfer.approvalDetails.map((b) => convertIncomingApprovalDetails(b, convertFunction))
   })
@@ -344,16 +344,16 @@ export function convertUserApprovedIncomingTransfer<T extends NumberType, U exte
  * @property {ValueOptions} initiatedByMappingOptions - The options to manipulate the values for the initiatedByMappingId.
  * @property {ValueOptions} transferTimesOptions - The options to manipulate the values for the transferTimes.
  * @property {ValueOptions} badgeIdsOptions - The options to manipulate the values for the badgeIds.
- * @property {ValueOptions} ownedTimesOptions - The options to manipulate the values for the ownedTimes.
- * @property {boolean} isAllowed - Whether this combination is allowed or not.
+ * @property {ValueOptions} ownershipTimesOptions - The options to manipulate the values for the ownershipTimes.
+ * @property {boolean} isApproved - Whether this combination is allowed or not.
  */
 export interface IsUserIncomingTransferAllowed {
   fromMappingOptions: ValueOptions;
   initiatedByMappingOptions: ValueOptions;
   transferTimesOptions: ValueOptions;
   badgeIdsOptions: ValueOptions;
-  ownedTimesOptions: ValueOptions;
-  isAllowed: boolean;
+  ownershipTimesOptions: ValueOptions;
+  isApproved: boolean;
 }
 
 // export function convertIsUserIncomingTransferAllowed<T extends NumberType, U extends NumberType>(allowed: IsUserIncomingTransferAllowed<T>, _convertFunction: (item: T) => U): IsUserIncomingTransferAllowed<U> {
@@ -416,7 +416,7 @@ export function convertIncomingApprovalDetails<T extends NumberType, U extends N
  *
  * @property {UintRange[]} transferTimes - The times of the transfer transaction.
  * @property {UintRange[]} badgeIds - The badge IDs to be transferred.
- * @property {UintRange[]} ownedTimes - The ownership times of the badges being transferred
+ * @property {UintRange[]} ownershipTimes - The ownership times of the badges being transferred
  *
  * @property {IsCollectionTransferAllowed[]} allowedCombinations - The allowed combinations of the transfer. Here, you can manipulate the default values (invert, all, none) and decide whether that combination is approved or not. Note this is first-match only.
  * @property {ApprovalDetails[]} approvalDetails - For allowed combinations, we also must check the details of the approval. These represent the restrictions that must be obeyed such as the total amount approved, max num transfers, merkle challenges, must own badges, etc.
@@ -427,7 +427,7 @@ export interface CollectionApprovedTransfer<T extends NumberType> {
   initiatedByMappingId: string;
   transferTimes: UintRange<T>[];
   badgeIds: UintRange<T>[];
-  ownedTimes: UintRange<T>[];
+  ownershipTimes: UintRange<T>[];
   allowedCombinations: IsCollectionTransferAllowed[];
   approvalDetails: ApprovalDetails<T>[];
 }
@@ -437,7 +437,7 @@ export function convertCollectionApprovedTransfer<T extends NumberType, U extend
     ...transfer,
     transferTimes: transfer.transferTimes.map((b) => convertUintRange(b, convertFunction)),
     badgeIds: transfer.badgeIds.map((b) => convertUintRange(b, convertFunction)),
-    ownedTimes: transfer.ownedTimes.map((b) => convertUintRange(b, convertFunction)),
+    ownershipTimes: transfer.ownershipTimes.map((b) => convertUintRange(b, convertFunction)),
     //allowedCombinations: transfer.allowedCombinations.map((b) => convertIsCollectionTransferAllowed(b, convertFunction)),
     approvalDetails: transfer.approvalDetails.map((b) => convertApprovalDetails(b, convertFunction))
   })
@@ -456,8 +456,8 @@ export function convertCollectionApprovedTransfer<T extends NumberType, U extend
  * @property {ValueOptions} initiatedByMappingOptions - The options to manipulate the values for the initiatedByMappingId.
  * @property {ValueOptions} transferTimesOptions - The options to manipulate the values for the transferTimes.
  * @property {ValueOptions} badgeIdsOptions - The options to manipulate the values for the badgeIds.
- * @property {ValueOptions} ownedTimesOptions - The options to manipulate the values for the ownedTimes.
- * @property {boolean} isAllowed - Whether this combination is allowed or not.
+ * @property {ValueOptions} ownershipTimesOptions - The options to manipulate the values for the ownershipTimes.
+ * @property {boolean} isApproved - Whether this combination is allowed or not.
  */
 export interface IsCollectionTransferAllowed {
   toMappingOptions: ValueOptions;
@@ -465,8 +465,8 @@ export interface IsCollectionTransferAllowed {
   initiatedByMappingOptions: ValueOptions;
   transferTimesOptions: ValueOptions;
   badgeIdsOptions: ValueOptions;
-  ownedTimesOptions: ValueOptions;
-  isAllowed: boolean;
+  ownershipTimesOptions: ValueOptions;
+  isApproved: boolean;
 }
 
 // export function convertIsCollectionTransferAllowed<T extends NumberType, U extends NumberType>(allowed: IsCollectionTransferAllowed<T>, _convertFunction: (item: T) => U): IsCollectionTransferAllowed<U> {

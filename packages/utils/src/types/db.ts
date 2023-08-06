@@ -608,7 +608,7 @@ export function convertMerkleChallengeWithDetails<T extends NumberType, U extend
 export interface MerkleChallengeDetails<T extends NumberType> {
   name: string;
   description: string;
-  hasPassword: boolean;
+  hasPassword?: boolean;
   password?: string;
 
   challengeDetails: ChallengeDetails<T>;

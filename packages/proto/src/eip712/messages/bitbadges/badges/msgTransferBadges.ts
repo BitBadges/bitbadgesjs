@@ -1,4 +1,4 @@
-import { NumberType, Transfer, getWrappedTransfers } from '../../../../'
+import { NumberType, Stringify, Transfer, convertTransfer } from '../../../../'
 import {
   BALANCE_TYPES,
   UINT_RANGE_TYPES,
@@ -19,6 +19,8 @@ const TRANSFERS_TYPES = [
   { name: 'memo', type: 'string' },
 ]
 
+
+
 const MERKLE_PROOF_TYPES = [
   { name: 'aunts', type: 'MerklePathItem[]' },
   { name: 'leaf', type: 'string' },
@@ -32,8 +34,10 @@ const MERKLE_PATH_ITEM_TYPES = [
 const PRECALCULATION_DETAILS_TYPES = [
   { name: 'approvalId', type: 'string' },
   { name: 'approvalLevel', type: 'string' },
-  { name: 'approvedAddress', type: 'string' },
+  { name: 'approverAddress', type: 'string' },
 ]
+
+
 
 
 export const MSG_TRANSFER_BADGES_TYPES = {
@@ -56,7 +60,7 @@ export function createEIP712MsgTransferBadges<T extends NumberType>(
     value: {
       creator,
       collectionId: collectionId.toString(),
-      transfers: getWrappedTransfers(transfers).map((s) => s.toObject()),
+      transfers: transfers.map((x) => convertTransfer(x, Stringify)),
     },
   }
 }

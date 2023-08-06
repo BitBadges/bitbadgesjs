@@ -2,9 +2,9 @@
 //			It is also not user-facing or dev-facing, so I am okay with how it is now
 
 import { AddressMapping, UintRange, ValueOptions } from "bitbadgesjs-proto";
-import { removeAddressMappingFromAddressMapping, isAddressMappingEmpty } from "./addressMappings";
-import { invertUintRanges, removeUintRangeFromUintRange, removeUintsFromUintRange } from "./uintRanges";
+import { isAddressMappingEmpty, removeAddressMappingFromAddressMapping } from "./addressMappings";
 import { deepCopy } from "./types/utils";
+import { invertUintRanges, removeUintRangeFromUintRange, removeUintsFromUintRange, sortUintRangesAndMergeIfNecessary } from "./uintRanges";
 
 //For permissions, we have many types of permissions that are all very similar to each other
 //Here, we abstract all those permissions to a UniversalPermission struct in order to reuse code.
@@ -16,6 +16,19 @@ import { deepCopy } from "./types/utils";
 //TODO: This file was created with AI from the Go equivalent in github.com/bitbadges/bitbadgeschain. It should be cleaned up to be more idiomatic TypeScript.
 
 export interface UniversalCombination {
+  timelineTimesOptions: ValueOptions; // The times of the timeline. Used in the timeline.
+  fromMappingOptions: ValueOptions; // The times that the from mapping is allowed to be used. Used in the timeline.
+  toMappingOptions: ValueOptions; // The times that the to mapping is allowed to be used. Used in the timeline.
+  initiatedByMappingOptions: ValueOptions; // The times that the initiated by mapping is allowed to be used. Used in the timeline.
+  transferTimesOptions: ValueOptions; // The times that the transfer mapping is allowed to be used. Used in the timeline.
+  badgeIdsOptions: ValueOptions; // The times that the badge ids are allowed to be used. Used in the timeline.
+  ownershipTimesOptions: ValueOptions; // The times that the owned times are allowed to be used. Used in the timeline.
+
+  permittedTimesOptions: ValueOptions; // The times that are permitted to be used.
+  forbiddenTimesOptions: ValueOptions; // The times that are forbidden to be used.
+}
+
+export interface UniversalCombination {
   timelineTimesOptions: ValueOptions;
 
   fromMappingOptions: ValueOptions;
@@ -23,7 +36,7 @@ export interface UniversalCombination {
   initiatedByMappingOptions: ValueOptions;
   transferTimesOptions: ValueOptions;
   badgeIdsOptions: ValueOptions;
-  ownedTimesOptions: ValueOptions;
+  ownershipTimesOptions: ValueOptions;
 
   permittedTimesOptions: ValueOptions;
   forbiddenTimesOptions: ValueOptions;
@@ -38,7 +51,7 @@ export interface UniversalDefaultValues {
   badgeIds: UintRange<bigint>[];
   timelineTimes: UintRange<bigint>[];
   transferTimes: UintRange<bigint>[];
-  ownedTimes: UintRange<bigint>[];
+  ownershipTimes: UintRange<bigint>[];
   toMapping: AddressMapping;
   fromMapping: AddressMapping;
   initiatedByMapping: AddressMapping;
@@ -52,7 +65,7 @@ export interface UniversalDefaultValues {
   usesToMapping: boolean;
   usesFromMapping: boolean;
   usesInitiatedByMapping: boolean;
-  usesOwnedTimes: boolean;
+  usesOwnershipTimes: boolean;
 
   arbitraryValue: any;
 }
@@ -107,7 +120,6 @@ export function getOverlapsAndNonOverlaps(firstDetails: UniversalPermissionDetai
 export function universalRemoveOverlapFromValues(handled: UniversalPermissionDetails, valuesToCheck: UniversalPermissionDetails[]): [UniversalPermissionDetails[], UniversalPermissionDetails[]] {
   let newValuesToCheck = [];
   let removed = [];
-
   for (let valueToCheck of valuesToCheck) {
     let [remaining, overlaps] = universalRemoveOverlaps(handled, valueToCheck);
     newValuesToCheck.push(...remaining);
@@ -118,21 +130,22 @@ export function universalRemoveOverlapFromValues(handled: UniversalPermissionDet
 }
 
 
-function universalRemoveOverlaps(handled: UniversalPermissionDetails, valueToCheck: UniversalPermissionDetails): [UniversalPermissionDetails[], UniversalPermissionDetails[]] {
+export function universalRemoveOverlaps(handled: UniversalPermissionDetails, valueToCheck: UniversalPermissionDetails): [UniversalPermissionDetails[], UniversalPermissionDetails[]] {
   let [timelineTimesAfterRemoval, removedTimelineTimes] = removeUintsFromUintRange(handled.timelineTime, valueToCheck.timelineTime);
   let [badgesAfterRemoval, removedBadges] = removeUintsFromUintRange(handled.badgeId, valueToCheck.badgeId);
   let [transferTimesAfterRemoval, removedTransferTimes] = removeUintsFromUintRange(handled.transferTime, valueToCheck.transferTime);
-  let [ownedTimesAfterRemoval, removedOwnedTimes] = removeUintsFromUintRange(handled.ownershipTime, valueToCheck.ownershipTime);
+  let [ownershipTimesAfterRemoval, removedOwnershipTimes] = removeUintsFromUintRange(handled.ownershipTime, valueToCheck.ownershipTime);
   let [toMappingAfterRemoval, removedToMapping] = removeAddressMappingFromAddressMapping(handled.toMapping, valueToCheck.toMapping);
   let [fromMappingAfterRemoval, removedFromMapping] = removeAddressMappingFromAddressMapping(handled.fromMapping, valueToCheck.fromMapping);
   let [initiatedByMappingAfterRemoval, removedInitiatedByMapping] = removeAddressMappingFromAddressMapping(handled.initiatedByMapping, valueToCheck.initiatedByMapping);
 
-  let toMappingRemoved = !isAddressMappingEmpty(removedToMapping);
-  let fromMappingRemoved = !isAddressMappingEmpty(removedFromMapping);
-  let initiatedByMappingRemoved = !isAddressMappingEmpty(removedInitiatedByMapping);
+  let removedToMappingIsEmpty = isAddressMappingEmpty(removedToMapping);
+  let removedFromMappingIsEmpty = isAddressMappingEmpty(removedFromMapping);
+  let removedInitiatedByMappingIsEmpty = isAddressMappingEmpty(removedInitiatedByMapping);
 
   const remaining: UniversalPermissionDetails[] = [];
-  if (removedTimelineTimes.length === 0 || removedBadges.length === 0 || removedTransferTimes.length === 0 || removedOwnedTimes.length === 0 || !toMappingRemoved || !fromMappingRemoved || !initiatedByMappingRemoved) {
+  //If we didn't remove anything at all
+  if (removedTimelineTimes.length === 0 || removedBadges.length === 0 || removedTransferTimes.length === 0 || removedOwnershipTimes.length === 0 || removedToMappingIsEmpty || removedFromMappingIsEmpty || removedInitiatedByMappingIsEmpty) {
     remaining.push(valueToCheck);
     return [remaining, []];
   }
@@ -185,12 +198,12 @@ function universalRemoveOverlaps(handled: UniversalPermissionDetails, valueToChe
     });
   }
 
-  for (let ownedTimeAfterRemoval of ownedTimesAfterRemoval) {
+  for (let ownershipTimeAfterRemoval of ownershipTimesAfterRemoval) {
     remaining.push({
       timelineTime: removedTimelineTimes[0],
       badgeId: removedBadges[0],
       transferTime: removedTransferTimes[0],
-      ownershipTime: ownedTimeAfterRemoval,
+      ownershipTime: ownershipTimeAfterRemoval,
       toMapping: valueToCheck.toMapping,
       fromMapping: valueToCheck.fromMapping,
       initiatedByMapping: valueToCheck.initiatedByMapping,
@@ -206,7 +219,7 @@ function universalRemoveOverlaps(handled: UniversalPermissionDetails, valueToChe
       timelineTime: removedTimelineTimes[0],
       badgeId: removedBadges[0],
       transferTime: removedTransferTimes[0],
-      ownershipTime: removedOwnedTimes[0],
+      ownershipTime: removedOwnershipTimes[0],
       toMapping: toMappingAfterRemoval,
       fromMapping: valueToCheck.fromMapping,
       initiatedByMapping: valueToCheck.initiatedByMapping,
@@ -216,14 +229,13 @@ function universalRemoveOverlaps(handled: UniversalPermissionDetails, valueToChe
       forbiddenTimes: [],
     })
   }
-
   if (!isAddressMappingEmpty(fromMappingAfterRemoval)) {
     remaining.push({
       timelineTime: removedTimelineTimes[0],
       badgeId: removedBadges[0],
       transferTime: removedTransferTimes[0],
-      ownershipTime: removedOwnedTimes[0],
-      toMapping: toMappingAfterRemoval,
+      ownershipTime: removedOwnershipTimes[0],
+      toMapping: removedToMapping,
       fromMapping: fromMappingAfterRemoval,
       initiatedByMapping: valueToCheck.initiatedByMapping,
 
@@ -238,9 +250,9 @@ function universalRemoveOverlaps(handled: UniversalPermissionDetails, valueToChe
       timelineTime: removedTimelineTimes[0],
       badgeId: removedBadges[0],
       transferTime: removedTransferTimes[0],
-      ownershipTime: removedOwnedTimes[0],
-      toMapping: toMappingAfterRemoval,
-      fromMapping: fromMappingAfterRemoval,
+      ownershipTime: removedOwnershipTimes[0],
+      toMapping: removedToMapping,
+      fromMapping: removedFromMapping,
       initiatedByMapping: initiatedByMappingAfterRemoval,
 
       arbitraryValue: valueToCheck.arbitraryValue,
@@ -253,12 +265,12 @@ function universalRemoveOverlaps(handled: UniversalPermissionDetails, valueToChe
   for (let removedTimelineTime of removedTimelineTimes) {
     for (let removedBadge of removedBadges) {
       for (let removedTransferTime of removedTransferTimes) {
-        for (let removedOwnedTime of removedOwnedTimes) {
+        for (let removedOwnershipTime of removedOwnershipTimes) {
           removed.push({
             timelineTime: removedTimelineTime,
             badgeId: removedBadge,
             transferTime: removedTransferTime,
-            ownershipTime: removedOwnedTime,
+            ownershipTime: removedOwnershipTime,
             toMapping: removedToMapping,
             fromMapping: removedFromMapping,
             initiatedByMapping: removedInitiatedByMapping,
@@ -325,7 +337,10 @@ export function GetMappingIdWithOptions(mappingId: string, options: ValueOptions
   return mappingId;
 }
 
-export function GetMappingWithOptions(mapping: AddressMapping, options: ValueOptions | null, uses: boolean): AddressMapping {
+export function GetMappingWithOptions(_mapping: AddressMapping, options: ValueOptions | null, uses: boolean): AddressMapping {
+  const mapping = deepCopy(_mapping);
+
+
   if (!uses) {
     mapping.addresses = []
     mapping.includeAddresses = false;
@@ -336,7 +351,7 @@ export function GetMappingWithOptions(mapping: AddressMapping, options: ValueOpt
   }
 
   if (options.allValues) {
-    mapping.addresses = []
+    mapping.addresses = [] //Note NO "Mint" address (so it is included)
     mapping.includeAddresses = false;
   }
 
@@ -352,15 +367,157 @@ export function GetMappingWithOptions(mapping: AddressMapping, options: ValueOpt
   return mapping;
 }
 
-export function GetFirstMatchOnly(permissions: UniversalPermission[]): UniversalPermissionDetails[] {
+//TODO: This is a mess and is not needed but requires some refactoring.
+
+export interface UsedFlags {
+  usesBadgeIds: boolean;
+  usesTimelineTimes: boolean;
+  usesTransferTimes: boolean;
+  usesToMapping: boolean;
+  usesFromMapping: boolean;
+  usesInitiatedByMapping: boolean;
+  usesOwnershipTimes: boolean;
+}
+
+export const ActionPermissionUsedFlags: UsedFlags = {
+  usesBadgeIds: false,
+  usesTimelineTimes: false,
+  usesTransferTimes: false,
+  usesToMapping: false,
+  usesFromMapping: false,
+  usesInitiatedByMapping: false,
+  usesOwnershipTimes: false,
+}
+
+export const TimedUpdatePermissionUsedFlags: UsedFlags = {
+  usesBadgeIds: false,
+  usesTimelineTimes: true,
+  usesTransferTimes: false,
+  usesToMapping: false,
+  usesFromMapping: false,
+  usesInitiatedByMapping: false,
+  usesOwnershipTimes: false,
+}
+
+export const TimedUpdateWithBadgeIdsPermissionUsedFlags: UsedFlags = {
+  usesBadgeIds: true,
+  usesTimelineTimes: true,
+  usesTransferTimes: false,
+  usesToMapping: false,
+  usesFromMapping: false,
+  usesInitiatedByMapping: false,
+  usesOwnershipTimes: false,
+}
+
+
+export const BalancesActionPermissionUsedFlags: UsedFlags = {
+  usesBadgeIds: true,
+  usesTimelineTimes: false,
+  usesTransferTimes: false,
+  usesToMapping: false,
+  usesFromMapping: false,
+  usesInitiatedByMapping: false,
+  usesOwnershipTimes: true,
+}
+
+
+export const ApprovedTransferPermissionUsedFlags: UsedFlags = {
+  usesBadgeIds: true,
+  usesTimelineTimes: true,
+  usesTransferTimes: true,
+  usesToMapping: true,
+  usesFromMapping: true,
+  usesInitiatedByMapping: true,
+  usesOwnershipTimes: true,
+}
+
+
+export function GetFirstMatchOnly(
+  permissions: UniversalPermission[],
+  handleAllPossibleCombinations?: boolean,
+  usesFlags?: UsedFlags, //TODO: get a better system for this
+): UniversalPermissionDetails[] {
   const handled: UniversalPermissionDetails[] = [];
+
+  if (handleAllPossibleCombinations && !usesFlags) throw new Error("handleAllPossibleCombinations is true but usesFlags is null");
+
+  if (handleAllPossibleCombinations && usesFlags) {
+    //Littel hack but we append a permission with empty permitted, forbidden times but ALL criteria to the end of the array.
+    //This is to ensure we always handle all values when we call GetFirstMatchOnly.
+    permissions.push({
+      defaultValues: {
+        timelineTimes: [],
+        fromMapping: { mappingId: '', addresses: [], includeAddresses: false, uri: '', customData: '' },
+        toMapping: { mappingId: '', addresses: [], includeAddresses: false, uri: '', customData: '' },
+        initiatedByMapping: { mappingId: '', addresses: [], includeAddresses: false, uri: '', customData: '' },
+        transferTimes: [],
+        badgeIds: [],
+        ownershipTimes: [],
+
+        permittedTimes: [],
+        forbiddenTimes: [],
+
+        ...usesFlags,
+
+        arbitraryValue: {},
+      },
+      combinations: [{
+        timelineTimesOptions: {
+          invertDefault: false,
+          allValues: true,
+          noValues: false
+        },
+        fromMappingOptions: {
+          invertDefault: false,
+          allValues: true,
+          noValues: false
+        },
+        toMappingOptions: {
+          invertDefault: false,
+          allValues: true,
+          noValues: false
+        },
+        initiatedByMappingOptions: {
+          invertDefault: false,
+          allValues: true,
+          noValues: false
+        },
+        transferTimesOptions: {
+          invertDefault: false,
+          allValues: true,
+          noValues: false
+        },
+        badgeIdsOptions: {
+          invertDefault: false,
+          allValues: true,
+          noValues: false
+        },
+        ownershipTimesOptions: {
+          invertDefault: false,
+          allValues: true,
+          noValues: false
+        },
+        permittedTimesOptions: {
+          invertDefault: false,
+          allValues: false,
+          noValues: true
+        },
+        forbiddenTimesOptions: {
+          invertDefault: false,
+          allValues: false,
+          noValues: true
+        },
+      }]
+    })
+  }
+
 
   for (const permission of permissions) {
     for (const combination of permission.combinations) {
       const badgeIds = GetUintRangesWithOptions(permission.defaultValues.badgeIds, combination.badgeIdsOptions, permission.defaultValues.usesBadgeIds);
       const timelineTimes = GetUintRangesWithOptions(permission.defaultValues.timelineTimes, combination.timelineTimesOptions, permission.defaultValues.usesTimelineTimes);
       const transferTimes = GetUintRangesWithOptions(permission.defaultValues.transferTimes, combination.transferTimesOptions, permission.defaultValues.usesTransferTimes);
-      const ownedTimes = GetUintRangesWithOptions(permission.defaultValues.ownedTimes, combination.ownedTimesOptions, permission.defaultValues.usesOwnedTimes);
+      const ownershipTimes = GetUintRangesWithOptions(permission.defaultValues.ownershipTimes, combination.ownershipTimesOptions, permission.defaultValues.usesOwnershipTimes);
       const permittedTimes = GetUintRangesWithOptions(permission.defaultValues.permittedTimes, combination.permittedTimesOptions, true);
       const forbiddenTimes = GetUintRangesWithOptions(permission.defaultValues.forbiddenTimes, combination.forbiddenTimesOptions, true);
       const arbitraryValue = permission.defaultValues.arbitraryValue;
@@ -372,7 +529,7 @@ export function GetFirstMatchOnly(permissions: UniversalPermission[]): Universal
       for (const badgeId of badgeIds) {
         for (const timelineTime of timelineTimes) {
           for (const transferTime of transferTimes) {
-            for (const ownershipTime of ownedTimes) {
+            for (const ownershipTime of ownershipTimes) {
               const brokenDown: UniversalPermissionDetails[] = [{
                 badgeId: badgeId,
                 timelineTime: timelineTime,
@@ -412,6 +569,102 @@ export function GetFirstMatchOnly(permissions: UniversalPermission[]): Universal
 
   return handled;
 }
+
+export interface MergedUniversalPermissionDetails {
+  badgeIds: UintRange<bigint>[];
+  timelineTimes: UintRange<bigint>[];
+  transferTimes: UintRange<bigint>[];
+  ownershipTimes: UintRange<bigint>[];
+  toMapping: AddressMapping;
+  fromMapping: AddressMapping;
+  initiatedByMapping: AddressMapping;
+
+  permittedTimes: UintRange<bigint>[];
+  forbiddenTimes: UintRange<bigint>[];
+
+  arbitraryValue: any;
+}
+
+export function MergeUniversalPermissionDetails(permissions: UniversalPermissionDetails[]) {
+  //We can merge two values if N - 1 fields are the same (note currently we only merge uint ranges)
+  const merged: MergedUniversalPermissionDetails[] = permissions.map((permission) => {
+    return {
+      badgeIds: [permission.badgeId],
+      timelineTimes: [permission.timelineTime],
+      transferTimes: [permission.transferTime],
+      ownershipTimes: [permission.ownershipTime],
+      toMapping: permission.toMapping,
+      fromMapping: permission.fromMapping,
+      initiatedByMapping: permission.initiatedByMapping,
+
+      permittedTimes: permission.permittedTimes,
+      forbiddenTimes: permission.forbiddenTimes,
+
+      arbitraryValue: permission.arbitraryValue,
+    };
+  });
+
+  let unhandledLeft = true;
+
+  while (unhandledLeft) {
+    unhandledLeft = false;
+
+    for (let i = 0; i < merged.length; i++) {
+      for (let j = i + 1; j < merged.length; j++) {
+        const first = merged[i];
+        const second = merged[j];
+
+        const badgeIdsAreSame = JSON.stringify(first.badgeIds) === JSON.stringify(second.badgeIds);
+        const timelineTimesAreSame = JSON.stringify(first.timelineTimes) === JSON.stringify(second.timelineTimes);
+        const transferTimesAreSame = JSON.stringify(first.transferTimes) === JSON.stringify(second.transferTimes);
+        const ownershipTimesAreSame = JSON.stringify(first.ownershipTimes) === JSON.stringify(second.ownershipTimes);
+        const toMappingsAreSame = first.toMapping.mappingId === second.toMapping.mappingId && first.toMapping.includeAddresses === second.toMapping.includeAddresses && first.toMapping.addresses === second.toMapping.addresses;
+        const fromMappingsAreSame = first.fromMapping.mappingId === second.fromMapping.mappingId && first.fromMapping.includeAddresses === second.fromMapping.includeAddresses && first.fromMapping.addresses === second.fromMapping.addresses;
+        const initiatedByMappingsAreSame = first.initiatedByMapping.mappingId === second.initiatedByMapping.mappingId && first.initiatedByMapping.includeAddresses === second.initiatedByMapping.includeAddresses && first.initiatedByMapping.addresses === second.initiatedByMapping.addresses;
+
+        const permittedTimesAreSame = JSON.stringify(first.permittedTimes) === JSON.stringify(second.permittedTimes);
+        const forbiddenTimesAreSame = JSON.stringify(first.forbiddenTimes) === JSON.stringify(second.forbiddenTimes);
+        const arbitraryValuesAreSame = JSON.stringify(first.arbitraryValue) === JSON.stringify(second.arbitraryValue);
+
+        const newBadgeIds = badgeIdsAreSame ? first.badgeIds : sortUintRangesAndMergeIfNecessary(deepCopy([...first.badgeIds, ...second.badgeIds]));
+        const newTimelineTimes = timelineTimesAreSame ? first.timelineTimes : sortUintRangesAndMergeIfNecessary(deepCopy([...first.timelineTimes, ...second.timelineTimes]));
+        const newTransferTimes = transferTimesAreSame ? first.transferTimes : sortUintRangesAndMergeIfNecessary(deepCopy([...first.transferTimes, ...second.transferTimes]));
+        const newOwnershipTimes = ownershipTimesAreSame ? first.ownershipTimes : sortUintRangesAndMergeIfNecessary(deepCopy([...first.ownershipTimes, ...second.ownershipTimes]));
+
+        let sameCount = 0;
+        if (badgeIdsAreSame) sameCount++;
+        if (timelineTimesAreSame) sameCount++;
+        if (transferTimesAreSame) sameCount++;
+        if (ownershipTimesAreSame) sameCount++;
+
+        if (sameCount === 3 && toMappingsAreSame && fromMappingsAreSame && initiatedByMappingsAreSame && permittedTimesAreSame && forbiddenTimesAreSame && arbitraryValuesAreSame) {
+          merged.push({
+            badgeIds: newBadgeIds,
+            timelineTimes: newTimelineTimes,
+            transferTimes: newTransferTimes,
+            ownershipTimes: newOwnershipTimes,
+            toMapping: first.toMapping,
+            fromMapping: first.fromMapping,
+            initiatedByMapping: first.initiatedByMapping,
+            permittedTimes: first.permittedTimes,
+            forbiddenTimes: first.forbiddenTimes,
+            arbitraryValue: first.arbitraryValue,
+          });
+
+          merged.splice(i, 1);
+          merged.splice(j, 1);
+
+          unhandledLeft = true;
+          i = Number.MAX_SAFE_INTEGER;
+          j = Number.MAX_SAFE_INTEGER;
+        }
+      }
+    }
+  }
+
+  return merged;
+}
+
 
 function GetPermissionString(permission: UniversalPermissionDetails): string {
   let str = "(";
@@ -520,13 +773,13 @@ export function ValidateUniversalPermissionUpdate(oldPermissions: UniversalPermi
         for (const oldPermittedTime of leftoverPermittedTimes) {
           errMsg += oldPermittedTime.start.toString() + "-" + oldPermittedTime.end.toString() + " ";
         }
-        errMsg += ") which are now set to disallowed";
+        errMsg += ") which are now set to disApproved";
       }
       if (leftoverForbiddenTimes.length > 0 && leftoverPermittedTimes.length > 0) {
         errMsg += " and";
       }
       if (leftoverForbiddenTimes.length > 0) {
-        errMsg += " previously explicitly disallowed the times ( ";
+        errMsg += " previously explicitly disApproved the times ( ";
         for (const oldForbiddenTime of leftoverForbiddenTimes) {
           errMsg += oldForbiddenTime.start.toString() + "-" + oldForbiddenTime.end.toString() + " ";
         }
@@ -537,7 +790,7 @@ export function ValidateUniversalPermissionUpdate(oldPermissions: UniversalPermi
     }
   }
 
-  // Note we do not care about inNewButNotOld because it is fine to add new permissions that were not explicitly allowed/disallowed before
+  // Note we do not care about inNewButNotOld because it is fine to add new permissions that were not explicitly allowed/disApproved before
 
   return null;
 }

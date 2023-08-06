@@ -40,7 +40,7 @@ export const getBalanceForIdAndTime = (id: bigint, time: bigint, balances: Balan
   let amount = 0n;
   for (const balance of balances) {
     const [_idx, found] = searchUintRangesForId(id, balance.badgeIds);
-    const [_, foundTime] = searchUintRangesForId(time, balance.ownedTimes);
+    const [_, foundTime] = searchUintRangesForId(time, balance.ownershipTimes);
     if (found && foundTime) {
       amount += balance.amount;
     }
@@ -71,7 +71,7 @@ export function getBalancesForTime(time: bigint, balances: Balance<bigint>[]) {
   let matchingBalances: Balance<bigint>[] = [];
 
   for (let balance of balances) {
-    let [_, found] = searchUintRangesForId(time, balance.ownedTimes);
+    let [_, found] = searchUintRangesForId(time, balance.ownershipTimes);
     if (found) {
       matchingBalances.push(balance);
     }
@@ -163,7 +163,7 @@ export function deepCopyBalances(balances: Balance<bigint>[]) {
     let balanceToAdd: Balance<bigint> = {
       amount: approval.amount,
       badgeIds: [],
-      ownedTimes: []
+      ownershipTimes: []
     };
 
     for (let j = 0; j < approval.badgeIds.length; j++) {
@@ -174,9 +174,9 @@ export function deepCopyBalances(balances: Balance<bigint>[]) {
       });
     }
 
-    for (let k = 0; k < approval.ownedTimes.length; k++) {
-      let time = approval.ownedTimes[k];
-      balanceToAdd.ownedTimes.push({
+    for (let k = 0; k < approval.ownershipTimes.length; k++) {
+      let time = approval.ownershipTimes[k];
+      balanceToAdd.ownershipTimes.push({
         start: time.start,
         end: time.end
       });
@@ -199,7 +199,7 @@ export function deepCopyBalances(balances: Balance<bigint>[]) {
  */
 export function updateBalances(newBalance: Balance<bigint>, balances: Balance<bigint>[]) {
   // We do a delete then set. Can maybe optimize in future.
-  balances = deleteBalances(newBalance.badgeIds, newBalance.ownedTimes, balances);
+  balances = deleteBalances(newBalance.badgeIds, newBalance.ownershipTimes, balances);
   balances = setBalance(newBalance, balances);
 
   return balances;
@@ -209,13 +209,11 @@ export function updateBalances(newBalance: Balance<bigint>, balances: Balance<bi
 /**
  * Adds the balanceToAdd to the existing balances.
  */
-export function addBalance(existingBalances: Balance<bigint>[], balanceToAdd: Balance<bigint>) {
-  const currBalances = getBalancesForIds(balanceToAdd.badgeIds, balanceToAdd.ownedTimes, existingBalances);
-  console.log("CURR BALANCES", JSON.stringify(currBalances));
-  console.log(currBalances);
+export function addBalance(existingBalances: Balance<bigint>[], balanceToAdd: Balance<bigint>, allowNegative?: boolean) {
+  const currBalances = getBalancesForIds(balanceToAdd.badgeIds, balanceToAdd.ownershipTimes, existingBalances);
 
   for (let balance of currBalances) {
-    balance.amount = safeAddUints(balance.amount, balanceToAdd.amount);
+    balance.amount = safeAddUints(balance.amount, balanceToAdd.amount, allowNegative);
 
     existingBalances = updateBalances(balance, existingBalances);
   }
@@ -226,12 +224,10 @@ export function addBalance(existingBalances: Balance<bigint>[], balanceToAdd: Ba
 /**
  * Adds multiple balances to the existing balances.
  */
-export function addBalances(balancesToAdd: Balance<bigint>[], balances: Balance<bigint>[]) {
+export function addBalances(balancesToAdd: Balance<bigint>[], balances: Balance<bigint>[], allowNegative?: boolean) {
 
   for (let balance of balancesToAdd) {
-    console.log("BEFORE", JSON.stringify(balances));
-    balances = addBalance(balances, balance);
-    console.log("AFTER", JSON.stringify(balances));
+    balances = addBalance(balances, balance, allowNegative);
   }
 
   return balances;
@@ -242,12 +238,12 @@ export function addBalances(balancesToAdd: Balance<bigint>[], balances: Balance<
  *
  * Throws an error if the balances underflow.
  */
-export function subtractBalance(balances: Balance<bigint>[], balanceToRemove: Balance<bigint>) {
-  const currBalances = getBalancesForIds(balanceToRemove.badgeIds, balanceToRemove.ownedTimes, balances);
+export function subtractBalance(balances: Balance<bigint>[], balanceToRemove: Balance<bigint>, allowUnderflow?: boolean) {
+  const currBalances = getBalancesForIds(balanceToRemove.badgeIds, balanceToRemove.ownershipTimes, balances);
 
   for (let currBalanceObj of currBalances) {
     // Use BigInt for safe subtraction
-    currBalanceObj.amount = safeSubtractUints(currBalanceObj.amount, balanceToRemove.amount);
+    currBalanceObj.amount = safeSubtractUints(currBalanceObj.amount, balanceToRemove.amount, allowUnderflow);
 
     balances = updateBalances(currBalanceObj, balances);
   }
@@ -260,9 +256,9 @@ export function subtractBalance(balances: Balance<bigint>[], balanceToRemove: Ba
  *
  * Throws an error if the balances underflow.
  */
-export function subtractBalances(balancesToSubtract: Balance<bigint>[], balances: Balance<bigint>[]) {
+export function subtractBalances(balancesToSubtract: Balance<bigint>[], balances: Balance<bigint>[], allowUnderflow?: boolean) {
   for (let balance of balancesToSubtract) {
-    balances = subtractBalance(balances, balance);
+    balances = subtractBalance(balances, balance, allowUnderflow);
   }
 
   return balances;
@@ -300,15 +296,15 @@ export function getBalancesForIds(idRanges: UintRange<bigint>[], times: UintRang
   const currPermissionDetails: UniversalPermissionDetails[] = [];
   for (const balanceObj of balances) {
     for (const currRange of balanceObj.badgeIds) {
-      for (const currTime of balanceObj.ownedTimes) {
+      for (const currTime of balanceObj.ownershipTimes) {
         currPermissionDetails.push({
           badgeId: currRange,
           ownershipTime: currTime,
           transferTime: { start: BigInt("18446744073709551615"), end: BigInt("18446744073709551615") }, // dummy range
           timelineTime: { start: BigInt("18446744073709551615"), end: BigInt("18446744073709551615") }, // dummy range
-          toMapping: { addresses: [], includeAddresses: false, mappingId: "", uri: "", customData: "" },
-          fromMapping: { addresses: [], includeAddresses: false, mappingId: "", uri: "", customData: "" },
-          initiatedByMapping: { addresses: [], includeAddresses: false, mappingId: "", uri: "", customData: "" },
+          toMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "" },
+          fromMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "" },
+          initiatedByMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "" },
           arbitraryValue: balanceObj.amount,
 
           permittedTimes: [],
@@ -326,9 +322,9 @@ export function getBalancesForIds(idRanges: UintRange<bigint>[], times: UintRang
         ownershipTime: timeToFetch,
         transferTime: { start: BigInt("18446744073709551615"), end: BigInt("18446744073709551615") }, // dummy range
         timelineTime: { start: BigInt("18446744073709551615"), end: BigInt("18446744073709551615") }, // dummy range
-        toMapping: { addresses: [], includeAddresses: false, mappingId: "", uri: "", customData: "" },
-        fromMapping: { addresses: [], includeAddresses: false, mappingId: "", uri: "", customData: "" },
-        initiatedByMapping: { addresses: [], includeAddresses: false, mappingId: "", uri: "", customData: "" },
+        toMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "" },
+        fromMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "" },
+        initiatedByMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "" },
 
         permittedTimes: [],
         forbiddenTimes: [],
@@ -346,7 +342,7 @@ export function getBalancesForIds(idRanges: UintRange<bigint>[], times: UintRang
     fetchedBalances.push({
       amount: amount,
       badgeIds: [overlap.badgeId],
-      ownedTimes: [overlap.ownershipTime],
+      ownershipTimes: [overlap.ownershipTime],
     });
   }
 
@@ -355,7 +351,7 @@ export function getBalancesForIds(idRanges: UintRange<bigint>[], times: UintRang
     fetchedBalances.push({
       amount: 0n,
       badgeIds: [detail.badgeId],
-      ownedTimes: [detail.ownershipTime],
+      ownershipTimes: [detail.ownershipTime],
     });
   }
 
@@ -373,15 +369,15 @@ export function deleteBalances(rangesToDelete: UintRange<bigint>[], timesToDelet
   for (let balanceObj of balances) {
     let currPermissionDetails: UniversalPermissionDetails[] = [];
     for (let currRange of balanceObj.badgeIds) {
-      for (let currTime of balanceObj.ownedTimes) {
+      for (let currTime of balanceObj.ownershipTimes) {
         currPermissionDetails.push({
           badgeId: currRange,
           ownershipTime: currTime,
           transferTime: { start: BigInt(Number.MAX_SAFE_INTEGER), end: BigInt(Number.MAX_SAFE_INTEGER) }, //dummy range
           timelineTime: { start: BigInt(Number.MAX_SAFE_INTEGER), end: BigInt(Number.MAX_SAFE_INTEGER) }, //dummy range
-          toMapping: { addresses: [], includeAddresses: false, mappingId: "", uri: "", customData: "" },
-          fromMapping: { addresses: [], includeAddresses: false, mappingId: "", uri: "", customData: "" },
-          initiatedByMapping: { addresses: [], includeAddresses: false, mappingId: "", uri: "", customData: "" },
+          toMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "" },
+          fromMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "" },
+          initiatedByMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "" },
 
           permittedTimes: [],
           forbiddenTimes: [],
@@ -398,9 +394,9 @@ export function deleteBalances(rangesToDelete: UintRange<bigint>[], timesToDelet
           ownershipTime: timeToDelete,
           transferTime: { start: BigInt(Number.MAX_SAFE_INTEGER), end: BigInt(Number.MAX_SAFE_INTEGER) }, //dummy range
           timelineTime: { start: BigInt(Number.MAX_SAFE_INTEGER), end: BigInt(Number.MAX_SAFE_INTEGER) }, //dummy range
-          toMapping: { addresses: [], includeAddresses: false, mappingId: "", uri: "", customData: "" },
-          fromMapping: { addresses: [], includeAddresses: false, mappingId: "", uri: "", customData: "" },
-          initiatedByMapping: { addresses: [], includeAddresses: false, mappingId: "", uri: "", customData: "" },
+          toMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "" },
+          fromMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "" },
+          initiatedByMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "" },
 
           permittedTimes: [],
           forbiddenTimes: [],
@@ -414,7 +410,7 @@ export function deleteBalances(rangesToDelete: UintRange<bigint>[], timesToDelet
       newBalances.push({
         amount: balanceObj.amount,
         badgeIds: [remainingBalance.badgeId],
-        ownedTimes: [remainingBalance.ownershipTime],
+        ownershipTimes: [remainingBalance.ownershipTime],
       });
     }
   }

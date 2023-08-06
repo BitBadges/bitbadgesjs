@@ -124,10 +124,20 @@ export function getReservedAddressMapping(addressMappingId: string, managerAddre
     };
   }
 
-  if (addressMappingId === 'All') {
+  if (addressMappingId === 'AllWithoutMint') {
     addressMapping = {
-      mappingId: 'All',
+      mappingId: 'AllWithoutMint',
       addresses: ['Mint'],
+      includeAddresses: false,
+      uri: '',
+      customData: '',
+    };
+  }
+
+  if (addressMappingId === 'AllWithMint') {
+    addressMapping = {
+      mappingId: 'AllWithMint',
+      addresses: [],
       includeAddresses: false,
       uri: '',
       customData: '',

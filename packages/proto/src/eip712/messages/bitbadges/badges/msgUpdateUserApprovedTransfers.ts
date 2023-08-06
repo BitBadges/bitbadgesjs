@@ -1,5 +1,5 @@
-import { NumberType, UserApprovedIncomingTransferTimeline, UserApprovedOutgoingTransferTimeline, UserPermissions, getWrappedIncomingTransfersTimeline, getWrappedOutgoingTransfersTimeline, getWrappedUserPermissions } from "../../../../"
-import { APPROVAL_AMOUNTS_TYPES, BALANCE_TYPES, INCOMING_APPROVAL_DETAILS_TYPES, INCREMENTED_BALANCES_TYPES, IS_USER_INCOMING_TRANSFER_ALLOWED_TYPES, IS_USER_OUTGOING_TRANSFER_ALLOWED_TYPES, MANUAL_BALANCES_TYPES, MAX_NUM_TRANSFERS_TYPES, MERKLE_CHALLENGE_TYPES, MUST_OWN_BADGES_TYPES, OUTGOING_APPROVAL_DETAILS_TYPES, PREDETERMINED_BALANCES_TYPES, PREDETERMINED_ORDER_CALCULATION_METHOD_TYPES, UINT_RANGE_TYPES, USER_APPROVED_INCOMING_TRANSFER_COMBINATION_TYPES, USER_APPROVED_INCOMING_TRANSFER_DEFAULT_VALUES_TYPES, USER_APPROVED_INCOMING_TRANSFER_PERMISSION_TYPES, USER_APPROVED_INCOMING_TRANSFER_TIMELINE_TYPES, USER_APPROVED_INCOMING_TRANSFER_TYPES, USER_APPROVED_OUTGOING_TRANSFER_COMBINATION_TYPES, USER_APPROVED_OUTGOING_TRANSFER_DEFAULT_VALUES_TYPES, USER_APPROVED_OUTGOING_TRANSFER_PERMISSION_TYPES, USER_APPROVED_OUTGOING_TRANSFER_TIMELINE_TYPES, USER_APPROVED_OUTGOING_TRANSFER_TYPES, USER_PERMISSIONS_TYPES, VALUE_OPTIONS_TYPES } from "./eip712HelperTypes"
+import { NumberType, Stringify, UserApprovedIncomingTransferTimeline, UserApprovedOutgoingTransferTimeline, UserPermissions, convertUserApprovedIncomingTransferTimeline, convertUserApprovedOutgoingTransferTimeline, convertUserPermissions } from "../../../../";
+import { APPROVAL_AMOUNTS_TYPES, BALANCE_TYPES, INCOMING_APPROVAL_DETAILS_TYPES, INCREMENTED_BALANCES_TYPES, IS_USER_INCOMING_TRANSFER_ALLOWED_TYPES, IS_USER_OUTGOING_TRANSFER_ALLOWED_TYPES, MANUAL_BALANCES_TYPES, MAX_NUM_TRANSFERS_TYPES, MERKLE_CHALLENGE_TYPES, MUST_OWN_BADGES_TYPES, OUTGOING_APPROVAL_DETAILS_TYPES, PREDETERMINED_BALANCES_TYPES, PREDETERMINED_ORDER_CALCULATION_METHOD_TYPES, UINT_RANGE_TYPES, USER_APPROVED_INCOMING_TRANSFER_COMBINATION_TYPES, USER_APPROVED_INCOMING_TRANSFER_DEFAULT_VALUES_TYPES, USER_APPROVED_INCOMING_TRANSFER_PERMISSION_TYPES, USER_APPROVED_INCOMING_TRANSFER_TIMELINE_TYPES, USER_APPROVED_INCOMING_TRANSFER_TYPES, USER_APPROVED_OUTGOING_TRANSFER_COMBINATION_TYPES, USER_APPROVED_OUTGOING_TRANSFER_DEFAULT_VALUES_TYPES, USER_APPROVED_OUTGOING_TRANSFER_PERMISSION_TYPES, USER_APPROVED_OUTGOING_TRANSFER_TIMELINE_TYPES, USER_APPROVED_OUTGOING_TRANSFER_TYPES, USER_PERMISSIONS_TYPES, VALUE_OPTIONS_TYPES } from "./eip712HelperTypes";
 
 const MsgUpdateUserApprovedTransfersValueType = [
   { name: 'creator', type: 'string' },
@@ -59,11 +59,11 @@ export function createEIP712MsgUpdateUserApprovedTransfers<T extends NumberType>
       creator,
       collectionId: collectionId.toString(),
       updateApprovedOutgoingTransfersTimeline,
-      approvedOutgoingTransfersTimeline: getWrappedOutgoingTransfersTimeline(approvedOutgoingTransfersTimeline).map((s) => s.toObject()),
+      approvedOutgoingTransfersTimeline: approvedOutgoingTransfersTimeline.map((x) => convertUserApprovedOutgoingTransferTimeline(x, Stringify)),
       updateApprovedIncomingTransfersTimeline,
-      approvedIncomingTransfersTimeline: getWrappedIncomingTransfersTimeline(approvedIncomingTransfersTimeline).map((s) => s.toObject()),
+      approvedIncomingTransfersTimeline: approvedIncomingTransfersTimeline.map((x) => convertUserApprovedIncomingTransferTimeline(x, Stringify)),
       updateUserPermissions,
-      userPermissions: getWrappedUserPermissions(userPermissions).toObject(),
+      userPermissions: convertUserPermissions(userPermissions, Stringify)
     },
   }
 }
