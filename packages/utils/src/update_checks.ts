@@ -5,6 +5,9 @@ import { castBadgeMetadataToUniversalPermission, castCollectionApprovedTransferT
 import { CollectionApprovedTransferPermissionWithDetails, CollectionApprovedTransferTimelineWithDetails, CollectionApprovedTransferWithDetails } from "./types/collections";
 import { getBadgeMetadataTimesAndValues, getCollectionApprovedTransferTimesAndValues, getCollectionMetadataTimesAndValues, getContractAddressTimesAndValues, getCustomDataTimesAndValues, getInheritedBalancesTimesAndValues, getIsArchivedTimesAndValues, getManagerTimesAndValues, getOffChainBalancesMetadataTimesAndValues, getStandardsTimesAndValues } from "./timeline_helpers";
 
+/**
+ * @category Validate Updates
+ */
 export function getPotentialUpdatesForTimelineValues(times: UintRange<bigint>[][], values: any[]): UniversalPermissionDetails[] {
   let castedPermissions: UniversalPermission[] = [];
   for (let idx = 0; idx < times.length; idx++) {
@@ -26,9 +29,9 @@ export function getPotentialUpdatesForTimelineValues(times: UintRange<bigint>[][
         badgeIds: [],
         ownershipTimes: [],
         transferTimes: [],
-        toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: '', customData: '' },
-        fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: '', customData: '' },
-        initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: '', customData: '' },
+        toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+        fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+        initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
       },
       combinations: [{
         timelineTimesOptions: {
@@ -85,6 +88,9 @@ export function getPotentialUpdatesForTimelineValues(times: UintRange<bigint>[][
   return firstMatches;
 }
 
+/**
+ * @category Validate Updates
+ */
 export function validateCollectionApprovedTransfersUpdate(
   oldApprovedTransfers: CollectionApprovedTransferTimelineWithDetails<bigint>[],
   newApprovedTransfers: CollectionApprovedTransferTimelineWithDetails<bigint>[],
@@ -167,6 +173,9 @@ export function validateCollectionApprovedTransfersUpdate(
 }
 
 
+/**
+ * @category Validate Updates
+ */
 export function validateBadgeMetadataUpdate(
   oldBadgeMetadata: BadgeMetadataTimeline<bigint>[],
   newBadgeMetadata: BadgeMetadataTimeline<bigint>[],
@@ -232,6 +241,9 @@ export function validateBadgeMetadataUpdate(
   return null;
 }
 
+/**
+ * @category Validate Updates
+ */
 export function validateCollectionMetadataUpdate(
   oldCollectionMetadata: CollectionMetadataTimeline<bigint>[],
   newCollectionMetadata: CollectionMetadataTimeline<bigint>[],
@@ -251,9 +263,9 @@ export function validateCollectionMetadataUpdate(
         badgeId: { start: 1n, end: 1n },
         ownershipTime: { start: 1n, end: 1n },
         transferTime: { start: 1n, end: 1n },
-        toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: '', customData: '' },
-        fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: '', customData: '' },
-        initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: '', customData: '' },
+        toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+        fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+        initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
         permittedTimes: [], forbiddenTimes: [], arbitraryValue: undefined
       });
     } else {
@@ -266,9 +278,9 @@ export function validateCollectionMetadataUpdate(
           badgeId: { start: 1n, end: 1n },
           ownershipTime: { start: 1n, end: 1n },
           transferTime: { start: 1n, end: 1n },
-          toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: '', customData: '' },
-          fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: '', customData: '' },
-          initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: '', customData: '' },
+          toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+          fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+          initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
           permittedTimes: [], forbiddenTimes: [], arbitraryValue: undefined
         });
       }
@@ -288,6 +300,9 @@ export function validateCollectionMetadataUpdate(
   return null;
 }
 
+/**
+ * @category Validate Updates
+ */
 export function validateOffChainBalancesMetadataUpdate(
   oldOffChainBalancesMetadata: OffChainBalancesMetadataTimeline<bigint>[],
   newOffChainBalancesMetadata: OffChainBalancesMetadataTimeline<bigint>[],
@@ -308,9 +323,9 @@ export function validateOffChainBalancesMetadataUpdate(
         badgeId: { start: 1n, end: 1n },
         ownershipTime: { start: 1n, end: 1n },
         transferTime: { start: 1n, end: 1n },
-        toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: '', customData: '' },
-        fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: '', customData: '' },
-        initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: '', customData: '' },
+        toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+        fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+        initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
         permittedTimes: [], forbiddenTimes: [], arbitraryValue: undefined
       });
     } else {
@@ -323,9 +338,9 @@ export function validateOffChainBalancesMetadataUpdate(
           badgeId: { start: 1n, end: 1n },
           ownershipTime: { start: 1n, end: 1n },
           transferTime: { start: 1n, end: 1n },
-          toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: '', customData: '' },
-          fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: '', customData: '' },
-          initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: '', customData: '' },
+          toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+          fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+          initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
           permittedTimes: [], forbiddenTimes: [], arbitraryValue: undefined
         });
       }
@@ -343,6 +358,9 @@ export function validateOffChainBalancesMetadataUpdate(
   return null;
 }
 
+/**
+ * @category Validate Updates
+ */
 export function validateInheritedBalancesUpdate(
   oldInheritedBalances: InheritedBalancesTimeline<bigint>[],
   newInheritedBalances: InheritedBalancesTimeline<bigint>[],
@@ -407,6 +425,9 @@ export function validateInheritedBalancesUpdate(
   return null;
 }
 
+/**
+ * @category Validate Updates
+ */
 export function getUpdatedStringCombinations(oldValue: any, newValue: any): UniversalPermissionDetails[] {
   let x: UniversalPermissionDetails[] = [];
   if ((oldValue === null && newValue !== null) || (oldValue !== null && newValue === null) || oldValue !== newValue) {
@@ -415,15 +436,18 @@ export function getUpdatedStringCombinations(oldValue: any, newValue: any): Univ
       badgeId: { start: 1n, end: 1n },
       ownershipTime: { start: 1n, end: 1n },
       transferTime: { start: 1n, end: 1n },
-      toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: '', customData: '' },
-      fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: '', customData: '' },
-      initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: '', customData: '' },
+      toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+      fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+      initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
       permittedTimes: [], forbiddenTimes: [], arbitraryValue: undefined
     });
   }
   return x;
 }
 
+/**
+ * @category Validate Updates
+ */
 export function getUpdatedBoolCombinations(oldValue: any, newValue: any): UniversalPermissionDetails[] {
   if ((oldValue === null && newValue !== null) || (oldValue !== null && newValue === null) || oldValue !== newValue) {
     return [{
@@ -431,15 +455,18 @@ export function getUpdatedBoolCombinations(oldValue: any, newValue: any): Univer
       badgeId: { start: 1n, end: 1n },
       ownershipTime: { start: 1n, end: 1n },
       transferTime: { start: 1n, end: 1n },
-      toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: '', customData: '' },
-      fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: '', customData: '' },
-      initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: '', customData: '' },
+      toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+      fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+      initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
       permittedTimes: [], forbiddenTimes: [], arbitraryValue: undefined
     }];
   }
   return [];
 }
 
+/**
+ * @category Validate Updates
+ */
 export function validateManagerUpdate(
   oldManager: ManagerTimeline<bigint>[],
   newManager: ManagerTimeline<bigint>[],
@@ -464,6 +491,9 @@ export function validateManagerUpdate(
 }
 
 
+/**
+ * @category Validate Updates
+ */
 export function validateCustomDataUpdate(
   oldCustomData: CustomDataTimeline<bigint>[],
   newCustomData: CustomDataTimeline<bigint>[],
@@ -488,6 +518,9 @@ export function validateCustomDataUpdate(
 }
 
 
+/**
+ * @category Validate Updates
+ */
 export function validateStandardsUpdate(
   oldStandards: StandardsTimeline<bigint>[],
   newStandards: StandardsTimeline<bigint>[],
@@ -506,9 +539,9 @@ export function validateStandardsUpdate(
         badgeId: { start: 1n, end: 1n },
         ownershipTime: { start: 1n, end: 1n },
         transferTime: { start: 1n, end: 1n },
-        toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: '', customData: '' },
-        fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: '', customData: '' },
-        initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: '', customData: '' },
+        toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+        fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+        initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
         permittedTimes: [], forbiddenTimes: [], arbitraryValue: undefined
       }];
     } else if (oldValue.length != newValue.length) {
@@ -517,9 +550,9 @@ export function validateStandardsUpdate(
         badgeId: { start: 1n, end: 1n },
         ownershipTime: { start: 1n, end: 1n },
         transferTime: { start: 1n, end: 1n },
-        toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: '', customData: '' },
-        fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: '', customData: '' },
-        initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: '', customData: '' },
+        toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+        fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+        initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
         permittedTimes: [], forbiddenTimes: [], arbitraryValue: undefined
       }];
     } else {
@@ -530,9 +563,9 @@ export function validateStandardsUpdate(
             badgeId: { start: 1n, end: 1n },
             ownershipTime: { start: 1n, end: 1n },
             transferTime: { start: 1n, end: 1n },
-            toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: '', customData: '' },
-            fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: '', customData: '' },
-            initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: '', customData: '' },
+            toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+            fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+            initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
             permittedTimes: [], forbiddenTimes: [], arbitraryValue: undefined
           }];
         }
@@ -552,6 +585,9 @@ export function validateStandardsUpdate(
   return null;
 }
 
+/**
+ * @category Validate Updates
+ */
 export function validateContractAddressUpdate(
   oldContractAddress: ContractAddressTimeline<bigint>[],
   newContractAddress: ContractAddressTimeline<bigint>[],
@@ -575,6 +611,9 @@ export function validateContractAddressUpdate(
   return null;
 }
 
+/**
+ * @category Validate Updates
+ */
 export function validateIsArchivedUpdate(
   oldIsArchived: IsArchivedTimeline<bigint>[],
   newIsArchived: IsArchivedTimeline<bigint>[],

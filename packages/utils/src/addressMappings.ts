@@ -3,6 +3,8 @@ import { convertToCosmosAddress } from "./chains";
 
 /**
  * Checks if a specific account is in the given address mapping.
+ *
+ * @category Address Mappings
  */
 export const isInAddressMapping = (addressesMapping: AddressMapping, addressToCheck: string) => {
   let found = addressesMapping.addresses.includes(addressToCheck);
@@ -18,6 +20,8 @@ export const isInAddressMapping = (addressesMapping: AddressMapping, addressToCh
  * Removes all addresses from one address mapping from another. Returns a new mapping.
  *
  * Returned mapping has ID "", so if you want to store it on the blockchain, you must set this with a unique ID.
+ *
+ * @category Address Mappings
  */
 export function removeAddressMappingFromAddressMapping(mappingToRemove: AddressMapping, addressMapping: AddressMapping) {
   let duplicates = [];
@@ -44,8 +48,8 @@ export function removeAddressMappingFromAddressMapping(mappingToRemove: AddressM
     }
   }
 
-  let removed: AddressMapping = { addresses: [], includeAddresses: false, mappingId: "", uri: "", customData: "" };
-  let remaining: AddressMapping = { addresses: [], includeAddresses: false, mappingId: "", uri: "", customData: "" };
+  let removed: AddressMapping = { addresses: [], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" };
+  let remaining: AddressMapping = { addresses: [], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" };
 
   if (mappingToRemove.includeAddresses && addressMapping.includeAddresses) {
     // Case 1
@@ -79,11 +83,16 @@ export function removeAddressMappingFromAddressMapping(mappingToRemove: AddressM
 
   return [remaining, removed];
 }
-
+/**
+ * @category Address Mappings
+ */
 export function isAddressMappingEmpty(mapping: AddressMapping) {
   return mapping.addresses.length === 0 && mapping.includeAddresses;
 }
 
+/**
+ * @category Address Mappings
+ */
 export function invertAddressMapping(mapping: AddressMapping) {
   mapping.includeAddresses = !mapping.includeAddresses;
   return mapping;
@@ -94,6 +103,8 @@ export function invertAddressMapping(mapping: AddressMapping) {
  *
  * @param {string} addressMappingId - The mapping ID to get the address mapping for
  * @param {string} managerAddress - The manager address to use for the Manager mapping ID
+ *
+ * @category Address Mappings
  */
 export function getReservedAddressMapping(addressMappingId: string, managerAddress: string): AddressMapping | undefined {
   let inverted = false;
@@ -111,6 +122,7 @@ export function getReservedAddressMapping(addressMappingId: string, managerAddre
       includeAddresses: true,
       uri: '',
       customData: '',
+      createdBy: '',
     };
   }
 
@@ -121,6 +133,7 @@ export function getReservedAddressMapping(addressMappingId: string, managerAddre
       includeAddresses: true,
       uri: '',
       customData: '',
+      createdBy: '',
     };
   }
 
@@ -131,6 +144,7 @@ export function getReservedAddressMapping(addressMappingId: string, managerAddre
       includeAddresses: false,
       uri: '',
       customData: '',
+      createdBy: '',
     };
   }
 
@@ -141,6 +155,7 @@ export function getReservedAddressMapping(addressMappingId: string, managerAddre
       includeAddresses: false,
       uri: '',
       customData: '',
+      createdBy: '',
     };
   }
 
@@ -151,6 +166,7 @@ export function getReservedAddressMapping(addressMappingId: string, managerAddre
       includeAddresses: true,
       uri: '',
       customData: '',
+      createdBy: '',
     };
   }
 
@@ -161,6 +177,7 @@ export function getReservedAddressMapping(addressMappingId: string, managerAddre
       includeAddresses: true,
       uri: '',
       customData: '',
+      createdBy: '',
     };
   }
 

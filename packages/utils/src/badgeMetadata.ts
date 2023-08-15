@@ -18,6 +18,8 @@ import { removeUintsFromUintRange, searchUintRangesForId, sortUintRangesAndMerge
  * getMetadataddDetailsForBadgeId - returns the { metadata, uri, badgeIds, metadata } object for a given badgeId
  *
  * setMetadataPropertyForAll - sets a specific (key, value) pair for all metadata entries in the array
+ *
+ * @category Metadata
  */
 
 /**
@@ -29,6 +31,8 @@ import { removeUintsFromUintRange, searchUintRangesForId, sortUintRangesAndMerge
  * @param {UintRange<bigint>[]} badgeIds - The badge IDs to remove the metadata for
  *
  * @returns {BadgeMetadataDetails<bigint>[]} - The new metadata array with the metadata removed
+ *
+ * @category Metadata
  */
 export const removeBadgeMetadata = (currBadgeMetadata: BadgeMetadataDetails<bigint>[], badgeIds: UintRange<bigint>[]) => {
   const dummyMetadata = { name: "metadataToRemove", description: "metadataToRemove", image: "metadataToRemove" };
@@ -52,6 +56,8 @@ export const removeBadgeMetadata = (currBadgeMetadata: BadgeMetadataDetails<bigi
  * @param {UintRange<bigint>} badgeIds - The badge IDs that correspond to the metadata
  * @param {string} uri - The URI that the metadata was fetched from
  *
+ *
+ * @category Metadata
  */
 export const updateBadgeMetadata = (currBadgeMetadata: BadgeMetadataDetails<bigint>[], newBadgeMetadataDetails: BadgeMetadataDetails<bigint>) => {
   let currentMetadata = newBadgeMetadataDetails.metadata;
@@ -121,6 +127,8 @@ export const updateBadgeMetadata = (currBadgeMetadata: BadgeMetadataDetails<bigi
  * @param {BadgeMetadataDetails<bigint>[]} metadataArr - The metadata array to search in
  *
  * @returns {MetadataddDetails | undefined} - The metadata object for the badgeId, or undefined if it does not exist
+ *
+ * @category Metadata
  */
 export function getMetadataDetailsForBadgeId(badgeId: bigint, metadataArr: BadgeMetadataDetails<bigint>[]) {
   let currentMetadata = undefined;
@@ -145,6 +153,8 @@ export function getMetadataDetailsForBadgeId(badgeId: bigint, metadataArr: Badge
  * @param {BadgeMetadataDetails<bigint>[]} metadataArr - The metadata array to search in
  *
  * @returns {Metadata<bigint> | undefined} - The metadata for the badgeId, or undefined if it does not exist
+ *
+ * @category Metadata
  */
 export function getMetadataForBadgeId(badgeId: bigint, metadataArr: BadgeMetadataDetails<bigint>[]) {
   return getMetadataDetailsForBadgeId(badgeId, metadataArr)?.metadata;
@@ -172,6 +182,8 @@ export function bigIntMax(a: bigint, b: bigint): bigint {
  * @param {UintRange<bigint>[]} badgeIds - The badge IDs to update
  * @param {string} key - The key to update
  * @param {any} value - The value to update
+ *
+ * @category Metadata
  */
 export const setMetadataPropertyForSpecificBadgeIds = (metadataArr: BadgeMetadataDetails<bigint>[], badgeIds: UintRange<bigint>[], key: string, value: any) => {
   for (const badgeUintRange of badgeIds) {

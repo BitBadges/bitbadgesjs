@@ -1,13 +1,15 @@
 import { Balance, UintRange } from "bitbadgesjs-proto";
 import { addBalances, getBlankBalance } from "./balances";
 import { BitBadgesCollection } from "./types/collections";
-import { BalanceInfo } from "./types/db";
+import { BalanceInfoWithDetails } from "./types/db";
 import { deepCopy } from "./types/utils";
 
 /**
  * Returns an UintRange[] of length 1 that covers all badgeIds in the collection.
  *
  * { start: 1, end: nextBadgeId - 1 }
+ *
+ * @category Uint Ranges
  */
 export function getUintRangesForAllBadgeIdsInCollection(collection: BitBadgesCollection<bigint>) {
   const totalAddressBalance = getBlankBalance(false);
@@ -40,10 +42,12 @@ export function getUintRangesForAllBadgeIdsInCollection(collection: BitBadgesCol
  *
  * @property {BitBadgesCollection<bigint>} existingCollection - The existing collection, if it exists
  * @property {Balance<bigint>} badgesToCreate - The new badges to create. Will be sent to the "Mint" address, and "Total" will be updated.
+ *
+ * @category Balances
  */
 export function incrementMintAndTotalBalances(
   collectionId: bigint,
-  owners: BalanceInfo<bigint>[],
+  owners: BalanceInfoWithDetails<bigint>[],
   badgesToCreate: Balance<bigint>[],
 ) {
   const totalBalanceStore = owners.find(x => x.cosmosAddress === "Total");
@@ -58,7 +62,7 @@ export function incrementMintAndTotalBalances(
   newUnmintedSupplys.balances = addBalances(badgesToCreate, newUnmintedSupplys.balances);
 
   //Replace "Mint" and "Total" in owners array with new balances
-  const newOwners: BalanceInfo<bigint>[] = owners.filter(x => x.cosmosAddress !== "Mint" && x.cosmosAddress !== "Total") ?? [];
+  const newOwners: BalanceInfoWithDetails<bigint>[] = owners.filter(x => x.cosmosAddress !== "Mint" && x.cosmosAddress !== "Total") ?? [];
   newOwners.push({
     _id: `${collectionId.toString()}:Mint`,
     balances: newUnmintedSupplys.balances,

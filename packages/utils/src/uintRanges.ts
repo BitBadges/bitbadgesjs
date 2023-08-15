@@ -11,6 +11,7 @@ import { bigIntMax, bigIntMin } from "./badgeMetadata";
  *
  * @remarks
  * Returns a new array but also does modify the original.
+ * @category Uint Ranges
  */
 export function sortUintRangesAndMergeIfNecessary(uintRanges: UintRange<bigint>[]) {
   //Insertion sort in order of range.Start. If two have same range.Start, sort by range.End.
@@ -49,6 +50,7 @@ function createUintRange(start: bigint, end: bigint) {
  * Deep copy a list of UintRanges.
  *
  * @param {UintRange<bigint>[]} ranges - The list of UintRanges to copy
+ * @category Uint Ranges
  */
 export function deepCopyRanges(ranges: UintRange<bigint>[]) {
   let newRanges = [];
@@ -64,6 +66,7 @@ export function deepCopyRanges(ranges: UintRange<bigint>[]) {
  *
  * @param {bigint} id - The ID to search for
  * @param {UintRange<bigint>[]} uintRanges - The list of UintRanges to search
+ * @category Uint Ranges
  */
 export function searchUintRangesForId(id: bigint, uintRanges: UintRange<bigint>[]): [bigint, boolean] {
   let ranges = deepCopyRanges(uintRanges)
@@ -94,6 +97,7 @@ export function searchUintRangesForId(id: bigint, uintRanges: UintRange<bigint>[
  *
  * @param {UintRange<bigint>[]} uintRanges - The list of UintRanges to invert
  * @param {bigint} maxId - The max ID to invert up to
+ * @category Uint Ranges
  */
 export function invertUintRanges(uintRanges: UintRange<bigint>[], minId: bigint, maxId: bigint) {
   let ranges = [];
@@ -121,6 +125,7 @@ export function invertUintRanges(uintRanges: UintRange<bigint>[], minId: bigint,
  *
  * @param {UintRange<bigint>} idxsToRemove - The range of Ids to remove
  * @param {UintRange<bigint>} rangeObject - The range of Ids to remove from
+ * @category Uint Ranges
  */
 export function removeUintsFromUintRange(idxsToRemove: UintRange<bigint>, rangeObject: UintRange<bigint>) {
   if (idxsToRemove.end < rangeObject.start || idxsToRemove.start > rangeObject.end) {
@@ -184,6 +189,7 @@ export function removeUintsFromUintRange(idxsToRemove: UintRange<bigint>, rangeO
  *
  * @param {UintRange<bigint>[]} idsToRemove - The range of Ids to remove
  * @param {UintRange<bigint>[]} rangeToRemoveFrom - The range of Ids to remove from
+ * @category Uint Ranges
  */
 export function removeUintRangeFromUintRange(idsToRemove: UintRange<bigint>[], rangeToRemoveFrom: UintRange<bigint>[]): [UintRange<bigint>[], UintRange<bigint>[]] {
   if (idsToRemove.length === 0) {
@@ -209,6 +215,7 @@ export function removeUintRangeFromUintRange(idsToRemove: UintRange<bigint>[], r
 /**
  * Asserts two UintRanges[] do not overlap at all with each other.
  * For example, if we have a list of permitted and forbidden times, we want to make sure that the forbidden times do not overlap with the permitted times.
+ * @category Uint Ranges
  */
 export function assertRangesDoNotOverlapAtAll(rangeToCheck: UintRange<bigint>[], overlappingRange: UintRange<bigint>[]) {
   // Check that for old times, there is 100% overlap with new times and 0% overlap with the opposite
@@ -233,6 +240,7 @@ export function assertRangesDoNotOverlapAtAll(rangeToCheck: UintRange<bigint>[],
  * Overlap here is considered inclusive, so [1, 10] and [10, 20] would be considered overlapping. [1, 10] and [11, 20] would not be considered overlapping.
  *
  * @param {UintRange<bigint>[]} uintRanges - The list of UintRanges to check
+ * @category Uint Ranges
  */
 export function checkIfUintRangesOverlap(uintRanges: UintRange<bigint>[]) {
   return uintRanges.some(({ start, end }, i) => {

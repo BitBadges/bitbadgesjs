@@ -1,11 +1,17 @@
-import { BadgeMetadataTimeline, CollectionApprovedTransferTimeline, CollectionMetadataTimeline, ContractAddressTimeline, CustomDataTimeline, InheritedBalancesTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadataTimeline, StandardsTimeline, TimelineItem, UserApprovedIncomingTransferTimeline, UserApprovedOutgoingTransferTimeline } from "bitbadgesjs-proto";
+import { BadgeMetadataTimeline, CollectionApprovedTransferTimeline, CollectionMetadataTimeline, ContractAddressTimeline, CustomDataTimeline, InheritedBalancesTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadataTimeline, StandardsTimeline, TimelineItem } from "bitbadgesjs-proto";
 import { DefaultPlaceholderMetadata } from "./constants";
 import { CollectionApprovedTransferTimelineWithDetails } from "./types/collections";
+import { UserApprovedIncomingTransferTimelineWithDetails, UserApprovedOutgoingTransferTimelineWithDetails } from "./types/users";
 import { removeUintRangeFromUintRange, searchUintRangesForId } from "./uintRanges";
 
 
 /**
  * Given a timeline-based field, get the index that corresponds to the value for the current time (Date.now()).
+ *
+ * @category Timelines
+ */
+/**
+ * @category Timelines
  */
 export function getCurrentValueIdxForTimeline(timeline: TimelineItem<bigint>[]): bigint {
   const currentTime = BigInt(Date.now());
@@ -31,6 +37,10 @@ function getFullTimeline<T extends TimelineItem<bigint>>(timeline: T[], fieldNam
     unhandledTimes = remaining;
   }
 
+  if (unhandledTimes.length === 0) {
+    return timeline;
+  }
+
   timeline.push({
     [fieldName]: emptyValue,
     timelineTimes: unhandledTimes,
@@ -39,53 +49,89 @@ function getFullTimeline<T extends TimelineItem<bigint>>(timeline: T[], fieldNam
   return timeline;
 }
 
-export async function getFullManagerTimeline(timeline: ManagerTimeline<bigint>[]): Promise<ManagerTimeline<bigint>[]> {
+/**
+ * @category Timelines
+ */
+export function getFullManagerTimeline(timeline: ManagerTimeline<bigint>[]): ManagerTimeline<bigint>[] {
   return getFullTimeline(timeline, "manager", "");
 }
 
-export async function getFullCollectionMetadataTimeline(timeline: CollectionMetadataTimeline<bigint>[]): Promise<CollectionMetadataTimeline<bigint>[]> {
+/**
+ * @category Timelines
+ */
+export function getFullCollectionMetadataTimeline(timeline: CollectionMetadataTimeline<bigint>[]): CollectionMetadataTimeline<bigint>[] {
   return getFullTimeline(timeline, "collectionMetadata", DefaultPlaceholderMetadata);
 }
 
-export async function getFullBadgeMetadataTimeline(timeline: BadgeMetadataTimeline<bigint>[]): Promise<BadgeMetadataTimeline<bigint>[]> {
+/**
+ * @category Timelines
+ */
+export function getFullBadgeMetadataTimeline(timeline: BadgeMetadataTimeline<bigint>[]): BadgeMetadataTimeline<bigint>[] {
   return getFullTimeline(timeline, "badgeMetadata", []);
 }
 
-export async function getOffChainBalancesMetadataTimeline(timeline: OffChainBalancesMetadataTimeline<bigint>[]): Promise<OffChainBalancesMetadataTimeline<bigint>[]> {
+/**
+ * @category Timelines
+ */
+export function getOffChainBalancesMetadataTimeline(timeline: OffChainBalancesMetadataTimeline<bigint>[]): OffChainBalancesMetadataTimeline<bigint>[] {
   return getFullTimeline(timeline, "offChainBalancesMetadata", {
     uri: '',
     customData: '',
   });
 }
 
-export async function getFullCustomDataTimeline(timeline: CustomDataTimeline<bigint>[]): Promise<CustomDataTimeline<bigint>[]> {
+/**
+ * @category Timelines
+ */
+export function getFullCustomDataTimeline(timeline: CustomDataTimeline<bigint>[]): CustomDataTimeline<bigint>[] {
   return getFullTimeline(timeline, "customData", "");
 }
 
-export async function getFullCollectionApprovedTransfersTimeline(timeline: CollectionApprovedTransferTimeline<bigint>[] | CollectionApprovedTransferTimelineWithDetails<bigint>[]): Promise<CollectionApprovedTransferTimeline<bigint>[] | CollectionApprovedTransferTimelineWithDetails<bigint>[]> {
+/**
+ * @category Timelines
+ */
+export function getFullCollectionApprovedTransfersTimeline(timeline: CollectionApprovedTransferTimelineWithDetails<bigint>[]): CollectionApprovedTransferTimeline<bigint>[] {
   return getFullTimeline(timeline, "collectionApprovedTransfers", []);
 }
 
-export async function getFullStandardsTimeline(timeline: StandardsTimeline<bigint>[]): Promise<StandardsTimeline<bigint>[]> {
+/**
+ * @category Timelines
+ */
+export function getFullStandardsTimeline(timeline: StandardsTimeline<bigint>[]): StandardsTimeline<bigint>[] {
   return getFullTimeline(timeline, "standards", []);
 }
 
-export async function getFullIsArchivedTimeline(timeline: IsArchivedTimeline<bigint>[]): Promise<IsArchivedTimeline<bigint>[]> {
+/**
+ * @category Timelines
+ */
+export function getFullIsArchivedTimeline(timeline: IsArchivedTimeline<bigint>[]): IsArchivedTimeline<bigint>[] {
   return getFullTimeline(timeline, "isArchived", false);
 }
 
-export async function getInheritedBalancesTimeline(timeline: InheritedBalancesTimeline<bigint>[]): Promise<InheritedBalancesTimeline<bigint>[]> {
+/**
+ * @category Timelines
+ */
+export function getInheritedBalancesTimeline(timeline: InheritedBalancesTimeline<bigint>[]): InheritedBalancesTimeline<bigint>[] {
   return getFullTimeline(timeline, "inheritedBalances", []);
 }
 
-export async function getFullContractAddressTimeline(timeline: ContractAddressTimeline<bigint>[]): Promise<ContractAddressTimeline<bigint>[]> {
+/**
+ * @category Timelines
+ */
+export function getFullContractAddressTimeline(timeline: ContractAddressTimeline<bigint>[]): ContractAddressTimeline<bigint>[] {
   return getFullTimeline(timeline, "contractAddress", "");
 }
 
-export async function getFullDefaultUserApprovedIncomingTransfersTimeline(timeline: UserApprovedIncomingTransferTimeline<bigint>[]): Promise<UserApprovedIncomingTransferTimeline<bigint>[]> {
+/**
+ * @category Timelines
+ */
+export function getFullDefaultUserApprovedIncomingTransfersTimeline(timeline: UserApprovedIncomingTransferTimelineWithDetails<bigint>[]): UserApprovedIncomingTransferTimelineWithDetails<bigint>[] {
   return getFullTimeline(timeline, "approvedIncomingTransfers", []);
 }
 
-export async function getFullDefaultUserApprovedOutgoingTransfersTimeline(timeline: UserApprovedOutgoingTransferTimeline<bigint>[]): Promise<UserApprovedOutgoingTransferTimeline<bigint>[]> {
+/**
+ * @category Timelines
+ */
+export function getFullDefaultUserApprovedOutgoingTransfersTimeline(timeline: UserApprovedOutgoingTransferTimelineWithDetails<bigint>[]): UserApprovedOutgoingTransferTimelineWithDetails<bigint>[] {
   return getFullTimeline(timeline, "approvedOutgoingTransfers", []);
 }

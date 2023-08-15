@@ -30,6 +30,8 @@ import { searchUintRangesForId } from "./uintRanges";
  *   fetch metadata from badgeUri.uri
  *   store metadata in database with metadataId = metadataId and badgeIds = badgeUri.badgeIds
  *  metadataId++
+ *
+ * @category Metadata
 */
 export const getMetadataIdForBadgeId = (badgeId: bigint, badgeUris: BadgeMetadata<bigint>[]) => {
   let batchIdx = 1n;
@@ -57,13 +59,17 @@ export const getMetadataIdForBadgeId = (badgeId: bigint, badgeUris: BadgeMetadat
   return -1;
 }
 
-export const getMetadataIdForUri = (uri: string, badgeUris: BadgeMetadata<bigint>[]) => {
+/**
+ * @category Metadata
+ */
+export const getMetadataIdsForUri = (uri: string, badgeUris: BadgeMetadata<bigint>[]) => {
   let batchIdx = 1n;
-
+  const metadataIds: bigint[] = [];
   for (const badgeUri of badgeUris) {
     if (badgeUri.uri.includes("{id}")) {
       if (badgeUri.uri === uri) {
-        return batchIdx;
+        metadataIds.push(batchIdx);
+        continue
       }
 
       //Check if uri has a number value that replaces {id}
@@ -82,7 +88,8 @@ export const getMetadataIdForUri = (uri: string, badgeUris: BadgeMetadata<bigint
 
           for (const badgeUintRange of badgeUri.badgeIds) {
             if (num >= badgeUintRange.start && num <= badgeUintRange.end) {
-              return batchIdx + num - badgeUintRange.start;
+              // return batchIdx + num - badgeUintRange.start;
+              metadataIds.push(batchIdx + num - badgeUintRange.start);
             }
 
             batchIdx += badgeUintRange.end - badgeUintRange.start + 1n;
@@ -95,17 +102,20 @@ export const getMetadataIdForUri = (uri: string, badgeUris: BadgeMetadata<bigint
       }
     } else {
       if (badgeUri.uri === uri) {
-        return batchIdx;
+        // return batchIdx;
+        metadataIds.push(batchIdx);
       }
       batchIdx++;
     }
   }
 
-  return -1;
+  return metadataIds;
 }
 
 /**
  * This returns the max metadataId for a collection based on its badge metadata.
+ *
+ * @category Metadata
 */
 export function getMaxMetadataId(badgeUris: BadgeMetadata<bigint>[]) {
   if (badgeUris.length === 0) {
@@ -128,7 +138,9 @@ export function getMaxMetadataId(badgeUris: BadgeMetadata<bigint>[]) {
   return metadataId;
 }
 
-
+/**
+ * @category Metadata
+ */
 export function getUrisForMetadataIds(metadataIds: bigint[], collectionUri: string, badgeUris: BadgeMetadata<bigint>[]) {
   let uris: string[] = [];
   if (metadataIds.find((id) => id === 0n)) {
@@ -151,7 +163,9 @@ export function getUrisForMetadataIds(metadataIds: bigint[], collectionUri: stri
         batchIdx += badgeUintRange.end - badgeUintRange.start + 1n;
       }
     } else {
-      uris.push(badgeUri.uri);
+      if (metadataIds.find((id) => id === batchIdx)) {
+        uris.push(badgeUri.uri);
+      }
       batchIdx++;
     }
   }
@@ -159,6 +173,9 @@ export function getUrisForMetadataIds(metadataIds: bigint[], collectionUri: stri
   return uris;
 }
 
+/**
+ * @category Metadata
+ */
 export function getBadgeIdsForMetadataId(metadataId: bigint, badgeUris: BadgeMetadata<bigint>[]) {
   let batchIdx = 1n;
 

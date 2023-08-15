@@ -447,9 +447,9 @@ export function GetFirstMatchOnly(
     permissions.push({
       defaultValues: {
         timelineTimes: [],
-        fromMapping: { mappingId: '', addresses: [], includeAddresses: false, uri: '', customData: '' },
-        toMapping: { mappingId: '', addresses: [], includeAddresses: false, uri: '', customData: '' },
-        initiatedByMapping: { mappingId: '', addresses: [], includeAddresses: false, uri: '', customData: '' },
+        fromMapping: { mappingId: '', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+        toMapping: { mappingId: '', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+        initiatedByMapping: { mappingId: '', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
         transferTimes: [],
         badgeIds: [],
         ownershipTimes: [],

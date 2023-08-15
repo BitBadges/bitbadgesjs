@@ -7,17 +7,23 @@ import { convertToCosmosAddress } from "./chains";
 /**
  * Given some transfers (potentially incremented), return the balance map to store for a collection with off-chain balances.
  *
+ *
+ * @category Balances
+ *
  * @param {TransferWithIncrements<bigint>[]} transfers - The transfers to process.
  */
-export const createBalanceMapForOffChainBalances = async (transfers: TransferWithIncrements<bigint>[]) => {
+export const createBalanceMapForOffChainBalances = async (transfersWithIncrements: TransferWithIncrements<bigint>[]) => {
   const balanceMap: OffChainBalancesMap<bigint> = {};
 
+  const transfers = getTransfersFromTransfersWithIncrements(transfersWithIncrements);
   //Calculate new balances of the toAddresses
   for (let idx = 0; idx < transfers.length; idx++) {
     const transfer = transfers[idx];
     for (let j = 0; j < transfer.toAddresses.length; j++) {
       const address = transfer.toAddresses[j];
       const cosmosAddress = convertToCosmosAddress(address);
+
+
 
       //currBalance is used as a Balance[] type to be compatible with addBalancesForUintRanges
       const currBalances = balanceMap[cosmosAddress] ? balanceMap[cosmosAddress] : [];
@@ -34,6 +40,8 @@ export const createBalanceMapForOffChainBalances = async (transfers: TransferWit
  * For a transfer with balances: [{ badgeIds: [{ start: 1n, end: 1n }], amount: 1n }], incrementIdsBy: 1n, toAddressesLength: 1000
  * We return [{ badgeIds: [{ start: 1n, end: 1000n }], amount: 1n }] because we transfer x1 badge to 1000 addresses
  * and increment the badgeIds by 1 each time.
+ *
+ * @category Balances
  *
  * @param {TransferWithIncrements<bigint>[]} transfers - The list of transfers with increments.
  * @returns {Balance<bigint>} The balances to be transferred.
@@ -90,6 +98,8 @@ export const getAllBalancesToBeTransferred = (transfers: TransferWithIncrements<
  * Note that if there are N increments, this will create N transfers.
  *
  * @param {TransferWithIncrements<bigint>[]} transfersWithIncrements - The list of transfers with increments.
+ *
+ * @category Balances
  */
 export const getTransfersFromTransfersWithIncrements = (transfersWithIncrements: TransferWithIncrements<bigint>[]) => {
   const transfers: Transfer<bigint>[] = [];
@@ -140,6 +150,8 @@ export const getTransfersFromTransfersWithIncrements = (transfersWithIncrements:
  * @param {bigint} endBadgeId - The end badge ID to subtract from.
  * @param {bigint} amountToTransfer - The amount to subtract.
  * @param {bigint} numRecipients - The number of recipients to subtract from.
+ *
+ * @category Balances
  */
 export const getBalanceAfterTransfer = (balance: Balance<bigint>[], startBadgeId: bigint, endBadgeId: bigint, ownershipTimeStart: bigint, ownershipTimeEnd: bigint, amountToTransfer: bigint, numRecipients: bigint, allowUnderflow?: boolean) => {
   const balanceCopy: Balance<bigint>[] = deepCopy(balance); //need a deep copy of the balance to not mess up calculations
@@ -160,6 +172,8 @@ export const getBalanceAfterTransfer = (balance: Balance<bigint>[], startBadgeId
  *
  * @param {Balance<bigint>[]} startBalance - The balance to subtract from.
  * @param {TransferWithIncrements<bigint>[]} transfers - The transfers that are being sent.
+ *
+ * @category Balances
  */
 export const getBalancesAfterTransfers = (startBalance: Balance<bigint>[], transfers: TransferWithIncrements<bigint>[], allowUnderflow?: boolean) => {
   let endBalances: Balance<bigint>[] = deepCopy(startBalance); //need a deep copy of the balance to not mess up calculations

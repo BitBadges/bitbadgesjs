@@ -18,10 +18,12 @@ import { deepCopy } from "./utils";
  * @property {string[]} [references] - References to another collection, field, anything.
  * @property {UintRange[]} [times] - Arbitrary times in milliseconds. For example, use this for event times.
  *
+ * @property {bigint} [fetchedAt] - UNIX milliseconds the metadata was cached / fetched at
  * @property {boolean} [_isUpdating] - Field used to indicate whether the metadata is in the refresh queue or not (being updated). Do not set this field manually. It will be set by the SDK / API.
  */
 export interface Metadata<T extends NumberType> {
   _isUpdating?: boolean;
+  fetchedAt?: T
 
   name: string;
   description: string;
@@ -41,5 +43,6 @@ export function convertMetadata<T extends NumberType, U extends NumberType>(item
     ...item,
     validFrom: item.validFrom ? item.validFrom.map((UintRange) => convertUintRange(UintRange, convertFunction)) : undefined,
     times: item.times ? item.times.map((UintRange) => convertUintRange(UintRange, convertFunction)) : undefined,
+    fetchedAt: item.fetchedAt ? convertFunction(item.fetchedAt) : undefined,
   })
 }

@@ -49,13 +49,21 @@ export function getBadgesToDisplay(
         const badgeIdsToDisplayIds: UintRange<bigint>[] = [];
         if (numEntriesLeftToHandle > 0) {
           const endBadgeId = bigIntMin(currBadgeId + numEntriesLeftToHandle - 1n, range.end);
-          badgeIdsToDisplayIds.push({ start: currBadgeId, end: endBadgeId });
+          if (currBadgeId <= endBadgeId) {
+            badgeIdsToDisplayIds.push({ start: currBadgeId, end: endBadgeId });
+          }
         }
+
+        const badgeIdsToAdd = sortUintRangesAndMergeIfNecessary(badgeIdsToDisplayIds);
 
         badgeIdsToDisplay.push({
           collectionId: collectionObj.collectionId,
-          badgeIds: sortUintRangesAndMergeIfNecessary(badgeIdsToDisplayIds)
+          badgeIds: badgeIdsToAdd
         });
+
+        const numBadgesAdded = badgeIdsToAdd.reduce((acc, curr) => acc + (curr.end - curr.start + 1n), 0n);
+
+        numEntriesLeftToHandle -= numBadgesAdded;
 
         if (numEntriesLeftToHandle <= 0) break;
       }

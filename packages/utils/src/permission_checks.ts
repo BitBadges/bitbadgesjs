@@ -11,6 +11,9 @@ interface CompareAndGetUpdateCombosToCheckFn {
   ): UniversalPermissionDetails[];
 }
 
+/**
+ * @category Validate Permissions
+ */
 export function getUpdateCombinationsToCheck(
   firstMatchesForOld: UniversalPermissionDetails[],
   firstMatchesForNew: UniversalPermissionDetails[],
@@ -116,6 +119,9 @@ function checkNotForbidden(permission: UniversalPermissionDetails): Error | null
   return null;
 }
 
+/**
+ * @category Validate Permissions
+ */
 export function checkActionPermission(permissions: ActionPermission<bigint>[]): Error | null {
   const castedPermissions = castActionPermissionToUniversalPermission(permissions);
   const permissionDetails = GetFirstMatchOnly(castedPermissions);
@@ -131,6 +137,9 @@ export function checkActionPermission(permissions: ActionPermission<bigint>[]): 
   return null;
 }
 
+/**
+ * @category Validate Permissions
+ */
 export function checkTimedUpdatePermission(
   timelineTimes: UintRange<bigint>[],
   permissions: TimedUpdatePermission<bigint>[]
@@ -143,9 +152,9 @@ export function checkTimedUpdatePermission(
       badgeId: { start: -1n, end: -1n },
       ownershipTime: { start: -1n, end: -1n },
       transferTime: { start: -1n, end: -1n },
-      toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: '', customData: '' },
-      fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: '', customData: '' },
-      initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: '', customData: '' },
+      toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+      fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+      initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
       permittedTimes: [],
       forbiddenTimes: [],
       arbitraryValue: undefined
@@ -159,6 +168,9 @@ export function checkTimedUpdatePermission(
   return checkNotForbiddenForAllOverlaps(permissionDetails, detailsToCheck);
 }
 
+/**
+ * @category Validate Permissions
+ */
 export function checkBalancesActionPermission(
   balances: Balance<bigint>[],
   permissions: BalancesActionPermission<bigint>[]
@@ -175,9 +187,9 @@ export function checkBalancesActionPermission(
           timelineTime: { start: -1n, end: -1n },
 
           transferTime: { start: -1n, end: -1n },
-          toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: '', customData: '' },
-          fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: '', customData: '' },
-          initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: '', customData: '' },
+          toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+          fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+          initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
           permittedTimes: [],
           forbiddenTimes: [],
           arbitraryValue: undefined
@@ -192,6 +204,9 @@ export function checkBalancesActionPermission(
   return checkNotForbiddenForAllOverlaps(permissionDetails, detailsToCheck);
 }
 
+/**
+ * @category Validate Permissions
+ */
 export function checkTimedUpdateWithBadgeIdsPermission(
   details: {
     timelineTimes: UintRange<bigint>[],
@@ -209,9 +224,9 @@ export function checkTimedUpdateWithBadgeIdsPermission(
 
           ownershipTime: { start: -1n, end: -1n },
           transferTime: { start: -1n, end: -1n },
-          toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: '', customData: '' },
-          fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: '', customData: '' },
-          initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: '', customData: '' },
+          toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+          fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+          initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
           permittedTimes: [],
           forbiddenTimes: [],
           arbitraryValue: undefined
@@ -229,6 +244,9 @@ export function checkTimedUpdateWithBadgeIdsPermission(
   return checkNotForbiddenForAllOverlaps(permissionDetails, detailsToCheck);
 }
 
+/**
+ * @category Validate Permissions
+ */
 export function checkCollectionApprovedTransferPermission(
   details: {
     timelineTimes: UintRange<bigint>[],
@@ -277,6 +295,9 @@ export function checkCollectionApprovedTransferPermission(
   );
 }
 
+/**
+ * @category Validate Permissions
+ */
 // export function checkUserApprovedOutgoingTransferPermission(
 //   detailsToCheck: UniversalPermissionDetails[],
 //   permissions: UserApprovedOutgoingTransferPermission<bigint>[],
@@ -294,6 +315,9 @@ export function checkCollectionApprovedTransferPermission(
 //   );
 // }
 
+/**
+ * @category Validate Permissions
+ */
 // export function checkUserApprovedIncomingTransferPermission(
 //   detailsToCheck: UniversalPermissionDetails[],
 //   permissions: UserApprovedIncomingTransferPermission<bigint>[],
@@ -311,6 +335,9 @@ export function checkCollectionApprovedTransferPermission(
 //   );
 // }
 
+/**
+ * @category Validate Permissions
+ */
 export function checkNotForbiddenForAllOverlaps(
   permissionDetails: UniversalPermissionDetails[],
   detailsToCheck: UniversalPermissionDetails[],
@@ -348,17 +375,17 @@ export function checkNotForbiddenForAllOverlaps(
 
     if (!usesMappings) {
       usesToMappings = false;
-      detailToCheck.toMapping = { mappingId: '', addresses: [], includeAddresses: false, uri: '', customData: '' }
+      detailToCheck.toMapping = { mappingId: '', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" }
     }
 
     if (!usesMappings) {
       usesFromMappings = false;
-      detailToCheck.fromMapping = { mappingId: '', addresses: [], includeAddresses: false, uri: '', customData: '' }
+      detailToCheck.fromMapping = { mappingId: '', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" }
     }
 
     if (!usesMappings) {
       usesInitiatedByMappings = false;
-      detailToCheck.initiatedByMapping = { mappingId: '', addresses: [], includeAddresses: false, uri: '', customData: '' }
+      detailToCheck.initiatedByMapping = { mappingId: '', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" }
     }
   }
 

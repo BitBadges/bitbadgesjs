@@ -1,9 +1,27 @@
+/**
+ * @category Number Types
+ */
 export type NumberType = bigint | number | string | boolean;
+/**
+ * @category Number Types
+ */
 export type JSPrimitiveNumberType = string | number | boolean;
 
+/**
+ * @category Number Types
+ */
 export const BigIntify = (item: NumberType) => numberify(item, StringNumberStorageOptions.BigInt) as bigint;
+/**
+ * @category Number Types
+ */
 export const Stringify = (item: NumberType) => numberify(item, StringNumberStorageOptions.String) as string;
+/**
+ * @category Number Types
+ */
 export const Numberify = (item: NumberType) => numberify(item, StringNumberStorageOptions.Number) as number;
+/**
+ * @category Number Types
+ */
 export const NumberifyIfPossible = (item: NumberType) => numberify(item, StringNumberStorageOptions.NumberIfPossible) as number | string;
 
 /**
@@ -18,9 +36,9 @@ export const NumberifyIfPossible = (item: NumberType) => numberify(item, StringN
  *
  * By default, we will attempt to store the value in the database as a JavaScript number if possible (for CouchDB compatibility).
  * If not, we will store it as a string. For queries, we need to handle both cases which can be done by checking the $type field with Mango.
+ *
+ * @category Number Types
  */
-// export interface JSPrimitiveNumberType DEPRECATED in favor of native primitive types. Use NumberType and numberify() instead.
-
 export enum StringNumberStorageOptions {
   String = 'String',
   BigInt = 'BigInt',
@@ -28,7 +46,7 @@ export enum StringNumberStorageOptions {
   NumberIfPossible = 'NumberIfPossible',
 }
 
-export function numberify(_item: NumberType, options?: StringNumberStorageOptions): NumberType {
+function numberify(_item: NumberType, options?: StringNumberStorageOptions): NumberType {
   const item = BigInt(_item);
   if (options === StringNumberStorageOptions.String) {
     return item.toString();

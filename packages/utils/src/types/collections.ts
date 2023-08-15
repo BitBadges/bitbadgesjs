@@ -1,11 +1,14 @@
-import { UintRange, NumberType, convertUintRange, CollectionApprovedTransfer, TimelineItem, ApprovalDetails, AddressMapping, convertApprovalDetails, convertCollectionApprovedTransfer, CollectionApprovedTransferPermission, convertCollectionPermissions, CollectionPermissions, convertCollectionApprovedTransferPermission, CollectionApprovedTransferPermissionDefaultValues, convertCollectionApprovedTransferPermissionDefaultValues } from "bitbadgesjs-proto";
+import { AddressMapping, ApprovalDetails, CollectionApprovedTransfer, CollectionApprovedTransferPermission, CollectionApprovedTransferPermissionDefaultValues, CollectionPermissions, NumberType, TimelineItem, UintRange, convertApprovalDetails, convertCollectionApprovedTransfer, convertCollectionApprovedTransferPermission, convertCollectionApprovedTransferPermissionDefaultValues, convertCollectionPermissions, convertUintRange } from "bitbadgesjs-proto";
 import { AnnouncementInfo, ReviewInfo, TransferActivityInfo, convertAnnouncementInfo, convertReviewInfo, convertTransferActivityInfo } from "./activity";
-import { BalanceInfo, CollectionInfoBase, Identified, convertBalanceInfo, convertCollectionInfo, ApprovalsTrackerInfo, convertApprovalsTrackerInfo, MerkleChallengeWithDetails, MerkleChallengeInfo, convertMerkleChallengeInfo, convertMerkleChallengeWithDetails } from "./db";
-import { Metadata, convertMetadata } from "./metadata";
-import { BitBadgesUserInfo, convertBitBadgesUserInfo } from "./users";
-import { deepCopy, removeCouchDBDetails } from "./utils";
 import { PaginationInfo } from "./api";
+import { ApprovalsTrackerInfo, BalanceInfoWithDetails, CollectionInfoBase, Identified, MerkleChallengeInfo, MerkleChallengeWithDetails, convertApprovalsTrackerInfo, convertBalanceInfoWithDetails, convertCollectionInfo, convertMerkleChallengeInfo, convertMerkleChallengeWithDetails } from "./db";
+import { Metadata, convertMetadata } from "./metadata";
+import { BitBadgesUserInfo, UserApprovedIncomingTransferTimelineWithDetails, UserApprovedOutgoingTransferTimelineWithDetails, convertBitBadgesUserInfo, convertUserApprovedIncomingTransferWithDetails, convertUserApprovedOutgoingTransferWithDetails } from "./users";
+import { deepCopy, removeCouchDBDetails } from "./utils";
 
+/**
+ * @category Metadata
+ */
 export interface BadgeMetadataDetails<T extends NumberType> {
   metadataId?: T,
   badgeIds: UintRange<T>[],
@@ -16,6 +19,9 @@ export interface BadgeMetadataDetails<T extends NumberType> {
   toUpdate?: boolean
 }
 
+/**
+ * @category Metadata
+ */
 export function convertBadgeMetadataDetails<T extends NumberType, U extends NumberType>(item: BadgeMetadataDetails<T>, convertFunction: (item: T) => U): BadgeMetadataDetails<U> {
   return deepCopy({
     ...item,
@@ -25,16 +31,25 @@ export function convertBadgeMetadataDetails<T extends NumberType, U extends Numb
   })
 }
 
+/**
+ * @category Approvals / Transferability
+ */
 export interface CollectionApprovedTransferPermissionDefaultValuesWithDetails<T extends NumberType> extends CollectionApprovedTransferPermissionDefaultValues<T> {
   toMapping: AddressMapping;
   fromMapping: AddressMapping;
   initiatedByMapping: AddressMapping;
 }
 
+/**
+ * @category Approvals / Transferability
+ */
 export interface CollectionApprovedTransferPermissionWithDetails<T extends NumberType> extends CollectionApprovedTransferPermission<T> {
   defaultValues: CollectionApprovedTransferPermissionDefaultValuesWithDetails<T>;
 }
 
+/**
+ * @category Approvals / Transferability
+ */
 export function convertCollectionApprovedTransferPermissionWithDetails<T extends NumberType, U extends NumberType>(item: CollectionApprovedTransferPermissionWithDetails<T>, convertFunction: (item: T) => U): CollectionApprovedTransferPermissionWithDetails<U> {
   return deepCopy({
     ...item,
@@ -65,10 +80,16 @@ export function convertCollectionPermissionsWithDetails<T extends NumberType, U 
   })
 }
 
+/**
+ * @category Approvals / Transferability
+ */
 export interface ApprovalDetailsWithDetails<T extends NumberType> extends ApprovalDetails<T> {
   merkleChallenges: MerkleChallengeWithDetails<T>[];
 }
 
+/**
+ * @category Approvals / Transferability
+ */
 export interface CollectionApprovedTransferWithDetails<T extends NumberType> extends CollectionApprovedTransfer<T> {
   approvalDetails: ApprovalDetailsWithDetails<T>[];
   toMapping: AddressMapping;
@@ -76,6 +97,9 @@ export interface CollectionApprovedTransferWithDetails<T extends NumberType> ext
   initiatedByMapping: AddressMapping;
 }
 
+/**
+ * @category Approvals / Transferability
+ */
 export function convertCollectionApprovedTransferWithDetails<T extends NumberType, U extends NumberType>(item: CollectionApprovedTransferWithDetails<T>, convertFunction: (item: T) => U): CollectionApprovedTransferWithDetails<U> {
   return deepCopy({
     ...item,
@@ -85,11 +109,17 @@ export function convertCollectionApprovedTransferWithDetails<T extends NumberTyp
       merkleChallenges: approvalDetails.merkleChallenges.map((merkleChallenge) => convertMerkleChallengeWithDetails(merkleChallenge, convertFunction)),
     })),
   })
-}
+
+/**
+ * @category Approvals / Transferability
+ */}
 export interface CollectionApprovedTransferTimelineWithDetails<T extends NumberType> extends TimelineItem<T> {
   collectionApprovedTransfers: CollectionApprovedTransferWithDetails<T>[]
 }
 
+/**
+ * @category Approvals / Transferability
+ */
 export function convertCollectionApprovedTransferTimelineWithDetails<T extends NumberType, U extends NumberType>(item: CollectionApprovedTransferTimelineWithDetails<T>, convertFunction: (item: T) => U): CollectionApprovedTransferTimelineWithDetails<U> {
   return deepCopy({
     ...item,
@@ -122,19 +152,24 @@ export function convertCollectionApprovedTransferTimelineWithDetails<T extends N
  * You are responsible for fetching the missing information as needed from the corresponding API routes.
  *
  * See documentation for helper functions, examples, and tutorials on handling this data and paginations.
+ *
+ * @category API / Indexer
  */
 export interface BitBadgesCollection<T extends NumberType> extends CollectionInfoBase<T>, Identified {
   managerInfo: BitBadgesUserInfo<T>;
   collectionApprovedTransfersTimeline: CollectionApprovedTransferTimelineWithDetails<T>[];
   collectionPermissions: CollectionPermissionsWithDetails<T>;
 
+  defaultUserApprovedOutgoingTransfersTimeline: UserApprovedOutgoingTransferTimelineWithDetails<T>[];
+  defaultUserApprovedIncomingTransfersTimeline: UserApprovedIncomingTransferTimelineWithDetails<T>[];
+
   //The following are to be fetched dynamically and as needed from the DB
-  collectionMetadata?: Metadata<T>;
-  badgeMetadata: BadgeMetadataDetails<T>[];
+  cachedCollectionMetadata?: Metadata<T>;
+  cachedBadgeMetadata: BadgeMetadataDetails<T>[];
   activity: TransferActivityInfo<T>[],
   announcements: AnnouncementInfo<T>[],
   reviews: ReviewInfo<T>[],
-  owners: BalanceInfo<T>[],
+  owners: BalanceInfoWithDetails<T>[],
   merkleChallenges: MerkleChallengeInfo<T>[],
   approvalsTrackers: ApprovalsTrackerInfo<T>[],
 
@@ -156,14 +191,24 @@ export function convertBitBadgesCollection<T extends NumberType, U extends Numbe
       timelineTimes: timelineItem.timelineTimes.map((timelineTime) => convertUintRange(timelineTime, convertFunction)),
       collectionApprovedTransfers: timelineItem.collectionApprovedTransfers.map((collectionApprovedTransfer) => convertCollectionApprovedTransferWithDetails(collectionApprovedTransfer, convertFunction)),
     })),
+    defaultUserApprovedIncomingTransfersTimeline: item.defaultUserApprovedIncomingTransfersTimeline.map((timelineItem) => ({
+      ...timelineItem,
+      timelineTimes: timelineItem.timelineTimes.map((timelineTime) => convertUintRange(timelineTime, convertFunction)),
+      approvedIncomingTransfers: timelineItem.approvedIncomingTransfers.map((approvedIncomingTransfer) => convertUserApprovedIncomingTransferWithDetails(approvedIncomingTransfer, convertFunction)),
+    })),
+    defaultUserApprovedOutgoingTransfersTimeline: item.defaultUserApprovedOutgoingTransfersTimeline.map((timelineItem) => ({
+      ...timelineItem,
+      timelineTimes: timelineItem.timelineTimes.map((timelineTime) => convertUintRange(timelineTime, convertFunction)),
+      approvedOutgoingTransfers: timelineItem.approvedOutgoingTransfers.map((approvedOutgoingTransfer) => convertUserApprovedOutgoingTransferWithDetails(approvedOutgoingTransfer, convertFunction)),
+    })),
     collectionPermissions: convertCollectionPermissionsWithDetails(item.collectionPermissions, convertFunction),
     managerInfo: convertBitBadgesUserInfo(item.managerInfo, convertFunction),
-    collectionMetadata: item.collectionMetadata ? convertMetadata(item.collectionMetadata, convertFunction) : undefined,
-    badgeMetadata: item.badgeMetadata.map((metadata) => convertBadgeMetadataDetails(metadata, convertFunction)),
+    cachedCollectionMetadata: item.cachedCollectionMetadata ? convertMetadata(item.cachedCollectionMetadata, convertFunction) : undefined,
+    cachedBadgeMetadata: item.cachedBadgeMetadata.map((metadata) => convertBadgeMetadataDetails(metadata, convertFunction)),
     activity: item.activity.map((activityItem) => convertTransferActivityInfo(activityItem, convertFunction)).map(x => removeCouchDBDetails(x)),
     announcements: item.announcements.map((activityItem) => convertAnnouncementInfo(activityItem, convertFunction)).map(x => removeCouchDBDetails(x)),
     reviews: item.reviews.map((activityItem) => convertReviewInfo(activityItem, convertFunction)).map(x => removeCouchDBDetails(x)),
-    owners: item.owners.map((balance) => convertBalanceInfo(balance, convertFunction)).map(x => removeCouchDBDetails(x)),
+    owners: item.owners.map((balance) => convertBalanceInfoWithDetails(balance, convertFunction)).map(x => removeCouchDBDetails(x)),
     merkleChallenges: item.merkleChallenges.map((merkleChallenge) => convertMerkleChallengeInfo(merkleChallenge, convertFunction)).map(x => removeCouchDBDetails(x)),
     approvalsTrackers: item.approvalsTrackers.map((approvalsTracker) => convertApprovalsTrackerInfo(approvalsTracker, convertFunction)).map(x => removeCouchDBDetails(x)),
     _rev: undefined,

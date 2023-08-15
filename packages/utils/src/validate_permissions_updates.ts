@@ -5,6 +5,9 @@ import { CollectionApprovedTransferPermissionWithDetails, CollectionPermissionsW
 import { removeUintRangeFromUintRange } from "./uintRanges";
 //TODO: Add validate basic logic
 
+/**
+ * @category Validate Updates
+ */
 export function validateBalancesActionPermissionUpdate(
   oldPermissions: BalancesActionPermission<bigint>[],
   newPermissions: BalancesActionPermission<bigint>[]
@@ -34,6 +37,9 @@ export function validateBalancesActionPermissionUpdate(
   return null;
 }
 
+/**
+ * @category Validate Updates
+ */
 export function validateTimedUpdatePermissionUpdate(
   oldPermissions: TimedUpdatePermission<bigint>[],
   newPermissions: TimedUpdatePermission<bigint>[]
@@ -63,6 +69,9 @@ export function validateTimedUpdatePermissionUpdate(
   return null;
 }
 
+/**
+ * @category Validate Updates
+ */
 export function validateTimedUpdateWithBadgeIdsPermissionUpdate(
   oldPermissions: TimedUpdateWithBadgeIdsPermission<bigint>[],
   newPermissions: TimedUpdateWithBadgeIdsPermission<bigint>[]
@@ -92,6 +101,9 @@ export function validateTimedUpdateWithBadgeIdsPermissionUpdate(
   return null;
 }
 
+/**
+ * @category Validate Updates
+ */
 export function validateCollectionApprovedTransferPermissionsUpdate(
   oldPermissions: CollectionApprovedTransferPermissionWithDetails<bigint>[],
   newPermissions: CollectionApprovedTransferPermissionWithDetails<bigint>[],
@@ -121,6 +133,9 @@ export function validateCollectionApprovedTransferPermissionsUpdate(
   return null;
 }
 
+/**
+ * @category Validate Updates
+ */
 export function validateActionPermissionUpdate(
   oldPermissions: ActionPermission<bigint>[],
   newPermissions: ActionPermission<bigint>[]
@@ -150,6 +165,9 @@ export function validateActionPermissionUpdate(
   return null;
 }
 
+/**
+ * @category Validate Updates
+ */
 export function validatePermissionsUpdate(
   oldPermissions: CollectionPermissionsWithDetails<bigint>,
   newPermissions: CollectionPermissionsWithDetails<bigint>
@@ -264,6 +282,9 @@ export function validatePermissionsUpdate(
   return null;
 }
 
+/**
+ * @category Validate Updates
+ */
 export function validateUniversalPermissionUpdate(
   oldPermissions: UniversalPermissionDetails[],
   newPermissions: UniversalPermissionDetails[]
