@@ -4,7 +4,7 @@ import { safeAddUints, safeSubtractUints } from "./math";
 import { getOverlapsAndNonOverlaps } from "./overlaps";
 import { BitBadgesCollection } from "./types/collections";
 import { CollectionInfoBase } from "./types/db";
-import { deepCopyRanges, searchUintRangesForId, sortUintRangesAndMergeIfNecessary } from "./uintRanges";
+import { searchUintRangesForId, sortUintRangesAndMergeIfNecessary } from "./uintRanges";
 
 /**
  * Creates a blank balance object with empty balances and approvals.

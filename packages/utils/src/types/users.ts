@@ -1,8 +1,9 @@
 import { AddressMapping, NumberType, TimelineItem, UserApprovedIncomingTransfer, UserApprovedOutgoingTransfer, convertUintRange, convertUserApprovedIncomingTransfer, convertUserApprovedOutgoingTransfer } from "bitbadgesjs-proto"
 import { AnnouncementInfo, ReviewInfo, TransferActivityInfo, convertAnnouncementInfo, convertReviewInfo, convertTransferActivityInfo } from "./activity"
 import { PaginationInfo } from "./api"
-import { AccountInfoBase, ApprovalsTrackerInfo, BalanceInfoWithDetails, Identified, MerkleChallengeInfo, ProfileInfoBase, convertAccountInfo, convertApprovalsTrackerInfo, convertBalanceInfoWithDetails, convertMerkleChallengeInfo, convertProfileInfo } from "./db"
+import { AccountInfoBase, ApprovalsTrackerInfo, BalanceInfoWithDetails, ClaimAlertInfo, Identified, MerkleChallengeInfo, ProfileInfoBase, convertAccountInfo, convertApprovalsTrackerInfo, convertBalanceInfoWithDetails, convertClaimAlertInfo, convertMerkleChallengeInfo, convertProfileInfo } from "./db"
 import { deepCopy, removeCouchDBDetails } from "./utils"
+import { AddressMappingWithMetadata, convertAddressMappingWithMetadata } from "./metadata"
 
 
 /**
@@ -119,6 +120,8 @@ export interface BitBadgesUserInfo<T extends NumberType> extends ProfileInfoBase
   reviews: ReviewInfo<T>[],
   merkleChallenges: MerkleChallengeInfo<T>[],
   approvalsTrackers: ApprovalsTrackerInfo<T>[],
+  addressMappings: AddressMappingWithMetadata<T>[],
+  claimAlerts: ClaimAlertInfo<T>[],
 
   views: {
     [viewKey: string]: {
@@ -142,6 +145,8 @@ export function convertBitBadgesUserInfo<T extends NumberType, U extends NumberT
     reviews: item.reviews.map((activityItem) => convertReviewInfo(activityItem, convertFunction)).map(x => removeCouchDBDetails(x)),
     merkleChallenges: item.merkleChallenges.map((challenge) => convertMerkleChallengeInfo(challenge, convertFunction)).map(x => removeCouchDBDetails(x)),
     approvalsTrackers: item.approvalsTrackers.map((tracker) => convertApprovalsTrackerInfo(tracker, convertFunction)).map(x => removeCouchDBDetails(x)),
+    addressMappings: item.addressMappings.map((mapping) => convertAddressMappingWithMetadata(mapping, convertFunction)),
+    claimAlerts: item.claimAlerts.map((alert) => convertClaimAlertInfo(alert, convertFunction)),
     views: item.views,
     _rev: undefined,
     _deleted: undefined,

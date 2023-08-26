@@ -243,7 +243,7 @@ export interface AddressMapping {
   uri: string;
   customData: string;
 
-  createdBy: string;
+  createdBy?: string;
 }
 
 // export function convertAddressMapping<T extends NumberType, U extends NumberType>(addressMapping: AddressMapping<T>, convertFunction: (item: T) => U): AddressMapping<U> {

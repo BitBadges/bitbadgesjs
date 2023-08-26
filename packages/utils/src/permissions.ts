@@ -334,7 +334,10 @@ export const castCollectionApprovedTransferToUniversalPermission = (
         usesFromMapping: true,
         usesInitiatedByMapping: true,
         usesOwnershipTimes: true,
-        arbitraryValue: approvedTransfer,
+        arbitraryValue: {
+          approvalDetails: approvedTransfer.approvalDetails,
+          allowedCombinations: approvedTransfer.allowedCombinations,
+        }
       },
       combinations: [{
         fromMappingOptions: {
@@ -416,7 +419,10 @@ export const castUserApprovedOutgoingTransfersToUniversalPermission = (
         usesFromMapping: true,
         usesInitiatedByMapping: true,
         usesOwnershipTimes: true,
-        arbitraryValue: approvedTransfer,
+        arbitraryValue: {
+          approvalDetails: approvedTransfer.approvalDetails,
+          allowedCombinations: approvedTransfer.allowedCombinations,
+        }
       },
       combinations: [{
         fromMappingOptions: {
@@ -499,7 +505,10 @@ export const castUserApprovedIncomingTransfersToUniversalPermission = (
         usesFromMapping: true,
         usesInitiatedByMapping: true,
         usesOwnershipTimes: true,
-        arbitraryValue: approvedTransfer,
+        arbitraryValue: {
+          approvalDetails: approvedTransfer.approvalDetails,
+          allowedCombinations: approvedTransfer.allowedCombinations,
+        }
       },
       combinations: [{
         fromMappingOptions: {

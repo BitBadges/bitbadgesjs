@@ -587,7 +587,7 @@ export interface MergedUniversalPermissionDetails {
 
 export function MergeUniversalPermissionDetails(permissions: UniversalPermissionDetails[]) {
   //We can merge two values if N - 1 fields are the same (note currently we only merge uint ranges)
-  const merged: MergedUniversalPermissionDetails[] = permissions.map((permission) => {
+  let merged: MergedUniversalPermissionDetails[] = permissions.map((permission) => {
     return {
       badgeIds: [permission.badgeId],
       timelineTimes: [permission.timelineTime],
@@ -618,9 +618,9 @@ export function MergeUniversalPermissionDetails(permissions: UniversalPermission
         const timelineTimesAreSame = JSON.stringify(first.timelineTimes) === JSON.stringify(second.timelineTimes);
         const transferTimesAreSame = JSON.stringify(first.transferTimes) === JSON.stringify(second.transferTimes);
         const ownershipTimesAreSame = JSON.stringify(first.ownershipTimes) === JSON.stringify(second.ownershipTimes);
-        const toMappingsAreSame = first.toMapping.mappingId === second.toMapping.mappingId && first.toMapping.includeAddresses === second.toMapping.includeAddresses && first.toMapping.addresses === second.toMapping.addresses;
-        const fromMappingsAreSame = first.fromMapping.mappingId === second.fromMapping.mappingId && first.fromMapping.includeAddresses === second.fromMapping.includeAddresses && first.fromMapping.addresses === second.fromMapping.addresses;
-        const initiatedByMappingsAreSame = first.initiatedByMapping.mappingId === second.initiatedByMapping.mappingId && first.initiatedByMapping.includeAddresses === second.initiatedByMapping.includeAddresses && first.initiatedByMapping.addresses === second.initiatedByMapping.addresses;
+        const toMappingsAreSame = first.toMapping.includeAddresses === second.toMapping.includeAddresses && JSON.stringify(first.toMapping.addresses) === JSON.stringify(second.toMapping.addresses);
+        const fromMappingsAreSame = first.fromMapping.includeAddresses === second.fromMapping.includeAddresses && JSON.stringify(first.fromMapping.addresses) === JSON.stringify(second.fromMapping.addresses);
+        const initiatedByMappingsAreSame = first.initiatedByMapping.includeAddresses === second.initiatedByMapping.includeAddresses && JSON.stringify(first.initiatedByMapping.addresses) === JSON.stringify(second.initiatedByMapping.addresses);
 
         const permittedTimesAreSame = JSON.stringify(first.permittedTimes) === JSON.stringify(second.permittedTimes);
         const forbiddenTimesAreSame = JSON.stringify(first.forbiddenTimes) === JSON.stringify(second.forbiddenTimes);
@@ -637,6 +637,11 @@ export function MergeUniversalPermissionDetails(permissions: UniversalPermission
         if (transferTimesAreSame) sameCount++;
         if (ownershipTimesAreSame) sameCount++;
 
+        let addressSameCount = 0;
+        if (toMappingsAreSame) addressSameCount++;
+        if (fromMappingsAreSame) addressSameCount++;
+        if (initiatedByMappingsAreSame) addressSameCount++;
+
         if (sameCount === 3 && toMappingsAreSame && fromMappingsAreSame && initiatedByMappingsAreSame && permittedTimesAreSame && forbiddenTimesAreSame && arbitraryValuesAreSame) {
           merged.push({
             badgeIds: newBadgeIds,
@@ -651,8 +656,37 @@ export function MergeUniversalPermissionDetails(permissions: UniversalPermission
             arbitraryValue: first.arbitraryValue,
           });
 
-          merged.splice(i, 1);
-          merged.splice(j, 1);
+          merged = merged.filter((_, idx) => idx !== i && idx !== j);
+
+          unhandledLeft = true;
+          i = Number.MAX_SAFE_INTEGER;
+          j = Number.MAX_SAFE_INTEGER;
+        } else if (sameCount === 4 && addressSameCount == 2 && permittedTimesAreSame && forbiddenTimesAreSame && arbitraryValuesAreSame) {
+          console.log("MERGING");
+          //TODO: Merge address mappings if includeAddresses is not the same
+          merged.push({
+            badgeIds: newBadgeIds,
+            timelineTimes: newTimelineTimes,
+            transferTimes: newTransferTimes,
+            ownershipTimes: newOwnershipTimes,
+            toMapping: !toMappingsAreSame && first.toMapping.includeAddresses === second.toMapping.includeAddresses ? {
+              ...first.toMapping,
+              addresses: [...new Set([...first.toMapping.addresses, ...second.toMapping.addresses])]
+            } : first.toMapping,
+            fromMapping: !fromMappingsAreSame && first.fromMapping.includeAddresses === second.fromMapping.includeAddresses ? {
+              ...first.fromMapping,
+              addresses: [...new Set([...first.fromMapping.addresses, ...second.fromMapping.addresses])]
+            } : first.fromMapping,
+            initiatedByMapping: !initiatedByMappingsAreSame && first.initiatedByMapping.includeAddresses === second.initiatedByMapping.includeAddresses ? {
+              ...first.initiatedByMapping,
+              addresses: [...new Set([...first.initiatedByMapping.addresses, ...second.initiatedByMapping.addresses])]
+            } : first.initiatedByMapping,
+            permittedTimes: first.permittedTimes,
+            forbiddenTimes: first.forbiddenTimes,
+            arbitraryValue: first.arbitraryValue,
+          });
+
+          merged = merged.filter((_, idx) => idx !== i && idx !== j);
 
           unhandledLeft = true;
           i = Number.MAX_SAFE_INTEGER;
@@ -661,7 +695,6 @@ export function MergeUniversalPermissionDetails(permissions: UniversalPermission
       }
     }
   }
-
   return merged;
 }
 

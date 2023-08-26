@@ -1,4 +1,4 @@
-import { AddressMapping, ApprovalTrackerIdDetails, BadgeMetadataTimeline, Balance, CollectionApprovedTransferTimeline, CollectionMetadataTimeline, CollectionPermissions, ContractAddressTimeline, CustomDataTimeline, InheritedBalancesTimeline, IsArchivedTimeline, ManagerTimeline, MerkleChallenge, OffChainBalancesMetadataTimeline, StandardsTimeline, UserApprovedIncomingTransferTimeline, UserApprovedOutgoingTransferTimeline, UserBalance, UserPermissions, convertBadgeMetadataTimeline, convertBalance, convertCollectionApprovedTransferTimeline, convertCollectionMetadataTimeline, convertCollectionPermissions, convertContractAddressTimeline, convertCustomDataTimeline, convertInheritedBalancesTimeline, convertIsArchivedTimeline, convertManagerTimeline, convertMerkleChallenge, convertOffChainBalancesMetadataTimeline, convertStandardsTimeline, convertUserApprovedIncomingTransferTimeline, convertUserApprovedOutgoingTransferTimeline, convertUserBalance, convertUserPermissions } from "bitbadgesjs-proto";
+import { AddressMapping, ApprovalTrackerIdDetails, BadgeMetadataTimeline, Balance, CollectionApprovedTransferTimeline, CollectionMetadataTimeline, CollectionPermissions, ContractAddressTimeline, CustomDataTimeline, InheritedBalancesTimeline, IsArchivedTimeline, ManagerTimeline, MerkleChallenge, OffChainBalancesMetadataTimeline, StandardsTimeline, UintRange, UserApprovedIncomingTransferTimeline, UserApprovedOutgoingTransferTimeline, UserBalance, UserPermissions, convertBadgeMetadataTimeline, convertBalance, convertCollectionApprovedTransferTimeline, convertCollectionMetadataTimeline, convertCollectionPermissions, convertContractAddressTimeline, convertCustomDataTimeline, convertInheritedBalancesTimeline, convertIsArchivedTimeline, convertManagerTimeline, convertMerkleChallenge, convertOffChainBalancesMetadataTimeline, convertStandardsTimeline, convertUintRange, convertUserApprovedIncomingTransferTimeline, convertUserApprovedOutgoingTransferTimeline, convertUserBalance, convertUserPermissions } from "bitbadgesjs-proto";
 import MerkleTree from "merkletreejs";
 import nano from "nano";
 import { CosmosCoin, convertCosmosCoin } from "./coin";
@@ -69,6 +69,7 @@ export interface CollectionInfoBase<T extends NumberType> {
   defaultUserPermissions: UserPermissions<T>;
   createdBy: string;
   createdBlock: T;
+  createdTimestamp: T;
 }
 /**
  * @category API / Indexer
@@ -101,6 +102,7 @@ export function convertCollectionInfo<T extends NumberType, U extends NumberType
     defaultUserApprovedIncomingTransfersTimeline: item.defaultUserApprovedIncomingTransfersTimeline.map((defaultUserApprovedIncomingTransfersTimeline) => convertUserApprovedIncomingTransferTimeline(defaultUserApprovedIncomingTransfersTimeline, convertFunction)),
     defaultUserPermissions: convertUserPermissions(item.defaultUserPermissions, convertFunction),
     createdBlock: convertFunction(item.createdBlock),
+    createdTimestamp: convertFunction(item.createdTimestamp),
   })
 }
 
@@ -179,6 +181,8 @@ export function convertAccountDoc<T extends NumberType, U extends NumberType>(it
  *
  * @category API / Indexer
  * @typedef {Object} ProfileInfoBase
+ * @property {boolean} fetchedProfile - Whether we have already fetched the profile or not
+ *
  * @property {NumberType} seenActivity - The timestamp of the last activity seen for this account (milliseconds since epoch)
  * @property {NumberType} createdAt - The timestamp of when this account was created (milliseconds since epoch)
  *
@@ -187,6 +191,9 @@ export function convertAccountDoc<T extends NumberType, U extends NumberType>(it
  * @property {string} github - The GitHub username of the account
  * @property {string} telegram - The Telegram username of the account
  * @property {string} readme - The readme of the account
+ * @property {string} profilePicUrl - The profile picture URL of the account
+ * @property {string} username - The username of the account
+ *
  *
  * @remarks
  * Other information like resolvedName, avatar, balance, etc are to be loaded dynamically each time the account is fetched
@@ -195,6 +202,8 @@ export function convertAccountDoc<T extends NumberType, U extends NumberType>(it
  * See UserInfo
  */
 export interface ProfileInfoBase<T extends NumberType> {
+  fetchedProfile?: boolean
+
   seenActivity?: T;
   createdAt?: T;
 
@@ -204,7 +213,33 @@ export interface ProfileInfoBase<T extends NumberType> {
   github?: string
   telegram?: string
   readme?: string
+
+  showAllByDefault?: boolean
+  shownBadges?: {
+    collectionId: T,
+    badgeIds: UintRange<T>[],
+  }[],
+  hiddenBadges?: {
+    collectionId: T,
+    badgeIds: UintRange<T>[],
+  }[],
+
+  customPages?: {
+    title: string,
+    description: string,
+    badges: {
+      collectionId: T,
+      badgeIds: UintRange<T>[],
+    }[]
+  }[]
+
+  profilePicUrl?: string
+  username?: string
+
+  latestSignedInChain?: SupportedChain
 }
+
+
 /**
  * @category API / Indexer
  */
@@ -222,6 +257,22 @@ export function convertProfileInfo<T extends NumberType, U extends NumberType>(i
     ...item,
     seenActivity: item.seenActivity ? convertFunction(item.seenActivity) : undefined,
     createdAt: item.createdAt ? convertFunction(item.createdAt) : undefined,
+    shownBadges: item.shownBadges ? item.shownBadges.map((shownBadge) => ({
+      collectionId: convertFunction(shownBadge.collectionId),
+      badgeIds: shownBadge.badgeIds.map((badgeId) => convertUintRange(badgeId, convertFunction)),
+    })) : undefined,
+    hiddenBadges: item.hiddenBadges ? item.hiddenBadges.map((hiddenBadge) => ({
+      collectionId: convertFunction(hiddenBadge.collectionId),
+      badgeIds: hiddenBadge.badgeIds.map((badgeId) => convertUintRange(badgeId, convertFunction)),
+    })) : undefined,
+    customPages: item.customPages ? item.customPages.map((customPage) => ({
+      title: customPage.title,
+      description: customPage.description,
+      badges: customPage.badges.map((badge) => ({
+        collectionId: convertFunction(badge.collectionId),
+        badgeIds: badge.badgeIds.map((badgeId) => convertUintRange(badgeId, convertFunction)),
+      })),
+    })) : undefined,
   })
 }
 
@@ -263,6 +314,7 @@ export interface QueueInfoBase<T extends NumberType> {
   lastFetchedAt?: T
   error?: string
   deletedAt?: T
+  nextFetchTime?: T
 };
 /**
  * @category API / Indexer
@@ -285,6 +337,7 @@ export function convertQueueItem<T extends NumberType, U extends NumberType>(ite
     numRetries: convertFunction(item.numRetries),
     lastFetchedAt: item.lastFetchedAt ? convertFunction(item.lastFetchedAt) : undefined,
     deletedAt: item.deletedAt ? convertFunction(item.deletedAt) : undefined,
+    nextFetchTime: item.nextFetchTime ? convertFunction(item.nextFetchTime) : undefined,
   })
 }
 
@@ -381,17 +434,39 @@ export function convertStatusDoc<T extends NumberType, U extends NumberType>(ite
  *
  * Docs are stored by mapping IDs. Note that reserved mappings should be obtained from getReservedAddressMapping.
  */
-export interface AddressMappingInfoBase extends AddressMapping {
+export interface AddressMappingInfoBase<T extends NumberType> extends AddressMapping {
   createdBy: string
+  createdBlock: T
+  createdTimestamp: T;
 }
 /**
  * @category API / Indexer
  */
-export type AddressMappingDoc = AddressMappingInfoBase & nano.IdentifiedDocument & nano.MaybeRevisionedDocument & DeletableDocument;
+export type AddressMappingDoc<T extends NumberType> = AddressMappingInfoBase<T> & nano.IdentifiedDocument & nano.MaybeRevisionedDocument & DeletableDocument;
 /**
  * @category API / Indexer
  */
-export type AddressMappingInfo = AddressMappingInfoBase & Identified;
+export type AddressMappingInfo<T extends NumberType> = AddressMappingInfoBase<T> & Identified;
+/**
+ * @category API / Indexer
+ */
+export function convertAddressMappingInfo<T extends NumberType, U extends NumberType>(item: AddressMappingInfo<T>, convertFunction: (item: T) => U): AddressMappingInfo<U> {
+  return deepCopy({
+    ...item,
+    createdBlock: convertFunction(item.createdBlock),
+    createdTimestamp: convertFunction(item.createdTimestamp),
+  })
+}
+
+/**
+ * @category API / Indexer
+ */
+export function convertAddressMappingDoc<T extends NumberType, U extends NumberType>(item: AddressMappingDoc<T>, convertFunction: (item: T) => U): AddressMappingDoc<U> {
+  return deepCopy({
+    ...convertAddressMappingInfo(removeCouchDBDetails(item), convertFunction),
+    ...getCouchDBDetails(item),
+  })
+}
 
 /**
  * BalanceInfoBase is the type of document stored in the balances database
@@ -413,6 +488,7 @@ export interface BalanceInfoBase<T extends NumberType> extends UserBalance<T> {
   //used if off-chain balances
   uri?: string,
   fetchedAt?: T, //Date.now()
+  fetchedAtBlock?: T,
   isPermanent?: boolean
 }
 /**
@@ -435,6 +511,7 @@ export function convertBalanceInfo<T extends NumberType, U extends NumberType>(i
     approvedOutgoingTransfersTimeline: item.approvedOutgoingTransfersTimeline.map(x => convertUserApprovedOutgoingTransferTimeline(x, convertFunction)),
     collectionId: convertFunction(item.collectionId),
     fetchedAt: item.fetchedAt ? convertFunction(item.fetchedAt) : undefined,
+    fetchedAtBlock: item.fetchedAtBlock ? convertFunction(item.fetchedAtBlock) : undefined,
   })
 }
 
@@ -524,6 +601,50 @@ export function convertPasswordInfo<T extends NumberType, U extends NumberType>(
 export function convertPasswordDoc<T extends NumberType, U extends NumberType>(item: PasswordDoc<T>, convertFunction: (item: T) => U): PasswordDoc<U> {
   return deepCopy({
     ...convertPasswordInfo(removeCouchDBDetails(item), convertFunction),
+    ...getCouchDBDetails(item),
+  })
+}
+
+/**
+ * ClaimAlertInfoBase represents a document for a claim alert.
+ * This is used to alert users of a claim that has been made for them.
+ *
+ * @category API / Indexer
+ */
+export interface ClaimAlertInfoBase<T extends NumberType> {
+  code?: string;
+  collectionId: T;
+  createdTimestamp: T;
+  message?: string;
+}
+
+/**
+ * @category API / Indexer
+ */
+export type ClaimAlertDoc<T extends NumberType> = ClaimAlertInfoBase<T> & nano.IdentifiedDocument & nano.MaybeRevisionedDocument & DeletableDocument;
+
+/**
+ * @category API / Indexer
+ */
+export type ClaimAlertInfo<T extends NumberType> = ClaimAlertInfoBase<T> & Identified;
+
+/**
+ * @category API / Indexer
+ */
+export function convertClaimAlertInfo<T extends NumberType, U extends NumberType>(item: ClaimAlertInfo<T>, convertFunction: (item: T) => U): ClaimAlertInfo<U> {
+  return deepCopy({
+    ...item,
+    collectionId: convertFunction(item.collectionId),
+    createdTimestamp: convertFunction(item.createdTimestamp),
+  })
+}
+
+/**
+ * @category API / Indexer
+ */
+export function convertClaimAlertDoc<T extends NumberType, U extends NumberType>(item: ClaimAlertDoc<T>, convertFunction: (item: T) => U): ClaimAlertDoc<U> {
+  return deepCopy({
+    ...convertClaimAlertInfo(removeCouchDBDetails(item), convertFunction),
     ...getCouchDBDetails(item),
   })
 }
@@ -812,6 +933,7 @@ export function convertMerkleChallengeDetails<T extends NumberType, U extends Nu
  * @typedef {Object} FetchInfoBase
  * @property {Metadata | MerkleChallengeDetails} content - The content of the fetch document. Note that we store balances in BALANCES_DB and not here to avoid double storage.
  * @property {NumberType} fetchedAt - The time the document was fetched
+ * @property {NumberType} fetchedAtBlock - The block the document was fetched
  * @property {"MerkleChallenge" | "Metadata" | "Balances"} db - The type of content fetched. This is used for querying purposes
  * @property {boolean} isPermanent - True if the document is permanent (i.e. fetched from a permanent URI like IPFS)
  * @property {string} uri - The URI of the document
@@ -819,6 +941,7 @@ export function convertMerkleChallengeDetails<T extends NumberType, U extends Nu
 export interface FetchInfoBase<T extends NumberType> {
   content?: Metadata<T> | MerkleChallengeDetails<T> | OffChainBalancesMap<T>
   fetchedAt: T, //Date.now()
+  fetchedAtBlock: T,
   db: 'MerkleChallenge' | 'Metadata' | 'Balances'
   isPermanent: boolean
 }
@@ -839,6 +962,7 @@ export function convertFetchInfo<T extends NumberType, U extends NumberType>(ite
     ...item,
     content: item.content ? item.db === 'Metadata' ? convertMetadata(item.content as Metadata<T>, convertFunction) : item.db === 'MerkleChallenge' ? convertMerkleChallengeDetails(item.content as MerkleChallengeDetails<T>, convertFunction) : convertOffChainBalancesMap(item.content as OffChainBalancesMap<T>, convertFunction) : undefined,
     fetchedAt: convertFunction(item.fetchedAt),
+    fetchedAtBlock: convertFunction(item.fetchedAtBlock),
   })
 }
 

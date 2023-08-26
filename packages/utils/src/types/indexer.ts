@@ -107,5 +107,5 @@ export interface ApprovalsTrackerDocs {
  * @property {AddressMappingDoc} [mappingId] - The mapping Id for the mapping.
  */
 export interface AddressMappingsDocs {
-  [mappingId: string]: (AddressMappingDoc) | undefined;
+  [mappingId: string]: (AddressMappingDoc<bigint>) | undefined;
 }

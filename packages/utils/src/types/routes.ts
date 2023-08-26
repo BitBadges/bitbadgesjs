@@ -40,11 +40,15 @@ export const GetBadgeActivityRoute = (collectionId: NumberType, badgeId: NumberT
 /**
  * @category API Routes
  */
-export const RefreshMetadataRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/refreshMetadata`;
+export const RefreshMetadataRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/refresh`;
 /**
  * @category API Routes
  */
-export const RefreshBadgeMetadataRoute = (collectionId: NumberType, badgeId: NumberType) => `/api/v0/collection/${collectionId.toString()}/${badgeId.toString()}/refreshMetadata`;
+export const RefreshBadgeMetadataRoute = (collectionId: NumberType, badgeId: NumberType) => `/api/v0/collection/${collectionId.toString()}/${badgeId.toString()}/refresh`;
+/**
+ * @category API Routes
+ */
+export const GetRefreshStatusRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/refreshStatus`;
 /**
  * @category API Routes
  */
@@ -61,12 +65,31 @@ export const AddAnnouncementRoute = (collectionId: NumberType) => `/api/v0/colle
  * @category API Routes
  */
 export const AddReviewForCollectionRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/addReview`;
+/**
+ * @category API Routes
+ */
+export const DeleteReviewRoute = (reviewId: string) => `/api/v0/deleteReview/${reviewId}`;
+/**
+ * @category API Routes
+ */
+export const DeleteAnnouncementRoute = (announcementId: string) => `/api/v0/deleteAnnouncement/${announcementId}`;
 
 //Address Mappings
 /**
  * @category API Routes
  */
 export const GetAddressMappingsRoute = () => "/api/v0/addressMappings";
+
+/**
+ * @category API Routes
+ */
+export const UpdateAddressMappingRoute = () => "/api/v0/addressMappings/update";
+
+
+/**
+ * @category API Routes
+ */
+export const DeleteAddressMappingRoute = () => "/api/v0/addressMappings/delete";
 
 //Approvals
 /**
@@ -78,6 +101,7 @@ export const GetApprovalsRoute = () => "/api/v0/approvals";
 /**
  * @category API Routes
  */
+
 export const GetMerkleChallengeTrackerRoute = () => "/api/v0/merkleChallenges";
 
 //User
@@ -97,6 +121,8 @@ export const AddReviewForUserRoute = (addressOrUsername: string) => `/api/v0/use
  * @category API Routes
  */
 export const UpdateAccountInfoRoute = () => "/api/v0/user/updateAccount";
+
+//Note delete review is defined above
 
 //IPFS
 /**
@@ -157,3 +183,10 @@ export const FetchMetadataDirectlyRoute = () => "/api/v0/metadata";
  * @category API Routes
  */
 export const GetTokensFromFaucetRoute = () => "/api/v0/faucet";
+
+
+//Claim Alerts
+/**
+ * @category API Routes
+ */
+export const SendClaimAlertRoute = () => "/api/v0/claimAlerts/send";

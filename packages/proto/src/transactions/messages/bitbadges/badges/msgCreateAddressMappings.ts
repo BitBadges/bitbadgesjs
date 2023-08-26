@@ -20,18 +20,6 @@ export interface MsgCreateAddressMappings {
   addressMappings: AddressMapping[];
 }
 
-// export function convertMsgCreateAddressMappings<T extends NumberType, U extends NumberType>(
-//   msg: MsgCreateAddressMappings<T>,
-//   convertFunction: (item: T) => U
-// ): MsgCreateAddressMappings<U> {
-//   return {
-//     ...msg,
-//     collectionId: convertFunction(msg.collectionId),
-//     addressMappings: msg.addressMappings,
-//   }
-// }
-
-
 export function convertFromProtoToMsgCreateAddressMappings(
   msg: badges.bitbadges.bitbadgeschain.badges.MsgCreateAddressMappings,
 ): MsgCreateAddressMappings {

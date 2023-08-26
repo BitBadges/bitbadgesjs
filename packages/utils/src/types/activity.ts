@@ -173,6 +173,9 @@ export function convertAnnouncementInfo<T extends NumberType, U extends NumberTy
  * @property {Balance<T>[]} balances - The list of balances and badge IDs that were transferred.
  * @property {NumberType} collectionId - The collection ID of the collection that was transferred.
  * @property {TransferMethod} method - The type of activity, which can be "Transfer", "Mint", or "Claim".
+ * @property {string} memo - The memo of the transfer.
+ * @property {PrecalculationDetails} precalculationDetails - The precalculation details of the transfer.
+ * @property {string} initiatedBy - The cosmos address of the user who initiated the transfer.
  * @category API / Indexer
  */
 export interface TransferActivityInfoBase<T extends NumberType> extends ActivityInfoBase<T> {
@@ -183,6 +186,7 @@ export interface TransferActivityInfoBase<T extends NumberType> extends Activity
   collectionId: T;
   memo: string;
   precalculationDetails: PrecalculationDetails;
+  initiatedBy: string;
 }
 /**
  * @category API / Indexer
