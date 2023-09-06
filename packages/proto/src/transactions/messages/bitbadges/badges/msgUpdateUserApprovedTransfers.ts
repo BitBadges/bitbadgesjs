@@ -33,15 +33,17 @@ export function convertMsgUpdateUserApprovedTransfers<T extends NumberType, U ex
 export function convertFromProtoToMsgUpdateUserApprovedTransfers(
   protoMsg: badges.bitbadges.bitbadgeschain.badges.MsgUpdateUserApprovedTransfers,
 ): MsgUpdateUserApprovedTransfers<bigint> {
+  const msg = protoMsg.toObject() as MsgUpdateUserApprovedTransfers<string>
+
   return {
-    creator: protoMsg.creator,
-    collectionId: BigInt(protoMsg.collectionId),
-    updateApprovedOutgoingTransfersTimeline: protoMsg.updateApprovedOutgoingTransfersTimeline,
-    approvedOutgoingTransfersTimeline: protoMsg.approvedOutgoingTransfersTimeline.map(x => convertUserApprovedOutgoingTransferTimeline(x.toObject() as any, BigInt)),
-    updateApprovedIncomingTransfersTimeline: protoMsg.updateApprovedIncomingTransfersTimeline,
-    approvedIncomingTransfersTimeline: protoMsg.approvedIncomingTransfersTimeline.map(x => convertUserApprovedIncomingTransferTimeline(x.toObject() as any, BigInt)),
-    updateUserPermissions: protoMsg.updateUserPermissions,
-    userPermissions: convertUserPermissions(protoMsg.userPermissions.toObject() as any, BigInt),
+    creator: msg.creator,
+    collectionId: BigInt(msg.collectionId),
+    updateApprovedOutgoingTransfersTimeline: msg.updateApprovedOutgoingTransfersTimeline,
+    approvedOutgoingTransfersTimeline: msg.approvedOutgoingTransfersTimeline.map(x => convertUserApprovedOutgoingTransferTimeline(x, BigInt)),
+    updateApprovedIncomingTransfersTimeline: msg.updateApprovedIncomingTransfersTimeline,
+    approvedIncomingTransfersTimeline: msg.approvedIncomingTransfersTimeline.map(x => convertUserApprovedIncomingTransferTimeline(x, BigInt)),
+    updateUserPermissions: msg.updateUserPermissions,
+    userPermissions: convertUserPermissions(msg.userPermissions, BigInt),
   }
 }
 

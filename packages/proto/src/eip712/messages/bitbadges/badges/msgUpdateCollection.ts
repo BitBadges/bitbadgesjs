@@ -1,6 +1,5 @@
-import { Stringify, convertCollectionApprovedTransferTimeline, convertUserApprovedIncomingTransferTimeline } from "../../../../"
-import { BadgeMetadataTimeline, Balance, CollectionApprovedTransferTimeline, CollectionMetadataTimeline, CollectionPermissions, ContractAddressTimeline, CustomDataTimeline, InheritedBalancesTimeline, IsArchivedTimeline, ManagerTimeline, NumberType, OffChainBalancesMetadataTimeline, StandardsTimeline, UserApprovedIncomingTransferTimeline, UserApprovedOutgoingTransferTimeline, UserPermissions, convertBadgeMetadataTimeline, convertBalance, convertCollectionMetadataTimeline, convertCollectionPermissions, convertContractAddressTimeline, convertCustomDataTimeline, convertInheritedBalancesTimeline, convertIsArchivedTimeline, convertManagerTimeline, convertOffChainBalancesMetadataTimeline, convertStandardsTimeline, convertUserApprovedOutgoingTransferTimeline, convertUserPermissions } from "../../../../"
-import { ACTION_COMBINATION_TYPES, ACTION_DEFAULT_VALUES_TYPES, ACTION_PERMISSION_TYPES, APPROVAL_AMOUNTS_TYPES, APPROVAL_DETAILS_TYPES, BADGE_METADATA_TIMELINE_TYPES, BADGE_METADATA_TYPES, BALANCES_ACTION_COMBINATION_TYPES, BALANCES_ACTION_DEFAULT_VALUES_TYPES, BALANCES_ACTION_PERMISSION_TYPES, BALANCE_TYPES, COLLECTIONS_PERMISSIONS_TYPES, COLLECTION_APPROVED_TRANSFER_COMBINATION_TYPES, COLLECTION_APPROVED_TRANSFER_DEFAULT_VALUES_TYPES, COLLECTION_APPROVED_TRANSFER_PERMISSION_TYPES, COLLECTION_APPROVED_TRANSFER_TIMELINE_TYPES, COLLECTION_APPROVED_TRANSFER_TYPES, COLLECTION_METADATA_TIMELINE_TYPES, COLLECTION_METADATA_TYPES, CONTRACT_ADDRESS_TIMELINE_TYPES, CUSTOM_DATA_TIMELINE_TYPES, INCOMING_APPROVAL_DETAILS_TYPES, INCREMENTED_BALANCES_TYPES, INHERITED_BALANCES_TIMELINE_TYPES, INHERITED_BALANCE_TYPES, IS_ARCHIVED_TIMELINE_TYPES, IS_COLLECTION_TRANSFER_ALLOWED_TYPES, IS_USER_INCOMING_TRANSFER_ALLOWED_TYPES, IS_USER_OUTGOING_TRANSFER_ALLOWED_TYPES, MANAGER_TIMELINE_TYPES, MANUAL_BALANCES_TYPES, MAX_NUM_TRANSFERS_TYPES, MERKLE_CHALLENGE_TYPES, MUST_OWN_BADGES_TYPES, OFF_CHAIN_BALANCES_METADATA_TIMELINE_TYPES, OFF_CHAIN_BALANCES_METADATA_TYPES, OUTGOING_APPROVAL_DETAILS_TYPES, PREDETERMINED_BALANCES_TYPES, PREDETERMINED_ORDER_CALCULATION_METHOD_TYPES, STANDARDS_TIMELINE_TYPES, TIMED_UPDATE_COMBINATION_TYPES, TIMED_UPDATE_DEFAULT_VALUES_TYPES, TIMED_UPDATE_PERMISSION_TYPES, TIMED_UPDATE_WITH_BADGE_IDS_COMBINATION_TYPES, TIMED_UPDATE_WITH_BADGE_IDS_DEFAULT_VALUES_TYPES, TIMED_UPDATE_WITH_BADGE_IDS_PERMISSION_TYPES, UINT_RANGE_TYPES, USER_APPROVED_INCOMING_TRANSFER_COMBINATION_TYPES, USER_APPROVED_INCOMING_TRANSFER_DEFAULT_VALUES_TYPES, USER_APPROVED_INCOMING_TRANSFER_PERMISSION_TYPES, USER_APPROVED_INCOMING_TRANSFER_TIMELINE_TYPES, USER_APPROVED_INCOMING_TRANSFER_TYPES, USER_APPROVED_OUTGOING_TRANSFER_COMBINATION_TYPES, USER_APPROVED_OUTGOING_TRANSFER_DEFAULT_VALUES_TYPES, USER_APPROVED_OUTGOING_TRANSFER_PERMISSION_TYPES, USER_APPROVED_OUTGOING_TRANSFER_TIMELINE_TYPES, USER_APPROVED_OUTGOING_TRANSFER_TYPES, USER_PERMISSIONS_TYPES, VALUE_OPTIONS_TYPES } from "./eip712HelperTypes"
+import { BadgeMetadataTimeline, Balance, CollectionApprovedTransferTimeline, CollectionMetadataTimeline, CollectionPermissions, ContractAddressTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, NumberType, OffChainBalancesMetadataTimeline, StandardsTimeline, Stringify, UserApprovedIncomingTransferTimeline, UserApprovedOutgoingTransferTimeline, UserPermissions, convertBadgeMetadataTimeline, convertBalance, convertCollectionApprovedTransferTimeline, convertCollectionMetadataTimeline, convertCollectionPermissions, convertContractAddressTimeline, convertCustomDataTimeline, convertIsArchivedTimeline, convertManagerTimeline, convertOffChainBalancesMetadataTimeline, convertStandardsTimeline, convertUserApprovedIncomingTransferTimeline, convertUserApprovedOutgoingTransferTimeline, convertUserPermissions } from "../../../../"
+import { ACTION_COMBINATION_TYPES, ACTION_DEFAULT_VALUES_TYPES, ACTION_PERMISSION_TYPES, APPROVAL_AMOUNTS_TYPES, APPROVAL_DETAILS_TYPES, BADGE_METADATA_TIMELINE_TYPES, BADGE_METADATA_TYPES, BALANCES_ACTION_COMBINATION_TYPES, BALANCES_ACTION_DEFAULT_VALUES_TYPES, BALANCES_ACTION_PERMISSION_TYPES, BALANCE_TYPES, COLLECTIONS_PERMISSIONS_TYPES, COLLECTION_APPROVED_TRANSFER_COMBINATION_TYPES, COLLECTION_APPROVED_TRANSFER_DEFAULT_VALUES_TYPES, COLLECTION_APPROVED_TRANSFER_PERMISSION_TYPES, COLLECTION_APPROVED_TRANSFER_TIMELINE_TYPES, COLLECTION_APPROVED_TRANSFER_TYPES, COLLECTION_METADATA_TIMELINE_TYPES, COLLECTION_METADATA_TYPES, CONTRACT_ADDRESS_TIMELINE_TYPES, CUSTOM_DATA_TIMELINE_TYPES, INCOMING_APPROVAL_DETAILS_TYPES, INCREMENTED_BALANCES_TYPES, IS_ARCHIVED_TIMELINE_TYPES, IS_COLLECTION_TRANSFER_ALLOWED_TYPES, IS_USER_INCOMING_TRANSFER_ALLOWED_TYPES, IS_USER_OUTGOING_TRANSFER_ALLOWED_TYPES, MANAGER_TIMELINE_TYPES, MANUAL_BALANCES_TYPES, MAX_NUM_TRANSFERS_TYPES, MERKLE_CHALLENGE_TYPES, MUST_OWN_BADGES_TYPES, OFF_CHAIN_BALANCES_METADATA_TIMELINE_TYPES, OFF_CHAIN_BALANCES_METADATA_TYPES, OUTGOING_APPROVAL_DETAILS_TYPES, PREDETERMINED_BALANCES_TYPES, PREDETERMINED_ORDER_CALCULATION_METHOD_TYPES, STANDARDS_TIMELINE_TYPES, TIMED_UPDATE_COMBINATION_TYPES, TIMED_UPDATE_DEFAULT_VALUES_TYPES, TIMED_UPDATE_PERMISSION_TYPES, TIMED_UPDATE_WITH_BADGE_IDS_COMBINATION_TYPES, TIMED_UPDATE_WITH_BADGE_IDS_DEFAULT_VALUES_TYPES, TIMED_UPDATE_WITH_BADGE_IDS_PERMISSION_TYPES, UINT_RANGE_TYPES, USER_APPROVED_INCOMING_TRANSFER_COMBINATION_TYPES, USER_APPROVED_INCOMING_TRANSFER_DEFAULT_VALUES_TYPES, USER_APPROVED_INCOMING_TRANSFER_PERMISSION_TYPES, USER_APPROVED_INCOMING_TRANSFER_TIMELINE_TYPES, USER_APPROVED_INCOMING_TRANSFER_TYPES, USER_APPROVED_OUTGOING_TRANSFER_COMBINATION_TYPES, USER_APPROVED_OUTGOING_TRANSFER_DEFAULT_VALUES_TYPES, USER_APPROVED_OUTGOING_TRANSFER_PERMISSION_TYPES, USER_APPROVED_OUTGOING_TRANSFER_TIMELINE_TYPES, USER_APPROVED_OUTGOING_TRANSFER_TYPES, USER_PERMISSIONS_TYPES, VALUE_OPTIONS_TYPES } from "./eip712HelperTypes"
 
 const MsgUpdateCollectionValueType = [
   { name: 'creator', type: 'string' },
@@ -22,8 +21,7 @@ const MsgUpdateCollectionValueType = [
   { name: 'offChainBalancesMetadataTimeline', type: 'OffChainBalancesMetadataTimeline[]' },
   { name: 'updateCustomDataTimeline', type: 'bool' },
   { name: 'customDataTimeline', type: 'CustomDataTimeline[]' },
-  { name: 'updateInheritedBalancesTimeline', type: 'bool' },
-  { name: 'inheritedBalancesTimeline', type: 'InheritedBalancesTimeline[]' },
+  { name: 'inheritedCollectionId', type: 'string' },
   { name: 'updateCollectionApprovedTransfersTimeline', type: 'bool' },
   { name: 'collectionApprovedTransfersTimeline', type: 'CollectionApprovedTransferTimeline[]' },
   { name: 'updateStandardsTimeline', type: 'bool' },
@@ -42,13 +40,11 @@ export const MSG_UPDATE_COLLECTION_TYPES = {
   "BadgeMetadataTimeline": BADGE_METADATA_TIMELINE_TYPES,
   "OffChainBalancesMetadataTimeline": OFF_CHAIN_BALANCES_METADATA_TIMELINE_TYPES,
   "CustomDataTimeline": CUSTOM_DATA_TIMELINE_TYPES,
-  "InheritedBalancesTimeline": INHERITED_BALANCES_TIMELINE_TYPES,
   "CollectionApprovedTransferTimeline": COLLECTION_APPROVED_TRANSFER_TIMELINE_TYPES,
   "StandardsTimeline": STANDARDS_TIMELINE_TYPES,
   "ContractAddressTimeline": CONTRACT_ADDRESS_TIMELINE_TYPES,
   "IsArchivedTimeline": IS_ARCHIVED_TIMELINE_TYPES,
   "CollectionApprovedTransfer": COLLECTION_APPROVED_TRANSFER_TYPES,
-  "InheritedBalance": INHERITED_BALANCE_TYPES,
   "UintRange": UINT_RANGE_TYPES,
   "Balance": BALANCE_TYPES,
   "BadgeMetadata": BADGE_METADATA_TYPES,
@@ -98,7 +94,6 @@ export const MSG_UPDATE_COLLECTION_TYPES = {
 }
 
 
-
 export function createEIP712MsgUpdateCollection<T extends NumberType>(
   creator: string,
   collectionId: T,
@@ -119,8 +114,7 @@ export function createEIP712MsgUpdateCollection<T extends NumberType>(
   offChainBalancesMetadataTimeline: OffChainBalancesMetadataTimeline<T>[],
   updateCustomDataTimeline: boolean,
   customDataTimeline: CustomDataTimeline<T>[],
-  updateInheritedBalancesTimeline: boolean,
-  inheritedBalancesTimeline: InheritedBalancesTimeline<T>[],
+  inheritedCollectionId: T,
   updateCollectionApprovedTransfersTimeline: boolean,
   collectionApprovedTransfersTimeline: CollectionApprovedTransferTimeline<T>[],
   updateStandardsTimeline: boolean,
@@ -136,12 +130,12 @@ export function createEIP712MsgUpdateCollection<T extends NumberType>(
       creator,
       collectionId: collectionId.toString(),
       balancesType,
-      defaultApprovedOutgoingTransfersTimeline: defaultApprovedOutgoingTransfersTimeline.map((x) => convertUserApprovedOutgoingTransferTimeline(x, Stringify)),
-      defaultApprovedIncomingTransfersTimeline: defaultApprovedIncomingTransfersTimeline.map((x) => convertUserApprovedIncomingTransferTimeline(x, Stringify)),
-      defaultUserPermissions: convertUserPermissions(defaultUserPermissions, Stringify),
+      defaultApprovedOutgoingTransfersTimeline: defaultApprovedOutgoingTransfersTimeline.map((x) => convertUserApprovedOutgoingTransferTimeline(x, Stringify, true)),
+      defaultApprovedIncomingTransfersTimeline: defaultApprovedIncomingTransfersTimeline.map((x) => convertUserApprovedIncomingTransferTimeline(x, Stringify, true)),
+      defaultUserPermissions: convertUserPermissions(defaultUserPermissions, Stringify, true),
       badgesToCreate: badgesToCreate.map((x) => convertBalance(x, Stringify)),
       updateCollectionPermissions,
-      collectionPermissions: convertCollectionPermissions(collectionPermissions, Stringify),
+      collectionPermissions: convertCollectionPermissions(collectionPermissions, Stringify, true),
       updateManagerTimeline,
       managerTimeline: managerTimeline.map((x) => convertManagerTimeline(x, Stringify)),
       updateCollectionMetadataTimeline,
@@ -152,10 +146,9 @@ export function createEIP712MsgUpdateCollection<T extends NumberType>(
       offChainBalancesMetadataTimeline: offChainBalancesMetadataTimeline.map((x) => convertOffChainBalancesMetadataTimeline(x, Stringify)),
       updateCustomDataTimeline,
       customDataTimeline: customDataTimeline.map((x) => convertCustomDataTimeline(x, Stringify)),
-      updateInheritedBalancesTimeline,
-      inheritedBalancesTimeline: inheritedBalancesTimeline.map((x) => convertInheritedBalancesTimeline(x, Stringify)),
+      inheritedCollectionId: inheritedCollectionId.toString(),
       updateCollectionApprovedTransfersTimeline,
-      collectionApprovedTransfersTimeline: collectionApprovedTransfersTimeline.map((x) => convertCollectionApprovedTransferTimeline(x, Stringify)),
+      collectionApprovedTransfersTimeline: collectionApprovedTransfersTimeline.map((x) => convertCollectionApprovedTransferTimeline(x, Stringify, true)),
       updateStandardsTimeline,
       standardsTimeline: standardsTimeline.map((x) => convertStandardsTimeline(x, Stringify)),
       updateContractAddressTimeline,

@@ -36,6 +36,8 @@ message MustOwnBadges {
   repeated UintRange badgeIds = 4;
 
   bool overrideWithCurrentTime = 5;
+
+  bool mustOwnAll = 6;
 }
 
 // InheritedBalances are a powerful feature of the BitBadges module.

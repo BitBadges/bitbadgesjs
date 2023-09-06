@@ -21,11 +21,13 @@ export interface MsgCreateAddressMappings {
 }
 
 export function convertFromProtoToMsgCreateAddressMappings(
-  msg: badges.bitbadges.bitbadgeschain.badges.MsgCreateAddressMappings,
+  protoMsg: badges.bitbadges.bitbadgeschain.badges.MsgCreateAddressMappings,
 ): MsgCreateAddressMappings {
+  const msg = protoMsg.toObject() as MsgCreateAddressMappings;
+
   return {
     creator: msg.creator,
-    addressMappings: msg.addressMappings.map(x => x.toObject() as any),
+    addressMappings: msg.addressMappings,
   }
 }
 

@@ -32,7 +32,7 @@ const MERKLE_PATH_ITEM_TYPES = [
 ]
 
 const PRECALCULATION_DETAILS_TYPES = [
-  { name: 'approvalId', type: 'string' },
+  { name: 'precalculationId', type: 'string' },
   { name: 'approvalLevel', type: 'string' },
   { name: 'approverAddress', type: 'string' },
 ]

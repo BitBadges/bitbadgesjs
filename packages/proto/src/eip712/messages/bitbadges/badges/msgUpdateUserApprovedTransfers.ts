@@ -59,11 +59,11 @@ export function createEIP712MsgUpdateUserApprovedTransfers<T extends NumberType>
       creator,
       collectionId: collectionId.toString(),
       updateApprovedOutgoingTransfersTimeline,
-      approvedOutgoingTransfersTimeline: approvedOutgoingTransfersTimeline.map((x) => convertUserApprovedOutgoingTransferTimeline(x, Stringify)),
+      approvedOutgoingTransfersTimeline: approvedOutgoingTransfersTimeline.map((x) => convertUserApprovedOutgoingTransferTimeline(x, Stringify, true)),
       updateApprovedIncomingTransfersTimeline,
-      approvedIncomingTransfersTimeline: approvedIncomingTransfersTimeline.map((x) => convertUserApprovedIncomingTransferTimeline(x, Stringify)),
+      approvedIncomingTransfersTimeline: approvedIncomingTransfersTimeline.map((x) => convertUserApprovedIncomingTransferTimeline(x, Stringify, true)),
       updateUserPermissions,
-      userPermissions: convertUserPermissions(userPermissions, Stringify)
+      userPermissions: convertUserPermissions(userPermissions, Stringify, true)
     },
   }
 }

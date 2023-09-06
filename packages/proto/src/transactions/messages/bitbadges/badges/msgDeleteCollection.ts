@@ -33,8 +33,10 @@ export function convertMsgDeleteCollection<T extends NumberType, U extends Numbe
 }
 
 export function convertFromProtoToMsgDeleteCollection(
-  msg: badges.bitbadges.bitbadgeschain.badges.MsgDeleteCollection,
+  protoMsg: badges.bitbadges.bitbadgeschain.badges.MsgDeleteCollection,
 ): MsgDeleteCollection<bigint> {
+  const msg = protoMsg.toObject() as MsgDeleteCollection<string>;
+
   return {
     creator: msg.creator,
     collectionId: BigInt(msg.collectionId),

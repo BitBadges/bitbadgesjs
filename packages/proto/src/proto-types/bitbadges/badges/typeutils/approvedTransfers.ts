@@ -14,12 +14,45 @@ export interface UserApprovedOutgoingTransferTimeline<T extends NumberType> {
   timelineTimes: UintRange<T>[];
 }
 
-export function convertUserApprovedOutgoingTransferTimeline<T extends NumberType, U extends NumberType>(timeline: UserApprovedOutgoingTransferTimeline<T>, convertFunction: (item: T) => U): UserApprovedOutgoingTransferTimeline<U> {
+export function convertUserApprovedOutgoingTransferTimeline<T extends NumberType, U extends NumberType>(timeline: UserApprovedOutgoingTransferTimeline<T>, convertFunction: (item: T) => U, populateOptionalFields?: boolean): UserApprovedOutgoingTransferTimeline<U> {
   return deepCopy({
     ...timeline,
-    approvedOutgoingTransfers: timeline.approvedOutgoingTransfers.map((b) => convertUserApprovedOutgoingTransfer(b, convertFunction)),
-    timelineTimes: timeline.timelineTimes.map((b) => convertUintRange(b, convertFunction))
+    approvedOutgoingTransfers: timeline.approvedOutgoingTransfers.map((b) => convertUserApprovedOutgoingTransfer(b, convertFunction, populateOptionalFields)),
+    timelineTimes: timeline.timelineTimes.map((b) => convertUintRange(b, convertFunction)),
   })
+}
+
+export const DefaultValues = {
+  toMappingOptions: {
+    invertDefault: false,
+    allValues: false,
+    noValues: false,
+  },
+  fromMappingOptions: {
+    invertDefault: false,
+    allValues: false,
+    noValues: false,
+  },
+  initiatedByMappingOptions: {
+    invertDefault: false,
+    allValues: false,
+    noValues: false,
+  },
+  transferTimesOptions: {
+    invertDefault: false,
+    allValues: false,
+    noValues: false,
+  },
+  badgeIdsOptions: {
+    invertDefault: false,
+    allValues: false,
+    noValues: false,
+  },
+  ownershipTimesOptions: {
+    invertDefault: false,
+    allValues: false,
+    noValues: false,
+  },
 }
 
 
@@ -45,14 +78,21 @@ export interface UserApprovedOutgoingTransfer<T extends NumberType> {
   approvalDetails: OutgoingApprovalDetails<T>[];
 }
 
-export function convertUserApprovedOutgoingTransfer<T extends NumberType, U extends NumberType>(transfer: UserApprovedOutgoingTransfer<T>, convertFunction: (item: T) => U): UserApprovedOutgoingTransfer<U> {
+export function convertUserApprovedOutgoingTransfer<T extends NumberType, U extends NumberType>(transfer: UserApprovedOutgoingTransfer<T>, convertFunction: (item: T) => U, populateOptionalFields?: boolean): UserApprovedOutgoingTransfer<U> {
   return deepCopy({
     ...transfer,
     transferTimes: transfer.transferTimes.map((b) => convertUintRange(b, convertFunction)),
     badgeIds: transfer.badgeIds.map((b) => convertUintRange(b, convertFunction)),
     ownershipTimes: transfer.ownershipTimes.map((b) => convertUintRange(b, convertFunction)),
     //allowedCombinations: transfer.allowedCombinations.map((b) => convertIsUserOutgoingTransferAllowed(b, convertFunction)),
-    approvalDetails: transfer.approvalDetails.map((b) => convertOutgoingApprovalDetails(b, convertFunction))
+    approvalDetails: transfer.approvalDetails.map((b) => convertOutgoingApprovalDetails(b, convertFunction)),
+    allowedCombinations: populateOptionalFields ? transfer.allowedCombinations.map((b) => {
+      return {
+        ...DefaultValues,
+        ...b,
+        fromMappingOptions: undefined,
+      } as Required<IsUserOutgoingTransferAllowed>
+    }) : transfer.allowedCombinations
   })
 }
 
@@ -70,11 +110,11 @@ export function convertUserApprovedOutgoingTransfer<T extends NumberType, U exte
  * @property {boolean} isApproved - Whether this combination is allowed or not.
  */
 export interface IsUserOutgoingTransferAllowed {
-  toMappingOptions: ValueOptions;
-  initiatedByMappingOptions: ValueOptions;
-  transferTimesOptions: ValueOptions;
-  badgeIdsOptions: ValueOptions;
-  ownershipTimesOptions: ValueOptions;
+  toMappingOptions?: ValueOptions;
+  initiatedByMappingOptions?: ValueOptions;
+  transferTimesOptions?: ValueOptions;
+  badgeIdsOptions?: ValueOptions;
+  ownershipTimesOptions?: ValueOptions;
   isApproved: boolean;
 }
 
@@ -88,7 +128,7 @@ export interface IsUserOutgoingTransferAllowed {
  * OutgoingApprovalDetails represents the details of an outgoing approval.
  *
  * @typedef {Object} OutgoingApprovalDetails
- * @property {string} approvalId - The ID of the approval. Must not be a duplicate of another approval ID in the same timeline.
+ * @property {string} approvalTrackerId - The ID of the approval. Must not be a duplicate of another approval ID in the same timeline.
  * @property {string} uri - The URI of the approval.
  * @property {string} customData - Arbitrary custom data of the approval.
  * @property {MustOwnBadges[]} mustOwnBadges - The list of must own badges to be approved.
@@ -100,7 +140,7 @@ export interface IsUserOutgoingTransferAllowed {
  * @property {boolean} requireToDoesNotEqualInitiatedBy - Whether the to address must not equal the initiatedBy address.
  */
 export interface OutgoingApprovalDetails<T extends NumberType> {
-  approvalId: string;
+  approvalTrackerId: string;
   uri: string;
   customData: string;
 
@@ -291,10 +331,10 @@ export interface UserApprovedIncomingTransferTimeline<T extends NumberType> {
   timelineTimes: UintRange<T>[];
 }
 
-export function convertUserApprovedIncomingTransferTimeline<T extends NumberType, U extends NumberType>(timeline: UserApprovedIncomingTransferTimeline<T>, convertFunction: (item: T) => U): UserApprovedIncomingTransferTimeline<U> {
+export function convertUserApprovedIncomingTransferTimeline<T extends NumberType, U extends NumberType>(timeline: UserApprovedIncomingTransferTimeline<T>, convertFunction: (item: T) => U, populateOptionalFields?: boolean): UserApprovedIncomingTransferTimeline<U> {
   return deepCopy({
     ...timeline,
-    approvedIncomingTransfers: timeline.approvedIncomingTransfers.map((b) => convertUserApprovedIncomingTransfer(b, convertFunction)),
+    approvedIncomingTransfers: timeline.approvedIncomingTransfers.map((b) => convertUserApprovedIncomingTransfer(b, convertFunction, populateOptionalFields)),
     timelineTimes: timeline.timelineTimes.map((b) => convertUintRange(b, convertFunction))
   })
 }
@@ -321,14 +361,20 @@ export interface UserApprovedIncomingTransfer<T extends NumberType> {
   approvalDetails: IncomingApprovalDetails<T>[];
 }
 
-export function convertUserApprovedIncomingTransfer<T extends NumberType, U extends NumberType>(transfer: UserApprovedIncomingTransfer<T>, convertFunction: (item: T) => U): UserApprovedIncomingTransfer<U> {
+export function convertUserApprovedIncomingTransfer<T extends NumberType, U extends NumberType>(transfer: UserApprovedIncomingTransfer<T>, convertFunction: (item: T) => U, populateOptionalFields?: boolean): UserApprovedIncomingTransfer<U> {
   return deepCopy({
     ...transfer,
     transferTimes: transfer.transferTimes.map((b) => convertUintRange(b, convertFunction)),
     badgeIds: transfer.badgeIds.map((b) => convertUintRange(b, convertFunction)),
     ownershipTimes: transfer.ownershipTimes.map((b) => convertUintRange(b, convertFunction)),
-    //allowedCombinations: transfer.allowedCombinations.map((b) => convertIsUserIncomingTransferAllowed(b, convertFunction)),
-    approvalDetails: transfer.approvalDetails.map((b) => convertIncomingApprovalDetails(b, convertFunction))
+    approvalDetails: transfer.approvalDetails.map((b) => convertIncomingApprovalDetails(b, convertFunction)),
+    allowedCombinations: populateOptionalFields ? transfer.allowedCombinations.map((b) => {
+      return {
+        ...DefaultValues,
+        ...b,
+        toMappingOptions: undefined,
+      } as Required<IsUserIncomingTransferAllowed>
+    }) : transfer.allowedCombinations
   })
 }
 
@@ -348,11 +394,11 @@ export function convertUserApprovedIncomingTransfer<T extends NumberType, U exte
  * @property {boolean} isApproved - Whether this combination is allowed or not.
  */
 export interface IsUserIncomingTransferAllowed {
-  fromMappingOptions: ValueOptions;
-  initiatedByMappingOptions: ValueOptions;
-  transferTimesOptions: ValueOptions;
-  badgeIdsOptions: ValueOptions;
-  ownershipTimesOptions: ValueOptions;
+  fromMappingOptions?: ValueOptions;
+  initiatedByMappingOptions?: ValueOptions;
+  transferTimesOptions?: ValueOptions;
+  badgeIdsOptions?: ValueOptions;
+  ownershipTimesOptions?: ValueOptions;
   isApproved: boolean;
 }
 
@@ -366,7 +412,7 @@ export interface IsUserIncomingTransferAllowed {
  * IncomingApprovalDetails represents the details of an incoming approval.
  *
  * @typedef {Object} IncomingApprovalDetails
- * @property {string} approvalId - The ID of the approval. Must not be a duplicate of another approval ID in the same timeline.
+ * @property {string} approvalTrackerId - The ID of the approval. Must not be a duplicate of another approval ID in the same timeline.
  * @property {string} uri - The URI of the approval.
  * @property {string} customData - Arbitrary custom data of the approval.
  *
@@ -380,7 +426,7 @@ export interface IsUserIncomingTransferAllowed {
  * @property {boolean} requireFromDoesNotEqualInitiatedBy - Whether the from address must not equal the initiatedBy address.
  */
 export interface IncomingApprovalDetails<T extends NumberType> {
-  approvalId: string;
+  approvalTrackerId: string;
   uri: string;
   customData: string;
 
@@ -432,14 +478,19 @@ export interface CollectionApprovedTransfer<T extends NumberType> {
   approvalDetails: ApprovalDetails<T>[];
 }
 
-export function convertCollectionApprovedTransfer<T extends NumberType, U extends NumberType>(transfer: CollectionApprovedTransfer<T>, convertFunction: (item: T) => U): CollectionApprovedTransfer<U> {
+export function convertCollectionApprovedTransfer<T extends NumberType, U extends NumberType>(transfer: CollectionApprovedTransfer<T>, convertFunction: (item: T) => U, populateOptionalFields?: boolean): CollectionApprovedTransfer<U> {
   return deepCopy({
     ...transfer,
     transferTimes: transfer.transferTimes.map((b) => convertUintRange(b, convertFunction)),
     badgeIds: transfer.badgeIds.map((b) => convertUintRange(b, convertFunction)),
     ownershipTimes: transfer.ownershipTimes.map((b) => convertUintRange(b, convertFunction)),
-    //allowedCombinations: transfer.allowedCombinations.map((b) => convertIsCollectionTransferAllowed(b, convertFunction)),
-    approvalDetails: transfer.approvalDetails.map((b) => convertApprovalDetails(b, convertFunction))
+    approvalDetails: transfer.approvalDetails.map((b) => convertApprovalDetails(b, convertFunction)),
+    allowedCombinations: populateOptionalFields ? transfer.allowedCombinations.map((b) => {
+      return {
+        ...DefaultValues,
+        ...b,
+      } as Required<IsCollectionTransferAllowed>
+    }) : transfer.allowedCombinations
   })
 }
 
@@ -460,12 +511,12 @@ export function convertCollectionApprovedTransfer<T extends NumberType, U extend
  * @property {boolean} isApproved - Whether this combination is allowed or not.
  */
 export interface IsCollectionTransferAllowed {
-  toMappingOptions: ValueOptions;
-  fromMappingOptions: ValueOptions;
-  initiatedByMappingOptions: ValueOptions;
-  transferTimesOptions: ValueOptions;
-  badgeIdsOptions: ValueOptions;
-  ownershipTimesOptions: ValueOptions;
+  toMappingOptions?: ValueOptions;
+  fromMappingOptions?: ValueOptions;
+  initiatedByMappingOptions?: ValueOptions;
+  transferTimesOptions?: ValueOptions;
+  badgeIdsOptions?: ValueOptions;
+  ownershipTimesOptions?: ValueOptions;
   isApproved: boolean;
 }
 
@@ -480,7 +531,7 @@ export interface IsCollectionTransferAllowed {
  * ApprovalDetails represents the details of an approval.
  *
  * @typedef {Object} ApprovalDetails
- * @property {string} approvalId - The ID of the approval. Must not be a duplicate of another approval ID in the same timeline.
+ * @property {string} approvalTrackerId - The ID of the approval. Must not be a duplicate of another approval ID in the same timeline.
  * @property {string} uri - The URI of the approval.
  * @property {string} customData - Arbitrary custom data of the approval.
  *
@@ -499,7 +550,7 @@ export interface IsCollectionTransferAllowed {
  * @property {boolean} overridesToApprovedIncomingTransfers - Whether this approval overrides the to address's approved incoming transfers.
  */
 export interface ApprovalDetails<T extends NumberType> {
-  approvalId: string;
+  approvalTrackerId: string;
   uri: string;
   customData: string;
 

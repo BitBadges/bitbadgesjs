@@ -125,7 +125,7 @@ export const IS_USER_OUTGOING_TRANSFER_ALLOWED_TYPES = [
 ];
 
 export const OUTGOING_APPROVAL_DETAILS_TYPES = [
-  { name: 'approvalId', type: 'string' },
+  { name: 'approvalTrackerId', type: 'string' },
   { name: 'uri', type: 'string' },
   { name: 'customData', type: 'string' },
   { name: 'mustOwnBadges', type: 'MustOwnBadges[]' },
@@ -147,7 +147,7 @@ export const IS_USER_INCOMING_TRANSFER_ALLOWED_TYPES = [
 ];
 
 export const INCOMING_APPROVAL_DETAILS_TYPES = [
-  { name: 'approvalId', type: 'string' },
+  { name: 'approvalTrackerId', type: 'string' },
   { name: 'uri', type: 'string' },
   { name: 'customData', type: 'string' },
   { name: 'mustOwnBadges', type: 'MustOwnBadges[]' },
@@ -228,7 +228,6 @@ export const COLLECTIONS_PERMISSIONS_TYPES = [
   { name: 'canUpdateCollectionMetadata', type: 'TimedUpdatePermission[]' },
   { name: 'canCreateMoreBadges', type: 'BalancesActionPermission[]' },
   { name: 'canUpdateBadgeMetadata', type: 'TimedUpdateWithBadgeIdsPermission[]' },
-  { name: 'canUpdateInheritedBalances', type: 'TimedUpdateWithBadgeIdsPermission[]' },
   { name: 'canUpdateCollectionApprovedTransfers', type: 'CollectionApprovedTransferPermission[]' },
 ];
 
@@ -257,10 +256,10 @@ export const CUSTOM_DATA_TIMELINE_TYPES = [
   { name: 'timelineTimes', type: 'UintRange[]' },
 ];
 
-export const INHERITED_BALANCES_TIMELINE_TYPES = [
-  { name: 'inheritedBalances', type: 'InheritedBalance[]' },
-  { name: 'timelineTimes', type: 'UintRange[]' },
-];
+// export const INHERITED_BALANCES_TIMELINE_TYPES = [
+//   { name: 'inheritedBalances', type: 'InheritedBalance[]' },
+//   { name: 'timelineTimes', type: 'UintRange[]' },
+// ];
 
 export const COLLECTION_APPROVED_TRANSFER_TIMELINE_TYPES = [
   { name: 'collectionApprovedTransfers', type: 'CollectionApprovedTransfer[]' },
@@ -293,11 +292,11 @@ export const COLLECTION_APPROVED_TRANSFER_TYPES = [
   { name: 'approvalDetails', type: 'ApprovalDetails[]' },
 ];
 
-export const INHERITED_BALANCE_TYPES = [
-  { name: 'collectionId', type: 'string' },
-  { name: 'parentCollectionId', type: 'string' },
-  { name: 'parentBadgeIds', type: 'UintRange[]' },
-];
+// export const INHERITED_BALANCE_TYPES = [
+//   { name: 'collectionId', type: 'string' },
+//   { name: 'parentCollectionId', type: 'string' },
+//   { name: 'parentBadgeIds', type: 'UintRange[]' },
+// ];
 
 export const BADGE_METADATA_TYPES = [
   { name: 'uri', type: 'string' },
@@ -426,7 +425,7 @@ export const TIMED_UPDATE_WITH_BADGE_IDS_DEFAULT_VALUES_TYPES = [
 ];
 
 export const APPROVAL_DETAILS_TYPES = [
-  { name: 'approvalId', type: 'string' },
+  { name: 'approvalTrackerId', type: 'string' },
   { name: 'uri', type: 'string' },
   { name: 'customData', type: 'string' },
   { name: 'mustOwnBadges', type: 'MustOwnBadges[]' },

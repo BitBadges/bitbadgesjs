@@ -291,7 +291,7 @@ export function convertTransfer<T extends NumberType, U extends NumberType>(tran
 }
 
 export interface PrecalculationDetails {
-  approvalId: string
+  precalculationId: string
   approvalLevel: string
   approverAddress: string
 }
@@ -299,8 +299,8 @@ export interface PrecalculationDetails {
 /**
  * ApprovalTrackerIdDetails is used to represent an exact approval.
  *
- * @typedef {Object} ApprovalIdDetails
- * @property {string} approvalId - The approval ID of the approval.
+ * @typedef {Object} ApprovalTrackerIdDetails
+ * @property {string} approvalTrackerId - The approval ID of the approval.
  * @property {string} approvalLevel - The approval level of the approval "collection", "incoming", or "outgoing".
  * @property {string} address - The address of the approval to check.
  * @property {string} addressToCheck - The address to check for the approval.
@@ -309,7 +309,7 @@ export interface ApprovalTrackerIdDetails<T extends NumberType> {
   collectionId: T
   approvalLevel: "collection" | "incoming" | "outgoing" | ""
   approverAddress: string
-  approvalId: string
+  approvalTrackerId: string
   trackerType: "overall" | "to" | "from" | "initiatedBy" | ""
   approvedAddress: string
 }
@@ -562,10 +562,10 @@ export interface CollectionApprovedTransferTimeline<T extends NumberType> extend
   timelineTimes: UintRange<T>[]
 }
 
-export function convertCollectionApprovedTransferTimeline<T extends NumberType, U extends NumberType>(collectionApprovedTransferTimeline: CollectionApprovedTransferTimeline<T>, convertFunction: (item: T) => U): CollectionApprovedTransferTimeline<U> {
+export function convertCollectionApprovedTransferTimeline<T extends NumberType, U extends NumberType>(collectionApprovedTransferTimeline: CollectionApprovedTransferTimeline<T>, convertFunction: (item: T) => U, populateOptionalFields?: boolean): CollectionApprovedTransferTimeline<U> {
   return deepCopy({
     ...collectionApprovedTransferTimeline,
-    collectionApprovedTransfers: collectionApprovedTransferTimeline.collectionApprovedTransfers.map((b) => convertCollectionApprovedTransfer(b, convertFunction)),
+    collectionApprovedTransfers: collectionApprovedTransferTimeline.collectionApprovedTransfers.map((b) => convertCollectionApprovedTransfer(b, convertFunction, populateOptionalFields)),
     timelineTimes: collectionApprovedTransferTimeline.timelineTimes.map((b) => convertUintRange(b, convertFunction))
   })
 }

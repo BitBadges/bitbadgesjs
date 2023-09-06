@@ -13,11 +13,11 @@ export interface UserPermissions<T extends NumberType> {
   canUpdateApprovedIncomingTransfers: UserApprovedIncomingTransferPermission<T>[];
 }
 
-export function convertUserPermissions<T extends NumberType, U extends NumberType>(permissions: UserPermissions<T>, convertFunction: (item: T) => U): UserPermissions<U> {
+export function convertUserPermissions<T extends NumberType, U extends NumberType>(permissions: UserPermissions<T>, convertFunction: (item: T) => U, populateOptionalFields?: boolean): UserPermissions<U> {
   return deepCopy({
     ...permissions,
-    canUpdateApprovedOutgoingTransfers: permissions.canUpdateApprovedOutgoingTransfers.map((b) => convertUserApprovedOutgoingTransferPermission(b, convertFunction)),
-    canUpdateApprovedIncomingTransfers: permissions.canUpdateApprovedIncomingTransfers.map((b) => convertUserApprovedIncomingTransferPermission(b, convertFunction))
+    canUpdateApprovedOutgoingTransfers: permissions.canUpdateApprovedOutgoingTransfers.map((b) => convertUserApprovedOutgoingTransferPermission(b, convertFunction, populateOptionalFields)),
+    canUpdateApprovedIncomingTransfers: permissions.canUpdateApprovedIncomingTransfers.map((b) => convertUserApprovedIncomingTransferPermission(b, convertFunction, populateOptionalFields))
   })
 }
 
@@ -33,11 +33,65 @@ export interface UserApprovedOutgoingTransferPermission<T extends NumberType> {
   combinations: UserApprovedOutgoingTransferCombination[];
 }
 
-export function convertUserApprovedOutgoingTransferPermission<T extends NumberType, U extends NumberType>(permission: UserApprovedOutgoingTransferPermission<T>, convertFunction: (item: T) => U): UserApprovedOutgoingTransferPermission<U> {
+const PermissionCombinationDefaultValues = {
+  timelineTimesOptions: {
+    invertDefault: false,
+    noValues: false,
+    allValues: false
+  },
+  toMappingOptions: {
+    invertDefault: false,
+    noValues: false,
+    allValues: false
+  },
+  fromMappingOptions: {
+    invertDefault: false,
+    noValues: false,
+    allValues: false
+  },
+  initiatedByMappingOptions: {
+    invertDefault: false,
+    noValues: false,
+    allValues: false
+  },
+  transferTimesOptions: {
+    invertDefault: false,
+    noValues: false,
+    allValues: false
+  },
+  badgeIdsOptions: {
+    invertDefault: false,
+    noValues: false,
+    allValues: false
+  },
+  ownershipTimesOptions: {
+    invertDefault: false,
+    noValues: false,
+    allValues: false
+  },
+  permittedTimesOptions: {
+    invertDefault: false,
+    noValues: false,
+    allValues: false
+  },
+  forbiddenTimesOptions: {
+    invertDefault: false,
+    noValues: false,
+    allValues: false
+  },
+}
+
+export function convertUserApprovedOutgoingTransferPermission<T extends NumberType, U extends NumberType>(permission: UserApprovedOutgoingTransferPermission<T>, convertFunction: (item: T) => U, populateOptionalFields?: boolean): UserApprovedOutgoingTransferPermission<U> {
   return deepCopy({
     ...permission,
-    defaultValues: convertUserApprovedOutgoingTransferDefaultValues(permission.defaultValues, convertFunction),
-    // combinations: permission.combinations.map((b) => convertUserApprovedOutgoingTransferCombination(b, convertFunction))
+    defaultValues: convertUserApprovedOutgoingTransferDefaultValues(permission.defaultValues, convertFunction,),
+    combinations: populateOptionalFields ? permission.combinations.map((b) => {
+      return {
+        ...PermissionCombinationDefaultValues,
+        ...b,
+        fromMappingOptions: undefined,
+      } as Required<UserApprovedOutgoingTransferCombination>
+    }) : permission.combinations
   })
 }
 
@@ -84,14 +138,14 @@ export function convertUserApprovedOutgoingTransferDefaultValues<T extends Numbe
  * @typedef {Object} UserApprovedOutgoingTransferCombination
  */
 export interface UserApprovedOutgoingTransferCombination {
-  timelineTimesOptions: ValueOptions;
-  toMappingOptions: ValueOptions;
-  initiatedByMappingOptions: ValueOptions;
-  transferTimesOptions: ValueOptions;
-  badgeIdsOptions: ValueOptions;
-  ownershipTimesOptions: ValueOptions;
-  permittedTimesOptions: ValueOptions;
-  forbiddenTimesOptions: ValueOptions;
+  timelineTimesOptions?: ValueOptions;
+  toMappingOptions?: ValueOptions;
+  initiatedByMappingOptions?: ValueOptions;
+  transferTimesOptions?: ValueOptions;
+  badgeIdsOptions?: ValueOptions;
+  ownershipTimesOptions?: ValueOptions;
+  permittedTimesOptions?: ValueOptions;
+  forbiddenTimesOptions?: ValueOptions;
 }
 
 // export function convertUserApprovedOutgoingTransferCombination<T extends NumberType, U extends NumberType>(combination: UserApprovedOutgoingTransferCombination<T>, _convertFunction: (item: T) => U): UserApprovedOutgoingTransferCombination<U> {
@@ -117,12 +171,12 @@ export interface UserApprovedOutgoingTransferCombination {
  * @property {boolean} noValues - Whether to override the default value with no values.
  */
 export interface ValueOptions {
-  invertDefault: boolean;
-  allValues: boolean;
-  noValues: boolean;
+  invertDefault?: boolean;
+  allValues?: boolean;
+  noValues?: boolean;
 }
 
-// export function convertValueOptions<T extends NumberType, U extends NumberType>(options: ValueOptions<T>): ValueOptions<U> {
+// export function convertValueOptions<T extends NumberType, U extends NumberType>(options?: ValueOptions<T>): ValueOptions<U> {
 //   return deepCopy({
 //     ...options
 //   })
@@ -140,11 +194,17 @@ export interface UserApprovedIncomingTransferPermission<T extends NumberType> {
   combinations: UserApprovedIncomingTransferCombination[];
 }
 
-export function convertUserApprovedIncomingTransferPermission<T extends NumberType, U extends NumberType>(permission: UserApprovedIncomingTransferPermission<T>, convertFunction: (item: T) => U): UserApprovedIncomingTransferPermission<U> {
+export function convertUserApprovedIncomingTransferPermission<T extends NumberType, U extends NumberType>(permission: UserApprovedIncomingTransferPermission<T>, convertFunction: (item: T) => U, populateOptionalFields?: boolean): UserApprovedIncomingTransferPermission<U> {
   return deepCopy({
     ...permission,
     defaultValues: convertUserApprovedIncomingTransferDefaultValues(permission.defaultValues, convertFunction),
-    // combinations: permission.combinations.map((b) => convertUserApprovedIncomingTransferCombination(b, convertFunction))
+    combinations: populateOptionalFields ? permission.combinations.map((b) => {
+      return {
+        ...PermissionCombinationDefaultValues,
+        ...b,
+        toMappingOptions: undefined,
+      } as Required<UserApprovedIncomingTransferCombination>
+    }) : permission.combinations
   })
 }
 
@@ -199,14 +259,14 @@ export function convertUserApprovedIncomingTransferDefaultValues<T extends Numbe
  * @property {ValueOptions} forbiddenTimesOptions - The options for manipulating the forbidden times.
  */
 export interface UserApprovedIncomingTransferCombination {
-  timelineTimesOptions: ValueOptions;
-  fromMappingOptions: ValueOptions;
-  initiatedByMappingOptions: ValueOptions;
-  transferTimesOptions: ValueOptions;
-  badgeIdsOptions: ValueOptions;
-  ownershipTimesOptions: ValueOptions;
-  permittedTimesOptions: ValueOptions;
-  forbiddenTimesOptions: ValueOptions;
+  timelineTimesOptions?: ValueOptions;
+  fromMappingOptions?: ValueOptions;
+  initiatedByMappingOptions?: ValueOptions;
+  transferTimesOptions?: ValueOptions;
+  badgeIdsOptions?: ValueOptions;
+  ownershipTimesOptions?: ValueOptions;
+  permittedTimesOptions?: ValueOptions;
+  forbiddenTimesOptions?: ValueOptions;
 }
 
 // export function convertUserApprovedIncomingTransferCombination<T extends NumberType, U extends NumberType>(combination: UserApprovedIncomingTransferCombination<T>, _convertFunction: (item: T) => U): UserApprovedIncomingTransferCombination<U> {
@@ -255,21 +315,21 @@ export interface CollectionPermissions<T extends NumberType> {
   canUpdateCollectionApprovedTransfers: CollectionApprovedTransferPermission<T>[];
 }
 
-export function convertCollectionPermissions<T extends NumberType, U extends NumberType>(permissions: CollectionPermissions<T>, convertFunction: (item: T) => U): CollectionPermissions<U> {
+export function convertCollectionPermissions<T extends NumberType, U extends NumberType>(permissions: CollectionPermissions<T>, convertFunction: (item: T) => U, populateOptionalFields?: boolean): CollectionPermissions<U> {
   return deepCopy({
     ...permissions,
-    canDeleteCollection: permissions.canDeleteCollection.map((b) => convertActionPermission(b, convertFunction)),
-    canArchiveCollection: permissions.canArchiveCollection.map((b) => convertTimedUpdatePermission(b, convertFunction)),
-    canUpdateContractAddress: permissions.canUpdateContractAddress.map((b) => convertTimedUpdatePermission(b, convertFunction)),
-    canUpdateOffChainBalancesMetadata: permissions.canUpdateOffChainBalancesMetadata.map((b) => convertTimedUpdatePermission(b, convertFunction)),
-    canUpdateStandards: permissions.canUpdateStandards.map((b) => convertTimedUpdatePermission(b, convertFunction)),
-    canUpdateCustomData: permissions.canUpdateCustomData.map((b) => convertTimedUpdatePermission(b, convertFunction)),
-    canUpdateManager: permissions.canUpdateManager.map((b) => convertTimedUpdatePermission(b, convertFunction)),
-    canUpdateCollectionMetadata: permissions.canUpdateCollectionMetadata.map((b) => convertTimedUpdatePermission(b, convertFunction)),
-    canCreateMoreBadges: permissions.canCreateMoreBadges.map((b) => convertBalancesActionPermission(b, convertFunction)),
-    canUpdateBadgeMetadata: permissions.canUpdateBadgeMetadata.map((b) => convertTimedUpdateWithBadgeIdsPermission(b, convertFunction)),
-    canUpdateInheritedBalances: permissions.canUpdateInheritedBalances.map((b) => convertTimedUpdateWithBadgeIdsPermission(b, convertFunction)),
-    canUpdateCollectionApprovedTransfers: permissions.canUpdateCollectionApprovedTransfers.map((b) => convertCollectionApprovedTransferPermission(b, convertFunction))
+    canDeleteCollection: permissions.canDeleteCollection.map((b) => convertActionPermission(b, convertFunction, populateOptionalFields)),
+    canArchiveCollection: permissions.canArchiveCollection.map((b) => convertTimedUpdatePermission(b, convertFunction, populateOptionalFields)),
+    canUpdateContractAddress: permissions.canUpdateContractAddress.map((b) => convertTimedUpdatePermission(b, convertFunction, populateOptionalFields)),
+    canUpdateOffChainBalancesMetadata: permissions.canUpdateOffChainBalancesMetadata.map((b) => convertTimedUpdatePermission(b, convertFunction, populateOptionalFields)),
+    canUpdateStandards: permissions.canUpdateStandards.map((b) => convertTimedUpdatePermission(b, convertFunction, populateOptionalFields)),
+    canUpdateCustomData: permissions.canUpdateCustomData.map((b) => convertTimedUpdatePermission(b, convertFunction, populateOptionalFields)),
+    canUpdateManager: permissions.canUpdateManager.map((b) => convertTimedUpdatePermission(b, convertFunction, populateOptionalFields)),
+    canUpdateCollectionMetadata: permissions.canUpdateCollectionMetadata.map((b) => convertTimedUpdatePermission(b, convertFunction, populateOptionalFields)),
+    canCreateMoreBadges: permissions.canCreateMoreBadges.map((b) => convertBalancesActionPermission(b, convertFunction, populateOptionalFields)),
+    canUpdateBadgeMetadata: permissions.canUpdateBadgeMetadata.map((b) => convertTimedUpdateWithBadgeIdsPermission(b, convertFunction, populateOptionalFields)),
+    canUpdateInheritedBalances: permissions.canUpdateInheritedBalances.map((b) => convertTimedUpdateWithBadgeIdsPermission(b, convertFunction, populateOptionalFields)),
+    canUpdateCollectionApprovedTransfers: permissions.canUpdateCollectionApprovedTransfers.map((b) => convertCollectionApprovedTransferPermission(b, convertFunction, populateOptionalFields))
   })
 }
 
@@ -281,11 +341,17 @@ export interface ActionPermission<T extends NumberType> {
   combinations: ActionPermissionCombination[];
 }
 
-export function convertActionPermission<T extends NumberType, U extends NumberType>(permission: ActionPermission<T>, convertFunction: (item: T) => U): ActionPermission<U> {
+export function convertActionPermission<T extends NumberType, U extends NumberType>(permission: ActionPermission<T>, convertFunction: (item: T) => U, populateOptionalFields?: boolean): ActionPermission<U> {
   return deepCopy({
     ...permission,
     defaultValues: convertActionPermissionDefaultValues(permission.defaultValues, convertFunction),
-    // combinations: permission.combinations.map((b) => convertActionPermissionCombination(b, convertFunction))
+    combinations: populateOptionalFields ? permission.combinations.map((b) => {
+      return {
+        permittedTimesOptions: PermissionCombinationDefaultValues.permittedTimesOptions,
+        forbiddenTimesOptions: PermissionCombinationDefaultValues.forbiddenTimesOptions,
+        ...b,
+      } as Required<ActionPermissionCombination>
+    }) : permission.combinations
   })
 }
 
@@ -318,8 +384,8 @@ export function convertActionPermissionDefaultValues<T extends NumberType, U ext
  * @property {ValueOptions} forbiddenTimesOptions - The options for manipulating the forbidden times.
  */
 export interface ActionPermissionCombination {
-  permittedTimesOptions: ValueOptions;
-  forbiddenTimesOptions: ValueOptions;
+  permittedTimesOptions?: ValueOptions;
+  forbiddenTimesOptions?: ValueOptions;
 }
 
 // export function convertActionPermissionCombination<T extends NumberType, U extends NumberType>(combination: ActionPermissionCombination<T>, _convertFunction: (item: T) => U): ActionPermissionCombination<U> {
@@ -343,11 +409,18 @@ export interface TimedUpdatePermission<T extends NumberType> {
   combinations: TimedUpdatePermissionCombination[];
 }
 
-export function convertTimedUpdatePermission<T extends NumberType, U extends NumberType>(permission: TimedUpdatePermission<T>, convertFunction: (item: T) => U): TimedUpdatePermission<U> {
+export function convertTimedUpdatePermission<T extends NumberType, U extends NumberType>(permission: TimedUpdatePermission<T>, convertFunction: (item: T) => U, populateOptionalFields?: boolean): TimedUpdatePermission<U> {
   return deepCopy({
     ...permission,
     defaultValues: convertTimedUpdatePermissionDefaultValues(permission.defaultValues, convertFunction),
-    // combinations: permission.combinations.map((b) => convertTimedUpdatePermissionCombination(b, convertFunction))
+    combinations: populateOptionalFields ? permission.combinations.map((b) => {
+      return {
+        timelineTimesOptions: PermissionCombinationDefaultValues.timelineTimesOptions,
+        permittedTimesOptions: PermissionCombinationDefaultValues.permittedTimesOptions,
+        forbiddenTimesOptions: PermissionCombinationDefaultValues.forbiddenTimesOptions,
+        ...b,
+      } as Required<TimedUpdatePermissionCombination>
+    }) : permission.combinations
   })
 }
 
@@ -385,9 +458,9 @@ export function convertTimedUpdatePermissionDefaultValues<T extends NumberType, 
  * @property {ValueOptions} forbiddenTimesOptions - The options for manipulating the forbidden times.
  */
 export interface TimedUpdatePermissionCombination {
-  timelineTimesOptions: ValueOptions;
-  permittedTimesOptions: ValueOptions;
-  forbiddenTimesOptions: ValueOptions;
+  timelineTimesOptions?: ValueOptions;
+  permittedTimesOptions?: ValueOptions;
+  forbiddenTimesOptions?: ValueOptions;
 }
 
 // export function convertTimedUpdatePermissionCombination<T extends NumberType, U extends NumberType>(combination: TimedUpdatePermissionCombination<T>, _convertFunction: (item: T) => U): TimedUpdatePermissionCombination<U> {
@@ -412,11 +485,19 @@ export interface TimedUpdateWithBadgeIdsPermission<T extends NumberType> {
   defaultValues: TimedUpdateWithBadgeIdsPermissionDefaultValues<T>;
   combinations: TimedUpdateWithBadgeIdsPermissionCombination[];
 }
-export function convertTimedUpdateWithBadgeIdsPermission<T extends NumberType, U extends NumberType>(permission: TimedUpdateWithBadgeIdsPermission<T>, convertFunction: (item: T) => U): TimedUpdateWithBadgeIdsPermission<U> {
+export function convertTimedUpdateWithBadgeIdsPermission<T extends NumberType, U extends NumberType>(permission: TimedUpdateWithBadgeIdsPermission<T>, convertFunction: (item: T) => U, populateOptionalFields?: boolean): TimedUpdateWithBadgeIdsPermission<U> {
   return deepCopy({
     ...permission,
     defaultValues: convertTimedUpdateWithBadgeIdsPermissionDefaultValues(permission.defaultValues, convertFunction),
-    // combinations: permission.combinations.map((b) => convertTimedUpdateWithBadgeIdsPermissionCombination(b, convertFunction))
+    combinations: populateOptionalFields ? permission.combinations.map((b) => {
+      return {
+        timelineTimesOptions: PermissionCombinationDefaultValues.timelineTimesOptions,
+        badgeIdsOptions: PermissionCombinationDefaultValues.badgeIdsOptions,
+        permittedTimesOptions: PermissionCombinationDefaultValues.permittedTimesOptions,
+        forbiddenTimesOptions: PermissionCombinationDefaultValues.forbiddenTimesOptions,
+        ...b,
+      } as Required<TimedUpdateWithBadgeIdsPermissionCombination>
+    }) : permission.combinations
   })
 }
 
@@ -458,10 +539,10 @@ export function convertTimedUpdateWithBadgeIdsPermissionDefaultValues<T extends 
  * @property {ValueOptions} forbiddenTimesOptions - The options for manipulating the forbidden times.
  */
 export interface TimedUpdateWithBadgeIdsPermissionCombination {
-  timelineTimesOptions: ValueOptions;
-  badgeIdsOptions: ValueOptions;
-  permittedTimesOptions: ValueOptions;
-  forbiddenTimesOptions: ValueOptions;
+  timelineTimesOptions?: ValueOptions;
+  badgeIdsOptions?: ValueOptions;
+  permittedTimesOptions?: ValueOptions;
+  forbiddenTimesOptions?: ValueOptions;
 }
 
 // export function convertTimedUpdateWithBadgeIdsPermissionCombination<T extends NumberType, U extends NumberType>(combination: TimedUpdateWithBadgeIdsPermissionCombination<T>, _convertFunction: (item: T) => U): TimedUpdateWithBadgeIdsPermissionCombination<U> {
@@ -488,11 +569,19 @@ export interface BalancesActionPermission<T extends NumberType> {
   combinations: BalancesActionPermissionCombination[];
 }
 
-export function convertBalancesActionPermission<T extends NumberType, U extends NumberType>(permission: BalancesActionPermission<T>, convertFunction: (item: T) => U): BalancesActionPermission<U> {
+export function convertBalancesActionPermission<T extends NumberType, U extends NumberType>(permission: BalancesActionPermission<T>, convertFunction: (item: T) => U, populateOptionalFields?: boolean): BalancesActionPermission<U> {
   return deepCopy({
     ...permission,
     defaultValues: convertBalancesActionPermissionDefaultValues(permission.defaultValues, convertFunction),
-    // combinations: permission.combinations.map((b) => convertBalancesActionPermissionCombination(b, convertFunction))
+    combinations: populateOptionalFields ? permission.combinations.map((b) => {
+      return {
+        badgeIdsOptions: PermissionCombinationDefaultValues.badgeIdsOptions,
+        ownershipTimesOptions: PermissionCombinationDefaultValues.ownershipTimesOptions,
+        permittedTimesOptions: PermissionCombinationDefaultValues.permittedTimesOptions,
+        forbiddenTimesOptions: PermissionCombinationDefaultValues.forbiddenTimesOptions,
+        ...b,
+      } as Required<BalancesActionPermissionCombination>
+    }) : permission.combinations
   })
 }
 
@@ -534,10 +623,10 @@ export function convertBalancesActionPermissionDefaultValues<T extends NumberTyp
  * @property {ValueOptions} forbiddenTimesOptions - The options for manipulating the forbidden times.
  */
 export interface BalancesActionPermissionCombination {
-  badgeIdsOptions: ValueOptions;
-  ownershipTimesOptions: ValueOptions;
-  permittedTimesOptions: ValueOptions;
-  forbiddenTimesOptions: ValueOptions;
+  badgeIdsOptions?: ValueOptions;
+  ownershipTimesOptions?: ValueOptions;
+  permittedTimesOptions?: ValueOptions;
+  forbiddenTimesOptions?: ValueOptions;
 }
 
 // export function convertBalancesActionPermissionCombination<T extends NumberType, U extends NumberType>(combination: BalancesActionPermissionCombination<T>, _convertFunction: (item: T) => U): BalancesActionPermissionCombination<U> {
@@ -564,11 +653,24 @@ export interface CollectionApprovedTransferPermission<T extends NumberType> {
   combinations: CollectionApprovedTransferPermissionCombination[];
 }
 
-export function convertCollectionApprovedTransferPermission<T extends NumberType, U extends NumberType>(permission: CollectionApprovedTransferPermission<T>, convertFunction: (item: T) => U): CollectionApprovedTransferPermission<U> {
+export function convertCollectionApprovedTransferPermission<T extends NumberType, U extends NumberType>(permission: CollectionApprovedTransferPermission<T>, convertFunction: (item: T) => U, populateOptionalFields?: boolean): CollectionApprovedTransferPermission<U> {
   return deepCopy({
     ...permission,
     defaultValues: convertCollectionApprovedTransferPermissionDefaultValues(permission.defaultValues, convertFunction),
-    // combinations: permission.combinations.map((b) => convertCollectionApprovedTransferPermissionCombination(b, convertFunction))
+    combinations: populateOptionalFields ? permission.combinations.map((b) => {
+      return {
+        timelineTimesOptions: PermissionCombinationDefaultValues.timelineTimesOptions,
+        fromMappingOptions: PermissionCombinationDefaultValues.fromMappingOptions,
+        toMappingOptions: PermissionCombinationDefaultValues.toMappingOptions,
+        initiatedByMappingOptions: PermissionCombinationDefaultValues.initiatedByMappingOptions,
+        transferTimesOptions: PermissionCombinationDefaultValues.transferTimesOptions,
+        badgeIdsOptions: PermissionCombinationDefaultValues.badgeIdsOptions,
+        ownershipTimesOptions: PermissionCombinationDefaultValues.ownershipTimesOptions,
+        permittedTimesOptions: PermissionCombinationDefaultValues.permittedTimesOptions,
+        forbiddenTimesOptions: PermissionCombinationDefaultValues.forbiddenTimesOptions,
+        ...b,
+      } as Required<CollectionApprovedTransferPermissionCombination>
+    }) : permission.combinations
   })
 }
 
@@ -627,15 +729,15 @@ export function convertCollectionApprovedTransferPermissionDefaultValues<T exten
  * @property {ValueOptions} forbiddenTimesOptions - The options for manipulating the forbidden times.
  */
 export interface CollectionApprovedTransferPermissionCombination {
-  timelineTimesOptions: ValueOptions;
-  fromMappingOptions: ValueOptions;
-  toMappingOptions: ValueOptions;
-  initiatedByMappingOptions: ValueOptions;
-  transferTimesOptions: ValueOptions;
-  badgeIdsOptions: ValueOptions;
-  ownershipTimesOptions: ValueOptions;
-  permittedTimesOptions: ValueOptions;
-  forbiddenTimesOptions: ValueOptions;
+  timelineTimesOptions?: ValueOptions;
+  fromMappingOptions?: ValueOptions;
+  toMappingOptions?: ValueOptions;
+  initiatedByMappingOptions?: ValueOptions;
+  transferTimesOptions?: ValueOptions;
+  badgeIdsOptions?: ValueOptions;
+  ownershipTimesOptions?: ValueOptions;
+  permittedTimesOptions?: ValueOptions;
+  forbiddenTimesOptions?: ValueOptions;
 }
 
 // export function convertCollectionApprovedTransferPermissionCombination<T extends NumberType, U extends NumberType>(combination: CollectionApprovedTransferPermissionCombination<T>, _convertFunction: (item: T) => U): CollectionApprovedTransferPermissionCombination<U> {
