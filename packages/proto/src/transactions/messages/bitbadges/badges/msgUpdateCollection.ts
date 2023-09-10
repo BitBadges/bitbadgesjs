@@ -70,7 +70,7 @@ export interface MsgUpdateCollection<T extends NumberType> {
   offChainBalancesMetadataTimeline: OffChainBalancesMetadataTimeline<T>[]
   updateCustomDataTimeline: boolean
   customDataTimeline: CustomDataTimeline<T>[]
-  inheritedCollectionId: T
+  // inheritedCollectionId: T
   updateCollectionApprovedTransfersTimeline: boolean
   collectionApprovedTransfersTimeline: CollectionApprovedTransferTimeline<T>[]
   updateStandardsTimeline: boolean
@@ -99,7 +99,7 @@ export function convertMsgUpdateCollection<T extends NumberType, U extends Numbe
     badgeMetadataTimeline: msg.badgeMetadataTimeline.map(x => convertBadgeMetadataTimeline(x, convertFunction)),
     offChainBalancesMetadataTimeline: msg.offChainBalancesMetadataTimeline.map(x => convertOffChainBalancesMetadataTimeline(x, convertFunction)),
     customDataTimeline: msg.customDataTimeline.map(x => convertCustomDataTimeline(x, convertFunction)),
-    inheritedCollectionId: convertFunction(msg.inheritedCollectionId),
+    // inheritedCollectionId: convertFunction(msg.inheritedCollectionId),
     collectionApprovedTransfersTimeline: msg.collectionApprovedTransfersTimeline.map(x => convertCollectionApprovedTransferTimeline(x, convertFunction)),
     standardsTimeline: msg.standardsTimeline.map(x => convertStandardsTimeline(x, convertFunction)),
     contractAddressTimeline: msg.contractAddressTimeline.map(x => convertContractAddressTimeline(x, convertFunction)),
@@ -128,7 +128,7 @@ export function convertFromProtoToMsgUpdateCollection(
     badgeMetadataTimeline: msg.badgeMetadataTimeline.map(x => convertBadgeMetadataTimeline(x, BigInt)),
     offChainBalancesMetadataTimeline: msg.offChainBalancesMetadataTimeline.map(x => convertOffChainBalancesMetadataTimeline(x, BigInt)),
     customDataTimeline: msg.customDataTimeline.map(x => convertCustomDataTimeline(x, BigInt)),
-    inheritedCollectionId: BigInt(msg.inheritedCollectionId),
+    // inheritedCollectionId: BigInt(msg.inheritedCollectionId),
     collectionApprovedTransfersTimeline: msg.collectionApprovedTransfersTimeline.map(x => convertCollectionApprovedTransferTimeline(x, BigInt)),
     standardsTimeline: msg.standardsTimeline.map(x => convertStandardsTimeline(x, BigInt)),
     contractAddressTimeline: msg.contractAddressTimeline.map(x => convertContractAddressTimeline(x, BigInt)),
@@ -184,7 +184,7 @@ export function createTxMsgUpdateCollection<T extends NumberType>(
     params.offChainBalancesMetadataTimeline,
     params.updateCustomDataTimeline,
     params.customDataTimeline,
-    params.inheritedCollectionId,
+    // params.inheritedCollectionId,
     params.updateCollectionApprovedTransfersTimeline,
     params.collectionApprovedTransfersTimeline,
     params.updateStandardsTimeline,
@@ -229,7 +229,7 @@ export function createTxMsgUpdateCollection<T extends NumberType>(
     params.offChainBalancesMetadataTimeline,
     params.updateCustomDataTimeline,
     params.customDataTimeline,
-    params.inheritedCollectionId,
+    // params.inheritedCollectionId,
     params.updateCollectionApprovedTransfersTimeline,
     params.collectionApprovedTransfersTimeline,
     params.updateStandardsTimeline,

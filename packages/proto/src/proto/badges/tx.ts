@@ -24,7 +24,6 @@ export namespace bitbadges.bitbadgeschain.badges {
       defaultApprovedOutgoingTransfersTimeline?: dependency_1.bitbadges.bitbadgeschain.badges.UserApprovedOutgoingTransferTimeline[];
       defaultApprovedIncomingTransfersTimeline?: dependency_1.bitbadges.bitbadgeschain.badges.UserApprovedIncomingTransferTimeline[];
       defaultUserPermissions?: dependency_3.bitbadges.bitbadgeschain.badges.UserPermissions;
-      inheritedCollectionId?: string;
       badgesToCreate?: dependency_2.bitbadges.bitbadgeschain.badges.Balance[];
       updateCollectionPermissions?: boolean;
       collectionPermissions?: dependency_3.bitbadges.bitbadgeschain.badges.CollectionPermissions;
@@ -67,9 +66,6 @@ export namespace bitbadges.bitbadgeschain.badges {
         }
         if ("defaultUserPermissions" in data && data.defaultUserPermissions != undefined) {
           this.defaultUserPermissions = data.defaultUserPermissions;
-        }
-        if ("inheritedCollectionId" in data && data.inheritedCollectionId != undefined) {
-          this.inheritedCollectionId = data.inheritedCollectionId;
         }
         if ("badgesToCreate" in data && data.badgesToCreate != undefined) {
           this.badgesToCreate = data.badgesToCreate;
@@ -174,12 +170,6 @@ export namespace bitbadges.bitbadgeschain.badges {
     }
     get has_defaultUserPermissions() {
       return pb_1.Message.getField(this, 27) != null;
-    }
-    get inheritedCollectionId() {
-      return pb_1.Message.getFieldWithDefault(this, 28, "") as string;
-    }
-    set inheritedCollectionId(value: string) {
-      pb_1.Message.setField(this, 28, value);
     }
     get badgesToCreate() {
       return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.Balance, 6) as dependency_2.bitbadges.bitbadgeschain.badges.Balance[];
@@ -317,7 +307,6 @@ export namespace bitbadges.bitbadgeschain.badges {
       defaultApprovedOutgoingTransfersTimeline?: ReturnType<typeof dependency_1.bitbadges.bitbadgeschain.badges.UserApprovedOutgoingTransferTimeline.prototype.toObject>[];
       defaultApprovedIncomingTransfersTimeline?: ReturnType<typeof dependency_1.bitbadges.bitbadgeschain.badges.UserApprovedIncomingTransferTimeline.prototype.toObject>[];
       defaultUserPermissions?: ReturnType<typeof dependency_3.bitbadges.bitbadgeschain.badges.UserPermissions.prototype.toObject>;
-      inheritedCollectionId?: string;
       badgesToCreate?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.Balance.prototype.toObject>[];
       updateCollectionPermissions?: boolean;
       collectionPermissions?: ReturnType<typeof dependency_3.bitbadges.bitbadgeschain.badges.CollectionPermissions.prototype.toObject>;
@@ -358,9 +347,6 @@ export namespace bitbadges.bitbadgeschain.badges {
       }
       if (data.defaultUserPermissions != null) {
         message.defaultUserPermissions = dependency_3.bitbadges.bitbadgeschain.badges.UserPermissions.fromObject(data.defaultUserPermissions);
-      }
-      if (data.inheritedCollectionId != null) {
-        message.inheritedCollectionId = data.inheritedCollectionId;
       }
       if (data.badgesToCreate != null) {
         message.badgesToCreate = data.badgesToCreate.map(item => dependency_2.bitbadges.bitbadgeschain.badges.Balance.fromObject(item));
@@ -435,7 +421,6 @@ export namespace bitbadges.bitbadgeschain.badges {
         defaultApprovedOutgoingTransfersTimeline?: ReturnType<typeof dependency_1.bitbadges.bitbadgeschain.badges.UserApprovedOutgoingTransferTimeline.prototype.toObject>[];
         defaultApprovedIncomingTransfersTimeline?: ReturnType<typeof dependency_1.bitbadges.bitbadgeschain.badges.UserApprovedIncomingTransferTimeline.prototype.toObject>[];
         defaultUserPermissions?: ReturnType<typeof dependency_3.bitbadges.bitbadgeschain.badges.UserPermissions.prototype.toObject>;
-        inheritedCollectionId?: string;
         badgesToCreate?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.Balance.prototype.toObject>[];
         updateCollectionPermissions?: boolean;
         collectionPermissions?: ReturnType<typeof dependency_3.bitbadges.bitbadgeschain.badges.CollectionPermissions.prototype.toObject>;
@@ -475,9 +460,6 @@ export namespace bitbadges.bitbadgeschain.badges {
       }
       if (this.defaultUserPermissions != null) {
         data.defaultUserPermissions = this.defaultUserPermissions.toObject();
-      }
-      if (this.inheritedCollectionId != null) {
-        data.inheritedCollectionId = this.inheritedCollectionId;
       }
       if (this.badgesToCreate != null) {
         data.badgesToCreate = this.badgesToCreate.map((item: dependency_2.bitbadges.bitbadgeschain.badges.Balance) => item.toObject());
@@ -560,8 +542,6 @@ export namespace bitbadges.bitbadgeschain.badges {
         writer.writeRepeatedMessage(5, this.defaultApprovedIncomingTransfersTimeline, (item: dependency_1.bitbadges.bitbadgeschain.badges.UserApprovedIncomingTransferTimeline) => item.serialize(writer));
       if (this.has_defaultUserPermissions)
         writer.writeMessage(27, this.defaultUserPermissions, () => this.defaultUserPermissions.serialize(writer));
-      if (this.inheritedCollectionId.length)
-        writer.writeString(28, this.inheritedCollectionId);
       if (this.badgesToCreate.length)
         writer.writeRepeatedMessage(6, this.badgesToCreate, (item: dependency_2.bitbadges.bitbadgeschain.badges.Balance) => item.serialize(writer));
       if (this.updateCollectionPermissions != false)
@@ -630,9 +610,6 @@ export namespace bitbadges.bitbadgeschain.badges {
             break;
           case 27:
             reader.readMessage(message.defaultUserPermissions, () => message.defaultUserPermissions = dependency_3.bitbadges.bitbadgeschain.badges.UserPermissions.deserialize(reader));
-            break;
-          case 28:
-            message.inheritedCollectionId = reader.readString();
             break;
           case 6:
             reader.readMessage(message.badgesToCreate, () => pb_1.Message.addToRepeatedWrapperField(message, 6, dependency_2.bitbadges.bitbadgeschain.badges.Balance.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.Balance));

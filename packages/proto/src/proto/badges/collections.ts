@@ -22,7 +22,6 @@ export namespace bitbadges.bitbadgeschain.badges {
       badgeMetadataTimeline?: dependency_6.bitbadges.bitbadgeschain.badges.BadgeMetadataTimeline[];
       balancesType?: string;
       offChainBalancesMetadataTimeline?: dependency_6.bitbadges.bitbadgeschain.badges.OffChainBalancesMetadataTimeline[];
-      inheritedCollectionId?: string;
       customDataTimeline?: dependency_6.bitbadges.bitbadgeschain.badges.CustomDataTimeline[];
       managerTimeline?: dependency_6.bitbadges.bitbadgeschain.badges.ManagerTimeline[];
       collectionPermissions?: dependency_4.bitbadges.bitbadgeschain.badges.CollectionPermissions;
@@ -52,9 +51,6 @@ export namespace bitbadges.bitbadgeschain.badges {
         }
         if ("offChainBalancesMetadataTimeline" in data && data.offChainBalancesMetadataTimeline != undefined) {
           this.offChainBalancesMetadataTimeline = data.offChainBalancesMetadataTimeline;
-        }
-        if ("inheritedCollectionId" in data && data.inheritedCollectionId != undefined) {
-          this.inheritedCollectionId = data.inheritedCollectionId;
         }
         if ("customDataTimeline" in data && data.customDataTimeline != undefined) {
           this.customDataTimeline = data.customDataTimeline;
@@ -120,12 +116,6 @@ export namespace bitbadges.bitbadgeschain.badges {
     }
     set offChainBalancesMetadataTimeline(value: dependency_6.bitbadges.bitbadgeschain.badges.OffChainBalancesMetadataTimeline[]) {
       pb_1.Message.setRepeatedWrapperField(this, 5, value);
-    }
-    get inheritedCollectionId() {
-      return pb_1.Message.getFieldWithDefault(this, 6, "") as string;
-    }
-    set inheritedCollectionId(value: string) {
-      pb_1.Message.setField(this, 6, value);
     }
     get customDataTimeline() {
       return pb_1.Message.getRepeatedWrapperField(this, dependency_6.bitbadges.bitbadgeschain.badges.CustomDataTimeline, 7) as dependency_6.bitbadges.bitbadgeschain.badges.CustomDataTimeline[];
@@ -205,7 +195,6 @@ export namespace bitbadges.bitbadgeschain.badges {
       badgeMetadataTimeline?: ReturnType<typeof dependency_6.bitbadges.bitbadgeschain.badges.BadgeMetadataTimeline.prototype.toObject>[];
       balancesType?: string;
       offChainBalancesMetadataTimeline?: ReturnType<typeof dependency_6.bitbadges.bitbadgeschain.badges.OffChainBalancesMetadataTimeline.prototype.toObject>[];
-      inheritedCollectionId?: string;
       customDataTimeline?: ReturnType<typeof dependency_6.bitbadges.bitbadgeschain.badges.CustomDataTimeline.prototype.toObject>[];
       managerTimeline?: ReturnType<typeof dependency_6.bitbadges.bitbadgeschain.badges.ManagerTimeline.prototype.toObject>[];
       collectionPermissions?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.CollectionPermissions.prototype.toObject>;
@@ -233,9 +222,6 @@ export namespace bitbadges.bitbadgeschain.badges {
       }
       if (data.offChainBalancesMetadataTimeline != null) {
         message.offChainBalancesMetadataTimeline = data.offChainBalancesMetadataTimeline.map(item => dependency_6.bitbadges.bitbadgeschain.badges.OffChainBalancesMetadataTimeline.fromObject(item));
-      }
-      if (data.inheritedCollectionId != null) {
-        message.inheritedCollectionId = data.inheritedCollectionId;
       }
       if (data.customDataTimeline != null) {
         message.customDataTimeline = data.customDataTimeline.map(item => dependency_6.bitbadges.bitbadgeschain.badges.CustomDataTimeline.fromObject(item));
@@ -279,7 +265,6 @@ export namespace bitbadges.bitbadgeschain.badges {
         badgeMetadataTimeline?: ReturnType<typeof dependency_6.bitbadges.bitbadgeschain.badges.BadgeMetadataTimeline.prototype.toObject>[];
         balancesType?: string;
         offChainBalancesMetadataTimeline?: ReturnType<typeof dependency_6.bitbadges.bitbadgeschain.badges.OffChainBalancesMetadataTimeline.prototype.toObject>[];
-        inheritedCollectionId?: string;
         customDataTimeline?: ReturnType<typeof dependency_6.bitbadges.bitbadgeschain.badges.CustomDataTimeline.prototype.toObject>[];
         managerTimeline?: ReturnType<typeof dependency_6.bitbadges.bitbadgeschain.badges.ManagerTimeline.prototype.toObject>[];
         collectionPermissions?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.CollectionPermissions.prototype.toObject>;
@@ -306,9 +291,6 @@ export namespace bitbadges.bitbadgeschain.badges {
       }
       if (this.offChainBalancesMetadataTimeline != null) {
         data.offChainBalancesMetadataTimeline = this.offChainBalancesMetadataTimeline.map((item: dependency_6.bitbadges.bitbadgeschain.badges.OffChainBalancesMetadataTimeline) => item.toObject());
-      }
-      if (this.inheritedCollectionId != null) {
-        data.inheritedCollectionId = this.inheritedCollectionId;
       }
       if (this.customDataTimeline != null) {
         data.customDataTimeline = this.customDataTimeline.map((item: dependency_6.bitbadges.bitbadgeschain.badges.CustomDataTimeline) => item.toObject());
@@ -359,8 +341,6 @@ export namespace bitbadges.bitbadgeschain.badges {
         writer.writeString(4, this.balancesType);
       if (this.offChainBalancesMetadataTimeline.length)
         writer.writeRepeatedMessage(5, this.offChainBalancesMetadataTimeline, (item: dependency_6.bitbadges.bitbadgeschain.badges.OffChainBalancesMetadataTimeline) => item.serialize(writer));
-      if (this.inheritedCollectionId.length)
-        writer.writeString(6, this.inheritedCollectionId);
       if (this.customDataTimeline.length)
         writer.writeRepeatedMessage(7, this.customDataTimeline, (item: dependency_6.bitbadges.bitbadgeschain.badges.CustomDataTimeline) => item.serialize(writer));
       if (this.managerTimeline.length)
@@ -406,9 +386,6 @@ export namespace bitbadges.bitbadgeschain.badges {
             break;
           case 5:
             reader.readMessage(message.offChainBalancesMetadataTimeline, () => pb_1.Message.addToRepeatedWrapperField(message, 5, dependency_6.bitbadges.bitbadgeschain.badges.OffChainBalancesMetadataTimeline.deserialize(reader), dependency_6.bitbadges.bitbadgeschain.badges.OffChainBalancesMetadataTimeline));
-            break;
-          case 6:
-            message.inheritedCollectionId = reader.readString();
             break;
           case 7:
             reader.readMessage(message.customDataTimeline, () => pb_1.Message.addToRepeatedWrapperField(message, 7, dependency_6.bitbadges.bitbadgeschain.badges.CustomDataTimeline.deserialize(reader), dependency_6.bitbadges.bitbadgeschain.badges.CustomDataTimeline));

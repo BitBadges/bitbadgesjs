@@ -39,7 +39,7 @@ message BadgeCollection {
   repeated OffChainBalancesMetadataTimeline offChainBalancesMetadataTimeline = 5;
 
   // The inherited balances that defines the parent collection for inherited balances.
-  string inheritedCollectionId = 6 [(gogoproto.customtype) = "Uint", (gogoproto.nullable) = false];
+  // string inheritedCollectionId = 6 [(gogoproto.customtype) = "Uint", (gogoproto.nullable) = false];
 
   // The custom data field is an arbitrary field that can be used to store any data.
   repeated CustomDataTimeline customDataTimeline = 7;
