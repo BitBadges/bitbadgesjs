@@ -287,27 +287,9 @@ export function setBalance(newBalance: Balance<bigint>, balances: Balance<bigint
     return balances;
   }
 
-  for (const balance of balances) {
-    if (balance.amount !== newBalance.amount) {
-      continue;
-    }
-
-    if (JSON.stringify(balance.badgeIds) === JSON.stringify(newBalance.badgeIds)) {
-      balance.ownershipTimes.push(...newBalance.ownershipTimes);
-      balance.ownershipTimes = sortUintRangesAndMergeIfNecessary(balance.ownershipTimes);
-
-      return balances;
-    } else if (JSON.stringify(balance.ownershipTimes) === JSON.stringify(newBalance.ownershipTimes)) {
-      balance.badgeIds.push(...newBalance.badgeIds);
-      balance.badgeIds = sortUintRangesAndMergeIfNecessary(balance.badgeIds);
-
-      return balances;
-    }
-  }
-
   balances.push(newBalance);
 
-  return balances;
+  return sortAndMergeBalances(balances);
 }
 
 /**
@@ -448,6 +430,47 @@ export function deleteBalances(rangesToDelete: UintRange<bigint>[], timesToDelet
       });
     }
   }
+
+  return newBalances;
+}
+
+export function sortAndMergeBalances(balances: Balance<bigint>[]) {
+  //sort in ascending order of amount
+  balances = balances.sort((a, b) => {
+    return a.amount > b.amount ? 1 : -1;
+  });
+
+  //Merge those which have same amount and ownership times or amount and badge ids
+  let newBalances: Balance<bigint>[] = [];
+
+  for (let i = 0; i < balances.length; i++) {
+    let balance = balances[i];
+    let found = false;
+    for (let j = 0; j < newBalances.length; j++) {
+      let newBalance = newBalances[j];
+      if (newBalance.amount === balance.amount) {
+        if (JSON.stringify(newBalance.ownershipTimes) === JSON.stringify(balance.ownershipTimes)) {
+          newBalance.badgeIds.push(...balance.badgeIds);
+          newBalance.badgeIds = sortUintRangesAndMergeIfNecessary(newBalance.badgeIds);
+          found = true;
+          break;
+        } else if (JSON.stringify(newBalance.badgeIds) === JSON.stringify(balance.badgeIds)) {
+          newBalance.ownershipTimes.push(...balance.ownershipTimes);
+          newBalance.ownershipTimes = sortUintRangesAndMergeIfNecessary(newBalance.ownershipTimes);
+          found = true;
+          break;
+        }
+      } else if (newBalance.amount > balance.amount) {
+        //We are past the point where we can find a match since it is sorted
+        break;
+      }
+    }
+
+    if (!found) {
+      newBalances.push(balance);
+    }
+  }
+
 
   return newBalances;
 }

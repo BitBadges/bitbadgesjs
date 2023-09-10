@@ -1,30 +1,98 @@
-import { BadgeMetadataTimeline, CollectionApprovedTransferTimeline, CollectionMetadataTimeline, ContractAddressTimeline, CustomDataTimeline, InheritedBalancesTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadataTimeline, StandardsTimeline, TimelineItem } from "bitbadgesjs-proto";
+import { BadgeMetadataTimeline, CollectionApprovedTransferTimeline, CollectionMetadataTimeline, ContractAddressTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, NumberType, OffChainBalancesMetadataTimeline, StandardsTimeline, TimelineItem } from "bitbadgesjs-proto";
 import { DefaultPlaceholderMetadata } from "./constants";
-import { CollectionApprovedTransferTimelineWithDetails } from "./types/collections";
+import { BitBadgesCollection, CollectionApprovedTransferTimelineWithDetails } from "./types/collections";
 import { UserApprovedIncomingTransferTimelineWithDetails, UserApprovedOutgoingTransferTimelineWithDetails } from "./types/users";
 import { removeUintRangeFromUintRange, searchUintRangesForId } from "./uintRanges";
 
 
 /**
- * Given a timeline-based field, get the index that corresponds to the value for the current time (Date.now()).
+ * @category Timelines
+ */
+export function getValuesAtTimeForCollection(collection: BitBadgesCollection<bigint>, time?: NumberType) {
+  return {
+    manager: getValueAtTimeForTimeline(collection.managerTimeline, time)?.manager ?? "",
+    collectionMetadata: getValueAtTimeForTimeline(collection.collectionMetadataTimeline, time)?.collectionMetadata ?? {
+      uri: '',
+      customData: '',
+    },
+    badgeMetadata: getValueAtTimeForTimeline(collection.badgeMetadataTimeline, time)?.badgeMetadata ?? [],
+    offChainBalancesMetadata: getValueAtTimeForTimeline(collection.offChainBalancesMetadataTimeline, time)?.offChainBalancesMetadata ?? {
+      uri: '',
+      customData: '',
+    },
+    customData: getValueAtTimeForTimeline(collection.customDataTimeline, time)?.customData ?? "",
+    collectionApprovedTransfers: getValueAtTimeForTimeline(collection.collectionApprovedTransfersTimeline, time)?.collectionApprovedTransfers ?? [],
+    standards: getValueAtTimeForTimeline(collection.standardsTimeline, time)?.standards ?? [],
+    isArchived: getValueAtTimeForTimeline(collection.isArchivedTimeline, time)?.isArchived ?? false,
+    // inheritedBalances: getValueAtTimeForTimeline(collection.inheritedBalancesTimeline, time)?.inheritedBalances ?? [],
+    contractAddress: getValueAtTimeForTimeline(collection.contractAddressTimeline, time)?.contractAddress ?? "",
+    defaultApprovedIncomingTransfers: getValueAtTimeForTimeline(collection.defaultUserApprovedIncomingTransfersTimeline, time)?.approvedIncomingTransfers ?? [],
+    defaultApprovedOutgoingTransfers: getValueAtTimeForTimeline(collection.defaultUserApprovedOutgoingTransfersTimeline, time)?.approvedOutgoingTransfers ?? [],
+  }
+}
+
+
+/**
+ * @category Timelines
+ */
+export function getCurrentValuesForCollection(collection: BitBadgesCollection<bigint>) {
+  return getValuesAtTimeForCollection(collection, BigInt(Date.now()));
+}
+
+/**
+ * @category Timelines
+ */
+export function getCurrentValueForTimeline<T extends TimelineItem<bigint>>(timeline: T[]): T | undefined {
+  return getValueAtTimeForTimeline(timeline, BigInt(Date.now()));
+}
+
+/**
+ * @category Timelines
+ */
+export function getCurrentIdxForTimeline(timeline: TimelineItem<bigint>[]): number {
+  return getIdxAtTimeForTimeline(timeline, BigInt(Date.now()));
+}
+
+/**
+ * Gets a value for a timeline-based field at a specific time (Date.now() by default).
+ *
+ * @category Timelines
+ */
+export function getValueAtTimeForTimeline<T extends TimelineItem<bigint>>(timeline: T[], time?: NumberType): T | undefined {
+  const timeToCheck = time ?? BigInt(Date.now())
+
+  for (const timelineItem of timeline) {
+    const timelineTimes = timelineItem.timelineTimes;
+    const [, found] = searchUintRangesForId(BigInt(timeToCheck), timelineTimes);
+    if (found) {
+      return timelineItem;
+    }
+  }
+
+  return undefined;
+}
+
+
+/**
+ * Given a timeline-based field, get the index that the value is at for a specific time (Date.now() by default).
  *
  * @category Timelines
  */
 /**
  * @category Timelines
  */
-export function getCurrentValueIdxForTimeline(timeline: TimelineItem<bigint>[]): bigint {
-  const currentTime = BigInt(Date.now());
+export function getIdxAtTimeForTimeline(timeline: TimelineItem<bigint>[], time?: NumberType): number {
+  const timeToCheck = time ?? BigInt(Date.now());
 
   for (const timelineItem of timeline) {
     const timelineTimes = timelineItem.timelineTimes;
-    const [idx, found] = searchUintRangesForId(currentTime, timelineTimes);
+    const [idx, found] = searchUintRangesForId(BigInt(timeToCheck), timelineTimes);
     if (found) {
-      return BigInt(idx);
+      return Number(idx);
     }
   }
 
-  return BigInt(-1);
+  return Number(-1);
 }
 
 /**
@@ -108,12 +176,12 @@ export function getFullIsArchivedTimeline(timeline: IsArchivedTimeline<bigint>[]
   return getFullTimeline(timeline, "isArchived", false);
 }
 
-/**
- * @category Timelines
- */
-export function getInheritedBalancesTimeline(timeline: InheritedBalancesTimeline<bigint>[]): InheritedBalancesTimeline<bigint>[] {
-  return getFullTimeline(timeline, "inheritedBalances", []);
-}
+// /**
+//  * @category Timelines
+//  */
+// export function getInheritedBalancesTimeline(timeline: InheritedBalancesTimeline<bigint>[]): InheritedBalancesTimeline<bigint>[] {
+//   return getFullTimeline(timeline, "inheritedBalances", []);
+// }
 
 /**
  * @category Timelines

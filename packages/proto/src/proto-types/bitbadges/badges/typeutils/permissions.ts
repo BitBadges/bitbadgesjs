@@ -297,7 +297,6 @@ export interface UserApprovedIncomingTransferCombination {
  * @property {TimedUpdatePermission[]} canUpdateCollectionMetadata - The list of permissions for updating the collection metadata.
  * @property {BalancesActionPermission[]} canCreateMoreBadges - The list of permissions for creating more badges.
  * @property {TimedUpdateWithBadgeIdsPermission[]} canUpdateBadgeMetadata - The list of permissions for updating the badge metadata.
- * @property {TimedUpdateWithBadgeIdsPermission[]} canUpdateInheritedBalances - The list of permissions for updating the inherited balances.
  * @property {CollectionApprovedTransferPermission[]} canUpdateCollectionApprovedTransfers - The list of permissions for updating the collection approved transfers.
  */
 export interface CollectionPermissions<T extends NumberType> {
@@ -311,7 +310,6 @@ export interface CollectionPermissions<T extends NumberType> {
   canUpdateCollectionMetadata: TimedUpdatePermission<T>[];
   canCreateMoreBadges: BalancesActionPermission<T>[];
   canUpdateBadgeMetadata: TimedUpdateWithBadgeIdsPermission<T>[];
-  canUpdateInheritedBalances: TimedUpdateWithBadgeIdsPermission<T>[];
   canUpdateCollectionApprovedTransfers: CollectionApprovedTransferPermission<T>[];
 }
 
@@ -328,7 +326,6 @@ export function convertCollectionPermissions<T extends NumberType, U extends Num
     canUpdateCollectionMetadata: permissions.canUpdateCollectionMetadata.map((b) => convertTimedUpdatePermission(b, convertFunction, populateOptionalFields)),
     canCreateMoreBadges: permissions.canCreateMoreBadges.map((b) => convertBalancesActionPermission(b, convertFunction, populateOptionalFields)),
     canUpdateBadgeMetadata: permissions.canUpdateBadgeMetadata.map((b) => convertTimedUpdateWithBadgeIdsPermission(b, convertFunction, populateOptionalFields)),
-    canUpdateInheritedBalances: permissions.canUpdateInheritedBalances.map((b) => convertTimedUpdateWithBadgeIdsPermission(b, convertFunction, populateOptionalFields)),
     canUpdateCollectionApprovedTransfers: permissions.canUpdateCollectionApprovedTransfers.map((b) => convertCollectionApprovedTransferPermission(b, convertFunction, populateOptionalFields))
   })
 }

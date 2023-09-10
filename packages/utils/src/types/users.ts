@@ -132,10 +132,22 @@ export interface BitBadgesUserInfo<T extends NumberType> extends ProfileInfoBase
   }
 }
 
+
 export function convertBitBadgesUserInfo<T extends NumberType, U extends NumberType>(item: BitBadgesUserInfo<T>, convertFunction: (item: T) => U): BitBadgesUserInfo<U> {
   const converted = deepCopy({
     ...convertProfileInfo({ ...item, _id: '' }, convertFunction),
-    ...convertAccountInfo({ ...item, _id: '' }, convertFunction),
+    //This is because if we spread ...item, we overwrite the profile info converted stuff
+    ...convertAccountInfo({
+      _id: '',
+      cosmosAddress: item.cosmosAddress,
+      address: item.address,
+      accountNumber: item.accountNumber,
+      username: item.username,
+      sequence: item.sequence,
+      balance: item.balance,
+      publicKey: item.publicKey,
+      chain: item.chain,
+    }, convertFunction),
     resolvedName: item.resolvedName,
     avatar: item.avatar,
     airdropped: item.airdropped,

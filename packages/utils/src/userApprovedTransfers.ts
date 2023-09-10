@@ -31,31 +31,6 @@ export function appendDefaultForIncoming(currApprovedTransfers: UserApprovedInco
     approvalDetails: [],
     allowedCombinations: [{
       isApproved: true,
-      transferTimesOptions: {
-        invertDefault: false,
-        allValues: false,
-        noValues: false,
-      },
-      badgeIdsOptions: {
-        invertDefault: false,
-        allValues: false,
-        noValues: false,
-      },
-      ownershipTimesOptions: {
-        invertDefault: false,
-        allValues: false,
-        noValues: false,
-      },
-      fromMappingOptions: {
-        invertDefault: false,
-        allValues: false,
-        noValues: false,
-      },
-      initiatedByMappingOptions: {
-        invertDefault: false,
-        allValues: false,
-        noValues: false,
-      },
     }],
   }]);
 
@@ -92,31 +67,6 @@ export function appendDefaultForOutgoing(currApprovedTransfers: UserApprovedOutg
     approvalDetails: [],
     allowedCombinations: [{
       isApproved: true,
-      transferTimesOptions: {
-        invertDefault: false,
-        allValues: false,
-        noValues: false,
-      },
-      badgeIdsOptions: {
-        invertDefault: false,
-        allValues: false,
-        noValues: false,
-      },
-      ownershipTimesOptions: {
-        invertDefault: false,
-        allValues: false,
-        noValues: false,
-      },
-      toMappingOptions: {
-        invertDefault: false,
-        allValues: false,
-        noValues: false,
-      },
-      initiatedByMappingOptions: {
-        invertDefault: false,
-        allValues: false,
-        noValues: false,
-      },
     }],
   }]);
 

@@ -8,10 +8,31 @@
   This file has helper functions for those three fields.
 */
 
+import { BadgeMetadata } from "bitbadgesjs-proto";
 import { GetFirstMatchOnly, MergeUniversalPermissionDetails } from "./overlaps";
 import { castCollectionApprovedTransferToUniversalPermission, castUserApprovedIncomingTransfersToUniversalPermission, castUserApprovedOutgoingTransfersToUniversalPermission } from "./permissions";
 import { CollectionApprovedTransferWithDetails } from "./types/collections";
 import { UserApprovedIncomingTransferWithDetails, UserApprovedOutgoingTransferWithDetails } from "./types/users";
+import { removeUintRangeFromUintRange } from "./uintRanges";
+
+/**
+ * @catgeory Metadata
+ */
+export function getFirstMatchForBadgeMetadata(
+  badgeMetadata: BadgeMetadata<bigint>[]
+) {
+  for (let i = 0; i < badgeMetadata.length; i++) {
+    const metadata = badgeMetadata[i];
+    for (let j = i + 1; j < badgeMetadata.length; j++) {
+      const otherMetadata = badgeMetadata[j];
+      const [remaining,] = removeUintRangeFromUintRange(metadata.badgeIds, otherMetadata.badgeIds);
+      otherMetadata.badgeIds = remaining;
+    }
+  }
+
+  return badgeMetadata
+}
+
 
 /**
  * @category Approvals / Transferability
@@ -38,36 +59,6 @@ export function getFirstMatchForCollectionApprovedTransfers(
       approvalDetails: [],
       allowedCombinations: [{
         isApproved: false,
-        fromMappingOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false,
-        },
-        toMappingOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false,
-        },
-        initiatedByMappingOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false,
-        },
-        transferTimesOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false,
-        },
-        badgeIdsOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false,
-        },
-        ownershipTimesOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false,
-        },
       }],
     });
   }
@@ -132,36 +123,6 @@ export function getFirstMatchForUserOutgoingApprovedTransfers(
       approvalDetails: [],
       allowedCombinations: [{
         isApproved: false,
-        // fromMappingOptions: {
-        //   invertDefault: false,
-        //   allValues: false,
-        //   noValues: false,
-        // },
-        toMappingOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false,
-        },
-        initiatedByMappingOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false,
-        },
-        transferTimesOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false,
-        },
-        badgeIdsOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false,
-        },
-        ownershipTimesOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false,
-        },
       }],
     });
   }
@@ -227,36 +188,6 @@ export function getFirstMatchForUserIncomingApprovedTransfers(
       approvalDetails: [],
       allowedCombinations: [{
         isApproved: false,
-        fromMappingOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false,
-        },
-        // toMappingOptions: {
-        //   invertDefault: false,
-        //   allValues: false,
-        //   noValues: false,
-        // },
-        initiatedByMappingOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false,
-        },
-        transferTimesOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false,
-        },
-        badgeIdsOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false,
-        },
-        ownershipTimesOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false,
-        },
       }],
     });
   }

@@ -165,6 +165,7 @@ export const MUST_OWN_BADGES_TYPES = [
   { name: 'badgeIds', type: 'UintRange[]' },
   { name: 'ownershipTimes', type: 'UintRange[]' },
   { name: 'overrideWithCurrentTime', type: 'bool' },
+  { name: 'mustOwnAll', type: 'bool' },
 ];
 
 
@@ -183,6 +184,7 @@ export const PREDETERMINED_BALANCES_TYPES = [
   { name: 'manualBalances', type: 'ManualBalances[]' },
   { name: 'incrementedBalances', type: 'IncrementedBalances' },
   { name: 'orderCalculationMethod', type: 'PredeterminedOrderCalculationMethod' },
+  { name: "precalculationId", type: "string" },
 ];
 
 export const APPROVAL_AMOUNTS_TYPES = [

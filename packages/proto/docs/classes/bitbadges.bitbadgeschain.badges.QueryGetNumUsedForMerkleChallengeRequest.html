@@ -25,7 +25,7 @@
 <ul class="tsd-hierarchy">
 <li><span class="target">QueryGetNumUsedForMerkleChallengeRequest</span></li></ul></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b02fd9b/packages/proto/src/proto/badges/query.ts#L791">packages/proto/src/proto/badges/query.ts:791</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b1e7967/packages/proto/src/proto/badges/query.ts#L814">packages/proto/src/proto/badges/query.ts:814</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-index-accordion" open><summary class="tsd-accordion-summary tsd-index-summary">
@@ -43,8 +43,8 @@
 </div></section>
 <section class="tsd-index-section">
 <h3 class="tsd-index-heading">Accessors</h3>
-<div class="tsd-index-list"><a href="bitbadges.bitbadgeschain.badges.QueryGetNumUsedForMerkleChallengeRequest.html#address" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><rect fill="var(--color-icon-background)" stroke="#FF4D4D" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="12" id="icon-262144-path"></rect><path d="M8.85 16L11.13 7.24H12.582L14.85 16H13.758L13.182 13.672H10.53L9.954 16H8.85ZM10.746 12.76H12.954L12.282 10.06C12.154 9.548 12.054 9.12 11.982 8.776C11.91 8.432 11.866 8.208 11.85 8.104C11.834 8.208 11.79 8.432 11.718 8.776C11.646 9.12 11.546 9.544 11.418 10.048L10.746 12.76Z" fill="var(--color-text)" id="icon-262144-text"></path></svg><span>address</span></a>
-<a href="bitbadges.bitbadgeschain.badges.QueryGetNumUsedForMerkleChallengeRequest.html#approvalLevel" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-262144-path"></use><use href="#icon-262144-text"></use></svg><span>approval<wbr/>Level</span></a>
+<div class="tsd-index-list"><a href="bitbadges.bitbadgeschain.badges.QueryGetNumUsedForMerkleChallengeRequest.html#approvalLevel" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><rect fill="var(--color-icon-background)" stroke="#FF4D4D" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="12" id="icon-262144-path"></rect><path d="M8.85 16L11.13 7.24H12.582L14.85 16H13.758L13.182 13.672H10.53L9.954 16H8.85ZM10.746 12.76H12.954L12.282 10.06C12.154 9.548 12.054 9.12 11.982 8.776C11.91 8.432 11.866 8.208 11.85 8.104C11.834 8.208 11.79 8.432 11.718 8.776C11.646 9.12 11.546 9.544 11.418 10.048L10.746 12.76Z" fill="var(--color-text)" id="icon-262144-text"></path></svg><span>approval<wbr/>Level</span></a>
+<a href="bitbadges.bitbadgeschain.badges.QueryGetNumUsedForMerkleChallengeRequest.html#approverAddress" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-262144-path"></use><use href="#icon-262144-text"></use></svg><span>approver<wbr/>Address</span></a>
 <a href="bitbadges.bitbadgeschain.badges.QueryGetNumUsedForMerkleChallengeRequest.html#challengeId" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-262144-path"></use><use href="#icon-262144-text"></use></svg><span>challenge<wbr/>Id</span></a>
 <a href="bitbadges.bitbadgeschain.badges.QueryGetNumUsedForMerkleChallengeRequest.html#collectionId" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-262144-path"></use><use href="#icon-262144-text"></use></svg><span>collection<wbr/>Id</span></a>
 <a href="bitbadges.bitbadgeschain.badges.QueryGetNumUsedForMerkleChallengeRequest.html#leafIndex" class="tsd-index-link"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-262144-path"></use><use href="#icon-262144-text"></use></svg><span>leaf<wbr/>Index</span></a>
@@ -112,18 +112,18 @@
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
 <li>
-<h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">data</span>: <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">{ </span><br/><span>    </span><span class="tsd-kind-property">address</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">approvalLevel</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">challengeId</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">collectionId</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">leafIndex</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span class="tsd-signature-symbol">}</span></h5></li></ul></div>
+<h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">data</span>: <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">{ </span><br/><span>    </span><span class="tsd-kind-property">approvalLevel</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">approverAddress</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">challengeId</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">collectionId</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">leafIndex</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span class="tsd-signature-symbol">}</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="bitbadges.bitbadgeschain.badges.QueryGetNumUsedForMerkleChallengeRequest.html" class="tsd-signature-type tsd-kind-class">QueryGetNumUsedForMerkleChallengeRequest</a></h4><aside class="tsd-sources">
 <p>Overrides pb_1.Message.constructor</p>
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b02fd9b/packages/proto/src/proto/badges/query.ts#L793">packages/proto/src/proto/badges/query.ts:793</a></li></ul></aside></li></ul></section></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b1e7967/packages/proto/src/proto/badges/query.ts#L816">packages/proto/src/proto/badges/query.ts:816</a></li></ul></aside></li></ul></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Properties</h2>
 <section class="tsd-panel tsd-member tsd-is-private"><a id="_one_of_decls" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <span>#one_<wbr/>of_<wbr/>decls</span><a href="#_one_of_decls" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">#one_<wbr/>of_<wbr/>decls</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> = []</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b02fd9b/packages/proto/src/proto/badges/query.ts#L792">packages/proto/src/proto/badges/query.ts:792</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b1e7967/packages/proto/src/proto/badges/query.ts#L815">packages/proto/src/proto/badges/query.ts:815</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="extensions" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>extensions</span><a href="#extensions" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">extensions</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{ </span><br/><span>    </span>[<span class="tsd-kind-index-signature">key</span>: <span class="tsd-signature-type">number</span>]<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">ExtensionFieldInfo</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type ">Message</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">; </span><br/><span class="tsd-signature-symbol">}</span></div>
@@ -148,24 +148,6 @@
 <li>Defined in node_modules/@types/google-protobuf/index.d.ts:130</li></ul></aside></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Accessors</h2>
-<section class="tsd-panel tsd-member"><a id="address" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><span>address</span><a href="#address" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
-<ul class="tsd-signatures">
-<li class="tsd-signature" id="address.address-1"><span class="tsd-signature-symbol">get</span> address<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
-<li class="tsd-description">
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b02fd9b/packages/proto/src/proto/badges/query.ts#L832">packages/proto/src/proto/badges/query.ts:832</a></li></ul></aside></li>
-<li class="tsd-signature" id="address.address-2"><span class="tsd-signature-symbol">set</span> address<span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">value</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
-<li class="tsd-description">
-<div class="tsd-parameters">
-<h4 class="tsd-parameters-title">Parameters</h4>
-<ul class="tsd-parameter-list">
-<li>
-<h5><span class="tsd-kind-parameter">value</span>: <span class="tsd-signature-type">string</span></h5></li></ul></div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b02fd9b/packages/proto/src/proto/badges/query.ts#L835">packages/proto/src/proto/badges/query.ts:835</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="approvalLevel" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>approval<wbr/>Level</span><a href="#approvalLevel" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -173,7 +155,7 @@
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b02fd9b/packages/proto/src/proto/badges/query.ts#L826">packages/proto/src/proto/badges/query.ts:826</a></li></ul></aside></li>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b1e7967/packages/proto/src/proto/badges/query.ts#L849">packages/proto/src/proto/badges/query.ts:849</a></li></ul></aside></li>
 <li class="tsd-signature" id="approvalLevel.approvalLevel-2"><span class="tsd-signature-symbol">set</span> approvalLevel<span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">value</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
@@ -183,7 +165,25 @@
 <h5><span class="tsd-kind-parameter">value</span>: <span class="tsd-signature-type">string</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b02fd9b/packages/proto/src/proto/badges/query.ts#L829">packages/proto/src/proto/badges/query.ts:829</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b1e7967/packages/proto/src/proto/badges/query.ts#L852">packages/proto/src/proto/badges/query.ts:852</a></li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member"><a id="approverAddress" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><span>approver<wbr/>Address</span><a href="#approverAddress" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="tsd-signature" id="approverAddress.approverAddress-1"><span class="tsd-signature-symbol">get</span> approverAddress<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+<li class="tsd-description">
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b1e7967/packages/proto/src/proto/badges/query.ts#L855">packages/proto/src/proto/badges/query.ts:855</a></li></ul></aside></li>
+<li class="tsd-signature" id="approverAddress.approverAddress-2"><span class="tsd-signature-symbol">set</span> approverAddress<span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">value</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+<li class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">value</span>: <span class="tsd-signature-type">string</span></h5></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b1e7967/packages/proto/src/proto/badges/query.ts#L858">packages/proto/src/proto/badges/query.ts:858</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="challengeId" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>challenge<wbr/>Id</span><a href="#challengeId" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -191,7 +191,7 @@
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b02fd9b/packages/proto/src/proto/badges/query.ts#L838">packages/proto/src/proto/badges/query.ts:838</a></li></ul></aside></li>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b1e7967/packages/proto/src/proto/badges/query.ts#L861">packages/proto/src/proto/badges/query.ts:861</a></li></ul></aside></li>
 <li class="tsd-signature" id="challengeId.challengeId-2"><span class="tsd-signature-symbol">set</span> challengeId<span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">value</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
@@ -201,7 +201,7 @@
 <h5><span class="tsd-kind-parameter">value</span>: <span class="tsd-signature-type">string</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b02fd9b/packages/proto/src/proto/badges/query.ts#L841">packages/proto/src/proto/badges/query.ts:841</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b1e7967/packages/proto/src/proto/badges/query.ts#L864">packages/proto/src/proto/badges/query.ts:864</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="collectionId" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>collection<wbr/>Id</span><a href="#collectionId" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -209,7 +209,7 @@
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b02fd9b/packages/proto/src/proto/badges/query.ts#L820">packages/proto/src/proto/badges/query.ts:820</a></li></ul></aside></li>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b1e7967/packages/proto/src/proto/badges/query.ts#L843">packages/proto/src/proto/badges/query.ts:843</a></li></ul></aside></li>
 <li class="tsd-signature" id="collectionId.collectionId-2"><span class="tsd-signature-symbol">set</span> collectionId<span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">value</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
@@ -219,7 +219,7 @@
 <h5><span class="tsd-kind-parameter">value</span>: <span class="tsd-signature-type">string</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b02fd9b/packages/proto/src/proto/badges/query.ts#L823">packages/proto/src/proto/badges/query.ts:823</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b1e7967/packages/proto/src/proto/badges/query.ts#L846">packages/proto/src/proto/badges/query.ts:846</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="leafIndex" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>leaf<wbr/>Index</span><a href="#leafIndex" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -227,7 +227,7 @@
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b02fd9b/packages/proto/src/proto/badges/query.ts#L844">packages/proto/src/proto/badges/query.ts:844</a></li></ul></aside></li>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b1e7967/packages/proto/src/proto/badges/query.ts#L867">packages/proto/src/proto/badges/query.ts:867</a></li></ul></aside></li>
 <li class="tsd-signature" id="leafIndex.leafIndex-2"><span class="tsd-signature-symbol">set</span> leafIndex<span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">value</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
@@ -237,7 +237,7 @@
 <h5><span class="tsd-kind-parameter">value</span>: <span class="tsd-signature-type">string</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b02fd9b/packages/proto/src/proto/badges/query.ts#L847">packages/proto/src/proto/badges/query.ts:847</a></li></ul></aside></li></ul></section></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b1e7967/packages/proto/src/proto/badges/query.ts#L870">packages/proto/src/proto/badges/query.ts:870</a></li></ul></aside></li></ul></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Methods</h2>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="clone" class="tsd-anchor"></a>
@@ -334,7 +334,7 @@
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Uint8Array</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b02fd9b/packages/proto/src/proto/badges/query.ts#L900">packages/proto/src/proto/badges/query.ts:900</a></li></ul></aside></li>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b1e7967/packages/proto/src/proto/badges/query.ts#L923">packages/proto/src/proto/badges/query.ts:923</a></li></ul></aside></li>
 <li class="tsd-signature tsd-anchor-link" id="serialize.serialize-2"><span class="tsd-kind-call-signature">serialize</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">w</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span><a href="#serialize.serialize-2" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
@@ -344,7 +344,7 @@
 <h5><span class="tsd-kind-parameter">w</span>: <span class="tsd-signature-type ">BinaryWriter</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b02fd9b/packages/proto/src/proto/badges/query.ts#L901">packages/proto/src/proto/badges/query.ts:901</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b1e7967/packages/proto/src/proto/badges/query.ts#L924">packages/proto/src/proto/badges/query.ts:924</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="serializeBinary" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>serialize<wbr/>Binary</span><a href="#serializeBinary" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -353,7 +353,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Uint8Array</span></h4><aside class="tsd-sources">
 <p>Overrides pb_1.Message.serializeBinary</p>
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b02fd9b/packages/proto/src/proto/badges/query.ts#L943">packages/proto/src/proto/badges/query.ts:943</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b1e7967/packages/proto/src/proto/badges/query.ts#L966">packages/proto/src/proto/badges/query.ts:966</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="serializeBinaryExtensions" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>serialize<wbr/>Binary<wbr/>Extensions</span><a href="#serializeBinaryExtensions" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited tsd-is-external">
@@ -426,14 +426,14 @@
 <section class="tsd-panel tsd-member"><a id="toObject" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>to<wbr/>Object</span><a href="#toObject" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
-<li class="tsd-signature tsd-anchor-link" id="toObject.toObject-1"><span class="tsd-kind-call-signature">to<wbr/>Object</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{ </span><br/><span>    </span><span class="tsd-kind-property">address</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">approvalLevel</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">challengeId</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">collectionId</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">leafIndex</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span class="tsd-signature-symbol">}</span><a href="#toObject.toObject-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
+<li class="tsd-signature tsd-anchor-link" id="toObject.toObject-1"><span class="tsd-kind-call-signature">to<wbr/>Object</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{ </span><br/><span>    </span><span class="tsd-kind-property">approvalLevel</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">approverAddress</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">challengeId</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">collectionId</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">leafIndex</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span class="tsd-signature-symbol">}</span><a href="#toObject.toObject-1" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></li>
 <li class="tsd-description">
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-symbol">{ </span><br/><span>    </span><span class="tsd-kind-property">address</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">approvalLevel</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">challengeId</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">collectionId</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">leafIndex</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span class="tsd-signature-symbol">}</span></h4>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-symbol">{ </span><br/><span>    </span><span class="tsd-kind-property">approvalLevel</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">approverAddress</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">challengeId</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">collectionId</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">leafIndex</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span class="tsd-signature-symbol">}</span></h4>
 <ul class="tsd-parameters">
 <li class="tsd-parameter">
-<h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-property">address</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span></h5></li>
-<li class="tsd-parameter">
 <h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-property">approval<wbr/>Level</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span></h5></li>
+<li class="tsd-parameter">
+<h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-property">approver<wbr/>Address</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span></h5></li>
 <li class="tsd-parameter">
 <h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-property">challenge<wbr/>Id</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span></h5></li>
 <li class="tsd-parameter">
@@ -442,7 +442,7 @@
 <h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-property">leaf<wbr/>Index</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span></h5></li></ul><aside class="tsd-sources">
 <p>Overrides pb_1.Message.toObject</p>
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b02fd9b/packages/proto/src/proto/badges/query.ts#L875">packages/proto/src/proto/badges/query.ts:875</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b1e7967/packages/proto/src/proto/badges/query.ts#L898">packages/proto/src/proto/badges/query.ts:898</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="toString" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>to<wbr/>String</span><a href="#toString" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited tsd-is-external">
@@ -677,7 +677,7 @@
 <h5><span class="tsd-kind-parameter">bytes</span>: <span class="tsd-signature-type ">Uint8Array</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type ">BinaryReader</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="bitbadges.bitbadgeschain.badges.QueryGetNumUsedForMerkleChallengeRequest.html" class="tsd-signature-type tsd-kind-class">QueryGetNumUsedForMerkleChallengeRequest</a></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b02fd9b/packages/proto/src/proto/badges/query.ts#L917">packages/proto/src/proto/badges/query.ts:917</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b1e7967/packages/proto/src/proto/badges/query.ts#L940">packages/proto/src/proto/badges/query.ts:940</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="deserializeBinary" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>deserialize<wbr/>Binary</span><a href="#deserializeBinary" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -691,7 +691,7 @@
 <h4 class="tsd-returns-title">Returns <a href="bitbadges.bitbadgeschain.badges.QueryGetNumUsedForMerkleChallengeRequest.html" class="tsd-signature-type tsd-kind-class">QueryGetNumUsedForMerkleChallengeRequest</a></h4><aside class="tsd-sources">
 <p>Overrides pb_1.Message.deserializeBinary</p>
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b02fd9b/packages/proto/src/proto/badges/query.ts#L946">packages/proto/src/proto/badges/query.ts:946</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b1e7967/packages/proto/src/proto/badges/query.ts#L969">packages/proto/src/proto/badges/query.ts:969</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="deserializeBinaryFromReader" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>deserialize<wbr/>Binary<wbr/>From<wbr/>Reader</span><a href="#deserializeBinaryFromReader" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited tsd-is-external">
@@ -754,12 +754,12 @@
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
 <li>
-<h5><span class="tsd-kind-parameter">data</span>: <span class="tsd-signature-symbol">{ </span><br/><span>    </span><span class="tsd-kind-property">address</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">approvalLevel</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">challengeId</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">collectionId</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">leafIndex</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span class="tsd-signature-symbol">}</span></h5>
+<h5><span class="tsd-kind-parameter">data</span>: <span class="tsd-signature-symbol">{ </span><br/><span>    </span><span class="tsd-kind-property">approvalLevel</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">approverAddress</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">challengeId</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">collectionId</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">leafIndex</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span class="tsd-signature-symbol">}</span></h5>
 <ul class="tsd-parameters">
 <li class="tsd-parameter">
-<h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-property">address</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span></h5></li>
-<li class="tsd-parameter">
 <h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-property">approval<wbr/>Level</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span></h5></li>
+<li class="tsd-parameter">
+<h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-property">approver<wbr/>Address</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span></h5></li>
 <li class="tsd-parameter">
 <h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-property">challenge<wbr/>Id</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span></h5></li>
 <li class="tsd-parameter">
@@ -768,7 +768,7 @@
 <h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-property">leaf<wbr/>Index</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span></h5></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="bitbadges.bitbadgeschain.badges.QueryGetNumUsedForMerkleChallengeRequest.html" class="tsd-signature-type tsd-kind-class">QueryGetNumUsedForMerkleChallengeRequest</a></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b02fd9b/packages/proto/src/proto/badges/query.ts#L850">packages/proto/src/proto/badges/query.ts:850</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b1e7967/packages/proto/src/proto/badges/query.ts#L873">packages/proto/src/proto/badges/query.ts:873</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="getField" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>get<wbr/>Field</span><a href="#getField" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited tsd-is-external">
@@ -1225,8 +1225,8 @@
 <li><a href="#_one_of_decls" class="tsd-is-private"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>#one_<wbr/>of_<wbr/>decls</span></a></li>
 <li><a href="#extensions" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>extensions</span></a></li>
 <li><a href="#extensionsBinary" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-1024-path"></use><use href="#icon-1024-text"></use></svg><span>extensions<wbr/>Binary</span></a></li>
-<li><a href="#address" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-262144-path"></use><use href="#icon-262144-text"></use></svg><span>address</span></a></li>
 <li><a href="#approvalLevel" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-262144-path"></use><use href="#icon-262144-text"></use></svg><span>approval<wbr/>Level</span></a></li>
+<li><a href="#approverAddress" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-262144-path"></use><use href="#icon-262144-text"></use></svg><span>approver<wbr/>Address</span></a></li>
 <li><a href="#challengeId" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-262144-path"></use><use href="#icon-262144-text"></use></svg><span>challenge<wbr/>Id</span></a></li>
 <li><a href="#collectionId" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-262144-path"></use><use href="#icon-262144-text"></use></svg><span>collection<wbr/>Id</span></a></li>
 <li><a href="#leafIndex" class=""><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-262144-path"></use><use href="#icon-262144-text"></use></svg><span>leaf<wbr/>Index</span></a></li>
@@ -1513,11 +1513,10 @@
 <li><a href="../variables/COLLECTION_METADATA_TYPES.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-32-path"></use><use href="#icon-32-text"></use></svg><span>COLLECTION_<wbr/>METADATA_<wbr/>TYPES</span></a></li>
 <li><a href="../variables/CONTRACT_ADDRESS_TIMELINE_TYPES.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-32-path"></use><use href="#icon-32-text"></use></svg><span>CONTRACT_<wbr/>ADDRESS_<wbr/>TIMELINE_<wbr/>TYPES</span></a></li>
 <li><a href="../variables/CUSTOM_DATA_TIMELINE_TYPES.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-32-path"></use><use href="#icon-32-text"></use></svg><span>CUSTOM_<wbr/>DATA_<wbr/>TIMELINE_<wbr/>TYPES</span></a></li>
+<li><a href="../variables/DefaultValues.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-32-path"></use><use href="#icon-32-text"></use></svg><span>Default<wbr/>Values</span></a></li>
 <li><a href="../variables/IBC_MSG_TRANSFER_TYPES.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-32-path"></use><use href="#icon-32-text"></use></svg><span>IBC_<wbr/>MSG_<wbr/>TRANSFER_<wbr/>TYPES</span></a></li>
 <li><a href="../variables/INCOMING_APPROVAL_DETAILS_TYPES.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-32-path"></use><use href="#icon-32-text"></use></svg><span>INCOMING_<wbr/>APPROVAL_<wbr/>DETAILS_<wbr/>TYPES</span></a></li>
 <li><a href="../variables/INCREMENTED_BALANCES_TYPES.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-32-path"></use><use href="#icon-32-text"></use></svg><span>INCREMENTED_<wbr/>BALANCES_<wbr/>TYPES</span></a></li>
-<li><a href="../variables/INHERITED_BALANCES_TIMELINE_TYPES.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-32-path"></use><use href="#icon-32-text"></use></svg><span>INHERITED_<wbr/>BALANCES_<wbr/>TIMELINE_<wbr/>TYPES</span></a></li>
-<li><a href="../variables/INHERITED_BALANCE_TYPES.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-32-path"></use><use href="#icon-32-text"></use></svg><span>INHERITED_<wbr/>BALANCE_<wbr/>TYPES</span></a></li>
 <li><a href="../variables/IS_ARCHIVED_TIMELINE_TYPES.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-32-path"></use><use href="#icon-32-text"></use></svg><span>IS_<wbr/>ARCHIVED_<wbr/>TIMELINE_<wbr/>TYPES</span></a></li>
 <li><a href="../variables/IS_COLLECTION_TRANSFER_ALLOWED_TYPES.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-32-path"></use><use href="#icon-32-text"></use></svg><span>IS_<wbr/>COLLECTION_<wbr/>TRANSFER_<wbr/>ALLOWED_<wbr/>TYPES</span></a></li>
 <li><a href="../variables/IS_USER_INCOMING_TRANSFER_ALLOWED_TYPES.html"><svg class="tsd-kind-icon" width="24" height="24" viewBox="0 0 24 24"><use href="#icon-32-path"></use><use href="#icon-32-text"></use></svg><span>IS_<wbr/>USER_<wbr/>INCOMING_<wbr/>TRANSFER_<wbr/>ALLOWED_<wbr/>TYPES</span></a></li>

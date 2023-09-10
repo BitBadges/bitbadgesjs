@@ -185,7 +185,7 @@ function CastIncomingApprovalDetailsToCollectionApprovalDetails(
   approvalDetails: IncomingApprovalDetails<bigint>
 ): ApprovalDetails<bigint> {
   return {
-    approvalId: approvalDetails.approvalId,
+    approvalTrackerId: approvalDetails.approvalTrackerId,
     approvalAmounts: approvalDetails.approvalAmounts,
     maxNumTransfers: approvalDetails.maxNumTransfers,
     requireFromEqualsInitiatedBy: approvalDetails.requireFromEqualsInitiatedBy,
@@ -207,7 +207,7 @@ function CastOutgoingApprovalDetailsToCollectionApprovalDetails(
   approvalDetails: OutgoingApprovalDetails<bigint>
 ): ApprovalDetails<bigint> {
   return {
-    approvalId: approvalDetails.approvalId,
+    approvalTrackerId: approvalDetails.approvalTrackerId,
     approvalAmounts: approvalDetails.approvalAmounts,
     maxNumTransfers: approvalDetails.maxNumTransfers,
     requireToEqualsInitiatedBy: approvalDetails.requireToEqualsInitiatedBy,
@@ -230,7 +230,7 @@ function CastFromCollectionApprovalDetailsToIncomingApprovalDetails(
   approvalDetails: ApprovalDetails<bigint>
 ): IncomingApprovalDetails<bigint> {
   return {
-    approvalId: approvalDetails.approvalId,
+    approvalTrackerId: approvalDetails.approvalTrackerId,
     approvalAmounts: approvalDetails.approvalAmounts,
     maxNumTransfers: approvalDetails.maxNumTransfers,
     requireFromEqualsInitiatedBy: approvalDetails.requireFromEqualsInitiatedBy,
@@ -247,7 +247,7 @@ function CastFromCollectionApprovalDetailsToOutgoingApprovalDetails(
   approvalDetails: ApprovalDetails<bigint>
 ): OutgoingApprovalDetails<bigint> {
   return {
-    approvalId: approvalDetails.approvalId,
+    approvalTrackerId: approvalDetails.approvalTrackerId,
     approvalAmounts: approvalDetails.approvalAmounts,
     maxNumTransfers: approvalDetails.maxNumTransfers,
     requireToEqualsInitiatedBy: approvalDetails.requireToEqualsInitiatedBy,

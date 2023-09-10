@@ -74,7 +74,8 @@ export function incrementMintAndTotalBalances(
     userPermissions: {
       canUpdateApprovedIncomingTransfers: [],
       canUpdateApprovedOutgoingTransfers: [],
-    }
+    },
+    updateHistory: [],
   });
 
   newOwners.push({
@@ -88,7 +89,8 @@ export function incrementMintAndTotalBalances(
     userPermissions: {
       canUpdateApprovedIncomingTransfers: [],
       canUpdateApprovedOutgoingTransfers: [],
-    }
+    },
+    updateHistory: [],
   });
 
   return newOwners;

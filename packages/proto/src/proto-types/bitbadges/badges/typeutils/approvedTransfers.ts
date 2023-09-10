@@ -177,11 +177,13 @@ export function convertOutgoingApprovalDetails<T extends NumberType, U extends N
  * @property {IncrementedBalances} incrementedBalances - Define a starting balance and increment the badge IDs and owned times by a certain amount after each transfer. Cannot be used with manualBalances.
  *                                                       Order number corresponds to number of times we increment.
  * @property {PredeterminedOrderCalculationMethod} orderCalculationMethod - The order calculation method.
+ * @property {string} precalculationId - The precalculation ID. Must not be a duplicate of another precalculation ID in the same timeline.
  */
 export interface PredeterminedBalances<T extends NumberType> {
   manualBalances: ManualBalances<T>[];
   incrementedBalances: IncrementedBalances<T>;
   orderCalculationMethod: PredeterminedOrderCalculationMethod;
+  precalculationId: string;
 }
 
 export function convertPredeterminedBalances<T extends NumberType, U extends NumberType>(balances: PredeterminedBalances<T>, convertFunction: (item: T) => U): PredeterminedBalances<U> {

@@ -1,4 +1,4 @@
-import { AddressMapping, ApprovalTrackerIdDetails, BadgeMetadataTimeline, Balance, CollectionApprovedTransferTimeline, CollectionMetadataTimeline, CollectionPermissions, ContractAddressTimeline, CustomDataTimeline, InheritedBalancesTimeline, IsArchivedTimeline, ManagerTimeline, MerkleChallenge, OffChainBalancesMetadataTimeline, StandardsTimeline, UintRange, UserApprovedIncomingTransferTimeline, UserApprovedOutgoingTransferTimeline, UserBalance, UserPermissions, convertBadgeMetadataTimeline, convertBalance, convertCollectionApprovedTransferTimeline, convertCollectionMetadataTimeline, convertCollectionPermissions, convertContractAddressTimeline, convertCustomDataTimeline, convertInheritedBalancesTimeline, convertIsArchivedTimeline, convertManagerTimeline, convertMerkleChallenge, convertOffChainBalancesMetadataTimeline, convertStandardsTimeline, convertUintRange, convertUserApprovedIncomingTransferTimeline, convertUserApprovedOutgoingTransferTimeline, convertUserBalance, convertUserPermissions } from "bitbadgesjs-proto";
+import { AddressMapping, ApprovalTrackerIdDetails, BadgeMetadataTimeline, Balance, CollectionApprovedTransferTimeline, CollectionMetadataTimeline, CollectionPermissions, ContractAddressTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, MerkleChallenge, OffChainBalancesMetadataTimeline, StandardsTimeline, UintRange, UserApprovedIncomingTransferTimeline, UserApprovedOutgoingTransferTimeline, UserBalance, UserPermissions, convertBadgeMetadataTimeline, convertBalance, convertCollectionApprovedTransferTimeline, convertCollectionMetadataTimeline, convertCollectionPermissions, convertContractAddressTimeline, convertCustomDataTimeline, convertIsArchivedTimeline, convertManagerTimeline, convertMerkleChallenge, convertOffChainBalancesMetadataTimeline, convertStandardsTimeline, convertUintRange, convertUserApprovedIncomingTransferTimeline, convertUserApprovedOutgoingTransferTimeline, convertUserBalance, convertUserPermissions } from "bitbadgesjs-proto";
 import MerkleTree from "merkletreejs";
 import nano from "nano";
 import { CosmosCoin, convertCosmosCoin } from "./coin";
@@ -36,7 +36,7 @@ export interface Identified {
  * @property {BadgeMetadataTimeline[]} badgeMetadataTimeline - The badge metadata timeline
  * @property {string} balancesType - The type of balances (i.e. "Standard", "Off-Chain", "Inherited")
  * @property {OffChainBalancesMetadataTimeline[]} offChainBalancesMetadataTimeline - The off-chain balances metadata timeline
- * @property {InheritedBalancesTimeline[]} inheritedBalancesTimeline - The inherited balances timeline
+ * @property {NumberType} inheritedCollectionId - The inherited collection ID
  * @property {CustomDataTimeline[]} customDataTimeline - The custom data timeline
  * @property {ManagerTimeline[]} managerTimeline - The manager timeline
  * @property {CollectionPermissions} collectionPermissions - The collection permissions
@@ -56,7 +56,7 @@ export interface CollectionInfoBase<T extends NumberType> {
   badgeMetadataTimeline: BadgeMetadataTimeline<T>[];
   balancesType: "Standard" | "Off-Chain" | "Inherited";
   offChainBalancesMetadataTimeline: OffChainBalancesMetadataTimeline<T>[];
-  inheritedBalancesTimeline: InheritedBalancesTimeline<T>[];
+  inheritedCollectionId: T;
   customDataTimeline: CustomDataTimeline<T>[];
   managerTimeline: ManagerTimeline<T>[];
   collectionPermissions: CollectionPermissions<T>;
@@ -70,6 +70,11 @@ export interface CollectionInfoBase<T extends NumberType> {
   createdBy: string;
   createdBlock: T;
   createdTimestamp: T;
+  updateHistory: {
+    txHash: string;
+    block: T;
+    blockTimestamp: T;
+  }[];
 }
 /**
  * @category API / Indexer
@@ -90,7 +95,7 @@ export function convertCollectionInfo<T extends NumberType, U extends NumberType
     collectionMetadataTimeline: item.collectionMetadataTimeline.map((collectionMetadataTimeline) => convertCollectionMetadataTimeline(collectionMetadataTimeline, convertFunction)),
     badgeMetadataTimeline: item.badgeMetadataTimeline.map((badgeMetadataTimeline) => convertBadgeMetadataTimeline(badgeMetadataTimeline, convertFunction)),
     offChainBalancesMetadataTimeline: item.offChainBalancesMetadataTimeline.map((offChainBalancesMetadataTimeline) => convertOffChainBalancesMetadataTimeline(offChainBalancesMetadataTimeline, convertFunction)),
-    inheritedBalancesTimeline: item.inheritedBalancesTimeline.map((inheritedBalancesTimeline) => convertInheritedBalancesTimeline(inheritedBalancesTimeline, convertFunction)),
+    inheritedCollectionId: convertFunction(item.inheritedCollectionId),
     customDataTimeline: item.customDataTimeline.map((customDataTimeline) => convertCustomDataTimeline(customDataTimeline, convertFunction)),
     managerTimeline: item.managerTimeline.map((managerTimeline) => convertManagerTimeline(managerTimeline, convertFunction)),
     collectionPermissions: convertCollectionPermissions(item.collectionPermissions, convertFunction),
@@ -103,6 +108,11 @@ export function convertCollectionInfo<T extends NumberType, U extends NumberType
     defaultUserPermissions: convertUserPermissions(item.defaultUserPermissions, convertFunction),
     createdBlock: convertFunction(item.createdBlock),
     createdTimestamp: convertFunction(item.createdTimestamp),
+    updateHistory: item.updateHistory.map((updateHistory) => ({
+      txHash: updateHistory.txHash,
+      block: convertFunction(updateHistory.block),
+      blockTimestamp: convertFunction(updateHistory.blockTimestamp),
+    })),
   })
 }
 
@@ -214,11 +224,18 @@ export interface ProfileInfoBase<T extends NumberType> {
   telegram?: string
   readme?: string
 
-  showAllByDefault?: boolean
+  customLinks?: {
+    title: string,
+    url: string,
+    image: string,
+  }[]
+
+  onlyShowApproved?: boolean
   shownBadges?: {
     collectionId: T,
     badgeIds: UintRange<T>[],
   }[],
+
   hiddenBadges?: {
     collectionId: T,
     badgeIds: UintRange<T>[],
@@ -438,6 +455,7 @@ export interface AddressMappingInfoBase<T extends NumberType> extends AddressMap
   createdBy: string
   createdBlock: T
   createdTimestamp: T;
+  lastUpdated: T;
 }
 /**
  * @category API / Indexer
@@ -455,6 +473,7 @@ export function convertAddressMappingInfo<T extends NumberType, U extends Number
     ...item,
     createdBlock: convertFunction(item.createdBlock),
     createdTimestamp: convertFunction(item.createdTimestamp),
+    lastUpdated: convertFunction(item.lastUpdated),
   })
 }
 
@@ -472,12 +491,20 @@ export function convertAddressMappingDoc<T extends NumberType, U extends NumberT
  * BalanceInfoBase is the type of document stored in the balances database
  * Partitioned database by cosmosAddress (e.g. 1-cosmosx..., 1-cosmosy..., and so on represent the balances documents for collection 1 and user with cosmos address x and y respectively)
  *
+ *
+ *
  * @category API / Indexer
  * @typedef {Object} BalanceInfoBase
  * @extends {UserBalance}
  *
  * @property {NumberType} collectionId - The collection ID
  * @property {string} cosmosAddress - The Cosmos address of the user
+ *
+ * @property {boolean} onChain - True if the balances are on-chain
+ * @property {string} [uri] - The URI of the off-chain balances.
+ * @property {NumberType} [fetchedAt] - The timestamp of when the off-chain balances were fetched (milliseconds since epoch). For BitBadges indexer, we only populate this for Mint and Total docs.
+ * @property {NumberType} [fetchedAtBlock] - The block number of when the off-chain balances were fetched. For BitBadges indexer, we only populate this for Mint and Total docs.
+ * @property {boolean} [isPermanent] - True if the off-chain balances are using permanent storage
  */
 export interface BalanceInfoBase<T extends NumberType> extends UserBalance<T> {
 
@@ -490,6 +517,12 @@ export interface BalanceInfoBase<T extends NumberType> extends UserBalance<T> {
   fetchedAt?: T, //Date.now()
   fetchedAtBlock?: T,
   isPermanent?: boolean
+
+  updateHistory: {
+    txHash: string;
+    block: T;
+    blockTimestamp: T;
+  }[];
 }
 /**
  * @category API / Indexer
@@ -512,6 +545,11 @@ export function convertBalanceInfo<T extends NumberType, U extends NumberType>(i
     collectionId: convertFunction(item.collectionId),
     fetchedAt: item.fetchedAt ? convertFunction(item.fetchedAt) : undefined,
     fetchedAtBlock: item.fetchedAtBlock ? convertFunction(item.fetchedAtBlock) : undefined,
+    updateHistory: item.updateHistory.map((updateHistory) => ({
+      txHash: updateHistory.txHash,
+      block: convertFunction(updateHistory.block),
+      blockTimestamp: convertFunction(updateHistory.blockTimestamp),
+    })),
   })
 }
 
@@ -613,6 +651,7 @@ export function convertPasswordDoc<T extends NumberType, U extends NumberType>(i
  */
 export interface ClaimAlertInfoBase<T extends NumberType> {
   code?: string;
+  cosmosAddresses: string[];
   collectionId: T;
   createdTimestamp: T;
   message?: string;

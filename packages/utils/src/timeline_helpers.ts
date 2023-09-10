@@ -1,4 +1,4 @@
-import { BadgeMetadata, BadgeMetadataTimeline, CollectionMetadata, CollectionMetadataTimeline, ContractAddressTimeline, CustomDataTimeline, InheritedBalance, InheritedBalancesTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadata, OffChainBalancesMetadataTimeline, StandardsTimeline, UintRange } from "bitbadgesjs-proto";
+import { BadgeMetadata, BadgeMetadataTimeline, CollectionMetadata, CollectionMetadataTimeline, ContractAddressTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadata, OffChainBalancesMetadataTimeline, StandardsTimeline, UintRange } from "bitbadgesjs-proto";
 import { CollectionApprovedTransferTimelineWithDetails, CollectionApprovedTransferWithDetails } from "./types/collections";
 
 export function getIsArchivedTimesAndValues(isArchivedTimeline: IsArchivedTimeline<bigint>[]): { times: UintRange<bigint>[][], values: boolean[] } {
@@ -49,17 +49,17 @@ export function getCollectionApprovedTransferTimesAndValues(approvedTransfers: C
 //   return { times, values };
 // }
 
-export function getInheritedBalancesTimesAndValues(inheritedBalances: InheritedBalancesTimeline<bigint>[]): { times: UintRange<bigint>[][], values: InheritedBalance<bigint>[][] } {
-  let times: UintRange<bigint>[][] = [];
-  let values: InheritedBalance<bigint>[][] = [];
+// export function getInheritedBalancesTimesAndValues(inheritedBalances: InheritedBalancesTimeline<bigint>[]): { times: UintRange<bigint>[][], values: InheritedBalance<bigint>[][] } {
+//   let times: UintRange<bigint>[][] = [];
+//   let values: InheritedBalance<bigint>[][] = [];
 
-  for (let timelineVal of inheritedBalances) {
-    times.push(timelineVal.timelineTimes);
-    values.push(timelineVal.inheritedBalances);
-  }
+//   for (let timelineVal of inheritedBalances) {
+//     times.push(timelineVal.timelineTimes);
+//     values.push(timelineVal.inheritedBalances);
+//   }
 
-  return { times, values };
-}
+//   return { times, values };
+// }
 
 export function getOffChainBalancesMetadataTimesAndValues(inheritedBalancesMetadata: OffChainBalancesMetadataTimeline<bigint>[]): { times: UintRange<bigint>[][], values: OffChainBalancesMetadata[] } {
   let times: UintRange<bigint>[][] = [];

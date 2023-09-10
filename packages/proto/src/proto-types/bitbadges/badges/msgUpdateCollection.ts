@@ -2,8 +2,8 @@ import * as tx from '../../../proto/badges/tx'
 import { NumberType } from './string-numbers'
 import { UserApprovedIncomingTransferTimeline, UserApprovedOutgoingTransferTimeline } from './typeutils/approvedTransfers'
 import { CollectionPermissions, UserPermissions } from './typeutils/permissions'
-import { BadgeMetadataTimeline, Balance, CollectionApprovedTransferTimeline, CollectionMetadataTimeline, ContractAddressTimeline, CustomDataTimeline, InheritedBalancesTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadataTimeline, StandardsTimeline } from './typeutils/typeUtils'
-import { getWrappedBadgeMetadataTimeline, getWrappedBalances, getWrappedCollectionApprovedTransfersTimeline, getWrappedCollectionMetadataTimeline, getWrappedCollectionPermissions, getWrappedContractAddressTimeline, getWrappedCustomDataTimeline, getWrappedIncomingTransfersTimeline, getWrappedInheritedBalancesTimeline, getWrappedIsArchivedTimeline, getWrappedManagerTimeline, getWrappedOffChainBalancesMetadataTimeline, getWrappedOutgoingTransfersTimeline, getWrappedStandardsTimeline, getWrappedUserPermissions } from './typeutils/wrappers'
+import { BadgeMetadataTimeline, Balance, CollectionApprovedTransferTimeline, CollectionMetadataTimeline, ContractAddressTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadataTimeline, StandardsTimeline } from './typeutils/typeUtils'
+import { getWrappedBadgeMetadataTimeline, getWrappedBalances, getWrappedCollectionApprovedTransfersTimeline, getWrappedCollectionMetadataTimeline, getWrappedCollectionPermissions, getWrappedContractAddressTimeline, getWrappedCustomDataTimeline, getWrappedIncomingTransfersTimeline, getWrappedIsArchivedTimeline, getWrappedManagerTimeline, getWrappedOffChainBalancesMetadataTimeline, getWrappedOutgoingTransfersTimeline, getWrappedStandardsTimeline, getWrappedUserPermissions } from './typeutils/wrappers'
 
 
 

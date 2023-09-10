@@ -3,7 +3,7 @@ import { AnnouncementInfo, ReviewInfo, TransferActivityInfo, convertAnnouncement
 import { PaginationInfo } from "./api";
 import { ApprovalsTrackerInfo, BalanceInfoWithDetails, CollectionInfoBase, Identified, MerkleChallengeInfo, MerkleChallengeWithDetails, convertApprovalsTrackerInfo, convertBalanceInfoWithDetails, convertCollectionInfo, convertMerkleChallengeInfo, convertMerkleChallengeWithDetails } from "./db";
 import { Metadata, convertMetadata } from "./metadata";
-import { BitBadgesUserInfo, UserApprovedIncomingTransferTimelineWithDetails, UserApprovedOutgoingTransferTimelineWithDetails, convertBitBadgesUserInfo, convertUserApprovedIncomingTransferWithDetails, convertUserApprovedOutgoingTransferWithDetails } from "./users";
+import { UserApprovedIncomingTransferTimelineWithDetails, UserApprovedOutgoingTransferTimelineWithDetails, convertUserApprovedIncomingTransferWithDetails, convertUserApprovedOutgoingTransferWithDetails } from "./users";
 import { deepCopy, removeCouchDBDetails } from "./utils";
 
 /**
@@ -136,7 +136,6 @@ export function convertCollectionApprovedTransferTimelineWithDetails<T extends N
  * @typedef {Object} BitBadgesCollection
  * @extends {CollectionInfoBase} The base collection document
  *
- * @property {BitBadgesUserInfo} managerInfo - The account information of the current manager of this collection
  * @property {Metadata} collectionMetadata - The metadata of this collection
  * @property {Metadata[]} badgeMetadata - The metadata of each badge in this collection stored in a map by metadataId (see how we calculate metadataId in the docs)
  * @property {TransferActivityDoc[]} activity - The transfer activity of this collection
@@ -156,7 +155,6 @@ export function convertCollectionApprovedTransferTimelineWithDetails<T extends N
  * @category API / Indexer
  */
 export interface BitBadgesCollection<T extends NumberType> extends CollectionInfoBase<T>, Identified {
-  managerInfo: BitBadgesUserInfo<T>;
   collectionApprovedTransfersTimeline: CollectionApprovedTransferTimelineWithDetails<T>[];
   collectionPermissions: CollectionPermissionsWithDetails<T>;
 
@@ -202,7 +200,6 @@ export function convertBitBadgesCollection<T extends NumberType, U extends Numbe
       approvedOutgoingTransfers: timelineItem.approvedOutgoingTransfers.map((approvedOutgoingTransfer) => convertUserApprovedOutgoingTransferWithDetails(approvedOutgoingTransfer, convertFunction)),
     })),
     collectionPermissions: convertCollectionPermissionsWithDetails(item.collectionPermissions, convertFunction),
-    managerInfo: convertBitBadgesUserInfo(item.managerInfo, convertFunction),
     cachedCollectionMetadata: item.cachedCollectionMetadata ? convertMetadata(item.cachedCollectionMetadata, convertFunction) : undefined,
     cachedBadgeMetadata: item.cachedBadgeMetadata.map((metadata) => convertBadgeMetadataDetails(metadata, convertFunction)),
     activity: item.activity.map((activityItem) => convertTransferActivityInfo(activityItem, convertFunction)).map(x => removeCouchDBDetails(x)),

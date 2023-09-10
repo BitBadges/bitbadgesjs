@@ -1,4 +1,4 @@
-import { ActionPermission, AddressMapping, BadgeMetadata, BalancesActionPermission, InheritedBalance, TimedUpdatePermission, TimedUpdateWithBadgeIdsPermission, UintRange } from "bitbadgesjs-proto";
+import { ActionPermission, AddressMapping, BadgeMetadata, BalancesActionPermission, TimedUpdatePermission, TimedUpdateWithBadgeIdsPermission, UintRange } from "bitbadgesjs-proto";
 import { getReservedAddressMapping } from "./addressMappings";
 import { UniversalCombination, UniversalPermission } from "./overlaps";
 import { CollectionApprovedTransferPermissionWithDetails, CollectionApprovedTransferWithDetails } from "./types/collections";
@@ -340,51 +340,6 @@ export const castCollectionApprovedTransferToUniversalPermission = (
         }
       },
       combinations: [{
-        fromMappingOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false
-        },
-        toMappingOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false
-        },
-        initiatedByMappingOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false
-        },
-        transferTimesOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false
-        },
-        badgeIdsOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false
-        },
-        ownershipTimesOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false
-        },
-        permittedTimesOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false
-        },
-        forbiddenTimesOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false
-        },
-        timelineTimesOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false
-        },
       }],
     });
   }
@@ -425,51 +380,6 @@ export const castUserApprovedOutgoingTransfersToUniversalPermission = (
         }
       },
       combinations: [{
-        fromMappingOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false
-        },
-        toMappingOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false
-        },
-        initiatedByMappingOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false
-        },
-        transferTimesOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false
-        },
-        badgeIdsOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false
-        },
-        ownershipTimesOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false
-        },
-        permittedTimesOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false
-        },
-        forbiddenTimesOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false
-        },
-        timelineTimesOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false
-        },
       }],
     });
   }
@@ -511,78 +421,34 @@ export const castUserApprovedIncomingTransfersToUniversalPermission = (
         }
       },
       combinations: [{
-        fromMappingOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false
-        },
-        toMappingOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false
-        },
-        initiatedByMappingOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false
-        },
-        transferTimesOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false
-        },
-        badgeIdsOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false
-        },
-        ownershipTimesOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false
-        },
-        permittedTimesOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false
-        },
-        forbiddenTimesOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false
-        },
-        timelineTimesOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false
-        },
+
       }],
     });
   }
   return castedPermissions;
 };
 
-export const castInheritedBalancesToUniversalPermission = (
-  inheritedBalances: InheritedBalance<bigint>[]
-): UniversalPermission[] => {
-  let castedPermissions: UniversalPermission[] = [];
-  for (let inheritedBalance of inheritedBalances) {
-    castedPermissions.push({
-      defaultValues: {
-        ...AllDefaultValues,
-        badgeIds: inheritedBalance.badgeIds,
-        usesBadgeIds: true,
-        arbitraryValue: inheritedBalance,
-      },
-      combinations: [
-        {
-          ...AllDefaultOptions,
-        }
-      ],
-    });
-  }
-  return castedPermissions;
-}
+// export const castInheritedBalancesToUniversalPermission = (
+//   inheritedBalances: InheritedBalance<bigint>[]
+// ): UniversalPermission[] => {
+//   let castedPermissions: UniversalPermission[] = [];
+//   for (let inheritedBalance of inheritedBalances) {
+//     castedPermissions.push({
+//       defaultValues: {
+//         ...AllDefaultValues,
+//         badgeIds: inheritedBalance.badgeIds,
+//         usesBadgeIds: true,
+//         arbitraryValue: inheritedBalance,
+//       },
+//       combinations: [
+//         {
+//           ...AllDefaultOptions,
+//         }
+//       ],
+//     });
+//   }
+//   return castedPermissions;
+// }
 
 export const castBadgeMetadataToUniversalPermission = (
   badgeMetadata: BadgeMetadata<bigint>[]

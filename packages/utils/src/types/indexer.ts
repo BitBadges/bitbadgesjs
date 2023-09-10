@@ -1,6 +1,6 @@
 import Nano from "nano";
 import { TransferActivityInfoBase } from "./activity";
-import { AccountDoc, BalanceDoc, MerkleChallengeDoc, CollectionDoc, QueueInfoBase, RefreshDoc, ApprovalsTrackerDoc, AddressMappingDoc } from "./db";
+import { AccountDoc, BalanceDoc, MerkleChallengeDoc, CollectionDoc, QueueInfoBase, RefreshDoc, ApprovalsTrackerDoc, AddressMappingDoc, ClaimAlertInfo, PasswordDoc } from "./db";
 
 /**
  * @category API / Indexer
@@ -33,7 +33,19 @@ export interface DocsCache {
   approvalsTrackers: ApprovalsTrackerDocs;
   addressMappings: AddressMappingsDocs;
   queueDocsToAdd: (QueueInfoBase<bigint> & Nano.MaybeIdentifiedDocument)[];
-  activityToAdd: (TransferActivityInfoBase<bigint> & Nano.MaybeIdentifiedDocument)[]
+  activityToAdd: (TransferActivityInfoBase<bigint> & Nano.MaybeIdentifiedDocument)[];
+  claimAlertsToAdd: (ClaimAlertInfo<bigint> & Nano.MaybeIdentifiedDocument)[];
+  passwordDocs: PasswordDocs;
+}
+
+/**
+ * PasswordDocs is a map of collectionId to collection documents.
+ *
+ * @category API / Indexer
+ * @typedef {Object} PasswordDocs
+ */
+export interface PasswordDocs {
+  [id: string]: (PasswordDoc<bigint>) | undefined;
 }
 
 /**

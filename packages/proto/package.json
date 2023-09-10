@@ -1,7 +1,7 @@
 {
   "name": "bitbadgesjs-proto",
   "description": "Protobuf files for BitBadges.",
-  "version": "0.1.87",
+  "version": "0.1.94",
   "license": "MIT",
   "eslintIgnore": [
     "src/proto/**/*.ts"

@@ -1,5 +1,5 @@
 import { DeliverTxResponse } from "@cosmjs/stargate"
-import { AddressMapping, ApprovalTrackerIdDetails, NumberType, UintRange } from "bitbadgesjs-proto"
+import { AddressMapping, ApprovalTrackerIdDetails, NumberType, UintRange, convertUintRange } from "bitbadgesjs-proto"
 import { BroadcastPostBody } from "bitbadgesjs-provider"
 import { ChallengeParams } from "blockin"
 import { TransferActivityInfo, convertTransferActivityInfo } from "./activity"
@@ -64,6 +64,10 @@ export interface GetSearchRouteSuccessResponse<T extends NumberType> {
   collections: BitBadgesCollection<T>[],
   accounts: BitBadgesUserInfo<T>[],
   addressMappings: AddressMappingWithMetadata<T>[],
+  badges: {
+    badgeIds: UintRange<T>[],
+    collection: BitBadgesCollection<T>,
+  }[],
 }
 /**
  * @category API / Indexer
@@ -78,6 +82,10 @@ export function convertGetSearchRouteSuccessResponse<T extends NumberType, U ext
     collections: item.collections.map((collection) => convertBitBadgesCollection(collection, convertFunction)),
     accounts: item.accounts.map((account) => convertBitBadgesUserInfo(account, convertFunction)),
     addressMappings: item.addressMappings.map((addressMapping) => convertAddressMappingWithMetadata(addressMapping, convertFunction)),
+    badges: item.badges.map((badge) => ({
+      badgeIds: badge.badgeIds.map((badgeId) => convertUintRange(badgeId, convertFunction)),
+      collection: convertBitBadgesCollection(badge.collection, convertFunction),
+    })),
   }
 }
 
@@ -130,6 +138,7 @@ export interface GetAdditionalCollectionDetailsRequestBody {
     viewKey: CollectionViewKey,
     bookmark: string
   }[],
+
   fetchTotalAndMintBalances?: boolean,
   merkleChallengeIdsToFetch?: MerkleChallengeTrackerIdDetails<NumberType>[],
   approvalsTrackerIdsToFetch?: ApprovalTrackerIdDetails<NumberType>[],
@@ -455,9 +464,7 @@ export function convertDeleteReviewRouteSuccessResponse<T extends NumberType, U 
 /**
  * @category API / Indexer
  */
-export interface DeleteAnnouncementRouteRequestBody {
-  reviewId: string
-}
+export interface DeleteAnnouncementRouteRequestBody { }
 /**
  * @category API / Indexer
  */
@@ -503,7 +510,9 @@ export function convertAddReviewForCollectionRouteSuccessResponse<T extends Numb
 /**
  * @category API / Indexer
  */
-export type AccountViewKey = 'latestActivity' | 'latestAnnouncements' | 'latestReviews' | 'badgesCollected' | 'addressMappings' | 'latestClaimAlerts';
+export type AccountViewKey =
+  'latestActivity' | 'latestAnnouncements' | 'latestReviews' | 'badgesCollected' | 'addressMappings' | 'latestClaimAlerts' | 'latestAddressMappings' | 'explicitlyIncludedAddressMappings' | 'explicitlyExcludedAddressMappings' | 'badgesCollectedWithHidden'
+  | 'createdBy' | 'managing'
 
 /**
  * This defines the options for fetching additional account details.
@@ -578,6 +587,7 @@ export interface GetAccountRouteRequestBody {
   fetchSequence?: boolean,
   fetchBalance?: boolean,
   noExternalCalls?: boolean,
+  fetchHidden?: boolean,
   viewsToFetch?: {
     viewKey: AccountViewKey,
     bookmark: string
@@ -636,7 +646,7 @@ export interface UpdateAccountInfoRouteRequestBody<T extends NumberType> {
   seenActivity?: NumberType,
   readme?: string,
 
-  showAllByDefault?: boolean
+  onlyShowApproved?: boolean
   shownBadges?: {
     collectionId: T,
     badgeIds: UintRange<T>[],

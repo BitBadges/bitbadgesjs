@@ -16,30 +16,30 @@ import { invertUintRanges, removeUintRangeFromUintRange, removeUintsFromUintRang
 //TODO: This file was created with AI from the Go equivalent in github.com/bitbadges/bitbadgeschain. It should be cleaned up to be more idiomatic TypeScript.
 
 export interface UniversalCombination {
-  timelineTimesOptions: ValueOptions; // The times of the timeline. Used in the timeline.
-  fromMappingOptions: ValueOptions; // The times that the from mapping is allowed to be used. Used in the timeline.
-  toMappingOptions: ValueOptions; // The times that the to mapping is allowed to be used. Used in the timeline.
-  initiatedByMappingOptions: ValueOptions; // The times that the initiated by mapping is allowed to be used. Used in the timeline.
-  transferTimesOptions: ValueOptions; // The times that the transfer mapping is allowed to be used. Used in the timeline.
-  badgeIdsOptions: ValueOptions; // The times that the badge ids are allowed to be used. Used in the timeline.
-  ownershipTimesOptions: ValueOptions; // The times that the owned times are allowed to be used. Used in the timeline.
+  timelineTimesOptions?: ValueOptions; // The times of the timeline. Used in the timeline.
+  fromMappingOptions?: ValueOptions; // The times that the from mapping is allowed to be used. Used in the timeline.
+  toMappingOptions?: ValueOptions; // The times that the to mapping is allowed to be used. Used in the timeline.
+  initiatedByMappingOptions?: ValueOptions; // The times that the initiated by mapping is allowed to be used. Used in the timeline.
+  transferTimesOptions?: ValueOptions; // The times that the transfer mapping is allowed to be used. Used in the timeline.
+  badgeIdsOptions?: ValueOptions; // The times that the badge ids are allowed to be used. Used in the timeline.
+  ownershipTimesOptions?: ValueOptions; // The times that the owned times are allowed to be used. Used in the timeline.
 
-  permittedTimesOptions: ValueOptions; // The times that are permitted to be used.
-  forbiddenTimesOptions: ValueOptions; // The times that are forbidden to be used.
+  permittedTimesOptions?: ValueOptions; // The times that are permitted to be used.
+  forbiddenTimesOptions?: ValueOptions; // The times that are forbidden to be used.
 }
 
 export interface UniversalCombination {
-  timelineTimesOptions: ValueOptions;
+  timelineTimesOptions?: ValueOptions;
 
-  fromMappingOptions: ValueOptions;
-  toMappingOptions: ValueOptions;
-  initiatedByMappingOptions: ValueOptions;
-  transferTimesOptions: ValueOptions;
-  badgeIdsOptions: ValueOptions;
-  ownershipTimesOptions: ValueOptions;
+  fromMappingOptions?: ValueOptions;
+  toMappingOptions?: ValueOptions;
+  initiatedByMappingOptions?: ValueOptions;
+  transferTimesOptions?: ValueOptions;
+  badgeIdsOptions?: ValueOptions;
+  ownershipTimesOptions?: ValueOptions;
 
-  permittedTimesOptions: ValueOptions;
-  forbiddenTimesOptions: ValueOptions;
+  permittedTimesOptions?: ValueOptions;
+  forbiddenTimesOptions?: ValueOptions;
 }
 
 export interface UniversalPermission {
@@ -288,13 +288,13 @@ export function universalRemoveOverlaps(handled: UniversalPermissionDetails, val
   return [remaining, removed]
 }
 
-export function GetUintRangesWithOptions(ranges: UintRange<bigint>[], options: ValueOptions, uses: boolean): UintRange<bigint>[] {
+export function GetUintRangesWithOptions(ranges: UintRange<bigint>[], options: ValueOptions | undefined, uses: boolean): UintRange<bigint>[] {
   if (!uses) {
     ranges = [{ start: BigInt(1), end: BigInt(1) }]; // dummy range
     return ranges;
   }
 
-  if (options === null) {
+  if (!options) {
     return ranges;
   }
 
@@ -318,7 +318,7 @@ export function GetMappingIdWithOptions(mappingId: string, options: ValueOptions
     mappingId = "All";
   }
 
-  if (options === null) {
+  if (!options) {
     return mappingId;
   }
 
@@ -337,7 +337,7 @@ export function GetMappingIdWithOptions(mappingId: string, options: ValueOptions
   return mappingId;
 }
 
-export function GetMappingWithOptions(_mapping: AddressMapping, options: ValueOptions | null, uses: boolean): AddressMapping {
+export function GetMappingWithOptions(_mapping: AddressMapping, options: ValueOptions | undefined, uses: boolean): AddressMapping {
   const mapping = deepCopy(_mapping);
 
 
@@ -346,7 +346,7 @@ export function GetMappingWithOptions(_mapping: AddressMapping, options: ValueOp
     mapping.includeAddresses = false;
   }
 
-  if (options === null) {
+  if (!options) {
     return mapping;
   }
 

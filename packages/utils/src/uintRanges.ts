@@ -14,6 +14,10 @@ import { bigIntMax, bigIntMin } from "./badgeMetadata";
  * @category Uint Ranges
  */
 export function sortUintRangesAndMergeIfNecessary(uintRanges: UintRange<bigint>[]) {
+  if (uintRanges.length <= 1) {
+    return uintRanges;
+  }
+
   //Insertion sort in order of range.Start. If two have same range.Start, sort by range.End.
   for (let i = 1; i < uintRanges.length; i++) {
     const uintRange = uintRanges[i];
@@ -26,17 +30,20 @@ export function sortUintRangesAndMergeIfNecessary(uintRanges: UintRange<bigint>[
   }
 
   //Merge overlapping ranges
+  let mergedRanges = [];
+  let currRange = uintRanges[0];
   for (let i = 1; i < uintRanges.length; i++) {
-    const uintRange = uintRanges[i];
-    const prevUintRange = uintRanges[i - 1];
-
-    if (uintRange.start <= prevUintRange.end + 1n) {
-      prevUintRange.end = uintRange.end;
-      uintRanges.splice(i, 1);
-      i--;
+    const range = uintRanges[i];
+    if (range.start <= currRange.end) {
+      currRange.end = bigIntMax(currRange.end, range.end);
+    } else {
+      mergedRanges.push(currRange);
+      currRange = range;
     }
   }
-  return uintRanges;
+  mergedRanges.push(currRange);
+
+  return mergedRanges;
 }
 
 function createUintRange(start: bigint, end: bigint) {

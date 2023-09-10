@@ -147,6 +147,8 @@ export interface OffChainBalancesMetadata {
  * @property {UintRange[]} ownershipTimes - The range of the times that the badges must be owned.
  * @property {UintRange[]} badgeIds - The range of the badge IDs that must be owned.
  * @property {boolean} overrideWithCurrentTime - Whether or not to override the ownershipTimes with the current time.
+ *
+ * @property {boolean} mustOwnAll - Whether or not the user must own all the sepcified badges. If false, we will accept if they own at least one.
  */
 export interface MustOwnBadges<T extends NumberType> {
   collectionId: T;
@@ -156,6 +158,8 @@ export interface MustOwnBadges<T extends NumberType> {
   badgeIds: UintRange<T>[];
 
   overrideWithCurrentTime: boolean;
+
+  mustOwnAll: boolean;
 }
 
 export function convertMustOwnBadges<T extends NumberType, U extends NumberType>(mustOwn: MustOwnBadges<T>, convertFunction: (item: T) => U): MustOwnBadges<U> {

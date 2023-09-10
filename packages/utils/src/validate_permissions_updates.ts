@@ -262,15 +262,7 @@ export function validatePermissionsUpdate(
       return new Error(`Error validating update in canUpdateBadgeMetadata permissions: ${error}`);
     }
   }
-
-  // Can Update Inherited Balances
-  if (newPermissions.canUpdateInheritedBalances !== null) {
-    const error = validateTimedUpdateWithBadgeIdsPermissionUpdate(oldPermissions.canUpdateInheritedBalances, newPermissions.canUpdateInheritedBalances);
-    if (error) {
-      return new Error(`Error validating update in canUpdateInheritedBalances permissions: ${error}`);
-    }
-  }
-
+  
   // Can Update Collection Approved Transfers
   if (newPermissions.canUpdateCollectionApprovedTransfers !== null) {
     const error = validateCollectionApprovedTransferPermissionsUpdate(oldPermissions.canUpdateCollectionApprovedTransfers, newPermissions.canUpdateCollectionApprovedTransfers);

@@ -1,9 +1,9 @@
-import { BadgeMetadata, BadgeMetadataTimeline, CollectionApprovedTransfer, CollectionMetadata, CollectionMetadataTimeline, ContractAddressTimeline, CustomDataTimeline, InheritedBalance, InheritedBalancesTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadata, OffChainBalancesMetadataTimeline, StandardsTimeline, TimedUpdatePermission, TimedUpdateWithBadgeIdsPermission, UintRange } from "bitbadgesjs-proto";
+import { BadgeMetadata, BadgeMetadataTimeline, CollectionApprovedTransfer, CollectionMetadata, CollectionMetadataTimeline, ContractAddressTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadata, OffChainBalancesMetadataTimeline, StandardsTimeline, TimedUpdatePermission, TimedUpdateWithBadgeIdsPermission, UintRange } from "bitbadgesjs-proto";
 import { GetFirstMatchOnly, UniversalPermission, UniversalPermissionDetails, getOverlapsAndNonOverlaps } from "./overlaps";
 import { checkCollectionApprovedTransferPermission, checkTimedUpdatePermission, checkTimedUpdateWithBadgeIdsPermission, getUpdateCombinationsToCheck } from "./permission_checks";
-import { castBadgeMetadataToUniversalPermission, castCollectionApprovedTransferToUniversalPermission, castInheritedBalancesToUniversalPermission } from "./permissions";
+import { castBadgeMetadataToUniversalPermission, castCollectionApprovedTransferToUniversalPermission } from "./permissions";
+import { getBadgeMetadataTimesAndValues, getCollectionApprovedTransferTimesAndValues, getCollectionMetadataTimesAndValues, getContractAddressTimesAndValues, getCustomDataTimesAndValues, getIsArchivedTimesAndValues, getManagerTimesAndValues, getOffChainBalancesMetadataTimesAndValues, getStandardsTimesAndValues } from "./timeline_helpers";
 import { CollectionApprovedTransferPermissionWithDetails, CollectionApprovedTransferTimelineWithDetails, CollectionApprovedTransferWithDetails } from "./types/collections";
-import { getBadgeMetadataTimesAndValues, getCollectionApprovedTransferTimesAndValues, getCollectionMetadataTimesAndValues, getContractAddressTimesAndValues, getCustomDataTimesAndValues, getInheritedBalancesTimesAndValues, getIsArchivedTimesAndValues, getManagerTimesAndValues, getOffChainBalancesMetadataTimesAndValues, getStandardsTimesAndValues } from "./timeline_helpers";
 
 /**
  * @category Validate Updates
@@ -34,51 +34,7 @@ export function getPotentialUpdatesForTimelineValues(times: UintRange<bigint>[][
         initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
       },
       combinations: [{
-        timelineTimesOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false,
-        },
-        badgeIdsOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false,
-        },
-        ownershipTimesOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false,
-        },
-        transferTimesOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false,
-        },
-        toMappingOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false,
-        },
-        fromMappingOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false,
-        },
-        initiatedByMappingOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false,
-        },
-        permittedTimesOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false,
-        },
-        forbiddenTimesOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: false,
-        },
+
       }],
     });
   }
@@ -351,73 +307,6 @@ export function validateOffChainBalancesMetadataUpdate(
   let details = detailsToCheck.map(x => x.timelineTime);
 
   let err = checkTimedUpdatePermission(details, canUpdateOffChainBalancesMetadata);
-  if (err) {
-    return err;
-  }
-
-  return null;
-}
-
-/**
- * @category Validate Updates
- */
-export function validateInheritedBalancesUpdate(
-  oldInheritedBalances: InheritedBalancesTimeline<bigint>[],
-  newInheritedBalances: InheritedBalancesTimeline<bigint>[],
-  canUpdateInheritedBalances: TimedUpdateWithBadgeIdsPermission<bigint>[]
-): Error | null {
-  let { times: oldTimes, values: oldValues } = getInheritedBalancesTimesAndValues(oldInheritedBalances);
-  let oldTimelineFirstMatches = getPotentialUpdatesForTimelineValues(oldTimes, oldValues);
-
-  let { times: newTimes, values: newValues } = getInheritedBalancesTimesAndValues(newInheritedBalances);
-  let newTimelineFirstMatches = getPotentialUpdatesForTimelineValues(newTimes, newValues);
-
-  let detailsToCheck = getUpdateCombinationsToCheck(oldTimelineFirstMatches, newTimelineFirstMatches, [], function (oldValue: any, newValue: any) {
-    let oldInheritedBalances = oldValue as InheritedBalance<bigint>[];
-    let firstMatchesForOld = GetFirstMatchOnly(castInheritedBalancesToUniversalPermission(oldInheritedBalances));
-
-    let newInheritedBalances = newValue as InheritedBalance<bigint>[];
-    let firstMatchesForNew = GetFirstMatchOnly(castInheritedBalancesToUniversalPermission(newInheritedBalances));
-
-    let detailsToReturn: UniversalPermissionDetails[] = [];
-    let [overlapObjects, inOldButNotNew, inNewButNotOld] = getOverlapsAndNonOverlaps(firstMatchesForOld, firstMatchesForNew);
-
-    for (const overlapObject of overlapObjects) {
-      let different = false;
-
-      if (overlapObject.firstDetails.arbitraryValue === null && overlapObject.secondDetails.arbitraryValue !== null ||
-        overlapObject.firstDetails.arbitraryValue !== null && overlapObject.secondDetails.arbitraryValue === null) {
-        different = true;
-      } else {
-        let oldVal = overlapObject.firstDetails.arbitraryValue as InheritedBalance<bigint>;
-        let newVal = overlapObject.secondDetails.arbitraryValue as InheritedBalance<bigint>;
-
-        if (JSON.stringify(newVal) !== JSON.stringify(oldVal)) {
-          different = true;
-        }
-      }
-
-      if (different) {
-        detailsToReturn.push(overlapObject.overlap);
-      }
-    }
-
-    // If metadata is in old but not new, then it is considered updated.
-    // If it is in new but not old, then it is considered updated.
-    detailsToReturn = detailsToReturn.concat(inOldButNotNew).concat(inNewButNotOld);
-
-    return detailsToReturn;
-  });
-
-  let details = detailsToCheck.map(x => {
-    const result = {
-      timelineTimes: [x.timelineTime],
-      badgeIds: [x.badgeId],
-    }
-    return result;
-  });
-
-  let err = checkTimedUpdateWithBadgeIdsPermission(details, canUpdateInheritedBalances);
   if (err) {
     return err;
   }

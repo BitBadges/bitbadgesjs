@@ -176,6 +176,8 @@ export function convertAnnouncementInfo<T extends NumberType, U extends NumberTy
  * @property {string} memo - The memo of the transfer.
  * @property {PrecalculationDetails} precalculationDetails - The precalculation details of the transfer.
  * @property {string} initiatedBy - The cosmos address of the user who initiated the transfer.
+ * @property {string} [txHash] - The transaction hash of the transfer.
+ *
  * @category API / Indexer
  */
 export interface TransferActivityInfoBase<T extends NumberType> extends ActivityInfoBase<T> {
@@ -187,6 +189,8 @@ export interface TransferActivityInfoBase<T extends NumberType> extends Activity
   memo: string;
   precalculationDetails: PrecalculationDetails;
   initiatedBy: string;
+
+  txHash?: string;
 }
 /**
  * @category API / Indexer

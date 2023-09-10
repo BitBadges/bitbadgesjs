@@ -220,7 +220,6 @@ export function getWrappedCollectionPermissions<T extends NumberType>(collection
     canArchiveCollection: getWrappedTimedUpdatePermission(collectionPermissions.canArchiveCollection),
     canCreateMoreBadges: getWrappedBalancesActionPermission(collectionPermissions.canCreateMoreBadges),
     canUpdateBadgeMetadata: getWrappedTimedUpdateWithBadgeIdsPermission(collectionPermissions.canUpdateBadgeMetadata),
-    canUpdateInheritedBalances: getWrappedTimedUpdateWithBadgeIdsPermission(collectionPermissions.canUpdateInheritedBalances),
     canUpdateCollectionApprovedTransfers: getWrappedCollectionApprovedTransferPermission(collectionPermissions.canUpdateCollectionApprovedTransfers),
     canUpdateCollectionMetadata: getWrappedTimedUpdatePermission(collectionPermissions.canUpdateCollectionMetadata),
     canUpdateContractAddress: getWrappedTimedUpdatePermission(collectionPermissions.canUpdateContractAddress),

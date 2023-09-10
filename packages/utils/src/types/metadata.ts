@@ -1,4 +1,5 @@
-import { UintRange, NumberType, convertUintRange, AddressMapping } from "bitbadgesjs-proto";
+import { NumberType, UintRange, convertUintRange } from "bitbadgesjs-proto";
+import { AddressMappingInfo, convertAddressMappingInfo } from "./db";
 import { deepCopy } from "./utils";
 
 /**
@@ -56,7 +57,7 @@ export function convertMetadata<T extends NumberType, U extends NumberType>(item
 /**
  * @category API / Indexer
  */
-export interface AddressMappingWithMetadata<T extends NumberType> extends AddressMapping {
+export interface AddressMappingWithMetadata<T extends NumberType> extends AddressMappingInfo<T> {
   metadata?: Metadata<T>
 }
 
@@ -65,7 +66,7 @@ export interface AddressMappingWithMetadata<T extends NumberType> extends Addres
  */
 export function convertAddressMappingWithMetadata<T extends NumberType, U extends NumberType>(item: AddressMappingWithMetadata<T>, convertFunction: (item: T) => U): AddressMappingWithMetadata<U> {
   return deepCopy({
-    ...item,
+    ...convertAddressMappingInfo(item, convertFunction),
     metadata: item.metadata ? convertMetadata(item.metadata, convertFunction) : undefined,
   })
 }
