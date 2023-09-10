@@ -24,7 +24,6 @@ export namespace bitbadges.bitbadgeschain.badges {
       offChainBalancesMetadataTimeline?: dependency_8.bitbadges.bitbadgeschain.badges.OffChainBalancesMetadataTimeline[];
       customDataTimeline?: dependency_8.bitbadges.bitbadgeschain.badges.CustomDataTimeline[];
       balancesType?: string;
-      inheritedCollectionId?: string;
       collectionApprovedTransfersTimeline?: dependency_8.bitbadges.bitbadgeschain.badges.CollectionApprovedTransferTimeline[];
       permissions?: dependency_3.bitbadges.bitbadgeschain.badges.CollectionPermissions;
       standardsTimeline?: dependency_8.bitbadges.bitbadgeschain.badges.StandardsTimeline[];
@@ -55,9 +54,6 @@ export namespace bitbadges.bitbadgeschain.badges {
         }
         if ("balancesType" in data && data.balancesType != undefined) {
           this.balancesType = data.balancesType;
-        }
-        if ("inheritedCollectionId" in data && data.inheritedCollectionId != undefined) {
-          this.inheritedCollectionId = data.inheritedCollectionId;
         }
         if ("collectionApprovedTransfersTimeline" in data && data.collectionApprovedTransfersTimeline != undefined) {
           this.collectionApprovedTransfersTimeline = data.collectionApprovedTransfersTimeline;
@@ -124,12 +120,6 @@ export namespace bitbadges.bitbadgeschain.badges {
     set balancesType(value: string) {
       pb_1.Message.setField(this, 6, value);
     }
-    get inheritedCollectionId() {
-      return pb_1.Message.getFieldWithDefault(this, 7, "") as string;
-    }
-    set inheritedCollectionId(value: string) {
-      pb_1.Message.setField(this, 7, value);
-    }
     get collectionApprovedTransfersTimeline() {
       return pb_1.Message.getRepeatedWrapperField(this, dependency_8.bitbadges.bitbadgeschain.badges.CollectionApprovedTransferTimeline, 8) as dependency_8.bitbadges.bitbadgeschain.badges.CollectionApprovedTransferTimeline[];
     }
@@ -194,7 +184,6 @@ export namespace bitbadges.bitbadgeschain.badges {
       offChainBalancesMetadataTimeline?: ReturnType<typeof dependency_8.bitbadges.bitbadgeschain.badges.OffChainBalancesMetadataTimeline.prototype.toObject>[];
       customDataTimeline?: ReturnType<typeof dependency_8.bitbadges.bitbadgeschain.badges.CustomDataTimeline.prototype.toObject>[];
       balancesType?: string;
-      inheritedCollectionId?: string;
       collectionApprovedTransfersTimeline?: ReturnType<typeof dependency_8.bitbadges.bitbadgeschain.badges.CollectionApprovedTransferTimeline.prototype.toObject>[];
       permissions?: ReturnType<typeof dependency_3.bitbadges.bitbadgeschain.badges.CollectionPermissions.prototype.toObject>;
       standardsTimeline?: ReturnType<typeof dependency_8.bitbadges.bitbadgeschain.badges.StandardsTimeline.prototype.toObject>[];
@@ -223,9 +212,6 @@ export namespace bitbadges.bitbadgeschain.badges {
       }
       if (data.balancesType != null) {
         message.balancesType = data.balancesType;
-      }
-      if (data.inheritedCollectionId != null) {
-        message.inheritedCollectionId = data.inheritedCollectionId;
       }
       if (data.collectionApprovedTransfersTimeline != null) {
         message.collectionApprovedTransfersTimeline = data.collectionApprovedTransfersTimeline.map(item => dependency_8.bitbadges.bitbadgeschain.badges.CollectionApprovedTransferTimeline.fromObject(item));
@@ -264,7 +250,6 @@ export namespace bitbadges.bitbadgeschain.badges {
         offChainBalancesMetadataTimeline?: ReturnType<typeof dependency_8.bitbadges.bitbadgeschain.badges.OffChainBalancesMetadataTimeline.prototype.toObject>[];
         customDataTimeline?: ReturnType<typeof dependency_8.bitbadges.bitbadgeschain.badges.CustomDataTimeline.prototype.toObject>[];
         balancesType?: string;
-        inheritedCollectionId?: string;
         collectionApprovedTransfersTimeline?: ReturnType<typeof dependency_8.bitbadges.bitbadgeschain.badges.CollectionApprovedTransferTimeline.prototype.toObject>[];
         permissions?: ReturnType<typeof dependency_3.bitbadges.bitbadgeschain.badges.CollectionPermissions.prototype.toObject>;
         standardsTimeline?: ReturnType<typeof dependency_8.bitbadges.bitbadgeschain.badges.StandardsTimeline.prototype.toObject>[];
@@ -292,9 +277,6 @@ export namespace bitbadges.bitbadgeschain.badges {
       }
       if (this.balancesType != null) {
         data.balancesType = this.balancesType;
-      }
-      if (this.inheritedCollectionId != null) {
-        data.inheritedCollectionId = this.inheritedCollectionId;
       }
       if (this.collectionApprovedTransfersTimeline != null) {
         data.collectionApprovedTransfersTimeline = this.collectionApprovedTransfersTimeline.map((item: dependency_8.bitbadges.bitbadgeschain.badges.CollectionApprovedTransferTimeline) => item.toObject());
@@ -341,8 +323,6 @@ export namespace bitbadges.bitbadgeschain.badges {
         writer.writeRepeatedMessage(5, this.customDataTimeline, (item: dependency_8.bitbadges.bitbadgeschain.badges.CustomDataTimeline) => item.serialize(writer));
       if (this.balancesType.length)
         writer.writeString(6, this.balancesType);
-      if (this.inheritedCollectionId.length)
-        writer.writeString(7, this.inheritedCollectionId);
       if (this.collectionApprovedTransfersTimeline.length)
         writer.writeRepeatedMessage(8, this.collectionApprovedTransfersTimeline, (item: dependency_8.bitbadges.bitbadgeschain.badges.CollectionApprovedTransferTimeline) => item.serialize(writer));
       if (this.has_permissions)
@@ -387,9 +367,6 @@ export namespace bitbadges.bitbadgeschain.badges {
             break;
           case 6:
             message.balancesType = reader.readString();
-            break;
-          case 7:
-            message.inheritedCollectionId = reader.readString();
             break;
           case 8:
             reader.readMessage(message.collectionApprovedTransfersTimeline, () => pb_1.Message.addToRepeatedWrapperField(message, 8, dependency_8.bitbadges.bitbadgeschain.badges.CollectionApprovedTransferTimeline.deserialize(reader), dependency_8.bitbadges.bitbadgeschain.badges.CollectionApprovedTransferTimeline));
