@@ -288,7 +288,9 @@ export function universalRemoveOverlaps(handled: UniversalPermissionDetails, val
   return [remaining, removed]
 }
 
-export function GetUintRangesWithOptions(ranges: UintRange<bigint>[], options: ValueOptions | undefined, uses: boolean): UintRange<bigint>[] {
+export function GetUintRangesWithOptions(_ranges: UintRange<bigint>[], options: ValueOptions | undefined, uses: boolean): UintRange<bigint>[] {
+  let ranges = deepCopy(_ranges);
+
   if (!uses) {
     ranges = [{ start: BigInt(1), end: BigInt(1) }]; // dummy range
     return ranges;
@@ -585,7 +587,7 @@ export interface MergedUniversalPermissionDetails {
   arbitraryValue: any;
 }
 
-export function MergeUniversalPermissionDetails(permissions: UniversalPermissionDetails[]) {
+export function MergeUniversalPermissionDetails(permissions: UniversalPermissionDetails[], doNotMerge?: boolean): MergedUniversalPermissionDetails[] {
   //We can merge two values if N - 1 fields are the same (note currently we only merge uint ranges)
   let merged: MergedUniversalPermissionDetails[] = permissions.map((permission) => {
     return {
@@ -603,6 +605,10 @@ export function MergeUniversalPermissionDetails(permissions: UniversalPermission
       arbitraryValue: permission.arbitraryValue,
     };
   });
+
+  if (doNotMerge) {
+    return merged;
+  }
 
   let unhandledLeft = true;
 

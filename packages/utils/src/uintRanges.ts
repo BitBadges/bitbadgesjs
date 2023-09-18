@@ -263,3 +263,13 @@ export function checkIfUintRangesOverlap(uintRanges: UintRange<bigint>[]) {
     });
   });
 }
+
+/**
+ * Checks if the provided id ranges are full (i.e. they cover all possible IDs).
+ *
+ * @param {UintRange<bigint>[]} uintRanges - The list of UintRanges to check
+ * @category Uint Ranges
+ */
+export function isFullUintRanges(uintRanges: UintRange<bigint>[]) {
+  return uintRanges.length == 1 && uintRanges[0].start == 1n && uintRanges[0].end == 18446744073709551615n;
+}

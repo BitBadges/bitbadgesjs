@@ -39,7 +39,8 @@ export function getFirstMatchForBadgeMetadata(
  */
 export function getFirstMatchForCollectionApprovedTransfers(
   collectionApprovedTransfers: CollectionApprovedTransferWithDetails<bigint>[],
-  handleAllPossibleCombinations?: boolean
+  handleAllPossibleCombinations?: boolean,
+  doNotMerge?: boolean
 ) {
   const currTransferability: CollectionApprovedTransferWithDetails<bigint>[] = [
     ...collectionApprovedTransfers,
@@ -74,7 +75,7 @@ export function getFirstMatchForCollectionApprovedTransfers(
   }
 
   const firstMatches = GetFirstMatchOnly(castCollectionApprovedTransferToUniversalPermission(expandedTransferability));
-  const merged = MergeUniversalPermissionDetails(firstMatches);
+  const merged = MergeUniversalPermissionDetails(firstMatches, doNotMerge);
 
   const newApprovedTransfers: CollectionApprovedTransferWithDetails<bigint>[] = [];
   for (const match of merged) {

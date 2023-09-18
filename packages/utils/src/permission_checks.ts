@@ -109,7 +109,7 @@ export function getUpdateCombinationsToCheck(
 function checkNotForbidden(permission: UniversalPermissionDetails): Error | null {
   // Throw if current block time is a forbidden time
   const blockTime = BigInt(Date.now());
-  const found = searchUintRangesForId(blockTime, permission.forbiddenTimes);
+  const [, found] = searchUintRangesForId(blockTime, permission.forbiddenTimes);
   if (found) {
     return new Error(
       `permission is forbidden from being executed at current time ${new Date(Number(blockTime)).toLocaleDateString() + ' ' + new Date(Number(blockTime)).toLocaleTimeString()}`

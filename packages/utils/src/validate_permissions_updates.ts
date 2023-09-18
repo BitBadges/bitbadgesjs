@@ -1,4 +1,4 @@
-import { ActionPermission, BalancesActionPermission, TimedUpdatePermission, TimedUpdateWithBadgeIdsPermission } from "bitbadgesjs-proto";
+import { ActionPermission, BalancesActionPermission, TimedUpdatePermission, TimedUpdateWithBadgeIdsPermission, deepCopy } from "bitbadgesjs-proto";
 import { GetFirstMatchOnly, UniversalPermission, UniversalPermissionDetails, getOverlapsAndNonOverlaps } from "./overlaps";
 import { castActionPermissionToUniversalPermission, castBalancesActionPermissionToUniversalPermission, castCollectionApprovedTransferPermissionToUniversalPermission, castTimedUpdatePermissionToUniversalPermission, castTimedUpdateWithBadgeIdsPermissionToUniversalPermission } from "./permissions";
 import { CollectionApprovedTransferPermissionWithDetails, CollectionPermissionsWithDetails } from "./types/collections";
@@ -87,9 +87,14 @@ export function validateTimedUpdateWithBadgeIdsPermissionUpdate(
   //   return new Error(`Error validating new permissions: ${errorNewPermissions}`);
   // }
 
-  const castedOldPermissions: UniversalPermission[] = castTimedUpdateWithBadgeIdsPermissionToUniversalPermission(oldPermissions);
-  const castedNewPermissions: UniversalPermission[] = castTimedUpdateWithBadgeIdsPermissionToUniversalPermission(newPermissions);
-
+  const castedOldPermissions: UniversalPermission[] =
+    deepCopy(
+      castTimedUpdateWithBadgeIdsPermissionToUniversalPermission(oldPermissions)
+    );
+  const castedNewPermissions: UniversalPermission[] =
+    deepCopy(
+      castTimedUpdateWithBadgeIdsPermissionToUniversalPermission(newPermissions)
+    );
   const errorUpdate = validateUniversalPermissionUpdate(
     GetFirstMatchOnly(castedOldPermissions),
     GetFirstMatchOnly(castedNewPermissions)
@@ -262,7 +267,7 @@ export function validatePermissionsUpdate(
       return new Error(`Error validating update in canUpdateBadgeMetadata permissions: ${error}`);
     }
   }
-  
+
   // Can Update Collection Approved Transfers
   if (newPermissions.canUpdateCollectionApprovedTransfers !== null) {
     const error = validateCollectionApprovedTransferPermissionsUpdate(oldPermissions.canUpdateCollectionApprovedTransfers, newPermissions.canUpdateCollectionApprovedTransfers);

@@ -36,7 +36,7 @@ export interface Identified {
  * @property {BadgeMetadataTimeline[]} badgeMetadataTimeline - The badge metadata timeline
  * @property {string} balancesType - The type of balances (i.e. "Standard", "Off-Chain", "Inherited")
  * @property {OffChainBalancesMetadataTimeline[]} offChainBalancesMetadataTimeline - The off-chain balances metadata timeline
- * @property {NumberType} inheritedCollectionId - The inherited collection ID
+//  * @property {NumberType} inheritedCollectionId - The inherited collection ID
  * @property {CustomDataTimeline[]} customDataTimeline - The custom data timeline
  * @property {ManagerTimeline[]} managerTimeline - The manager timeline
  * @property {CollectionPermissions} collectionPermissions - The collection permissions
@@ -56,7 +56,7 @@ export interface CollectionInfoBase<T extends NumberType> {
   badgeMetadataTimeline: BadgeMetadataTimeline<T>[];
   balancesType: "Standard" | "Off-Chain" | "Inherited";
   offChainBalancesMetadataTimeline: OffChainBalancesMetadataTimeline<T>[];
-  inheritedCollectionId: T;
+  // inheritedCollectionId: T;
   customDataTimeline: CustomDataTimeline<T>[];
   managerTimeline: ManagerTimeline<T>[];
   collectionPermissions: CollectionPermissions<T>;
@@ -95,7 +95,7 @@ export function convertCollectionInfo<T extends NumberType, U extends NumberType
     collectionMetadataTimeline: item.collectionMetadataTimeline.map((collectionMetadataTimeline) => convertCollectionMetadataTimeline(collectionMetadataTimeline, convertFunction)),
     badgeMetadataTimeline: item.badgeMetadataTimeline.map((badgeMetadataTimeline) => convertBadgeMetadataTimeline(badgeMetadataTimeline, convertFunction)),
     offChainBalancesMetadataTimeline: item.offChainBalancesMetadataTimeline.map((offChainBalancesMetadataTimeline) => convertOffChainBalancesMetadataTimeline(offChainBalancesMetadataTimeline, convertFunction)),
-    inheritedCollectionId: convertFunction(item.inheritedCollectionId),
+    // inheritedCollectionId: convertFunction(item.inheritedCollectionId),
     customDataTimeline: item.customDataTimeline.map((customDataTimeline) => convertCustomDataTimeline(customDataTimeline, convertFunction)),
     managerTimeline: item.managerTimeline.map((managerTimeline) => convertManagerTimeline(managerTimeline, convertFunction)),
     collectionPermissions: convertCollectionPermissions(item.collectionPermissions, convertFunction),
