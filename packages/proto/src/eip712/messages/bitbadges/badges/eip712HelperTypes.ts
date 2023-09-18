@@ -25,15 +25,15 @@ export const PROOF_TYPES = [
   { name: 'leaf', type: 'string' },
 ];
 
-export const USER_APPROVED_OUTGOING_TRANSFER_TIMELINE_TYPES = [
-  { name: 'approvedOutgoingTransfers', type: 'UserApprovedOutgoingTransfer[]' },
-  { name: 'timelineTimes', type: 'UintRange[]' },
-];
+// export const USER_APPROVED_OUTGOING_TRANSFER_TIMELINE_TYPES = [
+//   { name: 'approvedOutgoingTransfers', type: 'UserApprovedOutgoingTransfer[]' },
+//   { name: 'timelineTimes', type: 'UintRange[]' },
+// ];
 
-export const USER_APPROVED_INCOMING_TRANSFER_TIMELINE_TYPES = [
-  { name: 'approvedIncomingTransfers', type: 'UserApprovedIncomingTransfer[]' },
-  { name: 'timelineTimes', type: 'UintRange[]' },
-];
+// export const USER_APPROVED_INCOMING_TRANSFER_TIMELINE_TYPES = [
+//   { name: 'approvedIncomingTransfers', type: 'UserApprovedIncomingTransfer[]' },
+//   { name: 'timelineTimes', type: 'UintRange[]' },
+// ];
 
 export const USER_PERMISSIONS_TYPES = [
   { name: 'canUpdateApprovedOutgoingTransfers', type: 'UserApprovedOutgoingTransferPermission[]' },
@@ -71,7 +71,6 @@ export const USER_APPROVED_INCOMING_TRANSFER_PERMISSION_TYPES = [
 ];
 
 export const USER_APPROVED_OUTGOING_TRANSFER_DEFAULT_VALUES_TYPES = [
-  { name: 'timelineTimes', type: 'UintRange[]' },
   { name: 'toMappingId', type: 'string' },
   { name: 'initiatedByMappingId', type: 'string' },
   { name: 'transferTimes', type: 'UintRange[]' },
@@ -82,7 +81,6 @@ export const USER_APPROVED_OUTGOING_TRANSFER_DEFAULT_VALUES_TYPES = [
 ];
 
 export const USER_APPROVED_OUTGOING_TRANSFER_COMBINATION_TYPES = [
-  { name: 'timelineTimesOptions', type: 'ValueOptions' },
   { name: 'toMappingOptions', type: 'ValueOptions' },
   { name: 'initiatedByMappingOptions', type: 'ValueOptions' },
   { name: 'transferTimesOptions', type: 'ValueOptions' },
@@ -93,7 +91,6 @@ export const USER_APPROVED_OUTGOING_TRANSFER_COMBINATION_TYPES = [
 ];
 
 export const USER_APPROVED_INCOMING_TRANSFER_DEFAULT_VALUES_TYPES = [
-  { name: 'timelineTimes', type: 'UintRange[]' },
   { name: 'fromMappingId', type: 'string' },
   { name: 'initiatedByMappingId', type: 'string' },
   { name: 'transferTimes', type: 'UintRange[]' },
@@ -104,7 +101,6 @@ export const USER_APPROVED_INCOMING_TRANSFER_DEFAULT_VALUES_TYPES = [
 ];
 
 export const USER_APPROVED_INCOMING_TRANSFER_COMBINATION_TYPES = [
-  { name: 'timelineTimesOptions', type: 'ValueOptions' },
   { name: 'fromMappingOptions', type: 'ValueOptions' },
   { name: 'initiatedByMappingOptions', type: 'ValueOptions' },
   { name: 'transferTimesOptions', type: 'ValueOptions' },
@@ -263,10 +259,10 @@ export const CUSTOM_DATA_TIMELINE_TYPES = [
 //   { name: 'timelineTimes', type: 'UintRange[]' },
 // ];
 
-export const COLLECTION_APPROVED_TRANSFER_TIMELINE_TYPES = [
-  { name: 'collectionApprovedTransfers', type: 'CollectionApprovedTransfer[]' },
-  { name: 'timelineTimes', type: 'UintRange[]' },
-];
+// export const COLLECTION_APPROVED_TRANSFER_TIMELINE_TYPES = [
+//   { name: 'collectionApprovedTransfers', type: 'CollectionApprovedTransfer[]' },
+//   { name: 'timelineTimes', type: 'UintRange[]' },
+// ];
 
 export const STANDARDS_TIMELINE_TYPES = [
   { name: 'standards', type: 'string[]' },
@@ -353,7 +349,6 @@ export const COLLECTION_APPROVED_TRANSFER_PERMISSION_TYPES = [
 
 
 export const COLLECTION_APPROVED_TRANSFER_COMBINATION_TYPES = [
-  { name: 'timelineTimesOptions', type: 'ValueOptions' },
   { name: 'fromMappingOptions', type: 'ValueOptions' },
   { name: 'toMappingOptions', type: 'ValueOptions' },
   { name: 'initiatedByMappingOptions', type: 'ValueOptions' },
@@ -365,7 +360,6 @@ export const COLLECTION_APPROVED_TRANSFER_COMBINATION_TYPES = [
 ];
 
 export const COLLECTION_APPROVED_TRANSFER_DEFAULT_VALUES_TYPES = [
-  { name: 'timelineTimes', type: 'UintRange[]' },
   { name: 'fromMappingId', type: 'string' },
   { name: 'toMappingId', type: 'string' },
   { name: 'initiatedByMappingId', type: 'string' },

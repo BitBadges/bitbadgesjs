@@ -4,15 +4,15 @@ import { generateFee, generateTypes, MSG_UPDATE_USER_APPROVED_TRANSFERS_TYPES, g
 import { createTransaction } from "../../transaction"
 import { Chain, Sender, Fee } from "../../common"
 import { getDefaultDomainWithChainId } from "../../domain"
-import { NumberType, UserApprovedIncomingTransferTimeline, UserApprovedOutgoingTransferTimeline, UserPermissions, convertUserApprovedIncomingTransferTimeline, convertUserApprovedOutgoingTransferTimeline, convertUserPermissions, createMsgUpdateUserApprovedTransfers as protoMsgUpdateUserApprovedTransfers } from '../../../../'
+import { NumberType, UserApprovedIncomingTransfer, UserApprovedOutgoingTransfer, UserPermissions, convertUserApprovedIncomingTransfer, convertUserApprovedOutgoingTransfer, convertUserPermissions, createMsgUpdateUserApprovedTransfers as protoMsgUpdateUserApprovedTransfers } from '../../../../'
 
 export interface MsgUpdateUserApprovedTransfers<T extends NumberType> {
   creator: string
   collectionId: T
-  updateApprovedOutgoingTransfersTimeline: boolean
-  approvedOutgoingTransfersTimeline: UserApprovedOutgoingTransferTimeline<T>[]
-  updateApprovedIncomingTransfersTimeline: boolean
-  approvedIncomingTransfersTimeline: UserApprovedIncomingTransferTimeline<T>[]
+  updateApprovedOutgoingTransfers: boolean
+  approvedOutgoingTransfers: UserApprovedOutgoingTransfer<T>[]
+  updateApprovedIncomingTransfers: boolean
+  approvedIncomingTransfers: UserApprovedIncomingTransfer<T>[]
   updateUserPermissions: boolean
   userPermissions: UserPermissions<T>
 }
@@ -24,8 +24,8 @@ export function convertMsgUpdateUserApprovedTransfers<T extends NumberType, U ex
   return {
     ...msg,
     collectionId: convertFunction(msg.collectionId),
-    approvedOutgoingTransfersTimeline: msg.approvedOutgoingTransfersTimeline.map(x => convertUserApprovedOutgoingTransferTimeline(x, convertFunction)),
-    approvedIncomingTransfersTimeline: msg.approvedIncomingTransfersTimeline.map(x => convertUserApprovedIncomingTransferTimeline(x, convertFunction)),
+    approvedOutgoingTransfers: msg.approvedOutgoingTransfers.map(x => convertUserApprovedOutgoingTransfer(x, convertFunction)),
+    approvedIncomingTransfers: msg.approvedIncomingTransfers.map(x => convertUserApprovedIncomingTransfer(x, convertFunction)),
     userPermissions: convertUserPermissions(msg.userPermissions, convertFunction),
   }
 }
@@ -38,10 +38,10 @@ export function convertFromProtoToMsgUpdateUserApprovedTransfers(
   return {
     creator: msg.creator,
     collectionId: BigInt(msg.collectionId),
-    updateApprovedOutgoingTransfersTimeline: msg.updateApprovedOutgoingTransfersTimeline,
-    approvedOutgoingTransfersTimeline: msg.approvedOutgoingTransfersTimeline.map(x => convertUserApprovedOutgoingTransferTimeline(x, BigInt)),
-    updateApprovedIncomingTransfersTimeline: msg.updateApprovedIncomingTransfersTimeline,
-    approvedIncomingTransfersTimeline: msg.approvedIncomingTransfersTimeline.map(x => convertUserApprovedIncomingTransferTimeline(x, BigInt)),
+    updateApprovedOutgoingTransfers: msg.updateApprovedOutgoingTransfers,
+    approvedOutgoingTransfers: msg.approvedOutgoingTransfers.map(x => convertUserApprovedOutgoingTransfer(x, BigInt)),
+    updateApprovedIncomingTransfers: msg.updateApprovedIncomingTransfers,
+    approvedIncomingTransfers: msg.approvedIncomingTransfers.map(x => convertUserApprovedIncomingTransfer(x, BigInt)),
     updateUserPermissions: msg.updateUserPermissions,
     userPermissions: convertUserPermissions(msg.userPermissions, BigInt),
   }
@@ -67,10 +67,10 @@ export function createTxMsgUpdateUserApprovedTransfers<T extends NumberType>(
   const msg = createEIP712MsgUpdateUserApprovedTransfers(
     params.creator,
     params.collectionId,
-    params.updateApprovedOutgoingTransfersTimeline,
-    params.approvedOutgoingTransfersTimeline,
-    params.updateApprovedIncomingTransfersTimeline,
-    params.approvedIncomingTransfersTimeline,
+    params.updateApprovedOutgoingTransfers,
+    params.approvedOutgoingTransfers,
+    params.updateApprovedIncomingTransfers,
+    params.approvedIncomingTransfers,
     params.updateUserPermissions,
     params.userPermissions,
   )
@@ -92,10 +92,10 @@ export function createTxMsgUpdateUserApprovedTransfers<T extends NumberType>(
   const msgCosmos = protoMsgUpdateUserApprovedTransfers(
     params.creator,
     params.collectionId,
-    params.updateApprovedOutgoingTransfersTimeline,
-    params.approvedOutgoingTransfersTimeline,
-    params.updateApprovedIncomingTransfersTimeline,
-    params.approvedIncomingTransfersTimeline,
+    params.updateApprovedOutgoingTransfers,
+    params.approvedOutgoingTransfers,
+    params.updateApprovedIncomingTransfers,
+    params.approvedIncomingTransfers,
     params.updateUserPermissions,
     params.userPermissions,
   )

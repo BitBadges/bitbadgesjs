@@ -1,6 +1,6 @@
 import * as badges from '../../../../proto/badges/tx'
 
-import { BadgeMetadataTimeline, Balance, CollectionApprovedTransferTimeline, CollectionMetadataTimeline, CollectionPermissions, ContractAddressTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, NumberType, OffChainBalancesMetadataTimeline, StandardsTimeline, UserApprovedIncomingTransferTimeline, UserApprovedOutgoingTransferTimeline, UserPermissions, convertBadgeMetadataTimeline, convertBalance, convertCollectionApprovedTransferTimeline, convertCollectionMetadataTimeline, convertCollectionPermissions, convertContractAddressTimeline, convertCustomDataTimeline, convertIsArchivedTimeline, convertManagerTimeline, convertOffChainBalancesMetadataTimeline, convertStandardsTimeline, convertUserApprovedIncomingTransferTimeline, convertUserApprovedOutgoingTransferTimeline, convertUserPermissions, createMsgUpdateCollection as protoMsgUpdateCollection } from '../../../../'
+import { BadgeMetadataTimeline, Balance, CollectionApprovedTransfer, CollectionMetadataTimeline, CollectionPermissions, ContractAddressTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, NumberType, OffChainBalancesMetadataTimeline, StandardsTimeline, UserApprovedIncomingTransfer, UserApprovedOutgoingTransfer, UserPermissions, convertBadgeMetadataTimeline, convertBalance, convertCollectionApprovedTransfer, convertCollectionMetadataTimeline, convertCollectionPermissions, convertContractAddressTimeline, convertCustomDataTimeline, convertIsArchivedTimeline, convertManagerTimeline, convertOffChainBalancesMetadataTimeline, convertStandardsTimeline, convertUserApprovedIncomingTransfer, convertUserApprovedOutgoingTransfer, convertUserPermissions, createMsgUpdateCollection as protoMsgUpdateCollection } from '../../../../'
 import { MSG_UPDATE_COLLECTION_TYPES, createEIP712, createEIP712MsgUpdateCollection, generateFee, generateMessage, generateTypes } from "../../../../"
 import { createTransaction } from "../../transaction"
 import { Chain, Fee, Sender } from "../../common"
@@ -24,8 +24,8 @@ import { getDefaultDomainWithChainId } from "../../domain"
  * @property {string} creator - The creator of the transaction.
  * @property {T} collectionId - The collection ID. If you are creating a new collection, set this to "0".
  * @property {string} balancesType - The balances type. Either "Standard", "Off-Chain", or "Inherited".
- * @property {UserApprovedOutgoingTransferTimeline[]} defaultApprovedOutgoingTransfersTimeline - The default approved outgoing transfers timeline for users who have not interacted with the collection yet. Only can be set on initial creation. Only used if collection has "Standard" balance type.
- * @property {UserApprovedIncomingTransferTimeline[]} defaultApprovedIncomingTransfersTimeline - The default approved incoming transfers timeline for users who have not interacted with the collection yet. Only can be set on initial creation. Only used if collection has "Standard" balance type.
+ * @property {UserApprovedOutgoingTransfer[]} defaultApprovedOutgoingTransfers - The default approved outgoing transfers timeline for users who have not interacted with the collection yet. Only can be set on initial creation. Only used if collection has "Standard" balance type.
+ * @property {UserApprovedIncomingTransfer[]} defaultApprovedIncomingTransfers - The default approved incoming transfers timeline for users who have not interacted with the collection yet. Only can be set on initial creation. Only used if collection has "Standard" balance type.
  * @property {UserPermissions} defaultUserPermissions - The default user permissions for users who have not interacted with the collection yet. Only can be set on initial creation. Only used if collection has "Standard" balance type.
  * @property {Balance[]} badgesToCreate - The badges to create. Newly created badges will be sent to the "Mint" address. Must have necessary permissions. Only used if collection has "Standard" balance type.
  * @property {boolean} updateCollectionPermissions - Whether or not to update the collection permissions.
@@ -41,8 +41,8 @@ import { getDefaultDomainWithChainId } from "../../domain"
  * @property {boolean} updateCustomDataTimeline - Whether or not to update the custom data timeline.
  * @property {CustomDataTimeline[]} customDataTimeline - The new custom data timeline. Must have the necessary permissions to update.
  * @property {T} inheritedCollectionId - The new inherited collection ID. Must have the necessary permissions to update. Only used if "Inherited" balance type.
- * @property {boolean} updateCollectionApprovedTransfersTimeline - Whether or not to update the collection approved transfers timeline.
- * @property {CollectionApprovedTransferTimeline[]} collectionApprovedTransfersTimeline - The new collection approved transfers timeline. Must have the necessary permissions to update.
+ * @property {boolean} updateCollectionApprovedTransfers - Whether or not to update the collection approved transfers timeline.
+ * @property {CollectionApprovedTransfer[]} collectionApprovedTransfers - The new collection approved transfers timeline. Must have the necessary permissions to update.
  * @property {boolean} updateStandardsTimeline - Whether or not to update the standards timeline.
  * @property {StandardsTimeline[]} standardsTimeline - The new standards timeline. Must have the necessary permissions to update.
  * @property {boolean} updateContractAddressTimeline - Whether or not to update the contract address timeline.
@@ -54,8 +54,8 @@ export interface MsgUpdateCollection<T extends NumberType> {
   creator: string
   collectionId: T
   balancesType: string
-  defaultApprovedOutgoingTransfersTimeline: UserApprovedOutgoingTransferTimeline<T>[]
-  defaultApprovedIncomingTransfersTimeline: UserApprovedIncomingTransferTimeline<T>[]
+  defaultApprovedOutgoingTransfers: UserApprovedOutgoingTransfer<T>[]
+  defaultApprovedIncomingTransfers: UserApprovedIncomingTransfer<T>[]
   defaultUserPermissions: UserPermissions<T>
   badgesToCreate: Balance<T>[]
   updateCollectionPermissions: boolean
@@ -71,8 +71,8 @@ export interface MsgUpdateCollection<T extends NumberType> {
   updateCustomDataTimeline: boolean
   customDataTimeline: CustomDataTimeline<T>[]
   // inheritedCollectionId: T
-  updateCollectionApprovedTransfersTimeline: boolean
-  collectionApprovedTransfersTimeline: CollectionApprovedTransferTimeline<T>[]
+  updateCollectionApprovedTransfers: boolean
+  collectionApprovedTransfers: CollectionApprovedTransfer<T>[]
   updateStandardsTimeline: boolean
   standardsTimeline: StandardsTimeline<T>[]
   updateContractAddressTimeline: boolean
@@ -88,8 +88,8 @@ export function convertMsgUpdateCollection<T extends NumberType, U extends Numbe
   return {
     ...msg,
     collectionId: convertFunction(msg.collectionId),
-    defaultApprovedOutgoingTransfersTimeline: msg.defaultApprovedOutgoingTransfersTimeline.map(x => convertUserApprovedOutgoingTransferTimeline(x, convertFunction)),
-    defaultApprovedIncomingTransfersTimeline: msg.defaultApprovedIncomingTransfersTimeline.map(x => convertUserApprovedIncomingTransferTimeline(x, convertFunction)),
+    defaultApprovedOutgoingTransfers: msg.defaultApprovedOutgoingTransfers.map(x => convertUserApprovedOutgoingTransfer(x, convertFunction)),
+    defaultApprovedIncomingTransfers: msg.defaultApprovedIncomingTransfers.map(x => convertUserApprovedIncomingTransfer(x, convertFunction)),
     defaultUserPermissions: convertUserPermissions(msg.defaultUserPermissions, convertFunction),
 
     badgesToCreate: msg.badgesToCreate.map(x => convertBalance(x, convertFunction)),
@@ -100,7 +100,7 @@ export function convertMsgUpdateCollection<T extends NumberType, U extends Numbe
     offChainBalancesMetadataTimeline: msg.offChainBalancesMetadataTimeline.map(x => convertOffChainBalancesMetadataTimeline(x, convertFunction)),
     customDataTimeline: msg.customDataTimeline.map(x => convertCustomDataTimeline(x, convertFunction)),
     // inheritedCollectionId: convertFunction(msg.inheritedCollectionId),
-    collectionApprovedTransfersTimeline: msg.collectionApprovedTransfersTimeline.map(x => convertCollectionApprovedTransferTimeline(x, convertFunction)),
+    collectionApprovedTransfers: msg.collectionApprovedTransfers.map(x => convertCollectionApprovedTransfer(x, convertFunction)),
     standardsTimeline: msg.standardsTimeline.map(x => convertStandardsTimeline(x, convertFunction)),
     contractAddressTimeline: msg.contractAddressTimeline.map(x => convertContractAddressTimeline(x, convertFunction)),
     isArchivedTimeline: msg.isArchivedTimeline.map(x => convertIsArchivedTimeline(x, convertFunction)),
@@ -117,8 +117,8 @@ export function convertFromProtoToMsgUpdateCollection(
     creator: msg.creator,
     collectionId: BigInt(msg.collectionId),
     balancesType: msg.balancesType,
-    defaultApprovedOutgoingTransfersTimeline: msg.defaultApprovedOutgoingTransfersTimeline.map(x => convertUserApprovedOutgoingTransferTimeline(x, BigInt)),
-    defaultApprovedIncomingTransfersTimeline: msg.defaultApprovedIncomingTransfersTimeline.map(x => convertUserApprovedIncomingTransferTimeline(x, BigInt)),
+    defaultApprovedOutgoingTransfers: msg.defaultApprovedOutgoingTransfers.map(x => convertUserApprovedOutgoingTransfer(x, BigInt)),
+    defaultApprovedIncomingTransfers: msg.defaultApprovedIncomingTransfers.map(x => convertUserApprovedIncomingTransfer(x, BigInt)),
     defaultUserPermissions: convertUserPermissions(msg.defaultUserPermissions, BigInt),
 
     badgesToCreate: msg.badgesToCreate.map(x => convertBalance(x, BigInt)),
@@ -129,7 +129,7 @@ export function convertFromProtoToMsgUpdateCollection(
     offChainBalancesMetadataTimeline: msg.offChainBalancesMetadataTimeline.map(x => convertOffChainBalancesMetadataTimeline(x, BigInt)),
     customDataTimeline: msg.customDataTimeline.map(x => convertCustomDataTimeline(x, BigInt)),
     // inheritedCollectionId: BigInt(msg.inheritedCollectionId),
-    collectionApprovedTransfersTimeline: msg.collectionApprovedTransfersTimeline.map(x => convertCollectionApprovedTransferTimeline(x, BigInt)),
+    collectionApprovedTransfers: msg.collectionApprovedTransfers.map(x => convertCollectionApprovedTransfer(x, BigInt)),
     standardsTimeline: msg.standardsTimeline.map(x => convertStandardsTimeline(x, BigInt)),
     contractAddressTimeline: msg.contractAddressTimeline.map(x => convertContractAddressTimeline(x, BigInt)),
     isArchivedTimeline: msg.isArchivedTimeline.map(x => convertIsArchivedTimeline(x, BigInt)),
@@ -140,7 +140,7 @@ export function convertFromProtoToMsgUpdateCollection(
     updateBadgeMetadataTimeline: msg.updateBadgeMetadataTimeline,
     updateOffChainBalancesMetadataTimeline: msg.updateOffChainBalancesMetadataTimeline,
     updateCustomDataTimeline: msg.updateCustomDataTimeline,
-    updateCollectionApprovedTransfersTimeline: msg.updateCollectionApprovedTransfersTimeline,
+    updateCollectionApprovedTransfers: msg.updateCollectionApprovedTransfers,
     updateStandardsTimeline: msg.updateStandardsTimeline,
     updateContractAddressTimeline: msg.updateContractAddressTimeline,
     updateIsArchivedTimeline: msg.updateIsArchivedTimeline,
@@ -168,8 +168,8 @@ export function createTxMsgUpdateCollection<T extends NumberType>(
     params.creator,
     params.collectionId,
     params.balancesType,
-    params.defaultApprovedOutgoingTransfersTimeline,
-    params.defaultApprovedIncomingTransfersTimeline,
+    params.defaultApprovedOutgoingTransfers,
+    params.defaultApprovedIncomingTransfers,
     params.defaultUserPermissions,
     params.badgesToCreate,
     params.updateCollectionPermissions,
@@ -185,8 +185,8 @@ export function createTxMsgUpdateCollection<T extends NumberType>(
     params.updateCustomDataTimeline,
     params.customDataTimeline,
     // params.inheritedCollectionId,
-    params.updateCollectionApprovedTransfersTimeline,
-    params.collectionApprovedTransfersTimeline,
+    params.updateCollectionApprovedTransfers,
+    params.collectionApprovedTransfers,
     params.updateStandardsTimeline,
     params.standardsTimeline,
     params.updateContractAddressTimeline,
@@ -213,8 +213,8 @@ export function createTxMsgUpdateCollection<T extends NumberType>(
     params.creator,
     params.collectionId,
     params.balancesType,
-    params.defaultApprovedOutgoingTransfersTimeline,
-    params.defaultApprovedIncomingTransfersTimeline,
+    params.defaultApprovedOutgoingTransfers,
+    params.defaultApprovedIncomingTransfers,
     params.defaultUserPermissions,
     params.badgesToCreate,
     params.updateCollectionPermissions,
@@ -230,8 +230,8 @@ export function createTxMsgUpdateCollection<T extends NumberType>(
     params.updateCustomDataTimeline,
     params.customDataTimeline,
     // params.inheritedCollectionId,
-    params.updateCollectionApprovedTransfersTimeline,
-    params.collectionApprovedTransfersTimeline,
+    params.updateCollectionApprovedTransfers,
+    params.collectionApprovedTransfers,
     params.updateStandardsTimeline,
     params.standardsTimeline,
     params.updateContractAddressTimeline,

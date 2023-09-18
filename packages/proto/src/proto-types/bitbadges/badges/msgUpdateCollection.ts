@@ -1,9 +1,9 @@
 import * as tx from '../../../proto/badges/tx'
 import { NumberType } from './string-numbers'
-import { UserApprovedIncomingTransferTimeline, UserApprovedOutgoingTransferTimeline } from './typeutils/approvedTransfers'
+import { CollectionApprovedTransfer, UserApprovedIncomingTransfer, UserApprovedOutgoingTransfer } from './typeutils/approvedTransfers'
 import { CollectionPermissions, UserPermissions } from './typeutils/permissions'
-import { BadgeMetadataTimeline, Balance, CollectionApprovedTransferTimeline, CollectionMetadataTimeline, ContractAddressTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadataTimeline, StandardsTimeline } from './typeutils/typeUtils'
-import { getWrappedBadgeMetadataTimeline, getWrappedBalances, getWrappedCollectionApprovedTransfersTimeline, getWrappedCollectionMetadataTimeline, getWrappedCollectionPermissions, getWrappedContractAddressTimeline, getWrappedCustomDataTimeline, getWrappedIncomingTransfersTimeline, getWrappedIsArchivedTimeline, getWrappedManagerTimeline, getWrappedOffChainBalancesMetadataTimeline, getWrappedOutgoingTransfersTimeline, getWrappedStandardsTimeline, getWrappedUserPermissions } from './typeutils/wrappers'
+import { BadgeMetadataTimeline, Balance, CollectionMetadataTimeline, ContractAddressTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadataTimeline, StandardsTimeline } from './typeutils/typeUtils'
+import { getWrappedBadgeMetadataTimeline, getWrappedBalances, getWrappedCollectionApprovedTransfers, getWrappedCollectionMetadataTimeline, getWrappedCollectionPermissions, getWrappedContractAddressTimeline, getWrappedCustomDataTimeline, getWrappedIncomingTransfers, getWrappedIsArchivedTimeline, getWrappedManagerTimeline, getWrappedOffChainBalancesMetadataTimeline, getWrappedOutgoingTransfers, getWrappedStandardsTimeline, getWrappedUserPermissions } from './typeutils/wrappers'
 
 
 
@@ -11,8 +11,8 @@ export function createMsgUpdateCollection<T extends NumberType>(
   creator: string,
   collectionId: T,
   balancesType: string,
-  defaultApprovedOutgoingTransfersTimeline: UserApprovedOutgoingTransferTimeline<T>[],
-  defaultApprovedIncomingTransfersTimeline: UserApprovedIncomingTransferTimeline<T>[],
+  defaultApprovedOutgoingTransfers: UserApprovedOutgoingTransfer<T>[],
+  defaultApprovedIncomingTransfers: UserApprovedIncomingTransfer<T>[],
   defaultUserPermissions: UserPermissions<T>,
   badgesToCreate: Balance<T>[],
   updateCollectionPermissions: boolean,
@@ -28,8 +28,8 @@ export function createMsgUpdateCollection<T extends NumberType>(
   updateCustomDataTimeline: boolean,
   customDataTimeline: CustomDataTimeline<T>[],
   // inheritedCollectionId: T,
-  updateCollectionApprovedTransfersTimeline: boolean,
-  collectionApprovedTransfersTimeline: CollectionApprovedTransferTimeline<T>[],
+  updateCollectionApprovedTransfers: boolean,
+  collectionApprovedTransfers: CollectionApprovedTransfer<T>[],
   updateStandardsTimeline: boolean,
   standardsTimeline: StandardsTimeline<T>[],
   updateContractAddressTimeline: boolean,
@@ -41,8 +41,8 @@ export function createMsgUpdateCollection<T extends NumberType>(
     creator,
     collectionId: collectionId.toString(),
     balancesType,
-    defaultApprovedOutgoingTransfersTimeline: getWrappedOutgoingTransfersTimeline(defaultApprovedOutgoingTransfersTimeline),
-    defaultApprovedIncomingTransfersTimeline: getWrappedIncomingTransfersTimeline(defaultApprovedIncomingTransfersTimeline),
+    defaultApprovedOutgoingTransfers: getWrappedOutgoingTransfers(defaultApprovedOutgoingTransfers),
+    defaultApprovedIncomingTransfers: getWrappedIncomingTransfers(defaultApprovedIncomingTransfers),
     defaultUserPermissions: getWrappedUserPermissions(defaultUserPermissions),
     badgesToCreate: getWrappedBalances(badgesToCreate),
     updateCollectionPermissions,
@@ -58,8 +58,8 @@ export function createMsgUpdateCollection<T extends NumberType>(
     updateCustomDataTimeline,
     customDataTimeline: getWrappedCustomDataTimeline(customDataTimeline),
     // inheritedCollectionId: inheritedCollectionId.toString(),
-    updateCollectionApprovedTransfersTimeline,
-    collectionApprovedTransfersTimeline: getWrappedCollectionApprovedTransfersTimeline(collectionApprovedTransfersTimeline),
+    updateCollectionApprovedTransfers,
+    collectionApprovedTransfers: getWrappedCollectionApprovedTransfers(collectionApprovedTransfers),
     updateStandardsTimeline,
     standardsTimeline: getWrappedStandardsTimeline(standardsTimeline),
     updateContractAddressTimeline,
