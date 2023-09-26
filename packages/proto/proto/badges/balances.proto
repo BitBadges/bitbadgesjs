@@ -8,7 +8,7 @@ import "badges/params.proto";
 option go_package = "github.com/bitbadges/bitbadgeschain/x/badges/types";
 
 // uintRange is a range of IDs from some start to some end (inclusive).
-//
+// 
 // uintRanges are one of the core types used in the BitBadgesChain module.
 // They are used for evrything from badge IDs to time ranges to min / max balance amounts.
 message UintRange {
@@ -20,7 +20,7 @@ message UintRange {
 // The user amounts xAmount of a badge for the badgeID specified for the time ranges specified.
 //
 // Ex: User A owns x10 of badge IDs 1-10 from 1/1/2020 to 1/1/2021.
-//
+// 
 // If times or badgeIDs have len > 1, then the user owns all badge IDs specified for all time ranges specified.
 message Balance {
   string amount = 1  [(gogoproto.customtype) = "Uint", (gogoproto.nullable) = false];
@@ -36,7 +36,7 @@ message MustOwnBadges {
   repeated UintRange badgeIds = 4;
 
   bool overrideWithCurrentTime = 5;
-
+  
   bool mustOwnAll = 6;
 }
 

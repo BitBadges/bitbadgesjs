@@ -34,7 +34,7 @@ option go_package = "github.com/bitbadges/bitbadgeschain/x/badges/types";
 // Ex: We can have default value badgeIds = [1,2] and combinations = [{invertDefault: true, isApproved: false}, {isApproved: true}].
 // This would mean that badgeIds [1,2] are allowed but everything else is not allowed.
 //
-// IMPORTANT: For all permissions, we ONLY take the first combination that matches. Any subsequent combinations are ignored.
+// IMPORTANT: For all permissions, we ONLY take the first combination that matches. Any subsequent combinations are ignored. 
 // Ex: If we have defaultValues = {badgeIds: [1,2]} and combinations = [{isApproved: true}, {isApproved: false}].
 // This would mean that badgeIds [1,2] are allowed and the second combination is ignored.
 message CollectionPermissions {
@@ -43,7 +43,7 @@ message CollectionPermissions {
   repeated TimedUpdatePermission canUpdateContractAddress = 3;
   repeated TimedUpdatePermission canUpdateOffChainBalancesMetadata = 4;
   repeated TimedUpdatePermission canUpdateStandards = 5;
-
+  
   repeated TimedUpdatePermission canUpdateCustomData = 6;
   repeated TimedUpdatePermission canUpdateManager = 7;
   repeated TimedUpdatePermission canUpdateCollectionMetadata = 8;
@@ -80,6 +80,10 @@ message CollectionApprovedTransferCombination {
   ValueOptions badgeIdsOptions = 5;
   ValueOptions ownershipTimesOptions = 6;
 
+  ValueOptions approvalTrackerIdOptions = 10;
+  ValueOptions challengeTrackerIdOptions = 9;
+  
+
   ValueOptions permittedTimesOptions = 7;
   ValueOptions forbiddenTimesOptions = 8;
 }
@@ -92,6 +96,9 @@ message CollectionApprovedTransferDefaultValues {
   repeated UintRange badgeIds = 5;
   repeated UintRange ownershipTimes = 6;
 
+  string approvalTrackerId = 10;
+  string challengeTrackerId = 9;
+
   repeated UintRange permittedTimes = 7;
   repeated UintRange forbiddenTimes = 8;
 }
@@ -99,10 +106,10 @@ message CollectionApprovedTransferDefaultValues {
 // CollectionApprovedTransferPermission defines what collection approved transfers can be updated vs are locked.
 //
 // Each transfer is broken down to a (from, to, initiatedBy, transferTime, badgeId) tuple.
-// For a transfer to match, we need to match ALL of the fields in the combination.
+// For a transfer to match, we need to match ALL of the fields in the combination. 
 // These are detemined by the fromMappingId, toMappingId, initiatedByMappingId, transferTimes, badgeIds fields.
-// AddressMappings are used for (from, to, initiatedBy) which are a permanent list of addresses identified by an ID (see AddressMappings).
-//
+// AddressMappings are used for (from, to, initiatedBy) which are a permanent list of addresses identified by an ID (see AddressMappings). 
+// 
 // TimelineTimes: which timeline times of the collection's approvedTransfersTimeline field can be updated or not?
 // permitted/forbidden TimelineTimes: when can the manager execute this permission?
 //
@@ -124,6 +131,9 @@ message UserApprovedOutgoingTransferCombination {
   ValueOptions badgeIdsOptions = 4;
   ValueOptions ownershipTimesOptions = 5;
 
+  ValueOptions approvalTrackerIdOptions = 10;
+  ValueOptions challengeTrackerIdOptions = 9;
+
   ValueOptions permittedTimesOptions = 6;
   ValueOptions forbiddenTimesOptions = 7;
 }
@@ -134,6 +144,9 @@ message UserApprovedOutgoingTransferDefaultValues {
   repeated UintRange transferTimes = 3;
   repeated UintRange badgeIds = 4;
   repeated UintRange ownershipTimes = 5;
+
+  string approvalTrackerId = 10;
+  string challengeTrackerId = 9;
 
   repeated UintRange permittedTimes = 6;
   repeated UintRange forbiddenTimes = 7;
@@ -154,6 +167,9 @@ message UserApprovedIncomingTransferCombination {
   ValueOptions ownershipTimesOptions = 5;
 
 
+  ValueOptions approvalTrackerIdOptions = 10;
+  ValueOptions challengeTrackerIdOptions = 9;
+
   ValueOptions permittedTimesOptions = 6;
   ValueOptions forbiddenTimesOptions = 7;
 }
@@ -164,6 +180,9 @@ message UserApprovedIncomingTransferDefaultValues {
   repeated UintRange transferTimes = 3;
   repeated UintRange badgeIds = 4;
   repeated UintRange ownershipTimes = 5;
+
+  string approvalTrackerId = 10;
+  string challengeTrackerId = 9;
 
   repeated UintRange permittedTimes = 6;
   repeated UintRange forbiddenTimes = 7;
@@ -195,7 +214,7 @@ message BalancesActionDefaultValues {
 // BalancesActionPermission defines the permissions for updating a timeline-based field for specific badges and specific badge ownership times.
 // Currently, this is only used for creating new badges.
 //
-// Ex: If you want to lock the ability to create new badges for badgeIds [1,2] at ownershipTimes 1/1/2020 - 1/1/2021,
+// Ex: If you want to lock the ability to create new badges for badgeIds [1,2] at ownershipTimes 1/1/2020 - 1/1/2021, 
 // you could set the combination (badgeIds: [1,2], ownershipTimelineTimes: [1/1/2020 - 1/1/2021]) to always be forbidden.
 message BalancesActionPermission {
   BalancesActionDefaultValues defaultValues = 1;
@@ -213,7 +232,7 @@ message ActionCombination {
 }
 
 // ActionPermission defines the permissions for performing an action.
-//
+// 
 // This is simple and straightforward as the only thing we need to check is the permitted/forbidden times.
 message ActionPermission {
   ActionDefaultValues defaultValues = 1;
@@ -262,7 +281,7 @@ message TimedUpdateWithBadgeIdsDefaultValues {
 }
 
 // TimedUpdateWithBadgeIdsPermission defines the permissions for updating a timeline-based field for specific badges.
-//
+// 
 // Ex: If you want to lock the ability to update the metadata for badgeIds [1,2] for timelineTimes 1/1/2020 - 1/1/2021,
 // you could set the combination (badgeIds: [1,2], TimelineTimes: [1/1/2020 - 1/1/2021]) to always be forbidden.
 message TimedUpdateWithBadgeIdsPermission {

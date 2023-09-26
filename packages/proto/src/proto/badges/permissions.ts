@@ -11,3486 +11,3780 @@ import * as dependency_3 from "./address_mappings";
 import * as dependency_4 from "./../gogoproto/gogo";
 import * as pb_1 from "google-protobuf";
 export namespace bitbadges.bitbadgeschain.badges {
-  export class CollectionPermissions extends pb_1.Message {
-    #one_of_decls: number[][] = [];
-    constructor(data?: any[] | {
-      canDeleteCollection?: ActionPermission[];
-      canArchiveCollection?: TimedUpdatePermission[];
-      canUpdateContractAddress?: TimedUpdatePermission[];
-      canUpdateOffChainBalancesMetadata?: TimedUpdatePermission[];
-      canUpdateStandards?: TimedUpdatePermission[];
-      canUpdateCustomData?: TimedUpdatePermission[];
-      canUpdateManager?: TimedUpdatePermission[];
-      canUpdateCollectionMetadata?: TimedUpdatePermission[];
-      canCreateMoreBadges?: BalancesActionPermission[];
-      canUpdateBadgeMetadata?: TimedUpdateWithBadgeIdsPermission[];
-      canUpdateCollectionApprovedTransfers?: CollectionApprovedTransferPermission[];
-    }) {
-      super();
-      pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12], this.#one_of_decls);
-      if (!Array.isArray(data) && typeof data == "object") {
-        if ("canDeleteCollection" in data && data.canDeleteCollection != undefined) {
-          this.canDeleteCollection = data.canDeleteCollection;
-        }
-        if ("canArchiveCollection" in data && data.canArchiveCollection != undefined) {
-          this.canArchiveCollection = data.canArchiveCollection;
-        }
-        if ("canUpdateContractAddress" in data && data.canUpdateContractAddress != undefined) {
-          this.canUpdateContractAddress = data.canUpdateContractAddress;
-        }
-        if ("canUpdateOffChainBalancesMetadata" in data && data.canUpdateOffChainBalancesMetadata != undefined) {
-          this.canUpdateOffChainBalancesMetadata = data.canUpdateOffChainBalancesMetadata;
-        }
-        if ("canUpdateStandards" in data && data.canUpdateStandards != undefined) {
-          this.canUpdateStandards = data.canUpdateStandards;
-        }
-        if ("canUpdateCustomData" in data && data.canUpdateCustomData != undefined) {
-          this.canUpdateCustomData = data.canUpdateCustomData;
-        }
-        if ("canUpdateManager" in data && data.canUpdateManager != undefined) {
-          this.canUpdateManager = data.canUpdateManager;
-        }
-        if ("canUpdateCollectionMetadata" in data && data.canUpdateCollectionMetadata != undefined) {
-          this.canUpdateCollectionMetadata = data.canUpdateCollectionMetadata;
-        }
-        if ("canCreateMoreBadges" in data && data.canCreateMoreBadges != undefined) {
-          this.canCreateMoreBadges = data.canCreateMoreBadges;
-        }
-        if ("canUpdateBadgeMetadata" in data && data.canUpdateBadgeMetadata != undefined) {
-          this.canUpdateBadgeMetadata = data.canUpdateBadgeMetadata;
-        }
-        if ("canUpdateCollectionApprovedTransfers" in data && data.canUpdateCollectionApprovedTransfers != undefined) {
-          this.canUpdateCollectionApprovedTransfers = data.canUpdateCollectionApprovedTransfers;
-        }
-      }
-    }
-    get canDeleteCollection() {
-      return pb_1.Message.getRepeatedWrapperField(this, ActionPermission, 1) as ActionPermission[];
-    }
-    set canDeleteCollection(value: ActionPermission[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 1, value);
-    }
-    get canArchiveCollection() {
-      return pb_1.Message.getRepeatedWrapperField(this, TimedUpdatePermission, 2) as TimedUpdatePermission[];
-    }
-    set canArchiveCollection(value: TimedUpdatePermission[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 2, value);
-    }
-    get canUpdateContractAddress() {
-      return pb_1.Message.getRepeatedWrapperField(this, TimedUpdatePermission, 3) as TimedUpdatePermission[];
-    }
-    set canUpdateContractAddress(value: TimedUpdatePermission[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 3, value);
-    }
-    get canUpdateOffChainBalancesMetadata() {
-      return pb_1.Message.getRepeatedWrapperField(this, TimedUpdatePermission, 4) as TimedUpdatePermission[];
-    }
-    set canUpdateOffChainBalancesMetadata(value: TimedUpdatePermission[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 4, value);
-    }
-    get canUpdateStandards() {
-      return pb_1.Message.getRepeatedWrapperField(this, TimedUpdatePermission, 5) as TimedUpdatePermission[];
-    }
-    set canUpdateStandards(value: TimedUpdatePermission[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 5, value);
-    }
-    get canUpdateCustomData() {
-      return pb_1.Message.getRepeatedWrapperField(this, TimedUpdatePermission, 6) as TimedUpdatePermission[];
-    }
-    set canUpdateCustomData(value: TimedUpdatePermission[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 6, value);
-    }
-    get canUpdateManager() {
-      return pb_1.Message.getRepeatedWrapperField(this, TimedUpdatePermission, 7) as TimedUpdatePermission[];
-    }
-    set canUpdateManager(value: TimedUpdatePermission[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 7, value);
-    }
-    get canUpdateCollectionMetadata() {
-      return pb_1.Message.getRepeatedWrapperField(this, TimedUpdatePermission, 8) as TimedUpdatePermission[];
-    }
-    set canUpdateCollectionMetadata(value: TimedUpdatePermission[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 8, value);
-    }
-    get canCreateMoreBadges() {
-      return pb_1.Message.getRepeatedWrapperField(this, BalancesActionPermission, 9) as BalancesActionPermission[];
-    }
-    set canCreateMoreBadges(value: BalancesActionPermission[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 9, value);
-    }
-    get canUpdateBadgeMetadata() {
-      return pb_1.Message.getRepeatedWrapperField(this, TimedUpdateWithBadgeIdsPermission, 10) as TimedUpdateWithBadgeIdsPermission[];
-    }
-    set canUpdateBadgeMetadata(value: TimedUpdateWithBadgeIdsPermission[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 10, value);
-    }
-    get canUpdateCollectionApprovedTransfers() {
-      return pb_1.Message.getRepeatedWrapperField(this, CollectionApprovedTransferPermission, 12) as CollectionApprovedTransferPermission[];
-    }
-    set canUpdateCollectionApprovedTransfers(value: CollectionApprovedTransferPermission[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 12, value);
-    }
-    static fromObject(data: {
-      canDeleteCollection?: ReturnType<typeof ActionPermission.prototype.toObject>[];
-      canArchiveCollection?: ReturnType<typeof TimedUpdatePermission.prototype.toObject>[];
-      canUpdateContractAddress?: ReturnType<typeof TimedUpdatePermission.prototype.toObject>[];
-      canUpdateOffChainBalancesMetadata?: ReturnType<typeof TimedUpdatePermission.prototype.toObject>[];
-      canUpdateStandards?: ReturnType<typeof TimedUpdatePermission.prototype.toObject>[];
-      canUpdateCustomData?: ReturnType<typeof TimedUpdatePermission.prototype.toObject>[];
-      canUpdateManager?: ReturnType<typeof TimedUpdatePermission.prototype.toObject>[];
-      canUpdateCollectionMetadata?: ReturnType<typeof TimedUpdatePermission.prototype.toObject>[];
-      canCreateMoreBadges?: ReturnType<typeof BalancesActionPermission.prototype.toObject>[];
-      canUpdateBadgeMetadata?: ReturnType<typeof TimedUpdateWithBadgeIdsPermission.prototype.toObject>[];
-      canUpdateCollectionApprovedTransfers?: ReturnType<typeof CollectionApprovedTransferPermission.prototype.toObject>[];
-    }): CollectionPermissions {
-      const message = new CollectionPermissions({});
-      if (data.canDeleteCollection != null) {
-        message.canDeleteCollection = data.canDeleteCollection.map(item => ActionPermission.fromObject(item));
-      }
-      if (data.canArchiveCollection != null) {
-        message.canArchiveCollection = data.canArchiveCollection.map(item => TimedUpdatePermission.fromObject(item));
-      }
-      if (data.canUpdateContractAddress != null) {
-        message.canUpdateContractAddress = data.canUpdateContractAddress.map(item => TimedUpdatePermission.fromObject(item));
-      }
-      if (data.canUpdateOffChainBalancesMetadata != null) {
-        message.canUpdateOffChainBalancesMetadata = data.canUpdateOffChainBalancesMetadata.map(item => TimedUpdatePermission.fromObject(item));
-      }
-      if (data.canUpdateStandards != null) {
-        message.canUpdateStandards = data.canUpdateStandards.map(item => TimedUpdatePermission.fromObject(item));
-      }
-      if (data.canUpdateCustomData != null) {
-        message.canUpdateCustomData = data.canUpdateCustomData.map(item => TimedUpdatePermission.fromObject(item));
-      }
-      if (data.canUpdateManager != null) {
-        message.canUpdateManager = data.canUpdateManager.map(item => TimedUpdatePermission.fromObject(item));
-      }
-      if (data.canUpdateCollectionMetadata != null) {
-        message.canUpdateCollectionMetadata = data.canUpdateCollectionMetadata.map(item => TimedUpdatePermission.fromObject(item));
-      }
-      if (data.canCreateMoreBadges != null) {
-        message.canCreateMoreBadges = data.canCreateMoreBadges.map(item => BalancesActionPermission.fromObject(item));
-      }
-      if (data.canUpdateBadgeMetadata != null) {
-        message.canUpdateBadgeMetadata = data.canUpdateBadgeMetadata.map(item => TimedUpdateWithBadgeIdsPermission.fromObject(item));
-      }
-      if (data.canUpdateCollectionApprovedTransfers != null) {
-        message.canUpdateCollectionApprovedTransfers = data.canUpdateCollectionApprovedTransfers.map(item => CollectionApprovedTransferPermission.fromObject(item));
-      }
-      return message;
-    }
-    toObject() {
-      const data: {
-        canDeleteCollection?: ReturnType<typeof ActionPermission.prototype.toObject>[];
-        canArchiveCollection?: ReturnType<typeof TimedUpdatePermission.prototype.toObject>[];
-        canUpdateContractAddress?: ReturnType<typeof TimedUpdatePermission.prototype.toObject>[];
-        canUpdateOffChainBalancesMetadata?: ReturnType<typeof TimedUpdatePermission.prototype.toObject>[];
-        canUpdateStandards?: ReturnType<typeof TimedUpdatePermission.prototype.toObject>[];
-        canUpdateCustomData?: ReturnType<typeof TimedUpdatePermission.prototype.toObject>[];
-        canUpdateManager?: ReturnType<typeof TimedUpdatePermission.prototype.toObject>[];
-        canUpdateCollectionMetadata?: ReturnType<typeof TimedUpdatePermission.prototype.toObject>[];
-        canCreateMoreBadges?: ReturnType<typeof BalancesActionPermission.prototype.toObject>[];
-        canUpdateBadgeMetadata?: ReturnType<typeof TimedUpdateWithBadgeIdsPermission.prototype.toObject>[];
-        canUpdateCollectionApprovedTransfers?: ReturnType<typeof CollectionApprovedTransferPermission.prototype.toObject>[];
-      } = {};
-      if (this.canDeleteCollection != null) {
-        data.canDeleteCollection = this.canDeleteCollection.map((item: ActionPermission) => item.toObject());
-      }
-      if (this.canArchiveCollection != null) {
-        data.canArchiveCollection = this.canArchiveCollection.map((item: TimedUpdatePermission) => item.toObject());
-      }
-      if (this.canUpdateContractAddress != null) {
-        data.canUpdateContractAddress = this.canUpdateContractAddress.map((item: TimedUpdatePermission) => item.toObject());
-      }
-      if (this.canUpdateOffChainBalancesMetadata != null) {
-        data.canUpdateOffChainBalancesMetadata = this.canUpdateOffChainBalancesMetadata.map((item: TimedUpdatePermission) => item.toObject());
-      }
-      if (this.canUpdateStandards != null) {
-        data.canUpdateStandards = this.canUpdateStandards.map((item: TimedUpdatePermission) => item.toObject());
-      }
-      if (this.canUpdateCustomData != null) {
-        data.canUpdateCustomData = this.canUpdateCustomData.map((item: TimedUpdatePermission) => item.toObject());
-      }
-      if (this.canUpdateManager != null) {
-        data.canUpdateManager = this.canUpdateManager.map((item: TimedUpdatePermission) => item.toObject());
-      }
-      if (this.canUpdateCollectionMetadata != null) {
-        data.canUpdateCollectionMetadata = this.canUpdateCollectionMetadata.map((item: TimedUpdatePermission) => item.toObject());
-      }
-      if (this.canCreateMoreBadges != null) {
-        data.canCreateMoreBadges = this.canCreateMoreBadges.map((item: BalancesActionPermission) => item.toObject());
-      }
-      if (this.canUpdateBadgeMetadata != null) {
-        data.canUpdateBadgeMetadata = this.canUpdateBadgeMetadata.map((item: TimedUpdateWithBadgeIdsPermission) => item.toObject());
-      }
-      if (this.canUpdateCollectionApprovedTransfers != null) {
-        data.canUpdateCollectionApprovedTransfers = this.canUpdateCollectionApprovedTransfers.map((item: CollectionApprovedTransferPermission) => item.toObject());
-      }
-      return data;
-    }
-    serialize(): Uint8Array;
-    serialize(w: pb_1.BinaryWriter): void;
-    serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-      const writer = w || new pb_1.BinaryWriter();
-      if (this.canDeleteCollection.length)
-        writer.writeRepeatedMessage(1, this.canDeleteCollection, (item: ActionPermission) => item.serialize(writer));
-      if (this.canArchiveCollection.length)
-        writer.writeRepeatedMessage(2, this.canArchiveCollection, (item: TimedUpdatePermission) => item.serialize(writer));
-      if (this.canUpdateContractAddress.length)
-        writer.writeRepeatedMessage(3, this.canUpdateContractAddress, (item: TimedUpdatePermission) => item.serialize(writer));
-      if (this.canUpdateOffChainBalancesMetadata.length)
-        writer.writeRepeatedMessage(4, this.canUpdateOffChainBalancesMetadata, (item: TimedUpdatePermission) => item.serialize(writer));
-      if (this.canUpdateStandards.length)
-        writer.writeRepeatedMessage(5, this.canUpdateStandards, (item: TimedUpdatePermission) => item.serialize(writer));
-      if (this.canUpdateCustomData.length)
-        writer.writeRepeatedMessage(6, this.canUpdateCustomData, (item: TimedUpdatePermission) => item.serialize(writer));
-      if (this.canUpdateManager.length)
-        writer.writeRepeatedMessage(7, this.canUpdateManager, (item: TimedUpdatePermission) => item.serialize(writer));
-      if (this.canUpdateCollectionMetadata.length)
-        writer.writeRepeatedMessage(8, this.canUpdateCollectionMetadata, (item: TimedUpdatePermission) => item.serialize(writer));
-      if (this.canCreateMoreBadges.length)
-        writer.writeRepeatedMessage(9, this.canCreateMoreBadges, (item: BalancesActionPermission) => item.serialize(writer));
-      if (this.canUpdateBadgeMetadata.length)
-        writer.writeRepeatedMessage(10, this.canUpdateBadgeMetadata, (item: TimedUpdateWithBadgeIdsPermission) => item.serialize(writer));
-      if (this.canUpdateCollectionApprovedTransfers.length)
-        writer.writeRepeatedMessage(12, this.canUpdateCollectionApprovedTransfers, (item: CollectionApprovedTransferPermission) => item.serialize(writer));
-      if (!w)
-        return writer.getResultBuffer();
-    }
-    static deserialize(bytes: Uint8Array | pb_1.BinaryReader): CollectionPermissions {
-      const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new CollectionPermissions();
-      while (reader.nextField()) {
-        if (reader.isEndGroup())
-          break;
-        switch (reader.getFieldNumber()) {
-          case 1:
-            reader.readMessage(message.canDeleteCollection, () => pb_1.Message.addToRepeatedWrapperField(message, 1, ActionPermission.deserialize(reader), ActionPermission));
-            break;
-          case 2:
-            reader.readMessage(message.canArchiveCollection, () => pb_1.Message.addToRepeatedWrapperField(message, 2, TimedUpdatePermission.deserialize(reader), TimedUpdatePermission));
-            break;
-          case 3:
-            reader.readMessage(message.canUpdateContractAddress, () => pb_1.Message.addToRepeatedWrapperField(message, 3, TimedUpdatePermission.deserialize(reader), TimedUpdatePermission));
-            break;
-          case 4:
-            reader.readMessage(message.canUpdateOffChainBalancesMetadata, () => pb_1.Message.addToRepeatedWrapperField(message, 4, TimedUpdatePermission.deserialize(reader), TimedUpdatePermission));
-            break;
-          case 5:
-            reader.readMessage(message.canUpdateStandards, () => pb_1.Message.addToRepeatedWrapperField(message, 5, TimedUpdatePermission.deserialize(reader), TimedUpdatePermission));
-            break;
-          case 6:
-            reader.readMessage(message.canUpdateCustomData, () => pb_1.Message.addToRepeatedWrapperField(message, 6, TimedUpdatePermission.deserialize(reader), TimedUpdatePermission));
-            break;
-          case 7:
-            reader.readMessage(message.canUpdateManager, () => pb_1.Message.addToRepeatedWrapperField(message, 7, TimedUpdatePermission.deserialize(reader), TimedUpdatePermission));
-            break;
-          case 8:
-            reader.readMessage(message.canUpdateCollectionMetadata, () => pb_1.Message.addToRepeatedWrapperField(message, 8, TimedUpdatePermission.deserialize(reader), TimedUpdatePermission));
-            break;
-          case 9:
-            reader.readMessage(message.canCreateMoreBadges, () => pb_1.Message.addToRepeatedWrapperField(message, 9, BalancesActionPermission.deserialize(reader), BalancesActionPermission));
-            break;
-          case 10:
-            reader.readMessage(message.canUpdateBadgeMetadata, () => pb_1.Message.addToRepeatedWrapperField(message, 10, TimedUpdateWithBadgeIdsPermission.deserialize(reader), TimedUpdateWithBadgeIdsPermission));
-            break;
-          case 12:
-            reader.readMessage(message.canUpdateCollectionApprovedTransfers, () => pb_1.Message.addToRepeatedWrapperField(message, 12, CollectionApprovedTransferPermission.deserialize(reader), CollectionApprovedTransferPermission));
-            break;
-          default: reader.skipField();
-        }
-      }
-      return message;
-    }
-    serializeBinary(): Uint8Array {
-      return this.serialize();
-    }
-    static deserializeBinary(bytes: Uint8Array): CollectionPermissions {
-      return CollectionPermissions.deserialize(bytes);
-    }
-  }
-  export class UserPermissions extends pb_1.Message {
-    #one_of_decls: number[][] = [];
-    constructor(data?: any[] | {
-      canUpdateApprovedOutgoingTransfers?: UserApprovedOutgoingTransferPermission[];
-      canUpdateApprovedIncomingTransfers?: UserApprovedIncomingTransferPermission[];
-    }) {
-      super();
-      pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1, 2], this.#one_of_decls);
-      if (!Array.isArray(data) && typeof data == "object") {
-        if ("canUpdateApprovedOutgoingTransfers" in data && data.canUpdateApprovedOutgoingTransfers != undefined) {
-          this.canUpdateApprovedOutgoingTransfers = data.canUpdateApprovedOutgoingTransfers;
-        }
-        if ("canUpdateApprovedIncomingTransfers" in data && data.canUpdateApprovedIncomingTransfers != undefined) {
-          this.canUpdateApprovedIncomingTransfers = data.canUpdateApprovedIncomingTransfers;
-        }
-      }
-    }
-    get canUpdateApprovedOutgoingTransfers() {
-      return pb_1.Message.getRepeatedWrapperField(this, UserApprovedOutgoingTransferPermission, 1) as UserApprovedOutgoingTransferPermission[];
-    }
-    set canUpdateApprovedOutgoingTransfers(value: UserApprovedOutgoingTransferPermission[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 1, value);
-    }
-    get canUpdateApprovedIncomingTransfers() {
-      return pb_1.Message.getRepeatedWrapperField(this, UserApprovedIncomingTransferPermission, 2) as UserApprovedIncomingTransferPermission[];
-    }
-    set canUpdateApprovedIncomingTransfers(value: UserApprovedIncomingTransferPermission[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 2, value);
-    }
-    static fromObject(data: {
-      canUpdateApprovedOutgoingTransfers?: ReturnType<typeof UserApprovedOutgoingTransferPermission.prototype.toObject>[];
-      canUpdateApprovedIncomingTransfers?: ReturnType<typeof UserApprovedIncomingTransferPermission.prototype.toObject>[];
-    }): UserPermissions {
-      const message = new UserPermissions({});
-      if (data.canUpdateApprovedOutgoingTransfers != null) {
-        message.canUpdateApprovedOutgoingTransfers = data.canUpdateApprovedOutgoingTransfers.map(item => UserApprovedOutgoingTransferPermission.fromObject(item));
-      }
-      if (data.canUpdateApprovedIncomingTransfers != null) {
-        message.canUpdateApprovedIncomingTransfers = data.canUpdateApprovedIncomingTransfers.map(item => UserApprovedIncomingTransferPermission.fromObject(item));
-      }
-      return message;
-    }
-    toObject() {
-      const data: {
-        canUpdateApprovedOutgoingTransfers?: ReturnType<typeof UserApprovedOutgoingTransferPermission.prototype.toObject>[];
-        canUpdateApprovedIncomingTransfers?: ReturnType<typeof UserApprovedIncomingTransferPermission.prototype.toObject>[];
-      } = {};
-      if (this.canUpdateApprovedOutgoingTransfers != null) {
-        data.canUpdateApprovedOutgoingTransfers = this.canUpdateApprovedOutgoingTransfers.map((item: UserApprovedOutgoingTransferPermission) => item.toObject());
-      }
-      if (this.canUpdateApprovedIncomingTransfers != null) {
-        data.canUpdateApprovedIncomingTransfers = this.canUpdateApprovedIncomingTransfers.map((item: UserApprovedIncomingTransferPermission) => item.toObject());
-      }
-      return data;
-    }
-    serialize(): Uint8Array;
-    serialize(w: pb_1.BinaryWriter): void;
-    serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-      const writer = w || new pb_1.BinaryWriter();
-      if (this.canUpdateApprovedOutgoingTransfers.length)
-        writer.writeRepeatedMessage(1, this.canUpdateApprovedOutgoingTransfers, (item: UserApprovedOutgoingTransferPermission) => item.serialize(writer));
-      if (this.canUpdateApprovedIncomingTransfers.length)
-        writer.writeRepeatedMessage(2, this.canUpdateApprovedIncomingTransfers, (item: UserApprovedIncomingTransferPermission) => item.serialize(writer));
-      if (!w)
-        return writer.getResultBuffer();
-    }
-    static deserialize(bytes: Uint8Array | pb_1.BinaryReader): UserPermissions {
-      const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new UserPermissions();
-      while (reader.nextField()) {
-        if (reader.isEndGroup())
-          break;
-        switch (reader.getFieldNumber()) {
-          case 1:
-            reader.readMessage(message.canUpdateApprovedOutgoingTransfers, () => pb_1.Message.addToRepeatedWrapperField(message, 1, UserApprovedOutgoingTransferPermission.deserialize(reader), UserApprovedOutgoingTransferPermission));
-            break;
-          case 2:
-            reader.readMessage(message.canUpdateApprovedIncomingTransfers, () => pb_1.Message.addToRepeatedWrapperField(message, 2, UserApprovedIncomingTransferPermission.deserialize(reader), UserApprovedIncomingTransferPermission));
-            break;
-          default: reader.skipField();
-        }
-      }
-      return message;
-    }
-    serializeBinary(): Uint8Array {
-      return this.serialize();
-    }
-    static deserializeBinary(bytes: Uint8Array): UserPermissions {
-      return UserPermissions.deserialize(bytes);
-    }
-  }
-  export class ValueOptions extends pb_1.Message {
-    #one_of_decls: number[][] = [];
-    constructor(data?: any[] | {
-      invertDefault?: boolean;
-      allValues?: boolean;
-      noValues?: boolean;
-    }) {
-      super();
-      pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
-      if (!Array.isArray(data) && typeof data == "object") {
-        if ("invertDefault" in data && data.invertDefault != undefined) {
-          this.invertDefault = data.invertDefault;
-        }
-        if ("allValues" in data && data.allValues != undefined) {
-          this.allValues = data.allValues;
-        }
-        if ("noValues" in data && data.noValues != undefined) {
-          this.noValues = data.noValues;
-        }
-      }
-    }
-    get invertDefault() {
-      return pb_1.Message.getFieldWithDefault(this, 1, false) as boolean;
-    }
-    set invertDefault(value: boolean) {
-      pb_1.Message.setField(this, 1, value);
-    }
-    get allValues() {
-      return pb_1.Message.getFieldWithDefault(this, 2, false) as boolean;
-    }
-    set allValues(value: boolean) {
-      pb_1.Message.setField(this, 2, value);
-    }
-    get noValues() {
-      return pb_1.Message.getFieldWithDefault(this, 3, false) as boolean;
-    }
-    set noValues(value: boolean) {
-      pb_1.Message.setField(this, 3, value);
-    }
-    static fromObject(data: {
-      invertDefault?: boolean;
-      allValues?: boolean;
-      noValues?: boolean;
-    }): ValueOptions {
-      const message = new ValueOptions({});
-      if (data.invertDefault != null) {
-        message.invertDefault = data.invertDefault;
-      }
-      if (data.allValues != null) {
-        message.allValues = data.allValues;
-      }
-      if (data.noValues != null) {
-        message.noValues = data.noValues;
-      }
-      return message;
-    }
-    toObject() {
-      const data: {
-        invertDefault?: boolean;
-        allValues?: boolean;
-        noValues?: boolean;
-      } = {};
-      if (this.invertDefault != null) {
-        data.invertDefault = this.invertDefault;
-      }
-      if (this.allValues != null) {
-        data.allValues = this.allValues;
-      }
-      if (this.noValues != null) {
-        data.noValues = this.noValues;
-      }
-      return data;
-    }
-    serialize(): Uint8Array;
-    serialize(w: pb_1.BinaryWriter): void;
-    serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-      const writer = w || new pb_1.BinaryWriter();
-      if (this.invertDefault != false)
-        writer.writeBool(1, this.invertDefault);
-      if (this.allValues != false)
-        writer.writeBool(2, this.allValues);
-      if (this.noValues != false)
-        writer.writeBool(3, this.noValues);
-      if (!w)
-        return writer.getResultBuffer();
-    }
-    static deserialize(bytes: Uint8Array | pb_1.BinaryReader): ValueOptions {
-      const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new ValueOptions();
-      while (reader.nextField()) {
-        if (reader.isEndGroup())
-          break;
-        switch (reader.getFieldNumber()) {
-          case 1:
-            message.invertDefault = reader.readBool();
-            break;
-          case 2:
-            message.allValues = reader.readBool();
-            break;
-          case 3:
-            message.noValues = reader.readBool();
-            break;
-          default: reader.skipField();
-        }
-      }
-      return message;
-    }
-    serializeBinary(): Uint8Array {
-      return this.serialize();
-    }
-    static deserializeBinary(bytes: Uint8Array): ValueOptions {
-      return ValueOptions.deserialize(bytes);
-    }
-  }
-  export class CollectionApprovedTransferCombination extends pb_1.Message {
-    #one_of_decls: number[][] = [];
-    constructor(data?: any[] | {
-      fromMappingOptions?: ValueOptions;
-      toMappingOptions?: ValueOptions;
-      initiatedByMappingOptions?: ValueOptions;
-      transferTimesOptions?: ValueOptions;
-      badgeIdsOptions?: ValueOptions;
-      ownershipTimesOptions?: ValueOptions;
-      permittedTimesOptions?: ValueOptions;
-      forbiddenTimesOptions?: ValueOptions;
-    }) {
-      super();
-      pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
-      if (!Array.isArray(data) && typeof data == "object") {
-        if ("fromMappingOptions" in data && data.fromMappingOptions != undefined) {
-          this.fromMappingOptions = data.fromMappingOptions;
-        }
-        if ("toMappingOptions" in data && data.toMappingOptions != undefined) {
-          this.toMappingOptions = data.toMappingOptions;
-        }
-        if ("initiatedByMappingOptions" in data && data.initiatedByMappingOptions != undefined) {
-          this.initiatedByMappingOptions = data.initiatedByMappingOptions;
-        }
-        if ("transferTimesOptions" in data && data.transferTimesOptions != undefined) {
-          this.transferTimesOptions = data.transferTimesOptions;
-        }
-        if ("badgeIdsOptions" in data && data.badgeIdsOptions != undefined) {
-          this.badgeIdsOptions = data.badgeIdsOptions;
-        }
-        if ("ownershipTimesOptions" in data && data.ownershipTimesOptions != undefined) {
-          this.ownershipTimesOptions = data.ownershipTimesOptions;
-        }
-        if ("permittedTimesOptions" in data && data.permittedTimesOptions != undefined) {
-          this.permittedTimesOptions = data.permittedTimesOptions;
-        }
-        if ("forbiddenTimesOptions" in data && data.forbiddenTimesOptions != undefined) {
-          this.forbiddenTimesOptions = data.forbiddenTimesOptions;
-        }
-      }
-    }
-    get fromMappingOptions() {
-      return pb_1.Message.getWrapperField(this, ValueOptions, 1) as ValueOptions;
-    }
-    set fromMappingOptions(value: ValueOptions) {
-      pb_1.Message.setWrapperField(this, 1, value);
-    }
-    get has_fromMappingOptions() {
-      return pb_1.Message.getField(this, 1) != null;
-    }
-    get toMappingOptions() {
-      return pb_1.Message.getWrapperField(this, ValueOptions, 2) as ValueOptions;
-    }
-    set toMappingOptions(value: ValueOptions) {
-      pb_1.Message.setWrapperField(this, 2, value);
-    }
-    get has_toMappingOptions() {
-      return pb_1.Message.getField(this, 2) != null;
-    }
-    get initiatedByMappingOptions() {
-      return pb_1.Message.getWrapperField(this, ValueOptions, 3) as ValueOptions;
-    }
-    set initiatedByMappingOptions(value: ValueOptions) {
-      pb_1.Message.setWrapperField(this, 3, value);
-    }
-    get has_initiatedByMappingOptions() {
-      return pb_1.Message.getField(this, 3) != null;
-    }
-    get transferTimesOptions() {
-      return pb_1.Message.getWrapperField(this, ValueOptions, 4) as ValueOptions;
-    }
-    set transferTimesOptions(value: ValueOptions) {
-      pb_1.Message.setWrapperField(this, 4, value);
-    }
-    get has_transferTimesOptions() {
-      return pb_1.Message.getField(this, 4) != null;
-    }
-    get badgeIdsOptions() {
-      return pb_1.Message.getWrapperField(this, ValueOptions, 5) as ValueOptions;
-    }
-    set badgeIdsOptions(value: ValueOptions) {
-      pb_1.Message.setWrapperField(this, 5, value);
-    }
-    get has_badgeIdsOptions() {
-      return pb_1.Message.getField(this, 5) != null;
-    }
-    get ownershipTimesOptions() {
-      return pb_1.Message.getWrapperField(this, ValueOptions, 6) as ValueOptions;
-    }
-    set ownershipTimesOptions(value: ValueOptions) {
-      pb_1.Message.setWrapperField(this, 6, value);
-    }
-    get has_ownershipTimesOptions() {
-      return pb_1.Message.getField(this, 6) != null;
-    }
-    get permittedTimesOptions() {
-      return pb_1.Message.getWrapperField(this, ValueOptions, 7) as ValueOptions;
-    }
-    set permittedTimesOptions(value: ValueOptions) {
-      pb_1.Message.setWrapperField(this, 7, value);
-    }
-    get has_permittedTimesOptions() {
-      return pb_1.Message.getField(this, 7) != null;
-    }
-    get forbiddenTimesOptions() {
-      return pb_1.Message.getWrapperField(this, ValueOptions, 8) as ValueOptions;
-    }
-    set forbiddenTimesOptions(value: ValueOptions) {
-      pb_1.Message.setWrapperField(this, 8, value);
-    }
-    get has_forbiddenTimesOptions() {
-      return pb_1.Message.getField(this, 8) != null;
-    }
-    static fromObject(data: {
-      fromMappingOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-      toMappingOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-      initiatedByMappingOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-      transferTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-      badgeIdsOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-      ownershipTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-      permittedTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-      forbiddenTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-    }): CollectionApprovedTransferCombination {
-      const message = new CollectionApprovedTransferCombination({});
-      if (data.fromMappingOptions != null) {
-        message.fromMappingOptions = ValueOptions.fromObject(data.fromMappingOptions);
-      }
-      if (data.toMappingOptions != null) {
-        message.toMappingOptions = ValueOptions.fromObject(data.toMappingOptions);
-      }
-      if (data.initiatedByMappingOptions != null) {
-        message.initiatedByMappingOptions = ValueOptions.fromObject(data.initiatedByMappingOptions);
-      }
-      if (data.transferTimesOptions != null) {
-        message.transferTimesOptions = ValueOptions.fromObject(data.transferTimesOptions);
-      }
-      if (data.badgeIdsOptions != null) {
-        message.badgeIdsOptions = ValueOptions.fromObject(data.badgeIdsOptions);
-      }
-      if (data.ownershipTimesOptions != null) {
-        message.ownershipTimesOptions = ValueOptions.fromObject(data.ownershipTimesOptions);
-      }
-      if (data.permittedTimesOptions != null) {
-        message.permittedTimesOptions = ValueOptions.fromObject(data.permittedTimesOptions);
-      }
-      if (data.forbiddenTimesOptions != null) {
-        message.forbiddenTimesOptions = ValueOptions.fromObject(data.forbiddenTimesOptions);
-      }
-      return message;
-    }
-    toObject() {
-      const data: {
-        fromMappingOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-        toMappingOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-        initiatedByMappingOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-        transferTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-        badgeIdsOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-        ownershipTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-        permittedTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-        forbiddenTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-      } = {};
-      if (this.fromMappingOptions != null) {
-        data.fromMappingOptions = this.fromMappingOptions.toObject();
-      }
-      if (this.toMappingOptions != null) {
-        data.toMappingOptions = this.toMappingOptions.toObject();
-      }
-      if (this.initiatedByMappingOptions != null) {
-        data.initiatedByMappingOptions = this.initiatedByMappingOptions.toObject();
-      }
-      if (this.transferTimesOptions != null) {
-        data.transferTimesOptions = this.transferTimesOptions.toObject();
-      }
-      if (this.badgeIdsOptions != null) {
-        data.badgeIdsOptions = this.badgeIdsOptions.toObject();
-      }
-      if (this.ownershipTimesOptions != null) {
-        data.ownershipTimesOptions = this.ownershipTimesOptions.toObject();
-      }
-      if (this.permittedTimesOptions != null) {
-        data.permittedTimesOptions = this.permittedTimesOptions.toObject();
-      }
-      if (this.forbiddenTimesOptions != null) {
-        data.forbiddenTimesOptions = this.forbiddenTimesOptions.toObject();
-      }
-      return data;
-    }
-    serialize(): Uint8Array;
-    serialize(w: pb_1.BinaryWriter): void;
-    serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-      const writer = w || new pb_1.BinaryWriter();
-      if (this.has_fromMappingOptions)
-        writer.writeMessage(1, this.fromMappingOptions, () => this.fromMappingOptions.serialize(writer));
-      if (this.has_toMappingOptions)
-        writer.writeMessage(2, this.toMappingOptions, () => this.toMappingOptions.serialize(writer));
-      if (this.has_initiatedByMappingOptions)
-        writer.writeMessage(3, this.initiatedByMappingOptions, () => this.initiatedByMappingOptions.serialize(writer));
-      if (this.has_transferTimesOptions)
-        writer.writeMessage(4, this.transferTimesOptions, () => this.transferTimesOptions.serialize(writer));
-      if (this.has_badgeIdsOptions)
-        writer.writeMessage(5, this.badgeIdsOptions, () => this.badgeIdsOptions.serialize(writer));
-      if (this.has_ownershipTimesOptions)
-        writer.writeMessage(6, this.ownershipTimesOptions, () => this.ownershipTimesOptions.serialize(writer));
-      if (this.has_permittedTimesOptions)
-        writer.writeMessage(7, this.permittedTimesOptions, () => this.permittedTimesOptions.serialize(writer));
-      if (this.has_forbiddenTimesOptions)
-        writer.writeMessage(8, this.forbiddenTimesOptions, () => this.forbiddenTimesOptions.serialize(writer));
-      if (!w)
-        return writer.getResultBuffer();
-    }
-    static deserialize(bytes: Uint8Array | pb_1.BinaryReader): CollectionApprovedTransferCombination {
-      const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new CollectionApprovedTransferCombination();
-      while (reader.nextField()) {
-        if (reader.isEndGroup())
-          break;
-        switch (reader.getFieldNumber()) {
-          case 1:
-            reader.readMessage(message.fromMappingOptions, () => message.fromMappingOptions = ValueOptions.deserialize(reader));
-            break;
-          case 2:
-            reader.readMessage(message.toMappingOptions, () => message.toMappingOptions = ValueOptions.deserialize(reader));
-            break;
-          case 3:
-            reader.readMessage(message.initiatedByMappingOptions, () => message.initiatedByMappingOptions = ValueOptions.deserialize(reader));
-            break;
-          case 4:
-            reader.readMessage(message.transferTimesOptions, () => message.transferTimesOptions = ValueOptions.deserialize(reader));
-            break;
-          case 5:
-            reader.readMessage(message.badgeIdsOptions, () => message.badgeIdsOptions = ValueOptions.deserialize(reader));
-            break;
-          case 6:
-            reader.readMessage(message.ownershipTimesOptions, () => message.ownershipTimesOptions = ValueOptions.deserialize(reader));
-            break;
-          case 7:
-            reader.readMessage(message.permittedTimesOptions, () => message.permittedTimesOptions = ValueOptions.deserialize(reader));
-            break;
-          case 8:
-            reader.readMessage(message.forbiddenTimesOptions, () => message.forbiddenTimesOptions = ValueOptions.deserialize(reader));
-            break;
-          default: reader.skipField();
-        }
-      }
-      return message;
-    }
-    serializeBinary(): Uint8Array {
-      return this.serialize();
-    }
-    static deserializeBinary(bytes: Uint8Array): CollectionApprovedTransferCombination {
-      return CollectionApprovedTransferCombination.deserialize(bytes);
-    }
-  }
-  export class CollectionApprovedTransferDefaultValues extends pb_1.Message {
-    #one_of_decls: number[][] = [];
-    constructor(data?: any[] | {
-      fromMappingId?: string;
-      toMappingId?: string;
-      initiatedByMappingId?: string;
-      transferTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-      badgeIds?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-      ownershipTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-      permittedTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-      forbiddenTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-    }) {
-      super();
-      pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [4, 5, 6, 7, 8], this.#one_of_decls);
-      if (!Array.isArray(data) && typeof data == "object") {
-        if ("fromMappingId" in data && data.fromMappingId != undefined) {
-          this.fromMappingId = data.fromMappingId;
-        }
-        if ("toMappingId" in data && data.toMappingId != undefined) {
-          this.toMappingId = data.toMappingId;
-        }
-        if ("initiatedByMappingId" in data && data.initiatedByMappingId != undefined) {
-          this.initiatedByMappingId = data.initiatedByMappingId;
-        }
-        if ("transferTimes" in data && data.transferTimes != undefined) {
-          this.transferTimes = data.transferTimes;
-        }
-        if ("badgeIds" in data && data.badgeIds != undefined) {
-          this.badgeIds = data.badgeIds;
-        }
-        if ("ownershipTimes" in data && data.ownershipTimes != undefined) {
-          this.ownershipTimes = data.ownershipTimes;
-        }
-        if ("permittedTimes" in data && data.permittedTimes != undefined) {
-          this.permittedTimes = data.permittedTimes;
-        }
-        if ("forbiddenTimes" in data && data.forbiddenTimes != undefined) {
-          this.forbiddenTimes = data.forbiddenTimes;
-        }
-      }
-    }
-    get fromMappingId() {
-      return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
-    }
-    set fromMappingId(value: string) {
-      pb_1.Message.setField(this, 1, value);
-    }
-    get toMappingId() {
-      return pb_1.Message.getFieldWithDefault(this, 2, "") as string;
-    }
-    set toMappingId(value: string) {
-      pb_1.Message.setField(this, 2, value);
-    }
-    get initiatedByMappingId() {
-      return pb_1.Message.getFieldWithDefault(this, 3, "") as string;
-    }
-    set initiatedByMappingId(value: string) {
-      pb_1.Message.setField(this, 3, value);
-    }
-    get transferTimes() {
-      return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 4) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-    }
-    set transferTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 4, value);
-    }
-    get badgeIds() {
-      return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 5) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-    }
-    set badgeIds(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 5, value);
-    }
-    get ownershipTimes() {
-      return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 6) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-    }
-    set ownershipTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 6, value);
-    }
-    get permittedTimes() {
-      return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 7) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-    }
-    set permittedTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 7, value);
-    }
-    get forbiddenTimes() {
-      return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 8) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-    }
-    set forbiddenTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 8, value);
-    }
-    static fromObject(data: {
-      fromMappingId?: string;
-      toMappingId?: string;
-      initiatedByMappingId?: string;
-      transferTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-      badgeIds?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-      ownershipTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-      permittedTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-      forbiddenTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-    }): CollectionApprovedTransferDefaultValues {
-      const message = new CollectionApprovedTransferDefaultValues({});
-      if (data.fromMappingId != null) {
-        message.fromMappingId = data.fromMappingId;
-      }
-      if (data.toMappingId != null) {
-        message.toMappingId = data.toMappingId;
-      }
-      if (data.initiatedByMappingId != null) {
-        message.initiatedByMappingId = data.initiatedByMappingId;
-      }
-      if (data.transferTimes != null) {
-        message.transferTimes = data.transferTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
-      }
-      if (data.badgeIds != null) {
-        message.badgeIds = data.badgeIds.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
-      }
-      if (data.ownershipTimes != null) {
-        message.ownershipTimes = data.ownershipTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
-      }
-      if (data.permittedTimes != null) {
-        message.permittedTimes = data.permittedTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
-      }
-      if (data.forbiddenTimes != null) {
-        message.forbiddenTimes = data.forbiddenTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
-      }
-      return message;
-    }
-    toObject() {
-      const data: {
-        fromMappingId?: string;
-        toMappingId?: string;
-        initiatedByMappingId?: string;
-        transferTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-        badgeIds?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-        ownershipTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-        permittedTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-        forbiddenTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-      } = {};
-      if (this.fromMappingId != null) {
-        data.fromMappingId = this.fromMappingId;
-      }
-      if (this.toMappingId != null) {
-        data.toMappingId = this.toMappingId;
-      }
-      if (this.initiatedByMappingId != null) {
-        data.initiatedByMappingId = this.initiatedByMappingId;
-      }
-      if (this.transferTimes != null) {
-        data.transferTimes = this.transferTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
-      }
-      if (this.badgeIds != null) {
-        data.badgeIds = this.badgeIds.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
-      }
-      if (this.ownershipTimes != null) {
-        data.ownershipTimes = this.ownershipTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
-      }
-      if (this.permittedTimes != null) {
-        data.permittedTimes = this.permittedTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
-      }
-      if (this.forbiddenTimes != null) {
-        data.forbiddenTimes = this.forbiddenTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
-      }
-      return data;
-    }
-    serialize(): Uint8Array;
-    serialize(w: pb_1.BinaryWriter): void;
-    serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-      const writer = w || new pb_1.BinaryWriter();
-      if (this.fromMappingId.length)
-        writer.writeString(1, this.fromMappingId);
-      if (this.toMappingId.length)
-        writer.writeString(2, this.toMappingId);
-      if (this.initiatedByMappingId.length)
-        writer.writeString(3, this.initiatedByMappingId);
-      if (this.transferTimes.length)
-        writer.writeRepeatedMessage(4, this.transferTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
-      if (this.badgeIds.length)
-        writer.writeRepeatedMessage(5, this.badgeIds, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
-      if (this.ownershipTimes.length)
-        writer.writeRepeatedMessage(6, this.ownershipTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
-      if (this.permittedTimes.length)
-        writer.writeRepeatedMessage(7, this.permittedTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
-      if (this.forbiddenTimes.length)
-        writer.writeRepeatedMessage(8, this.forbiddenTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
-      if (!w)
-        return writer.getResultBuffer();
-    }
-    static deserialize(bytes: Uint8Array | pb_1.BinaryReader): CollectionApprovedTransferDefaultValues {
-      const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new CollectionApprovedTransferDefaultValues();
-      while (reader.nextField()) {
-        if (reader.isEndGroup())
-          break;
-        switch (reader.getFieldNumber()) {
-          case 1:
-            message.fromMappingId = reader.readString();
-            break;
-          case 2:
-            message.toMappingId = reader.readString();
-            break;
-          case 3:
-            message.initiatedByMappingId = reader.readString();
-            break;
-          case 4:
-            reader.readMessage(message.transferTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 4, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
-            break;
-          case 5:
-            reader.readMessage(message.badgeIds, () => pb_1.Message.addToRepeatedWrapperField(message, 5, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
-            break;
-          case 6:
-            reader.readMessage(message.ownershipTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 6, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
-            break;
-          case 7:
-            reader.readMessage(message.permittedTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 7, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
-            break;
-          case 8:
-            reader.readMessage(message.forbiddenTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 8, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
-            break;
-          default: reader.skipField();
-        }
-      }
-      return message;
-    }
-    serializeBinary(): Uint8Array {
-      return this.serialize();
-    }
-    static deserializeBinary(bytes: Uint8Array): CollectionApprovedTransferDefaultValues {
-      return CollectionApprovedTransferDefaultValues.deserialize(bytes);
-    }
-  }
-  export class CollectionApprovedTransferPermission extends pb_1.Message {
-    #one_of_decls: number[][] = [];
-    constructor(data?: any[] | {
-      defaultValues?: CollectionApprovedTransferDefaultValues;
-      combinations?: CollectionApprovedTransferCombination[];
-    }) {
-      super();
-      pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [7], this.#one_of_decls);
-      if (!Array.isArray(data) && typeof data == "object") {
-        if ("defaultValues" in data && data.defaultValues != undefined) {
-          this.defaultValues = data.defaultValues;
-        }
-        if ("combinations" in data && data.combinations != undefined) {
-          this.combinations = data.combinations;
-        }
-      }
-    }
-    get defaultValues() {
-      return pb_1.Message.getWrapperField(this, CollectionApprovedTransferDefaultValues, 1) as CollectionApprovedTransferDefaultValues;
-    }
-    set defaultValues(value: CollectionApprovedTransferDefaultValues) {
-      pb_1.Message.setWrapperField(this, 1, value);
-    }
-    get has_defaultValues() {
-      return pb_1.Message.getField(this, 1) != null;
-    }
-    get combinations() {
-      return pb_1.Message.getRepeatedWrapperField(this, CollectionApprovedTransferCombination, 7) as CollectionApprovedTransferCombination[];
-    }
-    set combinations(value: CollectionApprovedTransferCombination[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 7, value);
-    }
-    static fromObject(data: {
-      defaultValues?: ReturnType<typeof CollectionApprovedTransferDefaultValues.prototype.toObject>;
-      combinations?: ReturnType<typeof CollectionApprovedTransferCombination.prototype.toObject>[];
-    }): CollectionApprovedTransferPermission {
-      const message = new CollectionApprovedTransferPermission({});
-      if (data.defaultValues != null) {
-        message.defaultValues = CollectionApprovedTransferDefaultValues.fromObject(data.defaultValues);
-      }
-      if (data.combinations != null) {
-        message.combinations = data.combinations.map(item => CollectionApprovedTransferCombination.fromObject(item));
-      }
-      return message;
-    }
-    toObject() {
-      const data: {
-        defaultValues?: ReturnType<typeof CollectionApprovedTransferDefaultValues.prototype.toObject>;
-        combinations?: ReturnType<typeof CollectionApprovedTransferCombination.prototype.toObject>[];
-      } = {};
-      if (this.defaultValues != null) {
-        data.defaultValues = this.defaultValues.toObject();
-      }
-      if (this.combinations != null) {
-        data.combinations = this.combinations.map((item: CollectionApprovedTransferCombination) => item.toObject());
-      }
-      return data;
-    }
-    serialize(): Uint8Array;
-    serialize(w: pb_1.BinaryWriter): void;
-    serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-      const writer = w || new pb_1.BinaryWriter();
-      if (this.has_defaultValues)
-        writer.writeMessage(1, this.defaultValues, () => this.defaultValues.serialize(writer));
-      if (this.combinations.length)
-        writer.writeRepeatedMessage(7, this.combinations, (item: CollectionApprovedTransferCombination) => item.serialize(writer));
-      if (!w)
-        return writer.getResultBuffer();
-    }
-    static deserialize(bytes: Uint8Array | pb_1.BinaryReader): CollectionApprovedTransferPermission {
-      const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new CollectionApprovedTransferPermission();
-      while (reader.nextField()) {
-        if (reader.isEndGroup())
-          break;
-        switch (reader.getFieldNumber()) {
-          case 1:
-            reader.readMessage(message.defaultValues, () => message.defaultValues = CollectionApprovedTransferDefaultValues.deserialize(reader));
-            break;
-          case 7:
-            reader.readMessage(message.combinations, () => pb_1.Message.addToRepeatedWrapperField(message, 7, CollectionApprovedTransferCombination.deserialize(reader), CollectionApprovedTransferCombination));
-            break;
-          default: reader.skipField();
-        }
-      }
-      return message;
-    }
-    serializeBinary(): Uint8Array {
-      return this.serialize();
-    }
-    static deserializeBinary(bytes: Uint8Array): CollectionApprovedTransferPermission {
-      return CollectionApprovedTransferPermission.deserialize(bytes);
-    }
-  }
-  export class UserApprovedOutgoingTransferCombination extends pb_1.Message {
-    #one_of_decls: number[][] = [];
-    constructor(data?: any[] | {
-      toMappingOptions?: ValueOptions;
-      initiatedByMappingOptions?: ValueOptions;
-      transferTimesOptions?: ValueOptions;
-      badgeIdsOptions?: ValueOptions;
-      ownershipTimesOptions?: ValueOptions;
-      permittedTimesOptions?: ValueOptions;
-      forbiddenTimesOptions?: ValueOptions;
-    }) {
-      super();
-      pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
-      if (!Array.isArray(data) && typeof data == "object") {
-        if ("toMappingOptions" in data && data.toMappingOptions != undefined) {
-          this.toMappingOptions = data.toMappingOptions;
-        }
-        if ("initiatedByMappingOptions" in data && data.initiatedByMappingOptions != undefined) {
-          this.initiatedByMappingOptions = data.initiatedByMappingOptions;
-        }
-        if ("transferTimesOptions" in data && data.transferTimesOptions != undefined) {
-          this.transferTimesOptions = data.transferTimesOptions;
-        }
-        if ("badgeIdsOptions" in data && data.badgeIdsOptions != undefined) {
-          this.badgeIdsOptions = data.badgeIdsOptions;
-        }
-        if ("ownershipTimesOptions" in data && data.ownershipTimesOptions != undefined) {
-          this.ownershipTimesOptions = data.ownershipTimesOptions;
-        }
-        if ("permittedTimesOptions" in data && data.permittedTimesOptions != undefined) {
-          this.permittedTimesOptions = data.permittedTimesOptions;
-        }
-        if ("forbiddenTimesOptions" in data && data.forbiddenTimesOptions != undefined) {
-          this.forbiddenTimesOptions = data.forbiddenTimesOptions;
-        }
-      }
-    }
-    get toMappingOptions() {
-      return pb_1.Message.getWrapperField(this, ValueOptions, 1) as ValueOptions;
-    }
-    set toMappingOptions(value: ValueOptions) {
-      pb_1.Message.setWrapperField(this, 1, value);
-    }
-    get has_toMappingOptions() {
-      return pb_1.Message.getField(this, 1) != null;
-    }
-    get initiatedByMappingOptions() {
-      return pb_1.Message.getWrapperField(this, ValueOptions, 2) as ValueOptions;
-    }
-    set initiatedByMappingOptions(value: ValueOptions) {
-      pb_1.Message.setWrapperField(this, 2, value);
-    }
-    get has_initiatedByMappingOptions() {
-      return pb_1.Message.getField(this, 2) != null;
-    }
-    get transferTimesOptions() {
-      return pb_1.Message.getWrapperField(this, ValueOptions, 3) as ValueOptions;
-    }
-    set transferTimesOptions(value: ValueOptions) {
-      pb_1.Message.setWrapperField(this, 3, value);
-    }
-    get has_transferTimesOptions() {
-      return pb_1.Message.getField(this, 3) != null;
-    }
-    get badgeIdsOptions() {
-      return pb_1.Message.getWrapperField(this, ValueOptions, 4) as ValueOptions;
-    }
-    set badgeIdsOptions(value: ValueOptions) {
-      pb_1.Message.setWrapperField(this, 4, value);
-    }
-    get has_badgeIdsOptions() {
-      return pb_1.Message.getField(this, 4) != null;
-    }
-    get ownershipTimesOptions() {
-      return pb_1.Message.getWrapperField(this, ValueOptions, 5) as ValueOptions;
-    }
-    set ownershipTimesOptions(value: ValueOptions) {
-      pb_1.Message.setWrapperField(this, 5, value);
-    }
-    get has_ownershipTimesOptions() {
-      return pb_1.Message.getField(this, 5) != null;
-    }
-    get permittedTimesOptions() {
-      return pb_1.Message.getWrapperField(this, ValueOptions, 6) as ValueOptions;
-    }
-    set permittedTimesOptions(value: ValueOptions) {
-      pb_1.Message.setWrapperField(this, 6, value);
-    }
-    get has_permittedTimesOptions() {
-      return pb_1.Message.getField(this, 6) != null;
-    }
-    get forbiddenTimesOptions() {
-      return pb_1.Message.getWrapperField(this, ValueOptions, 7) as ValueOptions;
-    }
-    set forbiddenTimesOptions(value: ValueOptions) {
-      pb_1.Message.setWrapperField(this, 7, value);
-    }
-    get has_forbiddenTimesOptions() {
-      return pb_1.Message.getField(this, 7) != null;
-    }
-    static fromObject(data: {
-      toMappingOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-      initiatedByMappingOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-      transferTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-      badgeIdsOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-      ownershipTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-      permittedTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-      forbiddenTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-    }): UserApprovedOutgoingTransferCombination {
-      const message = new UserApprovedOutgoingTransferCombination({});
-      if (data.toMappingOptions != null) {
-        message.toMappingOptions = ValueOptions.fromObject(data.toMappingOptions);
-      }
-      if (data.initiatedByMappingOptions != null) {
-        message.initiatedByMappingOptions = ValueOptions.fromObject(data.initiatedByMappingOptions);
-      }
-      if (data.transferTimesOptions != null) {
-        message.transferTimesOptions = ValueOptions.fromObject(data.transferTimesOptions);
-      }
-      if (data.badgeIdsOptions != null) {
-        message.badgeIdsOptions = ValueOptions.fromObject(data.badgeIdsOptions);
-      }
-      if (data.ownershipTimesOptions != null) {
-        message.ownershipTimesOptions = ValueOptions.fromObject(data.ownershipTimesOptions);
-      }
-      if (data.permittedTimesOptions != null) {
-        message.permittedTimesOptions = ValueOptions.fromObject(data.permittedTimesOptions);
-      }
-      if (data.forbiddenTimesOptions != null) {
-        message.forbiddenTimesOptions = ValueOptions.fromObject(data.forbiddenTimesOptions);
-      }
-      return message;
-    }
-    toObject() {
-      const data: {
-        toMappingOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-        initiatedByMappingOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-        transferTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-        badgeIdsOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-        ownershipTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-        permittedTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-        forbiddenTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-      } = {};
-      if (this.toMappingOptions != null) {
-        data.toMappingOptions = this.toMappingOptions.toObject();
-      }
-      if (this.initiatedByMappingOptions != null) {
-        data.initiatedByMappingOptions = this.initiatedByMappingOptions.toObject();
-      }
-      if (this.transferTimesOptions != null) {
-        data.transferTimesOptions = this.transferTimesOptions.toObject();
-      }
-      if (this.badgeIdsOptions != null) {
-        data.badgeIdsOptions = this.badgeIdsOptions.toObject();
-      }
-      if (this.ownershipTimesOptions != null) {
-        data.ownershipTimesOptions = this.ownershipTimesOptions.toObject();
-      }
-      if (this.permittedTimesOptions != null) {
-        data.permittedTimesOptions = this.permittedTimesOptions.toObject();
-      }
-      if (this.forbiddenTimesOptions != null) {
-        data.forbiddenTimesOptions = this.forbiddenTimesOptions.toObject();
-      }
-      return data;
-    }
-    serialize(): Uint8Array;
-    serialize(w: pb_1.BinaryWriter): void;
-    serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-      const writer = w || new pb_1.BinaryWriter();
-      if (this.has_toMappingOptions)
-        writer.writeMessage(1, this.toMappingOptions, () => this.toMappingOptions.serialize(writer));
-      if (this.has_initiatedByMappingOptions)
-        writer.writeMessage(2, this.initiatedByMappingOptions, () => this.initiatedByMappingOptions.serialize(writer));
-      if (this.has_transferTimesOptions)
-        writer.writeMessage(3, this.transferTimesOptions, () => this.transferTimesOptions.serialize(writer));
-      if (this.has_badgeIdsOptions)
-        writer.writeMessage(4, this.badgeIdsOptions, () => this.badgeIdsOptions.serialize(writer));
-      if (this.has_ownershipTimesOptions)
-        writer.writeMessage(5, this.ownershipTimesOptions, () => this.ownershipTimesOptions.serialize(writer));
-      if (this.has_permittedTimesOptions)
-        writer.writeMessage(6, this.permittedTimesOptions, () => this.permittedTimesOptions.serialize(writer));
-      if (this.has_forbiddenTimesOptions)
-        writer.writeMessage(7, this.forbiddenTimesOptions, () => this.forbiddenTimesOptions.serialize(writer));
-      if (!w)
-        return writer.getResultBuffer();
-    }
-    static deserialize(bytes: Uint8Array | pb_1.BinaryReader): UserApprovedOutgoingTransferCombination {
-      const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new UserApprovedOutgoingTransferCombination();
-      while (reader.nextField()) {
-        if (reader.isEndGroup())
-          break;
-        switch (reader.getFieldNumber()) {
-          case 1:
-            reader.readMessage(message.toMappingOptions, () => message.toMappingOptions = ValueOptions.deserialize(reader));
-            break;
-          case 2:
-            reader.readMessage(message.initiatedByMappingOptions, () => message.initiatedByMappingOptions = ValueOptions.deserialize(reader));
-            break;
-          case 3:
-            reader.readMessage(message.transferTimesOptions, () => message.transferTimesOptions = ValueOptions.deserialize(reader));
-            break;
-          case 4:
-            reader.readMessage(message.badgeIdsOptions, () => message.badgeIdsOptions = ValueOptions.deserialize(reader));
-            break;
-          case 5:
-            reader.readMessage(message.ownershipTimesOptions, () => message.ownershipTimesOptions = ValueOptions.deserialize(reader));
-            break;
-          case 6:
-            reader.readMessage(message.permittedTimesOptions, () => message.permittedTimesOptions = ValueOptions.deserialize(reader));
-            break;
-          case 7:
-            reader.readMessage(message.forbiddenTimesOptions, () => message.forbiddenTimesOptions = ValueOptions.deserialize(reader));
-            break;
-          default: reader.skipField();
-        }
-      }
-      return message;
-    }
-    serializeBinary(): Uint8Array {
-      return this.serialize();
-    }
-    static deserializeBinary(bytes: Uint8Array): UserApprovedOutgoingTransferCombination {
-      return UserApprovedOutgoingTransferCombination.deserialize(bytes);
-    }
-  }
-  export class UserApprovedOutgoingTransferDefaultValues extends pb_1.Message {
-    #one_of_decls: number[][] = [];
-    constructor(data?: any[] | {
-      toMappingId?: string;
-      initiatedByMappingId?: string;
-      transferTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-      badgeIds?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-      ownershipTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-      permittedTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-      forbiddenTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-    }) {
-      super();
-      pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [3, 4, 5, 6, 7], this.#one_of_decls);
-      if (!Array.isArray(data) && typeof data == "object") {
-        if ("toMappingId" in data && data.toMappingId != undefined) {
-          this.toMappingId = data.toMappingId;
-        }
-        if ("initiatedByMappingId" in data && data.initiatedByMappingId != undefined) {
-          this.initiatedByMappingId = data.initiatedByMappingId;
-        }
-        if ("transferTimes" in data && data.transferTimes != undefined) {
-          this.transferTimes = data.transferTimes;
-        }
-        if ("badgeIds" in data && data.badgeIds != undefined) {
-          this.badgeIds = data.badgeIds;
-        }
-        if ("ownershipTimes" in data && data.ownershipTimes != undefined) {
-          this.ownershipTimes = data.ownershipTimes;
-        }
-        if ("permittedTimes" in data && data.permittedTimes != undefined) {
-          this.permittedTimes = data.permittedTimes;
-        }
-        if ("forbiddenTimes" in data && data.forbiddenTimes != undefined) {
-          this.forbiddenTimes = data.forbiddenTimes;
-        }
-      }
-    }
-    get toMappingId() {
-      return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
-    }
-    set toMappingId(value: string) {
-      pb_1.Message.setField(this, 1, value);
-    }
-    get initiatedByMappingId() {
-      return pb_1.Message.getFieldWithDefault(this, 2, "") as string;
-    }
-    set initiatedByMappingId(value: string) {
-      pb_1.Message.setField(this, 2, value);
-    }
-    get transferTimes() {
-      return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 3) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-    }
-    set transferTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 3, value);
-    }
-    get badgeIds() {
-      return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 4) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-    }
-    set badgeIds(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 4, value);
-    }
-    get ownershipTimes() {
-      return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 5) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-    }
-    set ownershipTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 5, value);
-    }
-    get permittedTimes() {
-      return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 6) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-    }
-    set permittedTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 6, value);
-    }
-    get forbiddenTimes() {
-      return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 7) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-    }
-    set forbiddenTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 7, value);
-    }
-    static fromObject(data: {
-      toMappingId?: string;
-      initiatedByMappingId?: string;
-      transferTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-      badgeIds?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-      ownershipTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-      permittedTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-      forbiddenTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-    }): UserApprovedOutgoingTransferDefaultValues {
-      const message = new UserApprovedOutgoingTransferDefaultValues({});
-      if (data.toMappingId != null) {
-        message.toMappingId = data.toMappingId;
-      }
-      if (data.initiatedByMappingId != null) {
-        message.initiatedByMappingId = data.initiatedByMappingId;
-      }
-      if (data.transferTimes != null) {
-        message.transferTimes = data.transferTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
-      }
-      if (data.badgeIds != null) {
-        message.badgeIds = data.badgeIds.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
-      }
-      if (data.ownershipTimes != null) {
-        message.ownershipTimes = data.ownershipTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
-      }
-      if (data.permittedTimes != null) {
-        message.permittedTimes = data.permittedTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
-      }
-      if (data.forbiddenTimes != null) {
-        message.forbiddenTimes = data.forbiddenTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
-      }
-      return message;
-    }
-    toObject() {
-      const data: {
-        toMappingId?: string;
-        initiatedByMappingId?: string;
-        transferTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-        badgeIds?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-        ownershipTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-        permittedTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-        forbiddenTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-      } = {};
-      if (this.toMappingId != null) {
-        data.toMappingId = this.toMappingId;
-      }
-      if (this.initiatedByMappingId != null) {
-        data.initiatedByMappingId = this.initiatedByMappingId;
-      }
-      if (this.transferTimes != null) {
-        data.transferTimes = this.transferTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
-      }
-      if (this.badgeIds != null) {
-        data.badgeIds = this.badgeIds.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
-      }
-      if (this.ownershipTimes != null) {
-        data.ownershipTimes = this.ownershipTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
-      }
-      if (this.permittedTimes != null) {
-        data.permittedTimes = this.permittedTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
-      }
-      if (this.forbiddenTimes != null) {
-        data.forbiddenTimes = this.forbiddenTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
-      }
-      return data;
-    }
-    serialize(): Uint8Array;
-    serialize(w: pb_1.BinaryWriter): void;
-    serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-      const writer = w || new pb_1.BinaryWriter();
-      if (this.toMappingId.length)
-        writer.writeString(1, this.toMappingId);
-      if (this.initiatedByMappingId.length)
-        writer.writeString(2, this.initiatedByMappingId);
-      if (this.transferTimes.length)
-        writer.writeRepeatedMessage(3, this.transferTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
-      if (this.badgeIds.length)
-        writer.writeRepeatedMessage(4, this.badgeIds, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
-      if (this.ownershipTimes.length)
-        writer.writeRepeatedMessage(5, this.ownershipTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
-      if (this.permittedTimes.length)
-        writer.writeRepeatedMessage(6, this.permittedTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
-      if (this.forbiddenTimes.length)
-        writer.writeRepeatedMessage(7, this.forbiddenTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
-      if (!w)
-        return writer.getResultBuffer();
-    }
-    static deserialize(bytes: Uint8Array | pb_1.BinaryReader): UserApprovedOutgoingTransferDefaultValues {
-      const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new UserApprovedOutgoingTransferDefaultValues();
-      while (reader.nextField()) {
-        if (reader.isEndGroup())
-          break;
-        switch (reader.getFieldNumber()) {
-          case 1:
-            message.toMappingId = reader.readString();
-            break;
-          case 2:
-            message.initiatedByMappingId = reader.readString();
-            break;
-          case 3:
-            reader.readMessage(message.transferTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 3, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
-            break;
-          case 4:
-            reader.readMessage(message.badgeIds, () => pb_1.Message.addToRepeatedWrapperField(message, 4, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
-            break;
-          case 5:
-            reader.readMessage(message.ownershipTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 5, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
-            break;
-          case 6:
-            reader.readMessage(message.permittedTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 6, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
-            break;
-          case 7:
-            reader.readMessage(message.forbiddenTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 7, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
-            break;
-          default: reader.skipField();
-        }
-      }
-      return message;
-    }
-    serializeBinary(): Uint8Array {
-      return this.serialize();
-    }
-    static deserializeBinary(bytes: Uint8Array): UserApprovedOutgoingTransferDefaultValues {
-      return UserApprovedOutgoingTransferDefaultValues.deserialize(bytes);
-    }
-  }
-  export class UserApprovedOutgoingTransferPermission extends pb_1.Message {
-    #one_of_decls: number[][] = [];
-    constructor(data?: any[] | {
-      defaultValues?: UserApprovedOutgoingTransferDefaultValues;
-      combinations?: UserApprovedOutgoingTransferCombination[];
-    }) {
-      super();
-      pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [2], this.#one_of_decls);
-      if (!Array.isArray(data) && typeof data == "object") {
-        if ("defaultValues" in data && data.defaultValues != undefined) {
-          this.defaultValues = data.defaultValues;
-        }
-        if ("combinations" in data && data.combinations != undefined) {
-          this.combinations = data.combinations;
-        }
-      }
-    }
-    get defaultValues() {
-      return pb_1.Message.getWrapperField(this, UserApprovedOutgoingTransferDefaultValues, 1) as UserApprovedOutgoingTransferDefaultValues;
-    }
-    set defaultValues(value: UserApprovedOutgoingTransferDefaultValues) {
-      pb_1.Message.setWrapperField(this, 1, value);
-    }
-    get has_defaultValues() {
-      return pb_1.Message.getField(this, 1) != null;
-    }
-    get combinations() {
-      return pb_1.Message.getRepeatedWrapperField(this, UserApprovedOutgoingTransferCombination, 2) as UserApprovedOutgoingTransferCombination[];
-    }
-    set combinations(value: UserApprovedOutgoingTransferCombination[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 2, value);
-    }
-    static fromObject(data: {
-      defaultValues?: ReturnType<typeof UserApprovedOutgoingTransferDefaultValues.prototype.toObject>;
-      combinations?: ReturnType<typeof UserApprovedOutgoingTransferCombination.prototype.toObject>[];
-    }): UserApprovedOutgoingTransferPermission {
-      const message = new UserApprovedOutgoingTransferPermission({});
-      if (data.defaultValues != null) {
-        message.defaultValues = UserApprovedOutgoingTransferDefaultValues.fromObject(data.defaultValues);
-      }
-      if (data.combinations != null) {
-        message.combinations = data.combinations.map(item => UserApprovedOutgoingTransferCombination.fromObject(item));
-      }
-      return message;
-    }
-    toObject() {
-      const data: {
-        defaultValues?: ReturnType<typeof UserApprovedOutgoingTransferDefaultValues.prototype.toObject>;
-        combinations?: ReturnType<typeof UserApprovedOutgoingTransferCombination.prototype.toObject>[];
-      } = {};
-      if (this.defaultValues != null) {
-        data.defaultValues = this.defaultValues.toObject();
-      }
-      if (this.combinations != null) {
-        data.combinations = this.combinations.map((item: UserApprovedOutgoingTransferCombination) => item.toObject());
-      }
-      return data;
-    }
-    serialize(): Uint8Array;
-    serialize(w: pb_1.BinaryWriter): void;
-    serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-      const writer = w || new pb_1.BinaryWriter();
-      if (this.has_defaultValues)
-        writer.writeMessage(1, this.defaultValues, () => this.defaultValues.serialize(writer));
-      if (this.combinations.length)
-        writer.writeRepeatedMessage(2, this.combinations, (item: UserApprovedOutgoingTransferCombination) => item.serialize(writer));
-      if (!w)
-        return writer.getResultBuffer();
-    }
-    static deserialize(bytes: Uint8Array | pb_1.BinaryReader): UserApprovedOutgoingTransferPermission {
-      const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new UserApprovedOutgoingTransferPermission();
-      while (reader.nextField()) {
-        if (reader.isEndGroup())
-          break;
-        switch (reader.getFieldNumber()) {
-          case 1:
-            reader.readMessage(message.defaultValues, () => message.defaultValues = UserApprovedOutgoingTransferDefaultValues.deserialize(reader));
-            break;
-          case 2:
-            reader.readMessage(message.combinations, () => pb_1.Message.addToRepeatedWrapperField(message, 2, UserApprovedOutgoingTransferCombination.deserialize(reader), UserApprovedOutgoingTransferCombination));
-            break;
-          default: reader.skipField();
-        }
-      }
-      return message;
-    }
-    serializeBinary(): Uint8Array {
-      return this.serialize();
-    }
-    static deserializeBinary(bytes: Uint8Array): UserApprovedOutgoingTransferPermission {
-      return UserApprovedOutgoingTransferPermission.deserialize(bytes);
-    }
-  }
-  export class UserApprovedIncomingTransferCombination extends pb_1.Message {
-    #one_of_decls: number[][] = [];
-    constructor(data?: any[] | {
-      fromMappingOptions?: ValueOptions;
-      initiatedByMappingOptions?: ValueOptions;
-      transferTimesOptions?: ValueOptions;
-      badgeIdsOptions?: ValueOptions;
-      ownershipTimesOptions?: ValueOptions;
-      permittedTimesOptions?: ValueOptions;
-      forbiddenTimesOptions?: ValueOptions;
-    }) {
-      super();
-      pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
-      if (!Array.isArray(data) && typeof data == "object") {
-        if ("fromMappingOptions" in data && data.fromMappingOptions != undefined) {
-          this.fromMappingOptions = data.fromMappingOptions;
-        }
-        if ("initiatedByMappingOptions" in data && data.initiatedByMappingOptions != undefined) {
-          this.initiatedByMappingOptions = data.initiatedByMappingOptions;
-        }
-        if ("transferTimesOptions" in data && data.transferTimesOptions != undefined) {
-          this.transferTimesOptions = data.transferTimesOptions;
-        }
-        if ("badgeIdsOptions" in data && data.badgeIdsOptions != undefined) {
-          this.badgeIdsOptions = data.badgeIdsOptions;
-        }
-        if ("ownershipTimesOptions" in data && data.ownershipTimesOptions != undefined) {
-          this.ownershipTimesOptions = data.ownershipTimesOptions;
-        }
-        if ("permittedTimesOptions" in data && data.permittedTimesOptions != undefined) {
-          this.permittedTimesOptions = data.permittedTimesOptions;
-        }
-        if ("forbiddenTimesOptions" in data && data.forbiddenTimesOptions != undefined) {
-          this.forbiddenTimesOptions = data.forbiddenTimesOptions;
-        }
-      }
-    }
-    get fromMappingOptions() {
-      return pb_1.Message.getWrapperField(this, ValueOptions, 1) as ValueOptions;
-    }
-    set fromMappingOptions(value: ValueOptions) {
-      pb_1.Message.setWrapperField(this, 1, value);
-    }
-    get has_fromMappingOptions() {
-      return pb_1.Message.getField(this, 1) != null;
-    }
-    get initiatedByMappingOptions() {
-      return pb_1.Message.getWrapperField(this, ValueOptions, 2) as ValueOptions;
-    }
-    set initiatedByMappingOptions(value: ValueOptions) {
-      pb_1.Message.setWrapperField(this, 2, value);
-    }
-    get has_initiatedByMappingOptions() {
-      return pb_1.Message.getField(this, 2) != null;
-    }
-    get transferTimesOptions() {
-      return pb_1.Message.getWrapperField(this, ValueOptions, 3) as ValueOptions;
-    }
-    set transferTimesOptions(value: ValueOptions) {
-      pb_1.Message.setWrapperField(this, 3, value);
-    }
-    get has_transferTimesOptions() {
-      return pb_1.Message.getField(this, 3) != null;
-    }
-    get badgeIdsOptions() {
-      return pb_1.Message.getWrapperField(this, ValueOptions, 4) as ValueOptions;
-    }
-    set badgeIdsOptions(value: ValueOptions) {
-      pb_1.Message.setWrapperField(this, 4, value);
-    }
-    get has_badgeIdsOptions() {
-      return pb_1.Message.getField(this, 4) != null;
-    }
-    get ownershipTimesOptions() {
-      return pb_1.Message.getWrapperField(this, ValueOptions, 5) as ValueOptions;
-    }
-    set ownershipTimesOptions(value: ValueOptions) {
-      pb_1.Message.setWrapperField(this, 5, value);
-    }
-    get has_ownershipTimesOptions() {
-      return pb_1.Message.getField(this, 5) != null;
-    }
-    get permittedTimesOptions() {
-      return pb_1.Message.getWrapperField(this, ValueOptions, 6) as ValueOptions;
-    }
-    set permittedTimesOptions(value: ValueOptions) {
-      pb_1.Message.setWrapperField(this, 6, value);
-    }
-    get has_permittedTimesOptions() {
-      return pb_1.Message.getField(this, 6) != null;
-    }
-    get forbiddenTimesOptions() {
-      return pb_1.Message.getWrapperField(this, ValueOptions, 7) as ValueOptions;
-    }
-    set forbiddenTimesOptions(value: ValueOptions) {
-      pb_1.Message.setWrapperField(this, 7, value);
-    }
-    get has_forbiddenTimesOptions() {
-      return pb_1.Message.getField(this, 7) != null;
-    }
-    static fromObject(data: {
-      fromMappingOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-      initiatedByMappingOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-      transferTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-      badgeIdsOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-      ownershipTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-      permittedTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-      forbiddenTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-    }): UserApprovedIncomingTransferCombination {
-      const message = new UserApprovedIncomingTransferCombination({});
-      if (data.fromMappingOptions != null) {
-        message.fromMappingOptions = ValueOptions.fromObject(data.fromMappingOptions);
-      }
-      if (data.initiatedByMappingOptions != null) {
-        message.initiatedByMappingOptions = ValueOptions.fromObject(data.initiatedByMappingOptions);
-      }
-      if (data.transferTimesOptions != null) {
-        message.transferTimesOptions = ValueOptions.fromObject(data.transferTimesOptions);
-      }
-      if (data.badgeIdsOptions != null) {
-        message.badgeIdsOptions = ValueOptions.fromObject(data.badgeIdsOptions);
-      }
-      if (data.ownershipTimesOptions != null) {
-        message.ownershipTimesOptions = ValueOptions.fromObject(data.ownershipTimesOptions);
-      }
-      if (data.permittedTimesOptions != null) {
-        message.permittedTimesOptions = ValueOptions.fromObject(data.permittedTimesOptions);
-      }
-      if (data.forbiddenTimesOptions != null) {
-        message.forbiddenTimesOptions = ValueOptions.fromObject(data.forbiddenTimesOptions);
-      }
-      return message;
-    }
-    toObject() {
-      const data: {
-        fromMappingOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-        initiatedByMappingOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-        transferTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-        badgeIdsOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-        ownershipTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-        permittedTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-        forbiddenTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-      } = {};
-      if (this.fromMappingOptions != null) {
-        data.fromMappingOptions = this.fromMappingOptions.toObject();
-      }
-      if (this.initiatedByMappingOptions != null) {
-        data.initiatedByMappingOptions = this.initiatedByMappingOptions.toObject();
-      }
-      if (this.transferTimesOptions != null) {
-        data.transferTimesOptions = this.transferTimesOptions.toObject();
-      }
-      if (this.badgeIdsOptions != null) {
-        data.badgeIdsOptions = this.badgeIdsOptions.toObject();
-      }
-      if (this.ownershipTimesOptions != null) {
-        data.ownershipTimesOptions = this.ownershipTimesOptions.toObject();
-      }
-      if (this.permittedTimesOptions != null) {
-        data.permittedTimesOptions = this.permittedTimesOptions.toObject();
-      }
-      if (this.forbiddenTimesOptions != null) {
-        data.forbiddenTimesOptions = this.forbiddenTimesOptions.toObject();
-      }
-      return data;
-    }
-    serialize(): Uint8Array;
-    serialize(w: pb_1.BinaryWriter): void;
-    serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-      const writer = w || new pb_1.BinaryWriter();
-      if (this.has_fromMappingOptions)
-        writer.writeMessage(1, this.fromMappingOptions, () => this.fromMappingOptions.serialize(writer));
-      if (this.has_initiatedByMappingOptions)
-        writer.writeMessage(2, this.initiatedByMappingOptions, () => this.initiatedByMappingOptions.serialize(writer));
-      if (this.has_transferTimesOptions)
-        writer.writeMessage(3, this.transferTimesOptions, () => this.transferTimesOptions.serialize(writer));
-      if (this.has_badgeIdsOptions)
-        writer.writeMessage(4, this.badgeIdsOptions, () => this.badgeIdsOptions.serialize(writer));
-      if (this.has_ownershipTimesOptions)
-        writer.writeMessage(5, this.ownershipTimesOptions, () => this.ownershipTimesOptions.serialize(writer));
-      if (this.has_permittedTimesOptions)
-        writer.writeMessage(6, this.permittedTimesOptions, () => this.permittedTimesOptions.serialize(writer));
-      if (this.has_forbiddenTimesOptions)
-        writer.writeMessage(7, this.forbiddenTimesOptions, () => this.forbiddenTimesOptions.serialize(writer));
-      if (!w)
-        return writer.getResultBuffer();
-    }
-    static deserialize(bytes: Uint8Array | pb_1.BinaryReader): UserApprovedIncomingTransferCombination {
-      const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new UserApprovedIncomingTransferCombination();
-      while (reader.nextField()) {
-        if (reader.isEndGroup())
-          break;
-        switch (reader.getFieldNumber()) {
-          case 1:
-            reader.readMessage(message.fromMappingOptions, () => message.fromMappingOptions = ValueOptions.deserialize(reader));
-            break;
-          case 2:
-            reader.readMessage(message.initiatedByMappingOptions, () => message.initiatedByMappingOptions = ValueOptions.deserialize(reader));
-            break;
-          case 3:
-            reader.readMessage(message.transferTimesOptions, () => message.transferTimesOptions = ValueOptions.deserialize(reader));
-            break;
-          case 4:
-            reader.readMessage(message.badgeIdsOptions, () => message.badgeIdsOptions = ValueOptions.deserialize(reader));
-            break;
-          case 5:
-            reader.readMessage(message.ownershipTimesOptions, () => message.ownershipTimesOptions = ValueOptions.deserialize(reader));
-            break;
-          case 6:
-            reader.readMessage(message.permittedTimesOptions, () => message.permittedTimesOptions = ValueOptions.deserialize(reader));
-            break;
-          case 7:
-            reader.readMessage(message.forbiddenTimesOptions, () => message.forbiddenTimesOptions = ValueOptions.deserialize(reader));
-            break;
-          default: reader.skipField();
-        }
-      }
-      return message;
-    }
-    serializeBinary(): Uint8Array {
-      return this.serialize();
-    }
-    static deserializeBinary(bytes: Uint8Array): UserApprovedIncomingTransferCombination {
-      return UserApprovedIncomingTransferCombination.deserialize(bytes);
-    }
-  }
-  export class UserApprovedIncomingTransferDefaultValues extends pb_1.Message {
-    #one_of_decls: number[][] = [];
-    constructor(data?: any[] | {
-      fromMappingId?: string;
-      initiatedByMappingId?: string;
-      transferTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-      badgeIds?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-      ownershipTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-      permittedTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-      forbiddenTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-    }) {
-      super();
-      pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [3, 4, 5, 6, 7], this.#one_of_decls);
-      if (!Array.isArray(data) && typeof data == "object") {
-        if ("fromMappingId" in data && data.fromMappingId != undefined) {
-          this.fromMappingId = data.fromMappingId;
-        }
-        if ("initiatedByMappingId" in data && data.initiatedByMappingId != undefined) {
-          this.initiatedByMappingId = data.initiatedByMappingId;
-        }
-        if ("transferTimes" in data && data.transferTimes != undefined) {
-          this.transferTimes = data.transferTimes;
-        }
-        if ("badgeIds" in data && data.badgeIds != undefined) {
-          this.badgeIds = data.badgeIds;
-        }
-        if ("ownershipTimes" in data && data.ownershipTimes != undefined) {
-          this.ownershipTimes = data.ownershipTimes;
-        }
-        if ("permittedTimes" in data && data.permittedTimes != undefined) {
-          this.permittedTimes = data.permittedTimes;
-        }
-        if ("forbiddenTimes" in data && data.forbiddenTimes != undefined) {
-          this.forbiddenTimes = data.forbiddenTimes;
-        }
-      }
-    }
-    get fromMappingId() {
-      return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
-    }
-    set fromMappingId(value: string) {
-      pb_1.Message.setField(this, 1, value);
-    }
-    get initiatedByMappingId() {
-      return pb_1.Message.getFieldWithDefault(this, 2, "") as string;
-    }
-    set initiatedByMappingId(value: string) {
-      pb_1.Message.setField(this, 2, value);
-    }
-    get transferTimes() {
-      return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 3) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-    }
-    set transferTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 3, value);
-    }
-    get badgeIds() {
-      return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 4) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-    }
-    set badgeIds(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 4, value);
-    }
-    get ownershipTimes() {
-      return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 5) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-    }
-    set ownershipTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 5, value);
-    }
-    get permittedTimes() {
-      return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 6) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-    }
-    set permittedTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 6, value);
-    }
-    get forbiddenTimes() {
-      return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 7) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-    }
-    set forbiddenTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 7, value);
-    }
-    static fromObject(data: {
-      fromMappingId?: string;
-      initiatedByMappingId?: string;
-      transferTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-      badgeIds?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-      ownershipTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-      permittedTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-      forbiddenTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-    }): UserApprovedIncomingTransferDefaultValues {
-      const message = new UserApprovedIncomingTransferDefaultValues({});
-      if (data.fromMappingId != null) {
-        message.fromMappingId = data.fromMappingId;
-      }
-      if (data.initiatedByMappingId != null) {
-        message.initiatedByMappingId = data.initiatedByMappingId;
-      }
-      if (data.transferTimes != null) {
-        message.transferTimes = data.transferTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
-      }
-      if (data.badgeIds != null) {
-        message.badgeIds = data.badgeIds.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
-      }
-      if (data.ownershipTimes != null) {
-        message.ownershipTimes = data.ownershipTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
-      }
-      if (data.permittedTimes != null) {
-        message.permittedTimes = data.permittedTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
-      }
-      if (data.forbiddenTimes != null) {
-        message.forbiddenTimes = data.forbiddenTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
-      }
-      return message;
-    }
-    toObject() {
-      const data: {
-        fromMappingId?: string;
-        initiatedByMappingId?: string;
-        transferTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-        badgeIds?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-        ownershipTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-        permittedTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-        forbiddenTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-      } = {};
-      if (this.fromMappingId != null) {
-        data.fromMappingId = this.fromMappingId;
-      }
-      if (this.initiatedByMappingId != null) {
-        data.initiatedByMappingId = this.initiatedByMappingId;
-      }
-      if (this.transferTimes != null) {
-        data.transferTimes = this.transferTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
-      }
-      if (this.badgeIds != null) {
-        data.badgeIds = this.badgeIds.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
-      }
-      if (this.ownershipTimes != null) {
-        data.ownershipTimes = this.ownershipTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
-      }
-      if (this.permittedTimes != null) {
-        data.permittedTimes = this.permittedTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
-      }
-      if (this.forbiddenTimes != null) {
-        data.forbiddenTimes = this.forbiddenTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
-      }
-      return data;
-    }
-    serialize(): Uint8Array;
-    serialize(w: pb_1.BinaryWriter): void;
-    serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-      const writer = w || new pb_1.BinaryWriter();
-      if (this.fromMappingId.length)
-        writer.writeString(1, this.fromMappingId);
-      if (this.initiatedByMappingId.length)
-        writer.writeString(2, this.initiatedByMappingId);
-      if (this.transferTimes.length)
-        writer.writeRepeatedMessage(3, this.transferTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
-      if (this.badgeIds.length)
-        writer.writeRepeatedMessage(4, this.badgeIds, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
-      if (this.ownershipTimes.length)
-        writer.writeRepeatedMessage(5, this.ownershipTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
-      if (this.permittedTimes.length)
-        writer.writeRepeatedMessage(6, this.permittedTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
-      if (this.forbiddenTimes.length)
-        writer.writeRepeatedMessage(7, this.forbiddenTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
-      if (!w)
-        return writer.getResultBuffer();
-    }
-    static deserialize(bytes: Uint8Array | pb_1.BinaryReader): UserApprovedIncomingTransferDefaultValues {
-      const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new UserApprovedIncomingTransferDefaultValues();
-      while (reader.nextField()) {
-        if (reader.isEndGroup())
-          break;
-        switch (reader.getFieldNumber()) {
-          case 1:
-            message.fromMappingId = reader.readString();
-            break;
-          case 2:
-            message.initiatedByMappingId = reader.readString();
-            break;
-          case 3:
-            reader.readMessage(message.transferTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 3, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
-            break;
-          case 4:
-            reader.readMessage(message.badgeIds, () => pb_1.Message.addToRepeatedWrapperField(message, 4, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
-            break;
-          case 5:
-            reader.readMessage(message.ownershipTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 5, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
-            break;
-          case 6:
-            reader.readMessage(message.permittedTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 6, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
-            break;
-          case 7:
-            reader.readMessage(message.forbiddenTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 7, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
-            break;
-          default: reader.skipField();
-        }
-      }
-      return message;
-    }
-    serializeBinary(): Uint8Array {
-      return this.serialize();
-    }
-    static deserializeBinary(bytes: Uint8Array): UserApprovedIncomingTransferDefaultValues {
-      return UserApprovedIncomingTransferDefaultValues.deserialize(bytes);
-    }
-  }
-  export class UserApprovedIncomingTransferPermission extends pb_1.Message {
-    #one_of_decls: number[][] = [];
-    constructor(data?: any[] | {
-      defaultValues?: UserApprovedIncomingTransferDefaultValues;
-      combinations?: UserApprovedIncomingTransferCombination[];
-    }) {
-      super();
-      pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [2], this.#one_of_decls);
-      if (!Array.isArray(data) && typeof data == "object") {
-        if ("defaultValues" in data && data.defaultValues != undefined) {
-          this.defaultValues = data.defaultValues;
-        }
-        if ("combinations" in data && data.combinations != undefined) {
-          this.combinations = data.combinations;
-        }
-      }
-    }
-    get defaultValues() {
-      return pb_1.Message.getWrapperField(this, UserApprovedIncomingTransferDefaultValues, 1) as UserApprovedIncomingTransferDefaultValues;
-    }
-    set defaultValues(value: UserApprovedIncomingTransferDefaultValues) {
-      pb_1.Message.setWrapperField(this, 1, value);
-    }
-    get has_defaultValues() {
-      return pb_1.Message.getField(this, 1) != null;
-    }
-    get combinations() {
-      return pb_1.Message.getRepeatedWrapperField(this, UserApprovedIncomingTransferCombination, 2) as UserApprovedIncomingTransferCombination[];
-    }
-    set combinations(value: UserApprovedIncomingTransferCombination[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 2, value);
-    }
-    static fromObject(data: {
-      defaultValues?: ReturnType<typeof UserApprovedIncomingTransferDefaultValues.prototype.toObject>;
-      combinations?: ReturnType<typeof UserApprovedIncomingTransferCombination.prototype.toObject>[];
-    }): UserApprovedIncomingTransferPermission {
-      const message = new UserApprovedIncomingTransferPermission({});
-      if (data.defaultValues != null) {
-        message.defaultValues = UserApprovedIncomingTransferDefaultValues.fromObject(data.defaultValues);
-      }
-      if (data.combinations != null) {
-        message.combinations = data.combinations.map(item => UserApprovedIncomingTransferCombination.fromObject(item));
-      }
-      return message;
-    }
-    toObject() {
-      const data: {
-        defaultValues?: ReturnType<typeof UserApprovedIncomingTransferDefaultValues.prototype.toObject>;
-        combinations?: ReturnType<typeof UserApprovedIncomingTransferCombination.prototype.toObject>[];
-      } = {};
-      if (this.defaultValues != null) {
-        data.defaultValues = this.defaultValues.toObject();
-      }
-      if (this.combinations != null) {
-        data.combinations = this.combinations.map((item: UserApprovedIncomingTransferCombination) => item.toObject());
-      }
-      return data;
-    }
-    serialize(): Uint8Array;
-    serialize(w: pb_1.BinaryWriter): void;
-    serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-      const writer = w || new pb_1.BinaryWriter();
-      if (this.has_defaultValues)
-        writer.writeMessage(1, this.defaultValues, () => this.defaultValues.serialize(writer));
-      if (this.combinations.length)
-        writer.writeRepeatedMessage(2, this.combinations, (item: UserApprovedIncomingTransferCombination) => item.serialize(writer));
-      if (!w)
-        return writer.getResultBuffer();
-    }
-    static deserialize(bytes: Uint8Array | pb_1.BinaryReader): UserApprovedIncomingTransferPermission {
-      const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new UserApprovedIncomingTransferPermission();
-      while (reader.nextField()) {
-        if (reader.isEndGroup())
-          break;
-        switch (reader.getFieldNumber()) {
-          case 1:
-            reader.readMessage(message.defaultValues, () => message.defaultValues = UserApprovedIncomingTransferDefaultValues.deserialize(reader));
-            break;
-          case 2:
-            reader.readMessage(message.combinations, () => pb_1.Message.addToRepeatedWrapperField(message, 2, UserApprovedIncomingTransferCombination.deserialize(reader), UserApprovedIncomingTransferCombination));
-            break;
-          default: reader.skipField();
-        }
-      }
-      return message;
-    }
-    serializeBinary(): Uint8Array {
-      return this.serialize();
-    }
-    static deserializeBinary(bytes: Uint8Array): UserApprovedIncomingTransferPermission {
-      return UserApprovedIncomingTransferPermission.deserialize(bytes);
-    }
-  }
-  export class BalancesActionCombination extends pb_1.Message {
-    #one_of_decls: number[][] = [];
-    constructor(data?: any[] | {
-      badgeIdsOptions?: ValueOptions;
-      ownershipTimesOptions?: ValueOptions;
-      permittedTimesOptions?: ValueOptions;
-      forbiddenTimesOptions?: ValueOptions;
-    }) {
-      super();
-      pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
-      if (!Array.isArray(data) && typeof data == "object") {
-        if ("badgeIdsOptions" in data && data.badgeIdsOptions != undefined) {
-          this.badgeIdsOptions = data.badgeIdsOptions;
-        }
-        if ("ownershipTimesOptions" in data && data.ownershipTimesOptions != undefined) {
-          this.ownershipTimesOptions = data.ownershipTimesOptions;
-        }
-        if ("permittedTimesOptions" in data && data.permittedTimesOptions != undefined) {
-          this.permittedTimesOptions = data.permittedTimesOptions;
-        }
-        if ("forbiddenTimesOptions" in data && data.forbiddenTimesOptions != undefined) {
-          this.forbiddenTimesOptions = data.forbiddenTimesOptions;
-        }
-      }
-    }
-    get badgeIdsOptions() {
-      return pb_1.Message.getWrapperField(this, ValueOptions, 1) as ValueOptions;
-    }
-    set badgeIdsOptions(value: ValueOptions) {
-      pb_1.Message.setWrapperField(this, 1, value);
-    }
-    get has_badgeIdsOptions() {
-      return pb_1.Message.getField(this, 1) != null;
-    }
-    get ownershipTimesOptions() {
-      return pb_1.Message.getWrapperField(this, ValueOptions, 2) as ValueOptions;
-    }
-    set ownershipTimesOptions(value: ValueOptions) {
-      pb_1.Message.setWrapperField(this, 2, value);
-    }
-    get has_ownershipTimesOptions() {
-      return pb_1.Message.getField(this, 2) != null;
-    }
-    get permittedTimesOptions() {
-      return pb_1.Message.getWrapperField(this, ValueOptions, 3) as ValueOptions;
-    }
-    set permittedTimesOptions(value: ValueOptions) {
-      pb_1.Message.setWrapperField(this, 3, value);
-    }
-    get has_permittedTimesOptions() {
-      return pb_1.Message.getField(this, 3) != null;
-    }
-    get forbiddenTimesOptions() {
-      return pb_1.Message.getWrapperField(this, ValueOptions, 4) as ValueOptions;
-    }
-    set forbiddenTimesOptions(value: ValueOptions) {
-      pb_1.Message.setWrapperField(this, 4, value);
-    }
-    get has_forbiddenTimesOptions() {
-      return pb_1.Message.getField(this, 4) != null;
-    }
-    static fromObject(data: {
-      badgeIdsOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-      ownershipTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-      permittedTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-      forbiddenTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-    }): BalancesActionCombination {
-      const message = new BalancesActionCombination({});
-      if (data.badgeIdsOptions != null) {
-        message.badgeIdsOptions = ValueOptions.fromObject(data.badgeIdsOptions);
-      }
-      if (data.ownershipTimesOptions != null) {
-        message.ownershipTimesOptions = ValueOptions.fromObject(data.ownershipTimesOptions);
-      }
-      if (data.permittedTimesOptions != null) {
-        message.permittedTimesOptions = ValueOptions.fromObject(data.permittedTimesOptions);
-      }
-      if (data.forbiddenTimesOptions != null) {
-        message.forbiddenTimesOptions = ValueOptions.fromObject(data.forbiddenTimesOptions);
-      }
-      return message;
-    }
-    toObject() {
-      const data: {
-        badgeIdsOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-        ownershipTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-        permittedTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-        forbiddenTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-      } = {};
-      if (this.badgeIdsOptions != null) {
-        data.badgeIdsOptions = this.badgeIdsOptions.toObject();
-      }
-      if (this.ownershipTimesOptions != null) {
-        data.ownershipTimesOptions = this.ownershipTimesOptions.toObject();
-      }
-      if (this.permittedTimesOptions != null) {
-        data.permittedTimesOptions = this.permittedTimesOptions.toObject();
-      }
-      if (this.forbiddenTimesOptions != null) {
-        data.forbiddenTimesOptions = this.forbiddenTimesOptions.toObject();
-      }
-      return data;
-    }
-    serialize(): Uint8Array;
-    serialize(w: pb_1.BinaryWriter): void;
-    serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-      const writer = w || new pb_1.BinaryWriter();
-      if (this.has_badgeIdsOptions)
-        writer.writeMessage(1, this.badgeIdsOptions, () => this.badgeIdsOptions.serialize(writer));
-      if (this.has_ownershipTimesOptions)
-        writer.writeMessage(2, this.ownershipTimesOptions, () => this.ownershipTimesOptions.serialize(writer));
-      if (this.has_permittedTimesOptions)
-        writer.writeMessage(3, this.permittedTimesOptions, () => this.permittedTimesOptions.serialize(writer));
-      if (this.has_forbiddenTimesOptions)
-        writer.writeMessage(4, this.forbiddenTimesOptions, () => this.forbiddenTimesOptions.serialize(writer));
-      if (!w)
-        return writer.getResultBuffer();
-    }
-    static deserialize(bytes: Uint8Array | pb_1.BinaryReader): BalancesActionCombination {
-      const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new BalancesActionCombination();
-      while (reader.nextField()) {
-        if (reader.isEndGroup())
-          break;
-        switch (reader.getFieldNumber()) {
-          case 1:
-            reader.readMessage(message.badgeIdsOptions, () => message.badgeIdsOptions = ValueOptions.deserialize(reader));
-            break;
-          case 2:
-            reader.readMessage(message.ownershipTimesOptions, () => message.ownershipTimesOptions = ValueOptions.deserialize(reader));
-            break;
-          case 3:
-            reader.readMessage(message.permittedTimesOptions, () => message.permittedTimesOptions = ValueOptions.deserialize(reader));
-            break;
-          case 4:
-            reader.readMessage(message.forbiddenTimesOptions, () => message.forbiddenTimesOptions = ValueOptions.deserialize(reader));
-            break;
-          default: reader.skipField();
-        }
-      }
-      return message;
-    }
-    serializeBinary(): Uint8Array {
-      return this.serialize();
-    }
-    static deserializeBinary(bytes: Uint8Array): BalancesActionCombination {
-      return BalancesActionCombination.deserialize(bytes);
-    }
-  }
-  export class BalancesActionDefaultValues extends pb_1.Message {
-    #one_of_decls: number[][] = [];
-    constructor(data?: any[] | {
-      badgeIds?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-      ownershipTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-      permittedTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-      forbiddenTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-    }) {
-      super();
-      pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1, 2, 3, 4], this.#one_of_decls);
-      if (!Array.isArray(data) && typeof data == "object") {
-        if ("badgeIds" in data && data.badgeIds != undefined) {
-          this.badgeIds = data.badgeIds;
-        }
-        if ("ownershipTimes" in data && data.ownershipTimes != undefined) {
-          this.ownershipTimes = data.ownershipTimes;
-        }
-        if ("permittedTimes" in data && data.permittedTimes != undefined) {
-          this.permittedTimes = data.permittedTimes;
-        }
-        if ("forbiddenTimes" in data && data.forbiddenTimes != undefined) {
-          this.forbiddenTimes = data.forbiddenTimes;
-        }
-      }
-    }
-    get badgeIds() {
-      return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 1) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-    }
-    set badgeIds(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 1, value);
-    }
-    get ownershipTimes() {
-      return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 2) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-    }
-    set ownershipTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 2, value);
-    }
-    get permittedTimes() {
-      return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 3) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-    }
-    set permittedTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 3, value);
-    }
-    get forbiddenTimes() {
-      return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 4) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-    }
-    set forbiddenTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 4, value);
-    }
-    static fromObject(data: {
-      badgeIds?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-      ownershipTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-      permittedTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-      forbiddenTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-    }): BalancesActionDefaultValues {
-      const message = new BalancesActionDefaultValues({});
-      if (data.badgeIds != null) {
-        message.badgeIds = data.badgeIds.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
-      }
-      if (data.ownershipTimes != null) {
-        message.ownershipTimes = data.ownershipTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
-      }
-      if (data.permittedTimes != null) {
-        message.permittedTimes = data.permittedTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
-      }
-      if (data.forbiddenTimes != null) {
-        message.forbiddenTimes = data.forbiddenTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
-      }
-      return message;
-    }
-    toObject() {
-      const data: {
-        badgeIds?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-        ownershipTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-        permittedTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-        forbiddenTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-      } = {};
-      if (this.badgeIds != null) {
-        data.badgeIds = this.badgeIds.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
-      }
-      if (this.ownershipTimes != null) {
-        data.ownershipTimes = this.ownershipTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
-      }
-      if (this.permittedTimes != null) {
-        data.permittedTimes = this.permittedTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
-      }
-      if (this.forbiddenTimes != null) {
-        data.forbiddenTimes = this.forbiddenTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
-      }
-      return data;
-    }
-    serialize(): Uint8Array;
-    serialize(w: pb_1.BinaryWriter): void;
-    serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-      const writer = w || new pb_1.BinaryWriter();
-      if (this.badgeIds.length)
-        writer.writeRepeatedMessage(1, this.badgeIds, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
-      if (this.ownershipTimes.length)
-        writer.writeRepeatedMessage(2, this.ownershipTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
-      if (this.permittedTimes.length)
-        writer.writeRepeatedMessage(3, this.permittedTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
-      if (this.forbiddenTimes.length)
-        writer.writeRepeatedMessage(4, this.forbiddenTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
-      if (!w)
-        return writer.getResultBuffer();
-    }
-    static deserialize(bytes: Uint8Array | pb_1.BinaryReader): BalancesActionDefaultValues {
-      const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new BalancesActionDefaultValues();
-      while (reader.nextField()) {
-        if (reader.isEndGroup())
-          break;
-        switch (reader.getFieldNumber()) {
-          case 1:
-            reader.readMessage(message.badgeIds, () => pb_1.Message.addToRepeatedWrapperField(message, 1, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
-            break;
-          case 2:
-            reader.readMessage(message.ownershipTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 2, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
-            break;
-          case 3:
-            reader.readMessage(message.permittedTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 3, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
-            break;
-          case 4:
-            reader.readMessage(message.forbiddenTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 4, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
-            break;
-          default: reader.skipField();
-        }
-      }
-      return message;
-    }
-    serializeBinary(): Uint8Array {
-      return this.serialize();
-    }
-    static deserializeBinary(bytes: Uint8Array): BalancesActionDefaultValues {
-      return BalancesActionDefaultValues.deserialize(bytes);
-    }
-  }
-  export class BalancesActionPermission extends pb_1.Message {
-    #one_of_decls: number[][] = [];
-    constructor(data?: any[] | {
-      defaultValues?: BalancesActionDefaultValues;
-      combinations?: BalancesActionCombination[];
-    }) {
-      super();
-      pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [2], this.#one_of_decls);
-      if (!Array.isArray(data) && typeof data == "object") {
-        if ("defaultValues" in data && data.defaultValues != undefined) {
-          this.defaultValues = data.defaultValues;
-        }
-        if ("combinations" in data && data.combinations != undefined) {
-          this.combinations = data.combinations;
-        }
-      }
-    }
-    get defaultValues() {
-      return pb_1.Message.getWrapperField(this, BalancesActionDefaultValues, 1) as BalancesActionDefaultValues;
-    }
-    set defaultValues(value: BalancesActionDefaultValues) {
-      pb_1.Message.setWrapperField(this, 1, value);
-    }
-    get has_defaultValues() {
-      return pb_1.Message.getField(this, 1) != null;
-    }
-    get combinations() {
-      return pb_1.Message.getRepeatedWrapperField(this, BalancesActionCombination, 2) as BalancesActionCombination[];
-    }
-    set combinations(value: BalancesActionCombination[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 2, value);
-    }
-    static fromObject(data: {
-      defaultValues?: ReturnType<typeof BalancesActionDefaultValues.prototype.toObject>;
-      combinations?: ReturnType<typeof BalancesActionCombination.prototype.toObject>[];
-    }): BalancesActionPermission {
-      const message = new BalancesActionPermission({});
-      if (data.defaultValues != null) {
-        message.defaultValues = BalancesActionDefaultValues.fromObject(data.defaultValues);
-      }
-      if (data.combinations != null) {
-        message.combinations = data.combinations.map(item => BalancesActionCombination.fromObject(item));
-      }
-      return message;
-    }
-    toObject() {
-      const data: {
-        defaultValues?: ReturnType<typeof BalancesActionDefaultValues.prototype.toObject>;
-        combinations?: ReturnType<typeof BalancesActionCombination.prototype.toObject>[];
-      } = {};
-      if (this.defaultValues != null) {
-        data.defaultValues = this.defaultValues.toObject();
-      }
-      if (this.combinations != null) {
-        data.combinations = this.combinations.map((item: BalancesActionCombination) => item.toObject());
-      }
-      return data;
-    }
-    serialize(): Uint8Array;
-    serialize(w: pb_1.BinaryWriter): void;
-    serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-      const writer = w || new pb_1.BinaryWriter();
-      if (this.has_defaultValues)
-        writer.writeMessage(1, this.defaultValues, () => this.defaultValues.serialize(writer));
-      if (this.combinations.length)
-        writer.writeRepeatedMessage(2, this.combinations, (item: BalancesActionCombination) => item.serialize(writer));
-      if (!w)
-        return writer.getResultBuffer();
-    }
-    static deserialize(bytes: Uint8Array | pb_1.BinaryReader): BalancesActionPermission {
-      const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new BalancesActionPermission();
-      while (reader.nextField()) {
-        if (reader.isEndGroup())
-          break;
-        switch (reader.getFieldNumber()) {
-          case 1:
-            reader.readMessage(message.defaultValues, () => message.defaultValues = BalancesActionDefaultValues.deserialize(reader));
-            break;
-          case 2:
-            reader.readMessage(message.combinations, () => pb_1.Message.addToRepeatedWrapperField(message, 2, BalancesActionCombination.deserialize(reader), BalancesActionCombination));
-            break;
-          default: reader.skipField();
-        }
-      }
-      return message;
-    }
-    serializeBinary(): Uint8Array {
-      return this.serialize();
-    }
-    static deserializeBinary(bytes: Uint8Array): BalancesActionPermission {
-      return BalancesActionPermission.deserialize(bytes);
-    }
-  }
-  export class ActionDefaultValues extends pb_1.Message {
-    #one_of_decls: number[][] = [];
-    constructor(data?: any[] | {
-      permittedTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-      forbiddenTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-    }) {
-      super();
-      pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1, 2], this.#one_of_decls);
-      if (!Array.isArray(data) && typeof data == "object") {
-        if ("permittedTimes" in data && data.permittedTimes != undefined) {
-          this.permittedTimes = data.permittedTimes;
-        }
-        if ("forbiddenTimes" in data && data.forbiddenTimes != undefined) {
-          this.forbiddenTimes = data.forbiddenTimes;
-        }
-      }
-    }
-    get permittedTimes() {
-      return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 1) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-    }
-    set permittedTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 1, value);
-    }
-    get forbiddenTimes() {
-      return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 2) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-    }
-    set forbiddenTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 2, value);
-    }
-    static fromObject(data: {
-      permittedTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-      forbiddenTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-    }): ActionDefaultValues {
-      const message = new ActionDefaultValues({});
-      if (data.permittedTimes != null) {
-        message.permittedTimes = data.permittedTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
-      }
-      if (data.forbiddenTimes != null) {
-        message.forbiddenTimes = data.forbiddenTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
-      }
-      return message;
-    }
-    toObject() {
-      const data: {
-        permittedTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-        forbiddenTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-      } = {};
-      if (this.permittedTimes != null) {
-        data.permittedTimes = this.permittedTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
-      }
-      if (this.forbiddenTimes != null) {
-        data.forbiddenTimes = this.forbiddenTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
-      }
-      return data;
-    }
-    serialize(): Uint8Array;
-    serialize(w: pb_1.BinaryWriter): void;
-    serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-      const writer = w || new pb_1.BinaryWriter();
-      if (this.permittedTimes.length)
-        writer.writeRepeatedMessage(1, this.permittedTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
-      if (this.forbiddenTimes.length)
-        writer.writeRepeatedMessage(2, this.forbiddenTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
-      if (!w)
-        return writer.getResultBuffer();
-    }
-    static deserialize(bytes: Uint8Array | pb_1.BinaryReader): ActionDefaultValues {
-      const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new ActionDefaultValues();
-      while (reader.nextField()) {
-        if (reader.isEndGroup())
-          break;
-        switch (reader.getFieldNumber()) {
-          case 1:
-            reader.readMessage(message.permittedTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 1, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
-            break;
-          case 2:
-            reader.readMessage(message.forbiddenTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 2, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
-            break;
-          default: reader.skipField();
-        }
-      }
-      return message;
-    }
-    serializeBinary(): Uint8Array {
-      return this.serialize();
-    }
-    static deserializeBinary(bytes: Uint8Array): ActionDefaultValues {
-      return ActionDefaultValues.deserialize(bytes);
-    }
-  }
-  export class ActionCombination extends pb_1.Message {
-    #one_of_decls: number[][] = [];
-    constructor(data?: any[] | {
-      permittedTimesOptions?: ValueOptions;
-      forbiddenTimesOptions?: ValueOptions;
-    }) {
-      super();
-      pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
-      if (!Array.isArray(data) && typeof data == "object") {
-        if ("permittedTimesOptions" in data && data.permittedTimesOptions != undefined) {
-          this.permittedTimesOptions = data.permittedTimesOptions;
-        }
-        if ("forbiddenTimesOptions" in data && data.forbiddenTimesOptions != undefined) {
-          this.forbiddenTimesOptions = data.forbiddenTimesOptions;
-        }
-      }
-    }
-    get permittedTimesOptions() {
-      return pb_1.Message.getWrapperField(this, ValueOptions, 1) as ValueOptions;
-    }
-    set permittedTimesOptions(value: ValueOptions) {
-      pb_1.Message.setWrapperField(this, 1, value);
-    }
-    get has_permittedTimesOptions() {
-      return pb_1.Message.getField(this, 1) != null;
-    }
-    get forbiddenTimesOptions() {
-      return pb_1.Message.getWrapperField(this, ValueOptions, 2) as ValueOptions;
-    }
-    set forbiddenTimesOptions(value: ValueOptions) {
-      pb_1.Message.setWrapperField(this, 2, value);
-    }
-    get has_forbiddenTimesOptions() {
-      return pb_1.Message.getField(this, 2) != null;
-    }
-    static fromObject(data: {
-      permittedTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-      forbiddenTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-    }): ActionCombination {
-      const message = new ActionCombination({});
-      if (data.permittedTimesOptions != null) {
-        message.permittedTimesOptions = ValueOptions.fromObject(data.permittedTimesOptions);
-      }
-      if (data.forbiddenTimesOptions != null) {
-        message.forbiddenTimesOptions = ValueOptions.fromObject(data.forbiddenTimesOptions);
-      }
-      return message;
-    }
-    toObject() {
-      const data: {
-        permittedTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-        forbiddenTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-      } = {};
-      if (this.permittedTimesOptions != null) {
-        data.permittedTimesOptions = this.permittedTimesOptions.toObject();
-      }
-      if (this.forbiddenTimesOptions != null) {
-        data.forbiddenTimesOptions = this.forbiddenTimesOptions.toObject();
-      }
-      return data;
-    }
-    serialize(): Uint8Array;
-    serialize(w: pb_1.BinaryWriter): void;
-    serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-      const writer = w || new pb_1.BinaryWriter();
-      if (this.has_permittedTimesOptions)
-        writer.writeMessage(1, this.permittedTimesOptions, () => this.permittedTimesOptions.serialize(writer));
-      if (this.has_forbiddenTimesOptions)
-        writer.writeMessage(2, this.forbiddenTimesOptions, () => this.forbiddenTimesOptions.serialize(writer));
-      if (!w)
-        return writer.getResultBuffer();
-    }
-    static deserialize(bytes: Uint8Array | pb_1.BinaryReader): ActionCombination {
-      const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new ActionCombination();
-      while (reader.nextField()) {
-        if (reader.isEndGroup())
-          break;
-        switch (reader.getFieldNumber()) {
-          case 1:
-            reader.readMessage(message.permittedTimesOptions, () => message.permittedTimesOptions = ValueOptions.deserialize(reader));
-            break;
-          case 2:
-            reader.readMessage(message.forbiddenTimesOptions, () => message.forbiddenTimesOptions = ValueOptions.deserialize(reader));
-            break;
-          default: reader.skipField();
-        }
-      }
-      return message;
-    }
-    serializeBinary(): Uint8Array {
-      return this.serialize();
-    }
-    static deserializeBinary(bytes: Uint8Array): ActionCombination {
-      return ActionCombination.deserialize(bytes);
-    }
-  }
-  export class ActionPermission extends pb_1.Message {
-    #one_of_decls: number[][] = [];
-    constructor(data?: any[] | {
-      defaultValues?: ActionDefaultValues;
-      combinations?: ActionCombination[];
-    }) {
-      super();
-      pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [2], this.#one_of_decls);
-      if (!Array.isArray(data) && typeof data == "object") {
-        if ("defaultValues" in data && data.defaultValues != undefined) {
-          this.defaultValues = data.defaultValues;
-        }
-        if ("combinations" in data && data.combinations != undefined) {
-          this.combinations = data.combinations;
-        }
-      }
-    }
-    get defaultValues() {
-      return pb_1.Message.getWrapperField(this, ActionDefaultValues, 1) as ActionDefaultValues;
-    }
-    set defaultValues(value: ActionDefaultValues) {
-      pb_1.Message.setWrapperField(this, 1, value);
-    }
-    get has_defaultValues() {
-      return pb_1.Message.getField(this, 1) != null;
-    }
-    get combinations() {
-      return pb_1.Message.getRepeatedWrapperField(this, ActionCombination, 2) as ActionCombination[];
-    }
-    set combinations(value: ActionCombination[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 2, value);
-    }
-    static fromObject(data: {
-      defaultValues?: ReturnType<typeof ActionDefaultValues.prototype.toObject>;
-      combinations?: ReturnType<typeof ActionCombination.prototype.toObject>[];
-    }): ActionPermission {
-      const message = new ActionPermission({});
-      if (data.defaultValues != null) {
-        message.defaultValues = ActionDefaultValues.fromObject(data.defaultValues);
-      }
-      if (data.combinations != null) {
-        message.combinations = data.combinations.map(item => ActionCombination.fromObject(item));
-      }
-      return message;
-    }
-    toObject() {
-      const data: {
-        defaultValues?: ReturnType<typeof ActionDefaultValues.prototype.toObject>;
-        combinations?: ReturnType<typeof ActionCombination.prototype.toObject>[];
-      } = {};
-      if (this.defaultValues != null) {
-        data.defaultValues = this.defaultValues.toObject();
-      }
-      if (this.combinations != null) {
-        data.combinations = this.combinations.map((item: ActionCombination) => item.toObject());
-      }
-      return data;
-    }
-    serialize(): Uint8Array;
-    serialize(w: pb_1.BinaryWriter): void;
-    serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-      const writer = w || new pb_1.BinaryWriter();
-      if (this.has_defaultValues)
-        writer.writeMessage(1, this.defaultValues, () => this.defaultValues.serialize(writer));
-      if (this.combinations.length)
-        writer.writeRepeatedMessage(2, this.combinations, (item: ActionCombination) => item.serialize(writer));
-      if (!w)
-        return writer.getResultBuffer();
-    }
-    static deserialize(bytes: Uint8Array | pb_1.BinaryReader): ActionPermission {
-      const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new ActionPermission();
-      while (reader.nextField()) {
-        if (reader.isEndGroup())
-          break;
-        switch (reader.getFieldNumber()) {
-          case 1:
-            reader.readMessage(message.defaultValues, () => message.defaultValues = ActionDefaultValues.deserialize(reader));
-            break;
-          case 2:
-            reader.readMessage(message.combinations, () => pb_1.Message.addToRepeatedWrapperField(message, 2, ActionCombination.deserialize(reader), ActionCombination));
-            break;
-          default: reader.skipField();
-        }
-      }
-      return message;
-    }
-    serializeBinary(): Uint8Array {
-      return this.serialize();
-    }
-    static deserializeBinary(bytes: Uint8Array): ActionPermission {
-      return ActionPermission.deserialize(bytes);
-    }
-  }
-  export class TimedUpdateCombination extends pb_1.Message {
-    #one_of_decls: number[][] = [];
-    constructor(data?: any[] | {
-      timelineTimesOptions?: ValueOptions;
-      permittedTimesOptions?: ValueOptions;
-      forbiddenTimesOptions?: ValueOptions;
-    }) {
-      super();
-      pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
-      if (!Array.isArray(data) && typeof data == "object") {
-        if ("timelineTimesOptions" in data && data.timelineTimesOptions != undefined) {
-          this.timelineTimesOptions = data.timelineTimesOptions;
-        }
-        if ("permittedTimesOptions" in data && data.permittedTimesOptions != undefined) {
-          this.permittedTimesOptions = data.permittedTimesOptions;
-        }
-        if ("forbiddenTimesOptions" in data && data.forbiddenTimesOptions != undefined) {
-          this.forbiddenTimesOptions = data.forbiddenTimesOptions;
-        }
-      }
-    }
-    get timelineTimesOptions() {
-      return pb_1.Message.getWrapperField(this, ValueOptions, 1) as ValueOptions;
-    }
-    set timelineTimesOptions(value: ValueOptions) {
-      pb_1.Message.setWrapperField(this, 1, value);
-    }
-    get has_timelineTimesOptions() {
-      return pb_1.Message.getField(this, 1) != null;
-    }
-    get permittedTimesOptions() {
-      return pb_1.Message.getWrapperField(this, ValueOptions, 2) as ValueOptions;
-    }
-    set permittedTimesOptions(value: ValueOptions) {
-      pb_1.Message.setWrapperField(this, 2, value);
-    }
-    get has_permittedTimesOptions() {
-      return pb_1.Message.getField(this, 2) != null;
-    }
-    get forbiddenTimesOptions() {
-      return pb_1.Message.getWrapperField(this, ValueOptions, 3) as ValueOptions;
-    }
-    set forbiddenTimesOptions(value: ValueOptions) {
-      pb_1.Message.setWrapperField(this, 3, value);
-    }
-    get has_forbiddenTimesOptions() {
-      return pb_1.Message.getField(this, 3) != null;
-    }
-    static fromObject(data: {
-      timelineTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-      permittedTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-      forbiddenTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-    }): TimedUpdateCombination {
-      const message = new TimedUpdateCombination({});
-      if (data.timelineTimesOptions != null) {
-        message.timelineTimesOptions = ValueOptions.fromObject(data.timelineTimesOptions);
-      }
-      if (data.permittedTimesOptions != null) {
-        message.permittedTimesOptions = ValueOptions.fromObject(data.permittedTimesOptions);
-      }
-      if (data.forbiddenTimesOptions != null) {
-        message.forbiddenTimesOptions = ValueOptions.fromObject(data.forbiddenTimesOptions);
-      }
-      return message;
-    }
-    toObject() {
-      const data: {
-        timelineTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-        permittedTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-        forbiddenTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-      } = {};
-      if (this.timelineTimesOptions != null) {
-        data.timelineTimesOptions = this.timelineTimesOptions.toObject();
-      }
-      if (this.permittedTimesOptions != null) {
-        data.permittedTimesOptions = this.permittedTimesOptions.toObject();
-      }
-      if (this.forbiddenTimesOptions != null) {
-        data.forbiddenTimesOptions = this.forbiddenTimesOptions.toObject();
-      }
-      return data;
-    }
-    serialize(): Uint8Array;
-    serialize(w: pb_1.BinaryWriter): void;
-    serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-      const writer = w || new pb_1.BinaryWriter();
-      if (this.has_timelineTimesOptions)
-        writer.writeMessage(1, this.timelineTimesOptions, () => this.timelineTimesOptions.serialize(writer));
-      if (this.has_permittedTimesOptions)
-        writer.writeMessage(2, this.permittedTimesOptions, () => this.permittedTimesOptions.serialize(writer));
-      if (this.has_forbiddenTimesOptions)
-        writer.writeMessage(3, this.forbiddenTimesOptions, () => this.forbiddenTimesOptions.serialize(writer));
-      if (!w)
-        return writer.getResultBuffer();
-    }
-    static deserialize(bytes: Uint8Array | pb_1.BinaryReader): TimedUpdateCombination {
-      const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new TimedUpdateCombination();
-      while (reader.nextField()) {
-        if (reader.isEndGroup())
-          break;
-        switch (reader.getFieldNumber()) {
-          case 1:
-            reader.readMessage(message.timelineTimesOptions, () => message.timelineTimesOptions = ValueOptions.deserialize(reader));
-            break;
-          case 2:
-            reader.readMessage(message.permittedTimesOptions, () => message.permittedTimesOptions = ValueOptions.deserialize(reader));
-            break;
-          case 3:
-            reader.readMessage(message.forbiddenTimesOptions, () => message.forbiddenTimesOptions = ValueOptions.deserialize(reader));
-            break;
-          default: reader.skipField();
-        }
-      }
-      return message;
-    }
-    serializeBinary(): Uint8Array {
-      return this.serialize();
-    }
-    static deserializeBinary(bytes: Uint8Array): TimedUpdateCombination {
-      return TimedUpdateCombination.deserialize(bytes);
-    }
-  }
-  export class TimedUpdateDefaultValues extends pb_1.Message {
-    #one_of_decls: number[][] = [];
-    constructor(data?: any[] | {
-      timelineTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-      permittedTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-      forbiddenTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-    }) {
-      super();
-      pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1, 2, 3], this.#one_of_decls);
-      if (!Array.isArray(data) && typeof data == "object") {
-        if ("timelineTimes" in data && data.timelineTimes != undefined) {
-          this.timelineTimes = data.timelineTimes;
-        }
-        if ("permittedTimes" in data && data.permittedTimes != undefined) {
-          this.permittedTimes = data.permittedTimes;
-        }
-        if ("forbiddenTimes" in data && data.forbiddenTimes != undefined) {
-          this.forbiddenTimes = data.forbiddenTimes;
-        }
-      }
-    }
-    get timelineTimes() {
-      return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 1) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-    }
-    set timelineTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 1, value);
-    }
-    get permittedTimes() {
-      return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 2) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-    }
-    set permittedTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 2, value);
-    }
-    get forbiddenTimes() {
-      return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 3) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-    }
-    set forbiddenTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 3, value);
-    }
-    static fromObject(data: {
-      timelineTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-      permittedTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-      forbiddenTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-    }): TimedUpdateDefaultValues {
-      const message = new TimedUpdateDefaultValues({});
-      if (data.timelineTimes != null) {
-        message.timelineTimes = data.timelineTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
-      }
-      if (data.permittedTimes != null) {
-        message.permittedTimes = data.permittedTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
-      }
-      if (data.forbiddenTimes != null) {
-        message.forbiddenTimes = data.forbiddenTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
-      }
-      return message;
-    }
-    toObject() {
-      const data: {
-        timelineTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-        permittedTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-        forbiddenTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-      } = {};
-      if (this.timelineTimes != null) {
-        data.timelineTimes = this.timelineTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
-      }
-      if (this.permittedTimes != null) {
-        data.permittedTimes = this.permittedTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
-      }
-      if (this.forbiddenTimes != null) {
-        data.forbiddenTimes = this.forbiddenTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
-      }
-      return data;
-    }
-    serialize(): Uint8Array;
-    serialize(w: pb_1.BinaryWriter): void;
-    serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-      const writer = w || new pb_1.BinaryWriter();
-      if (this.timelineTimes.length)
-        writer.writeRepeatedMessage(1, this.timelineTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
-      if (this.permittedTimes.length)
-        writer.writeRepeatedMessage(2, this.permittedTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
-      if (this.forbiddenTimes.length)
-        writer.writeRepeatedMessage(3, this.forbiddenTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
-      if (!w)
-        return writer.getResultBuffer();
-    }
-    static deserialize(bytes: Uint8Array | pb_1.BinaryReader): TimedUpdateDefaultValues {
-      const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new TimedUpdateDefaultValues();
-      while (reader.nextField()) {
-        if (reader.isEndGroup())
-          break;
-        switch (reader.getFieldNumber()) {
-          case 1:
-            reader.readMessage(message.timelineTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 1, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
-            break;
-          case 2:
-            reader.readMessage(message.permittedTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 2, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
-            break;
-          case 3:
-            reader.readMessage(message.forbiddenTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 3, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
-            break;
-          default: reader.skipField();
-        }
-      }
-      return message;
-    }
-    serializeBinary(): Uint8Array {
-      return this.serialize();
-    }
-    static deserializeBinary(bytes: Uint8Array): TimedUpdateDefaultValues {
-      return TimedUpdateDefaultValues.deserialize(bytes);
-    }
-  }
-  export class TimedUpdatePermission extends pb_1.Message {
-    #one_of_decls: number[][] = [];
-    constructor(data?: any[] | {
-      defaultValues?: TimedUpdateDefaultValues;
-      combinations?: TimedUpdateCombination[];
-    }) {
-      super();
-      pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [2], this.#one_of_decls);
-      if (!Array.isArray(data) && typeof data == "object") {
-        if ("defaultValues" in data && data.defaultValues != undefined) {
-          this.defaultValues = data.defaultValues;
-        }
-        if ("combinations" in data && data.combinations != undefined) {
-          this.combinations = data.combinations;
-        }
-      }
-    }
-    get defaultValues() {
-      return pb_1.Message.getWrapperField(this, TimedUpdateDefaultValues, 1) as TimedUpdateDefaultValues;
-    }
-    set defaultValues(value: TimedUpdateDefaultValues) {
-      pb_1.Message.setWrapperField(this, 1, value);
-    }
-    get has_defaultValues() {
-      return pb_1.Message.getField(this, 1) != null;
-    }
-    get combinations() {
-      return pb_1.Message.getRepeatedWrapperField(this, TimedUpdateCombination, 2) as TimedUpdateCombination[];
-    }
-    set combinations(value: TimedUpdateCombination[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 2, value);
-    }
-    static fromObject(data: {
-      defaultValues?: ReturnType<typeof TimedUpdateDefaultValues.prototype.toObject>;
-      combinations?: ReturnType<typeof TimedUpdateCombination.prototype.toObject>[];
-    }): TimedUpdatePermission {
-      const message = new TimedUpdatePermission({});
-      if (data.defaultValues != null) {
-        message.defaultValues = TimedUpdateDefaultValues.fromObject(data.defaultValues);
-      }
-      if (data.combinations != null) {
-        message.combinations = data.combinations.map(item => TimedUpdateCombination.fromObject(item));
-      }
-      return message;
-    }
-    toObject() {
-      const data: {
-        defaultValues?: ReturnType<typeof TimedUpdateDefaultValues.prototype.toObject>;
-        combinations?: ReturnType<typeof TimedUpdateCombination.prototype.toObject>[];
-      } = {};
-      if (this.defaultValues != null) {
-        data.defaultValues = this.defaultValues.toObject();
-      }
-      if (this.combinations != null) {
-        data.combinations = this.combinations.map((item: TimedUpdateCombination) => item.toObject());
-      }
-      return data;
-    }
-    serialize(): Uint8Array;
-    serialize(w: pb_1.BinaryWriter): void;
-    serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-      const writer = w || new pb_1.BinaryWriter();
-      if (this.has_defaultValues)
-        writer.writeMessage(1, this.defaultValues, () => this.defaultValues.serialize(writer));
-      if (this.combinations.length)
-        writer.writeRepeatedMessage(2, this.combinations, (item: TimedUpdateCombination) => item.serialize(writer));
-      if (!w)
-        return writer.getResultBuffer();
-    }
-    static deserialize(bytes: Uint8Array | pb_1.BinaryReader): TimedUpdatePermission {
-      const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new TimedUpdatePermission();
-      while (reader.nextField()) {
-        if (reader.isEndGroup())
-          break;
-        switch (reader.getFieldNumber()) {
-          case 1:
-            reader.readMessage(message.defaultValues, () => message.defaultValues = TimedUpdateDefaultValues.deserialize(reader));
-            break;
-          case 2:
-            reader.readMessage(message.combinations, () => pb_1.Message.addToRepeatedWrapperField(message, 2, TimedUpdateCombination.deserialize(reader), TimedUpdateCombination));
-            break;
-          default: reader.skipField();
-        }
-      }
-      return message;
-    }
-    serializeBinary(): Uint8Array {
-      return this.serialize();
-    }
-    static deserializeBinary(bytes: Uint8Array): TimedUpdatePermission {
-      return TimedUpdatePermission.deserialize(bytes);
-    }
-  }
-  export class TimedUpdateWithBadgeIdsCombination extends pb_1.Message {
-    #one_of_decls: number[][] = [];
-    constructor(data?: any[] | {
-      timelineTimesOptions?: ValueOptions;
-      badgeIdsOptions?: ValueOptions;
-      permittedTimesOptions?: ValueOptions;
-      forbiddenTimesOptions?: ValueOptions;
-    }) {
-      super();
-      pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
-      if (!Array.isArray(data) && typeof data == "object") {
-        if ("timelineTimesOptions" in data && data.timelineTimesOptions != undefined) {
-          this.timelineTimesOptions = data.timelineTimesOptions;
-        }
-        if ("badgeIdsOptions" in data && data.badgeIdsOptions != undefined) {
-          this.badgeIdsOptions = data.badgeIdsOptions;
-        }
-        if ("permittedTimesOptions" in data && data.permittedTimesOptions != undefined) {
-          this.permittedTimesOptions = data.permittedTimesOptions;
-        }
-        if ("forbiddenTimesOptions" in data && data.forbiddenTimesOptions != undefined) {
-          this.forbiddenTimesOptions = data.forbiddenTimesOptions;
-        }
-      }
-    }
-    get timelineTimesOptions() {
-      return pb_1.Message.getWrapperField(this, ValueOptions, 1) as ValueOptions;
-    }
-    set timelineTimesOptions(value: ValueOptions) {
-      pb_1.Message.setWrapperField(this, 1, value);
-    }
-    get has_timelineTimesOptions() {
-      return pb_1.Message.getField(this, 1) != null;
-    }
-    get badgeIdsOptions() {
-      return pb_1.Message.getWrapperField(this, ValueOptions, 2) as ValueOptions;
-    }
-    set badgeIdsOptions(value: ValueOptions) {
-      pb_1.Message.setWrapperField(this, 2, value);
-    }
-    get has_badgeIdsOptions() {
-      return pb_1.Message.getField(this, 2) != null;
-    }
-    get permittedTimesOptions() {
-      return pb_1.Message.getWrapperField(this, ValueOptions, 3) as ValueOptions;
-    }
-    set permittedTimesOptions(value: ValueOptions) {
-      pb_1.Message.setWrapperField(this, 3, value);
-    }
-    get has_permittedTimesOptions() {
-      return pb_1.Message.getField(this, 3) != null;
-    }
-    get forbiddenTimesOptions() {
-      return pb_1.Message.getWrapperField(this, ValueOptions, 4) as ValueOptions;
-    }
-    set forbiddenTimesOptions(value: ValueOptions) {
-      pb_1.Message.setWrapperField(this, 4, value);
-    }
-    get has_forbiddenTimesOptions() {
-      return pb_1.Message.getField(this, 4) != null;
-    }
-    static fromObject(data: {
-      timelineTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-      badgeIdsOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-      permittedTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-      forbiddenTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-    }): TimedUpdateWithBadgeIdsCombination {
-      const message = new TimedUpdateWithBadgeIdsCombination({});
-      if (data.timelineTimesOptions != null) {
-        message.timelineTimesOptions = ValueOptions.fromObject(data.timelineTimesOptions);
-      }
-      if (data.badgeIdsOptions != null) {
-        message.badgeIdsOptions = ValueOptions.fromObject(data.badgeIdsOptions);
-      }
-      if (data.permittedTimesOptions != null) {
-        message.permittedTimesOptions = ValueOptions.fromObject(data.permittedTimesOptions);
-      }
-      if (data.forbiddenTimesOptions != null) {
-        message.forbiddenTimesOptions = ValueOptions.fromObject(data.forbiddenTimesOptions);
-      }
-      return message;
-    }
-    toObject() {
-      const data: {
-        timelineTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-        badgeIdsOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-        permittedTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-        forbiddenTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
-      } = {};
-      if (this.timelineTimesOptions != null) {
-        data.timelineTimesOptions = this.timelineTimesOptions.toObject();
-      }
-      if (this.badgeIdsOptions != null) {
-        data.badgeIdsOptions = this.badgeIdsOptions.toObject();
-      }
-      if (this.permittedTimesOptions != null) {
-        data.permittedTimesOptions = this.permittedTimesOptions.toObject();
-      }
-      if (this.forbiddenTimesOptions != null) {
-        data.forbiddenTimesOptions = this.forbiddenTimesOptions.toObject();
-      }
-      return data;
-    }
-    serialize(): Uint8Array;
-    serialize(w: pb_1.BinaryWriter): void;
-    serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-      const writer = w || new pb_1.BinaryWriter();
-      if (this.has_timelineTimesOptions)
-        writer.writeMessage(1, this.timelineTimesOptions, () => this.timelineTimesOptions.serialize(writer));
-      if (this.has_badgeIdsOptions)
-        writer.writeMessage(2, this.badgeIdsOptions, () => this.badgeIdsOptions.serialize(writer));
-      if (this.has_permittedTimesOptions)
-        writer.writeMessage(3, this.permittedTimesOptions, () => this.permittedTimesOptions.serialize(writer));
-      if (this.has_forbiddenTimesOptions)
-        writer.writeMessage(4, this.forbiddenTimesOptions, () => this.forbiddenTimesOptions.serialize(writer));
-      if (!w)
-        return writer.getResultBuffer();
-    }
-    static deserialize(bytes: Uint8Array | pb_1.BinaryReader): TimedUpdateWithBadgeIdsCombination {
-      const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new TimedUpdateWithBadgeIdsCombination();
-      while (reader.nextField()) {
-        if (reader.isEndGroup())
-          break;
-        switch (reader.getFieldNumber()) {
-          case 1:
-            reader.readMessage(message.timelineTimesOptions, () => message.timelineTimesOptions = ValueOptions.deserialize(reader));
-            break;
-          case 2:
-            reader.readMessage(message.badgeIdsOptions, () => message.badgeIdsOptions = ValueOptions.deserialize(reader));
-            break;
-          case 3:
-            reader.readMessage(message.permittedTimesOptions, () => message.permittedTimesOptions = ValueOptions.deserialize(reader));
-            break;
-          case 4:
-            reader.readMessage(message.forbiddenTimesOptions, () => message.forbiddenTimesOptions = ValueOptions.deserialize(reader));
-            break;
-          default: reader.skipField();
-        }
-      }
-      return message;
-    }
-    serializeBinary(): Uint8Array {
-      return this.serialize();
-    }
-    static deserializeBinary(bytes: Uint8Array): TimedUpdateWithBadgeIdsCombination {
-      return TimedUpdateWithBadgeIdsCombination.deserialize(bytes);
-    }
-  }
-  export class TimedUpdateWithBadgeIdsDefaultValues extends pb_1.Message {
-    #one_of_decls: number[][] = [];
-    constructor(data?: any[] | {
-      badgeIds?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-      timelineTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-      permittedTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-      forbiddenTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-    }) {
-      super();
-      pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1, 2, 3, 4], this.#one_of_decls);
-      if (!Array.isArray(data) && typeof data == "object") {
-        if ("badgeIds" in data && data.badgeIds != undefined) {
-          this.badgeIds = data.badgeIds;
-        }
-        if ("timelineTimes" in data && data.timelineTimes != undefined) {
-          this.timelineTimes = data.timelineTimes;
-        }
-        if ("permittedTimes" in data && data.permittedTimes != undefined) {
-          this.permittedTimes = data.permittedTimes;
-        }
-        if ("forbiddenTimes" in data && data.forbiddenTimes != undefined) {
-          this.forbiddenTimes = data.forbiddenTimes;
-        }
-      }
-    }
-    get badgeIds() {
-      return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 1) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-    }
-    set badgeIds(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 1, value);
-    }
-    get timelineTimes() {
-      return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 2) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-    }
-    set timelineTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 2, value);
-    }
-    get permittedTimes() {
-      return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 3) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-    }
-    set permittedTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 3, value);
-    }
-    get forbiddenTimes() {
-      return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 4) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
-    }
-    set forbiddenTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 4, value);
-    }
-    static fromObject(data: {
-      badgeIds?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-      timelineTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-      permittedTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-      forbiddenTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-    }): TimedUpdateWithBadgeIdsDefaultValues {
-      const message = new TimedUpdateWithBadgeIdsDefaultValues({});
-      if (data.badgeIds != null) {
-        message.badgeIds = data.badgeIds.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
-      }
-      if (data.timelineTimes != null) {
-        message.timelineTimes = data.timelineTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
-      }
-      if (data.permittedTimes != null) {
-        message.permittedTimes = data.permittedTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
-      }
-      if (data.forbiddenTimes != null) {
-        message.forbiddenTimes = data.forbiddenTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
-      }
-      return message;
-    }
-    toObject() {
-      const data: {
-        badgeIds?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-        timelineTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-        permittedTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-        forbiddenTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-      } = {};
-      if (this.badgeIds != null) {
-        data.badgeIds = this.badgeIds.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
-      }
-      if (this.timelineTimes != null) {
-        data.timelineTimes = this.timelineTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
-      }
-      if (this.permittedTimes != null) {
-        data.permittedTimes = this.permittedTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
-      }
-      if (this.forbiddenTimes != null) {
-        data.forbiddenTimes = this.forbiddenTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
-      }
-      return data;
-    }
-    serialize(): Uint8Array;
-    serialize(w: pb_1.BinaryWriter): void;
-    serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-      const writer = w || new pb_1.BinaryWriter();
-      if (this.badgeIds.length)
-        writer.writeRepeatedMessage(1, this.badgeIds, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
-      if (this.timelineTimes.length)
-        writer.writeRepeatedMessage(2, this.timelineTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
-      if (this.permittedTimes.length)
-        writer.writeRepeatedMessage(3, this.permittedTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
-      if (this.forbiddenTimes.length)
-        writer.writeRepeatedMessage(4, this.forbiddenTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
-      if (!w)
-        return writer.getResultBuffer();
-    }
-    static deserialize(bytes: Uint8Array | pb_1.BinaryReader): TimedUpdateWithBadgeIdsDefaultValues {
-      const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new TimedUpdateWithBadgeIdsDefaultValues();
-      while (reader.nextField()) {
-        if (reader.isEndGroup())
-          break;
-        switch (reader.getFieldNumber()) {
-          case 1:
-            reader.readMessage(message.badgeIds, () => pb_1.Message.addToRepeatedWrapperField(message, 1, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
-            break;
-          case 2:
-            reader.readMessage(message.timelineTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 2, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
-            break;
-          case 3:
-            reader.readMessage(message.permittedTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 3, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
-            break;
-          case 4:
-            reader.readMessage(message.forbiddenTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 4, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
-            break;
-          default: reader.skipField();
-        }
-      }
-      return message;
-    }
-    serializeBinary(): Uint8Array {
-      return this.serialize();
-    }
-    static deserializeBinary(bytes: Uint8Array): TimedUpdateWithBadgeIdsDefaultValues {
-      return TimedUpdateWithBadgeIdsDefaultValues.deserialize(bytes);
-    }
-  }
-  export class TimedUpdateWithBadgeIdsPermission extends pb_1.Message {
-    #one_of_decls: number[][] = [];
-    constructor(data?: any[] | {
-      defaultValues?: TimedUpdateWithBadgeIdsDefaultValues;
-      combinations?: TimedUpdateWithBadgeIdsCombination[];
-    }) {
-      super();
-      pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [2], this.#one_of_decls);
-      if (!Array.isArray(data) && typeof data == "object") {
-        if ("defaultValues" in data && data.defaultValues != undefined) {
-          this.defaultValues = data.defaultValues;
-        }
-        if ("combinations" in data && data.combinations != undefined) {
-          this.combinations = data.combinations;
-        }
-      }
-    }
-    get defaultValues() {
-      return pb_1.Message.getWrapperField(this, TimedUpdateWithBadgeIdsDefaultValues, 1) as TimedUpdateWithBadgeIdsDefaultValues;
-    }
-    set defaultValues(value: TimedUpdateWithBadgeIdsDefaultValues) {
-      pb_1.Message.setWrapperField(this, 1, value);
-    }
-    get has_defaultValues() {
-      return pb_1.Message.getField(this, 1) != null;
-    }
-    get combinations() {
-      return pb_1.Message.getRepeatedWrapperField(this, TimedUpdateWithBadgeIdsCombination, 2) as TimedUpdateWithBadgeIdsCombination[];
-    }
-    set combinations(value: TimedUpdateWithBadgeIdsCombination[]) {
-      pb_1.Message.setRepeatedWrapperField(this, 2, value);
-    }
-    static fromObject(data: {
-      defaultValues?: ReturnType<typeof TimedUpdateWithBadgeIdsDefaultValues.prototype.toObject>;
-      combinations?: ReturnType<typeof TimedUpdateWithBadgeIdsCombination.prototype.toObject>[];
-    }): TimedUpdateWithBadgeIdsPermission {
-      const message = new TimedUpdateWithBadgeIdsPermission({});
-      if (data.defaultValues != null) {
-        message.defaultValues = TimedUpdateWithBadgeIdsDefaultValues.fromObject(data.defaultValues);
-      }
-      if (data.combinations != null) {
-        message.combinations = data.combinations.map(item => TimedUpdateWithBadgeIdsCombination.fromObject(item));
-      }
-      return message;
-    }
-    toObject() {
-      const data: {
-        defaultValues?: ReturnType<typeof TimedUpdateWithBadgeIdsDefaultValues.prototype.toObject>;
-        combinations?: ReturnType<typeof TimedUpdateWithBadgeIdsCombination.prototype.toObject>[];
-      } = {};
-      if (this.defaultValues != null) {
-        data.defaultValues = this.defaultValues.toObject();
-      }
-      if (this.combinations != null) {
-        data.combinations = this.combinations.map((item: TimedUpdateWithBadgeIdsCombination) => item.toObject());
-      }
-      return data;
-    }
-    serialize(): Uint8Array;
-    serialize(w: pb_1.BinaryWriter): void;
-    serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-      const writer = w || new pb_1.BinaryWriter();
-      if (this.has_defaultValues)
-        writer.writeMessage(1, this.defaultValues, () => this.defaultValues.serialize(writer));
-      if (this.combinations.length)
-        writer.writeRepeatedMessage(2, this.combinations, (item: TimedUpdateWithBadgeIdsCombination) => item.serialize(writer));
-      if (!w)
-        return writer.getResultBuffer();
-    }
-    static deserialize(bytes: Uint8Array | pb_1.BinaryReader): TimedUpdateWithBadgeIdsPermission {
-      const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new TimedUpdateWithBadgeIdsPermission();
-      while (reader.nextField()) {
-        if (reader.isEndGroup())
-          break;
-        switch (reader.getFieldNumber()) {
-          case 1:
-            reader.readMessage(message.defaultValues, () => message.defaultValues = TimedUpdateWithBadgeIdsDefaultValues.deserialize(reader));
-            break;
-          case 2:
-            reader.readMessage(message.combinations, () => pb_1.Message.addToRepeatedWrapperField(message, 2, TimedUpdateWithBadgeIdsCombination.deserialize(reader), TimedUpdateWithBadgeIdsCombination));
-            break;
-          default: reader.skipField();
-        }
-      }
-      return message;
-    }
-    serializeBinary(): Uint8Array {
-      return this.serialize();
-    }
-    static deserializeBinary(bytes: Uint8Array): TimedUpdateWithBadgeIdsPermission {
-      return TimedUpdateWithBadgeIdsPermission.deserialize(bytes);
+    export class CollectionPermissions extends pb_1.Message {
+        #one_of_decls: number[][] = [];
+        constructor(data?: any[] | {
+            canDeleteCollection?: ActionPermission[];
+            canArchiveCollection?: TimedUpdatePermission[];
+            canUpdateContractAddress?: TimedUpdatePermission[];
+            canUpdateOffChainBalancesMetadata?: TimedUpdatePermission[];
+            canUpdateStandards?: TimedUpdatePermission[];
+            canUpdateCustomData?: TimedUpdatePermission[];
+            canUpdateManager?: TimedUpdatePermission[];
+            canUpdateCollectionMetadata?: TimedUpdatePermission[];
+            canCreateMoreBadges?: BalancesActionPermission[];
+            canUpdateBadgeMetadata?: TimedUpdateWithBadgeIdsPermission[];
+            canUpdateCollectionApprovedTransfers?: CollectionApprovedTransferPermission[];
+        }) {
+            super();
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12], this.#one_of_decls);
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("canDeleteCollection" in data && data.canDeleteCollection != undefined) {
+                    this.canDeleteCollection = data.canDeleteCollection;
+                }
+                if ("canArchiveCollection" in data && data.canArchiveCollection != undefined) {
+                    this.canArchiveCollection = data.canArchiveCollection;
+                }
+                if ("canUpdateContractAddress" in data && data.canUpdateContractAddress != undefined) {
+                    this.canUpdateContractAddress = data.canUpdateContractAddress;
+                }
+                if ("canUpdateOffChainBalancesMetadata" in data && data.canUpdateOffChainBalancesMetadata != undefined) {
+                    this.canUpdateOffChainBalancesMetadata = data.canUpdateOffChainBalancesMetadata;
+                }
+                if ("canUpdateStandards" in data && data.canUpdateStandards != undefined) {
+                    this.canUpdateStandards = data.canUpdateStandards;
+                }
+                if ("canUpdateCustomData" in data && data.canUpdateCustomData != undefined) {
+                    this.canUpdateCustomData = data.canUpdateCustomData;
+                }
+                if ("canUpdateManager" in data && data.canUpdateManager != undefined) {
+                    this.canUpdateManager = data.canUpdateManager;
+                }
+                if ("canUpdateCollectionMetadata" in data && data.canUpdateCollectionMetadata != undefined) {
+                    this.canUpdateCollectionMetadata = data.canUpdateCollectionMetadata;
+                }
+                if ("canCreateMoreBadges" in data && data.canCreateMoreBadges != undefined) {
+                    this.canCreateMoreBadges = data.canCreateMoreBadges;
+                }
+                if ("canUpdateBadgeMetadata" in data && data.canUpdateBadgeMetadata != undefined) {
+                    this.canUpdateBadgeMetadata = data.canUpdateBadgeMetadata;
+                }
+                if ("canUpdateCollectionApprovedTransfers" in data && data.canUpdateCollectionApprovedTransfers != undefined) {
+                    this.canUpdateCollectionApprovedTransfers = data.canUpdateCollectionApprovedTransfers;
+                }
+            }
+        }
+        get canDeleteCollection() {
+            return pb_1.Message.getRepeatedWrapperField(this, ActionPermission, 1) as ActionPermission[];
+        }
+        set canDeleteCollection(value: ActionPermission[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 1, value);
+        }
+        get canArchiveCollection() {
+            return pb_1.Message.getRepeatedWrapperField(this, TimedUpdatePermission, 2) as TimedUpdatePermission[];
+        }
+        set canArchiveCollection(value: TimedUpdatePermission[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 2, value);
+        }
+        get canUpdateContractAddress() {
+            return pb_1.Message.getRepeatedWrapperField(this, TimedUpdatePermission, 3) as TimedUpdatePermission[];
+        }
+        set canUpdateContractAddress(value: TimedUpdatePermission[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 3, value);
+        }
+        get canUpdateOffChainBalancesMetadata() {
+            return pb_1.Message.getRepeatedWrapperField(this, TimedUpdatePermission, 4) as TimedUpdatePermission[];
+        }
+        set canUpdateOffChainBalancesMetadata(value: TimedUpdatePermission[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 4, value);
+        }
+        get canUpdateStandards() {
+            return pb_1.Message.getRepeatedWrapperField(this, TimedUpdatePermission, 5) as TimedUpdatePermission[];
+        }
+        set canUpdateStandards(value: TimedUpdatePermission[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 5, value);
+        }
+        get canUpdateCustomData() {
+            return pb_1.Message.getRepeatedWrapperField(this, TimedUpdatePermission, 6) as TimedUpdatePermission[];
+        }
+        set canUpdateCustomData(value: TimedUpdatePermission[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 6, value);
+        }
+        get canUpdateManager() {
+            return pb_1.Message.getRepeatedWrapperField(this, TimedUpdatePermission, 7) as TimedUpdatePermission[];
+        }
+        set canUpdateManager(value: TimedUpdatePermission[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 7, value);
+        }
+        get canUpdateCollectionMetadata() {
+            return pb_1.Message.getRepeatedWrapperField(this, TimedUpdatePermission, 8) as TimedUpdatePermission[];
+        }
+        set canUpdateCollectionMetadata(value: TimedUpdatePermission[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 8, value);
+        }
+        get canCreateMoreBadges() {
+            return pb_1.Message.getRepeatedWrapperField(this, BalancesActionPermission, 9) as BalancesActionPermission[];
+        }
+        set canCreateMoreBadges(value: BalancesActionPermission[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 9, value);
+        }
+        get canUpdateBadgeMetadata() {
+            return pb_1.Message.getRepeatedWrapperField(this, TimedUpdateWithBadgeIdsPermission, 10) as TimedUpdateWithBadgeIdsPermission[];
+        }
+        set canUpdateBadgeMetadata(value: TimedUpdateWithBadgeIdsPermission[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 10, value);
+        }
+        get canUpdateCollectionApprovedTransfers() {
+            return pb_1.Message.getRepeatedWrapperField(this, CollectionApprovedTransferPermission, 12) as CollectionApprovedTransferPermission[];
+        }
+        set canUpdateCollectionApprovedTransfers(value: CollectionApprovedTransferPermission[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 12, value);
+        }
+        static fromObject(data: {
+            canDeleteCollection?: ReturnType<typeof ActionPermission.prototype.toObject>[];
+            canArchiveCollection?: ReturnType<typeof TimedUpdatePermission.prototype.toObject>[];
+            canUpdateContractAddress?: ReturnType<typeof TimedUpdatePermission.prototype.toObject>[];
+            canUpdateOffChainBalancesMetadata?: ReturnType<typeof TimedUpdatePermission.prototype.toObject>[];
+            canUpdateStandards?: ReturnType<typeof TimedUpdatePermission.prototype.toObject>[];
+            canUpdateCustomData?: ReturnType<typeof TimedUpdatePermission.prototype.toObject>[];
+            canUpdateManager?: ReturnType<typeof TimedUpdatePermission.prototype.toObject>[];
+            canUpdateCollectionMetadata?: ReturnType<typeof TimedUpdatePermission.prototype.toObject>[];
+            canCreateMoreBadges?: ReturnType<typeof BalancesActionPermission.prototype.toObject>[];
+            canUpdateBadgeMetadata?: ReturnType<typeof TimedUpdateWithBadgeIdsPermission.prototype.toObject>[];
+            canUpdateCollectionApprovedTransfers?: ReturnType<typeof CollectionApprovedTransferPermission.prototype.toObject>[];
+        }): CollectionPermissions {
+            const message = new CollectionPermissions({});
+            if (data.canDeleteCollection != null) {
+                message.canDeleteCollection = data.canDeleteCollection.map(item => ActionPermission.fromObject(item));
+            }
+            if (data.canArchiveCollection != null) {
+                message.canArchiveCollection = data.canArchiveCollection.map(item => TimedUpdatePermission.fromObject(item));
+            }
+            if (data.canUpdateContractAddress != null) {
+                message.canUpdateContractAddress = data.canUpdateContractAddress.map(item => TimedUpdatePermission.fromObject(item));
+            }
+            if (data.canUpdateOffChainBalancesMetadata != null) {
+                message.canUpdateOffChainBalancesMetadata = data.canUpdateOffChainBalancesMetadata.map(item => TimedUpdatePermission.fromObject(item));
+            }
+            if (data.canUpdateStandards != null) {
+                message.canUpdateStandards = data.canUpdateStandards.map(item => TimedUpdatePermission.fromObject(item));
+            }
+            if (data.canUpdateCustomData != null) {
+                message.canUpdateCustomData = data.canUpdateCustomData.map(item => TimedUpdatePermission.fromObject(item));
+            }
+            if (data.canUpdateManager != null) {
+                message.canUpdateManager = data.canUpdateManager.map(item => TimedUpdatePermission.fromObject(item));
+            }
+            if (data.canUpdateCollectionMetadata != null) {
+                message.canUpdateCollectionMetadata = data.canUpdateCollectionMetadata.map(item => TimedUpdatePermission.fromObject(item));
+            }
+            if (data.canCreateMoreBadges != null) {
+                message.canCreateMoreBadges = data.canCreateMoreBadges.map(item => BalancesActionPermission.fromObject(item));
+            }
+            if (data.canUpdateBadgeMetadata != null) {
+                message.canUpdateBadgeMetadata = data.canUpdateBadgeMetadata.map(item => TimedUpdateWithBadgeIdsPermission.fromObject(item));
+            }
+            if (data.canUpdateCollectionApprovedTransfers != null) {
+                message.canUpdateCollectionApprovedTransfers = data.canUpdateCollectionApprovedTransfers.map(item => CollectionApprovedTransferPermission.fromObject(item));
+            }
+            return message;
+        }
+        toObject() {
+            const data: {
+                canDeleteCollection?: ReturnType<typeof ActionPermission.prototype.toObject>[];
+                canArchiveCollection?: ReturnType<typeof TimedUpdatePermission.prototype.toObject>[];
+                canUpdateContractAddress?: ReturnType<typeof TimedUpdatePermission.prototype.toObject>[];
+                canUpdateOffChainBalancesMetadata?: ReturnType<typeof TimedUpdatePermission.prototype.toObject>[];
+                canUpdateStandards?: ReturnType<typeof TimedUpdatePermission.prototype.toObject>[];
+                canUpdateCustomData?: ReturnType<typeof TimedUpdatePermission.prototype.toObject>[];
+                canUpdateManager?: ReturnType<typeof TimedUpdatePermission.prototype.toObject>[];
+                canUpdateCollectionMetadata?: ReturnType<typeof TimedUpdatePermission.prototype.toObject>[];
+                canCreateMoreBadges?: ReturnType<typeof BalancesActionPermission.prototype.toObject>[];
+                canUpdateBadgeMetadata?: ReturnType<typeof TimedUpdateWithBadgeIdsPermission.prototype.toObject>[];
+                canUpdateCollectionApprovedTransfers?: ReturnType<typeof CollectionApprovedTransferPermission.prototype.toObject>[];
+            } = {};
+            if (this.canDeleteCollection != null) {
+                data.canDeleteCollection = this.canDeleteCollection.map((item: ActionPermission) => item.toObject());
+            }
+            if (this.canArchiveCollection != null) {
+                data.canArchiveCollection = this.canArchiveCollection.map((item: TimedUpdatePermission) => item.toObject());
+            }
+            if (this.canUpdateContractAddress != null) {
+                data.canUpdateContractAddress = this.canUpdateContractAddress.map((item: TimedUpdatePermission) => item.toObject());
+            }
+            if (this.canUpdateOffChainBalancesMetadata != null) {
+                data.canUpdateOffChainBalancesMetadata = this.canUpdateOffChainBalancesMetadata.map((item: TimedUpdatePermission) => item.toObject());
+            }
+            if (this.canUpdateStandards != null) {
+                data.canUpdateStandards = this.canUpdateStandards.map((item: TimedUpdatePermission) => item.toObject());
+            }
+            if (this.canUpdateCustomData != null) {
+                data.canUpdateCustomData = this.canUpdateCustomData.map((item: TimedUpdatePermission) => item.toObject());
+            }
+            if (this.canUpdateManager != null) {
+                data.canUpdateManager = this.canUpdateManager.map((item: TimedUpdatePermission) => item.toObject());
+            }
+            if (this.canUpdateCollectionMetadata != null) {
+                data.canUpdateCollectionMetadata = this.canUpdateCollectionMetadata.map((item: TimedUpdatePermission) => item.toObject());
+            }
+            if (this.canCreateMoreBadges != null) {
+                data.canCreateMoreBadges = this.canCreateMoreBadges.map((item: BalancesActionPermission) => item.toObject());
+            }
+            if (this.canUpdateBadgeMetadata != null) {
+                data.canUpdateBadgeMetadata = this.canUpdateBadgeMetadata.map((item: TimedUpdateWithBadgeIdsPermission) => item.toObject());
+            }
+            if (this.canUpdateCollectionApprovedTransfers != null) {
+                data.canUpdateCollectionApprovedTransfers = this.canUpdateCollectionApprovedTransfers.map((item: CollectionApprovedTransferPermission) => item.toObject());
+            }
+            return data;
+        }
+        serialize(): Uint8Array;
+        serialize(w: pb_1.BinaryWriter): void;
+        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+            const writer = w || new pb_1.BinaryWriter();
+            if (this.canDeleteCollection.length)
+                writer.writeRepeatedMessage(1, this.canDeleteCollection, (item: ActionPermission) => item.serialize(writer));
+            if (this.canArchiveCollection.length)
+                writer.writeRepeatedMessage(2, this.canArchiveCollection, (item: TimedUpdatePermission) => item.serialize(writer));
+            if (this.canUpdateContractAddress.length)
+                writer.writeRepeatedMessage(3, this.canUpdateContractAddress, (item: TimedUpdatePermission) => item.serialize(writer));
+            if (this.canUpdateOffChainBalancesMetadata.length)
+                writer.writeRepeatedMessage(4, this.canUpdateOffChainBalancesMetadata, (item: TimedUpdatePermission) => item.serialize(writer));
+            if (this.canUpdateStandards.length)
+                writer.writeRepeatedMessage(5, this.canUpdateStandards, (item: TimedUpdatePermission) => item.serialize(writer));
+            if (this.canUpdateCustomData.length)
+                writer.writeRepeatedMessage(6, this.canUpdateCustomData, (item: TimedUpdatePermission) => item.serialize(writer));
+            if (this.canUpdateManager.length)
+                writer.writeRepeatedMessage(7, this.canUpdateManager, (item: TimedUpdatePermission) => item.serialize(writer));
+            if (this.canUpdateCollectionMetadata.length)
+                writer.writeRepeatedMessage(8, this.canUpdateCollectionMetadata, (item: TimedUpdatePermission) => item.serialize(writer));
+            if (this.canCreateMoreBadges.length)
+                writer.writeRepeatedMessage(9, this.canCreateMoreBadges, (item: BalancesActionPermission) => item.serialize(writer));
+            if (this.canUpdateBadgeMetadata.length)
+                writer.writeRepeatedMessage(10, this.canUpdateBadgeMetadata, (item: TimedUpdateWithBadgeIdsPermission) => item.serialize(writer));
+            if (this.canUpdateCollectionApprovedTransfers.length)
+                writer.writeRepeatedMessage(12, this.canUpdateCollectionApprovedTransfers, (item: CollectionApprovedTransferPermission) => item.serialize(writer));
+            if (!w)
+                return writer.getResultBuffer();
+        }
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): CollectionPermissions {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new CollectionPermissions();
+            while (reader.nextField()) {
+                if (reader.isEndGroup())
+                    break;
+                switch (reader.getFieldNumber()) {
+                    case 1:
+                        reader.readMessage(message.canDeleteCollection, () => pb_1.Message.addToRepeatedWrapperField(message, 1, ActionPermission.deserialize(reader), ActionPermission));
+                        break;
+                    case 2:
+                        reader.readMessage(message.canArchiveCollection, () => pb_1.Message.addToRepeatedWrapperField(message, 2, TimedUpdatePermission.deserialize(reader), TimedUpdatePermission));
+                        break;
+                    case 3:
+                        reader.readMessage(message.canUpdateContractAddress, () => pb_1.Message.addToRepeatedWrapperField(message, 3, TimedUpdatePermission.deserialize(reader), TimedUpdatePermission));
+                        break;
+                    case 4:
+                        reader.readMessage(message.canUpdateOffChainBalancesMetadata, () => pb_1.Message.addToRepeatedWrapperField(message, 4, TimedUpdatePermission.deserialize(reader), TimedUpdatePermission));
+                        break;
+                    case 5:
+                        reader.readMessage(message.canUpdateStandards, () => pb_1.Message.addToRepeatedWrapperField(message, 5, TimedUpdatePermission.deserialize(reader), TimedUpdatePermission));
+                        break;
+                    case 6:
+                        reader.readMessage(message.canUpdateCustomData, () => pb_1.Message.addToRepeatedWrapperField(message, 6, TimedUpdatePermission.deserialize(reader), TimedUpdatePermission));
+                        break;
+                    case 7:
+                        reader.readMessage(message.canUpdateManager, () => pb_1.Message.addToRepeatedWrapperField(message, 7, TimedUpdatePermission.deserialize(reader), TimedUpdatePermission));
+                        break;
+                    case 8:
+                        reader.readMessage(message.canUpdateCollectionMetadata, () => pb_1.Message.addToRepeatedWrapperField(message, 8, TimedUpdatePermission.deserialize(reader), TimedUpdatePermission));
+                        break;
+                    case 9:
+                        reader.readMessage(message.canCreateMoreBadges, () => pb_1.Message.addToRepeatedWrapperField(message, 9, BalancesActionPermission.deserialize(reader), BalancesActionPermission));
+                        break;
+                    case 10:
+                        reader.readMessage(message.canUpdateBadgeMetadata, () => pb_1.Message.addToRepeatedWrapperField(message, 10, TimedUpdateWithBadgeIdsPermission.deserialize(reader), TimedUpdateWithBadgeIdsPermission));
+                        break;
+                    case 12:
+                        reader.readMessage(message.canUpdateCollectionApprovedTransfers, () => pb_1.Message.addToRepeatedWrapperField(message, 12, CollectionApprovedTransferPermission.deserialize(reader), CollectionApprovedTransferPermission));
+                        break;
+                    default: reader.skipField();
+                }
+            }
+            return message;
+        }
+        serializeBinary(): Uint8Array {
+            return this.serialize();
+        }
+        static deserializeBinary(bytes: Uint8Array): CollectionPermissions {
+            return CollectionPermissions.deserialize(bytes);
+        }
+    }
+    export class UserPermissions extends pb_1.Message {
+        #one_of_decls: number[][] = [];
+        constructor(data?: any[] | {
+            canUpdateApprovedOutgoingTransfers?: UserApprovedOutgoingTransferPermission[];
+            canUpdateApprovedIncomingTransfers?: UserApprovedIncomingTransferPermission[];
+        }) {
+            super();
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1, 2], this.#one_of_decls);
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("canUpdateApprovedOutgoingTransfers" in data && data.canUpdateApprovedOutgoingTransfers != undefined) {
+                    this.canUpdateApprovedOutgoingTransfers = data.canUpdateApprovedOutgoingTransfers;
+                }
+                if ("canUpdateApprovedIncomingTransfers" in data && data.canUpdateApprovedIncomingTransfers != undefined) {
+                    this.canUpdateApprovedIncomingTransfers = data.canUpdateApprovedIncomingTransfers;
+                }
+            }
+        }
+        get canUpdateApprovedOutgoingTransfers() {
+            return pb_1.Message.getRepeatedWrapperField(this, UserApprovedOutgoingTransferPermission, 1) as UserApprovedOutgoingTransferPermission[];
+        }
+        set canUpdateApprovedOutgoingTransfers(value: UserApprovedOutgoingTransferPermission[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 1, value);
+        }
+        get canUpdateApprovedIncomingTransfers() {
+            return pb_1.Message.getRepeatedWrapperField(this, UserApprovedIncomingTransferPermission, 2) as UserApprovedIncomingTransferPermission[];
+        }
+        set canUpdateApprovedIncomingTransfers(value: UserApprovedIncomingTransferPermission[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 2, value);
+        }
+        static fromObject(data: {
+            canUpdateApprovedOutgoingTransfers?: ReturnType<typeof UserApprovedOutgoingTransferPermission.prototype.toObject>[];
+            canUpdateApprovedIncomingTransfers?: ReturnType<typeof UserApprovedIncomingTransferPermission.prototype.toObject>[];
+        }): UserPermissions {
+            const message = new UserPermissions({});
+            if (data.canUpdateApprovedOutgoingTransfers != null) {
+                message.canUpdateApprovedOutgoingTransfers = data.canUpdateApprovedOutgoingTransfers.map(item => UserApprovedOutgoingTransferPermission.fromObject(item));
+            }
+            if (data.canUpdateApprovedIncomingTransfers != null) {
+                message.canUpdateApprovedIncomingTransfers = data.canUpdateApprovedIncomingTransfers.map(item => UserApprovedIncomingTransferPermission.fromObject(item));
+            }
+            return message;
+        }
+        toObject() {
+            const data: {
+                canUpdateApprovedOutgoingTransfers?: ReturnType<typeof UserApprovedOutgoingTransferPermission.prototype.toObject>[];
+                canUpdateApprovedIncomingTransfers?: ReturnType<typeof UserApprovedIncomingTransferPermission.prototype.toObject>[];
+            } = {};
+            if (this.canUpdateApprovedOutgoingTransfers != null) {
+                data.canUpdateApprovedOutgoingTransfers = this.canUpdateApprovedOutgoingTransfers.map((item: UserApprovedOutgoingTransferPermission) => item.toObject());
+            }
+            if (this.canUpdateApprovedIncomingTransfers != null) {
+                data.canUpdateApprovedIncomingTransfers = this.canUpdateApprovedIncomingTransfers.map((item: UserApprovedIncomingTransferPermission) => item.toObject());
+            }
+            return data;
+        }
+        serialize(): Uint8Array;
+        serialize(w: pb_1.BinaryWriter): void;
+        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+            const writer = w || new pb_1.BinaryWriter();
+            if (this.canUpdateApprovedOutgoingTransfers.length)
+                writer.writeRepeatedMessage(1, this.canUpdateApprovedOutgoingTransfers, (item: UserApprovedOutgoingTransferPermission) => item.serialize(writer));
+            if (this.canUpdateApprovedIncomingTransfers.length)
+                writer.writeRepeatedMessage(2, this.canUpdateApprovedIncomingTransfers, (item: UserApprovedIncomingTransferPermission) => item.serialize(writer));
+            if (!w)
+                return writer.getResultBuffer();
+        }
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): UserPermissions {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new UserPermissions();
+            while (reader.nextField()) {
+                if (reader.isEndGroup())
+                    break;
+                switch (reader.getFieldNumber()) {
+                    case 1:
+                        reader.readMessage(message.canUpdateApprovedOutgoingTransfers, () => pb_1.Message.addToRepeatedWrapperField(message, 1, UserApprovedOutgoingTransferPermission.deserialize(reader), UserApprovedOutgoingTransferPermission));
+                        break;
+                    case 2:
+                        reader.readMessage(message.canUpdateApprovedIncomingTransfers, () => pb_1.Message.addToRepeatedWrapperField(message, 2, UserApprovedIncomingTransferPermission.deserialize(reader), UserApprovedIncomingTransferPermission));
+                        break;
+                    default: reader.skipField();
+                }
+            }
+            return message;
+        }
+        serializeBinary(): Uint8Array {
+            return this.serialize();
+        }
+        static deserializeBinary(bytes: Uint8Array): UserPermissions {
+            return UserPermissions.deserialize(bytes);
+        }
+    }
+    export class ValueOptions extends pb_1.Message {
+        #one_of_decls: number[][] = [];
+        constructor(data?: any[] | {
+            invertDefault?: boolean;
+            allValues?: boolean;
+            noValues?: boolean;
+        }) {
+            super();
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("invertDefault" in data && data.invertDefault != undefined) {
+                    this.invertDefault = data.invertDefault;
+                }
+                if ("allValues" in data && data.allValues != undefined) {
+                    this.allValues = data.allValues;
+                }
+                if ("noValues" in data && data.noValues != undefined) {
+                    this.noValues = data.noValues;
+                }
+            }
+        }
+        get invertDefault() {
+            return pb_1.Message.getFieldWithDefault(this, 1, false) as boolean;
+        }
+        set invertDefault(value: boolean) {
+            pb_1.Message.setField(this, 1, value);
+        }
+        get allValues() {
+            return pb_1.Message.getFieldWithDefault(this, 2, false) as boolean;
+        }
+        set allValues(value: boolean) {
+            pb_1.Message.setField(this, 2, value);
+        }
+        get noValues() {
+            return pb_1.Message.getFieldWithDefault(this, 3, false) as boolean;
+        }
+        set noValues(value: boolean) {
+            pb_1.Message.setField(this, 3, value);
+        }
+        static fromObject(data: {
+            invertDefault?: boolean;
+            allValues?: boolean;
+            noValues?: boolean;
+        }): ValueOptions {
+            const message = new ValueOptions({});
+            if (data.invertDefault != null) {
+                message.invertDefault = data.invertDefault;
+            }
+            if (data.allValues != null) {
+                message.allValues = data.allValues;
+            }
+            if (data.noValues != null) {
+                message.noValues = data.noValues;
+            }
+            return message;
+        }
+        toObject() {
+            const data: {
+                invertDefault?: boolean;
+                allValues?: boolean;
+                noValues?: boolean;
+            } = {};
+            if (this.invertDefault != null) {
+                data.invertDefault = this.invertDefault;
+            }
+            if (this.allValues != null) {
+                data.allValues = this.allValues;
+            }
+            if (this.noValues != null) {
+                data.noValues = this.noValues;
+            }
+            return data;
+        }
+        serialize(): Uint8Array;
+        serialize(w: pb_1.BinaryWriter): void;
+        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+            const writer = w || new pb_1.BinaryWriter();
+            if (this.invertDefault != false)
+                writer.writeBool(1, this.invertDefault);
+            if (this.allValues != false)
+                writer.writeBool(2, this.allValues);
+            if (this.noValues != false)
+                writer.writeBool(3, this.noValues);
+            if (!w)
+                return writer.getResultBuffer();
+        }
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): ValueOptions {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new ValueOptions();
+            while (reader.nextField()) {
+                if (reader.isEndGroup())
+                    break;
+                switch (reader.getFieldNumber()) {
+                    case 1:
+                        message.invertDefault = reader.readBool();
+                        break;
+                    case 2:
+                        message.allValues = reader.readBool();
+                        break;
+                    case 3:
+                        message.noValues = reader.readBool();
+                        break;
+                    default: reader.skipField();
+                }
+            }
+            return message;
+        }
+        serializeBinary(): Uint8Array {
+            return this.serialize();
+        }
+        static deserializeBinary(bytes: Uint8Array): ValueOptions {
+            return ValueOptions.deserialize(bytes);
+        }
+    }
+    export class CollectionApprovedTransferCombination extends pb_1.Message {
+        #one_of_decls: number[][] = [];
+        constructor(data?: any[] | {
+            fromMappingOptions?: ValueOptions;
+            toMappingOptions?: ValueOptions;
+            initiatedByMappingOptions?: ValueOptions;
+            transferTimesOptions?: ValueOptions;
+            badgeIdsOptions?: ValueOptions;
+            ownershipTimesOptions?: ValueOptions;
+            approvalTrackerIdOptions?: ValueOptions;
+            challengeTrackerIdOptions?: ValueOptions;
+            permittedTimesOptions?: ValueOptions;
+            forbiddenTimesOptions?: ValueOptions;
+        }) {
+            super();
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("fromMappingOptions" in data && data.fromMappingOptions != undefined) {
+                    this.fromMappingOptions = data.fromMappingOptions;
+                }
+                if ("toMappingOptions" in data && data.toMappingOptions != undefined) {
+                    this.toMappingOptions = data.toMappingOptions;
+                }
+                if ("initiatedByMappingOptions" in data && data.initiatedByMappingOptions != undefined) {
+                    this.initiatedByMappingOptions = data.initiatedByMappingOptions;
+                }
+                if ("transferTimesOptions" in data && data.transferTimesOptions != undefined) {
+                    this.transferTimesOptions = data.transferTimesOptions;
+                }
+                if ("badgeIdsOptions" in data && data.badgeIdsOptions != undefined) {
+                    this.badgeIdsOptions = data.badgeIdsOptions;
+                }
+                if ("ownershipTimesOptions" in data && data.ownershipTimesOptions != undefined) {
+                    this.ownershipTimesOptions = data.ownershipTimesOptions;
+                }
+                if ("approvalTrackerIdOptions" in data && data.approvalTrackerIdOptions != undefined) {
+                    this.approvalTrackerIdOptions = data.approvalTrackerIdOptions;
+                }
+                if ("challengeTrackerIdOptions" in data && data.challengeTrackerIdOptions != undefined) {
+                    this.challengeTrackerIdOptions = data.challengeTrackerIdOptions;
+                }
+                if ("permittedTimesOptions" in data && data.permittedTimesOptions != undefined) {
+                    this.permittedTimesOptions = data.permittedTimesOptions;
+                }
+                if ("forbiddenTimesOptions" in data && data.forbiddenTimesOptions != undefined) {
+                    this.forbiddenTimesOptions = data.forbiddenTimesOptions;
+                }
+            }
+        }
+        get fromMappingOptions() {
+            return pb_1.Message.getWrapperField(this, ValueOptions, 1) as ValueOptions;
+        }
+        set fromMappingOptions(value: ValueOptions) {
+            pb_1.Message.setWrapperField(this, 1, value);
+        }
+        get has_fromMappingOptions() {
+            return pb_1.Message.getField(this, 1) != null;
+        }
+        get toMappingOptions() {
+            return pb_1.Message.getWrapperField(this, ValueOptions, 2) as ValueOptions;
+        }
+        set toMappingOptions(value: ValueOptions) {
+            pb_1.Message.setWrapperField(this, 2, value);
+        }
+        get has_toMappingOptions() {
+            return pb_1.Message.getField(this, 2) != null;
+        }
+        get initiatedByMappingOptions() {
+            return pb_1.Message.getWrapperField(this, ValueOptions, 3) as ValueOptions;
+        }
+        set initiatedByMappingOptions(value: ValueOptions) {
+            pb_1.Message.setWrapperField(this, 3, value);
+        }
+        get has_initiatedByMappingOptions() {
+            return pb_1.Message.getField(this, 3) != null;
+        }
+        get transferTimesOptions() {
+            return pb_1.Message.getWrapperField(this, ValueOptions, 4) as ValueOptions;
+        }
+        set transferTimesOptions(value: ValueOptions) {
+            pb_1.Message.setWrapperField(this, 4, value);
+        }
+        get has_transferTimesOptions() {
+            return pb_1.Message.getField(this, 4) != null;
+        }
+        get badgeIdsOptions() {
+            return pb_1.Message.getWrapperField(this, ValueOptions, 5) as ValueOptions;
+        }
+        set badgeIdsOptions(value: ValueOptions) {
+            pb_1.Message.setWrapperField(this, 5, value);
+        }
+        get has_badgeIdsOptions() {
+            return pb_1.Message.getField(this, 5) != null;
+        }
+        get ownershipTimesOptions() {
+            return pb_1.Message.getWrapperField(this, ValueOptions, 6) as ValueOptions;
+        }
+        set ownershipTimesOptions(value: ValueOptions) {
+            pb_1.Message.setWrapperField(this, 6, value);
+        }
+        get has_ownershipTimesOptions() {
+            return pb_1.Message.getField(this, 6) != null;
+        }
+        get approvalTrackerIdOptions() {
+            return pb_1.Message.getWrapperField(this, ValueOptions, 10) as ValueOptions;
+        }
+        set approvalTrackerIdOptions(value: ValueOptions) {
+            pb_1.Message.setWrapperField(this, 10, value);
+        }
+        get has_approvalTrackerIdOptions() {
+            return pb_1.Message.getField(this, 10) != null;
+        }
+        get challengeTrackerIdOptions() {
+            return pb_1.Message.getWrapperField(this, ValueOptions, 9) as ValueOptions;
+        }
+        set challengeTrackerIdOptions(value: ValueOptions) {
+            pb_1.Message.setWrapperField(this, 9, value);
+        }
+        get has_challengeTrackerIdOptions() {
+            return pb_1.Message.getField(this, 9) != null;
+        }
+        get permittedTimesOptions() {
+            return pb_1.Message.getWrapperField(this, ValueOptions, 7) as ValueOptions;
+        }
+        set permittedTimesOptions(value: ValueOptions) {
+            pb_1.Message.setWrapperField(this, 7, value);
+        }
+        get has_permittedTimesOptions() {
+            return pb_1.Message.getField(this, 7) != null;
+        }
+        get forbiddenTimesOptions() {
+            return pb_1.Message.getWrapperField(this, ValueOptions, 8) as ValueOptions;
+        }
+        set forbiddenTimesOptions(value: ValueOptions) {
+            pb_1.Message.setWrapperField(this, 8, value);
+        }
+        get has_forbiddenTimesOptions() {
+            return pb_1.Message.getField(this, 8) != null;
+        }
+        static fromObject(data: {
+            fromMappingOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+            toMappingOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+            initiatedByMappingOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+            transferTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+            badgeIdsOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+            ownershipTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+            approvalTrackerIdOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+            challengeTrackerIdOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+            permittedTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+            forbiddenTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+        }): CollectionApprovedTransferCombination {
+            const message = new CollectionApprovedTransferCombination({});
+            if (data.fromMappingOptions != null) {
+                message.fromMappingOptions = ValueOptions.fromObject(data.fromMappingOptions);
+            }
+            if (data.toMappingOptions != null) {
+                message.toMappingOptions = ValueOptions.fromObject(data.toMappingOptions);
+            }
+            if (data.initiatedByMappingOptions != null) {
+                message.initiatedByMappingOptions = ValueOptions.fromObject(data.initiatedByMappingOptions);
+            }
+            if (data.transferTimesOptions != null) {
+                message.transferTimesOptions = ValueOptions.fromObject(data.transferTimesOptions);
+            }
+            if (data.badgeIdsOptions != null) {
+                message.badgeIdsOptions = ValueOptions.fromObject(data.badgeIdsOptions);
+            }
+            if (data.ownershipTimesOptions != null) {
+                message.ownershipTimesOptions = ValueOptions.fromObject(data.ownershipTimesOptions);
+            }
+            if (data.approvalTrackerIdOptions != null) {
+                message.approvalTrackerIdOptions = ValueOptions.fromObject(data.approvalTrackerIdOptions);
+            }
+            if (data.challengeTrackerIdOptions != null) {
+                message.challengeTrackerIdOptions = ValueOptions.fromObject(data.challengeTrackerIdOptions);
+            }
+            if (data.permittedTimesOptions != null) {
+                message.permittedTimesOptions = ValueOptions.fromObject(data.permittedTimesOptions);
+            }
+            if (data.forbiddenTimesOptions != null) {
+                message.forbiddenTimesOptions = ValueOptions.fromObject(data.forbiddenTimesOptions);
+            }
+            return message;
+        }
+        toObject() {
+            const data: {
+                fromMappingOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+                toMappingOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+                initiatedByMappingOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+                transferTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+                badgeIdsOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+                ownershipTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+                approvalTrackerIdOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+                challengeTrackerIdOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+                permittedTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+                forbiddenTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+            } = {};
+            if (this.fromMappingOptions != null) {
+                data.fromMappingOptions = this.fromMappingOptions.toObject();
+            }
+            if (this.toMappingOptions != null) {
+                data.toMappingOptions = this.toMappingOptions.toObject();
+            }
+            if (this.initiatedByMappingOptions != null) {
+                data.initiatedByMappingOptions = this.initiatedByMappingOptions.toObject();
+            }
+            if (this.transferTimesOptions != null) {
+                data.transferTimesOptions = this.transferTimesOptions.toObject();
+            }
+            if (this.badgeIdsOptions != null) {
+                data.badgeIdsOptions = this.badgeIdsOptions.toObject();
+            }
+            if (this.ownershipTimesOptions != null) {
+                data.ownershipTimesOptions = this.ownershipTimesOptions.toObject();
+            }
+            if (this.approvalTrackerIdOptions != null) {
+                data.approvalTrackerIdOptions = this.approvalTrackerIdOptions.toObject();
+            }
+            if (this.challengeTrackerIdOptions != null) {
+                data.challengeTrackerIdOptions = this.challengeTrackerIdOptions.toObject();
+            }
+            if (this.permittedTimesOptions != null) {
+                data.permittedTimesOptions = this.permittedTimesOptions.toObject();
+            }
+            if (this.forbiddenTimesOptions != null) {
+                data.forbiddenTimesOptions = this.forbiddenTimesOptions.toObject();
+            }
+            return data;
+        }
+        serialize(): Uint8Array;
+        serialize(w: pb_1.BinaryWriter): void;
+        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+            const writer = w || new pb_1.BinaryWriter();
+            if (this.has_fromMappingOptions)
+                writer.writeMessage(1, this.fromMappingOptions, () => this.fromMappingOptions.serialize(writer));
+            if (this.has_toMappingOptions)
+                writer.writeMessage(2, this.toMappingOptions, () => this.toMappingOptions.serialize(writer));
+            if (this.has_initiatedByMappingOptions)
+                writer.writeMessage(3, this.initiatedByMappingOptions, () => this.initiatedByMappingOptions.serialize(writer));
+            if (this.has_transferTimesOptions)
+                writer.writeMessage(4, this.transferTimesOptions, () => this.transferTimesOptions.serialize(writer));
+            if (this.has_badgeIdsOptions)
+                writer.writeMessage(5, this.badgeIdsOptions, () => this.badgeIdsOptions.serialize(writer));
+            if (this.has_ownershipTimesOptions)
+                writer.writeMessage(6, this.ownershipTimesOptions, () => this.ownershipTimesOptions.serialize(writer));
+            if (this.has_approvalTrackerIdOptions)
+                writer.writeMessage(10, this.approvalTrackerIdOptions, () => this.approvalTrackerIdOptions.serialize(writer));
+            if (this.has_challengeTrackerIdOptions)
+                writer.writeMessage(9, this.challengeTrackerIdOptions, () => this.challengeTrackerIdOptions.serialize(writer));
+            if (this.has_permittedTimesOptions)
+                writer.writeMessage(7, this.permittedTimesOptions, () => this.permittedTimesOptions.serialize(writer));
+            if (this.has_forbiddenTimesOptions)
+                writer.writeMessage(8, this.forbiddenTimesOptions, () => this.forbiddenTimesOptions.serialize(writer));
+            if (!w)
+                return writer.getResultBuffer();
+        }
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): CollectionApprovedTransferCombination {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new CollectionApprovedTransferCombination();
+            while (reader.nextField()) {
+                if (reader.isEndGroup())
+                    break;
+                switch (reader.getFieldNumber()) {
+                    case 1:
+                        reader.readMessage(message.fromMappingOptions, () => message.fromMappingOptions = ValueOptions.deserialize(reader));
+                        break;
+                    case 2:
+                        reader.readMessage(message.toMappingOptions, () => message.toMappingOptions = ValueOptions.deserialize(reader));
+                        break;
+                    case 3:
+                        reader.readMessage(message.initiatedByMappingOptions, () => message.initiatedByMappingOptions = ValueOptions.deserialize(reader));
+                        break;
+                    case 4:
+                        reader.readMessage(message.transferTimesOptions, () => message.transferTimesOptions = ValueOptions.deserialize(reader));
+                        break;
+                    case 5:
+                        reader.readMessage(message.badgeIdsOptions, () => message.badgeIdsOptions = ValueOptions.deserialize(reader));
+                        break;
+                    case 6:
+                        reader.readMessage(message.ownershipTimesOptions, () => message.ownershipTimesOptions = ValueOptions.deserialize(reader));
+                        break;
+                    case 10:
+                        reader.readMessage(message.approvalTrackerIdOptions, () => message.approvalTrackerIdOptions = ValueOptions.deserialize(reader));
+                        break;
+                    case 9:
+                        reader.readMessage(message.challengeTrackerIdOptions, () => message.challengeTrackerIdOptions = ValueOptions.deserialize(reader));
+                        break;
+                    case 7:
+                        reader.readMessage(message.permittedTimesOptions, () => message.permittedTimesOptions = ValueOptions.deserialize(reader));
+                        break;
+                    case 8:
+                        reader.readMessage(message.forbiddenTimesOptions, () => message.forbiddenTimesOptions = ValueOptions.deserialize(reader));
+                        break;
+                    default: reader.skipField();
+                }
+            }
+            return message;
+        }
+        serializeBinary(): Uint8Array {
+            return this.serialize();
+        }
+        static deserializeBinary(bytes: Uint8Array): CollectionApprovedTransferCombination {
+            return CollectionApprovedTransferCombination.deserialize(bytes);
+        }
+    }
+    export class CollectionApprovedTransferDefaultValues extends pb_1.Message {
+        #one_of_decls: number[][] = [];
+        constructor(data?: any[] | {
+            fromMappingId?: string;
+            toMappingId?: string;
+            initiatedByMappingId?: string;
+            transferTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+            badgeIds?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+            ownershipTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+            approvalTrackerId?: string;
+            challengeTrackerId?: string;
+            permittedTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+            forbiddenTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+        }) {
+            super();
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [4, 5, 6, 7, 8], this.#one_of_decls);
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("fromMappingId" in data && data.fromMappingId != undefined) {
+                    this.fromMappingId = data.fromMappingId;
+                }
+                if ("toMappingId" in data && data.toMappingId != undefined) {
+                    this.toMappingId = data.toMappingId;
+                }
+                if ("initiatedByMappingId" in data && data.initiatedByMappingId != undefined) {
+                    this.initiatedByMappingId = data.initiatedByMappingId;
+                }
+                if ("transferTimes" in data && data.transferTimes != undefined) {
+                    this.transferTimes = data.transferTimes;
+                }
+                if ("badgeIds" in data && data.badgeIds != undefined) {
+                    this.badgeIds = data.badgeIds;
+                }
+                if ("ownershipTimes" in data && data.ownershipTimes != undefined) {
+                    this.ownershipTimes = data.ownershipTimes;
+                }
+                if ("approvalTrackerId" in data && data.approvalTrackerId != undefined) {
+                    this.approvalTrackerId = data.approvalTrackerId;
+                }
+                if ("challengeTrackerId" in data && data.challengeTrackerId != undefined) {
+                    this.challengeTrackerId = data.challengeTrackerId;
+                }
+                if ("permittedTimes" in data && data.permittedTimes != undefined) {
+                    this.permittedTimes = data.permittedTimes;
+                }
+                if ("forbiddenTimes" in data && data.forbiddenTimes != undefined) {
+                    this.forbiddenTimes = data.forbiddenTimes;
+                }
+            }
+        }
+        get fromMappingId() {
+            return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
+        }
+        set fromMappingId(value: string) {
+            pb_1.Message.setField(this, 1, value);
+        }
+        get toMappingId() {
+            return pb_1.Message.getFieldWithDefault(this, 2, "") as string;
+        }
+        set toMappingId(value: string) {
+            pb_1.Message.setField(this, 2, value);
+        }
+        get initiatedByMappingId() {
+            return pb_1.Message.getFieldWithDefault(this, 3, "") as string;
+        }
+        set initiatedByMappingId(value: string) {
+            pb_1.Message.setField(this, 3, value);
+        }
+        get transferTimes() {
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 4) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+        }
+        set transferTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 4, value);
+        }
+        get badgeIds() {
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 5) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+        }
+        set badgeIds(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 5, value);
+        }
+        get ownershipTimes() {
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 6) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+        }
+        set ownershipTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 6, value);
+        }
+        get approvalTrackerId() {
+            return pb_1.Message.getFieldWithDefault(this, 10, "") as string;
+        }
+        set approvalTrackerId(value: string) {
+            pb_1.Message.setField(this, 10, value);
+        }
+        get challengeTrackerId() {
+            return pb_1.Message.getFieldWithDefault(this, 9, "") as string;
+        }
+        set challengeTrackerId(value: string) {
+            pb_1.Message.setField(this, 9, value);
+        }
+        get permittedTimes() {
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 7) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+        }
+        set permittedTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 7, value);
+        }
+        get forbiddenTimes() {
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 8) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+        }
+        set forbiddenTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 8, value);
+        }
+        static fromObject(data: {
+            fromMappingId?: string;
+            toMappingId?: string;
+            initiatedByMappingId?: string;
+            transferTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+            badgeIds?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+            ownershipTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+            approvalTrackerId?: string;
+            challengeTrackerId?: string;
+            permittedTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+            forbiddenTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+        }): CollectionApprovedTransferDefaultValues {
+            const message = new CollectionApprovedTransferDefaultValues({});
+            if (data.fromMappingId != null) {
+                message.fromMappingId = data.fromMappingId;
+            }
+            if (data.toMappingId != null) {
+                message.toMappingId = data.toMappingId;
+            }
+            if (data.initiatedByMappingId != null) {
+                message.initiatedByMappingId = data.initiatedByMappingId;
+            }
+            if (data.transferTimes != null) {
+                message.transferTimes = data.transferTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
+            }
+            if (data.badgeIds != null) {
+                message.badgeIds = data.badgeIds.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
+            }
+            if (data.ownershipTimes != null) {
+                message.ownershipTimes = data.ownershipTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
+            }
+            if (data.approvalTrackerId != null) {
+                message.approvalTrackerId = data.approvalTrackerId;
+            }
+            if (data.challengeTrackerId != null) {
+                message.challengeTrackerId = data.challengeTrackerId;
+            }
+            if (data.permittedTimes != null) {
+                message.permittedTimes = data.permittedTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
+            }
+            if (data.forbiddenTimes != null) {
+                message.forbiddenTimes = data.forbiddenTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
+            }
+            return message;
+        }
+        toObject() {
+            const data: {
+                fromMappingId?: string;
+                toMappingId?: string;
+                initiatedByMappingId?: string;
+                transferTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+                badgeIds?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+                ownershipTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+                approvalTrackerId?: string;
+                challengeTrackerId?: string;
+                permittedTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+                forbiddenTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+            } = {};
+            if (this.fromMappingId != null) {
+                data.fromMappingId = this.fromMappingId;
+            }
+            if (this.toMappingId != null) {
+                data.toMappingId = this.toMappingId;
+            }
+            if (this.initiatedByMappingId != null) {
+                data.initiatedByMappingId = this.initiatedByMappingId;
+            }
+            if (this.transferTimes != null) {
+                data.transferTimes = this.transferTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
+            }
+            if (this.badgeIds != null) {
+                data.badgeIds = this.badgeIds.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
+            }
+            if (this.ownershipTimes != null) {
+                data.ownershipTimes = this.ownershipTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
+            }
+            if (this.approvalTrackerId != null) {
+                data.approvalTrackerId = this.approvalTrackerId;
+            }
+            if (this.challengeTrackerId != null) {
+                data.challengeTrackerId = this.challengeTrackerId;
+            }
+            if (this.permittedTimes != null) {
+                data.permittedTimes = this.permittedTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
+            }
+            if (this.forbiddenTimes != null) {
+                data.forbiddenTimes = this.forbiddenTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
+            }
+            return data;
+        }
+        serialize(): Uint8Array;
+        serialize(w: pb_1.BinaryWriter): void;
+        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+            const writer = w || new pb_1.BinaryWriter();
+            if (this.fromMappingId.length)
+                writer.writeString(1, this.fromMappingId);
+            if (this.toMappingId.length)
+                writer.writeString(2, this.toMappingId);
+            if (this.initiatedByMappingId.length)
+                writer.writeString(3, this.initiatedByMappingId);
+            if (this.transferTimes.length)
+                writer.writeRepeatedMessage(4, this.transferTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
+            if (this.badgeIds.length)
+                writer.writeRepeatedMessage(5, this.badgeIds, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
+            if (this.ownershipTimes.length)
+                writer.writeRepeatedMessage(6, this.ownershipTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
+            if (this.approvalTrackerId.length)
+                writer.writeString(10, this.approvalTrackerId);
+            if (this.challengeTrackerId.length)
+                writer.writeString(9, this.challengeTrackerId);
+            if (this.permittedTimes.length)
+                writer.writeRepeatedMessage(7, this.permittedTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
+            if (this.forbiddenTimes.length)
+                writer.writeRepeatedMessage(8, this.forbiddenTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
+            if (!w)
+                return writer.getResultBuffer();
+        }
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): CollectionApprovedTransferDefaultValues {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new CollectionApprovedTransferDefaultValues();
+            while (reader.nextField()) {
+                if (reader.isEndGroup())
+                    break;
+                switch (reader.getFieldNumber()) {
+                    case 1:
+                        message.fromMappingId = reader.readString();
+                        break;
+                    case 2:
+                        message.toMappingId = reader.readString();
+                        break;
+                    case 3:
+                        message.initiatedByMappingId = reader.readString();
+                        break;
+                    case 4:
+                        reader.readMessage(message.transferTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 4, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
+                        break;
+                    case 5:
+                        reader.readMessage(message.badgeIds, () => pb_1.Message.addToRepeatedWrapperField(message, 5, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
+                        break;
+                    case 6:
+                        reader.readMessage(message.ownershipTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 6, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
+                        break;
+                    case 10:
+                        message.approvalTrackerId = reader.readString();
+                        break;
+                    case 9:
+                        message.challengeTrackerId = reader.readString();
+                        break;
+                    case 7:
+                        reader.readMessage(message.permittedTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 7, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
+                        break;
+                    case 8:
+                        reader.readMessage(message.forbiddenTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 8, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
+                        break;
+                    default: reader.skipField();
+                }
+            }
+            return message;
+        }
+        serializeBinary(): Uint8Array {
+            return this.serialize();
+        }
+        static deserializeBinary(bytes: Uint8Array): CollectionApprovedTransferDefaultValues {
+            return CollectionApprovedTransferDefaultValues.deserialize(bytes);
+        }
+    }
+    export class CollectionApprovedTransferPermission extends pb_1.Message {
+        #one_of_decls: number[][] = [];
+        constructor(data?: any[] | {
+            defaultValues?: CollectionApprovedTransferDefaultValues;
+            combinations?: CollectionApprovedTransferCombination[];
+        }) {
+            super();
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [7], this.#one_of_decls);
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("defaultValues" in data && data.defaultValues != undefined) {
+                    this.defaultValues = data.defaultValues;
+                }
+                if ("combinations" in data && data.combinations != undefined) {
+                    this.combinations = data.combinations;
+                }
+            }
+        }
+        get defaultValues() {
+            return pb_1.Message.getWrapperField(this, CollectionApprovedTransferDefaultValues, 1) as CollectionApprovedTransferDefaultValues;
+        }
+        set defaultValues(value: CollectionApprovedTransferDefaultValues) {
+            pb_1.Message.setWrapperField(this, 1, value);
+        }
+        get has_defaultValues() {
+            return pb_1.Message.getField(this, 1) != null;
+        }
+        get combinations() {
+            return pb_1.Message.getRepeatedWrapperField(this, CollectionApprovedTransferCombination, 7) as CollectionApprovedTransferCombination[];
+        }
+        set combinations(value: CollectionApprovedTransferCombination[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 7, value);
+        }
+        static fromObject(data: {
+            defaultValues?: ReturnType<typeof CollectionApprovedTransferDefaultValues.prototype.toObject>;
+            combinations?: ReturnType<typeof CollectionApprovedTransferCombination.prototype.toObject>[];
+        }): CollectionApprovedTransferPermission {
+            const message = new CollectionApprovedTransferPermission({});
+            if (data.defaultValues != null) {
+                message.defaultValues = CollectionApprovedTransferDefaultValues.fromObject(data.defaultValues);
+            }
+            if (data.combinations != null) {
+                message.combinations = data.combinations.map(item => CollectionApprovedTransferCombination.fromObject(item));
+            }
+            return message;
+        }
+        toObject() {
+            const data: {
+                defaultValues?: ReturnType<typeof CollectionApprovedTransferDefaultValues.prototype.toObject>;
+                combinations?: ReturnType<typeof CollectionApprovedTransferCombination.prototype.toObject>[];
+            } = {};
+            if (this.defaultValues != null) {
+                data.defaultValues = this.defaultValues.toObject();
+            }
+            if (this.combinations != null) {
+                data.combinations = this.combinations.map((item: CollectionApprovedTransferCombination) => item.toObject());
+            }
+            return data;
+        }
+        serialize(): Uint8Array;
+        serialize(w: pb_1.BinaryWriter): void;
+        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+            const writer = w || new pb_1.BinaryWriter();
+            if (this.has_defaultValues)
+                writer.writeMessage(1, this.defaultValues, () => this.defaultValues.serialize(writer));
+            if (this.combinations.length)
+                writer.writeRepeatedMessage(7, this.combinations, (item: CollectionApprovedTransferCombination) => item.serialize(writer));
+            if (!w)
+                return writer.getResultBuffer();
+        }
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): CollectionApprovedTransferPermission {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new CollectionApprovedTransferPermission();
+            while (reader.nextField()) {
+                if (reader.isEndGroup())
+                    break;
+                switch (reader.getFieldNumber()) {
+                    case 1:
+                        reader.readMessage(message.defaultValues, () => message.defaultValues = CollectionApprovedTransferDefaultValues.deserialize(reader));
+                        break;
+                    case 7:
+                        reader.readMessage(message.combinations, () => pb_1.Message.addToRepeatedWrapperField(message, 7, CollectionApprovedTransferCombination.deserialize(reader), CollectionApprovedTransferCombination));
+                        break;
+                    default: reader.skipField();
+                }
+            }
+            return message;
+        }
+        serializeBinary(): Uint8Array {
+            return this.serialize();
+        }
+        static deserializeBinary(bytes: Uint8Array): CollectionApprovedTransferPermission {
+            return CollectionApprovedTransferPermission.deserialize(bytes);
+        }
+    }
+    export class UserApprovedOutgoingTransferCombination extends pb_1.Message {
+        #one_of_decls: number[][] = [];
+        constructor(data?: any[] | {
+            toMappingOptions?: ValueOptions;
+            initiatedByMappingOptions?: ValueOptions;
+            transferTimesOptions?: ValueOptions;
+            badgeIdsOptions?: ValueOptions;
+            ownershipTimesOptions?: ValueOptions;
+            approvalTrackerIdOptions?: ValueOptions;
+            challengeTrackerIdOptions?: ValueOptions;
+            permittedTimesOptions?: ValueOptions;
+            forbiddenTimesOptions?: ValueOptions;
+        }) {
+            super();
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("toMappingOptions" in data && data.toMappingOptions != undefined) {
+                    this.toMappingOptions = data.toMappingOptions;
+                }
+                if ("initiatedByMappingOptions" in data && data.initiatedByMappingOptions != undefined) {
+                    this.initiatedByMappingOptions = data.initiatedByMappingOptions;
+                }
+                if ("transferTimesOptions" in data && data.transferTimesOptions != undefined) {
+                    this.transferTimesOptions = data.transferTimesOptions;
+                }
+                if ("badgeIdsOptions" in data && data.badgeIdsOptions != undefined) {
+                    this.badgeIdsOptions = data.badgeIdsOptions;
+                }
+                if ("ownershipTimesOptions" in data && data.ownershipTimesOptions != undefined) {
+                    this.ownershipTimesOptions = data.ownershipTimesOptions;
+                }
+                if ("approvalTrackerIdOptions" in data && data.approvalTrackerIdOptions != undefined) {
+                    this.approvalTrackerIdOptions = data.approvalTrackerIdOptions;
+                }
+                if ("challengeTrackerIdOptions" in data && data.challengeTrackerIdOptions != undefined) {
+                    this.challengeTrackerIdOptions = data.challengeTrackerIdOptions;
+                }
+                if ("permittedTimesOptions" in data && data.permittedTimesOptions != undefined) {
+                    this.permittedTimesOptions = data.permittedTimesOptions;
+                }
+                if ("forbiddenTimesOptions" in data && data.forbiddenTimesOptions != undefined) {
+                    this.forbiddenTimesOptions = data.forbiddenTimesOptions;
+                }
+            }
+        }
+        get toMappingOptions() {
+            return pb_1.Message.getWrapperField(this, ValueOptions, 1) as ValueOptions;
+        }
+        set toMappingOptions(value: ValueOptions) {
+            pb_1.Message.setWrapperField(this, 1, value);
+        }
+        get has_toMappingOptions() {
+            return pb_1.Message.getField(this, 1) != null;
+        }
+        get initiatedByMappingOptions() {
+            return pb_1.Message.getWrapperField(this, ValueOptions, 2) as ValueOptions;
+        }
+        set initiatedByMappingOptions(value: ValueOptions) {
+            pb_1.Message.setWrapperField(this, 2, value);
+        }
+        get has_initiatedByMappingOptions() {
+            return pb_1.Message.getField(this, 2) != null;
+        }
+        get transferTimesOptions() {
+            return pb_1.Message.getWrapperField(this, ValueOptions, 3) as ValueOptions;
+        }
+        set transferTimesOptions(value: ValueOptions) {
+            pb_1.Message.setWrapperField(this, 3, value);
+        }
+        get has_transferTimesOptions() {
+            return pb_1.Message.getField(this, 3) != null;
+        }
+        get badgeIdsOptions() {
+            return pb_1.Message.getWrapperField(this, ValueOptions, 4) as ValueOptions;
+        }
+        set badgeIdsOptions(value: ValueOptions) {
+            pb_1.Message.setWrapperField(this, 4, value);
+        }
+        get has_badgeIdsOptions() {
+            return pb_1.Message.getField(this, 4) != null;
+        }
+        get ownershipTimesOptions() {
+            return pb_1.Message.getWrapperField(this, ValueOptions, 5) as ValueOptions;
+        }
+        set ownershipTimesOptions(value: ValueOptions) {
+            pb_1.Message.setWrapperField(this, 5, value);
+        }
+        get has_ownershipTimesOptions() {
+            return pb_1.Message.getField(this, 5) != null;
+        }
+        get approvalTrackerIdOptions() {
+            return pb_1.Message.getWrapperField(this, ValueOptions, 10) as ValueOptions;
+        }
+        set approvalTrackerIdOptions(value: ValueOptions) {
+            pb_1.Message.setWrapperField(this, 10, value);
+        }
+        get has_approvalTrackerIdOptions() {
+            return pb_1.Message.getField(this, 10) != null;
+        }
+        get challengeTrackerIdOptions() {
+            return pb_1.Message.getWrapperField(this, ValueOptions, 9) as ValueOptions;
+        }
+        set challengeTrackerIdOptions(value: ValueOptions) {
+            pb_1.Message.setWrapperField(this, 9, value);
+        }
+        get has_challengeTrackerIdOptions() {
+            return pb_1.Message.getField(this, 9) != null;
+        }
+        get permittedTimesOptions() {
+            return pb_1.Message.getWrapperField(this, ValueOptions, 6) as ValueOptions;
+        }
+        set permittedTimesOptions(value: ValueOptions) {
+            pb_1.Message.setWrapperField(this, 6, value);
+        }
+        get has_permittedTimesOptions() {
+            return pb_1.Message.getField(this, 6) != null;
+        }
+        get forbiddenTimesOptions() {
+            return pb_1.Message.getWrapperField(this, ValueOptions, 7) as ValueOptions;
+        }
+        set forbiddenTimesOptions(value: ValueOptions) {
+            pb_1.Message.setWrapperField(this, 7, value);
+        }
+        get has_forbiddenTimesOptions() {
+            return pb_1.Message.getField(this, 7) != null;
+        }
+        static fromObject(data: {
+            toMappingOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+            initiatedByMappingOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+            transferTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+            badgeIdsOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+            ownershipTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+            approvalTrackerIdOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+            challengeTrackerIdOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+            permittedTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+            forbiddenTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+        }): UserApprovedOutgoingTransferCombination {
+            const message = new UserApprovedOutgoingTransferCombination({});
+            if (data.toMappingOptions != null) {
+                message.toMappingOptions = ValueOptions.fromObject(data.toMappingOptions);
+            }
+            if (data.initiatedByMappingOptions != null) {
+                message.initiatedByMappingOptions = ValueOptions.fromObject(data.initiatedByMappingOptions);
+            }
+            if (data.transferTimesOptions != null) {
+                message.transferTimesOptions = ValueOptions.fromObject(data.transferTimesOptions);
+            }
+            if (data.badgeIdsOptions != null) {
+                message.badgeIdsOptions = ValueOptions.fromObject(data.badgeIdsOptions);
+            }
+            if (data.ownershipTimesOptions != null) {
+                message.ownershipTimesOptions = ValueOptions.fromObject(data.ownershipTimesOptions);
+            }
+            if (data.approvalTrackerIdOptions != null) {
+                message.approvalTrackerIdOptions = ValueOptions.fromObject(data.approvalTrackerIdOptions);
+            }
+            if (data.challengeTrackerIdOptions != null) {
+                message.challengeTrackerIdOptions = ValueOptions.fromObject(data.challengeTrackerIdOptions);
+            }
+            if (data.permittedTimesOptions != null) {
+                message.permittedTimesOptions = ValueOptions.fromObject(data.permittedTimesOptions);
+            }
+            if (data.forbiddenTimesOptions != null) {
+                message.forbiddenTimesOptions = ValueOptions.fromObject(data.forbiddenTimesOptions);
+            }
+            return message;
+        }
+        toObject() {
+            const data: {
+                toMappingOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+                initiatedByMappingOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+                transferTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+                badgeIdsOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+                ownershipTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+                approvalTrackerIdOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+                challengeTrackerIdOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+                permittedTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+                forbiddenTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+            } = {};
+            if (this.toMappingOptions != null) {
+                data.toMappingOptions = this.toMappingOptions.toObject();
+            }
+            if (this.initiatedByMappingOptions != null) {
+                data.initiatedByMappingOptions = this.initiatedByMappingOptions.toObject();
+            }
+            if (this.transferTimesOptions != null) {
+                data.transferTimesOptions = this.transferTimesOptions.toObject();
+            }
+            if (this.badgeIdsOptions != null) {
+                data.badgeIdsOptions = this.badgeIdsOptions.toObject();
+            }
+            if (this.ownershipTimesOptions != null) {
+                data.ownershipTimesOptions = this.ownershipTimesOptions.toObject();
+            }
+            if (this.approvalTrackerIdOptions != null) {
+                data.approvalTrackerIdOptions = this.approvalTrackerIdOptions.toObject();
+            }
+            if (this.challengeTrackerIdOptions != null) {
+                data.challengeTrackerIdOptions = this.challengeTrackerIdOptions.toObject();
+            }
+            if (this.permittedTimesOptions != null) {
+                data.permittedTimesOptions = this.permittedTimesOptions.toObject();
+            }
+            if (this.forbiddenTimesOptions != null) {
+                data.forbiddenTimesOptions = this.forbiddenTimesOptions.toObject();
+            }
+            return data;
+        }
+        serialize(): Uint8Array;
+        serialize(w: pb_1.BinaryWriter): void;
+        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+            const writer = w || new pb_1.BinaryWriter();
+            if (this.has_toMappingOptions)
+                writer.writeMessage(1, this.toMappingOptions, () => this.toMappingOptions.serialize(writer));
+            if (this.has_initiatedByMappingOptions)
+                writer.writeMessage(2, this.initiatedByMappingOptions, () => this.initiatedByMappingOptions.serialize(writer));
+            if (this.has_transferTimesOptions)
+                writer.writeMessage(3, this.transferTimesOptions, () => this.transferTimesOptions.serialize(writer));
+            if (this.has_badgeIdsOptions)
+                writer.writeMessage(4, this.badgeIdsOptions, () => this.badgeIdsOptions.serialize(writer));
+            if (this.has_ownershipTimesOptions)
+                writer.writeMessage(5, this.ownershipTimesOptions, () => this.ownershipTimesOptions.serialize(writer));
+            if (this.has_approvalTrackerIdOptions)
+                writer.writeMessage(10, this.approvalTrackerIdOptions, () => this.approvalTrackerIdOptions.serialize(writer));
+            if (this.has_challengeTrackerIdOptions)
+                writer.writeMessage(9, this.challengeTrackerIdOptions, () => this.challengeTrackerIdOptions.serialize(writer));
+            if (this.has_permittedTimesOptions)
+                writer.writeMessage(6, this.permittedTimesOptions, () => this.permittedTimesOptions.serialize(writer));
+            if (this.has_forbiddenTimesOptions)
+                writer.writeMessage(7, this.forbiddenTimesOptions, () => this.forbiddenTimesOptions.serialize(writer));
+            if (!w)
+                return writer.getResultBuffer();
+        }
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): UserApprovedOutgoingTransferCombination {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new UserApprovedOutgoingTransferCombination();
+            while (reader.nextField()) {
+                if (reader.isEndGroup())
+                    break;
+                switch (reader.getFieldNumber()) {
+                    case 1:
+                        reader.readMessage(message.toMappingOptions, () => message.toMappingOptions = ValueOptions.deserialize(reader));
+                        break;
+                    case 2:
+                        reader.readMessage(message.initiatedByMappingOptions, () => message.initiatedByMappingOptions = ValueOptions.deserialize(reader));
+                        break;
+                    case 3:
+                        reader.readMessage(message.transferTimesOptions, () => message.transferTimesOptions = ValueOptions.deserialize(reader));
+                        break;
+                    case 4:
+                        reader.readMessage(message.badgeIdsOptions, () => message.badgeIdsOptions = ValueOptions.deserialize(reader));
+                        break;
+                    case 5:
+                        reader.readMessage(message.ownershipTimesOptions, () => message.ownershipTimesOptions = ValueOptions.deserialize(reader));
+                        break;
+                    case 10:
+                        reader.readMessage(message.approvalTrackerIdOptions, () => message.approvalTrackerIdOptions = ValueOptions.deserialize(reader));
+                        break;
+                    case 9:
+                        reader.readMessage(message.challengeTrackerIdOptions, () => message.challengeTrackerIdOptions = ValueOptions.deserialize(reader));
+                        break;
+                    case 6:
+                        reader.readMessage(message.permittedTimesOptions, () => message.permittedTimesOptions = ValueOptions.deserialize(reader));
+                        break;
+                    case 7:
+                        reader.readMessage(message.forbiddenTimesOptions, () => message.forbiddenTimesOptions = ValueOptions.deserialize(reader));
+                        break;
+                    default: reader.skipField();
+                }
+            }
+            return message;
+        }
+        serializeBinary(): Uint8Array {
+            return this.serialize();
+        }
+        static deserializeBinary(bytes: Uint8Array): UserApprovedOutgoingTransferCombination {
+            return UserApprovedOutgoingTransferCombination.deserialize(bytes);
+        }
+    }
+    export class UserApprovedOutgoingTransferDefaultValues extends pb_1.Message {
+        #one_of_decls: number[][] = [];
+        constructor(data?: any[] | {
+            toMappingId?: string;
+            initiatedByMappingId?: string;
+            transferTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+            badgeIds?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+            ownershipTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+            approvalTrackerId?: string;
+            challengeTrackerId?: string;
+            permittedTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+            forbiddenTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+        }) {
+            super();
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [3, 4, 5, 6, 7], this.#one_of_decls);
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("toMappingId" in data && data.toMappingId != undefined) {
+                    this.toMappingId = data.toMappingId;
+                }
+                if ("initiatedByMappingId" in data && data.initiatedByMappingId != undefined) {
+                    this.initiatedByMappingId = data.initiatedByMappingId;
+                }
+                if ("transferTimes" in data && data.transferTimes != undefined) {
+                    this.transferTimes = data.transferTimes;
+                }
+                if ("badgeIds" in data && data.badgeIds != undefined) {
+                    this.badgeIds = data.badgeIds;
+                }
+                if ("ownershipTimes" in data && data.ownershipTimes != undefined) {
+                    this.ownershipTimes = data.ownershipTimes;
+                }
+                if ("approvalTrackerId" in data && data.approvalTrackerId != undefined) {
+                    this.approvalTrackerId = data.approvalTrackerId;
+                }
+                if ("challengeTrackerId" in data && data.challengeTrackerId != undefined) {
+                    this.challengeTrackerId = data.challengeTrackerId;
+                }
+                if ("permittedTimes" in data && data.permittedTimes != undefined) {
+                    this.permittedTimes = data.permittedTimes;
+                }
+                if ("forbiddenTimes" in data && data.forbiddenTimes != undefined) {
+                    this.forbiddenTimes = data.forbiddenTimes;
+                }
+            }
+        }
+        get toMappingId() {
+            return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
+        }
+        set toMappingId(value: string) {
+            pb_1.Message.setField(this, 1, value);
+        }
+        get initiatedByMappingId() {
+            return pb_1.Message.getFieldWithDefault(this, 2, "") as string;
+        }
+        set initiatedByMappingId(value: string) {
+            pb_1.Message.setField(this, 2, value);
+        }
+        get transferTimes() {
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 3) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+        }
+        set transferTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 3, value);
+        }
+        get badgeIds() {
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 4) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+        }
+        set badgeIds(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 4, value);
+        }
+        get ownershipTimes() {
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 5) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+        }
+        set ownershipTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 5, value);
+        }
+        get approvalTrackerId() {
+            return pb_1.Message.getFieldWithDefault(this, 10, "") as string;
+        }
+        set approvalTrackerId(value: string) {
+            pb_1.Message.setField(this, 10, value);
+        }
+        get challengeTrackerId() {
+            return pb_1.Message.getFieldWithDefault(this, 9, "") as string;
+        }
+        set challengeTrackerId(value: string) {
+            pb_1.Message.setField(this, 9, value);
+        }
+        get permittedTimes() {
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 6) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+        }
+        set permittedTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 6, value);
+        }
+        get forbiddenTimes() {
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 7) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+        }
+        set forbiddenTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 7, value);
+        }
+        static fromObject(data: {
+            toMappingId?: string;
+            initiatedByMappingId?: string;
+            transferTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+            badgeIds?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+            ownershipTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+            approvalTrackerId?: string;
+            challengeTrackerId?: string;
+            permittedTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+            forbiddenTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+        }): UserApprovedOutgoingTransferDefaultValues {
+            const message = new UserApprovedOutgoingTransferDefaultValues({});
+            if (data.toMappingId != null) {
+                message.toMappingId = data.toMappingId;
+            }
+            if (data.initiatedByMappingId != null) {
+                message.initiatedByMappingId = data.initiatedByMappingId;
+            }
+            if (data.transferTimes != null) {
+                message.transferTimes = data.transferTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
+            }
+            if (data.badgeIds != null) {
+                message.badgeIds = data.badgeIds.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
+            }
+            if (data.ownershipTimes != null) {
+                message.ownershipTimes = data.ownershipTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
+            }
+            if (data.approvalTrackerId != null) {
+                message.approvalTrackerId = data.approvalTrackerId;
+            }
+            if (data.challengeTrackerId != null) {
+                message.challengeTrackerId = data.challengeTrackerId;
+            }
+            if (data.permittedTimes != null) {
+                message.permittedTimes = data.permittedTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
+            }
+            if (data.forbiddenTimes != null) {
+                message.forbiddenTimes = data.forbiddenTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
+            }
+            return message;
+        }
+        toObject() {
+            const data: {
+                toMappingId?: string;
+                initiatedByMappingId?: string;
+                transferTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+                badgeIds?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+                ownershipTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+                approvalTrackerId?: string;
+                challengeTrackerId?: string;
+                permittedTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+                forbiddenTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+            } = {};
+            if (this.toMappingId != null) {
+                data.toMappingId = this.toMappingId;
+            }
+            if (this.initiatedByMappingId != null) {
+                data.initiatedByMappingId = this.initiatedByMappingId;
+            }
+            if (this.transferTimes != null) {
+                data.transferTimes = this.transferTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
+            }
+            if (this.badgeIds != null) {
+                data.badgeIds = this.badgeIds.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
+            }
+            if (this.ownershipTimes != null) {
+                data.ownershipTimes = this.ownershipTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
+            }
+            if (this.approvalTrackerId != null) {
+                data.approvalTrackerId = this.approvalTrackerId;
+            }
+            if (this.challengeTrackerId != null) {
+                data.challengeTrackerId = this.challengeTrackerId;
+            }
+            if (this.permittedTimes != null) {
+                data.permittedTimes = this.permittedTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
+            }
+            if (this.forbiddenTimes != null) {
+                data.forbiddenTimes = this.forbiddenTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
+            }
+            return data;
+        }
+        serialize(): Uint8Array;
+        serialize(w: pb_1.BinaryWriter): void;
+        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+            const writer = w || new pb_1.BinaryWriter();
+            if (this.toMappingId.length)
+                writer.writeString(1, this.toMappingId);
+            if (this.initiatedByMappingId.length)
+                writer.writeString(2, this.initiatedByMappingId);
+            if (this.transferTimes.length)
+                writer.writeRepeatedMessage(3, this.transferTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
+            if (this.badgeIds.length)
+                writer.writeRepeatedMessage(4, this.badgeIds, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
+            if (this.ownershipTimes.length)
+                writer.writeRepeatedMessage(5, this.ownershipTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
+            if (this.approvalTrackerId.length)
+                writer.writeString(10, this.approvalTrackerId);
+            if (this.challengeTrackerId.length)
+                writer.writeString(9, this.challengeTrackerId);
+            if (this.permittedTimes.length)
+                writer.writeRepeatedMessage(6, this.permittedTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
+            if (this.forbiddenTimes.length)
+                writer.writeRepeatedMessage(7, this.forbiddenTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
+            if (!w)
+                return writer.getResultBuffer();
+        }
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): UserApprovedOutgoingTransferDefaultValues {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new UserApprovedOutgoingTransferDefaultValues();
+            while (reader.nextField()) {
+                if (reader.isEndGroup())
+                    break;
+                switch (reader.getFieldNumber()) {
+                    case 1:
+                        message.toMappingId = reader.readString();
+                        break;
+                    case 2:
+                        message.initiatedByMappingId = reader.readString();
+                        break;
+                    case 3:
+                        reader.readMessage(message.transferTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 3, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
+                        break;
+                    case 4:
+                        reader.readMessage(message.badgeIds, () => pb_1.Message.addToRepeatedWrapperField(message, 4, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
+                        break;
+                    case 5:
+                        reader.readMessage(message.ownershipTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 5, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
+                        break;
+                    case 10:
+                        message.approvalTrackerId = reader.readString();
+                        break;
+                    case 9:
+                        message.challengeTrackerId = reader.readString();
+                        break;
+                    case 6:
+                        reader.readMessage(message.permittedTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 6, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
+                        break;
+                    case 7:
+                        reader.readMessage(message.forbiddenTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 7, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
+                        break;
+                    default: reader.skipField();
+                }
+            }
+            return message;
+        }
+        serializeBinary(): Uint8Array {
+            return this.serialize();
+        }
+        static deserializeBinary(bytes: Uint8Array): UserApprovedOutgoingTransferDefaultValues {
+            return UserApprovedOutgoingTransferDefaultValues.deserialize(bytes);
+        }
+    }
+    export class UserApprovedOutgoingTransferPermission extends pb_1.Message {
+        #one_of_decls: number[][] = [];
+        constructor(data?: any[] | {
+            defaultValues?: UserApprovedOutgoingTransferDefaultValues;
+            combinations?: UserApprovedOutgoingTransferCombination[];
+        }) {
+            super();
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [2], this.#one_of_decls);
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("defaultValues" in data && data.defaultValues != undefined) {
+                    this.defaultValues = data.defaultValues;
+                }
+                if ("combinations" in data && data.combinations != undefined) {
+                    this.combinations = data.combinations;
+                }
+            }
+        }
+        get defaultValues() {
+            return pb_1.Message.getWrapperField(this, UserApprovedOutgoingTransferDefaultValues, 1) as UserApprovedOutgoingTransferDefaultValues;
+        }
+        set defaultValues(value: UserApprovedOutgoingTransferDefaultValues) {
+            pb_1.Message.setWrapperField(this, 1, value);
+        }
+        get has_defaultValues() {
+            return pb_1.Message.getField(this, 1) != null;
+        }
+        get combinations() {
+            return pb_1.Message.getRepeatedWrapperField(this, UserApprovedOutgoingTransferCombination, 2) as UserApprovedOutgoingTransferCombination[];
+        }
+        set combinations(value: UserApprovedOutgoingTransferCombination[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 2, value);
+        }
+        static fromObject(data: {
+            defaultValues?: ReturnType<typeof UserApprovedOutgoingTransferDefaultValues.prototype.toObject>;
+            combinations?: ReturnType<typeof UserApprovedOutgoingTransferCombination.prototype.toObject>[];
+        }): UserApprovedOutgoingTransferPermission {
+            const message = new UserApprovedOutgoingTransferPermission({});
+            if (data.defaultValues != null) {
+                message.defaultValues = UserApprovedOutgoingTransferDefaultValues.fromObject(data.defaultValues);
+            }
+            if (data.combinations != null) {
+                message.combinations = data.combinations.map(item => UserApprovedOutgoingTransferCombination.fromObject(item));
+            }
+            return message;
+        }
+        toObject() {
+            const data: {
+                defaultValues?: ReturnType<typeof UserApprovedOutgoingTransferDefaultValues.prototype.toObject>;
+                combinations?: ReturnType<typeof UserApprovedOutgoingTransferCombination.prototype.toObject>[];
+            } = {};
+            if (this.defaultValues != null) {
+                data.defaultValues = this.defaultValues.toObject();
+            }
+            if (this.combinations != null) {
+                data.combinations = this.combinations.map((item: UserApprovedOutgoingTransferCombination) => item.toObject());
+            }
+            return data;
+        }
+        serialize(): Uint8Array;
+        serialize(w: pb_1.BinaryWriter): void;
+        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+            const writer = w || new pb_1.BinaryWriter();
+            if (this.has_defaultValues)
+                writer.writeMessage(1, this.defaultValues, () => this.defaultValues.serialize(writer));
+            if (this.combinations.length)
+                writer.writeRepeatedMessage(2, this.combinations, (item: UserApprovedOutgoingTransferCombination) => item.serialize(writer));
+            if (!w)
+                return writer.getResultBuffer();
+        }
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): UserApprovedOutgoingTransferPermission {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new UserApprovedOutgoingTransferPermission();
+            while (reader.nextField()) {
+                if (reader.isEndGroup())
+                    break;
+                switch (reader.getFieldNumber()) {
+                    case 1:
+                        reader.readMessage(message.defaultValues, () => message.defaultValues = UserApprovedOutgoingTransferDefaultValues.deserialize(reader));
+                        break;
+                    case 2:
+                        reader.readMessage(message.combinations, () => pb_1.Message.addToRepeatedWrapperField(message, 2, UserApprovedOutgoingTransferCombination.deserialize(reader), UserApprovedOutgoingTransferCombination));
+                        break;
+                    default: reader.skipField();
+                }
+            }
+            return message;
+        }
+        serializeBinary(): Uint8Array {
+            return this.serialize();
+        }
+        static deserializeBinary(bytes: Uint8Array): UserApprovedOutgoingTransferPermission {
+            return UserApprovedOutgoingTransferPermission.deserialize(bytes);
+        }
+    }
+    export class UserApprovedIncomingTransferCombination extends pb_1.Message {
+        #one_of_decls: number[][] = [];
+        constructor(data?: any[] | {
+            fromMappingOptions?: ValueOptions;
+            initiatedByMappingOptions?: ValueOptions;
+            transferTimesOptions?: ValueOptions;
+            badgeIdsOptions?: ValueOptions;
+            ownershipTimesOptions?: ValueOptions;
+            approvalTrackerIdOptions?: ValueOptions;
+            challengeTrackerIdOptions?: ValueOptions;
+            permittedTimesOptions?: ValueOptions;
+            forbiddenTimesOptions?: ValueOptions;
+        }) {
+            super();
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("fromMappingOptions" in data && data.fromMappingOptions != undefined) {
+                    this.fromMappingOptions = data.fromMappingOptions;
+                }
+                if ("initiatedByMappingOptions" in data && data.initiatedByMappingOptions != undefined) {
+                    this.initiatedByMappingOptions = data.initiatedByMappingOptions;
+                }
+                if ("transferTimesOptions" in data && data.transferTimesOptions != undefined) {
+                    this.transferTimesOptions = data.transferTimesOptions;
+                }
+                if ("badgeIdsOptions" in data && data.badgeIdsOptions != undefined) {
+                    this.badgeIdsOptions = data.badgeIdsOptions;
+                }
+                if ("ownershipTimesOptions" in data && data.ownershipTimesOptions != undefined) {
+                    this.ownershipTimesOptions = data.ownershipTimesOptions;
+                }
+                if ("approvalTrackerIdOptions" in data && data.approvalTrackerIdOptions != undefined) {
+                    this.approvalTrackerIdOptions = data.approvalTrackerIdOptions;
+                }
+                if ("challengeTrackerIdOptions" in data && data.challengeTrackerIdOptions != undefined) {
+                    this.challengeTrackerIdOptions = data.challengeTrackerIdOptions;
+                }
+                if ("permittedTimesOptions" in data && data.permittedTimesOptions != undefined) {
+                    this.permittedTimesOptions = data.permittedTimesOptions;
+                }
+                if ("forbiddenTimesOptions" in data && data.forbiddenTimesOptions != undefined) {
+                    this.forbiddenTimesOptions = data.forbiddenTimesOptions;
+                }
+            }
+        }
+        get fromMappingOptions() {
+            return pb_1.Message.getWrapperField(this, ValueOptions, 1) as ValueOptions;
+        }
+        set fromMappingOptions(value: ValueOptions) {
+            pb_1.Message.setWrapperField(this, 1, value);
+        }
+        get has_fromMappingOptions() {
+            return pb_1.Message.getField(this, 1) != null;
+        }
+        get initiatedByMappingOptions() {
+            return pb_1.Message.getWrapperField(this, ValueOptions, 2) as ValueOptions;
+        }
+        set initiatedByMappingOptions(value: ValueOptions) {
+            pb_1.Message.setWrapperField(this, 2, value);
+        }
+        get has_initiatedByMappingOptions() {
+            return pb_1.Message.getField(this, 2) != null;
+        }
+        get transferTimesOptions() {
+            return pb_1.Message.getWrapperField(this, ValueOptions, 3) as ValueOptions;
+        }
+        set transferTimesOptions(value: ValueOptions) {
+            pb_1.Message.setWrapperField(this, 3, value);
+        }
+        get has_transferTimesOptions() {
+            return pb_1.Message.getField(this, 3) != null;
+        }
+        get badgeIdsOptions() {
+            return pb_1.Message.getWrapperField(this, ValueOptions, 4) as ValueOptions;
+        }
+        set badgeIdsOptions(value: ValueOptions) {
+            pb_1.Message.setWrapperField(this, 4, value);
+        }
+        get has_badgeIdsOptions() {
+            return pb_1.Message.getField(this, 4) != null;
+        }
+        get ownershipTimesOptions() {
+            return pb_1.Message.getWrapperField(this, ValueOptions, 5) as ValueOptions;
+        }
+        set ownershipTimesOptions(value: ValueOptions) {
+            pb_1.Message.setWrapperField(this, 5, value);
+        }
+        get has_ownershipTimesOptions() {
+            return pb_1.Message.getField(this, 5) != null;
+        }
+        get approvalTrackerIdOptions() {
+            return pb_1.Message.getWrapperField(this, ValueOptions, 10) as ValueOptions;
+        }
+        set approvalTrackerIdOptions(value: ValueOptions) {
+            pb_1.Message.setWrapperField(this, 10, value);
+        }
+        get has_approvalTrackerIdOptions() {
+            return pb_1.Message.getField(this, 10) != null;
+        }
+        get challengeTrackerIdOptions() {
+            return pb_1.Message.getWrapperField(this, ValueOptions, 9) as ValueOptions;
+        }
+        set challengeTrackerIdOptions(value: ValueOptions) {
+            pb_1.Message.setWrapperField(this, 9, value);
+        }
+        get has_challengeTrackerIdOptions() {
+            return pb_1.Message.getField(this, 9) != null;
+        }
+        get permittedTimesOptions() {
+            return pb_1.Message.getWrapperField(this, ValueOptions, 6) as ValueOptions;
+        }
+        set permittedTimesOptions(value: ValueOptions) {
+            pb_1.Message.setWrapperField(this, 6, value);
+        }
+        get has_permittedTimesOptions() {
+            return pb_1.Message.getField(this, 6) != null;
+        }
+        get forbiddenTimesOptions() {
+            return pb_1.Message.getWrapperField(this, ValueOptions, 7) as ValueOptions;
+        }
+        set forbiddenTimesOptions(value: ValueOptions) {
+            pb_1.Message.setWrapperField(this, 7, value);
+        }
+        get has_forbiddenTimesOptions() {
+            return pb_1.Message.getField(this, 7) != null;
+        }
+        static fromObject(data: {
+            fromMappingOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+            initiatedByMappingOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+            transferTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+            badgeIdsOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+            ownershipTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+            approvalTrackerIdOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+            challengeTrackerIdOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+            permittedTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+            forbiddenTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+        }): UserApprovedIncomingTransferCombination {
+            const message = new UserApprovedIncomingTransferCombination({});
+            if (data.fromMappingOptions != null) {
+                message.fromMappingOptions = ValueOptions.fromObject(data.fromMappingOptions);
+            }
+            if (data.initiatedByMappingOptions != null) {
+                message.initiatedByMappingOptions = ValueOptions.fromObject(data.initiatedByMappingOptions);
+            }
+            if (data.transferTimesOptions != null) {
+                message.transferTimesOptions = ValueOptions.fromObject(data.transferTimesOptions);
+            }
+            if (data.badgeIdsOptions != null) {
+                message.badgeIdsOptions = ValueOptions.fromObject(data.badgeIdsOptions);
+            }
+            if (data.ownershipTimesOptions != null) {
+                message.ownershipTimesOptions = ValueOptions.fromObject(data.ownershipTimesOptions);
+            }
+            if (data.approvalTrackerIdOptions != null) {
+                message.approvalTrackerIdOptions = ValueOptions.fromObject(data.approvalTrackerIdOptions);
+            }
+            if (data.challengeTrackerIdOptions != null) {
+                message.challengeTrackerIdOptions = ValueOptions.fromObject(data.challengeTrackerIdOptions);
+            }
+            if (data.permittedTimesOptions != null) {
+                message.permittedTimesOptions = ValueOptions.fromObject(data.permittedTimesOptions);
+            }
+            if (data.forbiddenTimesOptions != null) {
+                message.forbiddenTimesOptions = ValueOptions.fromObject(data.forbiddenTimesOptions);
+            }
+            return message;
+        }
+        toObject() {
+            const data: {
+                fromMappingOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+                initiatedByMappingOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+                transferTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+                badgeIdsOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+                ownershipTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+                approvalTrackerIdOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+                challengeTrackerIdOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+                permittedTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+                forbiddenTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+            } = {};
+            if (this.fromMappingOptions != null) {
+                data.fromMappingOptions = this.fromMappingOptions.toObject();
+            }
+            if (this.initiatedByMappingOptions != null) {
+                data.initiatedByMappingOptions = this.initiatedByMappingOptions.toObject();
+            }
+            if (this.transferTimesOptions != null) {
+                data.transferTimesOptions = this.transferTimesOptions.toObject();
+            }
+            if (this.badgeIdsOptions != null) {
+                data.badgeIdsOptions = this.badgeIdsOptions.toObject();
+            }
+            if (this.ownershipTimesOptions != null) {
+                data.ownershipTimesOptions = this.ownershipTimesOptions.toObject();
+            }
+            if (this.approvalTrackerIdOptions != null) {
+                data.approvalTrackerIdOptions = this.approvalTrackerIdOptions.toObject();
+            }
+            if (this.challengeTrackerIdOptions != null) {
+                data.challengeTrackerIdOptions = this.challengeTrackerIdOptions.toObject();
+            }
+            if (this.permittedTimesOptions != null) {
+                data.permittedTimesOptions = this.permittedTimesOptions.toObject();
+            }
+            if (this.forbiddenTimesOptions != null) {
+                data.forbiddenTimesOptions = this.forbiddenTimesOptions.toObject();
+            }
+            return data;
+        }
+        serialize(): Uint8Array;
+        serialize(w: pb_1.BinaryWriter): void;
+        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+            const writer = w || new pb_1.BinaryWriter();
+            if (this.has_fromMappingOptions)
+                writer.writeMessage(1, this.fromMappingOptions, () => this.fromMappingOptions.serialize(writer));
+            if (this.has_initiatedByMappingOptions)
+                writer.writeMessage(2, this.initiatedByMappingOptions, () => this.initiatedByMappingOptions.serialize(writer));
+            if (this.has_transferTimesOptions)
+                writer.writeMessage(3, this.transferTimesOptions, () => this.transferTimesOptions.serialize(writer));
+            if (this.has_badgeIdsOptions)
+                writer.writeMessage(4, this.badgeIdsOptions, () => this.badgeIdsOptions.serialize(writer));
+            if (this.has_ownershipTimesOptions)
+                writer.writeMessage(5, this.ownershipTimesOptions, () => this.ownershipTimesOptions.serialize(writer));
+            if (this.has_approvalTrackerIdOptions)
+                writer.writeMessage(10, this.approvalTrackerIdOptions, () => this.approvalTrackerIdOptions.serialize(writer));
+            if (this.has_challengeTrackerIdOptions)
+                writer.writeMessage(9, this.challengeTrackerIdOptions, () => this.challengeTrackerIdOptions.serialize(writer));
+            if (this.has_permittedTimesOptions)
+                writer.writeMessage(6, this.permittedTimesOptions, () => this.permittedTimesOptions.serialize(writer));
+            if (this.has_forbiddenTimesOptions)
+                writer.writeMessage(7, this.forbiddenTimesOptions, () => this.forbiddenTimesOptions.serialize(writer));
+            if (!w)
+                return writer.getResultBuffer();
+        }
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): UserApprovedIncomingTransferCombination {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new UserApprovedIncomingTransferCombination();
+            while (reader.nextField()) {
+                if (reader.isEndGroup())
+                    break;
+                switch (reader.getFieldNumber()) {
+                    case 1:
+                        reader.readMessage(message.fromMappingOptions, () => message.fromMappingOptions = ValueOptions.deserialize(reader));
+                        break;
+                    case 2:
+                        reader.readMessage(message.initiatedByMappingOptions, () => message.initiatedByMappingOptions = ValueOptions.deserialize(reader));
+                        break;
+                    case 3:
+                        reader.readMessage(message.transferTimesOptions, () => message.transferTimesOptions = ValueOptions.deserialize(reader));
+                        break;
+                    case 4:
+                        reader.readMessage(message.badgeIdsOptions, () => message.badgeIdsOptions = ValueOptions.deserialize(reader));
+                        break;
+                    case 5:
+                        reader.readMessage(message.ownershipTimesOptions, () => message.ownershipTimesOptions = ValueOptions.deserialize(reader));
+                        break;
+                    case 10:
+                        reader.readMessage(message.approvalTrackerIdOptions, () => message.approvalTrackerIdOptions = ValueOptions.deserialize(reader));
+                        break;
+                    case 9:
+                        reader.readMessage(message.challengeTrackerIdOptions, () => message.challengeTrackerIdOptions = ValueOptions.deserialize(reader));
+                        break;
+                    case 6:
+                        reader.readMessage(message.permittedTimesOptions, () => message.permittedTimesOptions = ValueOptions.deserialize(reader));
+                        break;
+                    case 7:
+                        reader.readMessage(message.forbiddenTimesOptions, () => message.forbiddenTimesOptions = ValueOptions.deserialize(reader));
+                        break;
+                    default: reader.skipField();
+                }
+            }
+            return message;
+        }
+        serializeBinary(): Uint8Array {
+            return this.serialize();
+        }
+        static deserializeBinary(bytes: Uint8Array): UserApprovedIncomingTransferCombination {
+            return UserApprovedIncomingTransferCombination.deserialize(bytes);
+        }
+    }
+    export class UserApprovedIncomingTransferDefaultValues extends pb_1.Message {
+        #one_of_decls: number[][] = [];
+        constructor(data?: any[] | {
+            fromMappingId?: string;
+            initiatedByMappingId?: string;
+            transferTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+            badgeIds?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+            ownershipTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+            approvalTrackerId?: string;
+            challengeTrackerId?: string;
+            permittedTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+            forbiddenTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+        }) {
+            super();
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [3, 4, 5, 6, 7], this.#one_of_decls);
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("fromMappingId" in data && data.fromMappingId != undefined) {
+                    this.fromMappingId = data.fromMappingId;
+                }
+                if ("initiatedByMappingId" in data && data.initiatedByMappingId != undefined) {
+                    this.initiatedByMappingId = data.initiatedByMappingId;
+                }
+                if ("transferTimes" in data && data.transferTimes != undefined) {
+                    this.transferTimes = data.transferTimes;
+                }
+                if ("badgeIds" in data && data.badgeIds != undefined) {
+                    this.badgeIds = data.badgeIds;
+                }
+                if ("ownershipTimes" in data && data.ownershipTimes != undefined) {
+                    this.ownershipTimes = data.ownershipTimes;
+                }
+                if ("approvalTrackerId" in data && data.approvalTrackerId != undefined) {
+                    this.approvalTrackerId = data.approvalTrackerId;
+                }
+                if ("challengeTrackerId" in data && data.challengeTrackerId != undefined) {
+                    this.challengeTrackerId = data.challengeTrackerId;
+                }
+                if ("permittedTimes" in data && data.permittedTimes != undefined) {
+                    this.permittedTimes = data.permittedTimes;
+                }
+                if ("forbiddenTimes" in data && data.forbiddenTimes != undefined) {
+                    this.forbiddenTimes = data.forbiddenTimes;
+                }
+            }
+        }
+        get fromMappingId() {
+            return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
+        }
+        set fromMappingId(value: string) {
+            pb_1.Message.setField(this, 1, value);
+        }
+        get initiatedByMappingId() {
+            return pb_1.Message.getFieldWithDefault(this, 2, "") as string;
+        }
+        set initiatedByMappingId(value: string) {
+            pb_1.Message.setField(this, 2, value);
+        }
+        get transferTimes() {
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 3) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+        }
+        set transferTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 3, value);
+        }
+        get badgeIds() {
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 4) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+        }
+        set badgeIds(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 4, value);
+        }
+        get ownershipTimes() {
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 5) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+        }
+        set ownershipTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 5, value);
+        }
+        get approvalTrackerId() {
+            return pb_1.Message.getFieldWithDefault(this, 10, "") as string;
+        }
+        set approvalTrackerId(value: string) {
+            pb_1.Message.setField(this, 10, value);
+        }
+        get challengeTrackerId() {
+            return pb_1.Message.getFieldWithDefault(this, 9, "") as string;
+        }
+        set challengeTrackerId(value: string) {
+            pb_1.Message.setField(this, 9, value);
+        }
+        get permittedTimes() {
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 6) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+        }
+        set permittedTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 6, value);
+        }
+        get forbiddenTimes() {
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 7) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+        }
+        set forbiddenTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 7, value);
+        }
+        static fromObject(data: {
+            fromMappingId?: string;
+            initiatedByMappingId?: string;
+            transferTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+            badgeIds?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+            ownershipTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+            approvalTrackerId?: string;
+            challengeTrackerId?: string;
+            permittedTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+            forbiddenTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+        }): UserApprovedIncomingTransferDefaultValues {
+            const message = new UserApprovedIncomingTransferDefaultValues({});
+            if (data.fromMappingId != null) {
+                message.fromMappingId = data.fromMappingId;
+            }
+            if (data.initiatedByMappingId != null) {
+                message.initiatedByMappingId = data.initiatedByMappingId;
+            }
+            if (data.transferTimes != null) {
+                message.transferTimes = data.transferTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
+            }
+            if (data.badgeIds != null) {
+                message.badgeIds = data.badgeIds.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
+            }
+            if (data.ownershipTimes != null) {
+                message.ownershipTimes = data.ownershipTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
+            }
+            if (data.approvalTrackerId != null) {
+                message.approvalTrackerId = data.approvalTrackerId;
+            }
+            if (data.challengeTrackerId != null) {
+                message.challengeTrackerId = data.challengeTrackerId;
+            }
+            if (data.permittedTimes != null) {
+                message.permittedTimes = data.permittedTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
+            }
+            if (data.forbiddenTimes != null) {
+                message.forbiddenTimes = data.forbiddenTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
+            }
+            return message;
+        }
+        toObject() {
+            const data: {
+                fromMappingId?: string;
+                initiatedByMappingId?: string;
+                transferTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+                badgeIds?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+                ownershipTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+                approvalTrackerId?: string;
+                challengeTrackerId?: string;
+                permittedTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+                forbiddenTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+            } = {};
+            if (this.fromMappingId != null) {
+                data.fromMappingId = this.fromMappingId;
+            }
+            if (this.initiatedByMappingId != null) {
+                data.initiatedByMappingId = this.initiatedByMappingId;
+            }
+            if (this.transferTimes != null) {
+                data.transferTimes = this.transferTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
+            }
+            if (this.badgeIds != null) {
+                data.badgeIds = this.badgeIds.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
+            }
+            if (this.ownershipTimes != null) {
+                data.ownershipTimes = this.ownershipTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
+            }
+            if (this.approvalTrackerId != null) {
+                data.approvalTrackerId = this.approvalTrackerId;
+            }
+            if (this.challengeTrackerId != null) {
+                data.challengeTrackerId = this.challengeTrackerId;
+            }
+            if (this.permittedTimes != null) {
+                data.permittedTimes = this.permittedTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
+            }
+            if (this.forbiddenTimes != null) {
+                data.forbiddenTimes = this.forbiddenTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
+            }
+            return data;
+        }
+        serialize(): Uint8Array;
+        serialize(w: pb_1.BinaryWriter): void;
+        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+            const writer = w || new pb_1.BinaryWriter();
+            if (this.fromMappingId.length)
+                writer.writeString(1, this.fromMappingId);
+            if (this.initiatedByMappingId.length)
+                writer.writeString(2, this.initiatedByMappingId);
+            if (this.transferTimes.length)
+                writer.writeRepeatedMessage(3, this.transferTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
+            if (this.badgeIds.length)
+                writer.writeRepeatedMessage(4, this.badgeIds, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
+            if (this.ownershipTimes.length)
+                writer.writeRepeatedMessage(5, this.ownershipTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
+            if (this.approvalTrackerId.length)
+                writer.writeString(10, this.approvalTrackerId);
+            if (this.challengeTrackerId.length)
+                writer.writeString(9, this.challengeTrackerId);
+            if (this.permittedTimes.length)
+                writer.writeRepeatedMessage(6, this.permittedTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
+            if (this.forbiddenTimes.length)
+                writer.writeRepeatedMessage(7, this.forbiddenTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
+            if (!w)
+                return writer.getResultBuffer();
+        }
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): UserApprovedIncomingTransferDefaultValues {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new UserApprovedIncomingTransferDefaultValues();
+            while (reader.nextField()) {
+                if (reader.isEndGroup())
+                    break;
+                switch (reader.getFieldNumber()) {
+                    case 1:
+                        message.fromMappingId = reader.readString();
+                        break;
+                    case 2:
+                        message.initiatedByMappingId = reader.readString();
+                        break;
+                    case 3:
+                        reader.readMessage(message.transferTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 3, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
+                        break;
+                    case 4:
+                        reader.readMessage(message.badgeIds, () => pb_1.Message.addToRepeatedWrapperField(message, 4, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
+                        break;
+                    case 5:
+                        reader.readMessage(message.ownershipTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 5, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
+                        break;
+                    case 10:
+                        message.approvalTrackerId = reader.readString();
+                        break;
+                    case 9:
+                        message.challengeTrackerId = reader.readString();
+                        break;
+                    case 6:
+                        reader.readMessage(message.permittedTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 6, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
+                        break;
+                    case 7:
+                        reader.readMessage(message.forbiddenTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 7, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
+                        break;
+                    default: reader.skipField();
+                }
+            }
+            return message;
+        }
+        serializeBinary(): Uint8Array {
+            return this.serialize();
+        }
+        static deserializeBinary(bytes: Uint8Array): UserApprovedIncomingTransferDefaultValues {
+            return UserApprovedIncomingTransferDefaultValues.deserialize(bytes);
+        }
+    }
+    export class UserApprovedIncomingTransferPermission extends pb_1.Message {
+        #one_of_decls: number[][] = [];
+        constructor(data?: any[] | {
+            defaultValues?: UserApprovedIncomingTransferDefaultValues;
+            combinations?: UserApprovedIncomingTransferCombination[];
+        }) {
+            super();
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [2], this.#one_of_decls);
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("defaultValues" in data && data.defaultValues != undefined) {
+                    this.defaultValues = data.defaultValues;
+                }
+                if ("combinations" in data && data.combinations != undefined) {
+                    this.combinations = data.combinations;
+                }
+            }
+        }
+        get defaultValues() {
+            return pb_1.Message.getWrapperField(this, UserApprovedIncomingTransferDefaultValues, 1) as UserApprovedIncomingTransferDefaultValues;
+        }
+        set defaultValues(value: UserApprovedIncomingTransferDefaultValues) {
+            pb_1.Message.setWrapperField(this, 1, value);
+        }
+        get has_defaultValues() {
+            return pb_1.Message.getField(this, 1) != null;
+        }
+        get combinations() {
+            return pb_1.Message.getRepeatedWrapperField(this, UserApprovedIncomingTransferCombination, 2) as UserApprovedIncomingTransferCombination[];
+        }
+        set combinations(value: UserApprovedIncomingTransferCombination[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 2, value);
+        }
+        static fromObject(data: {
+            defaultValues?: ReturnType<typeof UserApprovedIncomingTransferDefaultValues.prototype.toObject>;
+            combinations?: ReturnType<typeof UserApprovedIncomingTransferCombination.prototype.toObject>[];
+        }): UserApprovedIncomingTransferPermission {
+            const message = new UserApprovedIncomingTransferPermission({});
+            if (data.defaultValues != null) {
+                message.defaultValues = UserApprovedIncomingTransferDefaultValues.fromObject(data.defaultValues);
+            }
+            if (data.combinations != null) {
+                message.combinations = data.combinations.map(item => UserApprovedIncomingTransferCombination.fromObject(item));
+            }
+            return message;
+        }
+        toObject() {
+            const data: {
+                defaultValues?: ReturnType<typeof UserApprovedIncomingTransferDefaultValues.prototype.toObject>;
+                combinations?: ReturnType<typeof UserApprovedIncomingTransferCombination.prototype.toObject>[];
+            } = {};
+            if (this.defaultValues != null) {
+                data.defaultValues = this.defaultValues.toObject();
+            }
+            if (this.combinations != null) {
+                data.combinations = this.combinations.map((item: UserApprovedIncomingTransferCombination) => item.toObject());
+            }
+            return data;
+        }
+        serialize(): Uint8Array;
+        serialize(w: pb_1.BinaryWriter): void;
+        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+            const writer = w || new pb_1.BinaryWriter();
+            if (this.has_defaultValues)
+                writer.writeMessage(1, this.defaultValues, () => this.defaultValues.serialize(writer));
+            if (this.combinations.length)
+                writer.writeRepeatedMessage(2, this.combinations, (item: UserApprovedIncomingTransferCombination) => item.serialize(writer));
+            if (!w)
+                return writer.getResultBuffer();
+        }
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): UserApprovedIncomingTransferPermission {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new UserApprovedIncomingTransferPermission();
+            while (reader.nextField()) {
+                if (reader.isEndGroup())
+                    break;
+                switch (reader.getFieldNumber()) {
+                    case 1:
+                        reader.readMessage(message.defaultValues, () => message.defaultValues = UserApprovedIncomingTransferDefaultValues.deserialize(reader));
+                        break;
+                    case 2:
+                        reader.readMessage(message.combinations, () => pb_1.Message.addToRepeatedWrapperField(message, 2, UserApprovedIncomingTransferCombination.deserialize(reader), UserApprovedIncomingTransferCombination));
+                        break;
+                    default: reader.skipField();
+                }
+            }
+            return message;
+        }
+        serializeBinary(): Uint8Array {
+            return this.serialize();
+        }
+        static deserializeBinary(bytes: Uint8Array): UserApprovedIncomingTransferPermission {
+            return UserApprovedIncomingTransferPermission.deserialize(bytes);
+        }
+    }
+    export class BalancesActionCombination extends pb_1.Message {
+        #one_of_decls: number[][] = [];
+        constructor(data?: any[] | {
+            badgeIdsOptions?: ValueOptions;
+            ownershipTimesOptions?: ValueOptions;
+            permittedTimesOptions?: ValueOptions;
+            forbiddenTimesOptions?: ValueOptions;
+        }) {
+            super();
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("badgeIdsOptions" in data && data.badgeIdsOptions != undefined) {
+                    this.badgeIdsOptions = data.badgeIdsOptions;
+                }
+                if ("ownershipTimesOptions" in data && data.ownershipTimesOptions != undefined) {
+                    this.ownershipTimesOptions = data.ownershipTimesOptions;
+                }
+                if ("permittedTimesOptions" in data && data.permittedTimesOptions != undefined) {
+                    this.permittedTimesOptions = data.permittedTimesOptions;
+                }
+                if ("forbiddenTimesOptions" in data && data.forbiddenTimesOptions != undefined) {
+                    this.forbiddenTimesOptions = data.forbiddenTimesOptions;
+                }
+            }
+        }
+        get badgeIdsOptions() {
+            return pb_1.Message.getWrapperField(this, ValueOptions, 1) as ValueOptions;
+        }
+        set badgeIdsOptions(value: ValueOptions) {
+            pb_1.Message.setWrapperField(this, 1, value);
+        }
+        get has_badgeIdsOptions() {
+            return pb_1.Message.getField(this, 1) != null;
+        }
+        get ownershipTimesOptions() {
+            return pb_1.Message.getWrapperField(this, ValueOptions, 2) as ValueOptions;
+        }
+        set ownershipTimesOptions(value: ValueOptions) {
+            pb_1.Message.setWrapperField(this, 2, value);
+        }
+        get has_ownershipTimesOptions() {
+            return pb_1.Message.getField(this, 2) != null;
+        }
+        get permittedTimesOptions() {
+            return pb_1.Message.getWrapperField(this, ValueOptions, 3) as ValueOptions;
+        }
+        set permittedTimesOptions(value: ValueOptions) {
+            pb_1.Message.setWrapperField(this, 3, value);
+        }
+        get has_permittedTimesOptions() {
+            return pb_1.Message.getField(this, 3) != null;
+        }
+        get forbiddenTimesOptions() {
+            return pb_1.Message.getWrapperField(this, ValueOptions, 4) as ValueOptions;
+        }
+        set forbiddenTimesOptions(value: ValueOptions) {
+            pb_1.Message.setWrapperField(this, 4, value);
+        }
+        get has_forbiddenTimesOptions() {
+            return pb_1.Message.getField(this, 4) != null;
+        }
+        static fromObject(data: {
+            badgeIdsOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+            ownershipTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+            permittedTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+            forbiddenTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+        }): BalancesActionCombination {
+            const message = new BalancesActionCombination({});
+            if (data.badgeIdsOptions != null) {
+                message.badgeIdsOptions = ValueOptions.fromObject(data.badgeIdsOptions);
+            }
+            if (data.ownershipTimesOptions != null) {
+                message.ownershipTimesOptions = ValueOptions.fromObject(data.ownershipTimesOptions);
+            }
+            if (data.permittedTimesOptions != null) {
+                message.permittedTimesOptions = ValueOptions.fromObject(data.permittedTimesOptions);
+            }
+            if (data.forbiddenTimesOptions != null) {
+                message.forbiddenTimesOptions = ValueOptions.fromObject(data.forbiddenTimesOptions);
+            }
+            return message;
+        }
+        toObject() {
+            const data: {
+                badgeIdsOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+                ownershipTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+                permittedTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+                forbiddenTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+            } = {};
+            if (this.badgeIdsOptions != null) {
+                data.badgeIdsOptions = this.badgeIdsOptions.toObject();
+            }
+            if (this.ownershipTimesOptions != null) {
+                data.ownershipTimesOptions = this.ownershipTimesOptions.toObject();
+            }
+            if (this.permittedTimesOptions != null) {
+                data.permittedTimesOptions = this.permittedTimesOptions.toObject();
+            }
+            if (this.forbiddenTimesOptions != null) {
+                data.forbiddenTimesOptions = this.forbiddenTimesOptions.toObject();
+            }
+            return data;
+        }
+        serialize(): Uint8Array;
+        serialize(w: pb_1.BinaryWriter): void;
+        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+            const writer = w || new pb_1.BinaryWriter();
+            if (this.has_badgeIdsOptions)
+                writer.writeMessage(1, this.badgeIdsOptions, () => this.badgeIdsOptions.serialize(writer));
+            if (this.has_ownershipTimesOptions)
+                writer.writeMessage(2, this.ownershipTimesOptions, () => this.ownershipTimesOptions.serialize(writer));
+            if (this.has_permittedTimesOptions)
+                writer.writeMessage(3, this.permittedTimesOptions, () => this.permittedTimesOptions.serialize(writer));
+            if (this.has_forbiddenTimesOptions)
+                writer.writeMessage(4, this.forbiddenTimesOptions, () => this.forbiddenTimesOptions.serialize(writer));
+            if (!w)
+                return writer.getResultBuffer();
+        }
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): BalancesActionCombination {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new BalancesActionCombination();
+            while (reader.nextField()) {
+                if (reader.isEndGroup())
+                    break;
+                switch (reader.getFieldNumber()) {
+                    case 1:
+                        reader.readMessage(message.badgeIdsOptions, () => message.badgeIdsOptions = ValueOptions.deserialize(reader));
+                        break;
+                    case 2:
+                        reader.readMessage(message.ownershipTimesOptions, () => message.ownershipTimesOptions = ValueOptions.deserialize(reader));
+                        break;
+                    case 3:
+                        reader.readMessage(message.permittedTimesOptions, () => message.permittedTimesOptions = ValueOptions.deserialize(reader));
+                        break;
+                    case 4:
+                        reader.readMessage(message.forbiddenTimesOptions, () => message.forbiddenTimesOptions = ValueOptions.deserialize(reader));
+                        break;
+                    default: reader.skipField();
+                }
+            }
+            return message;
+        }
+        serializeBinary(): Uint8Array {
+            return this.serialize();
+        }
+        static deserializeBinary(bytes: Uint8Array): BalancesActionCombination {
+            return BalancesActionCombination.deserialize(bytes);
+        }
+    }
+    export class BalancesActionDefaultValues extends pb_1.Message {
+        #one_of_decls: number[][] = [];
+        constructor(data?: any[] | {
+            badgeIds?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+            ownershipTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+            permittedTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+            forbiddenTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+        }) {
+            super();
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1, 2, 3, 4], this.#one_of_decls);
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("badgeIds" in data && data.badgeIds != undefined) {
+                    this.badgeIds = data.badgeIds;
+                }
+                if ("ownershipTimes" in data && data.ownershipTimes != undefined) {
+                    this.ownershipTimes = data.ownershipTimes;
+                }
+                if ("permittedTimes" in data && data.permittedTimes != undefined) {
+                    this.permittedTimes = data.permittedTimes;
+                }
+                if ("forbiddenTimes" in data && data.forbiddenTimes != undefined) {
+                    this.forbiddenTimes = data.forbiddenTimes;
+                }
+            }
+        }
+        get badgeIds() {
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 1) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+        }
+        set badgeIds(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 1, value);
+        }
+        get ownershipTimes() {
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 2) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+        }
+        set ownershipTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 2, value);
+        }
+        get permittedTimes() {
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 3) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+        }
+        set permittedTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 3, value);
+        }
+        get forbiddenTimes() {
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 4) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+        }
+        set forbiddenTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 4, value);
+        }
+        static fromObject(data: {
+            badgeIds?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+            ownershipTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+            permittedTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+            forbiddenTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+        }): BalancesActionDefaultValues {
+            const message = new BalancesActionDefaultValues({});
+            if (data.badgeIds != null) {
+                message.badgeIds = data.badgeIds.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
+            }
+            if (data.ownershipTimes != null) {
+                message.ownershipTimes = data.ownershipTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
+            }
+            if (data.permittedTimes != null) {
+                message.permittedTimes = data.permittedTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
+            }
+            if (data.forbiddenTimes != null) {
+                message.forbiddenTimes = data.forbiddenTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
+            }
+            return message;
+        }
+        toObject() {
+            const data: {
+                badgeIds?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+                ownershipTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+                permittedTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+                forbiddenTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+            } = {};
+            if (this.badgeIds != null) {
+                data.badgeIds = this.badgeIds.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
+            }
+            if (this.ownershipTimes != null) {
+                data.ownershipTimes = this.ownershipTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
+            }
+            if (this.permittedTimes != null) {
+                data.permittedTimes = this.permittedTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
+            }
+            if (this.forbiddenTimes != null) {
+                data.forbiddenTimes = this.forbiddenTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
+            }
+            return data;
+        }
+        serialize(): Uint8Array;
+        serialize(w: pb_1.BinaryWriter): void;
+        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+            const writer = w || new pb_1.BinaryWriter();
+            if (this.badgeIds.length)
+                writer.writeRepeatedMessage(1, this.badgeIds, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
+            if (this.ownershipTimes.length)
+                writer.writeRepeatedMessage(2, this.ownershipTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
+            if (this.permittedTimes.length)
+                writer.writeRepeatedMessage(3, this.permittedTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
+            if (this.forbiddenTimes.length)
+                writer.writeRepeatedMessage(4, this.forbiddenTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
+            if (!w)
+                return writer.getResultBuffer();
+        }
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): BalancesActionDefaultValues {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new BalancesActionDefaultValues();
+            while (reader.nextField()) {
+                if (reader.isEndGroup())
+                    break;
+                switch (reader.getFieldNumber()) {
+                    case 1:
+                        reader.readMessage(message.badgeIds, () => pb_1.Message.addToRepeatedWrapperField(message, 1, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
+                        break;
+                    case 2:
+                        reader.readMessage(message.ownershipTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 2, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
+                        break;
+                    case 3:
+                        reader.readMessage(message.permittedTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 3, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
+                        break;
+                    case 4:
+                        reader.readMessage(message.forbiddenTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 4, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
+                        break;
+                    default: reader.skipField();
+                }
+            }
+            return message;
+        }
+        serializeBinary(): Uint8Array {
+            return this.serialize();
+        }
+        static deserializeBinary(bytes: Uint8Array): BalancesActionDefaultValues {
+            return BalancesActionDefaultValues.deserialize(bytes);
+        }
+    }
+    export class BalancesActionPermission extends pb_1.Message {
+        #one_of_decls: number[][] = [];
+        constructor(data?: any[] | {
+            defaultValues?: BalancesActionDefaultValues;
+            combinations?: BalancesActionCombination[];
+        }) {
+            super();
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [2], this.#one_of_decls);
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("defaultValues" in data && data.defaultValues != undefined) {
+                    this.defaultValues = data.defaultValues;
+                }
+                if ("combinations" in data && data.combinations != undefined) {
+                    this.combinations = data.combinations;
+                }
+            }
+        }
+        get defaultValues() {
+            return pb_1.Message.getWrapperField(this, BalancesActionDefaultValues, 1) as BalancesActionDefaultValues;
+        }
+        set defaultValues(value: BalancesActionDefaultValues) {
+            pb_1.Message.setWrapperField(this, 1, value);
+        }
+        get has_defaultValues() {
+            return pb_1.Message.getField(this, 1) != null;
+        }
+        get combinations() {
+            return pb_1.Message.getRepeatedWrapperField(this, BalancesActionCombination, 2) as BalancesActionCombination[];
+        }
+        set combinations(value: BalancesActionCombination[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 2, value);
+        }
+        static fromObject(data: {
+            defaultValues?: ReturnType<typeof BalancesActionDefaultValues.prototype.toObject>;
+            combinations?: ReturnType<typeof BalancesActionCombination.prototype.toObject>[];
+        }): BalancesActionPermission {
+            const message = new BalancesActionPermission({});
+            if (data.defaultValues != null) {
+                message.defaultValues = BalancesActionDefaultValues.fromObject(data.defaultValues);
+            }
+            if (data.combinations != null) {
+                message.combinations = data.combinations.map(item => BalancesActionCombination.fromObject(item));
+            }
+            return message;
+        }
+        toObject() {
+            const data: {
+                defaultValues?: ReturnType<typeof BalancesActionDefaultValues.prototype.toObject>;
+                combinations?: ReturnType<typeof BalancesActionCombination.prototype.toObject>[];
+            } = {};
+            if (this.defaultValues != null) {
+                data.defaultValues = this.defaultValues.toObject();
+            }
+            if (this.combinations != null) {
+                data.combinations = this.combinations.map((item: BalancesActionCombination) => item.toObject());
+            }
+            return data;
+        }
+        serialize(): Uint8Array;
+        serialize(w: pb_1.BinaryWriter): void;
+        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+            const writer = w || new pb_1.BinaryWriter();
+            if (this.has_defaultValues)
+                writer.writeMessage(1, this.defaultValues, () => this.defaultValues.serialize(writer));
+            if (this.combinations.length)
+                writer.writeRepeatedMessage(2, this.combinations, (item: BalancesActionCombination) => item.serialize(writer));
+            if (!w)
+                return writer.getResultBuffer();
+        }
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): BalancesActionPermission {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new BalancesActionPermission();
+            while (reader.nextField()) {
+                if (reader.isEndGroup())
+                    break;
+                switch (reader.getFieldNumber()) {
+                    case 1:
+                        reader.readMessage(message.defaultValues, () => message.defaultValues = BalancesActionDefaultValues.deserialize(reader));
+                        break;
+                    case 2:
+                        reader.readMessage(message.combinations, () => pb_1.Message.addToRepeatedWrapperField(message, 2, BalancesActionCombination.deserialize(reader), BalancesActionCombination));
+                        break;
+                    default: reader.skipField();
+                }
+            }
+            return message;
+        }
+        serializeBinary(): Uint8Array {
+            return this.serialize();
+        }
+        static deserializeBinary(bytes: Uint8Array): BalancesActionPermission {
+            return BalancesActionPermission.deserialize(bytes);
+        }
+    }
+    export class ActionDefaultValues extends pb_1.Message {
+        #one_of_decls: number[][] = [];
+        constructor(data?: any[] | {
+            permittedTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+            forbiddenTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+        }) {
+            super();
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1, 2], this.#one_of_decls);
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("permittedTimes" in data && data.permittedTimes != undefined) {
+                    this.permittedTimes = data.permittedTimes;
+                }
+                if ("forbiddenTimes" in data && data.forbiddenTimes != undefined) {
+                    this.forbiddenTimes = data.forbiddenTimes;
+                }
+            }
+        }
+        get permittedTimes() {
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 1) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+        }
+        set permittedTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 1, value);
+        }
+        get forbiddenTimes() {
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 2) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+        }
+        set forbiddenTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 2, value);
+        }
+        static fromObject(data: {
+            permittedTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+            forbiddenTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+        }): ActionDefaultValues {
+            const message = new ActionDefaultValues({});
+            if (data.permittedTimes != null) {
+                message.permittedTimes = data.permittedTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
+            }
+            if (data.forbiddenTimes != null) {
+                message.forbiddenTimes = data.forbiddenTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
+            }
+            return message;
+        }
+        toObject() {
+            const data: {
+                permittedTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+                forbiddenTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+            } = {};
+            if (this.permittedTimes != null) {
+                data.permittedTimes = this.permittedTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
+            }
+            if (this.forbiddenTimes != null) {
+                data.forbiddenTimes = this.forbiddenTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
+            }
+            return data;
+        }
+        serialize(): Uint8Array;
+        serialize(w: pb_1.BinaryWriter): void;
+        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+            const writer = w || new pb_1.BinaryWriter();
+            if (this.permittedTimes.length)
+                writer.writeRepeatedMessage(1, this.permittedTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
+            if (this.forbiddenTimes.length)
+                writer.writeRepeatedMessage(2, this.forbiddenTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
+            if (!w)
+                return writer.getResultBuffer();
+        }
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): ActionDefaultValues {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new ActionDefaultValues();
+            while (reader.nextField()) {
+                if (reader.isEndGroup())
+                    break;
+                switch (reader.getFieldNumber()) {
+                    case 1:
+                        reader.readMessage(message.permittedTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 1, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
+                        break;
+                    case 2:
+                        reader.readMessage(message.forbiddenTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 2, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
+                        break;
+                    default: reader.skipField();
+                }
+            }
+            return message;
+        }
+        serializeBinary(): Uint8Array {
+            return this.serialize();
+        }
+        static deserializeBinary(bytes: Uint8Array): ActionDefaultValues {
+            return ActionDefaultValues.deserialize(bytes);
+        }
+    }
+    export class ActionCombination extends pb_1.Message {
+        #one_of_decls: number[][] = [];
+        constructor(data?: any[] | {
+            permittedTimesOptions?: ValueOptions;
+            forbiddenTimesOptions?: ValueOptions;
+        }) {
+            super();
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("permittedTimesOptions" in data && data.permittedTimesOptions != undefined) {
+                    this.permittedTimesOptions = data.permittedTimesOptions;
+                }
+                if ("forbiddenTimesOptions" in data && data.forbiddenTimesOptions != undefined) {
+                    this.forbiddenTimesOptions = data.forbiddenTimesOptions;
+                }
+            }
+        }
+        get permittedTimesOptions() {
+            return pb_1.Message.getWrapperField(this, ValueOptions, 1) as ValueOptions;
+        }
+        set permittedTimesOptions(value: ValueOptions) {
+            pb_1.Message.setWrapperField(this, 1, value);
+        }
+        get has_permittedTimesOptions() {
+            return pb_1.Message.getField(this, 1) != null;
+        }
+        get forbiddenTimesOptions() {
+            return pb_1.Message.getWrapperField(this, ValueOptions, 2) as ValueOptions;
+        }
+        set forbiddenTimesOptions(value: ValueOptions) {
+            pb_1.Message.setWrapperField(this, 2, value);
+        }
+        get has_forbiddenTimesOptions() {
+            return pb_1.Message.getField(this, 2) != null;
+        }
+        static fromObject(data: {
+            permittedTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+            forbiddenTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+        }): ActionCombination {
+            const message = new ActionCombination({});
+            if (data.permittedTimesOptions != null) {
+                message.permittedTimesOptions = ValueOptions.fromObject(data.permittedTimesOptions);
+            }
+            if (data.forbiddenTimesOptions != null) {
+                message.forbiddenTimesOptions = ValueOptions.fromObject(data.forbiddenTimesOptions);
+            }
+            return message;
+        }
+        toObject() {
+            const data: {
+                permittedTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+                forbiddenTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+            } = {};
+            if (this.permittedTimesOptions != null) {
+                data.permittedTimesOptions = this.permittedTimesOptions.toObject();
+            }
+            if (this.forbiddenTimesOptions != null) {
+                data.forbiddenTimesOptions = this.forbiddenTimesOptions.toObject();
+            }
+            return data;
+        }
+        serialize(): Uint8Array;
+        serialize(w: pb_1.BinaryWriter): void;
+        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+            const writer = w || new pb_1.BinaryWriter();
+            if (this.has_permittedTimesOptions)
+                writer.writeMessage(1, this.permittedTimesOptions, () => this.permittedTimesOptions.serialize(writer));
+            if (this.has_forbiddenTimesOptions)
+                writer.writeMessage(2, this.forbiddenTimesOptions, () => this.forbiddenTimesOptions.serialize(writer));
+            if (!w)
+                return writer.getResultBuffer();
+        }
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): ActionCombination {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new ActionCombination();
+            while (reader.nextField()) {
+                if (reader.isEndGroup())
+                    break;
+                switch (reader.getFieldNumber()) {
+                    case 1:
+                        reader.readMessage(message.permittedTimesOptions, () => message.permittedTimesOptions = ValueOptions.deserialize(reader));
+                        break;
+                    case 2:
+                        reader.readMessage(message.forbiddenTimesOptions, () => message.forbiddenTimesOptions = ValueOptions.deserialize(reader));
+                        break;
+                    default: reader.skipField();
+                }
+            }
+            return message;
+        }
+        serializeBinary(): Uint8Array {
+            return this.serialize();
+        }
+        static deserializeBinary(bytes: Uint8Array): ActionCombination {
+            return ActionCombination.deserialize(bytes);
+        }
+    }
+    export class ActionPermission extends pb_1.Message {
+        #one_of_decls: number[][] = [];
+        constructor(data?: any[] | {
+            defaultValues?: ActionDefaultValues;
+            combinations?: ActionCombination[];
+        }) {
+            super();
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [2], this.#one_of_decls);
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("defaultValues" in data && data.defaultValues != undefined) {
+                    this.defaultValues = data.defaultValues;
+                }
+                if ("combinations" in data && data.combinations != undefined) {
+                    this.combinations = data.combinations;
+                }
+            }
+        }
+        get defaultValues() {
+            return pb_1.Message.getWrapperField(this, ActionDefaultValues, 1) as ActionDefaultValues;
+        }
+        set defaultValues(value: ActionDefaultValues) {
+            pb_1.Message.setWrapperField(this, 1, value);
+        }
+        get has_defaultValues() {
+            return pb_1.Message.getField(this, 1) != null;
+        }
+        get combinations() {
+            return pb_1.Message.getRepeatedWrapperField(this, ActionCombination, 2) as ActionCombination[];
+        }
+        set combinations(value: ActionCombination[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 2, value);
+        }
+        static fromObject(data: {
+            defaultValues?: ReturnType<typeof ActionDefaultValues.prototype.toObject>;
+            combinations?: ReturnType<typeof ActionCombination.prototype.toObject>[];
+        }): ActionPermission {
+            const message = new ActionPermission({});
+            if (data.defaultValues != null) {
+                message.defaultValues = ActionDefaultValues.fromObject(data.defaultValues);
+            }
+            if (data.combinations != null) {
+                message.combinations = data.combinations.map(item => ActionCombination.fromObject(item));
+            }
+            return message;
+        }
+        toObject() {
+            const data: {
+                defaultValues?: ReturnType<typeof ActionDefaultValues.prototype.toObject>;
+                combinations?: ReturnType<typeof ActionCombination.prototype.toObject>[];
+            } = {};
+            if (this.defaultValues != null) {
+                data.defaultValues = this.defaultValues.toObject();
+            }
+            if (this.combinations != null) {
+                data.combinations = this.combinations.map((item: ActionCombination) => item.toObject());
+            }
+            return data;
+        }
+        serialize(): Uint8Array;
+        serialize(w: pb_1.BinaryWriter): void;
+        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+            const writer = w || new pb_1.BinaryWriter();
+            if (this.has_defaultValues)
+                writer.writeMessage(1, this.defaultValues, () => this.defaultValues.serialize(writer));
+            if (this.combinations.length)
+                writer.writeRepeatedMessage(2, this.combinations, (item: ActionCombination) => item.serialize(writer));
+            if (!w)
+                return writer.getResultBuffer();
+        }
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): ActionPermission {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new ActionPermission();
+            while (reader.nextField()) {
+                if (reader.isEndGroup())
+                    break;
+                switch (reader.getFieldNumber()) {
+                    case 1:
+                        reader.readMessage(message.defaultValues, () => message.defaultValues = ActionDefaultValues.deserialize(reader));
+                        break;
+                    case 2:
+                        reader.readMessage(message.combinations, () => pb_1.Message.addToRepeatedWrapperField(message, 2, ActionCombination.deserialize(reader), ActionCombination));
+                        break;
+                    default: reader.skipField();
+                }
+            }
+            return message;
+        }
+        serializeBinary(): Uint8Array {
+            return this.serialize();
+        }
+        static deserializeBinary(bytes: Uint8Array): ActionPermission {
+            return ActionPermission.deserialize(bytes);
+        }
+    }
+    export class TimedUpdateCombination extends pb_1.Message {
+        #one_of_decls: number[][] = [];
+        constructor(data?: any[] | {
+            timelineTimesOptions?: ValueOptions;
+            permittedTimesOptions?: ValueOptions;
+            forbiddenTimesOptions?: ValueOptions;
+        }) {
+            super();
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("timelineTimesOptions" in data && data.timelineTimesOptions != undefined) {
+                    this.timelineTimesOptions = data.timelineTimesOptions;
+                }
+                if ("permittedTimesOptions" in data && data.permittedTimesOptions != undefined) {
+                    this.permittedTimesOptions = data.permittedTimesOptions;
+                }
+                if ("forbiddenTimesOptions" in data && data.forbiddenTimesOptions != undefined) {
+                    this.forbiddenTimesOptions = data.forbiddenTimesOptions;
+                }
+            }
+        }
+        get timelineTimesOptions() {
+            return pb_1.Message.getWrapperField(this, ValueOptions, 1) as ValueOptions;
+        }
+        set timelineTimesOptions(value: ValueOptions) {
+            pb_1.Message.setWrapperField(this, 1, value);
+        }
+        get has_timelineTimesOptions() {
+            return pb_1.Message.getField(this, 1) != null;
+        }
+        get permittedTimesOptions() {
+            return pb_1.Message.getWrapperField(this, ValueOptions, 2) as ValueOptions;
+        }
+        set permittedTimesOptions(value: ValueOptions) {
+            pb_1.Message.setWrapperField(this, 2, value);
+        }
+        get has_permittedTimesOptions() {
+            return pb_1.Message.getField(this, 2) != null;
+        }
+        get forbiddenTimesOptions() {
+            return pb_1.Message.getWrapperField(this, ValueOptions, 3) as ValueOptions;
+        }
+        set forbiddenTimesOptions(value: ValueOptions) {
+            pb_1.Message.setWrapperField(this, 3, value);
+        }
+        get has_forbiddenTimesOptions() {
+            return pb_1.Message.getField(this, 3) != null;
+        }
+        static fromObject(data: {
+            timelineTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+            permittedTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+            forbiddenTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+        }): TimedUpdateCombination {
+            const message = new TimedUpdateCombination({});
+            if (data.timelineTimesOptions != null) {
+                message.timelineTimesOptions = ValueOptions.fromObject(data.timelineTimesOptions);
+            }
+            if (data.permittedTimesOptions != null) {
+                message.permittedTimesOptions = ValueOptions.fromObject(data.permittedTimesOptions);
+            }
+            if (data.forbiddenTimesOptions != null) {
+                message.forbiddenTimesOptions = ValueOptions.fromObject(data.forbiddenTimesOptions);
+            }
+            return message;
+        }
+        toObject() {
+            const data: {
+                timelineTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+                permittedTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+                forbiddenTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+            } = {};
+            if (this.timelineTimesOptions != null) {
+                data.timelineTimesOptions = this.timelineTimesOptions.toObject();
+            }
+            if (this.permittedTimesOptions != null) {
+                data.permittedTimesOptions = this.permittedTimesOptions.toObject();
+            }
+            if (this.forbiddenTimesOptions != null) {
+                data.forbiddenTimesOptions = this.forbiddenTimesOptions.toObject();
+            }
+            return data;
+        }
+        serialize(): Uint8Array;
+        serialize(w: pb_1.BinaryWriter): void;
+        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+            const writer = w || new pb_1.BinaryWriter();
+            if (this.has_timelineTimesOptions)
+                writer.writeMessage(1, this.timelineTimesOptions, () => this.timelineTimesOptions.serialize(writer));
+            if (this.has_permittedTimesOptions)
+                writer.writeMessage(2, this.permittedTimesOptions, () => this.permittedTimesOptions.serialize(writer));
+            if (this.has_forbiddenTimesOptions)
+                writer.writeMessage(3, this.forbiddenTimesOptions, () => this.forbiddenTimesOptions.serialize(writer));
+            if (!w)
+                return writer.getResultBuffer();
+        }
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): TimedUpdateCombination {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new TimedUpdateCombination();
+            while (reader.nextField()) {
+                if (reader.isEndGroup())
+                    break;
+                switch (reader.getFieldNumber()) {
+                    case 1:
+                        reader.readMessage(message.timelineTimesOptions, () => message.timelineTimesOptions = ValueOptions.deserialize(reader));
+                        break;
+                    case 2:
+                        reader.readMessage(message.permittedTimesOptions, () => message.permittedTimesOptions = ValueOptions.deserialize(reader));
+                        break;
+                    case 3:
+                        reader.readMessage(message.forbiddenTimesOptions, () => message.forbiddenTimesOptions = ValueOptions.deserialize(reader));
+                        break;
+                    default: reader.skipField();
+                }
+            }
+            return message;
+        }
+        serializeBinary(): Uint8Array {
+            return this.serialize();
+        }
+        static deserializeBinary(bytes: Uint8Array): TimedUpdateCombination {
+            return TimedUpdateCombination.deserialize(bytes);
+        }
+    }
+    export class TimedUpdateDefaultValues extends pb_1.Message {
+        #one_of_decls: number[][] = [];
+        constructor(data?: any[] | {
+            timelineTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+            permittedTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+            forbiddenTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+        }) {
+            super();
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1, 2, 3], this.#one_of_decls);
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("timelineTimes" in data && data.timelineTimes != undefined) {
+                    this.timelineTimes = data.timelineTimes;
+                }
+                if ("permittedTimes" in data && data.permittedTimes != undefined) {
+                    this.permittedTimes = data.permittedTimes;
+                }
+                if ("forbiddenTimes" in data && data.forbiddenTimes != undefined) {
+                    this.forbiddenTimes = data.forbiddenTimes;
+                }
+            }
+        }
+        get timelineTimes() {
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 1) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+        }
+        set timelineTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 1, value);
+        }
+        get permittedTimes() {
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 2) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+        }
+        set permittedTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 2, value);
+        }
+        get forbiddenTimes() {
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 3) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+        }
+        set forbiddenTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 3, value);
+        }
+        static fromObject(data: {
+            timelineTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+            permittedTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+            forbiddenTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+        }): TimedUpdateDefaultValues {
+            const message = new TimedUpdateDefaultValues({});
+            if (data.timelineTimes != null) {
+                message.timelineTimes = data.timelineTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
+            }
+            if (data.permittedTimes != null) {
+                message.permittedTimes = data.permittedTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
+            }
+            if (data.forbiddenTimes != null) {
+                message.forbiddenTimes = data.forbiddenTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
+            }
+            return message;
+        }
+        toObject() {
+            const data: {
+                timelineTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+                permittedTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+                forbiddenTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+            } = {};
+            if (this.timelineTimes != null) {
+                data.timelineTimes = this.timelineTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
+            }
+            if (this.permittedTimes != null) {
+                data.permittedTimes = this.permittedTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
+            }
+            if (this.forbiddenTimes != null) {
+                data.forbiddenTimes = this.forbiddenTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
+            }
+            return data;
+        }
+        serialize(): Uint8Array;
+        serialize(w: pb_1.BinaryWriter): void;
+        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+            const writer = w || new pb_1.BinaryWriter();
+            if (this.timelineTimes.length)
+                writer.writeRepeatedMessage(1, this.timelineTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
+            if (this.permittedTimes.length)
+                writer.writeRepeatedMessage(2, this.permittedTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
+            if (this.forbiddenTimes.length)
+                writer.writeRepeatedMessage(3, this.forbiddenTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
+            if (!w)
+                return writer.getResultBuffer();
+        }
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): TimedUpdateDefaultValues {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new TimedUpdateDefaultValues();
+            while (reader.nextField()) {
+                if (reader.isEndGroup())
+                    break;
+                switch (reader.getFieldNumber()) {
+                    case 1:
+                        reader.readMessage(message.timelineTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 1, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
+                        break;
+                    case 2:
+                        reader.readMessage(message.permittedTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 2, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
+                        break;
+                    case 3:
+                        reader.readMessage(message.forbiddenTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 3, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
+                        break;
+                    default: reader.skipField();
+                }
+            }
+            return message;
+        }
+        serializeBinary(): Uint8Array {
+            return this.serialize();
+        }
+        static deserializeBinary(bytes: Uint8Array): TimedUpdateDefaultValues {
+            return TimedUpdateDefaultValues.deserialize(bytes);
+        }
+    }
+    export class TimedUpdatePermission extends pb_1.Message {
+        #one_of_decls: number[][] = [];
+        constructor(data?: any[] | {
+            defaultValues?: TimedUpdateDefaultValues;
+            combinations?: TimedUpdateCombination[];
+        }) {
+            super();
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [2], this.#one_of_decls);
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("defaultValues" in data && data.defaultValues != undefined) {
+                    this.defaultValues = data.defaultValues;
+                }
+                if ("combinations" in data && data.combinations != undefined) {
+                    this.combinations = data.combinations;
+                }
+            }
+        }
+        get defaultValues() {
+            return pb_1.Message.getWrapperField(this, TimedUpdateDefaultValues, 1) as TimedUpdateDefaultValues;
+        }
+        set defaultValues(value: TimedUpdateDefaultValues) {
+            pb_1.Message.setWrapperField(this, 1, value);
+        }
+        get has_defaultValues() {
+            return pb_1.Message.getField(this, 1) != null;
+        }
+        get combinations() {
+            return pb_1.Message.getRepeatedWrapperField(this, TimedUpdateCombination, 2) as TimedUpdateCombination[];
+        }
+        set combinations(value: TimedUpdateCombination[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 2, value);
+        }
+        static fromObject(data: {
+            defaultValues?: ReturnType<typeof TimedUpdateDefaultValues.prototype.toObject>;
+            combinations?: ReturnType<typeof TimedUpdateCombination.prototype.toObject>[];
+        }): TimedUpdatePermission {
+            const message = new TimedUpdatePermission({});
+            if (data.defaultValues != null) {
+                message.defaultValues = TimedUpdateDefaultValues.fromObject(data.defaultValues);
+            }
+            if (data.combinations != null) {
+                message.combinations = data.combinations.map(item => TimedUpdateCombination.fromObject(item));
+            }
+            return message;
+        }
+        toObject() {
+            const data: {
+                defaultValues?: ReturnType<typeof TimedUpdateDefaultValues.prototype.toObject>;
+                combinations?: ReturnType<typeof TimedUpdateCombination.prototype.toObject>[];
+            } = {};
+            if (this.defaultValues != null) {
+                data.defaultValues = this.defaultValues.toObject();
+            }
+            if (this.combinations != null) {
+                data.combinations = this.combinations.map((item: TimedUpdateCombination) => item.toObject());
+            }
+            return data;
+        }
+        serialize(): Uint8Array;
+        serialize(w: pb_1.BinaryWriter): void;
+        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+            const writer = w || new pb_1.BinaryWriter();
+            if (this.has_defaultValues)
+                writer.writeMessage(1, this.defaultValues, () => this.defaultValues.serialize(writer));
+            if (this.combinations.length)
+                writer.writeRepeatedMessage(2, this.combinations, (item: TimedUpdateCombination) => item.serialize(writer));
+            if (!w)
+                return writer.getResultBuffer();
+        }
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): TimedUpdatePermission {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new TimedUpdatePermission();
+            while (reader.nextField()) {
+                if (reader.isEndGroup())
+                    break;
+                switch (reader.getFieldNumber()) {
+                    case 1:
+                        reader.readMessage(message.defaultValues, () => message.defaultValues = TimedUpdateDefaultValues.deserialize(reader));
+                        break;
+                    case 2:
+                        reader.readMessage(message.combinations, () => pb_1.Message.addToRepeatedWrapperField(message, 2, TimedUpdateCombination.deserialize(reader), TimedUpdateCombination));
+                        break;
+                    default: reader.skipField();
+                }
+            }
+            return message;
+        }
+        serializeBinary(): Uint8Array {
+            return this.serialize();
+        }
+        static deserializeBinary(bytes: Uint8Array): TimedUpdatePermission {
+            return TimedUpdatePermission.deserialize(bytes);
+        }
+    }
+    export class TimedUpdateWithBadgeIdsCombination extends pb_1.Message {
+        #one_of_decls: number[][] = [];
+        constructor(data?: any[] | {
+            timelineTimesOptions?: ValueOptions;
+            badgeIdsOptions?: ValueOptions;
+            permittedTimesOptions?: ValueOptions;
+            forbiddenTimesOptions?: ValueOptions;
+        }) {
+            super();
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("timelineTimesOptions" in data && data.timelineTimesOptions != undefined) {
+                    this.timelineTimesOptions = data.timelineTimesOptions;
+                }
+                if ("badgeIdsOptions" in data && data.badgeIdsOptions != undefined) {
+                    this.badgeIdsOptions = data.badgeIdsOptions;
+                }
+                if ("permittedTimesOptions" in data && data.permittedTimesOptions != undefined) {
+                    this.permittedTimesOptions = data.permittedTimesOptions;
+                }
+                if ("forbiddenTimesOptions" in data && data.forbiddenTimesOptions != undefined) {
+                    this.forbiddenTimesOptions = data.forbiddenTimesOptions;
+                }
+            }
+        }
+        get timelineTimesOptions() {
+            return pb_1.Message.getWrapperField(this, ValueOptions, 1) as ValueOptions;
+        }
+        set timelineTimesOptions(value: ValueOptions) {
+            pb_1.Message.setWrapperField(this, 1, value);
+        }
+        get has_timelineTimesOptions() {
+            return pb_1.Message.getField(this, 1) != null;
+        }
+        get badgeIdsOptions() {
+            return pb_1.Message.getWrapperField(this, ValueOptions, 2) as ValueOptions;
+        }
+        set badgeIdsOptions(value: ValueOptions) {
+            pb_1.Message.setWrapperField(this, 2, value);
+        }
+        get has_badgeIdsOptions() {
+            return pb_1.Message.getField(this, 2) != null;
+        }
+        get permittedTimesOptions() {
+            return pb_1.Message.getWrapperField(this, ValueOptions, 3) as ValueOptions;
+        }
+        set permittedTimesOptions(value: ValueOptions) {
+            pb_1.Message.setWrapperField(this, 3, value);
+        }
+        get has_permittedTimesOptions() {
+            return pb_1.Message.getField(this, 3) != null;
+        }
+        get forbiddenTimesOptions() {
+            return pb_1.Message.getWrapperField(this, ValueOptions, 4) as ValueOptions;
+        }
+        set forbiddenTimesOptions(value: ValueOptions) {
+            pb_1.Message.setWrapperField(this, 4, value);
+        }
+        get has_forbiddenTimesOptions() {
+            return pb_1.Message.getField(this, 4) != null;
+        }
+        static fromObject(data: {
+            timelineTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+            badgeIdsOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+            permittedTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+            forbiddenTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+        }): TimedUpdateWithBadgeIdsCombination {
+            const message = new TimedUpdateWithBadgeIdsCombination({});
+            if (data.timelineTimesOptions != null) {
+                message.timelineTimesOptions = ValueOptions.fromObject(data.timelineTimesOptions);
+            }
+            if (data.badgeIdsOptions != null) {
+                message.badgeIdsOptions = ValueOptions.fromObject(data.badgeIdsOptions);
+            }
+            if (data.permittedTimesOptions != null) {
+                message.permittedTimesOptions = ValueOptions.fromObject(data.permittedTimesOptions);
+            }
+            if (data.forbiddenTimesOptions != null) {
+                message.forbiddenTimesOptions = ValueOptions.fromObject(data.forbiddenTimesOptions);
+            }
+            return message;
+        }
+        toObject() {
+            const data: {
+                timelineTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+                badgeIdsOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+                permittedTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+                forbiddenTimesOptions?: ReturnType<typeof ValueOptions.prototype.toObject>;
+            } = {};
+            if (this.timelineTimesOptions != null) {
+                data.timelineTimesOptions = this.timelineTimesOptions.toObject();
+            }
+            if (this.badgeIdsOptions != null) {
+                data.badgeIdsOptions = this.badgeIdsOptions.toObject();
+            }
+            if (this.permittedTimesOptions != null) {
+                data.permittedTimesOptions = this.permittedTimesOptions.toObject();
+            }
+            if (this.forbiddenTimesOptions != null) {
+                data.forbiddenTimesOptions = this.forbiddenTimesOptions.toObject();
+            }
+            return data;
+        }
+        serialize(): Uint8Array;
+        serialize(w: pb_1.BinaryWriter): void;
+        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+            const writer = w || new pb_1.BinaryWriter();
+            if (this.has_timelineTimesOptions)
+                writer.writeMessage(1, this.timelineTimesOptions, () => this.timelineTimesOptions.serialize(writer));
+            if (this.has_badgeIdsOptions)
+                writer.writeMessage(2, this.badgeIdsOptions, () => this.badgeIdsOptions.serialize(writer));
+            if (this.has_permittedTimesOptions)
+                writer.writeMessage(3, this.permittedTimesOptions, () => this.permittedTimesOptions.serialize(writer));
+            if (this.has_forbiddenTimesOptions)
+                writer.writeMessage(4, this.forbiddenTimesOptions, () => this.forbiddenTimesOptions.serialize(writer));
+            if (!w)
+                return writer.getResultBuffer();
+        }
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): TimedUpdateWithBadgeIdsCombination {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new TimedUpdateWithBadgeIdsCombination();
+            while (reader.nextField()) {
+                if (reader.isEndGroup())
+                    break;
+                switch (reader.getFieldNumber()) {
+                    case 1:
+                        reader.readMessage(message.timelineTimesOptions, () => message.timelineTimesOptions = ValueOptions.deserialize(reader));
+                        break;
+                    case 2:
+                        reader.readMessage(message.badgeIdsOptions, () => message.badgeIdsOptions = ValueOptions.deserialize(reader));
+                        break;
+                    case 3:
+                        reader.readMessage(message.permittedTimesOptions, () => message.permittedTimesOptions = ValueOptions.deserialize(reader));
+                        break;
+                    case 4:
+                        reader.readMessage(message.forbiddenTimesOptions, () => message.forbiddenTimesOptions = ValueOptions.deserialize(reader));
+                        break;
+                    default: reader.skipField();
+                }
+            }
+            return message;
+        }
+        serializeBinary(): Uint8Array {
+            return this.serialize();
+        }
+        static deserializeBinary(bytes: Uint8Array): TimedUpdateWithBadgeIdsCombination {
+            return TimedUpdateWithBadgeIdsCombination.deserialize(bytes);
+        }
+    }
+    export class TimedUpdateWithBadgeIdsDefaultValues extends pb_1.Message {
+        #one_of_decls: number[][] = [];
+        constructor(data?: any[] | {
+            badgeIds?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+            timelineTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+            permittedTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+            forbiddenTimes?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+        }) {
+            super();
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1, 2, 3, 4], this.#one_of_decls);
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("badgeIds" in data && data.badgeIds != undefined) {
+                    this.badgeIds = data.badgeIds;
+                }
+                if ("timelineTimes" in data && data.timelineTimes != undefined) {
+                    this.timelineTimes = data.timelineTimes;
+                }
+                if ("permittedTimes" in data && data.permittedTimes != undefined) {
+                    this.permittedTimes = data.permittedTimes;
+                }
+                if ("forbiddenTimes" in data && data.forbiddenTimes != undefined) {
+                    this.forbiddenTimes = data.forbiddenTimes;
+                }
+            }
+        }
+        get badgeIds() {
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 1) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+        }
+        set badgeIds(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 1, value);
+        }
+        get timelineTimes() {
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 2) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+        }
+        set timelineTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 2, value);
+        }
+        get permittedTimes() {
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 3) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+        }
+        set permittedTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 3, value);
+        }
+        get forbiddenTimes() {
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 4) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+        }
+        set forbiddenTimes(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 4, value);
+        }
+        static fromObject(data: {
+            badgeIds?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+            timelineTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+            permittedTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+            forbiddenTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+        }): TimedUpdateWithBadgeIdsDefaultValues {
+            const message = new TimedUpdateWithBadgeIdsDefaultValues({});
+            if (data.badgeIds != null) {
+                message.badgeIds = data.badgeIds.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
+            }
+            if (data.timelineTimes != null) {
+                message.timelineTimes = data.timelineTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
+            }
+            if (data.permittedTimes != null) {
+                message.permittedTimes = data.permittedTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
+            }
+            if (data.forbiddenTimes != null) {
+                message.forbiddenTimes = data.forbiddenTimes.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
+            }
+            return message;
+        }
+        toObject() {
+            const data: {
+                badgeIds?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+                timelineTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+                permittedTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+                forbiddenTimes?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+            } = {};
+            if (this.badgeIds != null) {
+                data.badgeIds = this.badgeIds.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
+            }
+            if (this.timelineTimes != null) {
+                data.timelineTimes = this.timelineTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
+            }
+            if (this.permittedTimes != null) {
+                data.permittedTimes = this.permittedTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
+            }
+            if (this.forbiddenTimes != null) {
+                data.forbiddenTimes = this.forbiddenTimes.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
+            }
+            return data;
+        }
+        serialize(): Uint8Array;
+        serialize(w: pb_1.BinaryWriter): void;
+        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+            const writer = w || new pb_1.BinaryWriter();
+            if (this.badgeIds.length)
+                writer.writeRepeatedMessage(1, this.badgeIds, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
+            if (this.timelineTimes.length)
+                writer.writeRepeatedMessage(2, this.timelineTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
+            if (this.permittedTimes.length)
+                writer.writeRepeatedMessage(3, this.permittedTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
+            if (this.forbiddenTimes.length)
+                writer.writeRepeatedMessage(4, this.forbiddenTimes, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
+            if (!w)
+                return writer.getResultBuffer();
+        }
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): TimedUpdateWithBadgeIdsDefaultValues {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new TimedUpdateWithBadgeIdsDefaultValues();
+            while (reader.nextField()) {
+                if (reader.isEndGroup())
+                    break;
+                switch (reader.getFieldNumber()) {
+                    case 1:
+                        reader.readMessage(message.badgeIds, () => pb_1.Message.addToRepeatedWrapperField(message, 1, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
+                        break;
+                    case 2:
+                        reader.readMessage(message.timelineTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 2, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
+                        break;
+                    case 3:
+                        reader.readMessage(message.permittedTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 3, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
+                        break;
+                    case 4:
+                        reader.readMessage(message.forbiddenTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 4, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
+                        break;
+                    default: reader.skipField();
+                }
+            }
+            return message;
+        }
+        serializeBinary(): Uint8Array {
+            return this.serialize();
+        }
+        static deserializeBinary(bytes: Uint8Array): TimedUpdateWithBadgeIdsDefaultValues {
+            return TimedUpdateWithBadgeIdsDefaultValues.deserialize(bytes);
+        }
+    }
+    export class TimedUpdateWithBadgeIdsPermission extends pb_1.Message {
+        #one_of_decls: number[][] = [];
+        constructor(data?: any[] | {
+            defaultValues?: TimedUpdateWithBadgeIdsDefaultValues;
+            combinations?: TimedUpdateWithBadgeIdsCombination[];
+        }) {
+            super();
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [2], this.#one_of_decls);
+            if (!Array.isArray(data) && typeof data == "object") {
+                if ("defaultValues" in data && data.defaultValues != undefined) {
+                    this.defaultValues = data.defaultValues;
+                }
+                if ("combinations" in data && data.combinations != undefined) {
+                    this.combinations = data.combinations;
+                }
+            }
+        }
+        get defaultValues() {
+            return pb_1.Message.getWrapperField(this, TimedUpdateWithBadgeIdsDefaultValues, 1) as TimedUpdateWithBadgeIdsDefaultValues;
+        }
+        set defaultValues(value: TimedUpdateWithBadgeIdsDefaultValues) {
+            pb_1.Message.setWrapperField(this, 1, value);
+        }
+        get has_defaultValues() {
+            return pb_1.Message.getField(this, 1) != null;
+        }
+        get combinations() {
+            return pb_1.Message.getRepeatedWrapperField(this, TimedUpdateWithBadgeIdsCombination, 2) as TimedUpdateWithBadgeIdsCombination[];
+        }
+        set combinations(value: TimedUpdateWithBadgeIdsCombination[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 2, value);
+        }
+        static fromObject(data: {
+            defaultValues?: ReturnType<typeof TimedUpdateWithBadgeIdsDefaultValues.prototype.toObject>;
+            combinations?: ReturnType<typeof TimedUpdateWithBadgeIdsCombination.prototype.toObject>[];
+        }): TimedUpdateWithBadgeIdsPermission {
+            const message = new TimedUpdateWithBadgeIdsPermission({});
+            if (data.defaultValues != null) {
+                message.defaultValues = TimedUpdateWithBadgeIdsDefaultValues.fromObject(data.defaultValues);
+            }
+            if (data.combinations != null) {
+                message.combinations = data.combinations.map(item => TimedUpdateWithBadgeIdsCombination.fromObject(item));
+            }
+            return message;
+        }
+        toObject() {
+            const data: {
+                defaultValues?: ReturnType<typeof TimedUpdateWithBadgeIdsDefaultValues.prototype.toObject>;
+                combinations?: ReturnType<typeof TimedUpdateWithBadgeIdsCombination.prototype.toObject>[];
+            } = {};
+            if (this.defaultValues != null) {
+                data.defaultValues = this.defaultValues.toObject();
+            }
+            if (this.combinations != null) {
+                data.combinations = this.combinations.map((item: TimedUpdateWithBadgeIdsCombination) => item.toObject());
+            }
+            return data;
+        }
+        serialize(): Uint8Array;
+        serialize(w: pb_1.BinaryWriter): void;
+        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+            const writer = w || new pb_1.BinaryWriter();
+            if (this.has_defaultValues)
+                writer.writeMessage(1, this.defaultValues, () => this.defaultValues.serialize(writer));
+            if (this.combinations.length)
+                writer.writeRepeatedMessage(2, this.combinations, (item: TimedUpdateWithBadgeIdsCombination) => item.serialize(writer));
+            if (!w)
+                return writer.getResultBuffer();
+        }
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): TimedUpdateWithBadgeIdsPermission {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new TimedUpdateWithBadgeIdsPermission();
+            while (reader.nextField()) {
+                if (reader.isEndGroup())
+                    break;
+                switch (reader.getFieldNumber()) {
+                    case 1:
+                        reader.readMessage(message.defaultValues, () => message.defaultValues = TimedUpdateWithBadgeIdsDefaultValues.deserialize(reader));
+                        break;
+                    case 2:
+                        reader.readMessage(message.combinations, () => pb_1.Message.addToRepeatedWrapperField(message, 2, TimedUpdateWithBadgeIdsCombination.deserialize(reader), TimedUpdateWithBadgeIdsCombination));
+                        break;
+                    default: reader.skipField();
+                }
+            }
+            return message;
+        }
+        serializeBinary(): Uint8Array {
+            return this.serialize();
+        }
+        static deserializeBinary(bytes: Uint8Array): TimedUpdateWithBadgeIdsPermission {
+            return TimedUpdateWithBadgeIdsPermission.deserialize(bytes);
+        }
     }
-  }
 }

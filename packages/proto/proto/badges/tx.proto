@@ -21,6 +21,7 @@ option go_package = "github.com/bitbadges/bitbadgeschain/x/badges/types";
 //   rpc UpdateUserApprovedTransfers(MsgUpdateUserApprovedTransfers) returns (MsgUpdateUserApprovedTransfersResponse);
 //   rpc DeleteCollection(MsgDeleteCollection) returns (MsgDeleteCollectionResponse);
 //   // this line is used by starport scaffolding # proto/tx/rpc
+// }
 
 //The types defined in these files are used to define the MsgServer types for all requests and responses for Msgs of the badges module.
 
