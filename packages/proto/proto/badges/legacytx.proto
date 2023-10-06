@@ -22,7 +22,7 @@ option go_package = "github.com/bitbadges/bitbadgeschain/x/badges/types";
 // service Msg {
 //   rpc NewCollection(MsgNewCollection) returns (MsgNewCollectionResponse);
 //   rpc MintAndDistributeBadges(MsgMintAndDistributeBadges) returns (MsgMintAndDistributeBadgesResponse);
-//   rpc UpdateCollectionApprovedTransfers(MsgUpdateCollectionApprovedTransfers) returns (MsgUpdateCollectionApprovedTransfersResponse);
+//   rpc UpdateCollectionApprovals(MsgUpdateCollectionApprovals) returns (MsgUpdateCollectionApprovalsResponse);
 //   rpc UpdateMetadata(MsgUpdateMetadata) returns (MsgUpdateMetadataResponse);
 //   rpc UpdateCollectionPermissions(MsgUpdateCollectionPermissions) returns (MsgUpdateCollectionPermissionsResponse);
 //   rpc UpdateUserPermissions (MsgUpdateUserPermissions) returns (MsgUpdateUserPermissionsResponse);
@@ -32,18 +32,18 @@ option go_package = "github.com/bitbadges/bitbadgeschain/x/badges/types";
 // }
 
 //The types defined in these files are used to define the MsgServer types for all requests and responses for Msgs of the badges module.
-message UserApprovedOutgoingTransferTimeline {
-  repeated UserApprovedOutgoingTransfer approvedOutgoingTransfers = 1;
+message UserOutgoingApprovalTimeline {
+  repeated UserOutgoingApproval outgoingApprovals = 1;
   repeated UintRange timelineTimes = 2;
 }
 
-message UserApprovedIncomingTransferTimeline {
-  repeated UserApprovedIncomingTransfer approvedIncomingTransfers = 1;
+message UserIncomingApprovalTimeline {
+  repeated UserIncomingApproval incomingApprovals = 1;
   repeated UintRange timelineTimes = 2;
 }
 
-message CollectionApprovedTransferTimeline {
-  repeated CollectionApprovedTransfer collectionApprovedTransfers = 1;
+message CollectionApprovalTimeline {
+  repeated CollectionApproval collectionApprovals = 1;
   repeated UintRange timelineTimes = 2;
 }
 
@@ -55,8 +55,8 @@ message MsgNewCollection {
   repeated BadgeMetadataTimeline badgeMetadataTimeline = 3;
   repeated OffChainBalancesMetadataTimeline offChainBalancesMetadataTimeline = 4;
   repeated CustomDataTimeline customDataTimeline = 5;
-  string balancesType = 6 [(gogoproto.nullable) = false, (gogoproto.customtype) = "Uint"];
-  repeated CollectionApprovedTransfer collectionApprovedTransfers = 8;
+  string balancesType = 6 [(gogoproto.customtype) = "Uint", (gogoproto.nullable) = false];
+  repeated CollectionApproval collectionApprovals = 8;
   CollectionPermissions permissions = 9;
   repeated StandardsTimeline standardsTimeline = 10;
 
@@ -67,8 +67,8 @@ message MsgNewCollection {
   repeated ContractAddressTimeline contractAddressTimeline = 13;
   repeated AddressMapping addressMappings = 14;
 
-  repeated UserApprovedOutgoingTransfer defaultApprovedOutgoingTransfers = 15; //The user's approved transfers for each badge ID.
-  repeated UserApprovedIncomingTransfer defaultApprovedIncomingTransfers = 16; //The user's approved incoming transfers for each badge ID.
+  repeated UserOutgoingApproval defaultOutgoingApprovals = 15; //The user's approved transfers for each badge ID.
+  repeated UserIncomingApproval defaultIncomingApprovals = 16; //The user's approved incoming transfers for each badge ID.
 }
 
 message MsgNewCollectionResponse {
@@ -99,34 +99,28 @@ message MsgMintAndDistributeBadges {
   repeated CollectionMetadataTimeline collectionMetadataTimeline = 6; 
   repeated BadgeMetadataTimeline badgeMetadataTimeline = 7;
   repeated OffChainBalancesMetadataTimeline offChainBalancesMetadataTimeline = 8;
-  repeated CollectionApprovedTransfer collectionApprovedTransfers = 9;
+  repeated CollectionApproval collectionApprovals = 9;
 
   repeated AddressMapping addressMappings = 10;
 }
 
 message MsgMintAndDistributeBadgesResponse {}
 
-message MsgUpdateCollectionApprovedTransfers {
+message MsgUpdateCollectionApprovals {
   string creator = 1;
-  string collectionId = 2  [
-      (gogoproto.customtype) = "Uint", 
-      (gogoproto.nullable) = false
-    ];
-  repeated CollectionApprovedTransfer collectionApprovedTransfers = 3;
+  string collectionId = 2  [(gogoproto.customtype) = "Uint", (gogoproto.nullable) = false];
+  repeated CollectionApproval collectionApprovals = 3;
   repeated AddressMapping addressMappings = 4;
 }
 
 
-message MsgUpdateCollectionApprovedTransfersResponse {}
+message MsgUpdateCollectionApprovalsResponse {}
 
 
 //Update badge Uris with new URI object, if permitted.
 message MsgUpdateMetadata {
   string creator = 1;
-  string collectionId = 2  [
-      (gogoproto.customtype) = "Uint", 
-      (gogoproto.nullable) = false
-    ];
+  string collectionId = 2  [(gogoproto.customtype) = "Uint", (gogoproto.nullable) = false];
   repeated CollectionMetadataTimeline collectionMetadataTimeline = 3; 
   repeated BadgeMetadataTimeline badgeMetadataTimeline = 4;
   repeated OffChainBalancesMetadataTimeline offChainBalancesMetadataTimeline = 5;
@@ -140,10 +134,7 @@ message MsgUpdateMetadataResponse {}
 //Update badge permissions with new permissions, if permitted.
 message MsgUpdateCollectionPermissions {
   string creator = 1;
-  string collectionId = 2  [
-      (gogoproto.customtype) = "Uint", 
-      (gogoproto.nullable) = false
-    ];
+  string collectionId = 2  [(gogoproto.customtype) = "Uint", (gogoproto.nullable) = false];
   CollectionPermissions permissions = 3;
   repeated AddressMapping addressMappings = 4;
 }
@@ -152,10 +143,7 @@ message MsgUpdateCollectionPermissionsResponse {}
 
 message MsgUpdateUserPermissions {
   string creator = 1;
-  string collectionId = 2  [
-      (gogoproto.customtype) = "Uint", 
-      (gogoproto.nullable) = false
-    ];
+  string collectionId = 2  [(gogoproto.customtype) = "Uint", (gogoproto.nullable) = false];
   UserPermissions permissions = 3;
   repeated AddressMapping addressMappings = 4;
 }
@@ -165,10 +153,7 @@ message MsgUpdateUserPermissionsResponse {}
 //Transfer manager to this address. Recipient must have made a request.
 message MsgUpdateManager {
   string creator = 1;
-  string collectionId = 2  [
-      (gogoproto.customtype) = "Uint", 
-      (gogoproto.nullable) = false
-    ];
+  string collectionId = 2  [(gogoproto.customtype) = "Uint", (gogoproto.nullable) = false];
   repeated ManagerTimeline managerTimeline = 3;
 }
 
@@ -177,10 +162,7 @@ message MsgUpdateManagerResponse {}
 
 message MsgArchiveCollection {
   string creator      = 1;
-  string collectionId = 2 [
-      (gogoproto.customtype) = "Uint", 
-      (gogoproto.nullable) = false
-    ];
+  string collectionId = 2 [(gogoproto.customtype) = "Uint", (gogoproto.nullable) = false];
   repeated IsArchivedTimeline isArchivedTimeline = 3;
 }
 

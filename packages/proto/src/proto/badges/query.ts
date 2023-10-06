@@ -817,7 +817,7 @@ export namespace bitbadges.bitbadgeschain.badges {
             collectionId?: string;
             approvalLevel?: string;
             approverAddress?: string;
-            challengeId?: string;
+            challengeTrackerId?: string;
             leafIndex?: string;
         }) {
             super();
@@ -832,8 +832,8 @@ export namespace bitbadges.bitbadgeschain.badges {
                 if ("approverAddress" in data && data.approverAddress != undefined) {
                     this.approverAddress = data.approverAddress;
                 }
-                if ("challengeId" in data && data.challengeId != undefined) {
-                    this.challengeId = data.challengeId;
+                if ("challengeTrackerId" in data && data.challengeTrackerId != undefined) {
+                    this.challengeTrackerId = data.challengeTrackerId;
                 }
                 if ("leafIndex" in data && data.leafIndex != undefined) {
                     this.leafIndex = data.leafIndex;
@@ -858,10 +858,10 @@ export namespace bitbadges.bitbadgeschain.badges {
         set approverAddress(value: string) {
             pb_1.Message.setField(this, 3, value);
         }
-        get challengeId() {
+        get challengeTrackerId() {
             return pb_1.Message.getFieldWithDefault(this, 4, "") as string;
         }
-        set challengeId(value: string) {
+        set challengeTrackerId(value: string) {
             pb_1.Message.setField(this, 4, value);
         }
         get leafIndex() {
@@ -874,7 +874,7 @@ export namespace bitbadges.bitbadgeschain.badges {
             collectionId?: string;
             approvalLevel?: string;
             approverAddress?: string;
-            challengeId?: string;
+            challengeTrackerId?: string;
             leafIndex?: string;
         }): QueryGetNumUsedForMerkleChallengeRequest {
             const message = new QueryGetNumUsedForMerkleChallengeRequest({});
@@ -887,8 +887,8 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (data.approverAddress != null) {
                 message.approverAddress = data.approverAddress;
             }
-            if (data.challengeId != null) {
-                message.challengeId = data.challengeId;
+            if (data.challengeTrackerId != null) {
+                message.challengeTrackerId = data.challengeTrackerId;
             }
             if (data.leafIndex != null) {
                 message.leafIndex = data.leafIndex;
@@ -900,7 +900,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                 collectionId?: string;
                 approvalLevel?: string;
                 approverAddress?: string;
-                challengeId?: string;
+                challengeTrackerId?: string;
                 leafIndex?: string;
             } = {};
             if (this.collectionId != null) {
@@ -912,8 +912,8 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (this.approverAddress != null) {
                 data.approverAddress = this.approverAddress;
             }
-            if (this.challengeId != null) {
-                data.challengeId = this.challengeId;
+            if (this.challengeTrackerId != null) {
+                data.challengeTrackerId = this.challengeTrackerId;
             }
             if (this.leafIndex != null) {
                 data.leafIndex = this.leafIndex;
@@ -930,8 +930,8 @@ export namespace bitbadges.bitbadgeschain.badges {
                 writer.writeString(2, this.approvalLevel);
             if (this.approverAddress.length)
                 writer.writeString(3, this.approverAddress);
-            if (this.challengeId.length)
-                writer.writeString(4, this.challengeId);
+            if (this.challengeTrackerId.length)
+                writer.writeString(4, this.challengeTrackerId);
             if (this.leafIndex.length)
                 writer.writeString(5, this.leafIndex);
             if (!w)
@@ -953,7 +953,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                         message.approverAddress = reader.readString();
                         break;
                     case 4:
-                        message.challengeId = reader.readString();
+                        message.challengeTrackerId = reader.readString();
                         break;
                     case 5:
                         message.leafIndex = reader.readString();

@@ -15,8 +15,8 @@ export namespace bitbadges.bitbadgeschain.badges {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
             balances?: dependency_4.bitbadges.bitbadgeschain.badges.Balance[];
-            approvedOutgoingTransfers?: UserApprovedOutgoingTransfer[];
-            approvedIncomingTransfers?: UserApprovedIncomingTransfer[];
+            outgoingApprovals?: UserOutgoingApproval[];
+            incomingApprovals?: UserIncomingApproval[];
             userPermissions?: dependency_2.bitbadges.bitbadgeschain.badges.UserPermissions;
         }) {
             super();
@@ -25,11 +25,11 @@ export namespace bitbadges.bitbadgeschain.badges {
                 if ("balances" in data && data.balances != undefined) {
                     this.balances = data.balances;
                 }
-                if ("approvedOutgoingTransfers" in data && data.approvedOutgoingTransfers != undefined) {
-                    this.approvedOutgoingTransfers = data.approvedOutgoingTransfers;
+                if ("outgoingApprovals" in data && data.outgoingApprovals != undefined) {
+                    this.outgoingApprovals = data.outgoingApprovals;
                 }
-                if ("approvedIncomingTransfers" in data && data.approvedIncomingTransfers != undefined) {
-                    this.approvedIncomingTransfers = data.approvedIncomingTransfers;
+                if ("incomingApprovals" in data && data.incomingApprovals != undefined) {
+                    this.incomingApprovals = data.incomingApprovals;
                 }
                 if ("userPermissions" in data && data.userPermissions != undefined) {
                     this.userPermissions = data.userPermissions;
@@ -42,16 +42,16 @@ export namespace bitbadges.bitbadgeschain.badges {
         set balances(value: dependency_4.bitbadges.bitbadgeschain.badges.Balance[]) {
             pb_1.Message.setRepeatedWrapperField(this, 1, value);
         }
-        get approvedOutgoingTransfers() {
-            return pb_1.Message.getRepeatedWrapperField(this, UserApprovedOutgoingTransfer, 2) as UserApprovedOutgoingTransfer[];
+        get outgoingApprovals() {
+            return pb_1.Message.getRepeatedWrapperField(this, UserOutgoingApproval, 2) as UserOutgoingApproval[];
         }
-        set approvedOutgoingTransfers(value: UserApprovedOutgoingTransfer[]) {
+        set outgoingApprovals(value: UserOutgoingApproval[]) {
             pb_1.Message.setRepeatedWrapperField(this, 2, value);
         }
-        get approvedIncomingTransfers() {
-            return pb_1.Message.getRepeatedWrapperField(this, UserApprovedIncomingTransfer, 3) as UserApprovedIncomingTransfer[];
+        get incomingApprovals() {
+            return pb_1.Message.getRepeatedWrapperField(this, UserIncomingApproval, 3) as UserIncomingApproval[];
         }
-        set approvedIncomingTransfers(value: UserApprovedIncomingTransfer[]) {
+        set incomingApprovals(value: UserIncomingApproval[]) {
             pb_1.Message.setRepeatedWrapperField(this, 3, value);
         }
         get userPermissions() {
@@ -65,19 +65,19 @@ export namespace bitbadges.bitbadgeschain.badges {
         }
         static fromObject(data: {
             balances?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.Balance.prototype.toObject>[];
-            approvedOutgoingTransfers?: ReturnType<typeof UserApprovedOutgoingTransfer.prototype.toObject>[];
-            approvedIncomingTransfers?: ReturnType<typeof UserApprovedIncomingTransfer.prototype.toObject>[];
+            outgoingApprovals?: ReturnType<typeof UserOutgoingApproval.prototype.toObject>[];
+            incomingApprovals?: ReturnType<typeof UserIncomingApproval.prototype.toObject>[];
             userPermissions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UserPermissions.prototype.toObject>;
         }): UserBalanceStore {
             const message = new UserBalanceStore({});
             if (data.balances != null) {
                 message.balances = data.balances.map(item => dependency_4.bitbadges.bitbadgeschain.badges.Balance.fromObject(item));
             }
-            if (data.approvedOutgoingTransfers != null) {
-                message.approvedOutgoingTransfers = data.approvedOutgoingTransfers.map(item => UserApprovedOutgoingTransfer.fromObject(item));
+            if (data.outgoingApprovals != null) {
+                message.outgoingApprovals = data.outgoingApprovals.map(item => UserOutgoingApproval.fromObject(item));
             }
-            if (data.approvedIncomingTransfers != null) {
-                message.approvedIncomingTransfers = data.approvedIncomingTransfers.map(item => UserApprovedIncomingTransfer.fromObject(item));
+            if (data.incomingApprovals != null) {
+                message.incomingApprovals = data.incomingApprovals.map(item => UserIncomingApproval.fromObject(item));
             }
             if (data.userPermissions != null) {
                 message.userPermissions = dependency_2.bitbadges.bitbadgeschain.badges.UserPermissions.fromObject(data.userPermissions);
@@ -87,18 +87,18 @@ export namespace bitbadges.bitbadgeschain.badges {
         toObject() {
             const data: {
                 balances?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.Balance.prototype.toObject>[];
-                approvedOutgoingTransfers?: ReturnType<typeof UserApprovedOutgoingTransfer.prototype.toObject>[];
-                approvedIncomingTransfers?: ReturnType<typeof UserApprovedIncomingTransfer.prototype.toObject>[];
+                outgoingApprovals?: ReturnType<typeof UserOutgoingApproval.prototype.toObject>[];
+                incomingApprovals?: ReturnType<typeof UserIncomingApproval.prototype.toObject>[];
                 userPermissions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UserPermissions.prototype.toObject>;
             } = {};
             if (this.balances != null) {
                 data.balances = this.balances.map((item: dependency_4.bitbadges.bitbadgeschain.badges.Balance) => item.toObject());
             }
-            if (this.approvedOutgoingTransfers != null) {
-                data.approvedOutgoingTransfers = this.approvedOutgoingTransfers.map((item: UserApprovedOutgoingTransfer) => item.toObject());
+            if (this.outgoingApprovals != null) {
+                data.outgoingApprovals = this.outgoingApprovals.map((item: UserOutgoingApproval) => item.toObject());
             }
-            if (this.approvedIncomingTransfers != null) {
-                data.approvedIncomingTransfers = this.approvedIncomingTransfers.map((item: UserApprovedIncomingTransfer) => item.toObject());
+            if (this.incomingApprovals != null) {
+                data.incomingApprovals = this.incomingApprovals.map((item: UserIncomingApproval) => item.toObject());
             }
             if (this.userPermissions != null) {
                 data.userPermissions = this.userPermissions.toObject();
@@ -111,10 +111,10 @@ export namespace bitbadges.bitbadgeschain.badges {
             const writer = w || new pb_1.BinaryWriter();
             if (this.balances.length)
                 writer.writeRepeatedMessage(1, this.balances, (item: dependency_4.bitbadges.bitbadgeschain.badges.Balance) => item.serialize(writer));
-            if (this.approvedOutgoingTransfers.length)
-                writer.writeRepeatedMessage(2, this.approvedOutgoingTransfers, (item: UserApprovedOutgoingTransfer) => item.serialize(writer));
-            if (this.approvedIncomingTransfers.length)
-                writer.writeRepeatedMessage(3, this.approvedIncomingTransfers, (item: UserApprovedIncomingTransfer) => item.serialize(writer));
+            if (this.outgoingApprovals.length)
+                writer.writeRepeatedMessage(2, this.outgoingApprovals, (item: UserOutgoingApproval) => item.serialize(writer));
+            if (this.incomingApprovals.length)
+                writer.writeRepeatedMessage(3, this.incomingApprovals, (item: UserIncomingApproval) => item.serialize(writer));
             if (this.has_userPermissions)
                 writer.writeMessage(4, this.userPermissions, () => this.userPermissions.serialize(writer));
             if (!w)
@@ -130,10 +130,10 @@ export namespace bitbadges.bitbadgeschain.badges {
                         reader.readMessage(message.balances, () => pb_1.Message.addToRepeatedWrapperField(message, 1, dependency_4.bitbadges.bitbadgeschain.badges.Balance.deserialize(reader), dependency_4.bitbadges.bitbadgeschain.badges.Balance));
                         break;
                     case 2:
-                        reader.readMessage(message.approvedOutgoingTransfers, () => pb_1.Message.addToRepeatedWrapperField(message, 2, UserApprovedOutgoingTransfer.deserialize(reader), UserApprovedOutgoingTransfer));
+                        reader.readMessage(message.outgoingApprovals, () => pb_1.Message.addToRepeatedWrapperField(message, 2, UserOutgoingApproval.deserialize(reader), UserOutgoingApproval));
                         break;
                     case 3:
-                        reader.readMessage(message.approvedIncomingTransfers, () => pb_1.Message.addToRepeatedWrapperField(message, 3, UserApprovedIncomingTransfer.deserialize(reader), UserApprovedIncomingTransfer));
+                        reader.readMessage(message.incomingApprovals, () => pb_1.Message.addToRepeatedWrapperField(message, 3, UserIncomingApproval.deserialize(reader), UserIncomingApproval));
                         break;
                     case 4:
                         reader.readMessage(message.userPermissions, () => message.userPermissions = dependency_2.bitbadges.bitbadgeschain.badges.UserPermissions.deserialize(reader));
@@ -157,7 +157,6 @@ export namespace bitbadges.bitbadgeschain.badges {
             expectedProofLength?: string;
             useCreatorAddressAsLeaf?: boolean;
             maxOneUsePerLeaf?: boolean;
-            useLeafIndexForTransferOrder?: boolean;
             uri?: string;
             customData?: string;
         }) {
@@ -175,9 +174,6 @@ export namespace bitbadges.bitbadgeschain.badges {
                 }
                 if ("maxOneUsePerLeaf" in data && data.maxOneUsePerLeaf != undefined) {
                     this.maxOneUsePerLeaf = data.maxOneUsePerLeaf;
-                }
-                if ("useLeafIndexForTransferOrder" in data && data.useLeafIndexForTransferOrder != undefined) {
-                    this.useLeafIndexForTransferOrder = data.useLeafIndexForTransferOrder;
                 }
                 if ("uri" in data && data.uri != undefined) {
                     this.uri = data.uri;
@@ -211,12 +207,6 @@ export namespace bitbadges.bitbadgeschain.badges {
         set maxOneUsePerLeaf(value: boolean) {
             pb_1.Message.setField(this, 4, value);
         }
-        get useLeafIndexForTransferOrder() {
-            return pb_1.Message.getFieldWithDefault(this, 5, false) as boolean;
-        }
-        set useLeafIndexForTransferOrder(value: boolean) {
-            pb_1.Message.setField(this, 5, value);
-        }
         get uri() {
             return pb_1.Message.getFieldWithDefault(this, 6, "") as string;
         }
@@ -234,7 +224,6 @@ export namespace bitbadges.bitbadgeschain.badges {
             expectedProofLength?: string;
             useCreatorAddressAsLeaf?: boolean;
             maxOneUsePerLeaf?: boolean;
-            useLeafIndexForTransferOrder?: boolean;
             uri?: string;
             customData?: string;
         }): MerkleChallenge {
@@ -251,9 +240,6 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (data.maxOneUsePerLeaf != null) {
                 message.maxOneUsePerLeaf = data.maxOneUsePerLeaf;
             }
-            if (data.useLeafIndexForTransferOrder != null) {
-                message.useLeafIndexForTransferOrder = data.useLeafIndexForTransferOrder;
-            }
             if (data.uri != null) {
                 message.uri = data.uri;
             }
@@ -268,7 +254,6 @@ export namespace bitbadges.bitbadgeschain.badges {
                 expectedProofLength?: string;
                 useCreatorAddressAsLeaf?: boolean;
                 maxOneUsePerLeaf?: boolean;
-                useLeafIndexForTransferOrder?: boolean;
                 uri?: string;
                 customData?: string;
             } = {};
@@ -283,9 +268,6 @@ export namespace bitbadges.bitbadgeschain.badges {
             }
             if (this.maxOneUsePerLeaf != null) {
                 data.maxOneUsePerLeaf = this.maxOneUsePerLeaf;
-            }
-            if (this.useLeafIndexForTransferOrder != null) {
-                data.useLeafIndexForTransferOrder = this.useLeafIndexForTransferOrder;
             }
             if (this.uri != null) {
                 data.uri = this.uri;
@@ -307,8 +289,6 @@ export namespace bitbadges.bitbadgeschain.badges {
                 writer.writeBool(3, this.useCreatorAddressAsLeaf);
             if (this.maxOneUsePerLeaf != false)
                 writer.writeBool(4, this.maxOneUsePerLeaf);
-            if (this.useLeafIndexForTransferOrder != false)
-                writer.writeBool(5, this.useLeafIndexForTransferOrder);
             if (this.uri.length)
                 writer.writeString(6, this.uri);
             if (this.customData.length)
@@ -334,9 +314,6 @@ export namespace bitbadges.bitbadgeschain.badges {
                     case 4:
                         message.maxOneUsePerLeaf = reader.readBool();
                         break;
-                    case 5:
-                        message.useLeafIndexForTransferOrder = reader.readBool();
-                        break;
                     case 6:
                         message.uri = reader.readString();
                         break;
@@ -355,9 +332,16 @@ export namespace bitbadges.bitbadgeschain.badges {
             return MerkleChallenge.deserialize(bytes);
         }
     }
-    export class IsUserOutgoingTransferAllowed extends pb_1.Message {
+    export class UserOutgoingApproval extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
+            toMappingId?: string;
+            initiatedByMappingId?: string;
+            transferTimes?: dependency_4.bitbadges.bitbadgeschain.badges.UintRange[];
+            badgeIds?: dependency_4.bitbadges.bitbadgeschain.badges.UintRange[];
+            ownershipTimes?: dependency_4.bitbadges.bitbadgeschain.badges.UintRange[];
+            approvalTrackerId?: string;
+            challengeTrackerId?: string;
             toMappingOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
             initiatedByMappingOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
             transferTimesOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
@@ -366,10 +350,35 @@ export namespace bitbadges.bitbadgeschain.badges {
             approvalTrackerIdOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
             challengeTrackerIdOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
             isApproved?: boolean;
+            uri?: string;
+            customData?: string;
+            approvalId?: string;
+            approvalCriteria?: OutgoingApprovalCriteria;
         }) {
             super();
-            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [3, 4, 5], this.#one_of_decls);
             if (!Array.isArray(data) && typeof data == "object") {
+                if ("toMappingId" in data && data.toMappingId != undefined) {
+                    this.toMappingId = data.toMappingId;
+                }
+                if ("initiatedByMappingId" in data && data.initiatedByMappingId != undefined) {
+                    this.initiatedByMappingId = data.initiatedByMappingId;
+                }
+                if ("transferTimes" in data && data.transferTimes != undefined) {
+                    this.transferTimes = data.transferTimes;
+                }
+                if ("badgeIds" in data && data.badgeIds != undefined) {
+                    this.badgeIds = data.badgeIds;
+                }
+                if ("ownershipTimes" in data && data.ownershipTimes != undefined) {
+                    this.ownershipTimes = data.ownershipTimes;
+                }
+                if ("approvalTrackerId" in data && data.approvalTrackerId != undefined) {
+                    this.approvalTrackerId = data.approvalTrackerId;
+                }
+                if ("challengeTrackerId" in data && data.challengeTrackerId != undefined) {
+                    this.challengeTrackerId = data.challengeTrackerId;
+                }
                 if ("toMappingOptions" in data && data.toMappingOptions != undefined) {
                     this.toMappingOptions = data.toMappingOptions;
                 }
@@ -394,511 +403,17 @@ export namespace bitbadges.bitbadgeschain.badges {
                 if ("isApproved" in data && data.isApproved != undefined) {
                     this.isApproved = data.isApproved;
                 }
-            }
-        }
-        get toMappingOptions() {
-            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 2) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
-        }
-        set toMappingOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
-            pb_1.Message.setWrapperField(this, 2, value);
-        }
-        get has_toMappingOptions() {
-            return pb_1.Message.getField(this, 2) != null;
-        }
-        get initiatedByMappingOptions() {
-            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 3) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
-        }
-        set initiatedByMappingOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
-            pb_1.Message.setWrapperField(this, 3, value);
-        }
-        get has_initiatedByMappingOptions() {
-            return pb_1.Message.getField(this, 3) != null;
-        }
-        get transferTimesOptions() {
-            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 4) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
-        }
-        set transferTimesOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
-            pb_1.Message.setWrapperField(this, 4, value);
-        }
-        get has_transferTimesOptions() {
-            return pb_1.Message.getField(this, 4) != null;
-        }
-        get badgeIdsOptions() {
-            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 5) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
-        }
-        set badgeIdsOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
-            pb_1.Message.setWrapperField(this, 5, value);
-        }
-        get has_badgeIdsOptions() {
-            return pb_1.Message.getField(this, 5) != null;
-        }
-        get ownershipTimesOptions() {
-            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 6) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
-        }
-        set ownershipTimesOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
-            pb_1.Message.setWrapperField(this, 6, value);
-        }
-        get has_ownershipTimesOptions() {
-            return pb_1.Message.getField(this, 6) != null;
-        }
-        get approvalTrackerIdOptions() {
-            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 7) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
-        }
-        set approvalTrackerIdOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
-            pb_1.Message.setWrapperField(this, 7, value);
-        }
-        get has_approvalTrackerIdOptions() {
-            return pb_1.Message.getField(this, 7) != null;
-        }
-        get challengeTrackerIdOptions() {
-            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 8) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
-        }
-        set challengeTrackerIdOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
-            pb_1.Message.setWrapperField(this, 8, value);
-        }
-        get has_challengeTrackerIdOptions() {
-            return pb_1.Message.getField(this, 8) != null;
-        }
-        get isApproved() {
-            return pb_1.Message.getFieldWithDefault(this, 9, false) as boolean;
-        }
-        set isApproved(value: boolean) {
-            pb_1.Message.setField(this, 9, value);
-        }
-        static fromObject(data: {
-            toMappingOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
-            initiatedByMappingOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
-            transferTimesOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
-            badgeIdsOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
-            ownershipTimesOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
-            approvalTrackerIdOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
-            challengeTrackerIdOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
-            isApproved?: boolean;
-        }): IsUserOutgoingTransferAllowed {
-            const message = new IsUserOutgoingTransferAllowed({});
-            if (data.toMappingOptions != null) {
-                message.toMappingOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.toMappingOptions);
-            }
-            if (data.initiatedByMappingOptions != null) {
-                message.initiatedByMappingOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.initiatedByMappingOptions);
-            }
-            if (data.transferTimesOptions != null) {
-                message.transferTimesOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.transferTimesOptions);
-            }
-            if (data.badgeIdsOptions != null) {
-                message.badgeIdsOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.badgeIdsOptions);
-            }
-            if (data.ownershipTimesOptions != null) {
-                message.ownershipTimesOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.ownershipTimesOptions);
-            }
-            if (data.approvalTrackerIdOptions != null) {
-                message.approvalTrackerIdOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.approvalTrackerIdOptions);
-            }
-            if (data.challengeTrackerIdOptions != null) {
-                message.challengeTrackerIdOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.challengeTrackerIdOptions);
-            }
-            if (data.isApproved != null) {
-                message.isApproved = data.isApproved;
-            }
-            return message;
-        }
-        toObject() {
-            const data: {
-                toMappingOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
-                initiatedByMappingOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
-                transferTimesOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
-                badgeIdsOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
-                ownershipTimesOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
-                approvalTrackerIdOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
-                challengeTrackerIdOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
-                isApproved?: boolean;
-            } = {};
-            if (this.toMappingOptions != null) {
-                data.toMappingOptions = this.toMappingOptions.toObject();
-            }
-            if (this.initiatedByMappingOptions != null) {
-                data.initiatedByMappingOptions = this.initiatedByMappingOptions.toObject();
-            }
-            if (this.transferTimesOptions != null) {
-                data.transferTimesOptions = this.transferTimesOptions.toObject();
-            }
-            if (this.badgeIdsOptions != null) {
-                data.badgeIdsOptions = this.badgeIdsOptions.toObject();
-            }
-            if (this.ownershipTimesOptions != null) {
-                data.ownershipTimesOptions = this.ownershipTimesOptions.toObject();
-            }
-            if (this.approvalTrackerIdOptions != null) {
-                data.approvalTrackerIdOptions = this.approvalTrackerIdOptions.toObject();
-            }
-            if (this.challengeTrackerIdOptions != null) {
-                data.challengeTrackerIdOptions = this.challengeTrackerIdOptions.toObject();
-            }
-            if (this.isApproved != null) {
-                data.isApproved = this.isApproved;
-            }
-            return data;
-        }
-        serialize(): Uint8Array;
-        serialize(w: pb_1.BinaryWriter): void;
-        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-            const writer = w || new pb_1.BinaryWriter();
-            if (this.has_toMappingOptions)
-                writer.writeMessage(2, this.toMappingOptions, () => this.toMappingOptions.serialize(writer));
-            if (this.has_initiatedByMappingOptions)
-                writer.writeMessage(3, this.initiatedByMappingOptions, () => this.initiatedByMappingOptions.serialize(writer));
-            if (this.has_transferTimesOptions)
-                writer.writeMessage(4, this.transferTimesOptions, () => this.transferTimesOptions.serialize(writer));
-            if (this.has_badgeIdsOptions)
-                writer.writeMessage(5, this.badgeIdsOptions, () => this.badgeIdsOptions.serialize(writer));
-            if (this.has_ownershipTimesOptions)
-                writer.writeMessage(6, this.ownershipTimesOptions, () => this.ownershipTimesOptions.serialize(writer));
-            if (this.has_approvalTrackerIdOptions)
-                writer.writeMessage(7, this.approvalTrackerIdOptions, () => this.approvalTrackerIdOptions.serialize(writer));
-            if (this.has_challengeTrackerIdOptions)
-                writer.writeMessage(8, this.challengeTrackerIdOptions, () => this.challengeTrackerIdOptions.serialize(writer));
-            if (this.isApproved != false)
-                writer.writeBool(9, this.isApproved);
-            if (!w)
-                return writer.getResultBuffer();
-        }
-        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): IsUserOutgoingTransferAllowed {
-            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new IsUserOutgoingTransferAllowed();
-            while (reader.nextField()) {
-                if (reader.isEndGroup())
-                    break;
-                switch (reader.getFieldNumber()) {
-                    case 2:
-                        reader.readMessage(message.toMappingOptions, () => message.toMappingOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
-                        break;
-                    case 3:
-                        reader.readMessage(message.initiatedByMappingOptions, () => message.initiatedByMappingOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
-                        break;
-                    case 4:
-                        reader.readMessage(message.transferTimesOptions, () => message.transferTimesOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
-                        break;
-                    case 5:
-                        reader.readMessage(message.badgeIdsOptions, () => message.badgeIdsOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
-                        break;
-                    case 6:
-                        reader.readMessage(message.ownershipTimesOptions, () => message.ownershipTimesOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
-                        break;
-                    case 7:
-                        reader.readMessage(message.approvalTrackerIdOptions, () => message.approvalTrackerIdOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
-                        break;
-                    case 8:
-                        reader.readMessage(message.challengeTrackerIdOptions, () => message.challengeTrackerIdOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
-                        break;
-                    case 9:
-                        message.isApproved = reader.readBool();
-                        break;
-                    default: reader.skipField();
+                if ("uri" in data && data.uri != undefined) {
+                    this.uri = data.uri;
                 }
-            }
-            return message;
-        }
-        serializeBinary(): Uint8Array {
-            return this.serialize();
-        }
-        static deserializeBinary(bytes: Uint8Array): IsUserOutgoingTransferAllowed {
-            return IsUserOutgoingTransferAllowed.deserialize(bytes);
-        }
-    }
-    export class IsUserIncomingTransferAllowed extends pb_1.Message {
-        #one_of_decls: number[][] = [];
-        constructor(data?: any[] | {
-            fromMappingOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
-            initiatedByMappingOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
-            transferTimesOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
-            badgeIdsOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
-            ownershipTimesOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
-            approvalTrackerIdOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
-            challengeTrackerIdOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
-            isApproved?: boolean;
-        }) {
-            super();
-            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
-            if (!Array.isArray(data) && typeof data == "object") {
-                if ("fromMappingOptions" in data && data.fromMappingOptions != undefined) {
-                    this.fromMappingOptions = data.fromMappingOptions;
-                }
-                if ("initiatedByMappingOptions" in data && data.initiatedByMappingOptions != undefined) {
-                    this.initiatedByMappingOptions = data.initiatedByMappingOptions;
-                }
-                if ("transferTimesOptions" in data && data.transferTimesOptions != undefined) {
-                    this.transferTimesOptions = data.transferTimesOptions;
-                }
-                if ("badgeIdsOptions" in data && data.badgeIdsOptions != undefined) {
-                    this.badgeIdsOptions = data.badgeIdsOptions;
-                }
-                if ("ownershipTimesOptions" in data && data.ownershipTimesOptions != undefined) {
-                    this.ownershipTimesOptions = data.ownershipTimesOptions;
-                }
-                if ("approvalTrackerIdOptions" in data && data.approvalTrackerIdOptions != undefined) {
-                    this.approvalTrackerIdOptions = data.approvalTrackerIdOptions;
-                }
-                if ("challengeTrackerIdOptions" in data && data.challengeTrackerIdOptions != undefined) {
-                    this.challengeTrackerIdOptions = data.challengeTrackerIdOptions;
-                }
-                if ("isApproved" in data && data.isApproved != undefined) {
-                    this.isApproved = data.isApproved;
-                }
-            }
-        }
-        get fromMappingOptions() {
-            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 2) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
-        }
-        set fromMappingOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
-            pb_1.Message.setWrapperField(this, 2, value);
-        }
-        get has_fromMappingOptions() {
-            return pb_1.Message.getField(this, 2) != null;
-        }
-        get initiatedByMappingOptions() {
-            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 3) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
-        }
-        set initiatedByMappingOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
-            pb_1.Message.setWrapperField(this, 3, value);
-        }
-        get has_initiatedByMappingOptions() {
-            return pb_1.Message.getField(this, 3) != null;
-        }
-        get transferTimesOptions() {
-            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 4) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
-        }
-        set transferTimesOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
-            pb_1.Message.setWrapperField(this, 4, value);
-        }
-        get has_transferTimesOptions() {
-            return pb_1.Message.getField(this, 4) != null;
-        }
-        get badgeIdsOptions() {
-            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 5) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
-        }
-        set badgeIdsOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
-            pb_1.Message.setWrapperField(this, 5, value);
-        }
-        get has_badgeIdsOptions() {
-            return pb_1.Message.getField(this, 5) != null;
-        }
-        get ownershipTimesOptions() {
-            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 6) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
-        }
-        set ownershipTimesOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
-            pb_1.Message.setWrapperField(this, 6, value);
-        }
-        get has_ownershipTimesOptions() {
-            return pb_1.Message.getField(this, 6) != null;
-        }
-        get approvalTrackerIdOptions() {
-            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 7) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
-        }
-        set approvalTrackerIdOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
-            pb_1.Message.setWrapperField(this, 7, value);
-        }
-        get has_approvalTrackerIdOptions() {
-            return pb_1.Message.getField(this, 7) != null;
-        }
-        get challengeTrackerIdOptions() {
-            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 8) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
-        }
-        set challengeTrackerIdOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
-            pb_1.Message.setWrapperField(this, 8, value);
-        }
-        get has_challengeTrackerIdOptions() {
-            return pb_1.Message.getField(this, 8) != null;
-        }
-        get isApproved() {
-            return pb_1.Message.getFieldWithDefault(this, 9, false) as boolean;
-        }
-        set isApproved(value: boolean) {
-            pb_1.Message.setField(this, 9, value);
-        }
-        static fromObject(data: {
-            fromMappingOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
-            initiatedByMappingOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
-            transferTimesOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
-            badgeIdsOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
-            ownershipTimesOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
-            approvalTrackerIdOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
-            challengeTrackerIdOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
-            isApproved?: boolean;
-        }): IsUserIncomingTransferAllowed {
-            const message = new IsUserIncomingTransferAllowed({});
-            if (data.fromMappingOptions != null) {
-                message.fromMappingOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.fromMappingOptions);
-            }
-            if (data.initiatedByMappingOptions != null) {
-                message.initiatedByMappingOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.initiatedByMappingOptions);
-            }
-            if (data.transferTimesOptions != null) {
-                message.transferTimesOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.transferTimesOptions);
-            }
-            if (data.badgeIdsOptions != null) {
-                message.badgeIdsOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.badgeIdsOptions);
-            }
-            if (data.ownershipTimesOptions != null) {
-                message.ownershipTimesOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.ownershipTimesOptions);
-            }
-            if (data.approvalTrackerIdOptions != null) {
-                message.approvalTrackerIdOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.approvalTrackerIdOptions);
-            }
-            if (data.challengeTrackerIdOptions != null) {
-                message.challengeTrackerIdOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.challengeTrackerIdOptions);
-            }
-            if (data.isApproved != null) {
-                message.isApproved = data.isApproved;
-            }
-            return message;
-        }
-        toObject() {
-            const data: {
-                fromMappingOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
-                initiatedByMappingOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
-                transferTimesOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
-                badgeIdsOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
-                ownershipTimesOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
-                approvalTrackerIdOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
-                challengeTrackerIdOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
-                isApproved?: boolean;
-            } = {};
-            if (this.fromMappingOptions != null) {
-                data.fromMappingOptions = this.fromMappingOptions.toObject();
-            }
-            if (this.initiatedByMappingOptions != null) {
-                data.initiatedByMappingOptions = this.initiatedByMappingOptions.toObject();
-            }
-            if (this.transferTimesOptions != null) {
-                data.transferTimesOptions = this.transferTimesOptions.toObject();
-            }
-            if (this.badgeIdsOptions != null) {
-                data.badgeIdsOptions = this.badgeIdsOptions.toObject();
-            }
-            if (this.ownershipTimesOptions != null) {
-                data.ownershipTimesOptions = this.ownershipTimesOptions.toObject();
-            }
-            if (this.approvalTrackerIdOptions != null) {
-                data.approvalTrackerIdOptions = this.approvalTrackerIdOptions.toObject();
-            }
-            if (this.challengeTrackerIdOptions != null) {
-                data.challengeTrackerIdOptions = this.challengeTrackerIdOptions.toObject();
-            }
-            if (this.isApproved != null) {
-                data.isApproved = this.isApproved;
-            }
-            return data;
-        }
-        serialize(): Uint8Array;
-        serialize(w: pb_1.BinaryWriter): void;
-        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-            const writer = w || new pb_1.BinaryWriter();
-            if (this.has_fromMappingOptions)
-                writer.writeMessage(2, this.fromMappingOptions, () => this.fromMappingOptions.serialize(writer));
-            if (this.has_initiatedByMappingOptions)
-                writer.writeMessage(3, this.initiatedByMappingOptions, () => this.initiatedByMappingOptions.serialize(writer));
-            if (this.has_transferTimesOptions)
-                writer.writeMessage(4, this.transferTimesOptions, () => this.transferTimesOptions.serialize(writer));
-            if (this.has_badgeIdsOptions)
-                writer.writeMessage(5, this.badgeIdsOptions, () => this.badgeIdsOptions.serialize(writer));
-            if (this.has_ownershipTimesOptions)
-                writer.writeMessage(6, this.ownershipTimesOptions, () => this.ownershipTimesOptions.serialize(writer));
-            if (this.has_approvalTrackerIdOptions)
-                writer.writeMessage(7, this.approvalTrackerIdOptions, () => this.approvalTrackerIdOptions.serialize(writer));
-            if (this.has_challengeTrackerIdOptions)
-                writer.writeMessage(8, this.challengeTrackerIdOptions, () => this.challengeTrackerIdOptions.serialize(writer));
-            if (this.isApproved != false)
-                writer.writeBool(9, this.isApproved);
-            if (!w)
-                return writer.getResultBuffer();
-        }
-        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): IsUserIncomingTransferAllowed {
-            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new IsUserIncomingTransferAllowed();
-            while (reader.nextField()) {
-                if (reader.isEndGroup())
-                    break;
-                switch (reader.getFieldNumber()) {
-                    case 2:
-                        reader.readMessage(message.fromMappingOptions, () => message.fromMappingOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
-                        break;
-                    case 3:
-                        reader.readMessage(message.initiatedByMappingOptions, () => message.initiatedByMappingOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
-                        break;
-                    case 4:
-                        reader.readMessage(message.transferTimesOptions, () => message.transferTimesOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
-                        break;
-                    case 5:
-                        reader.readMessage(message.badgeIdsOptions, () => message.badgeIdsOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
-                        break;
-                    case 6:
-                        reader.readMessage(message.ownershipTimesOptions, () => message.ownershipTimesOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
-                        break;
-                    case 7:
-                        reader.readMessage(message.approvalTrackerIdOptions, () => message.approvalTrackerIdOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
-                        break;
-                    case 8:
-                        reader.readMessage(message.challengeTrackerIdOptions, () => message.challengeTrackerIdOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
-                        break;
-                    case 9:
-                        message.isApproved = reader.readBool();
-                        break;
-                    default: reader.skipField();
-                }
-            }
-            return message;
-        }
-        serializeBinary(): Uint8Array {
-            return this.serialize();
-        }
-        static deserializeBinary(bytes: Uint8Array): IsUserIncomingTransferAllowed {
-            return IsUserIncomingTransferAllowed.deserialize(bytes);
-        }
-    }
-    export class UserApprovedOutgoingTransfer extends pb_1.Message {
-        #one_of_decls: number[][] = [];
-        constructor(data?: any[] | {
-            toMappingId?: string;
-            initiatedByMappingId?: string;
-            transferTimes?: dependency_4.bitbadges.bitbadgeschain.badges.UintRange[];
-            badgeIds?: dependency_4.bitbadges.bitbadgeschain.badges.UintRange[];
-            ownershipTimes?: dependency_4.bitbadges.bitbadgeschain.badges.UintRange[];
-            approvalId?: string;
-            approvalTrackerId?: string;
-            challengeTrackerId?: string;
-            allowedCombinations?: IsUserOutgoingTransferAllowed[];
-            approvalDetails?: OutgoingApprovalDetails;
-        }) {
-            super();
-            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [3, 4, 10, 5], this.#one_of_decls);
-            if (!Array.isArray(data) && typeof data == "object") {
-                if ("toMappingId" in data && data.toMappingId != undefined) {
-                    this.toMappingId = data.toMappingId;
-                }
-                if ("initiatedByMappingId" in data && data.initiatedByMappingId != undefined) {
-                    this.initiatedByMappingId = data.initiatedByMappingId;
-                }
-                if ("transferTimes" in data && data.transferTimes != undefined) {
-                    this.transferTimes = data.transferTimes;
-                }
-                if ("badgeIds" in data && data.badgeIds != undefined) {
-                    this.badgeIds = data.badgeIds;
-                }
-                if ("ownershipTimes" in data && data.ownershipTimes != undefined) {
-                    this.ownershipTimes = data.ownershipTimes;
+                if ("customData" in data && data.customData != undefined) {
+                    this.customData = data.customData;
                 }
                 if ("approvalId" in data && data.approvalId != undefined) {
                     this.approvalId = data.approvalId;
                 }
-                if ("approvalTrackerId" in data && data.approvalTrackerId != undefined) {
-                    this.approvalTrackerId = data.approvalTrackerId;
-                }
-                if ("challengeTrackerId" in data && data.challengeTrackerId != undefined) {
-                    this.challengeTrackerId = data.challengeTrackerId;
-                }
-                if ("allowedCombinations" in data && data.allowedCombinations != undefined) {
-                    this.allowedCombinations = data.allowedCombinations;
-                }
-                if ("approvalDetails" in data && data.approvalDetails != undefined) {
-                    this.approvalDetails = data.approvalDetails;
+                if ("approvalCriteria" in data && data.approvalCriteria != undefined) {
+                    this.approvalCriteria = data.approvalCriteria;
                 }
             }
         }
@@ -927,43 +442,118 @@ export namespace bitbadges.bitbadgeschain.badges {
             pb_1.Message.setRepeatedWrapperField(this, 4, value);
         }
         get ownershipTimes() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.bitbadges.bitbadgeschain.badges.UintRange, 10) as dependency_4.bitbadges.bitbadgeschain.badges.UintRange[];
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.bitbadges.bitbadgeschain.badges.UintRange, 5) as dependency_4.bitbadges.bitbadgeschain.badges.UintRange[];
         }
         set ownershipTimes(value: dependency_4.bitbadges.bitbadgeschain.badges.UintRange[]) {
-            pb_1.Message.setRepeatedWrapperField(this, 10, value);
-        }
-        get approvalId() {
-            return pb_1.Message.getFieldWithDefault(this, 7, "") as string;
-        }
-        set approvalId(value: string) {
-            pb_1.Message.setField(this, 7, value);
-        }
-        get approvalTrackerId() {
-            return pb_1.Message.getFieldWithDefault(this, 8, "") as string;
-        }
-        set approvalTrackerId(value: string) {
-            pb_1.Message.setField(this, 8, value);
-        }
-        get challengeTrackerId() {
-            return pb_1.Message.getFieldWithDefault(this, 9, "") as string;
-        }
-        set challengeTrackerId(value: string) {
-            pb_1.Message.setField(this, 9, value);
-        }
-        get allowedCombinations() {
-            return pb_1.Message.getRepeatedWrapperField(this, IsUserOutgoingTransferAllowed, 5) as IsUserOutgoingTransferAllowed[];
-        }
-        set allowedCombinations(value: IsUserOutgoingTransferAllowed[]) {
             pb_1.Message.setRepeatedWrapperField(this, 5, value);
         }
-        get approvalDetails() {
-            return pb_1.Message.getWrapperField(this, OutgoingApprovalDetails, 6) as OutgoingApprovalDetails;
+        get approvalTrackerId() {
+            return pb_1.Message.getFieldWithDefault(this, 6, "") as string;
         }
-        set approvalDetails(value: OutgoingApprovalDetails) {
-            pb_1.Message.setWrapperField(this, 6, value);
+        set approvalTrackerId(value: string) {
+            pb_1.Message.setField(this, 6, value);
         }
-        get has_approvalDetails() {
-            return pb_1.Message.getField(this, 6) != null;
+        get challengeTrackerId() {
+            return pb_1.Message.getFieldWithDefault(this, 7, "") as string;
+        }
+        set challengeTrackerId(value: string) {
+            pb_1.Message.setField(this, 7, value);
+        }
+        get toMappingOptions() {
+            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 8) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+        }
+        set toMappingOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
+            pb_1.Message.setWrapperField(this, 8, value);
+        }
+        get has_toMappingOptions() {
+            return pb_1.Message.getField(this, 8) != null;
+        }
+        get initiatedByMappingOptions() {
+            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 9) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+        }
+        set initiatedByMappingOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
+            pb_1.Message.setWrapperField(this, 9, value);
+        }
+        get has_initiatedByMappingOptions() {
+            return pb_1.Message.getField(this, 9) != null;
+        }
+        get transferTimesOptions() {
+            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 10) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+        }
+        set transferTimesOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
+            pb_1.Message.setWrapperField(this, 10, value);
+        }
+        get has_transferTimesOptions() {
+            return pb_1.Message.getField(this, 10) != null;
+        }
+        get badgeIdsOptions() {
+            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 11) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+        }
+        set badgeIdsOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
+            pb_1.Message.setWrapperField(this, 11, value);
+        }
+        get has_badgeIdsOptions() {
+            return pb_1.Message.getField(this, 11) != null;
+        }
+        get ownershipTimesOptions() {
+            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 12) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+        }
+        set ownershipTimesOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
+            pb_1.Message.setWrapperField(this, 12, value);
+        }
+        get has_ownershipTimesOptions() {
+            return pb_1.Message.getField(this, 12) != null;
+        }
+        get approvalTrackerIdOptions() {
+            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 13) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+        }
+        set approvalTrackerIdOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
+            pb_1.Message.setWrapperField(this, 13, value);
+        }
+        get has_approvalTrackerIdOptions() {
+            return pb_1.Message.getField(this, 13) != null;
+        }
+        get challengeTrackerIdOptions() {
+            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 14) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+        }
+        set challengeTrackerIdOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
+            pb_1.Message.setWrapperField(this, 14, value);
+        }
+        get has_challengeTrackerIdOptions() {
+            return pb_1.Message.getField(this, 14) != null;
+        }
+        get isApproved() {
+            return pb_1.Message.getFieldWithDefault(this, 15, false) as boolean;
+        }
+        set isApproved(value: boolean) {
+            pb_1.Message.setField(this, 15, value);
+        }
+        get uri() {
+            return pb_1.Message.getFieldWithDefault(this, 16, "") as string;
+        }
+        set uri(value: string) {
+            pb_1.Message.setField(this, 16, value);
+        }
+        get customData() {
+            return pb_1.Message.getFieldWithDefault(this, 17, "") as string;
+        }
+        set customData(value: string) {
+            pb_1.Message.setField(this, 17, value);
+        }
+        get approvalId() {
+            return pb_1.Message.getFieldWithDefault(this, 18, "") as string;
+        }
+        set approvalId(value: string) {
+            pb_1.Message.setField(this, 18, value);
+        }
+        get approvalCriteria() {
+            return pb_1.Message.getWrapperField(this, OutgoingApprovalCriteria, 19) as OutgoingApprovalCriteria;
+        }
+        set approvalCriteria(value: OutgoingApprovalCriteria) {
+            pb_1.Message.setWrapperField(this, 19, value);
+        }
+        get has_approvalCriteria() {
+            return pb_1.Message.getField(this, 19) != null;
         }
         static fromObject(data: {
             toMappingId?: string;
@@ -971,13 +561,22 @@ export namespace bitbadges.bitbadgeschain.badges {
             transferTimes?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
             badgeIds?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
             ownershipTimes?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-            approvalId?: string;
             approvalTrackerId?: string;
             challengeTrackerId?: string;
-            allowedCombinations?: ReturnType<typeof IsUserOutgoingTransferAllowed.prototype.toObject>[];
-            approvalDetails?: ReturnType<typeof OutgoingApprovalDetails.prototype.toObject>;
-        }): UserApprovedOutgoingTransfer {
-            const message = new UserApprovedOutgoingTransfer({});
+            toMappingOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+            initiatedByMappingOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+            transferTimesOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+            badgeIdsOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+            ownershipTimesOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+            approvalTrackerIdOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+            challengeTrackerIdOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+            isApproved?: boolean;
+            uri?: string;
+            customData?: string;
+            approvalId?: string;
+            approvalCriteria?: ReturnType<typeof OutgoingApprovalCriteria.prototype.toObject>;
+        }): UserOutgoingApproval {
+            const message = new UserOutgoingApproval({});
             if (data.toMappingId != null) {
                 message.toMappingId = data.toMappingId;
             }
@@ -993,20 +592,47 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (data.ownershipTimes != null) {
                 message.ownershipTimes = data.ownershipTimes.map(item => dependency_4.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
             }
-            if (data.approvalId != null) {
-                message.approvalId = data.approvalId;
-            }
             if (data.approvalTrackerId != null) {
                 message.approvalTrackerId = data.approvalTrackerId;
             }
             if (data.challengeTrackerId != null) {
                 message.challengeTrackerId = data.challengeTrackerId;
             }
-            if (data.allowedCombinations != null) {
-                message.allowedCombinations = data.allowedCombinations.map(item => IsUserOutgoingTransferAllowed.fromObject(item));
+            if (data.toMappingOptions != null) {
+                message.toMappingOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.toMappingOptions);
             }
-            if (data.approvalDetails != null) {
-                message.approvalDetails = OutgoingApprovalDetails.fromObject(data.approvalDetails);
+            if (data.initiatedByMappingOptions != null) {
+                message.initiatedByMappingOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.initiatedByMappingOptions);
+            }
+            if (data.transferTimesOptions != null) {
+                message.transferTimesOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.transferTimesOptions);
+            }
+            if (data.badgeIdsOptions != null) {
+                message.badgeIdsOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.badgeIdsOptions);
+            }
+            if (data.ownershipTimesOptions != null) {
+                message.ownershipTimesOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.ownershipTimesOptions);
+            }
+            if (data.approvalTrackerIdOptions != null) {
+                message.approvalTrackerIdOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.approvalTrackerIdOptions);
+            }
+            if (data.challengeTrackerIdOptions != null) {
+                message.challengeTrackerIdOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.challengeTrackerIdOptions);
+            }
+            if (data.isApproved != null) {
+                message.isApproved = data.isApproved;
+            }
+            if (data.uri != null) {
+                message.uri = data.uri;
+            }
+            if (data.customData != null) {
+                message.customData = data.customData;
+            }
+            if (data.approvalId != null) {
+                message.approvalId = data.approvalId;
+            }
+            if (data.approvalCriteria != null) {
+                message.approvalCriteria = OutgoingApprovalCriteria.fromObject(data.approvalCriteria);
             }
             return message;
         }
@@ -1017,11 +643,20 @@ export namespace bitbadges.bitbadgeschain.badges {
                 transferTimes?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
                 badgeIds?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
                 ownershipTimes?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-                approvalId?: string;
                 approvalTrackerId?: string;
                 challengeTrackerId?: string;
-                allowedCombinations?: ReturnType<typeof IsUserOutgoingTransferAllowed.prototype.toObject>[];
-                approvalDetails?: ReturnType<typeof OutgoingApprovalDetails.prototype.toObject>;
+                toMappingOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+                initiatedByMappingOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+                transferTimesOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+                badgeIdsOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+                ownershipTimesOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+                approvalTrackerIdOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+                challengeTrackerIdOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+                isApproved?: boolean;
+                uri?: string;
+                customData?: string;
+                approvalId?: string;
+                approvalCriteria?: ReturnType<typeof OutgoingApprovalCriteria.prototype.toObject>;
             } = {};
             if (this.toMappingId != null) {
                 data.toMappingId = this.toMappingId;
@@ -1038,20 +673,47 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (this.ownershipTimes != null) {
                 data.ownershipTimes = this.ownershipTimes.map((item: dependency_4.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
             }
-            if (this.approvalId != null) {
-                data.approvalId = this.approvalId;
-            }
             if (this.approvalTrackerId != null) {
                 data.approvalTrackerId = this.approvalTrackerId;
             }
             if (this.challengeTrackerId != null) {
                 data.challengeTrackerId = this.challengeTrackerId;
             }
-            if (this.allowedCombinations != null) {
-                data.allowedCombinations = this.allowedCombinations.map((item: IsUserOutgoingTransferAllowed) => item.toObject());
+            if (this.toMappingOptions != null) {
+                data.toMappingOptions = this.toMappingOptions.toObject();
             }
-            if (this.approvalDetails != null) {
-                data.approvalDetails = this.approvalDetails.toObject();
+            if (this.initiatedByMappingOptions != null) {
+                data.initiatedByMappingOptions = this.initiatedByMappingOptions.toObject();
+            }
+            if (this.transferTimesOptions != null) {
+                data.transferTimesOptions = this.transferTimesOptions.toObject();
+            }
+            if (this.badgeIdsOptions != null) {
+                data.badgeIdsOptions = this.badgeIdsOptions.toObject();
+            }
+            if (this.ownershipTimesOptions != null) {
+                data.ownershipTimesOptions = this.ownershipTimesOptions.toObject();
+            }
+            if (this.approvalTrackerIdOptions != null) {
+                data.approvalTrackerIdOptions = this.approvalTrackerIdOptions.toObject();
+            }
+            if (this.challengeTrackerIdOptions != null) {
+                data.challengeTrackerIdOptions = this.challengeTrackerIdOptions.toObject();
+            }
+            if (this.isApproved != null) {
+                data.isApproved = this.isApproved;
+            }
+            if (this.uri != null) {
+                data.uri = this.uri;
+            }
+            if (this.customData != null) {
+                data.customData = this.customData;
+            }
+            if (this.approvalId != null) {
+                data.approvalId = this.approvalId;
+            }
+            if (this.approvalCriteria != null) {
+                data.approvalCriteria = this.approvalCriteria.toObject();
             }
             return data;
         }
@@ -1068,22 +730,40 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (this.badgeIds.length)
                 writer.writeRepeatedMessage(4, this.badgeIds, (item: dependency_4.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
             if (this.ownershipTimes.length)
-                writer.writeRepeatedMessage(10, this.ownershipTimes, (item: dependency_4.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
-            if (this.approvalId.length)
-                writer.writeString(7, this.approvalId);
+                writer.writeRepeatedMessage(5, this.ownershipTimes, (item: dependency_4.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
             if (this.approvalTrackerId.length)
-                writer.writeString(8, this.approvalTrackerId);
+                writer.writeString(6, this.approvalTrackerId);
             if (this.challengeTrackerId.length)
-                writer.writeString(9, this.challengeTrackerId);
-            if (this.allowedCombinations.length)
-                writer.writeRepeatedMessage(5, this.allowedCombinations, (item: IsUserOutgoingTransferAllowed) => item.serialize(writer));
-            if (this.has_approvalDetails)
-                writer.writeMessage(6, this.approvalDetails, () => this.approvalDetails.serialize(writer));
+                writer.writeString(7, this.challengeTrackerId);
+            if (this.has_toMappingOptions)
+                writer.writeMessage(8, this.toMappingOptions, () => this.toMappingOptions.serialize(writer));
+            if (this.has_initiatedByMappingOptions)
+                writer.writeMessage(9, this.initiatedByMappingOptions, () => this.initiatedByMappingOptions.serialize(writer));
+            if (this.has_transferTimesOptions)
+                writer.writeMessage(10, this.transferTimesOptions, () => this.transferTimesOptions.serialize(writer));
+            if (this.has_badgeIdsOptions)
+                writer.writeMessage(11, this.badgeIdsOptions, () => this.badgeIdsOptions.serialize(writer));
+            if (this.has_ownershipTimesOptions)
+                writer.writeMessage(12, this.ownershipTimesOptions, () => this.ownershipTimesOptions.serialize(writer));
+            if (this.has_approvalTrackerIdOptions)
+                writer.writeMessage(13, this.approvalTrackerIdOptions, () => this.approvalTrackerIdOptions.serialize(writer));
+            if (this.has_challengeTrackerIdOptions)
+                writer.writeMessage(14, this.challengeTrackerIdOptions, () => this.challengeTrackerIdOptions.serialize(writer));
+            if (this.isApproved != false)
+                writer.writeBool(15, this.isApproved);
+            if (this.uri.length)
+                writer.writeString(16, this.uri);
+            if (this.customData.length)
+                writer.writeString(17, this.customData);
+            if (this.approvalId.length)
+                writer.writeString(18, this.approvalId);
+            if (this.has_approvalCriteria)
+                writer.writeMessage(19, this.approvalCriteria, () => this.approvalCriteria.serialize(writer));
             if (!w)
                 return writer.getResultBuffer();
         }
-        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): UserApprovedOutgoingTransfer {
-            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new UserApprovedOutgoingTransfer();
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): UserOutgoingApproval {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new UserOutgoingApproval();
             while (reader.nextField()) {
                 if (reader.isEndGroup())
                     break;
@@ -1100,23 +780,50 @@ export namespace bitbadges.bitbadgeschain.badges {
                     case 4:
                         reader.readMessage(message.badgeIds, () => pb_1.Message.addToRepeatedWrapperField(message, 4, dependency_4.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_4.bitbadges.bitbadgeschain.badges.UintRange));
                         break;
-                    case 10:
-                        reader.readMessage(message.ownershipTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 10, dependency_4.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_4.bitbadges.bitbadgeschain.badges.UintRange));
-                        break;
-                    case 7:
-                        message.approvalId = reader.readString();
-                        break;
-                    case 8:
-                        message.approvalTrackerId = reader.readString();
-                        break;
-                    case 9:
-                        message.challengeTrackerId = reader.readString();
-                        break;
                     case 5:
-                        reader.readMessage(message.allowedCombinations, () => pb_1.Message.addToRepeatedWrapperField(message, 5, IsUserOutgoingTransferAllowed.deserialize(reader), IsUserOutgoingTransferAllowed));
+                        reader.readMessage(message.ownershipTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 5, dependency_4.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_4.bitbadges.bitbadgeschain.badges.UintRange));
                         break;
                     case 6:
-                        reader.readMessage(message.approvalDetails, () => message.approvalDetails = OutgoingApprovalDetails.deserialize(reader));
+                        message.approvalTrackerId = reader.readString();
+                        break;
+                    case 7:
+                        message.challengeTrackerId = reader.readString();
+                        break;
+                    case 8:
+                        reader.readMessage(message.toMappingOptions, () => message.toMappingOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
+                        break;
+                    case 9:
+                        reader.readMessage(message.initiatedByMappingOptions, () => message.initiatedByMappingOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
+                        break;
+                    case 10:
+                        reader.readMessage(message.transferTimesOptions, () => message.transferTimesOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
+                        break;
+                    case 11:
+                        reader.readMessage(message.badgeIdsOptions, () => message.badgeIdsOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
+                        break;
+                    case 12:
+                        reader.readMessage(message.ownershipTimesOptions, () => message.ownershipTimesOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
+                        break;
+                    case 13:
+                        reader.readMessage(message.approvalTrackerIdOptions, () => message.approvalTrackerIdOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
+                        break;
+                    case 14:
+                        reader.readMessage(message.challengeTrackerIdOptions, () => message.challengeTrackerIdOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
+                        break;
+                    case 15:
+                        message.isApproved = reader.readBool();
+                        break;
+                    case 16:
+                        message.uri = reader.readString();
+                        break;
+                    case 17:
+                        message.customData = reader.readString();
+                        break;
+                    case 18:
+                        message.approvalId = reader.readString();
+                        break;
+                    case 19:
+                        reader.readMessage(message.approvalCriteria, () => message.approvalCriteria = OutgoingApprovalCriteria.deserialize(reader));
                         break;
                     default: reader.skipField();
                 }
@@ -1126,11 +833,11 @@ export namespace bitbadges.bitbadgeschain.badges {
         serializeBinary(): Uint8Array {
             return this.serialize();
         }
-        static deserializeBinary(bytes: Uint8Array): UserApprovedOutgoingTransfer {
-            return UserApprovedOutgoingTransfer.deserialize(bytes);
+        static deserializeBinary(bytes: Uint8Array): UserOutgoingApproval {
+            return UserOutgoingApproval.deserialize(bytes);
         }
     }
-    export class UserApprovedIncomingTransfer extends pb_1.Message {
+    export class UserIncomingApproval extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
             fromMappingId?: string;
@@ -1138,14 +845,23 @@ export namespace bitbadges.bitbadgeschain.badges {
             transferTimes?: dependency_4.bitbadges.bitbadgeschain.badges.UintRange[];
             badgeIds?: dependency_4.bitbadges.bitbadgeschain.badges.UintRange[];
             ownershipTimes?: dependency_4.bitbadges.bitbadgeschain.badges.UintRange[];
-            approvalId?: string;
             approvalTrackerId?: string;
             challengeTrackerId?: string;
-            allowedCombinations?: IsUserIncomingTransferAllowed[];
-            approvalDetails?: IncomingApprovalDetails;
+            fromMappingOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+            initiatedByMappingOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+            transferTimesOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+            badgeIdsOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+            ownershipTimesOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+            approvalTrackerIdOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+            challengeTrackerIdOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+            isApproved?: boolean;
+            uri?: string;
+            customData?: string;
+            approvalId?: string;
+            approvalCriteria?: IncomingApprovalCriteria;
         }) {
             super();
-            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [3, 4, 5, 6], this.#one_of_decls);
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [3, 4, 5], this.#one_of_decls);
             if (!Array.isArray(data) && typeof data == "object") {
                 if ("fromMappingId" in data && data.fromMappingId != undefined) {
                     this.fromMappingId = data.fromMappingId;
@@ -1162,20 +878,47 @@ export namespace bitbadges.bitbadgeschain.badges {
                 if ("ownershipTimes" in data && data.ownershipTimes != undefined) {
                     this.ownershipTimes = data.ownershipTimes;
                 }
-                if ("approvalId" in data && data.approvalId != undefined) {
-                    this.approvalId = data.approvalId;
-                }
                 if ("approvalTrackerId" in data && data.approvalTrackerId != undefined) {
                     this.approvalTrackerId = data.approvalTrackerId;
                 }
                 if ("challengeTrackerId" in data && data.challengeTrackerId != undefined) {
                     this.challengeTrackerId = data.challengeTrackerId;
                 }
-                if ("allowedCombinations" in data && data.allowedCombinations != undefined) {
-                    this.allowedCombinations = data.allowedCombinations;
+                if ("fromMappingOptions" in data && data.fromMappingOptions != undefined) {
+                    this.fromMappingOptions = data.fromMappingOptions;
                 }
-                if ("approvalDetails" in data && data.approvalDetails != undefined) {
-                    this.approvalDetails = data.approvalDetails;
+                if ("initiatedByMappingOptions" in data && data.initiatedByMappingOptions != undefined) {
+                    this.initiatedByMappingOptions = data.initiatedByMappingOptions;
+                }
+                if ("transferTimesOptions" in data && data.transferTimesOptions != undefined) {
+                    this.transferTimesOptions = data.transferTimesOptions;
+                }
+                if ("badgeIdsOptions" in data && data.badgeIdsOptions != undefined) {
+                    this.badgeIdsOptions = data.badgeIdsOptions;
+                }
+                if ("ownershipTimesOptions" in data && data.ownershipTimesOptions != undefined) {
+                    this.ownershipTimesOptions = data.ownershipTimesOptions;
+                }
+                if ("approvalTrackerIdOptions" in data && data.approvalTrackerIdOptions != undefined) {
+                    this.approvalTrackerIdOptions = data.approvalTrackerIdOptions;
+                }
+                if ("challengeTrackerIdOptions" in data && data.challengeTrackerIdOptions != undefined) {
+                    this.challengeTrackerIdOptions = data.challengeTrackerIdOptions;
+                }
+                if ("isApproved" in data && data.isApproved != undefined) {
+                    this.isApproved = data.isApproved;
+                }
+                if ("uri" in data && data.uri != undefined) {
+                    this.uri = data.uri;
+                }
+                if ("customData" in data && data.customData != undefined) {
+                    this.customData = data.customData;
+                }
+                if ("approvalId" in data && data.approvalId != undefined) {
+                    this.approvalId = data.approvalId;
+                }
+                if ("approvalCriteria" in data && data.approvalCriteria != undefined) {
+                    this.approvalCriteria = data.approvalCriteria;
                 }
             }
         }
@@ -1209,38 +952,113 @@ export namespace bitbadges.bitbadgeschain.badges {
         set ownershipTimes(value: dependency_4.bitbadges.bitbadgeschain.badges.UintRange[]) {
             pb_1.Message.setRepeatedWrapperField(this, 5, value);
         }
-        get approvalId() {
-            return pb_1.Message.getFieldWithDefault(this, 7, "") as string;
-        }
-        set approvalId(value: string) {
-            pb_1.Message.setField(this, 7, value);
-        }
         get approvalTrackerId() {
-            return pb_1.Message.getFieldWithDefault(this, 8, "") as string;
+            return pb_1.Message.getFieldWithDefault(this, 6, "") as string;
         }
         set approvalTrackerId(value: string) {
-            pb_1.Message.setField(this, 8, value);
+            pb_1.Message.setField(this, 6, value);
         }
         get challengeTrackerId() {
-            return pb_1.Message.getFieldWithDefault(this, 9, "") as string;
+            return pb_1.Message.getFieldWithDefault(this, 7, "") as string;
         }
         set challengeTrackerId(value: string) {
-            pb_1.Message.setField(this, 9, value);
+            pb_1.Message.setField(this, 7, value);
         }
-        get allowedCombinations() {
-            return pb_1.Message.getRepeatedWrapperField(this, IsUserIncomingTransferAllowed, 6) as IsUserIncomingTransferAllowed[];
+        get fromMappingOptions() {
+            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 8) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
         }
-        set allowedCombinations(value: IsUserIncomingTransferAllowed[]) {
-            pb_1.Message.setRepeatedWrapperField(this, 6, value);
+        set fromMappingOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
+            pb_1.Message.setWrapperField(this, 8, value);
         }
-        get approvalDetails() {
-            return pb_1.Message.getWrapperField(this, IncomingApprovalDetails, 10) as IncomingApprovalDetails;
+        get has_fromMappingOptions() {
+            return pb_1.Message.getField(this, 8) != null;
         }
-        set approvalDetails(value: IncomingApprovalDetails) {
+        get initiatedByMappingOptions() {
+            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 9) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+        }
+        set initiatedByMappingOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
+            pb_1.Message.setWrapperField(this, 9, value);
+        }
+        get has_initiatedByMappingOptions() {
+            return pb_1.Message.getField(this, 9) != null;
+        }
+        get transferTimesOptions() {
+            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 10) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+        }
+        set transferTimesOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
             pb_1.Message.setWrapperField(this, 10, value);
         }
-        get has_approvalDetails() {
+        get has_transferTimesOptions() {
             return pb_1.Message.getField(this, 10) != null;
+        }
+        get badgeIdsOptions() {
+            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 11) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+        }
+        set badgeIdsOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
+            pb_1.Message.setWrapperField(this, 11, value);
+        }
+        get has_badgeIdsOptions() {
+            return pb_1.Message.getField(this, 11) != null;
+        }
+        get ownershipTimesOptions() {
+            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 12) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+        }
+        set ownershipTimesOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
+            pb_1.Message.setWrapperField(this, 12, value);
+        }
+        get has_ownershipTimesOptions() {
+            return pb_1.Message.getField(this, 12) != null;
+        }
+        get approvalTrackerIdOptions() {
+            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 13) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+        }
+        set approvalTrackerIdOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
+            pb_1.Message.setWrapperField(this, 13, value);
+        }
+        get has_approvalTrackerIdOptions() {
+            return pb_1.Message.getField(this, 13) != null;
+        }
+        get challengeTrackerIdOptions() {
+            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 14) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+        }
+        set challengeTrackerIdOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
+            pb_1.Message.setWrapperField(this, 14, value);
+        }
+        get has_challengeTrackerIdOptions() {
+            return pb_1.Message.getField(this, 14) != null;
+        }
+        get isApproved() {
+            return pb_1.Message.getFieldWithDefault(this, 15, false) as boolean;
+        }
+        set isApproved(value: boolean) {
+            pb_1.Message.setField(this, 15, value);
+        }
+        get uri() {
+            return pb_1.Message.getFieldWithDefault(this, 16, "") as string;
+        }
+        set uri(value: string) {
+            pb_1.Message.setField(this, 16, value);
+        }
+        get customData() {
+            return pb_1.Message.getFieldWithDefault(this, 17, "") as string;
+        }
+        set customData(value: string) {
+            pb_1.Message.setField(this, 17, value);
+        }
+        get approvalId() {
+            return pb_1.Message.getFieldWithDefault(this, 18, "") as string;
+        }
+        set approvalId(value: string) {
+            pb_1.Message.setField(this, 18, value);
+        }
+        get approvalCriteria() {
+            return pb_1.Message.getWrapperField(this, IncomingApprovalCriteria, 19) as IncomingApprovalCriteria;
+        }
+        set approvalCriteria(value: IncomingApprovalCriteria) {
+            pb_1.Message.setWrapperField(this, 19, value);
+        }
+        get has_approvalCriteria() {
+            return pb_1.Message.getField(this, 19) != null;
         }
         static fromObject(data: {
             fromMappingId?: string;
@@ -1248,13 +1066,22 @@ export namespace bitbadges.bitbadgeschain.badges {
             transferTimes?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
             badgeIds?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
             ownershipTimes?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-            approvalId?: string;
             approvalTrackerId?: string;
             challengeTrackerId?: string;
-            allowedCombinations?: ReturnType<typeof IsUserIncomingTransferAllowed.prototype.toObject>[];
-            approvalDetails?: ReturnType<typeof IncomingApprovalDetails.prototype.toObject>;
-        }): UserApprovedIncomingTransfer {
-            const message = new UserApprovedIncomingTransfer({});
+            fromMappingOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+            initiatedByMappingOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+            transferTimesOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+            badgeIdsOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+            ownershipTimesOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+            approvalTrackerIdOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+            challengeTrackerIdOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+            isApproved?: boolean;
+            uri?: string;
+            customData?: string;
+            approvalId?: string;
+            approvalCriteria?: ReturnType<typeof IncomingApprovalCriteria.prototype.toObject>;
+        }): UserIncomingApproval {
+            const message = new UserIncomingApproval({});
             if (data.fromMappingId != null) {
                 message.fromMappingId = data.fromMappingId;
             }
@@ -1270,283 +1097,14 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (data.ownershipTimes != null) {
                 message.ownershipTimes = data.ownershipTimes.map(item => dependency_4.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
             }
-            if (data.approvalId != null) {
-                message.approvalId = data.approvalId;
-            }
             if (data.approvalTrackerId != null) {
                 message.approvalTrackerId = data.approvalTrackerId;
             }
             if (data.challengeTrackerId != null) {
                 message.challengeTrackerId = data.challengeTrackerId;
             }
-            if (data.allowedCombinations != null) {
-                message.allowedCombinations = data.allowedCombinations.map(item => IsUserIncomingTransferAllowed.fromObject(item));
-            }
-            if (data.approvalDetails != null) {
-                message.approvalDetails = IncomingApprovalDetails.fromObject(data.approvalDetails);
-            }
-            return message;
-        }
-        toObject() {
-            const data: {
-                fromMappingId?: string;
-                initiatedByMappingId?: string;
-                transferTimes?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-                badgeIds?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-                ownershipTimes?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-                approvalId?: string;
-                approvalTrackerId?: string;
-                challengeTrackerId?: string;
-                allowedCombinations?: ReturnType<typeof IsUserIncomingTransferAllowed.prototype.toObject>[];
-                approvalDetails?: ReturnType<typeof IncomingApprovalDetails.prototype.toObject>;
-            } = {};
-            if (this.fromMappingId != null) {
-                data.fromMappingId = this.fromMappingId;
-            }
-            if (this.initiatedByMappingId != null) {
-                data.initiatedByMappingId = this.initiatedByMappingId;
-            }
-            if (this.transferTimes != null) {
-                data.transferTimes = this.transferTimes.map((item: dependency_4.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
-            }
-            if (this.badgeIds != null) {
-                data.badgeIds = this.badgeIds.map((item: dependency_4.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
-            }
-            if (this.ownershipTimes != null) {
-                data.ownershipTimes = this.ownershipTimes.map((item: dependency_4.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
-            }
-            if (this.approvalId != null) {
-                data.approvalId = this.approvalId;
-            }
-            if (this.approvalTrackerId != null) {
-                data.approvalTrackerId = this.approvalTrackerId;
-            }
-            if (this.challengeTrackerId != null) {
-                data.challengeTrackerId = this.challengeTrackerId;
-            }
-            if (this.allowedCombinations != null) {
-                data.allowedCombinations = this.allowedCombinations.map((item: IsUserIncomingTransferAllowed) => item.toObject());
-            }
-            if (this.approvalDetails != null) {
-                data.approvalDetails = this.approvalDetails.toObject();
-            }
-            return data;
-        }
-        serialize(): Uint8Array;
-        serialize(w: pb_1.BinaryWriter): void;
-        serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
-            const writer = w || new pb_1.BinaryWriter();
-            if (this.fromMappingId.length)
-                writer.writeString(1, this.fromMappingId);
-            if (this.initiatedByMappingId.length)
-                writer.writeString(2, this.initiatedByMappingId);
-            if (this.transferTimes.length)
-                writer.writeRepeatedMessage(3, this.transferTimes, (item: dependency_4.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
-            if (this.badgeIds.length)
-                writer.writeRepeatedMessage(4, this.badgeIds, (item: dependency_4.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
-            if (this.ownershipTimes.length)
-                writer.writeRepeatedMessage(5, this.ownershipTimes, (item: dependency_4.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
-            if (this.approvalId.length)
-                writer.writeString(7, this.approvalId);
-            if (this.approvalTrackerId.length)
-                writer.writeString(8, this.approvalTrackerId);
-            if (this.challengeTrackerId.length)
-                writer.writeString(9, this.challengeTrackerId);
-            if (this.allowedCombinations.length)
-                writer.writeRepeatedMessage(6, this.allowedCombinations, (item: IsUserIncomingTransferAllowed) => item.serialize(writer));
-            if (this.has_approvalDetails)
-                writer.writeMessage(10, this.approvalDetails, () => this.approvalDetails.serialize(writer));
-            if (!w)
-                return writer.getResultBuffer();
-        }
-        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): UserApprovedIncomingTransfer {
-            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new UserApprovedIncomingTransfer();
-            while (reader.nextField()) {
-                if (reader.isEndGroup())
-                    break;
-                switch (reader.getFieldNumber()) {
-                    case 1:
-                        message.fromMappingId = reader.readString();
-                        break;
-                    case 2:
-                        message.initiatedByMappingId = reader.readString();
-                        break;
-                    case 3:
-                        reader.readMessage(message.transferTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 3, dependency_4.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_4.bitbadges.bitbadgeschain.badges.UintRange));
-                        break;
-                    case 4:
-                        reader.readMessage(message.badgeIds, () => pb_1.Message.addToRepeatedWrapperField(message, 4, dependency_4.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_4.bitbadges.bitbadgeschain.badges.UintRange));
-                        break;
-                    case 5:
-                        reader.readMessage(message.ownershipTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 5, dependency_4.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_4.bitbadges.bitbadgeschain.badges.UintRange));
-                        break;
-                    case 7:
-                        message.approvalId = reader.readString();
-                        break;
-                    case 8:
-                        message.approvalTrackerId = reader.readString();
-                        break;
-                    case 9:
-                        message.challengeTrackerId = reader.readString();
-                        break;
-                    case 6:
-                        reader.readMessage(message.allowedCombinations, () => pb_1.Message.addToRepeatedWrapperField(message, 6, IsUserIncomingTransferAllowed.deserialize(reader), IsUserIncomingTransferAllowed));
-                        break;
-                    case 10:
-                        reader.readMessage(message.approvalDetails, () => message.approvalDetails = IncomingApprovalDetails.deserialize(reader));
-                        break;
-                    default: reader.skipField();
-                }
-            }
-            return message;
-        }
-        serializeBinary(): Uint8Array {
-            return this.serialize();
-        }
-        static deserializeBinary(bytes: Uint8Array): UserApprovedIncomingTransfer {
-            return UserApprovedIncomingTransfer.deserialize(bytes);
-        }
-    }
-    export class IsCollectionTransferAllowed extends pb_1.Message {
-        #one_of_decls: number[][] = [];
-        constructor(data?: any[] | {
-            fromMappingOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
-            toMappingOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
-            initiatedByMappingOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
-            transferTimesOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
-            badgeIdsOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
-            ownershipTimesOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
-            approvalTrackerIdOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
-            challengeTrackerIdOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
-            isApproved?: boolean;
-        }) {
-            super();
-            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [], this.#one_of_decls);
-            if (!Array.isArray(data) && typeof data == "object") {
-                if ("fromMappingOptions" in data && data.fromMappingOptions != undefined) {
-                    this.fromMappingOptions = data.fromMappingOptions;
-                }
-                if ("toMappingOptions" in data && data.toMappingOptions != undefined) {
-                    this.toMappingOptions = data.toMappingOptions;
-                }
-                if ("initiatedByMappingOptions" in data && data.initiatedByMappingOptions != undefined) {
-                    this.initiatedByMappingOptions = data.initiatedByMappingOptions;
-                }
-                if ("transferTimesOptions" in data && data.transferTimesOptions != undefined) {
-                    this.transferTimesOptions = data.transferTimesOptions;
-                }
-                if ("badgeIdsOptions" in data && data.badgeIdsOptions != undefined) {
-                    this.badgeIdsOptions = data.badgeIdsOptions;
-                }
-                if ("ownershipTimesOptions" in data && data.ownershipTimesOptions != undefined) {
-                    this.ownershipTimesOptions = data.ownershipTimesOptions;
-                }
-                if ("approvalTrackerIdOptions" in data && data.approvalTrackerIdOptions != undefined) {
-                    this.approvalTrackerIdOptions = data.approvalTrackerIdOptions;
-                }
-                if ("challengeTrackerIdOptions" in data && data.challengeTrackerIdOptions != undefined) {
-                    this.challengeTrackerIdOptions = data.challengeTrackerIdOptions;
-                }
-                if ("isApproved" in data && data.isApproved != undefined) {
-                    this.isApproved = data.isApproved;
-                }
-            }
-        }
-        get fromMappingOptions() {
-            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 1) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
-        }
-        set fromMappingOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
-            pb_1.Message.setWrapperField(this, 1, value);
-        }
-        get has_fromMappingOptions() {
-            return pb_1.Message.getField(this, 1) != null;
-        }
-        get toMappingOptions() {
-            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 2) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
-        }
-        set toMappingOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
-            pb_1.Message.setWrapperField(this, 2, value);
-        }
-        get has_toMappingOptions() {
-            return pb_1.Message.getField(this, 2) != null;
-        }
-        get initiatedByMappingOptions() {
-            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 3) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
-        }
-        set initiatedByMappingOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
-            pb_1.Message.setWrapperField(this, 3, value);
-        }
-        get has_initiatedByMappingOptions() {
-            return pb_1.Message.getField(this, 3) != null;
-        }
-        get transferTimesOptions() {
-            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 4) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
-        }
-        set transferTimesOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
-            pb_1.Message.setWrapperField(this, 4, value);
-        }
-        get has_transferTimesOptions() {
-            return pb_1.Message.getField(this, 4) != null;
-        }
-        get badgeIdsOptions() {
-            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 5) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
-        }
-        set badgeIdsOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
-            pb_1.Message.setWrapperField(this, 5, value);
-        }
-        get has_badgeIdsOptions() {
-            return pb_1.Message.getField(this, 5) != null;
-        }
-        get ownershipTimesOptions() {
-            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 6) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
-        }
-        set ownershipTimesOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
-            pb_1.Message.setWrapperField(this, 6, value);
-        }
-        get has_ownershipTimesOptions() {
-            return pb_1.Message.getField(this, 6) != null;
-        }
-        get approvalTrackerIdOptions() {
-            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 7) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
-        }
-        set approvalTrackerIdOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
-            pb_1.Message.setWrapperField(this, 7, value);
-        }
-        get has_approvalTrackerIdOptions() {
-            return pb_1.Message.getField(this, 7) != null;
-        }
-        get challengeTrackerIdOptions() {
-            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 8) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
-        }
-        set challengeTrackerIdOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
-            pb_1.Message.setWrapperField(this, 8, value);
-        }
-        get has_challengeTrackerIdOptions() {
-            return pb_1.Message.getField(this, 8) != null;
-        }
-        get isApproved() {
-            return pb_1.Message.getFieldWithDefault(this, 9, false) as boolean;
-        }
-        set isApproved(value: boolean) {
-            pb_1.Message.setField(this, 9, value);
-        }
-        static fromObject(data: {
-            fromMappingOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
-            toMappingOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
-            initiatedByMappingOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
-            transferTimesOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
-            badgeIdsOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
-            ownershipTimesOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
-            approvalTrackerIdOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
-            challengeTrackerIdOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
-            isApproved?: boolean;
-        }): IsCollectionTransferAllowed {
-            const message = new IsCollectionTransferAllowed({});
             if (data.fromMappingOptions != null) {
                 message.fromMappingOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.fromMappingOptions);
-            }
-            if (data.toMappingOptions != null) {
-                message.toMappingOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.toMappingOptions);
             }
             if (data.initiatedByMappingOptions != null) {
                 message.initiatedByMappingOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.initiatedByMappingOptions);
@@ -1569,12 +1127,30 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (data.isApproved != null) {
                 message.isApproved = data.isApproved;
             }
+            if (data.uri != null) {
+                message.uri = data.uri;
+            }
+            if (data.customData != null) {
+                message.customData = data.customData;
+            }
+            if (data.approvalId != null) {
+                message.approvalId = data.approvalId;
+            }
+            if (data.approvalCriteria != null) {
+                message.approvalCriteria = IncomingApprovalCriteria.fromObject(data.approvalCriteria);
+            }
             return message;
         }
         toObject() {
             const data: {
+                fromMappingId?: string;
+                initiatedByMappingId?: string;
+                transferTimes?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+                badgeIds?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+                ownershipTimes?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+                approvalTrackerId?: string;
+                challengeTrackerId?: string;
                 fromMappingOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
-                toMappingOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
                 initiatedByMappingOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
                 transferTimesOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
                 badgeIdsOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
@@ -1582,12 +1158,34 @@ export namespace bitbadges.bitbadgeschain.badges {
                 approvalTrackerIdOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
                 challengeTrackerIdOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
                 isApproved?: boolean;
+                uri?: string;
+                customData?: string;
+                approvalId?: string;
+                approvalCriteria?: ReturnType<typeof IncomingApprovalCriteria.prototype.toObject>;
             } = {};
+            if (this.fromMappingId != null) {
+                data.fromMappingId = this.fromMappingId;
+            }
+            if (this.initiatedByMappingId != null) {
+                data.initiatedByMappingId = this.initiatedByMappingId;
+            }
+            if (this.transferTimes != null) {
+                data.transferTimes = this.transferTimes.map((item: dependency_4.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
+            }
+            if (this.badgeIds != null) {
+                data.badgeIds = this.badgeIds.map((item: dependency_4.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
+            }
+            if (this.ownershipTimes != null) {
+                data.ownershipTimes = this.ownershipTimes.map((item: dependency_4.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
+            }
+            if (this.approvalTrackerId != null) {
+                data.approvalTrackerId = this.approvalTrackerId;
+            }
+            if (this.challengeTrackerId != null) {
+                data.challengeTrackerId = this.challengeTrackerId;
+            }
             if (this.fromMappingOptions != null) {
                 data.fromMappingOptions = this.fromMappingOptions.toObject();
-            }
-            if (this.toMappingOptions != null) {
-                data.toMappingOptions = this.toMappingOptions.toObject();
             }
             if (this.initiatedByMappingOptions != null) {
                 data.initiatedByMappingOptions = this.initiatedByMappingOptions.toObject();
@@ -1610,65 +1208,127 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (this.isApproved != null) {
                 data.isApproved = this.isApproved;
             }
+            if (this.uri != null) {
+                data.uri = this.uri;
+            }
+            if (this.customData != null) {
+                data.customData = this.customData;
+            }
+            if (this.approvalId != null) {
+                data.approvalId = this.approvalId;
+            }
+            if (this.approvalCriteria != null) {
+                data.approvalCriteria = this.approvalCriteria.toObject();
+            }
             return data;
         }
         serialize(): Uint8Array;
         serialize(w: pb_1.BinaryWriter): void;
         serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
             const writer = w || new pb_1.BinaryWriter();
+            if (this.fromMappingId.length)
+                writer.writeString(1, this.fromMappingId);
+            if (this.initiatedByMappingId.length)
+                writer.writeString(2, this.initiatedByMappingId);
+            if (this.transferTimes.length)
+                writer.writeRepeatedMessage(3, this.transferTimes, (item: dependency_4.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
+            if (this.badgeIds.length)
+                writer.writeRepeatedMessage(4, this.badgeIds, (item: dependency_4.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
+            if (this.ownershipTimes.length)
+                writer.writeRepeatedMessage(5, this.ownershipTimes, (item: dependency_4.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
+            if (this.approvalTrackerId.length)
+                writer.writeString(6, this.approvalTrackerId);
+            if (this.challengeTrackerId.length)
+                writer.writeString(7, this.challengeTrackerId);
             if (this.has_fromMappingOptions)
-                writer.writeMessage(1, this.fromMappingOptions, () => this.fromMappingOptions.serialize(writer));
-            if (this.has_toMappingOptions)
-                writer.writeMessage(2, this.toMappingOptions, () => this.toMappingOptions.serialize(writer));
+                writer.writeMessage(8, this.fromMappingOptions, () => this.fromMappingOptions.serialize(writer));
             if (this.has_initiatedByMappingOptions)
-                writer.writeMessage(3, this.initiatedByMappingOptions, () => this.initiatedByMappingOptions.serialize(writer));
+                writer.writeMessage(9, this.initiatedByMappingOptions, () => this.initiatedByMappingOptions.serialize(writer));
             if (this.has_transferTimesOptions)
-                writer.writeMessage(4, this.transferTimesOptions, () => this.transferTimesOptions.serialize(writer));
+                writer.writeMessage(10, this.transferTimesOptions, () => this.transferTimesOptions.serialize(writer));
             if (this.has_badgeIdsOptions)
-                writer.writeMessage(5, this.badgeIdsOptions, () => this.badgeIdsOptions.serialize(writer));
+                writer.writeMessage(11, this.badgeIdsOptions, () => this.badgeIdsOptions.serialize(writer));
             if (this.has_ownershipTimesOptions)
-                writer.writeMessage(6, this.ownershipTimesOptions, () => this.ownershipTimesOptions.serialize(writer));
+                writer.writeMessage(12, this.ownershipTimesOptions, () => this.ownershipTimesOptions.serialize(writer));
             if (this.has_approvalTrackerIdOptions)
-                writer.writeMessage(7, this.approvalTrackerIdOptions, () => this.approvalTrackerIdOptions.serialize(writer));
+                writer.writeMessage(13, this.approvalTrackerIdOptions, () => this.approvalTrackerIdOptions.serialize(writer));
             if (this.has_challengeTrackerIdOptions)
-                writer.writeMessage(8, this.challengeTrackerIdOptions, () => this.challengeTrackerIdOptions.serialize(writer));
+                writer.writeMessage(14, this.challengeTrackerIdOptions, () => this.challengeTrackerIdOptions.serialize(writer));
             if (this.isApproved != false)
-                writer.writeBool(9, this.isApproved);
+                writer.writeBool(15, this.isApproved);
+            if (this.uri.length)
+                writer.writeString(16, this.uri);
+            if (this.customData.length)
+                writer.writeString(17, this.customData);
+            if (this.approvalId.length)
+                writer.writeString(18, this.approvalId);
+            if (this.has_approvalCriteria)
+                writer.writeMessage(19, this.approvalCriteria, () => this.approvalCriteria.serialize(writer));
             if (!w)
                 return writer.getResultBuffer();
         }
-        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): IsCollectionTransferAllowed {
-            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new IsCollectionTransferAllowed();
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): UserIncomingApproval {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new UserIncomingApproval();
             while (reader.nextField()) {
                 if (reader.isEndGroup())
                     break;
                 switch (reader.getFieldNumber()) {
                     case 1:
-                        reader.readMessage(message.fromMappingOptions, () => message.fromMappingOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
+                        message.fromMappingId = reader.readString();
                         break;
                     case 2:
-                        reader.readMessage(message.toMappingOptions, () => message.toMappingOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
+                        message.initiatedByMappingId = reader.readString();
                         break;
                     case 3:
-                        reader.readMessage(message.initiatedByMappingOptions, () => message.initiatedByMappingOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
+                        reader.readMessage(message.transferTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 3, dependency_4.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_4.bitbadges.bitbadgeschain.badges.UintRange));
                         break;
                     case 4:
-                        reader.readMessage(message.transferTimesOptions, () => message.transferTimesOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
+                        reader.readMessage(message.badgeIds, () => pb_1.Message.addToRepeatedWrapperField(message, 4, dependency_4.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_4.bitbadges.bitbadgeschain.badges.UintRange));
                         break;
                     case 5:
-                        reader.readMessage(message.badgeIdsOptions, () => message.badgeIdsOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
+                        reader.readMessage(message.ownershipTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 5, dependency_4.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_4.bitbadges.bitbadgeschain.badges.UintRange));
                         break;
                     case 6:
-                        reader.readMessage(message.ownershipTimesOptions, () => message.ownershipTimesOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
+                        message.approvalTrackerId = reader.readString();
                         break;
                     case 7:
-                        reader.readMessage(message.approvalTrackerIdOptions, () => message.approvalTrackerIdOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
+                        message.challengeTrackerId = reader.readString();
                         break;
                     case 8:
-                        reader.readMessage(message.challengeTrackerIdOptions, () => message.challengeTrackerIdOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
+                        reader.readMessage(message.fromMappingOptions, () => message.fromMappingOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
                         break;
                     case 9:
+                        reader.readMessage(message.initiatedByMappingOptions, () => message.initiatedByMappingOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
+                        break;
+                    case 10:
+                        reader.readMessage(message.transferTimesOptions, () => message.transferTimesOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
+                        break;
+                    case 11:
+                        reader.readMessage(message.badgeIdsOptions, () => message.badgeIdsOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
+                        break;
+                    case 12:
+                        reader.readMessage(message.ownershipTimesOptions, () => message.ownershipTimesOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
+                        break;
+                    case 13:
+                        reader.readMessage(message.approvalTrackerIdOptions, () => message.approvalTrackerIdOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
+                        break;
+                    case 14:
+                        reader.readMessage(message.challengeTrackerIdOptions, () => message.challengeTrackerIdOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
+                        break;
+                    case 15:
                         message.isApproved = reader.readBool();
+                        break;
+                    case 16:
+                        message.uri = reader.readString();
+                        break;
+                    case 17:
+                        message.customData = reader.readString();
+                        break;
+                    case 18:
+                        message.approvalId = reader.readString();
+                        break;
+                    case 19:
+                        reader.readMessage(message.approvalCriteria, () => message.approvalCriteria = IncomingApprovalCriteria.deserialize(reader));
                         break;
                     default: reader.skipField();
                 }
@@ -1678,8 +1338,8 @@ export namespace bitbadges.bitbadgeschain.badges {
         serializeBinary(): Uint8Array {
             return this.serialize();
         }
-        static deserializeBinary(bytes: Uint8Array): IsCollectionTransferAllowed {
-            return IsCollectionTransferAllowed.deserialize(bytes);
+        static deserializeBinary(bytes: Uint8Array): UserIncomingApproval {
+            return UserIncomingApproval.deserialize(bytes);
         }
     }
     export class ManualBalances extends pb_1.Message {
@@ -2502,11 +2162,9 @@ export namespace bitbadges.bitbadgeschain.badges {
             return ApprovalsTracker.deserialize(bytes);
         }
     }
-    export class ApprovalDetails extends pb_1.Message {
+    export class ApprovalCriteria extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
-            uri?: string;
-            customData?: string;
             mustOwnBadges?: dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges[];
             merkleChallenge?: MerkleChallenge;
             predeterminedBalances?: PredeterminedBalances;
@@ -2516,18 +2174,12 @@ export namespace bitbadges.bitbadgeschain.badges {
             requireFromEqualsInitiatedBy?: boolean;
             requireToDoesNotEqualInitiatedBy?: boolean;
             requireFromDoesNotEqualInitiatedBy?: boolean;
-            overridesFromApprovedOutgoingTransfers?: boolean;
-            overridesToApprovedIncomingTransfers?: boolean;
+            overridesFromOutgoingApprovals?: boolean;
+            overridesToIncomingApprovals?: boolean;
         }) {
             super();
             pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1], this.#one_of_decls);
             if (!Array.isArray(data) && typeof data == "object") {
-                if ("uri" in data && data.uri != undefined) {
-                    this.uri = data.uri;
-                }
-                if ("customData" in data && data.customData != undefined) {
-                    this.customData = data.customData;
-                }
                 if ("mustOwnBadges" in data && data.mustOwnBadges != undefined) {
                     this.mustOwnBadges = data.mustOwnBadges;
                 }
@@ -2555,25 +2207,13 @@ export namespace bitbadges.bitbadgeschain.badges {
                 if ("requireFromDoesNotEqualInitiatedBy" in data && data.requireFromDoesNotEqualInitiatedBy != undefined) {
                     this.requireFromDoesNotEqualInitiatedBy = data.requireFromDoesNotEqualInitiatedBy;
                 }
-                if ("overridesFromApprovedOutgoingTransfers" in data && data.overridesFromApprovedOutgoingTransfers != undefined) {
-                    this.overridesFromApprovedOutgoingTransfers = data.overridesFromApprovedOutgoingTransfers;
+                if ("overridesFromOutgoingApprovals" in data && data.overridesFromOutgoingApprovals != undefined) {
+                    this.overridesFromOutgoingApprovals = data.overridesFromOutgoingApprovals;
                 }
-                if ("overridesToApprovedIncomingTransfers" in data && data.overridesToApprovedIncomingTransfers != undefined) {
-                    this.overridesToApprovedIncomingTransfers = data.overridesToApprovedIncomingTransfers;
+                if ("overridesToIncomingApprovals" in data && data.overridesToIncomingApprovals != undefined) {
+                    this.overridesToIncomingApprovals = data.overridesToIncomingApprovals;
                 }
             }
-        }
-        get uri() {
-            return pb_1.Message.getFieldWithDefault(this, 7, "") as string;
-        }
-        set uri(value: string) {
-            pb_1.Message.setField(this, 7, value);
-        }
-        get customData() {
-            return pb_1.Message.getFieldWithDefault(this, 8, "") as string;
-        }
-        set customData(value: string) {
-            pb_1.Message.setField(this, 8, value);
         }
         get mustOwnBadges() {
             return pb_1.Message.getRepeatedWrapperField(this, dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges, 1) as dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges[];
@@ -2641,21 +2281,19 @@ export namespace bitbadges.bitbadgeschain.badges {
         set requireFromDoesNotEqualInitiatedBy(value: boolean) {
             pb_1.Message.setField(this, 12, value);
         }
-        get overridesFromApprovedOutgoingTransfers() {
+        get overridesFromOutgoingApprovals() {
             return pb_1.Message.getFieldWithDefault(this, 13, false) as boolean;
         }
-        set overridesFromApprovedOutgoingTransfers(value: boolean) {
+        set overridesFromOutgoingApprovals(value: boolean) {
             pb_1.Message.setField(this, 13, value);
         }
-        get overridesToApprovedIncomingTransfers() {
+        get overridesToIncomingApprovals() {
             return pb_1.Message.getFieldWithDefault(this, 14, false) as boolean;
         }
-        set overridesToApprovedIncomingTransfers(value: boolean) {
+        set overridesToIncomingApprovals(value: boolean) {
             pb_1.Message.setField(this, 14, value);
         }
         static fromObject(data: {
-            uri?: string;
-            customData?: string;
             mustOwnBadges?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges.prototype.toObject>[];
             merkleChallenge?: ReturnType<typeof MerkleChallenge.prototype.toObject>;
             predeterminedBalances?: ReturnType<typeof PredeterminedBalances.prototype.toObject>;
@@ -2665,16 +2303,10 @@ export namespace bitbadges.bitbadgeschain.badges {
             requireFromEqualsInitiatedBy?: boolean;
             requireToDoesNotEqualInitiatedBy?: boolean;
             requireFromDoesNotEqualInitiatedBy?: boolean;
-            overridesFromApprovedOutgoingTransfers?: boolean;
-            overridesToApprovedIncomingTransfers?: boolean;
-        }): ApprovalDetails {
-            const message = new ApprovalDetails({});
-            if (data.uri != null) {
-                message.uri = data.uri;
-            }
-            if (data.customData != null) {
-                message.customData = data.customData;
-            }
+            overridesFromOutgoingApprovals?: boolean;
+            overridesToIncomingApprovals?: boolean;
+        }): ApprovalCriteria {
+            const message = new ApprovalCriteria({});
             if (data.mustOwnBadges != null) {
                 message.mustOwnBadges = data.mustOwnBadges.map(item => dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges.fromObject(item));
             }
@@ -2702,18 +2334,16 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (data.requireFromDoesNotEqualInitiatedBy != null) {
                 message.requireFromDoesNotEqualInitiatedBy = data.requireFromDoesNotEqualInitiatedBy;
             }
-            if (data.overridesFromApprovedOutgoingTransfers != null) {
-                message.overridesFromApprovedOutgoingTransfers = data.overridesFromApprovedOutgoingTransfers;
+            if (data.overridesFromOutgoingApprovals != null) {
+                message.overridesFromOutgoingApprovals = data.overridesFromOutgoingApprovals;
             }
-            if (data.overridesToApprovedIncomingTransfers != null) {
-                message.overridesToApprovedIncomingTransfers = data.overridesToApprovedIncomingTransfers;
+            if (data.overridesToIncomingApprovals != null) {
+                message.overridesToIncomingApprovals = data.overridesToIncomingApprovals;
             }
             return message;
         }
         toObject() {
             const data: {
-                uri?: string;
-                customData?: string;
                 mustOwnBadges?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges.prototype.toObject>[];
                 merkleChallenge?: ReturnType<typeof MerkleChallenge.prototype.toObject>;
                 predeterminedBalances?: ReturnType<typeof PredeterminedBalances.prototype.toObject>;
@@ -2723,15 +2353,9 @@ export namespace bitbadges.bitbadgeschain.badges {
                 requireFromEqualsInitiatedBy?: boolean;
                 requireToDoesNotEqualInitiatedBy?: boolean;
                 requireFromDoesNotEqualInitiatedBy?: boolean;
-                overridesFromApprovedOutgoingTransfers?: boolean;
-                overridesToApprovedIncomingTransfers?: boolean;
+                overridesFromOutgoingApprovals?: boolean;
+                overridesToIncomingApprovals?: boolean;
             } = {};
-            if (this.uri != null) {
-                data.uri = this.uri;
-            }
-            if (this.customData != null) {
-                data.customData = this.customData;
-            }
             if (this.mustOwnBadges != null) {
                 data.mustOwnBadges = this.mustOwnBadges.map((item: dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges) => item.toObject());
             }
@@ -2759,11 +2383,11 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (this.requireFromDoesNotEqualInitiatedBy != null) {
                 data.requireFromDoesNotEqualInitiatedBy = this.requireFromDoesNotEqualInitiatedBy;
             }
-            if (this.overridesFromApprovedOutgoingTransfers != null) {
-                data.overridesFromApprovedOutgoingTransfers = this.overridesFromApprovedOutgoingTransfers;
+            if (this.overridesFromOutgoingApprovals != null) {
+                data.overridesFromOutgoingApprovals = this.overridesFromOutgoingApprovals;
             }
-            if (this.overridesToApprovedIncomingTransfers != null) {
-                data.overridesToApprovedIncomingTransfers = this.overridesToApprovedIncomingTransfers;
+            if (this.overridesToIncomingApprovals != null) {
+                data.overridesToIncomingApprovals = this.overridesToIncomingApprovals;
             }
             return data;
         }
@@ -2771,10 +2395,6 @@ export namespace bitbadges.bitbadgeschain.badges {
         serialize(w: pb_1.BinaryWriter): void;
         serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
             const writer = w || new pb_1.BinaryWriter();
-            if (this.uri.length)
-                writer.writeString(7, this.uri);
-            if (this.customData.length)
-                writer.writeString(8, this.customData);
             if (this.mustOwnBadges.length)
                 writer.writeRepeatedMessage(1, this.mustOwnBadges, (item: dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges) => item.serialize(writer));
             if (this.has_merkleChallenge)
@@ -2793,25 +2413,19 @@ export namespace bitbadges.bitbadgeschain.badges {
                 writer.writeBool(11, this.requireToDoesNotEqualInitiatedBy);
             if (this.requireFromDoesNotEqualInitiatedBy != false)
                 writer.writeBool(12, this.requireFromDoesNotEqualInitiatedBy);
-            if (this.overridesFromApprovedOutgoingTransfers != false)
-                writer.writeBool(13, this.overridesFromApprovedOutgoingTransfers);
-            if (this.overridesToApprovedIncomingTransfers != false)
-                writer.writeBool(14, this.overridesToApprovedIncomingTransfers);
+            if (this.overridesFromOutgoingApprovals != false)
+                writer.writeBool(13, this.overridesFromOutgoingApprovals);
+            if (this.overridesToIncomingApprovals != false)
+                writer.writeBool(14, this.overridesToIncomingApprovals);
             if (!w)
                 return writer.getResultBuffer();
         }
-        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): ApprovalDetails {
-            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new ApprovalDetails();
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): ApprovalCriteria {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new ApprovalCriteria();
             while (reader.nextField()) {
                 if (reader.isEndGroup())
                     break;
                 switch (reader.getFieldNumber()) {
-                    case 7:
-                        message.uri = reader.readString();
-                        break;
-                    case 8:
-                        message.customData = reader.readString();
-                        break;
                     case 1:
                         reader.readMessage(message.mustOwnBadges, () => pb_1.Message.addToRepeatedWrapperField(message, 1, dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges.deserialize(reader), dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges));
                         break;
@@ -2840,10 +2454,10 @@ export namespace bitbadges.bitbadgeschain.badges {
                         message.requireFromDoesNotEqualInitiatedBy = reader.readBool();
                         break;
                     case 13:
-                        message.overridesFromApprovedOutgoingTransfers = reader.readBool();
+                        message.overridesFromOutgoingApprovals = reader.readBool();
                         break;
                     case 14:
-                        message.overridesToApprovedIncomingTransfers = reader.readBool();
+                        message.overridesToIncomingApprovals = reader.readBool();
                         break;
                     default: reader.skipField();
                 }
@@ -2853,15 +2467,13 @@ export namespace bitbadges.bitbadgeschain.badges {
         serializeBinary(): Uint8Array {
             return this.serialize();
         }
-        static deserializeBinary(bytes: Uint8Array): ApprovalDetails {
-            return ApprovalDetails.deserialize(bytes);
+        static deserializeBinary(bytes: Uint8Array): ApprovalCriteria {
+            return ApprovalCriteria.deserialize(bytes);
         }
     }
-    export class OutgoingApprovalDetails extends pb_1.Message {
+    export class OutgoingApprovalCriteria extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
-            uri?: string;
-            customData?: string;
             mustOwnBadges?: dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges[];
             merkleChallenge?: MerkleChallenge;
             predeterminedBalances?: PredeterminedBalances;
@@ -2873,12 +2485,6 @@ export namespace bitbadges.bitbadgeschain.badges {
             super();
             pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1], this.#one_of_decls);
             if (!Array.isArray(data) && typeof data == "object") {
-                if ("uri" in data && data.uri != undefined) {
-                    this.uri = data.uri;
-                }
-                if ("customData" in data && data.customData != undefined) {
-                    this.customData = data.customData;
-                }
                 if ("mustOwnBadges" in data && data.mustOwnBadges != undefined) {
                     this.mustOwnBadges = data.mustOwnBadges;
                 }
@@ -2901,18 +2507,6 @@ export namespace bitbadges.bitbadgeschain.badges {
                     this.requireToDoesNotEqualInitiatedBy = data.requireToDoesNotEqualInitiatedBy;
                 }
             }
-        }
-        get uri() {
-            return pb_1.Message.getFieldWithDefault(this, 7, "") as string;
-        }
-        set uri(value: string) {
-            pb_1.Message.setField(this, 7, value);
-        }
-        get customData() {
-            return pb_1.Message.getFieldWithDefault(this, 8, "") as string;
-        }
-        set customData(value: string) {
-            pb_1.Message.setField(this, 8, value);
         }
         get mustOwnBadges() {
             return pb_1.Message.getRepeatedWrapperField(this, dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges, 1) as dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges[];
@@ -2969,8 +2563,6 @@ export namespace bitbadges.bitbadgeschain.badges {
             pb_1.Message.setField(this, 11, value);
         }
         static fromObject(data: {
-            uri?: string;
-            customData?: string;
             mustOwnBadges?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges.prototype.toObject>[];
             merkleChallenge?: ReturnType<typeof MerkleChallenge.prototype.toObject>;
             predeterminedBalances?: ReturnType<typeof PredeterminedBalances.prototype.toObject>;
@@ -2978,14 +2570,8 @@ export namespace bitbadges.bitbadgeschain.badges {
             maxNumTransfers?: ReturnType<typeof MaxNumTransfers.prototype.toObject>;
             requireToEqualsInitiatedBy?: boolean;
             requireToDoesNotEqualInitiatedBy?: boolean;
-        }): OutgoingApprovalDetails {
-            const message = new OutgoingApprovalDetails({});
-            if (data.uri != null) {
-                message.uri = data.uri;
-            }
-            if (data.customData != null) {
-                message.customData = data.customData;
-            }
+        }): OutgoingApprovalCriteria {
+            const message = new OutgoingApprovalCriteria({});
             if (data.mustOwnBadges != null) {
                 message.mustOwnBadges = data.mustOwnBadges.map(item => dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges.fromObject(item));
             }
@@ -3011,8 +2597,6 @@ export namespace bitbadges.bitbadgeschain.badges {
         }
         toObject() {
             const data: {
-                uri?: string;
-                customData?: string;
                 mustOwnBadges?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges.prototype.toObject>[];
                 merkleChallenge?: ReturnType<typeof MerkleChallenge.prototype.toObject>;
                 predeterminedBalances?: ReturnType<typeof PredeterminedBalances.prototype.toObject>;
@@ -3021,12 +2605,6 @@ export namespace bitbadges.bitbadgeschain.badges {
                 requireToEqualsInitiatedBy?: boolean;
                 requireToDoesNotEqualInitiatedBy?: boolean;
             } = {};
-            if (this.uri != null) {
-                data.uri = this.uri;
-            }
-            if (this.customData != null) {
-                data.customData = this.customData;
-            }
             if (this.mustOwnBadges != null) {
                 data.mustOwnBadges = this.mustOwnBadges.map((item: dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges) => item.toObject());
             }
@@ -3054,10 +2632,6 @@ export namespace bitbadges.bitbadgeschain.badges {
         serialize(w: pb_1.BinaryWriter): void;
         serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
             const writer = w || new pb_1.BinaryWriter();
-            if (this.uri.length)
-                writer.writeString(7, this.uri);
-            if (this.customData.length)
-                writer.writeString(8, this.customData);
             if (this.mustOwnBadges.length)
                 writer.writeRepeatedMessage(1, this.mustOwnBadges, (item: dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges) => item.serialize(writer));
             if (this.has_merkleChallenge)
@@ -3075,18 +2649,12 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (!w)
                 return writer.getResultBuffer();
         }
-        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): OutgoingApprovalDetails {
-            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new OutgoingApprovalDetails();
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): OutgoingApprovalCriteria {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new OutgoingApprovalCriteria();
             while (reader.nextField()) {
                 if (reader.isEndGroup())
                     break;
                 switch (reader.getFieldNumber()) {
-                    case 7:
-                        message.uri = reader.readString();
-                        break;
-                    case 8:
-                        message.customData = reader.readString();
-                        break;
                     case 1:
                         reader.readMessage(message.mustOwnBadges, () => pb_1.Message.addToRepeatedWrapperField(message, 1, dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges.deserialize(reader), dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges));
                         break;
@@ -3116,15 +2684,13 @@ export namespace bitbadges.bitbadgeschain.badges {
         serializeBinary(): Uint8Array {
             return this.serialize();
         }
-        static deserializeBinary(bytes: Uint8Array): OutgoingApprovalDetails {
-            return OutgoingApprovalDetails.deserialize(bytes);
+        static deserializeBinary(bytes: Uint8Array): OutgoingApprovalCriteria {
+            return OutgoingApprovalCriteria.deserialize(bytes);
         }
     }
-    export class IncomingApprovalDetails extends pb_1.Message {
+    export class IncomingApprovalCriteria extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
-            uri?: string;
-            customData?: string;
             mustOwnBadges?: dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges[];
             merkleChallenge?: MerkleChallenge;
             predeterminedBalances?: PredeterminedBalances;
@@ -3136,12 +2702,6 @@ export namespace bitbadges.bitbadgeschain.badges {
             super();
             pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1], this.#one_of_decls);
             if (!Array.isArray(data) && typeof data == "object") {
-                if ("uri" in data && data.uri != undefined) {
-                    this.uri = data.uri;
-                }
-                if ("customData" in data && data.customData != undefined) {
-                    this.customData = data.customData;
-                }
                 if ("mustOwnBadges" in data && data.mustOwnBadges != undefined) {
                     this.mustOwnBadges = data.mustOwnBadges;
                 }
@@ -3164,18 +2724,6 @@ export namespace bitbadges.bitbadgeschain.badges {
                     this.requireFromDoesNotEqualInitiatedBy = data.requireFromDoesNotEqualInitiatedBy;
                 }
             }
-        }
-        get uri() {
-            return pb_1.Message.getFieldWithDefault(this, 7, "") as string;
-        }
-        set uri(value: string) {
-            pb_1.Message.setField(this, 7, value);
-        }
-        get customData() {
-            return pb_1.Message.getFieldWithDefault(this, 8, "") as string;
-        }
-        set customData(value: string) {
-            pb_1.Message.setField(this, 8, value);
         }
         get mustOwnBadges() {
             return pb_1.Message.getRepeatedWrapperField(this, dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges, 1) as dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges[];
@@ -3232,8 +2780,6 @@ export namespace bitbadges.bitbadgeschain.badges {
             pb_1.Message.setField(this, 12, value);
         }
         static fromObject(data: {
-            uri?: string;
-            customData?: string;
             mustOwnBadges?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges.prototype.toObject>[];
             merkleChallenge?: ReturnType<typeof MerkleChallenge.prototype.toObject>;
             predeterminedBalances?: ReturnType<typeof PredeterminedBalances.prototype.toObject>;
@@ -3241,14 +2787,8 @@ export namespace bitbadges.bitbadgeschain.badges {
             maxNumTransfers?: ReturnType<typeof MaxNumTransfers.prototype.toObject>;
             requireFromEqualsInitiatedBy?: boolean;
             requireFromDoesNotEqualInitiatedBy?: boolean;
-        }): IncomingApprovalDetails {
-            const message = new IncomingApprovalDetails({});
-            if (data.uri != null) {
-                message.uri = data.uri;
-            }
-            if (data.customData != null) {
-                message.customData = data.customData;
-            }
+        }): IncomingApprovalCriteria {
+            const message = new IncomingApprovalCriteria({});
             if (data.mustOwnBadges != null) {
                 message.mustOwnBadges = data.mustOwnBadges.map(item => dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges.fromObject(item));
             }
@@ -3274,8 +2814,6 @@ export namespace bitbadges.bitbadgeschain.badges {
         }
         toObject() {
             const data: {
-                uri?: string;
-                customData?: string;
                 mustOwnBadges?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges.prototype.toObject>[];
                 merkleChallenge?: ReturnType<typeof MerkleChallenge.prototype.toObject>;
                 predeterminedBalances?: ReturnType<typeof PredeterminedBalances.prototype.toObject>;
@@ -3284,12 +2822,6 @@ export namespace bitbadges.bitbadgeschain.badges {
                 requireFromEqualsInitiatedBy?: boolean;
                 requireFromDoesNotEqualInitiatedBy?: boolean;
             } = {};
-            if (this.uri != null) {
-                data.uri = this.uri;
-            }
-            if (this.customData != null) {
-                data.customData = this.customData;
-            }
             if (this.mustOwnBadges != null) {
                 data.mustOwnBadges = this.mustOwnBadges.map((item: dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges) => item.toObject());
             }
@@ -3317,10 +2849,6 @@ export namespace bitbadges.bitbadgeschain.badges {
         serialize(w: pb_1.BinaryWriter): void;
         serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
             const writer = w || new pb_1.BinaryWriter();
-            if (this.uri.length)
-                writer.writeString(7, this.uri);
-            if (this.customData.length)
-                writer.writeString(8, this.customData);
             if (this.mustOwnBadges.length)
                 writer.writeRepeatedMessage(1, this.mustOwnBadges, (item: dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges) => item.serialize(writer));
             if (this.has_merkleChallenge)
@@ -3338,18 +2866,12 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (!w)
                 return writer.getResultBuffer();
         }
-        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): IncomingApprovalDetails {
-            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new IncomingApprovalDetails();
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): IncomingApprovalCriteria {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new IncomingApprovalCriteria();
             while (reader.nextField()) {
                 if (reader.isEndGroup())
                     break;
                 switch (reader.getFieldNumber()) {
-                    case 7:
-                        message.uri = reader.readString();
-                        break;
-                    case 8:
-                        message.customData = reader.readString();
-                        break;
                     case 1:
                         reader.readMessage(message.mustOwnBadges, () => pb_1.Message.addToRepeatedWrapperField(message, 1, dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges.deserialize(reader), dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges));
                         break;
@@ -3379,11 +2901,11 @@ export namespace bitbadges.bitbadgeschain.badges {
         serializeBinary(): Uint8Array {
             return this.serialize();
         }
-        static deserializeBinary(bytes: Uint8Array): IncomingApprovalDetails {
-            return IncomingApprovalDetails.deserialize(bytes);
+        static deserializeBinary(bytes: Uint8Array): IncomingApprovalCriteria {
+            return IncomingApprovalCriteria.deserialize(bytes);
         }
     }
-    export class CollectionApprovedTransfer extends pb_1.Message {
+    export class CollectionApproval extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
             fromMappingId?: string;
@@ -3392,14 +2914,24 @@ export namespace bitbadges.bitbadgeschain.badges {
             transferTimes?: dependency_4.bitbadges.bitbadgeschain.badges.UintRange[];
             badgeIds?: dependency_4.bitbadges.bitbadgeschain.badges.UintRange[];
             ownershipTimes?: dependency_4.bitbadges.bitbadgeschain.badges.UintRange[];
-            approvalId?: string;
             approvalTrackerId?: string;
             challengeTrackerId?: string;
-            allowedCombinations?: IsCollectionTransferAllowed[];
-            approvalDetails?: ApprovalDetails;
+            fromMappingOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+            toMappingOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+            initiatedByMappingOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+            transferTimesOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+            badgeIdsOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+            ownershipTimesOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+            approvalTrackerIdOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+            challengeTrackerIdOptions?: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+            isApproved?: boolean;
+            uri?: string;
+            customData?: string;
+            approvalId?: string;
+            approvalCriteria?: ApprovalCriteria;
         }) {
             super();
-            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [4, 5, 6, 10], this.#one_of_decls);
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [4, 5, 6], this.#one_of_decls);
             if (!Array.isArray(data) && typeof data == "object") {
                 if ("fromMappingId" in data && data.fromMappingId != undefined) {
                     this.fromMappingId = data.fromMappingId;
@@ -3419,20 +2951,50 @@ export namespace bitbadges.bitbadgeschain.badges {
                 if ("ownershipTimes" in data && data.ownershipTimes != undefined) {
                     this.ownershipTimes = data.ownershipTimes;
                 }
-                if ("approvalId" in data && data.approvalId != undefined) {
-                    this.approvalId = data.approvalId;
-                }
                 if ("approvalTrackerId" in data && data.approvalTrackerId != undefined) {
                     this.approvalTrackerId = data.approvalTrackerId;
                 }
                 if ("challengeTrackerId" in data && data.challengeTrackerId != undefined) {
                     this.challengeTrackerId = data.challengeTrackerId;
                 }
-                if ("allowedCombinations" in data && data.allowedCombinations != undefined) {
-                    this.allowedCombinations = data.allowedCombinations;
+                if ("fromMappingOptions" in data && data.fromMappingOptions != undefined) {
+                    this.fromMappingOptions = data.fromMappingOptions;
                 }
-                if ("approvalDetails" in data && data.approvalDetails != undefined) {
-                    this.approvalDetails = data.approvalDetails;
+                if ("toMappingOptions" in data && data.toMappingOptions != undefined) {
+                    this.toMappingOptions = data.toMappingOptions;
+                }
+                if ("initiatedByMappingOptions" in data && data.initiatedByMappingOptions != undefined) {
+                    this.initiatedByMappingOptions = data.initiatedByMappingOptions;
+                }
+                if ("transferTimesOptions" in data && data.transferTimesOptions != undefined) {
+                    this.transferTimesOptions = data.transferTimesOptions;
+                }
+                if ("badgeIdsOptions" in data && data.badgeIdsOptions != undefined) {
+                    this.badgeIdsOptions = data.badgeIdsOptions;
+                }
+                if ("ownershipTimesOptions" in data && data.ownershipTimesOptions != undefined) {
+                    this.ownershipTimesOptions = data.ownershipTimesOptions;
+                }
+                if ("approvalTrackerIdOptions" in data && data.approvalTrackerIdOptions != undefined) {
+                    this.approvalTrackerIdOptions = data.approvalTrackerIdOptions;
+                }
+                if ("challengeTrackerIdOptions" in data && data.challengeTrackerIdOptions != undefined) {
+                    this.challengeTrackerIdOptions = data.challengeTrackerIdOptions;
+                }
+                if ("isApproved" in data && data.isApproved != undefined) {
+                    this.isApproved = data.isApproved;
+                }
+                if ("uri" in data && data.uri != undefined) {
+                    this.uri = data.uri;
+                }
+                if ("customData" in data && data.customData != undefined) {
+                    this.customData = data.customData;
+                }
+                if ("approvalId" in data && data.approvalId != undefined) {
+                    this.approvalId = data.approvalId;
+                }
+                if ("approvalCriteria" in data && data.approvalCriteria != undefined) {
+                    this.approvalCriteria = data.approvalCriteria;
                 }
             }
         }
@@ -3472,38 +3034,122 @@ export namespace bitbadges.bitbadgeschain.badges {
         set ownershipTimes(value: dependency_4.bitbadges.bitbadgeschain.badges.UintRange[]) {
             pb_1.Message.setRepeatedWrapperField(this, 6, value);
         }
-        get approvalId() {
+        get approvalTrackerId() {
             return pb_1.Message.getFieldWithDefault(this, 7, "") as string;
         }
-        set approvalId(value: string) {
+        set approvalTrackerId(value: string) {
             pb_1.Message.setField(this, 7, value);
         }
-        get approvalTrackerId() {
+        get challengeTrackerId() {
             return pb_1.Message.getFieldWithDefault(this, 8, "") as string;
         }
-        set approvalTrackerId(value: string) {
+        set challengeTrackerId(value: string) {
             pb_1.Message.setField(this, 8, value);
         }
-        get challengeTrackerId() {
-            return pb_1.Message.getFieldWithDefault(this, 9, "") as string;
+        get fromMappingOptions() {
+            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 9) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
         }
-        set challengeTrackerId(value: string) {
-            pb_1.Message.setField(this, 9, value);
+        set fromMappingOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
+            pb_1.Message.setWrapperField(this, 9, value);
         }
-        get allowedCombinations() {
-            return pb_1.Message.getRepeatedWrapperField(this, IsCollectionTransferAllowed, 10) as IsCollectionTransferAllowed[];
+        get has_fromMappingOptions() {
+            return pb_1.Message.getField(this, 9) != null;
         }
-        set allowedCombinations(value: IsCollectionTransferAllowed[]) {
-            pb_1.Message.setRepeatedWrapperField(this, 10, value);
+        get toMappingOptions() {
+            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 10) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
         }
-        get approvalDetails() {
-            return pb_1.Message.getWrapperField(this, ApprovalDetails, 11) as ApprovalDetails;
+        set toMappingOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
+            pb_1.Message.setWrapperField(this, 10, value);
         }
-        set approvalDetails(value: ApprovalDetails) {
+        get has_toMappingOptions() {
+            return pb_1.Message.getField(this, 10) != null;
+        }
+        get initiatedByMappingOptions() {
+            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 11) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+        }
+        set initiatedByMappingOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
             pb_1.Message.setWrapperField(this, 11, value);
         }
-        get has_approvalDetails() {
+        get has_initiatedByMappingOptions() {
             return pb_1.Message.getField(this, 11) != null;
+        }
+        get transferTimesOptions() {
+            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 12) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+        }
+        set transferTimesOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
+            pb_1.Message.setWrapperField(this, 12, value);
+        }
+        get has_transferTimesOptions() {
+            return pb_1.Message.getField(this, 12) != null;
+        }
+        get badgeIdsOptions() {
+            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 13) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+        }
+        set badgeIdsOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
+            pb_1.Message.setWrapperField(this, 13, value);
+        }
+        get has_badgeIdsOptions() {
+            return pb_1.Message.getField(this, 13) != null;
+        }
+        get ownershipTimesOptions() {
+            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 14) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+        }
+        set ownershipTimesOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
+            pb_1.Message.setWrapperField(this, 14, value);
+        }
+        get has_ownershipTimesOptions() {
+            return pb_1.Message.getField(this, 14) != null;
+        }
+        get approvalTrackerIdOptions() {
+            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 15) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+        }
+        set approvalTrackerIdOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
+            pb_1.Message.setWrapperField(this, 15, value);
+        }
+        get has_approvalTrackerIdOptions() {
+            return pb_1.Message.getField(this, 15) != null;
+        }
+        get challengeTrackerIdOptions() {
+            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions, 16) as dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions;
+        }
+        set challengeTrackerIdOptions(value: dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions) {
+            pb_1.Message.setWrapperField(this, 16, value);
+        }
+        get has_challengeTrackerIdOptions() {
+            return pb_1.Message.getField(this, 16) != null;
+        }
+        get isApproved() {
+            return pb_1.Message.getFieldWithDefault(this, 17, false) as boolean;
+        }
+        set isApproved(value: boolean) {
+            pb_1.Message.setField(this, 17, value);
+        }
+        get uri() {
+            return pb_1.Message.getFieldWithDefault(this, 18, "") as string;
+        }
+        set uri(value: string) {
+            pb_1.Message.setField(this, 18, value);
+        }
+        get customData() {
+            return pb_1.Message.getFieldWithDefault(this, 19, "") as string;
+        }
+        set customData(value: string) {
+            pb_1.Message.setField(this, 19, value);
+        }
+        get approvalId() {
+            return pb_1.Message.getFieldWithDefault(this, 20, "") as string;
+        }
+        set approvalId(value: string) {
+            pb_1.Message.setField(this, 20, value);
+        }
+        get approvalCriteria() {
+            return pb_1.Message.getWrapperField(this, ApprovalCriteria, 21) as ApprovalCriteria;
+        }
+        set approvalCriteria(value: ApprovalCriteria) {
+            pb_1.Message.setWrapperField(this, 21, value);
+        }
+        get has_approvalCriteria() {
+            return pb_1.Message.getField(this, 21) != null;
         }
         static fromObject(data: {
             fromMappingId?: string;
@@ -3512,13 +3158,23 @@ export namespace bitbadges.bitbadgeschain.badges {
             transferTimes?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
             badgeIds?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
             ownershipTimes?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-            approvalId?: string;
             approvalTrackerId?: string;
             challengeTrackerId?: string;
-            allowedCombinations?: ReturnType<typeof IsCollectionTransferAllowed.prototype.toObject>[];
-            approvalDetails?: ReturnType<typeof ApprovalDetails.prototype.toObject>;
-        }): CollectionApprovedTransfer {
-            const message = new CollectionApprovedTransfer({});
+            fromMappingOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+            toMappingOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+            initiatedByMappingOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+            transferTimesOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+            badgeIdsOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+            ownershipTimesOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+            approvalTrackerIdOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+            challengeTrackerIdOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+            isApproved?: boolean;
+            uri?: string;
+            customData?: string;
+            approvalId?: string;
+            approvalCriteria?: ReturnType<typeof ApprovalCriteria.prototype.toObject>;
+        }): CollectionApproval {
+            const message = new CollectionApproval({});
             if (data.fromMappingId != null) {
                 message.fromMappingId = data.fromMappingId;
             }
@@ -3537,20 +3193,50 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (data.ownershipTimes != null) {
                 message.ownershipTimes = data.ownershipTimes.map(item => dependency_4.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
             }
-            if (data.approvalId != null) {
-                message.approvalId = data.approvalId;
-            }
             if (data.approvalTrackerId != null) {
                 message.approvalTrackerId = data.approvalTrackerId;
             }
             if (data.challengeTrackerId != null) {
                 message.challengeTrackerId = data.challengeTrackerId;
             }
-            if (data.allowedCombinations != null) {
-                message.allowedCombinations = data.allowedCombinations.map(item => IsCollectionTransferAllowed.fromObject(item));
+            if (data.fromMappingOptions != null) {
+                message.fromMappingOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.fromMappingOptions);
             }
-            if (data.approvalDetails != null) {
-                message.approvalDetails = ApprovalDetails.fromObject(data.approvalDetails);
+            if (data.toMappingOptions != null) {
+                message.toMappingOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.toMappingOptions);
+            }
+            if (data.initiatedByMappingOptions != null) {
+                message.initiatedByMappingOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.initiatedByMappingOptions);
+            }
+            if (data.transferTimesOptions != null) {
+                message.transferTimesOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.transferTimesOptions);
+            }
+            if (data.badgeIdsOptions != null) {
+                message.badgeIdsOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.badgeIdsOptions);
+            }
+            if (data.ownershipTimesOptions != null) {
+                message.ownershipTimesOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.ownershipTimesOptions);
+            }
+            if (data.approvalTrackerIdOptions != null) {
+                message.approvalTrackerIdOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.approvalTrackerIdOptions);
+            }
+            if (data.challengeTrackerIdOptions != null) {
+                message.challengeTrackerIdOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.fromObject(data.challengeTrackerIdOptions);
+            }
+            if (data.isApproved != null) {
+                message.isApproved = data.isApproved;
+            }
+            if (data.uri != null) {
+                message.uri = data.uri;
+            }
+            if (data.customData != null) {
+                message.customData = data.customData;
+            }
+            if (data.approvalId != null) {
+                message.approvalId = data.approvalId;
+            }
+            if (data.approvalCriteria != null) {
+                message.approvalCriteria = ApprovalCriteria.fromObject(data.approvalCriteria);
             }
             return message;
         }
@@ -3562,11 +3248,21 @@ export namespace bitbadges.bitbadgeschain.badges {
                 transferTimes?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
                 badgeIds?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
                 ownershipTimes?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-                approvalId?: string;
                 approvalTrackerId?: string;
                 challengeTrackerId?: string;
-                allowedCombinations?: ReturnType<typeof IsCollectionTransferAllowed.prototype.toObject>[];
-                approvalDetails?: ReturnType<typeof ApprovalDetails.prototype.toObject>;
+                fromMappingOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+                toMappingOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+                initiatedByMappingOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+                transferTimesOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+                badgeIdsOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+                ownershipTimesOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+                approvalTrackerIdOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+                challengeTrackerIdOptions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.prototype.toObject>;
+                isApproved?: boolean;
+                uri?: string;
+                customData?: string;
+                approvalId?: string;
+                approvalCriteria?: ReturnType<typeof ApprovalCriteria.prototype.toObject>;
             } = {};
             if (this.fromMappingId != null) {
                 data.fromMappingId = this.fromMappingId;
@@ -3586,20 +3282,50 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (this.ownershipTimes != null) {
                 data.ownershipTimes = this.ownershipTimes.map((item: dependency_4.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
             }
-            if (this.approvalId != null) {
-                data.approvalId = this.approvalId;
-            }
             if (this.approvalTrackerId != null) {
                 data.approvalTrackerId = this.approvalTrackerId;
             }
             if (this.challengeTrackerId != null) {
                 data.challengeTrackerId = this.challengeTrackerId;
             }
-            if (this.allowedCombinations != null) {
-                data.allowedCombinations = this.allowedCombinations.map((item: IsCollectionTransferAllowed) => item.toObject());
+            if (this.fromMappingOptions != null) {
+                data.fromMappingOptions = this.fromMappingOptions.toObject();
             }
-            if (this.approvalDetails != null) {
-                data.approvalDetails = this.approvalDetails.toObject();
+            if (this.toMappingOptions != null) {
+                data.toMappingOptions = this.toMappingOptions.toObject();
+            }
+            if (this.initiatedByMappingOptions != null) {
+                data.initiatedByMappingOptions = this.initiatedByMappingOptions.toObject();
+            }
+            if (this.transferTimesOptions != null) {
+                data.transferTimesOptions = this.transferTimesOptions.toObject();
+            }
+            if (this.badgeIdsOptions != null) {
+                data.badgeIdsOptions = this.badgeIdsOptions.toObject();
+            }
+            if (this.ownershipTimesOptions != null) {
+                data.ownershipTimesOptions = this.ownershipTimesOptions.toObject();
+            }
+            if (this.approvalTrackerIdOptions != null) {
+                data.approvalTrackerIdOptions = this.approvalTrackerIdOptions.toObject();
+            }
+            if (this.challengeTrackerIdOptions != null) {
+                data.challengeTrackerIdOptions = this.challengeTrackerIdOptions.toObject();
+            }
+            if (this.isApproved != null) {
+                data.isApproved = this.isApproved;
+            }
+            if (this.uri != null) {
+                data.uri = this.uri;
+            }
+            if (this.customData != null) {
+                data.customData = this.customData;
+            }
+            if (this.approvalId != null) {
+                data.approvalId = this.approvalId;
+            }
+            if (this.approvalCriteria != null) {
+                data.approvalCriteria = this.approvalCriteria.toObject();
             }
             return data;
         }
@@ -3619,21 +3345,41 @@ export namespace bitbadges.bitbadgeschain.badges {
                 writer.writeRepeatedMessage(5, this.badgeIds, (item: dependency_4.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
             if (this.ownershipTimes.length)
                 writer.writeRepeatedMessage(6, this.ownershipTimes, (item: dependency_4.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
-            if (this.approvalId.length)
-                writer.writeString(7, this.approvalId);
             if (this.approvalTrackerId.length)
-                writer.writeString(8, this.approvalTrackerId);
+                writer.writeString(7, this.approvalTrackerId);
             if (this.challengeTrackerId.length)
-                writer.writeString(9, this.challengeTrackerId);
-            if (this.allowedCombinations.length)
-                writer.writeRepeatedMessage(10, this.allowedCombinations, (item: IsCollectionTransferAllowed) => item.serialize(writer));
-            if (this.has_approvalDetails)
-                writer.writeMessage(11, this.approvalDetails, () => this.approvalDetails.serialize(writer));
+                writer.writeString(8, this.challengeTrackerId);
+            if (this.has_fromMappingOptions)
+                writer.writeMessage(9, this.fromMappingOptions, () => this.fromMappingOptions.serialize(writer));
+            if (this.has_toMappingOptions)
+                writer.writeMessage(10, this.toMappingOptions, () => this.toMappingOptions.serialize(writer));
+            if (this.has_initiatedByMappingOptions)
+                writer.writeMessage(11, this.initiatedByMappingOptions, () => this.initiatedByMappingOptions.serialize(writer));
+            if (this.has_transferTimesOptions)
+                writer.writeMessage(12, this.transferTimesOptions, () => this.transferTimesOptions.serialize(writer));
+            if (this.has_badgeIdsOptions)
+                writer.writeMessage(13, this.badgeIdsOptions, () => this.badgeIdsOptions.serialize(writer));
+            if (this.has_ownershipTimesOptions)
+                writer.writeMessage(14, this.ownershipTimesOptions, () => this.ownershipTimesOptions.serialize(writer));
+            if (this.has_approvalTrackerIdOptions)
+                writer.writeMessage(15, this.approvalTrackerIdOptions, () => this.approvalTrackerIdOptions.serialize(writer));
+            if (this.has_challengeTrackerIdOptions)
+                writer.writeMessage(16, this.challengeTrackerIdOptions, () => this.challengeTrackerIdOptions.serialize(writer));
+            if (this.isApproved != false)
+                writer.writeBool(17, this.isApproved);
+            if (this.uri.length)
+                writer.writeString(18, this.uri);
+            if (this.customData.length)
+                writer.writeString(19, this.customData);
+            if (this.approvalId.length)
+                writer.writeString(20, this.approvalId);
+            if (this.has_approvalCriteria)
+                writer.writeMessage(21, this.approvalCriteria, () => this.approvalCriteria.serialize(writer));
             if (!w)
                 return writer.getResultBuffer();
         }
-        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): CollectionApprovedTransfer {
-            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new CollectionApprovedTransfer();
+        static deserialize(bytes: Uint8Array | pb_1.BinaryReader): CollectionApproval {
+            const reader = bytes instanceof pb_1.BinaryReader ? bytes : new pb_1.BinaryReader(bytes), message = new CollectionApproval();
             while (reader.nextField()) {
                 if (reader.isEndGroup())
                     break;
@@ -3657,19 +3403,49 @@ export namespace bitbadges.bitbadgeschain.badges {
                         reader.readMessage(message.ownershipTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 6, dependency_4.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_4.bitbadges.bitbadgeschain.badges.UintRange));
                         break;
                     case 7:
-                        message.approvalId = reader.readString();
-                        break;
-                    case 8:
                         message.approvalTrackerId = reader.readString();
                         break;
-                    case 9:
+                    case 8:
                         message.challengeTrackerId = reader.readString();
                         break;
+                    case 9:
+                        reader.readMessage(message.fromMappingOptions, () => message.fromMappingOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
+                        break;
                     case 10:
-                        reader.readMessage(message.allowedCombinations, () => pb_1.Message.addToRepeatedWrapperField(message, 10, IsCollectionTransferAllowed.deserialize(reader), IsCollectionTransferAllowed));
+                        reader.readMessage(message.toMappingOptions, () => message.toMappingOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
                         break;
                     case 11:
-                        reader.readMessage(message.approvalDetails, () => message.approvalDetails = ApprovalDetails.deserialize(reader));
+                        reader.readMessage(message.initiatedByMappingOptions, () => message.initiatedByMappingOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
+                        break;
+                    case 12:
+                        reader.readMessage(message.transferTimesOptions, () => message.transferTimesOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
+                        break;
+                    case 13:
+                        reader.readMessage(message.badgeIdsOptions, () => message.badgeIdsOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
+                        break;
+                    case 14:
+                        reader.readMessage(message.ownershipTimesOptions, () => message.ownershipTimesOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
+                        break;
+                    case 15:
+                        reader.readMessage(message.approvalTrackerIdOptions, () => message.approvalTrackerIdOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
+                        break;
+                    case 16:
+                        reader.readMessage(message.challengeTrackerIdOptions, () => message.challengeTrackerIdOptions = dependency_2.bitbadges.bitbadgeschain.badges.ValueOptions.deserialize(reader));
+                        break;
+                    case 17:
+                        message.isApproved = reader.readBool();
+                        break;
+                    case 18:
+                        message.uri = reader.readString();
+                        break;
+                    case 19:
+                        message.customData = reader.readString();
+                        break;
+                    case 20:
+                        message.approvalId = reader.readString();
+                        break;
+                    case 21:
+                        reader.readMessage(message.approvalCriteria, () => message.approvalCriteria = ApprovalCriteria.deserialize(reader));
                         break;
                     default: reader.skipField();
                 }
@@ -3679,8 +3455,8 @@ export namespace bitbadges.bitbadgeschain.badges {
         serializeBinary(): Uint8Array {
             return this.serialize();
         }
-        static deserializeBinary(bytes: Uint8Array): CollectionApprovedTransfer {
-            return CollectionApprovedTransfer.deserialize(bytes);
+        static deserializeBinary(bytes: Uint8Array): CollectionApproval {
+            return CollectionApproval.deserialize(bytes);
         }
     }
     export class ApprovalIdentifierDetails extends pb_1.Message {
@@ -3802,7 +3578,7 @@ export namespace bitbadges.bitbadgeschain.badges {
             from?: string;
             toAddresses?: string[];
             balances?: dependency_4.bitbadges.bitbadgeschain.badges.Balance[];
-            precalculationDetails?: ApprovalIdentifierDetails;
+            precalculateBalancesFromApproval?: ApprovalIdentifierDetails;
             merkleProofs?: MerkleProof[];
             memo?: string;
             prioritizedApprovals?: ApprovalIdentifierDetails[];
@@ -3820,8 +3596,8 @@ export namespace bitbadges.bitbadgeschain.badges {
                 if ("balances" in data && data.balances != undefined) {
                     this.balances = data.balances;
                 }
-                if ("precalculationDetails" in data && data.precalculationDetails != undefined) {
-                    this.precalculationDetails = data.precalculationDetails;
+                if ("precalculateBalancesFromApproval" in data && data.precalculateBalancesFromApproval != undefined) {
+                    this.precalculateBalancesFromApproval = data.precalculateBalancesFromApproval;
                 }
                 if ("merkleProofs" in data && data.merkleProofs != undefined) {
                     this.merkleProofs = data.merkleProofs;
@@ -3855,13 +3631,13 @@ export namespace bitbadges.bitbadgeschain.badges {
         set balances(value: dependency_4.bitbadges.bitbadgeschain.badges.Balance[]) {
             pb_1.Message.setRepeatedWrapperField(this, 3, value);
         }
-        get precalculationDetails() {
+        get precalculateBalancesFromApproval() {
             return pb_1.Message.getWrapperField(this, ApprovalIdentifierDetails, 4) as ApprovalIdentifierDetails;
         }
-        set precalculationDetails(value: ApprovalIdentifierDetails) {
+        set precalculateBalancesFromApproval(value: ApprovalIdentifierDetails) {
             pb_1.Message.setWrapperField(this, 4, value);
         }
-        get has_precalculationDetails() {
+        get has_precalculateBalancesFromApproval() {
             return pb_1.Message.getField(this, 4) != null;
         }
         get merkleProofs() {
@@ -3892,7 +3668,7 @@ export namespace bitbadges.bitbadgeschain.badges {
             from?: string;
             toAddresses?: string[];
             balances?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.Balance.prototype.toObject>[];
-            precalculationDetails?: ReturnType<typeof ApprovalIdentifierDetails.prototype.toObject>;
+            precalculateBalancesFromApproval?: ReturnType<typeof ApprovalIdentifierDetails.prototype.toObject>;
             merkleProofs?: ReturnType<typeof MerkleProof.prototype.toObject>[];
             memo?: string;
             prioritizedApprovals?: ReturnType<typeof ApprovalIdentifierDetails.prototype.toObject>[];
@@ -3908,8 +3684,8 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (data.balances != null) {
                 message.balances = data.balances.map(item => dependency_4.bitbadges.bitbadgeschain.badges.Balance.fromObject(item));
             }
-            if (data.precalculationDetails != null) {
-                message.precalculationDetails = ApprovalIdentifierDetails.fromObject(data.precalculationDetails);
+            if (data.precalculateBalancesFromApproval != null) {
+                message.precalculateBalancesFromApproval = ApprovalIdentifierDetails.fromObject(data.precalculateBalancesFromApproval);
             }
             if (data.merkleProofs != null) {
                 message.merkleProofs = data.merkleProofs.map(item => MerkleProof.fromObject(item));
@@ -3930,7 +3706,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                 from?: string;
                 toAddresses?: string[];
                 balances?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.Balance.prototype.toObject>[];
-                precalculationDetails?: ReturnType<typeof ApprovalIdentifierDetails.prototype.toObject>;
+                precalculateBalancesFromApproval?: ReturnType<typeof ApprovalIdentifierDetails.prototype.toObject>;
                 merkleProofs?: ReturnType<typeof MerkleProof.prototype.toObject>[];
                 memo?: string;
                 prioritizedApprovals?: ReturnType<typeof ApprovalIdentifierDetails.prototype.toObject>[];
@@ -3945,8 +3721,8 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (this.balances != null) {
                 data.balances = this.balances.map((item: dependency_4.bitbadges.bitbadgeschain.badges.Balance) => item.toObject());
             }
-            if (this.precalculationDetails != null) {
-                data.precalculationDetails = this.precalculationDetails.toObject();
+            if (this.precalculateBalancesFromApproval != null) {
+                data.precalculateBalancesFromApproval = this.precalculateBalancesFromApproval.toObject();
             }
             if (this.merkleProofs != null) {
                 data.merkleProofs = this.merkleProofs.map((item: MerkleProof) => item.toObject());
@@ -3972,8 +3748,8 @@ export namespace bitbadges.bitbadgeschain.badges {
                 writer.writeRepeatedString(2, this.toAddresses);
             if (this.balances.length)
                 writer.writeRepeatedMessage(3, this.balances, (item: dependency_4.bitbadges.bitbadgeschain.badges.Balance) => item.serialize(writer));
-            if (this.has_precalculationDetails)
-                writer.writeMessage(4, this.precalculationDetails, () => this.precalculationDetails.serialize(writer));
+            if (this.has_precalculateBalancesFromApproval)
+                writer.writeMessage(4, this.precalculateBalancesFromApproval, () => this.precalculateBalancesFromApproval.serialize(writer));
             if (this.merkleProofs.length)
                 writer.writeRepeatedMessage(5, this.merkleProofs, (item: MerkleProof) => item.serialize(writer));
             if (this.memo.length)
@@ -4001,7 +3777,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                         reader.readMessage(message.balances, () => pb_1.Message.addToRepeatedWrapperField(message, 3, dependency_4.bitbadges.bitbadgeschain.badges.Balance.deserialize(reader), dependency_4.bitbadges.bitbadgeschain.badges.Balance));
                         break;
                     case 4:
-                        reader.readMessage(message.precalculationDetails, () => message.precalculationDetails = ApprovalIdentifierDetails.deserialize(reader));
+                        reader.readMessage(message.precalculateBalancesFromApproval, () => message.precalculateBalancesFromApproval = ApprovalIdentifierDetails.deserialize(reader));
                         break;
                     case 5:
                         reader.readMessage(message.merkleProofs, () => pb_1.Message.addToRepeatedWrapperField(message, 5, MerkleProof.deserialize(reader), MerkleProof));

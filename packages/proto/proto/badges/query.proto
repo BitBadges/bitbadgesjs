@@ -14,7 +14,7 @@ import "badges/address_mappings.proto";
 option go_package = "github.com/bitbadges/bitbadgeschain/x/badges/types";
 
 
-// // Query defines the gRPC querier service.
+// Query defines the gRPC querier service.
 // service Query {
 //   // Parameters queries the parameters of the module.
 //   rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
@@ -35,7 +35,7 @@ option go_package = "github.com/bitbadges/bitbadgeschain/x/badges/types";
 //   }
 
 //   rpc GetNumUsedForMerkleChallenge(QueryGetNumUsedForMerkleChallengeRequest) returns (QueryGetNumUsedForMerkleChallengeResponse) {
-//     option (google.api.http).get = "/bitbadges/bitbadgeschain/badges/get_num_used_for_challenge/{collectionId}/{approvalLevel}/{approverAddress}/{challengeId}/{leafIndex}";
+//     option (google.api.http).get = "/bitbadges/bitbadgeschain/badges/get_num_used_for_challenge/{collectionId}/{approvalLevel}/{approverAddress}/{challengeTrackerId}/{leafIndex}";
 //   }
 
 //   // Queries an addresses balance for a badge collection, specified by its ID.
@@ -56,10 +56,7 @@ message QueryParamsResponse {
 }
 
 message QueryGetCollectionRequest {
-  string collectionId = 1  [
-      (gogoproto.customtype) = "Uint",
-      (gogoproto.nullable) = false
-    ];
+  string collectionId = 1  [(gogoproto.customtype) = "Uint", (gogoproto.nullable) = false];
 }
 
 message QueryGetCollectionResponse {
@@ -100,7 +97,7 @@ message QueryGetNumUsedForMerkleChallengeRequest {
   string collectionId = 1 [(gogoproto.customtype) = "Uint", (gogoproto.nullable) = false];
   string approvalLevel = 2; //"collection" or "incoming" or "outgoing"
   string approverAddress = 3; //if approvalLevel is "collection", leave blank
-  string challengeId = 4;
+  string challengeTrackerId = 4;
   string leafIndex = 5 [(gogoproto.customtype) = "Uint", (gogoproto.nullable) = false];
 }
 
