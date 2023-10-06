@@ -11,24 +11,35 @@ import { getCurrentValuesForCollection } from "./timelines";
 
 export type DesiredNumberType = bigint;
 
-
-export const axios = axiosApi.create({
-  withCredentials: true,
-  headers: {
-    "Content-type": "application/json",
-    "x-api-key": process.env.BITBADGES_API_KEY,
-  },
-});
-
-let BACKEND_URL = process.env.BITBADGES_API_URL || "https://api.bitbadges.io";
-let ConvertFunction = BigIntify;
-
-//BITBADGES_API_KEY should be set in the .env file
+export interface BitBadgesApiDetails {
+  apiUrl?: string;
+  apiKey?: string;
+  convertFunction: (num: NumberType) => DesiredNumberType;
+}
 
 export class BitBadgesAPI {
-  constructor(backendUrl: string, convertFunction: (num: NumberType) => DesiredNumberType = BigIntify) {
-    BACKEND_URL = backendUrl;
-    ConvertFunction = convertFunction;
+  axios = axiosApi.create({
+    withCredentials: true,
+    headers: {
+      "Content-type": "application/json",
+      "x-api-key": process.env.BITBADGES_API_KEY,
+    },
+  });
+  BACKEND_URL = process.env.BITBADGES_API_URL || "https://api.bitbadges.io";
+  ConvertFunction = BigIntify;
+  apiKey = process.env.BITBADGES_API_KEY;
+
+  constructor(apiDetails: BitBadgesApiDetails) {
+    this.BACKEND_URL = apiDetails.apiUrl || this.BACKEND_URL;
+    this.ConvertFunction = apiDetails.convertFunction || this.ConvertFunction;
+    this.apiKey = apiDetails.apiKey || this.apiKey;
+    this.axios = axiosApi.create({
+      withCredentials: true,
+      headers: {
+        "Content-type": "application/json",
+        "x-api-key": this.apiKey,
+      },
+    });
   }
 
   public async handleApiError(error: any): Promise<void> {
@@ -56,8 +67,8 @@ export class BitBadgesAPI {
 
   public async getStatus(requestBody?: GetStatusRouteRequestBody): Promise<GetStatusRouteSuccessResponse<DesiredNumberType>> {
     try {
-      const response = await axios.post<GetStatusRouteSuccessResponse<string>>(`${BACKEND_URL}${GetStatusRoute()}`, requestBody);
-      return convertGetStatusRouteSuccessResponse(response.data, ConvertFunction);
+      const response = await this.axios.post<GetStatusRouteSuccessResponse<string>>(`${this.BACKEND_URL}${GetStatusRoute()}`, requestBody);
+      return convertGetStatusRouteSuccessResponse(response.data, this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -66,8 +77,8 @@ export class BitBadgesAPI {
 
   public async getSearchResults(searchValue: string, requestBody?: GetSearchRouteRequestBody): Promise<GetSearchRouteSuccessResponse<DesiredNumberType>> {
     try {
-      const response = await axios.post<GetSearchRouteSuccessResponse<string>>(`${BACKEND_URL}${GetSearchRoute(searchValue)}`, requestBody);
-      return convertGetSearchRouteSuccessResponse(response.data, ConvertFunction);
+      const response = await this.axios.post<GetSearchRouteSuccessResponse<string>>(`${this.BACKEND_URL}${GetSearchRoute(searchValue)}`, requestBody);
+      return convertGetSearchRouteSuccessResponse(response.data, this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -76,8 +87,8 @@ export class BitBadgesAPI {
 
   public async getCollections(requestBody: GetCollectionBatchRouteRequestBody): Promise<GetCollectionBatchRouteSuccessResponse<DesiredNumberType>> {
     try {
-      const response = await axios.post<GetCollectionBatchRouteSuccessResponse<string>>(`${BACKEND_URL}${GetCollectionBatchRoute()}`, requestBody);
-      return convertGetCollectionBatchRouteSuccessResponse(response.data, ConvertFunction);
+      const response = await this.axios.post<GetCollectionBatchRouteSuccessResponse<string>>(`${this.BACKEND_URL}${GetCollectionBatchRoute()}`, requestBody);
+      return convertGetCollectionBatchRouteSuccessResponse(response.data, this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -88,8 +99,8 @@ export class BitBadgesAPI {
     try {
       this.assertPositiveInteger(collectionId);
 
-      const response = await axios.post<GetCollectionRouteSuccessResponse<string>>(`${BACKEND_URL}${GetCollectionByIdRoute(collectionId)}`, requestBody);
-      const responseData = convertGetCollectionRouteSuccessResponse(response.data, ConvertFunction);
+      const response = await this.axios.post<GetCollectionRouteSuccessResponse<string>>(`${this.BACKEND_URL}${GetCollectionByIdRoute(collectionId)}`, requestBody);
+      const responseData = convertGetCollectionRouteSuccessResponse(response.data, this.ConvertFunction);
 
       if (fetchAllMetadata) {
         const _collection = convertBitBadgesCollection(responseData.collection, BigIntify);
@@ -111,8 +122,8 @@ export class BitBadgesAPI {
       this.assertPositiveInteger(collectionId);
       this.assertPositiveInteger(badgeId);
 
-      const response = await axios.post<GetOwnersForBadgeRouteSuccessResponse<string>>(`${BACKEND_URL}${GetOwnersForBadgeRoute(collectionId, badgeId)}`, requestBody);
-      return convertGetOwnersForBadgeRouteSuccessResponse(response.data, ConvertFunction);
+      const response = await this.axios.post<GetOwnersForBadgeRouteSuccessResponse<string>>(`${this.BACKEND_URL}${GetOwnersForBadgeRoute(collectionId, badgeId)}`, requestBody);
+      return convertGetOwnersForBadgeRouteSuccessResponse(response.data, this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -123,8 +134,8 @@ export class BitBadgesAPI {
     try {
       this.assertPositiveInteger(collectionId);
 
-      const response = await axios.post<GetMetadataForCollectionRouteSuccessResponse<string>>(`${BACKEND_URL}${GetMetadataForCollectionRoute(collectionId)}`, requestBody);
-      return convertGetMetadataForCollectionRouteSuccessResponse(response.data, ConvertFunction);
+      const response = await this.axios.post<GetMetadataForCollectionRouteSuccessResponse<string>>(`${this.BACKEND_URL}${GetMetadataForCollectionRoute(collectionId)}`, requestBody);
+      return convertGetMetadataForCollectionRouteSuccessResponse(response.data, this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -135,8 +146,8 @@ export class BitBadgesAPI {
     try {
       this.assertPositiveInteger(collectionId);
 
-      const response = await axios.post<GetBadgeBalanceByAddressRouteSuccessResponse<string>>(`${BACKEND_URL}${GetBadgeBalanceByAddressRoute(collectionId, cosmosAddress)}`, requestBody);
-      return convertGetBadgeBalanceByAddressRouteSuccessResponse(response.data, ConvertFunction);
+      const response = await this.axios.post<GetBadgeBalanceByAddressRouteSuccessResponse<string>>(`${this.BACKEND_URL}${GetBadgeBalanceByAddressRoute(collectionId, cosmosAddress)}`, requestBody);
+      return convertGetBadgeBalanceByAddressRouteSuccessResponse(response.data, this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -147,8 +158,8 @@ export class BitBadgesAPI {
     try {
       this.assertPositiveInteger(collectionId);
       this.assertPositiveInteger(badgeId);
-      const response = await axios.post<GetBadgeActivityRouteSuccessResponse<string>>(`${BACKEND_URL}${GetBadgeActivityRoute(collectionId, badgeId)}`, requestBody);
-      return convertGetBadgeActivityRouteSuccessResponse(response.data, ConvertFunction);
+      const response = await this.axios.post<GetBadgeActivityRouteSuccessResponse<string>>(`${this.BACKEND_URL}${GetBadgeActivityRoute(collectionId, badgeId)}`, requestBody);
+      return convertGetBadgeActivityRouteSuccessResponse(response.data, this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -159,8 +170,8 @@ export class BitBadgesAPI {
     try {
       this.assertPositiveInteger(collectionId);
 
-      const response = await axios.post<RefreshMetadataRouteSuccessResponse<string>>(`${BACKEND_URL}${RefreshMetadataRoute(collectionId)}`, requestBody);
-      return convertRefreshMetadataRouteSuccessResponse(response.data, ConvertFunction);
+      const response = await this.axios.post<RefreshMetadataRouteSuccessResponse<string>>(`${this.BACKEND_URL}${RefreshMetadataRoute(collectionId)}`, requestBody);
+      return convertRefreshMetadataRouteSuccessResponse(response.data, this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -171,8 +182,8 @@ export class BitBadgesAPI {
     try {
       this.assertPositiveInteger(collectionId);
 
-      const response = await axios.post<GetAllCodesAndPasswordsRouteSuccessResponse<string>>(`${BACKEND_URL}${GetAllPasswordsAndCodesRoute(collectionId)}`, requestBody);
-      return convertGetAllCodesAndPasswordsRouteSuccessResponse(response.data, ConvertFunction);
+      const response = await this.axios.post<GetAllCodesAndPasswordsRouteSuccessResponse<string>>(`${this.BACKEND_URL}${GetAllPasswordsAndCodesRoute(collectionId)}`, requestBody);
+      return convertGetAllCodesAndPasswordsRouteSuccessResponse(response.data, this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -183,8 +194,8 @@ export class BitBadgesAPI {
     try {
       this.assertPositiveInteger(collectionId);
 
-      const response = await axios.post<GetMerkleChallengeCodeViaPasswordRouteSuccessResponse<string>>(`${BACKEND_URL}${GetMerkleChallengeCodeViaPasswordRoute(collectionId, cid, password)}`, requestBody);
-      return convertGetMerkleChallengeCodeViaPasswordRouteSuccessResponse(response.data, ConvertFunction);
+      const response = await this.axios.post<GetMerkleChallengeCodeViaPasswordRouteSuccessResponse<string>>(`${this.BACKEND_URL}${GetMerkleChallengeCodeViaPasswordRoute(collectionId, cid, password)}`, requestBody);
+      return convertGetMerkleChallengeCodeViaPasswordRouteSuccessResponse(response.data, this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -195,8 +206,8 @@ export class BitBadgesAPI {
     try {
       this.assertPositiveInteger(collectionId);
 
-      const response = await axios.post<AddAnnouncementRouteSuccessResponse<string>>(`${BACKEND_URL}${AddAnnouncementRoute(collectionId)}`, requestBody);
-      return convertAddAnnouncementRouteSuccessResponse(response.data, ConvertFunction);
+      const response = await this.axios.post<AddAnnouncementRouteSuccessResponse<string>>(`${this.BACKEND_URL}${AddAnnouncementRoute(collectionId)}`, requestBody);
+      return convertAddAnnouncementRouteSuccessResponse(response.data, this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -206,8 +217,8 @@ export class BitBadgesAPI {
   public async deleteReview(reviewId: string, requestBody?: DeleteReviewRouteRequestBody): Promise<DeleteReviewRouteSuccessResponse<DesiredNumberType>> {
     try {
 
-      const response = await axios.post<DeleteReviewRouteSuccessResponse<string>>(`${BACKEND_URL}${DeleteReviewRoute(reviewId)}`, requestBody);
-      return convertDeleteReviewRouteSuccessResponse(response.data, ConvertFunction);
+      const response = await this.axios.post<DeleteReviewRouteSuccessResponse<string>>(`${this.BACKEND_URL}${DeleteReviewRoute(reviewId)}`, requestBody);
+      return convertDeleteReviewRouteSuccessResponse(response.data, this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -217,8 +228,8 @@ export class BitBadgesAPI {
   public async deleteAnnouncement(announcementId: string, requestBody?: DeleteAnnouncementRouteRequestBody): Promise<DeleteAnnouncementRouteSuccessResponse<DesiredNumberType>> {
     try {
 
-      const response = await axios.post<DeleteAnnouncementRouteSuccessResponse<string>>(`${BACKEND_URL}${DeleteAnnouncementRoute(announcementId)}`, requestBody);
-      return convertDeleteAnnouncementRouteSuccessResponse(response.data, ConvertFunction);
+      const response = await this.axios.post<DeleteAnnouncementRouteSuccessResponse<string>>(`${this.BACKEND_URL}${DeleteAnnouncementRoute(announcementId)}`, requestBody);
+      return convertDeleteAnnouncementRouteSuccessResponse(response.data, this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -230,8 +241,8 @@ export class BitBadgesAPI {
     try {
       this.assertPositiveInteger(collectionId);
 
-      const response = await axios.post<AddReviewForCollectionRouteSuccessResponse<string>>(`${BACKEND_URL}${AddReviewForCollectionRoute(collectionId)}`, requestBody);
-      return convertAddReviewForCollectionRouteSuccessResponse(response.data, ConvertFunction);
+      const response = await this.axios.post<AddReviewForCollectionRouteSuccessResponse<string>>(`${this.BACKEND_URL}${AddReviewForCollectionRoute(collectionId)}`, requestBody);
+      return convertAddReviewForCollectionRouteSuccessResponse(response.data, this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -240,8 +251,8 @@ export class BitBadgesAPI {
 
   public async getAccounts(requestBody: GetAccountsRouteRequestBody): Promise<GetAccountsRouteSuccessResponse<DesiredNumberType>> {
     try {
-      const response = await axios.post<GetAccountsRouteSuccessResponse<string>>(`${BACKEND_URL}${GetAccountsRoute()}`, requestBody);
-      return convertGetAccountsRouteSuccessResponse(response.data, ConvertFunction);
+      const response = await this.axios.post<GetAccountsRouteSuccessResponse<string>>(`${this.BACKEND_URL}${GetAccountsRoute()}`, requestBody);
+      return convertGetAccountsRouteSuccessResponse(response.data, this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -250,8 +261,8 @@ export class BitBadgesAPI {
 
   public async getAccount(addressOrUsername: string, requestBody: GetAccountRouteRequestBody): Promise<GetAccountRouteSuccessResponse<DesiredNumberType>> {
     try {
-      const response = await axios.post<GetAccountRouteSuccessResponse<string>>(`${BACKEND_URL}${GetAccountRoute(addressOrUsername)}`, requestBody);
-      return convertGetAccountRouteSuccessResponse(response.data, ConvertFunction);
+      const response = await this.axios.post<GetAccountRouteSuccessResponse<string>>(`${this.BACKEND_URL}${GetAccountRoute(addressOrUsername)}`, requestBody);
+      return convertGetAccountRouteSuccessResponse(response.data, this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -261,8 +272,8 @@ export class BitBadgesAPI {
 
   public async addReviewForUser(addressOrUsername: string, requestBody: AddReviewForUserRouteRequestBody): Promise<AddReviewForUserRouteSuccessResponse<DesiredNumberType>> {
     try {
-      const response = await axios.post<AddReviewForUserRouteSuccessResponse<string>>(`${BACKEND_URL}${AddReviewForUserRoute(addressOrUsername)}`, requestBody);
-      return convertAddReviewForUserRouteSuccessResponse(response.data, ConvertFunction);
+      const response = await this.axios.post<AddReviewForUserRouteSuccessResponse<string>>(`${this.BACKEND_URL}${AddReviewForUserRoute(addressOrUsername)}`, requestBody);
+      return convertAddReviewForUserRouteSuccessResponse(response.data, this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -271,8 +282,8 @@ export class BitBadgesAPI {
 
   public async updateAccountInfo(requestBody: UpdateAccountInfoRouteRequestBody<DesiredNumberType>): Promise<UpdateAccountInfoRouteSuccessResponse<DesiredNumberType>> {
     try {
-      const response = await axios.post<UpdateAccountInfoRouteSuccessResponse<string>>(`${BACKEND_URL}${UpdateAccountInfoRoute()}`, requestBody);
-      return convertUpdateAccountInfoRouteSuccessResponse(response.data, ConvertFunction);
+      const response = await this.axios.post<UpdateAccountInfoRouteSuccessResponse<string>>(`${this.BACKEND_URL}${UpdateAccountInfoRoute()}`, requestBody);
+      return convertUpdateAccountInfoRouteSuccessResponse(response.data, this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -281,8 +292,8 @@ export class BitBadgesAPI {
 
   public async addBalancesToIpfs(requestBody: AddBalancesToIpfsRouteRequestBody): Promise<AddBalancesToIpfsRouteSuccessResponse<DesiredNumberType>> {
     try {
-      const response = await axios.post<AddBalancesToIpfsRouteSuccessResponse<string>>(`${BACKEND_URL}${AddBalancesToIpfsRoute()}`, requestBody);
-      return convertAddBalancesToIpfsRouteSuccessResponse(response.data, ConvertFunction);
+      const response = await this.axios.post<AddBalancesToIpfsRouteSuccessResponse<string>>(`${this.BACKEND_URL}${AddBalancesToIpfsRoute()}`, requestBody);
+      return convertAddBalancesToIpfsRouteSuccessResponse(response.data, this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -291,8 +302,8 @@ export class BitBadgesAPI {
 
   public async addMetadataToIpfs(requestBody: AddMetadataToIpfsRouteRequestBody): Promise<AddMetadataToIpfsRouteSuccessResponse<DesiredNumberType>> {
     try {
-      const response = await axios.post<AddMetadataToIpfsRouteSuccessResponse<string>>(`${BACKEND_URL}${AddMetadataToIpfsRoute()}`, requestBody);
-      return convertAddMetadataToIpfsRouteSuccessResponse(response.data, ConvertFunction);
+      const response = await this.axios.post<AddMetadataToIpfsRouteSuccessResponse<string>>(`${this.BACKEND_URL}${AddMetadataToIpfsRoute()}`, requestBody);
+      return convertAddMetadataToIpfsRouteSuccessResponse(response.data, this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -301,8 +312,8 @@ export class BitBadgesAPI {
 
   public async addMerkleChallengeToIpfs(requestBody: AddMerkleChallengeToIpfsRouteRequestBody): Promise<AddMerkleChallengeToIpfsRouteSuccessResponse<DesiredNumberType>> {
     try {
-      const response = await axios.post<AddMerkleChallengeToIpfsRouteSuccessResponse<string>>(`${BACKEND_URL}${AddMerkleChallengeToIpfsRoute()}`, requestBody);
-      return convertAddMerkleChallengeToIpfsRouteSuccessResponse(response.data, ConvertFunction);
+      const response = await this.axios.post<AddMerkleChallengeToIpfsRouteSuccessResponse<string>>(`${this.BACKEND_URL}${AddMerkleChallengeToIpfsRoute()}`, requestBody);
+      return convertAddMerkleChallengeToIpfsRouteSuccessResponse(response.data, this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -311,8 +322,8 @@ export class BitBadgesAPI {
 
   public async getSignInChallenge(requestBody: GetSignInChallengeRouteRequestBody): Promise<GetSignInChallengeRouteSuccessResponse<DesiredNumberType>> {
     try {
-      const response = await axios.post<GetSignInChallengeRouteSuccessResponse<string>>(`${BACKEND_URL}${GetSignInChallengeRoute()}`, requestBody);
-      return convertGetSignInChallengeRouteSuccessResponse(response.data, ConvertFunction);
+      const response = await this.axios.post<GetSignInChallengeRouteSuccessResponse<string>>(`${this.BACKEND_URL}${GetSignInChallengeRoute()}`, requestBody);
+      return convertGetSignInChallengeRouteSuccessResponse(response.data, this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -322,8 +333,8 @@ export class BitBadgesAPI {
   public async verifySignIn(requestBody: VerifySignInRouteRequestBody): Promise<VerifySignInRouteSuccessResponse<DesiredNumberType>> {
     try {
       const body = stringify(requestBody);
-      const response = await axios.post<VerifySignInRouteSuccessResponse<string>>(`${BACKEND_URL}${VerifySignInRoute()}`, body);
-      return convertVerifySignInRouteSuccessResponse(response.data, ConvertFunction);
+      const response = await this.axios.post<VerifySignInRouteSuccessResponse<string>>(`${this.BACKEND_URL}${VerifySignInRoute()}`, body);
+      return convertVerifySignInRouteSuccessResponse(response.data, this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -333,8 +344,8 @@ export class BitBadgesAPI {
   public async checkIfSignedIn(requestBody: CheckSignInStatusRequestBody): Promise<CheckSignInStatusRequestSuccessResponse<DesiredNumberType>> {
     try {
       const body = stringify(requestBody);
-      const response = await axios.post<CheckSignInStatusRequestSuccessResponse<string>>(`${BACKEND_URL}${CheckIfSignedInRoute()}`, body);
-      return convertCheckSignInStatusRequestSuccessResponse(response.data, ConvertFunction);
+      const response = await this.axios.post<CheckSignInStatusRequestSuccessResponse<string>>(`${this.BACKEND_URL}${CheckIfSignedInRoute()}`, body);
+      return convertCheckSignInStatusRequestSuccessResponse(response.data, this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -343,8 +354,8 @@ export class BitBadgesAPI {
 
   public async signOut(requestBody?: SignOutRequestBody): Promise<SignOutSuccessResponse<DesiredNumberType>> {
     try {
-      const response = await axios.post<SignOutSuccessResponse<string>>(`${BACKEND_URL}${SignOutRoute()}`, requestBody);
-      return convertSignOutSuccessResponse(response.data, ConvertFunction);
+      const response = await this.axios.post<SignOutSuccessResponse<string>>(`${this.BACKEND_URL}${SignOutRoute()}`, requestBody);
+      return convertSignOutSuccessResponse(response.data, this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -353,8 +364,8 @@ export class BitBadgesAPI {
 
   public async getBrowseCollections(requestBody?: GetBrowseCollectionsRouteRequestBody): Promise<GetBrowseCollectionsRouteSuccessResponse<DesiredNumberType>> {
     try {
-      const response = await axios.post<GetBrowseCollectionsRouteSuccessResponse<string>>(`${BACKEND_URL}${GetBrowseCollectionsRoute()}`, requestBody);
-      return convertGetBrowseCollectionsRouteSuccessResponse(response.data, ConvertFunction);
+      const response = await this.axios.post<GetBrowseCollectionsRouteSuccessResponse<string>>(`${this.BACKEND_URL}${GetBrowseCollectionsRoute()}`, requestBody);
+      return convertGetBrowseCollectionsRouteSuccessResponse(response.data, this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -363,8 +374,8 @@ export class BitBadgesAPI {
 
   public async broadcastTx(requestBody: BroadcastTxRouteRequestBody | string): Promise<BroadcastTxRouteSuccessResponse<DesiredNumberType>> {
     try {
-      const response = await axios.post<BroadcastTxRouteSuccessResponse<string>>(`${BACKEND_URL}${BroadcastTxRoute()}`, requestBody);
-      return convertBroadcastTxRouteSuccessResponse(response.data, ConvertFunction);
+      const response = await this.axios.post<BroadcastTxRouteSuccessResponse<string>>(`${this.BACKEND_URL}${BroadcastTxRoute()}`, requestBody);
+      return convertBroadcastTxRouteSuccessResponse(response.data, this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -373,8 +384,8 @@ export class BitBadgesAPI {
 
   public async simulateTx(requestBody: SimulateTxRouteRequestBody | string): Promise<SimulateTxRouteSuccessResponse<DesiredNumberType>> {
     try {
-      const response = await axios.post<SimulateTxRouteSuccessResponse<string>>(`${BACKEND_URL}${SimulateTxRoute()}`, requestBody);
-      return convertSimulateTxRouteSuccessResponse(response.data, ConvertFunction);
+      const response = await this.axios.post<SimulateTxRouteSuccessResponse<string>>(`${this.BACKEND_URL}${SimulateTxRoute()}`, requestBody);
+      return convertSimulateTxRouteSuccessResponse(response.data, this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -388,8 +399,8 @@ export class BitBadgesAPI {
         throw `Invalid URIs`;
       }
 
-      const response = await axios.post<FetchMetadataDirectlyRouteSuccessResponse<string>>(`${BACKEND_URL}${FetchMetadataDirectlyRoute()}`, requestBody);
-      return convertFetchMetadataDirectlyRouteSuccessResponse(response.data, ConvertFunction);
+      const response = await this.axios.post<FetchMetadataDirectlyRouteSuccessResponse<string>>(`${this.BACKEND_URL}${FetchMetadataDirectlyRoute()}`, requestBody);
+      return convertFetchMetadataDirectlyRouteSuccessResponse(response.data, this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -398,8 +409,8 @@ export class BitBadgesAPI {
 
   public async getTokensFromFaucet(requestBody?: GetTokensFromFaucetRouteRequestBody): Promise<GetTokensFromFaucetRouteSuccessResponse<DesiredNumberType>> {
     try {
-      const response = await axios.post<GetTokensFromFaucetRouteSuccessResponse<string>>(`${BACKEND_URL}${GetTokensFromFaucetRoute()}`, requestBody);
-      return convertGetTokensFromFaucetRouteSuccessResponse(response.data, ConvertFunction);
+      const response = await this.axios.post<GetTokensFromFaucetRouteSuccessResponse<string>>(`${this.BACKEND_URL}${GetTokensFromFaucetRoute()}`, requestBody);
+      return convertGetTokensFromFaucetRouteSuccessResponse(response.data, this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -408,8 +419,8 @@ export class BitBadgesAPI {
 
   public async updateAddressMappings(requestBody?: UpdateAddressMappingsRouteRequestBody): Promise<UpdateAddressMappingsRouteSuccessResponse<DesiredNumberType>> {
     try {
-      const response = await axios.post<UpdateAddressMappingsRouteSuccessResponse<string>>(`${BACKEND_URL}${UpdateAddressMappingRoute()}`, requestBody);
-      return convertUpdateAddressMappingsRouteSuccessResponse(response.data, ConvertFunction);
+      const response = await this.axios.post<UpdateAddressMappingsRouteSuccessResponse<string>>(`${this.BACKEND_URL}${UpdateAddressMappingRoute()}`, requestBody);
+      return convertUpdateAddressMappingsRouteSuccessResponse(response.data, this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -418,8 +429,8 @@ export class BitBadgesAPI {
 
   public async getAddressMappings(requestBody?: GetAddressMappingsRouteRequestBody): Promise<GetAddressMappingsRouteSuccessResponse<DesiredNumberType>> {
     try {
-      const response = await axios.post<GetAddressMappingsRouteSuccessResponse<string>>(`${BACKEND_URL}${GetAddressMappingsRoute()}`, requestBody);
-      return convertGetAddressMappingsRouteSuccessResponse(response.data, ConvertFunction);
+      const response = await this.axios.post<GetAddressMappingsRouteSuccessResponse<string>>(`${this.BACKEND_URL}${GetAddressMappingsRoute()}`, requestBody);
+      return convertGetAddressMappingsRouteSuccessResponse(response.data, this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -428,8 +439,8 @@ export class BitBadgesAPI {
 
   public async deleteAddressMappings(requestBody?: DeleteAddressMappingsRouteRequestBody): Promise<DeleteAddressMappingsRouteSuccessResponse<DesiredNumberType>> {
     try {
-      const response = await axios.post<DeleteAddressMappingsRouteSuccessResponse<string>>(`${BACKEND_URL}${DeleteAddressMappingRoute()}`, requestBody);
-      return convertDeleteAddressMappingsRouteSuccessResponse(response.data, ConvertFunction);
+      const response = await this.axios.post<DeleteAddressMappingsRouteSuccessResponse<string>>(`${this.BACKEND_URL}${DeleteAddressMappingRoute()}`, requestBody);
+      return convertDeleteAddressMappingsRouteSuccessResponse(response.data, this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -439,8 +450,8 @@ export class BitBadgesAPI {
 
   public async getApprovalTrackers(requestBody?: GetApprovalsRouteRequestBody): Promise<GetApprovalsRouteSuccessResponse<DesiredNumberType>> {
     try {
-      const response = await axios.post<GetApprovalsRouteSuccessResponse<string>>(`${BACKEND_URL}${GetApprovalsRoute()}`, requestBody);
-      return convertGetApprovalsRouteSuccessResponse(response.data, ConvertFunction);
+      const response = await this.axios.post<GetApprovalsRouteSuccessResponse<string>>(`${this.BACKEND_URL}${GetApprovalsRoute()}`, requestBody);
+      return convertGetApprovalsRouteSuccessResponse(response.data, this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -449,8 +460,8 @@ export class BitBadgesAPI {
 
   public async getMerkleChallengeTrackers(requestBody?: GetMerkleChallengeTrackersRouteRequestBody): Promise<GetMerkleChallengeTrackersRouteSuccessResponse<DesiredNumberType>> {
     try {
-      const response = await axios.post<GetMerkleChallengeTrackersRouteSuccessResponse<string>>(`${BACKEND_URL}${GetMerkleChallengeTrackerRoute()}`, requestBody);
-      return convertGetMerkleChallengeTrackersRouteSuccessResponse(response.data, ConvertFunction);
+      const response = await this.axios.post<GetMerkleChallengeTrackersRouteSuccessResponse<string>>(`${this.BACKEND_URL}${GetMerkleChallengeTrackerRoute()}`, requestBody);
+      return convertGetMerkleChallengeTrackersRouteSuccessResponse(response.data, this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);

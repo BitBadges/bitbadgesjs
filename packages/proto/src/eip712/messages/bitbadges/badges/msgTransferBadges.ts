@@ -14,9 +14,11 @@ const TRANSFERS_TYPES = [
   { name: 'from', type: 'string' },
   { name: 'toAddresses', type: 'string[]' },
   { name: 'balances', type: 'Balance[]' },
-  { name: 'precalculationDetails', type: 'PrecalculationDetails' },
+  { name: 'precalculationDetails', type: 'ApprovalIdentifierDetails' },
   { name: 'merkleProofs', type: 'MerkleProof[]' },
   { name: 'memo', type: 'string' },
+  { name: 'prioritizedApprovals', type: 'ApprovalIdentifierDetails[]' },
+  { name: 'onlyCheckPrioritizedApprovals', type: 'bool' },
 ]
 
 
@@ -32,7 +34,7 @@ const MERKLE_PATH_ITEM_TYPES = [
 ]
 
 const PRECALCULATION_DETAILS_TYPES = [
-  { name: 'precalculationId', type: 'string' },
+  { name: 'approvalId', type: 'string' },
   { name: 'approvalLevel', type: 'string' },
   { name: 'approverAddress', type: 'string' },
 ]
@@ -47,7 +49,7 @@ export const MSG_TRANSFER_BADGES_TYPES = {
   Transfer: TRANSFERS_TYPES,
   MerkleProof: MERKLE_PROOF_TYPES,
   MerklePathItem: MERKLE_PATH_ITEM_TYPES,
-  PrecalculationDetails: PRECALCULATION_DETAILS_TYPES,
+  ApprovalIdentifierDetails: PRECALCULATION_DETAILS_TYPES,
 }
 
 export function createEIP712MsgTransferBadges<T extends NumberType>(

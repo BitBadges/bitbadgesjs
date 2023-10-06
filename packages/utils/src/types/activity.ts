@@ -1,4 +1,4 @@
-import { PrecalculationDetails, Balance, convertBalance } from "bitbadgesjs-proto";
+import { ApprovalIdentifierDetails, Balance, convertBalance } from "bitbadgesjs-proto";
 import { NumberType } from "./string-numbers";
 import { deepCopy, getCouchDBDetails, removeCouchDBDetails } from "./utils";
 import nano from "nano";
@@ -174,7 +174,9 @@ export function convertAnnouncementInfo<T extends NumberType, U extends NumberTy
  * @property {NumberType} collectionId - The collection ID of the collection that was transferred.
  * @property {TransferMethod} method - The type of activity, which can be "Transfer", "Mint", or "Claim".
  * @property {string} memo - The memo of the transfer.
- * @property {PrecalculationDetails} precalculationDetails - The precalculation details of the transfer.
+ * @property {ApprovalIdentifierDetails} precalculationDetails - The precalculation details of the transfer.
+ * @property {ApprovalIdentifierDetails[]} prioritizedApprovals - The prioritized approvals of the transfer.
+ * @property {boolean} onlyCheckPrioritizedApprovals - Whether or not to only check prioritized approvals.
  * @property {string} initiatedBy - The cosmos address of the user who initiated the transfer.
  * @property {string} [txHash] - The transaction hash of the transfer.
  *
@@ -187,7 +189,10 @@ export interface TransferActivityInfoBase<T extends NumberType> extends Activity
   balances: Balance<T>[];
   collectionId: T;
   memo: string;
-  precalculationDetails: PrecalculationDetails;
+  precalculationDetails: ApprovalIdentifierDetails;
+  prioritizedApprovals: ApprovalIdentifierDetails[];
+  onlyCheckPrioritizedApprovals: boolean;
+
   initiatedBy: string;
 
   txHash?: string;

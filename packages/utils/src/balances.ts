@@ -19,8 +19,8 @@ export function getBlankBalance(nonMintApproval: boolean, collection?: BitBadges
 
   const blankBalance: UserBalance<bigint> = {
     balances: [],
-    approvedIncomingTransfersTimeline: collection ? collection.defaultUserApprovedIncomingTransfersTimeline : [],
-    approvedOutgoingTransfersTimeline: collection ? collection.defaultUserApprovedOutgoingTransfersTimeline : [],
+    approvedIncomingTransfers: collection ? collection.defaultUserApprovedIncomingTransfers : [],
+    approvedOutgoingTransfers: collection ? collection.defaultUserApprovedOutgoingTransfers : [],
     userPermissions: collection ? collection.defaultUserPermissions : {
       canUpdateApprovedIncomingTransfers: [],
       canUpdateApprovedOutgoingTransfers: [],
@@ -320,6 +320,8 @@ export function getBalancesForIds(idRanges: UintRange<bigint>[], times: UintRang
           toMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
           fromMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
           initiatedByMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
+          approvalTrackerIdMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
+          challengeTrackerIdMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
           arbitraryValue: balanceObj.amount,
 
           permittedTimes: [],
@@ -340,6 +342,8 @@ export function getBalancesForIds(idRanges: UintRange<bigint>[], times: UintRang
         toMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
         fromMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
         initiatedByMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
+        approvalTrackerIdMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
+        challengeTrackerIdMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
 
         permittedTimes: [],
         forbiddenTimes: [],
@@ -394,6 +398,8 @@ export function deleteBalances(rangesToDelete: UintRange<bigint>[], timesToDelet
           toMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
           fromMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
           initiatedByMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
+          approvalTrackerIdMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
+          challengeTrackerIdMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
 
           permittedTimes: [],
           forbiddenTimes: [],
@@ -413,6 +419,8 @@ export function deleteBalances(rangesToDelete: UintRange<bigint>[], timesToDelet
           toMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
           fromMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
           initiatedByMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
+          approvalTrackerIdMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
+          challengeTrackerIdMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
 
           permittedTimes: [],
           forbiddenTimes: [],

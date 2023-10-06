@@ -4,7 +4,7 @@ import { BroadcastPostBody } from "bitbadgesjs-provider"
 import { ChallengeParams } from "blockin"
 import { TransferActivityInfo, convertTransferActivityInfo } from "./activity"
 import { BadgeMetadataDetails, BitBadgesCollection, convertBadgeMetadataDetails, convertBitBadgesCollection } from "./collections"
-import { ApprovalsTrackerInfo, BalanceInfoWithDetails, ChallengeDetails, MerkleChallengeIdDetails, MerkleChallengeInfo, MerkleChallengeTrackerIdDetails, QueueInfo, StatusInfo, convertApprovalsTrackerInfo, convertBalanceInfo, convertBalanceInfoWithDetails, convertMerkleChallengeInfo, convertQueueItem, convertStatusInfo } from "./db"
+import { ApprovalsTrackerInfo, BalanceInfoWithDetails, ChallengeDetails, MerkleChallengeIdDetails, MerkleChallengeInfo, MerkleChallengeTrackerIdDetails, QueueInfo, StatusInfo, convertApprovalsTrackerInfo, convertBalanceInfoWithDetails, convertMerkleChallengeInfo, convertQueueItem, convertStatusInfo } from "./db"
 import { AddressMappingWithMetadata, Metadata, convertAddressMappingWithMetadata, convertMetadata } from "./metadata"
 import { OffChainBalancesMap } from "./transfers"
 import { SupportedChain } from "./types"
@@ -224,7 +224,7 @@ export type GetOwnersForBadgeRouteResponse<T extends NumberType> = ErrorResponse
  */
 export function convertGetOwnersForBadgeRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetOwnersForBadgeRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetOwnersForBadgeRouteSuccessResponse<U> {
   return {
-    owners: item.owners.map((balance) => convertBalanceInfo(balance, convertFunction)),
+    owners: item.owners.map((balance) => convertBalanceInfoWithDetails(balance, convertFunction)),
     pagination: item.pagination,
   }
 }
@@ -667,6 +667,8 @@ export interface UpdateAccountInfoRouteRequestBody<T extends NumberType> {
 
   profilePicUrl?: string
   username?: string
+
+  profilePicImageFile?: any
 }
 
 /**

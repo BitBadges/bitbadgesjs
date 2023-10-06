@@ -54,10 +54,12 @@ export function getFirstMatchForCollectionApprovedTransfers(
       fromMappingId: 'AllWithMint',
       toMappingId: 'AllWithMint',
       initiatedByMappingId: 'AllWithMint',
+      approvalId: "",
+      approvalTrackerId: "",
+      challengeTrackerId: "",
       transferTimes: [{ start: 1n, end: 18446744073709551615n }],
       badgeIds: [{ start: 1n, end: 18446744073709551615n }],
       ownershipTimes: [{ start: 1n, end: 18446744073709551615n }],
-      approvalDetails: [],
       allowedCombinations: [{
         isApproved: false,
       }],
@@ -89,6 +91,11 @@ export function getFirstMatchForCollectionApprovedTransfers(
       badgeIds: match.badgeIds,
       transferTimes: match.transferTimes,
       ownershipTimes: match.ownershipTimes,
+
+      approvalId: match.arbitraryValue.approvalId,
+      approvalTrackerId: match.arbitraryValue.approvalTrackerId,
+      challengeTrackerId: match.arbitraryValue.challengeTrackerId,
+
       //TODO: if broken down via first match only, the same approval details may be duplicated across multiple matches (so predeterminedBalances, approvalAmounts, etc. may be weird)
       approvalDetails: match.arbitraryValue.approvalDetails,
       allowedCombinations: match.arbitraryValue.allowedCombinations,
@@ -118,10 +125,12 @@ export function getFirstMatchForUserOutgoingApprovedTransfers(
       // fromMappingId: 'AllWithMint',
       toMappingId: 'AllWithMint',
       initiatedByMappingId: 'AllWithMint',
+      approvalId: "",
+      approvalTrackerId: "",
+      challengeTrackerId: "",
       transferTimes: [{ start: 1n, end: 18446744073709551615n }],
       badgeIds: [{ start: 1n, end: 18446744073709551615n }],
       ownershipTimes: [{ start: 1n, end: 18446744073709551615n }],
-      approvalDetails: [],
       allowedCombinations: [{
         isApproved: false,
       }],
@@ -154,6 +163,10 @@ export function getFirstMatchForUserOutgoingApprovedTransfers(
       transferTimes: match.transferTimes,
       ownershipTimes: match.ownershipTimes,
 
+      approvalId: match.arbitraryValue.approvalId,
+      approvalTrackerId: match.arbitraryValue.approvalTrackerId,
+      challengeTrackerId: match.arbitraryValue.challengeTrackerId,
+
       //TODO: if broken down via first match only, the same approval details may be duplicated across multiple matches (so predeterminedBalances, approvalAmounts, etc. may be weird)
       approvalDetails: match.arbitraryValue.approvalDetails,
       allowedCombinations: match.arbitraryValue.allowedCombinations,
@@ -183,10 +196,12 @@ export function getFirstMatchForUserIncomingApprovedTransfers(
       fromMappingId: 'AllWithMint',
       // toMappingId: 'AllWithMint',
       initiatedByMappingId: 'AllWithMint',
+      approvalId: "",
+      approvalTrackerId: "",
+      challengeTrackerId: "",
       transferTimes: [{ start: 1n, end: 18446744073709551615n }],
       badgeIds: [{ start: 1n, end: 18446744073709551615n }],
       ownershipTimes: [{ start: 1n, end: 18446744073709551615n }],
-      approvalDetails: [],
       allowedCombinations: [{
         isApproved: false,
       }],
@@ -218,6 +233,10 @@ export function getFirstMatchForUserIncomingApprovedTransfers(
       badgeIds: match.badgeIds,
       transferTimes: match.transferTimes,
       ownershipTimes: match.ownershipTimes,
+
+      approvalId: match.arbitraryValue.approvalId,
+      approvalTrackerId: match.arbitraryValue.approvalTrackerId,
+      challengeTrackerId: match.arbitraryValue.challengeTrackerId,
 
       //TODO: if broken down via first match only, the same approval details may be duplicated across multiple matches (so predeterminedBalances, approvalAmounts, etc. may be weird)
       approvalDetails: match.arbitraryValue.approvalDetails,

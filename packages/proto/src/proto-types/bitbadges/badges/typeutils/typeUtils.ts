@@ -1,5 +1,5 @@
 import { NumberType } from "../string-numbers";
-import { CollectionApprovedTransfer, UserApprovedIncomingTransferTimeline, UserApprovedOutgoingTransferTimeline, convertCollectionApprovedTransfer, convertUserApprovedIncomingTransferTimeline, convertUserApprovedOutgoingTransferTimeline } from "./approvedTransfers";
+import { UserApprovedIncomingTransfer, UserApprovedOutgoingTransfer, convertUserApprovedIncomingTransfer, convertUserApprovedOutgoingTransfer } from "./approvedTransfers";
 import { UserPermissions, convertUserPermissions } from "./permissions";
 
 export function deepCopy<T>(obj: T): T {
@@ -32,14 +32,14 @@ function deepCopyWithBigInts<T>(obj: T): T {
  *
  * @typedef {Object} UserBalance
  * @property {Balance[]} balances - The balances of the user.
- * @property {UserApprovedOutgoingTransferTimeline[]} approvedOutgoingTransfersTimeline - The approved outgoing transfers of the user.
- * @property {UserApprovedIncomingTransferTimeline[]} approvedIncomingTransfersTimeline - The approved incoming transfers of the user.
+ * @property {UserApprovedOutgoingTransfer[]} approvedOutgoingTransfers - The approved outgoing transfers of the user.
+ * @property {UserApprovedIncomingTransfer[]} approvedIncomingTransfers - The approved incoming transfers of the user.
  * @property {UserPermissions} userPermissions - The permissions of the user to update their incoming / outgoing approvals.
  */
 export interface UserBalance<T extends NumberType> {
   balances: Balance<T>[];
-  approvedOutgoingTransfersTimeline: UserApprovedOutgoingTransferTimeline<T>[];
-  approvedIncomingTransfersTimeline: UserApprovedIncomingTransferTimeline<T>[];
+  approvedOutgoingTransfers: UserApprovedOutgoingTransfer<T>[];
+  approvedIncomingTransfers: UserApprovedIncomingTransfer<T>[];
   userPermissions: UserPermissions<T>;
 }
 
@@ -47,8 +47,8 @@ export function convertUserBalance<T extends NumberType, U extends NumberType>(b
   return deepCopy({
     ...balance,
     balances: balance.balances.map((b) => convertBalance(b, convertFunction)),
-    approvedOutgoingTransfersTimeline: balance.approvedOutgoingTransfersTimeline.map((t) => convertUserApprovedOutgoingTransferTimeline(t, convertFunction)),
-    approvedIncomingTransfersTimeline: balance.approvedIncomingTransfersTimeline.map((t) => convertUserApprovedIncomingTransferTimeline(t, convertFunction)),
+    approvedOutgoingTransfers: balance.approvedOutgoingTransfers.map((t) => convertUserApprovedOutgoingTransfer(t, convertFunction)),
+    approvedIncomingTransfers: balance.approvedIncomingTransfers.map((t) => convertUserApprovedIncomingTransfer(t, convertFunction)),
     userPermissions: convertUserPermissions(balance.userPermissions, convertFunction)
   })
 }
@@ -269,17 +269,21 @@ export interface AddressMapping {
  * @property {string} from - The address to transfer from.
  * @property {string[]} toAddresses - The addresses to transfer to.
  * @property {Balance[]} balances - The balances to transfer.
- * @property {PrecalculationDetails} precalculateFromApproval - If specified, we will precalculate from this approval and override the balances. This can only be used when the specified approval has predeterminedBalances set.
+ * @property {ApprovalIdentifierDetails} precalculationDetails - If specified, we will precalculate from this approval and override the balances. This can only be used when the specified approval has predeterminedBalances set.
  * @property {MerkleProof[]} merkleProofs - The merkle proofs that satisfy the mkerkle challenges in the approvals. If the transfer deducts from multiple approvals, we check all the merkle proofs and assert at least one is valid for every challenge.
  * @property {string} memo - Arbitrary memo for the transfer.
+ * @property {ApprovalIdentifierDetails[]} prioritizedApprovals - The prioritized approvals to use for the transfer. If specified, we will check these first.
+ * @property {boolean} onlyCheckPrioritizedApprovals - Whether or not to only check the prioritized approvals. If false, we will check all approvals with any prioritized first.
  */
 export interface Transfer<T extends NumberType> {
   from: string
   toAddresses: string[]
   balances: Balance<T>[]
-  precalculationDetails: PrecalculationDetails
+  precalculationDetails: ApprovalIdentifierDetails
   merkleProofs: MerkleProof[]
   memo: string
+  prioritizedApprovals: ApprovalIdentifierDetails[],
+  onlyCheckPrioritizedApprovals: boolean
 }
 
 export function convertTransfer<T extends NumberType, U extends NumberType>(transfer: Transfer<T>, convertFunction: (item: T) => U): Transfer<U> {
@@ -294,8 +298,8 @@ export function convertTransfer<T extends NumberType, U extends NumberType>(tran
   })
 }
 
-export interface PrecalculationDetails {
-  precalculationId: string
+export interface ApprovalIdentifierDetails {
+  approvalId: string
   approvalLevel: string
   approverAddress: string
 }
@@ -341,7 +345,6 @@ export function convertApprovalTrackerIdDetails<T extends NumberType, U extends 
  * @property {boolean} maxOneUsePerLeaf - Whether or not to enforce only one use per leaf. Used to prevent replay attacks.
  * @property {boolean} useLeafIndexForTransferOrder - Whether or not to use the leaf index for the transfer order for the predeterminedBalances.
  *                                                    If so, the leaf index 0 will be the leftmost leaf of the valid proof layer (i.e. the one that corresponds to expectedProofLength).
- * @property {string} challengeId - The challenge ID of the merkle challenge.
  */
 export interface MerkleChallenge<T extends NumberType> {
   root: string
@@ -349,7 +352,6 @@ export interface MerkleChallenge<T extends NumberType> {
   useCreatorAddressAsLeaf: boolean
   maxOneUsePerLeaf: boolean
   useLeafIndexForTransferOrder: boolean
-  challengeId: string
   uri: string
   customData: string
 }
@@ -551,25 +553,5 @@ export function convertIsArchivedTimeline<T extends NumberType, U extends Number
     ...isArchivedTimeline,
     isArchived: isArchivedTimeline.isArchived,
     timelineTimes: isArchivedTimeline.timelineTimes.map((b) => convertUintRange(b, convertFunction))
-  })
-}
-
-/**
- * CollectionApprovedTransferTimeline represents the value of the collection approved transfers over time
- *
- * @typedef {Object} CollectionApprovedTransferTimeline
- * @property {CollectionApprovedTransfer[]} collectionApprovedTransfers - The collection approved transfers.
- * @property {UintRange[]} timelineTimes - The times of the collection approved transfers.
- */
-export interface CollectionApprovedTransferTimeline<T extends NumberType> extends TimelineItem<T> {
-  collectionApprovedTransfers: CollectionApprovedTransfer<T>[]
-  timelineTimes: UintRange<T>[]
-}
-
-export function convertCollectionApprovedTransferTimeline<T extends NumberType, U extends NumberType>(collectionApprovedTransferTimeline: CollectionApprovedTransferTimeline<T>, convertFunction: (item: T) => U, populateOptionalFields?: boolean): CollectionApprovedTransferTimeline<U> {
-  return deepCopy({
-    ...collectionApprovedTransferTimeline,
-    collectionApprovedTransfers: collectionApprovedTransferTimeline.collectionApprovedTransfers.map((b) => convertCollectionApprovedTransfer(b, convertFunction, populateOptionalFields)),
-    timelineTimes: collectionApprovedTransferTimeline.timelineTimes.map((b) => convertUintRange(b, convertFunction))
   })
 }

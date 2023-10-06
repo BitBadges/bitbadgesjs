@@ -2,7 +2,7 @@
 import { createMsgExecuteContractCompat } from "../../../../";
 import { MSG_EXECUTE_CONTRACT_COMPAT_TYPES, createEIP712, createEIP712MsgExecuteContractCompat, generateFee, generateMessage, generateTypes } from "../../../../";
 import { createTransaction } from "../../transaction";
-import { Chain, Fee, Sender } from "../../common";
+import { Chain, Fee, Sender, SupportedChain } from "../../common";
 import { getDefaultDomainWithChainId } from "../../domain";
 
 export interface MsgExecuteContractCompat {
@@ -62,7 +62,7 @@ export function createTxMsgExecuteContractCompat(
     fee.amount,
     fee.denom,
     parseInt(fee.gas, 10),
-    'ethsecp256',
+    chain.chain === SupportedChain.ETH ? 'ethsecp256' : 'secp256k1',
     sender.pubkey,
     sender.sequence,
     sender.accountNumber,

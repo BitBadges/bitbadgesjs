@@ -37,7 +37,7 @@ export function castOutgoingTransferToCollectionTransfer(
   fromAddress: string
 ): CollectionApprovedTransferWithDetails<bigint> {
   const allowedCombinations: IsCollectionTransferAllowed[] = transfer.allowedCombinations.map(CastOutgoingCombinationToCollectionCombination);
-  const approvalDetails: ApprovalDetails<bigint>[] = transfer.approvalDetails.map(CastOutgoingApprovalDetailsToCollectionApprovalDetails);
+  const approvalDetails = transfer.approvalDetails ? CastOutgoingApprovalDetailsToCollectionApprovalDetails(transfer.approvalDetails) : undefined;
 
   return {
     ...transfer,
@@ -59,9 +59,10 @@ export function castFromCollectionTransferToOutgoingTransfer(
   transfer: CollectionApprovedTransferWithDetails<bigint>
 ): UserApprovedOutgoingTransferWithDetails<bigint> {
   const allowedCombinations: IsUserOutgoingTransferAllowed[] = transfer.allowedCombinations.map(CastFromCollectionCombinationToOutgoingCombination);
-  const approvalDetails: OutgoingApprovalDetails<bigint>[] = transfer.approvalDetails.map(CastFromCollectionApprovalDetailsToOutgoingApprovalDetails);
+  const approvalDetails = transfer.approvalDetails ? CastFromCollectionApprovalDetailsToOutgoingApprovalDetails(transfer.approvalDetails) : undefined;
 
   return {
+    ...transfer,
     toMappingId: transfer.toMappingId,
     toMapping: transfer.toMapping,
     initiatedByMapping: transfer.initiatedByMapping,
@@ -81,7 +82,7 @@ export function castIncomingTransferToCollectionTransfer(
   toAddress: string
 ): CollectionApprovedTransferWithDetails<bigint> {
   const allowedCombinations: IsCollectionTransferAllowed[] = transfer.allowedCombinations.map(CastIncomingCombinationToCollectionCombination);
-  const approvalDetails: ApprovalDetails<bigint>[] = transfer.approvalDetails.map(CastIncomingApprovalDetailsToCollectionApprovalDetails);
+  const approvalDetails = transfer.approvalDetails ? CastIncomingApprovalDetailsToCollectionApprovalDetails(transfer.approvalDetails) : undefined;
 
   return {
     ...transfer,
@@ -103,7 +104,7 @@ export function castFromCollectionTransferToIncomingTransfer(
   transfer: CollectionApprovedTransferWithDetails<bigint>
 ): UserApprovedIncomingTransferWithDetails<bigint> {
   const allowedCombinations: IsUserIncomingTransferAllowed[] = transfer.allowedCombinations.map(CastFromCollectionCombinationToIncomingCombination);
-  const approvalDetails: IncomingApprovalDetails<bigint>[] = transfer.approvalDetails.map(CastFromCollectionApprovalDetailsToIncomingApprovalDetails);
+  const approvalDetails = transfer.approvalDetails ? CastFromCollectionApprovalDetailsToIncomingApprovalDetails(transfer.approvalDetails) : undefined;
 
   return {
     ...transfer,
@@ -127,6 +128,8 @@ function CastIncomingCombinationToCollectionCombination(
     fromMappingOptions: combination.fromMappingOptions,
     initiatedByMappingOptions: combination.initiatedByMappingOptions,
     ownershipTimesOptions: combination.ownershipTimesOptions,
+    challengeTrackerIdOptions: combination.challengeTrackerIdOptions,
+    approvalTrackerIdOptions: combination.approvalTrackerIdOptions,
 
     toMappingOptions: {
       invertDefault: false,
@@ -146,6 +149,8 @@ function CastFromCollectionCombinationToIncomingCombination(
     fromMappingOptions: combination.fromMappingOptions,
     initiatedByMappingOptions: combination.initiatedByMappingOptions,
     ownershipTimesOptions: combination.ownershipTimesOptions,
+    approvalTrackerIdOptions: combination.approvalTrackerIdOptions,
+    challengeTrackerIdOptions: combination.challengeTrackerIdOptions,
   };
 }
 
@@ -159,6 +164,8 @@ function CastOutgoingCombinationToCollectionCombination(
     toMappingOptions: combination.toMappingOptions,
     initiatedByMappingOptions: combination.initiatedByMappingOptions,
     ownershipTimesOptions: combination.ownershipTimesOptions,
+    approvalTrackerIdOptions: combination.approvalTrackerIdOptions,
+    challengeTrackerIdOptions: combination.challengeTrackerIdOptions,
 
     fromMappingOptions: {
       invertDefault: false,
@@ -178,6 +185,8 @@ function CastFromCollectionCombinationToOutgoingCombination(
     toMappingOptions: combination.toMappingOptions,
     initiatedByMappingOptions: combination.initiatedByMappingOptions,
     ownershipTimesOptions: combination.ownershipTimesOptions,
+    approvalTrackerIdOptions: combination.approvalTrackerIdOptions,
+    challengeTrackerIdOptions: combination.challengeTrackerIdOptions,
   };
 }
 
@@ -185,7 +194,6 @@ function CastIncomingApprovalDetailsToCollectionApprovalDetails(
   approvalDetails: IncomingApprovalDetails<bigint>
 ): ApprovalDetails<bigint> {
   return {
-    approvalTrackerId: approvalDetails.approvalTrackerId,
     approvalAmounts: approvalDetails.approvalAmounts,
     maxNumTransfers: approvalDetails.maxNumTransfers,
     requireFromEqualsInitiatedBy: approvalDetails.requireFromEqualsInitiatedBy,
@@ -194,7 +202,7 @@ function CastIncomingApprovalDetailsToCollectionApprovalDetails(
     customData: approvalDetails.customData,
     predeterminedBalances: approvalDetails.predeterminedBalances,
     mustOwnBadges: approvalDetails.mustOwnBadges,
-    merkleChallenges: approvalDetails.merkleChallenges,
+    merkleChallenge: approvalDetails.merkleChallenge,
 
     requireToEqualsInitiatedBy: false,
     requireToDoesNotEqualInitiatedBy: false,
@@ -207,7 +215,6 @@ function CastOutgoingApprovalDetailsToCollectionApprovalDetails(
   approvalDetails: OutgoingApprovalDetails<bigint>
 ): ApprovalDetails<bigint> {
   return {
-    approvalTrackerId: approvalDetails.approvalTrackerId,
     approvalAmounts: approvalDetails.approvalAmounts,
     maxNumTransfers: approvalDetails.maxNumTransfers,
     requireToEqualsInitiatedBy: approvalDetails.requireToEqualsInitiatedBy,
@@ -216,7 +223,7 @@ function CastOutgoingApprovalDetailsToCollectionApprovalDetails(
     customData: approvalDetails.customData,
     predeterminedBalances: approvalDetails.predeterminedBalances,
     mustOwnBadges: approvalDetails.mustOwnBadges,
-    merkleChallenges: approvalDetails.merkleChallenges,
+    merkleChallenge: approvalDetails.merkleChallenge,
 
     requireFromEqualsInitiatedBy: false,
     requireFromDoesNotEqualInitiatedBy: false,
@@ -230,7 +237,6 @@ function CastFromCollectionApprovalDetailsToIncomingApprovalDetails(
   approvalDetails: ApprovalDetails<bigint>
 ): IncomingApprovalDetails<bigint> {
   return {
-    approvalTrackerId: approvalDetails.approvalTrackerId,
     approvalAmounts: approvalDetails.approvalAmounts,
     maxNumTransfers: approvalDetails.maxNumTransfers,
     requireFromEqualsInitiatedBy: approvalDetails.requireFromEqualsInitiatedBy,
@@ -239,7 +245,7 @@ function CastFromCollectionApprovalDetailsToIncomingApprovalDetails(
     customData: approvalDetails.customData,
     predeterminedBalances: approvalDetails.predeterminedBalances,
     mustOwnBadges: approvalDetails.mustOwnBadges,
-    merkleChallenges: approvalDetails.merkleChallenges,
+    merkleChallenge: approvalDetails.merkleChallenge,
   };
 }
 
@@ -247,7 +253,6 @@ function CastFromCollectionApprovalDetailsToOutgoingApprovalDetails(
   approvalDetails: ApprovalDetails<bigint>
 ): OutgoingApprovalDetails<bigint> {
   return {
-    approvalTrackerId: approvalDetails.approvalTrackerId,
     approvalAmounts: approvalDetails.approvalAmounts,
     maxNumTransfers: approvalDetails.maxNumTransfers,
     requireToEqualsInitiatedBy: approvalDetails.requireToEqualsInitiatedBy,
@@ -256,6 +261,6 @@ function CastFromCollectionApprovalDetailsToOutgoingApprovalDetails(
     customData: approvalDetails.customData,
     predeterminedBalances: approvalDetails.predeterminedBalances,
     mustOwnBadges: approvalDetails.mustOwnBadges,
-    merkleChallenges: approvalDetails.merkleChallenges,
+    merkleChallenge: approvalDetails.merkleChallenge,
   };
 }

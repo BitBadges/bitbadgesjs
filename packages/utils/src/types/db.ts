@@ -1,4 +1,4 @@
-import { AddressMapping, ApprovalTrackerIdDetails, BadgeMetadataTimeline, Balance, CollectionApprovedTransferTimeline, CollectionMetadataTimeline, CollectionPermissions, ContractAddressTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, MerkleChallenge, OffChainBalancesMetadataTimeline, StandardsTimeline, UintRange, UserApprovedIncomingTransferTimeline, UserApprovedOutgoingTransferTimeline, UserBalance, UserPermissions, convertBadgeMetadataTimeline, convertBalance, convertCollectionApprovedTransferTimeline, convertCollectionMetadataTimeline, convertCollectionPermissions, convertContractAddressTimeline, convertCustomDataTimeline, convertIsArchivedTimeline, convertManagerTimeline, convertMerkleChallenge, convertOffChainBalancesMetadataTimeline, convertStandardsTimeline, convertUintRange, convertUserApprovedIncomingTransferTimeline, convertUserApprovedOutgoingTransferTimeline, convertUserBalance, convertUserPermissions } from "bitbadgesjs-proto";
+import { AddressMapping, ApprovalTrackerIdDetails, BadgeMetadataTimeline, Balance, CollectionApprovedTransfer, CollectionMetadataTimeline, CollectionPermissions, ContractAddressTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, MerkleChallenge, OffChainBalancesMetadataTimeline, StandardsTimeline, UintRange, UserApprovedIncomingTransfer, UserApprovedOutgoingTransfer, UserBalance, UserPermissions, convertBadgeMetadataTimeline, convertBalance, convertCollectionApprovedTransfer, convertCollectionMetadataTimeline, convertCollectionPermissions, convertContractAddressTimeline, convertCustomDataTimeline, convertIsArchivedTimeline, convertManagerTimeline, convertMerkleChallenge, convertOffChainBalancesMetadataTimeline, convertStandardsTimeline, convertUintRange, convertUserApprovedIncomingTransfer, convertUserApprovedOutgoingTransfer, convertUserBalance, convertUserPermissions } from "bitbadgesjs-proto";
 import MerkleTree from "merkletreejs";
 import nano from "nano";
 import { CosmosCoin, convertCosmosCoin } from "./coin";
@@ -7,7 +7,7 @@ import { Metadata, convertMetadata } from "./metadata";
 import { NumberType } from "./string-numbers";
 import { OffChainBalancesMap, convertOffChainBalancesMap } from "./transfers";
 import { SupportedChain } from "./types";
-import { UserApprovedIncomingTransferTimelineWithDetails, UserApprovedOutgoingTransferTimelineWithDetails, convertUserApprovedIncomingTransferTimelineWithDetails, convertUserApprovedOutgoingTransferTimelineWithDetails } from "./users";
+import { UserApprovedIncomingTransferWithDetails, UserApprovedOutgoingTransferWithDetails, convertUserApprovedIncomingTransferWithDetails, convertUserApprovedOutgoingTransferWithDetails } from "./users";
 import { deepCopy, getCouchDBDetails, removeCouchDBDetails } from "./utils";
 
 /**
@@ -40,12 +40,12 @@ export interface Identified {
  * @property {CustomDataTimeline[]} customDataTimeline - The custom data timeline
  * @property {ManagerTimeline[]} managerTimeline - The manager timeline
  * @property {CollectionPermissions} collectionPermissions - The collection permissions
- * @property {CollectionApprovedTransferTimeline[]} collectionApprovedTransfersTimeline - The collection approved transfers timeline
+ * @property {CollectionApprovedTransfer[]} collectionApprovedTransfers - The collection approved transfers timeline
  * @property {StandardsTimeline[]} standardsTimeline - The standards timeline
  * @property {IsArchivedTimeline[]} isArchivedTimeline - The is archived timeline
  * @property {ContractAddressTimeline[]} contractAddressTimeline - The contract address timeline
- * @property {UserApprovedOutgoingTransferTimeline[]} defaultUserApprovedOutgoingTransfersTimeline - The default user approved outgoing transfers timeline
- * @property {UserApprovedIncomingTransferTimeline[]} defaultUserApprovedIncomingTransfersTimeline - The default user approved incoming transfers timeline
+ * @property {UserApprovedOutgoingTransfer[]} defaultUserApprovedOutgoingTransfers - The default user approved outgoing transfers
+ * @property {UserApprovedIncomingTransfer[]} defaultUserApprovedIncomingTransfers - The default user approved incoming transfers timeline
  * @property {UserPermissions} defaultUserPermissions - The default user permissions
  * @property {string} createdBy - The cosmos address of the user who created this collection
  * @property {NumberType} createdBlock - The block number when this collection was created
@@ -60,12 +60,12 @@ export interface CollectionInfoBase<T extends NumberType> {
   customDataTimeline: CustomDataTimeline<T>[];
   managerTimeline: ManagerTimeline<T>[];
   collectionPermissions: CollectionPermissions<T>;
-  collectionApprovedTransfersTimeline: CollectionApprovedTransferTimeline<T>[];
+  collectionApprovedTransfers: CollectionApprovedTransfer<T>[];
   standardsTimeline: StandardsTimeline<T>[];
   isArchivedTimeline: IsArchivedTimeline<T>[];
   contractAddressTimeline: ContractAddressTimeline<T>[];
-  defaultUserApprovedOutgoingTransfersTimeline: UserApprovedOutgoingTransferTimeline<T>[];
-  defaultUserApprovedIncomingTransfersTimeline: UserApprovedIncomingTransferTimeline<T>[];
+  defaultUserApprovedOutgoingTransfers: UserApprovedOutgoingTransfer<T>[];
+  defaultUserApprovedIncomingTransfers: UserApprovedIncomingTransfer<T>[];
   defaultUserPermissions: UserPermissions<T>;
   createdBy: string;
   createdBlock: T;
@@ -99,12 +99,12 @@ export function convertCollectionInfo<T extends NumberType, U extends NumberType
     customDataTimeline: item.customDataTimeline.map((customDataTimeline) => convertCustomDataTimeline(customDataTimeline, convertFunction)),
     managerTimeline: item.managerTimeline.map((managerTimeline) => convertManagerTimeline(managerTimeline, convertFunction)),
     collectionPermissions: convertCollectionPermissions(item.collectionPermissions, convertFunction),
-    collectionApprovedTransfersTimeline: item.collectionApprovedTransfersTimeline.map((collectionApprovedTransfersTimeline) => convertCollectionApprovedTransferTimeline(collectionApprovedTransfersTimeline, convertFunction)),
+    collectionApprovedTransfers: item.collectionApprovedTransfers.map((collectionApprovedTransfers) => convertCollectionApprovedTransfer(collectionApprovedTransfers, convertFunction)),
     standardsTimeline: item.standardsTimeline.map((standardsTimeline) => convertStandardsTimeline(standardsTimeline, convertFunction)),
     isArchivedTimeline: item.isArchivedTimeline.map((isArchivedTimeline) => convertIsArchivedTimeline(isArchivedTimeline, convertFunction)),
     contractAddressTimeline: item.contractAddressTimeline.map((contractAddressTimeline) => convertContractAddressTimeline(contractAddressTimeline, convertFunction)),
-    defaultUserApprovedOutgoingTransfersTimeline: item.defaultUserApprovedOutgoingTransfersTimeline.map((defaultUserApprovedOutgoingTransfersTimeline) => convertUserApprovedOutgoingTransferTimeline(defaultUserApprovedOutgoingTransfersTimeline, convertFunction)),
-    defaultUserApprovedIncomingTransfersTimeline: item.defaultUserApprovedIncomingTransfersTimeline.map((defaultUserApprovedIncomingTransfersTimeline) => convertUserApprovedIncomingTransferTimeline(defaultUserApprovedIncomingTransfersTimeline, convertFunction)),
+    defaultUserApprovedOutgoingTransfers: item.defaultUserApprovedOutgoingTransfers.map((defaultUserApprovedOutgoingTransfers) => convertUserApprovedOutgoingTransfer(defaultUserApprovedOutgoingTransfers, convertFunction)),
+    defaultUserApprovedIncomingTransfers: item.defaultUserApprovedIncomingTransfers.map((defaultUserApprovedIncomingTransfers) => convertUserApprovedIncomingTransfer(defaultUserApprovedIncomingTransfers, convertFunction)),
     defaultUserPermissions: convertUserPermissions(item.defaultUserPermissions, convertFunction),
     createdBlock: convertFunction(item.createdBlock),
     createdTimestamp: convertFunction(item.createdTimestamp),
@@ -540,8 +540,8 @@ export function convertBalanceInfo<T extends NumberType, U extends NumberType>(i
   return deepCopy({
     ...item,
     ...convertUserBalance(item, convertFunction),
-    approvedIncomingTransfersTimeline: item.approvedIncomingTransfersTimeline.map(x => convertUserApprovedIncomingTransferTimeline(x, convertFunction)),
-    approvedOutgoingTransfersTimeline: item.approvedOutgoingTransfersTimeline.map(x => convertUserApprovedOutgoingTransferTimeline(x, convertFunction)),
+    approvedIncomingTransfers: item.approvedIncomingTransfers.map(x => convertUserApprovedIncomingTransfer(x, convertFunction)),
+    approvedOutgoingTransfers: item.approvedOutgoingTransfers.map(x => convertUserApprovedOutgoingTransfer(x, convertFunction)),
     collectionId: convertFunction(item.collectionId),
     fetchedAt: item.fetchedAt ? convertFunction(item.fetchedAt) : undefined,
     fetchedAtBlock: item.fetchedAtBlock ? convertFunction(item.fetchedAtBlock) : undefined,
@@ -567,8 +567,8 @@ export function convertBalanceDoc<T extends NumberType, U extends NumberType>(it
  * @category API / Indexer
  */
 export interface BalanceInfoWithDetails<T extends NumberType> extends BalanceInfo<T> {
-  approvedOutgoingTransfersTimeline: UserApprovedOutgoingTransferTimelineWithDetails<T>[];
-  approvedIncomingTransfersTimeline: UserApprovedIncomingTransferTimelineWithDetails<T>[];
+  approvedOutgoingTransfers: UserApprovedOutgoingTransferWithDetails<T>[];
+  approvedIncomingTransfers: UserApprovedIncomingTransferWithDetails<T>[];
 }
 
 /**
@@ -577,8 +577,8 @@ export interface BalanceInfoWithDetails<T extends NumberType> extends BalanceInf
 export function convertBalanceInfoWithDetails<T extends NumberType, U extends NumberType>(item: BalanceInfoWithDetails<T>, convertFunction: (item: T) => U): BalanceInfoWithDetails<U> {
   return deepCopy({
     ...convertBalanceInfo(item, convertFunction),
-    approvedIncomingTransfersTimeline: item.approvedIncomingTransfersTimeline.map(x => convertUserApprovedIncomingTransferTimelineWithDetails(x, convertFunction)),
-    approvedOutgoingTransfersTimeline: item.approvedOutgoingTransfersTimeline.map(x => convertUserApprovedOutgoingTransferTimelineWithDetails(x, convertFunction)),
+    approvedIncomingTransfers: item.approvedIncomingTransfers.map(x => convertUserApprovedIncomingTransferWithDetails(x, convertFunction)),
+    approvedOutgoingTransfers: item.approvedOutgoingTransfers.map(x => convertUserApprovedOutgoingTransferWithDetails(x, convertFunction)),
   })
 }
 

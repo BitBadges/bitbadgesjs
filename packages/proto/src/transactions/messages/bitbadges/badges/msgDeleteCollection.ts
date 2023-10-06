@@ -3,7 +3,7 @@ import * as badges from '../../../../proto/badges/tx'
 import { NumberType, createMsgDeleteCollection as protoMsgDeleteCollection } from '../../../../'
 import { MSG_DELETE_COLLECTION_TYPES, createEIP712, createEIP712MsgDeleteCollection, generateFee, generateMessage, generateTypes } from "../../../../"
 import { createTransaction } from "../../transaction"
-import { Chain, Fee, Sender } from "../../common"
+import { Chain, Fee, Sender, SupportedChain } from "../../common"
 import { getDefaultDomainWithChainId } from "../../domain"
 
 /**
@@ -89,7 +89,7 @@ export function createTxMsgDeleteCollection<T extends NumberType>(
     fee.amount,
     fee.denom,
     parseInt(fee.gas, 10),
-    'ethsecp256',
+    chain.chain === SupportedChain.ETH ? 'ethsecp256' : 'secp256k1',
     sender.pubkey,
     sender.sequence,
     sender.accountNumber,

@@ -31,6 +31,10 @@ const AllDefaultValues = {
   fromMapping: { mappingId: 'All', addresses: ["Mint"], includeAddresses: false, uri: "", customData: "", createdBy: "" },
   toMapping: { mappingId: 'All', addresses: ["Mint"], includeAddresses: false, uri: "", customData: "", createdBy: "" },
   initiatedByMapping: { mappingId: 'All', addresses: ["Mint"], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+  approvalTrackerIdMapping: { mappingId: 'All', addresses: ["Mint"], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+  challengeTrackerIdMapping: { mappingId: 'All', addresses: ["Mint"], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+  usesApprovalTrackerIdMapping: false,
+  usesChallengeTrackerIdMapping: false,
   usesBadgeIds: false,
   usesTimelineTimes: false,
   usesTransferTimes: false, // Replace this with the actual usesTransferTimes property from actionPermission.defaultValues
@@ -120,6 +124,10 @@ export const castActionPermissionToUniversalPermission = (actionPermission: Acti
         fromMapping: { mappingId: 'All', addresses: ["Mint"], includeAddresses: false, uri: "", customData: "", createdBy: "" },
         toMapping: { mappingId: 'All', addresses: ["Mint"], includeAddresses: false, uri: "", customData: "", createdBy: "" },
         initiatedByMapping: { mappingId: 'All', addresses: ["Mint"], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+        approvalTrackerIdMapping: { mappingId: 'All', addresses: ["Mint"], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+        challengeTrackerIdMapping: { mappingId: 'All', addresses: ["Mint"], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+        usesApprovalTrackerIdMapping: false,
+        usesChallengeTrackerIdMapping: false,
         usesBadgeIds: false,
         usesTimelineTimes: false,
         usesTransferTimes: false, // Replace this with the actual usesTransferTimes property from actionPermission.defaultValues
@@ -153,7 +161,6 @@ export const castCollectionApprovedTransferPermissionToUniversalPermission = (
       castedCombinations.push({
         permittedTimesOptions: collectionCombination.permittedTimesOptions,
         forbiddenTimesOptions: collectionCombination.forbiddenTimesOptions,
-        timelineTimesOptions: collectionCombination.timelineTimesOptions,
         transferTimesOptions: collectionCombination.transferTimesOptions,
         ownershipTimesOptions: collectionCombination.ownershipTimesOptions,
         toMappingOptions: collectionCombination.toMappingOptions,
@@ -163,17 +170,60 @@ export const castCollectionApprovedTransferPermissionToUniversalPermission = (
       });
     }
 
+    let approvalTrackerMapping: AddressMapping | undefined = undefined;
+
+    if (collectionPermission.defaultValues.approvalTrackerId === "All") {
+      approvalTrackerMapping = {
+        uri: '',
+        customData: '',
+        mappingId: '',
+        addresses: [],
+        includeAddresses: false
+      };
+    } else {
+      approvalTrackerMapping = {
+        uri: '',
+        customData: '',
+        mappingId: '',
+        addresses: [collectionPermission.defaultValues.approvalTrackerId],
+        includeAddresses: true
+      };
+    }
+
+    let challengeTrackerMapping: AddressMapping | undefined = undefined;
+    if (collectionPermission.defaultValues.challengeTrackerId === "All") {
+      challengeTrackerMapping = {
+        uri: '',
+        customData: '',
+        mappingId: '',
+        addresses: [],
+        includeAddresses: false
+      };
+    } else {
+      challengeTrackerMapping = {
+        uri: '',
+        customData: '',
+        mappingId: '',
+        addresses: [collectionPermission.defaultValues.challengeTrackerId],
+        includeAddresses: true
+      };
+    }
+
+
     castedPermissions.push({
       defaultValues: {
-        timelineTimes: collectionPermission.defaultValues.timelineTimes,
+        ...AllDefaultValues,
         transferTimes: collectionPermission.defaultValues.transferTimes,
         ownershipTimes: collectionPermission.defaultValues.ownershipTimes,
         fromMapping: collectionPermission.defaultValues.fromMapping,
         toMapping: collectionPermission.defaultValues.toMapping,
         initiatedByMapping: collectionPermission.defaultValues.initiatedByMapping,
         badgeIds: collectionPermission.defaultValues.badgeIds,
+        approvalTrackerIdMapping: approvalTrackerMapping,
+        challengeTrackerIdMapping: challengeTrackerMapping,
+        usesApprovalTrackerIdMapping: true,
+        usesChallengeTrackerIdMapping: true,
         usesBadgeIds: true,
-        usesTimelineTimes: true,
         usesTransferTimes: true,
         usesOwnershipTimes: true,
         usesToMapping: true,
@@ -319,6 +369,46 @@ export const castCollectionApprovedTransferToUniversalPermission = (
   const castedPermissions: UniversalPermission[] = [];
 
   for (const approvedTransfer of collectionApprovedTransfers) {
+
+    let approvalTrackerMapping: AddressMapping | undefined = undefined;
+
+    if (approvedTransfer.approvalTrackerId === "All") {
+      approvalTrackerMapping = {
+        uri: '',
+        customData: '',
+        mappingId: '',
+        addresses: [],
+        includeAddresses: false
+      };
+    } else {
+      approvalTrackerMapping = {
+        uri: '',
+        customData: '',
+        mappingId: '',
+        addresses: [approvedTransfer.approvalTrackerId],
+        includeAddresses: true
+      };
+    }
+
+    let challengeTrackerMapping: AddressMapping | undefined = undefined;
+    if (approvedTransfer.challengeTrackerId === "All") {
+      challengeTrackerMapping = {
+        uri: '',
+        customData: '',
+        mappingId: '',
+        addresses: [],
+        includeAddresses: false
+      };
+    } else {
+      challengeTrackerMapping = {
+        uri: '',
+        customData: '',
+        mappingId: '',
+        addresses: [approvedTransfer.challengeTrackerId],
+        includeAddresses: true
+      };
+    }
+
     castedPermissions.push({
       defaultValues: {
         ...AllDefaultValues,
@@ -328,6 +418,10 @@ export const castCollectionApprovedTransferToUniversalPermission = (
         fromMapping: approvedTransfer.fromMapping,
         toMapping: approvedTransfer.toMapping,
         initiatedByMapping: approvedTransfer.initiatedByMapping,
+        approvalTrackerIdMapping: approvalTrackerMapping,
+        challengeTrackerIdMapping: challengeTrackerMapping,
+        usesApprovalTrackerIdMapping: true,
+        usesChallengeTrackerIdMapping: true,
         usesBadgeIds: true,
         usesTransferTimes: true,
         usesToMapping: true,
@@ -335,6 +429,9 @@ export const castCollectionApprovedTransferToUniversalPermission = (
         usesInitiatedByMapping: true,
         usesOwnershipTimes: true,
         arbitraryValue: {
+          approvalId: approvedTransfer.approvalId,
+          approvalTrackerId: approvedTransfer.approvalTrackerId,
+          challengeTrackerId: approvedTransfer.challengeTrackerId,
           approvalDetails: approvedTransfer.approvalDetails,
           allowedCombinations: approvedTransfer.allowedCombinations,
         }
@@ -359,6 +456,45 @@ export const castUserApprovedOutgoingTransfersToUniversalPermission = (
   const castedPermissions: UniversalPermission[] = [];
 
   for (const approvedTransfer of userApprovedOutgoingTransfers) {
+    let approvalTrackerMapping: AddressMapping | undefined = undefined;
+
+    if (approvedTransfer.approvalTrackerId === "All") {
+      approvalTrackerMapping = {
+        uri: '',
+        customData: '',
+        mappingId: '',
+        addresses: [],
+        includeAddresses: false
+      };
+    } else {
+      approvalTrackerMapping = {
+        uri: '',
+        customData: '',
+        mappingId: '',
+        addresses: [approvedTransfer.approvalTrackerId],
+        includeAddresses: true
+      };
+    }
+
+    let challengeTrackerMapping: AddressMapping | undefined = undefined;
+    if (approvedTransfer.challengeTrackerId === "All") {
+      challengeTrackerMapping = {
+        uri: '',
+        customData: '',
+        mappingId: '',
+        addresses: [],
+        includeAddresses: false
+      };
+    } else {
+      challengeTrackerMapping = {
+        uri: '',
+        customData: '',
+        mappingId: '',
+        addresses: [approvedTransfer.challengeTrackerId],
+        includeAddresses: true
+      };
+    }
+
     castedPermissions.push({
       defaultValues: {
         ...AllDefaultValues,
@@ -368,6 +504,10 @@ export const castUserApprovedOutgoingTransfersToUniversalPermission = (
         fromMapping: getReservedAddressMapping(fromAddress, "") as AddressMapping,
         toMapping: approvedTransfer.toMapping,
         initiatedByMapping: approvedTransfer.initiatedByMapping,
+        approvalTrackerIdMapping: approvalTrackerMapping,
+        challengeTrackerIdMapping: challengeTrackerMapping,
+        usesApprovalTrackerIdMapping: true,
+        usesChallengeTrackerIdMapping: true,
         usesBadgeIds: true,
         usesTransferTimes: true,
         usesToMapping: true,
@@ -375,6 +515,9 @@ export const castUserApprovedOutgoingTransfersToUniversalPermission = (
         usesInitiatedByMapping: true,
         usesOwnershipTimes: true,
         arbitraryValue: {
+          approvalId: approvedTransfer.approvalId,
+          approvalTrackerId: approvedTransfer.approvalTrackerId,
+          challengeTrackerId: approvedTransfer.challengeTrackerId,
           approvalDetails: approvedTransfer.approvalDetails,
           allowedCombinations: approvedTransfer.allowedCombinations,
         }
@@ -400,6 +543,45 @@ export const castUserApprovedIncomingTransfersToUniversalPermission = (
   const castedPermissions: UniversalPermission[] = [];
 
   for (const approvedTransfer of userApprovedIncomingTransfers) {
+    let approvalTrackerMapping: AddressMapping | undefined = undefined;
+
+    if (approvedTransfer.approvalTrackerId === "All") {
+      approvalTrackerMapping = {
+        uri: '',
+        customData: '',
+        mappingId: '',
+        addresses: [],
+        includeAddresses: false
+      };
+    } else {
+      approvalTrackerMapping = {
+        uri: '',
+        customData: '',
+        mappingId: '',
+        addresses: [approvedTransfer.approvalTrackerId],
+        includeAddresses: true
+      };
+    }
+
+    let challengeTrackerMapping: AddressMapping | undefined = undefined;
+    if (approvedTransfer.challengeTrackerId === "All") {
+      challengeTrackerMapping = {
+        uri: '',
+        customData: '',
+        mappingId: '',
+        addresses: [],
+        includeAddresses: false
+      };
+    } else {
+      challengeTrackerMapping = {
+        uri: '',
+        customData: '',
+        mappingId: '',
+        addresses: [approvedTransfer.challengeTrackerId],
+        includeAddresses: true
+      };
+    }
+
     castedPermissions.push({
       defaultValues: {
         ...AllDefaultValues,
@@ -409,6 +591,10 @@ export const castUserApprovedIncomingTransfersToUniversalPermission = (
         fromMapping: approvedTransfer.fromMapping,
         toMapping: getReservedAddressMapping(toAddress, "") as AddressMapping,
         initiatedByMapping: approvedTransfer.initiatedByMapping,
+        approvalTrackerIdMapping: approvalTrackerMapping,
+        challengeTrackerIdMapping: challengeTrackerMapping,
+        usesApprovalTrackerIdMapping: true,
+        usesChallengeTrackerIdMapping: true,
         usesBadgeIds: true,
         usesTransferTimes: true,
         usesToMapping: true,

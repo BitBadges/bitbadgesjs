@@ -28,7 +28,7 @@ import {
   createEIP712MsgWithdrawValidatorCommission,
 } from '../../../'
 
-import { Chain, Fee, Sender } from '../common'
+import { Chain, Fee, Sender, SupportedChain } from '../common'
 
 import { getDefaultDomainWithChainId } from '../domain'
 
@@ -87,7 +87,7 @@ export function createTxMsgDelegate(
     fee.amount,
     fee.denom,
     parseInt(fee.gas, 10),
-    'ethsecp256',
+    chain.chain === SupportedChain.ETH ? 'ethsecp256' : 'secp256k1',
     sender.pubkey,
     sender.sequence,
     sender.accountNumber,
@@ -159,7 +159,7 @@ export function createTxMsgBeginRedelegate(
     fee.amount,
     fee.denom,
     parseInt(fee.gas, 10),
-    'ethsecp256',
+    chain.chain === SupportedChain.ETH ? 'ethsecp256' : 'secp256k1',
     sender.pubkey,
     sender.sequence,
     sender.accountNumber,
@@ -228,7 +228,7 @@ export function createTxMsgUndelegate(
     fee.amount,
     fee.denom,
     parseInt(fee.gas, 10),
-    'ethsecp256',
+    chain.chain === SupportedChain.ETH ? 'ethsecp256' : 'secp256k1',
     sender.pubkey,
     sender.sequence,
     sender.accountNumber,
@@ -291,7 +291,7 @@ export function createTxMsgWithdrawDelegatorReward(
     fee.amount,
     fee.denom,
     parseInt(fee.gas, 10),
-    'ethsecp256',
+    chain.chain === SupportedChain.ETH ? 'ethsecp256' : 'secp256k1',
     sender.pubkey,
     sender.sequence,
     sender.accountNumber,
@@ -361,7 +361,7 @@ export function createTxMsgMultipleWithdrawDelegatorReward(
     fee.amount,
     fee.denom,
     parseInt(fee.gas, 10),
-    'ethsecp256',
+    chain.chain === SupportedChain.ETH ? 'ethsecp256' : 'secp256k1',
     sender.pubkey,
     sender.sequence,
     sender.accountNumber,
@@ -420,7 +420,7 @@ export function createTxMsgWithdrawValidatorCommission(
     fee.amount,
     fee.denom,
     parseInt(fee.gas, 10),
-    'ethsecp256',
+    chain.chain === SupportedChain.ETH ? 'ethsecp256' : 'secp256k1',
     sender.pubkey,
     sender.sequence,
     sender.accountNumber,

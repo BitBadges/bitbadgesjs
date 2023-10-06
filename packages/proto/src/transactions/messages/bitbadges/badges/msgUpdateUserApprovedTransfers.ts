@@ -2,7 +2,7 @@ import * as badges from '../../../../proto/badges/tx'
 
 import { generateFee, generateTypes, MSG_UPDATE_USER_APPROVED_TRANSFERS_TYPES, generateMessage, createEIP712, createEIP712MsgUpdateUserApprovedTransfers } from "../../../../"
 import { createTransaction } from "../../transaction"
-import { Chain, Sender, Fee } from "../../common"
+import { Chain, Sender, Fee, SupportedChain } from "../../common"
 import { getDefaultDomainWithChainId } from "../../domain"
 import { NumberType, UserApprovedIncomingTransfer, UserApprovedOutgoingTransfer, UserPermissions, convertUserApprovedIncomingTransfer, convertUserApprovedOutgoingTransfer, convertUserPermissions, createMsgUpdateUserApprovedTransfers as protoMsgUpdateUserApprovedTransfers } from '../../../../'
 
@@ -24,9 +24,9 @@ export function convertMsgUpdateUserApprovedTransfers<T extends NumberType, U ex
   return {
     ...msg,
     collectionId: convertFunction(msg.collectionId),
-    approvedOutgoingTransfers: msg.approvedOutgoingTransfers.map(x => convertUserApprovedOutgoingTransfer(x, convertFunction)),
-    approvedIncomingTransfers: msg.approvedIncomingTransfers.map(x => convertUserApprovedIncomingTransfer(x, convertFunction)),
-    userPermissions: convertUserPermissions(msg.userPermissions, convertFunction),
+    approvedOutgoingTransfers: msg.approvedOutgoingTransfers.map(x => convertUserApprovedOutgoingTransfer(x, convertFunction, true)),
+    approvedIncomingTransfers: msg.approvedIncomingTransfers.map(x => convertUserApprovedIncomingTransfer(x, convertFunction, true)),
+    userPermissions: convertUserPermissions(msg.userPermissions, convertFunction, true),
   }
 }
 
@@ -105,7 +105,7 @@ export function createTxMsgUpdateUserApprovedTransfers<T extends NumberType>(
     fee.amount,
     fee.denom,
     parseInt(fee.gas, 10),
-    'ethsecp256',
+    chain.chain === SupportedChain.ETH ? 'ethsecp256' : 'secp256k1',
     sender.pubkey,
     sender.sequence,
     sender.accountNumber,

@@ -3,7 +3,7 @@ import * as badges from '../../../../proto/badges/tx'
 import { BadgeMetadataTimeline, Balance, CollectionApprovedTransfer, CollectionMetadataTimeline, CollectionPermissions, ContractAddressTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, NumberType, OffChainBalancesMetadataTimeline, StandardsTimeline, UserApprovedIncomingTransfer, UserApprovedOutgoingTransfer, UserPermissions, convertBadgeMetadataTimeline, convertBalance, convertCollectionApprovedTransfer, convertCollectionMetadataTimeline, convertCollectionPermissions, convertContractAddressTimeline, convertCustomDataTimeline, convertIsArchivedTimeline, convertManagerTimeline, convertOffChainBalancesMetadataTimeline, convertStandardsTimeline, convertUserApprovedIncomingTransfer, convertUserApprovedOutgoingTransfer, convertUserPermissions, createMsgUpdateCollection as protoMsgUpdateCollection } from '../../../../'
 import { MSG_UPDATE_COLLECTION_TYPES, createEIP712, createEIP712MsgUpdateCollection, generateFee, generateMessage, generateTypes } from "../../../../"
 import { createTransaction } from "../../transaction"
-import { Chain, Fee, Sender } from "../../common"
+import { Chain, Fee, Sender, SupportedChain } from "../../common"
 import { getDefaultDomainWithChainId } from "../../domain"
 
 /**
@@ -245,7 +245,7 @@ export function createTxMsgUpdateCollection<T extends NumberType>(
     fee.amount,
     fee.denom,
     parseInt(fee.gas, 10),
-    'ethsecp256',
+    chain.chain === SupportedChain.ETH ? 'ethsecp256' : 'secp256k1',
     sender.pubkey,
     sender.sequence,
     sender.accountNumber,

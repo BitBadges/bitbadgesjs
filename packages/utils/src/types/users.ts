@@ -1,9 +1,9 @@
-import { AddressMapping, NumberType, TimelineItem, UserApprovedIncomingTransfer, UserApprovedOutgoingTransfer, convertUintRange, convertUserApprovedIncomingTransfer, convertUserApprovedOutgoingTransfer } from "bitbadgesjs-proto"
+import { AddressMapping, NumberType, UserApprovedIncomingTransfer, UserApprovedOutgoingTransfer, convertIncomingApprovalDetails, convertOutgoingApprovalDetails, convertUserApprovedIncomingTransfer, convertUserApprovedOutgoingTransfer } from "bitbadgesjs-proto"
 import { AnnouncementInfo, ReviewInfo, TransferActivityInfo, convertAnnouncementInfo, convertReviewInfo, convertTransferActivityInfo } from "./activity"
 import { PaginationInfo } from "./api"
 import { AccountInfoBase, ApprovalsTrackerInfo, BalanceInfoWithDetails, ClaimAlertInfo, Identified, MerkleChallengeInfo, ProfileInfoBase, convertAccountInfo, convertApprovalsTrackerInfo, convertBalanceInfoWithDetails, convertClaimAlertInfo, convertMerkleChallengeInfo, convertProfileInfo } from "./db"
-import { deepCopy, removeCouchDBDetails } from "./utils"
 import { AddressMappingWithMetadata, convertAddressMappingWithMetadata } from "./metadata"
+import { deepCopy, removeCouchDBDetails } from "./utils"
 
 
 /**
@@ -22,26 +22,11 @@ export function convertUserApprovedOutgoingTransferWithDetails<T extends NumberT
   return deepCopy({
     ...item,
     ...convertUserApprovedOutgoingTransfer(item, convertFunction),
+    //TODO: Don't know why this is needed. When commented out, it says incompatible types
+    approvalDetails: item.approvalDetails ? convertOutgoingApprovalDetails(item.approvalDetails, convertFunction) : undefined,
   })
 }
 
-/**
- * @category Approvals / Transferability
- */
-export interface UserApprovedOutgoingTransferTimelineWithDetails<T extends NumberType> extends TimelineItem<T> {
-  approvedOutgoingTransfers: UserApprovedOutgoingTransferWithDetails<T>[]
-}
-
-/**
- * @category Approvals / Transferability
- */
-export function convertUserApprovedOutgoingTransferTimelineWithDetails<T extends NumberType, U extends NumberType>(item: UserApprovedOutgoingTransferTimelineWithDetails<T>, convertFunction: (item: T) => U): UserApprovedOutgoingTransferTimelineWithDetails<U> {
-  return deepCopy({
-    ...item,
-    timelineTimes: item.timelineTimes.map((timelineTime) => convertUintRange(timelineTime, convertFunction)),
-    approvedOutgoingTransfers: item.approvedOutgoingTransfers.map((approvedOutgoingTransfer) => convertUserApprovedOutgoingTransferWithDetails(approvedOutgoingTransfer, convertFunction)),
-  })
-}
 
 
 /**
@@ -60,24 +45,7 @@ export function convertUserApprovedIncomingTransferWithDetails<T extends NumberT
   return deepCopy({
     ...item,
     ...convertUserApprovedIncomingTransfer(item, convertFunction),
-  })
-}
-
-/**
- * @category Approvals / Transferability
- */
-export interface UserApprovedIncomingTransferTimelineWithDetails<T extends NumberType> extends TimelineItem<T> {
-  approvedIncomingTransfers: UserApprovedIncomingTransferWithDetails<T>[]
-}
-
-/**
- * @category Approvals / Transferability
- */
-export function convertUserApprovedIncomingTransferTimelineWithDetails<T extends NumberType, U extends NumberType>(item: UserApprovedIncomingTransferTimelineWithDetails<T>, convertFunction: (item: T) => U): UserApprovedIncomingTransferTimelineWithDetails<U> {
-  return deepCopy({
-    ...item,
-    timelineTimes: item.timelineTimes.map((timelineTime) => convertUintRange(timelineTime, convertFunction)),
-    approvedIncomingTransfers: item.approvedIncomingTransfers.map((approvedIncomingTransfer) => convertUserApprovedIncomingTransferWithDetails(approvedIncomingTransfer, convertFunction)),
+    approvalDetails: item.approvalDetails ? convertIncomingApprovalDetails(item.approvalDetails, convertFunction) : undefined,
   })
 }
 
