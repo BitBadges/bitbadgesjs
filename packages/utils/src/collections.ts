@@ -69,8 +69,8 @@ export function incrementMintAndTotalBalances(
     cosmosAddress: "Mint",
     collectionId: collectionId,
     onChain: true,
-    approvedOutgoingTransfersTimeline: [],
-    approvedIncomingTransfersTimeline: [],
+    approvedOutgoingTransfers: [],
+    approvedIncomingTransfers: [],
     userPermissions: {
       canUpdateApprovedIncomingTransfers: [],
       canUpdateApprovedOutgoingTransfers: [],
@@ -84,8 +84,8 @@ export function incrementMintAndTotalBalances(
     cosmosAddress: "Total",
     collectionId: collectionId,
     onChain: true,
-    approvedOutgoingTransfersTimeline: [],
-    approvedIncomingTransfersTimeline: [],
+    approvedOutgoingTransfers: [],
+    approvedIncomingTransfers: [],
     userPermissions: {
       canUpdateApprovedIncomingTransfers: [],
       canUpdateApprovedOutgoingTransfers: [],

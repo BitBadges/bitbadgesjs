@@ -2,7 +2,7 @@
 import { AddressMapping, createMsgCreateAddressMappings as protoMsgCreateAddressMappings } from "../../../../";
 import { MSG_CREATE_ADDRESS_MAPPING_TYPES, createEIP712, createEIP712MsgCreateAddressMappings, generateFee, generateMessage, generateTypes } from "../../../../"
 import { createTransaction } from "../../transaction"
-import { Chain, Fee, Sender } from "../../common"
+import { Chain, Fee, Sender, SupportedChain } from "../../common"
 import { getDefaultDomainWithChainId } from "../../domain"
 
 import * as badges from '../../../../proto/badges/tx'
@@ -77,7 +77,7 @@ export function createTxMsgCreateAddressMappings(
     fee.amount,
     fee.denom,
     parseInt(fee.gas, 10),
-    'ethsecp256',
+    chain.chain === SupportedChain.ETH ? 'ethsecp256' : 'secp256k1',
     sender.pubkey,
     sender.sequence,
     sender.accountNumber,

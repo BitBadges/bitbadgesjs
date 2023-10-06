@@ -1,5 +1,4 @@
 import { BadgeMetadata, BadgeMetadataTimeline, CollectionMetadata, CollectionMetadataTimeline, ContractAddressTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadata, OffChainBalancesMetadataTimeline, StandardsTimeline, UintRange } from "bitbadgesjs-proto";
-import { CollectionApprovedTransferTimelineWithDetails, CollectionApprovedTransferWithDetails } from "./types/collections";
 
 export function getIsArchivedTimesAndValues(isArchivedTimeline: IsArchivedTimeline<bigint>[]): { times: UintRange<bigint>[][], values: boolean[] } {
   let times: UintRange<bigint>[][] = [];
@@ -12,54 +11,6 @@ export function getIsArchivedTimesAndValues(isArchivedTimeline: IsArchivedTimeli
 
   return { times, values };
 }
-
-export function getCollectionApprovedTransferTimesAndValues(approvedTransfers: CollectionApprovedTransferTimelineWithDetails<bigint>[]): { times: UintRange<bigint>[][], values: CollectionApprovedTransferWithDetails<bigint>[][] } {
-  let times: UintRange<bigint>[][] = [];
-  let values: CollectionApprovedTransferWithDetails<bigint>[][] = [];
-
-  for (let timelineVal of approvedTransfers) {
-    times.push(timelineVal.timelineTimes);
-    values.push(timelineVal.collectionApprovedTransfers);
-  }
-
-  return { times, values };
-}
-
-// export function getUserApprovedOutgoingTransferTimesAndValues(approvedTransfers: UserApprovedOutgoingTransferTimeline<bigint>[]): { times: UintRange<bigint>[][], values: ApprovedTransfer[] } {
-//   let times: UintRange<bigint>[][] = [];
-//   let values: ApprovedTransfer[] = [];
-
-//   for (let timelineVal of approvedTransfers) {
-//     times.push(timelineVal.timelineTimes);
-//     values.push(timelineVal.approvedOutgoingTransfers);
-//   }
-
-//   return { times, values };
-// }
-
-// export function getUserApprovedIncomingTransferTimesAndValues(approvedTransfers: UserApprovedIncomingTransferTimeline<bigint>[]): { times: UintRange<bigint>[][], values: ApprovedTransfer[] } {
-//   let times: UintRange<bigint>[][] = [];
-//   let values: ApprovedTransfer[] = [];
-
-//   for (let timelineVal of approvedTransfers) {
-//     times.push(timelineVal.timelineTimes);
-//     values.push(timelineVal.approvedIncomingTransfers);
-//   }
-
-//   return { times, values };
-// }
-
-// export function getInheritedBalancesTimesAndValues(inheritedBalances: InheritedBalancesTimeline<bigint>[]): { times: UintRange<bigint>[][], values: InheritedBalance<bigint>[][] } {
-//   let times: UintRange<bigint>[][] = [];
-//   let values: InheritedBalance<bigint>[][] = [];
-
-//   for (let timelineVal of inheritedBalances) {
-//     times.push(timelineVal.timelineTimes);
-//     values.push(timelineVal.inheritedBalances);
-//   }
-
-//   return { times, values };
-// }
 
 export function getOffChainBalancesMetadataTimesAndValues(inheritedBalancesMetadata: OffChainBalancesMetadataTimeline<bigint>[]): { times: UintRange<bigint>[][], values: OffChainBalancesMetadata[] } {
   let times: UintRange<bigint>[][] = [];

@@ -25,9 +25,26 @@ export interface Sender {
   pubkey: string
 }
 
+/**
+ * SupportedChain is an enum of all the supported chains.
+ * Currently, we only support Ethereum and Cosmos.
+ *
+ * Has an UNKNOWN value for when we don't know the chain yet.
+ *
+ * @typedef {string} SupportedChain
+ *
+ * @category API / Indexer
+ */
+export enum SupportedChain {
+  ETH = 'Ethereum',
+  COSMOS = 'Cosmos',
+}
+
+
 export interface Chain {
   chainId: number
   cosmosChainId: string
+  chain: SupportedChain
 }
 export interface TxGenerated {
   signDirect: {

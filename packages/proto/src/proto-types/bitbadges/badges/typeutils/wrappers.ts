@@ -4,10 +4,58 @@ import * as permissions from '../../../../proto/badges/permissions';
 import * as timelines from '../../../../proto/badges/timelines';
 import * as transfers from '../../../../proto/badges/transfers';
 import { NumberType } from '../string-numbers';
-import { CollectionApprovedTransfer, UserApprovedIncomingTransfer, UserApprovedOutgoingTransfer } from "./approvedTransfers";
+import { ApprovalDetails, CollectionApprovedTransfer, UserApprovedIncomingTransfer, UserApprovedOutgoingTransfer } from "./approvedTransfers";
 import { BalancesActionPermission, CollectionApprovedTransferPermission, CollectionPermissions, TimedUpdatePermission, TimedUpdateWithBadgeIdsPermission, UserPermissions } from "./permissions";
 import { BadgeMetadata, BadgeMetadataTimeline, Balance, CollectionMetadataTimeline, ContractAddressTimeline, CustomDataTimeline, InheritedBalancesTimeline, IsArchivedTimeline, ManagerTimeline, MerkleProof, OffChainBalancesMetadataTimeline, StandardsTimeline, Transfer, UintRange } from "./typeUtils";
 
+const DefaultNullApprovalDetails: ApprovalDetails<NumberType> = {
+  "uri": "",
+  "customData": "",
+  "mustOwnBadges": [],
+  "approvalAmounts": {
+    "overallApprovalAmount": "0",
+    "perFromAddressApprovalAmount": "0",
+    "perToAddressApprovalAmount": "0",
+    "perInitiatedByAddressApprovalAmount": "0"
+  },
+  "maxNumTransfers": {
+    "overallMaxNumTransfers": "0",
+    "perFromAddressMaxNumTransfers": "0",
+    "perToAddressMaxNumTransfers": "0",
+    "perInitiatedByAddressMaxNumTransfers": "0"
+  },
+  "predeterminedBalances": {
+    "manualBalances": [],
+    "incrementedBalances": {
+      "startBalances": [
+      ],
+      "incrementBadgeIdsBy": "0",
+      "incrementOwnershipTimesBy": "0"
+    },
+    "orderCalculationMethod": {
+      "useMerkleChallengeLeafIndex": false,
+      "useOverallNumTransfers": false,
+      "usePerFromAddressNumTransfers": false,
+      "usePerInitiatedByAddressNumTransfers": false,
+      "usePerToAddressNumTransfers": false
+    }
+  },
+  "merkleChallenge": {
+    "root": "",
+    "expectedProofLength": "0",
+    "useCreatorAddressAsLeaf": false,
+    "maxOneUsePerLeaf": false,
+    "useLeafIndexForTransferOrder": false,
+    "uri": "",
+    "customData": ""
+  },
+  "requireToEqualsInitiatedBy": false,
+  "requireFromEqualsInitiatedBy": false,
+  "requireToDoesNotEqualInitiatedBy": false,
+  "requireFromDoesNotEqualInitiatedBy": false,
+  "overridesToApprovedIncomingTransfers": false,
+  "overridesFromApprovedOutgoingTransfers": false
+}
 
 export function getWrappedBadgeIds<T extends NumberType>(badgeIds: UintRange<T>[]) {
   const wrappedBadgeIds: balances.bitbadges.bitbadgeschain.badges.UintRange[] = []
@@ -87,7 +135,13 @@ export function getWrappedTransfers<T extends NumberType>(transfersArr: Transfer
         ...transfer,
         balances: formattedBalances,
         merkleProofs: transfer.merkleProofs.map(getWrappedProof),
-        precalculationDetails: new transfers.bitbadges.bitbadgeschain.badges.PrecalulationDetails({ ...transfer.precalculationDetails }),
+        precalculationDetails: new transfers.bitbadges.bitbadgeschain.badges.ApprovalIdentifierDetails({ ...transfer.precalculationDetails }),
+        prioritizedApprovals: transfer.prioritizedApprovals.map((prioritizedApproval) => {
+          return new transfers.bitbadges.bitbadgeschain.badges.ApprovalIdentifierDetails({
+            ...prioritizedApproval,
+          })
+        }),
+
       }),
     )
   }
@@ -187,6 +241,8 @@ export function getWrappedCollectionApprovedTransferPermission<T extends NumberT
           ownershipTimesOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...combination.ownershipTimesOptions }),
           permittedTimesOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...combination.permittedTimesOptions }),
           forbiddenTimesOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...combination.forbiddenTimesOptions }),
+          approvalTrackerIdOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...combination.approvalTrackerIdOptions }),
+          challengeTrackerIdOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...combination.challengeTrackerIdOptions }),
         })
       }),
     })
@@ -253,6 +309,8 @@ export function getWrappedUserPermissions<T extends NumberType>(userPermissions:
             ownershipTimesOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...combination.ownershipTimesOptions }),
             permittedTimesOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...combination.permittedTimesOptions }),
             forbiddenTimesOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...combination.forbiddenTimesOptions }),
+            approvalTrackerIdOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...combination.approvalTrackerIdOptions }),
+            challengeTrackerIdOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...combination.challengeTrackerIdOptions }),
           })
         }),
       })
@@ -278,6 +336,8 @@ export function getWrappedUserPermissions<T extends NumberType>(userPermissions:
             ownershipTimesOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...combination.ownershipTimesOptions }),
             permittedTimesOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...combination.permittedTimesOptions }),
             forbiddenTimesOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...combination.forbiddenTimesOptions }),
+            approvalTrackerIdOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...combination.approvalTrackerIdOptions }),
+            challengeTrackerIdOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...combination.challengeTrackerIdOptions }),
           })
         }),
       })
@@ -286,25 +346,28 @@ export function getWrappedUserPermissions<T extends NumberType>(userPermissions:
 }
 
 export function getWrappedOutgoingTransfers<T extends NumberType>(approvedOutgoingTransfers: UserApprovedOutgoingTransfer<T>[]) {
-  return approvedOutgoingTransfers.map((outgoingTransfer) => new transfers.bitbadges.bitbadgeschain.badges.UserApprovedOutgoingTransfer({
-    ...outgoingTransfer,
-    transferTimes: getWrappedBadgeIds(outgoingTransfer.transferTimes),
-    badgeIds: getWrappedBadgeIds(outgoingTransfer.badgeIds),
-    ownershipTimes: getWrappedBadgeIds(outgoingTransfer.ownershipTimes),
-    allowedCombinations: outgoingTransfer.allowedCombinations.map((allowedCombination) => {
-      return new transfers.bitbadges.bitbadgeschain.badges.IsUserOutgoingTransferAllowed({
-        ...allowedCombination,
-        toMappingOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.toMappingOptions }),
-        initiatedByMappingOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.initiatedByMappingOptions }),
-        transferTimesOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.transferTimesOptions }),
-        badgeIdsOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.badgeIdsOptions }),
-        ownershipTimesOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.ownershipTimesOptions }),
-      })
-    }),
-    approvalDetails: outgoingTransfer.approvalDetails.map((approvalDetail) => {
-      return new transfers.bitbadges.bitbadgeschain.badges.OutgoingApprovalDetails({
-        ...approvalDetail,
-        mustOwnBadges: approvalDetail.mustOwnBadges.map((mustOwnBadge) => {
+  return approvedOutgoingTransfers.map((outgoingTransfer) => {
+    const approvalDetails = outgoingTransfer.approvalDetails ?? DefaultNullApprovalDetails;
+    return new transfers.bitbadges.bitbadgeschain.badges.UserApprovedOutgoingTransfer({
+      ...outgoingTransfer,
+      transferTimes: getWrappedBadgeIds(outgoingTransfer.transferTimes),
+      badgeIds: getWrappedBadgeIds(outgoingTransfer.badgeIds),
+      ownershipTimes: getWrappedBadgeIds(outgoingTransfer.ownershipTimes),
+      allowedCombinations: outgoingTransfer.allowedCombinations.map((allowedCombination) => {
+        return new transfers.bitbadges.bitbadgeschain.badges.IsUserOutgoingTransferAllowed({
+          ...allowedCombination,
+          toMappingOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.toMappingOptions }),
+          initiatedByMappingOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.initiatedByMappingOptions }),
+          transferTimesOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.transferTimesOptions }),
+          badgeIdsOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.badgeIdsOptions }),
+          ownershipTimesOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.ownershipTimesOptions }),
+          approvalTrackerIdOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.approvalTrackerIdOptions }),
+          challengeTrackerIdOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.challengeTrackerIdOptions }),
+        })
+      }),
+      approvalDetails: approvalDetails ? new transfers.bitbadges.bitbadgeschain.badges.OutgoingApprovalDetails({
+        ...approvalDetails,
+        mustOwnBadges: approvalDetails.mustOwnBadges.map((mustOwnBadge) => {
           return new balances.bitbadges.bitbadgeschain.badges.MustOwnBadges({
             ...mustOwnBadge,
             collectionId: mustOwnBadge.collectionId.toString(),
@@ -313,24 +376,23 @@ export function getWrappedOutgoingTransfers<T extends NumberType>(approvedOutgoi
             amountRange: getWrappedBadgeIds([mustOwnBadge.amountRange])[0],
           })
         }),
-        merkleChallenges: approvalDetail.merkleChallenges.map((merkleChallenge) => {
-          return new transfers.bitbadges.bitbadgeschain.badges.MerkleChallenge({
-            ...merkleChallenge,
-            expectedProofLength: merkleChallenge.expectedProofLength.toString(),
-          })
+        merkleChallenge: new transfers.bitbadges.bitbadgeschain.badges.MerkleChallenge({
+          ...approvalDetails.merkleChallenge,
+          expectedProofLength: approvalDetails.merkleChallenge.expectedProofLength.toString(),
         }),
+
         predeterminedBalances: new transfers.bitbadges.bitbadgeschain.badges.PredeterminedBalances({
-          ...approvalDetail.predeterminedBalances,
+          ...approvalDetails.predeterminedBalances,
           incrementedBalances: new transfers.bitbadges.bitbadgeschain.badges.IncrementedBalances({
-            ...approvalDetail.predeterminedBalances.incrementedBalances,
-            startBalances: getWrappedBalances(approvalDetail.predeterminedBalances.incrementedBalances.startBalances),
-            incrementBadgeIdsBy: approvalDetail.predeterminedBalances.incrementedBalances.incrementBadgeIdsBy.toString(),
-            incrementOwnershipTimesBy: approvalDetail.predeterminedBalances.incrementedBalances.incrementOwnershipTimesBy.toString(),
+            ...approvalDetails.predeterminedBalances.incrementedBalances,
+            startBalances: getWrappedBalances(approvalDetails.predeterminedBalances.incrementedBalances.startBalances),
+            incrementBadgeIdsBy: approvalDetails.predeterminedBalances.incrementedBalances.incrementBadgeIdsBy.toString(),
+            incrementOwnershipTimesBy: approvalDetails.predeterminedBalances.incrementedBalances.incrementOwnershipTimesBy.toString(),
           }),
           orderCalculationMethod: new transfers.bitbadges.bitbadgeschain.badges.PredeterminedOrderCalculationMethod({
-            ...approvalDetail.predeterminedBalances.orderCalculationMethod,
+            ...approvalDetails.predeterminedBalances.orderCalculationMethod,
           }),
-          manualBalances: approvalDetail.predeterminedBalances.manualBalances.map((manualBalance) => {
+          manualBalances: approvalDetails.predeterminedBalances.manualBalances.map((manualBalance) => {
             return new transfers.bitbadges.bitbadgeschain.badges.ManualBalances({
               ...manualBalance,
               balances: getWrappedBalances(manualBalance.balances),
@@ -338,44 +400,48 @@ export function getWrappedOutgoingTransfers<T extends NumberType>(approvedOutgoi
           }),
         }),
         approvalAmounts: new transfers.bitbadges.bitbadgeschain.badges.ApprovalAmounts({
-          ...approvalDetail.approvalAmounts,
-          overallApprovalAmount: approvalDetail.approvalAmounts.overallApprovalAmount.toString(),
-          perToAddressApprovalAmount: approvalDetail.approvalAmounts.perToAddressApprovalAmount.toString(),
-          perFromAddressApprovalAmount: approvalDetail.approvalAmounts.perFromAddressApprovalAmount.toString(),
-          perInitiatedByAddressApprovalAmount: approvalDetail.approvalAmounts.perInitiatedByAddressApprovalAmount.toString(),
+          ...approvalDetails.approvalAmounts,
+          overallApprovalAmount: approvalDetails.approvalAmounts.overallApprovalAmount.toString(),
+          perToAddressApprovalAmount: approvalDetails.approvalAmounts.perToAddressApprovalAmount.toString(),
+          perFromAddressApprovalAmount: approvalDetails.approvalAmounts.perFromAddressApprovalAmount.toString(),
+          perInitiatedByAddressApprovalAmount: approvalDetails.approvalAmounts.perInitiatedByAddressApprovalAmount.toString(),
         }),
         maxNumTransfers: new transfers.bitbadges.bitbadgeschain.badges.MaxNumTransfers({
-          ...approvalDetail.maxNumTransfers,
-          overallMaxNumTransfers: approvalDetail.maxNumTransfers.overallMaxNumTransfers.toString(),
-          perToAddressMaxNumTransfers: approvalDetail.maxNumTransfers.perToAddressMaxNumTransfers.toString(),
-          perFromAddressMaxNumTransfers: approvalDetail.maxNumTransfers.perFromAddressMaxNumTransfers.toString(),
-          perInitiatedByAddressMaxNumTransfers: approvalDetail.maxNumTransfers.perInitiatedByAddressMaxNumTransfers.toString(),
+          ...approvalDetails.maxNumTransfers,
+          overallMaxNumTransfers: approvalDetails.maxNumTransfers.overallMaxNumTransfers.toString(),
+          perToAddressMaxNumTransfers: approvalDetails.maxNumTransfers.perToAddressMaxNumTransfers.toString(),
+          perFromAddressMaxNumTransfers: approvalDetails.maxNumTransfers.perFromAddressMaxNumTransfers.toString(),
+          perInitiatedByAddressMaxNumTransfers: approvalDetails.maxNumTransfers.perInitiatedByAddressMaxNumTransfers.toString(),
         }),
-      })
-    }),
-  }))
+      }) : undefined,
+    })
+  })
 }
 
 export function getWrappedIncomingTransfers<T extends NumberType>(approvedIncomingTransfers: UserApprovedIncomingTransfer<T>[]) {
-  return approvedIncomingTransfers.map((outgoingTransfer) => new transfers.bitbadges.bitbadgeschain.badges.UserApprovedIncomingTransfer({
-    ...outgoingTransfer,
-    transferTimes: getWrappedBadgeIds(outgoingTransfer.transferTimes),
-    badgeIds: getWrappedBadgeIds(outgoingTransfer.badgeIds),
-    ownershipTimes: getWrappedBadgeIds(outgoingTransfer.ownershipTimes),
-    allowedCombinations: outgoingTransfer.allowedCombinations.map((allowedCombination) => {
-      return new transfers.bitbadges.bitbadgeschain.badges.IsUserIncomingTransferAllowed({
-        ...allowedCombination,
-        fromMappingOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.fromMappingOptions }),
-        initiatedByMappingOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.initiatedByMappingOptions }),
-        transferTimesOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.transferTimesOptions }),
-        badgeIdsOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.badgeIdsOptions }),
-        ownershipTimesOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.ownershipTimesOptions }),
-      })
-    }),
-    approvalDetails: outgoingTransfer.approvalDetails.map((approvalDetail) => {
-      return new transfers.bitbadges.bitbadgeschain.badges.IncomingApprovalDetails({
-        ...approvalDetail,
-        mustOwnBadges: approvalDetail.mustOwnBadges.map((mustOwnBadge) => {
+  return approvedIncomingTransfers.map((outgoingTransfer) => {
+
+    const approvalDetails = outgoingTransfer.approvalDetails ?? DefaultNullApprovalDetails;
+    return new transfers.bitbadges.bitbadgeschain.badges.UserApprovedIncomingTransfer({
+      ...outgoingTransfer,
+      transferTimes: getWrappedBadgeIds(outgoingTransfer.transferTimes),
+      badgeIds: getWrappedBadgeIds(outgoingTransfer.badgeIds),
+      ownershipTimes: getWrappedBadgeIds(outgoingTransfer.ownershipTimes),
+      allowedCombinations: outgoingTransfer.allowedCombinations.map((allowedCombination) => {
+        return new transfers.bitbadges.bitbadgeschain.badges.IsUserIncomingTransferAllowed({
+          ...allowedCombination,
+          fromMappingOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.fromMappingOptions }),
+          initiatedByMappingOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.initiatedByMappingOptions }),
+          transferTimesOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.transferTimesOptions }),
+          badgeIdsOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.badgeIdsOptions }),
+          ownershipTimesOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.ownershipTimesOptions }),
+          approvalTrackerIdOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.approvalTrackerIdOptions }),
+          challengeTrackerIdOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.challengeTrackerIdOptions }),
+        })
+      }),
+      approvalDetails: approvalDetails ? new transfers.bitbadges.bitbadgeschain.badges.IncomingApprovalDetails({
+        ...approvalDetails,
+        mustOwnBadges: approvalDetails.mustOwnBadges.map((mustOwnBadge) => {
           return new balances.bitbadges.bitbadgeschain.badges.MustOwnBadges({
             ...mustOwnBadge,
             collectionId: mustOwnBadge.collectionId.toString(),
@@ -384,24 +450,23 @@ export function getWrappedIncomingTransfers<T extends NumberType>(approvedIncomi
             amountRange: getWrappedBadgeIds([mustOwnBadge.amountRange])[0],
           })
         }),
-        merkleChallenges: approvalDetail.merkleChallenges.map((merkleChallenge) => {
-          return new transfers.bitbadges.bitbadgeschain.badges.MerkleChallenge({
-            ...merkleChallenge,
-            expectedProofLength: merkleChallenge.expectedProofLength.toString(),
-          })
+        merkleChallenge: new transfers.bitbadges.bitbadgeschain.badges.MerkleChallenge({
+          ...approvalDetails.merkleChallenge,
+          expectedProofLength: approvalDetails.merkleChallenge.expectedProofLength.toString(),
         }),
+
         predeterminedBalances: new transfers.bitbadges.bitbadgeschain.badges.PredeterminedBalances({
-          ...approvalDetail.predeterminedBalances,
+          ...approvalDetails.predeterminedBalances,
           incrementedBalances: new transfers.bitbadges.bitbadgeschain.badges.IncrementedBalances({
-            ...approvalDetail.predeterminedBalances.incrementedBalances,
-            startBalances: getWrappedBalances(approvalDetail.predeterminedBalances.incrementedBalances.startBalances),
-            incrementBadgeIdsBy: approvalDetail.predeterminedBalances.incrementedBalances.incrementBadgeIdsBy.toString(),
-            incrementOwnershipTimesBy: approvalDetail.predeterminedBalances.incrementedBalances.incrementOwnershipTimesBy.toString(),
+            ...approvalDetails.predeterminedBalances.incrementedBalances,
+            startBalances: getWrappedBalances(approvalDetails.predeterminedBalances.incrementedBalances.startBalances),
+            incrementBadgeIdsBy: approvalDetails.predeterminedBalances.incrementedBalances.incrementBadgeIdsBy.toString(),
+            incrementOwnershipTimesBy: approvalDetails.predeterminedBalances.incrementedBalances.incrementOwnershipTimesBy.toString(),
           }),
           orderCalculationMethod: new transfers.bitbadges.bitbadgeschain.badges.PredeterminedOrderCalculationMethod({
-            ...approvalDetail.predeterminedBalances.orderCalculationMethod,
+            ...approvalDetails.predeterminedBalances.orderCalculationMethod,
           }),
-          manualBalances: approvalDetail.predeterminedBalances.manualBalances.map((manualBalance) => {
+          manualBalances: approvalDetails.predeterminedBalances.manualBalances.map((manualBalance) => {
             return new transfers.bitbadges.bitbadgeschain.badges.ManualBalances({
               ...manualBalance,
               balances: getWrappedBalances(manualBalance.balances),
@@ -409,47 +474,50 @@ export function getWrappedIncomingTransfers<T extends NumberType>(approvedIncomi
           }),
         }),
         approvalAmounts: new transfers.bitbadges.bitbadgeschain.badges.ApprovalAmounts({
-          ...approvalDetail.approvalAmounts,
-          overallApprovalAmount: approvalDetail.approvalAmounts.overallApprovalAmount.toString(),
-          perToAddressApprovalAmount: approvalDetail.approvalAmounts.perToAddressApprovalAmount.toString(),
-          perFromAddressApprovalAmount: approvalDetail.approvalAmounts.perFromAddressApprovalAmount.toString(),
-          perInitiatedByAddressApprovalAmount: approvalDetail.approvalAmounts.perInitiatedByAddressApprovalAmount.toString(),
+          ...approvalDetails.approvalAmounts,
+          overallApprovalAmount: approvalDetails.approvalAmounts.overallApprovalAmount.toString(),
+          perToAddressApprovalAmount: approvalDetails.approvalAmounts.perToAddressApprovalAmount.toString(),
+          perFromAddressApprovalAmount: approvalDetails.approvalAmounts.perFromAddressApprovalAmount.toString(),
+          perInitiatedByAddressApprovalAmount: approvalDetails.approvalAmounts.perInitiatedByAddressApprovalAmount.toString(),
         }),
         maxNumTransfers: new transfers.bitbadges.bitbadgeschain.badges.MaxNumTransfers({
-          ...approvalDetail.maxNumTransfers,
-          overallMaxNumTransfers: approvalDetail.maxNumTransfers.overallMaxNumTransfers.toString(),
-          perToAddressMaxNumTransfers: approvalDetail.maxNumTransfers.perToAddressMaxNumTransfers.toString(),
-          perFromAddressMaxNumTransfers: approvalDetail.maxNumTransfers.perFromAddressMaxNumTransfers.toString(),
-          perInitiatedByAddressMaxNumTransfers: approvalDetail.maxNumTransfers.perInitiatedByAddressMaxNumTransfers.toString(),
+          ...approvalDetails.maxNumTransfers,
+          overallMaxNumTransfers: approvalDetails.maxNumTransfers.overallMaxNumTransfers.toString(),
+          perToAddressMaxNumTransfers: approvalDetails.maxNumTransfers.perToAddressMaxNumTransfers.toString(),
+          perFromAddressMaxNumTransfers: approvalDetails.maxNumTransfers.perFromAddressMaxNumTransfers.toString(),
+          perInitiatedByAddressMaxNumTransfers: approvalDetails.maxNumTransfers.perInitiatedByAddressMaxNumTransfers.toString(),
         }),
-      })
-    }),
-  }))
+      }) : undefined,
+    })
+  })
 }
 
 
 
 export function getWrappedCollectionApprovedTransfers<T extends NumberType>(collectionApprovedTransfers: CollectionApprovedTransfer<T>[]) {
-  return collectionApprovedTransfers.map((outgoingTransfer) => new transfers.bitbadges.bitbadgeschain.badges.CollectionApprovedTransfer({
-    ...outgoingTransfer,
-    transferTimes: getWrappedBadgeIds(outgoingTransfer.transferTimes),
-    badgeIds: getWrappedBadgeIds(outgoingTransfer.badgeIds),
-    ownershipTimes: getWrappedBadgeIds(outgoingTransfer.ownershipTimes),
-    allowedCombinations: outgoingTransfer.allowedCombinations.map((allowedCombination) => {
-      return new transfers.bitbadges.bitbadgeschain.badges.IsCollectionTransferAllowed({
-        ...allowedCombination,
-        fromMappingOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.fromMappingOptions }),
-        toMappingOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.toMappingOptions }),
-        initiatedByMappingOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.initiatedByMappingOptions }),
-        transferTimesOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.transferTimesOptions }),
-        badgeIdsOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.badgeIdsOptions }),
-        ownershipTimesOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.ownershipTimesOptions }),
-      })
-    }),
-    approvalDetails: outgoingTransfer.approvalDetails.map((approvalDetail) => {
-      return new transfers.bitbadges.bitbadgeschain.badges.ApprovalDetails({
-        ...approvalDetail,
-        mustOwnBadges: approvalDetail.mustOwnBadges.map((mustOwnBadge) => {
+  return collectionApprovedTransfers.map((outgoingTransfer) => {
+    const approvalDetails = outgoingTransfer.approvalDetails ?? DefaultNullApprovalDetails;
+    return new transfers.bitbadges.bitbadgeschain.badges.CollectionApprovedTransfer({
+      ...outgoingTransfer,
+      transferTimes: getWrappedBadgeIds(outgoingTransfer.transferTimes),
+      badgeIds: getWrappedBadgeIds(outgoingTransfer.badgeIds),
+      ownershipTimes: getWrappedBadgeIds(outgoingTransfer.ownershipTimes),
+      allowedCombinations: outgoingTransfer.allowedCombinations.map((allowedCombination) => {
+        return new transfers.bitbadges.bitbadgeschain.badges.IsCollectionTransferAllowed({
+          ...allowedCombination,
+          fromMappingOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.fromMappingOptions }),
+          toMappingOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.toMappingOptions }),
+          initiatedByMappingOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.initiatedByMappingOptions }),
+          transferTimesOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.transferTimesOptions }),
+          badgeIdsOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.badgeIdsOptions }),
+          ownershipTimesOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.ownershipTimesOptions }),
+          approvalTrackerIdOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.approvalTrackerIdOptions }),
+          challengeTrackerIdOptions: new permissions.bitbadges.bitbadgeschain.badges.ValueOptions({ ...allowedCombination.challengeTrackerIdOptions }),
+        })
+      }),
+      approvalDetails: approvalDetails ? new transfers.bitbadges.bitbadgeschain.badges.ApprovalDetails({
+        ...approvalDetails,
+        mustOwnBadges: approvalDetails.mustOwnBadges.map((mustOwnBadge) => {
           return new balances.bitbadges.bitbadgeschain.badges.MustOwnBadges({
             ...mustOwnBadge,
             collectionId: mustOwnBadge.collectionId.toString(),
@@ -458,24 +526,23 @@ export function getWrappedCollectionApprovedTransfers<T extends NumberType>(coll
             amountRange: getWrappedBadgeIds([mustOwnBadge.amountRange])[0],
           })
         }),
-        merkleChallenges: approvalDetail.merkleChallenges.map((merkleChallenge) => {
-          return new transfers.bitbadges.bitbadgeschain.badges.MerkleChallenge({
-            ...merkleChallenge,
-            expectedProofLength: merkleChallenge.expectedProofLength.toString(),
-          })
+        merkleChallenge: new transfers.bitbadges.bitbadgeschain.badges.MerkleChallenge({
+          ...approvalDetails.merkleChallenge,
+          expectedProofLength: approvalDetails.merkleChallenge.expectedProofLength.toString(),
         }),
+
         predeterminedBalances: new transfers.bitbadges.bitbadgeschain.badges.PredeterminedBalances({
-          ...approvalDetail.predeterminedBalances,
+          ...approvalDetails.predeterminedBalances,
           incrementedBalances: new transfers.bitbadges.bitbadgeschain.badges.IncrementedBalances({
-            ...approvalDetail.predeterminedBalances.incrementedBalances,
-            startBalances: getWrappedBalances(approvalDetail.predeterminedBalances.incrementedBalances.startBalances),
-            incrementBadgeIdsBy: approvalDetail.predeterminedBalances.incrementedBalances.incrementBadgeIdsBy.toString(),
-            incrementOwnershipTimesBy: approvalDetail.predeterminedBalances.incrementedBalances.incrementOwnershipTimesBy.toString(),
+            ...approvalDetails.predeterminedBalances.incrementedBalances,
+            startBalances: getWrappedBalances(approvalDetails.predeterminedBalances.incrementedBalances.startBalances),
+            incrementBadgeIdsBy: approvalDetails.predeterminedBalances.incrementedBalances.incrementBadgeIdsBy.toString(),
+            incrementOwnershipTimesBy: approvalDetails.predeterminedBalances.incrementedBalances.incrementOwnershipTimesBy.toString(),
           }),
           orderCalculationMethod: new transfers.bitbadges.bitbadgeschain.badges.PredeterminedOrderCalculationMethod({
-            ...approvalDetail.predeterminedBalances.orderCalculationMethod,
+            ...approvalDetails.predeterminedBalances.orderCalculationMethod,
           }),
-          manualBalances: approvalDetail.predeterminedBalances.manualBalances.map((manualBalance) => {
+          manualBalances: approvalDetails.predeterminedBalances.manualBalances.map((manualBalance) => {
             return new transfers.bitbadges.bitbadgeschain.badges.ManualBalances({
               ...manualBalance,
               balances: getWrappedBalances(manualBalance.balances),
@@ -483,22 +550,22 @@ export function getWrappedCollectionApprovedTransfers<T extends NumberType>(coll
           }),
         }),
         approvalAmounts: new transfers.bitbadges.bitbadgeschain.badges.ApprovalAmounts({
-          ...approvalDetail.approvalAmounts,
-          overallApprovalAmount: approvalDetail.approvalAmounts.overallApprovalAmount.toString(),
-          perToAddressApprovalAmount: approvalDetail.approvalAmounts.perToAddressApprovalAmount.toString(),
-          perFromAddressApprovalAmount: approvalDetail.approvalAmounts.perFromAddressApprovalAmount.toString(),
-          perInitiatedByAddressApprovalAmount: approvalDetail.approvalAmounts.perInitiatedByAddressApprovalAmount.toString(),
+          ...approvalDetails.approvalAmounts,
+          overallApprovalAmount: approvalDetails.approvalAmounts.overallApprovalAmount.toString(),
+          perToAddressApprovalAmount: approvalDetails.approvalAmounts.perToAddressApprovalAmount.toString(),
+          perFromAddressApprovalAmount: approvalDetails.approvalAmounts.perFromAddressApprovalAmount.toString(),
+          perInitiatedByAddressApprovalAmount: approvalDetails.approvalAmounts.perInitiatedByAddressApprovalAmount.toString(),
         }),
         maxNumTransfers: new transfers.bitbadges.bitbadgeschain.badges.MaxNumTransfers({
-          ...approvalDetail.maxNumTransfers,
-          overallMaxNumTransfers: approvalDetail.maxNumTransfers.overallMaxNumTransfers.toString(),
-          perToAddressMaxNumTransfers: approvalDetail.maxNumTransfers.perToAddressMaxNumTransfers.toString(),
-          perFromAddressMaxNumTransfers: approvalDetail.maxNumTransfers.perFromAddressMaxNumTransfers.toString(),
-          perInitiatedByAddressMaxNumTransfers: approvalDetail.maxNumTransfers.perInitiatedByAddressMaxNumTransfers.toString(),
+          ...approvalDetails.maxNumTransfers,
+          overallMaxNumTransfers: approvalDetails.maxNumTransfers.overallMaxNumTransfers.toString(),
+          perToAddressMaxNumTransfers: approvalDetails.maxNumTransfers.perToAddressMaxNumTransfers.toString(),
+          perFromAddressMaxNumTransfers: approvalDetails.maxNumTransfers.perFromAddressMaxNumTransfers.toString(),
+          perInitiatedByAddressMaxNumTransfers: approvalDetails.maxNumTransfers.perInitiatedByAddressMaxNumTransfers.toString(),
         }),
-      })
-    }),
-  }))
+      }) : undefined,
+    })
+  })
 }
 
 

@@ -43,6 +43,8 @@ export function getUpdateCombinationsToCheck(
         fromMapping: detailToAdd.fromMapping,
         initiatedByMapping: detailToAdd.initiatedByMapping,
         ownershipTime: detailToAdd.ownershipTime,
+        approvalTrackerIdMapping: detailToAdd.approvalTrackerIdMapping,
+        challengeTrackerIdMapping: detailToAdd.challengeTrackerIdMapping,
 
         permittedTimes: [],
         forbiddenTimes: [],
@@ -65,6 +67,9 @@ export function getUpdateCombinationsToCheck(
         toMapping: detailToAdd.toMapping,
         fromMapping: detailToAdd.fromMapping,
         initiatedByMapping: detailToAdd.initiatedByMapping,
+        approvalTrackerIdMapping: detailToAdd.approvalTrackerIdMapping,
+        challengeTrackerIdMapping: detailToAdd.challengeTrackerIdMapping,
+
 
         ownershipTime: detailToAdd.ownershipTime,
         permittedTimes: [],
@@ -92,7 +97,8 @@ export function getUpdateCombinationsToCheck(
         toMapping: detailToAdd.toMapping,
         fromMapping: detailToAdd.fromMapping,
         initiatedByMapping: detailToAdd.initiatedByMapping,
-
+        approvalTrackerIdMapping: detailToAdd.approvalTrackerIdMapping,
+        challengeTrackerIdMapping: detailToAdd.challengeTrackerIdMapping,
         ownershipTime: detailToAdd.ownershipTime,
 
         permittedTimes: [],
@@ -155,6 +161,8 @@ export function checkTimedUpdatePermission(
       toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
       fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
       initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+      approvalTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+      challengeTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
       permittedTimes: [],
       forbiddenTimes: [],
       arbitraryValue: undefined
@@ -190,6 +198,8 @@ export function checkBalancesActionPermission(
           toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
           fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
           initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+          approvalTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+          challengeTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
           permittedTimes: [],
           forbiddenTimes: [],
           arbitraryValue: undefined
@@ -227,6 +237,8 @@ export function checkTimedUpdateWithBadgeIdsPermission(
           toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
           fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
           initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+          approvalTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+          challengeTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
           permittedTimes: [],
           forbiddenTimes: [],
           arbitraryValue: undefined
@@ -256,6 +268,8 @@ export function checkCollectionApprovedTransferPermission(
     toMapping: AddressMapping,
     fromMapping: AddressMapping,
     initiatedByMapping: AddressMapping,
+    approvalTrackerIdMapping: AddressMapping,
+    challengeTrackerIdMapping: AddressMapping,
   }[],
   permissions: CollectionApprovedTransferPermissionWithDetails<bigint>[]
 ): Error | null {
@@ -278,6 +292,8 @@ export function checkCollectionApprovedTransferPermission(
               toMapping: detail.toMapping,
               fromMapping: detail.fromMapping,
               initiatedByMapping: detail.initiatedByMapping,
+              approvalTrackerIdMapping: detail.approvalTrackerIdMapping,
+              challengeTrackerIdMapping: detail.challengeTrackerIdMapping,
               permittedTimes: [],
               forbiddenTimes: [],
               arbitraryValue: undefined
@@ -350,6 +366,8 @@ export function checkNotForbiddenForAllOverlaps(
   let usesToMappings = true;
   let usesFromMappings = true;
   let usesInitiatedByMappings = true;
+  let usesApprovalTrackerIdMappings = true;
+  let usesChallengeTrackerIdMappings = true;
 
   // Apply dummy ranges to all detailsToCheck
   for (const detailToCheck of detailsToCheck) {
@@ -386,6 +404,16 @@ export function checkNotForbiddenForAllOverlaps(
     if (!usesMappings) {
       usesInitiatedByMappings = false;
       detailToCheck.initiatedByMapping = { mappingId: '', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" }
+    }
+
+    if (!usesMappings) {
+      usesApprovalTrackerIdMappings = false;
+      detailToCheck.approvalTrackerIdMapping = { mappingId: '', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" }
+    }
+
+    if (!usesMappings) {
+      usesChallengeTrackerIdMappings = false;
+      detailToCheck.challengeTrackerIdMapping = { mappingId: '', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" }
     }
   }
 
@@ -426,6 +454,15 @@ export function checkNotForbiddenForAllOverlaps(
 
           if (usesInitiatedByMappings) {
             errStr += ` for the initiated by mappings ${permissionDetail.initiatedByMapping.mappingId}`;
+          }
+
+          //TODO: this won't be right
+          if (usesApprovalTrackerIdMappings) {
+            errStr += ` for the approval tracker id ${permissionDetail.approvalTrackerIdMapping.mappingId}`;
+          }
+
+          if (usesChallengeTrackerIdMappings) {
+            errStr += ` for the challenge tracker id ${permissionDetail.challengeTrackerIdMapping.mappingId}`;
           }
 
           return new Error(errStr);

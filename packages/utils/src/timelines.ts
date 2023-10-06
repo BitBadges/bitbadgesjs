@@ -1,7 +1,6 @@
-import { BadgeMetadataTimeline, CollectionApprovedTransferTimeline, CollectionMetadataTimeline, ContractAddressTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, NumberType, OffChainBalancesMetadataTimeline, StandardsTimeline, TimelineItem } from "bitbadgesjs-proto";
+import { BadgeMetadataTimeline, CollectionMetadataTimeline, ContractAddressTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, NumberType, OffChainBalancesMetadataTimeline, StandardsTimeline, TimelineItem } from "bitbadgesjs-proto";
 import { DefaultPlaceholderMetadata } from "./constants";
-import { BitBadgesCollection, CollectionApprovedTransferTimelineWithDetails } from "./types/collections";
-import { UserApprovedIncomingTransferTimelineWithDetails, UserApprovedOutgoingTransferTimelineWithDetails } from "./types/users";
+import { BitBadgesCollection } from "./types/collections";
 import { removeUintRangeFromUintRange, searchUintRangesForId } from "./uintRanges";
 
 
@@ -21,13 +20,10 @@ export function getValuesAtTimeForCollection(collection: BitBadgesCollection<big
       customData: '',
     },
     customData: getValueAtTimeForTimeline(collection.customDataTimeline, time)?.customData ?? "",
-    collectionApprovedTransfers: getValueAtTimeForTimeline(collection.collectionApprovedTransfersTimeline, time)?.collectionApprovedTransfers ?? [],
     standards: getValueAtTimeForTimeline(collection.standardsTimeline, time)?.standards ?? [],
     isArchived: getValueAtTimeForTimeline(collection.isArchivedTimeline, time)?.isArchived ?? false,
     // inheritedBalances: getValueAtTimeForTimeline(collection.inheritedBalancesTimeline, time)?.inheritedBalances ?? [],
     contractAddress: getValueAtTimeForTimeline(collection.contractAddressTimeline, time)?.contractAddress ?? "",
-    defaultApprovedIncomingTransfers: getValueAtTimeForTimeline(collection.defaultUserApprovedIncomingTransfersTimeline, time)?.approvedIncomingTransfers ?? [],
-    defaultApprovedOutgoingTransfers: getValueAtTimeForTimeline(collection.defaultUserApprovedOutgoingTransfersTimeline, time)?.approvedOutgoingTransfers ?? [],
   }
 }
 
@@ -158,13 +154,6 @@ export function getFullCustomDataTimeline(timeline: CustomDataTimeline<bigint>[]
 /**
  * @category Timelines
  */
-export function getFullCollectionApprovedTransfersTimeline(timeline: CollectionApprovedTransferTimelineWithDetails<bigint>[]): CollectionApprovedTransferTimeline<bigint>[] {
-  return getFullTimeline(timeline, "collectionApprovedTransfers", []);
-}
-
-/**
- * @category Timelines
- */
 export function getFullStandardsTimeline(timeline: StandardsTimeline<bigint>[]): StandardsTimeline<bigint>[] {
   return getFullTimeline(timeline, "standards", []);
 }
@@ -188,18 +177,4 @@ export function getFullIsArchivedTimeline(timeline: IsArchivedTimeline<bigint>[]
  */
 export function getFullContractAddressTimeline(timeline: ContractAddressTimeline<bigint>[]): ContractAddressTimeline<bigint>[] {
   return getFullTimeline(timeline, "contractAddress", "");
-}
-
-/**
- * @category Timelines
- */
-export function getFullDefaultUserApprovedIncomingTransfersTimeline(timeline: UserApprovedIncomingTransferTimelineWithDetails<bigint>[]): UserApprovedIncomingTransferTimelineWithDetails<bigint>[] {
-  return getFullTimeline(timeline, "approvedIncomingTransfers", []);
-}
-
-/**
- * @category Timelines
- */
-export function getFullDefaultUserApprovedOutgoingTransfersTimeline(timeline: UserApprovedOutgoingTransferTimelineWithDetails<bigint>[]): UserApprovedOutgoingTransferTimelineWithDetails<bigint>[] {
-  return getFullTimeline(timeline, "approvedOutgoingTransfers", []);
 }

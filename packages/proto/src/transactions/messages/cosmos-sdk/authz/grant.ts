@@ -5,7 +5,7 @@ import {
   createTransaction,
 } from '../../../../'
 
-import { Chain, Fee, Sender } from '../../common'
+import { Chain, Fee, Sender, SupportedChain } from '../../common'
 
 /* eslint-disable camelcase */
 export interface MsgStakeAuthorizationParams {
@@ -45,7 +45,7 @@ export function createTxMsgStakeAuthorization(
     fee.amount,
     fee.denom,
     parseInt(fee.gas, 10),
-    'ethsecp256',
+    chain.chain === SupportedChain.ETH ? 'ethsecp256' : 'secp256k1',
     sender.pubkey,
     sender.sequence,
     sender.accountNumber,

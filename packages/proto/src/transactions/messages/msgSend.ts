@@ -16,7 +16,7 @@ import {
 
 import { getDefaultDomainWithChainId } from './domain'
 
-import { Chain, Fee, Sender } from './common'
+import { Chain, Fee, Sender, SupportedChain } from './common'
 
 export interface MsgSend<T extends NumberType> {
   destinationAddress: string
@@ -79,7 +79,7 @@ export function createTxMsgSend<T extends NumberType>(
     fee.amount,
     fee.denom,
     parseInt(fee.gas, 10),
-    'ethsecp256',
+    chain.chain === SupportedChain.ETH ? 'ethsecp256' : 'secp256k1',
     sender.pubkey,
     sender.sequence,
     sender.accountNumber,

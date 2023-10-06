@@ -200,7 +200,7 @@ describe('transaction eip712', () => {
       '20',
       'aphoton',
       200000,
-      'ethsecp256',
+      chain.chain === SupportedChain.ETH ? 'ethsecp256' : 'secp256k1',
       'AgTw+4v0daIrxsNSW4FcQ+IoingPseFwHO1DnssyoOqZ',
       1,
       9,

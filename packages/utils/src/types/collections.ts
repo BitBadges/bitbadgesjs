@@ -1,9 +1,9 @@
-import { AddressMapping, ApprovalDetails, CollectionApprovedTransfer, CollectionApprovedTransferPermission, CollectionApprovedTransferPermissionDefaultValues, CollectionPermissions, NumberType, TimelineItem, UintRange, convertApprovalDetails, convertCollectionApprovedTransfer, convertCollectionApprovedTransferPermission, convertCollectionApprovedTransferPermissionDefaultValues, convertCollectionPermissions, convertUintRange } from "bitbadgesjs-proto";
+import { AddressMapping, ApprovalDetails, CollectionApprovedTransfer, CollectionApprovedTransferPermission, CollectionApprovedTransferPermissionDefaultValues, CollectionPermissions, NumberType, UintRange, convertApprovalDetails, convertCollectionApprovedTransfer, convertCollectionApprovedTransferPermission, convertCollectionApprovedTransferPermissionDefaultValues, convertCollectionPermissions, convertUintRange } from "bitbadgesjs-proto";
 import { AnnouncementInfo, ReviewInfo, TransferActivityInfo, convertAnnouncementInfo, convertReviewInfo, convertTransferActivityInfo } from "./activity";
 import { PaginationInfo } from "./api";
 import { ApprovalsTrackerInfo, BalanceInfoWithDetails, CollectionInfoBase, Identified, MerkleChallengeInfo, MerkleChallengeWithDetails, convertApprovalsTrackerInfo, convertBalanceInfoWithDetails, convertCollectionInfo, convertMerkleChallengeInfo, convertMerkleChallengeWithDetails } from "./db";
 import { Metadata, convertMetadata } from "./metadata";
-import { UserApprovedIncomingTransferTimelineWithDetails, UserApprovedOutgoingTransferTimelineWithDetails, convertUserApprovedIncomingTransferWithDetails, convertUserApprovedOutgoingTransferWithDetails } from "./users";
+import { UserApprovedIncomingTransferWithDetails, UserApprovedOutgoingTransferWithDetails, convertUserApprovedIncomingTransferWithDetails, convertUserApprovedOutgoingTransferWithDetails } from "./users";
 import { deepCopy, removeCouchDBDetails } from "./utils";
 
 /**
@@ -84,14 +84,14 @@ export function convertCollectionPermissionsWithDetails<T extends NumberType, U 
  * @category Approvals / Transferability
  */
 export interface ApprovalDetailsWithDetails<T extends NumberType> extends ApprovalDetails<T> {
-  merkleChallenges: MerkleChallengeWithDetails<T>[];
+  merkleChallenge: MerkleChallengeWithDetails<T>;
 }
 
 /**
  * @category Approvals / Transferability
  */
 export interface CollectionApprovedTransferWithDetails<T extends NumberType> extends CollectionApprovedTransfer<T> {
-  approvalDetails: ApprovalDetailsWithDetails<T>[];
+  approvalDetails?: ApprovalDetailsWithDetails<T>;
   toMapping: AddressMapping;
   fromMapping: AddressMapping;
   initiatedByMapping: AddressMapping;
@@ -104,27 +104,10 @@ export function convertCollectionApprovedTransferWithDetails<T extends NumberTyp
   return deepCopy({
     ...item,
     ...convertCollectionApprovedTransfer(item, convertFunction),
-    approvalDetails: item.approvalDetails.map((approvalDetails) => ({
-      ...convertApprovalDetails(approvalDetails, convertFunction),
-      merkleChallenges: approvalDetails.merkleChallenges.map((merkleChallenge) => convertMerkleChallengeWithDetails(merkleChallenge, convertFunction)),
-    })),
-  })
-
-/**
- * @category Approvals / Transferability
- */}
-export interface CollectionApprovedTransferTimelineWithDetails<T extends NumberType> extends TimelineItem<T> {
-  collectionApprovedTransfers: CollectionApprovedTransferWithDetails<T>[]
-}
-
-/**
- * @category Approvals / Transferability
- */
-export function convertCollectionApprovedTransferTimelineWithDetails<T extends NumberType, U extends NumberType>(item: CollectionApprovedTransferTimelineWithDetails<T>, convertFunction: (item: T) => U): CollectionApprovedTransferTimelineWithDetails<U> {
-  return deepCopy({
-    ...item,
-    timelineTimes: item.timelineTimes.map((timelineTime) => convertUintRange(timelineTime, convertFunction)),
-    collectionApprovedTransfers: item.collectionApprovedTransfers.map((collectionApprovedTransfer) => convertCollectionApprovedTransferWithDetails(collectionApprovedTransfer, convertFunction)),
+    approvalDetails: item.approvalDetails ? {
+      ...convertApprovalDetails(item.approvalDetails, convertFunction),
+      merkleChallenge: convertMerkleChallengeWithDetails(item.approvalDetails.merkleChallenge, convertFunction),
+    } : undefined,
   })
 }
 
@@ -155,11 +138,11 @@ export function convertCollectionApprovedTransferTimelineWithDetails<T extends N
  * @category API / Indexer
  */
 export interface BitBadgesCollection<T extends NumberType> extends CollectionInfoBase<T>, Identified {
-  collectionApprovedTransfersTimeline: CollectionApprovedTransferTimelineWithDetails<T>[];
+  collectionApprovedTransfers: CollectionApprovedTransferWithDetails<T>[];
   collectionPermissions: CollectionPermissionsWithDetails<T>;
 
-  defaultUserApprovedOutgoingTransfersTimeline: UserApprovedOutgoingTransferTimelineWithDetails<T>[];
-  defaultUserApprovedIncomingTransfersTimeline: UserApprovedIncomingTransferTimelineWithDetails<T>[];
+  defaultUserApprovedOutgoingTransfers: UserApprovedOutgoingTransferWithDetails<T>[];
+  defaultUserApprovedIncomingTransfers: UserApprovedIncomingTransferWithDetails<T>[];
 
   //The following are to be fetched dynamically and as needed from the DB
   cachedCollectionMetadata?: Metadata<T>;
@@ -184,21 +167,9 @@ export function convertBitBadgesCollection<T extends NumberType, U extends Numbe
   return deepCopy({
     ...item,
     ...convertCollectionInfo(item, convertFunction),
-    collectionApprovedTransfersTimeline: item.collectionApprovedTransfersTimeline.map((timelineItem) => ({
-      ...timelineItem,
-      timelineTimes: timelineItem.timelineTimes.map((timelineTime) => convertUintRange(timelineTime, convertFunction)),
-      collectionApprovedTransfers: timelineItem.collectionApprovedTransfers.map((collectionApprovedTransfer) => convertCollectionApprovedTransferWithDetails(collectionApprovedTransfer, convertFunction)),
-    })),
-    defaultUserApprovedIncomingTransfersTimeline: item.defaultUserApprovedIncomingTransfersTimeline.map((timelineItem) => ({
-      ...timelineItem,
-      timelineTimes: timelineItem.timelineTimes.map((timelineTime) => convertUintRange(timelineTime, convertFunction)),
-      approvedIncomingTransfers: timelineItem.approvedIncomingTransfers.map((approvedIncomingTransfer) => convertUserApprovedIncomingTransferWithDetails(approvedIncomingTransfer, convertFunction)),
-    })),
-    defaultUserApprovedOutgoingTransfersTimeline: item.defaultUserApprovedOutgoingTransfersTimeline.map((timelineItem) => ({
-      ...timelineItem,
-      timelineTimes: timelineItem.timelineTimes.map((timelineTime) => convertUintRange(timelineTime, convertFunction)),
-      approvedOutgoingTransfers: timelineItem.approvedOutgoingTransfers.map((approvedOutgoingTransfer) => convertUserApprovedOutgoingTransferWithDetails(approvedOutgoingTransfer, convertFunction)),
-    })),
+    collectionApprovedTransfers: item.collectionApprovedTransfers.map((collectionApprovedTransfer) => convertCollectionApprovedTransferWithDetails(collectionApprovedTransfer, convertFunction)),
+    defaultUserApprovedIncomingTransfers: item.defaultUserApprovedIncomingTransfers.map((userApprovedIncomingTransfer) => convertUserApprovedIncomingTransferWithDetails(userApprovedIncomingTransfer, convertFunction)),
+    defaultUserApprovedOutgoingTransfers: item.defaultUserApprovedOutgoingTransfers.map((userApprovedOutgoingTransfer) => convertUserApprovedOutgoingTransferWithDetails(userApprovedOutgoingTransfer, convertFunction)),
     collectionPermissions: convertCollectionPermissionsWithDetails(item.collectionPermissions, convertFunction),
     cachedCollectionMetadata: item.cachedCollectionMetadata ? convertMetadata(item.cachedCollectionMetadata, convertFunction) : undefined,
     cachedBadgeMetadata: item.cachedBadgeMetadata.map((metadata) => convertBadgeMetadataDetails(metadata, convertFunction)),

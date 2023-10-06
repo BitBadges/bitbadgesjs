@@ -69,6 +69,16 @@ const PermissionCombinationDefaultValues = {
     noValues: false,
     allValues: false
   },
+  approvalTrackerIdOptions: {
+    invertDefault: false,
+    noValues: false,
+    allValues: false
+  },
+  challengeTrackerIdOptions: {
+    invertDefault: false,
+    noValues: false,
+    allValues: false
+  },
   permittedTimesOptions: {
     invertDefault: false,
     noValues: false,
@@ -105,16 +115,19 @@ export function convertUserApprovedOutgoingTransferPermission<T extends NumberTy
  * @property {UintRange[]} transferTimes - The transfer times of the approved outgoing transfers.
  * @property {UintRange[]} badgeIds - The badge IDs of the approved outgoing transfers.
  * @property {UintRange[]} ownershipTimes - The owned times of the approved outgoing transfers.
+ * @property {string} approvalTrackerId - The approval tracker ID of the approved outgoing transfers.
+ * @property {string} challengeTrackerId - The challenge tracker ID of the approved outgoing transfers.
  * @property {UintRange[]} permittedTimes - The permitted times of the approved outgoing transfers.
  * @property {UintRange[]} forbiddenTimes - The forbidden times of the approved outgoing transfers.
  */
 export interface UserApprovedOutgoingTransferDefaultValues<T extends NumberType> {
-  timelineTimes: UintRange<T>[];
   toMappingId: string;
   initiatedByMappingId: string;
   transferTimes: UintRange<T>[];
   badgeIds: UintRange<T>[];
   ownershipTimes: UintRange<T>[];
+  approvalTrackerId: string
+  challengeTrackerId: string
   permittedTimes: UintRange<T>[];
   forbiddenTimes: UintRange<T>[];
 }
@@ -122,7 +135,6 @@ export interface UserApprovedOutgoingTransferDefaultValues<T extends NumberType>
 export function convertUserApprovedOutgoingTransferDefaultValues<T extends NumberType, U extends NumberType>(values: UserApprovedOutgoingTransferDefaultValues<T>, convertFunction: (item: T) => U): UserApprovedOutgoingTransferDefaultValues<U> {
   return deepCopy({
     ...values,
-    timelineTimes: values.timelineTimes.map((b) => convertUintRange(b, convertFunction)),
     transferTimes: values.transferTimes.map((b) => convertUintRange(b, convertFunction)),
     badgeIds: values.badgeIds.map((b) => convertUintRange(b, convertFunction)),
     ownershipTimes: values.ownershipTimes.map((b) => convertUintRange(b, convertFunction)),
@@ -138,12 +150,13 @@ export function convertUserApprovedOutgoingTransferDefaultValues<T extends Numbe
  * @typedef {Object} UserApprovedOutgoingTransferCombination
  */
 export interface UserApprovedOutgoingTransferCombination {
-  timelineTimesOptions?: ValueOptions;
   toMappingOptions?: ValueOptions;
   initiatedByMappingOptions?: ValueOptions;
   transferTimesOptions?: ValueOptions;
   badgeIdsOptions?: ValueOptions;
   ownershipTimesOptions?: ValueOptions;
+  approvalTrackerIdOptions?: ValueOptions;
+  challengeTrackerIdOptions?: ValueOptions;
   permittedTimesOptions?: ValueOptions;
   forbiddenTimesOptions?: ValueOptions;
 }
@@ -218,16 +231,19 @@ export function convertUserApprovedIncomingTransferPermission<T extends NumberTy
  * @property {UintRange[]} transferTimes - The transfer times of the approved incoming transfers.
  * @property {UintRange[]} badgeIds - The badge IDs of the approved incoming transfers.
  * @property {UintRange[]} ownershipTimes - The owned times of the approved incoming transfers.
+ * @property {string} approvalTrackerId - The approval tracker ID of the approved incoming transfers.
+ * @property {string} challengeTrackerId - The challenge tracker ID of the approved incoming transfers.
  * @property {UintRange[]} permittedTimes - The permitted times of the approved incoming transfers.
  * @property {UintRange[]} forbiddenTimes - The forbidden times of the approved incoming transfers.
  */
 export interface UserApprovedIncomingTransferDefaultValues<T extends NumberType> {
-  timelineTimes: UintRange<T>[];
   fromMappingId: string;
   initiatedByMappingId: string;
   transferTimes: UintRange<T>[];
   badgeIds: UintRange<T>[];
   ownershipTimes: UintRange<T>[];
+  approvalTrackerId: string
+  challengeTrackerId: string
   permittedTimes: UintRange<T>[];
   forbiddenTimes: UintRange<T>[];
 }
@@ -235,7 +251,6 @@ export interface UserApprovedIncomingTransferDefaultValues<T extends NumberType>
 export function convertUserApprovedIncomingTransferDefaultValues<T extends NumberType, U extends NumberType>(values: UserApprovedIncomingTransferDefaultValues<T>, convertFunction: (item: T) => U): UserApprovedIncomingTransferDefaultValues<U> {
   return deepCopy({
     ...values,
-    timelineTimes: values.timelineTimes.map((b) => convertUintRange(b, convertFunction)),
     transferTimes: values.transferTimes.map((b) => convertUintRange(b, convertFunction)),
     badgeIds: values.badgeIds.map((b) => convertUintRange(b, convertFunction)),
     ownershipTimes: values.ownershipTimes.map((b) => convertUintRange(b, convertFunction)),
@@ -257,14 +272,17 @@ export function convertUserApprovedIncomingTransferDefaultValues<T extends Numbe
  * @property {ValueOptions} ownershipTimesOptions - The options for manipulating the owned times.
  * @property {ValueOptions} permittedTimesOptions - The options for manipulating the permitted times.
  * @property {ValueOptions} forbiddenTimesOptions - The options for manipulating the forbidden times.
+ * @property {ValueOptions} approvalTrackerIdOptions - The options for manipulating the approval tracker ID.
+ * @property {ValueOptions} challengeTrackerIdOptions - The options for manipulating the challenge tracker ID.
  */
 export interface UserApprovedIncomingTransferCombination {
-  timelineTimesOptions?: ValueOptions;
   fromMappingOptions?: ValueOptions;
   initiatedByMappingOptions?: ValueOptions;
   transferTimesOptions?: ValueOptions;
   badgeIdsOptions?: ValueOptions;
   ownershipTimesOptions?: ValueOptions;
+  approvalTrackerIdOptions?: ValueOptions;
+  challengeTrackerIdOptions?: ValueOptions;
   permittedTimesOptions?: ValueOptions;
   forbiddenTimesOptions?: ValueOptions;
 }
@@ -656,15 +674,7 @@ export function convertCollectionApprovedTransferPermission<T extends NumberType
     defaultValues: convertCollectionApprovedTransferPermissionDefaultValues(permission.defaultValues, convertFunction),
     combinations: populateOptionalFields ? permission.combinations.map((b) => {
       return {
-        timelineTimesOptions: PermissionCombinationDefaultValues.timelineTimesOptions,
-        fromMappingOptions: PermissionCombinationDefaultValues.fromMappingOptions,
-        toMappingOptions: PermissionCombinationDefaultValues.toMappingOptions,
-        initiatedByMappingOptions: PermissionCombinationDefaultValues.initiatedByMappingOptions,
-        transferTimesOptions: PermissionCombinationDefaultValues.transferTimesOptions,
-        badgeIdsOptions: PermissionCombinationDefaultValues.badgeIdsOptions,
-        ownershipTimesOptions: PermissionCombinationDefaultValues.ownershipTimesOptions,
-        permittedTimesOptions: PermissionCombinationDefaultValues.permittedTimesOptions,
-        forbiddenTimesOptions: PermissionCombinationDefaultValues.forbiddenTimesOptions,
+        ...PermissionCombinationDefaultValues,
         ...b,
       } as Required<CollectionApprovedTransferPermissionCombination>
     }) : permission.combinations
@@ -686,13 +696,14 @@ export function convertCollectionApprovedTransferPermission<T extends NumberType
  * @property {UintRange[]} forbiddenTimes - The forbidden times of this permission.
  */
 export interface CollectionApprovedTransferPermissionDefaultValues<T extends NumberType> {
-  timelineTimes: UintRange<T>[];
   fromMappingId: string;
   toMappingId: string;
   initiatedByMappingId: string;
   transferTimes: UintRange<T>[];
   badgeIds: UintRange<T>[];
   ownershipTimes: UintRange<T>[];
+  approvalTrackerId: string
+  challengeTrackerId: string
   permittedTimes: UintRange<T>[];
   forbiddenTimes: UintRange<T>[];
 }
@@ -700,7 +711,6 @@ export interface CollectionApprovedTransferPermissionDefaultValues<T extends Num
 export function convertCollectionApprovedTransferPermissionDefaultValues<T extends NumberType, U extends NumberType>(values: CollectionApprovedTransferPermissionDefaultValues<T>, convertFunction: (item: T) => U): CollectionApprovedTransferPermissionDefaultValues<U> {
   return deepCopy({
     ...values,
-    timelineTimes: values.timelineTimes.map((b) => convertUintRange(b, convertFunction)),
     transferTimes: values.transferTimes.map((b) => convertUintRange(b, convertFunction)),
     badgeIds: values.badgeIds.map((b) => convertUintRange(b, convertFunction)),
     ownershipTimes: values.ownershipTimes.map((b) => convertUintRange(b, convertFunction)),
@@ -722,17 +732,20 @@ export function convertCollectionApprovedTransferPermissionDefaultValues<T exten
  * @property {ValueOptions} transferTimesOptions - The options for manipulating the transfer times.
  * @property {ValueOptions} badgeIdsOptions - The options for manipulating the badge IDs.
  * @property {ValueOptions} ownershipTimesOptions - The options for manipulating the owned times.
+ * @property {ValueOptions} approvalTrackerIdOptions - The options for manipulating the approval tracker ID.
+ * @property {ValueOptions} challengeTrackerIdOptions - The options for manipulating the challenge tracker ID.
  * @property {ValueOptions} permittedTimesOptions - The options for manipulating the permitted times.
  * @property {ValueOptions} forbiddenTimesOptions - The options for manipulating the forbidden times.
  */
 export interface CollectionApprovedTransferPermissionCombination {
-  timelineTimesOptions?: ValueOptions;
   fromMappingOptions?: ValueOptions;
   toMappingOptions?: ValueOptions;
   initiatedByMappingOptions?: ValueOptions;
   transferTimesOptions?: ValueOptions;
   badgeIdsOptions?: ValueOptions;
   ownershipTimesOptions?: ValueOptions;
+  approvalTrackerIdOptions?: ValueOptions;
+  challengeTrackerIdOptions?: ValueOptions;
   permittedTimesOptions?: ValueOptions;
   forbiddenTimesOptions?: ValueOptions;
 }

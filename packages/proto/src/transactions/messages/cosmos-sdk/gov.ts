@@ -12,7 +12,7 @@ import {
   MSG_VOTE_TYPES,
 } from '../../../'
 
-import { Chain, Fee, Sender } from '../common'
+import { Chain, Fee, Sender, SupportedChain } from '../common'
 
 import { getDefaultDomainWithChainId } from '../domain'
 
@@ -69,7 +69,7 @@ export function createTxMsgVote(
     fee.amount,
     fee.denom,
     parseInt(fee.gas, 10),
-    'ethsecp256',
+    chain.chain === SupportedChain.ETH ? 'ethsecp256' : 'secp256k1',
     sender.pubkey,
     sender.sequence,
     sender.accountNumber,
