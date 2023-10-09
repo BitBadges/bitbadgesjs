@@ -1,5 +1,5 @@
 import { NumberType } from "../string-numbers";
-import { UserApprovedIncomingTransfer, UserApprovedOutgoingTransfer, convertUserApprovedIncomingTransfer, convertUserApprovedOutgoingTransfer } from "./approvedTransfers";
+import { UserIncomingApproval, UserOutgoingApproval, convertUserIncomingApproval, convertUserOutgoingApproval } from "./approvals";
 import { UserPermissions, convertUserPermissions } from "./permissions";
 
 export function deepCopy<T>(obj: T): T {
@@ -32,14 +32,14 @@ function deepCopyWithBigInts<T>(obj: T): T {
  *
  * @typedef {Object} UserBalance
  * @property {Balance[]} balances - The balances of the user.
- * @property {UserApprovedOutgoingTransfer[]} approvedOutgoingTransfers - The approved outgoing transfers of the user.
- * @property {UserApprovedIncomingTransfer[]} approvedIncomingTransfers - The approved incoming transfers of the user.
+ * @property {UserOutgoingApproval[]} outgoingApprovals - The approved outgoing transfers of the user.
+ * @property {UserIncomingApproval[]} incomingApprovals - The approved incoming transfers of the user.
  * @property {UserPermissions} userPermissions - The permissions of the user to update their incoming / outgoing approvals.
  */
 export interface UserBalance<T extends NumberType> {
   balances: Balance<T>[];
-  approvedOutgoingTransfers: UserApprovedOutgoingTransfer<T>[];
-  approvedIncomingTransfers: UserApprovedIncomingTransfer<T>[];
+  outgoingApprovals: UserOutgoingApproval<T>[];
+  incomingApprovals: UserIncomingApproval<T>[];
   userPermissions: UserPermissions<T>;
 }
 
@@ -47,8 +47,8 @@ export function convertUserBalance<T extends NumberType, U extends NumberType>(b
   return deepCopy({
     ...balance,
     balances: balance.balances.map((b) => convertBalance(b, convertFunction)),
-    approvedOutgoingTransfers: balance.approvedOutgoingTransfers.map((t) => convertUserApprovedOutgoingTransfer(t, convertFunction)),
-    approvedIncomingTransfers: balance.approvedIncomingTransfers.map((t) => convertUserApprovedIncomingTransfer(t, convertFunction)),
+    outgoingApprovals: balance.outgoingApprovals.map((t) => convertUserOutgoingApproval(t, convertFunction)),
+    incomingApprovals: balance.incomingApprovals.map((t) => convertUserIncomingApproval(t, convertFunction)),
     userPermissions: convertUserPermissions(balance.userPermissions, convertFunction)
   })
 }
@@ -269,7 +269,7 @@ export interface AddressMapping {
  * @property {string} from - The address to transfer from.
  * @property {string[]} toAddresses - The addresses to transfer to.
  * @property {Balance[]} balances - The balances to transfer.
- * @property {ApprovalIdentifierDetails} precalculationDetails - If specified, we will precalculate from this approval and override the balances. This can only be used when the specified approval has predeterminedBalances set.
+ * @property {ApprovalIdentifierDetails} precalculateBalancesFromApproval - If specified, we will precalculate from this approval and override the balances. This can only be used when the specified approval has predeterminedBalances set.
  * @property {MerkleProof[]} merkleProofs - The merkle proofs that satisfy the mkerkle challenges in the approvals. If the transfer deducts from multiple approvals, we check all the merkle proofs and assert at least one is valid for every challenge.
  * @property {string} memo - Arbitrary memo for the transfer.
  * @property {ApprovalIdentifierDetails[]} prioritizedApprovals - The prioritized approvals to use for the transfer. If specified, we will check these first.
@@ -279,22 +279,26 @@ export interface Transfer<T extends NumberType> {
   from: string
   toAddresses: string[]
   balances: Balance<T>[]
-  precalculationDetails: ApprovalIdentifierDetails
-  merkleProofs: MerkleProof[]
-  memo: string
-  prioritizedApprovals: ApprovalIdentifierDetails[],
-  onlyCheckPrioritizedApprovals: boolean
+  precalculateBalancesFromApproval?: ApprovalIdentifierDetails
+  merkleProofs?: MerkleProof[]
+  memo?: string
+  prioritizedApprovals?: ApprovalIdentifierDetails[],
+  onlyCheckPrioritizedApprovals?: boolean
 }
 
-export function convertTransfer<T extends NumberType, U extends NumberType>(transfer: Transfer<T>, convertFunction: (item: T) => U): Transfer<U> {
+export function convertTransfer<T extends NumberType, U extends NumberType>(transfer: Transfer<T>, convertFunction: (item: T) => U, populateOptionalFields?: boolean): Transfer<U> {
   return deepCopy({
     ...transfer,
-    from: transfer.from,
-    toAddresses: transfer.toAddresses,
     balances: transfer.balances.map((b) => convertBalance(b, convertFunction)),
-    // precalculateFromApproval: convertApprovalIdDetails(transfer.precalculateFromApproval, convertFunction),
-    merkleProofs: transfer.merkleProofs,
-    memo: transfer.memo
+    precalculateBalancesFromApproval: transfer.precalculateBalancesFromApproval ?? populateOptionalFields ? {
+      approvalId: '',
+      approvalLevel: '',
+      approverAddress: ''
+    } : undefined,
+    merkleProofs: transfer.merkleProofs ?? populateOptionalFields ? [] : undefined,
+    prioritizedApprovals: transfer.prioritizedApprovals ?? populateOptionalFields ? [] : undefined,
+    memo: transfer.memo ?? populateOptionalFields ? '' : undefined,
+    onlyCheckPrioritizedApprovals: transfer.onlyCheckPrioritizedApprovals ?? populateOptionalFields ? false : undefined,
   })
 }
 
@@ -305,24 +309,24 @@ export interface ApprovalIdentifierDetails {
 }
 
 /**
- * ApprovalTrackerIdDetails is used to represent an exact approval.
+ * AmountTrackerIdDetails is used to represent an exact approval.
  *
- * @typedef {Object} ApprovalTrackerIdDetails
- * @property {string} approvalTrackerId - The approval ID of the approval.
+ * @typedef {Object} AmountTrackerIdDetails
+ * @property {string} amountTrackerId - The approval ID of the approval.
  * @property {string} approvalLevel - The approval level of the approval "collection", "incoming", or "outgoing".
  * @property {string} address - The address of the approval to check.
  * @property {string} addressToCheck - The address to check for the approval.
  */
-export interface ApprovalTrackerIdDetails<T extends NumberType> {
+export interface AmountTrackerIdDetails<T extends NumberType> {
   collectionId: T
   approvalLevel: "collection" | "incoming" | "outgoing" | ""
   approverAddress: string
-  approvalTrackerId: string
+  amountTrackerId: string
   trackerType: "overall" | "to" | "from" | "initiatedBy" | ""
   approvedAddress: string
 }
 
-export function convertApprovalTrackerIdDetails<T extends NumberType, U extends NumberType>(approvalIdDetails: ApprovalTrackerIdDetails<T>, convertFunction: (item: T) => U): ApprovalTrackerIdDetails<U> {
+export function convertAmountTrackerIdDetails<T extends NumberType, U extends NumberType>(approvalIdDetails: AmountTrackerIdDetails<T>, convertFunction: (item: T) => U): AmountTrackerIdDetails<U> {
   return deepCopy({
     ...approvalIdDetails,
     collectionId: convertFunction(approvalIdDetails.collectionId),
@@ -351,7 +355,6 @@ export interface MerkleChallenge<T extends NumberType> {
   expectedProofLength: T;
   useCreatorAddressAsLeaf: boolean
   maxOneUsePerLeaf: boolean
-  useLeafIndexForTransferOrder: boolean
   uri: string
   customData: string
 }

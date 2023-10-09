@@ -15,45 +15,8 @@ import { invertUintRanges, removeUintRangeFromUintRange, removeUintsFromUintRang
 
 //TODO: This file was created with AI from the Go equivalent in github.com/bitbadges/bitbadgeschain. It should be cleaned up to be more idiomatic TypeScript.
 
-export interface UniversalCombination {
-  timelineTimesOptions?: ValueOptions; // The times of the timeline. Used in the timeline.
-  fromMappingOptions?: ValueOptions; // The times that the from mapping is allowed to be used. Used in the timeline.
-  toMappingOptions?: ValueOptions; // The times that the to mapping is allowed to be used. Used in the timeline.
-  initiatedByMappingOptions?: ValueOptions; // The times that the initiated by mapping is allowed to be used. Used in the timeline.
-  transferTimesOptions?: ValueOptions; // The times that the transfer mapping is allowed to be used. Used in the timeline.
-  badgeIdsOptions?: ValueOptions; // The times that the badge ids are allowed to be used. Used in the timeline.
-  ownershipTimesOptions?: ValueOptions; // The times that the owned times are allowed to be used. Used in the timeline.
-
-  approvalTrackerIdOptions?: ValueOptions; // The times that the approval tracker id is allowed to be used. Used in the approval tracker.
-  challengeTrackerIdOptions?: ValueOptions; // The times that the challenge tracker id is allowed to be used. Used in the challenge tracker.
-
-  permittedTimesOptions?: ValueOptions; // The times that are permitted to be used.
-  forbiddenTimesOptions?: ValueOptions; // The times that are forbidden to be used.
-}
-
-export interface UniversalCombination {
-  timelineTimesOptions?: ValueOptions;
-
-  fromMappingOptions?: ValueOptions;
-  toMappingOptions?: ValueOptions;
-  initiatedByMappingOptions?: ValueOptions;
-  transferTimesOptions?: ValueOptions;
-  badgeIdsOptions?: ValueOptions;
-  ownershipTimesOptions?: ValueOptions;
-
-  approvalTrackerIdOptions?: ValueOptions;
-  challengeTrackerIdOptions?: ValueOptions;
-
-  permittedTimesOptions?: ValueOptions;
-  forbiddenTimesOptions?: ValueOptions;
-}
 
 export interface UniversalPermission {
-  defaultValues: UniversalDefaultValues;
-  combinations: UniversalCombination[];
-}
-
-export interface UniversalDefaultValues {
   badgeIds: UintRange<bigint>[];
   timelineTimes: UintRange<bigint>[];
   transferTimes: UintRange<bigint>[];
@@ -62,7 +25,7 @@ export interface UniversalDefaultValues {
   fromMapping: AddressMapping;
   initiatedByMapping: AddressMapping;
 
-  approvalTrackerIdMapping: AddressMapping;
+  amountTrackerIdMapping: AddressMapping;
   challengeTrackerIdMapping: AddressMapping;
 
   permittedTimes: UintRange<bigint>[];
@@ -75,11 +38,26 @@ export interface UniversalDefaultValues {
   usesFromMapping: boolean;
   usesInitiatedByMapping: boolean;
   usesOwnershipTimes: boolean;
-  usesApprovalTrackerIdMapping: boolean;
+  usesAmountTrackerIdMapping: boolean;
   usesChallengeTrackerIdMapping: boolean;
 
   arbitraryValue: any;
+
+  timelineTimesOptions?: ValueOptions; // The times of the timeline. Used in the timeline.
+  fromMappingOptions?: ValueOptions; // The times that the from mapping is allowed to be used. Used in the timeline.
+  toMappingOptions?: ValueOptions; // The times that the to mapping is allowed to be used. Used in the timeline.
+  initiatedByMappingOptions?: ValueOptions; // The times that the initiated by mapping is allowed to be used. Used in the timeline.
+  transferTimesOptions?: ValueOptions; // The times that the transfer mapping is allowed to be used. Used in the timeline.
+  badgeIdsOptions?: ValueOptions; // The times that the badge ids are allowed to be used. Used in the timeline.
+  ownershipTimesOptions?: ValueOptions; // The times that the owned times are allowed to be used. Used in the timeline.
+
+  amountTrackerIdOptions?: ValueOptions; // The times that the approval tracker id is allowed to be used. Used in the approval tracker.
+  challengeTrackerIdOptions?: ValueOptions; // The times that the challenge tracker id is allowed to be used. Used in the challenge tracker.
+
+  permittedTimesOptions?: ValueOptions; // The times that are permitted to be used.
+  forbiddenTimesOptions?: ValueOptions; // The times that are forbidden to be used.
 }
+
 
 export interface UniversalPermissionDetails {
   badgeId: UintRange<bigint>;
@@ -90,7 +68,7 @@ export interface UniversalPermissionDetails {
   fromMapping: AddressMapping;
   initiatedByMapping: AddressMapping;
 
-  approvalTrackerIdMapping: AddressMapping;
+  amountTrackerIdMapping: AddressMapping;
   challengeTrackerIdMapping: AddressMapping;
 
   permittedTimes: UintRange<bigint>[];
@@ -152,19 +130,19 @@ export function universalRemoveOverlaps(handled: UniversalPermissionDetails, val
   let [toMappingAfterRemoval, removedToMapping] = removeAddressMappingFromAddressMapping(handled.toMapping, valueToCheck.toMapping);
   let [fromMappingAfterRemoval, removedFromMapping] = removeAddressMappingFromAddressMapping(handled.fromMapping, valueToCheck.fromMapping);
   let [initiatedByMappingAfterRemoval, removedInitiatedByMapping] = removeAddressMappingFromAddressMapping(handled.initiatedByMapping, valueToCheck.initiatedByMapping);
-  let [approvalTrackerIdMappingAfterRemoval, removedApprovalTrackerIdMapping] = removeAddressMappingFromAddressMapping(handled.approvalTrackerIdMapping, valueToCheck.approvalTrackerIdMapping);
+  let [amountTrackerIdMappingAfterRemoval, removedAmountTrackerIdMapping] = removeAddressMappingFromAddressMapping(handled.amountTrackerIdMapping, valueToCheck.amountTrackerIdMapping);
   let [challengeTrackerIdMappingAfterRemoval, removedChallengeTrackerIdMapping] = removeAddressMappingFromAddressMapping(handled.challengeTrackerIdMapping, valueToCheck.challengeTrackerIdMapping);
 
 
   let removedToMappingIsEmpty = isAddressMappingEmpty(removedToMapping);
   let removedFromMappingIsEmpty = isAddressMappingEmpty(removedFromMapping);
   let removedInitiatedByMappingIsEmpty = isAddressMappingEmpty(removedInitiatedByMapping);
-  let removedApprovalTrackerIdMappingIsEmpty = isAddressMappingEmpty(removedApprovalTrackerIdMapping);
+  let removedAmountTrackerIdMappingIsEmpty = isAddressMappingEmpty(removedAmountTrackerIdMapping);
   let removedChallengeTrackerIdMappingIsEmpty = isAddressMappingEmpty(removedChallengeTrackerIdMapping);
 
   const remaining: UniversalPermissionDetails[] = [];
   //If we didn't remove anything at all
-  if (removedTimelineTimes.length === 0 || removedBadges.length === 0 || removedTransferTimes.length === 0 || removedOwnershipTimes.length === 0 || removedToMappingIsEmpty || removedFromMappingIsEmpty || removedInitiatedByMappingIsEmpty || removedApprovalTrackerIdMappingIsEmpty || removedChallengeTrackerIdMappingIsEmpty) {
+  if (removedTimelineTimes.length === 0 || removedBadges.length === 0 || removedTransferTimes.length === 0 || removedOwnershipTimes.length === 0 || removedToMappingIsEmpty || removedFromMappingIsEmpty || removedInitiatedByMappingIsEmpty || removedAmountTrackerIdMappingIsEmpty || removedChallengeTrackerIdMappingIsEmpty) {
     remaining.push(valueToCheck);
     return [remaining, []];
   }
@@ -178,7 +156,7 @@ export function universalRemoveOverlaps(handled: UniversalPermissionDetails, val
       toMapping: valueToCheck.toMapping,
       fromMapping: valueToCheck.fromMapping,
       initiatedByMapping: valueToCheck.initiatedByMapping,
-      approvalTrackerIdMapping: valueToCheck.approvalTrackerIdMapping,
+      amountTrackerIdMapping: valueToCheck.amountTrackerIdMapping,
       challengeTrackerIdMapping: valueToCheck.challengeTrackerIdMapping,
 
 
@@ -199,7 +177,7 @@ export function universalRemoveOverlaps(handled: UniversalPermissionDetails, val
       fromMapping: valueToCheck.fromMapping,
       initiatedByMapping: valueToCheck.initiatedByMapping,
       arbitraryValue: valueToCheck.arbitraryValue,
-      approvalTrackerIdMapping: valueToCheck.approvalTrackerIdMapping,
+      amountTrackerIdMapping: valueToCheck.amountTrackerIdMapping,
       challengeTrackerIdMapping: valueToCheck.challengeTrackerIdMapping,
 
       permittedTimes: [],
@@ -217,7 +195,7 @@ export function universalRemoveOverlaps(handled: UniversalPermissionDetails, val
       fromMapping: valueToCheck.fromMapping,
       initiatedByMapping: valueToCheck.initiatedByMapping,
       arbitraryValue: valueToCheck.arbitraryValue,
-      approvalTrackerIdMapping: valueToCheck.approvalTrackerIdMapping,
+      amountTrackerIdMapping: valueToCheck.amountTrackerIdMapping,
       challengeTrackerIdMapping: valueToCheck.challengeTrackerIdMapping,
 
       permittedTimes: [],
@@ -235,7 +213,7 @@ export function universalRemoveOverlaps(handled: UniversalPermissionDetails, val
       fromMapping: valueToCheck.fromMapping,
       initiatedByMapping: valueToCheck.initiatedByMapping,
       arbitraryValue: valueToCheck.arbitraryValue,
-      approvalTrackerIdMapping: valueToCheck.approvalTrackerIdMapping,
+      amountTrackerIdMapping: valueToCheck.amountTrackerIdMapping,
       challengeTrackerIdMapping: valueToCheck.challengeTrackerIdMapping,
 
       permittedTimes: [],
@@ -252,7 +230,7 @@ export function universalRemoveOverlaps(handled: UniversalPermissionDetails, val
       toMapping: toMappingAfterRemoval,
       fromMapping: valueToCheck.fromMapping,
       initiatedByMapping: valueToCheck.initiatedByMapping,
-      approvalTrackerIdMapping: valueToCheck.approvalTrackerIdMapping,
+      amountTrackerIdMapping: valueToCheck.amountTrackerIdMapping,
       challengeTrackerIdMapping: valueToCheck.challengeTrackerIdMapping,
 
       arbitraryValue: valueToCheck.arbitraryValue,
@@ -269,7 +247,7 @@ export function universalRemoveOverlaps(handled: UniversalPermissionDetails, val
       toMapping: removedToMapping,
       fromMapping: fromMappingAfterRemoval,
       initiatedByMapping: valueToCheck.initiatedByMapping,
-      approvalTrackerIdMapping: valueToCheck.approvalTrackerIdMapping,
+      amountTrackerIdMapping: valueToCheck.amountTrackerIdMapping,
       challengeTrackerIdMapping: valueToCheck.challengeTrackerIdMapping,
 
       arbitraryValue: valueToCheck.arbitraryValue,
@@ -287,7 +265,7 @@ export function universalRemoveOverlaps(handled: UniversalPermissionDetails, val
       toMapping: removedToMapping,
       fromMapping: removedFromMapping,
       initiatedByMapping: initiatedByMappingAfterRemoval,
-      approvalTrackerIdMapping: valueToCheck.approvalTrackerIdMapping,
+      amountTrackerIdMapping: valueToCheck.amountTrackerIdMapping,
       challengeTrackerIdMapping: valueToCheck.challengeTrackerIdMapping,
 
       arbitraryValue: valueToCheck.arbitraryValue,
@@ -296,7 +274,7 @@ export function universalRemoveOverlaps(handled: UniversalPermissionDetails, val
     })
   }
 
-  if (!isAddressMappingEmpty(approvalTrackerIdMappingAfterRemoval)) {
+  if (!isAddressMappingEmpty(amountTrackerIdMappingAfterRemoval)) {
     remaining.push({
       timelineTime: removedTimelineTimes[0],
       badgeId: removedBadges[0],
@@ -305,7 +283,7 @@ export function universalRemoveOverlaps(handled: UniversalPermissionDetails, val
       toMapping: removedToMapping,
       fromMapping: removedFromMapping,
       initiatedByMapping: removedInitiatedByMapping,
-      approvalTrackerIdMapping: approvalTrackerIdMappingAfterRemoval,
+      amountTrackerIdMapping: amountTrackerIdMappingAfterRemoval,
       challengeTrackerIdMapping: valueToCheck.challengeTrackerIdMapping,
 
       arbitraryValue: valueToCheck.arbitraryValue,
@@ -323,7 +301,7 @@ export function universalRemoveOverlaps(handled: UniversalPermissionDetails, val
       toMapping: removedToMapping,
       fromMapping: removedFromMapping,
       initiatedByMapping: removedInitiatedByMapping,
-      approvalTrackerIdMapping: removedApprovalTrackerIdMapping,
+      amountTrackerIdMapping: removedAmountTrackerIdMapping,
       challengeTrackerIdMapping: challengeTrackerIdMappingAfterRemoval,
 
       arbitraryValue: valueToCheck.arbitraryValue,
@@ -345,7 +323,7 @@ export function universalRemoveOverlaps(handled: UniversalPermissionDetails, val
             toMapping: removedToMapping,
             fromMapping: removedFromMapping,
             initiatedByMapping: removedInitiatedByMapping,
-            approvalTrackerIdMapping: removedApprovalTrackerIdMapping,
+            amountTrackerIdMapping: removedAmountTrackerIdMapping,
             challengeTrackerIdMapping: removedChallengeTrackerIdMapping,
 
             arbitraryValue: valueToCheck.arbitraryValue,
@@ -452,7 +430,7 @@ export interface UsedFlags {
   usesFromMapping: boolean;
   usesInitiatedByMapping: boolean;
   usesOwnershipTimes: boolean;
-  usesApprovalTrackerIdMapping: boolean;
+  usesAmountTrackerIdMapping: boolean;
   usesChallengeTrackerIdMapping: boolean;
 }
 
@@ -464,7 +442,7 @@ export const ActionPermissionUsedFlags: UsedFlags = {
   usesFromMapping: false,
   usesInitiatedByMapping: false,
   usesOwnershipTimes: false,
-  usesApprovalTrackerIdMapping: false,
+  usesAmountTrackerIdMapping: false,
   usesChallengeTrackerIdMapping: false,
 }
 
@@ -476,7 +454,7 @@ export const TimedUpdatePermissionUsedFlags: UsedFlags = {
   usesFromMapping: false,
   usesInitiatedByMapping: false,
   usesOwnershipTimes: false,
-  usesApprovalTrackerIdMapping: false,
+  usesAmountTrackerIdMapping: false,
   usesChallengeTrackerIdMapping: false,
 }
 
@@ -488,7 +466,7 @@ export const TimedUpdateWithBadgeIdsPermissionUsedFlags: UsedFlags = {
   usesFromMapping: false,
   usesInitiatedByMapping: false,
   usesOwnershipTimes: false,
-  usesApprovalTrackerIdMapping: false,
+  usesAmountTrackerIdMapping: false,
   usesChallengeTrackerIdMapping: false,
 }
 
@@ -501,12 +479,12 @@ export const BalancesActionPermissionUsedFlags: UsedFlags = {
   usesFromMapping: false,
   usesInitiatedByMapping: false,
   usesOwnershipTimes: true,
-  usesApprovalTrackerIdMapping: false,
+  usesAmountTrackerIdMapping: false,
   usesChallengeTrackerIdMapping: false,
 }
 
 
-export const ApprovedTransferPermissionUsedFlags: UsedFlags = {
+export const ApprovalPermissionUsedFlags: UsedFlags = {
   usesBadgeIds: true,
   usesTimelineTimes: true,
   usesTransferTimes: true,
@@ -514,7 +492,7 @@ export const ApprovedTransferPermissionUsedFlags: UsedFlags = {
   usesFromMapping: true,
   usesInitiatedByMapping: true,
   usesOwnershipTimes: true,
-  usesApprovalTrackerIdMapping: true,
+  usesAmountTrackerIdMapping: true,
   usesChallengeTrackerIdMapping: true,
 }
 
@@ -532,144 +510,140 @@ export function GetFirstMatchOnly(
     //Littel hack but we append a permission with empty permitted, forbidden times but ALL criteria to the end of the array.
     //This is to ensure we always handle all values when we call GetFirstMatchOnly.
     permissions.push({
-      defaultValues: {
-        timelineTimes: [],
-        fromMapping: { mappingId: '', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-        toMapping: { mappingId: '', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-        initiatedByMapping: { mappingId: '', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-        approvalTrackerIdMapping: { mappingId: '', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-        challengeTrackerIdMapping: { mappingId: '', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-        transferTimes: [],
-        badgeIds: [],
-        ownershipTimes: [],
+      timelineTimes: [],
+      fromMapping: { mappingId: '', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+      toMapping: { mappingId: '', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+      initiatedByMapping: { mappingId: '', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+      amountTrackerIdMapping: { mappingId: '', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+      challengeTrackerIdMapping: { mappingId: '', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+      transferTimes: [],
+      badgeIds: [],
+      ownershipTimes: [],
 
-        permittedTimes: [],
-        forbiddenTimes: [],
+      permittedTimes: [],
+      forbiddenTimes: [],
 
-        ...usesFlags,
+      ...usesFlags,
 
-        arbitraryValue: {},
+      arbitraryValue: {},
+
+      timelineTimesOptions: {
+        invertDefault: false,
+        allValues: true,
+        noValues: false
       },
-      combinations: [{
-        timelineTimesOptions: {
-          invertDefault: false,
-          allValues: true,
-          noValues: false
-        },
-        fromMappingOptions: {
-          invertDefault: false,
-          allValues: true,
-          noValues: false
-        },
-        toMappingOptions: {
-          invertDefault: false,
-          allValues: true,
-          noValues: false
-        },
-        initiatedByMappingOptions: {
-          invertDefault: false,
-          allValues: true,
-          noValues: false
-        },
-        transferTimesOptions: {
-          invertDefault: false,
-          allValues: true,
-          noValues: false
-        },
-        badgeIdsOptions: {
-          invertDefault: false,
-          allValues: true,
-          noValues: false
-        },
-        ownershipTimesOptions: {
-          invertDefault: false,
-          allValues: true,
-          noValues: false
-        },
-        permittedTimesOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: true
-        },
-        forbiddenTimesOptions: {
-          invertDefault: false,
-          allValues: false,
-          noValues: true
-        },
-        approvalTrackerIdOptions: {
-          invertDefault: false,
-          allValues: true,
-          noValues: false
-        },
-        challengeTrackerIdOptions: {
-          invertDefault: false,
-          allValues: true,
-          noValues: false
-        },
-      }]
+      fromMappingOptions: {
+        invertDefault: false,
+        allValues: true,
+        noValues: false
+      },
+      toMappingOptions: {
+        invertDefault: false,
+        allValues: true,
+        noValues: false
+      },
+      initiatedByMappingOptions: {
+        invertDefault: false,
+        allValues: true,
+        noValues: false
+      },
+      transferTimesOptions: {
+        invertDefault: false,
+        allValues: true,
+        noValues: false
+      },
+      badgeIdsOptions: {
+        invertDefault: false,
+        allValues: true,
+        noValues: false
+      },
+      ownershipTimesOptions: {
+        invertDefault: false,
+        allValues: true,
+        noValues: false
+      },
+      permittedTimesOptions: {
+        invertDefault: false,
+        allValues: false,
+        noValues: true
+      },
+      forbiddenTimesOptions: {
+        invertDefault: false,
+        allValues: false,
+        noValues: true
+      },
+      amountTrackerIdOptions: {
+        invertDefault: false,
+        allValues: true,
+        noValues: false
+      },
+      challengeTrackerIdOptions: {
+        invertDefault: false,
+        allValues: true,
+        noValues: false
+      },
     })
   }
 
 
   for (const permission of permissions) {
-    for (const combination of permission.combinations) {
-      const badgeIds = GetUintRangesWithOptions(permission.defaultValues.badgeIds, combination.badgeIdsOptions, permission.defaultValues.usesBadgeIds);
-      const timelineTimes = GetUintRangesWithOptions(permission.defaultValues.timelineTimes, combination.timelineTimesOptions, permission.defaultValues.usesTimelineTimes);
-      const transferTimes = GetUintRangesWithOptions(permission.defaultValues.transferTimes, combination.transferTimesOptions, permission.defaultValues.usesTransferTimes);
-      const ownershipTimes = GetUintRangesWithOptions(permission.defaultValues.ownershipTimes, combination.ownershipTimesOptions, permission.defaultValues.usesOwnershipTimes);
-      const permittedTimes = GetUintRangesWithOptions(permission.defaultValues.permittedTimes, combination.permittedTimesOptions, true);
-      const forbiddenTimes = GetUintRangesWithOptions(permission.defaultValues.forbiddenTimes, combination.forbiddenTimesOptions, true);
-      const arbitraryValue = permission.defaultValues.arbitraryValue;
+    const badgeIds = GetUintRangesWithOptions(permission.badgeIds, permission.badgeIdsOptions, permission.usesBadgeIds);
+    const timelineTimes = GetUintRangesWithOptions(permission.timelineTimes, permission.timelineTimesOptions, permission.usesTimelineTimes);
+    const transferTimes = GetUintRangesWithOptions(permission.transferTimes, permission.transferTimesOptions, permission.usesTransferTimes);
+    const ownershipTimes = GetUintRangesWithOptions(permission.ownershipTimes, permission.ownershipTimesOptions, permission.usesOwnershipTimes);
+    const permittedTimes = GetUintRangesWithOptions(permission.permittedTimes, permission.permittedTimesOptions, true);
+    const forbiddenTimes = GetUintRangesWithOptions(permission.forbiddenTimes, permission.forbiddenTimesOptions, true);
+    const arbitraryValue = permission.arbitraryValue;
 
-      const toMapping = GetMappingWithOptions(permission.defaultValues.toMapping, combination.toMappingOptions, permission.defaultValues.usesToMapping);
-      const fromMapping = GetMappingWithOptions(permission.defaultValues.fromMapping, combination.fromMappingOptions, permission.defaultValues.usesFromMapping);
-      const initiatedByMapping = GetMappingWithOptions(permission.defaultValues.initiatedByMapping, combination.initiatedByMappingOptions, permission.defaultValues.usesInitiatedByMapping);
-      const approvalTrackerIdMapping = GetMappingWithOptions(permission.defaultValues.approvalTrackerIdMapping, combination.approvalTrackerIdOptions, permission.defaultValues.usesApprovalTrackerIdMapping);
-      const challengeTrackerIdMapping = GetMappingWithOptions(permission.defaultValues.challengeTrackerIdMapping, combination.challengeTrackerIdOptions, permission.defaultValues.usesChallengeTrackerIdMapping);
+    const toMapping = GetMappingWithOptions(permission.toMapping, permission.toMappingOptions, permission.usesToMapping);
+    const fromMapping = GetMappingWithOptions(permission.fromMapping, permission.fromMappingOptions, permission.usesFromMapping);
+    const initiatedByMapping = GetMappingWithOptions(permission.initiatedByMapping, permission.initiatedByMappingOptions, permission.usesInitiatedByMapping);
+    const amountTrackerIdMapping = GetMappingWithOptions(permission.amountTrackerIdMapping, permission.amountTrackerIdOptions, permission.usesAmountTrackerIdMapping);
+    const challengeTrackerIdMapping = GetMappingWithOptions(permission.challengeTrackerIdMapping, permission.challengeTrackerIdOptions, permission.usesChallengeTrackerIdMapping);
 
 
-      for (const badgeId of badgeIds) {
-        for (const timelineTime of timelineTimes) {
-          for (const transferTime of transferTimes) {
-            for (const ownershipTime of ownershipTimes) {
-              const brokenDown: UniversalPermissionDetails[] = [{
-                badgeId: badgeId,
-                timelineTime: timelineTime,
-                transferTime: transferTime,
-                ownershipTime: ownershipTime,
-                toMapping: toMapping,
-                fromMapping: fromMapping,
-                initiatedByMapping: initiatedByMapping,
-                approvalTrackerIdMapping: approvalTrackerIdMapping,
-                challengeTrackerIdMapping: challengeTrackerIdMapping,
+    for (const badgeId of badgeIds) {
+      for (const timelineTime of timelineTimes) {
+        for (const transferTime of transferTimes) {
+          for (const ownershipTime of ownershipTimes) {
+            const brokenDown: UniversalPermissionDetails[] = [{
+              badgeId: badgeId,
+              timelineTime: timelineTime,
+              transferTime: transferTime,
+              ownershipTime: ownershipTime,
+              toMapping: toMapping,
+              fromMapping: fromMapping,
+              initiatedByMapping: initiatedByMapping,
+              amountTrackerIdMapping: amountTrackerIdMapping,
+              challengeTrackerIdMapping: challengeTrackerIdMapping,
 
+              permittedTimes: permittedTimes,
+              forbiddenTimes: forbiddenTimes,
+
+              arbitraryValue,
+            }];
+
+            const [, remainingAfterHandledIsRemoved] = getOverlapsAndNonOverlaps(brokenDown, handled);
+            for (const remaining of remainingAfterHandledIsRemoved) {
+              handled.push({
+                timelineTime: remaining.timelineTime,
+                badgeId: remaining.badgeId,
+                transferTime: remaining.transferTime,
+                ownershipTime: remaining.ownershipTime,
+                toMapping: remaining.toMapping,
+                fromMapping: remaining.fromMapping,
+                initiatedByMapping: remaining.initiatedByMapping,
+                amountTrackerIdMapping: remaining.amountTrackerIdMapping,
+                challengeTrackerIdMapping: remaining.challengeTrackerIdMapping,
                 permittedTimes: permittedTimes,
                 forbiddenTimes: forbiddenTimes,
-
-                arbitraryValue,
-              }];
-
-              const [, remainingAfterHandledIsRemoved] = getOverlapsAndNonOverlaps(brokenDown, handled);
-              for (const remaining of remainingAfterHandledIsRemoved) {
-                handled.push({
-                  timelineTime: remaining.timelineTime,
-                  badgeId: remaining.badgeId,
-                  transferTime: remaining.transferTime,
-                  ownershipTime: remaining.ownershipTime,
-                  toMapping: remaining.toMapping,
-                  fromMapping: remaining.fromMapping,
-                  initiatedByMapping: remaining.initiatedByMapping,
-                  approvalTrackerIdMapping: remaining.approvalTrackerIdMapping,
-                  challengeTrackerIdMapping: remaining.challengeTrackerIdMapping,
-                  permittedTimes: permittedTimes,
-                  forbiddenTimes: forbiddenTimes,
-                  arbitraryValue: arbitraryValue,
-                });
-              }
+                arbitraryValue: arbitraryValue,
+              });
             }
           }
         }
       }
+
     }
   }
 
@@ -685,7 +659,7 @@ export interface MergedUniversalPermissionDetails {
   fromMapping: AddressMapping;
   initiatedByMapping: AddressMapping;
 
-  approvalTrackerIdMapping: AddressMapping;
+  amountTrackerIdMapping: AddressMapping;
   challengeTrackerIdMapping: AddressMapping;
 
   permittedTimes: UintRange<bigint>[];
@@ -705,7 +679,7 @@ export function MergeUniversalPermissionDetails(permissions: UniversalPermission
       toMapping: permission.toMapping,
       fromMapping: permission.fromMapping,
       initiatedByMapping: permission.initiatedByMapping,
-      approvalTrackerIdMapping: permission.approvalTrackerIdMapping,
+      amountTrackerIdMapping: permission.amountTrackerIdMapping,
       challengeTrackerIdMapping: permission.challengeTrackerIdMapping,
 
       permittedTimes: permission.permittedTimes,
@@ -736,7 +710,7 @@ export function MergeUniversalPermissionDetails(permissions: UniversalPermission
         const toMappingsAreSame = first.toMapping.includeAddresses === second.toMapping.includeAddresses && JSON.stringify(first.toMapping.addresses) === JSON.stringify(second.toMapping.addresses);
         const fromMappingsAreSame = first.fromMapping.includeAddresses === second.fromMapping.includeAddresses && JSON.stringify(first.fromMapping.addresses) === JSON.stringify(second.fromMapping.addresses);
         const initiatedByMappingsAreSame = first.initiatedByMapping.includeAddresses === second.initiatedByMapping.includeAddresses && JSON.stringify(first.initiatedByMapping.addresses) === JSON.stringify(second.initiatedByMapping.addresses);
-        const approvalTrackerIdMappingsAreSame = first.approvalTrackerIdMapping.includeAddresses === second.approvalTrackerIdMapping.includeAddresses && JSON.stringify(first.approvalTrackerIdMapping.addresses) === JSON.stringify(second.approvalTrackerIdMapping.addresses);
+        const amountTrackerIdMappingsAreSame = first.amountTrackerIdMapping.includeAddresses === second.amountTrackerIdMapping.includeAddresses && JSON.stringify(first.amountTrackerIdMapping.addresses) === JSON.stringify(second.amountTrackerIdMapping.addresses);
         const challengeTrackerIdMappingsAreSame = first.challengeTrackerIdMapping.includeAddresses === second.challengeTrackerIdMapping.includeAddresses && JSON.stringify(first.challengeTrackerIdMapping.addresses) === JSON.stringify(second.challengeTrackerIdMapping.addresses);
 
 
@@ -760,7 +734,7 @@ export function MergeUniversalPermissionDetails(permissions: UniversalPermission
         if (toMappingsAreSame) addressSameCount++;
         if (fromMappingsAreSame) addressSameCount++;
         if (initiatedByMappingsAreSame) addressSameCount++;
-        if (approvalTrackerIdMappingsAreSame) addressSameCount++;
+        if (amountTrackerIdMappingsAreSame) addressSameCount++;
         if (challengeTrackerIdMappingsAreSame) addressSameCount++;
 
         if (sameCount === 3 && toMappingsAreSame && fromMappingsAreSame && initiatedByMappingsAreSame && permittedTimesAreSame && forbiddenTimesAreSame && arbitraryValuesAreSame) {
@@ -772,7 +746,7 @@ export function MergeUniversalPermissionDetails(permissions: UniversalPermission
             toMapping: first.toMapping,
             fromMapping: first.fromMapping,
             initiatedByMapping: first.initiatedByMapping,
-            approvalTrackerIdMapping: first.approvalTrackerIdMapping,
+            amountTrackerIdMapping: first.amountTrackerIdMapping,
             challengeTrackerIdMapping: first.challengeTrackerIdMapping,
             permittedTimes: first.permittedTimes,
             forbiddenTimes: first.forbiddenTimes,
@@ -804,10 +778,10 @@ export function MergeUniversalPermissionDetails(permissions: UniversalPermission
               ...first.initiatedByMapping,
               addresses: [...new Set([...first.initiatedByMapping.addresses, ...second.initiatedByMapping.addresses])]
             } : first.initiatedByMapping,
-            approvalTrackerIdMapping: !approvalTrackerIdMappingsAreSame && first.approvalTrackerIdMapping.includeAddresses === second.approvalTrackerIdMapping.includeAddresses ? {
-              ...first.approvalTrackerIdMapping,
-              addresses: [...new Set([...first.approvalTrackerIdMapping.addresses, ...second.approvalTrackerIdMapping.addresses])]
-            } : first.approvalTrackerIdMapping,
+            amountTrackerIdMapping: !amountTrackerIdMappingsAreSame && first.amountTrackerIdMapping.includeAddresses === second.amountTrackerIdMapping.includeAddresses ? {
+              ...first.amountTrackerIdMapping,
+              addresses: [...new Set([...first.amountTrackerIdMapping.addresses, ...second.amountTrackerIdMapping.addresses])]
+            } : first.amountTrackerIdMapping,
             challengeTrackerIdMapping: !challengeTrackerIdMappingsAreSame && first.challengeTrackerIdMapping.includeAddresses === second.challengeTrackerIdMapping.includeAddresses ? {
               ...first.challengeTrackerIdMapping,
               addresses: [...new Set([...first.challengeTrackerIdMapping.addresses, ...second.challengeTrackerIdMapping.addresses])]

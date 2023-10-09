@@ -1,7 +1,7 @@
 import { ActionPermission, AddressMapping, Balance, BalancesActionPermission, TimedUpdatePermission, TimedUpdateWithBadgeIdsPermission, UintRange } from "bitbadgesjs-proto";
 import { GetFirstMatchOnly, UniversalPermissionDetails, getOverlapsAndNonOverlaps, universalRemoveOverlaps } from "./overlaps";
-import { castActionPermissionToUniversalPermission, castBalancesActionPermissionToUniversalPermission, castCollectionApprovedTransferPermissionToUniversalPermission, castTimedUpdatePermissionToUniversalPermission, castTimedUpdateWithBadgeIdsPermissionToUniversalPermission } from "./permissions";
-import { CollectionApprovedTransferPermissionWithDetails } from "./types/collections";
+import { castActionPermissionToUniversalPermission, castBalancesActionPermissionToUniversalPermission, castCollectionApprovalPermissionToUniversalPermission, castTimedUpdatePermissionToUniversalPermission, castTimedUpdateWithBadgeIdsPermissionToUniversalPermission } from "./permissions";
+import { CollectionApprovalPermissionWithDetails } from "./types/collections";
 import { searchUintRangesForId } from "./uintRanges";
 
 interface CompareAndGetUpdateCombosToCheckFn {
@@ -43,7 +43,7 @@ export function getUpdateCombinationsToCheck(
         fromMapping: detailToAdd.fromMapping,
         initiatedByMapping: detailToAdd.initiatedByMapping,
         ownershipTime: detailToAdd.ownershipTime,
-        approvalTrackerIdMapping: detailToAdd.approvalTrackerIdMapping,
+        amountTrackerIdMapping: detailToAdd.amountTrackerIdMapping,
         challengeTrackerIdMapping: detailToAdd.challengeTrackerIdMapping,
 
         permittedTimes: [],
@@ -67,7 +67,7 @@ export function getUpdateCombinationsToCheck(
         toMapping: detailToAdd.toMapping,
         fromMapping: detailToAdd.fromMapping,
         initiatedByMapping: detailToAdd.initiatedByMapping,
-        approvalTrackerIdMapping: detailToAdd.approvalTrackerIdMapping,
+        amountTrackerIdMapping: detailToAdd.amountTrackerIdMapping,
         challengeTrackerIdMapping: detailToAdd.challengeTrackerIdMapping,
 
 
@@ -97,7 +97,7 @@ export function getUpdateCombinationsToCheck(
         toMapping: detailToAdd.toMapping,
         fromMapping: detailToAdd.fromMapping,
         initiatedByMapping: detailToAdd.initiatedByMapping,
-        approvalTrackerIdMapping: detailToAdd.approvalTrackerIdMapping,
+        amountTrackerIdMapping: detailToAdd.amountTrackerIdMapping,
         challengeTrackerIdMapping: detailToAdd.challengeTrackerIdMapping,
         ownershipTime: detailToAdd.ownershipTime,
 
@@ -161,7 +161,7 @@ export function checkTimedUpdatePermission(
       toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
       fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
       initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-      approvalTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+      amountTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
       challengeTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
       permittedTimes: [],
       forbiddenTimes: [],
@@ -198,7 +198,7 @@ export function checkBalancesActionPermission(
           toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
           fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
           initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-          approvalTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+          amountTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
           challengeTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
           permittedTimes: [],
           forbiddenTimes: [],
@@ -237,7 +237,7 @@ export function checkTimedUpdateWithBadgeIdsPermission(
           toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
           fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
           initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-          approvalTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+          amountTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
           challengeTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
           permittedTimes: [],
           forbiddenTimes: [],
@@ -259,7 +259,7 @@ export function checkTimedUpdateWithBadgeIdsPermission(
 /**
  * @category Validate Permissions
  */
-export function checkCollectionApprovedTransferPermission(
+export function checkCollectionApprovalPermission(
   details: {
     timelineTimes: UintRange<bigint>[],
     badgeIds: UintRange<bigint>[],
@@ -268,12 +268,12 @@ export function checkCollectionApprovedTransferPermission(
     toMapping: AddressMapping,
     fromMapping: AddressMapping,
     initiatedByMapping: AddressMapping,
-    approvalTrackerIdMapping: AddressMapping,
+    amountTrackerIdMapping: AddressMapping,
     challengeTrackerIdMapping: AddressMapping,
   }[],
-  permissions: CollectionApprovedTransferPermissionWithDetails<bigint>[]
+  permissions: CollectionApprovalPermissionWithDetails<bigint>[]
 ): Error | null {
-  const castedPermissions = castCollectionApprovedTransferPermissionToUniversalPermission(
+  const castedPermissions = castCollectionApprovalPermissionToUniversalPermission(
     permissions
   );
   const permissionDetails = GetFirstMatchOnly(castedPermissions);
@@ -292,7 +292,7 @@ export function checkCollectionApprovedTransferPermission(
               toMapping: detail.toMapping,
               fromMapping: detail.fromMapping,
               initiatedByMapping: detail.initiatedByMapping,
-              approvalTrackerIdMapping: detail.approvalTrackerIdMapping,
+              amountTrackerIdMapping: detail.amountTrackerIdMapping,
               challengeTrackerIdMapping: detail.challengeTrackerIdMapping,
               permittedTimes: [],
               forbiddenTimes: [],
@@ -314,12 +314,12 @@ export function checkCollectionApprovedTransferPermission(
 /**
  * @category Validate Permissions
  */
-// export function checkUserApprovedOutgoingTransferPermission(
+// export function checkUserOutgoingApprovalPermission(
 //   detailsToCheck: UniversalPermissionDetails[],
-//   permissions: UserApprovedOutgoingTransferPermission<bigint>[],
+//   permissions: UserOutgoingApprovalPermission<bigint>[],
 //   managerAddress: string
 // ): Error | null {
-//   const castedPermissions = castUserApprovedOutgoingTransferPermissionToUniversalPermission(
+//   const castedPermissions = castUserOutgoingApprovalPermissionToUniversalPermission(
 //     managerAddress,
 //     permissions
 //   );
@@ -334,12 +334,12 @@ export function checkCollectionApprovedTransferPermission(
 /**
  * @category Validate Permissions
  */
-// export function checkUserApprovedIncomingTransferPermission(
+// export function checkUserIncomingApprovalPermission(
 //   detailsToCheck: UniversalPermissionDetails[],
-//   permissions: UserApprovedIncomingTransferPermission<bigint>[],
+//   permissions: UserIncomingApprovalPermission<bigint>[],
 //   managerAddress: string
 // ): Error | null {
-//   const castedPermissions = castUserApprovedIncomingTransferPermissionToUniversalPermission(
+//   const castedPermissions = castUserIncomingApprovalPermissionToUniversalPermission(
 //     managerAddress,
 //     permissions
 //   );
@@ -366,7 +366,7 @@ export function checkNotForbiddenForAllOverlaps(
   let usesToMappings = true;
   let usesFromMappings = true;
   let usesInitiatedByMappings = true;
-  let usesApprovalTrackerIdMappings = true;
+  let usesAmountTrackerIdMappings = true;
   let usesChallengeTrackerIdMappings = true;
 
   // Apply dummy ranges to all detailsToCheck
@@ -407,8 +407,8 @@ export function checkNotForbiddenForAllOverlaps(
     }
 
     if (!usesMappings) {
-      usesApprovalTrackerIdMappings = false;
-      detailToCheck.approvalTrackerIdMapping = { mappingId: '', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" }
+      usesAmountTrackerIdMappings = false;
+      detailToCheck.amountTrackerIdMapping = { mappingId: '', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" }
     }
 
     if (!usesMappings) {
@@ -457,8 +457,8 @@ export function checkNotForbiddenForAllOverlaps(
           }
 
           //TODO: this won't be right
-          if (usesApprovalTrackerIdMappings) {
-            errStr += ` for the approval tracker id ${permissionDetail.approvalTrackerIdMapping.mappingId}`;
+          if (usesAmountTrackerIdMappings) {
+            errStr += ` for the approval tracker id ${permissionDetail.amountTrackerIdMapping.mappingId}`;
           }
 
           if (usesChallengeTrackerIdMappings) {

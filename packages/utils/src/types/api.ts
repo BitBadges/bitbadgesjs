@@ -1,5 +1,5 @@
 import { DeliverTxResponse } from "@cosmjs/stargate"
-import { AddressMapping, ApprovalTrackerIdDetails, NumberType, UintRange, convertUintRange } from "bitbadgesjs-proto"
+import { AddressMapping, AmountTrackerIdDetails, NumberType, UintRange, convertUintRange } from "bitbadgesjs-proto"
 import { BroadcastPostBody } from "bitbadgesjs-provider"
 import { ChallengeParams } from "blockin"
 import { TransferActivityInfo, convertTransferActivityInfo } from "./activity"
@@ -130,7 +130,7 @@ export type CollectionViewKey = 'latestActivity' | 'latestAnnouncements' | 'late
  * @property {{ viewKey: CollectionViewKey, bookmark: string }[]} [viewsToFetch] - If present, the specified views will be fetched.
  * @property {boolean} [fetchTotalAndMintBalances] - If true, the total and mint balances will be fetched.
  * @property {string[]} [merkleChallengeIdsToFetch] - If present, the merkle challenges corresponding to the specified merkle challenge IDs will be fetched.
- * @property {ApprovalTrackerIdDetails<NumberType>[]} [approvalsTrackerIdsToFetch] - If present, the approvals trackers corresponding to the specified approvals tracker IDs will be fetched.
+ * @property {AmountTrackerIdDetails<NumberType>[]} [approvalsTrackerIdsToFetch] - If present, the approvals trackers corresponding to the specified approvals tracker IDs will be fetched.
  * @category API / Indexer
  */
 export interface GetAdditionalCollectionDetailsRequestBody {
@@ -141,7 +141,7 @@ export interface GetAdditionalCollectionDetailsRequestBody {
 
   fetchTotalAndMintBalances?: boolean,
   merkleChallengeIdsToFetch?: MerkleChallengeTrackerIdDetails<NumberType>[],
-  approvalsTrackerIdsToFetch?: ApprovalTrackerIdDetails<NumberType>[],
+  approvalsTrackerIdsToFetch?: AmountTrackerIdDetails<NumberType>[],
   handleAllAndAppendDefaults?: boolean
   //customQueries?: { db: string, selector: any, key: string }[],
   //TODO: we can add fully custom queries here (i.e. supply own Mango selector)
@@ -1134,7 +1134,7 @@ export function convertDeleteAddressMappingsRouteSuccessResponse<T extends Numbe
  * @category API / Indexer
  */
 export interface GetApprovalsRouteRequestBody {
-  approvalTrackerIds: ApprovalTrackerIdDetails<NumberType>[],
+  amountTrackerIds: AmountTrackerIdDetails<NumberType>[],
 }
 
 /**

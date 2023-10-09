@@ -14,7 +14,7 @@ const TRANSFERS_TYPES = [
   { name: 'from', type: 'string' },
   { name: 'toAddresses', type: 'string[]' },
   { name: 'balances', type: 'Balance[]' },
-  { name: 'precalculationDetails', type: 'ApprovalIdentifierDetails' },
+  { name: 'precalculateBalancesFromApproval', type: 'ApprovalIdentifierDetails' },
   { name: 'merkleProofs', type: 'MerkleProof[]' },
   { name: 'memo', type: 'string' },
   { name: 'prioritizedApprovals', type: 'ApprovalIdentifierDetails[]' },
@@ -62,7 +62,7 @@ export function createEIP712MsgTransferBadges<T extends NumberType>(
     value: {
       creator,
       collectionId: collectionId.toString(),
-      transfers: transfers.map((x) => convertTransfer(x, Stringify)),
+      transfers: transfers.map((x) => convertTransfer(x, Stringify, true)),
     },
   }
 }

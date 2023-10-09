@@ -1,10 +1,10 @@
-import { ApprovalDetails, BadgeMetadata, BadgeMetadataTimeline, CollectionMetadata, CollectionMetadataTimeline, ContractAddressTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadata, OffChainBalancesMetadataTimeline, StandardsTimeline, TimedUpdatePermission, TimedUpdateWithBadgeIdsPermission, UintRange, deepCopy } from "bitbadgesjs-proto";
+import { ApprovalCriteria, BadgeMetadata, BadgeMetadataTimeline, CollectionMetadata, CollectionMetadataTimeline, ContractAddressTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadata, OffChainBalancesMetadataTimeline, StandardsTimeline, TimedUpdatePermission, TimedUpdateWithBadgeIdsPermission, UintRange, deepCopy } from "bitbadgesjs-proto";
 import { GetFirstMatchOnly, GetUintRangesWithOptions, UniversalPermission, UniversalPermissionDetails, getOverlapsAndNonOverlaps } from "./overlaps";
-import { checkCollectionApprovedTransferPermission, checkTimedUpdatePermission, checkTimedUpdateWithBadgeIdsPermission, getUpdateCombinationsToCheck } from "./permission_checks";
-import { castBadgeMetadataToUniversalPermission, castCollectionApprovedTransferToUniversalPermission } from "./permissions";
+import { checkCollectionApprovalPermission, checkTimedUpdatePermission, checkTimedUpdateWithBadgeIdsPermission, getUpdateCombinationsToCheck } from "./permission_checks";
+import { castBadgeMetadataToUniversalPermission, castCollectionApprovalToUniversalPermission } from "./permissions";
 import { getBadgeMetadataTimesAndValues, getCollectionMetadataTimesAndValues, getContractAddressTimesAndValues, getCustomDataTimesAndValues, getIsArchivedTimesAndValues, getManagerTimesAndValues, getOffChainBalancesMetadataTimesAndValues, getStandardsTimesAndValues } from "./timeline_helpers";
-import { CollectionApprovedTransferPermissionWithDetails, CollectionApprovedTransferWithDetails } from "./types/collections";
-import { expandCollectionApprovedTransfers } from "./userApprovedTransfers";
+import { CollectionApprovalPermissionWithDetails, CollectionApprovalWithDetails } from "./types/collections";
+import { expandCollectionApprovals } from "./userApprovals";
 
 /**
  * @category Validate Updates
@@ -13,34 +13,30 @@ export function getPotentialUpdatesForTimelineValues(times: UintRange<bigint>[][
   let castedPermissions: UniversalPermission[] = [];
   for (let idx = 0; idx < times.length; idx++) {
     castedPermissions.push({
-      defaultValues: {
-        timelineTimes: times[idx],
-        arbitraryValue: values[idx],
-        usesTimelineTimes: true,
-        usesBadgeIds: false,
-        usesOwnershipTimes: false,
-        usesTransferTimes: false,
-        usesToMapping: false,
-        usesFromMapping: false,
-        usesInitiatedByMapping: false,
-        usesApprovalTrackerIdMapping: false,
-        usesChallengeTrackerIdMapping: false,
+      timelineTimes: times[idx],
+      arbitraryValue: values[idx],
+      usesTimelineTimes: true,
+      usesBadgeIds: false,
+      usesOwnershipTimes: false,
+      usesTransferTimes: false,
+      usesToMapping: false,
+      usesFromMapping: false,
+      usesInitiatedByMapping: false,
+      usesAmountTrackerIdMapping: false,
+      usesChallengeTrackerIdMapping: false,
 
-        permittedTimes: [],
-        forbiddenTimes: [],
+      permittedTimes: [],
+      forbiddenTimes: [],
 
-        badgeIds: [],
-        ownershipTimes: [],
-        transferTimes: [],
-        toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-        fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-        initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-        challengeTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-        approvalTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-      },
-      combinations: [{
+      badgeIds: [],
+      ownershipTimes: [],
+      transferTimes: [],
+      toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+      fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+      initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+      challengeTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+      amountTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
 
-      }],
     });
   }
 
@@ -49,91 +45,91 @@ export function getPotentialUpdatesForTimelineValues(times: UintRange<bigint>[][
   return firstMatches;
 }
 
-interface ApprovalDetailsWithIsApproved {
+interface ApprovalCriteriaWithIsApproved {
   isApproved: boolean;
-  approvalDetails: (ApprovalDetails<bigint> | null)[];
+  approvalCriteria: (ApprovalCriteria<bigint> | null)[];
 }
 
-function getFirstMatchOnlyWithApprovalDetails(permissions: UniversalPermission[]): UniversalPermissionDetails[] {
+function getFirstMatchOnlyWithApprovalCriteria(permissions: UniversalPermission[]): UniversalPermissionDetails[] {
   const handled: UniversalPermissionDetails[] = [];
 
   for (const permission of permissions) {
-    for (const combination of permission.combinations) {
-      const badgeIds = GetUintRangesWithOptions(permission.defaultValues.badgeIds, combination.badgeIdsOptions, permission.defaultValues.usesBadgeIds);
-      const timelineTimes = GetUintRangesWithOptions(permission.defaultValues.timelineTimes, combination.timelineTimesOptions, permission.defaultValues.usesTimelineTimes);
-      const transferTimes = GetUintRangesWithOptions(permission.defaultValues.transferTimes, combination.transferTimesOptions, permission.defaultValues.usesTransferTimes);
-      const ownershipTimes = GetUintRangesWithOptions(permission.defaultValues.ownershipTimes, combination.ownershipTimesOptions, permission.defaultValues.usesOwnershipTimes);
-      const permittedTimes = GetUintRangesWithOptions(permission.defaultValues.permittedTimes, combination.permittedTimesOptions, true);
-      const forbiddenTimes = GetUintRangesWithOptions(permission.defaultValues.forbiddenTimes, combination.forbiddenTimesOptions, true);
 
-      for (const badgeId of badgeIds) {
-        for (const timelineTime of timelineTimes) {
-          for (const transferTime of transferTimes) {
-            for (const ownershipTime of ownershipTimes) {
-              const approvalDetails: ApprovalDetails<bigint>[] = [
-                permission.defaultValues.arbitraryValue.approvalDetails ?? null,
-              ];
-              const isApproved: boolean = permission.defaultValues.arbitraryValue.allowedCombinations[0].isApproved;
-              const arbValue: ApprovalDetailsWithIsApproved = {
+    const badgeIds = GetUintRangesWithOptions(permission.badgeIds, permission.badgeIdsOptions, permission.usesBadgeIds);
+    const timelineTimes = GetUintRangesWithOptions(permission.timelineTimes, permission.timelineTimesOptions, permission.usesTimelineTimes);
+    const transferTimes = GetUintRangesWithOptions(permission.transferTimes, permission.transferTimesOptions, permission.usesTransferTimes);
+    const ownershipTimes = GetUintRangesWithOptions(permission.ownershipTimes, permission.ownershipTimesOptions, permission.usesOwnershipTimes);
+    const permittedTimes = GetUintRangesWithOptions(permission.permittedTimes, permission.permittedTimesOptions, true);
+    const forbiddenTimes = GetUintRangesWithOptions(permission.forbiddenTimes, permission.forbiddenTimesOptions, true);
+
+    for (const badgeId of badgeIds) {
+      for (const timelineTime of timelineTimes) {
+        for (const transferTime of transferTimes) {
+          for (const ownershipTime of ownershipTimes) {
+            const approvalCriteria: ApprovalCriteria<bigint>[] = [
+              permission.arbitraryValue.approvalCriteria ?? null,
+            ];
+            const isApproved: boolean = permission.arbitraryValue.isApproved;
+            const arbValue: ApprovalCriteriaWithIsApproved = {
+              isApproved: isApproved,
+              approvalCriteria: approvalCriteria,
+            };
+
+            const brokenDown: UniversalPermissionDetails[] = [
+              {
+                badgeId: badgeId,
+                timelineTime: timelineTime,
+                transferTime: transferTime,
+                ownershipTime: ownershipTime,
+                toMapping: permission.toMapping,
+                fromMapping: permission.fromMapping,
+                initiatedByMapping: permission.initiatedByMapping,
+                amountTrackerIdMapping: permission.amountTrackerIdMapping,
+                challengeTrackerIdMapping: permission.challengeTrackerIdMapping,
+                permittedTimes: permittedTimes,
+                forbiddenTimes: forbiddenTimes,
+                arbitraryValue: arbValue,
+              },
+            ];
+
+            const [overlaps, inBrokenDownButNotHandled, inHandledButNotBrokenDown] = getOverlapsAndNonOverlaps(brokenDown, handled);
+            handled.length = 0;
+
+            handled.push(...inHandledButNotBrokenDown);
+            handled.push(...inBrokenDownButNotHandled);
+
+            for (const overlap of overlaps) {
+              const mergedApprovalCriteria: (ApprovalCriteria<bigint> | null)[] = overlap.secondDetails.arbitraryValue.approvalCriteria.concat(overlap.firstDetails.arbitraryValue.approvalCriteria);
+
+              const isApprovedFirst: boolean = overlap.firstDetails.arbitraryValue.isApproved;
+              const isApprovedSecond: boolean = overlap.secondDetails.arbitraryValue.isApproved;
+              const isApproved: boolean = isApprovedFirst && isApprovedSecond;
+
+              const newArbValue: ApprovalCriteriaWithIsApproved = {
                 isApproved: isApproved,
-                approvalDetails: approvalDetails,
+                approvalCriteria: mergedApprovalCriteria,
               };
 
-              const brokenDown: UniversalPermissionDetails[] = [
-                {
-                  badgeId: badgeId,
-                  timelineTime: timelineTime,
-                  transferTime: transferTime,
-                  ownershipTime: ownershipTime,
-                  toMapping: permission.defaultValues.toMapping,
-                  fromMapping: permission.defaultValues.fromMapping,
-                  initiatedByMapping: permission.defaultValues.initiatedByMapping,
-                  approvalTrackerIdMapping: permission.defaultValues.approvalTrackerIdMapping,
-                  challengeTrackerIdMapping: permission.defaultValues.challengeTrackerIdMapping,
-                  permittedTimes: permittedTimes,
-                  forbiddenTimes: forbiddenTimes,
-                  arbitraryValue: arbValue,
-                },
-              ];
-
-              const [overlaps, inBrokenDownButNotHandled, inHandledButNotBrokenDown] = getOverlapsAndNonOverlaps(brokenDown, handled);
-              handled.length = 0;
-
-              handled.push(...inHandledButNotBrokenDown);
-              handled.push(...inBrokenDownButNotHandled);
-
-              for (const overlap of overlaps) {
-                const mergedApprovalDetails: (ApprovalDetails<bigint> | null)[] = overlap.secondDetails.arbitraryValue.approvalDetails.concat(overlap.firstDetails.arbitraryValue.approvalDetails);
-
-                const isApprovedFirst: boolean = overlap.firstDetails.arbitraryValue.isApproved;
-                const isApprovedSecond: boolean = overlap.secondDetails.arbitraryValue.isApproved;
-                const isApproved: boolean = isApprovedFirst && isApprovedSecond;
-
-                const newArbValue: ApprovalDetailsWithIsApproved = {
-                  isApproved: isApproved,
-                  approvalDetails: mergedApprovalDetails,
-                };
-
-                handled.push({
-                  timelineTime: overlap.overlap.timelineTime,
-                  badgeId: overlap.overlap.badgeId,
-                  transferTime: overlap.overlap.transferTime,
-                  ownershipTime: overlap.overlap.ownershipTime,
-                  toMapping: overlap.overlap.toMapping,
-                  fromMapping: overlap.overlap.fromMapping,
-                  initiatedByMapping: overlap.overlap.initiatedByMapping,
-                  approvalTrackerIdMapping: overlap.overlap.approvalTrackerIdMapping,
-                  challengeTrackerIdMapping: overlap.overlap.challengeTrackerIdMapping,
-                  permittedTimes: permittedTimes,
-                  forbiddenTimes: forbiddenTimes,
-                  arbitraryValue: newArbValue,
-                });
-              }
+              handled.push({
+                timelineTime: overlap.overlap.timelineTime,
+                badgeId: overlap.overlap.badgeId,
+                transferTime: overlap.overlap.transferTime,
+                ownershipTime: overlap.overlap.ownershipTime,
+                toMapping: overlap.overlap.toMapping,
+                fromMapping: overlap.overlap.fromMapping,
+                initiatedByMapping: overlap.overlap.initiatedByMapping,
+                amountTrackerIdMapping: overlap.overlap.amountTrackerIdMapping,
+                challengeTrackerIdMapping: overlap.overlap.challengeTrackerIdMapping,
+                permittedTimes: permittedTimes,
+                forbiddenTimes: forbiddenTimes,
+                arbitraryValue: newArbValue,
+              });
             }
           }
         }
       }
     }
+
   }
 
   const returnArr: UniversalPermissionDetails[] = [];
@@ -157,30 +153,30 @@ function getFirstMatchOnlyWithApprovalDetails(permissions: UniversalPermission[]
 /**
  * @category Validate Updates
  */
-export function validateCollectionApprovedTransfersUpdate(
-  oldApprovedTransfers: CollectionApprovedTransferWithDetails<bigint>[],
-  newApprovedTransfers: CollectionApprovedTransferWithDetails<bigint>[],
-  canUpdateCollectionApprovedTransfers: CollectionApprovedTransferPermissionWithDetails<bigint>[]
+export function validateCollectionApprovalsUpdate(
+  oldApprovals: CollectionApprovalWithDetails<bigint>[],
+  newApprovals: CollectionApprovalWithDetails<bigint>[],
+  canUpdateCollectionApprovals: CollectionApprovalPermissionWithDetails<bigint>[]
 ): Error | null {
   const dummyRanges = [[{ start: 1n, end: 1n }]]
-  let oldTimelineFirstMatches = getPotentialUpdatesForTimelineValues(deepCopy(dummyRanges), [deepCopy(oldApprovedTransfers)]);
-  let newTimelineFirstMatches = getPotentialUpdatesForTimelineValues(deepCopy(dummyRanges), [deepCopy(newApprovedTransfers)]);
+  let oldTimelineFirstMatches = getPotentialUpdatesForTimelineValues(deepCopy(dummyRanges), [deepCopy(oldApprovals)]);
+  let newTimelineFirstMatches = getPotentialUpdatesForTimelineValues(deepCopy(dummyRanges), [deepCopy(newApprovals)]);
 
   let detailsToCheck = getUpdateCombinationsToCheck(oldTimelineFirstMatches, newTimelineFirstMatches, [], function (oldValue: any, newValue: any) {
-    let expandedOldApprovedTransfers = expandCollectionApprovedTransfers(oldValue as CollectionApprovedTransferWithDetails<bigint>[]);
-    let expandedNewApprovedTransfers = expandCollectionApprovedTransfers(newValue as CollectionApprovedTransferWithDetails<bigint>[]);
+    let expandedOldApprovals = expandCollectionApprovals(oldValue as CollectionApprovalWithDetails<bigint>[]);
+    let expandedNewApprovals = expandCollectionApprovals(newValue as CollectionApprovalWithDetails<bigint>[]);
 
-    let oldApprovedTransfers = castCollectionApprovedTransferToUniversalPermission(expandedOldApprovedTransfers);
-    if (!oldApprovedTransfers) {
+    let oldApprovals = castCollectionApprovalToUniversalPermission(expandedOldApprovals);
+    if (!oldApprovals) {
       throw new Error("InvalidOldValue");
     }
-    let newApprovedTransfers = castCollectionApprovedTransferToUniversalPermission(expandedNewApprovedTransfers);
-    if (!newApprovedTransfers) {
+    let newApprovals = castCollectionApprovalToUniversalPermission(expandedNewApprovals);
+    if (!newApprovals) {
       throw new Error("InvalidNewValue");
     }
 
-    let firstMatchesForOld = getFirstMatchOnlyWithApprovalDetails(oldApprovedTransfers);
-    let firstMatchesForNew = getFirstMatchOnlyWithApprovalDetails(newApprovedTransfers);
+    let firstMatchesForOld = getFirstMatchOnlyWithApprovalCriteria(oldApprovals);
+    let firstMatchesForNew = getFirstMatchOnlyWithApprovalCriteria(newApprovals);
 
 
 
@@ -194,11 +190,11 @@ export function validateCollectionApprovedTransfersUpdate(
       if ((oldDetails.arbitraryValue === null && newDetails.arbitraryValue !== null) || (oldDetails.arbitraryValue !== null && newDetails.arbitraryValue === null)) {
         different = true;
       } else {
-        const oldArbVal: ApprovalDetailsWithIsApproved = oldDetails.arbitraryValue as ApprovalDetailsWithIsApproved;
-        const newArbVal: ApprovalDetailsWithIsApproved = newDetails.arbitraryValue as ApprovalDetailsWithIsApproved;
+        const oldArbVal: ApprovalCriteriaWithIsApproved = oldDetails.arbitraryValue as ApprovalCriteriaWithIsApproved;
+        const newArbVal: ApprovalCriteriaWithIsApproved = newDetails.arbitraryValue as ApprovalCriteriaWithIsApproved;
 
-        const oldVal = oldArbVal.approvalDetails;
-        const newVal = newArbVal.approvalDetails;
+        const oldVal = oldArbVal.approvalCriteria;
+        const newVal = newArbVal.approvalCriteria;
 
         if (oldArbVal.isApproved !== newArbVal.isApproved) {
           different = true;
@@ -236,13 +232,13 @@ export function validateCollectionApprovedTransfersUpdate(
       toMapping: x.toMapping,
       fromMapping: x.fromMapping,
       initiatedByMapping: x.initiatedByMapping,
-      approvalTrackerIdMapping: x.approvalTrackerIdMapping,
+      amountTrackerIdMapping: x.amountTrackerIdMapping,
       challengeTrackerIdMapping: x.challengeTrackerIdMapping,
     }
     return result;
   });
 
-  let err = checkCollectionApprovedTransferPermission(details, canUpdateCollectionApprovedTransfers);
+  let err = checkCollectionApprovalPermission(details, canUpdateCollectionApprovals);
   if (err) {
     return err;
   }
@@ -344,7 +340,7 @@ export function validateCollectionMetadataUpdate(
         toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
         fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
         initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-        approvalTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+        amountTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
         challengeTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
         permittedTimes: [], forbiddenTimes: [], arbitraryValue: undefined
       });
@@ -361,7 +357,7 @@ export function validateCollectionMetadataUpdate(
           toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
           fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
           initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-          approvalTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+          amountTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
           challengeTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
           permittedTimes: [], forbiddenTimes: [], arbitraryValue: undefined
         });
@@ -408,7 +404,7 @@ export function validateOffChainBalancesMetadataUpdate(
         toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
         fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
         initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-        approvalTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+        amountTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
         challengeTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
         permittedTimes: [], forbiddenTimes: [], arbitraryValue: undefined
       });
@@ -425,7 +421,7 @@ export function validateOffChainBalancesMetadataUpdate(
           toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
           fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
           initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-          approvalTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+          amountTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
           challengeTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
           permittedTimes: [], forbiddenTimes: [], arbitraryValue: undefined
         });
@@ -458,7 +454,7 @@ export function getUpdatedStringCombinations(oldValue: any, newValue: any): Univ
       toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
       fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
       initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-      approvalTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+      amountTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
       challengeTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
       permittedTimes: [], forbiddenTimes: [], arbitraryValue: undefined
     });
@@ -479,7 +475,7 @@ export function getUpdatedBoolCombinations(oldValue: any, newValue: any): Univer
       toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
       fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
       initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-      approvalTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+      amountTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
       challengeTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
       permittedTimes: [], forbiddenTimes: [], arbitraryValue: undefined
     }];
@@ -565,7 +561,7 @@ export function validateStandardsUpdate(
         toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
         fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
         initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-        approvalTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+        amountTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
         challengeTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
         permittedTimes: [], forbiddenTimes: [], arbitraryValue: undefined
       }];
@@ -578,7 +574,7 @@ export function validateStandardsUpdate(
         toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
         fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
         initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-        approvalTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+        amountTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
         challengeTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
         permittedTimes: [], forbiddenTimes: [], arbitraryValue: undefined
       }];
@@ -593,7 +589,7 @@ export function validateStandardsUpdate(
             toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
             fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
             initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-            approvalTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+            amountTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
             challengeTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
             permittedTimes: [], forbiddenTimes: [], arbitraryValue: undefined
           }];

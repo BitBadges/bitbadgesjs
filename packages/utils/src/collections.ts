@@ -69,11 +69,11 @@ export function incrementMintAndTotalBalances(
     cosmosAddress: "Mint",
     collectionId: collectionId,
     onChain: true,
-    approvedOutgoingTransfers: [],
-    approvedIncomingTransfers: [],
+    outgoingApprovals: [],
+    incomingApprovals: [],
     userPermissions: {
-      canUpdateApprovedIncomingTransfers: [],
-      canUpdateApprovedOutgoingTransfers: [],
+      canUpdateIncomingApprovals: [],
+      canUpdateOutgoingApprovals: [],
     },
     updateHistory: [],
   });
@@ -84,11 +84,11 @@ export function incrementMintAndTotalBalances(
     cosmosAddress: "Total",
     collectionId: collectionId,
     onChain: true,
-    approvedOutgoingTransfers: [],
-    approvedIncomingTransfers: [],
+    outgoingApprovals: [],
+    incomingApprovals: [],
     userPermissions: {
-      canUpdateApprovedIncomingTransfers: [],
-      canUpdateApprovedOutgoingTransfers: [],
+      canUpdateIncomingApprovals: [],
+      canUpdateOutgoingApprovals: [],
     },
     updateHistory: [],
   });

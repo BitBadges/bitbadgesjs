@@ -1,7 +1,7 @@
 import { ActionPermission, BalancesActionPermission, TimedUpdatePermission, TimedUpdateWithBadgeIdsPermission, deepCopy } from "bitbadgesjs-proto";
 import { GetFirstMatchOnly, UniversalPermission, UniversalPermissionDetails, getOverlapsAndNonOverlaps } from "./overlaps";
-import { castActionPermissionToUniversalPermission, castBalancesActionPermissionToUniversalPermission, castCollectionApprovedTransferPermissionToUniversalPermission, castTimedUpdatePermissionToUniversalPermission, castTimedUpdateWithBadgeIdsPermissionToUniversalPermission } from "./permissions";
-import { CollectionApprovedTransferPermissionWithDetails, CollectionPermissionsWithDetails } from "./types/collections";
+import { castActionPermissionToUniversalPermission, castBalancesActionPermissionToUniversalPermission, castCollectionApprovalPermissionToUniversalPermission, castTimedUpdatePermissionToUniversalPermission, castTimedUpdateWithBadgeIdsPermissionToUniversalPermission } from "./permissions";
+import { CollectionApprovalPermissionWithDetails, CollectionPermissionsWithDetails } from "./types/collections";
 import { removeUintRangeFromUintRange } from "./uintRanges";
 //TODO: Add validate basic logic
 
@@ -109,23 +109,23 @@ export function validateTimedUpdateWithBadgeIdsPermissionUpdate(
 /**
  * @category Validate Updates
  */
-export function validateCollectionApprovedTransferPermissionsUpdate(
-  oldPermissions: CollectionApprovedTransferPermissionWithDetails<bigint>[],
-  newPermissions: CollectionApprovedTransferPermissionWithDetails<bigint>[],
+export function validateCollectionApprovalPermissionsUpdate(
+  oldPermissions: CollectionApprovalPermissionWithDetails<bigint>[],
+  newPermissions: CollectionApprovalPermissionWithDetails<bigint>[],
 ): Error | null {
 
-  // const errorOldPermissions = validateCollectionApprovedTransferPermissions(oldPermissions);
+  // const errorOldPermissions = validateCollectionApprovalPermissions(oldPermissions);
   // if (errorOldPermissions) {
   //   return new Error(`Error validating old permissions: ${errorOldPermissions}`);
   // }
 
-  // const errorNewPermissions = validateCollectionApprovedTransferPermissions(newPermissions);
+  // const errorNewPermissions = validateCollectionApprovalPermissions(newPermissions);
   // if (errorNewPermissions) {
   //   return new Error(`Error validating new permissions: ${errorNewPermissions}`);
   // }
 
-  const castedOldPermissions: UniversalPermission[] = castCollectionApprovedTransferPermissionToUniversalPermission(oldPermissions);
-  const castedNewPermissions: UniversalPermission[] = castCollectionApprovedTransferPermissionToUniversalPermission(newPermissions);
+  const castedOldPermissions: UniversalPermission[] = castCollectionApprovalPermissionToUniversalPermission(oldPermissions);
+  const castedNewPermissions: UniversalPermission[] = castCollectionApprovalPermissionToUniversalPermission(newPermissions);
 
   const errorUpdate = validateUniversalPermissionUpdate(
     GetFirstMatchOnly(castedOldPermissions),
@@ -269,10 +269,10 @@ export function validatePermissionsUpdate(
   }
 
   // Can Update Collection Approved Transfers
-  if (newPermissions.canUpdateCollectionApprovedTransfers !== null) {
-    const error = validateCollectionApprovedTransferPermissionsUpdate(oldPermissions.canUpdateCollectionApprovedTransfers, newPermissions.canUpdateCollectionApprovedTransfers);
+  if (newPermissions.canUpdateCollectionApprovals !== null) {
+    const error = validateCollectionApprovalPermissionsUpdate(oldPermissions.canUpdateCollectionApprovals, newPermissions.canUpdateCollectionApprovals);
     if (error) {
-      return new Error(`Error validating update in canUpdateCollectionApprovedTransfers permissions: ${error}`);
+      return new Error(`Error validating update in canUpdateCollectionApprovals permissions: ${error}`);
     }
   }
 

@@ -106,7 +106,7 @@ export function invertAddressMapping(mapping: AddressMapping) {
  *
  * @category Address Mappings
  */
-export function getReservedAddressMapping(addressMappingId: string, managerAddress: string): AddressMapping | undefined {
+export function getReservedAddressMapping(addressMappingId: string): AddressMapping | undefined {
   let inverted = false;
   let addressMapping: AddressMapping | undefined = undefined;
 
@@ -126,17 +126,6 @@ export function getReservedAddressMapping(addressMappingId: string, managerAddre
     };
   }
 
-  if (addressMappingId === 'Manager') {
-    addressMapping = {
-      mappingId: 'Manager',
-      addresses: [managerAddress],
-      includeAddresses: true,
-      uri: '',
-      customData: '',
-      createdBy: '',
-    };
-  }
-
   if (addressMappingId === 'AllWithoutMint') {
     addressMapping = {
       mappingId: 'AllWithoutMint',
@@ -148,9 +137,9 @@ export function getReservedAddressMapping(addressMappingId: string, managerAddre
     };
   }
 
-  if (addressMappingId === 'AllWithMint') {
+  if (addressMappingId === 'AllWithMint' || addressMappingId === 'All') {
     addressMapping = {
-      mappingId: 'AllWithMint',
+      mappingId: addressMappingId,
       addresses: [],
       includeAddresses: false,
       uri: '',

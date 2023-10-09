@@ -1,4 +1,4 @@
-import { AddressMapping, NumberType, UserApprovedIncomingTransfer, UserApprovedOutgoingTransfer, convertIncomingApprovalDetails, convertOutgoingApprovalDetails, convertUserApprovedIncomingTransfer, convertUserApprovedOutgoingTransfer } from "bitbadgesjs-proto"
+import { AddressMapping, NumberType, UserIncomingApproval, UserOutgoingApproval, convertIncomingApprovalCriteria, convertOutgoingApprovalCriteria, convertUserIncomingApproval, convertUserOutgoingApproval } from "bitbadgesjs-proto"
 import { AnnouncementInfo, ReviewInfo, TransferActivityInfo, convertAnnouncementInfo, convertReviewInfo, convertTransferActivityInfo } from "./activity"
 import { PaginationInfo } from "./api"
 import { AccountInfoBase, ApprovalsTrackerInfo, BalanceInfoWithDetails, ClaimAlertInfo, Identified, MerkleChallengeInfo, ProfileInfoBase, convertAccountInfo, convertApprovalsTrackerInfo, convertBalanceInfoWithDetails, convertClaimAlertInfo, convertMerkleChallengeInfo, convertProfileInfo } from "./db"
@@ -9,7 +9,7 @@ import { deepCopy, removeCouchDBDetails } from "./utils"
 /**
  * @category Approvals / Transferability
  */
-export interface UserApprovedOutgoingTransferWithDetails<T extends NumberType> extends UserApprovedOutgoingTransfer<T> {
+export interface UserOutgoingApprovalWithDetails<T extends NumberType> extends UserOutgoingApproval<T> {
   toMapping: AddressMapping;
   // fromMapping: AddressMapping;
   initiatedByMapping: AddressMapping;
@@ -18,12 +18,12 @@ export interface UserApprovedOutgoingTransferWithDetails<T extends NumberType> e
 /**
  * @category Approvals / Transferability
  */
-export function convertUserApprovedOutgoingTransferWithDetails<T extends NumberType, U extends NumberType>(item: UserApprovedOutgoingTransferWithDetails<T>, convertFunction: (item: T) => U): UserApprovedOutgoingTransferWithDetails<U> {
+export function convertUserOutgoingApprovalWithDetails<T extends NumberType, U extends NumberType>(item: UserOutgoingApprovalWithDetails<T>, convertFunction: (item: T) => U): UserOutgoingApprovalWithDetails<U> {
   return deepCopy({
     ...item,
-    ...convertUserApprovedOutgoingTransfer(item, convertFunction),
+    ...convertUserOutgoingApproval(item, convertFunction),
     //TODO: Don't know why this is needed. When commented out, it says incompatible types
-    approvalDetails: item.approvalDetails ? convertOutgoingApprovalDetails(item.approvalDetails, convertFunction) : undefined,
+    approvalCriteria: item.approvalCriteria ? convertOutgoingApprovalCriteria(item.approvalCriteria, convertFunction) : undefined,
   })
 }
 
@@ -32,7 +32,7 @@ export function convertUserApprovedOutgoingTransferWithDetails<T extends NumberT
 /**
  * @category Approvals / Transferability
  */
-export interface UserApprovedIncomingTransferWithDetails<T extends NumberType> extends UserApprovedIncomingTransfer<T> {
+export interface UserIncomingApprovalWithDetails<T extends NumberType> extends UserIncomingApproval<T> {
   // toMapping: AddressMapping;
   fromMapping: AddressMapping;
   initiatedByMapping: AddressMapping;
@@ -41,11 +41,11 @@ export interface UserApprovedIncomingTransferWithDetails<T extends NumberType> e
 /**
  * @category Approvals / Transferability
  */
-export function convertUserApprovedIncomingTransferWithDetails<T extends NumberType, U extends NumberType>(item: UserApprovedIncomingTransferWithDetails<T>, convertFunction: (item: T) => U): UserApprovedIncomingTransferWithDetails<U> {
+export function convertUserIncomingApprovalWithDetails<T extends NumberType, U extends NumberType>(item: UserIncomingApprovalWithDetails<T>, convertFunction: (item: T) => U): UserIncomingApprovalWithDetails<U> {
   return deepCopy({
     ...item,
-    ...convertUserApprovedIncomingTransfer(item, convertFunction),
-    approvalDetails: item.approvalDetails ? convertIncomingApprovalDetails(item.approvalDetails, convertFunction) : undefined,
+    ...convertUserIncomingApproval(item, convertFunction),
+    approvalCriteria: item.approvalCriteria ? convertIncomingApprovalCriteria(item.approvalCriteria, convertFunction) : undefined,
   })
 }
 

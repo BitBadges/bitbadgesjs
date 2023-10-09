@@ -1,16 +1,16 @@
-import { AddressMapping, ApprovalDetails, IncomingApprovalDetails, IsCollectionTransferAllowed, IsUserIncomingTransferAllowed, IsUserOutgoingTransferAllowed, OutgoingApprovalDetails } from "bitbadgesjs-proto";
+import { AddressMapping, ApprovalCriteria, IncomingApprovalCriteria, OutgoingApprovalCriteria } from "bitbadgesjs-proto";
 import { getReservedAddressMapping } from "./addressMappings";
-import { CollectionApprovedTransferWithDetails } from "./types/collections";
-import { UserApprovedIncomingTransferWithDetails, UserApprovedOutgoingTransferWithDetails } from "./types/users";
+import { CollectionApprovalWithDetails } from "./types/collections";
+import { UserIncomingApprovalWithDetails, UserOutgoingApprovalWithDetails } from "./types/users";
 
 /**
  * @category Approvals / Transferability
  */
 export function castOutgoingTransfersToCollectionTransfers(
-  transfers: UserApprovedOutgoingTransferWithDetails<bigint>[],
+  transfers: UserOutgoingApprovalWithDetails<bigint>[],
   fromAddress: string
-): CollectionApprovedTransferWithDetails<bigint>[] {
-  const collectionTransfers: CollectionApprovedTransferWithDetails<bigint>[] = [];
+): CollectionApprovalWithDetails<bigint>[] {
+  const collectionTransfers: CollectionApprovalWithDetails<bigint>[] = [];
   for (const transfer of transfers) {
     collectionTransfers.push(castOutgoingTransferToCollectionTransfer(transfer, fromAddress));
   }
@@ -20,10 +20,10 @@ export function castOutgoingTransfersToCollectionTransfers(
  * @category Approvals / Transferability
  */
 export function castIncomingTransfersToCollectionTransfers(
-  transfers: UserApprovedIncomingTransferWithDetails<bigint>[],
+  transfers: UserIncomingApprovalWithDetails<bigint>[],
   toAddress: string
-): CollectionApprovedTransferWithDetails<bigint>[] {
-  const collectionTransfers: CollectionApprovedTransferWithDetails<bigint>[] = [];
+): CollectionApprovalWithDetails<bigint>[] {
+  const collectionTransfers: CollectionApprovalWithDetails<bigint>[] = [];
   for (const transfer of transfers) {
     collectionTransfers.push(castIncomingTransferToCollectionTransfer(transfer, toAddress));
   }
@@ -33,33 +33,31 @@ export function castIncomingTransfersToCollectionTransfers(
  * @category Approvals / Transferability
  */
 export function castOutgoingTransferToCollectionTransfer(
-  transfer: UserApprovedOutgoingTransferWithDetails<bigint>,
+  transfer: UserOutgoingApprovalWithDetails<bigint>,
   fromAddress: string
-): CollectionApprovedTransferWithDetails<bigint> {
-  const allowedCombinations: IsCollectionTransferAllowed[] = transfer.allowedCombinations.map(CastOutgoingCombinationToCollectionCombination);
-  const approvalDetails = transfer.approvalDetails ? CastOutgoingApprovalDetailsToCollectionApprovalDetails(transfer.approvalDetails) : undefined;
+): CollectionApprovalWithDetails<bigint> {
+  // const allowedCombinations: IsCollectionTransferAllowed[] = transfer.allowedCombinations.map(CastOutgoingCombinationToCollectionCombination);
+  const approvalCriteria = transfer.approvalCriteria ? CastOutgoingApprovalCriteriaToCollectionApprovalCriteria(transfer.approvalCriteria) : undefined;
 
   return {
     ...transfer,
     toMappingId: transfer.toMappingId,
     fromMappingId: fromAddress,
-    fromMapping: getReservedAddressMapping(fromAddress, "") as AddressMapping,
+    fromMapping: getReservedAddressMapping(fromAddress) as AddressMapping,
     initiatedByMappingId: transfer.initiatedByMappingId,
     transferTimes: transfer.transferTimes,
     badgeIds: transfer.badgeIds,
     ownershipTimes: transfer.ownershipTimes,
-    allowedCombinations: allowedCombinations,
-    approvalDetails: approvalDetails,
+    approvalCriteria: approvalCriteria,
   };
 }
 /**
  * @category Approvals / Transferability
  */
 export function castFromCollectionTransferToOutgoingTransfer(
-  transfer: CollectionApprovedTransferWithDetails<bigint>
-): UserApprovedOutgoingTransferWithDetails<bigint> {
-  const allowedCombinations: IsUserOutgoingTransferAllowed[] = transfer.allowedCombinations.map(CastFromCollectionCombinationToOutgoingCombination);
-  const approvalDetails = transfer.approvalDetails ? CastFromCollectionApprovalDetailsToOutgoingApprovalDetails(transfer.approvalDetails) : undefined;
+  transfer: CollectionApprovalWithDetails<bigint>
+): UserOutgoingApprovalWithDetails<bigint> {
+  const approvalCriteria = transfer.approvalCriteria ? CastFromCollectionApprovalCriteriaToOutgoingApprovalCriteria(transfer.approvalCriteria) : undefined;
 
   return {
     ...transfer,
@@ -70,41 +68,37 @@ export function castFromCollectionTransferToOutgoingTransfer(
     transferTimes: transfer.transferTimes,
     badgeIds: transfer.badgeIds,
     ownershipTimes: transfer.ownershipTimes,
-    allowedCombinations: allowedCombinations,
-    approvalDetails: approvalDetails,
+    approvalCriteria: approvalCriteria,
   };
 }
 /**
  * @category Approvals / Transferability
  */
 export function castIncomingTransferToCollectionTransfer(
-  transfer: UserApprovedIncomingTransferWithDetails<bigint>,
+  transfer: UserIncomingApprovalWithDetails<bigint>,
   toAddress: string
-): CollectionApprovedTransferWithDetails<bigint> {
-  const allowedCombinations: IsCollectionTransferAllowed[] = transfer.allowedCombinations.map(CastIncomingCombinationToCollectionCombination);
-  const approvalDetails = transfer.approvalDetails ? CastIncomingApprovalDetailsToCollectionApprovalDetails(transfer.approvalDetails) : undefined;
+): CollectionApprovalWithDetails<bigint> {
+  const approvalCriteria = transfer.approvalCriteria ? CastIncomingApprovalCriteriaToCollectionApprovalCriteria(transfer.approvalCriteria) : undefined;
 
   return {
     ...transfer,
-    toMapping: getReservedAddressMapping(toAddress, "") as AddressMapping,
+    toMapping: getReservedAddressMapping(toAddress) as AddressMapping,
     toMappingId: toAddress,
     fromMappingId: transfer.fromMappingId,
     initiatedByMappingId: transfer.initiatedByMappingId,
     transferTimes: transfer.transferTimes,
     badgeIds: transfer.badgeIds,
     ownershipTimes: transfer.ownershipTimes,
-    allowedCombinations: allowedCombinations,
-    approvalDetails: approvalDetails,
+    approvalCriteria: approvalCriteria,
   };
 }
 /**
  * @category Approvals / Transferability
  */
 export function castFromCollectionTransferToIncomingTransfer(
-  transfer: CollectionApprovedTransferWithDetails<bigint>
-): UserApprovedIncomingTransferWithDetails<bigint> {
-  const allowedCombinations: IsUserIncomingTransferAllowed[] = transfer.allowedCombinations.map(CastFromCollectionCombinationToIncomingCombination);
-  const approvalDetails = transfer.approvalDetails ? CastFromCollectionApprovalDetailsToIncomingApprovalDetails(transfer.approvalDetails) : undefined;
+  transfer: CollectionApprovalWithDetails<bigint>
+): UserIncomingApprovalWithDetails<bigint> {
+  const approvalCriteria = transfer.approvalCriteria ? CastFromCollectionApprovalCriteriaToIncomingApprovalCriteria(transfer.approvalCriteria) : undefined;
 
   return {
     ...transfer,
@@ -113,154 +107,73 @@ export function castFromCollectionTransferToIncomingTransfer(
     transferTimes: transfer.transferTimes,
     badgeIds: transfer.badgeIds,
     ownershipTimes: transfer.ownershipTimes,
-    allowedCombinations: allowedCombinations,
-    approvalDetails: approvalDetails,
+    approvalCriteria: approvalCriteria,
   };
 }
 
-function CastIncomingCombinationToCollectionCombination(
-  combination: IsUserIncomingTransferAllowed
-): IsCollectionTransferAllowed {
+function CastIncomingApprovalCriteriaToCollectionApprovalCriteria(
+  approvalCriteria: IncomingApprovalCriteria<bigint>
+): ApprovalCriteria<bigint> {
   return {
-    isApproved: combination.isApproved,
-    badgeIdsOptions: combination.badgeIdsOptions,
-    transferTimesOptions: combination.transferTimesOptions,
-    fromMappingOptions: combination.fromMappingOptions,
-    initiatedByMappingOptions: combination.initiatedByMappingOptions,
-    ownershipTimesOptions: combination.ownershipTimesOptions,
-    challengeTrackerIdOptions: combination.challengeTrackerIdOptions,
-    approvalTrackerIdOptions: combination.approvalTrackerIdOptions,
-
-    toMappingOptions: {
-      invertDefault: false,
-      allValues: false,
-      noValues: false,
-    }
-  };
-}
-
-function CastFromCollectionCombinationToIncomingCombination(
-  combination: IsCollectionTransferAllowed
-): IsUserIncomingTransferAllowed {
-  return {
-    isApproved: combination.isApproved,
-    badgeIdsOptions: combination.badgeIdsOptions,
-    transferTimesOptions: combination.transferTimesOptions,
-    fromMappingOptions: combination.fromMappingOptions,
-    initiatedByMappingOptions: combination.initiatedByMappingOptions,
-    ownershipTimesOptions: combination.ownershipTimesOptions,
-    approvalTrackerIdOptions: combination.approvalTrackerIdOptions,
-    challengeTrackerIdOptions: combination.challengeTrackerIdOptions,
-  };
-}
-
-function CastOutgoingCombinationToCollectionCombination(
-  combination: IsUserOutgoingTransferAllowed
-): IsCollectionTransferAllowed {
-  return {
-    isApproved: combination.isApproved,
-    badgeIdsOptions: combination.badgeIdsOptions,
-    transferTimesOptions: combination.transferTimesOptions,
-    toMappingOptions: combination.toMappingOptions,
-    initiatedByMappingOptions: combination.initiatedByMappingOptions,
-    ownershipTimesOptions: combination.ownershipTimesOptions,
-    approvalTrackerIdOptions: combination.approvalTrackerIdOptions,
-    challengeTrackerIdOptions: combination.challengeTrackerIdOptions,
-
-    fromMappingOptions: {
-      invertDefault: false,
-      allValues: false,
-      noValues: false,
-    }
-  };
-}
-
-function CastFromCollectionCombinationToOutgoingCombination(
-  combination: IsCollectionTransferAllowed
-): IsUserOutgoingTransferAllowed {
-  return {
-    isApproved: combination.isApproved,
-    badgeIdsOptions: combination.badgeIdsOptions,
-    transferTimesOptions: combination.transferTimesOptions,
-    toMappingOptions: combination.toMappingOptions,
-    initiatedByMappingOptions: combination.initiatedByMappingOptions,
-    ownershipTimesOptions: combination.ownershipTimesOptions,
-    approvalTrackerIdOptions: combination.approvalTrackerIdOptions,
-    challengeTrackerIdOptions: combination.challengeTrackerIdOptions,
-  };
-}
-
-function CastIncomingApprovalDetailsToCollectionApprovalDetails(
-  approvalDetails: IncomingApprovalDetails<bigint>
-): ApprovalDetails<bigint> {
-  return {
-    approvalAmounts: approvalDetails.approvalAmounts,
-    maxNumTransfers: approvalDetails.maxNumTransfers,
-    requireFromEqualsInitiatedBy: approvalDetails.requireFromEqualsInitiatedBy,
-    requireFromDoesNotEqualInitiatedBy: approvalDetails.requireFromDoesNotEqualInitiatedBy,
-    uri: approvalDetails.uri,
-    customData: approvalDetails.customData,
-    predeterminedBalances: approvalDetails.predeterminedBalances,
-    mustOwnBadges: approvalDetails.mustOwnBadges,
-    merkleChallenge: approvalDetails.merkleChallenge,
+    approvalAmounts: approvalCriteria.approvalAmounts,
+    maxNumTransfers: approvalCriteria.maxNumTransfers,
+    requireFromEqualsInitiatedBy: approvalCriteria.requireFromEqualsInitiatedBy,
+    requireFromDoesNotEqualInitiatedBy: approvalCriteria.requireFromDoesNotEqualInitiatedBy,
+    predeterminedBalances: approvalCriteria.predeterminedBalances,
+    mustOwnBadges: approvalCriteria.mustOwnBadges,
+    merkleChallenge: approvalCriteria.merkleChallenge,
 
     requireToEqualsInitiatedBy: false,
     requireToDoesNotEqualInitiatedBy: false,
-    overridesFromApprovedOutgoingTransfers: false,
-    overridesToApprovedIncomingTransfers: false,
+    overridesFromOutgoingApprovals: false,
+    overridesToIncomingApprovals: false,
   };
 }
 
-function CastOutgoingApprovalDetailsToCollectionApprovalDetails(
-  approvalDetails: OutgoingApprovalDetails<bigint>
-): ApprovalDetails<bigint> {
+function CastOutgoingApprovalCriteriaToCollectionApprovalCriteria(
+  approvalCriteria: OutgoingApprovalCriteria<bigint>
+): ApprovalCriteria<bigint> {
   return {
-    approvalAmounts: approvalDetails.approvalAmounts,
-    maxNumTransfers: approvalDetails.maxNumTransfers,
-    requireToEqualsInitiatedBy: approvalDetails.requireToEqualsInitiatedBy,
-    requireToDoesNotEqualInitiatedBy: approvalDetails.requireToDoesNotEqualInitiatedBy,
-    uri: approvalDetails.uri,
-    customData: approvalDetails.customData,
-    predeterminedBalances: approvalDetails.predeterminedBalances,
-    mustOwnBadges: approvalDetails.mustOwnBadges,
-    merkleChallenge: approvalDetails.merkleChallenge,
+    approvalAmounts: approvalCriteria.approvalAmounts,
+    maxNumTransfers: approvalCriteria.maxNumTransfers,
+    requireToEqualsInitiatedBy: approvalCriteria.requireToEqualsInitiatedBy,
+    requireToDoesNotEqualInitiatedBy: approvalCriteria.requireToDoesNotEqualInitiatedBy,
+    predeterminedBalances: approvalCriteria.predeterminedBalances,
+    mustOwnBadges: approvalCriteria.mustOwnBadges,
+    merkleChallenge: approvalCriteria.merkleChallenge,
 
     requireFromEqualsInitiatedBy: false,
     requireFromDoesNotEqualInitiatedBy: false,
-    overridesFromApprovedOutgoingTransfers: false,
-    overridesToApprovedIncomingTransfers: false,
+    overridesFromOutgoingApprovals: false,
+    overridesToIncomingApprovals: false,
 
   };
 }
 
-function CastFromCollectionApprovalDetailsToIncomingApprovalDetails(
-  approvalDetails: ApprovalDetails<bigint>
-): IncomingApprovalDetails<bigint> {
+function CastFromCollectionApprovalCriteriaToIncomingApprovalCriteria(
+  approvalCriteria: ApprovalCriteria<bigint>
+): IncomingApprovalCriteria<bigint> {
   return {
-    approvalAmounts: approvalDetails.approvalAmounts,
-    maxNumTransfers: approvalDetails.maxNumTransfers,
-    requireFromEqualsInitiatedBy: approvalDetails.requireFromEqualsInitiatedBy,
-    requireFromDoesNotEqualInitiatedBy: approvalDetails.requireFromDoesNotEqualInitiatedBy,
-    uri: approvalDetails.uri,
-    customData: approvalDetails.customData,
-    predeterminedBalances: approvalDetails.predeterminedBalances,
-    mustOwnBadges: approvalDetails.mustOwnBadges,
-    merkleChallenge: approvalDetails.merkleChallenge,
+    approvalAmounts: approvalCriteria.approvalAmounts,
+    maxNumTransfers: approvalCriteria.maxNumTransfers,
+    requireFromEqualsInitiatedBy: approvalCriteria.requireFromEqualsInitiatedBy,
+    requireFromDoesNotEqualInitiatedBy: approvalCriteria.requireFromDoesNotEqualInitiatedBy,
+    predeterminedBalances: approvalCriteria.predeterminedBalances,
+    mustOwnBadges: approvalCriteria.mustOwnBadges,
+    merkleChallenge: approvalCriteria.merkleChallenge,
   };
 }
 
-function CastFromCollectionApprovalDetailsToOutgoingApprovalDetails(
-  approvalDetails: ApprovalDetails<bigint>
-): OutgoingApprovalDetails<bigint> {
+function CastFromCollectionApprovalCriteriaToOutgoingApprovalCriteria(
+  approvalCriteria: ApprovalCriteria<bigint>
+): OutgoingApprovalCriteria<bigint> {
   return {
-    approvalAmounts: approvalDetails.approvalAmounts,
-    maxNumTransfers: approvalDetails.maxNumTransfers,
-    requireToEqualsInitiatedBy: approvalDetails.requireToEqualsInitiatedBy,
-    requireToDoesNotEqualInitiatedBy: approvalDetails.requireToDoesNotEqualInitiatedBy,
-    uri: approvalDetails.uri,
-    customData: approvalDetails.customData,
-    predeterminedBalances: approvalDetails.predeterminedBalances,
-    mustOwnBadges: approvalDetails.mustOwnBadges,
-    merkleChallenge: approvalDetails.merkleChallenge,
+    approvalAmounts: approvalCriteria.approvalAmounts,
+    maxNumTransfers: approvalCriteria.maxNumTransfers,
+    requireToEqualsInitiatedBy: approvalCriteria.requireToEqualsInitiatedBy,
+    requireToDoesNotEqualInitiatedBy: approvalCriteria.requireToDoesNotEqualInitiatedBy,
+    predeterminedBalances: approvalCriteria.predeterminedBalances,
+    mustOwnBadges: approvalCriteria.mustOwnBadges,
+    merkleChallenge: approvalCriteria.merkleChallenge,
   };
 }

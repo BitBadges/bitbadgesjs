@@ -9,9 +9,8 @@
   ],
   "references": [
     {"path": "../address-converter/tsconfig.build.json"},
-    {"path": "../eip712/tsconfig.build.json"},
     {"path": "../proto/tsconfig.build.json"},
     {"path": "../provider/tsconfig.build.json"},
-    {"path": "../transactions/tsconfig.build.json"},
+    {"path": "../utils/tsconfig.build.json"},
   ]
 }

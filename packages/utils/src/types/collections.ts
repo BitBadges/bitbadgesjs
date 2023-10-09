@@ -1,9 +1,9 @@
-import { AddressMapping, ApprovalDetails, CollectionApprovedTransfer, CollectionApprovedTransferPermission, CollectionApprovedTransferPermissionDefaultValues, CollectionPermissions, NumberType, UintRange, convertApprovalDetails, convertCollectionApprovedTransfer, convertCollectionApprovedTransferPermission, convertCollectionApprovedTransferPermissionDefaultValues, convertCollectionPermissions, convertUintRange } from "bitbadgesjs-proto";
+import { AddressMapping, ApprovalCriteria, CollectionApproval, CollectionApprovalPermission, CollectionPermissions, NumberType, UintRange, convertApprovalCriteria, convertCollectionApproval, convertCollectionApprovalPermission, convertCollectionPermissions, convertUintRange } from "bitbadgesjs-proto";
 import { AnnouncementInfo, ReviewInfo, TransferActivityInfo, convertAnnouncementInfo, convertReviewInfo, convertTransferActivityInfo } from "./activity";
 import { PaginationInfo } from "./api";
 import { ApprovalsTrackerInfo, BalanceInfoWithDetails, CollectionInfoBase, Identified, MerkleChallengeInfo, MerkleChallengeWithDetails, convertApprovalsTrackerInfo, convertBalanceInfoWithDetails, convertCollectionInfo, convertMerkleChallengeInfo, convertMerkleChallengeWithDetails } from "./db";
 import { Metadata, convertMetadata } from "./metadata";
-import { UserApprovedIncomingTransferWithDetails, UserApprovedOutgoingTransferWithDetails, convertUserApprovedIncomingTransferWithDetails, convertUserApprovedOutgoingTransferWithDetails } from "./users";
+import { UserIncomingApprovalWithDetails, UserOutgoingApprovalWithDetails, convertUserIncomingApprovalWithDetails, convertUserOutgoingApprovalWithDetails } from "./users";
 import { deepCopy, removeCouchDBDetails } from "./utils";
 
 /**
@@ -34,47 +34,38 @@ export function convertBadgeMetadataDetails<T extends NumberType, U extends Numb
 /**
  * @category Approvals / Transferability
  */
-export interface CollectionApprovedTransferPermissionDefaultValuesWithDetails<T extends NumberType> extends CollectionApprovedTransferPermissionDefaultValues<T> {
+export interface CollectionApprovalPermissionWithDetails<T extends NumberType> extends CollectionApprovalPermission<T> {
   toMapping: AddressMapping;
   fromMapping: AddressMapping;
   initiatedByMapping: AddressMapping;
 }
 
-/**
- * @category Approvals / Transferability
- */
-export interface CollectionApprovedTransferPermissionWithDetails<T extends NumberType> extends CollectionApprovedTransferPermission<T> {
-  defaultValues: CollectionApprovedTransferPermissionDefaultValuesWithDetails<T>;
-}
 
 /**
  * @category Approvals / Transferability
  */
-export function convertCollectionApprovedTransferPermissionWithDetails<T extends NumberType, U extends NumberType>(item: CollectionApprovedTransferPermissionWithDetails<T>, convertFunction: (item: T) => U): CollectionApprovedTransferPermissionWithDetails<U> {
+export function convertCollectionApprovalPermissionWithDetails<T extends NumberType, U extends NumberType>(item: CollectionApprovalPermissionWithDetails<T>, convertFunction: (item: T) => U): CollectionApprovalPermissionWithDetails<U> {
   return deepCopy({
     ...item,
-    ...convertCollectionApprovedTransferPermission(item, convertFunction),
-    defaultValues: {
-      ...convertCollectionApprovedTransferPermissionDefaultValues(item.defaultValues, convertFunction),
-      toMapping: item.defaultValues.toMapping,
-      fromMapping: item.defaultValues.fromMapping,
-      initiatedByMapping: item.defaultValues.initiatedByMapping,
-    }
+    ...convertCollectionApprovalPermission(item, convertFunction),
+    toMapping: item.toMapping,
+    fromMapping: item.fromMapping,
+    initiatedByMapping: item.initiatedByMapping,
   })
 }
 
 export interface CollectionPermissionsWithDetails<T extends NumberType> extends CollectionPermissions<T> {
-  canUpdateCollectionApprovedTransfers: CollectionApprovedTransferPermissionWithDetails<T>[];
+  canUpdateCollectionApprovals: CollectionApprovalPermissionWithDetails<T>[];
 }
 
 export function convertCollectionPermissionsWithDetails<T extends NumberType, U extends NumberType>(item: CollectionPermissionsWithDetails<T>, convertFunction: (item: T) => U): CollectionPermissionsWithDetails<U> {
   return deepCopy({
     ...item,
     ...convertCollectionPermissions(item, convertFunction),
-    canUpdateCollectionApprovedTransfers: item.canUpdateCollectionApprovedTransfers.map((canUpdateCollectionApprovedTransfer) => {
+    canUpdateCollectionApprovals: item.canUpdateCollectionApprovals.map((canUpdateCollectionApproval) => {
       return {
-        ...canUpdateCollectionApprovedTransfer,
-        ...convertCollectionApprovedTransferPermissionWithDetails(canUpdateCollectionApprovedTransfer, convertFunction),
+        ...canUpdateCollectionApproval,
+        ...convertCollectionApprovalPermissionWithDetails(canUpdateCollectionApproval, convertFunction),
       }
     }),
   })
@@ -83,15 +74,15 @@ export function convertCollectionPermissionsWithDetails<T extends NumberType, U 
 /**
  * @category Approvals / Transferability
  */
-export interface ApprovalDetailsWithDetails<T extends NumberType> extends ApprovalDetails<T> {
-  merkleChallenge: MerkleChallengeWithDetails<T>;
+export interface ApprovalCriteriaWithDetails<T extends NumberType> extends ApprovalCriteria<T> {
+  merkleChallenge?: MerkleChallengeWithDetails<T>;
 }
 
 /**
  * @category Approvals / Transferability
  */
-export interface CollectionApprovedTransferWithDetails<T extends NumberType> extends CollectionApprovedTransfer<T> {
-  approvalDetails?: ApprovalDetailsWithDetails<T>;
+export interface CollectionApprovalWithDetails<T extends NumberType> extends CollectionApproval<T> {
+  approvalCriteria?: ApprovalCriteriaWithDetails<T>;
   toMapping: AddressMapping;
   fromMapping: AddressMapping;
   initiatedByMapping: AddressMapping;
@@ -100,13 +91,13 @@ export interface CollectionApprovedTransferWithDetails<T extends NumberType> ext
 /**
  * @category Approvals / Transferability
  */
-export function convertCollectionApprovedTransferWithDetails<T extends NumberType, U extends NumberType>(item: CollectionApprovedTransferWithDetails<T>, convertFunction: (item: T) => U): CollectionApprovedTransferWithDetails<U> {
+export function convertCollectionApprovalWithDetails<T extends NumberType, U extends NumberType>(item: CollectionApprovalWithDetails<T>, convertFunction: (item: T) => U): CollectionApprovalWithDetails<U> {
   return deepCopy({
     ...item,
-    ...convertCollectionApprovedTransfer(item, convertFunction),
-    approvalDetails: item.approvalDetails ? {
-      ...convertApprovalDetails(item.approvalDetails, convertFunction),
-      merkleChallenge: convertMerkleChallengeWithDetails(item.approvalDetails.merkleChallenge, convertFunction),
+    ...convertCollectionApproval(item, convertFunction),
+    approvalCriteria: item.approvalCriteria ? {
+      ...convertApprovalCriteria(item.approvalCriteria, convertFunction),
+      merkleChallenge: item.approvalCriteria.merkleChallenge ? convertMerkleChallengeWithDetails(item.approvalCriteria.merkleChallenge, convertFunction) : undefined,
     } : undefined,
   })
 }
@@ -138,11 +129,11 @@ export function convertCollectionApprovedTransferWithDetails<T extends NumberTyp
  * @category API / Indexer
  */
 export interface BitBadgesCollection<T extends NumberType> extends CollectionInfoBase<T>, Identified {
-  collectionApprovedTransfers: CollectionApprovedTransferWithDetails<T>[];
+  collectionApprovals: CollectionApprovalWithDetails<T>[];
   collectionPermissions: CollectionPermissionsWithDetails<T>;
 
-  defaultUserApprovedOutgoingTransfers: UserApprovedOutgoingTransferWithDetails<T>[];
-  defaultUserApprovedIncomingTransfers: UserApprovedIncomingTransferWithDetails<T>[];
+  defaultUserOutgoingApprovals: UserOutgoingApprovalWithDetails<T>[];
+  defaultUserIncomingApprovals: UserIncomingApprovalWithDetails<T>[];
 
   //The following are to be fetched dynamically and as needed from the DB
   cachedCollectionMetadata?: Metadata<T>;
@@ -167,9 +158,9 @@ export function convertBitBadgesCollection<T extends NumberType, U extends Numbe
   return deepCopy({
     ...item,
     ...convertCollectionInfo(item, convertFunction),
-    collectionApprovedTransfers: item.collectionApprovedTransfers.map((collectionApprovedTransfer) => convertCollectionApprovedTransferWithDetails(collectionApprovedTransfer, convertFunction)),
-    defaultUserApprovedIncomingTransfers: item.defaultUserApprovedIncomingTransfers.map((userApprovedIncomingTransfer) => convertUserApprovedIncomingTransferWithDetails(userApprovedIncomingTransfer, convertFunction)),
-    defaultUserApprovedOutgoingTransfers: item.defaultUserApprovedOutgoingTransfers.map((userApprovedOutgoingTransfer) => convertUserApprovedOutgoingTransferWithDetails(userApprovedOutgoingTransfer, convertFunction)),
+    collectionApprovals: item.collectionApprovals.map((collectionApproval) => convertCollectionApprovalWithDetails(collectionApproval, convertFunction)),
+    defaultUserIncomingApprovals: item.defaultUserIncomingApprovals.map((userIncomingApproval) => convertUserIncomingApprovalWithDetails(userIncomingApproval, convertFunction)),
+    defaultUserOutgoingApprovals: item.defaultUserOutgoingApprovals.map((userOutgoingApproval) => convertUserOutgoingApprovalWithDetails(userOutgoingApproval, convertFunction)),
     collectionPermissions: convertCollectionPermissionsWithDetails(item.collectionPermissions, convertFunction),
     cachedCollectionMetadata: item.cachedCollectionMetadata ? convertMetadata(item.cachedCollectionMetadata, convertFunction) : undefined,
     cachedBadgeMetadata: item.cachedBadgeMetadata.map((metadata) => convertBadgeMetadataDetails(metadata, convertFunction)),

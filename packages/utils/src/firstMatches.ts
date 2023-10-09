@@ -10,9 +10,9 @@
 
 import { BadgeMetadata } from "bitbadgesjs-proto";
 import { GetFirstMatchOnly, MergeUniversalPermissionDetails } from "./overlaps";
-import { castCollectionApprovedTransferToUniversalPermission, castUserApprovedIncomingTransfersToUniversalPermission, castUserApprovedOutgoingTransfersToUniversalPermission } from "./permissions";
-import { CollectionApprovedTransferWithDetails } from "./types/collections";
-import { UserApprovedIncomingTransferWithDetails, UserApprovedOutgoingTransferWithDetails } from "./types/users";
+import { castCollectionApprovalToUniversalPermission, castUserIncomingApprovalsToUniversalPermission, castUserOutgoingApprovalsToUniversalPermission } from "./permissions";
+import { CollectionApprovalWithDetails } from "./types/collections";
+import { UserIncomingApprovalWithDetails, UserOutgoingApprovalWithDetails } from "./types/users";
 import { removeUintRangeFromUintRange } from "./uintRanges";
 
 /**
@@ -37,13 +37,13 @@ export function getFirstMatchForBadgeMetadata(
 /**
  * @category Approvals / Transferability
  */
-export function getFirstMatchForCollectionApprovedTransfers(
-  collectionApprovedTransfers: CollectionApprovedTransferWithDetails<bigint>[],
+export function getFirstMatchForCollectionApprovals(
+  collectionApprovals: CollectionApprovalWithDetails<bigint>[],
   handleAllPossibleCombinations?: boolean,
   doNotMerge?: boolean
 ) {
-  const currTransferability: CollectionApprovedTransferWithDetails<bigint>[] = [
-    ...collectionApprovedTransfers,
+  const currTransferability: CollectionApprovalWithDetails<bigint>[] = [
+    ...collectionApprovals,
   ]
 
   if (handleAllPossibleCombinations) {
@@ -55,33 +55,23 @@ export function getFirstMatchForCollectionApprovedTransfers(
       toMappingId: 'AllWithMint',
       initiatedByMappingId: 'AllWithMint',
       approvalId: "",
-      approvalTrackerId: "",
+      amountTrackerId: "",
       challengeTrackerId: "",
       transferTimes: [{ start: 1n, end: 18446744073709551615n }],
       badgeIds: [{ start: 1n, end: 18446744073709551615n }],
       ownershipTimes: [{ start: 1n, end: 18446744073709551615n }],
-      allowedCombinations: [{
-        isApproved: false,
-      }],
+      isApproved: false,
     });
   }
 
-  const expandedTransferability: CollectionApprovedTransferWithDetails<bigint>[] = [];
-  for (const transferability of currTransferability) {
-    for (const combination of transferability.allowedCombinations) {
-      expandedTransferability.push({
-        ...transferability,
-        allowedCombinations: [combination],
-      });
-    }
-  }
+  const expandedTransferability: CollectionApprovalWithDetails<bigint>[] = currTransferability;
 
-  const firstMatches = GetFirstMatchOnly(castCollectionApprovedTransferToUniversalPermission(expandedTransferability));
+  const firstMatches = GetFirstMatchOnly(castCollectionApprovalToUniversalPermission(expandedTransferability));
   const merged = MergeUniversalPermissionDetails(firstMatches, doNotMerge);
 
-  const newApprovedTransfers: CollectionApprovedTransferWithDetails<bigint>[] = [];
+  const newApprovals: CollectionApprovalWithDetails<bigint>[] = [];
   for (const match of merged) {
-    newApprovedTransfers.push({
+    newApprovals.push({
       fromMapping: match.fromMapping,
       fromMappingId: match.fromMapping.mappingId,
       toMapping: match.toMapping,
@@ -93,28 +83,28 @@ export function getFirstMatchForCollectionApprovedTransfers(
       ownershipTimes: match.ownershipTimes,
 
       approvalId: match.arbitraryValue.approvalId,
-      approvalTrackerId: match.arbitraryValue.approvalTrackerId,
+      amountTrackerId: match.arbitraryValue.amountTrackerId,
       challengeTrackerId: match.arbitraryValue.challengeTrackerId,
 
       //TODO: if broken down via first match only, the same approval details may be duplicated across multiple matches (so predeterminedBalances, approvalAmounts, etc. may be weird)
-      approvalDetails: match.arbitraryValue.approvalDetails,
-      allowedCombinations: match.arbitraryValue.allowedCombinations,
+      approvalCriteria: match.arbitraryValue.approvalCriteria,
+      isApproved: match.arbitraryValue.isApproved,
     })
   }
 
-  return newApprovedTransfers;
+  return newApprovals;
 }
 
 /**
  * @category Approvals / Transferability
  */
-export function getFirstMatchForUserOutgoingApprovedTransfers(
-  approvedTransfers: UserApprovedOutgoingTransferWithDetails<bigint>[],
+export function getFirstMatchForUserOutgoingApprovals(
+  approvals: UserOutgoingApprovalWithDetails<bigint>[],
   userAddress: string,
   handleAllPossibleCombinations?: boolean
 ) {
-  const currTransferability: UserApprovedOutgoingTransferWithDetails<bigint>[] = [
-    ...approvedTransfers,
+  const currTransferability: UserOutgoingApprovalWithDetails<bigint>[] = [
+    ...approvals,
   ]
 
   if (handleAllPossibleCombinations) {
@@ -126,33 +116,23 @@ export function getFirstMatchForUserOutgoingApprovedTransfers(
       toMappingId: 'AllWithMint',
       initiatedByMappingId: 'AllWithMint',
       approvalId: "",
-      approvalTrackerId: "",
+      amountTrackerId: "",
       challengeTrackerId: "",
       transferTimes: [{ start: 1n, end: 18446744073709551615n }],
       badgeIds: [{ start: 1n, end: 18446744073709551615n }],
       ownershipTimes: [{ start: 1n, end: 18446744073709551615n }],
-      allowedCombinations: [{
-        isApproved: false,
-      }],
+      isApproved: false,
     });
   }
 
-  const expandedTransferability: UserApprovedOutgoingTransferWithDetails<bigint>[] = [];
-  for (const transferability of currTransferability) {
-    for (const combination of transferability.allowedCombinations) {
-      expandedTransferability.push({
-        ...transferability,
-        allowedCombinations: [combination],
-      });
-    }
-  }
+  const expandedTransferability: UserOutgoingApprovalWithDetails<bigint>[] = currTransferability;
 
-  const firstMatches = GetFirstMatchOnly(castUserApprovedOutgoingTransfersToUniversalPermission(expandedTransferability, userAddress));
+  const firstMatches = GetFirstMatchOnly(castUserOutgoingApprovalsToUniversalPermission(expandedTransferability, userAddress));
   const merged = MergeUniversalPermissionDetails(firstMatches);
 
-  const newApprovedTransfers: UserApprovedOutgoingTransferWithDetails<bigint>[] = [];
+  const newApprovals: UserOutgoingApprovalWithDetails<bigint>[] = [];
   for (const match of merged) {
-    newApprovedTransfers.push({
+    newApprovals.push({
       // fromMapping: match.fromMapping,
       // fromMappingId: match.fromMapping.mappingId,
       toMapping: match.toMapping,
@@ -164,28 +144,28 @@ export function getFirstMatchForUserOutgoingApprovedTransfers(
       ownershipTimes: match.ownershipTimes,
 
       approvalId: match.arbitraryValue.approvalId,
-      approvalTrackerId: match.arbitraryValue.approvalTrackerId,
+      amountTrackerId: match.arbitraryValue.amountTrackerId,
       challengeTrackerId: match.arbitraryValue.challengeTrackerId,
 
       //TODO: if broken down via first match only, the same approval details may be duplicated across multiple matches (so predeterminedBalances, approvalAmounts, etc. may be weird)
-      approvalDetails: match.arbitraryValue.approvalDetails,
-      allowedCombinations: match.arbitraryValue.allowedCombinations,
+      approvalCriteria: match.arbitraryValue.approvalCriteria,
+      isApproved: match.arbitraryValue.isApproved,
     })
   }
 
-  return newApprovedTransfers;
+  return newApprovals;
 }
 
 /**
  * @category Approvals / Transferability
  */
-export function getFirstMatchForUserIncomingApprovedTransfers(
-  approvedTransfers: UserApprovedIncomingTransferWithDetails<bigint>[],
+export function getFirstMatchForUserIncomingApprovals(
+  approvals: UserIncomingApprovalWithDetails<bigint>[],
   userAddress: string,
   handleAllPossibleCombinations?: boolean
 ) {
-  const currTransferability: UserApprovedIncomingTransferWithDetails<bigint>[] = [
-    ...approvedTransfers,
+  const currTransferability: UserIncomingApprovalWithDetails<bigint>[] = [
+    ...approvals,
   ]
 
   if (handleAllPossibleCombinations) {
@@ -197,33 +177,23 @@ export function getFirstMatchForUserIncomingApprovedTransfers(
       // toMappingId: 'AllWithMint',
       initiatedByMappingId: 'AllWithMint',
       approvalId: "",
-      approvalTrackerId: "",
+      amountTrackerId: "",
       challengeTrackerId: "",
       transferTimes: [{ start: 1n, end: 18446744073709551615n }],
       badgeIds: [{ start: 1n, end: 18446744073709551615n }],
       ownershipTimes: [{ start: 1n, end: 18446744073709551615n }],
-      allowedCombinations: [{
-        isApproved: false,
-      }],
+      isApproved: false,
     });
   }
 
-  const expandedTransferability: UserApprovedIncomingTransferWithDetails<bigint>[] = [];
-  for (const transferability of currTransferability) {
-    for (const combination of transferability.allowedCombinations) {
-      expandedTransferability.push({
-        ...transferability,
-        allowedCombinations: [combination],
-      });
-    }
-  }
+  const expandedTransferability: UserIncomingApprovalWithDetails<bigint>[] = currTransferability;
 
-  const firstMatches = GetFirstMatchOnly(castUserApprovedIncomingTransfersToUniversalPermission(expandedTransferability, userAddress));
+  const firstMatches = GetFirstMatchOnly(castUserIncomingApprovalsToUniversalPermission(expandedTransferability, userAddress));
   const merged = MergeUniversalPermissionDetails(firstMatches);
 
-  const newApprovedTransfers: UserApprovedIncomingTransferWithDetails<bigint>[] = [];
+  const newApprovals: UserIncomingApprovalWithDetails<bigint>[] = [];
   for (const match of merged) {
-    newApprovedTransfers.push({
+    newApprovals.push({
       fromMapping: match.fromMapping,
       fromMappingId: match.fromMapping.mappingId,
       // toMapping: match.toMapping,
@@ -235,14 +205,14 @@ export function getFirstMatchForUserIncomingApprovedTransfers(
       ownershipTimes: match.ownershipTimes,
 
       approvalId: match.arbitraryValue.approvalId,
-      approvalTrackerId: match.arbitraryValue.approvalTrackerId,
+      amountTrackerId: match.arbitraryValue.amountTrackerId,
       challengeTrackerId: match.arbitraryValue.challengeTrackerId,
 
       //TODO: if broken down via first match only, the same approval details may be duplicated across multiple matches (so predeterminedBalances, approvalAmounts, etc. may be weird)
-      approvalDetails: match.arbitraryValue.approvalDetails,
-      allowedCombinations: match.arbitraryValue.allowedCombinations,
+      approvalCriteria: match.arbitraryValue.approvalCriteria,
+      isApproved: match.arbitraryValue.isApproved,
     })
   }
 
-  return newApprovedTransfers;
+  return newApprovals;
 }

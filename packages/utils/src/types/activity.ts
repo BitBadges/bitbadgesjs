@@ -174,7 +174,7 @@ export function convertAnnouncementInfo<T extends NumberType, U extends NumberTy
  * @property {NumberType} collectionId - The collection ID of the collection that was transferred.
  * @property {TransferMethod} method - The type of activity, which can be "Transfer", "Mint", or "Claim".
  * @property {string} memo - The memo of the transfer.
- * @property {ApprovalIdentifierDetails} precalculationDetails - The precalculation details of the transfer.
+ * @property {ApprovalIdentifierDetails} precalculateBalancesFromApproval - The precalculation details of the transfer.
  * @property {ApprovalIdentifierDetails[]} prioritizedApprovals - The prioritized approvals of the transfer.
  * @property {boolean} onlyCheckPrioritizedApprovals - Whether or not to only check prioritized approvals.
  * @property {string} initiatedBy - The cosmos address of the user who initiated the transfer.
@@ -188,10 +188,10 @@ export interface TransferActivityInfoBase<T extends NumberType> extends Activity
   from: string;
   balances: Balance<T>[];
   collectionId: T;
-  memo: string;
-  precalculationDetails: ApprovalIdentifierDetails;
-  prioritizedApprovals: ApprovalIdentifierDetails[];
-  onlyCheckPrioritizedApprovals: boolean;
+  memo?: string;
+  precalculateBalancesFromApproval?: ApprovalIdentifierDetails;
+  prioritizedApprovals?: ApprovalIdentifierDetails[];
+  onlyCheckPrioritizedApprovals?: boolean;
 
   initiatedBy: string;
 

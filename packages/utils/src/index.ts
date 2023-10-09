@@ -37,7 +37,7 @@ export * from './math';
 export * from './timelines';
 export * from './overlaps';
 export * from './permission_checks';
-export * from './userApprovedTransfers';
+export * from './userApprovals';
 export * from './update_checks'
 export * from './validate_permissions_updates';
 export * from './approved_transfers_casts';

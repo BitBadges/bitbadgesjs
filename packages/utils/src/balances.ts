@@ -19,11 +19,11 @@ export function getBlankBalance(nonMintApproval: boolean, collection?: BitBadges
 
   const blankBalance: UserBalance<bigint> = {
     balances: [],
-    approvedIncomingTransfers: collection ? collection.defaultUserApprovedIncomingTransfers : [],
-    approvedOutgoingTransfers: collection ? collection.defaultUserApprovedOutgoingTransfers : [],
+    incomingApprovals: collection ? collection.defaultUserIncomingApprovals : [],
+    outgoingApprovals: collection ? collection.defaultUserOutgoingApprovals : [],
     userPermissions: collection ? collection.defaultUserPermissions : {
-      canUpdateApprovedIncomingTransfers: [],
-      canUpdateApprovedOutgoingTransfers: [],
+      canUpdateIncomingApprovals: [],
+      canUpdateOutgoingApprovals: [],
     },
   }
 
@@ -320,7 +320,7 @@ export function getBalancesForIds(idRanges: UintRange<bigint>[], times: UintRang
           toMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
           fromMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
           initiatedByMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
-          approvalTrackerIdMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
+          amountTrackerIdMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
           challengeTrackerIdMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
           arbitraryValue: balanceObj.amount,
 
@@ -342,7 +342,7 @@ export function getBalancesForIds(idRanges: UintRange<bigint>[], times: UintRang
         toMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
         fromMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
         initiatedByMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
-        approvalTrackerIdMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
+        amountTrackerIdMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
         challengeTrackerIdMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
 
         permittedTimes: [],
@@ -398,7 +398,7 @@ export function deleteBalances(rangesToDelete: UintRange<bigint>[], timesToDelet
           toMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
           fromMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
           initiatedByMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
-          approvalTrackerIdMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
+          amountTrackerIdMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
           challengeTrackerIdMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
 
           permittedTimes: [],
@@ -419,7 +419,7 @@ export function deleteBalances(rangesToDelete: UintRange<bigint>[], timesToDelet
           toMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
           fromMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
           initiatedByMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
-          approvalTrackerIdMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
+          amountTrackerIdMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
           challengeTrackerIdMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
 
           permittedTimes: [],
