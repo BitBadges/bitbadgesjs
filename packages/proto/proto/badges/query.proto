@@ -15,36 +15,36 @@ option go_package = "github.com/bitbadges/bitbadgeschain/x/badges/types";
 
 
 // Query defines the gRPC querier service.
-service Query {
-  // Parameters queries the parameters of the module.
-  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
-      option (google.api.http).get = "/bitbadges/bitbadgeschain/badges/params";
-  }
+// service Query {
+//   // Parameters queries the parameters of the module.
+//   rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+//       option (google.api.http).get = "/bitbadges/bitbadgeschain/badges/params";
+//   }
 
-  // Queries a badge collection by ID.
-	rpc GetCollection(QueryGetCollectionRequest) returns (QueryGetCollectionResponse) {
-		option (google.api.http).get = "/bitbadges/bitbadgeschain/badges/get_collection/{collectionId}";
-	}
+//   // Queries a badge collection by ID.
+// 	rpc GetCollection(QueryGetCollectionRequest) returns (QueryGetCollectionResponse) {
+// 		option (google.api.http).get = "/bitbadges/bitbadgeschain/badges/get_collection/{collectionId}";
+// 	}
 
-  rpc GetAddressMapping(QueryGetAddressMappingRequest) returns (QueryGetAddressMappingResponse) {
-    option (google.api.http).get = "/bitbadges/bitbadgeschain/badges/get_address_mapping/{mappingId}";
-  }
+//   rpc GetAddressMapping(QueryGetAddressMappingRequest) returns (QueryGetAddressMappingResponse) {
+//     option (google.api.http).get = "/bitbadges/bitbadgeschain/badges/get_address_mapping/{mappingId}";
+//   }
 
-  rpc GetApprovalsTracker(QueryGetApprovalsTrackerRequest) returns (QueryGetApprovalsTrackerResponse) {
-    option (google.api.http).get = "/bitbadges/bitbadgeschain/badges/get_approvals_tracker/{collectionId}/{approvalLevel}/{approverAddress}/{amountTrackerId}/{trackerType}/{approvedAddress}";
-  }
+//   rpc GetApprovalsTracker(QueryGetApprovalsTrackerRequest) returns (QueryGetApprovalsTrackerResponse) {
+//     option (google.api.http).get = "/bitbadges/bitbadgeschain/badges/get_approvals_tracker/{collectionId}/{approvalLevel}/{approverAddress}/{amountTrackerId}/{trackerType}/{approvedAddress}";
+//   }
 
-  rpc GetNumUsedForMerkleChallenge(QueryGetNumUsedForMerkleChallengeRequest) returns (QueryGetNumUsedForMerkleChallengeResponse) {
-    option (google.api.http).get = "/bitbadges/bitbadgeschain/badges/get_num_used_for_challenge/{collectionId}/{approvalLevel}/{approverAddress}/{challengeTrackerId}/{leafIndex}";
-  }
+//   rpc GetNumUsedForMerkleChallenge(QueryGetNumUsedForMerkleChallengeRequest) returns (QueryGetNumUsedForMerkleChallengeResponse) {
+//     option (google.api.http).get = "/bitbadges/bitbadgeschain/badges/get_num_used_for_challenge/{collectionId}/{approvalLevel}/{approverAddress}/{challengeTrackerId}/{leafIndex}";
+//   }
 
-  // Queries an addresses balance for a badge collection, specified by its ID.
-	rpc GetBalance(QueryGetBalanceRequest) returns (QueryGetBalanceResponse) {
-		option (google.api.http).get = "/bitbadges/bitbadgeschain/badges/get_balance/{collectionId}/{address}";
-	}
+//   // Queries an addresses balance for a badge collection, specified by its ID.
+// 	rpc GetBalance(QueryGetBalanceRequest) returns (QueryGetBalanceResponse) {
+// 		option (google.api.http).get = "/bitbadges/bitbadgeschain/badges/get_balance/{collectionId}/{address}";
+// 	}
 
-  // this line is used by starport scaffolding # 2
-}
+//   // this line is used by starport scaffolding # 2
+// }
 
 // QueryParamsRequest is request type for the Query/Params RPC method.
 message QueryParamsRequest {}
@@ -84,7 +84,7 @@ message QueryGetApprovalsTrackerRequest {
   string collectionId = 5 [(gogoproto.customtype) = "Uint", (gogoproto.nullable) = false];
   string approvalLevel = 2; //"collection" or "incoming" or "outgoing"
   string approverAddress = 3; //if approvalLevel is "collection", leave blank
-  string amountTrackerId = 1; 
+  string amountTrackerId = 1;
   string trackerType = 4;; //"overall", "to", "from", "initiatedBy"
   string approvedAddress = 6; //if trackerType is "overall", leave blank
 }
@@ -98,7 +98,7 @@ message QueryGetNumUsedForMerkleChallengeRequest {
   string approvalLevel = 2; //"collection" or "incoming" or "outgoing"
   string approverAddress = 3; //if approvalLevel is "collection", leave blank
   string challengeTrackerId = 4;
-  string leafIndex = 5 [(gogoproto.customtype) = "Uint", (gogoproto.nullable) = false]; 
+  string leafIndex = 5 [(gogoproto.customtype) = "Uint", (gogoproto.nullable) = false];
 }
 
 message QueryGetNumUsedForMerkleChallengeResponse {
