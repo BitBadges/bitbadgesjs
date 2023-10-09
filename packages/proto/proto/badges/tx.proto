@@ -13,15 +13,15 @@ import "badges/timelines.proto";
 
 option go_package = "github.com/bitbadges/bitbadgeschain/x/badges/types";
 
-// // Msg defines the Msg service.
-// service Msg {
-//   rpc UpdateCollection      (MsgUpdateCollection) returns (MsgUpdateCollectionResponse);
-//   rpc CreateAddressMappings (MsgCreateAddressMappings) returns (MsgCreateAddressMappingsResponse);
-//   rpc TransferBadges(MsgTransferBadges) returns (MsgTransferBadgesResponse);
-//   rpc UpdateUserApprovals(MsgUpdateUserApprovals) returns (MsgUpdateUserApprovalsResponse);
-//   rpc DeleteCollection(MsgDeleteCollection) returns (MsgDeleteCollectionResponse);
-//   // this line is used by starport scaffolding # proto/tx/rpc
-// }
+// Msg defines the Msg service.
+service Msg {
+  rpc UpdateCollection      (MsgUpdateCollection) returns (MsgUpdateCollectionResponse);
+  rpc CreateAddressMappings (MsgCreateAddressMappings) returns (MsgCreateAddressMappingsResponse);
+  rpc TransferBadges(MsgTransferBadges) returns (MsgTransferBadgesResponse);
+  rpc UpdateUserApprovals(MsgUpdateUserApprovals) returns (MsgUpdateUserApprovalsResponse);
+  rpc DeleteCollection(MsgDeleteCollection) returns (MsgDeleteCollectionResponse);
+  // this line is used by starport scaffolding # proto/tx/rpc
+}
 
 //Used for WASM bindings and JSON parsing
 message BadgeCustomMsgType {
@@ -44,7 +44,7 @@ message MsgUpdateCollection {
   UserPermissions defaultUserPermissions = 27;
 
   //The rest of the fields are allowed to be set on creation or update.
-  repeated Balance badgesToCreate = 6;
+  repeated Balance badgesToCreate = 6; 
 
   bool updateCollectionPermissions = 7;
   CollectionPermissions collectionPermissions = 8;
@@ -74,7 +74,7 @@ message MsgUpdateCollection {
   repeated ContractAddressTimeline contractAddressTimeline = 26;
 
   bool updateIsArchivedTimeline = 19;
-  repeated IsArchivedTimeline isArchivedTimeline = 20;
+  repeated IsArchivedTimeline isArchivedTimeline = 20;  
 }
 
 message MsgUpdateCollectionResponse {
@@ -114,7 +114,7 @@ message MsgUpdateUserApprovals {
 
   bool updateIncomingApprovals = 5;
   repeated UserIncomingApproval incomingApprovals = 6;
-
+  
   bool updateUserPermissions = 7;
   UserPermissions userPermissions = 8;
 }
