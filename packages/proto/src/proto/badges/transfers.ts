@@ -202,7 +202,7 @@ export namespace bitbadges.bitbadgeschain.badges {
             root?: string;
             expectedProofLength?: string;
             useCreatorAddressAsLeaf?: boolean;
-            maxOneUsePerLeaf?: boolean;
+            maxUsesPerLeaf?: string;
             uri?: string;
             customData?: string;
         }) {
@@ -218,8 +218,8 @@ export namespace bitbadges.bitbadgeschain.badges {
                 if ("useCreatorAddressAsLeaf" in data && data.useCreatorAddressAsLeaf != undefined) {
                     this.useCreatorAddressAsLeaf = data.useCreatorAddressAsLeaf;
                 }
-                if ("maxOneUsePerLeaf" in data && data.maxOneUsePerLeaf != undefined) {
-                    this.maxOneUsePerLeaf = data.maxOneUsePerLeaf;
+                if ("maxUsesPerLeaf" in data && data.maxUsesPerLeaf != undefined) {
+                    this.maxUsesPerLeaf = data.maxUsesPerLeaf;
                 }
                 if ("uri" in data && data.uri != undefined) {
                     this.uri = data.uri;
@@ -247,10 +247,10 @@ export namespace bitbadges.bitbadgeschain.badges {
         set useCreatorAddressAsLeaf(value: boolean) {
             pb_1.Message.setField(this, 3, value);
         }
-        get maxOneUsePerLeaf() {
-            return pb_1.Message.getFieldWithDefault(this, 4, false) as boolean;
+        get maxUsesPerLeaf() {
+            return pb_1.Message.getFieldWithDefault(this, 4, "") as string;
         }
-        set maxOneUsePerLeaf(value: boolean) {
+        set maxUsesPerLeaf(value: string) {
             pb_1.Message.setField(this, 4, value);
         }
         get uri() {
@@ -269,7 +269,7 @@ export namespace bitbadges.bitbadgeschain.badges {
             root?: string;
             expectedProofLength?: string;
             useCreatorAddressAsLeaf?: boolean;
-            maxOneUsePerLeaf?: boolean;
+            maxUsesPerLeaf?: string;
             uri?: string;
             customData?: string;
         }): MerkleChallenge {
@@ -283,8 +283,8 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (data.useCreatorAddressAsLeaf != null) {
                 message.useCreatorAddressAsLeaf = data.useCreatorAddressAsLeaf;
             }
-            if (data.maxOneUsePerLeaf != null) {
-                message.maxOneUsePerLeaf = data.maxOneUsePerLeaf;
+            if (data.maxUsesPerLeaf != null) {
+                message.maxUsesPerLeaf = data.maxUsesPerLeaf;
             }
             if (data.uri != null) {
                 message.uri = data.uri;
@@ -299,7 +299,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                 root?: string;
                 expectedProofLength?: string;
                 useCreatorAddressAsLeaf?: boolean;
-                maxOneUsePerLeaf?: boolean;
+                maxUsesPerLeaf?: string;
                 uri?: string;
                 customData?: string;
             } = {};
@@ -312,8 +312,8 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (this.useCreatorAddressAsLeaf != null) {
                 data.useCreatorAddressAsLeaf = this.useCreatorAddressAsLeaf;
             }
-            if (this.maxOneUsePerLeaf != null) {
-                data.maxOneUsePerLeaf = this.maxOneUsePerLeaf;
+            if (this.maxUsesPerLeaf != null) {
+                data.maxUsesPerLeaf = this.maxUsesPerLeaf;
             }
             if (this.uri != null) {
                 data.uri = this.uri;
@@ -333,8 +333,8 @@ export namespace bitbadges.bitbadgeschain.badges {
                 writer.writeString(2, this.expectedProofLength);
             if (this.useCreatorAddressAsLeaf != false)
                 writer.writeBool(3, this.useCreatorAddressAsLeaf);
-            if (this.maxOneUsePerLeaf != false)
-                writer.writeBool(4, this.maxOneUsePerLeaf);
+            if (this.maxUsesPerLeaf.length)
+                writer.writeString(4, this.maxUsesPerLeaf);
             if (this.uri.length)
                 writer.writeString(6, this.uri);
             if (this.customData.length)
@@ -358,7 +358,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                         message.useCreatorAddressAsLeaf = reader.readBool();
                         break;
                     case 4:
-                        message.maxOneUsePerLeaf = reader.readBool();
+                        message.maxUsesPerLeaf = reader.readString();
                         break;
                     case 6:
                         message.uri = reader.readString();
