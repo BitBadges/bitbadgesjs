@@ -303,6 +303,7 @@ export namespace bitbadges.bitbadgeschain.badges {
             addressMappings?: dependency_7.bitbadges.bitbadgeschain.badges.AddressMapping[];
             defaultOutgoingApprovals?: dependency_1.bitbadges.bitbadgeschain.badges.UserOutgoingApproval[];
             defaultIncomingApprovals?: dependency_1.bitbadges.bitbadgeschain.badges.UserIncomingApproval[];
+            defaultDisapproveSelfInitiated?: boolean;
         }) {
             super();
             pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [2, 3, 4, 5, 8, 10, 11, 12, 13, 14, 15, 16], this.#one_of_decls);
@@ -351,6 +352,9 @@ export namespace bitbadges.bitbadgeschain.badges {
                 }
                 if ("defaultIncomingApprovals" in data && data.defaultIncomingApprovals != undefined) {
                     this.defaultIncomingApprovals = data.defaultIncomingApprovals;
+                }
+                if ("defaultDisapproveSelfInitiated" in data && data.defaultDisapproveSelfInitiated != undefined) {
+                    this.defaultDisapproveSelfInitiated = data.defaultDisapproveSelfInitiated;
                 }
             }
         }
@@ -447,6 +451,12 @@ export namespace bitbadges.bitbadgeschain.badges {
         set defaultIncomingApprovals(value: dependency_1.bitbadges.bitbadgeschain.badges.UserIncomingApproval[]) {
             pb_1.Message.setRepeatedWrapperField(this, 16, value);
         }
+        get defaultDisapproveSelfInitiated() {
+            return pb_1.Message.getFieldWithDefault(this, 17, false) as boolean;
+        }
+        set defaultDisapproveSelfInitiated(value: boolean) {
+            pb_1.Message.setField(this, 17, value);
+        }
         static fromObject(data: {
             creator?: string;
             collectionMetadataTimeline?: ReturnType<typeof dependency_8.bitbadges.bitbadgeschain.badges.CollectionMetadataTimeline.prototype.toObject>[];
@@ -463,6 +473,7 @@ export namespace bitbadges.bitbadgeschain.badges {
             addressMappings?: ReturnType<typeof dependency_7.bitbadges.bitbadgeschain.badges.AddressMapping.prototype.toObject>[];
             defaultOutgoingApprovals?: ReturnType<typeof dependency_1.bitbadges.bitbadgeschain.badges.UserOutgoingApproval.prototype.toObject>[];
             defaultIncomingApprovals?: ReturnType<typeof dependency_1.bitbadges.bitbadgeschain.badges.UserIncomingApproval.prototype.toObject>[];
+            defaultDisapproveSelfInitiated?: boolean;
         }): MsgNewCollection {
             const message = new MsgNewCollection({});
             if (data.creator != null) {
@@ -510,6 +521,9 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (data.defaultIncomingApprovals != null) {
                 message.defaultIncomingApprovals = data.defaultIncomingApprovals.map(item => dependency_1.bitbadges.bitbadgeschain.badges.UserIncomingApproval.fromObject(item));
             }
+            if (data.defaultDisapproveSelfInitiated != null) {
+                message.defaultDisapproveSelfInitiated = data.defaultDisapproveSelfInitiated;
+            }
             return message;
         }
         toObject() {
@@ -529,6 +543,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                 addressMappings?: ReturnType<typeof dependency_7.bitbadges.bitbadgeschain.badges.AddressMapping.prototype.toObject>[];
                 defaultOutgoingApprovals?: ReturnType<typeof dependency_1.bitbadges.bitbadgeschain.badges.UserOutgoingApproval.prototype.toObject>[];
                 defaultIncomingApprovals?: ReturnType<typeof dependency_1.bitbadges.bitbadgeschain.badges.UserIncomingApproval.prototype.toObject>[];
+                defaultDisapproveSelfInitiated?: boolean;
             } = {};
             if (this.creator != null) {
                 data.creator = this.creator;
@@ -575,6 +590,9 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (this.defaultIncomingApprovals != null) {
                 data.defaultIncomingApprovals = this.defaultIncomingApprovals.map((item: dependency_1.bitbadges.bitbadgeschain.badges.UserIncomingApproval) => item.toObject());
             }
+            if (this.defaultDisapproveSelfInitiated != null) {
+                data.defaultDisapproveSelfInitiated = this.defaultDisapproveSelfInitiated;
+            }
             return data;
         }
         serialize(): Uint8Array;
@@ -611,6 +629,8 @@ export namespace bitbadges.bitbadgeschain.badges {
                 writer.writeRepeatedMessage(15, this.defaultOutgoingApprovals, (item: dependency_1.bitbadges.bitbadgeschain.badges.UserOutgoingApproval) => item.serialize(writer));
             if (this.defaultIncomingApprovals.length)
                 writer.writeRepeatedMessage(16, this.defaultIncomingApprovals, (item: dependency_1.bitbadges.bitbadgeschain.badges.UserIncomingApproval) => item.serialize(writer));
+            if (this.defaultDisapproveSelfInitiated != false)
+                writer.writeBool(17, this.defaultDisapproveSelfInitiated);
             if (!w)
                 return writer.getResultBuffer();
         }
@@ -664,6 +684,9 @@ export namespace bitbadges.bitbadgeschain.badges {
                         break;
                     case 16:
                         reader.readMessage(message.defaultIncomingApprovals, () => pb_1.Message.addToRepeatedWrapperField(message, 16, dependency_1.bitbadges.bitbadgeschain.badges.UserIncomingApproval.deserialize(reader), dependency_1.bitbadges.bitbadgeschain.badges.UserIncomingApproval));
+                        break;
+                    case 17:
+                        message.defaultDisapproveSelfInitiated = reader.readBool();
                         break;
                     default: reader.skipField();
                 }

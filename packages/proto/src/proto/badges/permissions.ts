@@ -313,15 +313,23 @@ export namespace bitbadges.bitbadgeschain.badges {
         constructor(data?: any[] | {
             canUpdateOutgoingApprovals?: UserOutgoingApprovalPermission[];
             canUpdateIncomingApprovals?: UserIncomingApprovalPermission[];
+            canUpdateAutoApproveSelfInitiatedOutgoingTransfers?: ActionPermission[];
+            canUpdateAutoApproveSelfInitiatedIncomingTransfers?: ActionPermission[];
         }) {
             super();
-            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1, 2], this.#one_of_decls);
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1, 2, 3, 4], this.#one_of_decls);
             if (!Array.isArray(data) && typeof data == "object") {
                 if ("canUpdateOutgoingApprovals" in data && data.canUpdateOutgoingApprovals != undefined) {
                     this.canUpdateOutgoingApprovals = data.canUpdateOutgoingApprovals;
                 }
                 if ("canUpdateIncomingApprovals" in data && data.canUpdateIncomingApprovals != undefined) {
                     this.canUpdateIncomingApprovals = data.canUpdateIncomingApprovals;
+                }
+                if ("canUpdateAutoApproveSelfInitiatedOutgoingTransfers" in data && data.canUpdateAutoApproveSelfInitiatedOutgoingTransfers != undefined) {
+                    this.canUpdateAutoApproveSelfInitiatedOutgoingTransfers = data.canUpdateAutoApproveSelfInitiatedOutgoingTransfers;
+                }
+                if ("canUpdateAutoApproveSelfInitiatedIncomingTransfers" in data && data.canUpdateAutoApproveSelfInitiatedIncomingTransfers != undefined) {
+                    this.canUpdateAutoApproveSelfInitiatedIncomingTransfers = data.canUpdateAutoApproveSelfInitiatedIncomingTransfers;
                 }
             }
         }
@@ -337,9 +345,23 @@ export namespace bitbadges.bitbadgeschain.badges {
         set canUpdateIncomingApprovals(value: UserIncomingApprovalPermission[]) {
             pb_1.Message.setRepeatedWrapperField(this, 2, value);
         }
+        get canUpdateAutoApproveSelfInitiatedOutgoingTransfers() {
+            return pb_1.Message.getRepeatedWrapperField(this, ActionPermission, 3) as ActionPermission[];
+        }
+        set canUpdateAutoApproveSelfInitiatedOutgoingTransfers(value: ActionPermission[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 3, value);
+        }
+        get canUpdateAutoApproveSelfInitiatedIncomingTransfers() {
+            return pb_1.Message.getRepeatedWrapperField(this, ActionPermission, 4) as ActionPermission[];
+        }
+        set canUpdateAutoApproveSelfInitiatedIncomingTransfers(value: ActionPermission[]) {
+            pb_1.Message.setRepeatedWrapperField(this, 4, value);
+        }
         static fromObject(data: {
             canUpdateOutgoingApprovals?: ReturnType<typeof UserOutgoingApprovalPermission.prototype.toObject>[];
             canUpdateIncomingApprovals?: ReturnType<typeof UserIncomingApprovalPermission.prototype.toObject>[];
+            canUpdateAutoApproveSelfInitiatedOutgoingTransfers?: ReturnType<typeof ActionPermission.prototype.toObject>[];
+            canUpdateAutoApproveSelfInitiatedIncomingTransfers?: ReturnType<typeof ActionPermission.prototype.toObject>[];
         }): UserPermissions {
             const message = new UserPermissions({});
             if (data.canUpdateOutgoingApprovals != null) {
@@ -348,18 +370,32 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (data.canUpdateIncomingApprovals != null) {
                 message.canUpdateIncomingApprovals = data.canUpdateIncomingApprovals.map(item => UserIncomingApprovalPermission.fromObject(item));
             }
+            if (data.canUpdateAutoApproveSelfInitiatedOutgoingTransfers != null) {
+                message.canUpdateAutoApproveSelfInitiatedOutgoingTransfers = data.canUpdateAutoApproveSelfInitiatedOutgoingTransfers.map(item => ActionPermission.fromObject(item));
+            }
+            if (data.canUpdateAutoApproveSelfInitiatedIncomingTransfers != null) {
+                message.canUpdateAutoApproveSelfInitiatedIncomingTransfers = data.canUpdateAutoApproveSelfInitiatedIncomingTransfers.map(item => ActionPermission.fromObject(item));
+            }
             return message;
         }
         toObject() {
             const data: {
                 canUpdateOutgoingApprovals?: ReturnType<typeof UserOutgoingApprovalPermission.prototype.toObject>[];
                 canUpdateIncomingApprovals?: ReturnType<typeof UserIncomingApprovalPermission.prototype.toObject>[];
+                canUpdateAutoApproveSelfInitiatedOutgoingTransfers?: ReturnType<typeof ActionPermission.prototype.toObject>[];
+                canUpdateAutoApproveSelfInitiatedIncomingTransfers?: ReturnType<typeof ActionPermission.prototype.toObject>[];
             } = {};
             if (this.canUpdateOutgoingApprovals != null) {
                 data.canUpdateOutgoingApprovals = this.canUpdateOutgoingApprovals.map((item: UserOutgoingApprovalPermission) => item.toObject());
             }
             if (this.canUpdateIncomingApprovals != null) {
                 data.canUpdateIncomingApprovals = this.canUpdateIncomingApprovals.map((item: UserIncomingApprovalPermission) => item.toObject());
+            }
+            if (this.canUpdateAutoApproveSelfInitiatedOutgoingTransfers != null) {
+                data.canUpdateAutoApproveSelfInitiatedOutgoingTransfers = this.canUpdateAutoApproveSelfInitiatedOutgoingTransfers.map((item: ActionPermission) => item.toObject());
+            }
+            if (this.canUpdateAutoApproveSelfInitiatedIncomingTransfers != null) {
+                data.canUpdateAutoApproveSelfInitiatedIncomingTransfers = this.canUpdateAutoApproveSelfInitiatedIncomingTransfers.map((item: ActionPermission) => item.toObject());
             }
             return data;
         }
@@ -371,6 +407,10 @@ export namespace bitbadges.bitbadgeschain.badges {
                 writer.writeRepeatedMessage(1, this.canUpdateOutgoingApprovals, (item: UserOutgoingApprovalPermission) => item.serialize(writer));
             if (this.canUpdateIncomingApprovals.length)
                 writer.writeRepeatedMessage(2, this.canUpdateIncomingApprovals, (item: UserIncomingApprovalPermission) => item.serialize(writer));
+            if (this.canUpdateAutoApproveSelfInitiatedOutgoingTransfers.length)
+                writer.writeRepeatedMessage(3, this.canUpdateAutoApproveSelfInitiatedOutgoingTransfers, (item: ActionPermission) => item.serialize(writer));
+            if (this.canUpdateAutoApproveSelfInitiatedIncomingTransfers.length)
+                writer.writeRepeatedMessage(4, this.canUpdateAutoApproveSelfInitiatedIncomingTransfers, (item: ActionPermission) => item.serialize(writer));
             if (!w)
                 return writer.getResultBuffer();
         }
@@ -385,6 +425,12 @@ export namespace bitbadges.bitbadgeschain.badges {
                         break;
                     case 2:
                         reader.readMessage(message.canUpdateIncomingApprovals, () => pb_1.Message.addToRepeatedWrapperField(message, 2, UserIncomingApprovalPermission.deserialize(reader), UserIncomingApprovalPermission));
+                        break;
+                    case 3:
+                        reader.readMessage(message.canUpdateAutoApproveSelfInitiatedOutgoingTransfers, () => pb_1.Message.addToRepeatedWrapperField(message, 3, ActionPermission.deserialize(reader), ActionPermission));
+                        break;
+                    case 4:
+                        reader.readMessage(message.canUpdateAutoApproveSelfInitiatedIncomingTransfers, () => pb_1.Message.addToRepeatedWrapperField(message, 4, ActionPermission.deserialize(reader), ActionPermission));
                         break;
                     default: reader.skipField();
                 }
