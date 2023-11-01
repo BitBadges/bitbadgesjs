@@ -16,7 +16,6 @@ export namespace bitbadges.bitbadgeschain.badges {
         constructor(data?: any[] | {
             canDeleteCollection?: ActionPermission[];
             canArchiveCollection?: TimedUpdatePermission[];
-            canUpdateContractAddress?: TimedUpdatePermission[];
             canUpdateOffChainBalancesMetadata?: TimedUpdatePermission[];
             canUpdateStandards?: TimedUpdatePermission[];
             canUpdateCustomData?: TimedUpdatePermission[];
@@ -27,16 +26,13 @@ export namespace bitbadges.bitbadgeschain.badges {
             canUpdateCollectionApprovals?: CollectionApprovalPermission[];
         }) {
             super();
-            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12], this.#one_of_decls);
+            pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], this.#one_of_decls);
             if (!Array.isArray(data) && typeof data == "object") {
                 if ("canDeleteCollection" in data && data.canDeleteCollection != undefined) {
                     this.canDeleteCollection = data.canDeleteCollection;
                 }
                 if ("canArchiveCollection" in data && data.canArchiveCollection != undefined) {
                     this.canArchiveCollection = data.canArchiveCollection;
-                }
-                if ("canUpdateContractAddress" in data && data.canUpdateContractAddress != undefined) {
-                    this.canUpdateContractAddress = data.canUpdateContractAddress;
                 }
                 if ("canUpdateOffChainBalancesMetadata" in data && data.canUpdateOffChainBalancesMetadata != undefined) {
                     this.canUpdateOffChainBalancesMetadata = data.canUpdateOffChainBalancesMetadata;
@@ -76,64 +72,57 @@ export namespace bitbadges.bitbadgeschain.badges {
         set canArchiveCollection(value: TimedUpdatePermission[]) {
             pb_1.Message.setRepeatedWrapperField(this, 2, value);
         }
-        get canUpdateContractAddress() {
+        get canUpdateOffChainBalancesMetadata() {
             return pb_1.Message.getRepeatedWrapperField(this, TimedUpdatePermission, 3) as TimedUpdatePermission[];
         }
-        set canUpdateContractAddress(value: TimedUpdatePermission[]) {
+        set canUpdateOffChainBalancesMetadata(value: TimedUpdatePermission[]) {
             pb_1.Message.setRepeatedWrapperField(this, 3, value);
         }
-        get canUpdateOffChainBalancesMetadata() {
+        get canUpdateStandards() {
             return pb_1.Message.getRepeatedWrapperField(this, TimedUpdatePermission, 4) as TimedUpdatePermission[];
         }
-        set canUpdateOffChainBalancesMetadata(value: TimedUpdatePermission[]) {
+        set canUpdateStandards(value: TimedUpdatePermission[]) {
             pb_1.Message.setRepeatedWrapperField(this, 4, value);
         }
-        get canUpdateStandards() {
+        get canUpdateCustomData() {
             return pb_1.Message.getRepeatedWrapperField(this, TimedUpdatePermission, 5) as TimedUpdatePermission[];
         }
-        set canUpdateStandards(value: TimedUpdatePermission[]) {
+        set canUpdateCustomData(value: TimedUpdatePermission[]) {
             pb_1.Message.setRepeatedWrapperField(this, 5, value);
         }
-        get canUpdateCustomData() {
+        get canUpdateManager() {
             return pb_1.Message.getRepeatedWrapperField(this, TimedUpdatePermission, 6) as TimedUpdatePermission[];
         }
-        set canUpdateCustomData(value: TimedUpdatePermission[]) {
+        set canUpdateManager(value: TimedUpdatePermission[]) {
             pb_1.Message.setRepeatedWrapperField(this, 6, value);
         }
-        get canUpdateManager() {
+        get canUpdateCollectionMetadata() {
             return pb_1.Message.getRepeatedWrapperField(this, TimedUpdatePermission, 7) as TimedUpdatePermission[];
         }
-        set canUpdateManager(value: TimedUpdatePermission[]) {
+        set canUpdateCollectionMetadata(value: TimedUpdatePermission[]) {
             pb_1.Message.setRepeatedWrapperField(this, 7, value);
         }
-        get canUpdateCollectionMetadata() {
-            return pb_1.Message.getRepeatedWrapperField(this, TimedUpdatePermission, 8) as TimedUpdatePermission[];
-        }
-        set canUpdateCollectionMetadata(value: TimedUpdatePermission[]) {
-            pb_1.Message.setRepeatedWrapperField(this, 8, value);
-        }
         get canCreateMoreBadges() {
-            return pb_1.Message.getRepeatedWrapperField(this, BalancesActionPermission, 9) as BalancesActionPermission[];
+            return pb_1.Message.getRepeatedWrapperField(this, BalancesActionPermission, 8) as BalancesActionPermission[];
         }
         set canCreateMoreBadges(value: BalancesActionPermission[]) {
-            pb_1.Message.setRepeatedWrapperField(this, 9, value);
+            pb_1.Message.setRepeatedWrapperField(this, 8, value);
         }
         get canUpdateBadgeMetadata() {
-            return pb_1.Message.getRepeatedWrapperField(this, TimedUpdateWithBadgeIdsPermission, 10) as TimedUpdateWithBadgeIdsPermission[];
+            return pb_1.Message.getRepeatedWrapperField(this, TimedUpdateWithBadgeIdsPermission, 9) as TimedUpdateWithBadgeIdsPermission[];
         }
         set canUpdateBadgeMetadata(value: TimedUpdateWithBadgeIdsPermission[]) {
-            pb_1.Message.setRepeatedWrapperField(this, 10, value);
+            pb_1.Message.setRepeatedWrapperField(this, 9, value);
         }
         get canUpdateCollectionApprovals() {
-            return pb_1.Message.getRepeatedWrapperField(this, CollectionApprovalPermission, 12) as CollectionApprovalPermission[];
+            return pb_1.Message.getRepeatedWrapperField(this, CollectionApprovalPermission, 10) as CollectionApprovalPermission[];
         }
         set canUpdateCollectionApprovals(value: CollectionApprovalPermission[]) {
-            pb_1.Message.setRepeatedWrapperField(this, 12, value);
+            pb_1.Message.setRepeatedWrapperField(this, 10, value);
         }
         static fromObject(data: {
             canDeleteCollection?: ReturnType<typeof ActionPermission.prototype.toObject>[];
             canArchiveCollection?: ReturnType<typeof TimedUpdatePermission.prototype.toObject>[];
-            canUpdateContractAddress?: ReturnType<typeof TimedUpdatePermission.prototype.toObject>[];
             canUpdateOffChainBalancesMetadata?: ReturnType<typeof TimedUpdatePermission.prototype.toObject>[];
             canUpdateStandards?: ReturnType<typeof TimedUpdatePermission.prototype.toObject>[];
             canUpdateCustomData?: ReturnType<typeof TimedUpdatePermission.prototype.toObject>[];
@@ -149,9 +138,6 @@ export namespace bitbadges.bitbadgeschain.badges {
             }
             if (data.canArchiveCollection != null) {
                 message.canArchiveCollection = data.canArchiveCollection.map(item => TimedUpdatePermission.fromObject(item));
-            }
-            if (data.canUpdateContractAddress != null) {
-                message.canUpdateContractAddress = data.canUpdateContractAddress.map(item => TimedUpdatePermission.fromObject(item));
             }
             if (data.canUpdateOffChainBalancesMetadata != null) {
                 message.canUpdateOffChainBalancesMetadata = data.canUpdateOffChainBalancesMetadata.map(item => TimedUpdatePermission.fromObject(item));
@@ -183,7 +169,6 @@ export namespace bitbadges.bitbadgeschain.badges {
             const data: {
                 canDeleteCollection?: ReturnType<typeof ActionPermission.prototype.toObject>[];
                 canArchiveCollection?: ReturnType<typeof TimedUpdatePermission.prototype.toObject>[];
-                canUpdateContractAddress?: ReturnType<typeof TimedUpdatePermission.prototype.toObject>[];
                 canUpdateOffChainBalancesMetadata?: ReturnType<typeof TimedUpdatePermission.prototype.toObject>[];
                 canUpdateStandards?: ReturnType<typeof TimedUpdatePermission.prototype.toObject>[];
                 canUpdateCustomData?: ReturnType<typeof TimedUpdatePermission.prototype.toObject>[];
@@ -198,9 +183,6 @@ export namespace bitbadges.bitbadgeschain.badges {
             }
             if (this.canArchiveCollection != null) {
                 data.canArchiveCollection = this.canArchiveCollection.map((item: TimedUpdatePermission) => item.toObject());
-            }
-            if (this.canUpdateContractAddress != null) {
-                data.canUpdateContractAddress = this.canUpdateContractAddress.map((item: TimedUpdatePermission) => item.toObject());
             }
             if (this.canUpdateOffChainBalancesMetadata != null) {
                 data.canUpdateOffChainBalancesMetadata = this.canUpdateOffChainBalancesMetadata.map((item: TimedUpdatePermission) => item.toObject());
@@ -236,24 +218,22 @@ export namespace bitbadges.bitbadgeschain.badges {
                 writer.writeRepeatedMessage(1, this.canDeleteCollection, (item: ActionPermission) => item.serialize(writer));
             if (this.canArchiveCollection.length)
                 writer.writeRepeatedMessage(2, this.canArchiveCollection, (item: TimedUpdatePermission) => item.serialize(writer));
-            if (this.canUpdateContractAddress.length)
-                writer.writeRepeatedMessage(3, this.canUpdateContractAddress, (item: TimedUpdatePermission) => item.serialize(writer));
             if (this.canUpdateOffChainBalancesMetadata.length)
-                writer.writeRepeatedMessage(4, this.canUpdateOffChainBalancesMetadata, (item: TimedUpdatePermission) => item.serialize(writer));
+                writer.writeRepeatedMessage(3, this.canUpdateOffChainBalancesMetadata, (item: TimedUpdatePermission) => item.serialize(writer));
             if (this.canUpdateStandards.length)
-                writer.writeRepeatedMessage(5, this.canUpdateStandards, (item: TimedUpdatePermission) => item.serialize(writer));
+                writer.writeRepeatedMessage(4, this.canUpdateStandards, (item: TimedUpdatePermission) => item.serialize(writer));
             if (this.canUpdateCustomData.length)
-                writer.writeRepeatedMessage(6, this.canUpdateCustomData, (item: TimedUpdatePermission) => item.serialize(writer));
+                writer.writeRepeatedMessage(5, this.canUpdateCustomData, (item: TimedUpdatePermission) => item.serialize(writer));
             if (this.canUpdateManager.length)
-                writer.writeRepeatedMessage(7, this.canUpdateManager, (item: TimedUpdatePermission) => item.serialize(writer));
+                writer.writeRepeatedMessage(6, this.canUpdateManager, (item: TimedUpdatePermission) => item.serialize(writer));
             if (this.canUpdateCollectionMetadata.length)
-                writer.writeRepeatedMessage(8, this.canUpdateCollectionMetadata, (item: TimedUpdatePermission) => item.serialize(writer));
+                writer.writeRepeatedMessage(7, this.canUpdateCollectionMetadata, (item: TimedUpdatePermission) => item.serialize(writer));
             if (this.canCreateMoreBadges.length)
-                writer.writeRepeatedMessage(9, this.canCreateMoreBadges, (item: BalancesActionPermission) => item.serialize(writer));
+                writer.writeRepeatedMessage(8, this.canCreateMoreBadges, (item: BalancesActionPermission) => item.serialize(writer));
             if (this.canUpdateBadgeMetadata.length)
-                writer.writeRepeatedMessage(10, this.canUpdateBadgeMetadata, (item: TimedUpdateWithBadgeIdsPermission) => item.serialize(writer));
+                writer.writeRepeatedMessage(9, this.canUpdateBadgeMetadata, (item: TimedUpdateWithBadgeIdsPermission) => item.serialize(writer));
             if (this.canUpdateCollectionApprovals.length)
-                writer.writeRepeatedMessage(12, this.canUpdateCollectionApprovals, (item: CollectionApprovalPermission) => item.serialize(writer));
+                writer.writeRepeatedMessage(10, this.canUpdateCollectionApprovals, (item: CollectionApprovalPermission) => item.serialize(writer));
             if (!w)
                 return writer.getResultBuffer();
         }
@@ -270,31 +250,28 @@ export namespace bitbadges.bitbadgeschain.badges {
                         reader.readMessage(message.canArchiveCollection, () => pb_1.Message.addToRepeatedWrapperField(message, 2, TimedUpdatePermission.deserialize(reader), TimedUpdatePermission));
                         break;
                     case 3:
-                        reader.readMessage(message.canUpdateContractAddress, () => pb_1.Message.addToRepeatedWrapperField(message, 3, TimedUpdatePermission.deserialize(reader), TimedUpdatePermission));
+                        reader.readMessage(message.canUpdateOffChainBalancesMetadata, () => pb_1.Message.addToRepeatedWrapperField(message, 3, TimedUpdatePermission.deserialize(reader), TimedUpdatePermission));
                         break;
                     case 4:
-                        reader.readMessage(message.canUpdateOffChainBalancesMetadata, () => pb_1.Message.addToRepeatedWrapperField(message, 4, TimedUpdatePermission.deserialize(reader), TimedUpdatePermission));
+                        reader.readMessage(message.canUpdateStandards, () => pb_1.Message.addToRepeatedWrapperField(message, 4, TimedUpdatePermission.deserialize(reader), TimedUpdatePermission));
                         break;
                     case 5:
-                        reader.readMessage(message.canUpdateStandards, () => pb_1.Message.addToRepeatedWrapperField(message, 5, TimedUpdatePermission.deserialize(reader), TimedUpdatePermission));
+                        reader.readMessage(message.canUpdateCustomData, () => pb_1.Message.addToRepeatedWrapperField(message, 5, TimedUpdatePermission.deserialize(reader), TimedUpdatePermission));
                         break;
                     case 6:
-                        reader.readMessage(message.canUpdateCustomData, () => pb_1.Message.addToRepeatedWrapperField(message, 6, TimedUpdatePermission.deserialize(reader), TimedUpdatePermission));
+                        reader.readMessage(message.canUpdateManager, () => pb_1.Message.addToRepeatedWrapperField(message, 6, TimedUpdatePermission.deserialize(reader), TimedUpdatePermission));
                         break;
                     case 7:
-                        reader.readMessage(message.canUpdateManager, () => pb_1.Message.addToRepeatedWrapperField(message, 7, TimedUpdatePermission.deserialize(reader), TimedUpdatePermission));
+                        reader.readMessage(message.canUpdateCollectionMetadata, () => pb_1.Message.addToRepeatedWrapperField(message, 7, TimedUpdatePermission.deserialize(reader), TimedUpdatePermission));
                         break;
                     case 8:
-                        reader.readMessage(message.canUpdateCollectionMetadata, () => pb_1.Message.addToRepeatedWrapperField(message, 8, TimedUpdatePermission.deserialize(reader), TimedUpdatePermission));
+                        reader.readMessage(message.canCreateMoreBadges, () => pb_1.Message.addToRepeatedWrapperField(message, 8, BalancesActionPermission.deserialize(reader), BalancesActionPermission));
                         break;
                     case 9:
-                        reader.readMessage(message.canCreateMoreBadges, () => pb_1.Message.addToRepeatedWrapperField(message, 9, BalancesActionPermission.deserialize(reader), BalancesActionPermission));
+                        reader.readMessage(message.canUpdateBadgeMetadata, () => pb_1.Message.addToRepeatedWrapperField(message, 9, TimedUpdateWithBadgeIdsPermission.deserialize(reader), TimedUpdateWithBadgeIdsPermission));
                         break;
                     case 10:
-                        reader.readMessage(message.canUpdateBadgeMetadata, () => pb_1.Message.addToRepeatedWrapperField(message, 10, TimedUpdateWithBadgeIdsPermission.deserialize(reader), TimedUpdateWithBadgeIdsPermission));
-                        break;
-                    case 12:
-                        reader.readMessage(message.canUpdateCollectionApprovals, () => pb_1.Message.addToRepeatedWrapperField(message, 12, CollectionApprovalPermission.deserialize(reader), CollectionApprovalPermission));
+                        reader.readMessage(message.canUpdateCollectionApprovals, () => pb_1.Message.addToRepeatedWrapperField(message, 10, CollectionApprovalPermission.deserialize(reader), CollectionApprovalPermission));
                         break;
                     default: reader.skipField();
                 }

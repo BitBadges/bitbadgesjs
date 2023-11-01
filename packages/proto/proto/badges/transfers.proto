@@ -67,13 +67,13 @@ message UserOutgoingApproval {
   repeated UintRange transferTimes = 3;
   repeated UintRange badgeIds = 4;
   repeated UintRange ownershipTimes = 5;
-  string amountTrackerId = 6;
-  string challengeTrackerId = 7;
+  string amountTrackerId = 6; 
+  string challengeTrackerId = 7; 
 
   //if approved, we use these. if not, these are ignored
   string uri = 8;
   string customData = 9;
-  string approvalId = 10;
+  string approvalId = 10; 
   OutgoingApprovalCriteria approvalCriteria = 11;
 }
 
@@ -100,13 +100,13 @@ message UserIncomingApproval {
 // We check the approvals for first match of this tuple, using the approvals. Subsequent matches are ignored.
 //
 // If the first match is disallowed, the transfer is disallowed.
-// If the first match is allowed, then we check the rest of the restrictions. If any restrictions fail, then the transfer is disallowed.
+// If the first match is allowed, then we check the rest of the restrictions. If any restrictions fail, then the transfer is disallowed. 
 // We do not proceed to the next match.
 //
 // Challenges defines the challenges that must be met with valid solutions for the transfer to be approved.
 //
 // requireTo/From(DoesNot)EqualsInitiatedBy defines whether the to/from address must equal the initiatedBy address or not. If it doesn't, then the transfer is disallowed.
-//
+//  
 // overallApprovals defines the overall approvals for the transfer (i.e. the running tally of the number of transfers and amounts transferred by all addresses).
 // perAddressApprovals defines the approvals per unique from, to, and/or initiatedBy address.
 // If any of these are nil, we assume unlimited approvals.
@@ -120,11 +120,11 @@ message UserIncomingApproval {
 //
 // Ex: If overallApprovals maxNumTransfers = 20 and trackerID = "abc", then the first 20 transfers that map to trackerID = "abc" will be approved. The 21st transfer will be disallowed.
 //
-// IMPORTANT: Be very careful when updating an approved transfer but keeping the same tracker ID.
+// IMPORTANT: Be very careful when updating an approved transfer but keeping the same tracker ID. 
 // For example, if you change the corresponding badge IDs and the old badge IDs overlap, then the overlapping badge IDs will already have existing tallies.
-//
+//    
 // Another common area of confusion is what is actually being tallied. The tally is based on the approved transfer rules that are set.
-// For example, if you don't have per address rules set and you update the approved transfer rules to include per address rules,
+// For example, if you don't have per address rules set and you update the approved transfer rules to include per address rules, 
 // then the tally doesn't retroactively apply the per address rules to the previous transfers. It starts at that time.
 //
 // Lastly, we have overridesFromOutgoingApprovals and overridesToIncomingApprovals.
@@ -217,7 +217,7 @@ message IncomingApprovalCriteria {
 }
 
 message CollectionApproval {
-  // Match Criteria
+  // Match Criteria 
   string fromMappingId = 1;
   string toMappingId = 2;
   string initiatedByMappingId = 3;
