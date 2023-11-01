@@ -21,7 +21,7 @@ export const MAINNET_CHAIN_DETAILS = {
 export const DefaultPlaceholderMetadata: Metadata<bigint> = {
   name: 'Placeholder',
   description: '',
-  image: 'https://png.pngtree.com/element_pic/00/16/07/18578cd65e6ecaa.jpg',
+  image: 'ipfs://QmbG3PyyQyZTzdTBANxb3sA8zC37VgXndJhndXSBf7Sr4o',
 }
 
 export const ErrorMetadata: Metadata<bigint> = {

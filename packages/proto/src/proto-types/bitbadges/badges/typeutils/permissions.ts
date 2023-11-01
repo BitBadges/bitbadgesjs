@@ -11,13 +11,17 @@ import { UintRange, convertUintRange, deepCopy } from "./typeUtils";
 export interface UserPermissions<T extends NumberType> {
   canUpdateOutgoingApprovals: UserOutgoingApprovalPermission<T>[];
   canUpdateIncomingApprovals: UserIncomingApprovalPermission<T>[];
+  canUpdateAutoApproveSelfInitiatedOutgoingTransfers: ActionPermission<T>[];
+  canUpdateAutoApproveSelfInitiatedIncomingTransfers: ActionPermission<T>[];
 }
 
 export function convertUserPermissions<T extends NumberType, U extends NumberType>(permissions: UserPermissions<T>, convertFunction: (item: T) => U, populateOptionalFields?: boolean): UserPermissions<U> {
   return deepCopy({
     ...permissions,
     canUpdateOutgoingApprovals: permissions.canUpdateOutgoingApprovals.map((b) => convertUserOutgoingApprovalPermission(b, convertFunction, populateOptionalFields)),
-    canUpdateIncomingApprovals: permissions.canUpdateIncomingApprovals.map((b) => convertUserIncomingApprovalPermission(b, convertFunction, populateOptionalFields))
+    canUpdateIncomingApprovals: permissions.canUpdateIncomingApprovals.map((b) => convertUserIncomingApprovalPermission(b, convertFunction, populateOptionalFields)),
+    canUpdateAutoApproveSelfInitiatedIncomingTransfers: permissions.canUpdateAutoApproveSelfInitiatedIncomingTransfers.map((b) => convertActionPermission(b, convertFunction, populateOptionalFields)),
+    canUpdateAutoApproveSelfInitiatedOutgoingTransfers: permissions.canUpdateAutoApproveSelfInitiatedOutgoingTransfers.map((b) => convertActionPermission(b, convertFunction, populateOptionalFields)),
   })
 }
 

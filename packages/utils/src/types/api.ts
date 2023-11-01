@@ -510,9 +510,7 @@ export function convertAddReviewForCollectionRouteSuccessResponse<T extends Numb
 /**
  * @category API / Indexer
  */
-export type AccountViewKey =
-  'latestActivity' | 'latestAnnouncements' | 'latestReviews' | 'badgesCollected' | 'addressMappings' | 'latestClaimAlerts' | 'latestAddressMappings' | 'explicitlyIncludedAddressMappings' | 'explicitlyExcludedAddressMappings' | 'badgesCollectedWithHidden'
-  | 'createdBy' | 'managing'
+export type AccountViewKey = 'latestActivity' | 'latestAnnouncements' | 'latestReviews' | 'badgesCollected' | 'addressMappings' | 'latestClaimAlerts' | 'latestAddressMappings' | 'explicitlyIncludedAddressMappings' | 'explicitlyExcludedAddressMappings' | 'badgesCollectedWithHidden' | 'createdBy' | 'managing'
 
 /**
  * This defines the options for fetching additional account details.
@@ -691,26 +689,29 @@ export function convertUpdateAccountInfoRouteSuccessResponse<T extends NumberTyp
 /**
  * @category API / Indexer
  */
-export interface AddBalancesToIpfsRouteRequestBody {
-  balances: OffChainBalancesMap<NumberType>,
+export interface AddBalancesToOffChainStorageRouteRequestBody {
+  balances: OffChainBalancesMap<NumberType>;
+  method: 'ipfs' | 'centralized';
+  collectionId: NumberType;
 }
 /**
  * @category API / Indexer
  */
-export interface AddBalancesToIpfsRouteSuccessResponse<T extends NumberType> {
+export interface AddBalancesToOffChainStorageRouteSuccessResponse<T extends NumberType> {
+  uri?: string,
   result: {
-    cid: string,
+    cid?: string,
     // path: string,
   }
 }
 /**
  * @category API / Indexer
  */
-export type AddBalancesToIpfsRouteResponse<T extends NumberType> = ErrorResponse | AddBalancesToIpfsRouteSuccessResponse<T>;
+export type AddBalancesToOffChainStorageRouteResponse<T extends NumberType> = ErrorResponse | AddBalancesToOffChainStorageRouteSuccessResponse<T>;
 /**
  * @category API / Indexer
  */
-export function convertAddBalancesToIpfsRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: AddBalancesToIpfsRouteSuccessResponse<T>, convertFunction: (item: T) => U): AddBalancesToIpfsRouteSuccessResponse<U> {
+export function convertAddBalancesToOffChainStorageRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: AddBalancesToOffChainStorageRouteSuccessResponse<T>, convertFunction: (item: T) => U): AddBalancesToOffChainStorageRouteSuccessResponse<U> {
   return { ...item };
 }
 
@@ -752,7 +753,7 @@ export function convertAddMetadataToIpfsRouteSuccessResponse<T extends NumberTyp
 /**
  * @category API / Indexer
  */
-export interface AddMerkleChallengeToIpfsRouteRequestBody {
+export interface AddApprovalDetailsToOffChainStorageRouteRequestBody {
   name: string,
   description: string,
   challengeDetails?: ChallengeDetails<NumberType>,
@@ -760,7 +761,7 @@ export interface AddMerkleChallengeToIpfsRouteRequestBody {
 /**
  * @category API / Indexer
  */
-export interface AddMerkleChallengeToIpfsRouteSuccessResponse<T extends NumberType> {
+export interface AddApprovalDetailsToOffChainStorageRouteSuccessResponse<T extends NumberType> {
   result: {
     cid: string,
     // path: string,
@@ -769,11 +770,11 @@ export interface AddMerkleChallengeToIpfsRouteSuccessResponse<T extends NumberTy
 /**
  * @category API / Indexer
  */
-export type AddMerkleChallengeToIpfsRouteResponse<T extends NumberType> = ErrorResponse | AddMerkleChallengeToIpfsRouteSuccessResponse<T>;
+export type AddApprovalDetailsToOffChainStorageRouteResponse<T extends NumberType> = ErrorResponse | AddApprovalDetailsToOffChainStorageRouteSuccessResponse<T>;
 /**
  * @category API / Indexer
  */
-export function convertAddMerkleChallengeToIpfsRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: AddMerkleChallengeToIpfsRouteSuccessResponse<T>, convertFunction: (item: T) => U): AddMerkleChallengeToIpfsRouteSuccessResponse<U> {
+export function convertAddApprovalDetailsToOffChainStorageRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: AddApprovalDetailsToOffChainStorageRouteSuccessResponse<T>, convertFunction: (item: T) => U): AddApprovalDetailsToOffChainStorageRouteSuccessResponse<U> {
   return { ...item };
 }
 

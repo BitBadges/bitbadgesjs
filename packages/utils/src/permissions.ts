@@ -1,7 +1,7 @@
 import { ActionPermission, AddressMapping, BadgeMetadata, BalancesActionPermission, TimedUpdatePermission, TimedUpdateWithBadgeIdsPermission, UintRange } from "bitbadgesjs-proto";
 import { getReservedAddressMapping } from "./addressMappings";
 import { UniversalPermission } from "./overlaps";
-import { CollectionApprovalPermissionWithDetails, CollectionApprovalWithDetails } from "./types/collections";
+import { CollectionApprovalPermissionWithDetails, CollectionApprovalWithDetails, UserIncomingApprovalPermissionWithDetails, UserOutgoingApprovalPermissionWithDetails } from "./types/collections";
 import { UserIncomingApprovalWithDetails, UserOutgoingApprovalWithDetails } from "./types/users";
 import { searchUintRangesForId } from "./uintRanges";
 
@@ -45,53 +45,6 @@ const AllDefaultValues = {
   arbitraryValue: undefined, // Replace this with the actual arbitraryValue property from actionPermission
 }
 
-const AllDefaultOptions = {
-  fromMappingOptions: {
-    invertDefault: false,
-    allValues: true,
-    noValues: false
-  },
-  toMappingOptions: {
-    invertDefault: false,
-    allValues: true,
-    noValues: false
-  },
-  initiatedByMappingOptions: {
-    invertDefault: false,
-    allValues: true,
-    noValues: false
-  },
-  transferTimesOptions: {
-    invertDefault: false,
-    allValues: true,
-    noValues: false
-  },
-  badgeIdsOptions: {
-    invertDefault: false,
-    allValues: true,
-    noValues: false
-  },
-  ownershipTimesOptions: {
-    invertDefault: false,
-    allValues: true,
-    noValues: false
-  },
-  permittedTimesOptions: {
-    invertDefault: false,
-    allValues: true,
-    noValues: false
-  },
-  forbiddenTimesOptions: {
-    invertDefault: false,
-    allValues: true,
-    noValues: false
-  },
-  timelineTimesOptions: {
-    invertDefault: false,
-    allValues: true,
-    noValues: false
-  },
-};
 
 /**
  * Casts an ActionPermission to a UniversalPermission.
@@ -106,9 +59,6 @@ export const castActionPermissionToUniversalPermission = (actionPermission: Acti
   for (const permission of actionPermission) {
 
     castedPermissions.push({
-      ...AllDefaultOptions,
-      permittedTimesOptions: permission.permittedTimesOptions,
-      forbiddenTimesOptions: permission.forbiddenTimesOptions,
 
       permittedTimes: permission.permittedTimes,
       forbiddenTimes: permission.forbiddenTimes,
@@ -212,15 +162,6 @@ export const castCollectionApprovalPermissionToUniversalPermission = (
       permittedTimes: collectionPermission.permittedTimes,
       forbiddenTimes: collectionPermission.forbiddenTimes,
       arbitraryValue: undefined,
-
-      permittedTimesOptions: collectionPermission.permittedTimesOptions,
-      forbiddenTimesOptions: collectionPermission.forbiddenTimesOptions,
-      transferTimesOptions: collectionPermission.transferTimesOptions,
-      ownershipTimesOptions: collectionPermission.ownershipTimesOptions,
-      toMappingOptions: collectionPermission.toMappingOptions,
-      fromMappingOptions: collectionPermission.fromMappingOptions,
-      initiatedByMappingOptions: collectionPermission.initiatedByMappingOptions,
-      badgeIdsOptions: collectionPermission.badgeIdsOptions,
     });
 
   }
@@ -242,11 +183,6 @@ export const castTimedUpdateWithBadgeIdsPermissionToUniversalPermission = (
   for (const timedPermission of timedUpdateWithBadgeIdsPermission) {
 
     castedPermissions.push({
-      ...AllDefaultOptions,
-      badgeIdsOptions: timedPermission.badgeIdsOptions,
-      permittedTimesOptions: timedPermission.permittedTimesOptions,
-      forbiddenTimesOptions: timedPermission.forbiddenTimesOptions,
-      timelineTimesOptions: timedPermission.timelineTimesOptions,
 
       ...AllDefaultValues,
       timelineTimes: timedPermission.timelineTimes,
@@ -276,11 +212,6 @@ export const castTimedUpdatePermissionToUniversalPermission = (
   for (const timedPermission of timedUpdatePermission) {
 
     castedPermissions.push({
-      ...AllDefaultOptions,
-      permittedTimesOptions: timedPermission.permittedTimesOptions,
-      forbiddenTimesOptions: timedPermission.forbiddenTimesOptions,
-      timelineTimesOptions: timedPermission.timelineTimesOptions,
-
       ...AllDefaultValues,
       timelineTimes: timedPermission.timelineTimes,
       usesTimelineTimes: true,
@@ -307,11 +238,6 @@ export const castBalancesActionPermissionToUniversalPermission = (
   for (const permission of balancesActionPermission) {
 
     castedPermissions.push({
-      ...AllDefaultOptions,
-      badgeIdsOptions: permission.badgeIdsOptions,
-      ownershipTimesOptions: permission.ownershipTimesOptions,
-      permittedTimesOptions: permission.permittedTimesOptions,
-      forbiddenTimesOptions: permission.forbiddenTimesOptions,
       ...AllDefaultValues,
       badgeIds: permission.badgeIds,
       ownershipTimes: permission.ownershipTimes,
@@ -398,7 +324,7 @@ export const castCollectionApprovalToUniversalPermission = (
         amountTrackerId: approval.amountTrackerId,
         challengeTrackerId: approval.challengeTrackerId,
         approvalCriteria: approval.approvalCriteria,
-        isApproved: approval.isApproved,
+
       }
     });
   }
@@ -480,13 +406,50 @@ export const castUserOutgoingApprovalsToUniversalPermission = (
         amountTrackerId: approval.amountTrackerId,
         challengeTrackerId: approval.challengeTrackerId,
         approvalCriteria: approval.approvalCriteria,
-        isApproved: approval.isApproved,
+
       }
     });
   }
   return castedPermissions;
 };
 
+/**
+ * Casts a UserOutgoingApproval to a CollectionApprovalPermission.
+ *
+ * @category Permissions Casts
+ */
+export const castUserIncomingApprovalPermissionToCollectionApprovalPermission = (
+  userIncomingApprovals: UserIncomingApprovalPermissionWithDetails<bigint>[],
+  toAddress: string
+): CollectionApprovalPermissionWithDetails<bigint>[] => {
+  return userIncomingApprovals.map((approval) => {
+    return {
+      ...approval,
+      toMapping: getReservedAddressMapping(toAddress) as AddressMapping,
+      toMappingId: toAddress,
+    }
+  }
+  );
+}
+
+/**
+ * Casts a UserOutgoingApproval to a CollectionApprovalPermission.
+ *
+ * @category Permissions Casts
+ */
+export const castUserOutgoingApprovalPermissionToCollectionApprovalPermission = (
+  userOutgoingApprovals: UserOutgoingApprovalPermissionWithDetails<bigint>[],
+  fromAddress: string
+): CollectionApprovalPermissionWithDetails<bigint>[] => {
+  return userOutgoingApprovals.map((approval) => {
+    return {
+      ...approval,
+      fromMapping: getReservedAddressMapping(fromAddress) as AddressMapping,
+      fromMappingId: fromAddress,
+    }
+  }
+  );
+}
 
 
 /**
@@ -560,7 +523,7 @@ export const castUserIncomingApprovalsToUniversalPermission = (
       usesOwnershipTimes: true,
       arbitraryValue: {
         approvalCriteria: approval.approvalCriteria,
-        isApproved: approval.isApproved,
+
       }
     });
   }
@@ -599,8 +562,6 @@ export const castBadgeMetadataToUniversalPermission = (
       badgeIds: metadata.badgeIds,
       usesBadgeIds: true,
       arbitraryValue: metadata.uri + "<><><>" + metadata.customData,
-
-      ...AllDefaultOptions,
     });
   }
   return castedPermissions;

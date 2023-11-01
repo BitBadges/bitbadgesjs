@@ -56,6 +56,8 @@ export interface MsgUpdateCollection<T extends NumberType> {
   balancesType?: string
   defaultOutgoingApprovals?: UserOutgoingApproval<T>[]
   defaultIncomingApprovals?: UserIncomingApproval<T>[]
+  defaultAutoApproveSelfInitiatedOutgoingTransfers?: boolean
+  defaultAutoApproveSelfInitiatedIncomingTransfers?: boolean
   defaultUserPermissions?: UserPermissions<T>
   badgesToCreate?: Balance<T>[]
   updateCollectionPermissions?: boolean
@@ -170,7 +172,9 @@ export function createTxMsgUpdateCollection<T extends NumberType>(
     params.balancesType ?? 'Standard',
     params.defaultOutgoingApprovals ?? [],
     params.defaultIncomingApprovals ?? [],
-    params.defaultUserPermissions ?? { canUpdateIncomingApprovals: [], canUpdateOutgoingApprovals: [] },
+    params.defaultAutoApproveSelfInitiatedOutgoingTransfers ?? false,
+    params.defaultAutoApproveSelfInitiatedIncomingTransfers ?? false,
+    params.defaultUserPermissions ?? { canUpdateIncomingApprovals: [], canUpdateOutgoingApprovals: [], canUpdateAutoApproveSelfInitiatedIncomingTransfers: [], canUpdateAutoApproveSelfInitiatedOutgoingTransfers: [] },
     params.badgesToCreate ?? [],
     params.updateCollectionPermissions ?? false,
     params.collectionPermissions ?? {
@@ -227,7 +231,9 @@ export function createTxMsgUpdateCollection<T extends NumberType>(
     params.balancesType ?? 'Standard',
     params.defaultOutgoingApprovals ?? [],
     params.defaultIncomingApprovals ?? [],
-    params.defaultUserPermissions ?? { canUpdateIncomingApprovals: [], canUpdateOutgoingApprovals: [] },
+    params.defaultAutoApproveSelfInitiatedOutgoingTransfers ?? false,
+    params.defaultAutoApproveSelfInitiatedIncomingTransfers ?? false,
+    params.defaultUserPermissions ?? { canUpdateIncomingApprovals: [], canUpdateOutgoingApprovals: [], canUpdateAutoApproveSelfInitiatedIncomingTransfers: [], canUpdateAutoApproveSelfInitiatedOutgoingTransfers: [] },
     params.badgesToCreate ?? [],
     params.updateCollectionPermissions ?? false,
     params.collectionPermissions ?? {

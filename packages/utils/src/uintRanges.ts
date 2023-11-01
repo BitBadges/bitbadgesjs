@@ -8,12 +8,16 @@ import { bigIntMax, bigIntMin } from "./badgeMetadata";
  * [{start: 1, end: 3}, {start: 2, end: 4}] => [{start: 1, end: 4}]
  *
  * @param {UintRange<bigint>[]} UintRanges - The list of UintRanges to sort and merge.
+ * @param {boolean} mergeOverlappingRanges - Whether to merge overlapping (aka intersecting [1-5, 3-10]) ranges. If false and ranges overlap, an error is thrown.
+ *
  *
  * @remarks
- * Returns a new array but also does modify the original.
+ * Returns a new array.
  * @category Uint Ranges
  */
-export function sortUintRangesAndMergeIfNecessary(uintRanges: UintRange<bigint>[]) {
+export function sortUintRangesAndMergeIfNecessary(uintRanges: UintRange<bigint>[], mergeOverlappingRanges: boolean) {
+  uintRanges = deepCopyRanges(uintRanges);
+
   if (uintRanges.length <= 1) {
     return uintRanges;
   }
@@ -34,7 +38,7 @@ export function sortUintRangesAndMergeIfNecessary(uintRanges: UintRange<bigint>[
   let currRange = uintRanges[0];
   for (let i = 1; i < uintRanges.length; i++) {
     const range = uintRanges[i];
-    if (range.start <= currRange.end) {
+    if (range.start <= currRange.end + 1n) {
       currRange.end = bigIntMax(currRange.end, range.end);
     } else {
       mergedRanges.push(currRange);
@@ -77,7 +81,7 @@ export function deepCopyRanges(ranges: UintRange<bigint>[]) {
  */
 export function searchUintRangesForId(id: bigint, uintRanges: UintRange<bigint>[]): [bigint, boolean] {
   let ranges = deepCopyRanges(uintRanges)
-  ranges = sortUintRangesAndMergeIfNecessary(ranges)
+  ranges = sortUintRangesAndMergeIfNecessary(ranges, true);
 
   // Binary search because ID ranges will be sorted
   let low = 0;
@@ -88,6 +92,22 @@ export function searchUintRangesForId(id: bigint, uintRanges: UintRange<bigint>[
     let currRange = ranges[median];
 
     if (currRange.start <= id && currRange.end >= id) {
+      //found ID but we previously sorted, so it may mess up the order
+      //here, we need to search manually for the first range that contains the ID
+      //first check the actual median range bc if inputted as sorted, it would be that idx
+      if (currRange.start <= id && currRange.end >= id) {
+        return [BigInt(median), true];
+      }
+
+      let idx = 0;
+      for (const range of uintRanges) {
+        if (range.start <= id && range.end >= id) {
+          return [BigInt(idx), true];
+        }
+        idx++;
+      }
+
+      //should never reach here bc it was found
       return [BigInt(median), true]
     } else if (currRange.start > id) {
       high = median - 1;

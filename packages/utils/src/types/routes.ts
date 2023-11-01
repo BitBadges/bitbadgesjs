@@ -132,11 +132,11 @@ export const AddMetadataToIpfsRoute = () => "/api/v0/addMetadataToIpfs";
 /**
  * @category API Routes
  */
-export const AddMerkleChallengeToIpfsRoute = () => "/api/v0/addMerkleChallengeToIpfs";
+export const AddApprovalDetailsToOffChainStorageRoute = () => "/api/v0/addApprovalDetailsToOffChainStorage";
 /**
  * @category API Routes
  */
-export const AddBalancesToIpfsRoute = () => "/api/v0/addBalancesToIpfs";
+export const AddBalancesToOffChainStorageRoute = () => "/api/v0/addBalancesToOffChainStorage";
 
 //Blockin Auth
 /**

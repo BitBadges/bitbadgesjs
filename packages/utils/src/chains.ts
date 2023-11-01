@@ -8,6 +8,7 @@ import { Stringify } from "bitbadgesjs-proto";
 export const MINT_ACCOUNT: BitBadgesUserInfo<bigint> = {
   _id: 'Mint',
   cosmosAddress: 'Mint',
+  ethAddress: 'Mint',
   address: 'Mint',
   chain: SupportedChain.COSMOS,
   publicKey: '',
@@ -30,6 +31,7 @@ export const MINT_ACCOUNT: BitBadgesUserInfo<bigint> = {
 export const BLANK_USER_INFO: BitBadgesUserInfo<bigint> = {
   _id: '',
   cosmosAddress: '',
+  ethAddress: '',
   address: '',
   chain: SupportedChain.UNKNOWN,
   publicKey: '',

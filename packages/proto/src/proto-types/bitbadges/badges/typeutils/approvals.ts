@@ -48,55 +48,57 @@ export function convertUserOutgoingApproval<T extends NumberType, U extends Numb
     fromMappingOptions: undefined,
   } as Required<UserOutgoingApproval<T>> : transfer
 
+  const defaultOutgoingApprovalCriteria = {
+    "uri": "",
+    "customData": "",
+    "mustOwnBadges": [],
+    "approvalAmounts": {
+      "overallApprovalAmount": "0" as T,
+      "perFromAddressApprovalAmount": "0" as T,
+      "perToAddressApprovalAmount": "0" as T,
+      "perInitiatedByAddressApprovalAmount": "0" as T
+    },
+    "maxNumTransfers": {
+      "overallMaxNumTransfers": "0" as T,
+      "perFromAddressMaxNumTransfers": "0" as T,
+      "perToAddressMaxNumTransfers": "0" as T,
+      "perInitiatedByAddressMaxNumTransfers": "0" as T
+    },
+    "predeterminedBalances": {
+      "manualBalances": [],
+      "incrementedBalances": {
+        "startBalances": [
+        ],
+        "incrementBadgeIdsBy": "0" as T,
+        "incrementOwnershipTimesBy": "0" as T
+      },
+      "orderCalculationMethod": {
+        "useMerkleChallengeLeafIndex": false,
+        "useOverallNumTransfers": false,
+        "usePerFromAddressNumTransfers": false,
+        "usePerInitiatedByAddressNumTransfers": false,
+        "usePerToAddressNumTransfers": false
+      }
+    },
+    "merkleChallenge": {
+      "root": "",
+      "expectedProofLength": "0" as T,
+      "useCreatorAddressAsLeaf": false,
+      "maxUsesPerLeaf": "0" as T,
+      "uri": "",
+      "customData": ""
+    },
+    "requireToEqualsInitiatedBy": false,
+    "requireToDoesNotEqualInitiatedBy": false,
+  }
+
   return deepCopy({
     ..._transfer,
     transferTimes: transfer.transferTimes.map((b) => convertUintRange(b, convertFunction)),
     badgeIds: transfer.badgeIds.map((b) => convertUintRange(b, convertFunction)),
     ownershipTimes: transfer.ownershipTimes.map((b) => convertUintRange(b, convertFunction)),
     //allowedCombinations: transfer.allowedCombinations.map((b) => convertIsUserOutgoingTransferAllowed(b, convertFunction)),
-    approvalCriteria: transfer.approvalCriteria ? convertOutgoingApprovalCriteria(transfer.approvalCriteria, convertFunction) : populateOptionalFields ?
-      convertOutgoingApprovalCriteria(
-        {
-          "mustOwnBadges": [],
-          "approvalAmounts": {
-            "overallApprovalAmount": "0" as T,
-            "perFromAddressApprovalAmount": "0" as T,
-            "perToAddressApprovalAmount": "0" as T,
-            "perInitiatedByAddressApprovalAmount": "0" as T
-          },
-          "maxNumTransfers": {
-            "overallMaxNumTransfers": "0" as T,
-            "perFromAddressMaxNumTransfers": "0" as T,
-            "perToAddressMaxNumTransfers": "0" as T,
-            "perInitiatedByAddressMaxNumTransfers": "0" as T
-          },
-          "predeterminedBalances": {
-            "manualBalances": [],
-            "incrementedBalances": {
-              "startBalances": [
-              ],
-              "incrementBadgeIdsBy": "0" as T,
-              "incrementOwnershipTimesBy": "0" as T
-            },
-            "orderCalculationMethod": {
-              "useMerkleChallengeLeafIndex": false,
-              "useOverallNumTransfers": false,
-              "usePerFromAddressNumTransfers": false,
-              "usePerInitiatedByAddressNumTransfers": false,
-              "usePerToAddressNumTransfers": false
-            }
-          },
-          "merkleChallenge": {
-            "root": "",
-            "expectedProofLength": "0" as T,
-            "useCreatorAddressAsLeaf": false,
-            "maxOneUsePerLeaf": false,
-            "uri": "",
-            "customData": ""
-          },
-          "requireToEqualsInitiatedBy": false,
-          "requireToDoesNotEqualInitiatedBy": false,
-        }, convertFunction) : undefined,
+    approvalCriteria: populateOptionalFields ? convertOutgoingApprovalCriteria(getFilledOutObj(transfer.approvalCriteria, defaultOutgoingApprovalCriteria), convertFunction) : transfer.approvalCriteria ? convertOutgoingApprovalCriteria(transfer.approvalCriteria, convertFunction) : undefined,
   })
 }
 
@@ -326,55 +328,57 @@ export function convertUserIncomingApproval<T extends NumberType, U extends Numb
     toMappingOptions: undefined,
   } as Required<UserIncomingApproval<T>> : transfer
 
+  const defaultIncomingApprovalCriteria = {
+
+    "uri": "",
+    "customData": "",
+    "mustOwnBadges": [],
+    "approvalAmounts": {
+      "overallApprovalAmount": "0" as T,
+      "perFromAddressApprovalAmount": "0" as T,
+      "perToAddressApprovalAmount": "0" as T,
+      "perInitiatedByAddressApprovalAmount": "0" as T
+    },
+    "maxNumTransfers": {
+      "overallMaxNumTransfers": "0" as T,
+      "perFromAddressMaxNumTransfers": "0" as T,
+      "perToAddressMaxNumTransfers": "0" as T,
+      "perInitiatedByAddressMaxNumTransfers": "0" as T
+    },
+    "predeterminedBalances": {
+      "manualBalances": [],
+      "incrementedBalances": {
+        "startBalances": [
+        ],
+        "incrementBadgeIdsBy": "0" as T,
+        "incrementOwnershipTimesBy": "0" as T
+      },
+      "orderCalculationMethod": {
+        "useMerkleChallengeLeafIndex": false,
+        "useOverallNumTransfers": false,
+        "usePerFromAddressNumTransfers": false,
+        "usePerInitiatedByAddressNumTransfers": false,
+        "usePerToAddressNumTransfers": false
+      }
+    },
+    "merkleChallenge": {
+      "root": "",
+      "expectedProofLength": "0" as T,
+      "useCreatorAddressAsLeaf": false,
+      "maxUsesPerLeaf": "0" as T,
+      "uri": "",
+      "customData": ""
+    },
+    "requireFromEqualsInitiatedBy": false,
+    "requireFromDoesNotEqualInitiatedBy": false,
+  }
+
   return deepCopy({
     ..._transfer,
     transferTimes: transfer.transferTimes.map((b) => convertUintRange(b, convertFunction)),
     badgeIds: transfer.badgeIds.map((b) => convertUintRange(b, convertFunction)),
     ownershipTimes: transfer.ownershipTimes.map((b) => convertUintRange(b, convertFunction)),
-    approvalCriteria: transfer.approvalCriteria ? convertIncomingApprovalCriteria(transfer.approvalCriteria, convertFunction) : populateOptionalFields ?
-      convertIncomingApprovalCriteria(
-        {
-
-          "mustOwnBadges": [],
-          "approvalAmounts": {
-            "overallApprovalAmount": "0" as T,
-            "perFromAddressApprovalAmount": "0" as T,
-            "perToAddressApprovalAmount": "0" as T,
-            "perInitiatedByAddressApprovalAmount": "0" as T
-          },
-          "maxNumTransfers": {
-            "overallMaxNumTransfers": "0" as T,
-            "perFromAddressMaxNumTransfers": "0" as T,
-            "perToAddressMaxNumTransfers": "0" as T,
-            "perInitiatedByAddressMaxNumTransfers": "0" as T
-          },
-          "predeterminedBalances": {
-            "manualBalances": [],
-            "incrementedBalances": {
-              "startBalances": [
-              ],
-              "incrementBadgeIdsBy": "0" as T,
-              "incrementOwnershipTimesBy": "0" as T
-            },
-            "orderCalculationMethod": {
-              "useMerkleChallengeLeafIndex": false,
-              "useOverallNumTransfers": false,
-              "usePerFromAddressNumTransfers": false,
-              "usePerInitiatedByAddressNumTransfers": false,
-              "usePerToAddressNumTransfers": false
-            }
-          },
-          "merkleChallenge": {
-            "root": "",
-            "expectedProofLength": "0" as T,
-            "useCreatorAddressAsLeaf": false,
-            "maxOneUsePerLeaf": false,
-            "uri": "",
-            "customData": ""
-          },
-          "requireFromEqualsInitiatedBy": false,
-          "requireFromDoesNotEqualInitiatedBy": false,
-        }, convertFunction) : undefined,
+    approvalCriteria: populateOptionalFields ? convertIncomingApprovalCriteria(getFilledOutObj(transfer.approvalCriteria, defaultIncomingApprovalCriteria), convertFunction) : transfer.approvalCriteria ? convertIncomingApprovalCriteria(transfer.approvalCriteria, convertFunction) : undefined,
   })
 }
 
@@ -461,6 +465,18 @@ export interface CollectionApproval<T extends NumberType> {
   approvalCriteria?: ApprovalCriteria<T>;
 }
 
+const getFilledOutObj = (obj: any, defaultValues: any) => {
+  if (!obj) return defaultValues;
+
+  const allKeys = Object.keys(defaultValues)
+
+  const newObj: any = {};
+  for (const key of allKeys) {
+    newObj[key] = obj[key] ?? defaultValues[key]
+  }
+  return newObj;
+}
+
 export function convertCollectionApproval<T extends NumberType, U extends NumberType>(transfer: CollectionApproval<T>, convertFunction: (item: T) => U, populateOptionalFields?: boolean): CollectionApproval<U> {
   const _transfer = populateOptionalFields ? {
     uri: '',
@@ -468,58 +484,60 @@ export function convertCollectionApproval<T extends NumberType, U extends Number
     ...transfer,
   } as Required<CollectionApproval<T>> : transfer
 
+  const defaultApprovalCriteria = {
+    "uri": "",
+    "customData": "",
+    "mustOwnBadges": [],
+    "approvalAmounts": {
+      "overallApprovalAmount": "0" as T,
+      "perFromAddressApprovalAmount": "0" as T,
+      "perToAddressApprovalAmount": "0" as T,
+      "perInitiatedByAddressApprovalAmount": "0" as T
+    },
+    "maxNumTransfers": {
+      "overallMaxNumTransfers": "0" as T,
+      "perFromAddressMaxNumTransfers": "0" as T,
+      "perToAddressMaxNumTransfers": "0" as T,
+      "perInitiatedByAddressMaxNumTransfers": "0" as T
+    },
+    "predeterminedBalances": {
+      "manualBalances": [],
+      "incrementedBalances": {
+        "startBalances": [
+        ],
+        "incrementBadgeIdsBy": "0" as T,
+        "incrementOwnershipTimesBy": "0" as T
+      },
+      "orderCalculationMethod": {
+        "useMerkleChallengeLeafIndex": false,
+        "useOverallNumTransfers": false,
+        "usePerFromAddressNumTransfers": false,
+        "usePerInitiatedByAddressNumTransfers": false,
+        "usePerToAddressNumTransfers": false
+      }
+    },
+    "merkleChallenge": {
+      "root": "",
+      "expectedProofLength": "0" as T,
+      "useCreatorAddressAsLeaf": false,
+      "maxUsesPerLeaf": "0" as T,
+      "uri": "",
+      "customData": ""
+    },
+    "requireToEqualsInitiatedBy": false,
+    "requireFromEqualsInitiatedBy": false,
+    "requireToDoesNotEqualInitiatedBy": false,
+    "requireFromDoesNotEqualInitiatedBy": false,
+    "overridesToIncomingApprovals": false,
+    "overridesFromOutgoingApprovals": false
+  }
+
   return deepCopy({
     ..._transfer,
     transferTimes: transfer.transferTimes.map((b) => convertUintRange(b, convertFunction)),
     badgeIds: transfer.badgeIds.map((b) => convertUintRange(b, convertFunction)),
     ownershipTimes: transfer.ownershipTimes.map((b) => convertUintRange(b, convertFunction)),
-    approvalCriteria: transfer.approvalCriteria ? convertApprovalCriteria(transfer.approvalCriteria, convertFunction) : populateOptionalFields ?
-      convertApprovalCriteria(
-        {
-          "mustOwnBadges": [],
-          "approvalAmounts": {
-            "overallApprovalAmount": "0" as T,
-            "perFromAddressApprovalAmount": "0" as T,
-            "perToAddressApprovalAmount": "0" as T,
-            "perInitiatedByAddressApprovalAmount": "0" as T
-          },
-          "maxNumTransfers": {
-            "overallMaxNumTransfers": "0" as T,
-            "perFromAddressMaxNumTransfers": "0" as T,
-            "perToAddressMaxNumTransfers": "0" as T,
-            "perInitiatedByAddressMaxNumTransfers": "0" as T
-          },
-          "predeterminedBalances": {
-            "manualBalances": [],
-            "incrementedBalances": {
-              "startBalances": [
-              ],
-              "incrementBadgeIdsBy": "0" as T,
-              "incrementOwnershipTimesBy": "0" as T
-            },
-            "orderCalculationMethod": {
-              "useMerkleChallengeLeafIndex": false,
-              "useOverallNumTransfers": false,
-              "usePerFromAddressNumTransfers": false,
-              "usePerInitiatedByAddressNumTransfers": false,
-              "usePerToAddressNumTransfers": false
-            }
-          },
-          "merkleChallenge": {
-            "root": "",
-            "expectedProofLength": "0" as T,
-            "useCreatorAddressAsLeaf": false,
-            "maxOneUsePerLeaf": false,
-            "uri": "",
-            "customData": ""
-          },
-          "requireToEqualsInitiatedBy": false,
-          "requireFromEqualsInitiatedBy": false,
-          "requireToDoesNotEqualInitiatedBy": false,
-          "requireFromDoesNotEqualInitiatedBy": false,
-          "overridesToIncomingApprovals": false,
-          "overridesFromOutgoingApprovals": false
-        }, convertFunction) : undefined,
+    approvalCriteria: populateOptionalFields ? convertApprovalCriteria(getFilledOutObj(transfer.approvalCriteria, defaultApprovalCriteria), convertFunction) : transfer.approvalCriteria ? convertApprovalCriteria(transfer.approvalCriteria, convertFunction) : undefined,
   })
 }
 

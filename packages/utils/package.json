@@ -1,6 +1,6 @@
 {
   "name": "bitbadgesjs-utils",
-  "version": "1.1.239",
+  "version": "1.1.267",
   "description": "",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -16,7 +16,7 @@
   "dependencies": {
     "@cosmjs/stargate": "^0.30.1",
     "bitbadgesjs-address-converter": "^0.0.3",
-    "bitbadgesjs-proto": "^0.1.108",
+    "bitbadgesjs-proto": "^0.1.124",
     "bitbadgesjs-provider": "^0.0.3",
     "blockin": "^1.2.15",
     "ethers": "^5.7.0",

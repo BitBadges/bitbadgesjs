@@ -22,6 +22,8 @@ export const PROOF_TYPES = [
 export const USER_PERMISSIONS_TYPES = [
   { name: 'canUpdateOutgoingApprovals', type: 'UserOutgoingApprovalPermission[]' },
   { name: 'canUpdateIncomingApprovals', type: 'UserIncomingApprovalPermission[]' },
+  { name: "canUpdateAutoApproveSelfInitiatedOutgoingTransfers", type: "ActionPermission[]" },
+  { name: "canUpdateAutoApproveSelfInitiatedIncomingTransfers", type: "ActionPermission[]" },
 ];
 
 export const USER_APPROVED_OUTGOING_TRANSFER_TYPES = [
@@ -110,7 +112,7 @@ export const MERKLE_CHALLENGE_TYPES = [
   { name: 'root', type: 'string' },
   { name: 'expectedProofLength', type: 'string' },
   { name: 'useCreatorAddressAsLeaf', type: 'bool' },
-  { name: 'maxOneUsePerLeaf', type: 'bool' },
+  { name: 'maxUsesPerLeaf', type: 'string' },
   { name: 'uri', type: 'string' },
   { name: 'customData', type: 'string' },
 ];

@@ -106,7 +106,7 @@ export function invertAddressMapping(mapping: AddressMapping) {
  *
  * @category Address Mappings
  */
-export function getReservedAddressMapping(addressMappingId: string): AddressMapping | undefined {
+export function getReservedAddressMapping(addressMappingId: string): AddressMapping {
   let inverted = false;
   let addressMapping: AddressMapping | undefined = undefined;
 
@@ -126,15 +126,21 @@ export function getReservedAddressMapping(addressMappingId: string): AddressMapp
     };
   }
 
-  if (addressMappingId === 'AllWithoutMint') {
+  if (addressMappingId.startsWith('AllWithout')) {
     addressMapping = {
-      mappingId: 'AllWithoutMint',
-      addresses: ['Mint'],
+      mappingId: addressMappingId,
+      addresses: [],
       includeAddresses: false,
       uri: '',
       customData: '',
       createdBy: '',
     };
+
+    const addresses = addressMappingId.slice(10).split(':');
+
+    for (let address of addresses) {
+      addressMapping.addresses.push(address);
+    }
   }
 
   if (addressMappingId === 'AllWithMint' || addressMappingId === 'All') {
@@ -159,10 +165,19 @@ export function getReservedAddressMapping(addressMappingId: string): AddressMapp
     };
   }
 
-  if (convertToCosmosAddress(addressMappingId)) {
+  //split by :
+  const addressesToCheck = addressMappingId.split(':');
+  let allAreValid = true;
+  for (let address of addressesToCheck) {
+    if (address != "Mint" && !convertToCosmosAddress(address)) {
+      allAreValid = false;
+    }
+  }
+
+  if (allAreValid) {
     addressMapping = {
       mappingId: addressMappingId,
-      addresses: [addressMappingId],
+      addresses: addressesToCheck,
       includeAddresses: true,
       uri: '',
       customData: '',
@@ -170,10 +185,12 @@ export function getReservedAddressMapping(addressMappingId: string): AddressMapp
     };
   }
 
-
-
   if (inverted && addressMapping) {
     addressMapping.includeAddresses = !addressMapping.includeAddresses;
+  }
+
+  if (!addressMapping) {
+    throw new Error(`Invalid address mapping ID: ${addressMappingId}`);
   }
 
   return addressMapping;

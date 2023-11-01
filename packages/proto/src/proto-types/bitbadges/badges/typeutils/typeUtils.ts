@@ -7,25 +7,32 @@ export function deepCopy<T>(obj: T): T {
 }
 
 function deepCopyWithBigInts<T>(obj: T): T {
+  if (typeof obj !== 'object' || obj === null) {
+    // Base case: return primitive values as-is
+    return obj;
+  }
+
+  if (typeof obj === 'bigint') {
+    return BigInt(obj) as unknown as T;
+  }
+
   if (Array.isArray(obj)) {
     // Create a deep copy of an array
     return obj.map((item) => deepCopyWithBigInts(item)) as unknown as T;
   }
 
-  if (typeof obj !== 'object' || obj === null) {
-    // <T> case: return primitive values as-is
-    return obj;
-  }
+  const copiedObj: Record<string, any> = {};
 
-  // Create a deep copy of an object
-  const copiedObj = {} as T;
+  // Deep copy each property of the object
   for (const key in obj) {
-    if (obj.hasOwnProperty(key)) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
       copiedObj[key] = deepCopyWithBigInts(obj[key]);
     }
   }
-  return copiedObj;
+
+  return copiedObj as unknown as T;
 }
+
 
 /**
  * UserBalance represents the balance of a user and all their approved transfers / permissions.
@@ -40,6 +47,8 @@ export interface UserBalance<T extends NumberType> {
   balances: Balance<T>[];
   outgoingApprovals: UserOutgoingApproval<T>[];
   incomingApprovals: UserIncomingApproval<T>[];
+  autoApproveSelfInitiatedOutgoingTransfers: boolean;
+  autoApproveSelfInitiatedIncomingTransfers: boolean;
   userPermissions: UserPermissions<T>;
 }
 
@@ -290,15 +299,15 @@ export function convertTransfer<T extends NumberType, U extends NumberType>(tran
   return deepCopy({
     ...transfer,
     balances: transfer.balances.map((b) => convertBalance(b, convertFunction)),
-    precalculateBalancesFromApproval: transfer.precalculateBalancesFromApproval ?? populateOptionalFields ? {
+    precalculateBalancesFromApproval: transfer.precalculateBalancesFromApproval ?? (populateOptionalFields ? {
       approvalId: '',
       approvalLevel: '',
       approverAddress: ''
-    } : undefined,
-    merkleProofs: transfer.merkleProofs ?? populateOptionalFields ? [] : undefined,
-    prioritizedApprovals: transfer.prioritizedApprovals ?? populateOptionalFields ? [] : undefined,
-    memo: transfer.memo ?? populateOptionalFields ? '' : undefined,
-    onlyCheckPrioritizedApprovals: transfer.onlyCheckPrioritizedApprovals ?? populateOptionalFields ? false : undefined,
+    } : undefined),
+    merkleProofs: transfer.merkleProofs ?? (populateOptionalFields ? [] : undefined),
+    prioritizedApprovals: transfer.prioritizedApprovals ?? (populateOptionalFields ? [] : undefined),
+    memo: transfer.memo ?? (populateOptionalFields ? '' : undefined),
+    onlyCheckPrioritizedApprovals: transfer.onlyCheckPrioritizedApprovals ?? (populateOptionalFields ? false : undefined),
   })
 }
 
@@ -346,7 +355,7 @@ export function convertAmountTrackerIdDetails<T extends NumberType, U extends Nu
  * @property {string} root - The root of the merkle tree.
  * @property {NumberType} expectedProofLength - The expected proof length of the merkle proof.
  * @property {boolean} useCreatorAddressAsLeaf - Whether or not to override any leaf value and use the creator address as the leaf. Used for whitelist trees.
- * @property {boolean} maxOneUsePerLeaf - Whether or not to enforce only one use per leaf. Used to prevent replay attacks.
+ * @property {boolean} maxUsesPerLeaf - Whether or not to enforce max uses per leaf. Used to prevent replay attacks.
  * @property {boolean} useLeafIndexForTransferOrder - Whether or not to use the leaf index for the transfer order for the predeterminedBalances.
  *                                                    If so, the leaf index 0 will be the leftmost leaf of the valid proof layer (i.e. the one that corresponds to expectedProofLength).
  */
@@ -354,7 +363,7 @@ export interface MerkleChallenge<T extends NumberType> {
   root: string
   expectedProofLength: T;
   useCreatorAddressAsLeaf: boolean
-  maxOneUsePerLeaf: boolean
+  maxUsesPerLeaf: T
   uri: string
   customData: string
 }
@@ -362,6 +371,7 @@ export interface MerkleChallenge<T extends NumberType> {
 export function convertMerkleChallenge<T extends NumberType, U extends NumberType>(merkleChallenge: MerkleChallenge<T>, convertFunction: (item: T) => U): MerkleChallenge<U> {
   return deepCopy({
     ...merkleChallenge,
+    maxUsesPerLeaf: convertFunction(merkleChallenge.maxUsesPerLeaf),
     expectedProofLength: convertFunction(merkleChallenge.expectedProofLength),
   })
 }

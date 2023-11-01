@@ -1,10 +1,10 @@
 //TODO: This file should probably be refactored a lot, but it currently works.
 //			It is also not user-facing or dev-facing, so I am okay with how it is now
 
-import { AddressMapping, UintRange, ValueOptions } from "bitbadgesjs-proto";
-import { isAddressMappingEmpty, removeAddressMappingFromAddressMapping } from "./addressMappings";
+import { AddressMapping, UintRange } from "bitbadgesjs-proto";
+import { getReservedAddressMapping, isAddressMappingEmpty, removeAddressMappingFromAddressMapping } from "./addressMappings";
 import { deepCopy } from "./types/utils";
-import { invertUintRanges, removeUintRangeFromUintRange, removeUintsFromUintRange, sortUintRangesAndMergeIfNecessary } from "./uintRanges";
+import { removeUintRangeFromUintRange, removeUintsFromUintRange, sortUintRangesAndMergeIfNecessary } from "./uintRanges";
 
 //For permissions, we have many types of permissions that are all very similar to each other
 //Here, we abstract all those permissions to a UniversalPermission struct in order to reuse code.
@@ -42,20 +42,6 @@ export interface UniversalPermission {
   usesChallengeTrackerIdMapping: boolean;
 
   arbitraryValue: any;
-
-  timelineTimesOptions?: ValueOptions; // The times of the timeline. Used in the timeline.
-  fromMappingOptions?: ValueOptions; // The times that the from mapping is allowed to be used. Used in the timeline.
-  toMappingOptions?: ValueOptions; // The times that the to mapping is allowed to be used. Used in the timeline.
-  initiatedByMappingOptions?: ValueOptions; // The times that the initiated by mapping is allowed to be used. Used in the timeline.
-  transferTimesOptions?: ValueOptions; // The times that the transfer mapping is allowed to be used. Used in the timeline.
-  badgeIdsOptions?: ValueOptions; // The times that the badge ids are allowed to be used. Used in the timeline.
-  ownershipTimesOptions?: ValueOptions; // The times that the owned times are allowed to be used. Used in the timeline.
-
-  amountTrackerIdOptions?: ValueOptions; // The times that the approval tracker id is allowed to be used. Used in the approval tracker.
-  challengeTrackerIdOptions?: ValueOptions; // The times that the challenge tracker id is allowed to be used. Used in the challenge tracker.
-
-  permittedTimesOptions?: ValueOptions; // The times that are permitted to be used.
-  forbiddenTimesOptions?: ValueOptions; // The times that are forbidden to be used.
 }
 
 
@@ -339,7 +325,7 @@ export function universalRemoveOverlaps(handled: UniversalPermissionDetails, val
   return [remaining, removed]
 }
 
-export function GetUintRangesWithOptions(_ranges: UintRange<bigint>[], options: ValueOptions | undefined, uses: boolean): UintRange<bigint>[] {
+export function GetUintRangesWithOptions(_ranges: UintRange<bigint>[], uses: boolean): UintRange<bigint>[] {
   let ranges = deepCopy(_ranges);
 
   if (!uses) {
@@ -347,74 +333,24 @@ export function GetUintRangesWithOptions(_ranges: UintRange<bigint>[], options: 
     return ranges;
   }
 
-  if (!options) {
-    return ranges;
-  }
-
-  if (options.allValues) {
-    ranges = [{ start: 1n, end: BigInt("18446744073709551615") }];
-  }
-
-  if (options.invertDefault) {
-    ranges = invertUintRanges(ranges, 1n, BigInt("18446744073709551615"));
-  }
-
-  if (options.noValues) {
-    ranges = [];
-  }
-
   return ranges;
 }
 
-export function GetMappingIdWithOptions(mappingId: string, options?: ValueOptions, uses?: boolean): string {
+export function GetMappingIdWithOptions(mappingId: string, uses?: boolean): string {
   if (!uses) {
     mappingId = "All";
-  }
-
-  if (!options) {
-    return mappingId;
-  }
-
-  if (options.allValues) {
-    mappingId = "All";
-  }
-
-  if (options.invertDefault) {
-    mappingId = "!" + mappingId;
-  }
-
-  if (options.noValues) {
-    mappingId = "None";
   }
 
   return mappingId;
 }
 
-export function GetMappingWithOptions(_mapping: AddressMapping, options: ValueOptions | undefined, uses: boolean): AddressMapping {
+export function GetMappingWithOptions(_mapping: AddressMapping, uses: boolean): AddressMapping {
   const mapping = deepCopy(_mapping);
 
 
   if (!uses) {
     mapping.addresses = []
     mapping.includeAddresses = false;
-  }
-
-  if (!options) {
-    return mapping;
-  }
-
-  if (options.allValues) {
-    mapping.addresses = [] //Note NO "Mint" address (so it is included)
-    mapping.includeAddresses = false;
-  }
-
-  if (options.invertDefault) {
-    mapping.includeAddresses = !mapping.includeAddresses
-  }
-
-  if (options.noValues) {
-    mapping.addresses = []
-    mapping.includeAddresses = true;
   }
 
   return mapping;
@@ -486,7 +422,7 @@ export const BalancesActionPermissionUsedFlags: UsedFlags = {
 
 export const ApprovalPermissionUsedFlags: UsedFlags = {
   usesBadgeIds: true,
-  usesTimelineTimes: true,
+  usesTimelineTimes: false,
   usesTransferTimes: true,
   usesToMapping: true,
   usesFromMapping: true,
@@ -510,15 +446,15 @@ export function GetFirstMatchOnly(
     //Littel hack but we append a permission with empty permitted, forbidden times but ALL criteria to the end of the array.
     //This is to ensure we always handle all values when we call GetFirstMatchOnly.
     permissions.push({
-      timelineTimes: [],
-      fromMapping: { mappingId: '', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-      toMapping: { mappingId: '', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-      initiatedByMapping: { mappingId: '', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-      amountTrackerIdMapping: { mappingId: '', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-      challengeTrackerIdMapping: { mappingId: '', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-      transferTimes: [],
-      badgeIds: [],
-      ownershipTimes: [],
+      timelineTimes: [{ start: 1n, end: 18446744073709551615n }],
+      fromMapping: getReservedAddressMapping("All") as AddressMapping,
+      toMapping: getReservedAddressMapping("All") as AddressMapping,
+      initiatedByMapping: getReservedAddressMapping("All") as AddressMapping,
+      amountTrackerIdMapping: getReservedAddressMapping("All") as AddressMapping,
+      challengeTrackerIdMapping: getReservedAddressMapping("All") as AddressMapping,
+      transferTimes: [{ start: 1n, end: 18446744073709551615n }],
+      badgeIds: [{ start: 1n, end: 18446744073709551615n }],
+      ownershipTimes: [{ start: 1n, end: 18446744073709551615n }],
 
       permittedTimes: [],
       forbiddenTimes: [],
@@ -526,80 +462,24 @@ export function GetFirstMatchOnly(
       ...usesFlags,
 
       arbitraryValue: {},
-
-      timelineTimesOptions: {
-        invertDefault: false,
-        allValues: true,
-        noValues: false
-      },
-      fromMappingOptions: {
-        invertDefault: false,
-        allValues: true,
-        noValues: false
-      },
-      toMappingOptions: {
-        invertDefault: false,
-        allValues: true,
-        noValues: false
-      },
-      initiatedByMappingOptions: {
-        invertDefault: false,
-        allValues: true,
-        noValues: false
-      },
-      transferTimesOptions: {
-        invertDefault: false,
-        allValues: true,
-        noValues: false
-      },
-      badgeIdsOptions: {
-        invertDefault: false,
-        allValues: true,
-        noValues: false
-      },
-      ownershipTimesOptions: {
-        invertDefault: false,
-        allValues: true,
-        noValues: false
-      },
-      permittedTimesOptions: {
-        invertDefault: false,
-        allValues: false,
-        noValues: true
-      },
-      forbiddenTimesOptions: {
-        invertDefault: false,
-        allValues: false,
-        noValues: true
-      },
-      amountTrackerIdOptions: {
-        invertDefault: false,
-        allValues: true,
-        noValues: false
-      },
-      challengeTrackerIdOptions: {
-        invertDefault: false,
-        allValues: true,
-        noValues: false
-      },
     })
   }
 
 
   for (const permission of permissions) {
-    const badgeIds = GetUintRangesWithOptions(permission.badgeIds, permission.badgeIdsOptions, permission.usesBadgeIds);
-    const timelineTimes = GetUintRangesWithOptions(permission.timelineTimes, permission.timelineTimesOptions, permission.usesTimelineTimes);
-    const transferTimes = GetUintRangesWithOptions(permission.transferTimes, permission.transferTimesOptions, permission.usesTransferTimes);
-    const ownershipTimes = GetUintRangesWithOptions(permission.ownershipTimes, permission.ownershipTimesOptions, permission.usesOwnershipTimes);
-    const permittedTimes = GetUintRangesWithOptions(permission.permittedTimes, permission.permittedTimesOptions, true);
-    const forbiddenTimes = GetUintRangesWithOptions(permission.forbiddenTimes, permission.forbiddenTimesOptions, true);
+    const badgeIds = GetUintRangesWithOptions(permission.badgeIds, permission.usesBadgeIds);
+    const timelineTimes = GetUintRangesWithOptions(permission.timelineTimes, permission.usesTimelineTimes);
+    const transferTimes = GetUintRangesWithOptions(permission.transferTimes, permission.usesTransferTimes);
+    const ownershipTimes = GetUintRangesWithOptions(permission.ownershipTimes, permission.usesOwnershipTimes);
+    const permittedTimes = GetUintRangesWithOptions(permission.permittedTimes, true);
+    const forbiddenTimes = GetUintRangesWithOptions(permission.forbiddenTimes, true);
     const arbitraryValue = permission.arbitraryValue;
 
-    const toMapping = GetMappingWithOptions(permission.toMapping, permission.toMappingOptions, permission.usesToMapping);
-    const fromMapping = GetMappingWithOptions(permission.fromMapping, permission.fromMappingOptions, permission.usesFromMapping);
-    const initiatedByMapping = GetMappingWithOptions(permission.initiatedByMapping, permission.initiatedByMappingOptions, permission.usesInitiatedByMapping);
-    const amountTrackerIdMapping = GetMappingWithOptions(permission.amountTrackerIdMapping, permission.amountTrackerIdOptions, permission.usesAmountTrackerIdMapping);
-    const challengeTrackerIdMapping = GetMappingWithOptions(permission.challengeTrackerIdMapping, permission.challengeTrackerIdOptions, permission.usesChallengeTrackerIdMapping);
+    const toMapping = GetMappingWithOptions(permission.toMapping, permission.usesToMapping);
+    const fromMapping = GetMappingWithOptions(permission.fromMapping, permission.usesFromMapping);
+    const initiatedByMapping = GetMappingWithOptions(permission.initiatedByMapping, permission.usesInitiatedByMapping);
+    const amountTrackerIdMapping = GetMappingWithOptions(permission.amountTrackerIdMapping, permission.usesAmountTrackerIdMapping);
+    const challengeTrackerIdMapping = GetMappingWithOptions(permission.challengeTrackerIdMapping, permission.usesChallengeTrackerIdMapping);
 
 
     for (const badgeId of badgeIds) {
@@ -719,10 +599,10 @@ export function MergeUniversalPermissionDetails(permissions: UniversalPermission
         const forbiddenTimesAreSame = JSON.stringify(first.forbiddenTimes) === JSON.stringify(second.forbiddenTimes);
         const arbitraryValuesAreSame = JSON.stringify(first.arbitraryValue) === JSON.stringify(second.arbitraryValue);
 
-        const newBadgeIds = badgeIdsAreSame ? first.badgeIds : sortUintRangesAndMergeIfNecessary(deepCopy([...first.badgeIds, ...second.badgeIds]));
-        const newTimelineTimes = timelineTimesAreSame ? first.timelineTimes : sortUintRangesAndMergeIfNecessary(deepCopy([...first.timelineTimes, ...second.timelineTimes]));
-        const newTransferTimes = transferTimesAreSame ? first.transferTimes : sortUintRangesAndMergeIfNecessary(deepCopy([...first.transferTimes, ...second.transferTimes]));
-        const newOwnershipTimes = ownershipTimesAreSame ? first.ownershipTimes : sortUintRangesAndMergeIfNecessary(deepCopy([...first.ownershipTimes, ...second.ownershipTimes]));
+        const newBadgeIds = badgeIdsAreSame ? first.badgeIds : sortUintRangesAndMergeIfNecessary(deepCopy([...first.badgeIds, ...second.badgeIds]), true);
+        const newTimelineTimes = timelineTimesAreSame ? first.timelineTimes : sortUintRangesAndMergeIfNecessary(deepCopy([...first.timelineTimes, ...second.timelineTimes]), true);
+        const newTransferTimes = transferTimesAreSame ? first.transferTimes : sortUintRangesAndMergeIfNecessary(deepCopy([...first.transferTimes, ...second.transferTimes]), true);
+        const newOwnershipTimes = ownershipTimesAreSame ? first.ownershipTimes : sortUintRangesAndMergeIfNecessary(deepCopy([...first.ownershipTimes, ...second.ownershipTimes]), true);
 
         let sameCount = 0;
         if (badgeIdsAreSame) sameCount++;
