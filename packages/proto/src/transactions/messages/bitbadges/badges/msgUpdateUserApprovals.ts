@@ -13,6 +13,10 @@ export interface MsgUpdateUserApprovals<T extends NumberType> {
   outgoingApprovals?: UserOutgoingApproval<T>[]
   updateIncomingApprovals?: boolean
   incomingApprovals?: UserIncomingApproval<T>[]
+  updateAutoApproveSelfInitiatedOutgoingTransfers?: boolean
+  autoApproveSelfInitiatedOutgoingTransfers?: boolean
+  updateAutoApproveSelfInitiatedIncomingTransfers?: boolean
+  autoApproveSelfInitiatedIncomingTransfers?: boolean
   updateUserPermissions?: boolean
   userPermissions?: UserPermissions<T>
 }
@@ -36,6 +40,7 @@ export function convertFromProtoToMsgUpdateUserApprovals(
   const msg = protoMsg.toObject() as MsgUpdateUserApprovals<string>
 
   return {
+    ...msg,
     creator: msg.creator,
     collectionId: BigInt(msg.collectionId),
     updateOutgoingApprovals: msg.updateOutgoingApprovals,
@@ -71,10 +76,16 @@ export function createTxMsgUpdateUserApprovals<T extends NumberType>(
     params.outgoingApprovals ?? [],
     params.updateIncomingApprovals ?? false,
     params.incomingApprovals ?? [],
+    params.updateAutoApproveSelfInitiatedOutgoingTransfers ?? false,
+    params.autoApproveSelfInitiatedOutgoingTransfers ?? false,
+    params.updateAutoApproveSelfInitiatedIncomingTransfers ?? false,
+    params.autoApproveSelfInitiatedIncomingTransfers ?? false,
     params.updateUserPermissions ?? false,
     params.userPermissions ?? {
       canUpdateIncomingApprovals: [],
       canUpdateOutgoingApprovals: [],
+      canUpdateAutoApproveSelfInitiatedIncomingTransfers: [],
+      canUpdateAutoApproveSelfInitiatedOutgoingTransfers: [],
     },
   )
   const messages = generateMessage(
@@ -99,10 +110,16 @@ export function createTxMsgUpdateUserApprovals<T extends NumberType>(
     params.outgoingApprovals ?? [],
     params.updateIncomingApprovals ?? false,
     params.incomingApprovals ?? [],
+    params.updateAutoApproveSelfInitiatedOutgoingTransfers ?? false,
+    params.autoApproveSelfInitiatedOutgoingTransfers ?? false,
+    params.updateAutoApproveSelfInitiatedIncomingTransfers ?? false,
+    params.autoApproveSelfInitiatedIncomingTransfers ?? false,
     params.updateUserPermissions ?? false,
     params.userPermissions ?? {
       canUpdateIncomingApprovals: [],
       canUpdateOutgoingApprovals: [],
+      canUpdateAutoApproveSelfInitiatedIncomingTransfers: [],
+      canUpdateAutoApproveSelfInitiatedOutgoingTransfers: [],
     },
   )
   const tx = createTransaction(

@@ -2,8 +2,8 @@ import * as tx from '../../../proto/badges/tx'
 import { NumberType, Stringify } from './string-numbers'
 import { CollectionApproval, UserIncomingApproval, UserOutgoingApproval, convertCollectionApproval, convertUserIncomingApproval, convertUserOutgoingApproval } from './typeutils/approvals'
 import { CollectionPermissions, UserPermissions, convertCollectionPermissions, convertUserPermissions } from './typeutils/permissions'
-import { BadgeMetadataTimeline, Balance, CollectionMetadataTimeline, ContractAddressTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadataTimeline, StandardsTimeline, convertBadgeMetadataTimeline, convertBalance, convertCollectionMetadataTimeline, convertContractAddressTimeline, convertCustomDataTimeline, convertIsArchivedTimeline, convertManagerTimeline, convertOffChainBalancesMetadataTimeline, convertStandardsTimeline } from './typeutils/typeUtils'
-import { getWrappedBadgeMetadataTimeline, getWrappedBalances, getWrappedCollectionApprovals, getWrappedCollectionMetadataTimeline, getWrappedCollectionPermissions, getWrappedContractAddressTimeline, getWrappedCustomDataTimeline, getWrappedIncomingTransfers, getWrappedIsArchivedTimeline, getWrappedManagerTimeline, getWrappedOffChainBalancesMetadataTimeline, getWrappedOutgoingTransfers, getWrappedStandardsTimeline, getWrappedUserPermissions } from './typeutils/wrappers'
+import { BadgeMetadataTimeline, Balance, CollectionMetadataTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadataTimeline, StandardsTimeline, convertBadgeMetadataTimeline, convertBalance, convertCollectionMetadataTimeline, convertCustomDataTimeline, convertIsArchivedTimeline, convertManagerTimeline, convertOffChainBalancesMetadataTimeline, convertStandardsTimeline } from './typeutils/typeUtils'
+import { getWrappedBadgeMetadataTimeline, getWrappedBalances, getWrappedCollectionApprovals, getWrappedCollectionMetadataTimeline, getWrappedCollectionPermissions, getWrappedCustomDataTimeline, getWrappedIncomingTransfers, getWrappedIsArchivedTimeline, getWrappedManagerTimeline, getWrappedOffChainBalancesMetadataTimeline, getWrappedOutgoingTransfers, getWrappedStandardsTimeline, getWrappedUserPermissions } from './typeutils/wrappers'
 
 
 
@@ -13,6 +13,8 @@ export function createMsgUpdateCollection<T extends NumberType>(
   balancesType: string,
   defaultOutgoingApprovals: UserOutgoingApproval<T>[],
   defaultIncomingApprovals: UserIncomingApproval<T>[],
+  defaultAutoApproveSelfInitiatedOutgoingTransfers: boolean,
+  defaultAutoApproveSelfInitiatedIncomingTransfers: boolean,
   defaultUserPermissions: UserPermissions<T>,
   badgesToCreate: Balance<T>[],
   updateCollectionPermissions: boolean,
@@ -32,8 +34,6 @@ export function createMsgUpdateCollection<T extends NumberType>(
   collectionApprovals: CollectionApproval<T>[],
   updateStandardsTimeline: boolean,
   standardsTimeline: StandardsTimeline<T>[],
-  updateContractAddressTimeline: boolean,
-  contractAddressTimeline: ContractAddressTimeline<T>[],
   updateIsArchivedTimeline: boolean,
   isArchivedTimeline: IsArchivedTimeline<T>[],
 ) {
@@ -43,6 +43,8 @@ export function createMsgUpdateCollection<T extends NumberType>(
     balancesType,
     defaultOutgoingApprovals: getWrappedOutgoingTransfers(defaultOutgoingApprovals.map(x => convertUserOutgoingApproval(x, Stringify, true))),
     defaultIncomingApprovals: getWrappedIncomingTransfers(defaultIncomingApprovals.map(x => convertUserIncomingApproval(x, Stringify, true))),
+    defaultAutoApproveSelfInitiatedOutgoingTransfers,
+    defaultAutoApproveSelfInitiatedIncomingTransfers,
     defaultUserPermissions: getWrappedUserPermissions(convertUserPermissions(defaultUserPermissions, Stringify, true)),
     badgesToCreate: getWrappedBalances(badgesToCreate.map(x => convertBalance(x, Stringify))),
     updateCollectionPermissions,
@@ -62,8 +64,6 @@ export function createMsgUpdateCollection<T extends NumberType>(
     collectionApprovals: getWrappedCollectionApprovals(collectionApprovals.map(x => convertCollectionApproval(x, Stringify, true))),
     updateStandardsTimeline,
     standardsTimeline: getWrappedStandardsTimeline(standardsTimeline.map(x => convertStandardsTimeline(x, Stringify))),
-    updateContractAddressTimeline,
-    contractAddressTimeline: getWrappedContractAddressTimeline(contractAddressTimeline.map(x => convertContractAddressTimeline(x, Stringify))),
     updateIsArchivedTimeline,
     isArchivedTimeline: getWrappedIsArchivedTimeline(isArchivedTimeline.map(x => convertIsArchivedTimeline(x, Stringify))),
   })

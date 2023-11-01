@@ -71,9 +71,13 @@ export function incrementMintAndTotalBalances(
     onChain: true,
     outgoingApprovals: [],
     incomingApprovals: [],
+    autoApproveSelfInitiatedIncomingTransfers: false,
+    autoApproveSelfInitiatedOutgoingTransfers: false,
     userPermissions: {
       canUpdateIncomingApprovals: [],
       canUpdateOutgoingApprovals: [],
+      canUpdateAutoApproveSelfInitiatedIncomingTransfers: [],
+      canUpdateAutoApproveSelfInitiatedOutgoingTransfers: [],
     },
     updateHistory: [],
   });
@@ -86,9 +90,13 @@ export function incrementMintAndTotalBalances(
     onChain: true,
     outgoingApprovals: [],
     incomingApprovals: [],
+    autoApproveSelfInitiatedIncomingTransfers: false,
+    autoApproveSelfInitiatedOutgoingTransfers: false,
     userPermissions: {
       canUpdateIncomingApprovals: [],
       canUpdateOutgoingApprovals: [],
+      canUpdateAutoApproveSelfInitiatedIncomingTransfers: [],
+      canUpdateAutoApproveSelfInitiatedOutgoingTransfers: [],
     },
     updateHistory: [],
   });

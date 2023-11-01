@@ -11,6 +11,10 @@ export function createMsgUpdateUserApprovals<T extends NumberType>(
   outgoingApprovals: UserOutgoingApproval<T>[],
   updateIncomingApprovals: boolean,
   incomingApprovals: UserIncomingApproval<T>[],
+  updateAutoApproveSelfInitiatedOutgoingTransfers: boolean,
+  autoApproveSelfInitiatedOutgoingTransfers: boolean,
+  updateAutoApproveSelfInitiatedIncomingTransfers: boolean,
+  autoApproveSelfInitiatedIncomingTransfers: boolean,
   updateUserPermissions: boolean,
   userPermissions: UserPermissions<T>,
 ) {
@@ -22,6 +26,11 @@ export function createMsgUpdateUserApprovals<T extends NumberType>(
       outgoingApprovals: getWrappedOutgoingTransfers(outgoingApprovals.map((x) => convertUserOutgoingApproval(x, Stringify, true))),
       updateIncomingApprovals,
       incomingApprovals: getWrappedIncomingTransfers(incomingApprovals.map((x) => convertUserIncomingApproval(x, Stringify, true))),
+
+      updateAutoApproveSelfInitiatedOutgoingTransfers,
+      autoApproveSelfInitiatedOutgoingTransfers,
+      updateAutoApproveSelfInitiatedIncomingTransfers,
+      autoApproveSelfInitiatedIncomingTransfers,
       updateUserPermissions,
       userPermissions: getWrappedUserPermissions(convertUserPermissions(userPermissions, Stringify, true)),
     })

@@ -1,3 +1,0 @@
-# bitbadgesjs
-
-Main package

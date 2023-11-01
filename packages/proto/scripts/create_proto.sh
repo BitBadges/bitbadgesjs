@@ -6,6 +6,8 @@ proto_dir="./proto/badges/"
 # Set the output directory
 output_dir="./src/proto/"
 
+source_dir="./src/proto/badges/"
+
 # Find all .proto files in the directory
 for file in "$proto_dir"*.proto; do
   # Extract the filename without the directory path and extension

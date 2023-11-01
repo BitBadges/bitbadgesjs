@@ -1,7 +1,7 @@
-import { AddressMapping, ApprovalCriteria, CollectionApproval, CollectionApprovalPermission, CollectionPermissions, NumberType, UintRange, convertApprovalCriteria, convertCollectionApproval, convertCollectionApprovalPermission, convertCollectionPermissions, convertUintRange } from "bitbadgesjs-proto";
+import { AddressMapping, ApprovalCriteria, CollectionApproval, CollectionApprovalPermission, CollectionPermissions, NumberType, UintRange, UserIncomingApprovalPermission, UserOutgoingApprovalPermission, convertApprovalCriteria, convertCollectionApproval, convertCollectionApprovalPermission, convertCollectionPermissions, convertUintRange, convertUserIncomingApprovalPermission, convertUserOutgoingApprovalPermission } from "bitbadgesjs-proto";
 import { AnnouncementInfo, ReviewInfo, TransferActivityInfo, convertAnnouncementInfo, convertReviewInfo, convertTransferActivityInfo } from "./activity";
 import { PaginationInfo } from "./api";
-import { ApprovalsTrackerInfo, BalanceInfoWithDetails, CollectionInfoBase, Identified, MerkleChallengeInfo, MerkleChallengeWithDetails, convertApprovalsTrackerInfo, convertBalanceInfoWithDetails, convertCollectionInfo, convertMerkleChallengeInfo, convertMerkleChallengeWithDetails } from "./db";
+import { ApprovalInfoDetails, ApprovalsTrackerInfo, BalanceInfoWithDetails, CollectionInfoBase, Identified, MerkleChallengeInfo, MerkleChallengeWithDetails, convertApprovalInfoDetails, convertApprovalsTrackerInfo, convertBalanceInfoWithDetails, convertCollectionInfo, convertMerkleChallengeInfo } from "./db";
 import { Metadata, convertMetadata } from "./metadata";
 import { UserIncomingApprovalWithDetails, UserOutgoingApprovalWithDetails, convertUserIncomingApprovalWithDetails, convertUserOutgoingApprovalWithDetails } from "./users";
 import { deepCopy, removeCouchDBDetails } from "./utils";
@@ -54,6 +54,47 @@ export function convertCollectionApprovalPermissionWithDetails<T extends NumberT
   })
 }
 
+
+/**
+ * @category Approvals / Transferability
+ */
+export interface UserIncomingApprovalPermissionWithDetails<T extends NumberType> extends UserIncomingApprovalPermission<T> {
+  fromMapping: AddressMapping;
+  initiatedByMapping: AddressMapping;
+}
+
+/**
+ * @category Approvals / Transferability
+ */
+export function convertUserIncomingApprovalPermissionWithDetails<T extends NumberType, U extends NumberType>(item: UserIncomingApprovalPermissionWithDetails<T>, convertFunction: (item: T) => U): UserIncomingApprovalPermissionWithDetails<U> {
+  return deepCopy({
+    ...item,
+    ...convertUserIncomingApprovalPermission(item, convertFunction),
+    fromMapping: item.fromMapping,
+    initiatedByMapping: item.initiatedByMapping,
+  })
+}
+
+/**
+ * @category Approvals / Transferability
+ */
+export interface UserOutgoingApprovalPermissionWithDetails<T extends NumberType> extends UserOutgoingApprovalPermission<T> {
+  toMapping: AddressMapping;
+  initiatedByMapping: AddressMapping;
+}
+
+/**
+ * @category Approvals / Transferability
+ */
+export function convertUserOutgoingApprovalPermissionWithDetails<T extends NumberType, U extends NumberType>(item: UserOutgoingApprovalPermissionWithDetails<T>, convertFunction: (item: T) => U): UserOutgoingApprovalPermissionWithDetails<U> {
+  return deepCopy({
+    ...item,
+    ...convertUserOutgoingApprovalPermission(item, convertFunction),
+    toMapping: item.toMapping,
+    initiatedByMapping: item.initiatedByMapping,
+  })
+}
+
 export interface CollectionPermissionsWithDetails<T extends NumberType> extends CollectionPermissions<T> {
   canUpdateCollectionApprovals: CollectionApprovalPermissionWithDetails<T>[];
 }
@@ -83,6 +124,7 @@ export interface ApprovalCriteriaWithDetails<T extends NumberType> extends Appro
  */
 export interface CollectionApprovalWithDetails<T extends NumberType> extends CollectionApproval<T> {
   approvalCriteria?: ApprovalCriteriaWithDetails<T>;
+  details?: ApprovalInfoDetails<T>
   toMapping: AddressMapping;
   fromMapping: AddressMapping;
   initiatedByMapping: AddressMapping;
@@ -95,9 +137,9 @@ export function convertCollectionApprovalWithDetails<T extends NumberType, U ext
   return deepCopy({
     ...item,
     ...convertCollectionApproval(item, convertFunction),
+    details: item.details ? convertApprovalInfoDetails(item.details, convertFunction) : undefined,
     approvalCriteria: item.approvalCriteria ? {
       ...convertApprovalCriteria(item.approvalCriteria, convertFunction),
-      merkleChallenge: item.approvalCriteria.merkleChallenge ? convertMerkleChallengeWithDetails(item.approvalCriteria.merkleChallenge, convertFunction) : undefined,
     } : undefined,
   })
 }
@@ -134,6 +176,7 @@ export interface BitBadgesCollection<T extends NumberType> extends CollectionInf
 
   defaultUserOutgoingApprovals: UserOutgoingApprovalWithDetails<T>[];
   defaultUserIncomingApprovals: UserIncomingApprovalWithDetails<T>[];
+
 
   //The following are to be fetched dynamically and as needed from the DB
   cachedCollectionMetadata?: Metadata<T>;

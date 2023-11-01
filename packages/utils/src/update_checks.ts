@@ -55,12 +55,12 @@ function getFirstMatchOnlyWithApprovalCriteria(permissions: UniversalPermission[
 
   for (const permission of permissions) {
 
-    const badgeIds = GetUintRangesWithOptions(permission.badgeIds, permission.badgeIdsOptions, permission.usesBadgeIds);
-    const timelineTimes = GetUintRangesWithOptions(permission.timelineTimes, permission.timelineTimesOptions, permission.usesTimelineTimes);
-    const transferTimes = GetUintRangesWithOptions(permission.transferTimes, permission.transferTimesOptions, permission.usesTransferTimes);
-    const ownershipTimes = GetUintRangesWithOptions(permission.ownershipTimes, permission.ownershipTimesOptions, permission.usesOwnershipTimes);
-    const permittedTimes = GetUintRangesWithOptions(permission.permittedTimes, permission.permittedTimesOptions, true);
-    const forbiddenTimes = GetUintRangesWithOptions(permission.forbiddenTimes, permission.forbiddenTimesOptions, true);
+    const badgeIds = GetUintRangesWithOptions(permission.badgeIds, permission.usesBadgeIds);
+    const timelineTimes = GetUintRangesWithOptions(permission.timelineTimes, permission.usesTimelineTimes);
+    const transferTimes = GetUintRangesWithOptions(permission.transferTimes, permission.usesTransferTimes);
+    const ownershipTimes = GetUintRangesWithOptions(permission.ownershipTimes, permission.usesOwnershipTimes);
+    const permittedTimes = GetUintRangesWithOptions(permission.permittedTimes, true);
+    const forbiddenTimes = GetUintRangesWithOptions(permission.forbiddenTimes, true);
 
     for (const badgeId of badgeIds) {
       for (const timelineTime of timelineTimes) {

@@ -22,6 +22,8 @@ export const PROOF_TYPES = [
 export const USER_PERMISSIONS_TYPES = [
   { name: 'canUpdateOutgoingApprovals', type: 'UserOutgoingApprovalPermission[]' },
   { name: 'canUpdateIncomingApprovals', type: 'UserIncomingApprovalPermission[]' },
+  { name: "canUpdateAutoApproveSelfInitiatedOutgoingTransfers", type: "ActionPermission[]" },
+  { name: "canUpdateAutoApproveSelfInitiatedIncomingTransfers", type: "ActionPermission[]" },
 ];
 
 export const USER_APPROVED_OUTGOING_TRANSFER_TYPES = [
@@ -110,7 +112,7 @@ export const MERKLE_CHALLENGE_TYPES = [
   { name: 'root', type: 'string' },
   { name: 'expectedProofLength', type: 'string' },
   { name: 'useCreatorAddressAsLeaf', type: 'bool' },
-  { name: 'maxOneUsePerLeaf', type: 'bool' },
+  { name: 'maxUsesPerLeaf', type: 'string' },
   { name: 'uri', type: 'string' },
   { name: 'customData', type: 'string' },
 ];
@@ -156,7 +158,6 @@ export const PREDETERMINED_ORDER_CALCULATION_METHOD_TYPES = [
 export const COLLECTIONS_PERMISSIONS_TYPES = [
   { name: 'canDeleteCollection', type: 'ActionPermission[]' },
   { name: 'canArchiveCollection', type: 'TimedUpdatePermission[]' },
-  { name: 'canUpdateContractAddress', type: 'TimedUpdatePermission[]' },
   { name: 'canUpdateOffChainBalancesMetadata', type: 'TimedUpdatePermission[]' },
   { name: 'canUpdateStandards', type: 'TimedUpdatePermission[]' },
   { name: 'canUpdateCustomData', type: 'TimedUpdatePermission[]' },
@@ -204,11 +205,6 @@ export const CUSTOM_DATA_TIMELINE_TYPES = [
 
 export const STANDARDS_TIMELINE_TYPES = [
   { name: 'standards', type: 'string[]' },
-  { name: 'timelineTimes', type: 'UintRange[]' },
-];
-
-export const CONTRACT_ADDRESS_TIMELINE_TYPES = [
-  { name: 'contractAddress', type: 'string' },
   { name: 'timelineTimes', type: 'UintRange[]' },
 ];
 

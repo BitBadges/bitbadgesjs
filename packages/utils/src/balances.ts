@@ -21,9 +21,13 @@ export function getBlankBalance(nonMintApproval: boolean, collection?: BitBadges
     balances: [],
     incomingApprovals: collection ? collection.defaultUserIncomingApprovals : [],
     outgoingApprovals: collection ? collection.defaultUserOutgoingApprovals : [],
+    autoApproveSelfInitiatedIncomingTransfers: collection ? collection.defaultAutoApproveSelfInitiatedIncomingTransfers : false,
+    autoApproveSelfInitiatedOutgoingTransfers: collection ? collection.defaultAutoApproveSelfInitiatedOutgoingTransfers : false,
     userPermissions: collection ? collection.defaultUserPermissions : {
       canUpdateIncomingApprovals: [],
       canUpdateOutgoingApprovals: [],
+      canUpdateAutoApproveSelfInitiatedIncomingTransfers: [],
+      canUpdateAutoApproveSelfInitiatedOutgoingTransfers: [],
     },
   }
 
@@ -288,8 +292,10 @@ export function setBalance(newBalance: Balance<bigint>, balances: Balance<bigint
   }
 
   balances.push(newBalance);
+  balances = cleanBalances(balances);
+  balances = sortBalancesByAmount(balances);
 
-  return sortAndMergeBalances(balances);
+  return balances;
 }
 
 /**
@@ -442,43 +448,55 @@ export function deleteBalances(rangesToDelete: UintRange<bigint>[], timesToDelet
   return newBalances;
 }
 
-export function sortAndMergeBalances(balances: Balance<bigint>[]) {
-  //sort in ascending order of amount
-  balances = balances.sort((a, b) => {
+/**
+ * @category Balances
+ */
+export function sortBalancesByAmount(balances: Balance<bigint>[]) {
+  return balances.sort((a, b) => {
     return a.amount > b.amount ? 1 : -1;
   });
+}
 
-  //Merge those which have same amount and ownership times or amount and badge ids
-  let newBalances: Balance<bigint>[] = [];
-
-  for (let i = 0; i < balances.length; i++) {
-    let balance = balances[i];
-    let found = false;
-    for (let j = 0; j < newBalances.length; j++) {
-      let newBalance = newBalances[j];
-      if (newBalance.amount === balance.amount) {
-        if (JSON.stringify(newBalance.ownershipTimes) === JSON.stringify(balance.ownershipTimes)) {
-          newBalance.badgeIds.push(...balance.badgeIds);
-          newBalance.badgeIds = sortUintRangesAndMergeIfNecessary(newBalance.badgeIds);
-          found = true;
-          break;
-        } else if (JSON.stringify(newBalance.badgeIds) === JSON.stringify(balance.badgeIds)) {
-          newBalance.ownershipTimes.push(...balance.ownershipTimes);
-          newBalance.ownershipTimes = sortUintRangesAndMergeIfNecessary(newBalance.ownershipTimes);
-          found = true;
-          break;
-        }
-      } else if (newBalance.amount > balance.amount) {
-        //We are past the point where we can find a match since it is sorted
-        break;
-      }
-    }
-
-    if (!found) {
-      newBalances.push(balance);
-    }
+export function cleanBalances(balances: Balance<bigint>[]) {
+  for (let balance of balances) {
+    balance.badgeIds = sortUintRangesAndMergeIfNecessary(balance.badgeIds, false);
+    balance.ownershipTimes = sortUintRangesAndMergeIfNecessary(balance.ownershipTimes, false);
   }
 
+  return balances
+}
+
+/**
+ * Sorts and merges balances. Precondition that all badgeIds and ownershipTimes are non-overlapping.
+ *
+ * @param balances - The balances to sort and merge.
+ *
+ * @category Balances
+ */
+export function sortAndMergeBalances(balances: Balance<bigint>[]) {
+  balances = handleDuplicateBadgeIdsInBalances(balances);
+  balances = cleanBalances(balances);
+  balances = sortBalancesByAmount(balances);
+
+  return balances
+}
+
+/**
+ * @category Balances
+ */
+export function handleDuplicateBadgeIdsInBalances(balances: Balance<bigint>[]) {
+  let newBalances: Balance<bigint>[] = [];
+  for (const balance of balances) {
+    for (const badgeId of balance.badgeIds) {
+      for (const time of balance.ownershipTimes) {
+        newBalances = addBalance(newBalances, {
+          amount: balance.amount,
+          badgeIds: [badgeId],
+          ownershipTimes: [time],
+        });
+      }
+    }
+  }
 
   return newBalances;
 }

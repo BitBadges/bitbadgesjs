@@ -8,9 +8,11 @@
   This file has helper functions for those three fields.
 */
 
-import { BadgeMetadata } from "bitbadgesjs-proto";
+import { AddressMapping, BadgeMetadata, deepCopy } from "bitbadgesjs-proto";
+import { getReservedAddressMapping, isAddressMappingEmpty, isInAddressMapping, removeAddressMappingFromAddressMapping } from "./addressMappings";
+import { castIncomingTransfersToCollectionTransfers, castOutgoingTransfersToCollectionTransfers } from "./approved_transfers_casts";
 import { GetFirstMatchOnly, MergeUniversalPermissionDetails } from "./overlaps";
-import { castCollectionApprovalToUniversalPermission, castUserIncomingApprovalsToUniversalPermission, castUserOutgoingApprovalsToUniversalPermission } from "./permissions";
+import { castCollectionApprovalToUniversalPermission } from "./permissions";
 import { CollectionApprovalWithDetails } from "./types/collections";
 import { UserIncomingApprovalWithDetails, UserOutgoingApprovalWithDetails } from "./types/users";
 import { removeUintRangeFromUintRange } from "./uintRanges";
@@ -37,36 +39,45 @@ export function getFirstMatchForBadgeMetadata(
 /**
  * @category Approvals / Transferability
  */
-export function getFirstMatchForCollectionApprovals(
+export function getUnhandledCollectionApprovals(
   collectionApprovals: CollectionApprovalWithDetails<bigint>[],
-  handleAllPossibleCombinations?: boolean,
+  ignoreTrackerIds: boolean,
   doNotMerge?: boolean
 ) {
-  const currTransferability: CollectionApprovalWithDetails<bigint>[] = [
-    ...collectionApprovals,
-  ]
+  const currTransferability: CollectionApprovalWithDetails<bigint>[] = deepCopy(collectionApprovals);
 
-  if (handleAllPossibleCombinations) {
-    currTransferability.push({
-      fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-      toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-      initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-      fromMappingId: 'AllWithMint',
-      toMappingId: 'AllWithMint',
-      initiatedByMappingId: 'AllWithMint',
-      approvalId: "",
-      amountTrackerId: "",
-      challengeTrackerId: "",
-      transferTimes: [{ start: 1n, end: 18446744073709551615n }],
-      badgeIds: [{ start: 1n, end: 18446744073709551615n }],
-      ownershipTimes: [{ start: 1n, end: 18446744073709551615n }],
-      isApproved: false,
-    });
-  }
+  //Startegy here is to create a unique approval, get first matches, and then whatever makes it through the first matches (w/ approvalId "__disapproved__") is unhandled
+  currTransferability.push({
+    fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+    toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+    initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+    fromMappingId: 'AllWithMint',
+    toMappingId: 'AllWithMint',
+    initiatedByMappingId: 'AllWithMint',
+    approvalId: "__disapproved__",
+    amountTrackerId: "All",
+    challengeTrackerId: "All",
+    transferTimes: [{ start: 1n, end: 18446744073709551615n }],
+    badgeIds: [{ start: 1n, end: 18446744073709551615n }],
+    ownershipTimes: [{ start: 1n, end: 18446744073709551615n }],
+  });
+
 
   const expandedTransferability: CollectionApprovalWithDetails<bigint>[] = currTransferability;
+  console.log(castCollectionApprovalToUniversalPermission(expandedTransferability));
+  const firstMatches = GetFirstMatchOnly(castCollectionApprovalToUniversalPermission(expandedTransferability).map(x => {
+    if (ignoreTrackerIds) {
+      return {
+        ...x,
+        usesChallengeTrackerIdMapping: false,
+        usesAmountTrackerIdMapping: false,
+      }
+    } else {
+      return x;
+    }
+  }
+  ));
 
-  const firstMatches = GetFirstMatchOnly(castCollectionApprovalToUniversalPermission(expandedTransferability));
   const merged = MergeUniversalPermissionDetails(firstMatches, doNotMerge);
 
   const newApprovals: CollectionApprovalWithDetails<bigint>[] = [];
@@ -86,133 +97,112 @@ export function getFirstMatchForCollectionApprovals(
       amountTrackerId: match.arbitraryValue.amountTrackerId,
       challengeTrackerId: match.arbitraryValue.challengeTrackerId,
 
-      //TODO: if broken down via first match only, the same approval details may be duplicated across multiple matches (so predeterminedBalances, approvalAmounts, etc. may be weird)
       approvalCriteria: match.arbitraryValue.approvalCriteria,
-      isApproved: match.arbitraryValue.isApproved,
     })
   }
 
-  return newApprovals;
+  return newApprovals.filter((approval) => approval.approvalId == "__disapproved__");
 }
+
 
 /**
  * @category Approvals / Transferability
  */
-export function getFirstMatchForUserOutgoingApprovals(
+export function getUnhandledUserOutgoingApprovals(
   approvals: UserOutgoingApprovalWithDetails<bigint>[],
   userAddress: string,
-  handleAllPossibleCombinations?: boolean
+  ignoreTrackerIds: boolean,
+  doNotMerge?: boolean
 ) {
-  const currTransferability: UserOutgoingApprovalWithDetails<bigint>[] = [
-    ...approvals,
-  ]
-
-  if (handleAllPossibleCombinations) {
-    currTransferability.push({
-      // fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-      toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-      initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-      // fromMappingId: 'AllWithMint',
-      toMappingId: 'AllWithMint',
-      initiatedByMappingId: 'AllWithMint',
-      approvalId: "",
-      amountTrackerId: "",
-      challengeTrackerId: "",
-      transferTimes: [{ start: 1n, end: 18446744073709551615n }],
-      badgeIds: [{ start: 1n, end: 18446744073709551615n }],
-      ownershipTimes: [{ start: 1n, end: 18446744073709551615n }],
-      isApproved: false,
-    });
+  const castedApprovals = castOutgoingTransfersToCollectionTransfers(approvals, userAddress);
+  const unhandled = getUnhandledCollectionApprovals(castedApprovals, ignoreTrackerIds, doNotMerge);
+  const newUnhandled = [];
+  for (const unhandledApproval of unhandled) {
+    if (isInAddressMapping(unhandledApproval.fromMapping, userAddress)) {
+      unhandledApproval.fromMappingId = userAddress;
+      unhandledApproval.fromMapping = getReservedAddressMapping(userAddress) as AddressMapping;
+      newUnhandled.push(unhandledApproval);
+    }
   }
 
-  const expandedTransferability: UserOutgoingApprovalWithDetails<bigint>[] = currTransferability;
-
-  const firstMatches = GetFirstMatchOnly(castUserOutgoingApprovalsToUniversalPermission(expandedTransferability, userAddress));
-  const merged = MergeUniversalPermissionDetails(firstMatches);
-
-  const newApprovals: UserOutgoingApprovalWithDetails<bigint>[] = [];
-  for (const match of merged) {
-    newApprovals.push({
-      // fromMapping: match.fromMapping,
-      // fromMappingId: match.fromMapping.mappingId,
-      toMapping: match.toMapping,
-      toMappingId: match.toMapping.mappingId,
-      initiatedByMapping: match.initiatedByMapping,
-      initiatedByMappingId: match.initiatedByMapping.mappingId,
-      badgeIds: match.badgeIds,
-      transferTimes: match.transferTimes,
-      ownershipTimes: match.ownershipTimes,
-
-      approvalId: match.arbitraryValue.approvalId,
-      amountTrackerId: match.arbitraryValue.amountTrackerId,
-      challengeTrackerId: match.arbitraryValue.challengeTrackerId,
-
-      //TODO: if broken down via first match only, the same approval details may be duplicated across multiple matches (so predeterminedBalances, approvalAmounts, etc. may be weird)
-      approvalCriteria: match.arbitraryValue.approvalCriteria,
-      isApproved: match.arbitraryValue.isApproved,
-    })
-  }
-
-  return newApprovals;
+  return newUnhandled;
 }
 
 /**
  * @category Approvals / Transferability
  */
-export function getFirstMatchForUserIncomingApprovals(
+export function getUnhandledUserIncomingApprovals(
   approvals: UserIncomingApprovalWithDetails<bigint>[],
   userAddress: string,
-  handleAllPossibleCombinations?: boolean
+  ignoreTrackerIds: boolean,
+  doNotMerge?: boolean
 ) {
-  const currTransferability: UserIncomingApprovalWithDetails<bigint>[] = [
-    ...approvals,
-  ]
-
-  if (handleAllPossibleCombinations) {
-    currTransferability.push({
-      fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-      // toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-      initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-      fromMappingId: 'AllWithMint',
-      // toMappingId: 'AllWithMint',
-      initiatedByMappingId: 'AllWithMint',
-      approvalId: "",
-      amountTrackerId: "",
-      challengeTrackerId: "",
-      transferTimes: [{ start: 1n, end: 18446744073709551615n }],
-      badgeIds: [{ start: 1n, end: 18446744073709551615n }],
-      ownershipTimes: [{ start: 1n, end: 18446744073709551615n }],
-      isApproved: false,
-    });
+  const castedApprovals = castIncomingTransfersToCollectionTransfers(approvals, userAddress);
+  const unhandled = getUnhandledCollectionApprovals(castedApprovals, ignoreTrackerIds, doNotMerge);
+  const newUnhandled = [];
+  for (const unhandledApproval of unhandled) {
+    if (isInAddressMapping(unhandledApproval.toMapping, userAddress)) {
+      unhandledApproval.toMappingId = userAddress;
+      unhandledApproval.toMapping = getReservedAddressMapping(userAddress) as AddressMapping;
+      newUnhandled.push(unhandledApproval);
+    }
   }
 
-  const expandedTransferability: UserIncomingApprovalWithDetails<bigint>[] = currTransferability;
+  return newUnhandled;
+}
 
-  const firstMatches = GetFirstMatchOnly(castUserIncomingApprovalsToUniversalPermission(expandedTransferability, userAddress));
-  const merged = MergeUniversalPermissionDetails(firstMatches);
+/**
+ * @category Approvals / Transferability
+ */
+export const getNonMintApprovals = (collectionApprovals: CollectionApprovalWithDetails<bigint>[]) => {
+  const existingNonMint = collectionApprovals.map(x => {
+    if (isInAddressMapping(x.fromMapping, "Mint")) {
+      if (x.fromMappingId === 'AllWithMint') {
+        return {
+          ...x,
+          fromMapping: getReservedAddressMapping('AllWithoutMint'),
+          fromMappingId: 'AllWithoutMint'
+        }
+      }
 
-  const newApprovals: UserIncomingApprovalWithDetails<bigint>[] = [];
-  for (const match of merged) {
-    newApprovals.push({
-      fromMapping: match.fromMapping,
-      fromMappingId: match.fromMapping.mappingId,
-      // toMapping: match.toMapping,
-      // toMappingId: match.toMapping.mappingId,
-      initiatedByMapping: match.initiatedByMapping,
-      initiatedByMappingId: match.initiatedByMapping.mappingId,
-      badgeIds: match.badgeIds,
-      transferTimes: match.transferTimes,
-      ownershipTimes: match.ownershipTimes,
 
-      approvalId: match.arbitraryValue.approvalId,
-      amountTrackerId: match.arbitraryValue.amountTrackerId,
-      challengeTrackerId: match.arbitraryValue.challengeTrackerId,
+      const [remaining] = removeAddressMappingFromAddressMapping(getReservedAddressMapping('Mint'), x.fromMapping);
 
-      //TODO: if broken down via first match only, the same approval details may be duplicated across multiple matches (so predeterminedBalances, approvalAmounts, etc. may be weird)
-      approvalCriteria: match.arbitraryValue.approvalCriteria,
-      isApproved: match.arbitraryValue.isApproved,
-    })
-  }
+      if (isAddressMappingEmpty(remaining)) {
+        return undefined;
+      }
+
+      let newMappingId = remaining.includeAddresses ? "" : "AllWithout"
+      newMappingId += remaining.addresses.join(":");
+
+      return {
+        ...x,
+        fromMapping: remaining,
+        fromMappingId: newMappingId
+      }
+    } else {
+      return x;
+    }
+  }).filter(x => x !== undefined) as CollectionApprovalWithDetails<bigint>[];
+
+  return existingNonMint;
+}
+
+/**
+ * @category Approvals / Transferability
+ */
+export const getMintApprovals = (collectionApprovals: CollectionApprovalWithDetails<bigint>[]) => {
+  const newApprovals = collectionApprovals.map(x => {
+    if (isInAddressMapping(x.fromMapping, "Mint")) {
+      return {
+        ...x,
+        fromMapping: getReservedAddressMapping('Mint'),
+        fromMappingId: 'Mint',
+      }
+    } else {
+      return undefined;
+    }
+  }).filter(x => x !== undefined) as CollectionApprovalWithDetails<bigint>[];
 
   return newApprovals;
 }

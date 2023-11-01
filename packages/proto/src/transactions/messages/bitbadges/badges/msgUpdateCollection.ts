@@ -1,6 +1,6 @@
 import * as badges from '../../../../proto/badges/tx'
 
-import { BadgeMetadataTimeline, Balance, CollectionApproval, CollectionMetadataTimeline, CollectionPermissions, ContractAddressTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, NumberType, OffChainBalancesMetadataTimeline, StandardsTimeline, UserIncomingApproval, UserOutgoingApproval, UserPermissions, convertBadgeMetadataTimeline, convertBalance, convertCollectionApproval, convertCollectionMetadataTimeline, convertCollectionPermissions, convertContractAddressTimeline, convertCustomDataTimeline, convertIsArchivedTimeline, convertManagerTimeline, convertOffChainBalancesMetadataTimeline, convertStandardsTimeline, convertUserIncomingApproval, convertUserOutgoingApproval, convertUserPermissions, createMsgUpdateCollection as protoMsgUpdateCollection } from '../../../../'
+import { BadgeMetadataTimeline, Balance, CollectionApproval, CollectionMetadataTimeline, CollectionPermissions, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, NumberType, OffChainBalancesMetadataTimeline, StandardsTimeline, UserIncomingApproval, UserOutgoingApproval, UserPermissions, convertBadgeMetadataTimeline, convertBalance, convertCollectionApproval, convertCollectionMetadataTimeline, convertCollectionPermissions, convertCustomDataTimeline, convertIsArchivedTimeline, convertManagerTimeline, convertOffChainBalancesMetadataTimeline, convertStandardsTimeline, convertUserIncomingApproval, convertUserOutgoingApproval, convertUserPermissions, createMsgUpdateCollection as protoMsgUpdateCollection } from '../../../../'
 import { MSG_UPDATE_COLLECTION_TYPES, createEIP712, createEIP712MsgUpdateCollection, generateFee, generateMessage, generateTypes } from "../../../../"
 import { createTransaction } from "../../transaction"
 import { Chain, Fee, Sender, SupportedChain } from "../../common"
@@ -56,6 +56,8 @@ export interface MsgUpdateCollection<T extends NumberType> {
   balancesType?: string
   defaultOutgoingApprovals?: UserOutgoingApproval<T>[]
   defaultIncomingApprovals?: UserIncomingApproval<T>[]
+  defaultAutoApproveSelfInitiatedOutgoingTransfers?: boolean
+  defaultAutoApproveSelfInitiatedIncomingTransfers?: boolean
   defaultUserPermissions?: UserPermissions<T>
   badgesToCreate?: Balance<T>[]
   updateCollectionPermissions?: boolean
@@ -75,8 +77,6 @@ export interface MsgUpdateCollection<T extends NumberType> {
   collectionApprovals?: CollectionApproval<T>[]
   updateStandardsTimeline?: boolean
   standardsTimeline?: StandardsTimeline<T>[]
-  updateContractAddressTimeline?: boolean
-  contractAddressTimeline?: ContractAddressTimeline<T>[]
   updateIsArchivedTimeline?: boolean
   isArchivedTimeline?: IsArchivedTimeline<T>[]
 }
@@ -101,7 +101,6 @@ export function convertMsgUpdateCollection<T extends NumberType, U extends Numbe
     customDataTimeline: msg.customDataTimeline ? msg.customDataTimeline.map(x => convertCustomDataTimeline(x, convertFunction)) : undefined,
     collectionApprovals: msg.collectionApprovals ? msg.collectionApprovals.map(x => convertCollectionApproval(x, convertFunction)) : undefined,
     standardsTimeline: msg.standardsTimeline ? msg.standardsTimeline.map(x => convertStandardsTimeline(x, convertFunction)) : undefined,
-    contractAddressTimeline: msg.contractAddressTimeline ? msg.contractAddressTimeline.map(x => convertContractAddressTimeline(x, convertFunction)) : undefined,
     isArchivedTimeline: msg.isArchivedTimeline ? msg.isArchivedTimeline.map(x => convertIsArchivedTimeline(x, convertFunction)) : undefined,
   };
 }
@@ -131,7 +130,6 @@ export function convertFromProtoToMsgUpdateCollection(
     // inheritedCollectionId: BigInt(msg.inheritedCollectionId),
     collectionApprovals: msg.collectionApprovals?.map(x => convertCollectionApproval(x, BigInt)),
     standardsTimeline: msg.standardsTimeline?.map(x => convertStandardsTimeline(x, BigInt)),
-    contractAddressTimeline: msg.contractAddressTimeline?.map(x => convertContractAddressTimeline(x, BigInt)),
     isArchivedTimeline: msg.isArchivedTimeline?.map(x => convertIsArchivedTimeline(x, BigInt)),
 
     updateCollectionPermissions: msg.updateCollectionPermissions,
@@ -142,7 +140,6 @@ export function convertFromProtoToMsgUpdateCollection(
     updateCustomDataTimeline: msg.updateCustomDataTimeline,
     updateCollectionApprovals: msg.updateCollectionApprovals,
     updateStandardsTimeline: msg.updateStandardsTimeline,
-    updateContractAddressTimeline: msg.updateContractAddressTimeline,
     updateIsArchivedTimeline: msg.updateIsArchivedTimeline,
   }
 }
@@ -170,7 +167,9 @@ export function createTxMsgUpdateCollection<T extends NumberType>(
     params.balancesType ?? 'Standard',
     params.defaultOutgoingApprovals ?? [],
     params.defaultIncomingApprovals ?? [],
-    params.defaultUserPermissions ?? { canUpdateIncomingApprovals: [], canUpdateOutgoingApprovals: [] },
+    params.defaultAutoApproveSelfInitiatedOutgoingTransfers ?? false,
+    params.defaultAutoApproveSelfInitiatedIncomingTransfers ?? false,
+    params.defaultUserPermissions ?? { canUpdateIncomingApprovals: [], canUpdateOutgoingApprovals: [], canUpdateAutoApproveSelfInitiatedIncomingTransfers: [], canUpdateAutoApproveSelfInitiatedOutgoingTransfers: [] },
     params.badgesToCreate ?? [],
     params.updateCollectionPermissions ?? false,
     params.collectionPermissions ?? {
@@ -180,7 +179,6 @@ export function createTxMsgUpdateCollection<T extends NumberType>(
       canUpdateBadgeMetadata: [],
       canUpdateCollectionApprovals: [],
       canUpdateCollectionMetadata: [],
-      canUpdateContractAddress: [],
       canUpdateCustomData: [],
       canUpdateManager: [],
       canUpdateOffChainBalancesMetadata: [],
@@ -200,8 +198,6 @@ export function createTxMsgUpdateCollection<T extends NumberType>(
     params.collectionApprovals ?? [],
     params.updateStandardsTimeline ?? false,
     params.standardsTimeline ?? [],
-    params.updateContractAddressTimeline ?? false,
-    params.contractAddressTimeline ?? [],
     params.updateIsArchivedTimeline ?? false,
     params.isArchivedTimeline ?? []
   );
@@ -227,7 +223,9 @@ export function createTxMsgUpdateCollection<T extends NumberType>(
     params.balancesType ?? 'Standard',
     params.defaultOutgoingApprovals ?? [],
     params.defaultIncomingApprovals ?? [],
-    params.defaultUserPermissions ?? { canUpdateIncomingApprovals: [], canUpdateOutgoingApprovals: [] },
+    params.defaultAutoApproveSelfInitiatedOutgoingTransfers ?? false,
+    params.defaultAutoApproveSelfInitiatedIncomingTransfers ?? false,
+    params.defaultUserPermissions ?? { canUpdateIncomingApprovals: [], canUpdateOutgoingApprovals: [], canUpdateAutoApproveSelfInitiatedIncomingTransfers: [], canUpdateAutoApproveSelfInitiatedOutgoingTransfers: [] },
     params.badgesToCreate ?? [],
     params.updateCollectionPermissions ?? false,
     params.collectionPermissions ?? {
@@ -237,7 +235,6 @@ export function createTxMsgUpdateCollection<T extends NumberType>(
       canUpdateBadgeMetadata: [],
       canUpdateCollectionApprovals: [],
       canUpdateCollectionMetadata: [],
-      canUpdateContractAddress: [],
       canUpdateCustomData: [],
       canUpdateManager: [],
       canUpdateOffChainBalancesMetadata: [],
@@ -257,8 +254,6 @@ export function createTxMsgUpdateCollection<T extends NumberType>(
     params.collectionApprovals ?? [],
     params.updateStandardsTimeline ?? false,
     params.standardsTimeline ?? [],
-    params.updateContractAddressTimeline ?? false,
-    params.contractAddressTimeline ?? [],
     params.updateIsArchivedTimeline ?? false,
     params.isArchivedTimeline ?? []
   )

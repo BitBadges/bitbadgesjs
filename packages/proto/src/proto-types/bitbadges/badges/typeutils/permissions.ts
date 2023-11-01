@@ -11,13 +11,17 @@ import { UintRange, convertUintRange, deepCopy } from "./typeUtils";
 export interface UserPermissions<T extends NumberType> {
   canUpdateOutgoingApprovals: UserOutgoingApprovalPermission<T>[];
   canUpdateIncomingApprovals: UserIncomingApprovalPermission<T>[];
+  canUpdateAutoApproveSelfInitiatedOutgoingTransfers: ActionPermission<T>[];
+  canUpdateAutoApproveSelfInitiatedIncomingTransfers: ActionPermission<T>[];
 }
 
 export function convertUserPermissions<T extends NumberType, U extends NumberType>(permissions: UserPermissions<T>, convertFunction: (item: T) => U, populateOptionalFields?: boolean): UserPermissions<U> {
   return deepCopy({
     ...permissions,
     canUpdateOutgoingApprovals: permissions.canUpdateOutgoingApprovals.map((b) => convertUserOutgoingApprovalPermission(b, convertFunction, populateOptionalFields)),
-    canUpdateIncomingApprovals: permissions.canUpdateIncomingApprovals.map((b) => convertUserIncomingApprovalPermission(b, convertFunction, populateOptionalFields))
+    canUpdateIncomingApprovals: permissions.canUpdateIncomingApprovals.map((b) => convertUserIncomingApprovalPermission(b, convertFunction, populateOptionalFields)),
+    canUpdateAutoApproveSelfInitiatedIncomingTransfers: permissions.canUpdateAutoApproveSelfInitiatedIncomingTransfers.map((b) => convertActionPermission(b, convertFunction, populateOptionalFields)),
+    canUpdateAutoApproveSelfInitiatedOutgoingTransfers: permissions.canUpdateAutoApproveSelfInitiatedOutgoingTransfers.map((b) => convertActionPermission(b, convertFunction, populateOptionalFields)),
   })
 }
 
@@ -134,7 +138,6 @@ export function convertUserIncomingApprovalPermission<T extends NumberType, U ex
  * @typedef {Object} CollectionPermissions
  * @property {ActionPermission[]} canDeleteCollection - The list of permissions for deleting the collection.
  * @property {TimedUpdatePermission[]} canArchiveCollection - The list of permissions for archiving the collection.
- * @property {TimedUpdatePermission[]} canUpdateContractAddress - The list of permissions for updating the contract address.
  * @property {TimedUpdatePermission[]} canUpdateOffChainBalancesMetadata - The list of permissions for updating the off-chain balances metadata.
  * @property {TimedUpdatePermission[]} canUpdateStandards - The list of permissions for updating the standards.
  * @property {TimedUpdatePermission[]} canUpdateCustomData - The list of permissions for updating the custom data.
@@ -147,7 +150,6 @@ export function convertUserIncomingApprovalPermission<T extends NumberType, U ex
 export interface CollectionPermissions<T extends NumberType> {
   canDeleteCollection: ActionPermission<T>[];
   canArchiveCollection: TimedUpdatePermission<T>[];
-  canUpdateContractAddress: TimedUpdatePermission<T>[];
   canUpdateOffChainBalancesMetadata: TimedUpdatePermission<T>[];
   canUpdateStandards: TimedUpdatePermission<T>[];
   canUpdateCustomData: TimedUpdatePermission<T>[];
@@ -163,7 +165,6 @@ export function convertCollectionPermissions<T extends NumberType, U extends Num
     ...permissions,
     canDeleteCollection: permissions.canDeleteCollection.map((b) => convertActionPermission(b, convertFunction, populateOptionalFields)),
     canArchiveCollection: permissions.canArchiveCollection.map((b) => convertTimedUpdatePermission(b, convertFunction, populateOptionalFields)),
-    canUpdateContractAddress: permissions.canUpdateContractAddress.map((b) => convertTimedUpdatePermission(b, convertFunction, populateOptionalFields)),
     canUpdateOffChainBalancesMetadata: permissions.canUpdateOffChainBalancesMetadata.map((b) => convertTimedUpdatePermission(b, convertFunction, populateOptionalFields)),
     canUpdateStandards: permissions.canUpdateStandards.map((b) => convertTimedUpdatePermission(b, convertFunction, populateOptionalFields)),
     canUpdateCustomData: permissions.canUpdateCustomData.map((b) => convertTimedUpdatePermission(b, convertFunction, populateOptionalFields)),

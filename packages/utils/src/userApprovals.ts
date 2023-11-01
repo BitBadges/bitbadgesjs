@@ -11,16 +11,16 @@ import { UserIncomingApprovalWithDetails, UserOutgoingApprovalWithDetails } from
 export function expandCollectionApprovals(approvals: CollectionApprovalWithDetails<bigint>[]): CollectionApprovalWithDetails<bigint>[] {
   const newCurrApprovals: CollectionApprovalWithDetails<bigint>[] = [];
   for (const approval of approvals) {
-    const badgeIds = GetUintRangesWithOptions(approval.badgeIds, approval.badgeIdsOptions, true);
-    const ownershipTimes = GetUintRangesWithOptions(approval.ownershipTimes, approval.ownershipTimesOptions, true);
-    const times = GetUintRangesWithOptions(approval.transferTimes, approval.transferTimesOptions, true);
-    const toMappingId = GetMappingIdWithOptions(approval.toMappingId, approval.toMappingOptions, true);
-    const fromMappingId = GetMappingIdWithOptions(approval.fromMappingId, approval.fromMappingOptions, true);
-    const initiatedByMappingId = GetMappingIdWithOptions(approval.initiatedByMappingId, approval.initiatedByMappingOptions, true);
+    const badgeIds = GetUintRangesWithOptions(approval.badgeIds, true);
+    const ownershipTimes = GetUintRangesWithOptions(approval.ownershipTimes, true);
+    const times = GetUintRangesWithOptions(approval.transferTimes, true);
+    const toMappingId = GetMappingIdWithOptions(approval.toMappingId, true);
+    const fromMappingId = GetMappingIdWithOptions(approval.fromMappingId, true);
+    const initiatedByMappingId = GetMappingIdWithOptions(approval.initiatedByMappingId, true);
 
-    const toMapping = GetMappingWithOptions(approval.toMapping, approval.toMappingOptions, true);
-    const fromMapping = GetMappingWithOptions(approval.fromMapping, approval.fromMappingOptions, true);
-    const initiatedByMapping = GetMappingWithOptions(approval.initiatedByMapping, approval.initiatedByMappingOptions, true);
+    const toMapping = GetMappingWithOptions(approval.toMapping, true);
+    const fromMapping = GetMappingWithOptions(approval.fromMapping, true);
+    const initiatedByMapping = GetMappingWithOptions(approval.initiatedByMapping, true);
 
     newCurrApprovals.push({
       ...approval,
@@ -30,7 +30,6 @@ export function expandCollectionApprovals(approvals: CollectionApprovalWithDetai
       transferTimes: times,
       badgeIds: badgeIds,
       ownershipTimes: ownershipTimes,
-      isApproved: approval.isApproved,
       toMapping: toMapping,
       fromMapping: fromMapping,
       initiatedByMapping: initiatedByMapping,
@@ -72,9 +71,8 @@ export function appendDefaultForIncoming(currApprovals: UserIncomingApprovalWith
       end: 18446744073709551615n,
     }],
     approvalId: "default-incoming",
-    amountTrackerId: "",
-    challengeTrackerId: "",
-    isApproved: true,
+    amountTrackerId: "default-incoming",
+    challengeTrackerId: "default-incoming"
   }
 
   //append to front
@@ -111,9 +109,8 @@ export function appendDefaultForOutgoing(currApprovals: UserOutgoingApprovalWith
       end: 18446744073709551615n,
     }],
     approvalId: "default-outgoing",
-    amountTrackerId: "",
-    challengeTrackerId: "",
-    isApproved: true,
+    amountTrackerId: "default-outgoing",
+    challengeTrackerId: "default-outgoing"
   }
 
   //append to front

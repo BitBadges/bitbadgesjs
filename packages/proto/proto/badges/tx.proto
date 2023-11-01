@@ -14,14 +14,14 @@ import "badges/timelines.proto";
 option go_package = "github.com/bitbadges/bitbadgeschain/x/badges/types";
 
 // Msg defines the Msg service.
-service Msg {
-  rpc UpdateCollection      (MsgUpdateCollection) returns (MsgUpdateCollectionResponse);
-  rpc CreateAddressMappings (MsgCreateAddressMappings) returns (MsgCreateAddressMappingsResponse);
-  rpc TransferBadges(MsgTransferBadges) returns (MsgTransferBadgesResponse);
-  rpc UpdateUserApprovals(MsgUpdateUserApprovals) returns (MsgUpdateUserApprovalsResponse);
-  rpc DeleteCollection(MsgDeleteCollection) returns (MsgDeleteCollectionResponse);
-  // this line is used by starport scaffolding # proto/tx/rpc
-}
+// service Msg {
+//   rpc UpdateCollection      (MsgUpdateCollection) returns (MsgUpdateCollectionResponse);
+//   rpc CreateAddressMappings (MsgCreateAddressMappings) returns (MsgCreateAddressMappingsResponse);
+//   rpc TransferBadges(MsgTransferBadges) returns (MsgTransferBadgesResponse);
+//   rpc UpdateUserApprovals(MsgUpdateUserApprovals) returns (MsgUpdateUserApprovalsResponse);
+//   rpc DeleteCollection(MsgDeleteCollection) returns (MsgDeleteCollectionResponse);
+//   // this line is used by starport scaffolding # proto/tx/rpc
+// }
 
 //Used for WASM bindings and JSON parsing
 message BadgeCustomMsgType {
@@ -48,7 +48,7 @@ message MsgUpdateCollection {
   UserPermissions defaultUserPermissions = 31;
 
   //The rest of the fields are allowed to be set on creation or update.
-  repeated Balance badgesToCreate = 6; 
+  repeated Balance badgesToCreate = 6;
 
   bool updateCollectionPermissions = 7;
   CollectionPermissions collectionPermissions = 8;
@@ -75,7 +75,7 @@ message MsgUpdateCollection {
   repeated StandardsTimeline standardsTimeline = 24;
 
   bool updateIsArchivedTimeline = 27;
-  repeated IsArchivedTimeline isArchivedTimeline = 28;  
+  repeated IsArchivedTimeline isArchivedTimeline = 28;
 }
 
 message MsgUpdateCollectionResponse {
@@ -115,7 +115,7 @@ message MsgUpdateUserApprovals {
 
   bool updateIncomingApprovals = 5;
   repeated UserIncomingApproval incomingApprovals = 6;
-  
+
   bool updateAutoApproveSelfInitiatedOutgoingTransfers = 7;
   bool autoApproveSelfInitiatedOutgoingTransfers = 8;
 

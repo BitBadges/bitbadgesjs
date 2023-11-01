@@ -9,6 +9,7 @@ import { OffChainBalancesMap, convertOffChainBalancesMap } from "./transfers";
 import { SupportedChain } from "./types";
 import { UserIncomingApprovalWithDetails, UserOutgoingApprovalWithDetails, convertUserIncomingApprovalWithDetails, convertUserOutgoingApprovalWithDetails } from "./users";
 import { deepCopy, getCouchDBDetails, removeCouchDBDetails } from "./utils";
+import { Options as MerkleTreeJsOptions } from "merkletreejs/dist/MerkleTree";
 
 /**
  * @category API / Indexer
@@ -66,6 +67,8 @@ export interface CollectionInfoBase<T extends NumberType> {
   contractAddressTimeline: ContractAddressTimeline<T>[];
   defaultUserOutgoingApprovals: UserOutgoingApproval<T>[];
   defaultUserIncomingApprovals: UserIncomingApproval<T>[];
+  defaultAutoApproveSelfInitiatedOutgoingTransfers: boolean;
+  defaultAutoApproveSelfInitiatedIncomingTransfers: boolean;
   defaultUserPermissions: UserPermissions<T>;
   createdBy: string;
   createdBlock: T;
@@ -139,7 +142,7 @@ export function convertCollectionDoc<T extends NumberType, U extends NumberType>
  * @property {NumberType} sequence - The sequence of the account. Note we currently do not store sequence in the DB (it is dynamically fetched).
  * @property {SupportedChain} chain - The chain of the account
  * @property {string} cosmosAddress - The Cosmos address of the account
- * @property {string} address - The address of the account
+ * @property {string} ethAddress - The Eth address of the account
  * @property {string} [username] - The username of the account (from x/nameservice)
  * @property {CosmosCoin} [balance] - The balance of the account ($BADGE gas token balance not a specific badge)
  */
@@ -148,7 +151,7 @@ export interface AccountInfoBase<T extends NumberType> {
   // sequence: bigint | JSPrimitiveNumberType //We will add sequence support in the future
   chain: SupportedChain
   cosmosAddress: string
-  address: string
+  ethAddress: string
   accountNumber: T
   username?: string //from x/nameservice
   sequence?: T
@@ -458,6 +461,8 @@ export interface AddressMappingInfoBase<T extends NumberType> extends AddressMap
     block: T;
     blockTimestamp: T;
   }[];
+  createdBlock: T;
+  lastUpdated: T
 }
 /**
  * @category API / Indexer
@@ -479,6 +484,8 @@ export function convertAddressMappingInfo<T extends NumberType, U extends Number
       block: convertFunction(updateHistory.block),
       blockTimestamp: convertFunction(updateHistory.blockTimestamp),
     })),
+    createdBlock: convertFunction(item.createdBlock),
+    lastUpdated: convertFunction(item.lastUpdated),
   })
 }
 
@@ -742,11 +749,13 @@ export interface LeavesDetails {
  * @property {boolean} areLeavesHashed - True if the leaves are hashed
  * @property {(number)[]} usedLeafIndices - The indices of the leaves that have been used
  * @property {MerkleTree} tree - The Merkle tree
+ * @property {MerkleTreeJsOptions} treeOptions - The Merkle tree options for how to build it
  * @property {NumberType} numLeaves - The number of leaves in the Merkle tree. This takes priority over leaves.length if defined (used for buffer time between leaf generation and leaf length select)
  */
 export interface ChallengeDetails<T extends NumberType> {
   leavesDetails: LeavesDetails
   tree?: MerkleTree
+  treeOptions?: MerkleTreeJsOptions
 
   numLeaves?: T;
   currCode?: T;
@@ -917,10 +926,10 @@ export function convertMerkleChallengeIdDetails<T extends NumberType, U extends 
  * @typedef {Object} MerkleChallengeWithDetails
  * @extends {MerkleChallengeDoc}
  *
- * @property {MerkleChallengeDetails} details - The details of the claim
+ * @property {ApprovalInfoDetails} details - The details of the claim
  */
 export interface MerkleChallengeWithDetails<T extends NumberType> extends MerkleChallenge<T> {
-  details?: MerkleChallengeDetails<T>
+  details?: ApprovalInfoDetails<T>
 }
 
 /**
@@ -930,7 +939,7 @@ export function convertMerkleChallengeWithDetails<T extends NumberType, U extend
   return deepCopy({
     ...item,
     ...convertMerkleChallenge(item, convertFunction),
-    details: item.details ? convertMerkleChallengeDetails(item.details, convertFunction) : undefined,
+    details: item.details ? convertApprovalInfoDetails(item.details, convertFunction) : undefined,
     _rev: undefined,
   })
 }
@@ -941,7 +950,7 @@ export function convertMerkleChallengeWithDetails<T extends NumberType, U extend
  * The base Claim is what is stored on-chain, but this is the full claim with additional details stored in the indexer.
  *
  * @category API / Indexer
- * @typedef {Object} MerkleChallengeDetails
+ * @typedef {Object} ApprovalInfoDetails
  *
  * @property {string} name - The name of the claim
  * @property {string} description - The description of the claim. This describes how to earn and claim the badge.
@@ -949,7 +958,7 @@ export function convertMerkleChallengeWithDetails<T extends NumberType, U extend
  * @property {string} password - The password of the claim (if it has one)
  * @property {ChallengeDetails[]} challenges - The list of challenges for this claim (with extra helper details)
  */
-export interface MerkleChallengeDetails<T extends NumberType> {
+export interface ApprovalInfoDetails<T extends NumberType> {
   name: string;
   description: string;
   hasPassword?: boolean;
@@ -961,7 +970,7 @@ export interface MerkleChallengeDetails<T extends NumberType> {
 /**
  * @category API / Indexer
  */
-export function convertMerkleChallengeDetails<T extends NumberType, U extends NumberType>(item: MerkleChallengeDetails<T>, convertFunction: (item: T) => U): MerkleChallengeDetails<U> {
+export function convertApprovalInfoDetails<T extends NumberType, U extends NumberType>(item: ApprovalInfoDetails<T>, convertFunction: (item: T) => U): ApprovalInfoDetails<U> {
   return deepCopy({
     ...item,
     challengeDetails: convertChallengeDetails(item.challengeDetails, convertFunction),
@@ -975,18 +984,18 @@ export function convertMerkleChallengeDetails<T extends NumberType, U extends Nu
  *
  * @category API / Indexer
  * @typedef {Object} FetchInfoBase
- * @property {Metadata | MerkleChallengeDetails} content - The content of the fetch document. Note that we store balances in BALANCES_DB and not here to avoid double storage.
+ * @property {Metadata | ApprovalInfoDetails} content - The content of the fetch document. Note that we store balances in BALANCES_DB and not here to avoid double storage.
  * @property {NumberType} fetchedAt - The time the document was fetched
  * @property {NumberType} fetchedAtBlock - The block the document was fetched
- * @property {"MerkleChallenge" | "Metadata" | "Balances"} db - The type of content fetched. This is used for querying purposes
+ * @property {"ApprovalInfo" | "Metadata" | "Balances"} db - The type of content fetched. This is used for querying purposes
  * @property {boolean} isPermanent - True if the document is permanent (i.e. fetched from a permanent URI like IPFS)
  * @property {string} uri - The URI of the document
  */
 export interface FetchInfoBase<T extends NumberType> {
-  content?: Metadata<T> | MerkleChallengeDetails<T> | OffChainBalancesMap<T>
+  content?: Metadata<T> | ApprovalInfoDetails<T> | OffChainBalancesMap<T>
   fetchedAt: T, //Date.now()
   fetchedAtBlock: T,
-  db: 'MerkleChallenge' | 'Metadata' | 'Balances'
+  db: 'ApprovalInfo' | 'Metadata' | 'Balances'
   isPermanent: boolean
 }
 /**
@@ -1004,7 +1013,7 @@ export type FetchInfo<T extends NumberType> = FetchInfoBase<T> & Identified;
 export function convertFetchInfo<T extends NumberType, U extends NumberType>(item: FetchInfo<T>, convertFunction: (item: T) => U): FetchInfo<U> {
   return deepCopy({
     ...item,
-    content: item.content ? item.db === 'Metadata' ? convertMetadata(item.content as Metadata<T>, convertFunction) : item.db === 'MerkleChallenge' ? convertMerkleChallengeDetails(item.content as MerkleChallengeDetails<T>, convertFunction) : convertOffChainBalancesMap(item.content as OffChainBalancesMap<T>, convertFunction) : undefined,
+    content: item.content ? item.db === 'Metadata' ? convertMetadata(item.content as Metadata<T>, convertFunction) : item.db === 'ApprovalInfo' ? convertApprovalInfoDetails(item.content as ApprovalInfoDetails<T>, convertFunction) : convertOffChainBalancesMap(item.content as OffChainBalancesMap<T>, convertFunction) : undefined,
     fetchedAt: convertFunction(item.fetchedAt),
     fetchedAtBlock: convertFunction(item.fetchedAtBlock),
   })

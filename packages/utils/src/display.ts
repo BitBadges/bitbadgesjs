@@ -54,7 +54,7 @@ export function getBadgesToDisplay(
           }
         }
 
-        const badgeIdsToAdd = sortUintRangesAndMergeIfNecessary(badgeIdsToDisplayIds);
+        const badgeIdsToAdd = sortUintRangesAndMergeIfNecessary(badgeIdsToDisplayIds, true)
 
         badgeIdsToDisplay.push({
           collectionId: collectionObj.collectionId,
@@ -93,7 +93,7 @@ export function getBadgesToDisplay(
  * @param {BadgeMetadata<bigint>[]} badgeMetadata - The badge metadata of the collection
  */
 export function getMetadataIdsToFetch(_badgeIdsToDisplay: UintRange<bigint>[], currBadgeMetadataMap: BadgeMetadataDetails<bigint>[], badgeMetadata: BadgeMetadata<bigint>[]) {
-  const badgeIdsToDisplay = sortUintRangesAndMergeIfNecessary(_badgeIdsToDisplay);
+  const badgeIdsToDisplay = sortUintRangesAndMergeIfNecessary(_badgeIdsToDisplay, true);
 
   const metadataIds: bigint[] = [];
   const lastMetadataId = -1000000;

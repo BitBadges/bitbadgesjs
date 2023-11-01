@@ -50,6 +50,7 @@ export function convertUserIncomingApprovalWithDetails<T extends NumberType, U e
 }
 
 
+
 /**
  * BitBadgesUserInfo is the type for accounts returned by the BitBadges API. It includes all information about an account.
  *
@@ -81,6 +82,8 @@ export interface BitBadgesUserInfo<T extends NumberType> extends ProfileInfoBase
 
   airdropped?: boolean
 
+  address: string
+
   //Dynamically loaded as needed
   collected: BalanceInfoWithDetails<T>[],
   activity: TransferActivityInfo<T>[],
@@ -108,7 +111,7 @@ export function convertBitBadgesUserInfo<T extends NumberType, U extends NumberT
     ...convertAccountInfo({
       _id: '',
       cosmosAddress: item.cosmosAddress,
-      address: item.address,
+      ethAddress: item.ethAddress,
       accountNumber: item.accountNumber,
       username: item.username,
       sequence: item.sequence,
@@ -116,6 +119,7 @@ export function convertBitBadgesUserInfo<T extends NumberType, U extends NumberT
       publicKey: item.publicKey,
       chain: item.chain,
     }, convertFunction),
+    address: item.address,
     resolvedName: item.resolvedName,
     avatar: item.avatar,
     airdropped: item.airdropped,
