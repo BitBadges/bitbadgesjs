@@ -244,14 +244,6 @@ export function validatePermissionsUpdate(
     }
   }
 
-  // Can Update Contract Address
-  if (newPermissions.canUpdateContractAddress !== null) {
-    const error = validateTimedUpdatePermissionUpdate(oldPermissions.canUpdateContractAddress, newPermissions.canUpdateContractAddress);
-    if (error) {
-      return new Error(`Error validating update in canUpdateContractAddress permissions: ${error}`);
-    }
-  }
-
   // Can Create More Badges
   if (newPermissions.canCreateMoreBadges !== null) {
     const error = validateBalancesActionPermissionUpdate(oldPermissions.canCreateMoreBadges, newPermissions.canCreateMoreBadges);

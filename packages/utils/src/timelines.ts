@@ -1,4 +1,4 @@
-import { BadgeMetadataTimeline, CollectionMetadataTimeline, ContractAddressTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, NumberType, OffChainBalancesMetadataTimeline, StandardsTimeline, TimelineItem } from "bitbadgesjs-proto";
+import { BadgeMetadataTimeline, CollectionMetadataTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, NumberType, OffChainBalancesMetadataTimeline, StandardsTimeline, TimelineItem } from "bitbadgesjs-proto";
 import { DefaultPlaceholderMetadata } from "./constants";
 import { BitBadgesCollection } from "./types/collections";
 import { removeUintRangeFromUintRange, searchUintRangesForId } from "./uintRanges";
@@ -22,8 +22,6 @@ export function getValuesAtTimeForCollection(collection: BitBadgesCollection<big
     customData: getValueAtTimeForTimeline(collection.customDataTimeline, time)?.customData ?? "",
     standards: getValueAtTimeForTimeline(collection.standardsTimeline, time)?.standards ?? [],
     isArchived: getValueAtTimeForTimeline(collection.isArchivedTimeline, time)?.isArchived ?? false,
-    // inheritedBalances: getValueAtTimeForTimeline(collection.inheritedBalancesTimeline, time)?.inheritedBalances ?? [],
-    contractAddress: getValueAtTimeForTimeline(collection.contractAddressTimeline, time)?.contractAddress ?? "",
   }
 }
 
@@ -171,10 +169,3 @@ export function getFullIsArchivedTimeline(timeline: IsArchivedTimeline<bigint>[]
 // export function getInheritedBalancesTimeline(timeline: InheritedBalancesTimeline<bigint>[]): InheritedBalancesTimeline<bigint>[] {
 //   return getFullTimeline(timeline, "inheritedBalances", []);
 // }
-
-/**
- * @category Timelines
- */
-export function getFullContractAddressTimeline(timeline: ContractAddressTimeline<bigint>[]): ContractAddressTimeline<bigint>[] {
-  return getFullTimeline(timeline, "contractAddress", "");
-}

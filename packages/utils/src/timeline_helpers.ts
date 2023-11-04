@@ -1,4 +1,4 @@
-import { BadgeMetadata, BadgeMetadataTimeline, CollectionMetadata, CollectionMetadataTimeline, ContractAddressTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadata, OffChainBalancesMetadataTimeline, StandardsTimeline, UintRange } from "bitbadgesjs-proto";
+import { BadgeMetadata, BadgeMetadataTimeline, CollectionMetadata, CollectionMetadataTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadata, OffChainBalancesMetadataTimeline, StandardsTimeline, UintRange } from "bitbadgesjs-proto";
 
 export function getIsArchivedTimesAndValues(isArchivedTimeline: IsArchivedTimeline<bigint>[]): { times: UintRange<bigint>[][], values: boolean[] } {
   let times: UintRange<bigint>[][] = [];
@@ -55,18 +55,6 @@ export function getManagerTimesAndValues(managerTimeline: ManagerTimeline<bigint
   for (let timelineVal of managerTimeline) {
     times.push(timelineVal.timelineTimes);
     values.push(timelineVal.manager);
-  }
-
-  return { times, values };
-}
-
-export function getContractAddressTimesAndValues(contractAddressTimeline: ContractAddressTimeline<bigint>[]): { times: UintRange<bigint>[][], values: string[] } {
-  let times: UintRange<bigint>[][] = [];
-  let values: string[] = [];
-
-  for (let timelineVal of contractAddressTimeline) {
-    times.push(timelineVal.timelineTimes);
-    values.push(timelineVal.contractAddress);
   }
 
   return { times, values };

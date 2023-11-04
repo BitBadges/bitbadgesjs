@@ -791,7 +791,7 @@ export interface GetSignInChallengeRouteRequestBody {
  */
 export interface GetSignInChallengeRouteSuccessResponse<T extends NumberType> {
   nonce: string,
-  params: ChallengeParams,
+  params: ChallengeParams<T>,
   blockinMessage: string,
 }
 /**
@@ -802,7 +802,18 @@ export type GetSignInChallengeRouteResponse<T extends NumberType> = ErrorRespons
  * @category API / Indexer
  */
 export function convertGetSignInChallengeRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetSignInChallengeRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetSignInChallengeRouteSuccessResponse<U> {
-  return { ...item };
+  return {
+    ...item, params: {
+      ...item.params,
+      assets: item.params.assets?.map((asset) => ({
+        ...asset,
+        assetIds: asset.assetIds.map((assetId) => convertUintRange(assetId as UintRange<T>, convertFunction)),
+        ownershipTimes: asset.ownershipTimes ? asset.ownershipTimes.map((ownershipTime) => convertUintRange(ownershipTime, convertFunction)) : undefined,
+        mustOwnAmounts: convertUintRange(asset.mustOwnAmounts, convertFunction),
+      })),
+
+    }
+  };
 }
 
 /**

@@ -1,4 +1,4 @@
-import { AddressMapping, ApprovalCriteria, CollectionApproval, CollectionApprovalPermission, CollectionPermissions, NumberType, UintRange, UserIncomingApprovalPermission, UserOutgoingApprovalPermission, convertApprovalCriteria, convertCollectionApproval, convertCollectionApprovalPermission, convertCollectionPermissions, convertUintRange, convertUserIncomingApprovalPermission, convertUserOutgoingApprovalPermission } from "bitbadgesjs-proto";
+import { AddressMapping, ApprovalCriteria, CollectionApproval, CollectionApprovalPermission, CollectionPermissions, NumberType, UintRange, UserIncomingApprovalPermission, UserOutgoingApprovalPermission, UserPermissions, convertApprovalCriteria, convertCollectionApproval, convertCollectionApprovalPermission, convertCollectionPermissions, convertUintRange, convertUserIncomingApprovalPermission, convertUserOutgoingApprovalPermission, convertUserPermissions } from "bitbadgesjs-proto";
 import { AnnouncementInfo, ReviewInfo, TransferActivityInfo, convertAnnouncementInfo, convertReviewInfo, convertTransferActivityInfo } from "./activity";
 import { PaginationInfo } from "./api";
 import { ApprovalInfoDetails, ApprovalsTrackerInfo, BalanceInfoWithDetails, CollectionInfoBase, Identified, MerkleChallengeInfo, MerkleChallengeWithDetails, convertApprovalInfoDetails, convertApprovalsTrackerInfo, convertBalanceInfoWithDetails, convertCollectionInfo, convertMerkleChallengeInfo } from "./db";
@@ -39,6 +39,7 @@ export interface CollectionApprovalPermissionWithDetails<T extends NumberType> e
   fromMapping: AddressMapping;
   initiatedByMapping: AddressMapping;
 }
+
 
 
 /**
@@ -95,10 +96,16 @@ export function convertUserOutgoingApprovalPermissionWithDetails<T extends Numbe
   })
 }
 
+/**
+ * @category Approvals / Transferability
+ */
 export interface CollectionPermissionsWithDetails<T extends NumberType> extends CollectionPermissions<T> {
   canUpdateCollectionApprovals: CollectionApprovalPermissionWithDetails<T>[];
 }
 
+/**
+ * @category Approvals / Transferability
+ */
 export function convertCollectionPermissionsWithDetails<T extends NumberType, U extends NumberType>(item: CollectionPermissionsWithDetails<T>, convertFunction: (item: T) => U): CollectionPermissionsWithDetails<U> {
   return deepCopy({
     ...item,
@@ -107,6 +114,36 @@ export function convertCollectionPermissionsWithDetails<T extends NumberType, U 
       return {
         ...canUpdateCollectionApproval,
         ...convertCollectionApprovalPermissionWithDetails(canUpdateCollectionApproval, convertFunction),
+      }
+    }),
+  })
+}
+
+/**
+ * @category Approvals / Transferability
+ */
+export interface UserPermissionsWithDetails<T extends NumberType> extends UserPermissions<T> {
+  canUpdateIncomingApprovals: UserIncomingApprovalPermissionWithDetails<T>[];
+  canUpdateOutgoingApprovals: UserOutgoingApprovalPermissionWithDetails<T>[];
+}
+
+/**
+ * @category Approvals / Transferability
+ */
+export function convertUserPermissionsWithDetails<T extends NumberType, U extends NumberType>(item: UserPermissionsWithDetails<T>, convertFunction: (item: T) => U): UserPermissionsWithDetails<U> {
+  return deepCopy({
+    ...item,
+    ...convertUserPermissions(item, convertFunction),
+    canUpdateIncomingApprovals: item.canUpdateIncomingApprovals.map((canUpdateUserIncomingApproval) => {
+      return {
+        ...canUpdateUserIncomingApproval,
+        ...convertUserIncomingApprovalPermissionWithDetails(canUpdateUserIncomingApproval, convertFunction),
+      }
+    }),
+    canUpdateOutgoingApprovals: item.canUpdateOutgoingApprovals.map((canUpdateUserOutgoingApproval) => {
+      return {
+        ...canUpdateUserOutgoingApproval,
+        ...convertUserOutgoingApprovalPermissionWithDetails(canUpdateUserOutgoingApproval, convertFunction),
       }
     }),
   })
@@ -176,6 +213,7 @@ export interface BitBadgesCollection<T extends NumberType> extends CollectionInf
 
   defaultUserOutgoingApprovals: UserOutgoingApprovalWithDetails<T>[];
   defaultUserIncomingApprovals: UserIncomingApprovalWithDetails<T>[];
+  defaultUserPermissions: UserPermissionsWithDetails<T>;
 
 
   //The following are to be fetched dynamically and as needed from the DB
@@ -202,6 +240,7 @@ export function convertBitBadgesCollection<T extends NumberType, U extends Numbe
     ...item,
     ...convertCollectionInfo(item, convertFunction),
     collectionApprovals: item.collectionApprovals.map((collectionApproval) => convertCollectionApprovalWithDetails(collectionApproval, convertFunction)),
+    defaultUserPermissions: convertUserPermissionsWithDetails(item.defaultUserPermissions, convertFunction),
     defaultUserIncomingApprovals: item.defaultUserIncomingApprovals.map((userIncomingApproval) => convertUserIncomingApprovalWithDetails(userIncomingApproval, convertFunction)),
     defaultUserOutgoingApprovals: item.defaultUserOutgoingApprovals.map((userOutgoingApproval) => convertUserOutgoingApprovalWithDetails(userOutgoingApproval, convertFunction)),
     collectionPermissions: convertCollectionPermissionsWithDetails(item.collectionPermissions, convertFunction),

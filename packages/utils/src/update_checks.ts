@@ -1,8 +1,8 @@
-import { ApprovalCriteria, BadgeMetadata, BadgeMetadataTimeline, CollectionMetadata, CollectionMetadataTimeline, ContractAddressTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadata, OffChainBalancesMetadataTimeline, StandardsTimeline, TimedUpdatePermission, TimedUpdateWithBadgeIdsPermission, UintRange, deepCopy } from "bitbadgesjs-proto";
+import { ApprovalCriteria, BadgeMetadata, BadgeMetadataTimeline, CollectionMetadata, CollectionMetadataTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadata, OffChainBalancesMetadataTimeline, StandardsTimeline, TimedUpdatePermission, TimedUpdateWithBadgeIdsPermission, UintRange, deepCopy } from "bitbadgesjs-proto";
 import { GetFirstMatchOnly, GetUintRangesWithOptions, UniversalPermission, UniversalPermissionDetails, getOverlapsAndNonOverlaps } from "./overlaps";
 import { checkCollectionApprovalPermission, checkTimedUpdatePermission, checkTimedUpdateWithBadgeIdsPermission, getUpdateCombinationsToCheck } from "./permission_checks";
 import { castBadgeMetadataToUniversalPermission, castCollectionApprovalToUniversalPermission } from "./permissions";
-import { getBadgeMetadataTimesAndValues, getCollectionMetadataTimesAndValues, getContractAddressTimesAndValues, getCustomDataTimesAndValues, getIsArchivedTimesAndValues, getManagerTimesAndValues, getOffChainBalancesMetadataTimesAndValues, getStandardsTimesAndValues } from "./timeline_helpers";
+import { getBadgeMetadataTimesAndValues, getCollectionMetadataTimesAndValues, getCustomDataTimesAndValues, getIsArchivedTimesAndValues, getManagerTimesAndValues, getOffChainBalancesMetadataTimesAndValues, getStandardsTimesAndValues } from "./timeline_helpers";
 import { CollectionApprovalPermissionWithDetails, CollectionApprovalWithDetails } from "./types/collections";
 import { expandCollectionApprovals } from "./userApprovals";
 
@@ -603,32 +603,6 @@ export function validateStandardsUpdate(
   let details = updatedTimelineTimes.map(x => x.timelineTime);
 
   let err = checkTimedUpdatePermission(details, canUpdateStandards);
-  if (err) {
-    return err;
-  }
-
-  return null;
-}
-
-/**
- * @category Validate Updates
- */
-export function validateContractAddressUpdate(
-  oldContractAddress: ContractAddressTimeline<bigint>[],
-  newContractAddress: ContractAddressTimeline<bigint>[],
-  canUpdateContractAddress: TimedUpdatePermission<bigint>[]
-): Error | null {
-  let { times: oldTimes, values: oldValues } = getContractAddressTimesAndValues(oldContractAddress);
-  let oldTimelineFirstMatches = getPotentialUpdatesForTimelineValues(oldTimes, oldValues);
-
-  let { times: newTimes, values: newValues } = getContractAddressTimesAndValues(newContractAddress);
-  let newTimelineFirstMatches = getPotentialUpdatesForTimelineValues(newTimes, newValues);
-
-  let updatedTimelineTimes = getUpdateCombinationsToCheck(oldTimelineFirstMatches, newTimelineFirstMatches, "", getUpdatedStringCombinations);
-
-  let details = updatedTimelineTimes.map(x => x.timelineTime);
-
-  let err = checkTimedUpdatePermission(details, canUpdateContractAddress);
   if (err) {
     return err;
   }

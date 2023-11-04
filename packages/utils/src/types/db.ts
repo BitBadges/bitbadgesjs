@@ -1,4 +1,4 @@
-import { AddressMapping, AmountTrackerIdDetails, BadgeMetadataTimeline, Balance, CollectionApproval, CollectionMetadataTimeline, CollectionPermissions, ContractAddressTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, MerkleChallenge, OffChainBalancesMetadataTimeline, StandardsTimeline, UintRange, UserIncomingApproval, UserOutgoingApproval, UserBalance, UserPermissions, convertBadgeMetadataTimeline, convertBalance, convertCollectionApproval, convertCollectionMetadataTimeline, convertCollectionPermissions, convertContractAddressTimeline, convertCustomDataTimeline, convertIsArchivedTimeline, convertManagerTimeline, convertMerkleChallenge, convertOffChainBalancesMetadataTimeline, convertStandardsTimeline, convertUintRange, convertUserIncomingApproval, convertUserOutgoingApproval, convertUserBalance, convertUserPermissions } from "bitbadgesjs-proto";
+import { AddressMapping, AmountTrackerIdDetails, BadgeMetadataTimeline, Balance, CollectionApproval, CollectionMetadataTimeline, CollectionPermissions, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, MerkleChallenge, OffChainBalancesMetadataTimeline, StandardsTimeline, UintRange, UserIncomingApproval, UserOutgoingApproval, UserBalance, UserPermissions, convertBadgeMetadataTimeline, convertBalance, convertCollectionApproval, convertCollectionMetadataTimeline, convertCollectionPermissions, convertCustomDataTimeline, convertIsArchivedTimeline, convertManagerTimeline, convertMerkleChallenge, convertOffChainBalancesMetadataTimeline, convertStandardsTimeline, convertUintRange, convertUserIncomingApproval, convertUserOutgoingApproval, convertUserBalance, convertUserPermissions } from "bitbadgesjs-proto";
 import MerkleTree from "merkletreejs";
 import nano from "nano";
 import { CosmosCoin, convertCosmosCoin } from "./coin";
@@ -10,6 +10,7 @@ import { SupportedChain } from "./types";
 import { UserIncomingApprovalWithDetails, UserOutgoingApprovalWithDetails, convertUserIncomingApprovalWithDetails, convertUserOutgoingApprovalWithDetails } from "./users";
 import { deepCopy, getCouchDBDetails, removeCouchDBDetails } from "./utils";
 import { Options as MerkleTreeJsOptions } from "merkletreejs/dist/MerkleTree";
+import { UserPermissionsWithDetails, convertUserPermissionsWithDetails } from "./collections";
 
 /**
  * @category API / Indexer
@@ -44,7 +45,6 @@ export interface Identified {
  * @property {CollectionApproval[]} collectionApprovals - The collection approved transfers timeline
  * @property {StandardsTimeline[]} standardsTimeline - The standards timeline
  * @property {IsArchivedTimeline[]} isArchivedTimeline - The is archived timeline
- * @property {ContractAddressTimeline[]} contractAddressTimeline - The contract address timeline
  * @property {UserOutgoingApproval[]} defaultUserOutgoingApprovals - The default user approved outgoing transfers
  * @property {UserIncomingApproval[]} defaultUserIncomingApprovals - The default user approved incoming transfers timeline
  * @property {UserPermissions} defaultUserPermissions - The default user permissions
@@ -64,7 +64,6 @@ export interface CollectionInfoBase<T extends NumberType> {
   collectionApprovals: CollectionApproval<T>[];
   standardsTimeline: StandardsTimeline<T>[];
   isArchivedTimeline: IsArchivedTimeline<T>[];
-  contractAddressTimeline: ContractAddressTimeline<T>[];
   defaultUserOutgoingApprovals: UserOutgoingApproval<T>[];
   defaultUserIncomingApprovals: UserIncomingApproval<T>[];
   defaultAutoApproveSelfInitiatedOutgoingTransfers: boolean;
@@ -105,7 +104,6 @@ export function convertCollectionInfo<T extends NumberType, U extends NumberType
     collectionApprovals: item.collectionApprovals.map((collectionApprovals) => convertCollectionApproval(collectionApprovals, convertFunction)),
     standardsTimeline: item.standardsTimeline.map((standardsTimeline) => convertStandardsTimeline(standardsTimeline, convertFunction)),
     isArchivedTimeline: item.isArchivedTimeline.map((isArchivedTimeline) => convertIsArchivedTimeline(isArchivedTimeline, convertFunction)),
-    contractAddressTimeline: item.contractAddressTimeline.map((contractAddressTimeline) => convertContractAddressTimeline(contractAddressTimeline, convertFunction)),
     defaultUserOutgoingApprovals: item.defaultUserOutgoingApprovals.map((defaultUserOutgoingApprovals) => convertUserOutgoingApproval(defaultUserOutgoingApprovals, convertFunction)),
     defaultUserIncomingApprovals: item.defaultUserIncomingApprovals.map((defaultUserIncomingApprovals) => convertUserIncomingApproval(defaultUserIncomingApprovals, convertFunction)),
     defaultUserPermissions: convertUserPermissions(item.defaultUserPermissions, convertFunction),
@@ -581,6 +579,7 @@ export function convertBalanceDoc<T extends NumberType, U extends NumberType>(it
 export interface BalanceInfoWithDetails<T extends NumberType> extends BalanceInfo<T> {
   outgoingApprovals: UserOutgoingApprovalWithDetails<T>[];
   incomingApprovals: UserIncomingApprovalWithDetails<T>[];
+  userPermissions: UserPermissionsWithDetails<T>;
 }
 
 /**
@@ -591,6 +590,7 @@ export function convertBalanceInfoWithDetails<T extends NumberType, U extends Nu
     ...convertBalanceInfo(item, convertFunction),
     incomingApprovals: item.incomingApprovals.map(x => convertUserIncomingApprovalWithDetails(x, convertFunction)),
     outgoingApprovals: item.outgoingApprovals.map(x => convertUserOutgoingApprovalWithDetails(x, convertFunction)),
+    userPermissions: convertUserPermissionsWithDetails(item.userPermissions, convertFunction),
   })
 }
 
