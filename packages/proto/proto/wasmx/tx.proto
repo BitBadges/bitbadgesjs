@@ -1,12 +1,12 @@
 syntax = "proto3";
-package bitbadges.bitbadgeschain.wasmx;
+package wasmx;
 
 option go_package = "github.com/bitbadges/bitbadgeschain/x/wasmx/types";
 
 // Msg defines the wasmx Msg service.
-service Msg {
-  rpc ExecuteContractCompat(MsgExecuteContractCompat) returns (MsgExecuteContractCompatResponse);
-}
+// service Msg {
+//   rpc ExecuteContractCompat(MsgExecuteContractCompat) returns (MsgExecuteContractCompatResponse);
+// }
 
 // MsgExecuteContractCompat submits the given message data to a smart contract, compatible with EIP712
 message MsgExecuteContractCompat {

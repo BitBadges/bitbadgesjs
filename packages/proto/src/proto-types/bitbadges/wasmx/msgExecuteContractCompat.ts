@@ -7,7 +7,7 @@ export function createMsgExecuteContractCompat(
   funds: string,
 ) {
   const message =
-    new tx.bitbadges.bitbadgeschain.wasmx.MsgExecuteContractCompat({
+    new tx.wasmx.MsgExecuteContractCompat({
       sender,
       contract,
       msg,
@@ -15,6 +15,6 @@ export function createMsgExecuteContractCompat(
     })
   return {
     message,
-    path: 'bitbadges.bitbadgeschain.wasmx.MsgExecuteContractCompat',
+    path: 'wasmx.MsgExecuteContractCompat',
   }
 }

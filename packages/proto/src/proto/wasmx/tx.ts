@@ -6,7 +6,7 @@
  * source: wasmx/tx.proto
  * git: https://github.com/thesayyn/protoc-gen-ts */
 import * as pb_1 from "google-protobuf";
-export namespace bitbadges.bitbadgeschain.wasmx {
+export namespace wasmx {
     export class MsgExecuteContractCompat extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {

@@ -12,20 +12,20 @@ import * as dependency_4 from "./balances";
 import * as dependency_5 from "./transfers";
 import * as dependency_6 from "./address_mappings";
 import * as pb_1 from "google-protobuf";
-export namespace bitbadges.bitbadgeschain.badges {
+export namespace badges {
     export class GenesisState extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
-            params?: dependency_2.bitbadges.bitbadgeschain.badges.Params;
+            params?: dependency_2.badges.Params;
             port_id?: string;
-            collections?: dependency_3.bitbadges.bitbadgeschain.badges.BadgeCollection[];
+            collections?: dependency_3.badges.BadgeCollection[];
             nextCollectionId?: string;
-            balances?: dependency_5.bitbadges.bitbadgeschain.badges.UserBalanceStore[];
+            balances?: dependency_5.badges.UserBalanceStore[];
             balanceStoreKeys?: string[];
             numUsedForMerkleChallenges?: string[];
             numUsedForMerkleChallengesStoreKeys?: string[];
-            addressMappings?: dependency_6.bitbadges.bitbadgeschain.badges.AddressMapping[];
-            approvalsTrackers?: dependency_5.bitbadges.bitbadgeschain.badges.ApprovalsTracker[];
+            addressMappings?: dependency_6.badges.AddressMapping[];
+            approvalsTrackers?: dependency_5.badges.ApprovalsTracker[];
             approvalsTrackerStoreKeys?: string[];
         }) {
             super();
@@ -67,9 +67,9 @@ export namespace bitbadges.bitbadgeschain.badges {
             }
         }
         get params() {
-            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.Params, 1) as dependency_2.bitbadges.bitbadgeschain.badges.Params;
+            return pb_1.Message.getWrapperField(this, dependency_2.badges.Params, 1) as dependency_2.badges.Params;
         }
-        set params(value: dependency_2.bitbadges.bitbadgeschain.badges.Params) {
+        set params(value: dependency_2.badges.Params) {
             pb_1.Message.setWrapperField(this, 1, value);
         }
         get has_params() {
@@ -82,9 +82,9 @@ export namespace bitbadges.bitbadgeschain.badges {
             pb_1.Message.setField(this, 2, value);
         }
         get collections() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_3.bitbadges.bitbadgeschain.badges.BadgeCollection, 3) as dependency_3.bitbadges.bitbadgeschain.badges.BadgeCollection[];
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_3.badges.BadgeCollection, 3) as dependency_3.badges.BadgeCollection[];
         }
-        set collections(value: dependency_3.bitbadges.bitbadgeschain.badges.BadgeCollection[]) {
+        set collections(value: dependency_3.badges.BadgeCollection[]) {
             pb_1.Message.setRepeatedWrapperField(this, 3, value);
         }
         get nextCollectionId() {
@@ -94,9 +94,9 @@ export namespace bitbadges.bitbadgeschain.badges {
             pb_1.Message.setField(this, 4, value);
         }
         get balances() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_5.bitbadges.bitbadgeschain.badges.UserBalanceStore, 5) as dependency_5.bitbadges.bitbadgeschain.badges.UserBalanceStore[];
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_5.badges.UserBalanceStore, 5) as dependency_5.badges.UserBalanceStore[];
         }
-        set balances(value: dependency_5.bitbadges.bitbadgeschain.badges.UserBalanceStore[]) {
+        set balances(value: dependency_5.badges.UserBalanceStore[]) {
             pb_1.Message.setRepeatedWrapperField(this, 5, value);
         }
         get balanceStoreKeys() {
@@ -118,15 +118,15 @@ export namespace bitbadges.bitbadgeschain.badges {
             pb_1.Message.setField(this, 8, value);
         }
         get addressMappings() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_6.bitbadges.bitbadgeschain.badges.AddressMapping, 9) as dependency_6.bitbadges.bitbadgeschain.badges.AddressMapping[];
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_6.badges.AddressMapping, 9) as dependency_6.badges.AddressMapping[];
         }
-        set addressMappings(value: dependency_6.bitbadges.bitbadgeschain.badges.AddressMapping[]) {
+        set addressMappings(value: dependency_6.badges.AddressMapping[]) {
             pb_1.Message.setRepeatedWrapperField(this, 9, value);
         }
         get approvalsTrackers() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_5.bitbadges.bitbadgeschain.badges.ApprovalsTracker, 10) as dependency_5.bitbadges.bitbadgeschain.badges.ApprovalsTracker[];
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_5.badges.ApprovalsTracker, 10) as dependency_5.badges.ApprovalsTracker[];
         }
-        set approvalsTrackers(value: dependency_5.bitbadges.bitbadgeschain.badges.ApprovalsTracker[]) {
+        set approvalsTrackers(value: dependency_5.badges.ApprovalsTracker[]) {
             pb_1.Message.setRepeatedWrapperField(this, 10, value);
         }
         get approvalsTrackerStoreKeys() {
@@ -136,33 +136,33 @@ export namespace bitbadges.bitbadgeschain.badges {
             pb_1.Message.setField(this, 11, value);
         }
         static fromObject(data: {
-            params?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.Params.prototype.toObject>;
+            params?: ReturnType<typeof dependency_2.badges.Params.prototype.toObject>;
             port_id?: string;
-            collections?: ReturnType<typeof dependency_3.bitbadges.bitbadgeschain.badges.BadgeCollection.prototype.toObject>[];
+            collections?: ReturnType<typeof dependency_3.badges.BadgeCollection.prototype.toObject>[];
             nextCollectionId?: string;
-            balances?: ReturnType<typeof dependency_5.bitbadges.bitbadgeschain.badges.UserBalanceStore.prototype.toObject>[];
+            balances?: ReturnType<typeof dependency_5.badges.UserBalanceStore.prototype.toObject>[];
             balanceStoreKeys?: string[];
             numUsedForMerkleChallenges?: string[];
             numUsedForMerkleChallengesStoreKeys?: string[];
-            addressMappings?: ReturnType<typeof dependency_6.bitbadges.bitbadgeschain.badges.AddressMapping.prototype.toObject>[];
-            approvalsTrackers?: ReturnType<typeof dependency_5.bitbadges.bitbadgeschain.badges.ApprovalsTracker.prototype.toObject>[];
+            addressMappings?: ReturnType<typeof dependency_6.badges.AddressMapping.prototype.toObject>[];
+            approvalsTrackers?: ReturnType<typeof dependency_5.badges.ApprovalsTracker.prototype.toObject>[];
             approvalsTrackerStoreKeys?: string[];
         }): GenesisState {
             const message = new GenesisState({});
             if (data.params != null) {
-                message.params = dependency_2.bitbadges.bitbadgeschain.badges.Params.fromObject(data.params);
+                message.params = dependency_2.badges.Params.fromObject(data.params);
             }
             if (data.port_id != null) {
                 message.port_id = data.port_id;
             }
             if (data.collections != null) {
-                message.collections = data.collections.map(item => dependency_3.bitbadges.bitbadgeschain.badges.BadgeCollection.fromObject(item));
+                message.collections = data.collections.map(item => dependency_3.badges.BadgeCollection.fromObject(item));
             }
             if (data.nextCollectionId != null) {
                 message.nextCollectionId = data.nextCollectionId;
             }
             if (data.balances != null) {
-                message.balances = data.balances.map(item => dependency_5.bitbadges.bitbadgeschain.badges.UserBalanceStore.fromObject(item));
+                message.balances = data.balances.map(item => dependency_5.badges.UserBalanceStore.fromObject(item));
             }
             if (data.balanceStoreKeys != null) {
                 message.balanceStoreKeys = data.balanceStoreKeys;
@@ -174,10 +174,10 @@ export namespace bitbadges.bitbadgeschain.badges {
                 message.numUsedForMerkleChallengesStoreKeys = data.numUsedForMerkleChallengesStoreKeys;
             }
             if (data.addressMappings != null) {
-                message.addressMappings = data.addressMappings.map(item => dependency_6.bitbadges.bitbadgeschain.badges.AddressMapping.fromObject(item));
+                message.addressMappings = data.addressMappings.map(item => dependency_6.badges.AddressMapping.fromObject(item));
             }
             if (data.approvalsTrackers != null) {
-                message.approvalsTrackers = data.approvalsTrackers.map(item => dependency_5.bitbadges.bitbadgeschain.badges.ApprovalsTracker.fromObject(item));
+                message.approvalsTrackers = data.approvalsTrackers.map(item => dependency_5.badges.ApprovalsTracker.fromObject(item));
             }
             if (data.approvalsTrackerStoreKeys != null) {
                 message.approvalsTrackerStoreKeys = data.approvalsTrackerStoreKeys;
@@ -186,16 +186,16 @@ export namespace bitbadges.bitbadgeschain.badges {
         }
         toObject() {
             const data: {
-                params?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.Params.prototype.toObject>;
+                params?: ReturnType<typeof dependency_2.badges.Params.prototype.toObject>;
                 port_id?: string;
-                collections?: ReturnType<typeof dependency_3.bitbadges.bitbadgeschain.badges.BadgeCollection.prototype.toObject>[];
+                collections?: ReturnType<typeof dependency_3.badges.BadgeCollection.prototype.toObject>[];
                 nextCollectionId?: string;
-                balances?: ReturnType<typeof dependency_5.bitbadges.bitbadgeschain.badges.UserBalanceStore.prototype.toObject>[];
+                balances?: ReturnType<typeof dependency_5.badges.UserBalanceStore.prototype.toObject>[];
                 balanceStoreKeys?: string[];
                 numUsedForMerkleChallenges?: string[];
                 numUsedForMerkleChallengesStoreKeys?: string[];
-                addressMappings?: ReturnType<typeof dependency_6.bitbadges.bitbadgeschain.badges.AddressMapping.prototype.toObject>[];
-                approvalsTrackers?: ReturnType<typeof dependency_5.bitbadges.bitbadgeschain.badges.ApprovalsTracker.prototype.toObject>[];
+                addressMappings?: ReturnType<typeof dependency_6.badges.AddressMapping.prototype.toObject>[];
+                approvalsTrackers?: ReturnType<typeof dependency_5.badges.ApprovalsTracker.prototype.toObject>[];
                 approvalsTrackerStoreKeys?: string[];
             } = {};
             if (this.params != null) {
@@ -205,13 +205,13 @@ export namespace bitbadges.bitbadgeschain.badges {
                 data.port_id = this.port_id;
             }
             if (this.collections != null) {
-                data.collections = this.collections.map((item: dependency_3.bitbadges.bitbadgeschain.badges.BadgeCollection) => item.toObject());
+                data.collections = this.collections.map((item: dependency_3.badges.BadgeCollection) => item.toObject());
             }
             if (this.nextCollectionId != null) {
                 data.nextCollectionId = this.nextCollectionId;
             }
             if (this.balances != null) {
-                data.balances = this.balances.map((item: dependency_5.bitbadges.bitbadgeschain.badges.UserBalanceStore) => item.toObject());
+                data.balances = this.balances.map((item: dependency_5.badges.UserBalanceStore) => item.toObject());
             }
             if (this.balanceStoreKeys != null) {
                 data.balanceStoreKeys = this.balanceStoreKeys;
@@ -223,10 +223,10 @@ export namespace bitbadges.bitbadgeschain.badges {
                 data.numUsedForMerkleChallengesStoreKeys = this.numUsedForMerkleChallengesStoreKeys;
             }
             if (this.addressMappings != null) {
-                data.addressMappings = this.addressMappings.map((item: dependency_6.bitbadges.bitbadgeschain.badges.AddressMapping) => item.toObject());
+                data.addressMappings = this.addressMappings.map((item: dependency_6.badges.AddressMapping) => item.toObject());
             }
             if (this.approvalsTrackers != null) {
-                data.approvalsTrackers = this.approvalsTrackers.map((item: dependency_5.bitbadges.bitbadgeschain.badges.ApprovalsTracker) => item.toObject());
+                data.approvalsTrackers = this.approvalsTrackers.map((item: dependency_5.badges.ApprovalsTracker) => item.toObject());
             }
             if (this.approvalsTrackerStoreKeys != null) {
                 data.approvalsTrackerStoreKeys = this.approvalsTrackerStoreKeys;
@@ -242,11 +242,11 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (this.port_id.length)
                 writer.writeString(2, this.port_id);
             if (this.collections.length)
-                writer.writeRepeatedMessage(3, this.collections, (item: dependency_3.bitbadges.bitbadgeschain.badges.BadgeCollection) => item.serialize(writer));
+                writer.writeRepeatedMessage(3, this.collections, (item: dependency_3.badges.BadgeCollection) => item.serialize(writer));
             if (this.nextCollectionId.length)
                 writer.writeString(4, this.nextCollectionId);
             if (this.balances.length)
-                writer.writeRepeatedMessage(5, this.balances, (item: dependency_5.bitbadges.bitbadgeschain.badges.UserBalanceStore) => item.serialize(writer));
+                writer.writeRepeatedMessage(5, this.balances, (item: dependency_5.badges.UserBalanceStore) => item.serialize(writer));
             if (this.balanceStoreKeys.length)
                 writer.writeRepeatedString(6, this.balanceStoreKeys);
             if (this.numUsedForMerkleChallenges.length)
@@ -254,9 +254,9 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (this.numUsedForMerkleChallengesStoreKeys.length)
                 writer.writeRepeatedString(8, this.numUsedForMerkleChallengesStoreKeys);
             if (this.addressMappings.length)
-                writer.writeRepeatedMessage(9, this.addressMappings, (item: dependency_6.bitbadges.bitbadgeschain.badges.AddressMapping) => item.serialize(writer));
+                writer.writeRepeatedMessage(9, this.addressMappings, (item: dependency_6.badges.AddressMapping) => item.serialize(writer));
             if (this.approvalsTrackers.length)
-                writer.writeRepeatedMessage(10, this.approvalsTrackers, (item: dependency_5.bitbadges.bitbadgeschain.badges.ApprovalsTracker) => item.serialize(writer));
+                writer.writeRepeatedMessage(10, this.approvalsTrackers, (item: dependency_5.badges.ApprovalsTracker) => item.serialize(writer));
             if (this.approvalsTrackerStoreKeys.length)
                 writer.writeRepeatedString(11, this.approvalsTrackerStoreKeys);
             if (!w)
@@ -269,19 +269,19 @@ export namespace bitbadges.bitbadgeschain.badges {
                     break;
                 switch (reader.getFieldNumber()) {
                     case 1:
-                        reader.readMessage(message.params, () => message.params = dependency_2.bitbadges.bitbadgeschain.badges.Params.deserialize(reader));
+                        reader.readMessage(message.params, () => message.params = dependency_2.badges.Params.deserialize(reader));
                         break;
                     case 2:
                         message.port_id = reader.readString();
                         break;
                     case 3:
-                        reader.readMessage(message.collections, () => pb_1.Message.addToRepeatedWrapperField(message, 3, dependency_3.bitbadges.bitbadgeschain.badges.BadgeCollection.deserialize(reader), dependency_3.bitbadges.bitbadgeschain.badges.BadgeCollection));
+                        reader.readMessage(message.collections, () => pb_1.Message.addToRepeatedWrapperField(message, 3, dependency_3.badges.BadgeCollection.deserialize(reader), dependency_3.badges.BadgeCollection));
                         break;
                     case 4:
                         message.nextCollectionId = reader.readString();
                         break;
                     case 5:
-                        reader.readMessage(message.balances, () => pb_1.Message.addToRepeatedWrapperField(message, 5, dependency_5.bitbadges.bitbadgeschain.badges.UserBalanceStore.deserialize(reader), dependency_5.bitbadges.bitbadgeschain.badges.UserBalanceStore));
+                        reader.readMessage(message.balances, () => pb_1.Message.addToRepeatedWrapperField(message, 5, dependency_5.badges.UserBalanceStore.deserialize(reader), dependency_5.badges.UserBalanceStore));
                         break;
                     case 6:
                         pb_1.Message.addToRepeatedField(message, 6, reader.readString());
@@ -293,10 +293,10 @@ export namespace bitbadges.bitbadgeschain.badges {
                         pb_1.Message.addToRepeatedField(message, 8, reader.readString());
                         break;
                     case 9:
-                        reader.readMessage(message.addressMappings, () => pb_1.Message.addToRepeatedWrapperField(message, 9, dependency_6.bitbadges.bitbadgeschain.badges.AddressMapping.deserialize(reader), dependency_6.bitbadges.bitbadgeschain.badges.AddressMapping));
+                        reader.readMessage(message.addressMappings, () => pb_1.Message.addToRepeatedWrapperField(message, 9, dependency_6.badges.AddressMapping.deserialize(reader), dependency_6.badges.AddressMapping));
                         break;
                     case 10:
-                        reader.readMessage(message.approvalsTrackers, () => pb_1.Message.addToRepeatedWrapperField(message, 10, dependency_5.bitbadges.bitbadgeschain.badges.ApprovalsTracker.deserialize(reader), dependency_5.bitbadges.bitbadgeschain.badges.ApprovalsTracker));
+                        reader.readMessage(message.approvalsTrackers, () => pb_1.Message.addToRepeatedWrapperField(message, 10, dependency_5.badges.ApprovalsTracker.deserialize(reader), dependency_5.badges.ApprovalsTracker));
                         break;
                     case 11:
                         pb_1.Message.addToRepeatedField(message, 11, reader.readString());

@@ -6,12 +6,12 @@ export function createMsgCreateAddressMappings(
   creator: string,
   addressMappings: AddressMapping[],
 ) {
-  const message = new badges.bitbadges.bitbadgeschain.badges.MsgCreateAddressMappings({
+  const message = new badges.badges.MsgCreateAddressMappings({
     creator,
-    addressMappings: addressMappings.map((addressMapping) => new mapping.bitbadges.bitbadgeschain.badges.AddressMapping({ ...addressMapping })),
+    addressMappings: addressMappings.map((addressMapping) => new mapping.badges.AddressMapping({ ...addressMapping })),
   })
   return {
     message,
-    path: 'bitbadges.bitbadgeschain.badges.MsgCreateAddressMappings',
+    path: 'badges.MsgCreateAddressMappings',
   }
 }

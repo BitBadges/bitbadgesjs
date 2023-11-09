@@ -107,7 +107,7 @@ export function convertMsgUpdateCollection<T extends NumberType, U extends Numbe
 
 
 export function convertFromProtoToMsgUpdateCollection(
-  protoMsg: badges.bitbadges.bitbadgeschain.badges.MsgUpdateCollection,
+  protoMsg: badges.badges.MsgUpdateCollection,
 ): MsgUpdateCollection<bigint> {
   const msg = protoMsg.toObject() as MsgUpdateCollection<string>;
 

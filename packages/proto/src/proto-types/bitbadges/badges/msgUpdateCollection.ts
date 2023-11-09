@@ -37,7 +37,7 @@ export function createMsgUpdateCollection<T extends NumberType>(
   updateIsArchivedTimeline: boolean,
   isArchivedTimeline: IsArchivedTimeline<T>[],
 ) {
-  const message = new tx.bitbadges.bitbadgeschain.badges.MsgUpdateCollection({
+  const message = new tx.badges.MsgUpdateCollection({
     creator,
     collectionId: collectionId.toString(),
     balancesType,
@@ -70,6 +70,6 @@ export function createMsgUpdateCollection<T extends NumberType>(
 
   return {
     message,
-    path: 'bitbadges.bitbadgeschain.badges.MsgUpdateCollection',
+    path: 'badges.MsgUpdateCollection',
   }
 }

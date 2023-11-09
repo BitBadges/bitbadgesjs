@@ -35,7 +35,7 @@ export function convertMsgUpdateUserApprovals<T extends NumberType, U extends Nu
 }
 
 export function convertFromProtoToMsgUpdateUserApprovals(
-  protoMsg: badges.bitbadges.bitbadgeschain.badges.MsgUpdateUserApprovals,
+  protoMsg: badges.badges.MsgUpdateUserApprovals,
 ): MsgUpdateUserApprovals<bigint> {
   const msg = protoMsg.toObject() as MsgUpdateUserApprovals<string>
 

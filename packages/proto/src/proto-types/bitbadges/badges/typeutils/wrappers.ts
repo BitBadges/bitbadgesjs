@@ -55,10 +55,10 @@ const DefaultNullApprovalCriteria: ApprovalCriteria<NumberType> = {
 }
 
 export function getWrappedBadgeIds<T extends NumberType>(badgeIds: UintRange<T>[]) {
-  const wrappedBadgeIds: balances.bitbadges.bitbadgeschain.badges.UintRange[] = []
+  const wrappedBadgeIds: balances.badges.UintRange[] = []
   for (const range of badgeIds) {
     wrappedBadgeIds.push(
-      new balances.bitbadges.bitbadgeschain.badges.UintRange({
+      new balances.badges.UintRange({
         start: range.start.toString(),
         end: range.end.toString(),
       }),
@@ -69,10 +69,10 @@ export function getWrappedBadgeIds<T extends NumberType>(badgeIds: UintRange<T>[
 }
 
 export function getWrappedBadgeMetadata<T extends NumberType>(badgeUris: BadgeMetadata<T>[]) {
-  const wrappedBadgeMetadatas: metadata.bitbadges.bitbadgeschain.badges.BadgeMetadata[] = [];
+  const wrappedBadgeMetadatas: metadata.badges.BadgeMetadata[] = [];
   for (const badgeUri of badgeUris) {
     wrappedBadgeMetadatas.push(
-      new metadata.bitbadges.bitbadgeschain.badges.BadgeMetadata({
+      new metadata.badges.BadgeMetadata({
         uri: badgeUri.uri,
         customData: badgeUri.customData,
         badgeIds: getWrappedBadgeIds(badgeUri.badgeIds),
@@ -85,7 +85,7 @@ export function getWrappedBadgeMetadata<T extends NumberType>(badgeUris: BadgeMe
 
 
 export function getWrappedBalances<T extends NumberType>(balanceArr: Balance<T>[]) {
-  const formattedBalances: balances.bitbadges.bitbadgeschain.badges.Balance[] =
+  const formattedBalances: balances.badges.Balance[] =
     []
 
   for (const balance of balanceArr) {
@@ -93,7 +93,7 @@ export function getWrappedBalances<T extends NumberType>(balanceArr: Balance<T>[
     const wrappedOwnershipTimes = getWrappedBadgeIds(balance.ownershipTimes)
 
     formattedBalances.push(
-      new balances.bitbadges.bitbadgeschain.badges.Balance({
+      new balances.badges.Balance({
         badgeIds: wrappedBadgeIds,
         amount: balance.amount.toString(),
         ownershipTimes: wrappedOwnershipTimes,
@@ -104,18 +104,18 @@ export function getWrappedBalances<T extends NumberType>(balanceArr: Balance<T>[
 }
 
 export function getWrappedProof(proof: MerkleProof) {
-  const wrappedAunts: transfers.bitbadges.bitbadgeschain.badges.MerklePathItem[] = []
+  const wrappedAunts: transfers.badges.MerklePathItem[] = []
   for (const aunt of proof.aunts) {
     wrappedAunts.push(
-      new transfers.bitbadges.bitbadgeschain.badges.MerklePathItem({
+      new transfers.badges.MerklePathItem({
         aunt: aunt.aunt,
         onRight: aunt.onRight,
       }),
     )
   }
 
-  const wrappedProof: transfers.bitbadges.bitbadgeschain.badges.MerkleProof =
-    new transfers.bitbadges.bitbadgeschain.badges.MerkleProof({
+  const wrappedProof: transfers.badges.MerkleProof =
+    new transfers.badges.MerkleProof({
       aunts: wrappedAunts,
       leaf: proof.leaf,
     })
@@ -123,18 +123,18 @@ export function getWrappedProof(proof: MerkleProof) {
 }
 
 export function getWrappedTransfers<T extends NumberType>(transfersArr: Transfer<T>[]) {
-  const wrappedTransfers: transfers.bitbadges.bitbadgeschain.badges.Transfer[] = []
+  const wrappedTransfers: transfers.badges.Transfer[] = []
   for (const transfer of transfersArr) {
     const formattedBalances = getWrappedBalances(transfer.balances)
 
     wrappedTransfers.push(
-      new transfers.bitbadges.bitbadgeschain.badges.Transfer({
+      new transfers.badges.Transfer({
         ...transfer,
         balances: formattedBalances,
         merkleProofs: transfer.merkleProofs ? transfer.merkleProofs.map(getWrappedProof) : undefined,
-        precalculateBalancesFromApproval: transfer.precalculateBalancesFromApproval ? new transfers.bitbadges.bitbadgeschain.badges.ApprovalIdentifierDetails({ ...transfer.precalculateBalancesFromApproval }) : undefined,
+        precalculateBalancesFromApproval: transfer.precalculateBalancesFromApproval ? new transfers.badges.ApprovalIdentifierDetails({ ...transfer.precalculateBalancesFromApproval }) : undefined,
         prioritizedApprovals: transfer.prioritizedApprovals ? transfer.prioritizedApprovals.map((prioritizedApproval) => {
-          return new transfers.bitbadges.bitbadgeschain.badges.ApprovalIdentifierDetails({
+          return new transfers.badges.ApprovalIdentifierDetails({
             ...prioritizedApproval,
           })
         }) : undefined,
@@ -146,7 +146,7 @@ export function getWrappedTransfers<T extends NumberType>(transfersArr: Transfer
 
 export function getWrappedTimedUpdatePermission<T extends NumberType>(permissionsArr: TimedUpdatePermission<T>[]) {
   return permissionsArr.map((canArchiveCollection) => {
-    return new permissions.bitbadges.bitbadgeschain.badges.TimedUpdatePermission({
+    return new permissions.badges.TimedUpdatePermission({
       ...canArchiveCollection,
       timelineTimes: getWrappedBadgeIds(canArchiveCollection.timelineTimes),
       permittedTimes: getWrappedBadgeIds(canArchiveCollection.permittedTimes),
@@ -159,7 +159,7 @@ export function getWrappedTimedUpdatePermission<T extends NumberType>(permission
 
 export function getWrappedTimedUpdateWithBadgeIdsPermission<T extends NumberType>(permissionsArr: TimedUpdateWithBadgeIdsPermission<T>[]) {
   return permissionsArr.map((canArchiveCollection) => {
-    return new permissions.bitbadges.bitbadgeschain.badges.TimedUpdateWithBadgeIdsPermission({
+    return new permissions.badges.TimedUpdateWithBadgeIdsPermission({
       ...canArchiveCollection,
       timelineTimes: getWrappedBadgeIds(canArchiveCollection.timelineTimes),
       badgeIds: getWrappedBadgeIds(canArchiveCollection.badgeIds),
@@ -171,7 +171,7 @@ export function getWrappedTimedUpdateWithBadgeIdsPermission<T extends NumberType
 
 export function getWrappedBalancesActionPermission<T extends NumberType>(permissionsArr: BalancesActionPermission<T>[]) {
   return permissionsArr.map((canArchiveCollection) => {
-    return new permissions.bitbadges.bitbadgeschain.badges.BalancesActionPermission({
+    return new permissions.badges.BalancesActionPermission({
       ...canArchiveCollection,
       ownershipTimes: getWrappedBadgeIds(canArchiveCollection.ownershipTimes),
       badgeIds: getWrappedBadgeIds(canArchiveCollection.badgeIds),
@@ -184,7 +184,7 @@ export function getWrappedBalancesActionPermission<T extends NumberType>(permiss
 
 export function getWrappedCollectionApprovalPermission<T extends NumberType>(permissionsArr: CollectionApprovalPermission<T>[]) {
   return permissionsArr.map((canArchiveCollection) => {
-    return new permissions.bitbadges.bitbadgeschain.badges.CollectionApprovalPermission({
+    return new permissions.badges.CollectionApprovalPermission({
       ...canArchiveCollection,
       transferTimes: getWrappedBadgeIds(canArchiveCollection.transferTimes),
       badgeIds: getWrappedBadgeIds(canArchiveCollection.badgeIds),
@@ -199,10 +199,10 @@ export function getWrappedCollectionApprovalPermission<T extends NumberType>(per
 
 
 export function getWrappedCollectionPermissions<T extends NumberType>(collectionPermissions: CollectionPermissions<T>) {
-  return new permissions.bitbadges.bitbadgeschain.badges.CollectionPermissions({
+  return new permissions.badges.CollectionPermissions({
     ...collectionPermissions,
     canDeleteCollection: collectionPermissions.canDeleteCollection.map((canDeleteCollection) => {
-      return new permissions.bitbadges.bitbadgeschain.badges.ActionPermission({
+      return new permissions.badges.ActionPermission({
         permittedTimes: getWrappedBadgeIds(canDeleteCollection.permittedTimes),
         forbiddenTimes: getWrappedBadgeIds(canDeleteCollection.forbiddenTimes),
       })
@@ -221,24 +221,24 @@ export function getWrappedCollectionPermissions<T extends NumberType>(collection
 
 
 export function getWrappedUserPermissions<T extends NumberType>(userPermissions: UserPermissions<T>) {
-  return new permissions.bitbadges.bitbadgeschain.badges.UserPermissions({
+  return new permissions.badges.UserPermissions({
     ...userPermissions,
     canUpdateAutoApproveSelfInitiatedIncomingTransfers: userPermissions.canUpdateAutoApproveSelfInitiatedIncomingTransfers.map((canUpdateAutoApproveSelfInitiatedIncomingTransfer) => {
-      return new permissions.bitbadges.bitbadgeschain.badges.ActionPermission({
+      return new permissions.badges.ActionPermission({
         ...canUpdateAutoApproveSelfInitiatedIncomingTransfer,
         permittedTimes: getWrappedBadgeIds(canUpdateAutoApproveSelfInitiatedIncomingTransfer.permittedTimes),
         forbiddenTimes: getWrappedBadgeIds(canUpdateAutoApproveSelfInitiatedIncomingTransfer.forbiddenTimes),
       })
     }),
     canUpdateAutoApproveSelfInitiatedOutgoingTransfers: userPermissions.canUpdateAutoApproveSelfInitiatedOutgoingTransfers.map((canUpdateAutoApproveSelfInitiatedOutgoingTransfer) => {
-      return new permissions.bitbadges.bitbadgeschain.badges.ActionPermission({
+      return new permissions.badges.ActionPermission({
         ...canUpdateAutoApproveSelfInitiatedOutgoingTransfer,
         permittedTimes: getWrappedBadgeIds(canUpdateAutoApproveSelfInitiatedOutgoingTransfer.permittedTimes),
         forbiddenTimes: getWrappedBadgeIds(canUpdateAutoApproveSelfInitiatedOutgoingTransfer.forbiddenTimes),
       })
     }),
     canUpdateIncomingApprovals: userPermissions.canUpdateIncomingApprovals.map((canUpdateIncomingApproval) => {
-      return new permissions.bitbadges.bitbadgeschain.badges.UserIncomingApprovalPermission({
+      return new permissions.badges.UserIncomingApprovalPermission({
         ...canUpdateIncomingApproval,
         transferTimes: getWrappedBadgeIds(canUpdateIncomingApproval.transferTimes),
         badgeIds: getWrappedBadgeIds(canUpdateIncomingApproval.badgeIds),
@@ -248,7 +248,7 @@ export function getWrappedUserPermissions<T extends NumberType>(userPermissions:
       })
     }),
     canUpdateOutgoingApprovals: userPermissions.canUpdateOutgoingApprovals.map((canUpdateOutgoingApproval) => {
-      return new permissions.bitbadges.bitbadgeschain.badges.UserOutgoingApprovalPermission({
+      return new permissions.badges.UserOutgoingApprovalPermission({
         ...canUpdateOutgoingApproval,
         transferTimes: getWrappedBadgeIds(canUpdateOutgoingApproval.transferTimes),
         badgeIds: getWrappedBadgeIds(canUpdateOutgoingApproval.badgeIds),
@@ -263,16 +263,16 @@ export function getWrappedUserPermissions<T extends NumberType>(userPermissions:
 export function getWrappedOutgoingTransfers<T extends NumberType>(outgoingApprovals: UserOutgoingApproval<T>[]) {
   return outgoingApprovals.map((outgoingTransfer) => {
     const approvalCriteria = outgoingTransfer.approvalCriteria ?? DefaultNullApprovalCriteria;
-    return new transfers.bitbadges.bitbadgeschain.badges.UserOutgoingApproval({
+    return new transfers.badges.UserOutgoingApproval({
       ...outgoingTransfer,
       transferTimes: getWrappedBadgeIds(outgoingTransfer.transferTimes),
       badgeIds: getWrappedBadgeIds(outgoingTransfer.badgeIds),
       ownershipTimes: getWrappedBadgeIds(outgoingTransfer.ownershipTimes),
 
-      approvalCriteria: approvalCriteria ? new transfers.bitbadges.bitbadgeschain.badges.OutgoingApprovalCriteria({
+      approvalCriteria: approvalCriteria ? new transfers.badges.OutgoingApprovalCriteria({
         ...approvalCriteria,
         mustOwnBadges: approvalCriteria.mustOwnBadges ? approvalCriteria.mustOwnBadges.map((mustOwnBadge) => {
-          return new balances.bitbadges.bitbadgeschain.badges.MustOwnBadges({
+          return new balances.badges.MustOwnBadges({
             ...mustOwnBadge,
             collectionId: mustOwnBadge.collectionId.toString(),
             badgeIds: getWrappedBadgeIds(mustOwnBadge.badgeIds),
@@ -280,38 +280,38 @@ export function getWrappedOutgoingTransfers<T extends NumberType>(outgoingApprov
             amountRange: getWrappedBadgeIds([mustOwnBadge.amountRange])[0],
           })
         }) : undefined,
-        merkleChallenge: approvalCriteria.merkleChallenge ? new transfers.bitbadges.bitbadgeschain.badges.MerkleChallenge({
+        merkleChallenge: approvalCriteria.merkleChallenge ? new transfers.badges.MerkleChallenge({
           ...approvalCriteria.merkleChallenge,
           maxUsesPerLeaf: approvalCriteria.merkleChallenge.maxUsesPerLeaf.toString(),
           expectedProofLength: approvalCriteria.merkleChallenge.expectedProofLength.toString(),
         }) : undefined,
 
-        predeterminedBalances: approvalCriteria.predeterminedBalances ? new transfers.bitbadges.bitbadgeschain.badges.PredeterminedBalances({
+        predeterminedBalances: approvalCriteria.predeterminedBalances ? new transfers.badges.PredeterminedBalances({
           ...approvalCriteria.predeterminedBalances,
-          incrementedBalances: new transfers.bitbadges.bitbadgeschain.badges.IncrementedBalances({
+          incrementedBalances: new transfers.badges.IncrementedBalances({
             ...approvalCriteria.predeterminedBalances.incrementedBalances,
             startBalances: getWrappedBalances(approvalCriteria.predeterminedBalances.incrementedBalances.startBalances),
             incrementBadgeIdsBy: approvalCriteria.predeterminedBalances.incrementedBalances.incrementBadgeIdsBy.toString(),
             incrementOwnershipTimesBy: approvalCriteria.predeterminedBalances.incrementedBalances.incrementOwnershipTimesBy.toString(),
           }),
-          orderCalculationMethod: new transfers.bitbadges.bitbadgeschain.badges.PredeterminedOrderCalculationMethod({
+          orderCalculationMethod: new transfers.badges.PredeterminedOrderCalculationMethod({
             ...approvalCriteria.predeterminedBalances.orderCalculationMethod,
           }),
           manualBalances: approvalCriteria.predeterminedBalances.manualBalances.map((manualBalance) => {
-            return new transfers.bitbadges.bitbadgeschain.badges.ManualBalances({
+            return new transfers.badges.ManualBalances({
               ...manualBalance,
               balances: getWrappedBalances(manualBalance.balances),
             })
           }),
         }) : undefined,
-        approvalAmounts: approvalCriteria.approvalAmounts ? new transfers.bitbadges.bitbadgeschain.badges.ApprovalAmounts({
+        approvalAmounts: approvalCriteria.approvalAmounts ? new transfers.badges.ApprovalAmounts({
           ...approvalCriteria.approvalAmounts,
           overallApprovalAmount: approvalCriteria.approvalAmounts.overallApprovalAmount.toString(),
           perToAddressApprovalAmount: approvalCriteria.approvalAmounts.perToAddressApprovalAmount.toString(),
           perFromAddressApprovalAmount: approvalCriteria.approvalAmounts.perFromAddressApprovalAmount.toString(),
           perInitiatedByAddressApprovalAmount: approvalCriteria.approvalAmounts.perInitiatedByAddressApprovalAmount.toString(),
         }) : undefined,
-        maxNumTransfers: approvalCriteria.maxNumTransfers ? new transfers.bitbadges.bitbadgeschain.badges.MaxNumTransfers({
+        maxNumTransfers: approvalCriteria.maxNumTransfers ? new transfers.badges.MaxNumTransfers({
           ...approvalCriteria.maxNumTransfers,
           overallMaxNumTransfers: approvalCriteria.maxNumTransfers.overallMaxNumTransfers.toString(),
           perToAddressMaxNumTransfers: approvalCriteria.maxNumTransfers.perToAddressMaxNumTransfers.toString(),
@@ -327,16 +327,16 @@ export function getWrappedIncomingTransfers<T extends NumberType>(incomingApprov
   return incomingApprovals.map((outgoingTransfer) => {
 
     const approvalCriteria = outgoingTransfer.approvalCriteria ?? DefaultNullApprovalCriteria;
-    return new transfers.bitbadges.bitbadgeschain.badges.UserIncomingApproval({
+    return new transfers.badges.UserIncomingApproval({
       ...outgoingTransfer,
       transferTimes: getWrappedBadgeIds(outgoingTransfer.transferTimes),
       badgeIds: getWrappedBadgeIds(outgoingTransfer.badgeIds),
       ownershipTimes: getWrappedBadgeIds(outgoingTransfer.ownershipTimes),
 
-      approvalCriteria: approvalCriteria ? new transfers.bitbadges.bitbadgeschain.badges.IncomingApprovalCriteria({
+      approvalCriteria: approvalCriteria ? new transfers.badges.IncomingApprovalCriteria({
         ...approvalCriteria,
         mustOwnBadges: approvalCriteria.mustOwnBadges ? approvalCriteria.mustOwnBadges.map((mustOwnBadge) => {
-          return new balances.bitbadges.bitbadgeschain.badges.MustOwnBadges({
+          return new balances.badges.MustOwnBadges({
             ...mustOwnBadge,
             collectionId: mustOwnBadge.collectionId.toString(),
             badgeIds: getWrappedBadgeIds(mustOwnBadge.badgeIds),
@@ -344,38 +344,38 @@ export function getWrappedIncomingTransfers<T extends NumberType>(incomingApprov
             amountRange: getWrappedBadgeIds([mustOwnBadge.amountRange])[0],
           })
         }) : undefined,
-        merkleChallenge: approvalCriteria.merkleChallenge ? new transfers.bitbadges.bitbadgeschain.badges.MerkleChallenge({
+        merkleChallenge: approvalCriteria.merkleChallenge ? new transfers.badges.MerkleChallenge({
           ...approvalCriteria.merkleChallenge,
           maxUsesPerLeaf: approvalCriteria.merkleChallenge.maxUsesPerLeaf.toString(),
           expectedProofLength: approvalCriteria.merkleChallenge.expectedProofLength.toString(),
         }) : undefined,
 
-        predeterminedBalances: approvalCriteria.predeterminedBalances ? new transfers.bitbadges.bitbadgeschain.badges.PredeterminedBalances({
+        predeterminedBalances: approvalCriteria.predeterminedBalances ? new transfers.badges.PredeterminedBalances({
           ...approvalCriteria.predeterminedBalances,
-          incrementedBalances: new transfers.bitbadges.bitbadgeschain.badges.IncrementedBalances({
+          incrementedBalances: new transfers.badges.IncrementedBalances({
             ...approvalCriteria.predeterminedBalances.incrementedBalances,
             startBalances: getWrappedBalances(approvalCriteria.predeterminedBalances.incrementedBalances.startBalances),
             incrementBadgeIdsBy: approvalCriteria.predeterminedBalances.incrementedBalances.incrementBadgeIdsBy.toString(),
             incrementOwnershipTimesBy: approvalCriteria.predeterminedBalances.incrementedBalances.incrementOwnershipTimesBy.toString(),
           }),
-          orderCalculationMethod: new transfers.bitbadges.bitbadgeschain.badges.PredeterminedOrderCalculationMethod({
+          orderCalculationMethod: new transfers.badges.PredeterminedOrderCalculationMethod({
             ...approvalCriteria.predeterminedBalances.orderCalculationMethod,
           }),
           manualBalances: approvalCriteria.predeterminedBalances.manualBalances.map((manualBalance) => {
-            return new transfers.bitbadges.bitbadgeschain.badges.ManualBalances({
+            return new transfers.badges.ManualBalances({
               ...manualBalance,
               balances: getWrappedBalances(manualBalance.balances),
             })
           }),
         }) : undefined,
-        approvalAmounts: approvalCriteria.approvalAmounts ? new transfers.bitbadges.bitbadgeschain.badges.ApprovalAmounts({
+        approvalAmounts: approvalCriteria.approvalAmounts ? new transfers.badges.ApprovalAmounts({
           ...approvalCriteria.approvalAmounts,
           overallApprovalAmount: approvalCriteria.approvalAmounts.overallApprovalAmount.toString(),
           perToAddressApprovalAmount: approvalCriteria.approvalAmounts.perToAddressApprovalAmount.toString(),
           perFromAddressApprovalAmount: approvalCriteria.approvalAmounts.perFromAddressApprovalAmount.toString(),
           perInitiatedByAddressApprovalAmount: approvalCriteria.approvalAmounts.perInitiatedByAddressApprovalAmount.toString(),
         }) : undefined,
-        maxNumTransfers: approvalCriteria.maxNumTransfers ? new transfers.bitbadges.bitbadgeschain.badges.MaxNumTransfers({
+        maxNumTransfers: approvalCriteria.maxNumTransfers ? new transfers.badges.MaxNumTransfers({
           ...approvalCriteria.maxNumTransfers,
           overallMaxNumTransfers: approvalCriteria.maxNumTransfers.overallMaxNumTransfers.toString(),
           perToAddressMaxNumTransfers: approvalCriteria.maxNumTransfers.perToAddressMaxNumTransfers.toString(),
@@ -392,15 +392,15 @@ export function getWrappedIncomingTransfers<T extends NumberType>(incomingApprov
 export function getWrappedCollectionApprovals<T extends NumberType>(collectionApprovals: CollectionApproval<T>[]) {
   return collectionApprovals.map((outgoingTransfer) => {
     const approvalCriteria = outgoingTransfer.approvalCriteria ?? DefaultNullApprovalCriteria;
-    return new transfers.bitbadges.bitbadgeschain.badges.CollectionApproval({
+    return new transfers.badges.CollectionApproval({
       ...outgoingTransfer,
       transferTimes: getWrappedBadgeIds(outgoingTransfer.transferTimes),
       badgeIds: getWrappedBadgeIds(outgoingTransfer.badgeIds),
       ownershipTimes: getWrappedBadgeIds(outgoingTransfer.ownershipTimes),
-      approvalCriteria: approvalCriteria ? new transfers.bitbadges.bitbadgeschain.badges.ApprovalCriteria({
+      approvalCriteria: approvalCriteria ? new transfers.badges.ApprovalCriteria({
         ...approvalCriteria,
         mustOwnBadges: approvalCriteria.mustOwnBadges ? approvalCriteria.mustOwnBadges.map((mustOwnBadge) => {
-          return new balances.bitbadges.bitbadgeschain.badges.MustOwnBadges({
+          return new balances.badges.MustOwnBadges({
             ...mustOwnBadge,
             collectionId: mustOwnBadge.collectionId.toString(),
             badgeIds: getWrappedBadgeIds(mustOwnBadge.badgeIds),
@@ -408,38 +408,38 @@ export function getWrappedCollectionApprovals<T extends NumberType>(collectionAp
             amountRange: getWrappedBadgeIds([mustOwnBadge.amountRange])[0],
           })
         }) : undefined,
-        merkleChallenge: approvalCriteria.merkleChallenge ? new transfers.bitbadges.bitbadgeschain.badges.MerkleChallenge({
+        merkleChallenge: approvalCriteria.merkleChallenge ? new transfers.badges.MerkleChallenge({
           ...approvalCriteria.merkleChallenge,
           maxUsesPerLeaf: approvalCriteria.merkleChallenge.maxUsesPerLeaf.toString(),
           expectedProofLength: approvalCriteria.merkleChallenge.expectedProofLength.toString(),
         }) : undefined,
 
-        predeterminedBalances: approvalCriteria.predeterminedBalances ? new transfers.bitbadges.bitbadgeschain.badges.PredeterminedBalances({
+        predeterminedBalances: approvalCriteria.predeterminedBalances ? new transfers.badges.PredeterminedBalances({
           ...approvalCriteria.predeterminedBalances,
-          incrementedBalances: new transfers.bitbadges.bitbadgeschain.badges.IncrementedBalances({
+          incrementedBalances: new transfers.badges.IncrementedBalances({
             ...approvalCriteria.predeterminedBalances.incrementedBalances,
             startBalances: getWrappedBalances(approvalCriteria.predeterminedBalances.incrementedBalances.startBalances),
             incrementBadgeIdsBy: approvalCriteria.predeterminedBalances.incrementedBalances.incrementBadgeIdsBy.toString(),
             incrementOwnershipTimesBy: approvalCriteria.predeterminedBalances.incrementedBalances.incrementOwnershipTimesBy.toString(),
           }),
-          orderCalculationMethod: new transfers.bitbadges.bitbadgeschain.badges.PredeterminedOrderCalculationMethod({
+          orderCalculationMethod: new transfers.badges.PredeterminedOrderCalculationMethod({
             ...approvalCriteria.predeterminedBalances.orderCalculationMethod,
           }),
           manualBalances: approvalCriteria.predeterminedBalances.manualBalances.map((manualBalance) => {
-            return new transfers.bitbadges.bitbadgeschain.badges.ManualBalances({
+            return new transfers.badges.ManualBalances({
               ...manualBalance,
               balances: getWrappedBalances(manualBalance.balances),
             })
           }),
         }) : undefined,
-        approvalAmounts: approvalCriteria.approvalAmounts ? new transfers.bitbadges.bitbadgeschain.badges.ApprovalAmounts({
+        approvalAmounts: approvalCriteria.approvalAmounts ? new transfers.badges.ApprovalAmounts({
           ...approvalCriteria.approvalAmounts,
           overallApprovalAmount: approvalCriteria.approvalAmounts.overallApprovalAmount.toString(),
           perToAddressApprovalAmount: approvalCriteria.approvalAmounts.perToAddressApprovalAmount.toString(),
           perFromAddressApprovalAmount: approvalCriteria.approvalAmounts.perFromAddressApprovalAmount.toString(),
           perInitiatedByAddressApprovalAmount: approvalCriteria.approvalAmounts.perInitiatedByAddressApprovalAmount.toString(),
         }) : undefined,
-        maxNumTransfers: approvalCriteria.maxNumTransfers ? new transfers.bitbadges.bitbadgeschain.badges.MaxNumTransfers({
+        maxNumTransfers: approvalCriteria.maxNumTransfers ? new transfers.badges.MaxNumTransfers({
           ...approvalCriteria.maxNumTransfers,
           overallMaxNumTransfers: approvalCriteria.maxNumTransfers.overallMaxNumTransfers.toString(),
           perToAddressMaxNumTransfers: approvalCriteria.maxNumTransfers.perToAddressMaxNumTransfers.toString(),
@@ -453,49 +453,49 @@ export function getWrappedCollectionApprovals<T extends NumberType>(collectionAp
 
 
 export function getWrappedManagerTimeline(managerTimeline: ManagerTimeline<NumberType>[]) {
-  return managerTimeline.map((managerTimeline) => new timelines.bitbadges.bitbadgeschain.badges.ManagerTimeline({
+  return managerTimeline.map((managerTimeline) => new timelines.badges.ManagerTimeline({
     ...managerTimeline,
     timelineTimes: getWrappedBadgeIds(managerTimeline.timelineTimes),
   }))
 }
 
 export function getWrappedCollectionMetadataTimeline(collectionMetadataTimeline: CollectionMetadataTimeline<NumberType>[]) {
-  return collectionMetadataTimeline.map((collectionMetadataTimeline) => new timelines.bitbadges.bitbadgeschain.badges.CollectionMetadataTimeline({
+  return collectionMetadataTimeline.map((collectionMetadataTimeline) => new timelines.badges.CollectionMetadataTimeline({
     ...collectionMetadataTimeline,
     timelineTimes: getWrappedBadgeIds(collectionMetadataTimeline.timelineTimes),
-    collectionMetadata: new metadata.bitbadges.bitbadgeschain.badges.CollectionMetadata({ ...collectionMetadataTimeline.collectionMetadata }),
+    collectionMetadata: new metadata.badges.CollectionMetadata({ ...collectionMetadataTimeline.collectionMetadata }),
   }))
 }
 
-export const getWrappedBadgeMetadataTimeline = (badgeMetadataTimeline: BadgeMetadataTimeline<NumberType>[]) => badgeMetadataTimeline.map((badgeMetadataTimeline) => new timelines.bitbadges.bitbadgeschain.badges.BadgeMetadataTimeline({
+export const getWrappedBadgeMetadataTimeline = (badgeMetadataTimeline: BadgeMetadataTimeline<NumberType>[]) => badgeMetadataTimeline.map((badgeMetadataTimeline) => new timelines.badges.BadgeMetadataTimeline({
   ...badgeMetadataTimeline,
   timelineTimes: getWrappedBadgeIds(badgeMetadataTimeline.timelineTimes),
-  badgeMetadata: badgeMetadataTimeline.badgeMetadata.map((badgeMetadata) => new metadata.bitbadges.bitbadgeschain.badges.BadgeMetadata({
+  badgeMetadata: badgeMetadataTimeline.badgeMetadata.map((badgeMetadata) => new metadata.badges.BadgeMetadata({
     ...badgeMetadata,
     badgeIds: getWrappedBadgeIds(badgeMetadata.badgeIds),
   })),
 }))
 
 export function getWrappedOffChainBalancesMetadataTimeline(offChainBalancesMetadataTimeline: OffChainBalancesMetadataTimeline<NumberType>[]) {
-  return offChainBalancesMetadataTimeline.map((offChainBalancesMetadataTimeline) => new timelines.bitbadges.bitbadgeschain.badges.OffChainBalancesMetadataTimeline({
+  return offChainBalancesMetadataTimeline.map((offChainBalancesMetadataTimeline) => new timelines.badges.OffChainBalancesMetadataTimeline({
     ...offChainBalancesMetadataTimeline,
     timelineTimes: getWrappedBadgeIds(offChainBalancesMetadataTimeline.timelineTimes),
-    offChainBalancesMetadata: new metadata.bitbadges.bitbadgeschain.badges.OffChainBalancesMetadata({ ...offChainBalancesMetadataTimeline.offChainBalancesMetadata }),
+    offChainBalancesMetadata: new metadata.badges.OffChainBalancesMetadata({ ...offChainBalancesMetadataTimeline.offChainBalancesMetadata }),
   }))
 }
 
 export function getWrappedCustomDataTimeline(customDataTimeline: CustomDataTimeline<NumberType>[]) {
-  return customDataTimeline.map((customDataTimeline) => new timelines.bitbadges.bitbadgeschain.badges.CustomDataTimeline({
+  return customDataTimeline.map((customDataTimeline) => new timelines.badges.CustomDataTimeline({
     ...customDataTimeline,
     timelineTimes: getWrappedBadgeIds(customDataTimeline.timelineTimes),
   }))
 }
 
 export function getWrappedInheritedBalancesTimeline(inheritedBalancesTimeline: InheritedBalancesTimeline<NumberType>[]) {
-  return inheritedBalancesTimeline.map((inheritedBalancesTimeline) => new timelines.bitbadges.bitbadgeschain.badges.InheritedBalancesTimeline({
+  return inheritedBalancesTimeline.map((inheritedBalancesTimeline) => new timelines.badges.InheritedBalancesTimeline({
     ...inheritedBalancesTimeline,
     timelineTimes: getWrappedBadgeIds(inheritedBalancesTimeline.timelineTimes),
-    inheritedBalances: inheritedBalancesTimeline.inheritedBalances.map((inheritedBalance) => new balances.bitbadges.bitbadgeschain.badges.InheritedBalance({
+    inheritedBalances: inheritedBalancesTimeline.inheritedBalances.map((inheritedBalance) => new balances.badges.InheritedBalance({
       ...inheritedBalance,
       badgeIds: getWrappedBadgeIds(inheritedBalance.badgeIds),
       parentBadgeIds: getWrappedBadgeIds(inheritedBalance.parentBadgeIds),
@@ -505,14 +505,14 @@ export function getWrappedInheritedBalancesTimeline(inheritedBalancesTimeline: I
 }
 
 export function getWrappedStandardsTimeline(standardsTimeline: StandardsTimeline<NumberType>[]) {
-  return standardsTimeline.map((standardsTimeline) => new timelines.bitbadges.bitbadgeschain.badges.StandardsTimeline({
+  return standardsTimeline.map((standardsTimeline) => new timelines.badges.StandardsTimeline({
     ...standardsTimeline,
     timelineTimes: getWrappedBadgeIds(standardsTimeline.timelineTimes),
   }))
 }
 
 export function getWrappedIsArchivedTimeline(isArchivedTimeline: IsArchivedTimeline<NumberType>[]) {
-  return isArchivedTimeline.map((isArchivedTimeline) => new timelines.bitbadges.bitbadgeschain.badges.IsArchivedTimeline({
+  return isArchivedTimeline.map((isArchivedTimeline) => new timelines.badges.IsArchivedTimeline({
     ...isArchivedTimeline,
     timelineTimes: getWrappedBadgeIds(isArchivedTimeline.timelineTimes),
   }))

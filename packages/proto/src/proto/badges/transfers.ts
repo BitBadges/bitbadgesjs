@@ -10,16 +10,16 @@ import * as dependency_2 from "./permissions";
 import * as dependency_3 from "./address_mappings";
 import * as dependency_4 from "./balances";
 import * as pb_1 from "google-protobuf";
-export namespace bitbadges.bitbadgeschain.badges {
+export namespace badges {
     export class UserBalanceStore extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
-            balances?: dependency_4.bitbadges.bitbadgeschain.badges.Balance[];
+            balances?: dependency_4.badges.Balance[];
             outgoingApprovals?: UserOutgoingApproval[];
             incomingApprovals?: UserIncomingApproval[];
             autoApproveSelfInitiatedOutgoingTransfers?: boolean;
             autoApproveSelfInitiatedIncomingTransfers?: boolean;
-            userPermissions?: dependency_2.bitbadges.bitbadgeschain.badges.UserPermissions;
+            userPermissions?: dependency_2.badges.UserPermissions;
         }) {
             super();
             pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1, 2, 3], this.#one_of_decls);
@@ -45,9 +45,9 @@ export namespace bitbadges.bitbadgeschain.badges {
             }
         }
         get balances() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.bitbadges.bitbadgeschain.badges.Balance, 1) as dependency_4.bitbadges.bitbadgeschain.badges.Balance[];
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.badges.Balance, 1) as dependency_4.badges.Balance[];
         }
-        set balances(value: dependency_4.bitbadges.bitbadgeschain.badges.Balance[]) {
+        set balances(value: dependency_4.badges.Balance[]) {
             pb_1.Message.setRepeatedWrapperField(this, 1, value);
         }
         get outgoingApprovals() {
@@ -75,25 +75,25 @@ export namespace bitbadges.bitbadgeschain.badges {
             pb_1.Message.setField(this, 5, value);
         }
         get userPermissions() {
-            return pb_1.Message.getWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UserPermissions, 6) as dependency_2.bitbadges.bitbadgeschain.badges.UserPermissions;
+            return pb_1.Message.getWrapperField(this, dependency_2.badges.UserPermissions, 6) as dependency_2.badges.UserPermissions;
         }
-        set userPermissions(value: dependency_2.bitbadges.bitbadgeschain.badges.UserPermissions) {
+        set userPermissions(value: dependency_2.badges.UserPermissions) {
             pb_1.Message.setWrapperField(this, 6, value);
         }
         get has_userPermissions() {
             return pb_1.Message.getField(this, 6) != null;
         }
         static fromObject(data: {
-            balances?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.Balance.prototype.toObject>[];
+            balances?: ReturnType<typeof dependency_4.badges.Balance.prototype.toObject>[];
             outgoingApprovals?: ReturnType<typeof UserOutgoingApproval.prototype.toObject>[];
             incomingApprovals?: ReturnType<typeof UserIncomingApproval.prototype.toObject>[];
             autoApproveSelfInitiatedOutgoingTransfers?: boolean;
             autoApproveSelfInitiatedIncomingTransfers?: boolean;
-            userPermissions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UserPermissions.prototype.toObject>;
+            userPermissions?: ReturnType<typeof dependency_2.badges.UserPermissions.prototype.toObject>;
         }): UserBalanceStore {
             const message = new UserBalanceStore({});
             if (data.balances != null) {
-                message.balances = data.balances.map(item => dependency_4.bitbadges.bitbadgeschain.badges.Balance.fromObject(item));
+                message.balances = data.balances.map(item => dependency_4.badges.Balance.fromObject(item));
             }
             if (data.outgoingApprovals != null) {
                 message.outgoingApprovals = data.outgoingApprovals.map(item => UserOutgoingApproval.fromObject(item));
@@ -108,21 +108,21 @@ export namespace bitbadges.bitbadgeschain.badges {
                 message.autoApproveSelfInitiatedIncomingTransfers = data.autoApproveSelfInitiatedIncomingTransfers;
             }
             if (data.userPermissions != null) {
-                message.userPermissions = dependency_2.bitbadges.bitbadgeschain.badges.UserPermissions.fromObject(data.userPermissions);
+                message.userPermissions = dependency_2.badges.UserPermissions.fromObject(data.userPermissions);
             }
             return message;
         }
         toObject() {
             const data: {
-                balances?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.Balance.prototype.toObject>[];
+                balances?: ReturnType<typeof dependency_4.badges.Balance.prototype.toObject>[];
                 outgoingApprovals?: ReturnType<typeof UserOutgoingApproval.prototype.toObject>[];
                 incomingApprovals?: ReturnType<typeof UserIncomingApproval.prototype.toObject>[];
                 autoApproveSelfInitiatedOutgoingTransfers?: boolean;
                 autoApproveSelfInitiatedIncomingTransfers?: boolean;
-                userPermissions?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UserPermissions.prototype.toObject>;
+                userPermissions?: ReturnType<typeof dependency_2.badges.UserPermissions.prototype.toObject>;
             } = {};
             if (this.balances != null) {
-                data.balances = this.balances.map((item: dependency_4.bitbadges.bitbadgeschain.badges.Balance) => item.toObject());
+                data.balances = this.balances.map((item: dependency_4.badges.Balance) => item.toObject());
             }
             if (this.outgoingApprovals != null) {
                 data.outgoingApprovals = this.outgoingApprovals.map((item: UserOutgoingApproval) => item.toObject());
@@ -146,7 +146,7 @@ export namespace bitbadges.bitbadgeschain.badges {
         serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
             const writer = w || new pb_1.BinaryWriter();
             if (this.balances.length)
-                writer.writeRepeatedMessage(1, this.balances, (item: dependency_4.bitbadges.bitbadgeschain.badges.Balance) => item.serialize(writer));
+                writer.writeRepeatedMessage(1, this.balances, (item: dependency_4.badges.Balance) => item.serialize(writer));
             if (this.outgoingApprovals.length)
                 writer.writeRepeatedMessage(2, this.outgoingApprovals, (item: UserOutgoingApproval) => item.serialize(writer));
             if (this.incomingApprovals.length)
@@ -167,7 +167,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                     break;
                 switch (reader.getFieldNumber()) {
                     case 1:
-                        reader.readMessage(message.balances, () => pb_1.Message.addToRepeatedWrapperField(message, 1, dependency_4.bitbadges.bitbadgeschain.badges.Balance.deserialize(reader), dependency_4.bitbadges.bitbadgeschain.badges.Balance));
+                        reader.readMessage(message.balances, () => pb_1.Message.addToRepeatedWrapperField(message, 1, dependency_4.badges.Balance.deserialize(reader), dependency_4.badges.Balance));
                         break;
                     case 2:
                         reader.readMessage(message.outgoingApprovals, () => pb_1.Message.addToRepeatedWrapperField(message, 2, UserOutgoingApproval.deserialize(reader), UserOutgoingApproval));
@@ -182,7 +182,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                         message.autoApproveSelfInitiatedIncomingTransfers = reader.readBool();
                         break;
                     case 6:
-                        reader.readMessage(message.userPermissions, () => message.userPermissions = dependency_2.bitbadges.bitbadgeschain.badges.UserPermissions.deserialize(reader));
+                        reader.readMessage(message.userPermissions, () => message.userPermissions = dependency_2.badges.UserPermissions.deserialize(reader));
                         break;
                     default: reader.skipField();
                 }
@@ -383,9 +383,9 @@ export namespace bitbadges.bitbadgeschain.badges {
         constructor(data?: any[] | {
             toMappingId?: string;
             initiatedByMappingId?: string;
-            transferTimes?: dependency_4.bitbadges.bitbadgeschain.badges.UintRange[];
-            badgeIds?: dependency_4.bitbadges.bitbadgeschain.badges.UintRange[];
-            ownershipTimes?: dependency_4.bitbadges.bitbadgeschain.badges.UintRange[];
+            transferTimes?: dependency_4.badges.UintRange[];
+            badgeIds?: dependency_4.badges.UintRange[];
+            ownershipTimes?: dependency_4.badges.UintRange[];
             amountTrackerId?: string;
             challengeTrackerId?: string;
             uri?: string;
@@ -444,21 +444,21 @@ export namespace bitbadges.bitbadgeschain.badges {
             pb_1.Message.setField(this, 2, value);
         }
         get transferTimes() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.bitbadges.bitbadgeschain.badges.UintRange, 3) as dependency_4.bitbadges.bitbadgeschain.badges.UintRange[];
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.badges.UintRange, 3) as dependency_4.badges.UintRange[];
         }
-        set transferTimes(value: dependency_4.bitbadges.bitbadgeschain.badges.UintRange[]) {
+        set transferTimes(value: dependency_4.badges.UintRange[]) {
             pb_1.Message.setRepeatedWrapperField(this, 3, value);
         }
         get badgeIds() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.bitbadges.bitbadgeschain.badges.UintRange, 4) as dependency_4.bitbadges.bitbadgeschain.badges.UintRange[];
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.badges.UintRange, 4) as dependency_4.badges.UintRange[];
         }
-        set badgeIds(value: dependency_4.bitbadges.bitbadgeschain.badges.UintRange[]) {
+        set badgeIds(value: dependency_4.badges.UintRange[]) {
             pb_1.Message.setRepeatedWrapperField(this, 4, value);
         }
         get ownershipTimes() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.bitbadges.bitbadgeschain.badges.UintRange, 5) as dependency_4.bitbadges.bitbadgeschain.badges.UintRange[];
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.badges.UintRange, 5) as dependency_4.badges.UintRange[];
         }
-        set ownershipTimes(value: dependency_4.bitbadges.bitbadgeschain.badges.UintRange[]) {
+        set ownershipTimes(value: dependency_4.badges.UintRange[]) {
             pb_1.Message.setRepeatedWrapperField(this, 5, value);
         }
         get amountTrackerId() {
@@ -503,9 +503,9 @@ export namespace bitbadges.bitbadgeschain.badges {
         static fromObject(data: {
             toMappingId?: string;
             initiatedByMappingId?: string;
-            transferTimes?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-            badgeIds?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-            ownershipTimes?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+            transferTimes?: ReturnType<typeof dependency_4.badges.UintRange.prototype.toObject>[];
+            badgeIds?: ReturnType<typeof dependency_4.badges.UintRange.prototype.toObject>[];
+            ownershipTimes?: ReturnType<typeof dependency_4.badges.UintRange.prototype.toObject>[];
             amountTrackerId?: string;
             challengeTrackerId?: string;
             uri?: string;
@@ -521,13 +521,13 @@ export namespace bitbadges.bitbadgeschain.badges {
                 message.initiatedByMappingId = data.initiatedByMappingId;
             }
             if (data.transferTimes != null) {
-                message.transferTimes = data.transferTimes.map(item => dependency_4.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
+                message.transferTimes = data.transferTimes.map(item => dependency_4.badges.UintRange.fromObject(item));
             }
             if (data.badgeIds != null) {
-                message.badgeIds = data.badgeIds.map(item => dependency_4.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
+                message.badgeIds = data.badgeIds.map(item => dependency_4.badges.UintRange.fromObject(item));
             }
             if (data.ownershipTimes != null) {
-                message.ownershipTimes = data.ownershipTimes.map(item => dependency_4.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
+                message.ownershipTimes = data.ownershipTimes.map(item => dependency_4.badges.UintRange.fromObject(item));
             }
             if (data.amountTrackerId != null) {
                 message.amountTrackerId = data.amountTrackerId;
@@ -553,9 +553,9 @@ export namespace bitbadges.bitbadgeschain.badges {
             const data: {
                 toMappingId?: string;
                 initiatedByMappingId?: string;
-                transferTimes?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-                badgeIds?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-                ownershipTimes?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+                transferTimes?: ReturnType<typeof dependency_4.badges.UintRange.prototype.toObject>[];
+                badgeIds?: ReturnType<typeof dependency_4.badges.UintRange.prototype.toObject>[];
+                ownershipTimes?: ReturnType<typeof dependency_4.badges.UintRange.prototype.toObject>[];
                 amountTrackerId?: string;
                 challengeTrackerId?: string;
                 uri?: string;
@@ -570,13 +570,13 @@ export namespace bitbadges.bitbadgeschain.badges {
                 data.initiatedByMappingId = this.initiatedByMappingId;
             }
             if (this.transferTimes != null) {
-                data.transferTimes = this.transferTimes.map((item: dependency_4.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
+                data.transferTimes = this.transferTimes.map((item: dependency_4.badges.UintRange) => item.toObject());
             }
             if (this.badgeIds != null) {
-                data.badgeIds = this.badgeIds.map((item: dependency_4.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
+                data.badgeIds = this.badgeIds.map((item: dependency_4.badges.UintRange) => item.toObject());
             }
             if (this.ownershipTimes != null) {
-                data.ownershipTimes = this.ownershipTimes.map((item: dependency_4.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
+                data.ownershipTimes = this.ownershipTimes.map((item: dependency_4.badges.UintRange) => item.toObject());
             }
             if (this.amountTrackerId != null) {
                 data.amountTrackerId = this.amountTrackerId;
@@ -607,11 +607,11 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (this.initiatedByMappingId.length)
                 writer.writeString(2, this.initiatedByMappingId);
             if (this.transferTimes.length)
-                writer.writeRepeatedMessage(3, this.transferTimes, (item: dependency_4.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
+                writer.writeRepeatedMessage(3, this.transferTimes, (item: dependency_4.badges.UintRange) => item.serialize(writer));
             if (this.badgeIds.length)
-                writer.writeRepeatedMessage(4, this.badgeIds, (item: dependency_4.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
+                writer.writeRepeatedMessage(4, this.badgeIds, (item: dependency_4.badges.UintRange) => item.serialize(writer));
             if (this.ownershipTimes.length)
-                writer.writeRepeatedMessage(5, this.ownershipTimes, (item: dependency_4.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
+                writer.writeRepeatedMessage(5, this.ownershipTimes, (item: dependency_4.badges.UintRange) => item.serialize(writer));
             if (this.amountTrackerId.length)
                 writer.writeString(6, this.amountTrackerId);
             if (this.challengeTrackerId.length)
@@ -640,13 +640,13 @@ export namespace bitbadges.bitbadgeschain.badges {
                         message.initiatedByMappingId = reader.readString();
                         break;
                     case 3:
-                        reader.readMessage(message.transferTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 3, dependency_4.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_4.bitbadges.bitbadgeschain.badges.UintRange));
+                        reader.readMessage(message.transferTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 3, dependency_4.badges.UintRange.deserialize(reader), dependency_4.badges.UintRange));
                         break;
                     case 4:
-                        reader.readMessage(message.badgeIds, () => pb_1.Message.addToRepeatedWrapperField(message, 4, dependency_4.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_4.bitbadges.bitbadgeschain.badges.UintRange));
+                        reader.readMessage(message.badgeIds, () => pb_1.Message.addToRepeatedWrapperField(message, 4, dependency_4.badges.UintRange.deserialize(reader), dependency_4.badges.UintRange));
                         break;
                     case 5:
-                        reader.readMessage(message.ownershipTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 5, dependency_4.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_4.bitbadges.bitbadgeschain.badges.UintRange));
+                        reader.readMessage(message.ownershipTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 5, dependency_4.badges.UintRange.deserialize(reader), dependency_4.badges.UintRange));
                         break;
                     case 6:
                         message.amountTrackerId = reader.readString();
@@ -683,9 +683,9 @@ export namespace bitbadges.bitbadgeschain.badges {
         constructor(data?: any[] | {
             fromMappingId?: string;
             initiatedByMappingId?: string;
-            transferTimes?: dependency_4.bitbadges.bitbadgeschain.badges.UintRange[];
-            badgeIds?: dependency_4.bitbadges.bitbadgeschain.badges.UintRange[];
-            ownershipTimes?: dependency_4.bitbadges.bitbadgeschain.badges.UintRange[];
+            transferTimes?: dependency_4.badges.UintRange[];
+            badgeIds?: dependency_4.badges.UintRange[];
+            ownershipTimes?: dependency_4.badges.UintRange[];
             amountTrackerId?: string;
             challengeTrackerId?: string;
             uri?: string;
@@ -744,21 +744,21 @@ export namespace bitbadges.bitbadgeschain.badges {
             pb_1.Message.setField(this, 2, value);
         }
         get transferTimes() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.bitbadges.bitbadgeschain.badges.UintRange, 3) as dependency_4.bitbadges.bitbadgeschain.badges.UintRange[];
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.badges.UintRange, 3) as dependency_4.badges.UintRange[];
         }
-        set transferTimes(value: dependency_4.bitbadges.bitbadgeschain.badges.UintRange[]) {
+        set transferTimes(value: dependency_4.badges.UintRange[]) {
             pb_1.Message.setRepeatedWrapperField(this, 3, value);
         }
         get badgeIds() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.bitbadges.bitbadgeschain.badges.UintRange, 4) as dependency_4.bitbadges.bitbadgeschain.badges.UintRange[];
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.badges.UintRange, 4) as dependency_4.badges.UintRange[];
         }
-        set badgeIds(value: dependency_4.bitbadges.bitbadgeschain.badges.UintRange[]) {
+        set badgeIds(value: dependency_4.badges.UintRange[]) {
             pb_1.Message.setRepeatedWrapperField(this, 4, value);
         }
         get ownershipTimes() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.bitbadges.bitbadgeschain.badges.UintRange, 5) as dependency_4.bitbadges.bitbadgeschain.badges.UintRange[];
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.badges.UintRange, 5) as dependency_4.badges.UintRange[];
         }
-        set ownershipTimes(value: dependency_4.bitbadges.bitbadgeschain.badges.UintRange[]) {
+        set ownershipTimes(value: dependency_4.badges.UintRange[]) {
             pb_1.Message.setRepeatedWrapperField(this, 5, value);
         }
         get amountTrackerId() {
@@ -803,9 +803,9 @@ export namespace bitbadges.bitbadgeschain.badges {
         static fromObject(data: {
             fromMappingId?: string;
             initiatedByMappingId?: string;
-            transferTimes?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-            badgeIds?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-            ownershipTimes?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+            transferTimes?: ReturnType<typeof dependency_4.badges.UintRange.prototype.toObject>[];
+            badgeIds?: ReturnType<typeof dependency_4.badges.UintRange.prototype.toObject>[];
+            ownershipTimes?: ReturnType<typeof dependency_4.badges.UintRange.prototype.toObject>[];
             amountTrackerId?: string;
             challengeTrackerId?: string;
             uri?: string;
@@ -821,13 +821,13 @@ export namespace bitbadges.bitbadgeschain.badges {
                 message.initiatedByMappingId = data.initiatedByMappingId;
             }
             if (data.transferTimes != null) {
-                message.transferTimes = data.transferTimes.map(item => dependency_4.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
+                message.transferTimes = data.transferTimes.map(item => dependency_4.badges.UintRange.fromObject(item));
             }
             if (data.badgeIds != null) {
-                message.badgeIds = data.badgeIds.map(item => dependency_4.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
+                message.badgeIds = data.badgeIds.map(item => dependency_4.badges.UintRange.fromObject(item));
             }
             if (data.ownershipTimes != null) {
-                message.ownershipTimes = data.ownershipTimes.map(item => dependency_4.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
+                message.ownershipTimes = data.ownershipTimes.map(item => dependency_4.badges.UintRange.fromObject(item));
             }
             if (data.amountTrackerId != null) {
                 message.amountTrackerId = data.amountTrackerId;
@@ -853,9 +853,9 @@ export namespace bitbadges.bitbadgeschain.badges {
             const data: {
                 fromMappingId?: string;
                 initiatedByMappingId?: string;
-                transferTimes?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-                badgeIds?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-                ownershipTimes?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+                transferTimes?: ReturnType<typeof dependency_4.badges.UintRange.prototype.toObject>[];
+                badgeIds?: ReturnType<typeof dependency_4.badges.UintRange.prototype.toObject>[];
+                ownershipTimes?: ReturnType<typeof dependency_4.badges.UintRange.prototype.toObject>[];
                 amountTrackerId?: string;
                 challengeTrackerId?: string;
                 uri?: string;
@@ -870,13 +870,13 @@ export namespace bitbadges.bitbadgeschain.badges {
                 data.initiatedByMappingId = this.initiatedByMappingId;
             }
             if (this.transferTimes != null) {
-                data.transferTimes = this.transferTimes.map((item: dependency_4.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
+                data.transferTimes = this.transferTimes.map((item: dependency_4.badges.UintRange) => item.toObject());
             }
             if (this.badgeIds != null) {
-                data.badgeIds = this.badgeIds.map((item: dependency_4.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
+                data.badgeIds = this.badgeIds.map((item: dependency_4.badges.UintRange) => item.toObject());
             }
             if (this.ownershipTimes != null) {
-                data.ownershipTimes = this.ownershipTimes.map((item: dependency_4.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
+                data.ownershipTimes = this.ownershipTimes.map((item: dependency_4.badges.UintRange) => item.toObject());
             }
             if (this.amountTrackerId != null) {
                 data.amountTrackerId = this.amountTrackerId;
@@ -907,11 +907,11 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (this.initiatedByMappingId.length)
                 writer.writeString(2, this.initiatedByMappingId);
             if (this.transferTimes.length)
-                writer.writeRepeatedMessage(3, this.transferTimes, (item: dependency_4.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
+                writer.writeRepeatedMessage(3, this.transferTimes, (item: dependency_4.badges.UintRange) => item.serialize(writer));
             if (this.badgeIds.length)
-                writer.writeRepeatedMessage(4, this.badgeIds, (item: dependency_4.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
+                writer.writeRepeatedMessage(4, this.badgeIds, (item: dependency_4.badges.UintRange) => item.serialize(writer));
             if (this.ownershipTimes.length)
-                writer.writeRepeatedMessage(5, this.ownershipTimes, (item: dependency_4.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
+                writer.writeRepeatedMessage(5, this.ownershipTimes, (item: dependency_4.badges.UintRange) => item.serialize(writer));
             if (this.amountTrackerId.length)
                 writer.writeString(6, this.amountTrackerId);
             if (this.challengeTrackerId.length)
@@ -940,13 +940,13 @@ export namespace bitbadges.bitbadgeschain.badges {
                         message.initiatedByMappingId = reader.readString();
                         break;
                     case 3:
-                        reader.readMessage(message.transferTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 3, dependency_4.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_4.bitbadges.bitbadgeschain.badges.UintRange));
+                        reader.readMessage(message.transferTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 3, dependency_4.badges.UintRange.deserialize(reader), dependency_4.badges.UintRange));
                         break;
                     case 4:
-                        reader.readMessage(message.badgeIds, () => pb_1.Message.addToRepeatedWrapperField(message, 4, dependency_4.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_4.bitbadges.bitbadgeschain.badges.UintRange));
+                        reader.readMessage(message.badgeIds, () => pb_1.Message.addToRepeatedWrapperField(message, 4, dependency_4.badges.UintRange.deserialize(reader), dependency_4.badges.UintRange));
                         break;
                     case 5:
-                        reader.readMessage(message.ownershipTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 5, dependency_4.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_4.bitbadges.bitbadgeschain.badges.UintRange));
+                        reader.readMessage(message.ownershipTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 5, dependency_4.badges.UintRange.deserialize(reader), dependency_4.badges.UintRange));
                         break;
                     case 6:
                         message.amountTrackerId = reader.readString();
@@ -981,7 +981,7 @@ export namespace bitbadges.bitbadgeschain.badges {
     export class ManualBalances extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
-            balances?: dependency_4.bitbadges.bitbadgeschain.badges.Balance[];
+            balances?: dependency_4.badges.Balance[];
         }) {
             super();
             pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [1], this.#one_of_decls);
@@ -992,26 +992,26 @@ export namespace bitbadges.bitbadgeschain.badges {
             }
         }
         get balances() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.bitbadges.bitbadgeschain.badges.Balance, 1) as dependency_4.bitbadges.bitbadgeschain.badges.Balance[];
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.badges.Balance, 1) as dependency_4.badges.Balance[];
         }
-        set balances(value: dependency_4.bitbadges.bitbadgeschain.badges.Balance[]) {
+        set balances(value: dependency_4.badges.Balance[]) {
             pb_1.Message.setRepeatedWrapperField(this, 1, value);
         }
         static fromObject(data: {
-            balances?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.Balance.prototype.toObject>[];
+            balances?: ReturnType<typeof dependency_4.badges.Balance.prototype.toObject>[];
         }): ManualBalances {
             const message = new ManualBalances({});
             if (data.balances != null) {
-                message.balances = data.balances.map(item => dependency_4.bitbadges.bitbadgeschain.badges.Balance.fromObject(item));
+                message.balances = data.balances.map(item => dependency_4.badges.Balance.fromObject(item));
             }
             return message;
         }
         toObject() {
             const data: {
-                balances?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.Balance.prototype.toObject>[];
+                balances?: ReturnType<typeof dependency_4.badges.Balance.prototype.toObject>[];
             } = {};
             if (this.balances != null) {
-                data.balances = this.balances.map((item: dependency_4.bitbadges.bitbadgeschain.badges.Balance) => item.toObject());
+                data.balances = this.balances.map((item: dependency_4.badges.Balance) => item.toObject());
             }
             return data;
         }
@@ -1020,7 +1020,7 @@ export namespace bitbadges.bitbadgeschain.badges {
         serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
             const writer = w || new pb_1.BinaryWriter();
             if (this.balances.length)
-                writer.writeRepeatedMessage(1, this.balances, (item: dependency_4.bitbadges.bitbadgeschain.badges.Balance) => item.serialize(writer));
+                writer.writeRepeatedMessage(1, this.balances, (item: dependency_4.badges.Balance) => item.serialize(writer));
             if (!w)
                 return writer.getResultBuffer();
         }
@@ -1031,7 +1031,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                     break;
                 switch (reader.getFieldNumber()) {
                     case 1:
-                        reader.readMessage(message.balances, () => pb_1.Message.addToRepeatedWrapperField(message, 1, dependency_4.bitbadges.bitbadgeschain.badges.Balance.deserialize(reader), dependency_4.bitbadges.bitbadgeschain.badges.Balance));
+                        reader.readMessage(message.balances, () => pb_1.Message.addToRepeatedWrapperField(message, 1, dependency_4.badges.Balance.deserialize(reader), dependency_4.badges.Balance));
                         break;
                     default: reader.skipField();
                 }
@@ -1048,7 +1048,7 @@ export namespace bitbadges.bitbadgeschain.badges {
     export class IncrementedBalances extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
-            startBalances?: dependency_4.bitbadges.bitbadgeschain.badges.Balance[];
+            startBalances?: dependency_4.badges.Balance[];
             incrementBadgeIdsBy?: string;
             incrementOwnershipTimesBy?: string;
         }) {
@@ -1067,9 +1067,9 @@ export namespace bitbadges.bitbadgeschain.badges {
             }
         }
         get startBalances() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.bitbadges.bitbadgeschain.badges.Balance, 1) as dependency_4.bitbadges.bitbadgeschain.badges.Balance[];
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.badges.Balance, 1) as dependency_4.badges.Balance[];
         }
-        set startBalances(value: dependency_4.bitbadges.bitbadgeschain.badges.Balance[]) {
+        set startBalances(value: dependency_4.badges.Balance[]) {
             pb_1.Message.setRepeatedWrapperField(this, 1, value);
         }
         get incrementBadgeIdsBy() {
@@ -1085,13 +1085,13 @@ export namespace bitbadges.bitbadgeschain.badges {
             pb_1.Message.setField(this, 3, value);
         }
         static fromObject(data: {
-            startBalances?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.Balance.prototype.toObject>[];
+            startBalances?: ReturnType<typeof dependency_4.badges.Balance.prototype.toObject>[];
             incrementBadgeIdsBy?: string;
             incrementOwnershipTimesBy?: string;
         }): IncrementedBalances {
             const message = new IncrementedBalances({});
             if (data.startBalances != null) {
-                message.startBalances = data.startBalances.map(item => dependency_4.bitbadges.bitbadgeschain.badges.Balance.fromObject(item));
+                message.startBalances = data.startBalances.map(item => dependency_4.badges.Balance.fromObject(item));
             }
             if (data.incrementBadgeIdsBy != null) {
                 message.incrementBadgeIdsBy = data.incrementBadgeIdsBy;
@@ -1103,12 +1103,12 @@ export namespace bitbadges.bitbadgeschain.badges {
         }
         toObject() {
             const data: {
-                startBalances?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.Balance.prototype.toObject>[];
+                startBalances?: ReturnType<typeof dependency_4.badges.Balance.prototype.toObject>[];
                 incrementBadgeIdsBy?: string;
                 incrementOwnershipTimesBy?: string;
             } = {};
             if (this.startBalances != null) {
-                data.startBalances = this.startBalances.map((item: dependency_4.bitbadges.bitbadgeschain.badges.Balance) => item.toObject());
+                data.startBalances = this.startBalances.map((item: dependency_4.badges.Balance) => item.toObject());
             }
             if (this.incrementBadgeIdsBy != null) {
                 data.incrementBadgeIdsBy = this.incrementBadgeIdsBy;
@@ -1123,7 +1123,7 @@ export namespace bitbadges.bitbadgeschain.badges {
         serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
             const writer = w || new pb_1.BinaryWriter();
             if (this.startBalances.length)
-                writer.writeRepeatedMessage(1, this.startBalances, (item: dependency_4.bitbadges.bitbadgeschain.badges.Balance) => item.serialize(writer));
+                writer.writeRepeatedMessage(1, this.startBalances, (item: dependency_4.badges.Balance) => item.serialize(writer));
             if (this.incrementBadgeIdsBy.length)
                 writer.writeString(2, this.incrementBadgeIdsBy);
             if (this.incrementOwnershipTimesBy.length)
@@ -1138,7 +1138,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                     break;
                 switch (reader.getFieldNumber()) {
                     case 1:
-                        reader.readMessage(message.startBalances, () => pb_1.Message.addToRepeatedWrapperField(message, 1, dependency_4.bitbadges.bitbadgeschain.badges.Balance.deserialize(reader), dependency_4.bitbadges.bitbadgeschain.badges.Balance));
+                        reader.readMessage(message.startBalances, () => pb_1.Message.addToRepeatedWrapperField(message, 1, dependency_4.badges.Balance.deserialize(reader), dependency_4.badges.Balance));
                         break;
                     case 2:
                         message.incrementBadgeIdsBy = reader.readString();
@@ -1712,7 +1712,7 @@ export namespace bitbadges.bitbadgeschain.badges {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
             numTransfers?: string;
-            amounts?: dependency_4.bitbadges.bitbadgeschain.badges.Balance[];
+            amounts?: dependency_4.badges.Balance[];
         }) {
             super();
             pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [2], this.#one_of_decls);
@@ -1732,34 +1732,34 @@ export namespace bitbadges.bitbadgeschain.badges {
             pb_1.Message.setField(this, 1, value);
         }
         get amounts() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.bitbadges.bitbadgeschain.badges.Balance, 2) as dependency_4.bitbadges.bitbadgeschain.badges.Balance[];
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.badges.Balance, 2) as dependency_4.badges.Balance[];
         }
-        set amounts(value: dependency_4.bitbadges.bitbadgeschain.badges.Balance[]) {
+        set amounts(value: dependency_4.badges.Balance[]) {
             pb_1.Message.setRepeatedWrapperField(this, 2, value);
         }
         static fromObject(data: {
             numTransfers?: string;
-            amounts?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.Balance.prototype.toObject>[];
+            amounts?: ReturnType<typeof dependency_4.badges.Balance.prototype.toObject>[];
         }): ApprovalsTracker {
             const message = new ApprovalsTracker({});
             if (data.numTransfers != null) {
                 message.numTransfers = data.numTransfers;
             }
             if (data.amounts != null) {
-                message.amounts = data.amounts.map(item => dependency_4.bitbadges.bitbadgeschain.badges.Balance.fromObject(item));
+                message.amounts = data.amounts.map(item => dependency_4.badges.Balance.fromObject(item));
             }
             return message;
         }
         toObject() {
             const data: {
                 numTransfers?: string;
-                amounts?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.Balance.prototype.toObject>[];
+                amounts?: ReturnType<typeof dependency_4.badges.Balance.prototype.toObject>[];
             } = {};
             if (this.numTransfers != null) {
                 data.numTransfers = this.numTransfers;
             }
             if (this.amounts != null) {
-                data.amounts = this.amounts.map((item: dependency_4.bitbadges.bitbadgeschain.badges.Balance) => item.toObject());
+                data.amounts = this.amounts.map((item: dependency_4.badges.Balance) => item.toObject());
             }
             return data;
         }
@@ -1770,7 +1770,7 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (this.numTransfers.length)
                 writer.writeString(1, this.numTransfers);
             if (this.amounts.length)
-                writer.writeRepeatedMessage(2, this.amounts, (item: dependency_4.bitbadges.bitbadgeschain.badges.Balance) => item.serialize(writer));
+                writer.writeRepeatedMessage(2, this.amounts, (item: dependency_4.badges.Balance) => item.serialize(writer));
             if (!w)
                 return writer.getResultBuffer();
         }
@@ -1784,7 +1784,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                         message.numTransfers = reader.readString();
                         break;
                     case 2:
-                        reader.readMessage(message.amounts, () => pb_1.Message.addToRepeatedWrapperField(message, 2, dependency_4.bitbadges.bitbadgeschain.badges.Balance.deserialize(reader), dependency_4.bitbadges.bitbadgeschain.badges.Balance));
+                        reader.readMessage(message.amounts, () => pb_1.Message.addToRepeatedWrapperField(message, 2, dependency_4.badges.Balance.deserialize(reader), dependency_4.badges.Balance));
                         break;
                     default: reader.skipField();
                 }
@@ -1801,7 +1801,7 @@ export namespace bitbadges.bitbadgeschain.badges {
     export class ApprovalCriteria extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
-            mustOwnBadges?: dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges[];
+            mustOwnBadges?: dependency_4.badges.MustOwnBadges[];
             merkleChallenge?: MerkleChallenge;
             predeterminedBalances?: PredeterminedBalances;
             approvalAmounts?: ApprovalAmounts;
@@ -1852,9 +1852,9 @@ export namespace bitbadges.bitbadgeschain.badges {
             }
         }
         get mustOwnBadges() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges, 1) as dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges[];
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.badges.MustOwnBadges, 1) as dependency_4.badges.MustOwnBadges[];
         }
-        set mustOwnBadges(value: dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges[]) {
+        set mustOwnBadges(value: dependency_4.badges.MustOwnBadges[]) {
             pb_1.Message.setRepeatedWrapperField(this, 1, value);
         }
         get merkleChallenge() {
@@ -1930,7 +1930,7 @@ export namespace bitbadges.bitbadgeschain.badges {
             pb_1.Message.setField(this, 14, value);
         }
         static fromObject(data: {
-            mustOwnBadges?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges.prototype.toObject>[];
+            mustOwnBadges?: ReturnType<typeof dependency_4.badges.MustOwnBadges.prototype.toObject>[];
             merkleChallenge?: ReturnType<typeof MerkleChallenge.prototype.toObject>;
             predeterminedBalances?: ReturnType<typeof PredeterminedBalances.prototype.toObject>;
             approvalAmounts?: ReturnType<typeof ApprovalAmounts.prototype.toObject>;
@@ -1944,7 +1944,7 @@ export namespace bitbadges.bitbadgeschain.badges {
         }): ApprovalCriteria {
             const message = new ApprovalCriteria({});
             if (data.mustOwnBadges != null) {
-                message.mustOwnBadges = data.mustOwnBadges.map(item => dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges.fromObject(item));
+                message.mustOwnBadges = data.mustOwnBadges.map(item => dependency_4.badges.MustOwnBadges.fromObject(item));
             }
             if (data.merkleChallenge != null) {
                 message.merkleChallenge = MerkleChallenge.fromObject(data.merkleChallenge);
@@ -1980,7 +1980,7 @@ export namespace bitbadges.bitbadgeschain.badges {
         }
         toObject() {
             const data: {
-                mustOwnBadges?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges.prototype.toObject>[];
+                mustOwnBadges?: ReturnType<typeof dependency_4.badges.MustOwnBadges.prototype.toObject>[];
                 merkleChallenge?: ReturnType<typeof MerkleChallenge.prototype.toObject>;
                 predeterminedBalances?: ReturnType<typeof PredeterminedBalances.prototype.toObject>;
                 approvalAmounts?: ReturnType<typeof ApprovalAmounts.prototype.toObject>;
@@ -1993,7 +1993,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                 overridesToIncomingApprovals?: boolean;
             } = {};
             if (this.mustOwnBadges != null) {
-                data.mustOwnBadges = this.mustOwnBadges.map((item: dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges) => item.toObject());
+                data.mustOwnBadges = this.mustOwnBadges.map((item: dependency_4.badges.MustOwnBadges) => item.toObject());
             }
             if (this.merkleChallenge != null) {
                 data.merkleChallenge = this.merkleChallenge.toObject();
@@ -2032,7 +2032,7 @@ export namespace bitbadges.bitbadgeschain.badges {
         serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
             const writer = w || new pb_1.BinaryWriter();
             if (this.mustOwnBadges.length)
-                writer.writeRepeatedMessage(1, this.mustOwnBadges, (item: dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges) => item.serialize(writer));
+                writer.writeRepeatedMessage(1, this.mustOwnBadges, (item: dependency_4.badges.MustOwnBadges) => item.serialize(writer));
             if (this.has_merkleChallenge)
                 writer.writeMessage(2, this.merkleChallenge, () => this.merkleChallenge.serialize(writer));
             if (this.has_predeterminedBalances)
@@ -2063,7 +2063,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                     break;
                 switch (reader.getFieldNumber()) {
                     case 1:
-                        reader.readMessage(message.mustOwnBadges, () => pb_1.Message.addToRepeatedWrapperField(message, 1, dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges.deserialize(reader), dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges));
+                        reader.readMessage(message.mustOwnBadges, () => pb_1.Message.addToRepeatedWrapperField(message, 1, dependency_4.badges.MustOwnBadges.deserialize(reader), dependency_4.badges.MustOwnBadges));
                         break;
                     case 2:
                         reader.readMessage(message.merkleChallenge, () => message.merkleChallenge = MerkleChallenge.deserialize(reader));
@@ -2110,7 +2110,7 @@ export namespace bitbadges.bitbadgeschain.badges {
     export class OutgoingApprovalCriteria extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
-            mustOwnBadges?: dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges[];
+            mustOwnBadges?: dependency_4.badges.MustOwnBadges[];
             merkleChallenge?: MerkleChallenge;
             predeterminedBalances?: PredeterminedBalances;
             approvalAmounts?: ApprovalAmounts;
@@ -2145,9 +2145,9 @@ export namespace bitbadges.bitbadgeschain.badges {
             }
         }
         get mustOwnBadges() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges, 1) as dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges[];
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.badges.MustOwnBadges, 1) as dependency_4.badges.MustOwnBadges[];
         }
-        set mustOwnBadges(value: dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges[]) {
+        set mustOwnBadges(value: dependency_4.badges.MustOwnBadges[]) {
             pb_1.Message.setRepeatedWrapperField(this, 1, value);
         }
         get merkleChallenge() {
@@ -2199,7 +2199,7 @@ export namespace bitbadges.bitbadgeschain.badges {
             pb_1.Message.setField(this, 11, value);
         }
         static fromObject(data: {
-            mustOwnBadges?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges.prototype.toObject>[];
+            mustOwnBadges?: ReturnType<typeof dependency_4.badges.MustOwnBadges.prototype.toObject>[];
             merkleChallenge?: ReturnType<typeof MerkleChallenge.prototype.toObject>;
             predeterminedBalances?: ReturnType<typeof PredeterminedBalances.prototype.toObject>;
             approvalAmounts?: ReturnType<typeof ApprovalAmounts.prototype.toObject>;
@@ -2209,7 +2209,7 @@ export namespace bitbadges.bitbadgeschain.badges {
         }): OutgoingApprovalCriteria {
             const message = new OutgoingApprovalCriteria({});
             if (data.mustOwnBadges != null) {
-                message.mustOwnBadges = data.mustOwnBadges.map(item => dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges.fromObject(item));
+                message.mustOwnBadges = data.mustOwnBadges.map(item => dependency_4.badges.MustOwnBadges.fromObject(item));
             }
             if (data.merkleChallenge != null) {
                 message.merkleChallenge = MerkleChallenge.fromObject(data.merkleChallenge);
@@ -2233,7 +2233,7 @@ export namespace bitbadges.bitbadgeschain.badges {
         }
         toObject() {
             const data: {
-                mustOwnBadges?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges.prototype.toObject>[];
+                mustOwnBadges?: ReturnType<typeof dependency_4.badges.MustOwnBadges.prototype.toObject>[];
                 merkleChallenge?: ReturnType<typeof MerkleChallenge.prototype.toObject>;
                 predeterminedBalances?: ReturnType<typeof PredeterminedBalances.prototype.toObject>;
                 approvalAmounts?: ReturnType<typeof ApprovalAmounts.prototype.toObject>;
@@ -2242,7 +2242,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                 requireToDoesNotEqualInitiatedBy?: boolean;
             } = {};
             if (this.mustOwnBadges != null) {
-                data.mustOwnBadges = this.mustOwnBadges.map((item: dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges) => item.toObject());
+                data.mustOwnBadges = this.mustOwnBadges.map((item: dependency_4.badges.MustOwnBadges) => item.toObject());
             }
             if (this.merkleChallenge != null) {
                 data.merkleChallenge = this.merkleChallenge.toObject();
@@ -2269,7 +2269,7 @@ export namespace bitbadges.bitbadgeschain.badges {
         serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
             const writer = w || new pb_1.BinaryWriter();
             if (this.mustOwnBadges.length)
-                writer.writeRepeatedMessage(1, this.mustOwnBadges, (item: dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges) => item.serialize(writer));
+                writer.writeRepeatedMessage(1, this.mustOwnBadges, (item: dependency_4.badges.MustOwnBadges) => item.serialize(writer));
             if (this.has_merkleChallenge)
                 writer.writeMessage(2, this.merkleChallenge, () => this.merkleChallenge.serialize(writer));
             if (this.has_predeterminedBalances)
@@ -2292,7 +2292,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                     break;
                 switch (reader.getFieldNumber()) {
                     case 1:
-                        reader.readMessage(message.mustOwnBadges, () => pb_1.Message.addToRepeatedWrapperField(message, 1, dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges.deserialize(reader), dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges));
+                        reader.readMessage(message.mustOwnBadges, () => pb_1.Message.addToRepeatedWrapperField(message, 1, dependency_4.badges.MustOwnBadges.deserialize(reader), dependency_4.badges.MustOwnBadges));
                         break;
                     case 2:
                         reader.readMessage(message.merkleChallenge, () => message.merkleChallenge = MerkleChallenge.deserialize(reader));
@@ -2327,7 +2327,7 @@ export namespace bitbadges.bitbadgeschain.badges {
     export class IncomingApprovalCriteria extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
-            mustOwnBadges?: dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges[];
+            mustOwnBadges?: dependency_4.badges.MustOwnBadges[];
             merkleChallenge?: MerkleChallenge;
             predeterminedBalances?: PredeterminedBalances;
             approvalAmounts?: ApprovalAmounts;
@@ -2362,9 +2362,9 @@ export namespace bitbadges.bitbadgeschain.badges {
             }
         }
         get mustOwnBadges() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges, 1) as dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges[];
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.badges.MustOwnBadges, 1) as dependency_4.badges.MustOwnBadges[];
         }
-        set mustOwnBadges(value: dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges[]) {
+        set mustOwnBadges(value: dependency_4.badges.MustOwnBadges[]) {
             pb_1.Message.setRepeatedWrapperField(this, 1, value);
         }
         get merkleChallenge() {
@@ -2416,7 +2416,7 @@ export namespace bitbadges.bitbadgeschain.badges {
             pb_1.Message.setField(this, 12, value);
         }
         static fromObject(data: {
-            mustOwnBadges?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges.prototype.toObject>[];
+            mustOwnBadges?: ReturnType<typeof dependency_4.badges.MustOwnBadges.prototype.toObject>[];
             merkleChallenge?: ReturnType<typeof MerkleChallenge.prototype.toObject>;
             predeterminedBalances?: ReturnType<typeof PredeterminedBalances.prototype.toObject>;
             approvalAmounts?: ReturnType<typeof ApprovalAmounts.prototype.toObject>;
@@ -2426,7 +2426,7 @@ export namespace bitbadges.bitbadgeschain.badges {
         }): IncomingApprovalCriteria {
             const message = new IncomingApprovalCriteria({});
             if (data.mustOwnBadges != null) {
-                message.mustOwnBadges = data.mustOwnBadges.map(item => dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges.fromObject(item));
+                message.mustOwnBadges = data.mustOwnBadges.map(item => dependency_4.badges.MustOwnBadges.fromObject(item));
             }
             if (data.merkleChallenge != null) {
                 message.merkleChallenge = MerkleChallenge.fromObject(data.merkleChallenge);
@@ -2450,7 +2450,7 @@ export namespace bitbadges.bitbadgeschain.badges {
         }
         toObject() {
             const data: {
-                mustOwnBadges?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges.prototype.toObject>[];
+                mustOwnBadges?: ReturnType<typeof dependency_4.badges.MustOwnBadges.prototype.toObject>[];
                 merkleChallenge?: ReturnType<typeof MerkleChallenge.prototype.toObject>;
                 predeterminedBalances?: ReturnType<typeof PredeterminedBalances.prototype.toObject>;
                 approvalAmounts?: ReturnType<typeof ApprovalAmounts.prototype.toObject>;
@@ -2459,7 +2459,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                 requireFromDoesNotEqualInitiatedBy?: boolean;
             } = {};
             if (this.mustOwnBadges != null) {
-                data.mustOwnBadges = this.mustOwnBadges.map((item: dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges) => item.toObject());
+                data.mustOwnBadges = this.mustOwnBadges.map((item: dependency_4.badges.MustOwnBadges) => item.toObject());
             }
             if (this.merkleChallenge != null) {
                 data.merkleChallenge = this.merkleChallenge.toObject();
@@ -2486,7 +2486,7 @@ export namespace bitbadges.bitbadgeschain.badges {
         serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
             const writer = w || new pb_1.BinaryWriter();
             if (this.mustOwnBadges.length)
-                writer.writeRepeatedMessage(1, this.mustOwnBadges, (item: dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges) => item.serialize(writer));
+                writer.writeRepeatedMessage(1, this.mustOwnBadges, (item: dependency_4.badges.MustOwnBadges) => item.serialize(writer));
             if (this.has_merkleChallenge)
                 writer.writeMessage(2, this.merkleChallenge, () => this.merkleChallenge.serialize(writer));
             if (this.has_predeterminedBalances)
@@ -2509,7 +2509,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                     break;
                 switch (reader.getFieldNumber()) {
                     case 1:
-                        reader.readMessage(message.mustOwnBadges, () => pb_1.Message.addToRepeatedWrapperField(message, 1, dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges.deserialize(reader), dependency_4.bitbadges.bitbadgeschain.badges.MustOwnBadges));
+                        reader.readMessage(message.mustOwnBadges, () => pb_1.Message.addToRepeatedWrapperField(message, 1, dependency_4.badges.MustOwnBadges.deserialize(reader), dependency_4.badges.MustOwnBadges));
                         break;
                     case 2:
                         reader.readMessage(message.merkleChallenge, () => message.merkleChallenge = MerkleChallenge.deserialize(reader));
@@ -2547,9 +2547,9 @@ export namespace bitbadges.bitbadgeschain.badges {
             fromMappingId?: string;
             toMappingId?: string;
             initiatedByMappingId?: string;
-            transferTimes?: dependency_4.bitbadges.bitbadgeschain.badges.UintRange[];
-            badgeIds?: dependency_4.bitbadges.bitbadgeschain.badges.UintRange[];
-            ownershipTimes?: dependency_4.bitbadges.bitbadgeschain.badges.UintRange[];
+            transferTimes?: dependency_4.badges.UintRange[];
+            badgeIds?: dependency_4.badges.UintRange[];
+            ownershipTimes?: dependency_4.badges.UintRange[];
             amountTrackerId?: string;
             challengeTrackerId?: string;
             uri?: string;
@@ -2617,21 +2617,21 @@ export namespace bitbadges.bitbadgeschain.badges {
             pb_1.Message.setField(this, 3, value);
         }
         get transferTimes() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.bitbadges.bitbadgeschain.badges.UintRange, 4) as dependency_4.bitbadges.bitbadgeschain.badges.UintRange[];
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.badges.UintRange, 4) as dependency_4.badges.UintRange[];
         }
-        set transferTimes(value: dependency_4.bitbadges.bitbadgeschain.badges.UintRange[]) {
+        set transferTimes(value: dependency_4.badges.UintRange[]) {
             pb_1.Message.setRepeatedWrapperField(this, 4, value);
         }
         get badgeIds() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.bitbadges.bitbadgeschain.badges.UintRange, 5) as dependency_4.bitbadges.bitbadgeschain.badges.UintRange[];
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.badges.UintRange, 5) as dependency_4.badges.UintRange[];
         }
-        set badgeIds(value: dependency_4.bitbadges.bitbadgeschain.badges.UintRange[]) {
+        set badgeIds(value: dependency_4.badges.UintRange[]) {
             pb_1.Message.setRepeatedWrapperField(this, 5, value);
         }
         get ownershipTimes() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.bitbadges.bitbadgeschain.badges.UintRange, 6) as dependency_4.bitbadges.bitbadgeschain.badges.UintRange[];
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.badges.UintRange, 6) as dependency_4.badges.UintRange[];
         }
-        set ownershipTimes(value: dependency_4.bitbadges.bitbadgeschain.badges.UintRange[]) {
+        set ownershipTimes(value: dependency_4.badges.UintRange[]) {
             pb_1.Message.setRepeatedWrapperField(this, 6, value);
         }
         get amountTrackerId() {
@@ -2677,9 +2677,9 @@ export namespace bitbadges.bitbadgeschain.badges {
             fromMappingId?: string;
             toMappingId?: string;
             initiatedByMappingId?: string;
-            transferTimes?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-            badgeIds?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-            ownershipTimes?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+            transferTimes?: ReturnType<typeof dependency_4.badges.UintRange.prototype.toObject>[];
+            badgeIds?: ReturnType<typeof dependency_4.badges.UintRange.prototype.toObject>[];
+            ownershipTimes?: ReturnType<typeof dependency_4.badges.UintRange.prototype.toObject>[];
             amountTrackerId?: string;
             challengeTrackerId?: string;
             uri?: string;
@@ -2698,13 +2698,13 @@ export namespace bitbadges.bitbadgeschain.badges {
                 message.initiatedByMappingId = data.initiatedByMappingId;
             }
             if (data.transferTimes != null) {
-                message.transferTimes = data.transferTimes.map(item => dependency_4.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
+                message.transferTimes = data.transferTimes.map(item => dependency_4.badges.UintRange.fromObject(item));
             }
             if (data.badgeIds != null) {
-                message.badgeIds = data.badgeIds.map(item => dependency_4.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
+                message.badgeIds = data.badgeIds.map(item => dependency_4.badges.UintRange.fromObject(item));
             }
             if (data.ownershipTimes != null) {
-                message.ownershipTimes = data.ownershipTimes.map(item => dependency_4.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
+                message.ownershipTimes = data.ownershipTimes.map(item => dependency_4.badges.UintRange.fromObject(item));
             }
             if (data.amountTrackerId != null) {
                 message.amountTrackerId = data.amountTrackerId;
@@ -2731,9 +2731,9 @@ export namespace bitbadges.bitbadgeschain.badges {
                 fromMappingId?: string;
                 toMappingId?: string;
                 initiatedByMappingId?: string;
-                transferTimes?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-                badgeIds?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
-                ownershipTimes?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+                transferTimes?: ReturnType<typeof dependency_4.badges.UintRange.prototype.toObject>[];
+                badgeIds?: ReturnType<typeof dependency_4.badges.UintRange.prototype.toObject>[];
+                ownershipTimes?: ReturnType<typeof dependency_4.badges.UintRange.prototype.toObject>[];
                 amountTrackerId?: string;
                 challengeTrackerId?: string;
                 uri?: string;
@@ -2751,13 +2751,13 @@ export namespace bitbadges.bitbadgeschain.badges {
                 data.initiatedByMappingId = this.initiatedByMappingId;
             }
             if (this.transferTimes != null) {
-                data.transferTimes = this.transferTimes.map((item: dependency_4.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
+                data.transferTimes = this.transferTimes.map((item: dependency_4.badges.UintRange) => item.toObject());
             }
             if (this.badgeIds != null) {
-                data.badgeIds = this.badgeIds.map((item: dependency_4.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
+                data.badgeIds = this.badgeIds.map((item: dependency_4.badges.UintRange) => item.toObject());
             }
             if (this.ownershipTimes != null) {
-                data.ownershipTimes = this.ownershipTimes.map((item: dependency_4.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
+                data.ownershipTimes = this.ownershipTimes.map((item: dependency_4.badges.UintRange) => item.toObject());
             }
             if (this.amountTrackerId != null) {
                 data.amountTrackerId = this.amountTrackerId;
@@ -2790,11 +2790,11 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (this.initiatedByMappingId.length)
                 writer.writeString(3, this.initiatedByMappingId);
             if (this.transferTimes.length)
-                writer.writeRepeatedMessage(4, this.transferTimes, (item: dependency_4.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
+                writer.writeRepeatedMessage(4, this.transferTimes, (item: dependency_4.badges.UintRange) => item.serialize(writer));
             if (this.badgeIds.length)
-                writer.writeRepeatedMessage(5, this.badgeIds, (item: dependency_4.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
+                writer.writeRepeatedMessage(5, this.badgeIds, (item: dependency_4.badges.UintRange) => item.serialize(writer));
             if (this.ownershipTimes.length)
-                writer.writeRepeatedMessage(6, this.ownershipTimes, (item: dependency_4.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
+                writer.writeRepeatedMessage(6, this.ownershipTimes, (item: dependency_4.badges.UintRange) => item.serialize(writer));
             if (this.amountTrackerId.length)
                 writer.writeString(7, this.amountTrackerId);
             if (this.challengeTrackerId.length)
@@ -2826,13 +2826,13 @@ export namespace bitbadges.bitbadgeschain.badges {
                         message.initiatedByMappingId = reader.readString();
                         break;
                     case 4:
-                        reader.readMessage(message.transferTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 4, dependency_4.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_4.bitbadges.bitbadgeschain.badges.UintRange));
+                        reader.readMessage(message.transferTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 4, dependency_4.badges.UintRange.deserialize(reader), dependency_4.badges.UintRange));
                         break;
                     case 5:
-                        reader.readMessage(message.badgeIds, () => pb_1.Message.addToRepeatedWrapperField(message, 5, dependency_4.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_4.bitbadges.bitbadgeschain.badges.UintRange));
+                        reader.readMessage(message.badgeIds, () => pb_1.Message.addToRepeatedWrapperField(message, 5, dependency_4.badges.UintRange.deserialize(reader), dependency_4.badges.UintRange));
                         break;
                     case 6:
-                        reader.readMessage(message.ownershipTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 6, dependency_4.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_4.bitbadges.bitbadgeschain.badges.UintRange));
+                        reader.readMessage(message.ownershipTimes, () => pb_1.Message.addToRepeatedWrapperField(message, 6, dependency_4.badges.UintRange.deserialize(reader), dependency_4.badges.UintRange));
                         break;
                     case 7:
                         message.amountTrackerId = reader.readString();
@@ -2982,7 +2982,7 @@ export namespace bitbadges.bitbadgeschain.badges {
         constructor(data?: any[] | {
             from?: string;
             toAddresses?: string[];
-            balances?: dependency_4.bitbadges.bitbadgeschain.badges.Balance[];
+            balances?: dependency_4.badges.Balance[];
             precalculateBalancesFromApproval?: ApprovalIdentifierDetails;
             merkleProofs?: MerkleProof[];
             memo?: string;
@@ -3031,9 +3031,9 @@ export namespace bitbadges.bitbadgeschain.badges {
             pb_1.Message.setField(this, 2, value);
         }
         get balances() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.bitbadges.bitbadgeschain.badges.Balance, 3) as dependency_4.bitbadges.bitbadgeschain.badges.Balance[];
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_4.badges.Balance, 3) as dependency_4.badges.Balance[];
         }
-        set balances(value: dependency_4.bitbadges.bitbadgeschain.badges.Balance[]) {
+        set balances(value: dependency_4.badges.Balance[]) {
             pb_1.Message.setRepeatedWrapperField(this, 3, value);
         }
         get precalculateBalancesFromApproval() {
@@ -3072,7 +3072,7 @@ export namespace bitbadges.bitbadgeschain.badges {
         static fromObject(data: {
             from?: string;
             toAddresses?: string[];
-            balances?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.Balance.prototype.toObject>[];
+            balances?: ReturnType<typeof dependency_4.badges.Balance.prototype.toObject>[];
             precalculateBalancesFromApproval?: ReturnType<typeof ApprovalIdentifierDetails.prototype.toObject>;
             merkleProofs?: ReturnType<typeof MerkleProof.prototype.toObject>[];
             memo?: string;
@@ -3087,7 +3087,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                 message.toAddresses = data.toAddresses;
             }
             if (data.balances != null) {
-                message.balances = data.balances.map(item => dependency_4.bitbadges.bitbadgeschain.badges.Balance.fromObject(item));
+                message.balances = data.balances.map(item => dependency_4.badges.Balance.fromObject(item));
             }
             if (data.precalculateBalancesFromApproval != null) {
                 message.precalculateBalancesFromApproval = ApprovalIdentifierDetails.fromObject(data.precalculateBalancesFromApproval);
@@ -3110,7 +3110,7 @@ export namespace bitbadges.bitbadgeschain.badges {
             const data: {
                 from?: string;
                 toAddresses?: string[];
-                balances?: ReturnType<typeof dependency_4.bitbadges.bitbadgeschain.badges.Balance.prototype.toObject>[];
+                balances?: ReturnType<typeof dependency_4.badges.Balance.prototype.toObject>[];
                 precalculateBalancesFromApproval?: ReturnType<typeof ApprovalIdentifierDetails.prototype.toObject>;
                 merkleProofs?: ReturnType<typeof MerkleProof.prototype.toObject>[];
                 memo?: string;
@@ -3124,7 +3124,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                 data.toAddresses = this.toAddresses;
             }
             if (this.balances != null) {
-                data.balances = this.balances.map((item: dependency_4.bitbadges.bitbadgeschain.badges.Balance) => item.toObject());
+                data.balances = this.balances.map((item: dependency_4.badges.Balance) => item.toObject());
             }
             if (this.precalculateBalancesFromApproval != null) {
                 data.precalculateBalancesFromApproval = this.precalculateBalancesFromApproval.toObject();
@@ -3152,7 +3152,7 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (this.toAddresses.length)
                 writer.writeRepeatedString(2, this.toAddresses);
             if (this.balances.length)
-                writer.writeRepeatedMessage(3, this.balances, (item: dependency_4.bitbadges.bitbadgeschain.badges.Balance) => item.serialize(writer));
+                writer.writeRepeatedMessage(3, this.balances, (item: dependency_4.badges.Balance) => item.serialize(writer));
             if (this.has_precalculateBalancesFromApproval)
                 writer.writeMessage(4, this.precalculateBalancesFromApproval, () => this.precalculateBalancesFromApproval.serialize(writer));
             if (this.merkleProofs.length)
@@ -3179,7 +3179,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                         pb_1.Message.addToRepeatedField(message, 2, reader.readString());
                         break;
                     case 3:
-                        reader.readMessage(message.balances, () => pb_1.Message.addToRepeatedWrapperField(message, 3, dependency_4.bitbadges.bitbadgeschain.badges.Balance.deserialize(reader), dependency_4.bitbadges.bitbadgeschain.badges.Balance));
+                        reader.readMessage(message.balances, () => pb_1.Message.addToRepeatedWrapperField(message, 3, dependency_4.badges.Balance.deserialize(reader), dependency_4.badges.Balance));
                         break;
                     case 4:
                         reader.readMessage(message.precalculateBalancesFromApproval, () => message.precalculateBalancesFromApproval = ApprovalIdentifierDetails.deserialize(reader));

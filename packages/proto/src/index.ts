@@ -42,7 +42,7 @@ export * from './transactions/messages/bitbadges/wasmx/msgExecuteContractCompat'
 export * from './proto/badges/query'
 export * as query from './proto/cosmos/auth/v1beta1/query'
 export * as auth from './proto/cosmos/auth/v1beta1/auth'
-export * from './proto/ethermint/crypto/v1/ethsecp256k1/keys'
+export * from './proto/ethermint/keys'
 
 //TODO: Don't export these directly so they don't show up in the docs
 export * from './eip712/messages/cosmos-sdk/base'

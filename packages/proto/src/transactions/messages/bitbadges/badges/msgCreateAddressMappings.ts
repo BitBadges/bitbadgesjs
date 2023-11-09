@@ -21,7 +21,7 @@ export interface MsgCreateAddressMappings {
 }
 
 export function convertFromProtoToMsgCreateAddressMappings(
-  protoMsg: badges.bitbadges.bitbadgeschain.badges.MsgCreateAddressMappings,
+  protoMsg: badges.badges.MsgCreateAddressMappings,
 ): MsgCreateAddressMappings {
   const msg = protoMsg.toObject() as MsgCreateAddressMappings;
 

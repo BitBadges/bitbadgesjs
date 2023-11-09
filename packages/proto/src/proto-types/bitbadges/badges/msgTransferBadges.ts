@@ -9,7 +9,7 @@ export function createMsgTransferBadges<T extends NumberType>(
   collectionId: T,
   transfers: Transfer<T>[],
 ) {
-  const message = new tx.bitbadges.bitbadgeschain.badges.MsgTransferBadges({
+  const message = new tx.badges.MsgTransferBadges({
     creator,
     collectionId: collectionId.toString(),
     transfers: getWrappedTransfers(transfers.map(x => convertTransfer(x, Stringify, true))),
@@ -17,6 +17,6 @@ export function createMsgTransferBadges<T extends NumberType>(
 
   return {
     message,
-    path: 'bitbadges.bitbadgeschain.badges.MsgTransferBadges',
+    path: 'badges.MsgTransferBadges',
   }
 }

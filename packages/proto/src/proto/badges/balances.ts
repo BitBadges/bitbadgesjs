@@ -8,7 +8,7 @@
 import * as dependency_1 from "./../gogoproto/gogo";
 import * as dependency_2 from "./params";
 import * as pb_1 from "google-protobuf";
-export namespace bitbadges.bitbadgeschain.badges {
+export namespace badges {
     export class UintRange extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {

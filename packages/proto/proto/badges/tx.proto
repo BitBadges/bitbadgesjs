@@ -1,5 +1,5 @@
 syntax = "proto3";
-package bitbadges.bitbadgeschain.badges;
+package badges;
 
 // this line is used by starport scaffolding # proto/tx/import
 import "badges/transfers.proto";
@@ -13,7 +13,7 @@ import "badges/timelines.proto";
 
 option go_package = "github.com/bitbadges/bitbadgeschain/x/badges/types";
 
-// Msg defines the Msg service.
+// // Msg defines the Msg service.
 // service Msg {
 //   rpc UpdateCollection      (MsgUpdateCollection) returns (MsgUpdateCollectionResponse);
 //   rpc CreateAddressMappings (MsgCreateAddressMappings) returns (MsgCreateAddressMappingsResponse);
