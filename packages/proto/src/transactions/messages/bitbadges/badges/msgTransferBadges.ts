@@ -43,7 +43,7 @@ export function convertMsgTransferBadges<T extends NumberType, U extends NumberT
 
 
 export function convertFromProtoToMsgTransferBadges(
-  protoMsg: badges.bitbadges.bitbadgeschain.badges.MsgTransferBadges,
+  protoMsg: badges.badges.MsgTransferBadges,
 ): MsgTransferBadges<bigint> {
   const msg = protoMsg.toObject() as MsgTransferBadges<string>;
 

@@ -2,7 +2,7 @@ import { Keccak } from 'sha3'
 import * as tx from '../../proto/cosmos/tx/v1beta1/tx'
 import * as signing from '../../proto/cosmos/tx/signing/v1beta1/signing'
 import * as coin from '../../proto/cosmos/base/v1beta1/coin'
-import * as eth from '../../proto/ethermint/crypto/v1/ethsecp256k1/keys'
+import * as eth from '../../proto/ethermint/keys'
 import * as secp from '../../proto/cosmos/crypto/secp256k1/keys'
 
 import { createAnyMessage, MessageGenerated } from '../../proto-types/utils'
@@ -67,10 +67,10 @@ export function createSignerInfo(
   } else {
     // NOTE: assume ethsecp256k1 by default because after mainnet is the only one that is going to be supported
     pubkey = {
-      message: new eth.ethermint.crypto.v1.ethsecp256k1.PubKey({
+      message: new eth.ethermint.PubKey({
         key: publicKey,
       }),
-      path: 'ethermint.crypto.v1.ethsecp256k1.PubKey',
+      path: 'ethermint.PubKey',
     }
   }
 

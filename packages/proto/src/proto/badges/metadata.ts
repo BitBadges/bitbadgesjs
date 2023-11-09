@@ -9,13 +9,13 @@ import * as dependency_1 from "./../google/protobuf/any";
 import * as dependency_2 from "./balances";
 import * as dependency_3 from "./../gogoproto/gogo";
 import * as pb_1 from "google-protobuf";
-export namespace bitbadges.bitbadgeschain.badges {
+export namespace badges {
     export class BadgeMetadata extends pb_1.Message {
         #one_of_decls: number[][] = [];
         constructor(data?: any[] | {
             uri?: string;
             customData?: string;
-            badgeIds?: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+            badgeIds?: dependency_2.badges.UintRange[];
         }) {
             super();
             pb_1.Message.initialize(this, Array.isArray(data) ? data : [], 0, -1, [3], this.#one_of_decls);
@@ -44,15 +44,15 @@ export namespace bitbadges.bitbadgeschain.badges {
             pb_1.Message.setField(this, 2, value);
         }
         get badgeIds() {
-            return pb_1.Message.getRepeatedWrapperField(this, dependency_2.bitbadges.bitbadgeschain.badges.UintRange, 3) as dependency_2.bitbadges.bitbadgeschain.badges.UintRange[];
+            return pb_1.Message.getRepeatedWrapperField(this, dependency_2.badges.UintRange, 3) as dependency_2.badges.UintRange[];
         }
-        set badgeIds(value: dependency_2.bitbadges.bitbadgeschain.badges.UintRange[]) {
+        set badgeIds(value: dependency_2.badges.UintRange[]) {
             pb_1.Message.setRepeatedWrapperField(this, 3, value);
         }
         static fromObject(data: {
             uri?: string;
             customData?: string;
-            badgeIds?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+            badgeIds?: ReturnType<typeof dependency_2.badges.UintRange.prototype.toObject>[];
         }): BadgeMetadata {
             const message = new BadgeMetadata({});
             if (data.uri != null) {
@@ -62,7 +62,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                 message.customData = data.customData;
             }
             if (data.badgeIds != null) {
-                message.badgeIds = data.badgeIds.map(item => dependency_2.bitbadges.bitbadgeschain.badges.UintRange.fromObject(item));
+                message.badgeIds = data.badgeIds.map(item => dependency_2.badges.UintRange.fromObject(item));
             }
             return message;
         }
@@ -70,7 +70,7 @@ export namespace bitbadges.bitbadgeschain.badges {
             const data: {
                 uri?: string;
                 customData?: string;
-                badgeIds?: ReturnType<typeof dependency_2.bitbadges.bitbadgeschain.badges.UintRange.prototype.toObject>[];
+                badgeIds?: ReturnType<typeof dependency_2.badges.UintRange.prototype.toObject>[];
             } = {};
             if (this.uri != null) {
                 data.uri = this.uri;
@@ -79,7 +79,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                 data.customData = this.customData;
             }
             if (this.badgeIds != null) {
-                data.badgeIds = this.badgeIds.map((item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.toObject());
+                data.badgeIds = this.badgeIds.map((item: dependency_2.badges.UintRange) => item.toObject());
             }
             return data;
         }
@@ -92,7 +92,7 @@ export namespace bitbadges.bitbadgeschain.badges {
             if (this.customData.length)
                 writer.writeString(2, this.customData);
             if (this.badgeIds.length)
-                writer.writeRepeatedMessage(3, this.badgeIds, (item: dependency_2.bitbadges.bitbadgeschain.badges.UintRange) => item.serialize(writer));
+                writer.writeRepeatedMessage(3, this.badgeIds, (item: dependency_2.badges.UintRange) => item.serialize(writer));
             if (!w)
                 return writer.getResultBuffer();
         }
@@ -109,7 +109,7 @@ export namespace bitbadges.bitbadgeschain.badges {
                         message.customData = reader.readString();
                         break;
                     case 3:
-                        reader.readMessage(message.badgeIds, () => pb_1.Message.addToRepeatedWrapperField(message, 3, dependency_2.bitbadges.bitbadgeschain.badges.UintRange.deserialize(reader), dependency_2.bitbadges.bitbadgeschain.badges.UintRange));
+                        reader.readMessage(message.badgeIds, () => pb_1.Message.addToRepeatedWrapperField(message, 3, dependency_2.badges.UintRange.deserialize(reader), dependency_2.badges.UintRange));
                         break;
                     default: reader.skipField();
                 }

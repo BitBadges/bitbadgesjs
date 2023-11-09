@@ -19,7 +19,7 @@ export function createMsgUpdateUserApprovals<T extends NumberType>(
   userPermissions: UserPermissions<T>,
 ) {
   const message =
-    new tx.bitbadges.bitbadgeschain.badges.MsgUpdateUserApprovals({
+    new tx.badges.MsgUpdateUserApprovals({
       creator,
       collectionId: collectionId.toString(),
       updateOutgoingApprovals,
@@ -36,6 +36,6 @@ export function createMsgUpdateUserApprovals<T extends NumberType>(
     })
   return {
     message,
-    path: 'bitbadges.bitbadgeschain.badges.MsgUpdateUserApprovals',
+    path: 'badges.MsgUpdateUserApprovals',
   }
 }
