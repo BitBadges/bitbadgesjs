@@ -6,7 +6,7 @@ const ExecuteContractCompatMsgValueType = [
 ]
 
 export const MSG_EXECUTE_CONTRACT_COMPAT_TYPES = {
-  MsgValue: ExecuteContractCompatMsgValueType,
+  "MsgExecuteContractCompat": ExecuteContractCompatMsgValueType,
 }
 
 export function createEIP712MsgExecuteContractCompat(

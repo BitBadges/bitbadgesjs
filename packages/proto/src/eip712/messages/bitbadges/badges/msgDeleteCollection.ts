@@ -6,7 +6,7 @@ const DeleteCollectionMsgValueType = [
 ]
 
 export const MSG_DELETE_COLLECTION_TYPES = {
-  MsgValue: DeleteCollectionMsgValueType,
+  MsgDeleteCollection: DeleteCollectionMsgValueType,
 }
 
 export function createEIP712MsgDeleteCollection<T extends NumberType>(

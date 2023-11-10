@@ -1,5 +1,5 @@
 export const MSG_DELEGATE_TYPES = {
-  MsgValue: [
+  MsgDelegate: [
     { name: 'delegator_address', type: 'string' },
     { name: 'validator_address', type: 'string' },
     { name: 'amount', type: 'TypeAmount' },
@@ -29,7 +29,7 @@ export function createEIP712MsgDelegate(
 }
 
 export const MSG_BEGIN_REDELEGATE_TYPES = {
-  MsgValue: [
+  MsgBeginRedelegate: [
     { name: 'delegator_address', type: 'string' },
     { name: 'validator_src_address', type: 'string' },
     { name: 'validator_dst_address', type: 'string' },
@@ -62,7 +62,7 @@ export function createEIP712MsgBeginRedelegate(
 }
 
 export const MSG_UNDELEGATE_TYPES = {
-  MsgValue: [
+  MsgUndelegate: [
     { name: 'delegator_address', type: 'string' },
     { name: 'validator_address', type: 'string' },
     { name: 'amount', type: 'TypeAmount' },
@@ -92,7 +92,7 @@ export function createEIP712MsgUndelegate(
 }
 
 export const MSG_WITHDRAW_DELEGATOR_REWARD_TYPES = {
-  MsgValue: [
+  MsgWithdrawDelegationReward: [
     { name: 'delegator_address', type: 'string' },
     { name: 'validator_address', type: 'string' },
   ],
@@ -120,7 +120,7 @@ export function createEIP712MsgWithdrawDelegatorReward(
 }
 
 export const MSG_WITHDRAW_VALIDATOR_COMMISSION_TYPES = {
-  MsgValue: [{ name: 'validator_address', type: 'string' }],
+  MsgWithdrawValidatorCommission: [{ name: 'validator_address', type: 'string' }],
 }
 
 export interface MsgWithdrawValidatorCommissionInterface {

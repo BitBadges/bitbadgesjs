@@ -9,7 +9,7 @@ export const MSG_EDIT_VALIDATOR_TYPES = {
     { name: 'security_contact', type: 'string' },
     { name: 'details', type: 'string' },
   ],
-  MsgValue: [
+  MsgEditValidator: [
     { name: 'description', type: 'TypeDescription' },
     { name: 'validator_address', type: 'string' },
     { name: 'commission_rate', type: 'string' },

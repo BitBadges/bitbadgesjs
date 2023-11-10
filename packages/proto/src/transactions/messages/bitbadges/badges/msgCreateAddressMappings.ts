@@ -46,7 +46,7 @@ export function createTxMsgCreateAddressMappings(
     fee.gas,
     sender.accountAddress,
   )
-  const types = generateTypes(MSG_CREATE_ADDRESS_MAPPING_TYPES)
+  const types = generateTypes(MSG_CREATE_ADDRESS_MAPPING_TYPES, ["MsgCreateAddressMappings"])
 
   const msg = createEIP712MsgCreateAddressMappings(
     params.creator,

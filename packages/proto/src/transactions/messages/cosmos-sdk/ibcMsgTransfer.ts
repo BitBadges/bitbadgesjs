@@ -46,7 +46,7 @@ export function createTxIBCMsgTransfer(
     fee.gas,
     sender.accountAddress,
   )
-  const types = generateTypes(IBC_MSG_TRANSFER_TYPES)
+  const types = generateTypes(IBC_MSG_TRANSFER_TYPES, ["MsgTransfer"])
 
   const msg = createEIP712IBCMsgTransfer(
     params.receiver,

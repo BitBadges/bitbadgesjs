@@ -1,5 +1,5 @@
 export const MSG_VOTE_TYPES = {
-  MsgValue: [
+  MsgVote: [
     { name: 'proposal_id', type: 'uint64' },
     { name: 'voter', type: 'string' },
     { name: 'option', type: 'int32' },

@@ -67,7 +67,7 @@ export function createTxMsgUpdateUserApprovals<T extends NumberType>(
     fee.gas,
     sender.accountAddress,
   )
-  const types = generateTypes(MSG_UPDATE_USER_APPROVED_TRANSFERS_TYPES)
+  const types = generateTypes(MSG_UPDATE_USER_APPROVED_TRANSFERS_TYPES, ["MsgUpdateUserApprovals"])
 
   const msg = createEIP712MsgUpdateUserApprovals(
     params.creator,

@@ -32,7 +32,7 @@ const MsgUpdateCollectionValueType = [
 ]
 
 export const MSG_UPDATE_COLLECTION_TYPES = {
-  MsgValue: MsgUpdateCollectionValueType,
+  "MsgUpdateCollection": MsgUpdateCollectionValueType,
   "CollectionPermissions": COLLECTIONS_PERMISSIONS_TYPES,
   "ManagerTimeline": MANAGER_TIMELINE_TYPES,
   "CollectionMetadataTimeline": COLLECTION_METADATA_TIMELINE_TYPES,

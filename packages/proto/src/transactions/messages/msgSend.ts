@@ -44,7 +44,7 @@ export function createTxMsgSend<T extends NumberType>(
     fee.gas,
     sender.accountAddress,
   )
-  const types = generateTypes(MSG_SEND_TYPES)
+  const types = generateTypes(MSG_SEND_TYPES, ['MsgSend'])
   const msg = createEIP712MsgSend(
     params.amount,
     params.denom,

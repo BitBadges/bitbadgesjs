@@ -69,7 +69,7 @@ export function createTxMsgTransferBadges<T extends NumberType>(
     fee.gas,
     sender.accountAddress,
   )
-  const types = generateTypes(MSG_TRANSFER_BADGES_TYPES)
+  const types = generateTypes(MSG_TRANSFER_BADGES_TYPES, ["MsgTransferBadges"])
 
   const msg = createEIP712MsgTransferBadges(
     params.creator,

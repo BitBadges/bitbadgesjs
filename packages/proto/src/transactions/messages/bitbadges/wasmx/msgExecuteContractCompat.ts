@@ -27,7 +27,7 @@ export function createTxMsgExecuteContractCompat(
     fee.gas,
     sender.accountAddress,
   )
-  const types = generateTypes(MSG_EXECUTE_CONTRACT_COMPAT_TYPES)
+  const types = generateTypes(MSG_EXECUTE_CONTRACT_COMPAT_TYPES, ["MsgExecuteContractCompat"])
 
   const msg = createEIP712MsgExecuteContractCompat(
     params.sender,

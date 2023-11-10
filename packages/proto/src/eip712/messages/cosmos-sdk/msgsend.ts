@@ -1,7 +1,7 @@
 import { NumberType } from "../../../"
 
 export const MSG_SEND_TYPES = {
-  MsgValue: [
+  "MsgSend": [
     { name: 'from_address', type: 'string' },
     { name: 'to_address', type: 'string' },
     { name: 'amount', type: 'TypeAmount[]' },

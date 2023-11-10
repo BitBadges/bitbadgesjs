@@ -58,7 +58,7 @@ export function createTxMsgDeleteCollection<T extends NumberType>(
     fee.gas,
     sender.accountAddress,
   )
-  const types = generateTypes(MSG_DELETE_COLLECTION_TYPES)
+  const types = generateTypes(MSG_DELETE_COLLECTION_TYPES, ["MsgDeleteCollection"])
 
   const msg = createEIP712MsgDeleteCollection(
     params.creator,

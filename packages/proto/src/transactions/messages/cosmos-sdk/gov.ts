@@ -36,7 +36,7 @@ export function createTxMsgVote(
     fee.gas,
     sender.accountAddress,
   )
-  const types = generateTypes(MSG_VOTE_TYPES)
+  const types = generateTypes(MSG_VOTE_TYPES, ["MsgVote"])
 
   const msg = createEIP712MsgVote(
     params.proposalId,

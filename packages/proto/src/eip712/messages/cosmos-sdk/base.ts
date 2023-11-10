@@ -1,97 +1,111 @@
 export function createEIP712(types: object, message: object, domain?: object) {
-    return {
-        types,
-        primaryType: 'Tx',
-        domain,
-        message,
-    }
+  return {
+    types,
+    primaryType: 'Tx',
+    domain,
+    message,
+  }
 }
 
 export function generateMessageWithMultipleTransactions(
-    accountNumber: string,
-    sequence: string,
-    chainCosmosId: string,
-    memo: string,
-    fee: object,
-    msgs: object[],
+  accountNumber: string,
+  sequence: string,
+  chainCosmosId: string,
+  memo: string,
+  fee: object,
+  msgs: object[],
 ) {
-    return {
-        account_number: accountNumber,
-        chain_id: chainCosmosId,
-        fee,
-        memo,
-        msgs,
-        sequence,
-    }
+  const tx: any = {
+    account_number: accountNumber,
+    chain_id: chainCosmosId,
+    fee,
+    memo,
+    sequence,
+
+  }
+
+  for (let i = 0; i < msgs.length; i++) {
+    tx['msg' + i] = msgs[i]
+  }
+
+  return tx
 }
 
 export function generateMessage(
-    accountNumber: string,
-    sequence: string,
-    chainCosmosId: string,
-    memo: string,
-    fee: object,
-    msg: object,
+  accountNumber: string,
+  sequence: string,
+  chainCosmosId: string,
+  memo: string,
+  fee: object,
+  msg: object,
 ) {
-    return generateMessageWithMultipleTransactions(
-        accountNumber,
-        sequence,
-        chainCosmosId,
-        memo,
-        fee,
-        [msg],
-    )
+  return generateMessageWithMultipleTransactions(
+    accountNumber,
+    sequence,
+    chainCosmosId,
+    memo,
+    fee,
+    [msg],
+  )
 }
 
-export function generateTypes(msgValues: object) {
-    const types = {
-        EIP712Domain: [
-            { name: 'name', type: 'string' },
-            { name: 'version', type: 'string' },
-            { name: 'chainId', type: 'uint256' },
-            { name: 'verifyingContract', type: 'address' },
-            { name: 'salt', type: 'bytes32' },
-        ],
-        Tx: [
-            { name: 'account_number', type: 'string' },
-            { name: 'chain_id', type: 'string' },
-            { name: 'fee', type: 'Fee' },
-            { name: 'memo', type: 'string' },
-            { name: 'msgs', type: 'Msg[]' },
-            { name: 'sequence', type: 'string' },
-        ],
-        Fee: [
-            { name: 'feePayer', type: 'string' },
-            { name: 'amount', type: 'Coin[]' },
-            { name: 'gas', type: 'string' },
-        ],
-        Coin: [
-            { name: 'denom', type: 'string' },
-            { name: 'amount', type: 'string' },
-        ],
-        Msg: [
-            { name: 'type', type: 'string' },
-            { name: 'value', type: 'MsgValue' },
-        ],
-    }
-    Object.assign(types, msgValues)
-    return types
+export function generateTypes(msgValues: object, msgTypes: string[]) {
+
+  const msgTypeDefs = [];
+  const msgValueTypes: any = {};
+  for (let i = 0; i < msgTypes.length; i++) {
+    msgTypeDefs.push({ name: 'msg' + i, type: "MsgValue" + i });
+    msgValueTypes["MsgValue" + i] = [
+      { name: 'type', type: 'string' },
+      { name: 'value', type: msgTypes[i] },
+    ]
+  }
+
+  const types = {
+    EIP712Domain: [
+      { name: 'name', type: 'string' },
+      { name: 'version', type: 'string' },
+      { name: 'chainId', type: 'uint256' },
+      { name: 'verifyingContract', type: 'address' },
+      { name: 'salt', type: 'bytes32' },
+    ],
+    Tx: [
+      { name: 'account_number', type: 'string' },
+      { name: 'chain_id', type: 'string' },
+      { name: 'fee', type: 'Fee' },
+      { name: 'memo', type: 'string' },
+      { name: 'sequence', type: 'string' },
+      ...msgTypeDefs,
+    ],
+    Fee: [
+      { name: 'feePayer', type: 'string' },
+      { name: 'amount', type: 'Coin[]' },
+      { name: 'gas', type: 'string' },
+    ],
+    Coin: [
+      { name: 'denom', type: 'string' },
+      { name: 'amount', type: 'string' },
+    ],
+    ...msgValueTypes,
+  }
+  Object.assign(types, msgValues)
+  return types
 }
 
 export function generateFee(
-    amount: string,
-    denom: string,
-    gas: string,
-    feePayer: string,
+  amount: string,
+  denom: string,
+  gas: string,
+  feePayer: string,
 ) {
-    return {
-        amount: [
-            {
-                amount,
-                denom,
-            },
-        ],
-        gas,
-        feePayer,
-    }
+  return {
+    amount: [
+      {
+        amount,
+        denom,
+      },
+    ],
+    gas,
+    feePayer,
+  }
 }

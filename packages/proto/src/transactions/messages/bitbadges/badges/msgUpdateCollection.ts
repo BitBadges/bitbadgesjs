@@ -159,7 +159,7 @@ export function createTxMsgUpdateCollection<T extends NumberType>(
     fee.gas,
     sender.accountAddress,
   )
-  const types = generateTypes(MSG_UPDATE_COLLECTION_TYPES)
+  const types = generateTypes(MSG_UPDATE_COLLECTION_TYPES, ["MsgUpdateCollection"])
 
   const msg = createEIP712MsgUpdateCollection(
     params.creator,

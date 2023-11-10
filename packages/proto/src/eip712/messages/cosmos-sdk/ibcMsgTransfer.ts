@@ -1,5 +1,5 @@
 export const IBC_MSG_TRANSFER_TYPES = {
-  MsgValue: [
+  MsgTransfer: [
     { name: 'source_port', type: 'string' },
     { name: 'source_channel', type: 'string' },
     { name: 'token', type: 'TypeToken' },

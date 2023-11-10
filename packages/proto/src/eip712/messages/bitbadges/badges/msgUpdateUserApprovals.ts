@@ -17,7 +17,7 @@ const MsgUpdateUserApprovalsValueType = [
 ]
 
 export const MSG_UPDATE_USER_APPROVED_TRANSFERS_TYPES = {
-  MsgValue: MsgUpdateUserApprovalsValueType,
+  "MsgUpdateUserApprovals": MsgUpdateUserApprovalsValueType,
   "UserPermissions": USER_PERMISSIONS_TYPES,
   "UserOutgoingApproval": USER_APPROVED_OUTGOING_TRANSFER_TYPES,
   "UserIncomingApproval": USER_APPROVED_INCOMING_TRANSFER_TYPES,

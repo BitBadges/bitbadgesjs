@@ -42,7 +42,7 @@ export function createTxMsgEditValidator(
     fee.gas,
     sender.accountAddress,
   )
-  const types = generateTypes(MSG_EDIT_VALIDATOR_TYPES)
+  const types = generateTypes(MSG_EDIT_VALIDATOR_TYPES, ["MsgEditValidator"])
   const msg = createEIP712MsgEditValidator(
     params.moniker,
     params.identity,

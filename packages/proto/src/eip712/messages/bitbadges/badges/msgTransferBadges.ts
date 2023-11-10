@@ -43,7 +43,7 @@ const PRECALCULATION_DETAILS_TYPES = [
 
 
 export const MSG_TRANSFER_BADGES_TYPES = {
-  MsgValue: MsgTransferBadgesValueType,
+  MsgTransferBadges: MsgTransferBadgesValueType,
   UintRange: UINT_RANGE_TYPES,
   Balance: BALANCE_TYPES,
   Transfer: TRANSFERS_TYPES,

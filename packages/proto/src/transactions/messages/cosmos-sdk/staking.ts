@@ -53,7 +53,7 @@ export function createTxMsgDelegate(
     fee.gas,
     sender.accountAddress,
   )
-  const types = generateTypes(MSG_DELEGATE_TYPES)
+  const types = generateTypes(MSG_DELEGATE_TYPES, ['MsgDelegate'])
   const msg = createEIP712MsgDelegate(
     sender.accountAddress,
     params.validatorAddress,
@@ -123,7 +123,7 @@ export function createTxMsgBeginRedelegate(
     fee.gas,
     sender.accountAddress,
   )
-  const types = generateTypes(MSG_BEGIN_REDELEGATE_TYPES)
+  const types = generateTypes(MSG_BEGIN_REDELEGATE_TYPES, ["MsgBeginRedelegate"])
   const msg = createEIP712MsgBeginRedelegate(
     sender.accountAddress,
     params.validatorSrcAddress,
@@ -194,7 +194,7 @@ export function createTxMsgUndelegate(
     fee.gas,
     sender.accountAddress,
   )
-  const types = generateTypes(MSG_UNDELEGATE_TYPES)
+  const types = generateTypes(MSG_UNDELEGATE_TYPES, ['MsgUndelegate'])
   const msg = createEIP712MsgUndelegate(
     sender.accountAddress,
     params.validatorAddress,
@@ -261,7 +261,7 @@ export function createTxMsgWithdrawDelegatorReward(
     fee.gas,
     sender.accountAddress,
   )
-  const types = generateTypes(MSG_WITHDRAW_DELEGATOR_REWARD_TYPES)
+  const types = generateTypes(MSG_WITHDRAW_DELEGATOR_REWARD_TYPES, ["MsgWithdrawDelegatorReward"])
   const msg = createEIP712MsgWithdrawDelegatorReward(
     sender.accountAddress,
     params.validatorAddress,
@@ -325,7 +325,7 @@ export function createTxMsgMultipleWithdrawDelegatorReward(
     fee.gas,
     sender.accountAddress,
   )
-  const types = generateTypes(MSG_WITHDRAW_DELEGATOR_REWARD_TYPES)
+  const types = generateTypes(MSG_WITHDRAW_DELEGATOR_REWARD_TYPES, ["MsgWithdrawDelegatorReward"])
   // EIP712
   const msgs: MsgWithdrawDelegatorRewardInterface[] = []
   // Cosmos
@@ -394,7 +394,7 @@ export function createTxMsgWithdrawValidatorCommission(
     fee.gas,
     sender.accountAddress,
   )
-  const types = generateTypes(MSG_WITHDRAW_VALIDATOR_COMMISSION_TYPES)
+  const types = generateTypes(MSG_WITHDRAW_VALIDATOR_COMMISSION_TYPES, ["MsgWithdrawValidatorCommission"])
   const msg = createEIP712MsgWithdrawValidatorCommission(params.validatorAddress)
   const messages = generateMessage(
     sender.accountNumber.toString(),

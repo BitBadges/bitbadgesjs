@@ -6,7 +6,7 @@ const CreateAddressMappingsMsgValueType = [
 ]
 
 export const MSG_CREATE_ADDRESS_MAPPING_TYPES = {
-  MsgValue: CreateAddressMappingsMsgValueType,
+  MsgCreateAddressMappings: CreateAddressMappingsMsgValueType,
   AddressMapping: [
     { name: 'mappingId', type: 'string' },
     { name: 'addresses', type: 'string[]' },
