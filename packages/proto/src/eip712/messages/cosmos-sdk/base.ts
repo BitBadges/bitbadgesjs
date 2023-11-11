@@ -78,7 +78,7 @@ export function generateTypes(msgValues: object, msgTypes: string[]) {
       ...msgTypeDefs,
     ],
     Fee: [
-      { name: 'feePayer', type: 'string' },
+      // { name: 'feePayer', type: 'string' }, //No longer needed with non-legacy EIP712
       { name: 'amount', type: 'Coin[]' },
       { name: 'gas', type: 'string' },
     ],
