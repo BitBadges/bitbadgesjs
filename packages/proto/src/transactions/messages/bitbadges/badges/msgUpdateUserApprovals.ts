@@ -1,10 +1,8 @@
-import * as badges from '../../../../proto/badges/tx'
+import * as badges from '../../../../proto/badges/tx_pb'
 
-import { generateFee, generateTypes, MSG_UPDATE_USER_APPROVED_TRANSFERS_TYPES, generateMessage, createEIP712, createEIP712MsgUpdateUserApprovals } from "../../../.."
-import { createTransaction } from "../../transaction"
-import { Chain, Sender, Fee, SupportedChain } from "../../common"
-import { getDefaultDomainWithChainId } from "../../domain"
 import { NumberType, UserIncomingApproval, UserOutgoingApproval, UserPermissions, convertUserIncomingApproval, convertUserOutgoingApproval, convertUserPermissions, createMsgUpdateUserApprovals as protoMsgUpdateUserApprovals } from '../../../..'
+import { createTransactionPayload } from '../../base'
+import { Chain, Fee, Sender } from "../../common"
 
 export interface MsgUpdateUserApprovals<T extends NumberType> {
   creator: string
@@ -35,9 +33,9 @@ export function convertMsgUpdateUserApprovals<T extends NumberType, U extends Nu
 }
 
 export function convertFromProtoToMsgUpdateUserApprovals(
-  protoMsg: badges.badges.MsgUpdateUserApprovals,
+  protoMsg: badges.MsgUpdateUserApprovals,
 ): MsgUpdateUserApprovals<bigint> {
-  const msg = protoMsg.toObject() as MsgUpdateUserApprovals<string>
+  const msg = (protoMsg.toJson({ emitDefaultValues: true }) as any) as MsgUpdateUserApprovals<string>
 
   return {
     ...msg,
@@ -57,52 +55,8 @@ export function createTxMsgUpdateUserApprovals<T extends NumberType>(
   sender: Sender,
   fee: Fee,
   memo: string,
-  params: MsgUpdateUserApprovals<T>,
-  domain?: object,
+  params: MsgUpdateUserApprovals<T>
 ) {
-  // EIP712
-  const feeObject = generateFee(
-    fee.amount,
-    fee.denom,
-    fee.gas,
-    sender.accountAddress,
-  )
-  const types = generateTypes(MSG_UPDATE_USER_APPROVED_TRANSFERS_TYPES, ["MsgUpdateUserApprovals"])
-
-  const msg = createEIP712MsgUpdateUserApprovals(
-    params.creator,
-    params.collectionId,
-    params.updateOutgoingApprovals ?? false,
-    params.outgoingApprovals ?? [],
-    params.updateIncomingApprovals ?? false,
-    params.incomingApprovals ?? [],
-    params.updateAutoApproveSelfInitiatedOutgoingTransfers ?? false,
-    params.autoApproveSelfInitiatedOutgoingTransfers ?? false,
-    params.updateAutoApproveSelfInitiatedIncomingTransfers ?? false,
-    params.autoApproveSelfInitiatedIncomingTransfers ?? false,
-    params.updateUserPermissions ?? false,
-    params.userPermissions ?? {
-      canUpdateIncomingApprovals: [],
-      canUpdateOutgoingApprovals: [],
-      canUpdateAutoApproveSelfInitiatedIncomingTransfers: [],
-      canUpdateAutoApproveSelfInitiatedOutgoingTransfers: [],
-    },
-  )
-  const messages = generateMessage(
-    sender.accountNumber.toString(),
-    sender.sequence.toString(),
-    chain.cosmosChainId,
-    memo,
-    feeObject,
-    msg,
-  )
-  let domainObj = domain
-  if (!domain) {
-    domainObj = getDefaultDomainWithChainId(chain.chainId)
-  }
-  const eipToSign = createEIP712(types, messages, domainObj)
-
-  // Cosmos
   const msgCosmos = protoMsgUpdateUserApprovals(
     params.creator,
     params.collectionId,
@@ -122,22 +76,5 @@ export function createTxMsgUpdateUserApprovals<T extends NumberType>(
       canUpdateAutoApproveSelfInitiatedOutgoingTransfers: [],
     },
   )
-  const tx = createTransaction(
-    msgCosmos,
-    memo,
-    fee.amount,
-    fee.denom,
-    parseInt(fee.gas, 10),
-    chain.chain === SupportedChain.ETH ? 'ethsecp256' : 'secp256k1',
-    sender.pubkey,
-    sender.sequence,
-    sender.accountNumber,
-    chain.cosmosChainId,
-  )
-
-  return {
-    signDirect: tx.signDirect,
-    legacyAmino: tx.legacyAmino,
-    eipToSign,
-  }
+  return createTransactionPayload({ chain, sender, fee, memo, }, msgCosmos)
 }

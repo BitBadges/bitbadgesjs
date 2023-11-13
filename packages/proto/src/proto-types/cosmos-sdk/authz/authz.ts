@@ -1,7 +1,6 @@
-import * as authz from '../../../proto/cosmos/authz/v1beta1/tx'
-import * as authzUtils from '../../../proto/cosmos/authz/v1beta1/authz'
+import * as authz from '../../../proto/cosmos/authz/v1beta1/tx_pb'
+import * as authzUtils from '../../../proto/cosmos/authz/v1beta1/authz_pb'
 import { createAnyMessage, MessageGenerated } from '../../utils'
-import * as google from '../../../proto/google/protobuf/timestamp'
 
 export function createMsgGrant(
   granter: string,
@@ -9,15 +8,15 @@ export function createMsgGrant(
   grantMessage: MessageGenerated,
   seconds: number,
 ) {
-  const msg = new authz.cosmos.authz.v1beta1.MsgGrant({
+  const msg = new authz.MsgGrant({
     granter,
     grantee,
-    grant: new authzUtils.cosmos.authz.v1beta1.Grant({
+    grant: new authzUtils.Grant({
       authorization: createAnyMessage(grantMessage),
-      expiration: new google.google.protobuf.Timestamp({
-        seconds,
+      expiration: {
+        seconds: BigInt(seconds),
         nanos: 0,
-      }),
+      }
     }),
   })
   return {
@@ -36,10 +35,10 @@ export function createMsgRevoke(
   grantee: string,
   type: string | RevokeMessages,
 ) {
-  const msg = new authz.cosmos.authz.v1beta1.MsgRevoke({
+  const msg = new authz.MsgRevoke({
     granter,
     grantee,
-    msg_type_url: type,
+    msgTypeUrl: type,
   })
   return {
     message: msg,

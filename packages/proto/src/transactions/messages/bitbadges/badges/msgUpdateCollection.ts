@@ -1,10 +1,8 @@
-import * as badges from '../../../../proto/badges/tx'
+import * as badges from '../../../../proto/badges/tx_pb'
 
 import { BadgeMetadataTimeline, Balance, CollectionApproval, CollectionMetadataTimeline, CollectionPermissions, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, NumberType, OffChainBalancesMetadataTimeline, StandardsTimeline, UserIncomingApproval, UserOutgoingApproval, UserPermissions, convertBadgeMetadataTimeline, convertBalance, convertCollectionApproval, convertCollectionMetadataTimeline, convertCollectionPermissions, convertCustomDataTimeline, convertIsArchivedTimeline, convertManagerTimeline, convertOffChainBalancesMetadataTimeline, convertStandardsTimeline, convertUserIncomingApproval, convertUserOutgoingApproval, convertUserPermissions, createMsgUpdateCollection as protoMsgUpdateCollection } from '../../../../'
-import { MSG_UPDATE_COLLECTION_TYPES, createEIP712, createEIP712MsgUpdateCollection, generateFee, generateMessage, generateTypes } from "../../../../"
-import { createTransaction } from "../../transaction"
-import { Chain, Fee, Sender, SupportedChain } from "../../common"
-import { getDefaultDomainWithChainId } from "../../domain"
+import { createTransactionPayload } from '../../base'
+import { Chain, Fee, Sender } from "../../common"
 
 /**
  * MsgUpdateCollection is a universal transaction that can be used to create / update any collection. It is only executable by the manager.
@@ -107,9 +105,9 @@ export function convertMsgUpdateCollection<T extends NumberType, U extends Numbe
 
 
 export function convertFromProtoToMsgUpdateCollection(
-  protoMsg: badges.badges.MsgUpdateCollection,
+  protoMsg: badges.MsgUpdateCollection,
 ): MsgUpdateCollection<bigint> {
-  const msg = protoMsg.toObject() as MsgUpdateCollection<string>;
+  const msg = (protoMsg.toJson({emitDefaultValues: true}) as any) as MsgUpdateCollection<string>;
 
   return {
     ...msg,
@@ -150,73 +148,7 @@ export function createTxMsgUpdateCollection<T extends NumberType>(
   fee: Fee,
   memo: string,
   params: MsgUpdateCollection<T>,
-  domain?: object,
 ) {
-  // EIP712
-  const feeObject = generateFee(
-    fee.amount,
-    fee.denom,
-    fee.gas,
-    sender.accountAddress,
-  )
-  const types = generateTypes(MSG_UPDATE_COLLECTION_TYPES, ["MsgUpdateCollection"])
-
-  const msg = createEIP712MsgUpdateCollection(
-    params.creator,
-    params.collectionId,
-    params.balancesType ?? 'Standard',
-    params.defaultOutgoingApprovals ?? [],
-    params.defaultIncomingApprovals ?? [],
-    params.defaultAutoApproveSelfInitiatedOutgoingTransfers ?? false,
-    params.defaultAutoApproveSelfInitiatedIncomingTransfers ?? false,
-    params.defaultUserPermissions ?? { canUpdateIncomingApprovals: [], canUpdateOutgoingApprovals: [], canUpdateAutoApproveSelfInitiatedIncomingTransfers: [], canUpdateAutoApproveSelfInitiatedOutgoingTransfers: [] },
-    params.badgesToCreate ?? [],
-    params.updateCollectionPermissions ?? false,
-    params.collectionPermissions ?? {
-      canArchiveCollection: [],
-      canCreateMoreBadges: [],
-      canDeleteCollection: [],
-      canUpdateBadgeMetadata: [],
-      canUpdateCollectionApprovals: [],
-      canUpdateCollectionMetadata: [],
-      canUpdateCustomData: [],
-      canUpdateManager: [],
-      canUpdateOffChainBalancesMetadata: [],
-      canUpdateStandards: [],
-    },
-    params.updateManagerTimeline ?? false,
-    params.managerTimeline ?? [],
-    params.updateCollectionMetadataTimeline ?? false,
-    params.collectionMetadataTimeline ?? [],
-    params.updateBadgeMetadataTimeline ?? false,
-    params.badgeMetadataTimeline ?? [],
-    params.updateOffChainBalancesMetadataTimeline ?? false,
-    params.offChainBalancesMetadataTimeline ?? [],
-    params.updateCustomDataTimeline ?? false,
-    params.customDataTimeline ?? [],
-    params.updateCollectionApprovals ?? false,
-    params.collectionApprovals ?? [],
-    params.updateStandardsTimeline ?? false,
-    params.standardsTimeline ?? [],
-    params.updateIsArchivedTimeline ?? false,
-    params.isArchivedTimeline ?? []
-  );
-
-  const messages = generateMessage(
-    sender.accountNumber.toString(),
-    sender.sequence.toString(),
-    chain.cosmosChainId,
-    memo,
-    feeObject,
-    msg,
-  )
-  let domainObj = domain
-  if (!domain) {
-    domainObj = getDefaultDomainWithChainId(chain.chainId)
-  }
-  const eipToSign = createEIP712(types, messages, domainObj)
-
-  // Cosmos
   const msgCosmos = protoMsgUpdateCollection(
     params.creator,
     params.collectionId,
@@ -257,22 +189,5 @@ export function createTxMsgUpdateCollection<T extends NumberType>(
     params.updateIsArchivedTimeline ?? false,
     params.isArchivedTimeline ?? []
   )
-  const tx = createTransaction(
-    msgCosmos,
-    memo,
-    fee.amount,
-    fee.denom,
-    parseInt(fee.gas, 10),
-    chain.chain === SupportedChain.ETH ? 'ethsecp256' : 'secp256k1',
-    sender.pubkey,
-    sender.sequence,
-    sender.accountNumber,
-    chain.cosmosChainId,
-  )
-
-  return {
-    signDirect: tx.signDirect,
-    legacyAmino: tx.legacyAmino,
-    eipToSign,
-  }
+  return createTransactionPayload({ chain, sender, fee, memo, }, msgCosmos)
 }

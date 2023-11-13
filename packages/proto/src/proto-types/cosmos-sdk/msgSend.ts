@@ -1,6 +1,6 @@
-import { NumberType } from '../bitbadges/badges/string-numbers'
-import * as bank from '../../proto/cosmos/bank/v1beta1/tx'
-import * as coin from '../../proto/cosmos/base/v1beta1/coin'
+import { NumberType } from '../badges/string-numbers'
+import * as bank from '../../proto/cosmos/bank/v1beta1/tx_pb'
+import * as coin from '../../proto/cosmos/base/v1beta1/coin_pb'
 
 export function createMsgSend(
   fromAddress: string,
@@ -8,16 +8,17 @@ export function createMsgSend(
   amount: NumberType,
   denom: string,
 ) {
-  const value = new coin.cosmos.base.v1beta1.Coin({
+  const value = new coin.Coin({
     denom,
     amount: amount.toString(),
   })
 
-  const message = new bank.cosmos.bank.v1beta1.MsgSend({
-    from_address: fromAddress,
-    to_address: toAddress,
+  const message = new bank.MsgSend({
+    fromAddress: fromAddress,
+    toAddress: toAddress,
     amount: [value],
   })
+
   return {
     message,
     path: 'cosmos.bank.v1beta1.MsgSend',

@@ -1,11 +1,9 @@
 
 import { AddressMapping, createMsgCreateAddressMappings as protoMsgCreateAddressMappings } from "../../../../";
-import { MSG_CREATE_ADDRESS_MAPPING_TYPES, createEIP712, createEIP712MsgCreateAddressMappings, generateFee, generateMessage, generateTypes } from "../../../../"
-import { createTransaction } from "../../transaction"
-import { Chain, Fee, Sender, SupportedChain } from "../../common"
-import { getDefaultDomainWithChainId } from "../../domain"
+import { Chain, Fee, Sender } from "../../common";
 
-import * as badges from '../../../../proto/badges/tx'
+import * as badges from '../../../../proto/badges/tx_pb';
+import { createTransactionPayload } from "../../base";
 
 /**
  * MsgCreateAddressMappings defines a CreateAddressMappings message.
@@ -21,9 +19,9 @@ export interface MsgCreateAddressMappings {
 }
 
 export function convertFromProtoToMsgCreateAddressMappings(
-  protoMsg: badges.badges.MsgCreateAddressMappings,
+  protoMsg: badges.MsgCreateAddressMappings,
 ): MsgCreateAddressMappings {
-  const msg = protoMsg.toObject() as MsgCreateAddressMappings;
+  const msg = (protoMsg.toJson({ emitDefaultValues: true }) as any) as MsgCreateAddressMappings;
 
   return {
     creator: msg.creator,
@@ -36,57 +34,12 @@ export function createTxMsgCreateAddressMappings(
   sender: Sender,
   fee: Fee,
   memo: string,
-  params: MsgCreateAddressMappings,
-  domain?: object,
+  params: MsgCreateAddressMappings
 ) {
-  // EIP712
-  const feeObject = generateFee(
-    fee.amount,
-    fee.denom,
-    fee.gas,
-    sender.accountAddress,
-  )
-  const types = generateTypes(MSG_CREATE_ADDRESS_MAPPING_TYPES, ["MsgCreateAddressMappings"])
-
-  const msg = createEIP712MsgCreateAddressMappings(
-    params.creator,
-    params.addressMappings,
-  )
-  const messages = generateMessage(
-    sender.accountNumber.toString(),
-    sender.sequence.toString(),
-    chain.cosmosChainId,
-    memo,
-    feeObject,
-    msg,
-  )
-  let domainObj = domain;
-  if (!domain) {
-    domainObj = getDefaultDomainWithChainId(chain.chainId);
-  }
-  const eipToSign = createEIP712(types, messages, domainObj);
-
   // Cosmos
   const msgCosmos = protoMsgCreateAddressMappings(
     params.creator,
     params.addressMappings,
   )
-  const tx = createTransaction(
-    msgCosmos,
-    memo,
-    fee.amount,
-    fee.denom,
-    parseInt(fee.gas, 10),
-    chain.chain === SupportedChain.ETH ? 'ethsecp256' : 'secp256k1',
-    sender.pubkey,
-    sender.sequence,
-    sender.accountNumber,
-    chain.cosmosChainId,
-  )
-
-  return {
-    signDirect: tx.signDirect,
-    legacyAmino: tx.legacyAmino,
-    eipToSign,
-  }
+  return createTransactionPayload({ chain, sender, fee, memo, }, msgCosmos)
 }

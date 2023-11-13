@@ -1,10 +1,8 @@
-import * as badges from '../../../../proto/badges/tx'
+import * as badges from '../../../../proto/badges/tx_pb'
 
 import { NumberType, createMsgDeleteCollection as protoMsgDeleteCollection } from '../../../../'
-import { MSG_DELETE_COLLECTION_TYPES, createEIP712, createEIP712MsgDeleteCollection, generateFee, generateMessage, generateTypes } from "../../../../"
-import { createTransaction } from "../../transaction"
-import { Chain, Fee, Sender, SupportedChain } from "../../common"
-import { getDefaultDomainWithChainId } from "../../domain"
+import { createTransactionPayload } from '../../base'
+import { Chain, Fee, Sender } from "../../common"
 
 /**
  * MsgDeleteCollection represents the message for deleting a collection. Once deleted, the collection cannot be recovered.
@@ -33,9 +31,9 @@ export function convertMsgDeleteCollection<T extends NumberType, U extends Numbe
 }
 
 export function convertFromProtoToMsgDeleteCollection(
-  protoMsg: badges.badges.MsgDeleteCollection,
+  protoMsg: badges.MsgDeleteCollection,
 ): MsgDeleteCollection<bigint> {
-  const msg = protoMsg.toObject() as MsgDeleteCollection<string>;
+  const msg = (protoMsg.toJson({ emitDefaultValues: true }) as any) as MsgDeleteCollection<string>;
 
   return {
     creator: msg.creator,
@@ -48,57 +46,12 @@ export function createTxMsgDeleteCollection<T extends NumberType>(
   sender: Sender,
   fee: Fee,
   memo: string,
-  params: MsgDeleteCollection<T>,
-  domain?: object,
+  params: MsgDeleteCollection<T>
 ) {
-  // EIP712
-  const feeObject = generateFee(
-    fee.amount,
-    fee.denom,
-    fee.gas,
-    sender.accountAddress,
-  )
-  const types = generateTypes(MSG_DELETE_COLLECTION_TYPES, ["MsgDeleteCollection"])
-
-  const msg = createEIP712MsgDeleteCollection(
-    params.creator,
-    params.collectionId,
-  )
-  const messages = generateMessage(
-    sender.accountNumber.toString(),
-    sender.sequence.toString(),
-    chain.cosmosChainId,
-    memo,
-    feeObject,
-    msg,
-  )
-  let domainObj = domain
-  if (!domain) {
-    domainObj = getDefaultDomainWithChainId(chain.chainId)
-  }
-  const eipToSign = createEIP712(types, messages, domainObj)
-
-  // Cosmos
   const msgCosmos = protoMsgDeleteCollection(
     params.creator,
     params.collectionId,
   )
-  const tx = createTransaction(
-    msgCosmos,
-    memo,
-    fee.amount,
-    fee.denom,
-    parseInt(fee.gas, 10),
-    chain.chain === SupportedChain.ETH ? 'ethsecp256' : 'secp256k1',
-    sender.pubkey,
-    sender.sequence,
-    sender.accountNumber,
-    chain.cosmosChainId,
-  )
 
-  return {
-    signDirect: tx.signDirect,
-    legacyAmino: tx.legacyAmino,
-    eipToSign,
-  }
+  return createTransactionPayload({ chain, sender, fee, memo, }, msgCosmos)
 }

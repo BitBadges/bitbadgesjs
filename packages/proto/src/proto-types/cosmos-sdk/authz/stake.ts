@@ -1,27 +1,30 @@
-import * as coin from '../../../proto/cosmos/base/v1beta1/coin'
-import * as authzStake from '../../../proto/cosmos/staking/v1beta1/authz'
+import * as coin from '../../../proto/cosmos/base/v1beta1/coin_pb'
+import * as authzStake from '../../../proto/cosmos/staking/v1beta1/authz_pb'
 
 export const stakeAuthTypes =
-  authzStake.cosmos.staking.v1beta1.AuthorizationType
+  authzStake.AuthorizationType
 
 export function createStakeAuthorization(
   allowAddress: string,
   denom: string,
   maxTokens: string | undefined,
-  authorizationType: authzStake.cosmos.staking.v1beta1.AuthorizationType,
+  authorizationType: authzStake.AuthorizationType,
 ) {
-  const msg = new authzStake.cosmos.staking.v1beta1.StakeAuthorization({
-    allow_list:
-      new authzStake.cosmos.staking.v1beta1.StakeAuthorization.Validators({
+  const msg = new authzStake.StakeAuthorization({
+
+    validators: {
+      case: 'allowList',
+      value: {
         address: [allowAddress],
-      }),
-    max_tokens: maxTokens
-      ? new coin.cosmos.base.v1beta1.Coin({
-          denom,
-          amount: maxTokens,
-        })
+      },
+    },
+    maxTokens: maxTokens
+      ? new coin.Coin({
+        denom,
+        amount: maxTokens,
+      })
       : undefined,
-    authorization_type: authorizationType,
+    authorizationType: authorizationType,
   })
 
   return {

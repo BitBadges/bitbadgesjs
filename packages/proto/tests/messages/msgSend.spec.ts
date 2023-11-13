@@ -21,7 +21,7 @@ describe('msgSend tests', () => {
       ],
     }
 
-    expect(message.message.toObject()).toStrictEqual(expectedObject)
+    expect(message.message.toJson()).toStrictEqual(expectedObject)
     expect(message.path).toBe('cosmos.bank.v1beta1.MsgSend')
   })
 })

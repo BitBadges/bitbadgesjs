@@ -1,18 +1,18 @@
 import {
   createTxRaw,
   createAnyMessage,
-  protoTxNamespace,
   MessageGenerated,
 } from '../../'
+import { AuthInfo, TxBody } from '../../proto/cosmos/tx/v1beta1/tx_pb'
 
 export function createTxRawEIP712(
-  body: protoTxNamespace.txn.TxBody,
-  authInfo: protoTxNamespace.txn.AuthInfo,
+  body: TxBody,
+  authInfo: AuthInfo,
   extension: MessageGenerated,
 ) {
-  body.extension_options.push(createAnyMessage(extension))
+  body.extensionOptions.push(createAnyMessage(extension))
 
-  return createTxRaw(body.serializeBinary(), authInfo.serializeBinary(), [
+  return createTxRaw(body.toBinary(), authInfo.toBinary(), [
     new Uint8Array(),
   ])
 }

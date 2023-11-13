@@ -21,7 +21,7 @@ describe('msgEthereumTx tests', () => {
 
     // Create the authInfo
     const authInfoProto = bytesToAuthInfo(txRawProto.auth_info_bytes)
-    expect(authInfoProto.toObject()).toStrictEqual({
+    expect(authInfoProto.toJson()).toStrictEqual({
       signer_infos: [],
       fee: {
         amount: [
@@ -49,13 +49,13 @@ describe('msgEthereumTx tests', () => {
     const msgEthereumTxProto = bytesToMsgEthereumTx(
       bodyProtoMessages[0].value as Uint8Array,
     )
-    const msgEthTx = msgEthereumTxProto.toObject()
+    const msgEthTx = msgEthereumTxProto.toJson()
 
     // Create the LegacyTx/AccessListTx/DynamicFeeTx depending on the type_url
     expect(msgEthTx.data?.type_url).toBe('/ethermint.evm.v1.LegacyTx')
 
     // Create the LegacyTX
-    const ethTx = bytesToLegacyTx(msgEthTx.data?.value as Uint8Array).toObject()
+    const ethTx = bytesToLegacyTx(msgEthTx.data?.value as Uint8Array).toJson()
     expect(ethTx.nonce as number).toBe(1036)
     expect(ethTx.gas_price as string).toBe('5000000000000')
     expect(ethTx.gas as number).toBe(1200000)

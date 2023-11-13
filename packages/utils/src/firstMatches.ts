@@ -64,7 +64,6 @@ export function getUnhandledCollectionApprovals(
 
 
   const expandedTransferability: CollectionApprovalWithDetails<bigint>[] = currTransferability;
-  console.log(castCollectionApprovalToUniversalPermission(expandedTransferability));
   const firstMatches = GetFirstMatchOnly(castCollectionApprovalToUniversalPermission(expandedTransferability).map(x => {
     if (ignoreTrackerIds) {
       return {

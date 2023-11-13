@@ -639,7 +639,6 @@ export function MergeUniversalPermissionDetails(permissions: UniversalPermission
           i = Number.MAX_SAFE_INTEGER;
           j = Number.MAX_SAFE_INTEGER;
         } else if (sameCount === 4 && addressSameCount == 4 && permittedTimesAreSame && forbiddenTimesAreSame && arbitraryValuesAreSame) {
-          console.log("MERGING");
           //TODO: Merge address mappings if includeAddresses is not the same
           merged.push({
             badgeIds: newBadgeIds,

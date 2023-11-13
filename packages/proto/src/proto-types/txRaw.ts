@@ -1,15 +1,15 @@
-import * as tx from '../proto/cosmos/tx/v1beta1/tx'
+import { TxRaw, TxBody, AuthInfo } from "../proto/cosmos/tx/v1beta1/tx_pb"
 
 export function bytesToTxRaw(bytes: Uint8Array) {
-  return tx.cosmos.tx.v1beta1.TxRaw.deserialize(bytes)
+  return TxRaw.fromBinary(bytes)
 }
 
 export function bytesToTxBody(bytes: Uint8Array) {
-  return tx.cosmos.tx.v1beta1.TxBody.deserialize(bytes)
+  return TxBody.fromBinary(bytes)
 }
 
 export function bytesToAuthInfo(bytes: Uint8Array) {
-  return tx.cosmos.tx.v1beta1.AuthInfo.deserialize(bytes)
+  return AuthInfo.fromBinary(bytes)
 }
 
 export function createTxRaw(
@@ -17,13 +17,13 @@ export function createTxRaw(
   authInfoBytes: Uint8Array,
   signatures: Uint8Array[],
 ) {
-  const message = new tx.cosmos.tx.v1beta1.TxRaw({
-    body_bytes: bodyBytes,
-    auth_info_bytes: authInfoBytes,
+  const message = new TxRaw({
+    bodyBytes,
+    authInfoBytes,
     signatures,
   })
   return {
     message,
-    path: 'cosmos.tx.v1beta1.TxRaw',
+    path: TxRaw.typeName,
   }
 }

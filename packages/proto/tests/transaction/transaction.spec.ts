@@ -21,7 +21,7 @@ describe('transaction tests', () => {
       'aphoton',
     )
     const res = createBody(msgSend, 'this is a test')
-    expect(res.toObject()).toStrictEqual({
+    expect(res.toJson()).toStrictEqual({
       messages: [
         {
           type_url: '/cosmos.bank.v1beta1.MsgSend',
@@ -48,7 +48,7 @@ describe('transaction tests', () => {
     const denom = 'aphoton'
     const gas = 20000
     const fee = createFee(value, denom, gas)
-    expect(fee.toObject()).toStrictEqual({
+    expect(fee.toJson()).toStrictEqual({
       amount: [
         {
           amount: value,
@@ -67,7 +67,7 @@ describe('transaction tests', () => {
     ])
     const sequence = 0
     const info = createSignerInfo('ethsecp256k1', pubkey, sequence, SIGN_DIRECT)
-    expect(info.toObject()).toStrictEqual({
+    expect(info.toJson()).toStrictEqual({
       public_key: {
         type_url: '/ethermint.crypto.v1.ethsecp256k1.PubKey',
         // value: 'CiMKIQKIsfUxuHhx28A3KVGHJVyuS6DEvDfKcmEFshQK/Q5pFw=='
@@ -96,7 +96,7 @@ describe('transaction tests', () => {
     const fee = createFee(value, denom, gas)
 
     const msg = createAuthInfo(info, fee)
-    expect(msg.toObject()).toStrictEqual({
+    expect(msg.toJson()).toStrictEqual({
       signer_infos: [
         {
           public_key: {
@@ -157,7 +157,7 @@ describe('transaction tests', () => {
       chainId,
       accountNumber,
     )
-    expect(res.toObject()).toStrictEqual({
+    expect(res.toJson()).toStrictEqual({
       body_bytes: new Uint8Array([
         10, 142, 1, 10, 28, 47, 99, 111, 115, 109, 111, 115, 46, 98, 97, 110,
         107, 46, 118, 49, 98, 101, 116, 97, 49, 46, 77, 115, 103, 83, 101, 110,

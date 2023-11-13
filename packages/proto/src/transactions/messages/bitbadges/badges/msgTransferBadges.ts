@@ -1,10 +1,8 @@
-import * as badges from '../../../../proto/badges/tx'
+import * as badges from '../../../../proto/badges/tx_pb';
 
-import { NumberType, Transfer, convertTransfer, createMsgTransferBadges as protoMsgTransferBadges } from '../../../../'
-import { MSG_TRANSFER_BADGES_TYPES, createEIP712, createEIP712MsgTransferBadges, generateFee, generateMessage, generateTypes } from "../../../../"
-import { createTransaction } from "../../transaction"
-import { Chain, Fee, Sender, SupportedChain } from "../../common"
-import { getDefaultDomainWithChainId } from "../../domain"
+import { NumberType, Transfer, convertTransfer, createMsgTransferBadges as protoMsgTransferBadges } from '../../../../';
+import { createTransactionPayload } from '../../base';
+import { Chain, Fee, Sender } from "../../common";
 
 
 /**
@@ -43,9 +41,9 @@ export function convertMsgTransferBadges<T extends NumberType, U extends NumberT
 
 
 export function convertFromProtoToMsgTransferBadges(
-  protoMsg: badges.badges.MsgTransferBadges,
+  protoMsg: badges.MsgTransferBadges,
 ): MsgTransferBadges<bigint> {
-  const msg = protoMsg.toObject() as MsgTransferBadges<string>;
+  const msg = (protoMsg.toJson({ emitDefaultValues: true }) as any) as MsgTransferBadges<string>;
 
   return {
     creator: msg.creator,
@@ -59,59 +57,12 @@ export function createTxMsgTransferBadges<T extends NumberType>(
   sender: Sender,
   fee: Fee,
   memo: string,
-  params: MsgTransferBadges<T>,
-  domain?: object,
+  params: MsgTransferBadges<T>
 ) {
-  // EIP712
-  const feeObject = generateFee(
-    fee.amount,
-    fee.denom,
-    fee.gas,
-    sender.accountAddress,
-  )
-  const types = generateTypes(MSG_TRANSFER_BADGES_TYPES, ["MsgTransferBadges"])
-
-  const msg = createEIP712MsgTransferBadges(
-    params.creator,
-    params.collectionId,
-    params.transfers,
-  )
-  const messages = generateMessage(
-    sender.accountNumber.toString(),
-    sender.sequence.toString(),
-    chain.cosmosChainId,
-    memo,
-    feeObject,
-    msg,
-  )
-  let domainObj = domain;
-  if (!domain) {
-    domainObj = getDefaultDomainWithChainId(chain.chainId);
-  }
-  const eipToSign = createEIP712(types, messages, domainObj);
-
-  // Cosmos
   const msgCosmos = protoMsgTransferBadges(
     params.creator,
     params.collectionId,
     params.transfers,
   )
-  const tx = createTransaction(
-    msgCosmos,
-    memo,
-    fee.amount,
-    fee.denom,
-    parseInt(fee.gas, 10),
-    chain.chain === SupportedChain.ETH ? 'ethsecp256' : 'secp256k1',
-    sender.pubkey,
-    sender.sequence,
-    sender.accountNumber,
-    chain.cosmosChainId,
-  )
-
-  return {
-    signDirect: tx.signDirect,
-    legacyAmino: tx.legacyAmino,
-    eipToSign,
-  }
+  return createTransactionPayload({ chain, sender, fee, memo, }, msgCosmos)
 }
