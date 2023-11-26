@@ -1,8 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "references": [
-    {"path": "../address-converter/tsconfig.json"},
     {"path": "../proto/tsconfig.json"},
-    {"path": "../provider/tsconfig.json"},
+    {"path": "../utils/tsconfig.json"},
   ]
 }

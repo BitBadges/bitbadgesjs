@@ -15,12 +15,19 @@
 <li><a href="../modules.html">bitbadgesjs-utils</a></li>
 <li><a href="BitBadgesAPI.html">BitBadgesAPI</a></li></ul>
 <h1>Class BitBadgesAPI</h1></div>
+<section class="tsd-panel tsd-comment">
+<div class="tsd-comment tsd-typography"><p>This is the BitBadgesAPI class which provides all typed API calls to the BitBadges API.
+See official documentation for more details and examples.</p>
+<p>Must have a valid API key set. To get an API key, reach out to the team.</p>
+<p>convertFunction is used to convert any numbers returned by the API to the desired NumberType.</p>
+</div>
+<div class="tsd-comment tsd-typography"></div></section>
 <section class="tsd-panel tsd-hierarchy">
 <h4>Hierarchy</h4>
 <ul class="tsd-hierarchy">
 <li><span class="target">BitBadgesAPI</span></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L31">utils/src/api-sdk.ts:31</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L31">utils/src/api-sdk.ts:31</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-index-accordion" open><summary class="tsd-accordion-summary tsd-index-summary">
@@ -94,14 +101,14 @@
 <h5><span class="tsd-kind-parameter">apiDetails</span>: <a href="../interfaces/BitBadgesApiDetails.html" class="tsd-signature-type tsd-kind-interface">BitBadgesApiDetails</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="BitBadgesAPI.html" class="tsd-signature-type tsd-kind-class">BitBadgesAPI</a></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L43">utils/src/api-sdk.ts:43</a></li></ul></aside></li></ul></section></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L43">utils/src/api-sdk.ts:43</a></li></ul></aside></li></ul></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Properties</h2>
 <section class="tsd-panel tsd-member"><a id="BACKEND_URL" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>BACKEND_<wbr/>URL</span><a href="#BACKEND_URL" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">BACKEND_<wbr/>URL</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = ...</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L39">utils/src/api-sdk.ts:39</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L39">utils/src/api-sdk.ts:39</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="ConvertFunction" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>Convert<wbr/>Function</span><a href="#ConvertFunction" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">Convert<wbr/>Function</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">item</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">bigint</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> = BigIntify</span></div>
@@ -119,17 +126,17 @@
 <h5><span class="tsd-kind-parameter">item</span>: <span class="tsd-signature-type ">NumberType</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">bigint</span></h4></li></ul></li></ul></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L40">utils/src/api-sdk.ts:40</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L40">utils/src/api-sdk.ts:40</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="apiKey" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>api<wbr/>Key</span><a href="#apiKey" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">api<wbr/>Key</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = process.env.BITBADGES_API_KEY</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L41">utils/src/api-sdk.ts:41</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L41">utils/src/api-sdk.ts:41</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="axios" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>axios</span><a href="#axios" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">axios</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type ">AxiosInstance</span><span class="tsd-signature-symbol"> = ...</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L32">utils/src/api-sdk.ts:32</a></li></ul></aside></section></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L32">utils/src/api-sdk.ts:32</a></li></ul></aside></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Methods</h2>
 <section class="tsd-panel tsd-member"><a id="addAnnouncement" class="tsd-anchor"></a>
@@ -146,7 +153,7 @@
 <h5><span class="tsd-kind-parameter">requestBody</span>: <a href="../interfaces/AddAnnouncementRouteRequestBody.html" class="tsd-signature-type tsd-kind-interface">AddAnnouncementRouteRequestBody</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/AddAnnouncementRouteSuccessResponse.html" class="tsd-signature-type tsd-kind-interface">AddAnnouncementRouteSuccessResponse</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">bigint</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L216">utils/src/api-sdk.ts:216</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L216">utils/src/api-sdk.ts:216</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="addApprovalDetailsToOffChainStorage" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>add<wbr/>Approval<wbr/>Details<wbr/>To<wbr/>Off<wbr/>Chain<wbr/>Storage</span><a href="#addApprovalDetailsToOffChainStorage" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -159,7 +166,7 @@
 <h5><span class="tsd-kind-parameter">requestBody</span>: <a href="../interfaces/AddApprovalDetailsToOffChainStorageRouteRequestBody.html" class="tsd-signature-type tsd-kind-interface">AddApprovalDetailsToOffChainStorageRouteRequestBody</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/AddApprovalDetailsToOffChainStorageRouteSuccessResponse.html" class="tsd-signature-type tsd-kind-interface">AddApprovalDetailsToOffChainStorageRouteSuccessResponse</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">bigint</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L324">utils/src/api-sdk.ts:324</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L324">utils/src/api-sdk.ts:324</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="addBalancesToOffChainStorage" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>add<wbr/>Balances<wbr/>To<wbr/>Off<wbr/>Chain<wbr/>Storage</span><a href="#addBalancesToOffChainStorage" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -172,7 +179,7 @@
 <h5><span class="tsd-kind-parameter">requestBody</span>: <a href="../interfaces/AddBalancesToOffChainStorageRouteRequestBody.html" class="tsd-signature-type tsd-kind-interface">AddBalancesToOffChainStorageRouteRequestBody</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/AddBalancesToOffChainStorageRouteSuccessResponse.html" class="tsd-signature-type tsd-kind-interface">AddBalancesToOffChainStorageRouteSuccessResponse</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">bigint</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L304">utils/src/api-sdk.ts:304</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L304">utils/src/api-sdk.ts:304</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="addMetadataToIpfs" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>add<wbr/>Metadata<wbr/>To<wbr/>Ipfs</span><a href="#addMetadataToIpfs" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -185,7 +192,7 @@
 <h5><span class="tsd-kind-parameter">requestBody</span>: <a href="../interfaces/AddMetadataToIpfsRouteRequestBody.html" class="tsd-signature-type tsd-kind-interface">AddMetadataToIpfsRouteRequestBody</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/AddMetadataToIpfsRouteSuccessResponse.html" class="tsd-signature-type tsd-kind-interface">AddMetadataToIpfsRouteSuccessResponse</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">bigint</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L314">utils/src/api-sdk.ts:314</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L314">utils/src/api-sdk.ts:314</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="addReviewForCollection" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>add<wbr/>Review<wbr/>For<wbr/>Collection</span><a href="#addReviewForCollection" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -200,7 +207,7 @@
 <h5><span class="tsd-kind-parameter">requestBody</span>: <a href="../interfaces/AddReviewForCollectionRouteRequestBody.html" class="tsd-signature-type tsd-kind-interface">AddReviewForCollectionRouteRequestBody</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/AddReviewForCollectionRouteSuccessResponse.html" class="tsd-signature-type tsd-kind-interface">AddReviewForCollectionRouteSuccessResponse</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">bigint</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L251">utils/src/api-sdk.ts:251</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L251">utils/src/api-sdk.ts:251</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="addReviewForUser" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>add<wbr/>Review<wbr/>For<wbr/>User</span><a href="#addReviewForUser" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -215,7 +222,7 @@
 <h5><span class="tsd-kind-parameter">requestBody</span>: <a href="../interfaces/AddReviewForUserRouteRequestBody.html" class="tsd-signature-type tsd-kind-interface">AddReviewForUserRouteRequestBody</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/AddReviewForUserRouteSuccessResponse.html" class="tsd-signature-type tsd-kind-interface">AddReviewForUserRouteSuccessResponse</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">bigint</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L284">utils/src/api-sdk.ts:284</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L284">utils/src/api-sdk.ts:284</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-private"><a id="assertPositiveInteger" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <span>assert<wbr/>Positive<wbr/>Integer</span><a href="#assertPositiveInteger" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-private">
@@ -228,7 +235,7 @@
 <h5><span class="tsd-kind-parameter">num</span>: <span class="tsd-signature-type ">NumberType</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L67">utils/src/api-sdk.ts:67</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L67">utils/src/api-sdk.ts:67</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="broadcastTx" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>broadcast<wbr/>Tx</span><a href="#broadcastTx" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -241,7 +248,7 @@
 <h5><span class="tsd-kind-parameter">requestBody</span>: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type ">BroadcastPostBody</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/BroadcastTxRouteSuccessResponse.html" class="tsd-signature-type tsd-kind-interface">BroadcastTxRouteSuccessResponse</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">bigint</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L386">utils/src/api-sdk.ts:386</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L386">utils/src/api-sdk.ts:386</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="checkIfSignedIn" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>check<wbr/>If<wbr/>Signed<wbr/>In</span><a href="#checkIfSignedIn" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -254,7 +261,7 @@
 <h5><span class="tsd-kind-parameter">requestBody</span>: <a href="../interfaces/CheckSignInStatusRequestBody.html" class="tsd-signature-type tsd-kind-interface">CheckSignInStatusRequestBody</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/CheckSignInStatusRequestSuccessResponse.html" class="tsd-signature-type tsd-kind-interface">CheckSignInStatusRequestSuccessResponse</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">bigint</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L355">utils/src/api-sdk.ts:355</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L355">utils/src/api-sdk.ts:355</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="deleteAddressMappings" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>delete<wbr/>Address<wbr/>Mappings</span><a href="#deleteAddressMappings" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -267,7 +274,7 @@
 <h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">requestBody</span>: <a href="../interfaces/DeleteAddressMappingsRouteRequestBody.html" class="tsd-signature-type tsd-kind-interface">DeleteAddressMappingsRouteRequestBody</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/DeleteAddressMappingsRouteSuccessResponse.html" class="tsd-signature-type tsd-kind-interface">DeleteAddressMappingsRouteSuccessResponse</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">bigint</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L451">utils/src/api-sdk.ts:451</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L451">utils/src/api-sdk.ts:451</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="deleteAnnouncement" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>delete<wbr/>Announcement</span><a href="#deleteAnnouncement" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -282,7 +289,7 @@
 <h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">requestBody</span>: <a href="../interfaces/DeleteAnnouncementRouteRequestBody.html" class="tsd-signature-type tsd-kind-interface">DeleteAnnouncementRouteRequestBody</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/DeleteAnnouncementRouteSuccessResponse.html" class="tsd-signature-type tsd-kind-interface">DeleteAnnouncementRouteSuccessResponse</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">bigint</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L239">utils/src/api-sdk.ts:239</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L239">utils/src/api-sdk.ts:239</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="deleteReview" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>delete<wbr/>Review</span><a href="#deleteReview" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -297,7 +304,7 @@
 <h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">requestBody</span>: <a href="../interfaces/DeleteReviewRouteRequestBody.html" class="tsd-signature-type tsd-kind-interface">DeleteReviewRouteRequestBody</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/DeleteReviewRouteSuccessResponse.html" class="tsd-signature-type tsd-kind-interface">DeleteReviewRouteSuccessResponse</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">bigint</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L228">utils/src/api-sdk.ts:228</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L228">utils/src/api-sdk.ts:228</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="fetchAndUpdateMetadata" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>fetch<wbr/>And<wbr/>Update<wbr/>Metadata</span><a href="#fetchAndUpdateMetadata" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -312,7 +319,7 @@
 <h5><span class="tsd-kind-parameter">metadataFetchOptions</span>: <a href="../interfaces/MetadataFetchOptions.html" class="tsd-signature-type tsd-kind-interface">MetadataFetchOptions</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/BitBadgesCollection.html" class="tsd-signature-type tsd-kind-interface">BitBadgesCollection</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">bigint</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L488">utils/src/api-sdk.ts:488</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L488">utils/src/api-sdk.ts:488</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="fetchMetadataDirectly" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>fetch<wbr/>Metadata<wbr/>Directly</span><a href="#fetchMetadataDirectly" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -325,7 +332,7 @@
 <h5><span class="tsd-kind-parameter">requestBody</span>: <a href="../interfaces/FetchMetadataDirectlyRouteRequestBody.html" class="tsd-signature-type tsd-kind-interface">FetchMetadataDirectlyRouteRequestBody</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/FetchMetadataDirectlyRouteSuccessResponse.html" class="tsd-signature-type tsd-kind-interface">FetchMetadataDirectlyRouteSuccessResponse</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">bigint</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L406">utils/src/api-sdk.ts:406</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L406">utils/src/api-sdk.ts:406</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="getAccount" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Account</span><a href="#getAccount" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -340,7 +347,7 @@
 <h5><span class="tsd-kind-parameter">requestBody</span>: <a href="../interfaces/GetAccountRouteRequestBody.html" class="tsd-signature-type tsd-kind-interface">GetAccountRouteRequestBody</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../types/GetAccountRouteSuccessResponse.html" class="tsd-signature-type tsd-kind-type-alias">GetAccountRouteSuccessResponse</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">bigint</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L273">utils/src/api-sdk.ts:273</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L273">utils/src/api-sdk.ts:273</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="getAccounts" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Accounts</span><a href="#getAccounts" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -353,7 +360,7 @@
 <h5><span class="tsd-kind-parameter">requestBody</span>: <a href="../interfaces/GetAccountsRouteRequestBody.html" class="tsd-signature-type tsd-kind-interface">GetAccountsRouteRequestBody</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/GetAccountsRouteSuccessResponse.html" class="tsd-signature-type tsd-kind-interface">GetAccountsRouteSuccessResponse</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">bigint</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L263">utils/src/api-sdk.ts:263</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L263">utils/src/api-sdk.ts:263</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="getAddressMappings" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Address<wbr/>Mappings</span><a href="#getAddressMappings" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -366,7 +373,7 @@
 <h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">requestBody</span>: <a href="../interfaces/GetAddressMappingsRouteRequestBody.html" class="tsd-signature-type tsd-kind-interface">GetAddressMappingsRouteRequestBody</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/GetAddressMappingsRouteSuccessResponse.html" class="tsd-signature-type tsd-kind-interface">GetAddressMappingsRouteSuccessResponse</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">bigint</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L441">utils/src/api-sdk.ts:441</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L441">utils/src/api-sdk.ts:441</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="getAllPasswordsAndCodes" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>All<wbr/>Passwords<wbr/>And<wbr/>Codes</span><a href="#getAllPasswordsAndCodes" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -381,7 +388,7 @@
 <h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">requestBody</span>: <a href="../interfaces/GetAllCodesAndPasswordsRouteRequestBody.html" class="tsd-signature-type tsd-kind-interface">GetAllCodesAndPasswordsRouteRequestBody</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/GetAllCodesAndPasswordsRouteSuccessResponse.html" class="tsd-signature-type tsd-kind-interface">GetAllCodesAndPasswordsRouteSuccessResponse</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">bigint</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L192">utils/src/api-sdk.ts:192</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L192">utils/src/api-sdk.ts:192</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="getApprovalTrackers" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Approval<wbr/>Trackers</span><a href="#getApprovalTrackers" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -394,7 +401,7 @@
 <h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">requestBody</span>: <a href="../interfaces/GetApprovalsRouteRequestBody.html" class="tsd-signature-type tsd-kind-interface">GetApprovalsRouteRequestBody</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/GetApprovalsRouteSuccessResponse.html" class="tsd-signature-type tsd-kind-interface">GetApprovalsRouteSuccessResponse</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">bigint</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L462">utils/src/api-sdk.ts:462</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L462">utils/src/api-sdk.ts:462</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="getBadgeActivity" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Badge<wbr/>Activity</span><a href="#getBadgeActivity" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -411,7 +418,7 @@
 <h5><span class="tsd-kind-parameter">requestBody</span>: <a href="../interfaces/GetBadgeActivityRouteRequestBody.html" class="tsd-signature-type tsd-kind-interface">GetBadgeActivityRouteRequestBody</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/GetBadgeActivityRouteSuccessResponse.html" class="tsd-signature-type tsd-kind-interface">GetBadgeActivityRouteSuccessResponse</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">bigint</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L168">utils/src/api-sdk.ts:168</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L168">utils/src/api-sdk.ts:168</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="getBadgeBalanceByAddress" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Badge<wbr/>Balance<wbr/>By<wbr/>Address</span><a href="#getBadgeBalanceByAddress" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -428,7 +435,7 @@
 <h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">requestBody</span>: <a href="../interfaces/GetBadgeBalanceByAddressRouteRequestBody.html" class="tsd-signature-type tsd-kind-interface">GetBadgeBalanceByAddressRouteRequestBody</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/GetBadgeBalanceByAddressRouteSuccessResponse.html" class="tsd-signature-type tsd-kind-interface">GetBadgeBalanceByAddressRouteSuccessResponse</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">bigint</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L156">utils/src/api-sdk.ts:156</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L156">utils/src/api-sdk.ts:156</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="getBrowseCollections" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Browse<wbr/>Collections</span><a href="#getBrowseCollections" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -441,7 +448,7 @@
 <h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">requestBody</span>: <a href="../interfaces/GetBrowseCollectionsRouteRequestBody.html" class="tsd-signature-type tsd-kind-interface">GetBrowseCollectionsRouteRequestBody</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/GetBrowseCollectionsRouteSuccessResponse.html" class="tsd-signature-type tsd-kind-interface">GetBrowseCollectionsRouteSuccessResponse</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">bigint</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L376">utils/src/api-sdk.ts:376</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L376">utils/src/api-sdk.ts:376</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="getChallengeTrackers" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Challenge<wbr/>Trackers</span><a href="#getChallengeTrackers" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -454,7 +461,7 @@
 <h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">requestBody</span>: <a href="../interfaces/GetChallengeTrackersRouteRequestBody.html" class="tsd-signature-type tsd-kind-interface">GetChallengeTrackersRouteRequestBody</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/GetChallengeTrackersRouteSuccessResponse.html" class="tsd-signature-type tsd-kind-interface">GetChallengeTrackersRouteSuccessResponse</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">bigint</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L472">utils/src/api-sdk.ts:472</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L472">utils/src/api-sdk.ts:472</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="getCodeForPassword" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Code<wbr/>For<wbr/>Password</span><a href="#getCodeForPassword" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -473,7 +480,7 @@
 <h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">requestBody</span>: <a href="../interfaces/GetCodeForPasswordRouteRequestBody.html" class="tsd-signature-type tsd-kind-interface">GetCodeForPasswordRouteRequestBody</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/GetCodeForPasswordRouteSuccessResponse.html" class="tsd-signature-type tsd-kind-interface">GetCodeForPasswordRouteSuccessResponse</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">bigint</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L204">utils/src/api-sdk.ts:204</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L204">utils/src/api-sdk.ts:204</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="getCollectionById" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Collection<wbr/>By<wbr/>Id</span><a href="#getCollectionById" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -490,7 +497,7 @@
 <h5><span class="tsd-kind-parameter">fetchAllMetadata</span>: <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = false</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/GetCollectionRouteSuccessResponse.html" class="tsd-signature-type tsd-kind-interface">GetCollectionRouteSuccessResponse</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">bigint</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L109">utils/src/api-sdk.ts:109</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L109">utils/src/api-sdk.ts:109</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="getCollections" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Collections</span><a href="#getCollections" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -503,7 +510,7 @@
 <h5><span class="tsd-kind-parameter">requestBody</span>: <a href="../interfaces/GetCollectionBatchRouteRequestBody.html" class="tsd-signature-type tsd-kind-interface">GetCollectionBatchRouteRequestBody</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/GetCollectionBatchRouteSuccessResponse.html" class="tsd-signature-type tsd-kind-interface">GetCollectionBatchRouteSuccessResponse</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">bigint</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L99">utils/src/api-sdk.ts:99</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L99">utils/src/api-sdk.ts:99</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="getMetadataForCollection" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Metadata<wbr/>For<wbr/>Collection</span><a href="#getMetadataForCollection" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -518,7 +525,7 @@
 <h5><span class="tsd-kind-parameter">requestBody</span>: <a href="../interfaces/GetMetadataForCollectionRouteRequestBody.html" class="tsd-signature-type tsd-kind-interface">GetMetadataForCollectionRouteRequestBody</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/GetMetadataForCollectionRouteSuccessResponse.html" class="tsd-signature-type tsd-kind-interface">GetMetadataForCollectionRouteSuccessResponse</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">bigint</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L144">utils/src/api-sdk.ts:144</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L144">utils/src/api-sdk.ts:144</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="getOwnersForBadge" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Owners<wbr/>For<wbr/>Badge</span><a href="#getOwnersForBadge" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -535,7 +542,7 @@
 <h5><span class="tsd-kind-parameter">requestBody</span>: <a href="../interfaces/GetOwnersForBadgeRouteRequestBody.html" class="tsd-signature-type tsd-kind-interface">GetOwnersForBadgeRouteRequestBody</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/GetOwnersForBadgeRouteSuccessResponse.html" class="tsd-signature-type tsd-kind-interface">GetOwnersForBadgeRouteSuccessResponse</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">bigint</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L131">utils/src/api-sdk.ts:131</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L131">utils/src/api-sdk.ts:131</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="getSearchResults" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Search<wbr/>Results</span><a href="#getSearchResults" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -550,7 +557,7 @@
 <h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">requestBody</span>: <a href="../interfaces/GetSearchRouteRequestBody.html" class="tsd-signature-type tsd-kind-interface">GetSearchRouteRequestBody</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/GetSearchRouteSuccessResponse.html" class="tsd-signature-type tsd-kind-interface">GetSearchRouteSuccessResponse</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">bigint</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L89">utils/src/api-sdk.ts:89</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L89">utils/src/api-sdk.ts:89</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="getSignInChallenge" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Sign<wbr/>In<wbr/>Challenge</span><a href="#getSignInChallenge" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -563,7 +570,7 @@
 <h5><span class="tsd-kind-parameter">requestBody</span>: <a href="../interfaces/GetSignInChallengeRouteRequestBody.html" class="tsd-signature-type tsd-kind-interface">GetSignInChallengeRouteRequestBody</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/GetSignInChallengeRouteSuccessResponse.html" class="tsd-signature-type tsd-kind-interface">GetSignInChallengeRouteSuccessResponse</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">bigint</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L334">utils/src/api-sdk.ts:334</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L334">utils/src/api-sdk.ts:334</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="getStatus" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Status</span><a href="#getStatus" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -576,7 +583,7 @@
 <h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">requestBody</span>: <a href="../interfaces/GetStatusRouteRequestBody.html" class="tsd-signature-type tsd-kind-interface">GetStatusRouteRequestBody</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/GetStatusRouteSuccessResponse.html" class="tsd-signature-type tsd-kind-interface">GetStatusRouteSuccessResponse</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">bigint</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L79">utils/src/api-sdk.ts:79</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L79">utils/src/api-sdk.ts:79</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="getTokensFromFaucet" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Tokens<wbr/>From<wbr/>Faucet</span><a href="#getTokensFromFaucet" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -589,7 +596,7 @@
 <h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">requestBody</span>: <a href="../types/GetTokensFromFaucetRouteRequestBody.html" class="tsd-signature-type tsd-kind-type-alias">GetTokensFromFaucetRouteRequestBody</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type ">DeliverTxResponse</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L421">utils/src/api-sdk.ts:421</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L421">utils/src/api-sdk.ts:421</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="handleApiError" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>handle<wbr/>Api<wbr/>Error</span><a href="#handleApiError" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -602,7 +609,7 @@
 <h5><span class="tsd-kind-parameter">error</span>: <span class="tsd-signature-type">any</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L56">utils/src/api-sdk.ts:56</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L56">utils/src/api-sdk.ts:56</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="refreshMetadata" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>refresh<wbr/>Metadata</span><a href="#refreshMetadata" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -617,7 +624,7 @@
 <h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">requestBody</span>: <a href="../interfaces/RefreshMetadataRouteRequestBody.html" class="tsd-signature-type tsd-kind-interface">RefreshMetadataRouteRequestBody</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/RefreshMetadataRouteSuccessResponse.html" class="tsd-signature-type tsd-kind-interface">RefreshMetadataRouteSuccessResponse</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">bigint</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L180">utils/src/api-sdk.ts:180</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L180">utils/src/api-sdk.ts:180</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="signOut" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>sign<wbr/>Out</span><a href="#signOut" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -630,7 +637,7 @@
 <h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">requestBody</span>: <a href="../interfaces/SignOutRequestBody.html" class="tsd-signature-type tsd-kind-interface">SignOutRequestBody</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/SignOutSuccessResponse.html" class="tsd-signature-type tsd-kind-interface">SignOutSuccessResponse</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">bigint</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L366">utils/src/api-sdk.ts:366</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L366">utils/src/api-sdk.ts:366</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="simulateTx" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>simulate<wbr/>Tx</span><a href="#simulateTx" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -643,7 +650,7 @@
 <h5><span class="tsd-kind-parameter">requestBody</span>: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type ">BroadcastPostBody</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/SimulateTxRouteSuccessResponse.html" class="tsd-signature-type tsd-kind-interface">SimulateTxRouteSuccessResponse</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">bigint</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L396">utils/src/api-sdk.ts:396</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L396">utils/src/api-sdk.ts:396</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="updateAccountInfo" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>update<wbr/>Account<wbr/>Info</span><a href="#updateAccountInfo" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -656,7 +663,7 @@
 <h5><span class="tsd-kind-parameter">requestBody</span>: <a href="../interfaces/UpdateAccountInfoRouteRequestBody.html" class="tsd-signature-type tsd-kind-interface">UpdateAccountInfoRouteRequestBody</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">bigint</span><span class="tsd-signature-symbol">&gt;</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/UpdateAccountInfoRouteSuccessResponse.html" class="tsd-signature-type tsd-kind-interface">UpdateAccountInfoRouteSuccessResponse</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">bigint</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L294">utils/src/api-sdk.ts:294</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L294">utils/src/api-sdk.ts:294</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="updateAddressMappings" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>update<wbr/>Address<wbr/>Mappings</span><a href="#updateAddressMappings" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -669,7 +676,7 @@
 <h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">requestBody</span>: <a href="../interfaces/UpdateAddressMappingsRouteRequestBody.html" class="tsd-signature-type tsd-kind-interface">UpdateAddressMappingsRouteRequestBody</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/UpdateAddressMappingsRouteSuccessResponse.html" class="tsd-signature-type tsd-kind-interface">UpdateAddressMappingsRouteSuccessResponse</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">bigint</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L431">utils/src/api-sdk.ts:431</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L431">utils/src/api-sdk.ts:431</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="updateUserSeenActivity" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>update<wbr/>User<wbr/>Seen<wbr/>Activity</span><a href="#updateUserSeenActivity" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -680,7 +687,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/UpdateAccountInfoRouteSuccessResponse.html" class="tsd-signature-type tsd-kind-interface">UpdateAccountInfoRouteSuccessResponse</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">bigint</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L483">utils/src/api-sdk.ts:483</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L483">utils/src/api-sdk.ts:483</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="verifySignIn" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>verify<wbr/>Sign<wbr/>In</span><a href="#verifySignIn" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -693,7 +700,7 @@
 <h5><span class="tsd-kind-parameter">requestBody</span>: <a href="../interfaces/VerifySignInRouteRequestBody.html" class="tsd-signature-type tsd-kind-interface">VerifySignInRouteRequestBody</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/VerifySignInRouteSuccessResponse.html" class="tsd-signature-type tsd-kind-interface">VerifySignInRouteSuccessResponse</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">bigint</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/api-sdk.ts#L344">utils/src/api-sdk.ts:344</a></li></ul></aside></li></ul></section></section></div>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/b3b4899e/packages/utils/src/api-sdk.ts#L344">utils/src/api-sdk.ts:344</a></li></ul></aside></li></ul></section></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -784,14 +791,7 @@
 <div class="tsd-accordion-details">
 <ul class="tsd-nested-navigation">
 <li>
-<details class="tsd-index-accordion" data-key="Classes$API / Indexer\n\nThis is the BitBadgesAPI class which provides all typed API calls to the BitBadges API.\nSee official documentation for more details and examples.\n\nMust have a valid API key set. To get an API key, reach out to the team.\n\nconvertFunction is used to convert any numbers returned by the API to the desired NumberType."><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg><span>API / Indexer
-
-This is the BitBadgesAPI class which provides all typed API calls to the BitBadges API.
-See official documentation for more details and examples.
-
-Must have a valid API key set. To get an API key, reach out to the team.
-
-convertFunction is used to convert any numbers returned by the API to the desired NumberType.</span></summary>
+<details class="tsd-index-accordion" data-key="Classes$API / Indexer"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg><span>API / Indexer</span></summary>
 <div class="tsd-accordion-details">
 <ul class="tsd-nested-navigation">
 <li><a href="BitBadgesAPI.html" class="current"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-128"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-class)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6"></rect><path d="M11.898 16.1201C11.098 16.1201 10.466 15.8961 10.002 15.4481C9.53803 15.0001 9.30603 14.3841 9.30603 13.6001V9.64012C9.30603 8.85612 9.53803 8.24012 10.002 7.79212C10.466 7.34412 11.098 7.12012 11.898 7.12012C12.682 7.12012 13.306 7.34812 13.77 7.80412C14.234 8.25212 14.466 8.86412 14.466 9.64012H13.386C13.386 9.14412 13.254 8.76412 12.99 8.50012C12.734 8.22812 12.37 8.09212 11.898 8.09212C11.426 8.09212 11.054 8.22412 10.782 8.48812C10.518 8.75212 10.386 9.13212 10.386 9.62812V13.6001C10.386 14.0961 10.518 14.4801 10.782 14.7521C11.054 15.0161 11.426 15.1481 11.898 15.1481C12.37 15.1481 12.734 15.0161 12.99 14.7521C13.254 14.4801 13.386 14.0961 13.386 13.6001H14.466C14.466 14.3761 14.234 14.9921 13.77 15.4481C13.306 15.8961 12.682 16.1201 11.898 16.1201Z" fill="var(--color-text)"></path></g></svg><span>Bit<wbr/>BadgesAPI</span></a></li></ul></div></details></li></ul></div></details></li>

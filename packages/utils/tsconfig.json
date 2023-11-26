@@ -35,6 +35,6 @@
         "allowSyntheticDefaultImports": true,
         "downlevelIteration": true,
         "skipLibCheck": true,
-
+      "composite": true,
     }
 }
