@@ -344,3 +344,79 @@ export class QueryModuleVersionsResponse extends Message<QueryModuleVersionsResp
   }
 }
 
+/**
+ * QueryAuthorityRequest is the request type for Query/Authority
+ *
+ * Since: cosmos-sdk 0.46
+ *
+ * @generated from message cosmos.upgrade.v1beta1.QueryAuthorityRequest
+ */
+export class QueryAuthorityRequest extends Message<QueryAuthorityRequest> {
+  constructor(data?: PartialMessage<QueryAuthorityRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "cosmos.upgrade.v1beta1.QueryAuthorityRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryAuthorityRequest {
+    return new QueryAuthorityRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryAuthorityRequest {
+    return new QueryAuthorityRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryAuthorityRequest {
+    return new QueryAuthorityRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: QueryAuthorityRequest | PlainMessage<QueryAuthorityRequest> | undefined, b: QueryAuthorityRequest | PlainMessage<QueryAuthorityRequest> | undefined): boolean {
+    return proto3.util.equals(QueryAuthorityRequest, a, b);
+  }
+}
+
+/**
+ * QueryAuthorityResponse is the response type for Query/Authority
+ *
+ * Since: cosmos-sdk 0.46
+ *
+ * @generated from message cosmos.upgrade.v1beta1.QueryAuthorityResponse
+ */
+export class QueryAuthorityResponse extends Message<QueryAuthorityResponse> {
+  /**
+   * @generated from field: string address = 1;
+   */
+  address = "";
+
+  constructor(data?: PartialMessage<QueryAuthorityResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "cosmos.upgrade.v1beta1.QueryAuthorityResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryAuthorityResponse {
+    return new QueryAuthorityResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryAuthorityResponse {
+    return new QueryAuthorityResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryAuthorityResponse {
+    return new QueryAuthorityResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: QueryAuthorityResponse | PlainMessage<QueryAuthorityResponse> | undefined, b: QueryAuthorityResponse | PlainMessage<QueryAuthorityResponse> | undefined): boolean {
+    return proto3.util.equals(QueryAuthorityResponse, a, b);
+  }
+}
+

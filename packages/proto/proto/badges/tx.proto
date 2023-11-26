@@ -13,41 +13,37 @@ import "badges/timelines.proto";
 
 option go_package = "github.com/bitbadges/bitbadgeschain/x/badges/types";
 
-// // Msg defines the Msg service.
-// service Msg {
-//   rpc UpdateCollection      (MsgUpdateCollection) returns (MsgUpdateCollectionResponse);
-//   rpc CreateAddressMappings (MsgCreateAddressMappings) returns (MsgCreateAddressMappingsResponse);
-//   rpc TransferBadges(MsgTransferBadges) returns (MsgTransferBadgesResponse);
-//   rpc UpdateUserApprovals(MsgUpdateUserApprovals) returns (MsgUpdateUserApprovalsResponse);
-//   rpc DeleteCollection(MsgDeleteCollection) returns (MsgDeleteCollectionResponse);
-//   // this line is used by starport scaffolding # proto/tx/rpc
-// }
+// Msg defines the Msg service.
+service Msg {
+  rpc UniversalUpdateCollection      (MsgUniversalUpdateCollection) returns (MsgUniversalUpdateCollectionResponse);
+  rpc CreateAddressMappings (MsgCreateAddressMappings) returns (MsgCreateAddressMappingsResponse);
+  rpc TransferBadges(MsgTransferBadges) returns (MsgTransferBadgesResponse);
+  rpc UpdateUserApprovals(MsgUpdateUserApprovals) returns (MsgUpdateUserApprovalsResponse);
+  rpc DeleteCollection(MsgDeleteCollection) returns (MsgDeleteCollectionResponse);
+  rpc UpdateCollection      (MsgUpdateCollection) returns (MsgUpdateCollectionResponse);
+  rpc CreateCollection      (MsgCreateCollection) returns (MsgCreateCollectionResponse);
+  // this line is used by starport scaffolding # proto/tx/rpc
+}
 
 //Used for WASM bindings and JSON parsing
 message BadgeCustomMsgType {
   MsgCreateAddressMappings createAddressMappingsMsg = 1;
-  MsgUpdateCollection updateCollectionMsg = 2;
+  MsgUniversalUpdateCollection universalUpdateCollectionMsg = 2;
   MsgDeleteCollection deleteCollectionMsg = 3;
   MsgTransferBadges transferBadgesMsg = 4;
   MsgUpdateUserApprovals updateUserApprovalsMsg = 5;
+  MsgUpdateCollection updateCollectionMsg = 6;
+  MsgCreateCollection createCollectionMsg = 7;
 }
-
-//The types defined in these files are used to define the MsgServer types for all requests and responses for Msgs of the badges module.
-message MsgUpdateCollection {
+// The types defined in these files are used to define the MsgServer types for all requests and responses for Msgs of the badges module.
+message MsgUniversalUpdateCollection {
   string creator = 1;
-  string collectionId = 2  [(gogoproto.customtype) = "Uint", (gogoproto.nullable) = false]; //0 for new collection
-
-  //The following section of fields are only allowed to be set upon creation of a new collection.
+  string collectionId = 2 [(gogoproto.customtype) = "Uint", (gogoproto.nullable) = false]; // 0 for new collection
   string balancesType = 3;
 
-  //Default balance options for newly initiated accounts.
-  repeated UserOutgoingApproval defaultOutgoingApprovals = 4; //The user's approved transfers for each badge ID.
-  repeated UserIncomingApproval defaultIncomingApprovals = 5; //The user's approved incoming transfers for each badge ID.
-  bool defaultAutoApproveSelfInitiatedOutgoingTransfers = 29;
-  bool defaultAutoApproveSelfInitiatedIncomingTransfers = 30;
-  UserPermissions defaultUserPermissions = 31;
-
-  //The rest of the fields are allowed to be set on creation or update.
+  // Default balance options for newly initiated accounts.
+  repeated UserOutgoingApproval defaultOutgoingApprovals = 4; // The user's approved transfers for each badge ID.
+  repeated UserIncomingApproval defaultIncomingApprovals = 5; // The user's approved incoming transfers for each badge ID.
   repeated Balance badgesToCreate = 6;
 
   bool updateCollectionPermissions = 7;
@@ -76,11 +72,69 @@ message MsgUpdateCollection {
 
   bool updateIsArchivedTimeline = 27;
   repeated IsArchivedTimeline isArchivedTimeline = 28;
+
+  bool defaultAutoApproveSelfInitiatedOutgoingTransfers = 29;
+  bool defaultAutoApproveSelfInitiatedIncomingTransfers = 30;
+  UserPermissions defaultUserPermissions = 31;
+}
+
+message MsgUniversalUpdateCollectionResponse {
+  string collectionId = 1 [(gogoproto.customtype) = "Uint", (gogoproto.nullable) = false]; // ID of badge collection
+}
+
+message MsgUpdateCollection {
+  string creator = 1;
+  string collectionId = 2 [(gogoproto.customtype) = "Uint", (gogoproto.nullable) = false]; // 0 for new collection
+  repeated Balance badgesToCreate = 6;
+  bool updateCollectionPermissions = 7;
+  CollectionPermissions collectionPermissions = 8;
+  bool updateManagerTimeline = 9;
+  repeated ManagerTimeline managerTimeline = 10;
+  bool updateCollectionMetadataTimeline = 11;
+  repeated CollectionMetadataTimeline collectionMetadataTimeline = 12;
+  bool updateBadgeMetadataTimeline = 13;
+  repeated BadgeMetadataTimeline badgeMetadataTimeline = 14;
+  bool updateOffChainBalancesMetadataTimeline = 15;
+  repeated OffChainBalancesMetadataTimeline offChainBalancesMetadataTimeline = 16;
+  bool updateCustomDataTimeline = 17;
+  repeated CustomDataTimeline customDataTimeline = 18;
+  bool updateCollectionApprovals = 21;
+  repeated CollectionApproval collectionApprovals = 22;
+  bool updateStandardsTimeline = 23;
+  repeated StandardsTimeline standardsTimeline = 24;
+  bool updateIsArchivedTimeline = 27;
+  repeated IsArchivedTimeline isArchivedTimeline = 28;
 }
 
 message MsgUpdateCollectionResponse {
-  string collectionId = 1  [(gogoproto.customtype) = "Uint", (gogoproto.nullable) = false]; //ID of badge collection
+  string collectionId = 1 [(gogoproto.customtype) = "Uint", (gogoproto.nullable) = false]; // ID of badge collection
 }
+
+message MsgCreateCollection {
+  string creator = 1;
+  string balancesType = 2;
+  repeated UserOutgoingApproval defaultOutgoingApprovals = 3; // The user's approved transfers for each badge ID.
+  repeated UserIncomingApproval defaultIncomingApprovals = 4; // The user's approved incoming transfers for each badge ID.
+  repeated Balance badgesToCreate = 5;
+  CollectionPermissions collectionPermissions = 6;
+  repeated ManagerTimeline managerTimeline = 7;
+  repeated CollectionMetadataTimeline collectionMetadataTimeline = 8;
+  repeated BadgeMetadataTimeline badgeMetadataTimeline = 9;
+  repeated OffChainBalancesMetadataTimeline offChainBalancesMetadataTimeline = 10;
+  repeated CustomDataTimeline customDataTimeline = 11;
+  repeated CollectionApproval collectionApprovals = 12;
+  repeated StandardsTimeline standardsTimeline = 13;
+  repeated IsArchivedTimeline isArchivedTimeline = 14;
+  bool defaultAutoApproveSelfInitiatedOutgoingTransfers = 15;
+  bool defaultAutoApproveSelfInitiatedIncomingTransfers = 16;
+  UserPermissions defaultUserPermissions = 17;
+}
+
+
+message MsgCreateCollectionResponse {
+  string collectionId = 1 [(gogoproto.customtype) = "Uint", (gogoproto.nullable) = false]; // ID of badge collection
+}
+
 
 message MsgCreateAddressMappings {
   string creator = 1;
@@ -105,7 +159,6 @@ message MsgDeleteCollection {
 
 message MsgDeleteCollectionResponse {}
 
-
 message MsgUpdateUserApprovals {
   string creator = 1;
   string collectionId = 2  [(gogoproto.customtype) = "Uint", (gogoproto.nullable) = false];
@@ -115,7 +168,7 @@ message MsgUpdateUserApprovals {
 
   bool updateIncomingApprovals = 5;
   repeated UserIncomingApproval incomingApprovals = 6;
-
+  
   bool updateAutoApproveSelfInitiatedOutgoingTransfers = 7;
   bool autoApproveSelfInitiatedOutgoingTransfers = 8;
 

@@ -1,6 +1,7 @@
 import * as badges from '../../../../proto/badges/tx_pb'
 
-import { BadgeMetadataTimeline, Balance, CollectionApproval, CollectionMetadataTimeline, CollectionPermissions, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, NumberType, OffChainBalancesMetadataTimeline, StandardsTimeline, UserIncomingApproval, UserOutgoingApproval, UserPermissions, convertBadgeMetadataTimeline, convertBalance, convertCollectionApproval, convertCollectionMetadataTimeline, convertCollectionPermissions, convertCustomDataTimeline, convertIsArchivedTimeline, convertManagerTimeline, convertOffChainBalancesMetadataTimeline, convertStandardsTimeline, convertUserIncomingApproval, convertUserOutgoingApproval, convertUserPermissions, createMsgUpdateCollection as protoMsgUpdateCollection } from '../../../../'
+import { BadgeMetadataTimeline, Balance, CollectionApproval, CollectionMetadataTimeline, CollectionPermissions, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, NumberType, OffChainBalancesMetadataTimeline, StandardsTimeline, convertBadgeMetadataTimeline, convertBalance, convertCollectionApproval, convertCollectionMetadataTimeline, convertCollectionPermissions, convertCustomDataTimeline, convertIsArchivedTimeline, convertManagerTimeline, convertOffChainBalancesMetadataTimeline, convertStandardsTimeline } from '../../../..'
+import { createProtoMsg } from '../../../../proto-types/base'
 import { createTransactionPayload } from '../../base'
 import { Chain, Fee, Sender } from "../../common"
 
@@ -21,10 +22,6 @@ import { Chain, Fee, Sender } from "../../common"
  * @typedef {Object} MsgUpdateCollection
  * @property {string} creator - The creator of the transaction.
  * @property {T} collectionId - The collection ID. If you are creating a new collection, set this to "0".
- * @property {string} balancesType - The balances type. Either "Standard", "Off-Chain", or "Inherited".
- * @property {UserOutgoingApproval[]} defaultOutgoingApprovals - The default approved outgoing transfers timeline for users who have not interacted with the collection yet. Only can be set on initial creation. Only used if collection has "Standard" balance type.
- * @property {UserIncomingApproval[]} defaultIncomingApprovals - The default approved incoming transfers timeline for users who have not interacted with the collection yet. Only can be set on initial creation. Only used if collection has "Standard" balance type.
- * @property {UserPermissions} defaultUserPermissions - The default user permissions for users who have not interacted with the collection yet. Only can be set on initial creation. Only used if collection has "Standard" balance type.
  * @property {Balance[]} badgesToCreate - The badges to create. Newly created badges will be sent to the "Mint" address. Must have necessary permissions. Only used if collection has "Standard" balance type.
  * @property {boolean} updateCollectionPermissions - Whether or not to update the collection permissions.
  * @property {CollectionPermissions} collectionPermissions - The new collection permissions. Must have the necessary permissions to update.
@@ -51,12 +48,6 @@ import { Chain, Fee, Sender } from "../../common"
 export interface MsgUpdateCollection<T extends NumberType> {
   creator: string
   collectionId: T
-  balancesType?: string
-  defaultOutgoingApprovals?: UserOutgoingApproval<T>[]
-  defaultIncomingApprovals?: UserIncomingApproval<T>[]
-  defaultAutoApproveSelfInitiatedOutgoingTransfers?: boolean
-  defaultAutoApproveSelfInitiatedIncomingTransfers?: boolean
-  defaultUserPermissions?: UserPermissions<T>
   badgesToCreate?: Balance<T>[]
   updateCollectionPermissions?: boolean
   collectionPermissions?: CollectionPermissions<T>
@@ -86,10 +77,6 @@ export function convertMsgUpdateCollection<T extends NumberType, U extends Numbe
   return {
     ...msg,
     collectionId: convertFunction(msg.collectionId),
-    defaultOutgoingApprovals: msg.defaultOutgoingApprovals ? msg.defaultOutgoingApprovals.map(x => convertUserOutgoingApproval(x, convertFunction)) : undefined,
-    defaultIncomingApprovals: msg.defaultIncomingApprovals ? msg.defaultIncomingApprovals.map(x => convertUserIncomingApproval(x, convertFunction)) : undefined,
-    defaultUserPermissions: msg.defaultUserPermissions ? convertUserPermissions(msg.defaultUserPermissions, convertFunction) : undefined,
-
     badgesToCreate: msg.badgesToCreate ? msg.badgesToCreate.map(x => convertBalance(x, convertFunction)) : undefined,
     collectionPermissions: msg.collectionPermissions ? convertCollectionPermissions(msg.collectionPermissions, convertFunction) : undefined,
     managerTimeline: msg.managerTimeline ? msg.managerTimeline.map(x => convertManagerTimeline(x, convertFunction)) : undefined,
@@ -107,17 +94,12 @@ export function convertMsgUpdateCollection<T extends NumberType, U extends Numbe
 export function convertFromProtoToMsgUpdateCollection(
   protoMsg: badges.MsgUpdateCollection,
 ): MsgUpdateCollection<bigint> {
-  const msg = (protoMsg.toJson({emitDefaultValues: true}) as any) as MsgUpdateCollection<string>;
+  const msg = (protoMsg.toJson({ emitDefaultValues: true }) as any) as MsgUpdateCollection<string>;
 
   return {
     ...msg,
     creator: msg.creator,
     collectionId: BigInt(msg.collectionId),
-    balancesType: msg.balancesType,
-    defaultOutgoingApprovals: msg.defaultOutgoingApprovals?.map(x => convertUserOutgoingApproval(x, BigInt)),
-    defaultIncomingApprovals: msg.defaultIncomingApprovals?.map(x => convertUserIncomingApproval(x, BigInt)),
-    defaultUserPermissions: msg.defaultUserPermissions ? convertUserPermissions(msg.defaultUserPermissions, BigInt) : undefined,
-
     badgesToCreate: msg.badgesToCreate?.map(x => convertBalance(x, BigInt)),
     collectionPermissions: msg.collectionPermissions ? convertCollectionPermissions(msg.collectionPermissions, BigInt) : undefined,
     managerTimeline: msg.managerTimeline?.map(x => convertManagerTimeline(x, BigInt)),
@@ -149,45 +131,6 @@ export function createTxMsgUpdateCollection<T extends NumberType>(
   memo: string,
   params: MsgUpdateCollection<T>,
 ) {
-  const msgCosmos = protoMsgUpdateCollection(
-    params.creator,
-    params.collectionId,
-    params.balancesType ?? 'Standard',
-    params.defaultOutgoingApprovals ?? [],
-    params.defaultIncomingApprovals ?? [],
-    params.defaultAutoApproveSelfInitiatedOutgoingTransfers ?? false,
-    params.defaultAutoApproveSelfInitiatedIncomingTransfers ?? false,
-    params.defaultUserPermissions ?? { canUpdateIncomingApprovals: [], canUpdateOutgoingApprovals: [], canUpdateAutoApproveSelfInitiatedIncomingTransfers: [], canUpdateAutoApproveSelfInitiatedOutgoingTransfers: [] },
-    params.badgesToCreate ?? [],
-    params.updateCollectionPermissions ?? false,
-    params.collectionPermissions ?? {
-      canArchiveCollection: [],
-      canCreateMoreBadges: [],
-      canDeleteCollection: [],
-      canUpdateBadgeMetadata: [],
-      canUpdateCollectionApprovals: [],
-      canUpdateCollectionMetadata: [],
-      canUpdateCustomData: [],
-      canUpdateManager: [],
-      canUpdateOffChainBalancesMetadata: [],
-      canUpdateStandards: [],
-    },
-    params.updateManagerTimeline ?? false,
-    params.managerTimeline ?? [],
-    params.updateCollectionMetadataTimeline ?? false,
-    params.collectionMetadataTimeline ?? [],
-    params.updateBadgeMetadataTimeline ?? false,
-    params.badgeMetadataTimeline ?? [],
-    params.updateOffChainBalancesMetadataTimeline ?? false,
-    params.offChainBalancesMetadataTimeline ?? [],
-    params.updateCustomDataTimeline ?? false,
-    params.customDataTimeline ?? [],
-    params.updateCollectionApprovals ?? false,
-    params.collectionApprovals ?? [],
-    params.updateStandardsTimeline ?? false,
-    params.standardsTimeline ?? [],
-    params.updateIsArchivedTimeline ?? false,
-    params.isArchivedTimeline ?? []
-  )
+  const msgCosmos = createProtoMsg(new badges.MsgUpdateCollection(convertMsgUpdateCollection(params, String)))
   return createTransactionPayload({ chain, sender, fee, memo, }, msgCosmos)
 }

@@ -196,3 +196,103 @@ export class QueryAllowancesResponse extends Message<QueryAllowancesResponse> {
   }
 }
 
+/**
+ * QueryAllowancesByGranterRequest is the request type for the Query/AllowancesByGranter RPC method.
+ *
+ * Since: cosmos-sdk 0.46
+ *
+ * @generated from message cosmos.feegrant.v1beta1.QueryAllowancesByGranterRequest
+ */
+export class QueryAllowancesByGranterRequest extends Message<QueryAllowancesByGranterRequest> {
+  /**
+   * @generated from field: string granter = 1;
+   */
+  granter = "";
+
+  /**
+   * pagination defines an pagination for the request.
+   *
+   * @generated from field: cosmos.base.query.v1beta1.PageRequest pagination = 2;
+   */
+  pagination?: PageRequest;
+
+  constructor(data?: PartialMessage<QueryAllowancesByGranterRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "cosmos.feegrant.v1beta1.QueryAllowancesByGranterRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "granter", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "pagination", kind: "message", T: PageRequest },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryAllowancesByGranterRequest {
+    return new QueryAllowancesByGranterRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryAllowancesByGranterRequest {
+    return new QueryAllowancesByGranterRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryAllowancesByGranterRequest {
+    return new QueryAllowancesByGranterRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: QueryAllowancesByGranterRequest | PlainMessage<QueryAllowancesByGranterRequest> | undefined, b: QueryAllowancesByGranterRequest | PlainMessage<QueryAllowancesByGranterRequest> | undefined): boolean {
+    return proto3.util.equals(QueryAllowancesByGranterRequest, a, b);
+  }
+}
+
+/**
+ * QueryAllowancesByGranterResponse is the response type for the Query/AllowancesByGranter RPC method.
+ *
+ * Since: cosmos-sdk 0.46
+ *
+ * @generated from message cosmos.feegrant.v1beta1.QueryAllowancesByGranterResponse
+ */
+export class QueryAllowancesByGranterResponse extends Message<QueryAllowancesByGranterResponse> {
+  /**
+   * allowances that have been issued by the granter.
+   *
+   * @generated from field: repeated cosmos.feegrant.v1beta1.Grant allowances = 1;
+   */
+  allowances: Grant[] = [];
+
+  /**
+   * pagination defines an pagination for the response.
+   *
+   * @generated from field: cosmos.base.query.v1beta1.PageResponse pagination = 2;
+   */
+  pagination?: PageResponse;
+
+  constructor(data?: PartialMessage<QueryAllowancesByGranterResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "cosmos.feegrant.v1beta1.QueryAllowancesByGranterResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "allowances", kind: "message", T: Grant, repeated: true },
+    { no: 2, name: "pagination", kind: "message", T: PageResponse },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryAllowancesByGranterResponse {
+    return new QueryAllowancesByGranterResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryAllowancesByGranterResponse {
+    return new QueryAllowancesByGranterResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryAllowancesByGranterResponse {
+    return new QueryAllowancesByGranterResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: QueryAllowancesByGranterResponse | PlainMessage<QueryAllowancesByGranterResponse> | undefined, b: QueryAllowancesByGranterResponse | PlainMessage<QueryAllowancesByGranterResponse> | undefined): boolean {
+    return proto3.util.equals(QueryAllowancesByGranterResponse, a, b);
+  }
+}
+

@@ -10,12 +10,19 @@ import { CompactBitArray } from "../../../crypto/multisig/v1beta1/multisig_pb.js
 /**
  * SignMode represents a signing mode with its own security guarantees.
  *
+ * This enum should be considered a registry of all known sign modes
+ * in the Cosmos ecosystem. Apps are not expected to support all known
+ * sign modes. Apps that would like to support custom  sign modes are
+ * encouraged to open a small PR against this file to add a new case
+ * to this SignMode enum describing their sign mode so that different
+ * apps have a consistent version of this enum.
+ *
  * @generated from enum cosmos.tx.signing.v1beta1.SignMode
  */
 export enum SignMode {
   /**
    * SIGN_MODE_UNSPECIFIED specifies an unknown signing mode and will be
-   * rejected
+   * rejected.
    *
    * @generated from enum value: SIGN_MODE_UNSPECIFIED = 0;
    */
@@ -23,7 +30,7 @@ export enum SignMode {
 
   /**
    * SIGN_MODE_DIRECT specifies a signing mode which uses SignDoc and is
-   * verified with raw bytes from Tx
+   * verified with raw bytes from Tx.
    *
    * @generated from enum value: SIGN_MODE_DIRECT = 1;
    */
@@ -32,15 +39,27 @@ export enum SignMode {
   /**
    * SIGN_MODE_TEXTUAL is a future signing mode that will verify some
    * human-readable textual representation on top of the binary representation
-   * from SIGN_MODE_DIRECT
+   * from SIGN_MODE_DIRECT. It is currently not supported.
    *
    * @generated from enum value: SIGN_MODE_TEXTUAL = 2;
    */
   TEXTUAL = 2,
 
   /**
+   * SIGN_MODE_DIRECT_AUX specifies a signing mode which uses
+   * SignDocDirectAux. As opposed to SIGN_MODE_DIRECT, this sign mode does not
+   * require signers signing over other signers' `signer_info`. It also allows
+   * for adding Tips in transactions.
+   *
+   * Since: cosmos-sdk 0.46
+   *
+   * @generated from enum value: SIGN_MODE_DIRECT_AUX = 3;
+   */
+  DIRECT_AUX = 3,
+
+  /**
    * SIGN_MODE_LEGACY_AMINO_JSON is a backwards compatibility mode which uses
-   * Amino JSON and will be removed in the future
+   * Amino JSON and will be removed in the future.
    *
    * @generated from enum value: SIGN_MODE_LEGACY_AMINO_JSON = 127;
    */
@@ -67,6 +86,7 @@ proto3.util.setEnumType(SignMode, "cosmos.tx.signing.v1beta1.SignMode", [
   { no: 0, name: "SIGN_MODE_UNSPECIFIED" },
   { no: 1, name: "SIGN_MODE_DIRECT" },
   { no: 2, name: "SIGN_MODE_TEXTUAL" },
+  { no: 3, name: "SIGN_MODE_DIRECT_AUX" },
   { no: 127, name: "SIGN_MODE_LEGACY_AMINO_JSON" },
   { no: 191, name: "SIGN_MODE_EIP_191" },
 ]);

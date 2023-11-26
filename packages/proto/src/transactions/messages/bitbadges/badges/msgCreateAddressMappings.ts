@@ -1,7 +1,8 @@
 
-import { AddressMapping, createMsgCreateAddressMappings as protoMsgCreateAddressMappings } from "../../../../";
+import { AddressMapping } from "../../../../";
 import { Chain, Fee, Sender } from "../../common";
 
+import { createProtoMsg } from "../../../../proto-types/base";
 import * as badges from '../../../../proto/badges/tx_pb';
 import { createTransactionPayload } from "../../base";
 
@@ -36,10 +37,6 @@ export function createTxMsgCreateAddressMappings(
   memo: string,
   params: MsgCreateAddressMappings
 ) {
-  // Cosmos
-  const msgCosmos = protoMsgCreateAddressMappings(
-    params.creator,
-    params.addressMappings,
-  )
+  const msgCosmos = createProtoMsg(new badges.MsgCreateAddressMappings(params))
   return createTransactionPayload({ chain, sender, fee, memo, }, msgCosmos)
 }

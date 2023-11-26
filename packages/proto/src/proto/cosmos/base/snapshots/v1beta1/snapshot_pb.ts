@@ -113,6 +113,8 @@ export class Metadata extends Message<Metadata> {
 /**
  * SnapshotItem is an item contained in a rootmulti.Store snapshot.
  *
+ * Since: cosmos-sdk 0.46
+ *
  * @generated from message cosmos.base.snapshots.v1beta1.SnapshotItem
  */
 export class SnapshotItem extends Message<SnapshotItem> {
@@ -145,6 +147,20 @@ export class SnapshotItem extends Message<SnapshotItem> {
      */
     value: SnapshotExtensionPayload;
     case: "extensionPayload";
+  } | {
+    /**
+     * @generated from field: cosmos.base.snapshots.v1beta1.SnapshotKVItem kv = 5 [deprecated = true];
+     * @deprecated
+     */
+    value: SnapshotKVItem;
+    case: "kv";
+  } | {
+    /**
+     * @generated from field: cosmos.base.snapshots.v1beta1.SnapshotSchema schema = 6 [deprecated = true];
+     * @deprecated
+     */
+    value: SnapshotSchema;
+    case: "schema";
   } | { case: undefined; value?: undefined } = { case: undefined };
 
   constructor(data?: PartialMessage<SnapshotItem>) {
@@ -159,6 +175,8 @@ export class SnapshotItem extends Message<SnapshotItem> {
     { no: 2, name: "iavl", kind: "message", T: SnapshotIAVLItem, oneof: "item" },
     { no: 3, name: "extension", kind: "message", T: SnapshotExtensionMeta, oneof: "item" },
     { no: 4, name: "extension_payload", kind: "message", T: SnapshotExtensionPayload, oneof: "item" },
+    { no: 5, name: "kv", kind: "message", T: SnapshotKVItem, oneof: "item" },
+    { no: 6, name: "schema", kind: "message", T: SnapshotSchema, oneof: "item" },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SnapshotItem {
@@ -180,6 +198,8 @@ export class SnapshotItem extends Message<SnapshotItem> {
 
 /**
  * SnapshotStoreItem contains metadata about a snapshotted store.
+ *
+ * Since: cosmos-sdk 0.46
  *
  * @generated from message cosmos.base.snapshots.v1beta1.SnapshotStoreItem
  */
@@ -219,6 +239,8 @@ export class SnapshotStoreItem extends Message<SnapshotStoreItem> {
 
 /**
  * SnapshotIAVLItem is an exported IAVL node.
+ *
+ * Since: cosmos-sdk 0.46
  *
  * @generated from message cosmos.base.snapshots.v1beta1.SnapshotIAVLItem
  */
@@ -281,6 +303,8 @@ export class SnapshotIAVLItem extends Message<SnapshotIAVLItem> {
 /**
  * SnapshotExtensionMeta contains metadata about an external snapshotter.
  *
+ * Since: cosmos-sdk 0.46
+ *
  * @generated from message cosmos.base.snapshots.v1beta1.SnapshotExtensionMeta
  */
 export class SnapshotExtensionMeta extends Message<SnapshotExtensionMeta> {
@@ -326,6 +350,8 @@ export class SnapshotExtensionMeta extends Message<SnapshotExtensionMeta> {
 /**
  * SnapshotExtensionPayload contains payloads of an external snapshotter.
  *
+ * Since: cosmos-sdk 0.46
+ *
  * @generated from message cosmos.base.snapshots.v1beta1.SnapshotExtensionPayload
  */
 export class SnapshotExtensionPayload extends Message<SnapshotExtensionPayload> {
@@ -359,6 +385,98 @@ export class SnapshotExtensionPayload extends Message<SnapshotExtensionPayload> 
 
   static equals(a: SnapshotExtensionPayload | PlainMessage<SnapshotExtensionPayload> | undefined, b: SnapshotExtensionPayload | PlainMessage<SnapshotExtensionPayload> | undefined): boolean {
     return proto3.util.equals(SnapshotExtensionPayload, a, b);
+  }
+}
+
+/**
+ * SnapshotKVItem is an exported Key/Value Pair
+ *
+ * Since: cosmos-sdk 0.46
+ * Deprecated: This message was part of store/v2alpha1 which has been deleted from v0.47.
+ *
+ * @generated from message cosmos.base.snapshots.v1beta1.SnapshotKVItem
+ * @deprecated
+ */
+export class SnapshotKVItem extends Message<SnapshotKVItem> {
+  /**
+   * @generated from field: bytes key = 1;
+   */
+  key = new Uint8Array(0);
+
+  /**
+   * @generated from field: bytes value = 2;
+   */
+  value = new Uint8Array(0);
+
+  constructor(data?: PartialMessage<SnapshotKVItem>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "cosmos.base.snapshots.v1beta1.SnapshotKVItem";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "key", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
+    { no: 2, name: "value", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SnapshotKVItem {
+    return new SnapshotKVItem().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SnapshotKVItem {
+    return new SnapshotKVItem().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SnapshotKVItem {
+    return new SnapshotKVItem().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: SnapshotKVItem | PlainMessage<SnapshotKVItem> | undefined, b: SnapshotKVItem | PlainMessage<SnapshotKVItem> | undefined): boolean {
+    return proto3.util.equals(SnapshotKVItem, a, b);
+  }
+}
+
+/**
+ * SnapshotSchema is an exported schema of smt store
+ *
+ * Since: cosmos-sdk 0.46
+ * Deprecated: This message was part of store/v2alpha1 which has been deleted from v0.47.
+ *
+ * @generated from message cosmos.base.snapshots.v1beta1.SnapshotSchema
+ * @deprecated
+ */
+export class SnapshotSchema extends Message<SnapshotSchema> {
+  /**
+   * @generated from field: repeated bytes keys = 1;
+   */
+  keys: Uint8Array[] = [];
+
+  constructor(data?: PartialMessage<SnapshotSchema>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "cosmos.base.snapshots.v1beta1.SnapshotSchema";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "keys", kind: "scalar", T: 12 /* ScalarType.BYTES */, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SnapshotSchema {
+    return new SnapshotSchema().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SnapshotSchema {
+    return new SnapshotSchema().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SnapshotSchema {
+    return new SnapshotSchema().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: SnapshotSchema | PlainMessage<SnapshotSchema> | undefined, b: SnapshotSchema | PlainMessage<SnapshotSchema> | undefined): boolean {
+    return proto3.util.equals(SnapshotSchema, a, b);
   }
 }
 

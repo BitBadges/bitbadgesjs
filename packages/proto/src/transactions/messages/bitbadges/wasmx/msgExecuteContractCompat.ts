@@ -1,5 +1,6 @@
 
-import { createMsgExecuteContractCompat } from "../../../../";
+import { createProtoMsg } from "../../../../proto-types/base";
+import * as wasmx from "../../../../proto/wasmx/tx_pb";
 import { createTransactionPayload } from "../../base";
 import { Chain, Fee, Sender } from "../../common";
 
@@ -17,11 +18,6 @@ export function createTxMsgExecuteContractCompat(
   memo: string,
   params: MsgExecuteContractCompat
 ) {
-  const msgCosmos = createMsgExecuteContractCompat(
-    params.sender,
-    params.contract,
-    params.msg,
-    params.funds,
-  )
+  const msgCosmos = createProtoMsg(new wasmx.MsgExecuteContractCompat(params))
   return createTransactionPayload({ chain, sender, fee, memo, }, msgCosmos)
 }

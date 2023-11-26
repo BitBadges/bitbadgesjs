@@ -4,8 +4,8 @@
 // @ts-nocheck
 
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Any, Message, proto3, Timestamp } from "@bufbuild/protobuf";
-import { CommissionRates, Description } from "./staking_pb.js";
+import { Any, Message, proto3, protoInt64, Timestamp } from "@bufbuild/protobuf";
+import { CommissionRates, Description, Params } from "./staking_pb.js";
 import { Coin } from "../../base/v1beta1/coin_pb.js";
 
 /**
@@ -481,6 +481,193 @@ export class MsgUndelegateResponse extends Message<MsgUndelegateResponse> {
 
   static equals(a: MsgUndelegateResponse | PlainMessage<MsgUndelegateResponse> | undefined, b: MsgUndelegateResponse | PlainMessage<MsgUndelegateResponse> | undefined): boolean {
     return proto3.util.equals(MsgUndelegateResponse, a, b);
+  }
+}
+
+/**
+ * MsgCancelUnbondingDelegation defines the SDK message for performing a cancel unbonding delegation for delegator
+ *
+ * Since: cosmos-sdk 0.46
+ *
+ * @generated from message cosmos.staking.v1beta1.MsgCancelUnbondingDelegation
+ */
+export class MsgCancelUnbondingDelegation extends Message<MsgCancelUnbondingDelegation> {
+  /**
+   * @generated from field: string delegator_address = 1;
+   */
+  delegatorAddress = "";
+
+  /**
+   * @generated from field: string validator_address = 2;
+   */
+  validatorAddress = "";
+
+  /**
+   * amount is always less than or equal to unbonding delegation entry balance
+   *
+   * @generated from field: cosmos.base.v1beta1.Coin amount = 3;
+   */
+  amount?: Coin;
+
+  /**
+   * creation_height is the height which the unbonding took place.
+   *
+   * @generated from field: int64 creation_height = 4;
+   */
+  creationHeight = protoInt64.zero;
+
+  constructor(data?: PartialMessage<MsgCancelUnbondingDelegation>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "cosmos.staking.v1beta1.MsgCancelUnbondingDelegation";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "delegator_address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "validator_address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "amount", kind: "message", T: Coin },
+    { no: 4, name: "creation_height", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgCancelUnbondingDelegation {
+    return new MsgCancelUnbondingDelegation().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgCancelUnbondingDelegation {
+    return new MsgCancelUnbondingDelegation().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgCancelUnbondingDelegation {
+    return new MsgCancelUnbondingDelegation().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgCancelUnbondingDelegation | PlainMessage<MsgCancelUnbondingDelegation> | undefined, b: MsgCancelUnbondingDelegation | PlainMessage<MsgCancelUnbondingDelegation> | undefined): boolean {
+    return proto3.util.equals(MsgCancelUnbondingDelegation, a, b);
+  }
+}
+
+/**
+ * MsgCancelUnbondingDelegationResponse
+ *
+ * Since: cosmos-sdk 0.46
+ *
+ * @generated from message cosmos.staking.v1beta1.MsgCancelUnbondingDelegationResponse
+ */
+export class MsgCancelUnbondingDelegationResponse extends Message<MsgCancelUnbondingDelegationResponse> {
+  constructor(data?: PartialMessage<MsgCancelUnbondingDelegationResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "cosmos.staking.v1beta1.MsgCancelUnbondingDelegationResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgCancelUnbondingDelegationResponse {
+    return new MsgCancelUnbondingDelegationResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgCancelUnbondingDelegationResponse {
+    return new MsgCancelUnbondingDelegationResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgCancelUnbondingDelegationResponse {
+    return new MsgCancelUnbondingDelegationResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgCancelUnbondingDelegationResponse | PlainMessage<MsgCancelUnbondingDelegationResponse> | undefined, b: MsgCancelUnbondingDelegationResponse | PlainMessage<MsgCancelUnbondingDelegationResponse> | undefined): boolean {
+    return proto3.util.equals(MsgCancelUnbondingDelegationResponse, a, b);
+  }
+}
+
+/**
+ * MsgUpdateParams is the Msg/UpdateParams request type.
+ *
+ * Since: cosmos-sdk 0.47
+ *
+ * @generated from message cosmos.staking.v1beta1.MsgUpdateParams
+ */
+export class MsgUpdateParams extends Message<MsgUpdateParams> {
+  /**
+   * authority is the address that controls the module (defaults to x/gov unless overwritten).
+   *
+   * @generated from field: string authority = 1;
+   */
+  authority = "";
+
+  /**
+   * params defines the x/staking parameters to update.
+   *
+   * NOTE: All parameters must be supplied.
+   *
+   * @generated from field: cosmos.staking.v1beta1.Params params = 2;
+   */
+  params?: Params;
+
+  constructor(data?: PartialMessage<MsgUpdateParams>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "cosmos.staking.v1beta1.MsgUpdateParams";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "authority", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "params", kind: "message", T: Params },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUpdateParams {
+    return new MsgUpdateParams().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgUpdateParams {
+    return new MsgUpdateParams().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgUpdateParams {
+    return new MsgUpdateParams().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgUpdateParams | PlainMessage<MsgUpdateParams> | undefined, b: MsgUpdateParams | PlainMessage<MsgUpdateParams> | undefined): boolean {
+    return proto3.util.equals(MsgUpdateParams, a, b);
+  }
+}
+
+/**
+ * MsgUpdateParamsResponse defines the response structure for executing a
+ * MsgUpdateParams message.
+ *
+ * Since: cosmos-sdk 0.47
+ *
+ * @generated from message cosmos.staking.v1beta1.MsgUpdateParamsResponse
+ */
+export class MsgUpdateParamsResponse extends Message<MsgUpdateParamsResponse> {
+  constructor(data?: PartialMessage<MsgUpdateParamsResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "cosmos.staking.v1beta1.MsgUpdateParamsResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUpdateParamsResponse {
+    return new MsgUpdateParamsResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgUpdateParamsResponse {
+    return new MsgUpdateParamsResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgUpdateParamsResponse {
+    return new MsgUpdateParamsResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgUpdateParamsResponse | PlainMessage<MsgUpdateParamsResponse> | undefined, b: MsgUpdateParamsResponse | PlainMessage<MsgUpdateParamsResponse> | undefined): boolean {
+    return proto3.util.equals(MsgUpdateParamsResponse, a, b);
   }
 }
 

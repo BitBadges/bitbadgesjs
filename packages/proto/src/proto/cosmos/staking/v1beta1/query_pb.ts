@@ -154,7 +154,7 @@ export class QueryValidatorRequest extends Message<QueryValidatorRequest> {
  */
 export class QueryValidatorResponse extends Message<QueryValidatorResponse> {
   /**
-   * validator defines the the validator info.
+   * validator defines the validator info.
    *
    * @generated from field: cosmos.staking.v1beta1.Validator validator = 1;
    */
@@ -936,7 +936,7 @@ export class QueryDelegatorValidatorsRequest extends Message<QueryDelegatorValid
  */
 export class QueryDelegatorValidatorsResponse extends Message<QueryDelegatorValidatorsResponse> {
   /**
-   * validators defines the the validators' info of a delegator.
+   * validators defines the validators' info of a delegator.
    *
    * @generated from field: repeated cosmos.staking.v1beta1.Validator validators = 1;
    */
@@ -1036,7 +1036,7 @@ export class QueryDelegatorValidatorRequest extends Message<QueryDelegatorValida
  */
 export class QueryDelegatorValidatorResponse extends Message<QueryDelegatorValidatorResponse> {
   /**
-   * validator defines the the validator info.
+   * validator defines the validator info.
    *
    * @generated from field: cosmos.staking.v1beta1.Validator validator = 1;
    */

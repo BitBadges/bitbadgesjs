@@ -34,6 +34,7 @@ export interface EIP712ToSign {
 export enum SupportedChain {
   ETH = 'Ethereum',
   COSMOS = 'Cosmos',
+  SOLANA = 'Solana',
 }
 
 /**
@@ -103,6 +104,7 @@ export interface TxPayload {
     signBytes: string
   }
   eipToSign: EIP712ToSign | undefined
+  jsonToSign: string | undefined
 }
 
 export type Coin = {

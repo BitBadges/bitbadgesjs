@@ -1,6 +1,6 @@
 {
   "name": "bitbadgesjs-utils",
-  "version": "1.1.274",
+  "version": "1.1.294",
   "description": "",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -14,16 +14,18 @@
   "author": "trevormil",
   "license": "ISC",
   "dependencies": {
+    "@cosmjs/crypto": "^0.32.0",
     "@cosmjs/stargate": "^0.31.3",
-    "bitbadgesjs-address-converter": "^0.0.3",
-    "bitbadgesjs-proto": "^0.1.153",
-    "bitbadgesjs-provider": "^0.0.3",
+    "bech32": "^2.0.0",
+    "bitbadgesjs-proto": "^0.1.166",
+    "bs58": "^5.0.0",
     "ethers": "^5.7.0",
     "merkletreejs": "^0.3.11",
-    "nano": "^10.1.2"
+    "nano": "^10.1.2",
+    "crypto-addr-codec": "^0.1.7"
   },
   "devDependencies": {
-    "typedoc": "^0.24.5",
-    "blockin": "^1.2.58"
+    "blockin": "^1.2.58",
+    "typedoc": "^0.24.5"
   }
 }

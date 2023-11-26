@@ -137,21 +137,25 @@ export function convertCollectionDoc<T extends NumberType, U extends NumberType>
  * @category API / Indexer
  * @typedef {Object} AccountInfoBase
  * @property {string} publicKey - The public key of the account
- * @property {NumberType} sequence - The sequence of the account. Note we currently do not store sequence in the DB (it is dynamically fetched).
+ * @property {NumberType} accountNumber - The account number of the account
  * @property {SupportedChain} chain - The chain of the account
+ * @property {NumberType} sequence - The sequence of the account. Note we currently do not store sequence in the DB (it is dynamically fetched).
  * @property {string} cosmosAddress - The Cosmos address of the account
  * @property {string} ethAddress - The Eth address of the account
- * @property {string} [username] - The username of the account (from x/nameservice)
+ * @property {string} solAddress - The Solana address of the account
+ * @property {string} [username] - The username of the account
  * @property {CosmosCoin} [balance] - The balance of the account ($BADGE gas token balance not a specific badge)
  */
 export interface AccountInfoBase<T extends NumberType> {
   publicKey: string
-  // sequence: bigint | JSPrimitiveNumberType //We will add sequence support in the future
   chain: SupportedChain
   cosmosAddress: string
   ethAddress: string
+  solAddress: string
   accountNumber: T
-  username?: string //from x/nameservice
+
+
+  username?: string
   sequence?: T
   balance?: CosmosCoin<T>
 }
@@ -461,7 +465,11 @@ export interface AddressMappingInfoBase<T extends NumberType> extends AddressMap
   }[];
   createdBlock: T;
   lastUpdated: T
+
+  nsfw?: { reason: string };
+  reported?: { reason: string };
 }
+
 /**
  * @category API / Indexer
  */
@@ -526,6 +534,7 @@ export interface BalanceInfoBase<T extends NumberType> extends UserBalance<T> {
   uri?: string,
   fetchedAt?: T, //Date.now()
   fetchedAtBlock?: T,
+  contentHash?: string,
   isPermanent?: boolean
 
   updateHistory: {
@@ -821,16 +830,16 @@ export function convertApprovalsTrackerDoc<T extends NumberType, U extends Numbe
 }
 
 /**
- * MerkleChallengeTrackerIdDetails holds the fields used to identify a specific merkle challenge tracker
+ * ChallengeTrackerIdDetails holds the fields used to identify a specific merkle challenge tracker
  *
  * @category API / Indexer
- * @typedef {Object} MerkleChallengeTrackerIdDetails
+ * @typedef {Object} ChallengeTrackerIdDetails
  * @property {NumberType} collectionId - The collection ID
  * @property {string} challengeId - The challenge ID
  * @property {string} challengeLevel - The challenge level (i.e. "collection", "incoming", "outgoing")
  * @property {string} approverAddress - The approver address (leave blank if challengeLevel = "collection")
  */
-export interface MerkleChallengeTrackerIdDetails<T extends NumberType> {
+export interface ChallengeTrackerIdDetails<T extends NumberType> {
   collectionId: T;
   challengeId: string;
   challengeLevel: "collection" | "incoming" | "outgoing" | "";
@@ -840,7 +849,7 @@ export interface MerkleChallengeTrackerIdDetails<T extends NumberType> {
 /**
  * @category API / Indexer
  */
-export function convertMerkleChallengeTrackerIdDetails<T extends NumberType, U extends NumberType>(item: MerkleChallengeTrackerIdDetails<T>, convertFunction: (item: T) => U): MerkleChallengeTrackerIdDetails<U> {
+export function convertChallengeTrackerIdDetails<T extends NumberType, U extends NumberType>(item: ChallengeTrackerIdDetails<T>, convertFunction: (item: T) => U): ChallengeTrackerIdDetails<U> {
   return deepCopy({
     ...item,
     collectionId: convertFunction(item.collectionId),
@@ -1144,6 +1153,56 @@ export function convertIPFSTotalsInfo<T extends NumberType, U extends NumberType
 export function convertIPFSTotalsDoc<T extends NumberType, U extends NumberType>(item: IPFSTotalsDoc<T>, convertFunction: (item: T) => U): IPFSTotalsDoc<U> {
   return deepCopy({
     ...convertIPFSTotalsInfo(removeCouchDBDetails(item), convertFunction),
+    ...getCouchDBDetails(item),
+  })
+}
+
+/**
+ * @category API / Indexer
+ */
+export interface ComplianceInfoBase<T extends NumberType> {
+  badges: {
+    nsfw: { collectionId: T; badgeIds: UintRange<T>[], reason: string }[];
+    reported: { collectionId: T; badgeIds: UintRange<T>[], reason: string }[];
+  },
+  addressMappings: {
+    nsfw: { mappingId: string; reason: string }[];
+    reported: { mappingId: string; reason: string }[];
+  },
+  accounts: {
+    nsfw: { cosmosAddress: string; reason: string }[];
+    reported: { cosmosAddress: string; reason: string }[];
+  }
+}
+
+/**
+ * @category API / Indexer
+ */
+export type ComplianceDoc<T extends NumberType> = ComplianceInfoBase<T> & nano.IdentifiedDocument & nano.MaybeRevisionedDocument & DeletableDocument;
+/**
+ * @category API / Indexer
+ */
+export type ComplianceInfo<T extends NumberType> = ComplianceInfoBase<T> & Identified;
+
+/**
+ * @category API / Indexer
+ */
+export function convertComplianceInfo<T extends NumberType, U extends NumberType>(item: ComplianceInfo<T>, convertFunction: (item: T) => U): ComplianceInfo<U> {
+  return deepCopy({
+    ...item,
+    badges: {
+      nsfw: item.badges.nsfw.map(x => { return { ...x, collectionId: convertFunction(x.collectionId), badgeIds: x.badgeIds.map(y => convertUintRange(y, convertFunction)) } }),
+      reported: item.badges.reported.map(x => { return { ...x, collectionId: convertFunction(x.collectionId), badgeIds: x.badgeIds.map(y => convertUintRange(y, convertFunction)) } }),
+    },
+  })
+}
+
+/**
+ * @category API / Indexer
+ */
+export function convertComplianceDoc<T extends NumberType, U extends NumberType>(item: ComplianceDoc<T>, convertFunction: (item: T) => U): ComplianceDoc<U> {
+  return deepCopy({
+    ...convertComplianceInfo(removeCouchDBDetails(item), convertFunction),
     ...getCouchDBDetails(item),
   })
 }

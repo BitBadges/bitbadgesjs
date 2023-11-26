@@ -1,40 +1,12 @@
 {
-    "exclude": [
-        "node_modules",
-        "build",
-        "dist",
-        "scripts",
-        "acceptance-tests",
-        "webpack",
-        "test",
-        "jest",
-        "src/setupTests.ts",
-        "docs"
-    ],
-    "compilerOptions": {
-        "strict": true,
-        "esModuleInterop": true,
-        "baseUrl": ".",
-        "declaration": true,
-        "outDir": "dist",
-        "module": "CommonJS",
-        "lib": ["ESNext", "dom"],
-        "sourceMap": true,
-        "allowJs": true,
-        "jsx": "react",
-        "moduleResolution": "node",
-        "target": "ESNext",
-        "rootDir": "src",
-        "forceConsistentCasingInFileNames": true,
-        "noImplicitReturns": true,
-        "noImplicitThis": true,
-        "noImplicitAny": true,
-        "strictNullChecks": true,
-        "suppressImplicitAnyIndexErrors": true,
-        "noUnusedLocals": true,
-        "allowSyntheticDefaultImports": true,
-        "downlevelIteration": true,
-        "skipLibCheck": true,
-        "composite": true,
-    }
+  "extends": "../../tsconfig.build.json",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./dist"
+  },
+  "include": [
+    "./src/**/*.ts"
+  ],
+  "references": [
+  ]
 }

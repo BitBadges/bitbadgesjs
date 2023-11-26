@@ -436,9 +436,9 @@ export class MsgMintAndDistributeBadgesResponse extends Message<MsgMintAndDistri
 }
 
 /**
- * @generated from message badges.MsgUpdateCollectionApprovals
+ * @generated from message badges.MsgUniversalUpdateCollectionApprovals
  */
-export class MsgUpdateCollectionApprovals extends Message<MsgUpdateCollectionApprovals> {
+export class MsgUniversalUpdateCollectionApprovals extends Message<MsgUniversalUpdateCollectionApprovals> {
   /**
    * @generated from field: string creator = 1;
    */
@@ -459,13 +459,13 @@ export class MsgUpdateCollectionApprovals extends Message<MsgUpdateCollectionApp
    */
   addressMappings: AddressMapping[] = [];
 
-  constructor(data?: PartialMessage<MsgUpdateCollectionApprovals>) {
+  constructor(data?: PartialMessage<MsgUniversalUpdateCollectionApprovals>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.MsgUpdateCollectionApprovals";
+  static readonly typeName = "badges.MsgUniversalUpdateCollectionApprovals";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
@@ -473,51 +473,51 @@ export class MsgUpdateCollectionApprovals extends Message<MsgUpdateCollectionApp
     { no: 4, name: "addressMappings", kind: "message", T: AddressMapping, repeated: true },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUpdateCollectionApprovals {
-    return new MsgUpdateCollectionApprovals().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUniversalUpdateCollectionApprovals {
+    return new MsgUniversalUpdateCollectionApprovals().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgUpdateCollectionApprovals {
-    return new MsgUpdateCollectionApprovals().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgUniversalUpdateCollectionApprovals {
+    return new MsgUniversalUpdateCollectionApprovals().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgUpdateCollectionApprovals {
-    return new MsgUpdateCollectionApprovals().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgUniversalUpdateCollectionApprovals {
+    return new MsgUniversalUpdateCollectionApprovals().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgUpdateCollectionApprovals | PlainMessage<MsgUpdateCollectionApprovals> | undefined, b: MsgUpdateCollectionApprovals | PlainMessage<MsgUpdateCollectionApprovals> | undefined): boolean {
-    return proto3.util.equals(MsgUpdateCollectionApprovals, a, b);
+  static equals(a: MsgUniversalUpdateCollectionApprovals | PlainMessage<MsgUniversalUpdateCollectionApprovals> | undefined, b: MsgUniversalUpdateCollectionApprovals | PlainMessage<MsgUniversalUpdateCollectionApprovals> | undefined): boolean {
+    return proto3.util.equals(MsgUniversalUpdateCollectionApprovals, a, b);
   }
 }
 
 /**
- * @generated from message badges.MsgUpdateCollectionApprovalsResponse
+ * @generated from message badges.MsgUniversalUpdateCollectionApprovalsResponse
  */
-export class MsgUpdateCollectionApprovalsResponse extends Message<MsgUpdateCollectionApprovalsResponse> {
-  constructor(data?: PartialMessage<MsgUpdateCollectionApprovalsResponse>) {
+export class MsgUniversalUpdateCollectionApprovalsResponse extends Message<MsgUniversalUpdateCollectionApprovalsResponse> {
+  constructor(data?: PartialMessage<MsgUniversalUpdateCollectionApprovalsResponse>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.MsgUpdateCollectionApprovalsResponse";
+  static readonly typeName = "badges.MsgUniversalUpdateCollectionApprovalsResponse";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUpdateCollectionApprovalsResponse {
-    return new MsgUpdateCollectionApprovalsResponse().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUniversalUpdateCollectionApprovalsResponse {
+    return new MsgUniversalUpdateCollectionApprovalsResponse().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgUpdateCollectionApprovalsResponse {
-    return new MsgUpdateCollectionApprovalsResponse().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgUniversalUpdateCollectionApprovalsResponse {
+    return new MsgUniversalUpdateCollectionApprovalsResponse().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgUpdateCollectionApprovalsResponse {
-    return new MsgUpdateCollectionApprovalsResponse().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgUniversalUpdateCollectionApprovalsResponse {
+    return new MsgUniversalUpdateCollectionApprovalsResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgUpdateCollectionApprovalsResponse | PlainMessage<MsgUpdateCollectionApprovalsResponse> | undefined, b: MsgUpdateCollectionApprovalsResponse | PlainMessage<MsgUpdateCollectionApprovalsResponse> | undefined): boolean {
-    return proto3.util.equals(MsgUpdateCollectionApprovalsResponse, a, b);
+  static equals(a: MsgUniversalUpdateCollectionApprovalsResponse | PlainMessage<MsgUniversalUpdateCollectionApprovalsResponse> | undefined, b: MsgUniversalUpdateCollectionApprovalsResponse | PlainMessage<MsgUniversalUpdateCollectionApprovalsResponse> | undefined): boolean {
+    return proto3.util.equals(MsgUniversalUpdateCollectionApprovalsResponse, a, b);
   }
 }
 
@@ -636,9 +636,9 @@ export class MsgUpdateMetadataResponse extends Message<MsgUpdateMetadataResponse
 /**
  * Update badge permissions with new permissions, if permitted.
  *
- * @generated from message badges.MsgUpdateCollectionPermissions
+ * @generated from message badges.MsgUniversalUpdateCollectionPermissions
  */
-export class MsgUpdateCollectionPermissions extends Message<MsgUpdateCollectionPermissions> {
+export class MsgUniversalUpdateCollectionPermissions extends Message<MsgUniversalUpdateCollectionPermissions> {
   /**
    * @generated from field: string creator = 1;
    */
@@ -659,13 +659,13 @@ export class MsgUpdateCollectionPermissions extends Message<MsgUpdateCollectionP
    */
   addressMappings: AddressMapping[] = [];
 
-  constructor(data?: PartialMessage<MsgUpdateCollectionPermissions>) {
+  constructor(data?: PartialMessage<MsgUniversalUpdateCollectionPermissions>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.MsgUpdateCollectionPermissions";
+  static readonly typeName = "badges.MsgUniversalUpdateCollectionPermissions";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
@@ -673,51 +673,51 @@ export class MsgUpdateCollectionPermissions extends Message<MsgUpdateCollectionP
     { no: 4, name: "addressMappings", kind: "message", T: AddressMapping, repeated: true },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUpdateCollectionPermissions {
-    return new MsgUpdateCollectionPermissions().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUniversalUpdateCollectionPermissions {
+    return new MsgUniversalUpdateCollectionPermissions().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgUpdateCollectionPermissions {
-    return new MsgUpdateCollectionPermissions().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgUniversalUpdateCollectionPermissions {
+    return new MsgUniversalUpdateCollectionPermissions().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgUpdateCollectionPermissions {
-    return new MsgUpdateCollectionPermissions().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgUniversalUpdateCollectionPermissions {
+    return new MsgUniversalUpdateCollectionPermissions().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgUpdateCollectionPermissions | PlainMessage<MsgUpdateCollectionPermissions> | undefined, b: MsgUpdateCollectionPermissions | PlainMessage<MsgUpdateCollectionPermissions> | undefined): boolean {
-    return proto3.util.equals(MsgUpdateCollectionPermissions, a, b);
+  static equals(a: MsgUniversalUpdateCollectionPermissions | PlainMessage<MsgUniversalUpdateCollectionPermissions> | undefined, b: MsgUniversalUpdateCollectionPermissions | PlainMessage<MsgUniversalUpdateCollectionPermissions> | undefined): boolean {
+    return proto3.util.equals(MsgUniversalUpdateCollectionPermissions, a, b);
   }
 }
 
 /**
- * @generated from message badges.MsgUpdateCollectionPermissionsResponse
+ * @generated from message badges.MsgUniversalUpdateCollectionPermissionsResponse
  */
-export class MsgUpdateCollectionPermissionsResponse extends Message<MsgUpdateCollectionPermissionsResponse> {
-  constructor(data?: PartialMessage<MsgUpdateCollectionPermissionsResponse>) {
+export class MsgUniversalUpdateCollectionPermissionsResponse extends Message<MsgUniversalUpdateCollectionPermissionsResponse> {
+  constructor(data?: PartialMessage<MsgUniversalUpdateCollectionPermissionsResponse>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.MsgUpdateCollectionPermissionsResponse";
+  static readonly typeName = "badges.MsgUniversalUpdateCollectionPermissionsResponse";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUpdateCollectionPermissionsResponse {
-    return new MsgUpdateCollectionPermissionsResponse().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUniversalUpdateCollectionPermissionsResponse {
+    return new MsgUniversalUpdateCollectionPermissionsResponse().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgUpdateCollectionPermissionsResponse {
-    return new MsgUpdateCollectionPermissionsResponse().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgUniversalUpdateCollectionPermissionsResponse {
+    return new MsgUniversalUpdateCollectionPermissionsResponse().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgUpdateCollectionPermissionsResponse {
-    return new MsgUpdateCollectionPermissionsResponse().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgUniversalUpdateCollectionPermissionsResponse {
+    return new MsgUniversalUpdateCollectionPermissionsResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgUpdateCollectionPermissionsResponse | PlainMessage<MsgUpdateCollectionPermissionsResponse> | undefined, b: MsgUpdateCollectionPermissionsResponse | PlainMessage<MsgUpdateCollectionPermissionsResponse> | undefined): boolean {
-    return proto3.util.equals(MsgUpdateCollectionPermissionsResponse, a, b);
+  static equals(a: MsgUniversalUpdateCollectionPermissionsResponse | PlainMessage<MsgUniversalUpdateCollectionPermissionsResponse> | undefined, b: MsgUniversalUpdateCollectionPermissionsResponse | PlainMessage<MsgUniversalUpdateCollectionPermissionsResponse> | undefined): boolean {
+    return proto3.util.equals(MsgUniversalUpdateCollectionPermissionsResponse, a, b);
   }
 }
 

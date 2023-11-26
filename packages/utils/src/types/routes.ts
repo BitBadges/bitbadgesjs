@@ -56,7 +56,7 @@ export const GetAllPasswordsAndCodesRoute = (collectionId: NumberType) => `/api/
 /**
  * @category API Routes
  */
-export const GetMerkleChallengeCodeViaPasswordRoute = (collectionId: NumberType, challengeId: string, password: string) => `/api/v0/collection/${collectionId.toString()}/password/${challengeId}/${password}`;
+export const GetCodeForPasswordRoute = (collectionId: NumberType, challengeId: string, password: string) => `/api/v0/collection/${collectionId.toString()}/password/${challengeId}/${password}`;
 /**
  * @category API Routes
  */
@@ -102,7 +102,7 @@ export const GetApprovalsRoute = () => "/api/v0/approvals";
  * @category API Routes
  */
 
-export const GetMerkleChallengeTrackerRoute = () => "/api/v0/merkleChallenges";
+export const GetChallengeTrackerRoute = () => "/api/v0/challenges";
 
 //User
 /**

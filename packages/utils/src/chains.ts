@@ -1,14 +1,15 @@
-import { COSMOS, ethToCosmos } from "bitbadgesjs-address-converter";
-import { SupportedChain } from "./types/types";
-import { ethers } from "ethers";
-import { BitBadgesUserInfo, convertBitBadgesUserInfo } from "./types/users";
+import { COSMOS, ethToCosmos, solanaToCosmos } from "./converter";
 import { Stringify } from "bitbadgesjs-proto";
+import { ethers } from "ethers";
+import { SupportedChain } from "./types/types";
+import { BitBadgesUserInfo, convertBitBadgesUserInfo } from "./types/users";
 
 
 export const MINT_ACCOUNT: BitBadgesUserInfo<bigint> = {
   _id: 'Mint',
   cosmosAddress: 'Mint',
   ethAddress: 'Mint',
+  solAddress: 'Mint',
   address: 'Mint',
   chain: SupportedChain.COSMOS,
   publicKey: '',
@@ -32,6 +33,7 @@ export const BLANK_USER_INFO: BitBadgesUserInfo<bigint> = {
   _id: '',
   cosmosAddress: '',
   ethAddress: '',
+  solAddress: 'Mint',
   address: '',
   chain: SupportedChain.UNKNOWN,
   publicKey: '',
@@ -69,6 +71,13 @@ export function convertToCosmosAddress(address: string) {
   } catch {
     if (ethers.utils.isAddress(address)) {
       bech32Address = ethToCosmos(address);
+    } else if (address.length == 44) {
+      try {
+        // Decode the base58 Solana public key
+        return solanaToCosmos(address);
+      } catch {
+        bech32Address = '';
+      }
     }
   }
 
@@ -95,6 +104,8 @@ export function getChainForAddress(address: string) {
     return SupportedChain.ETH;
   } else if (addr.startsWith('cosmos')) {
     return SupportedChain.COSMOS;
+  } else if (address.length == 44) {
+    return SupportedChain.SOLANA;
   }
 
   return SupportedChain.UNKNOWN;
@@ -142,8 +153,11 @@ export function isAddressValid(address: string, chain?: string) {
         isValidAddress = false;
       }
       break;
+    // case SupportedChain.SOLANA:
+    //   isValidAddress = address.length == 44;
+    //   break;
     default:
-      isValidAddress = false;
+      isValidAddress = address.length == 44; //Solana address
       break;
   }
 

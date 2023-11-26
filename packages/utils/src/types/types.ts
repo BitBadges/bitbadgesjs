@@ -63,7 +63,6 @@ export function convertBalancesMap<T extends NumberType, U extends NumberType>(i
 
 /**
  * SupportedChain is an enum of all the supported chains.
- * Currently, we only support Ethereum and Cosmos.
  *
  * Has an UNKNOWN value for when we don't know the chain yet.
  *
@@ -74,6 +73,7 @@ export function convertBalancesMap<T extends NumberType, U extends NumberType>(i
 export enum SupportedChain {
   ETH = 'Ethereum',
   COSMOS = 'Cosmos',
+  SOLANA = 'Solana',
   UNKNOWN = 'Unknown' //If unknown address, we don't officially know the chain yet. For now, we assume it's Ethereum
 }
 

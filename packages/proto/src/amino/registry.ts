@@ -3,13 +3,15 @@ import {
   AminoTypes as AminoTypesClass,
 } from '@cosmjs/stargate'
 import { createBadgesAminoConverters } from '../proto-types/badges/aminoRegistry'
-
-// TODO: Add missing Amino types (see x/**/codec.go)
+import { createWasmXAminoConverters } from '../proto-types/wasmx/aminoRegistry'
+import {createWasmAminoConverters } from '@cosmjs/cosmwasm-stargate'
 
 export function createDefaultAminoConverters() {
   return {
     ...createDefaultCosmosAminoConverters(),
     ...createBadgesAminoConverters(),
+    ...createWasmXAminoConverters(),
+    ...createWasmAminoConverters(),
   }
 }
 

@@ -4,7 +4,7 @@
 // @ts-nocheck
 
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3, protoInt64 } from "@bufbuild/protobuf";
+import { Message, proto3, protoInt64, Timestamp } from "@bufbuild/protobuf";
 
 /**
  * CommitInfo defines commit information used by the multi-store when committing
@@ -23,6 +23,11 @@ export class CommitInfo extends Message<CommitInfo> {
    */
   storeInfos: StoreInfo[] = [];
 
+  /**
+   * @generated from field: google.protobuf.Timestamp timestamp = 3;
+   */
+  timestamp?: Timestamp;
+
   constructor(data?: PartialMessage<CommitInfo>) {
     super();
     proto3.util.initPartial(data, this);
@@ -33,6 +38,7 @@ export class CommitInfo extends Message<CommitInfo> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "version", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
     { no: 2, name: "store_infos", kind: "message", T: StoreInfo, repeated: true },
+    { no: 3, name: "timestamp", kind: "message", T: Timestamp },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CommitInfo {
@@ -99,7 +105,7 @@ export class StoreInfo extends Message<StoreInfo> {
 }
 
 /**
- * CommitID defines the committment information when a specific store is
+ * CommitID defines the commitment information when a specific store is
  * committed.
  *
  * @generated from message cosmos.base.store.v1beta1.CommitID

@@ -8,19 +8,19 @@ import "gogoproto/gogo.proto";
 option go_package = "github.com/bitbadges/bitbadgeschain/x/wasmx/types";
 
 // Query defines the gRPC querier service.
-// service Query {
+service Query {
 
-//   // Retrieves wasmx params
-//   rpc WasmxParams(QueryWasmxParamsRequest) returns (QueryWasmxParamsResponse) {
-//     option (google.api.http).get = "/bitbadges/bitbadgeschain/wasmx/v1/params";
-//   }
+  // Retrieves wasmx params
+  rpc WasmxParams(QueryWasmxParamsRequest) returns (QueryWasmxParamsResponse) {
+    option (google.api.http).get = "/bitbadges/bitbadgeschain/wasmx/v1/params";
+  }
+  
+  // Retrieves the entire wasmx module's state
+  rpc WasmxModuleState(QueryModuleStateRequest) returns (QueryModuleStateResponse) {
+    option (google.api.http).get = "/bitbadges/bitbadgeschain/wasmx/v1/module_state";
+  }
 
-//   // Retrieves the entire wasmx module's state
-//   rpc WasmxModuleState(QueryModuleStateRequest) returns (QueryModuleStateResponse) {
-//     option (google.api.http).get = "/bitbadges/bitbadgeschain/wasmx/v1/module_state";
-//   }
-
-// }
+}
 
 // QueryWasmxParamsRequest is the request type for the Query/WasmxParams RPC method.
 message QueryWasmxParamsRequest {}

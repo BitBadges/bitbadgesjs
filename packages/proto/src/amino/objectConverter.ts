@@ -23,7 +23,7 @@ export function convertProtoMessageToObject<T extends Message<T> = AnyMessage>(
 ): ProtobufObject {
   return {
     typeUrl: `/${msg.getType().typeName}`,
-    value: msg.toJson(),
+    value: msg.toJson({ emitDefaultValues: true }),
   }
 }
 

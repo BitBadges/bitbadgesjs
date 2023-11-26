@@ -60,6 +60,7 @@ export function convertUserIncomingApprovalWithDetails<T extends NumberType, U e
  *
  * @property {string} [resolvedName] - The resolved name of the account (e.g. ENS name).
  * @property {string} [avatar] - The avatar of the account.
+ * @property {SupportedChain} chain - The chain of the account.
  * @property {Coin} [balance] - The balance of the account ($BADGE).
  * @property {boolean} [airdropped] - Indicates whether the account has claimed their airdrop.
  * @property {BalanceDoc[]} collected - A list of badges that the account has collected. Paginated and fetches as needed.
@@ -94,6 +95,9 @@ export interface BitBadgesUserInfo<T extends NumberType> extends ProfileInfoBase
   addressMappings: AddressMappingWithMetadata<T>[],
   claimAlerts: ClaimAlertInfo<T>[],
 
+  nsfw?: { reason: string };
+  reported?: { reason: string };
+
   views: {
     [viewKey: string]: {
       ids: string[],
@@ -112,6 +116,7 @@ export function convertBitBadgesUserInfo<T extends NumberType, U extends NumberT
       _id: '',
       cosmosAddress: item.cosmosAddress,
       ethAddress: item.ethAddress,
+      solAddress: item.solAddress,
       accountNumber: item.accountNumber,
       username: item.username,
       sequence: item.sequence,

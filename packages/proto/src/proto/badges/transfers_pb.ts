@@ -982,7 +982,7 @@ export class IncomingApprovalCriteria extends Message<IncomingApprovalCriteria> 
  */
 export class CollectionApproval extends Message<CollectionApproval> {
   /**
-   * Match Criteria
+   * Match Criteria 
    *
    * @generated from field: string fromMappingId = 1;
    */
@@ -1307,3 +1307,4 @@ export class MerkleProof extends Message<MerkleProof> {
     return proto3.util.equals(MerkleProof, a, b);
   }
 }
+

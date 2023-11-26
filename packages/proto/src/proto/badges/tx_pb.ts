@@ -6,8 +6,8 @@
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
 import { Message, proto3 } from "@bufbuild/protobuf";
 import { CollectionApproval, Transfer, UserIncomingApproval, UserOutgoingApproval } from "./transfers_pb.js";
-import { CollectionPermissions, UserPermissions } from "./permissions_pb.js";
 import { Balance } from "./balances_pb.js";
+import { CollectionPermissions, UserPermissions } from "./permissions_pb.js";
 import { BadgeMetadataTimeline, CollectionMetadataTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadataTimeline, StandardsTimeline } from "./timelines_pb.js";
 import { AddressMapping } from "./address_mappings_pb.js";
 
@@ -23,9 +23,9 @@ export class BadgeCustomMsgType extends Message<BadgeCustomMsgType> {
   createAddressMappingsMsg?: MsgCreateAddressMappings;
 
   /**
-   * @generated from field: badges.MsgUpdateCollection updateCollectionMsg = 2;
+   * @generated from field: badges.MsgUniversalUpdateCollection universalUpdateCollectionMsg = 2;
    */
-  updateCollectionMsg?: MsgUpdateCollection;
+  universalUpdateCollectionMsg?: MsgUniversalUpdateCollection;
 
   /**
    * @generated from field: badges.MsgDeleteCollection deleteCollectionMsg = 3;
@@ -42,6 +42,16 @@ export class BadgeCustomMsgType extends Message<BadgeCustomMsgType> {
    */
   updateUserApprovalsMsg?: MsgUpdateUserApprovals;
 
+  /**
+   * @generated from field: badges.MsgUpdateCollection updateCollectionMsg = 6;
+   */
+  updateCollectionMsg?: MsgUpdateCollection;
+
+  /**
+   * @generated from field: badges.MsgCreateCollection createCollectionMsg = 7;
+   */
+  createCollectionMsg?: MsgCreateCollection;
+
   constructor(data?: PartialMessage<BadgeCustomMsgType>) {
     super();
     proto3.util.initPartial(data, this);
@@ -51,10 +61,12 @@ export class BadgeCustomMsgType extends Message<BadgeCustomMsgType> {
   static readonly typeName = "badges.BadgeCustomMsgType";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "createAddressMappingsMsg", kind: "message", T: MsgCreateAddressMappings },
-    { no: 2, name: "updateCollectionMsg", kind: "message", T: MsgUpdateCollection },
+    { no: 2, name: "universalUpdateCollectionMsg", kind: "message", T: MsgUniversalUpdateCollection },
     { no: 3, name: "deleteCollectionMsg", kind: "message", T: MsgDeleteCollection },
     { no: 4, name: "transferBadgesMsg", kind: "message", T: MsgTransferBadges },
     { no: 5, name: "updateUserApprovalsMsg", kind: "message", T: MsgUpdateUserApprovals },
+    { no: 6, name: "updateCollectionMsg", kind: "message", T: MsgUpdateCollection },
+    { no: 7, name: "createCollectionMsg", kind: "message", T: MsgCreateCollection },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BadgeCustomMsgType {
@@ -77,9 +89,9 @@ export class BadgeCustomMsgType extends Message<BadgeCustomMsgType> {
 /**
  * The types defined in these files are used to define the MsgServer types for all requests and responses for Msgs of the badges module.
  *
- * @generated from message badges.MsgUpdateCollection
+ * @generated from message badges.MsgUniversalUpdateCollection
  */
-export class MsgUpdateCollection extends Message<MsgUpdateCollection> {
+export class MsgUniversalUpdateCollection extends Message<MsgUniversalUpdateCollection> {
   /**
    * @generated from field: string creator = 1;
    */
@@ -93,8 +105,6 @@ export class MsgUpdateCollection extends Message<MsgUpdateCollection> {
   collectionId = "";
 
   /**
-   * The following section of fields are only allowed to be set upon creation of a new collection.
-   *
    * @generated from field: string balancesType = 3;
    */
   balancesType = "";
@@ -116,6 +126,101 @@ export class MsgUpdateCollection extends Message<MsgUpdateCollection> {
   defaultIncomingApprovals: UserIncomingApproval[] = [];
 
   /**
+   * @generated from field: repeated badges.Balance badgesToCreate = 6;
+   */
+  badgesToCreate: Balance[] = [];
+
+  /**
+   * @generated from field: bool updateCollectionPermissions = 7;
+   */
+  updateCollectionPermissions = false;
+
+  /**
+   * @generated from field: badges.CollectionPermissions collectionPermissions = 8;
+   */
+  collectionPermissions?: CollectionPermissions;
+
+  /**
+   * @generated from field: bool updateManagerTimeline = 9;
+   */
+  updateManagerTimeline = false;
+
+  /**
+   * @generated from field: repeated badges.ManagerTimeline managerTimeline = 10;
+   */
+  managerTimeline: ManagerTimeline[] = [];
+
+  /**
+   * @generated from field: bool updateCollectionMetadataTimeline = 11;
+   */
+  updateCollectionMetadataTimeline = false;
+
+  /**
+   * @generated from field: repeated badges.CollectionMetadataTimeline collectionMetadataTimeline = 12;
+   */
+  collectionMetadataTimeline: CollectionMetadataTimeline[] = [];
+
+  /**
+   * @generated from field: bool updateBadgeMetadataTimeline = 13;
+   */
+  updateBadgeMetadataTimeline = false;
+
+  /**
+   * @generated from field: repeated badges.BadgeMetadataTimeline badgeMetadataTimeline = 14;
+   */
+  badgeMetadataTimeline: BadgeMetadataTimeline[] = [];
+
+  /**
+   * @generated from field: bool updateOffChainBalancesMetadataTimeline = 15;
+   */
+  updateOffChainBalancesMetadataTimeline = false;
+
+  /**
+   * @generated from field: repeated badges.OffChainBalancesMetadataTimeline offChainBalancesMetadataTimeline = 16;
+   */
+  offChainBalancesMetadataTimeline: OffChainBalancesMetadataTimeline[] = [];
+
+  /**
+   * @generated from field: bool updateCustomDataTimeline = 17;
+   */
+  updateCustomDataTimeline = false;
+
+  /**
+   * @generated from field: repeated badges.CustomDataTimeline customDataTimeline = 18;
+   */
+  customDataTimeline: CustomDataTimeline[] = [];
+
+  /**
+   * @generated from field: bool updateCollectionApprovals = 21;
+   */
+  updateCollectionApprovals = false;
+
+  /**
+   * @generated from field: repeated badges.CollectionApproval collectionApprovals = 22;
+   */
+  collectionApprovals: CollectionApproval[] = [];
+
+  /**
+   * @generated from field: bool updateStandardsTimeline = 23;
+   */
+  updateStandardsTimeline = false;
+
+  /**
+   * @generated from field: repeated badges.StandardsTimeline standardsTimeline = 24;
+   */
+  standardsTimeline: StandardsTimeline[] = [];
+
+  /**
+   * @generated from field: bool updateIsArchivedTimeline = 27;
+   */
+  updateIsArchivedTimeline = false;
+
+  /**
+   * @generated from field: repeated badges.IsArchivedTimeline isArchivedTimeline = 28;
+   */
+  isArchivedTimeline: IsArchivedTimeline[] = [];
+
+  /**
    * @generated from field: bool defaultAutoApproveSelfInitiatedOutgoingTransfers = 29;
    */
   defaultAutoApproveSelfInitiatedOutgoingTransfers = false;
@@ -130,9 +235,116 @@ export class MsgUpdateCollection extends Message<MsgUpdateCollection> {
    */
   defaultUserPermissions?: UserPermissions;
 
+  constructor(data?: PartialMessage<MsgUniversalUpdateCollection>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MsgUniversalUpdateCollection";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "balancesType", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "defaultOutgoingApprovals", kind: "message", T: UserOutgoingApproval, repeated: true },
+    { no: 5, name: "defaultIncomingApprovals", kind: "message", T: UserIncomingApproval, repeated: true },
+    { no: 6, name: "badgesToCreate", kind: "message", T: Balance, repeated: true },
+    { no: 7, name: "updateCollectionPermissions", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 8, name: "collectionPermissions", kind: "message", T: CollectionPermissions },
+    { no: 9, name: "updateManagerTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 10, name: "managerTimeline", kind: "message", T: ManagerTimeline, repeated: true },
+    { no: 11, name: "updateCollectionMetadataTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 12, name: "collectionMetadataTimeline", kind: "message", T: CollectionMetadataTimeline, repeated: true },
+    { no: 13, name: "updateBadgeMetadataTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 14, name: "badgeMetadataTimeline", kind: "message", T: BadgeMetadataTimeline, repeated: true },
+    { no: 15, name: "updateOffChainBalancesMetadataTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 16, name: "offChainBalancesMetadataTimeline", kind: "message", T: OffChainBalancesMetadataTimeline, repeated: true },
+    { no: 17, name: "updateCustomDataTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 18, name: "customDataTimeline", kind: "message", T: CustomDataTimeline, repeated: true },
+    { no: 21, name: "updateCollectionApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 22, name: "collectionApprovals", kind: "message", T: CollectionApproval, repeated: true },
+    { no: 23, name: "updateStandardsTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 24, name: "standardsTimeline", kind: "message", T: StandardsTimeline, repeated: true },
+    { no: 27, name: "updateIsArchivedTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 28, name: "isArchivedTimeline", kind: "message", T: IsArchivedTimeline, repeated: true },
+    { no: 29, name: "defaultAutoApproveSelfInitiatedOutgoingTransfers", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 30, name: "defaultAutoApproveSelfInitiatedIncomingTransfers", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 31, name: "defaultUserPermissions", kind: "message", T: UserPermissions },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUniversalUpdateCollection {
+    return new MsgUniversalUpdateCollection().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgUniversalUpdateCollection {
+    return new MsgUniversalUpdateCollection().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgUniversalUpdateCollection {
+    return new MsgUniversalUpdateCollection().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgUniversalUpdateCollection | PlainMessage<MsgUniversalUpdateCollection> | undefined, b: MsgUniversalUpdateCollection | PlainMessage<MsgUniversalUpdateCollection> | undefined): boolean {
+    return proto3.util.equals(MsgUniversalUpdateCollection, a, b);
+  }
+}
+
+/**
+ * @generated from message badges.MsgUniversalUpdateCollectionResponse
+ */
+export class MsgUniversalUpdateCollectionResponse extends Message<MsgUniversalUpdateCollectionResponse> {
   /**
-   * The rest of the fields are allowed to be set on creation or update.
+   * ID of badge collection
    *
+   * @generated from field: string collectionId = 1;
+   */
+  collectionId = "";
+
+  constructor(data?: PartialMessage<MsgUniversalUpdateCollectionResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MsgUniversalUpdateCollectionResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUniversalUpdateCollectionResponse {
+    return new MsgUniversalUpdateCollectionResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgUniversalUpdateCollectionResponse {
+    return new MsgUniversalUpdateCollectionResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgUniversalUpdateCollectionResponse {
+    return new MsgUniversalUpdateCollectionResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgUniversalUpdateCollectionResponse | PlainMessage<MsgUniversalUpdateCollectionResponse> | undefined, b: MsgUniversalUpdateCollectionResponse | PlainMessage<MsgUniversalUpdateCollectionResponse> | undefined): boolean {
+    return proto3.util.equals(MsgUniversalUpdateCollectionResponse, a, b);
+  }
+}
+
+/**
+ * @generated from message badges.MsgUpdateCollection
+ */
+export class MsgUpdateCollection extends Message<MsgUpdateCollection> {
+  /**
+   * @generated from field: string creator = 1;
+   */
+  creator = "";
+
+  /**
+   * 0 for new collection
+   *
+   * @generated from field: string collectionId = 2;
+   */
+  collectionId = "";
+
+  /**
    * @generated from field: repeated badges.Balance badgesToCreate = 6;
    */
   badgesToCreate: Balance[] = [];
@@ -237,12 +449,6 @@ export class MsgUpdateCollection extends Message<MsgUpdateCollection> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "balancesType", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "defaultOutgoingApprovals", kind: "message", T: UserOutgoingApproval, repeated: true },
-    { no: 5, name: "defaultIncomingApprovals", kind: "message", T: UserIncomingApproval, repeated: true },
-    { no: 29, name: "defaultAutoApproveSelfInitiatedOutgoingTransfers", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 30, name: "defaultAutoApproveSelfInitiatedIncomingTransfers", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 31, name: "defaultUserPermissions", kind: "message", T: UserPermissions },
     { no: 6, name: "badgesToCreate", kind: "message", T: Balance, repeated: true },
     { no: 7, name: "updateCollectionPermissions", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 8, name: "collectionPermissions", kind: "message", T: CollectionPermissions },
@@ -317,6 +523,182 @@ export class MsgUpdateCollectionResponse extends Message<MsgUpdateCollectionResp
 
   static equals(a: MsgUpdateCollectionResponse | PlainMessage<MsgUpdateCollectionResponse> | undefined, b: MsgUpdateCollectionResponse | PlainMessage<MsgUpdateCollectionResponse> | undefined): boolean {
     return proto3.util.equals(MsgUpdateCollectionResponse, a, b);
+  }
+}
+
+/**
+ * @generated from message badges.MsgCreateCollection
+ */
+export class MsgCreateCollection extends Message<MsgCreateCollection> {
+  /**
+   * @generated from field: string creator = 1;
+   */
+  creator = "";
+
+  /**
+   * @generated from field: string balancesType = 2;
+   */
+  balancesType = "";
+
+  /**
+   * The user's approved transfers for each badge ID.
+   *
+   * @generated from field: repeated badges.UserOutgoingApproval defaultOutgoingApprovals = 3;
+   */
+  defaultOutgoingApprovals: UserOutgoingApproval[] = [];
+
+  /**
+   * The user's approved incoming transfers for each badge ID.
+   *
+   * @generated from field: repeated badges.UserIncomingApproval defaultIncomingApprovals = 4;
+   */
+  defaultIncomingApprovals: UserIncomingApproval[] = [];
+
+  /**
+   * @generated from field: repeated badges.Balance badgesToCreate = 5;
+   */
+  badgesToCreate: Balance[] = [];
+
+  /**
+   * @generated from field: badges.CollectionPermissions collectionPermissions = 6;
+   */
+  collectionPermissions?: CollectionPermissions;
+
+  /**
+   * @generated from field: repeated badges.ManagerTimeline managerTimeline = 7;
+   */
+  managerTimeline: ManagerTimeline[] = [];
+
+  /**
+   * @generated from field: repeated badges.CollectionMetadataTimeline collectionMetadataTimeline = 8;
+   */
+  collectionMetadataTimeline: CollectionMetadataTimeline[] = [];
+
+  /**
+   * @generated from field: repeated badges.BadgeMetadataTimeline badgeMetadataTimeline = 9;
+   */
+  badgeMetadataTimeline: BadgeMetadataTimeline[] = [];
+
+  /**
+   * @generated from field: repeated badges.OffChainBalancesMetadataTimeline offChainBalancesMetadataTimeline = 10;
+   */
+  offChainBalancesMetadataTimeline: OffChainBalancesMetadataTimeline[] = [];
+
+  /**
+   * @generated from field: repeated badges.CustomDataTimeline customDataTimeline = 11;
+   */
+  customDataTimeline: CustomDataTimeline[] = [];
+
+  /**
+   * @generated from field: repeated badges.CollectionApproval collectionApprovals = 12;
+   */
+  collectionApprovals: CollectionApproval[] = [];
+
+  /**
+   * @generated from field: repeated badges.StandardsTimeline standardsTimeline = 13;
+   */
+  standardsTimeline: StandardsTimeline[] = [];
+
+  /**
+   * @generated from field: repeated badges.IsArchivedTimeline isArchivedTimeline = 14;
+   */
+  isArchivedTimeline: IsArchivedTimeline[] = [];
+
+  /**
+   * @generated from field: bool defaultAutoApproveSelfInitiatedOutgoingTransfers = 15;
+   */
+  defaultAutoApproveSelfInitiatedOutgoingTransfers = false;
+
+  /**
+   * @generated from field: bool defaultAutoApproveSelfInitiatedIncomingTransfers = 16;
+   */
+  defaultAutoApproveSelfInitiatedIncomingTransfers = false;
+
+  /**
+   * @generated from field: badges.UserPermissions defaultUserPermissions = 17;
+   */
+  defaultUserPermissions?: UserPermissions;
+
+  constructor(data?: PartialMessage<MsgCreateCollection>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MsgCreateCollection";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "balancesType", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "defaultOutgoingApprovals", kind: "message", T: UserOutgoingApproval, repeated: true },
+    { no: 4, name: "defaultIncomingApprovals", kind: "message", T: UserIncomingApproval, repeated: true },
+    { no: 5, name: "badgesToCreate", kind: "message", T: Balance, repeated: true },
+    { no: 6, name: "collectionPermissions", kind: "message", T: CollectionPermissions },
+    { no: 7, name: "managerTimeline", kind: "message", T: ManagerTimeline, repeated: true },
+    { no: 8, name: "collectionMetadataTimeline", kind: "message", T: CollectionMetadataTimeline, repeated: true },
+    { no: 9, name: "badgeMetadataTimeline", kind: "message", T: BadgeMetadataTimeline, repeated: true },
+    { no: 10, name: "offChainBalancesMetadataTimeline", kind: "message", T: OffChainBalancesMetadataTimeline, repeated: true },
+    { no: 11, name: "customDataTimeline", kind: "message", T: CustomDataTimeline, repeated: true },
+    { no: 12, name: "collectionApprovals", kind: "message", T: CollectionApproval, repeated: true },
+    { no: 13, name: "standardsTimeline", kind: "message", T: StandardsTimeline, repeated: true },
+    { no: 14, name: "isArchivedTimeline", kind: "message", T: IsArchivedTimeline, repeated: true },
+    { no: 15, name: "defaultAutoApproveSelfInitiatedOutgoingTransfers", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 16, name: "defaultAutoApproveSelfInitiatedIncomingTransfers", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 17, name: "defaultUserPermissions", kind: "message", T: UserPermissions },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgCreateCollection {
+    return new MsgCreateCollection().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgCreateCollection {
+    return new MsgCreateCollection().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgCreateCollection {
+    return new MsgCreateCollection().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgCreateCollection | PlainMessage<MsgCreateCollection> | undefined, b: MsgCreateCollection | PlainMessage<MsgCreateCollection> | undefined): boolean {
+    return proto3.util.equals(MsgCreateCollection, a, b);
+  }
+}
+
+/**
+ * @generated from message badges.MsgCreateCollectionResponse
+ */
+export class MsgCreateCollectionResponse extends Message<MsgCreateCollectionResponse> {
+  /**
+   * ID of badge collection
+   *
+   * @generated from field: string collectionId = 1;
+   */
+  collectionId = "";
+
+  constructor(data?: PartialMessage<MsgCreateCollectionResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MsgCreateCollectionResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgCreateCollectionResponse {
+    return new MsgCreateCollectionResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgCreateCollectionResponse {
+    return new MsgCreateCollectionResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgCreateCollectionResponse {
+    return new MsgCreateCollectionResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgCreateCollectionResponse | PlainMessage<MsgCreateCollectionResponse> | undefined, b: MsgCreateCollectionResponse | PlainMessage<MsgCreateCollectionResponse> | undefined): boolean {
+    return proto3.util.equals(MsgCreateCollectionResponse, a, b);
   }
 }
 

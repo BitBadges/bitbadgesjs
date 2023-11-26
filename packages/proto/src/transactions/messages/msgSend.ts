@@ -1,7 +1,8 @@
 import {
-  NumberType,
-  createMsgSend as protoMsgSend
+  NumberType
 } from '../../'
+import { MsgSend as ProtoMsgSend } from '../../proto/cosmos/bank/v1beta1/tx_pb'
+import { createProtoMsg } from '../../proto-types/base'
 import { createTransactionPayload } from './base'
 import { Chain, Fee, Sender } from './common'
 
@@ -19,11 +20,13 @@ export function createTxMsgSend<T extends NumberType>(
   params: MsgSend<T>,
 ) {
   // Cosmos
-  const msgSend = protoMsgSend(
-    sender.accountAddress,
-    params.destinationAddress,
-    params.amount,
-    params.denom,
-  )
+  const msgSend = createProtoMsg(new ProtoMsgSend({
+    fromAddress: sender.accountAddress,
+    toAddress: params.destinationAddress,
+    amount: [{
+      denom: params.denom,
+      amount: params.amount.toString(),
+    }],
+  }))
   return createTransactionPayload({ chain, sender, fee, memo, }, msgSend)
 }

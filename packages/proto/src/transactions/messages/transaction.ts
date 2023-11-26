@@ -1,7 +1,7 @@
 import { Keccak } from 'sha3'
 import { Any } from '@bufbuild/protobuf'
 import { StdFee, makeSignDoc, serializeSignDoc } from '@cosmjs/amino'
-import { PubKey } from '../../proto/ethermint/keys_pb.js'
+import { PubKey } from '../../proto/ethereum/keys_pb.js'
 import { AminoTypes } from '../../amino/registry.js'
 import { convertProtoMessageToObject } from '../../amino/objectConverter.js'
 import { MessageGenerated, createAnyMessage } from '../../proto-types/utils.js'
@@ -9,6 +9,7 @@ import { Coin } from '../../proto/cosmos/base/v1beta1/coin_pb.js'
 import { SignMode } from '../../proto/cosmos/tx/signing/v1beta1/signing_pb.js'
 import { TxBody, Fee, SignerInfo, ModeInfo, ModeInfo_Single, AuthInfo, SignDoc } from '../../proto/cosmos/tx/v1beta1/tx_pb.js'
 import { PubKey as SECP256k1 } from '../../proto/cosmos/crypto/secp256k1/keys_pb.js'
+import { PubKey as PubKeySolana } from '../../proto/cosmos/crypto/ed25519/keys_pb.js'
 
 export const SIGN_DIRECT = SignMode.DIRECT
 export const LEGACY_AMINO = SignMode.LEGACY_AMINO_JSON
@@ -68,8 +69,6 @@ export function createSignerInfo(
   mode: number,
 ) {
   let pubkey: MessageGenerated
-
-  // NOTE: secp256k1 is going to be removed from evmos
   if (algo === 'secp256k1') {
     pubkey = {
       message: new SECP256k1({
@@ -77,13 +76,19 @@ export function createSignerInfo(
       }),
       path: 'cosmos.crypto.secp256k1.PubKey',
     }
+  } else if (algo === 'ed25519') {
+    pubkey = {
+      message: new PubKeySolana({
+        key: publicKey,
+      }),
+      path: 'cosmos.crypto.ed25519.PubKey',
+    }
   } else {
-    // NOTE: assume ethsecp256k1 by default because after mainnet is the only one that is going to be supported
     pubkey = {
       message: new PubKey({
         key: publicKey,
       }),
-      path: 'ethermint.PubKey',
+      path: 'ethereum.PubKey',
     }
   }
 

@@ -1,6 +1,7 @@
 import * as badges from '../../../../proto/badges/tx_pb'
 
-import { NumberType, UserIncomingApproval, UserOutgoingApproval, UserPermissions, convertUserIncomingApproval, convertUserOutgoingApproval, convertUserPermissions, createMsgUpdateUserApprovals as protoMsgUpdateUserApprovals } from '../../../..'
+import { createProtoMsg } from '../../../../proto-types/base'
+import { NumberType, UserIncomingApproval, UserOutgoingApproval, UserPermissions, convertUserIncomingApproval, convertUserOutgoingApproval, convertUserPermissions } from '../../../..'
 import { createTransactionPayload } from '../../base'
 import { Chain, Fee, Sender } from "../../common"
 
@@ -57,24 +58,6 @@ export function createTxMsgUpdateUserApprovals<T extends NumberType>(
   memo: string,
   params: MsgUpdateUserApprovals<T>
 ) {
-  const msgCosmos = protoMsgUpdateUserApprovals(
-    params.creator,
-    params.collectionId,
-    params.updateOutgoingApprovals ?? false,
-    params.outgoingApprovals ?? [],
-    params.updateIncomingApprovals ?? false,
-    params.incomingApprovals ?? [],
-    params.updateAutoApproveSelfInitiatedOutgoingTransfers ?? false,
-    params.autoApproveSelfInitiatedOutgoingTransfers ?? false,
-    params.updateAutoApproveSelfInitiatedIncomingTransfers ?? false,
-    params.autoApproveSelfInitiatedIncomingTransfers ?? false,
-    params.updateUserPermissions ?? false,
-    params.userPermissions ?? {
-      canUpdateIncomingApprovals: [],
-      canUpdateOutgoingApprovals: [],
-      canUpdateAutoApproveSelfInitiatedIncomingTransfers: [],
-      canUpdateAutoApproveSelfInitiatedOutgoingTransfers: [],
-    },
-  )
+  const msgCosmos = createProtoMsg(new badges.MsgUpdateUserApprovals(convertMsgUpdateUserApprovals(params, String)))
   return createTransactionPayload({ chain, sender, fee, memo, }, msgCosmos)
 }

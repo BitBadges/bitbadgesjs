@@ -1,7 +1,10 @@
 import {
   MessageGenerated,
+  createProtoMsg,
   createTypedData,
 } from '../../'
+import { populateUndefinedForMsgCreateCollection, populateUndefinedForMsgTransferBadges, populateUndefinedForMsgUniversalUpdateCollection, populateUndefinedForMsgUpdateCollection, populateUndefinedForMsgUpdateUserApprovals } from '../../eip712/payload/samples/getSampleMsg'
+import { MsgCreateCollection, MsgTransferBadges, MsgUniversalUpdateCollection, MsgUpdateCollection, MsgUpdateUserApprovals } from '../../proto/badges/tx_pb'
 import { Chain, Fee, Sender, SupportedChain } from './common.js'
 import {
   createStdFee,
@@ -43,7 +46,7 @@ const wrapTypeToArray = <T>(obj: T | T[]) => {
 }
 
 
-export const createEIP712TypedData = (
+const createEIP712TypedData = (
   context: TxContext,
   protoMsgs: MessageGenerated | MessageGenerated[],
 ) => {
@@ -82,7 +85,7 @@ const createCosmosPayload = (
     fee.amount,
     fee.denom,
     parseInt(fee.gas, 10),
-    chain.chain === SupportedChain.ETH ? 'ethsecp256' : 'secp256k1',
+    chain.chain === SupportedChain.ETH ? 'ethsecp256' : chain.chain === SupportedChain.SOLANA ? 'ed25519' : 'secp256k1',
     sender.pubkey,
     sender.sequence,
     sender.accountNumber,
@@ -90,13 +93,61 @@ const createCosmosPayload = (
   )
 }
 
+function recursivelySort(obj: any): any {
+  if (Array.isArray(obj)) {
+    return obj.map(recursivelySort);
+  } else if (typeof obj === 'object' && obj !== null) {
+    return Object.keys(obj)
+      .sort()
+      .reduce((result, key) => {
+        result[key] = recursivelySort(obj[key] as any);
+        return result;
+      }, {} as any);
+  }
+  return obj as any;
+}
+
 export const createTransactionPayload = (
   context: TxContext,
   messages: MessageGenerated | MessageGenerated[],
 ) => {
+  messages = wrapTypeToArray(messages)
+  messages = normalizeMessagesIfNecessary(messages)
+
+  const eipTxn = createEIP712TypedData(context, messages)
+  let sortedEipMessage = recursivelySort(eipTxn.message);
+  const message = JSON.stringify(sortedEipMessage);
+
   return {
     signDirect: createCosmosPayload(context, messages).signDirect,
     legacyAmino: createCosmosPayload(context, messages).legacyAmino,
     eipToSign: createEIP712TypedData(context, messages),
+    jsonToSign: message,
   }
+}
+
+
+const normalizeMessagesIfNecessary = (messages: MessageGenerated[]) => {
+  const newMessages = messages.map((msg) => {
+    const msgVal = msg.message;
+
+    if (msgVal.getType().typeName === MsgUpdateCollection.typeName) {
+      msg = createProtoMsg(populateUndefinedForMsgUpdateCollection(msgVal as MsgUpdateCollection))
+    } else if (msgVal.getType().typeName === MsgUpdateUserApprovals.typeName) {
+      msg = createProtoMsg(populateUndefinedForMsgUpdateUserApprovals(msgVal as MsgUpdateUserApprovals))
+    } else if (msgVal.getType().typeName === MsgTransferBadges.typeName) {
+      msg = createProtoMsg(populateUndefinedForMsgTransferBadges(msgVal as MsgTransferBadges))
+    } else if (msgVal.getType().typeName === MsgCreateCollection.typeName) {
+      msg = createProtoMsg(populateUndefinedForMsgCreateCollection(msgVal as MsgCreateCollection))
+    } else if (msgVal.getType().typeName === MsgUniversalUpdateCollection.typeName) {
+      msg = createProtoMsg(populateUndefinedForMsgUniversalUpdateCollection(msgVal as MsgUniversalUpdateCollection))
+    }
+
+    //MsgCreateAddressMappings and MsgDeleteCollection should be fine bc they are all primitive types
+    //We only normalize if there is a custom type which could be undefined
+
+    return msg
+  })
+
+  return newMessages;
 }

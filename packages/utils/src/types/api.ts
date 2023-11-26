@@ -4,7 +4,7 @@ import { BroadcastPostBody } from "bitbadgesjs-provider"
 import { ChallengeParams } from "blockin"
 import { TransferActivityInfo, convertTransferActivityInfo } from "./activity"
 import { BadgeMetadataDetails, BitBadgesCollection, convertBadgeMetadataDetails, convertBitBadgesCollection } from "./collections"
-import { ApprovalsTrackerInfo, BalanceInfoWithDetails, ChallengeDetails, MerkleChallengeIdDetails, MerkleChallengeInfo, MerkleChallengeTrackerIdDetails, QueueInfo, StatusInfo, convertApprovalsTrackerInfo, convertBalanceInfoWithDetails, convertMerkleChallengeInfo, convertQueueItem, convertStatusInfo } from "./db"
+import { ApprovalsTrackerInfo, BalanceInfoWithDetails, ChallengeDetails, MerkleChallengeIdDetails, MerkleChallengeInfo, ChallengeTrackerIdDetails, QueueInfo, StatusInfo, convertApprovalsTrackerInfo, convertBalanceInfoWithDetails, convertMerkleChallengeInfo, convertQueueItem, convertStatusInfo } from "./db"
 import { AddressMappingWithMetadata, Metadata, convertAddressMappingWithMetadata, convertMetadata } from "./metadata"
 import { OffChainBalancesMap } from "./transfers"
 import { SupportedChain } from "./types"
@@ -140,7 +140,7 @@ export interface GetAdditionalCollectionDetailsRequestBody {
   }[],
 
   fetchTotalAndMintBalances?: boolean,
-  merkleChallengeIdsToFetch?: MerkleChallengeTrackerIdDetails<NumberType>[],
+  merkleChallengeIdsToFetch?: ChallengeTrackerIdDetails<NumberType>[],
   approvalsTrackerIdsToFetch?: AmountTrackerIdDetails<NumberType>[],
   handleAllAndAppendDefaults?: boolean
   //customQueries?: { db: string, selector: any, key: string }[],
@@ -242,6 +242,7 @@ export interface GetMetadataForCollectionRouteSuccessResponse<T extends NumberTy
   collectionMetadata?: Metadata<T>,
   badgeMetadata?: BadgeMetadataDetails<T>[],
 }
+
 /**
  * @category API / Indexer
  */
@@ -259,9 +260,7 @@ export function convertGetMetadataForCollectionRouteSuccessResponse<T extends Nu
 /**
  * @category API / Indexer
  */
-export interface GetBadgeBalanceByAddressRouteRequestBody {
-  doNotHandleAllAndAppendDefaults?: boolean,
-}
+export interface GetBadgeBalanceByAddressRouteRequestBody { }
 /**
  * @category API / Indexer
  */
@@ -318,6 +317,7 @@ export interface RefreshMetadataRouteRequestBody { }
 export interface RefreshMetadataRouteSuccessResponse<T extends NumberType> {
   successMessage: string,
 }
+
 /**
  * @category API / Indexer
  */
@@ -396,21 +396,21 @@ export function convertGetAllCodesAndPasswordsRouteSuccessResponse<T extends Num
 /**
  * @category API / Indexer
  */
-export interface GetMerkleChallengeCodeViaPasswordRouteRequestBody { }
+export interface GetCodeForPasswordRouteRequestBody { }
 /**
  * @category API / Indexer
  */
-export interface GetMerkleChallengeCodeViaPasswordRouteSuccessResponse<T extends NumberType> {
+export interface GetCodeForPasswordRouteSuccessResponse<T extends NumberType> {
   code: string,
 }
 /**
  * @category API / Indexer
  */
-export type GetMerkleChallengeCodeViaPasswordRouteResponse<T extends NumberType> = ErrorResponse | GetMerkleChallengeCodeViaPasswordRouteSuccessResponse<T>;
+export type GetCodeForPasswordRouteResponse<T extends NumberType> = ErrorResponse | GetCodeForPasswordRouteSuccessResponse<T>;
 /**
  * @category API / Indexer
  */
-export function convertGetMerkleChallengeCodeViaPasswordRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetMerkleChallengeCodeViaPasswordRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetMerkleChallengeCodeViaPasswordRouteSuccessResponse<U> {
+export function convertGetCodeForPasswordRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetCodeForPasswordRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetCodeForPasswordRouteSuccessResponse<U> {
   return { ...item };
 }
 
@@ -643,12 +643,6 @@ export interface UpdateAccountInfoRouteRequestBody<T extends NumberType> {
   telegram?: string,
   seenActivity?: NumberType,
   readme?: string,
-
-  onlyShowApproved?: boolean
-  shownBadges?: {
-    collectionId: T,
-    badgeIds: UintRange<T>[],
-  }[],
   hiddenBadges?: {
     collectionId: T,
     badgeIds: UintRange<T>[],
@@ -1172,27 +1166,27 @@ export function convertGetApprovalsRouteSuccessResponse<T extends NumberType, U 
 /**
  * @category API / Indexer
  */
-export interface GetMerkleChallengeTrackersRouteRequestBody {
-  merkleChallengeTrackerIds: MerkleChallengeIdDetails<NumberType>[],
+export interface GetChallengeTrackersRouteRequestBody {
+  challengeTrackerIds: MerkleChallengeIdDetails<NumberType>[],
 }
 
 /**
  * @category API / Indexer
  */
-export interface GetMerkleChallengeTrackersRouteSuccessResponse<T extends NumberType> {
-  merkleChallengeTrackers: MerkleChallengeInfo<T>[],
+export interface GetChallengeTrackersRouteSuccessResponse<T extends NumberType> {
+  challengeTrackers: MerkleChallengeInfo<T>[],
 }
 
 /**
  * @category API / Indexer
  */
-export type GetMerkleChallengeTrackersRouteResponse<T extends NumberType> = ErrorResponse | GetMerkleChallengeTrackersRouteSuccessResponse<T>;
+export type GetChallengeTrackersRouteResponse<T extends NumberType> = ErrorResponse | GetChallengeTrackersRouteSuccessResponse<T>;
 /**
  * @category API / Indexer
  */
-export function convertGetMerkleChallengeTrackersRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetMerkleChallengeTrackersRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetMerkleChallengeTrackersRouteSuccessResponse<U> {
+export function convertGetChallengeTrackersRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetChallengeTrackersRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetChallengeTrackersRouteSuccessResponse<U> {
   return {
-    merkleChallengeTrackers: item.merkleChallengeTrackers.map((merkleChallenge) => convertMerkleChallengeInfo(merkleChallenge, convertFunction)),
+    challengeTrackers: item.challengeTrackers.map((merkleChallenge) => convertMerkleChallengeInfo(merkleChallenge, convertFunction)),
   }
 }
 

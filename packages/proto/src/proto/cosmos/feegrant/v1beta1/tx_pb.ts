@@ -30,7 +30,7 @@ export class MsgGrantAllowance extends Message<MsgGrantAllowance> {
   grantee = "";
 
   /**
-   * allowance can be any of basic and filtered fee allowance.
+   * allowance can be any of basic, periodic, allowed fee allowance.
    *
    * @generated from field: google.protobuf.Any allowance = 3;
    */

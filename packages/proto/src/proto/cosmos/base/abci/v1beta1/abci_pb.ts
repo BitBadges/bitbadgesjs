@@ -104,7 +104,7 @@ export class TxResponse extends Message<TxResponse> {
   /**
    * Events defines all the events emitted by processing a transaction. Note,
    * these events include those emitted by processing all the messages and those
-   * emitted from the ante handler. Whereas Logs contains the events, with
+   * emitted from the ante. Whereas Logs contains the events, with
    * additional metadata, emitted only by processing the messages.
    *
    * Since: cosmos-sdk 0.42.11, 0.44.5, 0.45
@@ -357,8 +357,11 @@ export class Result extends Message<Result> {
   /**
    * Data is any data returned from message or handler execution. It MUST be
    * length prefixed in order to separate data from multiple message executions.
+   * Deprecated. This field is still populated, but prefer msg_response instead
+   * because it also contains the Msg response typeURL.
    *
-   * @generated from field: bytes data = 1;
+   * @generated from field: bytes data = 1 [deprecated = true];
+   * @deprecated
    */
   data = new Uint8Array(0);
 
@@ -377,6 +380,15 @@ export class Result extends Message<Result> {
    */
   events: Event[] = [];
 
+  /**
+   * msg_responses contains the Msg handler responses type packed in Anys.
+   *
+   * Since: cosmos-sdk 0.46
+   *
+   * @generated from field: repeated google.protobuf.Any msg_responses = 4;
+   */
+  msgResponses: Any[] = [];
+
   constructor(data?: PartialMessage<Result>) {
     super();
     proto3.util.initPartial(data, this);
@@ -388,6 +400,7 @@ export class Result extends Message<Result> {
     { no: 1, name: "data", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
     { no: 2, name: "log", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "events", kind: "message", T: Event, repeated: true },
+    { no: 4, name: "msg_responses", kind: "message", T: Any, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Result {
@@ -458,6 +471,7 @@ export class SimulationResponse extends Message<SimulationResponse> {
  * execution.
  *
  * @generated from message cosmos.base.abci.v1beta1.MsgData
+ * @deprecated
  */
 export class MsgData extends Message<MsgData> {
   /**
@@ -507,9 +521,21 @@ export class MsgData extends Message<MsgData> {
  */
 export class TxMsgData extends Message<TxMsgData> {
   /**
-   * @generated from field: repeated cosmos.base.abci.v1beta1.MsgData data = 1;
+   * data field is deprecated and not populated.
+   *
+   * @generated from field: repeated cosmos.base.abci.v1beta1.MsgData data = 1 [deprecated = true];
+   * @deprecated
    */
   data: MsgData[] = [];
+
+  /**
+   * msg_responses contains the Msg handler responses packed into Anys.
+   *
+   * Since: cosmos-sdk 0.46
+   *
+   * @generated from field: repeated google.protobuf.Any msg_responses = 2;
+   */
+  msgResponses: Any[] = [];
 
   constructor(data?: PartialMessage<TxMsgData>) {
     super();
@@ -520,6 +546,7 @@ export class TxMsgData extends Message<TxMsgData> {
   static readonly typeName = "cosmos.base.abci.v1beta1.TxMsgData";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "data", kind: "message", T: MsgData, repeated: true },
+    { no: 2, name: "msg_responses", kind: "message", T: Any, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): TxMsgData {

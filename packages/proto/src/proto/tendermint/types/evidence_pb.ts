@@ -59,8 +59,7 @@ export class Evidence extends Message<Evidence> {
 }
 
 /**
- * DuplicateVoteEvidence contains evidence of a validator signed two conflicting
- * votes.
+ * DuplicateVoteEvidence contains evidence of a validator signed two conflicting votes.
  *
  * @generated from message tendermint.types.DuplicateVoteEvidence
  */
@@ -123,8 +122,7 @@ export class DuplicateVoteEvidence extends Message<DuplicateVoteEvidence> {
 }
 
 /**
- * LightClientAttackEvidence contains evidence of a set of validators attempting
- * to mislead a light client.
+ * LightClientAttackEvidence contains evidence of a set of validators attempting to mislead a light client.
  *
  * @generated from message tendermint.types.LightClientAttackEvidence
  */

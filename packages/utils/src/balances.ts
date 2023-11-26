@@ -64,7 +64,10 @@ export function getBalancesForId(badgeId: bigint, balances: Balance<bigint>[]) {
   for (let balance of balances) {
     let [_, found] = searchUintRangesForId(badgeId, balance.badgeIds);
     if (found) {
-      matchingBalances.push(balance);
+      matchingBalances.push({
+        ...balance,
+        badgeIds: [{ start: badgeId, end: badgeId }]
+      });
     }
   }
 
@@ -463,7 +466,40 @@ export function cleanBalances(balances: Balance<bigint>[]) {
     balance.ownershipTimes = sortUintRangesAndMergeIfNecessary(balance.ownershipTimes, false);
   }
 
-  return balances
+  balances = sortBalancesByAmount(balances);
+
+
+  //we also see if we can merge cross-balances
+  const newBalances: Balance<bigint>[] = [];
+  for (let i = 0; i < balances.length; i++) {
+    const currBalance = balances[i];
+
+    let merged = false;
+    for (let j = 0; j < newBalances.length; j++) {
+      const newBalance = newBalances[j];
+
+      //If the balances are equal, we merge them
+      if (currBalance.amount == newBalance.amount) {
+        //If the balances are equal, we merge them
+        if (JSON.stringify(currBalance.badgeIds) == JSON.stringify(newBalance.badgeIds)) {
+          newBalance.ownershipTimes = sortUintRangesAndMergeIfNecessary([...currBalance.ownershipTimes, ...newBalance.ownershipTimes], true);
+          merged = true;
+          break;
+        } else if (JSON.stringify(currBalance.ownershipTimes) == JSON.stringify(newBalance.ownershipTimes)) {
+          newBalance.badgeIds = sortUintRangesAndMergeIfNecessary([...currBalance.badgeIds, ...newBalance.badgeIds], true);
+          merged = true;
+          break;
+        }
+      }
+    }
+
+    if (!merged) {
+      newBalances.push(currBalance);
+    }
+  }
+
+
+  return newBalances
 }
 
 /**

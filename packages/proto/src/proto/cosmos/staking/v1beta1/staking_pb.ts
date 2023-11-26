@@ -7,6 +7,7 @@ import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialM
 import { Any, Duration, Message, proto3, protoInt64, Timestamp } from "@bufbuild/protobuf";
 import { Header } from "../../../tendermint/types/types_pb.js";
 import { Coin } from "../../base/v1beta1/coin_pb.js";
+import { ValidatorUpdate } from "../../../tendermint/abci/types_pb.js";
 
 /**
  * BondStatus is the status of a validator.
@@ -48,6 +49,40 @@ proto3.util.setEnumType(BondStatus, "cosmos.staking.v1beta1.BondStatus", [
   { no: 1, name: "BOND_STATUS_UNBONDED" },
   { no: 2, name: "BOND_STATUS_UNBONDING" },
   { no: 3, name: "BOND_STATUS_BONDED" },
+]);
+
+/**
+ * Infraction indicates the infraction a validator commited.
+ *
+ * @generated from enum cosmos.staking.v1beta1.Infraction
+ */
+export enum Infraction {
+  /**
+   * UNSPECIFIED defines an empty infraction.
+   *
+   * @generated from enum value: INFRACTION_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * DOUBLE_SIGN defines a validator that double-signs a block.
+   *
+   * @generated from enum value: INFRACTION_DOUBLE_SIGN = 1;
+   */
+  DOUBLE_SIGN = 1,
+
+  /**
+   * DOWNTIME defines a validator that missed signing too many blocks.
+   *
+   * @generated from enum value: INFRACTION_DOWNTIME = 2;
+   */
+  DOWNTIME = 2,
+}
+// Retrieve enum metadata with: proto3.getEnumType(Infraction)
+proto3.util.setEnumType(Infraction, "cosmos.staking.v1beta1.Infraction", [
+  { no: 0, name: "INFRACTION_UNSPECIFIED" },
+  { no: 1, name: "INFRACTION_DOUBLE_SIGN" },
+  { no: 2, name: "INFRACTION_DOWNTIME" },
 ]);
 
 /**
@@ -364,9 +399,25 @@ export class Validator extends Message<Validator> {
   /**
    * min_self_delegation is the validator's self declared minimum self delegation.
    *
+   * Since: cosmos-sdk 0.46
+   *
    * @generated from field: string min_self_delegation = 11;
    */
   minSelfDelegation = "";
+
+  /**
+   * strictly positive if this validator's unbonding has been stopped by external modules
+   *
+   * @generated from field: int64 unbonding_on_hold_ref_count = 12;
+   */
+  unbondingOnHoldRefCount = protoInt64.zero;
+
+  /**
+   * list of unbonding ids, each uniquely identifing an unbonding of this validator
+   *
+   * @generated from field: repeated uint64 unbonding_ids = 13;
+   */
+  unbondingIds: bigint[] = [];
 
   constructor(data?: PartialMessage<Validator>) {
     super();
@@ -387,6 +438,8 @@ export class Validator extends Message<Validator> {
     { no: 9, name: "unbonding_time", kind: "message", T: Timestamp },
     { no: 10, name: "commission", kind: "message", T: Commission },
     { no: 11, name: "min_self_delegation", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 12, name: "unbonding_on_hold_ref_count", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
+    { no: 13, name: "unbonding_ids", kind: "scalar", T: 4 /* ScalarType.UINT64 */, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Validator {
@@ -777,6 +830,20 @@ export class UnbondingDelegationEntry extends Message<UnbondingDelegationEntry> 
    */
   balance = "";
 
+  /**
+   * Incrementing id that uniquely identifies this entry
+   *
+   * @generated from field: uint64 unbonding_id = 5;
+   */
+  unbondingId = protoInt64.zero;
+
+  /**
+   * Strictly positive if this entry's unbonding has been stopped by external modules
+   *
+   * @generated from field: int64 unbonding_on_hold_ref_count = 6;
+   */
+  unbondingOnHoldRefCount = protoInt64.zero;
+
   constructor(data?: PartialMessage<UnbondingDelegationEntry>) {
     super();
     proto3.util.initPartial(data, this);
@@ -789,6 +856,8 @@ export class UnbondingDelegationEntry extends Message<UnbondingDelegationEntry> 
     { no: 2, name: "completion_time", kind: "message", T: Timestamp },
     { no: 3, name: "initial_balance", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 4, name: "balance", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: "unbonding_id", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
+    { no: 6, name: "unbonding_on_hold_ref_count", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UnbondingDelegationEntry {
@@ -842,6 +911,20 @@ export class RedelegationEntry extends Message<RedelegationEntry> {
    */
   sharesDst = "";
 
+  /**
+   * Incrementing id that uniquely identifies this entry
+   *
+   * @generated from field: uint64 unbonding_id = 5;
+   */
+  unbondingId = protoInt64.zero;
+
+  /**
+   * Strictly positive if this entry's unbonding has been stopped by external modules
+   *
+   * @generated from field: int64 unbonding_on_hold_ref_count = 6;
+   */
+  unbondingOnHoldRefCount = protoInt64.zero;
+
   constructor(data?: PartialMessage<RedelegationEntry>) {
     super();
     proto3.util.initPartial(data, this);
@@ -854,6 +937,8 @@ export class RedelegationEntry extends Message<RedelegationEntry> {
     { no: 2, name: "completion_time", kind: "message", T: Timestamp },
     { no: 3, name: "initial_balance", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 4, name: "shares_dst", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: "unbonding_id", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
+    { no: 6, name: "unbonding_on_hold_ref_count", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RedelegationEntry {
@@ -942,7 +1027,7 @@ export class Redelegation extends Message<Redelegation> {
 }
 
 /**
- * Params defines the parameters for the staking module.
+ * Params defines the parameters for the x/staking module.
  *
  * @generated from message cosmos.staking.v1beta1.Params
  */
@@ -982,6 +1067,13 @@ export class Params extends Message<Params> {
    */
   bondDenom = "";
 
+  /**
+   * min_commission_rate is the chain-wide minimum commission rate that a validator can charge their delegators
+   *
+   * @generated from field: string min_commission_rate = 6;
+   */
+  minCommissionRate = "";
+
   constructor(data?: PartialMessage<Params>) {
     super();
     proto3.util.initPartial(data, this);
@@ -995,6 +1087,7 @@ export class Params extends Message<Params> {
     { no: 3, name: "max_entries", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
     { no: 4, name: "historical_entries", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
     { no: 5, name: "bond_denom", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 6, name: "min_commission_rate", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Params {
@@ -1197,6 +1290,46 @@ export class Pool extends Message<Pool> {
 
   static equals(a: Pool | PlainMessage<Pool> | undefined, b: Pool | PlainMessage<Pool> | undefined): boolean {
     return proto3.util.equals(Pool, a, b);
+  }
+}
+
+/**
+ * ValidatorUpdates defines an array of abci.ValidatorUpdate objects.
+ * TODO: explore moving this to proto/cosmos/base to separate modules from tendermint dependence
+ *
+ * @generated from message cosmos.staking.v1beta1.ValidatorUpdates
+ */
+export class ValidatorUpdates extends Message<ValidatorUpdates> {
+  /**
+   * @generated from field: repeated tendermint.abci.ValidatorUpdate updates = 1;
+   */
+  updates: ValidatorUpdate[] = [];
+
+  constructor(data?: PartialMessage<ValidatorUpdates>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "cosmos.staking.v1beta1.ValidatorUpdates";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "updates", kind: "message", T: ValidatorUpdate, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ValidatorUpdates {
+    return new ValidatorUpdates().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ValidatorUpdates {
+    return new ValidatorUpdates().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ValidatorUpdates {
+    return new ValidatorUpdates().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ValidatorUpdates | PlainMessage<ValidatorUpdates> | undefined, b: ValidatorUpdates | PlainMessage<ValidatorUpdates> | undefined): boolean {
+    return proto3.util.equals(ValidatorUpdates, a, b);
   }
 }
 

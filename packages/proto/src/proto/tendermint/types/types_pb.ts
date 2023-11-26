@@ -221,7 +221,7 @@ export class BlockID extends Message<BlockID> {
 }
 
 /**
- * Header defines the structure of a Tendermint block header.
+ * Header defines the structure of a block header.
  *
  * @generated from message tendermint.types.Header
  */
@@ -493,8 +493,7 @@ export class Vote extends Message<Vote> {
 }
 
 /**
- * Commit contains the evidence that a block was committed by a set of
- * validators.
+ * Commit contains the evidence that a block was committed by a set of validators.
  *
  * @generated from message tendermint.types.Commit
  */
@@ -822,8 +821,7 @@ export class BlockMeta extends Message<BlockMeta> {
 }
 
 /**
- * TxProof represents a Merkle proof of the presence of a transaction in the
- * Merkle tree.
+ * TxProof represents a Merkle proof of the presence of a transaction in the Merkle tree.
  *
  * @generated from message tendermint.types.TxProof
  */

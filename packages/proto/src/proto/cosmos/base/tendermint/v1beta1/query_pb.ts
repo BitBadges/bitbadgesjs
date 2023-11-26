@@ -8,6 +8,7 @@ import { Any, Message, proto3, protoInt64 } from "@bufbuild/protobuf";
 import { PageRequest, PageResponse } from "../../query/v1beta1/pagination_pb.js";
 import { BlockID } from "../../../../tendermint/types/types_pb.js";
 import { Block } from "../../../../tendermint/types/block_pb.js";
+import { Block as Block$1 } from "./types_pb.js";
 import { DefaultNodeInfo } from "../../../../tendermint/p2p/types_pb.js";
 
 /**
@@ -312,9 +313,18 @@ export class GetBlockByHeightResponse extends Message<GetBlockByHeightResponse> 
   blockId?: BlockID;
 
   /**
+   * Deprecated: please use `sdk_block` instead
+   *
    * @generated from field: tendermint.types.Block block = 2;
    */
   block?: Block;
+
+  /**
+   * Since: cosmos-sdk 0.47
+   *
+   * @generated from field: cosmos.base.tendermint.v1beta1.Block sdk_block = 3;
+   */
+  sdkBlock?: Block$1;
 
   constructor(data?: PartialMessage<GetBlockByHeightResponse>) {
     super();
@@ -326,6 +336,7 @@ export class GetBlockByHeightResponse extends Message<GetBlockByHeightResponse> 
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "block_id", kind: "message", T: BlockID },
     { no: 2, name: "block", kind: "message", T: Block },
+    { no: 3, name: "sdk_block", kind: "message", T: Block$1 },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetBlockByHeightResponse {
@@ -390,9 +401,18 @@ export class GetLatestBlockResponse extends Message<GetLatestBlockResponse> {
   blockId?: BlockID;
 
   /**
+   * Deprecated: please use `sdk_block` instead
+   *
    * @generated from field: tendermint.types.Block block = 2;
    */
   block?: Block;
+
+  /**
+   * Since: cosmos-sdk 0.47
+   *
+   * @generated from field: cosmos.base.tendermint.v1beta1.Block sdk_block = 3;
+   */
+  sdkBlock?: Block$1;
 
   constructor(data?: PartialMessage<GetLatestBlockResponse>) {
     super();
@@ -404,6 +424,7 @@ export class GetLatestBlockResponse extends Message<GetLatestBlockResponse> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "block_id", kind: "message", T: BlockID },
     { no: 2, name: "block", kind: "message", T: Block },
+    { no: 3, name: "sdk_block", kind: "message", T: Block$1 },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetLatestBlockResponse {
@@ -529,7 +550,7 @@ export class GetNodeInfoRequest extends Message<GetNodeInfoRequest> {
 }
 
 /**
- * GetNodeInfoResponse is the request type for the Query/GetNodeInfo RPC method.
+ * GetNodeInfoResponse is the response type for the Query/GetNodeInfo RPC method.
  *
  * @generated from message cosmos.base.tendermint.v1beta1.GetNodeInfoResponse
  */
@@ -710,6 +731,253 @@ export class Module extends Message<Module> {
 
   static equals(a: Module | PlainMessage<Module> | undefined, b: Module | PlainMessage<Module> | undefined): boolean {
     return proto3.util.equals(Module, a, b);
+  }
+}
+
+/**
+ * ABCIQueryRequest defines the request structure for the ABCIQuery gRPC query.
+ *
+ * @generated from message cosmos.base.tendermint.v1beta1.ABCIQueryRequest
+ */
+export class ABCIQueryRequest extends Message<ABCIQueryRequest> {
+  /**
+   * @generated from field: bytes data = 1;
+   */
+  data = new Uint8Array(0);
+
+  /**
+   * @generated from field: string path = 2;
+   */
+  path = "";
+
+  /**
+   * @generated from field: int64 height = 3;
+   */
+  height = protoInt64.zero;
+
+  /**
+   * @generated from field: bool prove = 4;
+   */
+  prove = false;
+
+  constructor(data?: PartialMessage<ABCIQueryRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "cosmos.base.tendermint.v1beta1.ABCIQueryRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "data", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
+    { no: 2, name: "path", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "height", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
+    { no: 4, name: "prove", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ABCIQueryRequest {
+    return new ABCIQueryRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ABCIQueryRequest {
+    return new ABCIQueryRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ABCIQueryRequest {
+    return new ABCIQueryRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ABCIQueryRequest | PlainMessage<ABCIQueryRequest> | undefined, b: ABCIQueryRequest | PlainMessage<ABCIQueryRequest> | undefined): boolean {
+    return proto3.util.equals(ABCIQueryRequest, a, b);
+  }
+}
+
+/**
+ * ABCIQueryResponse defines the response structure for the ABCIQuery gRPC query.
+ *
+ * Note: This type is a duplicate of the ResponseQuery proto type defined in
+ * Tendermint.
+ *
+ * @generated from message cosmos.base.tendermint.v1beta1.ABCIQueryResponse
+ */
+export class ABCIQueryResponse extends Message<ABCIQueryResponse> {
+  /**
+   * @generated from field: uint32 code = 1;
+   */
+  code = 0;
+
+  /**
+   * nondeterministic
+   *
+   * @generated from field: string log = 3;
+   */
+  log = "";
+
+  /**
+   * nondeterministic
+   *
+   * @generated from field: string info = 4;
+   */
+  info = "";
+
+  /**
+   * @generated from field: int64 index = 5;
+   */
+  index = protoInt64.zero;
+
+  /**
+   * @generated from field: bytes key = 6;
+   */
+  key = new Uint8Array(0);
+
+  /**
+   * @generated from field: bytes value = 7;
+   */
+  value = new Uint8Array(0);
+
+  /**
+   * @generated from field: cosmos.base.tendermint.v1beta1.ProofOps proof_ops = 8;
+   */
+  proofOps?: ProofOps;
+
+  /**
+   * @generated from field: int64 height = 9;
+   */
+  height = protoInt64.zero;
+
+  /**
+   * @generated from field: string codespace = 10;
+   */
+  codespace = "";
+
+  constructor(data?: PartialMessage<ABCIQueryResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "cosmos.base.tendermint.v1beta1.ABCIQueryResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "code", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 3, name: "log", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "info", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: "index", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
+    { no: 6, name: "key", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
+    { no: 7, name: "value", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
+    { no: 8, name: "proof_ops", kind: "message", T: ProofOps },
+    { no: 9, name: "height", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
+    { no: 10, name: "codespace", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ABCIQueryResponse {
+    return new ABCIQueryResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ABCIQueryResponse {
+    return new ABCIQueryResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ABCIQueryResponse {
+    return new ABCIQueryResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ABCIQueryResponse | PlainMessage<ABCIQueryResponse> | undefined, b: ABCIQueryResponse | PlainMessage<ABCIQueryResponse> | undefined): boolean {
+    return proto3.util.equals(ABCIQueryResponse, a, b);
+  }
+}
+
+/**
+ * ProofOp defines an operation used for calculating Merkle root. The data could
+ * be arbitrary format, providing necessary data for example neighbouring node
+ * hash.
+ *
+ * Note: This type is a duplicate of the ProofOp proto type defined in Tendermint.
+ *
+ * @generated from message cosmos.base.tendermint.v1beta1.ProofOp
+ */
+export class ProofOp extends Message<ProofOp> {
+  /**
+   * @generated from field: string type = 1;
+   */
+  type = "";
+
+  /**
+   * @generated from field: bytes key = 2;
+   */
+  key = new Uint8Array(0);
+
+  /**
+   * @generated from field: bytes data = 3;
+   */
+  data = new Uint8Array(0);
+
+  constructor(data?: PartialMessage<ProofOp>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "cosmos.base.tendermint.v1beta1.ProofOp";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "type", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "key", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
+    { no: 3, name: "data", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ProofOp {
+    return new ProofOp().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ProofOp {
+    return new ProofOp().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ProofOp {
+    return new ProofOp().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ProofOp | PlainMessage<ProofOp> | undefined, b: ProofOp | PlainMessage<ProofOp> | undefined): boolean {
+    return proto3.util.equals(ProofOp, a, b);
+  }
+}
+
+/**
+ * ProofOps is Merkle proof defined by the list of ProofOps.
+ *
+ * Note: This type is a duplicate of the ProofOps proto type defined in Tendermint.
+ *
+ * @generated from message cosmos.base.tendermint.v1beta1.ProofOps
+ */
+export class ProofOps extends Message<ProofOps> {
+  /**
+   * @generated from field: repeated cosmos.base.tendermint.v1beta1.ProofOp ops = 1;
+   */
+  ops: ProofOp[] = [];
+
+  constructor(data?: PartialMessage<ProofOps>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "cosmos.base.tendermint.v1beta1.ProofOps";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "ops", kind: "message", T: ProofOp, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ProofOps {
+    return new ProofOps().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ProofOps {
+    return new ProofOps().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ProofOps {
+    return new ProofOps().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ProofOps | PlainMessage<ProofOps> | undefined, b: ProofOps | PlainMessage<ProofOps> | undefined): boolean {
+    return proto3.util.equals(ProofOps, a, b);
   }
 }
 

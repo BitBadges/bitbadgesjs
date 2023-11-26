@@ -226,6 +226,9 @@ export interface BitBadgesCollection<T extends NumberType> extends CollectionInf
   merkleChallenges: MerkleChallengeInfo<T>[],
   approvalsTrackers: ApprovalsTrackerInfo<T>[],
 
+  nsfw?: { badgeIds: UintRange<T>[], reason: string };
+  reported?: { badgeIds: UintRange<T>[], reason: string };
+
   views: {
     [viewKey: string]: {
       ids: string[],
@@ -254,5 +257,8 @@ export function convertBitBadgesCollection<T extends NumberType, U extends Numbe
     approvalsTrackers: item.approvalsTrackers.map((approvalsTracker) => convertApprovalsTrackerInfo(approvalsTracker, convertFunction)).map(x => removeCouchDBDetails(x)),
     _rev: undefined,
     _deleted: undefined,
+
+    nsfw: item.nsfw ? { ...item.nsfw, badgeIds: item.nsfw.badgeIds.map((UintRange) => convertUintRange(UintRange, convertFunction)) } : undefined,
+    reported: item.reported ? { ...item.reported, badgeIds: item.reported.badgeIds.map((UintRange) => convertUintRange(UintRange, convertFunction)) } : undefined,
   })
 }

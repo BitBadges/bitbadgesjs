@@ -204,6 +204,98 @@ export class SignDoc extends Message<SignDoc> {
 }
 
 /**
+ * SignDocDirectAux is the type used for generating sign bytes for
+ * SIGN_MODE_DIRECT_AUX.
+ *
+ * Since: cosmos-sdk 0.46
+ *
+ * @generated from message cosmos.tx.v1beta1.SignDocDirectAux
+ */
+export class SignDocDirectAux extends Message<SignDocDirectAux> {
+  /**
+   * body_bytes is protobuf serialization of a TxBody that matches the
+   * representation in TxRaw.
+   *
+   * @generated from field: bytes body_bytes = 1;
+   */
+  bodyBytes = new Uint8Array(0);
+
+  /**
+   * public_key is the public key of the signing account.
+   *
+   * @generated from field: google.protobuf.Any public_key = 2;
+   */
+  publicKey?: Any;
+
+  /**
+   * chain_id is the identifier of the chain this transaction targets.
+   * It prevents signed transactions from being used on another chain by an
+   * attacker.
+   *
+   * @generated from field: string chain_id = 3;
+   */
+  chainId = "";
+
+  /**
+   * account_number is the account number of the account in state.
+   *
+   * @generated from field: uint64 account_number = 4;
+   */
+  accountNumber = protoInt64.zero;
+
+  /**
+   * sequence is the sequence number of the signing account.
+   *
+   * @generated from field: uint64 sequence = 5;
+   */
+  sequence = protoInt64.zero;
+
+  /**
+   * Tip is the optional tip used for transactions fees paid in another denom.
+   * It should be left empty if the signer is not the tipper for this
+   * transaction.
+   *
+   * This field is ignored if the chain didn't enable tips, i.e. didn't add the
+   * `TipDecorator` in its posthandler.
+   *
+   * @generated from field: cosmos.tx.v1beta1.Tip tip = 6;
+   */
+  tip?: Tip;
+
+  constructor(data?: PartialMessage<SignDocDirectAux>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "cosmos.tx.v1beta1.SignDocDirectAux";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "body_bytes", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
+    { no: 2, name: "public_key", kind: "message", T: Any },
+    { no: 3, name: "chain_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "account_number", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
+    { no: 5, name: "sequence", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
+    { no: 6, name: "tip", kind: "message", T: Tip },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SignDocDirectAux {
+    return new SignDocDirectAux().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SignDocDirectAux {
+    return new SignDocDirectAux().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SignDocDirectAux {
+    return new SignDocDirectAux().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: SignDocDirectAux | PlainMessage<SignDocDirectAux> | undefined, b: SignDocDirectAux | PlainMessage<SignDocDirectAux> | undefined): boolean {
+    return proto3.util.equals(SignDocDirectAux, a, b);
+  }
+}
+
+/**
  * TxBody is the body of a transaction that all signers sign over.
  *
  * @generated from message cosmos.tx.v1beta1.TxBody
@@ -316,6 +408,18 @@ export class AuthInfo extends Message<AuthInfo> {
    */
   fee?: Fee;
 
+  /**
+   * Tip is the optional tip used for transactions fees paid in another denom.
+   *
+   * This field is ignored if the chain didn't enable tips, i.e. didn't add the
+   * `TipDecorator` in its posthandler.
+   *
+   * Since: cosmos-sdk 0.46
+   *
+   * @generated from field: cosmos.tx.v1beta1.Tip tip = 3;
+   */
+  tip?: Tip;
+
   constructor(data?: PartialMessage<AuthInfo>) {
     super();
     proto3.util.initPartial(data, this);
@@ -326,6 +430,7 @@ export class AuthInfo extends Message<AuthInfo> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "signer_infos", kind: "message", T: SignerInfo, repeated: true },
     { no: 2, name: "fee", kind: "message", T: Fee },
+    { no: 3, name: "tip", kind: "message", T: Tip },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AuthInfo {
@@ -629,6 +734,131 @@ export class Fee extends Message<Fee> {
 
   static equals(a: Fee | PlainMessage<Fee> | undefined, b: Fee | PlainMessage<Fee> | undefined): boolean {
     return proto3.util.equals(Fee, a, b);
+  }
+}
+
+/**
+ * Tip is the tip used for meta-transactions.
+ *
+ * Since: cosmos-sdk 0.46
+ *
+ * @generated from message cosmos.tx.v1beta1.Tip
+ */
+export class Tip extends Message<Tip> {
+  /**
+   * amount is the amount of the tip
+   *
+   * @generated from field: repeated cosmos.base.v1beta1.Coin amount = 1;
+   */
+  amount: Coin[] = [];
+
+  /**
+   * tipper is the address of the account paying for the tip
+   *
+   * @generated from field: string tipper = 2;
+   */
+  tipper = "";
+
+  constructor(data?: PartialMessage<Tip>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "cosmos.tx.v1beta1.Tip";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "amount", kind: "message", T: Coin, repeated: true },
+    { no: 2, name: "tipper", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Tip {
+    return new Tip().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Tip {
+    return new Tip().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Tip {
+    return new Tip().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: Tip | PlainMessage<Tip> | undefined, b: Tip | PlainMessage<Tip> | undefined): boolean {
+    return proto3.util.equals(Tip, a, b);
+  }
+}
+
+/**
+ * AuxSignerData is the intermediary format that an auxiliary signer (e.g. a
+ * tipper) builds and sends to the fee payer (who will build and broadcast the
+ * actual tx). AuxSignerData is not a valid tx in itself, and will be rejected
+ * by the node if sent directly as-is.
+ *
+ * Since: cosmos-sdk 0.46
+ *
+ * @generated from message cosmos.tx.v1beta1.AuxSignerData
+ */
+export class AuxSignerData extends Message<AuxSignerData> {
+  /**
+   * address is the bech32-encoded address of the auxiliary signer. If using
+   * AuxSignerData across different chains, the bech32 prefix of the target
+   * chain (where the final transaction is broadcasted) should be used.
+   *
+   * @generated from field: string address = 1;
+   */
+  address = "";
+
+  /**
+   * sign_doc is the SIGN_MODE_DIRECT_AUX sign doc that the auxiliary signer
+   * signs. Note: we use the same sign doc even if we're signing with
+   * LEGACY_AMINO_JSON.
+   *
+   * @generated from field: cosmos.tx.v1beta1.SignDocDirectAux sign_doc = 2;
+   */
+  signDoc?: SignDocDirectAux;
+
+  /**
+   * mode is the signing mode of the single signer.
+   *
+   * @generated from field: cosmos.tx.signing.v1beta1.SignMode mode = 3;
+   */
+  mode = SignMode.UNSPECIFIED;
+
+  /**
+   * sig is the signature of the sign doc.
+   *
+   * @generated from field: bytes sig = 4;
+   */
+  sig = new Uint8Array(0);
+
+  constructor(data?: PartialMessage<AuxSignerData>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "cosmos.tx.v1beta1.AuxSignerData";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "sign_doc", kind: "message", T: SignDocDirectAux },
+    { no: 3, name: "mode", kind: "enum", T: proto3.getEnumType(SignMode) },
+    { no: 4, name: "sig", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AuxSignerData {
+    return new AuxSignerData().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): AuxSignerData {
+    return new AuxSignerData().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): AuxSignerData {
+    return new AuxSignerData().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: AuxSignerData | PlainMessage<AuxSignerData> | undefined, b: AuxSignerData | PlainMessage<AuxSignerData> | undefined): boolean {
+    return proto3.util.equals(AuxSignerData, a, b);
   }
 }
 

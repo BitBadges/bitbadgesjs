@@ -54,9 +54,9 @@ export class App extends Message<App> {
 }
 
 /**
- * Consensus captures the consensus rules for processing a block in the
- * blockchain, including all blockchain data structures and the rules of the
- * application's state transition machine.
+ * Consensus captures the consensus rules for processing a block in the blockchain,
+ * including all blockchain data structures and the rules of the application's
+ * state transition machine.
  *
  * @generated from message tendermint.version.Consensus
  */

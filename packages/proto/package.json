@@ -1,7 +1,7 @@
 {
   "name": "bitbadgesjs-proto",
   "description": "Protobuf files for BitBadges.",
-  "version": "0.1.155",
+  "version": "0.1.180",
   "license": "MIT",
   "eslintIgnore": [
     "src/proto/**/*.ts"
@@ -31,7 +31,8 @@
   "dependencies": {
     "@bufbuild/buf": "^1.28.0",
     "@bufbuild/protobuf": "^1.4.2",
-    "@bufbuild/protoc-gen-es": "^1.4.2"
+    "@bufbuild/protoc-gen-es": "^1.4.2",
+    "@cosmjs/cosmwasm-stargate": "^0.31.3"
   },
   "devDependencies": {
     "@types/node": "^17.0.21"

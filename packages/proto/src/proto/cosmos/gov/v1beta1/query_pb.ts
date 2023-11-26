@@ -161,6 +161,8 @@ export class QueryProposalsRequest extends Message<QueryProposalsRequest> {
  */
 export class QueryProposalsResponse extends Message<QueryProposalsResponse> {
   /**
+   * proposals defines all the requested governance proposals.
+   *
    * @generated from field: repeated cosmos.gov.v1beta1.Proposal proposals = 1;
    */
   proposals: Proposal[] = [];
@@ -215,7 +217,7 @@ export class QueryVoteRequest extends Message<QueryVoteRequest> {
   proposalId = protoInt64.zero;
 
   /**
-   * voter defines the oter address for the proposals.
+   * voter defines the voter address for the proposals.
    *
    * @generated from field: string voter = 2;
    */
@@ -257,7 +259,7 @@ export class QueryVoteRequest extends Message<QueryVoteRequest> {
  */
 export class QueryVoteResponse extends Message<QueryVoteResponse> {
   /**
-   * vote defined the queried vote.
+   * vote defines the queried vote.
    *
    * @generated from field: cosmos.gov.v1beta1.Vote vote = 1;
    */
@@ -347,7 +349,7 @@ export class QueryVotesRequest extends Message<QueryVotesRequest> {
  */
 export class QueryVotesResponse extends Message<QueryVotesResponse> {
   /**
-   * votes defined the queried votes.
+   * votes defines the queried votes.
    *
    * @generated from field: repeated cosmos.gov.v1beta1.Vote votes = 1;
    */
@@ -634,6 +636,8 @@ export class QueryDepositsRequest extends Message<QueryDepositsRequest> {
  */
 export class QueryDepositsResponse extends Message<QueryDepositsResponse> {
   /**
+   * deposits defines the requested deposits.
+   *
    * @generated from field: repeated cosmos.gov.v1beta1.Deposit deposits = 1;
    */
   deposits: Deposit[] = [];

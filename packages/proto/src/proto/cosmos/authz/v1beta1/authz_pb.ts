@@ -63,6 +63,10 @@ export class Grant extends Message<Grant> {
   authorization?: Any;
 
   /**
+   * time when the grant will expire and will be pruned. If null, then the grant
+   * doesn't have a time expiration (other conditions  in `authorization`
+   * may apply to invalidate the grant)
+   *
    * @generated from field: google.protobuf.Timestamp expiration = 2;
    */
   expiration?: Timestamp;
@@ -99,8 +103,6 @@ export class Grant extends Message<Grant> {
 /**
  * GrantAuthorization extends a grant with both the addresses of the grantee and granter.
  * It is used in genesis.proto and query.proto
- *
- * Since: cosmos-sdk 0.45.2
  *
  * @generated from message cosmos.authz.v1beta1.GrantAuthorization
  */
@@ -153,6 +155,47 @@ export class GrantAuthorization extends Message<GrantAuthorization> {
 
   static equals(a: GrantAuthorization | PlainMessage<GrantAuthorization> | undefined, b: GrantAuthorization | PlainMessage<GrantAuthorization> | undefined): boolean {
     return proto3.util.equals(GrantAuthorization, a, b);
+  }
+}
+
+/**
+ * GrantQueueItem contains the list of TypeURL of a sdk.Msg.
+ *
+ * @generated from message cosmos.authz.v1beta1.GrantQueueItem
+ */
+export class GrantQueueItem extends Message<GrantQueueItem> {
+  /**
+   * msg_type_urls contains the list of TypeURL of a sdk.Msg.
+   *
+   * @generated from field: repeated string msg_type_urls = 1;
+   */
+  msgTypeUrls: string[] = [];
+
+  constructor(data?: PartialMessage<GrantQueueItem>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "cosmos.authz.v1beta1.GrantQueueItem";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "msg_type_urls", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GrantQueueItem {
+    return new GrantQueueItem().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GrantQueueItem {
+    return new GrantQueueItem().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GrantQueueItem {
+    return new GrantQueueItem().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GrantQueueItem | PlainMessage<GrantQueueItem> | undefined, b: GrantQueueItem | PlainMessage<GrantQueueItem> | undefined): boolean {
+    return proto3.util.equals(GrantQueueItem, a, b);
   }
 }
 

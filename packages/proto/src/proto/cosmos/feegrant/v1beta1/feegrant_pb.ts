@@ -10,15 +10,15 @@ import { Any, Duration, Message, proto3, Timestamp } from "@bufbuild/protobuf";
 import { Coin } from "../../base/v1beta1/coin_pb.js";
 
 /**
- * BasicAllowance implements Allowance with a one-time grant of tokens
+ * BasicAllowance implements Allowance with a one-time grant of coins
  * that optionally expires. The grantee can use up to SpendLimit to cover fees.
  *
  * @generated from message cosmos.feegrant.v1beta1.BasicAllowance
  */
 export class BasicAllowance extends Message<BasicAllowance> {
   /**
-   * spend_limit specifies the maximum amount of tokens that can be spent
-   * by this allowance and will be updated as tokens are spent. If it is
+   * spend_limit specifies the maximum amount of coins that can be spent
+   * by this allowance and will be updated as coins are spent. If it is
    * empty, there is no spend limit and any amount of coins can be spent.
    *
    * @generated from field: repeated cosmos.base.v1beta1.Coin spend_limit = 1;
@@ -146,7 +146,7 @@ export class PeriodicAllowance extends Message<PeriodicAllowance> {
  */
 export class AllowedMsgAllowance extends Message<AllowedMsgAllowance> {
   /**
-   * allowance can be any of basic and filtered fee allowance.
+   * allowance can be any of basic and periodic fee allowance.
    *
    * @generated from field: google.protobuf.Any allowance = 1;
    */
@@ -209,7 +209,7 @@ export class Grant extends Message<Grant> {
   grantee = "";
 
   /**
-   * allowance can be any of basic and filtered fee allowance.
+   * allowance can be any of basic, periodic, allowed fee allowance.
    *
    * @generated from field: google.protobuf.Any allowance = 3;
    */

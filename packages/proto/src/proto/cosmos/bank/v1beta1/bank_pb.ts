@@ -14,7 +14,14 @@ import { Coin } from "../../base/v1beta1/coin_pb.js";
  */
 export class Params extends Message<Params> {
   /**
-   * @generated from field: repeated cosmos.bank.v1beta1.SendEnabled send_enabled = 1;
+   * Deprecated: Use of SendEnabled in params is deprecated.
+   * For genesis, use the newly added send_enabled field in the genesis object.
+   * Storage, lookup, and manipulation of this information is now in the keeper.
+   *
+   * As of cosmos-sdk 0.47, this only exists for backwards compatibility of genesis files.
+   *
+   * @generated from field: repeated cosmos.bank.v1beta1.SendEnabled send_enabled = 1 [deprecated = true];
+   * @deprecated
    */
   sendEnabled: SendEnabled[] = [];
 
@@ -247,7 +254,7 @@ export class DenomUnit extends Message<DenomUnit> {
   /**
    * exponent represents power of 10 exponent that one must
    * raise the base_denom to in order to equal the given DenomUnit's denom
-   * 1 denom = 1^exponent base_denom
+   * 1 denom = 10^exponent base_denom
    * (e.g. with a base_denom of uatom, one can create a DenomUnit of 'atom' with
    * exponent = 6, thus: 1 atom = 10^6 uatom).
    *
@@ -345,6 +352,25 @@ export class Metadata extends Message<Metadata> {
    */
   symbol = "";
 
+  /**
+   * URI to a document (on or off-chain) that contains additional information. Optional.
+   *
+   * Since: cosmos-sdk 0.46
+   *
+   * @generated from field: string uri = 7;
+   */
+  uri = "";
+
+  /**
+   * URIHash is a sha256 hash of a document pointed by URI. It's used to verify that
+   * the document didn't change. Optional.
+   *
+   * Since: cosmos-sdk 0.46
+   *
+   * @generated from field: string uri_hash = 8;
+   */
+  uriHash = "";
+
   constructor(data?: PartialMessage<Metadata>) {
     super();
     proto3.util.initPartial(data, this);
@@ -359,6 +385,8 @@ export class Metadata extends Message<Metadata> {
     { no: 4, name: "display", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 5, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 6, name: "symbol", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 7, name: "uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 8, name: "uri_hash", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Metadata {

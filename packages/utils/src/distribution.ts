@@ -23,8 +23,6 @@ export const createBalanceMapForOffChainBalances = async (transfersWithIncrement
       const address = transfer.toAddresses[j];
       const cosmosAddress = convertToCosmosAddress(address);
 
-
-
       //currBalance is used as a Balance[] type to be compatible with addBalancesForUintRanges
       const currBalances = balanceMap[cosmosAddress] ? balanceMap[cosmosAddress] : [];
       balanceMap[cosmosAddress] = addBalances(transfer.balances, currBalances);
