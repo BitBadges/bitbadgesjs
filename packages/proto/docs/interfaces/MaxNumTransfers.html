@@ -17,6 +17,8 @@
 <h1>Interface MaxNumTransfers&lt;T&gt;</h1></div>
 <section class="tsd-panel tsd-comment">
 <div class="tsd-comment tsd-typography"><p>MaxNumTransfers represents the maximum number of transfers for the badge IDs and ownershipTimes of this approval.</p>
+<p>Can be set to 0 to represent an unlimited number of transfers.
+If set to non-zero value, we track the running tally of the number of transfers for each badge ID / ownership time. Once it reaches the max, no more transfers are allowed.</p>
 <p>Note that we only track the max num transfers if a) the max num transfers here is defined and not unlimited OR b) we need it for calculating the predetermined balances order (i.e. useXYZNumTransfers is set in the PredeterminedOrderCalculationMethod).
 Otherwise, we do not track the respective number of transfers</p>
 </div>
@@ -31,7 +33,7 @@ Otherwise, we do not track the respective number of transfers</p>
 <ul class="tsd-hierarchy">
 <li><span class="target">MaxNumTransfers</span></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/proto-types/badges/typeutils/approvals.ts#L277">proto-types/badges/typeutils/approvals.ts:277</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/proto-types/badges/typeutils/approvals.ts#L270">proto-types/badges/typeutils/approvals.ts:270</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-index-accordion" open><summary class="tsd-accordion-summary tsd-index-summary">
@@ -53,7 +55,7 @@ Otherwise, we do not track the respective number of transfers</p>
 </div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/proto-types/badges/typeutils/approvals.ts#L278">proto-types/badges/typeutils/approvals.ts:278</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/proto-types/badges/typeutils/approvals.ts#L271">proto-types/badges/typeutils/approvals.ts:271</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="perFromAddressMaxNumTransfers" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>per<wbr/>From<wbr/>Address<wbr/>Max<wbr/>Num<wbr/>Transfers</span><a href="#perFromAddressMaxNumTransfers" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">per<wbr/>From<wbr/>Address<wbr/>Max<wbr/>Num<wbr/>Transfers</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type tsd-kind-type-parameter">T</span></div>
@@ -61,7 +63,7 @@ Otherwise, we do not track the respective number of transfers</p>
 </div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/proto-types/badges/typeutils/approvals.ts#L280">proto-types/badges/typeutils/approvals.ts:280</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/proto-types/badges/typeutils/approvals.ts#L273">proto-types/badges/typeutils/approvals.ts:273</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="perInitiatedByAddressMaxNumTransfers" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>per<wbr/>Initiated<wbr/>By<wbr/>Address<wbr/>Max<wbr/>Num<wbr/>Transfers</span><a href="#perInitiatedByAddressMaxNumTransfers" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">per<wbr/>Initiated<wbr/>By<wbr/>Address<wbr/>Max<wbr/>Num<wbr/>Transfers</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type tsd-kind-type-parameter">T</span></div>
@@ -69,7 +71,7 @@ Otherwise, we do not track the respective number of transfers</p>
 </div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/proto-types/badges/typeutils/approvals.ts#L281">proto-types/badges/typeutils/approvals.ts:281</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/proto-types/badges/typeutils/approvals.ts#L274">proto-types/badges/typeutils/approvals.ts:274</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="perToAddressMaxNumTransfers" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>per<wbr/>To<wbr/>Address<wbr/>Max<wbr/>Num<wbr/>Transfers</span><a href="#perToAddressMaxNumTransfers" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">per<wbr/>To<wbr/>Address<wbr/>Max<wbr/>Num<wbr/>Transfers</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type tsd-kind-type-parameter">T</span></div>
@@ -77,7 +79,7 @@ Otherwise, we do not track the respective number of transfers</p>
 </div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/proto-types/badges/typeutils/approvals.ts#L279">proto-types/badges/typeutils/approvals.ts:279</a></li></ul></aside></section></section></div>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/proto-types/badges/typeutils/approvals.ts#L272">proto-types/badges/typeutils/approvals.ts:272</a></li></ul></aside></section></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -128,8 +130,6 @@ Otherwise, we do not track the respective number of transfers</p>
 <li><a href="Fee.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Fee</span></a></li>
 <li><a href="IncomingApprovalCriteria.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Incoming<wbr/>Approval<wbr/>Criteria</span></a></li>
 <li><a href="IncrementedBalances.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Incremented<wbr/>Balances</span></a></li>
-<li><a href="InheritedBalance.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Inherited<wbr/>Balance</span></a></li>
-<li><a href="InheritedBalancesTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Inherited<wbr/>Balances<wbr/>Timeline</span></a></li>
 <li><a href="IsArchivedTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Is<wbr/>Archived<wbr/>Timeline</span></a></li>
 <li><a href="ManagerTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Manager<wbr/>Timeline</span></a></li>
 <li><a href="ManualBalances.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Manual<wbr/>Balances</span></a></li>
@@ -203,8 +203,6 @@ Otherwise, we do not track the respective number of transfers</p>
 <li><a href="../functions/convertFromProtoToMsgUpdateUserApprovals.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>From<wbr/>Proto<wbr/>To<wbr/>Msg<wbr/>Update<wbr/>User<wbr/>Approvals</span></a></li>
 <li><a href="../functions/convertIncomingApprovalCriteria.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>Incoming<wbr/>Approval<wbr/>Criteria</span></a></li>
 <li><a href="../functions/convertIncrementedBalances.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>Incremented<wbr/>Balances</span></a></li>
-<li><a href="../functions/convertInheritedBalance.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>Inherited<wbr/>Balance</span></a></li>
-<li><a href="../functions/convertInheritedBalancesTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>Inherited<wbr/>Balances<wbr/>Timeline</span></a></li>
 <li><a href="../functions/convertIsArchivedTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>Is<wbr/>Archived<wbr/>Timeline</span></a></li>
 <li><a href="../functions/convertManagerTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>Manager<wbr/>Timeline</span></a></li>
 <li><a href="../functions/convertManualBalances.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>Manual<wbr/>Balances</span></a></li>
@@ -261,30 +259,7 @@ Otherwise, we do not track the respective number of transfers</p>
 <li><a href="../functions/createWeb3Extension.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>create<wbr/>Web3<wbr/>Extension</span></a></li>
 <li><a href="../functions/createWeb3ExtensionSolana.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>create<wbr/>Web3<wbr/>Extension<wbr/>Solana</span></a></li>
 <li><a href="../functions/deepCopy.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>deep<wbr/>Copy</span></a></li>
-<li><a href="../functions/getWrappedBadgeIds.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Badge<wbr/>Ids</span></a></li>
-<li><a href="../functions/getWrappedBadgeMetadata.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Badge<wbr/>Metadata</span></a></li>
-<li><a href="../functions/getWrappedBadgeMetadataTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Badge<wbr/>Metadata<wbr/>Timeline</span></a></li>
-<li><a href="../functions/getWrappedBalances.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Balances</span></a></li>
-<li><a href="../functions/getWrappedBalancesActionPermission.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Balances<wbr/>Action<wbr/>Permission</span></a></li>
-<li><a href="../functions/getWrappedCollectionApprovalPermission.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Collection<wbr/>Approval<wbr/>Permission</span></a></li>
-<li><a href="../functions/getWrappedCollectionApprovals.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Collection<wbr/>Approvals</span></a></li>
-<li><a href="../functions/getWrappedCollectionMetadataTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Collection<wbr/>Metadata<wbr/>Timeline</span></a></li>
-<li><a href="../functions/getWrappedCollectionPermissions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Collection<wbr/>Permissions</span></a></li>
-<li><a href="../functions/getWrappedCustomDataTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Custom<wbr/>Data<wbr/>Timeline</span></a></li>
-<li><a href="../functions/getWrappedIncomingTransfers.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Incoming<wbr/>Transfers</span></a></li>
-<li><a href="../functions/getWrappedInheritedBalancesTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Inherited<wbr/>Balances<wbr/>Timeline</span></a></li>
-<li><a href="../functions/getWrappedIsArchivedTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Is<wbr/>Archived<wbr/>Timeline</span></a></li>
-<li><a href="../functions/getWrappedManagerTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Manager<wbr/>Timeline</span></a></li>
-<li><a href="../functions/getWrappedOffChainBalancesMetadataTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Off<wbr/>Chain<wbr/>Balances<wbr/>Metadata<wbr/>Timeline</span></a></li>
-<li><a href="../functions/getWrappedOutgoingTransfers.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Outgoing<wbr/>Transfers</span></a></li>
-<li><a href="../functions/getWrappedProof.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Proof</span></a></li>
-<li><a href="../functions/getWrappedStandardsTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Standards<wbr/>Timeline</span></a></li>
-<li><a href="../functions/getWrappedTimedUpdatePermission.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Timed<wbr/>Update<wbr/>Permission</span></a></li>
-<li><a href="../functions/getWrappedTimedUpdateWithBadgeIdsPermission.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Timed<wbr/>Update<wbr/>With<wbr/>Badge<wbr/>Ids<wbr/>Permission</span></a></li>
-<li><a href="../functions/getWrappedTransfers.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Transfers</span></a></li>
-<li><a href="../functions/getWrappedUserPermissions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>User<wbr/>Permissions</span></a></li>
 <li><a href="../functions/keccak256ToBase64.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>keccak256<wbr/>To<wbr/>Base64</span></a></li>
-<li><a href="../functions/numberify-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>numberify</span></a></li>
 <li><a href="../functions/signatureToWeb3Extension.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>signature<wbr/>To<wbr/>Web3<wbr/>Extension</span></a></li>
 <li><a href="../functions/signatureToWeb3ExtensionSolana.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>signature<wbr/>To<wbr/>Web3<wbr/>Extension<wbr/>Solana</span></a></li></ul></nav></div></div></div>
 <div class="tsd-generator">

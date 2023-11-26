@@ -40,8 +40,6 @@ export interface CollectionApprovalPermissionWithDetails<T extends NumberType> e
   initiatedByMapping: AddressMapping;
 }
 
-
-
 /**
  * @category Approvals / Transferability
  */
@@ -184,24 +182,34 @@ export function convertCollectionApprovalWithDetails<T extends NumberType, U ext
 
 /**
  * BitBadgesCollection is the type for collections returned by the BitBadges API. It extends the base CollectionDoc type
- * and adds additional accompanying information.
+ * and adds additional accompanying information such as metadata, activity, balances, preferred chain, etc.
  *
  * @typedef {Object} BitBadgesCollection
  * @extends {CollectionInfoBase} The base collection document
  *
- * @property {Metadata} collectionMetadata - The metadata of this collection
- * @property {Metadata[]} badgeMetadata - The metadata of each badge in this collection stored in a map by metadataId (see how we calculate metadataId in the docs)
- * @property {TransferActivityDoc[]} activity - The transfer activity of this collection
- * @property {AnnouncementDoc[]} announcements - The announcement activity of this collection
- * @property {ReviewDoc[]} reviews - The review activity of this collection
- * @property {BalanceDoc[]} owners - The badge balance documents for owners of this collection
- * @property {MerkleChallengeInfo[]} claims - The claims of this collection
- * @property {ApprovalsTrackerInfo[]} approvalsTrackers - The approvals trackers of this collection
+ * @property {CollectionApprovalWithDetails[]} collectionApprovals - The collection approvals for this collection, with off-chain metadata populated.
+ * @property {CollectionPermissionsWithDetails} collectionPermissions - The collection permissions for this collection, with off-chain metadata populated.
+ * @property {UserOutgoingApprovalWithDetails[]} defaultUserOutgoingApprovals - The default user outgoing approvals for this collection, with off-chain metadata populated.
+ * @property {UserIncomingApprovalWithDetails[]} defaultUserIncomingApprovals - The default user incoming approvals for this collection, with off-chain metadata populated.
+ * @property {UserPermissionsWithDetails} defaultUserPermissions - The default user permissions for this collection, with off-chain metadata populated.
+ *
+ * @property {Metadata} cachedCollectionMetadata - The fetched collection metadata for this collection. Will only be fetched if requested. It is your responsibility to join this data.
+ * @property {BadgeMetadataDetails[]} cachedBadgeMetadata - The fetched badge metadata for this collection. Will only be fetched if requested. It is your responsibility to join this data.
+ *
+ * @property {TransferActivityInfo[]} activity - The fetched activity for this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views.
+ * @property {AnnouncementInfo[]} announcements - The fetched announcements for this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views.
+ * @property {ReviewInfo[]} reviews - The fetched reviews for this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views.
+ * @property {BalanceInfoWithDetails[]} owners - The fetched owners of this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views.
+ * @property {MerkleChallengeInfo[]} merkleChallenges - The fetched merkle challenges for this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views.
+ * @property {ApprovalsTrackerInfo[]} approvalsTrackers - The fetched approval trackers for this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views.
+ *
+ * @property {Object} nsfw - The badge IDs in this collection that are marked as NSFW.
+ * @property {Object} reported - The badge IDs in this collection that have been reported.
+ *
+ * @property {Object.<string, { ids: string[], type: string, pagination: PaginationInfo }>} views - The views for this collection and their pagination info. Views will only include the doc _ids. Use the pagination to fetch more. To be used in conjunction with activity, announcements, reviews, owners, merkleChallenges, and approvalsTrackers. For example, if you want to fetch the activity for a view, you would use the view's pagination to fetch the doc _ids, then use the corresponding activity array to find the matching docs.
  *
  * @remarks
- * Note that the collectionMetadata, badgeMetadata, activity, announcements, reviews, claims, and balances fields are
- * dynamically fetched from the DB as needed. They may be empty or missing information when the collection is first fetched.
- * You are responsible for fetching the missing information as needed from the corresponding API routes.
+ * Note that returned collections will only fetch what is requested. It is your responsibility to join the data together (paginations, etc).
  *
  * See documentation for helper functions, examples, and tutorials on handling this data and paginations.
  *

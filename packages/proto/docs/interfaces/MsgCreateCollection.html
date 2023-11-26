@@ -19,7 +19,6 @@
 <div class="tsd-comment tsd-typography"><p>MsgCreateCollection is a transaction that can be used to create a collection.</p>
 <p>Upon initial creation, you can set the default approved outgoing transfers, default approved incoming transfers, default user permissions, and balances type.
 However, after that, they are final and ignored in subsequent MsgCreateCollection calls.</p>
-<p>To specify you would like to update a field, the corresponding update field must be set to true. If it is set to false, we ignore it.</p>
 </div>
 <div class="tsd-comment tsd-typography"></div></section> 
 <section class="tsd-panel">
@@ -32,7 +31,7 @@ However, after that, they are final and ignored in subsequent MsgCreateCollectio
 <ul class="tsd-hierarchy">
 <li><span class="target">MsgCreateCollection</span></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L45">transactions/messages/bitbadges/badges/msgCreateCollection.ts:45</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L32">transactions/messages/bitbadges/badges/msgCreateCollection.ts:32</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-index-accordion" open><summary class="tsd-accordion-summary tsd-index-summary">
@@ -57,34 +56,25 @@ However, after that, they are final and ignored in subsequent MsgCreateCollectio
 <a href="MsgCreateCollection.html#managerTimeline" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>manager<wbr/>Timeline?</span></a>
 <a href="MsgCreateCollection.html#offChainBalancesMetadataTimeline" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>off<wbr/>Chain<wbr/>Balances<wbr/>Metadata<wbr/>Timeline?</span></a>
 <a href="MsgCreateCollection.html#standardsTimeline" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>standards<wbr/>Timeline?</span></a>
-<a href="MsgCreateCollection.html#updateBadgeMetadataTimeline" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>update<wbr/>Badge<wbr/>Metadata<wbr/>Timeline?</span></a>
-<a href="MsgCreateCollection.html#updateCollectionApprovals" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>update<wbr/>Collection<wbr/>Approvals?</span></a>
-<a href="MsgCreateCollection.html#updateCollectionMetadataTimeline" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>update<wbr/>Collection<wbr/>Metadata<wbr/>Timeline?</span></a>
-<a href="MsgCreateCollection.html#updateCollectionPermissions" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>update<wbr/>Collection<wbr/>Permissions?</span></a>
-<a href="MsgCreateCollection.html#updateCustomDataTimeline" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>update<wbr/>Custom<wbr/>Data<wbr/>Timeline?</span></a>
-<a href="MsgCreateCollection.html#updateIsArchivedTimeline" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>update<wbr/>Is<wbr/>Archived<wbr/>Timeline?</span></a>
-<a href="MsgCreateCollection.html#updateManagerTimeline" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>update<wbr/>Manager<wbr/>Timeline?</span></a>
-<a href="MsgCreateCollection.html#updateOffChainBalancesMetadataTimeline" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>update<wbr/>Off<wbr/>Chain<wbr/>Balances<wbr/>Metadata<wbr/>Timeline?</span></a>
-<a href="MsgCreateCollection.html#updateStandardsTimeline" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>update<wbr/>Standards<wbr/>Timeline?</span></a>
 </div></section></div></details></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Properties</h2>
 <section class="tsd-panel tsd-member"><a id="badgeMetadataTimeline" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>badge<wbr/>Metadata<wbr/>Timeline</span><a href="#badgeMetadataTimeline" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><g stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" id="icon-anchor"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5"></path><path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5"></path></g></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">badge<wbr/>Metadata<wbr/>Timeline</span><span class="tsd-signature-symbol">?:</span> <a href="BadgeMetadataTimeline.html" class="tsd-signature-type tsd-kind-interface">BadgeMetadataTimeline</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></div>
-<div class="tsd-comment tsd-typography"><p>The new badge metadata timeline. Must have the necessary permissions to update. Note we take first-match only for badge IDs, so do not define duplicates.</p>
+<div class="tsd-comment tsd-typography"><p>The new badge metadata timeline. Must have the necessary permissions in future transactions to update. However, no restrictions in this genesis Msg. Note we take first-match only for badge IDs, so do not define duplicates.</p>
 </div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L61">transactions/messages/bitbadges/badges/msgCreateCollection.ts:61</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L44">transactions/messages/bitbadges/badges/msgCreateCollection.ts:44</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="badgesToCreate" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>badges<wbr/>To<wbr/>Create</span><a href="#badgesToCreate" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">badges<wbr/>To<wbr/>Create</span><span class="tsd-signature-symbol">?:</span> <a href="Balance.html" class="tsd-signature-type tsd-kind-interface">Balance</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></div>
-<div class="tsd-comment tsd-typography"><p>The badges to create. Newly created badges will be sent to the &quot;Mint&quot; address. Must have necessary permissions. Only used if collection has &quot;Standard&quot; balance type.</p>
+<div class="tsd-comment tsd-typography"><p>The badges to create. Newly created badges will be sent to the &quot;Mint&quot; address. Must have necessary permissions in future transactions to update. However, no restrictions in this genesis Msg. Only used if collection has &quot;Standard&quot; balance type.</p>
 </div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L53">transactions/messages/bitbadges/badges/msgCreateCollection.ts:53</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L40">transactions/messages/bitbadges/badges/msgCreateCollection.ts:40</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="balancesType" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>balances<wbr/>Type</span><a href="#balancesType" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">balances<wbr/>Type</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
@@ -92,31 +82,31 @@ However, after that, they are final and ignored in subsequent MsgCreateCollectio
 </div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L47">transactions/messages/bitbadges/badges/msgCreateCollection.ts:47</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L34">transactions/messages/bitbadges/badges/msgCreateCollection.ts:34</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="collectionApprovals" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>collection<wbr/>Approvals</span><a href="#collectionApprovals" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">collection<wbr/>Approvals</span><span class="tsd-signature-symbol">?:</span> <a href="CollectionApproval.html" class="tsd-signature-type tsd-kind-interface">CollectionApproval</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></div>
-<div class="tsd-comment tsd-typography"><p>The new collection approved transfers timeline. Must have the necessary permissions to update.</p>
+<div class="tsd-comment tsd-typography"><p>The new collection approved transfers timeline. Must have the necessary permissions in future transactions to update. However, no restrictions in this genesis Msg.</p>
 </div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L68">transactions/messages/bitbadges/badges/msgCreateCollection.ts:68</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L47">transactions/messages/bitbadges/badges/msgCreateCollection.ts:47</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="collectionMetadataTimeline" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>collection<wbr/>Metadata<wbr/>Timeline</span><a href="#collectionMetadataTimeline" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">collection<wbr/>Metadata<wbr/>Timeline</span><span class="tsd-signature-symbol">?:</span> <a href="CollectionMetadataTimeline.html" class="tsd-signature-type tsd-kind-interface">CollectionMetadataTimeline</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></div>
-<div class="tsd-comment tsd-typography"><p>The new collection metadata timeline. Must have the necessary permissions to update.</p>
+<div class="tsd-comment tsd-typography"><p>The new collection metadata timeline. Must have the necessary permissions in future transactions to update. However, no restrictions in this genesis Msg.</p>
 </div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L59">transactions/messages/bitbadges/badges/msgCreateCollection.ts:59</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L43">transactions/messages/bitbadges/badges/msgCreateCollection.ts:43</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="collectionPermissions" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>collection<wbr/>Permissions</span><a href="#collectionPermissions" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">collection<wbr/>Permissions</span><span class="tsd-signature-symbol">?:</span> <a href="CollectionPermissions.html" class="tsd-signature-type tsd-kind-interface">CollectionPermissions</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span></div>
-<div class="tsd-comment tsd-typography"><p>The new collection permissions. Must have the necessary permissions to update.</p>
+<div class="tsd-comment tsd-typography"><p>The new collection permissions. Must have the necessary permissions in future transactions to update. However, no restrictions in this genesis Msg.</p>
 </div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L55">transactions/messages/bitbadges/badges/msgCreateCollection.ts:55</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L41">transactions/messages/bitbadges/badges/msgCreateCollection.ts:41</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="creator" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>creator</span><a href="#creator" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">creator</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
@@ -124,25 +114,25 @@ However, after that, they are final and ignored in subsequent MsgCreateCollectio
 </div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L46">transactions/messages/bitbadges/badges/msgCreateCollection.ts:46</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L33">transactions/messages/bitbadges/badges/msgCreateCollection.ts:33</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="customDataTimeline" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>custom<wbr/>Data<wbr/>Timeline</span><a href="#customDataTimeline" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">custom<wbr/>Data<wbr/>Timeline</span><span class="tsd-signature-symbol">?:</span> <a href="CustomDataTimeline.html" class="tsd-signature-type tsd-kind-interface">CustomDataTimeline</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></div>
-<div class="tsd-comment tsd-typography"><p>The new custom data timeline. Must have the necessary permissions to update.</p>
+<div class="tsd-comment tsd-typography"><p>The new custom data timeline. Must have the necessary permissions in future transactions to update. However, no restrictions in this genesis Msg.</p>
 </div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L65">transactions/messages/bitbadges/badges/msgCreateCollection.ts:65</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L46">transactions/messages/bitbadges/badges/msgCreateCollection.ts:46</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="defaultAutoApproveSelfInitiatedIncomingTransfers" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>default<wbr/>Auto<wbr/>Approve<wbr/>Self<wbr/>Initiated<wbr/>Incoming<wbr/>Transfers</span><a href="#defaultAutoApproveSelfInitiatedIncomingTransfers" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">default<wbr/>Auto<wbr/>Approve<wbr/>Self<wbr/>Initiated<wbr/>Incoming<wbr/>Transfers</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L51">transactions/messages/bitbadges/badges/msgCreateCollection.ts:51</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L38">transactions/messages/bitbadges/badges/msgCreateCollection.ts:38</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="defaultAutoApproveSelfInitiatedOutgoingTransfers" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>default<wbr/>Auto<wbr/>Approve<wbr/>Self<wbr/>Initiated<wbr/>Outgoing<wbr/>Transfers</span><a href="#defaultAutoApproveSelfInitiatedOutgoingTransfers" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">default<wbr/>Auto<wbr/>Approve<wbr/>Self<wbr/>Initiated<wbr/>Outgoing<wbr/>Transfers</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L50">transactions/messages/bitbadges/badges/msgCreateCollection.ts:50</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L37">transactions/messages/bitbadges/badges/msgCreateCollection.ts:37</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="defaultIncomingApprovals" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>default<wbr/>Incoming<wbr/>Approvals</span><a href="#defaultIncomingApprovals" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">default<wbr/>Incoming<wbr/>Approvals</span><span class="tsd-signature-symbol">?:</span> <a href="UserIncomingApproval.html" class="tsd-signature-type tsd-kind-interface">UserIncomingApproval</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></div>
@@ -150,7 +140,7 @@ However, after that, they are final and ignored in subsequent MsgCreateCollectio
 </div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L49">transactions/messages/bitbadges/badges/msgCreateCollection.ts:49</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L36">transactions/messages/bitbadges/badges/msgCreateCollection.ts:36</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="defaultOutgoingApprovals" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>default<wbr/>Outgoing<wbr/>Approvals</span><a href="#defaultOutgoingApprovals" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">default<wbr/>Outgoing<wbr/>Approvals</span><span class="tsd-signature-symbol">?:</span> <a href="UserOutgoingApproval.html" class="tsd-signature-type tsd-kind-interface">UserOutgoingApproval</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></div>
@@ -158,7 +148,7 @@ However, after that, they are final and ignored in subsequent MsgCreateCollectio
 </div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L48">transactions/messages/bitbadges/badges/msgCreateCollection.ts:48</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L35">transactions/messages/bitbadges/badges/msgCreateCollection.ts:35</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="defaultUserPermissions" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>default<wbr/>User<wbr/>Permissions</span><a href="#defaultUserPermissions" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">default<wbr/>User<wbr/>Permissions</span><span class="tsd-signature-symbol">?:</span> <a href="UserPermissions.html" class="tsd-signature-type tsd-kind-interface">UserPermissions</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span></div>
@@ -166,111 +156,39 @@ However, after that, they are final and ignored in subsequent MsgCreateCollectio
 </div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L52">transactions/messages/bitbadges/badges/msgCreateCollection.ts:52</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L39">transactions/messages/bitbadges/badges/msgCreateCollection.ts:39</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="isArchivedTimeline" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>is<wbr/>Archived<wbr/>Timeline</span><a href="#isArchivedTimeline" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">is<wbr/>Archived<wbr/>Timeline</span><span class="tsd-signature-symbol">?:</span> <a href="IsArchivedTimeline.html" class="tsd-signature-type tsd-kind-interface">IsArchivedTimeline</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></div>
-<div class="tsd-comment tsd-typography"><p>The new is archived timeline. Must have the necessary permissions to update.</p>
+<div class="tsd-comment tsd-typography"><p>The new is archived timeline. Must have the necessary permissions in future transactions to update. However, no restrictions in this genesis Msg.</p>
 </div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L72">transactions/messages/bitbadges/badges/msgCreateCollection.ts:72</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L49">transactions/messages/bitbadges/badges/msgCreateCollection.ts:49</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="managerTimeline" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>manager<wbr/>Timeline</span><a href="#managerTimeline" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">manager<wbr/>Timeline</span><span class="tsd-signature-symbol">?:</span> <a href="ManagerTimeline.html" class="tsd-signature-type tsd-kind-interface">ManagerTimeline</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></div>
-<div class="tsd-comment tsd-typography"><p>The new manager timeline. Must have the necessary permissions to update.</p>
+<div class="tsd-comment tsd-typography"><p>The new manager timeline. Must have the necessary permissions in future transactions to update. However, no restrictions in this genesis Msg.</p>
 </div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L57">transactions/messages/bitbadges/badges/msgCreateCollection.ts:57</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L42">transactions/messages/bitbadges/badges/msgCreateCollection.ts:42</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="offChainBalancesMetadataTimeline" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>off<wbr/>Chain<wbr/>Balances<wbr/>Metadata<wbr/>Timeline</span><a href="#offChainBalancesMetadataTimeline" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">off<wbr/>Chain<wbr/>Balances<wbr/>Metadata<wbr/>Timeline</span><span class="tsd-signature-symbol">?:</span> <a href="OffChainBalancesMetadataTimeline.html" class="tsd-signature-type tsd-kind-interface">OffChainBalancesMetadataTimeline</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></div>
-<div class="tsd-comment tsd-typography"><p>The new off-chain balances metadata timeline. Must have the necessary permissions to update. Only used if &quot;Off-Chain&quot; balance type.</p>
+<div class="tsd-comment tsd-typography"><p>The new off-chain balances metadata timeline. Must have the necessary permissions in future transactions to update. However, no restrictions in this genesis Msg. Only used if &quot;Off-Chain&quot; balance type.</p>
 </div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L63">transactions/messages/bitbadges/badges/msgCreateCollection.ts:63</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L45">transactions/messages/bitbadges/badges/msgCreateCollection.ts:45</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="standardsTimeline" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>standards<wbr/>Timeline</span><a href="#standardsTimeline" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">standards<wbr/>Timeline</span><span class="tsd-signature-symbol">?:</span> <a href="StandardsTimeline.html" class="tsd-signature-type tsd-kind-interface">StandardsTimeline</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></div>
-<div class="tsd-comment tsd-typography"><p>The new standards timeline. Must have the necessary permissions to update.</p>
+<div class="tsd-comment tsd-typography"><p>The new standards timeline. Must have the necessary permissions in future transactions to update. However, no restrictions in this genesis Msg.</p>
 </div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L70">transactions/messages/bitbadges/badges/msgCreateCollection.ts:70</a></li></ul></aside></section>
-<section class="tsd-panel tsd-member"><a id="updateBadgeMetadataTimeline" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>update<wbr/>Badge<wbr/>Metadata<wbr/>Timeline</span><a href="#updateBadgeMetadataTimeline" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">update<wbr/>Badge<wbr/>Metadata<wbr/>Timeline</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
-<div class="tsd-comment tsd-typography"><p>Whether or not to update the badge metadata timeline.</p>
-</div>
-<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L60">transactions/messages/bitbadges/badges/msgCreateCollection.ts:60</a></li></ul></aside></section>
-<section class="tsd-panel tsd-member"><a id="updateCollectionApprovals" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>update<wbr/>Collection<wbr/>Approvals</span><a href="#updateCollectionApprovals" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">update<wbr/>Collection<wbr/>Approvals</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
-<div class="tsd-comment tsd-typography"><p>Whether or not to update the collection approved transfers timeline.</p>
-</div>
-<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L67">transactions/messages/bitbadges/badges/msgCreateCollection.ts:67</a></li></ul></aside></section>
-<section class="tsd-panel tsd-member"><a id="updateCollectionMetadataTimeline" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>update<wbr/>Collection<wbr/>Metadata<wbr/>Timeline</span><a href="#updateCollectionMetadataTimeline" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">update<wbr/>Collection<wbr/>Metadata<wbr/>Timeline</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
-<div class="tsd-comment tsd-typography"><p>Whether or not to update the collection metadata timeline.</p>
-</div>
-<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L58">transactions/messages/bitbadges/badges/msgCreateCollection.ts:58</a></li></ul></aside></section>
-<section class="tsd-panel tsd-member"><a id="updateCollectionPermissions" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>update<wbr/>Collection<wbr/>Permissions</span><a href="#updateCollectionPermissions" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">update<wbr/>Collection<wbr/>Permissions</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
-<div class="tsd-comment tsd-typography"><p>Whether or not to update the collection permissions.</p>
-</div>
-<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L54">transactions/messages/bitbadges/badges/msgCreateCollection.ts:54</a></li></ul></aside></section>
-<section class="tsd-panel tsd-member"><a id="updateCustomDataTimeline" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>update<wbr/>Custom<wbr/>Data<wbr/>Timeline</span><a href="#updateCustomDataTimeline" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">update<wbr/>Custom<wbr/>Data<wbr/>Timeline</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
-<div class="tsd-comment tsd-typography"><p>Whether or not to update the custom data timeline.</p>
-</div>
-<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L64">transactions/messages/bitbadges/badges/msgCreateCollection.ts:64</a></li></ul></aside></section>
-<section class="tsd-panel tsd-member"><a id="updateIsArchivedTimeline" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>update<wbr/>Is<wbr/>Archived<wbr/>Timeline</span><a href="#updateIsArchivedTimeline" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">update<wbr/>Is<wbr/>Archived<wbr/>Timeline</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
-<div class="tsd-comment tsd-typography"><p>Whether or not to update the is archived timeline.</p>
-</div>
-<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L71">transactions/messages/bitbadges/badges/msgCreateCollection.ts:71</a></li></ul></aside></section>
-<section class="tsd-panel tsd-member"><a id="updateManagerTimeline" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>update<wbr/>Manager<wbr/>Timeline</span><a href="#updateManagerTimeline" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">update<wbr/>Manager<wbr/>Timeline</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
-<div class="tsd-comment tsd-typography"><p>Whether or not to update the manager timeline.</p>
-</div>
-<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L56">transactions/messages/bitbadges/badges/msgCreateCollection.ts:56</a></li></ul></aside></section>
-<section class="tsd-panel tsd-member"><a id="updateOffChainBalancesMetadataTimeline" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>update<wbr/>Off<wbr/>Chain<wbr/>Balances<wbr/>Metadata<wbr/>Timeline</span><a href="#updateOffChainBalancesMetadataTimeline" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">update<wbr/>Off<wbr/>Chain<wbr/>Balances<wbr/>Metadata<wbr/>Timeline</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
-<div class="tsd-comment tsd-typography"><p>Whether or not to update the off-chain balances metadata timeline.</p>
-</div>
-<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L62">transactions/messages/bitbadges/badges/msgCreateCollection.ts:62</a></li></ul></aside></section>
-<section class="tsd-panel tsd-member"><a id="updateStandardsTimeline" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>update<wbr/>Standards<wbr/>Timeline</span><a href="#updateStandardsTimeline" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">update<wbr/>Standards<wbr/>Timeline</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
-<div class="tsd-comment tsd-typography"><p>Whether or not to update the standards timeline.</p>
-</div>
-<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L69">transactions/messages/bitbadges/badges/msgCreateCollection.ts:69</a></li></ul></aside></section></section></div>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/transactions/messages/bitbadges/badges/msgCreateCollection.ts#L48">transactions/messages/bitbadges/badges/msgCreateCollection.ts:48</a></li></ul></aside></section></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -306,16 +224,7 @@ However, after that, they are final and ignored in subsequent MsgCreateCollectio
 <li><a href="#isArchivedTimeline" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>is<wbr/>Archived<wbr/>Timeline</span></a></li>
 <li><a href="#managerTimeline" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>manager<wbr/>Timeline</span></a></li>
 <li><a href="#offChainBalancesMetadataTimeline" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>off<wbr/>Chain<wbr/>Balances<wbr/>Metadata<wbr/>Timeline</span></a></li>
-<li><a href="#standardsTimeline" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>standards<wbr/>Timeline</span></a></li>
-<li><a href="#updateBadgeMetadataTimeline" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>update<wbr/>Badge<wbr/>Metadata<wbr/>Timeline</span></a></li>
-<li><a href="#updateCollectionApprovals" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>update<wbr/>Collection<wbr/>Approvals</span></a></li>
-<li><a href="#updateCollectionMetadataTimeline" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>update<wbr/>Collection<wbr/>Metadata<wbr/>Timeline</span></a></li>
-<li><a href="#updateCollectionPermissions" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>update<wbr/>Collection<wbr/>Permissions</span></a></li>
-<li><a href="#updateCustomDataTimeline" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>update<wbr/>Custom<wbr/>Data<wbr/>Timeline</span></a></li>
-<li><a href="#updateIsArchivedTimeline" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>update<wbr/>Is<wbr/>Archived<wbr/>Timeline</span></a></li>
-<li><a href="#updateManagerTimeline" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>update<wbr/>Manager<wbr/>Timeline</span></a></li>
-<li><a href="#updateOffChainBalancesMetadataTimeline" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>update<wbr/>Off<wbr/>Chain<wbr/>Balances<wbr/>Metadata<wbr/>Timeline</span></a></li>
-<li><a href="#updateStandardsTimeline" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>update<wbr/>Standards<wbr/>Timeline</span></a></li></ul></div></details></div>
+<li><a href="#standardsTimeline" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>standards<wbr/>Timeline</span></a></li></ul></div></details></div>
 <div class="site-menu">
 <nav class="tsd-navigation"><a href="../modules.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-4"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-namespace)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6"></rect><path d="M9.33 16V7.24H10.77L13.446 14.74C13.43 14.54 13.41 14.296 13.386 14.008C13.37 13.712 13.354 13.404 13.338 13.084C13.33 12.756 13.326 12.448 13.326 12.16V7.24H14.37V16H12.93L10.266 8.5C10.282 8.692 10.298 8.936 10.314 9.232C10.33 9.52 10.342 9.828 10.35 10.156C10.366 10.476 10.374 10.784 10.374 11.08V16H9.33Z" fill="var(--color-text)"></path></g></svg><span>bitbadgesjs-<wbr/>proto</span></a>
 <ul class="tsd-small-nested-navigation">
@@ -343,8 +252,6 @@ However, after that, they are final and ignored in subsequent MsgCreateCollectio
 <li><a href="Fee.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Fee</span></a></li>
 <li><a href="IncomingApprovalCriteria.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Incoming<wbr/>Approval<wbr/>Criteria</span></a></li>
 <li><a href="IncrementedBalances.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Incremented<wbr/>Balances</span></a></li>
-<li><a href="InheritedBalance.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Inherited<wbr/>Balance</span></a></li>
-<li><a href="InheritedBalancesTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Inherited<wbr/>Balances<wbr/>Timeline</span></a></li>
 <li><a href="IsArchivedTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Is<wbr/>Archived<wbr/>Timeline</span></a></li>
 <li><a href="ManagerTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Manager<wbr/>Timeline</span></a></li>
 <li><a href="ManualBalances.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Manual<wbr/>Balances</span></a></li>
@@ -418,8 +325,6 @@ However, after that, they are final and ignored in subsequent MsgCreateCollectio
 <li><a href="../functions/convertFromProtoToMsgUpdateUserApprovals.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>From<wbr/>Proto<wbr/>To<wbr/>Msg<wbr/>Update<wbr/>User<wbr/>Approvals</span></a></li>
 <li><a href="../functions/convertIncomingApprovalCriteria.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>Incoming<wbr/>Approval<wbr/>Criteria</span></a></li>
 <li><a href="../functions/convertIncrementedBalances.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>Incremented<wbr/>Balances</span></a></li>
-<li><a href="../functions/convertInheritedBalance.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>Inherited<wbr/>Balance</span></a></li>
-<li><a href="../functions/convertInheritedBalancesTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>Inherited<wbr/>Balances<wbr/>Timeline</span></a></li>
 <li><a href="../functions/convertIsArchivedTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>Is<wbr/>Archived<wbr/>Timeline</span></a></li>
 <li><a href="../functions/convertManagerTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>Manager<wbr/>Timeline</span></a></li>
 <li><a href="../functions/convertManualBalances.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>Manual<wbr/>Balances</span></a></li>
@@ -476,30 +381,7 @@ However, after that, they are final and ignored in subsequent MsgCreateCollectio
 <li><a href="../functions/createWeb3Extension.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>create<wbr/>Web3<wbr/>Extension</span></a></li>
 <li><a href="../functions/createWeb3ExtensionSolana.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>create<wbr/>Web3<wbr/>Extension<wbr/>Solana</span></a></li>
 <li><a href="../functions/deepCopy.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>deep<wbr/>Copy</span></a></li>
-<li><a href="../functions/getWrappedBadgeIds.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Badge<wbr/>Ids</span></a></li>
-<li><a href="../functions/getWrappedBadgeMetadata.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Badge<wbr/>Metadata</span></a></li>
-<li><a href="../functions/getWrappedBadgeMetadataTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Badge<wbr/>Metadata<wbr/>Timeline</span></a></li>
-<li><a href="../functions/getWrappedBalances.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Balances</span></a></li>
-<li><a href="../functions/getWrappedBalancesActionPermission.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Balances<wbr/>Action<wbr/>Permission</span></a></li>
-<li><a href="../functions/getWrappedCollectionApprovalPermission.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Collection<wbr/>Approval<wbr/>Permission</span></a></li>
-<li><a href="../functions/getWrappedCollectionApprovals.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Collection<wbr/>Approvals</span></a></li>
-<li><a href="../functions/getWrappedCollectionMetadataTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Collection<wbr/>Metadata<wbr/>Timeline</span></a></li>
-<li><a href="../functions/getWrappedCollectionPermissions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Collection<wbr/>Permissions</span></a></li>
-<li><a href="../functions/getWrappedCustomDataTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Custom<wbr/>Data<wbr/>Timeline</span></a></li>
-<li><a href="../functions/getWrappedIncomingTransfers.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Incoming<wbr/>Transfers</span></a></li>
-<li><a href="../functions/getWrappedInheritedBalancesTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Inherited<wbr/>Balances<wbr/>Timeline</span></a></li>
-<li><a href="../functions/getWrappedIsArchivedTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Is<wbr/>Archived<wbr/>Timeline</span></a></li>
-<li><a href="../functions/getWrappedManagerTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Manager<wbr/>Timeline</span></a></li>
-<li><a href="../functions/getWrappedOffChainBalancesMetadataTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Off<wbr/>Chain<wbr/>Balances<wbr/>Metadata<wbr/>Timeline</span></a></li>
-<li><a href="../functions/getWrappedOutgoingTransfers.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Outgoing<wbr/>Transfers</span></a></li>
-<li><a href="../functions/getWrappedProof.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Proof</span></a></li>
-<li><a href="../functions/getWrappedStandardsTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Standards<wbr/>Timeline</span></a></li>
-<li><a href="../functions/getWrappedTimedUpdatePermission.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Timed<wbr/>Update<wbr/>Permission</span></a></li>
-<li><a href="../functions/getWrappedTimedUpdateWithBadgeIdsPermission.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Timed<wbr/>Update<wbr/>With<wbr/>Badge<wbr/>Ids<wbr/>Permission</span></a></li>
-<li><a href="../functions/getWrappedTransfers.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Transfers</span></a></li>
-<li><a href="../functions/getWrappedUserPermissions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>User<wbr/>Permissions</span></a></li>
 <li><a href="../functions/keccak256ToBase64.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>keccak256<wbr/>To<wbr/>Base64</span></a></li>
-<li><a href="../functions/numberify-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>numberify</span></a></li>
 <li><a href="../functions/signatureToWeb3Extension.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>signature<wbr/>To<wbr/>Web3<wbr/>Extension</span></a></li>
 <li><a href="../functions/signatureToWeb3ExtensionSolana.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>signature<wbr/>To<wbr/>Web3<wbr/>Extension<wbr/>Solana</span></a></li></ul></nav></div></div></div>
 <div class="tsd-generator">

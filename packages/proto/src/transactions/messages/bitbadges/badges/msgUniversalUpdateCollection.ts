@@ -7,6 +7,7 @@ import { createProtoMsg } from '../../../../proto-types/base'
 
 /**
  * MsgUniversalUpdateCollection is a universal transaction that can be used to create / update any collection. It is only executable by the manager.
+ * MsgCreateCollection and MsgUpdateCollection are special cases of this message.
  *
  * Upon initial creation, you can set the default approved outgoing transfers, default approved incoming transfers, default user permissions, and balances type.
  * However, after that, they are final and ignored in subsequent MsgUniversalUpdateCollection calls.
@@ -39,13 +40,10 @@ import { createProtoMsg } from '../../../../proto-types/base'
  * @property {OffChainBalancesMetadataTimeline[]} offChainBalancesMetadataTimeline - The new off-chain balances metadata timeline. Must have the necessary permissions to update. Only used if "Off-Chain" balance type.
  * @property {boolean} updateCustomDataTimeline - Whether or not to update the custom data timeline.
  * @property {CustomDataTimeline[]} customDataTimeline - The new custom data timeline. Must have the necessary permissions to update.
- * @property {T} inheritedCollectionId - The new inherited collection ID. Must have the necessary permissions to update. Only used if "Inherited" balance type.
  * @property {boolean} updateCollectionApprovals - Whether or not to update the collection approved transfers timeline.
  * @property {CollectionApproval[]} collectionApprovals - The new collection approved transfers timeline. Must have the necessary permissions to update.
  * @property {boolean} updateStandardsTimeline - Whether or not to update the standards timeline.
  * @property {StandardsTimeline[]} standardsTimeline - The new standards timeline. Must have the necessary permissions to update.
- * @property {boolean} updateContractAddressTimeline - Whether or not to update the contract address timeline.
- * @property {ContractAddressTimeline[]} contractAddressTimeline - The new contract address timeline. Must have the necessary permissions to update.
  * @property {boolean} updateIsArchivedTimeline - Whether or not to update the is archived timeline.
  * @property {IsArchivedTimeline[]} isArchivedTimeline - The new is archived timeline. Must have the necessary permissions to update.
  */
@@ -71,7 +69,6 @@ export interface MsgUniversalUpdateCollection<T extends NumberType> {
   offChainBalancesMetadataTimeline?: OffChainBalancesMetadataTimeline<T>[]
   updateCustomDataTimeline?: boolean
   customDataTimeline?: CustomDataTimeline<T>[]
-  // inheritedCollectionId?: T
   updateCollectionApprovals?: boolean
   collectionApprovals?: CollectionApproval<T>[]
   updateStandardsTimeline?: boolean

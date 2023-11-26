@@ -1,9 +1,5 @@
 /*
-  We have some non-permission fields that we only take first matches for such as:
-    - canUpdateBadgeMetadata //TODO:
-    - canUpdateInheritedBalances //TODO:
-    - collection approved transfers
-    - user approved transfers
+  We have some non-permission fields that we only take first matches for
 
   This file has helper functions for those three fields.
 */
@@ -38,6 +34,8 @@ export function getFirstMatchForBadgeMetadata(
 
 /**
  * @category Approvals / Transferability
+ *
+ * For all (from, to, initiatedBy, badgeIds, transferTimes, ownershipTimes) that are not handled by the first matches, return them as unhandled / disapproved
  */
 export function getUnhandledCollectionApprovals(
   collectionApprovals: CollectionApprovalWithDetails<bigint>[],
@@ -152,6 +150,9 @@ export function getUnhandledUserIncomingApprovals(
 
 /**
  * @category Approvals / Transferability
+ *
+ * Returns the approvals without the "Mint" address in any fromMapping.
+ * For ones with "Mint" and addresses ABC, for example, it will return just ABC.
  */
 export const getNonMintApprovals = (collectionApprovals: CollectionApprovalWithDetails<bigint>[]) => {
   const existingNonMint = collectionApprovals.map(x => {
@@ -189,6 +190,9 @@ export const getNonMintApprovals = (collectionApprovals: CollectionApprovalWithD
 
 /**
  * @category Approvals / Transferability
+ *
+ * Returns the approvals with the "Mint" address in any fromMapping.
+ * For ones with "Mint" and addresses ABC, for example, it will return just Mint.
  */
 export const getMintApprovals = (collectionApprovals: CollectionApprovalWithDetails<bigint>[]) => {
   const newApprovals = collectionApprovals.map(x => {

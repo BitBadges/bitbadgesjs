@@ -1,6 +1,9 @@
 import nano from "nano";
 import { Identified, DeletableDocument } from "./db"
 
+/**
+ * Deep copies an object, including BigInts.
+ */
 export function deepCopy<T>(obj: T): T {
   return deepCopyWithBigInts(obj);
 }
@@ -32,11 +35,16 @@ function deepCopyWithBigInts<T>(obj: T): T {
   return copiedObj as unknown as T;
 }
 
-
+/**
+ * Removes CouchDB details from an object (_id, _rev, _deleted).
+ */
 export function removeCouchDBDetails<T extends Object & { _id: string }>(x: T): T & Identified {
   return { ...x, _rev: undefined, _deleted: undefined }
 }
 
+/**
+ * Gets CouchDB details from an object (_id, _rev, _deleted).
+ */
 export function getCouchDBDetails<T extends nano.IdentifiedDocument & nano.MaybeRevisionedDocument & DeletableDocument>(x: T): nano.IdentifiedDocument & nano.MaybeRevisionedDocument & DeletableDocument {
   return { _id: x._id, _rev: x._rev, _deleted: x._deleted }
 }

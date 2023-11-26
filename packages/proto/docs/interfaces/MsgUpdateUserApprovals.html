@@ -14,7 +14,22 @@
 <ul class="tsd-breadcrumb">
 <li><a href="../modules.html">bitbadgesjs-proto</a></li>
 <li><a href="MsgUpdateUserApprovals.html">MsgUpdateUserApprovals</a></li></ul>
-<h1>Interface MsgUpdateUserApprovals&lt;T&gt;</h1></div> 
+<h1>Interface MsgUpdateUserApprovals&lt;T&gt;</h1></div>
+<section class="tsd-panel tsd-comment">
+<div class="tsd-comment tsd-typography"><p>MsgUpdateUserApprovals represents the message for updating user approvals.</p>
+<p>For a transfer to be successful, the transfer has to satisfy the following conditions:</p>
+<ul>
+<li>Be approved on the collection level</li>
+<li>Be approved by the recipient&#39;s incoming transfers (if not forcefully overriden by the collection)</li>
+<li>Be approved by the sender&#39;s outgoing transfers (if not forcefully overriden by the collection)</li>
+<li>The sender must have enough badges to transfer</li>
+<li>All restrictions and challenges for each approval must be satisfied (merkle challenges, approved amounts, max num transfers, ...)</li>
+</ul>
+<p>For successful execution, the user must have the necessary permissions to update the corresponding fields. If not, it will throw an error.
+Permissions are updated last, so any permissions checked are the permissions BEFORE the update.</p>
+<p>To specify you would like to update a field, the corresponding update field must be set to true. If it is set to false, we ignore it.</p>
+</div>
+<div class="tsd-comment tsd-typography"></div></section> 
 <section class="tsd-panel">
 <h4>Type Parameters</h4>
 <ul class="tsd-type-parameter-list">
@@ -25,7 +40,7 @@
 <ul class="tsd-hierarchy">
 <li><span class="target">MsgUpdateUserApprovals</span></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts#L8">transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts:8</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts#L37">transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts:37</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-index-accordion" open><summary class="tsd-accordion-summary tsd-index-summary">
@@ -50,64 +65,100 @@
 <h2>Properties</h2>
 <section class="tsd-panel tsd-member"><a id="autoApproveSelfInitiatedIncomingTransfers" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>auto<wbr/>Approve<wbr/>Self<wbr/>Initiated<wbr/>Incoming<wbr/>Transfers</span><a href="#autoApproveSelfInitiatedIncomingTransfers" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><g stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" id="icon-anchor"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5"></path><path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5"></path></g></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">auto<wbr/>Approve<wbr/>Self<wbr/>Initiated<wbr/>Incoming<wbr/>Transfers</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">auto<wbr/>Approve<wbr/>Self<wbr/>Initiated<wbr/>Incoming<wbr/>Transfers</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
+<div class="tsd-comment tsd-typography"><p>The new auto approve self initiated incoming transfers. Must have the necessary permissions to update.</p>
+</div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts#L18">transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts:18</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts#L47">transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts:47</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="autoApproveSelfInitiatedOutgoingTransfers" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>auto<wbr/>Approve<wbr/>Self<wbr/>Initiated<wbr/>Outgoing<wbr/>Transfers</span><a href="#autoApproveSelfInitiatedOutgoingTransfers" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">auto<wbr/>Approve<wbr/>Self<wbr/>Initiated<wbr/>Outgoing<wbr/>Transfers</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">auto<wbr/>Approve<wbr/>Self<wbr/>Initiated<wbr/>Outgoing<wbr/>Transfers</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
+<div class="tsd-comment tsd-typography"><p>The new auto approve self initiated outgoing transfers. Must have the necessary permissions to update.</p>
+</div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts#L16">transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts:16</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts#L45">transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts:45</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="collectionId" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>collection<wbr/>Id</span><a href="#collectionId" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">collection<wbr/>Id</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type tsd-kind-type-parameter">T</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">collection<wbr/>Id</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type tsd-kind-type-parameter">T</span></div>
+<div class="tsd-comment tsd-typography"><p>The ID of the collection to transfer badges from.</p>
+</div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts#L10">transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts:10</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts#L39">transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts:39</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="creator" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>creator</span><a href="#creator" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">creator</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">creator</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+<div class="tsd-comment tsd-typography"><p>The creator of the transaction.</p>
+</div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts#L9">transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts:9</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts#L38">transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts:38</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="incomingApprovals" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>incoming<wbr/>Approvals</span><a href="#incomingApprovals" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">incoming<wbr/>Approvals</span><span class="tsd-signature-symbol">?:</span> <a href="UserIncomingApproval.html" class="tsd-signature-type tsd-kind-interface">UserIncomingApproval</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">incoming<wbr/>Approvals</span><span class="tsd-signature-symbol">?:</span> <a href="UserIncomingApproval.html" class="tsd-signature-type tsd-kind-interface">UserIncomingApproval</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></div>
+<div class="tsd-comment tsd-typography"><p>The new incoming approvals. Must have the necessary permissions to update.</p>
+</div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts#L14">transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts:14</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts#L43">transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts:43</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="outgoingApprovals" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>outgoing<wbr/>Approvals</span><a href="#outgoingApprovals" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">outgoing<wbr/>Approvals</span><span class="tsd-signature-symbol">?:</span> <a href="UserOutgoingApproval.html" class="tsd-signature-type tsd-kind-interface">UserOutgoingApproval</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">outgoing<wbr/>Approvals</span><span class="tsd-signature-symbol">?:</span> <a href="UserOutgoingApproval.html" class="tsd-signature-type tsd-kind-interface">UserOutgoingApproval</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></div>
+<div class="tsd-comment tsd-typography"><p>The new outgoing approvals. Must have the necessary permissions to update.</p>
+</div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts#L12">transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts:12</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts#L41">transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts:41</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="updateAutoApproveSelfInitiatedIncomingTransfers" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>update<wbr/>Auto<wbr/>Approve<wbr/>Self<wbr/>Initiated<wbr/>Incoming<wbr/>Transfers</span><a href="#updateAutoApproveSelfInitiatedIncomingTransfers" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">update<wbr/>Auto<wbr/>Approve<wbr/>Self<wbr/>Initiated<wbr/>Incoming<wbr/>Transfers</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">update<wbr/>Auto<wbr/>Approve<wbr/>Self<wbr/>Initiated<wbr/>Incoming<wbr/>Transfers</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
+<div class="tsd-comment tsd-typography"><p>Whether or not to update the auto approve self initiated incoming transfers (i.e. to == the user and initiator == the user).</p>
+</div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts#L17">transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts:17</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts#L46">transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts:46</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="updateAutoApproveSelfInitiatedOutgoingTransfers" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>update<wbr/>Auto<wbr/>Approve<wbr/>Self<wbr/>Initiated<wbr/>Outgoing<wbr/>Transfers</span><a href="#updateAutoApproveSelfInitiatedOutgoingTransfers" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">update<wbr/>Auto<wbr/>Approve<wbr/>Self<wbr/>Initiated<wbr/>Outgoing<wbr/>Transfers</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">update<wbr/>Auto<wbr/>Approve<wbr/>Self<wbr/>Initiated<wbr/>Outgoing<wbr/>Transfers</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
+<div class="tsd-comment tsd-typography"><p>Whether or not to update the auto approve self initiated outgoing transfers (i.e. from == the user and initiator == the user).</p>
+</div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts#L15">transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts:15</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts#L44">transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts:44</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="updateIncomingApprovals" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>update<wbr/>Incoming<wbr/>Approvals</span><a href="#updateIncomingApprovals" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">update<wbr/>Incoming<wbr/>Approvals</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">update<wbr/>Incoming<wbr/>Approvals</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
+<div class="tsd-comment tsd-typography"><p>Whether or not to update the incoming approvals.</p>
+</div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts#L13">transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts:13</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts#L42">transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts:42</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="updateOutgoingApprovals" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>update<wbr/>Outgoing<wbr/>Approvals</span><a href="#updateOutgoingApprovals" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">update<wbr/>Outgoing<wbr/>Approvals</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">update<wbr/>Outgoing<wbr/>Approvals</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
+<div class="tsd-comment tsd-typography"><p>Whether or not to update the outgoing approvals.</p>
+</div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts#L11">transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts:11</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts#L40">transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts:40</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="updateUserPermissions" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>update<wbr/>User<wbr/>Permissions</span><a href="#updateUserPermissions" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">update<wbr/>User<wbr/>Permissions</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">update<wbr/>User<wbr/>Permissions</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
+<div class="tsd-comment tsd-typography"><p>Whether or not to update the user permissions.</p>
+</div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts#L19">transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts:19</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts#L48">transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts:48</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="userPermissions" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>user<wbr/>Permissions</span><a href="#userPermissions" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">user<wbr/>Permissions</span><span class="tsd-signature-symbol">?:</span> <a href="UserPermissions.html" class="tsd-signature-type tsd-kind-interface">UserPermissions</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">user<wbr/>Permissions</span><span class="tsd-signature-symbol">?:</span> <a href="UserPermissions.html" class="tsd-signature-type tsd-kind-interface">UserPermissions</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span></div>
+<div class="tsd-comment tsd-typography"><p>The new user permissions. Must have the necessary permissions to update.</p>
+</div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts#L20">transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts:20</a></li></ul></aside></section></section></div>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts#L49">transactions/messages/bitbadges/badges/msgUpdateUserApprovals.ts:49</a></li></ul></aside></section></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -166,8 +217,6 @@
 <li><a href="Fee.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Fee</span></a></li>
 <li><a href="IncomingApprovalCriteria.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Incoming<wbr/>Approval<wbr/>Criteria</span></a></li>
 <li><a href="IncrementedBalances.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Incremented<wbr/>Balances</span></a></li>
-<li><a href="InheritedBalance.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Inherited<wbr/>Balance</span></a></li>
-<li><a href="InheritedBalancesTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Inherited<wbr/>Balances<wbr/>Timeline</span></a></li>
 <li><a href="IsArchivedTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Is<wbr/>Archived<wbr/>Timeline</span></a></li>
 <li><a href="ManagerTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Manager<wbr/>Timeline</span></a></li>
 <li><a href="ManualBalances.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Manual<wbr/>Balances</span></a></li>
@@ -241,8 +290,6 @@
 <li><a href="../functions/convertFromProtoToMsgUpdateUserApprovals.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>From<wbr/>Proto<wbr/>To<wbr/>Msg<wbr/>Update<wbr/>User<wbr/>Approvals</span></a></li>
 <li><a href="../functions/convertIncomingApprovalCriteria.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>Incoming<wbr/>Approval<wbr/>Criteria</span></a></li>
 <li><a href="../functions/convertIncrementedBalances.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>Incremented<wbr/>Balances</span></a></li>
-<li><a href="../functions/convertInheritedBalance.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>Inherited<wbr/>Balance</span></a></li>
-<li><a href="../functions/convertInheritedBalancesTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>Inherited<wbr/>Balances<wbr/>Timeline</span></a></li>
 <li><a href="../functions/convertIsArchivedTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>Is<wbr/>Archived<wbr/>Timeline</span></a></li>
 <li><a href="../functions/convertManagerTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>Manager<wbr/>Timeline</span></a></li>
 <li><a href="../functions/convertManualBalances.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>Manual<wbr/>Balances</span></a></li>
@@ -299,30 +346,7 @@
 <li><a href="../functions/createWeb3Extension.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>create<wbr/>Web3<wbr/>Extension</span></a></li>
 <li><a href="../functions/createWeb3ExtensionSolana.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>create<wbr/>Web3<wbr/>Extension<wbr/>Solana</span></a></li>
 <li><a href="../functions/deepCopy.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>deep<wbr/>Copy</span></a></li>
-<li><a href="../functions/getWrappedBadgeIds.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Badge<wbr/>Ids</span></a></li>
-<li><a href="../functions/getWrappedBadgeMetadata.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Badge<wbr/>Metadata</span></a></li>
-<li><a href="../functions/getWrappedBadgeMetadataTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Badge<wbr/>Metadata<wbr/>Timeline</span></a></li>
-<li><a href="../functions/getWrappedBalances.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Balances</span></a></li>
-<li><a href="../functions/getWrappedBalancesActionPermission.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Balances<wbr/>Action<wbr/>Permission</span></a></li>
-<li><a href="../functions/getWrappedCollectionApprovalPermission.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Collection<wbr/>Approval<wbr/>Permission</span></a></li>
-<li><a href="../functions/getWrappedCollectionApprovals.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Collection<wbr/>Approvals</span></a></li>
-<li><a href="../functions/getWrappedCollectionMetadataTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Collection<wbr/>Metadata<wbr/>Timeline</span></a></li>
-<li><a href="../functions/getWrappedCollectionPermissions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Collection<wbr/>Permissions</span></a></li>
-<li><a href="../functions/getWrappedCustomDataTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Custom<wbr/>Data<wbr/>Timeline</span></a></li>
-<li><a href="../functions/getWrappedIncomingTransfers.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Incoming<wbr/>Transfers</span></a></li>
-<li><a href="../functions/getWrappedInheritedBalancesTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Inherited<wbr/>Balances<wbr/>Timeline</span></a></li>
-<li><a href="../functions/getWrappedIsArchivedTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Is<wbr/>Archived<wbr/>Timeline</span></a></li>
-<li><a href="../functions/getWrappedManagerTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Manager<wbr/>Timeline</span></a></li>
-<li><a href="../functions/getWrappedOffChainBalancesMetadataTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Off<wbr/>Chain<wbr/>Balances<wbr/>Metadata<wbr/>Timeline</span></a></li>
-<li><a href="../functions/getWrappedOutgoingTransfers.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Outgoing<wbr/>Transfers</span></a></li>
-<li><a href="../functions/getWrappedProof.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Proof</span></a></li>
-<li><a href="../functions/getWrappedStandardsTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Standards<wbr/>Timeline</span></a></li>
-<li><a href="../functions/getWrappedTimedUpdatePermission.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Timed<wbr/>Update<wbr/>Permission</span></a></li>
-<li><a href="../functions/getWrappedTimedUpdateWithBadgeIdsPermission.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Timed<wbr/>Update<wbr/>With<wbr/>Badge<wbr/>Ids<wbr/>Permission</span></a></li>
-<li><a href="../functions/getWrappedTransfers.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Transfers</span></a></li>
-<li><a href="../functions/getWrappedUserPermissions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>User<wbr/>Permissions</span></a></li>
 <li><a href="../functions/keccak256ToBase64.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>keccak256<wbr/>To<wbr/>Base64</span></a></li>
-<li><a href="../functions/numberify-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>numberify</span></a></li>
 <li><a href="../functions/signatureToWeb3Extension.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>signature<wbr/>To<wbr/>Web3<wbr/>Extension</span></a></li>
 <li><a href="../functions/signatureToWeb3ExtensionSolana.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>signature<wbr/>To<wbr/>Web3<wbr/>Extension<wbr/>Solana</span></a></li></ul></nav></div></div></div>
 <div class="tsd-generator">

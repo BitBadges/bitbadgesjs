@@ -530,28 +530,6 @@ export const castUserIncomingApprovalsToUniversalPermission = (
   return castedPermissions;
 };
 
-// export const castInheritedBalancesToUniversalPermission = (
-//   inheritedBalances: InheritedBalance<bigint>[]
-// ): UniversalPermission[] => {
-//   let castedPermissions: UniversalPermission[] = [];
-//   for (let inheritedBalance of inheritedBalances) {
-//     castedPermissions.push({
-//       defaultValues: {
-//         ...AllDefaultValues,
-//         badgeIds: inheritedBalance.badgeIds,
-//         usesBadgeIds: true,
-//         arbitraryValue: inheritedBalance,
-//       },
-//       combinations: [
-//         {
-//           ...AllDefaultOptions,
-//         }
-//       ],
-//     });
-//   }
-//   return castedPermissions;
-// }
-
 export const castBadgeMetadataToUniversalPermission = (
   badgeMetadata: BadgeMetadata<bigint>[]
 ): UniversalPermission[] => {

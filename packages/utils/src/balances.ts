@@ -21,8 +21,8 @@ export function getBlankBalance(nonMintApproval: boolean, collection?: BitBadges
     balances: [],
     incomingApprovals: collection ? collection.defaultUserIncomingApprovals : [],
     outgoingApprovals: collection ? collection.defaultUserOutgoingApprovals : [],
-    autoApproveSelfInitiatedIncomingTransfers: collection ? collection.defaultAutoApproveSelfInitiatedIncomingTransfers : false,
-    autoApproveSelfInitiatedOutgoingTransfers: collection ? collection.defaultAutoApproveSelfInitiatedOutgoingTransfers : false,
+    autoApproveSelfInitiatedIncomingTransfers: collection ? collection.defaultAutoApproveSelfInitiatedIncomingTransfers : true,
+    autoApproveSelfInitiatedOutgoingTransfers: collection ? collection.defaultAutoApproveSelfInitiatedOutgoingTransfers : true,
     userPermissions: collection ? collection.defaultUserPermissions : {
       canUpdateIncomingApprovals: [],
       canUpdateOutgoingApprovals: [],
@@ -171,6 +171,11 @@ export function areBalancesEqual(expected: Balance<bigint>[], actual: Balance<bi
   return true;
 }
 
+/**
+ * Deep copies a set of balances, with bigints.
+ *
+ * @category Balances
+ */
 export function deepCopyBalances(balances: Balance<bigint>[]) {
   let newBalances = [];
   for (let i = 0; i < balances.length; i++) {

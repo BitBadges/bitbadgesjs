@@ -2,6 +2,9 @@ import { NumberType } from "../string-numbers";
 import { UserIncomingApproval, UserOutgoingApproval, convertUserIncomingApproval, convertUserOutgoingApproval } from "./approvals";
 import { UserPermissions, convertUserPermissions } from "./permissions";
 
+/**
+ * Deep copy an object, preserving bigints.
+ */
 export function deepCopy<T>(obj: T): T {
   return deepCopyWithBigInts(obj);
 }
@@ -42,6 +45,8 @@ function deepCopyWithBigInts<T>(obj: T): T {
  * @property {UserOutgoingApproval[]} outgoingApprovals - The approved outgoing transfers of the user.
  * @property {UserIncomingApproval[]} incomingApprovals - The approved incoming transfers of the user.
  * @property {UserPermissions} userPermissions - The permissions of the user to update their incoming / outgoing approvals.
+ * @property {boolean} autoApproveSelfInitiatedOutgoingTransfers - Whether or not to auto approve self-initiated outgoing transfers (i.e. from == initiator).
+ * @property {boolean} autoApproveSelfInitiatedIncomingTransfers - Whether or not to auto approve self-initiated incoming transfers (i.e. to == initiator).
  */
 export interface UserBalance<T extends NumberType> {
   balances: Balance<T>[];
@@ -86,10 +91,11 @@ export function convertUintRange<T extends NumberType, U extends NumberType>(ran
 
 
 /**
- * BadgeMetadata is used to represent the metadata for a range of badge IDs. The metadata can be hosted via a URI (via uri) or stored on-chain (via customData).
+ * BadgeMetadata is used to represent the metadata for a range of badge IDs.
+ * The metadata can be hosted via a URI (via uri) or stored on-chain (via customData).
  *
- * We take first-match only for the badge IDs. If a badge ID is in multiple BadgeMetadata, we take the first time
- * it is found in a linear search.
+ * We take first-match only for the badge IDs.
+ * If a badge ID is in multiple BadgeMetadata, we take the first match in a linear search.
  *
  * @typedef {Object} BadgeMetadata
  * @property {string} uri - The URI where to fetch the badge metadata from.
@@ -121,12 +127,6 @@ export interface CollectionMetadata {
   customData: string
 }
 
-// export function convertCollectionMetadata<T extends NumberType, U extends NumberType>(uri: CollectionMetadata<T>, convertFunction: (item: T) => U): CollectionMetadata<U> {
-//   return deepCopy({
-//     ...uri,
-//   })
-// }
-
 /**
  * OffChainBalancesMetadata represents the metadata of the off-chain balances
  *
@@ -139,16 +139,10 @@ export interface OffChainBalancesMetadata {
   customData: string
 }
 
-// export function convertOffChainBalancesMetadata<T extends NumberType, U extends NumberType>(uri: OffChainBalancesMetadata, convertFunction: (item: T) => U): OffChainBalancesMetadata<U> {
-//   return deepCopy({
-//     ...uri,
-//   })
-// }
-
 /**
  * MustOwnBadges are used to represent a challenge for an approved transfer where a user
  * must own min-max (amountRange) of the badges (badgeIds) from a specific collection (collectionId)
- * to be able to transfer the badges.
+ * to be able to transfer the badges and be approved.
  *
  * @typedef {Object} MustOwnBadges
  * @property {NumberType} collectionId - The collection ID of the badges to own.
@@ -156,8 +150,7 @@ export interface OffChainBalancesMetadata {
  * @property {UintRange[]} ownershipTimes - The range of the times that the badges must be owned.
  * @property {UintRange[]} badgeIds - The range of the badge IDs that must be owned.
  * @property {boolean} overrideWithCurrentTime - Whether or not to override the ownershipTimes with the current time.
- *
- * @property {boolean} mustOwnAll - Whether or not the user must own all the sepcified badges. If false, we will accept if they own at least one.
+ * @property {boolean} mustOwnAll - Whether or not the user must own all the sepcified badges. If false, we will accept if they own at least one for >= 1 millisecond.
  */
 export interface MustOwnBadges<T extends NumberType> {
   collectionId: T;
@@ -182,36 +175,8 @@ export function convertMustOwnBadges<T extends NumberType, U extends NumberType>
 }
 
 /**
- * InheritedBalance represents a balance that is inherited from a parent collection.
- * Only used for collections with inherited balance type.
- *
- * Note that the number of badgeIDs specified in the parentBadgeIds must equal one or match the number of badgeIDs specified in the badgeIds.
- * If the number of badgeIDs specified in the parentBadgeIds equals one, then all badgeIds will inherit the balance from the single parent badge ID.
- * If the number of badgeIDs specified in the parentBadgeIds matches the number of badgeIDs specified in the badgeIds, then each badgeId will inherit the balance from the corresponding parent badge ID.
- *
- * @typedef {Object} InheritedBalance
- * @property {NumberType} parentCollectionId - The parent collection ID of the inherited balance.
- * @property {UintRange[]} parentBadgeIds - The parent badge IDs of the inherited balance.
- * @property {UintRange[]} badgeIds - The badge IDs of the inherited balance.
- *
- */
-export interface InheritedBalance<T extends NumberType> {
-  badgeIds: UintRange<T>[];
-  parentCollectionId: T;
-  parentBadgeIds: UintRange<T>[];
-}
-
-export function convertInheritedBalance<T extends NumberType, U extends NumberType>(inheritedBalance: InheritedBalance<T>, convertFunction: (item: T) => U): InheritedBalance<U> {
-  return deepCopy({
-    ...inheritedBalance,
-    badgeIds: inheritedBalance.badgeIds.map((b) => convertUintRange(b, convertFunction)),
-    parentCollectionId: convertFunction(inheritedBalance.parentCollectionId),
-    parentBadgeIds: inheritedBalance.parentBadgeIds.map((b) => convertUintRange(b, convertFunction))
-  })
-}
-
-/**
  * Balance is used to represent a balance of a badge.
+ * A user owns x(amount) of the badge IDs (badgeIds) from a specific collection (collectionId) for a range of times (ownershipTimes).
  *
  * @typedef {Object} Balance
  * @property {NumberType} amount - The amount or balance of the owned badge.
@@ -236,9 +201,13 @@ export function convertBalance<T extends NumberType, U extends NumberType>(balan
 /**
  * AddressMappings represent a list of addresses, identified by a unique ID.
  *
- * AddressMappings can be used by any collection, so the ID must be globally unique and not used before.
+ * Some mapping IDs are reserved and auto generated by the blockchain.
+ * Otherwise, the mapping can be created on-chain via MsgCreateAddressMappings.
  *
- * Note that some IDs such as ("Mint", "Manager", etc) are reserved.
+ * For the BitBadges indexer / API, we also allow users to create off-chain mappings hosted in a centralized manner.
+ *
+ * On-chain mappings are stored on the blockchain, are permanent, non editable, non deletable, and can be used for defining permissions and approvals.
+ * Off-chain mappings are stored off-chain, are mutable, and can be edited / deleted at any time by the creator.
  *
  * @typedef {Object} AddressMapping
  * @property {string} mappingId - The ID of the address mapping.
@@ -246,6 +215,7 @@ export function convertBalance<T extends NumberType, U extends NumberType>(balan
  * @property {boolean} includeAddresses - Whether or not to include ONLY the addresses or include all EXCEPT the addresses.
  * @property {string} uri - The URI where to fetch the address mapping metadata from.
  * @property {string} customData - Arbitrary custom data that can be stored on-chain.
+ * @property {string} createdBy - The address that created the address mapping.
  */
 export interface AddressMapping {
   mappingId: string;
@@ -258,18 +228,6 @@ export interface AddressMapping {
 
   createdBy?: string;
 }
-
-// export function convertAddressMapping<T extends NumberType, U extends NumberType>(addressMapping: AddressMapping<T>, convertFunction: (item: T) => U): AddressMapping<U> {
-//   return deepCopy({
-//     ...addressMapping,
-//     mappingId: addressMapping.mappingId,
-//     addresses: addressMapping.addresses,
-//     includeAddresses: addressMapping.includeAddresses,
-//     uri: addressMapping.uri,
-//     customData: addressMapping.customData
-//   })
-// }
-
 
 /**
  * Transfer is used to represent a transfer of badges.
@@ -311,6 +269,14 @@ export function convertTransfer<T extends NumberType, U extends NumberType>(tran
   })
 }
 
+/**
+ * ApprovalIdentifierDetails is used to represent an exact approval.
+ *
+ * @typedef {Object} ApprovalIdentifierDetails
+ * @property {string} approvalId - The approval ID of the approval.
+ * @property {string} approvalLevel - The approval level of the approval "collection", "incoming", or "outgoing".
+ * @property {string} approverAddress - The address of the approval to check. If approvalLevel is "collection", this is blank "".
+ */
 export interface ApprovalIdentifierDetails {
   approvalId: string
   approvalLevel: string
@@ -318,13 +284,15 @@ export interface ApprovalIdentifierDetails {
 }
 
 /**
- * AmountTrackerIdDetails is used to represent an exact approval.
+ * AmountTrackerIdDetails is used to represent an exact approval tracker ID.
  *
  * @typedef {Object} AmountTrackerIdDetails
+ * @property {NumberType} collectionId - The collection ID for the approval.
  * @property {string} amountTrackerId - The approval ID of the approval.
  * @property {string} approvalLevel - The approval level of the approval "collection", "incoming", or "outgoing".
- * @property {string} address - The address of the approval to check.
- * @property {string} addressToCheck - The address to check for the approval.
+ * @property {string} approverAddress - The address of the approval to check.
+ * @property {string} trackerType - The type of tracker to check "overall", "to", "from", or "initiatedBy".
+ * @property {string} approvedAddress - The address to check for the approval.
  */
 export interface AmountTrackerIdDetails<T extends NumberType> {
   collectionId: T
@@ -342,12 +310,6 @@ export function convertAmountTrackerIdDetails<T extends NumberType, U extends Nu
   })
 }
 
-// export function convertApprovalIdDetails<T extends NumberType, U extends NumberType>(approvalIdDetails: ApprovalIdDetails<T>, convertFunction: (item: T) => U): ApprovalIdDetails<U> {
-//   return deepCopy({
-//     ...approvalIdDetails,
-//   })
-// }
-
 /**
  * MerkleChallenge is used to represent a merkle challenge for an approval.
  *
@@ -355,9 +317,9 @@ export function convertAmountTrackerIdDetails<T extends NumberType, U extends Nu
  * @property {string} root - The root of the merkle tree.
  * @property {NumberType} expectedProofLength - The expected proof length of the merkle proof.
  * @property {boolean} useCreatorAddressAsLeaf - Whether or not to override any leaf value and use the creator address as the leaf. Used for whitelist trees.
- * @property {boolean} maxUsesPerLeaf - Whether or not to enforce max uses per leaf. Used to prevent replay attacks.
- * @property {boolean} useLeafIndexForTransferOrder - Whether or not to use the leaf index for the transfer order for the predeterminedBalances.
- *                                                    If so, the leaf index 0 will be the leftmost leaf of the valid proof layer (i.e. the one that corresponds to expectedProofLength).
+ * @property {NumberType} maxUsesPerLeaf - Whether or not to enforce max uses per leaf. Used to prevent replay attacks.
+ * @property {string} uri - The URI where to fetch the merkle challenge metadata from.
+ * @property {string} customData - Arbitrary custom data that can be stored on-chain.
  */
 export interface MerkleChallenge<T extends NumberType> {
   root: string
@@ -376,16 +338,37 @@ export function convertMerkleChallenge<T extends NumberType, U extends NumberTyp
   })
 }
 
+/**
+ * MerklePathItem is used to represent a merkle path item.
+ *
+ * @typedef {Object} MerklePathItem
+ * @property {string} aunt - The aunt of the merkle path item.
+ * @property {boolean} onRight - Indicates whether the aunt node is on the right side of the path.
+ */
 export interface MerklePathItem {
   aunt: string
   onRight: boolean
 }
 
+/**
+ * MerkleProof is used to represent a merkle proof.
+ * The merkle proof is used to prove that a leaf is in a merkle tree.
+ *
+ * @typedef {Object} MerkleProof
+ * @property {MerklePathItem[]} aunts - The aunts of the merkle proof.
+ * @property {string} leaf - The leaf of the merkle proof. If useCreatorAddressAsLeaf is true, this will be populated with the creator Cosmos address.
+ */
 export interface MerkleProof {
   aunts: MerklePathItem[]
   leaf: string
 }
 
+/**
+ * TimelineItem is a generic type to represent timelines which have values corresponding to specific times.
+ *
+ * @typedef {Object} TimelineItem
+ * @property {UintRange[]} timelineTimes - The times of the timeline item. Times in a timeline cannot overlap.
+ */
 export interface TimelineItem<T extends NumberType> {
   timelineTimes: UintRange<T>[];
 }
@@ -396,7 +379,6 @@ export interface TimelineItem<T extends NumberType> {
  *
  * @typedef {Object} ManagerTimeline
  * @property {string} manager - The manager of the collection.
- * @property {UintRange[]} timelineTimes - The times of the manager.
  */
 export interface ManagerTimeline<T extends NumberType> extends TimelineItem<T> {
   manager: string
@@ -415,11 +397,9 @@ export function convertManagerTimeline<T extends NumberType, U extends NumberTyp
  *
  * @typedef {Object} CollectionMetadataTimeline
  * @property {CollectionMetadata} collectionMetadata - The collection metadata.
- * @property {UintRange[]} timelineTimes - The times of the collection metadata.
  */
 export interface CollectionMetadataTimeline<T extends NumberType> extends TimelineItem<T> {
   collectionMetadata: CollectionMetadata
-  timelineTimes: UintRange<T>[]
 }
 
 export function convertCollectionMetadataTimeline<T extends NumberType, U extends NumberType>(collectionMetadataTimeline: CollectionMetadataTimeline<T>, convertFunction: (item: T) => U): CollectionMetadataTimeline<U> {
@@ -435,11 +415,9 @@ export function convertCollectionMetadataTimeline<T extends NumberType, U extend
  *
  * @typedef {Object} BadgeMetadataTimeline
  * @property {BadgeMetadata} badgeMetadata - The badge metadata.
- * @property {UintRange[]} timelineTimes - The times of the badge metadata.
  */
 export interface BadgeMetadataTimeline<T extends NumberType> extends TimelineItem<T> {
   badgeMetadata: BadgeMetadata<T>[]
-  timelineTimes: UintRange<T>[]
 }
 export function convertBadgeMetadataTimeline<T extends NumberType, U extends NumberType>(badgeMetadataTimeline: BadgeMetadataTimeline<T>, convertFunction: (item: T) => U): BadgeMetadataTimeline<U> {
   return deepCopy({
@@ -454,12 +432,9 @@ export function convertBadgeMetadataTimeline<T extends NumberType, U extends Num
  *
  * @typedef {Object} OffChainBalancesMetadataTimeline
  * @property {OffChainBalancesMetadata} offChainBalancesMetadata - The off-chain balances metadata.
- * @property {UintRange[]} timelineTimes - The times of the off-chain balances metadata.
- *
  */
 export interface OffChainBalancesMetadataTimeline<T extends NumberType> extends TimelineItem<T> {
   offChainBalancesMetadata: OffChainBalancesMetadata
-  timelineTimes: UintRange<T>[]
 }
 export function convertOffChainBalancesMetadataTimeline<T extends NumberType, U extends NumberType>(offChainBalancesMetadataTimeline: OffChainBalancesMetadataTimeline<T>, convertFunction: (item: T) => U): OffChainBalancesMetadataTimeline<U> {
   return deepCopy({
@@ -475,11 +450,9 @@ export function convertOffChainBalancesMetadataTimeline<T extends NumberType, U 
  *
  * @typedef {Object} CustomDataTimeline
  * @property {string} customData - Arbitrary custom data.
- * @property {UintRange[]} timelineTimes - The times of the custom data.
  */
 export interface CustomDataTimeline<T extends NumberType> extends TimelineItem<T> {
   customData: string
-  timelineTimes: UintRange<T>[]
 }
 export function convertCustomDataTimeline<T extends NumberType, U extends NumberType>(customDataTimeline: CustomDataTimeline<T>, convertFunction: (item: T) => U): CustomDataTimeline<U> {
   return deepCopy({
@@ -490,36 +463,14 @@ export function convertCustomDataTimeline<T extends NumberType, U extends Number
 }
 
 /**
- * InheritedBalancesTimeline represents the value of the inherited balances over time. Only used for inherited balance collections.
- *
- * @typedef {Object} InheritedBalancesTimeline
- * @property {InheritedBalance[]} inheritedBalances - The inherited balances.
- *
- * @property {UintRange[]} timelineTimes - The times of the inherited balances.
- */
-export interface InheritedBalancesTimeline<T extends NumberType> extends TimelineItem<T> {
-  inheritedBalances: InheritedBalance<T>[]
-  timelineTimes: UintRange<T>[]
-}
-export function convertInheritedBalancesTimeline<T extends NumberType, U extends NumberType>(inheritedBalancesTimeline: InheritedBalancesTimeline<T>, convertFunction: (item: T) => U): InheritedBalancesTimeline<U> {
-  return deepCopy({
-    ...inheritedBalancesTimeline,
-    inheritedBalances: inheritedBalancesTimeline.inheritedBalances.map((b) => convertInheritedBalance(b, convertFunction)),
-    timelineTimes: inheritedBalancesTimeline.timelineTimes.map((b) => convertUintRange(b, convertFunction))
-  })
-}
-
-/**
  * StandardsTimeline represents the value of the standards over time
  *
  * @typedef {Object} StandardsTimeline
  * @property {string[]} standards - The standards.
- * @property {UintRange[]} timelineTimes - The times of the standards.
  *
  */
 export interface StandardsTimeline<T extends NumberType> extends TimelineItem<T> {
   standards: string[]
-  timelineTimes: UintRange<T>[]
 }
 export function convertStandardsTimeline<T extends NumberType, U extends NumberType>(standardsTimeline: StandardsTimeline<T>, convertFunction: (item: T) => U): StandardsTimeline<U> {
   return deepCopy({
@@ -534,11 +485,9 @@ export function convertStandardsTimeline<T extends NumberType, U extends NumberT
  *
  * @typedef {Object} IsArchivedTimeline
  * @property {boolean} isArchived - The isArchived.
- * @property {UintRange[]} timelineTimes - The times of the isArchived.
  */
 export interface IsArchivedTimeline<T extends NumberType> extends TimelineItem<T> {
   isArchived: boolean
-  timelineTimes: UintRange<T>[]
 }
 
 export function convertIsArchivedTimeline<T extends NumberType, U extends NumberType>(isArchivedTimeline: IsArchivedTimeline<T>, convertFunction: (item: T) => U): IsArchivedTimeline<U> {

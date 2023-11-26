@@ -9,7 +9,8 @@ import { stringify } from "./utils/preserveJson";
 import Joi from "joi";
 import { getCurrentValuesForCollection } from "./timelines";
 
-export type DesiredNumberType = bigint;
+type DesiredNumberType = bigint;
+
 
 export interface BitBadgesApiDetails {
   apiUrl?: string;
@@ -17,6 +18,16 @@ export interface BitBadgesApiDetails {
   convertFunction: (num: NumberType) => DesiredNumberType;
 }
 
+/**
+ * @category API / Indexer
+ *
+ * This is the BitBadgesAPI class which provides all typed API calls to the BitBadges API.
+ * See official documentation for more details and examples.
+ *
+ * Must have a valid API key set. To get an API key, reach out to the team.
+ *
+ * convertFunction is used to convert any numbers returned by the API to the desired NumberType.
+ */
 export class BitBadgesAPI {
   axios = axiosApi.create({
     withCredentials: true,

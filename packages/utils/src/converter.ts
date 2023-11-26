@@ -34,7 +34,7 @@ const hexChecksumChain = (name: string, chainId?: number) => ({
   name,
 })
 
-export const ETH = hexChecksumChain('ETH')
+const ETH = hexChecksumChain('ETH')
 
 function makeBech32Encoder(prefix: string) {
   return (data: Buffer) => bech32.encode(prefix, bech32.toWords(data))
@@ -56,13 +56,15 @@ const bech32Chain = (name: string, prefix: string) => ({
   name,
 })
 
-export const COSMOS = bech32Chain('COSMOS', 'cosmos')
+const COSMOS = bech32Chain('COSMOS', 'cosmos')
 
+//Converts an eth address to its corresponding cosmos address (bech32)
 export const ethToCosmos = (ethAddress: string) => {
   const data = ETH.decoder(ethAddress)
   return COSMOS.encoder(data)
 }
 
+//Converts a cosmos address to its corresponding eth address (hex)
 export const cosmosToEth = (cosmosAddress: string) => {
   const data = COSMOS.decoder(cosmosAddress)
   return ETH.encoder(data)
@@ -71,6 +73,8 @@ export const cosmosToEth = (cosmosAddress: string) => {
 //Note this is only one way due to how Solana addresses are
 //We can't convert from Cosmos to Solana bc Solana to Cosmsos is a hash + truncate, so we cannot reverse a hash
 
+
+//Converts a solana address to its corresponding cosmos address (bech32)
 export const solanaToCosmos = (solanaAddress: string) => {
   const solanaPublicKeyBuffer = bs58.decode(solanaAddress);
   const hash = sha256(solanaPublicKeyBuffer);
@@ -79,6 +83,7 @@ export const solanaToCosmos = (solanaAddress: string) => {
   return bech32Address;
 }
 
+//Converts a solana address to its corresponding eth address (hex)
 export const solanaToEth = (solanaAddress: string) => {
   return cosmosToEth(solanaToCosmos(solanaAddress));
 }

@@ -143,8 +143,6 @@ export interface GetAdditionalCollectionDetailsRequestBody {
   merkleChallengeIdsToFetch?: ChallengeTrackerIdDetails<NumberType>[],
   approvalsTrackerIdsToFetch?: AmountTrackerIdDetails<NumberType>[],
   handleAllAndAppendDefaults?: boolean
-  //customQueries?: { db: string, selector: any, key: string }[],
-  //TODO: we can add fully custom queries here (i.e. supply own Mango selector)
 }
 
 /**

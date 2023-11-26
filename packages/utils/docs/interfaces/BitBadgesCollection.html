@@ -17,12 +17,10 @@
 <h1>Interface BitBadgesCollection&lt;T&gt;</h1></div>
 <section class="tsd-panel tsd-comment">
 <div class="tsd-comment tsd-typography"><p>BitBadgesCollection is the type for collections returned by the BitBadges API. It extends the base CollectionDoc type
-and adds additional accompanying information.</p>
+and adds additional accompanying information such as metadata, activity, balances, preferred chain, etc.</p>
 </div>
 <div class="tsd-comment tsd-typography">
-<h4>Remarks</h4><p>Note that the collectionMetadata, badgeMetadata, activity, announcements, reviews, claims, and balances fields are
-dynamically fetched from the DB as needed. They may be empty or missing information when the collection is first fetched.
-You are responsible for fetching the missing information as needed from the corresponding API routes.</p>
+<h4>Remarks</h4><p>Note that returned collections will only fetch what is requested. It is your responsibility to join the data together (paginations, etc).</p>
 <p>See documentation for helper functions, examples, and tutorials on handling this data and paginations.</p>
 </div></section> 
 <section class="tsd-panel">
@@ -38,7 +36,7 @@ You are responsible for fetching the missing information as needed from the corr
 <ul class="tsd-hierarchy">
 <li><span class="target">BitBadgesCollection</span></li></ul></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/utils/src/types/collections.ts#L210">utils/src/types/collections.ts:210</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/types/collections.ts#L218">utils/src/types/collections.ts:218</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-index-accordion" open><summary class="tsd-accordion-summary tsd-index-summary">
@@ -88,43 +86,43 @@ You are responsible for fetching the missing information as needed from the corr
 <div class="tsd-signature"><span class="tsd-kind-property">_deleted</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">undefined</span></div><aside class="tsd-sources">
 <p>Inherited from <a href="Identified.html">Identified</a>.<a href="Identified.html#_deleted">_deleted</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/utils/src/types/db.ts#L28">utils/src/types/db.ts:28</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/types/db.ts#L28">utils/src/types/db.ts:28</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="_id" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>_id</span><a href="#_id" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">_id</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div><aside class="tsd-sources">
 <p>Inherited from <a href="Identified.html">Identified</a>.<a href="Identified.html#_id">_id</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/utils/src/types/db.ts#L26">utils/src/types/db.ts:26</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/types/db.ts#L26">utils/src/types/db.ts:26</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="_rev" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>_rev</span><a href="#_rev" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">_rev</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">undefined</span></div><aside class="tsd-sources">
 <p>Inherited from <a href="Identified.html">Identified</a>.<a href="Identified.html#_rev">_rev</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/utils/src/types/db.ts#L27">utils/src/types/db.ts:27</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/types/db.ts#L27">utils/src/types/db.ts:27</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="activity" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>activity</span><a href="#activity" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">activity</span><span class="tsd-signature-symbol">:</span> <a href="../types/TransferActivityInfo.html" class="tsd-signature-type tsd-kind-type-alias">TransferActivityInfo</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></div>
-<div class="tsd-comment tsd-typography"><p>The transfer activity of this collection</p>
+<div class="tsd-comment tsd-typography"><p>The fetched activity for this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views.</p>
 </div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/utils/src/types/collections.ts#L222">utils/src/types/collections.ts:222</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/types/collections.ts#L230">utils/src/types/collections.ts:230</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="announcements" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>announcements</span><a href="#announcements" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">announcements</span><span class="tsd-signature-symbol">:</span> <a href="../types/AnnouncementInfo.html" class="tsd-signature-type tsd-kind-type-alias">AnnouncementInfo</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></div>
-<div class="tsd-comment tsd-typography"><p>The announcement activity of this collection</p>
+<div class="tsd-comment tsd-typography"><p>The fetched announcements for this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views.</p>
 </div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/utils/src/types/collections.ts#L223">utils/src/types/collections.ts:223</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/types/collections.ts#L231">utils/src/types/collections.ts:231</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="approvalsTrackers" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>approvals<wbr/>Trackers</span><a href="#approvalsTrackers" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">approvals<wbr/>Trackers</span><span class="tsd-signature-symbol">:</span> <a href="../types/ApprovalsTrackerInfo.html" class="tsd-signature-type tsd-kind-type-alias">ApprovalsTrackerInfo</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></div>
-<div class="tsd-comment tsd-typography"><p>The approvals trackers of this collection</p>
+<div class="tsd-comment tsd-typography"><p>The fetched approval trackers for this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views.</p>
 </div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/utils/src/types/collections.ts#L227">utils/src/types/collections.ts:227</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/types/collections.ts#L235">utils/src/types/collections.ts:235</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="badgeMetadataTimeline" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>badge<wbr/>Metadata<wbr/>Timeline</span><a href="#badgeMetadataTimeline" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">badge<wbr/>Metadata<wbr/>Timeline</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type ">BadgeMetadataTimeline</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></div>
@@ -133,7 +131,7 @@ You are responsible for fetching the missing information as needed from the corr
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="CollectionInfoBase.html">CollectionInfoBase</a>.<a href="CollectionInfoBase.html#badgeMetadataTimeline">badgeMetadataTimeline</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/utils/src/types/db.ts#L57">utils/src/types/db.ts:57</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/types/db.ts#L60">utils/src/types/db.ts:60</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="balancesType" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>balances<wbr/>Type</span><a href="#balancesType" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">balances<wbr/>Type</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">&quot;Standard&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;Off-Chain&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;Inherited&quot;</span></div>
@@ -142,26 +140,32 @@ You are responsible for fetching the missing information as needed from the corr
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="CollectionInfoBase.html">CollectionInfoBase</a>.<a href="CollectionInfoBase.html#balancesType">balancesType</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/utils/src/types/db.ts#L58">utils/src/types/db.ts:58</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/types/db.ts#L61">utils/src/types/db.ts:61</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="cachedBadgeMetadata" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>cached<wbr/>Badge<wbr/>Metadata</span><a href="#cachedBadgeMetadata" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">cached<wbr/>Badge<wbr/>Metadata</span><span class="tsd-signature-symbol">:</span> <a href="BadgeMetadataDetails.html" class="tsd-signature-type tsd-kind-interface">BadgeMetadataDetails</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">cached<wbr/>Badge<wbr/>Metadata</span><span class="tsd-signature-symbol">:</span> <a href="BadgeMetadataDetails.html" class="tsd-signature-type tsd-kind-interface">BadgeMetadataDetails</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></div>
+<div class="tsd-comment tsd-typography"><p>The fetched badge metadata for this collection. Will only be fetched if requested. It is your responsibility to join this data.</p>
+</div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/utils/src/types/collections.ts#L221">utils/src/types/collections.ts:221</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/types/collections.ts#L229">utils/src/types/collections.ts:229</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="cachedCollectionMetadata" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>cached<wbr/>Collection<wbr/>Metadata</span><a href="#cachedCollectionMetadata" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">cached<wbr/>Collection<wbr/>Metadata</span><span class="tsd-signature-symbol">?:</span> <a href="Metadata.html" class="tsd-signature-type tsd-kind-interface">Metadata</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">cached<wbr/>Collection<wbr/>Metadata</span><span class="tsd-signature-symbol">?:</span> <a href="Metadata.html" class="tsd-signature-type tsd-kind-interface">Metadata</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span></div>
+<div class="tsd-comment tsd-typography"><p>The fetched collection metadata for this collection. Will only be fetched if requested. It is your responsibility to join this data.</p>
+</div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/utils/src/types/collections.ts#L220">utils/src/types/collections.ts:220</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/types/collections.ts#L228">utils/src/types/collections.ts:228</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="collectionApprovals" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>collection<wbr/>Approvals</span><a href="#collectionApprovals" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">collection<wbr/>Approvals</span><span class="tsd-signature-symbol">:</span> <a href="CollectionApprovalWithDetails.html" class="tsd-signature-type tsd-kind-interface">CollectionApprovalWithDetails</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></div>
-<div class="tsd-comment tsd-typography"><p>The collection approved transfers timeline</p>
+<div class="tsd-comment tsd-typography"><p>The collection approvals for this collection, with off-chain metadata populated.</p>
 </div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Overrides <a href="CollectionInfoBase.html">CollectionInfoBase</a>.<a href="CollectionInfoBase.html#collectionApprovals">collectionApprovals</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/utils/src/types/collections.ts#L211">utils/src/types/collections.ts:211</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/types/collections.ts#L219">utils/src/types/collections.ts:219</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="collectionId" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>collection<wbr/>Id</span><a href="#collectionId" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">collection<wbr/>Id</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type tsd-kind-type-parameter">T</span></div>
@@ -170,7 +174,7 @@ You are responsible for fetching the missing information as needed from the corr
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="CollectionInfoBase.html">CollectionInfoBase</a>.<a href="CollectionInfoBase.html#collectionId">collectionId</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/utils/src/types/db.ts#L55">utils/src/types/db.ts:55</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/types/db.ts#L58">utils/src/types/db.ts:58</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="collectionMetadataTimeline" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>collection<wbr/>Metadata<wbr/>Timeline</span><a href="#collectionMetadataTimeline" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">collection<wbr/>Metadata<wbr/>Timeline</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type ">CollectionMetadataTimeline</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></div>
@@ -179,16 +183,16 @@ You are responsible for fetching the missing information as needed from the corr
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="CollectionInfoBase.html">CollectionInfoBase</a>.<a href="CollectionInfoBase.html#collectionMetadataTimeline">collectionMetadataTimeline</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/utils/src/types/db.ts#L56">utils/src/types/db.ts:56</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/types/db.ts#L59">utils/src/types/db.ts:59</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="collectionPermissions" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>collection<wbr/>Permissions</span><a href="#collectionPermissions" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">collection<wbr/>Permissions</span><span class="tsd-signature-symbol">:</span> <a href="CollectionPermissionsWithDetails.html" class="tsd-signature-type tsd-kind-interface">CollectionPermissionsWithDetails</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span></div>
-<div class="tsd-comment tsd-typography"><p>The collection permissions</p>
+<div class="tsd-comment tsd-typography"><p>The collection permissions for this collection, with off-chain metadata populated.</p>
 </div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Overrides <a href="CollectionInfoBase.html">CollectionInfoBase</a>.<a href="CollectionInfoBase.html#collectionPermissions">collectionPermissions</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/utils/src/types/collections.ts#L212">utils/src/types/collections.ts:212</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/types/collections.ts#L220">utils/src/types/collections.ts:220</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="createdBlock" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>created<wbr/>Block</span><a href="#createdBlock" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">created<wbr/>Block</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type tsd-kind-type-parameter">T</span></div>
@@ -197,7 +201,7 @@ You are responsible for fetching the missing information as needed from the corr
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="CollectionInfoBase.html">CollectionInfoBase</a>.<a href="CollectionInfoBase.html#createdBlock">createdBlock</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/utils/src/types/db.ts#L73">utils/src/types/db.ts:73</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/types/db.ts#L75">utils/src/types/db.ts:75</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="createdBy" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>created<wbr/>By</span><a href="#createdBy" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">created<wbr/>By</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
@@ -206,13 +210,16 @@ You are responsible for fetching the missing information as needed from the corr
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="CollectionInfoBase.html">CollectionInfoBase</a>.<a href="CollectionInfoBase.html#createdBy">createdBy</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/utils/src/types/db.ts#L72">utils/src/types/db.ts:72</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/types/db.ts#L74">utils/src/types/db.ts:74</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="createdTimestamp" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>created<wbr/>Timestamp</span><a href="#createdTimestamp" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">created<wbr/>Timestamp</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type tsd-kind-type-parameter">T</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">created<wbr/>Timestamp</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type tsd-kind-type-parameter">T</span></div>
+<div class="tsd-comment tsd-typography"><p>The timestamp when this collection was created (milliseconds since epoch)</p>
+</div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="CollectionInfoBase.html">CollectionInfoBase</a>.<a href="CollectionInfoBase.html#createdTimestamp">createdTimestamp</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/utils/src/types/db.ts#L74">utils/src/types/db.ts:74</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/types/db.ts#L76">utils/src/types/db.ts:76</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="customDataTimeline" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>custom<wbr/>Data<wbr/>Timeline</span><a href="#customDataTimeline" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">custom<wbr/>Data<wbr/>Timeline</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type ">CustomDataTimeline</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></div>
@@ -221,46 +228,52 @@ You are responsible for fetching the missing information as needed from the corr
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="CollectionInfoBase.html">CollectionInfoBase</a>.<a href="CollectionInfoBase.html#customDataTimeline">customDataTimeline</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/utils/src/types/db.ts#L61">utils/src/types/db.ts:61</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/types/db.ts#L63">utils/src/types/db.ts:63</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="defaultAutoApproveSelfInitiatedIncomingTransfers" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>default<wbr/>Auto<wbr/>Approve<wbr/>Self<wbr/>Initiated<wbr/>Incoming<wbr/>Transfers</span><a href="#defaultAutoApproveSelfInitiatedIncomingTransfers" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">default<wbr/>Auto<wbr/>Approve<wbr/>Self<wbr/>Initiated<wbr/>Incoming<wbr/>Transfers</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">default<wbr/>Auto<wbr/>Approve<wbr/>Self<wbr/>Initiated<wbr/>Incoming<wbr/>Transfers</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
+<div class="tsd-comment tsd-typography"><p>Whether or not to auto approve self-initiated incoming transfers</p>
+</div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="CollectionInfoBase.html">CollectionInfoBase</a>.<a href="CollectionInfoBase.html#defaultAutoApproveSelfInitiatedIncomingTransfers">defaultAutoApproveSelfInitiatedIncomingTransfers</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/utils/src/types/db.ts#L70">utils/src/types/db.ts:70</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/types/db.ts#L72">utils/src/types/db.ts:72</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="defaultAutoApproveSelfInitiatedOutgoingTransfers" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>default<wbr/>Auto<wbr/>Approve<wbr/>Self<wbr/>Initiated<wbr/>Outgoing<wbr/>Transfers</span><a href="#defaultAutoApproveSelfInitiatedOutgoingTransfers" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">default<wbr/>Auto<wbr/>Approve<wbr/>Self<wbr/>Initiated<wbr/>Outgoing<wbr/>Transfers</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">default<wbr/>Auto<wbr/>Approve<wbr/>Self<wbr/>Initiated<wbr/>Outgoing<wbr/>Transfers</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
+<div class="tsd-comment tsd-typography"><p>Whether or not to auto approve self-initiated outgoing transfers</p>
+</div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="CollectionInfoBase.html">CollectionInfoBase</a>.<a href="CollectionInfoBase.html#defaultAutoApproveSelfInitiatedOutgoingTransfers">defaultAutoApproveSelfInitiatedOutgoingTransfers</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/utils/src/types/db.ts#L69">utils/src/types/db.ts:69</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/types/db.ts#L71">utils/src/types/db.ts:71</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="defaultUserIncomingApprovals" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>default<wbr/>User<wbr/>Incoming<wbr/>Approvals</span><a href="#defaultUserIncomingApprovals" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">default<wbr/>User<wbr/>Incoming<wbr/>Approvals</span><span class="tsd-signature-symbol">:</span> <a href="UserIncomingApprovalWithDetails.html" class="tsd-signature-type tsd-kind-interface">UserIncomingApprovalWithDetails</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></div>
-<div class="tsd-comment tsd-typography"><p>The default user approved incoming transfers timeline</p>
+<div class="tsd-comment tsd-typography"><p>The default user incoming approvals for this collection, with off-chain metadata populated.</p>
 </div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Overrides <a href="CollectionInfoBase.html">CollectionInfoBase</a>.<a href="CollectionInfoBase.html#defaultUserIncomingApprovals">defaultUserIncomingApprovals</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/utils/src/types/collections.ts#L215">utils/src/types/collections.ts:215</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/types/collections.ts#L223">utils/src/types/collections.ts:223</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="defaultUserOutgoingApprovals" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>default<wbr/>User<wbr/>Outgoing<wbr/>Approvals</span><a href="#defaultUserOutgoingApprovals" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">default<wbr/>User<wbr/>Outgoing<wbr/>Approvals</span><span class="tsd-signature-symbol">:</span> <a href="UserOutgoingApprovalWithDetails.html" class="tsd-signature-type tsd-kind-interface">UserOutgoingApprovalWithDetails</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></div>
-<div class="tsd-comment tsd-typography"><p>The default user approved outgoing transfers</p>
+<div class="tsd-comment tsd-typography"><p>The default user outgoing approvals for this collection, with off-chain metadata populated.</p>
 </div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Overrides <a href="CollectionInfoBase.html">CollectionInfoBase</a>.<a href="CollectionInfoBase.html#defaultUserOutgoingApprovals">defaultUserOutgoingApprovals</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/utils/src/types/collections.ts#L214">utils/src/types/collections.ts:214</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/types/collections.ts#L222">utils/src/types/collections.ts:222</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="defaultUserPermissions" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>default<wbr/>User<wbr/>Permissions</span><a href="#defaultUserPermissions" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">default<wbr/>User<wbr/>Permissions</span><span class="tsd-signature-symbol">:</span> <a href="UserPermissionsWithDetails.html" class="tsd-signature-type tsd-kind-interface">UserPermissionsWithDetails</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span></div>
-<div class="tsd-comment tsd-typography"><p>The default user permissions</p>
+<div class="tsd-comment tsd-typography"><p>The default user permissions for this collection, with off-chain metadata populated.</p>
 </div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Overrides <a href="CollectionInfoBase.html">CollectionInfoBase</a>.<a href="CollectionInfoBase.html#defaultUserPermissions">defaultUserPermissions</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/utils/src/types/collections.ts#L216">utils/src/types/collections.ts:216</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/types/collections.ts#L224">utils/src/types/collections.ts:224</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="isArchivedTimeline" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>is<wbr/>Archived<wbr/>Timeline</span><a href="#isArchivedTimeline" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">is<wbr/>Archived<wbr/>Timeline</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type ">IsArchivedTimeline</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></div>
@@ -269,7 +282,7 @@ You are responsible for fetching the missing information as needed from the corr
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="CollectionInfoBase.html">CollectionInfoBase</a>.<a href="CollectionInfoBase.html#isArchivedTimeline">isArchivedTimeline</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/utils/src/types/db.ts#L66">utils/src/types/db.ts:66</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/types/db.ts#L68">utils/src/types/db.ts:68</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="managerTimeline" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>manager<wbr/>Timeline</span><a href="#managerTimeline" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">manager<wbr/>Timeline</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type ">ManagerTimeline</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></div>
@@ -278,62 +291,70 @@ You are responsible for fetching the missing information as needed from the corr
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="CollectionInfoBase.html">CollectionInfoBase</a>.<a href="CollectionInfoBase.html#managerTimeline">managerTimeline</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/utils/src/types/db.ts#L62">utils/src/types/db.ts:62</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/types/db.ts#L64">utils/src/types/db.ts:64</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="merkleChallenges" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>merkle<wbr/>Challenges</span><a href="#merkleChallenges" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">merkle<wbr/>Challenges</span><span class="tsd-signature-symbol">:</span> <a href="../types/MerkleChallengeInfo.html" class="tsd-signature-type tsd-kind-type-alias">MerkleChallengeInfo</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">merkle<wbr/>Challenges</span><span class="tsd-signature-symbol">:</span> <a href="../types/MerkleChallengeInfo.html" class="tsd-signature-type tsd-kind-type-alias">MerkleChallengeInfo</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></div>
+<div class="tsd-comment tsd-typography"><p>The fetched merkle challenges for this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views.</p>
+</div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/utils/src/types/collections.ts#L226">utils/src/types/collections.ts:226</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/types/collections.ts#L234">utils/src/types/collections.ts:234</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="nsfw" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>nsfw</span><a href="#nsfw" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">nsfw</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-symbol">{ </span><br/><span>    </span><span class="tsd-kind-property">badgeIds</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">UintRange</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">reason</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span class="tsd-signature-symbol">}</span></div>
+<div class="tsd-comment tsd-typography"><p>The badge IDs in this collection that are marked as NSFW.</p>
+</div>
 <div class="tsd-type-declaration">
 <h4>Type declaration</h4>
 <ul class="tsd-parameters">
 <li class="tsd-parameter">
 <h5><span class="tsd-kind-property">badge<wbr/>Ids</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">UintRange</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></h5></li>
 <li class="tsd-parameter">
-<h5><span class="tsd-kind-property">reason</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></h5></li></ul></div><aside class="tsd-sources">
+<h5><span class="tsd-kind-property">reason</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></h5></li></ul></div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/utils/src/types/collections.ts#L229">utils/src/types/collections.ts:229</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/types/collections.ts#L237">utils/src/types/collections.ts:237</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="offChainBalancesMetadataTimeline" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>off<wbr/>Chain<wbr/>Balances<wbr/>Metadata<wbr/>Timeline</span><a href="#offChainBalancesMetadataTimeline" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">off<wbr/>Chain<wbr/>Balances<wbr/>Metadata<wbr/>Timeline</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type ">OffChainBalancesMetadataTimeline</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></div>
-<div class="tsd-comment tsd-typography"><p>The off-chain balances metadata timeline
-//  *</p>
+<div class="tsd-comment tsd-typography"><p>The off-chain balances metadata timeline</p>
 </div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="CollectionInfoBase.html">CollectionInfoBase</a>.<a href="CollectionInfoBase.html#offChainBalancesMetadataTimeline">offChainBalancesMetadataTimeline</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/utils/src/types/db.ts#L59">utils/src/types/db.ts:59</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/types/db.ts#L62">utils/src/types/db.ts:62</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="owners" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>owners</span><a href="#owners" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">owners</span><span class="tsd-signature-symbol">:</span> <a href="BalanceInfoWithDetails.html" class="tsd-signature-type tsd-kind-interface">BalanceInfoWithDetails</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></div>
-<div class="tsd-comment tsd-typography"><p>The badge balance documents for owners of this collection</p>
+<div class="tsd-comment tsd-typography"><p>The fetched owners of this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views.</p>
 </div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/utils/src/types/collections.ts#L225">utils/src/types/collections.ts:225</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/types/collections.ts#L233">utils/src/types/collections.ts:233</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="reported" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>reported</span><a href="#reported" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">reported</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-symbol">{ </span><br/><span>    </span><span class="tsd-kind-property">badgeIds</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">UintRange</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">reason</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span class="tsd-signature-symbol">}</span></div>
+<div class="tsd-comment tsd-typography"><p>The badge IDs in this collection that have been reported.</p>
+</div>
 <div class="tsd-type-declaration">
 <h4>Type declaration</h4>
 <ul class="tsd-parameters">
 <li class="tsd-parameter">
 <h5><span class="tsd-kind-property">badge<wbr/>Ids</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">UintRange</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></h5></li>
 <li class="tsd-parameter">
-<h5><span class="tsd-kind-property">reason</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></h5></li></ul></div><aside class="tsd-sources">
+<h5><span class="tsd-kind-property">reason</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></h5></li></ul></div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/utils/src/types/collections.ts#L230">utils/src/types/collections.ts:230</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/types/collections.ts#L238">utils/src/types/collections.ts:238</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="reviews" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>reviews</span><a href="#reviews" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">reviews</span><span class="tsd-signature-symbol">:</span> <a href="../types/ReviewInfo.html" class="tsd-signature-type tsd-kind-type-alias">ReviewInfo</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></div>
-<div class="tsd-comment tsd-typography"><p>The review activity of this collection</p>
+<div class="tsd-comment tsd-typography"><p>The fetched reviews for this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views.</p>
 </div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/utils/src/types/collections.ts#L224">utils/src/types/collections.ts:224</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/types/collections.ts#L232">utils/src/types/collections.ts:232</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="standardsTimeline" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>standards<wbr/>Timeline</span><a href="#standardsTimeline" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">standards<wbr/>Timeline</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type ">StandardsTimeline</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></div>
@@ -342,10 +363,12 @@ You are responsible for fetching the missing information as needed from the corr
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="CollectionInfoBase.html">CollectionInfoBase</a>.<a href="CollectionInfoBase.html#standardsTimeline">standardsTimeline</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/utils/src/types/db.ts#L65">utils/src/types/db.ts:65</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/types/db.ts#L67">utils/src/types/db.ts:67</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="updateHistory" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>update<wbr/>History</span><a href="#updateHistory" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">update<wbr/>History</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{ </span><br/><span>    </span><span class="tsd-kind-property">block</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">blockTimestamp</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">txHash</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol">[]</span></div>
+<div class="tsd-comment tsd-typography"><p>The update history of this collection</p>
+</div>
 <div class="tsd-type-declaration">
 <h4>Type declaration</h4>
 <ul class="tsd-parameters">
@@ -354,20 +377,24 @@ You are responsible for fetching the missing information as needed from the corr
 <li class="tsd-parameter">
 <h5><span class="tsd-kind-property">block<wbr/>Timestamp</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type tsd-kind-type-parameter">T</span></h5></li>
 <li class="tsd-parameter">
-<h5><span class="tsd-kind-property">tx<wbr/>Hash</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></h5></li></ul></div><aside class="tsd-sources">
+<h5><span class="tsd-kind-property">tx<wbr/>Hash</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></h5></li></ul></div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="CollectionInfoBase.html">CollectionInfoBase</a>.<a href="CollectionInfoBase.html#updateHistory">updateHistory</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/utils/src/types/db.ts#L75">utils/src/types/db.ts:75</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/types/db.ts#L77">utils/src/types/db.ts:77</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="views" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>views</span><a href="#views" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">views</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{ </span><br/><span>    </span>[<span class="tsd-kind-index-signature">viewKey</span>: <span class="tsd-signature-type">string</span>]<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{ </span><br/><span>        </span><span class="tsd-kind-property">ids</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">; </span><br/><span>        </span><span class="tsd-kind-property">pagination</span><span class="tsd-signature-symbol">: </span><a href="PaginationInfo.html" class="tsd-signature-type tsd-kind-interface">PaginationInfo</a><span class="tsd-signature-symbol">; </span><br/><span>        </span><span class="tsd-kind-property">type</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">; </span><br/><span class="tsd-signature-symbol">}</span></div>
+<div class="tsd-comment tsd-typography"><p>The views for this collection and their pagination info. Views will only include the doc _ids. Use the pagination to fetch more. To be used in conjunction with activity, announcements, reviews, owners, merkleChallenges, and approvalsTrackers. For example, if you want to fetch the activity for a view, you would use the view&#39;s pagination to fetch the doc _ids, then use the corresponding activity array to find the matching docs.</p>
+</div>
 <div class="tsd-type-declaration">
 <h4>Type declaration</h4>
 <ul class="tsd-parameters">
 <li class="tsd-parameter-index-signature">
-<h5><span class="tsd-signature-symbol">[</span><span class="tsd-kind-parameter">viewKey</span>: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">]: </span><span class="tsd-signature-symbol">{ </span><br/><span>    </span><span class="tsd-kind-property">ids</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">pagination</span><span class="tsd-signature-symbol">: </span><a href="PaginationInfo.html" class="tsd-signature-type tsd-kind-interface">PaginationInfo</a><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">type</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span></h5></li></ul></div><aside class="tsd-sources">
+<h5><span class="tsd-signature-symbol">[</span><span class="tsd-kind-parameter">viewKey</span>: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">]: </span><span class="tsd-signature-symbol">{ </span><br/><span>    </span><span class="tsd-kind-property">ids</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">pagination</span><span class="tsd-signature-symbol">: </span><a href="PaginationInfo.html" class="tsd-signature-type tsd-kind-interface">PaginationInfo</a><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">type</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span></h5></li></ul></div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/utils/src/types/collections.ts#L232">utils/src/types/collections.ts:232</a></li></ul></aside></section></section></div>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/utils/src/types/collections.ts#L240">utils/src/types/collections.ts:240</a></li></ul></aside></section></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -437,11 +464,6 @@ You are responsible for fetching the missing information as needed from the corr
 <li><a href="../enums/SupportedChain.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-8"></use></svg><span>Supported<wbr/>Chain</span></a></li>
 <li><a href="../enums/TransactionStatus.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-8"></use></svg><span>Transaction<wbr/>Status</span></a></li></ul></div></details></li>
 <li>
-<details class="tsd-index-accordion" data-key="Enumerations$Number Types"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg><span>Number Types</span></summary>
-<div class="tsd-accordion-details">
-<ul class="tsd-nested-navigation">
-<li><a href="../enums/StringNumberStorageOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-8"></use></svg><span>String<wbr/>Number<wbr/>Storage<wbr/>Options</span></a></li></ul></div></details></li>
-<li>
 <details class="tsd-index-accordion" data-key="Enumerations$Other"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg><span>Other</span></summary>
 <div class="tsd-accordion-details">
 <ul class="tsd-nested-navigation">
@@ -451,7 +473,18 @@ You are responsible for fetching the missing information as needed from the corr
 <details class="tsd-index-accordion" data-key="Classes"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg><span>Classes</span></summary>
 <div class="tsd-accordion-details">
 <ul class="tsd-nested-navigation">
-<li><a href="../classes/BitBadgesAPI.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-128"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-class)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6"></rect><path d="M11.898 16.1201C11.098 16.1201 10.466 15.8961 10.002 15.4481C9.53803 15.0001 9.30603 14.3841 9.30603 13.6001V9.64012C9.30603 8.85612 9.53803 8.24012 10.002 7.79212C10.466 7.34412 11.098 7.12012 11.898 7.12012C12.682 7.12012 13.306 7.34812 13.77 7.80412C14.234 8.25212 14.466 8.86412 14.466 9.64012H13.386C13.386 9.14412 13.254 8.76412 12.99 8.50012C12.734 8.22812 12.37 8.09212 11.898 8.09212C11.426 8.09212 11.054 8.22412 10.782 8.48812C10.518 8.75212 10.386 9.13212 10.386 9.62812V13.6001C10.386 14.0961 10.518 14.4801 10.782 14.7521C11.054 15.0161 11.426 15.1481 11.898 15.1481C12.37 15.1481 12.734 15.0161 12.99 14.7521C13.254 14.4801 13.386 14.0961 13.386 13.6001H14.466C14.466 14.3761 14.234 14.9921 13.77 15.4481C13.306 15.8961 12.682 16.1201 11.898 16.1201Z" fill="var(--color-text)"></path></g></svg><span>Bit<wbr/>BadgesAPI</span></a></li></ul></div></details></li>
+<li>
+<details class="tsd-index-accordion" data-key="Classes$API / Indexer\n\nThis is the BitBadgesAPI class which provides all typed API calls to the BitBadges API.\nSee official documentation for more details and examples.\n\nMust have a valid API key set. To get an API key, reach out to the team.\n\nconvertFunction is used to convert any numbers returned by the API to the desired NumberType."><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg><span>API / Indexer
+
+This is the BitBadgesAPI class which provides all typed API calls to the BitBadges API.
+See official documentation for more details and examples.
+
+Must have a valid API key set. To get an API key, reach out to the team.
+
+convertFunction is used to convert any numbers returned by the API to the desired NumberType.</span></summary>
+<div class="tsd-accordion-details">
+<ul class="tsd-nested-navigation">
+<li><a href="../classes/BitBadgesAPI.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-128"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-class)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6"></rect><path d="M11.898 16.1201C11.098 16.1201 10.466 15.8961 10.002 15.4481C9.53803 15.0001 9.30603 14.3841 9.30603 13.6001V9.64012C9.30603 8.85612 9.53803 8.24012 10.002 7.79212C10.466 7.34412 11.098 7.12012 11.898 7.12012C12.682 7.12012 13.306 7.34812 13.77 7.80412C14.234 8.25212 14.466 8.86412 14.466 9.64012H13.386C13.386 9.14412 13.254 8.76412 12.99 8.50012C12.734 8.22812 12.37 8.09212 11.898 8.09212C11.426 8.09212 11.054 8.22412 10.782 8.48812C10.518 8.75212 10.386 9.13212 10.386 9.62812V13.6001C10.386 14.0961 10.518 14.4801 10.782 14.7521C11.054 15.0161 11.426 15.1481 11.898 15.1481C12.37 15.1481 12.734 15.0161 12.99 14.7521C13.254 14.4801 13.386 14.0961 13.386 13.6001H14.466C14.466 14.3761 14.234 14.9921 13.77 15.4481C13.306 15.8961 12.682 16.1201 11.898 16.1201Z" fill="var(--color-text)"></path></g></svg><span>Bit<wbr/>BadgesAPI</span></a></li></ul></div></details></li></ul></div></details></li>
 <li>
 <details class="tsd-index-accordion" data-key="Interfaces"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg><span>Interfaces</span></summary>
 <div class="tsd-accordion-details">
@@ -476,6 +509,7 @@ You are responsible for fetching the missing information as needed from the corr
 <li><a href="AddReviewForCollectionRouteSuccessResponse.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Add<wbr/>Review<wbr/>For<wbr/>Collection<wbr/>Route<wbr/>Success<wbr/>Response</span></a></li>
 <li><a href="AddReviewForUserRouteRequestBody.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Add<wbr/>Review<wbr/>For<wbr/>User<wbr/>Route<wbr/>Request<wbr/>Body</span></a></li>
 <li><a href="AddReviewForUserRouteSuccessResponse.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Add<wbr/>Review<wbr/>For<wbr/>User<wbr/>Route<wbr/>Success<wbr/>Response</span></a></li>
+<li><a href="AddressMappingInfoBase.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Address<wbr/>Mapping<wbr/>Info<wbr/>Base</span></a></li>
 <li><a href="AddressMappingWithMetadata.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Address<wbr/>Mapping<wbr/>With<wbr/>Metadata</span></a></li>
 <li><a href="AddressMappingsDocs.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Address<wbr/>Mappings<wbr/>Docs</span></a></li>
 <li><a href="AirdropInfoBase.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Airdrop<wbr/>Info<wbr/>Base</span></a></li>
@@ -498,8 +532,10 @@ You are responsible for fetching the missing information as needed from the corr
 <li><a href="CodesAndPasswords.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Codes<wbr/>And<wbr/>Passwords</span></a></li>
 <li><a href="CollectionDocs.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Collection<wbr/>Docs</span></a></li>
 <li><a href="CollectionInfoBase.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Collection<wbr/>Info<wbr/>Base</span></a></li>
+<li><a href="CollectionMap.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Collection<wbr/>Map</span></a></li>
 <li><a href="ComplianceInfoBase.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Compliance<wbr/>Info<wbr/>Base</span></a></li>
 <li><a href="CosmosAccountResponse.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Cosmos<wbr/>Account<wbr/>Response</span></a></li>
+<li><a href="CustomLink.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Custom<wbr/>Link</span></a></li>
 <li><a href="DeletableDocument.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Deletable<wbr/>Document</span></a></li>
 <li><a href="DeleteAddressMappingsRouteRequestBody.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Delete<wbr/>Address<wbr/>Mappings<wbr/>Route<wbr/>Request<wbr/>Body</span></a></li>
 <li><a href="DeleteAddressMappingsRouteSuccessResponse.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Delete<wbr/>Address<wbr/>Mappings<wbr/>Route<wbr/>Success<wbr/>Response</span></a></li>
@@ -597,6 +633,12 @@ You are responsible for fetching the missing information as needed from the corr
 <li><a href="UserOutgoingApprovalWithDetails.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>User<wbr/>Outgoing<wbr/>Approval<wbr/>With<wbr/>Details</span></a></li>
 <li><a href="UserPermissionsWithDetails.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>User<wbr/>Permissions<wbr/>With<wbr/>Details</span></a></li></ul></div></details></li>
 <li>
+<details class="tsd-index-accordion" data-key="Interfaces$Balances"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg><span>Balances</span></summary>
+<div class="tsd-accordion-details">
+<ul class="tsd-nested-navigation">
+<li><a href="OffChainBalancesMap.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Off<wbr/>Chain<wbr/>Balances<wbr/>Map</span></a></li>
+<li><a href="TransferWithIncrements.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Transfer<wbr/>With<wbr/>Increments</span></a></li></ul></div></details></li>
+<li>
 <details class="tsd-index-accordion" data-key="Interfaces$Metadata"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg><span>Metadata</span></summary>
 <div class="tsd-accordion-details">
 <ul class="tsd-nested-navigation">
@@ -606,16 +648,15 @@ You are responsible for fetching the missing information as needed from the corr
 <div class="tsd-accordion-details">
 <ul class="tsd-nested-navigation">
 <li><a href="AccountResponse.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Account<wbr/>Response</span></a></li>
-<li><a href="AddressMappingInfoBase.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Address<wbr/>Mapping<wbr/>Info<wbr/>Base</span></a></li>
 <li><a href="BalancesResponse.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Balances<wbr/>Response</span></a></li>
 <li><a href="BitBadgesApiDetails.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Bit<wbr/>Badges<wbr/>Api<wbr/>Details</span></a></li>
 <li><a href="BroadcastPostBody.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Broadcast<wbr/>Post<wbr/>Body</span></a></li>
 <li><a href="Channel.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Channel</span></a></li>
 <li><a href="ChannelsResponse.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Channels<wbr/>Response</span></a></li>
 <li><a href="Coin.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Coin</span></a></li>
-<li><a href="CollectionMap.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Collection<wbr/>Map</span></a></li>
 <li><a href="CosmosCoin.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Cosmos<wbr/>Coin</span></a></li>
 <li><a href="CounterParty.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Counter<wbr/>Party</span></a></li>
+<li><a href="CustomPage.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Custom<wbr/>Page</span></a></li>
 <li><a href="DelegationResponse.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Delegation<wbr/>Response</span></a></li>
 <li><a href="DistributionRewardsResponse.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Distribution<wbr/>Rewards<wbr/>Response</span></a></li>
 <li><a href="GetDelegationsResponse.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Get<wbr/>Delegations<wbr/>Response</span></a></li>
@@ -623,13 +664,11 @@ You are responsible for fetching the missing information as needed from the corr
 <li><a href="GetValidatorsResponse.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Get<wbr/>Validators<wbr/>Response</span></a></li>
 <li><a href="IndexerStatus.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Indexer<wbr/>Status</span></a></li>
 <li><a href="MergedUniversalPermissionDetails.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Merged<wbr/>Universal<wbr/>Permission<wbr/>Details</span></a></li>
-<li><a href="OffChainBalancesMap.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Off<wbr/>Chain<wbr/>Balances<wbr/>Map</span></a></li>
 <li><a href="Overlap.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Overlap</span></a></li>
 <li><a href="Proposal.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Proposal</span></a></li>
 <li><a href="ProposalsResponse.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Proposals<wbr/>Response</span></a></li>
 <li><a href="Reward.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Reward</span></a></li>
 <li><a href="TallyResponse.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Tally<wbr/>Response</span></a></li>
-<li><a href="TransferWithIncrements.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Transfer<wbr/>With<wbr/>Increments</span></a></li>
 <li><a href="TxToSend.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Tx<wbr/>To<wbr/>Send</span></a></li>
 <li><a href="UndelegationResponse.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Undelegation<wbr/>Response</span></a></li>
 <li><a href="UniversalPermission.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Universal<wbr/>Permission</span></a></li>
@@ -740,12 +779,7 @@ You are responsible for fetching the missing information as needed from the corr
 <div class="tsd-accordion-details">
 <ul class="tsd-nested-navigation">
 <li><a href="../types/JSPrimitiveNumberType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>JSPrimitive<wbr/>Number<wbr/>Type</span></a></li>
-<li><a href="../types/NumberType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Number<wbr/>Type</span></a></li></ul></div></details></li>
-<li>
-<details class="tsd-index-accordion" data-key="Type Aliases$Other"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg><span>Other</span></summary>
-<div class="tsd-accordion-details">
-<ul class="tsd-nested-navigation">
-<li><a href="../types/DesiredNumberType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Desired<wbr/>Number<wbr/>Type</span></a></li></ul></div></details></li></ul></div></details></li>
+<li><a href="../types/NumberType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Number<wbr/>Type</span></a></li></ul></div></details></li></ul></div></details></li>
 <li>
 <details class="tsd-index-accordion" data-key="Variables"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg><span>Variables</span></summary>
 <div class="tsd-accordion-details">
@@ -755,9 +789,7 @@ You are responsible for fetching the missing information as needed from the corr
 <li><a href="../variables/BETANET_CHAIN_DETAILS.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-32"></use></svg><span>BETANET_<wbr/>CHAIN_<wbr/>DETAILS</span></a></li>
 <li><a href="../variables/BLANK_USER_INFO.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-32"></use></svg><span>BLANK_<wbr/>USER_<wbr/>INFO</span></a></li>
 <li><a href="../variables/BalancesActionPermissionUsedFlags.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-32"></use></svg><span>Balances<wbr/>Action<wbr/>Permission<wbr/>Used<wbr/>Flags</span></a></li>
-<li><a href="../variables/COSMOS.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-32"></use></svg><span>COSMOS</span></a></li>
 <li><a href="../variables/DefaultPlaceholderMetadata.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-32"></use></svg><span>Default<wbr/>Placeholder<wbr/>Metadata</span></a></li>
-<li><a href="../variables/ETH.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-32"></use></svg><span>ETH</span></a></li>
 <li><a href="../variables/ErrorMetadata.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-32"></use></svg><span>Error<wbr/>Metadata</span></a></li>
 <li><a href="../variables/MAINNET_CHAIN_DETAILS.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-32"></use></svg><span>MAINNET_<wbr/>CHAIN_<wbr/>DETAILS</span></a></li>
 <li><a href="../variables/METADATA_PAGE_LIMIT.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-32"></use></svg><span>METADATA_<wbr/>PAGE_<wbr/>LIMIT</span></a></li>
@@ -921,8 +953,6 @@ You are responsible for fetching the missing information as needed from the corr
 <details class="tsd-index-accordion" data-key="Functions$Approvals / Transferability"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg><span>Approvals / Transferability</span></summary>
 <div class="tsd-accordion-details">
 <ul class="tsd-nested-navigation">
-<li><a href="../functions/appendDefaultForIncoming.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>append<wbr/>Default<wbr/>For<wbr/>Incoming</span></a></li>
-<li><a href="../functions/appendDefaultForOutgoing.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>append<wbr/>Default<wbr/>For<wbr/>Outgoing</span></a></li>
 <li><a href="../functions/castFromCollectionTransferToIncomingTransfer.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>cast<wbr/>From<wbr/>Collection<wbr/>Transfer<wbr/>To<wbr/>Incoming<wbr/>Transfer</span></a></li>
 <li><a href="../functions/castFromCollectionTransferToOutgoingTransfer.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>cast<wbr/>From<wbr/>Collection<wbr/>Transfer<wbr/>To<wbr/>Outgoing<wbr/>Transfer</span></a></li>
 <li><a href="../functions/castIncomingTransferToCollectionTransfer.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>cast<wbr/>Incoming<wbr/>Transfer<wbr/>To<wbr/>Collection<wbr/>Transfer</span></a></li>
@@ -937,12 +967,54 @@ You are responsible for fetching the missing information as needed from the corr
 <li><a href="../functions/convertUserOutgoingApprovalPermissionWithDetails.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>User<wbr/>Outgoing<wbr/>Approval<wbr/>Permission<wbr/>With<wbr/>Details</span></a></li>
 <li><a href="../functions/convertUserOutgoingApprovalWithDetails.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>User<wbr/>Outgoing<wbr/>Approval<wbr/>With<wbr/>Details</span></a></li>
 <li><a href="../functions/convertUserPermissionsWithDetails.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>User<wbr/>Permissions<wbr/>With<wbr/>Details</span></a></li>
-<li><a href="../functions/expandCollectionApprovals.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>expand<wbr/>Collection<wbr/>Approvals</span></a></li>
-<li><a href="../functions/getMintApprovals.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Mint<wbr/>Approvals</span></a></li>
-<li><a href="../functions/getNonMintApprovals.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Non<wbr/>Mint<wbr/>Approvals</span></a></li>
-<li><a href="../functions/getUnhandledCollectionApprovals.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Unhandled<wbr/>Collection<wbr/>Approvals</span></a></li>
 <li><a href="../functions/getUnhandledUserIncomingApprovals.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Unhandled<wbr/>User<wbr/>Incoming<wbr/>Approvals</span></a></li>
 <li><a href="../functions/getUnhandledUserOutgoingApprovals.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Unhandled<wbr/>User<wbr/>Outgoing<wbr/>Approvals</span></a></li></ul></div></details></li>
+<li>
+<details class="tsd-index-accordion" data-key="Functions$Approvals / Transferability\n\nAppends the default approval (self-initiated) to the front of the list.\nThis will have \"default-incoming\" for IDs."><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg><span>Approvals / Transferability
+
+Appends the default approval (self-initiated) to the front of the list.
+This will have &quot;default-incoming&quot; for IDs.</span></summary>
+<div class="tsd-accordion-details">
+<ul class="tsd-nested-navigation">
+<li><a href="../functions/appendDefaultForIncoming.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>append<wbr/>Default<wbr/>For<wbr/>Incoming</span></a></li></ul></div></details></li>
+<li>
+<details class="tsd-index-accordion" data-key="Functions$Approvals / Transferability\n\nAppends the default approval (self-initiated) to the front of the list.\nThis will have \"default-outgoing\" for IDs."><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg><span>Approvals / Transferability
+
+Appends the default approval (self-initiated) to the front of the list.
+This will have &quot;default-outgoing&quot; for IDs.</span></summary>
+<div class="tsd-accordion-details">
+<ul class="tsd-nested-navigation">
+<li><a href="../functions/appendDefaultForOutgoing.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>append<wbr/>Default<wbr/>For<wbr/>Outgoing</span></a></li></ul></div></details></li>
+<li>
+<details class="tsd-index-accordion" data-key="Functions$Approvals / Transferability\n\nExpands the collection approvals to include the correct mappings and ranges."><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg><span>Approvals / Transferability
+
+Expands the collection approvals to include the correct mappings and ranges.</span></summary>
+<div class="tsd-accordion-details">
+<ul class="tsd-nested-navigation">
+<li><a href="../functions/expandCollectionApprovals.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>expand<wbr/>Collection<wbr/>Approvals</span></a></li></ul></div></details></li>
+<li>
+<details class="tsd-index-accordion" data-key="Functions$Approvals / Transferability\n\nFor all (from, to, initiatedBy, badgeIds, transferTimes, ownershipTimes) that are not handled by the first matches, return them as unhandled / disapproved"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg><span>Approvals / Transferability
+
+For all (from, to, initiatedBy, badgeIds, transferTimes, ownershipTimes) that are not handled by the first matches, return them as unhandled / disapproved</span></summary>
+<div class="tsd-accordion-details">
+<ul class="tsd-nested-navigation">
+<li><a href="../functions/getUnhandledCollectionApprovals.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Unhandled<wbr/>Collection<wbr/>Approvals</span></a></li></ul></div></details></li>
+<li>
+<details class="tsd-index-accordion" data-key="Functions$Approvals / Transferability\n\nReturns the approvals with the \"Mint\" address in any fromMapping.\nFor ones with \"Mint\" and addresses ABC, for example, it will return just Mint."><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg><span>Approvals / Transferability
+
+Returns the approvals with the &quot;Mint&quot; address in any fromMapping.
+For ones with &quot;Mint&quot; and addresses ABC, for example, it will return just Mint.</span></summary>
+<div class="tsd-accordion-details">
+<ul class="tsd-nested-navigation">
+<li><a href="../functions/getMintApprovals.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Mint<wbr/>Approvals</span></a></li></ul></div></details></li>
+<li>
+<details class="tsd-index-accordion" data-key="Functions$Approvals / Transferability\n\nReturns the approvals without the \"Mint\" address in any fromMapping.\nFor ones with \"Mint\" and addresses ABC, for example, it will return just ABC."><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg><span>Approvals / Transferability
+
+Returns the approvals without the &quot;Mint&quot; address in any fromMapping.
+For ones with &quot;Mint&quot; and addresses ABC, for example, it will return just ABC.</span></summary>
+<div class="tsd-accordion-details">
+<ul class="tsd-nested-navigation">
+<li><a href="../functions/getNonMintApprovals.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Non<wbr/>Mint<wbr/>Approvals</span></a></li></ul></div></details></li>
 <li>
 <details class="tsd-index-accordion" data-key="Functions$Balances"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg><span>Balances</span></summary>
 <div class="tsd-accordion-details">
@@ -951,7 +1023,10 @@ You are responsible for fetching the missing information as needed from the corr
 <li><a href="../functions/addBalances.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>add<wbr/>Balances</span></a></li>
 <li><a href="../functions/addBalancesAndCheckIfExceedsThreshold.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>add<wbr/>Balances<wbr/>And<wbr/>Check<wbr/>If<wbr/>Exceeds<wbr/>Threshold</span></a></li>
 <li><a href="../functions/areBalancesEqual.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>are<wbr/>Balances<wbr/>Equal</span></a></li>
+<li><a href="../functions/convertOffChainBalancesMap.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>Off<wbr/>Chain<wbr/>Balances<wbr/>Map</span></a></li>
+<li><a href="../functions/convertTransferWithIncrements.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>Transfer<wbr/>With<wbr/>Increments</span></a></li>
 <li><a href="../functions/createBalanceMapForOffChainBalances.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>create<wbr/>Balance<wbr/>Map<wbr/>For<wbr/>Off<wbr/>Chain<wbr/>Balances</span></a></li>
+<li><a href="../functions/deepCopyBalances.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>deep<wbr/>Copy<wbr/>Balances</span></a></li>
 <li><a href="../functions/deleteBalances.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>delete<wbr/>Balances</span></a></li>
 <li><a href="../functions/doBalancesExceedThreshold.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>do<wbr/>Balances<wbr/>Exceed<wbr/>Threshold</span></a></li>
 <li><a href="../functions/filterZeroBalances.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>filter<wbr/>Zero<wbr/>Balances</span></a></li>
@@ -1013,11 +1088,8 @@ You are responsible for fetching the missing information as needed from the corr
 <li><a href="../functions/convertBitBadgesCollection.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>Bit<wbr/>Badges<wbr/>Collection</span></a></li>
 <li><a href="../functions/convertBitBadgesUserInfo.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>Bit<wbr/>Badges<wbr/>User<wbr/>Info</span></a></li>
 <li><a href="../functions/convertCosmosCoin.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>Cosmos<wbr/>Coin</span></a></li>
-<li><a href="../functions/convertOffChainBalancesMap.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>Off<wbr/>Chain<wbr/>Balances<wbr/>Map</span></a></li>
 <li><a href="../functions/convertToCosmosAddress.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>To<wbr/>Cosmos<wbr/>Address</span></a></li>
-<li><a href="../functions/convertTransferWithIncrements.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>Transfer<wbr/>With<wbr/>Increments</span></a></li>
 <li><a href="../functions/cosmosToEth.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>cosmos<wbr/>To<wbr/>Eth</span></a></li>
-<li><a href="../functions/deepCopyBalances.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>deep<wbr/>Copy<wbr/>Balances</span></a></li>
 <li><a href="../functions/ethToCosmos.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>eth<wbr/>To<wbr/>Cosmos</span></a></li>
 <li><a href="../functions/generateEndpointAccount.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>generate<wbr/>Endpoint<wbr/>Account</span></a></li>
 <li><a href="../functions/generateEndpointBalances.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>generate<wbr/>Endpoint<wbr/>Balances</span></a></li>
@@ -1092,34 +1164,162 @@ You are responsible for fetching the missing information as needed from the corr
 <details class="tsd-index-accordion" data-key="Functions$Validate Permissions"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg><span>Validate Permissions</span></summary>
 <div class="tsd-accordion-details">
 <ul class="tsd-nested-navigation">
-<li><a href="../functions/checkActionPermission.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>check<wbr/>Action<wbr/>Permission</span></a></li>
-<li><a href="../functions/checkBalancesActionPermission.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>check<wbr/>Balances<wbr/>Action<wbr/>Permission</span></a></li>
-<li><a href="../functions/checkCollectionApprovalPermission.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>check<wbr/>Collection<wbr/>Approval<wbr/>Permission</span></a></li>
 <li><a href="../functions/checkNotForbiddenForAllOverlaps.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>check<wbr/>Not<wbr/>Forbidden<wbr/>For<wbr/>All<wbr/>Overlaps</span></a></li>
-<li><a href="../functions/checkTimedUpdatePermission.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>check<wbr/>Timed<wbr/>Update<wbr/>Permission</span></a></li>
-<li><a href="../functions/checkTimedUpdateWithBadgeIdsPermission.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>check<wbr/>Timed<wbr/>Update<wbr/>With<wbr/>Badge<wbr/>Ids<wbr/>Permission</span></a></li>
 <li><a href="../functions/getUpdateCombinationsToCheck.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Update<wbr/>Combinations<wbr/>To<wbr/>Check</span></a></li>
 <li><a href="../functions/isCurrentTimeForbidden.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>is<wbr/>Current<wbr/>Time<wbr/>Forbidden</span></a></li></ul></div></details></li>
+<li>
+<details class="tsd-index-accordion" data-key="Functions$Validate Permissions\n\nChecks a BalancesActionPermission to see if it is currently valid and not forbidden for the current time and provided balances"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg><span>Validate Permissions
+
+Checks a BalancesActionPermission to see if it is currently valid and not forbidden for the current time and provided balances</span></summary>
+<div class="tsd-accordion-details">
+<ul class="tsd-nested-navigation">
+<li><a href="../functions/checkBalancesActionPermission.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>check<wbr/>Balances<wbr/>Action<wbr/>Permission</span></a></li></ul></div></details></li>
+<li>
+<details class="tsd-index-accordion" data-key="Functions$Validate Permissions\n\nChecks a CollectionApprovalPermission to see if it is currently valid and not forbidden for the current time and provided transfer details."><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg><span>Validate Permissions
+
+Checks a CollectionApprovalPermission to see if it is currently valid and not forbidden for the current time and provided transfer details.</span></summary>
+<div class="tsd-accordion-details">
+<ul class="tsd-nested-navigation">
+<li><a href="../functions/checkCollectionApprovalPermission.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>check<wbr/>Collection<wbr/>Approval<wbr/>Permission</span></a></li></ul></div></details></li>
+<li>
+<details class="tsd-index-accordion" data-key="Functions$Validate Permissions\n\nChecks a TimedUpdatePermission to see if it is currently valid and not forbidden for the current time and provided timeline times"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg><span>Validate Permissions
+
+Checks a TimedUpdatePermission to see if it is currently valid and not forbidden for the current time and provided timeline times</span></summary>
+<div class="tsd-accordion-details">
+<ul class="tsd-nested-navigation">
+<li><a href="../functions/checkTimedUpdatePermission.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>check<wbr/>Timed<wbr/>Update<wbr/>Permission</span></a></li></ul></div></details></li>
+<li>
+<details class="tsd-index-accordion" data-key="Functions$Validate Permissions\n\nChecks a TimedUpdateWithBadgeIdsPermission to see if it is currently valid and not forbidden for the current time and provided timeline times and badge ids"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg><span>Validate Permissions
+
+Checks a TimedUpdateWithBadgeIdsPermission to see if it is currently valid and not forbidden for the current time and provided timeline times and badge ids</span></summary>
+<div class="tsd-accordion-details">
+<ul class="tsd-nested-navigation">
+<li><a href="../functions/checkTimedUpdateWithBadgeIdsPermission.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>check<wbr/>Timed<wbr/>Update<wbr/>With<wbr/>Badge<wbr/>Ids<wbr/>Permission</span></a></li></ul></div></details></li>
+<li>
+<details class="tsd-index-accordion" data-key="Functions$Validate Permissions\n\nChecks a UserIncomingApprovalPermission to see if it is currently valid and not forbidden for the current time and provided transfer details."><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg><span>Validate Permissions
+
+Checks a UserIncomingApprovalPermission to see if it is currently valid and not forbidden for the current time and provided transfer details.</span></summary>
+<div class="tsd-accordion-details">
+<ul class="tsd-nested-navigation">
+<li><a href="../functions/checkUserIncomingApprovalPermission.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>check<wbr/>User<wbr/>Incoming<wbr/>Approval<wbr/>Permission</span></a></li></ul></div></details></li>
+<li>
+<details class="tsd-index-accordion" data-key="Functions$Validate Permissions\n\nChecks a UserOutgoingApprovalPermission to see if it is currently valid and not forbidden for the current time and provided transfer details."><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg><span>Validate Permissions
+
+Checks a UserOutgoingApprovalPermission to see if it is currently valid and not forbidden for the current time and provided transfer details.</span></summary>
+<div class="tsd-accordion-details">
+<ul class="tsd-nested-navigation">
+<li><a href="../functions/checkUserOutgoingApprovalPermission.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>check<wbr/>User<wbr/>Outgoing<wbr/>Approval<wbr/>Permission</span></a></li></ul></div></details></li>
+<li>
+<details class="tsd-index-accordion" data-key="Functions$Validate Permissions\n\nChecks an ActionPermission to see if it is currently valid and not forbidden for the current time"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg><span>Validate Permissions
+
+Checks an ActionPermission to see if it is currently valid and not forbidden for the current time</span></summary>
+<div class="tsd-accordion-details">
+<ul class="tsd-nested-navigation">
+<li><a href="../functions/checkActionPermission.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>check<wbr/>Action<wbr/>Permission</span></a></li></ul></div></details></li>
 <li>
 <details class="tsd-index-accordion" data-key="Functions$Validate Updates"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg><span>Validate Updates</span></summary>
 <div class="tsd-accordion-details">
 <ul class="tsd-nested-navigation">
 <li><a href="../functions/getPotentialUpdatesForTimelineValues.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Potential<wbr/>Updates<wbr/>For<wbr/>Timeline<wbr/>Values</span></a></li>
-<li><a href="../functions/getUpdatedBoolCombinations.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Updated<wbr/>Bool<wbr/>Combinations</span></a></li>
-<li><a href="../functions/getUpdatedStringCombinations.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Updated<wbr/>String<wbr/>Combinations</span></a></li>
-<li><a href="../functions/validateActionPermissionUpdate.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>validate<wbr/>Action<wbr/>Permission<wbr/>Update</span></a></li>
-<li><a href="../functions/validateBadgeMetadataUpdate.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>validate<wbr/>Badge<wbr/>Metadata<wbr/>Update</span></a></li>
-<li><a href="../functions/validateBalancesActionPermissionUpdate.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>validate<wbr/>Balances<wbr/>Action<wbr/>Permission<wbr/>Update</span></a></li>
-<li><a href="../functions/validateCollectionApprovalPermissionsUpdate.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>validate<wbr/>Collection<wbr/>Approval<wbr/>Permissions<wbr/>Update</span></a></li>
+<li><a href="../functions/getUpdatedBoolCombinations.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Updated<wbr/>Bool<wbr/>Combinations</span></a></li></ul></div></details></li>
+<li>
+<details class="tsd-index-accordion" data-key="Functions$Validate Updates\n\nValidate if a balance permission update (old -> new) is valid (i.e. no permanently permitted or forbidden times are changed)"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg><span>Validate Updates
+
+Validate if a balance permission update (old -&gt; new) is valid (i.e. no permanently permitted or forbidden times are changed)</span></summary>
+<div class="tsd-accordion-details">
+<ul class="tsd-nested-navigation">
+<li><a href="../functions/validateBalancesActionPermissionUpdate.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>validate<wbr/>Balances<wbr/>Action<wbr/>Permission<wbr/>Update</span></a></li></ul></div></details></li>
+<li>
+<details class="tsd-index-accordion" data-key="Functions$Validate Updates\n\nValidate if a collection approval permission update (old -> new) is valid (i.e. no permanently permitted or forbidden times are changed)"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg><span>Validate Updates
+
+Validate if a collection approval permission update (old -&gt; new) is valid (i.e. no permanently permitted or forbidden times are changed)</span></summary>
+<div class="tsd-accordion-details">
+<ul class="tsd-nested-navigation">
+<li><a href="../functions/validateCollectionApprovalPermissionsUpdate.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>validate<wbr/>Collection<wbr/>Approval<wbr/>Permissions<wbr/>Update</span></a></li></ul></div></details></li>
+<li>
+<details class="tsd-index-accordion" data-key="Functions$Validate Updates\n\nValidate if a collection permissions update (old -> new) is valid (i.e. no permanently permitted or forbidden times are changed)"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg><span>Validate Updates
+
+Validate if a collection permissions update (old -&gt; new) is valid (i.e. no permanently permitted or forbidden times are changed)</span></summary>
+<div class="tsd-accordion-details">
+<ul class="tsd-nested-navigation">
+<li><a href="../functions/validatePermissionsUpdate.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>validate<wbr/>Permissions<wbr/>Update</span></a></li></ul></div></details></li>
+<li>
+<details class="tsd-index-accordion" data-key="Functions$Validate Updates\n\nValidate if a timed update permission update (old -> new) is valid (i.e. no permanently permitted or forbidden times are changed)"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg><span>Validate Updates
+
+Validate if a timed update permission update (old -&gt; new) is valid (i.e. no permanently permitted or forbidden times are changed)</span></summary>
+<div class="tsd-accordion-details">
+<ul class="tsd-nested-navigation">
+<li><a href="../functions/validateTimedUpdatePermissionUpdate.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>validate<wbr/>Timed<wbr/>Update<wbr/>Permission<wbr/>Update</span></a></li></ul></div></details></li>
+<li>
+<details class="tsd-index-accordion" data-key="Functions$Validate Updates\n\nValidate if a timed update with badge ids permission update (old -> new) is valid (i.e. no permanently permitted or forbidden times are changed)"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg><span>Validate Updates
+
+Validate if a timed update with badge ids permission update (old -&gt; new) is valid (i.e. no permanently permitted or forbidden times are changed)</span></summary>
+<div class="tsd-accordion-details">
+<ul class="tsd-nested-navigation">
+<li><a href="../functions/validateTimedUpdateWithBadgeIdsPermissionUpdate.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>validate<wbr/>Timed<wbr/>Update<wbr/>With<wbr/>Badge<wbr/>Ids<wbr/>Permission<wbr/>Update</span></a></li></ul></div></details></li>
+<li>
+<details class="tsd-index-accordion" data-key="Functions$Validate Updates\n\nValidate if a universal permission update (old -> new) is valid (i.e. no permanently permitted or forbidden times are changed)"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg><span>Validate Updates
+
+Validate if a universal permission update (old -&gt; new) is valid (i.e. no permanently permitted or forbidden times are changed)</span></summary>
+<div class="tsd-accordion-details">
+<ul class="tsd-nested-navigation">
+<li><a href="../functions/validateUniversalPermissionUpdate-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>validate<wbr/>Universal<wbr/>Permission<wbr/>Update</span></a></li></ul></div></details></li>
+<li>
+<details class="tsd-index-accordion" data-key="Functions$Validate Updates\n\nValidate if an action permission update (old -> new) is valid (i.e. no permanently permitted or forbidden times are changed)"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg><span>Validate Updates
+
+Validate if an action permission update (old -&gt; new) is valid (i.e. no permanently permitted or forbidden times are changed)</span></summary>
+<div class="tsd-accordion-details">
+<ul class="tsd-nested-navigation">
+<li><a href="../functions/validateActionPermissionUpdate.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>validate<wbr/>Action<wbr/>Permission<wbr/>Update</span></a></li></ul></div></details></li>
+<li>
+<details class="tsd-index-accordion" data-key="Functions$Validate Updates\n\nValidates if an update of badge approvals (old -> new) is valid according to the permissions"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg><span>Validate Updates
+
+Validates if an update of badge approvals (old -&gt; new) is valid according to the permissions</span></summary>
+<div class="tsd-accordion-details">
+<ul class="tsd-nested-navigation">
+<li><a href="../functions/validateBadgeMetadataUpdate.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>validate<wbr/>Badge<wbr/>Metadata<wbr/>Update</span></a></li></ul></div></details></li>
+<li>
+<details class="tsd-index-accordion" data-key="Functions$Validate Updates\n\nValidates if an update of collection approvals (old -> new) is valid according to the permissions"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg><span>Validate Updates
+
+Validates if an update of collection approvals (old -&gt; new) is valid according to the permissions</span></summary>
+<div class="tsd-accordion-details">
+<ul class="tsd-nested-navigation">
 <li><a href="../functions/validateCollectionApprovalsUpdate.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>validate<wbr/>Collection<wbr/>Approvals<wbr/>Update</span></a></li>
-<li><a href="../functions/validateCollectionMetadataUpdate.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>validate<wbr/>Collection<wbr/>Metadata<wbr/>Update</span></a></li>
-<li><a href="../functions/validateCustomDataUpdate.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>validate<wbr/>Custom<wbr/>Data<wbr/>Update</span></a></li>
-<li><a href="../functions/validateIsArchivedUpdate.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>validate<wbr/>Is<wbr/>Archived<wbr/>Update</span></a></li>
-<li><a href="../functions/validateManagerUpdate.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>validate<wbr/>Manager<wbr/>Update</span></a></li>
-<li><a href="../functions/validateOffChainBalancesMetadataUpdate.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>validate<wbr/>Off<wbr/>Chain<wbr/>Balances<wbr/>Metadata<wbr/>Update</span></a></li>
-<li><a href="../functions/validatePermissionsUpdate.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>validate<wbr/>Permissions<wbr/>Update</span></a></li>
-<li><a href="../functions/validateStandardsUpdate.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>validate<wbr/>Standards<wbr/>Update</span></a></li>
-<li><a href="../functions/validateTimedUpdatePermissionUpdate.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>validate<wbr/>Timed<wbr/>Update<wbr/>Permission<wbr/>Update</span></a></li>
-<li><a href="../functions/validateTimedUpdateWithBadgeIdsPermissionUpdate.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>validate<wbr/>Timed<wbr/>Update<wbr/>With<wbr/>Badge<wbr/>Ids<wbr/>Permission<wbr/>Update</span></a></li>
-<li><a href="../functions/validateUniversalPermissionUpdate-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>validate<wbr/>Universal<wbr/>Permission<wbr/>Update</span></a></li></ul></div></details></li></ul></div></details></li></ul></nav></div></div></div>
+<li><a href="../functions/validateCollectionMetadataUpdate.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>validate<wbr/>Collection<wbr/>Metadata<wbr/>Update</span></a></li></ul></div></details></li>
+<li>
+<details class="tsd-index-accordion" data-key="Functions$Validate Updates\n\nValidates if an update of custom data (old -> new) is valid according to the permissions"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg><span>Validate Updates
+
+Validates if an update of custom data (old -&gt; new) is valid according to the permissions</span></summary>
+<div class="tsd-accordion-details">
+<ul class="tsd-nested-navigation">
+<li><a href="../functions/validateCustomDataUpdate.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>validate<wbr/>Custom<wbr/>Data<wbr/>Update</span></a></li></ul></div></details></li>
+<li>
+<details class="tsd-index-accordion" data-key="Functions$Validate Updates\n\nValidates if an update of isArchived (old -> new) is valid according to the permissions"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg><span>Validate Updates
+
+Validates if an update of isArchived (old -&gt; new) is valid according to the permissions</span></summary>
+<div class="tsd-accordion-details">
+<ul class="tsd-nested-navigation">
+<li><a href="../functions/validateIsArchivedUpdate.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>validate<wbr/>Is<wbr/>Archived<wbr/>Update</span></a></li></ul></div></details></li>
+<li>
+<details class="tsd-index-accordion" data-key="Functions$Validate Updates\n\nValidates if an update of manager (old -> new) is valid according to the permissions"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg><span>Validate Updates
+
+Validates if an update of manager (old -&gt; new) is valid according to the permissions</span></summary>
+<div class="tsd-accordion-details">
+<ul class="tsd-nested-navigation">
+<li><a href="../functions/validateManagerUpdate.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>validate<wbr/>Manager<wbr/>Update</span></a></li></ul></div></details></li>
+<li>
+<details class="tsd-index-accordion" data-key="Functions$Validate Updates\n\nValidates if an update of off-chain balances metadata (old -> new) is valid according to the permissions"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg><span>Validate Updates
+
+Validates if an update of off-chain balances metadata (old -&gt; new) is valid according to the permissions</span></summary>
+<div class="tsd-accordion-details">
+<ul class="tsd-nested-navigation">
+<li><a href="../functions/validateOffChainBalancesMetadataUpdate.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>validate<wbr/>Off<wbr/>Chain<wbr/>Balances<wbr/>Metadata<wbr/>Update</span></a></li></ul></div></details></li>
+<li>
+<details class="tsd-index-accordion" data-key="Functions$Validate Updates\n\nValidates if an update of standards (old -> new) is valid according to the permissions"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg><span>Validate Updates
+
+Validates if an update of standards (old -&gt; new) is valid according to the permissions</span></summary>
+<div class="tsd-accordion-details">
+<ul class="tsd-nested-navigation">
+<li><a href="../functions/getUpdatedStringCombinations.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Updated<wbr/>String<wbr/>Combinations</span></a></li>
+<li><a href="../functions/validateStandardsUpdate.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>validate<wbr/>Standards<wbr/>Update</span></a></li></ul></div></details></li></ul></div></details></li></ul></nav></div></div></div>
 <div class="overlay"></div></body></html>

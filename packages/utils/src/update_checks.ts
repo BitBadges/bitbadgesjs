@@ -152,6 +152,8 @@ function getFirstMatchOnlyWithApprovalCriteria(permissions: UniversalPermission[
 
 /**
  * @category Validate Updates
+ *
+ * Validates if an update of collection approvals (old -> new) is valid according to the permissions
  */
 export function validateCollectionApprovalsUpdate(
   oldApprovals: CollectionApprovalWithDetails<bigint>[],
@@ -249,6 +251,8 @@ export function validateCollectionApprovalsUpdate(
 
 /**
  * @category Validate Updates
+ *
+ * Validates if an update of badge approvals (old -> new) is valid according to the permissions
  */
 export function validateBadgeMetadataUpdate(
   oldBadgeMetadata: BadgeMetadataTimeline<bigint>[],
@@ -317,6 +321,8 @@ export function validateBadgeMetadataUpdate(
 
 /**
  * @category Validate Updates
+ *
+ * Validates if an update of collection approvals (old -> new) is valid according to the permissions
  */
 export function validateCollectionMetadataUpdate(
   oldCollectionMetadata: CollectionMetadataTimeline<bigint>[],
@@ -380,6 +386,8 @@ export function validateCollectionMetadataUpdate(
 
 /**
  * @category Validate Updates
+ *
+ * Validates if an update of off-chain balances metadata (old -> new) is valid according to the permissions
  */
 export function validateOffChainBalancesMetadataUpdate(
   oldOffChainBalancesMetadata: OffChainBalancesMetadataTimeline<bigint>[],
@@ -442,6 +450,8 @@ export function validateOffChainBalancesMetadataUpdate(
 
 /**
  * @category Validate Updates
+ *
+ * Validates if an update of standards (old -> new) is valid according to the permissions
  */
 export function getUpdatedStringCombinations(oldValue: any, newValue: any): UniversalPermissionDetails[] {
   let x: UniversalPermissionDetails[] = [];
@@ -485,6 +495,8 @@ export function getUpdatedBoolCombinations(oldValue: any, newValue: any): Univer
 
 /**
  * @category Validate Updates
+ *
+ * Validates if an update of manager (old -> new) is valid according to the permissions
  */
 export function validateManagerUpdate(
   oldManager: ManagerTimeline<bigint>[],
@@ -512,6 +524,8 @@ export function validateManagerUpdate(
 
 /**
  * @category Validate Updates
+ *
+ * Validates if an update of custom data (old -> new) is valid according to the permissions
  */
 export function validateCustomDataUpdate(
   oldCustomData: CustomDataTimeline<bigint>[],
@@ -539,6 +553,8 @@ export function validateCustomDataUpdate(
 
 /**
  * @category Validate Updates
+ *
+ * Validates if an update of standards (old -> new) is valid according to the permissions
  */
 export function validateStandardsUpdate(
   oldStandards: StandardsTimeline<bigint>[],
@@ -612,6 +628,8 @@ export function validateStandardsUpdate(
 
 /**
  * @category Validate Updates
+ *
+ * Validates if an update of isArchived (old -> new) is valid according to the permissions
  */
 export function validateIsArchivedUpdate(
   oldIsArchived: IsArchivedTimeline<bigint>[],

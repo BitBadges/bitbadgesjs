@@ -38,11 +38,17 @@ export class ExtensionOptionsWeb3TxSolana extends Message<ExtensionOptionsWeb3Tx
   feePayerSig = new Uint8Array(0);
 
   /**
+   * chain should be "Solana"
+   *
    * @generated from field: string chain = 4;
    */
   chain = "";
 
   /**
+   * sol_address is the address of the solana account. 
+   * Used for indexing purposes because we can't natively go from a cosmos address (what is used on-chain) to a solana address
+   * without knowing the solana address in the first place. This is because conversion to cosmos requires a hash of the solana address.
+   *
    * @generated from field: string sol_address = 5;
    */
   solAddress = "";

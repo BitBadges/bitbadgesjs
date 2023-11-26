@@ -14,20 +14,9 @@
 <ul class="tsd-breadcrumb">
 <li><a href="../modules.html">bitbadgesjs-proto</a></li>
 <li><a href="StringNumberStorageOptions.html">StringNumberStorageOptions</a></li></ul>
-<h1>Enumeration StringNumberStorageOptions</h1></div>
-<section class="tsd-panel tsd-comment">
-<div class="tsd-comment tsd-typography"><p>Struct to represent a numeric value as both a string and a JavaScript number.
-This is what we will store in the CouchDB database to avoid precision issues with JavaScript numbers.</p>
-<p>For ease of use, this will only be used for values from the blockchain which can be &gt; 2^53 or Number.MAX_SAFE_INTEGER.
-For all other values, we will use JavaScript numbers. One example is Cosmos SDK coin amounts, which are represented as strings
-and can be &gt; 2^53 (e.g. { amount: &#39;10000000000000000000000000000000000&#39;, denom: &#39;badge&#39; }). Another is badge IDs.</p>
-<p>We will use this for both storing within CouchDB and for sending over the API HTTP.</p>
-<p>By default, we will attempt to store the value in the database as a JavaScript number if possible (for CouchDB compatibility).
-If not, we will store it as a string. For queries, we need to handle both cases which can be done by checking the $type field with Mango.</p>
-</div>
-<div class="tsd-comment tsd-typography"></div></section><aside class="tsd-sources">
+<h1>Enumeration StringNumberStorageOptions</h1></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/proto-types/badges/string-numbers.ts#L24">proto-types/badges/string-numbers.ts:24</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/proto-types/badges/string-numbers.ts#L27">proto-types/badges/string-numbers.ts:27</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-index-accordion" open><summary class="tsd-accordion-summary tsd-index-summary">
@@ -46,22 +35,22 @@ If not, we will store it as a string. For queries, we need to handle both cases 
 <h3 class="tsd-anchor-link"><span>Big<wbr/>Int</span><a href="#BigInt" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><g stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" id="icon-anchor"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5"></path><path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5"></path></g></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-enum-member">Big<wbr/>Int</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">&quot;BigInt&quot;</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/proto-types/badges/string-numbers.ts#L26">proto-types/badges/string-numbers.ts:26</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/proto-types/badges/string-numbers.ts#L29">proto-types/badges/string-numbers.ts:29</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="Number" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>Number</span><a href="#Number" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-enum-member">Number</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">&quot;Number&quot;</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/proto-types/badges/string-numbers.ts#L27">proto-types/badges/string-numbers.ts:27</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/proto-types/badges/string-numbers.ts#L30">proto-types/badges/string-numbers.ts:30</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="NumberIfPossible" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>Number<wbr/>If<wbr/>Possible</span><a href="#NumberIfPossible" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-enum-member">Number<wbr/>If<wbr/>Possible</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">&quot;NumberIfPossible&quot;</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/proto-types/badges/string-numbers.ts#L28">proto-types/badges/string-numbers.ts:28</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/proto-types/badges/string-numbers.ts#L31">proto-types/badges/string-numbers.ts:31</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="String" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>String</span><a href="#String" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-enum-member">String</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">&quot;String&quot;</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/proto-types/badges/string-numbers.ts#L25">proto-types/badges/string-numbers.ts:25</a></li></ul></aside></section></section></div>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/proto-types/badges/string-numbers.ts#L28">proto-types/badges/string-numbers.ts:28</a></li></ul></aside></section></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -112,8 +101,6 @@ If not, we will store it as a string. For queries, we need to handle both cases 
 <li><a href="../interfaces/Fee.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Fee</span></a></li>
 <li><a href="../interfaces/IncomingApprovalCriteria.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Incoming<wbr/>Approval<wbr/>Criteria</span></a></li>
 <li><a href="../interfaces/IncrementedBalances.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Incremented<wbr/>Balances</span></a></li>
-<li><a href="../interfaces/InheritedBalance.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Inherited<wbr/>Balance</span></a></li>
-<li><a href="../interfaces/InheritedBalancesTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Inherited<wbr/>Balances<wbr/>Timeline</span></a></li>
 <li><a href="../interfaces/IsArchivedTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Is<wbr/>Archived<wbr/>Timeline</span></a></li>
 <li><a href="../interfaces/ManagerTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Manager<wbr/>Timeline</span></a></li>
 <li><a href="../interfaces/ManualBalances.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Manual<wbr/>Balances</span></a></li>
@@ -187,8 +174,6 @@ If not, we will store it as a string. For queries, we need to handle both cases 
 <li><a href="../functions/convertFromProtoToMsgUpdateUserApprovals.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>From<wbr/>Proto<wbr/>To<wbr/>Msg<wbr/>Update<wbr/>User<wbr/>Approvals</span></a></li>
 <li><a href="../functions/convertIncomingApprovalCriteria.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>Incoming<wbr/>Approval<wbr/>Criteria</span></a></li>
 <li><a href="../functions/convertIncrementedBalances.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>Incremented<wbr/>Balances</span></a></li>
-<li><a href="../functions/convertInheritedBalance.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>Inherited<wbr/>Balance</span></a></li>
-<li><a href="../functions/convertInheritedBalancesTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>Inherited<wbr/>Balances<wbr/>Timeline</span></a></li>
 <li><a href="../functions/convertIsArchivedTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>Is<wbr/>Archived<wbr/>Timeline</span></a></li>
 <li><a href="../functions/convertManagerTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>Manager<wbr/>Timeline</span></a></li>
 <li><a href="../functions/convertManualBalances.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>Manual<wbr/>Balances</span></a></li>
@@ -245,30 +230,7 @@ If not, we will store it as a string. For queries, we need to handle both cases 
 <li><a href="../functions/createWeb3Extension.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>create<wbr/>Web3<wbr/>Extension</span></a></li>
 <li><a href="../functions/createWeb3ExtensionSolana.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>create<wbr/>Web3<wbr/>Extension<wbr/>Solana</span></a></li>
 <li><a href="../functions/deepCopy.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>deep<wbr/>Copy</span></a></li>
-<li><a href="../functions/getWrappedBadgeIds.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Badge<wbr/>Ids</span></a></li>
-<li><a href="../functions/getWrappedBadgeMetadata.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Badge<wbr/>Metadata</span></a></li>
-<li><a href="../functions/getWrappedBadgeMetadataTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Badge<wbr/>Metadata<wbr/>Timeline</span></a></li>
-<li><a href="../functions/getWrappedBalances.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Balances</span></a></li>
-<li><a href="../functions/getWrappedBalancesActionPermission.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Balances<wbr/>Action<wbr/>Permission</span></a></li>
-<li><a href="../functions/getWrappedCollectionApprovalPermission.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Collection<wbr/>Approval<wbr/>Permission</span></a></li>
-<li><a href="../functions/getWrappedCollectionApprovals.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Collection<wbr/>Approvals</span></a></li>
-<li><a href="../functions/getWrappedCollectionMetadataTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Collection<wbr/>Metadata<wbr/>Timeline</span></a></li>
-<li><a href="../functions/getWrappedCollectionPermissions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Collection<wbr/>Permissions</span></a></li>
-<li><a href="../functions/getWrappedCustomDataTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Custom<wbr/>Data<wbr/>Timeline</span></a></li>
-<li><a href="../functions/getWrappedIncomingTransfers.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Incoming<wbr/>Transfers</span></a></li>
-<li><a href="../functions/getWrappedInheritedBalancesTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Inherited<wbr/>Balances<wbr/>Timeline</span></a></li>
-<li><a href="../functions/getWrappedIsArchivedTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Is<wbr/>Archived<wbr/>Timeline</span></a></li>
-<li><a href="../functions/getWrappedManagerTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Manager<wbr/>Timeline</span></a></li>
-<li><a href="../functions/getWrappedOffChainBalancesMetadataTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Off<wbr/>Chain<wbr/>Balances<wbr/>Metadata<wbr/>Timeline</span></a></li>
-<li><a href="../functions/getWrappedOutgoingTransfers.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Outgoing<wbr/>Transfers</span></a></li>
-<li><a href="../functions/getWrappedProof.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Proof</span></a></li>
-<li><a href="../functions/getWrappedStandardsTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Standards<wbr/>Timeline</span></a></li>
-<li><a href="../functions/getWrappedTimedUpdatePermission.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Timed<wbr/>Update<wbr/>Permission</span></a></li>
-<li><a href="../functions/getWrappedTimedUpdateWithBadgeIdsPermission.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Timed<wbr/>Update<wbr/>With<wbr/>Badge<wbr/>Ids<wbr/>Permission</span></a></li>
-<li><a href="../functions/getWrappedTransfers.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Transfers</span></a></li>
-<li><a href="../functions/getWrappedUserPermissions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>User<wbr/>Permissions</span></a></li>
 <li><a href="../functions/keccak256ToBase64.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>keccak256<wbr/>To<wbr/>Base64</span></a></li>
-<li><a href="../functions/numberify-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>numberify</span></a></li>
 <li><a href="../functions/signatureToWeb3Extension.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>signature<wbr/>To<wbr/>Web3<wbr/>Extension</span></a></li>
 <li><a href="../functions/signatureToWeb3ExtensionSolana.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>signature<wbr/>To<wbr/>Web3<wbr/>Extension<wbr/>Solana</span></a></li></ul></nav></div></div></div>
 <div class="tsd-generator">

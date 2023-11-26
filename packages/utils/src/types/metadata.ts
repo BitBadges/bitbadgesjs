@@ -15,7 +15,6 @@ import { deepCopy } from "./utils";
  * @property {string} [category] - The category of the badge or badge collection (e.g. "Education", "Attendance").
  * @property {string} [externalUrl] - The external URL of the badge or badge collection.
  * @property {string[]} [tags] - The tags of the badge or badge collection
- * @property {UintRange[]} [times] - Arbitrary times in milliseconds. For example, use this for event times.
  *
  * @property {bigint} [fetchedAtBlock] - Block of fetch time
  * @property {bigint} [fetchedAt] - UNIX milliseconds the metadata was cached / fetched at
@@ -32,7 +31,6 @@ export interface Metadata<T extends NumberType> {
   name: string;
   description: string;
   image: string;
-  times?: UintRange<T>[];
   validFrom?: UintRange<T>[];
   color?: string;
   category?: string;
@@ -47,7 +45,6 @@ export function convertMetadata<T extends NumberType, U extends NumberType>(item
   return deepCopy({
     ...item,
     validFrom: item.validFrom ? item.validFrom.map((UintRange) => convertUintRange(UintRange, convertFunction)) : undefined,
-    times: item.times ? item.times.map((UintRange) => convertUintRange(UintRange, convertFunction)) : undefined,
     fetchedAt: item.fetchedAt ? convertFunction(item.fetchedAt) : undefined,
     fetchedAtBlock: item.fetchedAtBlock ? convertFunction(item.fetchedAtBlock) : undefined,
   })
@@ -56,6 +53,9 @@ export function convertMetadata<T extends NumberType, U extends NumberType>(item
 
 /**
  * @category API / Indexer
+ *
+ * @typedef {Object} AddressMappingWithMetadata
+ * @property {string} metadata - The metadata of the address mapping.
  */
 export interface AddressMappingWithMetadata<T extends NumberType> extends AddressMappingInfo<T> {
   metadata?: Metadata<T>

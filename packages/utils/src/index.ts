@@ -44,10 +44,10 @@ export * from './approved_transfers_casts';
 export * from './api-sdk';
 export * from './converter';
 
-export * from './rest/account'
-export * from './rest/balances'
-export * from './rest/broadcast'
-export * from './rest/coin'
-export * from './rest/gov'
-export * from './rest/ibc'
-export * from './rest/staking'
+export * from './node-rest-api/account'
+export * from './node-rest-api/balances'
+export * from './node-rest-api/broadcast'
+export * from './node-rest-api/coin'
+export * from './node-rest-api/gov'
+export * from './node-rest-api/ibc'
+export * from './node-rest-api/staking'

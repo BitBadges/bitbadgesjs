@@ -6,13 +6,21 @@ import { ActionPermission, BalancesActionPermission, CollectionApprovalPermissio
 import { BadgeMetadataTimeline, CollectionMetadataTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadataTimeline, StandardsTimeline } from "../../../proto/badges/timelines_pb";
 import { ApprovalAmounts, ApprovalCriteria, ApprovalIdentifierDetails, CollectionApproval, IncomingApprovalCriteria, IncrementedBalances, ManualBalances, MaxNumTransfers, MerkleChallenge, MerklePathItem, MerkleProof, OutgoingApprovalCriteria, PredeterminedBalances, PredeterminedOrderCalculationMethod, Transfer, UserIncomingApproval, UserOutgoingApproval } from "../../../proto/badges/transfers_pb";
 import { MsgCreateAddressMappings, MsgCreateCollection, MsgDeleteCollection, MsgTransferBadges, MsgUniversalUpdateCollection, MsgUpdateCollection, MsgUpdateUserApprovals } from "../../../proto/badges/tx_pb";
+/**
+ * This file is used to generate sample Msgs for EIP712 type generation.
+ *
+ * This is needed because the EIP712 type generation doesn't natively support optional types.
+ * Our solution is to always generate Msgs with all optional types populated with a default empty value (e.g. "", [], 0, etc.)
+ * For primitive types and primitive type arrays, we don't need to add bc protobuf automatically adds a default value, but for objects we do.
+ * For all Number type values (cosmos.Uint), we use strings and bigints (not numbers), so we need to add a default value of "0"
+ * because the chain parses and sets numbers as a "0" string.
+ *
+ * emitDefaultValues option must be set to handle the primitive types.
+ *
+ * For Msgs without optional fields, we don't need to do anything.
+ */
 
-//Here, we generate sample JSON Msgs for EIP712 type generation
-//These populate ALL optional / empty types with a sample value (e.g. "", [], 0, etc.)
-//For primitive types, we don't need to add bc protobuf automatically adds a default value
 
-//Note array types default to string[] so we don't need to include them
-//Other primitive arrays (e.g. boolean[]), we will need to include
 const approvalCriteria = new OutgoingApprovalCriteria({
   mustOwnBadges: [new MustOwnBadges({
     amountRange: new UintRange(),
@@ -80,10 +88,7 @@ const approvalCriteriaForPopulatingUndefined = new OutgoingApprovalCriteria({
   }),
 }).toJson({ emitDefaultValues: true }) as object;
 
-//emitDefaultValues handles all primitive types (e.g. string, number, boolean, empty arrays, etc)
-//However, it leaves custom type objects undefined. Here, we populate them with their empty default values
 
-//for all Number type values (cosmos.Uint), we also sign it with a 0 placeholder because that is what the chain parses it as
 
 function populateMerkleChallenge(merkleChallenge?: MerkleChallenge) {
   if (!merkleChallenge) {

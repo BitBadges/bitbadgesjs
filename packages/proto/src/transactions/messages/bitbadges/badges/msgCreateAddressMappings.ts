@@ -30,6 +30,17 @@ export function convertFromProtoToMsgCreateAddressMappings(
   }
 }
 
+/**
+ * Creates a new transaction with the MsgCreateAddressMappings message.
+ *
+ * Note this only creates a transaction with one Msg. For multi-msg transactions, you can custom build using createTransactionPayload. See docs for tutorials.
+ *
+ * @param {Chain} chain - The chain to create the transaction for.
+ * @param {Sender} sender - The sender details for the transaction.
+ * @param {Fee} fee - The fee of the transaction.
+ * @param {string} memo - The memo of the transaction.
+ * @param {MsgCreateAddressMappings} params - The parameters of the CreateAddressMappings message.
+ */
 export function createTxMsgCreateAddressMappings(
   chain: Chain,
   sender: Sender,

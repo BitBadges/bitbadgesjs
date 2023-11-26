@@ -1,7 +1,7 @@
 import { Keccak } from 'sha3'
 import { Any } from '@bufbuild/protobuf'
 import { StdFee, makeSignDoc, serializeSignDoc } from '@cosmjs/amino'
-import { PubKey } from '../../proto/ethereum/keys_pb.js'
+import { PubKey } from '../../proto/ethereum/ethsecp256k1/keys_pb.js'
 import { AminoTypes } from '../../amino/registry.js'
 import { convertProtoMessageToObject } from '../../amino/objectConverter.js'
 import { MessageGenerated, createAnyMessage } from '../../proto-types/utils.js'

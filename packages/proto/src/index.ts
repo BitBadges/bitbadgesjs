@@ -4,7 +4,6 @@ export * from './proto-types/utils'
 export * from './proto-types/base'
 export * from './proto-types/web3Extension'
 export * from './proto-types/badges/typeutils/typeUtils'
-export * from './proto-types/badges/typeutils/wrappers'
 export * from './proto-types/badges/typeutils/approvals'
 export * from './proto-types/badges/typeutils/permissions'
 

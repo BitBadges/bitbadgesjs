@@ -2,10 +2,10 @@ import { NumberType, UserBalance, convertUserBalance } from "bitbadgesjs-proto";
 import { BitBadgesCollection, convertBitBadgesCollection } from "./collections";
 import { BitBadgesUserInfo, convertBitBadgesUserInfo } from "./users";
 
-/*
+/**
   Used by the frontend for dynamically fetching data from the DB as neede
 
-  @category API / Indexerd
+  @category API / Indexer
 */
 export interface CollectionMap<T extends NumberType> {
   [collectionId: string]: BitBadgesCollection<T> | undefined
@@ -126,6 +126,5 @@ export enum DistributionMethod {
 export enum MetadataAddMethod {
   None = 'None',
   Manual = 'Manual',
-  UploadUrl = 'Insert Custom Metadata Url (Advanced)',
-  CSV = 'CSV',
+  UploadUrl = 'Insert Custom Metadata Url (Advanced)'
 }

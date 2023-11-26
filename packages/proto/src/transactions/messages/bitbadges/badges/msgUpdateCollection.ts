@@ -6,12 +6,7 @@ import { createTransactionPayload } from '../../base'
 import { Chain, Fee, Sender } from "../../common"
 
 /**
- * MsgUpdateCollection is a universal transaction that can be used to create / update any collection. It is only executable by the manager.
- *
- * Upon initial creation, you can set the default approved outgoing transfers, default approved incoming transfers, default user permissions, and balances type.
- * However, after that, they are final and ignored in subsequent MsgUpdateCollection calls.
- *
- * For a new collection, specify collectionId == "0".
+ * MsgUpdateCollection is a transaction that can be used to update any collection. It is only executable by the manager.
  *
  * Note that you must have the necessary privileges to update specific fields. If you do not have the necessary privileges, it will throw an error.
  * We update any CollectionPermissions at the end, so the permissions checked for the current execution are the permissions BEFORE the update.
@@ -40,8 +35,6 @@ import { Chain, Fee, Sender } from "../../common"
  * @property {CollectionApproval[]} collectionApprovals - The new collection approved transfers timeline. Must have the necessary permissions to update.
  * @property {boolean} updateStandardsTimeline - Whether or not to update the standards timeline.
  * @property {StandardsTimeline[]} standardsTimeline - The new standards timeline. Must have the necessary permissions to update.
- * @property {boolean} updateContractAddressTimeline - Whether or not to update the contract address timeline.
- * @property {ContractAddressTimeline[]} contractAddressTimeline - The new contract address timeline. Must have the necessary permissions to update.
  * @property {boolean} updateIsArchivedTimeline - Whether or not to update the is archived timeline.
  * @property {IsArchivedTimeline[]} isArchivedTimeline - The new is archived timeline. Must have the necessary permissions to update.
  */
@@ -61,7 +54,6 @@ export interface MsgUpdateCollection<T extends NumberType> {
   offChainBalancesMetadataTimeline?: OffChainBalancesMetadataTimeline<T>[]
   updateCustomDataTimeline?: boolean
   customDataTimeline?: CustomDataTimeline<T>[]
-  // inheritedCollectionId?: T
   updateCollectionApprovals?: boolean
   collectionApprovals?: CollectionApproval<T>[]
   updateStandardsTimeline?: boolean
@@ -107,7 +99,6 @@ export function convertFromProtoToMsgUpdateCollection(
     badgeMetadataTimeline: msg.badgeMetadataTimeline?.map(x => convertBadgeMetadataTimeline(x, BigInt)),
     offChainBalancesMetadataTimeline: msg.offChainBalancesMetadataTimeline?.map(x => convertOffChainBalancesMetadataTimeline(x, BigInt)),
     customDataTimeline: msg.customDataTimeline?.map(x => convertCustomDataTimeline(x, BigInt)),
-    // inheritedCollectionId: BigInt(msg.inheritedCollectionId),
     collectionApprovals: msg.collectionApprovals?.map(x => convertCollectionApproval(x, BigInt)),
     standardsTimeline: msg.standardsTimeline?.map(x => convertStandardsTimeline(x, BigInt)),
     isArchivedTimeline: msg.isArchivedTimeline?.map(x => convertIsArchivedTimeline(x, BigInt)),

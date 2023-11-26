@@ -7,9 +7,10 @@ import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialM
 import { Message, proto3 } from "@bufbuild/protobuf";
 
 /**
+ *
  * An AddressMapping is a permanent list of addresses that are referenced by a mapping ID.
  * The mapping may include only the specified addresses, or it may include all addresses but
- * the specified addresses (depending on if includeAddresses is true or false).
+ * the specified addresses (depending on if includeAddresses is true (whitelist) or false (blacklist)).
  *
  * AddressMappings are used for things like whitelists, blacklists, approvals, etc.
  *
@@ -17,31 +18,43 @@ import { Message, proto3 } from "@bufbuild/protobuf";
  */
 export class AddressMapping extends Message<AddressMapping> {
   /**
+   * Unique identifier for the address mapping.
+   *
    * @generated from field: string mappingId = 1;
    */
   mappingId = "";
 
   /**
+   * List of addresses included in the mapping.
+   *
    * @generated from field: repeated string addresses = 2;
    */
   addresses: string[] = [];
 
   /**
+   * Indicates whether the mapping includes the specified addresses (true) or excludes them (false).
+   *
    * @generated from field: bool includeAddresses = 3;
    */
   includeAddresses = false;
 
   /**
+   * URI (Uniform Resource Identifier) associated with the address mapping to provide metadata, if applicable.
+   *
    * @generated from field: string uri = 4;
    */
   uri = "";
 
   /**
+   * Custom arbitrary data or additional information related to the address mapping.
+   *
    * @generated from field: string customData = 5;
    */
   customData = "";
 
   /**
+   * The user or entity who created the address mapping.
+   *
    * @generated from field: string createdBy = 6;
    */
   createdBy = "";

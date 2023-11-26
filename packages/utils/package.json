@@ -17,7 +17,7 @@
     "@cosmjs/crypto": "^0.32.0",
     "@cosmjs/stargate": "^0.31.3",
     "bech32": "^2.0.0",
-    "bitbadgesjs-proto": "^0.1.166",
+    "bitbadgesjs-proto": "^0.1.181",
     "bs58": "^5.0.0",
     "ethers": "^5.7.0",
     "merkletreejs": "^0.3.11",

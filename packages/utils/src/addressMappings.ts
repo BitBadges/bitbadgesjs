@@ -23,12 +23,12 @@ export const isInAddressMapping = (addressesMapping: AddressMapping, addressToCh
  *
  * @category Address Mappings
  */
-export function removeAddressMappingFromAddressMapping(mappingToRemove: AddressMapping, addressMapping: AddressMapping) {
+export function removeAddressMappingFromAddressMapping(addressesToRemove: AddressMapping, addressMapping: AddressMapping) {
   let duplicates = [];
   let inToRemoveButNotMapping = [];
   let inMappingButNotToRemove = [];
 
-  for (let address of mappingToRemove.addresses) {
+  for (let address of addressesToRemove.addresses) {
     // Check if address is in addressMapping.addresses
     let found = addressMapping.addresses.includes(address);
 
@@ -40,8 +40,8 @@ export function removeAddressMappingFromAddressMapping(mappingToRemove: AddressM
   }
 
   for (let address of addressMapping.addresses) {
-    // Check if address is in mappingToRemove.addresses
-    let found = mappingToRemove.addresses.includes(address);
+    // Check if address is in addressesToRemove.addresses
+    let found = addressesToRemove.addresses.includes(address);
 
     if (!found) {
       inMappingButNotToRemove.push(address);
@@ -51,28 +51,28 @@ export function removeAddressMappingFromAddressMapping(mappingToRemove: AddressM
   let removed: AddressMapping = { addresses: [], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" };
   let remaining: AddressMapping = { addresses: [], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" };
 
-  if (mappingToRemove.includeAddresses && addressMapping.includeAddresses) {
+  if (addressesToRemove.includeAddresses && addressMapping.includeAddresses) {
     // Case 1
     removed.includeAddresses = true;
     removed.addresses = duplicates;
 
     remaining.includeAddresses = true;
     remaining.addresses = inMappingButNotToRemove;
-  } else if (!mappingToRemove.includeAddresses && addressMapping.includeAddresses) {
+  } else if (!addressesToRemove.includeAddresses && addressMapping.includeAddresses) {
     // Case 2
     removed.includeAddresses = true;
     removed.addresses = inMappingButNotToRemove;
 
     remaining.includeAddresses = true;
     remaining.addresses = duplicates;
-  } else if (mappingToRemove.includeAddresses && !addressMapping.includeAddresses) {
+  } else if (addressesToRemove.includeAddresses && !addressMapping.includeAddresses) {
     // Case 3
     removed.includeAddresses = true;
     removed.addresses = inToRemoveButNotMapping;
 
     remaining.includeAddresses = false;
     remaining.addresses = [...inMappingButNotToRemove, ...inToRemoveButNotMapping, ...duplicates];
-  } else if (!mappingToRemove.includeAddresses && !addressMapping.includeAddresses) {
+  } else if (!addressesToRemove.includeAddresses && !addressMapping.includeAddresses) {
     // Case 4
     removed.includeAddresses = false;
     removed.addresses = [...inMappingButNotToRemove, ...inToRemoveButNotMapping, ...duplicates];
@@ -83,6 +83,7 @@ export function removeAddressMappingFromAddressMapping(mappingToRemove: AddressM
 
   return [remaining, removed];
 }
+
 /**
  * @category Address Mappings
  */
@@ -102,7 +103,6 @@ export function invertAddressMapping(mapping: AddressMapping) {
  * Returns the address mapping for a mapping ID, if it is a reserved ID (i.e. Mint, Manager, All, None, validly formatted address, ...)
  *
  * @param {string} addressMappingId - The mapping ID to get the address mapping for
- * @param {string} managerAddress - The manager address to use for the Manager mapping ID
  *
  * @category Address Mappings
  */

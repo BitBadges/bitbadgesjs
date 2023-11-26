@@ -6,7 +6,7 @@ import { Balance, MerkleChallenge, MustOwnBadges, UintRange, convertBalance, con
  * UserOutgoingApproval represents a user's approved outgoing transfer.
  *
  * @typedef {Object} UserOutgoingApproval
- *@property {string} toMappingId - The mapping ID for the user(s) who is receiving the badges.
+ * @property {string} toMappingId - The mapping ID for the user(s) who is receiving the badges.
  * @property {string} initiatedByMappingId - The mapping ID for the user(s) who initiate the transfer.
  * @property {UintRange[]} transferTimes - The times of the transfer transaction.
  * @property {UintRange[]} badgeIds - The badge IDs to be transferred.
@@ -14,17 +14,9 @@ import { Balance, MerkleChallenge, MustOwnBadges, UintRange, convertBalance, con
  * @property {string} approvalId - The ID of the approval. Must not be a duplicate of another approval ID in the same timeline.
  * @property {string} amountTrackerId - The ID of the approval tracker. This is the key used to track tallies.
  * @property {string} challengeTrackerId - The ID of the challenge tracker. This is the key used to track used leaves for challenges.
- * @property {ValueOptions} toMappingOptions - The options to manipulate the values for the toMappingId.
- * @property {ValueOptions} initiatedByMappingOptions - The options to manipulate the values for the initiatedByMappingId.
- * @property {ValueOptions} transferTimesOptions - The options to manipulate the values for the transferTimes.
- * @property {ValueOptions} badgeIdsOptions - The options to manipulate the values for the badgeIds.
- * @property {ValueOptions} ownershipTimesOptions - The options to manipulate the values for the ownershipTimes.
- * @property {ValueOptions} amountTrackerIdOptions - The options to manipulate the values for the amountTrackerId.
- * @property {ValueOptions} challengeTrackerIdOptions - The options to manipulate the values for the challengeTrackerId.
- * @property {boolean} isApproved - Whether this combination is allowed or not.
- * @property {IsUserOutgoingTransferAllowed[]} allowedCombinations - The allowed combinations of the transfer. Here, you can manipulate the default values (invert, all, none) and decide whether that combination is approved or not. Note this is first-match only.
+ * @property {string} uri - The URI of the approval.
+ * @property {string} customData - Arbitrary custom data of the approval.
  * @property {OutgoingApprovalCriteria[]} approvalCriteria - For allowed combinations, we also must check the details of the approval. These represent the restrictions that must be obeyed such as the total amount approved, max num transfers, merkle challenges, must own badges, etc.
- *
  */
 export interface UserOutgoingApproval<T extends NumberType> {
   toMappingId: string;
@@ -97,7 +89,6 @@ export function convertUserOutgoingApproval<T extends NumberType, U extends Numb
     transferTimes: transfer.transferTimes.map((b) => convertUintRange(b, convertFunction)),
     badgeIds: transfer.badgeIds.map((b) => convertUintRange(b, convertFunction)),
     ownershipTimes: transfer.ownershipTimes.map((b) => convertUintRange(b, convertFunction)),
-    //allowedCombinations: transfer.allowedCombinations.map((b) => convertIsUserOutgoingTransferAllowed(b, convertFunction)),
     approvalCriteria: populateOptionalFields ? convertOutgoingApprovalCriteria(getFilledOutObj(transfer.approvalCriteria, defaultOutgoingApprovalCriteria), convertFunction) : transfer.approvalCriteria ? convertOutgoingApprovalCriteria(transfer.approvalCriteria, convertFunction) : undefined,
   })
 }
@@ -142,14 +133,13 @@ export function convertOutgoingApprovalCriteria<T extends NumberType, U extends 
  * This allows you to define an approval where Transfer A happens first, then Transfer B, then Transfer C, etc.
  * The order of the transfers is defined by the orderCalculationMethod. The order number 0 represents the first transfer, 1 represents the second transfer, etc.
  *
- * IMPORTANT: if the calculated balances exceed the bounds of the badgeIds or ownershipTimes of this approval, then the transfer will fail.
+ * IMPORTANT: if the balances of the transfer do not exactly match the predetermined balances, then the transfer will fail.
  *
  * @typedef {Object} PredeterminedBalances
  * @property {ManualBalances[]} manualBalances - Manually define the balances for each transfer. Cannot be used with incrementedBalances. Order number corresponds to the index of the balance in the array.
  * @property {IncrementedBalances} incrementedBalances - Define a starting balance and increment the badge IDs and owned times by a certain amount after each transfer. Cannot be used with manualBalances.
  *                                                       Order number corresponds to number of times we increment.
  * @property {PredeterminedOrderCalculationMethod} orderCalculationMethod - The order calculation method.
- * @property {string} precalculationId - The precalculation ID. Must not be a duplicate of another precalculation ID in the same timeline.
  */
 export interface PredeterminedBalances<T extends NumberType> {
   manualBalances: ManualBalances<T>[];
@@ -166,17 +156,16 @@ export function convertPredeterminedBalances<T extends NumberType, U extends Num
   })
 }
 
-export interface ManualBalances<T extends NumberType> {
-  balances: Balance<T>[];
-}
-
-
 /**
- * ManualBalances represents predetermined manually specified balances for transfers of an approval.
+ * ManualBalances represents predetermined manually specified balances for transfers of an approval with predetermined balances.
  *
  * @typedef {Object} ManualBalances
  * @property {Balance[]} balances - The list of balances for each transfer. Order number corresponds to the index of the balance in the array.
  */
+export interface ManualBalances<T extends NumberType> {
+  balances: Balance<T>[];
+}
+
 export function convertManualBalances<T extends NumberType, U extends NumberType>(balances: ManualBalances<T>, convertFunction: (item: T) => U): ManualBalances<U> {
   return deepCopy({
     ...balances,
@@ -186,7 +175,7 @@ export function convertManualBalances<T extends NumberType, U extends NumberType
 
 /**
  * IncrementedBalances represents predetermined incremented balances for transfers of an approval.
- * You can define a starting balance and increment the badge IDs and owned times by a certain amount after each transfer.
+ * You can define a starting balance and increment the badge IDs and owned times by a certain amount.
  *
  * @typedef {Object} IncrementedBalances
  *
@@ -210,8 +199,10 @@ export function convertIncrementedBalances<T extends NumberType, U extends Numbe
 }
 
 /**
- * PredeterminedOrderCalculationMethod represents the order calculation method for the predetermined balances.
- * Only one option can be true.
+ * PredeterminedOrderCalculationMethod represents the order calculation method for the predetermined balances. Only one option can be set to true.
+ * For manual balances, the order number corresponds to the index of the balance in the array.
+ * For incremented balances, the order number corresponds to the number of times we increment.
+ *
  *
  * @typedef {Object} PredeterminedOrderCalculationMethod
  * @property {boolean} useOverallNumTransfers - Use the overall number of transfers this approval has been used with as the order number. Ex: If this approval has been used 2 times by ANY address, then the order number for the next transfer will be 3.
@@ -228,16 +219,15 @@ export interface PredeterminedOrderCalculationMethod {
   usePerInitiatedByAddressNumTransfers: boolean;
   useMerkleChallengeLeafIndex: boolean;
 }
-// export function convertPredeterminedOrderCalculationMethod<T extends NumberType, U extends NumberType>(method: PredeterminedOrderCalculationMethod<T>, convertFunction: (item: T) => U): PredeterminedOrderCalculationMethod<U> {
-//   return deepCopy({
-//     ...method
-//   })
-// }
+
 
 /**
- * ApprovalAmounts represents the maximum approved amounts for the badge IDs of this approval.
+ * ApprovalAmounts represents the maximum approved amounts for the badge IDs / ownership times of this approval.
  * Can be set to 0 to represent an unlimited amount is approved.
- * Note that we only track the approval amounts if the approval is defined and not unlimited. Otherwise, we do not track the respective approval amount.
+ * If set to non-zero value, we track the running tally of the amount approved for each badge ID / ownership time.
+ * Once it reaches the max, no more transfers are allowed.
+ *
+ * Note that we only track the approval amounts if the approval is defined and not unlimited. If it is unlimited, we do not tally.
  *
  * @typedef {Object} ApprovalAmounts
  * @property {T} overallApprovalAmount - The overall maximum amount approved for the badgeIDs and ownershipTimes. Running tally that includes all transfers that match this approval.
@@ -264,6 +254,9 @@ export function convertApprovalAmounts<T extends NumberType, U extends NumberTyp
 
 /**
  * MaxNumTransfers represents the maximum number of transfers for the badge IDs and ownershipTimes of this approval.
+ *
+ * Can be set to 0 to represent an unlimited number of transfers.
+ * If set to non-zero value, we track the running tally of the number of transfers for each badge ID / ownership time. Once it reaches the max, no more transfers are allowed.
  *
  * Note that we only track the max num transfers if a) the max num transfers here is defined and not unlimited OR b) we need it for calculating the predetermined balances order (i.e. useXYZNumTransfers is set in the PredeterminedOrderCalculationMethod).
  * Otherwise, we do not track the respective number of transfers
@@ -303,7 +296,8 @@ export function convertMaxNumTransfers<T extends NumberType, U extends NumberTyp
  * @property {string} approvalId - The ID of the approval. Must not be a duplicate of another approval ID in the same timeline.
  * @property {string} amountTrackerId - The ID of the approval tracker. This is the key used to track tallies.
  * @property {string} challengeTrackerId - The ID of the challenge tracker. This is the key used to track used leaves for challenges.
- * @property {IsUserIncomingTransferAllowed[]} allowedCombinations - The allowed combinations of the transfer. Here, you can manipulate the default values (invert, all, none) and decide whether that combination is approved or not. Note this is first-match only.
+ * @property {string} uri - The URI of the approval.
+ * @property {string} customData - Arbitrary custom data of the approval
  * @property {IncomingApprovalCriteria[]} approvalCriteria - For allowed combinations, we also must check the details of the approval. These represent the restrictions that must be obeyed such as the total amount approved, max num transfers, merkle challenges, must own badges, etc.
  */
 export interface UserIncomingApproval<T extends NumberType> {
@@ -391,7 +385,7 @@ export function convertUserIncomingApproval<T extends NumberType, U extends Numb
  *
  * @property {MustOwnBadges[]} mustOwnBadges - The list of must own badges to be approved.
  * @property {MerkleChallenge} merkleChallenge - The list of merkle challenges that need valid proofs to be approved.
- * @property {PredeterminedBalances} predeterminedBalances - The predetermined balances for each transfer.
+ * @property {PredeterminedBalances} predeterminedBalances - The predetermined balances for each transfer using this approval.
  * @property {ApprovalAmounts} approvalAmounts - The maximum approved amounts for this approval.
  * @property {MaxNumTransfers} maxNumTransfers - The max num transfers for this approval.
  *
@@ -437,16 +431,9 @@ export function convertIncomingApprovalCriteria<T extends NumberType, U extends 
  * @property {string} amountTrackerId - The ID of the approval tracker. This is the key used to track tallies.
  * @property {string} challengeTrackerId - The ID of the challenge tracker. This is the key used to track used leaves for challenges.
  *
- * @property {ValueOptions} toMappingOptions - The options to manipulate the values for the toMappingId.
- * @property {ValueOptions} fromMappingOptions - The options to manipulate the values for the fromMappingId.
- * @property {ValueOptions} initiatedByMappingOptions - The options to manipulate the values for the initiatedByMappingId.
- * @property {ValueOptions} transferTimesOptions - The options to manipulate the values for the transferTimes.
- * @property {ValueOptions} badgeIdsOptions - The options to manipulate the values for the badgeIds.
- * @property {ValueOptions} ownershipTimesOptions - The options to manipulate the values for the ownershipTimes.
- * @property {ValueOptions} amountTrackerIdOptions - The options to manipulate the values for the amountTrackerId.
- * @property {ValueOptions} challengeTrackerIdOptions - The options to manipulate the values for the challengeTrackerId.
- * @property {boolean} isApproved - Whether this combination is allowed or not.
- * @property {IsCollectionTransferAllowed[]} allowedCombinations - The allowed combinations of the transfer. Here, you can manipulate the default values (invert, all, none) and decide whether that combination is approved or not. Note this is first-match only.
+ * @property {string} uri - The URI of the approval.
+ * @property {string} customData - Arbitrary custom data of the approval.
+ *
  * @property {ApprovalCriteria[]} approvalCriteria - For allowed combinations, we also must check the details of the approval. These represent the restrictions that must be obeyed such as the total amount approved, max num transfers, merkle challenges, must own badges, etc.
  */
 export interface CollectionApproval<T extends NumberType> {
@@ -465,6 +452,7 @@ export interface CollectionApproval<T extends NumberType> {
   approvalCriteria?: ApprovalCriteria<T>;
 }
 
+//Helper function to populate optional fields with default values
 const getFilledOutObj = (obj: any, defaultValues: any) => {
   if (!obj) return defaultValues;
 
@@ -542,16 +530,8 @@ export function convertCollectionApproval<T extends NumberType, U extends Number
 }
 
 
-
-// export function convertIsCollectionTransferAllowed<T extends NumberType, U extends NumberType>(allowed: IsCollectionTransferAllowed<T>, _convertFunction: (item: T) => U): IsCollectionTransferAllowed<U> {
-//   return deepCopy({
-//     ...allowed
-//   })
-// }
-
-
 /**
- * ApprovalCriteria represents the details of an approval.
+ * ApprovalCriteria represents the criteria for an approval. The approvee must satisfy all of the criteria to be approved.
  *
  * @typedef {Object} ApprovalCriteria
  *

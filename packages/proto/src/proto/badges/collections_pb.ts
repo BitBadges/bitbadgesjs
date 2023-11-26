@@ -10,10 +10,11 @@ import { CollectionPermissions, UserPermissions } from "./permissions_pb.js";
 import { CollectionApproval, UserIncomingApproval, UserOutgoingApproval } from "./transfers_pb.js";
 
 /**
- * A BadgeCollection is the top level object for a collection of badges. 
+ *
+ * A BadgeCollection is the top-level object for a collection of badges. 
  * It defines everything about the collection, such as the manager, metadata, etc.
  *
- * All collections are identified by a collectionId assigned by the blockchain, which is a uint64 that increments (i.e. first collection has ID 1).
+ * All collections are identified by a collectionId assigned by the blockchain, which is a uint64 that increments (i.e., the first collection has ID 1).
  *
  * All collections also have a manager who is responsible for managing the collection. 
  * They can be granted certain permissions, such as the ability to mint new badges.
@@ -22,127 +23,133 @@ import { CollectionApproval, UserIncomingApproval, UserOutgoingApproval } from "
  * We fetch the value according to the current time.
  * For example, we may set the manager to be Alice from Time1 to Time2, and then set the manager to be Bob from Time2 to Time3.
  *
- * Collections may have different balance types: standard vs off-chain vs inherited. See documentation for differences.
+ * Collections may have different balance types: standard vs. off-chain vs. inherited. 
+ *
+ * See documentation for more details.
  *
  * @generated from message badges.BadgeCollection
  */
 export class BadgeCollection extends Message<BadgeCollection> {
   /**
-   * The collectionId is the unique identifier for this collection.
+   * The unique identifier for this collection. This is assigned by the blockchain. First collection has ID 1.
    *
    * @generated from field: string collectionId = 1;
    */
   collectionId = "";
 
   /**
-   * The collection metadata is the metadata for the collection itself.
+   * The metadata for the collection itself, which can vary over time.
    *
    * @generated from field: repeated badges.CollectionMetadataTimeline collectionMetadataTimeline = 2;
    */
   collectionMetadataTimeline: CollectionMetadataTimeline[] = [];
 
   /**
-   * The badge metadata is the metadata for each badge in the collection.
+   * The metadata for each badge in the collection, also subject to changes over time.
    *
    * @generated from field: repeated badges.BadgeMetadataTimeline badgeMetadataTimeline = 3;
    */
   badgeMetadataTimeline: BadgeMetadataTimeline[] = [];
 
   /**
-   * The balancesType is the type of balances this collection uses (standard, off-chain, or inherited).
+   * The type of balances this collection uses ("Standard", "Off-Chain", or "Inherited").
    *
    * @generated from field: string balancesType = 4;
    */
   balancesType = "";
 
   /**
-   * The off-chain balances metadata defines where to fetch the balances for collections with off-chain balances.
+   * Metadata for fetching balances for collections with off-chain balances, subject to changes over time.
    *
    * @generated from field: repeated badges.OffChainBalancesMetadataTimeline offChainBalancesMetadataTimeline = 5;
    */
   offChainBalancesMetadataTimeline: OffChainBalancesMetadataTimeline[] = [];
 
   /**
-   * The custom data field is an arbitrary field that can be used to store any data.
+   * An arbitrary field that can store any data, subject to changes over time.
    *
    * @generated from field: repeated badges.CustomDataTimeline customDataTimeline = 7;
    */
   customDataTimeline: CustomDataTimeline[] = [];
 
   /**
-   * The manager is the address of the manager of this collection.
+   * The address of the manager of this collection, subject to changes over time.
    *
    * @generated from field: repeated badges.ManagerTimeline managerTimeline = 8;
    */
   managerTimeline: ManagerTimeline[] = [];
 
   /**
-   * The permissions define what the manager of the collection can do or not do.
+   * Permissions that define what the manager of the collection can do or not do.
    *
    * @generated from field: badges.CollectionPermissions collectionPermissions = 9;
    */
   collectionPermissions?: CollectionPermissions;
 
   /**
-   * The approved transfers defines the transferability of the collection for collections with standard balances.
-   * This defines it on a collection-level. All transfers must be explicitly allowed on the collection-level, or else, they will fail.
-   *
-   * Collection approved transfers can optionally specify to override the user approvals for a transfer (e.g. forcefully revoke a badge).
-   * If user approvals are not overriden, then a transfer must also satisfy the From user's approved outgoing transfers and the To user's approved incoming transfers.
+   * Transferability of the collection for collections with standard balances, subject to changes over time.
+   * Overrides user approvals for a transfer if specified.
+   * Transfer must satisfy both user and collection-level approvals.
+   * Not applicable for off-chain or inherited balances.
    *
    * @generated from field: repeated badges.CollectionApproval collectionApprovals = 10;
    */
   collectionApprovals: CollectionApproval[] = [];
 
   /**
-   * Standards allow us to define a standard for the collection. This lets others know how to interpret the fields of the collection.
+   * Standards that define how to interpret the fields of the collection, subject to changes over time.
    *
    * @generated from field: repeated badges.StandardsTimeline standardsTimeline = 11;
    */
   standardsTimeline: StandardsTimeline[] = [];
 
   /**
-   * The isArchivedTimeline defines whether the collection is archived or not. 
-   * When a collection is archived, it is read-only and no transactions can be processed.
+   * Whether the collection is archived or not, subject to changes over time.
+   * When archived, it becomes read-only, and no transactions can be processed until it is unarchived.
    *
    * @generated from field: repeated badges.IsArchivedTimeline isArchivedTimeline = 12;
    */
   isArchivedTimeline: IsArchivedTimeline[] = [];
 
   /**
-   * The defaultUserOutgoingApprovals defines the default user approved outgoing transfers for an uninitialized user balance. 
-   * The user can change this value at any time.
+   * Default user-approved outgoing transfers for an uninitialized user balance.
    *
    * @generated from field: repeated badges.UserOutgoingApproval defaultUserOutgoingApprovals = 14;
    */
   defaultUserOutgoingApprovals: UserOutgoingApproval[] = [];
 
   /**
-   * The defaultUserIncomingApprovals defines the default user approved incoming transfers for an uninitialized user balance.
-   * The user can change this value at any time.
-   *
-   * Ex: Set this to disallow all incoming transfers by default, making the user have to opt-in to receiving the badge.
+   * Default user-approved incoming transfers for an uninitialized user balance.
+   * Ex: Can be set to disallow all incoming transfers by default, allowing users to opt-in to receiving badges.
    *
    * @generated from field: repeated badges.UserIncomingApproval defaultUserIncomingApprovals = 15;
    */
   defaultUserIncomingApprovals: UserIncomingApproval[] = [];
 
   /**
+   * Default user permissions for an uninitialized user balance.
+   *
    * @generated from field: badges.UserPermissions defaultUserPermissions = 16;
    */
   defaultUserPermissions?: UserPermissions;
 
   /**
+   * Whether self-initiated outgoing transfers are auto-approved by default.
+   *
    * @generated from field: bool defaultAutoApproveSelfInitiatedOutgoingTransfers = 17;
    */
   defaultAutoApproveSelfInitiatedOutgoingTransfers = false;
 
   /**
+   * Whether self-initiated incoming transfers are auto-approved by default.
+   *
    * @generated from field: bool defaultAutoApproveSelfInitiatedIncomingTransfers = 18;
    */
   defaultAutoApproveSelfInitiatedIncomingTransfers = false;
 
   /**
+   * The user or entity who created the badge collection.
+   *
    * @generated from field: string createdBy = 19;
    */
   createdBy = "";

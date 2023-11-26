@@ -6,7 +6,6 @@ const FLAG_TYPED_ARRAY = "FLAG_TYPED_ARRAY";
  *
  * You will call stringify before sending and parse on the receiving end.
  */
-
 export const parse = (str: string) => {
   return JSON.parse(str, function (_key, value) {
     // the reviver function looks for the typed array flag

@@ -10,7 +10,7 @@ export interface TxToSend {
 
 export enum BroadcastMode {
   Unspecified = 'BROADCAST_MODE_UNSPECIFIED',
-  // Block = 'BROADCAST_MODE_BLOCK',
+  // Block = 'BROADCAST_MODE_BLOCK', // No longer supported
   Sync = 'BROADCAST_MODE_SYNC',
   Async = 'BROADCAST_MODE_ASYNC',
 }

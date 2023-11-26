@@ -7,20 +7,27 @@ import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialM
 import { Message, proto3 } from "@bufbuild/protobuf";
 
 /**
+ *
  * uintRange is a range of IDs from some start to some end (inclusive).
  *
  * uintRanges are one of the core types used in the BitBadgesChain module.
- * They are used for evrything from badge IDs to time ranges to min / max balance amounts.
+ * They are used for everything from badge IDs to time ranges to min/max balance amounts.
+ *
+ * See the BitBadges documentation for more information.
  *
  * @generated from message badges.UintRange
  */
 export class UintRange extends Message<UintRange> {
   /**
+   * The starting value of the range (inclusive).
+   *
    * @generated from field: string start = 1;
    */
   start = "";
 
   /**
+   * The ending value of the range (inclusive).
+   *
    * @generated from field: string end = 2;
    */
   end = "";
@@ -55,27 +62,36 @@ export class UintRange extends Message<UintRange> {
 }
 
 /**
+ *
  * Balance represents the balance of a badge for a specific user.
  * The user amounts xAmount of a badge for the badgeID specified for the time ranges specified.
  *
- * Ex: User A owns x10 of badge IDs 1-10 from 1/1/2020 to 1/1/2021.
+ * Example: User A owns x10 of badge IDs 1-10 from 1/1/2020 to 1/1/2021.
  *
  * If times or badgeIDs have len > 1, then the user owns all badge IDs specified for all time ranges specified.
+ *
+ * See the BitBadges documentation for more information.
  *
  * @generated from message badges.Balance
  */
 export class Balance extends Message<Balance> {
   /**
+   * The amount of the badge owned by the user.
+   *
    * @generated from field: string amount = 1;
    */
   amount = "";
 
   /**
+   * The time ranges during which the user owns the badge.
+   *
    * @generated from field: repeated badges.UintRange ownershipTimes = 2;
    */
   ownershipTimes: UintRange[] = [];
 
   /**
+   * The badge IDs for which the user owns the badge.
+   *
    * @generated from field: repeated badges.UintRange badgeIds = 3;
    */
   badgeIds: UintRange[] = [];
@@ -111,35 +127,58 @@ export class Balance extends Message<Balance> {
 }
 
 /**
+ *
+ * MustOwnBadges represents a condition where a user must own specific badges
+ * to be approved to transfer.
+ *
+ * - collectionId: The ID of the badge collection for the badges that must be owned
+ * - amountRange: The range of badge amounts the user must own (min to max)
+ * - ownershipTimes: The time ranges during which the user must own the badges.
+ * - badgeIds: The badge IDs the user must own.
+ * - overrideWithCurrentTime: If true, auto override ownershipTimes with the current time.
+ * - mustOwnAll: If true, the user must own all specified badges; otherwise, owning any one for >= 1 millisecond is sufficient.
+ *
  * @generated from message badges.MustOwnBadges
  */
 export class MustOwnBadges extends Message<MustOwnBadges> {
   /**
+   * The ID of the badge collection.
+   *
    * @generated from field: string collectionId = 1;
    */
   collectionId = "";
 
   /**
+   * The range of badge amounts the user must own (min to max).
+   *
    * @generated from field: badges.UintRange amountRange = 2;
    */
   amountRange?: UintRange;
 
   /**
+   * The time ranges during which the user must own the badges.
+   *
    * @generated from field: repeated badges.UintRange ownershipTimes = 3;
    */
   ownershipTimes: UintRange[] = [];
 
   /**
+   * The badge IDs the user must own.
+   *
    * @generated from field: repeated badges.UintRange badgeIds = 4;
    */
   badgeIds: UintRange[] = [];
 
   /**
+   * If true, override ownershipTimes with the current time.
+   *
    * @generated from field: bool overrideWithCurrentTime = 5;
    */
   overrideWithCurrentTime = false;
 
   /**
+   * If true, the user must own all specified badges; otherwise, owning any is sufficient (>= 1 millisecond).
+   *
    * @generated from field: bool mustOwnAll = 6;
    */
   mustOwnAll = false;
@@ -174,64 +213,6 @@ export class MustOwnBadges extends Message<MustOwnBadges> {
 
   static equals(a: MustOwnBadges | PlainMessage<MustOwnBadges> | undefined, b: MustOwnBadges | PlainMessage<MustOwnBadges> | undefined): boolean {
     return proto3.util.equals(MustOwnBadges, a, b);
-  }
-}
-
-/**
- * InheritedBalances are a powerful feature of the BitBadges module.
- * They allow a colllection to inherit the balances from another collection.
- * Ex: Badges from Collection A inherits the balances from badges from Collection B.
- *
- * The badgeIds specified will inherit the balances from the parent collection and badges specified.
- * If the total number of parent badges == 1, then all the badgeIds will inherit the balance from that parent badge.
- * Otherwise, the total number of parent badges must equal the total number of badgeIds specified.
- * By total number, we mean the sum of the number of badgeIds in each UintRange.
- *
- * @generated from message badges.InheritedBalance
- */
-export class InheritedBalance extends Message<InheritedBalance> {
-  /**
-   * @generated from field: repeated badges.UintRange badgeIds = 1;
-   */
-  badgeIds: UintRange[] = [];
-
-  /**
-   * @generated from field: string parentCollectionId = 2;
-   */
-  parentCollectionId = "";
-
-  /**
-   * @generated from field: repeated badges.UintRange parentBadgeIds = 3;
-   */
-  parentBadgeIds: UintRange[] = [];
-
-  constructor(data?: PartialMessage<InheritedBalance>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.InheritedBalance";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "badgeIds", kind: "message", T: UintRange, repeated: true },
-    { no: 2, name: "parentCollectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "parentBadgeIds", kind: "message", T: UintRange, repeated: true },
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): InheritedBalance {
-    return new InheritedBalance().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): InheritedBalance {
-    return new InheritedBalance().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): InheritedBalance {
-    return new InheritedBalance().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: InheritedBalance | PlainMessage<InheritedBalance> | undefined, b: InheritedBalance | PlainMessage<InheritedBalance> | undefined): boolean {
-    return proto3.util.equals(InheritedBalance, a, b);
   }
 }
 

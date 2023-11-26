@@ -1,4 +1,4 @@
-import { COSMOS, ethToCosmos, solanaToCosmos } from "./converter";
+import { cosmosToEth, ethToCosmos, solanaToCosmos } from "./converter";
 import { Stringify } from "bitbadgesjs-proto";
 import { ethers } from "ethers";
 import { SupportedChain } from "./types/types";
@@ -66,7 +66,7 @@ export const s_BLANK_USER_INFO: BitBadgesUserInfo<string> = convertBitBadgesUser
 export function convertToCosmosAddress(address: string) {
   let bech32Address = '';
   try {
-    COSMOS.decoder(address);
+    cosmosToEth(address); //throws on failure
     bech32Address = address;
   } catch {
     if (ethers.utils.isAddress(address)) {
@@ -91,7 +91,7 @@ export function convertToCosmosAddress(address: string) {
  */
 export function getChainForAddress(address: string) {
   try {
-    COSMOS.decoder(address);
+    cosmosToEth(address); //throws on failure
     return SupportedChain.COSMOS;
   } catch {
     if (ethers.utils.isAddress(address)) {
@@ -148,7 +148,7 @@ export function isAddressValid(address: string, chain?: string) {
       break;
     case SupportedChain.COSMOS:
       try {
-        COSMOS.decoder(address);
+        cosmosToEth(address); //throws on failure
       } catch {
         isValidAddress = false;
       }

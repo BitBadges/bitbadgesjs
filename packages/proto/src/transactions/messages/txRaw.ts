@@ -5,6 +5,9 @@ import {
 } from '../../'
 import { AuthInfo, TxBody } from '../../proto/cosmos/tx/v1beta1/tx_pb'
 
+/**
+ * This function is used to create the raw transaction to be sent to the blockchain for EIP712 transactions.
+ */
 export function createTxRawEIP712(
   body: TxBody,
   authInfo: AuthInfo,

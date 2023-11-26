@@ -35,6 +35,7 @@ export enum SupportedChain {
   ETH = 'Ethereum',
   COSMOS = 'Cosmos',
   SOLANA = 'Solana',
+  UNKNOWN = 'Unknown',
 }
 
 /**

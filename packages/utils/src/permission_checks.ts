@@ -1,7 +1,8 @@
 import { ActionPermission, AddressMapping, Balance, BalancesActionPermission, TimedUpdatePermission, TimedUpdateWithBadgeIdsPermission, UintRange } from "bitbadgesjs-proto";
+import { getReservedAddressMapping } from "./addressMappings";
 import { GetFirstMatchOnly, UniversalPermissionDetails, getOverlapsAndNonOverlaps, universalRemoveOverlaps } from "./overlaps";
-import { castActionPermissionToUniversalPermission, castBalancesActionPermissionToUniversalPermission, castCollectionApprovalPermissionToUniversalPermission, castTimedUpdatePermissionToUniversalPermission, castTimedUpdateWithBadgeIdsPermissionToUniversalPermission } from "./permissions";
-import { CollectionApprovalPermissionWithDetails } from "./types/collections";
+import { castActionPermissionToUniversalPermission, castBalancesActionPermissionToUniversalPermission, castCollectionApprovalPermissionToUniversalPermission, castTimedUpdatePermissionToUniversalPermission, castTimedUpdateWithBadgeIdsPermissionToUniversalPermission, castUserIncomingApprovalPermissionToCollectionApprovalPermission, castUserOutgoingApprovalPermissionToCollectionApprovalPermission } from "./permissions";
+import { CollectionApprovalPermissionWithDetails, UserIncomingApprovalPermissionWithDetails, UserOutgoingApprovalPermissionWithDetails } from "./types/collections";
 import { searchUintRangesForId } from "./uintRanges";
 
 interface CompareAndGetUpdateCombosToCheckFn {
@@ -127,6 +128,8 @@ function checkNotForbidden(permission: UniversalPermissionDetails): Error | null
 
 /**
  * @category Validate Permissions
+ *
+ * Checks an ActionPermission to see if it is currently valid and not forbidden for the current time
  */
 export function checkActionPermission(permissions: ActionPermission<bigint>[]): Error | null {
   const castedPermissions = castActionPermissionToUniversalPermission(permissions);
@@ -145,6 +148,8 @@ export function checkActionPermission(permissions: ActionPermission<bigint>[]): 
 
 /**
  * @category Validate Permissions
+ *
+ * Checks a TimedUpdatePermission to see if it is currently valid and not forbidden for the current time and provided timeline times
  */
 export function checkTimedUpdatePermission(
   timelineTimes: UintRange<bigint>[],
@@ -178,6 +183,9 @@ export function checkTimedUpdatePermission(
 
 /**
  * @category Validate Permissions
+ *
+ * Checks a BalancesActionPermission to see if it is currently valid and not forbidden for the current time and provided balances
+ *
  */
 export function checkBalancesActionPermission(
   balances: Balance<bigint>[],
@@ -216,6 +224,8 @@ export function checkBalancesActionPermission(
 
 /**
  * @category Validate Permissions
+ *
+ * Checks a TimedUpdateWithBadgeIdsPermission to see if it is currently valid and not forbidden for the current time and provided timeline times and badge ids
  */
 export function checkTimedUpdateWithBadgeIdsPermission(
   details: {
@@ -258,6 +268,8 @@ export function checkTimedUpdateWithBadgeIdsPermission(
 
 /**
  * @category Validate Permissions
+ *
+ * Checks a CollectionApprovalPermission to see if it is currently valid and not forbidden for the current time and provided transfer details.
  */
 export function checkCollectionApprovalPermission(
   details: {
@@ -313,43 +325,69 @@ export function checkCollectionApprovalPermission(
 
 /**
  * @category Validate Permissions
+ *
+ * Checks a UserOutgoingApprovalPermission to see if it is currently valid and not forbidden for the current time and provided transfer details.
  */
-// export function checkUserOutgoingApprovalPermission(
-//   detailsToCheck: UniversalPermissionDetails[],
-//   permissions: UserOutgoingApprovalPermission<bigint>[],
-//   managerAddress: string
-// ): Error | null {
-//   const castedPermissions = castUserOutgoingApprovalPermissionToUniversalPermission(
-//     managerAddress,
-//     permissions
-//   );
-//   const permissionDetails = GetFirstMatchOnly(castedPermissions);
+export function checkUserOutgoingApprovalPermission(
+  detailsToCheck: {
+    timelineTimes: UintRange<bigint>[],
+    badgeIds: UintRange<bigint>[],
+    ownershipTimes: UintRange<bigint>[],
+    transferTimes: UintRange<bigint>[],
+    toMapping: AddressMapping,
+    initiatedByMapping: AddressMapping,
+    amountTrackerIdMapping: AddressMapping,
+    challengeTrackerIdMapping: AddressMapping,
+  }[],
+  permissions: UserOutgoingApprovalPermissionWithDetails<bigint>[],
+  userAddress: string
+): Error | null {
+  const newDetails = detailsToCheck.map(x => {
+    return {
+      ...x,
+      fromMapping: getReservedAddressMapping(userAddress),
+    }
+  })
 
-//   return checkNotForbiddenForAllOverlaps(
-//     permissionDetails,
-//     detailsToCheck
-//   );
-// }
+  const castedPermissions = castUserOutgoingApprovalPermissionToCollectionApprovalPermission(
+    permissions,
+    userAddress
+  );
+  return checkCollectionApprovalPermission(newDetails, castedPermissions);
+}
 
 /**
  * @category Validate Permissions
+ *
+ * Checks a UserIncomingApprovalPermission to see if it is currently valid and not forbidden for the current time and provided transfer details.
  */
-// export function checkUserIncomingApprovalPermission(
-//   detailsToCheck: UniversalPermissionDetails[],
-//   permissions: UserIncomingApprovalPermission<bigint>[],
-//   managerAddress: string
-// ): Error | null {
-//   const castedPermissions = castUserIncomingApprovalPermissionToUniversalPermission(
-//     managerAddress,
-//     permissions
-//   );
-//   const permissionDetails = GetFirstMatchOnly(castedPermissions);
+export function checkUserIncomingApprovalPermission(
+  detailsToCheck: {
+    timelineTimes: UintRange<bigint>[],
+    badgeIds: UintRange<bigint>[],
+    ownershipTimes: UintRange<bigint>[],
+    transferTimes: UintRange<bigint>[],
+    fromMapping: AddressMapping,
+    initiatedByMapping: AddressMapping,
+    amountTrackerIdMapping: AddressMapping,
+    challengeTrackerIdMapping: AddressMapping,
+  }[],
+  permissions: UserIncomingApprovalPermissionWithDetails<bigint>[],
+  userAddress: string
+): Error | null {
+  const newDetails = detailsToCheck.map(x => {
+    return {
+      ...x,
+      toMapping: getReservedAddressMapping(userAddress),
+    }
+  })
 
-//   return checkNotForbiddenForAllOverlaps(
-//     permissionDetails,
-//     detailsToCheck
-//   );
-// }
+  const castedPermissions = castUserIncomingApprovalPermissionToCollectionApprovalPermission(
+    permissions,
+    userAddress
+  );
+  return checkCollectionApprovalPermission(newDetails, castedPermissions);
+}
 
 /**
  * @category Validate Permissions

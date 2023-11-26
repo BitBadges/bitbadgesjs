@@ -8,23 +8,30 @@ import { Message, proto3 } from "@bufbuild/protobuf";
 import { UintRange } from "./balances_pb.js";
 
 /**
- * This defines the metadata for specific badge IDs.
- * This should be interpreted according to the collection standard.
+ *
+ * This message defines the metadata for specific badge IDs.
+ * The interpretation of this metadata should follow the collection standard.
  *
  * @generated from message badges.BadgeMetadata
  */
 export class BadgeMetadata extends Message<BadgeMetadata> {
   /**
+   * The URI (Uniform Resource Identifier) associated with the badge metadata.
+   *
    * @generated from field: string uri = 1;
    */
   uri = "";
 
   /**
+   * Custom data or additional information related to the badge metadata.
+   *
    * @generated from field: string customData = 2;
    */
   customData = "";
 
   /**
+   * The badge IDs to which this metadata applies.
+   *
    * @generated from field: repeated badges.UintRange badgeIds = 3;
    */
   badgeIds: UintRange[] = [];
@@ -60,18 +67,23 @@ export class BadgeMetadata extends Message<BadgeMetadata> {
 }
 
 /**
- * This defines the metadata for the collection.
- * This should be interpreted according to the collection standard.
+ *
+ * This message defines the metadata for the collection.
+ * The interpretation of this metadata should follow the collection standard.
  *
  * @generated from message badges.CollectionMetadata
  */
 export class CollectionMetadata extends Message<CollectionMetadata> {
   /**
+   * The URI (Uniform Resource Identifier) associated with the collection metadata.
+   *
    * @generated from field: string uri = 1;
    */
   uri = "";
 
   /**
+   * Custom data or additional information related to the collection metadata.
+   *
    * @generated from field: string customData = 2;
    */
   customData = "";
@@ -106,18 +118,23 @@ export class CollectionMetadata extends Message<CollectionMetadata> {
 }
 
 /**
- * This defines the metadata for the off-chain balances (if using this balances type).
- * This should be interpreted according to the collection standard.
+ *
+ * This message defines the metadata for off-chain balances (if using this balances type).
+ * The interpretation of this metadata should follow the collection standard.
  *
  * @generated from message badges.OffChainBalancesMetadata
  */
 export class OffChainBalancesMetadata extends Message<OffChainBalancesMetadata> {
   /**
+   * The URI (Uniform Resource Identifier) associated with the off-chain balances metadata.
+   *
    * @generated from field: string uri = 1;
    */
   uri = "";
 
   /**
+   * Custom data or additional information related to the off-chain balances metadata.
+   *
    * @generated from field: string customData = 2;
    */
   customData = "";

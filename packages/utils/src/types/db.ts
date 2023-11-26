@@ -38,7 +38,6 @@ export interface Identified {
  * @property {BadgeMetadataTimeline[]} badgeMetadataTimeline - The badge metadata timeline
  * @property {string} balancesType - The type of balances (i.e. "Standard", "Off-Chain", "Inherited")
  * @property {OffChainBalancesMetadataTimeline[]} offChainBalancesMetadataTimeline - The off-chain balances metadata timeline
-//  * @property {NumberType} inheritedCollectionId - The inherited collection ID
  * @property {CustomDataTimeline[]} customDataTimeline - The custom data timeline
  * @property {ManagerTimeline[]} managerTimeline - The manager timeline
  * @property {CollectionPermissions} collectionPermissions - The collection permissions
@@ -47,9 +46,13 @@ export interface Identified {
  * @property {IsArchivedTimeline[]} isArchivedTimeline - The is archived timeline
  * @property {UserOutgoingApproval[]} defaultUserOutgoingApprovals - The default user approved outgoing transfers
  * @property {UserIncomingApproval[]} defaultUserIncomingApprovals - The default user approved incoming transfers timeline
+ * @property {boolean} defaultAutoApproveSelfInitiatedOutgoingTransfers - Whether or not to auto approve self-initiated outgoing transfers
+ * @property {boolean} defaultAutoApproveSelfInitiatedIncomingTransfers - Whether or not to auto approve self-initiated incoming transfers
  * @property {UserPermissions} defaultUserPermissions - The default user permissions
  * @property {string} createdBy - The cosmos address of the user who created this collection
  * @property {NumberType} createdBlock - The block number when this collection was created
+ * @property {NumberType} createdTimestamp - The timestamp when this collection was created (milliseconds since epoch)
+ * @property {Object[]} updateHistory - The update history of this collection
  */
 export interface CollectionInfoBase<T extends NumberType> {
   collectionId: T;
@@ -57,7 +60,6 @@ export interface CollectionInfoBase<T extends NumberType> {
   badgeMetadataTimeline: BadgeMetadataTimeline<T>[];
   balancesType: "Standard" | "Off-Chain" | "Inherited";
   offChainBalancesMetadataTimeline: OffChainBalancesMetadataTimeline<T>[];
-  // inheritedCollectionId: T;
   customDataTimeline: CustomDataTimeline<T>[];
   managerTimeline: ManagerTimeline<T>[];
   collectionPermissions: CollectionPermissions<T>;
@@ -139,14 +141,18 @@ export function convertCollectionDoc<T extends NumberType, U extends NumberType>
  * @property {string} publicKey - The public key of the account
  * @property {NumberType} accountNumber - The account number of the account
  * @property {SupportedChain} chain - The chain of the account
- * @property {NumberType} sequence - The sequence of the account. Note we currently do not store sequence in the DB (it is dynamically fetched).
  * @property {string} cosmosAddress - The Cosmos address of the account
  * @property {string} ethAddress - The Eth address of the account
  * @property {string} solAddress - The Solana address of the account
+ *
+ * @property {NumberType} sequence - The sequence of the account. Note we currently do not store sequence in the DB (it is dynamically fetched).
  * @property {string} [username] - The username of the account
  * @property {CosmosCoin} [balance] - The balance of the account ($BADGE gas token balance not a specific badge)
+ *
  */
 export interface AccountInfoBase<T extends NumberType> {
+  //stored in DB and cached for fast access and permanence
+
   publicKey: string
   chain: SupportedChain
   cosmosAddress: string
@@ -154,8 +160,8 @@ export interface AccountInfoBase<T extends NumberType> {
   solAddress: string
   accountNumber: T
 
+  //dynamically fetched
 
-  username?: string
   sequence?: T
   balance?: CosmosCoin<T>
 }
@@ -190,6 +196,31 @@ export function convertAccountDoc<T extends NumberType, U extends NumberType>(it
   })
 }
 
+
+/**
+ * CustomLinks are custom links that can be added to a profile.
+ *
+ * @category API / Indexer
+ */
+export interface CustomLink {
+  title: string,
+  url: string,
+  image: string,
+}
+
+/**
+ * CustomPage is a custom page that can be added to a profile.
+ * Custom pages allow you to group, sort, and display badges in a custom way.
+ */
+export interface CustomPage<T extends NumberType> {
+  title: string,
+  description: string,
+  badges: {
+    collectionId: T,
+    badgeIds: UintRange<T>[],
+  }[]
+}
+
 /**
  * ProfileInfoBase is the type of document stored in the profile database.
  * This is used for customizable profile info (not stored on the blockchain).
@@ -206,8 +237,15 @@ export function convertAccountDoc<T extends NumberType, U extends NumberType>(it
  * @property {string} github - The GitHub username of the account
  * @property {string} telegram - The Telegram username of the account
  * @property {string} readme - The readme of the account
+ *
  * @property {string} profilePicUrl - The profile picture URL of the account
  * @property {string} username - The username of the account
+ *
+ * @property {SupportedChain} latestSignedInChain - The latest chain the user signed in with
+ *
+ * @property {Object[]} hiddenBadges - The hidden badges of the account
+ * @property {CustomLink[]} customLinks - The custom links of the account
+ * @property {CustomPage[]} customPages - The custom badge pages of the account's portfolio
  *
  *
  * @remarks
@@ -229,31 +267,13 @@ export interface ProfileInfoBase<T extends NumberType> {
   telegram?: string
   readme?: string
 
-  customLinks?: {
-    title: string,
-    url: string,
-    image: string,
-  }[]
-
-  onlyShowApproved?: boolean
-  shownBadges?: {
-    collectionId: T,
-    badgeIds: UintRange<T>[],
-  }[],
-
+  customLinks?: CustomLink[]
   hiddenBadges?: {
     collectionId: T,
     badgeIds: UintRange<T>[],
   }[],
 
-  customPages?: {
-    title: string,
-    description: string,
-    badges: {
-      collectionId: T,
-      badgeIds: UintRange<T>[],
-    }[]
-  }[]
+  customPages?: CustomPage<T>[],
 
   profilePicUrl?: string
   username?: string
@@ -279,10 +299,6 @@ export function convertProfileInfo<T extends NumberType, U extends NumberType>(i
     ...item,
     seenActivity: item.seenActivity ? convertFunction(item.seenActivity) : undefined,
     createdAt: item.createdAt ? convertFunction(item.createdAt) : undefined,
-    shownBadges: item.shownBadges ? item.shownBadges.map((shownBadge) => ({
-      collectionId: convertFunction(shownBadge.collectionId),
-      badgeIds: shownBadge.badgeIds.map((badgeId) => convertUintRange(badgeId, convertFunction)),
-    })) : undefined,
     hiddenBadges: item.hiddenBadges ? item.hiddenBadges.map((hiddenBadge) => ({
       collectionId: convertFunction(hiddenBadge.collectionId),
       badgeIds: hiddenBadge.badgeIds.map((badgeId) => convertUintRange(badgeId, convertFunction)),
@@ -326,6 +342,7 @@ export interface IndexerStatus {
  * @property {NumberType} [lastFetchedAt] - The timestamp of when this metadata was last fetched (milliseconds since epoch)
  * @property {string} [error] - The error message if this metadata failed to be fetched
  * @property {NumberType} [deletedAt] - The timestamp of when this document was deleted (milliseconds since epoch)
+ * @property {NumberType} [nextFetchTime] - The timestamp of when this document should be fetched next (milliseconds since epoch)
  */
 export interface QueueInfoBase<T extends NumberType> {
   uri: string,
@@ -407,9 +424,9 @@ export function convertLatestBlockStatus<T extends NumberType, U extends NumberT
  * @typedef {Object} StatusDoc
  * @property {LatestBlockStatus} block - The latest synced block status (i.e. height, txIndex, timestamp)
  * @property {NumberType} nextCollectionId - The next collection ID to be used
- * @property {QueueDoc[]} queue - The queue of metadata to be fetched / handled
  * @property {NumberType} gasPrice - The current gas price based on the average of the lastXGasPrices
  * @property {(NumberType)[]} lastXGasPrices - The last X gas prices
+ * @property {(NumberType)[]} lastXGasLimits - The last X gas limits
  */
 export interface StatusInfoBase<T extends NumberType> {
   block: LatestBlockStatus<T>
@@ -435,7 +452,6 @@ export function convertStatusInfo<T extends NumberType, U extends NumberType>(it
     ...item,
     block: convertLatestBlockStatus(item.block, convertFunction),
     nextCollectionId: convertFunction(item.nextCollectionId),
-    // gasPrice: convertFunction(item.gasPrice),
     lastXGasLimits: item.lastXGasLimits.map((gasLimit) => convertFunction(gasLimit)),
     lastXGasAmounts: item.lastXGasAmounts.map((gasAmount) => convertFunction(gasAmount)),
   })
@@ -455,6 +471,16 @@ export function convertStatusDoc<T extends NumberType, U extends NumberType>(ite
  * AddressMapping is the type of document stored in the address mappings database.
  *
  * Docs are stored by mapping IDs. Note that reserved mappings should be obtained from getReservedAddressMapping.
+ *
+ * @category API / Indexer
+ * @typedef {Object} AddressMapping
+ *
+ * @property {string} createdBy - The cosmos address of the user who created this mapping
+ * @property {Object[]} updateHistory - The update history of this mapping
+ * @property {NumberType} createdBlock - The block number when this mapping was created
+ * @property {NumberType} lastUpdated - The timestamp of when this mapping was last updated (milliseconds since epoch)
+ * @property {Object} [nsfw] - The NSFW reason if this mapping is NSFW
+ * @property {Object} [reported] - The reported reason if this mapping is reported
  */
 export interface AddressMappingInfoBase<T extends NumberType> extends AddressMapping {
   createdBy: string
@@ -509,8 +535,6 @@ export function convertAddressMappingDoc<T extends NumberType, U extends NumberT
  * BalanceInfoBase is the type of document stored in the balances database
  * Partitioned database by cosmosAddress (e.g. 1-cosmosx..., 1-cosmosy..., and so on represent the balances documents for collection 1 and user with cosmos address x and y respectively)
  *
- *
- *
  * @category API / Indexer
  * @typedef {Object} BalanceInfoBase
  * @extends {UserBalance}
@@ -523,6 +547,9 @@ export function convertAddressMappingDoc<T extends NumberType, U extends NumberT
  * @property {NumberType} [fetchedAt] - The timestamp of when the off-chain balances were fetched (milliseconds since epoch). For BitBadges indexer, we only populate this for Mint and Total docs.
  * @property {NumberType} [fetchedAtBlock] - The block number of when the off-chain balances were fetched. For BitBadges indexer, we only populate this for Mint and Total docs.
  * @property {boolean} [isPermanent] - True if the off-chain balances are using permanent storage
+ * @property {string} [contentHash] - The content hash of the off-chain balances
+ *
+ * @property {Object[]} updateHistory - The update history of this balance
  */
 export interface BalanceInfoBase<T extends NumberType> extends UserBalance<T> {
 
@@ -584,6 +611,13 @@ export function convertBalanceDoc<T extends NumberType, U extends NumberType>(it
 
 /**
  * @category API / Indexer
+ *
+ * @typedef {Object} BalanceInfoWithDetails
+ * @extends {BalanceInfo}
+ *
+ * @property {UserOutgoingApprovalWithDetails[]} outgoingApprovals - The outgoing approvals with details like metadata and address mappings
+ * @property {UserIncomingApprovalWithDetails[]} incomingApprovals - The incoming approvals with details like metadata and address mappings
+ * @property {UserPermissionsWithDetails} userPermissions - The user permissions with details like metadata and address mappings
  */
 export interface BalanceInfoWithDetails<T extends NumberType> extends BalanceInfo<T> {
   outgoingApprovals: UserOutgoingApprovalWithDetails<T>[];
@@ -609,17 +643,13 @@ export function convertBalanceInfoWithDetails<T extends NumberType, U extends Nu
  *
  * @category API / Indexer
  * @typedef {Object} PasswordInfoBase
- * @property {string} password - The password or code
- * @property {string[]} codes - The list of codes
  *
- * @property {NumberType} currCode - The current code idx
  * @property {{[cosmosAddress: string]: NumberType}} claimedUsers - The list of users that have claimed this password
  * @property {string} cid - The CID of the password document
  * @property {boolean} docClaimedByCollection - True if the password document is claimed by the collection
- * @property {NumberType} claimId - The claim ID of the password document
  * @property {NumberType} collectionId - The collection ID of the password document
- * @property {NumberType} challengeId - The challenge ID of the password document
- * @property {boolean} isHashed - True if the codes / password are already hashed
+ * @property {string} createdBy - The cosmos address of the user who created this password
+ * @property {ChallengeDetails} [challengeDetails] - The challenge details of the password
  */
 export interface PasswordInfoBase<T extends NumberType> {
   cid: string
@@ -669,6 +699,14 @@ export function convertPasswordDoc<T extends NumberType, U extends NumberType>(i
  * This is used to alert users of a claim that has been made for them.
  *
  * @category API / Indexer
+ *
+ *@typedef {Object} ClaimAlertInfoBase
+ *
+ * @property {string} code - The code of the claim alert
+ * @property {string[]} cosmosAddresses - The cosmos addresses of the users that have been alerted
+ * @property {NumberType} collectionId - The collection ID of the claim alert
+ * @property {NumberType} createdTimestamp - The timestamp of when this claim alert was created (milliseconds since epoch)
+ * @property {string} [message] - The message of the claim alert
  */
 export interface ClaimAlertInfoBase<T extends NumberType> {
   code?: string;
@@ -754,12 +792,14 @@ export interface LeavesDetails {
  * @typedef {Object} ChallengeDetails
  * @extends {Challenge}
  *
- * @property {LeavesDetails} leaves - The leaves of the Merkle tree with accompanying details
- * @property {boolean} areLeavesHashed - True if the leaves are hashed
- * @property {(number)[]} usedLeafIndices - The indices of the leaves that have been used
+ * @property {LeavesDetails} leavesDetails - The leaves of the Merkle tree with accompanying details
  * @property {MerkleTree} tree - The Merkle tree
  * @property {MerkleTreeJsOptions} treeOptions - The Merkle tree options for how to build it
  * @property {NumberType} numLeaves - The number of leaves in the Merkle tree. This takes priority over leaves.length if defined (used for buffer time between leaf generation and leaf length select)
+ *
+ * @property {NumberType} currCode - The current code being used for the challenge. Used behind the scenes
+ * @property {boolean} hasPassword - True if the challenge has a password
+ * @property {string} password - The password of the challenge. Used behind the scenes
  */
 export interface ChallengeDetails<T extends NumberType> {
   leavesDetails: LeavesDetails
@@ -791,7 +831,6 @@ export function convertChallengeDetails<T extends NumberType, U extends NumberTy
  * @typedef {Object} ApprovalsTrackerInfoBase
  * @property {NumberType} numTransfers - The number of transfers. Is an incrementing tally.
  * @property {Balance[]} amounts - A tally of the amounts transferred for this approval.
- * @property {string} trackerType - The type of tracker (i.e. "overall", "to", "from", "initiatedBy")
  */
 export interface ApprovalsTrackerInfoBase<T extends NumberType> extends AmountTrackerIdDetails<T> {
   numTransfers: T;
@@ -864,10 +903,10 @@ export function convertChallengeTrackerIdDetails<T extends NumberType, U extends
  * @typedef {Object} MerkleChallengeInfoBase
  *
  * @property {NumberType} collectionId - The collection ID
- * @property {NumberType} claimId - The claim ID
- * @property {NumberType} totalClaimsProcessed - The total number of claims processed for this collection
- * @property {{[cosmosAddress: string]: number}} claimsPerAddressCount - A running count for the number of claims processed for each address
- * @property {(number)[][]} usedLeafIndices - The used leaf indices for each challenge. A leaf index is the leaf location in Merkle tree
+ * @property {string} challengeId - The challenge ID
+ * @property {string} challengeLevel - The challenge level (i.e. "collection", "incoming", "outgoing")
+ * @property {string} approverAddress - The approver address (leave blank if challengeLevel = "collection")
+ * @property {(number)[]} usedLeafIndices - The used leaf indices for each challenge. A leaf index is the leaf location in the bottommost layer of the Merkle tree
  */
 export interface MerkleChallengeInfoBase<T extends NumberType> {
   collectionId: T;
@@ -910,6 +949,13 @@ export function convertMerkleChallengeDoc<T extends NumberType, U extends Number
 
 /**
  * @category API / Indexer
+ *
+ * @typedef {Object} MerkleChallengeIdDetails
+ *
+ * @property {NumberType} collectionId - The collection ID
+ * @property {string} challengeId - The challenge ID
+ * @property {string} challengeLevel - The challenge level (i.e. "collection", "incoming", "outgoing")
+ * @property {string} approverAddress - The approver address (leave blank if challengeLevel = "collection")
  */
 export interface MerkleChallengeIdDetails<T extends NumberType> {
   collectionId: T;
@@ -935,7 +981,7 @@ export function convertMerkleChallengeIdDetails<T extends NumberType, U extends 
  * @typedef {Object} MerkleChallengeWithDetails
  * @extends {MerkleChallengeDoc}
  *
- * @property {ApprovalInfoDetails} details - The details of the claim
+ * @property {ApprovalInfoDetails} details - The details of the claim / approval
  */
 export interface MerkleChallengeWithDetails<T extends NumberType> extends MerkleChallenge<T> {
   details?: ApprovalInfoDetails<T>
@@ -965,7 +1011,7 @@ export function convertMerkleChallengeWithDetails<T extends NumberType, U extend
  * @property {string} description - The description of the claim. This describes how to earn and claim the badge.
  * @property {boolean} hasPassword - True if the claim has a password
  * @property {string} password - The password of the claim (if it has one)
- * @property {ChallengeDetails[]} challenges - The list of challenges for this claim (with extra helper details)
+ * @property {ChallengeDetails[]} challengeDetails - The challenge details of the claim / approval
  */
 export interface ApprovalInfoDetails<T extends NumberType> {
   name: string;
@@ -998,7 +1044,6 @@ export function convertApprovalInfoDetails<T extends NumberType, U extends Numbe
  * @property {NumberType} fetchedAtBlock - The block the document was fetched
  * @property {"ApprovalInfo" | "Metadata" | "Balances"} db - The type of content fetched. This is used for querying purposes
  * @property {boolean} isPermanent - True if the document is permanent (i.e. fetched from a permanent URI like IPFS)
- * @property {string} uri - The URI of the document
  */
 export interface FetchInfoBase<T extends NumberType> {
   content?: Metadata<T> | ApprovalInfoDetails<T> | OffChainBalancesMap<T>
@@ -1041,6 +1086,10 @@ export function convertFetchDoc<T extends NumberType, U extends NumberType>(item
 
 /**
  * @category API / Indexer
+ *
+ * @typedef {Object} RefreshInfoBase
+ * @property {NumberType} collectionId - The collection ID
+ * @property {NumberType} refreshRequestTime - The time the refresh was requested (Unix timestamp in milliseconds)
  */
 export interface RefreshInfoBase<T extends NumberType> {
   collectionId: T
@@ -1087,6 +1136,11 @@ export interface ErrorDoc {
 
 /**
  * @category API / Indexer
+ *
+ * @typedef {Object} AirdropInfoBase
+ * @property {boolean} airdropped - True if the airdrop has been completed
+ * @property {NumberType} timestamp - The timestamp of when the airdrop was completed (milliseconds since epoch)
+ * @property {string} [hash] - The hash of the airdrop transaction
  */
 export interface AirdropInfoBase<T extends NumberType> {
   airdropped: boolean
@@ -1124,6 +1178,9 @@ export function convertAirdropDoc<T extends NumberType, U extends NumberType>(it
 
 /**
  * @category API / Indexer
+ *
+ * @typedef {Object} IPFSTotalsInfoBase
+ * @property {NumberType} bytesUploaded - The total bytes uploaded
  */
 export interface IPFSTotalsInfoBase<T extends NumberType> {
   bytesUploaded: T
@@ -1159,6 +1216,12 @@ export function convertIPFSTotalsDoc<T extends NumberType, U extends NumberType>
 
 /**
  * @category API / Indexer
+ *
+ * @typedef {Object} ComplianceInfoBase
+ * @property {Object} badges - The badges that are NSFW or reported
+ * @property {Object} addressMappings - The address mappings that are NSFW or reported
+ * @property {Object} accounts - The accounts that are NSFW or reported
+ * 
  */
 export interface ComplianceInfoBase<T extends NumberType> {
   badges: {

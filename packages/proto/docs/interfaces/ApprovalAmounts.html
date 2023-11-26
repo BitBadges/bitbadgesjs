@@ -16,9 +16,11 @@
 <li><a href="ApprovalAmounts.html">ApprovalAmounts</a></li></ul>
 <h1>Interface ApprovalAmounts&lt;T&gt;</h1></div>
 <section class="tsd-panel tsd-comment">
-<div class="tsd-comment tsd-typography"><p>ApprovalAmounts represents the maximum approved amounts for the badge IDs of this approval.
+<div class="tsd-comment tsd-typography"><p>ApprovalAmounts represents the maximum approved amounts for the badge IDs / ownership times of this approval.
 Can be set to 0 to represent an unlimited amount is approved.
-Note that we only track the approval amounts if the approval is defined and not unlimited. Otherwise, we do not track the respective approval amount.</p>
+If set to non-zero value, we track the running tally of the amount approved for each badge ID / ownership time.
+Once it reaches the max, no more transfers are allowed.</p>
+<p>Note that we only track the approval amounts if the approval is defined and not unlimited. If it is unlimited, we do not tally.</p>
 </div>
 <div class="tsd-comment tsd-typography"></div></section> 
 <section class="tsd-panel">
@@ -31,7 +33,7 @@ Note that we only track the approval amounts if the approval is defined and not 
 <ul class="tsd-hierarchy">
 <li><span class="target">ApprovalAmounts</span></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/proto-types/badges/typeutils/approvals.ts#L248">proto-types/badges/typeutils/approvals.ts:248</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/proto-types/badges/typeutils/approvals.ts#L238">proto-types/badges/typeutils/approvals.ts:238</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-index-accordion" open><summary class="tsd-accordion-summary tsd-index-summary">
@@ -53,7 +55,7 @@ Note that we only track the approval amounts if the approval is defined and not 
 </div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/proto-types/badges/typeutils/approvals.ts#L249">proto-types/badges/typeutils/approvals.ts:249</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/proto-types/badges/typeutils/approvals.ts#L239">proto-types/badges/typeutils/approvals.ts:239</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="perFromAddressApprovalAmount" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>per<wbr/>From<wbr/>Address<wbr/>Approval<wbr/>Amount</span><a href="#perFromAddressApprovalAmount" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">per<wbr/>From<wbr/>Address<wbr/>Approval<wbr/>Amount</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type tsd-kind-type-parameter">T</span></div>
@@ -61,7 +63,7 @@ Note that we only track the approval amounts if the approval is defined and not 
 </div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/proto-types/badges/typeutils/approvals.ts#L251">proto-types/badges/typeutils/approvals.ts:251</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/proto-types/badges/typeutils/approvals.ts#L241">proto-types/badges/typeutils/approvals.ts:241</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="perInitiatedByAddressApprovalAmount" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>per<wbr/>Initiated<wbr/>By<wbr/>Address<wbr/>Approval<wbr/>Amount</span><a href="#perInitiatedByAddressApprovalAmount" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">per<wbr/>Initiated<wbr/>By<wbr/>Address<wbr/>Approval<wbr/>Amount</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type tsd-kind-type-parameter">T</span></div>
@@ -69,7 +71,7 @@ Note that we only track the approval amounts if the approval is defined and not 
 </div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/proto-types/badges/typeutils/approvals.ts#L252">proto-types/badges/typeutils/approvals.ts:252</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/proto-types/badges/typeutils/approvals.ts#L242">proto-types/badges/typeutils/approvals.ts:242</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="perToAddressApprovalAmount" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>per<wbr/>To<wbr/>Address<wbr/>Approval<wbr/>Amount</span><a href="#perToAddressApprovalAmount" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">per<wbr/>To<wbr/>Address<wbr/>Approval<wbr/>Amount</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type tsd-kind-type-parameter">T</span></div>
@@ -77,7 +79,7 @@ Note that we only track the approval amounts if the approval is defined and not 
 </div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/28d9986/packages/proto/src/proto-types/badges/typeutils/approvals.ts#L250">proto-types/badges/typeutils/approvals.ts:250</a></li></ul></aside></section></section></div>
+<li>Defined in <a href="https://github.com/bitbadges/bitbadgesjs/blob/7aafd436/packages/proto/src/proto-types/badges/typeutils/approvals.ts#L240">proto-types/badges/typeutils/approvals.ts:240</a></li></ul></aside></section></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -128,8 +130,6 @@ Note that we only track the approval amounts if the approval is defined and not 
 <li><a href="Fee.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Fee</span></a></li>
 <li><a href="IncomingApprovalCriteria.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Incoming<wbr/>Approval<wbr/>Criteria</span></a></li>
 <li><a href="IncrementedBalances.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Incremented<wbr/>Balances</span></a></li>
-<li><a href="InheritedBalance.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Inherited<wbr/>Balance</span></a></li>
-<li><a href="InheritedBalancesTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Inherited<wbr/>Balances<wbr/>Timeline</span></a></li>
 <li><a href="IsArchivedTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Is<wbr/>Archived<wbr/>Timeline</span></a></li>
 <li><a href="ManagerTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Manager<wbr/>Timeline</span></a></li>
 <li><a href="ManualBalances.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Manual<wbr/>Balances</span></a></li>
@@ -203,8 +203,6 @@ Note that we only track the approval amounts if the approval is defined and not 
 <li><a href="../functions/convertFromProtoToMsgUpdateUserApprovals.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>From<wbr/>Proto<wbr/>To<wbr/>Msg<wbr/>Update<wbr/>User<wbr/>Approvals</span></a></li>
 <li><a href="../functions/convertIncomingApprovalCriteria.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>Incoming<wbr/>Approval<wbr/>Criteria</span></a></li>
 <li><a href="../functions/convertIncrementedBalances.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>Incremented<wbr/>Balances</span></a></li>
-<li><a href="../functions/convertInheritedBalance.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>Inherited<wbr/>Balance</span></a></li>
-<li><a href="../functions/convertInheritedBalancesTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>Inherited<wbr/>Balances<wbr/>Timeline</span></a></li>
 <li><a href="../functions/convertIsArchivedTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>Is<wbr/>Archived<wbr/>Timeline</span></a></li>
 <li><a href="../functions/convertManagerTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>Manager<wbr/>Timeline</span></a></li>
 <li><a href="../functions/convertManualBalances.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>convert<wbr/>Manual<wbr/>Balances</span></a></li>
@@ -261,30 +259,7 @@ Note that we only track the approval amounts if the approval is defined and not 
 <li><a href="../functions/createWeb3Extension.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>create<wbr/>Web3<wbr/>Extension</span></a></li>
 <li><a href="../functions/createWeb3ExtensionSolana.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>create<wbr/>Web3<wbr/>Extension<wbr/>Solana</span></a></li>
 <li><a href="../functions/deepCopy.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>deep<wbr/>Copy</span></a></li>
-<li><a href="../functions/getWrappedBadgeIds.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Badge<wbr/>Ids</span></a></li>
-<li><a href="../functions/getWrappedBadgeMetadata.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Badge<wbr/>Metadata</span></a></li>
-<li><a href="../functions/getWrappedBadgeMetadataTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Badge<wbr/>Metadata<wbr/>Timeline</span></a></li>
-<li><a href="../functions/getWrappedBalances.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Balances</span></a></li>
-<li><a href="../functions/getWrappedBalancesActionPermission.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Balances<wbr/>Action<wbr/>Permission</span></a></li>
-<li><a href="../functions/getWrappedCollectionApprovalPermission.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Collection<wbr/>Approval<wbr/>Permission</span></a></li>
-<li><a href="../functions/getWrappedCollectionApprovals.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Collection<wbr/>Approvals</span></a></li>
-<li><a href="../functions/getWrappedCollectionMetadataTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Collection<wbr/>Metadata<wbr/>Timeline</span></a></li>
-<li><a href="../functions/getWrappedCollectionPermissions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Collection<wbr/>Permissions</span></a></li>
-<li><a href="../functions/getWrappedCustomDataTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Custom<wbr/>Data<wbr/>Timeline</span></a></li>
-<li><a href="../functions/getWrappedIncomingTransfers.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Incoming<wbr/>Transfers</span></a></li>
-<li><a href="../functions/getWrappedInheritedBalancesTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Inherited<wbr/>Balances<wbr/>Timeline</span></a></li>
-<li><a href="../functions/getWrappedIsArchivedTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Is<wbr/>Archived<wbr/>Timeline</span></a></li>
-<li><a href="../functions/getWrappedManagerTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Manager<wbr/>Timeline</span></a></li>
-<li><a href="../functions/getWrappedOffChainBalancesMetadataTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Off<wbr/>Chain<wbr/>Balances<wbr/>Metadata<wbr/>Timeline</span></a></li>
-<li><a href="../functions/getWrappedOutgoingTransfers.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Outgoing<wbr/>Transfers</span></a></li>
-<li><a href="../functions/getWrappedProof.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Proof</span></a></li>
-<li><a href="../functions/getWrappedStandardsTimeline.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Standards<wbr/>Timeline</span></a></li>
-<li><a href="../functions/getWrappedTimedUpdatePermission.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Timed<wbr/>Update<wbr/>Permission</span></a></li>
-<li><a href="../functions/getWrappedTimedUpdateWithBadgeIdsPermission.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Timed<wbr/>Update<wbr/>With<wbr/>Badge<wbr/>Ids<wbr/>Permission</span></a></li>
-<li><a href="../functions/getWrappedTransfers.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>Transfers</span></a></li>
-<li><a href="../functions/getWrappedUserPermissions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>get<wbr/>Wrapped<wbr/>User<wbr/>Permissions</span></a></li>
 <li><a href="../functions/keccak256ToBase64.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>keccak256<wbr/>To<wbr/>Base64</span></a></li>
-<li><a href="../functions/numberify-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>numberify</span></a></li>
 <li><a href="../functions/signatureToWeb3Extension.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>signature<wbr/>To<wbr/>Web3<wbr/>Extension</span></a></li>
 <li><a href="../functions/signatureToWeb3ExtensionSolana.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>signature<wbr/>To<wbr/>Web3<wbr/>Extension<wbr/>Solana</span></a></li></ul></nav></div></div></div>
 <div class="tsd-generator">

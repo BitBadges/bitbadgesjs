@@ -6,18 +6,24 @@
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
 import { Message, proto3 } from "@bufbuild/protobuf";
 import { BadgeMetadata, CollectionMetadata, OffChainBalancesMetadata } from "./metadata_pb.js";
-import { InheritedBalance, UintRange } from "./balances_pb.js";
+import { UintRange } from "./balances_pb.js";
 
 /**
+ * CollectionMetadataTimeline defines the metadata for a collection at different timeline times.
+ *
  * @generated from message badges.CollectionMetadataTimeline
  */
 export class CollectionMetadataTimeline extends Message<CollectionMetadataTimeline> {
   /**
+   * The collection metadata for a specific timeline element.
+   *
    * @generated from field: badges.CollectionMetadata collectionMetadata = 1;
    */
   collectionMetadata?: CollectionMetadata;
 
   /**
+   * The timeline times when the collection metadata is valid. Can not overlap with other timeline elements in same array.
+   *
    * @generated from field: repeated badges.UintRange timelineTimes = 2;
    */
   timelineTimes: UintRange[] = [];
@@ -52,15 +58,21 @@ export class CollectionMetadataTimeline extends Message<CollectionMetadataTimeli
 }
 
 /**
+ * BadgeMetadataTimeline defines the metadata for badges at different timeline times.
+ *
  * @generated from message badges.BadgeMetadataTimeline
  */
 export class BadgeMetadataTimeline extends Message<BadgeMetadataTimeline> {
   /**
+   * The badge metadata for a specific timeline element.
+   *
    * @generated from field: repeated badges.BadgeMetadata badgeMetadata = 1;
    */
   badgeMetadata: BadgeMetadata[] = [];
 
   /**
+   * The timeline times when the badge metadata is valid. Can not overlap with other timeline elements in same array.
+   *
    * @generated from field: repeated badges.UintRange timelineTimes = 2;
    */
   timelineTimes: UintRange[] = [];
@@ -95,15 +107,21 @@ export class BadgeMetadataTimeline extends Message<BadgeMetadataTimeline> {
 }
 
 /**
+ * OffChainBalancesMetadataTimeline defines the metadata for off-chain balances at different timeline times.
+ *
  * @generated from message badges.OffChainBalancesMetadataTimeline
  */
 export class OffChainBalancesMetadataTimeline extends Message<OffChainBalancesMetadataTimeline> {
   /**
+   * The off-chain balances metadata for a specific timeline element.
+   *
    * @generated from field: badges.OffChainBalancesMetadata offChainBalancesMetadata = 1;
    */
   offChainBalancesMetadata?: OffChainBalancesMetadata;
 
   /**
+   * The timeline times when the off-chain balances metadata is valid. Can not overlap with other timeline elements in same array.
+   *
    * @generated from field: repeated badges.UintRange timelineTimes = 2;
    */
   timelineTimes: UintRange[] = [];
@@ -138,58 +156,21 @@ export class OffChainBalancesMetadataTimeline extends Message<OffChainBalancesMe
 }
 
 /**
- * @generated from message badges.InheritedBalancesTimeline
- */
-export class InheritedBalancesTimeline extends Message<InheritedBalancesTimeline> {
-  /**
-   * @generated from field: repeated badges.InheritedBalance inheritedBalances = 1;
-   */
-  inheritedBalances: InheritedBalance[] = [];
-
-  /**
-   * @generated from field: repeated badges.UintRange timelineTimes = 2;
-   */
-  timelineTimes: UintRange[] = [];
-
-  constructor(data?: PartialMessage<InheritedBalancesTimeline>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.InheritedBalancesTimeline";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "inheritedBalances", kind: "message", T: InheritedBalance, repeated: true },
-    { no: 2, name: "timelineTimes", kind: "message", T: UintRange, repeated: true },
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): InheritedBalancesTimeline {
-    return new InheritedBalancesTimeline().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): InheritedBalancesTimeline {
-    return new InheritedBalancesTimeline().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): InheritedBalancesTimeline {
-    return new InheritedBalancesTimeline().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: InheritedBalancesTimeline | PlainMessage<InheritedBalancesTimeline> | undefined, b: InheritedBalancesTimeline | PlainMessage<InheritedBalancesTimeline> | undefined): boolean {
-    return proto3.util.equals(InheritedBalancesTimeline, a, b);
-  }
-}
-
-/**
+ * CustomDataTimeline defines custom data at different timeline times.
+ *
  * @generated from message badges.CustomDataTimeline
  */
 export class CustomDataTimeline extends Message<CustomDataTimeline> {
   /**
+   * The custom data for a specific timeline element.
+   *
    * @generated from field: string customData = 1;
    */
   customData = "";
 
   /**
+   * The timeline times when the custom data is valid. Can not overlap with other timeline elements in same array.
+   *
    * @generated from field: repeated badges.UintRange timelineTimes = 2;
    */
   timelineTimes: UintRange[] = [];
@@ -224,15 +205,21 @@ export class CustomDataTimeline extends Message<CustomDataTimeline> {
 }
 
 /**
+ * ManagerTimeline defines the manager address at different timeline times.
+ *
  * @generated from message badges.ManagerTimeline
  */
 export class ManagerTimeline extends Message<ManagerTimeline> {
   /**
+   * The manager address for a specific timeline element.
+   *
    * @generated from field: string manager = 1;
    */
   manager = "";
 
   /**
+   * The timeline times when the manager address is valid. Can not overlap with other timeline elements in same array.
+   *
    * @generated from field: repeated badges.UintRange timelineTimes = 2;
    */
   timelineTimes: UintRange[] = [];
@@ -267,15 +254,21 @@ export class ManagerTimeline extends Message<ManagerTimeline> {
 }
 
 /**
+ * IsArchivedTimeline defines whether a collection is archived at different timeline times.
+ *
  * @generated from message badges.IsArchivedTimeline
  */
 export class IsArchivedTimeline extends Message<IsArchivedTimeline> {
   /**
+   * Indicates whether the collection is archived for a specific timeline element.
+   *
    * @generated from field: bool isArchived = 1;
    */
   isArchived = false;
 
   /**
+   * The timeline times when the archived status is valid. Can not overlap with other timeline elements in same array.
+   *
    * @generated from field: repeated badges.UintRange timelineTimes = 2;
    */
   timelineTimes: UintRange[] = [];
@@ -310,15 +303,21 @@ export class IsArchivedTimeline extends Message<IsArchivedTimeline> {
 }
 
 /**
+ * ContractAddressTimeline defines the contract address at different timeline times.
+ *
  * @generated from message badges.ContractAddressTimeline
  */
 export class ContractAddressTimeline extends Message<ContractAddressTimeline> {
   /**
+   * The contract address for a specific timeline element.
+   *
    * @generated from field: string contractAddress = 1;
    */
   contractAddress = "";
 
   /**
+   * The timeline times when the contract address is valid. Can not overlap with other timeline elements in same array.
+   *
    * @generated from field: repeated badges.UintRange timelineTimes = 2;
    */
   timelineTimes: UintRange[] = [];
@@ -353,15 +352,21 @@ export class ContractAddressTimeline extends Message<ContractAddressTimeline> {
 }
 
 /**
+ * StandardsTimeline defines the standards used for a collection at different timeline times.
+ *
  * @generated from message badges.StandardsTimeline
  */
 export class StandardsTimeline extends Message<StandardsTimeline> {
   /**
+   * The standards applied to the collection for a specific timeline element.
+   *
    * @generated from field: repeated string standards = 1;
    */
   standards: string[] = [];
 
   /**
+   * The timeline times when the standards are valid. Can not overlap with other timeline elements in same array.
+   *
    * @generated from field: repeated badges.UintRange timelineTimes = 2;
    */
   timelineTimes: UintRange[] = [];

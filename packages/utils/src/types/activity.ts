@@ -23,6 +23,7 @@ export type ActivityMethod = ReviewMethod | TransferMethod | AnnouncementMethod;
 
 /**
  * Activity item that serves as the base type for all activity items.
+ *
  * @property {ActivityMethod} method - The type of activity (e.g. "Review", "Transfer", "Announcement", "Mint", "Claim").
  * @property {NumberType} timestamp - The timestamp of the activity.
  * @property {NumberType} block - The block number of the activity.
@@ -125,6 +126,7 @@ export function convertReviewDoc<T extends NumberType, U extends NumberType>(ite
  * @property {string} announcement - The announcement text (max 2048 characters).
  * @property {string} from - The cosmos address of the user who made the announcement.
  * @property {NumberType} collectionId - The collection ID of the collection that was announced.
+ *
  * @category API / Indexer
  */
 export interface AnnouncementInfoBase<T extends NumberType> extends ActivityInfoBase<T> {
@@ -174,7 +176,7 @@ export function convertAnnouncementInfo<T extends NumberType, U extends NumberTy
  * @property {NumberType} collectionId - The collection ID of the collection that was transferred.
  * @property {TransferMethod} method - The type of activity, which can be "Transfer", "Mint", or "Claim".
  * @property {string} memo - The memo of the transfer.
- * @property {ApprovalIdentifierDetails} precalculateBalancesFromApproval - The precalculation details of the transfer.
+ * @property {ApprovalIdentifierDetails} precalculateBalancesFromApproval - Which approval to use to precalculate the balances.
  * @property {ApprovalIdentifierDetails[]} prioritizedApprovals - The prioritized approvals of the transfer.
  * @property {boolean} onlyCheckPrioritizedApprovals - Whether or not to only check prioritized approvals.
  * @property {string} initiatedBy - The cosmos address of the user who initiated the transfer.

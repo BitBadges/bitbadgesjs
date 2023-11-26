@@ -5,8 +5,7 @@ import { deepCopy } from "./types/utils";
 import { convertToCosmosAddress } from "./chains";
 
 /**
- * Given some transfers (potentially incremented), return the balance map to store for a collection with off-chain balances.
- *
+ * Given some transfers (potentially incremented), return the balance map to store as a JSON for a collection with off-chain balances.
  *
  * @category Balances
  *

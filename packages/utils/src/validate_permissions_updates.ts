@@ -7,6 +7,8 @@ import { removeUintRangeFromUintRange } from "./uintRanges";
 
 /**
  * @category Validate Updates
+ *
+ * Validate if a balance permission update (old -> new) is valid (i.e. no permanently permitted or forbidden times are changed)
  */
 export function validateBalancesActionPermissionUpdate(
   oldPermissions: BalancesActionPermission<bigint>[],
@@ -39,6 +41,8 @@ export function validateBalancesActionPermissionUpdate(
 
 /**
  * @category Validate Updates
+ *
+ * Validate if a timed update permission update (old -> new) is valid (i.e. no permanently permitted or forbidden times are changed)
  */
 export function validateTimedUpdatePermissionUpdate(
   oldPermissions: TimedUpdatePermission<bigint>[],
@@ -71,6 +75,8 @@ export function validateTimedUpdatePermissionUpdate(
 
 /**
  * @category Validate Updates
+ *
+ * Validate if a timed update with badge ids permission update (old -> new) is valid (i.e. no permanently permitted or forbidden times are changed)
  */
 export function validateTimedUpdateWithBadgeIdsPermissionUpdate(
   oldPermissions: TimedUpdateWithBadgeIdsPermission<bigint>[],
@@ -108,6 +114,8 @@ export function validateTimedUpdateWithBadgeIdsPermissionUpdate(
 
 /**
  * @category Validate Updates
+ *
+ * Validate if a collection approval permission update (old -> new) is valid (i.e. no permanently permitted or forbidden times are changed)
  */
 export function validateCollectionApprovalPermissionsUpdate(
   oldPermissions: CollectionApprovalPermissionWithDetails<bigint>[],
@@ -140,6 +148,8 @@ export function validateCollectionApprovalPermissionsUpdate(
 
 /**
  * @category Validate Updates
+ *
+ * Validate if an action permission update (old -> new) is valid (i.e. no permanently permitted or forbidden times are changed)
  */
 export function validateActionPermissionUpdate(
   oldPermissions: ActionPermission<bigint>[],
@@ -172,6 +182,8 @@ export function validateActionPermissionUpdate(
 
 /**
  * @category Validate Updates
+ *
+ * Validate if a collection permissions update (old -> new) is valid (i.e. no permanently permitted or forbidden times are changed)
  */
 export function validatePermissionsUpdate(
   oldPermissions: CollectionPermissionsWithDetails<bigint>,
@@ -273,6 +285,8 @@ export function validatePermissionsUpdate(
 
 /**
  * @category Validate Updates
+ *
+ * Validate if a universal permission update (old -> new) is valid (i.e. no permanently permitted or forbidden times are changed)
  */
 export function validateUniversalPermissionUpdate(
   oldPermissions: UniversalPermissionDetails[],

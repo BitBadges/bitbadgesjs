@@ -1,5 +1,8 @@
 import { BadgeMetadata, BadgeMetadataTimeline, CollectionMetadata, CollectionMetadataTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadata, OffChainBalancesMetadataTimeline, StandardsTimeline, UintRange } from "bitbadgesjs-proto";
 
+/**
+ * @category Timelines
+ */
 export function getIsArchivedTimesAndValues(isArchivedTimeline: IsArchivedTimeline<bigint>[]): { times: UintRange<bigint>[][], values: boolean[] } {
   let times: UintRange<bigint>[][] = [];
   let values: boolean[] = [];
@@ -12,6 +15,9 @@ export function getIsArchivedTimesAndValues(isArchivedTimeline: IsArchivedTimeli
   return { times, values };
 }
 
+/**
+ * @category Timelines
+ */
 export function getOffChainBalancesMetadataTimesAndValues(inheritedBalancesMetadata: OffChainBalancesMetadataTimeline<bigint>[]): { times: UintRange<bigint>[][], values: OffChainBalancesMetadata[] } {
   let times: UintRange<bigint>[][] = [];
   let values: OffChainBalancesMetadata[] = [];
@@ -24,6 +30,9 @@ export function getOffChainBalancesMetadataTimesAndValues(inheritedBalancesMetad
   return { times, values };
 }
 
+/**
+ * @category Timelines
+ */
 export function getCollectionMetadataTimesAndValues(timeline: CollectionMetadataTimeline<bigint>[]): { times: UintRange<bigint>[][], values: CollectionMetadata[] } {
   let times: UintRange<bigint>[][] = [];
   let values: CollectionMetadata[] = [];
@@ -36,6 +45,9 @@ export function getCollectionMetadataTimesAndValues(timeline: CollectionMetadata
   return { times, values };
 }
 
+/**
+ * @category Timelines
+ */
 export function getBadgeMetadataTimesAndValues(timeline: BadgeMetadataTimeline<bigint>[]): { times: UintRange<bigint>[][], values: BadgeMetadata<bigint>[][] } {
   let times: UintRange<bigint>[][] = [];
   let values: BadgeMetadata<bigint>[][] = [];
@@ -48,6 +60,9 @@ export function getBadgeMetadataTimesAndValues(timeline: BadgeMetadataTimeline<b
   return { times, values };
 }
 
+/**
+ * @category Timelines
+ */
 export function getManagerTimesAndValues(managerTimeline: ManagerTimeline<bigint>[]): { times: UintRange<bigint>[][], values: string[] } {
   let times: UintRange<bigint>[][] = [];
   let values: string[] = [];
@@ -60,6 +75,9 @@ export function getManagerTimesAndValues(managerTimeline: ManagerTimeline<bigint
   return { times, values };
 }
 
+/**
+ * @category Timelines
+ */
 export function getCustomDataTimesAndValues(customDataTimeline: CustomDataTimeline<bigint>[]): { times: UintRange<bigint>[][], values: string[] } {
   let times: UintRange<bigint>[][] = [];
   let values: string[] = [];
@@ -72,6 +90,9 @@ export function getCustomDataTimesAndValues(customDataTimeline: CustomDataTimeli
   return { times, values };
 }
 
+/**
+ * @category Timelines
+ */
 export function getStandardsTimesAndValues(standardsTimeline: StandardsTimeline<bigint>[]): { times: UintRange<bigint>[][], values: string[][] } {
   let times: UintRange<bigint>[][] = [];
   let values: string[][] = [];

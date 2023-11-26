@@ -87,150 +87,198 @@ export class BadgeCustomMsgType extends Message<BadgeCustomMsgType> {
 }
 
 /**
- * The types defined in these files are used to define the MsgServer types for all requests and responses for Msgs of the badges module.
+ * MsgUniversalUpdateCollection is used to define MsgServer types for all requests and responses for Msgs of the badges module.
+ * It is a universal interface that can be used for both creating and updating collections.
+ * We have it defined for legacy purposes, but it is recommended to use MsgCreateCollection and MsgUpdateCollection instead.
  *
  * @generated from message badges.MsgUniversalUpdateCollection
  */
 export class MsgUniversalUpdateCollection extends Message<MsgUniversalUpdateCollection> {
   /**
+   * Address of the creator.
+   *
    * @generated from field: string creator = 1;
    */
   creator = "";
 
   /**
-   * 0 for new collection
+   * ID of the collection (0 for new collection).
    *
    * @generated from field: string collectionId = 2;
    */
   collectionId = "";
 
   /**
+   * Type of balances "Standard" or "Off-Chain".
+   *
    * @generated from field: string balancesType = 3;
    */
   balancesType = "";
 
   /**
-   * Default balance options for newly initiated accounts.
-   *
-   * The user's approved transfers for each badge ID.
+   * Default incoming approvals for newly initiated accounts.
    *
    * @generated from field: repeated badges.UserOutgoingApproval defaultOutgoingApprovals = 4;
    */
   defaultOutgoingApprovals: UserOutgoingApproval[] = [];
 
   /**
-   * The user's approved incoming transfers for each badge ID.
+   * Default outgoing approvals for newly initiated accounts.
    *
    * @generated from field: repeated badges.UserIncomingApproval defaultIncomingApprovals = 5;
    */
   defaultIncomingApprovals: UserIncomingApproval[] = [];
 
   /**
+   * Balances to create for the collection. Will be sent to the "Mint" address.
+   *
    * @generated from field: repeated badges.Balance badgesToCreate = 6;
    */
   badgesToCreate: Balance[] = [];
 
   /**
+   * Indicates if collection permissions should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   *
    * @generated from field: bool updateCollectionPermissions = 7;
    */
   updateCollectionPermissions = false;
 
   /**
+   * New collection permissions to set.
+   *
    * @generated from field: badges.CollectionPermissions collectionPermissions = 8;
    */
   collectionPermissions?: CollectionPermissions;
 
   /**
+   * Indicates if the manager timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   *
    * @generated from field: bool updateManagerTimeline = 9;
    */
   updateManagerTimeline = false;
 
   /**
+   * New manager timeline to set.
+   *
    * @generated from field: repeated badges.ManagerTimeline managerTimeline = 10;
    */
   managerTimeline: ManagerTimeline[] = [];
 
   /**
+   * Indicates if the collection metadata timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   *
    * @generated from field: bool updateCollectionMetadataTimeline = 11;
    */
   updateCollectionMetadataTimeline = false;
 
   /**
+   * New collection metadata timeline to set.
+   *
    * @generated from field: repeated badges.CollectionMetadataTimeline collectionMetadataTimeline = 12;
    */
   collectionMetadataTimeline: CollectionMetadataTimeline[] = [];
 
   /**
+   * Indicates if the badge metadata timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   *
    * @generated from field: bool updateBadgeMetadataTimeline = 13;
    */
   updateBadgeMetadataTimeline = false;
 
   /**
+   * New badge metadata timeline to set.
+   *
    * @generated from field: repeated badges.BadgeMetadataTimeline badgeMetadataTimeline = 14;
    */
   badgeMetadataTimeline: BadgeMetadataTimeline[] = [];
 
   /**
+   * Indicates if the off-chain balances metadata timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   *
    * @generated from field: bool updateOffChainBalancesMetadataTimeline = 15;
    */
   updateOffChainBalancesMetadataTimeline = false;
 
   /**
+   * New off-chain balances metadata timeline to set.
+   *
    * @generated from field: repeated badges.OffChainBalancesMetadataTimeline offChainBalancesMetadataTimeline = 16;
    */
   offChainBalancesMetadataTimeline: OffChainBalancesMetadataTimeline[] = [];
 
   /**
+   * Indicates if the custom data timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   *
    * @generated from field: bool updateCustomDataTimeline = 17;
    */
   updateCustomDataTimeline = false;
 
   /**
+   * New custom data timeline to set.
+   *
    * @generated from field: repeated badges.CustomDataTimeline customDataTimeline = 18;
    */
   customDataTimeline: CustomDataTimeline[] = [];
 
   /**
+   * Indicates if collection approvals should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   *
    * @generated from field: bool updateCollectionApprovals = 21;
    */
   updateCollectionApprovals = false;
 
   /**
+   * New collection approvals to set.
+   *
    * @generated from field: repeated badges.CollectionApproval collectionApprovals = 22;
    */
   collectionApprovals: CollectionApproval[] = [];
 
   /**
+   * Indicates if the standards timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   *
    * @generated from field: bool updateStandardsTimeline = 23;
    */
   updateStandardsTimeline = false;
 
   /**
+   * New standards timeline to set.
+   *
    * @generated from field: repeated badges.StandardsTimeline standardsTimeline = 24;
    */
   standardsTimeline: StandardsTimeline[] = [];
 
   /**
+   * Indicates if the isArchived timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   *
    * @generated from field: bool updateIsArchivedTimeline = 27;
    */
   updateIsArchivedTimeline = false;
 
   /**
+   * New isArchived timeline to set.
+   *
    * @generated from field: repeated badges.IsArchivedTimeline isArchivedTimeline = 28;
    */
   isArchivedTimeline: IsArchivedTimeline[] = [];
 
   /**
+   * Default auto-approve setting for self-initiated outgoing transfers for newly initiated accounts.
+   *
    * @generated from field: bool defaultAutoApproveSelfInitiatedOutgoingTransfers = 29;
    */
   defaultAutoApproveSelfInitiatedOutgoingTransfers = false;
 
   /**
+   * Default auto-approve setting for self-initiated incoming transfers for newly initiated accounts.
+   *
    * @generated from field: bool defaultAutoApproveSelfInitiatedIncomingTransfers = 30;
    */
   defaultAutoApproveSelfInitiatedIncomingTransfers = false;
 
   /**
+   * Default user permissions for newly initiated accounts.
+   *
    * @generated from field: badges.UserPermissions defaultUserPermissions = 31;
    */
   defaultUserPermissions?: UserPermissions;
@@ -290,11 +338,13 @@ export class MsgUniversalUpdateCollection extends Message<MsgUniversalUpdateColl
 }
 
 /**
+ * MsgUniversalUpdateCollectionResponse is the response to MsgUniversalUpdateCollection.
+ *
  * @generated from message badges.MsgUniversalUpdateCollectionResponse
  */
 export class MsgUniversalUpdateCollectionResponse extends Message<MsgUniversalUpdateCollectionResponse> {
   /**
-   * ID of badge collection
+   * ID of the badge collection.
    *
    * @generated from field: string collectionId = 1;
    */
@@ -329,112 +379,154 @@ export class MsgUniversalUpdateCollectionResponse extends Message<MsgUniversalUp
 }
 
 /**
+ * MsgUpdateCollection is used to update a collection.
+ *
  * @generated from message badges.MsgUpdateCollection
  */
 export class MsgUpdateCollection extends Message<MsgUpdateCollection> {
   /**
+   * Address of the creator.
+   *
    * @generated from field: string creator = 1;
    */
   creator = "";
 
   /**
-   * 0 for new collection
+   * ID of the collection (0 for new collection).
    *
    * @generated from field: string collectionId = 2;
    */
   collectionId = "";
 
   /**
+   * Balances to create for the collection. Will be sent to the "Mint" address.
+   *
    * @generated from field: repeated badges.Balance badgesToCreate = 6;
    */
   badgesToCreate: Balance[] = [];
 
   /**
+   * Indicates if collection permissions should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   *
    * @generated from field: bool updateCollectionPermissions = 7;
    */
   updateCollectionPermissions = false;
 
   /**
+   * New collection permissions to set.
+   *
    * @generated from field: badges.CollectionPermissions collectionPermissions = 8;
    */
   collectionPermissions?: CollectionPermissions;
 
   /**
+   * Indicates if the manager timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   *
    * @generated from field: bool updateManagerTimeline = 9;
    */
   updateManagerTimeline = false;
 
   /**
+   * New manager timeline to set.
+   *
    * @generated from field: repeated badges.ManagerTimeline managerTimeline = 10;
    */
   managerTimeline: ManagerTimeline[] = [];
 
   /**
+   * Indicates if the collection metadata timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   *
    * @generated from field: bool updateCollectionMetadataTimeline = 11;
    */
   updateCollectionMetadataTimeline = false;
 
   /**
+   * New collection metadata timeline to set.
+   *
    * @generated from field: repeated badges.CollectionMetadataTimeline collectionMetadataTimeline = 12;
    */
   collectionMetadataTimeline: CollectionMetadataTimeline[] = [];
 
   /**
+   * Indicates if the badge metadata timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   *
    * @generated from field: bool updateBadgeMetadataTimeline = 13;
    */
   updateBadgeMetadataTimeline = false;
 
   /**
+   * New badge metadata timeline to set.
+   *
    * @generated from field: repeated badges.BadgeMetadataTimeline badgeMetadataTimeline = 14;
    */
   badgeMetadataTimeline: BadgeMetadataTimeline[] = [];
 
   /**
+   * Indicates if the off-chain balances metadata timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   *
    * @generated from field: bool updateOffChainBalancesMetadataTimeline = 15;
    */
   updateOffChainBalancesMetadataTimeline = false;
 
   /**
+   * New off-chain balances metadata timeline to set.
+   *
    * @generated from field: repeated badges.OffChainBalancesMetadataTimeline offChainBalancesMetadataTimeline = 16;
    */
   offChainBalancesMetadataTimeline: OffChainBalancesMetadataTimeline[] = [];
 
   /**
+   * Indicates if the custom data timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   *
    * @generated from field: bool updateCustomDataTimeline = 17;
    */
   updateCustomDataTimeline = false;
 
   /**
+   * New custom data timeline to set.
+   *
    * @generated from field: repeated badges.CustomDataTimeline customDataTimeline = 18;
    */
   customDataTimeline: CustomDataTimeline[] = [];
 
   /**
+   * Indicates if collection approvals should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   *
    * @generated from field: bool updateCollectionApprovals = 21;
    */
   updateCollectionApprovals = false;
 
   /**
+   * New collection approvals to set.
+   *
    * @generated from field: repeated badges.CollectionApproval collectionApprovals = 22;
    */
   collectionApprovals: CollectionApproval[] = [];
 
   /**
+   * Indicates if the standards timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   *
    * @generated from field: bool updateStandardsTimeline = 23;
    */
   updateStandardsTimeline = false;
 
   /**
+   * New standards timeline to set.
+   *
    * @generated from field: repeated badges.StandardsTimeline standardsTimeline = 24;
    */
   standardsTimeline: StandardsTimeline[] = [];
 
   /**
+   * Indicates if the isArchived timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   *
    * @generated from field: bool updateIsArchivedTimeline = 27;
    */
   updateIsArchivedTimeline = false;
 
   /**
+   * New isArchived timeline to set.
+   *
    * @generated from field: repeated badges.IsArchivedTimeline isArchivedTimeline = 28;
    */
   isArchivedTimeline: IsArchivedTimeline[] = [];
@@ -488,11 +580,13 @@ export class MsgUpdateCollection extends Message<MsgUpdateCollection> {
 }
 
 /**
+ * MsgUpdateCollectionResponse is the response to MsgUpdateCollection.
+ *
  * @generated from message badges.MsgUpdateCollectionResponse
  */
 export class MsgUpdateCollectionResponse extends Message<MsgUpdateCollectionResponse> {
   /**
-   * ID of badge collection
+   * ID of the badge collection.
    *
    * @generated from field: string collectionId = 1;
    */
@@ -527,94 +621,126 @@ export class MsgUpdateCollectionResponse extends Message<MsgUpdateCollectionResp
 }
 
 /**
+ * MsgCreateCollection is used to create a new collection.
+ *
  * @generated from message badges.MsgCreateCollection
  */
 export class MsgCreateCollection extends Message<MsgCreateCollection> {
   /**
+   * Address of the creator.
+   *
    * @generated from field: string creator = 1;
    */
   creator = "";
 
   /**
+   * Type of balances "Standard" or "Off-Chain".
+   *
    * @generated from field: string balancesType = 2;
    */
   balancesType = "";
 
   /**
-   * The user's approved transfers for each badge ID.
+   * User's approved transfers for each badge ID.
    *
    * @generated from field: repeated badges.UserOutgoingApproval defaultOutgoingApprovals = 3;
    */
   defaultOutgoingApprovals: UserOutgoingApproval[] = [];
 
   /**
-   * The user's approved incoming transfers for each badge ID.
+   * User's approved incoming transfers for each badge ID.
    *
    * @generated from field: repeated badges.UserIncomingApproval defaultIncomingApprovals = 4;
    */
   defaultIncomingApprovals: UserIncomingApproval[] = [];
 
   /**
+   * Balances to create for the collection. Will be sent to the "Mint" address.
+   *
    * @generated from field: repeated badges.Balance badgesToCreate = 5;
    */
   badgesToCreate: Balance[] = [];
 
   /**
+   * Collection permissions.
+   *
    * @generated from field: badges.CollectionPermissions collectionPermissions = 6;
    */
   collectionPermissions?: CollectionPermissions;
 
   /**
+   * Manager timeline entries.
+   *
    * @generated from field: repeated badges.ManagerTimeline managerTimeline = 7;
    */
   managerTimeline: ManagerTimeline[] = [];
 
   /**
+   * Collection metadata timeline entries.
+   *
    * @generated from field: repeated badges.CollectionMetadataTimeline collectionMetadataTimeline = 8;
    */
   collectionMetadataTimeline: CollectionMetadataTimeline[] = [];
 
   /**
+   * Badge metadata timeline entries.
+   *
    * @generated from field: repeated badges.BadgeMetadataTimeline badgeMetadataTimeline = 9;
    */
   badgeMetadataTimeline: BadgeMetadataTimeline[] = [];
 
   /**
+   * Off-chain balances metadata timeline entries.
+   *
    * @generated from field: repeated badges.OffChainBalancesMetadataTimeline offChainBalancesMetadataTimeline = 10;
    */
   offChainBalancesMetadataTimeline: OffChainBalancesMetadataTimeline[] = [];
 
   /**
+   * Custom data timeline entries.
+   *
    * @generated from field: repeated badges.CustomDataTimeline customDataTimeline = 11;
    */
   customDataTimeline: CustomDataTimeline[] = [];
 
   /**
+   * Collection approvals.
+   *
    * @generated from field: repeated badges.CollectionApproval collectionApprovals = 12;
    */
   collectionApprovals: CollectionApproval[] = [];
 
   /**
+   * Standards timeline entries.
+   *
    * @generated from field: repeated badges.StandardsTimeline standardsTimeline = 13;
    */
   standardsTimeline: StandardsTimeline[] = [];
 
   /**
+   * isArchived timeline entries.
+   *
    * @generated from field: repeated badges.IsArchivedTimeline isArchivedTimeline = 14;
    */
   isArchivedTimeline: IsArchivedTimeline[] = [];
 
   /**
+   * Default auto-approve setting for self-initiated outgoing transfers.
+   *
    * @generated from field: bool defaultAutoApproveSelfInitiatedOutgoingTransfers = 15;
    */
   defaultAutoApproveSelfInitiatedOutgoingTransfers = false;
 
   /**
+   * Default auto-approve setting for self-initiated incoming transfers.
+   *
    * @generated from field: bool defaultAutoApproveSelfInitiatedIncomingTransfers = 16;
    */
   defaultAutoApproveSelfInitiatedIncomingTransfers = false;
 
   /**
+   * Default user permissions.
+   *
    * @generated from field: badges.UserPermissions defaultUserPermissions = 17;
    */
   defaultUserPermissions?: UserPermissions;
@@ -664,11 +790,13 @@ export class MsgCreateCollection extends Message<MsgCreateCollection> {
 }
 
 /**
+ * MsgCreateCollectionResponse is the response to MsgCreateCollection.
+ *
  * @generated from message badges.MsgCreateCollectionResponse
  */
 export class MsgCreateCollectionResponse extends Message<MsgCreateCollectionResponse> {
   /**
-   * ID of badge collection
+   * ID of the badge collection.
    *
    * @generated from field: string collectionId = 1;
    */
@@ -703,15 +831,21 @@ export class MsgCreateCollectionResponse extends Message<MsgCreateCollectionResp
 }
 
 /**
+ * MsgCreateAddressMappings is used to create address mappings.
+ *
  * @generated from message badges.MsgCreateAddressMappings
  */
 export class MsgCreateAddressMappings extends Message<MsgCreateAddressMappings> {
   /**
+   * Address of the creator.
+   *
    * @generated from field: string creator = 1;
    */
   creator = "";
 
   /**
+   * Address mappings to create.
+   *
    * @generated from field: repeated badges.AddressMapping addressMappings = 2;
    */
   addressMappings: AddressMapping[] = [];
@@ -746,6 +880,8 @@ export class MsgCreateAddressMappings extends Message<MsgCreateAddressMappings> 
 }
 
 /**
+ * MsgCreateAddressMappingsResponse is the response to MsgCreateAddressMappings.
+ *
  * @generated from message badges.MsgCreateAddressMappingsResponse
  */
 export class MsgCreateAddressMappingsResponse extends Message<MsgCreateAddressMappingsResponse> {
@@ -777,22 +913,28 @@ export class MsgCreateAddressMappingsResponse extends Message<MsgCreateAddressMa
 }
 
 /**
- * For each amount, for each toAddress, we will attempt to transfer all the badgeIds for the badge with ID badgeId.
+ * MsgTransferBadges is used to transfer badges.
  *
  * @generated from message badges.MsgTransferBadges
  */
 export class MsgTransferBadges extends Message<MsgTransferBadges> {
   /**
+   * Address of the creator.
+   *
    * @generated from field: string creator = 1;
    */
   creator = "";
 
   /**
+   * ID of the collection.
+   *
    * @generated from field: string collectionId = 2;
    */
   collectionId = "";
 
   /**
+   * Transfers to execute.
+   *
    * @generated from field: repeated badges.Transfer transfers = 3;
    */
   transfers: Transfer[] = [];
@@ -828,6 +970,8 @@ export class MsgTransferBadges extends Message<MsgTransferBadges> {
 }
 
 /**
+ * MsgTransferBadgesResponse is the response to MsgTransferBadges.
+ *
  * @generated from message badges.MsgTransferBadgesResponse
  */
 export class MsgTransferBadgesResponse extends Message<MsgTransferBadgesResponse> {
@@ -859,15 +1003,21 @@ export class MsgTransferBadgesResponse extends Message<MsgTransferBadgesResponse
 }
 
 /**
+ * MsgDeleteCollection is used to delete a collection.
+ *
  * @generated from message badges.MsgDeleteCollection
  */
 export class MsgDeleteCollection extends Message<MsgDeleteCollection> {
   /**
+   * Address of the creator.
+   *
    * @generated from field: string creator = 1;
    */
   creator = "";
 
   /**
+   * ID of the collection.
+   *
    * @generated from field: string collectionId = 2;
    */
   collectionId = "";
@@ -902,6 +1052,8 @@ export class MsgDeleteCollection extends Message<MsgDeleteCollection> {
 }
 
 /**
+ * MsgDeleteCollectionResponse is the response to MsgDeleteCollection.
+ *
  * @generated from message badges.MsgDeleteCollectionResponse
  */
 export class MsgDeleteCollectionResponse extends Message<MsgDeleteCollectionResponse> {
@@ -933,65 +1085,91 @@ export class MsgDeleteCollectionResponse extends Message<MsgDeleteCollectionResp
 }
 
 /**
+ * MsgUpdateUserApprovals is used to update user approvals.
+ *
  * @generated from message badges.MsgUpdateUserApprovals
  */
 export class MsgUpdateUserApprovals extends Message<MsgUpdateUserApprovals> {
   /**
+   * Address of the creator.
+   *
    * @generated from field: string creator = 1;
    */
   creator = "";
 
   /**
+   * ID of the collection.
+   *
    * @generated from field: string collectionId = 2;
    */
   collectionId = "";
 
   /**
+   * Indicates if outgoing approvals should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   *
    * @generated from field: bool updateOutgoingApprovals = 3;
    */
   updateOutgoingApprovals = false;
 
   /**
+   * New outgoing approvals to set. 
+   *
    * @generated from field: repeated badges.UserOutgoingApproval outgoingApprovals = 4;
    */
   outgoingApprovals: UserOutgoingApproval[] = [];
 
   /**
+   * Indicates if incoming approvals should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   *
    * @generated from field: bool updateIncomingApprovals = 5;
    */
   updateIncomingApprovals = false;
 
   /**
+   * New incoming approvals to set.
+   *
    * @generated from field: repeated badges.UserIncomingApproval incomingApprovals = 6;
    */
   incomingApprovals: UserIncomingApproval[] = [];
 
   /**
+   * Indicates if auto-approve settings for self-initiated outgoing transfers should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   *
    * @generated from field: bool updateAutoApproveSelfInitiatedOutgoingTransfers = 7;
    */
   updateAutoApproveSelfInitiatedOutgoingTransfers = false;
 
   /**
+   * Auto-approve setting for self-initiated outgoing transfers.
+   *
    * @generated from field: bool autoApproveSelfInitiatedOutgoingTransfers = 8;
    */
   autoApproveSelfInitiatedOutgoingTransfers = false;
 
   /**
+   * Indicates if auto-approve settings for self-initiated incoming transfers should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   *
    * @generated from field: bool updateAutoApproveSelfInitiatedIncomingTransfers = 9;
    */
   updateAutoApproveSelfInitiatedIncomingTransfers = false;
 
   /**
+   * Auto-approve setting for self-initiated incoming transfers.
+   *
    * @generated from field: bool autoApproveSelfInitiatedIncomingTransfers = 10;
    */
   autoApproveSelfInitiatedIncomingTransfers = false;
 
   /**
+   * Indicates if user permissions should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   *
    * @generated from field: bool updateUserPermissions = 11;
    */
   updateUserPermissions = false;
 
   /**
+   * New user permissions to set.
+   *
    * @generated from field: badges.UserPermissions userPermissions = 12;
    */
   userPermissions?: UserPermissions;
@@ -1036,6 +1214,8 @@ export class MsgUpdateUserApprovals extends Message<MsgUpdateUserApprovals> {
 }
 
 /**
+ * MsgUpdateUserApprovalsResponse is the response to MsgUpdateUserApprovals.
+ *
  * @generated from message badges.MsgUpdateUserApprovalsResponse
  */
 export class MsgUpdateUserApprovalsResponse extends Message<MsgUpdateUserApprovalsResponse> {

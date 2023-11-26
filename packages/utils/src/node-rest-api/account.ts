@@ -15,6 +15,5 @@ export interface AccountResponse {
       account_number: string
       sequence: string
     }
-    code_hash: string
   }
 }

@@ -63,17 +63,29 @@ export function convertUserIncomingApprovalWithDetails<T extends NumberType, U e
  * @property {SupportedChain} chain - The chain of the account.
  * @property {Coin} [balance] - The balance of the account ($BADGE).
  * @property {boolean} [airdropped] - Indicates whether the account has claimed their airdrop.
- * @property {BalanceDoc[]} collected - A list of badges that the account has collected. Paginated and fetches as needed.
- * @property {TransferActivityDoc[]} activity - A list of transfer activity items for the account. Paginated and fetches and needed.
- * @property {AnnouncementDoc[]} announcements - A list of announcement activity items for the account. Paginated and fetches and needed.
- * @property {ReviewDoc[]} reviews - A list of review activity items for the account. Paginated and fetches and needed.
+ * @property {BalanceDoc[]} collected - A list of badges that the account has collected. Paginated and fetched as needed. To be used in conjunction with views.
+ * @property {TransferActivityDoc[]} activity - A list of transfer activity items for the account. Paginated and fetched as needed. To be used in conjunction with views.
+ * @property {AnnouncementDoc[]} announcements - A list of announcement activity items for the account. Paginated and fetched as needed. To be used in conjunction with views.
+ * @property {ReviewDoc[]} reviews - A list of review activity items for the account. Paginated and fetched as needed. To be used in conjunction with views.
+ * @property {MerkleChallengeDoc[]} merkleChallenges - A list of merkle challenge activity items for the account. Paginated and fetched as needed. To be used in conjunction with views.
+ * @property {ApprovalsTrackerDoc[]} approvalsTrackers - A list of approvals tracker activity items for the account. Paginated and fetched as needed. To be used in conjunction with views.
+ * @property {AddressMappingWithMetadata[]} addressMappings - A list of address mappings for the account. Paginated and fetched as needed. To be used in conjunction with views.
+ * @property {ClaimAlertDoc[]} claimAlerts - A list of claim alerts for the account. Paginated and fetched as needed. To be used in conjunction with views.
  * @property {PaginationInfo} pagination - Pagination information for each of the profile information.
  *
- * @remarks
- * collected, activity, announcements, and reviews are profile information that is dynamically loaded as needed from the API.
- * The pagination object holds the bookmark and hasMore information for each of collected, activity, announcements, and reviews.
+ * @property {Object} [nsfw] - Indicates whether the account is NSFW.
+ * @property {Object} [reported] - Indicates whether the account has been reported.
  *
- * For typical fetches, collected, activity, announcements, and reviews will be empty arrays and are to be loaded as needed (pagination will be set to hasMore == true).
+ * @property {string} address - The address of the account.
+ *
+ * @property {Object} nsfw - The badge IDs in this collection that are marked as NSFW.
+ * @property {Object} reported - The badge IDs in this collection that have been reported.
+ *
+ * @property {Object.<string, { ids: string[], type: string, pagination: PaginationInfo }>} views - The views for this collection and their pagination info. Views will only include the doc _ids. Use the pagination to fetch more. To be used in conjunction with activity, announcements, reviews, owners, merkleChallenges, and approvalsTrackers. For example, if you want to fetch the activity for a view, you would use the view's pagination to fetch the doc _ids, then use the corresponding activity array to find the matching docs.
+ *
+ * @remarks
+ * Note that returned user infos will only fetch what is requested. It is your responsibility to join the data together (paginations, etc).
+ * See documentation for helper functions, examples, and tutorials on handling this data and paginations.
  *
  * @category API / Indexer
  */
@@ -118,7 +130,6 @@ export function convertBitBadgesUserInfo<T extends NumberType, U extends NumberT
       ethAddress: item.ethAddress,
       solAddress: item.solAddress,
       accountNumber: item.accountNumber,
-      username: item.username,
       sequence: item.sequence,
       balance: item.balance,
       publicKey: item.publicKey,

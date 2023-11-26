@@ -6,12 +6,31 @@ import { createProtoMsg } from '../../proto-types/base'
 import { createTransactionPayload } from './base'
 import { Chain, Fee, Sender } from './common'
 
+/**
+ * MsgSend represents a message to send coins from one account to another.
+ *
+ * @typedef {Object} MsgSend
+ * @property {string} destinationAddress - The address to send the coins to.
+ * @property {T} amount - The amount of coins to send.
+ * @property {string} denom - The denomination of the coins to send.
+ */
 export interface MsgSend<T extends NumberType> {
   destinationAddress: string
   amount: T
   denom: string
 }
 
+/**
+ *Creates a new transaction with the MsgSend message.
+ *
+ * Note this only creates a transaction with one Msg. For multi-msg transactions, you can custom build using createTransactionPayload. See docs for tutorials.
+ *
+ * @param {Chain} chain - The chain to create the transaction for.
+ * @param {Sender} sender - The sender details for the transaction.
+ * @param {Fee} fee - The fee of the transaction.
+ * @param {string} memo - The memo of the transaction.
+ * @param {MsgSend} params - The parameters of the Send message.
+ */
 export function createTxMsgSend<T extends NumberType>(
   chain: Chain,
   sender: Sender,

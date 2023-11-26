@@ -8,16 +8,17 @@ import { Message, proto3 } from "@bufbuild/protobuf";
 import { UintRange } from "./balances_pb.js";
 
 /**
- * CollectionPermissions defines the permissions for the collection (i.e. what the manager can and cannot do).
+ *
+ * CollectionPermissions defines the permissions for the collection (i.e., what the manager can and cannot do).
  *
  * There are five types of permissions for a collection: ActionPermission, TimedUpdatePermission, TimedUpdateWithBadgeIdsPermission, BalancesActionPermission, and CollectionApprovalPermission.
  *
  * The permission type allows fine-grained access control for each action.
- * ActionPermission: defines when the manager can perform an action.
- * TimedUpdatePermission: defines when the manager can update a timeline-based field and what times of the timeline can be updated.
- * TimedUpdateWithBadgeIdsPermission: defines when the manager can update a timeline-based field for specific badges and what times of the timeline can be updated.
- * BalancesActionPermission: defines when the manager can perform an action for specific badges and specific badge ownership times.
- * CollectionApprovalPermission: defines when the manager can update the transferability of the collection and what transfers can be updated vs locked
+ * - ActionPermission: defines when the manager can perform an action.
+ * - TimedUpdatePermission: defines when the manager can update a timeline-based field and what times of the timeline can be updated.
+ * - TimedUpdateWithBadgeIdsPermission: defines when the manager can update a timeline-based field for specific badges and what times of the timeline can be updated.
+ * - BalancesActionPermission: defines when the manager can perform an action for specific badges and specific badge ownership times.
+ * - CollectionApprovalPermission: defines when the manager can update the transferability of the collection and what transfers can be updated vs. locked.
  *
  * Note there are a few different times here which could get confusing:
  * - timelineTimes: the times when a timeline-based field is a specific value
@@ -29,64 +30,78 @@ import { UintRange } from "./balances_pb.js";
  * Once a time is set to be permitted or forbidden, it is PERMANENT and cannot be changed.
  * If a time is not set to be permitted or forbidden, it is considered NEUTRAL and can be updated but is ALLOWED by default.
  *
- * Each permission type has a defaultValues field and a combinations field.
- * The defaultValues field defines the default values for the permission which can be manipulated by the combinations field (to avoid unnecessary repetition).
- * Ex: We can have default value badgeIds = [1,2] and combinations = [{invertDefault: true, isApproved: false}, {isApproved: true}].
- * This would mean that badgeIds [1,2] are allowed but everything else is not allowed.
- *
- * IMPORTANT: For all permissions, we ONLY take the first combination that matches. Any subsequent combinations are ignored. 
- * Ex: If we have defaultValues = {badgeIds: [1,2]} and combinations = [{isApproved: true}, {isApproved: false}].
- * This would mean that badgeIds [1,2] are allowed and the second combination is ignored.
+ * IMPORTANT: We take first-match only for the permissions. This means that if you forbid time T in array index 0 and permit time T in index 1, 
+ * we will only check the first permission (forbid time T) and not the second permission (permit time T).
  *
  * @generated from message badges.CollectionPermissions
  */
 export class CollectionPermissions extends Message<CollectionPermissions> {
   /**
+   * Permissions related to deleting the collection.
+   *
    * @generated from field: repeated badges.ActionPermission canDeleteCollection = 1;
    */
   canDeleteCollection: ActionPermission[] = [];
 
   /**
+   * Permissions related to archiving the collection.
+   *
    * @generated from field: repeated badges.TimedUpdatePermission canArchiveCollection = 2;
    */
   canArchiveCollection: TimedUpdatePermission[] = [];
 
   /**
+   * Permissions related to updating off-chain balances metadata.
+   *
    * @generated from field: repeated badges.TimedUpdatePermission canUpdateOffChainBalancesMetadata = 3;
    */
   canUpdateOffChainBalancesMetadata: TimedUpdatePermission[] = [];
 
   /**
+   * Permissions related to updating standards for the collection.
+   *
    * @generated from field: repeated badges.TimedUpdatePermission canUpdateStandards = 4;
    */
   canUpdateStandards: TimedUpdatePermission[] = [];
 
   /**
+   * Permissions related to updating custom data for the collection.
+   *
    * @generated from field: repeated badges.TimedUpdatePermission canUpdateCustomData = 5;
    */
   canUpdateCustomData: TimedUpdatePermission[] = [];
 
   /**
+   * Permissions related to updating the collection's manager.
+   *
    * @generated from field: repeated badges.TimedUpdatePermission canUpdateManager = 6;
    */
   canUpdateManager: TimedUpdatePermission[] = [];
 
   /**
+   * Permissions related to updating the metadata of the collection.
+   *
    * @generated from field: repeated badges.TimedUpdatePermission canUpdateCollectionMetadata = 7;
    */
   canUpdateCollectionMetadata: TimedUpdatePermission[] = [];
 
   /**
+   * Permissions related to creating more badges for the collection.
+   *
    * @generated from field: repeated badges.BalancesActionPermission canCreateMoreBadges = 8;
    */
   canCreateMoreBadges: BalancesActionPermission[] = [];
 
   /**
+   * Permissions related to updating badge metadata for specific badges.
+   *
    * @generated from field: repeated badges.TimedUpdateWithBadgeIdsPermission canUpdateBadgeMetadata = 9;
    */
   canUpdateBadgeMetadata: TimedUpdateWithBadgeIdsPermission[] = [];
 
   /**
+   * Permissions related to updating collection approvals.
+   *
    * @generated from field: repeated badges.CollectionApprovalPermission canUpdateCollectionApprovals = 10;
    */
   canUpdateCollectionApprovals: CollectionApprovalPermission[] = [];
@@ -129,31 +144,41 @@ export class CollectionPermissions extends Message<CollectionPermissions> {
 }
 
 /**
- * UserPermissions defines the permissions for the user (i.e. what the user can and cannot do).
+ *
+ * UserPermissions defines the permissions for the user about their approvals (i.e., what the user can and cannot do).
  *
  * See CollectionPermissions for more details on the different types of permissions.
- * The UserApprovedOutgoing and UserApprovedIncoming permissions are the same as the CollectionApprovalPermission,
+ *
+ * canUpdateOutgoingApprovals and canUpdateOutgoingApprovals follow the same as the canUpdateCollectionApprovals in CollectionPermissions,
  * but certain fields are removed because they are not relevant to the user.
  *
  * @generated from message badges.UserPermissions
  */
 export class UserPermissions extends Message<UserPermissions> {
   /**
+   * Permissions related to updating the user's approved outgoing transfers.
+   *
    * @generated from field: repeated badges.UserOutgoingApprovalPermission canUpdateOutgoingApprovals = 1;
    */
   canUpdateOutgoingApprovals: UserOutgoingApprovalPermission[] = [];
 
   /**
+   * Permissions related to updating the user's approved incoming transfers.
+   *
    * @generated from field: repeated badges.UserIncomingApprovalPermission canUpdateIncomingApprovals = 2;
    */
   canUpdateIncomingApprovals: UserIncomingApprovalPermission[] = [];
 
   /**
+   * Permissions related to updating auto-approval settings for self-initiated outgoing transfers (whether they are allowed by default).
+   *
    * @generated from field: repeated badges.ActionPermission canUpdateAutoApproveSelfInitiatedOutgoingTransfers = 3;
    */
   canUpdateAutoApproveSelfInitiatedOutgoingTransfers: ActionPermission[] = [];
 
   /**
+   * Permissions related to updating auto-approval settings for self-initiated incoming transfers (whether they are allowed by default).
+   *
    * @generated from field: repeated badges.ActionPermission canUpdateAutoApproveSelfInitiatedIncomingTransfers = 4;
    */
   canUpdateAutoApproveSelfInitiatedIncomingTransfers: ActionPermission[] = [];
@@ -190,11 +215,12 @@ export class UserPermissions extends Message<UserPermissions> {
 }
 
 /**
- * CollectionApprovalPermission defines what collection approved transfers can be updated vs are locked.
+ *
+ * CollectionApprovalPermission defines what collection approved transfers can be updated vs. are locked.
  *
  * Each transfer is broken down to a (from, to, initiatedBy, transferTime, badgeId) tuple.
  * For a transfer to match, we need to match ALL of the fields in the combination. 
- * These are detemined by the fromMappingId, toMappingId, initiatedByMappingId, transferTimes, badgeIds fields.
+ * These are determined by the fromMappingId, toMappingId, initiatedByMappingId, transferTimes, badgeIds fields.
  * AddressMappings are used for (from, to, initiatedBy) which are a permanent list of addresses identified by an ID (see AddressMappings). 
  *
  * TimelineTimes: which timeline times of the collection's approvalsTimeline field can be updated or not?
@@ -211,51 +237,77 @@ export class UserPermissions extends Message<UserPermissions> {
  */
 export class CollectionApprovalPermission extends Message<CollectionApprovalPermission> {
   /**
+   * Identifier for the sender mapping.
+   *
    * @generated from field: string fromMappingId = 1;
    */
   fromMappingId = "";
 
   /**
+   * Identifier for the recipient mapping.
+   *
    * @generated from field: string toMappingId = 2;
    */
   toMappingId = "";
 
   /**
+   * Identifier for the initiator mapping (who is approved?).
+   *
    * @generated from field: string initiatedByMappingId = 3;
    */
   initiatedByMappingId = "";
 
   /**
+   * Specifies the times when the transfer can occur.
+   *
    * @generated from field: repeated badges.UintRange transferTimes = 4;
    */
   transferTimes: UintRange[] = [];
 
   /**
+   * Specifies the badge IDs involved in the transfer.
+   *
    * @generated from field: repeated badges.UintRange badgeIds = 5;
    */
   badgeIds: UintRange[] = [];
 
   /**
+   * Specifies the ownership times for the badges in the transfer.
+   *
    * @generated from field: repeated badges.UintRange ownershipTimes = 6;
    */
   ownershipTimes: UintRange[] = [];
 
   /**
+   * Identifier for the amountTrackerId. You can use "All" or "!trackerId" for shorthand.
+   * If you use "All", this approval will match to all amountTrackerIds.
+   * If you use "!trackerId", this approval will match to all amountTrackerIds except for trackerId.
+   * If you use "trackerId", this approval will match to only the specified trackerId and fail on all others.
+   *
    * @generated from field: string amountTrackerId = 7;
    */
   amountTrackerId = "";
 
   /**
+   * Identifier for the challengeTrackerId. You can use "All" or "!trackerId" for shorthand.
+   * If you use "All", this approval will match to all challengeTrackerIds.
+   * If you use "!trackerId", this approval will match to all challengeTrackerIds except for trackerId.
+   * If you use "trackerId", this approval will match to only the specified trackerId and fail on all others.
+   *
    * @generated from field: string challengeTrackerId = 8;
    */
   challengeTrackerId = "";
 
   /**
+   * Specifies the times when this permission is permitted. Can not overlap with forbiddenTimes.
+   *
    * @generated from field: repeated badges.UintRange permittedTimes = 9;
    */
   permittedTimes: UintRange[] = [];
 
   /**
+   * Specifies the times when this permission is forbidden. Can not overlap with permittedTimes.
+   *
    * @generated from field: repeated badges.UintRange forbiddenTimes = 10;
    */
   forbiddenTimes: UintRange[] = [];
@@ -298,53 +350,77 @@ export class CollectionApprovalPermission extends Message<CollectionApprovalPerm
 }
 
 /**
+ *
  * UserOutgoingApprovalPermission defines the permissions for updating the user's approved outgoing transfers.
- * See CollectionApprovalPermission for more details. This is equivalent without the fromMappingId field because that is always the user.
  *
  * @generated from message badges.UserOutgoingApprovalPermission
  */
 export class UserOutgoingApprovalPermission extends Message<UserOutgoingApprovalPermission> {
   /**
+   * Identifier for the recipient mapping.
+   *
    * @generated from field: string toMappingId = 1;
    */
   toMappingId = "";
 
   /**
+   * Identifier for the initiator mapping (who is approved?).
+   *
    * @generated from field: string initiatedByMappingId = 2;
    */
   initiatedByMappingId = "";
 
   /**
+   * Specifies the times when the transfer can occur.
+   *
    * @generated from field: repeated badges.UintRange transferTimes = 3;
    */
   transferTimes: UintRange[] = [];
 
   /**
+   * Specifies the badge IDs involved in the transfer.
+   *
    * @generated from field: repeated badges.UintRange badgeIds = 4;
    */
   badgeIds: UintRange[] = [];
 
   /**
+   * Specifies the ownership times for the badges in the transfer.
+   *
    * @generated from field: repeated badges.UintRange ownershipTimes = 5;
    */
   ownershipTimes: UintRange[] = [];
 
   /**
+   * Identifier for the amountTrackerId. You can use "All" or "!trackerId" for shorthand.
+   * If you use "All", this approval will match to all amountTrackerIds.
+   * If you use "!trackerId", this approval will match to all amountTrackerIds except for trackerId.
+   * If you use "trackerId", this approval will match to only the specified trackerId and fail on all others.
+   *
    * @generated from field: string amountTrackerId = 6;
    */
   amountTrackerId = "";
 
   /**
+   * Identifier for the challengeTrackerId. You can use "All" or "!trackerId" for shorthand.
+   * If you use "All", this approval will match to all challengeTrackerIds.
+   * If you use "!trackerId", this approval will match to all challengeTrackerIds except for trackerId.
+   * If you use "trackerId", this approval will match to only the specified trackerId and fail on all others.
+   *
    * @generated from field: string challengeTrackerId = 7;
    */
   challengeTrackerId = "";
 
   /**
+   * Specifies the times when this permission is permitted. Can not overlap with forbiddenTimes.
+   *
    * @generated from field: repeated badges.UintRange permittedTimes = 8;
    */
   permittedTimes: UintRange[] = [];
 
   /**
+   * Specifies the times when this permission is forbidden. Can not overlap with permittedTimes.
+   *
    * @generated from field: repeated badges.UintRange forbiddenTimes = 9;
    */
   forbiddenTimes: UintRange[] = [];
@@ -386,53 +462,79 @@ export class UserOutgoingApprovalPermission extends Message<UserOutgoingApproval
 }
 
 /**
+ *
  * UserIncomingApprovalPermission defines the permissions for updating the user's approved incoming transfers.
+ *
  * See CollectionApprovalPermission for more details. This is equivalent without the toMappingId field because that is always the user.
  *
  * @generated from message badges.UserIncomingApprovalPermission
  */
 export class UserIncomingApprovalPermission extends Message<UserIncomingApprovalPermission> {
   /**
+   * Identifier for the sender mapping.
+   *
    * @generated from field: string fromMappingId = 1;
    */
   fromMappingId = "";
 
   /**
+   * Identifier for the initiator mapping (who is approved?).
+   *
    * @generated from field: string initiatedByMappingId = 2;
    */
   initiatedByMappingId = "";
 
   /**
+   * Specifies the times when the transfer can occur.
+   *
    * @generated from field: repeated badges.UintRange transferTimes = 3;
    */
   transferTimes: UintRange[] = [];
 
   /**
+   * Specifies the badge IDs involved in the transfer.
+   *
    * @generated from field: repeated badges.UintRange badgeIds = 4;
    */
   badgeIds: UintRange[] = [];
 
   /**
+   * Specifies the ownership times for the badges in the transfer.
+   *
    * @generated from field: repeated badges.UintRange ownershipTimes = 5;
    */
   ownershipTimes: UintRange[] = [];
 
   /**
+   * Identifier for the amountTrackerId. You can use "All" or "!trackerId" for shorthand.
+   * If you use "All", this approval will match to all amountTrackerIds.
+   * If you use "!trackerId", this approval will match to all amountTrackerIds except for trackerId.
+   * If you use "trackerId", this approval will match to only the specified trackerId and fail on all others.
+   *
    * @generated from field: string amountTrackerId = 6;
    */
   amountTrackerId = "";
 
   /**
+   * Identifier for the challengeTrackerId. You can use "All" or "!trackerId" for shorthand.
+   * If you use "All", this approval will match to all challengeTrackerIds.
+   * If you use "!trackerId", this approval will match to all challengeTrackerIds except for trackerId.
+   * If you use "trackerId", this approval will match to only the specified trackerId and fail on all others.
+   *
    * @generated from field: string challengeTrackerId = 7;
    */
   challengeTrackerId = "";
 
   /**
+   * Specifies the times when this permission is permitted. Can not overlap with forbiddenTimes.
+   *
    * @generated from field: repeated badges.UintRange permittedTimes = 8;
    */
   permittedTimes: UintRange[] = [];
 
   /**
+   * Specifies the times when this permission is forbidden. Can not overlap with permittedTimes.
+   *
    * @generated from field: repeated badges.UintRange forbiddenTimes = 9;
    */
   forbiddenTimes: UintRange[] = [];
@@ -474,6 +576,7 @@ export class UserIncomingApprovalPermission extends Message<UserIncomingApproval
 }
 
 /**
+ *
  * BalancesActionPermission defines the permissions for updating a timeline-based field for specific badges and specific badge ownership times.
  * Currently, this is only used for creating new badges.
  *
@@ -484,21 +587,29 @@ export class UserIncomingApprovalPermission extends Message<UserIncomingApproval
  */
 export class BalancesActionPermission extends Message<BalancesActionPermission> {
   /**
+   * Specifies the badge IDs involved in the transfer.
+   *
    * @generated from field: repeated badges.UintRange badgeIds = 1;
    */
   badgeIds: UintRange[] = [];
 
   /**
+   * Specifies the ownership times for the badges in the transfer.
+   *
    * @generated from field: repeated badges.UintRange ownershipTimes = 2;
    */
   ownershipTimes: UintRange[] = [];
 
   /**
+   * Specifies the times when this permission is permitted. Can not overlap with forbiddenTimes.
+   *
    * @generated from field: repeated badges.UintRange permittedTimes = 3;
    */
   permittedTimes: UintRange[] = [];
 
   /**
+   * Specifies the times when this permission is forbidden. Can not overlap with permittedTimes.
+   *
    * @generated from field: repeated badges.UintRange forbiddenTimes = 4;
    */
   forbiddenTimes: UintRange[] = [];
@@ -535,6 +646,7 @@ export class BalancesActionPermission extends Message<BalancesActionPermission> 
 }
 
 /**
+ *
  * ActionPermission defines the permissions for performing an action.
  *
  * This is simple and straightforward as the only thing we need to check is the permitted/forbidden times.
@@ -543,11 +655,15 @@ export class BalancesActionPermission extends Message<BalancesActionPermission> 
  */
 export class ActionPermission extends Message<ActionPermission> {
   /**
+   * Specifies the times when this permission is permitted. Can not overlap with forbiddenTimes.
+   *
    * @generated from field: repeated badges.UintRange permittedTimes = 1;
    */
   permittedTimes: UintRange[] = [];
 
   /**
+   * Specifies the times when this permission is forbidden. Can not overlap with permittedTimes.
+   *
    * @generated from field: repeated badges.UintRange forbiddenTimes = 2;
    */
   forbiddenTimes: UintRange[] = [];
@@ -582,6 +698,7 @@ export class ActionPermission extends Message<ActionPermission> {
 }
 
 /**
+ *
  * TimedUpdatePermission defines the permissions for updating a timeline-based field.
  *
  * Ex: If you want to lock the ability to update the collection's metadata for timelineTimes 1/1/2020 - 1/1/2021,
@@ -591,19 +708,25 @@ export class ActionPermission extends Message<ActionPermission> {
  */
 export class TimedUpdatePermission extends Message<TimedUpdatePermission> {
   /**
-   * @generated from field: repeated badges.UintRange timelineTimes = 1;
-   */
-  timelineTimes: UintRange[] = [];
-
-  /**
-   * @generated from field: repeated badges.UintRange permittedTimes = 2;
+   * Specifies the times when this permission is permitted. Can not overlap with forbiddenTimes.
+   *
+   * @generated from field: repeated badges.UintRange permittedTimes = 1;
    */
   permittedTimes: UintRange[] = [];
 
   /**
-   * @generated from field: repeated badges.UintRange forbiddenTimes = 3;
+   * Specifies the times when this permission is forbidden. Can not overlap with permittedTimes.
+   *
+   * @generated from field: repeated badges.UintRange forbiddenTimes = 2;
    */
   forbiddenTimes: UintRange[] = [];
+
+  /**
+   * Specifies the times when the timeline-based field is a specific value.
+   *
+   * @generated from field: repeated badges.UintRange timelineTimes = 3;
+   */
+  timelineTimes: UintRange[] = [];
 
   constructor(data?: PartialMessage<TimedUpdatePermission>) {
     super();
@@ -613,9 +736,9 @@ export class TimedUpdatePermission extends Message<TimedUpdatePermission> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "badges.TimedUpdatePermission";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "timelineTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 2, name: "permittedTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 3, name: "forbiddenTimes", kind: "message", T: UintRange, repeated: true },
+    { no: 1, name: "permittedTimes", kind: "message", T: UintRange, repeated: true },
+    { no: 2, name: "forbiddenTimes", kind: "message", T: UintRange, repeated: true },
+    { no: 3, name: "timelineTimes", kind: "message", T: UintRange, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): TimedUpdatePermission {
@@ -636,6 +759,7 @@ export class TimedUpdatePermission extends Message<TimedUpdatePermission> {
 }
 
 /**
+ *
  * TimedUpdateWithBadgeIdsPermission defines the permissions for updating a timeline-based field for specific badges.
  *
  * Ex: If you want to lock the ability to update the metadata for badgeIds [1,2] for timelineTimes 1/1/2020 - 1/1/2021,
@@ -645,24 +769,32 @@ export class TimedUpdatePermission extends Message<TimedUpdatePermission> {
  */
 export class TimedUpdateWithBadgeIdsPermission extends Message<TimedUpdateWithBadgeIdsPermission> {
   /**
+   * Specifies the badge IDs involved in the transfer.
+   *
    * @generated from field: repeated badges.UintRange badgeIds = 1;
    */
   badgeIds: UintRange[] = [];
 
   /**
-   * @generated from field: repeated badges.UintRange timelineTimes = 2;
-   */
-  timelineTimes: UintRange[] = [];
-
-  /**
-   * @generated from field: repeated badges.UintRange permittedTimes = 3;
+   * Specifies the times when this permission is permitted. Can not overlap with forbiddenTimes.
+   *
+   * @generated from field: repeated badges.UintRange permittedTimes = 2;
    */
   permittedTimes: UintRange[] = [];
 
   /**
-   * @generated from field: repeated badges.UintRange forbiddenTimes = 4;
+   * Specifies the times when this permission is forbidden. Can not overlap with permittedTimes.
+   *
+   * @generated from field: repeated badges.UintRange forbiddenTimes = 3;
    */
   forbiddenTimes: UintRange[] = [];
+
+  /**
+   * Specifies the times when the timeline-based field is a specific value.
+   *
+   * @generated from field: repeated badges.UintRange timelineTimes = 4;
+   */
+  timelineTimes: UintRange[] = [];
 
   constructor(data?: PartialMessage<TimedUpdateWithBadgeIdsPermission>) {
     super();
@@ -673,9 +805,9 @@ export class TimedUpdateWithBadgeIdsPermission extends Message<TimedUpdateWithBa
   static readonly typeName = "badges.TimedUpdateWithBadgeIdsPermission";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "badgeIds", kind: "message", T: UintRange, repeated: true },
-    { no: 2, name: "timelineTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 3, name: "permittedTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 4, name: "forbiddenTimes", kind: "message", T: UintRange, repeated: true },
+    { no: 2, name: "permittedTimes", kind: "message", T: UintRange, repeated: true },
+    { no: 3, name: "forbiddenTimes", kind: "message", T: UintRange, repeated: true },
+    { no: 4, name: "timelineTimes", kind: "message", T: UintRange, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): TimedUpdateWithBadgeIdsPermission {

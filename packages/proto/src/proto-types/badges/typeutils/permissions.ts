@@ -2,11 +2,13 @@ import { NumberType } from "../string-numbers";
 import { UintRange, convertUintRange, deepCopy } from "./typeUtils";
 
 /**
- * UserPermissions represents the permissions of a user and whether they can update their approved outgoing and incoming transfers.
+ * UserPermissions represents the permissions of a user and what they can update about their approvals.
  *
  * @typedef {Object} UserPermissions
  * @property {UserOutgoingApprovalPermission[]} canUpdateOutgoingApprovals - The list of permissions for updating approved outgoing transfers.
  * @property {UserIncomingApprovalPermission[]} canUpdateIncomingApprovals - The list of permissions for updating approved incoming transfers.
+ * @property {ActionPermission[]} canUpdateAutoApproveSelfInitiatedOutgoingTransfers - The permissions for updating auto-approving self-initiated outgoing transfers. If auto-approve is enabled, then the user will be approved by default for all outgoing transfers that are self-initiated.
+ * @property {ActionPermission[]} canUpdateAutoApproveSelfInitiatedIncomingTransfers - The permissions for updating auto-approving self-initiated incoming transfers. If auto-approve is enabled, then the user will be approved by default for all incoming transfers that are self-initiated.
  */
 export interface UserPermissions<T extends NumberType> {
   canUpdateOutgoingApprovals: UserOutgoingApprovalPermission<T>[];
@@ -30,25 +32,15 @@ export function convertUserPermissions<T extends NumberType, U extends NumberTyp
  *
  * @typedef {Object} UserOutgoingApprovalPermission
  *
- * @property {UintRange[]} timelineTimes - The timeline times that the permission applies to.
  * @property {string} toMappingId - The mapping ID of the to addresses of the approved outgoing transfers.
  * @property {string} initiatedByMappingId - The mapping ID of the initiatedBy addresses of the approved outgoing transfers.
  * @property {UintRange[]} transferTimes - The transfer times of the approved outgoing transfers.
  * @property {UintRange[]} badgeIds - The badge IDs of the approved outgoing transfers.
  * @property {UintRange[]} ownershipTimes - The owned times of the approved outgoing transfers.
- * @property {string} amountTrackerId - The approval tracker ID of the approved outgoing transfers.
- * @property {string} challengeTrackerId - The challenge tracker ID of the approved outgoing transfers.
+ * @property {string} amountTrackerId - The approval tracker ID of the approved outgoing transfers. Can use "All" to represent all IDs, "!trackerId" to represent all IDs except trackerId, or "trackerId" to represent only trackerId.
+ * @property {string} challengeTrackerId - The challenge tracker ID of the approved outgoing transfers. Can use "All" to represent all IDs, "!trackerId" to represent all IDs except trackerId, or "trackerId" to represent only trackerId.
  * @property {UintRange[]} permittedTimes - The permitted times of the approved outgoing transfers.
  * @property {UintRange[]} forbiddenTimes - The forbidden times of the approved outgoing transfers.
- *
- * @property {ValueOptions} timelineTimesOptions - The options for manipulating the timeline times.
- * @property {ValueOptions} toMappingOptions - The options for manipulating the to mapping ID.
- * @property {ValueOptions} initiatedByMappingOptions - The options for manipulating the initiatedBy mapping ID.
- * @property {ValueOptions} transferTimesOptions - The options for manipulating the transfer times.
- * @property {ValueOptions} badgeIdsOptions - The options for manipulating the badge IDs.
- * @property {ValueOptions} ownershipTimesOptions - The options for manipulating the owned times.
- * @property {ValueOptions} permittedTimesOptions - The options for manipulating the permitted times.
- * @property {ValueOptions} forbiddenTimesOptions - The options for manipulating the forbidden times.
 */
 export interface UserOutgoingApprovalPermission<T extends NumberType> {
   toMappingId: string;
@@ -83,25 +75,15 @@ export function convertUserOutgoingApprovalPermission<T extends NumberType, U ex
  *
  * @typedef {Object} UserIncomingApprovalPermission
  *
- * @property {UintRange[]} timelineTimes - The timeline times that the permission applies to.
  * @property {string} fromMappingId - The mapping ID of the from addresses of the approved incoming transfers.
  * @property {string} initiatedByMappingId - The mapping ID of the initiatedBy addresses of the approved incoming transfers.
  * @property {UintRange[]} transferTimes - The transfer times of the approved incoming transfers.
  * @property {UintRange[]} badgeIds - The badge IDs of the approved incoming transfers.
  * @property {UintRange[]} ownershipTimes - The owned times of the approved incoming transfers.
- * @property {string} amountTrackerId - The approval tracker ID of the approved incoming transfers.
- * @property {string} challengeTrackerId - The challenge tracker ID of the approved incoming transfers.
+ * @property {string} amountTrackerId - The approval tracker ID of the approved incoming transfers. Can use "All" to represent all IDs, "!trackerId" to represent all IDs except trackerId, or "trackerId" to represent only trackerId.
+ * @property {string} challengeTrackerId - The challenge tracker ID of the approved incoming transfers. Can use "All" to represent all IDs, "!trackerId" to represent all IDs except trackerId, or "trackerId" to represent only trackerId.
  * @property {UintRange[]} permittedTimes - The permitted times of the approved incoming transfers.
  * @property {UintRange[]} forbiddenTimes - The forbidden times of the approved incoming transfers.
- *
- * @property {ValueOptions} timelineTimesOptions - The options for manipulating the timeline times.
- * @property {ValueOptions} fromMappingOptions - The options for manipulating the from mapping ID.
- * @property {ValueOptions} initiatedByMappingOptions - The options for manipulating the initiatedBy mapping ID.
- * @property {ValueOptions} transferTimesOptions - The options for manipulating the transfer times.
- * @property {ValueOptions} badgeIdsOptions - The options for manipulating the badge IDs.
- * @property {ValueOptions} ownershipTimesOptions - The options for manipulating the owned times.
- * @property {ValueOptions} permittedTimesOptions - The options for manipulating the permitted times.
- * @property {ValueOptions} forbiddenTimesOptions - The options for manipulating the forbidden times.
 */
 export interface UserIncomingApprovalPermission<T extends NumberType> {
   fromMappingId: string;
@@ -112,7 +94,7 @@ export interface UserIncomingApprovalPermission<T extends NumberType> {
   amountTrackerId: string
   challengeTrackerId: string
   permittedTimes: UintRange<T>[];
-  forbiddenTimes: UintRange<T>[];
+  forbiddenTimes: UintRange<T>[]
 
 }
 
@@ -133,19 +115,19 @@ export function convertUserIncomingApprovalPermission<T extends NumberType, U ex
 }
 
 /**
- * CollectionPermissions represents the permissions of a collection and whether it can be deleted, archived, or have its contract address, off-chain balances metadata, standards, custom data, manager, or metadata updated.
+ * CollectionPermissions represents the permissions of a collection.
  *
  * @typedef {Object} CollectionPermissions
- * @property {ActionPermission[]} canDeleteCollection - The list of permissions for deleting the collection.
- * @property {TimedUpdatePermission[]} canArchiveCollection - The list of permissions for archiving the collection.
- * @property {TimedUpdatePermission[]} canUpdateOffChainBalancesMetadata - The list of permissions for updating the off-chain balances metadata.
- * @property {TimedUpdatePermission[]} canUpdateStandards - The list of permissions for updating the standards.
- * @property {TimedUpdatePermission[]} canUpdateCustomData - The list of permissions for updating the custom data.
- * @property {TimedUpdatePermission[]} canUpdateManager - The list of permissions for updating the manager.
- * @property {TimedUpdatePermission[]} canUpdateCollectionMetadata - The list of permissions for updating the collection metadata.
- * @property {BalancesActionPermission[]} canCreateMoreBadges - The list of permissions for creating more badges.
- * @property {TimedUpdateWithBadgeIdsPermission[]} canUpdateBadgeMetadata - The list of permissions for updating the badge metadata.
- * @property {CollectionApprovalPermission[]} canUpdateCollectionApprovals - The list of permissions for updating the collection approved transfers.
+ * @property {ActionPermission[]} canDeleteCollection - The permissions for deleting the collection.
+ * @property {TimedUpdatePermission[]} canArchiveCollection - The permissions for archiving the collection.
+ * @property {TimedUpdatePermission[]} canUpdateOffChainBalancesMetadata - The permissions for updating the off-chain balances metadata.
+ * @property {TimedUpdatePermission[]} canUpdateStandards - The permissions for updating the standards.
+ * @property {TimedUpdatePermission[]} canUpdateCustomData - The permissions for updating the custom data.
+ * @property {TimedUpdatePermission[]} canUpdateManager - The permissions for updating the manager.
+ * @property {TimedUpdatePermission[]} canUpdateCollectionMetadata - The permissions for updating the collection metadata.
+ * @property {BalancesActionPermission[]} canCreateMoreBadges - The permissions for creating more badges.
+ * @property {TimedUpdateWithBadgeIdsPermission[]} canUpdateBadgeMetadata - The permissions for updating the badge metadata.
+ * @property {CollectionApprovalPermission[]} canUpdateCollectionApprovals - The permissions for updating the collection approved transfers.
  */
 export interface CollectionPermissions<T extends NumberType> {
   canDeleteCollection: ActionPermission<T>[];
@@ -182,9 +164,6 @@ export function convertCollectionPermissions<T extends NumberType, U extends Num
  *@typedef {Object} ActionPermission
  * @property {UintRange[]} permittedTimes - The permitted times of the permission.
  * @property {UintRange[]} forbiddenTimes - The forbidden times of the permission.
- *
- * @property {ValueOptions} permittedTimesOptions - The options for manipulating the permitted times.
- * @property {ValueOptions} forbiddenTimesOptions - The options for manipulating the forbidden times.
  */
 export interface ActionPermission<T extends NumberType> {
   permittedTimes: UintRange<T>[];
@@ -211,10 +190,6 @@ export function convertActionPermission<T extends NumberType, U extends NumberTy
  * @property {UintRange[]} timelineTimes - The timeline times that the permission applies to.
  *@property {UintRange[]} permittedTimes - The permitted times of the permission.
  * @property {UintRange[]} forbiddenTimes - The forbidden times of the permission.
- *
- * @property {ValueOptions} timelineTimesOptions - The options for manipulating the timeline times.
- * @property {ValueOptions} permittedTimesOptions - The options for manipulating the permitted times.
- * @property {ValueOptions} forbiddenTimesOptions - The options for manipulating the forbidden times.
  */
 export interface TimedUpdatePermission<T extends NumberType> {
   timelineTimes: UintRange<T>[];
@@ -236,7 +211,6 @@ export function convertTimedUpdatePermission<T extends NumberType, U extends Num
 }
 
 
-
 /**
  * TimedUpdateWithBadgeIdsPermission represents a permission that allows updating a timeline-based value time with bagde IDS. For example, updating the badge metadata.
  *
@@ -247,11 +221,6 @@ export function convertTimedUpdatePermission<T extends NumberType, U extends Num
  * @property {UintRange[]} badgeIds - The badge IDs that the permission applies to.
  * @property {UintRange[]} permittedTimes - The permitted times of the permission.
  * @property {UintRange[]} forbiddenTimes - The forbidden times of the permission.
- *
- * @property {ValueOptions} timelineTimesOptions - The options for manipulating the timeline times.
- * @property {ValueOptions} badgeIdsOptions - The options for manipulating the badge IDs.
- * @property {ValueOptions} permittedTimesOptions - The options for manipulating the permitted times.
- * @property {ValueOptions} forbiddenTimesOptions - The options for manipulating the forbidden times.
  */
 export interface TimedUpdateWithBadgeIdsPermission<T extends NumberType> {
   timelineTimes: UintRange<T>[];
@@ -259,6 +228,7 @@ export interface TimedUpdateWithBadgeIdsPermission<T extends NumberType> {
   permittedTimes: UintRange<T>[];
   forbiddenTimes: UintRange<T>[];
 }
+
 export function convertTimedUpdateWithBadgeIdsPermission<T extends NumberType, U extends NumberType>(permission: TimedUpdateWithBadgeIdsPermission<T>, convertFunction: (item: T) => U, populateOptionalFields?: boolean): TimedUpdateWithBadgeIdsPermission<U> {
   const _permission = populateOptionalFields ? {
     ...permission,
@@ -283,11 +253,6 @@ export function convertTimedUpdateWithBadgeIdsPermission<T extends NumberType, U
  * @property {UintRange[]} ownershipTimes - The owned times of the permission.
  * @property {UintRange[]} permittedTimes - The permitted times of the permission.
  * @property {UintRange[]} forbiddenTimes - The forbidden times of the permission.
- *
- * @property {ValueOptions} badgeIdsOptions - The options for manipulating the badge IDs.
- * @property {ValueOptions} ownershipTimesOptions - The options for manipulating the owned times.
- * @property {ValueOptions} permittedTimesOptions - The options for manipulating the permitted times.
- * @property {ValueOptions} forbiddenTimesOptions - The options for manipulating the forbidden times.
 */
 export interface BalancesActionPermission<T extends NumberType> {
   badgeIds: UintRange<T>[];
@@ -316,29 +281,16 @@ export function convertBalancesActionPermission<T extends NumberType, U extends 
  * This permission allows you to define when the approved transfers can be updated and which combinations of (from, to, initiatedBy, transferTimes, badgeIds, ownershipTimes, permittedTimes, forbiddenTimes) can be updated.
  *
  * @typedef {Object} CollectionApprovalPermission
- *@property {UintRange[]} timelineTimes - The timeline times that the permission applies to.
  * @property {string} fromMappingId - The mapping ID of the from addresses of the approved transfers.
  * @property {string} toMappingId - The mapping ID of the to addresses of the approved transfers.
  * @property {string} initiatedByMappingId - The mapping ID of the initiatedBy addresses of the approved transfers.
  * @property {UintRange[]} transferTimes - The transfer times of the approved transfers.
  * @property {UintRange[]} badgeIds - The badge IDs of the approved transfers.
  * @property {UintRange[]} ownershipTimes - The owned times of the approved transfers.
- * @property {string} amountTrackerId - The approval tracker ID of the approved transfers.
- * @property {string} challengeTrackerId - The challenge tracker ID of the approved transfers.
+ * @property {string} amountTrackerId - The approval tracker ID of the approved transfers. Can use "All" to represent all IDs, "!trackerId" to represent all IDs except trackerId, or "trackerId" to represent only trackerId.
+ * @property {string} challengeTrackerId - The challenge tracker ID of the approved transfers. Can use "All" to represent all IDs, "!trackerId" to represent all IDs except trackerId, or "trackerId" to represent only trackerId.
  * @property {UintRange[]} permittedTimes - The permitted times of this permission.
  * @property {UintRange[]} forbiddenTimes - The forbidden times of this permission.
- *
- * @property {ValueOptions} timelineTimesOptions - The options for manipulating the timeline times.
- * @property {ValueOptions} fromMappingOptions - The options for manipulating the from mapping ID.
- * @property {ValueOptions} toMappingOptions - The options for manipulating the to mapping ID.
- * @property {ValueOptions} initiatedByMappingOptions - The options for manipulating the initiatedBy mapping ID.
- * @property {ValueOptions} transferTimesOptions - The options for manipulating the transfer times.
- * @property {ValueOptions} badgeIdsOptions - The options for manipulating the badge IDs.
- * @property {ValueOptions} ownershipTimesOptions - The options for manipulating the owned times.
- * @property {ValueOptions} amountTrackerIdOptions - The options for manipulating the approval tracker ID.
- * @property {ValueOptions} challengeTrackerIdOptions - The options for manipulating the challenge tracker ID.
- * @property {ValueOptions} permittedTimesOptions - The options for manipulating the permitted times.
- * @property {ValueOptions} forbiddenTimesOptions - The options for manipulating the forbidden times.
  */
 export interface CollectionApprovalPermission<T extends NumberType> {
   fromMappingId: string;

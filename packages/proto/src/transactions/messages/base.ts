@@ -107,6 +107,17 @@ function recursivelySort(obj: any): any {
   return obj as any;
 }
 
+/**
+ * createTransactionPayload creates a transaction payload for a given transaction context and messages.
+ *
+ * It returns the payload in the following format: { signDirect, legacyAmino, eipToSign, jsonToSign }
+ * signDirect and legacyAmino are the payloads for signing with the respective signing methods from the Cosmos SDK.
+ * eipToSign is the payload to sign for Ethereum EIP-712 signing.
+ * jsonToSign is the payload to sign for Solana signing.
+ *
+ * @param {TxContext} context - The transaction context.
+ * @param {MessageGenerated | MessageGenerated[]} messages - The message(s) to create the transaction payload for.
+ */
 export const createTransactionPayload = (
   context: TxContext,
   messages: MessageGenerated | MessageGenerated[],
@@ -126,7 +137,8 @@ export const createTransactionPayload = (
   }
 }
 
-
+//Because the current eip712 and other code doesn't support Msgs with optional / empty fields,
+//we need to populate undefined fields with empty default values
 const normalizeMessagesIfNecessary = (messages: MessageGenerated[]) => {
   const newMessages = messages.map((msg) => {
     const msgVal = msg.message;
@@ -143,7 +155,7 @@ const normalizeMessagesIfNecessary = (messages: MessageGenerated[]) => {
       msg = createProtoMsg(populateUndefinedForMsgUniversalUpdateCollection(msgVal as MsgUniversalUpdateCollection))
     }
 
-    //MsgCreateAddressMappings and MsgDeleteCollection should be fine bc they are all primitive types
+    //MsgCreateAddressMappings and MsgDeleteCollection should be fine bc they are all primitive types and required
     //We only normalize if there is a custom type which could be undefined
 
     return msg

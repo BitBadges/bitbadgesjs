@@ -9,50 +9,68 @@ import { Balance, MustOwnBadges, UintRange } from "./balances_pb.js";
 import { UserPermissions } from "./permissions_pb.js";
 
 /**
- * UserBalanceStore is the store for the user balances
- * It consists of a list of balances, a list of approved outgoing transfers, and a list of approved incoming transfers,
- * and the permissions for updating the approved incoming/outgoing transfers.
  *
- * The default approved outgoing / incoming transfers are defined by the collection.
+ * UserBalanceStore is the store for the user balances for a collection.
+ *
+ * It consists of a list of balances, a list of approved outgoing transfers, and a list of approved incoming transfers,
+ * as well as the permissions for updating the approved incoming/outgoing transfers.
+ *
+ * Upon initialization, all fields (minus the balances) are set to the defaults specified by the collection.
  *
  * The outgoing transfers can be used to allow / disallow transfers which are sent from this user.
- * If a transfer has no match, then it is disallowed by default, unless from == initiatedBy (i.e. initiated by this user).
+ * If a transfer has no match, then it is disallowed by default, unless from == initiatedBy (i.e. initiated by this user)
+ * and autoApproveSelfInitiatedOutgoingTransfers is set to true.
  *
  * The incoming transfers can be used to allow / disallow transfers which are sent to this user.
- * If a transfer has no match, then it is disallowed by default, unless to == initiatedBy (i.e. initiated by this user).
+ * If a transfer has no match, then it is disallowed by default, unless to == initiatedBy (i.e. initiated by this user)
+ * and autoApproveSelfInitiatedIncomingTransfers is set to true.
  *
  * Note that the user approved transfers are only checked if the collection approved transfers do not specify to override
- * the user approved transfers.
+ * the user approved transfers. 
+ *
+ * The permissions are used to determine whether the user can update the approved incoming/outgoing transfers and auto approvals.
  *
  * @generated from message badges.UserBalanceStore
  */
 export class UserBalanceStore extends Message<UserBalanceStore> {
   /**
+   * The list of balances associated with this user.
+   *
    * @generated from field: repeated badges.Balance balances = 1;
    */
   balances: Balance[] = [];
 
   /**
+   * The list of approved outgoing transfers for this user.
+   *
    * @generated from field: repeated badges.UserOutgoingApproval outgoingApprovals = 2;
    */
   outgoingApprovals: UserOutgoingApproval[] = [];
 
   /**
+   * The list of approved incoming transfers for this user.
+   *
    * @generated from field: repeated badges.UserIncomingApproval incomingApprovals = 3;
    */
   incomingApprovals: UserIncomingApproval[] = [];
 
   /**
+   * Whether to auto-approve self-initiated outgoing transfers for this user (i.e. from == initiatedBy).
+   *
    * @generated from field: bool autoApproveSelfInitiatedOutgoingTransfers = 4;
    */
   autoApproveSelfInitiatedOutgoingTransfers = false;
 
   /**
+   * Whether to auto-approve self-initiated incoming transfers for this user (i.e. to == initiatedBy).
+   *
    * @generated from field: bool autoApproveSelfInitiatedIncomingTransfers = 5;
    */
   autoApproveSelfInitiatedIncomingTransfers = false;
 
   /**
+   * The permissions for this user's actions and transfers.
+   *
    * @generated from field: badges.UserPermissions userPermissions = 6;
    */
   userPermissions?: UserPermissions;
@@ -91,53 +109,59 @@ export class UserBalanceStore extends Message<UserBalanceStore> {
 }
 
 /**
- * Challenges define the rules for the approval.
- * If all challenge are not met with valid solutions, then the transfer is not approved.
  *
- * Currently, we only support Merkle tree challenges where the Merkle path must be to the provided root
- * and be the expected length.
+ * Challenges define a rule for the approval in the form of a Merkle challenge.
  *
- * We also support the following options:
- * -useCreatorAddressAsLeaf: If true, then the leaf will be set to the creator address. Used for whitelist trees.
- * -maxOneUsePerLeaf: If true, then each leaf can only be used once. If false, then the leaf can be used multiple times.
- * This is very important to be set to true if you want to prevent replay attacks.
- * -useLeafIndexForDistributionOrder: If true, we will use the leafIndex to determine the order of the distribution of badges.
- * leafIndex 0 will be the leftmost leaf of the expectedProofLength layer
+ * A Merkle challenge is a challenge where the user must provide a Merkle proof to a Merkle tree. If they provide a valid proof,
+ * then the challenge is met. All challenges must be met with valid solutions for the transfer to be approved.
  *
- * IMPORTANT: We track the number of uses per leaf according to a challenge ID.
- * Please use unique challenge IDs for different challenges of the same timeline.
+ * IMPORTANT: Merkle challenges currently are limited to SHA256 hashes. See documentation for MerkleChallenge for more details and tutorials.
+ *
+ * IMPORTANT: We track the number of uses per leaf according to the challengeTrackerId specified by the parent approval of this challenge.
  * If you update the challenge ID, then the used leaves tracker will reset and start a new tally.
- * It is highly recommended to avoid updating a challenge without resetting the tally via a new challenge ID.
+ * We recommend using a unique challenge ID for each challenge to prevent overlap and unexpected behavior.
  *
  * @generated from message badges.MerkleChallenge
  */
 export class MerkleChallenge extends Message<MerkleChallenge> {
   /**
+   * The root hash of the Merkle tree to which the Merkle path must lead for verification.
+   *
    * @generated from field: string root = 1;
    */
   root = "";
 
   /**
+   * The expected length of the Merkle path for verification. Used to prevent Merkle path truncation attacks.
+   *
    * @generated from field: string expectedProofLength = 2;
    */
   expectedProofLength = "";
 
   /**
+   * If true, we will override the user's leaf for their proof with their creator address. Used for whitelist trees where all leaves are valid Cosmos addresses.
+   *
    * @generated from field: bool useCreatorAddressAsLeaf = 3;
    */
   useCreatorAddressAsLeaf = false;
 
   /**
+   * The maximum number of times each leaf can be used. Must be 1 if useCreatorAddressAsLeaf is false to prevent replay attacks.
+   *
    * @generated from field: string maxUsesPerLeaf = 4;
    */
   maxUsesPerLeaf = "";
 
   /**
+   * The URI associated with this Merkle challenge, optionally providing metadata about the challenge.
+   *
    * @generated from field: string uri = 6;
    */
   uri = "";
 
   /**
+   * Arbitrary custom data associated with this Merkle challenge.
+   *
    * @generated from field: string customData = 7;
    */
   customData = "";
@@ -177,64 +201,85 @@ export class MerkleChallenge extends Message<MerkleChallenge> {
 
 /**
  * UserOutgoingApproval defines the rules for the approval of an outgoing transfer from a user.
- * See CollectionApproval for more details. This is the same minus a few fields.
  *
  * @generated from message badges.UserOutgoingApproval
  */
 export class UserOutgoingApproval extends Message<UserOutgoingApproval> {
   /**
+   * The mapping ID for the recipient of the transfer.
+   *
    * @generated from field: string toMappingId = 1;
    */
   toMappingId = "";
 
   /**
+   * The mapping ID for the user who initiated the transfer.
+   *
    * @generated from field: string initiatedByMappingId = 2;
    */
   initiatedByMappingId = "";
 
   /**
+   * The allowed range of transfer times for approval.
+   *
    * @generated from field: repeated badges.UintRange transferTimes = 3;
    */
   transferTimes: UintRange[] = [];
 
   /**
+   * The allowed range of badge IDs for approval.
+   *
    * @generated from field: repeated badges.UintRange badgeIds = 4;
    */
   badgeIds: UintRange[] = [];
 
   /**
+   * The allowed range of ownership times for approval.
+   *
    * @generated from field: repeated badges.UintRange ownershipTimes = 5;
    */
   ownershipTimes: UintRange[] = [];
 
   /**
+   * The ID of the amount tracker associated with this approval.
+   * We use this ID to track the number of transfers and amounts transferred.
+   *
    * @generated from field: string amountTrackerId = 6;
    */
   amountTrackerId = "";
 
   /**
+   * The ID of the challenge tracker associated with this approval.
+   * We use this ID to track the number of uses per leaf for the Merkle challenge.
+   *
    * @generated from field: string challengeTrackerId = 7;
    */
   challengeTrackerId = "";
 
   /**
-   * if approved, we use these. if not, these are ignored
+   * The URI associated with this approval, optionally providing metadata about the approval.
    *
    * @generated from field: string uri = 8;
    */
   uri = "";
 
   /**
+   * Arbitrary custom data associated with this approval.
+   *
    * @generated from field: string customData = 9;
    */
   customData = "";
 
   /**
+   * The ID of this approval. Must be unique per level (i.e. collection, outgoing, incoming).
+   *
    * @generated from field: string approvalId = 10;
    */
   approvalId = "";
 
   /**
+   * The criteria that must be met for this approval to be considered.
+   *
    * @generated from field: badges.OutgoingApprovalCriteria approvalCriteria = 11;
    */
   approvalCriteria?: OutgoingApprovalCriteria;
@@ -279,68 +324,85 @@ export class UserOutgoingApproval extends Message<UserOutgoingApproval> {
 
 /**
  * UserIncomingApproval defines the rules for the approval of an incoming transfer to a user.
- * See CollectionApproval for more details. This is the same minus a few fields.
  *
  * @generated from message badges.UserIncomingApproval
  */
 export class UserIncomingApproval extends Message<UserIncomingApproval> {
   /**
+   * The mapping ID for the sender of the transfer.
+   *
    * @generated from field: string fromMappingId = 1;
    */
   fromMappingId = "";
 
   /**
+   * The mapping ID for the user who initiated the transfer.
+   *
    * @generated from field: string initiatedByMappingId = 2;
    */
   initiatedByMappingId = "";
 
   /**
+   * The allowed range of transfer times for approval.
+   *
    * @generated from field: repeated badges.UintRange transferTimes = 3;
    */
   transferTimes: UintRange[] = [];
 
   /**
+   * The allowed range of badge IDs for approval.
+   *
    * @generated from field: repeated badges.UintRange badgeIds = 4;
    */
   badgeIds: UintRange[] = [];
 
   /**
+   * The allowed range of ownership times for approval.
+   *
    * @generated from field: repeated badges.UintRange ownershipTimes = 5;
    */
   ownershipTimes: UintRange[] = [];
 
   /**
-   * if applicable
+   * The ID of the amount tracker associated with this approval.
+   * We use this ID to track the number of transfers and amounts transferred.
    *
    * @generated from field: string amountTrackerId = 6;
    */
   amountTrackerId = "";
 
   /**
-   * if applicable
+   * The ID of the challenge tracker associated with this approval.
+   * We use this ID to track the number of uses per leaf for the Merkle challenge.
    *
    * @generated from field: string challengeTrackerId = 7;
    */
   challengeTrackerId = "";
 
   /**
+   * The URI associated with this approval, optionally providing metadata about the approval.
+   *
    * @generated from field: string uri = 8;
    */
   uri = "";
 
   /**
+   * Arbitrary custom data associated with this approval.
+   *
    * @generated from field: string customData = 9;
    */
   customData = "";
 
   /**
-   * if applicable
+   * The ID of this approval. Must be unique per level (i.e. collection, outgoing, incoming).
    *
    * @generated from field: string approvalId = 10;
    */
   approvalId = "";
 
   /**
+   * The criteria that must be met for this approval to be considered.
+   *
    * @generated from field: badges.IncomingApprovalCriteria approvalCriteria = 11;
    */
   approvalCriteria?: IncomingApprovalCriteria;
@@ -384,6 +446,8 @@ export class UserIncomingApproval extends Message<UserIncomingApproval> {
 }
 
 /**
+ * ManualBalances represents a list of manual balances entered for the predetermined balances criteria. Order is calculated according to the calculation method set. 
+ *
  * @generated from message badges.ManualBalances
  */
 export class ManualBalances extends Message<ManualBalances> {
@@ -421,6 +485,8 @@ export class ManualBalances extends Message<ManualBalances> {
 }
 
 /**
+ * IncrementedBalances represents balances that are incremented by specific amounts, according to the order calculation method.
+ *
  * @generated from message badges.IncrementedBalances
  */
 export class IncrementedBalances extends Message<IncrementedBalances> {
@@ -430,11 +496,15 @@ export class IncrementedBalances extends Message<IncrementedBalances> {
   startBalances: Balance[] = [];
 
   /**
+   * The amount by which to increment badge IDs.
+   *
    * @generated from field: string incrementBadgeIdsBy = 2;
    */
   incrementBadgeIdsBy = "";
 
   /**
+   * The amount by which to increment ownership times.
+   *
    * @generated from field: string incrementOwnershipTimesBy = 3;
    */
   incrementOwnershipTimesBy = "";
@@ -470,30 +540,42 @@ export class IncrementedBalances extends Message<IncrementedBalances> {
 }
 
 /**
+ * PredeterminedOrderCalculationMethod defines the method to calculate predetermined balances order.
+ *
  * @generated from message badges.PredeterminedOrderCalculationMethod
  */
 export class PredeterminedOrderCalculationMethod extends Message<PredeterminedOrderCalculationMethod> {
   /**
+   * Use the overall number of transfers to calculate the order. Ex: First transfer gets the first balance, second transfer gets the second balance, etc.
+   *
    * @generated from field: bool useOverallNumTransfers = 1;
    */
   useOverallNumTransfers = false;
 
   /**
+   * Use the number of transfers per "to" address to calculate the order. Ex: First transfer to address A gets the first balance, second transfer to address A gets the second balance, etc.
+   *
    * @generated from field: bool usePerToAddressNumTransfers = 2;
    */
   usePerToAddressNumTransfers = false;
 
   /**
+   * Use the number of transfers per "from" address to calculate the order. Ex: First transfer from address A gets the first balance, second transfer from address A gets the second balance, etc.
+   *
    * @generated from field: bool usePerFromAddressNumTransfers = 3;
    */
   usePerFromAddressNumTransfers = false;
 
   /**
+   * Use the number of transfers per "initiated by" address to calculate the order. Ex: First transfer initiated by address A gets the first balance, second transfer initiated by address A gets the second balance, etc.
+   *
    * @generated from field: bool usePerInitiatedByAddressNumTransfers = 4;
    */
   usePerInitiatedByAddressNumTransfers = false;
 
   /**
+   * Use the Merkle challenge leaf index to calculate the order. Ex: Transfer that uses leaf index 0 gets the first balance, transfer that uses leaf index 1 gets the second balance, etc.
+   *
    * @generated from field: bool useMerkleChallengeLeafIndex = 5;
    */
   useMerkleChallengeLeafIndex = false;
@@ -531,20 +613,28 @@ export class PredeterminedOrderCalculationMethod extends Message<PredeterminedOr
 }
 
 /**
+ * PredeterminedBalances represents balances with predetermined order calculation.
+ *
  * @generated from message badges.PredeterminedBalances
  */
 export class PredeterminedBalances extends Message<PredeterminedBalances> {
   /**
+   * Manual balances that can be entered. If this is nil, then we use the incremented balances.
+   *
    * @generated from field: repeated badges.ManualBalances manualBalances = 1;
    */
   manualBalances: ManualBalances[] = [];
 
   /**
+   * Balances that have a starting amount and increment. If this is nil, then we use the manual balances.
+   *
    * @generated from field: badges.IncrementedBalances incrementedBalances = 2;
    */
   incrementedBalances?: IncrementedBalances;
 
   /**
+   * The method to calculate the order of predetermined balances.
+   *
    * @generated from field: badges.PredeterminedOrderCalculationMethod orderCalculationMethod = 3;
    */
   orderCalculationMethod?: PredeterminedOrderCalculationMethod;
@@ -580,27 +670,38 @@ export class PredeterminedBalances extends Message<PredeterminedBalances> {
 }
 
 /**
- * PerAddressApprovals defines the approvals per unique from, to, and/or initiatedBy address.
+ * ApprovalAmounts defines approval amounts per unique "from," "to," and/or "initiated by" address.
+ * If any of these are nil or "0", we assume unlimited approvals.
+ * If they are set to a value, then the running tally of the amounts transferred for the specified badge IDs and ownership times 
+ * must not exceed the corresponding value.
  *
  * @generated from message badges.ApprovalAmounts
  */
 export class ApprovalAmounts extends Message<ApprovalAmounts> {
   /**
+   * Overall approval amount.
+   *
    * @generated from field: string overallApprovalAmount = 1;
    */
   overallApprovalAmount = "";
 
   /**
+   * Approval amount per "to" address.
+   *
    * @generated from field: string perToAddressApprovalAmount = 2;
    */
   perToAddressApprovalAmount = "";
 
   /**
+   * Approval amount per "from" address.
+   *
    * @generated from field: string perFromAddressApprovalAmount = 3;
    */
   perFromAddressApprovalAmount = "";
 
   /**
+   * Approval amount per "initiated by" address.
+   *
    * @generated from field: string perInitiatedByAddressApprovalAmount = 4;
    */
   perInitiatedByAddressApprovalAmount = "";
@@ -637,25 +738,38 @@ export class ApprovalAmounts extends Message<ApprovalAmounts> {
 }
 
 /**
+ * MaxNumTransfers defines the maximum number of transfers per unique "from," "to," and/or "initiated by" address.
+ * If any of these are nil or "0", we assume unlimited approvals.
+ * If they are set to a value, then the running tally of the number of transfers for the specified badge IDs and ownership times
+ * must not exceed the corresponding value.
+ *
  * @generated from message badges.MaxNumTransfers
  */
 export class MaxNumTransfers extends Message<MaxNumTransfers> {
   /**
+   * Overall maximum number of transfers.
+   *
    * @generated from field: string overallMaxNumTransfers = 1;
    */
   overallMaxNumTransfers = "";
 
   /**
+   * Maximum number of transfers per "to" address.
+   *
    * @generated from field: string perToAddressMaxNumTransfers = 2;
    */
   perToAddressMaxNumTransfers = "";
 
   /**
+   * Maximum number of transfers per "from" address.
+   *
    * @generated from field: string perFromAddressMaxNumTransfers = 3;
    */
   perFromAddressMaxNumTransfers = "";
 
   /**
+   * Maximum number of transfers per "initiated by" address.
+   *
    * @generated from field: string perInitiatedByAddressMaxNumTransfers = 4;
    */
   perInitiatedByAddressMaxNumTransfers = "";
@@ -692,15 +806,21 @@ export class MaxNumTransfers extends Message<MaxNumTransfers> {
 }
 
 /**
+ * ApprovalsTracker defines the tracker for approvals. This tracks the cumulative number of transfers and associated balances transferred.
+ *
  * @generated from message badges.ApprovalsTracker
  */
 export class ApprovalsTracker extends Message<ApprovalsTracker> {
   /**
+   * The number of transfers that have been processed.
+   *
    * @generated from field: string numTransfers = 1;
    */
   numTransfers = "";
 
   /**
+   * Cumulative balances associated with the transfers that have been processed.
+   *
    * @generated from field: repeated badges.Balance amounts = 2;
    */
   amounts: Balance[] = [];
@@ -735,60 +855,84 @@ export class ApprovalsTracker extends Message<ApprovalsTracker> {
 }
 
 /**
+ * ApprovalCriteria defines the criteria for approving transfers.
+ *
  * @generated from message badges.ApprovalCriteria
  */
 export class ApprovalCriteria extends Message<ApprovalCriteria> {
   /**
+   * List of badges that the user must own for approval.
+   *
    * @generated from field: repeated badges.MustOwnBadges mustOwnBadges = 1;
    */
   mustOwnBadges: MustOwnBadges[] = [];
 
   /**
+   * Merkle challenge that must be satisfied for approval.
+   *
    * @generated from field: badges.MerkleChallenge merkleChallenge = 2;
    */
   merkleChallenge?: MerkleChallenge;
 
   /**
+   * Predetermined balances for eeach approval.
+   *
    * @generated from field: badges.PredeterminedBalances predeterminedBalances = 3;
    */
   predeterminedBalances?: PredeterminedBalances;
 
   /**
+   * Threshold limit of amounts that can be transferred using this approval.
+   *
    * @generated from field: badges.ApprovalAmounts approvalAmounts = 4;
    */
   approvalAmounts?: ApprovalAmounts;
 
   /**
+   * Maximum number of transfers that can be processed using this approval.
+   *
    * @generated from field: badges.MaxNumTransfers maxNumTransfers = 5;
    */
   maxNumTransfers?: MaxNumTransfers;
 
   /**
+   * Require the "to" address to be equal to the "initiated by" address for approval.
+   *
    * @generated from field: bool requireToEqualsInitiatedBy = 9;
    */
   requireToEqualsInitiatedBy = false;
 
   /**
+   * Require the "from" address to be equal to the "initiated by" address for approval.
+   *
    * @generated from field: bool requireFromEqualsInitiatedBy = 10;
    */
   requireFromEqualsInitiatedBy = false;
 
   /**
+   * Require the "to" address to not be equal to the "initiated by" address for approval.
+   *
    * @generated from field: bool requireToDoesNotEqualInitiatedBy = 11;
    */
   requireToDoesNotEqualInitiatedBy = false;
 
   /**
+   * Require the "from" address to not be equal to the "initiated by" address for approval.
+   *
    * @generated from field: bool requireFromDoesNotEqualInitiatedBy = 12;
    */
   requireFromDoesNotEqualInitiatedBy = false;
 
   /**
+   * Overrides the user's outgoing approvals for approval.
+   *
    * @generated from field: bool overridesFromOutgoingApprovals = 13;
    */
   overridesFromOutgoingApprovals = false;
 
   /**
+   * Overrides the user's incoming approvals for approval.
+   *
    * @generated from field: bool overridesToIncomingApprovals = 14;
    */
   overridesToIncomingApprovals = false;
@@ -832,40 +976,56 @@ export class ApprovalCriteria extends Message<ApprovalCriteria> {
 }
 
 /**
+ * OutgoingApprovalCriteria defines the criteria for approving outgoing transfers.
+ *
  * @generated from message badges.OutgoingApprovalCriteria
  */
 export class OutgoingApprovalCriteria extends Message<OutgoingApprovalCriteria> {
   /**
+   * List of badges that the user must own for approval.
+   *
    * @generated from field: repeated badges.MustOwnBadges mustOwnBadges = 1;
    */
   mustOwnBadges: MustOwnBadges[] = [];
 
   /**
+   * Merkle challenge that must be satisfied for approval.
+   *
    * @generated from field: badges.MerkleChallenge merkleChallenge = 2;
    */
   merkleChallenge?: MerkleChallenge;
 
   /**
+   * Predetermined balances for eeach approval.
+   *
    * @generated from field: badges.PredeterminedBalances predeterminedBalances = 3;
    */
   predeterminedBalances?: PredeterminedBalances;
 
   /**
+   * Threshold limit of amounts that can be transferred using this approval.
+   *
    * @generated from field: badges.ApprovalAmounts approvalAmounts = 4;
    */
   approvalAmounts?: ApprovalAmounts;
 
   /**
+   * Maximum number of transfers that can be processed using this approval.
+   *
    * @generated from field: badges.MaxNumTransfers maxNumTransfers = 5;
    */
   maxNumTransfers?: MaxNumTransfers;
 
   /**
+   * Require the "to" address to be equal to the "initiated by" address for approval.
+   *
    * @generated from field: bool requireToEqualsInitiatedBy = 9;
    */
   requireToEqualsInitiatedBy = false;
 
   /**
+   * Require the "to" address to not be equal to the "initiated by" address for approval.
+   *
    * @generated from field: bool requireToDoesNotEqualInitiatedBy = 11;
    */
   requireToDoesNotEqualInitiatedBy = false;
@@ -905,40 +1065,56 @@ export class OutgoingApprovalCriteria extends Message<OutgoingApprovalCriteria> 
 }
 
 /**
+ * IncomingApprovalCriteria defines the criteria for approving incoming transfers.
+ *
  * @generated from message badges.IncomingApprovalCriteria
  */
 export class IncomingApprovalCriteria extends Message<IncomingApprovalCriteria> {
   /**
+   * List of badges that the user must own for approval.
+   *
    * @generated from field: repeated badges.MustOwnBadges mustOwnBadges = 1;
    */
   mustOwnBadges: MustOwnBadges[] = [];
 
   /**
+   * Merkle challenge that must be satisfied for approval.
+   *
    * @generated from field: badges.MerkleChallenge merkleChallenge = 2;
    */
   merkleChallenge?: MerkleChallenge;
 
   /**
+   * Predetermined balances for eeach approval.
+   *
    * @generated from field: badges.PredeterminedBalances predeterminedBalances = 3;
    */
   predeterminedBalances?: PredeterminedBalances;
 
   /**
+   * Threshold limit of amounts that can be transferred using this approval.
+   *
    * @generated from field: badges.ApprovalAmounts approvalAmounts = 4;
    */
   approvalAmounts?: ApprovalAmounts;
 
   /**
+   * Maximum number of transfers that can be processed using this approval.
+   *
    * @generated from field: badges.MaxNumTransfers maxNumTransfers = 5;
    */
   maxNumTransfers?: MaxNumTransfers;
 
   /**
+   * Require the "from" address to be equal to the "initiated by" address for approval.
+   *
    * @generated from field: bool requireFromEqualsInitiatedBy = 10;
    */
   requireFromEqualsInitiatedBy = false;
 
   /**
+   * Require the "from" address to not be equal to the "initiated by" address for approval.
+   *
    * @generated from field: bool requireFromDoesNotEqualInitiatedBy = 12;
    */
   requireFromDoesNotEqualInitiatedBy = false;
@@ -978,73 +1154,93 @@ export class IncomingApprovalCriteria extends Message<IncomingApprovalCriteria> 
 }
 
 /**
+ * CollectionApproval defines the rules for the approval of a transfer on the collection level
+ *
  * @generated from message badges.CollectionApproval
  */
 export class CollectionApproval extends Message<CollectionApproval> {
   /**
-   * Match Criteria 
+   * The mapping ID for the sender of the transfer.
    *
    * @generated from field: string fromMappingId = 1;
    */
   fromMappingId = "";
 
   /**
+   * The mapping ID for the recipient of the transfer.
+   *
    * @generated from field: string toMappingId = 2;
    */
   toMappingId = "";
 
   /**
+   * The mapping ID for the user who initiated the transfer.
+   *
    * @generated from field: string initiatedByMappingId = 3;
    */
   initiatedByMappingId = "";
 
   /**
+   * The allowed range of transfer times for approval.
+   *
    * @generated from field: repeated badges.UintRange transferTimes = 4;
    */
   transferTimes: UintRange[] = [];
 
   /**
+   * The allowed range of badge IDs for approval.
+   *
    * @generated from field: repeated badges.UintRange badgeIds = 5;
    */
   badgeIds: UintRange[] = [];
 
   /**
+   * The allowed range of ownership times for approval.
+   *
    * @generated from field: repeated badges.UintRange ownershipTimes = 6;
    */
   ownershipTimes: UintRange[] = [];
 
   /**
-   * if applicable
+   * The ID of the amount tracker associated with this approval.
+   * We use this ID to track the number of transfers and amounts transferred.
    *
    * @generated from field: string amountTrackerId = 7;
    */
   amountTrackerId = "";
 
   /**
-   * if applicable
+   * The ID of the challenge tracker associated with this approval.
+   * We use this ID to track the number of uses per leaf for the Merkle challenge.
    *
    * @generated from field: string challengeTrackerId = 8;
    */
   challengeTrackerId = "";
 
   /**
+   * The URI associated with this approval, optionally providing metadata about the approval.
+   *
    * @generated from field: string uri = 9;
    */
   uri = "";
 
   /**
+   * Arbitrary custom data associated with this approval.
+   *
    * @generated from field: string customData = 10;
    */
   customData = "";
 
   /**
-   * if applicable
+   * The ID of this approval. Must be unique per level (i.e. collection, outgoing, incoming).
    *
    * @generated from field: string approvalId = 11;
    */
   approvalId = "";
 
   /**
+   * The criteria that must be met for this approval to be considered.
+   *
    * @generated from field: badges.ApprovalCriteria approvalCriteria = 12;
    */
   approvalCriteria?: ApprovalCriteria;
@@ -1089,23 +1285,27 @@ export class CollectionApproval extends Message<CollectionApproval> {
 }
 
 /**
+ * ApprovalIdentifierDetails defines the details to identify a specific approval.
+ *
  * @generated from message badges.ApprovalIdentifierDetails
  */
 export class ApprovalIdentifierDetails extends Message<ApprovalIdentifierDetails> {
   /**
+   * The ID of the approval.
+   *
    * @generated from field: string approvalId = 1;
    */
   approvalId = "";
 
   /**
-   * "collection", "incoming", "outgoing"
+   * The level of the approval. Can be "collection", "incoming", or "outgoing".
    *
    * @generated from field: string approvalLevel = 2;
    */
   approvalLevel = "";
 
   /**
-   * Leave blank if approvalLevel == "collection"
+   * The address of the approver. Leave blank "" if approvalLevel == "collection".
    *
    * @generated from field: string approverAddress = 3;
    */
@@ -1142,45 +1342,67 @@ export class ApprovalIdentifierDetails extends Message<ApprovalIdentifierDetails
 }
 
 /**
+ * Transfer defines the details of a transfer of badges.
+ *
  * @generated from message badges.Transfer
  */
 export class Transfer extends Message<Transfer> {
   /**
+   * The address of the sender of the transfer.
+   *
    * @generated from field: string from = 1;
    */
   from = "";
 
   /**
+   * The addresses of the recipients of the transfer.
+   *
    * @generated from field: repeated string toAddresses = 2;
    */
   toAddresses: string[] = [];
 
   /**
+   * The balances to be transferred.
+   *
    * @generated from field: repeated badges.Balance balances = 3;
    */
   balances: Balance[] = [];
 
   /**
+   * If defined, we will use the predeterminedBalances from the specified approval to calculate the balances at execution time.
+   * We will override the balances field with the precalculated balances. Only applicable for approvals with predeterminedBalances set.
+   *
    * @generated from field: badges.ApprovalIdentifierDetails precalculateBalancesFromApproval = 4;
    */
   precalculateBalancesFromApproval?: ApprovalIdentifierDetails;
 
   /**
+   * The Merkle proofs / solutions for all Merkle challenges required for the transfer.
+   *
    * @generated from field: repeated badges.MerkleProof merkleProofs = 5;
    */
   merkleProofs: MerkleProof[] = [];
 
   /**
+   * The memo for the transfer.
+   *
    * @generated from field: string memo = 6;
    */
   memo = "";
 
   /**
+   * The prioritized approvals for the transfer. By default, we scan linearly through the approvals and use the first match.
+   * This field can be used to prioritize specific approvals and scan through them first.
+   *
    * @generated from field: repeated badges.ApprovalIdentifierDetails prioritizedApprovals = 7;
    */
   prioritizedApprovals: ApprovalIdentifierDetails[] = [];
 
   /**
+   * Whether to only check prioritized approvals for the transfer. 
+   * If true, we will only check the prioritized approvals and fail if none of them match (i.e. do not check any non-prioritized approvals).
+   * If false, we will check the prioritized approvals first and then scan through the rest of the approvals. 
+   *
    * @generated from field: bool onlyCheckPrioritizedApprovals = 8;
    */
   onlyCheckPrioritizedApprovals = false;
@@ -1221,15 +1443,21 @@ export class Transfer extends Message<Transfer> {
 }
 
 /**
+ * MerklePathItem represents an item in a Merkle path.
+ *
  * @generated from message badges.MerklePathItem
  */
 export class MerklePathItem extends Message<MerklePathItem> {
   /**
+   * The hash of the sibling node (aunt) in the Merkle path.
+   *
    * @generated from field: string aunt = 1;
    */
   aunt = "";
 
   /**
+   * Indicates whether the aunt node is on the right side of the path.
+   *
    * @generated from field: bool onRight = 2;
    */
   onRight = false;
@@ -1264,17 +1492,21 @@ export class MerklePathItem extends Message<MerklePathItem> {
 }
 
 /**
- * Consistent with tendermint/crypto merkle tree
+ * MerkleProof represents a Merkle proof, consistent with Tendermint/Crypto Merkle tree.
  *
  * @generated from message badges.MerkleProof
  */
 export class MerkleProof extends Message<MerkleProof> {
   /**
+   * The hash of the leaf node for which the proof is generated.
+   *
    * @generated from field: string leaf = 1;
    */
   leaf = "";
 
   /**
+   * List of Merkle path items (aunts) that make up the proof.
+   *
    * @generated from field: repeated badges.MerklePathItem aunts = 2;
    */
   aunts: MerklePathItem[] = [];
