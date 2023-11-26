@@ -19,10 +19,10 @@
     "bech32": "^2.0.0",
     "bitbadgesjs-proto": "^0.1.181",
     "bs58": "^5.0.0",
+    "crypto-addr-codec": "^0.1.7",
     "ethers": "^5.7.0",
     "merkletreejs": "^0.3.11",
-    "nano": "^10.1.2",
-    "crypto-addr-codec": "^0.1.7"
+    "nano": "^10.1.2"
   },
   "devDependencies": {
     "blockin": "^1.2.58",

@@ -1,6 +1,6 @@
 import { DeliverTxResponse } from "@cosmjs/stargate"
 import { AddressMapping, AmountTrackerIdDetails, NumberType, UintRange, convertUintRange } from "bitbadgesjs-proto"
-import { BroadcastPostBody } from "bitbadgesjs-provider"
+
 import { ChallengeParams } from "blockin"
 import { TransferActivityInfo, convertTransferActivityInfo } from "./activity"
 import { BadgeMetadataDetails, BitBadgesCollection, convertBadgeMetadataDetails, convertBitBadgesCollection } from "./collections"
@@ -9,6 +9,8 @@ import { AddressMappingWithMetadata, Metadata, convertAddressMappingWithMetadata
 import { OffChainBalancesMap } from "./transfers"
 import { SupportedChain } from "./types"
 import { BitBadgesUserInfo, convertBitBadgesUserInfo } from "./users"
+import { BroadcastPostBody } from "../node-rest-api/broadcast"
+
 
 /**
  * If an error occurs, the response will be an ErrorResponse.
@@ -21,11 +23,17 @@ import { BitBadgesUserInfo, convertBitBadgesUserInfo } from "./users"
  * @category API / Indexer
  */
 export interface ErrorResponse {
-  //Serialized error object for debugging purposes. Advanced users can use this to debug issues.
+  /**
+   * Serialized error object for debugging purposes. Advanced users can use this to debug issues.
+   */
   error?: any;
-  //UX-friendly error message that can be displayed to the user. Always present if error.
+  /**
+   * UX-friendly error message that can be displayed to the user. Always present if error.
+   */
   message: string;
-  //Authentication error. Present if the user is not authenticated.
+  /**
+   * Authentication error. Present if the user is not authenticated.
+   */
   unauthorized?: boolean;
 }
 
@@ -33,32 +41,45 @@ export interface ErrorResponse {
  * @category API / Indexer
  */
 export interface GetStatusRouteRequestBody { }
+
 /**
  * @category API / Indexer
  */
 export interface GetStatusRouteSuccessResponse<T extends NumberType> {
+  /**
+   * Represents the status information.
+   */
   status: StatusInfo<T>;
 }
+
 /**
  * @category API / Indexer
  */
 export type GetStatusRouteResponse<T extends NumberType> = ErrorResponse | GetStatusRouteSuccessResponse<T>;
+
 /**
+ * Converts a GetStatusRouteSuccessResponse to another NumberType.
+ *
  * @category API / Indexer
  */
-export function convertGetStatusRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetStatusRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetStatusRouteSuccessResponse<U> {
+export function convertGetStatusRouteSuccessResponse<T extends NumberType, U extends NumberType>(
+  item: GetStatusRouteSuccessResponse<T>,
+  convertFunction: (item: T) => U
+): GetStatusRouteSuccessResponse<U> {
   return {
     status: convertStatusInfo(item.status, convertFunction),
-  }
+  };
 }
-
 
 /**
  * @category API / Indexer
  */
 export interface GetSearchRouteRequestBody { }
+
 /**
  * @category API / Indexer
+ *
+ * @typedef {Object} GetSearchRouteSuccessResponse
  */
 export interface GetSearchRouteSuccessResponse<T extends NumberType> {
   collections: BitBadgesCollection<T>[],
@@ -69,14 +90,21 @@ export interface GetSearchRouteSuccessResponse<T extends NumberType> {
     collection: BitBadgesCollection<T>,
   }[],
 }
+
 /**
  * @category API / Indexer
  */
 export type GetSearchRouteResponse<T extends NumberType> = ErrorResponse | GetSearchRouteSuccessResponse<T>;
+
 /**
+ * Converts a GetSearchRouteSuccessResponse to another NumberType.
+ *
  * @category API / Indexer
  */
-export function convertGetSearchRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetSearchRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetSearchRouteSuccessResponse<U> {
+export function convertGetSearchRouteSuccessResponse<T extends NumberType, U extends NumberType>(
+  item: GetSearchRouteSuccessResponse<T>,
+  convertFunction: (item: T) => U
+): GetSearchRouteSuccessResponse<U> {
   return {
     ...item,
     collections: item.collections.map((collection) => convertBitBadgesCollection(collection, convertFunction)),
@@ -86,7 +114,7 @@ export function convertGetSearchRouteSuccessResponse<T extends NumberType, U ext
       badgeIds: badge.badgeIds.map((badgeId) => convertUintRange(badgeId, convertFunction)),
       collection: convertBitBadgesCollection(badge.collection, convertFunction),
     })),
-  }
+  };
 }
 
 /**
@@ -100,13 +128,27 @@ export function convertGetSearchRouteSuccessResponse<T extends NumberType, U ext
  * @category API / Indexer
  */
 export interface MetadataFetchOptions {
-  doNotFetchCollectionMetadata?: boolean,
-  metadataIds?: NumberType[] | UintRange<NumberType>[],
-  uris?: string[],
-  badgeIds?: NumberType[] | UintRange<NumberType>[],
+  /**
+   * If true, collection metadata will not be fetched.
+   */
+  doNotFetchCollectionMetadata?: boolean;
+  /**
+   * If present, the metadata corresponding to the specified metadata IDs will be fetched. See documentation for how to determine metadata IDs.
+   */
+  metadataIds?: NumberType[] | UintRange<NumberType>[];
+  /**
+   * If present, the metadata corresponding to the specified URIs will be fetched.
+   */
+  uris?: string[];
+  /**
+   * If present, the metadata corresponding to the specified badge IDs will be fetched.
+   */
+  badgeIds?: NumberType[] | UintRange<NumberType>[];
 }
 
 /**
+ * Supported view keys for fetching additional collection details.
+ *
  * @category API / Indexer
  */
 export type CollectionViewKey = 'latestActivity' | 'latestAnnouncements' | 'latestReviews' | 'owners' | 'merkleChallenges' | 'approvalsTrackers';
@@ -114,7 +156,7 @@ export type CollectionViewKey = 'latestActivity' | 'latestAnnouncements' | 'late
 /**
  * Defines the options for fetching additional collection details.
  *
- * A view is a way of fetching additional details about a collectionm, and these will be queryable in the response via the `views` property.
+ * A view is a way of fetching additional details about a collection, and these will be queryable in the response via the `views` property.
  * Each view has a bookmark that is used for pagination and must be supplied to get the next page.
  * If the bookmark is not supplied, the first page will be returned.
  *
@@ -134,196 +176,306 @@ export type CollectionViewKey = 'latestActivity' | 'latestAnnouncements' | 'late
  * @category API / Indexer
  */
 export interface GetAdditionalCollectionDetailsRequestBody {
+  /**
+   * If present, the specified views will be fetched.
+   */
   viewsToFetch?: {
-    viewKey: CollectionViewKey,
-    bookmark: string
-  }[],
-
-  fetchTotalAndMintBalances?: boolean,
-  merkleChallengeIdsToFetch?: ChallengeTrackerIdDetails<NumberType>[],
-  approvalsTrackerIdsToFetch?: AmountTrackerIdDetails<NumberType>[],
-  handleAllAndAppendDefaults?: boolean
+    viewKey: CollectionViewKey;
+    bookmark: string;
+  }[];
+  /**
+   * If true, the total and mint balances will be fetched and will be put in owners[].
+   */
+  fetchTotalAndMintBalances?: boolean;
+  /**
+   * If present, the merkle challenges corresponding to the specified merkle challenge IDs will be fetched.
+   */
+  merkleChallengeIdsToFetch?: ChallengeTrackerIdDetails<NumberType>[];
+  /**
+   * If present, the approvals trackers corresponding to the specified approvals tracker IDs will be fetched.
+   */
+  approvalsTrackerIdsToFetch?: AmountTrackerIdDetails<NumberType>[];
+  /**
+   * If true, we will append defaults with empty values.
+   */
+  handleAllAndAppendDefaults?: boolean;
 }
 
 /**
  * @category API / Indexer
  */
 export interface GetMetadataForCollectionRequestBody {
-  metadataToFetch?: MetadataFetchOptions,
+  /**
+   * If present, we will fetch the metadata corresponding to the specified options.
+   */
+  metadataToFetch?: MetadataFetchOptions;
 }
 
 /**
  * @category API / Indexer
  */
 export interface GetCollectionBatchRouteRequestBody {
-  collectionsToFetch: ({ collectionId: NumberType } & GetMetadataForCollectionRequestBody & GetAdditionalCollectionDetailsRequestBody)[],
+  collectionsToFetch: ({
+    /**
+     * The ID of the collection to fetch.
+     */
+    collectionId: NumberType
+  } & GetMetadataForCollectionRequestBody & GetAdditionalCollectionDetailsRequestBody)[];
 }
+
 /**
  * @category API / Indexer
  */
 export interface GetCollectionBatchRouteSuccessResponse<T extends NumberType> {
-  collections: BitBadgesCollection<T>[]
+  collections: BitBadgesCollection<T>[];
 }
+
 /**
  * @category API / Indexer
  */
 export type GetCollectionBatchRouteResponse<T extends NumberType> = ErrorResponse | GetCollectionBatchRouteSuccessResponse<T>;
+
 /**
+ * Converts a GetCollectionBatchRouteSuccessResponse to another NumberType.
+ *
  * @category API / Indexer
  */
-export function convertGetCollectionBatchRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetCollectionBatchRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetCollectionBatchRouteSuccessResponse<U> {
+export function convertGetCollectionBatchRouteSuccessResponse<T extends NumberType, U extends NumberType>(
+  item: GetCollectionBatchRouteSuccessResponse<T>,
+  convertFunction: (item: T) => U
+): GetCollectionBatchRouteSuccessResponse<U> {
   return {
     collections: item.collections.map((collection) => convertBitBadgesCollection(collection, convertFunction)),
-  }
+  };
 }
 
 /**
  * @category API / Indexer
  */
 export interface GetCollectionByIdRouteRequestBody extends GetAdditionalCollectionDetailsRequestBody, GetMetadataForCollectionRequestBody { }
+
 /**
  * @category API / Indexer
  */
 export interface GetCollectionRouteSuccessResponse<T extends NumberType> {
-  collection: BitBadgesCollection<T>,
+  collection: BitBadgesCollection<T>;
 }
+
 /**
  * @category API / Indexer
  */
 export type GetCollectionRouteResponse<T extends NumberType> = ErrorResponse | GetCollectionRouteSuccessResponse<T>;
+
 /**
+ * Converts a GetCollectionRouteSuccessResponse to another NumberType.
+ *
  * @category API / Indexer
  */
-export function convertGetCollectionRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetCollectionRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetCollectionRouteSuccessResponse<U> {
+export function convertGetCollectionRouteSuccessResponse<T extends NumberType, U extends NumberType>(
+  item: GetCollectionRouteSuccessResponse<T>,
+  convertFunction: (item: T) => U
+): GetCollectionRouteSuccessResponse<U> {
   return {
     collection: convertBitBadgesCollection(item.collection, convertFunction),
-  }
+  };
 }
 
 /**
  * @category API / Indexer
  */
 export interface GetOwnersForBadgeRouteRequestBody {
-  bookmark?: string,
+  /**
+   * The pagination bookmark for where to start the request. Bookmarks are obtained via the previous response. "" for first request.
+   */
+  bookmark?: string;
 }
+
 /**
  * @category API / Indexer
  */
 export interface GetOwnersForBadgeRouteSuccessResponse<T extends NumberType> {
-  owners: BalanceInfoWithDetails<T>[],
-  pagination: PaginationInfo,
+  /**
+   * Represents a list of owners balance details.
+   */
+  owners: BalanceInfoWithDetails<T>[];
+  /**
+   * Represents pagination information.
+   */
+  pagination: PaginationInfo;
 }
+
 /**
  * @category API / Indexer
  */
 export type GetOwnersForBadgeRouteResponse<T extends NumberType> = ErrorResponse | GetOwnersForBadgeRouteSuccessResponse<T>;
+
 /**
+ * Converts a GetOwnersForBadgeRouteSuccessResponse to another NumberType.
+ *
  * @category API / Indexer
  */
-export function convertGetOwnersForBadgeRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetOwnersForBadgeRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetOwnersForBadgeRouteSuccessResponse<U> {
+export function convertGetOwnersForBadgeRouteSuccessResponse<T extends NumberType, U extends NumberType>(
+  item: GetOwnersForBadgeRouteSuccessResponse<T>,
+  convertFunction: (item: T) => U
+): GetOwnersForBadgeRouteSuccessResponse<U> {
   return {
     owners: item.owners.map((balance) => convertBalanceInfoWithDetails(balance, convertFunction)),
     pagination: item.pagination,
-  }
+  };
 }
+
 
 /**
  * @category API / Indexer
  */
 export interface GetMetadataForCollectionRouteRequestBody {
-  metadataToFetch: MetadataFetchOptions,
-}
-/**
- * @category API / Indexer
- */
-export interface GetMetadataForCollectionRouteSuccessResponse<T extends NumberType> {
-  collectionMetadata?: Metadata<T>,
-  badgeMetadata?: BadgeMetadataDetails<T>[],
+  /**
+   * The metadata options to fetch.
+   */
+  metadataToFetch: MetadataFetchOptions;
 }
 
 /**
  * @category API / Indexer
  */
-export type GetMetadataForCollectionRouteResponse<T extends NumberType> = ErrorResponse | GetMetadataForCollectionRouteSuccessResponse<T>;
+export interface GetMetadataForCollectionRouteSuccessResponse<T extends NumberType> {
+  collectionMetadata?: Metadata<T>;
+  badgeMetadata?: BadgeMetadataDetails<T>[];
+}
+
 /**
  * @category API / Indexer
  */
-export function convertGetMetadataForCollectionRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetMetadataForCollectionRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetMetadataForCollectionRouteSuccessResponse<U> {
+export type GetMetadataForCollectionRouteResponse<T extends NumberType> =
+  ErrorResponse | GetMetadataForCollectionRouteSuccessResponse<T>;
+
+/**
+ * @category API / Indexer
+ * @param item - The input success response.
+ * @param convertFunction - A function to convert the type.
+ * @returns The converted success response.
+ */
+export function convertGetMetadataForCollectionRouteSuccessResponse<T extends NumberType, U extends NumberType>(
+  item: GetMetadataForCollectionRouteSuccessResponse<T>,
+  convertFunction: (item: T) => U
+): GetMetadataForCollectionRouteSuccessResponse<U> {
   return {
     collectionMetadata: item.collectionMetadata ? convertMetadata(item.collectionMetadata, convertFunction) : undefined,
     badgeMetadata: item.badgeMetadata ? item.badgeMetadata.map(x => convertBadgeMetadataDetails(x, convertFunction)) : undefined,
-  }
+  };
 }
 
 /**
  * @category API / Indexer
  */
 export interface GetBadgeBalanceByAddressRouteRequestBody { }
+
 /**
  * @category API / Indexer
  */
 export interface GetBadgeBalanceByAddressRouteSuccessResponse<T extends NumberType> {
-  balance: BalanceInfoWithDetails<T>,
+  balance: BalanceInfoWithDetails<T>;
 }
+
 /**
  * @category API / Indexer
  */
-export type GetBadgeBalanceByAddressRouteResponse<T extends NumberType> = ErrorResponse | GetBadgeBalanceByAddressRouteSuccessResponse<T>;
+export type GetBadgeBalanceByAddressRouteResponse<T extends NumberType> =
+  ErrorResponse | GetBadgeBalanceByAddressRouteSuccessResponse<T>;
+
 /**
  * @category API / Indexer
+ * @param item - The input success response.
+ * @param convertFunction - A function to convert the type.
+ * @returns The converted success response.
  */
-export function convertGetBadgeBalanceByAddressRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetBadgeBalanceByAddressRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetBadgeBalanceByAddressRouteSuccessResponse<U> {
+export function convertGetBadgeBalanceByAddressRouteSuccessResponse<T extends NumberType, U extends NumberType>(
+  item: GetBadgeBalanceByAddressRouteSuccessResponse<T>,
+  convertFunction: (item: T) => U
+): GetBadgeBalanceByAddressRouteSuccessResponse<U> {
   return {
     balance: convertBalanceInfoWithDetails(item.balance, convertFunction),
-  }
+  };
 }
 
 /**
  * @category API / Indexer
  */
 export interface GetBadgeActivityRouteRequestBody {
-  bookmark?: string,
+  /**
+   * An optional bookmark for pagination. Bookmarks are obtained via the previous response. "" for first request.
+   */
+  bookmark?: string;
 }
+
 /**
  * @category API / Indexer
  */
 export interface GetBadgeActivityRouteSuccessResponse<T extends NumberType> {
-  activity: TransferActivityInfo<T>[],
-  pagination: PaginationInfo,
+  /**
+   * Array of transfer activity information.
+   */
+  activity: TransferActivityInfo<T>[];
+
+  /**
+   * Pagination information.
+   */
+  pagination: PaginationInfo;
 }
+
 /**
  * @category API / Indexer
  */
-export type GetBadgeActivityRouteResponse<T extends NumberType> = ErrorResponse | GetBadgeActivityRouteSuccessResponse<T>;
+export type GetBadgeActivityRouteResponse<T extends NumberType> =
+  ErrorResponse | GetBadgeActivityRouteSuccessResponse<T>;
+
 /**
  * @category API / Indexer
+ * @param item - The input success response.
+ * @param convertFunction - A function to convert the type.
+ * @returns The converted success response.
  */
-export function convertGetBadgeActivityRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetBadgeActivityRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetBadgeActivityRouteSuccessResponse<U> {
+export function convertGetBadgeActivityRouteSuccessResponse<T extends NumberType, U extends NumberType>(
+  item: GetBadgeActivityRouteSuccessResponse<T>,
+  convertFunction: (item: T) => U
+): GetBadgeActivityRouteSuccessResponse<U> {
   return {
     activity: item.activity.map((activityItem) => convertTransferActivityInfo(activityItem, convertFunction)),
     pagination: item.pagination,
-  }
+  };
 }
 
 /**
  * @category API / Indexer
  */
 export interface RefreshMetadataRouteRequestBody { }
+
 /**
  * @category API / Indexer
  */
 export interface RefreshMetadataRouteSuccessResponse<T extends NumberType> {
-  successMessage: string,
+  /**
+   * A success message.
+   */
+  successMessage: string;
 }
 
 /**
  * @category API / Indexer
  */
-export type RefreshMetadataRouteResponse<T extends NumberType> = ErrorResponse | RefreshMetadataRouteSuccessResponse<T>;
+export type RefreshMetadataRouteResponse<T extends NumberType> =
+  ErrorResponse | RefreshMetadataRouteSuccessResponse<T>;
+
 /**
  * @category API / Indexer
+ * @param item - The input success response.
+ * @param convertFunction - A function to convert the type.
+ * @returns The converted success response.
  */
-export function convertRefreshMetadataRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: RefreshMetadataRouteSuccessResponse<T>, convertFunction: (item: T) => U): RefreshMetadataRouteSuccessResponse<U> {
+export function convertRefreshMetadataRouteSuccessResponse<T extends NumberType, U extends NumberType>(
+  item: RefreshMetadataRouteSuccessResponse<T>,
+  convertFunction: (item: T) => U
+): RefreshMetadataRouteSuccessResponse<U> {
   return { ...item };
 }
 
@@ -331,63 +483,96 @@ export function convertRefreshMetadataRouteSuccessResponse<T extends NumberType,
  * @category API / Indexer
  */
 export interface RefreshStatusRouteRequestBody<T extends NumberType> {
-  collectionId: T,
+  /**
+   * The collection ID to refresh.
+   */
+  collectionId: T;
 }
+
 /**
  * @category API / Indexer
  */
 export interface RefreshStatusRouteSuccessResponse<T extends NumberType> {
-  inQueue: boolean,
-  errorDocs: QueueInfo<T>[],
+  /**
+   * Boolean indicating if the collection is currently in the queue.
+   */
+  inQueue: boolean;
+
+  /**
+   * Array of error documents corresponding to the collection.
+   */
+  errorDocs: QueueInfo<T>[];
 }
+
 /**
  * @category API / Indexer
  */
-export type RefreshStatusRouteResponse<T extends NumberType> = ErrorResponse | RefreshStatusRouteSuccessResponse<T>;
+export type RefreshStatusRouteResponse<T extends NumberType> =
+  ErrorResponse | RefreshStatusRouteSuccessResponse<T>;
+
 /**
  * @category API / Indexer
+ * @param item - The input success response.
+ * @param convertFunction - A function to convert the type.
+ * @returns The converted success response.
  */
-export function convertRefreshStatusRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: RefreshStatusRouteSuccessResponse<T>, convertFunction: (item: T) => U): RefreshStatusRouteSuccessResponse<U> {
+export function convertRefreshStatusRouteSuccessResponse<T extends NumberType, U extends NumberType>(
+  item: RefreshStatusRouteSuccessResponse<T>,
+  convertFunction: (item: T) => U
+): RefreshStatusRouteSuccessResponse<U> {
   return {
     ...item,
     errorDocs: item.errorDocs.map((errorDoc) => convertQueueItem(errorDoc, convertFunction)),
   };
 }
 
-
 /**
- * Type to allow you to specify the codes and passwords for a merkle challenge.
+ * Type to allow specifying codes and passwords for a merkle challenge.
  *
- * We only support storing codes and passwords for merkle challenges created by BitBadges via IPFS. The IPFS CID of the merkle challenge is used to identify the merkle challenge.
+ * We only support storing codes and passwords for merkle challenges created by BitBadges via IPFS.
+ * The IPFS CID of the merkle challenge is used to identify the merkle challenge.
  *
  * Note that we only support storing a set of codes and passwords once per unique CID.
  *
  * @category API / Indexer
  */
 export interface CodesAndPasswords {
-  cid: string,
-  codes: string[],
-  password: string,
+  /**
+   * The IPFS CID of the merkle challenge.
+   */
+  cid: string;
+  codes: string[];
+  password: string;
 }
 
 /**
  * @category API / Indexer
  */
 export interface GetAllCodesAndPasswordsRouteRequestBody { }
+
 /**
  * @category API / Indexer
  */
 export interface GetAllCodesAndPasswordsRouteSuccessResponse<T extends NumberType> {
-  codesAndPasswords: CodesAndPasswords[],
+  codesAndPasswords: CodesAndPasswords[];
 }
+
 /**
  * @category API / Indexer
  */
-export type GetAllCodesAndPasswordsRouteResponse<T extends NumberType> = ErrorResponse | GetAllCodesAndPasswordsRouteSuccessResponse<T>;
+export type GetAllCodesAndPasswordsRouteResponse<T extends NumberType> =
+  ErrorResponse | GetAllCodesAndPasswordsRouteSuccessResponse<T>;
+
 /**
  * @category API / Indexer
+ * @param item - The input success response.
+ * @param convertFunction - A function to convert the type.
+ * @returns The converted success response.
  */
-export function convertGetAllCodesAndPasswordsRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetAllCodesAndPasswordsRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetAllCodesAndPasswordsRouteSuccessResponse<U> {
+export function convertGetAllCodesAndPasswordsRouteSuccessResponse<T extends NumberType, U extends NumberType>(
+  item: GetAllCodesAndPasswordsRouteSuccessResponse<T>,
+  convertFunction: (item: T) => U
+): GetAllCodesAndPasswordsRouteSuccessResponse<U> {
   return { ...item };
 }
 
@@ -395,20 +580,30 @@ export function convertGetAllCodesAndPasswordsRouteSuccessResponse<T extends Num
  * @category API / Indexer
  */
 export interface GetCodeForPasswordRouteRequestBody { }
+
 /**
  * @category API / Indexer
  */
 export interface GetCodeForPasswordRouteSuccessResponse<T extends NumberType> {
-  code: string,
+  code: string;
 }
+
 /**
  * @category API / Indexer
  */
-export type GetCodeForPasswordRouteResponse<T extends NumberType> = ErrorResponse | GetCodeForPasswordRouteSuccessResponse<T>;
+export type GetCodeForPasswordRouteResponse<T extends NumberType> =
+  ErrorResponse | GetCodeForPasswordRouteSuccessResponse<T>;
+
 /**
  * @category API / Indexer
+ * @param item - The input success response.
+ * @param convertFunction - A function to convert the type.
+ * @returns The converted success response.
  */
-export function convertGetCodeForPasswordRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetCodeForPasswordRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetCodeForPasswordRouteSuccessResponse<U> {
+export function convertGetCodeForPasswordRouteSuccessResponse<T extends NumberType, U extends NumberType>(
+  item: GetCodeForPasswordRouteSuccessResponse<T>,
+  convertFunction: (item: T) => U
+): GetCodeForPasswordRouteSuccessResponse<U> {
   return { ...item };
 }
 
@@ -416,46 +611,77 @@ export function convertGetCodeForPasswordRouteSuccessResponse<T extends NumberTy
  * @category API / Indexer
  */
 export interface AddAnnouncementRouteRequestBody {
-  announcement: string, //1 to 2048 characters
+  /**
+   * The announcement text (1 to 2048 characters).
+   */
+  announcement: string;
 }
+
 /**
  * @category API / Indexer
  */
 export interface AddAnnouncementRouteSuccessResponse<T extends NumberType> {
-  success: boolean
-}
-/**
- * @category API / Indexer
- */
-export type AddAnnouncementRouteResponse<T extends NumberType> = ErrorResponse | AddAnnouncementRouteSuccessResponse<T>;
-/**
- * @category API / Indexer
- */
-export function convertAddAnnouncementRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: AddAnnouncementRouteSuccessResponse<T>, convertFunction: (item: T) => U): AddAnnouncementRouteSuccessResponse<U> {
-  return { ...item };
+  /**
+   * Boolean indicating success.
+   */
+  success: boolean;
 }
 
+/**
+ * @category API / Indexer
+ */
+export type AddAnnouncementRouteResponse<T extends NumberType> =
+  ErrorResponse | AddAnnouncementRouteSuccessResponse<T>;
+
+/**
+ * @category API / Indexer
+ * @param item - The input success response.
+ * @param convertFunction - A function to convert the type.
+ * @returns The converted success response.
+ */
+export function convertAddAnnouncementRouteSuccessResponse<T extends NumberType, U extends NumberType>(
+  item: AddAnnouncementRouteSuccessResponse<T>,
+  convertFunction: (item: T) => U
+): AddAnnouncementRouteSuccessResponse<U> {
+  return { ...item };
+}
 
 /**
  * @category API / Indexer
  */
 export interface DeleteReviewRouteRequestBody {
-  reviewId: string
+  /**
+   * The review ID to delete.
+   */
+  reviewId: string;
 }
+
 /**
  * @category API / Indexer
  */
 export interface DeleteReviewRouteSuccessResponse<T extends NumberType> {
-  success: boolean
+  /**
+   * Boolean indicating success.
+   */
+  success: boolean;
 }
+
 /**
  * @category API / Indexer
  */
-export type DeleteReviewRouteResponse<T extends NumberType> = ErrorResponse | DeleteReviewRouteSuccessResponse<T>;
+export type DeleteReviewRouteResponse<T extends NumberType> =
+  ErrorResponse | DeleteReviewRouteSuccessResponse<T>;
+
 /**
  * @category API / Indexer
+ * @param item - The input success response.
+ * @param convertFunction - A function to convert the type.
+ * @returns The converted success response.
  */
-export function convertDeleteReviewRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: DeleteReviewRouteSuccessResponse<T>, convertFunction: (item: T) => U): DeleteReviewRouteSuccessResponse<U> {
+export function convertDeleteReviewRouteSuccessResponse<T extends NumberType, U extends NumberType>(
+  item: DeleteReviewRouteSuccessResponse<T>,
+  convertFunction: (item: T) => U
+): DeleteReviewRouteSuccessResponse<U> {
   return { ...item };
 }
 
@@ -463,52 +689,88 @@ export function convertDeleteReviewRouteSuccessResponse<T extends NumberType, U 
  * @category API / Indexer
  */
 export interface DeleteAnnouncementRouteRequestBody { }
+
 /**
  * @category API / Indexer
  */
 export interface DeleteAnnouncementRouteSuccessResponse<T extends NumberType> {
-  success: boolean
-}
-/**
- * @category API / Indexer
- */
-export type DeleteAnnouncementRouteResponse<T extends NumberType> = ErrorResponse | DeleteAnnouncementRouteSuccessResponse<T>;
-/**
- * @category API / Indexer
- */
-export function convertDeleteAnnouncementRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: DeleteAnnouncementRouteSuccessResponse<T>, convertFunction: (item: T) => U): DeleteAnnouncementRouteSuccessResponse<U> {
-  return { ...item };
+  /**
+   * Boolean indicating success.
+   */
+  success: boolean;
 }
 
+/**
+ * @category API / Indexer
+ */
+export type DeleteAnnouncementRouteResponse<T extends NumberType> =
+  ErrorResponse | DeleteAnnouncementRouteSuccessResponse<T>;
+
+/**
+ * @category API / Indexer
+ * @param item - The input success response.
+ * @param convertFunction - A function to convert the type.
+ * @returns The converted success response.
+ */
+export function convertDeleteAnnouncementRouteSuccessResponse<T extends NumberType, U extends NumberType>(
+  item: DeleteAnnouncementRouteSuccessResponse<T>,
+  convertFunction: (item: T) => U
+): DeleteAnnouncementRouteSuccessResponse<U> {
+  return { ...item };
+}
 
 /**
  * @category API / Indexer
  */
 export interface AddReviewForCollectionRouteRequestBody {
-  review: string, //1 to 2048 characters
-  stars: NumberType, //1 to 5
-}
-/**
- * @category API / Indexer
- */
-export interface AddReviewForCollectionRouteSuccessResponse<T extends NumberType> {
-  success: boolean
-}
-/**
- * @category API / Indexer
- */
-export type AddReviewForCollectionRouteResponse<T extends NumberType> = ErrorResponse | AddReviewForCollectionRouteSuccessResponse<T>;
-/**
- * @category API / Indexer
- */
-export function convertAddReviewForCollectionRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: AddReviewForCollectionRouteSuccessResponse<T>, convertFunction: (item: T) => U): AddReviewForCollectionRouteSuccessResponse<U> {
-  return { ...item };
+  /**
+   * The review text (1 to 2048 characters).
+   */
+  review: string;
+
+  /**
+   * The star rating (1 to 5).
+   */
+  stars: NumberType;
 }
 
 /**
  * @category API / Indexer
  */
+export interface AddReviewForCollectionRouteSuccessResponse<T extends NumberType> {
+  /**
+   * Boolean indicating success.
+   */
+  success: boolean;
+}
+
+/**
+ * @category API / Indexer
+ */
+export type AddReviewForCollectionRouteResponse<T extends NumberType> =
+  ErrorResponse | AddReviewForCollectionRouteSuccessResponse<T>;
+
+/**
+ * @category API / Indexer
+ * @param item - The input success response.
+ * @param convertFunction - A function to convert the type.
+ * @returns The converted success response.
+ */
+export function convertAddReviewForCollectionRouteSuccessResponse<T extends NumberType, U extends NumberType>(
+  item: AddReviewForCollectionRouteSuccessResponse<T>,
+  convertFunction: (item: T) => U
+): AddReviewForCollectionRouteSuccessResponse<U> {
+  return { ...item };
+}
+
+
+/**
+ * The supported view keys for fetching account details.
+ *
+ * @category API / Indexer
+ */
 export type AccountViewKey = 'latestActivity' | 'latestAnnouncements' | 'latestReviews' | 'badgesCollected' | 'addressMappings' | 'latestClaimAlerts' | 'latestAddressMappings' | 'explicitlyIncludedAddressMappings' | 'explicitlyExcludedAddressMappings' | 'badgesCollectedWithHidden' | 'createdBy' | 'managing'
+
 
 /**
  * This defines the options for fetching additional account details.
@@ -516,8 +778,6 @@ export type AccountViewKey = 'latestActivity' | 'latestAnnouncements' | 'latestR
  * A view is a way of fetching additional details about an account, and these will be queryable in the response via the `views` property.
  *
  * Each view has a bookmark that is used for pagination and must be supplied to get the next page.
- *
- * If the bookmark is not supplied, the first page will be returned.
  *
  * We support the following views:
  * - `latestActivity` - Fetches the latest activity for the account.
@@ -530,80 +790,112 @@ export type AccountViewKey = 'latestActivity' | 'latestAnnouncements' | 'latestR
  * @property {string} [address] - If present, the account corresponding to the specified address will be fetched. Please only specify one of `address` or `username`.
  * @property {string} [username] - If present, the account corresponding to the specified username will be fetched. Please only specify one of `address` or `username`.
  * @property {boolean} [fetchSequence] - If true, the sequence will be fetched from the blockchain.
- * @property {boolean} [fetchBalance] - If true, the balance will be fetched from the blockchain.
- * @property {boolean} [noExternalCalls] - If true, only fetches local information. Nothing external like resolved names, avatars, etc.
- */
-/**
+ * @property {boolean} [fetchBalance] - If true, the $BADGE balance will be fetched from the blockchain.
+ * @property {boolean} [noExternalCalls] - If true, only fetches local information stored in DB. Nothing external like resolved names, avatars, etc.
+ * @property {Array<{ viewKey: AccountViewKey, bookmark: string }>} [viewsToFetch] - An array of views to fetch with associated bookmarks.
+ *
  * @category API / Indexer
  */
 export type AccountFetchDetails = {
-  address?: string,
-  username?: string,
-  fetchSequence?: boolean,
-  fetchBalance?: boolean,
-  noExternalCalls?: boolean,
-  viewsToFetch?: {
-    viewKey: AccountViewKey,
-    bookmark: string,
-    // mangoQuerySelector?: nano.MangoSelector
-    // TODO: Allow users to specify their own mango query selector here. For now, we map the viewKey to a mango query selector.
-  }[],
-}
+  address?: string;
+  username?: string;
+  fetchSequence?: boolean;
+  fetchBalance?: boolean;
+  noExternalCalls?: boolean;
+  viewsToFetch?: { viewKey: AccountViewKey, bookmark: string }[];
+};
+
 
 /**
  * @category API / Indexer
  */
 export interface GetAccountsRouteRequestBody {
-  accountsToFetch: AccountFetchDetails[],
+  accountsToFetch: AccountFetchDetails[];
 }
 
 /**
  * @category API / Indexer
  */
 export interface GetAccountsRouteSuccessResponse<T extends NumberType> {
-  accounts: BitBadgesUserInfo<T>[],
+  accounts: BitBadgesUserInfo<T>[];
 }
+
 /**
  * @category API / Indexer
  */
-export type GetAccountsRouteResponse<T extends NumberType> = ErrorResponse | GetAccountsRouteSuccessResponse<T>;
+export type GetAccountsRouteResponse<T extends NumberType> =
+  ErrorResponse | GetAccountsRouteSuccessResponse<T>;
+
 /**
  * @category API / Indexer
+ * @param item The input item to convert.
+ * @param convertFunction Function to convert the item of type T to type U.
+ * @returns The converted success response.
  */
-export function convertGetAccountsRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetAccountsRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetAccountsRouteSuccessResponse<U> {
+export function convertGetAccountsRouteSuccessResponse<T extends NumberType, U extends NumberType>(
+  item: GetAccountsRouteSuccessResponse<T>,
+  convertFunction: (item: T) => U
+): GetAccountsRouteSuccessResponse<U> {
   return {
     accounts: item.accounts.map((account) => convertBitBadgesUserInfo(account, convertFunction)),
-  }
+  };
 }
 
 /**
  * @category API / Indexer
  */
 export interface GetAccountRouteRequestBody {
-  fetchSequence?: boolean,
-  fetchBalance?: boolean,
-  noExternalCalls?: boolean,
-  fetchHidden?: boolean,
+  /**
+   * Indicates whether to fetch the account's sequence.
+   */
+  fetchSequence?: boolean;
+
+  /**
+   * Indicates whether to fetch the account's balance.
+   */
+  fetchBalance?: boolean;
+
+  /**
+   * Indicates whether to avoid external API calls.
+   */
+  noExternalCalls?: boolean;
+
+  /**
+   * Indicates whether to fetch hidden badges.
+   */
+  fetchHidden?: boolean;
+
+  /**
+   * An array of views to fetch.
+   */
   viewsToFetch?: {
-    viewKey: AccountViewKey,
-    bookmark: string
-  }[],
-  //customQueries?: { db: string, selector: any, key: string }[],
-  //TODO: we can add fully custom queries here (i.e. supply own Mango selector)
+    viewKey: AccountViewKey;
+    bookmark: string;
+  }[];
 }
 
 /**
  * @category API / Indexer
  */
-export type GetAccountRouteSuccessResponse<T extends NumberType> = BitBadgesUserInfo<T>;
+export type GetAccountRouteSuccessResponse<T extends NumberType> =
+  BitBadgesUserInfo<T>;
+
 /**
  * @category API / Indexer
  */
-export type GetAccountRouteResponse<T extends NumberType> = ErrorResponse | GetAccountRouteSuccessResponse<T>;
+export type GetAccountRouteResponse<T extends NumberType> =
+  ErrorResponse | GetAccountRouteSuccessResponse<T>;
+
 /**
  * @category API / Indexer
+ * @param item The input item to convert.
+ * @param convertFunction Function to convert the item of type T to type U.
+ * @returns The converted success response.
  */
-export function convertGetAccountRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetAccountRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetAccountRouteSuccessResponse<U> {
+export function convertGetAccountRouteSuccessResponse<T extends NumberType, U extends NumberType>(
+  item: GetAccountRouteSuccessResponse<T>,
+  convertFunction: (item: T) => U
+): GetAccountRouteSuccessResponse<U> {
   return convertBitBadgesUserInfo(item, convertFunction);
 }
 
@@ -611,23 +903,43 @@ export function convertGetAccountRouteSuccessResponse<T extends NumberType, U ex
  * @category API / Indexer
  */
 export interface AddReviewForUserRouteRequestBody {
-  review: string, //1 to 2048 characters
-  stars: NumberType, //1 to 5
+  /**
+   * The review text (1 to 2048 characters).
+   */
+  review: string;
+
+  /**
+   * The number of stars (1 to 5) for the review.
+   */
+  stars: NumberType;
 }
+
 /**
  * @category API / Indexer
  */
 export interface AddReviewForUserRouteSuccessResponse<T extends NumberType> {
-  success: boolean
+  /**
+   * Indicates whether the review was added successfully.
+   */
+  success: boolean;
 }
+
 /**
  * @category API / Indexer
  */
-export type AddReviewForUserRouteResponse<T extends NumberType> = ErrorResponse | AddReviewForUserRouteSuccessResponse<T>;
+export type AddReviewForUserRouteResponse<T extends NumberType> =
+  ErrorResponse | AddReviewForUserRouteSuccessResponse<T>;
+
 /**
  * @category API / Indexer
+ * @param item The input item to convert.
+ * @param convertFunction Function to convert the item of type T to type U.
+ * @returns The converted success response.
  */
-export function convertAddReviewForUserRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: AddReviewForUserRouteSuccessResponse<T>, convertFunction: (item: T) => U): AddReviewForUserRouteSuccessResponse<U> {
+export function convertAddReviewForUserRouteSuccessResponse<T extends NumberType, U extends NumberType>(
+  item: AddReviewForUserRouteSuccessResponse<T>,
+  convertFunction: (item: T) => U
+): AddReviewForUserRouteSuccessResponse<U> {
   return { ...item };
 }
 
@@ -635,46 +947,98 @@ export function convertAddReviewForUserRouteSuccessResponse<T extends NumberType
  * @category API / Indexer
  */
 export interface UpdateAccountInfoRouteRequestBody<T extends NumberType> {
-  discord?: string,
-  twitter?: string,
-  github?: string,
-  telegram?: string,
-  seenActivity?: NumberType,
-  readme?: string,
+  /**
+   * The Discord username.
+   */
+  discord?: string;
+
+  /**
+   * The Twitter username.
+   */
+  twitter?: string;
+
+  /**
+   * The GitHub username.
+   */
+  github?: string;
+
+  /**
+   * The Telegram username.
+   */
+  telegram?: string;
+
+  /**
+   * The last seen activity timestamp.
+   */
+  seenActivity?: NumberType;
+
+  /**
+   * The README details.
+   */
+  readme?: string;
+
+  /**
+   * The badges to hide and not view for this profile's portfolio
+   */
   hiddenBadges?: {
-    collectionId: T,
-    badgeIds: UintRange<T>[],
-  }[],
+    collectionId: T;
+    badgeIds: UintRange<T>[];
+  }[];
 
+  /**
+   * An array of custom pages on the user's portolio. Used to customize, sort, and group badges into pages.
+   */
   customPages?: {
-    title: string,
-    description: string,
+    title: string;
+    description: string;
     badges: {
-      collectionId: T,
-      badgeIds: UintRange<T>[],
-    }[]
-  }[]
+      collectionId: T;
+      badgeIds: UintRange<T>[];
+    }[];
+  }[];
 
-  profilePicUrl?: string
-  username?: string
+  /**
+   * The profile picture URL.
+   */
+  profilePicUrl?: string;
 
-  profilePicImageFile?: any
+  /**
+   * The username.
+   */
+  username?: string;
+
+  /**
+   * The profile picture image file. We will then upload to our CDN.
+   */
+  profilePicImageFile?: any;
 }
 
 /**
  * @category API / Indexer
  */
 export interface UpdateAccountInfoRouteSuccessResponse<T extends NumberType> {
-  success: boolean
+  /**
+   * Indicates whether the update was successful.
+   */
+  success: boolean;
 }
+
 /**
  * @category API / Indexer
  */
-export type UpdateAccountInfoRouteResponse<T extends NumberType> = ErrorResponse | UpdateAccountInfoRouteSuccessResponse<T>;
+export type UpdateAccountInfoRouteResponse<T extends NumberType> =
+  ErrorResponse | UpdateAccountInfoRouteSuccessResponse<T>;
+
 /**
  * @category API / Indexer
+ * @param item The input item to convert.
+ * @param convertFunction Function to convert the item of type T to type U.
+ * @returns The converted success response.
  */
-export function convertUpdateAccountInfoRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: UpdateAccountInfoRouteSuccessResponse<T>, convertFunction: (item: T) => U): UpdateAccountInfoRouteSuccessResponse<U> {
+export function convertUpdateAccountInfoRouteSuccessResponse<T extends NumberType, U extends NumberType>(
+  item: UpdateAccountInfoRouteSuccessResponse<T>,
+  convertFunction: (item: T) => U
+): UpdateAccountInfoRouteSuccessResponse<U> {
   return { ...item };
 }
 
@@ -682,28 +1046,55 @@ export function convertUpdateAccountInfoRouteSuccessResponse<T extends NumberTyp
  * @category API / Indexer
  */
 export interface AddBalancesToOffChainStorageRouteRequestBody {
+  /**
+   * A map of Cosmos addresses or mapping IDs -> Balance<NumberType>[].
+   */
   balances: OffChainBalancesMap<NumberType>;
+
+  /**
+   * The method for storing balances (ipfs or centralized).
+   */
   method: 'ipfs' | 'centralized';
+
+  /**
+   * The collection ID.
+   */
   collectionId: NumberType;
 }
+
 /**
  * @category API / Indexer
  */
 export interface AddBalancesToOffChainStorageRouteSuccessResponse<T extends NumberType> {
-  uri?: string,
+  /**
+   * The URI of the stored data.
+   */
+  uri?: string;
+
+  /**
+   * The result object with CID.
+   */
   result: {
-    cid?: string,
-    // path: string,
-  }
+    cid?: string;
+  };
 }
+
 /**
  * @category API / Indexer
  */
-export type AddBalancesToOffChainStorageRouteResponse<T extends NumberType> = ErrorResponse | AddBalancesToOffChainStorageRouteSuccessResponse<T>;
+export type AddBalancesToOffChainStorageRouteResponse<T extends NumberType> =
+  ErrorResponse | AddBalancesToOffChainStorageRouteSuccessResponse<T>;
+
 /**
  * @category API / Indexer
+ * @param item The input item to convert.
+ * @param convertFunction Function to convert the item of type T to type U.
+ * @returns The converted success response.
  */
-export function convertAddBalancesToOffChainStorageRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: AddBalancesToOffChainStorageRouteSuccessResponse<T>, convertFunction: (item: T) => U): AddBalancesToOffChainStorageRouteSuccessResponse<U> {
+export function convertAddBalancesToOffChainStorageRouteSuccessResponse<T extends NumberType, U extends NumberType>(
+  item: AddBalancesToOffChainStorageRouteSuccessResponse<T>,
+  convertFunction: (item: T) => U
+): AddBalancesToOffChainStorageRouteSuccessResponse<U> {
   return { ...item };
 }
 
@@ -711,34 +1102,54 @@ export function convertAddBalancesToOffChainStorageRouteSuccessResponse<T extend
  * @category API / Indexer
  */
 export interface AddMetadataToIpfsRouteRequestBody {
-  collectionMetadata?: Metadata<NumberType>,
-  badgeMetadata?: BadgeMetadataDetails<NumberType>[] | Metadata<NumberType>[],
+  /**
+   * The collection metadata or an array of badge metadata details to add.
+   */
+  collectionMetadata?: Metadata<NumberType> | BadgeMetadataDetails<NumberType>[] | Metadata<NumberType>[];
 }
+
 /**
  * @category API / Indexer
  */
 export interface AddMetadataToIpfsRouteSuccessResponse<T extends NumberType> {
+  /**
+   * The result for collection metadata.
+   */
   collectionMetadataResult?: {
-    cid: string,
-    // path: string,
-  },
+    cid: string;
+  };
+
+  /**
+   * An array of badge metadata results, if applicable.
+   */
   badgeMetadataResults: {
-    cid: string,
-    // path: string,
-  }[],
+    cid: string;
+  }[];
+
+  /**
+   * An array of all results (collection and badge metadata).
+   */
   allResults: {
-    cid: string,
-    // path: string,
-  }[]
+    cid: string;
+  }[];
 }
+
 /**
  * @category API / Indexer
  */
-export type AddMetadataToIpfsRouteResponse<T extends NumberType> = ErrorResponse | AddMetadataToIpfsRouteSuccessResponse<T>;
+export type AddMetadataToIpfsRouteResponse<T extends NumberType> =
+  ErrorResponse | AddMetadataToIpfsRouteSuccessResponse<T>;
+
 /**
  * @category API / Indexer
+ * @param item The input item to convert.
+ * @param convertFunction Function to convert the item of type T to type U.
+ * @returns The converted success response.
  */
-export function convertAddMetadataToIpfsRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: AddMetadataToIpfsRouteSuccessResponse<T>, convertFunction: (item: T) => U): AddMetadataToIpfsRouteSuccessResponse<U> {
+export function convertAddMetadataToIpfsRouteSuccessResponse<T extends NumberType, U extends NumberType>(
+  item: AddMetadataToIpfsRouteSuccessResponse<T>,
+  convertFunction: (item: T) => U
+): AddMetadataToIpfsRouteSuccessResponse<U> {
   return { ...item };
 }
 
@@ -746,27 +1157,50 @@ export function convertAddMetadataToIpfsRouteSuccessResponse<T extends NumberTyp
  * @category API / Indexer
  */
 export interface AddApprovalDetailsToOffChainStorageRouteRequestBody {
-  name: string,
-  description: string,
-  challengeDetails?: ChallengeDetails<NumberType>,
+  /**
+   * The name of the approval.
+   */
+  name: string;
+
+  /**
+   * The description of the approval.
+   */
+  description: string;
+
+  /**
+   * The challenge details.
+   */
+  challengeDetails?: ChallengeDetails<NumberType>;
 }
+
 /**
  * @category API / Indexer
  */
 export interface AddApprovalDetailsToOffChainStorageRouteSuccessResponse<T extends NumberType> {
+  /**
+   * The result with CID for IPFS.
+   */
   result: {
-    cid: string,
-    // path: string,
-  }
+    cid: string;
+  };
 }
+
 /**
  * @category API / Indexer
  */
-export type AddApprovalDetailsToOffChainStorageRouteResponse<T extends NumberType> = ErrorResponse | AddApprovalDetailsToOffChainStorageRouteSuccessResponse<T>;
+export type AddApprovalDetailsToOffChainStorageRouteResponse<T extends NumberType> =
+  ErrorResponse | AddApprovalDetailsToOffChainStorageRouteSuccessResponse<T>;
+
 /**
  * @category API / Indexer
+ * @param item The input item to convert.
+ * @param convertFunction Function to convert the item of type T to type U.
+ * @returns The converted success response.
  */
-export function convertAddApprovalDetailsToOffChainStorageRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: AddApprovalDetailsToOffChainStorageRouteSuccessResponse<T>, convertFunction: (item: T) => U): AddApprovalDetailsToOffChainStorageRouteSuccessResponse<U> {
+export function convertAddApprovalDetailsToOffChainStorageRouteSuccessResponse<T extends NumberType, U extends NumberType>(
+  item: AddApprovalDetailsToOffChainStorageRouteSuccessResponse<T>,
+  convertFunction: (item: T) => U
+): AddApprovalDetailsToOffChainStorageRouteSuccessResponse<U> {
   return { ...item };
 }
 
@@ -774,28 +1208,61 @@ export function convertAddApprovalDetailsToOffChainStorageRouteSuccessResponse<T
  * @category API / Indexer
  */
 export interface GetSignInChallengeRouteRequestBody {
-  chain: SupportedChain,
-  address: string,
-  hours?: NumberType,
+  /**
+   * The blockchain chain to be signed in with.
+   */
+  chain: SupportedChain;
+
+  /**
+   * The user's blockchain address (in their native address).
+   */
+  address: string;
+
+  /**
+   * The number of hours to be signed in for.
+   */
+  hours?: NumberType;
 }
+
 /**
  * @category API / Indexer
  */
 export interface GetSignInChallengeRouteSuccessResponse<T extends NumberType> {
-  nonce: string,
-  params: ChallengeParams<T>,
-  blockinMessage: string,
+  /**
+   * The nonce for the challenge.
+   */
+  nonce: string;
+
+  /**
+   * The challenge parameters.
+   */
+  params: ChallengeParams<T>;
+
+  /**
+   * The Blockin message to sign.
+   */
+  blockinMessage: string;
 }
+
 /**
  * @category API / Indexer
  */
-export type GetSignInChallengeRouteResponse<T extends NumberType> = ErrorResponse | GetSignInChallengeRouteSuccessResponse<T>;
+export type GetSignInChallengeRouteResponse<T extends NumberType> =
+  ErrorResponse | GetSignInChallengeRouteSuccessResponse<T>;
+
 /**
  * @category API / Indexer
+ * @param item The input item to convert.
+ * @param convertFunction Function to convert the item of type T to type U.
+ * @returns The converted success response.
  */
-export function convertGetSignInChallengeRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetSignInChallengeRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetSignInChallengeRouteSuccessResponse<U> {
+export function convertGetSignInChallengeRouteSuccessResponse<T extends NumberType, U extends NumberType>(
+  item: GetSignInChallengeRouteSuccessResponse<T>,
+  convertFunction: (item: T) => U
+): GetSignInChallengeRouteSuccessResponse<U> {
   return {
-    ...item, params: {
+    ...item,
+    params: {
       ...item.params,
       assets: item.params.assets?.map((asset) => ({
         ...asset,
@@ -803,8 +1270,7 @@ export function convertGetSignInChallengeRouteSuccessResponse<T extends NumberTy
         ownershipTimes: asset.ownershipTimes ? asset.ownershipTimes.map((ownershipTime) => convertUintRange(ownershipTime, convertFunction)) : undefined,
         mustOwnAmounts: convertUintRange(asset.mustOwnAmounts, convertFunction),
       })),
-
-    }
+    },
   };
 }
 
@@ -812,105 +1278,181 @@ export function convertGetSignInChallengeRouteSuccessResponse<T extends NumberTy
  * @category API / Indexer
  */
 export interface VerifySignInRouteRequestBody {
-  chain: SupportedChain,
-  originalBytes: any
-  signatureBytes: any
+  /**
+   * The chain to be signed in with.
+   */
+  chain: SupportedChain;
+
+  /**
+   * The original bytes of the Blockin message
+   */
+  originalBytes: any;
+
+  /**
+   * The signature bytes of the Blockin message
+   */
+  signatureBytes: any;
 }
+
 /**
  * @category API / Indexer
  */
 export interface VerifySignInRouteSuccessResponse<T extends NumberType> {
-  success: boolean,
-  successMessage: string,
+  /**
+   * Indicates whether the verification was successful.
+   */
+  success: boolean;
+
+  /**
+   * The success message.
+   */
+  successMessage: string;
 }
+
 /**
  * @category API / Indexer
  */
-export type VerifySignInRouteResponse<T extends NumberType> = ErrorResponse | VerifySignInRouteSuccessResponse<T>;
+export type VerifySignInRouteResponse<T extends NumberType> =
+  ErrorResponse | VerifySignInRouteSuccessResponse<T>;
+
 /**
  * @category API / Indexer
+ * @param item The input item to convert.
+ * @param convertFunction Function to convert the item of type T to type U.
+ * @returns The converted success response.
  */
-export function convertVerifySignInRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: VerifySignInRouteSuccessResponse<T>, convertFunction: (item: T) => U): VerifySignInRouteSuccessResponse<U> {
+export function convertVerifySignInRouteSuccessResponse<T extends NumberType, U extends NumberType>(
+  item: VerifySignInRouteSuccessResponse<T>,
+  convertFunction: (item: T) => U
+): VerifySignInRouteSuccessResponse<U> {
   return { ...item };
 }
 
 /**
  * @category API / Indexer
  */
-export interface CheckSignInStatusRequestBody { }
+export interface CheckSignInStatusRequestBody {
+}
+
 /**
  * @category API / Indexer
  */
 export interface CheckSignInStatusRequestSuccessResponse<T extends NumberType> {
-  signedIn: boolean
+  /**
+   * Indicates whether the user is signed in.
+   */
+  signedIn: boolean;
 }
+
+
 /**
  * @category API / Indexer
+ * Represents a response for checking sign-in status.
+ * @typeparam T - Type parameter representing a number type.
  */
 export type CheckSignInStatusResponse<T extends NumberType> = ErrorResponse | CheckSignInStatusRequestSuccessResponse<T>;
+
 /**
  * @category API / Indexer
+ * Converts a CheckSignInStatusRequestSuccessResponse to a new type.
+ * @typeparam T - Type parameter representing the original number type.
+ * @typeparam U - Type parameter representing the new number type.
+ * @param item - The input response to convert.
+ * @param convertFunction - The function to convert the number type.
+ * @returns The converted response.
  */
-export function convertCheckSignInStatusRequestSuccessResponse<T extends NumberType, U extends NumberType>(item: CheckSignInStatusRequestSuccessResponse<T>, convertFunction: (item: T) => U): CheckSignInStatusRequestSuccessResponse<U> {
+export function convertCheckSignInStatusRequestSuccessResponse<T extends NumberType, U extends NumberType>(
+  item: CheckSignInStatusRequestSuccessResponse<T>,
+  convertFunction: (item: T) => U
+): CheckSignInStatusRequestSuccessResponse<U> {
   return { ...item };
 }
 
 /**
  * @category API / Indexer
+ * Represents the request body for signing out.
  */
 export interface SignOutRequestBody { }
+
 /**
  * @category API / Indexer
+ * Represents a successful sign-out response.
+ * @typeparam T - Type parameter representing a number type.
  */
 export interface SignOutSuccessResponse<T extends NumberType> {
-  success: boolean,
+  success: boolean;
 }
+
 /**
  * @category API / Indexer
+ * Represents a response for signing out.
+ * @typeparam T - Type parameter representing a number type.
  */
 export type SignOutResponse<T extends NumberType> = ErrorResponse | SignOutSuccessResponse<T>;
+
 /**
  * @category API / Indexer
+ * Converts a SignOutSuccessResponse to a new type.
+ * @typeparam T - Type parameter representing the original number type.
+ * @typeparam U - Type parameter representing the new number type.
+ * @param item - The input response to convert.
+ * @param convertFunction - The function to convert the number type.
+ * @returns The converted response.
  */
-export function convertSignOutSuccessResponse<T extends NumberType, U extends NumberType>(item: SignOutSuccessResponse<T>, convertFunction: (item: T) => U): SignOutSuccessResponse<U> {
+export function convertSignOutSuccessResponse<T extends NumberType, U extends NumberType>(
+  item: SignOutSuccessResponse<T>,
+  convertFunction: (item: T) => U
+): SignOutSuccessResponse<U> {
   return { ...item };
 }
 
 /**
  * @category API / Indexer
+ * Represents the request body for browsing collections.
  */
 export interface GetBrowseCollectionsRouteRequestBody { }
+
 /**
  * @category API / Indexer
+ * Represents a successful response for browsing collections.
+ * @typeparam T - Type parameter representing a number type.
  */
 export interface GetBrowseCollectionsRouteSuccessResponse<T extends NumberType> {
-  collections: {
-    [category: string]: BitBadgesCollection<T>[],
-  },
-  addressMappings: {
-    [category: string]: AddressMappingWithMetadata<T>[],
-  },
-  profiles: {
-    [category: string]: BitBadgesUserInfo<T>[],
-  },
-  activity: TransferActivityInfo<T>[],
-
+  collections: { [category: string]: BitBadgesCollection<T>[] };
+  addressMappings: { [category: string]: AddressMappingWithMetadata<T>[] };
+  profiles: { [category: string]: BitBadgesUserInfo<T>[] };
+  activity: TransferActivityInfo<T>[];
 }
+
 /**
  * @category API / Indexer
+ * Represents a response for browsing collections.
+ * @typeparam T - Type parameter representing a number type.
  */
 export type GetBrowseCollectionsRouteResponse<T extends NumberType> = ErrorResponse | GetBrowseCollectionsRouteSuccessResponse<T>;
+
 /**
  * @category API / Indexer
+ * Converts a GetBrowseCollectionsRouteSuccessResponse to a new type.
+ * @typeparam T - Type parameter representing the original number type.
+ * @typeparam U - Type parameter representing the new number type.
+ * @param item - The input response to convert.
+ * @param convertFunction - The function to convert the number type.
+ * @returns The converted response.
  */
-export function convertGetBrowseCollectionsRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetBrowseCollectionsRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetBrowseCollectionsRouteSuccessResponse<U> {
+export function convertGetBrowseCollectionsRouteSuccessResponse<T extends NumberType, U extends NumberType>(
+  item: GetBrowseCollectionsRouteSuccessResponse<T>,
+  convertFunction: (item: T) => U
+): GetBrowseCollectionsRouteSuccessResponse<U> {
   return {
     collections: Object.keys(item.collections).reduce((acc, category) => {
       acc[category] = item.collections[category].map((collection) => convertBitBadgesCollection(collection, convertFunction));
       return acc;
     }, {} as { [category: string]: BitBadgesCollection<U>[] }),
     addressMappings: Object.keys(item.addressMappings).reduce((acc, category) => {
-      acc[category] = item.addressMappings[category].map((addressMapping) => convertAddressMappingWithMetadata(addressMapping, convertFunction));
+      acc[category] = item.addressMappings[category].map((addressMapping) =>
+        convertAddressMappingWithMetadata(addressMapping, convertFunction)
+      );
       return acc;
     }, {} as { [category: string]: AddressMappingWithMetadata<U>[] }),
     profiles: Object.keys(item.profiles).reduce((acc, category) => {
@@ -918,307 +1460,453 @@ export function convertGetBrowseCollectionsRouteSuccessResponse<T extends Number
       return acc;
     }, {} as { [category: string]: BitBadgesUserInfo<U>[] }),
     activity: item.activity.map((activityItem) => convertTransferActivityInfo(activityItem, convertFunction)),
-  }
+  };
 }
 
 /**
  * @category API / Indexer
+ * Represents the request body for broadcasting a transaction.
  */
 export type BroadcastTxRouteRequestBody = BroadcastPostBody;
+
 /**
  * @category API / Indexer
+ * Represents a successful response for broadcasting a transaction.
+ * @typeparam T - Type parameter representing a number type.
  */
 export interface BroadcastTxRouteSuccessResponse<T extends NumberType> {
+  /**
+   * The response from the blockchain for the broadcasted tx.
+   * See Cosmos SDK documentation for what each field means.
+   */
   tx_response: {
-    code: number,
-    codespace: string,
-    data: string,
-    events: {
-      type: string,
-      attributes: {
-        key: string,
-        value: string,
-        index: boolean,
-      }[]
-    }[],
-    gas_wanted: string,
-    gas_used: string,
-    height: string,
-    info: string,
+    code: number;
+    codespace: string;
+    data: string;
+    events: { type: string; attributes: { key: string; value: string; index: boolean }[] }[];
+    gas_wanted: string;
+    gas_used: string;
+    height: string;
+    info: string;
     logs: {
-      events: {
-        type: string,
-        attributes: {
-          key: string,
-          value: string,
-          index: boolean,
-        }[]
-      }[],
-    }[],
-    raw_log: string,
-    timestamp: string,
-    tx: object | null,
-    txhash: string,
-  } //TODO: This and simulate response should be exported from an official Cosmos library
+      events: { type: string; attributes: { key: string; value: string; index: boolean }[] }[];
+    }[];
+    raw_log: string;
+    timestamp: string;
+    tx: object | null;
+    txhash: string;
+  };
 }
 
 /**
  * @category API / Indexer
+ * Represents a response for broadcasting a transaction.
+ * @typeparam T - Type parameter representing a number type.
  */
 export type BroadcastTxRouteResponse<T extends NumberType> = ErrorResponse | BroadcastTxRouteSuccessResponse<T>;
+
 /**
  * @category API / Indexer
+ * Converts a BroadcastTxRouteSuccessResponse to a new type.
+ * @typeparam T - Type parameter representing the original number type.
+ * @typeparam U - Type parameter representing the new number type.
+ * @param item - The input response to convert.
+ * @param convertFunction - The function to convert the number type.
+ * @returns The converted response.
  */
-export function convertBroadcastTxRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: BroadcastTxRouteSuccessResponse<T>, convertFunction: (item: T) => U): BroadcastTxRouteSuccessResponse<U> {
+export function convertBroadcastTxRouteSuccessResponse<T extends NumberType, U extends NumberType>(
+  item: BroadcastTxRouteSuccessResponse<T>,
+  convertFunction: (item: T) => U
+): BroadcastTxRouteSuccessResponse<U> {
   return { ...item };
 }
 
 /**
  * @category API / Indexer
+ * Represents the request body for simulating a transaction.
  */
 export type SimulateTxRouteRequestBody = BroadcastPostBody;
+
 /**
  * @category API / Indexer
+ * Represents a successful response for simulating a transaction.
+ * @typeparam T - Type parameter representing a number type.
  */
 export interface SimulateTxRouteSuccessResponse<T extends NumberType> {
-  gas_info: {
-    gas_used: string,
-    gas_wanted: string,
-  },
-  result: {
-    data: string,
-    log: string,
-    events: {
-      type: string,
-      attributes: {
-        key: string,
-        value: string,
-        index: boolean,
-      }[]
-    }[],
-    msg_responses: any[]
-  }
+  /**
+   * How much gas was used in the simulation.
+   */
+  gas_info: { gas_used: string; gas_wanted: string };
+  /**
+   * The result of the simulation.
+   */
+  result: { data: string; log: string; events: { type: string; attributes: { key: string; value: string; index: boolean }[] }[] };
 }
 
 /**
  * @category API / Indexer
+ * Represents a response for simulating a transaction.
+ * @typeparam T - Type parameter representing a number type.
  */
 export type SimulateTxRouteResponse<T extends NumberType> = ErrorResponse | SimulateTxRouteSuccessResponse<T>;
+
 /**
  * @category API / Indexer
+ * Converts a SimulateTxRouteSuccessResponse to a new type.
+ * @typeparam T - Type parameter representing the original number type.
+ * @typeparam U - Type parameter representing the new number type.
+ * @param item - The input response to convert.
+ * @param convertFunction - The function to convert the number type.
+ * @returns The converted response.
  */
-export function convertSimulateTxRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: SimulateTxRouteSuccessResponse<T>, convertFunction: (item: T) => U): SimulateTxRouteSuccessResponse<U> {
+export function convertSimulateTxRouteSuccessResponse<T extends NumberType, U extends NumberType>(
+  item: SimulateTxRouteSuccessResponse<T>,
+  convertFunction: (item: T) => U
+): SimulateTxRouteSuccessResponse<U> {
   return { ...item };
 }
 
 /**
  * @category API / Indexer
+ * Represents the request body for fetching metadata directly.
  */
 export interface FetchMetadataDirectlyRouteRequestBody {
-  uris: string[],
-}
-/**
- * @category API / Indexer
- */
-export interface FetchMetadataDirectlyRouteSuccessResponse<T extends NumberType> {
-  metadata: Metadata<T>[],
-}
-/**
- * @category API / Indexer
- */
-export type FetchMetadataDirectlyRouteResponse<T extends NumberType> = ErrorResponse | FetchMetadataDirectlyRouteSuccessResponse<T>;
-/**
- * @category API / Indexer
- */
-export function convertFetchMetadataDirectlyRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: FetchMetadataDirectlyRouteSuccessResponse<T>, convertFunction: (item: T) => U): FetchMetadataDirectlyRouteSuccessResponse<U> {
-  return {
-    metadata: item.metadata.map((metadata) => convertMetadata(metadata, convertFunction)),
-  }
+  uris: string[];
 }
 
 /**
  * @category API / Indexer
+ * Represents a successful response for fetching metadata directly.
+ * @typeparam T - Type parameter representing a number type.
  */
-export type GetTokensFromFaucetRouteRequestBody = {};
+export interface FetchMetadataDirectlyRouteSuccessResponse<T extends NumberType> {
+  metadata: Metadata<T>[];
+}
+
 /**
  * @category API / Indexer
+ * Represents a response for fetching metadata directly.
+ * @typeparam T - Type parameter representing a number type.
+ */
+export type FetchMetadataDirectlyRouteResponse<T extends NumberType> = ErrorResponse | FetchMetadataDirectlyRouteSuccessResponse<T>;
+
+/**
+ * @category API / Indexer
+ * Converts a FetchMetadataDirectlyRouteSuccessResponse to a new type.
+ * @typeparam T - Type parameter representing the original number type.
+ * @typeparam U - Type parameter representing the new number type.
+ * @param item - The input response to convert.
+ * @param convertFunction - The function to convert the number type.
+ * @returns The converted response.
+ */
+export function convertFetchMetadataDirectlyRouteSuccessResponse<T extends NumberType, U extends NumberType>(
+  item: FetchMetadataDirectlyRouteSuccessResponse<T>,
+  convertFunction: (item: T) => U
+): FetchMetadataDirectlyRouteSuccessResponse<U> {
+  return { metadata: item.metadata.map((metadata) => convertMetadata(metadata, convertFunction)) };
+}
+
+/**
+ * @category API / Indexer
+ * Represents the request body for getting tokens from a faucet.
+ */
+export interface GetTokensFromFaucetRouteRequestBody { }
+
+/**
+ * @category API / Indexer
+ * Represents a response for getting tokens from a faucet.
+ * @typeparam T - Type parameter representing a number type.
  */
 export type GetTokensFromFaucetRouteResponse<T extends NumberType> = DeliverTxResponse | ErrorResponse;
+
 /**
  * @category API / Indexer
+ * Represents a successful response for getting tokens from a faucet.
+ * @typeparam T - Type parameter representing a number type.
  */
 export type GetTokensFromFaucetRouteSuccessResponse<T extends NumberType> = DeliverTxResponse;
+
 /**
  * @category API / Indexer
+ * Converts a GetTokensFromFaucetRouteSuccessResponse to a new type.
+ * @typeparam T - Type parameter representing the original number type.
+ * @typeparam U - Type parameter representing the new number type.
+ * @param item - The input response to convert.
+ * @param convertFunction - The function to convert the number type.
+ * @returns The converted response.
  */
-export function convertGetTokensFromFaucetRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetTokensFromFaucetRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetTokensFromFaucetRouteSuccessResponse<U> {
+export function convertGetTokensFromFaucetRouteSuccessResponse<T extends NumberType, U extends NumberType>(
+  item: GetTokensFromFaucetRouteSuccessResponse<T>,
+  convertFunction: (item: T) => U
+): GetTokensFromFaucetRouteSuccessResponse<U> {
   return { ...item };
 }
 
 /**
  * @category API / Indexer
+ * Represents the request body for getting address mappings.
  */
 export interface GetAddressMappingsRouteRequestBody {
-  mappingIds: string[],
-  managerAddress?: string,
+  /**
+   * The mapping IDs to fetch. Can be reserved or custom IDs.
+   */
+  mappingIds: string[];
 }
 
 /**
  * @category API / Indexer
+ * Represents a successful response for getting address mappings.
+ * @typeparam T - Type parameter representing a number type.
  */
 export interface GetAddressMappingsRouteSuccessResponse<T extends NumberType> {
-  addressMappings: AddressMappingWithMetadata<T>[],
+  addressMappings: AddressMappingWithMetadata<T>[];
 }
 
 /**
  * @category API / Indexer
+ * Represents a response for getting address mappings.
+ * @typeparam T - Type parameter representing a number type.
  */
 export type GetAddressMappingsRouteResponse<T extends NumberType> = ErrorResponse | GetAddressMappingsRouteSuccessResponse<T>;
+
 /**
  * @category API / Indexer
+ * Converts a GetAddressMappingsRouteSuccessResponse to a new type.
+ * @typeparam T - Type parameter representing the original number type.
+ * @typeparam U - Type parameter representing the new number type.
+ * @param item - The input response to convert.
+ * @param convertFunction - The function to convert the number type.
+ * @returns The converted response.
  */
-export function convertGetAddressMappingsRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetAddressMappingsRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetAddressMappingsRouteSuccessResponse<U> {
-  return {
-    addressMappings: item.addressMappings.map((addressMapping) => convertAddressMappingWithMetadata(addressMapping, convertFunction)),
-  }
+export function convertGetAddressMappingsRouteSuccessResponse<T extends NumberType, U extends NumberType>(
+  item: GetAddressMappingsRouteSuccessResponse<T>,
+  convertFunction: (item: T) => U
+): GetAddressMappingsRouteSuccessResponse<U> {
+  return { addressMappings: item.addressMappings.map((addressMapping) => convertAddressMappingWithMetadata(addressMapping, convertFunction)) };
 }
 
 /**
  * @category API / Indexer
+ * Represents the request body for updating address mappings.
  */
 export interface UpdateAddressMappingsRouteRequestBody {
-  addressMappings: AddressMapping[],
+  /**
+   * New address mappings to update.
+   * Requester must be creator of the mappings.
+   * Only applicable to off-chain balances.
+   */
+  addressMappings: AddressMapping[];
 }
 
 /**
  * @category API / Indexer
+ * Represents a successful response for updating address mappings.
+ * @typeparam T - Type parameter representing a number type.
  */
 export interface UpdateAddressMappingsRouteSuccessResponse<T extends NumberType> { }
 
 /**
  * @category API / Indexer
+ * Represents a response for updating address mappings.
+ * @typeparam T - Type parameter representing a number type.
  */
 export type UpdateAddressMappingsRouteResponse<T extends NumberType> = ErrorResponse | UpdateAddressMappingsRouteSuccessResponse<T>;
-/**
- * @category API / Indexer
- */
-export function convertUpdateAddressMappingsRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: UpdateAddressMappingsRouteSuccessResponse<T>, convertFunction: (item: T) => U): UpdateAddressMappingsRouteSuccessResponse<U> {
-  return {
-    ...item,
-  }
-}
 
 /**
  * @category API / Indexer
+ * Converts an UpdateAddressMappingsRouteSuccessResponse to a new type.
+ * @typeparam T - Type parameter representing the original number type.
+ * @typeparam U - Type parameter representing the new number type.
+ * @param item - The input response to convert.
+ * @param convertFunction - The function to convert the number type.
+ * @returns The converted response.
+ */
+export function convertUpdateAddressMappingsRouteSuccessResponse<T extends NumberType, U extends NumberType>(
+  item: UpdateAddressMappingsRouteSuccessResponse<T>,
+  convertFunction: (item: T) => U
+): UpdateAddressMappingsRouteSuccessResponse<U> {
+  return { ...item };
+}
+
+
+/**
+ * @category API / Indexer
+ * Represents the request body for deleting address mappings.
  */
 export interface DeleteAddressMappingsRouteRequestBody {
-  mappingIds: string[],
+  /**
+   * The mapping IDs to delete.
+   */
+  mappingIds: string[];
 }
 
 /**
  * @category API / Indexer
+ * Represents a successful response for deleting address mappings.
+ * @typeparam T - Type parameter representing a number type.
  */
 export interface DeleteAddressMappingsRouteSuccessResponse<T extends NumberType> { }
 
 /**
  * @category API / Indexer
+ * Represents a response for deleting address mappings.
+ * @typeparam T - Type parameter representing a number type.
  */
 export type DeleteAddressMappingsRouteResponse<T extends NumberType> = ErrorResponse | DeleteAddressMappingsRouteSuccessResponse<T>;
+
 /**
  * @category API / Indexer
+ * Converts a DeleteAddressMappingsRouteSuccessResponse to a new type.
+ * @typeparam T - Type parameter representing the original number type.
+ * @typeparam U - Type parameter representing the new number type.
+ * @param item - The input response to convert.
+ * @param convertFunction - The function to convert the number type.
+ * @returns The converted response.
  */
-export function convertDeleteAddressMappingsRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: DeleteAddressMappingsRouteSuccessResponse<T>, convertFunction: (item: T) => U): DeleteAddressMappingsRouteSuccessResponse<U> {
+export function convertDeleteAddressMappingsRouteSuccessResponse<T extends NumberType, U extends NumberType>(
+  item: DeleteAddressMappingsRouteSuccessResponse<T>,
+  convertFunction: (item: T) => U
+): DeleteAddressMappingsRouteSuccessResponse<U> {
   return {
     ...item,
-  }
+  };
 }
-
 
 /**
  * @category API / Indexer
+ * Represents the request body for getting approvals.
  */
 export interface GetApprovalsRouteRequestBody {
-  amountTrackerIds: AmountTrackerIdDetails<NumberType>[],
+  /**
+   * The approval tracker IDs to fetch.
+   */
+  amountTrackerIds: AmountTrackerIdDetails<NumberType>[];
 }
 
 /**
  * @category API / Indexer
+ * Represents a successful response for getting approvals.
+ * @typeparam T - Type parameter representing a number type.
  */
 export interface GetApprovalsRouteSuccessResponse<T extends NumberType> {
-  approvalTrackers: ApprovalsTrackerInfo<T>[],
+  approvalTrackers: ApprovalsTrackerInfo<T>[];
 }
 
 /**
  * @category API / Indexer
+ * Represents a response for getting approvals.
+ * @typeparam T - Type parameter representing a number type.
  */
 export type GetApprovalsRouteResponse<T extends NumberType> = ErrorResponse | GetApprovalsRouteSuccessResponse<T>;
+
 /**
  * @category API / Indexer
+ * Converts a GetApprovalsRouteSuccessResponse to a new type.
+ * @typeparam T - Type parameter representing the original number type.
+ * @typeparam U - Type parameter representing the new number type.
+ * @param item - The input response to convert.
+ * @param convertFunction - The function to convert the number type.
+ * @returns The converted response.
  */
-export function convertGetApprovalsRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetApprovalsRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetApprovalsRouteSuccessResponse<U> {
+export function convertGetApprovalsRouteSuccessResponse<T extends NumberType, U extends NumberType>(
+  item: GetApprovalsRouteSuccessResponse<T>,
+  convertFunction: (item: T) => U
+): GetApprovalsRouteSuccessResponse<U> {
   return {
     approvalTrackers: item.approvalTrackers.map((approvalTracker) => convertApprovalsTrackerInfo(approvalTracker, convertFunction)),
-  }
+  };
 }
 
 /**
  * @category API / Indexer
+ * Represents the request body for getting challenge trackers.
  */
 export interface GetChallengeTrackersRouteRequestBody {
-  challengeTrackerIds: MerkleChallengeIdDetails<NumberType>[],
+  /**
+   * The challenge tracker IDs to fetch.
+   */
+  challengeTrackerIds: MerkleChallengeIdDetails<NumberType>[];
 }
 
 /**
  * @category API / Indexer
+ * Represents a successful response for getting challenge trackers.
+ * @typeparam T - Type parameter representing a number type.
  */
 export interface GetChallengeTrackersRouteSuccessResponse<T extends NumberType> {
-  challengeTrackers: MerkleChallengeInfo<T>[],
+  challengeTrackers: MerkleChallengeInfo<T>[];
 }
 
 /**
  * @category API / Indexer
+ * Represents a response for getting challenge trackers.
+ * @typeparam T - Type parameter representing a number type.
  */
 export type GetChallengeTrackersRouteResponse<T extends NumberType> = ErrorResponse | GetChallengeTrackersRouteSuccessResponse<T>;
+
 /**
  * @category API / Indexer
+ * Converts a GetChallengeTrackersRouteSuccessResponse to a new type.
+ * @typeparam T - Type parameter representing the original number type.
+ * @typeparam U - Type parameter representing the new number type.
+ * @param item - The input response to convert.
+ * @param convertFunction - The function to convert the number type.
+ * @returns The converted response.
  */
-export function convertGetChallengeTrackersRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: GetChallengeTrackersRouteSuccessResponse<T>, convertFunction: (item: T) => U): GetChallengeTrackersRouteSuccessResponse<U> {
+export function convertGetChallengeTrackersRouteSuccessResponse<T extends NumberType, U extends NumberType>(
+  item: GetChallengeTrackersRouteSuccessResponse<T>,
+  convertFunction: (item: T) => U
+): GetChallengeTrackersRouteSuccessResponse<U> {
   return {
     challengeTrackers: item.challengeTrackers.map((merkleChallenge) => convertMerkleChallengeInfo(merkleChallenge, convertFunction)),
-  }
+  };
 }
 
 /**
  * @category API / Indexer
+ * Represents the request body for sending claim alerts. Must be manager of the collection.
+ * @typeparam T - Type parameter representing a number type.
  */
 export interface SendClaimAlertsRouteRequestBody<T extends NumberType> {
-  collectionId: T,
+  collectionId: T;
   code?: string;
   message?: string;
   recipientAddress: string;
-};
-
-/**
- * @category API / Indexer
- */
-export interface SendClaimAlertsRouteSuccessResponse<T extends NumberType> {
-  success: boolean,
 }
 
 /**
  * @category API / Indexer
+ * Represents a successful response for sending claim alerts.
+ * @typeparam T - Type parameter representing a number type.
+ */
+export interface SendClaimAlertsRouteSuccessResponse<T extends NumberType> {
+  success: boolean;
+}
+
+/**
+ * @category API / Indexer
+ * Represents a response for sending claim alerts.
+ * @typeparam T - Type parameter representing a number type.
  */
 export type SendClaimAlertsRouteResponse<T extends NumberType> = ErrorResponse | SendClaimAlertsRouteSuccessResponse<T>;
 
 /**
  * @category API / Indexer
+ * Converts a SendClaimAlertsRouteSuccessResponse to a new type.
+ * @typeparam T - Type parameter representing the original number type.
+ * @typeparam U - Type parameter representing the new number type.
+ * @param item - The input response to convert.
+ * @param convertFunction - The function to convert the number type.
+ * @returns The converted response.
  */
-export function convertSendClaimAlertsRouteSuccessResponse<T extends NumberType, U extends NumberType>(item: SendClaimAlertsRouteSuccessResponse<T>, convertFunction: (item: T) => U): SendClaimAlertsRouteSuccessResponse<U> {
+export function convertSendClaimAlertsRouteSuccessResponse<T extends NumberType, U extends NumberType>(
+  item: SendClaimAlertsRouteSuccessResponse<T>,
+  convertFunction: (item: T) => U
+): SendClaimAlertsRouteSuccessResponse<U> {
   return {
     ...item,
-  }
+  };
 }
-
 
 /**
  * Type for CouchDB pagination information.
@@ -1229,15 +1917,16 @@ export function convertSendClaimAlertsRouteSuccessResponse<T extends NumberType,
  * @category API / Indexer
  */
 export interface PaginationInfo {
-  bookmark: string,
-  hasMore: boolean,
-  total?: number,
+  bookmark: string;
+  hasMore: boolean;
+  total?: number;
 }
 
 /**
- * Information returned by the REST API getAccount route
+ * Information returned by the REST API getAccount route.
  *
- * Note this should be converted into AccountDoc or BitBadgesUserInfo before being returned by the BitBadges API for consistency
+ * Note this should be converted into AccountDoc or BitBadgesUserInfo before being returned by the BitBadges API for consistency.
+ *
  * @category API / Indexer
  */
 export interface CosmosAccountResponse {
@@ -1245,6 +1934,6 @@ export interface CosmosAccountResponse {
   sequence: number;
   pub_key: {
     key: string;
-  }
+  };
   address: string;
 }
