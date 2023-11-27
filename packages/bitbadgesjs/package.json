@@ -27,10 +27,9 @@
   },
   "dependencies": {
     "@types/node": "^17.0.21",
-    "bitbadgesjs-address-converter": "^0.0.2",
-    "bitbadgesjs-proto": "^0.0.27",
+    "bitbadgesjs-proto": "^0.1.181",
     "bitbadgesjs-provider": "^0.0.1",
-    "bitbadgesjs-utils": "^1.0.0",
+    "bitbadgesjs-utils": "^1.1.294",
     "link-module-alias": "^1.2.0",
     "shx": "^0.3.4"
   }
