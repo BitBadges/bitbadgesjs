@@ -6,9 +6,9 @@ import { UserIncomingApprovalWithDetails, UserOutgoingApprovalWithDetails } from
 
 
 /**
- * @category Approvals / Transferability
- *
  * Expands the collection approvals to include the correct mappings and ranges.
+ *
+ *  @category Approvals / Transferability
  */
 export function expandCollectionApprovals(approvals: CollectionApprovalWithDetails<bigint>[]): CollectionApprovalWithDetails<bigint>[] {
   const newCurrApprovals: CollectionApprovalWithDetails<bigint>[] = [];
@@ -48,10 +48,12 @@ export function expandCollectionApprovals(approvals: CollectionApprovalWithDetai
 
 
 /**
- * @category Approvals / Transferability
+ *
  *
  * Appends the default approval (self-initiated) to the front of the list.
  * This will have "default-incoming" for IDs.
+ *
+ *  @category Approvals / Transferability
  */
 export function appendDefaultForIncoming(currApprovals: UserIncomingApprovalWithDetails<bigint>[], userAddress: string): UserIncomingApprovalWithDetails<bigint>[] {
   if (userAddress === "Mint" || userAddress === "Total") {
@@ -87,10 +89,10 @@ export function appendDefaultForIncoming(currApprovals: UserIncomingApprovalWith
 }
 
 /**
- * @category Approvals / Transferability
  *
  * Appends the default approval (self-initiated) to the front of the list.
  * This will have "default-outgoing" for IDs.
+ *  @category Approvals / Transferability
  */
 export function appendDefaultForOutgoing(currApprovals: UserOutgoingApprovalWithDetails<bigint>[], userAddress: string): UserOutgoingApprovalWithDetails<bigint>[] {
   if (userAddress === "Mint" || userAddress === "Total") {

@@ -26,6 +26,6 @@
   },
   "devDependencies": {
     "blockin": "^1.2.58",
-    "typedoc": "^0.24.5"
+    "typedoc": "^0.25.4"
   }
 }

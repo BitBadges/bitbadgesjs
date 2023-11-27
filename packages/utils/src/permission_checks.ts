@@ -127,9 +127,11 @@ function checkNotForbidden(permission: UniversalPermissionDetails): Error | null
 }
 
 /**
- * @category Validate Permissions
+ *
  *
  * Checks an ActionPermission to see if it is currently valid and not forbidden for the current time
+ *
+ *  @category Validate Permissions
  */
 export function checkActionPermission(permissions: ActionPermission<bigint>[]): Error | null {
   const castedPermissions = castActionPermissionToUniversalPermission(permissions);
@@ -147,9 +149,10 @@ export function checkActionPermission(permissions: ActionPermission<bigint>[]): 
 }
 
 /**
- * @category Validate Permissions
  *
  * Checks a TimedUpdatePermission to see if it is currently valid and not forbidden for the current time and provided timeline times
+ * @category Validate Permissions
+ *
  */
 export function checkTimedUpdatePermission(
   timelineTimes: UintRange<bigint>[],
@@ -182,10 +185,9 @@ export function checkTimedUpdatePermission(
 }
 
 /**
- * @category Validate Permissions
- *
  * Checks a BalancesActionPermission to see if it is currently valid and not forbidden for the current time and provided balances
  *
+ * @category Validate Permissions
  */
 export function checkBalancesActionPermission(
   balances: Balance<bigint>[],
@@ -223,10 +225,10 @@ export function checkBalancesActionPermission(
 }
 
 /**
- * @category Validate Permissions
  *
  * Checks a TimedUpdateWithBadgeIdsPermission to see if it is currently valid and not forbidden for the current time and provided timeline times and badge ids
- */
+ * @category Validate Permissions
+*/
 export function checkTimedUpdateWithBadgeIdsPermission(
   details: {
     timelineTimes: UintRange<bigint>[],
@@ -267,9 +269,9 @@ export function checkTimedUpdateWithBadgeIdsPermission(
 }
 
 /**
- * @category Validate Permissions
- *
  * Checks a CollectionApprovalPermission to see if it is currently valid and not forbidden for the current time and provided transfer details.
+ *
+ * @category Validate Permissions
  */
 export function checkCollectionApprovalPermission(
   details: {
@@ -324,9 +326,10 @@ export function checkCollectionApprovalPermission(
 }
 
 /**
+ * Checks a UserOutgoingApprovalPermission to see if it is currently valid and not forbidden for the current time and provided transfer details.
+ *
  * @category Validate Permissions
  *
- * Checks a UserOutgoingApprovalPermission to see if it is currently valid and not forbidden for the current time and provided transfer details.
  */
 export function checkUserOutgoingApprovalPermission(
   detailsToCheck: {
@@ -357,9 +360,8 @@ export function checkUserOutgoingApprovalPermission(
 }
 
 /**
- * @category Validate Permissions
- *
  * Checks a UserIncomingApprovalPermission to see if it is currently valid and not forbidden for the current time and provided transfer details.
+ * @category Validate Permissions
  */
 export function checkUserIncomingApprovalPermission(
   detailsToCheck: {

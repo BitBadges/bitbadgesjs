@@ -125,6 +125,7 @@ export function convertGetSearchRouteSuccessResponse<T extends NumberType, U ext
  * @property {NumberType[] | UintRange<NumberType>[]} [metadataIds] - If present, the metadata corresponding to the specified metadata IDs will be fetched. See documentation for how to determine metadata IDs.
  * @property {string[]} [uris] - If present, the metadata corresponding to the specified URIs will be fetched.
  * @property {NumberType[] | UintRange<NumberType>[]} [badgeIds] - If present, the metadata corresponding to the specified badge IDs will be fetched.
+ *
  * @category API / Indexer
  */
 export interface MetadataFetchOptions {
@@ -1347,19 +1348,11 @@ export interface CheckSignInStatusRequestSuccessResponse<T extends NumberType> {
 
 /**
  * @category API / Indexer
- * Represents a response for checking sign-in status.
- * @typeparam T - Type parameter representing a number type.
  */
 export type CheckSignInStatusResponse<T extends NumberType> = ErrorResponse | CheckSignInStatusRequestSuccessResponse<T>;
 
 /**
  * @category API / Indexer
- * Converts a CheckSignInStatusRequestSuccessResponse to a new type.
- * @typeparam T - Type parameter representing the original number type.
- * @typeparam U - Type parameter representing the new number type.
- * @param item - The input response to convert.
- * @param convertFunction - The function to convert the number type.
- * @returns The converted response.
  */
 export function convertCheckSignInStatusRequestSuccessResponse<T extends NumberType, U extends NumberType>(
   item: CheckSignInStatusRequestSuccessResponse<T>,
@@ -1370,14 +1363,11 @@ export function convertCheckSignInStatusRequestSuccessResponse<T extends NumberT
 
 /**
  * @category API / Indexer
- * Represents the request body for signing out.
  */
 export interface SignOutRequestBody { }
 
 /**
  * @category API / Indexer
- * Represents a successful sign-out response.
- * @typeparam T - Type parameter representing a number type.
  */
 export interface SignOutSuccessResponse<T extends NumberType> {
   success: boolean;
@@ -1385,19 +1375,11 @@ export interface SignOutSuccessResponse<T extends NumberType> {
 
 /**
  * @category API / Indexer
- * Represents a response for signing out.
- * @typeparam T - Type parameter representing a number type.
  */
 export type SignOutResponse<T extends NumberType> = ErrorResponse | SignOutSuccessResponse<T>;
 
 /**
  * @category API / Indexer
- * Converts a SignOutSuccessResponse to a new type.
- * @typeparam T - Type parameter representing the original number type.
- * @typeparam U - Type parameter representing the new number type.
- * @param item - The input response to convert.
- * @param convertFunction - The function to convert the number type.
- * @returns The converted response.
  */
 export function convertSignOutSuccessResponse<T extends NumberType, U extends NumberType>(
   item: SignOutSuccessResponse<T>,
@@ -1408,14 +1390,11 @@ export function convertSignOutSuccessResponse<T extends NumberType, U extends Nu
 
 /**
  * @category API / Indexer
- * Represents the request body for browsing collections.
  */
 export interface GetBrowseCollectionsRouteRequestBody { }
 
 /**
  * @category API / Indexer
- * Represents a successful response for browsing collections.
- * @typeparam T - Type parameter representing a number type.
  */
 export interface GetBrowseCollectionsRouteSuccessResponse<T extends NumberType> {
   collections: { [category: string]: BitBadgesCollection<T>[] };
@@ -1426,19 +1405,14 @@ export interface GetBrowseCollectionsRouteSuccessResponse<T extends NumberType> 
 
 /**
  * @category API / Indexer
- * Represents a response for browsing collections.
- * @typeparam T - Type parameter representing a number type.
  */
 export type GetBrowseCollectionsRouteResponse<T extends NumberType> = ErrorResponse | GetBrowseCollectionsRouteSuccessResponse<T>;
 
 /**
- * @category API / Indexer
+ *
  * Converts a GetBrowseCollectionsRouteSuccessResponse to a new type.
- * @typeparam T - Type parameter representing the original number type.
- * @typeparam U - Type parameter representing the new number type.
- * @param item - The input response to convert.
- * @param convertFunction - The function to convert the number type.
- * @returns The converted response.
+ *
+ * @category API / Indexer
  */
 export function convertGetBrowseCollectionsRouteSuccessResponse<T extends NumberType, U extends NumberType>(
   item: GetBrowseCollectionsRouteSuccessResponse<T>,
@@ -1465,14 +1439,11 @@ export function convertGetBrowseCollectionsRouteSuccessResponse<T extends Number
 
 /**
  * @category API / Indexer
- * Represents the request body for broadcasting a transaction.
  */
 export type BroadcastTxRouteRequestBody = BroadcastPostBody;
 
 /**
  * @category API / Indexer
- * Represents a successful response for broadcasting a transaction.
- * @typeparam T - Type parameter representing a number type.
  */
 export interface BroadcastTxRouteSuccessResponse<T extends NumberType> {
   /**
@@ -1500,19 +1471,11 @@ export interface BroadcastTxRouteSuccessResponse<T extends NumberType> {
 
 /**
  * @category API / Indexer
- * Represents a response for broadcasting a transaction.
- * @typeparam T - Type parameter representing a number type.
  */
 export type BroadcastTxRouteResponse<T extends NumberType> = ErrorResponse | BroadcastTxRouteSuccessResponse<T>;
 
 /**
- * @category API / Indexer
- * Converts a BroadcastTxRouteSuccessResponse to a new type.
- * @typeparam T - Type parameter representing the original number type.
- * @typeparam U - Type parameter representing the new number type.
- * @param item - The input response to convert.
- * @param convertFunction - The function to convert the number type.
- * @returns The converted response.
+ *  @category API / Indexer
  */
 export function convertBroadcastTxRouteSuccessResponse<T extends NumberType, U extends NumberType>(
   item: BroadcastTxRouteSuccessResponse<T>,
@@ -1523,14 +1486,11 @@ export function convertBroadcastTxRouteSuccessResponse<T extends NumberType, U e
 
 /**
  * @category API / Indexer
- * Represents the request body for simulating a transaction.
  */
 export type SimulateTxRouteRequestBody = BroadcastPostBody;
 
 /**
  * @category API / Indexer
- * Represents a successful response for simulating a transaction.
- * @typeparam T - Type parameter representing a number type.
  */
 export interface SimulateTxRouteSuccessResponse<T extends NumberType> {
   /**
@@ -1545,19 +1505,11 @@ export interface SimulateTxRouteSuccessResponse<T extends NumberType> {
 
 /**
  * @category API / Indexer
- * Represents a response for simulating a transaction.
- * @typeparam T - Type parameter representing a number type.
  */
 export type SimulateTxRouteResponse<T extends NumberType> = ErrorResponse | SimulateTxRouteSuccessResponse<T>;
 
 /**
  * @category API / Indexer
- * Converts a SimulateTxRouteSuccessResponse to a new type.
- * @typeparam T - Type parameter representing the original number type.
- * @typeparam U - Type parameter representing the new number type.
- * @param item - The input response to convert.
- * @param convertFunction - The function to convert the number type.
- * @returns The converted response.
  */
 export function convertSimulateTxRouteSuccessResponse<T extends NumberType, U extends NumberType>(
   item: SimulateTxRouteSuccessResponse<T>,
@@ -1568,7 +1520,6 @@ export function convertSimulateTxRouteSuccessResponse<T extends NumberType, U ex
 
 /**
  * @category API / Indexer
- * Represents the request body for fetching metadata directly.
  */
 export interface FetchMetadataDirectlyRouteRequestBody {
   uris: string[];
@@ -1576,8 +1527,6 @@ export interface FetchMetadataDirectlyRouteRequestBody {
 
 /**
  * @category API / Indexer
- * Represents a successful response for fetching metadata directly.
- * @typeparam T - Type parameter representing a number type.
  */
 export interface FetchMetadataDirectlyRouteSuccessResponse<T extends NumberType> {
   metadata: Metadata<T>[];
@@ -1585,19 +1534,11 @@ export interface FetchMetadataDirectlyRouteSuccessResponse<T extends NumberType>
 
 /**
  * @category API / Indexer
- * Represents a response for fetching metadata directly.
- * @typeparam T - Type parameter representing a number type.
  */
 export type FetchMetadataDirectlyRouteResponse<T extends NumberType> = ErrorResponse | FetchMetadataDirectlyRouteSuccessResponse<T>;
 
 /**
  * @category API / Indexer
- * Converts a FetchMetadataDirectlyRouteSuccessResponse to a new type.
- * @typeparam T - Type parameter representing the original number type.
- * @typeparam U - Type parameter representing the new number type.
- * @param item - The input response to convert.
- * @param convertFunction - The function to convert the number type.
- * @returns The converted response.
  */
 export function convertFetchMetadataDirectlyRouteSuccessResponse<T extends NumberType, U extends NumberType>(
   item: FetchMetadataDirectlyRouteSuccessResponse<T>,
@@ -1608,32 +1549,21 @@ export function convertFetchMetadataDirectlyRouteSuccessResponse<T extends Numbe
 
 /**
  * @category API / Indexer
- * Represents the request body for getting tokens from a faucet.
  */
 export interface GetTokensFromFaucetRouteRequestBody { }
 
 /**
  * @category API / Indexer
- * Represents a response for getting tokens from a faucet.
- * @typeparam T - Type parameter representing a number type.
  */
 export type GetTokensFromFaucetRouteResponse<T extends NumberType> = DeliverTxResponse | ErrorResponse;
 
 /**
  * @category API / Indexer
- * Represents a successful response for getting tokens from a faucet.
- * @typeparam T - Type parameter representing a number type.
  */
 export type GetTokensFromFaucetRouteSuccessResponse<T extends NumberType> = DeliverTxResponse;
 
 /**
  * @category API / Indexer
- * Converts a GetTokensFromFaucetRouteSuccessResponse to a new type.
- * @typeparam T - Type parameter representing the original number type.
- * @typeparam U - Type parameter representing the new number type.
- * @param item - The input response to convert.
- * @param convertFunction - The function to convert the number type.
- * @returns The converted response.
  */
 export function convertGetTokensFromFaucetRouteSuccessResponse<T extends NumberType, U extends NumberType>(
   item: GetTokensFromFaucetRouteSuccessResponse<T>,
@@ -1644,7 +1574,6 @@ export function convertGetTokensFromFaucetRouteSuccessResponse<T extends NumberT
 
 /**
  * @category API / Indexer
- * Represents the request body for getting address mappings.
  */
 export interface GetAddressMappingsRouteRequestBody {
   /**
@@ -1655,8 +1584,6 @@ export interface GetAddressMappingsRouteRequestBody {
 
 /**
  * @category API / Indexer
- * Represents a successful response for getting address mappings.
- * @typeparam T - Type parameter representing a number type.
  */
 export interface GetAddressMappingsRouteSuccessResponse<T extends NumberType> {
   addressMappings: AddressMappingWithMetadata<T>[];
@@ -1664,19 +1591,11 @@ export interface GetAddressMappingsRouteSuccessResponse<T extends NumberType> {
 
 /**
  * @category API / Indexer
- * Represents a response for getting address mappings.
- * @typeparam T - Type parameter representing a number type.
  */
 export type GetAddressMappingsRouteResponse<T extends NumberType> = ErrorResponse | GetAddressMappingsRouteSuccessResponse<T>;
 
 /**
  * @category API / Indexer
- * Converts a GetAddressMappingsRouteSuccessResponse to a new type.
- * @typeparam T - Type parameter representing the original number type.
- * @typeparam U - Type parameter representing the new number type.
- * @param item - The input response to convert.
- * @param convertFunction - The function to convert the number type.
- * @returns The converted response.
  */
 export function convertGetAddressMappingsRouteSuccessResponse<T extends NumberType, U extends NumberType>(
   item: GetAddressMappingsRouteSuccessResponse<T>,
@@ -1687,7 +1606,6 @@ export function convertGetAddressMappingsRouteSuccessResponse<T extends NumberTy
 
 /**
  * @category API / Indexer
- * Represents the request body for updating address mappings.
  */
 export interface UpdateAddressMappingsRouteRequestBody {
   /**
@@ -1700,26 +1618,16 @@ export interface UpdateAddressMappingsRouteRequestBody {
 
 /**
  * @category API / Indexer
- * Represents a successful response for updating address mappings.
- * @typeparam T - Type parameter representing a number type.
  */
 export interface UpdateAddressMappingsRouteSuccessResponse<T extends NumberType> { }
 
 /**
  * @category API / Indexer
- * Represents a response for updating address mappings.
- * @typeparam T - Type parameter representing a number type.
  */
 export type UpdateAddressMappingsRouteResponse<T extends NumberType> = ErrorResponse | UpdateAddressMappingsRouteSuccessResponse<T>;
 
 /**
  * @category API / Indexer
- * Converts an UpdateAddressMappingsRouteSuccessResponse to a new type.
- * @typeparam T - Type parameter representing the original number type.
- * @typeparam U - Type parameter representing the new number type.
- * @param item - The input response to convert.
- * @param convertFunction - The function to convert the number type.
- * @returns The converted response.
  */
 export function convertUpdateAddressMappingsRouteSuccessResponse<T extends NumberType, U extends NumberType>(
   item: UpdateAddressMappingsRouteSuccessResponse<T>,
@@ -1731,7 +1639,6 @@ export function convertUpdateAddressMappingsRouteSuccessResponse<T extends Numbe
 
 /**
  * @category API / Indexer
- * Represents the request body for deleting address mappings.
  */
 export interface DeleteAddressMappingsRouteRequestBody {
   /**
@@ -1742,26 +1649,16 @@ export interface DeleteAddressMappingsRouteRequestBody {
 
 /**
  * @category API / Indexer
- * Represents a successful response for deleting address mappings.
- * @typeparam T - Type parameter representing a number type.
  */
 export interface DeleteAddressMappingsRouteSuccessResponse<T extends NumberType> { }
 
 /**
  * @category API / Indexer
- * Represents a response for deleting address mappings.
- * @typeparam T - Type parameter representing a number type.
  */
 export type DeleteAddressMappingsRouteResponse<T extends NumberType> = ErrorResponse | DeleteAddressMappingsRouteSuccessResponse<T>;
 
 /**
  * @category API / Indexer
- * Converts a DeleteAddressMappingsRouteSuccessResponse to a new type.
- * @typeparam T - Type parameter representing the original number type.
- * @typeparam U - Type parameter representing the new number type.
- * @param item - The input response to convert.
- * @param convertFunction - The function to convert the number type.
- * @returns The converted response.
  */
 export function convertDeleteAddressMappingsRouteSuccessResponse<T extends NumberType, U extends NumberType>(
   item: DeleteAddressMappingsRouteSuccessResponse<T>,
@@ -1774,7 +1671,6 @@ export function convertDeleteAddressMappingsRouteSuccessResponse<T extends Numbe
 
 /**
  * @category API / Indexer
- * Represents the request body for getting approvals.
  */
 export interface GetApprovalsRouteRequestBody {
   /**
@@ -1785,8 +1681,6 @@ export interface GetApprovalsRouteRequestBody {
 
 /**
  * @category API / Indexer
- * Represents a successful response for getting approvals.
- * @typeparam T - Type parameter representing a number type.
  */
 export interface GetApprovalsRouteSuccessResponse<T extends NumberType> {
   approvalTrackers: ApprovalsTrackerInfo<T>[];
@@ -1794,19 +1688,11 @@ export interface GetApprovalsRouteSuccessResponse<T extends NumberType> {
 
 /**
  * @category API / Indexer
- * Represents a response for getting approvals.
- * @typeparam T - Type parameter representing a number type.
  */
 export type GetApprovalsRouteResponse<T extends NumberType> = ErrorResponse | GetApprovalsRouteSuccessResponse<T>;
 
 /**
  * @category API / Indexer
- * Converts a GetApprovalsRouteSuccessResponse to a new type.
- * @typeparam T - Type parameter representing the original number type.
- * @typeparam U - Type parameter representing the new number type.
- * @param item - The input response to convert.
- * @param convertFunction - The function to convert the number type.
- * @returns The converted response.
  */
 export function convertGetApprovalsRouteSuccessResponse<T extends NumberType, U extends NumberType>(
   item: GetApprovalsRouteSuccessResponse<T>,
@@ -1819,7 +1705,6 @@ export function convertGetApprovalsRouteSuccessResponse<T extends NumberType, U 
 
 /**
  * @category API / Indexer
- * Represents the request body for getting challenge trackers.
  */
 export interface GetChallengeTrackersRouteRequestBody {
   /**
@@ -1830,8 +1715,6 @@ export interface GetChallengeTrackersRouteRequestBody {
 
 /**
  * @category API / Indexer
- * Represents a successful response for getting challenge trackers.
- * @typeparam T - Type parameter representing a number type.
  */
 export interface GetChallengeTrackersRouteSuccessResponse<T extends NumberType> {
   challengeTrackers: MerkleChallengeInfo<T>[];
@@ -1839,19 +1722,11 @@ export interface GetChallengeTrackersRouteSuccessResponse<T extends NumberType> 
 
 /**
  * @category API / Indexer
- * Represents a response for getting challenge trackers.
- * @typeparam T - Type parameter representing a number type.
  */
 export type GetChallengeTrackersRouteResponse<T extends NumberType> = ErrorResponse | GetChallengeTrackersRouteSuccessResponse<T>;
 
 /**
  * @category API / Indexer
- * Converts a GetChallengeTrackersRouteSuccessResponse to a new type.
- * @typeparam T - Type parameter representing the original number type.
- * @typeparam U - Type parameter representing the new number type.
- * @param item - The input response to convert.
- * @param convertFunction - The function to convert the number type.
- * @returns The converted response.
  */
 export function convertGetChallengeTrackersRouteSuccessResponse<T extends NumberType, U extends NumberType>(
   item: GetChallengeTrackersRouteSuccessResponse<T>,
@@ -1864,8 +1739,6 @@ export function convertGetChallengeTrackersRouteSuccessResponse<T extends Number
 
 /**
  * @category API / Indexer
- * Represents the request body for sending claim alerts. Must be manager of the collection.
- * @typeparam T - Type parameter representing a number type.
  */
 export interface SendClaimAlertsRouteRequestBody<T extends NumberType> {
   collectionId: T;
@@ -1876,8 +1749,6 @@ export interface SendClaimAlertsRouteRequestBody<T extends NumberType> {
 
 /**
  * @category API / Indexer
- * Represents a successful response for sending claim alerts.
- * @typeparam T - Type parameter representing a number type.
  */
 export interface SendClaimAlertsRouteSuccessResponse<T extends NumberType> {
   success: boolean;
@@ -1885,19 +1756,11 @@ export interface SendClaimAlertsRouteSuccessResponse<T extends NumberType> {
 
 /**
  * @category API / Indexer
- * Represents a response for sending claim alerts.
- * @typeparam T - Type parameter representing a number type.
  */
 export type SendClaimAlertsRouteResponse<T extends NumberType> = ErrorResponse | SendClaimAlertsRouteSuccessResponse<T>;
 
 /**
  * @category API / Indexer
- * Converts a SendClaimAlertsRouteSuccessResponse to a new type.
- * @typeparam T - Type parameter representing the original number type.
- * @typeparam U - Type parameter representing the new number type.
- * @param item - The input response to convert.
- * @param convertFunction - The function to convert the number type.
- * @returns The converted response.
  */
 export function convertSendClaimAlertsRouteSuccessResponse<T extends NumberType, U extends NumberType>(
   item: SendClaimAlertsRouteSuccessResponse<T>,
