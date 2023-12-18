@@ -1,11 +1,5 @@
-import Nano from "nano";
-import { TransferActivityInfoBase } from "./activity";
-import { AccountDoc, BalanceDoc, MerkleChallengeDoc, CollectionDoc, QueueInfoBase, RefreshDoc, ApprovalsTrackerDoc, AddressMappingDoc, ClaimAlertInfo, PasswordDoc } from "./db";
-
-/**
- * @category API / Indexer
- */
-export type BlankDocument = Nano.Document; // Alias for Nano.Document to make it clear that this is a blank document and has no other details.
+import { TransferActivityDoc } from "./activity";
+import { AccountDoc, BalanceDoc, MerkleChallengeDoc, CollectionDoc, QueueDoc, RefreshDoc, ApprovalsTrackerDoc, AddressMappingDoc, ClaimAlertDoc, PasswordDoc } from "./db";
 
 /**
  * DocsCache is used by the indexer to cache documents in memory to avoid having to fetch and write to the database each time.
@@ -18,13 +12,13 @@ export type BlankDocument = Nano.Document; // Alias for Nano.Document to make it
  * @property {CollectionDocs} collections - The collections cache.
  * @property {BalanceDocs} balances - The balances cache.
  * @property {MerkleChallengeDocs} merkleChallenges - The claims cache.
- * @property {ActivityInfoBase[]} activityToAdd - The activity documents to add to the database.
- * @property {QueueInfoBase[]} queueDocsToAdd - The queue documents to add to the database.
+ * @property {ActivityDoc[]} activityToAdd - The activity documents to add to the database.
+ * @property {QueueDoc[]} queueDocsToAdd - The queue documents to add to the database.
  * @property {RefreshDocs} refreshes - The refreshes cache.
  * @property {ApprovalsTrackerDocs} approvalsTrackers - The approvals trackers cache.
  * @property {AddressMappingsDocs} addressMappings - The address mappings cache.
  * @property {PasswordDocs} passwordDocs - The password documents cache.
- * @property {ClaimAlertInfo[]} claimAlertsToAdd - The claim alerts to add to the database.
+ * @property {ClaimAlertDoc[]} claimAlertsToAdd - The claim alerts to add to the database.
  */
 export interface DocsCache {
   accounts: AccountDocs;
@@ -34,9 +28,9 @@ export interface DocsCache {
   refreshes: RefreshDocs;
   approvalsTrackers: ApprovalsTrackerDocs;
   addressMappings: AddressMappingsDocs;
-  queueDocsToAdd: (QueueInfoBase<bigint> & Nano.MaybeIdentifiedDocument)[];
-  activityToAdd: (TransferActivityInfoBase<bigint> & Nano.MaybeIdentifiedDocument)[];
-  claimAlertsToAdd: (ClaimAlertInfo<bigint> & Nano.MaybeIdentifiedDocument)[];
+  queueDocsToAdd: (QueueDoc<bigint>)[];
+  activityToAdd: (TransferActivityDoc<bigint>)[];
+  claimAlertsToAdd: (ClaimAlertDoc<bigint>)[];
   passwordDocs: PasswordDocs;
 }
 

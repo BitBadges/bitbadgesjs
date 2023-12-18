@@ -56,7 +56,7 @@ export const GetAllPasswordsAndCodesRoute = (collectionId: NumberType) => `/api/
 /**
  * @category API Routes
  */
-export const GetCodeForPasswordRoute = (collectionId: NumberType, challengeId: string, password: string) => `/api/v0/collection/${collectionId.toString()}/password/${challengeId}/${password}`;
+export const GetCodeForPasswordRoute = (collectionId: NumberType, cid: string, password: string) => `/api/v0/collection/${collectionId.toString()}/password/${cid}/${password}`;
 /**
  * @category API Routes
  */
@@ -155,6 +155,12 @@ export const SignOutRoute = () => "/api/v0/auth/logout";
  * @category API Routes
  */
 export const CheckIfSignedInRoute = () => '/api/v0/auth/status';
+/**
+ * @category API Routes
+ */
+export const GenericVerifyRoute = () => "/api/v0/auth/genericVerify";
+
+
 
 //Browse
 /**
@@ -190,3 +196,41 @@ export const GetTokensFromFaucetRoute = () => "/api/v0/faucet";
  * @category API Routes
  */
 export const SendClaimAlertRoute = () => "/api/v0/claimAlerts/send";
+
+/**
+ * @category API Routes
+ */
+export const GetClaimAlertsRoute = () => "/api/v0/claimAlerts";
+
+
+//Blockin Auth Codes
+
+/**
+ * @category API Routes
+ */
+export const GetAuthCodeRoute = () => "/api/v0/authCode";
+/**
+ * @category API Routes
+ */
+export const CreateAuthCodeRoute = () => "/api/v0/authCode/create";
+/**
+ * @category API Routes
+ */
+export const DeleteAuthCodeRoute = () => "/api/v0/authCode/delete";
+
+//Address Surveys
+/**
+ * @category API Routes
+ */
+export const AddAddressToSurveyRoute = (editKey: string) => `/api/v0/survey/${editKey}/add`;
+
+
+//Follow Protocol
+/**
+ * @category API Routes
+ */
+export const UpdateFollowDetailsRoute = () => "/api/v0/follow-protocol/update";
+/**
+ * @category API Routes
+ */
+export const GetFollowDetailsRoute = () => "/api/v0/follow-protocol";

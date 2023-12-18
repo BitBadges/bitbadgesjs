@@ -109,7 +109,7 @@ export class MsgUniversalUpdateCollection extends Message<MsgUniversalUpdateColl
   collectionId = "";
 
   /**
-   * Type of balances "Standard" or "Off-Chain".
+   * Type of balances "Standard" or "Off-Chain - Indexed".
    *
    * @generated from field: string balancesType = 3;
    */
@@ -634,7 +634,7 @@ export class MsgCreateCollection extends Message<MsgCreateCollection> {
   creator = "";
 
   /**
-   * Type of balances "Standard" or "Off-Chain".
+   * Type of balances "Standard" or "Off-Chain - Indexed".
    *
    * @generated from field: string balancesType = 2;
    */
@@ -1112,7 +1112,7 @@ export class MsgUpdateUserApprovals extends Message<MsgUpdateUserApprovals> {
   updateOutgoingApprovals = false;
 
   /**
-   * New outgoing approvals to set. 
+   * New outgoing approvals to set.
    *
    * @generated from field: repeated badges.UserOutgoingApproval outgoingApprovals = 4;
    */
@@ -1245,4 +1245,3 @@ export class MsgUpdateUserApprovalsResponse extends Message<MsgUpdateUserApprova
     return proto3.util.equals(MsgUpdateUserApprovalsResponse, a, b);
   }
 }
-

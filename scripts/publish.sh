@@ -10,6 +10,7 @@ for d in "$@" ; do
     echo "Installing $d"
     npm install
     echo "Building $d"
+    rm -rf dist
     npm run build
     echo "Incrementing version for $d"
     npm version patch

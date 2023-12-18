@@ -6,7 +6,6 @@ import { BitBadgesUserInfo, convertBitBadgesUserInfo } from "./types/users";
 
 
 export const MINT_ACCOUNT: BitBadgesUserInfo<bigint> = {
-  _id: 'Mint',
   cosmosAddress: 'Mint',
   ethAddress: 'Mint',
   solAddress: 'Mint',
@@ -23,6 +22,7 @@ export const MINT_ACCOUNT: BitBadgesUserInfo<bigint> = {
   claimAlerts: [],
   merkleChallenges: [],
   approvalsTrackers: [],
+  authCodes: [],
   seenActivity: 0n,
   createdAt: 0n,
   views: {},
@@ -30,7 +30,6 @@ export const MINT_ACCOUNT: BitBadgesUserInfo<bigint> = {
 
 
 export const BLANK_USER_INFO: BitBadgesUserInfo<bigint> = {
-  _id: '',
   cosmosAddress: '',
   ethAddress: '',
   solAddress: 'Mint',
@@ -47,6 +46,7 @@ export const BLANK_USER_INFO: BitBadgesUserInfo<bigint> = {
   merkleChallenges: [],
   approvalsTrackers: [],
   addressMappings: [],
+  authCodes: [],
   seenActivity: 0n,
   createdAt: 0n,
   views: {},

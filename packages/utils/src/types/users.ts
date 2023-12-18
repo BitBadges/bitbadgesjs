@@ -1,9 +1,9 @@
 import { AddressMapping, NumberType, UserIncomingApproval, UserOutgoingApproval, convertIncomingApprovalCriteria, convertOutgoingApprovalCriteria, convertUserIncomingApproval, convertUserOutgoingApproval } from "bitbadgesjs-proto"
-import { AnnouncementInfo, ReviewInfo, TransferActivityInfo, convertAnnouncementInfo, convertReviewInfo, convertTransferActivityInfo } from "./activity"
+import { AnnouncementDoc, ReviewDoc, TransferActivityDoc, convertAnnouncementDoc, convertReviewDoc, convertTransferActivityDoc } from "./activity"
 import { PaginationInfo } from "./api"
-import { AccountInfoBase, ApprovalsTrackerInfo, BalanceInfoWithDetails, ClaimAlertInfo, Identified, MerkleChallengeInfo, ProfileInfoBase, convertAccountInfo, convertApprovalsTrackerInfo, convertBalanceInfoWithDetails, convertClaimAlertInfo, convertMerkleChallengeInfo, convertProfileInfo } from "./db"
+import { AccountInfoBase, ApprovalsTrackerDoc, BalanceDocWithDetails, BlockinAuthSignatureDoc, ClaimAlertDoc, MerkleChallengeDoc, ProfileInfoBase, convertAccountDoc, convertApprovalsTrackerDoc, convertBalanceDocWithDetails, convertBlockinAuthSignatureDoc, convertClaimAlertDoc, convertMerkleChallengeDoc, convertProfileDoc } from "./db"
 import { AddressMappingWithMetadata, convertAddressMappingWithMetadata } from "./metadata"
-import { deepCopy, removeCouchDBDetails } from "./utils"
+import { deepCopy } from "./utils"
 
 
 /**
@@ -52,7 +52,7 @@ export function convertUserIncomingApprovalWithDetails<T extends NumberType, U e
 
 
 /**
- * BitBadgesUserInfo is the type for accounts returned by the BitBadges API. It includes all information about an account.
+ * BitBadgesUserInfo is the type for accounts returned by the BitBadges API. It includes all Docrmation about an account.
  *
  * @typedef {Object} BitBadgesUserInfo
  * @extends {ProfileInfoBase}
@@ -71,7 +71,7 @@ export function convertUserIncomingApprovalWithDetails<T extends NumberType, U e
  * @property {ApprovalsTrackerDoc[]} approvalsTrackers - A list of approvals tracker activity items for the account. Paginated and fetched as needed. To be used in conjunction with views.
  * @property {AddressMappingWithMetadata[]} addressMappings - A list of address mappings for the account. Paginated and fetched as needed. To be used in conjunction with views.
  * @property {ClaimAlertDoc[]} claimAlerts - A list of claim alerts for the account. Paginated and fetched as needed. To be used in conjunction with views.
- * @property {PaginationInfo} pagination - Pagination information for each of the profile information.
+ * @property {PaginationInfo} pagination - Pagination Docrmation for each of the profile Docrmation.
  *
  * @property {Object} [nsfw] - Indicates whether the account is NSFW.
  * @property {Object} [reported] - Indicates whether the account has been reported.
@@ -81,31 +81,33 @@ export function convertUserIncomingApprovalWithDetails<T extends NumberType, U e
  * @property {Object} nsfw - The badge IDs in this collection that are marked as NSFW.
  * @property {Object} reported - The badge IDs in this collection that have been reported.
  *
- * @property {Object.<string, { ids: string[], type: string, pagination: PaginationInfo }>} views - The views for this collection and their pagination info. Views will only include the doc _ids. Use the pagination to fetch more. To be used in conjunction with activity, announcements, reviews, owners, merkleChallenges, and approvalsTrackers. For example, if you want to fetch the activity for a view, you would use the view's pagination to fetch the doc _ids, then use the corresponding activity array to find the matching docs.
+ * @property {Object.<string, { ids: string[], type: string, pagination: PaginationInfo }>} views - The views for this collection and their pagination Doc. Views will only include the doc _ids. Use the pagination to fetch more. To be used in conjunction with activity, announcements, reviews, owners, merkleChallenges, and approvalsTrackers. For example, if you want to fetch the activity for a view, you would use the view's pagination to fetch the doc _ids, then use the corresponding activity array to find the matching docs.
  *
  * @remarks
- * Note that returned user infos will only fetch what is requested. It is your responsibility to join the data together (paginations, etc).
+ * Note that returned user Docs will only fetch what is requested. It is your responsibility to join the data together (paginations, etc).
  * See documentation for helper functions, examples, and tutorials on handling this data and paginations.
  *
  * @category API / Indexer
  */
-export interface BitBadgesUserInfo<T extends NumberType> extends ProfileInfoBase<T>, AccountInfoBase<T>, Identified {
+export interface BitBadgesUserInfo<T extends NumberType> extends ProfileInfoBase<T>, AccountInfoBase<T> {
   resolvedName?: string
   avatar?: string
+  solAddress: string
 
   airdropped?: boolean
 
   address: string
 
   //Dynamically loaded as needed
-  collected: BalanceInfoWithDetails<T>[],
-  activity: TransferActivityInfo<T>[],
-  announcements: AnnouncementInfo<T>[],
-  reviews: ReviewInfo<T>[],
-  merkleChallenges: MerkleChallengeInfo<T>[],
-  approvalsTrackers: ApprovalsTrackerInfo<T>[],
+  collected: BalanceDocWithDetails<T>[],
+  activity: TransferActivityDoc<T>[],
+  announcements: AnnouncementDoc<T>[],
+  reviews: ReviewDoc<T>[],
+  merkleChallenges: MerkleChallengeDoc<T>[],
+  approvalsTrackers: ApprovalsTrackerDoc<T>[],
   addressMappings: AddressMappingWithMetadata<T>[],
-  claimAlerts: ClaimAlertInfo<T>[],
+  claimAlerts: ClaimAlertDoc<T>[],
+  authCodes: BlockinAuthSignatureDoc<T>[],
 
   nsfw?: { reason: string };
   reported?: { reason: string };
@@ -122,10 +124,10 @@ export interface BitBadgesUserInfo<T extends NumberType> extends ProfileInfoBase
 
 export function convertBitBadgesUserInfo<T extends NumberType, U extends NumberType>(item: BitBadgesUserInfo<T>, convertFunction: (item: T) => U): BitBadgesUserInfo<U> {
   const converted = deepCopy({
-    ...convertProfileInfo({ ...item, _id: '' }, convertFunction),
-    //This is because if we spread ...item, we overwrite the profile info converted stuff
-    ...convertAccountInfo({
-      _id: '',
+    ...convertProfileDoc({ ...item, _legacyId: '', _id: '' }, convertFunction),
+    //This is because if we spread ...item, we overwrite the profile Doc converted stuff
+    ...convertAccountDoc({
+      _legacyId: '',
       cosmosAddress: item.cosmosAddress,
       ethAddress: item.ethAddress,
       solAddress: item.solAddress,
@@ -135,22 +137,25 @@ export function convertBitBadgesUserInfo<T extends NumberType, U extends NumberT
       publicKey: item.publicKey,
       chain: item.chain,
     }, convertFunction),
+
+    solAddress: item.solAddress,
     address: item.address,
     resolvedName: item.resolvedName,
     avatar: item.avatar,
     airdropped: item.airdropped,
-    collected: item.collected.map((balance) => convertBalanceInfoWithDetails(balance, convertFunction)).map(x => removeCouchDBDetails(x)),
-    activity: item.activity.map((activityItem) => convertTransferActivityInfo(activityItem, convertFunction)).map(x => removeCouchDBDetails(x)),
-    announcements: item.announcements.map((activityItem) => convertAnnouncementInfo(activityItem, convertFunction)).map(x => removeCouchDBDetails(x)),
-    reviews: item.reviews.map((activityItem) => convertReviewInfo(activityItem, convertFunction)).map(x => removeCouchDBDetails(x)),
-    merkleChallenges: item.merkleChallenges.map((challenge) => convertMerkleChallengeInfo(challenge, convertFunction)).map(x => removeCouchDBDetails(x)),
-    approvalsTrackers: item.approvalsTrackers.map((tracker) => convertApprovalsTrackerInfo(tracker, convertFunction)).map(x => removeCouchDBDetails(x)),
+    collected: item.collected.map((balance) => convertBalanceDocWithDetails(balance, convertFunction)),
+    activity: item.activity.map((activityItem) => convertTransferActivityDoc(activityItem, convertFunction)),
+    announcements: item.announcements.map((activityItem) => convertAnnouncementDoc(activityItem, convertFunction)),
+    reviews: item.reviews.map((activityItem) => convertReviewDoc(activityItem, convertFunction)),
+    merkleChallenges: item.merkleChallenges.map((challenge) => convertMerkleChallengeDoc(challenge, convertFunction)),
+    approvalsTrackers: item.approvalsTrackers.map((tracker) => convertApprovalsTrackerDoc(tracker, convertFunction)),
     addressMappings: item.addressMappings.map((mapping) => convertAddressMappingWithMetadata(mapping, convertFunction)),
-    claimAlerts: item.claimAlerts.map((alert) => convertClaimAlertInfo(alert, convertFunction)),
+    claimAlerts: item.claimAlerts.map((alert) => convertClaimAlertDoc(alert, convertFunction)),
+    authCodes: item.authCodes.map((code) => convertBlockinAuthSignatureDoc(code, convertFunction)),
     views: item.views,
     _rev: undefined,
     _deleted: undefined,
   })
 
-  return removeCouchDBDetails(converted);
+  return converted
 }

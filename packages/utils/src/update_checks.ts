@@ -388,8 +388,6 @@ export function validateCollectionMetadataUpdate(
  * Validates if an update of off-chain balances metadata (old -> new) is valid according to the permissions
  *
  * @category Validate Updates
- *
- *
  */
 export function validateOffChainBalancesMetadataUpdate(
   oldOffChainBalancesMetadata: OffChainBalancesMetadataTimeline<bigint>[],

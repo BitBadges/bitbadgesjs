@@ -79,6 +79,8 @@
   },
   "dependencies": {
     "joi": "^17.10.1",
+    "link-module-alias": "^1.2.0",
+    "mongoose": "^8.0.3",
     "protoc-gen-ts": "^0.8.7"
   }
 }

@@ -11,19 +11,19 @@ import { CollectionApproval, UserIncomingApproval, UserOutgoingApproval } from "
 
 /**
  *
- * A BadgeCollection is the top-level object for a collection of badges. 
+ * A BadgeCollection is the top-level object for a collection of badges.
  * It defines everything about the collection, such as the manager, metadata, etc.
  *
  * All collections are identified by a collectionId assigned by the blockchain, which is a uint64 that increments (i.e., the first collection has ID 1).
  *
- * All collections also have a manager who is responsible for managing the collection. 
+ * All collections also have a manager who is responsible for managing the collection.
  * They can be granted certain permissions, such as the ability to mint new badges.
  *
- * Certain fields are timeline-based, which means they may have different values at different block heights. 
+ * Certain fields are timeline-based, which means they may have different values at different block heights.
  * We fetch the value according to the current time.
  * For example, we may set the manager to be Alice from Time1 to Time2, and then set the manager to be Bob from Time2 to Time3.
  *
- * Collections may have different balance types: standard vs. off-chain vs. inherited. 
+ * Collections may have different balance types: standard vs. off-chain vs. inherited.
  *
  * See documentation for more details.
  *
@@ -52,7 +52,7 @@ export class BadgeCollection extends Message<BadgeCollection> {
   badgeMetadataTimeline: BadgeMetadataTimeline[] = [];
 
   /**
-   * The type of balances this collection uses ("Standard", "Off-Chain", or "Inherited").
+   * The type of balances this collection uses ("Standard", "Off-Chain - Indexed", or "Inherited").
    *
    * @generated from field: string balancesType = 4;
    */
@@ -197,4 +197,3 @@ export class BadgeCollection extends Message<BadgeCollection> {
     return proto3.util.equals(BadgeCollection, a, b);
   }
 }
-

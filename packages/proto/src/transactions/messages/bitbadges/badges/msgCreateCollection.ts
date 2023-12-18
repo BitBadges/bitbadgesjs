@@ -14,7 +14,7 @@ import { createProtoMsg } from '../../../../proto-types/base'
  *
  * @typedef {Object} MsgCreateCollection
  * @property {string} creator - The creator of the transaction.
- * @property {string} balancesType - The balances type. Either "Standard", "Off-Chain", or "Inherited".
+ * @property {string} balancesType - The balances type. Either "Standard", "Off-Chain - Indexed", "Off-Chain - Non-Indexed", or "Inherited".
  * @property {UserOutgoingApproval[]} defaultOutgoingApprovals - The default approved outgoing transfers timeline for users who have not interacted with the collection yet. Only can be set on initial creation. Only used if collection has "Standard" balance type.
  * @property {UserIncomingApproval[]} defaultIncomingApprovals - The default approved incoming transfers timeline for users who have not interacted with the collection yet. Only can be set on initial creation. Only used if collection has "Standard" balance type.
  * @property {UserPermissions} defaultUserPermissions - The default user permissions for users who have not interacted with the collection yet. Only can be set on initial creation. Only used if collection has "Standard" balance type.
@@ -23,7 +23,7 @@ import { createProtoMsg } from '../../../../proto-types/base'
  * @property {ManagerTimeline[]} managerTimeline - The new manager timeline. Must have the necessary permissions in future transactions to update. However, no restrictions in this genesis Msg.
  * @property {CollectionMetadataTimeline[]} collectionMetadataTimeline - The new collection metadata timeline. Must have the necessary permissions in future transactions to update. However, no restrictions in this genesis Msg.
  * @property {BadgeMetadataTimeline[]} badgeMetadataTimeline - The new badge metadata timeline. Must have the necessary permissions in future transactions to update. However, no restrictions in this genesis Msg. Note we take first-match only for badge IDs, so do not define duplicates.
- * @property {OffChainBalancesMetadataTimeline[]} offChainBalancesMetadataTimeline - The new off-chain balances metadata timeline. Must have the necessary permissions in future transactions to update. However, no restrictions in this genesis Msg. Only used if "Off-Chain" balance type.
+ * @property {OffChainBalancesMetadataTimeline[]} offChainBalancesMetadataTimeline - The new off-chain balances metadata timeline. Must have the necessary permissions in future transactions to update. However, no restrictions in this genesis Msg. Only used if "Off-Chain - Indexed" or "Off-Chain - Non-Indexed" balance type.
  * @property {CustomDataTimeline[]} customDataTimeline - The new custom data timeline. Must have the necessary permissions in future transactions to update. However, no restrictions in this genesis Msg.
  * @property {CollectionApproval[]} collectionApprovals - The new collection approved transfers timeline. Must have the necessary permissions in future transactions to update. However, no restrictions in this genesis Msg.
  * @property {StandardsTimeline[]} standardsTimeline - The new standards timeline. Must have the necessary permissions in future transactions to update. However, no restrictions in this genesis Msg.

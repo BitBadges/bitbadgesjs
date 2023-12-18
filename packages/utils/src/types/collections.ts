@@ -1,10 +1,10 @@
 import { AddressMapping, ApprovalCriteria, CollectionApproval, CollectionApprovalPermission, CollectionPermissions, NumberType, UintRange, UserIncomingApprovalPermission, UserOutgoingApprovalPermission, UserPermissions, convertApprovalCriteria, convertCollectionApproval, convertCollectionApprovalPermission, convertCollectionPermissions, convertUintRange, convertUserIncomingApprovalPermission, convertUserOutgoingApprovalPermission, convertUserPermissions } from "bitbadgesjs-proto";
-import { AnnouncementInfo, ReviewInfo, TransferActivityInfo, convertAnnouncementInfo, convertReviewInfo, convertTransferActivityInfo } from "./activity";
+import { AnnouncementDoc, ReviewDoc, TransferActivityDoc, convertAnnouncementDoc, convertReviewDoc, convertTransferActivityDoc } from "./activity";
 import { PaginationInfo } from "./api";
-import { ApprovalInfoDetails, ApprovalsTrackerInfo, BalanceInfoWithDetails, CollectionInfoBase, Identified, MerkleChallengeInfo, MerkleChallengeWithDetails, convertApprovalInfoDetails, convertApprovalsTrackerInfo, convertBalanceInfoWithDetails, convertCollectionInfo, convertMerkleChallengeInfo } from "./db";
+import { ApprovalInfoDetails, ApprovalsTrackerDoc, BalanceDocWithDetails, CollectionInfoBase, MerkleChallengeDoc, MerkleChallengeWithDetails, convertApprovalInfoDetails, convertApprovalsTrackerDoc, convertBalanceDocWithDetails, convertCollectionDoc, convertMerkleChallengeDoc } from "./db";
 import { Metadata, convertMetadata } from "./metadata";
 import { UserIncomingApprovalWithDetails, UserOutgoingApprovalWithDetails, convertUserIncomingApprovalWithDetails, convertUserOutgoingApprovalWithDetails } from "./users";
-import { deepCopy, removeCouchDBDetails } from "./utils";
+import { deepCopy } from "./utils";
 
 /**
  * @category Metadata
@@ -182,7 +182,7 @@ export function convertCollectionApprovalWithDetails<T extends NumberType, U ext
 
 /**
  * BitBadgesCollection is the type for collections returned by the BitBadges API. It extends the base CollectionDoc type
- * and adds additional accompanying information such as metadata, activity, balances, preferred chain, etc.
+ * and adds additional accompanying Docrmation such as metadata, activity, balances, preferred chain, etc.
  *
  * @typedef {Object} BitBadgesCollection
  * @extends {CollectionInfoBase} The base collection document
@@ -196,17 +196,17 @@ export function convertCollectionApprovalWithDetails<T extends NumberType, U ext
  * @property {Metadata} cachedCollectionMetadata - The fetched collection metadata for this collection. Will only be fetched if requested. It is your responsibility to join this data.
  * @property {BadgeMetadataDetails[]} cachedBadgeMetadata - The fetched badge metadata for this collection. Will only be fetched if requested. It is your responsibility to join this data.
  *
- * @property {TransferActivityInfo[]} activity - The fetched activity for this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views.
- * @property {AnnouncementInfo[]} announcements - The fetched announcements for this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views.
- * @property {ReviewInfo[]} reviews - The fetched reviews for this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views.
- * @property {BalanceInfoWithDetails[]} owners - The fetched owners of this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views.
- * @property {MerkleChallengeInfo[]} merkleChallenges - The fetched merkle challenges for this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views.
- * @property {ApprovalsTrackerInfo[]} approvalsTrackers - The fetched approval trackers for this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views.
+ * @property {TransferActivityDoc[]} activity - The fetched activity for this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views.
+ * @property {AnnouncementDoc[]} announcements - The fetched announcements for this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views.
+ * @property {ReviewDoc[]} reviews - The fetched reviews for this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views.
+ * @property {BalanceDocWithDetails[]} owners - The fetched owners of this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views.
+ * @property {MerkleChallengeDoc[]} merkleChallenges - The fetched merkle challenges for this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views.
+ * @property {ApprovalsTrackerDoc[]} approvalsTrackers - The fetched approval trackers for this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views.
  *
  * @property {Object} nsfw - The badge IDs in this collection that are marked as NSFW.
  * @property {Object} reported - The badge IDs in this collection that have been reported.
  *
- * @property {Object.<string, { ids: string[], type: string, pagination: PaginationInfo }>} views - The views for this collection and their pagination info. Views will only include the doc _ids. Use the pagination to fetch more. To be used in conjunction with activity, announcements, reviews, owners, merkleChallenges, and approvalsTrackers. For example, if you want to fetch the activity for a view, you would use the view's pagination to fetch the doc _ids, then use the corresponding activity array to find the matching docs.
+ * @property {Object.<string, { ids: string[], type: string, pagination: PaginationInfo }>} views - The views for this collection and their pagination Doc. Views will only include the doc _ids. Use the pagination to fetch more. To be used in conjunction with activity, announcements, reviews, owners, merkleChallenges, and approvalsTrackers. For example, if you want to fetch the activity for a view, you would use the view's pagination to fetch the doc _ids, then use the corresponding activity array to find the matching docs.
  *
  * @remarks
  * Note that returned collections will only fetch what is requested. It is your responsibility to join the data together (paginations, etc).
@@ -215,7 +215,7 @@ export function convertCollectionApprovalWithDetails<T extends NumberType, U ext
  *
  * @category API / Indexer
  */
-export interface BitBadgesCollection<T extends NumberType> extends CollectionInfoBase<T>, Identified {
+export interface BitBadgesCollection<T extends NumberType> extends CollectionInfoBase<T> {
   collectionApprovals: CollectionApprovalWithDetails<T>[];
   collectionPermissions: CollectionPermissionsWithDetails<T>;
 
@@ -227,12 +227,12 @@ export interface BitBadgesCollection<T extends NumberType> extends CollectionInf
   //The following are to be fetched dynamically and as needed from the DB
   cachedCollectionMetadata?: Metadata<T>;
   cachedBadgeMetadata: BadgeMetadataDetails<T>[];
-  activity: TransferActivityInfo<T>[],
-  announcements: AnnouncementInfo<T>[],
-  reviews: ReviewInfo<T>[],
-  owners: BalanceInfoWithDetails<T>[],
-  merkleChallenges: MerkleChallengeInfo<T>[],
-  approvalsTrackers: ApprovalsTrackerInfo<T>[],
+  activity: TransferActivityDoc<T>[],
+  announcements: AnnouncementDoc<T>[],
+  reviews: ReviewDoc<T>[],
+  owners: BalanceDocWithDetails<T>[],
+  merkleChallenges: MerkleChallengeDoc<T>[],
+  approvalsTrackers: ApprovalsTrackerDoc<T>[],
 
   nsfw?: { badgeIds: UintRange<T>[], reason: string };
   reported?: { badgeIds: UintRange<T>[], reason: string };
@@ -249,7 +249,7 @@ export interface BitBadgesCollection<T extends NumberType> extends CollectionInf
 export function convertBitBadgesCollection<T extends NumberType, U extends NumberType>(item: BitBadgesCollection<T>, convertFunction: (item: T) => U): BitBadgesCollection<U> {
   return deepCopy({
     ...item,
-    ...convertCollectionInfo(item, convertFunction),
+    ...convertCollectionDoc({ ...item, _legacyId: item.collectionId.toString() }, convertFunction),
     collectionApprovals: item.collectionApprovals.map((collectionApproval) => convertCollectionApprovalWithDetails(collectionApproval, convertFunction)),
     defaultUserPermissions: convertUserPermissionsWithDetails(item.defaultUserPermissions, convertFunction),
     defaultUserIncomingApprovals: item.defaultUserIncomingApprovals.map((userIncomingApproval) => convertUserIncomingApprovalWithDetails(userIncomingApproval, convertFunction)),
@@ -257,12 +257,12 @@ export function convertBitBadgesCollection<T extends NumberType, U extends Numbe
     collectionPermissions: convertCollectionPermissionsWithDetails(item.collectionPermissions, convertFunction),
     cachedCollectionMetadata: item.cachedCollectionMetadata ? convertMetadata(item.cachedCollectionMetadata, convertFunction) : undefined,
     cachedBadgeMetadata: item.cachedBadgeMetadata.map((metadata) => convertBadgeMetadataDetails(metadata, convertFunction)),
-    activity: item.activity.map((activityItem) => convertTransferActivityInfo(activityItem, convertFunction)).map(x => removeCouchDBDetails(x)),
-    announcements: item.announcements.map((activityItem) => convertAnnouncementInfo(activityItem, convertFunction)).map(x => removeCouchDBDetails(x)),
-    reviews: item.reviews.map((activityItem) => convertReviewInfo(activityItem, convertFunction)).map(x => removeCouchDBDetails(x)),
-    owners: item.owners.map((balance) => convertBalanceInfoWithDetails(balance, convertFunction)).map(x => removeCouchDBDetails(x)),
-    merkleChallenges: item.merkleChallenges.map((merkleChallenge) => convertMerkleChallengeInfo(merkleChallenge, convertFunction)).map(x => removeCouchDBDetails(x)),
-    approvalsTrackers: item.approvalsTrackers.map((approvalsTracker) => convertApprovalsTrackerInfo(approvalsTracker, convertFunction)).map(x => removeCouchDBDetails(x)),
+    activity: item.activity.map((activityItem) => convertTransferActivityDoc(activityItem, convertFunction)),
+    announcements: item.announcements.map((activityItem) => convertAnnouncementDoc(activityItem, convertFunction)),
+    reviews: item.reviews.map((activityItem) => convertReviewDoc(activityItem, convertFunction)),
+    owners: item.owners.map((balance) => convertBalanceDocWithDetails(balance, convertFunction)),
+    merkleChallenges: item.merkleChallenges.map((merkleChallenge) => convertMerkleChallengeDoc(merkleChallenge, convertFunction)),
+    approvalsTrackers: item.approvalsTrackers.map((approvalsTracker) => convertApprovalsTrackerDoc(approvalsTracker, convertFunction)),
     _rev: undefined,
     _deleted: undefined,
 

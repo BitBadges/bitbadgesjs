@@ -1,13 +1,12 @@
+import axiosApi from "axios";
 import { BigIntify, NumberType } from "bitbadgesjs-proto";
+import Joi from "joi";
 import { updateBadgeMetadata } from "./badgeMetadata";
 import { getMaxMetadataId } from "./metadataIds";
-import { ErrorResponse, GetStatusRouteRequestBody, GetStatusRouteSuccessResponse, convertGetStatusRouteSuccessResponse, GetSearchRouteRequestBody, GetSearchRouteSuccessResponse, convertGetSearchRouteSuccessResponse, GetCollectionBatchRouteRequestBody, GetCollectionBatchRouteSuccessResponse, convertGetCollectionBatchRouteSuccessResponse, GetCollectionByIdRouteRequestBody, GetCollectionRouteSuccessResponse, convertGetCollectionRouteSuccessResponse, GetOwnersForBadgeRouteRequestBody, GetOwnersForBadgeRouteSuccessResponse, convertGetOwnersForBadgeRouteSuccessResponse, GetMetadataForCollectionRouteRequestBody, GetMetadataForCollectionRouteSuccessResponse, convertGetMetadataForCollectionRouteSuccessResponse, GetBadgeBalanceByAddressRouteRequestBody, GetBadgeBalanceByAddressRouteSuccessResponse, convertGetBadgeBalanceByAddressRouteSuccessResponse, GetBadgeActivityRouteRequestBody, GetBadgeActivityRouteSuccessResponse, convertGetBadgeActivityRouteSuccessResponse, RefreshMetadataRouteRequestBody, RefreshMetadataRouteSuccessResponse, convertRefreshMetadataRouteSuccessResponse, GetAllCodesAndPasswordsRouteRequestBody, GetAllCodesAndPasswordsRouteSuccessResponse, convertGetAllCodesAndPasswordsRouteSuccessResponse, GetCodeForPasswordRouteRequestBody, GetCodeForPasswordRouteSuccessResponse, convertGetCodeForPasswordRouteSuccessResponse, AddAnnouncementRouteRequestBody, AddAnnouncementRouteSuccessResponse, convertAddAnnouncementRouteSuccessResponse, DeleteReviewRouteRequestBody, DeleteReviewRouteSuccessResponse, convertDeleteReviewRouteSuccessResponse, DeleteAnnouncementRouteRequestBody, DeleteAnnouncementRouteSuccessResponse, convertDeleteAnnouncementRouteSuccessResponse, AddReviewForCollectionRouteRequestBody, AddReviewForCollectionRouteSuccessResponse, convertAddReviewForCollectionRouteSuccessResponse, GetAccountsRouteRequestBody, GetAccountsRouteSuccessResponse, convertGetAccountsRouteSuccessResponse, GetAccountRouteRequestBody, GetAccountRouteSuccessResponse, convertGetAccountRouteSuccessResponse, AddReviewForUserRouteRequestBody, AddReviewForUserRouteSuccessResponse, convertAddReviewForUserRouteSuccessResponse, UpdateAccountInfoRouteRequestBody, UpdateAccountInfoRouteSuccessResponse, convertUpdateAccountInfoRouteSuccessResponse, AddBalancesToOffChainStorageRouteRequestBody, AddBalancesToOffChainStorageRouteSuccessResponse, convertAddBalancesToOffChainStorageRouteSuccessResponse, AddMetadataToIpfsRouteRequestBody, AddMetadataToIpfsRouteSuccessResponse, convertAddMetadataToIpfsRouteSuccessResponse, AddApprovalDetailsToOffChainStorageRouteRequestBody, AddApprovalDetailsToOffChainStorageRouteSuccessResponse, convertAddApprovalDetailsToOffChainStorageRouteSuccessResponse, GetSignInChallengeRouteRequestBody, GetSignInChallengeRouteSuccessResponse, convertGetSignInChallengeRouteSuccessResponse, VerifySignInRouteRequestBody, VerifySignInRouteSuccessResponse, convertVerifySignInRouteSuccessResponse, CheckSignInStatusRequestBody, CheckSignInStatusRequestSuccessResponse, convertCheckSignInStatusRequestSuccessResponse, SignOutRequestBody, SignOutSuccessResponse, convertSignOutSuccessResponse, GetBrowseCollectionsRouteRequestBody, GetBrowseCollectionsRouteSuccessResponse, convertGetBrowseCollectionsRouteSuccessResponse, BroadcastTxRouteRequestBody, BroadcastTxRouteSuccessResponse, convertBroadcastTxRouteSuccessResponse, SimulateTxRouteRequestBody, SimulateTxRouteSuccessResponse, convertSimulateTxRouteSuccessResponse, FetchMetadataDirectlyRouteRequestBody, FetchMetadataDirectlyRouteSuccessResponse, convertFetchMetadataDirectlyRouteSuccessResponse, GetTokensFromFaucetRouteRequestBody, GetTokensFromFaucetRouteSuccessResponse, convertGetTokensFromFaucetRouteSuccessResponse, UpdateAddressMappingsRouteRequestBody, UpdateAddressMappingsRouteSuccessResponse, convertUpdateAddressMappingsRouteSuccessResponse, GetAddressMappingsRouteRequestBody, GetAddressMappingsRouteSuccessResponse, convertGetAddressMappingsRouteSuccessResponse, DeleteAddressMappingsRouteRequestBody, DeleteAddressMappingsRouteSuccessResponse, convertDeleteAddressMappingsRouteSuccessResponse, GetApprovalsRouteRequestBody, GetApprovalsRouteSuccessResponse, convertGetApprovalsRouteSuccessResponse, GetChallengeTrackersRouteRequestBody, GetChallengeTrackersRouteSuccessResponse, convertGetChallengeTrackersRouteSuccessResponse, MetadataFetchOptions } from "./types/api";
-import { convertBitBadgesCollection, BitBadgesCollection } from "./types/collections";
-import { GetStatusRoute, GetSearchRoute, GetCollectionBatchRoute, GetCollectionByIdRoute, GetOwnersForBadgeRoute, GetMetadataForCollectionRoute, GetBadgeBalanceByAddressRoute, GetBadgeActivityRoute, RefreshMetadataRoute, GetAllPasswordsAndCodesRoute, GetCodeForPasswordRoute, AddAnnouncementRoute, DeleteReviewRoute, DeleteAnnouncementRoute, AddReviewForCollectionRoute, GetAccountsRoute, GetAccountRoute, AddReviewForUserRoute, UpdateAccountInfoRoute, AddBalancesToOffChainStorageRoute, AddMetadataToIpfsRoute, AddApprovalDetailsToOffChainStorageRoute, GetSignInChallengeRoute, VerifySignInRoute, CheckIfSignedInRoute, SignOutRoute, GetBrowseCollectionsRoute, BroadcastTxRoute, SimulateTxRoute, FetchMetadataDirectlyRoute, GetTokensFromFaucetRoute, UpdateAddressMappingRoute, GetAddressMappingsRoute, DeleteAddressMappingRoute, GetApprovalsRoute, GetChallengeTrackerRoute } from "./types/routes";
-import axiosApi from "axios";
-import { stringify } from "./utils/preserveJson";
-import Joi from "joi";
 import { getCurrentValuesForCollection } from "./timelines";
+import { AddAddressToSurveyRouteRequestBody, AddAddressToSurveyRouteSuccessResponse, AddAnnouncementRouteRequestBody, AddAnnouncementRouteSuccessResponse, AddApprovalDetailsToOffChainStorageRouteRequestBody, AddApprovalDetailsToOffChainStorageRouteSuccessResponse, AddBalancesToOffChainStorageRouteRequestBody, AddBalancesToOffChainStorageRouteSuccessResponse, AddMetadataToIpfsRouteRequestBody, AddMetadataToIpfsRouteSuccessResponse, AddReviewForCollectionRouteRequestBody, AddReviewForCollectionRouteSuccessResponse, AddReviewForUserRouteRequestBody, AddReviewForUserRouteSuccessResponse, BroadcastTxRouteRequestBody, BroadcastTxRouteSuccessResponse, CheckSignInStatusRequestBody, CheckSignInStatusRequestSuccessResponse, CreateBlockinAuthCodeRouteRequestBody, CreateBlockinAuthCodeRouteResponse, CreateBlockinAuthCodeRouteSuccessResponse, DeleteAddressMappingsRouteRequestBody, DeleteAddressMappingsRouteSuccessResponse, DeleteAnnouncementRouteRequestBody, DeleteAnnouncementRouteSuccessResponse, DeleteBlockinAuthCodeRouteRequestBody, DeleteBlockinAuthCodeRouteResponse, DeleteBlockinAuthCodeRouteSuccessResponse, DeleteReviewRouteRequestBody, DeleteReviewRouteSuccessResponse, ErrorResponse, FetchMetadataDirectlyRouteRequestBody, FetchMetadataDirectlyRouteSuccessResponse, GenericBlockinVerifyRouteRequestBody, GenericBlockinVerifyRouteSuccessResponse, GetAccountRouteRequestBody, GetAccountRouteSuccessResponse, GetAccountsRouteRequestBody, GetAccountsRouteSuccessResponse, GetAddressMappingsRouteRequestBody, GetAddressMappingsRouteSuccessResponse, GetAllCodesAndPasswordsRouteRequestBody, GetAllCodesAndPasswordsRouteSuccessResponse, GetApprovalsRouteRequestBody, GetApprovalsRouteSuccessResponse, GetBadgeActivityRouteRequestBody, GetBadgeActivityRouteSuccessResponse, GetBadgeBalanceByAddressRouteRequestBody, GetBadgeBalanceByAddressRouteSuccessResponse, GetBlockinAuthCodeRouteRequestBody, GetBlockinAuthCodeRouteSuccessResponse, GetBrowseCollectionsRouteRequestBody, GetBrowseCollectionsRouteSuccessResponse, GetChallengeTrackersRouteRequestBody, GetChallengeTrackersRouteSuccessResponse, GetClaimAlertsForCollectionRouteRequestBody, GetClaimAlertsForCollectionRouteSuccessResponse, GetCodeForPasswordRouteRequestBody, GetCodeForPasswordRouteSuccessResponse, GetCollectionBatchRouteRequestBody, GetCollectionBatchRouteSuccessResponse, GetCollectionByIdRouteRequestBody, GetCollectionRouteSuccessResponse, GetFollowDetailsRouteRequestBody, GetFollowDetailsRouteSuccessResponse, GetMetadataForCollectionRouteRequestBody, GetMetadataForCollectionRouteSuccessResponse, GetOwnersForBadgeRouteRequestBody, GetOwnersForBadgeRouteSuccessResponse, GetSearchRouteRequestBody, GetSearchRouteSuccessResponse, GetSignInChallengeRouteRequestBody, GetSignInChallengeRouteSuccessResponse, GetStatusRouteRequestBody, GetStatusRouteSuccessResponse, GetTokensFromFaucetRouteRequestBody, GetTokensFromFaucetRouteSuccessResponse, MetadataFetchOptions, RefreshMetadataRouteRequestBody, RefreshMetadataRouteSuccessResponse, RefreshStatusRouteSuccessResponse, SendClaimAlertsRouteRequestBody, SendClaimAlertsRouteSuccessResponse, SignOutRequestBody, SignOutSuccessResponse, SimulateTxRouteRequestBody, SimulateTxRouteSuccessResponse, UpdateAccountInfoRouteRequestBody, UpdateAccountInfoRouteSuccessResponse, UpdateAddressMappingsRouteRequestBody, UpdateAddressMappingsRouteSuccessResponse, UpdateFollowDetailsRouteRequestBody, UpdateFollowDetailsRouteSuccessResponse, VerifySignInRouteRequestBody, VerifySignInRouteSuccessResponse, convertAddAnnouncementRouteSuccessResponse, convertAddApprovalDetailsToOffChainStorageRouteSuccessResponse, convertAddBalancesToOffChainStorageRouteSuccessResponse, convertAddMetadataToIpfsRouteSuccessResponse, convertAddReviewForCollectionRouteSuccessResponse, convertAddReviewForUserRouteSuccessResponse, convertBroadcastTxRouteSuccessResponse, convertCheckSignInStatusRequestSuccessResponse, convertDeleteAddressMappingsRouteSuccessResponse, convertDeleteAnnouncementRouteSuccessResponse, convertDeleteReviewRouteSuccessResponse, convertFetchMetadataDirectlyRouteSuccessResponse, convertGetAccountRouteSuccessResponse, convertGetAccountsRouteSuccessResponse, convertGetAddressMappingsRouteSuccessResponse, convertGetAllCodesAndPasswordsRouteSuccessResponse, convertGetApprovalsRouteSuccessResponse, convertGetBadgeActivityRouteSuccessResponse, convertGetBadgeBalanceByAddressRouteSuccessResponse, convertGetBrowseCollectionsRouteSuccessResponse, convertGetChallengeTrackersRouteSuccessResponse, convertGetCodeForPasswordRouteSuccessResponse, convertGetCollectionBatchRouteSuccessResponse, convertGetCollectionRouteSuccessResponse, convertGetMetadataForCollectionRouteSuccessResponse, convertGetOwnersForBadgeRouteSuccessResponse, convertGetSearchRouteSuccessResponse, convertGetSignInChallengeRouteSuccessResponse, convertGetStatusRouteSuccessResponse, convertGetTokensFromFaucetRouteSuccessResponse, convertRefreshMetadataRouteSuccessResponse, convertSignOutSuccessResponse, convertSimulateTxRouteSuccessResponse, convertUpdateAccountInfoRouteSuccessResponse, convertUpdateAddressMappingsRouteSuccessResponse, convertVerifySignInRouteSuccessResponse } from "./types/api";
+import { BitBadgesCollection, convertBitBadgesCollection } from "./types/collections";
+import { AddAddressToSurveyRoute, AddAnnouncementRoute, AddApprovalDetailsToOffChainStorageRoute, AddBalancesToOffChainStorageRoute, AddMetadataToIpfsRoute, AddReviewForCollectionRoute, AddReviewForUserRoute, BroadcastTxRoute, CheckIfSignedInRoute, CreateAuthCodeRoute, DeleteAddressMappingRoute, DeleteAnnouncementRoute, DeleteAuthCodeRoute, DeleteReviewRoute, FetchMetadataDirectlyRoute, GenericVerifyRoute, GetAccountRoute, GetAccountsRoute, GetAddressMappingsRoute, GetAllPasswordsAndCodesRoute, GetApprovalsRoute, GetAuthCodeRoute, GetBadgeActivityRoute, GetBadgeBalanceByAddressRoute, GetBrowseCollectionsRoute, GetChallengeTrackerRoute, GetClaimAlertsRoute, GetCodeForPasswordRoute, GetCollectionBatchRoute, GetCollectionByIdRoute, GetFollowDetailsRoute, GetMetadataForCollectionRoute, GetOwnersForBadgeRoute, GetRefreshStatusRoute, GetSearchRoute, GetSignInChallengeRoute, GetStatusRoute, GetTokensFromFaucetRoute, RefreshMetadataRoute, SendClaimAlertRoute, SignOutRoute, SimulateTxRoute, UpdateAccountInfoRoute, UpdateAddressMappingRoute, UpdateFollowDetailsRoute, VerifySignInRoute } from "./types/routes";
 
 type DesiredNumberType = bigint;
 
@@ -291,7 +290,7 @@ export class BitBadgesAPI {
     }
   }
 
-  public async updateAccountInfo(requestBody: UpdateAccountInfoRouteRequestBody<DesiredNumberType>): Promise<UpdateAccountInfoRouteSuccessResponse<DesiredNumberType>> {
+  public async updateAccountInfo(requestBody: UpdateAccountInfoRouteRequestBody<NumberType>): Promise<UpdateAccountInfoRouteSuccessResponse<DesiredNumberType>> {
     try {
       const response = await this.axios.post<UpdateAccountInfoRouteSuccessResponse<string>>(`${this.BACKEND_URL}${UpdateAccountInfoRoute()}`, requestBody);
       return convertUpdateAccountInfoRouteSuccessResponse(response.data, this.ConvertFunction);
@@ -343,7 +342,7 @@ export class BitBadgesAPI {
 
   public async verifySignIn(requestBody: VerifySignInRouteRequestBody): Promise<VerifySignInRouteSuccessResponse<DesiredNumberType>> {
     try {
-      const body = stringify(requestBody);
+      const body = requestBody;
       const response = await this.axios.post<VerifySignInRouteSuccessResponse<string>>(`${this.BACKEND_URL}${VerifySignInRoute()}`, body);
       return convertVerifySignInRouteSuccessResponse(response.data, this.ConvertFunction);
     } catch (error) {
@@ -354,7 +353,7 @@ export class BitBadgesAPI {
 
   public async checkIfSignedIn(requestBody: CheckSignInStatusRequestBody): Promise<CheckSignInStatusRequestSuccessResponse<DesiredNumberType>> {
     try {
-      const body = stringify(requestBody);
+      const body = requestBody;
       const response = await this.axios.post<CheckSignInStatusRequestSuccessResponse<string>>(`${this.BACKEND_URL}${CheckIfSignedInRoute()}`, body);
       return convertCheckSignInStatusRequestSuccessResponse(response.data, this.ConvertFunction);
     } catch (error) {
@@ -428,7 +427,7 @@ export class BitBadgesAPI {
     }
   }
 
-  public async updateAddressMappings(requestBody?: UpdateAddressMappingsRouteRequestBody): Promise<UpdateAddressMappingsRouteSuccessResponse<DesiredNumberType>> {
+  public async updateAddressMappings(requestBody?: UpdateAddressMappingsRouteRequestBody<NumberType>): Promise<UpdateAddressMappingsRouteSuccessResponse<DesiredNumberType>> {
     try {
       const response = await this.axios.post<UpdateAddressMappingsRouteSuccessResponse<string>>(`${this.BACKEND_URL}${UpdateAddressMappingRoute()}`, requestBody);
       return convertUpdateAddressMappingsRouteSuccessResponse(response.data, this.ConvertFunction);
@@ -479,13 +478,114 @@ export class BitBadgesAPI {
     }
   }
 
+  public async getAuthCode(requestBody?: GetBlockinAuthCodeRouteRequestBody): Promise<GetBlockinAuthCodeRouteSuccessResponse> {
+    try {
+      const response = await this.axios.post<GetBlockinAuthCodeRouteSuccessResponse>(`${this.BACKEND_URL}${GetAuthCodeRoute()}`, requestBody);
+      return response.data;
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  public async createAuthCode(requestBody?: CreateBlockinAuthCodeRouteRequestBody): Promise<CreateBlockinAuthCodeRouteSuccessResponse> {
+    try {
+      const response = await this.axios.post<CreateBlockinAuthCodeRouteResponse>(`${this.BACKEND_URL}${CreateAuthCodeRoute()}`, requestBody);
+      return response.data;
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  public async deleteAuthCode(requestBody?: DeleteBlockinAuthCodeRouteRequestBody): Promise<DeleteBlockinAuthCodeRouteSuccessResponse> {
+    try {
+      const response = await this.axios.post<DeleteBlockinAuthCodeRouteResponse>(`${this.BACKEND_URL}${DeleteAuthCodeRoute()}`, requestBody);
+      return response.data;
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  public async verifySignInGeneric(requestBody: GenericBlockinVerifyRouteRequestBody): Promise<GenericBlockinVerifyRouteSuccessResponse> {
+    try {
+      const body = requestBody;
+      const response = await this.axios.post<GenericBlockinVerifyRouteSuccessResponse>(`${this.BACKEND_URL}${GenericVerifyRoute()}`, body);
+      return convertVerifySignInRouteSuccessResponse(response.data, this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  public async addAddressToSurvey(mappingId: string, requestBody: AddAddressToSurveyRouteRequestBody): Promise<AddAddressToSurveyRouteSuccessResponse> {
+    try {
+      const response = await this.axios.post<AddAddressToSurveyRouteSuccessResponse>(`${this.BACKEND_URL}${AddAddressToSurveyRoute(mappingId)}`, requestBody);
+      return response.data;
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  public async sendClaimAlert(requestBody: SendClaimAlertsRouteRequestBody<NumberType>): Promise<SendClaimAlertsRouteSuccessResponse<DesiredNumberType>> {
+    try {
+      const response = await this.axios.post<SendClaimAlertsRouteSuccessResponse<DesiredNumberType>>(`${this.BACKEND_URL}${SendClaimAlertRoute()}`, requestBody);
+      return response.data;
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  public async updateFollowDetails(requestBody: UpdateFollowDetailsRouteRequestBody<NumberType>): Promise<UpdateFollowDetailsRouteSuccessResponse> {
+    try {
+      const response = await this.axios.post<UpdateFollowDetailsRouteSuccessResponse>(`${this.BACKEND_URL}${UpdateFollowDetailsRoute()}`, requestBody);
+      return response.data;
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  public async getFollowDetails(requestBody: GetFollowDetailsRouteRequestBody): Promise<GetFollowDetailsRouteSuccessResponse<DesiredNumberType>> {
+    try {
+      const response = await this.axios.post<GetFollowDetailsRouteSuccessResponse<DesiredNumberType>>(`${this.BACKEND_URL}${GetFollowDetailsRoute()}`, requestBody);
+      return response.data;
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  public async getClaimAlerts(requestBody: GetClaimAlertsForCollectionRouteRequestBody<NumberType>): Promise<GetClaimAlertsForCollectionRouteSuccessResponse<DesiredNumberType>> {
+    try {
+      const response = await this.axios.post<GetClaimAlertsForCollectionRouteSuccessResponse<DesiredNumberType>>(`${this.BACKEND_URL}${GetClaimAlertsRoute()}`, requestBody);
+      return response.data;
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  public async getRefreshStatus(collectionId: NumberType): Promise<RefreshStatusRouteSuccessResponse<NumberType>> {
+    try {
+      const response = await this.axios.post<RefreshStatusRouteSuccessResponse<DesiredNumberType>>(`${this.BACKEND_URL}${GetRefreshStatusRoute(collectionId)}`);
+      return response.data;
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
   /** Update Helper Functions for Pagination and Dynamic Fetches */
   public async updateUserSeenActivity() {
     return await this.updateAccountInfo({ seenActivity: Date.now() }); //Authenticated route so no need to pass in address
   }
 
   //Gets metadata batches for a collection starting from startBatchId ?? 0 and incrementing METADATA_PAGE_LIMIT times
-  public async fetchAndUpdateMetadata(collection: BitBadgesCollection<bigint>, metadataFetchOptions: MetadataFetchOptions) {
+  public async fetchAndUpdateMetadata(collection: BitBadgesCollection<DesiredNumberType>, metadataFetchOptions: MetadataFetchOptions) {
     const promises = [];
     promises.push(this.getMetadataForCollection(collection.collectionId, { metadataToFetch: metadataFetchOptions }));
 

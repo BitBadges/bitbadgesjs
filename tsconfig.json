@@ -4,9 +4,7 @@
     "baseUrl": ".",
     "paths": {
         "bitbadgesjs":["packages/bitbadgesjs"],
-        "bitbadgesjs-address-converter": ["./packages/address-converter/*"],
         "bitbadgesjs-proto":["packages/proto"],
-        "bitbadgesjs-provider":["./packages/provider/*"],
     }
   }
 }

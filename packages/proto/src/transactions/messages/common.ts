@@ -1,5 +1,3 @@
-import { Proto } from '@evmos/proto'
-
 /**
  * EI712ToSign represents a signable EIP-712 payload that can be signed using MetaMask or Keplr.
  *
@@ -79,34 +77,6 @@ export interface Chain {
   chain: SupportedChain
 }
 
-/**
- * TxPayload is a transaction object with signable payloads
- * in multiple formats.
- *
- * @remarks
- * TxPayload includes signable payloads for Evmos `EIP-712`,
- * `SignDirect`, and `SignLegacyAmino`.
- *
- * Evmos uses the {@link https://eips.ethereum.org/EIPS/eip-712 | EIP-712 Specification}
- * to wrap and sign Cosmos payloads using Ethereum signers.
- *
- * See {@link https://docs.cosmos.network/main/core/encoding} for more
- * on `SignDirect` and `SignLegacyAmino`.
- */
-export interface TxPayload {
-  signDirect: {
-    body: Proto.Cosmos.Transactions.Tx.TxBody
-    authInfo: Proto.Cosmos.Transactions.Tx.AuthInfo
-    signBytes: string
-  }
-  legacyAmino: {
-    body: Proto.Cosmos.Transactions.Tx.TxBody
-    authInfo: Proto.Cosmos.Transactions.Tx.AuthInfo
-    signBytes: string
-  }
-  eipToSign: EIP712ToSign | undefined
-  jsonToSign: string | undefined
-}
 
 export type Coin = {
   denom: string

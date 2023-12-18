@@ -1,8 +1,7 @@
-import { ApprovalIdentifierDetails, Balance, convertBalance } from "bitbadgesjs-proto";
+import { ApprovalIdentifierDetails, Balance, JSPrimitiveNumberType, convertBalance } from "bitbadgesjs-proto";
+import mongoose from "mongoose";
 import { NumberType } from "./string-numbers";
-import { deepCopy, getCouchDBDetails, removeCouchDBDetails } from "./utils";
-import nano from "nano";
-import { Identified, DeletableDocument } from "./db";
+import { deepCopy } from "./utils";
 
 /**
  * @category API / Indexer
@@ -37,30 +36,16 @@ export interface ActivityInfoBase<T extends NumberType> {
 /**
  * @category API / Indexer
  */
-export type ActivityDoc<T extends NumberType> = ActivityInfoBase<T> & nano.IdentifiedDocument & nano.MaybeRevisionedDocument & DeletableDocument;
-/**
- * @category API / Indexer
- */
-export type ActivityInfo<T extends NumberType> = ActivityInfoBase<T> & Identified;
-
-/**
- * @category API / Indexer
- */
-export function convertActivityInfo<T extends NumberType, U extends NumberType>(item: ActivityInfo<T>, convertFunction: (item: T) => U): ActivityInfo<U> {
-  return deepCopy({
-    ...item,
-    timestamp: convertFunction(item.timestamp),
-    block: convertFunction(item.block)
-  })
-}
+export type ActivityDoc<T extends NumberType> = ActivityInfoBase<T> & { _legacyId: string, _id?: string };
 
 /**
  * @category API / Indexer
  */
 export function convertActivityDoc<T extends NumberType, U extends NumberType>(item: ActivityDoc<T>, convertFunction: (item: T) => U): ActivityDoc<U> {
   return deepCopy({
-    ...convertActivityInfo(removeCouchDBDetails(item), convertFunction),
-    ...getCouchDBDetails(item),
+    ...item,
+    timestamp: convertFunction(item.timestamp),
+    block: convertFunction(item.block)
   })
 }
 
@@ -88,32 +73,18 @@ export interface ReviewInfoBase<T extends NumberType> extends ActivityInfoBase<T
 /**
  * @category API / Indexer
  */
-export type ReviewDoc<T extends NumberType> = ReviewInfoBase<T> & nano.IdentifiedDocument & nano.MaybeRevisionedDocument & DeletableDocument;
-/**
- * @category API / Indexer
- */
-export type ReviewInfo<T extends NumberType> = ReviewInfoBase<T> & Identified;
-
-/**
- * @category API / Indexer
- */
-export function convertReviewInfo<T extends NumberType, U extends NumberType>(item: ReviewInfo<T>, convertFunction: (item: T) => U): ReviewInfo<U> {
-  return deepCopy({
-    ...item,
-    ...convertActivityInfo(item, convertFunction),
-    method: item.method,
-    stars: convertFunction(item.stars),
-    collectionId: item.collectionId ? convertFunction(item.collectionId) : undefined
-  })
-}
+export type ReviewDoc<T extends NumberType> = ReviewInfoBase<T> & { _legacyId: string, _id?: string };
 
 /**
  * @category API / Indexer
  */
 export function convertReviewDoc<T extends NumberType, U extends NumberType>(item: ReviewDoc<T>, convertFunction: (item: T) => U): ReviewDoc<U> {
   return deepCopy({
-    ...convertReviewInfo(removeCouchDBDetails(item), convertFunction),
-    ...getCouchDBDetails(item),
+    ...item,
+    ...convertActivityDoc(item, convertFunction),
+    method: item.method,
+    stars: convertFunction(item.stars),
+    collectionId: item.collectionId ? convertFunction(item.collectionId) : undefined
   })
 }
 
@@ -138,30 +109,15 @@ export interface AnnouncementInfoBase<T extends NumberType> extends ActivityInfo
 /**
  * @category API / Indexer
  */
-export type AnnouncementDoc<T extends NumberType> = AnnouncementInfoBase<T> & nano.IdentifiedDocument & nano.MaybeRevisionedDocument & DeletableDocument;
-/**
- * @category API / Indexer
- */
-export type AnnouncementInfo<T extends NumberType> = AnnouncementInfoBase<T> & Identified;
+export type AnnouncementDoc<T extends NumberType> = AnnouncementInfoBase<T> & { _legacyId: string, _id?: string };
 
 /**
  * @category API / Indexer
  */
 export function convertAnnouncementDoc<T extends NumberType, U extends NumberType>(item: AnnouncementDoc<T>, convertFunction: (item: T) => U): AnnouncementDoc<U> {
   return deepCopy({
-    ...convertAnnouncementInfo(removeCouchDBDetails(item), convertFunction),
-    ...getCouchDBDetails(item),
-
-  })
-}
-
-/**
- * @category API / Indexer
- */
-export function convertAnnouncementInfo<T extends NumberType, U extends NumberType>(item: AnnouncementInfo<T>, convertFunction: (item: T) => U): AnnouncementInfo<U> {
-  return deepCopy({
     ...item,
-    ...convertActivityInfo(item, convertFunction),
+    ...convertActivityDoc(item, convertFunction),
     method: item.method,
     collectionId: convertFunction(item.collectionId)
   })
@@ -202,32 +158,60 @@ export interface TransferActivityInfoBase<T extends NumberType> extends Activity
 /**
  * @category API / Indexer
  */
-export type TransferActivityDoc<T extends NumberType> = TransferActivityInfoBase<T> & nano.IdentifiedDocument & nano.MaybeRevisionedDocument & DeletableDocument;
-/**
- * @category API / Indexer
- */
-export type TransferActivityInfo<T extends NumberType> = TransferActivityInfoBase<T> & Identified;
+export type TransferActivityDoc<T extends NumberType> = TransferActivityInfoBase<T> & { _legacyId: string, _id?: string };
+
 
 /**
  * @category API / Indexer
  */
 export function convertTransferActivityDoc<T extends NumberType, U extends NumberType>(item: TransferActivityDoc<T>, convertFunction: (item: T) => U): TransferActivityDoc<U> {
   return deepCopy({
-    ...convertTransferActivityInfo(removeCouchDBDetails(item), convertFunction),
-    ...getCouchDBDetails(item),
-
-  })
-}
-
-/**
- * @category API / Indexer
- */
-export function convertTransferActivityInfo<T extends NumberType, U extends NumberType>(item: TransferActivityInfo<T>, convertFunction: (item: T) => U): TransferActivityInfo<U> {
-  return deepCopy({
     ...item,
-    ...convertActivityInfo(item, convertFunction),
+    ...convertActivityDoc(item, convertFunction),
     method: item.method,
     balances: item.balances.map((x) => convertBalance(x, convertFunction)),
     collectionId: convertFunction(item.collectionId),
   })
 }
+
+
+const { Schema } = mongoose;
+
+
+export const TransferActivitySchema = new Schema<TransferActivityDoc<JSPrimitiveNumberType>>({
+  _legacyId: String,
+  method: String,
+  to: [String],
+  from: String,
+  balances: [Schema.Types.Mixed],
+  collectionId: Schema.Types.Mixed,
+  timestamp: Schema.Types.Mixed,
+  block: Schema.Types.Mixed,
+  memo: String,
+  precalculateBalancesFromApproval: Schema.Types.Mixed,
+  prioritizedApprovals: [Schema.Types.Mixed],
+  onlyCheckPrioritizedApprovals: Boolean,
+  initiatedBy: String,
+  txHash: String,
+});
+export const ReviewSchema = new Schema<ReviewDoc<JSPrimitiveNumberType>>({
+  _legacyId: String,
+  method: String,
+  review: String,
+  stars: Schema.Types.Mixed,
+  timestamp: Schema.Types.Mixed,
+  block: Schema.Types.Mixed,
+  from: String,
+  collectionId: Schema.Types.Mixed,
+  reviewedAddress: String,
+});
+
+export const AnnouncementSchema = new Schema<AnnouncementDoc<JSPrimitiveNumberType>>({
+  _legacyId: String,
+  method: String,
+  announcement: String,
+  timestamp: Schema.Types.Mixed,
+  block: Schema.Types.Mixed,
+  from: String,
+  collectionId: Schema.Types.Mixed,
+});

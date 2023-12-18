@@ -1,7 +1,7 @@
 import { Balance, UintRange } from "bitbadgesjs-proto";
 import { addBalances, getBlankBalance } from "./balances";
 import { BitBadgesCollection } from "./types/collections";
-import { BalanceInfoWithDetails } from "./types/db";
+import { BalanceDocWithDetails } from "./types/db";
 import { deepCopy } from "./types/utils";
 
 /**
@@ -47,7 +47,7 @@ export function getUintRangesForAllBadgeIdsInCollection(collection: BitBadgesCol
  */
 export function incrementMintAndTotalBalances(
   collectionId: bigint,
-  owners: BalanceInfoWithDetails<bigint>[],
+  owners: BalanceDocWithDetails<bigint>[],
   badgesToCreate: Balance<bigint>[],
 ) {
   const totalBalanceStore = owners.find(x => x.cosmosAddress === "Total");
@@ -62,9 +62,10 @@ export function incrementMintAndTotalBalances(
   newUnmintedSupplys.balances = addBalances(badgesToCreate, newUnmintedSupplys.balances);
 
   //Replace "Mint" and "Total" in owners array with new balances
-  const newOwners: BalanceInfoWithDetails<bigint>[] = owners.filter(x => x.cosmosAddress !== "Mint" && x.cosmosAddress !== "Total") ?? [];
+  const newOwners: BalanceDocWithDetails<bigint>[] = owners.filter(x => x.cosmosAddress !== "Mint" && x.cosmosAddress !== "Total") ?? [];
   newOwners.push({
-    _id: `${collectionId.toString()}:Mint`,
+    _id: '',
+    _legacyId: `${collectionId.toString()}:Mint`,
     balances: newUnmintedSupplys.balances,
     cosmosAddress: "Mint",
     collectionId: collectionId,
@@ -83,7 +84,8 @@ export function incrementMintAndTotalBalances(
   });
 
   newOwners.push({
-    _id: `${collectionId.toString()}:Total`,
+    _id: '',
+    _legacyId: `${collectionId.toString()}:Total`,
     balances: newMaxSupplys.balances,
     cosmosAddress: "Total",
     collectionId: collectionId,

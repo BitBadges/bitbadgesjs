@@ -1,7 +1,7 @@
 {
   "name": "bitbadgesjs-proto",
   "description": "Protobuf files for BitBadges.",
-  "version": "0.1.181",
+  "version": "0.1.193",
   "license": "MIT",
   "eslintIgnore": [
     "src/proto/**/*.ts"
@@ -9,15 +9,14 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
-    "dist"
+    "/dist"
   ],
   "_moduleAliases": {
     "~proto": "dist"
   },
   "scripts": {
-    "postinstall": "shx mkdir -p dist && link-module-alias",
-    "build": "tsc --build tsconfig.build.json && link-module-alias",
-    "build:watch": "tsc --build -w tsconfig.build.json && link-module-alias",
+    "build": "tsc --build tsconfig.build.json",
+    "build:watch": "tsc --build -w tsconfig.build.json",
     "clean": "tsc --build tsconfig.build.json --clean  && shx rm -rf coverage *.log junit.xml dist && jest --clearCache",
     "test": "jest",
     "test:unit": "jest test/unit",
@@ -29,12 +28,13 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
-    "@bufbuild/buf": "^1.28.0",
     "@bufbuild/protobuf": "^1.4.2",
-    "@bufbuild/protoc-gen-es": "^1.4.2",
-    "@cosmjs/cosmwasm-stargate": "^0.31.3"
+    "@cosmjs/cosmwasm-stargate": "^0.31.3",
+    "shx": "^0.3.4"
   },
   "devDependencies": {
-    "@types/node": "^17.0.21"
+    "@types/node": "^17.0.21",
+    "@bufbuild/protoc-gen-es": "^1.4.2",
+    "@bufbuild/buf": "^1.28.0"
   }
 }

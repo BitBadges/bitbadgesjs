@@ -1,5 +1,5 @@
 import { NumberType, UintRange, convertUintRange } from "bitbadgesjs-proto";
-import { AddressMappingInfo, convertAddressMappingInfo } from "./db";
+import { AddressMappingDoc, convertAddressMappingDoc } from "./db";
 import { deepCopy } from "./utils";
 
 /**
@@ -15,6 +15,8 @@ import { deepCopy } from "./utils";
  * @property {string} [category] - The category of the badge or badge collection (e.g. "Education", "Attendance").
  * @property {string} [externalUrl] - The external URL of the badge or badge collection.
  * @property {string[]} [tags] - The tags of the badge or badge collection
+ *
+ * @property {Object} [socials] - The socials for the metadata
  *
  * @property {bigint} [fetchedAtBlock] - Block of fetch time
  * @property {bigint} [fetchedAt] - UNIX milliseconds the metadata was cached / fetched at
@@ -36,6 +38,10 @@ export interface Metadata<T extends NumberType> {
   category?: string;
   externalUrl?: string;
   tags?: string[];
+
+  socials?: {
+    [key: string]: string;
+  }
 }
 
 /**
@@ -57,7 +63,7 @@ export function convertMetadata<T extends NumberType, U extends NumberType>(item
  * @typedef {Object} AddressMappingWithMetadata
  * @property {string} metadata - The metadata of the address mapping.
  */
-export interface AddressMappingWithMetadata<T extends NumberType> extends AddressMappingInfo<T> {
+export interface AddressMappingWithMetadata<T extends NumberType> extends AddressMappingDoc<T> {
   metadata?: Metadata<T>
 }
 
@@ -66,7 +72,7 @@ export interface AddressMappingWithMetadata<T extends NumberType> extends Addres
  */
 export function convertAddressMappingWithMetadata<T extends NumberType, U extends NumberType>(item: AddressMappingWithMetadata<T>, convertFunction: (item: T) => U): AddressMappingWithMetadata<U> {
   return deepCopy({
-    ...convertAddressMappingInfo(item, convertFunction),
+    ...convertAddressMappingDoc(item, convertFunction),
     metadata: item.metadata ? convertMetadata(item.metadata, convertFunction) : undefined,
   })
 }

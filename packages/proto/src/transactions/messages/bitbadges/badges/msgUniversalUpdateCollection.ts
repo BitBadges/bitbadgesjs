@@ -23,7 +23,7 @@ import { createProtoMsg } from '../../../../proto-types/base'
  * @typedef {Object} MsgUniversalUpdateCollection
  * @property {string} creator - The creator of the transaction.
  * @property {T} collectionId - The collection ID. If you are creating a new collection, set this to "0".
- * @property {string} balancesType - The balances type. Either "Standard", "Off-Chain", or "Inherited".
+ * @property {string} balancesType - The balances type. Either "Standard", "Off-Chain - Indexed", "Off-Chain - Non-Indexed" or "Inherited". Only can be set on initial creation.
  * @property {UserOutgoingApproval[]} defaultOutgoingApprovals - The default approved outgoing transfers timeline for users who have not interacted with the collection yet. Only can be set on initial creation. Only used if collection has "Standard" balance type.
  * @property {UserIncomingApproval[]} defaultIncomingApprovals - The default approved incoming transfers timeline for users who have not interacted with the collection yet. Only can be set on initial creation. Only used if collection has "Standard" balance type.
  * @property {UserPermissions} defaultUserPermissions - The default user permissions for users who have not interacted with the collection yet. Only can be set on initial creation. Only used if collection has "Standard" balance type.
@@ -37,7 +37,7 @@ import { createProtoMsg } from '../../../../proto-types/base'
  * @property {boolean} updateBadgeMetadataTimeline - Whether or not to update the badge metadata timeline.
  * @property {BadgeMetadataTimeline[]} badgeMetadataTimeline - The new badge metadata timeline. Must have the necessary permissions to update. Note we take first-match only for badge IDs, so do not define duplicates.
  * @property {boolean} updateOffChainBalancesMetadataTimeline - Whether or not to update the off-chain balances metadata timeline.
- * @property {OffChainBalancesMetadataTimeline[]} offChainBalancesMetadataTimeline - The new off-chain balances metadata timeline. Must have the necessary permissions to update. Only used if "Off-Chain" balance type.
+ * @property {OffChainBalancesMetadataTimeline[]} offChainBalancesMetadataTimeline - The new off-chain balances metadata timeline. Must have the necessary permissions to update. Only used if "Off-Chain - Indexed" or "Off-Chain - Non-Indexed" balance type.
  * @property {boolean} updateCustomDataTimeline - Whether or not to update the custom data timeline.
  * @property {CustomDataTimeline[]} customDataTimeline - The new custom data timeline. Must have the necessary permissions to update.
  * @property {boolean} updateCollectionApprovals - Whether or not to update the collection approved transfers timeline.

@@ -6,8 +6,6 @@ import { removeUintRangeFromUintRange } from "./uintRanges";
 //TODO: Add validate basic logic
 
 /**
- *
- *
  * Validate if a balance permission update (old -> new) is valid (i.e. no permanently permitted or forbidden times are changed)
  *
  * @category Validate Updates
@@ -30,12 +28,12 @@ export function validateBalancesActionPermissionUpdate(
   const castedOldPermissions: UniversalPermission[] = castBalancesActionPermissionToUniversalPermission(oldPermissions);
   const castedNewPermissions: UniversalPermission[] = castBalancesActionPermissionToUniversalPermission(newPermissions);
 
-  const errorUpdate = validateUniversalPermissionUpdate(
+  const err = validateUniversalPermissionUpdate(
     GetFirstMatchOnly(castedOldPermissions),
     GetFirstMatchOnly(castedNewPermissions)
   );
-  if (errorUpdate) {
-    return new Error(`Error validating update in permissions: ${errorUpdate}`);
+  if (err) {
+    return new Error(`Error validating update in permissions: ${err}`);
   }
 
   return null;
@@ -65,12 +63,12 @@ export function validateTimedUpdatePermissionUpdate(
   const castedOldPermissions: UniversalPermission[] = castTimedUpdatePermissionToUniversalPermission(oldPermissions);
   const castedNewPermissions: UniversalPermission[] = castTimedUpdatePermissionToUniversalPermission(newPermissions);
 
-  const errorUpdate = validateUniversalPermissionUpdate(
+  const err = validateUniversalPermissionUpdate(
     GetFirstMatchOnly(castedOldPermissions),
     GetFirstMatchOnly(castedNewPermissions)
   );
-  if (errorUpdate) {
-    return new Error(`Error validating update in permissions: ${errorUpdate}`);
+  if (err) {
+    return new Error(`Error validating update in permissions: ${err}`);
   }
 
   return null;
@@ -104,12 +102,12 @@ export function validateTimedUpdateWithBadgeIdsPermissionUpdate(
     deepCopy(
       castTimedUpdateWithBadgeIdsPermissionToUniversalPermission(newPermissions)
     );
-  const errorUpdate = validateUniversalPermissionUpdate(
+  const err = validateUniversalPermissionUpdate(
     GetFirstMatchOnly(castedOldPermissions),
     GetFirstMatchOnly(castedNewPermissions)
   );
-  if (errorUpdate) {
-    return new Error(`Error validating update in permissions: ${errorUpdate}`);
+  if (err) {
+    return new Error(`Error validating update in permissions: ${err}`);
   }
 
   return null;
@@ -140,12 +138,12 @@ export function validateCollectionApprovalPermissionsUpdate(
   const castedOldPermissions: UniversalPermission[] = castCollectionApprovalPermissionToUniversalPermission(oldPermissions);
   const castedNewPermissions: UniversalPermission[] = castCollectionApprovalPermissionToUniversalPermission(newPermissions);
 
-  const errorUpdate = validateUniversalPermissionUpdate(
+  const err = validateUniversalPermissionUpdate(
     GetFirstMatchOnly(castedOldPermissions),
     GetFirstMatchOnly(castedNewPermissions)
   );
-  if (errorUpdate) {
-    return new Error(`Error validating update in permissions: ${errorUpdate}`);
+  if (err) {
+    return new Error(`Error validating update in permissions: ${err}`);
   }
 
   return null;
@@ -174,12 +172,12 @@ export function validateActionPermissionUpdate(
   const castedOldPermissions: UniversalPermission[] = castActionPermissionToUniversalPermission(oldPermissions);
   const castedNewPermissions: UniversalPermission[] = castActionPermissionToUniversalPermission(newPermissions);
 
-  const errorUpdate = validateUniversalPermissionUpdate(
+  const err = validateUniversalPermissionUpdate(
     GetFirstMatchOnly(castedOldPermissions),
     GetFirstMatchOnly(castedNewPermissions)
   );
-  if (errorUpdate) {
-    return new Error(`Error validating update in permissions: ${errorUpdate}`);
+  if (err) {
+    return new Error(`Error validating update in permissions: ${err}`);
   }
 
   return null;
