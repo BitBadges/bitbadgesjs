@@ -119,7 +119,7 @@ export class CollectionMetadata extends Message<CollectionMetadata> {
 
 /**
  *
- * This message defines the metadata for off-chain balances (if using this balances type).
+ * This message defines the metadata for off-chain balances (if using an off-chain balances type).
  * The interpretation of this metadata should follow the collection standard.
  *
  * @generated from message badges.OffChainBalancesMetadata

@@ -1,5 +1,5 @@
 import { DeliverTxResponse } from "@cosmjs/stargate"
-import { AddressMapping, AmountTrackerIdDetails, NumberType, UintRange, convertUintRange } from "bitbadgesjs-proto"
+import { AddressMapping, AmountTrackerIdDetails, NumberType, Protocol, UintRange, convertUintRange } from "bitbadgesjs-proto"
 
 import { ChallengeParams, VerifyChallengeOptions, convertChallengeParams } from "blockin"
 import { BroadcastPostBody } from "../node-rest-api/broadcast"
@@ -74,7 +74,13 @@ export function convertGetStatusRouteSuccessResponse<T extends NumberType, U ext
 /**
  * @category API / Indexer
  */
-export interface GetSearchRouteRequestBody { }
+export interface GetSearchRouteRequestBody {
+  noCollections?: boolean;
+  noAccounts?: boolean;
+  noAddressMappings?: boolean;
+  noBadges?: boolean;
+  specificCollectionId?: NumberType;
+}
 
 /**
  * @category API / Indexer
@@ -170,7 +176,7 @@ export type CollectionViewKey = 'latestActivity' | 'latestAnnouncements' | 'late
  * - `approvalsTrackers` - Fetches the approvals trackers for the collection in random order.
  *
  * @typedef {Object} GetAdditionalCollectionDetailsRequestBody
- * @property {{ viewKey: CollectionViewKey, bookmark: string }[]} [viewsToFetch] - If present, the specified views will be fetched.
+ * @property {{ viewType: string, bookmark: string }[]} [viewsToFetch] - If present, the specified views will be fetched.
  * @property {boolean} [fetchTotalAndMintBalances] - If true, the total and mint balances will be fetched.
  * @property {string[]} [merkleChallengeIdsToFetch] - If present, the merkle challenges corresponding to the specified merkle challenge IDs will be fetched.
  * @property {AmountTrackerIdDetails<NumberType>[]} [approvalsTrackerIdsToFetch] - If present, the approvals trackers corresponding to the specified approvals tracker IDs will be fetched.
@@ -181,9 +187,11 @@ export interface GetAdditionalCollectionDetailsRequestBody {
    * If present, the specified views will be fetched.
    */
   viewsToFetch?: {
-    viewKey: CollectionViewKey;
+    viewType: CollectionViewKey;
+    viewId: string;
     bookmark: string;
   }[];
+
   /**
    * If true, the total and mint balances will be fetched and will be put in owners[].
    */
@@ -773,7 +781,7 @@ export function convertAddReviewForCollectionRouteSuccessResponse<T extends Numb
  *
  * @category API / Indexer
  */
-export type AccountViewKey = 'createdLists' | 'privateLists' | 'authCodes' | 'latestActivity' | 'latestAnnouncements' | 'latestReviews' | 'badgesCollected' | 'addressMappings' | 'latestClaimAlerts' | 'latestAddressMappings' | 'explicitlyIncludedAddressMappings' | 'explicitlyExcludedAddressMappings' | 'badgesCollectedWithHidden' | 'createdBy' | 'managing'
+export type AccountViewKey = 'createdLists' | 'privateLists' | 'authCodes' | 'latestActivity' | 'latestAnnouncements' | 'latestReviews' | 'badgesCollected' | 'addressMappings' | 'latestClaimAlerts' | 'latestAddressMappings' | 'explicitlyIncludedAddressMappings' | 'explicitlyExcludedAddressMappings' | 'badgesCollectedWithHidden' | 'createdBy' | 'managing' | 'listsActivity'
 
 
 /**
@@ -796,7 +804,7 @@ export type AccountViewKey = 'createdLists' | 'privateLists' | 'authCodes' | 'la
  * @property {boolean} [fetchSequence] - If true, the sequence will be fetched from the blockchain.
  * @property {boolean} [fetchBalance] - If true, the $BADGE balance will be fetched from the blockchain.
  * @property {boolean} [noExternalCalls] - If true, only fetches local Docrmation stored in DB. Nothing external like resolved names, avatars, etc.
- * @property {Array<{ viewKey: AccountViewKey, bookmark: string }>} [viewsToFetch] - An array of views to fetch with associated bookmarks.
+ * @property {Array<{ viewType: string, bookmark: string }>} [viewsToFetch] - An array of views to fetch with associated bookmarks.
  *
  * @category API / Indexer
  */
@@ -806,7 +814,16 @@ export type AccountFetchDetails = {
   fetchSequence?: boolean;
   fetchBalance?: boolean;
   noExternalCalls?: boolean;
-  viewsToFetch?: { viewKey: AccountViewKey, bookmark: string }[];
+  viewsToFetch?: {
+    viewId: string,
+    viewType: AccountViewKey,
+    filteredCollections?: {
+      badgeIds: UintRange<NumberType>[];
+      collectionId: NumberType;
+    }[];
+    filteredLists?: string[];
+    bookmark: string
+  }[];
 };
 
 
@@ -873,7 +890,13 @@ export interface GetAccountRouteRequestBody {
    * An array of views to fetch.
    */
   viewsToFetch?: {
-    viewKey: AccountViewKey;
+    viewId: string,
+    viewType: AccountViewKey,
+    filteredCollections?: {
+      badgeIds: UintRange<NumberType>[];
+      collectionId: NumberType;
+    }[];
+    filteredLists?: string[];
     bookmark: string;
   }[];
 }
@@ -1445,6 +1468,12 @@ export interface GetBrowseCollectionsRouteSuccessResponse<T extends NumberType> 
   addressMappings: { [category: string]: AddressMappingWithMetadata<T>[] };
   profiles: { [category: string]: BitBadgesUserInfo<T>[] };
   activity: TransferActivityDoc<T>[];
+  badges: {
+    [category: string]: {
+      badgeIds: UintRange<T>[]
+      collection: BitBadgesCollection<T>
+    }[]
+  }
 }
 
 /**
@@ -1478,6 +1507,13 @@ export function convertGetBrowseCollectionsRouteSuccessResponse<T extends Number
       return acc;
     }, {} as { [category: string]: BitBadgesUserInfo<U>[] }),
     activity: item.activity.map((activityItem) => convertTransferActivityDoc(activityItem, convertFunction)),
+    badges: Object.keys(item.badges).reduce((acc, category) => {
+      acc[category] = item.badges[category].map((badge) => ({
+        badgeIds: badge.badgeIds.map((badgeId) => convertUintRange(badgeId, convertFunction)),
+        collection: convertBitBadgesCollection(badge.collection, convertFunction),
+      }));
+      return acc;
+    }, {} as { [category: string]: { badgeIds: UintRange<U>[]; collection: BitBadgesCollection<U> }[] }),
   };
 }
 
@@ -2017,34 +2053,6 @@ export function convertAddAddressToSurveyRouteSuccessResponse<T extends NumberTy
   return { ...item };
 }
 
-
-/**
- * @category API / Indexer
- */
-export interface UpdateFollowDetailsRouteRequestBody<T extends NumberType> {
-  followingCollectionId: T;
-}
-
-/**
- * @category API / Indexer
- */
-export interface UpdateFollowDetailsRouteSuccessResponse { }
-
-/**
- * @category API / Indexer
- */
-export type UpdateFollowDetailsRouteResponse = ErrorResponse | UpdateFollowDetailsRouteSuccessResponse;
-
-/**
- * @category API / Indexer
- */
-export function convertUpdateFollowDetailsRouteSuccessResponse<T extends NumberType, U extends NumberType>(
-  item: UpdateFollowDetailsRouteSuccessResponse,
-  convertFunction: (item: T) => U
-): UpdateFollowDetailsRouteSuccessResponse {
-  return { ...item };
-}
-
 /**
  * @category API / Indexer
  */
@@ -2053,6 +2061,8 @@ export interface GetFollowDetailsRouteRequestBody {
 
   followingBookmark?: string;
   followersBookmark?: string;
+
+  protocol?: string;
 }
 
 /**
@@ -2064,6 +2074,8 @@ export interface GetFollowDetailsRouteSuccessResponse<T extends NumberType> exte
 
   followersPagination: PaginationInfo;
   followingPagination: PaginationInfo;
+
+  followingCollectionId: T;
 }
 
 /**
@@ -2081,6 +2093,7 @@ export function convertGetFollowDetailsRouteSuccessResponse<T extends NumberType
   return {
     ...item,
     ...convertFollowDetailsDoc(item, convertFunction),
+    followingCollectionId: convertFunction(item.followingCollectionId),
   };
 }
 
@@ -2116,5 +2129,109 @@ export function convertGetClaimAlertsForCollectionRouteSuccessResponse<T extends
   return {
     ...item,
     claimAlerts: item.claimAlerts.map((claimAlert) => convertClaimAlertDoc(claimAlert, convertFunction)),
+  };
+}
+
+/**
+ * @category API / Indexer
+ */
+export interface GetProtocolsRouteRequestBody {
+  names: string[];
+}
+
+/**
+ * @category API / Indexer
+ */
+export interface GetProtocolsRouteSuccessResponse {
+  protocols: Protocol[]
+}
+
+/**
+ * @category API / Indexer
+ */
+export type GetProtocolsRouteResponse = ErrorResponse | GetProtocolsRouteSuccessResponse;
+
+/**
+ * @category API / Indexer
+ */
+export function convertGetProtocolsRouteSuccessResponse<T extends NumberType, U extends NumberType>(
+  item: GetProtocolsRouteSuccessResponse,
+  convertFunction: (item: T) => U
+): GetProtocolsRouteSuccessResponse {
+  return {
+    ...item,
+  };
+}
+
+/**
+ * @category API / Indexer
+ */
+export interface GetCollectionForProtocolRouteRequestBody {
+  name: string
+  address: string
+}
+
+/**
+ * @category API / Indexer
+ */
+export interface GetCollectionForProtocolRouteSuccessResponse<T extends NumberType> {
+  collectionId: T
+}
+
+/**
+ * @category API / Indexer
+ */
+export type GetCollectionForProtocolRouteResponse<T extends NumberType> = ErrorResponse | GetCollectionForProtocolRouteSuccessResponse<T>;
+
+/**
+ * @category API / Indexer
+ */
+export function convertGetCollectionForProtocolRouteSuccessResponse<T extends NumberType, U extends NumberType>(
+  item: GetCollectionForProtocolRouteSuccessResponse<T>,
+  convertFunction: (item: T) => U
+): GetCollectionForProtocolRouteSuccessResponse<U> {
+  return {
+    ...item,
+    collectionId: convertFunction(item.collectionId),
+  };
+
+}
+
+
+/**
+ * @category API / Indexer
+ */
+export interface FilterBadgesInCollectionRequestBody {
+  collectionId: NumberType
+  badgeIds?: UintRange<NumberType>[]
+  categories?: string[]
+  tags?: string[]
+  mostViewed?: 'daily' | 'allTime' | 'weekly' | 'monthly' | 'yearly'
+  bookmark?: string
+}
+
+/**
+ * @category API / Indexer
+ */
+export interface FilterBadgesInCollectionSuccessResponse<T extends NumberType> {
+  badgeIds: UintRange<T>[]
+  pagination: PaginationInfo
+}
+
+/**
+ * @category API / Indexer
+ */
+export type FilterBadgesInCollectionResponse<T extends NumberType> = ErrorResponse | FilterBadgesInCollectionSuccessResponse<T>;
+
+/**
+ * @category API / Indexer
+ */
+export function convertFilterBadgesInCollectionSuccessResponse<T extends NumberType, U extends NumberType>(
+  item: FilterBadgesInCollectionSuccessResponse<T>,
+  convertFunction: (item: T) => U
+): FilterBadgesInCollectionSuccessResponse<U> {
+  return {
+    ...item,
+    badgeIds: item.badgeIds.map((badgeId) => convertUintRange(badgeId, convertFunction)),
   };
 }

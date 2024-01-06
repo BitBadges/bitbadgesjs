@@ -16,7 +16,7 @@ const doOverlap = checkIfUintRangesOverlap(...);
 const metadata = updateMetadataMap(....);
 ```
 
-It also allows you to switch between equivalent addresses
+It also allows you to switch between equivalent addresses of different blockchains (e.g. Ethereum and Cosmos) using the following functions:
 
 ```ts
 const cosmosAddress = ethToCosmos(address);
@@ -29,10 +29,7 @@ See Broadcasting Txs on the official documentation for more info and tutorials.
 
 ```ts
 const msg: MsgUpdateCollection = {
-    creator: chain.cosmosAddress,
-    collectionId: collectionId,
-    collectionUri: collectionUri,
-    badgeUris: badgeUris
+    ...
 }
 const txMsg = createTxMsgUpdateCollection(
     txDetails.chain,
@@ -43,9 +40,11 @@ const txMsg = createTxMsgUpdateCollection(
 )
 ```
 
-### Generating, Broadcasting, and Signing Txs
-
+### Further Documentation
 We refer you to the official [documentation](https://docs.bitbadges.io/for-developers/create-and-broadcast-txs) for more details and tutorials on how to generate, broadcast, and sign transactions using this repository.
+
+For a fully generated documentation of the library, see [https://bitbadges.github.io/bitbadgesjs/packages/bitbadgesjs/docs/modules.html](https://bitbadges.github.io/bitbadgesjs/packages/bitbadgesjs/docs/modules.html).
+
 
 ## Acknowledgements
 
@@ -54,5 +53,5 @@ We would like to thank the Evmos team for their work and for making this project
 
 ## Other Examples
 
-Because this was forked from evmosjs, please feel free to refer to their examples in their repository.
+Because this was forked from evmosjs, feel free to reference their examples as well in their repository. Not everything will be the same, but it should be similar enough to get you started.
 Note you will have to change everything to the BitBadges equivalent (e.g. evmosjs -> bitbadgesjs, evmos -> bitbadges, aevmos -> badge, new chain details, etc).

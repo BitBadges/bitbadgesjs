@@ -1,4 +1,4 @@
-import { AddressMapping, ApprovalCriteria, CollectionApproval, CollectionApprovalPermission, CollectionPermissions, NumberType, UintRange, UserIncomingApprovalPermission, UserOutgoingApprovalPermission, UserPermissions, convertApprovalCriteria, convertCollectionApproval, convertCollectionApprovalPermission, convertCollectionPermissions, convertUintRange, convertUserIncomingApprovalPermission, convertUserOutgoingApprovalPermission, convertUserPermissions } from "bitbadgesjs-proto";
+import { AddressMapping, ApprovalCriteria, CollectionApproval, CollectionApprovalPermission, CollectionPermissions, NumberType, UintRange, UserBalanceStore, UserIncomingApprovalPermission, UserOutgoingApprovalPermission, UserPermissions, convertApprovalCriteria, convertCollectionApproval, convertCollectionApprovalPermission, convertCollectionPermissions, convertUintRange, convertUserBalanceStore, convertUserIncomingApprovalPermission, convertUserOutgoingApprovalPermission, convertUserPermissions } from "bitbadgesjs-proto";
 import { AnnouncementDoc, ReviewDoc, TransferActivityDoc, convertAnnouncementDoc, convertReviewDoc, convertTransferActivityDoc } from "./activity";
 import { PaginationInfo } from "./api";
 import { ApprovalInfoDetails, ApprovalsTrackerDoc, BalanceDocWithDetails, CollectionInfoBase, MerkleChallengeDoc, MerkleChallengeWithDetails, convertApprovalInfoDetails, convertApprovalsTrackerDoc, convertBalanceDocWithDetails, convertCollectionDoc, convertMerkleChallengeDoc } from "./db";
@@ -179,6 +179,31 @@ export function convertCollectionApprovalWithDetails<T extends NumberType, U ext
   })
 }
 
+/**
+ * @category Approvals / Transferability
+ *
+ * @property {UserOutgoingApprovalWithDetails[]} outgoingApprovals - The default user outgoing approvals for this collection, with off-chain metadata populated.
+ * @property {UserIncomingApprovalWithDetails[]} incomingApprovals - The default user incoming approvals for this collection, with off-chain metadata populated.
+ * @property {UserPermissionsWithDetails} userPermissions - The default user permissions for this collection, with off-chain metadata populated.
+ */
+export interface UserBalanceStoreWithDetails<T extends NumberType> extends UserBalanceStore<T> {
+  outgoingApprovals: UserOutgoingApprovalWithDetails<T>[];
+  incomingApprovals: UserIncomingApprovalWithDetails<T>[];
+  userPermissions: UserPermissionsWithDetails<T>;
+}
+
+/**
+ * @category Approvals / Transferability
+ */
+export function convertUserBalanceStoreWithDetails<T extends NumberType, U extends NumberType>(item: UserBalanceStoreWithDetails<T>, convertFunction: (item: T) => U): UserBalanceStoreWithDetails<U> {
+  return deepCopy({
+    ...item,
+    ...convertUserBalanceStore(item, convertFunction),
+    outgoingApprovals: item.outgoingApprovals.map((outgoingApproval) => convertUserOutgoingApprovalWithDetails(outgoingApproval, convertFunction)),
+    incomingApprovals: item.incomingApprovals.map((incomingApproval) => convertUserIncomingApprovalWithDetails(incomingApproval, convertFunction)),
+    userPermissions: convertUserPermissionsWithDetails(item.userPermissions, convertFunction),
+  })
+}
 
 /**
  * BitBadgesCollection is the type for collections returned by the BitBadges API. It extends the base CollectionDoc type
@@ -189,12 +214,11 @@ export function convertCollectionApprovalWithDetails<T extends NumberType, U ext
  *
  * @property {CollectionApprovalWithDetails[]} collectionApprovals - The collection approvals for this collection, with off-chain metadata populated.
  * @property {CollectionPermissionsWithDetails} collectionPermissions - The collection permissions for this collection, with off-chain metadata populated.
- * @property {UserOutgoingApprovalWithDetails[]} defaultUserOutgoingApprovals - The default user outgoing approvals for this collection, with off-chain metadata populated.
- * @property {UserIncomingApprovalWithDetails[]} defaultUserIncomingApprovals - The default user incoming approvals for this collection, with off-chain metadata populated.
- * @property {UserPermissionsWithDetails} defaultUserPermissions - The default user permissions for this collection, with off-chain metadata populated.
  *
  * @property {Metadata} cachedCollectionMetadata - The fetched collection metadata for this collection. Will only be fetched if requested. It is your responsibility to join this data.
  * @property {BadgeMetadataDetails[]} cachedBadgeMetadata - The fetched badge metadata for this collection. Will only be fetched if requested. It is your responsibility to join this data.
+ *
+ * @property {UserBalanceStoreWithDetails} defaultBalances - The default balances for users upon genesis, with off-chain metadata populated.
  *
  * @property {TransferActivityDoc[]} activity - The fetched activity for this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views.
  * @property {AnnouncementDoc[]} announcements - The fetched announcements for this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views.
@@ -219,10 +243,7 @@ export interface BitBadgesCollection<T extends NumberType> extends CollectionInf
   collectionApprovals: CollectionApprovalWithDetails<T>[];
   collectionPermissions: CollectionPermissionsWithDetails<T>;
 
-  defaultUserOutgoingApprovals: UserOutgoingApprovalWithDetails<T>[];
-  defaultUserIncomingApprovals: UserIncomingApprovalWithDetails<T>[];
-  defaultUserPermissions: UserPermissionsWithDetails<T>;
-
+  defaultBalances: UserBalanceStoreWithDetails<T>;
 
   //The following are to be fetched dynamically and as needed from the DB
   cachedCollectionMetadata?: Metadata<T>;
@@ -238,7 +259,7 @@ export interface BitBadgesCollection<T extends NumberType> extends CollectionInf
   reported?: { badgeIds: UintRange<T>[], reason: string };
 
   views: {
-    [viewKey: string]: {
+    [viewId: string]: {
       ids: string[],
       type: string,
       pagination: PaginationInfo,
@@ -251,9 +272,7 @@ export function convertBitBadgesCollection<T extends NumberType, U extends Numbe
     ...item,
     ...convertCollectionDoc({ ...item, _legacyId: item.collectionId.toString() }, convertFunction),
     collectionApprovals: item.collectionApprovals.map((collectionApproval) => convertCollectionApprovalWithDetails(collectionApproval, convertFunction)),
-    defaultUserPermissions: convertUserPermissionsWithDetails(item.defaultUserPermissions, convertFunction),
-    defaultUserIncomingApprovals: item.defaultUserIncomingApprovals.map((userIncomingApproval) => convertUserIncomingApprovalWithDetails(userIncomingApproval, convertFunction)),
-    defaultUserOutgoingApprovals: item.defaultUserOutgoingApprovals.map((userOutgoingApproval) => convertUserOutgoingApprovalWithDetails(userOutgoingApproval, convertFunction)),
+    defaultBalances: convertUserBalanceStoreWithDetails(item.defaultBalances, convertFunction),
     collectionPermissions: convertCollectionPermissionsWithDetails(item.collectionPermissions, convertFunction),
     cachedCollectionMetadata: item.cachedCollectionMetadata ? convertMetadata(item.cachedCollectionMetadata, convertFunction) : undefined,
     cachedBadgeMetadata: item.cachedBadgeMetadata.map((metadata) => convertBadgeMetadataDetails(metadata, convertFunction)),

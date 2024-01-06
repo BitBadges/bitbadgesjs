@@ -293,3 +293,20 @@ export function checkIfUintRangesOverlap(uintRanges: UintRange<bigint>[]) {
 export function isFullUintRanges(uintRanges: UintRange<bigint>[]) {
   return uintRanges.length == 1 && uintRanges[0].start == 1n && uintRanges[0].end == 18446744073709551615n;
 }
+
+
+/**
+ * Gets the total number of IDs covered by a list of UintRanges.
+ *
+ * @param {UintRange<bigint>[]} uintRanges - The list of UintRanges to check
+ * @category Uint Ranges
+ * @returns {bigint} The total number of IDs covered by the list of UintRanges
+ */
+export const getTotalNumberOfBadgeIds = (badgeIds: UintRange<bigint>[]) => {
+  let sum = 0n
+  for (const range of badgeIds) {
+    sum += range.end - range.start + 1n
+  }
+
+  return sum
+}

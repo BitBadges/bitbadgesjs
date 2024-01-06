@@ -5,7 +5,7 @@
 */
 
 import { AddressMapping, BadgeMetadata, deepCopy } from "bitbadgesjs-proto";
-import { getReservedAddressMapping, isAddressMappingEmpty, isInAddressMapping, removeAddressMappingFromAddressMapping } from "./addressMappings";
+import { generateReservedMappingId, getReservedAddressMapping, isAddressMappingEmpty, isInAddressMapping, removeAddressMappingFromAddressMapping } from "./addressMappings";
 import { castIncomingTransfersToCollectionTransfers, castOutgoingTransfersToCollectionTransfers } from "./approved_transfers_casts";
 import { GetFirstMatchOnly, MergeUniversalPermissionDetails } from "./overlaps";
 import { castCollectionApprovalToUniversalPermission } from "./permissions";
@@ -160,8 +160,8 @@ export const getNonMintApprovals = (collectionApprovals: CollectionApprovalWithD
       if (x.fromMappingId === 'AllWithMint') {
         return {
           ...x,
-          fromMapping: getReservedAddressMapping('AllWithoutMint'),
-          fromMappingId: 'AllWithoutMint'
+          fromMapping: getReservedAddressMapping('!Mint'),
+          fromMappingId: '!Mint'
         }
       }
 
@@ -172,13 +172,10 @@ export const getNonMintApprovals = (collectionApprovals: CollectionApprovalWithD
         return undefined;
       }
 
-      let newMappingId = remaining.includeAddresses ? "" : "AllWithout"
-      newMappingId += remaining.addresses.join(":");
-
       return {
         ...x,
         fromMapping: remaining,
-        fromMappingId: newMappingId
+        fromMappingId: generateReservedMappingId(remaining)
       }
     } else {
       return x;

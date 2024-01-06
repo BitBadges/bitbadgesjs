@@ -30,7 +30,7 @@ import { UintRange } from "./balances_pb.js";
  * Once a time is set to be permitted or forbidden, it is PERMANENT and cannot be changed.
  * If a time is not set to be permitted or forbidden, it is considered NEUTRAL and can be updated but is ALLOWED by default.
  *
- * IMPORTANT: We take first-match only for the permissions. This means that if you forbid time T in array index 0 and permit time T in index 1, 
+ * IMPORTANT: We take first-match only for the permissions. This means that if you forbid time T in array index 0 and permit time T in index 1,
  * we will only check the first permission (forbid time T) and not the second permission (permit time T).
  *
  * @generated from message badges.CollectionPermissions
@@ -219,19 +219,19 @@ export class UserPermissions extends Message<UserPermissions> {
  * CollectionApprovalPermission defines what collection approved transfers can be updated vs. are locked.
  *
  * Each transfer is broken down to a (from, to, initiatedBy, transferTime, badgeId) tuple.
- * For a transfer to match, we need to match ALL of the fields in the combination. 
+ * For a transfer to match, we need to match ALL of the fields in the combination.
  * These are determined by the fromMappingId, toMappingId, initiatedByMappingId, transferTimes, badgeIds fields.
- * AddressMappings are used for (from, to, initiatedBy) which are a permanent list of addresses identified by an ID (see AddressMappings). 
+ * AddressMappings are used for (from, to, initiatedBy) which are a permanent list of addresses identified by an ID (see AddressMappings).
  *
  * TimelineTimes: which timeline times of the collection's approvalsTimeline field can be updated or not?
  * permitted/forbidden TimelineTimes: when can the manager execute this permission?
  *
- * Ex: Let's say we are updating the transferability for timelineTime 1 and the transfer tuple ("AllWithoutMint", "AllWithoutMint", "AllWithoutMint", 10, 1000).
+ * Ex: Let's say we are updating the transferability for timelineTime 1 and the transfer tuple ("!Mint", "!Mint", "!Mint", 10, 1000).
  * We would check to find the FIRST CollectionApprovalPermission that matches this combination.
  * If we find a match, we would check the permitted/forbidden times to see if we can execute this permission (default is ALLOWED).
  *
  * Ex: So if you wanted to freeze the transferability to enforce that badge ID 1 will always be transferable, you could set
- * the combination ("AllWithoutMint", "AllWithoutMint", "AllWithoutMint", "All Transfer Times", 1) to always be forbidden at all timelineTimes.
+ * the combination ("!Mint", "!Mint", "!Mint", "All Transfer Times", 1) to always be forbidden at all timelineTimes.
  *
  * @generated from message badges.CollectionApprovalPermission
  */
@@ -580,7 +580,7 @@ export class UserIncomingApprovalPermission extends Message<UserIncomingApproval
  * BalancesActionPermission defines the permissions for updating a timeline-based field for specific badges and specific badge ownership times.
  * Currently, this is only used for creating new badges.
  *
- * Ex: If you want to lock the ability to create new badges for badgeIds [1,2] at ownershipTimes 1/1/2020 - 1/1/2021, 
+ * Ex: If you want to lock the ability to create new badges for badgeIds [1,2] at ownershipTimes 1/1/2020 - 1/1/2021,
  * you could set the combination (badgeIds: [1,2], ownershipTimelineTimes: [1/1/2020 - 1/1/2021]) to always be forbidden.
  *
  * @generated from message badges.BalancesActionPermission
@@ -826,4 +826,3 @@ export class TimedUpdateWithBadgeIdsPermission extends Message<TimedUpdateWithBa
     return proto3.util.equals(TimedUpdateWithBadgeIdsPermission, a, b);
   }
 }
-

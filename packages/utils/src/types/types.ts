@@ -71,6 +71,7 @@ export function convertBalancesMap<T extends NumberType, U extends NumberType>(i
  * @category API / Indexer
  */
 export enum SupportedChain {
+  BTC = 'Bitcoin',
   ETH = 'Ethereum',
   COSMOS = 'Cosmos',
   SOLANA = 'Solana',

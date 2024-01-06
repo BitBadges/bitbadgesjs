@@ -15,7 +15,6 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "removeComments": true,
-    "composite": true,
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,

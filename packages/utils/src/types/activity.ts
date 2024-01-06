@@ -14,11 +14,15 @@ export type TransferMethod = 'Transfer';
 /**
  * @category API / Indexer
  */
+export type ListUpdateMethod = 'ListUpdate';
+/**
+ * @category API / Indexer
+ */
 export type AnnouncementMethod = 'Announcement';
 /**
  * @category API / Indexer
  */
-export type ActivityMethod = ReviewMethod | TransferMethod | AnnouncementMethod;
+export type ActivityMethod = ReviewMethod | TransferMethod | AnnouncementMethod | ListUpdateMethod;
 
 /**
  * Activity item that serves as the base type for all activity items.
@@ -155,6 +159,7 @@ export interface TransferActivityInfoBase<T extends NumberType> extends Activity
 
   txHash?: string;
 }
+
 /**
  * @category API / Indexer
  */
@@ -173,10 +178,51 @@ export function convertTransferActivityDoc<T extends NumberType, U extends Numbe
     collectionId: convertFunction(item.collectionId),
   })
 }
+/**
+ * Type for transfer activity items that extends the base ActivityDoc interface.
+ * @typedef {Object} ListActivityInfoBase
+ * @property {string} mappingId - The mapping ID of the list.
+ * @property {boolean} [onList] - Whether or not the address is included in the list
+ *
+ *
+ * @category API / Indexer
+ */
+export interface ListActivityInfoBase<T extends NumberType> extends ActivityInfoBase<T> {
+  mappingId: string;
+  onList?: boolean;
+  addresses?: string[];
+  method: ListUpdateMethod;
+  txHash?: string;
+}
+/**
+ * @category API / Indexer
+ */
+export type ListActivityDoc<T extends NumberType> = ListActivityInfoBase<T> & { _legacyId: string, _id?: string };
 
+
+/**
+ * @category API / Indexer
+ */
+export function convertListActivityDoc<T extends NumberType, U extends NumberType>(item: ListActivityDoc<T>, convertFunction: (item: T) => U): ListActivityDoc<U> {
+  return deepCopy({
+    ...item,
+    ...convertActivityDoc(item, convertFunction),
+    method: item.method,
+  })
+}
 
 const { Schema } = mongoose;
 
+export const ListActivitySchema = new Schema<ListActivityDoc<JSPrimitiveNumberType>>({
+  _legacyId: String,
+  method: String,
+  mappingId: String,
+  onList: Boolean,
+  addresses: [String],
+  timestamp: Schema.Types.Mixed,
+  block: Schema.Types.Mixed,
+  txHash: String,
+});
 
 export const TransferActivitySchema = new Schema<TransferActivityDoc<JSPrimitiveNumberType>>({
   _legacyId: String,

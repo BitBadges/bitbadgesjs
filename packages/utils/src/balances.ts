@@ -18,12 +18,12 @@ export function getBlankBalance(nonMintApproval: boolean, collection?: BitBadges
   }
 
   const blankBalance: UserBalance<bigint> = {
-    balances: [],
-    incomingApprovals: collection ? collection.defaultUserIncomingApprovals : [],
-    outgoingApprovals: collection ? collection.defaultUserOutgoingApprovals : [],
-    autoApproveSelfInitiatedIncomingTransfers: collection ? collection.defaultAutoApproveSelfInitiatedIncomingTransfers : true,
-    autoApproveSelfInitiatedOutgoingTransfers: collection ? collection.defaultAutoApproveSelfInitiatedOutgoingTransfers : true,
-    userPermissions: collection ? collection.defaultUserPermissions : {
+    balances: collection ? collection.defaultBalances.balances : [],
+    incomingApprovals: collection ? collection.defaultBalances.incomingApprovals : [],
+    outgoingApprovals: collection ? collection.defaultBalances.outgoingApprovals : [],
+    autoApproveSelfInitiatedIncomingTransfers: collection ? collection.defaultBalances.autoApproveSelfInitiatedIncomingTransfers : true,
+    autoApproveSelfInitiatedOutgoingTransfers: collection ? collection.defaultBalances.autoApproveSelfInitiatedOutgoingTransfers : true,
+    userPermissions: collection ? collection.defaultBalances.userPermissions : {
       canUpdateIncomingApprovals: [],
       canUpdateOutgoingApprovals: [],
       canUpdateAutoApproveSelfInitiatedIncomingTransfers: [],

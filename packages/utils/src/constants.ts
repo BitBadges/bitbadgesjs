@@ -24,7 +24,7 @@ export const MAINNET_CHAIN_DETAILS = {
 //Placeholder metadata with the BitBadges logo
 export const DefaultPlaceholderMetadata: Metadata<bigint> = {
   name: 'Placeholder',
-  description: '',
+  description: 'Placeholder metadata may be used for a few reasons, such as when the metadata is not yet available / fetched, the badge is not yet created, or if the metadata violates the terms of service.',
   image: 'ipfs://QmbG3PyyQyZTzdTBANxb3sA8zC37VgXndJhndXSBf7Sr4o',
 }
 

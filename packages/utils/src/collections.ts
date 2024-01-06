@@ -105,3 +105,37 @@ export function incrementMintAndTotalBalances(
 
   return newOwners;
 }
+
+/**
+ * Gets the maximum badge ID currently created for the collection.
+ *
+ * Checks all circulating supplys + default balances.
+ *
+ * @category Balances
+ */
+export function getMaxBadgeIdForCollection(
+  collection: BitBadgesCollection<bigint>
+) {
+  const totalSupplyBalance =
+    collection?.owners.find((x) => x.cosmosAddress === "Total")?.balances ?? []
+  const defaultBalances = collection.defaultBalances.balances ?? []
+
+  let maxBadgeId = 0n
+  for (const balance of totalSupplyBalance) {
+    for (const badgeIdRange of balance.badgeIds) {
+      if (badgeIdRange.end > maxBadgeId) {
+        maxBadgeId = badgeIdRange.end
+      }
+    }
+  }
+
+  for (const balance of defaultBalances) {
+    for (const badgeIdRange of balance.badgeIds) {
+      if (badgeIdRange.end > maxBadgeId) {
+        maxBadgeId = badgeIdRange.end
+      }
+    }
+  }
+
+  return maxBadgeId
+}

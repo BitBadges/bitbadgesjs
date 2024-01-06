@@ -59,6 +59,13 @@ export class AddressMapping extends Message<AddressMapping> {
    */
   createdBy = "";
 
+  /**
+   * The alias cosmos address for the mapping.
+   *
+   * @generated from field: string aliasAddress = 7;
+   */
+  aliasAddress = "";
+
   constructor(data?: PartialMessage<AddressMapping>) {
     super();
     proto3.util.initPartial(data, this);
@@ -73,6 +80,7 @@ export class AddressMapping extends Message<AddressMapping> {
     { no: 4, name: "uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 5, name: "customData", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 6, name: "createdBy", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 7, name: "aliasAddress", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AddressMapping {

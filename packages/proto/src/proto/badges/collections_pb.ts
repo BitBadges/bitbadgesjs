@@ -6,24 +6,24 @@
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
 import { Message, proto3 } from "@bufbuild/protobuf";
 import { BadgeMetadataTimeline, CollectionMetadataTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadataTimeline, StandardsTimeline } from "./timelines_pb.js";
-import { CollectionPermissions, UserPermissions } from "./permissions_pb.js";
-import { CollectionApproval, UserIncomingApproval, UserOutgoingApproval } from "./transfers_pb.js";
+import { CollectionPermissions } from "./permissions_pb.js";
+import { CollectionApproval, UserBalanceStore } from "./transfers_pb.js";
 
 /**
  *
- * A BadgeCollection is the top-level object for a collection of badges.
+ * A BadgeCollection is the top-level object for a collection of badges. 
  * It defines everything about the collection, such as the manager, metadata, etc.
  *
  * All collections are identified by a collectionId assigned by the blockchain, which is a uint64 that increments (i.e., the first collection has ID 1).
  *
- * All collections also have a manager who is responsible for managing the collection.
+ * All collections also have a manager who is responsible for managing the collection. 
  * They can be granted certain permissions, such as the ability to mint new badges.
  *
- * Certain fields are timeline-based, which means they may have different values at different block heights.
+ * Certain fields are timeline-based, which means they may have different values at different block heights. 
  * We fetch the value according to the current time.
  * For example, we may set the manager to be Alice from Time1 to Time2, and then set the manager to be Bob from Time2 to Time3.
  *
- * Collections may have different balance types: standard vs. off-chain vs. inherited.
+ * Collections may have different balance types: standard vs. off-chain - indexed vs. inherited.vs off-chain - non-indexed.
  *
  * See documentation for more details.
  *
@@ -52,7 +52,7 @@ export class BadgeCollection extends Message<BadgeCollection> {
   badgeMetadataTimeline: BadgeMetadataTimeline[] = [];
 
   /**
-   * The type of balances this collection uses ("Standard", "Off-Chain - Indexed", or "Inherited").
+   * The type of balances this collection uses ("Standard", "Off-Chain - Indexed", "Off-Chain - Non-Indexed", or "Inherited").
    *
    * @generated from field: string balancesType = 4;
    */
@@ -90,7 +90,7 @@ export class BadgeCollection extends Message<BadgeCollection> {
    * Transferability of the collection for collections with standard balances, subject to changes over time.
    * Overrides user approvals for a transfer if specified.
    * Transfer must satisfy both user and collection-level approvals.
-   * Not applicable for off-chain or inherited balances.
+   * Only applicable to on-chain balances.
    *
    * @generated from field: repeated badges.CollectionApproval collectionApprovals = 10;
    */
@@ -112,47 +112,25 @@ export class BadgeCollection extends Message<BadgeCollection> {
   isArchivedTimeline: IsArchivedTimeline[] = [];
 
   /**
-   * Default user-approved outgoing transfers for an uninitialized user balance.
+   * The default store of a balance for a user, upon genesis.
    *
-   * @generated from field: repeated badges.UserOutgoingApproval defaultUserOutgoingApprovals = 14;
+   * @generated from field: badges.UserBalanceStore defaultBalances = 13;
    */
-  defaultUserOutgoingApprovals: UserOutgoingApproval[] = [];
-
-  /**
-   * Default user-approved incoming transfers for an uninitialized user balance.
-   * Ex: Can be set to disallow all incoming transfers by default, allowing users to opt-in to receiving badges.
-   *
-   * @generated from field: repeated badges.UserIncomingApproval defaultUserIncomingApprovals = 15;
-   */
-  defaultUserIncomingApprovals: UserIncomingApproval[] = [];
-
-  /**
-   * Default user permissions for an uninitialized user balance.
-   *
-   * @generated from field: badges.UserPermissions defaultUserPermissions = 16;
-   */
-  defaultUserPermissions?: UserPermissions;
-
-  /**
-   * Whether self-initiated outgoing transfers are auto-approved by default.
-   *
-   * @generated from field: bool defaultAutoApproveSelfInitiatedOutgoingTransfers = 17;
-   */
-  defaultAutoApproveSelfInitiatedOutgoingTransfers = false;
-
-  /**
-   * Whether self-initiated incoming transfers are auto-approved by default.
-   *
-   * @generated from field: bool defaultAutoApproveSelfInitiatedIncomingTransfers = 18;
-   */
-  defaultAutoApproveSelfInitiatedIncomingTransfers = false;
+  defaultBalances?: UserBalanceStore;
 
   /**
    * The user or entity who created the badge collection.
    *
-   * @generated from field: string createdBy = 19;
+   * @generated from field: string createdBy = 14;
    */
   createdBy = "";
+
+  /**
+   * The generated address of the badge collection.
+   *
+   * @generated from field: string aliasAddress = 15;
+   */
+  aliasAddress = "";
 
   constructor(data?: PartialMessage<BadgeCollection>) {
     super();
@@ -173,12 +151,9 @@ export class BadgeCollection extends Message<BadgeCollection> {
     { no: 10, name: "collectionApprovals", kind: "message", T: CollectionApproval, repeated: true },
     { no: 11, name: "standardsTimeline", kind: "message", T: StandardsTimeline, repeated: true },
     { no: 12, name: "isArchivedTimeline", kind: "message", T: IsArchivedTimeline, repeated: true },
-    { no: 14, name: "defaultUserOutgoingApprovals", kind: "message", T: UserOutgoingApproval, repeated: true },
-    { no: 15, name: "defaultUserIncomingApprovals", kind: "message", T: UserIncomingApproval, repeated: true },
-    { no: 16, name: "defaultUserPermissions", kind: "message", T: UserPermissions },
-    { no: 17, name: "defaultAutoApproveSelfInitiatedOutgoingTransfers", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 18, name: "defaultAutoApproveSelfInitiatedIncomingTransfers", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 19, name: "createdBy", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 13, name: "defaultBalances", kind: "message", T: UserBalanceStore },
+    { no: 14, name: "createdBy", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 15, name: "aliasAddress", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BadgeCollection {
@@ -197,3 +172,4 @@ export class BadgeCollection extends Message<BadgeCollection> {
     return proto3.util.equals(BadgeCollection, a, b);
   }
 }
+

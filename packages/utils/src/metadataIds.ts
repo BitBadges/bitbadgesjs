@@ -1,5 +1,8 @@
-import { BadgeMetadata } from "bitbadgesjs-proto";
-import { searchUintRangesForId } from "./uintRanges";
+import { BadgeMetadata, BigIntify, NumberType, UintRange, convertUintRange } from "bitbadgesjs-proto";
+import { removeUintRangeFromUintRange, searchUintRangesForId, sortUintRangesAndMergeIfNecessary } from "./uintRanges";
+import { MetadataFetchOptions } from "./types/api";
+import { BitBadgesCollection } from "./types/collections";
+import { getCurrentValueForTimeline } from "./timelines";
 
 /**
  * This is the logic we use to deterministically compute the metadataId for a collection in our indexer.
@@ -122,7 +125,7 @@ export function getMaxMetadataId(badgeUris: BadgeMetadata<bigint>[]) {
     return 0n;
   }
 
-  let metadataId = 1n; // Start at 1 because batch 0 is reserved for collection metadata
+  let metadataId = 0n; // Start at 1 because batch 0 is reserved for collection metadata
 
   for (const badgeUri of badgeUris) {
     // If the URI contains {id}, each badge ID will belong to its own private batch
@@ -200,4 +203,110 @@ export function getBadgeIdsForMetadataId(metadataId: bigint, badgeUris: BadgeMet
   }
 
   return [];
+}
+
+function getCurrentMetadata(collection: BitBadgesCollection<bigint>) {
+  const collectionMetadata = getCurrentValueForTimeline(collection.collectionMetadataTimeline)?.collectionMetadata;
+  const badgeMetadata = getCurrentValueForTimeline(collection.badgeMetadataTimeline)?.badgeMetadata ?? []
+
+  return {
+    collectionMetadata,
+    badgeMetadata
+  };
+}
+
+/**
+ * Prunes the metadata to fetch based on the cached collection and the metadata fetch request
+ *
+ * @category Metadata
+ */
+export const pruneMetadataToFetch = (cachedCollection: BitBadgesCollection<bigint>, metadataFetchReq?: MetadataFetchOptions) => {
+  if (!cachedCollection) throw new Error('Collection does not exist');
+
+  const metadataToFetch: Required<MetadataFetchOptions> = {
+    doNotFetchCollectionMetadata: cachedCollection.cachedCollectionMetadata !== undefined || metadataFetchReq?.doNotFetchCollectionMetadata || false,
+    uris: [],
+    badgeIds: [],
+    metadataIds: [],
+  };
+
+  if (metadataFetchReq) {
+    const { collectionMetadata, badgeMetadata } = getCurrentMetadata(cachedCollection);
+
+    //See if we already have the metadata corresponding to the uris
+    if (metadataFetchReq.uris) {
+      for (const uri of metadataFetchReq.uris) {
+        if (!cachedCollection.cachedBadgeMetadata.find(x => x.uri === uri)) {
+          metadataToFetch.uris.push(uri);
+        }
+      }
+    }
+
+    const metadataIdsToCheck: bigint[] = [];
+    //See if we already have the metadata corresponding to the metadataIds
+    if (metadataFetchReq.metadataIds) {
+      for (const metadataId of metadataFetchReq.metadataIds) {
+        const metadataIdCastedAsUintRange = metadataId as UintRange<NumberType>;
+        const metadataIdCastedAsNumber = metadataId as NumberType;
+
+        if (typeof metadataIdCastedAsNumber === 'object' && metadataIdCastedAsUintRange.start && metadataIdCastedAsUintRange.end) {
+          //Is a UintRange, need to check start -> end metadata ID
+          const uintRange = convertUintRange(metadataIdCastedAsUintRange, BigIntify);
+          for (let i = uintRange.start; i <= uintRange.end; i++) {
+            metadataIdsToCheck.push(BigInt(i));
+          }
+        } else {
+          metadataIdsToCheck.push(BigInt(metadataIdCastedAsNumber));
+        }
+      }
+    }
+
+    //Check if we have all metadata corresponding to the badgeIds
+    if (metadataFetchReq.badgeIds) {
+      for (const badgeId of metadataFetchReq.badgeIds) {
+        const badgeIdCastedAsUintRange = badgeId as UintRange<NumberType>;
+        const badgeIdCastedAsNumber = badgeId as NumberType;
+
+        if (typeof badgeIdCastedAsNumber === 'object' && badgeIdCastedAsUintRange.start && badgeIdCastedAsUintRange.end) {
+          let badgeIdsLeft = [convertUintRange(badgeIdCastedAsUintRange, BigIntify)]
+
+          //Intutition: check singular, starting badge ID. If it is same as others, handle all together. Else, just handle that and continue
+          while (badgeIdsLeft.length > 0) {
+            const currBadgeUintRange = badgeIdsLeft[0];
+
+            const metadataId = getMetadataIdForBadgeId(BigInt(currBadgeUintRange.start), badgeMetadata);
+            if (metadataId === -1) break
+
+            metadataIdsToCheck.push(BigInt(metadataId));
+
+            //Remove other badgeIds that map to the same metadataId and add any remaining back to the queue
+            const otherMatchingBadgeUintRanges = getBadgeIdsForMetadataId(BigInt(metadataId), badgeMetadata);
+            const [remaining,] = removeUintRangeFromUintRange(otherMatchingBadgeUintRanges, badgeIdsLeft);
+            badgeIdsLeft = remaining
+            badgeIdsLeft = sortUintRangesAndMergeIfNecessary(badgeIdsLeft, true)
+          }
+
+        } else {
+          //Is a singular badgeId
+          const metadataId = getMetadataIdForBadgeId(BigInt(badgeIdCastedAsNumber), badgeMetadata);
+          if (metadataId === -1) break
+          metadataIdsToCheck.push(BigInt(metadataId));
+        }
+      }
+    }
+
+    //Check if we have the URIs yet in the cached metadata. If not, add to the list of URIs to fetch
+    const uris = getUrisForMetadataIds(metadataIdsToCheck, collectionMetadata?.uri || '', badgeMetadata);
+    for (const uri of uris) {
+      const existingMetadata = cachedCollection.cachedBadgeMetadata.find(x => x.uri === uri);
+      if (!existingMetadata) metadataToFetch.uris.push(uri);
+    }
+  }
+
+
+
+  return {
+    ...metadataToFetch,
+    uris: metadataToFetch.uris ?? [],
+  } as { doNotFetchCollectionMetadata: boolean, uris: string[] };
 }

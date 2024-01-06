@@ -216,6 +216,7 @@ export function convertBalance<T extends NumberType, U extends NumberType>(balan
  * @property {string} uri - The URI where to fetch the address mapping metadata from.
  * @property {string} customData - Arbitrary custom data that can be stored on-chain.
  * @property {string} createdBy - The address that created the address mapping.
+ * @property {string} aliasAddress - The alias cosmos address of the address mapping.
  */
 export interface AddressMapping {
   mappingId: string;
@@ -227,6 +228,8 @@ export interface AddressMapping {
   customData: string;
 
   createdBy?: string;
+
+  aliasAddress?: string;
 }
 
 /**

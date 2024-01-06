@@ -4,8 +4,10 @@ import { Balance, MustOwnBadges, UintRange } from "../../../proto/badges/balance
 import { BadgeMetadata, CollectionMetadata, OffChainBalancesMetadata } from "../../../proto/badges/metadata_pb";
 import { ActionPermission, BalancesActionPermission, CollectionApprovalPermission, CollectionPermissions, TimedUpdatePermission, TimedUpdateWithBadgeIdsPermission, UserIncomingApprovalPermission, UserOutgoingApprovalPermission, UserPermissions } from "../../../proto/badges/permissions_pb";
 import { BadgeMetadataTimeline, CollectionMetadataTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadataTimeline, StandardsTimeline } from "../../../proto/badges/timelines_pb";
-import { ApprovalAmounts, ApprovalCriteria, ApprovalIdentifierDetails, CollectionApproval, IncomingApprovalCriteria, IncrementedBalances, ManualBalances, MaxNumTransfers, MerkleChallenge, MerklePathItem, MerkleProof, OutgoingApprovalCriteria, PredeterminedBalances, PredeterminedOrderCalculationMethod, Transfer, UserIncomingApproval, UserOutgoingApproval } from "../../../proto/badges/transfers_pb";
+import { ApprovalAmounts, ApprovalCriteria, ApprovalIdentifierDetails, CollectionApproval, IncomingApprovalCriteria, IncrementedBalances, ManualBalances, MaxNumTransfers, MerkleChallenge, MerklePathItem, MerkleProof, OutgoingApprovalCriteria, PredeterminedBalances, PredeterminedOrderCalculationMethod, Transfer, UserBalanceStore, UserIncomingApproval, UserOutgoingApproval } from "../../../proto/badges/transfers_pb";
 import { MsgCreateAddressMappings, MsgCreateCollection, MsgDeleteCollection, MsgTransferBadges, MsgUniversalUpdateCollection, MsgUpdateCollection, MsgUpdateUserApprovals } from "../../../proto/badges/tx_pb";
+import { MsgCreateProtocol, MsgDeleteProtocol, MsgSetCollectionForProtocol, MsgUpdateProtocol } from "../../../proto/protocols/tx_pb";
+
 /**
  * This file is used to generate sample Msgs for EIP712 type generation.
  *
@@ -210,14 +212,24 @@ export function populateUndefinedForMsgCreateCollection(msg: MsgCreateCollection
 }
 
 export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUniversalUpdateCollection) {
-  if (!msg.defaultUserPermissions) {
-    msg.defaultUserPermissions = new UserPermissions();
+  if (!msg.defaultBalances) {
+    msg.defaultBalances = new UserBalanceStore();
+  }
+  if (!msg.defaultBalances.userPermissions) {
+    msg.defaultBalances.userPermissions = new UserPermissions();
   }
   if (!msg.collectionPermissions) {
     msg.collectionPermissions = new CollectionPermissions();
   }
 
-  for (const approval of msg.defaultOutgoingApprovals) {
+  if (!msg.defaultBalances.balances) {
+    msg.defaultBalances.balances = [new Balance({
+      ownershipTimes: [new UintRange()],
+      badgeIds: [new UintRange()]
+    })];
+  }
+
+  for (const approval of msg.defaultBalances.outgoingApprovals) {
     if (!approval.approvalCriteria) {
       approval.approvalCriteria = new OutgoingApprovalCriteria({ ...approvalCriteriaForPopulatingUndefined });
       approval.approvalCriteria.mustOwnBadges = populateMustOwnBadges(approval.approvalCriteria.mustOwnBadges);
@@ -228,7 +240,7 @@ export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUnivers
 
     }
   }
-  for (const approval of msg.defaultIncomingApprovals) {
+  for (const approval of msg.defaultBalances.incomingApprovals) {
     if (!approval.approvalCriteria) {
       approval.approvalCriteria = new IncomingApprovalCriteria({ ...approvalCriteriaForPopulatingUndefined });
     }
@@ -266,45 +278,51 @@ export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUnivers
 }
 
 const universalParams = {
-  defaultOutgoingApprovals: [new UserOutgoingApproval({
-    transferTimes: [new UintRange()],
-    badgeIds: [new UintRange()],
-    ownershipTimes: [new UintRange()],
-    approvalCriteria: new OutgoingApprovalCriteria({
-      ...approvalCriteria,
-    }),
-  })],
-  defaultIncomingApprovals: [new UserIncomingApproval({
-    transferTimes: [new UintRange()],
-    badgeIds: [new UintRange()],
-    ownershipTimes: [new UintRange()],
-    approvalCriteria: new IncomingApprovalCriteria({
-      ...approvalCriteria,
-    }),
-  })],
-  defaultUserPermissions: new UserPermissions({
-    canUpdateOutgoingApprovals: [new UserOutgoingApprovalPermission({
+  defaultBalances: new UserBalanceStore({
+    balances: [new Balance({
+      ownershipTimes: [new UintRange()],
+      badgeIds: [new UintRange()]
+    })],
+    outgoingApprovals: [new UserOutgoingApproval({
       transferTimes: [new UintRange()],
       badgeIds: [new UintRange()],
       ownershipTimes: [new UintRange()],
-      permittedTimes: [new UintRange()],
-      forbiddenTimes: [new UintRange()],
+      approvalCriteria: new OutgoingApprovalCriteria({
+        ...approvalCriteria,
+      }),
     })],
-    canUpdateIncomingApprovals: [new UserIncomingApprovalPermission({
+    incomingApprovals: [new UserIncomingApproval({
       transferTimes: [new UintRange()],
       badgeIds: [new UintRange()],
       ownershipTimes: [new UintRange()],
-      permittedTimes: [new UintRange()],
-      forbiddenTimes: [new UintRange()],
+      approvalCriteria: new IncomingApprovalCriteria({
+        ...approvalCriteria,
+      }),
     })],
-    canUpdateAutoApproveSelfInitiatedIncomingTransfers: [new ActionPermission({
-      permittedTimes: [new UintRange()],
-      forbiddenTimes: [new UintRange()],
-    })],
-    canUpdateAutoApproveSelfInitiatedOutgoingTransfers: [new ActionPermission({
-      permittedTimes: [new UintRange()],
-      forbiddenTimes: [new UintRange()],
-    })],
+    userPermissions: new UserPermissions({
+      canUpdateOutgoingApprovals: [new UserOutgoingApprovalPermission({
+        transferTimes: [new UintRange()],
+        badgeIds: [new UintRange()],
+        ownershipTimes: [new UintRange()],
+        permittedTimes: [new UintRange()],
+        forbiddenTimes: [new UintRange()],
+      })],
+      canUpdateIncomingApprovals: [new UserIncomingApprovalPermission({
+        transferTimes: [new UintRange()],
+        badgeIds: [new UintRange()],
+        ownershipTimes: [new UintRange()],
+        permittedTimes: [new UintRange()],
+        forbiddenTimes: [new UintRange()],
+      })],
+      canUpdateAutoApproveSelfInitiatedIncomingTransfers: [new ActionPermission({
+        permittedTimes: [new UintRange()],
+        forbiddenTimes: [new UintRange()],
+      })],
+      canUpdateAutoApproveSelfInitiatedOutgoingTransfers: [new ActionPermission({
+        permittedTimes: [new UintRange()],
+        forbiddenTimes: [new UintRange()],
+      })],
+    }),
   }),
   badgesToCreate: [new Balance({
     ownershipTimes: [new UintRange()],
@@ -407,6 +425,15 @@ const universalParams = {
 
 export function getSampleMsg(msgType: string, currMsg: any) {
   switch (msgType) {
+    case 'protocols/CreateProtocol':
+      return { type: msgType, value: new MsgCreateProtocol().toJson({ emitDefaultValues: true }) };
+    case 'protocols/DeleteProtocol':
+      return { type: msgType, value: new MsgDeleteProtocol().toJson({ emitDefaultValues: true }) };
+    case 'protocols/SetCollectionForProtocol':
+      return { type: msgType, value: new MsgSetCollectionForProtocol().toJson({ emitDefaultValues: true }) };
+    case 'protocols/UpdateProtocol':
+      return { type: msgType, value: new MsgUpdateProtocol().toJson({ emitDefaultValues: true }) };
+
     case 'badges/DeleteCollection':
       return { type: msgType, value: new MsgDeleteCollection().toJson({ emitDefaultValues: true }) };
     case 'badges/CreateAddressMappings':

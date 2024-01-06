@@ -2,7 +2,7 @@
 //			It is also not user-facing or dev-facing, so I am okay with how it is now
 
 import { AddressMapping, UintRange } from "bitbadgesjs-proto";
-import { getReservedAddressMapping, isAddressMappingEmpty, removeAddressMappingFromAddressMapping } from "./addressMappings";
+import { getReservedAddressMapping, getReservedTrackerMapping, isAddressMappingEmpty, removeAddressMappingFromAddressMapping } from "./addressMappings";
 import { deepCopy } from "./types/utils";
 import { removeUintRangeFromUintRange, removeUintsFromUintRange, sortUintRangesAndMergeIfNecessary } from "./uintRanges";
 
@@ -450,8 +450,8 @@ export function GetFirstMatchOnly(
       fromMapping: getReservedAddressMapping("All") as AddressMapping,
       toMapping: getReservedAddressMapping("All") as AddressMapping,
       initiatedByMapping: getReservedAddressMapping("All") as AddressMapping,
-      amountTrackerIdMapping: getReservedAddressMapping("All") as AddressMapping,
-      challengeTrackerIdMapping: getReservedAddressMapping("All") as AddressMapping,
+      amountTrackerIdMapping: getReservedTrackerMapping("All") as AddressMapping,
+      challengeTrackerIdMapping: getReservedTrackerMapping("All") as AddressMapping,
       transferTimes: [{ start: 1n, end: 18446744073709551615n }],
       badgeIds: [{ start: 1n, end: 18446744073709551615n }],
       ownershipTimes: [{ start: 1n, end: 18446744073709551615n }],

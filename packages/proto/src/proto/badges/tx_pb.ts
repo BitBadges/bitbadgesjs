@@ -5,7 +5,7 @@
 
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
 import { Message, proto3 } from "@bufbuild/protobuf";
-import { CollectionApproval, Transfer, UserIncomingApproval, UserOutgoingApproval } from "./transfers_pb.js";
+import { CollectionApproval, Transfer, UserBalanceStore, UserIncomingApproval, UserOutgoingApproval } from "./transfers_pb.js";
 import { Balance } from "./balances_pb.js";
 import { CollectionPermissions, UserPermissions } from "./permissions_pb.js";
 import { BadgeMetadataTimeline, CollectionMetadataTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadataTimeline, StandardsTimeline } from "./timelines_pb.js";
@@ -109,25 +109,18 @@ export class MsgUniversalUpdateCollection extends Message<MsgUniversalUpdateColl
   collectionId = "";
 
   /**
-   * Type of balances "Standard" or "Off-Chain - Indexed".
+   * Type of balances "Standard" or "Off-Chain - Indexed" or "Off-Chain - Non-Indexed".
    *
    * @generated from field: string balancesType = 3;
    */
   balancesType = "";
 
   /**
-   * Default incoming approvals for newly initiated accounts.
+   * The default balances for the user
    *
-   * @generated from field: repeated badges.UserOutgoingApproval defaultOutgoingApprovals = 4;
+   * @generated from field: badges.UserBalanceStore defaultBalances = 4;
    */
-  defaultOutgoingApprovals: UserOutgoingApproval[] = [];
-
-  /**
-   * Default outgoing approvals for newly initiated accounts.
-   *
-   * @generated from field: repeated badges.UserIncomingApproval defaultIncomingApprovals = 5;
-   */
-  defaultIncomingApprovals: UserIncomingApproval[] = [];
+  defaultBalances?: UserBalanceStore;
 
   /**
    * Balances to create for the collection. Will be sent to the "Mint" address.
@@ -251,37 +244,16 @@ export class MsgUniversalUpdateCollection extends Message<MsgUniversalUpdateColl
   /**
    * Indicates if the isArchived timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
    *
-   * @generated from field: bool updateIsArchivedTimeline = 27;
+   * @generated from field: bool updateIsArchivedTimeline = 25;
    */
   updateIsArchivedTimeline = false;
 
   /**
    * New isArchived timeline to set.
    *
-   * @generated from field: repeated badges.IsArchivedTimeline isArchivedTimeline = 28;
+   * @generated from field: repeated badges.IsArchivedTimeline isArchivedTimeline = 26;
    */
   isArchivedTimeline: IsArchivedTimeline[] = [];
-
-  /**
-   * Default auto-approve setting for self-initiated outgoing transfers for newly initiated accounts.
-   *
-   * @generated from field: bool defaultAutoApproveSelfInitiatedOutgoingTransfers = 29;
-   */
-  defaultAutoApproveSelfInitiatedOutgoingTransfers = false;
-
-  /**
-   * Default auto-approve setting for self-initiated incoming transfers for newly initiated accounts.
-   *
-   * @generated from field: bool defaultAutoApproveSelfInitiatedIncomingTransfers = 30;
-   */
-  defaultAutoApproveSelfInitiatedIncomingTransfers = false;
-
-  /**
-   * Default user permissions for newly initiated accounts.
-   *
-   * @generated from field: badges.UserPermissions defaultUserPermissions = 31;
-   */
-  defaultUserPermissions?: UserPermissions;
 
   constructor(data?: PartialMessage<MsgUniversalUpdateCollection>) {
     super();
@@ -294,8 +266,7 @@ export class MsgUniversalUpdateCollection extends Message<MsgUniversalUpdateColl
     { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "balancesType", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "defaultOutgoingApprovals", kind: "message", T: UserOutgoingApproval, repeated: true },
-    { no: 5, name: "defaultIncomingApprovals", kind: "message", T: UserIncomingApproval, repeated: true },
+    { no: 4, name: "defaultBalances", kind: "message", T: UserBalanceStore },
     { no: 6, name: "badgesToCreate", kind: "message", T: Balance, repeated: true },
     { no: 7, name: "updateCollectionPermissions", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 8, name: "collectionPermissions", kind: "message", T: CollectionPermissions },
@@ -313,11 +284,8 @@ export class MsgUniversalUpdateCollection extends Message<MsgUniversalUpdateColl
     { no: 22, name: "collectionApprovals", kind: "message", T: CollectionApproval, repeated: true },
     { no: 23, name: "updateStandardsTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 24, name: "standardsTimeline", kind: "message", T: StandardsTimeline, repeated: true },
-    { no: 27, name: "updateIsArchivedTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 28, name: "isArchivedTimeline", kind: "message", T: IsArchivedTimeline, repeated: true },
-    { no: 29, name: "defaultAutoApproveSelfInitiatedOutgoingTransfers", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 30, name: "defaultAutoApproveSelfInitiatedIncomingTransfers", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 31, name: "defaultUserPermissions", kind: "message", T: UserPermissions },
+    { no: 25, name: "updateIsArchivedTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 26, name: "isArchivedTimeline", kind: "message", T: IsArchivedTimeline, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUniversalUpdateCollection {
@@ -634,25 +602,18 @@ export class MsgCreateCollection extends Message<MsgCreateCollection> {
   creator = "";
 
   /**
-   * Type of balances "Standard" or "Off-Chain - Indexed".
+   * Type of balances "Standard" or "Off-Chain - Indexed" or "Off-Chain - Non-Indexed".
    *
    * @generated from field: string balancesType = 2;
    */
   balancesType = "";
 
   /**
-   * User's approved transfers for each badge ID.
+   * The default balances for the user
    *
-   * @generated from field: repeated badges.UserOutgoingApproval defaultOutgoingApprovals = 3;
+   * @generated from field: badges.UserBalanceStore defaultBalances = 4;
    */
-  defaultOutgoingApprovals: UserOutgoingApproval[] = [];
-
-  /**
-   * User's approved incoming transfers for each badge ID.
-   *
-   * @generated from field: repeated badges.UserIncomingApproval defaultIncomingApprovals = 4;
-   */
-  defaultIncomingApprovals: UserIncomingApproval[] = [];
+  defaultBalances?: UserBalanceStore;
 
   /**
    * Balances to create for the collection. Will be sent to the "Mint" address.
@@ -724,27 +685,6 @@ export class MsgCreateCollection extends Message<MsgCreateCollection> {
    */
   isArchivedTimeline: IsArchivedTimeline[] = [];
 
-  /**
-   * Default auto-approve setting for self-initiated outgoing transfers.
-   *
-   * @generated from field: bool defaultAutoApproveSelfInitiatedOutgoingTransfers = 15;
-   */
-  defaultAutoApproveSelfInitiatedOutgoingTransfers = false;
-
-  /**
-   * Default auto-approve setting for self-initiated incoming transfers.
-   *
-   * @generated from field: bool defaultAutoApproveSelfInitiatedIncomingTransfers = 16;
-   */
-  defaultAutoApproveSelfInitiatedIncomingTransfers = false;
-
-  /**
-   * Default user permissions.
-   *
-   * @generated from field: badges.UserPermissions defaultUserPermissions = 17;
-   */
-  defaultUserPermissions?: UserPermissions;
-
   constructor(data?: PartialMessage<MsgCreateCollection>) {
     super();
     proto3.util.initPartial(data, this);
@@ -755,8 +695,7 @@ export class MsgCreateCollection extends Message<MsgCreateCollection> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "balancesType", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "defaultOutgoingApprovals", kind: "message", T: UserOutgoingApproval, repeated: true },
-    { no: 4, name: "defaultIncomingApprovals", kind: "message", T: UserIncomingApproval, repeated: true },
+    { no: 4, name: "defaultBalances", kind: "message", T: UserBalanceStore },
     { no: 5, name: "badgesToCreate", kind: "message", T: Balance, repeated: true },
     { no: 6, name: "collectionPermissions", kind: "message", T: CollectionPermissions },
     { no: 7, name: "managerTimeline", kind: "message", T: ManagerTimeline, repeated: true },
@@ -767,9 +706,6 @@ export class MsgCreateCollection extends Message<MsgCreateCollection> {
     { no: 12, name: "collectionApprovals", kind: "message", T: CollectionApproval, repeated: true },
     { no: 13, name: "standardsTimeline", kind: "message", T: StandardsTimeline, repeated: true },
     { no: 14, name: "isArchivedTimeline", kind: "message", T: IsArchivedTimeline, repeated: true },
-    { no: 15, name: "defaultAutoApproveSelfInitiatedOutgoingTransfers", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 16, name: "defaultAutoApproveSelfInitiatedIncomingTransfers", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 17, name: "defaultUserPermissions", kind: "message", T: UserPermissions },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgCreateCollection {
@@ -1112,7 +1048,7 @@ export class MsgUpdateUserApprovals extends Message<MsgUpdateUserApprovals> {
   updateOutgoingApprovals = false;
 
   /**
-   * New outgoing approvals to set.
+   * New outgoing approvals to set. 
    *
    * @generated from field: repeated badges.UserOutgoingApproval outgoingApprovals = 4;
    */
@@ -1245,3 +1181,4 @@ export class MsgUpdateUserApprovalsResponse extends Message<MsgUpdateUserApprova
     return proto3.util.equals(MsgUpdateUserApprovalsResponse, a, b);
   }
 }
+

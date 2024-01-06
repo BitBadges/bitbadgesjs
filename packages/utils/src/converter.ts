@@ -1,3 +1,4 @@
+
 import {
   isValidChecksumAddress,
   stripHexPrefix,
@@ -8,6 +9,7 @@ import { sha256 } from '@cosmjs/crypto';
 
 const bs58 = require('bs58');
 
+const BITCOIN_WITNESS_VERSION_SEPARATOR_BYTE = 0;
 
 function makeChecksummedHexDecoder(chainId?: number) {
   return (data: string) => {
@@ -37,7 +39,13 @@ const hexChecksumChain = (name: string, chainId?: number) => ({
 const ETH = hexChecksumChain('ETH')
 
 function makeBech32Encoder(prefix: string) {
-  return (data: Buffer) => bech32.encode(prefix, bech32.toWords(data))
+  return (data: Buffer) => {
+    const words = bech32.toWords(data)
+    const wordsToEncode = prefix == 'bc' ? [BITCOIN_WITNESS_VERSION_SEPARATOR_BYTE, ...words] : words;
+    const encodedAddress = bech32.encode(prefix, wordsToEncode)
+
+    return encodedAddress
+  }
 }
 
 function makeBech32Decoder(currentPrefix: string) {
@@ -46,6 +54,11 @@ function makeBech32Decoder(currentPrefix: string) {
     if (prefix !== currentPrefix) {
       throw Error('Unrecognised address format')
     }
+    if (prefix == 'bc') {
+      //remove witness version separator byte
+      words.shift();
+    }
+
     return Buffer.from(bech32.fromWords(words))
   }
 }
@@ -68,6 +81,20 @@ export const ethToCosmos = (ethAddress: string) => {
 export const cosmosToEth = (cosmosAddress: string) => {
   const data = COSMOS.decoder(cosmosAddress)
   return ETH.encoder(data)
+}
+
+const BTC = bech32Chain('BTC', 'bc')
+
+//Converts a btc address to its corresponding cosmos address (bech32)
+export const btcToCosmos = (btcAddress: string) => {
+  const data = BTC.decoder(btcAddress)
+  return COSMOS.encoder(data)
+}
+
+//Converts a cosmos address to its corresponding btc address (bech32)
+export const cosmosToBtc = (cosmosAddress: string) => {
+  const data = COSMOS.decoder(cosmosAddress)
+  return BTC.encoder(data)
 }
 
 //Note this is only one way due to how Solana addresses are

@@ -1,4 +1,4 @@
-import { Balance, Transfer } from "bitbadgesjs-proto";
+import { Balance, Transfer, UintRange } from "bitbadgesjs-proto";
 import { addBalance, addBalances, subtractBalances } from "./balances";
 import { OffChainBalancesMap, TransferWithIncrements } from "./types/transfers";
 import { deepCopy } from "./types/utils";
@@ -32,18 +32,69 @@ export const createBalanceMapForOffChainBalances = async (transfersWithIncrement
 }
 
 /**
- * Gets the balances to be transferred for a given transfer with increments.
+ * Gets the badge IDs to be transferred for a given transfer with increments.
  * @example
  * For a transfer with balances: [{ badgeIds: [{ start: 1n, end: 1n }], amount: 1n }], incrementIdsBy: 1n, toAddressesLength: 1000
- * We return [{ badgeIds: [{ start: 1n, end: 1000n }], amount: 1n }] because we transfer x1 badge to 1000 addresses
- * and increment the badgeIds by 1 each time.
+ * We return { badgeIds: [{ start: 1n, end: 1000n }] because we increment the badgeIds by 1 each time.
  *
  * @category Balances
  *
  * @param {TransferWithIncrements<bigint>[]} transfers - The list of transfers with increments.
  * @returns {Balance<bigint>} The balances to be transferred.
  */
-export const getAllBalancesToBeTransferred = (transfers: TransferWithIncrements<bigint>[], allowNegative?: boolean) => {
+export const getAllBadgeIdsToBeTransferred = (transfers: TransferWithIncrements<bigint>[]) => {
+  const allBadgeIds: UintRange<bigint>[] = [];
+  for (const transfer of transfers) {
+    for (const balance of transfer.balances) {
+
+      //toAddressesLength takes priority
+      const _numRecipients = transfer.toAddressesLength ? transfer.toAddressesLength : transfer.toAddresses ? transfer.toAddresses.length : 0;
+      const numRecipients = BigInt(_numRecipients);
+
+      const badgeIds = deepCopy(balance.badgeIds);
+      const ownershipTimes = deepCopy(balance.ownershipTimes);
+
+      //If incrementIdsBy is not set, then we are not incrementing badgeIds and we can just batch calculate the balance
+      if (!transfer.incrementBadgeIdsBy && !transfer.incrementOwnershipTimesBy) {
+        allBadgeIds.push(...badgeIds);
+      } else {
+        for (let i = 0; i < numRecipients; i++) {
+          allBadgeIds.push(...badgeIds);
+
+          for (const badgeId of badgeIds) {
+            badgeId.start += transfer.incrementBadgeIdsBy || 0n;
+            badgeId.end += transfer.incrementBadgeIdsBy || 0n;
+          }
+
+          for (const ownershipTime of ownershipTimes) {
+            ownershipTime.start += transfer.incrementOwnershipTimesBy || 0n;
+            ownershipTime.end += transfer.incrementOwnershipTimesBy || 0n;
+          }
+        }
+      }
+    }
+  }
+
+  return allBadgeIds;
+}
+
+
+/**
+ * Gets the balances to be transferred for a given transfer with increments.
+ * @example
+ * For a transfer with balances: [{ badgeIds: [{ start: 1n, end: 1n }], amount: 1n }], incrementIdsBy: 1n, toAddressesLength: 1000
+ * We return [{ badgeIds: [{ start: 1n, end: 1000n }], amount: 1n }] because we transfer x1 badge to 1000 addresses
+ * and increment the badgeIds by 1 each time.
+ *
+ *
+ * This is really inefficient and should be optimized for large N.
+ *
+ * @category Balances
+ *
+ * @param {TransferWithIncrements<bigint>[]} transfers - The list of transfers with increments.
+ * @returns {Balance<bigint>} The balances to be transferred.
+ */
+export const getAllBalancesToBeTransferred = (transfers: TransferWithIncrements<bigint>[]) => {
   let startBalances: Balance<bigint>[] = [];
   for (const transfer of transfers) {
     for (const balance of transfer.balances) {
@@ -61,16 +112,15 @@ export const getAllBalancesToBeTransferred = (transfers: TransferWithIncrements<
           amount: balance.amount * numRecipients,
           badgeIds,
           ownershipTimes,
-        }, allowNegative);
+        }, true);
       } else {
-        //If incrementIdsBy is set, then we need to increment the badgeIds after each transfer
-        //TODO: This is not efficient, we should be able to LeetCode optimize this somehow. Imagine a claim with 100000000 possible claims.
+        //TODO: This is not efficient, we should be able to LeetCode optimize this somehow. Imagine a claim with 100000000 possible claims
         for (let i = 0; i < numRecipients; i++) {
           startBalances = addBalance(startBalances, {
             amount: balance.amount,
             badgeIds,
             ownershipTimes,
-          }, allowNegative);
+          }, true);
 
           for (const badgeId of badgeIds) {
             badgeId.start += transfer.incrementBadgeIdsBy || 0n;
@@ -81,6 +131,7 @@ export const getAllBalancesToBeTransferred = (transfers: TransferWithIncrements<
             ownershipTime.start += transfer.incrementOwnershipTimesBy || 0n;
             ownershipTime.end += transfer.incrementOwnershipTimesBy || 0n;
           }
+
         }
       }
     }

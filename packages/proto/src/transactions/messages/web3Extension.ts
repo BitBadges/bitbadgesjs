@@ -1,4 +1,4 @@
-import { createWeb3Extension, createWeb3ExtensionSolana } from '../../'
+import { createWeb3Extension, createWeb3ExtensionBitcoin, createWeb3ExtensionSolana } from '../../'
 import { Chain, Sender } from './common'
 
 /**
@@ -52,5 +52,30 @@ export function signatureToWeb3ExtensionSolana(
     sender.accountAddress,
     Uint8Array.from(Buffer.from(signature, 'hex')),
     solanaAddress,
+  )
+}
+
+/**
+ *This function is used to convert a signature to a web3 extension for a Bitcoin transaction.
+ *
+ * @param chain - The details of the chain you are using.
+ * @param sender - The sender details for the transaction. sender.accountAddress must be the mapped Cosmos address of the Bitcoin address.
+ * @param hexFormattedSignature - The signature of the signed message. Must resolve to the fee payer address.
+ */
+export function signatureToWeb3ExtensionBitcoin(
+  chain: Chain,
+  sender: Sender,
+  hexFormattedSignature: string
+) {
+  let signature = hexFormattedSignature
+  const temp = hexFormattedSignature.split('0x')
+  if (temp.length === 2) {
+    [, signature] = temp
+  }
+
+  return createWeb3ExtensionBitcoin(
+    chain.chainId,
+    sender.accountAddress,
+    Uint8Array.from(Buffer.from(signature, 'hex'))
   )
 }

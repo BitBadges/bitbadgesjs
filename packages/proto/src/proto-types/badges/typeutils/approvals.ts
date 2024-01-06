@@ -1,5 +1,41 @@
 import { NumberType } from "../string-numbers";
+import { UserPermissions, convertUserPermissions } from "./permissions";
 import { Balance, MerkleChallenge, MustOwnBadges, UintRange, convertBalance, convertMerkleChallenge, convertMustOwnBadges, convertUintRange, deepCopy } from "./typeUtils";
+
+/**
+ * UserBalanceStore represents a user's balance store.
+ *
+ * @typedef {Object} UserBalanceStore
+ * @property {Balance[]} balances - The balances of the user.
+ * @property {UserIncomingApproval[]} incomingApprovals - The incoming approvals of the user.
+ * @property {UserOutgoingApproval[]} outgoingApprovals - The outgoing approvals of the user.
+ * @property {UserPermissions} userPermissions - The user permissions of the user.
+ * @property {boolean} autoApproveSelfInitiatedOutgoingTransfers - Whether or not to auto approve self initiated outgoing transfers.
+ * @property {boolean} autoApproveSelfInitiatedIncomingTransfers - Whether or not to auto approve self initiated incoming transfers.
+ */
+export interface UserBalanceStore<T extends NumberType>{
+  balances: Balance<T>[];
+  incomingApprovals: UserIncomingApproval<T>[];
+  outgoingApprovals: UserOutgoingApproval<T>[];
+  userPermissions: UserPermissions<T>;
+  autoApproveSelfInitiatedOutgoingTransfers: boolean;
+  autoApproveSelfInitiatedIncomingTransfers: boolean;
+}
+
+/**
+ * 
+ */
+export function convertUserBalanceStore<T extends NumberType, U extends NumberType>(store: UserBalanceStore<T>, convertFunction: (item: T) => U): UserBalanceStore<U> {
+  return deepCopy({
+    ...store,
+    balances: store.balances.map((b) => convertBalance(b, convertFunction)),
+    incomingApprovals: store.incomingApprovals.map((b) => convertUserIncomingApproval(b, convertFunction)),
+    outgoingApprovals: store.outgoingApprovals.map((b) => convertUserOutgoingApproval(b, convertFunction)),
+    userPermissions: convertUserPermissions(store.userPermissions, convertFunction)
+  })
+}
+
+
 
 
 /**

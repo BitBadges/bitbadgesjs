@@ -1,5 +1,5 @@
 import { ActionPermission, AddressMapping, BadgeMetadata, BalancesActionPermission, TimedUpdatePermission, TimedUpdateWithBadgeIdsPermission, UintRange } from "bitbadgesjs-proto";
-import { getReservedAddressMapping } from "./addressMappings";
+import { getReservedAddressMapping, getReservedTrackerMapping } from "./addressMappings";
 import { UniversalPermission } from "./overlaps";
 import { CollectionApprovalPermissionWithDetails, CollectionApprovalWithDetails, UserIncomingApprovalPermissionWithDetails, UserOutgoingApprovalPermissionWithDetails } from "./types/collections";
 import { UserIncomingApprovalWithDetails, UserOutgoingApprovalWithDetails } from "./types/users";
@@ -101,46 +101,6 @@ export const castCollectionApprovalPermissionToUniversalPermission = (
   const castedPermissions: UniversalPermission[] = [];
   for (const collectionPermission of collectionUpdatePermission) {
 
-    let approvalTrackerMapping: AddressMapping | undefined = undefined;
-
-    if (collectionPermission.amountTrackerId === "All") {
-      approvalTrackerMapping = {
-        uri: '',
-        customData: '',
-        mappingId: '',
-        addresses: [],
-        includeAddresses: false
-      };
-    } else {
-      approvalTrackerMapping = {
-        uri: '',
-        customData: '',
-        mappingId: '',
-        addresses: [collectionPermission.amountTrackerId],
-        includeAddresses: true
-      };
-    }
-
-    let challengeTrackerMapping: AddressMapping | undefined = undefined;
-    if (collectionPermission.challengeTrackerId === "All") {
-      challengeTrackerMapping = {
-        uri: '',
-        customData: '',
-        mappingId: '',
-        addresses: [],
-        includeAddresses: false
-      };
-    } else {
-      challengeTrackerMapping = {
-        uri: '',
-        customData: '',
-        mappingId: '',
-        addresses: [collectionPermission.challengeTrackerId],
-        includeAddresses: true
-      };
-    }
-
-
     castedPermissions.push({
       ...AllDefaultValues,
       transferTimes: collectionPermission.transferTimes,
@@ -149,8 +109,8 @@ export const castCollectionApprovalPermissionToUniversalPermission = (
       toMapping: collectionPermission.toMapping,
       initiatedByMapping: collectionPermission.initiatedByMapping,
       badgeIds: collectionPermission.badgeIds,
-      amountTrackerIdMapping: approvalTrackerMapping,
-      challengeTrackerIdMapping: challengeTrackerMapping,
+      amountTrackerIdMapping: getReservedTrackerMapping(collectionPermission.amountTrackerId),
+      challengeTrackerIdMapping: getReservedTrackerMapping(collectionPermission.challengeTrackerId),
       usesAmountTrackerIdMapping: true,
       usesChallengeTrackerIdMapping: true,
       usesBadgeIds: true,
@@ -261,46 +221,6 @@ export const castCollectionApprovalToUniversalPermission = (
   const castedPermissions: UniversalPermission[] = [];
 
   for (const approval of collectionApprovals) {
-
-    let approvalTrackerMapping: AddressMapping | undefined = undefined;
-
-    if (approval.amountTrackerId === "All") {
-      approvalTrackerMapping = {
-        uri: '',
-        customData: '',
-        mappingId: '',
-        addresses: [],
-        includeAddresses: false
-      };
-    } else {
-      approvalTrackerMapping = {
-        uri: '',
-        customData: '',
-        mappingId: '',
-        addresses: [approval.amountTrackerId],
-        includeAddresses: true
-      };
-    }
-
-    let challengeTrackerMapping: AddressMapping | undefined = undefined;
-    if (approval.challengeTrackerId === "All") {
-      challengeTrackerMapping = {
-        uri: '',
-        customData: '',
-        mappingId: '',
-        addresses: [],
-        includeAddresses: false
-      };
-    } else {
-      challengeTrackerMapping = {
-        uri: '',
-        customData: '',
-        mappingId: '',
-        addresses: [approval.challengeTrackerId],
-        includeAddresses: true
-      };
-    }
-
     castedPermissions.push({
       ...AllDefaultValues,
       badgeIds: approval.badgeIds,
@@ -309,8 +229,8 @@ export const castCollectionApprovalToUniversalPermission = (
       fromMapping: approval.fromMapping,
       toMapping: approval.toMapping,
       initiatedByMapping: approval.initiatedByMapping,
-      amountTrackerIdMapping: approvalTrackerMapping,
-      challengeTrackerIdMapping: challengeTrackerMapping,
+      amountTrackerIdMapping: getReservedTrackerMapping(approval.amountTrackerId) as AddressMapping,
+      challengeTrackerIdMapping: getReservedTrackerMapping(approval.challengeTrackerId) as AddressMapping,
       usesAmountTrackerIdMapping: true,
       usesChallengeTrackerIdMapping: true,
       usesBadgeIds: true,
@@ -344,45 +264,6 @@ export const castUserOutgoingApprovalsToUniversalPermission = (
   const castedPermissions: UniversalPermission[] = [];
 
   for (const approval of userOutgoingApprovals) {
-    let approvalTrackerMapping: AddressMapping | undefined = undefined;
-
-    if (approval.amountTrackerId === "All") {
-      approvalTrackerMapping = {
-        uri: '',
-        customData: '',
-        mappingId: '',
-        addresses: [],
-        includeAddresses: false
-      };
-    } else {
-      approvalTrackerMapping = {
-        uri: '',
-        customData: '',
-        mappingId: '',
-        addresses: [approval.amountTrackerId],
-        includeAddresses: true
-      };
-    }
-
-    let challengeTrackerMapping: AddressMapping | undefined = undefined;
-    if (approval.challengeTrackerId === "All") {
-      challengeTrackerMapping = {
-        uri: '',
-        customData: '',
-        mappingId: '',
-        addresses: [],
-        includeAddresses: false
-      };
-    } else {
-      challengeTrackerMapping = {
-        uri: '',
-        customData: '',
-        mappingId: '',
-        addresses: [approval.challengeTrackerId],
-        includeAddresses: true
-      };
-    }
-
     castedPermissions.push({
       ...AllDefaultValues,
       badgeIds: approval.badgeIds,
@@ -391,8 +272,8 @@ export const castUserOutgoingApprovalsToUniversalPermission = (
       fromMapping: getReservedAddressMapping(fromAddress) as AddressMapping,
       toMapping: approval.toMapping,
       initiatedByMapping: approval.initiatedByMapping,
-      amountTrackerIdMapping: approvalTrackerMapping,
-      challengeTrackerIdMapping: challengeTrackerMapping,
+      amountTrackerIdMapping: getReservedTrackerMapping(approval.amountTrackerId) as AddressMapping,
+      challengeTrackerIdMapping: getReservedTrackerMapping(approval.challengeTrackerId) as AddressMapping,
       usesAmountTrackerIdMapping: true,
       usesChallengeTrackerIdMapping: true,
       usesBadgeIds: true,
@@ -464,45 +345,6 @@ export const castUserIncomingApprovalsToUniversalPermission = (
   const castedPermissions: UniversalPermission[] = [];
 
   for (const approval of userIncomingApprovals) {
-    let approvalTrackerMapping: AddressMapping | undefined = undefined;
-
-    if (approval.amountTrackerId === "All") {
-      approvalTrackerMapping = {
-        uri: '',
-        customData: '',
-        mappingId: '',
-        addresses: [],
-        includeAddresses: false
-      };
-    } else {
-      approvalTrackerMapping = {
-        uri: '',
-        customData: '',
-        mappingId: '',
-        addresses: [approval.amountTrackerId],
-        includeAddresses: true
-      };
-    }
-
-    let challengeTrackerMapping: AddressMapping | undefined = undefined;
-    if (approval.challengeTrackerId === "All") {
-      challengeTrackerMapping = {
-        uri: '',
-        customData: '',
-        mappingId: '',
-        addresses: [],
-        includeAddresses: false
-      };
-    } else {
-      challengeTrackerMapping = {
-        uri: '',
-        customData: '',
-        mappingId: '',
-        addresses: [approval.challengeTrackerId],
-        includeAddresses: true
-      };
-    }
-
     castedPermissions.push({
       ...AllDefaultValues,
       badgeIds: approval.badgeIds,
@@ -511,8 +353,8 @@ export const castUserIncomingApprovalsToUniversalPermission = (
       fromMapping: approval.fromMapping,
       toMapping: getReservedAddressMapping(toAddress) as AddressMapping,
       initiatedByMapping: approval.initiatedByMapping,
-      amountTrackerIdMapping: approvalTrackerMapping,
-      challengeTrackerIdMapping: challengeTrackerMapping,
+      amountTrackerIdMapping: getReservedTrackerMapping(approval.amountTrackerId) as AddressMapping,
+      challengeTrackerIdMapping: getReservedTrackerMapping(approval.challengeTrackerId) as AddressMapping,
       usesAmountTrackerIdMapping: true,
       usesChallengeTrackerIdMapping: true,
       usesBadgeIds: true,

@@ -1,9 +1,9 @@
 import * as badges from '../../../../proto/badges/tx_pb'
 
-import { BadgeMetadataTimeline, Balance, CollectionApproval, CollectionMetadataTimeline, CollectionPermissions, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, NumberType, OffChainBalancesMetadataTimeline, StandardsTimeline, UserIncomingApproval, UserOutgoingApproval, UserPermissions, convertBadgeMetadataTimeline, convertBalance, convertCollectionApproval, convertCollectionMetadataTimeline, convertCollectionPermissions, convertCustomDataTimeline, convertIsArchivedTimeline, convertManagerTimeline, convertOffChainBalancesMetadataTimeline, convertStandardsTimeline, convertUserIncomingApproval, convertUserOutgoingApproval, convertUserPermissions } from '../../../..'
+import { BadgeMetadataTimeline, Balance, CollectionApproval, CollectionMetadataTimeline, CollectionPermissions, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, NumberType, OffChainBalancesMetadataTimeline, StandardsTimeline, UserBalanceStore, convertBadgeMetadataTimeline, convertBalance, convertCollectionApproval, convertCollectionMetadataTimeline, convertCollectionPermissions, convertCustomDataTimeline, convertIsArchivedTimeline, convertManagerTimeline, convertOffChainBalancesMetadataTimeline, convertStandardsTimeline, convertUserBalanceStore } from '../../../..'
+import { createProtoMsg } from '../../../../proto-types/base'
 import { createTransactionPayload } from '../../base'
 import { Chain, Fee, Sender } from "../../common"
-import { createProtoMsg } from '../../../../proto-types/base'
 
 /**
  * MsgUniversalUpdateCollection is a universal transaction that can be used to create / update any collection. It is only executable by the manager.
@@ -24,9 +24,7 @@ import { createProtoMsg } from '../../../../proto-types/base'
  * @property {string} creator - The creator of the transaction.
  * @property {T} collectionId - The collection ID. If you are creating a new collection, set this to "0".
  * @property {string} balancesType - The balances type. Either "Standard", "Off-Chain - Indexed", "Off-Chain - Non-Indexed" or "Inherited". Only can be set on initial creation.
- * @property {UserOutgoingApproval[]} defaultOutgoingApprovals - The default approved outgoing transfers timeline for users who have not interacted with the collection yet. Only can be set on initial creation. Only used if collection has "Standard" balance type.
- * @property {UserIncomingApproval[]} defaultIncomingApprovals - The default approved incoming transfers timeline for users who have not interacted with the collection yet. Only can be set on initial creation. Only used if collection has "Standard" balance type.
- * @property {UserPermissions} defaultUserPermissions - The default user permissions for users who have not interacted with the collection yet. Only can be set on initial creation. Only used if collection has "Standard" balance type.
+ * @property {UserBalanceStore} defaultBalances - The default balances for users who have not interacted with the collection yet. Only can be set on initial creation. Only used if collection has "Standard" balance type.
  * @property {Balance[]} badgesToCreate - The badges to create. Newly created badges will be sent to the "Mint" address. Must have necessary permissions. Only used if collection has "Standard" balance type.
  * @property {boolean} updateCollectionPermissions - Whether or not to update the collection permissions.
  * @property {CollectionPermissions} collectionPermissions - The new collection permissions. Must have the necessary permissions to update.
@@ -51,11 +49,7 @@ export interface MsgUniversalUpdateCollection<T extends NumberType> {
   creator: string
   collectionId: T
   balancesType?: string
-  defaultOutgoingApprovals?: UserOutgoingApproval<T>[]
-  defaultIncomingApprovals?: UserIncomingApproval<T>[]
-  defaultAutoApproveSelfInitiatedOutgoingTransfers?: boolean
-  defaultAutoApproveSelfInitiatedIncomingTransfers?: boolean
-  defaultUserPermissions?: UserPermissions<T>
+  defaultBalances?: UserBalanceStore<T>
   badgesToCreate?: Balance<T>[]
   updateCollectionPermissions?: boolean
   collectionPermissions?: CollectionPermissions<T>
@@ -84,9 +78,9 @@ export function convertMsgUniversalUpdateCollection<T extends NumberType, U exte
   return {
     ...msg,
     collectionId: convertFunction(msg.collectionId),
-    defaultOutgoingApprovals: msg.defaultOutgoingApprovals ? msg.defaultOutgoingApprovals.map(x => convertUserOutgoingApproval(x, convertFunction)) : undefined,
-    defaultIncomingApprovals: msg.defaultIncomingApprovals ? msg.defaultIncomingApprovals.map(x => convertUserIncomingApproval(x, convertFunction)) : undefined,
-    defaultUserPermissions: msg.defaultUserPermissions ? convertUserPermissions(msg.defaultUserPermissions, convertFunction) : undefined,
+
+
+    defaultBalances: msg.defaultBalances ? convertUserBalanceStore(msg.defaultBalances, convertFunction) : undefined,
 
     badgesToCreate: msg.badgesToCreate ? msg.badgesToCreate.map(x => convertBalance(x, convertFunction)) : undefined,
     collectionPermissions: msg.collectionPermissions ? convertCollectionPermissions(msg.collectionPermissions, convertFunction) : undefined,
@@ -112,9 +106,7 @@ export function convertFromProtoToMsgUniversalUpdateCollection(
     creator: msg.creator,
     collectionId: BigInt(msg.collectionId),
     balancesType: msg.balancesType,
-    defaultOutgoingApprovals: msg.defaultOutgoingApprovals?.map(x => convertUserOutgoingApproval(x, BigInt)),
-    defaultIncomingApprovals: msg.defaultIncomingApprovals?.map(x => convertUserIncomingApproval(x, BigInt)),
-    defaultUserPermissions: msg.defaultUserPermissions ? convertUserPermissions(msg.defaultUserPermissions, BigInt) : undefined,
+    defaultBalances: msg.defaultBalances ? convertUserBalanceStore(msg.defaultBalances, BigInt) : undefined,
 
     badgesToCreate: msg.badgesToCreate?.map(x => convertBalance(x, BigInt)),
     collectionPermissions: msg.collectionPermissions ? convertCollectionPermissions(msg.collectionPermissions, BigInt) : undefined,

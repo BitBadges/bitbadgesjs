@@ -23,9 +23,22 @@ export function getBadgesToDisplay(
   }[] = [],
   _pageNumber: number,
   _pageSize: number,
-) {
+  sortBy?: 'newest' | 'oldest' | undefined
+): {
+  collectionId: bigint,
+  badgeIds: UintRange<bigint>[]
+}[] {
   const pageNumber = BigInt(_pageNumber);
   const pageSize = BigInt(_pageSize);
+
+  if (sortBy === 'newest') {
+    const totalNumPages = Math.ceil(Number(collectionObjectsToDisplay.reduce((acc, curr) => {
+      const numBadges = curr.badgeIds.reduce((acc, curr) => acc + (curr.end - curr.start + 1n), 0n);
+      return acc + numBadges;
+    }, 0n)) / _pageSize);
+
+    return getBadgesToDisplay(collectionObjectsToDisplay, Number(totalNumPages - _pageNumber + 1), _pageSize, undefined);
+  }
 
   const startIdxNum = BigInt((pageNumber - 1n) * pageSize);
   const badgeIdsToDisplay: { collectionId: bigint, badgeIds: UintRange<bigint>[] }[] = [];

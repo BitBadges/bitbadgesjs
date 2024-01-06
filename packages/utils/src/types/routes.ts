@@ -229,8 +229,20 @@ export const AddAddressToSurveyRoute = (editKey: string) => `/api/v0/survey/${ed
 /**
  * @category API Routes
  */
-export const UpdateFollowDetailsRoute = () => "/api/v0/follow-protocol/update";
+export const GetFollowDetailsRoute = () => "/api/v0/follow-protocol";
+
 /**
  * @category API Routes
  */
-export const GetFollowDetailsRoute = () => "/api/v0/follow-protocol";
+export const GetProtocolsRoute = () => "/api/v0/protocols";
+
+/**
+ * @category API Routes
+ */
+export const GetCollectionForProtocolRoute = () => "/api/v0/protocols/collection";
+
+
+/**
+ * @category API Routes
+ */
+export const FilterBadgesInCollectionRoute = () => "/api/v0/collections/filter";

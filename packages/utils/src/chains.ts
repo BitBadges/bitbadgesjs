@@ -1,4 +1,4 @@
-import { cosmosToEth, ethToCosmos, solanaToCosmos } from "./converter";
+import { btcToCosmos, cosmosToEth, ethToCosmos, solanaToCosmos } from "./converter";
 import { Stringify } from "bitbadgesjs-proto";
 import { ethers } from "ethers";
 import { SupportedChain } from "./types/types";
@@ -9,6 +9,7 @@ export const MINT_ACCOUNT: BitBadgesUserInfo<bigint> = {
   cosmosAddress: 'Mint',
   ethAddress: 'Mint',
   solAddress: 'Mint',
+  btcAddress: 'Mint',
   address: 'Mint',
   chain: SupportedChain.COSMOS,
   publicKey: '',
@@ -16,6 +17,7 @@ export const MINT_ACCOUNT: BitBadgesUserInfo<bigint> = {
   sequence: 0n,
   collected: [],
   activity: [],
+  listsActivity: [],
   announcements: [],
   reviews: [],
   addressMappings: [],
@@ -32,7 +34,8 @@ export const MINT_ACCOUNT: BitBadgesUserInfo<bigint> = {
 export const BLANK_USER_INFO: BitBadgesUserInfo<bigint> = {
   cosmosAddress: '',
   ethAddress: '',
-  solAddress: 'Mint',
+  solAddress: '',
+  btcAddress: '',
   address: '',
   chain: SupportedChain.UNKNOWN,
   publicKey: '',
@@ -46,6 +49,7 @@ export const BLANK_USER_INFO: BitBadgesUserInfo<bigint> = {
   merkleChallenges: [],
   approvalsTrackers: [],
   addressMappings: [],
+  listsActivity: [],
   authCodes: [],
   seenActivity: 0n,
   createdAt: 0n,
@@ -78,6 +82,8 @@ export function convertToCosmosAddress(address: string) {
       } catch {
         bech32Address = '';
       }
+    } else if (address.startsWith('bc')) {
+      bech32Address = btcToCosmos(address);
     }
   }
 
@@ -106,6 +112,8 @@ export function getChainForAddress(address: string) {
     return SupportedChain.COSMOS;
   } else if (address.length == 44) {
     return SupportedChain.SOLANA;
+  } else if (address.startsWith('bc')) {
+    return SupportedChain.BTC;
   }
 
   return SupportedChain.UNKNOWN;
@@ -156,6 +164,15 @@ export function isAddressValid(address: string, chain?: string) {
     // case SupportedChain.SOLANA:
     //   isValidAddress = address.length == 44;
     //   break;
+    case SupportedChain.BTC:
+      try {
+
+        cosmosToEth(btcToCosmos(address)); //throws on failure
+      } catch {
+        isValidAddress = false;
+      }
+
+      break;
     default:
       isValidAddress = address.length == 44; //Solana address
       break;

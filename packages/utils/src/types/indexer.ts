@@ -1,5 +1,5 @@
 import { TransferActivityDoc } from "./activity";
-import { AccountDoc, BalanceDoc, MerkleChallengeDoc, CollectionDoc, QueueDoc, RefreshDoc, ApprovalsTrackerDoc, AddressMappingDoc, ClaimAlertDoc, PasswordDoc } from "./db";
+import { AccountDoc, BalanceDoc, MerkleChallengeDoc, CollectionDoc, QueueDoc, RefreshDoc, ApprovalsTrackerDoc, AddressMappingDoc, ClaimAlertDoc, PasswordDoc, ProtocolDoc, UserProtocolCollectionsDoc } from "./db";
 
 /**
  * DocsCache is used by the indexer to cache documents in memory to avoid having to fetch and write to the database each time.
@@ -32,6 +32,13 @@ export interface DocsCache {
   activityToAdd: (TransferActivityDoc<bigint>)[];
   claimAlertsToAdd: (ClaimAlertDoc<bigint>)[];
   passwordDocs: PasswordDocs;
+
+  protocols: {
+    [protocolName: string]: ProtocolDoc<bigint> | undefined;
+  }
+  userProtocolCollections: {
+    [cosmosAddress: string]: (UserProtocolCollectionsDoc<bigint>) | undefined;
+  }
 }
 
 /**

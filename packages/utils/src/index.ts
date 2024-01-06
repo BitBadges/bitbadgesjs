@@ -43,6 +43,7 @@ export * from './validate_permissions_updates';
 export * from './approved_transfers_casts';
 export * from './api-sdk';
 export * from './converter';
+export * from './aliases';
 
 export * from './node-rest-api/account'
 export * from './node-rest-api/balances'

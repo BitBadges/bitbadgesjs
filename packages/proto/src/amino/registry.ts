@@ -5,6 +5,7 @@ import {
 import { createBadgesAminoConverters } from '../proto-types/badges/aminoRegistry'
 import { createWasmXAminoConverters } from '../proto-types/wasmx/aminoRegistry'
 import {createWasmAminoConverters } from '@cosmjs/cosmwasm-stargate'
+import { createProtocolsAminoConverters } from '../proto-types/protocols/aminoRegistry'
 
 export function createDefaultAminoConverters() {
   return {
@@ -12,6 +13,7 @@ export function createDefaultAminoConverters() {
     ...createBadgesAminoConverters(),
     ...createWasmXAminoConverters(),
     ...createWasmAminoConverters(),
+    ...createProtocolsAminoConverters(),
   }
 }
 

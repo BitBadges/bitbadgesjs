@@ -30,6 +30,7 @@ export interface EIP712ToSign {
  * @category API / Indexer
  */
 export enum SupportedChain {
+  BTC = 'Bitcoin',
   ETH = 'Ethereum',
   COSMOS = 'Cosmos',
   SOLANA = 'Solana',

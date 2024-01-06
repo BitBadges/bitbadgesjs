@@ -1,5 +1,6 @@
 import * as web3 from '../proto/ethereum/web3_pb'
 import * as web3Sol from '../proto/solana/web3_pb'
+import * as web3Btc from '../proto/bitcoin/web3_pb'
 
 /**
  * This function is used to create a web3 extension for an Ethereum EIP712 transaction.
@@ -50,6 +51,33 @@ export function createWeb3ExtensionSolana(
     feePayerSig: feePayerSig,
     chain: "Solana",
     solAddress: solanaAddress,
+  })
+  return {
+    message,
+    path: message.getType().typeName,
+  }
+}
+
+
+/**
+ * This function is used to create a web3 extension for a Bitcoin transaction.
+ *
+ * @param chainId The chain id of the chain you are using. For mainnet (bitbadges_1-1, this is 1). For testnets / betanet (bitbadges_1-2, this is 2 and so on).
+ * @param feePayer The mapped Cosmos address of the fee payer. This is the address that signed the transaction. Use solanaToCosmos(...)
+ * @param feePayerSig The signature of the signed message. Must resolve to the fee payer address.
+ *
+ * See documentation for more details:
+ */
+export function createWeb3ExtensionBitcoin(
+  chainId: number | bigint,
+  feePayer: string,
+  feePayerSig: Uint8Array,
+) {
+  const message = new web3Btc.ExtensionOptionsWeb3TxBitcoin({
+    typedDataChainId: BigInt(chainId),
+    feePayer: feePayer,
+    feePayerSig: feePayerSig,
+    chain: "Bitcoin",
   })
   return {
     message,

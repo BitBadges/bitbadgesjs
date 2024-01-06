@@ -1,4 +1,5 @@
-import { AddressMapping, AmountTrackerIdDetails, BadgeMetadataTimeline, Balance, CollectionApproval, CollectionMetadataTimeline, CollectionPermissions, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, MerkleChallenge, OffChainBalancesMetadataTimeline, StandardsTimeline, UintRange, UserBalance, UserIncomingApproval, UserOutgoingApproval, UserPermissions, convertBadgeMetadataTimeline, convertBalance, convertCollectionApproval, convertCollectionMetadataTimeline, convertCollectionPermissions, convertCustomDataTimeline, convertIsArchivedTimeline, convertManagerTimeline, convertMerkleChallenge, convertOffChainBalancesMetadataTimeline, convertStandardsTimeline, convertUintRange, convertUserBalance, convertUserIncomingApproval, convertUserOutgoingApproval, convertUserPermissions } from "bitbadgesjs-proto";
+import { UserBalanceStore, convertUserBalanceStore, AddressMapping, AmountTrackerIdDetails, BadgeMetadataTimeline, Balance, CollectionApproval, CollectionMetadataTimeline, CollectionPermissions, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, MerkleChallenge, OffChainBalancesMetadataTimeline, StandardsTimeline,
+  UintRange, UserBalance, convertBadgeMetadataTimeline, convertBalance, convertCollectionApproval, convertCollectionMetadataTimeline, convertCollectionPermissions, convertCustomDataTimeline, convertIsArchivedTimeline, convertManagerTimeline, convertMerkleChallenge, convertOffChainBalancesMetadataTimeline, convertStandardsTimeline, convertUintRange, convertUserBalance, convertUserIncomingApproval, convertUserOutgoingApproval, Protocol } from "bitbadgesjs-proto";
 import { ChallengeParams, convertChallengeParams } from "blockin";
 import MerkleTree from "merkletreejs";
 import { Options as MerkleTreeJsOptions } from "merkletreejs/dist/MerkleTree";
@@ -30,15 +31,12 @@ import { deepCopy } from "./utils";
  * @property {CollectionApproval[]} collectionApprovals - The collection approved transfers timeline
  * @property {StandardsTimeline[]} standardsTimeline - The standards timeline
  * @property {IsArchivedTimeline[]} isArchivedTimeline - The is archived timeline
- * @property {UserOutgoingApproval[]} defaultUserOutgoingApprovals - The default user approved outgoing transfers
- * @property {UserIncomingApproval[]} defaultUserIncomingApprovals - The default user approved incoming transfers timeline
- * @property {boolean} defaultAutoApproveSelfInitiatedOutgoingTransfers - Whether or not to auto approve self-initiated outgoing transfers
- * @property {boolean} defaultAutoApproveSelfInitiatedIncomingTransfers - Whether or not to auto approve self-initiated incoming transfers
- * @property {UserPermissions} defaultUserPermissions - The default user permissions
+ * @property {UserBalanceStore} defaultBalances - The default balances for users who have not interacted with the collection yet. Only used if collection has "Standard" balance type.
  * @property {string} createdBy - The cosmos address of the user who created this collection
  * @property {NumberType} createdBlock - The block number when this collection was created
  * @property {NumberType} createdTimestamp - The timestamp when this collection was created (milliseconds since epoch)
  * @property {Object[]} updateHistory - The update history of this collection
+ * @property {string} aliasAddress - The alias cosmos address for the collection
  */
 export interface CollectionInfoBase<T extends NumberType> {
   collectionId: T;
@@ -52,11 +50,7 @@ export interface CollectionInfoBase<T extends NumberType> {
   collectionApprovals: CollectionApproval<T>[];
   standardsTimeline: StandardsTimeline<T>[];
   isArchivedTimeline: IsArchivedTimeline<T>[];
-  defaultUserOutgoingApprovals: UserOutgoingApproval<T>[];
-  defaultUserIncomingApprovals: UserIncomingApproval<T>[];
-  defaultAutoApproveSelfInitiatedOutgoingTransfers: boolean;
-  defaultAutoApproveSelfInitiatedIncomingTransfers: boolean;
-  defaultUserPermissions: UserPermissions<T>;
+  defaultBalances: UserBalanceStore<T>;
   createdBy: string;
   createdBlock: T;
   createdTimestamp: T;
@@ -65,6 +59,7 @@ export interface CollectionInfoBase<T extends NumberType> {
     block: T;
     blockTimestamp: T;
   }[];
+  aliasAddress: string;
 }
 /**
  * @category API / Indexer
@@ -88,9 +83,8 @@ export function convertCollectionDoc<T extends NumberType, U extends NumberType>
     collectionApprovals: item.collectionApprovals.map((collectionApprovals) => convertCollectionApproval(collectionApprovals, convertFunction)),
     standardsTimeline: item.standardsTimeline.map((standardsTimeline) => convertStandardsTimeline(standardsTimeline, convertFunction)),
     isArchivedTimeline: item.isArchivedTimeline.map((isArchivedTimeline) => convertIsArchivedTimeline(isArchivedTimeline, convertFunction)),
-    defaultUserOutgoingApprovals: item.defaultUserOutgoingApprovals.map((defaultUserOutgoingApprovals) => convertUserOutgoingApproval(defaultUserOutgoingApprovals, convertFunction)),
-    defaultUserIncomingApprovals: item.defaultUserIncomingApprovals.map((defaultUserIncomingApprovals) => convertUserIncomingApproval(defaultUserIncomingApprovals, convertFunction)),
-    defaultUserPermissions: convertUserPermissions(item.defaultUserPermissions, convertFunction),
+
+    defaultBalances: convertUserBalanceStore(item.defaultBalances, convertFunction),
     createdBlock: convertFunction(item.createdBlock),
     createdTimestamp: convertFunction(item.createdTimestamp),
     updateHistory: item.updateHistory.map((updateHistory) => ({
@@ -114,6 +108,7 @@ export function convertCollectionDoc<T extends NumberType, U extends NumberType>
  * @property {string} cosmosAddress - The Cosmos address of the account
  * @property {string} ethAddress - The Eth address of the account
  * @property {string} solAddress - The Solana address of the account
+ * @property {string} btcAddress - The Bitcoin address of the account
  *
  * @property {NumberType} sequence - The sequence of the account. Note we currently do not store sequence in the DB (it is dynamically fetched).
  * @property {string} [username] - The username of the account
@@ -128,6 +123,7 @@ export interface AccountInfoBase<T extends NumberType> {
   cosmosAddress: string
   ethAddress: string
   solAddress: string
+  btcAddress: string
   accountNumber: T
 
   //dynamically fetched
@@ -1174,8 +1170,6 @@ export interface FollowDetailsInfoBase<T extends NumberType> {
   cosmosAddress: string;
   followingCount: T;
   followersCount: T;
-
-  followingCollectionId: T;
 }
 
 /**
@@ -1191,11 +1185,68 @@ export function convertFollowDetailsDoc<T extends NumberType, U extends NumberTy
     ...item,
     followingCount: convertFunction(item.followingCount),
     followersCount: convertFunction(item.followersCount),
-    followingCollectionId: convertFunction(item.followingCollectionId),
+  })
+}
+
+/**
+ * @category API / Indexer
+ */
+export interface ProtocolInfoBase<T extends NumberType> extends Protocol {
+}
+
+/**
+ * @category API / Indexer
+ */
+export type ProtocolDoc<T extends NumberType> = ProtocolInfoBase<T> & { _legacyId: string, _id?: string }
+
+/**
+ * @category API / Indexer
+ */
+export function convertProtocolDoc<T extends NumberType, U extends NumberType>(item: ProtocolDoc<T>, convertFunction: (item: T) => U): ProtocolDoc<U> {
+  return deepCopy({
+    ...item,
+  })
+}
+
+/**
+ * @category API / Indexer
+ */
+export interface UserProtocolCollectionsInfoBase<T extends NumberType> {
+  protocols: {
+    [protocolName: string]: T;
+  }
+}
+
+/**
+ * @category API / Indexer
+ */
+export type UserProtocolCollectionsDoc<T extends NumberType> = UserProtocolCollectionsInfoBase<T> & { _legacyId: string, _id?: string }
+
+/**
+ * @category API / Indexer
+ */
+export function convertUserProtocolCollectionsDoc<T extends NumberType, U extends NumberType>(item: UserProtocolCollectionsDoc<T>, convertFunction: (item: T) => U): UserProtocolCollectionsDoc<U> {
+  return deepCopy({
+    ...item,
+    protocols: Object.fromEntries(Object.entries(item.protocols).map(([key, value]) => [key, convertFunction(value)])),
   })
 }
 
 const { Schema } = mongoose;
+
+export const ProtocolSchema = new Schema<ProtocolDoc<JSPrimitiveNumberType>>({
+  _legacyId: String,
+  name: String,
+  uri: String,
+  customData: String,
+  createdBy: String,
+  isFrozen: Boolean
+});
+
+export const UserProtocolCollectionsSchema = new Schema<UserProtocolCollectionsDoc<JSPrimitiveNumberType>>({
+  _legacyId: String,
+  protocols: Schema.Types.Mixed,
+});
 
 
 export const CollectionSchema = new Schema<CollectionDoc<JSPrimitiveNumberType>>({
@@ -1211,21 +1262,12 @@ export const CollectionSchema = new Schema<CollectionDoc<JSPrimitiveNumberType>>
   collectionApprovals: [Schema.Types.Mixed],
   standardsTimeline: [Schema.Types.Mixed],
   isArchivedTimeline: [Schema.Types.Mixed],
-  defaultUserOutgoingApprovals: [Schema.Types.Mixed],
-  defaultUserIncomingApprovals: [Schema.Types.Mixed],
-  defaultAutoApproveSelfInitiatedOutgoingTransfers: Schema.Types.Mixed,
-  defaultAutoApproveSelfInitiatedIncomingTransfers: Schema.Types.Mixed,
-  defaultUserPermissions: Schema.Types.Mixed,
+  defaultBalances: Schema.Types.Mixed,
   createdBy: String, // Not set as Mixed, as you mentioned it can be a string
   createdBlock: Schema.Types.Mixed,
   createdTimestamp: Schema.Types.Mixed,
-  updateHistory: [
-    {
-      txHash: String,
-      block: Schema.Types.Mixed,
-      blockTimestamp: Schema.Types.Mixed,
-    },
-  ],
+  updateHistory: [Schema.Types.Mixed],
+  aliasAddress: String, // Not set as Mixed, as you mentioned it can be a string
 });
 
 export const AccountSchema = new Schema<AccountDoc<JSPrimitiveNumberType>>({
@@ -1235,6 +1277,7 @@ export const AccountSchema = new Schema<AccountDoc<JSPrimitiveNumberType>>({
   cosmosAddress: String, // String type for cosmosAddress
   ethAddress: String, // String type for ethAddress
   solAddress: String, // String type for solAddress
+  btcAddress: String, // String type for btcAddress
   accountNumber: Schema.Types.Mixed, // Mixed type for accountNumber (number type)
 
   // Dynamically fetched fields
@@ -1303,13 +1346,8 @@ export const AddressMappingSchema = new Schema<AddressMappingDoc<JSPrimitiveNumb
   uri: String, // String type for uri
   customData: String, // String type for customData
   createdBy: String, // String type for createdBy
-  updateHistory: [
-    {
-      txHash: String, // String type for txHash
-      block: Schema.Types.Mixed, // Mixed type for block (number type)
-      blockTimestamp: Schema.Types.Mixed, // Mixed type for blockTimestamp (number type)
-    },
-  ],
+  aliasAddress: String, // String type for aliasAddress
+  updateHistory: [Schema.Types.Mixed],
   createdBlock: Schema.Types.Mixed, // Mixed type for createdBlock (number type)
   lastUpdated: Schema.Types.Mixed, // Mixed type for lastUpdated (number type)
   private: Boolean, // Boolean type for private
@@ -1334,13 +1372,7 @@ export const BalanceSchema = new Schema<BalanceDoc<JSPrimitiveNumberType>>({
   fetchedAtBlock: Schema.Types.Mixed, // Mixed type for fetchedAtBlock (number type)
   contentHash: String, // String type for contentHash
   isPermanent: Boolean, // Boolean type for isPermanent
-  updateHistory: [
-    {
-      txHash: String, // String type for txHash
-      block: Schema.Types.Mixed, // Mixed type for block (number type)
-      blockTimestamp: Schema.Types.Mixed, // Mixed type for blockTimestamp (number type)
-    },
-  ],
+  updateHistory: [Schema.Types.Mixed],
 });
 
 export const PasswordSchema = new Schema<PasswordDoc<JSPrimitiveNumberType>>({
@@ -1376,6 +1408,11 @@ export const ApprovalsTrackerSchema = new Schema<ApprovalsTrackerDoc<JSPrimitive
   collectionId: Schema.Types.Mixed, // Mixed type for collectionId (number type)
   numTransfers: Schema.Types.Mixed, // Mixed type for numTransfers (number type)
   amounts: [Schema.Types.Mixed], // Array of Mixed type for amounts (Balance type)
+  approvalLevel: String, // String type for approvalLevel
+  approverAddress: String, // String type for approverAddress
+  amountTrackerId: String, // String type for amountTrackerId
+  trackerType: String, // String type for trackerType
+  approvedAddress: String, // String type for approvedAddress
 });
 
 export const FetchSchema = new Schema<FetchDoc<JSPrimitiveNumberType>>({
@@ -1429,5 +1466,4 @@ export const FollowDetailsSchema = new Schema<FollowDetailsDoc<JSPrimitiveNumber
   cosmosAddress: String, // String type for cosmosAddress
   followingCount: Schema.Types.Mixed, // Mixed type for followingCount (number type)
   followersCount: Schema.Types.Mixed, // Mixed type for followersCount (number type)
-  followingCollectionId: Schema.Types.Mixed, // Mixed type for followingCollectionId (number type)
 });

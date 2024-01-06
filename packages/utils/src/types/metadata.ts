@@ -9,6 +9,7 @@ import { deepCopy } from "./utils";
  * @property {string} name - The name of the badge or badge collection.
  * @property {string} description - The description of the badge or badge collection.
  * @property {string} image - The image of the badge or badge collection.
+ * @property {string} video - The video of the badge or badge collection. If a standard video is used, this should be a link to the video. We will use image as the poster image. If a youtube video is used, we embed it as an iframe.
  * @property {string} [creator] - The creator of the badge or badge collection.
  * @property {UintRange} [validFrom] - The start time in milliseconds to end time in milliseconds of the badge or badge collection.
  * @property {string} [color] - The color of the badge or badge collection.
@@ -17,6 +18,8 @@ import { deepCopy } from "./utils";
  * @property {string[]} [tags] - The tags of the badge or badge collection
  *
  * @property {Object} [socials] - The socials for the metadata
+ *
+ * @property {Object} [offChainTransferabilityInfo] - The off-chain transferability info for the metadata
  *
  * @property {bigint} [fetchedAtBlock] - Block of fetch time
  * @property {bigint} [fetchedAt] - UNIX milliseconds the metadata was cached / fetched at
@@ -33,6 +36,7 @@ export interface Metadata<T extends NumberType> {
   name: string;
   description: string;
   image: string;
+  video?: string;
   validFrom?: UintRange<T>[];
   color?: string;
   category?: string;
@@ -41,6 +45,11 @@ export interface Metadata<T extends NumberType> {
 
   socials?: {
     [key: string]: string;
+  }
+
+  offChainTransferabilityInfo?: {
+    host: string
+    assignMethod: string
   }
 }
 

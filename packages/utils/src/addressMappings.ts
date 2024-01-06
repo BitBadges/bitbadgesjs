@@ -1,19 +1,22 @@
-import { AddressMapping } from "bitbadgesjs-proto";
-import { convertToCosmosAddress } from "./chains";
+import { AddressMapping } from 'bitbadgesjs-proto'
+import { convertToCosmosAddress, isAddressValid } from './chains'
 
 /**
  * Checks if a specific account is in the given address mapping.
  *
  * @category Address Mappings
  */
-export const isInAddressMapping = (addressesMapping: AddressMapping, addressToCheck: string) => {
-  let found = addressesMapping.addresses.includes(addressToCheck);
+export const isInAddressMapping = (
+  addressesMapping: AddressMapping,
+  addressToCheck: string,
+) => {
+  let found = addressesMapping.addresses.includes(addressToCheck)
 
   if (!addressesMapping.includeAddresses) {
-    found = !found;
+    found = !found
   }
 
-  return found;
+  return found
 }
 
 /**
@@ -23,80 +26,125 @@ export const isInAddressMapping = (addressesMapping: AddressMapping, addressToCh
  *
  * @category Address Mappings
  */
-export function removeAddressMappingFromAddressMapping(addressesToRemove: AddressMapping, addressMapping: AddressMapping) {
-  let duplicates = [];
-  let inToRemoveButNotMapping = [];
-  let inMappingButNotToRemove = [];
+export function removeAddressMappingFromAddressMapping(
+  addressesToRemove: AddressMapping,
+  addressMapping: AddressMapping,
+) {
+  let duplicates = []
+  let inToRemoveButNotMapping = []
+  let inMappingButNotToRemove = []
 
   for (let address of addressesToRemove.addresses) {
     // Check if address is in addressMapping.addresses
-    let found = addressMapping.addresses.includes(address);
+    let found = addressMapping.addresses.includes(address)
 
     if (found) {
-      duplicates.push(address);
+      duplicates.push(address)
     } else {
-      inToRemoveButNotMapping.push(address);
+      inToRemoveButNotMapping.push(address)
     }
   }
 
   for (let address of addressMapping.addresses) {
     // Check if address is in addressesToRemove.addresses
-    let found = addressesToRemove.addresses.includes(address);
+    let found = addressesToRemove.addresses.includes(address)
 
     if (!found) {
-      inMappingButNotToRemove.push(address);
+      inMappingButNotToRemove.push(address)
     }
   }
 
-  let removed: AddressMapping = { addresses: [], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" };
-  let remaining: AddressMapping = { addresses: [], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" };
+  let removed: AddressMapping = {
+    addresses: [],
+    includeAddresses: false,
+    mappingId: '',
+    uri: '',
+    customData: '',
+    createdBy: '',
+  }
+  let remaining: AddressMapping = {
+    addresses: [],
+    includeAddresses: false,
+    mappingId: '',
+    uri: '',
+    customData: '',
+    createdBy: '',
+  }
 
   if (addressesToRemove.includeAddresses && addressMapping.includeAddresses) {
     // Case 1
-    removed.includeAddresses = true;
-    removed.addresses = duplicates;
+    removed.includeAddresses = true
+    removed.addresses = duplicates
 
-    remaining.includeAddresses = true;
-    remaining.addresses = inMappingButNotToRemove;
-  } else if (!addressesToRemove.includeAddresses && addressMapping.includeAddresses) {
+    remaining.includeAddresses = true
+    remaining.addresses = inMappingButNotToRemove
+  } else if (
+    !addressesToRemove.includeAddresses &&
+    addressMapping.includeAddresses
+  ) {
     // Case 2
-    removed.includeAddresses = true;
-    removed.addresses = inMappingButNotToRemove;
+    removed.includeAddresses = true
+    removed.addresses = inMappingButNotToRemove
 
-    remaining.includeAddresses = true;
-    remaining.addresses = duplicates;
-  } else if (addressesToRemove.includeAddresses && !addressMapping.includeAddresses) {
+    remaining.includeAddresses = true
+    remaining.addresses = duplicates
+  } else if (
+    addressesToRemove.includeAddresses &&
+    !addressMapping.includeAddresses
+  ) {
     // Case 3
-    removed.includeAddresses = true;
-    removed.addresses = inToRemoveButNotMapping;
+    removed.includeAddresses = true
+    removed.addresses = inToRemoveButNotMapping
 
-    remaining.includeAddresses = false;
-    remaining.addresses = [...inMappingButNotToRemove, ...inToRemoveButNotMapping, ...duplicates];
-  } else if (!addressesToRemove.includeAddresses && !addressMapping.includeAddresses) {
+    remaining.includeAddresses = false
+    remaining.addresses = [
+      ...inMappingButNotToRemove,
+      ...inToRemoveButNotMapping,
+      ...duplicates,
+    ]
+  } else if (
+    !addressesToRemove.includeAddresses &&
+    !addressMapping.includeAddresses
+  ) {
     // Case 4
-    removed.includeAddresses = false;
-    removed.addresses = [...inMappingButNotToRemove, ...inToRemoveButNotMapping, ...duplicates];
+    removed.includeAddresses = false
+    removed.addresses = [
+      ...inMappingButNotToRemove,
+      ...inToRemoveButNotMapping,
+      ...duplicates,
+    ]
 
-    remaining.includeAddresses = true;
-    remaining.addresses = inToRemoveButNotMapping;
+    remaining.includeAddresses = true
+    remaining.addresses = inToRemoveButNotMapping
   }
 
-  return [remaining, removed];
+  return [remaining, removed]
 }
 
 /**
  * @category Address Mappings
  */
 export function isAddressMappingEmpty(mapping: AddressMapping) {
-  return mapping.addresses.length === 0 && mapping.includeAddresses;
+  return mapping.addresses.length === 0 && mapping.includeAddresses
 }
 
 /**
  * @category Address Mappings
  */
 export function invertAddressMapping(mapping: AddressMapping) {
-  mapping.includeAddresses = !mapping.includeAddresses;
-  return mapping;
+  mapping.includeAddresses = !mapping.includeAddresses
+  return mapping
+}
+
+/**
+ * Returns the tracker mapping for a tracker ID mapping. Little different logic because tracker ID mappings can only be reserved IDs (no storage)
+ * and can be nonvalid addresses
+ * @param {string} trackerMappingId - The mapping ID to get the address mapping for
+ *
+ * @category Address Mappings
+ */
+export function getReservedTrackerMapping(trackerMappingId: string) {
+  return getReservedMapping(trackerMappingId, true)
 }
 
 /**
@@ -106,13 +154,25 @@ export function invertAddressMapping(mapping: AddressMapping) {
  *
  * @category Address Mappings
  */
-export function getReservedAddressMapping(addressMappingId: string): AddressMapping {
-  let inverted = false;
-  let addressMapping: AddressMapping | undefined = undefined;
+export function getReservedAddressMapping(
+  addressMappingId: string,
+): AddressMapping {
+  return getReservedMapping(addressMappingId)
+}
 
-  if (addressMappingId[0] === '!') {
-    inverted = true;
-    addressMappingId = addressMappingId.slice(1);
+function getReservedMapping(
+  addressMappingId: string,
+  allowAliases?: boolean,
+): AddressMapping {
+  let inverted = false
+  let addressMapping: AddressMapping | undefined = undefined
+
+  if (addressMappingId[0] === '!' && !addressMappingId.startsWith('!(')) {
+    inverted = true
+    addressMappingId = addressMappingId.slice(1)
+  } else if (addressMappingId.startsWith('!(') && addressMappingId.endsWith(')')) {
+    inverted = true
+    addressMappingId = addressMappingId.slice(2, -1)
   }
 
   if (addressMappingId === 'Mint') {
@@ -123,10 +183,8 @@ export function getReservedAddressMapping(addressMappingId: string): AddressMapp
       uri: '',
       customData: '',
       createdBy: '',
-    };
-  }
-
-  if (addressMappingId.startsWith('AllWithout')) {
+    }
+  } else if (addressMappingId.startsWith('AllWithout')) {
     addressMapping = {
       mappingId: addressMappingId,
       addresses: [],
@@ -134,16 +192,14 @@ export function getReservedAddressMapping(addressMappingId: string): AddressMapp
       uri: '',
       customData: '',
       createdBy: '',
-    };
+    }
 
-    const addresses = addressMappingId.slice(10).split(':');
+    const addresses = addressMappingId.slice(10).split(':')
 
     for (let address of addresses) {
-      addressMapping.addresses.push(address);
+      addressMapping.addresses.push(address)
     }
-  }
-
-  if (addressMappingId === 'AllWithMint' || addressMappingId === 'All') {
+  } else if (addressMappingId === 'AllWithMint' || addressMappingId === 'All') {
     addressMapping = {
       mappingId: addressMappingId,
       addresses: [],
@@ -151,10 +207,8 @@ export function getReservedAddressMapping(addressMappingId: string): AddressMapp
       uri: '',
       customData: '',
       createdBy: '',
-    };
-  }
-
-  if (addressMappingId === 'None') {
+    }
+  } else if (addressMappingId === 'None') {
     addressMapping = {
       mappingId: 'None',
       addresses: [],
@@ -162,36 +216,75 @@ export function getReservedAddressMapping(addressMappingId: string): AddressMapp
       uri: '',
       customData: '',
       createdBy: '',
-    };
-  }
+    }
+  } else {
+    //split by :
+    const addressesToCheck = addressMappingId.split(':')
+    let allAreValid = true
+    //For tracker IDs, we allow aliasses(aka non valid addresses)
+    if (!allowAliases) {
+      for (let address of addressesToCheck) {
+        if (address != 'Mint' && !convertToCosmosAddress(address)) {
+          allAreValid = false
+        }
+      }
+    }
 
-  //split by :
-  const addressesToCheck = addressMappingId.split(':');
-  let allAreValid = true;
-  for (let address of addressesToCheck) {
-    if (address != "Mint" && !convertToCosmosAddress(address)) {
-      allAreValid = false;
+    if (allAreValid) {
+      addressMapping = {
+        mappingId: addressMappingId,
+        addresses: addressesToCheck,
+        includeAddresses: true,
+        uri: '',
+        customData: '',
+        createdBy: '',
+      }
     }
   }
 
-  if (allAreValid) {
-    addressMapping = {
-      mappingId: addressMappingId,
-      addresses: addressesToCheck,
-      includeAddresses: true,
-      uri: '',
-      customData: '',
-      createdBy: '',
-    };
-  }
-
   if (inverted && addressMapping) {
-    addressMapping.includeAddresses = !addressMapping.includeAddresses;
+    addressMapping.includeAddresses = !addressMapping.includeAddresses
   }
 
   if (!addressMapping) {
-    throw new Error(`Invalid address mapping ID: ${addressMappingId}`);
+    throw new Error(`Invalid address mapping ID: ${addressMappingId}`)
   }
 
-  return addressMapping;
+  return addressMapping
+}
+
+/**
+ * Generates a mapping ID for a given address mapping.
+ *
+ * @param {AddressMapping} addressMapping - The address mapping to generate the ID for
+ *
+ * @category Address Mappings
+ */
+export const generateReservedMappingId = (
+  addressMapping: AddressMapping,
+): string => {
+  let mappingId = ''
+
+  // Logic to determine the mappingId based on the properties of addressMapping
+  if (addressMapping.includeAddresses) {
+    if (addressMapping.addresses.length > 0) {
+      const addresses = addressMapping.addresses
+        .map((x) => (isAddressValid(x) ? convertToCosmosAddress(x) : x))
+        .join(':')
+      mappingId = `${addresses}`
+    } else {
+      mappingId = 'None'
+    }
+  } else {
+    if (addressMapping.addresses.length > 0) {
+      const addresses = addressMapping.addresses
+        .map((x) => (isAddressValid(x) ? convertToCosmosAddress(x) : x))
+        .join(':')
+      mappingId = `!(${addresses})`
+    } else {
+      mappingId = 'All'
+    }
+  }
+
+  return mappingId
 }

@@ -1,5 +1,5 @@
 import { AddressMapping, NumberType, UserIncomingApproval, UserOutgoingApproval, convertIncomingApprovalCriteria, convertOutgoingApprovalCriteria, convertUserIncomingApproval, convertUserOutgoingApproval } from "bitbadgesjs-proto"
-import { AnnouncementDoc, ReviewDoc, TransferActivityDoc, convertAnnouncementDoc, convertReviewDoc, convertTransferActivityDoc } from "./activity"
+import { AnnouncementDoc, ListActivityDoc, ReviewDoc, TransferActivityDoc, convertAnnouncementDoc, convertListActivityDoc, convertReviewDoc, convertTransferActivityDoc } from "./activity"
 import { PaginationInfo } from "./api"
 import { AccountInfoBase, ApprovalsTrackerDoc, BalanceDocWithDetails, BlockinAuthSignatureDoc, ClaimAlertDoc, MerkleChallengeDoc, ProfileInfoBase, convertAccountDoc, convertApprovalsTrackerDoc, convertBalanceDocWithDetails, convertBlockinAuthSignatureDoc, convertClaimAlertDoc, convertMerkleChallengeDoc, convertProfileDoc } from "./db"
 import { AddressMappingWithMetadata, convertAddressMappingWithMetadata } from "./metadata"
@@ -83,6 +83,8 @@ export function convertUserIncomingApprovalWithDetails<T extends NumberType, U e
  *
  * @property {Object.<string, { ids: string[], type: string, pagination: PaginationInfo }>} views - The views for this collection and their pagination Doc. Views will only include the doc _ids. Use the pagination to fetch more. To be used in conjunction with activity, announcements, reviews, owners, merkleChallenges, and approvalsTrackers. For example, if you want to fetch the activity for a view, you would use the view's pagination to fetch the doc _ids, then use the corresponding activity array to find the matching docs.
  *
+ * @property {Object} alias - Returns whether this account is an alias for a collection or mapping.
+ *
  * @remarks
  * Note that returned user Docs will only fetch what is requested. It is your responsibility to join the data together (paginations, etc).
  * See documentation for helper functions, examples, and tutorials on handling this data and paginations.
@@ -101,6 +103,7 @@ export interface BitBadgesUserInfo<T extends NumberType> extends ProfileInfoBase
   //Dynamically loaded as needed
   collected: BalanceDocWithDetails<T>[],
   activity: TransferActivityDoc<T>[],
+  listsActivity: ListActivityDoc<T>[],
   announcements: AnnouncementDoc<T>[],
   reviews: ReviewDoc<T>[],
   merkleChallenges: MerkleChallengeDoc<T>[],
@@ -113,11 +116,16 @@ export interface BitBadgesUserInfo<T extends NumberType> extends ProfileInfoBase
   reported?: { reason: string };
 
   views: {
-    [viewKey: string]: {
+    [viewId: string]: {
       ids: string[],
       type: string,
       pagination: PaginationInfo,
     } | undefined
+  }
+
+  alias?: {
+    collectionId?: T,
+    mappingId?: string
   }
 }
 
@@ -130,6 +138,7 @@ export function convertBitBadgesUserInfo<T extends NumberType, U extends NumberT
       _legacyId: '',
       cosmosAddress: item.cosmosAddress,
       ethAddress: item.ethAddress,
+      btcAddress: item.btcAddress,
       solAddress: item.solAddress,
       accountNumber: item.accountNumber,
       sequence: item.sequence,
@@ -145,6 +154,7 @@ export function convertBitBadgesUserInfo<T extends NumberType, U extends NumberT
     airdropped: item.airdropped,
     collected: item.collected.map((balance) => convertBalanceDocWithDetails(balance, convertFunction)),
     activity: item.activity.map((activityItem) => convertTransferActivityDoc(activityItem, convertFunction)),
+    listsActivity: item.listsActivity.map((activityItem) => convertListActivityDoc(activityItem, convertFunction)),
     announcements: item.announcements.map((activityItem) => convertAnnouncementDoc(activityItem, convertFunction)),
     reviews: item.reviews.map((activityItem) => convertReviewDoc(activityItem, convertFunction)),
     merkleChallenges: item.merkleChallenges.map((challenge) => convertMerkleChallengeDoc(challenge, convertFunction)),
@@ -152,6 +162,10 @@ export function convertBitBadgesUserInfo<T extends NumberType, U extends NumberT
     addressMappings: item.addressMappings.map((mapping) => convertAddressMappingWithMetadata(mapping, convertFunction)),
     claimAlerts: item.claimAlerts.map((alert) => convertClaimAlertDoc(alert, convertFunction)),
     authCodes: item.authCodes.map((code) => convertBlockinAuthSignatureDoc(code, convertFunction)),
+    alias: item.alias ? {
+      collectionId: item.alias.collectionId ? convertFunction(item.alias.collectionId) : undefined,
+      mappingId: item.alias.mappingId,
+    } : undefined,
     views: item.views,
     _rev: undefined,
     _deleted: undefined,
