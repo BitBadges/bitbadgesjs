@@ -95,9 +95,7 @@ export interface BitBadgesUserInfo<T extends NumberType> extends ProfileInfoBase
   resolvedName?: string
   avatar?: string
   solAddress: string
-
   airdropped?: boolean
-
   address: string
 
   //Dynamically loaded as needed

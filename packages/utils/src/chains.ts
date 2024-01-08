@@ -1,4 +1,4 @@
-import { btcToCosmos, cosmosToEth, ethToCosmos, solanaToCosmos } from "./converter";
+import { btcToCosmos, cosmosToBtc, cosmosToEth, ethToCosmos, solanaToCosmos } from "./converter";
 import { Stringify } from "bitbadgesjs-proto";
 import { ethers } from "ethers";
 import { SupportedChain } from "./types/types";
@@ -86,6 +86,75 @@ export function convertToCosmosAddress(address: string) {
       bech32Address = btcToCosmos(address);
     }
   }
+
+  return bech32Address;
+}
+
+
+/**
+ * Converts an address from a supported chain to a cosmos address. Throws when cannot convert.
+ *
+ * @param {string} address - The address to convert
+ */
+export function mustConvertToCosmosAddress(address: string) {
+  let bech32Address = convertToCosmosAddress(address);
+  if (!bech32Address) throw new Error("Could not convert. Please make sure inputted address is well-formed")
+
+
+  return bech32Address;
+}
+
+/**
+ * Converts an address from a supported chain to a Ethereum address. Throws when cannot convert.
+ *
+ * @param {string} address - The address to convert
+ */
+export function mustConvertToEthAddress(address: string) {
+  let bech32Address = convertToEthAddress(address);
+  if (!bech32Address) throw new Error("Could not convert. Please make sure inputted address is well-formed")
+
+  return bech32Address;
+}
+
+/**
+ * Converts an address from a supported chain to a Bitcoin address. Throws when cannot convert.
+ *
+ * @param {string} address - The address to convert
+ */
+export function mustConvertToBtcAddress(address: string) {
+  let bech32Address = convertToBtcAddress(address);
+  if (!bech32Address) throw new Error("Could not convert. Please make sure inputted address is well-formed")
+
+  return bech32Address;
+}
+
+/**
+ * Converts an address from a supported chain to an Ethereum address
+ * If we are unable to convert the address, we return an empty string
+ *
+ * @param {string} address - The address to convert
+ */
+export function convertToEthAddress(address: string) {
+  let bech32Address = '';
+  try {
+    bech32Address = cosmosToEth(convertToCosmosAddress(address));
+  } catch { }
+
+  return bech32Address;
+}
+
+
+/**
+ * Converts an address from a supported chain to a Bitcoin address
+ * If we are unable to convert the address, we return an empty string
+ *
+ * @param {string} address - The address to convert
+ */
+export function convertToBtcAddress(address: string) {
+  let bech32Address = '';
+  try {
+    bech32Address = cosmosToBtc(convertToCosmosAddress(address));
+  } catch { }
 
   return bech32Address;
 }

@@ -1,5 +1,7 @@
-import { UserBalanceStore, convertUserBalanceStore, AddressMapping, AmountTrackerIdDetails, BadgeMetadataTimeline, Balance, CollectionApproval, CollectionMetadataTimeline, CollectionPermissions, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, MerkleChallenge, OffChainBalancesMetadataTimeline, StandardsTimeline,
-  UintRange, UserBalance, convertBadgeMetadataTimeline, convertBalance, convertCollectionApproval, convertCollectionMetadataTimeline, convertCollectionPermissions, convertCustomDataTimeline, convertIsArchivedTimeline, convertManagerTimeline, convertMerkleChallenge, convertOffChainBalancesMetadataTimeline, convertStandardsTimeline, convertUintRange, convertUserBalance, convertUserIncomingApproval, convertUserOutgoingApproval, Protocol } from "bitbadgesjs-proto";
+import {
+  UserBalanceStore, convertUserBalanceStore, AddressMapping, AmountTrackerIdDetails, BadgeMetadataTimeline, Balance, CollectionApproval, CollectionMetadataTimeline, CollectionPermissions, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, MerkleChallenge, OffChainBalancesMetadataTimeline, StandardsTimeline,
+  UintRange, UserBalance, convertBadgeMetadataTimeline, convertBalance, convertCollectionApproval, convertCollectionMetadataTimeline, convertCollectionPermissions, convertCustomDataTimeline, convertIsArchivedTimeline, convertManagerTimeline, convertMerkleChallenge, convertOffChainBalancesMetadataTimeline, convertStandardsTimeline, convertUintRange, convertUserBalance, convertUserIncomingApproval, convertUserOutgoingApproval, Protocol
+} from "bitbadgesjs-proto";
 import { ChallengeParams, convertChallengeParams } from "blockin";
 import MerkleTree from "merkletreejs";
 import { Options as MerkleTreeJsOptions } from "merkletreejs/dist/MerkleTree";
