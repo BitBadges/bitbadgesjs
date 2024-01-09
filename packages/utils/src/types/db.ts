@@ -1,11 +1,17 @@
 import {
-  UserBalanceStore, convertUserBalanceStore, AddressMapping, AmountTrackerIdDetails, BadgeMetadataTimeline, Balance, CollectionApproval, CollectionMetadataTimeline, CollectionPermissions, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, MerkleChallenge, OffChainBalancesMetadataTimeline, StandardsTimeline,
-  UintRange, UserBalance, convertBadgeMetadataTimeline, convertBalance, convertCollectionApproval, convertCollectionMetadataTimeline, convertCollectionPermissions, convertCustomDataTimeline, convertIsArchivedTimeline, convertManagerTimeline, convertMerkleChallenge, convertOffChainBalancesMetadataTimeline, convertStandardsTimeline, convertUintRange, convertUserBalance, convertUserIncomingApproval, convertUserOutgoingApproval, Protocol
+  AddressList, AmountTrackerIdDetails, BadgeMetadataTimeline, Balance, CollectionApproval, CollectionMetadataTimeline, CollectionPermissions, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, MerkleChallenge, OffChainBalancesMetadataTimeline,
+  Protocol,
+  StandardsTimeline,
+  UintRange,
+  UserBalanceStore,
+  convertBadgeMetadataTimeline, convertBalance, convertCollectionApproval, convertCollectionMetadataTimeline, convertCollectionPermissions, convertCustomDataTimeline, convertIsArchivedTimeline, convertManagerTimeline, convertMerkleChallenge, convertOffChainBalancesMetadataTimeline, convertStandardsTimeline, convertUintRange, convertUserBalanceStore,
+  convertUserIncomingApproval, convertUserOutgoingApproval
 } from "bitbadgesjs-proto";
 import { ChallengeParams, convertChallengeParams } from "blockin";
 import MerkleTree from "merkletreejs";
 import { Options as MerkleTreeJsOptions } from "merkletreejs/dist/MerkleTree";
 import mongoose from "mongoose";
+import { BatchBadgeDetails } from "src/batch-utils";
 import { CosmosCoin, convertCosmosCoin } from "./coin";
 import { UserPermissionsWithDetails, convertUserPermissionsWithDetails } from "./collections";
 import { DocsCache } from "./indexer";
@@ -15,6 +21,14 @@ import { OffChainBalancesMap, convertOffChainBalancesMap } from "./transfers";
 import { SupportedChain } from "./types";
 import { UserIncomingApprovalWithDetails, UserOutgoingApprovalWithDetails, convertUserIncomingApprovalWithDetails, convertUserOutgoingApprovalWithDetails } from "./users";
 import { deepCopy } from "./utils";
+
+export interface Doc {
+  //A unique stringified document ID
+  _docId: string,
+
+  //A uniuqe document ID (Mongo DB ObjectID compatible)
+  _id?: string
+}
 
 
 /**
@@ -66,7 +80,7 @@ export interface CollectionInfoBase<T extends NumberType> {
 /**
  * @category API / Indexer
  */
-export type CollectionDoc<T extends NumberType> = CollectionInfoBase<T> & { _legacyId: string, _id?: string };
+export type CollectionDoc<T extends NumberType> = CollectionInfoBase<T> & Doc;
 
 /**
  * @category API / Indexer
@@ -136,7 +150,7 @@ export interface AccountInfoBase<T extends NumberType> {
 /**
  * @category API / Indexer
  */
-export type AccountDoc<T extends NumberType> = AccountInfoBase<T> & { _legacyId: string, _id?: string };
+export type AccountDoc<T extends NumberType> = AccountInfoBase<T> & Doc;
 
 /**
  * @category API / Indexer
@@ -169,19 +183,17 @@ export interface CustomLink {
 export interface CustomPage<T extends NumberType> {
   title: string,
   description: string,
-  badges: {
-    collectionId: T,
-    badgeIds: UintRange<T>[],
-  }[]
+  items: BatchBadgeDetails<T>[]
 }
 
+export type AddressListId = string;
 /**
- * CustomListPage is a custom list page that can be added to a profile.
+ * CustomListPage is a custom list page that can be added to a profile. The items are valid list IDs.
  */
 export interface CustomListPage {
   title: string,
   description: string,
-  mappingIds: string[],
+  items: AddressListId[],
 }
 
 
@@ -238,17 +250,18 @@ export interface ProfileInfoBase<T extends NumberType> {
 
   customLinks?: CustomLink[]
 
-  hiddenBadges?: {
-    collectionId: T,
-    badgeIds: UintRange<T>[],
-  }[],
+  hiddenBadges?: BatchBadgeDetails<T>[],
   hiddenLists?: string[];
 
-  customListPages?: CustomListPage[],
-  customPages?: CustomPage<T>[],
+  customPages?: {
+    badges: CustomPage<T>[],
+    lists: CustomListPage[],
+  }
 
-  watchedBadgePages?: CustomPage<T>[],
-  watchedListPages?: CustomListPage[],
+  watchlists?: {
+    badges: CustomPage<T>[],
+    lists: CustomListPage[],
+  }
 
   profilePicUrl?: string
   username?: string
@@ -261,7 +274,7 @@ export interface ProfileInfoBase<T extends NumberType> {
 /**
  * @category API / Indexer
  */
-export type ProfileDoc<T extends NumberType> = ProfileInfoBase<T> & { _legacyId: string, _id?: string }
+export type ProfileDoc<T extends NumberType> = ProfileInfoBase<T> & Doc
 
 
 /**
@@ -276,23 +289,36 @@ export function convertProfileDoc<T extends NumberType, U extends NumberType>(it
       collectionId: convertFunction(hiddenBadge.collectionId),
       badgeIds: hiddenBadge.badgeIds.map((badgeId) => convertUintRange(badgeId, convertFunction)),
     })) : undefined,
-    customPages: item.customPages ? item.customPages.map((customPage) => ({
-      title: customPage.title,
-      description: customPage.description,
-      badges: customPage.badges.map((badge) => ({
-        collectionId: convertFunction(badge.collectionId),
-        badgeIds: badge.badgeIds.map((badgeId) => convertUintRange(badgeId, convertFunction)),
+    customPages: item.customPages ? {
+      badges: item.customPages.badges.map((customPage) => ({
+        title: customPage.title,
+        description: customPage.description,
+        items: customPage.items.map((badge) => ({
+          collectionId: convertFunction(badge.collectionId),
+          badgeIds: badge.badgeIds.map((badgeId) => convertUintRange(badgeId, convertFunction)),
+        })),
       })),
-    })) : undefined,
-    watchedBadgePages: item.watchedBadgePages ? item.watchedBadgePages.map((watchedBadgePage) => ({
-      title: watchedBadgePage.title,
-      description: watchedBadgePage.description,
-      badges: watchedBadgePage.badges.map((badge) => ({
-        collectionId: convertFunction(badge.collectionId),
-        badgeIds: badge.badgeIds.map((badgeId) => convertUintRange(badgeId, convertFunction)),
+      lists: item.customPages.lists.map((customPage) => ({
+        title: customPage.title,
+        description: customPage.description,
+        items: customPage.items,
       })),
-    })) : undefined,
-
+    } : undefined,
+    watchlists: item.watchlists ? {
+      badges: item.watchlists.badges.map((customPage) => ({
+        title: customPage.title,
+        description: customPage.description,
+        items: customPage.items.map((badge) => ({
+          collectionId: convertFunction(badge.collectionId),
+          badgeIds: badge.badgeIds.map((badgeId) => convertUintRange(badgeId, convertFunction)),
+        })),
+      })),
+      lists: item.watchlists.lists.map((customPage) => ({
+        title: customPage.title,
+        description: customPage.description,
+        items: customPage.items,
+      })),
+    } : undefined,
   })
 }
 
@@ -331,7 +357,7 @@ export interface QueueInfoBase<T extends NumberType> {
 /**
  * @category API / Indexer
  */
-export type QueueDoc<T extends NumberType> = QueueInfoBase<T> & { _legacyId: string, _id?: string }
+export type QueueDoc<T extends NumberType> = QueueInfoBase<T> & Doc
 
 /**
  * @category API / Indexer
@@ -394,10 +420,11 @@ export interface StatusInfoBase<T extends NumberType> {
   lastXGasLimits: T[];
   lastXGasAmounts: T[];
 }
+
 /**
  * @category API / Indexer
  */
-export type StatusDoc<T extends NumberType> = StatusInfoBase<T> & { _legacyId: string, _id?: string }
+export type StatusDoc<T extends NumberType> = StatusInfoBase<T> & Doc
 
 /**
  * @category API / Indexer
@@ -414,18 +441,18 @@ export function convertStatusDoc<T extends NumberType, U extends NumberType>(ite
 
 
 /**
- * An edit key is a feature for off-chain address mappings that allows users to create a key that can be used to edit the address mapping.
- * For example, surveys can be created that allow users to edit their address mapping.
+ * An edit key is a feature for off-chain address lists that allows users to create a key that can be used to edit the address list.
+ * For example, surveys can be created that allow users to edit their address list.
  *
  * Each use can add one address to the list.
  *
- * @param {string} key - The key that can be used to edit the address mapping
+ * @param {string} key - The key that can be used to edit the address list
  * @param {NumberType} expirationDate - The expiration date of the key (milliseconds since epoch)
  * @param {boolean} [mustSignIn] - True if the user can only add their signed in address to the list
  *
  * @category API / Indexer
  */
-export interface AddressMappingEditKey<T extends NumberType> {
+export interface AddressListEditKey<T extends NumberType> {
   key: string;
   expirationDate: T
   mustSignIn?: boolean
@@ -434,8 +461,8 @@ export interface AddressMappingEditKey<T extends NumberType> {
 /**
  * @category API / Indexer
  */
-export interface AddressMappingEditKeyDoc<T extends NumberType> extends AddressMappingEditKey<T> {
-  _legacyId: string;
+export interface AddressListEditKeyDoc<T extends NumberType> extends AddressListEditKey<T> {
+  _docId: string;
   _rev?: undefined;
   _deleted?: undefined;
 }
@@ -443,7 +470,7 @@ export interface AddressMappingEditKeyDoc<T extends NumberType> extends AddressM
 /**
  * @category API / Indexer
  */
-export function convertAddressMappingEditKey<T extends NumberType, U extends NumberType>(item: AddressMappingEditKey<T>, convertFunction: (item: T) => U): AddressMappingEditKey<U> {
+export function convertAddressListEditKey<T extends NumberType, U extends NumberType>(item: AddressListEditKey<T>, convertFunction: (item: T) => U): AddressListEditKey<U> {
   return deepCopy({
     ...item,
     expirationDate: convertFunction(item.expirationDate),
@@ -452,23 +479,23 @@ export function convertAddressMappingEditKey<T extends NumberType, U extends Num
 
 
 /**
- * AddressMapping is the type of document stored in the address mappings database.
+ * AddressList is the type of document stored in the address lists database.
  *
- * Docs are stored by mapping IDs. Note that reserved mappings should be obtained from getReservedAddressMapping.
+ * Docs are stored by list IDs. Note that reserved lists should be obtained from getReservedAddressList.
  *
  * @category API / Indexer
- * @typedef {Object} AddressMapping
+ * @typedef {Object} AddressList
  *
- * @property {string} createdBy - The cosmos address of the user who created this mapping
- * @property {Object[]} updateHistory - The update history of this mapping
- * @property {NumberType} createdBlock - The block number when this mapping was created
- * @property {NumberType} lastUpdated - The timestamp of when this mapping was last updated (milliseconds since epoch)
- * @property {Object} [nsfw] - The NSFW reason if this mapping is NSFW
- * @property {Object} [reported] - The reported reason if this mapping is reported
- * @property {boolean} private - True if this mapping is private and will not show up in search results
- * @property {AddressMappingEditKey[]} [editKeys] - The edit keys of this mapping
+ * @property {string} createdBy - The cosmos address of the user who created this list
+ * @property {Object[]} updateHistory - The update history of this list
+ * @property {NumberType} createdBlock - The block number when this list was created
+ * @property {NumberType} lastUpdated - The timestamp of when this list was last updated (milliseconds since epoch)
+ * @property {Object} [nsfw] - The NSFW reason if this list is NSFW
+ * @property {Object} [reported] - The reported reason if this list is reported
+ * @property {boolean} private - True if this list is private and will not show up in search results
+ * @property {AddressListEditKey[]} [editKeys] - The edit keys of this list
  */
-export interface AddressMappingInfoBase<T extends NumberType> extends AddressMapping {
+export interface AddressListInfoBase<T extends NumberType> extends AddressList {
   createdBy: string
   updateHistory: {
     txHash: string;
@@ -479,7 +506,7 @@ export interface AddressMappingInfoBase<T extends NumberType> extends AddressMap
   lastUpdated: T
 
   private?: boolean
-  editKeys?: AddressMappingEditKey<T>[];
+  editKeys?: AddressListEditKey<T>[];
 
   nsfw?: { reason: string };
   reported?: { reason: string };
@@ -489,7 +516,7 @@ export interface AddressMappingInfoBase<T extends NumberType> extends AddressMap
 /**
  * @category API / Indexer
  */
-export function convertAddressMappingInfoBase<T extends NumberType, U extends NumberType>(item: AddressMappingInfoBase<T>, convertFunction: (item: T) => U): AddressMappingInfoBase<U> {
+export function convertAddressListInfoBase<T extends NumberType, U extends NumberType>(item: AddressListInfoBase<T>, convertFunction: (item: T) => U): AddressListInfoBase<U> {
   return deepCopy({
     ...item,
     updateHistory: item.updateHistory.map((updateHistory) => ({
@@ -499,7 +526,7 @@ export function convertAddressMappingInfoBase<T extends NumberType, U extends Nu
     })),
     createdBlock: convertFunction(item.createdBlock),
     lastUpdated: convertFunction(item.lastUpdated),
-    editKeys: item.editKeys ? item.editKeys.map((editKey) => convertAddressMappingEditKey(editKey, convertFunction)) : undefined,
+    editKeys: item.editKeys ? item.editKeys.map((editKey) => convertAddressListEditKey(editKey, convertFunction)) : undefined,
   })
 }
 
@@ -507,11 +534,11 @@ export function convertAddressMappingInfoBase<T extends NumberType, U extends Nu
 /**
  * @category API / Indexer
  */
-export type AddressMappingDoc<T extends NumberType> = AddressMappingInfoBase<T> & { _legacyId: string, _id?: string }
+export type AddressListDoc<T extends NumberType> = AddressListInfoBase<T> & Doc
 /**
  * @category API / Indexer
  */
-export function convertAddressMappingDoc<T extends NumberType, U extends NumberType>(item: AddressMappingDoc<T>, convertFunction: (item: T) => U): AddressMappingDoc<U> {
+export function convertAddressListDoc<T extends NumberType, U extends NumberType>(item: AddressListDoc<T>, convertFunction: (item: T) => U): AddressListDoc<U> {
   return deepCopy({
     ...item,
     updateHistory: item.updateHistory.map((updateHistory) => ({
@@ -521,7 +548,7 @@ export function convertAddressMappingDoc<T extends NumberType, U extends NumberT
     })),
     createdBlock: convertFunction(item.createdBlock),
     lastUpdated: convertFunction(item.lastUpdated),
-    editKeys: item.editKeys ? item.editKeys.map((editKey) => convertAddressMappingEditKey(editKey, convertFunction)) : undefined,
+    editKeys: item.editKeys ? item.editKeys.map((editKey) => convertAddressListEditKey(editKey, convertFunction)) : undefined,
   })
 }
 
@@ -545,7 +572,7 @@ export function convertAddressMappingDoc<T extends NumberType, U extends NumberT
  *
  * @property {Object[]} updateHistory - The update history of this balance
  */
-export interface BalanceInfoBase<T extends NumberType> extends UserBalance<T> {
+export interface BalanceInfoBase<T extends NumberType> extends UserBalanceStore<T> {
 
   collectionId: T;
   cosmosAddress: string;
@@ -567,7 +594,7 @@ export interface BalanceInfoBase<T extends NumberType> extends UserBalance<T> {
 /**
  * @category API / Indexer
  */
-export type BalanceDoc<T extends NumberType> = BalanceInfoBase<T> & { _legacyId: string, _id?: string }
+export type BalanceDoc<T extends NumberType> = BalanceInfoBase<T> & Doc
 
 /**
  * @category API / Indexer
@@ -575,7 +602,7 @@ export type BalanceDoc<T extends NumberType> = BalanceInfoBase<T> & { _legacyId:
 export function convertBalanceDoc<T extends NumberType, U extends NumberType>(item: BalanceDoc<T>, convertFunction: (item: T) => U): BalanceDoc<U> {
   return deepCopy({
     ...item,
-    ...convertUserBalance(item, convertFunction),
+    ...convertUserBalanceStore(item, convertFunction),
     incomingApprovals: item.incomingApprovals.map(x => convertUserIncomingApproval(x, convertFunction)),
     outgoingApprovals: item.outgoingApprovals.map(x => convertUserOutgoingApproval(x, convertFunction)),
     collectionId: convertFunction(item.collectionId),
@@ -595,9 +622,9 @@ export function convertBalanceDoc<T extends NumberType, U extends NumberType>(it
  * @typedef {Object} BalanceDocWithDetails
  * @extends {BalanceInfo}
  *
- * @property {UserOutgoingApprovalWithDetails[]} outgoingApprovals - The outgoing approvals with details like metadata and address mappings
- * @property {UserIncomingApprovalWithDetails[]} incomingApprovals - The incoming approvals with details like metadata and address mappings
- * @property {UserPermissionsWithDetails} userPermissions - The user permissions with details like metadata and address mappings
+ * @property {UserOutgoingApprovalWithDetails[]} outgoingApprovals - The outgoing approvals with details like metadata and address lists
+ * @property {UserIncomingApprovalWithDetails[]} incomingApprovals - The incoming approvals with details like metadata and address lists
+ * @property {UserPermissionsWithDetails} userPermissions - The user permissions with details like metadata and address lists
  */
 export interface BalanceDocWithDetails<T extends NumberType> extends BalanceDoc<T> {
   outgoingApprovals: UserOutgoingApprovalWithDetails<T>[];
@@ -646,7 +673,7 @@ export interface PasswordInfoBase<T extends NumberType> {
 /**
  * @category API / Indexer
  */
-export type PasswordDoc<T extends NumberType> = PasswordInfoBase<T> & { _legacyId: string, _id?: string }
+export type PasswordDoc<T extends NumberType> = PasswordInfoBase<T> & Doc
 
 /**
  * @category API / Indexer
@@ -685,7 +712,7 @@ export interface ClaimAlertInfoBase<T extends NumberType> {
 /**
  * @category API / Indexer
  */
-export type ClaimAlertDoc<T extends NumberType> = ClaimAlertInfoBase<T> & { _legacyId: string, _id?: string }
+export type ClaimAlertDoc<T extends NumberType> = ClaimAlertInfoBase<T> & Doc
 
 /**
  * @category API / Indexer
@@ -707,7 +734,7 @@ export function convertClaimAlertDoc<T extends NumberType, U extends NumberType>
  * If the leaves are not hashed, then the value entered by the user will be checked directly against the provided leaf values.
  *
  * IMPORTANT: The leaf values here are to be publicly stored on IPFS, so they should not contain any sensitive information (i.e. codes, passwords, etc.)
- * Only use this with the non-hashed option when the values do not contain any sensitive information (i.e. a public whitelist of addresses).
+ * Only use this with the non-hashed option when the values do not contain any sensitive information (i.e. a public allowlist of addresses).
  *
  * @example Codes
  * 1. Generate N codes privately
@@ -715,9 +742,9 @@ export function convertClaimAlertDoc<T extends NumberType, U extends NumberType>
  * 3. Store the hashed codes publicly on IPFS via this struct
  * 4. When a user enters a code, we hash it and check if it matches any of the hashed codes. This way, the codes are never stored publicly on IPFS and only known by the generator of the codes.
  *
- * @example Whitelist
- * For storing a public whitelist of addresses (with useCreatorAddressAsLeaf = true), hashing complicates everything because the whitelist can be stored publicly.
- * 1. Generate N whitelist addresses
+ * @example Allowlist
+ * For storing a public allowlist of addresses (with useCreatorAddressAsLeaf = true), hashing complicates everything because the allowlist can be stored publicly.
+ * 1. Generate N allowlist addresses
  * 2. Store the addresses publicly on IPFS via this struct
  * 3. When a user enters an address, we check if it matches any of the addresses.
  *
@@ -777,14 +804,14 @@ export function convertChallengeDetails<T extends NumberType, U extends NumberTy
 }
 
 /**
- * ApprovalsTrackerInfoBase is the type of document stored in the approvals tracker database
+ * ApprovalTrackerInfoBase is the type of document stored in the approvals tracker database
  *
  * @category API / Indexer
- * @typedef {Object} ApprovalsTrackerInfoBase
+ * @typedef {Object} ApprovalTrackerInfoBase
  * @property {NumberType} numTransfers - The number of transfers. Is an incrementing tally.
  * @property {Balance[]} amounts - A tally of the amounts transferred for this approval.
  */
-export interface ApprovalsTrackerInfoBase<T extends NumberType> extends AmountTrackerIdDetails<T> {
+export interface ApprovalTrackerInfoBase<T extends NumberType> extends AmountTrackerIdDetails<T> {
   numTransfers: T;
   amounts: Balance<T>[];
 }
@@ -792,12 +819,12 @@ export interface ApprovalsTrackerInfoBase<T extends NumberType> extends AmountTr
 /**
  * @category API / Indexer
  */
-export type ApprovalsTrackerDoc<T extends NumberType> = ApprovalsTrackerInfoBase<T> & { _legacyId: string, _id?: string }
+export type ApprovalTrackerDoc<T extends NumberType> = ApprovalTrackerInfoBase<T> & Doc
 
 /**
  * @category API / Indexer
  */
-export function convertApprovalsTrackerDoc<T extends NumberType, U extends NumberType>(item: ApprovalsTrackerDoc<T>, convertFunction: (item: T) => U): ApprovalsTrackerDoc<U> {
+export function convertApprovalTrackerDoc<T extends NumberType, U extends NumberType>(item: ApprovalTrackerDoc<T>, convertFunction: (item: T) => U): ApprovalTrackerDoc<U> {
   return deepCopy({
     ...item,
     collectionId: convertFunction(item.collectionId),
@@ -858,7 +885,7 @@ export interface MerkleChallengeInfoBase<T extends NumberType> {
 /**
  * @category API / Indexer
  */
-export type MerkleChallengeDoc<T extends NumberType> = MerkleChallengeInfoBase<T> & { _legacyId: string, _id?: string }
+export type MerkleChallengeDoc<T extends NumberType> = MerkleChallengeInfoBase<T> & Doc
 
 /**
  * @category API / Indexer
@@ -979,7 +1006,7 @@ export interface FetchInfoBase<T extends NumberType> {
 /**
  * @category API / Indexer
  */
-export type FetchDoc<T extends NumberType> = FetchInfoBase<T> & { _legacyId: string, _id?: string }
+export type FetchDoc<T extends NumberType> = FetchInfoBase<T> & Doc
 
 /**
  * @category API / Indexer
@@ -1007,7 +1034,7 @@ export interface RefreshInfoBase<T extends NumberType> {
 /**
  * @category API / Indexer
  */
-export type RefreshDoc<T extends NumberType> = RefreshInfoBase<T> & { _legacyId: string, _id?: string }
+export type RefreshDoc<T extends NumberType> = RefreshInfoBase<T> & Doc
 
 /**
  * @category API / Indexer
@@ -1024,7 +1051,7 @@ export function convertRefreshDoc<T extends NumberType, U extends NumberType>(it
  * @category API / Indexer
  */
 export interface ErrorDoc {
-  _legacyId: string,
+  _docId: string,
   _id?: string,
   error: string,
   function: string,
@@ -1047,7 +1074,7 @@ export interface AirdropInfoBase<T extends NumberType> {
 /**
  * @category API / Indexer
  */
-export type AirdropDoc<T extends NumberType> = AirdropInfoBase<T> & { _legacyId: string, _id?: string }
+export type AirdropDoc<T extends NumberType> = AirdropInfoBase<T> & Doc
 
 /**
  * @category API / Indexer
@@ -1071,7 +1098,7 @@ export interface IPFSTotalsInfoBase<T extends NumberType> {
 /**
  * @category API / Indexer
  */
-export type IPFSTotalsDoc<T extends NumberType> = IPFSTotalsInfoBase<T> & { _legacyId: string, _id?: string }
+export type IPFSTotalsDoc<T extends NumberType> = IPFSTotalsInfoBase<T> & Doc
 
 /**
  * @category API / Indexer
@@ -1088,7 +1115,7 @@ export function convertIPFSTotalsDoc<T extends NumberType, U extends NumberType>
  *
  * @typedef {Object} ComplianceInfoBase
  * @property {Object} badges - The badges that are NSFW or reported
- * @property {Object} addressMappings - The address mappings that are NSFW or reported
+ * @property {Object} addressLists - The address lists that are NSFW or reported
  * @property {Object} accounts - The accounts that are NSFW or reported
  *
  */
@@ -1097,9 +1124,9 @@ export interface ComplianceInfoBase<T extends NumberType> {
     nsfw: { collectionId: T; badgeIds: UintRange<T>[], reason: string }[];
     reported: { collectionId: T; badgeIds: UintRange<T>[], reason: string }[];
   },
-  addressMappings: {
-    nsfw: { mappingId: string; reason: string }[];
-    reported: { mappingId: string; reason: string }[];
+  addressLists: {
+    nsfw: { listId: AddressListId; reason: string }[];
+    reported: { listId: AddressListId; reason: string }[];
   },
   accounts: {
     nsfw: { cosmosAddress: string; reason: string }[];
@@ -1110,7 +1137,7 @@ export interface ComplianceInfoBase<T extends NumberType> {
 /**
  * @category API / Indexer
  */
-export type ComplianceDoc<T extends NumberType> = ComplianceInfoBase<T> & { _legacyId: string, _id?: string }
+export type ComplianceDoc<T extends NumberType> = ComplianceInfoBase<T> & Doc
 
 /**
  * @category API / Indexer
@@ -1144,7 +1171,7 @@ export interface BlockinAuthSignatureInfoBase<T extends NumberType> {
 /**
  * @category API / Indexer
  */
-export type BlockinAuthSignatureDoc<T extends NumberType> = BlockinAuthSignatureInfoBase<T> & { _legacyId: string, _id?: string }
+export type BlockinAuthSignatureDoc<T extends NumberType> = BlockinAuthSignatureInfoBase<T> & Doc
 
 /**
  * @category API / Indexer
@@ -1177,7 +1204,7 @@ export interface FollowDetailsInfoBase<T extends NumberType> {
 /**
  * @category API / Indexer
  */
-export type FollowDetailsDoc<T extends NumberType> = FollowDetailsInfoBase<T> & { _legacyId: string, _id?: string }
+export type FollowDetailsDoc<T extends NumberType> = FollowDetailsInfoBase<T> & Doc
 
 /**
  * @category API / Indexer
@@ -1199,7 +1226,7 @@ export interface ProtocolInfoBase<T extends NumberType> extends Protocol {
 /**
  * @category API / Indexer
  */
-export type ProtocolDoc<T extends NumberType> = ProtocolInfoBase<T> & { _legacyId: string, _id?: string }
+export type ProtocolDoc<T extends NumberType> = ProtocolInfoBase<T> & Doc
 
 /**
  * @category API / Indexer
@@ -1222,7 +1249,7 @@ export interface UserProtocolCollectionsInfoBase<T extends NumberType> {
 /**
  * @category API / Indexer
  */
-export type UserProtocolCollectionsDoc<T extends NumberType> = UserProtocolCollectionsInfoBase<T> & { _legacyId: string, _id?: string }
+export type UserProtocolCollectionsDoc<T extends NumberType> = UserProtocolCollectionsInfoBase<T> & Doc
 
 /**
  * @category API / Indexer
@@ -1237,7 +1264,7 @@ export function convertUserProtocolCollectionsDoc<T extends NumberType, U extend
 const { Schema } = mongoose;
 
 export const ProtocolSchema = new Schema<ProtocolDoc<JSPrimitiveNumberType>>({
-  _legacyId: String,
+  _docId: String,
   name: String,
   uri: String,
   customData: String,
@@ -1246,13 +1273,13 @@ export const ProtocolSchema = new Schema<ProtocolDoc<JSPrimitiveNumberType>>({
 });
 
 export const UserProtocolCollectionsSchema = new Schema<UserProtocolCollectionsDoc<JSPrimitiveNumberType>>({
-  _legacyId: String,
+  _docId: String,
   protocols: Schema.Types.Mixed,
 });
 
 
 export const CollectionSchema = new Schema<CollectionDoc<JSPrimitiveNumberType>>({
-  _legacyId: String,
+  _docId: String,
   collectionId: Schema.Types.Mixed,
   collectionMetadataTimeline: [Schema.Types.Mixed],
   badgeMetadataTimeline: [Schema.Types.Mixed],
@@ -1273,7 +1300,7 @@ export const CollectionSchema = new Schema<CollectionDoc<JSPrimitiveNumberType>>
 });
 
 export const AccountSchema = new Schema<AccountDoc<JSPrimitiveNumberType>>({
-  _legacyId: String,
+  _docId: String,
   publicKey: String, // String type for publicKey
   chain: String, // String type for chain (assuming it's a string)
   cosmosAddress: String, // String type for cosmosAddress
@@ -1290,7 +1317,7 @@ export const AccountSchema = new Schema<AccountDoc<JSPrimitiveNumberType>>({
 });
 
 export const ProfileSchema = new Schema<ProfileDoc<JSPrimitiveNumberType>>({
-  _legacyId: String,
+  _docId: String,
   fetchedProfile: Boolean, // Boolean type for fetchedProfile
   seenActivity: Schema.Types.Mixed, // Mixed type for seenActivity (number type)
   createdAt: Schema.Types.Mixed, // Mixed type for createdAt (number type)
@@ -1307,10 +1334,8 @@ export const ProfileSchema = new Schema<ProfileDoc<JSPrimitiveNumberType>>({
     },
   ],
   hiddenLists: [String], // Array of string
-  customListPages: [Schema.Types.Mixed], // Array of CustomListPage
   customPages: [Schema.Types.Mixed], // Array of CustomPage
-  watchedBadgePages: [Schema.Types.Mixed], // Array of WatchedBadgePage
-  watchedListPages: [Schema.Types.Mixed], // Array of WatchedListPage
+  watchlists: [Schema.Types.Mixed], // Array of Watchlist
 
   profilePicUrl: String, // String type for profilePicUrl
   username: String, // String type for username
@@ -1319,7 +1344,7 @@ export const ProfileSchema = new Schema<ProfileDoc<JSPrimitiveNumberType>>({
 });
 
 export const QueueSchema = new Schema<QueueDoc<JSPrimitiveNumberType>>({
-  _legacyId: String,
+  _docId: String,
   uri: String, // String type for uri
   collectionId: Schema.Types.Mixed, // Mixed type for collectionId (number type)
   loadBalanceId: Schema.Types.Mixed, // Mixed type for loadBalanceId (number type)
@@ -1332,7 +1357,7 @@ export const QueueSchema = new Schema<QueueDoc<JSPrimitiveNumberType>>({
 });
 
 export const StatusSchema = new Schema<StatusDoc<JSPrimitiveNumberType>>({
-  _legacyId: String,
+  _docId: String,
   block: Schema.Types.Mixed, // Mixed type for block (number type)
   nextCollectionId: Schema.Types.Mixed, // Mixed type for nextCollectionId (number type)
   gasPrice: Number, // Number type for gasPrice
@@ -1340,11 +1365,11 @@ export const StatusSchema = new Schema<StatusDoc<JSPrimitiveNumberType>>({
   lastXGasAmounts: [Schema.Types.Mixed], // Array of Mixed type for lastXGasAmounts (number type)
 });
 
-export const AddressMappingSchema = new Schema<AddressMappingDoc<JSPrimitiveNumberType>>({
-  _legacyId: String,
-  mappingId: String, // String type for mappingId
+export const AddressListSchema = new Schema<AddressListDoc<JSPrimitiveNumberType>>({
+  _docId: String,
+  listId: String, // String type for listId
   addresses: [String], // Array of string for addresses
-  includeAddresses: Boolean, // Boolean type for includeAddresses
+  allowlist: Boolean, // Boolean type for allowlist
   uri: String, // String type for uri
   customData: String, // String type for customData
   createdBy: String, // String type for createdBy
@@ -1353,13 +1378,13 @@ export const AddressMappingSchema = new Schema<AddressMappingDoc<JSPrimitiveNumb
   createdBlock: Schema.Types.Mixed, // Mixed type for createdBlock (number type)
   lastUpdated: Schema.Types.Mixed, // Mixed type for lastUpdated (number type)
   private: Boolean, // Boolean type for private
-  editKeys: [Schema.Types.Mixed], // Array of Mixed type for editKeys (AddressMappingEditKey type)
+  editKeys: [Schema.Types.Mixed], // Array of Mixed type for editKeys (AddressListEditKey type)
   nsfw: { reason: String }, // Object with string type property for nsfw
   reported: { reason: String }, // Object with string type property for reported
 });
 
 export const BalanceSchema = new Schema<BalanceDoc<JSPrimitiveNumberType>>({
-  _legacyId: String,
+  _docId: String,
   collectionId: Schema.Types.Mixed, // Mixed type for collectionId (number type)
   cosmosAddress: String, // String type for cosmosAddress
   balances: [Schema.Types.Mixed], // Array of Mixed type for balances (UserBalance type)
@@ -1378,7 +1403,7 @@ export const BalanceSchema = new Schema<BalanceDoc<JSPrimitiveNumberType>>({
 });
 
 export const PasswordSchema = new Schema<PasswordDoc<JSPrimitiveNumberType>>({
-  _legacyId: String,
+  _docId: String,
   cid: String, // String type for cid
   createdBy: String, // String type for createdBy
   docClaimedByCollection: Boolean, // Boolean type for docClaimedByCollection
@@ -1388,7 +1413,7 @@ export const PasswordSchema = new Schema<PasswordDoc<JSPrimitiveNumberType>>({
 });
 
 export const ClaimAlertSchema = new Schema<ClaimAlertDoc<JSPrimitiveNumberType>>({
-  _legacyId: String,
+  _docId: String,
   code: String, // String type for code
   cosmosAddresses: [String], // Array of string for cosmosAddresses
   collectionId: Schema.Types.Mixed, // Mixed type for collectionId (number type)
@@ -1397,7 +1422,7 @@ export const ClaimAlertSchema = new Schema<ClaimAlertDoc<JSPrimitiveNumberType>>
 });
 
 export const ChallengeSchema = new Schema<MerkleChallengeDoc<JSPrimitiveNumberType>>({
-  _legacyId: String,
+  _docId: String,
   collectionId: Schema.Types.Mixed, // Mixed type for collectionId (number type)
   challengeId: String, // String type for challengeId
   challengeLevel: String, // String type for challengeLevel
@@ -1405,8 +1430,8 @@ export const ChallengeSchema = new Schema<MerkleChallengeDoc<JSPrimitiveNumberTy
   usedLeafIndices: [Schema.Types.Mixed], // Array of Mixed type for usedLeafIndices (number type)
 });
 
-export const ApprovalsTrackerSchema = new Schema<ApprovalsTrackerDoc<JSPrimitiveNumberType>>({
-  _legacyId: String,
+export const ApprovalTrackerSchema = new Schema<ApprovalTrackerDoc<JSPrimitiveNumberType>>({
+  _docId: String,
   collectionId: Schema.Types.Mixed, // Mixed type for collectionId (number type)
   numTransfers: Schema.Types.Mixed, // Mixed type for numTransfers (number type)
   amounts: [Schema.Types.Mixed], // Array of Mixed type for amounts (Balance type)
@@ -1418,7 +1443,7 @@ export const ApprovalsTrackerSchema = new Schema<ApprovalsTrackerDoc<JSPrimitive
 });
 
 export const FetchSchema = new Schema<FetchDoc<JSPrimitiveNumberType>>({
-  _legacyId: String,
+  _docId: String,
   content: Schema.Types.Mixed, // Mixed type for content
   fetchedAt: Schema.Types.Mixed, // Mixed type for fetchedAt (number type)
   fetchedAtBlock: Schema.Types.Mixed, // Mixed type for fetchedAtBlock (number type)
@@ -1427,33 +1452,33 @@ export const FetchSchema = new Schema<FetchDoc<JSPrimitiveNumberType>>({
 });
 
 export const RefreshSchema = new Schema<RefreshDoc<JSPrimitiveNumberType>>({
-  _legacyId: String,
+  _docId: String,
   collectionId: Schema.Types.Mixed, // Mixed type for collectionId (number type)
   refreshRequestTime: Schema.Types.Mixed, // Mixed type for refreshRequestTime (number type)
 });
 
 export const AirdropSchema = new Schema<AirdropDoc<JSPrimitiveNumberType>>({
-  _legacyId: String,
+  _docId: String,
   airdropped: Boolean, // Boolean type for airdropped
   timestamp: Schema.Types.Mixed, // Mixed type for timestamp (number type)
   hash: String, // String type for hash
 });
 
 export const IPFSTotalsSchema = new Schema<IPFSTotalsDoc<JSPrimitiveNumberType>>({
-  _legacyId: String,
+  _docId: String,
   bytesUploaded: Schema.Types.Mixed, // Mixed type for bytesUploaded (number type)
 });
 
 export const ComplianceSchema = new Schema<ComplianceDoc<JSPrimitiveNumberType>>({
-  _legacyId: String,
+  _docId: String,
   badges: Schema.Types.Mixed, // Mixed type for badges
-  addressMappings: Schema.Types.Mixed, // Mixed type for addressMappings
+  addressLists: Schema.Types.Mixed, // Mixed type for addressLists
   accounts: Schema.Types.Mixed, // Mixed type for accounts
 });
 
 
 export const BlockinAuthSignatureSchema = new Schema<BlockinAuthSignatureDoc<JSPrimitiveNumberType>>({
-  _legacyId: String,
+  _docId: String,
   signature: String, // String type for signature
   name: String, // String type for name
   description: String, // String type for description
@@ -1464,7 +1489,7 @@ export const BlockinAuthSignatureSchema = new Schema<BlockinAuthSignatureDoc<JSP
 });
 
 export const FollowDetailsSchema = new Schema<FollowDetailsDoc<JSPrimitiveNumberType>>({
-  _legacyId: String,
+  _docId: String,
   cosmosAddress: String, // String type for cosmosAddress
   followingCount: Schema.Types.Mixed, // Mixed type for followingCount (number type)
   followersCount: Schema.Types.Mixed, // Mixed type for followersCount (number type)

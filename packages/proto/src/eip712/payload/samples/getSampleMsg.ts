@@ -1,11 +1,11 @@
 import { deepCopy } from "../../../proto-types/badges/typeutils/typeUtils";
-import { AddressMapping } from "../../../proto/badges/address_mappings_pb";
+import { AddressList } from "../../../proto/badges/address_lists_pb";
 import { Balance, MustOwnBadges, UintRange } from "../../../proto/badges/balances_pb";
 import { BadgeMetadata, CollectionMetadata, OffChainBalancesMetadata } from "../../../proto/badges/metadata_pb";
 import { ActionPermission, BalancesActionPermission, CollectionApprovalPermission, CollectionPermissions, TimedUpdatePermission, TimedUpdateWithBadgeIdsPermission, UserIncomingApprovalPermission, UserOutgoingApprovalPermission, UserPermissions } from "../../../proto/badges/permissions_pb";
 import { BadgeMetadataTimeline, CollectionMetadataTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadataTimeline, StandardsTimeline } from "../../../proto/badges/timelines_pb";
 import { ApprovalAmounts, ApprovalCriteria, ApprovalIdentifierDetails, CollectionApproval, IncomingApprovalCriteria, IncrementedBalances, ManualBalances, MaxNumTransfers, MerkleChallenge, MerklePathItem, MerkleProof, OutgoingApprovalCriteria, PredeterminedBalances, PredeterminedOrderCalculationMethod, Transfer, UserBalanceStore, UserIncomingApproval, UserOutgoingApproval } from "../../../proto/badges/transfers_pb";
-import { MsgCreateAddressMappings, MsgCreateCollection, MsgDeleteCollection, MsgTransferBadges, MsgUniversalUpdateCollection, MsgUpdateCollection, MsgUpdateUserApprovals } from "../../../proto/badges/tx_pb";
+import { MsgCreateAddressLists, MsgCreateCollection, MsgDeleteCollection, MsgTransferBadges, MsgUniversalUpdateCollection, MsgUpdateCollection, MsgUpdateUserApprovals } from "../../../proto/badges/tx_pb";
 import { MsgCreateProtocol, MsgDeleteProtocol, MsgSetCollectionForProtocol, MsgUpdateProtocol } from "../../../proto/protocols/tx_pb";
 
 /**
@@ -304,23 +304,23 @@ const universalParams = {
         transferTimes: [new UintRange()],
         badgeIds: [new UintRange()],
         ownershipTimes: [new UintRange()],
-        permittedTimes: [new UintRange()],
-        forbiddenTimes: [new UintRange()],
+        permanentlyPermittedTimes: [new UintRange()],
+        permanentlyForbiddenTimes: [new UintRange()],
       })],
       canUpdateIncomingApprovals: [new UserIncomingApprovalPermission({
         transferTimes: [new UintRange()],
         badgeIds: [new UintRange()],
         ownershipTimes: [new UintRange()],
-        permittedTimes: [new UintRange()],
-        forbiddenTimes: [new UintRange()],
+        permanentlyPermittedTimes: [new UintRange()],
+        permanentlyForbiddenTimes: [new UintRange()],
       })],
       canUpdateAutoApproveSelfInitiatedIncomingTransfers: [new ActionPermission({
-        permittedTimes: [new UintRange()],
-        forbiddenTimes: [new UintRange()],
+        permanentlyPermittedTimes: [new UintRange()],
+        permanentlyForbiddenTimes: [new UintRange()],
       })],
       canUpdateAutoApproveSelfInitiatedOutgoingTransfers: [new ActionPermission({
-        permittedTimes: [new UintRange()],
-        forbiddenTimes: [new UintRange()],
+        permanentlyPermittedTimes: [new UintRange()],
+        permanentlyForbiddenTimes: [new UintRange()],
       })],
     }),
   }),
@@ -368,48 +368,48 @@ const universalParams = {
   })],
   collectionPermissions: new CollectionPermissions({
     canDeleteCollection: [new ActionPermission({
-      permittedTimes: [new UintRange()],
-      forbiddenTimes: [new UintRange()],
+      permanentlyPermittedTimes: [new UintRange()],
+      permanentlyForbiddenTimes: [new UintRange()],
     })],
     canArchiveCollection: [new TimedUpdatePermission({
-      permittedTimes: [new UintRange()],
-      forbiddenTimes: [new UintRange()],
+      permanentlyPermittedTimes: [new UintRange()],
+      permanentlyForbiddenTimes: [new UintRange()],
       timelineTimes: [new UintRange()],
     })],
     canUpdateOffChainBalancesMetadata: [new TimedUpdatePermission({
-      permittedTimes: [new UintRange()],
-      forbiddenTimes: [new UintRange()],
+      permanentlyPermittedTimes: [new UintRange()],
+      permanentlyForbiddenTimes: [new UintRange()],
       timelineTimes: [new UintRange()],
     })],
     canUpdateStandards: [new TimedUpdatePermission({
-      permittedTimes: [new UintRange()],
-      forbiddenTimes: [new UintRange()],
+      permanentlyPermittedTimes: [new UintRange()],
+      permanentlyForbiddenTimes: [new UintRange()],
       timelineTimes: [new UintRange()],
     })],
     canUpdateCustomData: [new TimedUpdatePermission({
-      permittedTimes: [new UintRange()],
-      forbiddenTimes: [new UintRange()],
+      permanentlyPermittedTimes: [new UintRange()],
+      permanentlyForbiddenTimes: [new UintRange()],
       timelineTimes: [new UintRange()],
     })],
     canUpdateManager: [new TimedUpdatePermission({
-      permittedTimes: [new UintRange()],
-      forbiddenTimes: [new UintRange()],
+      permanentlyPermittedTimes: [new UintRange()],
+      permanentlyForbiddenTimes: [new UintRange()],
       timelineTimes: [new UintRange()],
     })],
     canUpdateCollectionMetadata: [new TimedUpdatePermission({
-      permittedTimes: [new UintRange()],
-      forbiddenTimes: [new UintRange()],
+      permanentlyPermittedTimes: [new UintRange()],
+      permanentlyForbiddenTimes: [new UintRange()],
       timelineTimes: [new UintRange()],
     })],
     canCreateMoreBadges: [new BalancesActionPermission({
-      permittedTimes: [new UintRange()],
-      forbiddenTimes: [new UintRange()],
+      permanentlyPermittedTimes: [new UintRange()],
+      permanentlyForbiddenTimes: [new UintRange()],
       badgeIds: [new UintRange()],
       ownershipTimes: [new UintRange()],
     })],
     canUpdateBadgeMetadata: [new TimedUpdateWithBadgeIdsPermission({
-      permittedTimes: [new UintRange()],
-      forbiddenTimes: [new UintRange()],
+      permanentlyPermittedTimes: [new UintRange()],
+      permanentlyForbiddenTimes: [new UintRange()],
       badgeIds: [new UintRange()],
       timelineTimes: [new UintRange()],
     })],
@@ -417,8 +417,8 @@ const universalParams = {
       transferTimes: [new UintRange()],
       badgeIds: [new UintRange()],
       ownershipTimes: [new UintRange()],
-      permittedTimes: [new UintRange()],
-      forbiddenTimes: [new UintRange()],
+      permanentlyPermittedTimes: [new UintRange()],
+      permanentlyForbiddenTimes: [new UintRange()],
     })],
   }),
 }
@@ -436,10 +436,10 @@ export function getSampleMsg(msgType: string, currMsg: any) {
 
     case 'badges/DeleteCollection':
       return { type: msgType, value: new MsgDeleteCollection().toJson({ emitDefaultValues: true }) };
-    case 'badges/CreateAddressMappings':
+    case 'badges/CreateAddressLists':
       return {
-        type: msgType, value: new MsgCreateAddressMappings({
-          addressMappings: [new AddressMapping()]
+        type: msgType, value: new MsgCreateAddressLists({
+          addressLists: [new AddressList()]
         }).toJson({ emitDefaultValues: true })
       };
     case 'badges/TransferBadges':
@@ -486,23 +486,23 @@ export function getSampleMsg(msgType: string, currMsg: any) {
               transferTimes: [new UintRange()],
               badgeIds: [new UintRange()],
               ownershipTimes: [new UintRange()],
-              permittedTimes: [new UintRange()],
-              forbiddenTimes: [new UintRange()],
+              permanentlyPermittedTimes: [new UintRange()],
+              permanentlyForbiddenTimes: [new UintRange()],
             })],
             canUpdateIncomingApprovals: [new UserIncomingApprovalPermission({
               transferTimes: [new UintRange()],
               badgeIds: [new UintRange()],
               ownershipTimes: [new UintRange()],
-              permittedTimes: [new UintRange()],
-              forbiddenTimes: [new UintRange()],
+              permanentlyPermittedTimes: [new UintRange()],
+              permanentlyForbiddenTimes: [new UintRange()],
             })],
             canUpdateAutoApproveSelfInitiatedIncomingTransfers: [new ActionPermission({
-              permittedTimes: [new UintRange()],
-              forbiddenTimes: [new UintRange()],
+              permanentlyPermittedTimes: [new UintRange()],
+              permanentlyForbiddenTimes: [new UintRange()],
             })],
             canUpdateAutoApproveSelfInitiatedOutgoingTransfers: [new ActionPermission({
-              permittedTimes: [new UintRange()],
-              forbiddenTimes: [new UintRange()],
+              permanentlyPermittedTimes: [new UintRange()],
+              permanentlyForbiddenTimes: [new UintRange()],
             })],
           }),
         }).toJson({ emitDefaultValues: true })

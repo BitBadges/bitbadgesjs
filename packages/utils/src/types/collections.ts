@@ -1,7 +1,7 @@
-import { AddressMapping, ApprovalCriteria, CollectionApproval, CollectionApprovalPermission, CollectionPermissions, NumberType, UintRange, UserBalanceStore, UserIncomingApprovalPermission, UserOutgoingApprovalPermission, UserPermissions, convertApprovalCriteria, convertCollectionApproval, convertCollectionApprovalPermission, convertCollectionPermissions, convertUintRange, convertUserBalanceStore, convertUserIncomingApprovalPermission, convertUserOutgoingApprovalPermission, convertUserPermissions } from "bitbadgesjs-proto";
+import { AddressList, ApprovalCriteria, CollectionApproval, CollectionApprovalPermission, CollectionPermissions, NumberType, UintRange, UserBalanceStore, UserIncomingApprovalPermission, UserOutgoingApprovalPermission, UserPermissions, convertApprovalCriteria, convertCollectionApproval, convertCollectionApprovalPermission, convertCollectionPermissions, convertUintRange, convertUserBalanceStore, convertUserIncomingApprovalPermission, convertUserOutgoingApprovalPermission, convertUserPermissions } from "bitbadgesjs-proto";
 import { AnnouncementDoc, ReviewDoc, TransferActivityDoc, convertAnnouncementDoc, convertReviewDoc, convertTransferActivityDoc } from "./activity";
 import { PaginationInfo } from "./api";
-import { ApprovalInfoDetails, ApprovalsTrackerDoc, BalanceDocWithDetails, CollectionInfoBase, MerkleChallengeDoc, MerkleChallengeWithDetails, convertApprovalInfoDetails, convertApprovalsTrackerDoc, convertBalanceDocWithDetails, convertCollectionDoc, convertMerkleChallengeDoc } from "./db";
+import { ApprovalInfoDetails, ApprovalTrackerDoc, BalanceDocWithDetails, CollectionInfoBase, MerkleChallengeDoc, MerkleChallengeWithDetails, convertApprovalInfoDetails, convertApprovalTrackerDoc, convertBalanceDocWithDetails, convertCollectionDoc, convertMerkleChallengeDoc } from "./db";
 import { Metadata, convertMetadata } from "./metadata";
 import { UserIncomingApprovalWithDetails, UserOutgoingApprovalWithDetails, convertUserIncomingApprovalWithDetails, convertUserOutgoingApprovalWithDetails } from "./users";
 import { deepCopy } from "./utils";
@@ -35,9 +35,9 @@ export function convertBadgeMetadataDetails<T extends NumberType, U extends Numb
  * @category Approvals / Transferability
  */
 export interface CollectionApprovalPermissionWithDetails<T extends NumberType> extends CollectionApprovalPermission<T> {
-  toMapping: AddressMapping;
-  fromMapping: AddressMapping;
-  initiatedByMapping: AddressMapping;
+  toList: AddressList;
+  fromList: AddressList;
+  initiatedByList: AddressList;
 }
 
 /**
@@ -47,9 +47,9 @@ export function convertCollectionApprovalPermissionWithDetails<T extends NumberT
   return deepCopy({
     ...item,
     ...convertCollectionApprovalPermission(item, convertFunction),
-    toMapping: item.toMapping,
-    fromMapping: item.fromMapping,
-    initiatedByMapping: item.initiatedByMapping,
+    toList: item.toList,
+    fromList: item.fromList,
+    initiatedByList: item.initiatedByList,
   })
 }
 
@@ -58,8 +58,8 @@ export function convertCollectionApprovalPermissionWithDetails<T extends NumberT
  * @category Approvals / Transferability
  */
 export interface UserIncomingApprovalPermissionWithDetails<T extends NumberType> extends UserIncomingApprovalPermission<T> {
-  fromMapping: AddressMapping;
-  initiatedByMapping: AddressMapping;
+  fromList: AddressList;
+  initiatedByList: AddressList;
 }
 
 /**
@@ -69,8 +69,8 @@ export function convertUserIncomingApprovalPermissionWithDetails<T extends Numbe
   return deepCopy({
     ...item,
     ...convertUserIncomingApprovalPermission(item, convertFunction),
-    fromMapping: item.fromMapping,
-    initiatedByMapping: item.initiatedByMapping,
+    fromList: item.fromList,
+    initiatedByList: item.initiatedByList,
   })
 }
 
@@ -78,8 +78,8 @@ export function convertUserIncomingApprovalPermissionWithDetails<T extends Numbe
  * @category Approvals / Transferability
  */
 export interface UserOutgoingApprovalPermissionWithDetails<T extends NumberType> extends UserOutgoingApprovalPermission<T> {
-  toMapping: AddressMapping;
-  initiatedByMapping: AddressMapping;
+  toList: AddressList;
+  initiatedByList: AddressList;
 }
 
 /**
@@ -89,8 +89,8 @@ export function convertUserOutgoingApprovalPermissionWithDetails<T extends Numbe
   return deepCopy({
     ...item,
     ...convertUserOutgoingApprovalPermission(item, convertFunction),
-    toMapping: item.toMapping,
-    initiatedByMapping: item.initiatedByMapping,
+    toList: item.toList,
+    initiatedByList: item.initiatedByList,
   })
 }
 
@@ -160,9 +160,9 @@ export interface ApprovalCriteriaWithDetails<T extends NumberType> extends Appro
 export interface CollectionApprovalWithDetails<T extends NumberType> extends CollectionApproval<T> {
   approvalCriteria?: ApprovalCriteriaWithDetails<T>;
   details?: ApprovalInfoDetails<T>
-  toMapping: AddressMapping;
-  fromMapping: AddressMapping;
-  initiatedByMapping: AddressMapping;
+  toList: AddressList;
+  fromList: AddressList;
+  initiatedByList: AddressList;
 }
 
 /**
@@ -225,12 +225,12 @@ export function convertUserBalanceStoreWithDetails<T extends NumberType, U exten
  * @property {ReviewDoc[]} reviews - The fetched reviews for this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views.
  * @property {BalanceDocWithDetails[]} owners - The fetched owners of this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views.
  * @property {MerkleChallengeDoc[]} merkleChallenges - The fetched merkle challenges for this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views.
- * @property {ApprovalsTrackerDoc[]} approvalsTrackers - The fetched approval trackers for this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views.
+ * @property {ApprovalTrackerDoc[]} approvalTrackers - The fetched approval trackers for this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views.
  *
  * @property {Object} nsfw - The badge IDs in this collection that are marked as NSFW.
  * @property {Object} reported - The badge IDs in this collection that have been reported.
  *
- * @property {Object.<string, { ids: string[], type: string, pagination: PaginationInfo }>} views - The views for this collection and their pagination Doc. Views will only include the doc _ids. Use the pagination to fetch more. To be used in conjunction with activity, announcements, reviews, owners, merkleChallenges, and approvalsTrackers. For example, if you want to fetch the activity for a view, you would use the view's pagination to fetch the doc _ids, then use the corresponding activity array to find the matching docs.
+ * @property {Object.<string, { ids: string[], type: string, pagination: PaginationInfo }>} views - The views for this collection and their pagination Doc. Views will only include the doc _ids. Use the pagination to fetch more. To be used in conjunction with activity, announcements, reviews, owners, merkleChallenges, and approvalTrackers. For example, if you want to fetch the activity for a view, you would use the view's pagination to fetch the doc _ids, then use the corresponding activity array to find the matching docs.
  *
  * @remarks
  * Note that returned collections will only fetch what is requested. It is your responsibility to join the data together (paginations, etc).
@@ -253,7 +253,7 @@ export interface BitBadgesCollection<T extends NumberType> extends CollectionInf
   reviews: ReviewDoc<T>[],
   owners: BalanceDocWithDetails<T>[],
   merkleChallenges: MerkleChallengeDoc<T>[],
-  approvalsTrackers: ApprovalsTrackerDoc<T>[],
+  approvalTrackers: ApprovalTrackerDoc<T>[],
 
   nsfw?: { badgeIds: UintRange<T>[], reason: string };
   reported?: { badgeIds: UintRange<T>[], reason: string };
@@ -270,7 +270,7 @@ export interface BitBadgesCollection<T extends NumberType> extends CollectionInf
 export function convertBitBadgesCollection<T extends NumberType, U extends NumberType>(item: BitBadgesCollection<T>, convertFunction: (item: T) => U): BitBadgesCollection<U> {
   return deepCopy({
     ...item,
-    ...convertCollectionDoc({ ...item, _legacyId: item.collectionId.toString() }, convertFunction),
+    ...convertCollectionDoc({ ...item, _docId: item.collectionId.toString() }, convertFunction),
     collectionApprovals: item.collectionApprovals.map((collectionApproval) => convertCollectionApprovalWithDetails(collectionApproval, convertFunction)),
     defaultBalances: convertUserBalanceStoreWithDetails(item.defaultBalances, convertFunction),
     collectionPermissions: convertCollectionPermissionsWithDetails(item.collectionPermissions, convertFunction),
@@ -281,7 +281,7 @@ export function convertBitBadgesCollection<T extends NumberType, U extends Numbe
     reviews: item.reviews.map((activityItem) => convertReviewDoc(activityItem, convertFunction)),
     owners: item.owners.map((balance) => convertBalanceDocWithDetails(balance, convertFunction)),
     merkleChallenges: item.merkleChallenges.map((merkleChallenge) => convertMerkleChallengeDoc(merkleChallenge, convertFunction)),
-    approvalsTrackers: item.approvalsTrackers.map((approvalsTracker) => convertApprovalsTrackerDoc(approvalsTracker, convertFunction)),
+    approvalTrackers: item.approvalTrackers.map((approvalTracker) => convertApprovalTrackerDoc(approvalTracker, convertFunction)),
     _rev: undefined,
     _deleted: undefined,
 

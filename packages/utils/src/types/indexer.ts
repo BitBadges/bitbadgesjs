@@ -1,5 +1,5 @@
 import { TransferActivityDoc } from "./activity";
-import { AccountDoc, BalanceDoc, MerkleChallengeDoc, CollectionDoc, QueueDoc, RefreshDoc, ApprovalsTrackerDoc, AddressMappingDoc, ClaimAlertDoc, PasswordDoc, ProtocolDoc, UserProtocolCollectionsDoc } from "./db";
+import { AccountDoc, BalanceDoc, MerkleChallengeDoc, CollectionDoc, QueueDoc, RefreshDoc, ApprovalTrackerDoc, AddressListDoc, ClaimAlertDoc, PasswordDoc, ProtocolDoc, UserProtocolCollectionsDoc } from "./db";
 
 /**
  * DocsCache is used by the indexer to cache documents in memory to avoid having to fetch and write to the database each time.
@@ -15,8 +15,8 @@ import { AccountDoc, BalanceDoc, MerkleChallengeDoc, CollectionDoc, QueueDoc, Re
  * @property {ActivityDoc[]} activityToAdd - The activity documents to add to the database.
  * @property {QueueDoc[]} queueDocsToAdd - The queue documents to add to the database.
  * @property {RefreshDocs} refreshes - The refreshes cache.
- * @property {ApprovalsTrackerDocs} approvalsTrackers - The approvals trackers cache.
- * @property {AddressMappingsDocs} addressMappings - The address mappings cache.
+ * @property {ApprovalTrackerDocs} approvalTrackers - The approvals trackers cache.
+ * @property {AddressListsDocs} addressLists - The address lists cache.
  * @property {PasswordDocs} passwordDocs - The password documents cache.
  * @property {ClaimAlertDoc[]} claimAlertsToAdd - The claim alerts to add to the database.
  */
@@ -26,8 +26,8 @@ export interface DocsCache {
   balances: BalanceDocs;
   merkleChallenges: MerkleChallengeDocs;
   refreshes: RefreshDocs;
-  approvalsTrackers: ApprovalsTrackerDocs;
-  addressMappings: AddressMappingsDocs;
+  approvalTrackers: ApprovalTrackerDocs;
+  addressLists: AddressListsDocs;
   queueDocsToAdd: (QueueDoc<bigint>)[];
   activityToAdd: (TransferActivityDoc<bigint>)[];
   claimAlertsToAdd: (ClaimAlertDoc<bigint>)[];
@@ -103,24 +103,24 @@ export interface MerkleChallengeDocs {
 }
 
 /**
- * ApprovalsTrackerDocs is a map of partitionedId to approvals tracker documents.
+ * ApprovalTrackerDocs is a map of partitionedId to approvals tracker documents.
  *
  * The partitionedId is the collectionId and a random identifier string joined by a dash (e.g. "1-abc123").
  * Queries should look up by the ApprovalIdDetails, such as $eq approvalId, approvalLevel, and so on.
  *
  * @category API / Indexer
  */
-export interface ApprovalsTrackerDocs {
-  [partitionedId: string]: (ApprovalsTrackerDoc<bigint>) | undefined;
+export interface ApprovalTrackerDocs {
+  [partitionedId: string]: (ApprovalTrackerDoc<bigint>) | undefined;
 }
 
 /**
- * AddressMappingsDocs is a map of mappingId to address mapping documents.
+ * AddressListsDocs is a map of listId to address list documents.
  *
  * @category API / Indexer
- * @typedef {Object} AddressMappingsDocs
- * @property {AddressMappingDoc} [mappingId] - The mapping Id for the mapping.
+ * @typedef {Object} AddressListsDocs
+ * @property {AddressListDoc} [listId] - The list Id for the list.
  */
-export interface AddressMappingsDocs {
-  [mappingId: string]: (AddressMappingDoc<bigint>) | undefined;
+export interface AddressListsDocs {
+  [listId: string]: (AddressListDoc<bigint>) | undefined;
 }

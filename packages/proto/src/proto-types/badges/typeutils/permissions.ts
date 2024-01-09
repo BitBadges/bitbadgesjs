@@ -32,32 +32,33 @@ export function convertUserPermissions<T extends NumberType, U extends NumberTyp
  *
  * @typedef {Object} UserOutgoingApprovalPermission
  *
- * @property {string} toMappingId - The mapping ID of the to addresses of the approved outgoing transfers.
- * @property {string} initiatedByMappingId - The mapping ID of the initiatedBy addresses of the approved outgoing transfers.
+ * @property {string} toListId - The list ID of the to addresses of the approved outgoing transfers.
+ * @property {string} initiatedByListId - The list ID of the initiatedBy addresses of the approved outgoing transfers.
  * @property {UintRange[]} transferTimes - The transfer times of the approved outgoing transfers.
  * @property {UintRange[]} badgeIds - The badge IDs of the approved outgoing transfers.
  * @property {UintRange[]} ownershipTimes - The owned times of the approved outgoing transfers.
  * @property {string} amountTrackerId - The approval tracker ID of the approved outgoing transfers. Can use "All" to represent all IDs, "!trackerId" to represent all IDs except trackerId, or "trackerId" to represent only trackerId.
  * @property {string} challengeTrackerId - The challenge tracker ID of the approved outgoing transfers. Can use "All" to represent all IDs, "!trackerId" to represent all IDs except trackerId, or "trackerId" to represent only trackerId.
- * @property {UintRange[]} permittedTimes - The permitted times of the approved outgoing transfers.
- * @property {UintRange[]} forbiddenTimes - The forbidden times of the approved outgoing transfers.
+ * @property {UintRange[]} permanentlyPermittedTimes - The permitted times of the approved outgoing transfers.
+ * @property {UintRange[]} permanentlyForbiddenTimes - The forbidden times of the approved outgoing transfers.
 */
 export interface UserOutgoingApprovalPermission<T extends NumberType> {
-  toMappingId: string;
-  initiatedByMappingId: string;
+  toListId: string;
+  initiatedByListId: string;
   transferTimes: UintRange<T>[];
   badgeIds: UintRange<T>[];
   ownershipTimes: UintRange<T>[];
   amountTrackerId: string
   challengeTrackerId: string
-  permittedTimes: UintRange<T>[];
-  forbiddenTimes: UintRange<T>[];
+  
+  permanentlyPermittedTimes: UintRange<T>[];
+  permanentlyForbiddenTimes: UintRange<T>[];
 }
 
 export function convertUserOutgoingApprovalPermission<T extends NumberType, U extends NumberType>(permission: UserOutgoingApprovalPermission<T>, convertFunction: (item: T) => U, populateOptionalFields?: boolean): UserOutgoingApprovalPermission<U> {
   const _permission = populateOptionalFields ? {
     ...permission,
-    fromMappingOptions: undefined,
+    fromListOptions: undefined,
   } as Required<UserOutgoingApprovalPermission<T>> : permission
 
   return deepCopy({
@@ -65,8 +66,8 @@ export function convertUserOutgoingApprovalPermission<T extends NumberType, U ex
     transferTimes: permission.transferTimes.map((b) => convertUintRange(b, convertFunction)),
     badgeIds: permission.badgeIds.map((b) => convertUintRange(b, convertFunction)),
     ownershipTimes: permission.ownershipTimes.map((b) => convertUintRange(b, convertFunction)),
-    permittedTimes: permission.permittedTimes.map((b) => convertUintRange(b, convertFunction)),
-    forbiddenTimes: permission.forbiddenTimes.map((b) => convertUintRange(b, convertFunction))
+    permanentlyPermittedTimes: permission.permanentlyPermittedTimes.map((b) => convertUintRange(b, convertFunction)),
+    permanentlyForbiddenTimes: permission.permanentlyForbiddenTimes.map((b) => convertUintRange(b, convertFunction))
   })
 }
 
@@ -75,33 +76,33 @@ export function convertUserOutgoingApprovalPermission<T extends NumberType, U ex
  *
  * @typedef {Object} UserIncomingApprovalPermission
  *
- * @property {string} fromMappingId - The mapping ID of the from addresses of the approved incoming transfers.
- * @property {string} initiatedByMappingId - The mapping ID of the initiatedBy addresses of the approved incoming transfers.
+ * @property {string} fromListId - The list ID of the from addresses of the approved incoming transfers.
+ * @property {string} initiatedByListId - The list ID of the initiatedBy addresses of the approved incoming transfers.
  * @property {UintRange[]} transferTimes - The transfer times of the approved incoming transfers.
  * @property {UintRange[]} badgeIds - The badge IDs of the approved incoming transfers.
  * @property {UintRange[]} ownershipTimes - The owned times of the approved incoming transfers.
  * @property {string} amountTrackerId - The approval tracker ID of the approved incoming transfers. Can use "All" to represent all IDs, "!trackerId" to represent all IDs except trackerId, or "trackerId" to represent only trackerId.
  * @property {string} challengeTrackerId - The challenge tracker ID of the approved incoming transfers. Can use "All" to represent all IDs, "!trackerId" to represent all IDs except trackerId, or "trackerId" to represent only trackerId.
- * @property {UintRange[]} permittedTimes - The permitted times of the approved incoming transfers.
- * @property {UintRange[]} forbiddenTimes - The forbidden times of the approved incoming transfers.
+ * @property {UintRange[]} permanentlyPermittedTimes - The permitted times of the approved incoming transfers.
+ * @property {UintRange[]} permanentlyForbiddenTimes - The forbidden times of the approved incoming transfers.
 */
 export interface UserIncomingApprovalPermission<T extends NumberType> {
-  fromMappingId: string;
-  initiatedByMappingId: string;
+  fromListId: string;
+  initiatedByListId: string;
   transferTimes: UintRange<T>[];
   badgeIds: UintRange<T>[];
   ownershipTimes: UintRange<T>[];
   amountTrackerId: string
   challengeTrackerId: string
-  permittedTimes: UintRange<T>[];
-  forbiddenTimes: UintRange<T>[]
+  permanentlyPermittedTimes: UintRange<T>[];
+  permanentlyForbiddenTimes: UintRange<T>[]
 
 }
 
 export function convertUserIncomingApprovalPermission<T extends NumberType, U extends NumberType>(permission: UserIncomingApprovalPermission<T>, convertFunction: (item: T) => U, populateOptionalFields?: boolean): UserIncomingApprovalPermission<U> {
   const _permission = populateOptionalFields ? {
     ...permission,
-    toMappingOptions: undefined,
+    toListOptions: undefined,
   } as Required<UserIncomingApprovalPermission<T>> : permission
 
   return deepCopy({
@@ -109,8 +110,8 @@ export function convertUserIncomingApprovalPermission<T extends NumberType, U ex
     transferTimes: permission.transferTimes.map((b) => convertUintRange(b, convertFunction)),
     badgeIds: permission.badgeIds.map((b) => convertUintRange(b, convertFunction)),
     ownershipTimes: permission.ownershipTimes.map((b) => convertUintRange(b, convertFunction)),
-    permittedTimes: permission.permittedTimes.map((b) => convertUintRange(b, convertFunction)),
-    forbiddenTimes: permission.forbiddenTimes.map((b) => convertUintRange(b, convertFunction))
+    permanentlyPermittedTimes: permission.permanentlyPermittedTimes.map((b) => convertUintRange(b, convertFunction)),
+    permanentlyForbiddenTimes: permission.permanentlyForbiddenTimes.map((b) => convertUintRange(b, convertFunction))
   })
 }
 
@@ -162,12 +163,12 @@ export function convertCollectionPermissions<T extends NumberType, U extends Num
  * ActionPermission represents a standard permission with no extra criteria.
  *
  *@typedef {Object} ActionPermission
- * @property {UintRange[]} permittedTimes - The permitted times of the permission.
- * @property {UintRange[]} forbiddenTimes - The forbidden times of the permission.
+ * @property {UintRange[]} permanentlyPermittedTimes - The permitted times of the permission.
+ * @property {UintRange[]} permanentlyForbiddenTimes - The forbidden times of the permission.
  */
 export interface ActionPermission<T extends NumberType> {
-  permittedTimes: UintRange<T>[];
-  forbiddenTimes: UintRange<T>[];
+  permanentlyPermittedTimes: UintRange<T>[];
+  permanentlyForbiddenTimes: UintRange<T>[];
 }
 
 export function convertActionPermission<T extends NumberType, U extends NumberType>(permission: ActionPermission<T>, convertFunction: (item: T) => U, populateOptionalFields?: boolean): ActionPermission<U> {
@@ -177,8 +178,8 @@ export function convertActionPermission<T extends NumberType, U extends NumberTy
 
   return deepCopy({
     ..._permission,
-    permittedTimes: permission.permittedTimes.map((b) => convertUintRange(b, convertFunction)),
-    forbiddenTimes: permission.forbiddenTimes.map((b) => convertUintRange(b, convertFunction))
+    permanentlyPermittedTimes: permission.permanentlyPermittedTimes.map((b) => convertUintRange(b, convertFunction)),
+    permanentlyForbiddenTimes: permission.permanentlyForbiddenTimes.map((b) => convertUintRange(b, convertFunction))
   })
 }
 
@@ -188,13 +189,13 @@ export function convertActionPermission<T extends NumberType, U extends NumberTy
  *
  * @typedef {Object} TimedUpdatePermission
  * @property {UintRange[]} timelineTimes - The timeline times that the permission applies to.
- *@property {UintRange[]} permittedTimes - The permitted times of the permission.
- * @property {UintRange[]} forbiddenTimes - The forbidden times of the permission.
+ *@property {UintRange[]} permanentlyPermittedTimes - The permitted times of the permission.
+ * @property {UintRange[]} permanentlyForbiddenTimes - The forbidden times of the permission.
  */
 export interface TimedUpdatePermission<T extends NumberType> {
   timelineTimes: UintRange<T>[];
-  permittedTimes: UintRange<T>[];
-  forbiddenTimes: UintRange<T>[];
+  permanentlyPermittedTimes: UintRange<T>[];
+  permanentlyForbiddenTimes: UintRange<T>[];
 }
 
 export function convertTimedUpdatePermission<T extends NumberType, U extends NumberType>(permission: TimedUpdatePermission<T>, convertFunction: (item: T) => U, populateOptionalFields?: boolean): TimedUpdatePermission<U> {
@@ -205,8 +206,8 @@ export function convertTimedUpdatePermission<T extends NumberType, U extends Num
   return deepCopy({
     ..._permission,
     timelineTimes: permission.timelineTimes.map((b) => convertUintRange(b, convertFunction)),
-    permittedTimes: permission.permittedTimes.map((b) => convertUintRange(b, convertFunction)),
-    forbiddenTimes: permission.forbiddenTimes.map((b) => convertUintRange(b, convertFunction))
+    permanentlyPermittedTimes: permission.permanentlyPermittedTimes.map((b) => convertUintRange(b, convertFunction)),
+    permanentlyForbiddenTimes: permission.permanentlyForbiddenTimes.map((b) => convertUintRange(b, convertFunction))
   })
 }
 
@@ -219,14 +220,14 @@ export function convertTimedUpdatePermission<T extends NumberType, U extends Num
  * @typedef {Object} TimedUpdateWithBadgeIdsPermission
  *@property {UintRange[]} timelineTimes - The timeline times that the permission applies to.
  * @property {UintRange[]} badgeIds - The badge IDs that the permission applies to.
- * @property {UintRange[]} permittedTimes - The permitted times of the permission.
- * @property {UintRange[]} forbiddenTimes - The forbidden times of the permission.
+ * @property {UintRange[]} permanentlyPermittedTimes - The permitted times of the permission.
+ * @property {UintRange[]} permanentlyForbiddenTimes - The forbidden times of the permission.
  */
 export interface TimedUpdateWithBadgeIdsPermission<T extends NumberType> {
   timelineTimes: UintRange<T>[];
   badgeIds: UintRange<T>[];
-  permittedTimes: UintRange<T>[];
-  forbiddenTimes: UintRange<T>[];
+  permanentlyPermittedTimes: UintRange<T>[];
+  permanentlyForbiddenTimes: UintRange<T>[];
 }
 
 export function convertTimedUpdateWithBadgeIdsPermission<T extends NumberType, U extends NumberType>(permission: TimedUpdateWithBadgeIdsPermission<T>, convertFunction: (item: T) => U, populateOptionalFields?: boolean): TimedUpdateWithBadgeIdsPermission<U> {
@@ -238,8 +239,8 @@ export function convertTimedUpdateWithBadgeIdsPermission<T extends NumberType, U
     ..._permission,
     timelineTimes: permission.timelineTimes.map((b) => convertUintRange(b, convertFunction)),
     badgeIds: permission.badgeIds.map((b) => convertUintRange(b, convertFunction)),
-    permittedTimes: permission.permittedTimes.map((b) => convertUintRange(b, convertFunction)),
-    forbiddenTimes: permission.forbiddenTimes.map((b) => convertUintRange(b, convertFunction))
+    permanentlyPermittedTimes: permission.permanentlyPermittedTimes.map((b) => convertUintRange(b, convertFunction)),
+    permanentlyForbiddenTimes: permission.permanentlyForbiddenTimes.map((b) => convertUintRange(b, convertFunction))
   })
 }
 
@@ -251,14 +252,14 @@ export function convertTimedUpdateWithBadgeIdsPermission<T extends NumberType, U
  * @typedef {Object} BalancesActionPermission
  * @property {UintRange[]} badgeIds - The badge IDs that the permission applies to.
  * @property {UintRange[]} ownershipTimes - The owned times of the permission.
- * @property {UintRange[]} permittedTimes - The permitted times of the permission.
- * @property {UintRange[]} forbiddenTimes - The forbidden times of the permission.
+ * @property {UintRange[]} permanentlyPermittedTimes - The permitted times of the permission.
+ * @property {UintRange[]} permanentlyForbiddenTimes - The forbidden times of the permission.
 */
 export interface BalancesActionPermission<T extends NumberType> {
   badgeIds: UintRange<T>[];
   ownershipTimes: UintRange<T>[];
-  permittedTimes: UintRange<T>[];
-  forbiddenTimes: UintRange<T>[];
+  permanentlyPermittedTimes: UintRange<T>[];
+  permanentlyForbiddenTimes: UintRange<T>[];
 }
 
 export function convertBalancesActionPermission<T extends NumberType, U extends NumberType>(permission: BalancesActionPermission<T>, convertFunction: (item: T) => U, populateOptionalFields?: boolean): BalancesActionPermission<U> {
@@ -270,39 +271,39 @@ export function convertBalancesActionPermission<T extends NumberType, U extends 
     ..._permission,
     badgeIds: permission.badgeIds.map((b) => convertUintRange(b, convertFunction)),
     ownershipTimes: permission.ownershipTimes.map((b) => convertUintRange(b, convertFunction)),
-    permittedTimes: permission.permittedTimes.map((b) => convertUintRange(b, convertFunction)),
-    forbiddenTimes: permission.forbiddenTimes.map((b) => convertUintRange(b, convertFunction)),
+    permanentlyPermittedTimes: permission.permanentlyPermittedTimes.map((b) => convertUintRange(b, convertFunction)),
+    permanentlyForbiddenTimes: permission.permanentlyForbiddenTimes.map((b) => convertUintRange(b, convertFunction)),
   })
 }
 
 /**
  * CollectionApprovalPermission represents a permission that allows updating the collection approved transfers.
  *
- * This permission allows you to define when the approved transfers can be updated and which combinations of (from, to, initiatedBy, transferTimes, badgeIds, ownershipTimes, permittedTimes, forbiddenTimes) can be updated.
+ * This permission allows you to define when the approved transfers can be updated and which combinations of (from, to, initiatedBy, transferTimes, badgeIds, ownershipTimes, permanentlyPermittedTimes, permanentlyForbiddenTimes) can be updated.
  *
  * @typedef {Object} CollectionApprovalPermission
- * @property {string} fromMappingId - The mapping ID of the from addresses of the approved transfers.
- * @property {string} toMappingId - The mapping ID of the to addresses of the approved transfers.
- * @property {string} initiatedByMappingId - The mapping ID of the initiatedBy addresses of the approved transfers.
+ * @property {string} fromListId - The list ID of the from addresses of the approved transfers.
+ * @property {string} toListId - The list ID of the to addresses of the approved transfers.
+ * @property {string} initiatedByListId - The list ID of the initiatedBy addresses of the approved transfers.
  * @property {UintRange[]} transferTimes - The transfer times of the approved transfers.
  * @property {UintRange[]} badgeIds - The badge IDs of the approved transfers.
  * @property {UintRange[]} ownershipTimes - The owned times of the approved transfers.
  * @property {string} amountTrackerId - The approval tracker ID of the approved transfers. Can use "All" to represent all IDs, "!trackerId" to represent all IDs except trackerId, or "trackerId" to represent only trackerId.
  * @property {string} challengeTrackerId - The challenge tracker ID of the approved transfers. Can use "All" to represent all IDs, "!trackerId" to represent all IDs except trackerId, or "trackerId" to represent only trackerId.
- * @property {UintRange[]} permittedTimes - The permitted times of this permission.
- * @property {UintRange[]} forbiddenTimes - The forbidden times of this permission.
+ * @property {UintRange[]} permanentlyPermittedTimes - The permitted times of this permission.
+ * @property {UintRange[]} permanentlyForbiddenTimes - The forbidden times of this permission.
  */
 export interface CollectionApprovalPermission<T extends NumberType> {
-  fromMappingId: string;
-  toMappingId: string;
-  initiatedByMappingId: string;
+  fromListId: string;
+  toListId: string;
+  initiatedByListId: string;
   transferTimes: UintRange<T>[];
   badgeIds: UintRange<T>[];
   ownershipTimes: UintRange<T>[];
   amountTrackerId: string
   challengeTrackerId: string
-  permittedTimes: UintRange<T>[];
-  forbiddenTimes: UintRange<T>[];
+  permanentlyPermittedTimes: UintRange<T>[];
+  permanentlyForbiddenTimes: UintRange<T>[];
 }
 
 export function convertCollectionApprovalPermission<T extends NumberType, U extends NumberType>(permission: CollectionApprovalPermission<T>, convertFunction: (item: T) => U, populateOptionalFields?: boolean): CollectionApprovalPermission<U> {
@@ -315,7 +316,7 @@ export function convertCollectionApprovalPermission<T extends NumberType, U exte
     transferTimes: permission.transferTimes.map((b) => convertUintRange(b, convertFunction)),
     badgeIds: permission.badgeIds.map((b) => convertUintRange(b, convertFunction)),
     ownershipTimes: permission.ownershipTimes.map((b) => convertUintRange(b, convertFunction)),
-    permittedTimes: permission.permittedTimes.map((b) => convertUintRange(b, convertFunction)),
-    forbiddenTimes: permission.forbiddenTimes.map((b) => convertUintRange(b, convertFunction))
+    permanentlyPermittedTimes: permission.permanentlyPermittedTimes.map((b) => convertUintRange(b, convertFunction)),
+    permanentlyForbiddenTimes: permission.permanentlyForbiddenTimes.map((b) => convertUintRange(b, convertFunction))
   })
 }

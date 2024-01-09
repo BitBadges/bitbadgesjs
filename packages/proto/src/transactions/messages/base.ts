@@ -155,7 +155,7 @@ const normalizeMessagesIfNecessary = (messages: MessageGenerated[]) => {
       msg = createProtoMsg(populateUndefinedForMsgUniversalUpdateCollection(msgVal as MsgUniversalUpdateCollection))
     }
 
-    //MsgCreateAddressMappings and MsgDeleteCollection should be fine bc they are all primitive types and required
+    //MsgCreateAddressLists and MsgDeleteCollection should be fine bc they are all primitive types and required
     //We only normalize if there is a custom type which could be undefined
 
     return msg

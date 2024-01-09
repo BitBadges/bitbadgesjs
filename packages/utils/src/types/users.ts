@@ -1,8 +1,8 @@
-import { AddressMapping, NumberType, UserIncomingApproval, UserOutgoingApproval, convertIncomingApprovalCriteria, convertOutgoingApprovalCriteria, convertUserIncomingApproval, convertUserOutgoingApproval } from "bitbadgesjs-proto"
+import { AddressList, NumberType, UserIncomingApproval, UserOutgoingApproval, convertIncomingApprovalCriteria, convertOutgoingApprovalCriteria, convertUserIncomingApproval, convertUserOutgoingApproval } from "bitbadgesjs-proto"
 import { AnnouncementDoc, ListActivityDoc, ReviewDoc, TransferActivityDoc, convertAnnouncementDoc, convertListActivityDoc, convertReviewDoc, convertTransferActivityDoc } from "./activity"
 import { PaginationInfo } from "./api"
-import { AccountInfoBase, ApprovalsTrackerDoc, BalanceDocWithDetails, BlockinAuthSignatureDoc, ClaimAlertDoc, MerkleChallengeDoc, ProfileInfoBase, convertAccountDoc, convertApprovalsTrackerDoc, convertBalanceDocWithDetails, convertBlockinAuthSignatureDoc, convertClaimAlertDoc, convertMerkleChallengeDoc, convertProfileDoc } from "./db"
-import { AddressMappingWithMetadata, convertAddressMappingWithMetadata } from "./metadata"
+import { AccountInfoBase, ApprovalTrackerDoc, BalanceDocWithDetails, BlockinAuthSignatureDoc, ClaimAlertDoc, MerkleChallengeDoc, ProfileInfoBase, convertAccountDoc, convertApprovalTrackerDoc, convertBalanceDocWithDetails, convertBlockinAuthSignatureDoc, convertClaimAlertDoc, convertMerkleChallengeDoc, convertProfileDoc } from "./db"
+import { AddressListWithMetadata, convertAddressListWithMetadata } from "./metadata"
 import { deepCopy } from "./utils"
 
 
@@ -10,9 +10,9 @@ import { deepCopy } from "./utils"
  * @category Approvals / Transferability
  */
 export interface UserOutgoingApprovalWithDetails<T extends NumberType> extends UserOutgoingApproval<T> {
-  toMapping: AddressMapping;
-  // fromMapping: AddressMapping;
-  initiatedByMapping: AddressMapping;
+  toList: AddressList;
+  // fromList: AddressList;
+  initiatedByList: AddressList;
 }
 
 /**
@@ -33,9 +33,9 @@ export function convertUserOutgoingApprovalWithDetails<T extends NumberType, U e
  * @category Approvals / Transferability
  */
 export interface UserIncomingApprovalWithDetails<T extends NumberType> extends UserIncomingApproval<T> {
-  // toMapping: AddressMapping;
-  fromMapping: AddressMapping;
-  initiatedByMapping: AddressMapping;
+  // toList: AddressList;
+  fromList: AddressList;
+  initiatedByList: AddressList;
 }
 
 /**
@@ -68,8 +68,8 @@ export function convertUserIncomingApprovalWithDetails<T extends NumberType, U e
  * @property {AnnouncementDoc[]} announcements - A list of announcement activity items for the account. Paginated and fetched as needed. To be used in conjunction with views.
  * @property {ReviewDoc[]} reviews - A list of review activity items for the account. Paginated and fetched as needed. To be used in conjunction with views.
  * @property {MerkleChallengeDoc[]} merkleChallenges - A list of merkle challenge activity items for the account. Paginated and fetched as needed. To be used in conjunction with views.
- * @property {ApprovalsTrackerDoc[]} approvalsTrackers - A list of approvals tracker activity items for the account. Paginated and fetched as needed. To be used in conjunction with views.
- * @property {AddressMappingWithMetadata[]} addressMappings - A list of address mappings for the account. Paginated and fetched as needed. To be used in conjunction with views.
+ * @property {ApprovalTrackerDoc[]} approvalTrackers - A list of approvals tracker activity items for the account. Paginated and fetched as needed. To be used in conjunction with views.
+ * @property {AddressListWithMetadata[]} addressLists - A list of address lists for the account. Paginated and fetched as needed. To be used in conjunction with views.
  * @property {ClaimAlertDoc[]} claimAlerts - A list of claim alerts for the account. Paginated and fetched as needed. To be used in conjunction with views.
  * @property {PaginationInfo} pagination - Pagination Docrmation for each of the profile Docrmation.
  *
@@ -81,9 +81,9 @@ export function convertUserIncomingApprovalWithDetails<T extends NumberType, U e
  * @property {Object} nsfw - The badge IDs in this collection that are marked as NSFW.
  * @property {Object} reported - The badge IDs in this collection that have been reported.
  *
- * @property {Object.<string, { ids: string[], type: string, pagination: PaginationInfo }>} views - The views for this collection and their pagination Doc. Views will only include the doc _ids. Use the pagination to fetch more. To be used in conjunction with activity, announcements, reviews, owners, merkleChallenges, and approvalsTrackers. For example, if you want to fetch the activity for a view, you would use the view's pagination to fetch the doc _ids, then use the corresponding activity array to find the matching docs.
+ * @property {Object.<string, { ids: string[], type: string, pagination: PaginationInfo }>} views - The views for this collection and their pagination Doc. Views will only include the doc _ids. Use the pagination to fetch more. To be used in conjunction with activity, announcements, reviews, owners, merkleChallenges, and approvalTrackers. For example, if you want to fetch the activity for a view, you would use the view's pagination to fetch the doc _ids, then use the corresponding activity array to find the matching docs.
  *
- * @property {Object} alias - Returns whether this account is an alias for a collection or mapping.
+ * @property {Object} alias - Returns whether this account is an alias for a collection or list.
  *
  * @remarks
  * Note that returned user Docs will only fetch what is requested. It is your responsibility to join the data together (paginations, etc).
@@ -105,8 +105,8 @@ export interface BitBadgesUserInfo<T extends NumberType> extends ProfileInfoBase
   announcements: AnnouncementDoc<T>[],
   reviews: ReviewDoc<T>[],
   merkleChallenges: MerkleChallengeDoc<T>[],
-  approvalsTrackers: ApprovalsTrackerDoc<T>[],
-  addressMappings: AddressMappingWithMetadata<T>[],
+  approvalTrackers: ApprovalTrackerDoc<T>[],
+  addressLists: AddressListWithMetadata<T>[],
   claimAlerts: ClaimAlertDoc<T>[],
   authCodes: BlockinAuthSignatureDoc<T>[],
 
@@ -123,17 +123,17 @@ export interface BitBadgesUserInfo<T extends NumberType> extends ProfileInfoBase
 
   alias?: {
     collectionId?: T,
-    mappingId?: string
+    listId?: string
   }
 }
 
 
 export function convertBitBadgesUserInfo<T extends NumberType, U extends NumberType>(item: BitBadgesUserInfo<T>, convertFunction: (item: T) => U): BitBadgesUserInfo<U> {
   const converted = deepCopy({
-    ...convertProfileDoc({ ...item, _legacyId: '', _id: '' }, convertFunction),
+    ...convertProfileDoc({ ...item, _docId: '', _id: '' }, convertFunction),
     //This is because if we spread ...item, we overwrite the profile Doc converted stuff
     ...convertAccountDoc({
-      _legacyId: '',
+      _docId: '',
       cosmosAddress: item.cosmosAddress,
       ethAddress: item.ethAddress,
       btcAddress: item.btcAddress,
@@ -156,13 +156,13 @@ export function convertBitBadgesUserInfo<T extends NumberType, U extends NumberT
     announcements: item.announcements.map((activityItem) => convertAnnouncementDoc(activityItem, convertFunction)),
     reviews: item.reviews.map((activityItem) => convertReviewDoc(activityItem, convertFunction)),
     merkleChallenges: item.merkleChallenges.map((challenge) => convertMerkleChallengeDoc(challenge, convertFunction)),
-    approvalsTrackers: item.approvalsTrackers.map((tracker) => convertApprovalsTrackerDoc(tracker, convertFunction)),
-    addressMappings: item.addressMappings.map((mapping) => convertAddressMappingWithMetadata(mapping, convertFunction)),
+    approvalTrackers: item.approvalTrackers.map((tracker) => convertApprovalTrackerDoc(tracker, convertFunction)),
+    addressLists: item.addressLists.map((list) => convertAddressListWithMetadata(list, convertFunction)),
     claimAlerts: item.claimAlerts.map((alert) => convertClaimAlertDoc(alert, convertFunction)),
     authCodes: item.authCodes.map((code) => convertBlockinAuthSignatureDoc(code, convertFunction)),
     alias: item.alias ? {
       collectionId: item.alias.collectionId ? convertFunction(item.alias.collectionId) : undefined,
-      mappingId: item.alias.mappingId,
+      listId: item.alias.listId,
     } : undefined,
     views: item.views,
     _rev: undefined,

@@ -1,4 +1,4 @@
-import { Balance, UintRange, UserBalance, deepCopy } from "bitbadgesjs-proto";
+import { Balance, UintRange, UserBalanceStore, deepCopy } from "bitbadgesjs-proto";
 import { UniversalPermissionDetails } from "./overlaps";
 import { safeAddUints, safeSubtractUints } from "./math";
 import { getOverlapsAndNonOverlaps } from "./overlaps";
@@ -7,17 +7,50 @@ import { CollectionInfoBase } from "./types/db";
 import { searchUintRangesForId, sortUintRangesAndMergeIfNecessary } from "./uintRanges";
 
 /**
+ * Applys increments to the starting balances
+ *
+ * @category Balances
+ */
+export const applyIncrementsToBalances = (
+  startBalances: Balance<bigint>[],
+  incrementBadgeIdsBy: bigint,
+  incrementOwnershipTimesBy: bigint,
+  numIncrements: bigint,
+) => {
+  let balancesToReturn = deepCopy(startBalances)
+  balancesToReturn = startBalances.map((x) => {
+    return {
+      ...x,
+      badgeIds: x.badgeIds.map((y) => {
+        return {
+          start: y.start + incrementBadgeIdsBy * BigInt(numIncrements),
+          end: y.end + incrementBadgeIdsBy * BigInt(numIncrements),
+        }
+      }),
+      ownershipTimes: x.ownershipTimes.map((y) => {
+        return {
+          start: y.start + incrementOwnershipTimesBy * BigInt(numIncrements),
+          end: y.end + incrementOwnershipTimesBy * BigInt(numIncrements),
+        }
+      }),
+    }
+  })
+
+  return balancesToReturn
+}
+
+/**
  * Creates a blank balance object with empty balances and approvals.
  *
  * This appends the defaults according to the collection's specified ones. Override this for the "Mint" address (bc it has no approvals).
  * @category Balances
 */
-export function getBlankBalance(nonMintApproval: boolean, collection?: BitBadgesCollection<bigint> | CollectionInfoBase<bigint>): UserBalance<bigint> {
+export function getBlankBalance(nonMintApproval: boolean, collection?: BitBadgesCollection<bigint> | CollectionInfoBase<bigint>): UserBalanceStore<bigint> {
   if (nonMintApproval && !collection) {
     throw new Error("Cannot create a blank balance for a non-mint approval without a collection. Must know default details");
   }
 
-  const blankBalance: UserBalance<bigint> = {
+  const blankBalance: UserBalanceStore<bigint> = {
     balances: collection ? collection.defaultBalances.balances : [],
     incomingApprovals: collection ? collection.defaultBalances.incomingApprovals : [],
     outgoingApprovals: collection ? collection.defaultBalances.outgoingApprovals : [],
@@ -331,15 +364,15 @@ export function getBalancesForIds(idRanges: UintRange<bigint>[], times: UintRang
           ownershipTime: currTime,
           transferTime: { start: BigInt("18446744073709551615"), end: BigInt("18446744073709551615") }, // dummy range
           timelineTime: { start: BigInt("18446744073709551615"), end: BigInt("18446744073709551615") }, // dummy range
-          toMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
-          fromMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
-          initiatedByMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
-          amountTrackerIdMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
-          challengeTrackerIdMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
+          toList: { addresses: ["Mint"], allowlist: false, listId: "", uri: "", customData: "", createdBy: "" },
+          fromList: { addresses: ["Mint"], allowlist: false, listId: "", uri: "", customData: "", createdBy: "" },
+          initiatedByList: { addresses: ["Mint"], allowlist: false, listId: "", uri: "", customData: "", createdBy: "" },
+          amountTrackerIdList: { addresses: ["Mint"], allowlist: false, listId: "", uri: "", customData: "", createdBy: "" },
+          challengeTrackerIdList: { addresses: ["Mint"], allowlist: false, listId: "", uri: "", customData: "", createdBy: "" },
           arbitraryValue: balanceObj.amount,
 
-          permittedTimes: [],
-          forbiddenTimes: []
+          permanentlyPermittedTimes: [],
+          permanentlyForbiddenTimes: []
         });
       }
     }
@@ -353,14 +386,14 @@ export function getBalancesForIds(idRanges: UintRange<bigint>[], times: UintRang
         ownershipTime: timeToFetch,
         transferTime: { start: BigInt("18446744073709551615"), end: BigInt("18446744073709551615") }, // dummy range
         timelineTime: { start: BigInt("18446744073709551615"), end: BigInt("18446744073709551615") }, // dummy range
-        toMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
-        fromMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
-        initiatedByMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
-        amountTrackerIdMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
-        challengeTrackerIdMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
+        toList: { addresses: ["Mint"], allowlist: false, listId: "", uri: "", customData: "", createdBy: "" },
+        fromList: { addresses: ["Mint"], allowlist: false, listId: "", uri: "", customData: "", createdBy: "" },
+        initiatedByList: { addresses: ["Mint"], allowlist: false, listId: "", uri: "", customData: "", createdBy: "" },
+        amountTrackerIdList: { addresses: ["Mint"], allowlist: false, listId: "", uri: "", customData: "", createdBy: "" },
+        challengeTrackerIdList: { addresses: ["Mint"], allowlist: false, listId: "", uri: "", customData: "", createdBy: "" },
 
-        permittedTimes: [],
-        forbiddenTimes: [],
+        permanentlyPermittedTimes: [],
+        permanentlyForbiddenTimes: [],
         arbitraryValue: 0n,
       });
     }
@@ -409,14 +442,14 @@ export function deleteBalances(rangesToDelete: UintRange<bigint>[], timesToDelet
           ownershipTime: currTime,
           transferTime: { start: BigInt(Number.MAX_SAFE_INTEGER), end: BigInt(Number.MAX_SAFE_INTEGER) }, //dummy range
           timelineTime: { start: BigInt(Number.MAX_SAFE_INTEGER), end: BigInt(Number.MAX_SAFE_INTEGER) }, //dummy range
-          toMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
-          fromMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
-          initiatedByMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
-          amountTrackerIdMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
-          challengeTrackerIdMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
+          toList: { addresses: ["Mint"], allowlist: false, listId: "", uri: "", customData: "", createdBy: "" },
+          fromList: { addresses: ["Mint"], allowlist: false, listId: "", uri: "", customData: "", createdBy: "" },
+          initiatedByList: { addresses: ["Mint"], allowlist: false, listId: "", uri: "", customData: "", createdBy: "" },
+          amountTrackerIdList: { addresses: ["Mint"], allowlist: false, listId: "", uri: "", customData: "", createdBy: "" },
+          challengeTrackerIdList: { addresses: ["Mint"], allowlist: false, listId: "", uri: "", customData: "", createdBy: "" },
 
-          permittedTimes: [],
-          forbiddenTimes: [],
+          permanentlyPermittedTimes: [],
+          permanentlyForbiddenTimes: [],
           arbitraryValue: 0n,
         });
       }
@@ -430,14 +463,14 @@ export function deleteBalances(rangesToDelete: UintRange<bigint>[], timesToDelet
           ownershipTime: timeToDelete,
           transferTime: { start: BigInt(Number.MAX_SAFE_INTEGER), end: BigInt(Number.MAX_SAFE_INTEGER) }, //dummy range
           timelineTime: { start: BigInt(Number.MAX_SAFE_INTEGER), end: BigInt(Number.MAX_SAFE_INTEGER) }, //dummy range
-          toMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
-          fromMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
-          initiatedByMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
-          amountTrackerIdMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
-          challengeTrackerIdMapping: { addresses: ["Mint"], includeAddresses: false, mappingId: "", uri: "", customData: "", createdBy: "" },
+          toList: { addresses: ["Mint"], allowlist: false, listId: "", uri: "", customData: "", createdBy: "" },
+          fromList: { addresses: ["Mint"], allowlist: false, listId: "", uri: "", customData: "", createdBy: "" },
+          initiatedByList: { addresses: ["Mint"], allowlist: false, listId: "", uri: "", customData: "", createdBy: "" },
+          amountTrackerIdList: { addresses: ["Mint"], allowlist: false, listId: "", uri: "", customData: "", createdBy: "" },
+          challengeTrackerIdList: { addresses: ["Mint"], allowlist: false, listId: "", uri: "", customData: "", createdBy: "" },
 
-          permittedTimes: [],
-          forbiddenTimes: [],
+          permanentlyPermittedTimes: [],
+          permanentlyForbiddenTimes: [],
           arbitraryValue: 0n,
         });
       }

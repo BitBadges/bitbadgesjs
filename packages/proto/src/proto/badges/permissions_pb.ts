@@ -22,15 +22,15 @@ import { UintRange } from "./balances_pb.js";
  *
  * Note there are a few different times here which could get confusing:
  * - timelineTimes: the times when a timeline-based field is a specific value
- * - permitted/forbiddenTimes - the times that a permission can be performed
+ * - permanentlyPermitted/ForbiddenTimes - the times that a permission can be performed
  * - transferTimes - the times that a transfer occurs
  * - ownershipTimes - the times when a badge is owned by a user
  *
- * The permitted/forbiddenTimes are used to determine when a permission can be executed.
+ * The permitted/permanentlyForbiddenTimes are used to determine when a permission can be executed.
  * Once a time is set to be permitted or forbidden, it is PERMANENT and cannot be changed.
  * If a time is not set to be permitted or forbidden, it is considered NEUTRAL and can be updated but is ALLOWED by default.
  *
- * IMPORTANT: We take first-match only for the permissions. This means that if you forbid time T in array index 0 and permit time T in index 1,
+ * IMPORTANT: We take first-match only for the permissions. This means that if you forbid time T in array index 0 and permit time T in index 1, 
  * we will only check the first permission (forbid time T) and not the second permission (permit time T).
  *
  * @generated from message badges.CollectionPermissions
@@ -219,43 +219,43 @@ export class UserPermissions extends Message<UserPermissions> {
  * CollectionApprovalPermission defines what collection approved transfers can be updated vs. are locked.
  *
  * Each transfer is broken down to a (from, to, initiatedBy, transferTime, badgeId) tuple.
- * For a transfer to match, we need to match ALL of the fields in the combination.
- * These are determined by the fromMappingId, toMappingId, initiatedByMappingId, transferTimes, badgeIds fields.
- * AddressMappings are used for (from, to, initiatedBy) which are a permanent list of addresses identified by an ID (see AddressMappings).
+ * For a transfer to match, we need to match ALL of the fields in the combination. 
+ * These are determined by the fromListId, toListId, initiatedByListId, transferTimes, badgeIds fields.
+ * AddressLists are used for (from, to, initiatedBy) which are a permanent list of addresses identified by an ID (see AddressLists). 
  *
  * TimelineTimes: which timeline times of the collection's approvalsTimeline field can be updated or not?
- * permitted/forbidden TimelineTimes: when can the manager execute this permission?
+ * permanentlyPermitted/ForbiddenTimes: when can the manager execute this permission?
  *
- * Ex: Let's say we are updating the transferability for timelineTime 1 and the transfer tuple ("!Mint", "!Mint", "!Mint", 10, 1000).
+ * Ex: Let's say we are updating the transferability for timelineTime 1 and the transfer tuple ("AllWithoutMint", "AllWithoutMint", "AllWithoutMint", 10, 1000).
  * We would check to find the FIRST CollectionApprovalPermission that matches this combination.
  * If we find a match, we would check the permitted/forbidden times to see if we can execute this permission (default is ALLOWED).
  *
  * Ex: So if you wanted to freeze the transferability to enforce that badge ID 1 will always be transferable, you could set
- * the combination ("!Mint", "!Mint", "!Mint", "All Transfer Times", 1) to always be forbidden at all timelineTimes.
+ * the combination ("AllWithoutMint", "AllWithoutMint", "AllWithoutMint", "All Transfer Times", 1) to always be forbidden at all timelineTimes.
  *
  * @generated from message badges.CollectionApprovalPermission
  */
 export class CollectionApprovalPermission extends Message<CollectionApprovalPermission> {
   /**
-   * Identifier for the sender mapping.
+   * Identifier for the sender list.
    *
-   * @generated from field: string fromMappingId = 1;
+   * @generated from field: string fromListId = 1;
    */
-  fromMappingId = "";
+  fromListId = "";
 
   /**
-   * Identifier for the recipient mapping.
+   * Identifier for the recipient list.
    *
-   * @generated from field: string toMappingId = 2;
+   * @generated from field: string toListId = 2;
    */
-  toMappingId = "";
+  toListId = "";
 
   /**
-   * Identifier for the initiator mapping (who is approved?).
+   * Identifier for the initiator list (who is approved?).
    *
-   * @generated from field: string initiatedByMappingId = 3;
+   * @generated from field: string initiatedByListId = 3;
    */
-  initiatedByMappingId = "";
+  initiatedByListId = "";
 
   /**
    * Specifies the times when the transfer can occur.
@@ -299,18 +299,18 @@ export class CollectionApprovalPermission extends Message<CollectionApprovalPerm
   challengeTrackerId = "";
 
   /**
-   * Specifies the times when this permission is permitted. Can not overlap with forbiddenTimes.
+   * Specifies the times when this permission is permitted. Can not overlap with permanentlyForbiddenTimes.
    *
-   * @generated from field: repeated badges.UintRange permittedTimes = 9;
+   * @generated from field: repeated badges.UintRange permanentlyPermittedTimes = 9;
    */
-  permittedTimes: UintRange[] = [];
+  permanentlyPermittedTimes: UintRange[] = [];
 
   /**
-   * Specifies the times when this permission is forbidden. Can not overlap with permittedTimes.
+   * Specifies the times when this permission is forbidden. Can not overlap with permanentlyPermittedTimes.
    *
-   * @generated from field: repeated badges.UintRange forbiddenTimes = 10;
+   * @generated from field: repeated badges.UintRange permanentlyForbiddenTimes = 10;
    */
-  forbiddenTimes: UintRange[] = [];
+  permanentlyForbiddenTimes: UintRange[] = [];
 
   constructor(data?: PartialMessage<CollectionApprovalPermission>) {
     super();
@@ -320,16 +320,16 @@ export class CollectionApprovalPermission extends Message<CollectionApprovalPerm
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "badges.CollectionApprovalPermission";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "fromMappingId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "toMappingId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "initiatedByMappingId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: "fromListId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "toListId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "initiatedByListId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 4, name: "transferTimes", kind: "message", T: UintRange, repeated: true },
     { no: 5, name: "badgeIds", kind: "message", T: UintRange, repeated: true },
     { no: 6, name: "ownershipTimes", kind: "message", T: UintRange, repeated: true },
     { no: 7, name: "amountTrackerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 8, name: "challengeTrackerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 9, name: "permittedTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 10, name: "forbiddenTimes", kind: "message", T: UintRange, repeated: true },
+    { no: 9, name: "permanentlyPermittedTimes", kind: "message", T: UintRange, repeated: true },
+    { no: 10, name: "permanentlyForbiddenTimes", kind: "message", T: UintRange, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CollectionApprovalPermission {
@@ -357,18 +357,18 @@ export class CollectionApprovalPermission extends Message<CollectionApprovalPerm
  */
 export class UserOutgoingApprovalPermission extends Message<UserOutgoingApprovalPermission> {
   /**
-   * Identifier for the recipient mapping.
+   * Identifier for the recipient list.
    *
-   * @generated from field: string toMappingId = 1;
+   * @generated from field: string toListId = 1;
    */
-  toMappingId = "";
+  toListId = "";
 
   /**
-   * Identifier for the initiator mapping (who is approved?).
+   * Identifier for the initiator list (who is approved?).
    *
-   * @generated from field: string initiatedByMappingId = 2;
+   * @generated from field: string initiatedByListId = 2;
    */
-  initiatedByMappingId = "";
+  initiatedByListId = "";
 
   /**
    * Specifies the times when the transfer can occur.
@@ -412,18 +412,18 @@ export class UserOutgoingApprovalPermission extends Message<UserOutgoingApproval
   challengeTrackerId = "";
 
   /**
-   * Specifies the times when this permission is permitted. Can not overlap with forbiddenTimes.
+   * Specifies the times when this permission is permitted. Can not overlap with permanentlyForbiddenTimes.
    *
-   * @generated from field: repeated badges.UintRange permittedTimes = 8;
+   * @generated from field: repeated badges.UintRange permanentlyPermittedTimes = 8;
    */
-  permittedTimes: UintRange[] = [];
+  permanentlyPermittedTimes: UintRange[] = [];
 
   /**
-   * Specifies the times when this permission is forbidden. Can not overlap with permittedTimes.
+   * Specifies the times when this permission is forbidden. Can not overlap with permanentlyPermittedTimes.
    *
-   * @generated from field: repeated badges.UintRange forbiddenTimes = 9;
+   * @generated from field: repeated badges.UintRange permanentlyForbiddenTimes = 9;
    */
-  forbiddenTimes: UintRange[] = [];
+  permanentlyForbiddenTimes: UintRange[] = [];
 
   constructor(data?: PartialMessage<UserOutgoingApprovalPermission>) {
     super();
@@ -433,15 +433,15 @@ export class UserOutgoingApprovalPermission extends Message<UserOutgoingApproval
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "badges.UserOutgoingApprovalPermission";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "toMappingId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "initiatedByMappingId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: "toListId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "initiatedByListId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "transferTimes", kind: "message", T: UintRange, repeated: true },
     { no: 4, name: "badgeIds", kind: "message", T: UintRange, repeated: true },
     { no: 5, name: "ownershipTimes", kind: "message", T: UintRange, repeated: true },
     { no: 6, name: "amountTrackerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 7, name: "challengeTrackerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 8, name: "permittedTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 9, name: "forbiddenTimes", kind: "message", T: UintRange, repeated: true },
+    { no: 8, name: "permanentlyPermittedTimes", kind: "message", T: UintRange, repeated: true },
+    { no: 9, name: "permanentlyForbiddenTimes", kind: "message", T: UintRange, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UserOutgoingApprovalPermission {
@@ -465,24 +465,24 @@ export class UserOutgoingApprovalPermission extends Message<UserOutgoingApproval
  *
  * UserIncomingApprovalPermission defines the permissions for updating the user's approved incoming transfers.
  *
- * See CollectionApprovalPermission for more details. This is equivalent without the toMappingId field because that is always the user.
+ * See CollectionApprovalPermission for more details. This is equivalent without the toListId field because that is always the user.
  *
  * @generated from message badges.UserIncomingApprovalPermission
  */
 export class UserIncomingApprovalPermission extends Message<UserIncomingApprovalPermission> {
   /**
-   * Identifier for the sender mapping.
+   * Identifier for the sender list.
    *
-   * @generated from field: string fromMappingId = 1;
+   * @generated from field: string fromListId = 1;
    */
-  fromMappingId = "";
+  fromListId = "";
 
   /**
-   * Identifier for the initiator mapping (who is approved?).
+   * Identifier for the initiator list (who is approved?).
    *
-   * @generated from field: string initiatedByMappingId = 2;
+   * @generated from field: string initiatedByListId = 2;
    */
-  initiatedByMappingId = "";
+  initiatedByListId = "";
 
   /**
    * Specifies the times when the transfer can occur.
@@ -526,18 +526,18 @@ export class UserIncomingApprovalPermission extends Message<UserIncomingApproval
   challengeTrackerId = "";
 
   /**
-   * Specifies the times when this permission is permitted. Can not overlap with forbiddenTimes.
+   * Specifies the times when this permission is permitted. Can not overlap with permanentlyForbiddenTimes.
    *
-   * @generated from field: repeated badges.UintRange permittedTimes = 8;
+   * @generated from field: repeated badges.UintRange permanentlyPermittedTimes = 8;
    */
-  permittedTimes: UintRange[] = [];
+  permanentlyPermittedTimes: UintRange[] = [];
 
   /**
-   * Specifies the times when this permission is forbidden. Can not overlap with permittedTimes.
+   * Specifies the times when this permission is forbidden. Can not overlap with permanentlyPermittedTimes.
    *
-   * @generated from field: repeated badges.UintRange forbiddenTimes = 9;
+   * @generated from field: repeated badges.UintRange permanentlyForbiddenTimes = 9;
    */
-  forbiddenTimes: UintRange[] = [];
+  permanentlyForbiddenTimes: UintRange[] = [];
 
   constructor(data?: PartialMessage<UserIncomingApprovalPermission>) {
     super();
@@ -547,15 +547,15 @@ export class UserIncomingApprovalPermission extends Message<UserIncomingApproval
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "badges.UserIncomingApprovalPermission";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "fromMappingId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "initiatedByMappingId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: "fromListId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "initiatedByListId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "transferTimes", kind: "message", T: UintRange, repeated: true },
     { no: 4, name: "badgeIds", kind: "message", T: UintRange, repeated: true },
     { no: 5, name: "ownershipTimes", kind: "message", T: UintRange, repeated: true },
     { no: 6, name: "amountTrackerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 7, name: "challengeTrackerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 8, name: "permittedTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 9, name: "forbiddenTimes", kind: "message", T: UintRange, repeated: true },
+    { no: 8, name: "permanentlyPermittedTimes", kind: "message", T: UintRange, repeated: true },
+    { no: 9, name: "permanentlyForbiddenTimes", kind: "message", T: UintRange, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UserIncomingApprovalPermission {
@@ -580,7 +580,7 @@ export class UserIncomingApprovalPermission extends Message<UserIncomingApproval
  * BalancesActionPermission defines the permissions for updating a timeline-based field for specific badges and specific badge ownership times.
  * Currently, this is only used for creating new badges.
  *
- * Ex: If you want to lock the ability to create new badges for badgeIds [1,2] at ownershipTimes 1/1/2020 - 1/1/2021,
+ * Ex: If you want to lock the ability to create new badges for badgeIds [1,2] at ownershipTimes 1/1/2020 - 1/1/2021, 
  * you could set the combination (badgeIds: [1,2], ownershipTimelineTimes: [1/1/2020 - 1/1/2021]) to always be forbidden.
  *
  * @generated from message badges.BalancesActionPermission
@@ -601,18 +601,18 @@ export class BalancesActionPermission extends Message<BalancesActionPermission> 
   ownershipTimes: UintRange[] = [];
 
   /**
-   * Specifies the times when this permission is permitted. Can not overlap with forbiddenTimes.
+   * Specifies the times when this permission is permitted. Can not overlap with permanentlyForbiddenTimes.
    *
-   * @generated from field: repeated badges.UintRange permittedTimes = 3;
+   * @generated from field: repeated badges.UintRange permanentlyPermittedTimes = 3;
    */
-  permittedTimes: UintRange[] = [];
+  permanentlyPermittedTimes: UintRange[] = [];
 
   /**
-   * Specifies the times when this permission is forbidden. Can not overlap with permittedTimes.
+   * Specifies the times when this permission is forbidden. Can not overlap with permanentlyPermittedTimes.
    *
-   * @generated from field: repeated badges.UintRange forbiddenTimes = 4;
+   * @generated from field: repeated badges.UintRange permanentlyForbiddenTimes = 4;
    */
-  forbiddenTimes: UintRange[] = [];
+  permanentlyForbiddenTimes: UintRange[] = [];
 
   constructor(data?: PartialMessage<BalancesActionPermission>) {
     super();
@@ -624,8 +624,8 @@ export class BalancesActionPermission extends Message<BalancesActionPermission> 
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "badgeIds", kind: "message", T: UintRange, repeated: true },
     { no: 2, name: "ownershipTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 3, name: "permittedTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 4, name: "forbiddenTimes", kind: "message", T: UintRange, repeated: true },
+    { no: 3, name: "permanentlyPermittedTimes", kind: "message", T: UintRange, repeated: true },
+    { no: 4, name: "permanentlyForbiddenTimes", kind: "message", T: UintRange, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BalancesActionPermission {
@@ -655,18 +655,18 @@ export class BalancesActionPermission extends Message<BalancesActionPermission> 
  */
 export class ActionPermission extends Message<ActionPermission> {
   /**
-   * Specifies the times when this permission is permitted. Can not overlap with forbiddenTimes.
+   * Specifies the times when this permission is permitted. Can not overlap with permanentlyForbiddenTimes.
    *
-   * @generated from field: repeated badges.UintRange permittedTimes = 1;
+   * @generated from field: repeated badges.UintRange permanentlyPermittedTimes = 1;
    */
-  permittedTimes: UintRange[] = [];
+  permanentlyPermittedTimes: UintRange[] = [];
 
   /**
-   * Specifies the times when this permission is forbidden. Can not overlap with permittedTimes.
+   * Specifies the times when this permission is forbidden. Can not overlap with permanentlyPermittedTimes.
    *
-   * @generated from field: repeated badges.UintRange forbiddenTimes = 2;
+   * @generated from field: repeated badges.UintRange permanentlyForbiddenTimes = 2;
    */
-  forbiddenTimes: UintRange[] = [];
+  permanentlyForbiddenTimes: UintRange[] = [];
 
   constructor(data?: PartialMessage<ActionPermission>) {
     super();
@@ -676,8 +676,8 @@ export class ActionPermission extends Message<ActionPermission> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "badges.ActionPermission";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "permittedTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 2, name: "forbiddenTimes", kind: "message", T: UintRange, repeated: true },
+    { no: 1, name: "permanentlyPermittedTimes", kind: "message", T: UintRange, repeated: true },
+    { no: 2, name: "permanentlyForbiddenTimes", kind: "message", T: UintRange, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ActionPermission {
@@ -708,18 +708,18 @@ export class ActionPermission extends Message<ActionPermission> {
  */
 export class TimedUpdatePermission extends Message<TimedUpdatePermission> {
   /**
-   * Specifies the times when this permission is permitted. Can not overlap with forbiddenTimes.
+   * Specifies the times when this permission is permitted. Can not overlap with permanentlyForbiddenTimes.
    *
-   * @generated from field: repeated badges.UintRange permittedTimes = 1;
+   * @generated from field: repeated badges.UintRange permanentlyPermittedTimes = 1;
    */
-  permittedTimes: UintRange[] = [];
+  permanentlyPermittedTimes: UintRange[] = [];
 
   /**
-   * Specifies the times when this permission is forbidden. Can not overlap with permittedTimes.
+   * Specifies the times when this permission is forbidden. Can not overlap with permanentlyPermittedTimes.
    *
-   * @generated from field: repeated badges.UintRange forbiddenTimes = 2;
+   * @generated from field: repeated badges.UintRange permanentlyForbiddenTimes = 2;
    */
-  forbiddenTimes: UintRange[] = [];
+  permanentlyForbiddenTimes: UintRange[] = [];
 
   /**
    * Specifies the times when the timeline-based field is a specific value.
@@ -736,8 +736,8 @@ export class TimedUpdatePermission extends Message<TimedUpdatePermission> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "badges.TimedUpdatePermission";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "permittedTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 2, name: "forbiddenTimes", kind: "message", T: UintRange, repeated: true },
+    { no: 1, name: "permanentlyPermittedTimes", kind: "message", T: UintRange, repeated: true },
+    { no: 2, name: "permanentlyForbiddenTimes", kind: "message", T: UintRange, repeated: true },
     { no: 3, name: "timelineTimes", kind: "message", T: UintRange, repeated: true },
   ]);
 
@@ -776,18 +776,18 @@ export class TimedUpdateWithBadgeIdsPermission extends Message<TimedUpdateWithBa
   badgeIds: UintRange[] = [];
 
   /**
-   * Specifies the times when this permission is permitted. Can not overlap with forbiddenTimes.
+   * Specifies the times when this permission is permitted. Can not overlap with permanentlyForbiddenTimes.
    *
-   * @generated from field: repeated badges.UintRange permittedTimes = 2;
+   * @generated from field: repeated badges.UintRange permanentlyPermittedTimes = 2;
    */
-  permittedTimes: UintRange[] = [];
+  permanentlyPermittedTimes: UintRange[] = [];
 
   /**
-   * Specifies the times when this permission is forbidden. Can not overlap with permittedTimes.
+   * Specifies the times when this permission is forbidden. Can not overlap with permanentlyPermittedTimes.
    *
-   * @generated from field: repeated badges.UintRange forbiddenTimes = 3;
+   * @generated from field: repeated badges.UintRange permanentlyForbiddenTimes = 3;
    */
-  forbiddenTimes: UintRange[] = [];
+  permanentlyForbiddenTimes: UintRange[] = [];
 
   /**
    * Specifies the times when the timeline-based field is a specific value.
@@ -805,8 +805,8 @@ export class TimedUpdateWithBadgeIdsPermission extends Message<TimedUpdateWithBa
   static readonly typeName = "badges.TimedUpdateWithBadgeIdsPermission";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "badgeIds", kind: "message", T: UintRange, repeated: true },
-    { no: 2, name: "permittedTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 3, name: "forbiddenTimes", kind: "message", T: UintRange, repeated: true },
+    { no: 2, name: "permanentlyPermittedTimes", kind: "message", T: UintRange, repeated: true },
+    { no: 3, name: "permanentlyForbiddenTimes", kind: "message", T: UintRange, repeated: true },
     { no: 4, name: "timelineTimes", kind: "message", T: UintRange, repeated: true },
   ]);
 
@@ -826,3 +826,4 @@ export class TimedUpdateWithBadgeIdsPermission extends Message<TimedUpdateWithBa
     return proto3.util.equals(TimedUpdateWithBadgeIdsPermission, a, b);
   }
 }
+

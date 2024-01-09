@@ -54,7 +54,7 @@ export async function getAliasDerivationKeysForCollection(collectionId: NumberTy
   return derivationKey;
 }
 
-export async function getAliasDerivationKeysForMapping(id: NumberType) {
+export async function getAliasDerivationKeysForList(id: NumberType) {
   const derivationKey = Buffer.concat([Buffer.from([AddressGenerationPrefix]), uint64ToBufferBE(id)]);
   return derivationKey;
 }

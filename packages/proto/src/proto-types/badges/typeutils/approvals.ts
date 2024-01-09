@@ -3,17 +3,35 @@ import { UserPermissions, convertUserPermissions } from "./permissions";
 import { Balance, MerkleChallenge, MustOwnBadges, UintRange, convertBalance, convertMerkleChallenge, convertMustOwnBadges, convertUintRange, deepCopy } from "./typeUtils";
 
 /**
- * UserBalanceStore represents a user's balance store.
+ * UserBalanceStore is the store for the user balances for a collection.
+ *
+ * It consists of a list of balances, a list of approved outgoing transfers, and a list of approved incoming transfers,
+ * as well as the permissions for updating the approved incoming/outgoing transfers.
+ *
+ * Upon initialization, all fields (minus the balances) are set to the defaults specified by the collection.
+ *
+ * The outgoing transfers can be used to allow / disallow transfers which are sent from this user.
+ * If a transfer has no match, then it is disallowed by default, unless from == initiatedBy (i.e. initiated by this user)
+ * and autoApproveSelfInitiatedOutgoingTransfers is set to true.
+ *
+ * The incoming transfers can be used to allow / disallow transfers which are sent to this user.
+ * If a transfer has no match, then it is disallowed by default, unless to == initiatedBy (i.e. initiated by this user)
+ * and autoApproveSelfInitiatedIncomingTransfers is set to true.
+ *
+ * Note that the user approved transfers are only checked if the collection approved transfers do not specify to override
+ * the user approved transfers.
+ *
+ * The permissions are used to determine whether the user can update the approved incoming/outgoing transfers and auto approvals.
  *
  * @typedef {Object} UserBalanceStore
  * @property {Balance[]} balances - The balances of the user.
  * @property {UserIncomingApproval[]} incomingApprovals - The incoming approvals of the user.
  * @property {UserOutgoingApproval[]} outgoingApprovals - The outgoing approvals of the user.
- * @property {UserPermissions} userPermissions - The user permissions of the user.
+ * @property {UserPermissions} userPermissions - The permissions of the user.
  * @property {boolean} autoApproveSelfInitiatedOutgoingTransfers - Whether or not to auto approve self initiated outgoing transfers.
  * @property {boolean} autoApproveSelfInitiatedIncomingTransfers - Whether or not to auto approve self initiated incoming transfers.
  */
-export interface UserBalanceStore<T extends NumberType>{
+export interface UserBalanceStore<T extends NumberType> {
   balances: Balance<T>[];
   incomingApprovals: UserIncomingApproval<T>[];
   outgoingApprovals: UserOutgoingApproval<T>[];
@@ -23,7 +41,7 @@ export interface UserBalanceStore<T extends NumberType>{
 }
 
 /**
- * 
+ *
  */
 export function convertUserBalanceStore<T extends NumberType, U extends NumberType>(store: UserBalanceStore<T>, convertFunction: (item: T) => U): UserBalanceStore<U> {
   return deepCopy({
@@ -39,15 +57,15 @@ export function convertUserBalanceStore<T extends NumberType, U extends NumberTy
 
 
 /**
- * UserOutgoingApproval represents a user's approved outgoing transfer.
+ * UserOutgoingApproval defines the rules for the approval of an outgoing transfer from a user.
  *
  * @typedef {Object} UserOutgoingApproval
- * @property {string} toMappingId - The mapping ID for the user(s) who is receiving the badges.
- * @property {string} initiatedByMappingId - The mapping ID for the user(s) who initiate the transfer.
- * @property {UintRange[]} transferTimes - The times of the transfer transaction.
- * @property {UintRange[]} badgeIds - The badge IDs to be transferred.
- * @property {UintRange[]} ownershipTimes - The ownership times of the badges being transferred
- * @property {string} approvalId - The ID of the approval. Must not be a duplicate of another approval ID in the same timeline.
+ * @property {string} toListId - The list ID for the user(s) who can receive the badges.
+ * @property {string} initiatedByListId - The list ID for the user(s) who can initiate the transfer.
+ * @property {UintRange[]} transferTimes - The times allowed for the transfer transaction.
+ * @property {UintRange[]} badgeIds - The badge IDs that can be transferred.
+ * @property {UintRange[]} ownershipTimes - The ownership times of the badges that can be transferred
+ * @property {string} approvalId - The unique ID of the approval. Must not be a duplicate of another approval ID in the same timeline.
  * @property {string} amountTrackerId - The ID of the approval tracker. This is the key used to track tallies.
  * @property {string} challengeTrackerId - The ID of the challenge tracker. This is the key used to track used leaves for challenges.
  * @property {string} uri - The URI of the approval.
@@ -55,8 +73,8 @@ export function convertUserBalanceStore<T extends NumberType, U extends NumberTy
  * @property {OutgoingApprovalCriteria[]} approvalCriteria - For allowed combinations, we also must check the details of the approval. These represent the restrictions that must be obeyed such as the total amount approved, max num transfers, merkle challenges, must own badges, etc.
  */
 export interface UserOutgoingApproval<T extends NumberType> {
-  toMappingId: string;
-  initiatedByMappingId: string;
+  toListId: string;
+  initiatedByListId: string;
   transferTimes: UintRange<T>[];
   badgeIds: UintRange<T>[];
   ownershipTimes: UintRange<T>[];
@@ -68,54 +86,58 @@ export interface UserOutgoingApproval<T extends NumberType> {
   approvalCriteria?: OutgoingApprovalCriteria<T>;
 }
 
+const defaultEmptyCriteria = {
+  "uri": "",
+  "customData": "",
+  "mustOwnBadges": [],
+  "approvalAmounts": {
+    "overallApprovalAmount": "0",
+    "perFromAddressApprovalAmount": "0",
+    "perToAddressApprovalAmount": "0",
+    "perInitiatedByAddressApprovalAmount": "0"
+  },
+  "maxNumTransfers": {
+    "overallMaxNumTransfers": "0",
+    "perFromAddressMaxNumTransfers": "0",
+    "perToAddressMaxNumTransfers": "0",
+    "perInitiatedByAddressMaxNumTransfers": "0"
+  },
+  "predeterminedBalances": {
+    "manualBalances": [],
+    "incrementedBalances": {
+      "startBalances": [
+      ],
+      "incrementBadgeIdsBy": "0",
+      "incrementOwnershipTimesBy": "0"
+    },
+    "orderCalculationMethod": {
+      "useMerkleChallengeLeafIndex": false,
+      "useOverallNumTransfers": false,
+      "usePerFromAddressNumTransfers": false,
+      "usePerInitiatedByAddressNumTransfers": false,
+      "usePerToAddressNumTransfers": false
+    }
+  },
+  "merkleChallenge": {
+    "root": "",
+    "expectedProofLength": "0",
+    "useCreatorAddressAsLeaf": false,
+    "maxUsesPerLeaf": "0",
+    "uri": "",
+    "customData": ""
+  },
+}
+
 export function convertUserOutgoingApproval<T extends NumberType, U extends NumberType>(transfer: UserOutgoingApproval<T>, convertFunction: (item: T) => U, populateOptionalFields?: boolean): UserOutgoingApproval<U> {
   const _transfer = populateOptionalFields ? {
     uri: '',
     customData: '',
     ...transfer,
-    fromMappingOptions: undefined,
+    fromListOptions: undefined,
   } as Required<UserOutgoingApproval<T>> : transfer
 
   const defaultOutgoingApprovalCriteria = {
-    "uri": "",
-    "customData": "",
-    "mustOwnBadges": [],
-    "approvalAmounts": {
-      "overallApprovalAmount": "0" as T,
-      "perFromAddressApprovalAmount": "0" as T,
-      "perToAddressApprovalAmount": "0" as T,
-      "perInitiatedByAddressApprovalAmount": "0" as T
-    },
-    "maxNumTransfers": {
-      "overallMaxNumTransfers": "0" as T,
-      "perFromAddressMaxNumTransfers": "0" as T,
-      "perToAddressMaxNumTransfers": "0" as T,
-      "perInitiatedByAddressMaxNumTransfers": "0" as T
-    },
-    "predeterminedBalances": {
-      "manualBalances": [],
-      "incrementedBalances": {
-        "startBalances": [
-        ],
-        "incrementBadgeIdsBy": "0" as T,
-        "incrementOwnershipTimesBy": "0" as T
-      },
-      "orderCalculationMethod": {
-        "useMerkleChallengeLeafIndex": false,
-        "useOverallNumTransfers": false,
-        "usePerFromAddressNumTransfers": false,
-        "usePerInitiatedByAddressNumTransfers": false,
-        "usePerToAddressNumTransfers": false
-      }
-    },
-    "merkleChallenge": {
-      "root": "",
-      "expectedProofLength": "0" as T,
-      "useCreatorAddressAsLeaf": false,
-      "maxUsesPerLeaf": "0" as T,
-      "uri": "",
-      "customData": ""
-    },
+    ...defaultEmptyCriteria as any,
     "requireToEqualsInitiatedBy": false,
     "requireToDoesNotEqualInitiatedBy": false,
   }
@@ -246,7 +268,7 @@ export function convertIncrementedBalances<T extends NumberType, U extends Numbe
  * @property {boolean} usePerFromAddressNumTransfers - Use the number of times this approval has been used by each from address as the order number. Ex: If this approval has been used 2 times by from address A, then the order number for the next transfer by from address A will be 3.
  * @property {boolean} usePerInitiatedByAddressNumTransfers - Use the number of times this approval has been used by each initiated by address as the order number. Ex: If this approval has been used 2 times by initiated by address A, then the order number for the next transfer by initiated by address A will be 3.
  * @property {boolean} useMerkleChallengeLeafIndex - Use the merkle challenge leaf index as the order number. Must specify ONE merkle challenge with the useLeafIndexForTransferOrder flag set to true. If so, we will use the leaf index of each merkle proof to calculate the order number.
- *                                                   This is used to reserve specific balances for specific leaves (such as codes or whitelist address leafs)
+ *                                                   This is used to reserve specific balances for specific leaves (such as codes or allowlist address leafs)
  */
 export interface PredeterminedOrderCalculationMethod {
   useOverallNumTransfers: boolean;
@@ -324,8 +346,8 @@ export function convertMaxNumTransfers<T extends NumberType, U extends NumberTyp
  * UserIncomingApproval represents a user's approved incoming transfer.
  *
  * @typedef {Object} UserIncomingApproval
- * @property {string} fromMappingId - The mapping ID for the user(s) who is sending the badges.
- * @property {string} initiatedByMappingId - The mapping ID for the user(s) who initiate the transfer.
+ * @property {string} fromListId - The list ID for the user(s) who is sending the badges.
+ * @property {string} initiatedByListId - The list ID for the user(s) who initiate the transfer.
  * @property {UintRange[]} transferTimes - The times of the transfer transaction.
  * @property {UintRange[]} badgeIds - The badge IDs to be transferred.
  * @property {UintRange[]} ownershipTimes - The ownership times of the badges being transferred
@@ -337,8 +359,8 @@ export function convertMaxNumTransfers<T extends NumberType, U extends NumberTyp
  * @property {IncomingApprovalCriteria[]} approvalCriteria - For allowed combinations, we also must check the details of the approval. These represent the restrictions that must be obeyed such as the total amount approved, max num transfers, merkle challenges, must own badges, etc.
  */
 export interface UserIncomingApproval<T extends NumberType> {
-  fromMappingId: string;
-  initiatedByMappingId: string;
+  fromListId: string;
+  initiatedByListId: string;
   transferTimes: UintRange<T>[];
   badgeIds: UintRange<T>[];
   ownershipTimes: UintRange<T>[];
@@ -355,50 +377,11 @@ export function convertUserIncomingApproval<T extends NumberType, U extends Numb
     uri: '',
     customData: '',
     ...transfer,
-    toMappingOptions: undefined,
+    toListOptions: undefined,
   } as Required<UserIncomingApproval<T>> : transfer
 
   const defaultIncomingApprovalCriteria = {
-
-    "uri": "",
-    "customData": "",
-    "mustOwnBadges": [],
-    "approvalAmounts": {
-      "overallApprovalAmount": "0" as T,
-      "perFromAddressApprovalAmount": "0" as T,
-      "perToAddressApprovalAmount": "0" as T,
-      "perInitiatedByAddressApprovalAmount": "0" as T
-    },
-    "maxNumTransfers": {
-      "overallMaxNumTransfers": "0" as T,
-      "perFromAddressMaxNumTransfers": "0" as T,
-      "perToAddressMaxNumTransfers": "0" as T,
-      "perInitiatedByAddressMaxNumTransfers": "0" as T
-    },
-    "predeterminedBalances": {
-      "manualBalances": [],
-      "incrementedBalances": {
-        "startBalances": [
-        ],
-        "incrementBadgeIdsBy": "0" as T,
-        "incrementOwnershipTimesBy": "0" as T
-      },
-      "orderCalculationMethod": {
-        "useMerkleChallengeLeafIndex": false,
-        "useOverallNumTransfers": false,
-        "usePerFromAddressNumTransfers": false,
-        "usePerInitiatedByAddressNumTransfers": false,
-        "usePerToAddressNumTransfers": false
-      }
-    },
-    "merkleChallenge": {
-      "root": "",
-      "expectedProofLength": "0" as T,
-      "useCreatorAddressAsLeaf": false,
-      "maxUsesPerLeaf": "0" as T,
-      "uri": "",
-      "customData": ""
-    },
+    ...defaultEmptyCriteria as any,
     "requireFromEqualsInitiatedBy": false,
     "requireFromDoesNotEqualInitiatedBy": false,
   }
@@ -455,9 +438,9 @@ export function convertIncomingApprovalCriteria<T extends NumberType, U extends 
  *
  * @typedef {Object} CollectionApproval
  *
- * @property {string} toMappingId - The mapping ID for the user(s) who is receiving the badges.
- * @property {string} fromMappingId - The mapping ID for the user(s) who is sending the badges.
- * @property {string} initiatedByMappingId - The mapping ID for the user(s) who initiate the transfer.
+ * @property {string} toListId - The list ID for the user(s) who is receiving the badges.
+ * @property {string} fromListId - The list ID for the user(s) who is sending the badges.
+ * @property {string} initiatedByListId - The list ID for the user(s) who initiate the transfer.
  *
  * @property {UintRange[]} transferTimes - The times of the transfer transaction.
  * @property {UintRange[]} badgeIds - The badge IDs to be transferred.
@@ -473,9 +456,9 @@ export function convertIncomingApprovalCriteria<T extends NumberType, U extends 
  * @property {ApprovalCriteria[]} approvalCriteria - For allowed combinations, we also must check the details of the approval. These represent the restrictions that must be obeyed such as the total amount approved, max num transfers, merkle challenges, must own badges, etc.
  */
 export interface CollectionApproval<T extends NumberType> {
-  toMappingId: string;
-  fromMappingId: string;
-  initiatedByMappingId: string;
+  toListId: string;
+  fromListId: string;
+  initiatedByListId: string;
   transferTimes: UintRange<T>[];
   badgeIds: UintRange<T>[];
   ownershipTimes: UintRange<T>[];
@@ -509,45 +492,7 @@ export function convertCollectionApproval<T extends NumberType, U extends Number
   } as Required<CollectionApproval<T>> : transfer
 
   const defaultApprovalCriteria = {
-    "uri": "",
-    "customData": "",
-    "mustOwnBadges": [],
-    "approvalAmounts": {
-      "overallApprovalAmount": "0" as T,
-      "perFromAddressApprovalAmount": "0" as T,
-      "perToAddressApprovalAmount": "0" as T,
-      "perInitiatedByAddressApprovalAmount": "0" as T
-    },
-    "maxNumTransfers": {
-      "overallMaxNumTransfers": "0" as T,
-      "perFromAddressMaxNumTransfers": "0" as T,
-      "perToAddressMaxNumTransfers": "0" as T,
-      "perInitiatedByAddressMaxNumTransfers": "0" as T
-    },
-    "predeterminedBalances": {
-      "manualBalances": [],
-      "incrementedBalances": {
-        "startBalances": [
-        ],
-        "incrementBadgeIdsBy": "0" as T,
-        "incrementOwnershipTimesBy": "0" as T
-      },
-      "orderCalculationMethod": {
-        "useMerkleChallengeLeafIndex": false,
-        "useOverallNumTransfers": false,
-        "usePerFromAddressNumTransfers": false,
-        "usePerInitiatedByAddressNumTransfers": false,
-        "usePerToAddressNumTransfers": false
-      }
-    },
-    "merkleChallenge": {
-      "root": "",
-      "expectedProofLength": "0" as T,
-      "useCreatorAddressAsLeaf": false,
-      "maxUsesPerLeaf": "0" as T,
-      "uri": "",
-      "customData": ""
-    },
+    ...defaultEmptyCriteria as any,
     "requireToEqualsInitiatedBy": false,
     "requireFromEqualsInitiatedBy": false,
     "requireToDoesNotEqualInitiatedBy": false,

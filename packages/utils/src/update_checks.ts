@@ -19,23 +19,23 @@ export function getPotentialUpdatesForTimelineValues(times: UintRange<bigint>[][
       usesBadgeIds: false,
       usesOwnershipTimes: false,
       usesTransferTimes: false,
-      usesToMapping: false,
-      usesFromMapping: false,
-      usesInitiatedByMapping: false,
-      usesAmountTrackerIdMapping: false,
-      usesChallengeTrackerIdMapping: false,
+      usesToList: false,
+      usesFromList: false,
+      usesInitiatedByList: false,
+      usesAmountTrackerIdList: false,
+      usesChallengeTrackerIdList: false,
 
-      permittedTimes: [],
-      forbiddenTimes: [],
+      permanentlyPermittedTimes: [],
+      permanentlyForbiddenTimes: [],
 
       badgeIds: [],
       ownershipTimes: [],
       transferTimes: [],
-      toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-      fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-      initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-      challengeTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-      amountTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
+      toList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+      fromList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+      initiatedByList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+      challengeTrackerIdList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+      amountTrackerIdList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
 
     });
   }
@@ -59,8 +59,8 @@ function getFirstMatchOnlyWithApprovalCriteria(permissions: UniversalPermission[
     const timelineTimes = GetUintRangesWithOptions(permission.timelineTimes, permission.usesTimelineTimes);
     const transferTimes = GetUintRangesWithOptions(permission.transferTimes, permission.usesTransferTimes);
     const ownershipTimes = GetUintRangesWithOptions(permission.ownershipTimes, permission.usesOwnershipTimes);
-    const permittedTimes = GetUintRangesWithOptions(permission.permittedTimes, true);
-    const forbiddenTimes = GetUintRangesWithOptions(permission.forbiddenTimes, true);
+    const permanentlyPermittedTimes = GetUintRangesWithOptions(permission.permanentlyPermittedTimes, true);
+    const permanentlyForbiddenTimes = GetUintRangesWithOptions(permission.permanentlyForbiddenTimes, true);
 
     for (const badgeId of badgeIds) {
       for (const timelineTime of timelineTimes) {
@@ -81,13 +81,13 @@ function getFirstMatchOnlyWithApprovalCriteria(permissions: UniversalPermission[
                 timelineTime: timelineTime,
                 transferTime: transferTime,
                 ownershipTime: ownershipTime,
-                toMapping: permission.toMapping,
-                fromMapping: permission.fromMapping,
-                initiatedByMapping: permission.initiatedByMapping,
-                amountTrackerIdMapping: permission.amountTrackerIdMapping,
-                challengeTrackerIdMapping: permission.challengeTrackerIdMapping,
-                permittedTimes: permittedTimes,
-                forbiddenTimes: forbiddenTimes,
+                toList: permission.toList,
+                fromList: permission.fromList,
+                initiatedByList: permission.initiatedByList,
+                amountTrackerIdList: permission.amountTrackerIdList,
+                challengeTrackerIdList: permission.challengeTrackerIdList,
+                permanentlyPermittedTimes: permanentlyPermittedTimes,
+                permanentlyForbiddenTimes: permanentlyForbiddenTimes,
                 arbitraryValue: arbValue,
               },
             ];
@@ -115,13 +115,13 @@ function getFirstMatchOnlyWithApprovalCriteria(permissions: UniversalPermission[
                 badgeId: overlap.overlap.badgeId,
                 transferTime: overlap.overlap.transferTime,
                 ownershipTime: overlap.overlap.ownershipTime,
-                toMapping: overlap.overlap.toMapping,
-                fromMapping: overlap.overlap.fromMapping,
-                initiatedByMapping: overlap.overlap.initiatedByMapping,
-                amountTrackerIdMapping: overlap.overlap.amountTrackerIdMapping,
-                challengeTrackerIdMapping: overlap.overlap.challengeTrackerIdMapping,
-                permittedTimes: permittedTimes,
-                forbiddenTimes: forbiddenTimes,
+                toList: overlap.overlap.toList,
+                fromList: overlap.overlap.fromList,
+                initiatedByList: overlap.overlap.initiatedByList,
+                amountTrackerIdList: overlap.overlap.amountTrackerIdList,
+                challengeTrackerIdList: overlap.overlap.challengeTrackerIdList,
+                permanentlyPermittedTimes: permanentlyPermittedTimes,
+                permanentlyForbiddenTimes: permanentlyForbiddenTimes,
                 arbitraryValue: newArbValue,
               });
             }
@@ -231,11 +231,11 @@ export function validateCollectionApprovalsUpdate(
       badgeIds: [x.badgeId],
       ownershipTimes: [x.ownershipTime],
       transferTimes: [x.transferTime],
-      toMapping: x.toMapping,
-      fromMapping: x.fromMapping,
-      initiatedByMapping: x.initiatedByMapping,
-      amountTrackerIdMapping: x.amountTrackerIdMapping,
-      challengeTrackerIdMapping: x.challengeTrackerIdMapping,
+      toList: x.toList,
+      fromList: x.fromList,
+      initiatedByList: x.initiatedByList,
+      amountTrackerIdList: x.amountTrackerIdList,
+      challengeTrackerIdList: x.challengeTrackerIdList,
     }
     return result;
   });
@@ -304,9 +304,9 @@ export function validateBadgeMetadataUpdate(
       badgeIds: [x.badgeId],
       ownershipTimes: [x.ownershipTime],
       transferTimes: [x.transferTime],
-      toMapping: x.toMapping,
-      fromMapping: x.fromMapping,
-      initiatedByMapping: x.initiatedByMapping,
+      toList: x.toList,
+      fromList: x.fromList,
+      initiatedByList: x.initiatedByList,
     }
     return result;
   });
@@ -342,12 +342,12 @@ export function validateCollectionMetadataUpdate(
         badgeId: { start: 1n, end: 1n },
         ownershipTime: { start: 1n, end: 1n },
         transferTime: { start: 1n, end: 1n },
-        toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-        fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-        initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-        amountTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-        challengeTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-        permittedTimes: [], forbiddenTimes: [], arbitraryValue: undefined
+        toList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+        fromList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+        initiatedByList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+        amountTrackerIdList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+        challengeTrackerIdList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+        permanentlyPermittedTimes: [], permanentlyForbiddenTimes: [], arbitraryValue: undefined
       });
     } else {
       let oldVal = oldValue as CollectionMetadata;
@@ -359,12 +359,12 @@ export function validateCollectionMetadataUpdate(
           badgeId: { start: 1n, end: 1n },
           ownershipTime: { start: 1n, end: 1n },
           transferTime: { start: 1n, end: 1n },
-          toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-          fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-          initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-          amountTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-          challengeTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-          permittedTimes: [], forbiddenTimes: [], arbitraryValue: undefined
+          toList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+          fromList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+          initiatedByList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+          amountTrackerIdList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+          challengeTrackerIdList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+          permanentlyPermittedTimes: [], permanentlyForbiddenTimes: [], arbitraryValue: undefined
         });
       }
     }
@@ -409,12 +409,12 @@ export function validateOffChainBalancesMetadataUpdate(
         badgeId: { start: 1n, end: 1n },
         ownershipTime: { start: 1n, end: 1n },
         transferTime: { start: 1n, end: 1n },
-        toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-        fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-        initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-        amountTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-        challengeTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-        permittedTimes: [], forbiddenTimes: [], arbitraryValue: undefined
+        toList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+        fromList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+        initiatedByList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+        amountTrackerIdList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+        challengeTrackerIdList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+        permanentlyPermittedTimes: [], permanentlyForbiddenTimes: [], arbitraryValue: undefined
       });
     } else {
       let oldVal = oldValue as OffChainBalancesMetadata;
@@ -426,12 +426,12 @@ export function validateOffChainBalancesMetadataUpdate(
           badgeId: { start: 1n, end: 1n },
           ownershipTime: { start: 1n, end: 1n },
           transferTime: { start: 1n, end: 1n },
-          toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-          fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-          initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-          amountTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-          challengeTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-          permittedTimes: [], forbiddenTimes: [], arbitraryValue: undefined
+          toList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+          fromList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+          initiatedByList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+          amountTrackerIdList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+          challengeTrackerIdList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+          permanentlyPermittedTimes: [], permanentlyForbiddenTimes: [], arbitraryValue: undefined
         });
       }
     }
@@ -463,12 +463,12 @@ export function getUpdatedStringCombinations(oldValue: any, newValue: any): Univ
       badgeId: { start: 1n, end: 1n },
       ownershipTime: { start: 1n, end: 1n },
       transferTime: { start: 1n, end: 1n },
-      toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-      fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-      initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-      amountTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-      challengeTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-      permittedTimes: [], forbiddenTimes: [], arbitraryValue: undefined
+      toList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+      fromList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+      initiatedByList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+      amountTrackerIdList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+      challengeTrackerIdList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+      permanentlyPermittedTimes: [], permanentlyForbiddenTimes: [], arbitraryValue: undefined
     });
   }
   return x;
@@ -484,12 +484,12 @@ export function getUpdatedBoolCombinations(oldValue: any, newValue: any): Univer
       badgeId: { start: 1n, end: 1n },
       ownershipTime: { start: 1n, end: 1n },
       transferTime: { start: 1n, end: 1n },
-      toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-      fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-      initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-      amountTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-      challengeTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-      permittedTimes: [], forbiddenTimes: [], arbitraryValue: undefined
+      toList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+      fromList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+      initiatedByList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+      amountTrackerIdList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+      challengeTrackerIdList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+      permanentlyPermittedTimes: [], permanentlyForbiddenTimes: [], arbitraryValue: undefined
     }];
   }
   return [];
@@ -576,12 +576,12 @@ export function validateStandardsUpdate(
         badgeId: { start: 1n, end: 1n },
         ownershipTime: { start: 1n, end: 1n },
         transferTime: { start: 1n, end: 1n },
-        toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-        fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-        initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-        amountTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-        challengeTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-        permittedTimes: [], forbiddenTimes: [], arbitraryValue: undefined
+        toList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+        fromList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+        initiatedByList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+        amountTrackerIdList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+        challengeTrackerIdList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+        permanentlyPermittedTimes: [], permanentlyForbiddenTimes: [], arbitraryValue: undefined
       }];
     } else if (oldValue.length != newValue.length) {
       return [{
@@ -589,12 +589,12 @@ export function validateStandardsUpdate(
         badgeId: { start: 1n, end: 1n },
         ownershipTime: { start: 1n, end: 1n },
         transferTime: { start: 1n, end: 1n },
-        toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-        fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-        initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-        amountTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-        challengeTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-        permittedTimes: [], forbiddenTimes: [], arbitraryValue: undefined
+        toList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+        fromList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+        initiatedByList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+        amountTrackerIdList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+        challengeTrackerIdList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+        permanentlyPermittedTimes: [], permanentlyForbiddenTimes: [], arbitraryValue: undefined
       }];
     } else {
       for (let i = 0; i < oldValue.length; i++) {
@@ -604,12 +604,12 @@ export function validateStandardsUpdate(
             badgeId: { start: 1n, end: 1n },
             ownershipTime: { start: 1n, end: 1n },
             transferTime: { start: 1n, end: 1n },
-            toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-            fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-            initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-            amountTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-            challengeTrackerIdMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-            permittedTimes: [], forbiddenTimes: [], arbitraryValue: undefined
+            toList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+            fromList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+            initiatedByList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+            amountTrackerIdList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+            challengeTrackerIdList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+            permanentlyPermittedTimes: [], permanentlyForbiddenTimes: [], arbitraryValue: undefined
           }];
         }
       }

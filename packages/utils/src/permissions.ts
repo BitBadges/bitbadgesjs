@@ -1,5 +1,5 @@
-import { ActionPermission, AddressMapping, BadgeMetadata, BalancesActionPermission, TimedUpdatePermission, TimedUpdateWithBadgeIdsPermission, UintRange } from "bitbadgesjs-proto";
-import { getReservedAddressMapping, getReservedTrackerMapping } from "./addressMappings";
+import { ActionPermission, AddressList, BadgeMetadata, BalancesActionPermission, TimedUpdatePermission, TimedUpdateWithBadgeIdsPermission, UintRange } from "bitbadgesjs-proto";
+import { getReservedAddressList, getReservedTrackerList } from "./addressLists";
 import { UniversalPermission } from "./overlaps";
 import { CollectionApprovalPermissionWithDetails, CollectionApprovalWithDetails, UserIncomingApprovalPermissionWithDetails, UserOutgoingApprovalPermissionWithDetails } from "./types/collections";
 import { UserIncomingApprovalWithDetails, UserOutgoingApprovalWithDetails } from "./types/users";
@@ -7,40 +7,40 @@ import { searchUintRangesForId } from "./uintRanges";
 
 
 /**
- * Simply checks if Date.now() is in the forbiddenTimes provided. If this returns false, the permission is permitted. Else, it is explicitly forbidden.
+ * Simply checks if Date.now() is in the permanentlyForbiddenTimes provided. If this returns false, the permission is permitted. Else, it is explicitly forbidden.
  *
- * @param {UintRange<bigint>[]} forbiddenTimes - The forbidden times to check.
+ * @param {UintRange<bigint>[]} permanentlyForbiddenTimes - The forbidden times to check.
  *
  * @category Validate Permissions
  */
-export function isCurrentTimeForbidden(forbiddenTimes: UintRange<bigint>[]) {
+export function isCurrentTimeForbidden(permanentlyForbiddenTimes: UintRange<bigint>[]) {
   const currentTime = BigInt(Date.now());
 
-  const [_, found] = searchUintRangesForId(currentTime, forbiddenTimes);
+  const [_, found] = searchUintRangesForId(currentTime, permanentlyForbiddenTimes);
   return found;
 }
 
 
 const AllDefaultValues = {
-  permittedTimes: [],
-  forbiddenTimes: [],
+  permanentlyPermittedTimes: [],
+  permanentlyForbiddenTimes: [],
   badgeIds: [],
   timelineTimes: [],
   transferTimes: [],
   ownershipTimes: [],
-  fromMapping: { mappingId: 'All', addresses: ["Mint"], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-  toMapping: { mappingId: 'All', addresses: ["Mint"], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-  initiatedByMapping: { mappingId: 'All', addresses: ["Mint"], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-  amountTrackerIdMapping: { mappingId: 'All', addresses: ["Mint"], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-  challengeTrackerIdMapping: { mappingId: 'All', addresses: ["Mint"], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-  usesAmountTrackerIdMapping: false,
-  usesChallengeTrackerIdMapping: false,
+  fromList: { listId: 'All', addresses: ["Mint"], allowlist: false, uri: "", customData: "", createdBy: "" },
+  toList: { listId: 'All', addresses: ["Mint"], allowlist: false, uri: "", customData: "", createdBy: "" },
+  initiatedByList: { listId: 'All', addresses: ["Mint"], allowlist: false, uri: "", customData: "", createdBy: "" },
+  amountTrackerIdList: { listId: 'All', addresses: ["Mint"], allowlist: false, uri: "", customData: "", createdBy: "" },
+  challengeTrackerIdList: { listId: 'All', addresses: ["Mint"], allowlist: false, uri: "", customData: "", createdBy: "" },
+  usesAmountTrackerIdList: false,
+  usesChallengeTrackerIdList: false,
   usesBadgeIds: false,
   usesTimelineTimes: false,
   usesTransferTimes: false, // Replace this with the actual usesTransferTimes property from actionPermission
-  usesToMapping: false, // Replace this with the actual usesToMapping property from actionPermission
-  usesFromMapping: false, // Replace this with the actual usesFromMapping property from actionPermission
-  usesInitiatedByMapping: false, // Replace this with the actual usesInitiatedByMapping property from actionPermission
+  usesToList: false, // Replace this with the actual usesToList property from actionPermission
+  usesFromList: false, // Replace this with the actual usesFromList property from actionPermission
+  usesInitiatedByList: false, // Replace this with the actual usesInitiatedByList property from actionPermission
   usesOwnershipTimes: false, // Replace this with the actual usesOwnershipTimes property from actionPermission
   arbitraryValue: undefined, // Replace this with the actual arbitraryValue property from actionPermission
 }
@@ -60,25 +60,25 @@ export const castActionPermissionToUniversalPermission = (actionPermission: Acti
 
     castedPermissions.push({
 
-      permittedTimes: permission.permittedTimes,
-      forbiddenTimes: permission.forbiddenTimes,
+      permanentlyPermittedTimes: permission.permanentlyPermittedTimes,
+      permanentlyForbiddenTimes: permission.permanentlyForbiddenTimes,
       badgeIds: [],
       timelineTimes: [],
       transferTimes: [],
       ownershipTimes: [],
-      fromMapping: { mappingId: 'All', addresses: ["Mint"], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-      toMapping: { mappingId: 'All', addresses: ["Mint"], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-      initiatedByMapping: { mappingId: 'All', addresses: ["Mint"], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-      amountTrackerIdMapping: { mappingId: 'All', addresses: ["Mint"], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-      challengeTrackerIdMapping: { mappingId: 'All', addresses: ["Mint"], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-      usesAmountTrackerIdMapping: false,
-      usesChallengeTrackerIdMapping: false,
+      fromList: { listId: 'All', addresses: ["Mint"], allowlist: false, uri: "", customData: "", createdBy: "" },
+      toList: { listId: 'All', addresses: ["Mint"], allowlist: false, uri: "", customData: "", createdBy: "" },
+      initiatedByList: { listId: 'All', addresses: ["Mint"], allowlist: false, uri: "", customData: "", createdBy: "" },
+      amountTrackerIdList: { listId: 'All', addresses: ["Mint"], allowlist: false, uri: "", customData: "", createdBy: "" },
+      challengeTrackerIdList: { listId: 'All', addresses: ["Mint"], allowlist: false, uri: "", customData: "", createdBy: "" },
+      usesAmountTrackerIdList: false,
+      usesChallengeTrackerIdList: false,
       usesBadgeIds: false,
       usesTimelineTimes: false,
       usesTransferTimes: false, // Replace this with the actual usesTransferTimes property from actionPermission
-      usesToMapping: false, // Replace this with the actual usesToMapping property from actionPermission
-      usesFromMapping: false, // Replace this with the actual usesFromMapping property from actionPermission
-      usesInitiatedByMapping: false, // Replace this with the actual usesInitiatedByMapping property from actionPermission
+      usesToList: false, // Replace this with the actual usesToList property from actionPermission
+      usesFromList: false, // Replace this with the actual usesFromList property from actionPermission
+      usesInitiatedByList: false, // Replace this with the actual usesInitiatedByList property from actionPermission
       usesOwnershipTimes: false, // Replace this with the actual usesOwnershipTimes property from actionPermission
       arbitraryValue: undefined, // Replace this with the actual arbitraryValue property from actionPermission
     }
@@ -105,22 +105,22 @@ export const castCollectionApprovalPermissionToUniversalPermission = (
       ...AllDefaultValues,
       transferTimes: collectionPermission.transferTimes,
       ownershipTimes: collectionPermission.ownershipTimes,
-      fromMapping: collectionPermission.fromMapping,
-      toMapping: collectionPermission.toMapping,
-      initiatedByMapping: collectionPermission.initiatedByMapping,
+      fromList: collectionPermission.fromList,
+      toList: collectionPermission.toList,
+      initiatedByList: collectionPermission.initiatedByList,
       badgeIds: collectionPermission.badgeIds,
-      amountTrackerIdMapping: getReservedTrackerMapping(collectionPermission.amountTrackerId),
-      challengeTrackerIdMapping: getReservedTrackerMapping(collectionPermission.challengeTrackerId),
-      usesAmountTrackerIdMapping: true,
-      usesChallengeTrackerIdMapping: true,
+      amountTrackerIdList: getReservedTrackerList(collectionPermission.amountTrackerId),
+      challengeTrackerIdList: getReservedTrackerList(collectionPermission.challengeTrackerId),
+      usesAmountTrackerIdList: true,
+      usesChallengeTrackerIdList: true,
       usesBadgeIds: true,
       usesTransferTimes: true,
       usesOwnershipTimes: true,
-      usesToMapping: true,
-      usesFromMapping: true,
-      usesInitiatedByMapping: true,
-      permittedTimes: collectionPermission.permittedTimes,
-      forbiddenTimes: collectionPermission.forbiddenTimes,
+      usesToList: true,
+      usesFromList: true,
+      usesInitiatedByList: true,
+      permanentlyPermittedTimes: collectionPermission.permanentlyPermittedTimes,
+      permanentlyForbiddenTimes: collectionPermission.permanentlyForbiddenTimes,
       arbitraryValue: undefined,
     });
 
@@ -149,8 +149,8 @@ export const castTimedUpdateWithBadgeIdsPermissionToUniversalPermission = (
       badgeIds: timedPermission.badgeIds,
       usesTimelineTimes: true,
       usesBadgeIds: true,
-      permittedTimes: timedPermission.permittedTimes,
-      forbiddenTimes: timedPermission.forbiddenTimes,
+      permanentlyPermittedTimes: timedPermission.permanentlyPermittedTimes,
+      permanentlyForbiddenTimes: timedPermission.permanentlyForbiddenTimes,
     });
   }
   return castedPermissions;
@@ -175,8 +175,8 @@ export const castTimedUpdatePermissionToUniversalPermission = (
       ...AllDefaultValues,
       timelineTimes: timedPermission.timelineTimes,
       usesTimelineTimes: true,
-      permittedTimes: timedPermission.permittedTimes,
-      forbiddenTimes: timedPermission.forbiddenTimes,
+      permanentlyPermittedTimes: timedPermission.permanentlyPermittedTimes,
+      permanentlyForbiddenTimes: timedPermission.permanentlyForbiddenTimes,
 
     });
   }
@@ -203,8 +203,8 @@ export const castBalancesActionPermissionToUniversalPermission = (
       ownershipTimes: permission.ownershipTimes,
       usesBadgeIds: true,
       usesOwnershipTimes: true,
-      permittedTimes: permission.permittedTimes,
-      forbiddenTimes: permission.forbiddenTimes,
+      permanentlyPermittedTimes: permission.permanentlyPermittedTimes,
+      permanentlyForbiddenTimes: permission.permanentlyForbiddenTimes,
     });
   }
   return castedPermissions;
@@ -226,18 +226,18 @@ export const castCollectionApprovalToUniversalPermission = (
       badgeIds: approval.badgeIds,
       transferTimes: approval.transferTimes,
       ownershipTimes: approval.ownershipTimes,
-      fromMapping: approval.fromMapping,
-      toMapping: approval.toMapping,
-      initiatedByMapping: approval.initiatedByMapping,
-      amountTrackerIdMapping: getReservedTrackerMapping(approval.amountTrackerId) as AddressMapping,
-      challengeTrackerIdMapping: getReservedTrackerMapping(approval.challengeTrackerId) as AddressMapping,
-      usesAmountTrackerIdMapping: true,
-      usesChallengeTrackerIdMapping: true,
+      fromList: approval.fromList,
+      toList: approval.toList,
+      initiatedByList: approval.initiatedByList,
+      amountTrackerIdList: getReservedTrackerList(approval.amountTrackerId) as AddressList,
+      challengeTrackerIdList: getReservedTrackerList(approval.challengeTrackerId) as AddressList,
+      usesAmountTrackerIdList: true,
+      usesChallengeTrackerIdList: true,
       usesBadgeIds: true,
       usesTransferTimes: true,
-      usesToMapping: true,
-      usesFromMapping: true,
-      usesInitiatedByMapping: true,
+      usesToList: true,
+      usesFromList: true,
+      usesInitiatedByList: true,
       usesOwnershipTimes: true,
       arbitraryValue: {
         approvalId: approval.approvalId,
@@ -269,18 +269,18 @@ export const castUserOutgoingApprovalsToUniversalPermission = (
       badgeIds: approval.badgeIds,
       transferTimes: approval.transferTimes,
       ownershipTimes: approval.ownershipTimes,
-      fromMapping: getReservedAddressMapping(fromAddress) as AddressMapping,
-      toMapping: approval.toMapping,
-      initiatedByMapping: approval.initiatedByMapping,
-      amountTrackerIdMapping: getReservedTrackerMapping(approval.amountTrackerId) as AddressMapping,
-      challengeTrackerIdMapping: getReservedTrackerMapping(approval.challengeTrackerId) as AddressMapping,
-      usesAmountTrackerIdMapping: true,
-      usesChallengeTrackerIdMapping: true,
+      fromList: getReservedAddressList(fromAddress) as AddressList,
+      toList: approval.toList,
+      initiatedByList: approval.initiatedByList,
+      amountTrackerIdList: getReservedTrackerList(approval.amountTrackerId) as AddressList,
+      challengeTrackerIdList: getReservedTrackerList(approval.challengeTrackerId) as AddressList,
+      usesAmountTrackerIdList: true,
+      usesChallengeTrackerIdList: true,
       usesBadgeIds: true,
       usesTransferTimes: true,
-      usesToMapping: true,
-      usesFromMapping: true,
-      usesInitiatedByMapping: true,
+      usesToList: true,
+      usesFromList: true,
+      usesInitiatedByList: true,
       usesOwnershipTimes: true,
       arbitraryValue: {
         approvalId: approval.approvalId,
@@ -306,8 +306,8 @@ export const castUserIncomingApprovalPermissionToCollectionApprovalPermission = 
   return userIncomingApprovals.map((approval) => {
     return {
       ...approval,
-      toMapping: getReservedAddressMapping(toAddress) as AddressMapping,
-      toMappingId: toAddress,
+      toList: getReservedAddressList(toAddress) as AddressList,
+      toListId: toAddress,
     }
   }
   );
@@ -325,8 +325,8 @@ export const castUserOutgoingApprovalPermissionToCollectionApprovalPermission = 
   return userOutgoingApprovals.map((approval) => {
     return {
       ...approval,
-      fromMapping: getReservedAddressMapping(fromAddress) as AddressMapping,
-      fromMappingId: fromAddress,
+      fromList: getReservedAddressList(fromAddress) as AddressList,
+      fromListId: fromAddress,
     }
   }
   );
@@ -350,18 +350,18 @@ export const castUserIncomingApprovalsToUniversalPermission = (
       badgeIds: approval.badgeIds,
       transferTimes: approval.transferTimes,
       ownershipTimes: approval.ownershipTimes,
-      fromMapping: approval.fromMapping,
-      toMapping: getReservedAddressMapping(toAddress) as AddressMapping,
-      initiatedByMapping: approval.initiatedByMapping,
-      amountTrackerIdMapping: getReservedTrackerMapping(approval.amountTrackerId) as AddressMapping,
-      challengeTrackerIdMapping: getReservedTrackerMapping(approval.challengeTrackerId) as AddressMapping,
-      usesAmountTrackerIdMapping: true,
-      usesChallengeTrackerIdMapping: true,
+      fromList: approval.fromList,
+      toList: getReservedAddressList(toAddress) as AddressList,
+      initiatedByList: approval.initiatedByList,
+      amountTrackerIdList: getReservedTrackerList(approval.amountTrackerId) as AddressList,
+      challengeTrackerIdList: getReservedTrackerList(approval.challengeTrackerId) as AddressList,
+      usesAmountTrackerIdList: true,
+      usesChallengeTrackerIdList: true,
       usesBadgeIds: true,
       usesTransferTimes: true,
-      usesToMapping: true,
-      usesFromMapping: true,
-      usesInitiatedByMapping: true,
+      usesToList: true,
+      usesFromList: true,
+      usesInitiatedByList: true,
       usesOwnershipTimes: true,
       arbitraryValue: {
         approvalCriteria: approval.approvalCriteria,

@@ -310,8 +310,8 @@ export function validateUniversalPermissionUpdate(
     const oldPermission = overlapObj.firstDetails;
     const newPermission = overlapObj.secondDetails;
 
-    const [leftoverPermittedTimes] = removeUintRangeFromUintRange(newPermission.permittedTimes, oldPermission.permittedTimes);
-    const [leftoverForbiddenTimes] = removeUintRangeFromUintRange(newPermission.forbiddenTimes, oldPermission.forbiddenTimes);
+    const [leftoverPermittedTimes] = removeUintRangeFromUintRange(newPermission.permanentlyPermittedTimes, oldPermission.permanentlyPermittedTimes);
+    const [leftoverForbiddenTimes] = removeUintRangeFromUintRange(newPermission.permanentlyForbiddenTimes, oldPermission.permanentlyForbiddenTimes);
 
     if (leftoverPermittedTimes.length > 0 || leftoverForbiddenTimes.length > 0) {
       let errMsg = `Permission ${getPermissionString(oldPermission)} found in both new and old permissions but `;
@@ -360,51 +360,51 @@ function getPermissionString(permission: UniversalPermissionDetails): string {
     str += `ownershipTime: ${permission.ownershipTime.start} `;
   }
 
-  if (permission.toMapping) {
-    str += "toMapping: ";
-    if (!permission.toMapping.includeAddresses) {
-      str += `${permission.toMapping.addresses.length} addresses `;
+  if (permission.toList) {
+    str += "toList: ";
+    if (!permission.toList.allowlist) {
+      str += `${permission.toList.addresses.length} addresses `;
     } else {
-      str += `all except ${permission.toMapping.addresses.length} addresses `;
+      str += `all except ${permission.toList.addresses.length} addresses `;
     }
 
-    if (permission.toMapping.addresses.length > 0 && permission.toMapping.addresses.length <= 5) {
+    if (permission.toList.addresses.length > 0 && permission.toList.addresses.length <= 5) {
       str += "(";
-      for (const address of permission.toMapping.addresses) {
+      for (const address of permission.toList.addresses) {
         str += address + " ";
       }
       str += ")";
     }
   }
 
-  if (permission.fromMapping) {
-    str += "fromMapping: ";
-    if (!permission.fromMapping.includeAddresses) {
-      str += `${permission.fromMapping.addresses.length} addresses `;
+  if (permission.fromList) {
+    str += "fromList: ";
+    if (!permission.fromList.allowlist) {
+      str += `${permission.fromList.addresses.length} addresses `;
     } else {
-      str += `all except ${permission.fromMapping.addresses.length} addresses `;
+      str += `all except ${permission.fromList.addresses.length} addresses `;
     }
 
-    if (permission.fromMapping.addresses.length > 0 && permission.fromMapping.addresses.length <= 5) {
+    if (permission.fromList.addresses.length > 0 && permission.fromList.addresses.length <= 5) {
       str += "(";
-      for (const address of permission.fromMapping.addresses) {
+      for (const address of permission.fromList.addresses) {
         str += address + " ";
       }
       str += ")";
     }
   }
 
-  if (permission.initiatedByMapping) {
-    str += "initiatedByMapping: ";
-    if (!permission.initiatedByMapping.includeAddresses) {
-      str += `${permission.initiatedByMapping.addresses.length} addresses `;
+  if (permission.initiatedByList) {
+    str += "initiatedByList: ";
+    if (!permission.initiatedByList.allowlist) {
+      str += `${permission.initiatedByList.addresses.length} addresses `;
     } else {
-      str += `all except ${permission.initiatedByMapping.addresses.length} addresses `;
+      str += `all except ${permission.initiatedByList.addresses.length} addresses `;
     }
 
-    if (permission.initiatedByMapping.addresses.length > 0 && permission.initiatedByMapping.addresses.length <= 5) {
+    if (permission.initiatedByList.addresses.length > 0 && permission.initiatedByList.addresses.length <= 5) {
       str += "(";
-      for (const address of permission.initiatedByMapping.addresses) {
+      for (const address of permission.initiatedByList.addresses) {
         str += address + " ";
       }
       str += ")";

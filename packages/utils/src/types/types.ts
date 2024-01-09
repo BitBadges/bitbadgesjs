@@ -1,4 +1,4 @@
-import { NumberType, UserBalance, convertUserBalance } from "bitbadgesjs-proto";
+import { NumberType, UserBalanceStore, convertUserBalanceStore } from "bitbadgesjs-proto";
 import { BitBadgesCollection, convertBitBadgesCollection } from "./collections";
 import { BitBadgesUserInfo, convertBitBadgesUserInfo } from "./users";
 
@@ -49,7 +49,7 @@ export function convertAccountMap<T extends NumberType, U extends NumberType>(it
  * @category API / Indexer
  */
 export interface BalancesMap<T extends NumberType> {
-  [cosmosAddress: string]: UserBalance<T> | undefined;
+  [cosmosAddress: string]: UserBalanceStore<T> | undefined;
 }
 
 /**
@@ -57,7 +57,7 @@ export interface BalancesMap<T extends NumberType> {
  */
 export function convertBalancesMap<T extends NumberType, U extends NumberType>(item: BalancesMap<T>, convertFunction: (item: T) => U): BalancesMap<U> {
   return Object.fromEntries(Object.entries(item).map(([key, value]) => {
-    return [key, value ? convertUserBalance(value, convertFunction) : undefined];
+    return [key, value ? convertUserBalanceStore(value, convertFunction) : undefined];
   }));
 }
 
@@ -94,7 +94,7 @@ export enum TransactionStatus {
  *
  * @property {string} None - No distribution method is set
  * @property {string} FirstComeFirstServe - Badges are distributed on a first come first serve basis
- * @property {string} Whitelist - Badges are distributed to a whitelist of addresses
+ * @property {string} Allowlist - Badges are distributed to a allowlist of addresses
  * @property {string} Codes - Badges are distributed to addresses that have a code / password
  * @property {string} Unminted - Do nothing. Badges are not distributed.
  * @property {string} JSON - Upload a JSON file to specify how to distribute badges
@@ -105,7 +105,7 @@ export enum TransactionStatus {
 export enum DistributionMethod {
   None = 'None',
   FirstComeFirstServe = 'First Come First Serve',
-  Whitelist = 'Whitelist',
+  Allowlist = 'Allowlist',
   Codes = 'Codes',
   Unminted = 'Unminted',
   JSON = 'JSON',

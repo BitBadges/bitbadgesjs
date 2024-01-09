@@ -1,12 +1,13 @@
 import { DeliverTxResponse } from "@cosmjs/stargate"
-import { AddressMapping, AmountTrackerIdDetails, NumberType, Protocol, UintRange, convertUintRange } from "bitbadgesjs-proto"
+import { AddressList, AmountTrackerIdDetails, NumberType, Protocol, UintRange, convertUintRange } from "bitbadgesjs-proto"
 
 import { ChallengeParams, VerifyChallengeOptions, convertChallengeParams } from "blockin"
+import { BatchBadgeDetails } from "../batch-utils"
 import { BroadcastPostBody } from "../node-rest-api/broadcast"
 import { TransferActivityDoc, convertTransferActivityDoc } from "./activity"
-import { BadgeMetadataDetails, BitBadgesCollection, convertBadgeMetadataDetails, convertBitBadgesCollection } from "./collections"
-import { AddressMappingEditKey, ApprovalsTrackerDoc, BalanceDocWithDetails, ChallengeDetails, ChallengeTrackerIdDetails, FollowDetailsDoc, MerkleChallengeIdDetails, MerkleChallengeDoc, QueueDoc, StatusDoc, convertApprovalsTrackerDoc, convertBalanceDocWithDetails, convertFollowDetailsDoc, convertMerkleChallengeDoc, convertQueueDoc, convertStatusDoc, ClaimAlertDoc, convertClaimAlertDoc, RefreshDoc, convertRefreshDoc } from "./db"
-import { AddressMappingWithMetadata, Metadata, convertAddressMappingWithMetadata, convertMetadata } from "./metadata"
+import { BadgeMetadataDetails, BitBadgesCollection, convertBitBadgesCollection } from "./collections"
+import { AddressListEditKey, BalanceDocWithDetails, ChallengeDetails, ChallengeTrackerIdDetails, ClaimAlertDoc, CustomListPage, CustomPage, FollowDetailsDoc, QueueDoc, RefreshDoc, StatusDoc, convertBalanceDocWithDetails, convertClaimAlertDoc, convertFollowDetailsDoc, convertQueueDoc, convertRefreshDoc, convertStatusDoc } from "./db"
+import { AddressListWithMetadata, Metadata, convertAddressListWithMetadata, convertMetadata } from "./metadata"
 import { OffChainBalancesMap } from "./transfers"
 import { SupportedChain } from "./types"
 import { BitBadgesUserInfo, convertBitBadgesUserInfo } from "./users"
@@ -24,7 +25,7 @@ import { BitBadgesUserInfo, convertBitBadgesUserInfo } from "./users"
  */
 export interface ErrorResponse {
   /**
-   * Serialized error object for debugging purposes. Advanced users can use this to debug issues.
+   * Serialized error object for debugging purposes. Technical users can use this to debug issues.
    */
   error?: any;
   /**
@@ -47,7 +48,7 @@ export interface GetStatusRouteRequestBody { }
  */
 export interface GetStatusRouteSuccessResponse<T extends NumberType> {
   /**
-   * Represents the status Docrmation.
+   * Includes status details about the indexer / blockchain.
    */
   status: StatusDoc<T>;
 }
@@ -75,10 +76,15 @@ export function convertGetStatusRouteSuccessResponse<T extends NumberType, U ext
  * @category API / Indexer
  */
 export interface GetSearchRouteRequestBody {
+  //If true, we will skip all collection queries.
   noCollections?: boolean;
+  //If true, we will skip all account queries.
   noAccounts?: boolean;
-  noAddressMappings?: boolean;
+  //If true, we will skip all address list queries.
+  noAddressLists?: boolean;
+  //If true, we will skip all badge queries.
   noBadges?: boolean;
+  //If true, we will limit collection results to a single collection.
   specificCollectionId?: NumberType;
 }
 
@@ -90,7 +96,7 @@ export interface GetSearchRouteRequestBody {
 export interface GetSearchRouteSuccessResponse<T extends NumberType> {
   collections: BitBadgesCollection<T>[],
   accounts: BitBadgesUserInfo<T>[],
-  addressMappings: AddressMappingWithMetadata<T>[],
+  addressLists: AddressListWithMetadata<T>[],
   badges: {
     badgeIds: UintRange<T>[],
     collection: BitBadgesCollection<T>,
@@ -115,7 +121,7 @@ export function convertGetSearchRouteSuccessResponse<T extends NumberType, U ext
     ...item,
     collections: item.collections.map((collection) => convertBitBadgesCollection(collection, convertFunction)),
     accounts: item.accounts.map((account) => convertBitBadgesUserInfo(account, convertFunction)),
-    addressMappings: item.addressMappings.map((addressMapping) => convertAddressMappingWithMetadata(addressMapping, convertFunction)),
+    addressLists: item.addressLists.map((addressList) => convertAddressListWithMetadata(addressList, convertFunction)),
     badges: item.badges.map((badge) => ({
       badgeIds: badge.badgeIds.map((badgeId) => convertUintRange(badgeId, convertFunction)),
       collection: convertBitBadgesCollection(badge.collection, convertFunction),
@@ -140,7 +146,19 @@ export interface MetadataFetchOptions {
    */
   doNotFetchCollectionMetadata?: boolean;
   /**
-   * If present, the metadata corresponding to the specified metadata IDs will be fetched. See documentation for how to determine metadata IDs.
+   * If present, the metadata corresponding to the specified metadata IDs will be fetched.
+   * Metadata IDs are helpful when determining UNQIUE URIs to be fetched.
+   *
+   * If badges 1-10000 all share the same URI, they will have the same single metadata ID.
+   * If badge 1 has a different URI than badges 2-10000, badge 1 will have a different metadata ID than the rest/
+   *
+   * We scan in increasing order of badge IDs, so metadata ID 1 will be for badge 1-X, metadata ID 2 will be for badge X+1-Y, etc.
+   *
+   * ID 0 = Collection metadata fetch
+   * ID 1 = First badge metadata fetch
+   * ID 2 = Second badge metadata fetch (if present)
+   * And so on
+   * Learn more in documentation.
    */
   metadataIds?: NumberType[] | UintRange<NumberType>[];
   /**
@@ -158,7 +176,7 @@ export interface MetadataFetchOptions {
  *
  * @category API / Indexer
  */
-export type CollectionViewKey = 'latestActivity' | 'latestAnnouncements' | 'latestReviews' | 'owners' | 'merkleChallenges' | 'approvalsTrackers';
+export type CollectionViewKey = 'transferActivity' | 'reviews' | 'owners';
 
 /**
  * Defines the options for fetching additional collection details.
@@ -168,18 +186,18 @@ export type CollectionViewKey = 'latestActivity' | 'latestAnnouncements' | 'late
  * If the bookmark is not supplied, the first page will be returned.
  *
  * We support the following views:
- * - `latestActivity` - Fetches the latest activity for the collection.
+ * - `transferActivity` - Fetches the latest activity for the collection.
  * - `latestAnnouncements` - Fetches the latest announcements for the collection.
- * - `latestReviews` - Fetches the latest reviews for the collection.
+ * - `reviews` - Fetches the latest reviews for the collection.
  * - `owners` - Fetches the owners of the collection sequentially in random order.
  * - `merkleChallenges` - Fetches the merkle challenges for the collection in random order.
- * - `approvalsTrackers` - Fetches the approvals trackers for the collection in random order.
+ * - `approvalTrackers` - Fetches the approvals trackers for the collection in random order.
  *
  * @typedef {Object} GetAdditionalCollectionDetailsRequestBody
  * @property {{ viewType: string, bookmark: string }[]} [viewsToFetch] - If present, the specified views will be fetched.
  * @property {boolean} [fetchTotalAndMintBalances] - If true, the total and mint balances will be fetched.
- * @property {string[]} [merkleChallengeIdsToFetch] - If present, the merkle challenges corresponding to the specified merkle challenge IDs will be fetched.
- * @property {AmountTrackerIdDetails<NumberType>[]} [approvalsTrackerIdsToFetch] - If present, the approvals trackers corresponding to the specified approvals tracker IDs will be fetched.
+ * @property {string[]} [challengeTrackersToFetch] - If present, the merkle challenges corresponding to the specified merkle challenge IDs will be fetched.
+ * @property {AmountTrackerIdDetails<NumberType>[]} [approvalTrackersToFetch] - If present, the approvals trackers corresponding to the specified approvals tracker IDs will be fetched.
  * @category API / Indexer
  */
 export interface GetAdditionalCollectionDetailsRequestBody {
@@ -187,23 +205,28 @@ export interface GetAdditionalCollectionDetailsRequestBody {
    * If present, the specified views will be fetched.
    */
   viewsToFetch?: {
+    //The base view type to fetch.
     viewType: CollectionViewKey;
+    //A unique view ID. This is used for pagination. All fetches w/ same ID should be made with same criteria.
     viewId: string;
+    //A bookmark to pass in for pagination. "" for first request.
     bookmark: string;
   }[];
 
   /**
    * If true, the total and mint balances will be fetched and will be put in owners[].
+   *
+   * collection.owners.find(x => x.cosmosAddresss === 'Mint')
    */
   fetchTotalAndMintBalances?: boolean;
   /**
    * If present, the merkle challenges corresponding to the specified merkle challenge IDs will be fetched.
    */
-  merkleChallengeIdsToFetch?: ChallengeTrackerIdDetails<NumberType>[];
+  challengeTrackersToFetch?: ChallengeTrackerIdDetails<NumberType>[];
   /**
    * If present, the approvals trackers corresponding to the specified approvals tracker IDs will be fetched.
    */
-  approvalsTrackerIdsToFetch?: AmountTrackerIdDetails<NumberType>[];
+  approvalTrackersToFetch?: AmountTrackerIdDetails<NumberType>[];
   /**
    * If true, we will append defaults with empty values.
    */
@@ -216,6 +239,8 @@ export interface GetAdditionalCollectionDetailsRequestBody {
 export interface GetMetadataForCollectionRequestBody {
   /**
    * If present, we will fetch the metadata corresponding to the specified options.
+   *
+   * Consider using pruneMetadataToFetch for filtering out previously fetched metadata.
    */
   metadataToFetch?: MetadataFetchOptions;
 }
@@ -308,7 +333,7 @@ export interface GetOwnersForBadgeRouteSuccessResponse<T extends NumberType> {
    */
   owners: BalanceDocWithDetails<T>[];
   /**
-   * Represents pagination Docrmation.
+   * Represents pagination information.
    */
   pagination: PaginationInfo;
 }
@@ -333,46 +358,6 @@ export function convertGetOwnersForBadgeRouteSuccessResponse<T extends NumberTyp
   };
 }
 
-
-/**
- * @category API / Indexer
- */
-export interface GetMetadataForCollectionRouteRequestBody {
-  /**
-   * The metadata options to fetch.
-   */
-  metadataToFetch: MetadataFetchOptions;
-}
-
-/**
- * @category API / Indexer
- */
-export interface GetMetadataForCollectionRouteSuccessResponse<T extends NumberType> {
-  collectionMetadata?: Metadata<T>;
-  badgeMetadata?: BadgeMetadataDetails<T>[];
-}
-
-/**
- * @category API / Indexer
- */
-export type GetMetadataForCollectionRouteResponse<T extends NumberType> =
-  ErrorResponse | GetMetadataForCollectionRouteSuccessResponse<T>;
-
-/**
- * @category API / Indexer
- * @param item - The input success response.
- * @param convertFunction - A function to convert the type.
- * @returns The converted success response.
- */
-export function convertGetMetadataForCollectionRouteSuccessResponse<T extends NumberType, U extends NumberType>(
-  item: GetMetadataForCollectionRouteSuccessResponse<T>,
-  convertFunction: (item: T) => U
-): GetMetadataForCollectionRouteSuccessResponse<U> {
-  return {
-    collectionMetadata: item.collectionMetadata ? convertMetadata(item.collectionMetadata, convertFunction) : undefined,
-    badgeMetadata: item.badgeMetadata ? item.badgeMetadata.map(x => convertBadgeMetadataDetails(x, convertFunction)) : undefined,
-  };
-}
 
 /**
  * @category API / Indexer
@@ -422,12 +407,12 @@ export interface GetBadgeActivityRouteRequestBody {
  */
 export interface GetBadgeActivityRouteSuccessResponse<T extends NumberType> {
   /**
-   * Array of transfer activity Docrmation.
+   * Array of transfer activity information.
    */
   activity: TransferActivityDoc<T>[];
 
   /**
-   * Pagination Docrmation.
+   * Pagination information.
    */
   pagination: PaginationInfo;
 }
@@ -510,7 +495,7 @@ export interface RefreshStatusRouteSuccessResponse<T extends NumberType> {
   errorDocs: QueueDoc<T>[];
 
   /**
-   * The status Docrmation corresponding to the collection.
+   * The status information corresponding to the collection.
    */
   refreshDoc: RefreshDoc<T>;
 }
@@ -781,7 +766,9 @@ export function convertAddReviewForCollectionRouteSuccessResponse<T extends Numb
  *
  * @category API / Indexer
  */
-export type AccountViewKey = 'createdLists' | 'privateLists' | 'authCodes' | 'latestActivity' | 'latestAnnouncements' | 'latestReviews' | 'badgesCollected' | 'addressMappings' | 'latestClaimAlerts' | 'latestAddressMappings' | 'explicitlyIncludedAddressMappings' | 'explicitlyExcludedAddressMappings' | 'badgesCollectedWithHidden' | 'createdBy' | 'managing' | 'listsActivity'
+export type AccountViewKey = 'createdLists' | 'privateLists' | 'authCodes' | 'transferActivity' | 'reviews' | 'badgesCollected' | 'latestClaimAlerts'
+  | 'addressLists' | 'latestAddressLists' | 'explicitlyIncludedAddressLists' | 'explicitlyExcludedAddressLists' | 'badgesCollectedWithHidden'
+  | 'createdBy' | 'managing' | 'listsActivity'
 
 
 /**
@@ -792,9 +779,9 @@ export type AccountViewKey = 'createdLists' | 'privateLists' | 'authCodes' | 'la
  * Each view has a bookmark that is used for pagination and must be supplied to get the next page.
  *
  * We support the following views:
- * - `latestActivity` - Fetches the latest activity for the account.
+ * - `transferActivity` - Fetches the latest activity for the account.
  * - `latestAnnouncements` - Fetches the latest announcements for the account.
- * - `latestReviews` - Fetches the latest reviews for the account.
+ * - `reviews` - Fetches the latest reviews for the account.
  * - `badgesCollected` - Fetches the badges collected by the account sequentially in random order.
  *
  * @typedef {Object} AccountFetchDetails
@@ -803,7 +790,7 @@ export type AccountViewKey = 'createdLists' | 'privateLists' | 'authCodes' | 'la
  * @property {string} [username] - If present, the account corresponding to the specified username will be fetched. Please only specify one of `address` or `username`.
  * @property {boolean} [fetchSequence] - If true, the sequence will be fetched from the blockchain.
  * @property {boolean} [fetchBalance] - If true, the $BADGE balance will be fetched from the blockchain.
- * @property {boolean} [noExternalCalls] - If true, only fetches local Docrmation stored in DB. Nothing external like resolved names, avatars, etc.
+ * @property {boolean} [noExternalCalls] - If true, only fetches local information stored in DB. Nothing external like resolved names, avatars, etc.
  * @property {Array<{ viewType: string, bookmark: string }>} [viewsToFetch] - An array of views to fetch with associated bookmarks.
  *
  * @category API / Indexer
@@ -811,17 +798,23 @@ export type AccountViewKey = 'createdLists' | 'privateLists' | 'authCodes' | 'la
 export type AccountFetchDetails = {
   address?: string;
   username?: string;
+  //If true, we will fetch the sequence from the blockchain.
   fetchSequence?: boolean;
+  //If true, we will fetch the $BADGE balance from the blockchain.
   fetchBalance?: boolean;
+  //If true, we will avoid external API calls.
   noExternalCalls?: boolean;
+  //An array of views to fetch
   viewsToFetch?: {
+    //Unique view ID. Used for pagination. All fetches w/ same ID should be made with same criteria.
     viewId: string,
+    //The base view type to fetch.
     viewType: AccountViewKey,
-    filteredCollections?: {
-      badgeIds: UintRange<NumberType>[];
-      collectionId: NumberType;
-    }[];
-    filteredLists?: string[];
+    //If defined, we will filter the view to only include the specified collections.
+    specificCollections?: BatchBadgeDetails<NumberType>[];
+    //If defined, we will filter the view to only include the specified lists.
+    specificLists?: string[];
+    //A bookmark to pass in for pagination. "" for first request.
     bookmark: string
   }[];
 };
@@ -844,8 +837,7 @@ export interface GetAccountsRouteSuccessResponse<T extends NumberType> {
 /**
  * @category API / Indexer
  */
-export type GetAccountsRouteResponse<T extends NumberType> =
-  ErrorResponse | GetAccountsRouteSuccessResponse<T>;
+export type GetAccountsRouteResponse<T extends NumberType> = ErrorResponse | GetAccountsRouteSuccessResponse<T>;
 
 /**
  * @category API / Indexer
@@ -865,47 +857,12 @@ export function convertGetAccountsRouteSuccessResponse<T extends NumberType, U e
 /**
  * @category API / Indexer
  */
-export interface GetAccountRouteRequestBody {
-  /**
-   * Indicates whether to fetch the account's sequence.
-   */
-  fetchSequence?: boolean;
-
-  /**
-   * Indicates whether to fetch the account's balance.
-   */
-  fetchBalance?: boolean;
-
-  /**
-   * Indicates whether to avoid external API calls.
-   */
-  noExternalCalls?: boolean;
-
-  /**
-   * Indicates whether to fetch hidden badges.
-   */
-  fetchHidden?: boolean;
-
-  /**
-   * An array of views to fetch.
-   */
-  viewsToFetch?: {
-    viewId: string,
-    viewType: AccountViewKey,
-    filteredCollections?: {
-      badgeIds: UintRange<NumberType>[];
-      collectionId: NumberType;
-    }[];
-    filteredLists?: string[];
-    bookmark: string;
-  }[];
-}
+export interface GetAccountRouteRequestBody extends Omit<AccountFetchDetails, 'address' | 'username'> { }
 
 /**
  * @category API / Indexer
  */
-export type GetAccountRouteSuccessResponse<T extends NumberType> =
-  BitBadgesUserInfo<T>;
+export type GetAccountRouteSuccessResponse<T extends NumberType> = BitBadgesUserInfo<T>;
 
 /**
  * @category API / Indexer
@@ -1007,10 +964,7 @@ export interface UpdateAccountInfoRouteRequestBody<T extends NumberType> {
   /**
    * The badges to hide and not view for this profile's portfolio
    */
-  hiddenBadges?: {
-    collectionId: T;
-    badgeIds: UintRange<T>[];
-  }[];
+  hiddenBadges?: BatchBadgeDetails<T>[];
 
   /**
    * The lists to hide and not view for this profile's portfolio
@@ -1018,46 +972,20 @@ export interface UpdateAccountInfoRouteRequestBody<T extends NumberType> {
   hiddenLists?: string[];
 
   /**
-   * An array of custom pages on the user's portolio. Used to customize, sort, and group badges into pages.
+   * An array of custom pages on the user's portolio. Used to customize, sort, and group badges / lists into pages.
    */
   customPages?: {
-    title: string;
-    description: string;
-    badges: {
-      collectionId: T;
-      badgeIds: UintRange<T>[];
-    }[];
-  }[];
+    badges: CustomPage<T>[];
+    lists: CustomListPage[];
+  };
 
   /**
-   * An array of custom lists on the user's portolio. Used to customize, sort, and group badges into lists.
+   * The watchlist of badges / lists
    */
-  customListPages?: {
-    title: string;
-    description: string;
-    mappingIds: string[];
-  }[];
-
-  /**
-   * The watchlist of badges
-   */
-  watchedBadgePages?: {
-    title: string;
-    description: string;
-    badges: {
-      collectionId: T;
-      badgeIds: UintRange<T>[];
-    }[];
-  }[];
-
-  /**
-   * The watchlist of lists
-   */
-  watchedListPages?: {
-    title: string;
-    description: string;
-    mappingIds: string[];
-  }[];
+  watchlists?: {
+    badges: CustomPage<T>[];
+    lists: CustomListPage[];
+  };
 
   /**
    * The profile picture URL.
@@ -1109,7 +1037,7 @@ export function convertUpdateAccountInfoRouteSuccessResponse<T extends NumberTyp
  */
 export interface AddBalancesToOffChainStorageRouteRequestBody {
   /**
-   * A map of Cosmos addresses or mapping IDs -> Balance<NumberType>[].
+   * A map of Cosmos addresses or list IDs -> Balance<NumberType>[].
    */
   balances: OffChainBalancesMap<NumberType>;
 
@@ -1275,12 +1203,12 @@ export function convertAddApprovalDetailsToOffChainStorageRouteSuccessResponse<T
  */
 export interface GetSignInChallengeRouteRequestBody {
   /**
-   * The blockchain chain to be signed in with.
+   * The blockchain to be signed in with.
    */
   chain: SupportedChain;
 
   /**
-   * The user's blockchain address (in their native address).
+   * The user's blockchain address (their native L1 address).
    */
   address: string;
 
@@ -1370,11 +1298,6 @@ export interface VerifySignInRouteSuccessResponse<T extends NumberType> {
    * The success message.
    */
   successMessage: string;
-
-  /**
-   * QR code text, if requested.
-   */
-  qrCodeText?: string;
 }
 
 /**
@@ -1465,7 +1388,7 @@ export interface GetBrowseCollectionsRouteRequestBody { }
  */
 export interface GetBrowseCollectionsRouteSuccessResponse<T extends NumberType> {
   collections: { [category: string]: BitBadgesCollection<T>[] };
-  addressMappings: { [category: string]: AddressMappingWithMetadata<T>[] };
+  addressLists: { [category: string]: AddressListWithMetadata<T>[] };
   profiles: { [category: string]: BitBadgesUserInfo<T>[] };
   activity: TransferActivityDoc<T>[];
   badges: {
@@ -1496,12 +1419,12 @@ export function convertGetBrowseCollectionsRouteSuccessResponse<T extends Number
       acc[category] = item.collections[category].map((collection) => convertBitBadgesCollection(collection, convertFunction));
       return acc;
     }, {} as { [category: string]: BitBadgesCollection<U>[] }),
-    addressMappings: Object.keys(item.addressMappings).reduce((acc, category) => {
-      acc[category] = item.addressMappings[category].map((addressMapping) =>
-        convertAddressMappingWithMetadata(addressMapping, convertFunction)
+    addressLists: Object.keys(item.addressLists).reduce((acc, category) => {
+      acc[category] = item.addressLists[category].map((addressList) =>
+        convertAddressListWithMetadata(addressList, convertFunction)
       );
       return acc;
-    }, {} as { [category: string]: AddressMappingWithMetadata<U>[] }),
+    }, {} as { [category: string]: AddressListWithMetadata<U>[] }),
     profiles: Object.keys(item.profiles).reduce((acc, category) => {
       acc[category] = item.profiles[category].map((profile) => convertBitBadgesUserInfo(profile, convertFunction));
       return acc;
@@ -1655,68 +1578,70 @@ export function convertGetTokensFromFaucetRouteSuccessResponse<T extends NumberT
 /**
  * @category API / Indexer
  */
-export interface GetAddressMappingsRouteRequestBody {
+export interface GetAddressListsRouteRequestBody {
   /**
-   * The mapping IDs to fetch. Can be reserved or custom IDs.
+   * The list IDs to fetch. Can be reserved or custom IDs.
    */
-  mappingIds: string[];
+  listIds: string[];
 }
 
 /**
  * @category API / Indexer
  */
-export interface GetAddressMappingsRouteSuccessResponse<T extends NumberType> {
-  addressMappings: AddressMappingWithMetadata<T>[];
+export interface GetAddressListsRouteSuccessResponse<T extends NumberType> {
+  addressLists: AddressListWithMetadata<T>[];
 }
 
 /**
  * @category API / Indexer
  */
-export type GetAddressMappingsRouteResponse<T extends NumberType> = ErrorResponse | GetAddressMappingsRouteSuccessResponse<T>;
+export type GetAddressListsRouteResponse<T extends NumberType> = ErrorResponse | GetAddressListsRouteSuccessResponse<T>;
 
 /**
  * @category API / Indexer
  */
-export function convertGetAddressMappingsRouteSuccessResponse<T extends NumberType, U extends NumberType>(
-  item: GetAddressMappingsRouteSuccessResponse<T>,
+export function convertGetAddressListsRouteSuccessResponse<T extends NumberType, U extends NumberType>(
+  item: GetAddressListsRouteSuccessResponse<T>,
   convertFunction: (item: T) => U
-): GetAddressMappingsRouteSuccessResponse<U> {
-  return { addressMappings: item.addressMappings.map((addressMapping) => convertAddressMappingWithMetadata(addressMapping, convertFunction)) };
+): GetAddressListsRouteSuccessResponse<U> {
+  return { addressLists: item.addressLists.map((addressList) => convertAddressListWithMetadata(addressList, convertFunction)) };
 }
 
 /**
  * @category API / Indexer
  */
-export interface UpdateAddressMappingsRouteRequestBody<T extends NumberType> {
+export interface UpdateAddressListsRouteRequestBody<T extends NumberType> {
   /**
-   * New address mappings to update.
-   * Requester must be creator of the mappings.
+   * New address lists to update.
+   * Requester must be creator of the lists.
    * Only applicable to off-chain balances.
    */
-  addressMappings: (AddressMapping & {
+  addressLists: (AddressList & {
+    //Whether the list is private.
     private?: boolean;
 
-    editKeys?: AddressMappingEditKey<T>[];
+    //Any edit keys to be used by others to add addresses to the list. Used for surveys
+    editKeys?: AddressListEditKey<T>[];
   })[];
 }
 
 /**
  * @category API / Indexer
  */
-export interface UpdateAddressMappingsRouteSuccessResponse<T extends NumberType> { }
+export interface UpdateAddressListsRouteSuccessResponse<T extends NumberType> { }
 
 /**
  * @category API / Indexer
  */
-export type UpdateAddressMappingsRouteResponse<T extends NumberType> = ErrorResponse | UpdateAddressMappingsRouteSuccessResponse<T>;
+export type UpdateAddressListsRouteResponse<T extends NumberType> = ErrorResponse | UpdateAddressListsRouteSuccessResponse<T>;
 
 /**
  * @category API / Indexer
  */
-export function convertUpdateAddressMappingsRouteSuccessResponse<T extends NumberType, U extends NumberType>(
-  item: UpdateAddressMappingsRouteSuccessResponse<T>,
+export function convertUpdateAddressListsRouteSuccessResponse<T extends NumberType, U extends NumberType>(
+  item: UpdateAddressListsRouteSuccessResponse<T>,
   convertFunction: (item: T) => U
-): UpdateAddressMappingsRouteSuccessResponse<U> {
+): UpdateAddressListsRouteSuccessResponse<U> {
   return { ...item };
 }
 
@@ -1724,100 +1649,32 @@ export function convertUpdateAddressMappingsRouteSuccessResponse<T extends Numbe
 /**
  * @category API / Indexer
  */
-export interface DeleteAddressMappingsRouteRequestBody {
+export interface DeleteAddressListsRouteRequestBody {
   /**
-   * The mapping IDs to delete.
+   * The list IDs to delete.
    */
-  mappingIds: string[];
+  listIds: string[];
 }
 
 /**
  * @category API / Indexer
  */
-export interface DeleteAddressMappingsRouteSuccessResponse<T extends NumberType> { }
+export interface DeleteAddressListsRouteSuccessResponse<T extends NumberType> { }
 
 /**
  * @category API / Indexer
  */
-export type DeleteAddressMappingsRouteResponse<T extends NumberType> = ErrorResponse | DeleteAddressMappingsRouteSuccessResponse<T>;
+export type DeleteAddressListsRouteResponse<T extends NumberType> = ErrorResponse | DeleteAddressListsRouteSuccessResponse<T>;
 
 /**
  * @category API / Indexer
  */
-export function convertDeleteAddressMappingsRouteSuccessResponse<T extends NumberType, U extends NumberType>(
-  item: DeleteAddressMappingsRouteSuccessResponse<T>,
+export function convertDeleteAddressListsRouteSuccessResponse<T extends NumberType, U extends NumberType>(
+  item: DeleteAddressListsRouteSuccessResponse<T>,
   convertFunction: (item: T) => U
-): DeleteAddressMappingsRouteSuccessResponse<U> {
+): DeleteAddressListsRouteSuccessResponse<U> {
   return {
     ...item,
-  };
-}
-
-/**
- * @category API / Indexer
- */
-export interface GetApprovalsRouteRequestBody {
-  /**
-   * The approval tracker IDs to fetch.
-   */
-  amountTrackerIds: AmountTrackerIdDetails<NumberType>[];
-}
-
-/**
- * @category API / Indexer
- */
-export interface GetApprovalsRouteSuccessResponse<T extends NumberType> {
-  approvalTrackers: ApprovalsTrackerDoc<T>[];
-}
-
-/**
- * @category API / Indexer
- */
-export type GetApprovalsRouteResponse<T extends NumberType> = ErrorResponse | GetApprovalsRouteSuccessResponse<T>;
-
-/**
- * @category API / Indexer
- */
-export function convertGetApprovalsRouteSuccessResponse<T extends NumberType, U extends NumberType>(
-  item: GetApprovalsRouteSuccessResponse<T>,
-  convertFunction: (item: T) => U
-): GetApprovalsRouteSuccessResponse<U> {
-  return {
-    approvalTrackers: item.approvalTrackers.map((approvalTracker) => convertApprovalsTrackerDoc(approvalTracker, convertFunction)),
-  };
-}
-
-/**
- * @category API / Indexer
- */
-export interface GetChallengeTrackersRouteRequestBody {
-  /**
-   * The challenge tracker IDs to fetch.
-   */
-  challengeTrackerIds: MerkleChallengeIdDetails<NumberType>[];
-}
-
-/**
- * @category API / Indexer
- */
-export interface GetChallengeTrackersRouteSuccessResponse<T extends NumberType> {
-  challengeTrackers: MerkleChallengeDoc<T>[];
-}
-
-/**
- * @category API / Indexer
- */
-export type GetChallengeTrackersRouteResponse<T extends NumberType> = ErrorResponse | GetChallengeTrackersRouteSuccessResponse<T>;
-
-/**
- * @category API / Indexer
- */
-export function convertGetChallengeTrackersRouteSuccessResponse<T extends NumberType, U extends NumberType>(
-  item: GetChallengeTrackersRouteSuccessResponse<T>,
-  convertFunction: (item: T) => U
-): GetChallengeTrackersRouteSuccessResponse<U> {
-  return {
-    challengeTrackers: item.challengeTrackers.map((merkleChallenge) => convertMerkleChallengeDoc(merkleChallenge, convertFunction)),
   };
 }
 
@@ -1857,21 +1714,19 @@ export function convertSendClaimAlertsRouteSuccessResponse<T extends NumberType,
 }
 
 /**
- * Type for CouchDB pagination Docrmation.
+ * Type for CouchDB pagination information.
  * @typedef {Object} PaginationInfo
  * @property {string} bookmark - The bookmark to be used to fetch the next X documents. Initially, bookmark should be '' (empty string) to fetch the first X documents. Each time the next X documents are fetched, the bookmark should be updated to the bookmark returned by the previous fetch.
  * @property {boolean} hasMore - Indicates whether there are more documents to be fetched. Once hasMore is false, all documents have been fetched.
- * @property {number} [total] - The total number of documents in this view. This is only returned for the first fetch (when bookmark is empty string). It is not returned for subsequent fetches.
  * @category API / Indexer
  */
 export interface PaginationInfo {
   bookmark: string;
   hasMore: boolean;
-  total?: number;
 }
 
 /**
- * Docrmation returned by the REST API getAccount route.
+ * information returned by the REST API getAccount route.
  *
  * Note this should be converted into AccountDoc or BitBadgesUserInfo before being returned by the BitBadges API for consistency.
  *
@@ -2202,11 +2057,18 @@ export function convertGetCollectionForProtocolRouteSuccessResponse<T extends Nu
  * @category API / Indexer
  */
 export interface FilterBadgesInCollectionRequestBody {
+  //The collection ID to filter
   collectionId: NumberType
+  //Limit to specific badge IDs. Leave undefined to not filter by badge ID.
   badgeIds?: UintRange<NumberType>[]
+  //Limit to specific lists. Leave undefined to not filter by list.
   categories?: string[]
+  //Limit to specific lists. Leave undefined to not filter by list.
   tags?: string[]
+
+  //mostViewed is a special view that sorts by most viewed badges. May be incompatible with other filters.
   mostViewed?: 'daily' | 'allTime' | 'weekly' | 'monthly' | 'yearly'
+  //Pagination bookmark. Leave undefined or "" for first request.
   bookmark?: string
 }
 

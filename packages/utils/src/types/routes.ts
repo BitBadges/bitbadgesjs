@@ -28,10 +28,6 @@ export const GetOwnersForBadgeRoute = (collectionId: NumberType, badgeId: Number
 /**
  * @category API Routes
  */
-export const GetMetadataForCollectionRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/metadata`;
-/**
- * @category API Routes
- */
 export const GetBadgeBalanceByAddressRoute = (collectionId: NumberType, cosmosAddress: string) => `/api/v0/collection/${collectionId.toString()}/balance/${cosmosAddress}`;
 /**
  * @category API Routes
@@ -74,35 +70,22 @@ export const DeleteReviewRoute = (reviewId: string) => `/api/v0/deleteReview/${r
  */
 export const DeleteAnnouncementRoute = (announcementId: string) => `/api/v0/deleteAnnouncement/${announcementId}`;
 
-//Address Mappings
+//Address Lists
 /**
  * @category API Routes
  */
-export const GetAddressMappingsRoute = () => "/api/v0/addressMappings";
-
-/**
- * @category API Routes
- */
-export const UpdateAddressMappingRoute = () => "/api/v0/addressMappings/update";
-
+export const GetAddressListsRoute = () => "/api/v0/addressLists";
 
 /**
  * @category API Routes
  */
-export const DeleteAddressMappingRoute = () => "/api/v0/addressMappings/delete";
+export const UpdateAddressListRoute = () => "/api/v0/addressLists/update";
 
-//Approvals
+
 /**
  * @category API Routes
  */
-export const GetApprovalsRoute = () => "/api/v0/approvals";
-
-//Merkle Challenge Tracker
-/**
- * @category API Routes
- */
-
-export const GetChallengeTrackerRoute = () => "/api/v0/challenges";
+export const DeleteAddressListRoute = () => "/api/v0/addressLists/delete";
 
 //User
 /**

@@ -56,10 +56,10 @@ export const getAllBadgeIdsToBeTransferred = (transfers: TransferWithIncrements<
 
       //If incrementIdsBy is not set, then we are not incrementing badgeIds and we can just batch calculate the balance
       if (!transfer.incrementBadgeIdsBy && !transfer.incrementOwnershipTimesBy) {
-        allBadgeIds.push(...badgeIds);
+        allBadgeIds.push(...deepCopy(badgeIds));
       } else {
         for (let i = 0; i < numRecipients; i++) {
-          allBadgeIds.push(...badgeIds);
+          allBadgeIds.push(...deepCopy(badgeIds));
 
           for (const badgeId of badgeIds) {
             badgeId.start += transfer.incrementBadgeIdsBy || 0n;

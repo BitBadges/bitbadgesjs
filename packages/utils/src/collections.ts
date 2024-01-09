@@ -65,7 +65,7 @@ export function incrementMintAndTotalBalances(
   const newOwners: BalanceDocWithDetails<bigint>[] = owners.filter(x => x.cosmosAddress !== "Mint" && x.cosmosAddress !== "Total") ?? [];
   newOwners.push({
     _id: '',
-    _legacyId: `${collectionId.toString()}:Mint`,
+    _docId: `${collectionId.toString()}:Mint`,
     balances: newUnmintedSupplys.balances,
     cosmosAddress: "Mint",
     collectionId: collectionId,
@@ -85,7 +85,7 @@ export function incrementMintAndTotalBalances(
 
   newOwners.push({
     _id: '',
-    _legacyId: `${collectionId.toString()}:Total`,
+    _docId: `${collectionId.toString()}:Total`,
     balances: newMaxSupplys.balances,
     cosmosAddress: "Total",
     collectionId: collectionId,

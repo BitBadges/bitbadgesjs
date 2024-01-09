@@ -9,7 +9,7 @@ import { CollectionApproval, Transfer, UserIncomingApproval, UserOutgoingApprova
 import { Balance, UintRange } from "./balances_pb.js";
 import { BadgeMetadataTimeline, CollectionMetadataTimeline, ContractAddressTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadataTimeline, StandardsTimeline } from "./timelines_pb.js";
 import { CollectionPermissions, UserPermissions } from "./permissions_pb.js";
-import { AddressMapping } from "./address_mappings_pb.js";
+import { AddressList } from "./address_lists_pb.js";
 
 /**
  * The types defined in these files are used to define the MsgServer types for all requests and responses for Msgs of the badges module.
@@ -212,9 +212,9 @@ export class MsgNewCollection extends Message<MsgNewCollection> {
   contractAddressTimeline: ContractAddressTimeline[] = [];
 
   /**
-   * @generated from field: repeated badges.AddressMapping addressMappings = 14;
+   * @generated from field: repeated badges.AddressList addressLists = 14;
    */
-  addressMappings: AddressMapping[] = [];
+  addressLists: AddressList[] = [];
 
   /**
    * The user's approved transfers for each badge ID.
@@ -255,7 +255,7 @@ export class MsgNewCollection extends Message<MsgNewCollection> {
     { no: 11, name: "badgesToCreate", kind: "message", T: Balance, repeated: true },
     { no: 12, name: "transfers", kind: "message", T: Transfer, repeated: true },
     { no: 13, name: "contractAddressTimeline", kind: "message", T: ContractAddressTimeline, repeated: true },
-    { no: 14, name: "addressMappings", kind: "message", T: AddressMapping, repeated: true },
+    { no: 14, name: "addressLists", kind: "message", T: AddressList, repeated: true },
     { no: 15, name: "defaultOutgoingApprovals", kind: "message", T: UserOutgoingApproval, repeated: true },
     { no: 16, name: "defaultIncomingApprovals", kind: "message", T: UserIncomingApproval, repeated: true },
     { no: 17, name: "defaultDisapproveSelfInitiated", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
@@ -364,9 +364,9 @@ export class MsgMintAndDistributeBadges extends Message<MsgMintAndDistributeBadg
   collectionApprovals: CollectionApproval[] = [];
 
   /**
-   * @generated from field: repeated badges.AddressMapping addressMappings = 10;
+   * @generated from field: repeated badges.AddressList addressLists = 10;
    */
-  addressMappings: AddressMapping[] = [];
+  addressLists: AddressList[] = [];
 
   constructor(data?: PartialMessage<MsgMintAndDistributeBadges>) {
     super();
@@ -384,7 +384,7 @@ export class MsgMintAndDistributeBadges extends Message<MsgMintAndDistributeBadg
     { no: 7, name: "badgeMetadataTimeline", kind: "message", T: BadgeMetadataTimeline, repeated: true },
     { no: 8, name: "offChainBalancesMetadataTimeline", kind: "message", T: OffChainBalancesMetadataTimeline, repeated: true },
     { no: 9, name: "collectionApprovals", kind: "message", T: CollectionApproval, repeated: true },
-    { no: 10, name: "addressMappings", kind: "message", T: AddressMapping, repeated: true },
+    { no: 10, name: "addressLists", kind: "message", T: AddressList, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgMintAndDistributeBadges {
@@ -455,9 +455,9 @@ export class MsgUniversalUpdateCollectionApprovals extends Message<MsgUniversalU
   collectionApprovals: CollectionApproval[] = [];
 
   /**
-   * @generated from field: repeated badges.AddressMapping addressMappings = 4;
+   * @generated from field: repeated badges.AddressList addressLists = 4;
    */
-  addressMappings: AddressMapping[] = [];
+  addressLists: AddressList[] = [];
 
   constructor(data?: PartialMessage<MsgUniversalUpdateCollectionApprovals>) {
     super();
@@ -470,7 +470,7 @@ export class MsgUniversalUpdateCollectionApprovals extends Message<MsgUniversalU
     { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "collectionApprovals", kind: "message", T: CollectionApproval, repeated: true },
-    { no: 4, name: "addressMappings", kind: "message", T: AddressMapping, repeated: true },
+    { no: 4, name: "addressLists", kind: "message", T: AddressList, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUniversalUpdateCollectionApprovals {
@@ -655,9 +655,9 @@ export class MsgUniversalUpdateCollectionPermissions extends Message<MsgUniversa
   permissions?: CollectionPermissions;
 
   /**
-   * @generated from field: repeated badges.AddressMapping addressMappings = 4;
+   * @generated from field: repeated badges.AddressList addressLists = 4;
    */
-  addressMappings: AddressMapping[] = [];
+  addressLists: AddressList[] = [];
 
   constructor(data?: PartialMessage<MsgUniversalUpdateCollectionPermissions>) {
     super();
@@ -670,7 +670,7 @@ export class MsgUniversalUpdateCollectionPermissions extends Message<MsgUniversa
     { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "permissions", kind: "message", T: CollectionPermissions },
-    { no: 4, name: "addressMappings", kind: "message", T: AddressMapping, repeated: true },
+    { no: 4, name: "addressLists", kind: "message", T: AddressList, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUniversalUpdateCollectionPermissions {
@@ -741,9 +741,9 @@ export class MsgUpdateUserPermissions extends Message<MsgUpdateUserPermissions> 
   permissions?: UserPermissions;
 
   /**
-   * @generated from field: repeated badges.AddressMapping addressMappings = 4;
+   * @generated from field: repeated badges.AddressList addressLists = 4;
    */
-  addressMappings: AddressMapping[] = [];
+  addressLists: AddressList[] = [];
 
   constructor(data?: PartialMessage<MsgUpdateUserPermissions>) {
     super();
@@ -756,7 +756,7 @@ export class MsgUpdateUserPermissions extends Message<MsgUpdateUserPermissions> 
     { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "permissions", kind: "message", T: UserPermissions },
-    { no: 4, name: "addressMappings", kind: "message", T: AddressMapping, repeated: true },
+    { no: 4, name: "addressLists", kind: "message", T: AddressList, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUpdateUserPermissions {

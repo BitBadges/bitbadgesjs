@@ -4,6 +4,7 @@ import { METADATA_PAGE_LIMIT } from "./constants";
 import { getMetadataIdForBadgeId } from "./metadataIds";
 import { BadgeMetadataDetails } from "./types/collections";
 import { sortUintRangesAndMergeIfNecessary } from "./uintRanges";
+import { BatchBadgeDetails } from "./batch-utils";
 
 /**
  * For a multicollection display, return the badges to be shown on a specific page.
@@ -17,17 +18,11 @@ import { sortUintRangesAndMergeIfNecessary } from "./uintRanges";
  * Return value is an array of { collection, badgeIds } objects.
  */
 export function getBadgesToDisplay(
-  collectionObjectsToDisplay: {
-    collectionId: bigint,
-    badgeIds: UintRange<bigint>[]
-  }[] = [],
+  collectionObjectsToDisplay: BatchBadgeDetails<bigint>[] = [],
   _pageNumber: number,
   _pageSize: number,
   sortBy?: 'newest' | 'oldest' | undefined
-): {
-  collectionId: bigint,
-  badgeIds: UintRange<bigint>[]
-}[] {
+): BatchBadgeDetails<bigint>[] {
   const pageNumber = BigInt(_pageNumber);
   const pageSize = BigInt(_pageSize);
 
@@ -41,7 +36,7 @@ export function getBadgesToDisplay(
   }
 
   const startIdxNum = BigInt((pageNumber - 1n) * pageSize);
-  const badgeIdsToDisplay: { collectionId: bigint, badgeIds: UintRange<bigint>[] }[] = [];
+  const badgeIdsToDisplay: BatchBadgeDetails<bigint>[] = [];
 
   let currIdx = 0n;
   let numEntriesLeftToHandle = pageSize;

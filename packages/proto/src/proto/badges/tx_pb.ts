@@ -9,7 +9,7 @@ import { CollectionApproval, Transfer, UserBalanceStore, UserIncomingApproval, U
 import { Balance } from "./balances_pb.js";
 import { CollectionPermissions, UserPermissions } from "./permissions_pb.js";
 import { BadgeMetadataTimeline, CollectionMetadataTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadataTimeline, StandardsTimeline } from "./timelines_pb.js";
-import { AddressMapping } from "./address_mappings_pb.js";
+import { AddressList } from "./address_lists_pb.js";
 
 /**
  * Used for WASM bindings and JSON parsing
@@ -18,9 +18,9 @@ import { AddressMapping } from "./address_mappings_pb.js";
  */
 export class BadgeCustomMsgType extends Message<BadgeCustomMsgType> {
   /**
-   * @generated from field: badges.MsgCreateAddressMappings createAddressMappingsMsg = 1;
+   * @generated from field: badges.MsgCreateAddressLists createAddressListsMsg = 1;
    */
-  createAddressMappingsMsg?: MsgCreateAddressMappings;
+  createAddressListsMsg?: MsgCreateAddressLists;
 
   /**
    * @generated from field: badges.MsgUniversalUpdateCollection universalUpdateCollectionMsg = 2;
@@ -60,7 +60,7 @@ export class BadgeCustomMsgType extends Message<BadgeCustomMsgType> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "badges.BadgeCustomMsgType";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "createAddressMappingsMsg", kind: "message", T: MsgCreateAddressMappings },
+    { no: 1, name: "createAddressListsMsg", kind: "message", T: MsgCreateAddressLists },
     { no: 2, name: "universalUpdateCollectionMsg", kind: "message", T: MsgUniversalUpdateCollection },
     { no: 3, name: "deleteCollectionMsg", kind: "message", T: MsgDeleteCollection },
     { no: 4, name: "transferBadgesMsg", kind: "message", T: MsgTransferBadges },
@@ -767,11 +767,11 @@ export class MsgCreateCollectionResponse extends Message<MsgCreateCollectionResp
 }
 
 /**
- * MsgCreateAddressMappings is used to create address mappings.
+ * MsgCreateAddressLists is used to create address lists.
  *
- * @generated from message badges.MsgCreateAddressMappings
+ * @generated from message badges.MsgCreateAddressLists
  */
-export class MsgCreateAddressMappings extends Message<MsgCreateAddressMappings> {
+export class MsgCreateAddressLists extends Message<MsgCreateAddressLists> {
   /**
    * Address of the creator.
    *
@@ -780,71 +780,71 @@ export class MsgCreateAddressMappings extends Message<MsgCreateAddressMappings> 
   creator = "";
 
   /**
-   * Address mappings to create.
+   * Address lists to create.
    *
-   * @generated from field: repeated badges.AddressMapping addressMappings = 2;
+   * @generated from field: repeated badges.AddressList addressLists = 2;
    */
-  addressMappings: AddressMapping[] = [];
+  addressLists: AddressList[] = [];
 
-  constructor(data?: PartialMessage<MsgCreateAddressMappings>) {
+  constructor(data?: PartialMessage<MsgCreateAddressLists>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.MsgCreateAddressMappings";
+  static readonly typeName = "badges.MsgCreateAddressLists";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "addressMappings", kind: "message", T: AddressMapping, repeated: true },
+    { no: 2, name: "addressLists", kind: "message", T: AddressList, repeated: true },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgCreateAddressMappings {
-    return new MsgCreateAddressMappings().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgCreateAddressLists {
+    return new MsgCreateAddressLists().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgCreateAddressMappings {
-    return new MsgCreateAddressMappings().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgCreateAddressLists {
+    return new MsgCreateAddressLists().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgCreateAddressMappings {
-    return new MsgCreateAddressMappings().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgCreateAddressLists {
+    return new MsgCreateAddressLists().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgCreateAddressMappings | PlainMessage<MsgCreateAddressMappings> | undefined, b: MsgCreateAddressMappings | PlainMessage<MsgCreateAddressMappings> | undefined): boolean {
-    return proto3.util.equals(MsgCreateAddressMappings, a, b);
+  static equals(a: MsgCreateAddressLists | PlainMessage<MsgCreateAddressLists> | undefined, b: MsgCreateAddressLists | PlainMessage<MsgCreateAddressLists> | undefined): boolean {
+    return proto3.util.equals(MsgCreateAddressLists, a, b);
   }
 }
 
 /**
- * MsgCreateAddressMappingsResponse is the response to MsgCreateAddressMappings.
+ * MsgCreateAddressListsResponse is the response to MsgCreateAddressLists.
  *
- * @generated from message badges.MsgCreateAddressMappingsResponse
+ * @generated from message badges.MsgCreateAddressListsResponse
  */
-export class MsgCreateAddressMappingsResponse extends Message<MsgCreateAddressMappingsResponse> {
-  constructor(data?: PartialMessage<MsgCreateAddressMappingsResponse>) {
+export class MsgCreateAddressListsResponse extends Message<MsgCreateAddressListsResponse> {
+  constructor(data?: PartialMessage<MsgCreateAddressListsResponse>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.MsgCreateAddressMappingsResponse";
+  static readonly typeName = "badges.MsgCreateAddressListsResponse";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgCreateAddressMappingsResponse {
-    return new MsgCreateAddressMappingsResponse().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgCreateAddressListsResponse {
+    return new MsgCreateAddressListsResponse().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgCreateAddressMappingsResponse {
-    return new MsgCreateAddressMappingsResponse().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgCreateAddressListsResponse {
+    return new MsgCreateAddressListsResponse().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgCreateAddressMappingsResponse {
-    return new MsgCreateAddressMappingsResponse().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgCreateAddressListsResponse {
+    return new MsgCreateAddressListsResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgCreateAddressMappingsResponse | PlainMessage<MsgCreateAddressMappingsResponse> | undefined, b: MsgCreateAddressMappingsResponse | PlainMessage<MsgCreateAddressMappingsResponse> | undefined): boolean {
-    return proto3.util.equals(MsgCreateAddressMappingsResponse, a, b);
+  static equals(a: MsgCreateAddressListsResponse | PlainMessage<MsgCreateAddressListsResponse> | undefined, b: MsgCreateAddressListsResponse | PlainMessage<MsgCreateAddressListsResponse> | undefined): boolean {
+    return proto3.util.equals(MsgCreateAddressListsResponse, a, b);
   }
 }
 

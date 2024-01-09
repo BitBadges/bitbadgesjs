@@ -1,5 +1,5 @@
-import { AddressMapping, ApprovalCriteria, IncomingApprovalCriteria, OutgoingApprovalCriteria } from "bitbadgesjs-proto";
-import { getReservedAddressMapping } from "./addressMappings";
+import { AddressList, ApprovalCriteria, IncomingApprovalCriteria, OutgoingApprovalCriteria } from "bitbadgesjs-proto";
+import { getReservedAddressList } from "./addressLists";
 import { CollectionApprovalWithDetails } from "./types/collections";
 import { UserIncomingApprovalWithDetails, UserOutgoingApprovalWithDetails } from "./types/users";
 
@@ -41,10 +41,10 @@ export function castOutgoingTransferToCollectionTransfer(
 
   return {
     ...transfer,
-    toMappingId: transfer.toMappingId,
-    fromMappingId: fromAddress,
-    fromMapping: getReservedAddressMapping(fromAddress) as AddressMapping,
-    initiatedByMappingId: transfer.initiatedByMappingId,
+    toListId: transfer.toListId,
+    fromListId: fromAddress,
+    fromList: getReservedAddressList(fromAddress) as AddressList,
+    initiatedByListId: transfer.initiatedByListId,
     transferTimes: transfer.transferTimes,
     badgeIds: transfer.badgeIds,
     ownershipTimes: transfer.ownershipTimes,
@@ -61,10 +61,10 @@ export function castFromCollectionTransferToOutgoingTransfer(
 
   return {
     ...transfer,
-    toMappingId: transfer.toMappingId,
-    toMapping: transfer.toMapping,
-    initiatedByMapping: transfer.initiatedByMapping,
-    initiatedByMappingId: transfer.initiatedByMappingId,
+    toListId: transfer.toListId,
+    toList: transfer.toList,
+    initiatedByList: transfer.initiatedByList,
+    initiatedByListId: transfer.initiatedByListId,
     transferTimes: transfer.transferTimes,
     badgeIds: transfer.badgeIds,
     ownershipTimes: transfer.ownershipTimes,
@@ -82,10 +82,10 @@ export function castIncomingTransferToCollectionTransfer(
 
   return {
     ...transfer,
-    toMapping: getReservedAddressMapping(toAddress) as AddressMapping,
-    toMappingId: toAddress,
-    fromMappingId: transfer.fromMappingId,
-    initiatedByMappingId: transfer.initiatedByMappingId,
+    toList: getReservedAddressList(toAddress) as AddressList,
+    toListId: toAddress,
+    fromListId: transfer.fromListId,
+    initiatedByListId: transfer.initiatedByListId,
     transferTimes: transfer.transferTimes,
     badgeIds: transfer.badgeIds,
     ownershipTimes: transfer.ownershipTimes,
@@ -102,8 +102,8 @@ export function castFromCollectionTransferToIncomingTransfer(
 
   return {
     ...transfer,
-    fromMappingId: transfer.fromMappingId,
-    initiatedByMappingId: transfer.initiatedByMappingId,
+    fromListId: transfer.fromListId,
+    initiatedByListId: transfer.initiatedByListId,
     transferTimes: transfer.transferTimes,
     badgeIds: transfer.badgeIds,
     ownershipTimes: transfer.ownershipTimes,

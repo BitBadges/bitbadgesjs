@@ -7,8 +7,8 @@ import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialM
 import { Message, proto3 } from "@bufbuild/protobuf";
 import { Params } from "./params_pb.js";
 import { BadgeCollection } from "./collections_pb.js";
-import { ApprovalsTracker, UserBalanceStore } from "./transfers_pb.js";
-import { AddressMapping } from "./address_mappings_pb.js";
+import { ApprovalTracker, UserBalanceStore } from "./transfers_pb.js";
+import { AddressList } from "./address_lists_pb.js";
 
 /**
  * GenesisState defines the badges module's genesis state.
@@ -47,31 +47,31 @@ export class GenesisState extends Message<GenesisState> {
   balanceStoreKeys: string[] = [];
 
   /**
-   * @generated from field: repeated string numUsedForMerkleChallenges = 7;
+   * @generated from field: repeated string challengeTrackers = 7;
    */
-  numUsedForMerkleChallenges: string[] = [];
+  challengeTrackers: string[] = [];
 
   /**
-   * @generated from field: repeated string numUsedForMerkleChallengesStoreKeys = 8;
+   * @generated from field: repeated string challengeTrackerStoreKeys = 8;
    */
-  numUsedForMerkleChallengesStoreKeys: string[] = [];
+  challengeTrackerStoreKeys: string[] = [];
 
   /**
-   * @generated from field: repeated badges.AddressMapping addressMappings = 9;
+   * @generated from field: repeated badges.AddressList addressLists = 9;
    */
-  addressMappings: AddressMapping[] = [];
+  addressLists: AddressList[] = [];
 
   /**
-   * @generated from field: repeated badges.ApprovalsTracker approvalsTrackers = 10;
+   * @generated from field: repeated badges.ApprovalTracker approvalTrackers = 10;
    */
-  approvalsTrackers: ApprovalsTracker[] = [];
+  approvalTrackers: ApprovalTracker[] = [];
 
   /**
    * this line is used by starport scaffolding # genesis/proto/state
    *
-   * @generated from field: repeated string approvalsTrackerStoreKeys = 11;
+   * @generated from field: repeated string approvalTrackerStoreKeys = 11;
    */
-  approvalsTrackerStoreKeys: string[] = [];
+  approvalTrackerStoreKeys: string[] = [];
 
   constructor(data?: PartialMessage<GenesisState>) {
     super();
@@ -87,11 +87,11 @@ export class GenesisState extends Message<GenesisState> {
     { no: 4, name: "nextCollectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 5, name: "balances", kind: "message", T: UserBalanceStore, repeated: true },
     { no: 6, name: "balanceStoreKeys", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
-    { no: 7, name: "numUsedForMerkleChallenges", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
-    { no: 8, name: "numUsedForMerkleChallengesStoreKeys", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
-    { no: 9, name: "addressMappings", kind: "message", T: AddressMapping, repeated: true },
-    { no: 10, name: "approvalsTrackers", kind: "message", T: ApprovalsTracker, repeated: true },
-    { no: 11, name: "approvalsTrackerStoreKeys", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 7, name: "challengeTrackers", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 8, name: "challengeTrackerStoreKeys", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 9, name: "addressLists", kind: "message", T: AddressList, repeated: true },
+    { no: 10, name: "approvalTrackers", kind: "message", T: ApprovalTracker, repeated: true },
+    { no: 11, name: "approvalTrackerStoreKeys", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GenesisState {

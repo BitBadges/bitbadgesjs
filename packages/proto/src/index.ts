@@ -22,7 +22,7 @@ export * from './transactions/messages/bitbadges/badges/msgDeleteCollection'
 export * from './transactions/messages/bitbadges/badges/msgUniversalUpdateCollection'
 export * from './transactions/messages/bitbadges/badges/msgUpdateCollection'
 export * from './transactions/messages/bitbadges/badges/msgCreateCollection'
-export * from './transactions/messages/bitbadges/badges/msgCreateAddressMappings'
+export * from './transactions/messages/bitbadges/badges/msgCreateAddressLists'
 export * from './transactions/messages/bitbadges/badges/msgUpdateUserApprovals'
 export * from './transactions/messages/bitbadges/wasmx/msgExecuteContractCompat'
 

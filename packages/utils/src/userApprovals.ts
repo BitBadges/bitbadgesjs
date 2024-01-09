@@ -1,12 +1,12 @@
-import { AddressMapping } from "bitbadgesjs-proto";
-import { getReservedAddressMapping } from "./addressMappings";
-import { GetMappingIdWithOptions, GetMappingWithOptions, GetUintRangesWithOptions } from "./overlaps";
+import { AddressList } from "bitbadgesjs-proto";
+import { getReservedAddressList } from "./addressLists";
+import { GetListIdWithOptions, GetListWithOptions, GetUintRangesWithOptions } from "./overlaps";
 import { CollectionApprovalWithDetails } from "./types/collections";
 import { UserIncomingApprovalWithDetails, UserOutgoingApprovalWithDetails } from "./types/users";
 
 
 /**
- * Expands the collection approvals to include the correct mappings and ranges.
+ * Expands the collection approvals to include the correct lists and ranges.
  *
  *  @category Approvals / Transferability
  */
@@ -16,25 +16,25 @@ export function expandCollectionApprovals(approvals: CollectionApprovalWithDetai
     const badgeIds = GetUintRangesWithOptions(approval.badgeIds, true);
     const ownershipTimes = GetUintRangesWithOptions(approval.ownershipTimes, true);
     const times = GetUintRangesWithOptions(approval.transferTimes, true);
-    const toMappingId = GetMappingIdWithOptions(approval.toMappingId, true);
-    const fromMappingId = GetMappingIdWithOptions(approval.fromMappingId, true);
-    const initiatedByMappingId = GetMappingIdWithOptions(approval.initiatedByMappingId, true);
+    const toListId = GetListIdWithOptions(approval.toListId, true);
+    const fromListId = GetListIdWithOptions(approval.fromListId, true);
+    const initiatedByListId = GetListIdWithOptions(approval.initiatedByListId, true);
 
-    const toMapping = GetMappingWithOptions(approval.toMapping, true);
-    const fromMapping = GetMappingWithOptions(approval.fromMapping, true);
-    const initiatedByMapping = GetMappingWithOptions(approval.initiatedByMapping, true);
+    const toList = GetListWithOptions(approval.toList, true);
+    const fromList = GetListWithOptions(approval.fromList, true);
+    const initiatedByList = GetListWithOptions(approval.initiatedByList, true);
 
     newCurrApprovals.push({
       ...approval,
-      toMappingId: toMappingId,
-      fromMappingId: fromMappingId,
-      initiatedByMappingId: initiatedByMappingId,
+      toListId: toListId,
+      fromListId: fromListId,
+      initiatedByListId: initiatedByListId,
       transferTimes: times,
       badgeIds: badgeIds,
       ownershipTimes: ownershipTimes,
-      toMapping: toMapping,
-      fromMapping: fromMapping,
-      initiatedByMapping: initiatedByMapping,
+      toList: toList,
+      fromList: fromList,
+      initiatedByList: initiatedByList,
       approvalCriteria: approval.approvalCriteria,
       approvalId: approval.approvalId,
       amountTrackerId: approval.amountTrackerId,
@@ -61,10 +61,10 @@ export function appendDefaultForIncoming(currApprovals: UserIncomingApprovalWith
   }
 
   const defaultToAdd = {
-    fromMappingId: "AllWithMint", //everyone
-    fromMapping: getReservedAddressMapping("AllWithMint") as AddressMapping,
-    initiatedByMapping: getReservedAddressMapping(userAddress) as AddressMapping,
-    initiatedByMappingId: userAddress,
+    fromListId: "AllWithMint", //everyone
+    fromList: getReservedAddressList("AllWithMint") as AddressList,
+    initiatedByList: getReservedAddressList(userAddress) as AddressList,
+    initiatedByListId: userAddress,
     transferTimes: [{
       start: 1n,
       end: 18446744073709551615n,
@@ -100,10 +100,10 @@ export function appendDefaultForOutgoing(currApprovals: UserOutgoingApprovalWith
   }
 
   const defaultToAdd = {
-    toMappingId: "AllWithMint", //everyone
-    initiatedByMappingId: userAddress,
-    toMapping: getReservedAddressMapping("AllWithMint") as AddressMapping,
-    initiatedByMapping: getReservedAddressMapping(userAddress) as AddressMapping,
+    toListId: "AllWithMint", //everyone
+    initiatedByListId: userAddress,
+    toList: getReservedAddressList("AllWithMint") as AddressList,
+    initiatedByList: getReservedAddressList(userAddress) as AddressList,
     transferTimes: [{
       start: 1n,
       end: 18446744073709551615n,

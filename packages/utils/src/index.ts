@@ -27,7 +27,7 @@ export * from './distribution';
 export * from './balances';
 export * from './uintRanges';
 export * from './constants';
-export * from './addressMappings';
+export * from './addressLists';
 export * from './permissions';
 export * from './badgeMetadata';
 export * from './metadataIds';
@@ -44,6 +44,8 @@ export * from './approved_transfers_casts';
 export * from './api-sdk';
 export * from './converter';
 export * from './aliases';
+export * from './api-utils';
+export * from './batch-utils';
 
 export * from './node-rest-api/account'
 export * from './node-rest-api/balances'

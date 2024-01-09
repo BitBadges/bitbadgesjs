@@ -4,8 +4,8 @@
   This file has helper functions for those three fields.
 */
 
-import { AddressMapping, BadgeMetadata, deepCopy } from "bitbadgesjs-proto";
-import { generateReservedMappingId, getReservedAddressMapping, isAddressMappingEmpty, isInAddressMapping, removeAddressMappingFromAddressMapping } from "./addressMappings";
+import { AddressList, BadgeMetadata, deepCopy } from "bitbadgesjs-proto";
+import { generateReservedListId, getReservedAddressList, isAddressListEmpty, isInAddressList, removeAddressListFromAddressList } from "./addressLists";
 import { castIncomingTransfersToCollectionTransfers, castOutgoingTransfersToCollectionTransfers } from "./approved_transfers_casts";
 import { GetFirstMatchOnly, MergeUniversalPermissionDetails } from "./overlaps";
 import { castCollectionApprovalToUniversalPermission } from "./permissions";
@@ -46,12 +46,12 @@ export function getUnhandledCollectionApprovals(
 
   //Startegy here is to create a unique approval, get first matches, and then whatever makes it through the first matches (w/ approvalId "__disapproved__") is unhandled
   currTransferability.push({
-    fromMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-    toMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-    initiatedByMapping: { mappingId: 'AllWithMint', addresses: [], includeAddresses: false, uri: "", customData: "", createdBy: "" },
-    fromMappingId: 'AllWithMint',
-    toMappingId: 'AllWithMint',
-    initiatedByMappingId: 'AllWithMint',
+    fromList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+    toList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+    initiatedByList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+    fromListId: 'AllWithMint',
+    toListId: 'AllWithMint',
+    initiatedByListId: 'AllWithMint',
     approvalId: "__disapproved__",
     amountTrackerId: "All",
     challengeTrackerId: "All",
@@ -66,8 +66,8 @@ export function getUnhandledCollectionApprovals(
     if (ignoreTrackerIds) {
       return {
         ...x,
-        usesChallengeTrackerIdMapping: false,
-        usesAmountTrackerIdMapping: false,
+        usesChallengeTrackerIdList: false,
+        usesAmountTrackerIdList: false,
       }
     } else {
       return x;
@@ -80,12 +80,12 @@ export function getUnhandledCollectionApprovals(
   const newApprovals: CollectionApprovalWithDetails<bigint>[] = [];
   for (const match of merged) {
     newApprovals.push({
-      fromMapping: match.fromMapping,
-      fromMappingId: match.fromMapping.mappingId,
-      toMapping: match.toMapping,
-      toMappingId: match.toMapping.mappingId,
-      initiatedByMapping: match.initiatedByMapping,
-      initiatedByMappingId: match.initiatedByMapping.mappingId,
+      fromList: match.fromList,
+      fromListId: match.fromList.listId,
+      toList: match.toList,
+      toListId: match.toList.listId,
+      initiatedByList: match.initiatedByList,
+      initiatedByListId: match.initiatedByList.listId,
       badgeIds: match.badgeIds,
       transferTimes: match.transferTimes,
       ownershipTimes: match.ownershipTimes,
@@ -115,9 +115,9 @@ export function getUnhandledUserOutgoingApprovals(
   const unhandled = getUnhandledCollectionApprovals(castedApprovals, ignoreTrackerIds, doNotMerge);
   const newUnhandled = [];
   for (const unhandledApproval of unhandled) {
-    if (isInAddressMapping(unhandledApproval.fromMapping, userAddress)) {
-      unhandledApproval.fromMappingId = userAddress;
-      unhandledApproval.fromMapping = getReservedAddressMapping(userAddress) as AddressMapping;
+    if (isInAddressList(unhandledApproval.fromList, userAddress)) {
+      unhandledApproval.fromListId = userAddress;
+      unhandledApproval.fromList = getReservedAddressList(userAddress) as AddressList;
       newUnhandled.push(unhandledApproval);
     }
   }
@@ -138,9 +138,9 @@ export function getUnhandledUserIncomingApprovals(
   const unhandled = getUnhandledCollectionApprovals(castedApprovals, ignoreTrackerIds, doNotMerge);
   const newUnhandled = [];
   for (const unhandledApproval of unhandled) {
-    if (isInAddressMapping(unhandledApproval.toMapping, userAddress)) {
-      unhandledApproval.toMappingId = userAddress;
-      unhandledApproval.toMapping = getReservedAddressMapping(userAddress) as AddressMapping;
+    if (isInAddressList(unhandledApproval.toList, userAddress)) {
+      unhandledApproval.toListId = userAddress;
+      unhandledApproval.toList = getReservedAddressList(userAddress) as AddressList;
       newUnhandled.push(unhandledApproval);
     }
   }
@@ -149,33 +149,33 @@ export function getUnhandledUserIncomingApprovals(
 }
 
 /**
- * Returns the approvals without the "Mint" address in any fromMapping.
+ * Returns the approvals without the "Mint" address in any fromList.
  * For ones with "Mint" and addresses ABC, for example, it will return just ABC.
  *
  * @category Approvals / Transferability
  */
 export const getNonMintApprovals = (collectionApprovals: CollectionApprovalWithDetails<bigint>[]) => {
   const existingNonMint = collectionApprovals.map(x => {
-    if (isInAddressMapping(x.fromMapping, "Mint")) {
-      if (x.fromMappingId === 'AllWithMint') {
+    if (isInAddressList(x.fromList, "Mint")) {
+      if (x.fromListId === 'AllWithMint') {
         return {
           ...x,
-          fromMapping: getReservedAddressMapping('!Mint'),
-          fromMappingId: '!Mint'
+          fromList: getReservedAddressList('!Mint'),
+          fromListId: '!Mint'
         }
       }
 
 
-      const [remaining] = removeAddressMappingFromAddressMapping(getReservedAddressMapping('Mint'), x.fromMapping);
+      const [remaining] = removeAddressListFromAddressList(getReservedAddressList('Mint'), x.fromList);
 
-      if (isAddressMappingEmpty(remaining)) {
+      if (isAddressListEmpty(remaining)) {
         return undefined;
       }
 
       return {
         ...x,
-        fromMapping: remaining,
-        fromMappingId: generateReservedMappingId(remaining)
+        fromList: remaining,
+        fromListId: generateReservedListId(remaining)
       }
     } else {
       return x;
@@ -187,18 +187,18 @@ export const getNonMintApprovals = (collectionApprovals: CollectionApprovalWithD
 
 /**
  *
- * Returns the approvals with the "Mint" address in any fromMapping.
+ * Returns the approvals with the "Mint" address in any fromList.
  * For ones with "Mint" and addresses ABC, for example, it will return just Mint.
  *
  * @category Approvals / Transferability
  */
 export const getMintApprovals = (collectionApprovals: CollectionApprovalWithDetails<bigint>[]) => {
   const newApprovals = collectionApprovals.map(x => {
-    if (isInAddressMapping(x.fromMapping, "Mint")) {
+    if (isInAddressList(x.fromList, "Mint")) {
       return {
         ...x,
-        fromMapping: getReservedAddressMapping('Mint'),
-        fromMappingId: 'Mint',
+        fromList: getReservedAddressList('Mint'),
+        fromListId: 'Mint',
       }
     } else {
       return undefined;
