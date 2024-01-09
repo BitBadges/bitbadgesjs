@@ -77,9 +77,9 @@ export class BitBadgesAPI {
   /**
    * Gets the current status details about the blockchain / indexer (gas, block height, etc).
    *
-   * API Route: POST /api/v0/status
+   * **API Route**: POST /api/v0/status
    *
-   * SDK Function Call: await BitBadgesAPI.getStatus();
+   * **SDK Function Call**: await BitBadgesAPI.getStatus();
    */
   public async getStatus(): Promise<GetStatusRouteSuccessResponse<DesiredNumberType>> {
     try {
@@ -94,9 +94,9 @@ export class BitBadgesAPI {
   /**
    * Search collections, badges, accounts, address lists based on a search value.
    *
-   * API Route: POST /api/v0/search/:searchValue
+   * **API Route**: POST /api/v0/search/:searchValue
    *
-   * SDK Function Call: await BitBadgesAPI.getSearchResults(searchValue);
+   * **SDK Function Call**: await BitBadgesAPI.getSearchResults(searchValue);
    */
   public async getSearchResults(searchValue: string, requestBody?: GetSearchRouteRequestBody): Promise<GetSearchRouteSuccessResponse<DesiredNumberType>> {
     try {
@@ -111,11 +111,11 @@ export class BitBadgesAPI {
   /**
    * Gets badge collections and accompying details.
    *
-   * API Route: POST /api/v0/collection/batch
+   * **API Route**: POST /api/v0/collection/batch
    *
-   * SDK Function Call: await BitBadgesAPI.getCollections(requestBody);
+   * **SDK Function Call**: await BitBadgesAPI.getCollections(requestBody);
    *
-   * Tutorial: See the Fetching Collections tutoral on the official docs.
+   * **Tutorial**: See the Fetching Collections tutoral on the official docs.
    */
   public async getCollections(requestBody: GetCollectionBatchRouteRequestBody): Promise<GetCollectionBatchRouteSuccessResponse<DesiredNumberType>> {
     try {
@@ -130,9 +130,9 @@ export class BitBadgesAPI {
   /**
    * Gets the owners for a specific badge in a collection
    *
-   * API Route: POST /api/v0/collection/:collectionId/:badgeId/owners
+   * **API Route**: POST /api/v0/collection/:collectionId/:badgeId/owners
    *
-   * SDK Function Call: await BitBadgesAPI.getOwnersForBadge(collectionId, badgeId, requestBody);
+   * **SDK Function Call**: await BitBadgesAPI.getOwnersForBadge(collectionId, badgeId, requestBody);
    */
   public async getOwnersForBadge(collectionId: NumberType, badgeId: NumberType, requestBody: GetOwnersForBadgeRouteRequestBody): Promise<GetOwnersForBadgeRouteSuccessResponse<DesiredNumberType>> {
     try {
@@ -150,9 +150,9 @@ export class BitBadgesAPI {
   /**
    * Gets the balance of a specific badge for a specific address
    *
-   * API Route: POST /api/v0/collection/:collectionId/balance/:cosmosAddress
+   * **API Route**: POST /api/v0/collection/:collectionId/balance/:cosmosAddress
    *
-   * SDK Function Call: await BitBadgesAPI.getBadgeBalanceByAddress(collectionId, cosmosAddress, requestBody);
+   * **SDK Function Call**: await BitBadgesAPI.getBadgeBalanceByAddress(collectionId, cosmosAddress, requestBody);
    */
   public async getBadgeBalanceByAddress(collectionId: NumberType, cosmosAddress: string, requestBody?: GetBadgeBalanceByAddressRouteRequestBody): Promise<GetBadgeBalanceByAddressRouteSuccessResponse<DesiredNumberType>> {
     try {
@@ -169,9 +169,9 @@ export class BitBadgesAPI {
   /**
    * Gets the activity for a specific badge in a collection
    *
-   * API Route: POST /api/v0/collection/:collectionId/:badgeId/activity
+   * **API Route**: POST /api/v0/collection/:collectionId/:badgeId/activity
    *
-   * SDK Function Call: await BitBadgesAPI.getBadgeActivity(collectionId, badgeId, requestBody);
+   * **SDK Function Call**: await BitBadgesAPI.getBadgeActivity(collectionId, badgeId, requestBody);
    */
   public async getBadgeActivity(collectionId: NumberType, badgeId: NumberType, requestBody: GetBadgeActivityRouteRequestBody): Promise<GetBadgeActivityRouteSuccessResponse<DesiredNumberType>> {
     try {
@@ -190,9 +190,9 @@ export class BitBadgesAPI {
    * This will refetch any details for the collection (such as metadata, balances, approval details, etc).
    * Note it will reject if recently refreshed. Uses a cooldown of 5 minutes.
    *
-   * API Route: POST /api/v0/collection/:collectionId/refresh
+   * **API Route**: POST /api/v0/collection/:collectionId/refresh
    *
-   * SDK Function Call: await BitBadgesAPI.refreshMetadata(collectionId, requestBody);
+   * **SDK Function Call**: await BitBadgesAPI.refreshMetadata(collectionId, requestBody);
    */
   public async refreshMetadata(collectionId: NumberType, requestBody?: RefreshMetadataRouteRequestBody): Promise<RefreshMetadataRouteSuccessResponse<DesiredNumberType>> {
     try {
@@ -209,10 +209,11 @@ export class BitBadgesAPI {
   /**
    * Gets the password and/or codes for a specific approval.
    *
-   * API Route: POST /api/v0/collection/:collectionId/codes
+   * **API Route**: POST /api/v0/collection/:collectionId/codes
    *
-   * SDK Function Call: await BitBadgesAPI.getAllPasswordsAndCodes(collectionId, requestBody);
-   * Authentication: Must be signed in and the manager of the requested collection.
+   * **SDK Function Call**: await BitBadgesAPI.getAllPasswordsAndCodes(collectionId, requestBody);
+   *
+   * **Authentication**: Must be signed in and the manager of the requested collection.
    */
   public async getAllPasswordsAndCodes(collectionId: NumberType, requestBody?: GetAllCodesAndPasswordsRouteRequestBody): Promise<GetAllCodesAndPasswordsRouteSuccessResponse<DesiredNumberType>> {
     try {
@@ -232,10 +233,11 @@ export class BitBadgesAPI {
    *
    * Each address is limited to one code per password. If the password is provided again, they will receive the same code.
    *
-   * API Route: POST /api/v0/collection/:collectionId/password/:cid/:password
+   * **API Route**: POST /api/v0/collection/:collectionId/password/:cid/:password
    *
-   * SDK Function Call: await BitBadgesAPI.getCodeForPassword(collectionId, cid, password, requestBody);
-   * Authentication: Must be signed in.
+   * **SDK Function Call**: await BitBadgesAPI.getCodeForPassword(collectionId, cid, password, requestBody);
+   *
+   * **Authentication**: Must be signed in.
    */
   public async getCodeForPassword(collectionId: NumberType, cid: string, password: string, requestBody?: GetCodeForPasswordRouteRequestBody): Promise<GetCodeForPasswordRouteSuccessResponse<DesiredNumberType>> {
     try {
@@ -267,10 +269,11 @@ export class BitBadgesAPI {
   /**
    * Deletes a review.
    *
-   * API Route: POST /api/v0/deleteReview/:reviewId
+   * **API Route**: POST /api/v0/deleteReview/:reviewId
    *
-   * SDK Function Call: await BitBadgesAPI.deleteReview(reviewId, requestBody);
-   * Authentication: Must be signed in and the owner of the review.
+   * **SDK Function Call**: await BitBadgesAPI.deleteReview(reviewId, requestBody);
+   *
+   * **Authentication**: Must be signed in and the owner of the review.
    */
   public async deleteReview(reviewId: string, requestBody?: DeleteReviewRouteRequestBody): Promise<DeleteReviewRouteSuccessResponse<DesiredNumberType>> {
     try {
@@ -297,10 +300,11 @@ export class BitBadgesAPI {
   /**
    * Adds a new review for a collection.
    *
-   * API Route: POST /api/v0/collection/:collectionId/addReview
+   * **API Route**: POST /api/v0/collection/:collectionId/addReview
    *
-   * SDK Function Call: await BitBadgesAPI.addReviewForCollection(collectionId, requestBody);
-   * Authentication: Must be signed in.
+   * **SDK Function Call**: await BitBadgesAPI.addReviewForCollection(collectionId, requestBody);
+   *
+   * **Authentication**: Must be signed in.
    */
   public async addReviewForCollection(collectionId: NumberType, requestBody: AddReviewForCollectionRouteRequestBody): Promise<AddReviewForCollectionRouteSuccessResponse<DesiredNumberType>> {
     try {
@@ -317,12 +321,13 @@ export class BitBadgesAPI {
   /**
    * Gets accounts and accompying details.
    *
-   * API Route: POST /api/v0/user/batch
+   * **API Route**: POST /api/v0/user/batch
    *
-   * SDK Function Call: await BitBadgesAPI.getAccounts(requestBody);
+   * **SDK Function Call**: await BitBadgesAPI.getAccounts(requestBody);
    *
-   * Tutorial: See the Fetching Accounts tutoral on the official docs.
-   * Authentication: Must be signed in, if fetching private information such as private lists or auth codes. If fetching public information only, no sign in required.
+   * **Tutorial**: See the Fetching Accounts tutoral on the official docs.
+   *
+   * **Authentication**: Must be signed in, if fetching private information such as private lists or auth codes. If fetching public information only, no sign in required.
    */
   public async getAccounts(requestBody: GetAccountsRouteRequestBody): Promise<GetAccountsRouteSuccessResponse<DesiredNumberType>> {
     try {
@@ -337,10 +342,11 @@ export class BitBadgesAPI {
   /**
    * Adds a review for a user.
    *
-   * API Route: POST /api/v0/user/:addressOrUsername/addReview
+   * **API Route**: POST /api/v0/user/:addressOrUsername/addReview
    *
-   * SDK Function Call: await BitBadgesAPI.addReviewForUser(addressOrUsername, requestBody);
-   * Authentication: Must be signed in.
+   * **SDK Function Call**: await BitBadgesAPI.addReviewForUser(addressOrUsername, requestBody);
+   *
+   * **Authentication**: Must be signed in.
    */
   public async addReviewForUser(addressOrUsername: string, requestBody: AddReviewForUserRouteRequestBody): Promise<AddReviewForUserRouteSuccessResponse<DesiredNumberType>> {
     try {
@@ -355,10 +361,11 @@ export class BitBadgesAPI {
   /**
    * Updates the profile / account information for a user. We will only update the provided fields.
    *
-   * API Route: POST /api/v0/user/updateAccount
+   * **API Route**: POST /api/v0/user/updateAccount
    *
-   * SDK Function Call: await BitBadgesAPI.updateAccountInfo(requestBody);
-   * Authentication: Must be signed in.
+   * **SDK Function Call**: await BitBadgesAPI.updateAccountInfo(requestBody);
+   *
+   * **Authentication**: Must be signed in.
    */
   public async updateAccountInfo(requestBody: UpdateAccountInfoRouteRequestBody<NumberType>): Promise<UpdateAccountInfoRouteSuccessResponse<DesiredNumberType>> {
     try {
@@ -373,9 +380,9 @@ export class BitBadgesAPI {
   /**
    * Adds a balance map to off-chain storage. Mode can either be 'ipfs" for storing on IPFS or 'centralized' for storing on DigitalOcean.
    *
-   * API Route: POST /api/v0/addBalancesToOffChainStorage
+   * **API Route**: POST /api/v0/addBalancesToOffChainStorage
    *
-   * SDK Function Call: await BitBadgesAPI.addBalancesToOffChainStorage(requestBody);
+   * **SDK Function Call**: await BitBadgesAPI.addBalancesToOffChainStorage(requestBody);
    */
   public async addBalancesToOffChainStorage(requestBody: AddBalancesToOffChainStorageRouteRequestBody): Promise<AddBalancesToOffChainStorageRouteSuccessResponse<DesiredNumberType>> {
     try {
@@ -390,9 +397,9 @@ export class BitBadgesAPI {
   /**
    * Adds metadata to IPFS.
    *
-   * API Route: POST /api/v0/addMetadataToIpfs
+   * **API Route**: POST /api/v0/addMetadataToIpfs
    *
-   * SDK Function Call: await BitBadgesAPI.addMetadataToIpfs(requestBody);
+   * **SDK Function Call**: await BitBadgesAPI.addMetadataToIpfs(requestBody);
    */
   public async addMetadataToIpfs(requestBody: AddMetadataToIpfsRouteRequestBody): Promise<AddMetadataToIpfsRouteSuccessResponse<DesiredNumberType>> {
     try {
@@ -407,9 +414,9 @@ export class BitBadgesAPI {
   /**
    * Adds approval details to off-chain storage
    *
-   * API Route: POST /api/v0/addApprovalDetailsToOffChainStorage
+   * **API Route**: POST /api/v0/addApprovalDetailsToOffChainStorage
    *
-   * SDK Function Call: await BitBadgesAPI.addApprovalDetailsToOffChainStorage(requestBody);
+   * **SDK Function Call**: await BitBadgesAPI.addApprovalDetailsToOffChainStorage(requestBody);
    */
   public async addApprovalDetailsToOffChainStorage(requestBody: AddApprovalDetailsToOffChainStorageRouteRequestBody): Promise<AddApprovalDetailsToOffChainStorageRouteSuccessResponse<DesiredNumberType>> {
     try {
@@ -424,11 +431,11 @@ export class BitBadgesAPI {
   /**
    * Gets the Blockin sign in challenge to be signed for authentication. The returned blockinMessage is the message to be signed by the user.
    *
-   * API Route: POST /api/v0/auth/getChallenge
+   * **API Route**: POST /api/v0/auth/getChallenge
    *
-   * SDK Function Call: await BitBadgesAPI.getSignInChallenge(requestBody);
+   * **SDK Function Call**: await BitBadgesAPI.getSignInChallenge(requestBody);
    *
-   * Tutorial: See Authentication tutorial on the official docs.
+   * **Tutorial**: See Authentication tutorial on the official docs.
    */
   public async getSignInChallenge(requestBody: GetSignInChallengeRouteRequestBody): Promise<GetSignInChallengeRouteSuccessResponse<DesiredNumberType>> {
     try {
@@ -443,11 +450,11 @@ export class BitBadgesAPI {
   /**
    * Verifies the user signed challenge and grants them a valid session if everything checks out.
    *
-   * API Route: POST /api/v0/auth/verify
+   * **API Route**: POST /api/v0/auth/verify
    *
-   * SDK Function Call: await BitBadgesAPI.verifySignIn(requestBody);
+   * **SDK Function Call**: await BitBadgesAPI.verifySignIn(requestBody);
    *
-   * Tutorial: See Authentication tutorial on the official docs.
+   * **Tutorial**: See Authentication tutorial on the official docs.
    */
   public async verifySignIn(requestBody: VerifySignInRouteRequestBody): Promise<VerifySignInRouteSuccessResponse<DesiredNumberType>> {
     try {
@@ -463,11 +470,11 @@ export class BitBadgesAPI {
   /**
    * Checks if the user is signed in.
    *
-   * API Route: POST /api/v0/auth/status
+   * **API Route**: POST /api/v0/auth/status
    *
-   * SDK Function Call: await BitBadgesAPI.checkIfSignedIn(requestBody);
+   * **SDK Function Call**: await BitBadgesAPI.checkIfSignedIn(requestBody);
    *
-   * Tutorial: See Authentication tutorial on the official docs.
+   * **Tutorial**: See Authentication tutorial on the official docs.
    */
   public async checkIfSignedIn(requestBody: CheckSignInStatusRequestBody): Promise<CheckSignInStatusRequestSuccessResponse<DesiredNumberType>> {
     try {
@@ -483,11 +490,11 @@ export class BitBadgesAPI {
   /**
    * Signs the user out.
    *
-   * API Route: POST /api/v0/auth/logout
+   * **API Route**: POST /api/v0/auth/logout
    *
-   * SDK Function Call: await BitBadgesAPI.signOut(requestBody);
+   * **SDK Function Call**: await BitBadgesAPI.signOut(requestBody);
    *
-   * Tutorial: See Authentication tutorial on the official docs.
+   * **Tutorial**: See Authentication tutorial on the official docs.
    */
   public async signOut(requestBody?: SignOutRequestBody): Promise<SignOutSuccessResponse<DesiredNumberType>> {
     try {
@@ -502,9 +509,9 @@ export class BitBadgesAPI {
   /**
    * Gets details for a browse / explore page.
    *
-   * API Route: POST /api/v0/browse
+   * **API Route**: POST /api/v0/browse
    *
-   * SDK Function Call: await BitBadgesAPI.getBrowseCollections(requestBody);
+   * **SDK Function Call**: await BitBadgesAPI.getBrowseCollections(requestBody);
    */
   public async getBrowseCollections(requestBody?: GetBrowseCollectionsRouteRequestBody): Promise<GetBrowseCollectionsRouteSuccessResponse<DesiredNumberType>> {
     try {
@@ -521,11 +528,11 @@ export class BitBadgesAPI {
    *
    * Also, consider checking out https://bitbadges.io/dev/broadcast, so you can simply copy and paste your transaction to a UI. All signing, API communication, etc is outsourced to the UI,
    *
-   * API Route: POST /api/v0/broadcast
+   * **API Route**: POST /api/v0/broadcast
    *
-   * SDK Function Call: await BitBadgesAPI.broadcastTx(requestBody);
+   * **SDK Function Call**: await BitBadgesAPI.broadcastTx(requestBody);
    *
-   * Tutorial: See Broadcasting Transactions tutorial on the official docs.
+   * **Tutorial**: See Broadcasting Transactions tutorial on the official docs.
    */
   public async broadcastTx(requestBody: BroadcastTxRouteRequestBody | string): Promise<BroadcastTxRouteSuccessResponse<DesiredNumberType>> {
     try {
@@ -541,11 +548,11 @@ export class BitBadgesAPI {
    * Simulates a transaction on the blockchain. This means that it will return the gas used and any errors that occur on a dry run.
    * Should be used before broadcasting a transaction. Does not require signatures.
    *
-   * API Route: POST /api/v0/simulate
+   * **API Route**: POST /api/v0/simulate
    *
-   * SDK Function Call: await BitBadgesAPI.simulateTx(requestBody);
+   * **SDK Function Call**: await BitBadgesAPI.simulateTx(requestBody);
    *
-   * Tutorial: See Broadcasting Transactions tutorial on the official docs.
+   * **Tutorial**: See Broadcasting Transactions tutorial on the official docs.
    */
   public async simulateTx(requestBody: SimulateTxRouteRequestBody | string): Promise<SimulateTxRouteSuccessResponse<DesiredNumberType>> {
     try {
@@ -560,9 +567,9 @@ export class BitBadgesAPI {
   /**
    * Fetches arbitrary metadata directly from IPFS. This is useful for fetching metadata that is not stored on-chain.
    *
-   * API Route: POST /api/v0/metadata
+   * **API Route**: POST /api/v0/metadata
    *
-   * SDK Function Call: await BitBadgesAPI.fetchMetadataDirectly(requestBody);
+   * **SDK Function Call**: await BitBadgesAPI.fetchMetadataDirectly(requestBody);
    */
   public async fetchMetadataDirectly(requestBody: FetchMetadataDirectlyRouteRequestBody): Promise<FetchMetadataDirectlyRouteSuccessResponse<DesiredNumberType>> {
     try {
@@ -582,10 +589,11 @@ export class BitBadgesAPI {
   /**
    * Gets the tokens from the faucet. This will only work on betanet.
    *
-   * API Route: POST /api/v0/faucet
+   * **API Route**: POST /api/v0/faucet
    *
-   * SDK Function Call: await BitBadgesAPI.getTokensFromFaucet(requestBody);
-   * Authentication: Must be signed in.
+   * **SDK Function Call**: await BitBadgesAPI.getTokensFromFaucet(requestBody);
+   *
+   * **Authentication**: Must be signed in.
    */
   public async getTokensFromFaucet(requestBody?: GetTokensFromFaucetRouteRequestBody): Promise<GetTokensFromFaucetRouteSuccessResponse<DesiredNumberType>> {
     try {
@@ -602,9 +610,9 @@ export class BitBadgesAPI {
    * Must be created off-chain. For on-chain, they must be created through MsgCreateAddressMappings.
    * Creator can update their created lists with no restrictions. Else, requires an edit key.
    *
-   * API Route: POST /api/v0/addressList/update
+   * **API Route**: POST /api/v0/addressList/update
    *
-   * SDK Function Call: await BitBadgesAPI.updateAddressLists(requestBody);
+   * **SDK Function Call**: await BitBadgesAPI.updateAddressLists(requestBody);
    */
   public async updateAddressLists(requestBody?: UpdateAddressListsRouteRequestBody<NumberType>): Promise<UpdateAddressListsRouteSuccessResponse<DesiredNumberType>> {
     try {
@@ -621,9 +629,9 @@ export class BitBadgesAPI {
    * Note for reserved lists, you can use getReservedAddressList from the SDK.
    *
    *
-   * API Route: POST /api/v0/addressList/get
+   * **API Route**: POST /api/v0/addressList/get
    *
-   * SDK Function Call: await BitBadgesAPI.getAddressLists(requestBody);
+   * **SDK Function Call**: await BitBadgesAPI.getAddressLists(requestBody);
    */
   public async getAddressLists(requestBody?: GetAddressListsRouteRequestBody): Promise<GetAddressListsRouteSuccessResponse<DesiredNumberType>> {
     try {
@@ -638,10 +646,11 @@ export class BitBadgesAPI {
   /**
    * Deletes address lists. Must be created off-chain.
    *
-   * API Route: POST /api/v0/addressList/delete
+   * **API Route**: POST /api/v0/addressList/delete
    *
-   * SDK Function Call: await BitBadgesAPI.deleteAddressLists(requestBody);
-   * Authentication: Must be signed in and the creator of the address list.
+   * **SDK Function Call**: await BitBadgesAPI.deleteAddressLists(requestBody);
+   *
+   * **Authentication**: Must be signed in and the creator of the address list.
    */
   public async deleteAddressLists(requestBody?: DeleteAddressListsRouteRequestBody): Promise<DeleteAddressListsRouteSuccessResponse<DesiredNumberType>> {
     try {
@@ -657,9 +666,9 @@ export class BitBadgesAPI {
    * Gets a Blockin authentication code. This is used for signing in with Blockin at in-person events.
    * Anyone with the signature is able to fetch the preimage message.
    *
-   * API Route: POST /api/v0/authCode
+   * **API Route**: POST /api/v0/authCode
    *
-   * SDK Function Call: await BitBadgesAPI.getAuthCode(requestBody);
+   * **SDK Function Call**: await BitBadgesAPI.getAuthCode(requestBody);
    */
   public async getAuthCode(requestBody?: GetBlockinAuthCodeRouteRequestBody): Promise<GetBlockinAuthCodeRouteSuccessResponse> {
     try {
@@ -674,9 +683,9 @@ export class BitBadgesAPI {
   /**
    * Creates a Blockin authentication code. This is used for signing in with Blockin at in-person events.
    *
-   * API Route: POST /api/v0/authCode/create
+   * **API Route**: POST /api/v0/authCode/create
    *
-   * SDK Function Call: await BitBadgesAPI.createAuthCode(requestBody);
+   * **SDK Function Call**: await BitBadgesAPI.createAuthCode(requestBody);
    */
   public async createAuthCode(requestBody?: CreateBlockinAuthCodeRouteRequestBody): Promise<CreateBlockinAuthCodeRouteSuccessResponse> {
     try {
@@ -691,10 +700,11 @@ export class BitBadgesAPI {
   /**
    * Deletes a Blockin authentication code. This is used for signing in with Blockin at in-person events.
    *
-   * API Route: POST /api/v0/authCode/delete
+   * **API Route**: POST /api/v0/authCode/delete
    *
-   * SDK Function Call: await BitBadgesAPI.deleteAuthCode(requestBody);
-   * Authentication: Must be signed in and the owner of the auth code.
+   * **SDK Function Call**: await BitBadgesAPI.deleteAuthCode(requestBody);
+   *
+   * **Authentication**: Must be signed in and the owner of the auth code.
    */
   public async deleteAuthCode(requestBody?: DeleteBlockinAuthCodeRouteRequestBody): Promise<DeleteBlockinAuthCodeRouteSuccessResponse> {
     try {
@@ -709,9 +719,9 @@ export class BitBadgesAPI {
   /**
    * A generic route for verifying Blockin sign in requests. Used as a helper if implementing Blockin on your own.
    *
-   * API Route: POST /api/v0/auth/verifyGeneric
+   * **API Route**: POST /api/v0/auth/verifyGeneric
    *
-   * SDK Function Call: await BitBadgesAPI.verifySignInGeneric(requestBody);
+   * **SDK Function Call**: await BitBadgesAPI.verifySignInGeneric(requestBody);
    */
   public async verifySignInGeneric(requestBody: GenericBlockinVerifyRouteRequestBody): Promise<GenericBlockinVerifyRouteSuccessResponse> {
     try {
@@ -728,9 +738,9 @@ export class BitBadgesAPI {
    * Adds an address to an address list. Must be created off-chain.
    * Must provide a valid edit key, or else, must be the creator
    *
-   * API Route: POST /api/v0/addressList/addAddress
+   * **API Route**: POST /api/v0/addressList/addAddress
    *
-   * SDK Function Call: await BitBadgesAPI.addAddressToAddressList(requestBody);
+   * **SDK Function Call**: await BitBadgesAPI.addAddressToAddressList(requestBody);
    */
   public async addAddressToSurvey(listId: string, requestBody: AddAddressToSurveyRouteRequestBody): Promise<AddAddressToSurveyRouteSuccessResponse> {
     try {
@@ -745,7 +755,7 @@ export class BitBadgesAPI {
   /**
    * Sends claim alert notifications out.
    *
-   * API Route: POST /api/v0/sendClaimAlerts
+   * **API Route**: POST /api/v0/sendClaimAlerts
    */
   public async sendClaimAlert(requestBody: SendClaimAlertsRouteRequestBody<NumberType>): Promise<SendClaimAlertsRouteSuccessResponse<DesiredNumberType>> {
     try {
@@ -760,9 +770,9 @@ export class BitBadgesAPI {
   /**
    * Gets the follow details for a user with the BitBadges follow protocol.
    *
-   * API Route: POST /api/v0/getFollowDetails
+   * **API Route**: POST /api/v0/getFollowDetails
    *
-   * SDK Function Call: await BitBadgesAPI.getFollowDetails(requestBody);
+   * **SDK Function Call**: await BitBadgesAPI.getFollowDetails(requestBody);
    */
   public async getFollowDetails(requestBody: GetFollowDetailsRouteRequestBody): Promise<GetFollowDetailsRouteSuccessResponse<DesiredNumberType>> {
     try {
@@ -777,9 +787,9 @@ export class BitBadgesAPI {
   /**
    * Gets claim alerts for a collection or user
    *
-   * API Route: POST /api/v0/getClaimAlerts
+   * **API Route**: POST /api/v0/getClaimAlerts
    *
-   * SDK Function Call: await BitBadgesAPI.getClaimAlerts(requestBody);
+   * **SDK Function Call**: await BitBadgesAPI.getClaimAlerts(requestBody);
    */
   public async getClaimAlerts(requestBody: GetClaimAlertsForCollectionRouteRequestBody<NumberType>): Promise<GetClaimAlertsForCollectionRouteSuccessResponse<DesiredNumberType>> {
     try {
@@ -794,9 +804,9 @@ export class BitBadgesAPI {
   /**
    * Gets the refresh status for a collection. Used to track if any errors occur during a refresh, or if it is in the queue or not.
    *
-   * API Route: POST /api/v0/getRefreshStatus
+   * **API Route**: POST /api/v0/getRefreshStatus
    *
-   * SDK Function Call: await BitBadgesAPI.getRefreshStatus(requestBody);
+   * **SDK Function Call**: await BitBadgesAPI.getRefreshStatus(requestBody);
    */
   public async getRefreshStatus(collectionId: NumberType): Promise<RefreshStatusRouteSuccessResponse<NumberType>> {
     try {
@@ -811,9 +821,9 @@ export class BitBadgesAPI {
   /**
    * Get protocol details by name.
    *
-   * API Route: POST /api/v0/getProtocol
+   * **API Route**: POST /api/v0/getProtocol
    *
-   * SDK Function Call: await BitBadgesAPI.getProtocol(requestBody);
+   * **SDK Function Call**: await BitBadgesAPI.getProtocol(requestBody);
    */
   public async getProtocol(requestBody: GetProtocolsRouteRequestBody): Promise<GetProtocolsRouteSuccessResponse> {
     try {
@@ -828,9 +838,9 @@ export class BitBadgesAPI {
   /**
    * Gets the collection ID set by a user for a protocol.
    *
-   * API Route: POST /api/v0/getCollectionForProtocol
+   * **API Route**: POST /api/v0/getCollectionForProtocol
    *
-   * SDK Function Call: await BitBadgesAPI.getCollectionForProtocol(requestBody);
+   * **SDK Function Call**: await BitBadgesAPI.getCollectionForProtocol(requestBody);
    */
   public async getCollectionForProtocol(requestBody: GetCollectionForProtocolRouteRequestBody): Promise<GetCollectionForProtocolRouteSuccessResponse<DesiredNumberType>> {
     try {
@@ -845,9 +855,9 @@ export class BitBadgesAPI {
   /**
    * Filters badges in a collection based on multiple filter values.
    *
-   * API Route: POST /api/v0/filterBadgesInCollection
+   * **API Route**: POST /api/v0/filterBadgesInCollection
    *
-   * SDK Function Call: await BitBadgesAPI.filterBadgesInCollection(requestBody);
+   * **SDK Function Call**: await BitBadgesAPI.filterBadgesInCollection(requestBody);
    */
   public async filterBadgesInCollection(requestBody: FilterBadgesInCollectionRequestBody): Promise<FilterBadgesInCollectionSuccessResponse<DesiredNumberType>> {
     try {
