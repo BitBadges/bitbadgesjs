@@ -1,7 +1,0 @@
-{
-  "extends": "../../tsconfig.json",
-  "references": [
-    {"path": "../proto/tsconfig.json"},
-    {"path": "../utils/tsconfig.json"},
-  ]
-}
