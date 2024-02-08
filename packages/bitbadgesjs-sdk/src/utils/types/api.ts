@@ -1286,6 +1286,11 @@ export interface VerifySignInRouteRequestBody {
    * Additional options for verifying the challenge.
    */
   options?: VerifyChallengeOptions;
+
+  /**
+   * Required for some chains. The public key of the signer.
+   */
+  publicKey?: string;
 }
 
 /**

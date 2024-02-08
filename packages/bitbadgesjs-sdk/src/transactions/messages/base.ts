@@ -170,9 +170,9 @@ export const createTransactionPayload = (
     throw new Error('Sequence must be greater than or equal to 0')
   }
 
-  if (context.sender.pubkey === '') {
-    throw new Error('Public key must be a validly formatted public key')
-  }
+  // if (context.sender.pubkey === '') {
+  //   throw new Error('Public key must be a validly formatted public key')
+  // }
 
   const eipTxn = createEIP712TypedData(context, generatedMsgs)
   const sortedEipMessage = recursivelySort(eipTxn.message);
