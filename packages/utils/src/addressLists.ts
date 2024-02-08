@@ -12,7 +12,7 @@ export const isInAddressList = (
 ) => {
   let found = addressesList.addresses.includes(addressToCheck)
 
-  if (!addressesList.allowlist) {
+  if (!addressesList.whitelist) {
     found = !found
   }
 
@@ -56,7 +56,7 @@ export function removeAddressListFromAddressList(
 
   let removed: AddressList = {
     addresses: [],
-    allowlist: false,
+    whitelist: false,
     listId: '',
     uri: '',
     customData: '',
@@ -64,57 +64,57 @@ export function removeAddressListFromAddressList(
   }
   let remaining: AddressList = {
     addresses: [],
-    allowlist: false,
+    whitelist: false,
     listId: '',
     uri: '',
     customData: '',
     createdBy: '',
   }
 
-  if (addressesToRemove.allowlist && addressList.allowlist) {
+  if (addressesToRemove.whitelist && addressList.whitelist) {
     // Case 1
-    removed.allowlist = true
+    removed.whitelist = true
     removed.addresses = duplicates
 
-    remaining.allowlist = true
+    remaining.whitelist = true
     remaining.addresses = inListButNotToRemove
   } else if (
-    !addressesToRemove.allowlist &&
-    addressList.allowlist
+    !addressesToRemove.whitelist &&
+    addressList.whitelist
   ) {
     // Case 2
-    removed.allowlist = true
+    removed.whitelist = true
     removed.addresses = inListButNotToRemove
 
-    remaining.allowlist = true
+    remaining.whitelist = true
     remaining.addresses = duplicates
   } else if (
-    addressesToRemove.allowlist &&
-    !addressList.allowlist
+    addressesToRemove.whitelist &&
+    !addressList.whitelist
   ) {
     // Case 3
-    removed.allowlist = true
+    removed.whitelist = true
     removed.addresses = inToRemoveButNotList
 
-    remaining.allowlist = false
+    remaining.whitelist = false
     remaining.addresses = [
       ...inListButNotToRemove,
       ...inToRemoveButNotList,
       ...duplicates,
     ]
   } else if (
-    !addressesToRemove.allowlist &&
-    !addressList.allowlist
+    !addressesToRemove.whitelist &&
+    !addressList.whitelist
   ) {
     // Case 4
-    removed.allowlist = false
+    removed.whitelist = false
     removed.addresses = [
       ...inListButNotToRemove,
       ...inToRemoveButNotList,
       ...duplicates,
     ]
 
-    remaining.allowlist = true
+    remaining.whitelist = true
     remaining.addresses = inToRemoveButNotList
   }
 
@@ -125,14 +125,14 @@ export function removeAddressListFromAddressList(
  * @category Address Lists
  */
 export function isAddressListEmpty(list: AddressList) {
-  return list.addresses.length === 0 && list.allowlist
+  return list.addresses.length === 0 && list.whitelist
 }
 
 /**
  * @category Address Lists
  */
 export function invertAddressList(list: AddressList) {
-  list.allowlist = !list.allowlist
+  list.whitelist = !list.whitelist
   return list
 }
 
@@ -166,6 +166,7 @@ function getReservedList(
 ): AddressList {
   let inverted = false
   let addressList: AddressList | undefined = undefined
+  let addressListIdCopy = addressListId
 
   if (addressListId[0] === '!' && !addressListId.startsWith('!(')) {
     inverted = true
@@ -179,7 +180,7 @@ function getReservedList(
     addressList = {
       listId: 'Mint',
       addresses: ['Mint'],
-      allowlist: true,
+      whitelist: true,
       uri: '',
       customData: '',
       createdBy: '',
@@ -188,7 +189,7 @@ function getReservedList(
     addressList = {
       listId: addressListId,
       addresses: [],
-      allowlist: false,
+      whitelist: false,
       uri: '',
       customData: '',
       createdBy: '',
@@ -203,7 +204,7 @@ function getReservedList(
     addressList = {
       listId: addressListId,
       addresses: [],
-      allowlist: false,
+      whitelist: false,
       uri: '',
       customData: '',
       createdBy: '',
@@ -212,7 +213,7 @@ function getReservedList(
     addressList = {
       listId: 'None',
       addresses: [],
-      allowlist: true,
+      whitelist: true,
       uri: '',
       customData: '',
       createdBy: '',
@@ -234,7 +235,7 @@ function getReservedList(
       addressList = {
         listId: addressListId,
         addresses: addressesToCheck,
-        allowlist: true,
+        whitelist: true,
         uri: '',
         customData: '',
         createdBy: '',
@@ -243,14 +244,17 @@ function getReservedList(
   }
 
   if (inverted && addressList) {
-    addressList.allowlist = !addressList.allowlist
+    addressList.whitelist = !addressList.whitelist
   }
 
   if (!addressList) {
     throw new Error(`Invalid address list ID: ${addressListId}`)
   }
 
-  return addressList
+  return {
+    ...addressList,
+    listId: addressListIdCopy,
+  }
 }
 
 /**
@@ -266,7 +270,7 @@ export const generateReservedListId = (
   let listId = ''
 
   // Logic to determine the listId based on the properties of addressList
-  if (addressList.allowlist) {
+  if (addressList.whitelist) {
     if (addressList.addresses.length > 0) {
       const addresses = addressList.addresses
         .map((x) => (isAddressValid(x) ? convertToCosmosAddress(x) : x))

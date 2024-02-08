@@ -1,6 +1,5 @@
 import * as badges from '../../../../proto/badges/tx_pb'
 
-import { createProtoMsg } from '../../../../proto-types/base'
 import { NumberType } from '../../../../'
 import { createTransactionPayload } from '../../base'
 import { Chain, Fee, Sender } from "../../common"
@@ -60,6 +59,6 @@ export function createTxMsgDeleteCollection<T extends NumberType>(
   memo: string,
   params: MsgDeleteCollection<T>
 ) {
-  const msgCosmos = createProtoMsg(new badges.MsgDeleteCollection(convertMsgDeleteCollection(params, String)))
+  const msgCosmos = new badges.MsgDeleteCollection(convertMsgDeleteCollection(params, String))
   return createTransactionPayload({ chain, sender, fee, memo, }, msgCosmos)
 }

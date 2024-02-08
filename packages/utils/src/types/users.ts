@@ -1,9 +1,10 @@
 import { AddressList, NumberType, UserIncomingApproval, UserOutgoingApproval, convertIncomingApprovalCriteria, convertOutgoingApprovalCriteria, convertUserIncomingApproval, convertUserOutgoingApproval } from "bitbadgesjs-proto"
-import { AnnouncementDoc, ListActivityDoc, ReviewDoc, TransferActivityDoc, convertAnnouncementDoc, convertListActivityDoc, convertReviewDoc, convertTransferActivityDoc } from "./activity"
+import { AnnouncementDoc, ClaimAlertDoc, convertClaimAlertDoc, ListActivityDoc, ReviewDoc, TransferActivityDoc, convertAnnouncementDoc, convertListActivityDoc, convertReviewDoc, convertTransferActivityDoc } from "./activity"
 import { PaginationInfo } from "./api"
-import { AccountInfoBase, ApprovalTrackerDoc, BalanceDocWithDetails, BlockinAuthSignatureDoc, ClaimAlertDoc, MerkleChallengeDoc, ProfileInfoBase, convertAccountDoc, convertApprovalTrackerDoc, convertBalanceDocWithDetails, convertBlockinAuthSignatureDoc, convertClaimAlertDoc, convertMerkleChallengeDoc, convertProfileDoc } from "./db"
-import { AddressListWithMetadata, convertAddressListWithMetadata } from "./metadata"
+import { AccountInfoBase, ApprovalTrackerDoc, BalanceDocWithDetails, BlockinAuthSignatureDoc, MerkleChallengeDoc, ProfileInfoBase, convertAccountDoc, convertApprovalTrackerDoc, convertBalanceDocWithDetails, convertBlockinAuthSignatureDoc, convertMerkleChallengeDoc, convertProfileDoc } from "./db"
+import { BitBadgesAddressList, convertBitBadgesAddressList } from "./metadata"
 import { deepCopy } from "./utils"
+import { SupportedChain } from "./types"
 
 
 /**
@@ -69,7 +70,7 @@ export function convertUserIncomingApprovalWithDetails<T extends NumberType, U e
  * @property {ReviewDoc[]} reviews - A list of review activity items for the account. Paginated and fetched as needed. To be used in conjunction with views.
  * @property {MerkleChallengeDoc[]} merkleChallenges - A list of merkle challenge activity items for the account. Paginated and fetched as needed. To be used in conjunction with views.
  * @property {ApprovalTrackerDoc[]} approvalTrackers - A list of approvals tracker activity items for the account. Paginated and fetched as needed. To be used in conjunction with views.
- * @property {AddressListWithMetadata[]} addressLists - A list of address lists for the account. Paginated and fetched as needed. To be used in conjunction with views.
+ * @property {BitBadgesAddressList[]} addressLists - A list of address lists for the account. Paginated and fetched as needed. To be used in conjunction with views.
  * @property {ClaimAlertDoc[]} claimAlerts - A list of claim alerts for the account. Paginated and fetched as needed. To be used in conjunction with views.
  * @property {PaginationInfo} pagination - Pagination Docrmation for each of the profile Docrmation.
  *
@@ -97,6 +98,7 @@ export interface BitBadgesUserInfo<T extends NumberType> extends ProfileInfoBase
   solAddress: string
   airdropped?: boolean
   address: string
+  chain: SupportedChain
 
   //Dynamically loaded as needed
   collected: BalanceDocWithDetails<T>[],
@@ -106,7 +108,7 @@ export interface BitBadgesUserInfo<T extends NumberType> extends ProfileInfoBase
   reviews: ReviewDoc<T>[],
   merkleChallenges: MerkleChallengeDoc<T>[],
   approvalTrackers: ApprovalTrackerDoc<T>[],
-  addressLists: AddressListWithMetadata<T>[],
+  addressLists: BitBadgesAddressList<T>[],
   claimAlerts: ClaimAlertDoc<T>[],
   authCodes: BlockinAuthSignatureDoc<T>[],
 
@@ -141,10 +143,11 @@ export function convertBitBadgesUserInfo<T extends NumberType, U extends NumberT
       accountNumber: item.accountNumber,
       sequence: item.sequence,
       balance: item.balance,
+      pubKeyType: item.pubKeyType,
       publicKey: item.publicKey,
-      chain: item.chain,
     }, convertFunction),
 
+    chain: item.chain,
     solAddress: item.solAddress,
     address: item.address,
     resolvedName: item.resolvedName,
@@ -157,7 +160,7 @@ export function convertBitBadgesUserInfo<T extends NumberType, U extends NumberT
     reviews: item.reviews.map((activityItem) => convertReviewDoc(activityItem, convertFunction)),
     merkleChallenges: item.merkleChallenges.map((challenge) => convertMerkleChallengeDoc(challenge, convertFunction)),
     approvalTrackers: item.approvalTrackers.map((tracker) => convertApprovalTrackerDoc(tracker, convertFunction)),
-    addressLists: item.addressLists.map((list) => convertAddressListWithMetadata(list, convertFunction)),
+    addressLists: item.addressLists.map((list) => convertBitBadgesAddressList(list, convertFunction)),
     claimAlerts: item.claimAlerts.map((alert) => convertClaimAlertDoc(alert, convertFunction)),
     authCodes: item.authCodes.map((code) => convertBlockinAuthSignatureDoc(code, convertFunction)),
     alias: item.alias ? {

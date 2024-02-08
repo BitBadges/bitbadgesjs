@@ -44,8 +44,10 @@ export function getUpdateCombinationsToCheck(
         fromList: detailToAdd.fromList,
         initiatedByList: detailToAdd.initiatedByList,
         ownershipTime: detailToAdd.ownershipTime,
+        approvalIdList: detailToAdd.approvalIdList,
         amountTrackerIdList: detailToAdd.amountTrackerIdList,
         challengeTrackerIdList: detailToAdd.challengeTrackerIdList,
+
 
         permanentlyPermittedTimes: [],
         permanentlyForbiddenTimes: [],
@@ -68,6 +70,7 @@ export function getUpdateCombinationsToCheck(
         toList: detailToAdd.toList,
         fromList: detailToAdd.fromList,
         initiatedByList: detailToAdd.initiatedByList,
+        approvalIdList: detailToAdd.approvalIdList,
         amountTrackerIdList: detailToAdd.amountTrackerIdList,
         challengeTrackerIdList: detailToAdd.challengeTrackerIdList,
 
@@ -98,6 +101,7 @@ export function getUpdateCombinationsToCheck(
         toList: detailToAdd.toList,
         fromList: detailToAdd.fromList,
         initiatedByList: detailToAdd.initiatedByList,
+        approvalIdList: detailToAdd.approvalIdList,
         amountTrackerIdList: detailToAdd.amountTrackerIdList,
         challengeTrackerIdList: detailToAdd.challengeTrackerIdList,
         ownershipTime: detailToAdd.ownershipTime,
@@ -127,13 +131,11 @@ function checkNotForbidden(permission: UniversalPermissionDetails): Error | null
 }
 
 /**
- *
- *
  * Checks an ActionPermission to see if it is currently valid and not forbidden for the current time
  *
  *  @category Validate Permissions
  */
-export function checkActionPermission(permissions: ActionPermission<bigint>[]): Error | null {
+export function checkIfActionPermissionPermits(permissions: ActionPermission<bigint>[]): Error | null {
   const castedPermissions = castActionPermissionToUniversalPermission(permissions);
   const permissionDetails = GetFirstMatchOnly(castedPermissions);
 
@@ -154,7 +156,7 @@ export function checkActionPermission(permissions: ActionPermission<bigint>[]): 
  * @category Validate Permissions
  *
  */
-export function checkTimedUpdatePermission(
+export function checkIfTimedUpdatePermissionPermits(
   timelineTimes: UintRange<bigint>[],
   permissions: TimedUpdatePermission<bigint>[]
 ): Error | null {
@@ -166,11 +168,12 @@ export function checkTimedUpdatePermission(
       badgeId: { start: -1n, end: -1n },
       ownershipTime: { start: -1n, end: -1n },
       transferTime: { start: -1n, end: -1n },
-      toList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
-      fromList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
-      initiatedByList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
-      amountTrackerIdList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
-      challengeTrackerIdList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+      toList: { listId: 'AllWithMint', addresses: [], whitelist: false, uri: "", customData: "", createdBy: "" },
+      fromList: { listId: 'AllWithMint', addresses: [], whitelist: false, uri: "", customData: "", createdBy: "" },
+      initiatedByList: { listId: 'AllWithMint', addresses: [], whitelist: false, uri: "", customData: "", createdBy: "" },
+      approvalIdList: { listId: 'AllWithMint', addresses: [], whitelist: false, uri: "", customData: "", createdBy: "" },
+      amountTrackerIdList: { listId: 'AllWithMint', addresses: [], whitelist: false, uri: "", customData: "", createdBy: "" },
+      challengeTrackerIdList: { listId: 'AllWithMint', addresses: [], whitelist: false, uri: "", customData: "", createdBy: "" },
       permanentlyPermittedTimes: [],
       permanentlyForbiddenTimes: [],
       arbitraryValue: undefined
@@ -189,7 +192,7 @@ export function checkTimedUpdatePermission(
  *
  * @category Validate Permissions
  */
-export function checkBalancesActionPermission(
+export function checkIfBalancesActionPermissionPermits(
   balances: Balance<bigint>[],
   permissions: BalancesActionPermission<bigint>[]
 ): Error | null {
@@ -205,11 +208,12 @@ export function checkBalancesActionPermission(
           timelineTime: { start: -1n, end: -1n },
 
           transferTime: { start: -1n, end: -1n },
-          toList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
-          fromList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
-          initiatedByList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
-          amountTrackerIdList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
-          challengeTrackerIdList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+          toList: { listId: 'AllWithMint', addresses: [], whitelist: false, uri: "", customData: "", createdBy: "" },
+          fromList: { listId: 'AllWithMint', addresses: [], whitelist: false, uri: "", customData: "", createdBy: "" },
+          initiatedByList: { listId: 'AllWithMint', addresses: [], whitelist: false, uri: "", customData: "", createdBy: "" },
+          approvalIdList: { listId: 'AllWithMint', addresses: [], whitelist: false, uri: "", customData: "", createdBy: "" },
+          amountTrackerIdList: { listId: 'AllWithMint', addresses: [], whitelist: false, uri: "", customData: "", createdBy: "" },
+          challengeTrackerIdList: { listId: 'AllWithMint', addresses: [], whitelist: false, uri: "", customData: "", createdBy: "" },
           permanentlyPermittedTimes: [],
           permanentlyForbiddenTimes: [],
           arbitraryValue: undefined
@@ -229,7 +233,7 @@ export function checkBalancesActionPermission(
  * Checks a TimedUpdateWithBadgeIdsPermission to see if it is currently valid and not forbidden for the current time and provided timeline times and badge ids
  * @category Validate Permissions
 */
-export function checkTimedUpdateWithBadgeIdsPermission(
+export function checkIfTimedUpdateWithBadgeIdsPermissionPermits(
   details: {
     timelineTimes: UintRange<bigint>[],
     badgeIds: UintRange<bigint>[],
@@ -246,11 +250,12 @@ export function checkTimedUpdateWithBadgeIdsPermission(
 
           ownershipTime: { start: -1n, end: -1n },
           transferTime: { start: -1n, end: -1n },
-          toList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
-          fromList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
-          initiatedByList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
-          amountTrackerIdList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
-          challengeTrackerIdList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+          toList: { listId: 'AllWithMint', addresses: [], whitelist: false, uri: "", customData: "", createdBy: "" },
+          fromList: { listId: 'AllWithMint', addresses: [], whitelist: false, uri: "", customData: "", createdBy: "" },
+          initiatedByList: { listId: 'AllWithMint', addresses: [], whitelist: false, uri: "", customData: "", createdBy: "" },
+          approvalIdList: { listId: 'AllWithMint', addresses: [], whitelist: false, uri: "", customData: "", createdBy: "" },
+          amountTrackerIdList: { listId: 'AllWithMint', addresses: [], whitelist: false, uri: "", customData: "", createdBy: "" },
+          challengeTrackerIdList: { listId: 'AllWithMint', addresses: [], whitelist: false, uri: "", customData: "", createdBy: "" },
           permanentlyPermittedTimes: [],
           permanentlyForbiddenTimes: [],
           arbitraryValue: undefined
@@ -273,7 +278,7 @@ export function checkTimedUpdateWithBadgeIdsPermission(
  *
  * @category Validate Permissions
  */
-export function checkCollectionApprovalPermission(
+export function checkIfCollectionApprovalPermissionPermits(
   details: {
     timelineTimes: UintRange<bigint>[],
     badgeIds: UintRange<bigint>[],
@@ -282,6 +287,7 @@ export function checkCollectionApprovalPermission(
     toList: AddressList,
     fromList: AddressList,
     initiatedByList: AddressList,
+    approvalIdList: AddressList,
     amountTrackerIdList: AddressList,
     challengeTrackerIdList: AddressList,
   }[],
@@ -306,6 +312,7 @@ export function checkCollectionApprovalPermission(
               toList: detail.toList,
               fromList: detail.fromList,
               initiatedByList: detail.initiatedByList,
+              approvalIdList: detail.approvalIdList,
               amountTrackerIdList: detail.amountTrackerIdList,
               challengeTrackerIdList: detail.challengeTrackerIdList,
               permanentlyPermittedTimes: [],
@@ -331,7 +338,7 @@ export function checkCollectionApprovalPermission(
  * @category Validate Permissions
  *
  */
-export function checkUserOutgoingApprovalPermission(
+export function checkIfUserOutgoingApprovalPermissionPermits(
   detailsToCheck: {
     timelineTimes: UintRange<bigint>[],
     badgeIds: UintRange<bigint>[],
@@ -339,6 +346,7 @@ export function checkUserOutgoingApprovalPermission(
     transferTimes: UintRange<bigint>[],
     toList: AddressList,
     initiatedByList: AddressList,
+    approvalIdList: AddressList,
     amountTrackerIdList: AddressList,
     challengeTrackerIdList: AddressList,
   }[],
@@ -356,14 +364,14 @@ export function checkUserOutgoingApprovalPermission(
     permissions,
     userAddress
   );
-  return checkCollectionApprovalPermission(newDetails, castedPermissions);
+  return checkIfCollectionApprovalPermissionPermits(newDetails, castedPermissions);
 }
 
 /**
  * Checks a UserIncomingApprovalPermission to see if it is currently valid and not forbidden for the current time and provided transfer details.
  * @category Validate Permissions
  */
-export function checkUserIncomingApprovalPermission(
+export function checkIfUserIncomingApprovalPermissionPermits(
   detailsToCheck: {
     timelineTimes: UintRange<bigint>[],
     badgeIds: UintRange<bigint>[],
@@ -371,6 +379,7 @@ export function checkUserIncomingApprovalPermission(
     transferTimes: UintRange<bigint>[],
     fromList: AddressList,
     initiatedByList: AddressList,
+    approvalIdList: AddressList,
     amountTrackerIdList: AddressList,
     challengeTrackerIdList: AddressList,
   }[],
@@ -388,7 +397,7 @@ export function checkUserIncomingApprovalPermission(
     permissions,
     userAddress
   );
-  return checkCollectionApprovalPermission(newDetails, castedPermissions);
+  return checkIfCollectionApprovalPermissionPermits(newDetails, castedPermissions);
 }
 
 /**
@@ -406,8 +415,9 @@ export function checkNotForbiddenForAllOverlaps(
   let usesToLists = true;
   let usesFromLists = true;
   let usesInitiatedByLists = true;
-  let usesAmountTrackerIdLists = true;
-  let usesChallengeTrackerIdLists = true;
+  let usesApprovalIdLists = true;
+  let usesAmountTrackerIdList = true;
+  let usesChallengeTrackerIdList = true;
 
   // Apply dummy ranges to all detailsToCheck
   for (const detailToCheck of detailsToCheck) {
@@ -433,27 +443,32 @@ export function checkNotForbiddenForAllOverlaps(
 
     if (!usesLists) {
       usesToLists = false;
-      detailToCheck.toList = { listId: '', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" }
+      detailToCheck.toList = { listId: '', addresses: [], whitelist: false, uri: "", customData: "", createdBy: "" }
     }
 
     if (!usesLists) {
       usesFromLists = false;
-      detailToCheck.fromList = { listId: '', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" }
+      detailToCheck.fromList = { listId: '', addresses: [], whitelist: false, uri: "", customData: "", createdBy: "" }
     }
 
     if (!usesLists) {
       usesInitiatedByLists = false;
-      detailToCheck.initiatedByList = { listId: '', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" }
+      detailToCheck.initiatedByList = { listId: '', addresses: [], whitelist: false, uri: "", customData: "", createdBy: "" }
     }
 
     if (!usesLists) {
-      usesAmountTrackerIdLists = false;
-      detailToCheck.amountTrackerIdList = { listId: '', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" }
+      usesApprovalIdLists = false;
+      detailToCheck.approvalIdList = { listId: '', addresses: [], whitelist: false, uri: "", customData: "", createdBy: "" }
     }
 
     if (!usesLists) {
-      usesChallengeTrackerIdLists = false;
-      detailToCheck.challengeTrackerIdList = { listId: '', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" }
+      usesAmountTrackerIdList = false;
+      detailToCheck.amountTrackerIdList = { listId: '', addresses: [], whitelist: false, uri: "", customData: "", createdBy: "" }
+    }
+
+    if (!usesLists) {
+      usesChallengeTrackerIdList = false;
+      detailToCheck.challengeTrackerIdList = { listId: '', addresses: [], whitelist: false, uri: "", customData: "", createdBy: "" }
     }
   }
 
@@ -497,11 +512,15 @@ export function checkNotForbiddenForAllOverlaps(
           }
 
           //TODO: this won't be right
-          if (usesAmountTrackerIdLists) {
-            errStr += ` for the approval tracker id ${permissionDetail.amountTrackerIdList.listId}`;
+          if (usesApprovalIdLists) {
+            errStr += ` for the approval id ${permissionDetail.approvalIdList.listId}`;
           }
 
-          if (usesChallengeTrackerIdLists) {
+          if (usesAmountTrackerIdList) {
+            errStr += ` for the amount tracker id ${permissionDetail.amountTrackerIdList.listId}`;
+          }
+
+          if (usesChallengeTrackerIdList) {
             errStr += ` for the challenge tracker id ${permissionDetail.challengeTrackerIdList.listId}`;
           }
 

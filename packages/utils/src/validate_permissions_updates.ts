@@ -2,7 +2,7 @@ import { ActionPermission, BalancesActionPermission, TimedUpdatePermission, Time
 import { GetFirstMatchOnly, UniversalPermission, UniversalPermissionDetails, getOverlapsAndNonOverlaps } from "./overlaps";
 import { castActionPermissionToUniversalPermission, castBalancesActionPermissionToUniversalPermission, castCollectionApprovalPermissionToUniversalPermission, castTimedUpdatePermissionToUniversalPermission, castTimedUpdateWithBadgeIdsPermissionToUniversalPermission } from "./permissions";
 import { CollectionApprovalPermissionWithDetails, CollectionPermissionsWithDetails } from "./types/collections";
-import { removeUintRangeFromUintRange } from "./uintRanges";
+import { removeUintRangesFromUintRanges } from "./uintRanges";
 //TODO: Add validate basic logic
 
 /**
@@ -310,8 +310,8 @@ export function validateUniversalPermissionUpdate(
     const oldPermission = overlapObj.firstDetails;
     const newPermission = overlapObj.secondDetails;
 
-    const [leftoverPermittedTimes] = removeUintRangeFromUintRange(newPermission.permanentlyPermittedTimes, oldPermission.permanentlyPermittedTimes);
-    const [leftoverForbiddenTimes] = removeUintRangeFromUintRange(newPermission.permanentlyForbiddenTimes, oldPermission.permanentlyForbiddenTimes);
+    const [leftoverPermittedTimes] = removeUintRangesFromUintRanges(newPermission.permanentlyPermittedTimes, oldPermission.permanentlyPermittedTimes);
+    const [leftoverForbiddenTimes] = removeUintRangesFromUintRanges(newPermission.permanentlyForbiddenTimes, oldPermission.permanentlyForbiddenTimes);
 
     if (leftoverPermittedTimes.length > 0 || leftoverForbiddenTimes.length > 0) {
       let errMsg = `Permission ${getPermissionString(oldPermission)} found in both new and old permissions but `;
@@ -362,7 +362,7 @@ function getPermissionString(permission: UniversalPermissionDetails): string {
 
   if (permission.toList) {
     str += "toList: ";
-    if (!permission.toList.allowlist) {
+    if (!permission.toList.whitelist) {
       str += `${permission.toList.addresses.length} addresses `;
     } else {
       str += `all except ${permission.toList.addresses.length} addresses `;
@@ -379,7 +379,7 @@ function getPermissionString(permission: UniversalPermissionDetails): string {
 
   if (permission.fromList) {
     str += "fromList: ";
-    if (!permission.fromList.allowlist) {
+    if (!permission.fromList.whitelist) {
       str += `${permission.fromList.addresses.length} addresses `;
     } else {
       str += `all except ${permission.fromList.addresses.length} addresses `;
@@ -396,7 +396,7 @@ function getPermissionString(permission: UniversalPermissionDetails): string {
 
   if (permission.initiatedByList) {
     str += "initiatedByList: ";
-    if (!permission.initiatedByList.allowlist) {
+    if (!permission.initiatedByList.whitelist) {
       str += `${permission.initiatedByList.addresses.length} addresses `;
     } else {
       str += `all except ${permission.initiatedByList.addresses.length} addresses `;

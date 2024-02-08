@@ -364,11 +364,12 @@ export function getBalancesForIds(idRanges: UintRange<bigint>[], times: UintRang
           ownershipTime: currTime,
           transferTime: { start: BigInt("18446744073709551615"), end: BigInt("18446744073709551615") }, // dummy range
           timelineTime: { start: BigInt("18446744073709551615"), end: BigInt("18446744073709551615") }, // dummy range
-          toList: { addresses: ["Mint"], allowlist: false, listId: "", uri: "", customData: "", createdBy: "" },
-          fromList: { addresses: ["Mint"], allowlist: false, listId: "", uri: "", customData: "", createdBy: "" },
-          initiatedByList: { addresses: ["Mint"], allowlist: false, listId: "", uri: "", customData: "", createdBy: "" },
-          amountTrackerIdList: { addresses: ["Mint"], allowlist: false, listId: "", uri: "", customData: "", createdBy: "" },
-          challengeTrackerIdList: { addresses: ["Mint"], allowlist: false, listId: "", uri: "", customData: "", createdBy: "" },
+          toList: { addresses: ["Mint"], whitelist: false, listId: "", uri: "", customData: "", createdBy: "" },
+          fromList: { addresses: ["Mint"], whitelist: false, listId: "", uri: "", customData: "", createdBy: "" },
+          initiatedByList: { addresses: ["Mint"], whitelist: false, listId: "", uri: "", customData: "", createdBy: "" },
+          approvalIdList: { addresses: ["Mint"], whitelist: false, listId: "", uri: "", customData: "", createdBy: "" },
+          amountTrackerIdList: { addresses: ["Mint"], whitelist: false, listId: "", uri: "", customData: "", createdBy: "" },
+          challengeTrackerIdList: { addresses: ["Mint"], whitelist: false, listId: "", uri: "", customData: "", createdBy: "" },
           arbitraryValue: balanceObj.amount,
 
           permanentlyPermittedTimes: [],
@@ -386,11 +387,12 @@ export function getBalancesForIds(idRanges: UintRange<bigint>[], times: UintRang
         ownershipTime: timeToFetch,
         transferTime: { start: BigInt("18446744073709551615"), end: BigInt("18446744073709551615") }, // dummy range
         timelineTime: { start: BigInt("18446744073709551615"), end: BigInt("18446744073709551615") }, // dummy range
-        toList: { addresses: ["Mint"], allowlist: false, listId: "", uri: "", customData: "", createdBy: "" },
-        fromList: { addresses: ["Mint"], allowlist: false, listId: "", uri: "", customData: "", createdBy: "" },
-        initiatedByList: { addresses: ["Mint"], allowlist: false, listId: "", uri: "", customData: "", createdBy: "" },
-        amountTrackerIdList: { addresses: ["Mint"], allowlist: false, listId: "", uri: "", customData: "", createdBy: "" },
-        challengeTrackerIdList: { addresses: ["Mint"], allowlist: false, listId: "", uri: "", customData: "", createdBy: "" },
+        toList: { addresses: ["Mint"], whitelist: false, listId: "", uri: "", customData: "", createdBy: "" },
+        fromList: { addresses: ["Mint"], whitelist: false, listId: "", uri: "", customData: "", createdBy: "" },
+        initiatedByList: { addresses: ["Mint"], whitelist: false, listId: "", uri: "", customData: "", createdBy: "" },
+        approvalIdList: { addresses: ["Mint"], whitelist: false, listId: "", uri: "", customData: "", createdBy: "" },
+        amountTrackerIdList: { addresses: ["Mint"], whitelist: false, listId: "", uri: "", customData: "", createdBy: "" },
+        challengeTrackerIdList: { addresses: ["Mint"], whitelist: false, listId: "", uri: "", customData: "", createdBy: "" },
 
         permanentlyPermittedTimes: [],
         permanentlyForbiddenTimes: [],
@@ -442,11 +444,12 @@ export function deleteBalances(rangesToDelete: UintRange<bigint>[], timesToDelet
           ownershipTime: currTime,
           transferTime: { start: BigInt(Number.MAX_SAFE_INTEGER), end: BigInt(Number.MAX_SAFE_INTEGER) }, //dummy range
           timelineTime: { start: BigInt(Number.MAX_SAFE_INTEGER), end: BigInt(Number.MAX_SAFE_INTEGER) }, //dummy range
-          toList: { addresses: ["Mint"], allowlist: false, listId: "", uri: "", customData: "", createdBy: "" },
-          fromList: { addresses: ["Mint"], allowlist: false, listId: "", uri: "", customData: "", createdBy: "" },
-          initiatedByList: { addresses: ["Mint"], allowlist: false, listId: "", uri: "", customData: "", createdBy: "" },
-          amountTrackerIdList: { addresses: ["Mint"], allowlist: false, listId: "", uri: "", customData: "", createdBy: "" },
-          challengeTrackerIdList: { addresses: ["Mint"], allowlist: false, listId: "", uri: "", customData: "", createdBy: "" },
+          toList: { addresses: ["Mint"], whitelist: false, listId: "", uri: "", customData: "", createdBy: "" },
+          fromList: { addresses: ["Mint"], whitelist: false, listId: "", uri: "", customData: "", createdBy: "" },
+          initiatedByList: { addresses: ["Mint"], whitelist: false, listId: "", uri: "", customData: "", createdBy: "" },
+          approvalIdList: { addresses: ["Mint"], whitelist: false, listId: "", uri: "", customData: "", createdBy: "" },
+          amountTrackerIdList: { addresses: ["Mint"], whitelist: false, listId: "", uri: "", customData: "", createdBy: "" },
+          challengeTrackerIdList: { addresses: ["Mint"], whitelist: false, listId: "", uri: "", customData: "", createdBy: "" },
 
           permanentlyPermittedTimes: [],
           permanentlyForbiddenTimes: [],
@@ -463,12 +466,13 @@ export function deleteBalances(rangesToDelete: UintRange<bigint>[], timesToDelet
           ownershipTime: timeToDelete,
           transferTime: { start: BigInt(Number.MAX_SAFE_INTEGER), end: BigInt(Number.MAX_SAFE_INTEGER) }, //dummy range
           timelineTime: { start: BigInt(Number.MAX_SAFE_INTEGER), end: BigInt(Number.MAX_SAFE_INTEGER) }, //dummy range
-          toList: { addresses: ["Mint"], allowlist: false, listId: "", uri: "", customData: "", createdBy: "" },
-          fromList: { addresses: ["Mint"], allowlist: false, listId: "", uri: "", customData: "", createdBy: "" },
-          initiatedByList: { addresses: ["Mint"], allowlist: false, listId: "", uri: "", customData: "", createdBy: "" },
-          amountTrackerIdList: { addresses: ["Mint"], allowlist: false, listId: "", uri: "", customData: "", createdBy: "" },
-          challengeTrackerIdList: { addresses: ["Mint"], allowlist: false, listId: "", uri: "", customData: "", createdBy: "" },
-
+          toList: { addresses: ["Mint"], whitelist: false, listId: "", uri: "", customData: "", createdBy: "" },
+          fromList: { addresses: ["Mint"], whitelist: false, listId: "", uri: "", customData: "", createdBy: "" },
+          initiatedByList: { addresses: ["Mint"], whitelist: false, listId: "", uri: "", customData: "", createdBy: "" },
+          approvalIdList: { addresses: ["Mint"], whitelist: false, listId: "", uri: "", customData: "", createdBy: "" },
+          amountTrackerIdList: { addresses: ["Mint"], whitelist: false, listId: "", uri: "", customData: "", createdBy: "" },
+          challengeTrackerIdList: { addresses: ["Mint"], whitelist: false, listId: "", uri: "", customData: "", createdBy: "" },
+          
           permanentlyPermittedTimes: [],
           permanentlyForbiddenTimes: [],
           arbitraryValue: 0n,

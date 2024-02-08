@@ -4,10 +4,10 @@ import { AddressList, AmountTrackerIdDetails, NumberType, Protocol, UintRange, c
 import { ChallengeParams, VerifyChallengeOptions, convertChallengeParams } from "blockin"
 import { BatchBadgeDetails } from "../batch-utils"
 import { BroadcastPostBody } from "../node-rest-api/broadcast"
-import { TransferActivityDoc, convertTransferActivityDoc } from "./activity"
+import { ClaimAlertDoc, convertClaimAlertDoc, TransferActivityDoc, convertTransferActivityDoc } from "./activity"
 import { BadgeMetadataDetails, BitBadgesCollection, convertBitBadgesCollection } from "./collections"
-import { AddressListEditKey, BalanceDocWithDetails, ChallengeDetails, ChallengeTrackerIdDetails, ClaimAlertDoc, CustomListPage, CustomPage, FollowDetailsDoc, QueueDoc, RefreshDoc, StatusDoc, convertBalanceDocWithDetails, convertClaimAlertDoc, convertFollowDetailsDoc, convertQueueDoc, convertRefreshDoc, convertStatusDoc } from "./db"
-import { AddressListWithMetadata, Metadata, convertAddressListWithMetadata, convertMetadata } from "./metadata"
+import { AddressListEditKey, BalanceDocWithDetails, ChallengeDetails, ChallengeTrackerIdDetails, CustomListPage, CustomPage, FollowDetailsDoc, QueueDoc, RefreshDoc, StatusDoc, convertBalanceDocWithDetails, convertFollowDetailsDoc, convertQueueDoc, convertRefreshDoc, convertStatusDoc } from "./db"
+import { BitBadgesAddressList, Metadata, convertBitBadgesAddressList, convertMetadata } from "./metadata"
 import { OffChainBalancesMap } from "./transfers"
 import { SupportedChain } from "./types"
 import { BitBadgesUserInfo, convertBitBadgesUserInfo } from "./users"
@@ -31,7 +31,7 @@ export interface ErrorResponse {
   /**
    * UX-friendly error message that can be displayed to the user. Always present if error.
    */
-  message: string;
+  errorMessage: string;
   /**
    * Authentication error. Present if the user is not authenticated.
    */
@@ -96,7 +96,7 @@ export interface GetSearchRouteRequestBody {
 export interface GetSearchRouteSuccessResponse<T extends NumberType> {
   collections: BitBadgesCollection<T>[],
   accounts: BitBadgesUserInfo<T>[],
-  addressLists: AddressListWithMetadata<T>[],
+  addressLists: BitBadgesAddressList<T>[],
   badges: {
     badgeIds: UintRange<T>[],
     collection: BitBadgesCollection<T>,
@@ -121,7 +121,7 @@ export function convertGetSearchRouteSuccessResponse<T extends NumberType, U ext
     ...item,
     collections: item.collections.map((collection) => convertBitBadgesCollection(collection, convertFunction)),
     accounts: item.accounts.map((account) => convertBitBadgesUserInfo(account, convertFunction)),
-    addressLists: item.addressLists.map((addressList) => convertAddressListWithMetadata(addressList, convertFunction)),
+    addressLists: item.addressLists.map((addressList) => convertBitBadgesAddressList(addressList, convertFunction)),
     badges: item.badges.map((badge) => ({
       badgeIds: badge.badgeIds.map((badgeId) => convertUintRange(badgeId, convertFunction)),
       collection: convertBitBadgesCollection(badge.collection, convertFunction),
@@ -211,6 +211,8 @@ export interface GetAdditionalCollectionDetailsRequestBody {
     viewId: string;
     //A bookmark to pass in for pagination. "" for first request.
     bookmark: string;
+    //If defined, we will return the oldest items first..
+    oldestFirst?: boolean;
   }[];
 
   /**
@@ -447,12 +449,7 @@ export interface RefreshMetadataRouteRequestBody { }
 /**
  * @category API / Indexer
  */
-export interface RefreshMetadataRouteSuccessResponse<T extends NumberType> {
-  /**
-   * A success message.
-   */
-  successMessage: string;
-}
+export interface RefreshMetadataRouteSuccessResponse<T extends NumberType> { }
 
 /**
  * @category API / Indexer
@@ -766,9 +763,9 @@ export function convertAddReviewForCollectionRouteSuccessResponse<T extends Numb
  *
  * @category API / Indexer
  */
-export type AccountViewKey = 'createdLists' | 'privateLists' | 'authCodes' | 'transferActivity' | 'reviews' | 'badgesCollected' | 'latestClaimAlerts'
-  | 'addressLists' | 'latestAddressLists' | 'explicitlyIncludedAddressLists' | 'explicitlyExcludedAddressLists' | 'badgesCollectedWithHidden'
-  | 'createdBy' | 'managing' | 'listsActivity'
+export type AccountViewKey = 'createdLists' | 'privateLists'
+  | 'authCodes' | 'transferActivity' | 'reviews' | 'badgesCollected' | 'claimAlerts'
+  | 'allLists' | 'whitelists' | 'blacklists' | 'createdBadges' | 'managingBadges' | 'listsActivity'
 
 
 /**
@@ -814,6 +811,8 @@ export type AccountFetchDetails = {
     specificCollections?: BatchBadgeDetails<NumberType>[];
     //If defined, we will filter the view to only include the specified lists.
     specificLists?: string[];
+    //Oldest first. By default, we fetch newest
+    oldestFirst?: boolean;
     //A bookmark to pass in for pagination. "" for first request.
     bookmark: string
   }[];
@@ -1001,6 +1000,15 @@ export interface UpdateAccountInfoRouteRequestBody<T extends NumberType> {
    * The profile picture image file. We will then upload to our CDN.
    */
   profilePicImageFile?: any;
+
+  /**
+   * The notification preferences for the user.
+   */
+  notifications?: {
+    email?: string;
+    antiPhishingCode?: string;
+    preferences?: {}
+  }
 }
 
 /**
@@ -1233,9 +1241,9 @@ export interface GetSignInChallengeRouteSuccessResponse<T extends NumberType> {
   params: ChallengeParams<T>;
 
   /**
-   * The Blockin message to sign.
+   * The Blockin challenge message to sign.
    */
-  blockinMessage: string;
+  message: string;
 }
 
 /**
@@ -1265,11 +1273,6 @@ export function convertGetSignInChallengeRouteSuccessResponse<T extends NumberTy
  */
 export interface VerifySignInRouteRequestBody {
   /**
-   * The chain to be signed in with.
-   */
-  chain: SupportedChain;
-
-  /**
    * The original Blockin message
    */
   message: string;
@@ -1293,11 +1296,6 @@ export interface VerifySignInRouteSuccessResponse<T extends NumberType> {
    * Indicates whether the verification was successful.
    */
   success: boolean;
-
-  /**
-   * The success message.
-   */
-  successMessage: string;
 }
 
 /**
@@ -1333,6 +1331,11 @@ export interface CheckSignInStatusRequestSuccessResponse<T extends NumberType> {
    * Indicates whether the user is signed in.
    */
   signedIn: boolean;
+
+  /**
+   * The Blockin message that was signed.
+   */
+  message: string;
 }
 
 
@@ -1388,7 +1391,7 @@ export interface GetBrowseCollectionsRouteRequestBody { }
  */
 export interface GetBrowseCollectionsRouteSuccessResponse<T extends NumberType> {
   collections: { [category: string]: BitBadgesCollection<T>[] };
-  addressLists: { [category: string]: AddressListWithMetadata<T>[] };
+  addressLists: { [category: string]: BitBadgesAddressList<T>[] };
   profiles: { [category: string]: BitBadgesUserInfo<T>[] };
   activity: TransferActivityDoc<T>[];
   badges: {
@@ -1421,10 +1424,10 @@ export function convertGetBrowseCollectionsRouteSuccessResponse<T extends Number
     }, {} as { [category: string]: BitBadgesCollection<U>[] }),
     addressLists: Object.keys(item.addressLists).reduce((acc, category) => {
       acc[category] = item.addressLists[category].map((addressList) =>
-        convertAddressListWithMetadata(addressList, convertFunction)
+        convertBitBadgesAddressList(addressList, convertFunction)
       );
       return acc;
-    }, {} as { [category: string]: AddressListWithMetadata<U>[] }),
+    }, {} as { [category: string]: BitBadgesAddressList<U>[] }),
     profiles: Object.keys(item.profiles).reduce((acc, category) => {
       acc[category] = item.profiles[category].map((profile) => convertBitBadgesUserInfo(profile, convertFunction));
       return acc;
@@ -1582,14 +1585,21 @@ export interface GetAddressListsRouteRequestBody {
   /**
    * The list IDs to fetch. Can be reserved or custom IDs.
    */
-  listIds: string[];
+  listsToFetch: {
+    listId: string;
+    viewsToFetch?: {
+      viewId: string;
+      viewType: 'listActivity';
+      bookmark: string;
+    }[];
+  }[]
 }
 
 /**
  * @category API / Indexer
  */
 export interface GetAddressListsRouteSuccessResponse<T extends NumberType> {
-  addressLists: AddressListWithMetadata<T>[];
+  addressLists: BitBadgesAddressList<T>[];
 }
 
 /**
@@ -1604,7 +1614,7 @@ export function convertGetAddressListsRouteSuccessResponse<T extends NumberType,
   item: GetAddressListsRouteSuccessResponse<T>,
   convertFunction: (item: T) => U
 ): GetAddressListsRouteSuccessResponse<U> {
-  return { addressLists: item.addressLists.map((addressList) => convertAddressListWithMetadata(addressList, convertFunction)) };
+  return { addressLists: item.addressLists.map((addressList) => convertBitBadgesAddressList(addressList, convertFunction)) };
 }
 
 /**
@@ -1831,9 +1841,9 @@ export interface GetBlockinAuthCodeRouteSuccessResponse {
      */
     success: boolean;
     /**
-     * Returns the message returned from verifying the signature.
+     * Returns the response message returned from Blockin verification.
      */
-    verificationMessage: string;
+    errorMessage?: string;
   }
 }
 
@@ -1918,19 +1928,19 @@ export interface GetFollowDetailsRouteRequestBody {
   followersBookmark?: string;
 
   protocol?: string;
+
+  activityBookmark?: string;
 }
 
 /**
  * @category API / Indexer
  */
 export interface GetFollowDetailsRouteSuccessResponse<T extends NumberType> extends FollowDetailsDoc<T> {
-  followers: string[];
-  following: string[];
-
   followersPagination: PaginationInfo;
   followingPagination: PaginationInfo;
 
-  followingCollectionId: T;
+  activity: TransferActivityDoc<T>[];
+  activityPagination: PaginationInfo;
 }
 
 /**
@@ -1948,7 +1958,8 @@ export function convertGetFollowDetailsRouteSuccessResponse<T extends NumberType
   return {
     ...item,
     ...convertFollowDetailsDoc(item, convertFunction),
-    followingCollectionId: convertFunction(item.followingCollectionId),
+    activity: item.activity.map((activity) => convertTransferActivityDoc(activity, convertFunction)),
+
   };
 }
 

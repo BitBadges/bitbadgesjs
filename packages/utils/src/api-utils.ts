@@ -188,6 +188,7 @@ export function updateAccountWithResponse(oldAccount: BitBadgesUserInfo<bigint> 
       : cachedAccount?.resolvedName
         ? cachedAccount.resolvedName
         : '',
+    notifications: account.notifications ? account.notifications : cachedAccount?.notifications ? cachedAccount.notifications : undefined,
   };
 
   //Filter duplicates
@@ -235,7 +236,7 @@ export function updateAccountWithResponse(oldAccount: BitBadgesUserInfo<bigint> 
     b.timestamp - a.timestamp > 0 ? -1 : 1
   );
   newAccount.claimAlerts = newAccount.claimAlerts.sort((a, b) =>
-    b.createdTimestamp - a.createdTimestamp > 0 ? -1 : 1
+    b.timestamp - a.timestamp > 0 ? -1 : 1
   );
   newAccount.authCodes = newAccount.authCodes.sort((a, b) =>
     b.createdAt - a.createdAt > 0 ? -1 : 1

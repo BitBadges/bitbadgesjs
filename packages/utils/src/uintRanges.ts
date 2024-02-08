@@ -135,7 +135,7 @@ export function invertUintRanges(uintRanges: UintRange<bigint>[], minId: bigint,
     let newRanges = [] as UintRange<bigint>[];
     for (let j = 0; j < ranges.length; j++) {
       let rangeObject = ranges[j];
-      let [rangesAfterRemoval, _] = removeUintsFromUintRange(uintRange, rangeObject);
+      let [rangesAfterRemoval, _] = removeUintRangeFromUintRange(uintRange, rangeObject);
       newRanges = newRanges.concat(rangesAfterRemoval);
     }
     ranges = newRanges;
@@ -154,7 +154,7 @@ export function invertUintRanges(uintRanges: UintRange<bigint>[], minId: bigint,
  * @param {UintRange<bigint>} rangeObject - The range of Ids to remove from
  * @category Uint Ranges
  */
-export function removeUintsFromUintRange(idxsToRemove: UintRange<bigint>, rangeObject: UintRange<bigint>) {
+export function removeUintRangeFromUintRange(idxsToRemove: UintRange<bigint>, rangeObject: UintRange<bigint>) {
   if (idxsToRemove.end < rangeObject.start || idxsToRemove.start > rangeObject.end) {
     // idxsToRemove doesn't overlap with rangeObject, so nothing is removed
     return [[rangeObject], []];
@@ -218,7 +218,7 @@ export function removeUintsFromUintRange(idxsToRemove: UintRange<bigint>, rangeO
  * @param {UintRange<bigint>[]} rangeToRemoveFrom - The range of Ids to remove from
  * @category Uint Ranges
  */
-export function removeUintRangeFromUintRange(idsToRemove: UintRange<bigint>[], rangeToRemoveFrom: UintRange<bigint>[]): [UintRange<bigint>[], UintRange<bigint>[]] {
+export function removeUintRangesFromUintRanges(idsToRemove: UintRange<bigint>[], rangeToRemoveFrom: UintRange<bigint>[]): [UintRange<bigint>[], UintRange<bigint>[]] {
   if (idsToRemove.length === 0) {
     return [rangeToRemoveFrom, []];
   }
@@ -229,7 +229,7 @@ export function removeUintRangeFromUintRange(idsToRemove: UintRange<bigint>[], r
     let newRanges: UintRange<bigint>[] = [];
     for (let j = 0; j < rangeToRemoveFrom.length; j++) {
       let oldPermittedTime = rangeToRemoveFrom[j];
-      let [rangesAfterRemoval, removed] = removeUintsFromUintRange(handledValue, oldPermittedTime);
+      let [rangesAfterRemoval, removed] = removeUintRangeFromUintRange(handledValue, oldPermittedTime);
       newRanges = newRanges.concat(rangesAfterRemoval);
       removedRanges = removedRanges.concat(removed);
     }
@@ -251,7 +251,7 @@ export function assertRangesDoNotOverlapAtAll(rangeToCheck: UintRange<bigint>[],
     for (let j = 0; j < overlappingRange.length; j++) {
       let newAllowedTime = overlappingRange[j];
       // Check that the new time completely overlaps with the old time
-      let [, removed] = removeUintsFromUintRange(newAllowedTime, oldAllowedTime);
+      let [, removed] = removeUintRangeFromUintRange(newAllowedTime, oldAllowedTime);
       if (removed.length > 0) {
         throw new Error("RangesOverlap");
       }

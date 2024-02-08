@@ -55,7 +55,7 @@ export function expandCollectionApprovals(approvals: CollectionApprovalWithDetai
  *
  *  @category Approvals / Transferability
  */
-export function appendDefaultForIncoming(currApprovals: UserIncomingApprovalWithDetails<bigint>[], userAddress: string): UserIncomingApprovalWithDetails<bigint>[] {
+export function appendSelfInitiatedIncomingApproval(currApprovals: UserIncomingApprovalWithDetails<bigint>[], userAddress: string): UserIncomingApprovalWithDetails<bigint>[] {
   if (userAddress === "Mint" || userAddress === "Total") {
     return currApprovals;
   }
@@ -77,9 +77,9 @@ export function appendDefaultForIncoming(currApprovals: UserIncomingApprovalWith
       start: 1n,
       end: 18446744073709551615n,
     }],
-    approvalId: "default-incoming",
-    amountTrackerId: "default-incoming",
-    challengeTrackerId: "default-incoming"
+    approvalId: "self-initiated-incoming",
+    amountTrackerId: "self-initiated-incoming",
+    challengeTrackerId: "self-initiated-incoming"
   }
 
   //append to front
@@ -94,7 +94,7 @@ export function appendDefaultForIncoming(currApprovals: UserIncomingApprovalWith
  * This will have "default-outgoing" for IDs.
  *  @category Approvals / Transferability
  */
-export function appendDefaultForOutgoing(currApprovals: UserOutgoingApprovalWithDetails<bigint>[], userAddress: string): UserOutgoingApprovalWithDetails<bigint>[] {
+export function appendSelfInitiatedOutgoingApproval(currApprovals: UserOutgoingApprovalWithDetails<bigint>[], userAddress: string): UserOutgoingApprovalWithDetails<bigint>[] {
   if (userAddress === "Mint" || userAddress === "Total") {
     return currApprovals;
   }
@@ -116,9 +116,9 @@ export function appendDefaultForOutgoing(currApprovals: UserOutgoingApprovalWith
       start: 1n,
       end: 18446744073709551615n,
     }],
-    approvalId: "default-outgoing",
-    amountTrackerId: "default-outgoing",
-    challengeTrackerId: "default-outgoing"
+    approvalId: "self-initiated-outgoing",
+    amountTrackerId: "self-initiated-outgoing",
+    challengeTrackerId: "self-initiated-outgoing"
   }
 
   //append to front

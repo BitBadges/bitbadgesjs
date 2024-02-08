@@ -4,7 +4,7 @@
 import { AddressList, UintRange } from "bitbadgesjs-proto";
 import { getReservedAddressList, getReservedTrackerList, isAddressListEmpty, removeAddressListFromAddressList } from "./addressLists";
 import { deepCopy } from "./types/utils";
-import { removeUintRangeFromUintRange, removeUintsFromUintRange, sortUintRangesAndMergeIfNecessary } from "./uintRanges";
+import { removeUintRangeFromUintRange, removeUintRangesFromUintRanges, sortUintRangesAndMergeIfNecessary } from "./uintRanges";
 
 //For permissions, we have many types of permissions that are all very similar to each other
 //Here, we abstract all those permissions to a UniversalPermission struct in order to reuse code.
@@ -25,6 +25,7 @@ export interface UniversalPermission {
   fromList: AddressList;
   initiatedByList: AddressList;
 
+  approvalIdList: AddressList;
   amountTrackerIdList: AddressList;
   challengeTrackerIdList: AddressList;
 
@@ -38,6 +39,7 @@ export interface UniversalPermission {
   usesFromList: boolean;
   usesInitiatedByList: boolean;
   usesOwnershipTimes: boolean;
+  usesApprovalIdList: boolean;
   usesAmountTrackerIdList: boolean;
   usesChallengeTrackerIdList: boolean;
 
@@ -54,6 +56,7 @@ export interface UniversalPermissionDetails {
   fromList: AddressList;
   initiatedByList: AddressList;
 
+  approvalIdList: AddressList;
   amountTrackerIdList: AddressList;
   challengeTrackerIdList: AddressList;
 
@@ -109,26 +112,27 @@ export function universalRemoveOverlapFromValues(handled: UniversalPermissionDet
 
 
 export function universalRemoveOverlaps(handled: UniversalPermissionDetails, valueToCheck: UniversalPermissionDetails): [UniversalPermissionDetails[], UniversalPermissionDetails[]] {
-  let [timelineTimesAfterRemoval, removedTimelineTimes] = removeUintsFromUintRange(handled.timelineTime, valueToCheck.timelineTime);
-  let [badgesAfterRemoval, removedBadges] = removeUintsFromUintRange(handled.badgeId, valueToCheck.badgeId);
-  let [transferTimesAfterRemoval, removedTransferTimes] = removeUintsFromUintRange(handled.transferTime, valueToCheck.transferTime);
-  let [ownershipTimesAfterRemoval, removedOwnershipTimes] = removeUintsFromUintRange(handled.ownershipTime, valueToCheck.ownershipTime);
+  let [timelineTimesAfterRemoval, removedTimelineTimes] = removeUintRangeFromUintRange(handled.timelineTime, valueToCheck.timelineTime);
+  let [badgesAfterRemoval, removedBadges] = removeUintRangeFromUintRange(handled.badgeId, valueToCheck.badgeId);
+  let [transferTimesAfterRemoval, removedTransferTimes] = removeUintRangeFromUintRange(handled.transferTime, valueToCheck.transferTime);
+  let [ownershipTimesAfterRemoval, removedOwnershipTimes] = removeUintRangeFromUintRange(handled.ownershipTime, valueToCheck.ownershipTime);
   let [toListAfterRemoval, removedToList] = removeAddressListFromAddressList(handled.toList, valueToCheck.toList);
   let [fromListAfterRemoval, removedFromList] = removeAddressListFromAddressList(handled.fromList, valueToCheck.fromList);
   let [initiatedByListAfterRemoval, removedInitiatedByList] = removeAddressListFromAddressList(handled.initiatedByList, valueToCheck.initiatedByList);
+  let [approvalIdListAfterRemoval, removedApprovalIdList] = removeAddressListFromAddressList(handled.approvalIdList, valueToCheck.approvalIdList);
   let [amountTrackerIdListAfterRemoval, removedAmountTrackerIdList] = removeAddressListFromAddressList(handled.amountTrackerIdList, valueToCheck.amountTrackerIdList);
   let [challengeTrackerIdListAfterRemoval, removedChallengeTrackerIdList] = removeAddressListFromAddressList(handled.challengeTrackerIdList, valueToCheck.challengeTrackerIdList);
-
 
   let removedToListIsEmpty = isAddressListEmpty(removedToList);
   let removedFromListIsEmpty = isAddressListEmpty(removedFromList);
   let removedInitiatedByListIsEmpty = isAddressListEmpty(removedInitiatedByList);
+  let removedApprovalIdListIsEmpty = isAddressListEmpty(removedApprovalIdList);
   let removedAmountTrackerIdListIsEmpty = isAddressListEmpty(removedAmountTrackerIdList);
   let removedChallengeTrackerIdListIsEmpty = isAddressListEmpty(removedChallengeTrackerIdList);
 
   const remaining: UniversalPermissionDetails[] = [];
   //If we didn't remove anything at all
-  if (removedTimelineTimes.length === 0 || removedBadges.length === 0 || removedTransferTimes.length === 0 || removedOwnershipTimes.length === 0 || removedToListIsEmpty || removedFromListIsEmpty || removedInitiatedByListIsEmpty || removedAmountTrackerIdListIsEmpty || removedChallengeTrackerIdListIsEmpty) {
+  if (removedTimelineTimes.length === 0 || removedBadges.length === 0 || removedTransferTimes.length === 0 || removedOwnershipTimes.length === 0 || removedToListIsEmpty || removedFromListIsEmpty || removedInitiatedByListIsEmpty || removedApprovalIdListIsEmpty || removedAmountTrackerIdListIsEmpty || removedChallengeTrackerIdListIsEmpty) {
     remaining.push(valueToCheck);
     return [remaining, []];
   }
@@ -142,9 +146,9 @@ export function universalRemoveOverlaps(handled: UniversalPermissionDetails, val
       toList: valueToCheck.toList,
       fromList: valueToCheck.fromList,
       initiatedByList: valueToCheck.initiatedByList,
+      approvalIdList: valueToCheck.approvalIdList,
       amountTrackerIdList: valueToCheck.amountTrackerIdList,
       challengeTrackerIdList: valueToCheck.challengeTrackerIdList,
-
 
       arbitraryValue: valueToCheck.arbitraryValue,
 
@@ -163,6 +167,7 @@ export function universalRemoveOverlaps(handled: UniversalPermissionDetails, val
       fromList: valueToCheck.fromList,
       initiatedByList: valueToCheck.initiatedByList,
       arbitraryValue: valueToCheck.arbitraryValue,
+      approvalIdList: valueToCheck.approvalIdList,
       amountTrackerIdList: valueToCheck.amountTrackerIdList,
       challengeTrackerIdList: valueToCheck.challengeTrackerIdList,
 
@@ -181,6 +186,7 @@ export function universalRemoveOverlaps(handled: UniversalPermissionDetails, val
       fromList: valueToCheck.fromList,
       initiatedByList: valueToCheck.initiatedByList,
       arbitraryValue: valueToCheck.arbitraryValue,
+      approvalIdList: valueToCheck.approvalIdList,
       amountTrackerIdList: valueToCheck.amountTrackerIdList,
       challengeTrackerIdList: valueToCheck.challengeTrackerIdList,
 
@@ -199,6 +205,7 @@ export function universalRemoveOverlaps(handled: UniversalPermissionDetails, val
       fromList: valueToCheck.fromList,
       initiatedByList: valueToCheck.initiatedByList,
       arbitraryValue: valueToCheck.arbitraryValue,
+      approvalIdList: valueToCheck.approvalIdList,
       amountTrackerIdList: valueToCheck.amountTrackerIdList,
       challengeTrackerIdList: valueToCheck.challengeTrackerIdList,
 
@@ -216,6 +223,7 @@ export function universalRemoveOverlaps(handled: UniversalPermissionDetails, val
       toList: toListAfterRemoval,
       fromList: valueToCheck.fromList,
       initiatedByList: valueToCheck.initiatedByList,
+      approvalIdList: valueToCheck.approvalIdList,
       amountTrackerIdList: valueToCheck.amountTrackerIdList,
       challengeTrackerIdList: valueToCheck.challengeTrackerIdList,
 
@@ -233,6 +241,7 @@ export function universalRemoveOverlaps(handled: UniversalPermissionDetails, val
       toList: removedToList,
       fromList: fromListAfterRemoval,
       initiatedByList: valueToCheck.initiatedByList,
+      approvalIdList: valueToCheck.approvalIdList,
       amountTrackerIdList: valueToCheck.amountTrackerIdList,
       challengeTrackerIdList: valueToCheck.challengeTrackerIdList,
 
@@ -251,6 +260,26 @@ export function universalRemoveOverlaps(handled: UniversalPermissionDetails, val
       toList: removedToList,
       fromList: removedFromList,
       initiatedByList: initiatedByListAfterRemoval,
+      approvalIdList: valueToCheck.approvalIdList,
+      amountTrackerIdList: valueToCheck.amountTrackerIdList,
+      challengeTrackerIdList: valueToCheck.challengeTrackerIdList,
+
+      arbitraryValue: valueToCheck.arbitraryValue,
+      permanentlyPermittedTimes: [],
+      permanentlyForbiddenTimes: [],
+    })
+  }
+
+  if (!isAddressListEmpty(approvalIdListAfterRemoval)) {
+    remaining.push({
+      timelineTime: removedTimelineTimes[0],
+      badgeId: removedBadges[0],
+      transferTime: removedTransferTimes[0],
+      ownershipTime: removedOwnershipTimes[0],
+      toList: removedToList,
+      fromList: removedFromList,
+      initiatedByList: removedInitiatedByList,
+      approvalIdList: approvalIdListAfterRemoval,
       amountTrackerIdList: valueToCheck.amountTrackerIdList,
       challengeTrackerIdList: valueToCheck.challengeTrackerIdList,
 
@@ -269,6 +298,7 @@ export function universalRemoveOverlaps(handled: UniversalPermissionDetails, val
       toList: removedToList,
       fromList: removedFromList,
       initiatedByList: removedInitiatedByList,
+      approvalIdList: removedApprovalIdList,
       amountTrackerIdList: amountTrackerIdListAfterRemoval,
       challengeTrackerIdList: valueToCheck.challengeTrackerIdList,
 
@@ -287,6 +317,7 @@ export function universalRemoveOverlaps(handled: UniversalPermissionDetails, val
       toList: removedToList,
       fromList: removedFromList,
       initiatedByList: removedInitiatedByList,
+      approvalIdList: removedApprovalIdList,
       amountTrackerIdList: removedAmountTrackerIdList,
       challengeTrackerIdList: challengeTrackerIdListAfterRemoval,
 
@@ -309,6 +340,7 @@ export function universalRemoveOverlaps(handled: UniversalPermissionDetails, val
             toList: removedToList,
             fromList: removedFromList,
             initiatedByList: removedInitiatedByList,
+            approvalIdList: removedApprovalIdList,
             amountTrackerIdList: removedAmountTrackerIdList,
             challengeTrackerIdList: removedChallengeTrackerIdList,
 
@@ -350,7 +382,7 @@ export function GetListWithOptions(_list: AddressList, uses: boolean): AddressLi
 
   if (!uses) {
     list.addresses = []
-    list.allowlist = false;
+    list.whitelist = false;
   }
 
   return list;
@@ -366,6 +398,7 @@ export interface UsedFlags {
   usesFromList: boolean;
   usesInitiatedByList: boolean;
   usesOwnershipTimes: boolean;
+  usesApprovalIdList: boolean;
   usesAmountTrackerIdList: boolean;
   usesChallengeTrackerIdList: boolean;
 }
@@ -378,6 +411,7 @@ export const ActionPermissionUsedFlags: UsedFlags = {
   usesFromList: false,
   usesInitiatedByList: false,
   usesOwnershipTimes: false,
+  usesApprovalIdList: false,
   usesAmountTrackerIdList: false,
   usesChallengeTrackerIdList: false,
 }
@@ -390,6 +424,7 @@ export const TimedUpdatePermissionUsedFlags: UsedFlags = {
   usesFromList: false,
   usesInitiatedByList: false,
   usesOwnershipTimes: false,
+  usesApprovalIdList: false,
   usesAmountTrackerIdList: false,
   usesChallengeTrackerIdList: false,
 }
@@ -402,6 +437,7 @@ export const TimedUpdateWithBadgeIdsPermissionUsedFlags: UsedFlags = {
   usesFromList: false,
   usesInitiatedByList: false,
   usesOwnershipTimes: false,
+  usesApprovalIdList: false,
   usesAmountTrackerIdList: false,
   usesChallengeTrackerIdList: false,
 }
@@ -415,6 +451,7 @@ export const BalancesActionPermissionUsedFlags: UsedFlags = {
   usesFromList: false,
   usesInitiatedByList: false,
   usesOwnershipTimes: true,
+  usesApprovalIdList: false,
   usesAmountTrackerIdList: false,
   usesChallengeTrackerIdList: false,
 }
@@ -428,6 +465,7 @@ export const ApprovalPermissionUsedFlags: UsedFlags = {
   usesFromList: true,
   usesInitiatedByList: true,
   usesOwnershipTimes: true,
+  usesApprovalIdList: true,
   usesAmountTrackerIdList: true,
   usesChallengeTrackerIdList: true,
 }
@@ -450,6 +488,7 @@ export function GetFirstMatchOnly(
       fromList: getReservedAddressList("All") as AddressList,
       toList: getReservedAddressList("All") as AddressList,
       initiatedByList: getReservedAddressList("All") as AddressList,
+      approvalIdList: getReservedTrackerList("All") as AddressList,
       amountTrackerIdList: getReservedTrackerList("All") as AddressList,
       challengeTrackerIdList: getReservedTrackerList("All") as AddressList,
       transferTimes: [{ start: 1n, end: 18446744073709551615n }],
@@ -478,6 +517,7 @@ export function GetFirstMatchOnly(
     const toList = GetListWithOptions(permission.toList, permission.usesToList);
     const fromList = GetListWithOptions(permission.fromList, permission.usesFromList);
     const initiatedByList = GetListWithOptions(permission.initiatedByList, permission.usesInitiatedByList);
+    const approvalIdList = GetListWithOptions(permission.approvalIdList, permission.usesApprovalIdList);
     const amountTrackerIdList = GetListWithOptions(permission.amountTrackerIdList, permission.usesAmountTrackerIdList);
     const challengeTrackerIdList = GetListWithOptions(permission.challengeTrackerIdList, permission.usesChallengeTrackerIdList);
 
@@ -494,6 +534,7 @@ export function GetFirstMatchOnly(
               toList: toList,
               fromList: fromList,
               initiatedByList: initiatedByList,
+              approvalIdList: approvalIdList,
               amountTrackerIdList: amountTrackerIdList,
               challengeTrackerIdList: challengeTrackerIdList,
 
@@ -513,6 +554,7 @@ export function GetFirstMatchOnly(
                 toList: remaining.toList,
                 fromList: remaining.fromList,
                 initiatedByList: remaining.initiatedByList,
+                approvalIdList: remaining.approvalIdList,
                 amountTrackerIdList: remaining.amountTrackerIdList,
                 challengeTrackerIdList: remaining.challengeTrackerIdList,
                 permanentlyPermittedTimes: permanentlyPermittedTimes,
@@ -539,6 +581,7 @@ export interface MergedUniversalPermissionDetails {
   fromList: AddressList;
   initiatedByList: AddressList;
 
+  approvalIdList: AddressList;
   amountTrackerIdList: AddressList;
   challengeTrackerIdList: AddressList;
 
@@ -559,6 +602,7 @@ export function MergeUniversalPermissionDetails(permissions: UniversalPermission
       toList: permission.toList,
       fromList: permission.fromList,
       initiatedByList: permission.initiatedByList,
+      approvalIdList: permission.approvalIdList,
       amountTrackerIdList: permission.amountTrackerIdList,
       challengeTrackerIdList: permission.challengeTrackerIdList,
 
@@ -587,13 +631,12 @@ export function MergeUniversalPermissionDetails(permissions: UniversalPermission
         const timelineTimesAreSame = JSON.stringify(first.timelineTimes) === JSON.stringify(second.timelineTimes);
         const transferTimesAreSame = JSON.stringify(first.transferTimes) === JSON.stringify(second.transferTimes);
         const ownershipTimesAreSame = JSON.stringify(first.ownershipTimes) === JSON.stringify(second.ownershipTimes);
-        const toListsAreSame = first.toList.allowlist === second.toList.allowlist && JSON.stringify(first.toList.addresses) === JSON.stringify(second.toList.addresses);
-        const fromListsAreSame = first.fromList.allowlist === second.fromList.allowlist && JSON.stringify(first.fromList.addresses) === JSON.stringify(second.fromList.addresses);
-        const initiatedByListsAreSame = first.initiatedByList.allowlist === second.initiatedByList.allowlist && JSON.stringify(first.initiatedByList.addresses) === JSON.stringify(second.initiatedByList.addresses);
-        const amountTrackerIdListsAreSame = first.amountTrackerIdList.allowlist === second.amountTrackerIdList.allowlist && JSON.stringify(first.amountTrackerIdList.addresses) === JSON.stringify(second.amountTrackerIdList.addresses);
-        const challengeTrackerIdListsAreSame = first.challengeTrackerIdList.allowlist === second.challengeTrackerIdList.allowlist && JSON.stringify(first.challengeTrackerIdList.addresses) === JSON.stringify(second.challengeTrackerIdList.addresses);
-
-
+        const toListsAreSame = first.toList.whitelist === second.toList.whitelist && JSON.stringify(first.toList.addresses) === JSON.stringify(second.toList.addresses);
+        const fromListsAreSame = first.fromList.whitelist === second.fromList.whitelist && JSON.stringify(first.fromList.addresses) === JSON.stringify(second.fromList.addresses);
+        const initiatedByListsAreSame = first.initiatedByList.whitelist === second.initiatedByList.whitelist && JSON.stringify(first.initiatedByList.addresses) === JSON.stringify(second.initiatedByList.addresses);
+        const approvalIdListsAreSame = first.approvalIdList.whitelist === second.approvalIdList.whitelist && JSON.stringify(first.approvalIdList.addresses) === JSON.stringify(second.approvalIdList.addresses);
+        const amountTrackerIdListsAreSame = first.amountTrackerIdList.whitelist === second.amountTrackerIdList.whitelist && JSON.stringify(first.amountTrackerIdList.addresses) === JSON.stringify(second.amountTrackerIdList.addresses);
+        const challengeTrackerIdListsAreSame = first.challengeTrackerIdList.whitelist === second.challengeTrackerIdList.whitelist && JSON.stringify(first.challengeTrackerIdList.addresses) === JSON.stringify(second.challengeTrackerIdList.addresses);
 
         const permittedTimesAreSame = JSON.stringify(first.permanentlyPermittedTimes) === JSON.stringify(second.permanentlyPermittedTimes);
         const forbiddenTimesAreSame = JSON.stringify(first.permanentlyForbiddenTimes) === JSON.stringify(second.permanentlyForbiddenTimes);
@@ -614,10 +657,14 @@ export function MergeUniversalPermissionDetails(permissions: UniversalPermission
         if (toListsAreSame) addressSameCount++;
         if (fromListsAreSame) addressSameCount++;
         if (initiatedByListsAreSame) addressSameCount++;
+        if (approvalIdListsAreSame) addressSameCount++;
         if (amountTrackerIdListsAreSame) addressSameCount++;
         if (challengeTrackerIdListsAreSame) addressSameCount++;
 
-        if (sameCount === 3 && toListsAreSame && fromListsAreSame && initiatedByListsAreSame && permittedTimesAreSame && forbiddenTimesAreSame && arbitraryValuesAreSame) {
+
+        if (sameCount === 3 &&
+          approvalIdListsAreSame && amountTrackerIdListsAreSame && challengeTrackerIdListsAreSame &&
+          toListsAreSame && fromListsAreSame && initiatedByListsAreSame && permittedTimesAreSame && forbiddenTimesAreSame && arbitraryValuesAreSame) {
           merged.push({
             badgeIds: newBadgeIds,
             timelineTimes: newTimelineTimes,
@@ -626,6 +673,7 @@ export function MergeUniversalPermissionDetails(permissions: UniversalPermission
             toList: first.toList,
             fromList: first.fromList,
             initiatedByList: first.initiatedByList,
+            approvalIdList: first.approvalIdList,
             amountTrackerIdList: first.amountTrackerIdList,
             challengeTrackerIdList: first.challengeTrackerIdList,
             permanentlyPermittedTimes: first.permanentlyPermittedTimes,
@@ -638,30 +686,34 @@ export function MergeUniversalPermissionDetails(permissions: UniversalPermission
           unhandledLeft = true;
           i = Number.MAX_SAFE_INTEGER;
           j = Number.MAX_SAFE_INTEGER;
-        } else if (sameCount === 4 && addressSameCount == 4 && permittedTimesAreSame && forbiddenTimesAreSame && arbitraryValuesAreSame) {
-          //TODO: Merge address lists if allowlist is not the same
+        } else if (sameCount === 4 && addressSameCount == 5 && permittedTimesAreSame && forbiddenTimesAreSame && arbitraryValuesAreSame) {
+          //TODO: Merge address lists if whitelist is not the same
           merged.push({
             badgeIds: newBadgeIds,
             timelineTimes: newTimelineTimes,
             transferTimes: newTransferTimes,
             ownershipTimes: newOwnershipTimes,
-            toList: !toListsAreSame && first.toList.allowlist === second.toList.allowlist ? {
+            toList: !toListsAreSame && first.toList.whitelist === second.toList.whitelist ? {
               ...first.toList,
               addresses: [...new Set([...first.toList.addresses, ...second.toList.addresses])]
             } : first.toList,
-            fromList: !fromListsAreSame && first.fromList.allowlist === second.fromList.allowlist ? {
+            fromList: !fromListsAreSame && first.fromList.whitelist === second.fromList.whitelist ? {
               ...first.fromList,
               addresses: [...new Set([...first.fromList.addresses, ...second.fromList.addresses])]
             } : first.fromList,
-            initiatedByList: !initiatedByListsAreSame && first.initiatedByList.allowlist === second.initiatedByList.allowlist ? {
+            initiatedByList: !initiatedByListsAreSame && first.initiatedByList.whitelist === second.initiatedByList.whitelist ? {
               ...first.initiatedByList,
               addresses: [...new Set([...first.initiatedByList.addresses, ...second.initiatedByList.addresses])]
             } : first.initiatedByList,
-            amountTrackerIdList: !amountTrackerIdListsAreSame && first.amountTrackerIdList.allowlist === second.amountTrackerIdList.allowlist ? {
+            approvalIdList: !approvalIdListsAreSame && first.approvalIdList.whitelist === second.approvalIdList.whitelist ? {
+              ...first.approvalIdList,
+              addresses: [...new Set([...first.approvalIdList.addresses, ...second.approvalIdList.addresses])]
+            } : first.approvalIdList,
+            amountTrackerIdList: !amountTrackerIdListsAreSame && first.amountTrackerIdList.whitelist === second.amountTrackerIdList.whitelist ? {
               ...first.amountTrackerIdList,
               addresses: [...new Set([...first.amountTrackerIdList.addresses, ...second.amountTrackerIdList.addresses])]
             } : first.amountTrackerIdList,
-            challengeTrackerIdList: !challengeTrackerIdListsAreSame && first.challengeTrackerIdList.allowlist === second.challengeTrackerIdList.allowlist ? {
+            challengeTrackerIdList: !challengeTrackerIdListsAreSame && first.challengeTrackerIdList.whitelist === second.challengeTrackerIdList.whitelist ? {
               ...first.challengeTrackerIdList,
               addresses: [...new Set([...first.challengeTrackerIdList.addresses, ...second.challengeTrackerIdList.addresses])]
             } : first.challengeTrackerIdList,
@@ -703,7 +755,7 @@ function GetPermissionString(permission: UniversalPermissionDetails): string {
 
   if (permission.toList !== null) {
     str += "toList: ";
-    if (!permission.toList.allowlist) {
+    if (!permission.toList.whitelist) {
       str += permission.toList.addresses.length.toString() + " addresses ";
     } else {
       str += "all except " + permission.toList.addresses.length.toString() + " addresses ";
@@ -720,7 +772,7 @@ function GetPermissionString(permission: UniversalPermissionDetails): string {
 
   if (permission.fromList !== null) {
     str += "fromList: ";
-    if (!permission.fromList.allowlist) {
+    if (!permission.fromList.whitelist) {
       str += permission.fromList.addresses.length.toString() + " addresses ";
     } else {
       str += "all except " + permission.fromList.addresses.length.toString() + " addresses ";
@@ -737,7 +789,7 @@ function GetPermissionString(permission: UniversalPermissionDetails): string {
 
   if (permission.initiatedByList !== null) {
     str += "initiatedByList: ";
-    if (!permission.initiatedByList.allowlist) {
+    if (!permission.initiatedByList.whitelist) {
       str += permission.initiatedByList.addresses.length.toString() + " addresses ";
     } else {
       str += "all except " + permission.initiatedByList.addresses.length.toString() + " addresses ";
@@ -778,8 +830,8 @@ export function ValidateUniversalPermissionUpdate(oldPermissions: UniversalPermi
     const oldPermission = overlapObj.firstDetails;
     const newPermission = overlapObj.secondDetails;
 
-    const [leftoverPermittedTimes, _x] = removeUintRangeFromUintRange(newPermission.permanentlyPermittedTimes, oldPermission.permanentlyPermittedTimes);
-    const [leftoverForbiddenTimes, _y] = removeUintRangeFromUintRange(newPermission.permanentlyForbiddenTimes, oldPermission.permanentlyForbiddenTimes);
+    const [leftoverPermittedTimes, _x] = removeUintRangesFromUintRanges(newPermission.permanentlyPermittedTimes, oldPermission.permanentlyPermittedTimes);
+    const [leftoverForbiddenTimes, _y] = removeUintRangesFromUintRanges(newPermission.permanentlyForbiddenTimes, oldPermission.permanentlyForbiddenTimes);
 
     if (leftoverPermittedTimes.length > 0 || leftoverForbiddenTimes.length > 0) {
       let errMsg = "permission ";

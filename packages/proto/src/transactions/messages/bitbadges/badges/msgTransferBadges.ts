@@ -1,6 +1,5 @@
 import * as badges from '../../../../proto/badges/tx_pb';
 
-import { createProtoMsg } from '../../../../proto-types/base';
 import { NumberType, Transfer, convertTransfer } from '../../../../';
 import { createTransactionPayload } from '../../base';
 import { Chain, Fee, Sender } from "../../common";
@@ -71,6 +70,6 @@ export function createTxMsgTransferBadges<T extends NumberType>(
   memo: string,
   params: MsgTransferBadges<T>
 ) {
-  const msgCosmos = createProtoMsg(new badges.MsgTransferBadges(convertMsgTransferBadges(params, String)))
+  const msgCosmos = new badges.MsgTransferBadges(convertMsgTransferBadges(params, String))
   return createTransactionPayload({ chain, sender, fee, memo, }, msgCosmos)
 }

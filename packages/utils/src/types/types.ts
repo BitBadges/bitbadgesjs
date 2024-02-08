@@ -94,7 +94,7 @@ export enum TransactionStatus {
  *
  * @property {string} None - No distribution method is set
  * @property {string} FirstComeFirstServe - Badges are distributed on a first come first serve basis
- * @property {string} Allowlist - Badges are distributed to a allowlist of addresses
+ * @property {string} Whitelist - Badges are distributed to a whitelist of addresses
  * @property {string} Codes - Badges are distributed to addresses that have a code / password
  * @property {string} Unminted - Do nothing. Badges are not distributed.
  * @property {string} JSON - Upload a JSON file to specify how to distribute badges
@@ -105,7 +105,7 @@ export enum TransactionStatus {
 export enum DistributionMethod {
   None = 'None',
   FirstComeFirstServe = 'First Come First Serve',
-  Allowlist = 'Allowlist',
+  Whitelist = 'Whitelist',
   Codes = 'Codes',
   Unminted = 'Unminted',
   JSON = 'JSON',

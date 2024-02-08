@@ -41,7 +41,7 @@ function Derive(address: string, key: Buffer) {
   return Hash(Buffer.from(address, 'hex'), key);
 }
 
-export async function generateAlias(moduleName: string, derivationKeys: Buffer[]) {
+export function generateAlias(moduleName: string, derivationKeys: Buffer[]) {
   const address = Module(moduleName, ...derivationKeys);
   const cosmosPrefix = "cosmos";
   const words = bech32.toWords(Buffer.from(address, 'hex'))
@@ -49,13 +49,18 @@ export async function generateAlias(moduleName: string, derivationKeys: Buffer[]
   return bech32Address;
 }
 
-export async function getAliasDerivationKeysForCollection(collectionId: NumberType) {
-  const derivationKey = Buffer.concat([Buffer.from([AccountGenerationPrefix]), uint64ToBufferBE(collectionId)]);
+export function getAliasDerivationKeysForBadge(collectionId: NumberType, badgeId: NumberType) {
+  const derivationKey = [Buffer.from([AccountGenerationPrefix]), uint64ToBufferBE(collectionId), uint64ToBufferBE(badgeId)];
   return derivationKey;
 }
 
-export async function getAliasDerivationKeysForList(id: NumberType) {
-  const derivationKey = Buffer.concat([Buffer.from([AddressGenerationPrefix]), uint64ToBufferBE(id)]);
+export function getAliasDerivationKeysForCollection(collectionId: NumberType) {
+  const derivationKey = [Buffer.from([AccountGenerationPrefix]), uint64ToBufferBE(collectionId)];
+  return derivationKey;
+}
+
+export function getAliasDerivationKeysForList(id: NumberType) {
+  const derivationKey = [Buffer.from([AddressGenerationPrefix]), uint64ToBufferBE(id)];
   return derivationKey;
 }
 

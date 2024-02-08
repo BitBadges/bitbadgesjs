@@ -1,10 +1,17 @@
+import { Message } from '@bufbuild/protobuf'
 import {
   MessageGenerated,
   createProtoMsg,
+  createTxRaw,
+  createTxRawWithExtension,
   createTypedData,
+  signatureToWeb3Extension,
+  signatureToWeb3ExtensionBitcoin,
+  signatureToWeb3ExtensionSolana,
 } from '../../'
 import { populateUndefinedForMsgCreateCollection, populateUndefinedForMsgTransferBadges, populateUndefinedForMsgUniversalUpdateCollection, populateUndefinedForMsgUpdateCollection, populateUndefinedForMsgUpdateUserApprovals } from '../../eip712/payload/samples/getSampleMsg'
 import { MsgCreateCollection, MsgTransferBadges, MsgUniversalUpdateCollection, MsgUpdateCollection, MsgUpdateUserApprovals } from '../../proto/badges/tx_pb'
+import { TxBody, AuthInfo, TxRaw } from '../../proto/cosmos/tx/v1beta1/tx_pb'
 import { Chain, Fee, Sender, SupportedChain } from './common.js'
 import {
   createStdFee,
@@ -34,6 +41,8 @@ export interface TxContext {
 export interface EIP712TypedData {
   types: object
   message: object | object[]
+  domain: object
+  primaryType: string
 }
 
 /**
@@ -107,6 +116,21 @@ function recursivelySort(obj: any): any {
   return obj as any;
 }
 
+export interface TransactionPayload {
+  legacyAmino: {
+    body: TxBody;
+    authInfo: AuthInfo;
+    signBytes: string;
+  };
+  signDirect: {
+    body: TxBody;
+    authInfo: AuthInfo;
+    signBytes: string;
+  };
+  eipToSign: EIP712TypedData
+  jsonToSign: string
+}
+
 /**
  * createTransactionPayload creates a transaction payload for a given transaction context and messages.
  *
@@ -120,19 +144,42 @@ function recursivelySort(obj: any): any {
  */
 export const createTransactionPayload = (
   context: TxContext,
-  messages: MessageGenerated | MessageGenerated[],
-) => {
+  messages: Message | Message[],
+): TransactionPayload => {
   messages = wrapTypeToArray(messages)
-  messages = normalizeMessagesIfNecessary(messages)
 
-  const eipTxn = createEIP712TypedData(context, messages)
-  let sortedEipMessage = recursivelySort(eipTxn.message);
+  //Don't do anything with these msgs like setShowJson bc they are simulated messages, not final ones
+  let generatedMsgs: MessageGenerated[] = []
+  for (const cosmosMsg of messages) {
+    generatedMsgs.push(createProtoMsg(cosmosMsg));
+  }
+  generatedMsgs = normalizeMessagesIfNecessary(generatedMsgs)
+
+
+  if (context.sender.accountAddress === '' || !context.sender.accountAddress.startsWith('cosmos')) {
+    throw new Error('Account address must be a validly formatted Cosmos address')
+  }
+
+  if (context.sender.accountNumber <= 0) {
+    throw new Error('Account number must be greater than 0. This means the user is unregistered on the blockchain. Users can be registered by sending them any amount of $BADGE. This is a pre-requisite because the user needs to be able to pay for the transaction fees.')
+  }
+
+  if (context.sender.sequence < 0) {
+    throw new Error('Sequence must be greater than or equal to 0')
+  }
+
+  if (context.sender.pubkey === '') {
+    throw new Error('Public key must be a validly formatted public key')
+  }
+
+  const eipTxn = createEIP712TypedData(context, generatedMsgs)
+  const sortedEipMessage = recursivelySort(eipTxn.message);
   const message = JSON.stringify(sortedEipMessage);
 
   return {
-    signDirect: createCosmosPayload(context, messages).signDirect,
-    legacyAmino: createCosmosPayload(context, messages).legacyAmino,
-    eipToSign: createEIP712TypedData(context, messages),
+    signDirect: createCosmosPayload(context, generatedMsgs).signDirect,
+    legacyAmino: createCosmosPayload(context, generatedMsgs).legacyAmino,
+    eipToSign: createEIP712TypedData(context, generatedMsgs),
     jsonToSign: message,
   }
 }
@@ -162,4 +209,114 @@ const normalizeMessagesIfNecessary = (messages: MessageGenerated[]) => {
   })
 
   return newMessages;
+}
+
+export enum BroadcastMode {
+  Unspecified = 'BROADCAST_MODE_UNSPECIFIED',
+  // Block = 'BROADCAST_MODE_BLOCK', // No longer supported
+  Sync = 'BROADCAST_MODE_SYNC',
+  Async = 'BROADCAST_MODE_ASYNC',
+}
+
+interface TxToSend {
+  message: {
+    toBinary: () => Uint8Array
+  }
+  path: string
+}
+
+
+export function generatePostBodyBroadcast(
+  txRaw: TxToSend,
+  broadcastMode: string = BroadcastMode.Sync,
+) {
+  return `{ "tx_bytes": [${txRaw.message
+    .toBinary()
+    .toString()}], "mode": "${broadcastMode}" }`
+}
+
+/* eslint-disable camelcase */
+export interface BroadcastPostBody {
+  tx_bytes: Uint8Array
+  mode: string
+}
+
+
+export function createTxRawBitcoin(context: TxContext, payload: TransactionPayload, signature: string): {
+  message: TxRaw;
+  path: string;
+} {
+  const { chain, sender } = context;
+
+  let txnExtension = signatureToWeb3ExtensionBitcoin(chain, sender, signature);
+  // Create the txRaw
+  let rawTx = createTxRawWithExtension(
+    payload.legacyAmino.body,
+    payload.legacyAmino.authInfo,
+    txnExtension
+  );
+
+  return rawTx;
+}
+
+export function createTxBroadcastBodyBitcoin(context: TxContext, payload: TransactionPayload, signature: string) {
+  return generatePostBodyBroadcast(createTxRawBitcoin(context, payload, signature));
+}
+
+export function createTxRawSolana(context: TxContext, payload: TransactionPayload, signature: string, solanaAddress: string): {
+  message: TxRaw;
+  path: string;
+} {
+  const { chain, sender } = context;
+
+  let txnExtension = signatureToWeb3ExtensionSolana(chain, sender, signature, solanaAddress)
+  // Create the txRaw
+  let rawTx = createTxRawWithExtension(
+    payload.legacyAmino.body,
+    payload.legacyAmino.authInfo,
+    txnExtension
+  );
+
+  return rawTx;
+}
+
+export function createTxBroadcastBodySolana(context: TxContext, payload: TransactionPayload, signature: string, solanaAddress: string) {
+  return generatePostBodyBroadcast(createTxRawSolana(context, payload, signature, solanaAddress));
+}
+
+export function createTxRawEthereum(context: TxContext, payload: TransactionPayload, signature: string): {
+  message: TxRaw;
+  path: string;
+} {
+  const { chain, sender } = context;
+
+  let txnExtension = signatureToWeb3Extension(chain, sender, signature);
+  // Create the txRaw
+  let rawTx = createTxRawWithExtension(
+    payload.legacyAmino.body,
+    payload.legacyAmino.authInfo,
+    txnExtension
+  );
+
+  return rawTx;
+}
+
+export function createTxBroadcastBodyEthereum(context: TxContext, payload: TransactionPayload, signature: string) {
+  return generatePostBodyBroadcast(createTxRawEthereum(context, payload, signature));
+}
+
+export function createTxRawCosmos(payload: TransactionPayload, signatures: Uint8Array[]) {
+  const simulatedTx = createTxRaw(
+    payload.signDirect.body.toBinary(),
+    payload.signDirect.authInfo.toBinary(),
+    [
+      ...signatures,
+    ],
+  )
+
+  return simulatedTx;
+}
+
+export function createTxBroadcastBodyCosmos(payload: TransactionPayload, signatures: Uint8Array[]) {
+  return generatePostBodyBroadcast(createTxRawCosmos(payload, signatures));
 }

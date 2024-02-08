@@ -1,5 +1,5 @@
 import { BadgeMetadata, BigIntify, NumberType, UintRange, convertUintRange } from "bitbadgesjs-proto";
-import { removeUintRangeFromUintRange, searchUintRangesForId, sortUintRangesAndMergeIfNecessary } from "./uintRanges";
+import { removeUintRangesFromUintRanges, searchUintRangesForId, sortUintRangesAndMergeIfNecessary } from "./uintRanges";
 import { MetadataFetchOptions } from "./types/api";
 import { BitBadgesCollection } from "./types/collections";
 import { getCurrentValueForTimeline } from "./timelines";
@@ -281,7 +281,7 @@ export const pruneMetadataToFetch = (cachedCollection: BitBadgesCollection<bigin
 
             //Remove other badgeIds that map to the same metadataId and add any remaining back to the queue
             const otherMatchingBadgeUintRanges = getBadgeIdsForMetadataId(BigInt(metadataId), badgeMetadata);
-            const [remaining,] = removeUintRangeFromUintRange(otherMatchingBadgeUintRanges, badgeIdsLeft);
+            const [remaining,] = removeUintRangesFromUintRanges(otherMatchingBadgeUintRanges, badgeIdsLeft);
             badgeIdsLeft = remaining
             badgeIdsLeft = sortUintRangesAndMergeIfNecessary(badgeIdsLeft, true)
           }

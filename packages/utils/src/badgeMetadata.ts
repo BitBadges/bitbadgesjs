@@ -1,7 +1,7 @@
 import { BigIntify, UintRange, deepCopy } from "bitbadgesjs-proto";
 import { BadgeMetadataDetails } from "./types/collections";
 import { Metadata, convertMetadata } from "./types/metadata";
-import { removeUintRangeFromUintRange, searchUintRangesForId, sortUintRangesAndMergeIfNecessary } from "./uintRanges";
+import { removeUintRangesFromUintRanges, searchUintRangesForId, sortUintRangesAndMergeIfNecessary } from "./uintRanges";
 import { SHA256 } from "crypto-js";
 import { compareObjects } from "./utils/compare";
 
@@ -78,7 +78,7 @@ export const batchUpdateBadgeMetadata = (currBadgeMetadata: BadgeMetadataDetails
     const val = currBadgeMetadata[i];
     if (!val) continue; //For TS
 
-    const [remaining, _] = removeUintRangeFromUintRange(allBadgeIds, val.badgeIds);
+    const [remaining, _] = removeUintRangesFromUintRanges(allBadgeIds, val.badgeIds);
     val.badgeIds = remaining;
   }
 

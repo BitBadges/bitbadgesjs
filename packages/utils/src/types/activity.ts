@@ -2,6 +2,7 @@ import { ApprovalIdentifierDetails, Balance, JSPrimitiveNumberType, convertBalan
 import mongoose from "mongoose";
 import { NumberType } from "./string-numbers";
 import { deepCopy } from "./utils";
+import { Doc } from "./db";
 
 /**
  * Activity item that serves as the base type for all activity items.
@@ -11,6 +12,7 @@ import { deepCopy } from "./utils";
  * @category API / Indexer
  */
 export interface ActivityInfoBase<T extends NumberType> {
+  _notificationsHandled?: boolean;
   timestamp: T;
   block: T;
 }
@@ -94,6 +96,7 @@ export function convertAnnouncementDoc<T extends NumberType, U extends NumberTyp
   return deepCopy({
     ...item,
     ...convertActivityDoc(item, convertFunction),
+
     collectionId: convertFunction(item.collectionId)
   })
 }
@@ -142,6 +145,7 @@ export function convertTransferActivityDoc<T extends NumberType, U extends Numbe
   return deepCopy({
     ...item,
     ...convertActivityDoc(item, convertFunction),
+
     balances: item.balances.map((x) => convertBalance(x, convertFunction)),
     collectionId: convertFunction(item.collectionId),
   })
@@ -151,7 +155,7 @@ export function convertTransferActivityDoc<T extends NumberType, U extends Numbe
  *
  * @typedef {Object} ListActivityInfoBase
  * @property {string} listId - The list ID of the list.
- * @property {boolean} [addedToList] - Whether or not the address is included in the list. Note that this could mean added to an allowlist or a blocklist
+ * @property {boolean} [addedToList] - Whether or not the address is included in the list. Note that this could mean added to an whitelist or a blacklist
  * @property {string[]} [addresses] - The list of addresses that were added or removed from the list.
  *
  * @category API / Indexer
@@ -162,6 +166,8 @@ export interface ListActivityInfoBase<T extends NumberType> extends ActivityInfo
   addresses?: string[];
   txHash?: string;
 }
+
+
 /**
  * @category API / Indexer
  */
@@ -175,6 +181,45 @@ export function convertListActivityDoc<T extends NumberType, U extends NumberTyp
   return deepCopy({
     ...item,
     ...convertActivityDoc(item, convertFunction),
+
+  })
+}
+
+/**
+ * ClaimAlertInfoBase represents a document for a claim alert.
+ * This is used to alert users of a claim that has been made for them.
+ *
+ * @category API / Indexer
+ *
+ *@typedef {Object} ClaimAlertInfoBase
+ *
+ * @property {string} code - The code of the claim alert
+ * @property {string[]} cosmosAddresses - The cosmos addresses of the users that have been alerted
+ * @property {NumberType} collectionId - The collection ID of the claim alert
+ * @property {NumberType} createdTimestamp - The timestamp of when this claim alert was created (milliseconds since epoch)
+ * @property {string} [message] - The message of the claim alert
+ */
+export interface ClaimAlertInfoBase<T extends NumberType> extends ActivityInfoBase<T> {
+  code?: string;
+  cosmosAddresses: string[];
+  collectionId: T;
+  message?: string;
+}
+
+/**
+ * @category API / Indexer
+ */
+export type ClaimAlertDoc<T extends NumberType> = ClaimAlertInfoBase<T> & Doc
+
+/**
+ * @category API / Indexer
+ */
+export function convertClaimAlertDoc<T extends NumberType, U extends NumberType>(item: ClaimAlertDoc<T>, convertFunction: (item: T) => U): ClaimAlertDoc<U> {
+  return deepCopy({
+    ...item,
+    ...convertActivityDoc(item, convertFunction),
+
+    collectionId: convertFunction(item.collectionId),
   })
 }
 
@@ -182,6 +227,7 @@ const { Schema } = mongoose;
 
 export const ListActivitySchema = new Schema<ListActivityDoc<JSPrimitiveNumberType>>({
   _docId: String,
+  _notificationsHandled: Boolean,
   listId: String,
   addedToList: Boolean,
   addresses: [String],
@@ -194,6 +240,7 @@ export const TransferActivitySchema = new Schema<TransferActivityDoc<JSPrimitive
   _docId: String,
   to: [String],
   from: String,
+  _notificationsHandled: Boolean,
   balances: [Schema.Types.Mixed],
   collectionId: Schema.Types.Mixed,
   timestamp: Schema.Types.Mixed,
@@ -223,4 +270,16 @@ export const AnnouncementSchema = new Schema<AnnouncementDoc<JSPrimitiveNumberTy
   block: Schema.Types.Mixed,
   from: String,
   collectionId: Schema.Types.Mixed,
+});
+
+
+export const ClaimAlertSchema = new Schema<ClaimAlertDoc<JSPrimitiveNumberType>>({
+  _docId: String,
+  _notificationsHandled: Boolean,
+  code: String, // String type for code
+  cosmosAddresses: [String], // Array of string for cosmosAddresses
+  collectionId: Schema.Types.Mixed, // Mixed type for collectionId (number type)
+  timestamp: Schema.Types.Mixed, // Mixed type for timestamp (number type)
+  block: Schema.Types.Mixed, // Mixed type for block (number type)
+  message: String, // String type for message
 });

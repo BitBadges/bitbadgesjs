@@ -1,5 +1,5 @@
 import { UintRange } from "bitbadgesjs-proto";
-import { removeUintRangeFromUintRange, sortUintRangesAndMergeIfNecessary } from "./uintRanges";
+import { removeUintRangesFromUintRanges, sortUintRangesAndMergeIfNecessary } from "./uintRanges";
 import { NumberType } from "./types/string-numbers";
 
 export interface BatchBadgeDetails<T extends NumberType> {
@@ -7,13 +7,21 @@ export interface BatchBadgeDetails<T extends NumberType> {
   badgeIds: UintRange<T>[]
 }
 
-export const inBatchArray = (arr: BatchBadgeDetails<bigint>[], badgeIdObj: BatchBadgeDetails<bigint>) => {
-  return !!arr.find(x => {
-    if (x.badgeIds.length == 0) return false;
+export const noneInBatchArray = (arr: BatchBadgeDetails<bigint>[], badgeIdObj: BatchBadgeDetails<bigint>) => {
+  const matchingElem = arr.find(x => x.collectionId === badgeIdObj.collectionId);
+  if (!matchingElem) return true;
 
-    const [remaining] = removeUintRangeFromUintRange(x.badgeIds, badgeIdObj.badgeIds);
-    return x.collectionId == badgeIdObj.collectionId && remaining.length == 0
-  });
+  const [_, removed] = removeUintRangesFromUintRanges(matchingElem.badgeIds, badgeIdObj.badgeIds);
+  return removed.length == 0
+}
+
+
+export const allInBatchArray = (arr: BatchBadgeDetails<bigint>[], badgeIdObj: BatchBadgeDetails<bigint>) => {
+  const matchingElem = arr.find(x => x.collectionId === badgeIdObj.collectionId);
+  if (!matchingElem) return false;
+
+  const [remaining] = removeUintRangesFromUintRanges(matchingElem.badgeIds, badgeIdObj.badgeIds);
+  return remaining.length == 0
 }
 
 export const addToBatchArray = (
@@ -52,7 +60,7 @@ export const removeFromBatchArray = (
       (x) => x.collectionId == badgeIdObj.collectionId
     )
     if (existingIdx != -1) {
-      const [remaining] = removeUintRangeFromUintRange(
+      const [remaining] = removeUintRangesFromUintRanges(
         badgeIdsToRemove,
         arr[existingIdx].badgeIds
       )

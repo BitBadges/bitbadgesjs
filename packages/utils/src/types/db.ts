@@ -11,7 +11,7 @@ import { ChallengeParams, convertChallengeParams } from "blockin";
 import MerkleTree from "merkletreejs";
 import { Options as MerkleTreeJsOptions } from "merkletreejs/dist/MerkleTree";
 import mongoose from "mongoose";
-import { BatchBadgeDetails } from "src/batch-utils";
+import { BatchBadgeDetails } from "../batch-utils";
 import { CosmosCoin, convertCosmosCoin } from "./coin";
 import { UserPermissionsWithDetails, convertUserPermissionsWithDetails } from "./collections";
 import { DocsCache } from "./indexer";
@@ -22,6 +22,15 @@ import { SupportedChain } from "./types";
 import { UserIncomingApprovalWithDetails, UserOutgoingApprovalWithDetails, convertUserIncomingApprovalWithDetails, convertUserOutgoingApprovalWithDetails } from "./users";
 import { deepCopy } from "./utils";
 
+
+/**
+ * A database document
+ * @category API / Indexer
+ *
+ * @typedef {Object} Doc
+ * @property {string} _docId - A unique stringified document ID
+ * @property {string} [_id] - A uniuqe document ID (Mongo DB ObjectID)
+ */
 export interface Doc {
   //A unique stringified document ID
   _docId: string,
@@ -120,7 +129,7 @@ export function convertCollectionDoc<T extends NumberType, U extends NumberType>
  * @typedef {Object} AccountInfoBase
  * @property {string} publicKey - The public key of the account
  * @property {NumberType} accountNumber - The account number of the account
- * @property {SupportedChain} chain - The chain of the account
+ * @property {string} pubKeyType - The public key type of the account
  * @property {string} cosmosAddress - The Cosmos address of the account
  * @property {string} ethAddress - The Eth address of the account
  * @property {string} solAddress - The Solana address of the account
@@ -135,7 +144,7 @@ export interface AccountInfoBase<T extends NumberType> {
   //stored in DB and cached for fast access and permanence
 
   publicKey: string
-  chain: SupportedChain
+  pubKeyType: string
   cosmosAddress: string
   ethAddress: string
   solAddress: string
@@ -268,6 +277,21 @@ export interface ProfileInfoBase<T extends NumberType> {
 
   latestSignedInChain?: SupportedChain
   solAddress?: string
+
+  notifications?: {
+    email?: string;
+    emailVerification?: {
+      verified?: boolean;
+      token?: string;
+      expiry?: T;
+      antiPhishingCode?: string;
+    },
+    preferences?: {
+      listActivity?: boolean;
+      transferActivity?: boolean;
+      claimAlerts?: boolean;
+    }
+  }
 }
 
 
@@ -319,6 +343,16 @@ export function convertProfileDoc<T extends NumberType, U extends NumberType>(it
         items: customPage.items,
       })),
     } : undefined,
+    notifications: item.notifications ? {
+      email: item.notifications.email,
+      emailVerification: item.notifications.emailVerification ? {
+        verified: item.notifications.emailVerification.verified,
+        token: item.notifications.emailVerification.token,
+        expiry: item.notifications.emailVerification.expiry ? convertFunction(item.notifications.emailVerification.expiry) : undefined,
+        antiPhishingCode: item.notifications.emailVerification.antiPhishingCode,
+      } : undefined,
+      preferences: item.notifications.preferences,
+    } : undefined,
   })
 }
 
@@ -342,6 +376,9 @@ export interface IndexerStatus {
  * @property {string} [error] - The error message if this metadata failed to be fetched
  * @property {NumberType} [deletedAt] - The timestamp of when this document was deleted (milliseconds since epoch)
  * @property {NumberType} [nextFetchTime] - The timestamp of when this document should be fetched next (milliseconds since epoch)
+ *
+ * @property {object[]} [emailsToSend] - The emails to send for this queue item. Only used for notification worker queue items.
+ * @property {string} [activityDocId] - The activity doc ID of this queue item that was failed.
  */
 export interface QueueInfoBase<T extends NumberType> {
   uri: string,
@@ -353,7 +390,15 @@ export interface QueueInfoBase<T extends NumberType> {
   error?: string
   deletedAt?: T
   nextFetchTime?: T
+
+  //Only used for failed push notifications
+  emailMessage?: string
+  recipientAddress?: string
+  activityDocId?: string
+  notificationType?: string
 };
+
+
 /**
  * @category API / Indexer
  */
@@ -493,6 +538,7 @@ export function convertAddressListEditKey<T extends NumberType, U extends Number
  * @property {Object} [nsfw] - The NSFW reason if this list is NSFW
  * @property {Object} [reported] - The reported reason if this list is reported
  * @property {boolean} private - True if this list is private and will not show up in search results
+ * @property {boolean} viewableWithLink - True if this list is viewable if queried by the list ID directly
  * @property {AddressListEditKey[]} [editKeys] - The edit keys of this list
  */
 export interface AddressListInfoBase<T extends NumberType> extends AddressList {
@@ -506,6 +552,8 @@ export interface AddressListInfoBase<T extends NumberType> extends AddressList {
   lastUpdated: T
 
   private?: boolean
+  viewableWithLink?: boolean
+
   editKeys?: AddressListEditKey<T>[];
 
   nsfw?: { reason: string };
@@ -687,43 +735,6 @@ export function convertPasswordDoc<T extends NumberType, U extends NumberType>(i
   })
 }
 
-/**
- * ClaimAlertInfoBase represents a document for a claim alert.
- * This is used to alert users of a claim that has been made for them.
- *
- * @category API / Indexer
- *
- *@typedef {Object} ClaimAlertInfoBase
- *
- * @property {string} code - The code of the claim alert
- * @property {string[]} cosmosAddresses - The cosmos addresses of the users that have been alerted
- * @property {NumberType} collectionId - The collection ID of the claim alert
- * @property {NumberType} createdTimestamp - The timestamp of when this claim alert was created (milliseconds since epoch)
- * @property {string} [message] - The message of the claim alert
- */
-export interface ClaimAlertInfoBase<T extends NumberType> {
-  code?: string;
-  cosmosAddresses: string[];
-  collectionId: T;
-  createdTimestamp: T;
-  message?: string;
-}
-
-/**
- * @category API / Indexer
- */
-export type ClaimAlertDoc<T extends NumberType> = ClaimAlertInfoBase<T> & Doc
-
-/**
- * @category API / Indexer
- */
-export function convertClaimAlertDoc<T extends NumberType, U extends NumberType>(item: ClaimAlertDoc<T>, convertFunction: (item: T) => U): ClaimAlertDoc<U> {
-  return deepCopy({
-    ...item,
-    collectionId: convertFunction(item.collectionId),
-    createdTimestamp: convertFunction(item.createdTimestamp),
-  })
-}
 
 
 /**
@@ -734,7 +745,7 @@ export function convertClaimAlertDoc<T extends NumberType, U extends NumberType>
  * If the leaves are not hashed, then the value entered by the user will be checked directly against the provided leaf values.
  *
  * IMPORTANT: The leaf values here are to be publicly stored on IPFS, so they should not contain any sensitive information (i.e. codes, passwords, etc.)
- * Only use this with the non-hashed option when the values do not contain any sensitive information (i.e. a public allowlist of addresses).
+ * Only use this with the non-hashed option when the values do not contain any sensitive information (i.e. a public whitelist of addresses).
  *
  * @example Codes
  * 1. Generate N codes privately
@@ -742,9 +753,9 @@ export function convertClaimAlertDoc<T extends NumberType, U extends NumberType>
  * 3. Store the hashed codes publicly on IPFS via this struct
  * 4. When a user enters a code, we hash it and check if it matches any of the hashed codes. This way, the codes are never stored publicly on IPFS and only known by the generator of the codes.
  *
- * @example Allowlist
- * For storing a public allowlist of addresses (with useCreatorAddressAsLeaf = true), hashing complicates everything because the allowlist can be stored publicly.
- * 1. Generate N allowlist addresses
+ * @example Whitelist
+ * For storing a public whitelist of addresses (with useCreatorAddressAsLeaf = true), hashing complicates everything because the whitelist can be stored publicly.
+ * 1. Generate N whitelist addresses
  * 2. Store the addresses publicly on IPFS via this struct
  * 3. When a user enters an address, we check if it matches any of the addresses.
  *
@@ -1166,6 +1177,7 @@ export interface BlockinAuthSignatureInfoBase<T extends NumberType> {
   params: ChallengeParams<T>;
 
   createdAt: T
+  deletedAt?: T
 }
 
 /**
@@ -1181,6 +1193,7 @@ export function convertBlockinAuthSignatureDoc<T extends NumberType, U extends N
     ...item,
     createdAt: convertFunction(item.createdAt),
     params: convertChallengeParams(item.params, convertFunction),
+    deletedAt: item.deletedAt ? convertFunction(item.deletedAt) : undefined,
   })
 }
 
@@ -1197,8 +1210,11 @@ export function convertBlockinAuthSignatureDoc<T extends NumberType, U extends N
  */
 export interface FollowDetailsInfoBase<T extends NumberType> {
   cosmosAddress: string;
+  followingCollectionId: T;
   followingCount: T;
   followersCount: T;
+  followers: string[],
+  following: string[],
 }
 
 /**
@@ -1214,6 +1230,7 @@ export function convertFollowDetailsDoc<T extends NumberType, U extends NumberTy
     ...item,
     followingCount: convertFunction(item.followingCount),
     followersCount: convertFunction(item.followersCount),
+    followingCollectionId: convertFunction(item.followingCollectionId),
   })
 }
 
@@ -1302,7 +1319,7 @@ export const CollectionSchema = new Schema<CollectionDoc<JSPrimitiveNumberType>>
 export const AccountSchema = new Schema<AccountDoc<JSPrimitiveNumberType>>({
   _docId: String,
   publicKey: String, // String type for publicKey
-  chain: String, // String type for chain (assuming it's a string)
+  pubKeyType: String, // String type for pubKeyType
   cosmosAddress: String, // String type for cosmosAddress
   ethAddress: String, // String type for ethAddress
   solAddress: String, // String type for solAddress
@@ -1334,13 +1351,14 @@ export const ProfileSchema = new Schema<ProfileDoc<JSPrimitiveNumberType>>({
     },
   ],
   hiddenLists: [String], // Array of string
-  customPages: [Schema.Types.Mixed], // Array of CustomPage
-  watchlists: [Schema.Types.Mixed], // Array of Watchlist
+  customPages: Schema.Types.Mixed, // Array of CustomPage
+  watchlists: Schema.Types.Mixed, // Array of Watchlist
 
   profilePicUrl: String, // String type for profilePicUrl
   username: String, // String type for username
   latestSignedInChain: String, // String type for latestSignedInChain
   solAddress: String, // String type for solAddress
+  notifications: Schema.Types.Mixed, // Notification details
 });
 
 export const QueueSchema = new Schema<QueueDoc<JSPrimitiveNumberType>>({
@@ -1354,6 +1372,11 @@ export const QueueSchema = new Schema<QueueDoc<JSPrimitiveNumberType>>({
   error: String, // String type for error
   deletedAt: Schema.Types.Mixed, // Mixed type for deletedAt (number type)
   nextFetchTime: Schema.Types.Mixed, // Mixed type for nextFetchTime (number type)
+
+  emailMessage: String, // String type for emailMessage
+  recipientAddress: String, // String type for recipientAddress
+  activityDocId: String, // String type for activityDocId
+  notificationType: String, // String type for notificationType
 });
 
 export const StatusSchema = new Schema<StatusDoc<JSPrimitiveNumberType>>({
@@ -1369,7 +1392,7 @@ export const AddressListSchema = new Schema<AddressListDoc<JSPrimitiveNumberType
   _docId: String,
   listId: String, // String type for listId
   addresses: [String], // Array of string for addresses
-  allowlist: Boolean, // Boolean type for allowlist
+  whitelist: Boolean, // Boolean type for whitelist
   uri: String, // String type for uri
   customData: String, // String type for customData
   createdBy: String, // String type for createdBy
@@ -1412,14 +1435,6 @@ export const PasswordSchema = new Schema<PasswordDoc<JSPrimitiveNumberType>>({
   challengeDetails: Schema.Types.Mixed, // Mixed type for challengeDetails (ChallengeDetails type)
 });
 
-export const ClaimAlertSchema = new Schema<ClaimAlertDoc<JSPrimitiveNumberType>>({
-  _docId: String,
-  code: String, // String type for code
-  cosmosAddresses: [String], // Array of string for cosmosAddresses
-  collectionId: Schema.Types.Mixed, // Mixed type for collectionId (number type)
-  createdTimestamp: Schema.Types.Mixed, // Mixed type for createdTimestamp (number type)
-  message: String, // String type for message
-});
 
 export const ChallengeSchema = new Schema<MerkleChallengeDoc<JSPrimitiveNumberType>>({
   _docId: String,
@@ -1486,6 +1501,7 @@ export const BlockinAuthSignatureSchema = new Schema<BlockinAuthSignatureDoc<JSP
   cosmosAddress: String, // String type for cosmosAddress
   params: Schema.Types.Mixed, // Mixed type for params (ChallengeParams type)
   createdAt: Schema.Types.Mixed, // Mixed type for createdAt (number type)
+  deletedAt: Schema.Types.Mixed, // Mixed type for deletedAt (number type)
 });
 
 export const FollowDetailsSchema = new Schema<FollowDetailsDoc<JSPrimitiveNumberType>>({
@@ -1493,4 +1509,7 @@ export const FollowDetailsSchema = new Schema<FollowDetailsDoc<JSPrimitiveNumber
   cosmosAddress: String, // String type for cosmosAddress
   followingCount: Schema.Types.Mixed, // Mixed type for followingCount (number type)
   followersCount: Schema.Types.Mixed, // Mixed type for followersCount (number type)
+  followingCollectionId: Schema.Types.Mixed, // Mixed type for followingCollectionId (number type)
+  followers: Schema.Types.Mixed, // Mixed type for followers
+  following: Schema.Types.Mixed, // Mixed type for following
 });

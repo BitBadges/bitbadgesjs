@@ -1,8 +1,12 @@
 import axiosApi from "axios";
 import { BigIntify, NumberType } from "bitbadgesjs-proto";
 import Joi from "joi";
-import { AddAddressToSurveyRouteRequestBody, AddAddressToSurveyRouteSuccessResponse, AddApprovalDetailsToOffChainStorageRouteRequestBody, AddApprovalDetailsToOffChainStorageRouteSuccessResponse, AddBalancesToOffChainStorageRouteRequestBody, AddBalancesToOffChainStorageRouteSuccessResponse, AddMetadataToIpfsRouteRequestBody, AddMetadataToIpfsRouteSuccessResponse, AddReviewForCollectionRouteRequestBody, AddReviewForCollectionRouteSuccessResponse, AddReviewForUserRouteRequestBody, AddReviewForUserRouteSuccessResponse, BroadcastTxRouteRequestBody, BroadcastTxRouteSuccessResponse, CheckSignInStatusRequestBody, CheckSignInStatusRequestSuccessResponse, CreateBlockinAuthCodeRouteRequestBody, CreateBlockinAuthCodeRouteResponse, CreateBlockinAuthCodeRouteSuccessResponse, DeleteAddressListsRouteRequestBody, DeleteAddressListsRouteSuccessResponse, DeleteBlockinAuthCodeRouteRequestBody, DeleteBlockinAuthCodeRouteResponse, DeleteBlockinAuthCodeRouteSuccessResponse, DeleteReviewRouteRequestBody, DeleteReviewRouteSuccessResponse, ErrorResponse, FetchMetadataDirectlyRouteRequestBody, FetchMetadataDirectlyRouteSuccessResponse, FilterBadgesInCollectionRequestBody, FilterBadgesInCollectionSuccessResponse, GenericBlockinVerifyRouteRequestBody, GenericBlockinVerifyRouteSuccessResponse, GetAccountsRouteRequestBody, GetAccountsRouteSuccessResponse, GetAddressListsRouteRequestBody, GetAddressListsRouteSuccessResponse, GetAllCodesAndPasswordsRouteRequestBody, GetAllCodesAndPasswordsRouteSuccessResponse, GetBadgeActivityRouteRequestBody, GetBadgeActivityRouteSuccessResponse, GetBadgeBalanceByAddressRouteRequestBody, GetBadgeBalanceByAddressRouteSuccessResponse, GetBlockinAuthCodeRouteRequestBody, GetBlockinAuthCodeRouteSuccessResponse, GetBrowseCollectionsRouteRequestBody, GetBrowseCollectionsRouteSuccessResponse, GetClaimAlertsForCollectionRouteRequestBody, GetClaimAlertsForCollectionRouteSuccessResponse, GetCodeForPasswordRouteRequestBody, GetCodeForPasswordRouteSuccessResponse, GetCollectionBatchRouteRequestBody, GetCollectionBatchRouteSuccessResponse, GetCollectionForProtocolRouteRequestBody, GetCollectionForProtocolRouteSuccessResponse, GetFollowDetailsRouteRequestBody, GetFollowDetailsRouteSuccessResponse, GetOwnersForBadgeRouteRequestBody, GetOwnersForBadgeRouteSuccessResponse, GetProtocolsRouteRequestBody, GetProtocolsRouteSuccessResponse, GetSearchRouteRequestBody, GetSearchRouteSuccessResponse, GetSignInChallengeRouteRequestBody, GetSignInChallengeRouteSuccessResponse, GetStatusRouteSuccessResponse, GetTokensFromFaucetRouteRequestBody, GetTokensFromFaucetRouteSuccessResponse, RefreshMetadataRouteRequestBody, RefreshMetadataRouteSuccessResponse, RefreshStatusRouteSuccessResponse, SendClaimAlertsRouteRequestBody, SendClaimAlertsRouteSuccessResponse, SignOutRequestBody, SignOutSuccessResponse, SimulateTxRouteRequestBody, SimulateTxRouteSuccessResponse, UpdateAccountInfoRouteRequestBody, UpdateAccountInfoRouteSuccessResponse, UpdateAddressListsRouteRequestBody, UpdateAddressListsRouteSuccessResponse, VerifySignInRouteRequestBody, VerifySignInRouteSuccessResponse, convertAddApprovalDetailsToOffChainStorageRouteSuccessResponse, convertAddBalancesToOffChainStorageRouteSuccessResponse, convertAddMetadataToIpfsRouteSuccessResponse, convertAddReviewForCollectionRouteSuccessResponse, convertAddReviewForUserRouteSuccessResponse, convertBroadcastTxRouteSuccessResponse, convertCheckSignInStatusRequestSuccessResponse, convertDeleteAddressListsRouteSuccessResponse, convertDeleteReviewRouteSuccessResponse, convertFetchMetadataDirectlyRouteSuccessResponse, convertGetAccountsRouteSuccessResponse, convertGetAddressListsRouteSuccessResponse, convertGetAllCodesAndPasswordsRouteSuccessResponse, convertGetBadgeActivityRouteSuccessResponse, convertGetBadgeBalanceByAddressRouteSuccessResponse, convertGetBrowseCollectionsRouteSuccessResponse, convertGetCodeForPasswordRouteSuccessResponse, convertGetCollectionBatchRouteSuccessResponse, convertGetOwnersForBadgeRouteSuccessResponse, convertGetSearchRouteSuccessResponse, convertGetSignInChallengeRouteSuccessResponse, convertGetStatusRouteSuccessResponse, convertGetTokensFromFaucetRouteSuccessResponse, convertRefreshMetadataRouteSuccessResponse, convertSignOutSuccessResponse, convertSimulateTxRouteSuccessResponse, convertUpdateAccountInfoRouteSuccessResponse, convertUpdateAddressListsRouteSuccessResponse, convertVerifySignInRouteSuccessResponse } from "./types/api";
+import { AddAddressToSurveyRouteRequestBody, AddAddressToSurveyRouteSuccessResponse, AddApprovalDetailsToOffChainStorageRouteRequestBody, AddApprovalDetailsToOffChainStorageRouteSuccessResponse, AddBalancesToOffChainStorageRouteRequestBody, AddBalancesToOffChainStorageRouteSuccessResponse, AddMetadataToIpfsRouteRequestBody, AddMetadataToIpfsRouteSuccessResponse, AddReviewForCollectionRouteRequestBody, AddReviewForCollectionRouteSuccessResponse, AddReviewForUserRouteRequestBody, AddReviewForUserRouteSuccessResponse, BroadcastTxRouteRequestBody, BroadcastTxRouteSuccessResponse, CheckSignInStatusRequestBody, CheckSignInStatusRequestSuccessResponse, CreateBlockinAuthCodeRouteRequestBody, CreateBlockinAuthCodeRouteResponse, CreateBlockinAuthCodeRouteSuccessResponse, DeleteAddressListsRouteRequestBody, DeleteAddressListsRouteSuccessResponse, DeleteBlockinAuthCodeRouteRequestBody, DeleteBlockinAuthCodeRouteResponse, DeleteBlockinAuthCodeRouteSuccessResponse, DeleteReviewRouteRequestBody, DeleteReviewRouteSuccessResponse, ErrorResponse, FetchMetadataDirectlyRouteRequestBody, FetchMetadataDirectlyRouteSuccessResponse, FilterBadgesInCollectionRequestBody, FilterBadgesInCollectionSuccessResponse, GenericBlockinVerifyRouteRequestBody, GenericBlockinVerifyRouteSuccessResponse, GetAccountsRouteRequestBody, GetAccountsRouteSuccessResponse, GetAddressListsRouteRequestBody, GetAddressListsRouteSuccessResponse, GetAllCodesAndPasswordsRouteRequestBody, GetAllCodesAndPasswordsRouteSuccessResponse, GetBadgeActivityRouteRequestBody, GetBadgeActivityRouteSuccessResponse, GetBadgeBalanceByAddressRouteRequestBody, GetBadgeBalanceByAddressRouteSuccessResponse, GetBlockinAuthCodeRouteRequestBody, GetBlockinAuthCodeRouteSuccessResponse, GetBrowseCollectionsRouteRequestBody, GetBrowseCollectionsRouteSuccessResponse, GetClaimAlertsForCollectionRouteRequestBody, GetClaimAlertsForCollectionRouteSuccessResponse, GetCodeForPasswordRouteRequestBody, GetCodeForPasswordRouteSuccessResponse, GetCollectionBatchRouteRequestBody, GetCollectionBatchRouteSuccessResponse, GetCollectionForProtocolRouteRequestBody, GetCollectionForProtocolRouteSuccessResponse, GetFollowDetailsRouteRequestBody, GetFollowDetailsRouteSuccessResponse, GetOwnersForBadgeRouteRequestBody, GetOwnersForBadgeRouteSuccessResponse, GetProtocolsRouteRequestBody, GetProtocolsRouteSuccessResponse, GetSearchRouteRequestBody, GetSearchRouteSuccessResponse, GetSignInChallengeRouteRequestBody, GetSignInChallengeRouteSuccessResponse, GetStatusRouteSuccessResponse, GetTokensFromFaucetRouteRequestBody, GetTokensFromFaucetRouteSuccessResponse, RefreshMetadataRouteRequestBody, RefreshMetadataRouteSuccessResponse, RefreshStatusRouteSuccessResponse, SendClaimAlertsRouteRequestBody, SendClaimAlertsRouteSuccessResponse, SignOutRequestBody, SignOutSuccessResponse, SimulateTxRouteRequestBody, SimulateTxRouteSuccessResponse, UpdateAccountInfoRouteRequestBody, UpdateAccountInfoRouteSuccessResponse, UpdateAddressListsRouteRequestBody, UpdateAddressListsRouteSuccessResponse, VerifySignInRouteRequestBody, VerifySignInRouteSuccessResponse, convertAddApprovalDetailsToOffChainStorageRouteSuccessResponse, convertAddBalancesToOffChainStorageRouteSuccessResponse, convertAddMetadataToIpfsRouteSuccessResponse, convertAddReviewForCollectionRouteSuccessResponse, convertAddReviewForUserRouteSuccessResponse, convertBroadcastTxRouteSuccessResponse, convertCheckSignInStatusRequestSuccessResponse, convertDeleteAddressListsRouteSuccessResponse, convertDeleteReviewRouteSuccessResponse, convertFetchMetadataDirectlyRouteSuccessResponse, convertFilterBadgesInCollectionSuccessResponse, convertGetAccountsRouteSuccessResponse, convertGetAddressListsRouteSuccessResponse, convertGetAllCodesAndPasswordsRouteSuccessResponse, convertGetBadgeActivityRouteSuccessResponse, convertGetBadgeBalanceByAddressRouteSuccessResponse, convertGetBrowseCollectionsRouteSuccessResponse, convertGetClaimAlertsForCollectionRouteSuccessResponse, convertGetCodeForPasswordRouteSuccessResponse, convertGetCollectionBatchRouteSuccessResponse, convertGetCollectionForProtocolRouteSuccessResponse, convertGetFollowDetailsRouteSuccessResponse, convertGetOwnersForBadgeRouteSuccessResponse, convertGetProtocolsRouteSuccessResponse, convertGetSearchRouteSuccessResponse, convertGetSignInChallengeRouteSuccessResponse, convertGetStatusRouteSuccessResponse, convertGetTokensFromFaucetRouteSuccessResponse, convertRefreshMetadataRouteSuccessResponse, convertRefreshStatusRouteSuccessResponse, convertSignOutSuccessResponse, convertSimulateTxRouteSuccessResponse, convertUpdateAccountInfoRouteSuccessResponse, convertUpdateAddressListsRouteSuccessResponse, convertVerifySignInRouteSuccessResponse } from "./types/api";
 import { AddAddressToSurveyRoute, AddApprovalDetailsToOffChainStorageRoute, AddBalancesToOffChainStorageRoute, AddMetadataToIpfsRoute, AddReviewForCollectionRoute, AddReviewForUserRoute, BroadcastTxRoute, CheckIfSignedInRoute, CreateAuthCodeRoute, DeleteAddressListRoute, DeleteAuthCodeRoute, DeleteReviewRoute, FetchMetadataDirectlyRoute, FilterBadgesInCollectionRoute, GenericVerifyRoute, GetAccountsRoute, GetAddressListsRoute, GetAllPasswordsAndCodesRoute, GetAuthCodeRoute, GetBadgeActivityRoute, GetBadgeBalanceByAddressRoute, GetBrowseCollectionsRoute, GetClaimAlertsRoute, GetCodeForPasswordRoute, GetCollectionBatchRoute, GetCollectionForProtocolRoute, GetFollowDetailsRoute, GetOwnersForBadgeRoute, GetProtocolsRoute, GetRefreshStatusRoute, GetSearchRoute, GetSignInChallengeRoute, GetStatusRoute, GetTokensFromFaucetRoute, RefreshMetadataRoute, SendClaimAlertRoute, SignOutRoute, SimulateTxRoute, UpdateAccountInfoRoute, UpdateAddressListRoute, VerifySignInRoute } from "./types/routes";
+import { BitBadgesCollection } from "./types/collections";
+import { pruneMetadataToFetch } from "./metadataIds";
+import { updateAccountWithResponse, updateCollectionWithResponse } from "./api-utils";
+import { BitBadgesUserInfo } from "./types/users";
 
 type DesiredNumberType = bigint;
 
@@ -109,7 +113,8 @@ export class BitBadgesAPI {
   }
 
   /**
-   * Gets badge collections and accompying details.
+   * Gets badge collections and accompying details. Consider using the getCollectionsAndUpdate function instead to natively help you handle paginations,
+   * appending metadata, and so on.
    *
    * **API Route**: POST /api/v0/collection/batch
    *
@@ -121,6 +126,48 @@ export class BitBadgesAPI {
     try {
       const response = await this.axios.post<GetCollectionBatchRouteSuccessResponse<string>>(`${this.BACKEND_URL}${GetCollectionBatchRoute()}`, requestBody);
       return convertGetCollectionBatchRouteSuccessResponse(response.data, this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Gets badge collections and accompying details. This returns updated collections using your currently cached collections.
+   * This handles pagination, appending metadata, and so on. It also prunes the request's metadataToFetch to only fetch non-fetched metadata.
+   *
+   * All previously fetched collections are required to be present in the currCollections array for intended behavior.
+   *
+   * **API Route**: POST /api/v0/collection/batch
+   *
+   * **SDK Function Call**: await BitBadgesAPI.getCollections(requestBody);
+   *
+   * **Tutorial**: See the Fetching Collections tutoral on the official docs.
+   */
+  public async getCollectionsAndUpdate(requestBody: GetCollectionBatchRouteRequestBody, currCollections: BitBadgesCollection<bigint>[]): Promise<BitBadgesCollection<bigint>[]> {
+    try {
+      for (const collectionToFetch of requestBody.collectionsToFetch) {
+        const matchingCollection = currCollections.find(x => BigInt(x.collectionId) === BigInt(collectionToFetch.collectionId));
+        if (!matchingCollection) continue;
+
+        collectionToFetch.metadataToFetch = pruneMetadataToFetch(matchingCollection, collectionToFetch.metadataToFetch);
+      }
+
+      const response = await this.axios.post<GetCollectionBatchRouteSuccessResponse<string>>(`${this.BACKEND_URL}${GetCollectionBatchRoute()}`, requestBody);
+      const convertedResponse = convertGetCollectionBatchRouteSuccessResponse(response.data, this.ConvertFunction);
+
+      const updatedCollections: BitBadgesCollection<bigint>[] = [];
+      for (const collectionRes of convertedResponse.collections) {
+        const matchingCollection = currCollections.find(x => BigInt(x.collectionId) === BigInt(collectionRes.collectionId));
+        if (!matchingCollection) {
+          updatedCollections.push(collectionRes);
+        } else {
+          const updatedRes = updateCollectionWithResponse(matchingCollection, collectionRes);
+          updatedCollections.push(updatedRes);
+        }
+      }
+
+      return updatedCollections;
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -251,21 +298,6 @@ export class BitBadgesAPI {
     }
   }
 
-  // /**
-  //  *
-  //  */
-  // public async addAnnouncement(collectionId: NumberType, requestBody: AddAnnouncementRouteRequestBody): Promise<AddAnnouncementRouteSuccessResponse<DesiredNumberType>> {
-  //   try {
-  //     this.assertPositiveInteger(collectionId);
-
-  //     const response = await this.axios.post<AddAnnouncementRouteSuccessResponse<string>>(`${this.BACKEND_URL}${AddAnnouncementRoute(collectionId)}`, requestBody);
-  //     return convertAddAnnouncementRouteSuccessResponse(response.data, this.ConvertFunction);
-  //   } catch (error) {
-  //     await this.handleApiError(error);
-  //     return Promise.reject(error);
-  //   }
-  // }
-
   /**
    * Deletes a review.
    *
@@ -340,6 +372,40 @@ export class BitBadgesAPI {
   }
 
   /**
+   * Gets accounts and accompying details and handles pagination, appending metadata, and so on to previously fetched accounts.
+   *
+   * **API Route**: POST /api/v0/user/batch
+   *
+   * **SDK Function Call**: await BitBadgesAPI.getAccounts(requestBody);
+   *
+   * **Tutorial**: See the Fetching Accounts tutoral on the official docs.
+   *
+   * **Authentication**: Must be signed in, if fetching private information such as private lists or auth codes. If fetching public information only, no sign in required.
+   */
+  public async getAccountsAndUpdate(requestBody: GetAccountsRouteRequestBody, currAccounts: BitBadgesUserInfo<bigint>[]): Promise<BitBadgesUserInfo<bigint>[]> {
+    try {
+      const response = await this.axios.post<GetAccountsRouteSuccessResponse<string>>(`${this.BACKEND_URL}${GetAccountsRoute()}`, requestBody);
+      const convertedResponse = convertGetAccountsRouteSuccessResponse(response.data, this.ConvertFunction);
+
+      const updatedAccounts: BitBadgesUserInfo<bigint>[] = [];
+      for (const accountRes of convertedResponse.accounts) {
+        const matchingAccount = currAccounts.find(x => x.address === accountRes.address);
+        if (!matchingAccount) {
+          updatedAccounts.push(accountRes);
+        } else {
+          const updatedRes = updateAccountWithResponse(matchingAccount, accountRes);
+          updatedAccounts.push(updatedRes);
+        }
+      }
+
+      return updatedAccounts;
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
    * Adds a review for a user.
    *
    * **API Route**: POST /api/v0/user/:addressOrUsername/addReview
@@ -383,6 +449,8 @@ export class BitBadgesAPI {
    * **API Route**: POST /api/v0/addBalancesToOffChainStorage
    *
    * **SDK Function Call**: await BitBadgesAPI.addBalancesToOffChainStorage(requestBody);
+   *
+   * **CORS**: Restricted to only BitBadges official site. Otherwise, you will need to self-host.
    */
   public async addBalancesToOffChainStorage(requestBody: AddBalancesToOffChainStorageRouteRequestBody): Promise<AddBalancesToOffChainStorageRouteSuccessResponse<DesiredNumberType>> {
     try {
@@ -400,6 +468,8 @@ export class BitBadgesAPI {
    * **API Route**: POST /api/v0/addMetadataToIpfs
    *
    * **SDK Function Call**: await BitBadgesAPI.addMetadataToIpfs(requestBody);
+   *
+   * **CORS**: Restricted to only BitBadges official site. Otherwise, you will need to self-host.
    */
   public async addMetadataToIpfs(requestBody: AddMetadataToIpfsRouteRequestBody): Promise<AddMetadataToIpfsRouteSuccessResponse<DesiredNumberType>> {
     try {
@@ -417,6 +487,8 @@ export class BitBadgesAPI {
    * **API Route**: POST /api/v0/addApprovalDetailsToOffChainStorage
    *
    * **SDK Function Call**: await BitBadgesAPI.addApprovalDetailsToOffChainStorage(requestBody);
+   *
+   * **CORS**: Restricted to only BitBadges official site. Otherwise, you will need to self-host.
    */
   public async addApprovalDetailsToOffChainStorage(requestBody: AddApprovalDetailsToOffChainStorageRouteRequestBody): Promise<AddApprovalDetailsToOffChainStorageRouteSuccessResponse<DesiredNumberType>> {
     try {
@@ -570,6 +642,8 @@ export class BitBadgesAPI {
    * **API Route**: POST /api/v0/metadata
    *
    * **SDK Function Call**: await BitBadgesAPI.fetchMetadataDirectly(requestBody);
+   *
+   * **CORS**: Restricted to only BitBadges official site.
    */
   public async fetchMetadataDirectly(requestBody: FetchMetadataDirectlyRouteRequestBody): Promise<FetchMetadataDirectlyRouteSuccessResponse<DesiredNumberType>> {
     try {
@@ -756,10 +830,16 @@ export class BitBadgesAPI {
    * Sends claim alert notifications out.
    *
    * **API Route**: POST /api/v0/sendClaimAlerts
+   *
+   * **SDK Function Call**: await BitBadgesAPI.sendClaimAlert(requestBody);
+   *
+   * **Authentication**: Must be signed in and the manager of the collection.
+   *
+   * **CORS**: Restricted to only BitBadges official site. Otherwise, you will need to self-host.
    */
   public async sendClaimAlert(requestBody: SendClaimAlertsRouteRequestBody<NumberType>): Promise<SendClaimAlertsRouteSuccessResponse<DesiredNumberType>> {
     try {
-      const response = await this.axios.post<SendClaimAlertsRouteSuccessResponse<DesiredNumberType>>(`${this.BACKEND_URL}${SendClaimAlertRoute()}`, requestBody);
+      const response = await this.axios.post<SendClaimAlertsRouteSuccessResponse<string>>(`${this.BACKEND_URL}${SendClaimAlertRoute()}`, requestBody);
       return response.data;
     } catch (error) {
       await this.handleApiError(error);
@@ -776,8 +856,8 @@ export class BitBadgesAPI {
    */
   public async getFollowDetails(requestBody: GetFollowDetailsRouteRequestBody): Promise<GetFollowDetailsRouteSuccessResponse<DesiredNumberType>> {
     try {
-      const response = await this.axios.post<GetFollowDetailsRouteSuccessResponse<DesiredNumberType>>(`${this.BACKEND_URL}${GetFollowDetailsRoute()}`, requestBody);
-      return response.data;
+      const response = await this.axios.post<GetFollowDetailsRouteSuccessResponse<string>>(`${this.BACKEND_URL}${GetFollowDetailsRoute()}`, requestBody);
+      return convertGetFollowDetailsRouteSuccessResponse(response.data, this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -793,8 +873,8 @@ export class BitBadgesAPI {
    */
   public async getClaimAlerts(requestBody: GetClaimAlertsForCollectionRouteRequestBody<NumberType>): Promise<GetClaimAlertsForCollectionRouteSuccessResponse<DesiredNumberType>> {
     try {
-      const response = await this.axios.post<GetClaimAlertsForCollectionRouteSuccessResponse<DesiredNumberType>>(`${this.BACKEND_URL}${GetClaimAlertsRoute()}`, requestBody);
-      return response.data;
+      const response = await this.axios.post<GetClaimAlertsForCollectionRouteSuccessResponse<string>>(`${this.BACKEND_URL}${GetClaimAlertsRoute()}`, requestBody);
+      return convertGetClaimAlertsForCollectionRouteSuccessResponse(response.data, this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -810,8 +890,8 @@ export class BitBadgesAPI {
    */
   public async getRefreshStatus(collectionId: NumberType): Promise<RefreshStatusRouteSuccessResponse<NumberType>> {
     try {
-      const response = await this.axios.post<RefreshStatusRouteSuccessResponse<DesiredNumberType>>(`${this.BACKEND_URL}${GetRefreshStatusRoute(collectionId)}`);
-      return response.data;
+      const response = await this.axios.post<RefreshStatusRouteSuccessResponse<string>>(`${this.BACKEND_URL}${GetRefreshStatusRoute(collectionId)}`);
+      return convertRefreshStatusRouteSuccessResponse(response.data, this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -828,7 +908,7 @@ export class BitBadgesAPI {
   public async getProtocol(requestBody: GetProtocolsRouteRequestBody): Promise<GetProtocolsRouteSuccessResponse> {
     try {
       const response = await this.axios.post<GetProtocolsRouteSuccessResponse>(`${this.BACKEND_URL}${GetProtocolsRoute()}`, requestBody);
-      return response.data;
+      return convertGetProtocolsRouteSuccessResponse(response.data, this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -844,8 +924,8 @@ export class BitBadgesAPI {
    */
   public async getCollectionForProtocol(requestBody: GetCollectionForProtocolRouteRequestBody): Promise<GetCollectionForProtocolRouteSuccessResponse<DesiredNumberType>> {
     try {
-      const response = await this.axios.post<GetCollectionForProtocolRouteSuccessResponse<DesiredNumberType>>(`${this.BACKEND_URL}${GetCollectionForProtocolRoute()}`, requestBody);
-      return response.data;
+      const response = await this.axios.post<GetCollectionForProtocolRouteSuccessResponse<string>>(`${this.BACKEND_URL}${GetCollectionForProtocolRoute()}`, requestBody);
+      return convertGetCollectionForProtocolRouteSuccessResponse(response.data, this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -861,8 +941,8 @@ export class BitBadgesAPI {
    */
   public async filterBadgesInCollection(requestBody: FilterBadgesInCollectionRequestBody): Promise<FilterBadgesInCollectionSuccessResponse<DesiredNumberType>> {
     try {
-      const response = await this.axios.post<FilterBadgesInCollectionSuccessResponse<DesiredNumberType>>(`${this.BACKEND_URL}${FilterBadgesInCollectionRoute()}`, requestBody);
-      return response.data;
+      const response = await this.axios.post<FilterBadgesInCollectionSuccessResponse<string>>(`${this.BACKEND_URL}${FilterBadgesInCollectionRoute()}`, requestBody);
+      return convertFilterBadgesInCollectionSuccessResponse(response.data, this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);

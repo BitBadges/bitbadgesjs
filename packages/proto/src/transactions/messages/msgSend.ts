@@ -1,8 +1,8 @@
 import {
-  NumberType
+  NumberType,
+  deepCopy
 } from '../../'
 import { MsgSend as ProtoMsgSend } from '../../proto/cosmos/bank/v1beta1/tx_pb'
-import { createProtoMsg } from '../../proto-types/base'
 import { createTransactionPayload } from './base'
 import { Chain, Fee, Sender } from './common'
 
@@ -10,15 +10,36 @@ import { Chain, Fee, Sender } from './common'
  * MsgSend represents a message to send coins from one account to another.
  *
  * @typedef {Object} MsgSend
- * @property {string} destinationAddress - The address to send the coins to.
- * @property {T} amount - The amount of coins to send.
- * @property {string} denom - The denomination of the coins to send.
+ * @property {string} fromAddress - The sender of the transaction.
+ * @property {string} toAddress - The recipient of the transaction.
+ * @property {CosmosCoin[]} amount - The amount of coins to send.
  */
 export interface MsgSend<T extends NumberType> {
-  destinationAddress: string
-  amount: T
-  denom: string
+  fromAddress: string
+  toAddress: string
+  amount: CosmosCoin<T>[]
 }
+
+
+/**
+ * Type for Cosmos SDK Coin information with support for bigint amounts (e.g. { amount: 1000000, denom: 'badge' }).
+ *
+ * @typedef {Object} CosmosCoin
+ * @property {NumberType} amount - The amount of the coin.
+ * @property {string} denom - The denomination of the coin.
+ */
+export interface CosmosCoin<T extends NumberType> {
+  amount: T,
+  denom: string,
+}
+
+export function convertCosmosCoin<T extends NumberType, U extends NumberType>(item: CosmosCoin<T>, convertFunction: (item: T) => U): CosmosCoin<U> {
+  return deepCopy({
+    ...item,
+    amount: convertFunction(item.amount),
+  })
+}
+
 
 /**
  *Creates a new transaction with the MsgSend message.
@@ -39,13 +60,15 @@ export function createTxMsgSend<T extends NumberType>(
   params: MsgSend<T>,
 ) {
   // Cosmos
-  const msgSend = createProtoMsg(new ProtoMsgSend({
-    fromAddress: sender.accountAddress,
-    toAddress: params.destinationAddress,
-    amount: [{
-      denom: params.denom,
-      amount: params.amount.toString(),
-    }],
-  }))
+  const msgSend = new ProtoMsgSend({
+    fromAddress: params.fromAddress,
+    toAddress: params.toAddress,
+    amount: params.amount.map((item) => {
+      return {
+        amount: item.amount.toString(),
+        denom: item.denom,
+      }
+    }),
+  })
   return createTransactionPayload({ chain, sender, fee, memo, }, msgSend)
 }

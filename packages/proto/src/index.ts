@@ -25,6 +25,9 @@ export * from './transactions/messages/bitbadges/badges/msgCreateCollection'
 export * from './transactions/messages/bitbadges/badges/msgCreateAddressLists'
 export * from './transactions/messages/bitbadges/badges/msgUpdateUserApprovals'
 export * from './transactions/messages/bitbadges/wasmx/msgExecuteContractCompat'
+export * from './transactions/messages/bitbadges/wasmx/msgStoreCodeCompat'
+export * from './transactions/messages/bitbadges/wasmx/msgInstantiateContractCompat'
+
 
 export * from './transactions/messages/bitbadges/protocols/msgCreateProtocol'
 export * from './transactions/messages/bitbadges/protocols/msgUpdateProtocol'
@@ -35,3 +38,5 @@ export * from './transactions/messages/bitbadges/protocols/msgUnsetCollectionFor
 
 // Payload
 export * from './eip712/payload/index'
+
+export * as proto from './proto/index'

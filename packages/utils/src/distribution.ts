@@ -3,6 +3,7 @@ import { addBalance, addBalances, subtractBalances } from "./balances";
 import { OffChainBalancesMap, TransferWithIncrements } from "./types/transfers";
 import { deepCopy } from "./types/utils";
 import { convertToCosmosAddress } from "./chains";
+import { sortUintRangesAndMergeIfNecessary } from "./uintRanges";
 
 /**
  * Given some transfers (potentially incremented), return the balance map to store as a JSON for a collection with off-chain balances.
@@ -43,7 +44,7 @@ export const createBalanceMapForOffChainBalances = async (transfersWithIncrement
  * @returns {Balance<bigint>} The balances to be transferred.
  */
 export const getAllBadgeIdsToBeTransferred = (transfers: TransferWithIncrements<bigint>[]) => {
-  const allBadgeIds: UintRange<bigint>[] = [];
+  let allBadgeIds: UintRange<bigint>[] = [];
   for (const transfer of transfers) {
     for (const balance of transfer.balances) {
 
@@ -60,6 +61,7 @@ export const getAllBadgeIdsToBeTransferred = (transfers: TransferWithIncrements<
       } else {
         for (let i = 0; i < numRecipients; i++) {
           allBadgeIds.push(...deepCopy(badgeIds));
+          allBadgeIds = sortUintRangesAndMergeIfNecessary(allBadgeIds, true);
 
           for (const badgeId of badgeIds) {
             badgeId.start += transfer.incrementBadgeIdsBy || 0n;

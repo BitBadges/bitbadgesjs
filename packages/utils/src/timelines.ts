@@ -1,7 +1,7 @@
 import { BadgeMetadataTimeline, CollectionMetadataTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, NumberType, OffChainBalancesMetadataTimeline, StandardsTimeline, TimelineItem } from "bitbadgesjs-proto";
 import { DefaultPlaceholderMetadata } from "./constants";
 import { BitBadgesCollection } from "./types/collections";
-import { removeUintRangeFromUintRange, searchUintRangesForId } from "./uintRanges";
+import { removeUintRangesFromUintRanges, searchUintRangesForId } from "./uintRanges";
 
 
 /**
@@ -95,7 +95,7 @@ export function getIdxAtTimeForTimeline(timeline: TimelineItem<bigint>[], time?:
 function getFullTimeline<T extends TimelineItem<bigint>>(timeline: T[], fieldName: string, emptyValue: any, maxTime = 18446744073709551615n): T[] {
   let unhandledTimes = [{ start: BigInt(1n), end: maxTime }];
   for (const timelineVal of timeline) {
-    const [remaining, _removed] = removeUintRangeFromUintRange(timelineVal.timelineTimes, unhandledTimes);
+    const [remaining, _removed] = removeUintRangesFromUintRanges(timelineVal.timelineTimes, unhandledTimes);
     unhandledTimes = remaining;
   }
 

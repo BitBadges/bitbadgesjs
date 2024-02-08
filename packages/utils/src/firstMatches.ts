@@ -11,7 +11,7 @@ import { GetFirstMatchOnly, MergeUniversalPermissionDetails } from "./overlaps";
 import { castCollectionApprovalToUniversalPermission } from "./permissions";
 import { CollectionApprovalWithDetails } from "./types/collections";
 import { UserIncomingApprovalWithDetails, UserOutgoingApprovalWithDetails } from "./types/users";
-import { removeUintRangeFromUintRange } from "./uintRanges";
+import { removeUintRangesFromUintRanges } from "./uintRanges";
 
 /**
  * @catgeory Metadata
@@ -23,7 +23,7 @@ export function getFirstMatchForBadgeMetadata(
     const metadata = badgeMetadata[i];
     for (let j = i + 1; j < badgeMetadata.length; j++) {
       const otherMetadata = badgeMetadata[j];
-      const [remaining,] = removeUintRangeFromUintRange(metadata.badgeIds, otherMetadata.badgeIds);
+      const [remaining,] = removeUintRangesFromUintRanges(metadata.badgeIds, otherMetadata.badgeIds);
       otherMetadata.badgeIds = remaining;
     }
   }
@@ -46,9 +46,9 @@ export function getUnhandledCollectionApprovals(
 
   //Startegy here is to create a unique approval, get first matches, and then whatever makes it through the first matches (w/ approvalId "__disapproved__") is unhandled
   currTransferability.push({
-    fromList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
-    toList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
-    initiatedByList: { listId: 'AllWithMint', addresses: [], allowlist: false, uri: "", customData: "", createdBy: "" },
+    fromList: { listId: 'AllWithMint', addresses: [], whitelist: false, uri: "", customData: "", createdBy: "" },
+    toList: { listId: 'AllWithMint', addresses: [], whitelist: false, uri: "", customData: "", createdBy: "" },
+    initiatedByList: { listId: 'AllWithMint', addresses: [], whitelist: false, uri: "", customData: "", createdBy: "" },
     fromListId: 'AllWithMint',
     toListId: 'AllWithMint',
     initiatedByListId: 'AllWithMint',
@@ -66,8 +66,9 @@ export function getUnhandledCollectionApprovals(
     if (ignoreTrackerIds) {
       return {
         ...x,
-        usesChallengeTrackerIdList: false,
+        usesApprovalIdList: false,
         usesAmountTrackerIdList: false,
+        usesChallengeTrackerIdList: false,
       }
     } else {
       return x;
@@ -90,6 +91,7 @@ export function getUnhandledCollectionApprovals(
       transferTimes: match.transferTimes,
       ownershipTimes: match.ownershipTimes,
 
+      //TODO: Is this right?
       approvalId: match.arbitraryValue.approvalId,
       amountTrackerId: match.arbitraryValue.amountTrackerId,
       challengeTrackerId: match.arbitraryValue.challengeTrackerId,
