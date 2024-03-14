@@ -3,8 +3,8 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3, protoInt64 } from "@bufbuild/protobuf";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3, protoInt64 } from '@bufbuild/protobuf';
 
 /**
  * Snapshot contains Tendermint state sync snapshot info.
@@ -43,13 +43,13 @@ export class Snapshot extends Message<Snapshot> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.base.snapshots.v1beta1.Snapshot";
+  static readonly typeName = 'cosmos.base.snapshots.v1beta1.Snapshot';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "height", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
-    { no: 2, name: "format", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 3, name: "chunks", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 4, name: "hash", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 5, name: "metadata", kind: "message", T: Metadata },
+    { no: 1, name: 'height', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ },
+    { no: 2, name: 'format', kind: 'scalar', T: 13 /* ScalarType.UINT32 */ },
+    { no: 3, name: 'chunks', kind: 'scalar', T: 13 /* ScalarType.UINT32 */ },
+    { no: 4, name: 'hash', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 5, name: 'metadata', kind: 'message', T: Metadata }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Snapshot {
@@ -88,9 +88,9 @@ export class Metadata extends Message<Metadata> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.base.snapshots.v1beta1.Metadata";
+  static readonly typeName = 'cosmos.base.snapshots.v1beta1.Metadata';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "chunk_hashes", kind: "scalar", T: 12 /* ScalarType.BYTES */, repeated: true },
+    { no: 1, name: 'chunk_hashes', kind: 'scalar', T: 12 /* ScalarType.BYTES */, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Metadata {
@@ -123,45 +123,52 @@ export class SnapshotItem extends Message<SnapshotItem> {
    *
    * @generated from oneof cosmos.base.snapshots.v1beta1.SnapshotItem.item
    */
-  item: {
-    /**
-     * @generated from field: cosmos.base.snapshots.v1beta1.SnapshotStoreItem store = 1;
-     */
-    value: SnapshotStoreItem;
-    case: "store";
-  } | {
-    /**
-     * @generated from field: cosmos.base.snapshots.v1beta1.SnapshotIAVLItem iavl = 2;
-     */
-    value: SnapshotIAVLItem;
-    case: "iavl";
-  } | {
-    /**
-     * @generated from field: cosmos.base.snapshots.v1beta1.SnapshotExtensionMeta extension = 3;
-     */
-    value: SnapshotExtensionMeta;
-    case: "extension";
-  } | {
-    /**
-     * @generated from field: cosmos.base.snapshots.v1beta1.SnapshotExtensionPayload extension_payload = 4;
-     */
-    value: SnapshotExtensionPayload;
-    case: "extensionPayload";
-  } | {
-    /**
-     * @generated from field: cosmos.base.snapshots.v1beta1.SnapshotKVItem kv = 5 [deprecated = true];
-     * @deprecated
-     */
-    value: SnapshotKVItem;
-    case: "kv";
-  } | {
-    /**
-     * @generated from field: cosmos.base.snapshots.v1beta1.SnapshotSchema schema = 6 [deprecated = true];
-     * @deprecated
-     */
-    value: SnapshotSchema;
-    case: "schema";
-  } | { case: undefined; value?: undefined } = { case: undefined };
+  item:
+    | {
+        /**
+         * @generated from field: cosmos.base.snapshots.v1beta1.SnapshotStoreItem store = 1;
+         */
+        value: SnapshotStoreItem;
+        case: 'store';
+      }
+    | {
+        /**
+         * @generated from field: cosmos.base.snapshots.v1beta1.SnapshotIAVLItem iavl = 2;
+         */
+        value: SnapshotIAVLItem;
+        case: 'iavl';
+      }
+    | {
+        /**
+         * @generated from field: cosmos.base.snapshots.v1beta1.SnapshotExtensionMeta extension = 3;
+         */
+        value: SnapshotExtensionMeta;
+        case: 'extension';
+      }
+    | {
+        /**
+         * @generated from field: cosmos.base.snapshots.v1beta1.SnapshotExtensionPayload extension_payload = 4;
+         */
+        value: SnapshotExtensionPayload;
+        case: 'extensionPayload';
+      }
+    | {
+        /**
+         * @generated from field: cosmos.base.snapshots.v1beta1.SnapshotKVItem kv = 5 [deprecated = true];
+         * @deprecated
+         */
+        value: SnapshotKVItem;
+        case: 'kv';
+      }
+    | {
+        /**
+         * @generated from field: cosmos.base.snapshots.v1beta1.SnapshotSchema schema = 6 [deprecated = true];
+         * @deprecated
+         */
+        value: SnapshotSchema;
+        case: 'schema';
+      }
+    | { case: undefined; value?: undefined } = { case: undefined };
 
   constructor(data?: PartialMessage<SnapshotItem>) {
     super();
@@ -169,14 +176,14 @@ export class SnapshotItem extends Message<SnapshotItem> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.base.snapshots.v1beta1.SnapshotItem";
+  static readonly typeName = 'cosmos.base.snapshots.v1beta1.SnapshotItem';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "store", kind: "message", T: SnapshotStoreItem, oneof: "item" },
-    { no: 2, name: "iavl", kind: "message", T: SnapshotIAVLItem, oneof: "item" },
-    { no: 3, name: "extension", kind: "message", T: SnapshotExtensionMeta, oneof: "item" },
-    { no: 4, name: "extension_payload", kind: "message", T: SnapshotExtensionPayload, oneof: "item" },
-    { no: 5, name: "kv", kind: "message", T: SnapshotKVItem, oneof: "item" },
-    { no: 6, name: "schema", kind: "message", T: SnapshotSchema, oneof: "item" },
+    { no: 1, name: 'store', kind: 'message', T: SnapshotStoreItem, oneof: 'item' },
+    { no: 2, name: 'iavl', kind: 'message', T: SnapshotIAVLItem, oneof: 'item' },
+    { no: 3, name: 'extension', kind: 'message', T: SnapshotExtensionMeta, oneof: 'item' },
+    { no: 4, name: 'extension_payload', kind: 'message', T: SnapshotExtensionPayload, oneof: 'item' },
+    { no: 5, name: 'kv', kind: 'message', T: SnapshotKVItem, oneof: 'item' },
+    { no: 6, name: 'schema', kind: 'message', T: SnapshotSchema, oneof: 'item' }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SnapshotItem {
@@ -207,7 +214,7 @@ export class SnapshotStoreItem extends Message<SnapshotStoreItem> {
   /**
    * @generated from field: string name = 1;
    */
-  name = "";
+  name = '';
 
   constructor(data?: PartialMessage<SnapshotStoreItem>) {
     super();
@@ -215,10 +222,8 @@ export class SnapshotStoreItem extends Message<SnapshotStoreItem> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.base.snapshots.v1beta1.SnapshotStoreItem";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-  ]);
+  static readonly typeName = 'cosmos.base.snapshots.v1beta1.SnapshotStoreItem';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'name', kind: 'scalar', T: 9 /* ScalarType.STRING */ }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SnapshotStoreItem {
     return new SnapshotStoreItem().fromBinary(bytes, options);
@@ -232,7 +237,10 @@ export class SnapshotStoreItem extends Message<SnapshotStoreItem> {
     return new SnapshotStoreItem().fromJsonString(jsonString, options);
   }
 
-  static equals(a: SnapshotStoreItem | PlainMessage<SnapshotStoreItem> | undefined, b: SnapshotStoreItem | PlainMessage<SnapshotStoreItem> | undefined): boolean {
+  static equals(
+    a: SnapshotStoreItem | PlainMessage<SnapshotStoreItem> | undefined,
+    b: SnapshotStoreItem | PlainMessage<SnapshotStoreItem> | undefined
+  ): boolean {
     return proto3.util.equals(SnapshotStoreItem, a, b);
   }
 }
@@ -275,12 +283,12 @@ export class SnapshotIAVLItem extends Message<SnapshotIAVLItem> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.base.snapshots.v1beta1.SnapshotIAVLItem";
+  static readonly typeName = 'cosmos.base.snapshots.v1beta1.SnapshotIAVLItem';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "key", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 2, name: "value", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 3, name: "version", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
-    { no: 4, name: "height", kind: "scalar", T: 5 /* ScalarType.INT32 */ },
+    { no: 1, name: 'key', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 2, name: 'value', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 3, name: 'version', kind: 'scalar', T: 3 /* ScalarType.INT64 */ },
+    { no: 4, name: 'height', kind: 'scalar', T: 5 /* ScalarType.INT32 */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SnapshotIAVLItem {
@@ -295,7 +303,10 @@ export class SnapshotIAVLItem extends Message<SnapshotIAVLItem> {
     return new SnapshotIAVLItem().fromJsonString(jsonString, options);
   }
 
-  static equals(a: SnapshotIAVLItem | PlainMessage<SnapshotIAVLItem> | undefined, b: SnapshotIAVLItem | PlainMessage<SnapshotIAVLItem> | undefined): boolean {
+  static equals(
+    a: SnapshotIAVLItem | PlainMessage<SnapshotIAVLItem> | undefined,
+    b: SnapshotIAVLItem | PlainMessage<SnapshotIAVLItem> | undefined
+  ): boolean {
     return proto3.util.equals(SnapshotIAVLItem, a, b);
   }
 }
@@ -311,7 +322,7 @@ export class SnapshotExtensionMeta extends Message<SnapshotExtensionMeta> {
   /**
    * @generated from field: string name = 1;
    */
-  name = "";
+  name = '';
 
   /**
    * @generated from field: uint32 format = 2;
@@ -324,10 +335,10 @@ export class SnapshotExtensionMeta extends Message<SnapshotExtensionMeta> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.base.snapshots.v1beta1.SnapshotExtensionMeta";
+  static readonly typeName = 'cosmos.base.snapshots.v1beta1.SnapshotExtensionMeta';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "format", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 1, name: 'name', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'format', kind: 'scalar', T: 13 /* ScalarType.UINT32 */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SnapshotExtensionMeta {
@@ -342,7 +353,10 @@ export class SnapshotExtensionMeta extends Message<SnapshotExtensionMeta> {
     return new SnapshotExtensionMeta().fromJsonString(jsonString, options);
   }
 
-  static equals(a: SnapshotExtensionMeta | PlainMessage<SnapshotExtensionMeta> | undefined, b: SnapshotExtensionMeta | PlainMessage<SnapshotExtensionMeta> | undefined): boolean {
+  static equals(
+    a: SnapshotExtensionMeta | PlainMessage<SnapshotExtensionMeta> | undefined,
+    b: SnapshotExtensionMeta | PlainMessage<SnapshotExtensionMeta> | undefined
+  ): boolean {
     return proto3.util.equals(SnapshotExtensionMeta, a, b);
   }
 }
@@ -366,10 +380,8 @@ export class SnapshotExtensionPayload extends Message<SnapshotExtensionPayload> 
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.base.snapshots.v1beta1.SnapshotExtensionPayload";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "payload", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-  ]);
+  static readonly typeName = 'cosmos.base.snapshots.v1beta1.SnapshotExtensionPayload';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'payload', kind: 'scalar', T: 12 /* ScalarType.BYTES */ }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SnapshotExtensionPayload {
     return new SnapshotExtensionPayload().fromBinary(bytes, options);
@@ -383,7 +395,10 @@ export class SnapshotExtensionPayload extends Message<SnapshotExtensionPayload> 
     return new SnapshotExtensionPayload().fromJsonString(jsonString, options);
   }
 
-  static equals(a: SnapshotExtensionPayload | PlainMessage<SnapshotExtensionPayload> | undefined, b: SnapshotExtensionPayload | PlainMessage<SnapshotExtensionPayload> | undefined): boolean {
+  static equals(
+    a: SnapshotExtensionPayload | PlainMessage<SnapshotExtensionPayload> | undefined,
+    b: SnapshotExtensionPayload | PlainMessage<SnapshotExtensionPayload> | undefined
+  ): boolean {
     return proto3.util.equals(SnapshotExtensionPayload, a, b);
   }
 }
@@ -414,10 +429,10 @@ export class SnapshotKVItem extends Message<SnapshotKVItem> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.base.snapshots.v1beta1.SnapshotKVItem";
+  static readonly typeName = 'cosmos.base.snapshots.v1beta1.SnapshotKVItem';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "key", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 2, name: "value", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
+    { no: 1, name: 'key', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 2, name: 'value', kind: 'scalar', T: 12 /* ScalarType.BYTES */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SnapshotKVItem {
@@ -458,9 +473,9 @@ export class SnapshotSchema extends Message<SnapshotSchema> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.base.snapshots.v1beta1.SnapshotSchema";
+  static readonly typeName = 'cosmos.base.snapshots.v1beta1.SnapshotSchema';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "keys", kind: "scalar", T: 12 /* ScalarType.BYTES */, repeated: true },
+    { no: 1, name: 'keys', kind: 'scalar', T: 12 /* ScalarType.BYTES */, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SnapshotSchema {
@@ -479,4 +494,3 @@ export class SnapshotSchema extends Message<SnapshotSchema> {
     return proto3.util.equals(SnapshotSchema, a, b);
   }
 }
-

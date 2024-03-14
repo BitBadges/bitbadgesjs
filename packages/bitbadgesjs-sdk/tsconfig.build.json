@@ -1,8 +1,29 @@
 {
-  "extends": "../../tsconfig.build.json",
   "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+    "target": "ESNext",
+    "module": "commonjs",
+    "moduleResolution": "node",
     "outDir": "dist",
+    "lib": ["DOM", "es2019", "es2021", "es2022", "es2023"],
+    "strict": true,
+    // "noUnusedLocals": true,
+    // "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "removeComments": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "incremental": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "types": ["node", "jest"]
   },
-  "references": [
-  ]
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts", "docs", "./dist"],
+  "include": ["**/*.ts", "**/*.json"]
 }

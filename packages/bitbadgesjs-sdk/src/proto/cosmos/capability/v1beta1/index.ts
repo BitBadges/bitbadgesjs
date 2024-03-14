@@ -1,2 +1,2 @@
-export * from './capability_pb'
-export * from './genesis_pb'
+export * from './capability_pb';
+export * from './genesis_pb';

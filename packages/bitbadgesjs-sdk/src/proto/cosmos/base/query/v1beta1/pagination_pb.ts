@@ -3,8 +3,8 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3, protoInt64 } from "@bufbuild/protobuf";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3, protoInt64 } from '@bufbuild/protobuf';
 
 /**
  * PageRequest is to be embedded in gRPC request messages for efficient
@@ -69,13 +69,13 @@ export class PageRequest extends Message<PageRequest> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.base.query.v1beta1.PageRequest";
+  static readonly typeName = 'cosmos.base.query.v1beta1.PageRequest';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "key", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 2, name: "offset", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
-    { no: 3, name: "limit", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
-    { no: 4, name: "count_total", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 5, name: "reverse", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 1, name: 'key', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 2, name: 'offset', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ },
+    { no: 3, name: 'limit', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ },
+    { no: 4, name: 'count_total', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 5, name: 'reverse', kind: 'scalar', T: 8 /* ScalarType.BOOL */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PageRequest {
@@ -130,10 +130,10 @@ export class PageResponse extends Message<PageResponse> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.base.query.v1beta1.PageResponse";
+  static readonly typeName = 'cosmos.base.query.v1beta1.PageResponse';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "next_key", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 2, name: "total", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
+    { no: 1, name: 'next_key', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 2, name: 'total', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PageResponse {
@@ -152,4 +152,3 @@ export class PageResponse extends Message<PageResponse> {
     return proto3.util.equals(PageResponse, a, b);
   }
 }
-

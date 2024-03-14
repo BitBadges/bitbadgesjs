@@ -3,9 +3,9 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3, protoInt64 } from "@bufbuild/protobuf";
-import { ClientConsensusStates, IdentifiedClientState, Params } from "./client_pb.js";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3, protoInt64 } from '@bufbuild/protobuf';
+import { ClientConsensusStates, IdentifiedClientState, Params } from './client_pb.js';
 
 /**
  * GenesisState defines the ibc client submodule's genesis state.
@@ -59,14 +59,14 @@ export class GenesisState extends Message<GenesisState> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ibc.core.client.v1.GenesisState";
+  static readonly typeName = 'ibc.core.client.v1.GenesisState';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "clients", kind: "message", T: IdentifiedClientState, repeated: true },
-    { no: 2, name: "clients_consensus", kind: "message", T: ClientConsensusStates, repeated: true },
-    { no: 3, name: "clients_metadata", kind: "message", T: IdentifiedGenesisMetadata, repeated: true },
-    { no: 4, name: "params", kind: "message", T: Params },
-    { no: 5, name: "create_localhost", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 6, name: "next_client_sequence", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
+    { no: 1, name: 'clients', kind: 'message', T: IdentifiedClientState, repeated: true },
+    { no: 2, name: 'clients_consensus', kind: 'message', T: ClientConsensusStates, repeated: true },
+    { no: 3, name: 'clients_metadata', kind: 'message', T: IdentifiedGenesisMetadata, repeated: true },
+    { no: 4, name: 'params', kind: 'message', T: Params },
+    { no: 5, name: 'create_localhost', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 6, name: 'next_client_sequence', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GenesisState {
@@ -113,10 +113,10 @@ export class GenesisMetadata extends Message<GenesisMetadata> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ibc.core.client.v1.GenesisMetadata";
+  static readonly typeName = 'ibc.core.client.v1.GenesisMetadata';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "key", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 2, name: "value", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
+    { no: 1, name: 'key', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 2, name: 'value', kind: 'scalar', T: 12 /* ScalarType.BYTES */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GenesisMetadata {
@@ -131,7 +131,10 @@ export class GenesisMetadata extends Message<GenesisMetadata> {
     return new GenesisMetadata().fromJsonString(jsonString, options);
   }
 
-  static equals(a: GenesisMetadata | PlainMessage<GenesisMetadata> | undefined, b: GenesisMetadata | PlainMessage<GenesisMetadata> | undefined): boolean {
+  static equals(
+    a: GenesisMetadata | PlainMessage<GenesisMetadata> | undefined,
+    b: GenesisMetadata | PlainMessage<GenesisMetadata> | undefined
+  ): boolean {
     return proto3.util.equals(GenesisMetadata, a, b);
   }
 }
@@ -146,7 +149,7 @@ export class IdentifiedGenesisMetadata extends Message<IdentifiedGenesisMetadata
   /**
    * @generated from field: string client_id = 1;
    */
-  clientId = "";
+  clientId = '';
 
   /**
    * @generated from field: repeated ibc.core.client.v1.GenesisMetadata client_metadata = 2;
@@ -159,10 +162,10 @@ export class IdentifiedGenesisMetadata extends Message<IdentifiedGenesisMetadata
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ibc.core.client.v1.IdentifiedGenesisMetadata";
+  static readonly typeName = 'ibc.core.client.v1.IdentifiedGenesisMetadata';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "client_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "client_metadata", kind: "message", T: GenesisMetadata, repeated: true },
+    { no: 1, name: 'client_id', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'client_metadata', kind: 'message', T: GenesisMetadata, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): IdentifiedGenesisMetadata {
@@ -177,8 +180,10 @@ export class IdentifiedGenesisMetadata extends Message<IdentifiedGenesisMetadata
     return new IdentifiedGenesisMetadata().fromJsonString(jsonString, options);
   }
 
-  static equals(a: IdentifiedGenesisMetadata | PlainMessage<IdentifiedGenesisMetadata> | undefined, b: IdentifiedGenesisMetadata | PlainMessage<IdentifiedGenesisMetadata> | undefined): boolean {
+  static equals(
+    a: IdentifiedGenesisMetadata | PlainMessage<IdentifiedGenesisMetadata> | undefined,
+    b: IdentifiedGenesisMetadata | PlainMessage<IdentifiedGenesisMetadata> | undefined
+  ): boolean {
     return proto3.util.equals(IdentifiedGenesisMetadata, a, b);
   }
 }
-

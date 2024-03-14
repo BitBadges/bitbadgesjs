@@ -1,2 +1,2 @@
-export * from './options_pb'
-export * from './query_pb'
+export * from './options_pb';
+export * from './query_pb';

@@ -3,8 +3,8 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3 } from '@bufbuild/protobuf';
 
 /**
  * EventSend is emitted on Msg/Send
@@ -17,28 +17,28 @@ export class EventSend extends Message<EventSend> {
    *
    * @generated from field: string class_id = 1;
    */
-  classId = "";
+  classId = '';
 
   /**
    * id is a unique identifier of the nft
    *
    * @generated from field: string id = 2;
    */
-  id = "";
+  id = '';
 
   /**
    * sender is the address of the owner of nft
    *
    * @generated from field: string sender = 3;
    */
-  sender = "";
+  sender = '';
 
   /**
    * receiver is the receiver address of nft
    *
    * @generated from field: string receiver = 4;
    */
-  receiver = "";
+  receiver = '';
 
   constructor(data?: PartialMessage<EventSend>) {
     super();
@@ -46,12 +46,12 @@ export class EventSend extends Message<EventSend> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.nft.v1beta1.EventSend";
+  static readonly typeName = 'cosmos.nft.v1beta1.EventSend';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "class_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "sender", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "receiver", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'class_id', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'id', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'sender', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: 'receiver', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): EventSend {
@@ -82,21 +82,21 @@ export class EventMint extends Message<EventMint> {
    *
    * @generated from field: string class_id = 1;
    */
-  classId = "";
+  classId = '';
 
   /**
    * id is a unique identifier of the nft
    *
    * @generated from field: string id = 2;
    */
-  id = "";
+  id = '';
 
   /**
    * owner is the owner address of the nft
    *
    * @generated from field: string owner = 3;
    */
-  owner = "";
+  owner = '';
 
   constructor(data?: PartialMessage<EventMint>) {
     super();
@@ -104,11 +104,11 @@ export class EventMint extends Message<EventMint> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.nft.v1beta1.EventMint";
+  static readonly typeName = 'cosmos.nft.v1beta1.EventMint';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "class_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "owner", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'class_id', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'id', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'owner', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): EventMint {
@@ -139,21 +139,21 @@ export class EventBurn extends Message<EventBurn> {
    *
    * @generated from field: string class_id = 1;
    */
-  classId = "";
+  classId = '';
 
   /**
    * id is a unique identifier of the nft
    *
    * @generated from field: string id = 2;
    */
-  id = "";
+  id = '';
 
   /**
    * owner is the owner address of the nft
    *
    * @generated from field: string owner = 3;
    */
-  owner = "";
+  owner = '';
 
   constructor(data?: PartialMessage<EventBurn>) {
     super();
@@ -161,11 +161,11 @@ export class EventBurn extends Message<EventBurn> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.nft.v1beta1.EventBurn";
+  static readonly typeName = 'cosmos.nft.v1beta1.EventBurn';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "class_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "owner", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'class_id', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'id', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'owner', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): EventBurn {
@@ -184,4 +184,3 @@ export class EventBurn extends Message<EventBurn> {
     return proto3.util.equals(EventBurn, a, b);
   }
 }
-

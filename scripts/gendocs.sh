@@ -6,4 +6,5 @@ for d in */ ; do
     echo "Generating docs for $d"
     npx typedoc ./src --out docs
     cd ..
+    cd ..
 done

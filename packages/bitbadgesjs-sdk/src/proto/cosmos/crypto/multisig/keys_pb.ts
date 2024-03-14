@@ -3,8 +3,8 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Any, Message, proto3 } from "@bufbuild/protobuf";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Any, Message, proto3 } from '@bufbuild/protobuf';
 
 /**
  * LegacyAminoPubKey specifies a public key type
@@ -30,10 +30,10 @@ export class LegacyAminoPubKey extends Message<LegacyAminoPubKey> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.crypto.multisig.LegacyAminoPubKey";
+  static readonly typeName = 'cosmos.crypto.multisig.LegacyAminoPubKey';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "threshold", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 2, name: "public_keys", kind: "message", T: Any, repeated: true },
+    { no: 1, name: 'threshold', kind: 'scalar', T: 13 /* ScalarType.UINT32 */ },
+    { no: 2, name: 'public_keys', kind: 'message', T: Any, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): LegacyAminoPubKey {
@@ -48,8 +48,10 @@ export class LegacyAminoPubKey extends Message<LegacyAminoPubKey> {
     return new LegacyAminoPubKey().fromJsonString(jsonString, options);
   }
 
-  static equals(a: LegacyAminoPubKey | PlainMessage<LegacyAminoPubKey> | undefined, b: LegacyAminoPubKey | PlainMessage<LegacyAminoPubKey> | undefined): boolean {
+  static equals(
+    a: LegacyAminoPubKey | PlainMessage<LegacyAminoPubKey> | undefined,
+    b: LegacyAminoPubKey | PlainMessage<LegacyAminoPubKey> | undefined
+  ): boolean {
     return proto3.util.equals(LegacyAminoPubKey, a, b);
   }
 }
-

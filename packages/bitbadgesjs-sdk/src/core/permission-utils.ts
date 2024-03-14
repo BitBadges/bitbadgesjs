@@ -1,0 +1,170 @@
+import { CollectionApprovalWithDetails } from './approvals';
+import { BadgeMetadataTimeline, CollectionMetadataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadataTimeline } from './misc';
+import type { UsedFlags } from './overlaps';
+import {
+  ActionPermissionUsedFlags,
+  ApprovalPermissionUsedFlags,
+  BalancesActionPermissionUsedFlags,
+  TimedUpdatePermissionUsedFlags,
+  TimedUpdateWithBadgeIdsPermissionUsedFlags
+} from './overlaps';
+import {
+  ActionPermission,
+  BalancesActionPermission,
+  CollectionApprovalPermission,
+  TimedUpdatePermission,
+  TimedUpdateWithBadgeIdsPermission
+} from './permissions';
+
+/**
+ * @category Permissions
+ */
+export type PermissionNameString =
+  | 'canDeleteCollection'
+  | 'canArchiveCollection'
+  | 'canUpdateOffChainBalancesMetadata'
+  | 'canUpdateBadgeMetadata'
+  | 'canUpdateCollectionMetadata'
+  | 'canCreateMoreBadges'
+  | 'canUpdateCollectionApprovals'
+  | 'canUpdateAutoApproveSelfInitiatedIncomingTransfers'
+  | 'canUpdateAutoApproveSelfInitiatedOutgoingTransfers'
+  | 'canUpdateStandards'
+  | 'canUpdateCustomData'
+  | 'canUpdateManager';
+
+/**
+ * Gets the permission variables from a permission name. Variables include the flags, question, and validation function.
+ * Cast functions are directly used on the object itself.
+ *
+ * @category Permissions
+ */
+export const getPermissionVariablesFromName = (permissionName: PermissionNameString) => {
+  let flags: UsedFlags = ApprovalPermissionUsedFlags;
+
+  let validateFunction: any = undefined;
+  let validatePermissionUpdateFunction: any = undefined;
+  switch (permissionName) {
+    case 'canArchiveCollection':
+      validateFunction = IsArchivedTimeline.validateUpdate;
+      break;
+    case 'canUpdateOffChainBalancesMetadata':
+      validateFunction = OffChainBalancesMetadataTimeline.validateUpdate;
+      break;
+    // case 'canUpdateStandards':
+    // case 'canUpdateCustomData':
+    case 'canUpdateManager':
+      validateFunction = ManagerTimeline.validateUpdate;
+      break;
+    case 'canUpdateCollectionMetadata':
+      validateFunction = CollectionMetadataTimeline.validateUpdate;
+      break;
+    case 'canUpdateBadgeMetadata':
+      validateFunction = BadgeMetadataTimeline.validateUpdate;
+      break;
+    case 'canUpdateCollectionApprovals':
+      validateFunction = CollectionApprovalWithDetails.validateUpdate;
+      break;
+  }
+  switch (permissionName) {
+    case 'canDeleteCollection':
+    case 'canUpdateAutoApproveSelfInitiatedOutgoingTransfers':
+    case 'canUpdateAutoApproveSelfInitiatedIncomingTransfers':
+      validatePermissionUpdateFunction = ActionPermission.validateUpdate;
+      break;
+    case 'canArchiveCollection':
+    case 'canUpdateOffChainBalancesMetadata':
+    case 'canUpdateStandards':
+    case 'canUpdateCustomData':
+    case 'canUpdateManager':
+    case 'canUpdateCollectionMetadata':
+      validatePermissionUpdateFunction = TimedUpdatePermission.validateUpdate;
+      break;
+    case 'canCreateMoreBadges':
+      validatePermissionUpdateFunction = BalancesActionPermission.validateUpdate;
+
+      break;
+    case 'canUpdateBadgeMetadata':
+      // case 'canUpdateInheritedBalances':
+      validatePermissionUpdateFunction = TimedUpdateWithBadgeIdsPermission.validateUpdate;
+
+      break;
+    case 'canUpdateCollectionApprovals':
+      validatePermissionUpdateFunction = CollectionApprovalPermission.validateUpdate;
+      break;
+  }
+
+  let question = '';
+  switch (permissionName) {
+    case 'canDeleteCollection':
+      question = 'Can delete the collection?';
+      break;
+    case 'canArchiveCollection':
+      question = 'Can archive the collection?';
+      break;
+    case 'canUpdateOffChainBalancesMetadata':
+      question = 'Can update the off-chain balances metadata?';
+      break;
+    case 'canUpdateStandards':
+      question = 'Can update the standards?';
+      break;
+    case 'canUpdateCustomData':
+      question = 'Can update the custom data?';
+      break;
+    case 'canUpdateManager':
+      question = 'Can update the manager?';
+      break;
+    case 'canUpdateCollectionMetadata':
+      question = 'Can update the collection metadata?';
+      break;
+    case 'canCreateMoreBadges':
+      question = 'Can create more badges?';
+      break;
+    case 'canUpdateBadgeMetadata':
+      question = 'Can update the badge metadata?';
+      break;
+    case 'canUpdateCollectionApprovals':
+      question = 'Can update collection approvals?';
+      break;
+    case 'canUpdateAutoApproveSelfInitiatedOutgoingTransfers':
+      question = 'Can update auto approve self initiated outgoing transfers?';
+      break;
+    case 'canUpdateAutoApproveSelfInitiatedIncomingTransfers':
+      question = 'Can update auto approve self initiated incoming transfers?';
+      break;
+    // Add custom questions for other permissions as needed
+  }
+
+  switch (permissionName) {
+    case 'canDeleteCollection':
+    case 'canUpdateAutoApproveSelfInitiatedOutgoingTransfers':
+    case 'canUpdateAutoApproveSelfInitiatedIncomingTransfers':
+      flags = ActionPermissionUsedFlags;
+      break;
+    case 'canArchiveCollection':
+    case 'canUpdateOffChainBalancesMetadata':
+    case 'canUpdateStandards':
+    case 'canUpdateCustomData':
+    case 'canUpdateManager':
+    case 'canUpdateCollectionMetadata':
+      flags = TimedUpdatePermissionUsedFlags;
+      break;
+    case 'canCreateMoreBadges':
+      flags = BalancesActionPermissionUsedFlags;
+      break;
+    case 'canUpdateBadgeMetadata':
+      // case 'canUpdateInheritedBalances':
+      flags = TimedUpdateWithBadgeIdsPermissionUsedFlags;
+      break;
+    case 'canUpdateCollectionApprovals':
+      flags = ApprovalPermissionUsedFlags;
+      break;
+  }
+
+  return {
+    flags,
+    question,
+    validateFunction,
+    validatePermissionUpdateFunction
+  };
+};

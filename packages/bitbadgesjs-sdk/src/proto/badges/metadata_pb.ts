@@ -3,9 +3,9 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
-import { UintRange } from "./balances_pb.js";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3 } from '@bufbuild/protobuf';
+import { UintRange } from './balances_pb.js';
 
 /**
  *
@@ -20,14 +20,14 @@ export class BadgeMetadata extends Message<BadgeMetadata> {
    *
    * @generated from field: string uri = 1;
    */
-  uri = "";
+  uri = '';
 
   /**
    * Custom data or additional information related to the badge metadata.
    *
    * @generated from field: string customData = 2;
    */
-  customData = "";
+  customData = '';
 
   /**
    * The badge IDs to which this metadata applies.
@@ -42,11 +42,11 @@ export class BadgeMetadata extends Message<BadgeMetadata> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.BadgeMetadata";
+  static readonly typeName = 'badges.BadgeMetadata';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "customData", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "badgeIds", kind: "message", T: UintRange, repeated: true },
+    { no: 1, name: 'uri', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'customData', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'badgeIds', kind: 'message', T: UintRange, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BadgeMetadata {
@@ -79,14 +79,14 @@ export class CollectionMetadata extends Message<CollectionMetadata> {
    *
    * @generated from field: string uri = 1;
    */
-  uri = "";
+  uri = '';
 
   /**
    * Custom data or additional information related to the collection metadata.
    *
    * @generated from field: string customData = 2;
    */
-  customData = "";
+  customData = '';
 
   constructor(data?: PartialMessage<CollectionMetadata>) {
     super();
@@ -94,10 +94,10 @@ export class CollectionMetadata extends Message<CollectionMetadata> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.CollectionMetadata";
+  static readonly typeName = 'badges.CollectionMetadata';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "customData", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'uri', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'customData', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CollectionMetadata {
@@ -112,7 +112,10 @@ export class CollectionMetadata extends Message<CollectionMetadata> {
     return new CollectionMetadata().fromJsonString(jsonString, options);
   }
 
-  static equals(a: CollectionMetadata | PlainMessage<CollectionMetadata> | undefined, b: CollectionMetadata | PlainMessage<CollectionMetadata> | undefined): boolean {
+  static equals(
+    a: CollectionMetadata | PlainMessage<CollectionMetadata> | undefined,
+    b: CollectionMetadata | PlainMessage<CollectionMetadata> | undefined
+  ): boolean {
     return proto3.util.equals(CollectionMetadata, a, b);
   }
 }
@@ -130,14 +133,14 @@ export class OffChainBalancesMetadata extends Message<OffChainBalancesMetadata> 
    *
    * @generated from field: string uri = 1;
    */
-  uri = "";
+  uri = '';
 
   /**
    * Custom data or additional information related to the off-chain balances metadata.
    *
    * @generated from field: string customData = 2;
    */
-  customData = "";
+  customData = '';
 
   constructor(data?: PartialMessage<OffChainBalancesMetadata>) {
     super();
@@ -145,10 +148,10 @@ export class OffChainBalancesMetadata extends Message<OffChainBalancesMetadata> 
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.OffChainBalancesMetadata";
+  static readonly typeName = 'badges.OffChainBalancesMetadata';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "customData", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'uri', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'customData', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): OffChainBalancesMetadata {
@@ -163,8 +166,10 @@ export class OffChainBalancesMetadata extends Message<OffChainBalancesMetadata> 
     return new OffChainBalancesMetadata().fromJsonString(jsonString, options);
   }
 
-  static equals(a: OffChainBalancesMetadata | PlainMessage<OffChainBalancesMetadata> | undefined, b: OffChainBalancesMetadata | PlainMessage<OffChainBalancesMetadata> | undefined): boolean {
+  static equals(
+    a: OffChainBalancesMetadata | PlainMessage<OffChainBalancesMetadata> | undefined,
+    b: OffChainBalancesMetadata | PlainMessage<OffChainBalancesMetadata> | undefined
+  ): boolean {
     return proto3.util.equals(OffChainBalancesMetadata, a, b);
   }
 }
-

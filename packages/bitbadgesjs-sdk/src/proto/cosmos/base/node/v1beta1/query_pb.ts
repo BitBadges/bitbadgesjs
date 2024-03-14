@@ -3,8 +3,8 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3 } from '@bufbuild/protobuf';
 
 /**
  * ConfigRequest defines the request structure for the Config gRPC query.
@@ -18,9 +18,8 @@ export class ConfigRequest extends Message<ConfigRequest> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.base.node.v1beta1.ConfigRequest";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-  ]);
+  static readonly typeName = 'cosmos.base.node.v1beta1.ConfigRequest';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => []);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ConfigRequest {
     return new ConfigRequest().fromBinary(bytes, options);
@@ -48,7 +47,7 @@ export class ConfigResponse extends Message<ConfigResponse> {
   /**
    * @generated from field: string minimum_gas_price = 1;
    */
-  minimumGasPrice = "";
+  minimumGasPrice = '';
 
   constructor(data?: PartialMessage<ConfigResponse>) {
     super();
@@ -56,9 +55,9 @@ export class ConfigResponse extends Message<ConfigResponse> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.base.node.v1beta1.ConfigResponse";
+  static readonly typeName = 'cosmos.base.node.v1beta1.ConfigResponse';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "minimum_gas_price", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'minimum_gas_price', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ConfigResponse {
@@ -77,4 +76,3 @@ export class ConfigResponse extends Message<ConfigResponse> {
     return proto3.util.equals(ConfigResponse, a, b);
   }
 }
-

@@ -1,9 +1,11 @@
-import * as badges from '../../../../proto/badges/tx_pb';
+import type { NumberType } from '@/common/string-numbers';
+import { Stringify } from '@/common/string-numbers';
+import type { iMsgTransferBadges } from './interfaces';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base';
+import * as badges from '@/proto/badges/tx_pb';
 
-import { NumberType, Transfer, convertTransfer } from '../../../..';
-import { createTransactionPayload } from '../../base';
-import { Chain, Fee, Sender } from "../../common";
-
+import { Transfer } from '@/core/transfers';
+import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 
 /**
  * MsgTransferBadges represents a message to transfer badges from one user to another.
@@ -16,60 +18,53 @@ import { Chain, Fee, Sender } from "../../common";
  *
  * Note that the transfer transaction is atomic, meaning that either all transfers succeed or all fail.
  *
- * @typedef
- * @property {string} creator - The creator of the transaction.
- * @property {T} collectionId - The ID of the collection to transfer badges from.
- * @property {Transfer<T>[]} transfers - The transfers to perform.
+ * @category Transactions
  */
-export interface MsgTransferBadges<T extends NumberType> {
+export class MsgTransferBadges<T extends NumberType> extends BaseNumberTypeClass<MsgTransferBadges<T>> implements iMsgTransferBadges<T> {
   creator: string;
   collectionId: T;
   transfers: Transfer<T>[];
-}
 
-export function convertMsgTransferBadges<T extends NumberType, U extends NumberType>(
-  msg: MsgTransferBadges<T>,
-  convertFunction: (item: T) => U
-): MsgTransferBadges<U> {
-  return {
-    ...msg,
-
-    collectionId: convertFunction(msg.collectionId),
-    transfers: msg.transfers.map((x) => convertTransfer(x, convertFunction)),
+  constructor(msg: iMsgTransferBadges<T>) {
+    super();
+    this.creator = msg.creator;
+    this.collectionId = msg.collectionId;
+    this.transfers = msg.transfers.map((x) => new Transfer(x));
   }
-}
 
-
-export function convertFromProtoToMsgTransferBadges(
-  protoMsg: badges.MsgTransferBadges,
-): MsgTransferBadges<bigint> {
-  const msg = (protoMsg.toJson({ emitDefaultValues: true }) as any) as MsgTransferBadges<string>;
-
-  return {
-    creator: msg.creator,
-    collectionId: BigInt(msg.collectionId),
-    transfers: msg.transfers.map((x) => convertTransfer(x, BigInt)),
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): MsgTransferBadges<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as MsgTransferBadges<U>;
   }
-}
 
-/**
- *Creates a new transaction with the MsgTransferBadges message.
- *
- * Note this only creates a transaction with one Msg. For multi-msg transactions, you can custom build using createTransactionPayload. See docs for tutorials.
- *
- * @param {Chain} chain - The chain to create the transaction for.
- * @param {Sender} sender - The sender details for the transaction.
- * @param {Fee} fee - The fee of the transaction.
- * @param {string} memo - The memo of the transaction.
- * @param {MsgTransferBadges} params - The parameters of the TransferBadges message.
- */
-export function createTxMsgTransferBadges<T extends NumberType>(
-  chain: Chain,
-  sender: Sender,
-  fee: Fee,
-  memo: string,
-  params: MsgTransferBadges<T>
-) {
-  const msgCosmos = new badges.MsgTransferBadges(convertMsgTransferBadges(params, String))
-  return createTransactionPayload({ chain, sender, fee, memo, }, msgCosmos)
+  getNumberFieldNames(): string[] {
+    return ['collectionId'];
+  }
+
+  toProto(): badges.MsgTransferBadges {
+    return new badges.MsgTransferBadges(this.convert(Stringify));
+  }
+
+  static fromJson<U extends NumberType>(
+    jsonValue: JsonValue,
+    convertFunction: (item: NumberType) => U,
+    options?: Partial<JsonReadOptions>
+  ): MsgTransferBadges<U> {
+    return MsgTransferBadges.fromProto(badges.MsgTransferBadges.fromJson(jsonValue, options), convertFunction);
+  }
+
+  static fromJsonString<U extends NumberType>(
+    jsonString: string,
+    convertFunction: (item: NumberType) => U,
+    options?: Partial<JsonReadOptions>
+  ): MsgTransferBadges<U> {
+    return MsgTransferBadges.fromProto(badges.MsgTransferBadges.fromJsonString(jsonString, options), convertFunction);
+  }
+
+  static fromProto<U extends NumberType>(protoMsg: badges.MsgTransferBadges, convertFunction: (item: NumberType) => U): MsgTransferBadges<U> {
+    return new MsgTransferBadges({
+      creator: protoMsg.creator,
+      collectionId: convertFunction(protoMsg.collectionId),
+      transfers: protoMsg.transfers.map((x) => Transfer.fromProto(x, convertFunction))
+    });
+  }
 }

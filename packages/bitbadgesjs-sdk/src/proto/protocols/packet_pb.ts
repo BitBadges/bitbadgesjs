@@ -3,8 +3,8 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3 } from '@bufbuild/protobuf';
 
 /**
  * @generated from message protocols.ProtocolsPacketData
@@ -13,13 +13,15 @@ export class ProtocolsPacketData extends Message<ProtocolsPacketData> {
   /**
    * @generated from oneof protocols.ProtocolsPacketData.packet
    */
-  packet: {
-    /**
-     * @generated from field: protocols.NoData noData = 1;
-     */
-    value: NoData;
-    case: "noData";
-  } | { case: undefined; value?: undefined } = { case: undefined };
+  packet:
+    | {
+        /**
+         * @generated from field: protocols.NoData noData = 1;
+         */
+        value: NoData;
+        case: 'noData';
+      }
+    | { case: undefined; value?: undefined } = { case: undefined };
 
   constructor(data?: PartialMessage<ProtocolsPacketData>) {
     super();
@@ -27,10 +29,8 @@ export class ProtocolsPacketData extends Message<ProtocolsPacketData> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "protocols.ProtocolsPacketData";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "noData", kind: "message", T: NoData, oneof: "packet" },
-  ]);
+  static readonly typeName = 'protocols.ProtocolsPacketData';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'noData', kind: 'message', T: NoData, oneof: 'packet' }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ProtocolsPacketData {
     return new ProtocolsPacketData().fromBinary(bytes, options);
@@ -44,7 +44,10 @@ export class ProtocolsPacketData extends Message<ProtocolsPacketData> {
     return new ProtocolsPacketData().fromJsonString(jsonString, options);
   }
 
-  static equals(a: ProtocolsPacketData | PlainMessage<ProtocolsPacketData> | undefined, b: ProtocolsPacketData | PlainMessage<ProtocolsPacketData> | undefined): boolean {
+  static equals(
+    a: ProtocolsPacketData | PlainMessage<ProtocolsPacketData> | undefined,
+    b: ProtocolsPacketData | PlainMessage<ProtocolsPacketData> | undefined
+  ): boolean {
     return proto3.util.equals(ProtocolsPacketData, a, b);
   }
 }
@@ -59,9 +62,8 @@ export class NoData extends Message<NoData> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "protocols.NoData";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-  ]);
+  static readonly typeName = 'protocols.NoData';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => []);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): NoData {
     return new NoData().fromBinary(bytes, options);
@@ -79,4 +81,3 @@ export class NoData extends Message<NoData> {
     return proto3.util.equals(NoData, a, b);
   }
 }
-

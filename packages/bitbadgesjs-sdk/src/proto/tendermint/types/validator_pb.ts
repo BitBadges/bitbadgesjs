@@ -3,9 +3,9 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3, protoInt64 } from "@bufbuild/protobuf";
-import { PublicKey } from "../crypto/keys_pb.js";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3, protoInt64 } from '@bufbuild/protobuf';
+import { PublicKey } from '../crypto/keys_pb.js';
 
 /**
  * @generated from message tendermint.types.ValidatorSet
@@ -32,11 +32,11 @@ export class ValidatorSet extends Message<ValidatorSet> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.types.ValidatorSet";
+  static readonly typeName = 'tendermint.types.ValidatorSet';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "validators", kind: "message", T: Validator, repeated: true },
-    { no: 2, name: "proposer", kind: "message", T: Validator },
-    { no: 3, name: "total_voting_power", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
+    { no: 1, name: 'validators', kind: 'message', T: Validator, repeated: true },
+    { no: 2, name: 'proposer', kind: 'message', T: Validator },
+    { no: 3, name: 'total_voting_power', kind: 'scalar', T: 3 /* ScalarType.INT64 */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ValidatorSet {
@@ -86,12 +86,12 @@ export class Validator extends Message<Validator> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.types.Validator";
+  static readonly typeName = 'tendermint.types.Validator';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "address", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 2, name: "pub_key", kind: "message", T: PublicKey },
-    { no: 3, name: "voting_power", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
-    { no: 4, name: "proposer_priority", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
+    { no: 1, name: 'address', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 2, name: 'pub_key', kind: 'message', T: PublicKey },
+    { no: 3, name: 'voting_power', kind: 'scalar', T: 3 /* ScalarType.INT64 */ },
+    { no: 4, name: 'proposer_priority', kind: 'scalar', T: 3 /* ScalarType.INT64 */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Validator {
@@ -131,10 +131,10 @@ export class SimpleValidator extends Message<SimpleValidator> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.types.SimpleValidator";
+  static readonly typeName = 'tendermint.types.SimpleValidator';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "pub_key", kind: "message", T: PublicKey },
-    { no: 2, name: "voting_power", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
+    { no: 1, name: 'pub_key', kind: 'message', T: PublicKey },
+    { no: 2, name: 'voting_power', kind: 'scalar', T: 3 /* ScalarType.INT64 */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SimpleValidator {
@@ -149,8 +149,10 @@ export class SimpleValidator extends Message<SimpleValidator> {
     return new SimpleValidator().fromJsonString(jsonString, options);
   }
 
-  static equals(a: SimpleValidator | PlainMessage<SimpleValidator> | undefined, b: SimpleValidator | PlainMessage<SimpleValidator> | undefined): boolean {
+  static equals(
+    a: SimpleValidator | PlainMessage<SimpleValidator> | undefined,
+    b: SimpleValidator | PlainMessage<SimpleValidator> | undefined
+  ): boolean {
     return proto3.util.equals(SimpleValidator, a, b);
   }
 }
-

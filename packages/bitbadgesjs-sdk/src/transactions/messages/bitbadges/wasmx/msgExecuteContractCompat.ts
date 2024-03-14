@@ -1,42 +1,46 @@
-
-import * as wasmx from "../../../../proto/wasmx/tx_pb";
-import { createTransactionPayload } from "../../base";
-import { Chain, Fee, Sender } from "../../common";
+import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
+import * as wasmx from '@/proto/wasmx/tx_pb';
+import { CustomTypeClass } from '@/common/base';
+import type { iMsgExecuteContractCompat } from './interfaces';
 
 /**
  * MsgExecuteContractCompat defines a ExecuteContractCompat message.
+ * This is a wrapper for MsgExecuteContract that allows for compatibility with the different signatures.
  *
- * @typedef {Object} MsgExecuteContractCompat
- * @property {string} sender - The sender of the transaction.
- * @property {string} contract - The contract address to execute.
- * @property {string} msg - The message to pass to the contract. Must be a valid JSON string.
- * @property {string} funds - The funds to send to the contract. Must be a valid JSON string.
+ * @category Transactions
  */
-export interface MsgExecuteContractCompat {
-  sender: string
-  contract: string
-  msg: string
-  funds: string
-}
+export class MsgExecuteContractCompat extends CustomTypeClass<MsgExecuteContractCompat> implements iMsgExecuteContractCompat {
+  sender: string;
+  contract: string;
+  msg: string;
+  funds: string;
 
-/**
- * Creates a new transaction with the MsgExecuteContractCompat message.
- *
- * Note this only creates a transaction with one Msg. For multi-msg transactions, you can custom build using createTransactionPayload. See docs for tutorials.
- *
- * @param {Chain} chain - The chain to create the transaction for.
- * @param {Sender} sender - The sender details for the transaction.
- * @param {Fee} fee - The fee of the transaction.
- * @param {string} memo - The memo of the transaction.
- * @param {MsgExecuteContractCompat} params - The parameters of the ExecuteContractCompat message.
- */
-export function createTxMsgExecuteContractCompat(
-  chain: Chain,
-  sender: Sender,
-  fee: Fee,
-  memo: string,
-  params: MsgExecuteContractCompat
-) {
-  const msgCosmos = new wasmx.MsgExecuteContractCompat(params)
-  return createTransactionPayload({ chain, sender, fee, memo, }, msgCosmos)
+  constructor(msg: iMsgExecuteContractCompat) {
+    super();
+    this.sender = msg.sender;
+    this.contract = msg.contract;
+    this.msg = msg.msg;
+    this.funds = msg.funds;
+  }
+
+  toProto(): wasmx.MsgExecuteContractCompat {
+    return new wasmx.MsgExecuteContractCompat({ ...this });
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgExecuteContractCompat {
+    return MsgExecuteContractCompat.fromProto(wasmx.MsgExecuteContractCompat.fromJson(jsonValue, options));
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgExecuteContractCompat {
+    return MsgExecuteContractCompat.fromProto(wasmx.MsgExecuteContractCompat.fromJsonString(jsonString, options));
+  }
+
+  static fromProto(protoMsg: wasmx.MsgExecuteContractCompat): MsgExecuteContractCompat {
+    return new MsgExecuteContractCompat({
+      sender: protoMsg.sender,
+      contract: protoMsg.contract,
+      msg: protoMsg.msg,
+      funds: protoMsg.funds
+    });
+  }
 }

@@ -3,8 +3,8 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { FileDescriptorProto, Message, proto3 } from "@bufbuild/protobuf";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { FileDescriptorProto, Message, proto3 } from '@bufbuild/protobuf';
 
 /**
  * FileDescriptorsRequest is the Query/FileDescriptors request type.
@@ -18,9 +18,8 @@ export class FileDescriptorsRequest extends Message<FileDescriptorsRequest> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.reflection.v1.FileDescriptorsRequest";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-  ]);
+  static readonly typeName = 'cosmos.reflection.v1.FileDescriptorsRequest';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => []);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): FileDescriptorsRequest {
     return new FileDescriptorsRequest().fromBinary(bytes, options);
@@ -34,7 +33,10 @@ export class FileDescriptorsRequest extends Message<FileDescriptorsRequest> {
     return new FileDescriptorsRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: FileDescriptorsRequest | PlainMessage<FileDescriptorsRequest> | undefined, b: FileDescriptorsRequest | PlainMessage<FileDescriptorsRequest> | undefined): boolean {
+  static equals(
+    a: FileDescriptorsRequest | PlainMessage<FileDescriptorsRequest> | undefined,
+    b: FileDescriptorsRequest | PlainMessage<FileDescriptorsRequest> | undefined
+  ): boolean {
     return proto3.util.equals(FileDescriptorsRequest, a, b);
   }
 }
@@ -58,9 +60,9 @@ export class FileDescriptorsResponse extends Message<FileDescriptorsResponse> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.reflection.v1.FileDescriptorsResponse";
+  static readonly typeName = 'cosmos.reflection.v1.FileDescriptorsResponse';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "files", kind: "message", T: FileDescriptorProto, repeated: true },
+    { no: 1, name: 'files', kind: 'message', T: FileDescriptorProto, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): FileDescriptorsResponse {
@@ -75,8 +77,10 @@ export class FileDescriptorsResponse extends Message<FileDescriptorsResponse> {
     return new FileDescriptorsResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: FileDescriptorsResponse | PlainMessage<FileDescriptorsResponse> | undefined, b: FileDescriptorsResponse | PlainMessage<FileDescriptorsResponse> | undefined): boolean {
+  static equals(
+    a: FileDescriptorsResponse | PlainMessage<FileDescriptorsResponse> | undefined,
+    b: FileDescriptorsResponse | PlainMessage<FileDescriptorsResponse> | undefined
+  ): boolean {
     return proto3.util.equals(FileDescriptorsResponse, a, b);
   }
 }
-

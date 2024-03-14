@@ -3,10 +3,10 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
-import { Commit, Data, Header } from "./types_pb.js";
-import { EvidenceList } from "./evidence_pb.js";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3 } from '@bufbuild/protobuf';
+import { Commit, Data, Header } from './types_pb.js';
+import { EvidenceList } from './evidence_pb.js';
 
 /**
  * @generated from message tendermint.types.Block
@@ -38,12 +38,12 @@ export class Block extends Message<Block> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.types.Block";
+  static readonly typeName = 'tendermint.types.Block';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "header", kind: "message", T: Header },
-    { no: 2, name: "data", kind: "message", T: Data },
-    { no: 3, name: "evidence", kind: "message", T: EvidenceList },
-    { no: 4, name: "last_commit", kind: "message", T: Commit },
+    { no: 1, name: 'header', kind: 'message', T: Header },
+    { no: 2, name: 'data', kind: 'message', T: Data },
+    { no: 3, name: 'evidence', kind: 'message', T: EvidenceList },
+    { no: 4, name: 'last_commit', kind: 'message', T: Commit }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Block {
@@ -62,4 +62,3 @@ export class Block extends Message<Block> {
     return proto3.util.equals(Block, a, b);
   }
 }
-

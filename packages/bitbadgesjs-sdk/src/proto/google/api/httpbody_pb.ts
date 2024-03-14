@@ -18,8 +18,8 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Any, Message, proto3 } from "@bufbuild/protobuf";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Any, Message, proto3 } from '@bufbuild/protobuf';
 
 /**
  * Message that represents an arbitrary HTTP body. It should only be used for
@@ -70,7 +70,7 @@ export class HttpBody extends Message<HttpBody> {
    *
    * @generated from field: string content_type = 1;
    */
-  contentType = "";
+  contentType = '';
 
   /**
    * The HTTP request/response body as raw binary.
@@ -93,11 +93,11 @@ export class HttpBody extends Message<HttpBody> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "google.api.HttpBody";
+  static readonly typeName = 'google.api.HttpBody';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "content_type", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "data", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 3, name: "extensions", kind: "message", T: Any, repeated: true },
+    { no: 1, name: 'content_type', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'data', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 3, name: 'extensions', kind: 'message', T: Any, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): HttpBody {
@@ -116,4 +116,3 @@ export class HttpBody extends Message<HttpBody> {
     return proto3.util.equals(HttpBody, a, b);
   }
 }
-

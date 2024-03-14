@@ -3,13 +3,21 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
-import { CollectionApproval, Transfer, UserBalanceStore, UserIncomingApproval, UserOutgoingApproval } from "./transfers_pb.js";
-import { Balance } from "./balances_pb.js";
-import { CollectionPermissions, UserPermissions } from "./permissions_pb.js";
-import { BadgeMetadataTimeline, CollectionMetadataTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadataTimeline, StandardsTimeline } from "./timelines_pb.js";
-import { AddressList } from "./address_lists_pb.js";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3 } from '@bufbuild/protobuf';
+import { CollectionApproval, Transfer, UserBalanceStore, UserIncomingApproval, UserOutgoingApproval } from './transfers_pb.js';
+import { Balance } from './balances_pb.js';
+import { CollectionPermissions, UserPermissions } from './permissions_pb.js';
+import {
+  BadgeMetadataTimeline,
+  CollectionMetadataTimeline,
+  CustomDataTimeline,
+  IsArchivedTimeline,
+  ManagerTimeline,
+  OffChainBalancesMetadataTimeline,
+  StandardsTimeline
+} from './timelines_pb.js';
+import { AddressList } from './address_lists_pb.js';
 
 /**
  * Used for WASM bindings and JSON parsing
@@ -58,15 +66,15 @@ export class BadgeCustomMsgType extends Message<BadgeCustomMsgType> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.BadgeCustomMsgType";
+  static readonly typeName = 'badges.BadgeCustomMsgType';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "createAddressListsMsg", kind: "message", T: MsgCreateAddressLists },
-    { no: 2, name: "universalUpdateCollectionMsg", kind: "message", T: MsgUniversalUpdateCollection },
-    { no: 3, name: "deleteCollectionMsg", kind: "message", T: MsgDeleteCollection },
-    { no: 4, name: "transferBadgesMsg", kind: "message", T: MsgTransferBadges },
-    { no: 5, name: "updateUserApprovalsMsg", kind: "message", T: MsgUpdateUserApprovals },
-    { no: 6, name: "updateCollectionMsg", kind: "message", T: MsgUpdateCollection },
-    { no: 7, name: "createCollectionMsg", kind: "message", T: MsgCreateCollection },
+    { no: 1, name: 'createAddressListsMsg', kind: 'message', T: MsgCreateAddressLists },
+    { no: 2, name: 'universalUpdateCollectionMsg', kind: 'message', T: MsgUniversalUpdateCollection },
+    { no: 3, name: 'deleteCollectionMsg', kind: 'message', T: MsgDeleteCollection },
+    { no: 4, name: 'transferBadgesMsg', kind: 'message', T: MsgTransferBadges },
+    { no: 5, name: 'updateUserApprovalsMsg', kind: 'message', T: MsgUpdateUserApprovals },
+    { no: 6, name: 'updateCollectionMsg', kind: 'message', T: MsgUpdateCollection },
+    { no: 7, name: 'createCollectionMsg', kind: 'message', T: MsgCreateCollection }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BadgeCustomMsgType {
@@ -81,7 +89,10 @@ export class BadgeCustomMsgType extends Message<BadgeCustomMsgType> {
     return new BadgeCustomMsgType().fromJsonString(jsonString, options);
   }
 
-  static equals(a: BadgeCustomMsgType | PlainMessage<BadgeCustomMsgType> | undefined, b: BadgeCustomMsgType | PlainMessage<BadgeCustomMsgType> | undefined): boolean {
+  static equals(
+    a: BadgeCustomMsgType | PlainMessage<BadgeCustomMsgType> | undefined,
+    b: BadgeCustomMsgType | PlainMessage<BadgeCustomMsgType> | undefined
+  ): boolean {
     return proto3.util.equals(BadgeCustomMsgType, a, b);
   }
 }
@@ -99,21 +110,21 @@ export class MsgUniversalUpdateCollection extends Message<MsgUniversalUpdateColl
    *
    * @generated from field: string creator = 1;
    */
-  creator = "";
+  creator = '';
 
   /**
    * ID of the collection (0 for new collection).
    *
    * @generated from field: string collectionId = 2;
    */
-  collectionId = "";
+  collectionId = '';
 
   /**
    * Type of balances "Standard" or "Off-Chain - Indexed" or "Off-Chain - Non-Indexed".
    *
    * @generated from field: string balancesType = 3;
    */
-  balancesType = "";
+  balancesType = '';
 
   /**
    * The default balances for the user
@@ -261,31 +272,37 @@ export class MsgUniversalUpdateCollection extends Message<MsgUniversalUpdateColl
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.MsgUniversalUpdateCollection";
+  static readonly typeName = 'badges.MsgUniversalUpdateCollection';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "balancesType", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "defaultBalances", kind: "message", T: UserBalanceStore },
-    { no: 6, name: "badgesToCreate", kind: "message", T: Balance, repeated: true },
-    { no: 7, name: "updateCollectionPermissions", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 8, name: "collectionPermissions", kind: "message", T: CollectionPermissions },
-    { no: 9, name: "updateManagerTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 10, name: "managerTimeline", kind: "message", T: ManagerTimeline, repeated: true },
-    { no: 11, name: "updateCollectionMetadataTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 12, name: "collectionMetadataTimeline", kind: "message", T: CollectionMetadataTimeline, repeated: true },
-    { no: 13, name: "updateBadgeMetadataTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 14, name: "badgeMetadataTimeline", kind: "message", T: BadgeMetadataTimeline, repeated: true },
-    { no: 15, name: "updateOffChainBalancesMetadataTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 16, name: "offChainBalancesMetadataTimeline", kind: "message", T: OffChainBalancesMetadataTimeline, repeated: true },
-    { no: 17, name: "updateCustomDataTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 18, name: "customDataTimeline", kind: "message", T: CustomDataTimeline, repeated: true },
-    { no: 21, name: "updateCollectionApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 22, name: "collectionApprovals", kind: "message", T: CollectionApproval, repeated: true },
-    { no: 23, name: "updateStandardsTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 24, name: "standardsTimeline", kind: "message", T: StandardsTimeline, repeated: true },
-    { no: 25, name: "updateIsArchivedTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 26, name: "isArchivedTimeline", kind: "message", T: IsArchivedTimeline, repeated: true },
+    { no: 1, name: 'creator', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'collectionId', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'balancesType', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: 'defaultBalances', kind: 'message', T: UserBalanceStore },
+    { no: 6, name: 'badgesToCreate', kind: 'message', T: Balance, repeated: true },
+    { no: 7, name: 'updateCollectionPermissions', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 8, name: 'collectionPermissions', kind: 'message', T: CollectionPermissions },
+    { no: 9, name: 'updateManagerTimeline', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 10, name: 'managerTimeline', kind: 'message', T: ManagerTimeline, repeated: true },
+    { no: 11, name: 'updateCollectionMetadataTimeline', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 12, name: 'collectionMetadataTimeline', kind: 'message', T: CollectionMetadataTimeline, repeated: true },
+    { no: 13, name: 'updateBadgeMetadataTimeline', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 14, name: 'badgeMetadataTimeline', kind: 'message', T: BadgeMetadataTimeline, repeated: true },
+    { no: 15, name: 'updateOffChainBalancesMetadataTimeline', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    {
+      no: 16,
+      name: 'offChainBalancesMetadataTimeline',
+      kind: 'message',
+      T: OffChainBalancesMetadataTimeline,
+      repeated: true
+    },
+    { no: 17, name: 'updateCustomDataTimeline', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 18, name: 'customDataTimeline', kind: 'message', T: CustomDataTimeline, repeated: true },
+    { no: 21, name: 'updateCollectionApprovals', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 22, name: 'collectionApprovals', kind: 'message', T: CollectionApproval, repeated: true },
+    { no: 23, name: 'updateStandardsTimeline', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 24, name: 'standardsTimeline', kind: 'message', T: StandardsTimeline, repeated: true },
+    { no: 25, name: 'updateIsArchivedTimeline', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 26, name: 'isArchivedTimeline', kind: 'message', T: IsArchivedTimeline, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUniversalUpdateCollection {
@@ -300,7 +317,10 @@ export class MsgUniversalUpdateCollection extends Message<MsgUniversalUpdateColl
     return new MsgUniversalUpdateCollection().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgUniversalUpdateCollection | PlainMessage<MsgUniversalUpdateCollection> | undefined, b: MsgUniversalUpdateCollection | PlainMessage<MsgUniversalUpdateCollection> | undefined): boolean {
+  static equals(
+    a: MsgUniversalUpdateCollection | PlainMessage<MsgUniversalUpdateCollection> | undefined,
+    b: MsgUniversalUpdateCollection | PlainMessage<MsgUniversalUpdateCollection> | undefined
+  ): boolean {
     return proto3.util.equals(MsgUniversalUpdateCollection, a, b);
   }
 }
@@ -316,7 +336,7 @@ export class MsgUniversalUpdateCollectionResponse extends Message<MsgUniversalUp
    *
    * @generated from field: string collectionId = 1;
    */
-  collectionId = "";
+  collectionId = '';
 
   constructor(data?: PartialMessage<MsgUniversalUpdateCollectionResponse>) {
     super();
@@ -324,10 +344,8 @@ export class MsgUniversalUpdateCollectionResponse extends Message<MsgUniversalUp
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.MsgUniversalUpdateCollectionResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-  ]);
+  static readonly typeName = 'badges.MsgUniversalUpdateCollectionResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'collectionId', kind: 'scalar', T: 9 /* ScalarType.STRING */ }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUniversalUpdateCollectionResponse {
     return new MsgUniversalUpdateCollectionResponse().fromBinary(bytes, options);
@@ -341,7 +359,10 @@ export class MsgUniversalUpdateCollectionResponse extends Message<MsgUniversalUp
     return new MsgUniversalUpdateCollectionResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgUniversalUpdateCollectionResponse | PlainMessage<MsgUniversalUpdateCollectionResponse> | undefined, b: MsgUniversalUpdateCollectionResponse | PlainMessage<MsgUniversalUpdateCollectionResponse> | undefined): boolean {
+  static equals(
+    a: MsgUniversalUpdateCollectionResponse | PlainMessage<MsgUniversalUpdateCollectionResponse> | undefined,
+    b: MsgUniversalUpdateCollectionResponse | PlainMessage<MsgUniversalUpdateCollectionResponse> | undefined
+  ): boolean {
     return proto3.util.equals(MsgUniversalUpdateCollectionResponse, a, b);
   }
 }
@@ -357,14 +378,14 @@ export class MsgUpdateCollection extends Message<MsgUpdateCollection> {
    *
    * @generated from field: string creator = 1;
    */
-  creator = "";
+  creator = '';
 
   /**
    * ID of the collection (0 for new collection).
    *
    * @generated from field: string collectionId = 2;
    */
-  collectionId = "";
+  collectionId = '';
 
   /**
    * Balances to create for the collection. Will be sent to the "Mint" address.
@@ -505,29 +526,35 @@ export class MsgUpdateCollection extends Message<MsgUpdateCollection> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.MsgUpdateCollection";
+  static readonly typeName = 'badges.MsgUpdateCollection';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 6, name: "badgesToCreate", kind: "message", T: Balance, repeated: true },
-    { no: 7, name: "updateCollectionPermissions", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 8, name: "collectionPermissions", kind: "message", T: CollectionPermissions },
-    { no: 9, name: "updateManagerTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 10, name: "managerTimeline", kind: "message", T: ManagerTimeline, repeated: true },
-    { no: 11, name: "updateCollectionMetadataTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 12, name: "collectionMetadataTimeline", kind: "message", T: CollectionMetadataTimeline, repeated: true },
-    { no: 13, name: "updateBadgeMetadataTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 14, name: "badgeMetadataTimeline", kind: "message", T: BadgeMetadataTimeline, repeated: true },
-    { no: 15, name: "updateOffChainBalancesMetadataTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 16, name: "offChainBalancesMetadataTimeline", kind: "message", T: OffChainBalancesMetadataTimeline, repeated: true },
-    { no: 17, name: "updateCustomDataTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 18, name: "customDataTimeline", kind: "message", T: CustomDataTimeline, repeated: true },
-    { no: 21, name: "updateCollectionApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 22, name: "collectionApprovals", kind: "message", T: CollectionApproval, repeated: true },
-    { no: 23, name: "updateStandardsTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 24, name: "standardsTimeline", kind: "message", T: StandardsTimeline, repeated: true },
-    { no: 27, name: "updateIsArchivedTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 28, name: "isArchivedTimeline", kind: "message", T: IsArchivedTimeline, repeated: true },
+    { no: 1, name: 'creator', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'collectionId', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 6, name: 'badgesToCreate', kind: 'message', T: Balance, repeated: true },
+    { no: 7, name: 'updateCollectionPermissions', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 8, name: 'collectionPermissions', kind: 'message', T: CollectionPermissions },
+    { no: 9, name: 'updateManagerTimeline', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 10, name: 'managerTimeline', kind: 'message', T: ManagerTimeline, repeated: true },
+    { no: 11, name: 'updateCollectionMetadataTimeline', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 12, name: 'collectionMetadataTimeline', kind: 'message', T: CollectionMetadataTimeline, repeated: true },
+    { no: 13, name: 'updateBadgeMetadataTimeline', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 14, name: 'badgeMetadataTimeline', kind: 'message', T: BadgeMetadataTimeline, repeated: true },
+    { no: 15, name: 'updateOffChainBalancesMetadataTimeline', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    {
+      no: 16,
+      name: 'offChainBalancesMetadataTimeline',
+      kind: 'message',
+      T: OffChainBalancesMetadataTimeline,
+      repeated: true
+    },
+    { no: 17, name: 'updateCustomDataTimeline', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 18, name: 'customDataTimeline', kind: 'message', T: CustomDataTimeline, repeated: true },
+    { no: 21, name: 'updateCollectionApprovals', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 22, name: 'collectionApprovals', kind: 'message', T: CollectionApproval, repeated: true },
+    { no: 23, name: 'updateStandardsTimeline', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 24, name: 'standardsTimeline', kind: 'message', T: StandardsTimeline, repeated: true },
+    { no: 27, name: 'updateIsArchivedTimeline', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 28, name: 'isArchivedTimeline', kind: 'message', T: IsArchivedTimeline, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUpdateCollection {
@@ -542,7 +569,10 @@ export class MsgUpdateCollection extends Message<MsgUpdateCollection> {
     return new MsgUpdateCollection().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgUpdateCollection | PlainMessage<MsgUpdateCollection> | undefined, b: MsgUpdateCollection | PlainMessage<MsgUpdateCollection> | undefined): boolean {
+  static equals(
+    a: MsgUpdateCollection | PlainMessage<MsgUpdateCollection> | undefined,
+    b: MsgUpdateCollection | PlainMessage<MsgUpdateCollection> | undefined
+  ): boolean {
     return proto3.util.equals(MsgUpdateCollection, a, b);
   }
 }
@@ -558,7 +588,7 @@ export class MsgUpdateCollectionResponse extends Message<MsgUpdateCollectionResp
    *
    * @generated from field: string collectionId = 1;
    */
-  collectionId = "";
+  collectionId = '';
 
   constructor(data?: PartialMessage<MsgUpdateCollectionResponse>) {
     super();
@@ -566,10 +596,8 @@ export class MsgUpdateCollectionResponse extends Message<MsgUpdateCollectionResp
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.MsgUpdateCollectionResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-  ]);
+  static readonly typeName = 'badges.MsgUpdateCollectionResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'collectionId', kind: 'scalar', T: 9 /* ScalarType.STRING */ }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUpdateCollectionResponse {
     return new MsgUpdateCollectionResponse().fromBinary(bytes, options);
@@ -583,7 +611,10 @@ export class MsgUpdateCollectionResponse extends Message<MsgUpdateCollectionResp
     return new MsgUpdateCollectionResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgUpdateCollectionResponse | PlainMessage<MsgUpdateCollectionResponse> | undefined, b: MsgUpdateCollectionResponse | PlainMessage<MsgUpdateCollectionResponse> | undefined): boolean {
+  static equals(
+    a: MsgUpdateCollectionResponse | PlainMessage<MsgUpdateCollectionResponse> | undefined,
+    b: MsgUpdateCollectionResponse | PlainMessage<MsgUpdateCollectionResponse> | undefined
+  ): boolean {
     return proto3.util.equals(MsgUpdateCollectionResponse, a, b);
   }
 }
@@ -599,14 +630,14 @@ export class MsgCreateCollection extends Message<MsgCreateCollection> {
    *
    * @generated from field: string creator = 1;
    */
-  creator = "";
+  creator = '';
 
   /**
    * Type of balances "Standard" or "Off-Chain - Indexed" or "Off-Chain - Non-Indexed".
    *
    * @generated from field: string balancesType = 2;
    */
-  balancesType = "";
+  balancesType = '';
 
   /**
    * The default balances for the user
@@ -691,21 +722,27 @@ export class MsgCreateCollection extends Message<MsgCreateCollection> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.MsgCreateCollection";
+  static readonly typeName = 'badges.MsgCreateCollection';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "balancesType", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "defaultBalances", kind: "message", T: UserBalanceStore },
-    { no: 5, name: "badgesToCreate", kind: "message", T: Balance, repeated: true },
-    { no: 6, name: "collectionPermissions", kind: "message", T: CollectionPermissions },
-    { no: 7, name: "managerTimeline", kind: "message", T: ManagerTimeline, repeated: true },
-    { no: 8, name: "collectionMetadataTimeline", kind: "message", T: CollectionMetadataTimeline, repeated: true },
-    { no: 9, name: "badgeMetadataTimeline", kind: "message", T: BadgeMetadataTimeline, repeated: true },
-    { no: 10, name: "offChainBalancesMetadataTimeline", kind: "message", T: OffChainBalancesMetadataTimeline, repeated: true },
-    { no: 11, name: "customDataTimeline", kind: "message", T: CustomDataTimeline, repeated: true },
-    { no: 12, name: "collectionApprovals", kind: "message", T: CollectionApproval, repeated: true },
-    { no: 13, name: "standardsTimeline", kind: "message", T: StandardsTimeline, repeated: true },
-    { no: 14, name: "isArchivedTimeline", kind: "message", T: IsArchivedTimeline, repeated: true },
+    { no: 1, name: 'creator', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'balancesType', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: 'defaultBalances', kind: 'message', T: UserBalanceStore },
+    { no: 5, name: 'badgesToCreate', kind: 'message', T: Balance, repeated: true },
+    { no: 6, name: 'collectionPermissions', kind: 'message', T: CollectionPermissions },
+    { no: 7, name: 'managerTimeline', kind: 'message', T: ManagerTimeline, repeated: true },
+    { no: 8, name: 'collectionMetadataTimeline', kind: 'message', T: CollectionMetadataTimeline, repeated: true },
+    { no: 9, name: 'badgeMetadataTimeline', kind: 'message', T: BadgeMetadataTimeline, repeated: true },
+    {
+      no: 10,
+      name: 'offChainBalancesMetadataTimeline',
+      kind: 'message',
+      T: OffChainBalancesMetadataTimeline,
+      repeated: true
+    },
+    { no: 11, name: 'customDataTimeline', kind: 'message', T: CustomDataTimeline, repeated: true },
+    { no: 12, name: 'collectionApprovals', kind: 'message', T: CollectionApproval, repeated: true },
+    { no: 13, name: 'standardsTimeline', kind: 'message', T: StandardsTimeline, repeated: true },
+    { no: 14, name: 'isArchivedTimeline', kind: 'message', T: IsArchivedTimeline, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgCreateCollection {
@@ -720,7 +757,10 @@ export class MsgCreateCollection extends Message<MsgCreateCollection> {
     return new MsgCreateCollection().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgCreateCollection | PlainMessage<MsgCreateCollection> | undefined, b: MsgCreateCollection | PlainMessage<MsgCreateCollection> | undefined): boolean {
+  static equals(
+    a: MsgCreateCollection | PlainMessage<MsgCreateCollection> | undefined,
+    b: MsgCreateCollection | PlainMessage<MsgCreateCollection> | undefined
+  ): boolean {
     return proto3.util.equals(MsgCreateCollection, a, b);
   }
 }
@@ -736,7 +776,7 @@ export class MsgCreateCollectionResponse extends Message<MsgCreateCollectionResp
    *
    * @generated from field: string collectionId = 1;
    */
-  collectionId = "";
+  collectionId = '';
 
   constructor(data?: PartialMessage<MsgCreateCollectionResponse>) {
     super();
@@ -744,10 +784,8 @@ export class MsgCreateCollectionResponse extends Message<MsgCreateCollectionResp
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.MsgCreateCollectionResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-  ]);
+  static readonly typeName = 'badges.MsgCreateCollectionResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'collectionId', kind: 'scalar', T: 9 /* ScalarType.STRING */ }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgCreateCollectionResponse {
     return new MsgCreateCollectionResponse().fromBinary(bytes, options);
@@ -761,7 +799,10 @@ export class MsgCreateCollectionResponse extends Message<MsgCreateCollectionResp
     return new MsgCreateCollectionResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgCreateCollectionResponse | PlainMessage<MsgCreateCollectionResponse> | undefined, b: MsgCreateCollectionResponse | PlainMessage<MsgCreateCollectionResponse> | undefined): boolean {
+  static equals(
+    a: MsgCreateCollectionResponse | PlainMessage<MsgCreateCollectionResponse> | undefined,
+    b: MsgCreateCollectionResponse | PlainMessage<MsgCreateCollectionResponse> | undefined
+  ): boolean {
     return proto3.util.equals(MsgCreateCollectionResponse, a, b);
   }
 }
@@ -777,7 +818,7 @@ export class MsgCreateAddressLists extends Message<MsgCreateAddressLists> {
    *
    * @generated from field: string creator = 1;
    */
-  creator = "";
+  creator = '';
 
   /**
    * Address lists to create.
@@ -792,10 +833,10 @@ export class MsgCreateAddressLists extends Message<MsgCreateAddressLists> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.MsgCreateAddressLists";
+  static readonly typeName = 'badges.MsgCreateAddressLists';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "addressLists", kind: "message", T: AddressList, repeated: true },
+    { no: 1, name: 'creator', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'addressLists', kind: 'message', T: AddressList, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgCreateAddressLists {
@@ -810,7 +851,10 @@ export class MsgCreateAddressLists extends Message<MsgCreateAddressLists> {
     return new MsgCreateAddressLists().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgCreateAddressLists | PlainMessage<MsgCreateAddressLists> | undefined, b: MsgCreateAddressLists | PlainMessage<MsgCreateAddressLists> | undefined): boolean {
+  static equals(
+    a: MsgCreateAddressLists | PlainMessage<MsgCreateAddressLists> | undefined,
+    b: MsgCreateAddressLists | PlainMessage<MsgCreateAddressLists> | undefined
+  ): boolean {
     return proto3.util.equals(MsgCreateAddressLists, a, b);
   }
 }
@@ -827,9 +871,8 @@ export class MsgCreateAddressListsResponse extends Message<MsgCreateAddressLists
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.MsgCreateAddressListsResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-  ]);
+  static readonly typeName = 'badges.MsgCreateAddressListsResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => []);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgCreateAddressListsResponse {
     return new MsgCreateAddressListsResponse().fromBinary(bytes, options);
@@ -843,7 +886,10 @@ export class MsgCreateAddressListsResponse extends Message<MsgCreateAddressLists
     return new MsgCreateAddressListsResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgCreateAddressListsResponse | PlainMessage<MsgCreateAddressListsResponse> | undefined, b: MsgCreateAddressListsResponse | PlainMessage<MsgCreateAddressListsResponse> | undefined): boolean {
+  static equals(
+    a: MsgCreateAddressListsResponse | PlainMessage<MsgCreateAddressListsResponse> | undefined,
+    b: MsgCreateAddressListsResponse | PlainMessage<MsgCreateAddressListsResponse> | undefined
+  ): boolean {
     return proto3.util.equals(MsgCreateAddressListsResponse, a, b);
   }
 }
@@ -859,14 +905,14 @@ export class MsgTransferBadges extends Message<MsgTransferBadges> {
    *
    * @generated from field: string creator = 1;
    */
-  creator = "";
+  creator = '';
 
   /**
    * ID of the collection.
    *
    * @generated from field: string collectionId = 2;
    */
-  collectionId = "";
+  collectionId = '';
 
   /**
    * Transfers to execute.
@@ -881,11 +927,11 @@ export class MsgTransferBadges extends Message<MsgTransferBadges> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.MsgTransferBadges";
+  static readonly typeName = 'badges.MsgTransferBadges';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "transfers", kind: "message", T: Transfer, repeated: true },
+    { no: 1, name: 'creator', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'collectionId', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'transfers', kind: 'message', T: Transfer, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgTransferBadges {
@@ -900,7 +946,10 @@ export class MsgTransferBadges extends Message<MsgTransferBadges> {
     return new MsgTransferBadges().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgTransferBadges | PlainMessage<MsgTransferBadges> | undefined, b: MsgTransferBadges | PlainMessage<MsgTransferBadges> | undefined): boolean {
+  static equals(
+    a: MsgTransferBadges | PlainMessage<MsgTransferBadges> | undefined,
+    b: MsgTransferBadges | PlainMessage<MsgTransferBadges> | undefined
+  ): boolean {
     return proto3.util.equals(MsgTransferBadges, a, b);
   }
 }
@@ -917,9 +966,8 @@ export class MsgTransferBadgesResponse extends Message<MsgTransferBadgesResponse
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.MsgTransferBadgesResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-  ]);
+  static readonly typeName = 'badges.MsgTransferBadgesResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => []);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgTransferBadgesResponse {
     return new MsgTransferBadgesResponse().fromBinary(bytes, options);
@@ -933,7 +981,10 @@ export class MsgTransferBadgesResponse extends Message<MsgTransferBadgesResponse
     return new MsgTransferBadgesResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgTransferBadgesResponse | PlainMessage<MsgTransferBadgesResponse> | undefined, b: MsgTransferBadgesResponse | PlainMessage<MsgTransferBadgesResponse> | undefined): boolean {
+  static equals(
+    a: MsgTransferBadgesResponse | PlainMessage<MsgTransferBadgesResponse> | undefined,
+    b: MsgTransferBadgesResponse | PlainMessage<MsgTransferBadgesResponse> | undefined
+  ): boolean {
     return proto3.util.equals(MsgTransferBadgesResponse, a, b);
   }
 }
@@ -949,14 +1000,14 @@ export class MsgDeleteCollection extends Message<MsgDeleteCollection> {
    *
    * @generated from field: string creator = 1;
    */
-  creator = "";
+  creator = '';
 
   /**
    * ID of the collection.
    *
    * @generated from field: string collectionId = 2;
    */
-  collectionId = "";
+  collectionId = '';
 
   constructor(data?: PartialMessage<MsgDeleteCollection>) {
     super();
@@ -964,10 +1015,10 @@ export class MsgDeleteCollection extends Message<MsgDeleteCollection> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.MsgDeleteCollection";
+  static readonly typeName = 'badges.MsgDeleteCollection';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'creator', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'collectionId', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgDeleteCollection {
@@ -982,7 +1033,10 @@ export class MsgDeleteCollection extends Message<MsgDeleteCollection> {
     return new MsgDeleteCollection().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgDeleteCollection | PlainMessage<MsgDeleteCollection> | undefined, b: MsgDeleteCollection | PlainMessage<MsgDeleteCollection> | undefined): boolean {
+  static equals(
+    a: MsgDeleteCollection | PlainMessage<MsgDeleteCollection> | undefined,
+    b: MsgDeleteCollection | PlainMessage<MsgDeleteCollection> | undefined
+  ): boolean {
     return proto3.util.equals(MsgDeleteCollection, a, b);
   }
 }
@@ -999,9 +1053,8 @@ export class MsgDeleteCollectionResponse extends Message<MsgDeleteCollectionResp
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.MsgDeleteCollectionResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-  ]);
+  static readonly typeName = 'badges.MsgDeleteCollectionResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => []);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgDeleteCollectionResponse {
     return new MsgDeleteCollectionResponse().fromBinary(bytes, options);
@@ -1015,7 +1068,10 @@ export class MsgDeleteCollectionResponse extends Message<MsgDeleteCollectionResp
     return new MsgDeleteCollectionResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgDeleteCollectionResponse | PlainMessage<MsgDeleteCollectionResponse> | undefined, b: MsgDeleteCollectionResponse | PlainMessage<MsgDeleteCollectionResponse> | undefined): boolean {
+  static equals(
+    a: MsgDeleteCollectionResponse | PlainMessage<MsgDeleteCollectionResponse> | undefined,
+    b: MsgDeleteCollectionResponse | PlainMessage<MsgDeleteCollectionResponse> | undefined
+  ): boolean {
     return proto3.util.equals(MsgDeleteCollectionResponse, a, b);
   }
 }
@@ -1031,14 +1087,14 @@ export class MsgUpdateUserApprovals extends Message<MsgUpdateUserApprovals> {
    *
    * @generated from field: string creator = 1;
    */
-  creator = "";
+  creator = '';
 
   /**
    * ID of the collection.
    *
    * @generated from field: string collectionId = 2;
    */
-  collectionId = "";
+  collectionId = '';
 
   /**
    * Indicates if outgoing approvals should be updated. If true, we set to value in this Msg. If false, we keep existing value.
@@ -1048,7 +1104,7 @@ export class MsgUpdateUserApprovals extends Message<MsgUpdateUserApprovals> {
   updateOutgoingApprovals = false;
 
   /**
-   * New outgoing approvals to set. 
+   * New outgoing approvals to set.
    *
    * @generated from field: repeated badges.UserOutgoingApproval outgoingApprovals = 4;
    */
@@ -1116,20 +1172,20 @@ export class MsgUpdateUserApprovals extends Message<MsgUpdateUserApprovals> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.MsgUpdateUserApprovals";
+  static readonly typeName = 'badges.MsgUpdateUserApprovals';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "updateOutgoingApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 4, name: "outgoingApprovals", kind: "message", T: UserOutgoingApproval, repeated: true },
-    { no: 5, name: "updateIncomingApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 6, name: "incomingApprovals", kind: "message", T: UserIncomingApproval, repeated: true },
-    { no: 7, name: "updateAutoApproveSelfInitiatedOutgoingTransfers", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 8, name: "autoApproveSelfInitiatedOutgoingTransfers", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 9, name: "updateAutoApproveSelfInitiatedIncomingTransfers", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 10, name: "autoApproveSelfInitiatedIncomingTransfers", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 11, name: "updateUserPermissions", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 12, name: "userPermissions", kind: "message", T: UserPermissions },
+    { no: 1, name: 'creator', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'collectionId', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'updateOutgoingApprovals', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 4, name: 'outgoingApprovals', kind: 'message', T: UserOutgoingApproval, repeated: true },
+    { no: 5, name: 'updateIncomingApprovals', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 6, name: 'incomingApprovals', kind: 'message', T: UserIncomingApproval, repeated: true },
+    { no: 7, name: 'updateAutoApproveSelfInitiatedOutgoingTransfers', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 8, name: 'autoApproveSelfInitiatedOutgoingTransfers', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 9, name: 'updateAutoApproveSelfInitiatedIncomingTransfers', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 10, name: 'autoApproveSelfInitiatedIncomingTransfers', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 11, name: 'updateUserPermissions', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 12, name: 'userPermissions', kind: 'message', T: UserPermissions }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUpdateUserApprovals {
@@ -1144,7 +1200,10 @@ export class MsgUpdateUserApprovals extends Message<MsgUpdateUserApprovals> {
     return new MsgUpdateUserApprovals().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgUpdateUserApprovals | PlainMessage<MsgUpdateUserApprovals> | undefined, b: MsgUpdateUserApprovals | PlainMessage<MsgUpdateUserApprovals> | undefined): boolean {
+  static equals(
+    a: MsgUpdateUserApprovals | PlainMessage<MsgUpdateUserApprovals> | undefined,
+    b: MsgUpdateUserApprovals | PlainMessage<MsgUpdateUserApprovals> | undefined
+  ): boolean {
     return proto3.util.equals(MsgUpdateUserApprovals, a, b);
   }
 }
@@ -1161,9 +1220,8 @@ export class MsgUpdateUserApprovalsResponse extends Message<MsgUpdateUserApprova
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.MsgUpdateUserApprovalsResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-  ]);
+  static readonly typeName = 'badges.MsgUpdateUserApprovalsResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => []);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUpdateUserApprovalsResponse {
     return new MsgUpdateUserApprovalsResponse().fromBinary(bytes, options);
@@ -1177,8 +1235,10 @@ export class MsgUpdateUserApprovalsResponse extends Message<MsgUpdateUserApprova
     return new MsgUpdateUserApprovalsResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgUpdateUserApprovalsResponse | PlainMessage<MsgUpdateUserApprovalsResponse> | undefined, b: MsgUpdateUserApprovalsResponse | PlainMessage<MsgUpdateUserApprovalsResponse> | undefined): boolean {
+  static equals(
+    a: MsgUpdateUserApprovalsResponse | PlainMessage<MsgUpdateUserApprovalsResponse> | undefined,
+    b: MsgUpdateUserApprovalsResponse | PlainMessage<MsgUpdateUserApprovalsResponse> | undefined
+  ): boolean {
     return proto3.util.equals(MsgUpdateUserApprovalsResponse, a, b);
   }
 }
-

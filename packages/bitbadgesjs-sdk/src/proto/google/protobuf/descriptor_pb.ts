@@ -41,8 +41,8 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto2 } from "@bufbuild/protobuf";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto2 } from '@bufbuild/protobuf';
 
 /**
  * The protocol compiler can output a FileDescriptorSet containing the .proto
@@ -62,9 +62,9 @@ export class FileDescriptorSet extends Message<FileDescriptorSet> {
   }
 
   static readonly runtime: typeof proto2 = proto2;
-  static readonly typeName = "google.protobuf.FileDescriptorSet";
+  static readonly typeName = 'google.protobuf.FileDescriptorSet';
   static readonly fields: FieldList = proto2.util.newFieldList(() => [
-    { no: 1, name: "file", kind: "message", T: FileDescriptorProto, repeated: true },
+    { no: 1, name: 'file', kind: 'message', T: FileDescriptorProto, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): FileDescriptorSet {
@@ -79,7 +79,10 @@ export class FileDescriptorSet extends Message<FileDescriptorSet> {
     return new FileDescriptorSet().fromJsonString(jsonString, options);
   }
 
-  static equals(a: FileDescriptorSet | PlainMessage<FileDescriptorSet> | undefined, b: FileDescriptorSet | PlainMessage<FileDescriptorSet> | undefined): boolean {
+  static equals(
+    a: FileDescriptorSet | PlainMessage<FileDescriptorSet> | undefined,
+    b: FileDescriptorSet | PlainMessage<FileDescriptorSet> | undefined
+  ): boolean {
     return proto2.util.equals(FileDescriptorSet, a, b);
   }
 }
@@ -177,20 +180,20 @@ export class FileDescriptorProto extends Message<FileDescriptorProto> {
   }
 
   static readonly runtime: typeof proto2 = proto2;
-  static readonly typeName = "google.protobuf.FileDescriptorProto";
+  static readonly typeName = 'google.protobuf.FileDescriptorProto';
   static readonly fields: FieldList = proto2.util.newFieldList(() => [
-    { no: 1, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
-    { no: 2, name: "package", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
-    { no: 3, name: "dependency", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
-    { no: 10, name: "public_dependency", kind: "scalar", T: 5 /* ScalarType.INT32 */, repeated: true },
-    { no: 11, name: "weak_dependency", kind: "scalar", T: 5 /* ScalarType.INT32 */, repeated: true },
-    { no: 4, name: "message_type", kind: "message", T: DescriptorProto, repeated: true },
-    { no: 5, name: "enum_type", kind: "message", T: EnumDescriptorProto, repeated: true },
-    { no: 6, name: "service", kind: "message", T: ServiceDescriptorProto, repeated: true },
-    { no: 7, name: "extension", kind: "message", T: FieldDescriptorProto, repeated: true },
-    { no: 8, name: "options", kind: "message", T: FileOptions, opt: true },
-    { no: 9, name: "source_code_info", kind: "message", T: SourceCodeInfo, opt: true },
-    { no: 12, name: "syntax", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 1, name: 'name', kind: 'scalar', T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 2, name: 'package', kind: 'scalar', T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 3, name: 'dependency', kind: 'scalar', T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 10, name: 'public_dependency', kind: 'scalar', T: 5 /* ScalarType.INT32 */, repeated: true },
+    { no: 11, name: 'weak_dependency', kind: 'scalar', T: 5 /* ScalarType.INT32 */, repeated: true },
+    { no: 4, name: 'message_type', kind: 'message', T: DescriptorProto, repeated: true },
+    { no: 5, name: 'enum_type', kind: 'message', T: EnumDescriptorProto, repeated: true },
+    { no: 6, name: 'service', kind: 'message', T: ServiceDescriptorProto, repeated: true },
+    { no: 7, name: 'extension', kind: 'message', T: FieldDescriptorProto, repeated: true },
+    { no: 8, name: 'options', kind: 'message', T: FileOptions, opt: true },
+    { no: 9, name: 'source_code_info', kind: 'message', T: SourceCodeInfo, opt: true },
+    { no: 12, name: 'syntax', kind: 'scalar', T: 9 /* ScalarType.STRING */, opt: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): FileDescriptorProto {
@@ -205,7 +208,10 @@ export class FileDescriptorProto extends Message<FileDescriptorProto> {
     return new FileDescriptorProto().fromJsonString(jsonString, options);
   }
 
-  static equals(a: FileDescriptorProto | PlainMessage<FileDescriptorProto> | undefined, b: FileDescriptorProto | PlainMessage<FileDescriptorProto> | undefined): boolean {
+  static equals(
+    a: FileDescriptorProto | PlainMessage<FileDescriptorProto> | undefined,
+    b: FileDescriptorProto | PlainMessage<FileDescriptorProto> | undefined
+  ): boolean {
     return proto2.util.equals(FileDescriptorProto, a, b);
   }
 }
@@ -275,18 +281,18 @@ export class DescriptorProto extends Message<DescriptorProto> {
   }
 
   static readonly runtime: typeof proto2 = proto2;
-  static readonly typeName = "google.protobuf.DescriptorProto";
+  static readonly typeName = 'google.protobuf.DescriptorProto';
   static readonly fields: FieldList = proto2.util.newFieldList(() => [
-    { no: 1, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
-    { no: 2, name: "field", kind: "message", T: FieldDescriptorProto, repeated: true },
-    { no: 6, name: "extension", kind: "message", T: FieldDescriptorProto, repeated: true },
-    { no: 3, name: "nested_type", kind: "message", T: DescriptorProto, repeated: true },
-    { no: 4, name: "enum_type", kind: "message", T: EnumDescriptorProto, repeated: true },
-    { no: 5, name: "extension_range", kind: "message", T: DescriptorProto_ExtensionRange, repeated: true },
-    { no: 8, name: "oneof_decl", kind: "message", T: OneofDescriptorProto, repeated: true },
-    { no: 7, name: "options", kind: "message", T: MessageOptions, opt: true },
-    { no: 9, name: "reserved_range", kind: "message", T: DescriptorProto_ReservedRange, repeated: true },
-    { no: 10, name: "reserved_name", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 1, name: 'name', kind: 'scalar', T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 2, name: 'field', kind: 'message', T: FieldDescriptorProto, repeated: true },
+    { no: 6, name: 'extension', kind: 'message', T: FieldDescriptorProto, repeated: true },
+    { no: 3, name: 'nested_type', kind: 'message', T: DescriptorProto, repeated: true },
+    { no: 4, name: 'enum_type', kind: 'message', T: EnumDescriptorProto, repeated: true },
+    { no: 5, name: 'extension_range', kind: 'message', T: DescriptorProto_ExtensionRange, repeated: true },
+    { no: 8, name: 'oneof_decl', kind: 'message', T: OneofDescriptorProto, repeated: true },
+    { no: 7, name: 'options', kind: 'message', T: MessageOptions, opt: true },
+    { no: 9, name: 'reserved_range', kind: 'message', T: DescriptorProto_ReservedRange, repeated: true },
+    { no: 10, name: 'reserved_name', kind: 'scalar', T: 9 /* ScalarType.STRING */, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DescriptorProto {
@@ -301,7 +307,10 @@ export class DescriptorProto extends Message<DescriptorProto> {
     return new DescriptorProto().fromJsonString(jsonString, options);
   }
 
-  static equals(a: DescriptorProto | PlainMessage<DescriptorProto> | undefined, b: DescriptorProto | PlainMessage<DescriptorProto> | undefined): boolean {
+  static equals(
+    a: DescriptorProto | PlainMessage<DescriptorProto> | undefined,
+    b: DescriptorProto | PlainMessage<DescriptorProto> | undefined
+  ): boolean {
     return proto2.util.equals(DescriptorProto, a, b);
   }
 }
@@ -335,11 +344,11 @@ export class DescriptorProto_ExtensionRange extends Message<DescriptorProto_Exte
   }
 
   static readonly runtime: typeof proto2 = proto2;
-  static readonly typeName = "google.protobuf.DescriptorProto.ExtensionRange";
+  static readonly typeName = 'google.protobuf.DescriptorProto.ExtensionRange';
   static readonly fields: FieldList = proto2.util.newFieldList(() => [
-    { no: 1, name: "start", kind: "scalar", T: 5 /* ScalarType.INT32 */, opt: true },
-    { no: 2, name: "end", kind: "scalar", T: 5 /* ScalarType.INT32 */, opt: true },
-    { no: 3, name: "options", kind: "message", T: ExtensionRangeOptions, opt: true },
+    { no: 1, name: 'start', kind: 'scalar', T: 5 /* ScalarType.INT32 */, opt: true },
+    { no: 2, name: 'end', kind: 'scalar', T: 5 /* ScalarType.INT32 */, opt: true },
+    { no: 3, name: 'options', kind: 'message', T: ExtensionRangeOptions, opt: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DescriptorProto_ExtensionRange {
@@ -354,7 +363,10 @@ export class DescriptorProto_ExtensionRange extends Message<DescriptorProto_Exte
     return new DescriptorProto_ExtensionRange().fromJsonString(jsonString, options);
   }
 
-  static equals(a: DescriptorProto_ExtensionRange | PlainMessage<DescriptorProto_ExtensionRange> | undefined, b: DescriptorProto_ExtensionRange | PlainMessage<DescriptorProto_ExtensionRange> | undefined): boolean {
+  static equals(
+    a: DescriptorProto_ExtensionRange | PlainMessage<DescriptorProto_ExtensionRange> | undefined,
+    b: DescriptorProto_ExtensionRange | PlainMessage<DescriptorProto_ExtensionRange> | undefined
+  ): boolean {
     return proto2.util.equals(DescriptorProto_ExtensionRange, a, b);
   }
 }
@@ -387,10 +399,10 @@ export class DescriptorProto_ReservedRange extends Message<DescriptorProto_Reser
   }
 
   static readonly runtime: typeof proto2 = proto2;
-  static readonly typeName = "google.protobuf.DescriptorProto.ReservedRange";
+  static readonly typeName = 'google.protobuf.DescriptorProto.ReservedRange';
   static readonly fields: FieldList = proto2.util.newFieldList(() => [
-    { no: 1, name: "start", kind: "scalar", T: 5 /* ScalarType.INT32 */, opt: true },
-    { no: 2, name: "end", kind: "scalar", T: 5 /* ScalarType.INT32 */, opt: true },
+    { no: 1, name: 'start', kind: 'scalar', T: 5 /* ScalarType.INT32 */, opt: true },
+    { no: 2, name: 'end', kind: 'scalar', T: 5 /* ScalarType.INT32 */, opt: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DescriptorProto_ReservedRange {
@@ -405,7 +417,10 @@ export class DescriptorProto_ReservedRange extends Message<DescriptorProto_Reser
     return new DescriptorProto_ReservedRange().fromJsonString(jsonString, options);
   }
 
-  static equals(a: DescriptorProto_ReservedRange | PlainMessage<DescriptorProto_ReservedRange> | undefined, b: DescriptorProto_ReservedRange | PlainMessage<DescriptorProto_ReservedRange> | undefined): boolean {
+  static equals(
+    a: DescriptorProto_ReservedRange | PlainMessage<DescriptorProto_ReservedRange> | undefined,
+    b: DescriptorProto_ReservedRange | PlainMessage<DescriptorProto_ReservedRange> | undefined
+  ): boolean {
     return proto2.util.equals(DescriptorProto_ReservedRange, a, b);
   }
 }
@@ -427,9 +442,9 @@ export class ExtensionRangeOptions extends Message<ExtensionRangeOptions> {
   }
 
   static readonly runtime: typeof proto2 = proto2;
-  static readonly typeName = "google.protobuf.ExtensionRangeOptions";
+  static readonly typeName = 'google.protobuf.ExtensionRangeOptions';
   static readonly fields: FieldList = proto2.util.newFieldList(() => [
-    { no: 999, name: "uninterpreted_option", kind: "message", T: UninterpretedOption, repeated: true },
+    { no: 999, name: 'uninterpreted_option', kind: 'message', T: UninterpretedOption, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ExtensionRangeOptions {
@@ -444,7 +459,10 @@ export class ExtensionRangeOptions extends Message<ExtensionRangeOptions> {
     return new ExtensionRangeOptions().fromJsonString(jsonString, options);
   }
 
-  static equals(a: ExtensionRangeOptions | PlainMessage<ExtensionRangeOptions> | undefined, b: ExtensionRangeOptions | PlainMessage<ExtensionRangeOptions> | undefined): boolean {
+  static equals(
+    a: ExtensionRangeOptions | PlainMessage<ExtensionRangeOptions> | undefined,
+    b: ExtensionRangeOptions | PlainMessage<ExtensionRangeOptions> | undefined
+  ): boolean {
     return proto2.util.equals(ExtensionRangeOptions, a, b);
   }
 }
@@ -564,19 +582,19 @@ export class FieldDescriptorProto extends Message<FieldDescriptorProto> {
   }
 
   static readonly runtime: typeof proto2 = proto2;
-  static readonly typeName = "google.protobuf.FieldDescriptorProto";
+  static readonly typeName = 'google.protobuf.FieldDescriptorProto';
   static readonly fields: FieldList = proto2.util.newFieldList(() => [
-    { no: 1, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
-    { no: 3, name: "number", kind: "scalar", T: 5 /* ScalarType.INT32 */, opt: true },
-    { no: 4, name: "label", kind: "enum", T: proto2.getEnumType(FieldDescriptorProto_Label), opt: true },
-    { no: 5, name: "type", kind: "enum", T: proto2.getEnumType(FieldDescriptorProto_Type), opt: true },
-    { no: 6, name: "type_name", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
-    { no: 2, name: "extendee", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
-    { no: 7, name: "default_value", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
-    { no: 9, name: "oneof_index", kind: "scalar", T: 5 /* ScalarType.INT32 */, opt: true },
-    { no: 10, name: "json_name", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
-    { no: 8, name: "options", kind: "message", T: FieldOptions, opt: true },
-    { no: 17, name: "proto3_optional", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
+    { no: 1, name: 'name', kind: 'scalar', T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 3, name: 'number', kind: 'scalar', T: 5 /* ScalarType.INT32 */, opt: true },
+    { no: 4, name: 'label', kind: 'enum', T: proto2.getEnumType(FieldDescriptorProto_Label), opt: true },
+    { no: 5, name: 'type', kind: 'enum', T: proto2.getEnumType(FieldDescriptorProto_Type), opt: true },
+    { no: 6, name: 'type_name', kind: 'scalar', T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 2, name: 'extendee', kind: 'scalar', T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 7, name: 'default_value', kind: 'scalar', T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 9, name: 'oneof_index', kind: 'scalar', T: 5 /* ScalarType.INT32 */, opt: true },
+    { no: 10, name: 'json_name', kind: 'scalar', T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 8, name: 'options', kind: 'message', T: FieldOptions, opt: true },
+    { no: 17, name: 'proto3_optional', kind: 'scalar', T: 8 /* ScalarType.BOOL */, opt: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): FieldDescriptorProto {
@@ -591,7 +609,10 @@ export class FieldDescriptorProto extends Message<FieldDescriptorProto> {
     return new FieldDescriptorProto().fromJsonString(jsonString, options);
   }
 
-  static equals(a: FieldDescriptorProto | PlainMessage<FieldDescriptorProto> | undefined, b: FieldDescriptorProto | PlainMessage<FieldDescriptorProto> | undefined): boolean {
+  static equals(
+    a: FieldDescriptorProto | PlainMessage<FieldDescriptorProto> | undefined,
+    b: FieldDescriptorProto | PlainMessage<FieldDescriptorProto> | undefined
+  ): boolean {
     return proto2.util.equals(FieldDescriptorProto, a, b);
   }
 }
@@ -710,28 +731,28 @@ export enum FieldDescriptorProto_Type {
    *
    * @generated from enum value: TYPE_SINT64 = 18;
    */
-  SINT64 = 18,
+  SINT64 = 18
 }
 // Retrieve enum metadata with: proto2.getEnumType(FieldDescriptorProto_Type)
-proto2.util.setEnumType(FieldDescriptorProto_Type, "google.protobuf.FieldDescriptorProto.Type", [
-  { no: 1, name: "TYPE_DOUBLE" },
-  { no: 2, name: "TYPE_FLOAT" },
-  { no: 3, name: "TYPE_INT64" },
-  { no: 4, name: "TYPE_UINT64" },
-  { no: 5, name: "TYPE_INT32" },
-  { no: 6, name: "TYPE_FIXED64" },
-  { no: 7, name: "TYPE_FIXED32" },
-  { no: 8, name: "TYPE_BOOL" },
-  { no: 9, name: "TYPE_STRING" },
-  { no: 10, name: "TYPE_GROUP" },
-  { no: 11, name: "TYPE_MESSAGE" },
-  { no: 12, name: "TYPE_BYTES" },
-  { no: 13, name: "TYPE_UINT32" },
-  { no: 14, name: "TYPE_ENUM" },
-  { no: 15, name: "TYPE_SFIXED32" },
-  { no: 16, name: "TYPE_SFIXED64" },
-  { no: 17, name: "TYPE_SINT32" },
-  { no: 18, name: "TYPE_SINT64" },
+proto2.util.setEnumType(FieldDescriptorProto_Type, 'google.protobuf.FieldDescriptorProto.Type', [
+  { no: 1, name: 'TYPE_DOUBLE' },
+  { no: 2, name: 'TYPE_FLOAT' },
+  { no: 3, name: 'TYPE_INT64' },
+  { no: 4, name: 'TYPE_UINT64' },
+  { no: 5, name: 'TYPE_INT32' },
+  { no: 6, name: 'TYPE_FIXED64' },
+  { no: 7, name: 'TYPE_FIXED32' },
+  { no: 8, name: 'TYPE_BOOL' },
+  { no: 9, name: 'TYPE_STRING' },
+  { no: 10, name: 'TYPE_GROUP' },
+  { no: 11, name: 'TYPE_MESSAGE' },
+  { no: 12, name: 'TYPE_BYTES' },
+  { no: 13, name: 'TYPE_UINT32' },
+  { no: 14, name: 'TYPE_ENUM' },
+  { no: 15, name: 'TYPE_SFIXED32' },
+  { no: 16, name: 'TYPE_SFIXED64' },
+  { no: 17, name: 'TYPE_SINT32' },
+  { no: 18, name: 'TYPE_SINT64' }
 ]);
 
 /**
@@ -753,13 +774,13 @@ export enum FieldDescriptorProto_Label {
   /**
    * @generated from enum value: LABEL_REPEATED = 3;
    */
-  REPEATED = 3,
+  REPEATED = 3
 }
 // Retrieve enum metadata with: proto2.getEnumType(FieldDescriptorProto_Label)
-proto2.util.setEnumType(FieldDescriptorProto_Label, "google.protobuf.FieldDescriptorProto.Label", [
-  { no: 1, name: "LABEL_OPTIONAL" },
-  { no: 2, name: "LABEL_REQUIRED" },
-  { no: 3, name: "LABEL_REPEATED" },
+proto2.util.setEnumType(FieldDescriptorProto_Label, 'google.protobuf.FieldDescriptorProto.Label', [
+  { no: 1, name: 'LABEL_OPTIONAL' },
+  { no: 2, name: 'LABEL_REQUIRED' },
+  { no: 3, name: 'LABEL_REPEATED' }
 ]);
 
 /**
@@ -784,10 +805,10 @@ export class OneofDescriptorProto extends Message<OneofDescriptorProto> {
   }
 
   static readonly runtime: typeof proto2 = proto2;
-  static readonly typeName = "google.protobuf.OneofDescriptorProto";
+  static readonly typeName = 'google.protobuf.OneofDescriptorProto';
   static readonly fields: FieldList = proto2.util.newFieldList(() => [
-    { no: 1, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
-    { no: 2, name: "options", kind: "message", T: OneofOptions, opt: true },
+    { no: 1, name: 'name', kind: 'scalar', T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 2, name: 'options', kind: 'message', T: OneofOptions, opt: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): OneofDescriptorProto {
@@ -802,7 +823,10 @@ export class OneofDescriptorProto extends Message<OneofDescriptorProto> {
     return new OneofDescriptorProto().fromJsonString(jsonString, options);
   }
 
-  static equals(a: OneofDescriptorProto | PlainMessage<OneofDescriptorProto> | undefined, b: OneofDescriptorProto | PlainMessage<OneofDescriptorProto> | undefined): boolean {
+  static equals(
+    a: OneofDescriptorProto | PlainMessage<OneofDescriptorProto> | undefined,
+    b: OneofDescriptorProto | PlainMessage<OneofDescriptorProto> | undefined
+  ): boolean {
     return proto2.util.equals(OneofDescriptorProto, a, b);
   }
 }
@@ -851,13 +875,13 @@ export class EnumDescriptorProto extends Message<EnumDescriptorProto> {
   }
 
   static readonly runtime: typeof proto2 = proto2;
-  static readonly typeName = "google.protobuf.EnumDescriptorProto";
+  static readonly typeName = 'google.protobuf.EnumDescriptorProto';
   static readonly fields: FieldList = proto2.util.newFieldList(() => [
-    { no: 1, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
-    { no: 2, name: "value", kind: "message", T: EnumValueDescriptorProto, repeated: true },
-    { no: 3, name: "options", kind: "message", T: EnumOptions, opt: true },
-    { no: 4, name: "reserved_range", kind: "message", T: EnumDescriptorProto_EnumReservedRange, repeated: true },
-    { no: 5, name: "reserved_name", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 1, name: 'name', kind: 'scalar', T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 2, name: 'value', kind: 'message', T: EnumValueDescriptorProto, repeated: true },
+    { no: 3, name: 'options', kind: 'message', T: EnumOptions, opt: true },
+    { no: 4, name: 'reserved_range', kind: 'message', T: EnumDescriptorProto_EnumReservedRange, repeated: true },
+    { no: 5, name: 'reserved_name', kind: 'scalar', T: 9 /* ScalarType.STRING */, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): EnumDescriptorProto {
@@ -872,7 +896,10 @@ export class EnumDescriptorProto extends Message<EnumDescriptorProto> {
     return new EnumDescriptorProto().fromJsonString(jsonString, options);
   }
 
-  static equals(a: EnumDescriptorProto | PlainMessage<EnumDescriptorProto> | undefined, b: EnumDescriptorProto | PlainMessage<EnumDescriptorProto> | undefined): boolean {
+  static equals(
+    a: EnumDescriptorProto | PlainMessage<EnumDescriptorProto> | undefined,
+    b: EnumDescriptorProto | PlainMessage<EnumDescriptorProto> | undefined
+  ): boolean {
     return proto2.util.equals(EnumDescriptorProto, a, b);
   }
 }
@@ -908,10 +935,10 @@ export class EnumDescriptorProto_EnumReservedRange extends Message<EnumDescripto
   }
 
   static readonly runtime: typeof proto2 = proto2;
-  static readonly typeName = "google.protobuf.EnumDescriptorProto.EnumReservedRange";
+  static readonly typeName = 'google.protobuf.EnumDescriptorProto.EnumReservedRange';
   static readonly fields: FieldList = proto2.util.newFieldList(() => [
-    { no: 1, name: "start", kind: "scalar", T: 5 /* ScalarType.INT32 */, opt: true },
-    { no: 2, name: "end", kind: "scalar", T: 5 /* ScalarType.INT32 */, opt: true },
+    { no: 1, name: 'start', kind: 'scalar', T: 5 /* ScalarType.INT32 */, opt: true },
+    { no: 2, name: 'end', kind: 'scalar', T: 5 /* ScalarType.INT32 */, opt: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): EnumDescriptorProto_EnumReservedRange {
@@ -926,7 +953,10 @@ export class EnumDescriptorProto_EnumReservedRange extends Message<EnumDescripto
     return new EnumDescriptorProto_EnumReservedRange().fromJsonString(jsonString, options);
   }
 
-  static equals(a: EnumDescriptorProto_EnumReservedRange | PlainMessage<EnumDescriptorProto_EnumReservedRange> | undefined, b: EnumDescriptorProto_EnumReservedRange | PlainMessage<EnumDescriptorProto_EnumReservedRange> | undefined): boolean {
+  static equals(
+    a: EnumDescriptorProto_EnumReservedRange | PlainMessage<EnumDescriptorProto_EnumReservedRange> | undefined,
+    b: EnumDescriptorProto_EnumReservedRange | PlainMessage<EnumDescriptorProto_EnumReservedRange> | undefined
+  ): boolean {
     return proto2.util.equals(EnumDescriptorProto_EnumReservedRange, a, b);
   }
 }
@@ -958,11 +988,11 @@ export class EnumValueDescriptorProto extends Message<EnumValueDescriptorProto> 
   }
 
   static readonly runtime: typeof proto2 = proto2;
-  static readonly typeName = "google.protobuf.EnumValueDescriptorProto";
+  static readonly typeName = 'google.protobuf.EnumValueDescriptorProto';
   static readonly fields: FieldList = proto2.util.newFieldList(() => [
-    { no: 1, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
-    { no: 2, name: "number", kind: "scalar", T: 5 /* ScalarType.INT32 */, opt: true },
-    { no: 3, name: "options", kind: "message", T: EnumValueOptions, opt: true },
+    { no: 1, name: 'name', kind: 'scalar', T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 2, name: 'number', kind: 'scalar', T: 5 /* ScalarType.INT32 */, opt: true },
+    { no: 3, name: 'options', kind: 'message', T: EnumValueOptions, opt: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): EnumValueDescriptorProto {
@@ -977,7 +1007,10 @@ export class EnumValueDescriptorProto extends Message<EnumValueDescriptorProto> 
     return new EnumValueDescriptorProto().fromJsonString(jsonString, options);
   }
 
-  static equals(a: EnumValueDescriptorProto | PlainMessage<EnumValueDescriptorProto> | undefined, b: EnumValueDescriptorProto | PlainMessage<EnumValueDescriptorProto> | undefined): boolean {
+  static equals(
+    a: EnumValueDescriptorProto | PlainMessage<EnumValueDescriptorProto> | undefined,
+    b: EnumValueDescriptorProto | PlainMessage<EnumValueDescriptorProto> | undefined
+  ): boolean {
     return proto2.util.equals(EnumValueDescriptorProto, a, b);
   }
 }
@@ -1009,11 +1042,11 @@ export class ServiceDescriptorProto extends Message<ServiceDescriptorProto> {
   }
 
   static readonly runtime: typeof proto2 = proto2;
-  static readonly typeName = "google.protobuf.ServiceDescriptorProto";
+  static readonly typeName = 'google.protobuf.ServiceDescriptorProto';
   static readonly fields: FieldList = proto2.util.newFieldList(() => [
-    { no: 1, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
-    { no: 2, name: "method", kind: "message", T: MethodDescriptorProto, repeated: true },
-    { no: 3, name: "options", kind: "message", T: ServiceOptions, opt: true },
+    { no: 1, name: 'name', kind: 'scalar', T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 2, name: 'method', kind: 'message', T: MethodDescriptorProto, repeated: true },
+    { no: 3, name: 'options', kind: 'message', T: ServiceOptions, opt: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ServiceDescriptorProto {
@@ -1028,7 +1061,10 @@ export class ServiceDescriptorProto extends Message<ServiceDescriptorProto> {
     return new ServiceDescriptorProto().fromJsonString(jsonString, options);
   }
 
-  static equals(a: ServiceDescriptorProto | PlainMessage<ServiceDescriptorProto> | undefined, b: ServiceDescriptorProto | PlainMessage<ServiceDescriptorProto> | undefined): boolean {
+  static equals(
+    a: ServiceDescriptorProto | PlainMessage<ServiceDescriptorProto> | undefined,
+    b: ServiceDescriptorProto | PlainMessage<ServiceDescriptorProto> | undefined
+  ): boolean {
     return proto2.util.equals(ServiceDescriptorProto, a, b);
   }
 }
@@ -1082,14 +1118,14 @@ export class MethodDescriptorProto extends Message<MethodDescriptorProto> {
   }
 
   static readonly runtime: typeof proto2 = proto2;
-  static readonly typeName = "google.protobuf.MethodDescriptorProto";
+  static readonly typeName = 'google.protobuf.MethodDescriptorProto';
   static readonly fields: FieldList = proto2.util.newFieldList(() => [
-    { no: 1, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
-    { no: 2, name: "input_type", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
-    { no: 3, name: "output_type", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
-    { no: 4, name: "options", kind: "message", T: MethodOptions, opt: true },
-    { no: 5, name: "client_streaming", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true, default: false },
-    { no: 6, name: "server_streaming", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true, default: false },
+    { no: 1, name: 'name', kind: 'scalar', T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 2, name: 'input_type', kind: 'scalar', T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 3, name: 'output_type', kind: 'scalar', T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 4, name: 'options', kind: 'message', T: MethodOptions, opt: true },
+    { no: 5, name: 'client_streaming', kind: 'scalar', T: 8 /* ScalarType.BOOL */, opt: true, default: false },
+    { no: 6, name: 'server_streaming', kind: 'scalar', T: 8 /* ScalarType.BOOL */, opt: true, default: false }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MethodDescriptorProto {
@@ -1104,7 +1140,10 @@ export class MethodDescriptorProto extends Message<MethodDescriptorProto> {
     return new MethodDescriptorProto().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MethodDescriptorProto | PlainMessage<MethodDescriptorProto> | undefined, b: MethodDescriptorProto | PlainMessage<MethodDescriptorProto> | undefined): boolean {
+  static equals(
+    a: MethodDescriptorProto | PlainMessage<MethodDescriptorProto> | undefined,
+    b: MethodDescriptorProto | PlainMessage<MethodDescriptorProto> | undefined
+  ): boolean {
     return proto2.util.equals(MethodDescriptorProto, a, b);
   }
 }
@@ -1305,29 +1344,36 @@ export class FileOptions extends Message<FileOptions> {
   }
 
   static readonly runtime: typeof proto2 = proto2;
-  static readonly typeName = "google.protobuf.FileOptions";
+  static readonly typeName = 'google.protobuf.FileOptions';
   static readonly fields: FieldList = proto2.util.newFieldList(() => [
-    { no: 1, name: "java_package", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
-    { no: 8, name: "java_outer_classname", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
-    { no: 10, name: "java_multiple_files", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true, default: false },
-    { no: 20, name: "java_generate_equals_and_hash", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
-    { no: 27, name: "java_string_check_utf8", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true, default: false },
-    { no: 9, name: "optimize_for", kind: "enum", T: proto2.getEnumType(FileOptions_OptimizeMode), opt: true, default: FileOptions_OptimizeMode.SPEED },
-    { no: 11, name: "go_package", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
-    { no: 16, name: "cc_generic_services", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true, default: false },
-    { no: 17, name: "java_generic_services", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true, default: false },
-    { no: 18, name: "py_generic_services", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true, default: false },
-    { no: 42, name: "php_generic_services", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true, default: false },
-    { no: 23, name: "deprecated", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true, default: false },
-    { no: 31, name: "cc_enable_arenas", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true, default: true },
-    { no: 36, name: "objc_class_prefix", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
-    { no: 37, name: "csharp_namespace", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
-    { no: 39, name: "swift_prefix", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
-    { no: 40, name: "php_class_prefix", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
-    { no: 41, name: "php_namespace", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
-    { no: 44, name: "php_metadata_namespace", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
-    { no: 45, name: "ruby_package", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
-    { no: 999, name: "uninterpreted_option", kind: "message", T: UninterpretedOption, repeated: true },
+    { no: 1, name: 'java_package', kind: 'scalar', T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 8, name: 'java_outer_classname', kind: 'scalar', T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 10, name: 'java_multiple_files', kind: 'scalar', T: 8 /* ScalarType.BOOL */, opt: true, default: false },
+    { no: 20, name: 'java_generate_equals_and_hash', kind: 'scalar', T: 8 /* ScalarType.BOOL */, opt: true },
+    { no: 27, name: 'java_string_check_utf8', kind: 'scalar', T: 8 /* ScalarType.BOOL */, opt: true, default: false },
+    {
+      no: 9,
+      name: 'optimize_for',
+      kind: 'enum',
+      T: proto2.getEnumType(FileOptions_OptimizeMode),
+      opt: true,
+      default: FileOptions_OptimizeMode.SPEED
+    },
+    { no: 11, name: 'go_package', kind: 'scalar', T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 16, name: 'cc_generic_services', kind: 'scalar', T: 8 /* ScalarType.BOOL */, opt: true, default: false },
+    { no: 17, name: 'java_generic_services', kind: 'scalar', T: 8 /* ScalarType.BOOL */, opt: true, default: false },
+    { no: 18, name: 'py_generic_services', kind: 'scalar', T: 8 /* ScalarType.BOOL */, opt: true, default: false },
+    { no: 42, name: 'php_generic_services', kind: 'scalar', T: 8 /* ScalarType.BOOL */, opt: true, default: false },
+    { no: 23, name: 'deprecated', kind: 'scalar', T: 8 /* ScalarType.BOOL */, opt: true, default: false },
+    { no: 31, name: 'cc_enable_arenas', kind: 'scalar', T: 8 /* ScalarType.BOOL */, opt: true, default: true },
+    { no: 36, name: 'objc_class_prefix', kind: 'scalar', T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 37, name: 'csharp_namespace', kind: 'scalar', T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 39, name: 'swift_prefix', kind: 'scalar', T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 40, name: 'php_class_prefix', kind: 'scalar', T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 41, name: 'php_namespace', kind: 'scalar', T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 44, name: 'php_metadata_namespace', kind: 'scalar', T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 45, name: 'ruby_package', kind: 'scalar', T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 999, name: 'uninterpreted_option', kind: 'message', T: UninterpretedOption, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): FileOptions {
@@ -1374,13 +1420,13 @@ export enum FileOptions_OptimizeMode {
    *
    * @generated from enum value: LITE_RUNTIME = 3;
    */
-  LITE_RUNTIME = 3,
+  LITE_RUNTIME = 3
 }
 // Retrieve enum metadata with: proto2.getEnumType(FileOptions_OptimizeMode)
-proto2.util.setEnumType(FileOptions_OptimizeMode, "google.protobuf.FileOptions.OptimizeMode", [
-  { no: 1, name: "SPEED" },
-  { no: 2, name: "CODE_SIZE" },
-  { no: 3, name: "LITE_RUNTIME" },
+proto2.util.setEnumType(FileOptions_OptimizeMode, 'google.protobuf.FileOptions.OptimizeMode', [
+  { no: 1, name: 'SPEED' },
+  { no: 2, name: 'CODE_SIZE' },
+  { no: 3, name: 'LITE_RUNTIME' }
 ]);
 
 /**
@@ -1470,13 +1516,20 @@ export class MessageOptions extends Message<MessageOptions> {
   }
 
   static readonly runtime: typeof proto2 = proto2;
-  static readonly typeName = "google.protobuf.MessageOptions";
+  static readonly typeName = 'google.protobuf.MessageOptions';
   static readonly fields: FieldList = proto2.util.newFieldList(() => [
-    { no: 1, name: "message_set_wire_format", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true, default: false },
-    { no: 2, name: "no_standard_descriptor_accessor", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true, default: false },
-    { no: 3, name: "deprecated", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true, default: false },
-    { no: 7, name: "map_entry", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
-    { no: 999, name: "uninterpreted_option", kind: "message", T: UninterpretedOption, repeated: true },
+    { no: 1, name: 'message_set_wire_format', kind: 'scalar', T: 8 /* ScalarType.BOOL */, opt: true, default: false },
+    {
+      no: 2,
+      name: 'no_standard_descriptor_accessor',
+      kind: 'scalar',
+      T: 8 /* ScalarType.BOOL */,
+      opt: true,
+      default: false
+    },
+    { no: 3, name: 'deprecated', kind: 'scalar', T: 8 /* ScalarType.BOOL */, opt: true, default: false },
+    { no: 7, name: 'map_entry', kind: 'scalar', T: 8 /* ScalarType.BOOL */, opt: true },
+    { no: 999, name: 'uninterpreted_option', kind: 'message', T: UninterpretedOption, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MessageOptions {
@@ -1602,15 +1655,29 @@ export class FieldOptions extends Message<FieldOptions> {
   }
 
   static readonly runtime: typeof proto2 = proto2;
-  static readonly typeName = "google.protobuf.FieldOptions";
+  static readonly typeName = 'google.protobuf.FieldOptions';
   static readonly fields: FieldList = proto2.util.newFieldList(() => [
-    { no: 1, name: "ctype", kind: "enum", T: proto2.getEnumType(FieldOptions_CType), opt: true, default: FieldOptions_CType.STRING },
-    { no: 2, name: "packed", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
-    { no: 6, name: "jstype", kind: "enum", T: proto2.getEnumType(FieldOptions_JSType), opt: true, default: FieldOptions_JSType.JS_NORMAL },
-    { no: 5, name: "lazy", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true, default: false },
-    { no: 3, name: "deprecated", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true, default: false },
-    { no: 10, name: "weak", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true, default: false },
-    { no: 999, name: "uninterpreted_option", kind: "message", T: UninterpretedOption, repeated: true },
+    {
+      no: 1,
+      name: 'ctype',
+      kind: 'enum',
+      T: proto2.getEnumType(FieldOptions_CType),
+      opt: true,
+      default: FieldOptions_CType.STRING
+    },
+    { no: 2, name: 'packed', kind: 'scalar', T: 8 /* ScalarType.BOOL */, opt: true },
+    {
+      no: 6,
+      name: 'jstype',
+      kind: 'enum',
+      T: proto2.getEnumType(FieldOptions_JSType),
+      opt: true,
+      default: FieldOptions_JSType.JS_NORMAL
+    },
+    { no: 5, name: 'lazy', kind: 'scalar', T: 8 /* ScalarType.BOOL */, opt: true, default: false },
+    { no: 3, name: 'deprecated', kind: 'scalar', T: 8 /* ScalarType.BOOL */, opt: true, default: false },
+    { no: 10, name: 'weak', kind: 'scalar', T: 8 /* ScalarType.BOOL */, opt: true, default: false },
+    { no: 999, name: 'uninterpreted_option', kind: 'message', T: UninterpretedOption, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): FieldOptions {
@@ -1649,13 +1716,13 @@ export enum FieldOptions_CType {
   /**
    * @generated from enum value: STRING_PIECE = 2;
    */
-  STRING_PIECE = 2,
+  STRING_PIECE = 2
 }
 // Retrieve enum metadata with: proto2.getEnumType(FieldOptions_CType)
-proto2.util.setEnumType(FieldOptions_CType, "google.protobuf.FieldOptions.CType", [
-  { no: 0, name: "STRING" },
-  { no: 1, name: "CORD" },
-  { no: 2, name: "STRING_PIECE" },
+proto2.util.setEnumType(FieldOptions_CType, 'google.protobuf.FieldOptions.CType', [
+  { no: 0, name: 'STRING' },
+  { no: 1, name: 'CORD' },
+  { no: 2, name: 'STRING_PIECE' }
 ]);
 
 /**
@@ -1681,13 +1748,13 @@ export enum FieldOptions_JSType {
    *
    * @generated from enum value: JS_NUMBER = 2;
    */
-  JS_NUMBER = 2,
+  JS_NUMBER = 2
 }
 // Retrieve enum metadata with: proto2.getEnumType(FieldOptions_JSType)
-proto2.util.setEnumType(FieldOptions_JSType, "google.protobuf.FieldOptions.JSType", [
-  { no: 0, name: "JS_NORMAL" },
-  { no: 1, name: "JS_STRING" },
-  { no: 2, name: "JS_NUMBER" },
+proto2.util.setEnumType(FieldOptions_JSType, 'google.protobuf.FieldOptions.JSType', [
+  { no: 0, name: 'JS_NORMAL' },
+  { no: 1, name: 'JS_STRING' },
+  { no: 2, name: 'JS_NUMBER' }
 ]);
 
 /**
@@ -1707,9 +1774,9 @@ export class OneofOptions extends Message<OneofOptions> {
   }
 
   static readonly runtime: typeof proto2 = proto2;
-  static readonly typeName = "google.protobuf.OneofOptions";
+  static readonly typeName = 'google.protobuf.OneofOptions';
   static readonly fields: FieldList = proto2.util.newFieldList(() => [
-    { no: 999, name: "uninterpreted_option", kind: "message", T: UninterpretedOption, repeated: true },
+    { no: 999, name: 'uninterpreted_option', kind: 'message', T: UninterpretedOption, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): OneofOptions {
@@ -1764,11 +1831,11 @@ export class EnumOptions extends Message<EnumOptions> {
   }
 
   static readonly runtime: typeof proto2 = proto2;
-  static readonly typeName = "google.protobuf.EnumOptions";
+  static readonly typeName = 'google.protobuf.EnumOptions';
   static readonly fields: FieldList = proto2.util.newFieldList(() => [
-    { no: 2, name: "allow_alias", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
-    { no: 3, name: "deprecated", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true, default: false },
-    { no: 999, name: "uninterpreted_option", kind: "message", T: UninterpretedOption, repeated: true },
+    { no: 2, name: 'allow_alias', kind: 'scalar', T: 8 /* ScalarType.BOOL */, opt: true },
+    { no: 3, name: 'deprecated', kind: 'scalar', T: 8 /* ScalarType.BOOL */, opt: true, default: false },
+    { no: 999, name: 'uninterpreted_option', kind: 'message', T: UninterpretedOption, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): EnumOptions {
@@ -1815,10 +1882,10 @@ export class EnumValueOptions extends Message<EnumValueOptions> {
   }
 
   static readonly runtime: typeof proto2 = proto2;
-  static readonly typeName = "google.protobuf.EnumValueOptions";
+  static readonly typeName = 'google.protobuf.EnumValueOptions';
   static readonly fields: FieldList = proto2.util.newFieldList(() => [
-    { no: 1, name: "deprecated", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true, default: false },
-    { no: 999, name: "uninterpreted_option", kind: "message", T: UninterpretedOption, repeated: true },
+    { no: 1, name: 'deprecated', kind: 'scalar', T: 8 /* ScalarType.BOOL */, opt: true, default: false },
+    { no: 999, name: 'uninterpreted_option', kind: 'message', T: UninterpretedOption, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): EnumValueOptions {
@@ -1833,7 +1900,10 @@ export class EnumValueOptions extends Message<EnumValueOptions> {
     return new EnumValueOptions().fromJsonString(jsonString, options);
   }
 
-  static equals(a: EnumValueOptions | PlainMessage<EnumValueOptions> | undefined, b: EnumValueOptions | PlainMessage<EnumValueOptions> | undefined): boolean {
+  static equals(
+    a: EnumValueOptions | PlainMessage<EnumValueOptions> | undefined,
+    b: EnumValueOptions | PlainMessage<EnumValueOptions> | undefined
+  ): boolean {
     return proto2.util.equals(EnumValueOptions, a, b);
   }
 }
@@ -1865,10 +1935,10 @@ export class ServiceOptions extends Message<ServiceOptions> {
   }
 
   static readonly runtime: typeof proto2 = proto2;
-  static readonly typeName = "google.protobuf.ServiceOptions";
+  static readonly typeName = 'google.protobuf.ServiceOptions';
   static readonly fields: FieldList = proto2.util.newFieldList(() => [
-    { no: 33, name: "deprecated", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true, default: false },
-    { no: 999, name: "uninterpreted_option", kind: "message", T: UninterpretedOption, repeated: true },
+    { no: 33, name: 'deprecated', kind: 'scalar', T: 8 /* ScalarType.BOOL */, opt: true, default: false },
+    { no: 999, name: 'uninterpreted_option', kind: 'message', T: UninterpretedOption, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ServiceOptions {
@@ -1920,11 +1990,18 @@ export class MethodOptions extends Message<MethodOptions> {
   }
 
   static readonly runtime: typeof proto2 = proto2;
-  static readonly typeName = "google.protobuf.MethodOptions";
+  static readonly typeName = 'google.protobuf.MethodOptions';
   static readonly fields: FieldList = proto2.util.newFieldList(() => [
-    { no: 33, name: "deprecated", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true, default: false },
-    { no: 34, name: "idempotency_level", kind: "enum", T: proto2.getEnumType(MethodOptions_IdempotencyLevel), opt: true, default: MethodOptions_IdempotencyLevel.IDEMPOTENCY_UNKNOWN },
-    { no: 999, name: "uninterpreted_option", kind: "message", T: UninterpretedOption, repeated: true },
+    { no: 33, name: 'deprecated', kind: 'scalar', T: 8 /* ScalarType.BOOL */, opt: true, default: false },
+    {
+      no: 34,
+      name: 'idempotency_level',
+      kind: 'enum',
+      T: proto2.getEnumType(MethodOptions_IdempotencyLevel),
+      opt: true,
+      default: MethodOptions_IdempotencyLevel.IDEMPOTENCY_UNKNOWN
+    },
+    { no: 999, name: 'uninterpreted_option', kind: 'message', T: UninterpretedOption, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MethodOptions {
@@ -1969,13 +2046,13 @@ export enum MethodOptions_IdempotencyLevel {
    *
    * @generated from enum value: IDEMPOTENT = 2;
    */
-  IDEMPOTENT = 2,
+  IDEMPOTENT = 2
 }
 // Retrieve enum metadata with: proto2.getEnumType(MethodOptions_IdempotencyLevel)
-proto2.util.setEnumType(MethodOptions_IdempotencyLevel, "google.protobuf.MethodOptions.IdempotencyLevel", [
-  { no: 0, name: "IDEMPOTENCY_UNKNOWN" },
-  { no: 1, name: "NO_SIDE_EFFECTS" },
-  { no: 2, name: "IDEMPOTENT" },
+proto2.util.setEnumType(MethodOptions_IdempotencyLevel, 'google.protobuf.MethodOptions.IdempotencyLevel', [
+  { no: 0, name: 'IDEMPOTENCY_UNKNOWN' },
+  { no: 1, name: 'NO_SIDE_EFFECTS' },
+  { no: 2, name: 'IDEMPOTENT' }
 ]);
 
 /**
@@ -2033,15 +2110,15 @@ export class UninterpretedOption extends Message<UninterpretedOption> {
   }
 
   static readonly runtime: typeof proto2 = proto2;
-  static readonly typeName = "google.protobuf.UninterpretedOption";
+  static readonly typeName = 'google.protobuf.UninterpretedOption';
   static readonly fields: FieldList = proto2.util.newFieldList(() => [
-    { no: 2, name: "name", kind: "message", T: UninterpretedOption_NamePart, repeated: true },
-    { no: 3, name: "identifier_value", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
-    { no: 4, name: "positive_int_value", kind: "scalar", T: 4 /* ScalarType.UINT64 */, opt: true },
-    { no: 5, name: "negative_int_value", kind: "scalar", T: 3 /* ScalarType.INT64 */, opt: true },
-    { no: 6, name: "double_value", kind: "scalar", T: 1 /* ScalarType.DOUBLE */, opt: true },
-    { no: 7, name: "string_value", kind: "scalar", T: 12 /* ScalarType.BYTES */, opt: true },
-    { no: 8, name: "aggregate_value", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 2, name: 'name', kind: 'message', T: UninterpretedOption_NamePart, repeated: true },
+    { no: 3, name: 'identifier_value', kind: 'scalar', T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 4, name: 'positive_int_value', kind: 'scalar', T: 4 /* ScalarType.UINT64 */, opt: true },
+    { no: 5, name: 'negative_int_value', kind: 'scalar', T: 3 /* ScalarType.INT64 */, opt: true },
+    { no: 6, name: 'double_value', kind: 'scalar', T: 1 /* ScalarType.DOUBLE */, opt: true },
+    { no: 7, name: 'string_value', kind: 'scalar', T: 12 /* ScalarType.BYTES */, opt: true },
+    { no: 8, name: 'aggregate_value', kind: 'scalar', T: 9 /* ScalarType.STRING */, opt: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UninterpretedOption {
@@ -2056,7 +2133,10 @@ export class UninterpretedOption extends Message<UninterpretedOption> {
     return new UninterpretedOption().fromJsonString(jsonString, options);
   }
 
-  static equals(a: UninterpretedOption | PlainMessage<UninterpretedOption> | undefined, b: UninterpretedOption | PlainMessage<UninterpretedOption> | undefined): boolean {
+  static equals(
+    a: UninterpretedOption | PlainMessage<UninterpretedOption> | undefined,
+    b: UninterpretedOption | PlainMessage<UninterpretedOption> | undefined
+  ): boolean {
     return proto2.util.equals(UninterpretedOption, a, b);
   }
 }
@@ -2087,10 +2167,10 @@ export class UninterpretedOption_NamePart extends Message<UninterpretedOption_Na
   }
 
   static readonly runtime: typeof proto2 = proto2;
-  static readonly typeName = "google.protobuf.UninterpretedOption.NamePart";
+  static readonly typeName = 'google.protobuf.UninterpretedOption.NamePart';
   static readonly fields: FieldList = proto2.util.newFieldList(() => [
-    { no: 1, name: "name_part", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "is_extension", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 1, name: 'name_part', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'is_extension', kind: 'scalar', T: 8 /* ScalarType.BOOL */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UninterpretedOption_NamePart {
@@ -2105,7 +2185,10 @@ export class UninterpretedOption_NamePart extends Message<UninterpretedOption_Na
     return new UninterpretedOption_NamePart().fromJsonString(jsonString, options);
   }
 
-  static equals(a: UninterpretedOption_NamePart | PlainMessage<UninterpretedOption_NamePart> | undefined, b: UninterpretedOption_NamePart | PlainMessage<UninterpretedOption_NamePart> | undefined): boolean {
+  static equals(
+    a: UninterpretedOption_NamePart | PlainMessage<UninterpretedOption_NamePart> | undefined,
+    b: UninterpretedOption_NamePart | PlainMessage<UninterpretedOption_NamePart> | undefined
+  ): boolean {
     return proto2.util.equals(UninterpretedOption_NamePart, a, b);
   }
 }
@@ -2172,9 +2255,9 @@ export class SourceCodeInfo extends Message<SourceCodeInfo> {
   }
 
   static readonly runtime: typeof proto2 = proto2;
-  static readonly typeName = "google.protobuf.SourceCodeInfo";
+  static readonly typeName = 'google.protobuf.SourceCodeInfo';
   static readonly fields: FieldList = proto2.util.newFieldList(() => [
-    { no: 1, name: "location", kind: "message", T: SourceCodeInfo_Location, repeated: true },
+    { no: 1, name: 'location', kind: 'message', T: SourceCodeInfo_Location, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SourceCodeInfo {
@@ -2307,13 +2390,13 @@ export class SourceCodeInfo_Location extends Message<SourceCodeInfo_Location> {
   }
 
   static readonly runtime: typeof proto2 = proto2;
-  static readonly typeName = "google.protobuf.SourceCodeInfo.Location";
+  static readonly typeName = 'google.protobuf.SourceCodeInfo.Location';
   static readonly fields: FieldList = proto2.util.newFieldList(() => [
-    { no: 1, name: "path", kind: "scalar", T: 5 /* ScalarType.INT32 */, repeated: true, packed: true },
-    { no: 2, name: "span", kind: "scalar", T: 5 /* ScalarType.INT32 */, repeated: true, packed: true },
-    { no: 3, name: "leading_comments", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
-    { no: 4, name: "trailing_comments", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
-    { no: 6, name: "leading_detached_comments", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 1, name: 'path', kind: 'scalar', T: 5 /* ScalarType.INT32 */, repeated: true, packed: true },
+    { no: 2, name: 'span', kind: 'scalar', T: 5 /* ScalarType.INT32 */, repeated: true, packed: true },
+    { no: 3, name: 'leading_comments', kind: 'scalar', T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 4, name: 'trailing_comments', kind: 'scalar', T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 6, name: 'leading_detached_comments', kind: 'scalar', T: 9 /* ScalarType.STRING */, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SourceCodeInfo_Location {
@@ -2328,7 +2411,10 @@ export class SourceCodeInfo_Location extends Message<SourceCodeInfo_Location> {
     return new SourceCodeInfo_Location().fromJsonString(jsonString, options);
   }
 
-  static equals(a: SourceCodeInfo_Location | PlainMessage<SourceCodeInfo_Location> | undefined, b: SourceCodeInfo_Location | PlainMessage<SourceCodeInfo_Location> | undefined): boolean {
+  static equals(
+    a: SourceCodeInfo_Location | PlainMessage<SourceCodeInfo_Location> | undefined,
+    b: SourceCodeInfo_Location | PlainMessage<SourceCodeInfo_Location> | undefined
+  ): boolean {
     return proto2.util.equals(SourceCodeInfo_Location, a, b);
   }
 }
@@ -2355,9 +2441,9 @@ export class GeneratedCodeInfo extends Message<GeneratedCodeInfo> {
   }
 
   static readonly runtime: typeof proto2 = proto2;
-  static readonly typeName = "google.protobuf.GeneratedCodeInfo";
+  static readonly typeName = 'google.protobuf.GeneratedCodeInfo';
   static readonly fields: FieldList = proto2.util.newFieldList(() => [
-    { no: 1, name: "annotation", kind: "message", T: GeneratedCodeInfo_Annotation, repeated: true },
+    { no: 1, name: 'annotation', kind: 'message', T: GeneratedCodeInfo_Annotation, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GeneratedCodeInfo {
@@ -2372,7 +2458,10 @@ export class GeneratedCodeInfo extends Message<GeneratedCodeInfo> {
     return new GeneratedCodeInfo().fromJsonString(jsonString, options);
   }
 
-  static equals(a: GeneratedCodeInfo | PlainMessage<GeneratedCodeInfo> | undefined, b: GeneratedCodeInfo | PlainMessage<GeneratedCodeInfo> | undefined): boolean {
+  static equals(
+    a: GeneratedCodeInfo | PlainMessage<GeneratedCodeInfo> | undefined,
+    b: GeneratedCodeInfo | PlainMessage<GeneratedCodeInfo> | undefined
+  ): boolean {
     return proto2.util.equals(GeneratedCodeInfo, a, b);
   }
 }
@@ -2419,12 +2508,12 @@ export class GeneratedCodeInfo_Annotation extends Message<GeneratedCodeInfo_Anno
   }
 
   static readonly runtime: typeof proto2 = proto2;
-  static readonly typeName = "google.protobuf.GeneratedCodeInfo.Annotation";
+  static readonly typeName = 'google.protobuf.GeneratedCodeInfo.Annotation';
   static readonly fields: FieldList = proto2.util.newFieldList(() => [
-    { no: 1, name: "path", kind: "scalar", T: 5 /* ScalarType.INT32 */, repeated: true, packed: true },
-    { no: 2, name: "source_file", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
-    { no: 3, name: "begin", kind: "scalar", T: 5 /* ScalarType.INT32 */, opt: true },
-    { no: 4, name: "end", kind: "scalar", T: 5 /* ScalarType.INT32 */, opt: true },
+    { no: 1, name: 'path', kind: 'scalar', T: 5 /* ScalarType.INT32 */, repeated: true, packed: true },
+    { no: 2, name: 'source_file', kind: 'scalar', T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 3, name: 'begin', kind: 'scalar', T: 5 /* ScalarType.INT32 */, opt: true },
+    { no: 4, name: 'end', kind: 'scalar', T: 5 /* ScalarType.INT32 */, opt: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GeneratedCodeInfo_Annotation {
@@ -2439,8 +2528,10 @@ export class GeneratedCodeInfo_Annotation extends Message<GeneratedCodeInfo_Anno
     return new GeneratedCodeInfo_Annotation().fromJsonString(jsonString, options);
   }
 
-  static equals(a: GeneratedCodeInfo_Annotation | PlainMessage<GeneratedCodeInfo_Annotation> | undefined, b: GeneratedCodeInfo_Annotation | PlainMessage<GeneratedCodeInfo_Annotation> | undefined): boolean {
+  static equals(
+    a: GeneratedCodeInfo_Annotation | PlainMessage<GeneratedCodeInfo_Annotation> | undefined,
+    b: GeneratedCodeInfo_Annotation | PlainMessage<GeneratedCodeInfo_Annotation> | undefined
+  ): boolean {
     return proto2.util.equals(GeneratedCodeInfo_Annotation, a, b);
   }
 }
-

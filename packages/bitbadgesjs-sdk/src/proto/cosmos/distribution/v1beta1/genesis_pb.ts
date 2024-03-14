@@ -3,10 +3,18 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3, protoInt64 } from "@bufbuild/protobuf";
-import { DecCoin } from "../../base/v1beta1/coin_pb.js";
-import { DelegatorStartingInfo, FeePool, Params, ValidatorAccumulatedCommission, ValidatorCurrentRewards, ValidatorHistoricalRewards, ValidatorSlashEvent } from "./distribution_pb.js";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3, protoInt64 } from '@bufbuild/protobuf';
+import { DecCoin } from '../../base/v1beta1/coin_pb.js';
+import {
+  DelegatorStartingInfo,
+  FeePool,
+  Params,
+  ValidatorAccumulatedCommission,
+  ValidatorCurrentRewards,
+  ValidatorHistoricalRewards,
+  ValidatorSlashEvent
+} from './distribution_pb.js';
 
 /**
  * DelegatorWithdrawInfo is the address for where distributions rewards are
@@ -21,14 +29,14 @@ export class DelegatorWithdrawInfo extends Message<DelegatorWithdrawInfo> {
    *
    * @generated from field: string delegator_address = 1;
    */
-  delegatorAddress = "";
+  delegatorAddress = '';
 
   /**
    * withdraw_address is the address to withdraw the delegation rewards to.
    *
    * @generated from field: string withdraw_address = 2;
    */
-  withdrawAddress = "";
+  withdrawAddress = '';
 
   constructor(data?: PartialMessage<DelegatorWithdrawInfo>) {
     super();
@@ -36,10 +44,10 @@ export class DelegatorWithdrawInfo extends Message<DelegatorWithdrawInfo> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.distribution.v1beta1.DelegatorWithdrawInfo";
+  static readonly typeName = 'cosmos.distribution.v1beta1.DelegatorWithdrawInfo';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "delegator_address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "withdraw_address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'delegator_address', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'withdraw_address', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DelegatorWithdrawInfo {
@@ -54,7 +62,10 @@ export class DelegatorWithdrawInfo extends Message<DelegatorWithdrawInfo> {
     return new DelegatorWithdrawInfo().fromJsonString(jsonString, options);
   }
 
-  static equals(a: DelegatorWithdrawInfo | PlainMessage<DelegatorWithdrawInfo> | undefined, b: DelegatorWithdrawInfo | PlainMessage<DelegatorWithdrawInfo> | undefined): boolean {
+  static equals(
+    a: DelegatorWithdrawInfo | PlainMessage<DelegatorWithdrawInfo> | undefined,
+    b: DelegatorWithdrawInfo | PlainMessage<DelegatorWithdrawInfo> | undefined
+  ): boolean {
     return proto3.util.equals(DelegatorWithdrawInfo, a, b);
   }
 }
@@ -70,7 +81,7 @@ export class ValidatorOutstandingRewardsRecord extends Message<ValidatorOutstand
    *
    * @generated from field: string validator_address = 1;
    */
-  validatorAddress = "";
+  validatorAddress = '';
 
   /**
    * outstanding_rewards represents the outstanding rewards of a validator.
@@ -85,10 +96,10 @@ export class ValidatorOutstandingRewardsRecord extends Message<ValidatorOutstand
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.distribution.v1beta1.ValidatorOutstandingRewardsRecord";
+  static readonly typeName = 'cosmos.distribution.v1beta1.ValidatorOutstandingRewardsRecord';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "validator_address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "outstanding_rewards", kind: "message", T: DecCoin, repeated: true },
+    { no: 1, name: 'validator_address', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'outstanding_rewards', kind: 'message', T: DecCoin, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ValidatorOutstandingRewardsRecord {
@@ -103,7 +114,10 @@ export class ValidatorOutstandingRewardsRecord extends Message<ValidatorOutstand
     return new ValidatorOutstandingRewardsRecord().fromJsonString(jsonString, options);
   }
 
-  static equals(a: ValidatorOutstandingRewardsRecord | PlainMessage<ValidatorOutstandingRewardsRecord> | undefined, b: ValidatorOutstandingRewardsRecord | PlainMessage<ValidatorOutstandingRewardsRecord> | undefined): boolean {
+  static equals(
+    a: ValidatorOutstandingRewardsRecord | PlainMessage<ValidatorOutstandingRewardsRecord> | undefined,
+    b: ValidatorOutstandingRewardsRecord | PlainMessage<ValidatorOutstandingRewardsRecord> | undefined
+  ): boolean {
     return proto3.util.equals(ValidatorOutstandingRewardsRecord, a, b);
   }
 }
@@ -120,7 +134,7 @@ export class ValidatorAccumulatedCommissionRecord extends Message<ValidatorAccum
    *
    * @generated from field: string validator_address = 1;
    */
-  validatorAddress = "";
+  validatorAddress = '';
 
   /**
    * accumulated is the accumulated commission of a validator.
@@ -135,10 +149,10 @@ export class ValidatorAccumulatedCommissionRecord extends Message<ValidatorAccum
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.distribution.v1beta1.ValidatorAccumulatedCommissionRecord";
+  static readonly typeName = 'cosmos.distribution.v1beta1.ValidatorAccumulatedCommissionRecord';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "validator_address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "accumulated", kind: "message", T: ValidatorAccumulatedCommission },
+    { no: 1, name: 'validator_address', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'accumulated', kind: 'message', T: ValidatorAccumulatedCommission }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ValidatorAccumulatedCommissionRecord {
@@ -153,7 +167,10 @@ export class ValidatorAccumulatedCommissionRecord extends Message<ValidatorAccum
     return new ValidatorAccumulatedCommissionRecord().fromJsonString(jsonString, options);
   }
 
-  static equals(a: ValidatorAccumulatedCommissionRecord | PlainMessage<ValidatorAccumulatedCommissionRecord> | undefined, b: ValidatorAccumulatedCommissionRecord | PlainMessage<ValidatorAccumulatedCommissionRecord> | undefined): boolean {
+  static equals(
+    a: ValidatorAccumulatedCommissionRecord | PlainMessage<ValidatorAccumulatedCommissionRecord> | undefined,
+    b: ValidatorAccumulatedCommissionRecord | PlainMessage<ValidatorAccumulatedCommissionRecord> | undefined
+  ): boolean {
     return proto3.util.equals(ValidatorAccumulatedCommissionRecord, a, b);
   }
 }
@@ -170,7 +187,7 @@ export class ValidatorHistoricalRewardsRecord extends Message<ValidatorHistorica
    *
    * @generated from field: string validator_address = 1;
    */
-  validatorAddress = "";
+  validatorAddress = '';
 
   /**
    * period defines the period the historical rewards apply to.
@@ -192,11 +209,11 @@ export class ValidatorHistoricalRewardsRecord extends Message<ValidatorHistorica
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.distribution.v1beta1.ValidatorHistoricalRewardsRecord";
+  static readonly typeName = 'cosmos.distribution.v1beta1.ValidatorHistoricalRewardsRecord';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "validator_address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "period", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
-    { no: 3, name: "rewards", kind: "message", T: ValidatorHistoricalRewards },
+    { no: 1, name: 'validator_address', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'period', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ },
+    { no: 3, name: 'rewards', kind: 'message', T: ValidatorHistoricalRewards }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ValidatorHistoricalRewardsRecord {
@@ -211,7 +228,10 @@ export class ValidatorHistoricalRewardsRecord extends Message<ValidatorHistorica
     return new ValidatorHistoricalRewardsRecord().fromJsonString(jsonString, options);
   }
 
-  static equals(a: ValidatorHistoricalRewardsRecord | PlainMessage<ValidatorHistoricalRewardsRecord> | undefined, b: ValidatorHistoricalRewardsRecord | PlainMessage<ValidatorHistoricalRewardsRecord> | undefined): boolean {
+  static equals(
+    a: ValidatorHistoricalRewardsRecord | PlainMessage<ValidatorHistoricalRewardsRecord> | undefined,
+    b: ValidatorHistoricalRewardsRecord | PlainMessage<ValidatorHistoricalRewardsRecord> | undefined
+  ): boolean {
     return proto3.util.equals(ValidatorHistoricalRewardsRecord, a, b);
   }
 }
@@ -227,7 +247,7 @@ export class ValidatorCurrentRewardsRecord extends Message<ValidatorCurrentRewar
    *
    * @generated from field: string validator_address = 1;
    */
-  validatorAddress = "";
+  validatorAddress = '';
 
   /**
    * rewards defines the current rewards of a validator.
@@ -242,10 +262,10 @@ export class ValidatorCurrentRewardsRecord extends Message<ValidatorCurrentRewar
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.distribution.v1beta1.ValidatorCurrentRewardsRecord";
+  static readonly typeName = 'cosmos.distribution.v1beta1.ValidatorCurrentRewardsRecord';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "validator_address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "rewards", kind: "message", T: ValidatorCurrentRewards },
+    { no: 1, name: 'validator_address', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'rewards', kind: 'message', T: ValidatorCurrentRewards }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ValidatorCurrentRewardsRecord {
@@ -260,7 +280,10 @@ export class ValidatorCurrentRewardsRecord extends Message<ValidatorCurrentRewar
     return new ValidatorCurrentRewardsRecord().fromJsonString(jsonString, options);
   }
 
-  static equals(a: ValidatorCurrentRewardsRecord | PlainMessage<ValidatorCurrentRewardsRecord> | undefined, b: ValidatorCurrentRewardsRecord | PlainMessage<ValidatorCurrentRewardsRecord> | undefined): boolean {
+  static equals(
+    a: ValidatorCurrentRewardsRecord | PlainMessage<ValidatorCurrentRewardsRecord> | undefined,
+    b: ValidatorCurrentRewardsRecord | PlainMessage<ValidatorCurrentRewardsRecord> | undefined
+  ): boolean {
     return proto3.util.equals(ValidatorCurrentRewardsRecord, a, b);
   }
 }
@@ -276,14 +299,14 @@ export class DelegatorStartingInfoRecord extends Message<DelegatorStartingInfoRe
    *
    * @generated from field: string delegator_address = 1;
    */
-  delegatorAddress = "";
+  delegatorAddress = '';
 
   /**
    * validator_address is the address of the validator.
    *
    * @generated from field: string validator_address = 2;
    */
-  validatorAddress = "";
+  validatorAddress = '';
 
   /**
    * starting_info defines the starting info of a delegator.
@@ -298,11 +321,11 @@ export class DelegatorStartingInfoRecord extends Message<DelegatorStartingInfoRe
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.distribution.v1beta1.DelegatorStartingInfoRecord";
+  static readonly typeName = 'cosmos.distribution.v1beta1.DelegatorStartingInfoRecord';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "delegator_address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "validator_address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "starting_info", kind: "message", T: DelegatorStartingInfo },
+    { no: 1, name: 'delegator_address', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'validator_address', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'starting_info', kind: 'message', T: DelegatorStartingInfo }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DelegatorStartingInfoRecord {
@@ -317,7 +340,10 @@ export class DelegatorStartingInfoRecord extends Message<DelegatorStartingInfoRe
     return new DelegatorStartingInfoRecord().fromJsonString(jsonString, options);
   }
 
-  static equals(a: DelegatorStartingInfoRecord | PlainMessage<DelegatorStartingInfoRecord> | undefined, b: DelegatorStartingInfoRecord | PlainMessage<DelegatorStartingInfoRecord> | undefined): boolean {
+  static equals(
+    a: DelegatorStartingInfoRecord | PlainMessage<DelegatorStartingInfoRecord> | undefined,
+    b: DelegatorStartingInfoRecord | PlainMessage<DelegatorStartingInfoRecord> | undefined
+  ): boolean {
     return proto3.util.equals(DelegatorStartingInfoRecord, a, b);
   }
 }
@@ -333,7 +359,7 @@ export class ValidatorSlashEventRecord extends Message<ValidatorSlashEventRecord
    *
    * @generated from field: string validator_address = 1;
    */
-  validatorAddress = "";
+  validatorAddress = '';
 
   /**
    * height defines the block height at which the slash event occurred.
@@ -362,12 +388,12 @@ export class ValidatorSlashEventRecord extends Message<ValidatorSlashEventRecord
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.distribution.v1beta1.ValidatorSlashEventRecord";
+  static readonly typeName = 'cosmos.distribution.v1beta1.ValidatorSlashEventRecord';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "validator_address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "height", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
-    { no: 3, name: "period", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
-    { no: 4, name: "validator_slash_event", kind: "message", T: ValidatorSlashEvent },
+    { no: 1, name: 'validator_address', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'height', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ },
+    { no: 3, name: 'period', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ },
+    { no: 4, name: 'validator_slash_event', kind: 'message', T: ValidatorSlashEvent }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ValidatorSlashEventRecord {
@@ -382,7 +408,10 @@ export class ValidatorSlashEventRecord extends Message<ValidatorSlashEventRecord
     return new ValidatorSlashEventRecord().fromJsonString(jsonString, options);
   }
 
-  static equals(a: ValidatorSlashEventRecord | PlainMessage<ValidatorSlashEventRecord> | undefined, b: ValidatorSlashEventRecord | PlainMessage<ValidatorSlashEventRecord> | undefined): boolean {
+  static equals(
+    a: ValidatorSlashEventRecord | PlainMessage<ValidatorSlashEventRecord> | undefined,
+    b: ValidatorSlashEventRecord | PlainMessage<ValidatorSlashEventRecord> | undefined
+  ): boolean {
     return proto3.util.equals(ValidatorSlashEventRecord, a, b);
   }
 }
@@ -419,7 +448,7 @@ export class GenesisState extends Message<GenesisState> {
    *
    * @generated from field: string previous_proposer = 4;
    */
-  previousProposer = "";
+  previousProposer = '';
 
   /**
    * fee_pool defines the outstanding rewards of all validators at genesis.
@@ -469,18 +498,30 @@ export class GenesisState extends Message<GenesisState> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.distribution.v1beta1.GenesisState";
+  static readonly typeName = 'cosmos.distribution.v1beta1.GenesisState';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "params", kind: "message", T: Params },
-    { no: 2, name: "fee_pool", kind: "message", T: FeePool },
-    { no: 3, name: "delegator_withdraw_infos", kind: "message", T: DelegatorWithdrawInfo, repeated: true },
-    { no: 4, name: "previous_proposer", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 5, name: "outstanding_rewards", kind: "message", T: ValidatorOutstandingRewardsRecord, repeated: true },
-    { no: 6, name: "validator_accumulated_commissions", kind: "message", T: ValidatorAccumulatedCommissionRecord, repeated: true },
-    { no: 7, name: "validator_historical_rewards", kind: "message", T: ValidatorHistoricalRewardsRecord, repeated: true },
-    { no: 8, name: "validator_current_rewards", kind: "message", T: ValidatorCurrentRewardsRecord, repeated: true },
-    { no: 9, name: "delegator_starting_infos", kind: "message", T: DelegatorStartingInfoRecord, repeated: true },
-    { no: 10, name: "validator_slash_events", kind: "message", T: ValidatorSlashEventRecord, repeated: true },
+    { no: 1, name: 'params', kind: 'message', T: Params },
+    { no: 2, name: 'fee_pool', kind: 'message', T: FeePool },
+    { no: 3, name: 'delegator_withdraw_infos', kind: 'message', T: DelegatorWithdrawInfo, repeated: true },
+    { no: 4, name: 'previous_proposer', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: 'outstanding_rewards', kind: 'message', T: ValidatorOutstandingRewardsRecord, repeated: true },
+    {
+      no: 6,
+      name: 'validator_accumulated_commissions',
+      kind: 'message',
+      T: ValidatorAccumulatedCommissionRecord,
+      repeated: true
+    },
+    {
+      no: 7,
+      name: 'validator_historical_rewards',
+      kind: 'message',
+      T: ValidatorHistoricalRewardsRecord,
+      repeated: true
+    },
+    { no: 8, name: 'validator_current_rewards', kind: 'message', T: ValidatorCurrentRewardsRecord, repeated: true },
+    { no: 9, name: 'delegator_starting_infos', kind: 'message', T: DelegatorStartingInfoRecord, repeated: true },
+    { no: 10, name: 'validator_slash_events', kind: 'message', T: ValidatorSlashEventRecord, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GenesisState {
@@ -499,4 +540,3 @@ export class GenesisState extends Message<GenesisState> {
     return proto3.util.equals(GenesisState, a, b);
   }
 }
-

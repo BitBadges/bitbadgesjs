@@ -3,10 +3,10 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
-import { Balance, MustOwnBadges, UintRange } from "./balances_pb.js";
-import { UserPermissions } from "./permissions_pb.js";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3 } from '@bufbuild/protobuf';
+import { Balance, MustOwnBadges, UintRange } from './balances_pb.js';
+import { UserPermissions } from './permissions_pb.js';
 
 /**
  *
@@ -26,7 +26,7 @@ import { UserPermissions } from "./permissions_pb.js";
  * and autoApproveSelfInitiatedIncomingTransfers is set to true.
  *
  * Note that the user approved transfers are only checked if the collection approved transfers do not specify to override
- * the user approved transfers. 
+ * the user approved transfers.
  *
  * The permissions are used to determine whether the user can update the approved incoming/outgoing transfers and auto approvals.
  *
@@ -81,14 +81,14 @@ export class UserBalanceStore extends Message<UserBalanceStore> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.UserBalanceStore";
+  static readonly typeName = 'badges.UserBalanceStore';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "balances", kind: "message", T: Balance, repeated: true },
-    { no: 2, name: "outgoingApprovals", kind: "message", T: UserOutgoingApproval, repeated: true },
-    { no: 3, name: "incomingApprovals", kind: "message", T: UserIncomingApproval, repeated: true },
-    { no: 4, name: "autoApproveSelfInitiatedOutgoingTransfers", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 5, name: "autoApproveSelfInitiatedIncomingTransfers", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 6, name: "userPermissions", kind: "message", T: UserPermissions },
+    { no: 1, name: 'balances', kind: 'message', T: Balance, repeated: true },
+    { no: 2, name: 'outgoingApprovals', kind: 'message', T: UserOutgoingApproval, repeated: true },
+    { no: 3, name: 'incomingApprovals', kind: 'message', T: UserIncomingApproval, repeated: true },
+    { no: 4, name: 'autoApproveSelfInitiatedOutgoingTransfers', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 5, name: 'autoApproveSelfInitiatedIncomingTransfers', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 6, name: 'userPermissions', kind: 'message', T: UserPermissions }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UserBalanceStore {
@@ -103,7 +103,10 @@ export class UserBalanceStore extends Message<UserBalanceStore> {
     return new UserBalanceStore().fromJsonString(jsonString, options);
   }
 
-  static equals(a: UserBalanceStore | PlainMessage<UserBalanceStore> | undefined, b: UserBalanceStore | PlainMessage<UserBalanceStore> | undefined): boolean {
+  static equals(
+    a: UserBalanceStore | PlainMessage<UserBalanceStore> | undefined,
+    b: UserBalanceStore | PlainMessage<UserBalanceStore> | undefined
+  ): boolean {
     return proto3.util.equals(UserBalanceStore, a, b);
   }
 }
@@ -129,14 +132,14 @@ export class MerkleChallenge extends Message<MerkleChallenge> {
    *
    * @generated from field: string root = 1;
    */
-  root = "";
+  root = '';
 
   /**
    * The expected length of the Merkle path for verification. Used to prevent Merkle path truncation attacks.
    *
    * @generated from field: string expectedProofLength = 2;
    */
-  expectedProofLength = "";
+  expectedProofLength = '';
 
   /**
    * If true, we will override the user's leaf for their proof with their creator address. Used for whitelist trees where all leaves are valid Cosmos addresses.
@@ -150,21 +153,21 @@ export class MerkleChallenge extends Message<MerkleChallenge> {
    *
    * @generated from field: string maxUsesPerLeaf = 4;
    */
-  maxUsesPerLeaf = "";
+  maxUsesPerLeaf = '';
 
   /**
    * The URI associated with this Merkle challenge, optionally providing metadata about the challenge.
    *
    * @generated from field: string uri = 5;
    */
-  uri = "";
+  uri = '';
 
   /**
    * Arbitrary custom data associated with this Merkle challenge.
    *
    * @generated from field: string customData = 6;
    */
-  customData = "";
+  customData = '';
 
   constructor(data?: PartialMessage<MerkleChallenge>) {
     super();
@@ -172,14 +175,14 @@ export class MerkleChallenge extends Message<MerkleChallenge> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.MerkleChallenge";
+  static readonly typeName = 'badges.MerkleChallenge';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "root", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "expectedProofLength", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "useCreatorAddressAsLeaf", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 4, name: "maxUsesPerLeaf", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 5, name: "uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 6, name: "customData", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'root', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'expectedProofLength', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'useCreatorAddressAsLeaf', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 4, name: 'maxUsesPerLeaf', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: 'uri', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 6, name: 'customData', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MerkleChallenge {
@@ -194,7 +197,10 @@ export class MerkleChallenge extends Message<MerkleChallenge> {
     return new MerkleChallenge().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MerkleChallenge | PlainMessage<MerkleChallenge> | undefined, b: MerkleChallenge | PlainMessage<MerkleChallenge> | undefined): boolean {
+  static equals(
+    a: MerkleChallenge | PlainMessage<MerkleChallenge> | undefined,
+    b: MerkleChallenge | PlainMessage<MerkleChallenge> | undefined
+  ): boolean {
     return proto3.util.equals(MerkleChallenge, a, b);
   }
 }
@@ -210,14 +216,14 @@ export class UserOutgoingApproval extends Message<UserOutgoingApproval> {
    *
    * @generated from field: string toListId = 1;
    */
-  toListId = "";
+  toListId = '';
 
   /**
    * The list ID for the user who initiated the transfer.
    *
    * @generated from field: string initiatedByListId = 2;
    */
-  initiatedByListId = "";
+  initiatedByListId = '';
 
   /**
    * The allowed range of transfer times for approval.
@@ -246,7 +252,7 @@ export class UserOutgoingApproval extends Message<UserOutgoingApproval> {
    *
    * @generated from field: string amountTrackerId = 6;
    */
-  amountTrackerId = "";
+  amountTrackerId = '';
 
   /**
    * The ID of the challenge tracker associated with this approval.
@@ -254,28 +260,28 @@ export class UserOutgoingApproval extends Message<UserOutgoingApproval> {
    *
    * @generated from field: string challengeTrackerId = 7;
    */
-  challengeTrackerId = "";
+  challengeTrackerId = '';
 
   /**
    * The URI associated with this approval, optionally providing metadata about the approval.
    *
    * @generated from field: string uri = 8;
    */
-  uri = "";
+  uri = '';
 
   /**
    * Arbitrary custom data associated with this approval.
    *
    * @generated from field: string customData = 9;
    */
-  customData = "";
+  customData = '';
 
   /**
    * The ID of this approval. Must be unique per level (i.e. collection, outgoing, incoming).
    *
    * @generated from field: string approvalId = 10;
    */
-  approvalId = "";
+  approvalId = '';
 
   /**
    * The criteria that must be met for this approval to be considered.
@@ -290,19 +296,19 @@ export class UserOutgoingApproval extends Message<UserOutgoingApproval> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.UserOutgoingApproval";
+  static readonly typeName = 'badges.UserOutgoingApproval';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "toListId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "initiatedByListId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "transferTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 4, name: "badgeIds", kind: "message", T: UintRange, repeated: true },
-    { no: 5, name: "ownershipTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 6, name: "amountTrackerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 7, name: "challengeTrackerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 8, name: "uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 9, name: "customData", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 10, name: "approvalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 11, name: "approvalCriteria", kind: "message", T: OutgoingApprovalCriteria },
+    { no: 1, name: 'toListId', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'initiatedByListId', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'transferTimes', kind: 'message', T: UintRange, repeated: true },
+    { no: 4, name: 'badgeIds', kind: 'message', T: UintRange, repeated: true },
+    { no: 5, name: 'ownershipTimes', kind: 'message', T: UintRange, repeated: true },
+    { no: 6, name: 'amountTrackerId', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 7, name: 'challengeTrackerId', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 8, name: 'uri', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 9, name: 'customData', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 10, name: 'approvalId', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 11, name: 'approvalCriteria', kind: 'message', T: OutgoingApprovalCriteria }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UserOutgoingApproval {
@@ -317,7 +323,10 @@ export class UserOutgoingApproval extends Message<UserOutgoingApproval> {
     return new UserOutgoingApproval().fromJsonString(jsonString, options);
   }
 
-  static equals(a: UserOutgoingApproval | PlainMessage<UserOutgoingApproval> | undefined, b: UserOutgoingApproval | PlainMessage<UserOutgoingApproval> | undefined): boolean {
+  static equals(
+    a: UserOutgoingApproval | PlainMessage<UserOutgoingApproval> | undefined,
+    b: UserOutgoingApproval | PlainMessage<UserOutgoingApproval> | undefined
+  ): boolean {
     return proto3.util.equals(UserOutgoingApproval, a, b);
   }
 }
@@ -333,14 +342,14 @@ export class UserIncomingApproval extends Message<UserIncomingApproval> {
    *
    * @generated from field: string fromListId = 1;
    */
-  fromListId = "";
+  fromListId = '';
 
   /**
    * The list ID for the user who initiated the transfer.
    *
    * @generated from field: string initiatedByListId = 2;
    */
-  initiatedByListId = "";
+  initiatedByListId = '';
 
   /**
    * The allowed range of transfer times for approval.
@@ -369,7 +378,7 @@ export class UserIncomingApproval extends Message<UserIncomingApproval> {
    *
    * @generated from field: string amountTrackerId = 6;
    */
-  amountTrackerId = "";
+  amountTrackerId = '';
 
   /**
    * The ID of the challenge tracker associated with this approval.
@@ -377,28 +386,28 @@ export class UserIncomingApproval extends Message<UserIncomingApproval> {
    *
    * @generated from field: string challengeTrackerId = 7;
    */
-  challengeTrackerId = "";
+  challengeTrackerId = '';
 
   /**
    * The URI associated with this approval, optionally providing metadata about the approval.
    *
    * @generated from field: string uri = 8;
    */
-  uri = "";
+  uri = '';
 
   /**
    * Arbitrary custom data associated with this approval.
    *
    * @generated from field: string customData = 9;
    */
-  customData = "";
+  customData = '';
 
   /**
    * The ID of this approval. Must be unique per level (i.e. collection, outgoing, incoming).
    *
    * @generated from field: string approvalId = 10;
    */
-  approvalId = "";
+  approvalId = '';
 
   /**
    * The criteria that must be met for this approval to be considered.
@@ -413,19 +422,19 @@ export class UserIncomingApproval extends Message<UserIncomingApproval> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.UserIncomingApproval";
+  static readonly typeName = 'badges.UserIncomingApproval';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "fromListId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "initiatedByListId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "transferTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 4, name: "badgeIds", kind: "message", T: UintRange, repeated: true },
-    { no: 5, name: "ownershipTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 6, name: "amountTrackerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 7, name: "challengeTrackerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 8, name: "uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 9, name: "customData", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 10, name: "approvalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 11, name: "approvalCriteria", kind: "message", T: IncomingApprovalCriteria },
+    { no: 1, name: 'fromListId', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'initiatedByListId', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'transferTimes', kind: 'message', T: UintRange, repeated: true },
+    { no: 4, name: 'badgeIds', kind: 'message', T: UintRange, repeated: true },
+    { no: 5, name: 'ownershipTimes', kind: 'message', T: UintRange, repeated: true },
+    { no: 6, name: 'amountTrackerId', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 7, name: 'challengeTrackerId', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 8, name: 'uri', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 9, name: 'customData', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 10, name: 'approvalId', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 11, name: 'approvalCriteria', kind: 'message', T: IncomingApprovalCriteria }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UserIncomingApproval {
@@ -440,13 +449,16 @@ export class UserIncomingApproval extends Message<UserIncomingApproval> {
     return new UserIncomingApproval().fromJsonString(jsonString, options);
   }
 
-  static equals(a: UserIncomingApproval | PlainMessage<UserIncomingApproval> | undefined, b: UserIncomingApproval | PlainMessage<UserIncomingApproval> | undefined): boolean {
+  static equals(
+    a: UserIncomingApproval | PlainMessage<UserIncomingApproval> | undefined,
+    b: UserIncomingApproval | PlainMessage<UserIncomingApproval> | undefined
+  ): boolean {
     return proto3.util.equals(UserIncomingApproval, a, b);
   }
 }
 
 /**
- * ManualBalances represents a list of manual balances entered for the predetermined balances criteria. Order is calculated according to the calculation method set. 
+ * ManualBalances represents a list of manual balances entered for the predetermined balances criteria. Order is calculated according to the calculation method set.
  *
  * @generated from message badges.ManualBalances
  */
@@ -462,10 +474,8 @@ export class ManualBalances extends Message<ManualBalances> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.ManualBalances";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "balances", kind: "message", T: Balance, repeated: true },
-  ]);
+  static readonly typeName = 'badges.ManualBalances';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'balances', kind: 'message', T: Balance, repeated: true }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ManualBalances {
     return new ManualBalances().fromBinary(bytes, options);
@@ -500,14 +510,14 @@ export class IncrementedBalances extends Message<IncrementedBalances> {
    *
    * @generated from field: string incrementBadgeIdsBy = 2;
    */
-  incrementBadgeIdsBy = "";
+  incrementBadgeIdsBy = '';
 
   /**
    * The amount by which to increment ownership times.
    *
    * @generated from field: string incrementOwnershipTimesBy = 3;
    */
-  incrementOwnershipTimesBy = "";
+  incrementOwnershipTimesBy = '';
 
   constructor(data?: PartialMessage<IncrementedBalances>) {
     super();
@@ -515,11 +525,11 @@ export class IncrementedBalances extends Message<IncrementedBalances> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.IncrementedBalances";
+  static readonly typeName = 'badges.IncrementedBalances';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "startBalances", kind: "message", T: Balance, repeated: true },
-    { no: 2, name: "incrementBadgeIdsBy", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "incrementOwnershipTimesBy", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'startBalances', kind: 'message', T: Balance, repeated: true },
+    { no: 2, name: 'incrementBadgeIdsBy', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'incrementOwnershipTimesBy', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): IncrementedBalances {
@@ -534,7 +544,10 @@ export class IncrementedBalances extends Message<IncrementedBalances> {
     return new IncrementedBalances().fromJsonString(jsonString, options);
   }
 
-  static equals(a: IncrementedBalances | PlainMessage<IncrementedBalances> | undefined, b: IncrementedBalances | PlainMessage<IncrementedBalances> | undefined): boolean {
+  static equals(
+    a: IncrementedBalances | PlainMessage<IncrementedBalances> | undefined,
+    b: IncrementedBalances | PlainMessage<IncrementedBalances> | undefined
+  ): boolean {
     return proto3.util.equals(IncrementedBalances, a, b);
   }
 }
@@ -586,13 +599,13 @@ export class PredeterminedOrderCalculationMethod extends Message<PredeterminedOr
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.PredeterminedOrderCalculationMethod";
+  static readonly typeName = 'badges.PredeterminedOrderCalculationMethod';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "useOverallNumTransfers", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 2, name: "usePerToAddressNumTransfers", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 3, name: "usePerFromAddressNumTransfers", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 4, name: "usePerInitiatedByAddressNumTransfers", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 5, name: "useMerkleChallengeLeafIndex", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 1, name: 'useOverallNumTransfers', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 2, name: 'usePerToAddressNumTransfers', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 3, name: 'usePerFromAddressNumTransfers', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 4, name: 'usePerInitiatedByAddressNumTransfers', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 5, name: 'useMerkleChallengeLeafIndex', kind: 'scalar', T: 8 /* ScalarType.BOOL */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PredeterminedOrderCalculationMethod {
@@ -607,7 +620,10 @@ export class PredeterminedOrderCalculationMethod extends Message<PredeterminedOr
     return new PredeterminedOrderCalculationMethod().fromJsonString(jsonString, options);
   }
 
-  static equals(a: PredeterminedOrderCalculationMethod | PlainMessage<PredeterminedOrderCalculationMethod> | undefined, b: PredeterminedOrderCalculationMethod | PlainMessage<PredeterminedOrderCalculationMethod> | undefined): boolean {
+  static equals(
+    a: PredeterminedOrderCalculationMethod | PlainMessage<PredeterminedOrderCalculationMethod> | undefined,
+    b: PredeterminedOrderCalculationMethod | PlainMessage<PredeterminedOrderCalculationMethod> | undefined
+  ): boolean {
     return proto3.util.equals(PredeterminedOrderCalculationMethod, a, b);
   }
 }
@@ -645,11 +661,11 @@ export class PredeterminedBalances extends Message<PredeterminedBalances> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.PredeterminedBalances";
+  static readonly typeName = 'badges.PredeterminedBalances';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "manualBalances", kind: "message", T: ManualBalances, repeated: true },
-    { no: 2, name: "incrementedBalances", kind: "message", T: IncrementedBalances },
-    { no: 3, name: "orderCalculationMethod", kind: "message", T: PredeterminedOrderCalculationMethod },
+    { no: 1, name: 'manualBalances', kind: 'message', T: ManualBalances, repeated: true },
+    { no: 2, name: 'incrementedBalances', kind: 'message', T: IncrementedBalances },
+    { no: 3, name: 'orderCalculationMethod', kind: 'message', T: PredeterminedOrderCalculationMethod }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PredeterminedBalances {
@@ -664,7 +680,10 @@ export class PredeterminedBalances extends Message<PredeterminedBalances> {
     return new PredeterminedBalances().fromJsonString(jsonString, options);
   }
 
-  static equals(a: PredeterminedBalances | PlainMessage<PredeterminedBalances> | undefined, b: PredeterminedBalances | PlainMessage<PredeterminedBalances> | undefined): boolean {
+  static equals(
+    a: PredeterminedBalances | PlainMessage<PredeterminedBalances> | undefined,
+    b: PredeterminedBalances | PlainMessage<PredeterminedBalances> | undefined
+  ): boolean {
     return proto3.util.equals(PredeterminedBalances, a, b);
   }
 }
@@ -672,7 +691,7 @@ export class PredeterminedBalances extends Message<PredeterminedBalances> {
 /**
  * ApprovalAmounts defines approval amounts per unique "from," "to," and/or "initiated by" address.
  * If any of these are nil or "0", we assume unlimited approvals.
- * If they are set to a value, then the running tally of the amounts transferred for the specified badge IDs and ownership times 
+ * If they are set to a value, then the running tally of the amounts transferred for the specified badge IDs and ownership times
  * must not exceed the corresponding value.
  *
  * @generated from message badges.ApprovalAmounts
@@ -683,28 +702,28 @@ export class ApprovalAmounts extends Message<ApprovalAmounts> {
    *
    * @generated from field: string overallApprovalAmount = 1;
    */
-  overallApprovalAmount = "";
+  overallApprovalAmount = '';
 
   /**
    * Approval amount per "to" address.
    *
    * @generated from field: string perToAddressApprovalAmount = 2;
    */
-  perToAddressApprovalAmount = "";
+  perToAddressApprovalAmount = '';
 
   /**
    * Approval amount per "from" address.
    *
    * @generated from field: string perFromAddressApprovalAmount = 3;
    */
-  perFromAddressApprovalAmount = "";
+  perFromAddressApprovalAmount = '';
 
   /**
    * Approval amount per "initiated by" address.
    *
    * @generated from field: string perInitiatedByAddressApprovalAmount = 4;
    */
-  perInitiatedByAddressApprovalAmount = "";
+  perInitiatedByAddressApprovalAmount = '';
 
   constructor(data?: PartialMessage<ApprovalAmounts>) {
     super();
@@ -712,12 +731,12 @@ export class ApprovalAmounts extends Message<ApprovalAmounts> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.ApprovalAmounts";
+  static readonly typeName = 'badges.ApprovalAmounts';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "overallApprovalAmount", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "perToAddressApprovalAmount", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "perFromAddressApprovalAmount", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "perInitiatedByAddressApprovalAmount", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'overallApprovalAmount', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'perToAddressApprovalAmount', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'perFromAddressApprovalAmount', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: 'perInitiatedByAddressApprovalAmount', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ApprovalAmounts {
@@ -732,7 +751,10 @@ export class ApprovalAmounts extends Message<ApprovalAmounts> {
     return new ApprovalAmounts().fromJsonString(jsonString, options);
   }
 
-  static equals(a: ApprovalAmounts | PlainMessage<ApprovalAmounts> | undefined, b: ApprovalAmounts | PlainMessage<ApprovalAmounts> | undefined): boolean {
+  static equals(
+    a: ApprovalAmounts | PlainMessage<ApprovalAmounts> | undefined,
+    b: ApprovalAmounts | PlainMessage<ApprovalAmounts> | undefined
+  ): boolean {
     return proto3.util.equals(ApprovalAmounts, a, b);
   }
 }
@@ -751,28 +773,28 @@ export class MaxNumTransfers extends Message<MaxNumTransfers> {
    *
    * @generated from field: string overallMaxNumTransfers = 1;
    */
-  overallMaxNumTransfers = "";
+  overallMaxNumTransfers = '';
 
   /**
    * Maximum number of transfers per "to" address.
    *
    * @generated from field: string perToAddressMaxNumTransfers = 2;
    */
-  perToAddressMaxNumTransfers = "";
+  perToAddressMaxNumTransfers = '';
 
   /**
    * Maximum number of transfers per "from" address.
    *
    * @generated from field: string perFromAddressMaxNumTransfers = 3;
    */
-  perFromAddressMaxNumTransfers = "";
+  perFromAddressMaxNumTransfers = '';
 
   /**
    * Maximum number of transfers per "initiated by" address.
    *
    * @generated from field: string perInitiatedByAddressMaxNumTransfers = 4;
    */
-  perInitiatedByAddressMaxNumTransfers = "";
+  perInitiatedByAddressMaxNumTransfers = '';
 
   constructor(data?: PartialMessage<MaxNumTransfers>) {
     super();
@@ -780,12 +802,12 @@ export class MaxNumTransfers extends Message<MaxNumTransfers> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.MaxNumTransfers";
+  static readonly typeName = 'badges.MaxNumTransfers';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "overallMaxNumTransfers", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "perToAddressMaxNumTransfers", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "perFromAddressMaxNumTransfers", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "perInitiatedByAddressMaxNumTransfers", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'overallMaxNumTransfers', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'perToAddressMaxNumTransfers', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'perFromAddressMaxNumTransfers', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: 'perInitiatedByAddressMaxNumTransfers', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MaxNumTransfers {
@@ -800,7 +822,10 @@ export class MaxNumTransfers extends Message<MaxNumTransfers> {
     return new MaxNumTransfers().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MaxNumTransfers | PlainMessage<MaxNumTransfers> | undefined, b: MaxNumTransfers | PlainMessage<MaxNumTransfers> | undefined): boolean {
+  static equals(
+    a: MaxNumTransfers | PlainMessage<MaxNumTransfers> | undefined,
+    b: MaxNumTransfers | PlainMessage<MaxNumTransfers> | undefined
+  ): boolean {
     return proto3.util.equals(MaxNumTransfers, a, b);
   }
 }
@@ -816,7 +841,7 @@ export class ApprovalTracker extends Message<ApprovalTracker> {
    *
    * @generated from field: string numTransfers = 1;
    */
-  numTransfers = "";
+  numTransfers = '';
 
   /**
    * Cumulative balances associated with the transfers that have been processed.
@@ -831,10 +856,10 @@ export class ApprovalTracker extends Message<ApprovalTracker> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.ApprovalTracker";
+  static readonly typeName = 'badges.ApprovalTracker';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "numTransfers", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "amounts", kind: "message", T: Balance, repeated: true },
+    { no: 1, name: 'numTransfers', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'amounts', kind: 'message', T: Balance, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ApprovalTracker {
@@ -849,7 +874,10 @@ export class ApprovalTracker extends Message<ApprovalTracker> {
     return new ApprovalTracker().fromJsonString(jsonString, options);
   }
 
-  static equals(a: ApprovalTracker | PlainMessage<ApprovalTracker> | undefined, b: ApprovalTracker | PlainMessage<ApprovalTracker> | undefined): boolean {
+  static equals(
+    a: ApprovalTracker | PlainMessage<ApprovalTracker> | undefined,
+    b: ApprovalTracker | PlainMessage<ApprovalTracker> | undefined
+  ): boolean {
     return proto3.util.equals(ApprovalTracker, a, b);
   }
 }
@@ -943,19 +971,19 @@ export class ApprovalCriteria extends Message<ApprovalCriteria> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.ApprovalCriteria";
+  static readonly typeName = 'badges.ApprovalCriteria';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "mustOwnBadges", kind: "message", T: MustOwnBadges, repeated: true },
-    { no: 2, name: "merkleChallenge", kind: "message", T: MerkleChallenge },
-    { no: 3, name: "predeterminedBalances", kind: "message", T: PredeterminedBalances },
-    { no: 4, name: "approvalAmounts", kind: "message", T: ApprovalAmounts },
-    { no: 5, name: "maxNumTransfers", kind: "message", T: MaxNumTransfers },
-    { no: 9, name: "requireToEqualsInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 10, name: "requireFromEqualsInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 11, name: "requireToDoesNotEqualInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 12, name: "requireFromDoesNotEqualInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 13, name: "overridesFromOutgoingApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 14, name: "overridesToIncomingApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 1, name: 'mustOwnBadges', kind: 'message', T: MustOwnBadges, repeated: true },
+    { no: 2, name: 'merkleChallenge', kind: 'message', T: MerkleChallenge },
+    { no: 3, name: 'predeterminedBalances', kind: 'message', T: PredeterminedBalances },
+    { no: 4, name: 'approvalAmounts', kind: 'message', T: ApprovalAmounts },
+    { no: 5, name: 'maxNumTransfers', kind: 'message', T: MaxNumTransfers },
+    { no: 9, name: 'requireToEqualsInitiatedBy', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 10, name: 'requireFromEqualsInitiatedBy', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 11, name: 'requireToDoesNotEqualInitiatedBy', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 12, name: 'requireFromDoesNotEqualInitiatedBy', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 13, name: 'overridesFromOutgoingApprovals', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 14, name: 'overridesToIncomingApprovals', kind: 'scalar', T: 8 /* ScalarType.BOOL */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ApprovalCriteria {
@@ -970,7 +998,10 @@ export class ApprovalCriteria extends Message<ApprovalCriteria> {
     return new ApprovalCriteria().fromJsonString(jsonString, options);
   }
 
-  static equals(a: ApprovalCriteria | PlainMessage<ApprovalCriteria> | undefined, b: ApprovalCriteria | PlainMessage<ApprovalCriteria> | undefined): boolean {
+  static equals(
+    a: ApprovalCriteria | PlainMessage<ApprovalCriteria> | undefined,
+    b: ApprovalCriteria | PlainMessage<ApprovalCriteria> | undefined
+  ): boolean {
     return proto3.util.equals(ApprovalCriteria, a, b);
   }
 }
@@ -1036,15 +1067,15 @@ export class OutgoingApprovalCriteria extends Message<OutgoingApprovalCriteria> 
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.OutgoingApprovalCriteria";
+  static readonly typeName = 'badges.OutgoingApprovalCriteria';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "mustOwnBadges", kind: "message", T: MustOwnBadges, repeated: true },
-    { no: 2, name: "merkleChallenge", kind: "message", T: MerkleChallenge },
-    { no: 3, name: "predeterminedBalances", kind: "message", T: PredeterminedBalances },
-    { no: 4, name: "approvalAmounts", kind: "message", T: ApprovalAmounts },
-    { no: 5, name: "maxNumTransfers", kind: "message", T: MaxNumTransfers },
-    { no: 9, name: "requireToEqualsInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 11, name: "requireToDoesNotEqualInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 1, name: 'mustOwnBadges', kind: 'message', T: MustOwnBadges, repeated: true },
+    { no: 2, name: 'merkleChallenge', kind: 'message', T: MerkleChallenge },
+    { no: 3, name: 'predeterminedBalances', kind: 'message', T: PredeterminedBalances },
+    { no: 4, name: 'approvalAmounts', kind: 'message', T: ApprovalAmounts },
+    { no: 5, name: 'maxNumTransfers', kind: 'message', T: MaxNumTransfers },
+    { no: 9, name: 'requireToEqualsInitiatedBy', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 11, name: 'requireToDoesNotEqualInitiatedBy', kind: 'scalar', T: 8 /* ScalarType.BOOL */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): OutgoingApprovalCriteria {
@@ -1059,7 +1090,10 @@ export class OutgoingApprovalCriteria extends Message<OutgoingApprovalCriteria> 
     return new OutgoingApprovalCriteria().fromJsonString(jsonString, options);
   }
 
-  static equals(a: OutgoingApprovalCriteria | PlainMessage<OutgoingApprovalCriteria> | undefined, b: OutgoingApprovalCriteria | PlainMessage<OutgoingApprovalCriteria> | undefined): boolean {
+  static equals(
+    a: OutgoingApprovalCriteria | PlainMessage<OutgoingApprovalCriteria> | undefined,
+    b: OutgoingApprovalCriteria | PlainMessage<OutgoingApprovalCriteria> | undefined
+  ): boolean {
     return proto3.util.equals(OutgoingApprovalCriteria, a, b);
   }
 }
@@ -1125,15 +1159,15 @@ export class IncomingApprovalCriteria extends Message<IncomingApprovalCriteria> 
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.IncomingApprovalCriteria";
+  static readonly typeName = 'badges.IncomingApprovalCriteria';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "mustOwnBadges", kind: "message", T: MustOwnBadges, repeated: true },
-    { no: 2, name: "merkleChallenge", kind: "message", T: MerkleChallenge },
-    { no: 3, name: "predeterminedBalances", kind: "message", T: PredeterminedBalances },
-    { no: 4, name: "approvalAmounts", kind: "message", T: ApprovalAmounts },
-    { no: 5, name: "maxNumTransfers", kind: "message", T: MaxNumTransfers },
-    { no: 10, name: "requireFromEqualsInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 12, name: "requireFromDoesNotEqualInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 1, name: 'mustOwnBadges', kind: 'message', T: MustOwnBadges, repeated: true },
+    { no: 2, name: 'merkleChallenge', kind: 'message', T: MerkleChallenge },
+    { no: 3, name: 'predeterminedBalances', kind: 'message', T: PredeterminedBalances },
+    { no: 4, name: 'approvalAmounts', kind: 'message', T: ApprovalAmounts },
+    { no: 5, name: 'maxNumTransfers', kind: 'message', T: MaxNumTransfers },
+    { no: 10, name: 'requireFromEqualsInitiatedBy', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 12, name: 'requireFromDoesNotEqualInitiatedBy', kind: 'scalar', T: 8 /* ScalarType.BOOL */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): IncomingApprovalCriteria {
@@ -1148,7 +1182,10 @@ export class IncomingApprovalCriteria extends Message<IncomingApprovalCriteria> 
     return new IncomingApprovalCriteria().fromJsonString(jsonString, options);
   }
 
-  static equals(a: IncomingApprovalCriteria | PlainMessage<IncomingApprovalCriteria> | undefined, b: IncomingApprovalCriteria | PlainMessage<IncomingApprovalCriteria> | undefined): boolean {
+  static equals(
+    a: IncomingApprovalCriteria | PlainMessage<IncomingApprovalCriteria> | undefined,
+    b: IncomingApprovalCriteria | PlainMessage<IncomingApprovalCriteria> | undefined
+  ): boolean {
     return proto3.util.equals(IncomingApprovalCriteria, a, b);
   }
 }
@@ -1164,21 +1201,21 @@ export class CollectionApproval extends Message<CollectionApproval> {
    *
    * @generated from field: string fromListId = 1;
    */
-  fromListId = "";
+  fromListId = '';
 
   /**
    * The list ID for the recipient of the transfer.
    *
    * @generated from field: string toListId = 2;
    */
-  toListId = "";
+  toListId = '';
 
   /**
    * The list ID for the user who initiated the transfer.
    *
    * @generated from field: string initiatedByListId = 3;
    */
-  initiatedByListId = "";
+  initiatedByListId = '';
 
   /**
    * The allowed range of transfer times for approval.
@@ -1207,7 +1244,7 @@ export class CollectionApproval extends Message<CollectionApproval> {
    *
    * @generated from field: string amountTrackerId = 7;
    */
-  amountTrackerId = "";
+  amountTrackerId = '';
 
   /**
    * The ID of the challenge tracker associated with this approval.
@@ -1215,28 +1252,28 @@ export class CollectionApproval extends Message<CollectionApproval> {
    *
    * @generated from field: string challengeTrackerId = 8;
    */
-  challengeTrackerId = "";
+  challengeTrackerId = '';
 
   /**
    * The URI associated with this approval, optionally providing metadata about the approval.
    *
    * @generated from field: string uri = 9;
    */
-  uri = "";
+  uri = '';
 
   /**
    * Arbitrary custom data associated with this approval.
    *
    * @generated from field: string customData = 10;
    */
-  customData = "";
+  customData = '';
 
   /**
    * The ID of this approval. Must be unique per level (i.e. collection, outgoing, incoming).
    *
    * @generated from field: string approvalId = 11;
    */
-  approvalId = "";
+  approvalId = '';
 
   /**
    * The criteria that must be met for this approval to be considered.
@@ -1251,20 +1288,20 @@ export class CollectionApproval extends Message<CollectionApproval> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.CollectionApproval";
+  static readonly typeName = 'badges.CollectionApproval';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "fromListId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "toListId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "initiatedByListId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "transferTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 5, name: "badgeIds", kind: "message", T: UintRange, repeated: true },
-    { no: 6, name: "ownershipTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 7, name: "amountTrackerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 8, name: "challengeTrackerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 9, name: "uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 10, name: "customData", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 11, name: "approvalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 12, name: "approvalCriteria", kind: "message", T: ApprovalCriteria },
+    { no: 1, name: 'fromListId', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'toListId', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'initiatedByListId', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: 'transferTimes', kind: 'message', T: UintRange, repeated: true },
+    { no: 5, name: 'badgeIds', kind: 'message', T: UintRange, repeated: true },
+    { no: 6, name: 'ownershipTimes', kind: 'message', T: UintRange, repeated: true },
+    { no: 7, name: 'amountTrackerId', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 8, name: 'challengeTrackerId', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 9, name: 'uri', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 10, name: 'customData', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 11, name: 'approvalId', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 12, name: 'approvalCriteria', kind: 'message', T: ApprovalCriteria }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CollectionApproval {
@@ -1279,7 +1316,10 @@ export class CollectionApproval extends Message<CollectionApproval> {
     return new CollectionApproval().fromJsonString(jsonString, options);
   }
 
-  static equals(a: CollectionApproval | PlainMessage<CollectionApproval> | undefined, b: CollectionApproval | PlainMessage<CollectionApproval> | undefined): boolean {
+  static equals(
+    a: CollectionApproval | PlainMessage<CollectionApproval> | undefined,
+    b: CollectionApproval | PlainMessage<CollectionApproval> | undefined
+  ): boolean {
     return proto3.util.equals(CollectionApproval, a, b);
   }
 }
@@ -1295,21 +1335,21 @@ export class ApprovalIdentifierDetails extends Message<ApprovalIdentifierDetails
    *
    * @generated from field: string approvalId = 1;
    */
-  approvalId = "";
+  approvalId = '';
 
   /**
    * The level of the approval. Can be "collection", "incoming", or "outgoing".
    *
    * @generated from field: string approvalLevel = 2;
    */
-  approvalLevel = "";
+  approvalLevel = '';
 
   /**
    * The address of the approver. Leave blank "" if approvalLevel == "collection".
    *
    * @generated from field: string approverAddress = 3;
    */
-  approverAddress = "";
+  approverAddress = '';
 
   constructor(data?: PartialMessage<ApprovalIdentifierDetails>) {
     super();
@@ -1317,11 +1357,11 @@ export class ApprovalIdentifierDetails extends Message<ApprovalIdentifierDetails
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.ApprovalIdentifierDetails";
+  static readonly typeName = 'badges.ApprovalIdentifierDetails';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "approvalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "approvalLevel", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "approverAddress", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'approvalId', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'approvalLevel', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'approverAddress', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ApprovalIdentifierDetails {
@@ -1336,7 +1376,10 @@ export class ApprovalIdentifierDetails extends Message<ApprovalIdentifierDetails
     return new ApprovalIdentifierDetails().fromJsonString(jsonString, options);
   }
 
-  static equals(a: ApprovalIdentifierDetails | PlainMessage<ApprovalIdentifierDetails> | undefined, b: ApprovalIdentifierDetails | PlainMessage<ApprovalIdentifierDetails> | undefined): boolean {
+  static equals(
+    a: ApprovalIdentifierDetails | PlainMessage<ApprovalIdentifierDetails> | undefined,
+    b: ApprovalIdentifierDetails | PlainMessage<ApprovalIdentifierDetails> | undefined
+  ): boolean {
     return proto3.util.equals(ApprovalIdentifierDetails, a, b);
   }
 }
@@ -1352,7 +1395,7 @@ export class Transfer extends Message<Transfer> {
    *
    * @generated from field: string from = 1;
    */
-  from = "";
+  from = '';
 
   /**
    * The addresses of the recipients of the transfer.
@@ -1388,7 +1431,7 @@ export class Transfer extends Message<Transfer> {
    *
    * @generated from field: string memo = 6;
    */
-  memo = "";
+  memo = '';
 
   /**
    * The prioritized approvals for the transfer. By default, we scan linearly through the approvals and use the first match.
@@ -1399,9 +1442,9 @@ export class Transfer extends Message<Transfer> {
   prioritizedApprovals: ApprovalIdentifierDetails[] = [];
 
   /**
-   * Whether to only check prioritized approvals for the transfer. 
+   * Whether to only check prioritized approvals for the transfer.
    * If true, we will only check the prioritized approvals and fail if none of them match (i.e. do not check any non-prioritized approvals).
-   * If false, we will check the prioritized approvals first and then scan through the rest of the approvals. 
+   * If false, we will check the prioritized approvals first and then scan through the rest of the approvals.
    *
    * @generated from field: bool onlyCheckPrioritizedApprovals = 8;
    */
@@ -1413,16 +1456,16 @@ export class Transfer extends Message<Transfer> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.Transfer";
+  static readonly typeName = 'badges.Transfer';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "from", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "toAddresses", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
-    { no: 3, name: "balances", kind: "message", T: Balance, repeated: true },
-    { no: 4, name: "precalculateBalancesFromApproval", kind: "message", T: ApprovalIdentifierDetails },
-    { no: 5, name: "merkleProofs", kind: "message", T: MerkleProof, repeated: true },
-    { no: 6, name: "memo", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 7, name: "prioritizedApprovals", kind: "message", T: ApprovalIdentifierDetails, repeated: true },
-    { no: 8, name: "onlyCheckPrioritizedApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 1, name: 'from', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'toAddresses', kind: 'scalar', T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 3, name: 'balances', kind: 'message', T: Balance, repeated: true },
+    { no: 4, name: 'precalculateBalancesFromApproval', kind: 'message', T: ApprovalIdentifierDetails },
+    { no: 5, name: 'merkleProofs', kind: 'message', T: MerkleProof, repeated: true },
+    { no: 6, name: 'memo', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 7, name: 'prioritizedApprovals', kind: 'message', T: ApprovalIdentifierDetails, repeated: true },
+    { no: 8, name: 'onlyCheckPrioritizedApprovals', kind: 'scalar', T: 8 /* ScalarType.BOOL */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Transfer {
@@ -1453,7 +1496,7 @@ export class MerklePathItem extends Message<MerklePathItem> {
    *
    * @generated from field: string aunt = 1;
    */
-  aunt = "";
+  aunt = '';
 
   /**
    * Indicates whether the aunt node is on the right side of the path.
@@ -1468,10 +1511,10 @@ export class MerklePathItem extends Message<MerklePathItem> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.MerklePathItem";
+  static readonly typeName = 'badges.MerklePathItem';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "aunt", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "onRight", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 1, name: 'aunt', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'onRight', kind: 'scalar', T: 8 /* ScalarType.BOOL */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MerklePathItem {
@@ -1502,7 +1545,7 @@ export class MerkleProof extends Message<MerkleProof> {
    *
    * @generated from field: string leaf = 1;
    */
-  leaf = "";
+  leaf = '';
 
   /**
    * List of Merkle path items (aunts) that make up the proof.
@@ -1517,10 +1560,10 @@ export class MerkleProof extends Message<MerkleProof> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.MerkleProof";
+  static readonly typeName = 'badges.MerkleProof';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "leaf", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "aunts", kind: "message", T: MerklePathItem, repeated: true },
+    { no: 1, name: 'leaf', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'aunts', kind: 'message', T: MerklePathItem, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MerkleProof {
@@ -1539,4 +1582,3 @@ export class MerkleProof extends Message<MerkleProof> {
     return proto3.util.equals(MerkleProof, a, b);
   }
 }
-

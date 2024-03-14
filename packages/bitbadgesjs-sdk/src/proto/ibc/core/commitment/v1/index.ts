@@ -1,1 +1,1 @@
-export * from './commitment_pb'
+export * from './commitment_pb';

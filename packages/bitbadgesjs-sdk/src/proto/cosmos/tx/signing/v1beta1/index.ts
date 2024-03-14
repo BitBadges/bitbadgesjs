@@ -1,1 +1,1 @@
-export * from './signing_pb'
+export * from './signing_pb';

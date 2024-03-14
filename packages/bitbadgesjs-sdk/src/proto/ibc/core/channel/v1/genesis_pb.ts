@@ -3,9 +3,9 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3, protoInt64 } from "@bufbuild/protobuf";
-import { IdentifiedChannel, PacketState } from "./channel_pb.js";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3, protoInt64 } from '@bufbuild/protobuf';
+import { IdentifiedChannel, PacketState } from './channel_pb.js';
 
 /**
  * GenesisState defines the ibc channel submodule's genesis state.
@@ -61,16 +61,16 @@ export class GenesisState extends Message<GenesisState> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ibc.core.channel.v1.GenesisState";
+  static readonly typeName = 'ibc.core.channel.v1.GenesisState';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "channels", kind: "message", T: IdentifiedChannel, repeated: true },
-    { no: 2, name: "acknowledgements", kind: "message", T: PacketState, repeated: true },
-    { no: 3, name: "commitments", kind: "message", T: PacketState, repeated: true },
-    { no: 4, name: "receipts", kind: "message", T: PacketState, repeated: true },
-    { no: 5, name: "send_sequences", kind: "message", T: PacketSequence, repeated: true },
-    { no: 6, name: "recv_sequences", kind: "message", T: PacketSequence, repeated: true },
-    { no: 7, name: "ack_sequences", kind: "message", T: PacketSequence, repeated: true },
-    { no: 8, name: "next_channel_sequence", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
+    { no: 1, name: 'channels', kind: 'message', T: IdentifiedChannel, repeated: true },
+    { no: 2, name: 'acknowledgements', kind: 'message', T: PacketState, repeated: true },
+    { no: 3, name: 'commitments', kind: 'message', T: PacketState, repeated: true },
+    { no: 4, name: 'receipts', kind: 'message', T: PacketState, repeated: true },
+    { no: 5, name: 'send_sequences', kind: 'message', T: PacketSequence, repeated: true },
+    { no: 6, name: 'recv_sequences', kind: 'message', T: PacketSequence, repeated: true },
+    { no: 7, name: 'ack_sequences', kind: 'message', T: PacketSequence, repeated: true },
+    { no: 8, name: 'next_channel_sequence', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GenesisState {
@@ -100,12 +100,12 @@ export class PacketSequence extends Message<PacketSequence> {
   /**
    * @generated from field: string port_id = 1;
    */
-  portId = "";
+  portId = '';
 
   /**
    * @generated from field: string channel_id = 2;
    */
-  channelId = "";
+  channelId = '';
 
   /**
    * @generated from field: uint64 sequence = 3;
@@ -118,11 +118,11 @@ export class PacketSequence extends Message<PacketSequence> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ibc.core.channel.v1.PacketSequence";
+  static readonly typeName = 'ibc.core.channel.v1.PacketSequence';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "port_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "channel_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "sequence", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
+    { no: 1, name: 'port_id', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'channel_id', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'sequence', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PacketSequence {
@@ -141,4 +141,3 @@ export class PacketSequence extends Message<PacketSequence> {
     return proto3.util.equals(PacketSequence, a, b);
   }
 }
-

@@ -1,21 +1,42 @@
-import {
-  createTxRaw,
-  createAnyMessage,
-  MessageGenerated,
-} from '../..'
-import { AuthInfo, TxBody } from '../../proto/cosmos/tx/v1beta1/tx_pb'
+import { AuthInfo, TxBody } from '@/proto/cosmos/tx/v1beta1/tx_pb';
+import { TxRaw } from '@/proto/cosmos/tx/v1beta1/tx_pb';
+import type { MessageGenerated } from './utils';
+import { createAnyMessage } from './utils';
+
+export function bytesToTxRaw(bytes: Uint8Array) {
+  return TxRaw.fromBinary(bytes);
+}
+
+export function bytesToTxBody(bytes: Uint8Array) {
+  return TxBody.fromBinary(bytes);
+}
+
+export function bytesToAuthInfo(bytes: Uint8Array) {
+  return AuthInfo.fromBinary(bytes);
+}
+
+/**
+ * This function is used to create the raw transaction to be sent to the blockchain.
+ *
+ * See documentation for more details:
+ */
+export function createTxRaw(bodyBytes: Uint8Array, authInfoBytes: Uint8Array, signatures: Uint8Array[]) {
+  const message = new TxRaw({
+    bodyBytes,
+    authInfoBytes,
+    signatures
+  });
+  return {
+    message,
+    path: TxRaw.typeName
+  };
+}
 
 /**
  * This function is used to create the raw transaction to be sent to the blockchain for EIP712 transactions.
  */
-export function createTxRawWithExtension(
-  body: TxBody,
-  authInfo: AuthInfo,
-  extension: MessageGenerated,
-) {
-  body.extensionOptions.push(createAnyMessage(extension))
+export function createTxRawWithExtension(body: TxBody, authInfo: AuthInfo, extension: MessageGenerated) {
+  body.extensionOptions.push(createAnyMessage(extension));
 
-  return createTxRaw(body.toBinary(), authInfo.toBinary(), [
-    new Uint8Array(),
-  ])
+  return createTxRaw(body.toBinary(), authInfo.toBinary(), [new Uint8Array()]);
 }

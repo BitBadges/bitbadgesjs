@@ -3,8 +3,8 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3 } from '@bufbuild/protobuf';
 
 /**
  * MsgExecuteContractCompat submits the given message data to a smart contract, compatible with EIP712
@@ -17,28 +17,28 @@ export class MsgExecuteContractCompat extends Message<MsgExecuteContractCompat> 
    *
    * @generated from field: string sender = 1;
    */
-  sender = "";
+  sender = '';
 
   /**
    * Contract is the address of the smart contract
    *
    * @generated from field: string contract = 2;
    */
-  contract = "";
+  contract = '';
 
   /**
    * Msg json encoded message to be passed to the contract
    *
    * @generated from field: string msg = 3;
    */
-  msg = "";
+  msg = '';
 
   /**
    * Funds coins that are transferred to the contract on execution
    *
    * @generated from field: string funds = 4;
    */
-  funds = "";
+  funds = '';
 
   constructor(data?: PartialMessage<MsgExecuteContractCompat>) {
     super();
@@ -46,12 +46,12 @@ export class MsgExecuteContractCompat extends Message<MsgExecuteContractCompat> 
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "wasmx.MsgExecuteContractCompat";
+  static readonly typeName = 'wasmx.MsgExecuteContractCompat';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "sender", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "contract", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "msg", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "funds", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'sender', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'contract', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'msg', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: 'funds', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgExecuteContractCompat {
@@ -66,7 +66,10 @@ export class MsgExecuteContractCompat extends Message<MsgExecuteContractCompat> 
     return new MsgExecuteContractCompat().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgExecuteContractCompat | PlainMessage<MsgExecuteContractCompat> | undefined, b: MsgExecuteContractCompat | PlainMessage<MsgExecuteContractCompat> | undefined): boolean {
+  static equals(
+    a: MsgExecuteContractCompat | PlainMessage<MsgExecuteContractCompat> | undefined,
+    b: MsgExecuteContractCompat | PlainMessage<MsgExecuteContractCompat> | undefined
+  ): boolean {
     return proto3.util.equals(MsgExecuteContractCompat, a, b);
   }
 }
@@ -90,10 +93,8 @@ export class MsgExecuteContractCompatResponse extends Message<MsgExecuteContract
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "wasmx.MsgExecuteContractCompatResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "data", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-  ]);
+  static readonly typeName = 'wasmx.MsgExecuteContractCompatResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'data', kind: 'scalar', T: 12 /* ScalarType.BYTES */ }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgExecuteContractCompatResponse {
     return new MsgExecuteContractCompatResponse().fromBinary(bytes, options);
@@ -107,7 +108,10 @@ export class MsgExecuteContractCompatResponse extends Message<MsgExecuteContract
     return new MsgExecuteContractCompatResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgExecuteContractCompatResponse | PlainMessage<MsgExecuteContractCompatResponse> | undefined, b: MsgExecuteContractCompatResponse | PlainMessage<MsgExecuteContractCompatResponse> | undefined): boolean {
+  static equals(
+    a: MsgExecuteContractCompatResponse | PlainMessage<MsgExecuteContractCompatResponse> | undefined,
+    b: MsgExecuteContractCompatResponse | PlainMessage<MsgExecuteContractCompatResponse> | undefined
+  ): boolean {
     return proto3.util.equals(MsgExecuteContractCompatResponse, a, b);
   }
 }
@@ -123,14 +127,14 @@ export class MsgStoreCodeCompat extends Message<MsgStoreCodeCompat> {
    *
    * @generated from field: string sender = 1;
    */
-  sender = "";
+  sender = '';
 
   /**
    * WasmByteCode is the raw wasm bytes
    *
    * @generated from field: string hexWasmByteCode = 2;
    */
-  hexWasmByteCode = "";
+  hexWasmByteCode = '';
 
   constructor(data?: PartialMessage<MsgStoreCodeCompat>) {
     super();
@@ -138,10 +142,10 @@ export class MsgStoreCodeCompat extends Message<MsgStoreCodeCompat> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "wasmx.MsgStoreCodeCompat";
+  static readonly typeName = 'wasmx.MsgStoreCodeCompat';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "sender", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "hexWasmByteCode", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'sender', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'hexWasmByteCode', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgStoreCodeCompat {
@@ -156,7 +160,10 @@ export class MsgStoreCodeCompat extends Message<MsgStoreCodeCompat> {
     return new MsgStoreCodeCompat().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgStoreCodeCompat | PlainMessage<MsgStoreCodeCompat> | undefined, b: MsgStoreCodeCompat | PlainMessage<MsgStoreCodeCompat> | undefined): boolean {
+  static equals(
+    a: MsgStoreCodeCompat | PlainMessage<MsgStoreCodeCompat> | undefined,
+    b: MsgStoreCodeCompat | PlainMessage<MsgStoreCodeCompat> | undefined
+  ): boolean {
     return proto3.util.equals(MsgStoreCodeCompat, a, b);
   }
 }
@@ -172,7 +179,7 @@ export class MsgStoreCodeCompatResponse extends Message<MsgStoreCodeCompatRespon
    *
    * @generated from field: string codeId = 1;
    */
-  codeId = "";
+  codeId = '';
 
   /**
    * Checksum is the sha256 hash of the stored code
@@ -187,10 +194,10 @@ export class MsgStoreCodeCompatResponse extends Message<MsgStoreCodeCompatRespon
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "wasmx.MsgStoreCodeCompatResponse";
+  static readonly typeName = 'wasmx.MsgStoreCodeCompatResponse';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "codeId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "checksum", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
+    { no: 1, name: 'codeId', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'checksum', kind: 'scalar', T: 12 /* ScalarType.BYTES */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgStoreCodeCompatResponse {
@@ -205,7 +212,10 @@ export class MsgStoreCodeCompatResponse extends Message<MsgStoreCodeCompatRespon
     return new MsgStoreCodeCompatResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgStoreCodeCompatResponse | PlainMessage<MsgStoreCodeCompatResponse> | undefined, b: MsgStoreCodeCompatResponse | PlainMessage<MsgStoreCodeCompatResponse> | undefined): boolean {
+  static equals(
+    a: MsgStoreCodeCompatResponse | PlainMessage<MsgStoreCodeCompatResponse> | undefined,
+    b: MsgStoreCodeCompatResponse | PlainMessage<MsgStoreCodeCompatResponse> | undefined
+  ): boolean {
     return proto3.util.equals(MsgStoreCodeCompatResponse, a, b);
   }
 }
@@ -219,28 +229,28 @@ export class MsgInstantiateContractCompat extends Message<MsgInstantiateContract
    *
    * @generated from field: string sender = 1;
    */
-  sender = "";
+  sender = '';
 
   /**
    * Code ID obtained from store wasm code
    *
    * @generated from field: string codeId = 2;
    */
-  codeId = "";
+  codeId = '';
 
   /**
    * Label is a human-readable string for labelling the contract
    *
    * @generated from field: string label = 3;
    */
-  label = "";
+  label = '';
 
   /**
    * Funds coins that are transferred to the contract on instantiation
    *
    * @generated from field: string funds = 4;
    */
-  funds = "";
+  funds = '';
 
   constructor(data?: PartialMessage<MsgInstantiateContractCompat>) {
     super();
@@ -248,12 +258,12 @@ export class MsgInstantiateContractCompat extends Message<MsgInstantiateContract
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "wasmx.MsgInstantiateContractCompat";
+  static readonly typeName = 'wasmx.MsgInstantiateContractCompat';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "sender", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "codeId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "label", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "funds", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'sender', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'codeId', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'label', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: 'funds', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgInstantiateContractCompat {
@@ -268,7 +278,10 @@ export class MsgInstantiateContractCompat extends Message<MsgInstantiateContract
     return new MsgInstantiateContractCompat().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgInstantiateContractCompat | PlainMessage<MsgInstantiateContractCompat> | undefined, b: MsgInstantiateContractCompat | PlainMessage<MsgInstantiateContractCompat> | undefined): boolean {
+  static equals(
+    a: MsgInstantiateContractCompat | PlainMessage<MsgInstantiateContractCompat> | undefined,
+    b: MsgInstantiateContractCompat | PlainMessage<MsgInstantiateContractCompat> | undefined
+  ): boolean {
     return proto3.util.equals(MsgInstantiateContractCompat, a, b);
   }
 }
@@ -282,7 +295,7 @@ export class MsgInstantiateContractCompatResponse extends Message<MsgInstantiate
   /**
    * @generated from field: string address = 1;
    */
-  address = "";
+  address = '';
 
   /**
    * @generated from field: bytes data = 2;
@@ -295,10 +308,10 @@ export class MsgInstantiateContractCompatResponse extends Message<MsgInstantiate
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "wasmx.MsgInstantiateContractCompatResponse";
+  static readonly typeName = 'wasmx.MsgInstantiateContractCompatResponse';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "data", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
+    { no: 1, name: 'address', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'data', kind: 'scalar', T: 12 /* ScalarType.BYTES */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgInstantiateContractCompatResponse {
@@ -313,8 +326,10 @@ export class MsgInstantiateContractCompatResponse extends Message<MsgInstantiate
     return new MsgInstantiateContractCompatResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgInstantiateContractCompatResponse | PlainMessage<MsgInstantiateContractCompatResponse> | undefined, b: MsgInstantiateContractCompatResponse | PlainMessage<MsgInstantiateContractCompatResponse> | undefined): boolean {
+  static equals(
+    a: MsgInstantiateContractCompatResponse | PlainMessage<MsgInstantiateContractCompatResponse> | undefined,
+    b: MsgInstantiateContractCompatResponse | PlainMessage<MsgInstantiateContractCompatResponse> | undefined
+  ): boolean {
     return proto3.util.equals(MsgInstantiateContractCompatResponse, a, b);
   }
 }
-

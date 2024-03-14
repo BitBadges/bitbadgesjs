@@ -5,10 +5,10 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
-import { Grant } from "./feegrant_pb.js";
-import { PageRequest, PageResponse } from "../../base/query/v1beta1/pagination_pb.js";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3 } from '@bufbuild/protobuf';
+import { Grant } from './feegrant_pb.js';
+import { PageRequest, PageResponse } from '../../base/query/v1beta1/pagination_pb.js';
 
 /**
  * QueryAllowanceRequest is the request type for the Query/Allowance RPC method.
@@ -21,14 +21,14 @@ export class QueryAllowanceRequest extends Message<QueryAllowanceRequest> {
    *
    * @generated from field: string granter = 1;
    */
-  granter = "";
+  granter = '';
 
   /**
    * grantee is the address of the user being granted an allowance of another user's funds.
    *
    * @generated from field: string grantee = 2;
    */
-  grantee = "";
+  grantee = '';
 
   constructor(data?: PartialMessage<QueryAllowanceRequest>) {
     super();
@@ -36,10 +36,10 @@ export class QueryAllowanceRequest extends Message<QueryAllowanceRequest> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.feegrant.v1beta1.QueryAllowanceRequest";
+  static readonly typeName = 'cosmos.feegrant.v1beta1.QueryAllowanceRequest';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "granter", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "grantee", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'granter', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'grantee', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryAllowanceRequest {
@@ -54,7 +54,10 @@ export class QueryAllowanceRequest extends Message<QueryAllowanceRequest> {
     return new QueryAllowanceRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryAllowanceRequest | PlainMessage<QueryAllowanceRequest> | undefined, b: QueryAllowanceRequest | PlainMessage<QueryAllowanceRequest> | undefined): boolean {
+  static equals(
+    a: QueryAllowanceRequest | PlainMessage<QueryAllowanceRequest> | undefined,
+    b: QueryAllowanceRequest | PlainMessage<QueryAllowanceRequest> | undefined
+  ): boolean {
     return proto3.util.equals(QueryAllowanceRequest, a, b);
   }
 }
@@ -78,10 +81,8 @@ export class QueryAllowanceResponse extends Message<QueryAllowanceResponse> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.feegrant.v1beta1.QueryAllowanceResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "allowance", kind: "message", T: Grant },
-  ]);
+  static readonly typeName = 'cosmos.feegrant.v1beta1.QueryAllowanceResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'allowance', kind: 'message', T: Grant }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryAllowanceResponse {
     return new QueryAllowanceResponse().fromBinary(bytes, options);
@@ -95,7 +96,10 @@ export class QueryAllowanceResponse extends Message<QueryAllowanceResponse> {
     return new QueryAllowanceResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryAllowanceResponse | PlainMessage<QueryAllowanceResponse> | undefined, b: QueryAllowanceResponse | PlainMessage<QueryAllowanceResponse> | undefined): boolean {
+  static equals(
+    a: QueryAllowanceResponse | PlainMessage<QueryAllowanceResponse> | undefined,
+    b: QueryAllowanceResponse | PlainMessage<QueryAllowanceResponse> | undefined
+  ): boolean {
     return proto3.util.equals(QueryAllowanceResponse, a, b);
   }
 }
@@ -109,7 +113,7 @@ export class QueryAllowancesRequest extends Message<QueryAllowancesRequest> {
   /**
    * @generated from field: string grantee = 1;
    */
-  grantee = "";
+  grantee = '';
 
   /**
    * pagination defines an pagination for the request.
@@ -124,10 +128,10 @@ export class QueryAllowancesRequest extends Message<QueryAllowancesRequest> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.feegrant.v1beta1.QueryAllowancesRequest";
+  static readonly typeName = 'cosmos.feegrant.v1beta1.QueryAllowancesRequest';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "grantee", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "pagination", kind: "message", T: PageRequest },
+    { no: 1, name: 'grantee', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'pagination', kind: 'message', T: PageRequest }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryAllowancesRequest {
@@ -142,7 +146,10 @@ export class QueryAllowancesRequest extends Message<QueryAllowancesRequest> {
     return new QueryAllowancesRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryAllowancesRequest | PlainMessage<QueryAllowancesRequest> | undefined, b: QueryAllowancesRequest | PlainMessage<QueryAllowancesRequest> | undefined): boolean {
+  static equals(
+    a: QueryAllowancesRequest | PlainMessage<QueryAllowancesRequest> | undefined,
+    b: QueryAllowancesRequest | PlainMessage<QueryAllowancesRequest> | undefined
+  ): boolean {
     return proto3.util.equals(QueryAllowancesRequest, a, b);
   }
 }
@@ -173,10 +180,10 @@ export class QueryAllowancesResponse extends Message<QueryAllowancesResponse> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.feegrant.v1beta1.QueryAllowancesResponse";
+  static readonly typeName = 'cosmos.feegrant.v1beta1.QueryAllowancesResponse';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "allowances", kind: "message", T: Grant, repeated: true },
-    { no: 2, name: "pagination", kind: "message", T: PageResponse },
+    { no: 1, name: 'allowances', kind: 'message', T: Grant, repeated: true },
+    { no: 2, name: 'pagination', kind: 'message', T: PageResponse }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryAllowancesResponse {
@@ -191,7 +198,10 @@ export class QueryAllowancesResponse extends Message<QueryAllowancesResponse> {
     return new QueryAllowancesResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryAllowancesResponse | PlainMessage<QueryAllowancesResponse> | undefined, b: QueryAllowancesResponse | PlainMessage<QueryAllowancesResponse> | undefined): boolean {
+  static equals(
+    a: QueryAllowancesResponse | PlainMessage<QueryAllowancesResponse> | undefined,
+    b: QueryAllowancesResponse | PlainMessage<QueryAllowancesResponse> | undefined
+  ): boolean {
     return proto3.util.equals(QueryAllowancesResponse, a, b);
   }
 }
@@ -207,7 +217,7 @@ export class QueryAllowancesByGranterRequest extends Message<QueryAllowancesByGr
   /**
    * @generated from field: string granter = 1;
    */
-  granter = "";
+  granter = '';
 
   /**
    * pagination defines an pagination for the request.
@@ -222,10 +232,10 @@ export class QueryAllowancesByGranterRequest extends Message<QueryAllowancesByGr
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.feegrant.v1beta1.QueryAllowancesByGranterRequest";
+  static readonly typeName = 'cosmos.feegrant.v1beta1.QueryAllowancesByGranterRequest';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "granter", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "pagination", kind: "message", T: PageRequest },
+    { no: 1, name: 'granter', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'pagination', kind: 'message', T: PageRequest }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryAllowancesByGranterRequest {
@@ -240,7 +250,10 @@ export class QueryAllowancesByGranterRequest extends Message<QueryAllowancesByGr
     return new QueryAllowancesByGranterRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryAllowancesByGranterRequest | PlainMessage<QueryAllowancesByGranterRequest> | undefined, b: QueryAllowancesByGranterRequest | PlainMessage<QueryAllowancesByGranterRequest> | undefined): boolean {
+  static equals(
+    a: QueryAllowancesByGranterRequest | PlainMessage<QueryAllowancesByGranterRequest> | undefined,
+    b: QueryAllowancesByGranterRequest | PlainMessage<QueryAllowancesByGranterRequest> | undefined
+  ): boolean {
     return proto3.util.equals(QueryAllowancesByGranterRequest, a, b);
   }
 }
@@ -273,10 +286,10 @@ export class QueryAllowancesByGranterResponse extends Message<QueryAllowancesByG
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.feegrant.v1beta1.QueryAllowancesByGranterResponse";
+  static readonly typeName = 'cosmos.feegrant.v1beta1.QueryAllowancesByGranterResponse';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "allowances", kind: "message", T: Grant, repeated: true },
-    { no: 2, name: "pagination", kind: "message", T: PageResponse },
+    { no: 1, name: 'allowances', kind: 'message', T: Grant, repeated: true },
+    { no: 2, name: 'pagination', kind: 'message', T: PageResponse }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryAllowancesByGranterResponse {
@@ -291,8 +304,10 @@ export class QueryAllowancesByGranterResponse extends Message<QueryAllowancesByG
     return new QueryAllowancesByGranterResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryAllowancesByGranterResponse | PlainMessage<QueryAllowancesByGranterResponse> | undefined, b: QueryAllowancesByGranterResponse | PlainMessage<QueryAllowancesByGranterResponse> | undefined): boolean {
+  static equals(
+    a: QueryAllowancesByGranterResponse | PlainMessage<QueryAllowancesByGranterResponse> | undefined,
+    b: QueryAllowancesByGranterResponse | PlainMessage<QueryAllowancesByGranterResponse> | undefined
+  ): boolean {
     return proto3.util.equals(QueryAllowancesByGranterResponse, a, b);
   }
 }
-

@@ -3,8 +3,8 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3 } from '@bufbuild/protobuf';
 
 /**
  * Pairs defines a repeated slice of Pair objects.
@@ -23,10 +23,8 @@ export class Pairs extends Message<Pairs> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.base.kv.v1beta1.Pairs";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "pairs", kind: "message", T: Pair, repeated: true },
-  ]);
+  static readonly typeName = 'cosmos.base.kv.v1beta1.Pairs';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'pairs', kind: 'message', T: Pair, repeated: true }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Pairs {
     return new Pairs().fromBinary(bytes, options);
@@ -67,10 +65,10 @@ export class Pair extends Message<Pair> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.base.kv.v1beta1.Pair";
+  static readonly typeName = 'cosmos.base.kv.v1beta1.Pair';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "key", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 2, name: "value", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
+    { no: 1, name: 'key', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 2, name: 'value', kind: 'scalar', T: 12 /* ScalarType.BYTES */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Pair {
@@ -89,4 +87,3 @@ export class Pair extends Message<Pair> {
     return proto3.util.equals(Pair, a, b);
   }
 }
-

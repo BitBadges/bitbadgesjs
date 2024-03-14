@@ -1,1 +1,1 @@
-export * from './module_pb'
+export * from './module_pb';

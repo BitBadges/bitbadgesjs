@@ -3,9 +3,9 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
-import { Params } from "./wasmx_pb.js";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3 } from '@bufbuild/protobuf';
+import { Params } from './wasmx_pb.js';
 
 /**
  * GenesisState defines the wasmx module's genesis state.
@@ -26,10 +26,8 @@ export class GenesisState extends Message<GenesisState> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "wasmx.GenesisState";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "params", kind: "message", T: Params },
-  ]);
+  static readonly typeName = 'wasmx.GenesisState';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'params', kind: 'message', T: Params }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GenesisState {
     return new GenesisState().fromBinary(bytes, options);
@@ -47,4 +45,3 @@ export class GenesisState extends Message<GenesisState> {
     return proto3.util.equals(GenesisState, a, b);
   }
 }
-

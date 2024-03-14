@@ -3,9 +3,9 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3, protoInt64 } from "@bufbuild/protobuf";
-import { Height } from "../../client/v1/client_pb.js";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3, protoInt64 } from '@bufbuild/protobuf';
+import { Height } from '../../client/v1/client_pb.js';
 
 /**
  * State defines if a channel is in one of the following states:
@@ -49,15 +49,15 @@ export enum State {
    *
    * @generated from enum value: STATE_CLOSED = 4;
    */
-  CLOSED = 4,
+  CLOSED = 4
 }
 // Retrieve enum metadata with: proto3.getEnumType(State)
-proto3.util.setEnumType(State, "ibc.core.channel.v1.State", [
-  { no: 0, name: "STATE_UNINITIALIZED_UNSPECIFIED" },
-  { no: 1, name: "STATE_INIT" },
-  { no: 2, name: "STATE_TRYOPEN" },
-  { no: 3, name: "STATE_OPEN" },
-  { no: 4, name: "STATE_CLOSED" },
+proto3.util.setEnumType(State, 'ibc.core.channel.v1.State', [
+  { no: 0, name: 'STATE_UNINITIALIZED_UNSPECIFIED' },
+  { no: 1, name: 'STATE_INIT' },
+  { no: 2, name: 'STATE_TRYOPEN' },
+  { no: 3, name: 'STATE_OPEN' },
+  { no: 4, name: 'STATE_CLOSED' }
 ]);
 
 /**
@@ -86,13 +86,13 @@ export enum Order {
    *
    * @generated from enum value: ORDER_ORDERED = 2;
    */
-  ORDERED = 2,
+  ORDERED = 2
 }
 // Retrieve enum metadata with: proto3.getEnumType(Order)
-proto3.util.setEnumType(Order, "ibc.core.channel.v1.Order", [
-  { no: 0, name: "ORDER_NONE_UNSPECIFIED" },
-  { no: 1, name: "ORDER_UNORDERED" },
-  { no: 2, name: "ORDER_ORDERED" },
+proto3.util.setEnumType(Order, 'ibc.core.channel.v1.Order', [
+  { no: 0, name: 'ORDER_NONE_UNSPECIFIED' },
+  { no: 1, name: 'ORDER_UNORDERED' },
+  { no: 2, name: 'ORDER_ORDERED' }
 ]);
 
 /**
@@ -137,7 +137,7 @@ export class Channel extends Message<Channel> {
    *
    * @generated from field: string version = 5;
    */
-  version = "";
+  version = '';
 
   constructor(data?: PartialMessage<Channel>) {
     super();
@@ -145,13 +145,13 @@ export class Channel extends Message<Channel> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ibc.core.channel.v1.Channel";
+  static readonly typeName = 'ibc.core.channel.v1.Channel';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "state", kind: "enum", T: proto3.getEnumType(State) },
-    { no: 2, name: "ordering", kind: "enum", T: proto3.getEnumType(Order) },
-    { no: 3, name: "counterparty", kind: "message", T: Counterparty },
-    { no: 4, name: "connection_hops", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
-    { no: 5, name: "version", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'state', kind: 'enum', T: proto3.getEnumType(State) },
+    { no: 2, name: 'ordering', kind: 'enum', T: proto3.getEnumType(Order) },
+    { no: 3, name: 'counterparty', kind: 'message', T: Counterparty },
+    { no: 4, name: 'connection_hops', kind: 'scalar', T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 5, name: 'version', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Channel {
@@ -212,21 +212,21 @@ export class IdentifiedChannel extends Message<IdentifiedChannel> {
    *
    * @generated from field: string version = 5;
    */
-  version = "";
+  version = '';
 
   /**
    * port identifier
    *
    * @generated from field: string port_id = 6;
    */
-  portId = "";
+  portId = '';
 
   /**
    * channel identifier
    *
    * @generated from field: string channel_id = 7;
    */
-  channelId = "";
+  channelId = '';
 
   constructor(data?: PartialMessage<IdentifiedChannel>) {
     super();
@@ -234,15 +234,15 @@ export class IdentifiedChannel extends Message<IdentifiedChannel> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ibc.core.channel.v1.IdentifiedChannel";
+  static readonly typeName = 'ibc.core.channel.v1.IdentifiedChannel';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "state", kind: "enum", T: proto3.getEnumType(State) },
-    { no: 2, name: "ordering", kind: "enum", T: proto3.getEnumType(Order) },
-    { no: 3, name: "counterparty", kind: "message", T: Counterparty },
-    { no: 4, name: "connection_hops", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
-    { no: 5, name: "version", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 6, name: "port_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 7, name: "channel_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'state', kind: 'enum', T: proto3.getEnumType(State) },
+    { no: 2, name: 'ordering', kind: 'enum', T: proto3.getEnumType(Order) },
+    { no: 3, name: 'counterparty', kind: 'message', T: Counterparty },
+    { no: 4, name: 'connection_hops', kind: 'scalar', T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 5, name: 'version', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 6, name: 'port_id', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 7, name: 'channel_id', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): IdentifiedChannel {
@@ -257,7 +257,10 @@ export class IdentifiedChannel extends Message<IdentifiedChannel> {
     return new IdentifiedChannel().fromJsonString(jsonString, options);
   }
 
-  static equals(a: IdentifiedChannel | PlainMessage<IdentifiedChannel> | undefined, b: IdentifiedChannel | PlainMessage<IdentifiedChannel> | undefined): boolean {
+  static equals(
+    a: IdentifiedChannel | PlainMessage<IdentifiedChannel> | undefined,
+    b: IdentifiedChannel | PlainMessage<IdentifiedChannel> | undefined
+  ): boolean {
     return proto3.util.equals(IdentifiedChannel, a, b);
   }
 }
@@ -273,14 +276,14 @@ export class Counterparty extends Message<Counterparty> {
    *
    * @generated from field: string port_id = 1;
    */
-  portId = "";
+  portId = '';
 
   /**
    * channel end on the counterparty chain
    *
    * @generated from field: string channel_id = 2;
    */
-  channelId = "";
+  channelId = '';
 
   constructor(data?: PartialMessage<Counterparty>) {
     super();
@@ -288,10 +291,10 @@ export class Counterparty extends Message<Counterparty> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ibc.core.channel.v1.Counterparty";
+  static readonly typeName = 'ibc.core.channel.v1.Counterparty';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "port_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "channel_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'port_id', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'channel_id', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Counterparty {
@@ -331,28 +334,28 @@ export class Packet extends Message<Packet> {
    *
    * @generated from field: string source_port = 2;
    */
-  sourcePort = "";
+  sourcePort = '';
 
   /**
    * identifies the channel end on the sending chain.
    *
    * @generated from field: string source_channel = 3;
    */
-  sourceChannel = "";
+  sourceChannel = '';
 
   /**
    * identifies the port on the receiving chain.
    *
    * @generated from field: string destination_port = 4;
    */
-  destinationPort = "";
+  destinationPort = '';
 
   /**
    * identifies the channel end on the receiving chain.
    *
    * @generated from field: string destination_channel = 5;
    */
-  destinationChannel = "";
+  destinationChannel = '';
 
   /**
    * actual opaque bytes transferred directly to the application module
@@ -381,16 +384,16 @@ export class Packet extends Message<Packet> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ibc.core.channel.v1.Packet";
+  static readonly typeName = 'ibc.core.channel.v1.Packet';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "sequence", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
-    { no: 2, name: "source_port", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "source_channel", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "destination_port", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 5, name: "destination_channel", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 6, name: "data", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 7, name: "timeout_height", kind: "message", T: Height },
-    { no: 8, name: "timeout_timestamp", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
+    { no: 1, name: 'sequence', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ },
+    { no: 2, name: 'source_port', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'source_channel', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: 'destination_port', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: 'destination_channel', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 6, name: 'data', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 7, name: 'timeout_height', kind: 'message', T: Height },
+    { no: 8, name: 'timeout_timestamp', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Packet {
@@ -424,14 +427,14 @@ export class PacketState extends Message<PacketState> {
    *
    * @generated from field: string port_id = 1;
    */
-  portId = "";
+  portId = '';
 
   /**
    * channel unique identifier.
    *
    * @generated from field: string channel_id = 2;
    */
-  channelId = "";
+  channelId = '';
 
   /**
    * packet sequence.
@@ -453,12 +456,12 @@ export class PacketState extends Message<PacketState> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ibc.core.channel.v1.PacketState";
+  static readonly typeName = 'ibc.core.channel.v1.PacketState';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "port_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "channel_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "sequence", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
-    { no: 4, name: "data", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
+    { no: 1, name: 'port_id', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'channel_id', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'sequence', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ },
+    { no: 4, name: 'data', kind: 'scalar', T: 12 /* ScalarType.BYTES */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PacketState {
@@ -495,19 +498,22 @@ export class Acknowledgement extends Message<Acknowledgement> {
    *
    * @generated from oneof ibc.core.channel.v1.Acknowledgement.response
    */
-  response: {
-    /**
-     * @generated from field: bytes result = 21;
-     */
-    value: Uint8Array;
-    case: "result";
-  } | {
-    /**
-     * @generated from field: string error = 22;
-     */
-    value: string;
-    case: "error";
-  } | { case: undefined; value?: undefined } = { case: undefined };
+  response:
+    | {
+        /**
+         * @generated from field: bytes result = 21;
+         */
+        value: Uint8Array;
+        case: 'result';
+      }
+    | {
+        /**
+         * @generated from field: string error = 22;
+         */
+        value: string;
+        case: 'error';
+      }
+    | { case: undefined; value?: undefined } = { case: undefined };
 
   constructor(data?: PartialMessage<Acknowledgement>) {
     super();
@@ -515,10 +521,10 @@ export class Acknowledgement extends Message<Acknowledgement> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ibc.core.channel.v1.Acknowledgement";
+  static readonly typeName = 'ibc.core.channel.v1.Acknowledgement';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 21, name: "result", kind: "scalar", T: 12 /* ScalarType.BYTES */, oneof: "response" },
-    { no: 22, name: "error", kind: "scalar", T: 9 /* ScalarType.STRING */, oneof: "response" },
+    { no: 21, name: 'result', kind: 'scalar', T: 12 /* ScalarType.BYTES */, oneof: 'response' },
+    { no: 22, name: 'error', kind: 'scalar', T: 9 /* ScalarType.STRING */, oneof: 'response' }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Acknowledgement {
@@ -533,8 +539,10 @@ export class Acknowledgement extends Message<Acknowledgement> {
     return new Acknowledgement().fromJsonString(jsonString, options);
   }
 
-  static equals(a: Acknowledgement | PlainMessage<Acknowledgement> | undefined, b: Acknowledgement | PlainMessage<Acknowledgement> | undefined): boolean {
+  static equals(
+    a: Acknowledgement | PlainMessage<Acknowledgement> | undefined,
+    b: Acknowledgement | PlainMessage<Acknowledgement> | undefined
+  ): boolean {
     return proto3.util.equals(Acknowledgement, a, b);
   }
 }
-

@@ -3,11 +3,11 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Any, Message, proto3, protoInt64 } from "@bufbuild/protobuf";
-import { ConnectionEnd, IdentifiedConnection } from "./connection_pb.js";
-import { Height, IdentifiedClientState } from "../../client/v1/client_pb.js";
-import { PageRequest, PageResponse } from "../../../../cosmos/base/query/v1beta1/pagination_pb.js";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Any, Message, proto3, protoInt64 } from '@bufbuild/protobuf';
+import { ConnectionEnd, IdentifiedConnection } from './connection_pb.js';
+import { Height, IdentifiedClientState } from '../../client/v1/client_pb.js';
+import { PageRequest, PageResponse } from '../../../../cosmos/base/query/v1beta1/pagination_pb.js';
 
 /**
  * QueryConnectionRequest is the request type for the Query/Connection RPC
@@ -21,7 +21,7 @@ export class QueryConnectionRequest extends Message<QueryConnectionRequest> {
    *
    * @generated from field: string connection_id = 1;
    */
-  connectionId = "";
+  connectionId = '';
 
   constructor(data?: PartialMessage<QueryConnectionRequest>) {
     super();
@@ -29,9 +29,9 @@ export class QueryConnectionRequest extends Message<QueryConnectionRequest> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ibc.core.connection.v1.QueryConnectionRequest";
+  static readonly typeName = 'ibc.core.connection.v1.QueryConnectionRequest';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "connection_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'connection_id', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryConnectionRequest {
@@ -46,7 +46,10 @@ export class QueryConnectionRequest extends Message<QueryConnectionRequest> {
     return new QueryConnectionRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryConnectionRequest | PlainMessage<QueryConnectionRequest> | undefined, b: QueryConnectionRequest | PlainMessage<QueryConnectionRequest> | undefined): boolean {
+  static equals(
+    a: QueryConnectionRequest | PlainMessage<QueryConnectionRequest> | undefined,
+    b: QueryConnectionRequest | PlainMessage<QueryConnectionRequest> | undefined
+  ): boolean {
     return proto3.util.equals(QueryConnectionRequest, a, b);
   }
 }
@@ -86,11 +89,11 @@ export class QueryConnectionResponse extends Message<QueryConnectionResponse> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ibc.core.connection.v1.QueryConnectionResponse";
+  static readonly typeName = 'ibc.core.connection.v1.QueryConnectionResponse';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "connection", kind: "message", T: ConnectionEnd },
-    { no: 2, name: "proof", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 3, name: "proof_height", kind: "message", T: Height },
+    { no: 1, name: 'connection', kind: 'message', T: ConnectionEnd },
+    { no: 2, name: 'proof', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 3, name: 'proof_height', kind: 'message', T: Height }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryConnectionResponse {
@@ -105,7 +108,10 @@ export class QueryConnectionResponse extends Message<QueryConnectionResponse> {
     return new QueryConnectionResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryConnectionResponse | PlainMessage<QueryConnectionResponse> | undefined, b: QueryConnectionResponse | PlainMessage<QueryConnectionResponse> | undefined): boolean {
+  static equals(
+    a: QueryConnectionResponse | PlainMessage<QueryConnectionResponse> | undefined,
+    b: QueryConnectionResponse | PlainMessage<QueryConnectionResponse> | undefined
+  ): boolean {
     return proto3.util.equals(QueryConnectionResponse, a, b);
   }
 }
@@ -128,10 +134,8 @@ export class QueryConnectionsRequest extends Message<QueryConnectionsRequest> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ibc.core.connection.v1.QueryConnectionsRequest";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "pagination", kind: "message", T: PageRequest },
-  ]);
+  static readonly typeName = 'ibc.core.connection.v1.QueryConnectionsRequest';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'pagination', kind: 'message', T: PageRequest }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryConnectionsRequest {
     return new QueryConnectionsRequest().fromBinary(bytes, options);
@@ -145,7 +149,10 @@ export class QueryConnectionsRequest extends Message<QueryConnectionsRequest> {
     return new QueryConnectionsRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryConnectionsRequest | PlainMessage<QueryConnectionsRequest> | undefined, b: QueryConnectionsRequest | PlainMessage<QueryConnectionsRequest> | undefined): boolean {
+  static equals(
+    a: QueryConnectionsRequest | PlainMessage<QueryConnectionsRequest> | undefined,
+    b: QueryConnectionsRequest | PlainMessage<QueryConnectionsRequest> | undefined
+  ): boolean {
     return proto3.util.equals(QueryConnectionsRequest, a, b);
   }
 }
@@ -184,11 +191,11 @@ export class QueryConnectionsResponse extends Message<QueryConnectionsResponse> 
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ibc.core.connection.v1.QueryConnectionsResponse";
+  static readonly typeName = 'ibc.core.connection.v1.QueryConnectionsResponse';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "connections", kind: "message", T: IdentifiedConnection, repeated: true },
-    { no: 2, name: "pagination", kind: "message", T: PageResponse },
-    { no: 3, name: "height", kind: "message", T: Height },
+    { no: 1, name: 'connections', kind: 'message', T: IdentifiedConnection, repeated: true },
+    { no: 2, name: 'pagination', kind: 'message', T: PageResponse },
+    { no: 3, name: 'height', kind: 'message', T: Height }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryConnectionsResponse {
@@ -203,7 +210,10 @@ export class QueryConnectionsResponse extends Message<QueryConnectionsResponse> 
     return new QueryConnectionsResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryConnectionsResponse | PlainMessage<QueryConnectionsResponse> | undefined, b: QueryConnectionsResponse | PlainMessage<QueryConnectionsResponse> | undefined): boolean {
+  static equals(
+    a: QueryConnectionsResponse | PlainMessage<QueryConnectionsResponse> | undefined,
+    b: QueryConnectionsResponse | PlainMessage<QueryConnectionsResponse> | undefined
+  ): boolean {
     return proto3.util.equals(QueryConnectionsResponse, a, b);
   }
 }
@@ -220,7 +230,7 @@ export class QueryClientConnectionsRequest extends Message<QueryClientConnection
    *
    * @generated from field: string client_id = 1;
    */
-  clientId = "";
+  clientId = '';
 
   constructor(data?: PartialMessage<QueryClientConnectionsRequest>) {
     super();
@@ -228,10 +238,8 @@ export class QueryClientConnectionsRequest extends Message<QueryClientConnection
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ibc.core.connection.v1.QueryClientConnectionsRequest";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "client_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-  ]);
+  static readonly typeName = 'ibc.core.connection.v1.QueryClientConnectionsRequest';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'client_id', kind: 'scalar', T: 9 /* ScalarType.STRING */ }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryClientConnectionsRequest {
     return new QueryClientConnectionsRequest().fromBinary(bytes, options);
@@ -245,7 +253,10 @@ export class QueryClientConnectionsRequest extends Message<QueryClientConnection
     return new QueryClientConnectionsRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryClientConnectionsRequest | PlainMessage<QueryClientConnectionsRequest> | undefined, b: QueryClientConnectionsRequest | PlainMessage<QueryClientConnectionsRequest> | undefined): boolean {
+  static equals(
+    a: QueryClientConnectionsRequest | PlainMessage<QueryClientConnectionsRequest> | undefined,
+    b: QueryClientConnectionsRequest | PlainMessage<QueryClientConnectionsRequest> | undefined
+  ): boolean {
     return proto3.util.equals(QueryClientConnectionsRequest, a, b);
   }
 }
@@ -284,11 +295,11 @@ export class QueryClientConnectionsResponse extends Message<QueryClientConnectio
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ibc.core.connection.v1.QueryClientConnectionsResponse";
+  static readonly typeName = 'ibc.core.connection.v1.QueryClientConnectionsResponse';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "connection_paths", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
-    { no: 2, name: "proof", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 3, name: "proof_height", kind: "message", T: Height },
+    { no: 1, name: 'connection_paths', kind: 'scalar', T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 2, name: 'proof', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 3, name: 'proof_height', kind: 'message', T: Height }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryClientConnectionsResponse {
@@ -303,7 +314,10 @@ export class QueryClientConnectionsResponse extends Message<QueryClientConnectio
     return new QueryClientConnectionsResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryClientConnectionsResponse | PlainMessage<QueryClientConnectionsResponse> | undefined, b: QueryClientConnectionsResponse | PlainMessage<QueryClientConnectionsResponse> | undefined): boolean {
+  static equals(
+    a: QueryClientConnectionsResponse | PlainMessage<QueryClientConnectionsResponse> | undefined,
+    b: QueryClientConnectionsResponse | PlainMessage<QueryClientConnectionsResponse> | undefined
+  ): boolean {
     return proto3.util.equals(QueryClientConnectionsResponse, a, b);
   }
 }
@@ -320,7 +334,7 @@ export class QueryConnectionClientStateRequest extends Message<QueryConnectionCl
    *
    * @generated from field: string connection_id = 1;
    */
-  connectionId = "";
+  connectionId = '';
 
   constructor(data?: PartialMessage<QueryConnectionClientStateRequest>) {
     super();
@@ -328,9 +342,9 @@ export class QueryConnectionClientStateRequest extends Message<QueryConnectionCl
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ibc.core.connection.v1.QueryConnectionClientStateRequest";
+  static readonly typeName = 'ibc.core.connection.v1.QueryConnectionClientStateRequest';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "connection_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'connection_id', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryConnectionClientStateRequest {
@@ -345,7 +359,10 @@ export class QueryConnectionClientStateRequest extends Message<QueryConnectionCl
     return new QueryConnectionClientStateRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryConnectionClientStateRequest | PlainMessage<QueryConnectionClientStateRequest> | undefined, b: QueryConnectionClientStateRequest | PlainMessage<QueryConnectionClientStateRequest> | undefined): boolean {
+  static equals(
+    a: QueryConnectionClientStateRequest | PlainMessage<QueryConnectionClientStateRequest> | undefined,
+    b: QueryConnectionClientStateRequest | PlainMessage<QueryConnectionClientStateRequest> | undefined
+  ): boolean {
     return proto3.util.equals(QueryConnectionClientStateRequest, a, b);
   }
 }
@@ -384,11 +401,11 @@ export class QueryConnectionClientStateResponse extends Message<QueryConnectionC
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ibc.core.connection.v1.QueryConnectionClientStateResponse";
+  static readonly typeName = 'ibc.core.connection.v1.QueryConnectionClientStateResponse';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "identified_client_state", kind: "message", T: IdentifiedClientState },
-    { no: 2, name: "proof", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 3, name: "proof_height", kind: "message", T: Height },
+    { no: 1, name: 'identified_client_state', kind: 'message', T: IdentifiedClientState },
+    { no: 2, name: 'proof', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 3, name: 'proof_height', kind: 'message', T: Height }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryConnectionClientStateResponse {
@@ -403,7 +420,10 @@ export class QueryConnectionClientStateResponse extends Message<QueryConnectionC
     return new QueryConnectionClientStateResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryConnectionClientStateResponse | PlainMessage<QueryConnectionClientStateResponse> | undefined, b: QueryConnectionClientStateResponse | PlainMessage<QueryConnectionClientStateResponse> | undefined): boolean {
+  static equals(
+    a: QueryConnectionClientStateResponse | PlainMessage<QueryConnectionClientStateResponse> | undefined,
+    b: QueryConnectionClientStateResponse | PlainMessage<QueryConnectionClientStateResponse> | undefined
+  ): boolean {
     return proto3.util.equals(QueryConnectionClientStateResponse, a, b);
   }
 }
@@ -420,7 +440,7 @@ export class QueryConnectionConsensusStateRequest extends Message<QueryConnectio
    *
    * @generated from field: string connection_id = 1;
    */
-  connectionId = "";
+  connectionId = '';
 
   /**
    * @generated from field: uint64 revision_number = 2;
@@ -438,11 +458,11 @@ export class QueryConnectionConsensusStateRequest extends Message<QueryConnectio
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ibc.core.connection.v1.QueryConnectionConsensusStateRequest";
+  static readonly typeName = 'ibc.core.connection.v1.QueryConnectionConsensusStateRequest';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "connection_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "revision_number", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
-    { no: 3, name: "revision_height", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
+    { no: 1, name: 'connection_id', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'revision_number', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ },
+    { no: 3, name: 'revision_height', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryConnectionConsensusStateRequest {
@@ -457,7 +477,10 @@ export class QueryConnectionConsensusStateRequest extends Message<QueryConnectio
     return new QueryConnectionConsensusStateRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryConnectionConsensusStateRequest | PlainMessage<QueryConnectionConsensusStateRequest> | undefined, b: QueryConnectionConsensusStateRequest | PlainMessage<QueryConnectionConsensusStateRequest> | undefined): boolean {
+  static equals(
+    a: QueryConnectionConsensusStateRequest | PlainMessage<QueryConnectionConsensusStateRequest> | undefined,
+    b: QueryConnectionConsensusStateRequest | PlainMessage<QueryConnectionConsensusStateRequest> | undefined
+  ): boolean {
     return proto3.util.equals(QueryConnectionConsensusStateRequest, a, b);
   }
 }
@@ -481,7 +504,7 @@ export class QueryConnectionConsensusStateResponse extends Message<QueryConnecti
    *
    * @generated from field: string client_id = 2;
    */
-  clientId = "";
+  clientId = '';
 
   /**
    * merkle proof of existence
@@ -503,12 +526,12 @@ export class QueryConnectionConsensusStateResponse extends Message<QueryConnecti
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ibc.core.connection.v1.QueryConnectionConsensusStateResponse";
+  static readonly typeName = 'ibc.core.connection.v1.QueryConnectionConsensusStateResponse';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "consensus_state", kind: "message", T: Any },
-    { no: 2, name: "client_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "proof", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 4, name: "proof_height", kind: "message", T: Height },
+    { no: 1, name: 'consensus_state', kind: 'message', T: Any },
+    { no: 2, name: 'client_id', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'proof', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 4, name: 'proof_height', kind: 'message', T: Height }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryConnectionConsensusStateResponse {
@@ -523,8 +546,10 @@ export class QueryConnectionConsensusStateResponse extends Message<QueryConnecti
     return new QueryConnectionConsensusStateResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryConnectionConsensusStateResponse | PlainMessage<QueryConnectionConsensusStateResponse> | undefined, b: QueryConnectionConsensusStateResponse | PlainMessage<QueryConnectionConsensusStateResponse> | undefined): boolean {
+  static equals(
+    a: QueryConnectionConsensusStateResponse | PlainMessage<QueryConnectionConsensusStateResponse> | undefined,
+    b: QueryConnectionConsensusStateResponse | PlainMessage<QueryConnectionConsensusStateResponse> | undefined
+  ): boolean {
     return proto3.util.equals(QueryConnectionConsensusStateResponse, a, b);
   }
 }
-

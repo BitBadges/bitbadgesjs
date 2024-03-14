@@ -17,8 +17,8 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3 } from '@bufbuild/protobuf';
 
 /**
  * Defines the HTTP configuration for an API service. It contains a list of
@@ -55,10 +55,10 @@ export class Http extends Message<Http> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "google.api.Http";
+  static readonly typeName = 'google.api.Http';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "rules", kind: "message", T: HttpRule, repeated: true },
-    { no: 2, name: "fully_decode_reserved_expansion", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 1, name: 'rules', kind: 'message', T: HttpRule, repeated: true },
+    { no: 2, name: 'fully_decode_reserved_expansion', kind: 'scalar', T: 8 /* ScalarType.BOOL */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Http {
@@ -315,7 +315,7 @@ export class HttpRule extends Message<HttpRule> {
    *
    * @generated from field: string selector = 1;
    */
-  selector = "";
+  selector = '';
 
   /**
    * Determines the URL pattern is matched by this rules. This pattern can be
@@ -324,58 +324,65 @@ export class HttpRule extends Message<HttpRule> {
    *
    * @generated from oneof google.api.HttpRule.pattern
    */
-  pattern: {
-    /**
-     * Used for listing and getting information about resources.
-     *
-     * @generated from field: string get = 2;
-     */
-    value: string;
-    case: "get";
-  } | {
-    /**
-     * Used for updating a resource.
-     *
-     * @generated from field: string put = 3;
-     */
-    value: string;
-    case: "put";
-  } | {
-    /**
-     * Used for creating a resource.
-     *
-     * @generated from field: string post = 4;
-     */
-    value: string;
-    case: "post";
-  } | {
-    /**
-     * Used for deleting a resource.
-     *
-     * @generated from field: string delete = 5;
-     */
-    value: string;
-    case: "delete";
-  } | {
-    /**
-     * Used for updating a resource.
-     *
-     * @generated from field: string patch = 6;
-     */
-    value: string;
-    case: "patch";
-  } | {
-    /**
-     * The custom pattern is used for specifying an HTTP method that is not
-     * included in the `pattern` field, such as HEAD, or "*" to leave the
-     * HTTP method unspecified for this rule. The wild-card rule is useful
-     * for services that provide content to Web (HTML) clients.
-     *
-     * @generated from field: google.api.CustomHttpPattern custom = 8;
-     */
-    value: CustomHttpPattern;
-    case: "custom";
-  } | { case: undefined; value?: undefined } = { case: undefined };
+  pattern:
+    | {
+        /**
+         * Used for listing and getting information about resources.
+         *
+         * @generated from field: string get = 2;
+         */
+        value: string;
+        case: 'get';
+      }
+    | {
+        /**
+         * Used for updating a resource.
+         *
+         * @generated from field: string put = 3;
+         */
+        value: string;
+        case: 'put';
+      }
+    | {
+        /**
+         * Used for creating a resource.
+         *
+         * @generated from field: string post = 4;
+         */
+        value: string;
+        case: 'post';
+      }
+    | {
+        /**
+         * Used for deleting a resource.
+         *
+         * @generated from field: string delete = 5;
+         */
+        value: string;
+        case: 'delete';
+      }
+    | {
+        /**
+         * Used for updating a resource.
+         *
+         * @generated from field: string patch = 6;
+         */
+        value: string;
+        case: 'patch';
+      }
+    | {
+        /**
+         * The custom pattern is used for specifying an HTTP method that is not
+         * included in the `pattern` field, such as HEAD, or "*" to leave the
+         * HTTP method unspecified for this rule. The wild-card rule is useful
+         * for services that provide content to Web (HTML) clients.
+         *
+         * @generated from field: google.api.CustomHttpPattern custom = 8;
+         */
+        value: CustomHttpPattern;
+        case: 'custom';
+      }
+    | { case: undefined; value?: undefined } = { case: undefined };
 
   /**
    * The name of the request field whose value is mapped to the HTTP body, or
@@ -385,7 +392,7 @@ export class HttpRule extends Message<HttpRule> {
    *
    * @generated from field: string body = 7;
    */
-  body = "";
+  body = '';
 
   /**
    * Optional. The name of the response field whose value is mapped to the HTTP
@@ -394,7 +401,7 @@ export class HttpRule extends Message<HttpRule> {
    *
    * @generated from field: string response_body = 12;
    */
-  responseBody = "";
+  responseBody = '';
 
   /**
    * Additional HTTP bindings for the selector. Nested bindings must
@@ -411,18 +418,18 @@ export class HttpRule extends Message<HttpRule> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "google.api.HttpRule";
+  static readonly typeName = 'google.api.HttpRule';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "selector", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "get", kind: "scalar", T: 9 /* ScalarType.STRING */, oneof: "pattern" },
-    { no: 3, name: "put", kind: "scalar", T: 9 /* ScalarType.STRING */, oneof: "pattern" },
-    { no: 4, name: "post", kind: "scalar", T: 9 /* ScalarType.STRING */, oneof: "pattern" },
-    { no: 5, name: "delete", kind: "scalar", T: 9 /* ScalarType.STRING */, oneof: "pattern" },
-    { no: 6, name: "patch", kind: "scalar", T: 9 /* ScalarType.STRING */, oneof: "pattern" },
-    { no: 8, name: "custom", kind: "message", T: CustomHttpPattern, oneof: "pattern" },
-    { no: 7, name: "body", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 12, name: "response_body", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 11, name: "additional_bindings", kind: "message", T: HttpRule, repeated: true },
+    { no: 1, name: 'selector', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'get', kind: 'scalar', T: 9 /* ScalarType.STRING */, oneof: 'pattern' },
+    { no: 3, name: 'put', kind: 'scalar', T: 9 /* ScalarType.STRING */, oneof: 'pattern' },
+    { no: 4, name: 'post', kind: 'scalar', T: 9 /* ScalarType.STRING */, oneof: 'pattern' },
+    { no: 5, name: 'delete', kind: 'scalar', T: 9 /* ScalarType.STRING */, oneof: 'pattern' },
+    { no: 6, name: 'patch', kind: 'scalar', T: 9 /* ScalarType.STRING */, oneof: 'pattern' },
+    { no: 8, name: 'custom', kind: 'message', T: CustomHttpPattern, oneof: 'pattern' },
+    { no: 7, name: 'body', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 12, name: 'response_body', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 11, name: 'additional_bindings', kind: 'message', T: HttpRule, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): HttpRule {
@@ -453,14 +460,14 @@ export class CustomHttpPattern extends Message<CustomHttpPattern> {
    *
    * @generated from field: string kind = 1;
    */
-  kind = "";
+  kind = '';
 
   /**
    * The path matched by this custom verb.
    *
    * @generated from field: string path = 2;
    */
-  path = "";
+  path = '';
 
   constructor(data?: PartialMessage<CustomHttpPattern>) {
     super();
@@ -468,10 +475,10 @@ export class CustomHttpPattern extends Message<CustomHttpPattern> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "google.api.CustomHttpPattern";
+  static readonly typeName = 'google.api.CustomHttpPattern';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "kind", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "path", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'kind', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'path', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CustomHttpPattern {
@@ -486,8 +493,10 @@ export class CustomHttpPattern extends Message<CustomHttpPattern> {
     return new CustomHttpPattern().fromJsonString(jsonString, options);
   }
 
-  static equals(a: CustomHttpPattern | PlainMessage<CustomHttpPattern> | undefined, b: CustomHttpPattern | PlainMessage<CustomHttpPattern> | undefined): boolean {
+  static equals(
+    a: CustomHttpPattern | PlainMessage<CustomHttpPattern> | undefined,
+    b: CustomHttpPattern | PlainMessage<CustomHttpPattern> | undefined
+  ): boolean {
     return proto3.util.equals(CustomHttpPattern, a, b);
   }
 }
-

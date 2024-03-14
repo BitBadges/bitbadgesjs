@@ -5,8 +5,8 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3 } from '@bufbuild/protobuf';
 
 /**
  * BIP44Params is used as path field in ledger item in Record.
@@ -56,13 +56,13 @@ export class BIP44Params extends Message<BIP44Params> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.crypto.hd.v1.BIP44Params";
+  static readonly typeName = 'cosmos.crypto.hd.v1.BIP44Params';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "purpose", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 2, name: "coin_type", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 3, name: "account", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 4, name: "change", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 5, name: "address_index", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 1, name: 'purpose', kind: 'scalar', T: 13 /* ScalarType.UINT32 */ },
+    { no: 2, name: 'coin_type', kind: 'scalar', T: 13 /* ScalarType.UINT32 */ },
+    { no: 3, name: 'account', kind: 'scalar', T: 13 /* ScalarType.UINT32 */ },
+    { no: 4, name: 'change', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 5, name: 'address_index', kind: 'scalar', T: 13 /* ScalarType.UINT32 */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BIP44Params {
@@ -81,4 +81,3 @@ export class BIP44Params extends Message<BIP44Params> {
     return proto3.util.equals(BIP44Params, a, b);
   }
 }
-

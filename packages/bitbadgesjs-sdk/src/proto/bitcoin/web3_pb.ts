@@ -3,8 +3,8 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3, protoInt64 } from "@bufbuild/protobuf";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3, protoInt64 } from '@bufbuild/protobuf';
 
 /**
  * ExtensionOptionsWeb3Tx is an extension option that specifies the typed chain id,
@@ -27,7 +27,7 @@ export class ExtensionOptionsWeb3TxBitcoin extends Message<ExtensionOptionsWeb3T
    *
    * @generated from field: string fee_payer = 2;
    */
-  feePayer = "";
+  feePayer = '';
 
   /**
    * fee_payer_sig is a signature data from the fee paying account,
@@ -42,7 +42,7 @@ export class ExtensionOptionsWeb3TxBitcoin extends Message<ExtensionOptionsWeb3T
    *
    * @generated from field: string chain = 4;
    */
-  chain = "";
+  chain = '';
 
   constructor(data?: PartialMessage<ExtensionOptionsWeb3TxBitcoin>) {
     super();
@@ -50,12 +50,12 @@ export class ExtensionOptionsWeb3TxBitcoin extends Message<ExtensionOptionsWeb3T
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "bitcoin.ExtensionOptionsWeb3TxBitcoin";
+  static readonly typeName = 'bitcoin.ExtensionOptionsWeb3TxBitcoin';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "typed_data_chain_id", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
-    { no: 2, name: "fee_payer", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "fee_payer_sig", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 4, name: "chain", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'typed_data_chain_id', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ },
+    { no: 2, name: 'fee_payer', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'fee_payer_sig', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 4, name: 'chain', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ExtensionOptionsWeb3TxBitcoin {
@@ -70,8 +70,10 @@ export class ExtensionOptionsWeb3TxBitcoin extends Message<ExtensionOptionsWeb3T
     return new ExtensionOptionsWeb3TxBitcoin().fromJsonString(jsonString, options);
   }
 
-  static equals(a: ExtensionOptionsWeb3TxBitcoin | PlainMessage<ExtensionOptionsWeb3TxBitcoin> | undefined, b: ExtensionOptionsWeb3TxBitcoin | PlainMessage<ExtensionOptionsWeb3TxBitcoin> | undefined): boolean {
+  static equals(
+    a: ExtensionOptionsWeb3TxBitcoin | PlainMessage<ExtensionOptionsWeb3TxBitcoin> | undefined,
+    b: ExtensionOptionsWeb3TxBitcoin | PlainMessage<ExtensionOptionsWeb3TxBitcoin> | undefined
+  ): boolean {
     return proto3.util.equals(ExtensionOptionsWeb3TxBitcoin, a, b);
   }
 }
-

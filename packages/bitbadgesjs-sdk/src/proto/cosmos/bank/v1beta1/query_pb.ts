@@ -3,11 +3,11 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
-import { Coin } from "../../base/v1beta1/coin_pb.js";
-import { PageRequest, PageResponse } from "../../base/query/v1beta1/pagination_pb.js";
-import { Metadata, Params, SendEnabled } from "./bank_pb.js";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3 } from '@bufbuild/protobuf';
+import { Coin } from '../../base/v1beta1/coin_pb.js';
+import { PageRequest, PageResponse } from '../../base/query/v1beta1/pagination_pb.js';
+import { Metadata, Params, SendEnabled } from './bank_pb.js';
 
 /**
  * QueryBalanceRequest is the request type for the Query/Balance RPC method.
@@ -20,14 +20,14 @@ export class QueryBalanceRequest extends Message<QueryBalanceRequest> {
    *
    * @generated from field: string address = 1;
    */
-  address = "";
+  address = '';
 
   /**
    * denom is the coin denom to query balances for.
    *
    * @generated from field: string denom = 2;
    */
-  denom = "";
+  denom = '';
 
   constructor(data?: PartialMessage<QueryBalanceRequest>) {
     super();
@@ -35,10 +35,10 @@ export class QueryBalanceRequest extends Message<QueryBalanceRequest> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.bank.v1beta1.QueryBalanceRequest";
+  static readonly typeName = 'cosmos.bank.v1beta1.QueryBalanceRequest';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "denom", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'address', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'denom', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryBalanceRequest {
@@ -53,7 +53,10 @@ export class QueryBalanceRequest extends Message<QueryBalanceRequest> {
     return new QueryBalanceRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryBalanceRequest | PlainMessage<QueryBalanceRequest> | undefined, b: QueryBalanceRequest | PlainMessage<QueryBalanceRequest> | undefined): boolean {
+  static equals(
+    a: QueryBalanceRequest | PlainMessage<QueryBalanceRequest> | undefined,
+    b: QueryBalanceRequest | PlainMessage<QueryBalanceRequest> | undefined
+  ): boolean {
     return proto3.util.equals(QueryBalanceRequest, a, b);
   }
 }
@@ -77,10 +80,8 @@ export class QueryBalanceResponse extends Message<QueryBalanceResponse> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.bank.v1beta1.QueryBalanceResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "balance", kind: "message", T: Coin },
-  ]);
+  static readonly typeName = 'cosmos.bank.v1beta1.QueryBalanceResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'balance', kind: 'message', T: Coin }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryBalanceResponse {
     return new QueryBalanceResponse().fromBinary(bytes, options);
@@ -94,7 +95,10 @@ export class QueryBalanceResponse extends Message<QueryBalanceResponse> {
     return new QueryBalanceResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryBalanceResponse | PlainMessage<QueryBalanceResponse> | undefined, b: QueryBalanceResponse | PlainMessage<QueryBalanceResponse> | undefined): boolean {
+  static equals(
+    a: QueryBalanceResponse | PlainMessage<QueryBalanceResponse> | undefined,
+    b: QueryBalanceResponse | PlainMessage<QueryBalanceResponse> | undefined
+  ): boolean {
     return proto3.util.equals(QueryBalanceResponse, a, b);
   }
 }
@@ -110,7 +114,7 @@ export class QueryAllBalancesRequest extends Message<QueryAllBalancesRequest> {
    *
    * @generated from field: string address = 1;
    */
-  address = "";
+  address = '';
 
   /**
    * pagination defines an optional pagination for the request.
@@ -125,10 +129,10 @@ export class QueryAllBalancesRequest extends Message<QueryAllBalancesRequest> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.bank.v1beta1.QueryAllBalancesRequest";
+  static readonly typeName = 'cosmos.bank.v1beta1.QueryAllBalancesRequest';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "pagination", kind: "message", T: PageRequest },
+    { no: 1, name: 'address', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'pagination', kind: 'message', T: PageRequest }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryAllBalancesRequest {
@@ -143,7 +147,10 @@ export class QueryAllBalancesRequest extends Message<QueryAllBalancesRequest> {
     return new QueryAllBalancesRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryAllBalancesRequest | PlainMessage<QueryAllBalancesRequest> | undefined, b: QueryAllBalancesRequest | PlainMessage<QueryAllBalancesRequest> | undefined): boolean {
+  static equals(
+    a: QueryAllBalancesRequest | PlainMessage<QueryAllBalancesRequest> | undefined,
+    b: QueryAllBalancesRequest | PlainMessage<QueryAllBalancesRequest> | undefined
+  ): boolean {
     return proto3.util.equals(QueryAllBalancesRequest, a, b);
   }
 }
@@ -175,10 +182,10 @@ export class QueryAllBalancesResponse extends Message<QueryAllBalancesResponse> 
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.bank.v1beta1.QueryAllBalancesResponse";
+  static readonly typeName = 'cosmos.bank.v1beta1.QueryAllBalancesResponse';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "balances", kind: "message", T: Coin, repeated: true },
-    { no: 2, name: "pagination", kind: "message", T: PageResponse },
+    { no: 1, name: 'balances', kind: 'message', T: Coin, repeated: true },
+    { no: 2, name: 'pagination', kind: 'message', T: PageResponse }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryAllBalancesResponse {
@@ -193,7 +200,10 @@ export class QueryAllBalancesResponse extends Message<QueryAllBalancesResponse> 
     return new QueryAllBalancesResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryAllBalancesResponse | PlainMessage<QueryAllBalancesResponse> | undefined, b: QueryAllBalancesResponse | PlainMessage<QueryAllBalancesResponse> | undefined): boolean {
+  static equals(
+    a: QueryAllBalancesResponse | PlainMessage<QueryAllBalancesResponse> | undefined,
+    b: QueryAllBalancesResponse | PlainMessage<QueryAllBalancesResponse> | undefined
+  ): boolean {
     return proto3.util.equals(QueryAllBalancesResponse, a, b);
   }
 }
@@ -212,7 +222,7 @@ export class QuerySpendableBalancesRequest extends Message<QuerySpendableBalance
    *
    * @generated from field: string address = 1;
    */
-  address = "";
+  address = '';
 
   /**
    * pagination defines an optional pagination for the request.
@@ -227,10 +237,10 @@ export class QuerySpendableBalancesRequest extends Message<QuerySpendableBalance
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.bank.v1beta1.QuerySpendableBalancesRequest";
+  static readonly typeName = 'cosmos.bank.v1beta1.QuerySpendableBalancesRequest';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "pagination", kind: "message", T: PageRequest },
+    { no: 1, name: 'address', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'pagination', kind: 'message', T: PageRequest }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QuerySpendableBalancesRequest {
@@ -245,7 +255,10 @@ export class QuerySpendableBalancesRequest extends Message<QuerySpendableBalance
     return new QuerySpendableBalancesRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QuerySpendableBalancesRequest | PlainMessage<QuerySpendableBalancesRequest> | undefined, b: QuerySpendableBalancesRequest | PlainMessage<QuerySpendableBalancesRequest> | undefined): boolean {
+  static equals(
+    a: QuerySpendableBalancesRequest | PlainMessage<QuerySpendableBalancesRequest> | undefined,
+    b: QuerySpendableBalancesRequest | PlainMessage<QuerySpendableBalancesRequest> | undefined
+  ): boolean {
     return proto3.util.equals(QuerySpendableBalancesRequest, a, b);
   }
 }
@@ -279,10 +292,10 @@ export class QuerySpendableBalancesResponse extends Message<QuerySpendableBalanc
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.bank.v1beta1.QuerySpendableBalancesResponse";
+  static readonly typeName = 'cosmos.bank.v1beta1.QuerySpendableBalancesResponse';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "balances", kind: "message", T: Coin, repeated: true },
-    { no: 2, name: "pagination", kind: "message", T: PageResponse },
+    { no: 1, name: 'balances', kind: 'message', T: Coin, repeated: true },
+    { no: 2, name: 'pagination', kind: 'message', T: PageResponse }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QuerySpendableBalancesResponse {
@@ -297,7 +310,10 @@ export class QuerySpendableBalancesResponse extends Message<QuerySpendableBalanc
     return new QuerySpendableBalancesResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QuerySpendableBalancesResponse | PlainMessage<QuerySpendableBalancesResponse> | undefined, b: QuerySpendableBalancesResponse | PlainMessage<QuerySpendableBalancesResponse> | undefined): boolean {
+  static equals(
+    a: QuerySpendableBalancesResponse | PlainMessage<QuerySpendableBalancesResponse> | undefined,
+    b: QuerySpendableBalancesResponse | PlainMessage<QuerySpendableBalancesResponse> | undefined
+  ): boolean {
     return proto3.util.equals(QuerySpendableBalancesResponse, a, b);
   }
 }
@@ -316,14 +332,14 @@ export class QuerySpendableBalanceByDenomRequest extends Message<QuerySpendableB
    *
    * @generated from field: string address = 1;
    */
-  address = "";
+  address = '';
 
   /**
    * denom is the coin denom to query balances for.
    *
    * @generated from field: string denom = 2;
    */
-  denom = "";
+  denom = '';
 
   constructor(data?: PartialMessage<QuerySpendableBalanceByDenomRequest>) {
     super();
@@ -331,10 +347,10 @@ export class QuerySpendableBalanceByDenomRequest extends Message<QuerySpendableB
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.bank.v1beta1.QuerySpendableBalanceByDenomRequest";
+  static readonly typeName = 'cosmos.bank.v1beta1.QuerySpendableBalanceByDenomRequest';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "denom", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'address', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'denom', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QuerySpendableBalanceByDenomRequest {
@@ -349,7 +365,10 @@ export class QuerySpendableBalanceByDenomRequest extends Message<QuerySpendableB
     return new QuerySpendableBalanceByDenomRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QuerySpendableBalanceByDenomRequest | PlainMessage<QuerySpendableBalanceByDenomRequest> | undefined, b: QuerySpendableBalanceByDenomRequest | PlainMessage<QuerySpendableBalanceByDenomRequest> | undefined): boolean {
+  static equals(
+    a: QuerySpendableBalanceByDenomRequest | PlainMessage<QuerySpendableBalanceByDenomRequest> | undefined,
+    b: QuerySpendableBalanceByDenomRequest | PlainMessage<QuerySpendableBalanceByDenomRequest> | undefined
+  ): boolean {
     return proto3.util.equals(QuerySpendableBalanceByDenomRequest, a, b);
   }
 }
@@ -376,10 +395,8 @@ export class QuerySpendableBalanceByDenomResponse extends Message<QuerySpendable
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.bank.v1beta1.QuerySpendableBalanceByDenomResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "balance", kind: "message", T: Coin },
-  ]);
+  static readonly typeName = 'cosmos.bank.v1beta1.QuerySpendableBalanceByDenomResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'balance', kind: 'message', T: Coin }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QuerySpendableBalanceByDenomResponse {
     return new QuerySpendableBalanceByDenomResponse().fromBinary(bytes, options);
@@ -393,7 +410,10 @@ export class QuerySpendableBalanceByDenomResponse extends Message<QuerySpendable
     return new QuerySpendableBalanceByDenomResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QuerySpendableBalanceByDenomResponse | PlainMessage<QuerySpendableBalanceByDenomResponse> | undefined, b: QuerySpendableBalanceByDenomResponse | PlainMessage<QuerySpendableBalanceByDenomResponse> | undefined): boolean {
+  static equals(
+    a: QuerySpendableBalanceByDenomResponse | PlainMessage<QuerySpendableBalanceByDenomResponse> | undefined,
+    b: QuerySpendableBalanceByDenomResponse | PlainMessage<QuerySpendableBalanceByDenomResponse> | undefined
+  ): boolean {
     return proto3.util.equals(QuerySpendableBalanceByDenomResponse, a, b);
   }
 }
@@ -420,10 +440,8 @@ export class QueryTotalSupplyRequest extends Message<QueryTotalSupplyRequest> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.bank.v1beta1.QueryTotalSupplyRequest";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "pagination", kind: "message", T: PageRequest },
-  ]);
+  static readonly typeName = 'cosmos.bank.v1beta1.QueryTotalSupplyRequest';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'pagination', kind: 'message', T: PageRequest }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryTotalSupplyRequest {
     return new QueryTotalSupplyRequest().fromBinary(bytes, options);
@@ -437,7 +455,10 @@ export class QueryTotalSupplyRequest extends Message<QueryTotalSupplyRequest> {
     return new QueryTotalSupplyRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryTotalSupplyRequest | PlainMessage<QueryTotalSupplyRequest> | undefined, b: QueryTotalSupplyRequest | PlainMessage<QueryTotalSupplyRequest> | undefined): boolean {
+  static equals(
+    a: QueryTotalSupplyRequest | PlainMessage<QueryTotalSupplyRequest> | undefined,
+    b: QueryTotalSupplyRequest | PlainMessage<QueryTotalSupplyRequest> | undefined
+  ): boolean {
     return proto3.util.equals(QueryTotalSupplyRequest, a, b);
   }
 }
@@ -471,10 +492,10 @@ export class QueryTotalSupplyResponse extends Message<QueryTotalSupplyResponse> 
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.bank.v1beta1.QueryTotalSupplyResponse";
+  static readonly typeName = 'cosmos.bank.v1beta1.QueryTotalSupplyResponse';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "supply", kind: "message", T: Coin, repeated: true },
-    { no: 2, name: "pagination", kind: "message", T: PageResponse },
+    { no: 1, name: 'supply', kind: 'message', T: Coin, repeated: true },
+    { no: 2, name: 'pagination', kind: 'message', T: PageResponse }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryTotalSupplyResponse {
@@ -489,7 +510,10 @@ export class QueryTotalSupplyResponse extends Message<QueryTotalSupplyResponse> 
     return new QueryTotalSupplyResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryTotalSupplyResponse | PlainMessage<QueryTotalSupplyResponse> | undefined, b: QueryTotalSupplyResponse | PlainMessage<QueryTotalSupplyResponse> | undefined): boolean {
+  static equals(
+    a: QueryTotalSupplyResponse | PlainMessage<QueryTotalSupplyResponse> | undefined,
+    b: QueryTotalSupplyResponse | PlainMessage<QueryTotalSupplyResponse> | undefined
+  ): boolean {
     return proto3.util.equals(QueryTotalSupplyResponse, a, b);
   }
 }
@@ -505,7 +529,7 @@ export class QuerySupplyOfRequest extends Message<QuerySupplyOfRequest> {
    *
    * @generated from field: string denom = 1;
    */
-  denom = "";
+  denom = '';
 
   constructor(data?: PartialMessage<QuerySupplyOfRequest>) {
     super();
@@ -513,10 +537,8 @@ export class QuerySupplyOfRequest extends Message<QuerySupplyOfRequest> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.bank.v1beta1.QuerySupplyOfRequest";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "denom", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-  ]);
+  static readonly typeName = 'cosmos.bank.v1beta1.QuerySupplyOfRequest';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'denom', kind: 'scalar', T: 9 /* ScalarType.STRING */ }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QuerySupplyOfRequest {
     return new QuerySupplyOfRequest().fromBinary(bytes, options);
@@ -530,7 +552,10 @@ export class QuerySupplyOfRequest extends Message<QuerySupplyOfRequest> {
     return new QuerySupplyOfRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QuerySupplyOfRequest | PlainMessage<QuerySupplyOfRequest> | undefined, b: QuerySupplyOfRequest | PlainMessage<QuerySupplyOfRequest> | undefined): boolean {
+  static equals(
+    a: QuerySupplyOfRequest | PlainMessage<QuerySupplyOfRequest> | undefined,
+    b: QuerySupplyOfRequest | PlainMessage<QuerySupplyOfRequest> | undefined
+  ): boolean {
     return proto3.util.equals(QuerySupplyOfRequest, a, b);
   }
 }
@@ -554,10 +579,8 @@ export class QuerySupplyOfResponse extends Message<QuerySupplyOfResponse> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.bank.v1beta1.QuerySupplyOfResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "amount", kind: "message", T: Coin },
-  ]);
+  static readonly typeName = 'cosmos.bank.v1beta1.QuerySupplyOfResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'amount', kind: 'message', T: Coin }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QuerySupplyOfResponse {
     return new QuerySupplyOfResponse().fromBinary(bytes, options);
@@ -571,7 +594,10 @@ export class QuerySupplyOfResponse extends Message<QuerySupplyOfResponse> {
     return new QuerySupplyOfResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QuerySupplyOfResponse | PlainMessage<QuerySupplyOfResponse> | undefined, b: QuerySupplyOfResponse | PlainMessage<QuerySupplyOfResponse> | undefined): boolean {
+  static equals(
+    a: QuerySupplyOfResponse | PlainMessage<QuerySupplyOfResponse> | undefined,
+    b: QuerySupplyOfResponse | PlainMessage<QuerySupplyOfResponse> | undefined
+  ): boolean {
     return proto3.util.equals(QuerySupplyOfResponse, a, b);
   }
 }
@@ -588,9 +614,8 @@ export class QueryParamsRequest extends Message<QueryParamsRequest> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.bank.v1beta1.QueryParamsRequest";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-  ]);
+  static readonly typeName = 'cosmos.bank.v1beta1.QueryParamsRequest';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => []);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryParamsRequest {
     return new QueryParamsRequest().fromBinary(bytes, options);
@@ -604,7 +629,10 @@ export class QueryParamsRequest extends Message<QueryParamsRequest> {
     return new QueryParamsRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryParamsRequest | PlainMessage<QueryParamsRequest> | undefined, b: QueryParamsRequest | PlainMessage<QueryParamsRequest> | undefined): boolean {
+  static equals(
+    a: QueryParamsRequest | PlainMessage<QueryParamsRequest> | undefined,
+    b: QueryParamsRequest | PlainMessage<QueryParamsRequest> | undefined
+  ): boolean {
     return proto3.util.equals(QueryParamsRequest, a, b);
   }
 }
@@ -626,10 +654,8 @@ export class QueryParamsResponse extends Message<QueryParamsResponse> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.bank.v1beta1.QueryParamsResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "params", kind: "message", T: Params },
-  ]);
+  static readonly typeName = 'cosmos.bank.v1beta1.QueryParamsResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'params', kind: 'message', T: Params }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryParamsResponse {
     return new QueryParamsResponse().fromBinary(bytes, options);
@@ -643,7 +669,10 @@ export class QueryParamsResponse extends Message<QueryParamsResponse> {
     return new QueryParamsResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryParamsResponse | PlainMessage<QueryParamsResponse> | undefined, b: QueryParamsResponse | PlainMessage<QueryParamsResponse> | undefined): boolean {
+  static equals(
+    a: QueryParamsResponse | PlainMessage<QueryParamsResponse> | undefined,
+    b: QueryParamsResponse | PlainMessage<QueryParamsResponse> | undefined
+  ): boolean {
     return proto3.util.equals(QueryParamsResponse, a, b);
   }
 }
@@ -667,10 +696,8 @@ export class QueryDenomsMetadataRequest extends Message<QueryDenomsMetadataReque
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.bank.v1beta1.QueryDenomsMetadataRequest";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "pagination", kind: "message", T: PageRequest },
-  ]);
+  static readonly typeName = 'cosmos.bank.v1beta1.QueryDenomsMetadataRequest';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'pagination', kind: 'message', T: PageRequest }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryDenomsMetadataRequest {
     return new QueryDenomsMetadataRequest().fromBinary(bytes, options);
@@ -684,7 +711,10 @@ export class QueryDenomsMetadataRequest extends Message<QueryDenomsMetadataReque
     return new QueryDenomsMetadataRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryDenomsMetadataRequest | PlainMessage<QueryDenomsMetadataRequest> | undefined, b: QueryDenomsMetadataRequest | PlainMessage<QueryDenomsMetadataRequest> | undefined): boolean {
+  static equals(
+    a: QueryDenomsMetadataRequest | PlainMessage<QueryDenomsMetadataRequest> | undefined,
+    b: QueryDenomsMetadataRequest | PlainMessage<QueryDenomsMetadataRequest> | undefined
+  ): boolean {
     return proto3.util.equals(QueryDenomsMetadataRequest, a, b);
   }
 }
@@ -716,10 +746,10 @@ export class QueryDenomsMetadataResponse extends Message<QueryDenomsMetadataResp
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.bank.v1beta1.QueryDenomsMetadataResponse";
+  static readonly typeName = 'cosmos.bank.v1beta1.QueryDenomsMetadataResponse';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "metadatas", kind: "message", T: Metadata, repeated: true },
-    { no: 2, name: "pagination", kind: "message", T: PageResponse },
+    { no: 1, name: 'metadatas', kind: 'message', T: Metadata, repeated: true },
+    { no: 2, name: 'pagination', kind: 'message', T: PageResponse }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryDenomsMetadataResponse {
@@ -734,7 +764,10 @@ export class QueryDenomsMetadataResponse extends Message<QueryDenomsMetadataResp
     return new QueryDenomsMetadataResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryDenomsMetadataResponse | PlainMessage<QueryDenomsMetadataResponse> | undefined, b: QueryDenomsMetadataResponse | PlainMessage<QueryDenomsMetadataResponse> | undefined): boolean {
+  static equals(
+    a: QueryDenomsMetadataResponse | PlainMessage<QueryDenomsMetadataResponse> | undefined,
+    b: QueryDenomsMetadataResponse | PlainMessage<QueryDenomsMetadataResponse> | undefined
+  ): boolean {
     return proto3.util.equals(QueryDenomsMetadataResponse, a, b);
   }
 }
@@ -750,7 +783,7 @@ export class QueryDenomMetadataRequest extends Message<QueryDenomMetadataRequest
    *
    * @generated from field: string denom = 1;
    */
-  denom = "";
+  denom = '';
 
   constructor(data?: PartialMessage<QueryDenomMetadataRequest>) {
     super();
@@ -758,10 +791,8 @@ export class QueryDenomMetadataRequest extends Message<QueryDenomMetadataRequest
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.bank.v1beta1.QueryDenomMetadataRequest";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "denom", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-  ]);
+  static readonly typeName = 'cosmos.bank.v1beta1.QueryDenomMetadataRequest';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'denom', kind: 'scalar', T: 9 /* ScalarType.STRING */ }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryDenomMetadataRequest {
     return new QueryDenomMetadataRequest().fromBinary(bytes, options);
@@ -775,7 +806,10 @@ export class QueryDenomMetadataRequest extends Message<QueryDenomMetadataRequest
     return new QueryDenomMetadataRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryDenomMetadataRequest | PlainMessage<QueryDenomMetadataRequest> | undefined, b: QueryDenomMetadataRequest | PlainMessage<QueryDenomMetadataRequest> | undefined): boolean {
+  static equals(
+    a: QueryDenomMetadataRequest | PlainMessage<QueryDenomMetadataRequest> | undefined,
+    b: QueryDenomMetadataRequest | PlainMessage<QueryDenomMetadataRequest> | undefined
+  ): boolean {
     return proto3.util.equals(QueryDenomMetadataRequest, a, b);
   }
 }
@@ -800,10 +834,8 @@ export class QueryDenomMetadataResponse extends Message<QueryDenomMetadataRespon
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.bank.v1beta1.QueryDenomMetadataResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "metadata", kind: "message", T: Metadata },
-  ]);
+  static readonly typeName = 'cosmos.bank.v1beta1.QueryDenomMetadataResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'metadata', kind: 'message', T: Metadata }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryDenomMetadataResponse {
     return new QueryDenomMetadataResponse().fromBinary(bytes, options);
@@ -817,7 +849,10 @@ export class QueryDenomMetadataResponse extends Message<QueryDenomMetadataRespon
     return new QueryDenomMetadataResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryDenomMetadataResponse | PlainMessage<QueryDenomMetadataResponse> | undefined, b: QueryDenomMetadataResponse | PlainMessage<QueryDenomMetadataResponse> | undefined): boolean {
+  static equals(
+    a: QueryDenomMetadataResponse | PlainMessage<QueryDenomMetadataResponse> | undefined,
+    b: QueryDenomMetadataResponse | PlainMessage<QueryDenomMetadataResponse> | undefined
+  ): boolean {
     return proto3.util.equals(QueryDenomMetadataResponse, a, b);
   }
 }
@@ -835,7 +870,7 @@ export class QueryDenomOwnersRequest extends Message<QueryDenomOwnersRequest> {
    *
    * @generated from field: string denom = 1;
    */
-  denom = "";
+  denom = '';
 
   /**
    * pagination defines an optional pagination for the request.
@@ -850,10 +885,10 @@ export class QueryDenomOwnersRequest extends Message<QueryDenomOwnersRequest> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.bank.v1beta1.QueryDenomOwnersRequest";
+  static readonly typeName = 'cosmos.bank.v1beta1.QueryDenomOwnersRequest';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "denom", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "pagination", kind: "message", T: PageRequest },
+    { no: 1, name: 'denom', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'pagination', kind: 'message', T: PageRequest }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryDenomOwnersRequest {
@@ -868,7 +903,10 @@ export class QueryDenomOwnersRequest extends Message<QueryDenomOwnersRequest> {
     return new QueryDenomOwnersRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryDenomOwnersRequest | PlainMessage<QueryDenomOwnersRequest> | undefined, b: QueryDenomOwnersRequest | PlainMessage<QueryDenomOwnersRequest> | undefined): boolean {
+  static equals(
+    a: QueryDenomOwnersRequest | PlainMessage<QueryDenomOwnersRequest> | undefined,
+    b: QueryDenomOwnersRequest | PlainMessage<QueryDenomOwnersRequest> | undefined
+  ): boolean {
     return proto3.util.equals(QueryDenomOwnersRequest, a, b);
   }
 }
@@ -888,7 +926,7 @@ export class DenomOwner extends Message<DenomOwner> {
    *
    * @generated from field: string address = 1;
    */
-  address = "";
+  address = '';
 
   /**
    * balance is the balance of the denominated coin for an account.
@@ -903,10 +941,10 @@ export class DenomOwner extends Message<DenomOwner> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.bank.v1beta1.DenomOwner";
+  static readonly typeName = 'cosmos.bank.v1beta1.DenomOwner';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "balance", kind: "message", T: Coin },
+    { no: 1, name: 'address', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'balance', kind: 'message', T: Coin }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DenomOwner {
@@ -952,10 +990,10 @@ export class QueryDenomOwnersResponse extends Message<QueryDenomOwnersResponse> 
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.bank.v1beta1.QueryDenomOwnersResponse";
+  static readonly typeName = 'cosmos.bank.v1beta1.QueryDenomOwnersResponse';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "denom_owners", kind: "message", T: DenomOwner, repeated: true },
-    { no: 2, name: "pagination", kind: "message", T: PageResponse },
+    { no: 1, name: 'denom_owners', kind: 'message', T: DenomOwner, repeated: true },
+    { no: 2, name: 'pagination', kind: 'message', T: PageResponse }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryDenomOwnersResponse {
@@ -970,7 +1008,10 @@ export class QueryDenomOwnersResponse extends Message<QueryDenomOwnersResponse> 
     return new QueryDenomOwnersResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryDenomOwnersResponse | PlainMessage<QueryDenomOwnersResponse> | undefined, b: QueryDenomOwnersResponse | PlainMessage<QueryDenomOwnersResponse> | undefined): boolean {
+  static equals(
+    a: QueryDenomOwnersResponse | PlainMessage<QueryDenomOwnersResponse> | undefined,
+    b: QueryDenomOwnersResponse | PlainMessage<QueryDenomOwnersResponse> | undefined
+  ): boolean {
     return proto3.util.equals(QueryDenomOwnersResponse, a, b);
   }
 }
@@ -1004,10 +1045,10 @@ export class QuerySendEnabledRequest extends Message<QuerySendEnabledRequest> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.bank.v1beta1.QuerySendEnabledRequest";
+  static readonly typeName = 'cosmos.bank.v1beta1.QuerySendEnabledRequest';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "denoms", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
-    { no: 99, name: "pagination", kind: "message", T: PageRequest },
+    { no: 1, name: 'denoms', kind: 'scalar', T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 99, name: 'pagination', kind: 'message', T: PageRequest }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QuerySendEnabledRequest {
@@ -1022,7 +1063,10 @@ export class QuerySendEnabledRequest extends Message<QuerySendEnabledRequest> {
     return new QuerySendEnabledRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QuerySendEnabledRequest | PlainMessage<QuerySendEnabledRequest> | undefined, b: QuerySendEnabledRequest | PlainMessage<QuerySendEnabledRequest> | undefined): boolean {
+  static equals(
+    a: QuerySendEnabledRequest | PlainMessage<QuerySendEnabledRequest> | undefined,
+    b: QuerySendEnabledRequest | PlainMessage<QuerySendEnabledRequest> | undefined
+  ): boolean {
     return proto3.util.equals(QuerySendEnabledRequest, a, b);
   }
 }
@@ -1054,10 +1098,10 @@ export class QuerySendEnabledResponse extends Message<QuerySendEnabledResponse> 
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.bank.v1beta1.QuerySendEnabledResponse";
+  static readonly typeName = 'cosmos.bank.v1beta1.QuerySendEnabledResponse';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "send_enabled", kind: "message", T: SendEnabled, repeated: true },
-    { no: 99, name: "pagination", kind: "message", T: PageResponse },
+    { no: 1, name: 'send_enabled', kind: 'message', T: SendEnabled, repeated: true },
+    { no: 99, name: 'pagination', kind: 'message', T: PageResponse }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QuerySendEnabledResponse {
@@ -1072,8 +1116,10 @@ export class QuerySendEnabledResponse extends Message<QuerySendEnabledResponse> 
     return new QuerySendEnabledResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QuerySendEnabledResponse | PlainMessage<QuerySendEnabledResponse> | undefined, b: QuerySendEnabledResponse | PlainMessage<QuerySendEnabledResponse> | undefined): boolean {
+  static equals(
+    a: QuerySendEnabledResponse | PlainMessage<QuerySendEnabledResponse> | undefined,
+    b: QuerySendEnabledResponse | PlainMessage<QuerySendEnabledResponse> | undefined
+  ): boolean {
     return proto3.util.equals(QuerySendEnabledResponse, a, b);
   }
 }
-

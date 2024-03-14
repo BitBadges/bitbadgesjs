@@ -12,7 +12,7 @@ npm install bitbadgesjs-proto
 bitbadgesjs-utils is a library which provides miscellaneous functionality to help you interact with the BitBadges API and indexer, such as types, managing metadata requests, logic with Uint ranges and balances, etc.
 
 ```ts
-const doOverlap = checkIfUintRangesOverlap(...);
+const doOverlap = hasOverlaps(...);
 const metadata = updateMetadataMap(....);
 ```
 

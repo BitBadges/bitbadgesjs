@@ -3,8 +3,8 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3 } from '@bufbuild/protobuf';
 
 /**
  * Metadata defines a set of protocol specific data encoded into the ICS27
@@ -19,7 +19,7 @@ export class Metadata extends Message<Metadata> {
    *
    * @generated from field: string version = 1;
    */
-  version = "";
+  version = '';
 
   /**
    * controller_connection_id is the connection identifier associated with the
@@ -27,7 +27,7 @@ export class Metadata extends Message<Metadata> {
    *
    * @generated from field: string controller_connection_id = 2;
    */
-  controllerConnectionId = "";
+  controllerConnectionId = '';
 
   /**
    * host_connection_id is the connection identifier associated with the host
@@ -35,7 +35,7 @@ export class Metadata extends Message<Metadata> {
    *
    * @generated from field: string host_connection_id = 3;
    */
-  hostConnectionId = "";
+  hostConnectionId = '';
 
   /**
    * address defines the interchain account address to be fulfilled upon the
@@ -44,21 +44,21 @@ export class Metadata extends Message<Metadata> {
    *
    * @generated from field: string address = 4;
    */
-  address = "";
+  address = '';
 
   /**
    * encoding defines the supported codec format
    *
    * @generated from field: string encoding = 5;
    */
-  encoding = "";
+  encoding = '';
 
   /**
    * tx_type defines the type of transactions the interchain account can execute
    *
    * @generated from field: string tx_type = 6;
    */
-  txType = "";
+  txType = '';
 
   constructor(data?: PartialMessage<Metadata>) {
     super();
@@ -66,14 +66,14 @@ export class Metadata extends Message<Metadata> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ibc.applications.interchain_accounts.v1.Metadata";
+  static readonly typeName = 'ibc.applications.interchain_accounts.v1.Metadata';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "version", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "controller_connection_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "host_connection_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 5, name: "encoding", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 6, name: "tx_type", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'version', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'controller_connection_id', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'host_connection_id', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: 'address', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: 'encoding', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 6, name: 'tx_type', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Metadata {
@@ -92,4 +92,3 @@ export class Metadata extends Message<Metadata> {
     return proto3.util.equals(Metadata, a, b);
   }
 }
-

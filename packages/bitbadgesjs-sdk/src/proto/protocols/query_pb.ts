@@ -3,10 +3,10 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
-import { Params } from "./params_pb.js";
-import { Protocol } from "./tx_pb.js";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3 } from '@bufbuild/protobuf';
+import { Params } from './params_pb.js';
+import { Protocol } from './tx_pb.js';
 
 /**
  * QueryParamsRequest is request type for the Query/Params RPC method.
@@ -20,9 +20,8 @@ export class QueryParamsRequest extends Message<QueryParamsRequest> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "protocols.QueryParamsRequest";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-  ]);
+  static readonly typeName = 'protocols.QueryParamsRequest';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => []);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryParamsRequest {
     return new QueryParamsRequest().fromBinary(bytes, options);
@@ -36,7 +35,10 @@ export class QueryParamsRequest extends Message<QueryParamsRequest> {
     return new QueryParamsRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryParamsRequest | PlainMessage<QueryParamsRequest> | undefined, b: QueryParamsRequest | PlainMessage<QueryParamsRequest> | undefined): boolean {
+  static equals(
+    a: QueryParamsRequest | PlainMessage<QueryParamsRequest> | undefined,
+    b: QueryParamsRequest | PlainMessage<QueryParamsRequest> | undefined
+  ): boolean {
     return proto3.util.equals(QueryParamsRequest, a, b);
   }
 }
@@ -60,10 +62,8 @@ export class QueryParamsResponse extends Message<QueryParamsResponse> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "protocols.QueryParamsResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "params", kind: "message", T: Params },
-  ]);
+  static readonly typeName = 'protocols.QueryParamsResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'params', kind: 'message', T: Params }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryParamsResponse {
     return new QueryParamsResponse().fromBinary(bytes, options);
@@ -77,7 +77,10 @@ export class QueryParamsResponse extends Message<QueryParamsResponse> {
     return new QueryParamsResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryParamsResponse | PlainMessage<QueryParamsResponse> | undefined, b: QueryParamsResponse | PlainMessage<QueryParamsResponse> | undefined): boolean {
+  static equals(
+    a: QueryParamsResponse | PlainMessage<QueryParamsResponse> | undefined,
+    b: QueryParamsResponse | PlainMessage<QueryParamsResponse> | undefined
+  ): boolean {
     return proto3.util.equals(QueryParamsResponse, a, b);
   }
 }
@@ -89,7 +92,7 @@ export class QueryGetProtocolRequest extends Message<QueryGetProtocolRequest> {
   /**
    * @generated from field: string name = 1;
    */
-  name = "";
+  name = '';
 
   constructor(data?: PartialMessage<QueryGetProtocolRequest>) {
     super();
@@ -97,10 +100,8 @@ export class QueryGetProtocolRequest extends Message<QueryGetProtocolRequest> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "protocols.QueryGetProtocolRequest";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-  ]);
+  static readonly typeName = 'protocols.QueryGetProtocolRequest';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'name', kind: 'scalar', T: 9 /* ScalarType.STRING */ }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryGetProtocolRequest {
     return new QueryGetProtocolRequest().fromBinary(bytes, options);
@@ -114,7 +115,10 @@ export class QueryGetProtocolRequest extends Message<QueryGetProtocolRequest> {
     return new QueryGetProtocolRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryGetProtocolRequest | PlainMessage<QueryGetProtocolRequest> | undefined, b: QueryGetProtocolRequest | PlainMessage<QueryGetProtocolRequest> | undefined): boolean {
+  static equals(
+    a: QueryGetProtocolRequest | PlainMessage<QueryGetProtocolRequest> | undefined,
+    b: QueryGetProtocolRequest | PlainMessage<QueryGetProtocolRequest> | undefined
+  ): boolean {
     return proto3.util.equals(QueryGetProtocolRequest, a, b);
   }
 }
@@ -134,10 +138,8 @@ export class QueryGetProtocolResponse extends Message<QueryGetProtocolResponse> 
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "protocols.QueryGetProtocolResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "protocol", kind: "message", T: Protocol },
-  ]);
+  static readonly typeName = 'protocols.QueryGetProtocolResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'protocol', kind: 'message', T: Protocol }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryGetProtocolResponse {
     return new QueryGetProtocolResponse().fromBinary(bytes, options);
@@ -151,7 +153,10 @@ export class QueryGetProtocolResponse extends Message<QueryGetProtocolResponse> 
     return new QueryGetProtocolResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryGetProtocolResponse | PlainMessage<QueryGetProtocolResponse> | undefined, b: QueryGetProtocolResponse | PlainMessage<QueryGetProtocolResponse> | undefined): boolean {
+  static equals(
+    a: QueryGetProtocolResponse | PlainMessage<QueryGetProtocolResponse> | undefined,
+    b: QueryGetProtocolResponse | PlainMessage<QueryGetProtocolResponse> | undefined
+  ): boolean {
     return proto3.util.equals(QueryGetProtocolResponse, a, b);
   }
 }
@@ -163,12 +168,12 @@ export class QueryGetCollectionIdForProtocolRequest extends Message<QueryGetColl
   /**
    * @generated from field: string name = 1;
    */
-  name = "";
+  name = '';
 
   /**
    * @generated from field: string address = 2;
    */
-  address = "";
+  address = '';
 
   constructor(data?: PartialMessage<QueryGetCollectionIdForProtocolRequest>) {
     super();
@@ -176,10 +181,10 @@ export class QueryGetCollectionIdForProtocolRequest extends Message<QueryGetColl
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "protocols.QueryGetCollectionIdForProtocolRequest";
+  static readonly typeName = 'protocols.QueryGetCollectionIdForProtocolRequest';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'name', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'address', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryGetCollectionIdForProtocolRequest {
@@ -194,7 +199,10 @@ export class QueryGetCollectionIdForProtocolRequest extends Message<QueryGetColl
     return new QueryGetCollectionIdForProtocolRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryGetCollectionIdForProtocolRequest | PlainMessage<QueryGetCollectionIdForProtocolRequest> | undefined, b: QueryGetCollectionIdForProtocolRequest | PlainMessage<QueryGetCollectionIdForProtocolRequest> | undefined): boolean {
+  static equals(
+    a: QueryGetCollectionIdForProtocolRequest | PlainMessage<QueryGetCollectionIdForProtocolRequest> | undefined,
+    b: QueryGetCollectionIdForProtocolRequest | PlainMessage<QueryGetCollectionIdForProtocolRequest> | undefined
+  ): boolean {
     return proto3.util.equals(QueryGetCollectionIdForProtocolRequest, a, b);
   }
 }
@@ -206,7 +214,7 @@ export class QueryGetCollectionIdForProtocolResponse extends Message<QueryGetCol
   /**
    * @generated from field: string collection_id = 1;
    */
-  collectionId = "";
+  collectionId = '';
 
   constructor(data?: PartialMessage<QueryGetCollectionIdForProtocolResponse>) {
     super();
@@ -214,9 +222,9 @@ export class QueryGetCollectionIdForProtocolResponse extends Message<QueryGetCol
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "protocols.QueryGetCollectionIdForProtocolResponse";
+  static readonly typeName = 'protocols.QueryGetCollectionIdForProtocolResponse';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "collection_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'collection_id', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryGetCollectionIdForProtocolResponse {
@@ -231,8 +239,10 @@ export class QueryGetCollectionIdForProtocolResponse extends Message<QueryGetCol
     return new QueryGetCollectionIdForProtocolResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryGetCollectionIdForProtocolResponse | PlainMessage<QueryGetCollectionIdForProtocolResponse> | undefined, b: QueryGetCollectionIdForProtocolResponse | PlainMessage<QueryGetCollectionIdForProtocolResponse> | undefined): boolean {
+  static equals(
+    a: QueryGetCollectionIdForProtocolResponse | PlainMessage<QueryGetCollectionIdForProtocolResponse> | undefined,
+    b: QueryGetCollectionIdForProtocolResponse | PlainMessage<QueryGetCollectionIdForProtocolResponse> | undefined
+  ): boolean {
     return proto3.util.equals(QueryGetCollectionIdForProtocolResponse, a, b);
   }
 }
-

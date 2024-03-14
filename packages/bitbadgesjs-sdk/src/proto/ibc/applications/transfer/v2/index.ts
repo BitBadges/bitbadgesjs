@@ -1,1 +1,1 @@
-export * from './packet_pb'
+export * from './packet_pb';

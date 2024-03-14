@@ -3,9 +3,9 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
-import { CommitmentProof } from "../../../../proofs_pb.js";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3 } from '@bufbuild/protobuf';
+import { CommitmentProof } from '../../../../proofs_pb.js';
 
 /**
  * MerkleRoot defines a merkle root hash.
@@ -25,10 +25,8 @@ export class MerkleRoot extends Message<MerkleRoot> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ibc.core.commitment.v1.MerkleRoot";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "hash", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-  ]);
+  static readonly typeName = 'ibc.core.commitment.v1.MerkleRoot';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'hash', kind: 'scalar', T: 12 /* ScalarType.BYTES */ }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MerkleRoot {
     return new MerkleRoot().fromBinary(bytes, options);
@@ -66,10 +64,8 @@ export class MerklePrefix extends Message<MerklePrefix> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ibc.core.commitment.v1.MerklePrefix";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "key_prefix", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-  ]);
+  static readonly typeName = 'ibc.core.commitment.v1.MerklePrefix';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'key_prefix', kind: 'scalar', T: 12 /* ScalarType.BYTES */ }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MerklePrefix {
     return new MerklePrefix().fromBinary(bytes, options);
@@ -107,9 +103,9 @@ export class MerklePath extends Message<MerklePath> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ibc.core.commitment.v1.MerklePath";
+  static readonly typeName = 'ibc.core.commitment.v1.MerklePath';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "key_path", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 1, name: 'key_path', kind: 'scalar', T: 9 /* ScalarType.STRING */, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MerklePath {
@@ -150,9 +146,9 @@ export class MerkleProof extends Message<MerkleProof> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ibc.core.commitment.v1.MerkleProof";
+  static readonly typeName = 'ibc.core.commitment.v1.MerkleProof';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "proofs", kind: "message", T: CommitmentProof, repeated: true },
+    { no: 1, name: 'proofs', kind: 'message', T: CommitmentProof, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MerkleProof {
@@ -171,4 +167,3 @@ export class MerkleProof extends Message<MerkleProof> {
     return proto3.util.equals(MerkleProof, a, b);
   }
 }
-

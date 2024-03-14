@@ -3,8 +3,8 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3 } from '@bufbuild/protobuf';
 
 /**
  * Module is the config object of the bank module.
@@ -26,7 +26,7 @@ export class Module extends Message<Module> {
    *
    * @generated from field: string authority = 2;
    */
-  authority = "";
+  authority = '';
 
   constructor(data?: PartialMessage<Module>) {
     super();
@@ -34,10 +34,10 @@ export class Module extends Message<Module> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.bank.module.v1.Module";
+  static readonly typeName = 'cosmos.bank.module.v1.Module';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "blocked_module_accounts_override", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
-    { no: 2, name: "authority", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'blocked_module_accounts_override', kind: 'scalar', T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 2, name: 'authority', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Module {
@@ -56,4 +56,3 @@ export class Module extends Message<Module> {
     return proto3.util.equals(Module, a, b);
   }
 }
-

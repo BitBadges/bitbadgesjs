@@ -3,8 +3,8 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3 } from '@bufbuild/protobuf';
 
 /**
  * PubKey defines a type alias for an ecdsa.PublicKey that implements
@@ -29,10 +29,8 @@ export class PubKey extends Message<PubKey> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ethereum.PubKey";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "key", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-  ]);
+  static readonly typeName = 'ethereum.PubKey';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'key', kind: 'scalar', T: 12 /* ScalarType.BYTES */ }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PubKey {
     return new PubKey().fromBinary(bytes, options);
@@ -71,10 +69,8 @@ export class PrivKey extends Message<PrivKey> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ethereum.PrivKey";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "key", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-  ]);
+  static readonly typeName = 'ethereum.PrivKey';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'key', kind: 'scalar', T: 12 /* ScalarType.BYTES */ }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PrivKey {
     return new PrivKey().fromBinary(bytes, options);
@@ -92,4 +88,3 @@ export class PrivKey extends Message<PrivKey> {
     return proto3.util.equals(PrivKey, a, b);
   }
 }
-

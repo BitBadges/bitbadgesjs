@@ -3,9 +3,9 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3, protoInt64 } from "@bufbuild/protobuf";
-import { ConnectionPaths, IdentifiedConnection, Params } from "./connection_pb.js";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3, protoInt64 } from '@bufbuild/protobuf';
+import { ConnectionPaths, IdentifiedConnection, Params } from './connection_pb.js';
 
 /**
  * GenesisState defines the ibc connection submodule's genesis state.
@@ -41,12 +41,12 @@ export class GenesisState extends Message<GenesisState> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ibc.core.connection.v1.GenesisState";
+  static readonly typeName = 'ibc.core.connection.v1.GenesisState';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "connections", kind: "message", T: IdentifiedConnection, repeated: true },
-    { no: 2, name: "client_connection_paths", kind: "message", T: ConnectionPaths, repeated: true },
-    { no: 3, name: "next_connection_sequence", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
-    { no: 4, name: "params", kind: "message", T: Params },
+    { no: 1, name: 'connections', kind: 'message', T: IdentifiedConnection, repeated: true },
+    { no: 2, name: 'client_connection_paths', kind: 'message', T: ConnectionPaths, repeated: true },
+    { no: 3, name: 'next_connection_sequence', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ },
+    { no: 4, name: 'params', kind: 'message', T: Params }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GenesisState {
@@ -65,4 +65,3 @@ export class GenesisState extends Message<GenesisState> {
     return proto3.util.equals(GenesisState, a, b);
   }
 }
-

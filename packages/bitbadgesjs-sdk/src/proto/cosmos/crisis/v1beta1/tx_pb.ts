@@ -3,9 +3,9 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
-import { Coin } from "../../base/v1beta1/coin_pb.js";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3 } from '@bufbuild/protobuf';
+import { Coin } from '../../base/v1beta1/coin_pb.js';
 
 /**
  * MsgVerifyInvariant represents a message to verify a particular invariance.
@@ -18,21 +18,21 @@ export class MsgVerifyInvariant extends Message<MsgVerifyInvariant> {
    *
    * @generated from field: string sender = 1;
    */
-  sender = "";
+  sender = '';
 
   /**
    * name of the invariant module.
    *
    * @generated from field: string invariant_module_name = 2;
    */
-  invariantModuleName = "";
+  invariantModuleName = '';
 
   /**
    * invariant_route is the msg's invariant route.
    *
    * @generated from field: string invariant_route = 3;
    */
-  invariantRoute = "";
+  invariantRoute = '';
 
   constructor(data?: PartialMessage<MsgVerifyInvariant>) {
     super();
@@ -40,11 +40,11 @@ export class MsgVerifyInvariant extends Message<MsgVerifyInvariant> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.crisis.v1beta1.MsgVerifyInvariant";
+  static readonly typeName = 'cosmos.crisis.v1beta1.MsgVerifyInvariant';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "sender", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "invariant_module_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "invariant_route", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'sender', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'invariant_module_name', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'invariant_route', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgVerifyInvariant {
@@ -59,7 +59,10 @@ export class MsgVerifyInvariant extends Message<MsgVerifyInvariant> {
     return new MsgVerifyInvariant().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgVerifyInvariant | PlainMessage<MsgVerifyInvariant> | undefined, b: MsgVerifyInvariant | PlainMessage<MsgVerifyInvariant> | undefined): boolean {
+  static equals(
+    a: MsgVerifyInvariant | PlainMessage<MsgVerifyInvariant> | undefined,
+    b: MsgVerifyInvariant | PlainMessage<MsgVerifyInvariant> | undefined
+  ): boolean {
     return proto3.util.equals(MsgVerifyInvariant, a, b);
   }
 }
@@ -76,9 +79,8 @@ export class MsgVerifyInvariantResponse extends Message<MsgVerifyInvariantRespon
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.crisis.v1beta1.MsgVerifyInvariantResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-  ]);
+  static readonly typeName = 'cosmos.crisis.v1beta1.MsgVerifyInvariantResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => []);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgVerifyInvariantResponse {
     return new MsgVerifyInvariantResponse().fromBinary(bytes, options);
@@ -92,7 +94,10 @@ export class MsgVerifyInvariantResponse extends Message<MsgVerifyInvariantRespon
     return new MsgVerifyInvariantResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgVerifyInvariantResponse | PlainMessage<MsgVerifyInvariantResponse> | undefined, b: MsgVerifyInvariantResponse | PlainMessage<MsgVerifyInvariantResponse> | undefined): boolean {
+  static equals(
+    a: MsgVerifyInvariantResponse | PlainMessage<MsgVerifyInvariantResponse> | undefined,
+    b: MsgVerifyInvariantResponse | PlainMessage<MsgVerifyInvariantResponse> | undefined
+  ): boolean {
     return proto3.util.equals(MsgVerifyInvariantResponse, a, b);
   }
 }
@@ -110,7 +115,7 @@ export class MsgUpdateParams extends Message<MsgUpdateParams> {
    *
    * @generated from field: string authority = 1;
    */
-  authority = "";
+  authority = '';
 
   /**
    * constant_fee defines the x/crisis parameter.
@@ -125,10 +130,10 @@ export class MsgUpdateParams extends Message<MsgUpdateParams> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.crisis.v1beta1.MsgUpdateParams";
+  static readonly typeName = 'cosmos.crisis.v1beta1.MsgUpdateParams';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "authority", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "constant_fee", kind: "message", T: Coin },
+    { no: 1, name: 'authority', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'constant_fee', kind: 'message', T: Coin }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUpdateParams {
@@ -143,7 +148,10 @@ export class MsgUpdateParams extends Message<MsgUpdateParams> {
     return new MsgUpdateParams().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgUpdateParams | PlainMessage<MsgUpdateParams> | undefined, b: MsgUpdateParams | PlainMessage<MsgUpdateParams> | undefined): boolean {
+  static equals(
+    a: MsgUpdateParams | PlainMessage<MsgUpdateParams> | undefined,
+    b: MsgUpdateParams | PlainMessage<MsgUpdateParams> | undefined
+  ): boolean {
     return proto3.util.equals(MsgUpdateParams, a, b);
   }
 }
@@ -163,9 +171,8 @@ export class MsgUpdateParamsResponse extends Message<MsgUpdateParamsResponse> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.crisis.v1beta1.MsgUpdateParamsResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-  ]);
+  static readonly typeName = 'cosmos.crisis.v1beta1.MsgUpdateParamsResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => []);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUpdateParamsResponse {
     return new MsgUpdateParamsResponse().fromBinary(bytes, options);
@@ -179,8 +186,10 @@ export class MsgUpdateParamsResponse extends Message<MsgUpdateParamsResponse> {
     return new MsgUpdateParamsResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgUpdateParamsResponse | PlainMessage<MsgUpdateParamsResponse> | undefined, b: MsgUpdateParamsResponse | PlainMessage<MsgUpdateParamsResponse> | undefined): boolean {
+  static equals(
+    a: MsgUpdateParamsResponse | PlainMessage<MsgUpdateParamsResponse> | undefined,
+    b: MsgUpdateParamsResponse | PlainMessage<MsgUpdateParamsResponse> | undefined
+  ): boolean {
     return proto3.util.equals(MsgUpdateParamsResponse, a, b);
   }
 }
-

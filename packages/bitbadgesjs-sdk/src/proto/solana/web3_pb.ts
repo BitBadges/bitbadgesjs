@@ -3,8 +3,8 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3, protoInt64 } from "@bufbuild/protobuf";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3, protoInt64 } from '@bufbuild/protobuf';
 
 /**
  * ExtensionOptionsWeb3Tx is an extension option that specifies the typed chain id,
@@ -27,7 +27,7 @@ export class ExtensionOptionsWeb3TxSolana extends Message<ExtensionOptionsWeb3Tx
    *
    * @generated from field: string fee_payer = 2;
    */
-  feePayer = "";
+  feePayer = '';
 
   /**
    * fee_payer_sig is a signature data from the fee paying account,
@@ -42,16 +42,16 @@ export class ExtensionOptionsWeb3TxSolana extends Message<ExtensionOptionsWeb3Tx
    *
    * @generated from field: string chain = 4;
    */
-  chain = "";
+  chain = '';
 
   /**
-   * sol_address is the address of the solana account. 
+   * sol_address is the address of the solana account.
    * Used for indexing purposes because we can't natively go from a cosmos address (what is used on-chain) to a solana address
    * without knowing the solana address in the first place. This is because conversion to cosmos requires a hash of the solana address.
    *
    * @generated from field: string sol_address = 5;
    */
-  solAddress = "";
+  solAddress = '';
 
   constructor(data?: PartialMessage<ExtensionOptionsWeb3TxSolana>) {
     super();
@@ -59,13 +59,13 @@ export class ExtensionOptionsWeb3TxSolana extends Message<ExtensionOptionsWeb3Tx
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "solana.ExtensionOptionsWeb3TxSolana";
+  static readonly typeName = 'solana.ExtensionOptionsWeb3TxSolana';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "typed_data_chain_id", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
-    { no: 2, name: "fee_payer", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "fee_payer_sig", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 4, name: "chain", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 5, name: "sol_address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'typed_data_chain_id', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ },
+    { no: 2, name: 'fee_payer', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'fee_payer_sig', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 4, name: 'chain', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: 'sol_address', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ExtensionOptionsWeb3TxSolana {
@@ -80,8 +80,10 @@ export class ExtensionOptionsWeb3TxSolana extends Message<ExtensionOptionsWeb3Tx
     return new ExtensionOptionsWeb3TxSolana().fromJsonString(jsonString, options);
   }
 
-  static equals(a: ExtensionOptionsWeb3TxSolana | PlainMessage<ExtensionOptionsWeb3TxSolana> | undefined, b: ExtensionOptionsWeb3TxSolana | PlainMessage<ExtensionOptionsWeb3TxSolana> | undefined): boolean {
+  static equals(
+    a: ExtensionOptionsWeb3TxSolana | PlainMessage<ExtensionOptionsWeb3TxSolana> | undefined,
+    b: ExtensionOptionsWeb3TxSolana | PlainMessage<ExtensionOptionsWeb3TxSolana> | undefined
+  ): boolean {
     return proto3.util.equals(ExtensionOptionsWeb3TxSolana, a, b);
   }
 }
-

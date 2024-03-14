@@ -3,9 +3,9 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Any, Message, proto3, protoInt64 } from "@bufbuild/protobuf";
-import { Event } from "../../../../tendermint/abci/types_pb.js";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Any, Message, proto3, protoInt64 } from '@bufbuild/protobuf';
+import { Event } from '../../../../tendermint/abci/types_pb.js';
 
 /**
  * TxResponse defines a structure containing relevant tx data and metadata. The
@@ -26,14 +26,14 @@ export class TxResponse extends Message<TxResponse> {
    *
    * @generated from field: string txhash = 2;
    */
-  txhash = "";
+  txhash = '';
 
   /**
    * Namespace for the Code
    *
    * @generated from field: string codespace = 3;
    */
-  codespace = "";
+  codespace = '';
 
   /**
    * Response code.
@@ -47,7 +47,7 @@ export class TxResponse extends Message<TxResponse> {
    *
    * @generated from field: string data = 5;
    */
-  data = "";
+  data = '';
 
   /**
    * The output of the application's logger (raw string). May be
@@ -55,7 +55,7 @@ export class TxResponse extends Message<TxResponse> {
    *
    * @generated from field: string raw_log = 6;
    */
-  rawLog = "";
+  rawLog = '';
 
   /**
    * The output of the application's logger (typed). May be non-deterministic.
@@ -69,7 +69,7 @@ export class TxResponse extends Message<TxResponse> {
    *
    * @generated from field: string info = 8;
    */
-  info = "";
+  info = '';
 
   /**
    * Amount of gas requested for transaction.
@@ -99,7 +99,7 @@ export class TxResponse extends Message<TxResponse> {
    *
    * @generated from field: string timestamp = 12;
    */
-  timestamp = "";
+  timestamp = '';
 
   /**
    * Events defines all the events emitted by processing a transaction. Note,
@@ -119,21 +119,21 @@ export class TxResponse extends Message<TxResponse> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.base.abci.v1beta1.TxResponse";
+  static readonly typeName = 'cosmos.base.abci.v1beta1.TxResponse';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "height", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
-    { no: 2, name: "txhash", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "codespace", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "code", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 5, name: "data", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 6, name: "raw_log", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 7, name: "logs", kind: "message", T: ABCIMessageLog, repeated: true },
-    { no: 8, name: "info", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 9, name: "gas_wanted", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
-    { no: 10, name: "gas_used", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
-    { no: 11, name: "tx", kind: "message", T: Any },
-    { no: 12, name: "timestamp", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 13, name: "events", kind: "message", T: Event, repeated: true },
+    { no: 1, name: 'height', kind: 'scalar', T: 3 /* ScalarType.INT64 */ },
+    { no: 2, name: 'txhash', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'codespace', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: 'code', kind: 'scalar', T: 13 /* ScalarType.UINT32 */ },
+    { no: 5, name: 'data', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 6, name: 'raw_log', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 7, name: 'logs', kind: 'message', T: ABCIMessageLog, repeated: true },
+    { no: 8, name: 'info', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 9, name: 'gas_wanted', kind: 'scalar', T: 3 /* ScalarType.INT64 */ },
+    { no: 10, name: 'gas_used', kind: 'scalar', T: 3 /* ScalarType.INT64 */ },
+    { no: 11, name: 'tx', kind: 'message', T: Any },
+    { no: 12, name: 'timestamp', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 13, name: 'events', kind: 'message', T: Event, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): TxResponse {
@@ -167,7 +167,7 @@ export class ABCIMessageLog extends Message<ABCIMessageLog> {
   /**
    * @generated from field: string log = 2;
    */
-  log = "";
+  log = '';
 
   /**
    * Events contains a slice of Event objects that were emitted during some
@@ -183,11 +183,11 @@ export class ABCIMessageLog extends Message<ABCIMessageLog> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.base.abci.v1beta1.ABCIMessageLog";
+  static readonly typeName = 'cosmos.base.abci.v1beta1.ABCIMessageLog';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "msg_index", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 2, name: "log", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "events", kind: "message", T: StringEvent, repeated: true },
+    { no: 1, name: 'msg_index', kind: 'scalar', T: 13 /* ScalarType.UINT32 */ },
+    { no: 2, name: 'log', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'events', kind: 'message', T: StringEvent, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ABCIMessageLog {
@@ -217,7 +217,7 @@ export class StringEvent extends Message<StringEvent> {
   /**
    * @generated from field: string type = 1;
    */
-  type = "";
+  type = '';
 
   /**
    * @generated from field: repeated cosmos.base.abci.v1beta1.Attribute attributes = 2;
@@ -230,10 +230,10 @@ export class StringEvent extends Message<StringEvent> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.base.abci.v1beta1.StringEvent";
+  static readonly typeName = 'cosmos.base.abci.v1beta1.StringEvent';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "type", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "attributes", kind: "message", T: Attribute, repeated: true },
+    { no: 1, name: 'type', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'attributes', kind: 'message', T: Attribute, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): StringEvent {
@@ -263,12 +263,12 @@ export class Attribute extends Message<Attribute> {
   /**
    * @generated from field: string key = 1;
    */
-  key = "";
+  key = '';
 
   /**
    * @generated from field: string value = 2;
    */
-  value = "";
+  value = '';
 
   constructor(data?: PartialMessage<Attribute>) {
     super();
@@ -276,10 +276,10 @@ export class Attribute extends Message<Attribute> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.base.abci.v1beta1.Attribute";
+  static readonly typeName = 'cosmos.base.abci.v1beta1.Attribute';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "key", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "value", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'key', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'value', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Attribute {
@@ -325,10 +325,10 @@ export class GasInfo extends Message<GasInfo> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.base.abci.v1beta1.GasInfo";
+  static readonly typeName = 'cosmos.base.abci.v1beta1.GasInfo';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "gas_wanted", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
-    { no: 2, name: "gas_used", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
+    { no: 1, name: 'gas_wanted', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ },
+    { no: 2, name: 'gas_used', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GasInfo {
@@ -370,7 +370,7 @@ export class Result extends Message<Result> {
    *
    * @generated from field: string log = 2;
    */
-  log = "";
+  log = '';
 
   /**
    * Events contains a slice of Event objects that were emitted during message
@@ -395,12 +395,12 @@ export class Result extends Message<Result> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.base.abci.v1beta1.Result";
+  static readonly typeName = 'cosmos.base.abci.v1beta1.Result';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "data", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 2, name: "log", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "events", kind: "message", T: Event, repeated: true },
-    { no: 4, name: "msg_responses", kind: "message", T: Any, repeated: true },
+    { no: 1, name: 'data', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 2, name: 'log', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'events', kind: 'message', T: Event, repeated: true },
+    { no: 4, name: 'msg_responses', kind: 'message', T: Any, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Result {
@@ -443,10 +443,10 @@ export class SimulationResponse extends Message<SimulationResponse> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.base.abci.v1beta1.SimulationResponse";
+  static readonly typeName = 'cosmos.base.abci.v1beta1.SimulationResponse';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "gas_info", kind: "message", T: GasInfo },
-    { no: 2, name: "result", kind: "message", T: Result },
+    { no: 1, name: 'gas_info', kind: 'message', T: GasInfo },
+    { no: 2, name: 'result', kind: 'message', T: Result }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SimulationResponse {
@@ -461,7 +461,10 @@ export class SimulationResponse extends Message<SimulationResponse> {
     return new SimulationResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: SimulationResponse | PlainMessage<SimulationResponse> | undefined, b: SimulationResponse | PlainMessage<SimulationResponse> | undefined): boolean {
+  static equals(
+    a: SimulationResponse | PlainMessage<SimulationResponse> | undefined,
+    b: SimulationResponse | PlainMessage<SimulationResponse> | undefined
+  ): boolean {
     return proto3.util.equals(SimulationResponse, a, b);
   }
 }
@@ -477,7 +480,7 @@ export class MsgData extends Message<MsgData> {
   /**
    * @generated from field: string msg_type = 1;
    */
-  msgType = "";
+  msgType = '';
 
   /**
    * @generated from field: bytes data = 2;
@@ -490,10 +493,10 @@ export class MsgData extends Message<MsgData> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.base.abci.v1beta1.MsgData";
+  static readonly typeName = 'cosmos.base.abci.v1beta1.MsgData';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "msg_type", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "data", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
+    { no: 1, name: 'msg_type', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'data', kind: 'scalar', T: 12 /* ScalarType.BYTES */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgData {
@@ -543,10 +546,10 @@ export class TxMsgData extends Message<TxMsgData> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.base.abci.v1beta1.TxMsgData";
+  static readonly typeName = 'cosmos.base.abci.v1beta1.TxMsgData';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "data", kind: "message", T: MsgData, repeated: true },
-    { no: 2, name: "msg_responses", kind: "message", T: Any, repeated: true },
+    { no: 1, name: 'data', kind: 'message', T: MsgData, repeated: true },
+    { no: 2, name: 'msg_responses', kind: 'message', T: Any, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): TxMsgData {
@@ -620,14 +623,14 @@ export class SearchTxsResult extends Message<SearchTxsResult> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.base.abci.v1beta1.SearchTxsResult";
+  static readonly typeName = 'cosmos.base.abci.v1beta1.SearchTxsResult';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "total_count", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
-    { no: 2, name: "count", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
-    { no: 3, name: "page_number", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
-    { no: 4, name: "page_total", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
-    { no: 5, name: "limit", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
-    { no: 6, name: "txs", kind: "message", T: TxResponse, repeated: true },
+    { no: 1, name: 'total_count', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ },
+    { no: 2, name: 'count', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ },
+    { no: 3, name: 'page_number', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ },
+    { no: 4, name: 'page_total', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ },
+    { no: 5, name: 'limit', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ },
+    { no: 6, name: 'txs', kind: 'message', T: TxResponse, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SearchTxsResult {
@@ -642,8 +645,10 @@ export class SearchTxsResult extends Message<SearchTxsResult> {
     return new SearchTxsResult().fromJsonString(jsonString, options);
   }
 
-  static equals(a: SearchTxsResult | PlainMessage<SearchTxsResult> | undefined, b: SearchTxsResult | PlainMessage<SearchTxsResult> | undefined): boolean {
+  static equals(
+    a: SearchTxsResult | PlainMessage<SearchTxsResult> | undefined,
+    b: SearchTxsResult | PlainMessage<SearchTxsResult> | undefined
+  ): boolean {
     return proto3.util.equals(SearchTxsResult, a, b);
   }
 }
-

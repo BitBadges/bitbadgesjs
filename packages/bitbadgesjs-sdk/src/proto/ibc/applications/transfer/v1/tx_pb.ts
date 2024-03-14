@@ -3,10 +3,10 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3, protoInt64 } from "@bufbuild/protobuf";
-import { Coin } from "../../../../cosmos/base/v1beta1/coin_pb.js";
-import { Height } from "../../../core/client/v1/client_pb.js";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3, protoInt64 } from '@bufbuild/protobuf';
+import { Coin } from '../../../../cosmos/base/v1beta1/coin_pb.js';
+import { Height } from '../../../core/client/v1/client_pb.js';
 
 /**
  * MsgTransfer defines a msg to transfer fungible tokens (i.e Coins) between
@@ -21,14 +21,14 @@ export class MsgTransfer extends Message<MsgTransfer> {
    *
    * @generated from field: string source_port = 1;
    */
-  sourcePort = "";
+  sourcePort = '';
 
   /**
    * the channel by which the packet will be sent
    *
    * @generated from field: string source_channel = 2;
    */
-  sourceChannel = "";
+  sourceChannel = '';
 
   /**
    * the tokens to be transferred
@@ -42,14 +42,14 @@ export class MsgTransfer extends Message<MsgTransfer> {
    *
    * @generated from field: string sender = 4;
    */
-  sender = "";
+  sender = '';
 
   /**
    * the recipient address on the destination chain
    *
    * @generated from field: string receiver = 5;
    */
-  receiver = "";
+  receiver = '';
 
   /**
    * Timeout height relative to the current block height.
@@ -73,15 +73,15 @@ export class MsgTransfer extends Message<MsgTransfer> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ibc.applications.transfer.v1.MsgTransfer";
+  static readonly typeName = 'ibc.applications.transfer.v1.MsgTransfer';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "source_port", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "source_channel", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "token", kind: "message", T: Coin },
-    { no: 4, name: "sender", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 5, name: "receiver", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 6, name: "timeout_height", kind: "message", T: Height },
-    { no: 7, name: "timeout_timestamp", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
+    { no: 1, name: 'source_port', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'source_channel', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'token', kind: 'message', T: Coin },
+    { no: 4, name: 'sender', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: 'receiver', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 6, name: 'timeout_height', kind: 'message', T: Height },
+    { no: 7, name: 'timeout_timestamp', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgTransfer {
@@ -113,9 +113,8 @@ export class MsgTransferResponse extends Message<MsgTransferResponse> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ibc.applications.transfer.v1.MsgTransferResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-  ]);
+  static readonly typeName = 'ibc.applications.transfer.v1.MsgTransferResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => []);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgTransferResponse {
     return new MsgTransferResponse().fromBinary(bytes, options);
@@ -129,8 +128,10 @@ export class MsgTransferResponse extends Message<MsgTransferResponse> {
     return new MsgTransferResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgTransferResponse | PlainMessage<MsgTransferResponse> | undefined, b: MsgTransferResponse | PlainMessage<MsgTransferResponse> | undefined): boolean {
+  static equals(
+    a: MsgTransferResponse | PlainMessage<MsgTransferResponse> | undefined,
+    b: MsgTransferResponse | PlainMessage<MsgTransferResponse> | undefined
+  ): boolean {
     return proto3.util.equals(MsgTransferResponse, a, b);
   }
 }
-

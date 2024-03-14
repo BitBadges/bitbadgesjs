@@ -3,8 +3,8 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3 } from '@bufbuild/protobuf';
 
 /**
  * ListAllInterfacesRequest is the request type of the ListAllInterfaces RPC.
@@ -18,9 +18,8 @@ export class ListAllInterfacesRequest extends Message<ListAllInterfacesRequest> 
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.base.reflection.v1beta1.ListAllInterfacesRequest";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-  ]);
+  static readonly typeName = 'cosmos.base.reflection.v1beta1.ListAllInterfacesRequest';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => []);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListAllInterfacesRequest {
     return new ListAllInterfacesRequest().fromBinary(bytes, options);
@@ -34,7 +33,10 @@ export class ListAllInterfacesRequest extends Message<ListAllInterfacesRequest> 
     return new ListAllInterfacesRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: ListAllInterfacesRequest | PlainMessage<ListAllInterfacesRequest> | undefined, b: ListAllInterfacesRequest | PlainMessage<ListAllInterfacesRequest> | undefined): boolean {
+  static equals(
+    a: ListAllInterfacesRequest | PlainMessage<ListAllInterfacesRequest> | undefined,
+    b: ListAllInterfacesRequest | PlainMessage<ListAllInterfacesRequest> | undefined
+  ): boolean {
     return proto3.util.equals(ListAllInterfacesRequest, a, b);
   }
 }
@@ -58,9 +60,9 @@ export class ListAllInterfacesResponse extends Message<ListAllInterfacesResponse
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.base.reflection.v1beta1.ListAllInterfacesResponse";
+  static readonly typeName = 'cosmos.base.reflection.v1beta1.ListAllInterfacesResponse';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "interface_names", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 1, name: 'interface_names', kind: 'scalar', T: 9 /* ScalarType.STRING */, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListAllInterfacesResponse {
@@ -75,7 +77,10 @@ export class ListAllInterfacesResponse extends Message<ListAllInterfacesResponse
     return new ListAllInterfacesResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: ListAllInterfacesResponse | PlainMessage<ListAllInterfacesResponse> | undefined, b: ListAllInterfacesResponse | PlainMessage<ListAllInterfacesResponse> | undefined): boolean {
+  static equals(
+    a: ListAllInterfacesResponse | PlainMessage<ListAllInterfacesResponse> | undefined,
+    b: ListAllInterfacesResponse | PlainMessage<ListAllInterfacesResponse> | undefined
+  ): boolean {
     return proto3.util.equals(ListAllInterfacesResponse, a, b);
   }
 }
@@ -92,7 +97,7 @@ export class ListImplementationsRequest extends Message<ListImplementationsReque
    *
    * @generated from field: string interface_name = 1;
    */
-  interfaceName = "";
+  interfaceName = '';
 
   constructor(data?: PartialMessage<ListImplementationsRequest>) {
     super();
@@ -100,9 +105,9 @@ export class ListImplementationsRequest extends Message<ListImplementationsReque
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.base.reflection.v1beta1.ListImplementationsRequest";
+  static readonly typeName = 'cosmos.base.reflection.v1beta1.ListImplementationsRequest';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "interface_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'interface_name', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListImplementationsRequest {
@@ -117,7 +122,10 @@ export class ListImplementationsRequest extends Message<ListImplementationsReque
     return new ListImplementationsRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: ListImplementationsRequest | PlainMessage<ListImplementationsRequest> | undefined, b: ListImplementationsRequest | PlainMessage<ListImplementationsRequest> | undefined): boolean {
+  static equals(
+    a: ListImplementationsRequest | PlainMessage<ListImplementationsRequest> | undefined,
+    b: ListImplementationsRequest | PlainMessage<ListImplementationsRequest> | undefined
+  ): boolean {
     return proto3.util.equals(ListImplementationsRequest, a, b);
   }
 }
@@ -140,9 +148,9 @@ export class ListImplementationsResponse extends Message<ListImplementationsResp
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.base.reflection.v1beta1.ListImplementationsResponse";
+  static readonly typeName = 'cosmos.base.reflection.v1beta1.ListImplementationsResponse';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "implementation_message_names", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 1, name: 'implementation_message_names', kind: 'scalar', T: 9 /* ScalarType.STRING */, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListImplementationsResponse {
@@ -157,8 +165,10 @@ export class ListImplementationsResponse extends Message<ListImplementationsResp
     return new ListImplementationsResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: ListImplementationsResponse | PlainMessage<ListImplementationsResponse> | undefined, b: ListImplementationsResponse | PlainMessage<ListImplementationsResponse> | undefined): boolean {
+  static equals(
+    a: ListImplementationsResponse | PlainMessage<ListImplementationsResponse> | undefined,
+    b: ListImplementationsResponse | PlainMessage<ListImplementationsResponse> | undefined
+  ): boolean {
     return proto3.util.equals(ListImplementationsResponse, a, b);
   }
 }
-

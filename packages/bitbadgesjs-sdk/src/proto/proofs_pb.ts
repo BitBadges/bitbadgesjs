@@ -3,8 +3,8 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3 } from '@bufbuild/protobuf';
 
 /**
  * @generated from enum ics23.HashOp
@@ -43,16 +43,16 @@ export enum HashOp {
    *
    * @generated from enum value: BITCOIN = 5;
    */
-  BITCOIN = 5,
+  BITCOIN = 5
 }
 // Retrieve enum metadata with: proto3.getEnumType(HashOp)
-proto3.util.setEnumType(HashOp, "ics23.HashOp", [
-  { no: 0, name: "NO_HASH" },
-  { no: 1, name: "SHA256" },
-  { no: 2, name: "SHA512" },
-  { no: 3, name: "KECCAK" },
-  { no: 4, name: "RIPEMD160" },
-  { no: 5, name: "BITCOIN" },
+proto3.util.setEnumType(HashOp, 'ics23.HashOp', [
+  { no: 0, name: 'NO_HASH' },
+  { no: 1, name: 'SHA256' },
+  { no: 2, name: 'SHA512' },
+  { no: 3, name: 'KECCAK' },
+  { no: 4, name: 'RIPEMD160' },
+  { no: 5, name: 'BITCOIN' }
 ]);
 
 /**
@@ -130,19 +130,19 @@ export enum LengthOp {
    *
    * @generated from enum value: REQUIRE_64_BYTES = 8;
    */
-  REQUIRE_64_BYTES = 8,
+  REQUIRE_64_BYTES = 8
 }
 // Retrieve enum metadata with: proto3.getEnumType(LengthOp)
-proto3.util.setEnumType(LengthOp, "ics23.LengthOp", [
-  { no: 0, name: "NO_PREFIX" },
-  { no: 1, name: "VAR_PROTO" },
-  { no: 2, name: "VAR_RLP" },
-  { no: 3, name: "FIXED32_BIG" },
-  { no: 4, name: "FIXED32_LITTLE" },
-  { no: 5, name: "FIXED64_BIG" },
-  { no: 6, name: "FIXED64_LITTLE" },
-  { no: 7, name: "REQUIRE_32_BYTES" },
-  { no: 8, name: "REQUIRE_64_BYTES" },
+proto3.util.setEnumType(LengthOp, 'ics23.LengthOp', [
+  { no: 0, name: 'NO_PREFIX' },
+  { no: 1, name: 'VAR_PROTO' },
+  { no: 2, name: 'VAR_RLP' },
+  { no: 3, name: 'FIXED32_BIG' },
+  { no: 4, name: 'FIXED32_LITTLE' },
+  { no: 5, name: 'FIXED64_BIG' },
+  { no: 6, name: 'FIXED64_LITTLE' },
+  { no: 7, name: 'REQUIRE_32_BYTES' },
+  { no: 8, name: 'REQUIRE_64_BYTES' }
 ]);
 
 /**
@@ -194,12 +194,12 @@ export class ExistenceProof extends Message<ExistenceProof> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ics23.ExistenceProof";
+  static readonly typeName = 'ics23.ExistenceProof';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "key", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 2, name: "value", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 3, name: "leaf", kind: "message", T: LeafOp },
-    { no: 4, name: "path", kind: "message", T: InnerOp, repeated: true },
+    { no: 1, name: 'key', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 2, name: 'value', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 3, name: 'leaf', kind: 'message', T: LeafOp },
+    { no: 4, name: 'path', kind: 'message', T: InnerOp, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ExistenceProof {
@@ -251,11 +251,11 @@ export class NonExistenceProof extends Message<NonExistenceProof> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ics23.NonExistenceProof";
+  static readonly typeName = 'ics23.NonExistenceProof';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "key", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 2, name: "left", kind: "message", T: ExistenceProof },
-    { no: 3, name: "right", kind: "message", T: ExistenceProof },
+    { no: 1, name: 'key', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 2, name: 'left', kind: 'message', T: ExistenceProof },
+    { no: 3, name: 'right', kind: 'message', T: ExistenceProof }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): NonExistenceProof {
@@ -270,7 +270,10 @@ export class NonExistenceProof extends Message<NonExistenceProof> {
     return new NonExistenceProof().fromJsonString(jsonString, options);
   }
 
-  static equals(a: NonExistenceProof | PlainMessage<NonExistenceProof> | undefined, b: NonExistenceProof | PlainMessage<NonExistenceProof> | undefined): boolean {
+  static equals(
+    a: NonExistenceProof | PlainMessage<NonExistenceProof> | undefined,
+    b: NonExistenceProof | PlainMessage<NonExistenceProof> | undefined
+  ): boolean {
     return proto3.util.equals(NonExistenceProof, a, b);
   }
 }
@@ -286,31 +289,36 @@ export class CommitmentProof extends Message<CommitmentProof> {
   /**
    * @generated from oneof ics23.CommitmentProof.proof
    */
-  proof: {
-    /**
-     * @generated from field: ics23.ExistenceProof exist = 1;
-     */
-    value: ExistenceProof;
-    case: "exist";
-  } | {
-    /**
-     * @generated from field: ics23.NonExistenceProof nonexist = 2;
-     */
-    value: NonExistenceProof;
-    case: "nonexist";
-  } | {
-    /**
-     * @generated from field: ics23.BatchProof batch = 3;
-     */
-    value: BatchProof;
-    case: "batch";
-  } | {
-    /**
-     * @generated from field: ics23.CompressedBatchProof compressed = 4;
-     */
-    value: CompressedBatchProof;
-    case: "compressed";
-  } | { case: undefined; value?: undefined } = { case: undefined };
+  proof:
+    | {
+        /**
+         * @generated from field: ics23.ExistenceProof exist = 1;
+         */
+        value: ExistenceProof;
+        case: 'exist';
+      }
+    | {
+        /**
+         * @generated from field: ics23.NonExistenceProof nonexist = 2;
+         */
+        value: NonExistenceProof;
+        case: 'nonexist';
+      }
+    | {
+        /**
+         * @generated from field: ics23.BatchProof batch = 3;
+         */
+        value: BatchProof;
+        case: 'batch';
+      }
+    | {
+        /**
+         * @generated from field: ics23.CompressedBatchProof compressed = 4;
+         */
+        value: CompressedBatchProof;
+        case: 'compressed';
+      }
+    | { case: undefined; value?: undefined } = { case: undefined };
 
   constructor(data?: PartialMessage<CommitmentProof>) {
     super();
@@ -318,12 +326,12 @@ export class CommitmentProof extends Message<CommitmentProof> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ics23.CommitmentProof";
+  static readonly typeName = 'ics23.CommitmentProof';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "exist", kind: "message", T: ExistenceProof, oneof: "proof" },
-    { no: 2, name: "nonexist", kind: "message", T: NonExistenceProof, oneof: "proof" },
-    { no: 3, name: "batch", kind: "message", T: BatchProof, oneof: "proof" },
-    { no: 4, name: "compressed", kind: "message", T: CompressedBatchProof, oneof: "proof" },
+    { no: 1, name: 'exist', kind: 'message', T: ExistenceProof, oneof: 'proof' },
+    { no: 2, name: 'nonexist', kind: 'message', T: NonExistenceProof, oneof: 'proof' },
+    { no: 3, name: 'batch', kind: 'message', T: BatchProof, oneof: 'proof' },
+    { no: 4, name: 'compressed', kind: 'message', T: CompressedBatchProof, oneof: 'proof' }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CommitmentProof {
@@ -338,7 +346,10 @@ export class CommitmentProof extends Message<CommitmentProof> {
     return new CommitmentProof().fromJsonString(jsonString, options);
   }
 
-  static equals(a: CommitmentProof | PlainMessage<CommitmentProof> | undefined, b: CommitmentProof | PlainMessage<CommitmentProof> | undefined): boolean {
+  static equals(
+    a: CommitmentProof | PlainMessage<CommitmentProof> | undefined,
+    b: CommitmentProof | PlainMessage<CommitmentProof> | undefined
+  ): boolean {
     return proto3.util.equals(CommitmentProof, a, b);
   }
 }
@@ -396,13 +407,13 @@ export class LeafOp extends Message<LeafOp> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ics23.LeafOp";
+  static readonly typeName = 'ics23.LeafOp';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "hash", kind: "enum", T: proto3.getEnumType(HashOp) },
-    { no: 2, name: "prehash_key", kind: "enum", T: proto3.getEnumType(HashOp) },
-    { no: 3, name: "prehash_value", kind: "enum", T: proto3.getEnumType(HashOp) },
-    { no: 4, name: "length", kind: "enum", T: proto3.getEnumType(LengthOp) },
-    { no: 5, name: "prefix", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
+    { no: 1, name: 'hash', kind: 'enum', T: proto3.getEnumType(HashOp) },
+    { no: 2, name: 'prehash_key', kind: 'enum', T: proto3.getEnumType(HashOp) },
+    { no: 3, name: 'prehash_value', kind: 'enum', T: proto3.getEnumType(HashOp) },
+    { no: 4, name: 'length', kind: 'enum', T: proto3.getEnumType(LengthOp) },
+    { no: 5, name: 'prefix', kind: 'scalar', T: 12 /* ScalarType.BYTES */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): LeafOp {
@@ -466,11 +477,11 @@ export class InnerOp extends Message<InnerOp> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ics23.InnerOp";
+  static readonly typeName = 'ics23.InnerOp';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "hash", kind: "enum", T: proto3.getEnumType(HashOp) },
-    { no: 2, name: "prefix", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 3, name: "suffix", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
+    { no: 1, name: 'hash', kind: 'enum', T: proto3.getEnumType(HashOp) },
+    { no: 2, name: 'prefix', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 3, name: 'suffix', kind: 'scalar', T: 12 /* ScalarType.BYTES */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): InnerOp {
@@ -541,12 +552,12 @@ export class ProofSpec extends Message<ProofSpec> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ics23.ProofSpec";
+  static readonly typeName = 'ics23.ProofSpec';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "leaf_spec", kind: "message", T: LeafOp },
-    { no: 2, name: "inner_spec", kind: "message", T: InnerSpec },
-    { no: 3, name: "max_depth", kind: "scalar", T: 5 /* ScalarType.INT32 */ },
-    { no: 4, name: "min_depth", kind: "scalar", T: 5 /* ScalarType.INT32 */ },
+    { no: 1, name: 'leaf_spec', kind: 'message', T: LeafOp },
+    { no: 2, name: 'inner_spec', kind: 'message', T: InnerSpec },
+    { no: 3, name: 'max_depth', kind: 'scalar', T: 5 /* ScalarType.INT32 */ },
+    { no: 4, name: 'min_depth', kind: 'scalar', T: 5 /* ScalarType.INT32 */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ProofSpec {
@@ -625,14 +636,14 @@ export class InnerSpec extends Message<InnerSpec> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ics23.InnerSpec";
+  static readonly typeName = 'ics23.InnerSpec';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "child_order", kind: "scalar", T: 5 /* ScalarType.INT32 */, repeated: true },
-    { no: 2, name: "child_size", kind: "scalar", T: 5 /* ScalarType.INT32 */ },
-    { no: 3, name: "min_prefix_length", kind: "scalar", T: 5 /* ScalarType.INT32 */ },
-    { no: 4, name: "max_prefix_length", kind: "scalar", T: 5 /* ScalarType.INT32 */ },
-    { no: 5, name: "empty_child", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 6, name: "hash", kind: "enum", T: proto3.getEnumType(HashOp) },
+    { no: 1, name: 'child_order', kind: 'scalar', T: 5 /* ScalarType.INT32 */, repeated: true },
+    { no: 2, name: 'child_size', kind: 'scalar', T: 5 /* ScalarType.INT32 */ },
+    { no: 3, name: 'min_prefix_length', kind: 'scalar', T: 5 /* ScalarType.INT32 */ },
+    { no: 4, name: 'max_prefix_length', kind: 'scalar', T: 5 /* ScalarType.INT32 */ },
+    { no: 5, name: 'empty_child', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 6, name: 'hash', kind: 'enum', T: proto3.getEnumType(HashOp) }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): InnerSpec {
@@ -670,10 +681,8 @@ export class BatchProof extends Message<BatchProof> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ics23.BatchProof";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "entries", kind: "message", T: BatchEntry, repeated: true },
-  ]);
+  static readonly typeName = 'ics23.BatchProof';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'entries', kind: 'message', T: BatchEntry, repeated: true }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BatchProof {
     return new BatchProof().fromBinary(bytes, options);
@@ -701,19 +710,22 @@ export class BatchEntry extends Message<BatchEntry> {
   /**
    * @generated from oneof ics23.BatchEntry.proof
    */
-  proof: {
-    /**
-     * @generated from field: ics23.ExistenceProof exist = 1;
-     */
-    value: ExistenceProof;
-    case: "exist";
-  } | {
-    /**
-     * @generated from field: ics23.NonExistenceProof nonexist = 2;
-     */
-    value: NonExistenceProof;
-    case: "nonexist";
-  } | { case: undefined; value?: undefined } = { case: undefined };
+  proof:
+    | {
+        /**
+         * @generated from field: ics23.ExistenceProof exist = 1;
+         */
+        value: ExistenceProof;
+        case: 'exist';
+      }
+    | {
+        /**
+         * @generated from field: ics23.NonExistenceProof nonexist = 2;
+         */
+        value: NonExistenceProof;
+        case: 'nonexist';
+      }
+    | { case: undefined; value?: undefined } = { case: undefined };
 
   constructor(data?: PartialMessage<BatchEntry>) {
     super();
@@ -721,10 +733,10 @@ export class BatchEntry extends Message<BatchEntry> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ics23.BatchEntry";
+  static readonly typeName = 'ics23.BatchEntry';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "exist", kind: "message", T: ExistenceProof, oneof: "proof" },
-    { no: 2, name: "nonexist", kind: "message", T: NonExistenceProof, oneof: "proof" },
+    { no: 1, name: 'exist', kind: 'message', T: ExistenceProof, oneof: 'proof' },
+    { no: 2, name: 'nonexist', kind: 'message', T: NonExistenceProof, oneof: 'proof' }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BatchEntry {
@@ -764,10 +776,10 @@ export class CompressedBatchProof extends Message<CompressedBatchProof> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ics23.CompressedBatchProof";
+  static readonly typeName = 'ics23.CompressedBatchProof';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "entries", kind: "message", T: CompressedBatchEntry, repeated: true },
-    { no: 2, name: "lookup_inners", kind: "message", T: InnerOp, repeated: true },
+    { no: 1, name: 'entries', kind: 'message', T: CompressedBatchEntry, repeated: true },
+    { no: 2, name: 'lookup_inners', kind: 'message', T: InnerOp, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CompressedBatchProof {
@@ -782,7 +794,10 @@ export class CompressedBatchProof extends Message<CompressedBatchProof> {
     return new CompressedBatchProof().fromJsonString(jsonString, options);
   }
 
-  static equals(a: CompressedBatchProof | PlainMessage<CompressedBatchProof> | undefined, b: CompressedBatchProof | PlainMessage<CompressedBatchProof> | undefined): boolean {
+  static equals(
+    a: CompressedBatchProof | PlainMessage<CompressedBatchProof> | undefined,
+    b: CompressedBatchProof | PlainMessage<CompressedBatchProof> | undefined
+  ): boolean {
     return proto3.util.equals(CompressedBatchProof, a, b);
   }
 }
@@ -796,19 +811,22 @@ export class CompressedBatchEntry extends Message<CompressedBatchEntry> {
   /**
    * @generated from oneof ics23.CompressedBatchEntry.proof
    */
-  proof: {
-    /**
-     * @generated from field: ics23.CompressedExistenceProof exist = 1;
-     */
-    value: CompressedExistenceProof;
-    case: "exist";
-  } | {
-    /**
-     * @generated from field: ics23.CompressedNonExistenceProof nonexist = 2;
-     */
-    value: CompressedNonExistenceProof;
-    case: "nonexist";
-  } | { case: undefined; value?: undefined } = { case: undefined };
+  proof:
+    | {
+        /**
+         * @generated from field: ics23.CompressedExistenceProof exist = 1;
+         */
+        value: CompressedExistenceProof;
+        case: 'exist';
+      }
+    | {
+        /**
+         * @generated from field: ics23.CompressedNonExistenceProof nonexist = 2;
+         */
+        value: CompressedNonExistenceProof;
+        case: 'nonexist';
+      }
+    | { case: undefined; value?: undefined } = { case: undefined };
 
   constructor(data?: PartialMessage<CompressedBatchEntry>) {
     super();
@@ -816,10 +834,10 @@ export class CompressedBatchEntry extends Message<CompressedBatchEntry> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ics23.CompressedBatchEntry";
+  static readonly typeName = 'ics23.CompressedBatchEntry';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "exist", kind: "message", T: CompressedExistenceProof, oneof: "proof" },
-    { no: 2, name: "nonexist", kind: "message", T: CompressedNonExistenceProof, oneof: "proof" },
+    { no: 1, name: 'exist', kind: 'message', T: CompressedExistenceProof, oneof: 'proof' },
+    { no: 2, name: 'nonexist', kind: 'message', T: CompressedNonExistenceProof, oneof: 'proof' }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CompressedBatchEntry {
@@ -834,7 +852,10 @@ export class CompressedBatchEntry extends Message<CompressedBatchEntry> {
     return new CompressedBatchEntry().fromJsonString(jsonString, options);
   }
 
-  static equals(a: CompressedBatchEntry | PlainMessage<CompressedBatchEntry> | undefined, b: CompressedBatchEntry | PlainMessage<CompressedBatchEntry> | undefined): boolean {
+  static equals(
+    a: CompressedBatchEntry | PlainMessage<CompressedBatchEntry> | undefined,
+    b: CompressedBatchEntry | PlainMessage<CompressedBatchEntry> | undefined
+  ): boolean {
     return proto3.util.equals(CompressedBatchEntry, a, b);
   }
 }
@@ -871,12 +892,12 @@ export class CompressedExistenceProof extends Message<CompressedExistenceProof> 
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ics23.CompressedExistenceProof";
+  static readonly typeName = 'ics23.CompressedExistenceProof';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "key", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 2, name: "value", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 3, name: "leaf", kind: "message", T: LeafOp },
-    { no: 4, name: "path", kind: "scalar", T: 5 /* ScalarType.INT32 */, repeated: true },
+    { no: 1, name: 'key', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 2, name: 'value', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 3, name: 'leaf', kind: 'message', T: LeafOp },
+    { no: 4, name: 'path', kind: 'scalar', T: 5 /* ScalarType.INT32 */, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CompressedExistenceProof {
@@ -891,7 +912,10 @@ export class CompressedExistenceProof extends Message<CompressedExistenceProof> 
     return new CompressedExistenceProof().fromJsonString(jsonString, options);
   }
 
-  static equals(a: CompressedExistenceProof | PlainMessage<CompressedExistenceProof> | undefined, b: CompressedExistenceProof | PlainMessage<CompressedExistenceProof> | undefined): boolean {
+  static equals(
+    a: CompressedExistenceProof | PlainMessage<CompressedExistenceProof> | undefined,
+    b: CompressedExistenceProof | PlainMessage<CompressedExistenceProof> | undefined
+  ): boolean {
     return proto3.util.equals(CompressedExistenceProof, a, b);
   }
 }
@@ -923,11 +947,11 @@ export class CompressedNonExistenceProof extends Message<CompressedNonExistenceP
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ics23.CompressedNonExistenceProof";
+  static readonly typeName = 'ics23.CompressedNonExistenceProof';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "key", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 2, name: "left", kind: "message", T: CompressedExistenceProof },
-    { no: 3, name: "right", kind: "message", T: CompressedExistenceProof },
+    { no: 1, name: 'key', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 2, name: 'left', kind: 'message', T: CompressedExistenceProof },
+    { no: 3, name: 'right', kind: 'message', T: CompressedExistenceProof }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CompressedNonExistenceProof {
@@ -942,8 +966,10 @@ export class CompressedNonExistenceProof extends Message<CompressedNonExistenceP
     return new CompressedNonExistenceProof().fromJsonString(jsonString, options);
   }
 
-  static equals(a: CompressedNonExistenceProof | PlainMessage<CompressedNonExistenceProof> | undefined, b: CompressedNonExistenceProof | PlainMessage<CompressedNonExistenceProof> | undefined): boolean {
+  static equals(
+    a: CompressedNonExistenceProof | PlainMessage<CompressedNonExistenceProof> | undefined,
+    b: CompressedNonExistenceProof | PlainMessage<CompressedNonExistenceProof> | undefined
+  ): boolean {
     return proto3.util.equals(CompressedNonExistenceProof, a, b);
   }
 }
-

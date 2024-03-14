@@ -3,12 +3,12 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3, protoInt64, Timestamp } from "@bufbuild/protobuf";
-import { ConsensusParams } from "../types/params_pb.js";
-import { Header } from "../types/types_pb.js";
-import { ProofOps } from "../crypto/proof_pb.js";
-import { PublicKey } from "../crypto/keys_pb.js";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3, protoInt64, Timestamp } from '@bufbuild/protobuf';
+import { ConsensusParams } from '../types/params_pb.js';
+import { Header } from '../types/types_pb.js';
+import { ProofOps } from '../crypto/proof_pb.js';
+import { PublicKey } from '../crypto/keys_pb.js';
 
 /**
  * @generated from enum tendermint.abci.CheckTxType
@@ -22,12 +22,12 @@ export enum CheckTxType {
   /**
    * @generated from enum value: RECHECK = 1;
    */
-  RECHECK = 1,
+  RECHECK = 1
 }
 // Retrieve enum metadata with: proto3.getEnumType(CheckTxType)
-proto3.util.setEnumType(CheckTxType, "tendermint.abci.CheckTxType", [
-  { no: 0, name: "NEW" },
-  { no: 1, name: "RECHECK" },
+proto3.util.setEnumType(CheckTxType, 'tendermint.abci.CheckTxType', [
+  { no: 0, name: 'NEW' },
+  { no: 1, name: 'RECHECK' }
 ]);
 
 /**
@@ -47,13 +47,13 @@ export enum MisbehaviorType {
   /**
    * @generated from enum value: LIGHT_CLIENT_ATTACK = 2;
    */
-  LIGHT_CLIENT_ATTACK = 2,
+  LIGHT_CLIENT_ATTACK = 2
 }
 // Retrieve enum metadata with: proto3.getEnumType(MisbehaviorType)
-proto3.util.setEnumType(MisbehaviorType, "tendermint.abci.MisbehaviorType", [
-  { no: 0, name: "UNKNOWN" },
-  { no: 1, name: "DUPLICATE_VOTE" },
-  { no: 2, name: "LIGHT_CLIENT_ATTACK" },
+proto3.util.setEnumType(MisbehaviorType, 'tendermint.abci.MisbehaviorType', [
+  { no: 0, name: 'UNKNOWN' },
+  { no: 1, name: 'DUPLICATE_VOTE' },
+  { no: 2, name: 'LIGHT_CLIENT_ATTACK' }
 ]);
 
 /**
@@ -63,103 +63,120 @@ export class Request extends Message<Request> {
   /**
    * @generated from oneof tendermint.abci.Request.value
    */
-  value: {
-    /**
-     * @generated from field: tendermint.abci.RequestEcho echo = 1;
-     */
-    value: RequestEcho;
-    case: "echo";
-  } | {
-    /**
-     * @generated from field: tendermint.abci.RequestFlush flush = 2;
-     */
-    value: RequestFlush;
-    case: "flush";
-  } | {
-    /**
-     * @generated from field: tendermint.abci.RequestInfo info = 3;
-     */
-    value: RequestInfo;
-    case: "info";
-  } | {
-    /**
-     * @generated from field: tendermint.abci.RequestInitChain init_chain = 5;
-     */
-    value: RequestInitChain;
-    case: "initChain";
-  } | {
-    /**
-     * @generated from field: tendermint.abci.RequestQuery query = 6;
-     */
-    value: RequestQuery;
-    case: "query";
-  } | {
-    /**
-     * @generated from field: tendermint.abci.RequestBeginBlock begin_block = 7;
-     */
-    value: RequestBeginBlock;
-    case: "beginBlock";
-  } | {
-    /**
-     * @generated from field: tendermint.abci.RequestCheckTx check_tx = 8;
-     */
-    value: RequestCheckTx;
-    case: "checkTx";
-  } | {
-    /**
-     * @generated from field: tendermint.abci.RequestDeliverTx deliver_tx = 9;
-     */
-    value: RequestDeliverTx;
-    case: "deliverTx";
-  } | {
-    /**
-     * @generated from field: tendermint.abci.RequestEndBlock end_block = 10;
-     */
-    value: RequestEndBlock;
-    case: "endBlock";
-  } | {
-    /**
-     * @generated from field: tendermint.abci.RequestCommit commit = 11;
-     */
-    value: RequestCommit;
-    case: "commit";
-  } | {
-    /**
-     * @generated from field: tendermint.abci.RequestListSnapshots list_snapshots = 12;
-     */
-    value: RequestListSnapshots;
-    case: "listSnapshots";
-  } | {
-    /**
-     * @generated from field: tendermint.abci.RequestOfferSnapshot offer_snapshot = 13;
-     */
-    value: RequestOfferSnapshot;
-    case: "offerSnapshot";
-  } | {
-    /**
-     * @generated from field: tendermint.abci.RequestLoadSnapshotChunk load_snapshot_chunk = 14;
-     */
-    value: RequestLoadSnapshotChunk;
-    case: "loadSnapshotChunk";
-  } | {
-    /**
-     * @generated from field: tendermint.abci.RequestApplySnapshotChunk apply_snapshot_chunk = 15;
-     */
-    value: RequestApplySnapshotChunk;
-    case: "applySnapshotChunk";
-  } | {
-    /**
-     * @generated from field: tendermint.abci.RequestPrepareProposal prepare_proposal = 16;
-     */
-    value: RequestPrepareProposal;
-    case: "prepareProposal";
-  } | {
-    /**
-     * @generated from field: tendermint.abci.RequestProcessProposal process_proposal = 17;
-     */
-    value: RequestProcessProposal;
-    case: "processProposal";
-  } | { case: undefined; value?: undefined } = { case: undefined };
+  value:
+    | {
+        /**
+         * @generated from field: tendermint.abci.RequestEcho echo = 1;
+         */
+        value: RequestEcho;
+        case: 'echo';
+      }
+    | {
+        /**
+         * @generated from field: tendermint.abci.RequestFlush flush = 2;
+         */
+        value: RequestFlush;
+        case: 'flush';
+      }
+    | {
+        /**
+         * @generated from field: tendermint.abci.RequestInfo info = 3;
+         */
+        value: RequestInfo;
+        case: 'info';
+      }
+    | {
+        /**
+         * @generated from field: tendermint.abci.RequestInitChain init_chain = 5;
+         */
+        value: RequestInitChain;
+        case: 'initChain';
+      }
+    | {
+        /**
+         * @generated from field: tendermint.abci.RequestQuery query = 6;
+         */
+        value: RequestQuery;
+        case: 'query';
+      }
+    | {
+        /**
+         * @generated from field: tendermint.abci.RequestBeginBlock begin_block = 7;
+         */
+        value: RequestBeginBlock;
+        case: 'beginBlock';
+      }
+    | {
+        /**
+         * @generated from field: tendermint.abci.RequestCheckTx check_tx = 8;
+         */
+        value: RequestCheckTx;
+        case: 'checkTx';
+      }
+    | {
+        /**
+         * @generated from field: tendermint.abci.RequestDeliverTx deliver_tx = 9;
+         */
+        value: RequestDeliverTx;
+        case: 'deliverTx';
+      }
+    | {
+        /**
+         * @generated from field: tendermint.abci.RequestEndBlock end_block = 10;
+         */
+        value: RequestEndBlock;
+        case: 'endBlock';
+      }
+    | {
+        /**
+         * @generated from field: tendermint.abci.RequestCommit commit = 11;
+         */
+        value: RequestCommit;
+        case: 'commit';
+      }
+    | {
+        /**
+         * @generated from field: tendermint.abci.RequestListSnapshots list_snapshots = 12;
+         */
+        value: RequestListSnapshots;
+        case: 'listSnapshots';
+      }
+    | {
+        /**
+         * @generated from field: tendermint.abci.RequestOfferSnapshot offer_snapshot = 13;
+         */
+        value: RequestOfferSnapshot;
+        case: 'offerSnapshot';
+      }
+    | {
+        /**
+         * @generated from field: tendermint.abci.RequestLoadSnapshotChunk load_snapshot_chunk = 14;
+         */
+        value: RequestLoadSnapshotChunk;
+        case: 'loadSnapshotChunk';
+      }
+    | {
+        /**
+         * @generated from field: tendermint.abci.RequestApplySnapshotChunk apply_snapshot_chunk = 15;
+         */
+        value: RequestApplySnapshotChunk;
+        case: 'applySnapshotChunk';
+      }
+    | {
+        /**
+         * @generated from field: tendermint.abci.RequestPrepareProposal prepare_proposal = 16;
+         */
+        value: RequestPrepareProposal;
+        case: 'prepareProposal';
+      }
+    | {
+        /**
+         * @generated from field: tendermint.abci.RequestProcessProposal process_proposal = 17;
+         */
+        value: RequestProcessProposal;
+        case: 'processProposal';
+      }
+    | { case: undefined; value?: undefined } = { case: undefined };
 
   constructor(data?: PartialMessage<Request>) {
     super();
@@ -167,24 +184,24 @@ export class Request extends Message<Request> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.Request";
+  static readonly typeName = 'tendermint.abci.Request';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "echo", kind: "message", T: RequestEcho, oneof: "value" },
-    { no: 2, name: "flush", kind: "message", T: RequestFlush, oneof: "value" },
-    { no: 3, name: "info", kind: "message", T: RequestInfo, oneof: "value" },
-    { no: 5, name: "init_chain", kind: "message", T: RequestInitChain, oneof: "value" },
-    { no: 6, name: "query", kind: "message", T: RequestQuery, oneof: "value" },
-    { no: 7, name: "begin_block", kind: "message", T: RequestBeginBlock, oneof: "value" },
-    { no: 8, name: "check_tx", kind: "message", T: RequestCheckTx, oneof: "value" },
-    { no: 9, name: "deliver_tx", kind: "message", T: RequestDeliverTx, oneof: "value" },
-    { no: 10, name: "end_block", kind: "message", T: RequestEndBlock, oneof: "value" },
-    { no: 11, name: "commit", kind: "message", T: RequestCommit, oneof: "value" },
-    { no: 12, name: "list_snapshots", kind: "message", T: RequestListSnapshots, oneof: "value" },
-    { no: 13, name: "offer_snapshot", kind: "message", T: RequestOfferSnapshot, oneof: "value" },
-    { no: 14, name: "load_snapshot_chunk", kind: "message", T: RequestLoadSnapshotChunk, oneof: "value" },
-    { no: 15, name: "apply_snapshot_chunk", kind: "message", T: RequestApplySnapshotChunk, oneof: "value" },
-    { no: 16, name: "prepare_proposal", kind: "message", T: RequestPrepareProposal, oneof: "value" },
-    { no: 17, name: "process_proposal", kind: "message", T: RequestProcessProposal, oneof: "value" },
+    { no: 1, name: 'echo', kind: 'message', T: RequestEcho, oneof: 'value' },
+    { no: 2, name: 'flush', kind: 'message', T: RequestFlush, oneof: 'value' },
+    { no: 3, name: 'info', kind: 'message', T: RequestInfo, oneof: 'value' },
+    { no: 5, name: 'init_chain', kind: 'message', T: RequestInitChain, oneof: 'value' },
+    { no: 6, name: 'query', kind: 'message', T: RequestQuery, oneof: 'value' },
+    { no: 7, name: 'begin_block', kind: 'message', T: RequestBeginBlock, oneof: 'value' },
+    { no: 8, name: 'check_tx', kind: 'message', T: RequestCheckTx, oneof: 'value' },
+    { no: 9, name: 'deliver_tx', kind: 'message', T: RequestDeliverTx, oneof: 'value' },
+    { no: 10, name: 'end_block', kind: 'message', T: RequestEndBlock, oneof: 'value' },
+    { no: 11, name: 'commit', kind: 'message', T: RequestCommit, oneof: 'value' },
+    { no: 12, name: 'list_snapshots', kind: 'message', T: RequestListSnapshots, oneof: 'value' },
+    { no: 13, name: 'offer_snapshot', kind: 'message', T: RequestOfferSnapshot, oneof: 'value' },
+    { no: 14, name: 'load_snapshot_chunk', kind: 'message', T: RequestLoadSnapshotChunk, oneof: 'value' },
+    { no: 15, name: 'apply_snapshot_chunk', kind: 'message', T: RequestApplySnapshotChunk, oneof: 'value' },
+    { no: 16, name: 'prepare_proposal', kind: 'message', T: RequestPrepareProposal, oneof: 'value' },
+    { no: 17, name: 'process_proposal', kind: 'message', T: RequestProcessProposal, oneof: 'value' }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Request {
@@ -211,7 +228,7 @@ export class RequestEcho extends Message<RequestEcho> {
   /**
    * @generated from field: string message = 1;
    */
-  message = "";
+  message = '';
 
   constructor(data?: PartialMessage<RequestEcho>) {
     super();
@@ -219,10 +236,8 @@ export class RequestEcho extends Message<RequestEcho> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.RequestEcho";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "message", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-  ]);
+  static readonly typeName = 'tendermint.abci.RequestEcho';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'message', kind: 'scalar', T: 9 /* ScalarType.STRING */ }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RequestEcho {
     return new RequestEcho().fromBinary(bytes, options);
@@ -251,9 +266,8 @@ export class RequestFlush extends Message<RequestFlush> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.RequestFlush";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-  ]);
+  static readonly typeName = 'tendermint.abci.RequestFlush';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => []);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RequestFlush {
     return new RequestFlush().fromBinary(bytes, options);
@@ -279,7 +293,7 @@ export class RequestInfo extends Message<RequestInfo> {
   /**
    * @generated from field: string version = 1;
    */
-  version = "";
+  version = '';
 
   /**
    * @generated from field: uint64 block_version = 2;
@@ -294,7 +308,7 @@ export class RequestInfo extends Message<RequestInfo> {
   /**
    * @generated from field: string abci_version = 4;
    */
-  abciVersion = "";
+  abciVersion = '';
 
   constructor(data?: PartialMessage<RequestInfo>) {
     super();
@@ -302,12 +316,12 @@ export class RequestInfo extends Message<RequestInfo> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.RequestInfo";
+  static readonly typeName = 'tendermint.abci.RequestInfo';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "version", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "block_version", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
-    { no: 3, name: "p2p_version", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
-    { no: 4, name: "abci_version", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'version', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'block_version', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ },
+    { no: 3, name: 'p2p_version', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ },
+    { no: 4, name: 'abci_version', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RequestInfo {
@@ -339,7 +353,7 @@ export class RequestInitChain extends Message<RequestInitChain> {
   /**
    * @generated from field: string chain_id = 2;
    */
-  chainId = "";
+  chainId = '';
 
   /**
    * @generated from field: tendermint.types.ConsensusParams consensus_params = 3;
@@ -367,14 +381,14 @@ export class RequestInitChain extends Message<RequestInitChain> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.RequestInitChain";
+  static readonly typeName = 'tendermint.abci.RequestInitChain';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "time", kind: "message", T: Timestamp },
-    { no: 2, name: "chain_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "consensus_params", kind: "message", T: ConsensusParams },
-    { no: 4, name: "validators", kind: "message", T: ValidatorUpdate, repeated: true },
-    { no: 5, name: "app_state_bytes", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 6, name: "initial_height", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
+    { no: 1, name: 'time', kind: 'message', T: Timestamp },
+    { no: 2, name: 'chain_id', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'consensus_params', kind: 'message', T: ConsensusParams },
+    { no: 4, name: 'validators', kind: 'message', T: ValidatorUpdate, repeated: true },
+    { no: 5, name: 'app_state_bytes', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 6, name: 'initial_height', kind: 'scalar', T: 3 /* ScalarType.INT64 */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RequestInitChain {
@@ -389,7 +403,10 @@ export class RequestInitChain extends Message<RequestInitChain> {
     return new RequestInitChain().fromJsonString(jsonString, options);
   }
 
-  static equals(a: RequestInitChain | PlainMessage<RequestInitChain> | undefined, b: RequestInitChain | PlainMessage<RequestInitChain> | undefined): boolean {
+  static equals(
+    a: RequestInitChain | PlainMessage<RequestInitChain> | undefined,
+    b: RequestInitChain | PlainMessage<RequestInitChain> | undefined
+  ): boolean {
     return proto3.util.equals(RequestInitChain, a, b);
   }
 }
@@ -406,7 +423,7 @@ export class RequestQuery extends Message<RequestQuery> {
   /**
    * @generated from field: string path = 2;
    */
-  path = "";
+  path = '';
 
   /**
    * @generated from field: int64 height = 3;
@@ -424,12 +441,12 @@ export class RequestQuery extends Message<RequestQuery> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.RequestQuery";
+  static readonly typeName = 'tendermint.abci.RequestQuery';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "data", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 2, name: "path", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "height", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
-    { no: 4, name: "prove", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 1, name: 'data', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 2, name: 'path', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'height', kind: 'scalar', T: 3 /* ScalarType.INT64 */ },
+    { no: 4, name: 'prove', kind: 'scalar', T: 8 /* ScalarType.BOOL */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RequestQuery {
@@ -479,12 +496,12 @@ export class RequestBeginBlock extends Message<RequestBeginBlock> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.RequestBeginBlock";
+  static readonly typeName = 'tendermint.abci.RequestBeginBlock';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "hash", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 2, name: "header", kind: "message", T: Header },
-    { no: 3, name: "last_commit_info", kind: "message", T: CommitInfo },
-    { no: 4, name: "byzantine_validators", kind: "message", T: Misbehavior, repeated: true },
+    { no: 1, name: 'hash', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 2, name: 'header', kind: 'message', T: Header },
+    { no: 3, name: 'last_commit_info', kind: 'message', T: CommitInfo },
+    { no: 4, name: 'byzantine_validators', kind: 'message', T: Misbehavior, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RequestBeginBlock {
@@ -499,7 +516,10 @@ export class RequestBeginBlock extends Message<RequestBeginBlock> {
     return new RequestBeginBlock().fromJsonString(jsonString, options);
   }
 
-  static equals(a: RequestBeginBlock | PlainMessage<RequestBeginBlock> | undefined, b: RequestBeginBlock | PlainMessage<RequestBeginBlock> | undefined): boolean {
+  static equals(
+    a: RequestBeginBlock | PlainMessage<RequestBeginBlock> | undefined,
+    b: RequestBeginBlock | PlainMessage<RequestBeginBlock> | undefined
+  ): boolean {
     return proto3.util.equals(RequestBeginBlock, a, b);
   }
 }
@@ -524,10 +544,10 @@ export class RequestCheckTx extends Message<RequestCheckTx> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.RequestCheckTx";
+  static readonly typeName = 'tendermint.abci.RequestCheckTx';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "tx", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 2, name: "type", kind: "enum", T: proto3.getEnumType(CheckTxType) },
+    { no: 1, name: 'tx', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 2, name: 'type', kind: 'enum', T: proto3.getEnumType(CheckTxType) }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RequestCheckTx {
@@ -562,10 +582,8 @@ export class RequestDeliverTx extends Message<RequestDeliverTx> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.RequestDeliverTx";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "tx", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-  ]);
+  static readonly typeName = 'tendermint.abci.RequestDeliverTx';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'tx', kind: 'scalar', T: 12 /* ScalarType.BYTES */ }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RequestDeliverTx {
     return new RequestDeliverTx().fromBinary(bytes, options);
@@ -579,7 +597,10 @@ export class RequestDeliverTx extends Message<RequestDeliverTx> {
     return new RequestDeliverTx().fromJsonString(jsonString, options);
   }
 
-  static equals(a: RequestDeliverTx | PlainMessage<RequestDeliverTx> | undefined, b: RequestDeliverTx | PlainMessage<RequestDeliverTx> | undefined): boolean {
+  static equals(
+    a: RequestDeliverTx | PlainMessage<RequestDeliverTx> | undefined,
+    b: RequestDeliverTx | PlainMessage<RequestDeliverTx> | undefined
+  ): boolean {
     return proto3.util.equals(RequestDeliverTx, a, b);
   }
 }
@@ -599,10 +620,8 @@ export class RequestEndBlock extends Message<RequestEndBlock> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.RequestEndBlock";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "height", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
-  ]);
+  static readonly typeName = 'tendermint.abci.RequestEndBlock';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'height', kind: 'scalar', T: 3 /* ScalarType.INT64 */ }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RequestEndBlock {
     return new RequestEndBlock().fromBinary(bytes, options);
@@ -616,7 +635,10 @@ export class RequestEndBlock extends Message<RequestEndBlock> {
     return new RequestEndBlock().fromJsonString(jsonString, options);
   }
 
-  static equals(a: RequestEndBlock | PlainMessage<RequestEndBlock> | undefined, b: RequestEndBlock | PlainMessage<RequestEndBlock> | undefined): boolean {
+  static equals(
+    a: RequestEndBlock | PlainMessage<RequestEndBlock> | undefined,
+    b: RequestEndBlock | PlainMessage<RequestEndBlock> | undefined
+  ): boolean {
     return proto3.util.equals(RequestEndBlock, a, b);
   }
 }
@@ -631,9 +653,8 @@ export class RequestCommit extends Message<RequestCommit> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.RequestCommit";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-  ]);
+  static readonly typeName = 'tendermint.abci.RequestCommit';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => []);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RequestCommit {
     return new RequestCommit().fromBinary(bytes, options);
@@ -664,9 +685,8 @@ export class RequestListSnapshots extends Message<RequestListSnapshots> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.RequestListSnapshots";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-  ]);
+  static readonly typeName = 'tendermint.abci.RequestListSnapshots';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => []);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RequestListSnapshots {
     return new RequestListSnapshots().fromBinary(bytes, options);
@@ -680,7 +700,10 @@ export class RequestListSnapshots extends Message<RequestListSnapshots> {
     return new RequestListSnapshots().fromJsonString(jsonString, options);
   }
 
-  static equals(a: RequestListSnapshots | PlainMessage<RequestListSnapshots> | undefined, b: RequestListSnapshots | PlainMessage<RequestListSnapshots> | undefined): boolean {
+  static equals(
+    a: RequestListSnapshots | PlainMessage<RequestListSnapshots> | undefined,
+    b: RequestListSnapshots | PlainMessage<RequestListSnapshots> | undefined
+  ): boolean {
     return proto3.util.equals(RequestListSnapshots, a, b);
   }
 }
@@ -711,10 +734,10 @@ export class RequestOfferSnapshot extends Message<RequestOfferSnapshot> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.RequestOfferSnapshot";
+  static readonly typeName = 'tendermint.abci.RequestOfferSnapshot';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "snapshot", kind: "message", T: Snapshot },
-    { no: 2, name: "app_hash", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
+    { no: 1, name: 'snapshot', kind: 'message', T: Snapshot },
+    { no: 2, name: 'app_hash', kind: 'scalar', T: 12 /* ScalarType.BYTES */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RequestOfferSnapshot {
@@ -729,7 +752,10 @@ export class RequestOfferSnapshot extends Message<RequestOfferSnapshot> {
     return new RequestOfferSnapshot().fromJsonString(jsonString, options);
   }
 
-  static equals(a: RequestOfferSnapshot | PlainMessage<RequestOfferSnapshot> | undefined, b: RequestOfferSnapshot | PlainMessage<RequestOfferSnapshot> | undefined): boolean {
+  static equals(
+    a: RequestOfferSnapshot | PlainMessage<RequestOfferSnapshot> | undefined,
+    b: RequestOfferSnapshot | PlainMessage<RequestOfferSnapshot> | undefined
+  ): boolean {
     return proto3.util.equals(RequestOfferSnapshot, a, b);
   }
 }
@@ -761,11 +787,11 @@ export class RequestLoadSnapshotChunk extends Message<RequestLoadSnapshotChunk> 
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.RequestLoadSnapshotChunk";
+  static readonly typeName = 'tendermint.abci.RequestLoadSnapshotChunk';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "height", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
-    { no: 2, name: "format", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 3, name: "chunk", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 1, name: 'height', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ },
+    { no: 2, name: 'format', kind: 'scalar', T: 13 /* ScalarType.UINT32 */ },
+    { no: 3, name: 'chunk', kind: 'scalar', T: 13 /* ScalarType.UINT32 */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RequestLoadSnapshotChunk {
@@ -780,7 +806,10 @@ export class RequestLoadSnapshotChunk extends Message<RequestLoadSnapshotChunk> 
     return new RequestLoadSnapshotChunk().fromJsonString(jsonString, options);
   }
 
-  static equals(a: RequestLoadSnapshotChunk | PlainMessage<RequestLoadSnapshotChunk> | undefined, b: RequestLoadSnapshotChunk | PlainMessage<RequestLoadSnapshotChunk> | undefined): boolean {
+  static equals(
+    a: RequestLoadSnapshotChunk | PlainMessage<RequestLoadSnapshotChunk> | undefined,
+    b: RequestLoadSnapshotChunk | PlainMessage<RequestLoadSnapshotChunk> | undefined
+  ): boolean {
     return proto3.util.equals(RequestLoadSnapshotChunk, a, b);
   }
 }
@@ -804,7 +833,7 @@ export class RequestApplySnapshotChunk extends Message<RequestApplySnapshotChunk
   /**
    * @generated from field: string sender = 3;
    */
-  sender = "";
+  sender = '';
 
   constructor(data?: PartialMessage<RequestApplySnapshotChunk>) {
     super();
@@ -812,11 +841,11 @@ export class RequestApplySnapshotChunk extends Message<RequestApplySnapshotChunk
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.RequestApplySnapshotChunk";
+  static readonly typeName = 'tendermint.abci.RequestApplySnapshotChunk';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "index", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 2, name: "chunk", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 3, name: "sender", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'index', kind: 'scalar', T: 13 /* ScalarType.UINT32 */ },
+    { no: 2, name: 'chunk', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 3, name: 'sender', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RequestApplySnapshotChunk {
@@ -831,7 +860,10 @@ export class RequestApplySnapshotChunk extends Message<RequestApplySnapshotChunk
     return new RequestApplySnapshotChunk().fromJsonString(jsonString, options);
   }
 
-  static equals(a: RequestApplySnapshotChunk | PlainMessage<RequestApplySnapshotChunk> | undefined, b: RequestApplySnapshotChunk | PlainMessage<RequestApplySnapshotChunk> | undefined): boolean {
+  static equals(
+    a: RequestApplySnapshotChunk | PlainMessage<RequestApplySnapshotChunk> | undefined,
+    b: RequestApplySnapshotChunk | PlainMessage<RequestApplySnapshotChunk> | undefined
+  ): boolean {
     return proto3.util.equals(RequestApplySnapshotChunk, a, b);
   }
 }
@@ -893,16 +925,16 @@ export class RequestPrepareProposal extends Message<RequestPrepareProposal> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.RequestPrepareProposal";
+  static readonly typeName = 'tendermint.abci.RequestPrepareProposal';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "max_tx_bytes", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
-    { no: 2, name: "txs", kind: "scalar", T: 12 /* ScalarType.BYTES */, repeated: true },
-    { no: 3, name: "local_last_commit", kind: "message", T: ExtendedCommitInfo },
-    { no: 4, name: "misbehavior", kind: "message", T: Misbehavior, repeated: true },
-    { no: 5, name: "height", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
-    { no: 6, name: "time", kind: "message", T: Timestamp },
-    { no: 7, name: "next_validators_hash", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 8, name: "proposer_address", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
+    { no: 1, name: 'max_tx_bytes', kind: 'scalar', T: 3 /* ScalarType.INT64 */ },
+    { no: 2, name: 'txs', kind: 'scalar', T: 12 /* ScalarType.BYTES */, repeated: true },
+    { no: 3, name: 'local_last_commit', kind: 'message', T: ExtendedCommitInfo },
+    { no: 4, name: 'misbehavior', kind: 'message', T: Misbehavior, repeated: true },
+    { no: 5, name: 'height', kind: 'scalar', T: 3 /* ScalarType.INT64 */ },
+    { no: 6, name: 'time', kind: 'message', T: Timestamp },
+    { no: 7, name: 'next_validators_hash', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 8, name: 'proposer_address', kind: 'scalar', T: 12 /* ScalarType.BYTES */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RequestPrepareProposal {
@@ -917,7 +949,10 @@ export class RequestPrepareProposal extends Message<RequestPrepareProposal> {
     return new RequestPrepareProposal().fromJsonString(jsonString, options);
   }
 
-  static equals(a: RequestPrepareProposal | PlainMessage<RequestPrepareProposal> | undefined, b: RequestPrepareProposal | PlainMessage<RequestPrepareProposal> | undefined): boolean {
+  static equals(
+    a: RequestPrepareProposal | PlainMessage<RequestPrepareProposal> | undefined,
+    b: RequestPrepareProposal | PlainMessage<RequestPrepareProposal> | undefined
+  ): boolean {
     return proto3.util.equals(RequestPrepareProposal, a, b);
   }
 }
@@ -976,16 +1011,16 @@ export class RequestProcessProposal extends Message<RequestProcessProposal> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.RequestProcessProposal";
+  static readonly typeName = 'tendermint.abci.RequestProcessProposal';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "txs", kind: "scalar", T: 12 /* ScalarType.BYTES */, repeated: true },
-    { no: 2, name: "proposed_last_commit", kind: "message", T: CommitInfo },
-    { no: 3, name: "misbehavior", kind: "message", T: Misbehavior, repeated: true },
-    { no: 4, name: "hash", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 5, name: "height", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
-    { no: 6, name: "time", kind: "message", T: Timestamp },
-    { no: 7, name: "next_validators_hash", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 8, name: "proposer_address", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
+    { no: 1, name: 'txs', kind: 'scalar', T: 12 /* ScalarType.BYTES */, repeated: true },
+    { no: 2, name: 'proposed_last_commit', kind: 'message', T: CommitInfo },
+    { no: 3, name: 'misbehavior', kind: 'message', T: Misbehavior, repeated: true },
+    { no: 4, name: 'hash', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 5, name: 'height', kind: 'scalar', T: 3 /* ScalarType.INT64 */ },
+    { no: 6, name: 'time', kind: 'message', T: Timestamp },
+    { no: 7, name: 'next_validators_hash', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 8, name: 'proposer_address', kind: 'scalar', T: 12 /* ScalarType.BYTES */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RequestProcessProposal {
@@ -1000,7 +1035,10 @@ export class RequestProcessProposal extends Message<RequestProcessProposal> {
     return new RequestProcessProposal().fromJsonString(jsonString, options);
   }
 
-  static equals(a: RequestProcessProposal | PlainMessage<RequestProcessProposal> | undefined, b: RequestProcessProposal | PlainMessage<RequestProcessProposal> | undefined): boolean {
+  static equals(
+    a: RequestProcessProposal | PlainMessage<RequestProcessProposal> | undefined,
+    b: RequestProcessProposal | PlainMessage<RequestProcessProposal> | undefined
+  ): boolean {
     return proto3.util.equals(RequestProcessProposal, a, b);
   }
 }
@@ -1012,109 +1050,127 @@ export class Response extends Message<Response> {
   /**
    * @generated from oneof tendermint.abci.Response.value
    */
-  value: {
-    /**
-     * @generated from field: tendermint.abci.ResponseException exception = 1;
-     */
-    value: ResponseException;
-    case: "exception";
-  } | {
-    /**
-     * @generated from field: tendermint.abci.ResponseEcho echo = 2;
-     */
-    value: ResponseEcho;
-    case: "echo";
-  } | {
-    /**
-     * @generated from field: tendermint.abci.ResponseFlush flush = 3;
-     */
-    value: ResponseFlush;
-    case: "flush";
-  } | {
-    /**
-     * @generated from field: tendermint.abci.ResponseInfo info = 4;
-     */
-    value: ResponseInfo;
-    case: "info";
-  } | {
-    /**
-     * @generated from field: tendermint.abci.ResponseInitChain init_chain = 6;
-     */
-    value: ResponseInitChain;
-    case: "initChain";
-  } | {
-    /**
-     * @generated from field: tendermint.abci.ResponseQuery query = 7;
-     */
-    value: ResponseQuery;
-    case: "query";
-  } | {
-    /**
-     * @generated from field: tendermint.abci.ResponseBeginBlock begin_block = 8;
-     */
-    value: ResponseBeginBlock;
-    case: "beginBlock";
-  } | {
-    /**
-     * @generated from field: tendermint.abci.ResponseCheckTx check_tx = 9;
-     */
-    value: ResponseCheckTx;
-    case: "checkTx";
-  } | {
-    /**
-     * @generated from field: tendermint.abci.ResponseDeliverTx deliver_tx = 10;
-     */
-    value: ResponseDeliverTx;
-    case: "deliverTx";
-  } | {
-    /**
-     * @generated from field: tendermint.abci.ResponseEndBlock end_block = 11;
-     */
-    value: ResponseEndBlock;
-    case: "endBlock";
-  } | {
-    /**
-     * @generated from field: tendermint.abci.ResponseCommit commit = 12;
-     */
-    value: ResponseCommit;
-    case: "commit";
-  } | {
-    /**
-     * @generated from field: tendermint.abci.ResponseListSnapshots list_snapshots = 13;
-     */
-    value: ResponseListSnapshots;
-    case: "listSnapshots";
-  } | {
-    /**
-     * @generated from field: tendermint.abci.ResponseOfferSnapshot offer_snapshot = 14;
-     */
-    value: ResponseOfferSnapshot;
-    case: "offerSnapshot";
-  } | {
-    /**
-     * @generated from field: tendermint.abci.ResponseLoadSnapshotChunk load_snapshot_chunk = 15;
-     */
-    value: ResponseLoadSnapshotChunk;
-    case: "loadSnapshotChunk";
-  } | {
-    /**
-     * @generated from field: tendermint.abci.ResponseApplySnapshotChunk apply_snapshot_chunk = 16;
-     */
-    value: ResponseApplySnapshotChunk;
-    case: "applySnapshotChunk";
-  } | {
-    /**
-     * @generated from field: tendermint.abci.ResponsePrepareProposal prepare_proposal = 17;
-     */
-    value: ResponsePrepareProposal;
-    case: "prepareProposal";
-  } | {
-    /**
-     * @generated from field: tendermint.abci.ResponseProcessProposal process_proposal = 18;
-     */
-    value: ResponseProcessProposal;
-    case: "processProposal";
-  } | { case: undefined; value?: undefined } = { case: undefined };
+  value:
+    | {
+        /**
+         * @generated from field: tendermint.abci.ResponseException exception = 1;
+         */
+        value: ResponseException;
+        case: 'exception';
+      }
+    | {
+        /**
+         * @generated from field: tendermint.abci.ResponseEcho echo = 2;
+         */
+        value: ResponseEcho;
+        case: 'echo';
+      }
+    | {
+        /**
+         * @generated from field: tendermint.abci.ResponseFlush flush = 3;
+         */
+        value: ResponseFlush;
+        case: 'flush';
+      }
+    | {
+        /**
+         * @generated from field: tendermint.abci.ResponseInfo info = 4;
+         */
+        value: ResponseInfo;
+        case: 'info';
+      }
+    | {
+        /**
+         * @generated from field: tendermint.abci.ResponseInitChain init_chain = 6;
+         */
+        value: ResponseInitChain;
+        case: 'initChain';
+      }
+    | {
+        /**
+         * @generated from field: tendermint.abci.ResponseQuery query = 7;
+         */
+        value: ResponseQuery;
+        case: 'query';
+      }
+    | {
+        /**
+         * @generated from field: tendermint.abci.ResponseBeginBlock begin_block = 8;
+         */
+        value: ResponseBeginBlock;
+        case: 'beginBlock';
+      }
+    | {
+        /**
+         * @generated from field: tendermint.abci.ResponseCheckTx check_tx = 9;
+         */
+        value: ResponseCheckTx;
+        case: 'checkTx';
+      }
+    | {
+        /**
+         * @generated from field: tendermint.abci.ResponseDeliverTx deliver_tx = 10;
+         */
+        value: ResponseDeliverTx;
+        case: 'deliverTx';
+      }
+    | {
+        /**
+         * @generated from field: tendermint.abci.ResponseEndBlock end_block = 11;
+         */
+        value: ResponseEndBlock;
+        case: 'endBlock';
+      }
+    | {
+        /**
+         * @generated from field: tendermint.abci.ResponseCommit commit = 12;
+         */
+        value: ResponseCommit;
+        case: 'commit';
+      }
+    | {
+        /**
+         * @generated from field: tendermint.abci.ResponseListSnapshots list_snapshots = 13;
+         */
+        value: ResponseListSnapshots;
+        case: 'listSnapshots';
+      }
+    | {
+        /**
+         * @generated from field: tendermint.abci.ResponseOfferSnapshot offer_snapshot = 14;
+         */
+        value: ResponseOfferSnapshot;
+        case: 'offerSnapshot';
+      }
+    | {
+        /**
+         * @generated from field: tendermint.abci.ResponseLoadSnapshotChunk load_snapshot_chunk = 15;
+         */
+        value: ResponseLoadSnapshotChunk;
+        case: 'loadSnapshotChunk';
+      }
+    | {
+        /**
+         * @generated from field: tendermint.abci.ResponseApplySnapshotChunk apply_snapshot_chunk = 16;
+         */
+        value: ResponseApplySnapshotChunk;
+        case: 'applySnapshotChunk';
+      }
+    | {
+        /**
+         * @generated from field: tendermint.abci.ResponsePrepareProposal prepare_proposal = 17;
+         */
+        value: ResponsePrepareProposal;
+        case: 'prepareProposal';
+      }
+    | {
+        /**
+         * @generated from field: tendermint.abci.ResponseProcessProposal process_proposal = 18;
+         */
+        value: ResponseProcessProposal;
+        case: 'processProposal';
+      }
+    | { case: undefined; value?: undefined } = { case: undefined };
 
   constructor(data?: PartialMessage<Response>) {
     super();
@@ -1122,25 +1178,25 @@ export class Response extends Message<Response> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.Response";
+  static readonly typeName = 'tendermint.abci.Response';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "exception", kind: "message", T: ResponseException, oneof: "value" },
-    { no: 2, name: "echo", kind: "message", T: ResponseEcho, oneof: "value" },
-    { no: 3, name: "flush", kind: "message", T: ResponseFlush, oneof: "value" },
-    { no: 4, name: "info", kind: "message", T: ResponseInfo, oneof: "value" },
-    { no: 6, name: "init_chain", kind: "message", T: ResponseInitChain, oneof: "value" },
-    { no: 7, name: "query", kind: "message", T: ResponseQuery, oneof: "value" },
-    { no: 8, name: "begin_block", kind: "message", T: ResponseBeginBlock, oneof: "value" },
-    { no: 9, name: "check_tx", kind: "message", T: ResponseCheckTx, oneof: "value" },
-    { no: 10, name: "deliver_tx", kind: "message", T: ResponseDeliverTx, oneof: "value" },
-    { no: 11, name: "end_block", kind: "message", T: ResponseEndBlock, oneof: "value" },
-    { no: 12, name: "commit", kind: "message", T: ResponseCommit, oneof: "value" },
-    { no: 13, name: "list_snapshots", kind: "message", T: ResponseListSnapshots, oneof: "value" },
-    { no: 14, name: "offer_snapshot", kind: "message", T: ResponseOfferSnapshot, oneof: "value" },
-    { no: 15, name: "load_snapshot_chunk", kind: "message", T: ResponseLoadSnapshotChunk, oneof: "value" },
-    { no: 16, name: "apply_snapshot_chunk", kind: "message", T: ResponseApplySnapshotChunk, oneof: "value" },
-    { no: 17, name: "prepare_proposal", kind: "message", T: ResponsePrepareProposal, oneof: "value" },
-    { no: 18, name: "process_proposal", kind: "message", T: ResponseProcessProposal, oneof: "value" },
+    { no: 1, name: 'exception', kind: 'message', T: ResponseException, oneof: 'value' },
+    { no: 2, name: 'echo', kind: 'message', T: ResponseEcho, oneof: 'value' },
+    { no: 3, name: 'flush', kind: 'message', T: ResponseFlush, oneof: 'value' },
+    { no: 4, name: 'info', kind: 'message', T: ResponseInfo, oneof: 'value' },
+    { no: 6, name: 'init_chain', kind: 'message', T: ResponseInitChain, oneof: 'value' },
+    { no: 7, name: 'query', kind: 'message', T: ResponseQuery, oneof: 'value' },
+    { no: 8, name: 'begin_block', kind: 'message', T: ResponseBeginBlock, oneof: 'value' },
+    { no: 9, name: 'check_tx', kind: 'message', T: ResponseCheckTx, oneof: 'value' },
+    { no: 10, name: 'deliver_tx', kind: 'message', T: ResponseDeliverTx, oneof: 'value' },
+    { no: 11, name: 'end_block', kind: 'message', T: ResponseEndBlock, oneof: 'value' },
+    { no: 12, name: 'commit', kind: 'message', T: ResponseCommit, oneof: 'value' },
+    { no: 13, name: 'list_snapshots', kind: 'message', T: ResponseListSnapshots, oneof: 'value' },
+    { no: 14, name: 'offer_snapshot', kind: 'message', T: ResponseOfferSnapshot, oneof: 'value' },
+    { no: 15, name: 'load_snapshot_chunk', kind: 'message', T: ResponseLoadSnapshotChunk, oneof: 'value' },
+    { no: 16, name: 'apply_snapshot_chunk', kind: 'message', T: ResponseApplySnapshotChunk, oneof: 'value' },
+    { no: 17, name: 'prepare_proposal', kind: 'message', T: ResponsePrepareProposal, oneof: 'value' },
+    { no: 18, name: 'process_proposal', kind: 'message', T: ResponseProcessProposal, oneof: 'value' }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Response {
@@ -1169,7 +1225,7 @@ export class ResponseException extends Message<ResponseException> {
   /**
    * @generated from field: string error = 1;
    */
-  error = "";
+  error = '';
 
   constructor(data?: PartialMessage<ResponseException>) {
     super();
@@ -1177,10 +1233,8 @@ export class ResponseException extends Message<ResponseException> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.ResponseException";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "error", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-  ]);
+  static readonly typeName = 'tendermint.abci.ResponseException';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'error', kind: 'scalar', T: 9 /* ScalarType.STRING */ }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ResponseException {
     return new ResponseException().fromBinary(bytes, options);
@@ -1194,7 +1248,10 @@ export class ResponseException extends Message<ResponseException> {
     return new ResponseException().fromJsonString(jsonString, options);
   }
 
-  static equals(a: ResponseException | PlainMessage<ResponseException> | undefined, b: ResponseException | PlainMessage<ResponseException> | undefined): boolean {
+  static equals(
+    a: ResponseException | PlainMessage<ResponseException> | undefined,
+    b: ResponseException | PlainMessage<ResponseException> | undefined
+  ): boolean {
     return proto3.util.equals(ResponseException, a, b);
   }
 }
@@ -1206,7 +1263,7 @@ export class ResponseEcho extends Message<ResponseEcho> {
   /**
    * @generated from field: string message = 1;
    */
-  message = "";
+  message = '';
 
   constructor(data?: PartialMessage<ResponseEcho>) {
     super();
@@ -1214,10 +1271,8 @@ export class ResponseEcho extends Message<ResponseEcho> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.ResponseEcho";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "message", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-  ]);
+  static readonly typeName = 'tendermint.abci.ResponseEcho';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'message', kind: 'scalar', T: 9 /* ScalarType.STRING */ }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ResponseEcho {
     return new ResponseEcho().fromBinary(bytes, options);
@@ -1246,9 +1301,8 @@ export class ResponseFlush extends Message<ResponseFlush> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.ResponseFlush";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-  ]);
+  static readonly typeName = 'tendermint.abci.ResponseFlush';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => []);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ResponseFlush {
     return new ResponseFlush().fromBinary(bytes, options);
@@ -1274,12 +1328,12 @@ export class ResponseInfo extends Message<ResponseInfo> {
   /**
    * @generated from field: string data = 1;
    */
-  data = "";
+  data = '';
 
   /**
    * @generated from field: string version = 2;
    */
-  version = "";
+  version = '';
 
   /**
    * @generated from field: uint64 app_version = 3;
@@ -1302,13 +1356,13 @@ export class ResponseInfo extends Message<ResponseInfo> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.ResponseInfo";
+  static readonly typeName = 'tendermint.abci.ResponseInfo';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "data", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "version", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "app_version", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
-    { no: 4, name: "last_block_height", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
-    { no: 5, name: "last_block_app_hash", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
+    { no: 1, name: 'data', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'version', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'app_version', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ },
+    { no: 4, name: 'last_block_height', kind: 'scalar', T: 3 /* ScalarType.INT64 */ },
+    { no: 5, name: 'last_block_app_hash', kind: 'scalar', T: 12 /* ScalarType.BYTES */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ResponseInfo {
@@ -1353,11 +1407,11 @@ export class ResponseInitChain extends Message<ResponseInitChain> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.ResponseInitChain";
+  static readonly typeName = 'tendermint.abci.ResponseInitChain';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "consensus_params", kind: "message", T: ConsensusParams },
-    { no: 2, name: "validators", kind: "message", T: ValidatorUpdate, repeated: true },
-    { no: 3, name: "app_hash", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
+    { no: 1, name: 'consensus_params', kind: 'message', T: ConsensusParams },
+    { no: 2, name: 'validators', kind: 'message', T: ValidatorUpdate, repeated: true },
+    { no: 3, name: 'app_hash', kind: 'scalar', T: 12 /* ScalarType.BYTES */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ResponseInitChain {
@@ -1372,7 +1426,10 @@ export class ResponseInitChain extends Message<ResponseInitChain> {
     return new ResponseInitChain().fromJsonString(jsonString, options);
   }
 
-  static equals(a: ResponseInitChain | PlainMessage<ResponseInitChain> | undefined, b: ResponseInitChain | PlainMessage<ResponseInitChain> | undefined): boolean {
+  static equals(
+    a: ResponseInitChain | PlainMessage<ResponseInitChain> | undefined,
+    b: ResponseInitChain | PlainMessage<ResponseInitChain> | undefined
+  ): boolean {
     return proto3.util.equals(ResponseInitChain, a, b);
   }
 }
@@ -1393,14 +1450,14 @@ export class ResponseQuery extends Message<ResponseQuery> {
    *
    * @generated from field: string log = 3;
    */
-  log = "";
+  log = '';
 
   /**
    * nondeterministic
    *
    * @generated from field: string info = 4;
    */
-  info = "";
+  info = '';
 
   /**
    * @generated from field: int64 index = 5;
@@ -1430,7 +1487,7 @@ export class ResponseQuery extends Message<ResponseQuery> {
   /**
    * @generated from field: string codespace = 10;
    */
-  codespace = "";
+  codespace = '';
 
   constructor(data?: PartialMessage<ResponseQuery>) {
     super();
@@ -1438,17 +1495,17 @@ export class ResponseQuery extends Message<ResponseQuery> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.ResponseQuery";
+  static readonly typeName = 'tendermint.abci.ResponseQuery';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "code", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 3, name: "log", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "info", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 5, name: "index", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
-    { no: 6, name: "key", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 7, name: "value", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 8, name: "proof_ops", kind: "message", T: ProofOps },
-    { no: 9, name: "height", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
-    { no: 10, name: "codespace", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'code', kind: 'scalar', T: 13 /* ScalarType.UINT32 */ },
+    { no: 3, name: 'log', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: 'info', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: 'index', kind: 'scalar', T: 3 /* ScalarType.INT64 */ },
+    { no: 6, name: 'key', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 7, name: 'value', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 8, name: 'proof_ops', kind: 'message', T: ProofOps },
+    { no: 9, name: 'height', kind: 'scalar', T: 3 /* ScalarType.INT64 */ },
+    { no: 10, name: 'codespace', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ResponseQuery {
@@ -1483,10 +1540,8 @@ export class ResponseBeginBlock extends Message<ResponseBeginBlock> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.ResponseBeginBlock";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "events", kind: "message", T: Event, repeated: true },
-  ]);
+  static readonly typeName = 'tendermint.abci.ResponseBeginBlock';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'events', kind: 'message', T: Event, repeated: true }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ResponseBeginBlock {
     return new ResponseBeginBlock().fromBinary(bytes, options);
@@ -1500,7 +1555,10 @@ export class ResponseBeginBlock extends Message<ResponseBeginBlock> {
     return new ResponseBeginBlock().fromJsonString(jsonString, options);
   }
 
-  static equals(a: ResponseBeginBlock | PlainMessage<ResponseBeginBlock> | undefined, b: ResponseBeginBlock | PlainMessage<ResponseBeginBlock> | undefined): boolean {
+  static equals(
+    a: ResponseBeginBlock | PlainMessage<ResponseBeginBlock> | undefined,
+    b: ResponseBeginBlock | PlainMessage<ResponseBeginBlock> | undefined
+  ): boolean {
     return proto3.util.equals(ResponseBeginBlock, a, b);
   }
 }
@@ -1524,14 +1582,14 @@ export class ResponseCheckTx extends Message<ResponseCheckTx> {
    *
    * @generated from field: string log = 3;
    */
-  log = "";
+  log = '';
 
   /**
    * nondeterministic
    *
    * @generated from field: string info = 4;
    */
-  info = "";
+  info = '';
 
   /**
    * @generated from field: int64 gas_wanted = 5 [json_name = "gas_wanted"];
@@ -1551,12 +1609,12 @@ export class ResponseCheckTx extends Message<ResponseCheckTx> {
   /**
    * @generated from field: string codespace = 8;
    */
-  codespace = "";
+  codespace = '';
 
   /**
    * @generated from field: string sender = 9;
    */
-  sender = "";
+  sender = '';
 
   /**
    * @generated from field: int64 priority = 10;
@@ -1569,7 +1627,7 @@ export class ResponseCheckTx extends Message<ResponseCheckTx> {
    *
    * @generated from field: string mempool_error = 11;
    */
-  mempoolError = "";
+  mempoolError = '';
 
   constructor(data?: PartialMessage<ResponseCheckTx>) {
     super();
@@ -1577,19 +1635,19 @@ export class ResponseCheckTx extends Message<ResponseCheckTx> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.ResponseCheckTx";
+  static readonly typeName = 'tendermint.abci.ResponseCheckTx';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "code", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 2, name: "data", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 3, name: "log", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "info", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 5, name: "gas_wanted", jsonName: "gas_wanted", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
-    { no: 6, name: "gas_used", jsonName: "gas_used", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
-    { no: 7, name: "events", kind: "message", T: Event, repeated: true },
-    { no: 8, name: "codespace", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 9, name: "sender", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 10, name: "priority", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
-    { no: 11, name: "mempool_error", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'code', kind: 'scalar', T: 13 /* ScalarType.UINT32 */ },
+    { no: 2, name: 'data', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 3, name: 'log', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: 'info', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: 'gas_wanted', jsonName: 'gas_wanted', kind: 'scalar', T: 3 /* ScalarType.INT64 */ },
+    { no: 6, name: 'gas_used', jsonName: 'gas_used', kind: 'scalar', T: 3 /* ScalarType.INT64 */ },
+    { no: 7, name: 'events', kind: 'message', T: Event, repeated: true },
+    { no: 8, name: 'codespace', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 9, name: 'sender', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 10, name: 'priority', kind: 'scalar', T: 3 /* ScalarType.INT64 */ },
+    { no: 11, name: 'mempool_error', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ResponseCheckTx {
@@ -1604,7 +1662,10 @@ export class ResponseCheckTx extends Message<ResponseCheckTx> {
     return new ResponseCheckTx().fromJsonString(jsonString, options);
   }
 
-  static equals(a: ResponseCheckTx | PlainMessage<ResponseCheckTx> | undefined, b: ResponseCheckTx | PlainMessage<ResponseCheckTx> | undefined): boolean {
+  static equals(
+    a: ResponseCheckTx | PlainMessage<ResponseCheckTx> | undefined,
+    b: ResponseCheckTx | PlainMessage<ResponseCheckTx> | undefined
+  ): boolean {
     return proto3.util.equals(ResponseCheckTx, a, b);
   }
 }
@@ -1628,14 +1689,14 @@ export class ResponseDeliverTx extends Message<ResponseDeliverTx> {
    *
    * @generated from field: string log = 3;
    */
-  log = "";
+  log = '';
 
   /**
    * nondeterministic
    *
    * @generated from field: string info = 4;
    */
-  info = "";
+  info = '';
 
   /**
    * @generated from field: int64 gas_wanted = 5 [json_name = "gas_wanted"];
@@ -1657,7 +1718,7 @@ export class ResponseDeliverTx extends Message<ResponseDeliverTx> {
   /**
    * @generated from field: string codespace = 8;
    */
-  codespace = "";
+  codespace = '';
 
   constructor(data?: PartialMessage<ResponseDeliverTx>) {
     super();
@@ -1665,16 +1726,16 @@ export class ResponseDeliverTx extends Message<ResponseDeliverTx> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.ResponseDeliverTx";
+  static readonly typeName = 'tendermint.abci.ResponseDeliverTx';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "code", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 2, name: "data", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 3, name: "log", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "info", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 5, name: "gas_wanted", jsonName: "gas_wanted", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
-    { no: 6, name: "gas_used", jsonName: "gas_used", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
-    { no: 7, name: "events", kind: "message", T: Event, repeated: true },
-    { no: 8, name: "codespace", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'code', kind: 'scalar', T: 13 /* ScalarType.UINT32 */ },
+    { no: 2, name: 'data', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 3, name: 'log', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: 'info', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: 'gas_wanted', jsonName: 'gas_wanted', kind: 'scalar', T: 3 /* ScalarType.INT64 */ },
+    { no: 6, name: 'gas_used', jsonName: 'gas_used', kind: 'scalar', T: 3 /* ScalarType.INT64 */ },
+    { no: 7, name: 'events', kind: 'message', T: Event, repeated: true },
+    { no: 8, name: 'codespace', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ResponseDeliverTx {
@@ -1689,7 +1750,10 @@ export class ResponseDeliverTx extends Message<ResponseDeliverTx> {
     return new ResponseDeliverTx().fromJsonString(jsonString, options);
   }
 
-  static equals(a: ResponseDeliverTx | PlainMessage<ResponseDeliverTx> | undefined, b: ResponseDeliverTx | PlainMessage<ResponseDeliverTx> | undefined): boolean {
+  static equals(
+    a: ResponseDeliverTx | PlainMessage<ResponseDeliverTx> | undefined,
+    b: ResponseDeliverTx | PlainMessage<ResponseDeliverTx> | undefined
+  ): boolean {
     return proto3.util.equals(ResponseDeliverTx, a, b);
   }
 }
@@ -1719,11 +1783,11 @@ export class ResponseEndBlock extends Message<ResponseEndBlock> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.ResponseEndBlock";
+  static readonly typeName = 'tendermint.abci.ResponseEndBlock';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "validator_updates", kind: "message", T: ValidatorUpdate, repeated: true },
-    { no: 2, name: "consensus_param_updates", kind: "message", T: ConsensusParams },
-    { no: 3, name: "events", kind: "message", T: Event, repeated: true },
+    { no: 1, name: 'validator_updates', kind: 'message', T: ValidatorUpdate, repeated: true },
+    { no: 2, name: 'consensus_param_updates', kind: 'message', T: ConsensusParams },
+    { no: 3, name: 'events', kind: 'message', T: Event, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ResponseEndBlock {
@@ -1738,7 +1802,10 @@ export class ResponseEndBlock extends Message<ResponseEndBlock> {
     return new ResponseEndBlock().fromJsonString(jsonString, options);
   }
 
-  static equals(a: ResponseEndBlock | PlainMessage<ResponseEndBlock> | undefined, b: ResponseEndBlock | PlainMessage<ResponseEndBlock> | undefined): boolean {
+  static equals(
+    a: ResponseEndBlock | PlainMessage<ResponseEndBlock> | undefined,
+    b: ResponseEndBlock | PlainMessage<ResponseEndBlock> | undefined
+  ): boolean {
     return proto3.util.equals(ResponseEndBlock, a, b);
   }
 }
@@ -1765,10 +1832,10 @@ export class ResponseCommit extends Message<ResponseCommit> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.ResponseCommit";
+  static readonly typeName = 'tendermint.abci.ResponseCommit';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 2, name: "data", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 3, name: "retain_height", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
+    { no: 2, name: 'data', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 3, name: 'retain_height', kind: 'scalar', T: 3 /* ScalarType.INT64 */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ResponseCommit {
@@ -1803,10 +1870,8 @@ export class ResponseListSnapshots extends Message<ResponseListSnapshots> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.ResponseListSnapshots";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "snapshots", kind: "message", T: Snapshot, repeated: true },
-  ]);
+  static readonly typeName = 'tendermint.abci.ResponseListSnapshots';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'snapshots', kind: 'message', T: Snapshot, repeated: true }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ResponseListSnapshots {
     return new ResponseListSnapshots().fromBinary(bytes, options);
@@ -1820,7 +1885,10 @@ export class ResponseListSnapshots extends Message<ResponseListSnapshots> {
     return new ResponseListSnapshots().fromJsonString(jsonString, options);
   }
 
-  static equals(a: ResponseListSnapshots | PlainMessage<ResponseListSnapshots> | undefined, b: ResponseListSnapshots | PlainMessage<ResponseListSnapshots> | undefined): boolean {
+  static equals(
+    a: ResponseListSnapshots | PlainMessage<ResponseListSnapshots> | undefined,
+    b: ResponseListSnapshots | PlainMessage<ResponseListSnapshots> | undefined
+  ): boolean {
     return proto3.util.equals(ResponseListSnapshots, a, b);
   }
 }
@@ -1840,9 +1908,9 @@ export class ResponseOfferSnapshot extends Message<ResponseOfferSnapshot> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.ResponseOfferSnapshot";
+  static readonly typeName = 'tendermint.abci.ResponseOfferSnapshot';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "result", kind: "enum", T: proto3.getEnumType(ResponseOfferSnapshot_Result) },
+    { no: 1, name: 'result', kind: 'enum', T: proto3.getEnumType(ResponseOfferSnapshot_Result) }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ResponseOfferSnapshot {
@@ -1857,7 +1925,10 @@ export class ResponseOfferSnapshot extends Message<ResponseOfferSnapshot> {
     return new ResponseOfferSnapshot().fromJsonString(jsonString, options);
   }
 
-  static equals(a: ResponseOfferSnapshot | PlainMessage<ResponseOfferSnapshot> | undefined, b: ResponseOfferSnapshot | PlainMessage<ResponseOfferSnapshot> | undefined): boolean {
+  static equals(
+    a: ResponseOfferSnapshot | PlainMessage<ResponseOfferSnapshot> | undefined,
+    b: ResponseOfferSnapshot | PlainMessage<ResponseOfferSnapshot> | undefined
+  ): boolean {
     return proto3.util.equals(ResponseOfferSnapshot, a, b);
   }
 }
@@ -1906,16 +1977,16 @@ export enum ResponseOfferSnapshot_Result {
    *
    * @generated from enum value: REJECT_SENDER = 5;
    */
-  REJECT_SENDER = 5,
+  REJECT_SENDER = 5
 }
 // Retrieve enum metadata with: proto3.getEnumType(ResponseOfferSnapshot_Result)
-proto3.util.setEnumType(ResponseOfferSnapshot_Result, "tendermint.abci.ResponseOfferSnapshot.Result", [
-  { no: 0, name: "UNKNOWN" },
-  { no: 1, name: "ACCEPT" },
-  { no: 2, name: "ABORT" },
-  { no: 3, name: "REJECT" },
-  { no: 4, name: "REJECT_FORMAT" },
-  { no: 5, name: "REJECT_SENDER" },
+proto3.util.setEnumType(ResponseOfferSnapshot_Result, 'tendermint.abci.ResponseOfferSnapshot.Result', [
+  { no: 0, name: 'UNKNOWN' },
+  { no: 1, name: 'ACCEPT' },
+  { no: 2, name: 'ABORT' },
+  { no: 3, name: 'REJECT' },
+  { no: 4, name: 'REJECT_FORMAT' },
+  { no: 5, name: 'REJECT_SENDER' }
 ]);
 
 /**
@@ -1933,10 +2004,8 @@ export class ResponseLoadSnapshotChunk extends Message<ResponseLoadSnapshotChunk
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.ResponseLoadSnapshotChunk";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "chunk", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-  ]);
+  static readonly typeName = 'tendermint.abci.ResponseLoadSnapshotChunk';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'chunk', kind: 'scalar', T: 12 /* ScalarType.BYTES */ }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ResponseLoadSnapshotChunk {
     return new ResponseLoadSnapshotChunk().fromBinary(bytes, options);
@@ -1950,7 +2019,10 @@ export class ResponseLoadSnapshotChunk extends Message<ResponseLoadSnapshotChunk
     return new ResponseLoadSnapshotChunk().fromJsonString(jsonString, options);
   }
 
-  static equals(a: ResponseLoadSnapshotChunk | PlainMessage<ResponseLoadSnapshotChunk> | undefined, b: ResponseLoadSnapshotChunk | PlainMessage<ResponseLoadSnapshotChunk> | undefined): boolean {
+  static equals(
+    a: ResponseLoadSnapshotChunk | PlainMessage<ResponseLoadSnapshotChunk> | undefined,
+    b: ResponseLoadSnapshotChunk | PlainMessage<ResponseLoadSnapshotChunk> | undefined
+  ): boolean {
     return proto3.util.equals(ResponseLoadSnapshotChunk, a, b);
   }
 }
@@ -1984,11 +2056,11 @@ export class ResponseApplySnapshotChunk extends Message<ResponseApplySnapshotChu
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.ResponseApplySnapshotChunk";
+  static readonly typeName = 'tendermint.abci.ResponseApplySnapshotChunk';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "result", kind: "enum", T: proto3.getEnumType(ResponseApplySnapshotChunk_Result) },
-    { no: 2, name: "refetch_chunks", kind: "scalar", T: 13 /* ScalarType.UINT32 */, repeated: true },
-    { no: 3, name: "reject_senders", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 1, name: 'result', kind: 'enum', T: proto3.getEnumType(ResponseApplySnapshotChunk_Result) },
+    { no: 2, name: 'refetch_chunks', kind: 'scalar', T: 13 /* ScalarType.UINT32 */, repeated: true },
+    { no: 3, name: 'reject_senders', kind: 'scalar', T: 9 /* ScalarType.STRING */, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ResponseApplySnapshotChunk {
@@ -2003,7 +2075,10 @@ export class ResponseApplySnapshotChunk extends Message<ResponseApplySnapshotChu
     return new ResponseApplySnapshotChunk().fromJsonString(jsonString, options);
   }
 
-  static equals(a: ResponseApplySnapshotChunk | PlainMessage<ResponseApplySnapshotChunk> | undefined, b: ResponseApplySnapshotChunk | PlainMessage<ResponseApplySnapshotChunk> | undefined): boolean {
+  static equals(
+    a: ResponseApplySnapshotChunk | PlainMessage<ResponseApplySnapshotChunk> | undefined,
+    b: ResponseApplySnapshotChunk | PlainMessage<ResponseApplySnapshotChunk> | undefined
+  ): boolean {
     return proto3.util.equals(ResponseApplySnapshotChunk, a, b);
   }
 }
@@ -2052,16 +2127,16 @@ export enum ResponseApplySnapshotChunk_Result {
    *
    * @generated from enum value: REJECT_SNAPSHOT = 5;
    */
-  REJECT_SNAPSHOT = 5,
+  REJECT_SNAPSHOT = 5
 }
 // Retrieve enum metadata with: proto3.getEnumType(ResponseApplySnapshotChunk_Result)
-proto3.util.setEnumType(ResponseApplySnapshotChunk_Result, "tendermint.abci.ResponseApplySnapshotChunk.Result", [
-  { no: 0, name: "UNKNOWN" },
-  { no: 1, name: "ACCEPT" },
-  { no: 2, name: "ABORT" },
-  { no: 3, name: "RETRY" },
-  { no: 4, name: "RETRY_SNAPSHOT" },
-  { no: 5, name: "REJECT_SNAPSHOT" },
+proto3.util.setEnumType(ResponseApplySnapshotChunk_Result, 'tendermint.abci.ResponseApplySnapshotChunk.Result', [
+  { no: 0, name: 'UNKNOWN' },
+  { no: 1, name: 'ACCEPT' },
+  { no: 2, name: 'ABORT' },
+  { no: 3, name: 'RETRY' },
+  { no: 4, name: 'RETRY_SNAPSHOT' },
+  { no: 5, name: 'REJECT_SNAPSHOT' }
 ]);
 
 /**
@@ -2079,9 +2154,9 @@ export class ResponsePrepareProposal extends Message<ResponsePrepareProposal> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.ResponsePrepareProposal";
+  static readonly typeName = 'tendermint.abci.ResponsePrepareProposal';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "txs", kind: "scalar", T: 12 /* ScalarType.BYTES */, repeated: true },
+    { no: 1, name: 'txs', kind: 'scalar', T: 12 /* ScalarType.BYTES */, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ResponsePrepareProposal {
@@ -2096,7 +2171,10 @@ export class ResponsePrepareProposal extends Message<ResponsePrepareProposal> {
     return new ResponsePrepareProposal().fromJsonString(jsonString, options);
   }
 
-  static equals(a: ResponsePrepareProposal | PlainMessage<ResponsePrepareProposal> | undefined, b: ResponsePrepareProposal | PlainMessage<ResponsePrepareProposal> | undefined): boolean {
+  static equals(
+    a: ResponsePrepareProposal | PlainMessage<ResponsePrepareProposal> | undefined,
+    b: ResponsePrepareProposal | PlainMessage<ResponsePrepareProposal> | undefined
+  ): boolean {
     return proto3.util.equals(ResponsePrepareProposal, a, b);
   }
 }
@@ -2116,9 +2194,9 @@ export class ResponseProcessProposal extends Message<ResponseProcessProposal> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.ResponseProcessProposal";
+  static readonly typeName = 'tendermint.abci.ResponseProcessProposal';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "status", kind: "enum", T: proto3.getEnumType(ResponseProcessProposal_ProposalStatus) },
+    { no: 1, name: 'status', kind: 'enum', T: proto3.getEnumType(ResponseProcessProposal_ProposalStatus) }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ResponseProcessProposal {
@@ -2133,7 +2211,10 @@ export class ResponseProcessProposal extends Message<ResponseProcessProposal> {
     return new ResponseProcessProposal().fromJsonString(jsonString, options);
   }
 
-  static equals(a: ResponseProcessProposal | PlainMessage<ResponseProcessProposal> | undefined, b: ResponseProcessProposal | PlainMessage<ResponseProcessProposal> | undefined): boolean {
+  static equals(
+    a: ResponseProcessProposal | PlainMessage<ResponseProcessProposal> | undefined,
+    b: ResponseProcessProposal | PlainMessage<ResponseProcessProposal> | undefined
+  ): boolean {
     return proto3.util.equals(ResponseProcessProposal, a, b);
   }
 }
@@ -2155,13 +2236,13 @@ export enum ResponseProcessProposal_ProposalStatus {
   /**
    * @generated from enum value: REJECT = 2;
    */
-  REJECT = 2,
+  REJECT = 2
 }
 // Retrieve enum metadata with: proto3.getEnumType(ResponseProcessProposal_ProposalStatus)
-proto3.util.setEnumType(ResponseProcessProposal_ProposalStatus, "tendermint.abci.ResponseProcessProposal.ProposalStatus", [
-  { no: 0, name: "UNKNOWN" },
-  { no: 1, name: "ACCEPT" },
-  { no: 2, name: "REJECT" },
+proto3.util.setEnumType(ResponseProcessProposal_ProposalStatus, 'tendermint.abci.ResponseProcessProposal.ProposalStatus', [
+  { no: 0, name: 'UNKNOWN' },
+  { no: 1, name: 'ACCEPT' },
+  { no: 2, name: 'REJECT' }
 ]);
 
 /**
@@ -2184,10 +2265,10 @@ export class CommitInfo extends Message<CommitInfo> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.CommitInfo";
+  static readonly typeName = 'tendermint.abci.CommitInfo';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "round", kind: "scalar", T: 5 /* ScalarType.INT32 */ },
-    { no: 2, name: "votes", kind: "message", T: VoteInfo, repeated: true },
+    { no: 1, name: 'round', kind: 'scalar', T: 5 /* ScalarType.INT32 */ },
+    { no: 2, name: 'votes', kind: 'message', T: VoteInfo, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CommitInfo {
@@ -2232,10 +2313,10 @@ export class ExtendedCommitInfo extends Message<ExtendedCommitInfo> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.ExtendedCommitInfo";
+  static readonly typeName = 'tendermint.abci.ExtendedCommitInfo';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "round", kind: "scalar", T: 5 /* ScalarType.INT32 */ },
-    { no: 2, name: "votes", kind: "message", T: ExtendedVoteInfo, repeated: true },
+    { no: 1, name: 'round', kind: 'scalar', T: 5 /* ScalarType.INT32 */ },
+    { no: 2, name: 'votes', kind: 'message', T: ExtendedVoteInfo, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ExtendedCommitInfo {
@@ -2250,7 +2331,10 @@ export class ExtendedCommitInfo extends Message<ExtendedCommitInfo> {
     return new ExtendedCommitInfo().fromJsonString(jsonString, options);
   }
 
-  static equals(a: ExtendedCommitInfo | PlainMessage<ExtendedCommitInfo> | undefined, b: ExtendedCommitInfo | PlainMessage<ExtendedCommitInfo> | undefined): boolean {
+  static equals(
+    a: ExtendedCommitInfo | PlainMessage<ExtendedCommitInfo> | undefined,
+    b: ExtendedCommitInfo | PlainMessage<ExtendedCommitInfo> | undefined
+  ): boolean {
     return proto3.util.equals(ExtendedCommitInfo, a, b);
   }
 }
@@ -2266,7 +2350,7 @@ export class Event extends Message<Event> {
   /**
    * @generated from field: string type = 1;
    */
-  type = "";
+  type = '';
 
   /**
    * @generated from field: repeated tendermint.abci.EventAttribute attributes = 2;
@@ -2279,10 +2363,10 @@ export class Event extends Message<Event> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.Event";
+  static readonly typeName = 'tendermint.abci.Event';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "type", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "attributes", kind: "message", T: EventAttribute, repeated: true },
+    { no: 1, name: 'type', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'attributes', kind: 'message', T: EventAttribute, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Event {
@@ -2311,12 +2395,12 @@ export class EventAttribute extends Message<EventAttribute> {
   /**
    * @generated from field: string key = 1;
    */
-  key = "";
+  key = '';
 
   /**
    * @generated from field: string value = 2;
    */
-  value = "";
+  value = '';
 
   /**
    * nondeterministic
@@ -2331,11 +2415,11 @@ export class EventAttribute extends Message<EventAttribute> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.EventAttribute";
+  static readonly typeName = 'tendermint.abci.EventAttribute';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "key", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "value", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "index", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 1, name: 'key', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'value', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'index', kind: 'scalar', T: 8 /* ScalarType.BOOL */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): EventAttribute {
@@ -2389,12 +2473,12 @@ export class TxResult extends Message<TxResult> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.TxResult";
+  static readonly typeName = 'tendermint.abci.TxResult';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "height", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
-    { no: 2, name: "index", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 3, name: "tx", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 4, name: "result", kind: "message", T: ResponseDeliverTx },
+    { no: 1, name: 'height', kind: 'scalar', T: 3 /* ScalarType.INT64 */ },
+    { no: 2, name: 'index', kind: 'scalar', T: 13 /* ScalarType.UINT32 */ },
+    { no: 3, name: 'tx', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 4, name: 'result', kind: 'message', T: ResponseDeliverTx }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): TxResult {
@@ -2442,10 +2526,10 @@ export class Validator extends Message<Validator> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.Validator";
+  static readonly typeName = 'tendermint.abci.Validator';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "address", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 3, name: "power", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
+    { no: 1, name: 'address', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 3, name: 'power', kind: 'scalar', T: 3 /* ScalarType.INT64 */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Validator {
@@ -2487,10 +2571,10 @@ export class ValidatorUpdate extends Message<ValidatorUpdate> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.ValidatorUpdate";
+  static readonly typeName = 'tendermint.abci.ValidatorUpdate';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "pub_key", kind: "message", T: PublicKey },
-    { no: 2, name: "power", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
+    { no: 1, name: 'pub_key', kind: 'message', T: PublicKey },
+    { no: 2, name: 'power', kind: 'scalar', T: 3 /* ScalarType.INT64 */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ValidatorUpdate {
@@ -2505,7 +2589,10 @@ export class ValidatorUpdate extends Message<ValidatorUpdate> {
     return new ValidatorUpdate().fromJsonString(jsonString, options);
   }
 
-  static equals(a: ValidatorUpdate | PlainMessage<ValidatorUpdate> | undefined, b: ValidatorUpdate | PlainMessage<ValidatorUpdate> | undefined): boolean {
+  static equals(
+    a: ValidatorUpdate | PlainMessage<ValidatorUpdate> | undefined,
+    b: ValidatorUpdate | PlainMessage<ValidatorUpdate> | undefined
+  ): boolean {
     return proto3.util.equals(ValidatorUpdate, a, b);
   }
 }
@@ -2532,10 +2619,10 @@ export class VoteInfo extends Message<VoteInfo> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.VoteInfo";
+  static readonly typeName = 'tendermint.abci.VoteInfo';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "validator", kind: "message", T: Validator },
-    { no: 2, name: "signed_last_block", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 1, name: 'validator', kind: 'message', T: Validator },
+    { no: 2, name: 'signed_last_block', kind: 'scalar', T: 8 /* ScalarType.BOOL */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): VoteInfo {
@@ -2582,11 +2669,11 @@ export class ExtendedVoteInfo extends Message<ExtendedVoteInfo> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.ExtendedVoteInfo";
+  static readonly typeName = 'tendermint.abci.ExtendedVoteInfo';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "validator", kind: "message", T: Validator },
-    { no: 2, name: "signed_last_block", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 3, name: "vote_extension", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
+    { no: 1, name: 'validator', kind: 'message', T: Validator },
+    { no: 2, name: 'signed_last_block', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 3, name: 'vote_extension', kind: 'scalar', T: 12 /* ScalarType.BYTES */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ExtendedVoteInfo {
@@ -2601,7 +2688,10 @@ export class ExtendedVoteInfo extends Message<ExtendedVoteInfo> {
     return new ExtendedVoteInfo().fromJsonString(jsonString, options);
   }
 
-  static equals(a: ExtendedVoteInfo | PlainMessage<ExtendedVoteInfo> | undefined, b: ExtendedVoteInfo | PlainMessage<ExtendedVoteInfo> | undefined): boolean {
+  static equals(
+    a: ExtendedVoteInfo | PlainMessage<ExtendedVoteInfo> | undefined,
+    b: ExtendedVoteInfo | PlainMessage<ExtendedVoteInfo> | undefined
+  ): boolean {
     return proto3.util.equals(ExtendedVoteInfo, a, b);
   }
 }
@@ -2651,13 +2741,13 @@ export class Misbehavior extends Message<Misbehavior> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.Misbehavior";
+  static readonly typeName = 'tendermint.abci.Misbehavior';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "type", kind: "enum", T: proto3.getEnumType(MisbehaviorType) },
-    { no: 2, name: "validator", kind: "message", T: Validator },
-    { no: 3, name: "height", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
-    { no: 4, name: "time", kind: "message", T: Timestamp },
-    { no: 5, name: "total_voting_power", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
+    { no: 1, name: 'type', kind: 'enum', T: proto3.getEnumType(MisbehaviorType) },
+    { no: 2, name: 'validator', kind: 'message', T: Validator },
+    { no: 3, name: 'height', kind: 'scalar', T: 3 /* ScalarType.INT64 */ },
+    { no: 4, name: 'time', kind: 'message', T: Timestamp },
+    { no: 5, name: 'total_voting_power', kind: 'scalar', T: 3 /* ScalarType.INT64 */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Misbehavior {
@@ -2722,13 +2812,13 @@ export class Snapshot extends Message<Snapshot> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.abci.Snapshot";
+  static readonly typeName = 'tendermint.abci.Snapshot';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "height", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
-    { no: 2, name: "format", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 3, name: "chunks", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 4, name: "hash", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 5, name: "metadata", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
+    { no: 1, name: 'height', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ },
+    { no: 2, name: 'format', kind: 'scalar', T: 13 /* ScalarType.UINT32 */ },
+    { no: 3, name: 'chunks', kind: 'scalar', T: 13 /* ScalarType.UINT32 */ },
+    { no: 4, name: 'hash', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 5, name: 'metadata', kind: 'scalar', T: 12 /* ScalarType.BYTES */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Snapshot {
@@ -2747,4 +2837,3 @@ export class Snapshot extends Message<Snapshot> {
     return proto3.util.equals(Snapshot, a, b);
   }
 }
-

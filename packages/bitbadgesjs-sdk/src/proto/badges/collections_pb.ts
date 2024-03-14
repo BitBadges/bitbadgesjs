@@ -3,15 +3,23 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
-import { BadgeMetadataTimeline, CollectionMetadataTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadataTimeline, StandardsTimeline } from "./timelines_pb.js";
-import { CollectionPermissions } from "./permissions_pb.js";
-import { CollectionApproval, UserBalanceStore } from "./transfers_pb.js";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3 } from '@bufbuild/protobuf';
+import {
+  BadgeMetadataTimeline,
+  CollectionMetadataTimeline,
+  CustomDataTimeline,
+  IsArchivedTimeline,
+  ManagerTimeline,
+  OffChainBalancesMetadataTimeline,
+  StandardsTimeline
+} from './timelines_pb.js';
+import { CollectionPermissions } from './permissions_pb.js';
+import { CollectionApproval, UserBalanceStore } from './transfers_pb.js';
 
 /**
  *
- * A BadgeCollection is the top-level object for a collection of badges. 
+ * A BadgeCollection is the top-level object for a collection of badges.
  * It defines everything about the collection, such as the manager, metadata, etc.
  *
  * All collections are identified by a collectionId assigned by the blockchain, which is a uint64 that increments (i.e. the first collection has ID 1).
@@ -19,7 +27,7 @@ import { CollectionApproval, UserBalanceStore } from "./transfers_pb.js";
  * All collections can have a manager who is responsible for managing the collection and can be granted certain admin
  * permissions, such as the ability to mint new badges.
  *
- * Certain fields are timeline-based, which means they may have different values at different block heights. 
+ * Certain fields are timeline-based, which means they may have different values at different block heights.
  * We fetch the value according to the current time.
  * For example, we may set the manager to be Alice from Time1 to Time2, and then set the manager to be Bob from Time2 to Time3.
  *
@@ -35,7 +43,7 @@ export class BadgeCollection extends Message<BadgeCollection> {
    *
    * @generated from field: string collectionId = 1;
    */
-  collectionId = "";
+  collectionId = '';
 
   /**
    * The metadata for the collection itself, which can vary over time.
@@ -56,7 +64,7 @@ export class BadgeCollection extends Message<BadgeCollection> {
    *
    * @generated from field: string balancesType = 4;
    */
-  balancesType = "";
+  balancesType = '';
 
   /**
    * Metadata for fetching balances for collections with off-chain balances, subject to changes over time.
@@ -123,14 +131,14 @@ export class BadgeCollection extends Message<BadgeCollection> {
    *
    * @generated from field: string createdBy = 14;
    */
-  createdBy = "";
+  createdBy = '';
 
   /**
    * The generated address of the badge collection.
    *
    * @generated from field: string aliasAddress = 15;
    */
-  aliasAddress = "";
+  aliasAddress = '';
 
   constructor(data?: PartialMessage<BadgeCollection>) {
     super();
@@ -138,22 +146,28 @@ export class BadgeCollection extends Message<BadgeCollection> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.BadgeCollection";
+  static readonly typeName = 'badges.BadgeCollection';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "collectionMetadataTimeline", kind: "message", T: CollectionMetadataTimeline, repeated: true },
-    { no: 3, name: "badgeMetadataTimeline", kind: "message", T: BadgeMetadataTimeline, repeated: true },
-    { no: 4, name: "balancesType", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 5, name: "offChainBalancesMetadataTimeline", kind: "message", T: OffChainBalancesMetadataTimeline, repeated: true },
-    { no: 7, name: "customDataTimeline", kind: "message", T: CustomDataTimeline, repeated: true },
-    { no: 8, name: "managerTimeline", kind: "message", T: ManagerTimeline, repeated: true },
-    { no: 9, name: "collectionPermissions", kind: "message", T: CollectionPermissions },
-    { no: 10, name: "collectionApprovals", kind: "message", T: CollectionApproval, repeated: true },
-    { no: 11, name: "standardsTimeline", kind: "message", T: StandardsTimeline, repeated: true },
-    { no: 12, name: "isArchivedTimeline", kind: "message", T: IsArchivedTimeline, repeated: true },
-    { no: 13, name: "defaultBalances", kind: "message", T: UserBalanceStore },
-    { no: 14, name: "createdBy", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 15, name: "aliasAddress", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'collectionId', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'collectionMetadataTimeline', kind: 'message', T: CollectionMetadataTimeline, repeated: true },
+    { no: 3, name: 'badgeMetadataTimeline', kind: 'message', T: BadgeMetadataTimeline, repeated: true },
+    { no: 4, name: 'balancesType', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    {
+      no: 5,
+      name: 'offChainBalancesMetadataTimeline',
+      kind: 'message',
+      T: OffChainBalancesMetadataTimeline,
+      repeated: true
+    },
+    { no: 7, name: 'customDataTimeline', kind: 'message', T: CustomDataTimeline, repeated: true },
+    { no: 8, name: 'managerTimeline', kind: 'message', T: ManagerTimeline, repeated: true },
+    { no: 9, name: 'collectionPermissions', kind: 'message', T: CollectionPermissions },
+    { no: 10, name: 'collectionApprovals', kind: 'message', T: CollectionApproval, repeated: true },
+    { no: 11, name: 'standardsTimeline', kind: 'message', T: StandardsTimeline, repeated: true },
+    { no: 12, name: 'isArchivedTimeline', kind: 'message', T: IsArchivedTimeline, repeated: true },
+    { no: 13, name: 'defaultBalances', kind: 'message', T: UserBalanceStore },
+    { no: 14, name: 'createdBy', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 15, name: 'aliasAddress', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BadgeCollection {
@@ -168,8 +182,10 @@ export class BadgeCollection extends Message<BadgeCollection> {
     return new BadgeCollection().fromJsonString(jsonString, options);
   }
 
-  static equals(a: BadgeCollection | PlainMessage<BadgeCollection> | undefined, b: BadgeCollection | PlainMessage<BadgeCollection> | undefined): boolean {
+  static equals(
+    a: BadgeCollection | PlainMessage<BadgeCollection> | undefined,
+    b: BadgeCollection | PlainMessage<BadgeCollection> | undefined
+  ): boolean {
     return proto3.util.equals(BadgeCollection, a, b);
   }
 }
-

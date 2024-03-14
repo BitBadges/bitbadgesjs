@@ -1,2 +1,3 @@
-export * from './controller_pb'
-export * from './query_pb'
+export * from './controller_pb';
+
+export * from './query_pb';

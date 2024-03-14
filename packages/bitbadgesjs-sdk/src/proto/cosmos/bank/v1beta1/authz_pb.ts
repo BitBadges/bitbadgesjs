@@ -3,9 +3,9 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
-import { Coin } from "../../base/v1beta1/coin_pb.js";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3 } from '@bufbuild/protobuf';
+import { Coin } from '../../base/v1beta1/coin_pb.js';
 
 /**
  * SendAuthorization allows the grantee to spend up to spend_limit coins from
@@ -37,10 +37,10 @@ export class SendAuthorization extends Message<SendAuthorization> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.bank.v1beta1.SendAuthorization";
+  static readonly typeName = 'cosmos.bank.v1beta1.SendAuthorization';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "spend_limit", kind: "message", T: Coin, repeated: true },
-    { no: 2, name: "allow_list", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 1, name: 'spend_limit', kind: 'message', T: Coin, repeated: true },
+    { no: 2, name: 'allow_list', kind: 'scalar', T: 9 /* ScalarType.STRING */, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SendAuthorization {
@@ -55,8 +55,10 @@ export class SendAuthorization extends Message<SendAuthorization> {
     return new SendAuthorization().fromJsonString(jsonString, options);
   }
 
-  static equals(a: SendAuthorization | PlainMessage<SendAuthorization> | undefined, b: SendAuthorization | PlainMessage<SendAuthorization> | undefined): boolean {
+  static equals(
+    a: SendAuthorization | PlainMessage<SendAuthorization> | undefined,
+    b: SendAuthorization | PlainMessage<SendAuthorization> | undefined
+  ): boolean {
     return proto3.util.equals(SendAuthorization, a, b);
   }
 }
-

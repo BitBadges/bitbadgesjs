@@ -1,1 +1,1 @@
-export * from './solomachine_pb'
+export * from './solomachine_pb';

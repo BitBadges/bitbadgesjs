@@ -1,1 +1,1 @@
-export * from './types_pb'
+export * from './types_pb';

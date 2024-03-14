@@ -3,8 +3,8 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Any, Message, proto3, protoInt64 } from "@bufbuild/protobuf";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Any, Message, proto3, protoInt64 } from '@bufbuild/protobuf';
 
 /**
  * BaseAccount defines a base account type. It contains all the necessary fields
@@ -17,7 +17,7 @@ export class BaseAccount extends Message<BaseAccount> {
   /**
    * @generated from field: string address = 1;
    */
-  address = "";
+  address = '';
 
   /**
    * @generated from field: google.protobuf.Any pub_key = 2;
@@ -40,12 +40,12 @@ export class BaseAccount extends Message<BaseAccount> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.auth.v1beta1.BaseAccount";
+  static readonly typeName = 'cosmos.auth.v1beta1.BaseAccount';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "pub_key", kind: "message", T: Any },
-    { no: 3, name: "account_number", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
-    { no: 4, name: "sequence", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
+    { no: 1, name: 'address', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'pub_key', kind: 'message', T: Any },
+    { no: 3, name: 'account_number', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ },
+    { no: 4, name: 'sequence', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BaseAccount {
@@ -79,7 +79,7 @@ export class ModuleAccount extends Message<ModuleAccount> {
   /**
    * @generated from field: string name = 2;
    */
-  name = "";
+  name = '';
 
   /**
    * @generated from field: repeated string permissions = 3;
@@ -92,11 +92,11 @@ export class ModuleAccount extends Message<ModuleAccount> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.auth.v1beta1.ModuleAccount";
+  static readonly typeName = 'cosmos.auth.v1beta1.ModuleAccount';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "base_account", kind: "message", T: BaseAccount },
-    { no: 2, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "permissions", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 1, name: 'base_account', kind: 'message', T: BaseAccount },
+    { no: 2, name: 'name', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'permissions', kind: 'scalar', T: 9 /* ScalarType.STRING */, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ModuleAccount {
@@ -129,7 +129,7 @@ export class ModuleCredential extends Message<ModuleCredential> {
    *
    * @generated from field: string module_name = 1;
    */
-  moduleName = "";
+  moduleName = '';
 
   /**
    * derivation_keys is for deriving a module account address (passed into address.Module)
@@ -145,10 +145,10 @@ export class ModuleCredential extends Message<ModuleCredential> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.auth.v1beta1.ModuleCredential";
+  static readonly typeName = 'cosmos.auth.v1beta1.ModuleCredential';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "module_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "derivation_keys", kind: "scalar", T: 12 /* ScalarType.BYTES */, repeated: true },
+    { no: 1, name: 'module_name', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'derivation_keys', kind: 'scalar', T: 12 /* ScalarType.BYTES */, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ModuleCredential {
@@ -163,7 +163,10 @@ export class ModuleCredential extends Message<ModuleCredential> {
     return new ModuleCredential().fromJsonString(jsonString, options);
   }
 
-  static equals(a: ModuleCredential | PlainMessage<ModuleCredential> | undefined, b: ModuleCredential | PlainMessage<ModuleCredential> | undefined): boolean {
+  static equals(
+    a: ModuleCredential | PlainMessage<ModuleCredential> | undefined,
+    b: ModuleCredential | PlainMessage<ModuleCredential> | undefined
+  ): boolean {
     return proto3.util.equals(ModuleCredential, a, b);
   }
 }
@@ -205,13 +208,13 @@ export class Params extends Message<Params> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.auth.v1beta1.Params";
+  static readonly typeName = 'cosmos.auth.v1beta1.Params';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "max_memo_characters", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
-    { no: 2, name: "tx_sig_limit", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
-    { no: 3, name: "tx_size_cost_per_byte", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
-    { no: 4, name: "sig_verify_cost_ed25519", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
-    { no: 5, name: "sig_verify_cost_secp256k1", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
+    { no: 1, name: 'max_memo_characters', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ },
+    { no: 2, name: 'tx_sig_limit', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ },
+    { no: 3, name: 'tx_size_cost_per_byte', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ },
+    { no: 4, name: 'sig_verify_cost_ed25519', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ },
+    { no: 5, name: 'sig_verify_cost_secp256k1', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Params {
@@ -230,4 +233,3 @@ export class Params extends Message<Params> {
     return proto3.util.equals(Params, a, b);
   }
 }
-

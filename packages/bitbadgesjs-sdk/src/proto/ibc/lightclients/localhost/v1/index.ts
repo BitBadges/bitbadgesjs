@@ -1,1 +1,1 @@
-export * from './localhost_pb'
+export * from './localhost_pb';

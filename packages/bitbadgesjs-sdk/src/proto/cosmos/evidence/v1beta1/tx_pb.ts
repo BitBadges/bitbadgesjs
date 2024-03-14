@@ -3,8 +3,8 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Any, Message, proto3 } from "@bufbuild/protobuf";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Any, Message, proto3 } from '@bufbuild/protobuf';
 
 /**
  * MsgSubmitEvidence represents a message that supports submitting arbitrary
@@ -18,7 +18,7 @@ export class MsgSubmitEvidence extends Message<MsgSubmitEvidence> {
    *
    * @generated from field: string submitter = 1;
    */
-  submitter = "";
+  submitter = '';
 
   /**
    * evidence defines the evidence of misbehavior.
@@ -33,10 +33,10 @@ export class MsgSubmitEvidence extends Message<MsgSubmitEvidence> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.evidence.v1beta1.MsgSubmitEvidence";
+  static readonly typeName = 'cosmos.evidence.v1beta1.MsgSubmitEvidence';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "submitter", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "evidence", kind: "message", T: Any },
+    { no: 1, name: 'submitter', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'evidence', kind: 'message', T: Any }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgSubmitEvidence {
@@ -51,7 +51,10 @@ export class MsgSubmitEvidence extends Message<MsgSubmitEvidence> {
     return new MsgSubmitEvidence().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgSubmitEvidence | PlainMessage<MsgSubmitEvidence> | undefined, b: MsgSubmitEvidence | PlainMessage<MsgSubmitEvidence> | undefined): boolean {
+  static equals(
+    a: MsgSubmitEvidence | PlainMessage<MsgSubmitEvidence> | undefined,
+    b: MsgSubmitEvidence | PlainMessage<MsgSubmitEvidence> | undefined
+  ): boolean {
     return proto3.util.equals(MsgSubmitEvidence, a, b);
   }
 }
@@ -75,10 +78,8 @@ export class MsgSubmitEvidenceResponse extends Message<MsgSubmitEvidenceResponse
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.evidence.v1beta1.MsgSubmitEvidenceResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 4, name: "hash", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-  ]);
+  static readonly typeName = 'cosmos.evidence.v1beta1.MsgSubmitEvidenceResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 4, name: 'hash', kind: 'scalar', T: 12 /* ScalarType.BYTES */ }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgSubmitEvidenceResponse {
     return new MsgSubmitEvidenceResponse().fromBinary(bytes, options);
@@ -92,8 +93,10 @@ export class MsgSubmitEvidenceResponse extends Message<MsgSubmitEvidenceResponse
     return new MsgSubmitEvidenceResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgSubmitEvidenceResponse | PlainMessage<MsgSubmitEvidenceResponse> | undefined, b: MsgSubmitEvidenceResponse | PlainMessage<MsgSubmitEvidenceResponse> | undefined): boolean {
+  static equals(
+    a: MsgSubmitEvidenceResponse | PlainMessage<MsgSubmitEvidenceResponse> | undefined,
+    b: MsgSubmitEvidenceResponse | PlainMessage<MsgSubmitEvidenceResponse> | undefined
+  ): boolean {
     return proto3.util.equals(MsgSubmitEvidenceResponse, a, b);
   }
 }
-

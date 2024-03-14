@@ -3,8 +3,8 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3, protoInt64 } from "@bufbuild/protobuf";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3, protoInt64 } from '@bufbuild/protobuf';
 
 /**
  * Capability defines an implementation of an object capability. The index
@@ -24,10 +24,8 @@ export class Capability extends Message<Capability> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.capability.v1beta1.Capability";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "index", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
-  ]);
+  static readonly typeName = 'cosmos.capability.v1beta1.Capability';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'index', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Capability {
     return new Capability().fromBinary(bytes, options);
@@ -56,12 +54,12 @@ export class Owner extends Message<Owner> {
   /**
    * @generated from field: string module = 1;
    */
-  module = "";
+  module = '';
 
   /**
    * @generated from field: string name = 2;
    */
-  name = "";
+  name = '';
 
   constructor(data?: PartialMessage<Owner>) {
     super();
@@ -69,10 +67,10 @@ export class Owner extends Message<Owner> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.capability.v1beta1.Owner";
+  static readonly typeName = 'cosmos.capability.v1beta1.Owner';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "module", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'module', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'name', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Owner {
@@ -110,10 +108,8 @@ export class CapabilityOwners extends Message<CapabilityOwners> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.capability.v1beta1.CapabilityOwners";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "owners", kind: "message", T: Owner, repeated: true },
-  ]);
+  static readonly typeName = 'cosmos.capability.v1beta1.CapabilityOwners';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'owners', kind: 'message', T: Owner, repeated: true }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CapabilityOwners {
     return new CapabilityOwners().fromBinary(bytes, options);
@@ -127,8 +123,10 @@ export class CapabilityOwners extends Message<CapabilityOwners> {
     return new CapabilityOwners().fromJsonString(jsonString, options);
   }
 
-  static equals(a: CapabilityOwners | PlainMessage<CapabilityOwners> | undefined, b: CapabilityOwners | PlainMessage<CapabilityOwners> | undefined): boolean {
+  static equals(
+    a: CapabilityOwners | PlainMessage<CapabilityOwners> | undefined,
+    b: CapabilityOwners | PlainMessage<CapabilityOwners> | undefined
+  ): boolean {
     return proto3.util.equals(CapabilityOwners, a, b);
   }
 }
-

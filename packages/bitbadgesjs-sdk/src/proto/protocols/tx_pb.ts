@@ -3,8 +3,8 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3 } from '@bufbuild/protobuf';
 
 /**
  * @generated from message protocols.Protocol
@@ -13,22 +13,22 @@ export class Protocol extends Message<Protocol> {
   /**
    * @generated from field: string name = 1;
    */
-  name = "";
+  name = '';
 
   /**
    * @generated from field: string uri = 2;
    */
-  uri = "";
+  uri = '';
 
   /**
    * @generated from field: string customData = 3;
    */
-  customData = "";
+  customData = '';
 
   /**
    * @generated from field: string createdBy = 4;
    */
-  createdBy = "";
+  createdBy = '';
 
   /**
    * @generated from field: bool isFrozen = 5;
@@ -41,13 +41,13 @@ export class Protocol extends Message<Protocol> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "protocols.Protocol";
+  static readonly typeName = 'protocols.Protocol';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "customData", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "createdBy", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 5, name: "isFrozen", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 1, name: 'name', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'uri', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'customData', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: 'createdBy', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: 'isFrozen', kind: 'scalar', T: 8 /* ScalarType.BOOL */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Protocol {
@@ -74,22 +74,22 @@ export class MsgCreateProtocol extends Message<MsgCreateProtocol> {
   /**
    * @generated from field: string creator = 1;
    */
-  creator = "";
+  creator = '';
 
   /**
    * @generated from field: string name = 2;
    */
-  name = "";
+  name = '';
 
   /**
    * @generated from field: string uri = 3;
    */
-  uri = "";
+  uri = '';
 
   /**
    * @generated from field: string customData = 4;
    */
-  customData = "";
+  customData = '';
 
   /**
    * @generated from field: bool isFrozen = 5;
@@ -102,13 +102,13 @@ export class MsgCreateProtocol extends Message<MsgCreateProtocol> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "protocols.MsgCreateProtocol";
+  static readonly typeName = 'protocols.MsgCreateProtocol';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "customData", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 5, name: "isFrozen", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 1, name: 'creator', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'name', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'uri', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: 'customData', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: 'isFrozen', kind: 'scalar', T: 8 /* ScalarType.BOOL */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgCreateProtocol {
@@ -123,7 +123,10 @@ export class MsgCreateProtocol extends Message<MsgCreateProtocol> {
     return new MsgCreateProtocol().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgCreateProtocol | PlainMessage<MsgCreateProtocol> | undefined, b: MsgCreateProtocol | PlainMessage<MsgCreateProtocol> | undefined): boolean {
+  static equals(
+    a: MsgCreateProtocol | PlainMessage<MsgCreateProtocol> | undefined,
+    b: MsgCreateProtocol | PlainMessage<MsgCreateProtocol> | undefined
+  ): boolean {
     return proto3.util.equals(MsgCreateProtocol, a, b);
   }
 }
@@ -138,9 +141,8 @@ export class MsgCreateProtocolResponse extends Message<MsgCreateProtocolResponse
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "protocols.MsgCreateProtocolResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-  ]);
+  static readonly typeName = 'protocols.MsgCreateProtocolResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => []);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgCreateProtocolResponse {
     return new MsgCreateProtocolResponse().fromBinary(bytes, options);
@@ -154,7 +156,10 @@ export class MsgCreateProtocolResponse extends Message<MsgCreateProtocolResponse
     return new MsgCreateProtocolResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgCreateProtocolResponse | PlainMessage<MsgCreateProtocolResponse> | undefined, b: MsgCreateProtocolResponse | PlainMessage<MsgCreateProtocolResponse> | undefined): boolean {
+  static equals(
+    a: MsgCreateProtocolResponse | PlainMessage<MsgCreateProtocolResponse> | undefined,
+    b: MsgCreateProtocolResponse | PlainMessage<MsgCreateProtocolResponse> | undefined
+  ): boolean {
     return proto3.util.equals(MsgCreateProtocolResponse, a, b);
   }
 }
@@ -166,22 +171,22 @@ export class MsgUpdateProtocol extends Message<MsgUpdateProtocol> {
   /**
    * @generated from field: string creator = 1;
    */
-  creator = "";
+  creator = '';
 
   /**
    * @generated from field: string name = 2;
    */
-  name = "";
+  name = '';
 
   /**
    * @generated from field: string uri = 3;
    */
-  uri = "";
+  uri = '';
 
   /**
    * @generated from field: string customData = 4;
    */
-  customData = "";
+  customData = '';
 
   /**
    * @generated from field: bool isFrozen = 5;
@@ -194,13 +199,13 @@ export class MsgUpdateProtocol extends Message<MsgUpdateProtocol> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "protocols.MsgUpdateProtocol";
+  static readonly typeName = 'protocols.MsgUpdateProtocol';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "customData", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 5, name: "isFrozen", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 1, name: 'creator', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'name', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'uri', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: 'customData', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: 'isFrozen', kind: 'scalar', T: 8 /* ScalarType.BOOL */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUpdateProtocol {
@@ -215,7 +220,10 @@ export class MsgUpdateProtocol extends Message<MsgUpdateProtocol> {
     return new MsgUpdateProtocol().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgUpdateProtocol | PlainMessage<MsgUpdateProtocol> | undefined, b: MsgUpdateProtocol | PlainMessage<MsgUpdateProtocol> | undefined): boolean {
+  static equals(
+    a: MsgUpdateProtocol | PlainMessage<MsgUpdateProtocol> | undefined,
+    b: MsgUpdateProtocol | PlainMessage<MsgUpdateProtocol> | undefined
+  ): boolean {
     return proto3.util.equals(MsgUpdateProtocol, a, b);
   }
 }
@@ -230,9 +238,8 @@ export class MsgUpdateProtocolResponse extends Message<MsgUpdateProtocolResponse
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "protocols.MsgUpdateProtocolResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-  ]);
+  static readonly typeName = 'protocols.MsgUpdateProtocolResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => []);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUpdateProtocolResponse {
     return new MsgUpdateProtocolResponse().fromBinary(bytes, options);
@@ -246,7 +253,10 @@ export class MsgUpdateProtocolResponse extends Message<MsgUpdateProtocolResponse
     return new MsgUpdateProtocolResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgUpdateProtocolResponse | PlainMessage<MsgUpdateProtocolResponse> | undefined, b: MsgUpdateProtocolResponse | PlainMessage<MsgUpdateProtocolResponse> | undefined): boolean {
+  static equals(
+    a: MsgUpdateProtocolResponse | PlainMessage<MsgUpdateProtocolResponse> | undefined,
+    b: MsgUpdateProtocolResponse | PlainMessage<MsgUpdateProtocolResponse> | undefined
+  ): boolean {
     return proto3.util.equals(MsgUpdateProtocolResponse, a, b);
   }
 }
@@ -258,12 +268,12 @@ export class MsgDeleteProtocol extends Message<MsgDeleteProtocol> {
   /**
    * @generated from field: string creator = 1;
    */
-  creator = "";
+  creator = '';
 
   /**
    * @generated from field: string name = 2;
    */
-  name = "";
+  name = '';
 
   constructor(data?: PartialMessage<MsgDeleteProtocol>) {
     super();
@@ -271,10 +281,10 @@ export class MsgDeleteProtocol extends Message<MsgDeleteProtocol> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "protocols.MsgDeleteProtocol";
+  static readonly typeName = 'protocols.MsgDeleteProtocol';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'creator', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'name', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgDeleteProtocol {
@@ -289,7 +299,10 @@ export class MsgDeleteProtocol extends Message<MsgDeleteProtocol> {
     return new MsgDeleteProtocol().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgDeleteProtocol | PlainMessage<MsgDeleteProtocol> | undefined, b: MsgDeleteProtocol | PlainMessage<MsgDeleteProtocol> | undefined): boolean {
+  static equals(
+    a: MsgDeleteProtocol | PlainMessage<MsgDeleteProtocol> | undefined,
+    b: MsgDeleteProtocol | PlainMessage<MsgDeleteProtocol> | undefined
+  ): boolean {
     return proto3.util.equals(MsgDeleteProtocol, a, b);
   }
 }
@@ -304,9 +317,8 @@ export class MsgDeleteProtocolResponse extends Message<MsgDeleteProtocolResponse
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "protocols.MsgDeleteProtocolResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-  ]);
+  static readonly typeName = 'protocols.MsgDeleteProtocolResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => []);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgDeleteProtocolResponse {
     return new MsgDeleteProtocolResponse().fromBinary(bytes, options);
@@ -320,7 +332,10 @@ export class MsgDeleteProtocolResponse extends Message<MsgDeleteProtocolResponse
     return new MsgDeleteProtocolResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgDeleteProtocolResponse | PlainMessage<MsgDeleteProtocolResponse> | undefined, b: MsgDeleteProtocolResponse | PlainMessage<MsgDeleteProtocolResponse> | undefined): boolean {
+  static equals(
+    a: MsgDeleteProtocolResponse | PlainMessage<MsgDeleteProtocolResponse> | undefined,
+    b: MsgDeleteProtocolResponse | PlainMessage<MsgDeleteProtocolResponse> | undefined
+  ): boolean {
     return proto3.util.equals(MsgDeleteProtocolResponse, a, b);
   }
 }
@@ -332,17 +347,17 @@ export class MsgSetCollectionForProtocol extends Message<MsgSetCollectionForProt
   /**
    * @generated from field: string creator = 1;
    */
-  creator = "";
+  creator = '';
 
   /**
    * @generated from field: string name = 2;
    */
-  name = "";
+  name = '';
 
   /**
    * @generated from field: string collectionId = 3;
    */
-  collectionId = "";
+  collectionId = '';
 
   constructor(data?: PartialMessage<MsgSetCollectionForProtocol>) {
     super();
@@ -350,11 +365,11 @@ export class MsgSetCollectionForProtocol extends Message<MsgSetCollectionForProt
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "protocols.MsgSetCollectionForProtocol";
+  static readonly typeName = 'protocols.MsgSetCollectionForProtocol';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'creator', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'name', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'collectionId', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgSetCollectionForProtocol {
@@ -369,7 +384,10 @@ export class MsgSetCollectionForProtocol extends Message<MsgSetCollectionForProt
     return new MsgSetCollectionForProtocol().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgSetCollectionForProtocol | PlainMessage<MsgSetCollectionForProtocol> | undefined, b: MsgSetCollectionForProtocol | PlainMessage<MsgSetCollectionForProtocol> | undefined): boolean {
+  static equals(
+    a: MsgSetCollectionForProtocol | PlainMessage<MsgSetCollectionForProtocol> | undefined,
+    b: MsgSetCollectionForProtocol | PlainMessage<MsgSetCollectionForProtocol> | undefined
+  ): boolean {
     return proto3.util.equals(MsgSetCollectionForProtocol, a, b);
   }
 }
@@ -384,9 +402,8 @@ export class MsgSetCollectionForProtocolResponse extends Message<MsgSetCollectio
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "protocols.MsgSetCollectionForProtocolResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-  ]);
+  static readonly typeName = 'protocols.MsgSetCollectionForProtocolResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => []);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgSetCollectionForProtocolResponse {
     return new MsgSetCollectionForProtocolResponse().fromBinary(bytes, options);
@@ -400,7 +417,10 @@ export class MsgSetCollectionForProtocolResponse extends Message<MsgSetCollectio
     return new MsgSetCollectionForProtocolResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgSetCollectionForProtocolResponse | PlainMessage<MsgSetCollectionForProtocolResponse> | undefined, b: MsgSetCollectionForProtocolResponse | PlainMessage<MsgSetCollectionForProtocolResponse> | undefined): boolean {
+  static equals(
+    a: MsgSetCollectionForProtocolResponse | PlainMessage<MsgSetCollectionForProtocolResponse> | undefined,
+    b: MsgSetCollectionForProtocolResponse | PlainMessage<MsgSetCollectionForProtocolResponse> | undefined
+  ): boolean {
     return proto3.util.equals(MsgSetCollectionForProtocolResponse, a, b);
   }
 }
@@ -412,12 +432,12 @@ export class MsgUnsetCollectionForProtocol extends Message<MsgUnsetCollectionFor
   /**
    * @generated from field: string creator = 1;
    */
-  creator = "";
+  creator = '';
 
   /**
    * @generated from field: string name = 2;
    */
-  name = "";
+  name = '';
 
   constructor(data?: PartialMessage<MsgUnsetCollectionForProtocol>) {
     super();
@@ -425,10 +445,10 @@ export class MsgUnsetCollectionForProtocol extends Message<MsgUnsetCollectionFor
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "protocols.MsgUnsetCollectionForProtocol";
+  static readonly typeName = 'protocols.MsgUnsetCollectionForProtocol';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'creator', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'name', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUnsetCollectionForProtocol {
@@ -443,7 +463,10 @@ export class MsgUnsetCollectionForProtocol extends Message<MsgUnsetCollectionFor
     return new MsgUnsetCollectionForProtocol().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgUnsetCollectionForProtocol | PlainMessage<MsgUnsetCollectionForProtocol> | undefined, b: MsgUnsetCollectionForProtocol | PlainMessage<MsgUnsetCollectionForProtocol> | undefined): boolean {
+  static equals(
+    a: MsgUnsetCollectionForProtocol | PlainMessage<MsgUnsetCollectionForProtocol> | undefined,
+    b: MsgUnsetCollectionForProtocol | PlainMessage<MsgUnsetCollectionForProtocol> | undefined
+  ): boolean {
     return proto3.util.equals(MsgUnsetCollectionForProtocol, a, b);
   }
 }
@@ -458,9 +481,8 @@ export class MsgUnsetCollectionForProtocolResponse extends Message<MsgUnsetColle
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "protocols.MsgUnsetCollectionForProtocolResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-  ]);
+  static readonly typeName = 'protocols.MsgUnsetCollectionForProtocolResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => []);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUnsetCollectionForProtocolResponse {
     return new MsgUnsetCollectionForProtocolResponse().fromBinary(bytes, options);
@@ -474,8 +496,10 @@ export class MsgUnsetCollectionForProtocolResponse extends Message<MsgUnsetColle
     return new MsgUnsetCollectionForProtocolResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgUnsetCollectionForProtocolResponse | PlainMessage<MsgUnsetCollectionForProtocolResponse> | undefined, b: MsgUnsetCollectionForProtocolResponse | PlainMessage<MsgUnsetCollectionForProtocolResponse> | undefined): boolean {
+  static equals(
+    a: MsgUnsetCollectionForProtocolResponse | PlainMessage<MsgUnsetCollectionForProtocolResponse> | undefined,
+    b: MsgUnsetCollectionForProtocolResponse | PlainMessage<MsgUnsetCollectionForProtocolResponse> | undefined
+  ): boolean {
     return proto3.util.equals(MsgUnsetCollectionForProtocolResponse, a, b);
   }
 }
-

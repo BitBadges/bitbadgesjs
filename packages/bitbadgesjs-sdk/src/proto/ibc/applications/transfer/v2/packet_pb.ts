@@ -3,8 +3,8 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3 } from '@bufbuild/protobuf';
 
 /**
  * FungibleTokenPacketData defines a struct for the packet payload
@@ -19,28 +19,28 @@ export class FungibleTokenPacketData extends Message<FungibleTokenPacketData> {
    *
    * @generated from field: string denom = 1;
    */
-  denom = "";
+  denom = '';
 
   /**
    * the token amount to be transferred
    *
    * @generated from field: string amount = 2;
    */
-  amount = "";
+  amount = '';
 
   /**
    * the sender address
    *
    * @generated from field: string sender = 3;
    */
-  sender = "";
+  sender = '';
 
   /**
    * the recipient address on the destination chain
    *
    * @generated from field: string receiver = 4;
    */
-  receiver = "";
+  receiver = '';
 
   constructor(data?: PartialMessage<FungibleTokenPacketData>) {
     super();
@@ -48,12 +48,12 @@ export class FungibleTokenPacketData extends Message<FungibleTokenPacketData> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ibc.applications.transfer.v2.FungibleTokenPacketData";
+  static readonly typeName = 'ibc.applications.transfer.v2.FungibleTokenPacketData';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "denom", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "amount", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "sender", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "receiver", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'denom', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'amount', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'sender', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: 'receiver', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): FungibleTokenPacketData {
@@ -68,8 +68,10 @@ export class FungibleTokenPacketData extends Message<FungibleTokenPacketData> {
     return new FungibleTokenPacketData().fromJsonString(jsonString, options);
   }
 
-  static equals(a: FungibleTokenPacketData | PlainMessage<FungibleTokenPacketData> | undefined, b: FungibleTokenPacketData | PlainMessage<FungibleTokenPacketData> | undefined): boolean {
+  static equals(
+    a: FungibleTokenPacketData | PlainMessage<FungibleTokenPacketData> | undefined,
+    b: FungibleTokenPacketData | PlainMessage<FungibleTokenPacketData> | undefined
+  ): boolean {
     return proto3.util.equals(FungibleTokenPacketData, a, b);
   }
 }
-

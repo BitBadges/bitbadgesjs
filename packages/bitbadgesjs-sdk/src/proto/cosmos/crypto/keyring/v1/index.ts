@@ -1,1 +1,1 @@
-export * from './record_pb'
+export * from './record_pb';

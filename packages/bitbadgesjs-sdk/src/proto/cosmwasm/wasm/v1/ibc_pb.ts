@@ -3,8 +3,8 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3, protoInt64 } from "@bufbuild/protobuf";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3, protoInt64 } from '@bufbuild/protobuf';
 
 /**
  * MsgIBCSend
@@ -17,7 +17,7 @@ export class MsgIBCSend extends Message<MsgIBCSend> {
    *
    * @generated from field: string channel = 2;
    */
-  channel = "";
+  channel = '';
 
   /**
    * Timeout height relative to the current block height.
@@ -49,12 +49,12 @@ export class MsgIBCSend extends Message<MsgIBCSend> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmwasm.wasm.v1.MsgIBCSend";
+  static readonly typeName = 'cosmwasm.wasm.v1.MsgIBCSend';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 2, name: "channel", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "timeout_height", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
-    { no: 5, name: "timeout_timestamp", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
-    { no: 6, name: "data", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
+    { no: 2, name: 'channel', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: 'timeout_height', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ },
+    { no: 5, name: 'timeout_timestamp', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ },
+    { no: 6, name: 'data', kind: 'scalar', T: 12 /* ScalarType.BYTES */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgIBCSend {
@@ -93,10 +93,8 @@ export class MsgIBCSendResponse extends Message<MsgIBCSendResponse> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmwasm.wasm.v1.MsgIBCSendResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "sequence", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
-  ]);
+  static readonly typeName = 'cosmwasm.wasm.v1.MsgIBCSendResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'sequence', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgIBCSendResponse {
     return new MsgIBCSendResponse().fromBinary(bytes, options);
@@ -110,7 +108,10 @@ export class MsgIBCSendResponse extends Message<MsgIBCSendResponse> {
     return new MsgIBCSendResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgIBCSendResponse | PlainMessage<MsgIBCSendResponse> | undefined, b: MsgIBCSendResponse | PlainMessage<MsgIBCSendResponse> | undefined): boolean {
+  static equals(
+    a: MsgIBCSendResponse | PlainMessage<MsgIBCSendResponse> | undefined,
+    b: MsgIBCSendResponse | PlainMessage<MsgIBCSendResponse> | undefined
+  ): boolean {
     return proto3.util.equals(MsgIBCSendResponse, a, b);
   }
 }
@@ -124,7 +125,7 @@ export class MsgIBCCloseChannel extends Message<MsgIBCCloseChannel> {
   /**
    * @generated from field: string channel = 2;
    */
-  channel = "";
+  channel = '';
 
   constructor(data?: PartialMessage<MsgIBCCloseChannel>) {
     super();
@@ -132,10 +133,8 @@ export class MsgIBCCloseChannel extends Message<MsgIBCCloseChannel> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmwasm.wasm.v1.MsgIBCCloseChannel";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 2, name: "channel", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-  ]);
+  static readonly typeName = 'cosmwasm.wasm.v1.MsgIBCCloseChannel';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 2, name: 'channel', kind: 'scalar', T: 9 /* ScalarType.STRING */ }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgIBCCloseChannel {
     return new MsgIBCCloseChannel().fromBinary(bytes, options);
@@ -149,8 +148,10 @@ export class MsgIBCCloseChannel extends Message<MsgIBCCloseChannel> {
     return new MsgIBCCloseChannel().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgIBCCloseChannel | PlainMessage<MsgIBCCloseChannel> | undefined, b: MsgIBCCloseChannel | PlainMessage<MsgIBCCloseChannel> | undefined): boolean {
+  static equals(
+    a: MsgIBCCloseChannel | PlainMessage<MsgIBCCloseChannel> | undefined,
+    b: MsgIBCCloseChannel | PlainMessage<MsgIBCCloseChannel> | undefined
+  ): boolean {
     return proto3.util.equals(MsgIBCCloseChannel, a, b);
   }
 }
-

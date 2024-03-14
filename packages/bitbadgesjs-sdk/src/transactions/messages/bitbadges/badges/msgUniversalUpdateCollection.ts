@@ -1,8 +1,24 @@
-import * as badges from '../../../../proto/badges/tx_pb'
+import * as badges from '@/proto/badges/tx_pb';
 
-import { BadgeMetadataTimeline, Balance, CollectionApproval, CollectionMetadataTimeline, CollectionPermissions, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, NumberType, OffChainBalancesMetadataTimeline, StandardsTimeline, UserBalanceStore, convertBadgeMetadataTimeline, convertBalance, convertCollectionApproval, convertCollectionMetadataTimeline, convertCollectionPermissions, convertCustomDataTimeline, convertIsArchivedTimeline, convertManagerTimeline, convertOffChainBalancesMetadataTimeline, convertStandardsTimeline, convertUserBalanceStore } from '../../../..'
-import { createTransactionPayload } from '../../base'
-import { Chain, Fee, Sender } from "../../common"
+import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
+import { CollectionApproval } from '@/core/approvals';
+import {
+  BadgeMetadataTimeline,
+  CollectionMetadataTimeline,
+  CustomDataTimeline,
+  IsArchivedTimeline,
+  ManagerTimeline,
+  OffChainBalancesMetadataTimeline,
+  StandardsTimeline
+} from '@/core/misc';
+import { CollectionPermissions } from '@/core/permissions';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base';
+
+import type { iMsgUniversalUpdateCollection } from './interfaces';
+import type { NumberType } from '@/common/string-numbers';
+import { Stringify } from '@/common/string-numbers';
+import { Balance, BalanceArray } from '@/core/balances';
+import { UserBalanceStore } from '@/core/userBalances';
 
 /**
  * MsgUniversalUpdateCollection is a universal transaction that can be used to create / update any collection. It is only executable by the manager.
@@ -19,125 +35,135 @@ import { Chain, Fee, Sender } from "../../common"
  *
  * To specify you would like to update a field, the corresponding update field must be set to true. If it is set to false, we ignore it.
  *
- * @typedef {Object} MsgUniversalUpdateCollection
- * @property {string} creator - The creator of the transaction.
- * @property {T} collectionId - The collection ID. If you are creating a new collection, set this to "0".
- * @property {string} balancesType - The balances type. Either "Standard", "Off-Chain - Indexed", "Off-Chain - Non-Indexed" or "Inherited". Only can be set on initial creation.
- * @property {UserBalanceStore} defaultBalances - The default balances for users who have not interacted with the collection yet. Only can be set on initial creation. Only used if collection has "Standard" balance type.
- * @property {Balance[]} badgesToCreate - The badges to create. Newly created badges will be sent to the "Mint" address. Must have necessary permissions. Only used if collection has "Standard" balance type.
- * @property {boolean} updateCollectionPermissions - Whether or not to update the collection permissions.
- * @property {CollectionPermissions} collectionPermissions - The new collection permissions. Must have the necessary permissions to update.
- * @property {boolean} updateManagerTimeline - Whether or not to update the manager timeline.
- * @property {ManagerTimeline[]} managerTimeline - The new manager timeline. Must have the necessary permissions to update.
- * @property {boolean} updateCollectionMetadataTimeline - Whether or not to update the collection metadata timeline.
- * @property {CollectionMetadataTimeline[]} collectionMetadataTimeline - The new collection metadata timeline. Must have the necessary permissions to update.
- * @property {boolean} updateBadgeMetadataTimeline - Whether or not to update the badge metadata timeline.
- * @property {BadgeMetadataTimeline[]} badgeMetadataTimeline - The new badge metadata timeline. Must have the necessary permissions to update. Note we take first-match only for badge IDs, so do not define duplicates.
- * @property {boolean} updateOffChainBalancesMetadataTimeline - Whether or not to update the off-chain balances metadata timeline.
- * @property {OffChainBalancesMetadataTimeline[]} offChainBalancesMetadataTimeline - The new off-chain balances metadata timeline. Must have the necessary permissions to update. Only used if "Off-Chain - Indexed" or "Off-Chain - Non-Indexed" balance type.
- * @property {boolean} updateCustomDataTimeline - Whether or not to update the custom data timeline.
- * @property {CustomDataTimeline[]} customDataTimeline - The new custom data timeline. Must have the necessary permissions to update.
- * @property {boolean} updateCollectionApprovals - Whether or not to update the collection approved transfers timeline.
- * @property {CollectionApproval[]} collectionApprovals - The new collection approved transfers timeline. Must have the necessary permissions to update.
- * @property {boolean} updateStandardsTimeline - Whether or not to update the standards timeline.
- * @property {StandardsTimeline[]} standardsTimeline - The new standards timeline. Must have the necessary permissions to update.
- * @property {boolean} updateIsArchivedTimeline - Whether or not to update the is archived timeline.
- * @property {IsArchivedTimeline[]} isArchivedTimeline - The new is archived timeline. Must have the necessary permissions to update.
+ * @category Transactions
  */
-export interface MsgUniversalUpdateCollection<T extends NumberType> {
-  creator: string
-  collectionId: T
-  balancesType?: string
-  defaultBalances?: UserBalanceStore<T>
-  badgesToCreate?: Balance<T>[]
-  updateCollectionPermissions?: boolean
-  collectionPermissions?: CollectionPermissions<T>
-  updateManagerTimeline?: boolean
-  managerTimeline?: ManagerTimeline<T>[]
-  updateCollectionMetadataTimeline?: boolean
-  collectionMetadataTimeline?: CollectionMetadataTimeline<T>[]
-  updateBadgeMetadataTimeline?: boolean
-  badgeMetadataTimeline?: BadgeMetadataTimeline<T>[]
-  updateOffChainBalancesMetadataTimeline?: boolean
-  offChainBalancesMetadataTimeline?: OffChainBalancesMetadataTimeline<T>[]
-  updateCustomDataTimeline?: boolean
-  customDataTimeline?: CustomDataTimeline<T>[]
-  updateCollectionApprovals?: boolean
-  collectionApprovals?: CollectionApproval<T>[]
-  updateStandardsTimeline?: boolean
-  standardsTimeline?: StandardsTimeline<T>[]
-  updateIsArchivedTimeline?: boolean
-  isArchivedTimeline?: IsArchivedTimeline<T>[]
-}
+export class MsgUniversalUpdateCollection<T extends NumberType>
+  extends BaseNumberTypeClass<MsgUniversalUpdateCollection<T>>
+  implements iMsgUniversalUpdateCollection<T>
+{
+  creator: string;
+  collectionId: T;
+  balancesType?: string;
+  defaultBalances?: UserBalanceStore<T>;
+  badgesToCreate?: BalanceArray<T>;
+  updateCollectionPermissions?: boolean;
+  collectionPermissions?: CollectionPermissions<T>;
+  updateManagerTimeline?: boolean;
+  managerTimeline?: ManagerTimeline<T>[];
+  updateCollectionMetadataTimeline?: boolean;
+  collectionMetadataTimeline?: CollectionMetadataTimeline<T>[];
+  updateBadgeMetadataTimeline?: boolean;
+  badgeMetadataTimeline?: BadgeMetadataTimeline<T>[];
+  updateOffChainBalancesMetadataTimeline?: boolean;
+  offChainBalancesMetadataTimeline?: OffChainBalancesMetadataTimeline<T>[];
+  updateCustomDataTimeline?: boolean;
+  customDataTimeline?: CustomDataTimeline<T>[];
+  updateCollectionApprovals?: boolean;
+  collectionApprovals?: CollectionApproval<T>[];
+  updateStandardsTimeline?: boolean;
+  standardsTimeline?: StandardsTimeline<T>[];
+  updateIsArchivedTimeline?: boolean;
+  isArchivedTimeline?: IsArchivedTimeline<T>[];
 
-export function convertMsgUniversalUpdateCollection<T extends NumberType, U extends NumberType>(
-  msg: MsgUniversalUpdateCollection<T>,
-  convertFunction: (item: T) => U
-): MsgUniversalUpdateCollection<U> {
-  return {
-    ...msg,
-    collectionId: convertFunction(msg.collectionId),
-
-
-    defaultBalances: msg.defaultBalances ? convertUserBalanceStore(msg.defaultBalances, convertFunction) : undefined,
-
-    badgesToCreate: msg.badgesToCreate ? msg.badgesToCreate.map(x => convertBalance(x, convertFunction)) : undefined,
-    collectionPermissions: msg.collectionPermissions ? convertCollectionPermissions(msg.collectionPermissions, convertFunction) : undefined,
-    managerTimeline: msg.managerTimeline ? msg.managerTimeline.map(x => convertManagerTimeline(x, convertFunction)) : undefined,
-    collectionMetadataTimeline: msg.collectionMetadataTimeline ? msg.collectionMetadataTimeline.map(x => convertCollectionMetadataTimeline(x, convertFunction)) : undefined,
-    badgeMetadataTimeline: msg.badgeMetadataTimeline ? msg.badgeMetadataTimeline.map(x => convertBadgeMetadataTimeline(x, convertFunction)) : undefined,
-    offChainBalancesMetadataTimeline: msg.offChainBalancesMetadataTimeline ? msg.offChainBalancesMetadataTimeline.map(x => convertOffChainBalancesMetadataTimeline(x, convertFunction)) : undefined,
-    customDataTimeline: msg.customDataTimeline ? msg.customDataTimeline.map(x => convertCustomDataTimeline(x, convertFunction)) : undefined,
-    collectionApprovals: msg.collectionApprovals ? msg.collectionApprovals.map(x => convertCollectionApproval(x, convertFunction)) : undefined,
-    standardsTimeline: msg.standardsTimeline ? msg.standardsTimeline.map(x => convertStandardsTimeline(x, convertFunction)) : undefined,
-    isArchivedTimeline: msg.isArchivedTimeline ? msg.isArchivedTimeline.map(x => convertIsArchivedTimeline(x, convertFunction)) : undefined,
-  };
-}
-
-
-export function convertFromProtoToMsgUniversalUpdateCollection(
-  protoMsg: badges.MsgUniversalUpdateCollection,
-): MsgUniversalUpdateCollection<bigint> {
-  const msg = (protoMsg.toJson({ emitDefaultValues: true }) as any) as MsgUniversalUpdateCollection<string>;
-
-  return {
-    ...msg,
-    creator: msg.creator,
-    collectionId: BigInt(msg.collectionId),
-    balancesType: msg.balancesType,
-    defaultBalances: msg.defaultBalances ? convertUserBalanceStore(msg.defaultBalances, BigInt) : undefined,
-
-    badgesToCreate: msg.badgesToCreate?.map(x => convertBalance(x, BigInt)),
-    collectionPermissions: msg.collectionPermissions ? convertCollectionPermissions(msg.collectionPermissions, BigInt) : undefined,
-    managerTimeline: msg.managerTimeline?.map(x => convertManagerTimeline(x, BigInt)),
-    collectionMetadataTimeline: msg.collectionMetadataTimeline?.map(x => convertCollectionMetadataTimeline(x, BigInt)),
-    badgeMetadataTimeline: msg.badgeMetadataTimeline?.map(x => convertBadgeMetadataTimeline(x, BigInt)),
-    offChainBalancesMetadataTimeline: msg.offChainBalancesMetadataTimeline?.map(x => convertOffChainBalancesMetadataTimeline(x, BigInt)),
-    customDataTimeline: msg.customDataTimeline?.map(x => convertCustomDataTimeline(x, BigInt)),
-    // inheritedCollectionId: BigInt(msg.inheritedCollectionId),
-    collectionApprovals: msg.collectionApprovals?.map(x => convertCollectionApproval(x, BigInt)),
-    standardsTimeline: msg.standardsTimeline?.map(x => convertStandardsTimeline(x, BigInt)),
-    isArchivedTimeline: msg.isArchivedTimeline?.map(x => convertIsArchivedTimeline(x, BigInt)),
-
-    updateCollectionPermissions: msg.updateCollectionPermissions,
-    updateManagerTimeline: msg.updateManagerTimeline,
-    updateCollectionMetadataTimeline: msg.updateCollectionMetadataTimeline,
-    updateBadgeMetadataTimeline: msg.updateBadgeMetadataTimeline,
-    updateOffChainBalancesMetadataTimeline: msg.updateOffChainBalancesMetadataTimeline,
-    updateCustomDataTimeline: msg.updateCustomDataTimeline,
-    updateCollectionApprovals: msg.updateCollectionApprovals,
-    updateStandardsTimeline: msg.updateStandardsTimeline,
-    updateIsArchivedTimeline: msg.updateIsArchivedTimeline,
+  constructor(msg: iMsgUniversalUpdateCollection<T>) {
+    super();
+    this.creator = msg.creator;
+    this.collectionId = msg.collectionId;
+    this.balancesType = msg.balancesType;
+    this.defaultBalances = msg.defaultBalances ? new UserBalanceStore(msg.defaultBalances) : undefined;
+    this.badgesToCreate = msg.badgesToCreate ? BalanceArray.From(msg.badgesToCreate) : undefined;
+    this.updateCollectionPermissions = msg.updateCollectionPermissions;
+    this.collectionPermissions = msg.collectionPermissions ? new CollectionPermissions(msg.collectionPermissions) : undefined;
+    this.updateManagerTimeline = msg.updateManagerTimeline;
+    this.managerTimeline = msg.managerTimeline?.map((x) => new ManagerTimeline(x));
+    this.updateCollectionMetadataTimeline = msg.updateCollectionMetadataTimeline;
+    this.collectionMetadataTimeline = msg.collectionMetadataTimeline?.map((x) => new CollectionMetadataTimeline(x));
+    this.updateBadgeMetadataTimeline = msg.updateBadgeMetadataTimeline;
+    this.badgeMetadataTimeline = msg.badgeMetadataTimeline?.map((x) => new BadgeMetadataTimeline(x));
+    this.updateOffChainBalancesMetadataTimeline = msg.updateOffChainBalancesMetadataTimeline;
+    this.offChainBalancesMetadataTimeline = msg.offChainBalancesMetadataTimeline?.map((x) => new OffChainBalancesMetadataTimeline(x));
+    this.updateCustomDataTimeline = msg.updateCustomDataTimeline;
+    this.customDataTimeline = msg.customDataTimeline?.map((x) => new CustomDataTimeline(x));
+    this.updateCollectionApprovals = msg.updateCollectionApprovals;
+    this.collectionApprovals = msg.collectionApprovals?.map((x) => new CollectionApproval(x));
+    this.updateStandardsTimeline = msg.updateStandardsTimeline;
+    this.standardsTimeline = msg.standardsTimeline?.map((x) => new StandardsTimeline(x));
+    this.updateIsArchivedTimeline = msg.updateIsArchivedTimeline;
+    this.isArchivedTimeline = msg.isArchivedTimeline?.map((x) => new IsArchivedTimeline(x));
   }
-}
 
-export function createTxMsgUniversalUpdateCollection<T extends NumberType>(
-  chain: Chain,
-  sender: Sender,
-  fee: Fee,
-  memo: string,
-  params: MsgUniversalUpdateCollection<T>,
-) {
-  const msgCosmos = new badges.MsgUniversalUpdateCollection(convertMsgUniversalUpdateCollection(params, String))
-  return createTransactionPayload({ chain, sender, fee, memo, }, msgCosmos)
+  getNumberFieldNames(): string[] {
+    return ['collectionId'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): MsgUniversalUpdateCollection<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as MsgUniversalUpdateCollection<U>;
+  }
+
+  toProto(): badges.MsgUniversalUpdateCollection {
+    return new badges.MsgUniversalUpdateCollection(this.convert(Stringify));
+  }
+
+  static fromJson<U extends NumberType>(
+    jsonValue: JsonValue,
+    convertFunction: (item: NumberType) => U,
+    options?: Partial<JsonReadOptions>
+  ): MsgUniversalUpdateCollection<U> {
+    return MsgUniversalUpdateCollection.fromProto(badges.MsgUniversalUpdateCollection.fromJson(jsonValue, options), convertFunction);
+  }
+
+  static fromJsonString<U extends NumberType>(
+    jsonString: string,
+    convertFunction: (item: NumberType) => U,
+    options?: Partial<JsonReadOptions>
+  ): MsgUniversalUpdateCollection<U> {
+    return MsgUniversalUpdateCollection.fromProto(badges.MsgUniversalUpdateCollection.fromJsonString(jsonString, options), convertFunction);
+  }
+
+  static fromProto<U extends NumberType>(
+    protoMsg: badges.MsgUniversalUpdateCollection,
+    convertFunction: (item: NumberType) => U
+  ): MsgUniversalUpdateCollection<U> {
+    return new MsgUniversalUpdateCollection({
+      creator: protoMsg.creator,
+      collectionId: convertFunction(protoMsg.collectionId),
+      balancesType: protoMsg.balancesType,
+      defaultBalances: protoMsg.defaultBalances ? UserBalanceStore.fromProto(protoMsg.defaultBalances, convertFunction) : undefined,
+      badgesToCreate: protoMsg.badgesToCreate ? protoMsg.badgesToCreate.map((x) => Balance.fromProto(x, convertFunction)) : undefined,
+      updateCollectionPermissions: protoMsg.updateCollectionPermissions,
+      collectionPermissions: protoMsg.collectionPermissions
+        ? CollectionPermissions.fromProto(protoMsg.collectionPermissions, convertFunction)
+        : undefined,
+      updateManagerTimeline: protoMsg.updateManagerTimeline,
+      managerTimeline: protoMsg.managerTimeline ? protoMsg.managerTimeline.map((x) => ManagerTimeline.fromProto(x, convertFunction)) : undefined,
+      updateCollectionMetadataTimeline: protoMsg.updateCollectionMetadataTimeline,
+      collectionMetadataTimeline: protoMsg.collectionMetadataTimeline
+        ? protoMsg.collectionMetadataTimeline.map((x) => CollectionMetadataTimeline.fromProto(x, convertFunction))
+        : undefined,
+      updateBadgeMetadataTimeline: protoMsg.updateBadgeMetadataTimeline,
+      badgeMetadataTimeline: protoMsg.badgeMetadataTimeline
+        ? protoMsg.badgeMetadataTimeline.map((x) => BadgeMetadataTimeline.fromProto(x, convertFunction))
+        : undefined,
+      updateOffChainBalancesMetadataTimeline: protoMsg.updateOffChainBalancesMetadataTimeline,
+      offChainBalancesMetadataTimeline: protoMsg.offChainBalancesMetadataTimeline
+        ? protoMsg.offChainBalancesMetadataTimeline.map((x) => OffChainBalancesMetadataTimeline.fromProto(x, convertFunction))
+        : undefined,
+      updateCustomDataTimeline: protoMsg.updateCustomDataTimeline,
+      customDataTimeline: protoMsg.customDataTimeline
+        ? protoMsg.customDataTimeline.map((x) => CustomDataTimeline.fromProto(x, convertFunction))
+        : undefined,
+      updateCollectionApprovals: protoMsg.updateCollectionApprovals,
+      collectionApprovals: protoMsg.collectionApprovals
+        ? protoMsg.collectionApprovals.map((x) => CollectionApproval.fromProto(x, convertFunction))
+        : undefined,
+      updateStandardsTimeline: protoMsg.updateStandardsTimeline,
+      standardsTimeline: protoMsg.standardsTimeline
+        ? protoMsg.standardsTimeline.map((x) => StandardsTimeline.fromProto(x, convertFunction))
+        : undefined,
+      updateIsArchivedTimeline: protoMsg.updateIsArchivedTimeline,
+      isArchivedTimeline: protoMsg.isArchivedTimeline
+        ? protoMsg.isArchivedTimeline.map((x) => IsArchivedTimeline.fromProto(x, convertFunction))
+        : undefined
+    });
+  }
 }

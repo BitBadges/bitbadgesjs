@@ -3,8 +3,8 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3, protoInt64 } from "@bufbuild/protobuf";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3, protoInt64 } from '@bufbuild/protobuf';
 
 /**
  * @generated from message wasmx.Params
@@ -44,12 +44,12 @@ export class Params extends Message<Params> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "wasmx.Params";
+  static readonly typeName = 'wasmx.Params';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "is_execution_enabled", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 2, name: "max_begin_block_total_gas", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
-    { no: 3, name: "max_contract_gas_limit", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
-    { no: 4, name: "min_gas_price", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
+    { no: 1, name: 'is_execution_enabled', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 2, name: 'max_begin_block_total_gas', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ },
+    { no: 3, name: 'max_contract_gas_limit', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ },
+    { no: 4, name: 'min_gas_price', kind: 'scalar', T: 4 /* ScalarType.UINT64 */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Params {
@@ -68,4 +68,3 @@ export class Params extends Message<Params> {
     return proto3.util.equals(Params, a, b);
   }
 }
-

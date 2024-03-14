@@ -3,8 +3,8 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3 } from '@bufbuild/protobuf';
 
 /**
  * Config is the config object of the x/auth/tx package.
@@ -34,10 +34,10 @@ export class Config extends Message<Config> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.tx.config.v1.Config";
+  static readonly typeName = 'cosmos.tx.config.v1.Config';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "skip_ante_handler", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 2, name: "skip_post_handler", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 1, name: 'skip_ante_handler', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 2, name: 'skip_post_handler', kind: 'scalar', T: 8 /* ScalarType.BOOL */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Config {
@@ -56,4 +56,3 @@ export class Config extends Message<Config> {
     return proto3.util.equals(Config, a, b);
   }
 }
-

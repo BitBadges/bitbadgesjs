@@ -5,8 +5,8 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Any, Message, proto3, Timestamp } from "@bufbuild/protobuf";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Any, Message, proto3, Timestamp } from '@bufbuild/protobuf';
 
 /**
  * GenericAuthorization gives the grantee unrestricted permissions to execute
@@ -20,7 +20,7 @@ export class GenericAuthorization extends Message<GenericAuthorization> {
    *
    * @generated from field: string msg = 1;
    */
-  msg = "";
+  msg = '';
 
   constructor(data?: PartialMessage<GenericAuthorization>) {
     super();
@@ -28,10 +28,8 @@ export class GenericAuthorization extends Message<GenericAuthorization> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.authz.v1beta1.GenericAuthorization";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "msg", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-  ]);
+  static readonly typeName = 'cosmos.authz.v1beta1.GenericAuthorization';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'msg', kind: 'scalar', T: 9 /* ScalarType.STRING */ }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GenericAuthorization {
     return new GenericAuthorization().fromBinary(bytes, options);
@@ -45,7 +43,10 @@ export class GenericAuthorization extends Message<GenericAuthorization> {
     return new GenericAuthorization().fromJsonString(jsonString, options);
   }
 
-  static equals(a: GenericAuthorization | PlainMessage<GenericAuthorization> | undefined, b: GenericAuthorization | PlainMessage<GenericAuthorization> | undefined): boolean {
+  static equals(
+    a: GenericAuthorization | PlainMessage<GenericAuthorization> | undefined,
+    b: GenericAuthorization | PlainMessage<GenericAuthorization> | undefined
+  ): boolean {
     return proto3.util.equals(GenericAuthorization, a, b);
   }
 }
@@ -77,10 +78,10 @@ export class Grant extends Message<Grant> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.authz.v1beta1.Grant";
+  static readonly typeName = 'cosmos.authz.v1beta1.Grant';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "authorization", kind: "message", T: Any },
-    { no: 2, name: "expiration", kind: "message", T: Timestamp },
+    { no: 1, name: 'authorization', kind: 'message', T: Any },
+    { no: 2, name: 'expiration', kind: 'message', T: Timestamp }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Grant {
@@ -110,12 +111,12 @@ export class GrantAuthorization extends Message<GrantAuthorization> {
   /**
    * @generated from field: string granter = 1;
    */
-  granter = "";
+  granter = '';
 
   /**
    * @generated from field: string grantee = 2;
    */
-  grantee = "";
+  grantee = '';
 
   /**
    * @generated from field: google.protobuf.Any authorization = 3;
@@ -133,12 +134,12 @@ export class GrantAuthorization extends Message<GrantAuthorization> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.authz.v1beta1.GrantAuthorization";
+  static readonly typeName = 'cosmos.authz.v1beta1.GrantAuthorization';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "granter", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "grantee", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "authorization", kind: "message", T: Any },
-    { no: 4, name: "expiration", kind: "message", T: Timestamp },
+    { no: 1, name: 'granter', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'grantee', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'authorization', kind: 'message', T: Any },
+    { no: 4, name: 'expiration', kind: 'message', T: Timestamp }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GrantAuthorization {
@@ -153,7 +154,10 @@ export class GrantAuthorization extends Message<GrantAuthorization> {
     return new GrantAuthorization().fromJsonString(jsonString, options);
   }
 
-  static equals(a: GrantAuthorization | PlainMessage<GrantAuthorization> | undefined, b: GrantAuthorization | PlainMessage<GrantAuthorization> | undefined): boolean {
+  static equals(
+    a: GrantAuthorization | PlainMessage<GrantAuthorization> | undefined,
+    b: GrantAuthorization | PlainMessage<GrantAuthorization> | undefined
+  ): boolean {
     return proto3.util.equals(GrantAuthorization, a, b);
   }
 }
@@ -177,9 +181,9 @@ export class GrantQueueItem extends Message<GrantQueueItem> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.authz.v1beta1.GrantQueueItem";
+  static readonly typeName = 'cosmos.authz.v1beta1.GrantQueueItem';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "msg_type_urls", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 1, name: 'msg_type_urls', kind: 'scalar', T: 9 /* ScalarType.STRING */, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GrantQueueItem {
@@ -198,4 +202,3 @@ export class GrantQueueItem extends Message<GrantQueueItem> {
     return proto3.util.equals(GrantQueueItem, a, b);
   }
 }
-

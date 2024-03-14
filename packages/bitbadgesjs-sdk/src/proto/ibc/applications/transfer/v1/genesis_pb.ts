@@ -3,9 +3,9 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
-import { DenomTrace, Params } from "./transfer_pb.js";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3 } from '@bufbuild/protobuf';
+import { DenomTrace, Params } from './transfer_pb.js';
 
 /**
  * GenesisState defines the ibc-transfer genesis state
@@ -16,7 +16,7 @@ export class GenesisState extends Message<GenesisState> {
   /**
    * @generated from field: string port_id = 1;
    */
-  portId = "";
+  portId = '';
 
   /**
    * @generated from field: repeated ibc.applications.transfer.v1.DenomTrace denom_traces = 2;
@@ -34,11 +34,11 @@ export class GenesisState extends Message<GenesisState> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ibc.applications.transfer.v1.GenesisState";
+  static readonly typeName = 'ibc.applications.transfer.v1.GenesisState';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "port_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "denom_traces", kind: "message", T: DenomTrace, repeated: true },
-    { no: 3, name: "params", kind: "message", T: Params },
+    { no: 1, name: 'port_id', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'denom_traces', kind: 'message', T: DenomTrace, repeated: true },
+    { no: 3, name: 'params', kind: 'message', T: Params }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GenesisState {
@@ -57,4 +57,3 @@ export class GenesisState extends Message<GenesisState> {
     return proto3.util.equals(GenesisState, a, b);
   }
 }
-

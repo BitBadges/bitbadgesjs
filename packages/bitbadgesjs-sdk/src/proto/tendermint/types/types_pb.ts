@@ -3,11 +3,11 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3, protoInt64, Timestamp } from "@bufbuild/protobuf";
-import { Proof } from "../crypto/proof_pb.js";
-import { Consensus } from "../version/types_pb.js";
-import { ValidatorSet } from "./validator_pb.js";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3, protoInt64, Timestamp } from '@bufbuild/protobuf';
+import { Proof } from '../crypto/proof_pb.js';
+import { Consensus } from '../version/types_pb.js';
+import { ValidatorSet } from './validator_pb.js';
 
 /**
  * BlockIdFlag indicates which BlcokID the signature is for
@@ -33,14 +33,14 @@ export enum BlockIDFlag {
   /**
    * @generated from enum value: BLOCK_ID_FLAG_NIL = 3;
    */
-  BLOCK_ID_FLAG_NIL = 3,
+  BLOCK_ID_FLAG_NIL = 3
 }
 // Retrieve enum metadata with: proto3.getEnumType(BlockIDFlag)
-proto3.util.setEnumType(BlockIDFlag, "tendermint.types.BlockIDFlag", [
-  { no: 0, name: "BLOCK_ID_FLAG_UNKNOWN" },
-  { no: 1, name: "BLOCK_ID_FLAG_ABSENT" },
-  { no: 2, name: "BLOCK_ID_FLAG_COMMIT" },
-  { no: 3, name: "BLOCK_ID_FLAG_NIL" },
+proto3.util.setEnumType(BlockIDFlag, 'tendermint.types.BlockIDFlag', [
+  { no: 0, name: 'BLOCK_ID_FLAG_UNKNOWN' },
+  { no: 1, name: 'BLOCK_ID_FLAG_ABSENT' },
+  { no: 2, name: 'BLOCK_ID_FLAG_COMMIT' },
+  { no: 3, name: 'BLOCK_ID_FLAG_NIL' }
 ]);
 
 /**
@@ -71,14 +71,14 @@ export enum SignedMsgType {
    *
    * @generated from enum value: SIGNED_MSG_TYPE_PROPOSAL = 32;
    */
-  PROPOSAL = 32,
+  PROPOSAL = 32
 }
 // Retrieve enum metadata with: proto3.getEnumType(SignedMsgType)
-proto3.util.setEnumType(SignedMsgType, "tendermint.types.SignedMsgType", [
-  { no: 0, name: "SIGNED_MSG_TYPE_UNKNOWN" },
-  { no: 1, name: "SIGNED_MSG_TYPE_PREVOTE" },
-  { no: 2, name: "SIGNED_MSG_TYPE_PRECOMMIT" },
-  { no: 32, name: "SIGNED_MSG_TYPE_PROPOSAL" },
+proto3.util.setEnumType(SignedMsgType, 'tendermint.types.SignedMsgType', [
+  { no: 0, name: 'SIGNED_MSG_TYPE_UNKNOWN' },
+  { no: 1, name: 'SIGNED_MSG_TYPE_PREVOTE' },
+  { no: 2, name: 'SIGNED_MSG_TYPE_PRECOMMIT' },
+  { no: 32, name: 'SIGNED_MSG_TYPE_PROPOSAL' }
 ]);
 
 /**
@@ -103,10 +103,10 @@ export class PartSetHeader extends Message<PartSetHeader> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.types.PartSetHeader";
+  static readonly typeName = 'tendermint.types.PartSetHeader';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "total", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 2, name: "hash", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
+    { no: 1, name: 'total', kind: 'scalar', T: 13 /* ScalarType.UINT32 */ },
+    { no: 2, name: 'hash', kind: 'scalar', T: 12 /* ScalarType.BYTES */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PartSetHeader {
@@ -151,11 +151,11 @@ export class Part extends Message<Part> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.types.Part";
+  static readonly typeName = 'tendermint.types.Part';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "index", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 2, name: "bytes", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 3, name: "proof", kind: "message", T: Proof },
+    { no: 1, name: 'index', kind: 'scalar', T: 13 /* ScalarType.UINT32 */ },
+    { no: 2, name: 'bytes', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 3, name: 'proof', kind: 'message', T: Proof }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Part {
@@ -197,10 +197,10 @@ export class BlockID extends Message<BlockID> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.types.BlockID";
+  static readonly typeName = 'tendermint.types.BlockID';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "hash", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 2, name: "part_set_header", kind: "message", T: PartSetHeader },
+    { no: 1, name: 'hash', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 2, name: 'part_set_header', kind: 'message', T: PartSetHeader }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BlockID {
@@ -236,7 +236,7 @@ export class Header extends Message<Header> {
   /**
    * @generated from field: string chain_id = 2;
    */
-  chainId = "";
+  chainId = '';
 
   /**
    * @generated from field: int64 height = 3;
@@ -330,22 +330,22 @@ export class Header extends Message<Header> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.types.Header";
+  static readonly typeName = 'tendermint.types.Header';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "version", kind: "message", T: Consensus },
-    { no: 2, name: "chain_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "height", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
-    { no: 4, name: "time", kind: "message", T: Timestamp },
-    { no: 5, name: "last_block_id", kind: "message", T: BlockID },
-    { no: 6, name: "last_commit_hash", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 7, name: "data_hash", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 8, name: "validators_hash", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 9, name: "next_validators_hash", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 10, name: "consensus_hash", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 11, name: "app_hash", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 12, name: "last_results_hash", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 13, name: "evidence_hash", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 14, name: "proposer_address", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
+    { no: 1, name: 'version', kind: 'message', T: Consensus },
+    { no: 2, name: 'chain_id', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'height', kind: 'scalar', T: 3 /* ScalarType.INT64 */ },
+    { no: 4, name: 'time', kind: 'message', T: Timestamp },
+    { no: 5, name: 'last_block_id', kind: 'message', T: BlockID },
+    { no: 6, name: 'last_commit_hash', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 7, name: 'data_hash', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 8, name: 'validators_hash', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 9, name: 'next_validators_hash', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 10, name: 'consensus_hash', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 11, name: 'app_hash', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 12, name: 'last_results_hash', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 13, name: 'evidence_hash', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 14, name: 'proposer_address', kind: 'scalar', T: 12 /* ScalarType.BYTES */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Header {
@@ -386,9 +386,9 @@ export class Data extends Message<Data> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.types.Data";
+  static readonly typeName = 'tendermint.types.Data';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "txs", kind: "scalar", T: 12 /* ScalarType.BYTES */, repeated: true },
+    { no: 1, name: 'txs', kind: 'scalar', T: 12 /* ScalarType.BYTES */, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Data {
@@ -463,16 +463,16 @@ export class Vote extends Message<Vote> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.types.Vote";
+  static readonly typeName = 'tendermint.types.Vote';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "type", kind: "enum", T: proto3.getEnumType(SignedMsgType) },
-    { no: 2, name: "height", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
-    { no: 3, name: "round", kind: "scalar", T: 5 /* ScalarType.INT32 */ },
-    { no: 4, name: "block_id", kind: "message", T: BlockID },
-    { no: 5, name: "timestamp", kind: "message", T: Timestamp },
-    { no: 6, name: "validator_address", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 7, name: "validator_index", kind: "scalar", T: 5 /* ScalarType.INT32 */ },
-    { no: 8, name: "signature", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
+    { no: 1, name: 'type', kind: 'enum', T: proto3.getEnumType(SignedMsgType) },
+    { no: 2, name: 'height', kind: 'scalar', T: 3 /* ScalarType.INT64 */ },
+    { no: 3, name: 'round', kind: 'scalar', T: 5 /* ScalarType.INT32 */ },
+    { no: 4, name: 'block_id', kind: 'message', T: BlockID },
+    { no: 5, name: 'timestamp', kind: 'message', T: Timestamp },
+    { no: 6, name: 'validator_address', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 7, name: 'validator_index', kind: 'scalar', T: 5 /* ScalarType.INT32 */ },
+    { no: 8, name: 'signature', kind: 'scalar', T: 12 /* ScalarType.BYTES */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Vote {
@@ -524,12 +524,12 @@ export class Commit extends Message<Commit> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.types.Commit";
+  static readonly typeName = 'tendermint.types.Commit';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "height", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
-    { no: 2, name: "round", kind: "scalar", T: 5 /* ScalarType.INT32 */ },
-    { no: 3, name: "block_id", kind: "message", T: BlockID },
-    { no: 4, name: "signatures", kind: "message", T: CommitSig, repeated: true },
+    { no: 1, name: 'height', kind: 'scalar', T: 3 /* ScalarType.INT64 */ },
+    { no: 2, name: 'round', kind: 'scalar', T: 5 /* ScalarType.INT32 */ },
+    { no: 3, name: 'block_id', kind: 'message', T: BlockID },
+    { no: 4, name: 'signatures', kind: 'message', T: CommitSig, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Commit {
@@ -581,12 +581,12 @@ export class CommitSig extends Message<CommitSig> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.types.CommitSig";
+  static readonly typeName = 'tendermint.types.CommitSig';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "block_id_flag", kind: "enum", T: proto3.getEnumType(BlockIDFlag) },
-    { no: 2, name: "validator_address", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 3, name: "timestamp", kind: "message", T: Timestamp },
-    { no: 4, name: "signature", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
+    { no: 1, name: 'block_id_flag', kind: 'enum', T: proto3.getEnumType(BlockIDFlag) },
+    { no: 2, name: 'validator_address', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 3, name: 'timestamp', kind: 'message', T: Timestamp },
+    { no: 4, name: 'signature', kind: 'scalar', T: 12 /* ScalarType.BYTES */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CommitSig {
@@ -651,15 +651,15 @@ export class Proposal extends Message<Proposal> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.types.Proposal";
+  static readonly typeName = 'tendermint.types.Proposal';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "type", kind: "enum", T: proto3.getEnumType(SignedMsgType) },
-    { no: 2, name: "height", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
-    { no: 3, name: "round", kind: "scalar", T: 5 /* ScalarType.INT32 */ },
-    { no: 4, name: "pol_round", kind: "scalar", T: 5 /* ScalarType.INT32 */ },
-    { no: 5, name: "block_id", kind: "message", T: BlockID },
-    { no: 6, name: "timestamp", kind: "message", T: Timestamp },
-    { no: 7, name: "signature", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
+    { no: 1, name: 'type', kind: 'enum', T: proto3.getEnumType(SignedMsgType) },
+    { no: 2, name: 'height', kind: 'scalar', T: 3 /* ScalarType.INT64 */ },
+    { no: 3, name: 'round', kind: 'scalar', T: 5 /* ScalarType.INT32 */ },
+    { no: 4, name: 'pol_round', kind: 'scalar', T: 5 /* ScalarType.INT32 */ },
+    { no: 5, name: 'block_id', kind: 'message', T: BlockID },
+    { no: 6, name: 'timestamp', kind: 'message', T: Timestamp },
+    { no: 7, name: 'signature', kind: 'scalar', T: 12 /* ScalarType.BYTES */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Proposal {
@@ -699,10 +699,10 @@ export class SignedHeader extends Message<SignedHeader> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.types.SignedHeader";
+  static readonly typeName = 'tendermint.types.SignedHeader';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "header", kind: "message", T: Header },
-    { no: 2, name: "commit", kind: "message", T: Commit },
+    { no: 1, name: 'header', kind: 'message', T: Header },
+    { no: 2, name: 'commit', kind: 'message', T: Commit }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SignedHeader {
@@ -742,10 +742,10 @@ export class LightBlock extends Message<LightBlock> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.types.LightBlock";
+  static readonly typeName = 'tendermint.types.LightBlock';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "signed_header", kind: "message", T: SignedHeader },
-    { no: 2, name: "validator_set", kind: "message", T: ValidatorSet },
+    { no: 1, name: 'signed_header', kind: 'message', T: SignedHeader },
+    { no: 2, name: 'validator_set', kind: 'message', T: ValidatorSet }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): LightBlock {
@@ -795,12 +795,12 @@ export class BlockMeta extends Message<BlockMeta> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.types.BlockMeta";
+  static readonly typeName = 'tendermint.types.BlockMeta';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "block_id", kind: "message", T: BlockID },
-    { no: 2, name: "block_size", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
-    { no: 3, name: "header", kind: "message", T: Header },
-    { no: 4, name: "num_txs", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
+    { no: 1, name: 'block_id', kind: 'message', T: BlockID },
+    { no: 2, name: 'block_size', kind: 'scalar', T: 3 /* ScalarType.INT64 */ },
+    { no: 3, name: 'header', kind: 'message', T: Header },
+    { no: 4, name: 'num_txs', kind: 'scalar', T: 3 /* ScalarType.INT64 */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BlockMeta {
@@ -847,11 +847,11 @@ export class TxProof extends Message<TxProof> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.types.TxProof";
+  static readonly typeName = 'tendermint.types.TxProof';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "root_hash", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 2, name: "data", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 3, name: "proof", kind: "message", T: Proof },
+    { no: 1, name: 'root_hash', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 2, name: 'data', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 3, name: 'proof', kind: 'message', T: Proof }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): TxProof {
@@ -870,4 +870,3 @@ export class TxProof extends Message<TxProof> {
     return proto3.util.equals(TxProof, a, b);
   }
 }
-

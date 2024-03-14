@@ -1,4 +1,4 @@
-import { SupportedChain } from "../../utils"
+import type { SupportedChain } from '@/common/types';
 
 /**
  * EI712ToSign represents a signable EIP-712 payload that can be signed using MetaMask or Keplr.
@@ -7,18 +7,20 @@ import { SupportedChain } from "../../utils"
  * Evmos uses the EIP-712 protocol to wrap Cosmos SDK Transactions for Ethereum signing clients.
  * EIP-712 payload signatures can be used interchangeably with standard Cosmos SDK signatures.
  * Learn more about the {@link https://eips.ethereum.org/EIPS/eip-712 | EIP-712 Standard}
+ *
+ * @category Transactions
  */
 export interface EIP712ToSign {
-  types: object
-  primaryType: string
+  types: object;
+  primaryType: string;
   domain: {
-    name: string
-    version: string
-    chainId: number
-    verifyingContract: string
-    salt: string
-  }
-  message: object
+    name: string;
+    version: string;
+    chainId: number;
+    verifyingContract: string;
+    salt: string;
+  };
+  message: object;
 }
 
 /**
@@ -28,11 +30,13 @@ export interface EIP712ToSign {
  * Learn more about fees in Evmos from the
  * {@link https://docs.cosmos.network/main/basics/gas-fees | Cosmos SDK Fee Docs}
  * and the {@link https://docs.evmos.org/protocol/concepts/gas-and-fees | Evmos Gas and Fee Docs}
+ *
+ * @category Transactions
  */
 export interface Fee {
-  amount: string
-  denom: string
-  gas: string
+  amount: string;
+  denom: string;
+  gas: string;
 }
 
 /**
@@ -41,12 +45,14 @@ export interface Fee {
  * @remarks
  * A sender object is used to populate the Cosmos SDK's SignerInfo field,
  * which is used to declare transaction signers.
+ *
+ * @category Transactions
  */
 export interface Sender {
-  accountAddress: string
-  sequence: number
-  accountNumber: number
-  pubkey: string
+  accountAddress: string;
+  sequence: number;
+  accountNumber: number;
+  pubkey: string;
 }
 
 /**
@@ -55,9 +61,11 @@ export interface Sender {
  * @remarks
  * chainId corresponds to a numerical Ethereum ChainID (e.g. 9001)
  * cosmosChainId corresponds to a Cosmos SDK string ChainID (e.g. 'evmos_9001-2'
+ *
+ * @category Transactions
  */
 export interface Chain {
-  chainId: number
-  cosmosChainId: string
-  chain: SupportedChain
+  chainId: number;
+  cosmosChainId: string;
+  chain: SupportedChain;
 }

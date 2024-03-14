@@ -33,8 +33,18 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, IMessageTypeRegistry, JsonReadOptions, JsonValue, JsonWriteOptions, MessageType, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
+import type {
+  BinaryReadOptions,
+  FieldList,
+  IMessageTypeRegistry,
+  JsonReadOptions,
+  JsonValue,
+  JsonWriteOptions,
+  MessageType,
+  PartialMessage,
+  PlainMessage
+} from '@bufbuild/protobuf';
+import { Message, proto3 } from '@bufbuild/protobuf';
 
 /**
  * `Any` contains an arbitrary serialized protocol buffer message along with a
@@ -153,7 +163,7 @@ export class Any extends Message<Any> {
    *
    * @generated from field: string type_url = 1;
    */
-  typeUrl = "";
+  typeUrl = '';
 
   /**
    * Must be a valid serialized protocol buffer of the above specified type.
@@ -168,7 +178,7 @@ export class Any extends Message<Any> {
   }
 
   override toJson(options?: Partial<JsonWriteOptions>): JsonValue {
-    if (this.typeUrl === "") {
+    if (this.typeUrl === '') {
       return {};
     }
     const typeName = this.typeUrlToName(this.typeUrl);
@@ -178,34 +188,37 @@ export class Any extends Message<Any> {
     }
     const message = messageType.fromBinary(this.value);
     let json = message.toJson(options);
-    if (typeName.startsWith("google.protobuf.") || (json === null || Array.isArray(json) || typeof json !== "object")) {
-      json = {value: json};
+    if (typeName.startsWith('google.protobuf.') || json === null || Array.isArray(json) || typeof json !== 'object') {
+      json = { value: json };
     }
-    json["@type"] = this.typeUrl;
+    json['@type'] = this.typeUrl;
     return json;
   }
 
   override fromJson(json: JsonValue, options?: Partial<JsonReadOptions>): this {
-    if (json === null || Array.isArray(json) || typeof json != "object") {
-      throw new Error(`cannot decode message google.protobuf.Any from JSON: expected object but got ${json === null ? "null" : Array.isArray(json) ? "array" : typeof json}`);
+    if (json === null || Array.isArray(json) || typeof json != 'object') {
+      throw new Error(
+        `cannot decode message google.protobuf.Any from JSON: expected object but got ${json === null ? 'null' : Array.isArray(json) ? 'array' : typeof json}`
+      );
     }
     if (Object.keys(json).length == 0) {
       return this;
     }
-    const typeUrl = json["@type"];
-    if (typeof typeUrl != "string" || typeUrl == "") {
+    const typeUrl = json['@type'];
+    if (typeof typeUrl != 'string' || typeUrl == '') {
       throw new Error(`cannot decode message google.protobuf.Any from JSON: "@type" is empty`);
     }
-    const typeName = this.typeUrlToName(typeUrl), messageType = options?.typeRegistry?.findMessage(typeName);
+    const typeName = this.typeUrlToName(typeUrl),
+      messageType = options?.typeRegistry?.findMessage(typeName);
     if (!messageType) {
       throw new Error(`cannot decode message google.protobuf.Any from JSON: ${typeUrl} is not in the type registry`);
     }
     let message;
-    if (typeName.startsWith("google.protobuf.") &&  Object.prototype.hasOwnProperty.call(json, "value")) {
-      message = messageType.fromJson(json["value"], options);
+    if (typeName.startsWith('google.protobuf.') && Object.prototype.hasOwnProperty.call(json, 'value')) {
+      message = messageType.fromJson(json['value'], options);
     } else {
       const copy = Object.assign({}, json);
-      delete copy["@type"];
+      delete copy['@type'];
       message = messageType.fromJson(copy, options);
     }
     this.packFrom(message);
@@ -226,7 +239,7 @@ export class Any extends Message<Any> {
   }
 
   unpack(registry: IMessageTypeRegistry): Message | undefined {
-    if (this.typeUrl === "") {
+    if (this.typeUrl === '') {
       return undefined;
     }
     const messageType = registry.findMessage(this.typeUrlToName(this.typeUrl));
@@ -243,9 +256,9 @@ export class Any extends Message<Any> {
     const name = this.typeUrlToName(this.typeUrl);
     let typeName = '';
     if (typeof type === 'string') {
-        typeName = type;
+      typeName = type;
     } else {
-        typeName = type.typeName;
+      typeName = type.typeName;
     }
     return name === typeName;
   }
@@ -258,7 +271,7 @@ export class Any extends Message<Any> {
     if (!url.length) {
       throw new Error(`invalid type url: ${url}`);
     }
-    const slash = url.lastIndexOf("/");
+    const slash = url.lastIndexOf('/');
     const name = slash > 0 ? url.substring(slash + 1) : url;
     if (!name.length) {
       throw new Error(`invalid type url: ${url}`);
@@ -267,10 +280,10 @@ export class Any extends Message<Any> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "google.protobuf.Any";
+  static readonly typeName = 'google.protobuf.Any';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "type_url", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "value", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
+    { no: 1, name: 'type_url', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'value', kind: 'scalar', T: 12 /* ScalarType.BYTES */ }
   ]);
 
   static pack(message: Message): Any {
@@ -295,4 +308,3 @@ export class Any extends Message<Any> {
     return proto3.util.equals(Any, a, b);
   }
 }
-

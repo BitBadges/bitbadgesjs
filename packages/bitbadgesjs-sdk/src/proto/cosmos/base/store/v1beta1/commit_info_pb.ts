@@ -3,8 +3,8 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3, protoInt64, Timestamp } from "@bufbuild/protobuf";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3, protoInt64, Timestamp } from '@bufbuild/protobuf';
 
 /**
  * CommitInfo defines commit information used by the multi-store when committing
@@ -34,11 +34,11 @@ export class CommitInfo extends Message<CommitInfo> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.base.store.v1beta1.CommitInfo";
+  static readonly typeName = 'cosmos.base.store.v1beta1.CommitInfo';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "version", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
-    { no: 2, name: "store_infos", kind: "message", T: StoreInfo, repeated: true },
-    { no: 3, name: "timestamp", kind: "message", T: Timestamp },
+    { no: 1, name: 'version', kind: 'scalar', T: 3 /* ScalarType.INT64 */ },
+    { no: 2, name: 'store_infos', kind: 'message', T: StoreInfo, repeated: true },
+    { no: 3, name: 'timestamp', kind: 'message', T: Timestamp }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CommitInfo {
@@ -68,7 +68,7 @@ export class StoreInfo extends Message<StoreInfo> {
   /**
    * @generated from field: string name = 1;
    */
-  name = "";
+  name = '';
 
   /**
    * @generated from field: cosmos.base.store.v1beta1.CommitID commit_id = 2;
@@ -81,10 +81,10 @@ export class StoreInfo extends Message<StoreInfo> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.base.store.v1beta1.StoreInfo";
+  static readonly typeName = 'cosmos.base.store.v1beta1.StoreInfo';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "commit_id", kind: "message", T: CommitID },
+    { no: 1, name: 'name', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'commit_id', kind: 'message', T: CommitID }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): StoreInfo {
@@ -127,10 +127,10 @@ export class CommitID extends Message<CommitID> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.base.store.v1beta1.CommitID";
+  static readonly typeName = 'cosmos.base.store.v1beta1.CommitID';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "version", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
-    { no: 2, name: "hash", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
+    { no: 1, name: 'version', kind: 'scalar', T: 3 /* ScalarType.INT64 */ },
+    { no: 2, name: 'hash', kind: 'scalar', T: 12 /* ScalarType.BYTES */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CommitID {
@@ -149,4 +149,3 @@ export class CommitID extends Message<CommitID> {
     return proto3.util.equals(CommitID, a, b);
   }
 }
-

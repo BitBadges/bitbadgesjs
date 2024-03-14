@@ -3,8 +3,8 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3 } from '@bufbuild/protobuf';
 
 /**
  * Coin defines a token with a denomination and an amount.
@@ -18,12 +18,12 @@ export class Coin extends Message<Coin> {
   /**
    * @generated from field: string denom = 1;
    */
-  denom = "";
+  denom = '';
 
   /**
    * @generated from field: string amount = 2;
    */
-  amount = "";
+  amount = '';
 
   constructor(data?: PartialMessage<Coin>) {
     super();
@@ -31,10 +31,10 @@ export class Coin extends Message<Coin> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.base.v1beta1.Coin";
+  static readonly typeName = 'cosmos.base.v1beta1.Coin';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "denom", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "amount", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'denom', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'amount', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Coin {
@@ -66,12 +66,12 @@ export class DecCoin extends Message<DecCoin> {
   /**
    * @generated from field: string denom = 1;
    */
-  denom = "";
+  denom = '';
 
   /**
    * @generated from field: string amount = 2;
    */
-  amount = "";
+  amount = '';
 
   constructor(data?: PartialMessage<DecCoin>) {
     super();
@@ -79,10 +79,10 @@ export class DecCoin extends Message<DecCoin> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.base.v1beta1.DecCoin";
+  static readonly typeName = 'cosmos.base.v1beta1.DecCoin';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "denom", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "amount", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'denom', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'amount', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DecCoin {
@@ -111,7 +111,7 @@ export class IntProto extends Message<IntProto> {
   /**
    * @generated from field: string int = 1;
    */
-  int = "";
+  int = '';
 
   constructor(data?: PartialMessage<IntProto>) {
     super();
@@ -119,10 +119,8 @@ export class IntProto extends Message<IntProto> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.base.v1beta1.IntProto";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "int", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-  ]);
+  static readonly typeName = 'cosmos.base.v1beta1.IntProto';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'int', kind: 'scalar', T: 9 /* ScalarType.STRING */ }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): IntProto {
     return new IntProto().fromBinary(bytes, options);
@@ -150,7 +148,7 @@ export class DecProto extends Message<DecProto> {
   /**
    * @generated from field: string dec = 1;
    */
-  dec = "";
+  dec = '';
 
   constructor(data?: PartialMessage<DecProto>) {
     super();
@@ -158,10 +156,8 @@ export class DecProto extends Message<DecProto> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.base.v1beta1.DecProto";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "dec", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-  ]);
+  static readonly typeName = 'cosmos.base.v1beta1.DecProto';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'dec', kind: 'scalar', T: 9 /* ScalarType.STRING */ }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DecProto {
     return new DecProto().fromBinary(bytes, options);
@@ -179,4 +175,3 @@ export class DecProto extends Message<DecProto> {
     return proto3.util.equals(DecProto, a, b);
   }
 }
-

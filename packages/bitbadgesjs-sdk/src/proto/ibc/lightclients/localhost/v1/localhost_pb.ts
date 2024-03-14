@@ -3,9 +3,9 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
-import { Height } from "../../../core/client/v1/client_pb.js";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3 } from '@bufbuild/protobuf';
+import { Height } from '../../../core/client/v1/client_pb.js';
 
 /**
  * ClientState defines a loopback (localhost) client. It requires (read-only)
@@ -19,7 +19,7 @@ export class ClientState extends Message<ClientState> {
    *
    * @generated from field: string chain_id = 1;
    */
-  chainId = "";
+  chainId = '';
 
   /**
    * self latest block height
@@ -34,10 +34,10 @@ export class ClientState extends Message<ClientState> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ibc.lightclients.localhost.v1.ClientState";
+  static readonly typeName = 'ibc.lightclients.localhost.v1.ClientState';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "chain_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "height", kind: "message", T: Height },
+    { no: 1, name: 'chain_id', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'height', kind: 'message', T: Height }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ClientState {
@@ -56,4 +56,3 @@ export class ClientState extends Message<ClientState> {
     return proto3.util.equals(ClientState, a, b);
   }
 }
-

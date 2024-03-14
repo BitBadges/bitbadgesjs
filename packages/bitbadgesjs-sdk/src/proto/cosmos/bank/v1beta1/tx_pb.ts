@@ -3,10 +3,10 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
-import { Coin } from "../../base/v1beta1/coin_pb.js";
-import { Input, Output, Params, SendEnabled } from "./bank_pb.js";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3 } from '@bufbuild/protobuf';
+import { Coin } from '../../base/v1beta1/coin_pb.js';
+import { Input, Output, Params, SendEnabled } from './bank_pb.js';
 
 /**
  * MsgSend represents a message to send coins from one account to another.
@@ -17,12 +17,12 @@ export class MsgSend extends Message<MsgSend> {
   /**
    * @generated from field: string from_address = 1;
    */
-  fromAddress = "";
+  fromAddress = '';
 
   /**
    * @generated from field: string to_address = 2;
    */
-  toAddress = "";
+  toAddress = '';
 
   /**
    * @generated from field: repeated cosmos.base.v1beta1.Coin amount = 3;
@@ -35,11 +35,11 @@ export class MsgSend extends Message<MsgSend> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.bank.v1beta1.MsgSend";
+  static readonly typeName = 'cosmos.bank.v1beta1.MsgSend';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "from_address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "to_address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "amount", kind: "message", T: Coin, repeated: true },
+    { no: 1, name: 'from_address', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'to_address', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'amount', kind: 'message', T: Coin, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgSend {
@@ -71,9 +71,8 @@ export class MsgSendResponse extends Message<MsgSendResponse> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.bank.v1beta1.MsgSendResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-  ]);
+  static readonly typeName = 'cosmos.bank.v1beta1.MsgSendResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => []);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgSendResponse {
     return new MsgSendResponse().fromBinary(bytes, options);
@@ -87,7 +86,10 @@ export class MsgSendResponse extends Message<MsgSendResponse> {
     return new MsgSendResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgSendResponse | PlainMessage<MsgSendResponse> | undefined, b: MsgSendResponse | PlainMessage<MsgSendResponse> | undefined): boolean {
+  static equals(
+    a: MsgSendResponse | PlainMessage<MsgSendResponse> | undefined,
+    b: MsgSendResponse | PlainMessage<MsgSendResponse> | undefined
+  ): boolean {
     return proto3.util.equals(MsgSendResponse, a, b);
   }
 }
@@ -117,10 +119,10 @@ export class MsgMultiSend extends Message<MsgMultiSend> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.bank.v1beta1.MsgMultiSend";
+  static readonly typeName = 'cosmos.bank.v1beta1.MsgMultiSend';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "inputs", kind: "message", T: Input, repeated: true },
-    { no: 2, name: "outputs", kind: "message", T: Output, repeated: true },
+    { no: 1, name: 'inputs', kind: 'message', T: Input, repeated: true },
+    { no: 2, name: 'outputs', kind: 'message', T: Output, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgMultiSend {
@@ -152,9 +154,8 @@ export class MsgMultiSendResponse extends Message<MsgMultiSendResponse> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.bank.v1beta1.MsgMultiSendResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-  ]);
+  static readonly typeName = 'cosmos.bank.v1beta1.MsgMultiSendResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => []);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgMultiSendResponse {
     return new MsgMultiSendResponse().fromBinary(bytes, options);
@@ -168,7 +169,10 @@ export class MsgMultiSendResponse extends Message<MsgMultiSendResponse> {
     return new MsgMultiSendResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgMultiSendResponse | PlainMessage<MsgMultiSendResponse> | undefined, b: MsgMultiSendResponse | PlainMessage<MsgMultiSendResponse> | undefined): boolean {
+  static equals(
+    a: MsgMultiSendResponse | PlainMessage<MsgMultiSendResponse> | undefined,
+    b: MsgMultiSendResponse | PlainMessage<MsgMultiSendResponse> | undefined
+  ): boolean {
     return proto3.util.equals(MsgMultiSendResponse, a, b);
   }
 }
@@ -186,7 +190,7 @@ export class MsgUpdateParams extends Message<MsgUpdateParams> {
    *
    * @generated from field: string authority = 1;
    */
-  authority = "";
+  authority = '';
 
   /**
    * params defines the x/bank parameters to update.
@@ -203,10 +207,10 @@ export class MsgUpdateParams extends Message<MsgUpdateParams> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.bank.v1beta1.MsgUpdateParams";
+  static readonly typeName = 'cosmos.bank.v1beta1.MsgUpdateParams';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "authority", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "params", kind: "message", T: Params },
+    { no: 1, name: 'authority', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'params', kind: 'message', T: Params }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUpdateParams {
@@ -221,7 +225,10 @@ export class MsgUpdateParams extends Message<MsgUpdateParams> {
     return new MsgUpdateParams().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgUpdateParams | PlainMessage<MsgUpdateParams> | undefined, b: MsgUpdateParams | PlainMessage<MsgUpdateParams> | undefined): boolean {
+  static equals(
+    a: MsgUpdateParams | PlainMessage<MsgUpdateParams> | undefined,
+    b: MsgUpdateParams | PlainMessage<MsgUpdateParams> | undefined
+  ): boolean {
     return proto3.util.equals(MsgUpdateParams, a, b);
   }
 }
@@ -241,9 +248,8 @@ export class MsgUpdateParamsResponse extends Message<MsgUpdateParamsResponse> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.bank.v1beta1.MsgUpdateParamsResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-  ]);
+  static readonly typeName = 'cosmos.bank.v1beta1.MsgUpdateParamsResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => []);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUpdateParamsResponse {
     return new MsgUpdateParamsResponse().fromBinary(bytes, options);
@@ -257,7 +263,10 @@ export class MsgUpdateParamsResponse extends Message<MsgUpdateParamsResponse> {
     return new MsgUpdateParamsResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgUpdateParamsResponse | PlainMessage<MsgUpdateParamsResponse> | undefined, b: MsgUpdateParamsResponse | PlainMessage<MsgUpdateParamsResponse> | undefined): boolean {
+  static equals(
+    a: MsgUpdateParamsResponse | PlainMessage<MsgUpdateParamsResponse> | undefined,
+    b: MsgUpdateParamsResponse | PlainMessage<MsgUpdateParamsResponse> | undefined
+  ): boolean {
     return proto3.util.equals(MsgUpdateParamsResponse, a, b);
   }
 }
@@ -277,7 +286,7 @@ export class MsgSetSendEnabled extends Message<MsgSetSendEnabled> {
   /**
    * @generated from field: string authority = 1;
    */
-  authority = "";
+  authority = '';
 
   /**
    * send_enabled is the list of entries to add or update.
@@ -302,11 +311,11 @@ export class MsgSetSendEnabled extends Message<MsgSetSendEnabled> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.bank.v1beta1.MsgSetSendEnabled";
+  static readonly typeName = 'cosmos.bank.v1beta1.MsgSetSendEnabled';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "authority", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "send_enabled", kind: "message", T: SendEnabled, repeated: true },
-    { no: 3, name: "use_default_for", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 1, name: 'authority', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'send_enabled', kind: 'message', T: SendEnabled, repeated: true },
+    { no: 3, name: 'use_default_for', kind: 'scalar', T: 9 /* ScalarType.STRING */, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgSetSendEnabled {
@@ -321,7 +330,10 @@ export class MsgSetSendEnabled extends Message<MsgSetSendEnabled> {
     return new MsgSetSendEnabled().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgSetSendEnabled | PlainMessage<MsgSetSendEnabled> | undefined, b: MsgSetSendEnabled | PlainMessage<MsgSetSendEnabled> | undefined): boolean {
+  static equals(
+    a: MsgSetSendEnabled | PlainMessage<MsgSetSendEnabled> | undefined,
+    b: MsgSetSendEnabled | PlainMessage<MsgSetSendEnabled> | undefined
+  ): boolean {
     return proto3.util.equals(MsgSetSendEnabled, a, b);
   }
 }
@@ -340,9 +352,8 @@ export class MsgSetSendEnabledResponse extends Message<MsgSetSendEnabledResponse
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.bank.v1beta1.MsgSetSendEnabledResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-  ]);
+  static readonly typeName = 'cosmos.bank.v1beta1.MsgSetSendEnabledResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => []);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgSetSendEnabledResponse {
     return new MsgSetSendEnabledResponse().fromBinary(bytes, options);
@@ -356,8 +367,10 @@ export class MsgSetSendEnabledResponse extends Message<MsgSetSendEnabledResponse
     return new MsgSetSendEnabledResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgSetSendEnabledResponse | PlainMessage<MsgSetSendEnabledResponse> | undefined, b: MsgSetSendEnabledResponse | PlainMessage<MsgSetSendEnabledResponse> | undefined): boolean {
+  static equals(
+    a: MsgSetSendEnabledResponse | PlainMessage<MsgSetSendEnabledResponse> | undefined,
+    b: MsgSetSendEnabledResponse | PlainMessage<MsgSetSendEnabledResponse> | undefined
+  ): boolean {
     return proto3.util.equals(MsgSetSendEnabledResponse, a, b);
   }
 }
-

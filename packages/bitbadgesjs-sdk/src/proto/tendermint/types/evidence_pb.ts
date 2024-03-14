@@ -3,10 +3,10 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3, protoInt64, Timestamp } from "@bufbuild/protobuf";
-import { LightBlock, Vote } from "./types_pb.js";
-import { Validator } from "./validator_pb.js";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3, protoInt64, Timestamp } from '@bufbuild/protobuf';
+import { LightBlock, Vote } from './types_pb.js';
+import { Validator } from './validator_pb.js';
 
 /**
  * @generated from message tendermint.types.Evidence
@@ -15,19 +15,22 @@ export class Evidence extends Message<Evidence> {
   /**
    * @generated from oneof tendermint.types.Evidence.sum
    */
-  sum: {
-    /**
-     * @generated from field: tendermint.types.DuplicateVoteEvidence duplicate_vote_evidence = 1;
-     */
-    value: DuplicateVoteEvidence;
-    case: "duplicateVoteEvidence";
-  } | {
-    /**
-     * @generated from field: tendermint.types.LightClientAttackEvidence light_client_attack_evidence = 2;
-     */
-    value: LightClientAttackEvidence;
-    case: "lightClientAttackEvidence";
-  } | { case: undefined; value?: undefined } = { case: undefined };
+  sum:
+    | {
+        /**
+         * @generated from field: tendermint.types.DuplicateVoteEvidence duplicate_vote_evidence = 1;
+         */
+        value: DuplicateVoteEvidence;
+        case: 'duplicateVoteEvidence';
+      }
+    | {
+        /**
+         * @generated from field: tendermint.types.LightClientAttackEvidence light_client_attack_evidence = 2;
+         */
+        value: LightClientAttackEvidence;
+        case: 'lightClientAttackEvidence';
+      }
+    | { case: undefined; value?: undefined } = { case: undefined };
 
   constructor(data?: PartialMessage<Evidence>) {
     super();
@@ -35,10 +38,10 @@ export class Evidence extends Message<Evidence> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.types.Evidence";
+  static readonly typeName = 'tendermint.types.Evidence';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "duplicate_vote_evidence", kind: "message", T: DuplicateVoteEvidence, oneof: "sum" },
-    { no: 2, name: "light_client_attack_evidence", kind: "message", T: LightClientAttackEvidence, oneof: "sum" },
+    { no: 1, name: 'duplicate_vote_evidence', kind: 'message', T: DuplicateVoteEvidence, oneof: 'sum' },
+    { no: 2, name: 'light_client_attack_evidence', kind: 'message', T: LightClientAttackEvidence, oneof: 'sum' }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Evidence {
@@ -95,13 +98,13 @@ export class DuplicateVoteEvidence extends Message<DuplicateVoteEvidence> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.types.DuplicateVoteEvidence";
+  static readonly typeName = 'tendermint.types.DuplicateVoteEvidence';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "vote_a", kind: "message", T: Vote },
-    { no: 2, name: "vote_b", kind: "message", T: Vote },
-    { no: 3, name: "total_voting_power", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
-    { no: 4, name: "validator_power", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
-    { no: 5, name: "timestamp", kind: "message", T: Timestamp },
+    { no: 1, name: 'vote_a', kind: 'message', T: Vote },
+    { no: 2, name: 'vote_b', kind: 'message', T: Vote },
+    { no: 3, name: 'total_voting_power', kind: 'scalar', T: 3 /* ScalarType.INT64 */ },
+    { no: 4, name: 'validator_power', kind: 'scalar', T: 3 /* ScalarType.INT64 */ },
+    { no: 5, name: 'timestamp', kind: 'message', T: Timestamp }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DuplicateVoteEvidence {
@@ -116,7 +119,10 @@ export class DuplicateVoteEvidence extends Message<DuplicateVoteEvidence> {
     return new DuplicateVoteEvidence().fromJsonString(jsonString, options);
   }
 
-  static equals(a: DuplicateVoteEvidence | PlainMessage<DuplicateVoteEvidence> | undefined, b: DuplicateVoteEvidence | PlainMessage<DuplicateVoteEvidence> | undefined): boolean {
+  static equals(
+    a: DuplicateVoteEvidence | PlainMessage<DuplicateVoteEvidence> | undefined,
+    b: DuplicateVoteEvidence | PlainMessage<DuplicateVoteEvidence> | undefined
+  ): boolean {
     return proto3.util.equals(DuplicateVoteEvidence, a, b);
   }
 }
@@ -158,13 +164,13 @@ export class LightClientAttackEvidence extends Message<LightClientAttackEvidence
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.types.LightClientAttackEvidence";
+  static readonly typeName = 'tendermint.types.LightClientAttackEvidence';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "conflicting_block", kind: "message", T: LightBlock },
-    { no: 2, name: "common_height", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
-    { no: 3, name: "byzantine_validators", kind: "message", T: Validator, repeated: true },
-    { no: 4, name: "total_voting_power", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
-    { no: 5, name: "timestamp", kind: "message", T: Timestamp },
+    { no: 1, name: 'conflicting_block', kind: 'message', T: LightBlock },
+    { no: 2, name: 'common_height', kind: 'scalar', T: 3 /* ScalarType.INT64 */ },
+    { no: 3, name: 'byzantine_validators', kind: 'message', T: Validator, repeated: true },
+    { no: 4, name: 'total_voting_power', kind: 'scalar', T: 3 /* ScalarType.INT64 */ },
+    { no: 5, name: 'timestamp', kind: 'message', T: Timestamp }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): LightClientAttackEvidence {
@@ -179,7 +185,10 @@ export class LightClientAttackEvidence extends Message<LightClientAttackEvidence
     return new LightClientAttackEvidence().fromJsonString(jsonString, options);
   }
 
-  static equals(a: LightClientAttackEvidence | PlainMessage<LightClientAttackEvidence> | undefined, b: LightClientAttackEvidence | PlainMessage<LightClientAttackEvidence> | undefined): boolean {
+  static equals(
+    a: LightClientAttackEvidence | PlainMessage<LightClientAttackEvidence> | undefined,
+    b: LightClientAttackEvidence | PlainMessage<LightClientAttackEvidence> | undefined
+  ): boolean {
     return proto3.util.equals(LightClientAttackEvidence, a, b);
   }
 }
@@ -199,10 +208,8 @@ export class EvidenceList extends Message<EvidenceList> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tendermint.types.EvidenceList";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "evidence", kind: "message", T: Evidence, repeated: true },
-  ]);
+  static readonly typeName = 'tendermint.types.EvidenceList';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'evidence', kind: 'message', T: Evidence, repeated: true }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): EvidenceList {
     return new EvidenceList().fromBinary(bytes, options);
@@ -220,4 +227,3 @@ export class EvidenceList extends Message<EvidenceList> {
     return proto3.util.equals(EvidenceList, a, b);
   }
 }
-

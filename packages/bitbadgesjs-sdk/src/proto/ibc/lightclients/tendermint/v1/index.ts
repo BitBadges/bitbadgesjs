@@ -1,1 +1,1 @@
-export * from './tendermint_pb'
+export * from './tendermint_pb';

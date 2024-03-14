@@ -9,7 +9,7 @@ npm install bitbadgesjs-sdk
 utils is a library which provides miscellaneous functionality to help you interact with the BitBadges API and indexer, such as types, managing metadata requests, logic with Uint ranges and balances, etc.
 
 ```ts
-const doOverlap = checkIfUintRangesOverlap(...);
+const doOverlap = hasOverlaps(...);
 const metadata = updateMetadataMap(....);
 ```
 
@@ -38,10 +38,10 @@ const txMsg = createTxMsgUpdateCollection(
 ```
 
 ### Further Documentation
+
 We refer you to the official [documentation](https://docs.bitbadges.io/for-developers/create-and-broadcast-txs) for more details and tutorials on how to generate, broadcast, and sign transactions using this repository.
 
 For a fully generated documentation of the library, see [https://bitbadges.github.io/bitbadgesjs/packages/bitbadgesjs/docs/modules.html](https://bitbadges.github.io/bitbadgesjs/packages/bitbadgesjs/docs/modules.html).
-
 
 ## Acknowledgements
 

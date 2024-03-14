@@ -5,9 +5,9 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Any, Duration, Message, proto3, Timestamp } from "@bufbuild/protobuf";
-import { Coin } from "../../base/v1beta1/coin_pb.js";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Any, Duration, Message, proto3, Timestamp } from '@bufbuild/protobuf';
+import { Coin } from '../../base/v1beta1/coin_pb.js';
 
 /**
  * BasicAllowance implements Allowance with a one-time grant of coins
@@ -38,10 +38,10 @@ export class BasicAllowance extends Message<BasicAllowance> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.feegrant.v1beta1.BasicAllowance";
+  static readonly typeName = 'cosmos.feegrant.v1beta1.BasicAllowance';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "spend_limit", kind: "message", T: Coin, repeated: true },
-    { no: 2, name: "expiration", kind: "message", T: Timestamp },
+    { no: 1, name: 'spend_limit', kind: 'message', T: Coin, repeated: true },
+    { no: 2, name: 'expiration', kind: 'message', T: Timestamp }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BasicAllowance {
@@ -113,13 +113,13 @@ export class PeriodicAllowance extends Message<PeriodicAllowance> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.feegrant.v1beta1.PeriodicAllowance";
+  static readonly typeName = 'cosmos.feegrant.v1beta1.PeriodicAllowance';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "basic", kind: "message", T: BasicAllowance },
-    { no: 2, name: "period", kind: "message", T: Duration },
-    { no: 3, name: "period_spend_limit", kind: "message", T: Coin, repeated: true },
-    { no: 4, name: "period_can_spend", kind: "message", T: Coin, repeated: true },
-    { no: 5, name: "period_reset", kind: "message", T: Timestamp },
+    { no: 1, name: 'basic', kind: 'message', T: BasicAllowance },
+    { no: 2, name: 'period', kind: 'message', T: Duration },
+    { no: 3, name: 'period_spend_limit', kind: 'message', T: Coin, repeated: true },
+    { no: 4, name: 'period_can_spend', kind: 'message', T: Coin, repeated: true },
+    { no: 5, name: 'period_reset', kind: 'message', T: Timestamp }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PeriodicAllowance {
@@ -134,7 +134,10 @@ export class PeriodicAllowance extends Message<PeriodicAllowance> {
     return new PeriodicAllowance().fromJsonString(jsonString, options);
   }
 
-  static equals(a: PeriodicAllowance | PlainMessage<PeriodicAllowance> | undefined, b: PeriodicAllowance | PlainMessage<PeriodicAllowance> | undefined): boolean {
+  static equals(
+    a: PeriodicAllowance | PlainMessage<PeriodicAllowance> | undefined,
+    b: PeriodicAllowance | PlainMessage<PeriodicAllowance> | undefined
+  ): boolean {
     return proto3.util.equals(PeriodicAllowance, a, b);
   }
 }
@@ -165,10 +168,10 @@ export class AllowedMsgAllowance extends Message<AllowedMsgAllowance> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.feegrant.v1beta1.AllowedMsgAllowance";
+  static readonly typeName = 'cosmos.feegrant.v1beta1.AllowedMsgAllowance';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "allowance", kind: "message", T: Any },
-    { no: 2, name: "allowed_messages", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 1, name: 'allowance', kind: 'message', T: Any },
+    { no: 2, name: 'allowed_messages', kind: 'scalar', T: 9 /* ScalarType.STRING */, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AllowedMsgAllowance {
@@ -183,7 +186,10 @@ export class AllowedMsgAllowance extends Message<AllowedMsgAllowance> {
     return new AllowedMsgAllowance().fromJsonString(jsonString, options);
   }
 
-  static equals(a: AllowedMsgAllowance | PlainMessage<AllowedMsgAllowance> | undefined, b: AllowedMsgAllowance | PlainMessage<AllowedMsgAllowance> | undefined): boolean {
+  static equals(
+    a: AllowedMsgAllowance | PlainMessage<AllowedMsgAllowance> | undefined,
+    b: AllowedMsgAllowance | PlainMessage<AllowedMsgAllowance> | undefined
+  ): boolean {
     return proto3.util.equals(AllowedMsgAllowance, a, b);
   }
 }
@@ -199,14 +205,14 @@ export class Grant extends Message<Grant> {
    *
    * @generated from field: string granter = 1;
    */
-  granter = "";
+  granter = '';
 
   /**
    * grantee is the address of the user being granted an allowance of another user's funds.
    *
    * @generated from field: string grantee = 2;
    */
-  grantee = "";
+  grantee = '';
 
   /**
    * allowance can be any of basic, periodic, allowed fee allowance.
@@ -221,11 +227,11 @@ export class Grant extends Message<Grant> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.feegrant.v1beta1.Grant";
+  static readonly typeName = 'cosmos.feegrant.v1beta1.Grant';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "granter", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "grantee", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "allowance", kind: "message", T: Any },
+    { no: 1, name: 'granter', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'grantee', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'allowance', kind: 'message', T: Any }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Grant {
@@ -244,4 +250,3 @@ export class Grant extends Message<Grant> {
     return proto3.util.equals(Grant, a, b);
   }
 }
-

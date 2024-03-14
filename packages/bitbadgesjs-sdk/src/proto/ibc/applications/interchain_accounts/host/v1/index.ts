@@ -1,2 +1,3 @@
-export * from './host_pb'
-export * from './query_pb'
+export * from './host_pb';
+
+export * from './query_pb';

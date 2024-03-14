@@ -3,8 +3,8 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3 } from '@bufbuild/protobuf';
 
 /**
  *
@@ -22,7 +22,7 @@ export class AddressList extends Message<AddressList> {
    *
    * @generated from field: string listId = 1;
    */
-  listId = "";
+  listId = '';
 
   /**
    * List of addresses included in the list.
@@ -43,28 +43,28 @@ export class AddressList extends Message<AddressList> {
    *
    * @generated from field: string uri = 4;
    */
-  uri = "";
+  uri = '';
 
   /**
    * Custom arbitrary data or additional information related to the address list.
    *
    * @generated from field: string customData = 5;
    */
-  customData = "";
+  customData = '';
 
   /**
    * The user or entity who created the address list.
    *
    * @generated from field: string createdBy = 6;
    */
-  createdBy = "";
+  createdBy = '';
 
   /**
    * The alias cosmos address for the list.
    *
    * @generated from field: string aliasAddress = 7;
    */
-  aliasAddress = "";
+  aliasAddress = '';
 
   constructor(data?: PartialMessage<AddressList>) {
     super();
@@ -72,15 +72,15 @@ export class AddressList extends Message<AddressList> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.AddressList";
+  static readonly typeName = 'badges.AddressList';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "listId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "addresses", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
-    { no: 3, name: "whitelist", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 4, name: "uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 5, name: "customData", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 6, name: "createdBy", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 7, name: "aliasAddress", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'listId', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'addresses', kind: 'scalar', T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 3, name: 'whitelist', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 4, name: 'uri', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: 'customData', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 6, name: 'createdBy', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 7, name: 'aliasAddress', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AddressList {
@@ -99,4 +99,3 @@ export class AddressList extends Message<AddressList> {
     return proto3.util.equals(AddressList, a, b);
   }
 }
-

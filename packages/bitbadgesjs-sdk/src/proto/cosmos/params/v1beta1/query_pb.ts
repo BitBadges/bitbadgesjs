@@ -3,9 +3,9 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
-import { ParamChange } from "./params_pb.js";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3 } from '@bufbuild/protobuf';
+import { ParamChange } from './params_pb.js';
 
 /**
  * QueryParamsRequest is request type for the Query/Params RPC method.
@@ -18,14 +18,14 @@ export class QueryParamsRequest extends Message<QueryParamsRequest> {
    *
    * @generated from field: string subspace = 1;
    */
-  subspace = "";
+  subspace = '';
 
   /**
    * key defines the key of the parameter in the subspace.
    *
    * @generated from field: string key = 2;
    */
-  key = "";
+  key = '';
 
   constructor(data?: PartialMessage<QueryParamsRequest>) {
     super();
@@ -33,10 +33,10 @@ export class QueryParamsRequest extends Message<QueryParamsRequest> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.params.v1beta1.QueryParamsRequest";
+  static readonly typeName = 'cosmos.params.v1beta1.QueryParamsRequest';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "subspace", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "key", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'subspace', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'key', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryParamsRequest {
@@ -51,7 +51,10 @@ export class QueryParamsRequest extends Message<QueryParamsRequest> {
     return new QueryParamsRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryParamsRequest | PlainMessage<QueryParamsRequest> | undefined, b: QueryParamsRequest | PlainMessage<QueryParamsRequest> | undefined): boolean {
+  static equals(
+    a: QueryParamsRequest | PlainMessage<QueryParamsRequest> | undefined,
+    b: QueryParamsRequest | PlainMessage<QueryParamsRequest> | undefined
+  ): boolean {
     return proto3.util.equals(QueryParamsRequest, a, b);
   }
 }
@@ -75,10 +78,8 @@ export class QueryParamsResponse extends Message<QueryParamsResponse> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.params.v1beta1.QueryParamsResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "param", kind: "message", T: ParamChange },
-  ]);
+  static readonly typeName = 'cosmos.params.v1beta1.QueryParamsResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'param', kind: 'message', T: ParamChange }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryParamsResponse {
     return new QueryParamsResponse().fromBinary(bytes, options);
@@ -92,7 +93,10 @@ export class QueryParamsResponse extends Message<QueryParamsResponse> {
     return new QueryParamsResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryParamsResponse | PlainMessage<QueryParamsResponse> | undefined, b: QueryParamsResponse | PlainMessage<QueryParamsResponse> | undefined): boolean {
+  static equals(
+    a: QueryParamsResponse | PlainMessage<QueryParamsResponse> | undefined,
+    b: QueryParamsResponse | PlainMessage<QueryParamsResponse> | undefined
+  ): boolean {
     return proto3.util.equals(QueryParamsResponse, a, b);
   }
 }
@@ -112,9 +116,8 @@ export class QuerySubspacesRequest extends Message<QuerySubspacesRequest> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.params.v1beta1.QuerySubspacesRequest";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-  ]);
+  static readonly typeName = 'cosmos.params.v1beta1.QuerySubspacesRequest';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => []);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QuerySubspacesRequest {
     return new QuerySubspacesRequest().fromBinary(bytes, options);
@@ -128,7 +131,10 @@ export class QuerySubspacesRequest extends Message<QuerySubspacesRequest> {
     return new QuerySubspacesRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QuerySubspacesRequest | PlainMessage<QuerySubspacesRequest> | undefined, b: QuerySubspacesRequest | PlainMessage<QuerySubspacesRequest> | undefined): boolean {
+  static equals(
+    a: QuerySubspacesRequest | PlainMessage<QuerySubspacesRequest> | undefined,
+    b: QuerySubspacesRequest | PlainMessage<QuerySubspacesRequest> | undefined
+  ): boolean {
     return proto3.util.equals(QuerySubspacesRequest, a, b);
   }
 }
@@ -153,10 +159,8 @@ export class QuerySubspacesResponse extends Message<QuerySubspacesResponse> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.params.v1beta1.QuerySubspacesResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "subspaces", kind: "message", T: Subspace, repeated: true },
-  ]);
+  static readonly typeName = 'cosmos.params.v1beta1.QuerySubspacesResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'subspaces', kind: 'message', T: Subspace, repeated: true }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QuerySubspacesResponse {
     return new QuerySubspacesResponse().fromBinary(bytes, options);
@@ -170,7 +174,10 @@ export class QuerySubspacesResponse extends Message<QuerySubspacesResponse> {
     return new QuerySubspacesResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QuerySubspacesResponse | PlainMessage<QuerySubspacesResponse> | undefined, b: QuerySubspacesResponse | PlainMessage<QuerySubspacesResponse> | undefined): boolean {
+  static equals(
+    a: QuerySubspacesResponse | PlainMessage<QuerySubspacesResponse> | undefined,
+    b: QuerySubspacesResponse | PlainMessage<QuerySubspacesResponse> | undefined
+  ): boolean {
     return proto3.util.equals(QuerySubspacesResponse, a, b);
   }
 }
@@ -187,7 +194,7 @@ export class Subspace extends Message<Subspace> {
   /**
    * @generated from field: string subspace = 1;
    */
-  subspace = "";
+  subspace = '';
 
   /**
    * @generated from field: repeated string keys = 2;
@@ -200,10 +207,10 @@ export class Subspace extends Message<Subspace> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.params.v1beta1.Subspace";
+  static readonly typeName = 'cosmos.params.v1beta1.Subspace';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "subspace", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "keys", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 1, name: 'subspace', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'keys', kind: 'scalar', T: 9 /* ScalarType.STRING */, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Subspace {
@@ -222,4 +229,3 @@ export class Subspace extends Message<Subspace> {
     return proto3.util.equals(Subspace, a, b);
   }
 }
-

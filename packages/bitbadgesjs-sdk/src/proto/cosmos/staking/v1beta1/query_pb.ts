@@ -3,10 +3,10 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3, protoInt64 } from "@bufbuild/protobuf";
-import { PageRequest, PageResponse } from "../../base/query/v1beta1/pagination_pb.js";
-import { DelegationResponse, HistoricalInfo, Params, Pool, RedelegationResponse, UnbondingDelegation, Validator } from "./staking_pb.js";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3, protoInt64 } from '@bufbuild/protobuf';
+import { PageRequest, PageResponse } from '../../base/query/v1beta1/pagination_pb.js';
+import { DelegationResponse, HistoricalInfo, Params, Pool, RedelegationResponse, UnbondingDelegation, Validator } from './staking_pb.js';
 
 /**
  * QueryValidatorsRequest is request type for Query/Validators RPC method.
@@ -19,7 +19,7 @@ export class QueryValidatorsRequest extends Message<QueryValidatorsRequest> {
    *
    * @generated from field: string status = 1;
    */
-  status = "";
+  status = '';
 
   /**
    * pagination defines an optional pagination for the request.
@@ -34,10 +34,10 @@ export class QueryValidatorsRequest extends Message<QueryValidatorsRequest> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.staking.v1beta1.QueryValidatorsRequest";
+  static readonly typeName = 'cosmos.staking.v1beta1.QueryValidatorsRequest';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "status", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "pagination", kind: "message", T: PageRequest },
+    { no: 1, name: 'status', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'pagination', kind: 'message', T: PageRequest }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryValidatorsRequest {
@@ -52,7 +52,10 @@ export class QueryValidatorsRequest extends Message<QueryValidatorsRequest> {
     return new QueryValidatorsRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryValidatorsRequest | PlainMessage<QueryValidatorsRequest> | undefined, b: QueryValidatorsRequest | PlainMessage<QueryValidatorsRequest> | undefined): boolean {
+  static equals(
+    a: QueryValidatorsRequest | PlainMessage<QueryValidatorsRequest> | undefined,
+    b: QueryValidatorsRequest | PlainMessage<QueryValidatorsRequest> | undefined
+  ): boolean {
     return proto3.util.equals(QueryValidatorsRequest, a, b);
   }
 }
@@ -83,10 +86,10 @@ export class QueryValidatorsResponse extends Message<QueryValidatorsResponse> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.staking.v1beta1.QueryValidatorsResponse";
+  static readonly typeName = 'cosmos.staking.v1beta1.QueryValidatorsResponse';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "validators", kind: "message", T: Validator, repeated: true },
-    { no: 2, name: "pagination", kind: "message", T: PageResponse },
+    { no: 1, name: 'validators', kind: 'message', T: Validator, repeated: true },
+    { no: 2, name: 'pagination', kind: 'message', T: PageResponse }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryValidatorsResponse {
@@ -101,7 +104,10 @@ export class QueryValidatorsResponse extends Message<QueryValidatorsResponse> {
     return new QueryValidatorsResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryValidatorsResponse | PlainMessage<QueryValidatorsResponse> | undefined, b: QueryValidatorsResponse | PlainMessage<QueryValidatorsResponse> | undefined): boolean {
+  static equals(
+    a: QueryValidatorsResponse | PlainMessage<QueryValidatorsResponse> | undefined,
+    b: QueryValidatorsResponse | PlainMessage<QueryValidatorsResponse> | undefined
+  ): boolean {
     return proto3.util.equals(QueryValidatorsResponse, a, b);
   }
 }
@@ -117,7 +123,7 @@ export class QueryValidatorRequest extends Message<QueryValidatorRequest> {
    *
    * @generated from field: string validator_addr = 1;
    */
-  validatorAddr = "";
+  validatorAddr = '';
 
   constructor(data?: PartialMessage<QueryValidatorRequest>) {
     super();
@@ -125,9 +131,9 @@ export class QueryValidatorRequest extends Message<QueryValidatorRequest> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.staking.v1beta1.QueryValidatorRequest";
+  static readonly typeName = 'cosmos.staking.v1beta1.QueryValidatorRequest';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "validator_addr", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'validator_addr', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryValidatorRequest {
@@ -142,7 +148,10 @@ export class QueryValidatorRequest extends Message<QueryValidatorRequest> {
     return new QueryValidatorRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryValidatorRequest | PlainMessage<QueryValidatorRequest> | undefined, b: QueryValidatorRequest | PlainMessage<QueryValidatorRequest> | undefined): boolean {
+  static equals(
+    a: QueryValidatorRequest | PlainMessage<QueryValidatorRequest> | undefined,
+    b: QueryValidatorRequest | PlainMessage<QueryValidatorRequest> | undefined
+  ): boolean {
     return proto3.util.equals(QueryValidatorRequest, a, b);
   }
 }
@@ -166,10 +175,8 @@ export class QueryValidatorResponse extends Message<QueryValidatorResponse> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.staking.v1beta1.QueryValidatorResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "validator", kind: "message", T: Validator },
-  ]);
+  static readonly typeName = 'cosmos.staking.v1beta1.QueryValidatorResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'validator', kind: 'message', T: Validator }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryValidatorResponse {
     return new QueryValidatorResponse().fromBinary(bytes, options);
@@ -183,7 +190,10 @@ export class QueryValidatorResponse extends Message<QueryValidatorResponse> {
     return new QueryValidatorResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryValidatorResponse | PlainMessage<QueryValidatorResponse> | undefined, b: QueryValidatorResponse | PlainMessage<QueryValidatorResponse> | undefined): boolean {
+  static equals(
+    a: QueryValidatorResponse | PlainMessage<QueryValidatorResponse> | undefined,
+    b: QueryValidatorResponse | PlainMessage<QueryValidatorResponse> | undefined
+  ): boolean {
     return proto3.util.equals(QueryValidatorResponse, a, b);
   }
 }
@@ -200,7 +210,7 @@ export class QueryValidatorDelegationsRequest extends Message<QueryValidatorDele
    *
    * @generated from field: string validator_addr = 1;
    */
-  validatorAddr = "";
+  validatorAddr = '';
 
   /**
    * pagination defines an optional pagination for the request.
@@ -215,10 +225,10 @@ export class QueryValidatorDelegationsRequest extends Message<QueryValidatorDele
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.staking.v1beta1.QueryValidatorDelegationsRequest";
+  static readonly typeName = 'cosmos.staking.v1beta1.QueryValidatorDelegationsRequest';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "validator_addr", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "pagination", kind: "message", T: PageRequest },
+    { no: 1, name: 'validator_addr', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'pagination', kind: 'message', T: PageRequest }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryValidatorDelegationsRequest {
@@ -233,7 +243,10 @@ export class QueryValidatorDelegationsRequest extends Message<QueryValidatorDele
     return new QueryValidatorDelegationsRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryValidatorDelegationsRequest | PlainMessage<QueryValidatorDelegationsRequest> | undefined, b: QueryValidatorDelegationsRequest | PlainMessage<QueryValidatorDelegationsRequest> | undefined): boolean {
+  static equals(
+    a: QueryValidatorDelegationsRequest | PlainMessage<QueryValidatorDelegationsRequest> | undefined,
+    b: QueryValidatorDelegationsRequest | PlainMessage<QueryValidatorDelegationsRequest> | undefined
+  ): boolean {
     return proto3.util.equals(QueryValidatorDelegationsRequest, a, b);
   }
 }
@@ -263,10 +276,10 @@ export class QueryValidatorDelegationsResponse extends Message<QueryValidatorDel
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.staking.v1beta1.QueryValidatorDelegationsResponse";
+  static readonly typeName = 'cosmos.staking.v1beta1.QueryValidatorDelegationsResponse';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "delegation_responses", kind: "message", T: DelegationResponse, repeated: true },
-    { no: 2, name: "pagination", kind: "message", T: PageResponse },
+    { no: 1, name: 'delegation_responses', kind: 'message', T: DelegationResponse, repeated: true },
+    { no: 2, name: 'pagination', kind: 'message', T: PageResponse }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryValidatorDelegationsResponse {
@@ -281,7 +294,10 @@ export class QueryValidatorDelegationsResponse extends Message<QueryValidatorDel
     return new QueryValidatorDelegationsResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryValidatorDelegationsResponse | PlainMessage<QueryValidatorDelegationsResponse> | undefined, b: QueryValidatorDelegationsResponse | PlainMessage<QueryValidatorDelegationsResponse> | undefined): boolean {
+  static equals(
+    a: QueryValidatorDelegationsResponse | PlainMessage<QueryValidatorDelegationsResponse> | undefined,
+    b: QueryValidatorDelegationsResponse | PlainMessage<QueryValidatorDelegationsResponse> | undefined
+  ): boolean {
     return proto3.util.equals(QueryValidatorDelegationsResponse, a, b);
   }
 }
@@ -298,7 +314,7 @@ export class QueryValidatorUnbondingDelegationsRequest extends Message<QueryVali
    *
    * @generated from field: string validator_addr = 1;
    */
-  validatorAddr = "";
+  validatorAddr = '';
 
   /**
    * pagination defines an optional pagination for the request.
@@ -313,10 +329,10 @@ export class QueryValidatorUnbondingDelegationsRequest extends Message<QueryVali
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.staking.v1beta1.QueryValidatorUnbondingDelegationsRequest";
+  static readonly typeName = 'cosmos.staking.v1beta1.QueryValidatorUnbondingDelegationsRequest';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "validator_addr", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "pagination", kind: "message", T: PageRequest },
+    { no: 1, name: 'validator_addr', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'pagination', kind: 'message', T: PageRequest }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryValidatorUnbondingDelegationsRequest {
@@ -331,7 +347,10 @@ export class QueryValidatorUnbondingDelegationsRequest extends Message<QueryVali
     return new QueryValidatorUnbondingDelegationsRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryValidatorUnbondingDelegationsRequest | PlainMessage<QueryValidatorUnbondingDelegationsRequest> | undefined, b: QueryValidatorUnbondingDelegationsRequest | PlainMessage<QueryValidatorUnbondingDelegationsRequest> | undefined): boolean {
+  static equals(
+    a: QueryValidatorUnbondingDelegationsRequest | PlainMessage<QueryValidatorUnbondingDelegationsRequest> | undefined,
+    b: QueryValidatorUnbondingDelegationsRequest | PlainMessage<QueryValidatorUnbondingDelegationsRequest> | undefined
+  ): boolean {
     return proto3.util.equals(QueryValidatorUnbondingDelegationsRequest, a, b);
   }
 }
@@ -361,10 +380,10 @@ export class QueryValidatorUnbondingDelegationsResponse extends Message<QueryVal
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.staking.v1beta1.QueryValidatorUnbondingDelegationsResponse";
+  static readonly typeName = 'cosmos.staking.v1beta1.QueryValidatorUnbondingDelegationsResponse';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "unbonding_responses", kind: "message", T: UnbondingDelegation, repeated: true },
-    { no: 2, name: "pagination", kind: "message", T: PageResponse },
+    { no: 1, name: 'unbonding_responses', kind: 'message', T: UnbondingDelegation, repeated: true },
+    { no: 2, name: 'pagination', kind: 'message', T: PageResponse }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryValidatorUnbondingDelegationsResponse {
@@ -379,7 +398,10 @@ export class QueryValidatorUnbondingDelegationsResponse extends Message<QueryVal
     return new QueryValidatorUnbondingDelegationsResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryValidatorUnbondingDelegationsResponse | PlainMessage<QueryValidatorUnbondingDelegationsResponse> | undefined, b: QueryValidatorUnbondingDelegationsResponse | PlainMessage<QueryValidatorUnbondingDelegationsResponse> | undefined): boolean {
+  static equals(
+    a: QueryValidatorUnbondingDelegationsResponse | PlainMessage<QueryValidatorUnbondingDelegationsResponse> | undefined,
+    b: QueryValidatorUnbondingDelegationsResponse | PlainMessage<QueryValidatorUnbondingDelegationsResponse> | undefined
+  ): boolean {
     return proto3.util.equals(QueryValidatorUnbondingDelegationsResponse, a, b);
   }
 }
@@ -395,14 +417,14 @@ export class QueryDelegationRequest extends Message<QueryDelegationRequest> {
    *
    * @generated from field: string delegator_addr = 1;
    */
-  delegatorAddr = "";
+  delegatorAddr = '';
 
   /**
    * validator_addr defines the validator address to query for.
    *
    * @generated from field: string validator_addr = 2;
    */
-  validatorAddr = "";
+  validatorAddr = '';
 
   constructor(data?: PartialMessage<QueryDelegationRequest>) {
     super();
@@ -410,10 +432,10 @@ export class QueryDelegationRequest extends Message<QueryDelegationRequest> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.staking.v1beta1.QueryDelegationRequest";
+  static readonly typeName = 'cosmos.staking.v1beta1.QueryDelegationRequest';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "delegator_addr", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "validator_addr", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'delegator_addr', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'validator_addr', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryDelegationRequest {
@@ -428,7 +450,10 @@ export class QueryDelegationRequest extends Message<QueryDelegationRequest> {
     return new QueryDelegationRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryDelegationRequest | PlainMessage<QueryDelegationRequest> | undefined, b: QueryDelegationRequest | PlainMessage<QueryDelegationRequest> | undefined): boolean {
+  static equals(
+    a: QueryDelegationRequest | PlainMessage<QueryDelegationRequest> | undefined,
+    b: QueryDelegationRequest | PlainMessage<QueryDelegationRequest> | undefined
+  ): boolean {
     return proto3.util.equals(QueryDelegationRequest, a, b);
   }
 }
@@ -452,9 +477,9 @@ export class QueryDelegationResponse extends Message<QueryDelegationResponse> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.staking.v1beta1.QueryDelegationResponse";
+  static readonly typeName = 'cosmos.staking.v1beta1.QueryDelegationResponse';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "delegation_response", kind: "message", T: DelegationResponse },
+    { no: 1, name: 'delegation_response', kind: 'message', T: DelegationResponse }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryDelegationResponse {
@@ -469,7 +494,10 @@ export class QueryDelegationResponse extends Message<QueryDelegationResponse> {
     return new QueryDelegationResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryDelegationResponse | PlainMessage<QueryDelegationResponse> | undefined, b: QueryDelegationResponse | PlainMessage<QueryDelegationResponse> | undefined): boolean {
+  static equals(
+    a: QueryDelegationResponse | PlainMessage<QueryDelegationResponse> | undefined,
+    b: QueryDelegationResponse | PlainMessage<QueryDelegationResponse> | undefined
+  ): boolean {
     return proto3.util.equals(QueryDelegationResponse, a, b);
   }
 }
@@ -486,14 +514,14 @@ export class QueryUnbondingDelegationRequest extends Message<QueryUnbondingDeleg
    *
    * @generated from field: string delegator_addr = 1;
    */
-  delegatorAddr = "";
+  delegatorAddr = '';
 
   /**
    * validator_addr defines the validator address to query for.
    *
    * @generated from field: string validator_addr = 2;
    */
-  validatorAddr = "";
+  validatorAddr = '';
 
   constructor(data?: PartialMessage<QueryUnbondingDelegationRequest>) {
     super();
@@ -501,10 +529,10 @@ export class QueryUnbondingDelegationRequest extends Message<QueryUnbondingDeleg
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.staking.v1beta1.QueryUnbondingDelegationRequest";
+  static readonly typeName = 'cosmos.staking.v1beta1.QueryUnbondingDelegationRequest';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "delegator_addr", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "validator_addr", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'delegator_addr', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'validator_addr', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryUnbondingDelegationRequest {
@@ -519,7 +547,10 @@ export class QueryUnbondingDelegationRequest extends Message<QueryUnbondingDeleg
     return new QueryUnbondingDelegationRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryUnbondingDelegationRequest | PlainMessage<QueryUnbondingDelegationRequest> | undefined, b: QueryUnbondingDelegationRequest | PlainMessage<QueryUnbondingDelegationRequest> | undefined): boolean {
+  static equals(
+    a: QueryUnbondingDelegationRequest | PlainMessage<QueryUnbondingDelegationRequest> | undefined,
+    b: QueryUnbondingDelegationRequest | PlainMessage<QueryUnbondingDelegationRequest> | undefined
+  ): boolean {
     return proto3.util.equals(QueryUnbondingDelegationRequest, a, b);
   }
 }
@@ -544,10 +575,8 @@ export class QueryUnbondingDelegationResponse extends Message<QueryUnbondingDele
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.staking.v1beta1.QueryUnbondingDelegationResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "unbond", kind: "message", T: UnbondingDelegation },
-  ]);
+  static readonly typeName = 'cosmos.staking.v1beta1.QueryUnbondingDelegationResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'unbond', kind: 'message', T: UnbondingDelegation }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryUnbondingDelegationResponse {
     return new QueryUnbondingDelegationResponse().fromBinary(bytes, options);
@@ -561,7 +590,10 @@ export class QueryUnbondingDelegationResponse extends Message<QueryUnbondingDele
     return new QueryUnbondingDelegationResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryUnbondingDelegationResponse | PlainMessage<QueryUnbondingDelegationResponse> | undefined, b: QueryUnbondingDelegationResponse | PlainMessage<QueryUnbondingDelegationResponse> | undefined): boolean {
+  static equals(
+    a: QueryUnbondingDelegationResponse | PlainMessage<QueryUnbondingDelegationResponse> | undefined,
+    b: QueryUnbondingDelegationResponse | PlainMessage<QueryUnbondingDelegationResponse> | undefined
+  ): boolean {
     return proto3.util.equals(QueryUnbondingDelegationResponse, a, b);
   }
 }
@@ -578,7 +610,7 @@ export class QueryDelegatorDelegationsRequest extends Message<QueryDelegatorDele
    *
    * @generated from field: string delegator_addr = 1;
    */
-  delegatorAddr = "";
+  delegatorAddr = '';
 
   /**
    * pagination defines an optional pagination for the request.
@@ -593,10 +625,10 @@ export class QueryDelegatorDelegationsRequest extends Message<QueryDelegatorDele
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.staking.v1beta1.QueryDelegatorDelegationsRequest";
+  static readonly typeName = 'cosmos.staking.v1beta1.QueryDelegatorDelegationsRequest';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "delegator_addr", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "pagination", kind: "message", T: PageRequest },
+    { no: 1, name: 'delegator_addr', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'pagination', kind: 'message', T: PageRequest }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryDelegatorDelegationsRequest {
@@ -611,7 +643,10 @@ export class QueryDelegatorDelegationsRequest extends Message<QueryDelegatorDele
     return new QueryDelegatorDelegationsRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryDelegatorDelegationsRequest | PlainMessage<QueryDelegatorDelegationsRequest> | undefined, b: QueryDelegatorDelegationsRequest | PlainMessage<QueryDelegatorDelegationsRequest> | undefined): boolean {
+  static equals(
+    a: QueryDelegatorDelegationsRequest | PlainMessage<QueryDelegatorDelegationsRequest> | undefined,
+    b: QueryDelegatorDelegationsRequest | PlainMessage<QueryDelegatorDelegationsRequest> | undefined
+  ): boolean {
     return proto3.util.equals(QueryDelegatorDelegationsRequest, a, b);
   }
 }
@@ -643,10 +678,10 @@ export class QueryDelegatorDelegationsResponse extends Message<QueryDelegatorDel
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.staking.v1beta1.QueryDelegatorDelegationsResponse";
+  static readonly typeName = 'cosmos.staking.v1beta1.QueryDelegatorDelegationsResponse';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "delegation_responses", kind: "message", T: DelegationResponse, repeated: true },
-    { no: 2, name: "pagination", kind: "message", T: PageResponse },
+    { no: 1, name: 'delegation_responses', kind: 'message', T: DelegationResponse, repeated: true },
+    { no: 2, name: 'pagination', kind: 'message', T: PageResponse }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryDelegatorDelegationsResponse {
@@ -661,7 +696,10 @@ export class QueryDelegatorDelegationsResponse extends Message<QueryDelegatorDel
     return new QueryDelegatorDelegationsResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryDelegatorDelegationsResponse | PlainMessage<QueryDelegatorDelegationsResponse> | undefined, b: QueryDelegatorDelegationsResponse | PlainMessage<QueryDelegatorDelegationsResponse> | undefined): boolean {
+  static equals(
+    a: QueryDelegatorDelegationsResponse | PlainMessage<QueryDelegatorDelegationsResponse> | undefined,
+    b: QueryDelegatorDelegationsResponse | PlainMessage<QueryDelegatorDelegationsResponse> | undefined
+  ): boolean {
     return proto3.util.equals(QueryDelegatorDelegationsResponse, a, b);
   }
 }
@@ -678,7 +716,7 @@ export class QueryDelegatorUnbondingDelegationsRequest extends Message<QueryDele
    *
    * @generated from field: string delegator_addr = 1;
    */
-  delegatorAddr = "";
+  delegatorAddr = '';
 
   /**
    * pagination defines an optional pagination for the request.
@@ -693,10 +731,10 @@ export class QueryDelegatorUnbondingDelegationsRequest extends Message<QueryDele
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.staking.v1beta1.QueryDelegatorUnbondingDelegationsRequest";
+  static readonly typeName = 'cosmos.staking.v1beta1.QueryDelegatorUnbondingDelegationsRequest';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "delegator_addr", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "pagination", kind: "message", T: PageRequest },
+    { no: 1, name: 'delegator_addr', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'pagination', kind: 'message', T: PageRequest }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryDelegatorUnbondingDelegationsRequest {
@@ -711,7 +749,10 @@ export class QueryDelegatorUnbondingDelegationsRequest extends Message<QueryDele
     return new QueryDelegatorUnbondingDelegationsRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryDelegatorUnbondingDelegationsRequest | PlainMessage<QueryDelegatorUnbondingDelegationsRequest> | undefined, b: QueryDelegatorUnbondingDelegationsRequest | PlainMessage<QueryDelegatorUnbondingDelegationsRequest> | undefined): boolean {
+  static equals(
+    a: QueryDelegatorUnbondingDelegationsRequest | PlainMessage<QueryDelegatorUnbondingDelegationsRequest> | undefined,
+    b: QueryDelegatorUnbondingDelegationsRequest | PlainMessage<QueryDelegatorUnbondingDelegationsRequest> | undefined
+  ): boolean {
     return proto3.util.equals(QueryDelegatorUnbondingDelegationsRequest, a, b);
   }
 }
@@ -741,10 +782,10 @@ export class QueryDelegatorUnbondingDelegationsResponse extends Message<QueryDel
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.staking.v1beta1.QueryDelegatorUnbondingDelegationsResponse";
+  static readonly typeName = 'cosmos.staking.v1beta1.QueryDelegatorUnbondingDelegationsResponse';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "unbonding_responses", kind: "message", T: UnbondingDelegation, repeated: true },
-    { no: 2, name: "pagination", kind: "message", T: PageResponse },
+    { no: 1, name: 'unbonding_responses', kind: 'message', T: UnbondingDelegation, repeated: true },
+    { no: 2, name: 'pagination', kind: 'message', T: PageResponse }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryDelegatorUnbondingDelegationsResponse {
@@ -759,7 +800,10 @@ export class QueryDelegatorUnbondingDelegationsResponse extends Message<QueryDel
     return new QueryDelegatorUnbondingDelegationsResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryDelegatorUnbondingDelegationsResponse | PlainMessage<QueryDelegatorUnbondingDelegationsResponse> | undefined, b: QueryDelegatorUnbondingDelegationsResponse | PlainMessage<QueryDelegatorUnbondingDelegationsResponse> | undefined): boolean {
+  static equals(
+    a: QueryDelegatorUnbondingDelegationsResponse | PlainMessage<QueryDelegatorUnbondingDelegationsResponse> | undefined,
+    b: QueryDelegatorUnbondingDelegationsResponse | PlainMessage<QueryDelegatorUnbondingDelegationsResponse> | undefined
+  ): boolean {
     return proto3.util.equals(QueryDelegatorUnbondingDelegationsResponse, a, b);
   }
 }
@@ -776,21 +820,21 @@ export class QueryRedelegationsRequest extends Message<QueryRedelegationsRequest
    *
    * @generated from field: string delegator_addr = 1;
    */
-  delegatorAddr = "";
+  delegatorAddr = '';
 
   /**
    * src_validator_addr defines the validator address to redelegate from.
    *
    * @generated from field: string src_validator_addr = 2;
    */
-  srcValidatorAddr = "";
+  srcValidatorAddr = '';
 
   /**
    * dst_validator_addr defines the validator address to redelegate to.
    *
    * @generated from field: string dst_validator_addr = 3;
    */
-  dstValidatorAddr = "";
+  dstValidatorAddr = '';
 
   /**
    * pagination defines an optional pagination for the request.
@@ -805,12 +849,12 @@ export class QueryRedelegationsRequest extends Message<QueryRedelegationsRequest
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.staking.v1beta1.QueryRedelegationsRequest";
+  static readonly typeName = 'cosmos.staking.v1beta1.QueryRedelegationsRequest';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "delegator_addr", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "src_validator_addr", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "dst_validator_addr", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "pagination", kind: "message", T: PageRequest },
+    { no: 1, name: 'delegator_addr', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'src_validator_addr', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'dst_validator_addr', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: 'pagination', kind: 'message', T: PageRequest }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryRedelegationsRequest {
@@ -825,7 +869,10 @@ export class QueryRedelegationsRequest extends Message<QueryRedelegationsRequest
     return new QueryRedelegationsRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryRedelegationsRequest | PlainMessage<QueryRedelegationsRequest> | undefined, b: QueryRedelegationsRequest | PlainMessage<QueryRedelegationsRequest> | undefined): boolean {
+  static equals(
+    a: QueryRedelegationsRequest | PlainMessage<QueryRedelegationsRequest> | undefined,
+    b: QueryRedelegationsRequest | PlainMessage<QueryRedelegationsRequest> | undefined
+  ): boolean {
     return proto3.util.equals(QueryRedelegationsRequest, a, b);
   }
 }
@@ -855,10 +902,10 @@ export class QueryRedelegationsResponse extends Message<QueryRedelegationsRespon
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.staking.v1beta1.QueryRedelegationsResponse";
+  static readonly typeName = 'cosmos.staking.v1beta1.QueryRedelegationsResponse';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "redelegation_responses", kind: "message", T: RedelegationResponse, repeated: true },
-    { no: 2, name: "pagination", kind: "message", T: PageResponse },
+    { no: 1, name: 'redelegation_responses', kind: 'message', T: RedelegationResponse, repeated: true },
+    { no: 2, name: 'pagination', kind: 'message', T: PageResponse }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryRedelegationsResponse {
@@ -873,7 +920,10 @@ export class QueryRedelegationsResponse extends Message<QueryRedelegationsRespon
     return new QueryRedelegationsResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryRedelegationsResponse | PlainMessage<QueryRedelegationsResponse> | undefined, b: QueryRedelegationsResponse | PlainMessage<QueryRedelegationsResponse> | undefined): boolean {
+  static equals(
+    a: QueryRedelegationsResponse | PlainMessage<QueryRedelegationsResponse> | undefined,
+    b: QueryRedelegationsResponse | PlainMessage<QueryRedelegationsResponse> | undefined
+  ): boolean {
     return proto3.util.equals(QueryRedelegationsResponse, a, b);
   }
 }
@@ -890,7 +940,7 @@ export class QueryDelegatorValidatorsRequest extends Message<QueryDelegatorValid
    *
    * @generated from field: string delegator_addr = 1;
    */
-  delegatorAddr = "";
+  delegatorAddr = '';
 
   /**
    * pagination defines an optional pagination for the request.
@@ -905,10 +955,10 @@ export class QueryDelegatorValidatorsRequest extends Message<QueryDelegatorValid
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.staking.v1beta1.QueryDelegatorValidatorsRequest";
+  static readonly typeName = 'cosmos.staking.v1beta1.QueryDelegatorValidatorsRequest';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "delegator_addr", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "pagination", kind: "message", T: PageRequest },
+    { no: 1, name: 'delegator_addr', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'pagination', kind: 'message', T: PageRequest }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryDelegatorValidatorsRequest {
@@ -923,7 +973,10 @@ export class QueryDelegatorValidatorsRequest extends Message<QueryDelegatorValid
     return new QueryDelegatorValidatorsRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryDelegatorValidatorsRequest | PlainMessage<QueryDelegatorValidatorsRequest> | undefined, b: QueryDelegatorValidatorsRequest | PlainMessage<QueryDelegatorValidatorsRequest> | undefined): boolean {
+  static equals(
+    a: QueryDelegatorValidatorsRequest | PlainMessage<QueryDelegatorValidatorsRequest> | undefined,
+    b: QueryDelegatorValidatorsRequest | PlainMessage<QueryDelegatorValidatorsRequest> | undefined
+  ): boolean {
     return proto3.util.equals(QueryDelegatorValidatorsRequest, a, b);
   }
 }
@@ -955,10 +1008,10 @@ export class QueryDelegatorValidatorsResponse extends Message<QueryDelegatorVali
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.staking.v1beta1.QueryDelegatorValidatorsResponse";
+  static readonly typeName = 'cosmos.staking.v1beta1.QueryDelegatorValidatorsResponse';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "validators", kind: "message", T: Validator, repeated: true },
-    { no: 2, name: "pagination", kind: "message", T: PageResponse },
+    { no: 1, name: 'validators', kind: 'message', T: Validator, repeated: true },
+    { no: 2, name: 'pagination', kind: 'message', T: PageResponse }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryDelegatorValidatorsResponse {
@@ -973,7 +1026,10 @@ export class QueryDelegatorValidatorsResponse extends Message<QueryDelegatorVali
     return new QueryDelegatorValidatorsResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryDelegatorValidatorsResponse | PlainMessage<QueryDelegatorValidatorsResponse> | undefined, b: QueryDelegatorValidatorsResponse | PlainMessage<QueryDelegatorValidatorsResponse> | undefined): boolean {
+  static equals(
+    a: QueryDelegatorValidatorsResponse | PlainMessage<QueryDelegatorValidatorsResponse> | undefined,
+    b: QueryDelegatorValidatorsResponse | PlainMessage<QueryDelegatorValidatorsResponse> | undefined
+  ): boolean {
     return proto3.util.equals(QueryDelegatorValidatorsResponse, a, b);
   }
 }
@@ -990,14 +1046,14 @@ export class QueryDelegatorValidatorRequest extends Message<QueryDelegatorValida
    *
    * @generated from field: string delegator_addr = 1;
    */
-  delegatorAddr = "";
+  delegatorAddr = '';
 
   /**
    * validator_addr defines the validator address to query for.
    *
    * @generated from field: string validator_addr = 2;
    */
-  validatorAddr = "";
+  validatorAddr = '';
 
   constructor(data?: PartialMessage<QueryDelegatorValidatorRequest>) {
     super();
@@ -1005,10 +1061,10 @@ export class QueryDelegatorValidatorRequest extends Message<QueryDelegatorValida
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.staking.v1beta1.QueryDelegatorValidatorRequest";
+  static readonly typeName = 'cosmos.staking.v1beta1.QueryDelegatorValidatorRequest';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "delegator_addr", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "validator_addr", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'delegator_addr', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'validator_addr', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryDelegatorValidatorRequest {
@@ -1023,7 +1079,10 @@ export class QueryDelegatorValidatorRequest extends Message<QueryDelegatorValida
     return new QueryDelegatorValidatorRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryDelegatorValidatorRequest | PlainMessage<QueryDelegatorValidatorRequest> | undefined, b: QueryDelegatorValidatorRequest | PlainMessage<QueryDelegatorValidatorRequest> | undefined): boolean {
+  static equals(
+    a: QueryDelegatorValidatorRequest | PlainMessage<QueryDelegatorValidatorRequest> | undefined,
+    b: QueryDelegatorValidatorRequest | PlainMessage<QueryDelegatorValidatorRequest> | undefined
+  ): boolean {
     return proto3.util.equals(QueryDelegatorValidatorRequest, a, b);
   }
 }
@@ -1048,10 +1107,8 @@ export class QueryDelegatorValidatorResponse extends Message<QueryDelegatorValid
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.staking.v1beta1.QueryDelegatorValidatorResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "validator", kind: "message", T: Validator },
-  ]);
+  static readonly typeName = 'cosmos.staking.v1beta1.QueryDelegatorValidatorResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'validator', kind: 'message', T: Validator }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryDelegatorValidatorResponse {
     return new QueryDelegatorValidatorResponse().fromBinary(bytes, options);
@@ -1065,7 +1122,10 @@ export class QueryDelegatorValidatorResponse extends Message<QueryDelegatorValid
     return new QueryDelegatorValidatorResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryDelegatorValidatorResponse | PlainMessage<QueryDelegatorValidatorResponse> | undefined, b: QueryDelegatorValidatorResponse | PlainMessage<QueryDelegatorValidatorResponse> | undefined): boolean {
+  static equals(
+    a: QueryDelegatorValidatorResponse | PlainMessage<QueryDelegatorValidatorResponse> | undefined,
+    b: QueryDelegatorValidatorResponse | PlainMessage<QueryDelegatorValidatorResponse> | undefined
+  ): boolean {
     return proto3.util.equals(QueryDelegatorValidatorResponse, a, b);
   }
 }
@@ -1090,10 +1150,8 @@ export class QueryHistoricalInfoRequest extends Message<QueryHistoricalInfoReque
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.staking.v1beta1.QueryHistoricalInfoRequest";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "height", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
-  ]);
+  static readonly typeName = 'cosmos.staking.v1beta1.QueryHistoricalInfoRequest';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'height', kind: 'scalar', T: 3 /* ScalarType.INT64 */ }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryHistoricalInfoRequest {
     return new QueryHistoricalInfoRequest().fromBinary(bytes, options);
@@ -1107,7 +1165,10 @@ export class QueryHistoricalInfoRequest extends Message<QueryHistoricalInfoReque
     return new QueryHistoricalInfoRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryHistoricalInfoRequest | PlainMessage<QueryHistoricalInfoRequest> | undefined, b: QueryHistoricalInfoRequest | PlainMessage<QueryHistoricalInfoRequest> | undefined): boolean {
+  static equals(
+    a: QueryHistoricalInfoRequest | PlainMessage<QueryHistoricalInfoRequest> | undefined,
+    b: QueryHistoricalInfoRequest | PlainMessage<QueryHistoricalInfoRequest> | undefined
+  ): boolean {
     return proto3.util.equals(QueryHistoricalInfoRequest, a, b);
   }
 }
@@ -1132,10 +1193,8 @@ export class QueryHistoricalInfoResponse extends Message<QueryHistoricalInfoResp
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.staking.v1beta1.QueryHistoricalInfoResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "hist", kind: "message", T: HistoricalInfo },
-  ]);
+  static readonly typeName = 'cosmos.staking.v1beta1.QueryHistoricalInfoResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'hist', kind: 'message', T: HistoricalInfo }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryHistoricalInfoResponse {
     return new QueryHistoricalInfoResponse().fromBinary(bytes, options);
@@ -1149,7 +1208,10 @@ export class QueryHistoricalInfoResponse extends Message<QueryHistoricalInfoResp
     return new QueryHistoricalInfoResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryHistoricalInfoResponse | PlainMessage<QueryHistoricalInfoResponse> | undefined, b: QueryHistoricalInfoResponse | PlainMessage<QueryHistoricalInfoResponse> | undefined): boolean {
+  static equals(
+    a: QueryHistoricalInfoResponse | PlainMessage<QueryHistoricalInfoResponse> | undefined,
+    b: QueryHistoricalInfoResponse | PlainMessage<QueryHistoricalInfoResponse> | undefined
+  ): boolean {
     return proto3.util.equals(QueryHistoricalInfoResponse, a, b);
   }
 }
@@ -1166,9 +1228,8 @@ export class QueryPoolRequest extends Message<QueryPoolRequest> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.staking.v1beta1.QueryPoolRequest";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-  ]);
+  static readonly typeName = 'cosmos.staking.v1beta1.QueryPoolRequest';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => []);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryPoolRequest {
     return new QueryPoolRequest().fromBinary(bytes, options);
@@ -1182,7 +1243,10 @@ export class QueryPoolRequest extends Message<QueryPoolRequest> {
     return new QueryPoolRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryPoolRequest | PlainMessage<QueryPoolRequest> | undefined, b: QueryPoolRequest | PlainMessage<QueryPoolRequest> | undefined): boolean {
+  static equals(
+    a: QueryPoolRequest | PlainMessage<QueryPoolRequest> | undefined,
+    b: QueryPoolRequest | PlainMessage<QueryPoolRequest> | undefined
+  ): boolean {
     return proto3.util.equals(QueryPoolRequest, a, b);
   }
 }
@@ -1206,10 +1270,8 @@ export class QueryPoolResponse extends Message<QueryPoolResponse> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.staking.v1beta1.QueryPoolResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "pool", kind: "message", T: Pool },
-  ]);
+  static readonly typeName = 'cosmos.staking.v1beta1.QueryPoolResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'pool', kind: 'message', T: Pool }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryPoolResponse {
     return new QueryPoolResponse().fromBinary(bytes, options);
@@ -1223,7 +1285,10 @@ export class QueryPoolResponse extends Message<QueryPoolResponse> {
     return new QueryPoolResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryPoolResponse | PlainMessage<QueryPoolResponse> | undefined, b: QueryPoolResponse | PlainMessage<QueryPoolResponse> | undefined): boolean {
+  static equals(
+    a: QueryPoolResponse | PlainMessage<QueryPoolResponse> | undefined,
+    b: QueryPoolResponse | PlainMessage<QueryPoolResponse> | undefined
+  ): boolean {
     return proto3.util.equals(QueryPoolResponse, a, b);
   }
 }
@@ -1240,9 +1305,8 @@ export class QueryParamsRequest extends Message<QueryParamsRequest> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.staking.v1beta1.QueryParamsRequest";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-  ]);
+  static readonly typeName = 'cosmos.staking.v1beta1.QueryParamsRequest';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => []);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryParamsRequest {
     return new QueryParamsRequest().fromBinary(bytes, options);
@@ -1256,7 +1320,10 @@ export class QueryParamsRequest extends Message<QueryParamsRequest> {
     return new QueryParamsRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryParamsRequest | PlainMessage<QueryParamsRequest> | undefined, b: QueryParamsRequest | PlainMessage<QueryParamsRequest> | undefined): boolean {
+  static equals(
+    a: QueryParamsRequest | PlainMessage<QueryParamsRequest> | undefined,
+    b: QueryParamsRequest | PlainMessage<QueryParamsRequest> | undefined
+  ): boolean {
     return proto3.util.equals(QueryParamsRequest, a, b);
   }
 }
@@ -1280,10 +1347,8 @@ export class QueryParamsResponse extends Message<QueryParamsResponse> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.staking.v1beta1.QueryParamsResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "params", kind: "message", T: Params },
-  ]);
+  static readonly typeName = 'cosmos.staking.v1beta1.QueryParamsResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'params', kind: 'message', T: Params }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryParamsResponse {
     return new QueryParamsResponse().fromBinary(bytes, options);
@@ -1297,8 +1362,10 @@ export class QueryParamsResponse extends Message<QueryParamsResponse> {
     return new QueryParamsResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryParamsResponse | PlainMessage<QueryParamsResponse> | undefined, b: QueryParamsResponse | PlainMessage<QueryParamsResponse> | undefined): boolean {
+  static equals(
+    a: QueryParamsResponse | PlainMessage<QueryParamsResponse> | undefined,
+    b: QueryParamsResponse | PlainMessage<QueryParamsResponse> | undefined
+  ): boolean {
     return proto3.util.equals(QueryParamsResponse, a, b);
   }
 }
-

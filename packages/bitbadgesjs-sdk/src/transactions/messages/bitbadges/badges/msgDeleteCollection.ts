@@ -1,64 +1,60 @@
-import * as badges from '../../../../proto/badges/tx_pb'
-
-import { NumberType } from '../../../..'
-import { createTransactionPayload } from '../../base'
-import { Chain, Fee, Sender } from "../../common"
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base';
+import type { NumberType } from '@/common/string-numbers';
+import { Stringify } from '@/common/string-numbers';
+import * as badges from '@/proto/badges/tx_pb';
+import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
+import type { iMsgDeleteCollection } from './interfaces';
 
 /**
  * MsgDeleteCollection represents the message for deleting a collection. Once deleted, the collection cannot be recovered.
- *
  * Note that the collection can be archived instead of deleted, which will prevent any transactions but not delete the collection from the storage.
  *
  * Only executable by the manager. Must have adequate permissions.
  *
- * @typedef {Object} MsgDeleteCollection
- * @property {string} creator - The creator of the transaction.
- * @property {T} collectionId - The ID of the collection to delete.
+ * @category Transactions
  */
-export interface MsgDeleteCollection<T extends NumberType> {
-  creator: string
-  collectionId: T
-}
+export class MsgDeleteCollection<T extends NumberType> extends BaseNumberTypeClass<MsgDeleteCollection<T>> implements iMsgDeleteCollection<T> {
+  creator: string;
+  collectionId: T;
 
-export function convertMsgDeleteCollection<T extends NumberType, U extends NumberType>(
-  msg: MsgDeleteCollection<T>,
-  convertFunction: (item: T) => U
-): MsgDeleteCollection<U> {
-  return {
-    ...msg,
-    collectionId: convertFunction(msg.collectionId),
+  constructor(msg: iMsgDeleteCollection<T>) {
+    super();
+    this.creator = msg.creator;
+    this.collectionId = msg.collectionId;
   }
-}
 
-export function convertFromProtoToMsgDeleteCollection(
-  protoMsg: badges.MsgDeleteCollection,
-): MsgDeleteCollection<bigint> {
-  const msg = (protoMsg.toJson({ emitDefaultValues: true }) as any) as MsgDeleteCollection<string>;
-
-  return {
-    creator: msg.creator,
-    collectionId: BigInt(msg.collectionId),
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): MsgDeleteCollection<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as MsgDeleteCollection<U>;
   }
-}
 
-/**
- * Creates a new transaction with the MsgDeleteCollection message.
- *
- * Note this only creates a transaction with one Msg. For multi-msg transactions, you can custom build using createTransactionPayload. See docs for tutorials.
- *
- * @param {Chain} chain - The chain to create the transaction for.
- * @param {Sender} sender - The sender details for the transaction.
- * @param {Fee} fee - The fee of the transaction.
- * @param {string} memo - The memo of the transaction.
- * @param {MsgDeleteCollection} params - The parameters of the DeleteCollection message.
- */
-export function createTxMsgDeleteCollection<T extends NumberType>(
-  chain: Chain,
-  sender: Sender,
-  fee: Fee,
-  memo: string,
-  params: MsgDeleteCollection<T>
-) {
-  const msgCosmos = new badges.MsgDeleteCollection(convertMsgDeleteCollection(params, String))
-  return createTransactionPayload({ chain, sender, fee, memo, }, msgCosmos)
+  getNumberFieldNames(): string[] {
+    return ['collectionId'];
+  }
+
+  toProto(): badges.MsgDeleteCollection {
+    return new badges.MsgDeleteCollection(this.convert(Stringify));
+  }
+
+  static fromJson<U extends NumberType>(
+    jsonValue: JsonValue,
+    convertFunction: (item: NumberType) => U,
+    options?: Partial<JsonReadOptions>
+  ): MsgDeleteCollection<U> {
+    return MsgDeleteCollection.fromProto(badges.MsgDeleteCollection.fromJson(jsonValue, options), convertFunction);
+  }
+
+  static fromJsonString<U extends NumberType>(
+    jsonString: string,
+    convertFunction: (item: NumberType) => U,
+    options?: Partial<JsonReadOptions>
+  ): MsgDeleteCollection<U> {
+    return MsgDeleteCollection.fromProto(badges.MsgDeleteCollection.fromJsonString(jsonString, options), convertFunction);
+  }
+
+  static fromProto<U extends NumberType>(protoMsg: badges.MsgDeleteCollection, convertFunction: (item: NumberType) => U): MsgDeleteCollection<U> {
+    return new MsgDeleteCollection({
+      creator: protoMsg.creator,
+      collectionId: convertFunction(protoMsg.collectionId)
+    });
+  }
 }

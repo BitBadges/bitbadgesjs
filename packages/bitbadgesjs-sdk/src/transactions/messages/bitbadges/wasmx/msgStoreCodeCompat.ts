@@ -1,41 +1,39 @@
-
-import * as wasmx from "../../../../proto/wasmx/tx_pb";
-import { createTransactionPayload } from "../../base";
-import { Chain, Fee, Sender } from "../../common";
-
-/**
- * MsgStoreCodeCompat defines a ExecuteContractCompat message.
- *
- * @typedef {Object} MsgStoreCodeCompat
- * @property {string} sender - The sender of the transaction.
- * @property {string} hexWasmByteCode - The contract address to execute.
- */
-export interface MsgStoreCodeCompat {
-  sender: string
-  hexWasmByteCode: string
-}
+import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
+import type { iMsgStoreCodeCompat } from './interfaces';
+import * as wasmx from '@/proto/wasmx/tx_pb';
+import { CustomTypeClass } from '@/common/base';
 
 /**
- * Creates a new transaction with the MsgStoreCodeCompat message.
+ * MsgStoreCodeCompat defines a StoreCodeCompat message. This is a wrapper for MsgStoreCode that allows for compatibility with the different signatures.
  *
- * Note this only creates a transaction with one Msg. For multi-msg transactions, you can custom build using createTransactionPayload. See docs for tutorials.
- *
- * @param {Chain} chain - The chain to create the transaction for.
- * @param {Sender} sender - The sender details for the transaction.
- * @param {Fee} fee - The fee of the transaction.
- * @param {string} memo - The memo of the transaction.
- * @param {MsgStoreCodeCompat} params - The parameters of the ExecuteContractCompat message.
+ * @category Transactions
  */
-export function createTxMsgStoreCodeCompat(
-  chain: Chain,
-  sender: Sender,
-  fee: Fee,
-  memo: string,
-  params: MsgStoreCodeCompat
-) {
-  const msgCosmos = new wasmx.MsgStoreCodeCompat({
-    sender: params.sender,
-    hexWasmByteCode: params.hexWasmByteCode,
-  })
-  return createTransactionPayload({ chain, sender, fee, memo, }, msgCosmos)
+export class MsgStoreCodeCompat extends CustomTypeClass<MsgStoreCodeCompat> implements iMsgStoreCodeCompat {
+  sender: string;
+  hexWasmByteCode: string;
+
+  constructor(msg: iMsgStoreCodeCompat) {
+    super();
+    this.sender = msg.sender;
+    this.hexWasmByteCode = msg.hexWasmByteCode;
+  }
+
+  toProto(): wasmx.MsgStoreCodeCompat {
+    return new wasmx.MsgStoreCodeCompat({ ...this });
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgStoreCodeCompat {
+    return MsgStoreCodeCompat.fromProto(wasmx.MsgStoreCodeCompat.fromJson(jsonValue, options));
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgStoreCodeCompat {
+    return MsgStoreCodeCompat.fromProto(wasmx.MsgStoreCodeCompat.fromJsonString(jsonString, options));
+  }
+
+  static fromProto(protoMsg: wasmx.MsgStoreCodeCompat): MsgStoreCodeCompat {
+    return new MsgStoreCodeCompat({
+      sender: protoMsg.sender,
+      hexWasmByteCode: protoMsg.hexWasmByteCode
+    });
+  }
 }

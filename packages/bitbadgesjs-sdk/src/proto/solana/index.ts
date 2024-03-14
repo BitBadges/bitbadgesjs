@@ -1,1 +1,1 @@
-export * from './web3_pb'
+export * from './web3_pb';

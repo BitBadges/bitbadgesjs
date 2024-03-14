@@ -3,10 +3,10 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3, protoInt64 } from "@bufbuild/protobuf";
-import { Coin } from "../../base/v1beta1/coin_pb.js";
-import { Period } from "./vesting_pb.js";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3, protoInt64 } from '@bufbuild/protobuf';
+import { Coin } from '../../base/v1beta1/coin_pb.js';
+import { Period } from './vesting_pb.js';
 
 /**
  * MsgCreateVestingAccount defines a message that enables creating a vesting
@@ -18,12 +18,12 @@ export class MsgCreateVestingAccount extends Message<MsgCreateVestingAccount> {
   /**
    * @generated from field: string from_address = 1;
    */
-  fromAddress = "";
+  fromAddress = '';
 
   /**
    * @generated from field: string to_address = 2;
    */
-  toAddress = "";
+  toAddress = '';
 
   /**
    * @generated from field: repeated cosmos.base.v1beta1.Coin amount = 3;
@@ -48,13 +48,13 @@ export class MsgCreateVestingAccount extends Message<MsgCreateVestingAccount> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.vesting.v1beta1.MsgCreateVestingAccount";
+  static readonly typeName = 'cosmos.vesting.v1beta1.MsgCreateVestingAccount';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "from_address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "to_address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "amount", kind: "message", T: Coin, repeated: true },
-    { no: 4, name: "end_time", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
-    { no: 5, name: "delayed", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 1, name: 'from_address', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'to_address', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'amount', kind: 'message', T: Coin, repeated: true },
+    { no: 4, name: 'end_time', kind: 'scalar', T: 3 /* ScalarType.INT64 */ },
+    { no: 5, name: 'delayed', kind: 'scalar', T: 8 /* ScalarType.BOOL */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgCreateVestingAccount {
@@ -69,7 +69,10 @@ export class MsgCreateVestingAccount extends Message<MsgCreateVestingAccount> {
     return new MsgCreateVestingAccount().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgCreateVestingAccount | PlainMessage<MsgCreateVestingAccount> | undefined, b: MsgCreateVestingAccount | PlainMessage<MsgCreateVestingAccount> | undefined): boolean {
+  static equals(
+    a: MsgCreateVestingAccount | PlainMessage<MsgCreateVestingAccount> | undefined,
+    b: MsgCreateVestingAccount | PlainMessage<MsgCreateVestingAccount> | undefined
+  ): boolean {
     return proto3.util.equals(MsgCreateVestingAccount, a, b);
   }
 }
@@ -86,9 +89,8 @@ export class MsgCreateVestingAccountResponse extends Message<MsgCreateVestingAcc
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.vesting.v1beta1.MsgCreateVestingAccountResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-  ]);
+  static readonly typeName = 'cosmos.vesting.v1beta1.MsgCreateVestingAccountResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => []);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgCreateVestingAccountResponse {
     return new MsgCreateVestingAccountResponse().fromBinary(bytes, options);
@@ -102,7 +104,10 @@ export class MsgCreateVestingAccountResponse extends Message<MsgCreateVestingAcc
     return new MsgCreateVestingAccountResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgCreateVestingAccountResponse | PlainMessage<MsgCreateVestingAccountResponse> | undefined, b: MsgCreateVestingAccountResponse | PlainMessage<MsgCreateVestingAccountResponse> | undefined): boolean {
+  static equals(
+    a: MsgCreateVestingAccountResponse | PlainMessage<MsgCreateVestingAccountResponse> | undefined,
+    b: MsgCreateVestingAccountResponse | PlainMessage<MsgCreateVestingAccountResponse> | undefined
+  ): boolean {
     return proto3.util.equals(MsgCreateVestingAccountResponse, a, b);
   }
 }
@@ -119,12 +124,12 @@ export class MsgCreatePermanentLockedAccount extends Message<MsgCreatePermanentL
   /**
    * @generated from field: string from_address = 1;
    */
-  fromAddress = "";
+  fromAddress = '';
 
   /**
    * @generated from field: string to_address = 2;
    */
-  toAddress = "";
+  toAddress = '';
 
   /**
    * @generated from field: repeated cosmos.base.v1beta1.Coin amount = 3;
@@ -137,11 +142,11 @@ export class MsgCreatePermanentLockedAccount extends Message<MsgCreatePermanentL
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.vesting.v1beta1.MsgCreatePermanentLockedAccount";
+  static readonly typeName = 'cosmos.vesting.v1beta1.MsgCreatePermanentLockedAccount';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "from_address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "to_address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "amount", kind: "message", T: Coin, repeated: true },
+    { no: 1, name: 'from_address', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'to_address', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'amount', kind: 'message', T: Coin, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgCreatePermanentLockedAccount {
@@ -156,7 +161,10 @@ export class MsgCreatePermanentLockedAccount extends Message<MsgCreatePermanentL
     return new MsgCreatePermanentLockedAccount().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgCreatePermanentLockedAccount | PlainMessage<MsgCreatePermanentLockedAccount> | undefined, b: MsgCreatePermanentLockedAccount | PlainMessage<MsgCreatePermanentLockedAccount> | undefined): boolean {
+  static equals(
+    a: MsgCreatePermanentLockedAccount | PlainMessage<MsgCreatePermanentLockedAccount> | undefined,
+    b: MsgCreatePermanentLockedAccount | PlainMessage<MsgCreatePermanentLockedAccount> | undefined
+  ): boolean {
     return proto3.util.equals(MsgCreatePermanentLockedAccount, a, b);
   }
 }
@@ -175,9 +183,8 @@ export class MsgCreatePermanentLockedAccountResponse extends Message<MsgCreatePe
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.vesting.v1beta1.MsgCreatePermanentLockedAccountResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-  ]);
+  static readonly typeName = 'cosmos.vesting.v1beta1.MsgCreatePermanentLockedAccountResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => []);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgCreatePermanentLockedAccountResponse {
     return new MsgCreatePermanentLockedAccountResponse().fromBinary(bytes, options);
@@ -191,7 +198,10 @@ export class MsgCreatePermanentLockedAccountResponse extends Message<MsgCreatePe
     return new MsgCreatePermanentLockedAccountResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgCreatePermanentLockedAccountResponse | PlainMessage<MsgCreatePermanentLockedAccountResponse> | undefined, b: MsgCreatePermanentLockedAccountResponse | PlainMessage<MsgCreatePermanentLockedAccountResponse> | undefined): boolean {
+  static equals(
+    a: MsgCreatePermanentLockedAccountResponse | PlainMessage<MsgCreatePermanentLockedAccountResponse> | undefined,
+    b: MsgCreatePermanentLockedAccountResponse | PlainMessage<MsgCreatePermanentLockedAccountResponse> | undefined
+  ): boolean {
     return proto3.util.equals(MsgCreatePermanentLockedAccountResponse, a, b);
   }
 }
@@ -208,12 +218,12 @@ export class MsgCreatePeriodicVestingAccount extends Message<MsgCreatePeriodicVe
   /**
    * @generated from field: string from_address = 1;
    */
-  fromAddress = "";
+  fromAddress = '';
 
   /**
    * @generated from field: string to_address = 2;
    */
-  toAddress = "";
+  toAddress = '';
 
   /**
    * start of vesting as unix time (in seconds).
@@ -233,12 +243,12 @@ export class MsgCreatePeriodicVestingAccount extends Message<MsgCreatePeriodicVe
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.vesting.v1beta1.MsgCreatePeriodicVestingAccount";
+  static readonly typeName = 'cosmos.vesting.v1beta1.MsgCreatePeriodicVestingAccount';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "from_address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "to_address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "start_time", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
-    { no: 4, name: "vesting_periods", kind: "message", T: Period, repeated: true },
+    { no: 1, name: 'from_address', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'to_address', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'start_time', kind: 'scalar', T: 3 /* ScalarType.INT64 */ },
+    { no: 4, name: 'vesting_periods', kind: 'message', T: Period, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgCreatePeriodicVestingAccount {
@@ -253,7 +263,10 @@ export class MsgCreatePeriodicVestingAccount extends Message<MsgCreatePeriodicVe
     return new MsgCreatePeriodicVestingAccount().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgCreatePeriodicVestingAccount | PlainMessage<MsgCreatePeriodicVestingAccount> | undefined, b: MsgCreatePeriodicVestingAccount | PlainMessage<MsgCreatePeriodicVestingAccount> | undefined): boolean {
+  static equals(
+    a: MsgCreatePeriodicVestingAccount | PlainMessage<MsgCreatePeriodicVestingAccount> | undefined,
+    b: MsgCreatePeriodicVestingAccount | PlainMessage<MsgCreatePeriodicVestingAccount> | undefined
+  ): boolean {
     return proto3.util.equals(MsgCreatePeriodicVestingAccount, a, b);
   }
 }
@@ -273,9 +286,8 @@ export class MsgCreatePeriodicVestingAccountResponse extends Message<MsgCreatePe
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.vesting.v1beta1.MsgCreatePeriodicVestingAccountResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-  ]);
+  static readonly typeName = 'cosmos.vesting.v1beta1.MsgCreatePeriodicVestingAccountResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => []);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgCreatePeriodicVestingAccountResponse {
     return new MsgCreatePeriodicVestingAccountResponse().fromBinary(bytes, options);
@@ -289,8 +301,10 @@ export class MsgCreatePeriodicVestingAccountResponse extends Message<MsgCreatePe
     return new MsgCreatePeriodicVestingAccountResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MsgCreatePeriodicVestingAccountResponse | PlainMessage<MsgCreatePeriodicVestingAccountResponse> | undefined, b: MsgCreatePeriodicVestingAccountResponse | PlainMessage<MsgCreatePeriodicVestingAccountResponse> | undefined): boolean {
+  static equals(
+    a: MsgCreatePeriodicVestingAccountResponse | PlainMessage<MsgCreatePeriodicVestingAccountResponse> | undefined,
+    b: MsgCreatePeriodicVestingAccountResponse | PlainMessage<MsgCreatePeriodicVestingAccountResponse> | undefined
+  ): boolean {
     return proto3.util.equals(MsgCreatePeriodicVestingAccountResponse, a, b);
   }
 }
-

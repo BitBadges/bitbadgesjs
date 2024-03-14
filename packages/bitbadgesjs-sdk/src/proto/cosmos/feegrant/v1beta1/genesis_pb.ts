@@ -5,9 +5,9 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
-import { Grant } from "./feegrant_pb.js";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3 } from '@bufbuild/protobuf';
+import { Grant } from './feegrant_pb.js';
 
 /**
  * GenesisState contains a set of fee allowances, persisted from the store
@@ -26,10 +26,8 @@ export class GenesisState extends Message<GenesisState> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.feegrant.v1beta1.GenesisState";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "allowances", kind: "message", T: Grant, repeated: true },
-  ]);
+  static readonly typeName = 'cosmos.feegrant.v1beta1.GenesisState';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'allowances', kind: 'message', T: Grant, repeated: true }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GenesisState {
     return new GenesisState().fromBinary(bytes, options);
@@ -47,4 +45,3 @@ export class GenesisState extends Message<GenesisState> {
     return proto3.util.equals(GenesisState, a, b);
   }
 }
-

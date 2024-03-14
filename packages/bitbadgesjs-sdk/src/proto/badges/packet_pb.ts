@@ -3,8 +3,8 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3 } from '@bufbuild/protobuf';
 
 /**
  * @generated from message badges.BadgesPacketData
@@ -13,15 +13,17 @@ export class BadgesPacketData extends Message<BadgesPacketData> {
   /**
    * @generated from oneof badges.BadgesPacketData.packet
    */
-  packet: {
-    /**
-     * this line is used by starport scaffolding # ibc/packet/proto/field
-     *
-     * @generated from field: badges.NoData noData = 1;
-     */
-    value: NoData;
-    case: "noData";
-  } | { case: undefined; value?: undefined } = { case: undefined };
+  packet:
+    | {
+        /**
+         * this line is used by starport scaffolding # ibc/packet/proto/field
+         *
+         * @generated from field: badges.NoData noData = 1;
+         */
+        value: NoData;
+        case: 'noData';
+      }
+    | { case: undefined; value?: undefined } = { case: undefined };
 
   constructor(data?: PartialMessage<BadgesPacketData>) {
     super();
@@ -29,10 +31,8 @@ export class BadgesPacketData extends Message<BadgesPacketData> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.BadgesPacketData";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "noData", kind: "message", T: NoData, oneof: "packet" },
-  ]);
+  static readonly typeName = 'badges.BadgesPacketData';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'noData', kind: 'message', T: NoData, oneof: 'packet' }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BadgesPacketData {
     return new BadgesPacketData().fromBinary(bytes, options);
@@ -46,7 +46,10 @@ export class BadgesPacketData extends Message<BadgesPacketData> {
     return new BadgesPacketData().fromJsonString(jsonString, options);
   }
 
-  static equals(a: BadgesPacketData | PlainMessage<BadgesPacketData> | undefined, b: BadgesPacketData | PlainMessage<BadgesPacketData> | undefined): boolean {
+  static equals(
+    a: BadgesPacketData | PlainMessage<BadgesPacketData> | undefined,
+    b: BadgesPacketData | PlainMessage<BadgesPacketData> | undefined
+  ): boolean {
     return proto3.util.equals(BadgesPacketData, a, b);
   }
 }
@@ -61,9 +64,8 @@ export class NoData extends Message<NoData> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.NoData";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-  ]);
+  static readonly typeName = 'badges.NoData';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => []);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): NoData {
     return new NoData().fromBinary(bytes, options);
@@ -81,4 +83,3 @@ export class NoData extends Message<NoData> {
     return proto3.util.equals(NoData, a, b);
   }
 }
-

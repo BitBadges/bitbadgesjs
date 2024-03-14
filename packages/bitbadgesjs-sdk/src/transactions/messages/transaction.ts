@@ -1,53 +1,55 @@
-import { Keccak } from 'sha3'
-import { Any } from '@bufbuild/protobuf'
-import { StdFee, makeSignDoc, serializeSignDoc } from '@cosmjs/amino'
-import { PubKey } from '../../proto/ethereum/ethsecp256k1/keys_pb.js'
-import { AminoTypes } from '../../amino/registry.js'
-import { convertProtoMessageToObject } from '../../amino/objectConverter.js'
-import { MessageGenerated, createAnyMessage } from '../../proto-types/utils.js'
-import { Coin } from '../../proto/cosmos/base/v1beta1/coin_pb.js'
-import { SignMode } from '../../proto/cosmos/tx/signing/v1beta1/signing_pb.js'
-import { TxBody, Fee, SignerInfo, ModeInfo, ModeInfo_Single, AuthInfo, SignDoc } from '../../proto/cosmos/tx/v1beta1/tx_pb.js'
-import { PubKey as SECP256k1 } from '../../proto/cosmos/crypto/secp256k1/keys_pb.js'
-import { PubKey as PubKeySolana } from '../../proto/cosmos/crypto/ed25519/keys_pb.js'
+import { Keccak } from 'sha3';
+import type { Any } from '@bufbuild/protobuf';
+import type { StdFee } from '@cosmjs/amino';
+import { makeSignDoc, serializeSignDoc } from '@cosmjs/amino';
+import { PubKey } from '@/proto/ethereum/ethsecp256k1/keys_pb.js';
+import { Coin } from '@/proto/cosmos/base/v1beta1/coin_pb.js';
+import { SignMode } from '@/proto/cosmos/tx/signing/v1beta1/signing_pb.js';
+import { TxBody, Fee, SignerInfo, ModeInfo, ModeInfo_Single, AuthInfo, SignDoc } from '@/proto/cosmos/tx/v1beta1/tx_pb.js';
+import { PubKey as SECP256k1 } from '@/proto/cosmos/crypto/secp256k1/keys_pb.js';
+import { PubKey as PubKeySolana } from '@/proto/cosmos/crypto/ed25519/keys_pb.js';
+import { convertProtoMessageToObject } from '@/transactions/amino/objectConverter.js';
+import { AminoTypes } from '@/transactions/amino/registry.js';
+import type { MessageGenerated } from './utils';
+import { createAnyMessage } from './utils';
 
-export const SIGN_DIRECT = SignMode.DIRECT
-export const LEGACY_AMINO = SignMode.LEGACY_AMINO_JSON
+export const SIGN_DIRECT = SignMode.DIRECT;
+export const LEGACY_AMINO = SignMode.LEGACY_AMINO_JSON;
 
 // Returns a base-64-encoded keccak256 hash of the
 // given content bytes.
 export function keccak256ToBase64(content: Uint8Array) {
-  const hash = new Keccak(256)
-  hash.update(Buffer.from(content))
-  const bytes = hash.digest('binary')
-  return Buffer.from(bytes).toString('base64')
+  const hash = new Keccak(256);
+  hash.update(Buffer.from(content));
+  const bytes = hash.digest('binary');
+  return Buffer.from(bytes).toString('base64');
 }
 
 // Converts an array of Protobuf MessageGenerated
 // objects to Amino representations using the registry.
 export function convertProtoMessagesToAmino(protoMessages: MessageGenerated[]) {
   return protoMessages.map((wrappedProtoMsg) => {
-    const protoObject = convertProtoMessageToObject(wrappedProtoMsg.message)
-    return AminoTypes.toAmino(protoObject)
-  })
+    const protoObject = convertProtoMessageToObject(wrappedProtoMsg.message);
+    return AminoTypes.toAmino(protoObject);
+  });
 }
 
 // TODO: messages should be typed as proto message. A types package is needed to export that type without problems
 export function createBodyWithMultipleMessages(messages: any[], memo: string) {
-  const content: Any[] = []
+  const content: Any[] = [];
 
   messages.forEach((message) => {
-    content.push(createAnyMessage(message))
-  })
+    content.push(createAnyMessage(message));
+  });
 
   return new TxBody({
     messages: content,
-    memo,
-  })
+    memo
+  });
 }
 
 export function createBody(message: any, memo: string) {
-  return createBodyWithMultipleMessages([message], memo)
+  return createBodyWithMultipleMessages([message], memo);
 }
 
 export function createFee(fee: string, denom: string, gasLimit: number) {
@@ -55,41 +57,36 @@ export function createFee(fee: string, denom: string, gasLimit: number) {
     amount: [
       new Coin({
         denom,
-        amount: fee,
-      }),
+        amount: fee
+      })
     ],
-    gasLimit: BigInt(gasLimit),
-  })
+    gasLimit: BigInt(gasLimit)
+  });
 }
 
-export function createSignerInfo(
-  algo: string,
-  publicKey: Uint8Array,
-  sequence: number,
-  mode: number,
-) {
-  let pubkey: MessageGenerated
+export function createSignerInfo(algo: string, publicKey: Uint8Array, sequence: number, mode: number) {
+  let pubkey: MessageGenerated;
   if (algo === 'secp256k1') {
     pubkey = {
       message: new SECP256k1({
-        key: publicKey,
+        key: publicKey
       }),
-      path: 'cosmos.crypto.secp256k1.PubKey',
-    }
+      path: 'cosmos.crypto.secp256k1.PubKey'
+    };
   } else if (algo === 'ed25519') {
     pubkey = {
       message: new PubKeySolana({
-        key: publicKey,
+        key: publicKey
       }),
-      path: 'cosmos.crypto.ed25519.PubKey',
-    }
+      path: 'cosmos.crypto.ed25519.PubKey'
+    };
   } else {
     pubkey = {
       message: new PubKey({
-        key: publicKey,
+        key: publicKey
       }),
-      path: 'ethereum.PubKey',
-    }
+      path: 'ethereum.PubKey'
+    };
   }
 
   const signerInfo = new SignerInfo({
@@ -97,36 +94,31 @@ export function createSignerInfo(
     modeInfo: new ModeInfo({
       sum: {
         value: new ModeInfo_Single({
-          mode,
+          mode
         }),
-        case: 'single',
-      },
+        case: 'single'
+      }
     }),
-    sequence: BigInt(sequence),
-  })
+    sequence: BigInt(sequence)
+  });
 
-  return signerInfo
+  return signerInfo;
 }
 
 export function createAuthInfo(signerInfo: SignerInfo, fee: Fee) {
   return new AuthInfo({
     signerInfos: [signerInfo],
-    fee,
-  })
+    fee
+  });
 }
 
-export function createSignDoc(
-  bodyBytes: Uint8Array,
-  authInfoBytes: Uint8Array,
-  chainId: string,
-  accountNumber: number,
-) {
+export function createSignDoc(bodyBytes: Uint8Array, authInfoBytes: Uint8Array, chainId: string, accountNumber: number) {
   return new SignDoc({
     bodyBytes,
     authInfoBytes,
     chainId,
-    accountNumber: BigInt(accountNumber),
-  })
+    accountNumber: BigInt(accountNumber)
+  });
 }
 
 export function createStdFee(amount: string, denom: string, gasLimit: number) {
@@ -134,23 +126,16 @@ export function createStdFee(amount: string, denom: string, gasLimit: number) {
     amount: [
       {
         amount,
-        denom,
-      },
+        denom
+      }
     ],
-    gas: gasLimit.toString(),
-  }
+    gas: gasLimit.toString()
+  };
 }
 
-export function createStdSignDocFromProto(
-  protoMessages: any[],
-  fee: StdFee,
-  chainId: string,
-  memo: string,
-  sequence: number,
-  accountNumber: number,
-) {
-  const aminoMsgs = convertProtoMessagesToAmino(protoMessages)
-  return makeSignDoc(aminoMsgs, fee, chainId, memo, accountNumber, sequence)
+export function createStdSignDocFromProto(protoMessages: any[], fee: StdFee, chainId: string, memo: string, sequence: number, accountNumber: number) {
+  const aminoMsgs = convertProtoMessagesToAmino(protoMessages);
+  return makeSignDoc(aminoMsgs, fee, chainId, memo, accountNumber, sequence);
 }
 
 // Returns the hashed digest of the corresponding StdSignDoc.
@@ -164,22 +149,15 @@ export function createStdSignDigestFromProto(
   gasLimit: number,
   sequence: number,
   accountNumber: number,
-  chainId: string,
+  chainId: string
 ) {
   try {
-    const stdFee = createStdFee(fee, denom, gasLimit)
-    const stdSignDoc = createStdSignDocFromProto(
-      messages,
-      stdFee,
-      chainId,
-      memo,
-      sequence,
-      accountNumber,
-    )
+    const stdFee = createStdFee(fee, denom, gasLimit);
+    const stdSignDoc = createStdSignDocFromProto(messages, stdFee, chainId, memo, sequence, accountNumber);
 
-    return keccak256ToBase64(serializeSignDoc(stdSignDoc))
+    return keccak256ToBase64(serializeSignDoc(stdSignDoc));
   } catch {
-    return ''
+    return '';
   }
 }
 
@@ -194,58 +172,34 @@ export function createTransactionWithMultipleMessages(
   pubKey: string,
   sequence: number,
   accountNumber: number,
-  chainId: string,
+  chainId: string
 ) {
-  const body = createBodyWithMultipleMessages(messages, memo)
-  const feeMessage = createFee(fee, denom, gasLimit)
-  const pubKeyDecoded = Buffer.from(pubKey, 'base64')
+  const body = createBodyWithMultipleMessages(messages, memo);
+  const feeMessage = createFee(fee, denom, gasLimit);
+  const pubKeyDecoded = Buffer.from(pubKey, 'base64');
 
-  const aminoSignerInfo = createSignerInfo(
-    algo,
-    new Uint8Array(pubKeyDecoded),
-    sequence,
-    LEGACY_AMINO,
-  )
-  const aminoAuthInfo = createAuthInfo(aminoSignerInfo, feeMessage)
-  const aminoSignDigest = createStdSignDigestFromProto(
-    messages,
-    memo,
-    fee,
-    denom,
-    gasLimit,
-    sequence,
-    accountNumber,
-    chainId,
-  )
+  const aminoSignerInfo = createSignerInfo(algo, new Uint8Array(pubKeyDecoded), sequence, LEGACY_AMINO);
+  const aminoAuthInfo = createAuthInfo(aminoSignerInfo, feeMessage);
+  const aminoSignDigest = createStdSignDigestFromProto(messages, memo, fee, denom, gasLimit, sequence, accountNumber, chainId);
 
-  const directSignerInfo = createSignerInfo(
-    algo,
-    new Uint8Array(pubKeyDecoded),
-    sequence,
-    SIGN_DIRECT,
-  )
-  const directAuthInfo = createAuthInfo(directSignerInfo, feeMessage)
-  const directSignDoc = createSignDoc(
-    body.toBinary(),
-    directAuthInfo.toBinary(),
-    chainId,
-    accountNumber,
-  )
+  const directSignerInfo = createSignerInfo(algo, new Uint8Array(pubKeyDecoded), sequence, SIGN_DIRECT);
+  const directAuthInfo = createAuthInfo(directSignerInfo, feeMessage);
+  const directSignDoc = createSignDoc(body.toBinary(), directAuthInfo.toBinary(), chainId, accountNumber);
 
-  const directSignDigest = keccak256ToBase64(directSignDoc.toBinary())
+  const directSignDigest = keccak256ToBase64(directSignDoc.toBinary());
 
   return {
     legacyAmino: {
       body,
       authInfo: aminoAuthInfo,
-      signBytes: aminoSignDigest,
+      signBytes: aminoSignDigest
     },
     signDirect: {
       body,
       authInfo: directAuthInfo,
-      signBytes: directSignDigest,
-    },
-  }
+      signBytes: directSignDigest
+    }
+  };
 }
 
 export function createTransaction(
@@ -258,18 +212,7 @@ export function createTransaction(
   pubKey: string,
   sequence: number,
   accountNumber: number,
-  chainId: string,
+  chainId: string
 ) {
-  return createTransactionWithMultipleMessages(
-    [message],
-    memo,
-    fee,
-    denom,
-    gasLimit,
-    algo,
-    pubKey,
-    sequence,
-    accountNumber,
-    chainId,
-  )
+  return createTransactionWithMultipleMessages([message], memo, fee, denom, gasLimit, algo, pubKey, sequence, accountNumber, chainId);
 }

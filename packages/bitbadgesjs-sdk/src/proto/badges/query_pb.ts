@@ -3,12 +3,12 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
-import { Params } from "./params_pb.js";
-import { BadgeCollection } from "./collections_pb.js";
-import { ApprovalTracker, UserBalanceStore } from "./transfers_pb.js";
-import { AddressList } from "./address_lists_pb.js";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3 } from '@bufbuild/protobuf';
+import { Params } from './params_pb.js';
+import { BadgeCollection } from './collections_pb.js';
+import { ApprovalTracker, UserBalanceStore } from './transfers_pb.js';
+import { AddressList } from './address_lists_pb.js';
 
 /**
  * QueryParamsRequest is request type for the Query/Params RPC method.
@@ -22,9 +22,8 @@ export class QueryParamsRequest extends Message<QueryParamsRequest> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.QueryParamsRequest";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-  ]);
+  static readonly typeName = 'badges.QueryParamsRequest';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => []);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryParamsRequest {
     return new QueryParamsRequest().fromBinary(bytes, options);
@@ -38,7 +37,10 @@ export class QueryParamsRequest extends Message<QueryParamsRequest> {
     return new QueryParamsRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryParamsRequest | PlainMessage<QueryParamsRequest> | undefined, b: QueryParamsRequest | PlainMessage<QueryParamsRequest> | undefined): boolean {
+  static equals(
+    a: QueryParamsRequest | PlainMessage<QueryParamsRequest> | undefined,
+    b: QueryParamsRequest | PlainMessage<QueryParamsRequest> | undefined
+  ): boolean {
     return proto3.util.equals(QueryParamsRequest, a, b);
   }
 }
@@ -62,10 +64,8 @@ export class QueryParamsResponse extends Message<QueryParamsResponse> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.QueryParamsResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "params", kind: "message", T: Params },
-  ]);
+  static readonly typeName = 'badges.QueryParamsResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'params', kind: 'message', T: Params }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryParamsResponse {
     return new QueryParamsResponse().fromBinary(bytes, options);
@@ -79,7 +79,10 @@ export class QueryParamsResponse extends Message<QueryParamsResponse> {
     return new QueryParamsResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryParamsResponse | PlainMessage<QueryParamsResponse> | undefined, b: QueryParamsResponse | PlainMessage<QueryParamsResponse> | undefined): boolean {
+  static equals(
+    a: QueryParamsResponse | PlainMessage<QueryParamsResponse> | undefined,
+    b: QueryParamsResponse | PlainMessage<QueryParamsResponse> | undefined
+  ): boolean {
     return proto3.util.equals(QueryParamsResponse, a, b);
   }
 }
@@ -91,7 +94,7 @@ export class QueryGetCollectionRequest extends Message<QueryGetCollectionRequest
   /**
    * @generated from field: string collectionId = 1;
    */
-  collectionId = "";
+  collectionId = '';
 
   constructor(data?: PartialMessage<QueryGetCollectionRequest>) {
     super();
@@ -99,10 +102,8 @@ export class QueryGetCollectionRequest extends Message<QueryGetCollectionRequest
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.QueryGetCollectionRequest";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-  ]);
+  static readonly typeName = 'badges.QueryGetCollectionRequest';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'collectionId', kind: 'scalar', T: 9 /* ScalarType.STRING */ }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryGetCollectionRequest {
     return new QueryGetCollectionRequest().fromBinary(bytes, options);
@@ -116,7 +117,10 @@ export class QueryGetCollectionRequest extends Message<QueryGetCollectionRequest
     return new QueryGetCollectionRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryGetCollectionRequest | PlainMessage<QueryGetCollectionRequest> | undefined, b: QueryGetCollectionRequest | PlainMessage<QueryGetCollectionRequest> | undefined): boolean {
+  static equals(
+    a: QueryGetCollectionRequest | PlainMessage<QueryGetCollectionRequest> | undefined,
+    b: QueryGetCollectionRequest | PlainMessage<QueryGetCollectionRequest> | undefined
+  ): boolean {
     return proto3.util.equals(QueryGetCollectionRequest, a, b);
   }
 }
@@ -136,10 +140,8 @@ export class QueryGetCollectionResponse extends Message<QueryGetCollectionRespon
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.QueryGetCollectionResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "collection", kind: "message", T: BadgeCollection },
-  ]);
+  static readonly typeName = 'badges.QueryGetCollectionResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'collection', kind: 'message', T: BadgeCollection }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryGetCollectionResponse {
     return new QueryGetCollectionResponse().fromBinary(bytes, options);
@@ -153,7 +155,10 @@ export class QueryGetCollectionResponse extends Message<QueryGetCollectionRespon
     return new QueryGetCollectionResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryGetCollectionResponse | PlainMessage<QueryGetCollectionResponse> | undefined, b: QueryGetCollectionResponse | PlainMessage<QueryGetCollectionResponse> | undefined): boolean {
+  static equals(
+    a: QueryGetCollectionResponse | PlainMessage<QueryGetCollectionResponse> | undefined,
+    b: QueryGetCollectionResponse | PlainMessage<QueryGetCollectionResponse> | undefined
+  ): boolean {
     return proto3.util.equals(QueryGetCollectionResponse, a, b);
   }
 }
@@ -165,12 +170,12 @@ export class QueryGetBalanceRequest extends Message<QueryGetBalanceRequest> {
   /**
    * @generated from field: string collectionId = 1;
    */
-  collectionId = "";
+  collectionId = '';
 
   /**
    * @generated from field: string address = 2;
    */
-  address = "";
+  address = '';
 
   constructor(data?: PartialMessage<QueryGetBalanceRequest>) {
     super();
@@ -178,10 +183,10 @@ export class QueryGetBalanceRequest extends Message<QueryGetBalanceRequest> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.QueryGetBalanceRequest";
+  static readonly typeName = 'badges.QueryGetBalanceRequest';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'collectionId', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'address', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryGetBalanceRequest {
@@ -196,7 +201,10 @@ export class QueryGetBalanceRequest extends Message<QueryGetBalanceRequest> {
     return new QueryGetBalanceRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryGetBalanceRequest | PlainMessage<QueryGetBalanceRequest> | undefined, b: QueryGetBalanceRequest | PlainMessage<QueryGetBalanceRequest> | undefined): boolean {
+  static equals(
+    a: QueryGetBalanceRequest | PlainMessage<QueryGetBalanceRequest> | undefined,
+    b: QueryGetBalanceRequest | PlainMessage<QueryGetBalanceRequest> | undefined
+  ): boolean {
     return proto3.util.equals(QueryGetBalanceRequest, a, b);
   }
 }
@@ -216,10 +224,8 @@ export class QueryGetBalanceResponse extends Message<QueryGetBalanceResponse> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.QueryGetBalanceResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "balance", kind: "message", T: UserBalanceStore },
-  ]);
+  static readonly typeName = 'badges.QueryGetBalanceResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'balance', kind: 'message', T: UserBalanceStore }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryGetBalanceResponse {
     return new QueryGetBalanceResponse().fromBinary(bytes, options);
@@ -233,7 +239,10 @@ export class QueryGetBalanceResponse extends Message<QueryGetBalanceResponse> {
     return new QueryGetBalanceResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryGetBalanceResponse | PlainMessage<QueryGetBalanceResponse> | undefined, b: QueryGetBalanceResponse | PlainMessage<QueryGetBalanceResponse> | undefined): boolean {
+  static equals(
+    a: QueryGetBalanceResponse | PlainMessage<QueryGetBalanceResponse> | undefined,
+    b: QueryGetBalanceResponse | PlainMessage<QueryGetBalanceResponse> | undefined
+  ): boolean {
     return proto3.util.equals(QueryGetBalanceResponse, a, b);
   }
 }
@@ -245,7 +254,7 @@ export class QueryGetAddressListRequest extends Message<QueryGetAddressListReque
   /**
    * @generated from field: string listId = 1;
    */
-  listId = "";
+  listId = '';
 
   constructor(data?: PartialMessage<QueryGetAddressListRequest>) {
     super();
@@ -253,10 +262,8 @@ export class QueryGetAddressListRequest extends Message<QueryGetAddressListReque
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.QueryGetAddressListRequest";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "listId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-  ]);
+  static readonly typeName = 'badges.QueryGetAddressListRequest';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'listId', kind: 'scalar', T: 9 /* ScalarType.STRING */ }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryGetAddressListRequest {
     return new QueryGetAddressListRequest().fromBinary(bytes, options);
@@ -270,7 +277,10 @@ export class QueryGetAddressListRequest extends Message<QueryGetAddressListReque
     return new QueryGetAddressListRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryGetAddressListRequest | PlainMessage<QueryGetAddressListRequest> | undefined, b: QueryGetAddressListRequest | PlainMessage<QueryGetAddressListRequest> | undefined): boolean {
+  static equals(
+    a: QueryGetAddressListRequest | PlainMessage<QueryGetAddressListRequest> | undefined,
+    b: QueryGetAddressListRequest | PlainMessage<QueryGetAddressListRequest> | undefined
+  ): boolean {
     return proto3.util.equals(QueryGetAddressListRequest, a, b);
   }
 }
@@ -290,10 +300,8 @@ export class QueryGetAddressListResponse extends Message<QueryGetAddressListResp
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.QueryGetAddressListResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "list", kind: "message", T: AddressList },
-  ]);
+  static readonly typeName = 'badges.QueryGetAddressListResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'list', kind: 'message', T: AddressList }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryGetAddressListResponse {
     return new QueryGetAddressListResponse().fromBinary(bytes, options);
@@ -307,7 +315,10 @@ export class QueryGetAddressListResponse extends Message<QueryGetAddressListResp
     return new QueryGetAddressListResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryGetAddressListResponse | PlainMessage<QueryGetAddressListResponse> | undefined, b: QueryGetAddressListResponse | PlainMessage<QueryGetAddressListResponse> | undefined): boolean {
+  static equals(
+    a: QueryGetAddressListResponse | PlainMessage<QueryGetAddressListResponse> | undefined,
+    b: QueryGetAddressListResponse | PlainMessage<QueryGetAddressListResponse> | undefined
+  ): boolean {
     return proto3.util.equals(QueryGetAddressListResponse, a, b);
   }
 }
@@ -319,38 +330,38 @@ export class QueryGetApprovalTrackerRequest extends Message<QueryGetApprovalTrac
   /**
    * @generated from field: string collectionId = 5;
    */
-  collectionId = "";
+  collectionId = '';
 
   /**
    * "collection" or "incoming" or "outgoing"
    *
    * @generated from field: string approvalLevel = 2;
    */
-  approvalLevel = "";
+  approvalLevel = '';
 
   /**
    * if approvalLevel is "collection", leave blank
    *
    * @generated from field: string approverAddress = 3;
    */
-  approverAddress = "";
+  approverAddress = '';
 
   /**
    * @generated from field: string amountTrackerId = 1;
    */
-  amountTrackerId = "";
+  amountTrackerId = '';
 
   /**
    * @generated from field: string trackerType = 4;
    */
-  trackerType = "";
+  trackerType = '';
 
   /**
    * if trackerType is "overall", leave blank
    *
    * @generated from field: string approvedAddress = 6;
    */
-  approvedAddress = "";
+  approvedAddress = '';
 
   constructor(data?: PartialMessage<QueryGetApprovalTrackerRequest>) {
     super();
@@ -358,14 +369,14 @@ export class QueryGetApprovalTrackerRequest extends Message<QueryGetApprovalTrac
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.QueryGetApprovalTrackerRequest";
+  static readonly typeName = 'badges.QueryGetApprovalTrackerRequest';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 5, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "approvalLevel", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "approverAddress", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 1, name: "amountTrackerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "trackerType", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 6, name: "approvedAddress", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: 'collectionId', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'approvalLevel', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'approverAddress', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'amountTrackerId', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: 'trackerType', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 6, name: 'approvedAddress', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryGetApprovalTrackerRequest {
@@ -380,7 +391,10 @@ export class QueryGetApprovalTrackerRequest extends Message<QueryGetApprovalTrac
     return new QueryGetApprovalTrackerRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryGetApprovalTrackerRequest | PlainMessage<QueryGetApprovalTrackerRequest> | undefined, b: QueryGetApprovalTrackerRequest | PlainMessage<QueryGetApprovalTrackerRequest> | undefined): boolean {
+  static equals(
+    a: QueryGetApprovalTrackerRequest | PlainMessage<QueryGetApprovalTrackerRequest> | undefined,
+    b: QueryGetApprovalTrackerRequest | PlainMessage<QueryGetApprovalTrackerRequest> | undefined
+  ): boolean {
     return proto3.util.equals(QueryGetApprovalTrackerRequest, a, b);
   }
 }
@@ -400,10 +414,8 @@ export class QueryGetApprovalTrackerResponse extends Message<QueryGetApprovalTra
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.QueryGetApprovalTrackerResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "tracker", kind: "message", T: ApprovalTracker },
-  ]);
+  static readonly typeName = 'badges.QueryGetApprovalTrackerResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'tracker', kind: 'message', T: ApprovalTracker }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryGetApprovalTrackerResponse {
     return new QueryGetApprovalTrackerResponse().fromBinary(bytes, options);
@@ -417,7 +429,10 @@ export class QueryGetApprovalTrackerResponse extends Message<QueryGetApprovalTra
     return new QueryGetApprovalTrackerResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryGetApprovalTrackerResponse | PlainMessage<QueryGetApprovalTrackerResponse> | undefined, b: QueryGetApprovalTrackerResponse | PlainMessage<QueryGetApprovalTrackerResponse> | undefined): boolean {
+  static equals(
+    a: QueryGetApprovalTrackerResponse | PlainMessage<QueryGetApprovalTrackerResponse> | undefined,
+    b: QueryGetApprovalTrackerResponse | PlainMessage<QueryGetApprovalTrackerResponse> | undefined
+  ): boolean {
     return proto3.util.equals(QueryGetApprovalTrackerResponse, a, b);
   }
 }
@@ -429,31 +444,31 @@ export class QueryGetChallengeTrackerRequest extends Message<QueryGetChallengeTr
   /**
    * @generated from field: string collectionId = 1;
    */
-  collectionId = "";
+  collectionId = '';
 
   /**
    * "collection" or "incoming" or "outgoing"
    *
    * @generated from field: string approvalLevel = 2;
    */
-  approvalLevel = "";
+  approvalLevel = '';
 
   /**
    * if approvalLevel is "collection", leave blank
    *
    * @generated from field: string approverAddress = 3;
    */
-  approverAddress = "";
+  approverAddress = '';
 
   /**
    * @generated from field: string challengeTrackerId = 4;
    */
-  challengeTrackerId = "";
+  challengeTrackerId = '';
 
   /**
    * @generated from field: string leafIndex = 5;
    */
-  leafIndex = "";
+  leafIndex = '';
 
   constructor(data?: PartialMessage<QueryGetChallengeTrackerRequest>) {
     super();
@@ -461,13 +476,13 @@ export class QueryGetChallengeTrackerRequest extends Message<QueryGetChallengeTr
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.QueryGetChallengeTrackerRequest";
+  static readonly typeName = 'badges.QueryGetChallengeTrackerRequest';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "approvalLevel", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "approverAddress", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "challengeTrackerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 5, name: "leafIndex", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'collectionId', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'approvalLevel', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'approverAddress', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: 'challengeTrackerId', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: 'leafIndex', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryGetChallengeTrackerRequest {
@@ -482,7 +497,10 @@ export class QueryGetChallengeTrackerRequest extends Message<QueryGetChallengeTr
     return new QueryGetChallengeTrackerRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryGetChallengeTrackerRequest | PlainMessage<QueryGetChallengeTrackerRequest> | undefined, b: QueryGetChallengeTrackerRequest | PlainMessage<QueryGetChallengeTrackerRequest> | undefined): boolean {
+  static equals(
+    a: QueryGetChallengeTrackerRequest | PlainMessage<QueryGetChallengeTrackerRequest> | undefined,
+    b: QueryGetChallengeTrackerRequest | PlainMessage<QueryGetChallengeTrackerRequest> | undefined
+  ): boolean {
     return proto3.util.equals(QueryGetChallengeTrackerRequest, a, b);
   }
 }
@@ -494,7 +512,7 @@ export class QueryGetChallengeTrackerResponse extends Message<QueryGetChallengeT
   /**
    * @generated from field: string numUsed = 1;
    */
-  numUsed = "";
+  numUsed = '';
 
   constructor(data?: PartialMessage<QueryGetChallengeTrackerResponse>) {
     super();
@@ -502,10 +520,8 @@ export class QueryGetChallengeTrackerResponse extends Message<QueryGetChallengeT
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.QueryGetChallengeTrackerResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "numUsed", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-  ]);
+  static readonly typeName = 'badges.QueryGetChallengeTrackerResponse';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'numUsed', kind: 'scalar', T: 9 /* ScalarType.STRING */ }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryGetChallengeTrackerResponse {
     return new QueryGetChallengeTrackerResponse().fromBinary(bytes, options);
@@ -519,8 +535,10 @@ export class QueryGetChallengeTrackerResponse extends Message<QueryGetChallengeT
     return new QueryGetChallengeTrackerResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: QueryGetChallengeTrackerResponse | PlainMessage<QueryGetChallengeTrackerResponse> | undefined, b: QueryGetChallengeTrackerResponse | PlainMessage<QueryGetChallengeTrackerResponse> | undefined): boolean {
+  static equals(
+    a: QueryGetChallengeTrackerResponse | PlainMessage<QueryGetChallengeTrackerResponse> | undefined,
+    b: QueryGetChallengeTrackerResponse | PlainMessage<QueryGetChallengeTrackerResponse> | undefined
+  ): boolean {
     return proto3.util.equals(QueryGetChallengeTrackerResponse, a, b);
   }
 }
-

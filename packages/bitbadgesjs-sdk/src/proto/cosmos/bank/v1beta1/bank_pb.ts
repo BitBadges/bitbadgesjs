@@ -3,9 +3,9 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
-import { Coin } from "../../base/v1beta1/coin_pb.js";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3 } from '@bufbuild/protobuf';
+import { Coin } from '../../base/v1beta1/coin_pb.js';
 
 /**
  * Params defines the parameters for the bank module.
@@ -36,10 +36,10 @@ export class Params extends Message<Params> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.bank.v1beta1.Params";
+  static readonly typeName = 'cosmos.bank.v1beta1.Params';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "send_enabled", kind: "message", T: SendEnabled, repeated: true },
-    { no: 2, name: "default_send_enabled", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 1, name: 'send_enabled', kind: 'message', T: SendEnabled, repeated: true },
+    { no: 2, name: 'default_send_enabled', kind: 'scalar', T: 8 /* ScalarType.BOOL */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Params {
@@ -69,7 +69,7 @@ export class SendEnabled extends Message<SendEnabled> {
   /**
    * @generated from field: string denom = 1;
    */
-  denom = "";
+  denom = '';
 
   /**
    * @generated from field: bool enabled = 2;
@@ -82,10 +82,10 @@ export class SendEnabled extends Message<SendEnabled> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.bank.v1beta1.SendEnabled";
+  static readonly typeName = 'cosmos.bank.v1beta1.SendEnabled';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "denom", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "enabled", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 1, name: 'denom', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'enabled', kind: 'scalar', T: 8 /* ScalarType.BOOL */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SendEnabled {
@@ -114,7 +114,7 @@ export class Input extends Message<Input> {
   /**
    * @generated from field: string address = 1;
    */
-  address = "";
+  address = '';
 
   /**
    * @generated from field: repeated cosmos.base.v1beta1.Coin coins = 2;
@@ -127,10 +127,10 @@ export class Input extends Message<Input> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.bank.v1beta1.Input";
+  static readonly typeName = 'cosmos.bank.v1beta1.Input';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "coins", kind: "message", T: Coin, repeated: true },
+    { no: 1, name: 'address', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'coins', kind: 'message', T: Coin, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Input {
@@ -159,7 +159,7 @@ export class Output extends Message<Output> {
   /**
    * @generated from field: string address = 1;
    */
-  address = "";
+  address = '';
 
   /**
    * @generated from field: repeated cosmos.base.v1beta1.Coin coins = 2;
@@ -172,10 +172,10 @@ export class Output extends Message<Output> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.bank.v1beta1.Output";
+  static readonly typeName = 'cosmos.bank.v1beta1.Output';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "coins", kind: "message", T: Coin, repeated: true },
+    { no: 1, name: 'address', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'coins', kind: 'message', T: Coin, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Output {
@@ -215,10 +215,8 @@ export class Supply extends Message<Supply> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.bank.v1beta1.Supply";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "total", kind: "message", T: Coin, repeated: true },
-  ]);
+  static readonly typeName = 'cosmos.bank.v1beta1.Supply';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [{ no: 1, name: 'total', kind: 'message', T: Coin, repeated: true }]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Supply {
     return new Supply().fromBinary(bytes, options);
@@ -249,7 +247,7 @@ export class DenomUnit extends Message<DenomUnit> {
    *
    * @generated from field: string denom = 1;
    */
-  denom = "";
+  denom = '';
 
   /**
    * exponent represents power of 10 exponent that one must
@@ -275,11 +273,11 @@ export class DenomUnit extends Message<DenomUnit> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.bank.v1beta1.DenomUnit";
+  static readonly typeName = 'cosmos.bank.v1beta1.DenomUnit';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "denom", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "exponent", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 3, name: "aliases", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 1, name: 'denom', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'exponent', kind: 'scalar', T: 13 /* ScalarType.UINT32 */ },
+    { no: 3, name: 'aliases', kind: 'scalar', T: 9 /* ScalarType.STRING */, repeated: true }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DenomUnit {
@@ -309,7 +307,7 @@ export class Metadata extends Message<Metadata> {
   /**
    * @generated from field: string description = 1;
    */
-  description = "";
+  description = '';
 
   /**
    * denom_units represents the list of DenomUnit's for a given coin
@@ -323,7 +321,7 @@ export class Metadata extends Message<Metadata> {
    *
    * @generated from field: string base = 3;
    */
-  base = "";
+  base = '';
 
   /**
    * display indicates the suggested denom that should be
@@ -331,7 +329,7 @@ export class Metadata extends Message<Metadata> {
    *
    * @generated from field: string display = 4;
    */
-  display = "";
+  display = '';
 
   /**
    * name defines the name of the token (eg: Cosmos Atom)
@@ -340,7 +338,7 @@ export class Metadata extends Message<Metadata> {
    *
    * @generated from field: string name = 5;
    */
-  name = "";
+  name = '';
 
   /**
    * symbol is the token symbol usually shown on exchanges (eg: ATOM). This can
@@ -350,7 +348,7 @@ export class Metadata extends Message<Metadata> {
    *
    * @generated from field: string symbol = 6;
    */
-  symbol = "";
+  symbol = '';
 
   /**
    * URI to a document (on or off-chain) that contains additional information. Optional.
@@ -359,7 +357,7 @@ export class Metadata extends Message<Metadata> {
    *
    * @generated from field: string uri = 7;
    */
-  uri = "";
+  uri = '';
 
   /**
    * URIHash is a sha256 hash of a document pointed by URI. It's used to verify that
@@ -369,7 +367,7 @@ export class Metadata extends Message<Metadata> {
    *
    * @generated from field: string uri_hash = 8;
    */
-  uriHash = "";
+  uriHash = '';
 
   constructor(data?: PartialMessage<Metadata>) {
     super();
@@ -377,16 +375,16 @@ export class Metadata extends Message<Metadata> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.bank.v1beta1.Metadata";
+  static readonly typeName = 'cosmos.bank.v1beta1.Metadata';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "description", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "denom_units", kind: "message", T: DenomUnit, repeated: true },
-    { no: 3, name: "base", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "display", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 5, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 6, name: "symbol", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 7, name: "uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 8, name: "uri_hash", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: 'description', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'denom_units', kind: 'message', T: DenomUnit, repeated: true },
+    { no: 3, name: 'base', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: 'display', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: 'name', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 6, name: 'symbol', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 7, name: 'uri', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 8, name: 'uri_hash', kind: 'scalar', T: 9 /* ScalarType.STRING */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Metadata {
@@ -405,4 +403,3 @@ export class Metadata extends Message<Metadata> {
     return proto3.util.equals(Metadata, a, b);
   }
 }
-

@@ -3,8 +3,8 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3 } from '@bufbuild/protobuf';
 
 /**
  * StorageType
@@ -64,15 +64,15 @@ export enum StorageType {
    *
    * @generated from enum value: STORAGE_TYPE_COMMITMENT = 4;
    */
-  COMMITMENT = 4,
+  COMMITMENT = 4
 }
 // Retrieve enum metadata with: proto3.getEnumType(StorageType)
-proto3.util.setEnumType(StorageType, "cosmos.orm.v1alpha1.StorageType", [
-  { no: 0, name: "STORAGE_TYPE_DEFAULT_UNSPECIFIED" },
-  { no: 1, name: "STORAGE_TYPE_MEMORY" },
-  { no: 2, name: "STORAGE_TYPE_TRANSIENT" },
-  { no: 3, name: "STORAGE_TYPE_INDEX" },
-  { no: 4, name: "STORAGE_TYPE_COMMITMENT" },
+proto3.util.setEnumType(StorageType, 'cosmos.orm.v1alpha1.StorageType', [
+  { no: 0, name: 'STORAGE_TYPE_DEFAULT_UNSPECIFIED' },
+  { no: 1, name: 'STORAGE_TYPE_MEMORY' },
+  { no: 2, name: 'STORAGE_TYPE_TRANSIENT' },
+  { no: 3, name: 'STORAGE_TYPE_INDEX' },
+  { no: 4, name: 'STORAGE_TYPE_COMMITMENT' }
 ]);
 
 /**
@@ -100,10 +100,10 @@ export class ModuleSchemaDescriptor extends Message<ModuleSchemaDescriptor> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.orm.v1alpha1.ModuleSchemaDescriptor";
+  static readonly typeName = 'cosmos.orm.v1alpha1.ModuleSchemaDescriptor';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "schema_file", kind: "message", T: ModuleSchemaDescriptor_FileEntry, repeated: true },
-    { no: 2, name: "prefix", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
+    { no: 1, name: 'schema_file', kind: 'message', T: ModuleSchemaDescriptor_FileEntry, repeated: true },
+    { no: 2, name: 'prefix', kind: 'scalar', T: 12 /* ScalarType.BYTES */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ModuleSchemaDescriptor {
@@ -118,7 +118,10 @@ export class ModuleSchemaDescriptor extends Message<ModuleSchemaDescriptor> {
     return new ModuleSchemaDescriptor().fromJsonString(jsonString, options);
   }
 
-  static equals(a: ModuleSchemaDescriptor | PlainMessage<ModuleSchemaDescriptor> | undefined, b: ModuleSchemaDescriptor | PlainMessage<ModuleSchemaDescriptor> | undefined): boolean {
+  static equals(
+    a: ModuleSchemaDescriptor | PlainMessage<ModuleSchemaDescriptor> | undefined,
+    b: ModuleSchemaDescriptor | PlainMessage<ModuleSchemaDescriptor> | undefined
+  ): boolean {
     return proto3.util.equals(ModuleSchemaDescriptor, a, b);
   }
 }
@@ -144,7 +147,7 @@ export class ModuleSchemaDescriptor_FileEntry extends Message<ModuleSchemaDescri
    *
    * @generated from field: string proto_file_name = 2;
    */
-  protoFileName = "";
+  protoFileName = '';
 
   /**
    * storage_type optionally indicates the type of storage this file's
@@ -161,11 +164,11 @@ export class ModuleSchemaDescriptor_FileEntry extends Message<ModuleSchemaDescri
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.orm.v1alpha1.ModuleSchemaDescriptor.FileEntry";
+  static readonly typeName = 'cosmos.orm.v1alpha1.ModuleSchemaDescriptor.FileEntry';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    { no: 2, name: "proto_file_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "storage_type", kind: "enum", T: proto3.getEnumType(StorageType) },
+    { no: 1, name: 'id', kind: 'scalar', T: 13 /* ScalarType.UINT32 */ },
+    { no: 2, name: 'proto_file_name', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: 'storage_type', kind: 'enum', T: proto3.getEnumType(StorageType) }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ModuleSchemaDescriptor_FileEntry {
@@ -180,8 +183,10 @@ export class ModuleSchemaDescriptor_FileEntry extends Message<ModuleSchemaDescri
     return new ModuleSchemaDescriptor_FileEntry().fromJsonString(jsonString, options);
   }
 
-  static equals(a: ModuleSchemaDescriptor_FileEntry | PlainMessage<ModuleSchemaDescriptor_FileEntry> | undefined, b: ModuleSchemaDescriptor_FileEntry | PlainMessage<ModuleSchemaDescriptor_FileEntry> | undefined): boolean {
+  static equals(
+    a: ModuleSchemaDescriptor_FileEntry | PlainMessage<ModuleSchemaDescriptor_FileEntry> | undefined,
+    b: ModuleSchemaDescriptor_FileEntry | PlainMessage<ModuleSchemaDescriptor_FileEntry> | undefined
+  ): boolean {
     return proto3.util.equals(ModuleSchemaDescriptor_FileEntry, a, b);
   }
 }
-

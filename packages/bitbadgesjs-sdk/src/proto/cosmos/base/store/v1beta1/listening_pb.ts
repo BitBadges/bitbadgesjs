@@ -3,9 +3,17 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
-import { RequestBeginBlock, RequestDeliverTx, RequestEndBlock, ResponseBeginBlock, ResponseCommit, ResponseDeliverTx, ResponseEndBlock } from "../../../../tendermint/abci/types_pb.js";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3 } from '@bufbuild/protobuf';
+import {
+  RequestBeginBlock,
+  RequestDeliverTx,
+  RequestEndBlock,
+  ResponseBeginBlock,
+  ResponseCommit,
+  ResponseDeliverTx,
+  ResponseEndBlock
+} from '../../../../tendermint/abci/types_pb.js';
 
 /**
  * StoreKVPair is a KVStore KVPair used for listening to state changes (Sets and Deletes)
@@ -22,7 +30,7 @@ export class StoreKVPair extends Message<StoreKVPair> {
    *
    * @generated from field: string store_key = 1;
    */
-  storeKey = "";
+  storeKey = '';
 
   /**
    * true indicates a delete operation, false indicates a set operation
@@ -47,12 +55,12 @@ export class StoreKVPair extends Message<StoreKVPair> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.base.store.v1beta1.StoreKVPair";
+  static readonly typeName = 'cosmos.base.store.v1beta1.StoreKVPair';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "store_key", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "delete", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 3, name: "key", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    { no: 4, name: "value", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
+    { no: 1, name: 'store_key', kind: 'scalar', T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: 'delete', kind: 'scalar', T: 8 /* ScalarType.BOOL */ },
+    { no: 3, name: 'key', kind: 'scalar', T: 12 /* ScalarType.BYTES */ },
+    { no: 4, name: 'value', kind: 'scalar', T: 12 /* ScalarType.BYTES */ }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): StoreKVPair {
@@ -115,14 +123,14 @@ export class BlockMetadata extends Message<BlockMetadata> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.base.store.v1beta1.BlockMetadata";
+  static readonly typeName = 'cosmos.base.store.v1beta1.BlockMetadata';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "request_begin_block", kind: "message", T: RequestBeginBlock },
-    { no: 2, name: "response_begin_block", kind: "message", T: ResponseBeginBlock },
-    { no: 3, name: "deliver_txs", kind: "message", T: BlockMetadata_DeliverTx, repeated: true },
-    { no: 4, name: "request_end_block", kind: "message", T: RequestEndBlock },
-    { no: 5, name: "response_end_block", kind: "message", T: ResponseEndBlock },
-    { no: 6, name: "response_commit", kind: "message", T: ResponseCommit },
+    { no: 1, name: 'request_begin_block', kind: 'message', T: RequestBeginBlock },
+    { no: 2, name: 'response_begin_block', kind: 'message', T: ResponseBeginBlock },
+    { no: 3, name: 'deliver_txs', kind: 'message', T: BlockMetadata_DeliverTx, repeated: true },
+    { no: 4, name: 'request_end_block', kind: 'message', T: RequestEndBlock },
+    { no: 5, name: 'response_end_block', kind: 'message', T: ResponseEndBlock },
+    { no: 6, name: 'response_commit', kind: 'message', T: ResponseCommit }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BlockMetadata {
@@ -164,10 +172,10 @@ export class BlockMetadata_DeliverTx extends Message<BlockMetadata_DeliverTx> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.base.store.v1beta1.BlockMetadata.DeliverTx";
+  static readonly typeName = 'cosmos.base.store.v1beta1.BlockMetadata.DeliverTx';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "request", kind: "message", T: RequestDeliverTx },
-    { no: 2, name: "response", kind: "message", T: ResponseDeliverTx },
+    { no: 1, name: 'request', kind: 'message', T: RequestDeliverTx },
+    { no: 2, name: 'response', kind: 'message', T: ResponseDeliverTx }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BlockMetadata_DeliverTx {
@@ -182,8 +190,10 @@ export class BlockMetadata_DeliverTx extends Message<BlockMetadata_DeliverTx> {
     return new BlockMetadata_DeliverTx().fromJsonString(jsonString, options);
   }
 
-  static equals(a: BlockMetadata_DeliverTx | PlainMessage<BlockMetadata_DeliverTx> | undefined, b: BlockMetadata_DeliverTx | PlainMessage<BlockMetadata_DeliverTx> | undefined): boolean {
+  static equals(
+    a: BlockMetadata_DeliverTx | PlainMessage<BlockMetadata_DeliverTx> | undefined,
+    b: BlockMetadata_DeliverTx | PlainMessage<BlockMetadata_DeliverTx> | undefined
+  ): boolean {
     return proto3.util.equals(BlockMetadata_DeliverTx, a, b);
   }
 }
-

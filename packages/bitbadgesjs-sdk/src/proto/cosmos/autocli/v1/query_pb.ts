@@ -3,9 +3,9 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
-import { ModuleOptions } from "./options_pb.js";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from '@bufbuild/protobuf';
+import { Message, proto3 } from '@bufbuild/protobuf';
+import { ModuleOptions } from './options_pb.js';
 
 /**
  * AppOptionsRequest is the RemoteInfoService/AppOptions request type.
@@ -19,9 +19,8 @@ export class AppOptionsRequest extends Message<AppOptionsRequest> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.autocli.v1.AppOptionsRequest";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-  ]);
+  static readonly typeName = 'cosmos.autocli.v1.AppOptionsRequest';
+  static readonly fields: FieldList = proto3.util.newFieldList(() => []);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AppOptionsRequest {
     return new AppOptionsRequest().fromBinary(bytes, options);
@@ -35,7 +34,10 @@ export class AppOptionsRequest extends Message<AppOptionsRequest> {
     return new AppOptionsRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: AppOptionsRequest | PlainMessage<AppOptionsRequest> | undefined, b: AppOptionsRequest | PlainMessage<AppOptionsRequest> | undefined): boolean {
+  static equals(
+    a: AppOptionsRequest | PlainMessage<AppOptionsRequest> | undefined,
+    b: AppOptionsRequest | PlainMessage<AppOptionsRequest> | undefined
+  ): boolean {
     return proto3.util.equals(AppOptionsRequest, a, b);
   }
 }
@@ -59,9 +61,15 @@ export class AppOptionsResponse extends Message<AppOptionsResponse> {
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "cosmos.autocli.v1.AppOptionsResponse";
+  static readonly typeName = 'cosmos.autocli.v1.AppOptionsResponse';
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "module_options", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "message", T: ModuleOptions} },
+    {
+      no: 1,
+      name: 'module_options',
+      kind: 'map',
+      K: 9 /* ScalarType.STRING */,
+      V: { kind: 'message', T: ModuleOptions }
+    }
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AppOptionsResponse {
@@ -76,8 +84,10 @@ export class AppOptionsResponse extends Message<AppOptionsResponse> {
     return new AppOptionsResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: AppOptionsResponse | PlainMessage<AppOptionsResponse> | undefined, b: AppOptionsResponse | PlainMessage<AppOptionsResponse> | undefined): boolean {
+  static equals(
+    a: AppOptionsResponse | PlainMessage<AppOptionsResponse> | undefined,
+    b: AppOptionsResponse | PlainMessage<AppOptionsResponse> | undefined
+  ): boolean {
     return proto3.util.equals(AppOptionsResponse, a, b);
   }
 }
-

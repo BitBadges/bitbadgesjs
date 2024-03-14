@@ -1,1 +1,1 @@
-export * from './orm_pb'
+export * from './orm_pb';
