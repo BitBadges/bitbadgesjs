@@ -1,54 +1,47 @@
-# bitbadgesjs
+# Overview
 
-The BitBadges SDK is a JavaScript library that provides all the tools and functions needed for you to interact with the BitBadges API, blockchain, indexer, or build your own frontend.
+The BitBadges SDK is a bundle of TypeScript libraries that provide all the tools and functions needed for you to build your own frontend or interact with the BitBadges API, blockchain, and indexer.
 
-```bash
+GitHub: [https://github.com/bitbadges/bitbadgesjs](https://github.com/bitbadges/bitbadgesjs)
+
+Reference repositories that use the SDK:
+
+- [BitBadges Frontend](https://github.com/BitBadges/bitbadges-frontend)
+- [BitBadges Indexer / API](https://github.com/BitBadges/bitbadges-indexer)
+
+See [full documentation](full-documentation.md) for complete documentation on each library. Also, the BitBadges official indexer source code and BitBadges official frontend code both use the SDK, so please feel free to reference them.
+
+```
 npm install bitbadgesjs-sdk
 ```
 
-utils is a library which provides miscellaneous functionality to help you interact with the BitBadges API and indexer, such as types, managing metadata requests, logic with Uint ranges and balances, etc.
+This library provides miscellaneous functionality to help you interact with BitBadges, such as types, API routes, managing metadata requests, logic with ID ranges and balances, etc.
 
-```ts
-const doOverlap = hasOverlaps(...);
-const metadata = updateMetadataMap(....);
-```
-
-It also allows you to switch between equivalent addresses of different blockchains (e.g. Ethereum and Cosmos) using the following functions:
-
-```ts
-const cosmosAddress = ethToCosmos(address);
+```typescript
+const cosmosAddress = convertToCosmosAddress(address);
 const ethAddress = cosmosToEth(cosmosAddress);
 ```
 
-proto exports all the types and functions needed for interacting with the BitBadges blockchain, such as transactions, messages, and queries. provider exports functions for broadcasting transactions and interacting with a blockchain node.
+It also exports functions for broadcasting transactions and interacting with the blockchain. See [Broadcasting Txs](../create-and-broadcast-txs/) for how to use.
 
-See Broadcasting Txs on the official documentation for more info and tutorials.
+```typescript
+// Find a node URL from a network endpoint:
+// https://docs.evmos.org/develop/api/networks.
+const nodeUrl = ...
 
-```ts
-const msg: MsgUpdateCollection = {
-    ...
+const postOptions = {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: generatePostBodyBroadcast(signedTx),
 }
-const txMsg = createTxMsgUpdateCollection(
-    txDetails.chain,
-    txDetails.sender,
-    txDetails.fee,
-    txDetails.memo,
-    msg
+
+const broadcastEndpoint = `${nodeUrl}${generateEndpointBroadcast()}`
+const broadcastPost = await fetch(
+  broadcastEndpoint,
+  postOptions,
 )
+
+const response = await broadcastPost.json()
 ```
 
-### Further Documentation
-
-We refer you to the official [documentation](https://docs.bitbadges.io/for-developers/create-and-broadcast-txs) for more details and tutorials on how to generate, broadcast, and sign transactions using this repository.
-
-For a fully generated documentation of the library, see [https://bitbadges.github.io/bitbadgesjs/packages/bitbadgesjs/docs/modules.html](https://bitbadges.github.io/bitbadgesjs/packages/bitbadgesjs/docs/modules.html).
-
-## Acknowledgements
-
-This project was forked from [evmosjs](https://github.com/evmos/evmosjs) and adapted for the BitBadges blockchain.
-We would like to thank the Evmos team for their work and for making this project possible.
-
-## Other Examples
-
-Because this was forked from evmosjs, feel free to reference their examples as well in their repository. Not everything will be the same, but it should be similar enough to get you started.
-Note you will have to change everything to the BitBadges equivalent (e.g. evmosjs -> bitbadgesjs, evmos -> bitbadges, aevmos -> badge, new chain details, etc).
+For most use cases, you will not need to broadcast transactions. If you do, consider first exploring the helper broadcast tool at [https://bitbadges.io/dev/broadcast](https://bitbadges.io/dev/broadcast).
