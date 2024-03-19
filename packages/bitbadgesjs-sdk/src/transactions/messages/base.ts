@@ -7,7 +7,7 @@ import {
   MsgUpdateUserApprovals
 } from '@/proto/badges/tx_pb';
 import type { TxBody, AuthInfo, TxRaw } from '@/proto/cosmos/tx/v1beta1/tx_pb';
-import type { Chain, Fee, Sender } from './common.js';
+import type { Chain, Fee, Sender } from './common';
 import { createStdFee, createStdSignDocFromProto, createTransactionWithMultipleMessages } from './transaction';
 import { SupportedChain } from '@/common/types';
 import { generatePostBodyBroadcast } from '@/node-rest-api/broadcast';
@@ -20,8 +20,8 @@ import {
 } from '@/transactions/eip712/payload/samples/getSampleMsg';
 import { createTxRaw, createTxRawWithExtension } from './txRaw';
 import { signatureToWeb3ExtensionBitcoin, signatureToWeb3ExtensionSolana, signatureToWeb3ExtensionEthereum } from './web3Extension';
-import { createTypedData } from '@/transactions/eip712/payload/createTypedData.js';
-import type { MessageGenerated } from './utils.js';
+import { createTypedData } from '@/transactions/eip712/payload/createTypedData';
+import type { MessageGenerated } from './utils';
 
 /**
  * TxContext is the transaction context for a SignDoc that is independent

@@ -8,17 +8,17 @@ import {
   MsgUniversalUpdateCollection,
   MsgUpdateCollection,
   MsgUpdateUserApprovals
-} from '@/proto/badges/tx_pb.js';
-import { createAminoConverter } from './objectConverter.js';
-import { MsgExecuteContract, MsgInstantiateContract, MsgStoreCode } from '@/proto/cosmwasm/wasm/v1/tx_pb.js';
+} from '@/proto/badges/tx_pb';
+import { createAminoConverter } from './objectConverter';
+import { MsgExecuteContract, MsgInstantiateContract, MsgStoreCode } from '@/proto/cosmwasm/wasm/v1/tx_pb';
 import {
   MsgCreateProtocol,
   MsgDeleteProtocol,
   MsgSetCollectionForProtocol,
   MsgUnsetCollectionForProtocol,
   MsgUpdateProtocol
-} from '@/proto/protocols/tx_pb.js';
-import { MsgExecuteContractCompat, MsgStoreCodeCompat, MsgInstantiateContractCompat } from '@/proto/wasmx/tx_pb.js';
+} from '@/proto/protocols/tx_pb';
+import { MsgExecuteContractCompat, MsgStoreCodeCompat, MsgInstantiateContractCompat } from '@/proto/wasmx/tx_pb';
 
 export function createBadgesAminoConverters(): AminoConverters {
   return {

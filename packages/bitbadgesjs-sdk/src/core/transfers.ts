@@ -6,7 +6,7 @@ import { convertToCosmosAddress } from '../address-converter/converter';
 import { GO_MAX_UINT_64, safeAddKeepLeft, safeMultiplyKeepLeft } from '../common/math';
 import type { NumberType } from '../common/string-numbers';
 import { BigIntify, Stringify } from '../common/string-numbers';
-import { Balance, BalanceArray, addBalances } from './balances';
+import { Balance, BalanceArray } from './balances';
 import { ApprovalIdentifierDetails, MerkleProof } from './misc';
 import { UintRangeArray } from './uintRanges';
 
@@ -213,7 +213,8 @@ export const createBalanceMapForOffChainBalances = async <T extends NumberType>(
 
       //currBalance is used as a Balance[] type to be compatible with addBalancesForUintRanges
       const currBalances = balanceMap[cosmosAddress] ? balanceMap[cosmosAddress] : BalanceArray.From<T>([]);
-      balanceMap[cosmosAddress] = BalanceArray.From(addBalances(currBalances, transfer.balances));
+      currBalances.addBalances(transfer.balances);
+      balanceMap[cosmosAddress] = BalanceArray.From(currBalances);
     }
   }
 

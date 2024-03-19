@@ -461,7 +461,16 @@ export type ClaimIntegrationPluginType =
   | 'transferTimes'
   | 'requiresProofOfAddress'
   | 'whitelist'
-  | 'mustOwnBadges';
+  | 'mustOwnBadges'
+  | 'api';
+
+export type JsonBodyInputWithValue = {
+  key: string;
+  label: string;
+  type?: 'date' | 'url';
+  value: string | number | boolean;
+};
+export type JsonBodyInputSchema = { key: string; label: string; type: 'date' | 'url' | 'string' | 'number' | 'boolean'; helper?: string };
 
 export type ClaimIntegrationPublicParamsType<T extends ClaimIntegrationPluginType> = T extends 'numUses'
   ? {
@@ -478,6 +487,7 @@ export type ClaimIntegrationPublicParamsType<T extends ClaimIntegrationPluginTyp
           users?: string[];
           serverId?: string;
           serverName?: string;
+          maxUsesPerUser?: number;
         }
       : T extends 'codes'
         ? {
@@ -486,6 +496,7 @@ export type ClaimIntegrationPublicParamsType<T extends ClaimIntegrationPluginTyp
         : T extends 'twitter'
           ? {
               users?: string[];
+              maxUsesPerUser?: number;
             }
           : T extends 'transferTimes'
             ? {
@@ -500,7 +511,21 @@ export type ClaimIntegrationPublicParamsType<T extends ClaimIntegrationPluginTyp
                 ? {
                     ownershipRequirements?: AndGroup<NumberType> | OrGroup<NumberType> | OwnershipRequirements<NumberType>;
                   }
-                : {};
+                : T extends 'api'
+                  ? {
+                      apiCalls: ClaimApiCallInfo[];
+                    }
+                  : {};
+
+export interface ClaimApiCallInfo {
+  uri: string;
+  name: string;
+  description?: string;
+  passDiscord?: boolean;
+  passTwitter?: boolean;
+  bodyParams?: object;
+  userInputsSchema: Array<JsonBodyInputSchema>;
+}
 
 export type ClaimIntegrationPrivateParamsType<T extends ClaimIntegrationPluginType> = T extends 'password'
   ? {

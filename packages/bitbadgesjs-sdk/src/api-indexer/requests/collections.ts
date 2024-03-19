@@ -220,7 +220,7 @@ export interface MetadataFetchOptions {
  *
  * @category API Requests / Responses
  */
-export type CollectionViewKey = 'transferActivity' | 'reviews' | 'owners';
+export type CollectionViewKey = 'transferActivity' | 'reviews' | 'owners' | 'amountTrackers' | 'challengeTrackers';
 
 /**
  * Defines the options for fetching additional collection details.

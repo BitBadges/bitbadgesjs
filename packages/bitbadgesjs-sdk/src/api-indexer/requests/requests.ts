@@ -27,10 +27,9 @@ import { IncrementedBalances, iChallengeDetails } from '@/core/approvals';
 import type { iBatchBadgeDetails } from '@/core/batch-utils';
 import type { iOffChainBalancesMap } from '@/core/transfers';
 import { UintRangeArray } from '@/core/uintRanges';
-import type { CustomType, iIncrementedBalances, iUintRange } from '@/interfaces';
+import type { iIncrementedBalances, iUintRange } from '@/interfaces';
 import type { BroadcastPostBody } from '@/node-rest-api/broadcast';
-import type { DeliverTxResponse } from '@cosmjs/stargate';
-import type { Event } from '@cosmjs/stargate';
+import type { DeliverTxResponse, Event } from '@cosmjs/stargate';
 import type { ChallengeParams, VerifyChallengeOptions } from 'blockin';
 import { BlockinChallengeParams } from './blockin';
 
@@ -1128,11 +1127,13 @@ export class GetBlockinAuthCodeRouteSuccessResponse
     success: boolean;
     errorMessage?: string;
   };
+  params: BlockinChallengeParams<NumberType>;
 
   constructor(data: iGetBlockinAuthCodeRouteSuccessResponse) {
     super();
     this.message = data.message;
     this.verificationResponse = data.verificationResponse;
+    this.params = new BlockinChallengeParams(data.params);
   }
 }
 
@@ -1144,6 +1145,10 @@ export interface iGetBlockinAuthCodeRouteSuccessResponse {
    * The corresponding message that was signed to obtain the signature.
    */
   message: string;
+  /**
+   * The converted Blockin params fort the message
+   */
+  params: BlockinChallengeParams<NumberType>;
   /**
    * Verification response
    */

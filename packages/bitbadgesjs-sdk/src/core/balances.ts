@@ -224,7 +224,7 @@ export function doBalancesExceedThreshold<T extends NumberType>(balances: iBalan
   const thresholdCopy = BalanceArray.From(thresholdBalances).clone();
 
   try {
-    subtractBalances(balances, thresholdCopy);
+    subtractBalances(balances, thresholdCopy, false);
   } catch (e) {
     return true;
   }
@@ -818,10 +818,11 @@ export class BalanceArray<T extends NumberType> extends BaseTypedArray<BalanceAr
    * Checks if the current balances are a subset of the threshold balances (i.e. doesn't exceed the threshold).
    */
   subsetOf(threshold: iBalance<T>[] | BalanceArray<T>) {
-    return doBalancesExceedThreshold(
+    const res = doBalancesExceedThreshold(
       this.map((x) => x.convert(BigIntify)),
       BalanceArray.From(threshold).map((x) => x.convert(BigIntify))
     );
+    return !res;
   }
 
   /**

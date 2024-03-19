@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
+    "baseUrl": "src",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["*"]
     },
     "target": "ESNext",
     "module": "commonjs",
@@ -24,6 +24,6 @@
     "skipLibCheck": true,
     "types": ["node", "jest"]
   },
-  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts", "docs", "./dist"],
-  "include": ["**/*.ts", "**/*.json"]
+  "exclude": ["node_modules", "dist", "docs", "./dist"],
+  "include": ["src", "**/*.test.ts", "**/*.spec.ts"]
 }
