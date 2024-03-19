@@ -1,13 +1,13 @@
 import { ethers } from 'ethers';
 import { AddressList, convertToCosmosAddress } from '..';
 
-const generateAddress = () => {
+export const genTestAddress = () => {
   const ethAddress = ethers.Wallet.createRandom().address;
   return convertToCosmosAddress(ethAddress);
 };
 const addressList = new AddressList({
   listId: '1',
-  addresses: [generateAddress()],
+  addresses: [genTestAddress()],
   whitelist: false,
   createdBy: '1',
   customData: '',
@@ -31,20 +31,20 @@ describe('AddressList', () => {
   it('should check address', () => {
     const addressList = new AddressList({
       listId: '1',
-      addresses: [generateAddress()],
+      addresses: [genTestAddress()],
       whitelist: true,
       createdBy: '1',
       customData: '',
       uri: ''
     });
 
-    expect(addressList.checkAddress(generateAddress())).toBeFalsy();
+    expect(addressList.checkAddress(genTestAddress())).toBeFalsy();
 
     expect(addressList.checkAddress(addressList.addresses[0])).toBeTruthy();
   });
 
   it('should check address - blacklist', () => {
-    expect(addressList.checkAddress(generateAddress())).toBeTruthy();
+    expect(addressList.checkAddress(genTestAddress())).toBeTruthy();
 
     expect(addressList.checkAddress(addressList.addresses[0])).toBeFalsy();
   });
@@ -63,7 +63,7 @@ describe('AddressList', () => {
   it('should get overlaps', () => {
     const addressListTwo = new AddressList({
       listId: '1',
-      addresses: [generateAddress()],
+      addresses: [genTestAddress()],
       whitelist: true,
       createdBy: '1',
       customData: '',
@@ -89,7 +89,7 @@ describe('AddressList', () => {
   it('should get overlap details', () => {
     const addressListTwo = new AddressList({
       listId: '1',
-      addresses: [generateAddress()],
+      addresses: [genTestAddress()],
       whitelist: true,
       createdBy: '1',
       customData: '',
@@ -126,7 +126,7 @@ describe('AddressList', () => {
     expect(reservedTracker.addresses).toEqual(['Mint']);
     expect(reservedTracker.whitelist).toBeFalsy();
 
-    const address = generateAddress();
+    const address = genTestAddress();
     const reservedOne = AddressList.Reserved(address);
     expect(AddressList.generateReservedListId(reservedOne)).toEqual(reservedOne.listId);
     expect(AddressList.generateReservedListId(reservedOne.toInverted())).toEqual('!(' + reservedOne.listId + ')');
