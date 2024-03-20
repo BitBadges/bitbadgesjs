@@ -305,7 +305,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * Each address is limited to one code per password. If the password is provided again, they will receive the same code.
    *
    * @remarks
-   * - **API Route**: `POST /api/v0/collection/:collectionId/password/:cid/:password`
+   * - **API Route**: `POST /api/v0/claims/:claimId/:cosmosAddress`
    * - **SDK Function Call**: `await BitBadgesApi.checkAndCompleteClaim(collectionId, cid, password);`
    * - **Authentication**: Must be signed in.
    *
@@ -981,6 +981,35 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
     return await BitBadgesCollection.FilterBadgesInCollection(this, requestBody);
   }
 
+  /**
+   * Generates an Apple wallet pass for a code.
+   *
+   * Returns application/vnd.apple.pkpass content type.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/appleWalletPass`
+   * - **SDK Function Call**: `await BitBadgesApi.generateAppleWalletPass(requestBody);`
+   *
+   * @example
+   * ```typescript
+   * const res = await BitBadgesApi.generateAppleWalletPass(requestBody);
+   * console.log(res);
+   * ```
+   *
+   * @example
+   * ```typescript
+   * const pass = Buffer.from(res.data);
+   *
+   * const blob = new Blob([pass], { type: 'application/vnd.apple.pkpass' });
+   * const url = window.URL.createObjectURL(blob);
+   * if (url) {
+   *    const link = document.createElement('a');
+   *    link.href = url;
+   *    link.download = 'bitbadges.pkpass';
+   *    link.click()
+   * }
+   * ```
+   */
   public async generateAppleWalletPass(requestBody: GenerateAppleWalletPassRouteRequestBody): Promise<GenerateAppleWalletPassRouteSuccessResponse> {
     try {
       const response = await this.axios.post<GenerateAppleWalletPassRouteSuccessResponse>(
@@ -994,9 +1023,25 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
     }
   }
 
+  /**
+   * Gets the claim by ID.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/claims`
+   * - **SDK Function Call**: `await BitBadgesApi.getClaims(requestBody);`
+   *
+   * @example
+   * ```typescript
+   * const res = await BitBadgesApi.getClaims(requestBody);
+   * console.log(res);
+   * ```
+   */
   public async getClaims(requestBody: GetClaimsRouteRequestBody): Promise<GetClaimsRouteSuccessResponse<T>> {
     try {
-      const response = await this.axios.post<GetClaimsRouteSuccessResponse<T>>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetClaimsRoute()}`, requestBody);
+      const response = await this.axios.post<GetClaimsRouteSuccessResponse<T>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetClaimsRoute()}`,
+        requestBody
+      );
       return new GetClaimsRouteSuccessResponse(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);

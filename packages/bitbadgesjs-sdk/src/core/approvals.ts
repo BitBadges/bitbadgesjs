@@ -1173,58 +1173,7 @@ export class ApprovalInfoDetails<T extends NumberType> extends BaseNumberTypeCla
 /**
  * @category Interfaces
  */
-export interface iMerkleChallengeWithDetails<T extends NumberType> extends iMerkleChallenge<T> {
-  details?: iApprovalInfoDetails<T>;
-}
-
-/**
- * MerkleChallengeWithDetails extends the base MerkleChallenge and provides additional details.
- *
- * @category Approvals / Transferability
- */
-export class MerkleChallengeWithDetails<T extends NumberType> extends MerkleChallenge<T> implements iMerkleChallengeWithDetails<T> {
-  /** The details of the claim / approval */
-  details?: ApprovalInfoDetails<T>;
-
-  constructor(data: iMerkleChallengeWithDetails<T>) {
-    super(data);
-    this.details = data.details ? new ApprovalInfoDetails(data.details) : undefined;
-  }
-
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): MerkleChallengeWithDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as MerkleChallengeWithDetails<U>;
-  }
-}
-
-/**
- * @category Interfaces
- */
-export interface iApprovalCriteriaWithDetails<T extends NumberType> extends iApprovalCriteria<T> {
-  merkleChallenge?: iMerkleChallengeWithDetails<T>;
-}
-
-/**
- * @category Approvals / Transferability
- */
-export class ApprovalCriteriaWithDetails<T extends NumberType> extends ApprovalCriteria<T> implements iApprovalCriteriaWithDetails<T> {
-  merkleChallenge?: MerkleChallengeWithDetails<T>;
-
-  constructor(data: iApprovalCriteriaWithDetails<T>) {
-    super(data);
-
-    this.merkleChallenge = data.merkleChallenge ? new MerkleChallengeWithDetails(data.merkleChallenge) : undefined;
-  }
-
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ApprovalCriteriaWithDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as ApprovalCriteriaWithDetails<U>;
-  }
-}
-
-/**
- * @category Interfaces
- */
 export interface iCollectionApprovalWithDetails<T extends NumberType> extends iCollectionApproval<T> {
-  approvalCriteria?: iApprovalCriteriaWithDetails<T>;
   details?: iApprovalInfoDetails<T>;
   toList: iAddressList;
   fromList: iAddressList;
@@ -1235,7 +1184,6 @@ export interface iCollectionApprovalWithDetails<T extends NumberType> extends iC
  * @category Approvals / Transferability
  */
 export class CollectionApprovalWithDetails<T extends NumberType> extends CollectionApproval<T> implements iCollectionApprovalWithDetails<T> {
-  approvalCriteria?: ApprovalCriteriaWithDetails<T>;
   details?: ApprovalInfoDetails<T>;
   toList: AddressList;
   fromList: AddressList;
@@ -1243,7 +1191,6 @@ export class CollectionApprovalWithDetails<T extends NumberType> extends Collect
 
   constructor(data: iCollectionApprovalWithDetails<T>) {
     super(data);
-    this.approvalCriteria = data.approvalCriteria ? new ApprovalCriteriaWithDetails(data.approvalCriteria) : undefined;
     this.details = data.details ? new ApprovalInfoDetails(data.details) : undefined;
     this.toList = new AddressList(data.toList);
     this.fromList = new AddressList(data.fromList);
