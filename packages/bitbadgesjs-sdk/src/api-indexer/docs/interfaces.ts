@@ -464,7 +464,8 @@ export type ClaimIntegrationPluginType =
   | 'requiresProofOfAddress'
   | 'whitelist'
   | 'mustOwnBadges'
-  | 'api';
+  | 'api'
+  | 'email';
 
 export type JsonBodyInputWithValue = {
   key: string;
@@ -474,7 +475,7 @@ export type JsonBodyInputWithValue = {
 };
 export type JsonBodyInputSchema = { key: string; label: string; type: 'date' | 'url' | 'string' | 'number' | 'boolean'; helper?: string };
 
-type OauthAppName = 'twitter' | 'stripe' | 'github' | 'google';
+type OauthAppName = 'twitter' | 'stripe' | 'github' | 'google' | 'email';
 export type ClaimIntegrationPublicParamsType<T extends ClaimIntegrationPluginType> = T extends 'numUses'
   ? {
       maxUses: number;
@@ -523,6 +524,7 @@ export interface ClaimApiCallInfo {
   name: string;
   description?: string;
   passAddress?: boolean;
+  passEmail?: boolean;
   passDiscord?: boolean;
   // passStripe?: boolean;
   passTwitter?: boolean;
