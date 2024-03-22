@@ -83,6 +83,12 @@ export class BlockinAssetDetails<T extends NumberType> extends BaseNumberTypeCla
   getNumberFieldNames(): string[] {
     //TODO: Get a better solution. This may result in edge cases where collectionId is a string number and converts to a number
     try {
+      if (typeof this.collectionId === 'string') {
+        if (this.collectionId.startsWith('0x')) {
+          return [];
+        }
+      }
+
       BigInt(this.collectionId as any);
       return ['collectionId'];
     } catch (e) {

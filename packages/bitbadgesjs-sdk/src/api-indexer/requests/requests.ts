@@ -707,6 +707,20 @@ export interface iCheckSignInStatusRequestSuccessResponse {
     id: string;
     username: string;
   };
+
+  // stripe?: {
+  //   id: string;
+  //   username: string;
+  // };
+  github?: {
+    id: string;
+    username: string;
+  };
+
+  google?: {
+    id: string;
+    username: string;
+  };
 }
 
 /**
@@ -727,6 +741,14 @@ export class CheckSignInStatusRequestSuccessResponse
     username: string;
     id: string;
   };
+  github?: {
+    username: string;
+    id: string;
+  };
+  google?: {
+    id: string;
+    username: string;
+  };
 
   constructor(data: iCheckSignInStatusRequestSuccessResponse) {
     super();
@@ -734,6 +756,8 @@ export class CheckSignInStatusRequestSuccessResponse
     this.message = data.message;
     this.discord = data.discord;
     this.twitter = data.twitter;
+    this.github = data.github;
+    this.google = data.google;
   }
 }
 
@@ -744,6 +768,9 @@ export interface SignOutRequestBody {
   signOutDiscord: boolean;
   signOutTwitter: boolean;
   signOutBlockin: boolean;
+  signOutGoogle: boolean;
+  signOutGithub: boolean;
+  // signOutStripe: boolean;
 }
 
 /**

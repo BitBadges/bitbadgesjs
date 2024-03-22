@@ -454,10 +454,12 @@ export interface iBalanceDocWithDetails<T extends NumberType> extends iBalanceDo
 export type ClaimIntegrationPluginType =
   | 'password'
   | 'numUses'
-  | 'greaterThanXBADGEBalance'
   | 'discord'
   | 'codes'
+  | 'github'
+  | 'google'
   | 'twitter'
+  // | 'stripe'
   | 'transferTimes'
   | 'requiresProofOfAddress'
   | 'whitelist'
@@ -472,58 +474,61 @@ export type JsonBodyInputWithValue = {
 };
 export type JsonBodyInputSchema = { key: string; label: string; type: 'date' | 'url' | 'string' | 'number' | 'boolean'; helper?: string };
 
+type OauthAppName = 'twitter' | 'stripe' | 'github' | 'google';
 export type ClaimIntegrationPublicParamsType<T extends ClaimIntegrationPluginType> = T extends 'numUses'
   ? {
       maxUses: number;
       maxUsesPerAddress?: number;
       assignMethod: 'firstComeFirstServe' | 'codeIdx';
     }
-  : T extends 'greaterThanXBADGEBalance'
+  : T extends 'discord'
     ? {
-        minBalance: number;
+        users?: string[];
+        serverId?: string;
+        serverName?: string;
+        maxUsesPerUser?: number;
+        hasPrivateList: boolean;
       }
-    : T extends 'discord'
+    : T extends 'codes'
       ? {
-          users?: string[];
-          serverId?: string;
-          serverName?: string;
-          maxUsesPerUser?: number;
+          numCodes: number;
         }
-      : T extends 'codes'
+      : T extends OauthAppName
         ? {
-            numCodes: number;
+            hasPrivateList: boolean;
+            users?: string[];
+            maxUsesPerUser?: number;
           }
-        : T extends 'twitter'
+        : T extends 'transferTimes'
           ? {
-              users?: string[];
-              maxUsesPerUser?: number;
+              transferTimes: iUintRange<JSPrimitiveNumberType>[];
             }
-          : T extends 'transferTimes'
+          : T extends 'whitelist'
             ? {
-                transferTimes: iUintRange<JSPrimitiveNumberType>[];
+                listId?: string;
+                list?: iAddressList;
               }
-            : T extends 'whitelist'
+            : T extends 'mustOwnBadges'
               ? {
-                  listId?: string;
-                  list?: iAddressList;
+                  ownershipRequirements?: AndGroup<NumberType> | OrGroup<NumberType> | OwnershipRequirements<NumberType>;
                 }
-              : T extends 'mustOwnBadges'
+              : T extends 'api'
                 ? {
-                    ownershipRequirements?: AndGroup<NumberType> | OrGroup<NumberType> | OwnershipRequirements<NumberType>;
+                    apiCalls: ClaimApiCallInfo[];
                   }
-                : T extends 'api'
-                  ? {
-                      apiCalls: ClaimApiCallInfo[];
-                    }
-                  : {};
+                : {};
 
 export interface ClaimApiCallInfo {
   uri: string;
   name: string;
   description?: string;
+  passAddress?: boolean;
   passDiscord?: boolean;
+  // passStripe?: boolean;
   passTwitter?: boolean;
-  bodyParams?: object;
+  passGithub?: boolean;
+  passGoogle?: boolean;
+  bodyParams?: any;
   userInputsSchema: Array<JsonBodyInputSchema>;
 }
 
@@ -541,7 +546,7 @@ export type ClaimIntegrationPrivateParamsType<T extends ClaimIntegrationPluginTy
           listId?: string;
           list?: iAddressList;
         }
-      : T extends 'twitter'
+      : T extends OauthAppName
         ? {
             users?: string[];
           }
