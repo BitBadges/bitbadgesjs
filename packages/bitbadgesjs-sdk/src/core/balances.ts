@@ -333,13 +333,12 @@ function getConverterFunctionForBalances<T extends NumberType>(balance: iBalance
 export function addBalance<T extends NumberType>(existingBalances: iBalance<T>[], balanceToAdd: iBalance<T>): BalanceArray<T> {
   const currBalances = getBalancesForIds(balanceToAdd.badgeIds, balanceToAdd.ownershipTimes, existingBalances);
   let existing = BalanceArray.From(existingBalances).clone();
-
   existing = deleteBalances(balanceToAdd.badgeIds, balanceToAdd.ownershipTimes, existing);
-
   for (const balance of currBalances) {
     balance.amount = safeAdd(balance.amount, balanceToAdd.amount);
-    existing = setBalance(balance, existing);
   }
+
+  existing = setBalances(currBalances, existing);
 
   return existing;
 }
@@ -384,8 +383,9 @@ export function subtractBalance<T extends NumberType>(
 
   for (const currBalanceObj of currBalances) {
     currBalanceObj.amount = safeSubtract(currBalanceObj.amount, balanceToRemove.amount, allowUnderflow);
-    balancesArr = setBalance(currBalanceObj, balancesArr);
   }
+
+  balancesArr = setBalances(currBalances, balancesArr);
 
   return balancesArr;
 }
@@ -438,6 +438,16 @@ function setBalance<T extends NumberType>(newBalance: iBalance<T>, balances: iBa
   return newBalances;
 }
 
+function setBalances<T extends NumberType>(newBalances: iBalance<T>[], balances: iBalance<T>[]): BalanceArray<T> {
+  let newBalancesArr = BalanceArray.From(balances).clone();
+
+  newBalancesArr.push(...newBalances.filter((x) => x.amount !== 0n));
+  newBalancesArr = cleanBalances(newBalancesArr);
+  newBalancesArr = sortBalancesByAmount(newBalancesArr);
+
+  return newBalancesArr;
+}
+
 /**
  * Gets the balances for specified ID ranges.
  *
@@ -455,12 +465,12 @@ export function getBalancesForIds<T extends NumberType>(idRanges: iUintRange<T>[
   if (idRanges.length === 0) {
     throw new Error('invalid idRanges');
   }
-
   const convertFunction = getConverterFunction(idRanges[0].start);
 
   const fetchedBalances: BalanceArray<bigint> = BalanceArray.From([]);
 
   const currPermissionDetails: UniversalPermissionDetails[] = [];
+  //assumes balances are sorted and non-overlapping
   for (const balanceObj of balances) {
     for (const currRange of balanceObj.badgeIds) {
       for (const currTime of balanceObj.ownershipTimes) {
@@ -490,7 +500,7 @@ export function getBalancesForIds<T extends NumberType>(idRanges: iUintRange<T>[
       toFetchPermissionDetails.push({
         badgeId: new UintRange(rangeToFetch).convert(BigIntify),
         ownershipTime: new UintRange(timeToFetch).convert(BigIntify),
-        transferTime: UintRange.FullRange(), // dummy range
+        transferTime: UintRange.FullRange(), //dummy range
         timelineTime: UintRange.FullRange(), // dummy range
         toList: AddressList.AllAddresses(),
         fromList: AddressList.AllAddresses(),
@@ -534,7 +544,6 @@ export function getBalancesForIds<T extends NumberType>(idRanges: iUintRange<T>[
   }
 
   //Handle duplicates
-
   return fetchedBalances.convert(convertFunction);
 }
 
@@ -560,6 +569,28 @@ function deleteBalances<T extends NumberType>(
   const convertFunction = getConverterFunctionForBalances(balances);
   const newBalances: BalanceArray<bigint> = BalanceArray.From([]);
 
+  const toDeletePermissionDetails: UniversalPermissionDetails[] = [];
+  for (const rangeToDelete of rangesToDelete) {
+    for (const timeToDelete of timesToDelete) {
+      toDeletePermissionDetails.push({
+        badgeId: new UintRange(rangeToDelete).convert(BigIntify),
+        ownershipTime: new UintRange(timeToDelete).convert(BigIntify),
+        transferTime: UintRange.FullRange(), //dummy range
+        timelineTime: UintRange.FullRange(), //dummy range
+        toList: AddressList.AllAddresses(),
+        fromList: AddressList.AllAddresses(),
+        initiatedByList: AddressList.AllAddresses(),
+        approvalIdList: AddressList.AllAddresses(),
+        amountTrackerIdList: AddressList.AllAddresses(),
+        challengeTrackerIdList: AddressList.AllAddresses(),
+
+        permanentlyPermittedTimes: UintRangeArray.From([]),
+        permanentlyForbiddenTimes: UintRangeArray.From([]),
+        arbitraryValue: 0n
+      });
+    }
+  }
+
   for (const balanceObj of balances) {
     const currPermissionDetails: UniversalPermissionDetails[] = [];
     for (const currRange of balanceObj.badgeIds) {
@@ -578,29 +609,7 @@ function deleteBalances<T extends NumberType>(
 
           permanentlyPermittedTimes: UintRangeArray.From([]),
           permanentlyForbiddenTimes: UintRangeArray.From([]),
-          arbitraryValue: 0n
-        });
-      }
-    }
-
-    const toDeletePermissionDetails: UniversalPermissionDetails[] = [];
-    for (const rangeToDelete of rangesToDelete) {
-      for (const timeToDelete of timesToDelete) {
-        toDeletePermissionDetails.push({
-          badgeId: new UintRange(rangeToDelete).convert(BigIntify),
-          ownershipTime: new UintRange(timeToDelete).convert(BigIntify),
-          transferTime: UintRange.FullRange(), //dummy range
-          timelineTime: UintRange.FullRange(), //dummy range
-          toList: AddressList.AllAddresses(),
-          fromList: AddressList.AllAddresses(),
-          initiatedByList: AddressList.AllAddresses(),
-          approvalIdList: AddressList.AllAddresses(),
-          amountTrackerIdList: AddressList.AllAddresses(),
-          challengeTrackerIdList: AddressList.AllAddresses(),
-
-          permanentlyPermittedTimes: UintRangeArray.From([]),
-          permanentlyForbiddenTimes: UintRangeArray.From([]),
-          arbitraryValue: 0n
+          arbitraryValue: balanceObj.amount
         });
       }
     }
@@ -647,7 +656,6 @@ export function cleanBalances<T extends NumberType>(balancesArr: iBalance<T>[]) 
     balance.badgeIds.sortAndMerge();
     balance.ownershipTimes.sortAndMerge();
   }
-
   balances = sortBalancesByAmount(balances);
 
   //we also see if we can merge cross-balances
@@ -662,17 +670,20 @@ export function cleanBalances<T extends NumberType>(balancesArr: iBalance<T>[]) 
       //If the balances are equal, we merge them
       if (currBalance.amount == newBalance.amount) {
         //If the balances are equal, we merge them
-        if (JSON.stringify(currBalance.badgeIds) == JSON.stringify(newBalance.badgeIds)) {
+        if (uintRangeArrsEqual(currBalance.badgeIds, newBalance.badgeIds)) {
           newBalance.ownershipTimes.push(...currBalance.ownershipTimes);
           newBalance.ownershipTimes.sortAndMerge();
           merged = true;
           break;
-        } else if (JSON.stringify(currBalance.ownershipTimes) == JSON.stringify(newBalance.ownershipTimes)) {
+        } else if (uintRangeArrsEqual(currBalance.ownershipTimes, newBalance.ownershipTimes)) {
           newBalance.badgeIds.push(...currBalance.badgeIds);
           newBalance.badgeIds.sortAndMerge();
           merged = true;
           break;
         }
+      } else if (currBalance.amount > newBalance.amount) {
+        j = newBalances.length;
+        break;
       }
     }
 
@@ -682,6 +693,20 @@ export function cleanBalances<T extends NumberType>(balancesArr: iBalance<T>[]) 
   }
 
   return newBalances;
+}
+
+export function uintRangeArrsEqual<T extends NumberType>(arr1: UintRangeArray<T>, arr2: UintRangeArray<T>) {
+  if (arr1.length !== arr2.length) {
+    return false;
+  }
+
+  for (let i = 0; i < arr1.length; i++) {
+    if (arr1[i].start !== arr2[i].start || arr1[i].end !== arr2[i].end) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 /**
@@ -708,17 +733,7 @@ export function sortAndMergeBalances<T extends NumberType>(balances: iBalance<T>
  */
 export function handleDuplicateBadgeIdsInBalances<T extends NumberType>(balances: iBalance<T>[]) {
   let newBalances: BalanceArray<T> = BalanceArray.From([]);
-  for (const balance of balances) {
-    for (const badgeId of balance.badgeIds) {
-      for (const time of balance.ownershipTimes) {
-        newBalances.addBalance({
-          amount: balance.amount,
-          badgeIds: [badgeId],
-          ownershipTimes: [time]
-        });
-      }
-    }
-  }
+  newBalances.addBalances(balances);
   return newBalances;
 }
 

@@ -13,6 +13,8 @@ import { BaseBitBadgesApi } from './base';
 import type {
   UpdateAddressListsRouteRequestBody,
   UpdateAddressListsRouteSuccessResponse,
+  CreateAddressListsRouteSuccessResponse,
+  CreateAddressListsRouteRequestBody,
   GetAddressListsRouteRequestBody,
   GetAddressListsRouteSuccessResponse,
   DeleteAddressListsRouteRequestBody,
@@ -762,7 +764,19 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
-   * Updates or creates address lists stored by BitBadges centralized servers.
+   * Creates address lists stored by BitBadges centralized servers.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/addressList/update`
+   * - **SDK Function Call**: `await BitBadgesApi.updateAddressLists(requestBody);`
+   *
+   * Must be created off-chain. For on-chain, they must be created through MsgCreateAddressMappings. Creator can update their created lists with no restrictions. Else, requires an edit key.
+   */
+  public async createAddressLists(requestBody: CreateAddressListsRouteRequestBody): Promise<CreateAddressListsRouteSuccessResponse> {
+    return await BitBadgesAddressList.CreateAddressList(this, requestBody);
+  }
+  /**
+   * Updates address lists stored by BitBadges centralized servers.
    *
    * @remarks
    * - **API Route**: `POST /api/v0/addressList/update`

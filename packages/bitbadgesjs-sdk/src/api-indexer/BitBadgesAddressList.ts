@@ -226,8 +226,17 @@ export class BitBadgesAddressList<T extends NumberType>
    *
    * Behind the scenes, this is just an alias for UpdateAddressList.
    */
-  static async CreateAddressList<T extends NumberType>(api: BaseBitBadgesApi<T>, options: UpdateAddressListsRouteRequestBody<T>) {
-    await BitBadgesAddressList.UpdateAddressList(api, options);
+  static async CreateAddressList<T extends NumberType>(api: BaseBitBadgesApi<T>, options: CreateAddressListsRouteRequestBody) {
+    try {
+      const response = await api.axios.post<iCreateAddressListsRouteSuccessResponse>(
+        `${api.BACKEND_URL}${BitBadgesApiRoutes.CreateAddressListRoute()}`,
+        options
+      );
+      return new CreateAddressListsRouteSuccessResponse(response.data);
+    } catch (error) {
+      await api.handleApiError(error);
+      return Promise.reject(error);
+    }
   }
 
   /**
@@ -384,6 +393,21 @@ export interface iUpdateAddressListsRouteSuccessResponse {}
  * @category API Requests / Responses
  */
 export class UpdateAddressListsRouteSuccessResponse extends EmptyResponseClass {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface CreateAddressListsRouteRequestBody extends UpdateAddressListsRouteRequestBody<NumberType> {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iCreateAddressListsRouteSuccessResponse {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class CreateAddressListsRouteSuccessResponse extends EmptyResponseClass {}
 
 /**
  * @category API Requests / Responses

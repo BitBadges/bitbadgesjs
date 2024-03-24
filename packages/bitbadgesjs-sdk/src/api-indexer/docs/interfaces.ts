@@ -489,6 +489,7 @@ export type ClaimIntegrationPublicParamsType<T extends ClaimIntegrationPluginTyp
         serverName?: string;
         maxUsesPerUser?: number;
         hasPrivateList: boolean;
+        listUrl?: string;
       }
     : T extends 'codes'
       ? {
@@ -499,6 +500,7 @@ export type ClaimIntegrationPublicParamsType<T extends ClaimIntegrationPluginTyp
             hasPrivateList: boolean;
             users?: string[];
             maxUsesPerUser?: number;
+            listUrl?: string;
           }
         : T extends 'transferTimes'
           ? {

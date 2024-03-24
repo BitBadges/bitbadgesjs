@@ -1,7 +1,7 @@
 //TODO: This file should probably be refactored a lot, but it currently works.
 //			It is also not user-facing or dev-facing, so I am okay with how it is now
-import { AddressList } from './addressLists';
 import { BigIntify } from '../common/string-numbers';
+import { AddressList } from './addressLists';
 import { UintRange, UintRangeArray } from './uintRanges';
 
 const { getReservedTrackerList } = AddressList;
@@ -144,6 +144,7 @@ export function universalRemoveOverlaps(
   const removedChallengeTrackerIdListIsEmpty = removedChallengeTrackerIdList.isEmpty();
 
   const remaining: UniversalPermissionDetails[] = [];
+
   //If we didn't remove anything at all
   if (
     removedTimelineTimes.length === 0 ||
@@ -160,7 +161,6 @@ export function universalRemoveOverlaps(
     remaining.push(valueToCheck);
     return [remaining, []];
   }
-
   for (const timelineTimeAfterRemoval of timelineTimesAfterRemoval) {
     remaining.push({
       timelineTime: timelineTimeAfterRemoval,
@@ -425,7 +425,6 @@ export interface UsedFlags {
   usesAmountTrackerIdList: boolean;
   usesChallengeTrackerIdList: boolean;
 }
-
 export const ActionPermissionUsedFlags: UsedFlags = {
   usesBadgeIds: false,
   usesTimelineTimes: false,

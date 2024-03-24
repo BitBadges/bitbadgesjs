@@ -31,6 +31,7 @@ export class BitBadgesApiRoutes {
   static DeleteReviewRoute = (reviewId: string) => `/api/v0/deleteReview/${reviewId}`;
   static DeleteAnnouncementRoute = (announcementId: string) => `/api/v0/deleteAnnouncement/${announcementId}`;
   static GetAddressListsRoute = () => '/api/v0/addressLists';
+  static CreateAddressListRoute = () => '/api/v0/addressLists/create';
   static UpdateAddressListRoute = () => '/api/v0/addressLists/update';
   static DeleteAddressListRoute = () => '/api/v0/addressLists/delete';
   static GetAccountsRoute = () => '/api/v0/user/batch';
