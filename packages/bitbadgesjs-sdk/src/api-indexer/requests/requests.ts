@@ -1155,12 +1155,14 @@ export class GetBlockinAuthCodeRouteSuccessResponse
     errorMessage?: string;
   };
   params: BlockinChallengeParams<NumberType>;
+  cosmosAddress: string;
 
   constructor(data: iGetBlockinAuthCodeRouteSuccessResponse) {
     super();
     this.message = data.message;
     this.verificationResponse = data.verificationResponse;
     this.params = new BlockinChallengeParams(data.params);
+    this.cosmosAddress = data.cosmosAddress;
   }
 }
 
@@ -1176,6 +1178,11 @@ export interface iGetBlockinAuthCodeRouteSuccessResponse {
    * The converted Blockin params fort the message
    */
   params: BlockinChallengeParams<NumberType>;
+  /**
+   * The converted Cosmos address of params.address. This can be used as the
+   * unique identifier for the user (e.g. avoid duplicate sign ins from equivalent 0x and cosmos1 addresses).
+   */
+  cosmosAddress: string;
   /**
    * Verification response
    */
