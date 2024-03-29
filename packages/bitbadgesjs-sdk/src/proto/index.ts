@@ -4,6 +4,7 @@ export * as cosmos from './cosmos/index';
 export * as cosmos_proto from './cosmos_proto/index';
 export * as cosmwasm from './cosmwasm/index';
 export * as ethereum from './ethereum/index';
+export * as anchor from './anchor/index';
 export * as google from './google/index';
 export * as ibc from './ibc/index';
 export * from './proofs_pb';

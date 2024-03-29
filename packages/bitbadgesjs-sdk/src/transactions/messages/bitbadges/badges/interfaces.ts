@@ -32,7 +32,7 @@ export interface iMsgCreateCollection<T extends NumberType> {
   /** The creator of the transaction. */
   creator: string;
 
-  /** The balances type. Either "Standard", "Off-Chain - Indexed", "Off-Chain - Non-Indexed" */
+  /** The balances type. Either "Standard", "Off-Chain - Indexed", "Off-Chain - Non-Indexed" or "Non-Public" */
   balancesType?: string;
 
   /** The default balances for users who have not interacted with the collection yet. Only can be set on initial creation. Only used if collection has "Standard" balance type. */

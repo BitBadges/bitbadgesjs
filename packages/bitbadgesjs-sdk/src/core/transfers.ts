@@ -1,5 +1,5 @@
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, deepCopyPrimitives, getConverterFunction } from '@/common/base';
-import type { iBalance, iTransfer } from '@/interfaces/badges/core';
+import type { iBalance, iTransfer, iZkProofSolution } from '@/interfaces/badges/core';
 import * as proto from '@/proto';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 import { convertToCosmosAddress } from '../address-converter/converter';
@@ -7,7 +7,7 @@ import { GO_MAX_UINT_64, safeAddKeepLeft, safeMultiplyKeepLeft } from '../common
 import type { NumberType } from '../common/string-numbers';
 import { BigIntify, Stringify } from '../common/string-numbers';
 import { Balance, BalanceArray } from './balances';
-import { ApprovalIdentifierDetails, MerkleProof } from './misc';
+import { ApprovalIdentifierDetails, MerkleProof, ZkProofSolution } from './misc';
 import { UintRangeArray } from './uintRanges';
 
 /**
@@ -24,6 +24,7 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
   memo?: string;
   prioritizedApprovals?: ApprovalIdentifierDetails[];
   onlyCheckPrioritizedApprovals?: boolean;
+  zkProofSolutions?: ZkProofSolution[] | undefined;
 
   constructor(transfer: iTransfer<T>) {
     super();
@@ -39,6 +40,7 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
       ? transfer.prioritizedApprovals.map((b) => new ApprovalIdentifierDetails(b))
       : undefined;
     this.onlyCheckPrioritizedApprovals = transfer.onlyCheckPrioritizedApprovals;
+    this.zkProofSolutions = transfer.zkProofSolutions ? transfer.zkProofSolutions.map((b) => new ZkProofSolution(b)) : undefined;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): Transfer<U> {
@@ -51,7 +53,8 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
         merkleProofs: this.merkleProofs ? this.merkleProofs : undefined,
         memo: this.memo ? this.memo : undefined,
         prioritizedApprovals: this.prioritizedApprovals ? this.prioritizedApprovals : undefined,
-        onlyCheckPrioritizedApprovals: this.onlyCheckPrioritizedApprovals ? this.onlyCheckPrioritizedApprovals : undefined
+        onlyCheckPrioritizedApprovals: this.onlyCheckPrioritizedApprovals ? this.onlyCheckPrioritizedApprovals : undefined,
+        zkProofSolutions: this.zkProofSolutions ? this.zkProofSolutions : undefined
       })
     );
   }
@@ -87,7 +90,8 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
       merkleProofs: item.merkleProofs ? item.merkleProofs.map((b) => MerkleProof.fromProto(b)) : undefined,
       memo: item.memo ? item.memo : undefined,
       prioritizedApprovals: item.prioritizedApprovals ? item.prioritizedApprovals.map((b) => ApprovalIdentifierDetails.fromProto(b)) : undefined,
-      onlyCheckPrioritizedApprovals: item.onlyCheckPrioritizedApprovals ? item.onlyCheckPrioritizedApprovals : undefined
+      onlyCheckPrioritizedApprovals: item.onlyCheckPrioritizedApprovals ? item.onlyCheckPrioritizedApprovals : undefined,
+      zkProofSolutions: item.zkProofSolutions ? item.zkProofSolutions.map((b) => ZkProofSolution.fromProto(b)) : undefined
     });
   }
 }
@@ -168,6 +172,7 @@ export class TransferWithIncrements<T extends NumberType>
   memo?: string;
   prioritizedApprovals?: ApprovalIdentifierDetails[];
   onlyCheckPrioritizedApprovals?: boolean;
+  zkProofSolutions?: ZkProofSolution[] | undefined;
 
   constructor(data: iTransferWithIncrements<T>) {
     super();
@@ -184,6 +189,7 @@ export class TransferWithIncrements<T extends NumberType>
     this.memo = data.memo;
     this.prioritizedApprovals = data.prioritizedApprovals ? data.prioritizedApprovals.map((b) => new ApprovalIdentifierDetails(b)) : undefined;
     this.onlyCheckPrioritizedApprovals = data.onlyCheckPrioritizedApprovals;
+    this.zkProofSolutions = data.zkProofSolutions ? data.zkProofSolutions.map((b) => new ZkProofSolution(b)) : undefined;
   }
 
   getNumberFieldNames(): string[] {

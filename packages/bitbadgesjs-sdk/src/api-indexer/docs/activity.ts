@@ -1,8 +1,9 @@
 import { BalanceArray } from '@/core/balances';
 import type { NumberType } from '@/common/string-numbers';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base';
-import { ApprovalIdentifierDetails } from '@/proto/badges/transfers_pb';
+import { ApprovalIdentifierDetails, ZkProofSolution } from '@/proto/badges/transfers_pb';
 import type { iActivityDoc, iClaimAlertDoc, iListActivityDoc, iReviewDoc, iTransferActivityDoc } from './interfaces';
+import { iZkProofSolution } from '@/interfaces';
 
 /**
  * Base activity item interface. All activity items should extend this interface.
@@ -78,6 +79,7 @@ export class TransferActivityDoc<T extends NumberType> extends ActivityDoc<T> im
   precalculateBalancesFromApproval?: ApprovalIdentifierDetails;
   prioritizedApprovals?: ApprovalIdentifierDetails[];
   onlyCheckPrioritizedApprovals?: boolean;
+  zkProofSolutions?: ZkProofSolution[];
   initiatedBy: string;
   txHash?: string;
 
@@ -88,6 +90,7 @@ export class TransferActivityDoc<T extends NumberType> extends ActivityDoc<T> im
     this.balances = BalanceArray.From(data.balances);
     this.collectionId = data.collectionId;
     this.memo = data.memo;
+    this.zkProofSolutions = data.zkProofSolutions ? data.zkProofSolutions.map((x) => new ZkProofSolution(x)) : undefined;
     this.precalculateBalancesFromApproval = data.precalculateBalancesFromApproval
       ? new ApprovalIdentifierDetails(data.precalculateBalancesFromApproval)
       : undefined;
@@ -98,7 +101,7 @@ export class TransferActivityDoc<T extends NumberType> extends ActivityDoc<T> im
   }
 
   getNumberFieldNames(): string[] {
-    return [...super.getNumberFieldNames(),  'collectionId'];
+    return [...super.getNumberFieldNames(), 'collectionId'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): TransferActivityDoc<U> {
@@ -150,7 +153,7 @@ export class ClaimAlertDoc<T extends NumberType> extends ActivityDoc<T> implemen
   }
 
   getNumberFieldNames(): string[] {
-    return [...super.getNumberFieldNames(),  'collectionId'];
+    return [...super.getNumberFieldNames(), 'collectionId'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ClaimAlertDoc<U> {

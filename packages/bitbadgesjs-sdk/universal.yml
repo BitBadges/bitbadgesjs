@@ -697,12 +697,12 @@
           enum:
             - Standard
             - Off-Chain - Indexed
-            - Inherited
+            - Non-Public
             - Off-Chain - Non-Indexed
           title: iCollectionDoc.balancesType
           description: >-
             The type of balances (i.e. "Standard", "Off-Chain - Indexed",
-            "Inherited, "Off-Chain - Non-Indexed")
+            "Non-Public", "Off-Chain - Non-Indexed")
           type: string
         offChainBalancesMetadataTimeline:
           items:
@@ -2818,23 +2818,23 @@
           title: iBitBadgesAddressList.views
           description: The views of the address list.
           type: object
-        editClaims:
+        claims:
           items:
             properties:
               claimId:
-                title: iBitBadgesAddressList.editClaims.[].claimId
+                title: iBitBadgesAddressList.claims.[].claimId
                 type: string
               plugins:
                 items: {}
-                title: iBitBadgesAddressList.editClaims.[].plugins
+                title: iBitBadgesAddressList.claims.[].plugins
                 type: array
             required:
               - claimId
               - plugins
             additionalProperties: false
-            title: iBitBadgesAddressList.editClaims.[]
+            title: iBitBadgesAddressList.claims.[]
             type: object
-          title: iBitBadgesAddressList.editClaims
+          title: iBitBadgesAddressList.claims
           type: array
       required:
         - _docId
@@ -2844,7 +2844,7 @@
         - lastUpdated
         - listsActivity
         - views
-        - editClaims
+        - claims
       additionalProperties: false
       title: iBitBadgesAddressList, Doc
       description: |-
@@ -2929,29 +2929,29 @@
               private:
                 title: private
                 type: boolean
-              editClaims:
+              claims:
                 items:
                   properties:
                     claimId:
-                      title: editClaims.[].claimId
+                      title: claims.[].claimId
                       type: string
                     plugins:
                       items: {}
-                      title: editClaims.[].plugins
+                      title: claims.[].plugins
                       type: array
                   required:
                     - claimId
                     - plugins
                   additionalProperties: false
-                  title: editClaims.[]
+                  title: claims.[]
                   type: object
-                title: editClaims
+                title: claims
                 type: array
               viewableWithLink:
                 title: viewableWithLink
                 type: boolean
             required:
-              - editClaims
+              - claims
             additionalProperties: false
             type: object
           title: UpdateAddressListsRouteRequestBody.addressLists
@@ -4437,29 +4437,29 @@
           $ref: '#/components/schemas/iOffChainBalancesMap'
           title: AddBalancesToOffChainStorageRouteRequestBody.balances
           description: A map of Cosmos addresses or list IDs -> Balance[].
-        offChainClaims:
+        claims:
           items:
             properties:
               claimId:
                 title: >-
-                  AddBalancesToOffChainStorageRouteRequestBody.offChainClaims.[].claimId
+                  AddBalancesToOffChainStorageRouteRequestBody.claims.[].claimId
                 type: string
               plugins:
                 items: {}
                 title: >-
-                  AddBalancesToOffChainStorageRouteRequestBody.offChainClaims.[].plugins
+                  AddBalancesToOffChainStorageRouteRequestBody.claims.[].plugins
                 type: array
               balancesToSet:
                 $ref: '#/components/schemas/iIncrementedBalances'
                 title: >-
-                  AddBalancesToOffChainStorageRouteRequestBody.offChainClaims.[].balancesToSet
+                  AddBalancesToOffChainStorageRouteRequestBody.claims.[].balancesToSet
             required:
               - claimId
               - plugins
             additionalProperties: false
-            title: AddBalancesToOffChainStorageRouteRequestBody.offChainClaims.[]
+            title: AddBalancesToOffChainStorageRouteRequestBody.claims.[]
             type: object
-          title: AddBalancesToOffChainStorageRouteRequestBody.offChainClaims
+          title: AddBalancesToOffChainStorageRouteRequestBody.claims
           description: The claim details
           type: array
         method:
@@ -4576,31 +4576,31 @@
           $ref: '#/components/schemas/iChallengeDetails'
           title: AddApprovalDetailsToOffChainStorageRouteRequestBody.challengeDetails
           description: The challenge details.
-        offChainClaims:
+        claims:
           items:
             properties:
               plugins:
                 items: {}
                 title: >-
-                  AddApprovalDetailsToOffChainStorageRouteRequestBody.offChainClaims.[].plugins
+                  AddApprovalDetailsToOffChainStorageRouteRequestBody.claims.[].plugins
                 description: The plugins for the approval.
                 type: array
               claimId:
                 title: >-
-                  AddApprovalDetailsToOffChainStorageRouteRequestBody.offChainClaims.[].claimId
+                  AddApprovalDetailsToOffChainStorageRouteRequestBody.claims.[].claimId
                 type: string
               manualDistribution:
                 title: >-
-                  AddApprovalDetailsToOffChainStorageRouteRequestBody.offChainClaims.[].manualDistribution
+                  AddApprovalDetailsToOffChainStorageRouteRequestBody.claims.[].manualDistribution
                 type: boolean
             required:
               - plugins
               - claimId
             additionalProperties: false
             title: >-
-              AddApprovalDetailsToOffChainStorageRouteRequestBody.offChainClaims.[]
+              AddApprovalDetailsToOffChainStorageRouteRequestBody.claims.[]
             type: object
-          title: AddApprovalDetailsToOffChainStorageRouteRequestBody.offChainClaims
+          title: AddApprovalDetailsToOffChainStorageRouteRequestBody.claims
           type: array
       required:
         - name
@@ -5728,27 +5728,27 @@
           $ref: '#/components/schemas/iChallengeDetails'
           title: iApprovalInfoDetails.challengeDetails
           description: The challenge details of the claim / approval
-        offChainClaims:
+        claims:
           items:
             properties:
               plugins:
                 items: {}
-                title: iApprovalInfoDetails.offChainClaims.[].plugins
+                title: iApprovalInfoDetails.claims.[].plugins
                 description: The plugins of the claim / approval
                 type: array
               claimId:
-                title: iApprovalInfoDetails.offChainClaims.[].claimId
+                title: iApprovalInfoDetails.claims.[].claimId
                 type: string
               manualDistribution:
-                title: iApprovalInfoDetails.offChainClaims.[].manualDistribution
+                title: iApprovalInfoDetails.claims.[].manualDistribution
                 type: boolean
             required:
               - plugins
               - claimId
             additionalProperties: false
-            title: iApprovalInfoDetails.offChainClaims.[]
+            title: iApprovalInfoDetails.claims.[]
             type: object
-          title: iApprovalInfoDetails.offChainClaims
+          title: iApprovalInfoDetails.claims
           type: array
       required:
         - name
@@ -5980,7 +5980,7 @@
         Fee represents a Cosmos SDK transaction fee object.
 
         @remarks Learn more about fees in Evmos from the
-         ://docs.cosmos.network/main/basics/gas-fees | Cosmos SDK Fee Docs 
+         ://docs.cosmos.network/main/basics/gas-fees | Cosmos SDK Fee Docs
         and the  ://docs.evmos.org/protocol/concepts/gas-and-fees | Evmos Gas
         and Fee Docs
 

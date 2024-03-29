@@ -28,7 +28,7 @@ export interface iBitBadgesAddressList<T extends NumberType> extends iAddressLis
     };
   };
 
-  editClaims: {
+  claims: {
     claimId: string;
     plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
   }[];
@@ -50,14 +50,14 @@ export class BitBadgesAddressList<T extends NumberType>
       pagination: PaginationInfo;
     };
   };
-  editClaims: { plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[]; claimId: string }[];
+  claims: { plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[]; claimId: string }[];
 
   constructor(data: iBitBadgesAddressList<T>) {
     super(data);
     this.metadata = data.metadata ? new Metadata(data.metadata) : undefined;
     this.listsActivity = data.listsActivity.map((activity) => new ListActivityDoc(activity));
     this.views = data.views;
-    this.editClaims = data.editClaims;
+    this.claims = data.claims;
   }
 
   getNumberFieldNames(): string[] {
@@ -376,7 +376,7 @@ export interface UpdateAddressListsRouteRequestBody<T extends NumberType> {
     //Whether the list is private.
     private?: boolean;
 
-    editClaims: {
+    claims: {
       claimId: string;
       plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
     }[];

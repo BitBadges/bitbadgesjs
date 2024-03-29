@@ -14,22 +14,22 @@ import type {
   iUserIncomingApprovalWithDetails,
   iUserOutgoingApproval
 } from '@/interfaces/badges/approvals';
-import type { iAddressList, iMerkleChallenge } from '@/interfaces/badges/core';
+import type { iAddressList } from '@/interfaces/badges/core';
 import * as proto from '@/proto';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 import type MerkleTree from 'merkletreejs';
 import type { Options as MerkleTreeJsOptions } from 'merkletreejs/dist/MerkleTree';
+import { ClaimIntegrationPluginType, IntegrationPluginDetails } from '..';
 import { BigIntify, Stringify, type NumberType } from '../common/string-numbers';
 import { AddressList } from './addressLists';
 import { Balance, BalanceArray } from './balances';
-import { MerkleChallenge, MustOwnBadges } from './misc';
+import { MerkleChallenge, MustOwnBadges, ZkProof } from './misc';
 import type { UniversalPermission, UniversalPermissionDetails } from './overlaps';
 import { GetListIdWithOptions, GetListWithOptions, GetUintRangesWithOptions, getOverlapsAndNonOverlaps } from './overlaps';
 import type { CollectionApprovalPermissionWithDetails } from './permissions';
 import { CollectionApprovalPermission } from './permissions';
 import { UintRange, UintRangeArray } from './uintRanges';
 import { AllDefaultValues, getPotentialUpdatesForTimelineValues, getUpdateCombinationsToCheck } from './validate-utils';
-import { IntegrationPluginDetails, ClaimIntegrationPluginType } from '..';
 
 const { getReservedAddressList, getReservedTrackerList } = AddressList;
 
@@ -123,6 +123,7 @@ export class OutgoingApprovalCriteria<T extends NumberType>
   maxNumTransfers?: MaxNumTransfers<T>;
   requireToEqualsInitiatedBy?: boolean;
   requireToDoesNotEqualInitiatedBy?: boolean;
+  zkProofs?: ZkProof[];
 
   constructor(msg: iOutgoingApprovalCriteria<T>) {
     super();
@@ -133,6 +134,7 @@ export class OutgoingApprovalCriteria<T extends NumberType>
     this.maxNumTransfers = msg.maxNumTransfers ? new MaxNumTransfers(msg.maxNumTransfers) : undefined;
     this.requireToEqualsInitiatedBy = msg.requireToEqualsInitiatedBy;
     this.requireToDoesNotEqualInitiatedBy = msg.requireToDoesNotEqualInitiatedBy;
+    this.zkProofs = msg.zkProofs ? msg.zkProofs.map((x) => new ZkProof(x)) : undefined;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): OutgoingApprovalCriteria<U> {
@@ -144,7 +146,8 @@ export class OutgoingApprovalCriteria<T extends NumberType>
         approvalAmounts: this.approvalAmounts?.convert(convertFunction),
         maxNumTransfers: this.maxNumTransfers?.convert(convertFunction),
         requireToEqualsInitiatedBy: this.requireToEqualsInitiatedBy,
-        requireToDoesNotEqualInitiatedBy: this.requireToDoesNotEqualInitiatedBy
+        requireToDoesNotEqualInitiatedBy: this.requireToDoesNotEqualInitiatedBy,
+        zkProofs: this.zkProofs?.map((x) => x)
       })
     );
   }
@@ -180,7 +183,8 @@ export class OutgoingApprovalCriteria<T extends NumberType>
       approvalAmounts: item.approvalAmounts ? ApprovalAmounts.fromProto(item.approvalAmounts, convertFunction) : undefined,
       maxNumTransfers: item.maxNumTransfers ? MaxNumTransfers.fromProto(item.maxNumTransfers, convertFunction) : undefined,
       requireToEqualsInitiatedBy: item.requireToEqualsInitiatedBy,
-      requireToDoesNotEqualInitiatedBy: item.requireToDoesNotEqualInitiatedBy
+      requireToDoesNotEqualInitiatedBy: item.requireToDoesNotEqualInitiatedBy,
+      zkProofs: item.zkProofs
     });
   }
 
@@ -193,6 +197,7 @@ export class OutgoingApprovalCriteria<T extends NumberType>
       predeterminedBalances: this.predeterminedBalances,
       mustOwnBadges: this.mustOwnBadges,
       merkleChallenge: this.merkleChallenge,
+      zkProofs: this.zkProofs,
 
       requireFromEqualsInitiatedBy: false,
       requireFromDoesNotEqualInitiatedBy: false,
@@ -685,6 +690,7 @@ export class IncomingApprovalCriteria<T extends NumberType>
   maxNumTransfers?: MaxNumTransfers<T>;
   requireFromEqualsInitiatedBy?: boolean;
   requireFromDoesNotEqualInitiatedBy?: boolean;
+  zkProofs?: ZkProof[];
 
   constructor(msg: iIncomingApprovalCriteria<T>) {
     super();
@@ -695,6 +701,7 @@ export class IncomingApprovalCriteria<T extends NumberType>
     this.maxNumTransfers = msg.maxNumTransfers ? new MaxNumTransfers(msg.maxNumTransfers) : undefined;
     this.requireFromEqualsInitiatedBy = msg.requireFromEqualsInitiatedBy;
     this.requireFromDoesNotEqualInitiatedBy = msg.requireFromDoesNotEqualInitiatedBy;
+    this.zkProofs = msg.zkProofs ? msg.zkProofs.map((x) => new ZkProof(x)) : undefined;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): IncomingApprovalCriteria<U> {
@@ -706,7 +713,8 @@ export class IncomingApprovalCriteria<T extends NumberType>
         approvalAmounts: this.approvalAmounts ? this.approvalAmounts.convert(convertFunction) : undefined,
         maxNumTransfers: this.maxNumTransfers ? this.maxNumTransfers.convert(convertFunction) : undefined,
         requireFromEqualsInitiatedBy: this.requireFromEqualsInitiatedBy,
-        requireFromDoesNotEqualInitiatedBy: this.requireFromDoesNotEqualInitiatedBy
+        requireFromDoesNotEqualInitiatedBy: this.requireFromDoesNotEqualInitiatedBy,
+        zkProofs: this.zkProofs?.map((x) => x)
       })
     );
   }
@@ -742,7 +750,8 @@ export class IncomingApprovalCriteria<T extends NumberType>
       approvalAmounts: item.approvalAmounts ? ApprovalAmounts.fromProto(item.approvalAmounts, convertFunction) : undefined,
       maxNumTransfers: item.maxNumTransfers ? MaxNumTransfers.fromProto(item.maxNumTransfers, convertFunction) : undefined,
       requireFromEqualsInitiatedBy: item.requireFromEqualsInitiatedBy,
-      requireFromDoesNotEqualInitiatedBy: item.requireFromDoesNotEqualInitiatedBy
+      requireFromDoesNotEqualInitiatedBy: item.requireFromDoesNotEqualInitiatedBy,
+      zkProofs: item.zkProofs?.map((x) => ZkProof.fromProto(x))
     });
   }
 
@@ -754,6 +763,7 @@ export class IncomingApprovalCriteria<T extends NumberType>
       requireFromDoesNotEqualInitiatedBy: this.requireFromDoesNotEqualInitiatedBy,
       predeterminedBalances: this.predeterminedBalances,
       mustOwnBadges: this.mustOwnBadges,
+      zkProofs: this.zkProofs,
       merkleChallenge: this.merkleChallenge,
 
       requireToEqualsInitiatedBy: false,
@@ -904,6 +914,7 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
   requireFromDoesNotEqualInitiatedBy?: boolean;
   overridesFromOutgoingApprovals?: boolean;
   overridesToIncomingApprovals?: boolean;
+  zkProofs?: ZkProof[];
 
   constructor(msg: iApprovalCriteria<T>) {
     super();
@@ -918,6 +929,7 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
     this.requireFromDoesNotEqualInitiatedBy = msg.requireFromDoesNotEqualInitiatedBy;
     this.overridesFromOutgoingApprovals = msg.overridesFromOutgoingApprovals;
     this.overridesToIncomingApprovals = msg.overridesToIncomingApprovals;
+    this.zkProofs = msg.zkProofs ? msg.zkProofs.map((x) => new ZkProof(x)) : undefined;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ApprovalCriteria<U> {
@@ -951,6 +963,7 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
       predeterminedBalances: item.predeterminedBalances ? PredeterminedBalances.fromProto(item.predeterminedBalances, convertFunction) : undefined,
       approvalAmounts: item.approvalAmounts ? ApprovalAmounts.fromProto(item.approvalAmounts, convertFunction) : undefined,
       maxNumTransfers: item.maxNumTransfers ? MaxNumTransfers.fromProto(item.maxNumTransfers, convertFunction) : undefined,
+      zkProofs: item.zkProofs.map((x) => ZkProof.fromProto(x)),
       requireToEqualsInitiatedBy: item.requireToEqualsInitiatedBy,
       requireFromEqualsInitiatedBy: item.requireFromEqualsInitiatedBy,
       requireToDoesNotEqualInitiatedBy: item.requireToDoesNotEqualInitiatedBy,
@@ -1130,7 +1143,7 @@ export interface iApprovalInfoDetails<T extends NumberType> {
   /** The challenge details of the claim / approval */
   challengeDetails?: iChallengeDetails<T>;
 
-  offChainClaims?: {
+  claims?: {
     /** The plugins of the claim / approval */
     plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
     claimId: string;
@@ -1145,7 +1158,7 @@ export class ApprovalInfoDetails<T extends NumberType> extends BaseNumberTypeCla
   name: string;
   description: string;
   challengeDetails?: ChallengeDetails<T>;
-  offChainClaims?: {
+  claims?: {
     /** The plugins of the claim / approval */
     plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
     manualDistribution?: boolean;
@@ -1157,7 +1170,7 @@ export class ApprovalInfoDetails<T extends NumberType> extends BaseNumberTypeCla
     this.name = data.name;
     this.description = data.description;
     this.challengeDetails = data.challengeDetails ? new ChallengeDetails(data.challengeDetails) : undefined;
-    this.offChainClaims = data.offChainClaims;
+    this.claims = data.claims;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ApprovalInfoDetails<U> {

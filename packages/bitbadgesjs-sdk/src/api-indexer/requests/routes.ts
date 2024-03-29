@@ -60,4 +60,6 @@ export class BitBadgesApiRoutes {
   static GetCollectionForProtocolRoute = () => '/api/v0/protocols/collection';
   static FilterBadgesInCollectionRoute = () => '/api/v0/collections/filter';
   static GenerateAppleWalletPassRoute = () => '/api/v0/appleWalletPass';
+
+  static GetExternalCallKeyRoute = () => '/api/v0/externalCallKey';
 }

@@ -417,7 +417,7 @@ export interface AddBalancesToOffChainStorageRouteRequestBody {
   /**
    * The claim details
    */
-  offChainClaims?: {
+  claims?: {
     claimId: string;
     plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
     balancesToSet?: iIncrementedBalances<NumberType>;
@@ -540,7 +540,7 @@ export interface AddApprovalDetailsToOffChainStorageRouteRequestBody {
    */
   challengeDetails?: iChallengeDetails<NumberType>;
 
-  offChainClaims?: {
+  claims?: {
     /**
      * The plugins for the approval.
      */
@@ -1279,5 +1279,38 @@ export class GetClaimAlertsForCollectionRouteSuccessResponse<T extends NumberTyp
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetClaimAlertsForCollectionRouteSuccessResponse<U> {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetClaimAlertsForCollectionRouteSuccessResponse<U>;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface GetExternalCallRouteRequestBody {
+  uri: string;
+  key: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetExternalCallRouteSuccessResponse {
+  key: string;
+  timestamp: number;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetExternalCallRouteSuccessResponse
+  extends CustomTypeClass<GetExternalCallRouteSuccessResponse>
+  implements iGetExternalCallRouteSuccessResponse
+{
+  key: string;
+  timestamp: number;
+
+  constructor(data: iGetExternalCallRouteSuccessResponse) {
+    super();
+    this.key = data.key;
+    this.timestamp = data.timestamp;
   }
 }

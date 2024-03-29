@@ -16,7 +16,9 @@ import type {
   iOffChainBalancesMetadata,
   iOffChainBalancesMetadataTimeline,
   iStandardsTimeline,
-  iTimelineItem
+  iTimelineItem,
+  iZkProof,
+  iZkProofSolution
 } from '@/interfaces/badges/core';
 import * as proto from '@/proto';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
@@ -259,6 +261,67 @@ export class MustOwnBadges<T extends NumberType> extends BaseNumberTypeClass<Mus
       overrideWithCurrentTime: item.overrideWithCurrentTime,
       mustSatisfyForAllAssets: item.mustSatisfyForAllAssets
     });
+  }
+}
+
+export class ZkProof extends CustomTypeClass<ZkProof> implements iZkProof {
+  verificationKey: string;
+  uri: string;
+  customData: string;
+
+  constructor(zkProof: iZkProof) {
+    super();
+    this.verificationKey = zkProof.verificationKey;
+    this.uri = zkProof.uri;
+    this.customData = zkProof.customData;
+  }
+
+  toProto(): proto.badges.ZkProof {
+    return new proto.badges.ZkProof(this.clone().toJson());
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ZkProof {
+    return ZkProof.fromProto(proto.badges.ZkProof.fromJson(jsonValue, options));
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ZkProof {
+    return ZkProof.fromProto(proto.badges.ZkProof.fromJsonString(jsonString, options));
+  }
+
+  static fromProto(item: proto.badges.ZkProof): ZkProof {
+    return new ZkProof({ ...item });
+  }
+}
+
+/**
+ * ZK proof solutions for proof approvals
+ *
+ * @category Approvals / Transferability
+ */
+export class ZkProofSolution extends CustomTypeClass<ZkProofSolution> implements iZkProofSolution {
+  proof: string;
+  publicInputs: string;
+
+  constructor(zkProofSolution: iZkProofSolution) {
+    super();
+    this.proof = zkProofSolution.proof;
+    this.publicInputs = zkProofSolution.publicInputs;
+  }
+
+  toProto(): proto.badges.ZkProofSolution {
+    return new proto.badges.ZkProofSolution(this.clone().toJson());
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ZkProofSolution {
+    return ZkProofSolution.fromProto(proto.badges.ZkProofSolution.fromJson(jsonValue, options));
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ZkProofSolution {
+    return ZkProofSolution.fromProto(proto.badges.ZkProofSolution.fromJsonString(jsonString, options));
+  }
+
+  static fromProto(item: proto.badges.ZkProofSolution): ZkProofSolution {
+    return new ZkProofSolution({ ...item });
   }
 }
 

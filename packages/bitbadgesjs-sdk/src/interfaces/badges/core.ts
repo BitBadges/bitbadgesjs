@@ -68,6 +68,41 @@ export interface iOffChainBalancesMetadata {
 /**
  * @category Interfaces
  */
+export interface iZkProof {
+  /**
+   * The verification key of the zkProof.
+   */
+  verificationKey: string;
+
+  /**
+   * The URI where to fetch the zkProof metadata from.
+   */
+  uri: string;
+
+  /**
+   * Arbitrary custom data that can be stored on-chain.
+   */
+  customData: string;
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iZkProofSolution {
+  /**
+   * The proof of the zkProof.
+   */
+  proof: string;
+
+  /**
+   * The public inputs of the zkProof.
+   */
+  publicInputs: string;
+}
+
+/**
+ * @category Interfaces
+ */
 export interface iMustOwnBadges<T extends NumberType> {
   /**
    * The collection ID of the badges to own.
@@ -203,6 +238,11 @@ export interface iTransfer<T extends NumberType> {
    * Whether or not to only check the prioritized approvals. If false, we will check all approvals with any prioritized first.
    */
   onlyCheckPrioritizedApprovals?: boolean;
+
+  /**
+   * The zk proof solutions for approvals.
+   */
+  zkProofSolutions?: iZkProofSolution[];
 }
 
 /**

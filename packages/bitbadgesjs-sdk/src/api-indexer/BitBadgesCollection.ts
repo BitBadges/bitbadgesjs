@@ -135,7 +135,7 @@ export interface iBitBadgesCollection<T extends NumberType> extends iCollectionD
   };
 
   /** Details about any off-chain claims for this collection. Only applicable when outsourced to BitBadges. */
-  offChainClaims: {
+  claims: {
     claimId: string;
     plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
     balancesToSet: iIncrementedBalances<T>;
@@ -166,7 +166,7 @@ export class BitBadgesCollection<T extends NumberType>
   merkleChallenges: MerkleChallengeDoc<T>[];
   approvalTrackers: ApprovalTrackerDoc<T>[];
 
-  offChainClaims: {
+  claims: {
     claimId: string;
     plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
     balancesToSet: IncrementedBalances<T>;
@@ -201,7 +201,7 @@ export class BitBadgesCollection<T extends NumberType>
     this.nsfw = data.nsfw ? { ...data.nsfw, badgeIds: UintRangeArray.From(data.nsfw.badgeIds) } : undefined;
     this.reported = data.reported ? { ...data.reported, badgeIds: UintRangeArray.From(data.reported.badgeIds) } : undefined;
     this.views = data.views;
-    this.offChainClaims = data.offChainClaims.map((x) => {
+    this.claims = data.claims.map((x) => {
       return {
         claimId: x.claimId,
         plugins: x.plugins,
@@ -285,7 +285,7 @@ export class BitBadgesCollection<T extends NumberType>
    *
    * @remarks
    * This does not fetch the balance from the API. It only returns the cached balance. To fetch the balance, this
-   * can either be done directly, or if the collection balances are indexable (i.e. balances type is anything but Off-Chain - Non-Indexed),
+   * can either be done directly, or if the collection balances are indexable
    * then the balances can also be fetched via the views and / or the other fetch methods.
    *
    * @example

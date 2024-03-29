@@ -72,7 +72,7 @@
 //   };
 
 //   /** Details about any off-chain claims for this collection. Only applicable when outsourced to BitBadges. */
-//   offChainClaims: {
+//   claims: {
 //     claimId: string;
 //     plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
 //     balancesToSet: iIncrementedBalances;
@@ -924,7 +924,7 @@
 //     };
 //   };
 
-//   editClaims: {
+//   claims: {
 //     claimId: string;
 //     plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
 //   }[];
@@ -968,7 +968,7 @@
 //     //Whether the list is private.
 //     private?: boolean;
 
-//     editClaims: {
+//     claims: {
 //       claimId: string;
 //       plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
 //     }[];
@@ -1801,7 +1801,7 @@
 //   /**
 //    * The claim details
 //    */
-//   offChainClaims?: {
+//   claims?: {
 //     claimId: string;
 //     plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
 //     balancesToSet?: iIncrementedBalances;
@@ -1887,7 +1887,7 @@
 //    */
 //   challengeDetails?: iChallengeDetails;
 
-//   offChainClaims?: {
+//   claims?: {
 //     /**
 //      * The plugins for the approval.
 //      */
@@ -2421,7 +2421,7 @@
 //   /** The challenge details of the claim / approval */
 //   challengeDetails?: iChallengeDetails;
 
-//   offChainClaims?: {
+//   claims?: {
 //     /** The plugins of the claim / approval */
 //     plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
 //     claimId: string;

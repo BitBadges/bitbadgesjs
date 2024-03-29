@@ -1,5 +1,5 @@
 import type { NumberType } from '@/common/string-numbers';
-import type { iUintRange, iMustOwnBadges, iMerkleChallenge, iBalance, iAddressList } from './core';
+import type { iUintRange, iMustOwnBadges, iMerkleChallenge, iBalance, iAddressList, iZkProof } from './core';
 
 /**
  * @category Interfaces
@@ -24,6 +24,8 @@ export interface iUserOutgoingApproval<T extends NumberType> {
 export interface iOutgoingApprovalCriteria<T extends NumberType> {
   /** The list of must own badges to be approved. */
   mustOwnBadges?: iMustOwnBadges<T>[];
+  /** The list of ZK proofs that need to be satisfied. One use per proof solution. */
+  zkProofs?: iZkProof[];
   /** The list of merkle challenges that need valid proofs to be approved. */
   merkleChallenge?: iMerkleChallenge<T>;
   /** The predetermined balances for each transfer. */
@@ -148,6 +150,8 @@ export interface iUserIncomingApproval<T extends NumberType> {
 export interface iIncomingApprovalCriteria<T extends NumberType> {
   /** The list of must own badges to be approved. */
   mustOwnBadges?: iMustOwnBadges<T>[];
+  /** The list of ZK proofs that need to be satisfied. One use per proof solution. */
+  zkProofs?: iZkProof[];
   /** The list of merkle challenges that need valid proofs to be approved. */
   merkleChallenge?: iMerkleChallenge<T>;
   /** The predetermined balances for each transfer using this approval. */
@@ -198,6 +202,8 @@ export interface iCollectionApproval<T extends NumberType> {
 export interface iApprovalCriteria<T extends NumberType> {
   /** The list of must own badges to be approved. */
   mustOwnBadges?: iMustOwnBadges<T>[];
+  /** The list of ZK proofs that need to be satisfied. One use per proof solution. */
+  zkProofs?: iZkProof[];
   /** The list of merkle challenges that need valid proofs to be approved. */
   merkleChallenge?: iMerkleChallenge<T>;
   /** The predetermined balances for each transfer. */

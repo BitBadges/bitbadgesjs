@@ -4,6 +4,7 @@ import {
   MsgCreateAddressLists,
   MsgCreateCollection,
   MsgDeleteCollection,
+  MsgGlobalArchive,
   MsgTransferBadges,
   MsgUniversalUpdateCollection,
   MsgUpdateCollection,
@@ -18,7 +19,8 @@ import {
   MsgUnsetCollectionForProtocol,
   MsgUpdateProtocol
 } from '@/proto/protocols/tx_pb';
-import { MsgExecuteContractCompat, MsgStoreCodeCompat, MsgInstantiateContractCompat } from '@/proto/wasmx/tx_pb';
+import { MsgExecuteContractCompat, MsgInstantiateContractCompat } from '@/proto/wasmx/tx_pb';
+import { MsgAddCustomData } from '@/proto/anchor/tx_pb';
 
 export function createBadgesAminoConverters(): AminoConverters {
   return {
@@ -28,14 +30,14 @@ export function createBadgesAminoConverters(): AminoConverters {
     ...createAminoConverter(MsgUpdateUserApprovals, 'badges/UpdateUserApprovals'),
     ...createAminoConverter(MsgCreateAddressLists, 'badges/CreateAddressLists'),
     ...createAminoConverter(MsgCreateCollection, 'badges/CreateCollection'),
-    ...createAminoConverter(MsgUniversalUpdateCollection, 'badges/UniversalUpdateCollection')
+    ...createAminoConverter(MsgUniversalUpdateCollection, 'badges/UniversalUpdateCollection'),
+    ...createAminoConverter(MsgGlobalArchive, 'badges/GlobalArchive')
   };
 }
 
 export function createWasmXAminoConverters(): AminoConverters {
   return {
     ...createAminoConverter(MsgExecuteContractCompat, 'wasmx/MsgExecuteContractCompat'),
-    ...createAminoConverter(MsgStoreCodeCompat, 'wasmx/MsgStoreCodeCompat'),
     ...createAminoConverter(MsgInstantiateContractCompat, 'wasmx/MsgInstantiateContractCompat'),
     ...createAminoConverter(MsgExecuteContract, 'wasm/MsgExecuteContract'),
     ...createAminoConverter(MsgStoreCode, 'wasm/MsgStoreCode'),
@@ -53,12 +55,19 @@ export function createProtocolsAminoConverters(): AminoConverters {
   };
 }
 
+export function createAnchorAminoConverters(): AminoConverters {
+  return {
+    ...createAminoConverter(MsgAddCustomData, 'anchor/AddCustomData')
+  };
+}
+
 export function createDefaultAminoConverters() {
   return {
     ...createDefaultCosmosAminoConverters(),
     ...createBadgesAminoConverters(),
     ...createWasmXAminoConverters(),
-    ...createProtocolsAminoConverters()
+    ...createProtocolsAminoConverters(),
+    ...createAnchorAminoConverters()
   };
 }
 

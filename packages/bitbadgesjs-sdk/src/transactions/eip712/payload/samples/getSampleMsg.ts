@@ -59,7 +59,8 @@ import {
   AddressList,
   Transfer,
   MerkleProof,
-  MerklePathItem
+  MerklePathItem,
+  ZkProof
 } from '@/proto/badges';
 import { MsgCreateProtocol, MsgDeleteProtocol, MsgSetCollectionForProtocol, MsgUpdateProtocol } from '@/proto/protocols/tx_pb';
 import { deepCopyPrimitives } from '@/common/base';
@@ -70,6 +71,13 @@ const approvalCriteria = new OutgoingApprovalCriteria({
       amountRange: new UintRange(),
       badgeIds: [new UintRange()],
       ownershipTimes: [new UintRange()]
+    })
+  ],
+  zkProofs: [
+    new ZkProof({
+      verificationKey: '',
+      uri: '',
+      customData: ''
     })
   ],
   merkleChallenge: new MerkleChallenge({
@@ -118,6 +126,13 @@ const approvalCriteriaForPopulatingUndefined = new OutgoingApprovalCriteria({
     expectedProofLength: '0',
     maxUsesPerLeaf: '0'
   }),
+  zkProofs: [
+    new ZkProof({
+      verificationKey: '',
+      uri: '',
+      customData: ''
+    })
+  ],
   predeterminedBalances: new PredeterminedBalances({
     orderCalculationMethod: new PredeterminedOrderCalculationMethod(),
     incrementedBalances: new IncrementedBalances({
@@ -442,7 +457,14 @@ const universalParams = {
       badgeIds: [new UintRange()],
       ownershipTimes: [new UintRange()],
       approvalCriteria: new ApprovalCriteria({
-        ...approvalCriteria
+        ...approvalCriteria,
+        zkProofs: [
+          new ZkProof({
+            verificationKey: '',
+            uri: '',
+            customData: ''
+          })
+        ]
       })
     })
   ],
@@ -525,6 +547,8 @@ const universalParams = {
 
 export function getSampleMsg(msgType: string, currMsg: any) {
   switch (msgType) {
+    case 'badges/GlobalArchive':
+      return { type: msgType, value: { creator: '', archive: true } };
     case 'protocols/CreateProtocol':
       return { type: msgType, value: new MsgCreateProtocol().toJson({ emitDefaultValues: true }) };
     case 'protocols/DeleteProtocol':

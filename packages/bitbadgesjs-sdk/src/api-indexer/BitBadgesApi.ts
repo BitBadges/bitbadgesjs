@@ -79,7 +79,9 @@ import {
   iDeleteReviewRouteSuccessResponse,
   GenerateAppleWalletPassRouteRequestBody,
   GetClaimsRouteRequestBody,
-  GetClaimsRouteSuccessResponse
+  GetClaimsRouteSuccessResponse,
+  GetExternalCallRouteRequestBody,
+  GetExternalCallRouteSuccessResponse
 } from './requests/requests';
 import {
   GetStatusRouteSuccessResponse,
@@ -1057,6 +1059,26 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
         requestBody
       );
       return new GetClaimsRouteSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Gets a key + timestamp pair for an API external call to prove it is actually coming from BitBadges.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/externalCallKey`
+   * - **SDK Function Call**: `await BitBadgesApi.getExternalCallKey(requestBody);`
+   */
+  public async getExternalCallKey(requestBody: GetExternalCallRouteRequestBody): Promise<GetExternalCallRouteSuccessResponse> {
+    try {
+      const response = await this.axios.post<GetExternalCallRouteSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetExternalCallKeyRoute()}`,
+        requestBody
+      );
+      return new GetExternalCallRouteSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);

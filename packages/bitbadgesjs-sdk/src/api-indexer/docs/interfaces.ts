@@ -19,7 +19,8 @@ import type {
   iManagerTimeline,
   iOffChainBalancesMetadataTimeline,
   iStandardsTimeline,
-  iUintRange
+  iUintRange,
+  iZkProofSolution
 } from '@/interfaces/badges/core';
 import type { iCollectionPermissions, iUserPermissionsWithDetails } from '@/interfaces/badges/permissions';
 import type { iUserBalanceStore } from '@/interfaces/badges/userBalances';
@@ -100,6 +101,8 @@ export interface iTransferActivityDoc<T extends NumberType> extends iActivityDoc
   prioritizedApprovals?: iApprovalIdentifierDetails[];
   /** Whether or not to only check prioritized approvals. */
   onlyCheckPrioritizedApprovals?: boolean;
+  /**The ZK proofs for the transfer. */
+  zkProofSolutions?: iZkProofSolution[];
   /** The cosmos address of the user who initiated the activity. */
   initiatedBy: string;
   /** The transaction hash of the activity. */
@@ -144,8 +147,8 @@ export interface iCollectionDoc<T extends NumberType> extends Doc {
   collectionMetadataTimeline: iCollectionMetadataTimeline<T>[];
   /** The badge metadata timeline */
   badgeMetadataTimeline: iBadgeMetadataTimeline<T>[];
-  /** The type of balances (i.e. "Standard", "Off-Chain - Indexed", "Inherited, "Off-Chain - Non-Indexed") */
-  balancesType: 'Standard' | 'Off-Chain - Indexed' | 'Inherited' | 'Off-Chain - Non-Indexed';
+  /** The type of balances (i.e. "Standard", "Off-Chain - Indexed", "Non-Public, "Off-Chain - Non-Indexed") */
+  balancesType: 'Standard' | 'Off-Chain - Indexed' | 'Non-Public' | 'Off-Chain - Non-Indexed';
   /** The off-chain balances metadata timeline */
   offChainBalancesMetadataTimeline: iOffChainBalancesMetadataTimeline<T>[];
   /** The custom data timeline */

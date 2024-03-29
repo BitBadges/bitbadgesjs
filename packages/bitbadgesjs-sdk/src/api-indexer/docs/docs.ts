@@ -82,7 +82,7 @@ export class CollectionDoc<T extends NumberType>
   collectionId: T;
   collectionMetadataTimeline: CollectionMetadataTimeline<T>[];
   badgeMetadataTimeline: BadgeMetadataTimeline<T>[];
-  balancesType: 'Standard' | 'Off-Chain - Indexed' | 'Inherited' | 'Off-Chain - Non-Indexed';
+  balancesType: 'Standard' | 'Off-Chain - Indexed' | 'Non-Public' | 'Off-Chain - Non-Indexed';
   offChainBalancesMetadataTimeline: OffChainBalancesMetadataTimeline<T>[];
   customDataTimeline: CustomDataTimeline<T>[];
   managerTimeline: ManagerTimeline<T>[];
