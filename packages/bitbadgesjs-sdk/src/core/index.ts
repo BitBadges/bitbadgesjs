@@ -16,3 +16,6 @@ export * from './timelines';
 export * from './transfers';
 export * from './uintRanges';
 export * from './userBalances';
+export * from './secrets';
+
+

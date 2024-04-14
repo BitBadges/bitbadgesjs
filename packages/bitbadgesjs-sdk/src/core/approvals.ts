@@ -14,7 +14,7 @@ import type {
   iUserIncomingApprovalWithDetails,
   iUserOutgoingApproval
 } from '@/interfaces/badges/approvals';
-import type { iAddressList } from '@/interfaces/badges/core';
+import type { iAddressList, iCoinTransfer, iMerkleChallenge } from '@/interfaces/badges/core';
 import * as proto from '@/proto';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 import type MerkleTree from 'merkletreejs';
@@ -23,7 +23,7 @@ import { ClaimIntegrationPluginType, IntegrationPluginDetails } from '..';
 import { BigIntify, Stringify, type NumberType } from '../common/string-numbers';
 import { AddressList } from './addressLists';
 import { Balance, BalanceArray } from './balances';
-import { MerkleChallenge, MustOwnBadges, ZkProof } from './misc';
+import { CoinTransfer, MerkleChallenge, MustOwnBadges, ZkProof } from './misc';
 import type { UniversalPermission, UniversalPermissionDetails } from './overlaps';
 import { GetListIdWithOptions, GetListWithOptions, GetUintRangesWithOptions, getOverlapsAndNonOverlaps } from './overlaps';
 import type { CollectionApprovalPermissionWithDetails } from './permissions';
@@ -45,8 +45,6 @@ export class UserOutgoingApproval<T extends NumberType> extends BaseNumberTypeCl
   badgeIds: UintRangeArray<T>;
   ownershipTimes: UintRangeArray<T>;
   approvalId: string;
-  amountTrackerId: string;
-  challengeTrackerId: string;
   uri?: string;
   customData?: string;
   approvalCriteria?: OutgoingApprovalCriteria<T>;
@@ -59,8 +57,6 @@ export class UserOutgoingApproval<T extends NumberType> extends BaseNumberTypeCl
     this.badgeIds = UintRangeArray.From(msg.badgeIds);
     this.ownershipTimes = UintRangeArray.From(msg.ownershipTimes);
     this.approvalId = msg.approvalId;
-    this.amountTrackerId = msg.amountTrackerId;
-    this.challengeTrackerId = msg.challengeTrackerId;
     this.uri = msg.uri;
     this.customData = msg.customData;
     this.approvalCriteria = msg.approvalCriteria ? new OutgoingApprovalCriteria(msg.approvalCriteria) : undefined;
@@ -98,8 +94,6 @@ export class UserOutgoingApproval<T extends NumberType> extends BaseNumberTypeCl
       badgeIds: item.badgeIds.map((x) => UintRange.fromProto(x, convertFunction)),
       ownershipTimes: item.ownershipTimes.map((x) => UintRange.fromProto(x, convertFunction)),
       approvalId: item.approvalId,
-      amountTrackerId: item.amountTrackerId,
-      challengeTrackerId: item.challengeTrackerId,
       uri: item.uri,
       customData: item.customData,
       approvalCriteria: item.approvalCriteria ? OutgoingApprovalCriteria.fromProto(item.approvalCriteria, convertFunction) : undefined
@@ -117,23 +111,25 @@ export class OutgoingApprovalCriteria<T extends NumberType>
   implements iOutgoingApprovalCriteria<T>
 {
   mustOwnBadges?: MustOwnBadges<T>[];
-  merkleChallenge?: MerkleChallenge<T>;
+  merkleChallenges?: MerkleChallenge<T>[];
   predeterminedBalances?: PredeterminedBalances<T>;
   approvalAmounts?: ApprovalAmounts<T>;
   maxNumTransfers?: MaxNumTransfers<T>;
   requireToEqualsInitiatedBy?: boolean;
   requireToDoesNotEqualInitiatedBy?: boolean;
   zkProofs?: ZkProof[];
+  coinTransfers?: CoinTransfer<T>[] | undefined;
 
   constructor(msg: iOutgoingApprovalCriteria<T>) {
     super();
     this.mustOwnBadges = msg.mustOwnBadges?.map((x) => new MustOwnBadges(x));
-    this.merkleChallenge = msg.merkleChallenge ? new MerkleChallenge(msg.merkleChallenge) : undefined;
+    this.merkleChallenges = msg.merkleChallenges?.map((x) => new MerkleChallenge(x));
     this.predeterminedBalances = msg.predeterminedBalances ? new PredeterminedBalances(msg.predeterminedBalances) : undefined;
     this.approvalAmounts = msg.approvalAmounts ? new ApprovalAmounts(msg.approvalAmounts) : undefined;
     this.maxNumTransfers = msg.maxNumTransfers ? new MaxNumTransfers(msg.maxNumTransfers) : undefined;
     this.requireToEqualsInitiatedBy = msg.requireToEqualsInitiatedBy;
     this.requireToDoesNotEqualInitiatedBy = msg.requireToDoesNotEqualInitiatedBy;
+    this.coinTransfers = msg.coinTransfers ? msg.coinTransfers.map((x) => new CoinTransfer(x)) : undefined;
     this.zkProofs = msg.zkProofs ? msg.zkProofs.map((x) => new ZkProof(x)) : undefined;
   }
 
@@ -141,13 +137,14 @@ export class OutgoingApprovalCriteria<T extends NumberType>
     return new OutgoingApprovalCriteria(
       deepCopyPrimitives({
         mustOwnBadges: this.mustOwnBadges?.map((x) => x.convert(convertFunction)),
-        merkleChallenge: this.merkleChallenge?.convert(convertFunction),
+        merkleChallenges: this.merkleChallenges?.map((x) => x.convert(convertFunction)),
         predeterminedBalances: this.predeterminedBalances?.convert(convertFunction),
         approvalAmounts: this.approvalAmounts?.convert(convertFunction),
         maxNumTransfers: this.maxNumTransfers?.convert(convertFunction),
         requireToEqualsInitiatedBy: this.requireToEqualsInitiatedBy,
         requireToDoesNotEqualInitiatedBy: this.requireToDoesNotEqualInitiatedBy,
-        zkProofs: this.zkProofs?.map((x) => x)
+        zkProofs: this.zkProofs?.map((x) => x),
+        coinTransfers: this.coinTransfers?.map((x) => x.convert(convertFunction))
       })
     );
   }
@@ -178,13 +175,14 @@ export class OutgoingApprovalCriteria<T extends NumberType>
   ): OutgoingApprovalCriteria<U> {
     return new OutgoingApprovalCriteria<U>({
       mustOwnBadges: item.mustOwnBadges.map((x) => MustOwnBadges.fromProto(x, convertFunction)),
-      merkleChallenge: item.merkleChallenge ? MerkleChallenge.fromProto(item.merkleChallenge, convertFunction) : undefined,
+      merkleChallenges: item.merkleChallenges.map((x) => MerkleChallenge.fromProto(x, convertFunction)),
       predeterminedBalances: item.predeterminedBalances ? PredeterminedBalances.fromProto(item.predeterminedBalances, convertFunction) : undefined,
       approvalAmounts: item.approvalAmounts ? ApprovalAmounts.fromProto(item.approvalAmounts, convertFunction) : undefined,
       maxNumTransfers: item.maxNumTransfers ? MaxNumTransfers.fromProto(item.maxNumTransfers, convertFunction) : undefined,
       requireToEqualsInitiatedBy: item.requireToEqualsInitiatedBy,
       requireToDoesNotEqualInitiatedBy: item.requireToDoesNotEqualInitiatedBy,
-      zkProofs: item.zkProofs
+      zkProofs: item.zkProofs,
+      coinTransfers: item.coinTransfers ? item.coinTransfers.map((x) => CoinTransfer.fromProto(x, convertFunction)) : undefined
     });
   }
 
@@ -196,8 +194,9 @@ export class OutgoingApprovalCriteria<T extends NumberType>
       requireToDoesNotEqualInitiatedBy: this.requireToDoesNotEqualInitiatedBy,
       predeterminedBalances: this.predeterminedBalances,
       mustOwnBadges: this.mustOwnBadges,
-      merkleChallenge: this.merkleChallenge,
+      merkleChallenges: this.merkleChallenges,
       zkProofs: this.zkProofs,
+      coinTransfers: this.coinTransfers,
 
       requireFromEqualsInitiatedBy: false,
       requireFromDoesNotEqualInitiatedBy: false,
@@ -278,7 +277,8 @@ export class PredeterminedBalances<T extends NumberType> extends BaseNumberTypeC
             usePerFromAddressNumTransfers: false,
             usePerToAddressNumTransfers: false,
             usePerInitiatedByAddressNumTransfers: false,
-            useMerkleChallengeLeafIndex: false
+            useMerkleChallengeLeafIndex: false,
+            challengeTrackerId: ''
           })
     });
   }
@@ -410,6 +410,7 @@ export class PredeterminedOrderCalculationMethod
   usePerFromAddressNumTransfers: boolean;
   usePerInitiatedByAddressNumTransfers: boolean;
   useMerkleChallengeLeafIndex: boolean;
+  challengeTrackerId: string;
 
   constructor(msg: iPredeterminedOrderCalculationMethod) {
     super();
@@ -418,6 +419,7 @@ export class PredeterminedOrderCalculationMethod
     this.usePerFromAddressNumTransfers = msg.usePerFromAddressNumTransfers;
     this.usePerInitiatedByAddressNumTransfers = msg.usePerInitiatedByAddressNumTransfers;
     this.useMerkleChallengeLeafIndex = msg.useMerkleChallengeLeafIndex;
+    this.challengeTrackerId = msg.challengeTrackerId;
   }
 
   toProto(): proto.badges.PredeterminedOrderCalculationMethod {
@@ -438,7 +440,8 @@ export class PredeterminedOrderCalculationMethod
       usePerToAddressNumTransfers: item.usePerToAddressNumTransfers,
       usePerFromAddressNumTransfers: item.usePerFromAddressNumTransfers,
       usePerInitiatedByAddressNumTransfers: item.usePerInitiatedByAddressNumTransfers,
-      useMerkleChallengeLeafIndex: item.useMerkleChallengeLeafIndex
+      useMerkleChallengeLeafIndex: item.useMerkleChallengeLeafIndex,
+      challengeTrackerId: item.challengeTrackerId
     });
   }
 }
@@ -458,6 +461,7 @@ export class ApprovalAmounts<T extends NumberType> extends BaseNumberTypeClass<A
   perToAddressApprovalAmount: T;
   perFromAddressApprovalAmount: T;
   perInitiatedByAddressApprovalAmount: T;
+  amountTrackerId: string;
 
   constructor(msg: iApprovalAmounts<T>) {
     super();
@@ -465,6 +469,7 @@ export class ApprovalAmounts<T extends NumberType> extends BaseNumberTypeClass<A
     this.perToAddressApprovalAmount = msg.perToAddressApprovalAmount;
     this.perFromAddressApprovalAmount = msg.perFromAddressApprovalAmount;
     this.perInitiatedByAddressApprovalAmount = msg.perInitiatedByAddressApprovalAmount;
+    this.amountTrackerId = msg.amountTrackerId;
   }
   getNumberFieldNames(): string[] {
     return ['overallApprovalAmount', 'perToAddressApprovalAmount', 'perFromAddressApprovalAmount', 'perInitiatedByAddressApprovalAmount'];
@@ -476,7 +481,8 @@ export class ApprovalAmounts<T extends NumberType> extends BaseNumberTypeClass<A
         overallApprovalAmount: convertFunction(this.overallApprovalAmount),
         perToAddressApprovalAmount: convertFunction(this.perToAddressApprovalAmount),
         perFromAddressApprovalAmount: convertFunction(this.perFromAddressApprovalAmount),
-        perInitiatedByAddressApprovalAmount: convertFunction(this.perInitiatedByAddressApprovalAmount)
+        perInitiatedByAddressApprovalAmount: convertFunction(this.perInitiatedByAddressApprovalAmount),
+        amountTrackerId: this.amountTrackerId
       })
     );
   }
@@ -506,7 +512,8 @@ export class ApprovalAmounts<T extends NumberType> extends BaseNumberTypeClass<A
       overallApprovalAmount: convertFunction(item.overallApprovalAmount),
       perToAddressApprovalAmount: convertFunction(item.perToAddressApprovalAmount),
       perFromAddressApprovalAmount: convertFunction(item.perFromAddressApprovalAmount),
-      perInitiatedByAddressApprovalAmount: convertFunction(item.perInitiatedByAddressApprovalAmount)
+      perInitiatedByAddressApprovalAmount: convertFunction(item.perInitiatedByAddressApprovalAmount),
+      amountTrackerId: item.amountTrackerId
     });
   }
 }
@@ -527,6 +534,7 @@ export class MaxNumTransfers<T extends NumberType> extends BaseNumberTypeClass<M
   perToAddressMaxNumTransfers: T;
   perFromAddressMaxNumTransfers: T;
   perInitiatedByAddressMaxNumTransfers: T;
+  amountTrackerId: string;
 
   constructor(msg: iMaxNumTransfers<T>) {
     super();
@@ -534,6 +542,7 @@ export class MaxNumTransfers<T extends NumberType> extends BaseNumberTypeClass<M
     this.perToAddressMaxNumTransfers = msg.perToAddressMaxNumTransfers;
     this.perFromAddressMaxNumTransfers = msg.perFromAddressMaxNumTransfers;
     this.perInitiatedByAddressMaxNumTransfers = msg.perInitiatedByAddressMaxNumTransfers;
+    this.amountTrackerId = msg.amountTrackerId;
   }
 
   getNumberFieldNames(): string[] {
@@ -546,7 +555,8 @@ export class MaxNumTransfers<T extends NumberType> extends BaseNumberTypeClass<M
         overallMaxNumTransfers: convertFunction(this.overallMaxNumTransfers),
         perToAddressMaxNumTransfers: convertFunction(this.perToAddressMaxNumTransfers),
         perFromAddressMaxNumTransfers: convertFunction(this.perFromAddressMaxNumTransfers),
-        perInitiatedByAddressMaxNumTransfers: convertFunction(this.perInitiatedByAddressMaxNumTransfers)
+        perInitiatedByAddressMaxNumTransfers: convertFunction(this.perInitiatedByAddressMaxNumTransfers),
+        amountTrackerId: this.amountTrackerId
       })
     );
   }
@@ -576,7 +586,8 @@ export class MaxNumTransfers<T extends NumberType> extends BaseNumberTypeClass<M
       overallMaxNumTransfers: convertFunction(item.overallMaxNumTransfers),
       perToAddressMaxNumTransfers: convertFunction(item.perToAddressMaxNumTransfers),
       perFromAddressMaxNumTransfers: convertFunction(item.perFromAddressMaxNumTransfers),
-      perInitiatedByAddressMaxNumTransfers: convertFunction(item.perInitiatedByAddressMaxNumTransfers)
+      perInitiatedByAddressMaxNumTransfers: convertFunction(item.perInitiatedByAddressMaxNumTransfers),
+      amountTrackerId: item.amountTrackerId
     });
   }
 }
@@ -593,8 +604,6 @@ export class UserIncomingApproval<T extends NumberType> extends BaseNumberTypeCl
   badgeIds: UintRangeArray<T>;
   ownershipTimes: UintRangeArray<T>;
   approvalId: string;
-  amountTrackerId: string;
-  challengeTrackerId: string;
   uri?: string;
   customData?: string;
   approvalCriteria?: IncomingApprovalCriteria<T>;
@@ -607,8 +616,6 @@ export class UserIncomingApproval<T extends NumberType> extends BaseNumberTypeCl
     this.badgeIds = UintRangeArray.From(msg.badgeIds);
     this.ownershipTimes = UintRangeArray.From(msg.ownershipTimes);
     this.approvalId = msg.approvalId;
-    this.amountTrackerId = msg.amountTrackerId;
-    this.challengeTrackerId = msg.challengeTrackerId;
     this.uri = msg.uri;
     this.customData = msg.customData;
     this.approvalCriteria = msg.approvalCriteria ? new IncomingApprovalCriteria(msg.approvalCriteria) : undefined;
@@ -646,22 +653,9 @@ export class UserIncomingApproval<T extends NumberType> extends BaseNumberTypeCl
       badgeIds: item.badgeIds.map((x) => UintRange.fromProto(x, convertFunction)),
       ownershipTimes: item.ownershipTimes.map((x) => UintRange.fromProto(x, convertFunction)),
       approvalId: item.approvalId,
-      amountTrackerId: item.amountTrackerId,
-      challengeTrackerId: item.challengeTrackerId,
       uri: item.uri,
       customData: item.customData,
       approvalCriteria: item.approvalCriteria ? IncomingApprovalCriteria.fromProto(item.approvalCriteria, convertFunction) : undefined
-    });
-  }
-
-  /**
-   * Convert this UserIncomingApproval to a UserIncomingApprovalWithDetails.
-   */
-  toWithDetails(fromList: iAddressList, initiatedByList: iAddressList): UserIncomingApprovalWithDetails<T> {
-    return new UserIncomingApprovalWithDetails({
-      ...this,
-      fromList,
-      initiatedByList
     });
   }
 
@@ -684,37 +678,40 @@ export class IncomingApprovalCriteria<T extends NumberType>
   implements iIncomingApprovalCriteria<T>
 {
   mustOwnBadges?: MustOwnBadges<T>[];
-  merkleChallenge?: MerkleChallenge<T>;
+  merkleChallenges?: MerkleChallenge<T>[];
   predeterminedBalances?: PredeterminedBalances<T>;
   approvalAmounts?: ApprovalAmounts<T>;
   maxNumTransfers?: MaxNumTransfers<T>;
   requireFromEqualsInitiatedBy?: boolean;
   requireFromDoesNotEqualInitiatedBy?: boolean;
   zkProofs?: ZkProof[];
+  coinTransfers?: CoinTransfer<T>[] | undefined;
 
   constructor(msg: iIncomingApprovalCriteria<T>) {
     super();
     this.mustOwnBadges = msg.mustOwnBadges?.map((x) => new MustOwnBadges(x));
-    this.merkleChallenge = msg.merkleChallenge ? new MerkleChallenge(msg.merkleChallenge) : undefined;
+    this.merkleChallenges = msg.merkleChallenges?.map((x) => new MerkleChallenge(x));
     this.predeterminedBalances = msg.predeterminedBalances ? new PredeterminedBalances(msg.predeterminedBalances) : undefined;
     this.approvalAmounts = msg.approvalAmounts ? new ApprovalAmounts(msg.approvalAmounts) : undefined;
     this.maxNumTransfers = msg.maxNumTransfers ? new MaxNumTransfers(msg.maxNumTransfers) : undefined;
     this.requireFromEqualsInitiatedBy = msg.requireFromEqualsInitiatedBy;
     this.requireFromDoesNotEqualInitiatedBy = msg.requireFromDoesNotEqualInitiatedBy;
     this.zkProofs = msg.zkProofs ? msg.zkProofs.map((x) => new ZkProof(x)) : undefined;
+    this.coinTransfers = msg.coinTransfers ? msg.coinTransfers.map((x) => new CoinTransfer(x)) : undefined;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): IncomingApprovalCriteria<U> {
     return new IncomingApprovalCriteria(
       deepCopyPrimitives({
         mustOwnBadges: this.mustOwnBadges?.map((x) => x.convert(convertFunction)),
-        merkleChallenge: this.merkleChallenge ? this.merkleChallenge.convert(convertFunction) : undefined,
+        merkleChallenge: this.merkleChallenges?.map((x) => x.convert(convertFunction)),
         predeterminedBalances: this.predeterminedBalances ? this.predeterminedBalances.convert(convertFunction) : undefined,
         approvalAmounts: this.approvalAmounts ? this.approvalAmounts.convert(convertFunction) : undefined,
         maxNumTransfers: this.maxNumTransfers ? this.maxNumTransfers.convert(convertFunction) : undefined,
         requireFromEqualsInitiatedBy: this.requireFromEqualsInitiatedBy,
         requireFromDoesNotEqualInitiatedBy: this.requireFromDoesNotEqualInitiatedBy,
-        zkProofs: this.zkProofs?.map((x) => x)
+        zkProofs: this.zkProofs?.map((x) => x),
+        coinTransfers: this.coinTransfers?.map((x) => x.convert(convertFunction))
       })
     );
   }
@@ -745,13 +742,14 @@ export class IncomingApprovalCriteria<T extends NumberType>
   ): IncomingApprovalCriteria<U> {
     return new IncomingApprovalCriteria<U>({
       mustOwnBadges: item.mustOwnBadges.map((x) => MustOwnBadges.fromProto(x, convertFunction)),
-      merkleChallenge: item.merkleChallenge ? MerkleChallenge.fromProto(item.merkleChallenge, convertFunction) : undefined,
+      merkleChallenges: item.merkleChallenges.map((x) => MerkleChallenge.fromProto(x, convertFunction)),
       predeterminedBalances: item.predeterminedBalances ? PredeterminedBalances.fromProto(item.predeterminedBalances, convertFunction) : undefined,
       approvalAmounts: item.approvalAmounts ? ApprovalAmounts.fromProto(item.approvalAmounts, convertFunction) : undefined,
       maxNumTransfers: item.maxNumTransfers ? MaxNumTransfers.fromProto(item.maxNumTransfers, convertFunction) : undefined,
       requireFromEqualsInitiatedBy: item.requireFromEqualsInitiatedBy,
       requireFromDoesNotEqualInitiatedBy: item.requireFromDoesNotEqualInitiatedBy,
-      zkProofs: item.zkProofs?.map((x) => ZkProof.fromProto(x))
+      zkProofs: item.zkProofs?.map((x) => ZkProof.fromProto(x)),
+      coinTransfers: item.coinTransfers ? item.coinTransfers.map((x) => CoinTransfer.fromProto(x, convertFunction)) : undefined
     });
   }
 
@@ -764,7 +762,8 @@ export class IncomingApprovalCriteria<T extends NumberType>
       predeterminedBalances: this.predeterminedBalances,
       mustOwnBadges: this.mustOwnBadges,
       zkProofs: this.zkProofs,
-      merkleChallenge: this.merkleChallenge,
+      merkleChallenges: this.merkleChallenges,
+      coinTransfers: this.coinTransfers,
 
       requireToEqualsInitiatedBy: false,
       requireToDoesNotEqualInitiatedBy: false,
@@ -787,8 +786,6 @@ export class CollectionApproval<T extends NumberType> extends BaseNumberTypeClas
   badgeIds: UintRangeArray<T>;
   ownershipTimes: UintRangeArray<T>;
   approvalId: string;
-  amountTrackerId: string;
-  challengeTrackerId: string;
   uri?: string;
   customData?: string;
   approvalCriteria?: ApprovalCriteria<T>;
@@ -802,8 +799,6 @@ export class CollectionApproval<T extends NumberType> extends BaseNumberTypeClas
     this.badgeIds = UintRangeArray.From(msg.badgeIds);
     this.ownershipTimes = UintRangeArray.From(msg.ownershipTimes);
     this.approvalId = msg.approvalId;
-    this.amountTrackerId = msg.amountTrackerId;
-    this.challengeTrackerId = msg.challengeTrackerId;
     this.uri = msg.uri;
     this.customData = msg.customData;
     this.approvalCriteria = msg.approvalCriteria ? new ApprovalCriteria(msg.approvalCriteria) : undefined;
@@ -854,20 +849,9 @@ export class CollectionApproval<T extends NumberType> extends BaseNumberTypeClas
       badgeIds: item.badgeIds.map((x) => UintRange.fromProto(x, convertFunction)),
       ownershipTimes: item.ownershipTimes.map((x) => UintRange.fromProto(x, convertFunction)),
       approvalId: item.approvalId,
-      amountTrackerId: item.amountTrackerId,
-      challengeTrackerId: item.challengeTrackerId,
       uri: item.uri,
       customData: item.customData,
       approvalCriteria: item.approvalCriteria ? ApprovalCriteria.fromProto(item.approvalCriteria, convertFunction) : undefined
-    });
-  }
-
-  toWithDetails(toList: iAddressList, fromList: iAddressList, initiatedByList: iAddressList): CollectionApprovalWithDetails<T> {
-    return new CollectionApprovalWithDetails({
-      ...this,
-      toList,
-      fromList,
-      initiatedByList
     });
   }
 
@@ -904,7 +888,7 @@ export class CollectionApproval<T extends NumberType> extends BaseNumberTypeClas
  */
 export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<ApprovalCriteria<T>> implements iApprovalCriteria<T> {
   mustOwnBadges?: MustOwnBadges<T>[];
-  merkleChallenge?: MerkleChallenge<T>;
+  merkleChallenges?: MerkleChallenge<T>[];
   predeterminedBalances?: PredeterminedBalances<T>;
   approvalAmounts?: ApprovalAmounts<T>;
   maxNumTransfers?: MaxNumTransfers<T>;
@@ -915,11 +899,12 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
   overridesFromOutgoingApprovals?: boolean;
   overridesToIncomingApprovals?: boolean;
   zkProofs?: ZkProof[];
+  coinTransfers?: iCoinTransfer<T>[] | undefined;
 
   constructor(msg: iApprovalCriteria<T>) {
     super();
     this.mustOwnBadges = msg.mustOwnBadges?.map((x) => new MustOwnBadges(x));
-    this.merkleChallenge = msg.merkleChallenge ? new MerkleChallenge(msg.merkleChallenge) : undefined;
+    this.merkleChallenges = msg.merkleChallenges?.map((x) => new MerkleChallenge(x));
     this.predeterminedBalances = msg.predeterminedBalances ? new PredeterminedBalances(msg.predeterminedBalances) : undefined;
     this.approvalAmounts = msg.approvalAmounts ? new ApprovalAmounts(msg.approvalAmounts) : undefined;
     this.maxNumTransfers = msg.maxNumTransfers ? new MaxNumTransfers(msg.maxNumTransfers) : undefined;
@@ -930,6 +915,7 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
     this.overridesFromOutgoingApprovals = msg.overridesFromOutgoingApprovals;
     this.overridesToIncomingApprovals = msg.overridesToIncomingApprovals;
     this.zkProofs = msg.zkProofs ? msg.zkProofs.map((x) => new ZkProof(x)) : undefined;
+    this.coinTransfers = msg.coinTransfers ? msg.coinTransfers.map((x) => new CoinTransfer(x)) : undefined;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ApprovalCriteria<U> {
@@ -959,11 +945,12 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
   static fromProto<U extends NumberType>(item: proto.badges.ApprovalCriteria, convertFunction: (item: NumberType) => U): ApprovalCriteria<U> {
     return new ApprovalCriteria<U>({
       mustOwnBadges: item.mustOwnBadges.map((x) => MustOwnBadges.fromProto(x, convertFunction)),
-      merkleChallenge: item.merkleChallenge ? MerkleChallenge.fromProto(item.merkleChallenge, convertFunction) : undefined,
+      merkleChallenges: item.merkleChallenges.map((x) => MerkleChallenge.fromProto(x, convertFunction)),
       predeterminedBalances: item.predeterminedBalances ? PredeterminedBalances.fromProto(item.predeterminedBalances, convertFunction) : undefined,
       approvalAmounts: item.approvalAmounts ? ApprovalAmounts.fromProto(item.approvalAmounts, convertFunction) : undefined,
       maxNumTransfers: item.maxNumTransfers ? MaxNumTransfers.fromProto(item.maxNumTransfers, convertFunction) : undefined,
       zkProofs: item.zkProofs.map((x) => ZkProof.fromProto(x)),
+      coinTransfers: item.coinTransfers ? item.coinTransfers.map((x) => CoinTransfer.fromProto(x, convertFunction)) : undefined,
       requireToEqualsInitiatedBy: item.requireToEqualsInitiatedBy,
       requireFromEqualsInitiatedBy: item.requireFromEqualsInitiatedBy,
       requireToDoesNotEqualInitiatedBy: item.requireToDoesNotEqualInitiatedBy,
@@ -980,6 +967,7 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
 export interface iUserOutgoingApprovalWithDetails<T extends NumberType> extends iUserOutgoingApproval<T> {
   toList: iAddressList;
   initiatedByList: iAddressList;
+  approvalCriteria?: iOutgoingApprovalCriteriaWithDetails<T>;
 }
 
 /**
@@ -988,11 +976,13 @@ export interface iUserOutgoingApprovalWithDetails<T extends NumberType> extends 
 export class UserOutgoingApprovalWithDetails<T extends NumberType> extends UserOutgoingApproval<T> implements iUserOutgoingApprovalWithDetails<T> {
   toList: AddressList;
   initiatedByList: AddressList;
+  approvalCriteria?: OutgoingApprovalCriteriaWithDetails<T> | undefined;
 
   constructor(data: iUserOutgoingApprovalWithDetails<T>) {
     super(data);
     this.toList = new AddressList(data.toList);
     this.initiatedByList = new AddressList(data.initiatedByList);
+    this.approvalCriteria = data.approvalCriteria ? new OutgoingApprovalCriteriaWithDetails(data.approvalCriteria) : undefined;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): UserOutgoingApprovalWithDetails<U> {
@@ -1019,11 +1009,13 @@ export class UserOutgoingApprovalWithDetails<T extends NumberType> extends UserO
 export class UserIncomingApprovalWithDetails<T extends NumberType> extends UserIncomingApproval<T> implements iUserIncomingApprovalWithDetails<T> {
   fromList: AddressList;
   initiatedByList: AddressList;
+  approvalCriteria?: IncomingApprovalCriteriaWithDetails<T> | undefined;
 
   constructor(data: iUserIncomingApprovalWithDetails<T>) {
     super(data);
     this.fromList = new AddressList(data.fromList);
     this.initiatedByList = new AddressList(data.initiatedByList);
+    this.approvalCriteria = data.approvalCriteria ? new IncomingApprovalCriteriaWithDetails(data.approvalCriteria) : undefined;
   }
 
   clone(): UserIncomingApprovalWithDetails<T> {
@@ -1049,15 +1041,6 @@ export class UserIncomingApprovalWithDetails<T extends NumberType> extends UserI
 }
 
 /**
- * LeavesDetails represents details about the leaves of a claims tree.
- * This is used as helpers for storing leaves and for UI purposes.
- *
- * This is used to check if an entered claim value is valid. If the leaves are hashed, then the value entered by the user will be hashed before being checked against the provided leaf values.
- * If the leaves are not hashed, then the value entered by the user will be checked directly against the provided leaf values.
- *
- * IMPORTANT: The leaf values here are to be publicly stored on IPFS, so they should not contain any sensitive information (i.e. codes, passwords, etc.)
- * Only use this with the non-hashed option when the values do not contain any sensitive information (i.e. a public whitelist of addresses).
- *
  * @example Codes
  * 1. Generate N codes privately
  * 2. Hash each code
@@ -1070,28 +1053,18 @@ export class UserIncomingApprovalWithDetails<T extends NumberType> extends UserI
  * 2. Store the addresses publicly on IPFS via this struct
  * 3. When a user enters an address, we check if it matches any of the addresses.
  *
- *
- * @category Approvals / Transferability
- * @typedef {Object} LeavesDetails
- *
- * @property {string[]} leaves - The values of the leaves
- * @property {boolean} isHashed - True if the leaves are hashed
- * @property {string[]} preimages - The preimages of the leaves (only used if isHashed = true). Oftentimes, this is used for secret codes so shoul dnot be present when user-facing.
- */
-export interface LeavesDetails {
-  leaves: string[];
-  isHashed: boolean;
-
-  preimages?: string[];
-  seedCode?: string;
-}
-
-/**
  * @category Interfaces
  */
 export interface iChallengeDetails<T extends NumberType> {
-  /** The leaves of the Merkle tree with accompanying details */
-  leavesDetails: LeavesDetails;
+  /** The leaves of the Merkle tree. Leaves should be considered public. Use preimages for the secrets + isHashed. For whitelist trees, these can be the plaintext Cosmos addresses. */
+  leaves: string[];
+  /** True if the leaves are hashed. Hash(preimage[i]) = leaves[i] */
+  isHashed: boolean;
+
+  /** The preimages of the leaves (only used if isHashed = true). Oftentimes, this is used for secret codes so should not be present when user-facing. */
+  preimages?: string[];
+  /** Seed code for generating the leaves */
+  seedCode?: string;
   /** The Merkle tree */
   tree?: MerkleTree;
   /** The Merkle tree options for how to build it */
@@ -1106,23 +1079,26 @@ export interface iChallengeDetails<T extends NumberType> {
  * @category Approvals / Transferability
  */
 export class ChallengeDetails<T extends NumberType> extends BaseNumberTypeClass<ChallengeDetails<T>> implements iChallengeDetails<T> {
-  leavesDetails: LeavesDetails;
-  tree?: MerkleTree;
   treeOptions?: MerkleTreeJsOptions;
   numLeaves?: T;
-  currCode?: T;
+  leaves: string[];
+  isHashed: boolean;
+  preimages?: string[] | undefined;
+  seedCode?: string | undefined;
+  tree?: MerkleTree | undefined;
 
   constructor(data: iChallengeDetails<T>) {
     super();
-    this.leavesDetails = data.leavesDetails;
-    this.tree = data.tree;
     this.treeOptions = data.treeOptions;
     this.numLeaves = data.numLeaves;
-    this.currCode = data.currCode;
+    this.leaves = data.leaves;
+    this.isHashed = data.isHashed;
+    this.preimages = data.preimages;
+    this.seedCode = data.seedCode;
   }
 
   getNumberFieldNames(): string[] {
-    return ['numLeaves', 'currCode'];
+    return ['numLeaves'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ChallengeDetails<U> {
@@ -1133,53 +1109,223 @@ export class ChallengeDetails<T extends NumberType> extends BaseNumberTypeClass<
 /**
  * @category Interfaces
  */
-export interface iApprovalInfoDetails<T extends NumberType> {
+export interface iChallengeInfoDetails<T extends NumberType> {
+  /** The challenge details of the claim / approval */
+  challengeDetails: iChallengeDetails<T>;
+
+  claim?: {
+    /** The plugins of the claim / approval */
+    plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
+    claimId: string;
+    manualDistribution?: boolean;
+  };
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iApprovalInfoDetails {
   /** The name of the claim */
   name: string;
 
   /** The description of the claim. This describes how to earn and claim the badge. */
   description: string;
-
-  /** The challenge details of the claim / approval */
-  challengeDetails?: iChallengeDetails<T>;
-
-  claims?: {
-    /** The plugins of the claim / approval */
-    plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
-    claimId: string;
-    manualDistribution?: boolean;
-  }[];
 }
 
 /**
  * @category Approvals / Transferability
  */
-export class ApprovalInfoDetails<T extends NumberType> extends BaseNumberTypeClass<ApprovalInfoDetails<T>> implements iApprovalInfoDetails<T> {
+export class ChallengeInfoDetails<T extends NumberType> extends BaseNumberTypeClass<ChallengeInfoDetails<T>> implements iChallengeInfoDetails<T> {
+  challengeDetails: ChallengeDetails<T>;
+  claim?: {
+    plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
+    claimId: string;
+    manualDistribution?: boolean;
+  };
+
+  constructor(data: iChallengeInfoDetails<T>) {
+    super();
+    this.challengeDetails = new ChallengeDetails(data.challengeDetails);
+    this.claim = data.claim;
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ChallengeInfoDetails<U> {
+    return new ChallengeInfoDetails(
+      deepCopyPrimitives({
+        ...this,
+        challengeDetails: this.challengeDetails.convert(convertFunction)
+      })
+    );
+  }
+}
+
+/**
+ * @category Approvals / Transferability
+ */
+export class ApprovalInfoDetails<T extends NumberType> extends BaseNumberTypeClass<ApprovalInfoDetails<T>> implements iApprovalInfoDetails {
   name: string;
   description: string;
-  challengeDetails?: ChallengeDetails<T>;
-  claims?: {
-    /** The plugins of the claim / approval */
-    plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
-    manualDistribution?: boolean;
-    claimId: string;
-  }[];
 
-  constructor(data: iApprovalInfoDetails<T>) {
+  constructor(data: iApprovalInfoDetails) {
     super();
     this.name = data.name;
     this.description = data.description;
-    this.challengeDetails = data.challengeDetails ? new ChallengeDetails(data.challengeDetails) : undefined;
-    this.claims = data.claims;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ApprovalInfoDetails<U> {
-    return new ApprovalInfoDetails(
-      deepCopyPrimitives({
-        ...this,
-        challengeDetails: this.challengeDetails ? this.challengeDetails.convert(convertFunction) : undefined
-      })
-    );
+    return new ApprovalInfoDetails(deepCopyPrimitives({ ...this }));
+  }
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iMerkleChallengeWithDetails<T extends NumberType> extends iMerkleChallenge<T> {
+  challengeInfoDetails: iChallengeInfoDetails<T>;
+}
+
+/**
+ * @category Approvals / Transferability
+ */
+export class MerkleChallengeWithDetails<T extends NumberType> extends MerkleChallenge<T> implements iMerkleChallengeWithDetails<T> {
+  challengeInfoDetails: ChallengeInfoDetails<T>;
+
+  constructor(data: iMerkleChallengeWithDetails<T>) {
+    super(data);
+    this.challengeInfoDetails = new ChallengeInfoDetails(data.challengeInfoDetails);
+  }
+
+  getNumberFieldNames(): string[] {
+    return super.getNumberFieldNames().concat(this.challengeInfoDetails.challengeDetails.getNumberFieldNames());
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): MerkleChallengeWithDetails<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as MerkleChallengeWithDetails<U>;
+  }
+
+  clone(): MerkleChallengeWithDetails<T> {
+    return super.clone() as MerkleChallengeWithDetails<T>;
+  }
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iApprovalCriteriaWithDetails<T extends NumberType> extends iApprovalCriteria<T> {
+  merkleChallenges?: iMerkleChallengeWithDetails<T>[];
+}
+
+/**
+ * @category Approvals / Transferability
+ */
+export class ApprovalCriteriaWithDetails<T extends NumberType> extends ApprovalCriteria<T> implements iApprovalCriteriaWithDetails<T> {
+  merkleChallenges?: MerkleChallengeWithDetails<T>[];
+
+  constructor(data: iApprovalCriteriaWithDetails<T>) {
+    super(data);
+    this.merkleChallenges = data.merkleChallenges?.map((x) => new MerkleChallengeWithDetails(x));
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ApprovalCriteriaWithDetails<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as ApprovalCriteriaWithDetails<U>;
+  }
+
+  clone(): ApprovalCriteriaWithDetails<T> {
+    return super.clone() as ApprovalCriteriaWithDetails<T>;
+  }
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iIncomingApprovalCriteriaWithDetails<T extends NumberType> extends iIncomingApprovalCriteria<T> {
+  merkleChallenges?: iMerkleChallengeWithDetails<T>[];
+}
+
+/**
+ * @category Approvals / Transferability
+ */
+export class IncomingApprovalCriteriaWithDetails<T extends NumberType>
+  extends IncomingApprovalCriteria<T>
+  implements iIncomingApprovalCriteriaWithDetails<T>
+{
+  merkleChallenges?: MerkleChallengeWithDetails<T>[];
+
+  constructor(data: iIncomingApprovalCriteriaWithDetails<T>) {
+    super(data);
+    this.merkleChallenges = data.merkleChallenges?.map((x) => new MerkleChallengeWithDetails(x));
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): IncomingApprovalCriteriaWithDetails<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as IncomingApprovalCriteriaWithDetails<U>;
+  }
+
+  clone(): IncomingApprovalCriteriaWithDetails<T> {
+    return super.clone() as IncomingApprovalCriteriaWithDetails<T>;
+  }
+
+  castToCollectionApprovalCriteria(): ApprovalCriteriaWithDetails<T> {
+    return new ApprovalCriteriaWithDetails({
+      approvalAmounts: this.approvalAmounts,
+      maxNumTransfers: this.maxNumTransfers,
+      predeterminedBalances: this.predeterminedBalances,
+      mustOwnBadges: this.mustOwnBadges,
+      zkProofs: this.zkProofs,
+      merkleChallenges: this.merkleChallenges,
+      coinTransfers: this.coinTransfers,
+
+      requireFromEqualsInitiatedBy: false,
+      requireFromDoesNotEqualInitiatedBy: false,
+      overridesFromOutgoingApprovals: false,
+      overridesToIncomingApprovals: false
+    });
+  }
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iOutgoingApprovalCriteriaWithDetails<T extends NumberType> extends iOutgoingApprovalCriteria<T> {
+  merkleChallenges?: iMerkleChallengeWithDetails<T>[];
+}
+
+/**
+ * @category Approvals / Transferability
+ */
+export class OutgoingApprovalCriteriaWithDetails<T extends NumberType>
+  extends OutgoingApprovalCriteria<T>
+  implements iOutgoingApprovalCriteriaWithDetails<T>
+{
+  merkleChallenges?: MerkleChallengeWithDetails<T>[];
+
+  constructor(data: iOutgoingApprovalCriteriaWithDetails<T>) {
+    super(data);
+    this.merkleChallenges = data.merkleChallenges?.map((x) => new MerkleChallengeWithDetails(x));
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): OutgoingApprovalCriteriaWithDetails<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as OutgoingApprovalCriteriaWithDetails<U>;
+  }
+
+  clone(): OutgoingApprovalCriteriaWithDetails<T> {
+    return super.clone() as OutgoingApprovalCriteriaWithDetails<T>;
+  }
+
+  castToCollectionApprovalCriteria(): ApprovalCriteriaWithDetails<T> {
+    return new ApprovalCriteriaWithDetails({
+      approvalAmounts: this.approvalAmounts,
+      maxNumTransfers: this.maxNumTransfers,
+      predeterminedBalances: this.predeterminedBalances,
+      mustOwnBadges: this.mustOwnBadges,
+      zkProofs: this.zkProofs,
+      merkleChallenges: this.merkleChallenges,
+      coinTransfers: this.coinTransfers,
+
+      requireToEqualsInitiatedBy: false,
+      requireToDoesNotEqualInitiatedBy: false,
+      overridesFromOutgoingApprovals: false,
+      overridesToIncomingApprovals: false
+    });
   }
 }
 
@@ -1187,10 +1333,11 @@ export class ApprovalInfoDetails<T extends NumberType> extends BaseNumberTypeCla
  * @category Interfaces
  */
 export interface iCollectionApprovalWithDetails<T extends NumberType> extends iCollectionApproval<T> {
-  details?: iApprovalInfoDetails<T>;
+  details?: iApprovalInfoDetails;
   toList: iAddressList;
   fromList: iAddressList;
   initiatedByList: iAddressList;
+  approvalCriteria?: iApprovalCriteriaWithDetails<T>;
 }
 
 /**
@@ -1201,6 +1348,7 @@ export class CollectionApprovalWithDetails<T extends NumberType> extends Collect
   toList: AddressList;
   fromList: AddressList;
   initiatedByList: AddressList;
+  approvalCriteria?: ApprovalCriteriaWithDetails<T>;
 
   constructor(data: iCollectionApprovalWithDetails<T>) {
     super(data);
@@ -1208,6 +1356,7 @@ export class CollectionApprovalWithDetails<T extends NumberType> extends Collect
     this.toList = new AddressList(data.toList);
     this.fromList = new AddressList(data.fromList);
     this.initiatedByList = new AddressList(data.initiatedByList);
+    this.approvalCriteria = data.approvalCriteria ? new ApprovalCriteriaWithDetails(data.approvalCriteria) : undefined;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): CollectionApprovalWithDetails<U> {
@@ -1228,10 +1377,6 @@ export class CollectionApprovalWithDetails<T extends NumberType> extends Collect
       toList: this.toList,
       initiatedByList: this.initiatedByList,
       approvalIdList: getReservedTrackerList(this.approvalId),
-      amountTrackerIdList: getReservedTrackerList(this.amountTrackerId),
-      challengeTrackerIdList: getReservedTrackerList(this.challengeTrackerId),
-      usesAmountTrackerIdList: true,
-      usesChallengeTrackerIdList: true,
       usesApprovalIdList: true,
       usesBadgeIds: true,
       usesTransferTimes: true,
@@ -1241,8 +1386,6 @@ export class CollectionApprovalWithDetails<T extends NumberType> extends Collect
       usesOwnershipTimes: true,
       arbitraryValue: {
         approvalId: this.approvalId,
-        amountTrackerId: this.amountTrackerId,
-        challengeTrackerId: this.challengeTrackerId,
         approvalCriteria: this.approvalCriteria
       }
     };
@@ -1330,8 +1473,6 @@ export function getFirstMatchOnlyWithApprovalCriteria(permissions: UniversalPerm
                 fromList: permission.fromList,
                 initiatedByList: permission.initiatedByList,
                 approvalIdList: permission.approvalIdList,
-                amountTrackerIdList: permission.amountTrackerIdList,
-                challengeTrackerIdList: permission.challengeTrackerIdList,
                 permanentlyPermittedTimes: permanentlyPermittedTimes,
                 permanentlyForbiddenTimes: permanentlyForbiddenTimes,
                 arbitraryValue: arbValue
@@ -1367,8 +1508,6 @@ export function getFirstMatchOnlyWithApprovalCriteria(permissions: UniversalPerm
                 fromList: overlap.overlap.fromList,
                 initiatedByList: overlap.overlap.initiatedByList,
                 approvalIdList: overlap.overlap.approvalIdList,
-                amountTrackerIdList: overlap.overlap.amountTrackerIdList,
-                challengeTrackerIdList: overlap.overlap.challengeTrackerIdList,
                 permanentlyPermittedTimes: permanentlyPermittedTimes,
                 permanentlyForbiddenTimes: permanentlyForbiddenTimes,
                 arbitraryValue: newArbValue
@@ -1487,9 +1626,7 @@ export function validateCollectionApprovalsUpdate<T extends NumberType>(
       toList: x.toList,
       fromList: x.fromList,
       initiatedByList: x.initiatedByList,
-      approvalIdList: x.approvalIdList,
-      amountTrackerIdList: x.amountTrackerIdList,
-      challengeTrackerIdList: x.challengeTrackerIdList
+      approvalIdList: x.approvalIdList
     };
     return result;
   });
@@ -1538,9 +1675,7 @@ export function expandCollectionApprovals(approvals: CollectionApprovalWithDetai
         fromList: fromList,
         initiatedByList: initiatedByList,
         approvalCriteria: approval.approvalCriteria,
-        approvalId: approval.approvalId,
-        amountTrackerId: approval.amountTrackerId,
-        challengeTrackerId: approval.challengeTrackerId
+        approvalId: approval.approvalId
       })
     );
   }

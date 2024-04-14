@@ -23,7 +23,7 @@ import { CollectionApproval, UserBalanceStore } from "./transfers_pb.js";
  * We fetch the value according to the current time.
  * For example, we may set the manager to be Alice from Time1 to Time2, and then set the manager to be Bob from Time2 to Time3.
  *
- * Collections may have different balance types: standard vs. off-chain - indexed vs. inherited.vs off-chain - non-indexed.
+ * Collections may have different balance types: standard vs. off-chain - indexed vs. inherited.vs off-chain - non-indexed vs non-public.
  *
  * See documentation for more details.
  *
@@ -52,7 +52,7 @@ export class BadgeCollection extends Message<BadgeCollection> {
   badgeMetadataTimeline: BadgeMetadataTimeline[] = [];
 
   /**
-   * The type of balances this collection uses ("Standard", "Off-Chain - Indexed", "Off-Chain - Non-Indexed", or "Inherited").
+   * The type of balances this collection uses ("Standard", "Off-Chain - Indexed", "Off-Chain - Non-Indexed", or "Non-Public").
    *
    * @generated from field: string balancesType = 4;
    */

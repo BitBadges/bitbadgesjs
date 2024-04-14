@@ -29,8 +29,6 @@ export function appendSelfInitiatedIncomingApproval(
     ownershipTimes: [UintRange.FullRange()],
     badgeIds: [UintRange.FullRange()],
     approvalId: 'self-initiated-incoming',
-    amountTrackerId: 'self-initiated-incoming',
-    challengeTrackerId: 'self-initiated-incoming'
   });
 
   //append to front
@@ -62,8 +60,6 @@ export function appendSelfInitiatedOutgoingApproval(
     ownershipTimes: [UintRange.FullRange()],
     badgeIds: [UintRange.FullRange()],
     approvalId: 'self-initiated-outgoing',
-    amountTrackerId: 'self-initiated-outgoing',
-    challengeTrackerId: 'self-initiated-outgoing'
   });
 
   //append to front
@@ -100,8 +96,6 @@ export function getUnhandledCollectionApprovals(
       toListId: 'All',
       initiatedByListId: 'All',
       approvalId: '__disapproved__',
-      amountTrackerId: 'All',
-      challengeTrackerId: 'All',
       transferTimes: [UintRange.FullRange()],
       badgeIds: [UintRange.FullRange()],
       ownershipTimes: [UintRange.FullRange()]
@@ -144,9 +138,6 @@ export function getUnhandledCollectionApprovals(
 
         //TODO: Is this right?
         approvalId: match.arbitraryValue.approvalId,
-        amountTrackerId: match.arbitraryValue.amountTrackerId,
-        challengeTrackerId: match.arbitraryValue.challengeTrackerId,
-
         approvalCriteria: match.arbitraryValue.approvalCriteria
       })
     );

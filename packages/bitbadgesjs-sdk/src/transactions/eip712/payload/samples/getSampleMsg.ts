@@ -64,6 +64,8 @@ import {
 } from '@/proto/badges';
 import { MsgCreateProtocol, MsgDeleteProtocol, MsgSetCollectionForProtocol, MsgUpdateProtocol } from '@/proto/protocols/tx_pb';
 import { deepCopyPrimitives } from '@/common/base';
+import { MapPermissions, MapUpdateCriteria, MsgCreateMap, MsgDeleteMap, MsgSetValue, MsgUpdateMap, ValueOptions } from '@/proto/maps/tx_pb';
+import { CoinTransfer } from '@/core';
 
 const approvalCriteria = new OutgoingApprovalCriteria({
   mustOwnBadges: [
@@ -73,6 +75,17 @@ const approvalCriteria = new OutgoingApprovalCriteria({
       ownershipTimes: [new UintRange()]
     })
   ],
+  coinTransfers: [
+    new CoinTransfer({
+      to: '',
+      coins: [
+        {
+          denom: '',
+          amount: '0'
+        }
+      ]
+    })
+  ],
   zkProofs: [
     new ZkProof({
       verificationKey: '',
@@ -80,10 +93,12 @@ const approvalCriteria = new OutgoingApprovalCriteria({
       customData: ''
     })
   ],
-  merkleChallenge: new MerkleChallenge({
-    expectedProofLength: '0',
-    maxUsesPerLeaf: '0'
-  }),
+  merkleChallenges: [
+    new MerkleChallenge({
+      expectedProofLength: '0',
+      maxUsesPerLeaf: '0'
+    })
+  ],
   predeterminedBalances: new PredeterminedBalances({
     manualBalances: [
       new ManualBalances({
@@ -122,15 +137,18 @@ const approvalCriteria = new OutgoingApprovalCriteria({
 }).toJson({ emitDefaultValues: true }) as object;
 
 const approvalCriteriaForPopulatingUndefined = new OutgoingApprovalCriteria({
-  merkleChallenge: new MerkleChallenge({
-    expectedProofLength: '0',
-    maxUsesPerLeaf: '0'
-  }),
+  merkleChallenges: [
+    new MerkleChallenge({
+      expectedProofLength: '0',
+      maxUsesPerLeaf: '0'
+    })
+  ],
   zkProofs: [
     new ZkProof({
       verificationKey: '',
       uri: '',
-      customData: ''
+      customData: '',
+      zkpTrackerId: ''
     })
   ],
   predeterminedBalances: new PredeterminedBalances({
@@ -154,15 +172,14 @@ const approvalCriteriaForPopulatingUndefined = new OutgoingApprovalCriteria({
   })
 }).toJson({ emitDefaultValues: true }) as object;
 
-function populateMerkleChallenge(merkleChallenge?: MerkleChallenge) {
-  if (!merkleChallenge) {
-    return new MerkleChallenge({
-      expectedProofLength: '0',
-      maxUsesPerLeaf: '0'
-    });
-  }
-
-  return merkleChallenge;
+function populateMerkleChallenges(merkleChallenges?: MerkleChallenge[]) {
+  return (
+    merkleChallenges?.map((merkleChallenge) => {
+      merkleChallenge.expectedProofLength = merkleChallenge.expectedProofLength || '0';
+      merkleChallenge.maxUsesPerLeaf = merkleChallenge.maxUsesPerLeaf || '0';
+      return merkleChallenge;
+    }) || []
+  );
 }
 
 function populatePredeterminedBalances(predeterminedBalances?: PredeterminedBalances) {
@@ -221,7 +238,7 @@ export function populateUndefinedForMsgUpdateUserApprovals(msg: MsgUpdateUserApp
       approval.approvalCriteria = new OutgoingApprovalCriteria({ ...approvalCriteriaForPopulatingUndefined });
     }
     approval.approvalCriteria.mustOwnBadges = populateMustOwnBadges(approval.approvalCriteria.mustOwnBadges);
-    approval.approvalCriteria.merkleChallenge = populateMerkleChallenge(approval.approvalCriteria.merkleChallenge);
+    approval.approvalCriteria.merkleChallenges = populateMerkleChallenges(approval.approvalCriteria.merkleChallenges);
     approval.approvalCriteria.predeterminedBalances = populatePredeterminedBalances(approval.approvalCriteria.predeterminedBalances);
     approval.approvalCriteria.approvalAmounts = populateApprovalAmounts(approval.approvalCriteria.approvalAmounts);
     approval.approvalCriteria.maxNumTransfers = populateMaxNumTransfers(approval.approvalCriteria.maxNumTransfers);
@@ -231,7 +248,7 @@ export function populateUndefinedForMsgUpdateUserApprovals(msg: MsgUpdateUserApp
       approval.approvalCriteria = new IncomingApprovalCriteria({ ...approvalCriteriaForPopulatingUndefined });
     }
     approval.approvalCriteria.mustOwnBadges = populateMustOwnBadges(approval.approvalCriteria.mustOwnBadges);
-    approval.approvalCriteria.merkleChallenge = populateMerkleChallenge(approval.approvalCriteria.merkleChallenge);
+    approval.approvalCriteria.merkleChallenges = populateMerkleChallenges(approval.approvalCriteria.merkleChallenges);
     approval.approvalCriteria.predeterminedBalances = populatePredeterminedBalances(approval.approvalCriteria.predeterminedBalances);
     approval.approvalCriteria.approvalAmounts = populateApprovalAmounts(approval.approvalCriteria.approvalAmounts);
     approval.approvalCriteria.maxNumTransfers = populateMaxNumTransfers(approval.approvalCriteria.maxNumTransfers);
@@ -299,7 +316,7 @@ export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUnivers
     if (!approval.approvalCriteria) {
       approval.approvalCriteria = new OutgoingApprovalCriteria({ ...approvalCriteriaForPopulatingUndefined });
       approval.approvalCriteria.mustOwnBadges = populateMustOwnBadges(approval.approvalCriteria.mustOwnBadges);
-      approval.approvalCriteria.merkleChallenge = populateMerkleChallenge(approval.approvalCriteria.merkleChallenge);
+      approval.approvalCriteria.merkleChallenges = populateMerkleChallenges(approval.approvalCriteria.merkleChallenges);
       approval.approvalCriteria.predeterminedBalances = populatePredeterminedBalances(approval.approvalCriteria.predeterminedBalances);
       approval.approvalCriteria.approvalAmounts = populateApprovalAmounts(approval.approvalCriteria.approvalAmounts);
       approval.approvalCriteria.maxNumTransfers = populateMaxNumTransfers(approval.approvalCriteria.maxNumTransfers);
@@ -310,7 +327,7 @@ export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUnivers
       approval.approvalCriteria = new IncomingApprovalCriteria({ ...approvalCriteriaForPopulatingUndefined });
     }
     approval.approvalCriteria.mustOwnBadges = populateMustOwnBadges(approval.approvalCriteria.mustOwnBadges);
-    approval.approvalCriteria.merkleChallenge = populateMerkleChallenge(approval.approvalCriteria.merkleChallenge);
+    approval.approvalCriteria.merkleChallenges = populateMerkleChallenges(approval.approvalCriteria.merkleChallenges);
     approval.approvalCriteria.predeterminedBalances = populatePredeterminedBalances(approval.approvalCriteria.predeterminedBalances);
     approval.approvalCriteria.approvalAmounts = populateApprovalAmounts(approval.approvalCriteria.approvalAmounts);
     approval.approvalCriteria.maxNumTransfers = populateMaxNumTransfers(approval.approvalCriteria.maxNumTransfers);
@@ -320,7 +337,7 @@ export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUnivers
       approval.approvalCriteria = new ApprovalCriteria({ ...approvalCriteriaForPopulatingUndefined });
     }
     approval.approvalCriteria.mustOwnBadges = populateMustOwnBadges(approval.approvalCriteria.mustOwnBadges);
-    approval.approvalCriteria.merkleChallenge = populateMerkleChallenge(approval.approvalCriteria.merkleChallenge);
+    approval.approvalCriteria.merkleChallenges = populateMerkleChallenges(approval.approvalCriteria.merkleChallenges);
     approval.approvalCriteria.predeterminedBalances = populatePredeterminedBalances(approval.approvalCriteria.predeterminedBalances);
     approval.approvalCriteria.approvalAmounts = populateApprovalAmounts(approval.approvalCriteria.approvalAmounts);
     approval.approvalCriteria.maxNumTransfers = populateMaxNumTransfers(approval.approvalCriteria.maxNumTransfers);
@@ -557,7 +574,26 @@ export function getSampleMsg(msgType: string, currMsg: any) {
       return { type: msgType, value: new MsgSetCollectionForProtocol().toJson({ emitDefaultValues: true }) };
     case 'protocols/UpdateProtocol':
       return { type: msgType, value: new MsgUpdateProtocol().toJson({ emitDefaultValues: true }) };
-
+    case 'maps/CreateMap':
+      return {
+        type: msgType,
+        value: new MsgCreateMap({
+          valueOptions: new ValueOptions(),
+          updateCriteria: new MapUpdateCriteria(),
+          permissions: new MapPermissions()
+        }).toJson({ emitDefaultValues: true })
+      };
+    case 'badges/DeleteMap':
+      return { type: msgType, value: new MsgDeleteMap().toJson({ emitDefaultValues: true }) };
+    case 'badges/SetValue':
+      return { type: msgType, value: new MsgSetValue().toJson({ emitDefaultValues: true }) };
+    case 'badges/UpdateMap':
+      return {
+        type: msgType,
+        value: new MsgUpdateMap({
+          permissions: new MapPermissions()
+        }).toJson({ emitDefaultValues: true })
+      };
     case 'badges/DeleteCollection':
       return { type: msgType, value: new MsgDeleteCollection().toJson({ emitDefaultValues: true }) };
     case 'badges/CreateAddressLists':

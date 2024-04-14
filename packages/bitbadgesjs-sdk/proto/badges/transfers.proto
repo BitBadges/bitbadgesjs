@@ -5,6 +5,7 @@ import "gogoproto/gogo.proto";
 import "badges/permissions.proto";
 import "badges/address_lists.proto";
 import "badges/balances.proto";
+import "cosmos/base/v1beta1/coin.proto";
 
 option go_package = "github.com/bitbadges/bitbadgeschain/x/badges/types";
 
@@ -79,6 +80,9 @@ message MerkleChallenge {
 
   // Arbitrary custom data associated with this Merkle challenge.
   string customData = 6;
+
+  // The ID of this Merkle challenge for tracking the number of uses per leaf.
+  string challengeTrackerId = 7;
 }
 
 
@@ -98,14 +102,6 @@ message UserOutgoingApproval {
 
   // The allowed range of ownership times for approval.
   repeated UintRange ownershipTimes = 5;
-
-  // The ID of the amount tracker associated with this approval.
-  // We use this ID to track the number of transfers and amounts transferred.
-  string amountTrackerId = 6;
-
-  // The ID of the challenge tracker associated with this approval.
-  // We use this ID to track the number of uses per leaf for the Merkle challenge.
-  string challengeTrackerId = 7;
 
   // The URI associated with this approval, optionally providing metadata about the approval.
   string uri = 8;
@@ -136,14 +132,6 @@ message UserIncomingApproval {
 
   // The allowed range of ownership times for approval.
   repeated UintRange ownershipTimes = 5;
-
-  // The ID of the amount tracker associated with this approval.
-  // We use this ID to track the number of transfers and amounts transferred.
-  string amountTrackerId = 6;
-
-  // The ID of the challenge tracker associated with this approval.
-  // We use this ID to track the number of uses per leaf for the Merkle challenge.
-  string challengeTrackerId = 7;
 
   // The URI associated with this approval, optionally providing metadata about the approval.
   string uri = 8;
@@ -241,6 +229,8 @@ message PredeterminedOrderCalculationMethod {
   bool usePerInitiatedByAddressNumTransfers = 4;
   // Use the Merkle challenge leaf index to calculate the order. Ex: Transfer that uses leaf index 0 gets the first balance, transfer that uses leaf index 1 gets the second balance, etc.
   bool useMerkleChallengeLeafIndex = 5;
+  // If useMerkleChallengeLeafIndex is set, then this is the ID of the challenge tracker associated with this calculation method.
+  string challengeTrackerId = 6;
 }
 
 // PredeterminedBalances represents balances with predetermined order calculation.
@@ -266,6 +256,9 @@ message ApprovalAmounts {
   string perFromAddressApprovalAmount = 3 [(gogoproto.customtype) = "Uint", (gogoproto.nullable) = false];
   // Approval amount per "initiated by" address.
   string perInitiatedByAddressApprovalAmount = 4 [(gogoproto.customtype) = "Uint", (gogoproto.nullable) = false];
+  // The ID of the amount tracker associated with this approval.
+  // We use this ID to track the number of transfers and amounts transferred.
+  string amountTrackerId = 6;
 }
 
 // MaxNumTransfers defines the maximum number of transfers per unique "from," "to," and/or "initiated by" address.
@@ -281,6 +274,9 @@ message MaxNumTransfers {
   string perFromAddressMaxNumTransfers = 3 [(gogoproto.customtype) = "Uint", (gogoproto.nullable) = false];
   // Maximum number of transfers per "initiated by" address.
   string perInitiatedByAddressMaxNumTransfers = 4 [(gogoproto.customtype) = "Uint", (gogoproto.nullable) = false];
+  // The ID of the amount tracker associated with this approval.
+  // We use this ID to track the number of transfers and amounts transferred.
+  string amountTrackerId = 6;
 }
 
 // ApprovalTracker defines the tracker for approvals. This tracks the cumulative number of transfers and associated balances transferred.
@@ -298,6 +294,8 @@ message ZkProof {
   string uri = 2;
   // Arbitrary custom data associated with this proof.
   string customData = 3;
+  // The ID of this proof
+  string zkpTrackerId = 4;
 }
 
 message ZkProofSolution {
@@ -307,12 +305,19 @@ message ZkProofSolution {
   string proof = 2;
 }
 
+message CoinTransfer {
+  // The address of the recipient of the transfer.
+  string to = 1;
+  // The sdk.Coins to be transferred.
+  repeated cosmos.base.v1beta1.Coin coins = 2;
+}
+
 // ApprovalCriteria defines the criteria for approving transfers.
 message ApprovalCriteria {
   // List of badges that the user must own for approval.
   repeated MustOwnBadges mustOwnBadges = 1;
   // Merkle challenge that must be satisfied for approval.
-  MerkleChallenge merkleChallenge = 2;
+  repeated MerkleChallenge merkleChallenges = 2;
   // Predetermined balances for eeach approval.
   PredeterminedBalances predeterminedBalances = 3;
   // Threshold limit of amounts that can be transferred using this approval.
@@ -321,6 +326,8 @@ message ApprovalCriteria {
   MaxNumTransfers maxNumTransfers = 5;
   // The ZKPs that need to be solved for approval.
   repeated ZkProof zkProofs = 6;
+  // The sdk.Coins that need to be transferred for approval.
+  repeated CoinTransfer coinTransfers = 7;
 
   // Require the "to" address to be equal to the "initiated by" address for approval.
   bool requireToEqualsInitiatedBy = 9;
@@ -342,7 +349,7 @@ message OutgoingApprovalCriteria {
   // List of badges that the user must own for approval.
   repeated MustOwnBadges mustOwnBadges = 1;
   // Merkle challenge that must be satisfied for approval.
-  MerkleChallenge merkleChallenge = 2;
+  repeated MerkleChallenge merkleChallenges = 2;
   // Predetermined balances for eeach approval.
   PredeterminedBalances predeterminedBalances = 3;
   // Threshold limit of amounts that can be transferred using this approval.
@@ -351,6 +358,8 @@ message OutgoingApprovalCriteria {
   MaxNumTransfers maxNumTransfers = 5;
   // The ZKPs that need to be solved for approval.
   repeated ZkProof zkProofs = 6;
+// The sdk.Coins that need to be transferred for approval.
+repeated CoinTransfer coinTransfers = 7;
 
   // Require the "to" address to be equal to the "initiated by" address for approval.
   bool requireToEqualsInitiatedBy = 9;
@@ -363,7 +372,7 @@ message IncomingApprovalCriteria {
   // List of badges that the user must own for approval.
   repeated MustOwnBadges mustOwnBadges = 1;
   // Merkle challenge that must be satisfied for approval.
-  MerkleChallenge merkleChallenge= 2;
+  repeated MerkleChallenge merkleChallenges= 2;
   // Predetermined balances for eeach approval.
   PredeterminedBalances predeterminedBalances = 3;
   // Threshold limit of amounts that can be transferred using this approval.
@@ -372,6 +381,8 @@ message IncomingApprovalCriteria {
   MaxNumTransfers maxNumTransfers = 5;
   // The ZKPs that need to be solved for approval.
   repeated ZkProof zkProofs = 6;
+// The sdk.Coins that need to be transferred for approval.
+repeated CoinTransfer coinTransfers = 7;
 
   // Require the "from" address to be equal to the "initiated by" address for approval.
   bool requireFromEqualsInitiatedBy = 10;
@@ -394,12 +405,6 @@ message CollectionApproval {
   repeated UintRange badgeIds = 5;
   // The allowed range of ownership times for approval.
   repeated UintRange ownershipTimes = 6;
-  // The ID of the amount tracker associated with this approval.
-  // We use this ID to track the number of transfers and amounts transferred.
-  string amountTrackerId = 7;
-  // The ID of the challenge tracker associated with this approval.
-  // We use this ID to track the number of uses per leaf for the Merkle challenge.
-  string challengeTrackerId = 8;
   // The URI associated with this approval, optionally providing metadata about the approval.
   string uri = 9;
   // Arbitrary custom data associated with this approval.

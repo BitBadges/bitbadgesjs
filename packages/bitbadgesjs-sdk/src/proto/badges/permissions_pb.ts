@@ -279,26 +279,6 @@ export class CollectionApprovalPermission extends Message<CollectionApprovalPerm
   ownershipTimes: UintRange[] = [];
 
   /**
-   * Identifier for the amountTrackerId. You can use "All" or "!trackerId" for shorthand.
-   * If you use "All", this approval will match to all amountTrackerIds.
-   * If you use "!trackerId", this approval will match to all amountTrackerIds except for trackerId.
-   * If you use "trackerId", this approval will match to only the specified trackerId and fail on all others.
-   *
-   * @generated from field: string amountTrackerId = 7;
-   */
-  amountTrackerId = "";
-
-  /**
-   * Identifier for the challengeTrackerId. You can use "All" or "!trackerId" for shorthand.
-   * If you use "All", this approval will match to all challengeTrackerIds.
-   * If you use "!trackerId", this approval will match to all challengeTrackerIds except for trackerId.
-   * If you use "trackerId", this approval will match to only the specified trackerId and fail on all others.
-   *
-   * @generated from field: string challengeTrackerId = 8;
-   */
-  challengeTrackerId = "";
-
-  /**
    * Identifier for the approvalId. You can use "All" or "!approvalId" for shorthand.
    * If you use "All", this approval will match to all approvalIds.
    * If you use "!approvalId", this approval will match to all approvalIds except for approvalId.
@@ -336,8 +316,6 @@ export class CollectionApprovalPermission extends Message<CollectionApprovalPerm
     { no: 4, name: "transferTimes", kind: "message", T: UintRange, repeated: true },
     { no: 5, name: "badgeIds", kind: "message", T: UintRange, repeated: true },
     { no: 6, name: "ownershipTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 7, name: "amountTrackerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 8, name: "challengeTrackerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 9, name: "approvalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 10, name: "permanentlyPermittedTimes", kind: "message", T: UintRange, repeated: true },
     { no: 11, name: "permanentlyForbiddenTimes", kind: "message", T: UintRange, repeated: true },
@@ -403,26 +381,6 @@ export class UserOutgoingApprovalPermission extends Message<UserOutgoingApproval
   ownershipTimes: UintRange[] = [];
 
   /**
-   * Identifier for the amountTrackerId. You can use "All" or "!trackerId" for shorthand.
-   * If you use "All", this approval will match to all amountTrackerIds.
-   * If you use "!trackerId", this approval will match to all amountTrackerIds except for trackerId.
-   * If you use "trackerId", this approval will match to only the specified trackerId and fail on all others.
-   *
-   * @generated from field: string amountTrackerId = 6;
-   */
-  amountTrackerId = "";
-
-  /**
-   * Identifier for the challengeTrackerId. You can use "All" or "!trackerId" for shorthand.
-   * If you use "All", this approval will match to all challengeTrackerIds.
-   * If you use "!trackerId", this approval will match to all challengeTrackerIds except for trackerId.
-   * If you use "trackerId", this approval will match to only the specified trackerId and fail on all others.
-   *
-   * @generated from field: string challengeTrackerId = 7;
-   */
-  challengeTrackerId = "";
-
-  /**
    * Identifier for the approvalId. You can use "All" or "!approvalId" for shorthand.
    * If you use "All", this approval will match to all approvalIds.
    * If you use "!approvalId", this approval will match to all approvalIds except for approvalId.
@@ -459,8 +417,6 @@ export class UserOutgoingApprovalPermission extends Message<UserOutgoingApproval
     { no: 3, name: "transferTimes", kind: "message", T: UintRange, repeated: true },
     { no: 4, name: "badgeIds", kind: "message", T: UintRange, repeated: true },
     { no: 5, name: "ownershipTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 6, name: "amountTrackerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 7, name: "challengeTrackerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 8, name: "approvalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 9, name: "permanentlyPermittedTimes", kind: "message", T: UintRange, repeated: true },
     { no: 10, name: "permanentlyForbiddenTimes", kind: "message", T: UintRange, repeated: true },
@@ -528,26 +484,6 @@ export class UserIncomingApprovalPermission extends Message<UserIncomingApproval
   ownershipTimes: UintRange[] = [];
 
   /**
-   * Identifier for the amountTrackerId. You can use "All" or "!trackerId" for shorthand.
-   * If you use "All", this approval will match to all amountTrackerIds.
-   * If you use "!trackerId", this approval will match to all amountTrackerIds except for trackerId.
-   * If you use "trackerId", this approval will match to only the specified trackerId and fail on all others.
-   *
-   * @generated from field: string amountTrackerId = 6;
-   */
-  amountTrackerId = "";
-
-  /**
-   * Identifier for the challengeTrackerId. You can use "All" or "!trackerId" for shorthand.
-   * If you use "All", this approval will match to all challengeTrackerIds.
-   * If you use "!trackerId", this approval will match to all challengeTrackerIds except for trackerId.
-   * If you use "trackerId", this approval will match to only the specified trackerId and fail on all others.
-   *
-   * @generated from field: string challengeTrackerId = 7;
-   */
-  challengeTrackerId = "";
-
-  /**
    * Identifier for the approvalId. You can use "All" or "!approvalId" for shorthand.
    * If you use "All", this approval will match to all approvalIds.
    * If you use "!approvalId", this approval will match to all approvalIds except for approvalId.
@@ -584,8 +520,6 @@ export class UserIncomingApprovalPermission extends Message<UserIncomingApproval
     { no: 3, name: "transferTimes", kind: "message", T: UintRange, repeated: true },
     { no: 4, name: "badgeIds", kind: "message", T: UintRange, repeated: true },
     { no: 5, name: "ownershipTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 6, name: "amountTrackerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 7, name: "challengeTrackerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 8, name: "approvalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 9, name: "permanentlyPermittedTimes", kind: "message", T: UintRange, repeated: true },
     { no: 10, name: "permanentlyForbiddenTimes", kind: "message", T: UintRange, repeated: true },

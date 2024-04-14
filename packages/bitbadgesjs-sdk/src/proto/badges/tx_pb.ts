@@ -115,7 +115,7 @@ export class MsgUniversalUpdateCollection extends Message<MsgUniversalUpdateColl
   collectionId = "";
 
   /**
-   * Type of balances "Standard" or "Off-Chain - Indexed" or "Off-Chain - Non-Indexed".
+   * Type of balances "Standard" or "Off-Chain - Indexed" or "Off-Chain - Non-Indexed" or "Non-Public".
    *
    * @generated from field: string balancesType = 3;
    */
@@ -608,7 +608,7 @@ export class MsgCreateCollection extends Message<MsgCreateCollection> {
   creator = "";
 
   /**
-   * Type of balances "Standard" or "Off-Chain - Indexed" or "Off-Chain - Non-Indexed".
+   * Type of balances "Standard" or "Off-Chain - Indexed" or "Off-Chain - Non-Indexed" or "Non-Public".
    *
    * @generated from field: string balancesType = 2;
    */

@@ -48,10 +48,6 @@ export interface iUserOutgoingApprovalPermission<T extends NumberType> {
   ownershipTimes: iUintRange<T>[];
   /** The approval ID of the approved outgoing transfers. Can use "All" to represent all IDs, "!approvalId" to represent all IDs except approvalId, or "approvalId" to represent only approvalId. */
   approvalId: string;
-  /** The approval tracker ID of the approved transfers. Can use "All" to represent all IDs, "!trackerId" to represent all IDs except trackerId, or "trackerId" to represent only trackerId. */
-  amountTrackerId: string;
-  /** The challenge tracker ID of the approved transfers. Can use "All" to represent all IDs, "!trackerId" to represent all IDs except trackerId, or "trackerId" to represent only trackerId. */
-  challengeTrackerId: string;
   /** The permitted times of the approved outgoing transfers. */
   permanentlyPermittedTimes: iUintRange<T>[];
   /** The forbidden times of the approved outgoing transfers. */
@@ -74,10 +70,6 @@ export interface iUserIncomingApprovalPermission<T extends NumberType> {
   ownershipTimes: iUintRange<T>[];
   /** The approval ID of the approved incoming transfers. Can use "All" to represent all IDs, "!approvalId" to represent all IDs except approvalId, or "approvalId" to represent only approvalId. */
   approvalId: string;
-  /** The approval tracker ID of the approved transfers. Can use "All" to represent all IDs, "!trackerId" to represent all IDs except trackerId, or "trackerId" to represent only trackerId. */
-  amountTrackerId: string;
-  /** The challenge tracker ID of the approved transfers. Can use "All" to represent all IDs, "!trackerId" to represent all IDs except trackerId, or "trackerId" to represent only trackerId. */
-  challengeTrackerId: string;
   /** The permitted times of the approved incoming transfers. */
   permanentlyPermittedTimes: iUintRange<T>[];
   /** The forbidden times of the approved incoming transfers. */
@@ -178,10 +170,6 @@ export interface iCollectionApprovalPermission<T extends NumberType> {
   ownershipTimes: iUintRange<T>[];
   /** The approval ID of the approved transfers. Can use "All" to represent all IDs, "!approvalId" to represent all IDs except approvalId, or "approvalId" to represent only approvalId. */
   approvalId: string;
-  /** The approval tracker ID of the approved transfers. Can use "All" to represent all IDs, "!trackerId" to represent all IDs except trackerId, or "trackerId" to represent only trackerId. */
-  amountTrackerId: string;
-  /** The challenge tracker ID of the approved transfers. Can use "All" to represent all IDs, "!trackerId" to represent all IDs except trackerId, or "trackerId" to represent only trackerId. */
-  challengeTrackerId: string;
   /** The permitted times of this permission. */
   permanentlyPermittedTimes: iUintRange<T>[];
   /** The forbidden times of this permission. */

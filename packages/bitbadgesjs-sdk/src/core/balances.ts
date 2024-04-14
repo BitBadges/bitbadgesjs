@@ -483,8 +483,7 @@ export function getBalancesForIds<T extends NumberType>(idRanges: iUintRange<T>[
           fromList: AddressList.AllAddresses(),
           initiatedByList: AddressList.AllAddresses(),
           approvalIdList: AddressList.AllAddresses(),
-          amountTrackerIdList: AddressList.AllAddresses(),
-          challengeTrackerIdList: AddressList.AllAddresses(),
+
           arbitraryValue: balanceObj.amount,
 
           permanentlyPermittedTimes: UintRangeArray.From([]),
@@ -506,8 +505,6 @@ export function getBalancesForIds<T extends NumberType>(idRanges: iUintRange<T>[
         fromList: AddressList.AllAddresses(),
         initiatedByList: AddressList.AllAddresses(),
         approvalIdList: AddressList.AllAddresses(),
-        amountTrackerIdList: AddressList.AllAddresses(),
-        challengeTrackerIdList: AddressList.AllAddresses(),
 
         permanentlyPermittedTimes: UintRangeArray.From([]),
         permanentlyForbiddenTimes: UintRangeArray.From([]),
@@ -581,8 +578,6 @@ function deleteBalances<T extends NumberType>(
         fromList: AddressList.AllAddresses(),
         initiatedByList: AddressList.AllAddresses(),
         approvalIdList: AddressList.AllAddresses(),
-        amountTrackerIdList: AddressList.AllAddresses(),
-        challengeTrackerIdList: AddressList.AllAddresses(),
 
         permanentlyPermittedTimes: UintRangeArray.From([]),
         permanentlyForbiddenTimes: UintRangeArray.From([]),
@@ -604,8 +599,6 @@ function deleteBalances<T extends NumberType>(
           fromList: AddressList.AllAddresses(),
           initiatedByList: AddressList.AllAddresses(),
           approvalIdList: AddressList.AllAddresses(),
-          amountTrackerIdList: AddressList.AllAddresses(),
-          challengeTrackerIdList: AddressList.AllAddresses(),
 
           permanentlyPermittedTimes: UintRangeArray.From([]),
           permanentlyForbiddenTimes: UintRangeArray.From([]),

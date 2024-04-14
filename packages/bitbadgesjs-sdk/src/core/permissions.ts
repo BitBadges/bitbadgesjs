@@ -133,8 +133,6 @@ export class UserOutgoingApprovalPermission<T extends NumberType>
   badgeIds: UintRangeArray<T>;
   ownershipTimes: UintRangeArray<T>;
   approvalId: string;
-  amountTrackerId: string;
-  challengeTrackerId: string;
   permanentlyPermittedTimes: UintRangeArray<T>;
   permanentlyForbiddenTimes: UintRangeArray<T>;
 
@@ -146,8 +144,6 @@ export class UserOutgoingApprovalPermission<T extends NumberType>
     this.badgeIds = UintRangeArray.From(msg.badgeIds);
     this.ownershipTimes = UintRangeArray.From(msg.ownershipTimes);
     this.approvalId = msg.approvalId;
-    this.amountTrackerId = msg.amountTrackerId;
-    this.challengeTrackerId = msg.challengeTrackerId;
     this.permanentlyPermittedTimes = UintRangeArray.From(msg.permanentlyPermittedTimes);
     this.permanentlyForbiddenTimes = UintRangeArray.From(msg.permanentlyForbiddenTimes);
   }
@@ -187,8 +183,6 @@ export class UserOutgoingApprovalPermission<T extends NumberType>
       badgeIds: protoMsg.badgeIds.map((x) => UintRange.fromProto(x, convertFunction)),
       ownershipTimes: protoMsg.ownershipTimes.map((x) => UintRange.fromProto(x, convertFunction)),
       approvalId: protoMsg.approvalId,
-      amountTrackerId: protoMsg.amountTrackerId,
-      challengeTrackerId: protoMsg.challengeTrackerId,
       permanentlyPermittedTimes: protoMsg.permanentlyPermittedTimes.map((x) => UintRange.fromProto(x, convertFunction)),
       permanentlyForbiddenTimes: protoMsg.permanentlyForbiddenTimes.map((x) => UintRange.fromProto(x, convertFunction))
     });
@@ -261,8 +255,6 @@ export class UserIncomingApprovalPermission<T extends NumberType>
   badgeIds: UintRangeArray<T>;
   ownershipTimes: UintRangeArray<T>;
   approvalId: string;
-  amountTrackerId: string;
-  challengeTrackerId: string;
   permanentlyPermittedTimes: UintRangeArray<T>;
   permanentlyForbiddenTimes: UintRangeArray<T>;
 
@@ -271,14 +263,10 @@ export class UserIncomingApprovalPermission<T extends NumberType>
     this.fromListId = msg.fromListId;
     this.initiatedByListId = msg.initiatedByListId;
     this.approvalId = msg.approvalId;
-    this.amountTrackerId = msg.amountTrackerId;
-    this.challengeTrackerId = msg.challengeTrackerId;
     this.transferTimes = UintRangeArray.From(msg.transferTimes);
     this.badgeIds = UintRangeArray.From(msg.badgeIds);
     this.ownershipTimes = UintRangeArray.From(msg.ownershipTimes);
     this.approvalId = msg.approvalId;
-    this.amountTrackerId = msg.amountTrackerId;
-    this.challengeTrackerId = msg.challengeTrackerId;
     this.permanentlyPermittedTimes = UintRangeArray.From(msg.permanentlyPermittedTimes);
     this.permanentlyForbiddenTimes = UintRangeArray.From(msg.permanentlyForbiddenTimes);
   }
@@ -318,8 +306,6 @@ export class UserIncomingApprovalPermission<T extends NumberType>
       badgeIds: protoMsg.badgeIds.map((x) => UintRange.fromProto(x, convertFunction)),
       ownershipTimes: protoMsg.ownershipTimes.map((x) => UintRange.fromProto(x, convertFunction)),
       approvalId: protoMsg.approvalId,
-      amountTrackerId: protoMsg.amountTrackerId,
-      challengeTrackerId: protoMsg.challengeTrackerId,
       permanentlyPermittedTimes: protoMsg.permanentlyPermittedTimes.map((x) => UintRange.fromProto(x, convertFunction)),
       permanentlyForbiddenTimes: protoMsg.permanentlyForbiddenTimes.map((x) => UintRange.fromProto(x, convertFunction))
     });
@@ -682,22 +668,6 @@ const AllDefaultDetailsValues: UniversalPermissionDetails = {
     customData: '',
     createdBy: ''
   }),
-  amountTrackerIdList: new AddressList({
-    listId: 'All',
-    addresses: [],
-    whitelist: false,
-    uri: '',
-    customData: '',
-    createdBy: ''
-  }),
-  challengeTrackerIdList: new AddressList({
-    listId: 'All',
-    addresses: [],
-    whitelist: false,
-    uri: '',
-    customData: '',
-    createdBy: ''
-  }),
   permanentlyPermittedTimes: UintRangeArray.From([]),
   permanentlyForbiddenTimes: UintRangeArray.From([]),
   arbitraryValue: undefined
@@ -949,8 +919,6 @@ export class CollectionApprovalPermission<T extends NumberType>
   badgeIds: UintRangeArray<T>;
   ownershipTimes: UintRangeArray<T>;
   approvalId: string;
-  amountTrackerId: string;
-  challengeTrackerId: string;
   permanentlyPermittedTimes: UintRangeArray<T>;
   permanentlyForbiddenTimes: UintRangeArray<T>;
 
@@ -963,8 +931,6 @@ export class CollectionApprovalPermission<T extends NumberType>
     this.badgeIds = UintRangeArray.From(msg.badgeIds);
     this.ownershipTimes = UintRangeArray.From(msg.ownershipTimes);
     this.approvalId = msg.approvalId;
-    this.amountTrackerId = msg.amountTrackerId;
-    this.challengeTrackerId = msg.challengeTrackerId;
     this.permanentlyPermittedTimes = UintRangeArray.From(msg.permanentlyPermittedTimes);
     this.permanentlyForbiddenTimes = UintRangeArray.From(msg.permanentlyForbiddenTimes);
   }
@@ -979,8 +945,6 @@ export class CollectionApprovalPermission<T extends NumberType>
         badgeIds: this.badgeIds.map((x) => x.convert(convertFunction)),
         ownershipTimes: this.ownershipTimes.map((x) => x.convert(convertFunction)),
         approvalId: this.approvalId,
-        amountTrackerId: this.amountTrackerId,
-        challengeTrackerId: this.challengeTrackerId,
         permanentlyPermittedTimes: this.permanentlyPermittedTimes.map((x) => x.convert(convertFunction)),
         permanentlyForbiddenTimes: this.permanentlyForbiddenTimes.map((x) => x.convert(convertFunction))
       })
@@ -1019,8 +983,6 @@ export class CollectionApprovalPermission<T extends NumberType>
       badgeIds: protoMsg.badgeIds.map((x) => UintRange.fromProto(x, convertFunction)),
       ownershipTimes: protoMsg.ownershipTimes.map((x) => UintRange.fromProto(x, convertFunction)),
       approvalId: protoMsg.approvalId,
-      amountTrackerId: protoMsg.amountTrackerId,
-      challengeTrackerId: protoMsg.challengeTrackerId,
       permanentlyPermittedTimes: protoMsg.permanentlyPermittedTimes.map((x) => UintRange.fromProto(x, convertFunction)),
       permanentlyForbiddenTimes: protoMsg.permanentlyForbiddenTimes.map((x) => UintRange.fromProto(x, convertFunction))
     });
@@ -1044,8 +1006,6 @@ export class CollectionApprovalPermission<T extends NumberType>
       fromList: AddressList;
       initiatedByList: AddressList;
       approvalIdList: AddressList;
-      amountTrackerIdList: AddressList;
-      challengeTrackerIdList: AddressList;
     }[],
     permissions: CollectionApprovalPermissionWithDetails<U>[],
     time?: U
@@ -1064,8 +1024,6 @@ export class CollectionApprovalPermission<T extends NumberType>
               fromList: detail.fromList,
               initiatedByList: detail.initiatedByList,
               approvalIdList: detail.approvalIdList,
-              amountTrackerIdList: detail.amountTrackerIdList,
-              challengeTrackerIdList: detail.challengeTrackerIdList
             });
           }
         }
@@ -1116,10 +1074,6 @@ export class CollectionApprovalPermissionWithDetails<T extends NumberType>
       badgeIds: this.badgeIds.convert(BigIntify),
       ownershipTimes: this.ownershipTimes.convert(BigIntify),
       approvalIdList: getReservedTrackerList(this.approvalId),
-      amountTrackerIdList: getReservedTrackerList(this.amountTrackerId),
-      challengeTrackerIdList: getReservedTrackerList(this.challengeTrackerId),
-      usesAmountTrackerIdList: true,
-      usesChallengeTrackerIdList: true,
       usesApprovalIdList: true,
       usesBadgeIds: true,
       usesTransferTimes: true,
@@ -1332,16 +1286,6 @@ function checkNotForbiddenForAllOverlaps(
       usesApprovalIdLists = false;
       detailToCheck.approvalIdList = AddressList.AllAddresses();
     }
-
-    if (!usesLists) {
-      usesAmountTrackerIdList = false;
-      detailToCheck.amountTrackerIdList = AddressList.AllAddresses();
-    }
-
-    if (!usesLists) {
-      usesChallengeTrackerIdList = false;
-      detailToCheck.challengeTrackerIdList = AddressList.AllAddresses();
-    }
   }
 
   // Validate that for each updated timeline time, the current time is permitted
@@ -1386,14 +1330,6 @@ function checkNotForbiddenForAllOverlaps(
           //TODO: this won't be right
           if (usesApprovalIdLists) {
             errStr += ` for the approval id ${permissionDetail.approvalIdList.listId}`;
-          }
-
-          if (usesAmountTrackerIdList) {
-            errStr += ` for the amount tracker id ${permissionDetail.amountTrackerIdList.listId}`;
-          }
-
-          if (usesChallengeTrackerIdList) {
-            errStr += ` for the challenge tracker id ${permissionDetail.challengeTrackerIdList.listId}`;
           }
 
           return new Error(errStr);

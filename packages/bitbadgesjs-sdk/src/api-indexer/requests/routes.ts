@@ -25,16 +25,20 @@ export class BitBadgesApiRoutes {
   static RefreshBadgeMetadataRoute = (collectionId: NumberType, badgeId: NumberType) =>
     `/api/v0/collection/${collectionId.toString()}/${badgeId.toString()}/refresh`;
   static GetRefreshStatusRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/refreshStatus`;
+
   static CheckAndCompleteClaimRoute = (claimId: string, cosmosAddress: string) => `/api/v0/claims/${claimId.toString()}/${cosmosAddress}`;
   static GetClaimsRoute = () => `/api/v0/claims`;
+
   static AddReviewForCollectionRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/addReview`;
   static DeleteReviewRoute = (reviewId: string) => `/api/v0/deleteReview/${reviewId}`;
-  static DeleteAnnouncementRoute = (announcementId: string) => `/api/v0/deleteAnnouncement/${announcementId}`;
+  static FilterBadgesInCollectionRoute = () => '/api/v0/collections/filter';
+
   static GetAddressListsRoute = () => '/api/v0/addressLists';
   static CreateAddressListRoute = () => '/api/v0/addressLists/create';
   static UpdateAddressListRoute = () => '/api/v0/addressLists/update';
   static DeleteAddressListRoute = () => '/api/v0/addressLists/delete';
   static GetAccountsRoute = () => '/api/v0/user/batch';
+
   static AddReviewForUserRoute = (addressOrUsername: string) => `/api/v0/user/${addressOrUsername}/addReview`;
   static UpdateAccountInfoRoute = () => '/api/v0/user/updateAccount';
   static AddMetadataToIpfsRoute = () => '/api/v0/addMetadataToIpfs';
@@ -50,16 +54,24 @@ export class BitBadgesApiRoutes {
   static SimulateTxRoute = () => '/api/v0/simulate';
   static FetchMetadataDirectlyRoute = () => '/api/v0/metadata';
   static GetTokensFromFaucetRoute = () => '/api/v0/faucet';
+
   static SendClaimAlertRoute = () => '/api/v0/claimAlerts/send';
   static GetClaimAlertsRoute = () => '/api/v0/claimAlerts';
+
   static GetAuthCodeRoute = () => '/api/v0/authCode';
   static CreateAuthCodeRoute = () => '/api/v0/authCode/create';
   static DeleteAuthCodeRoute = () => '/api/v0/authCode/delete';
+
   static GetFollowDetailsRoute = () => '/api/v0/follow-protocol';
-  static GetProtocolsRoute = () => '/api/v0/protocols';
-  static GetCollectionForProtocolRoute = () => '/api/v0/protocols/collection';
-  static FilterBadgesInCollectionRoute = () => '/api/v0/collections/filter';
+
   static GenerateAppleWalletPassRoute = () => '/api/v0/appleWalletPass';
 
   static GetExternalCallKeyRoute = () => '/api/v0/externalCallKey';
+
+  static GetSecretRoute = () => '/api/v0/secret';
+  static CreateSecretRoute = () => '/api/v0/secret/create';
+  static DeleteSecretRoute = () => '/api/v0/secret/delete';
+  static UpdateSecretRoute = () => '/api/v0/secret/update';
+
+  static GetMapsRoute = () => '/api/v0/maps';
 }

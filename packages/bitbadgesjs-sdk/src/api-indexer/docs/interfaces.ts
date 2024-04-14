@@ -2,7 +2,7 @@ import type { Doc } from '@/api-indexer/base';
 import type { iMetadata } from '@/api-indexer/metadata/metadata';
 import type { JSPrimitiveNumberType, NumberType } from '@/common/string-numbers';
 import type { SupportedChain } from '@/common/types';
-import type { iApprovalInfoDetails, iChallengeDetails, iUserOutgoingApprovalWithDetails } from '@/core/approvals';
+import type { iApprovalInfoDetails, iChallengeDetails, iChallengeInfoDetails, iUserOutgoingApprovalWithDetails } from '@/core/approvals';
 import type { iBatchBadgeDetails } from '@/core/batch-utils';
 import type { iCosmosCoin } from '@/core/coin';
 import type { iOffChainBalancesMap } from '@/core/transfers';
@@ -18,15 +18,44 @@ import type {
   iIsArchivedTimeline,
   iManagerTimeline,
   iOffChainBalancesMetadataTimeline,
+  iSecret,
+  iSecretsProof,
   iStandardsTimeline,
   iUintRange,
   iZkProofSolution
 } from '@/interfaces/badges/core';
 import type { iCollectionPermissions, iUserPermissionsWithDetails } from '@/interfaces/badges/permissions';
 import type { iUserBalanceStore } from '@/interfaces/badges/userBalances';
-import type { iProtocol } from '@/transactions/messages/bitbadges/protocols/interfaces';
 import type { AndGroup, ChallengeParams, OrGroup, OwnershipRequirements } from 'blockin';
-import { BlockinAssetConditionGroup } from '../requests/blockin';
+import { iUpdateHistory } from './docs';
+import { iMapWithValues } from '../requests/maps';
+
+/**
+ * @category Interfaces
+ */
+export interface iSocialConnections<T extends NumberType> {
+  discord?: {
+    username: string;
+    id: string;
+    discriminator?: string;
+    lastUpdated: T;
+  };
+  twitter?: {
+    username: string;
+    id: string;
+    lastUpdated: T;
+  };
+  google?: {
+    username: string;
+    id: string;
+    lastUpdated: T;
+  };
+  github?: {
+    username: string;
+    id: string;
+    lastUpdated: T;
+  };
+}
 
 /**
  * @category Interfaces
@@ -127,6 +156,8 @@ export interface iListActivityDoc<T extends NumberType> extends iActivityDoc<T> 
  * @category Interfaces
  */
 export interface iClaimAlertDoc<T extends NumberType> extends iActivityDoc<T> {
+  /** The sender */
+  from: string;
   /** The code of the claim alert. */
   code?: string;
   /** The cosmos addresses of the users that have been alerted. */
@@ -172,11 +203,7 @@ export interface iCollectionDoc<T extends NumberType> extends Doc {
   /** The timestamp when this collection was created (milliseconds since epoch) */
   createdTimestamp: T;
   /** The update history of this collection */
-  updateHistory: {
-    txHash: string;
-    block: T;
-    blockTimestamp: T;
-  }[];
+  updateHistory: iUpdateHistory<T>[];
   /** The alias cosmos address for the collection */
   aliasAddress: string;
 }
@@ -293,6 +320,9 @@ export interface iProfileDoc<T extends NumberType> extends Doc {
   /** The notifications of the account */
   notifications?: iNotificationPreferences<T>;
 
+  /** Social connections stored for the account */
+  socialConnections?: iSocialConnections<T>;
+
   /** Approved ways to sign in (rather than Blockin) */
   approvedSignInMethods?: {
     discord?: {
@@ -387,11 +417,7 @@ export interface iAddressListDoc<T extends NumberType> extends iAddressList, Doc
   /** The cosmos address of the user who created this list */
   createdBy: string;
   /** The update history of this list */
-  updateHistory: {
-    txHash: string;
-    block: T;
-    blockTimestamp: T;
-  }[];
+  updateHistory: iUpdateHistory<T>[];
   /** The block number when this list was created */
   createdBlock: T;
   /** The timestamp of when this list was last updated (milliseconds since epoch) */
@@ -435,11 +461,7 @@ export interface iBalanceDoc<T extends NumberType> extends iUserBalanceStore<T>,
   contentHash?: string;
 
   /** The update history of this balance */
-  updateHistory: {
-    txHash: string;
-    block: T;
-    blockTimestamp: T;
-  }[];
+  updateHistory: iUpdateHistory<T>[];
 }
 
 /**
@@ -578,7 +600,7 @@ export type ClaimIntegrationPublicStateType<T extends ClaimIntegrationPluginType
     }
   : T extends 'codes'
     ? {
-        usedCodes: string[];
+        usedCodeIndices: string[];
       }
     : {};
 
@@ -642,8 +664,12 @@ export interface iApprovalTrackerDoc<T extends NumberType> extends iAmountTracke
 export interface iChallengeTrackerIdDetails<T extends NumberType> {
   /** The collection ID */
   collectionId: T;
+  /**
+   * The approval ID
+   */
+  approvalId: string;
   /** The challenge ID */
-  challengeId: string;
+  challengeTrackerId: string;
   /** The challenge level (i.e. "collection", "incoming", "outgoing") */
   challengeLevel: 'collection' | 'incoming' | 'outgoing' | '';
   /** The approver address (leave blank if challengeLevel = "collection") */
@@ -657,7 +683,9 @@ export interface iMerkleChallengeDoc<T extends NumberType> extends Doc {
   /** The collection ID */
   collectionId: T;
   /** The challenge ID */
-  challengeId: string;
+  challengeTrackerId: string;
+  /** The approval ID */
+  approvalId: string;
   /** The challenge level (i.e. "collection", "incoming", "outgoing") */
   challengeLevel: 'collection' | 'incoming' | 'outgoing' | '';
   /** The approver address (leave blank if challengeLevel = "collection") */
@@ -669,11 +697,11 @@ export interface iMerkleChallengeDoc<T extends NumberType> extends Doc {
 /**
  * @category Interfaces
  */
-export interface iMerkleChallengeIdDetails<T extends NumberType> {
+export interface iMerklechallengeTrackerIdDetails<T extends NumberType> {
   /** The collection ID */
   collectionId: T;
   /** The challenge ID */
-  challengeId: string;
+  challengeTrackerId: string;
   /** The challenge level (i.e. "collection", "incoming", "outgoing") */
   challengeLevel: 'collection' | 'incoming' | 'outgoing' | '';
   /** The approver address (leave blank if challengeLevel = "collection") */
@@ -687,13 +715,13 @@ export interface iMerkleChallengeIdDetails<T extends NumberType> {
  */
 export interface iFetchDoc<T extends NumberType> extends Doc {
   /** The content of the fetch document. Note that we store balances in BALANCES_DB and not here to avoid double storage. */
-  content?: iMetadata<T> | iApprovalInfoDetails<T> | iOffChainBalancesMap<T>;
+  content?: iMetadata<T> | iApprovalInfoDetails | iOffChainBalancesMap<T> | iChallengeDetails<T>;
   /** The time the document was fetched */
   fetchedAt: T;
   /** The block the document was fetched */
   fetchedAtBlock: T;
   /** The type of content fetched. This is used for querying purposes */
-  db: 'ApprovalInfo' | 'Metadata' | 'Balances';
+  db: 'ApprovalInfo' | 'Metadata' | 'Balances' | 'ChallengeInfo';
   /** True if the document is permanent (i.e. fetched from a permanent URI like IPFS) */
   isPermanent: boolean;
 }
@@ -751,6 +779,7 @@ export interface iComplianceDoc<T extends NumberType> extends Doc {
  */
 export interface iBlockinAuthSignatureDoc<T extends NumberType> extends Doc {
   signature: string;
+  publicKey?: string;
 
   name: string;
   description: string;
@@ -759,8 +788,17 @@ export interface iBlockinAuthSignatureDoc<T extends NumberType> extends Doc {
   cosmosAddress: string;
   params: ChallengeParams<T>;
 
+  secretsProofs: iSecretsProof<T>[];
+
   createdAt: T;
   deletedAt?: T;
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iSecretDoc<T extends NumberType> extends Doc, iSecret {
+  updateHistory: iUpdateHistory<T>[];
 }
 
 /**
@@ -785,13 +823,4 @@ export interface iFollowDetailsDoc<T extends NumberType> extends Doc {
 /**
  * @category Interfaces
  */
-export interface iProtocolDoc extends iProtocol, Doc {}
-
-/**
- * @category Interfaces
- */
-export interface iUserProtocolCollectionsDoc<T extends NumberType> extends Doc {
-  protocols: {
-    [protocolName: string]: T;
-  };
-}
+export interface iMapDoc<T extends NumberType> extends Doc, iMapWithValues<T> {}

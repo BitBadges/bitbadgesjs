@@ -1,5 +1,6 @@
 import type { NumberType } from '@/common/string-numbers';
-import type { iUintRange, iMustOwnBadges, iMerkleChallenge, iBalance, iAddressList, iZkProof } from './core';
+import type { iUintRange, iMustOwnBadges, iMerkleChallenge, iBalance, iAddressList, iZkProof, iCoinTransfer } from './core';
+import { iIncomingApprovalCriteriaWithDetails } from '@/core';
 
 /**
  * @category Interfaces
@@ -11,8 +12,6 @@ export interface iUserOutgoingApproval<T extends NumberType> {
   badgeIds: iUintRange<T>[];
   ownershipTimes: iUintRange<T>[];
   approvalId: string;
-  amountTrackerId: string;
-  challengeTrackerId: string;
   uri?: string;
   customData?: string;
   approvalCriteria?: iOutgoingApprovalCriteria<T>;
@@ -26,8 +25,11 @@ export interface iOutgoingApprovalCriteria<T extends NumberType> {
   mustOwnBadges?: iMustOwnBadges<T>[];
   /** The list of ZK proofs that need to be satisfied. One use per proof solution. */
   zkProofs?: iZkProof[];
+  /** The $BADGE transfers to be executed upon every approval. */
+  coinTransfers?: iCoinTransfer<T>[];
+
   /** The list of merkle challenges that need valid proofs to be approved. */
-  merkleChallenge?: iMerkleChallenge<T>;
+  merkleChallenges?: iMerkleChallenge<T>[];
   /** The predetermined balances for each transfer. */
   predeterminedBalances?: iPredeterminedBalances<T>;
   /** The maximum approved amounts for this approval. */
@@ -86,6 +88,8 @@ export interface iPredeterminedOrderCalculationMethod {
   usePerInitiatedByAddressNumTransfers: boolean;
   /** Use the merkle challenge leaf index as the order number. Must specify ONE merkle challenge with the useLeafIndexForTransferOrder flag set to true. If so, we will use the leaf index of each merkle proof to calculate the order number. This is used to reserve specific balances for specific leaves (such as codes or whitelist address leafs) */
   useMerkleChallengeLeafIndex: boolean;
+  /** Use the merkle challenge leaf index as the order number. Must specify ONE merkle challenge with the useLeafIndexForTransferOrder flag set to true. If so, we will use the leaf index of each merkle proof to calculate the order number. This is used to reserve specific balances for specific leaves (such as codes or whitelist address leafs) */
+  challengeTrackerId: string;
 }
 
 /**
@@ -100,6 +104,8 @@ export interface iApprovalAmounts<T extends NumberType> {
   perFromAddressApprovalAmount: T;
   /** The maximum amount approved for the badgeIDs and ownershipTimes for each initiated by address. Running tally that includes all transfers from each unique initiated by address that match this approval. */
   perInitiatedByAddressApprovalAmount: T;
+  /** The ID of the approval tracker. This is the key used to track tallies. */
+  amountTrackerId: string;
 }
 
 /**
@@ -114,6 +120,8 @@ export interface iMaxNumTransfers<T extends NumberType> {
   perFromAddressMaxNumTransfers: T;
   /** The maximum number of transfers for the badgeIDs and ownershipTimes for each initiated by address. Running tally that includes all transfers from each unique initiated by address that match this approval. */
   perInitiatedByAddressMaxNumTransfers: T;
+  /** The ID of the approval tracker. This is the key used to track tallies. */
+  amountTrackerId: string;
 }
 
 /**
@@ -132,10 +140,6 @@ export interface iUserIncomingApproval<T extends NumberType> {
   ownershipTimes: iUintRange<T>[];
   /** The ID of the approval. Must not be a duplicate of another approval ID in the same timeline. */
   approvalId: string;
-  /** The ID of the approval tracker. This is the key used to track tallies. */
-  amountTrackerId: string;
-  /** The ID of the challenge tracker. This is the key used to track used leaves for challenges. */
-  challengeTrackerId: string;
   /** The URI of the approval. */
   uri?: string;
   /** Arbitrary custom data of the approval */
@@ -152,8 +156,10 @@ export interface iIncomingApprovalCriteria<T extends NumberType> {
   mustOwnBadges?: iMustOwnBadges<T>[];
   /** The list of ZK proofs that need to be satisfied. One use per proof solution. */
   zkProofs?: iZkProof[];
+  /** The $BADGE transfers to be executed upon every approval. */
+  coinTransfers?: iCoinTransfer<T>[];
   /** The list of merkle challenges that need valid proofs to be approved. */
-  merkleChallenge?: iMerkleChallenge<T>;
+  merkleChallenges?: iMerkleChallenge<T>[];
   /** The predetermined balances for each transfer using this approval. */
   predeterminedBalances?: iPredeterminedBalances<T>;
   /** The maximum approved amounts for this approval. */
@@ -184,10 +190,6 @@ export interface iCollectionApproval<T extends NumberType> {
   ownershipTimes: iUintRange<T>[];
   /** The ID of the approval. Must not be a duplicate of another approval ID in the same timeline. */
   approvalId: string;
-  /** The ID of the approval tracker. This is the key used to track tallies. */
-  amountTrackerId: string;
-  /** The ID of the challenge tracker. This is the key used to track used leaves for challenges. */
-  challengeTrackerId: string;
   /** The URI of the approval. */
   uri?: string;
   /** Arbitrary custom data of the approval */
@@ -204,8 +206,10 @@ export interface iApprovalCriteria<T extends NumberType> {
   mustOwnBadges?: iMustOwnBadges<T>[];
   /** The list of ZK proofs that need to be satisfied. One use per proof solution. */
   zkProofs?: iZkProof[];
+  /** The $BADGE transfers to be executed upon every approval. */
+  coinTransfers?: iCoinTransfer<T>[];
   /** The list of merkle challenges that need valid proofs to be approved. */
-  merkleChallenge?: iMerkleChallenge<T>;
+  merkleChallenges?: iMerkleChallenge<T>[];
   /** The predetermined balances for each transfer. */
   predeterminedBalances?: iPredeterminedBalances<T>;
   /** The maximum approved amounts for this approval. */
@@ -232,4 +236,5 @@ export interface iApprovalCriteria<T extends NumberType> {
 export interface iUserIncomingApprovalWithDetails<T extends NumberType> extends iUserIncomingApproval<T> {
   fromList: iAddressList;
   initiatedByList: iAddressList;
+  approvalCriteria?: iIncomingApprovalCriteriaWithDetails<T>;
 }

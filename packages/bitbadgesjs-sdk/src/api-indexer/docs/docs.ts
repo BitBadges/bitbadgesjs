@@ -3,15 +3,18 @@ import { BaseNumberTypeClass, CustomTypeClass, convertClassPropertiesAndMaintain
 import type { NumberType } from '@/common/string-numbers';
 import { BigIntify } from '@/common/string-numbers';
 import type { SupportedChain } from '@/common/types';
-import { AddressList, getValueAtTimeForTimeline } from '@/core';
-import { IncrementedBalances, iApprovalInfoDetails } from '@/core/approvals';
+import { AddressList, SecretsProof, getValueAtTimeForTimeline } from '@/core';
 import {
   ApprovalInfoDetails,
+  ChallengeDetails,
   CollectionApproval,
+  IncrementedBalances,
   UserIncomingApproval,
   UserIncomingApprovalWithDetails,
   UserOutgoingApproval,
-  UserOutgoingApprovalWithDetails
+  UserOutgoingApprovalWithDetails,
+  iApprovalInfoDetails,
+  iChallengeDetails
 } from '@/core/approvals';
 import { BalanceArray } from '@/core/balances';
 import { BatchBadgeDetailsArray } from '@/core/batch-utils';
@@ -28,25 +31,25 @@ import {
 import { CollectionPermissions, UserPermissions, UserPermissionsWithDetails } from '@/core/permissions';
 import type { iOffChainBalancesMap } from '@/core/transfers';
 import { UserBalanceStore } from '@/core/userBalances';
-import { iIncrementedBalances } from '@/interfaces';
 import type { iAmountTrackerIdDetails } from '@/interfaces/badges/core';
 import type { iUserBalanceStore } from '@/interfaces/badges/userBalances';
 import type { Doc } from '../base';
 import type { iMetadata } from '../metadata/metadata';
 import { Metadata } from '../metadata/metadata';
 import { BlockinChallengeParams } from '../requests/blockin';
+import { MapWithValues } from '../requests/maps';
 import type {
   ClaimIntegrationPluginType,
-  IntegrationPluginDetails,
+  IntegrationPluginParams,
   iAccountDoc,
   iAddressListDoc,
-  iAddressListEditKey,
   iAirdropDoc,
   iApprovalTrackerDoc,
   iBalanceDoc,
   iBalanceDocWithDetails,
   iBlockinAuthSignatureDoc,
   iChallengeTrackerIdDetails,
+  iClaimBuilderDoc,
   iCollectionDoc,
   iComplianceDoc,
   iCustomLink,
@@ -57,17 +60,16 @@ import type {
   iFollowDetailsDoc,
   iIPFSTotalsDoc,
   iLatestBlockStatus,
+  iMapDoc,
   iMerkleChallengeDoc,
-  iMerkleChallengeIdDetails,
+  iMerklechallengeTrackerIdDetails,
   iNotificationPreferences,
-  iClaimBuilderDoc,
   iProfileDoc,
-  iProtocolDoc,
   iQueueDoc,
   iRefreshDoc,
-  iStatusDoc,
-  iUserProtocolCollectionsDoc,
-  IntegrationPluginParams
+  iSecretDoc,
+  iSocialConnections,
+  iStatusDoc
 } from './interfaces';
 
 /**
@@ -253,6 +255,58 @@ export class AccountDoc<T extends NumberType> extends BaseNumberTypeClass<Accoun
 /**
  * @category Accounts
  */
+export class SocialConnectionInfo<T extends NumberType> extends BaseNumberTypeClass<SocialConnectionInfo<T>> {
+  username: string;
+  id: string;
+  lastUpdated: T;
+  discriminator?: string;
+
+  constructor(data: { username: string; id: string; lastUpdated: T; discriminator?: string }) {
+    super();
+    this.username = data.username;
+    this.id = data.id;
+    this.lastUpdated = data.lastUpdated;
+    this.discriminator = data.discriminator;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['lastUpdated'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): SocialConnectionInfo<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as SocialConnectionInfo<U>;
+  }
+}
+
+/**
+ * @category Accounts
+ */
+export class SocialConnections<T extends NumberType> extends BaseNumberTypeClass<SocialConnections<T>> implements iSocialConnections<T> {
+  discord?: SocialConnectionInfo<T> | undefined;
+  twitter?: SocialConnectionInfo<T> | undefined;
+  github?: SocialConnectionInfo<T> | undefined;
+  google?: SocialConnectionInfo<T> | undefined;
+
+  constructor(data: iSocialConnections<T>) {
+    super();
+    this.discord = data.discord ? new SocialConnectionInfo(data.discord) : undefined;
+    this.twitter = data.twitter ? new SocialConnectionInfo(data.twitter) : undefined;
+    this.github = data.github ? new SocialConnectionInfo(data.github) : undefined;
+    this.google = data.google ? new SocialConnectionInfo(data.google) : undefined;
+  }
+
+  getNumberFieldNames(): string[] {
+    return [];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): SocialConnections<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as SocialConnections<U>;
+  }
+}
+
+/**
+ * @category Accounts
+ */
 export class NotificationPreferences<T extends NumberType>
   extends BaseNumberTypeClass<NotificationPreferences<T>>
   implements iNotificationPreferences<T>
@@ -372,6 +426,7 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
   latestSignedInChain?: SupportedChain;
   solAddress?: string;
   notifications?: NotificationPreferences<T>;
+  socialConnections?: SocialConnections<T>;
   approvedSignInMethods?: { discord?: { username: string; discriminator?: string | undefined; id: string } | undefined } | undefined;
 
   constructor(data: iProfileDoc<T>) {
@@ -407,6 +462,7 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
     this.solAddress = data.solAddress;
     this.notifications = data.notifications ? new NotificationPreferences(data.notifications) : undefined;
     this.approvedSignInMethods = data.approvedSignInMethods;
+    this.socialConnections = data.socialConnections ? new SocialConnections(data.socialConnections) : undefined;
   }
 
   getNumberFieldNames(): string[] {
@@ -638,6 +694,7 @@ export interface iUpdateHistory<T extends NumberType> {
   txHash: string;
   block: T;
   blockTimestamp: T;
+  timestamp: T;
 }
 
 /**
@@ -647,16 +704,18 @@ export class UpdateHistory<T extends NumberType> extends BaseNumberTypeClass<Upd
   txHash: string;
   block: T;
   blockTimestamp: T;
+  timestamp: T;
 
   constructor(data: iUpdateHistory<T>) {
     super();
     this.txHash = data.txHash;
     this.block = data.block;
     this.blockTimestamp = data.blockTimestamp;
+    this.timestamp = data.timestamp;
   }
 
   getNumberFieldNames(): string[] {
-    return ['block', 'blockTimestamp'];
+    return ['block', 'blockTimestamp', 'timestamp'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): UpdateHistory<U> {
@@ -768,6 +827,7 @@ export class ApprovalTrackerDoc<T extends NumberType> extends BaseNumberTypeClas
   numTransfers: T;
   amounts: BalanceArray<T>;
   collectionId: T;
+  approvalId: string;
   amountTrackerId: string;
   approvalLevel: string;
   approverAddress: string;
@@ -780,6 +840,7 @@ export class ApprovalTrackerDoc<T extends NumberType> extends BaseNumberTypeClas
     this.amounts = BalanceArray.From(data.amounts);
     this._docId = data._docId;
     this._id = data._id;
+    this.approvalId = data.approvalId;
     this.collectionId = data.collectionId;
     this.amountTrackerId = data.amountTrackerId;
     this.approvalLevel = data.approvalLevel;
@@ -805,14 +866,16 @@ export class ChallengeTrackerIdDetails<T extends NumberType>
   implements iChallengeTrackerIdDetails<T>
 {
   collectionId: T;
-  challengeId: string;
+  approvalId: string;
+  challengeTrackerId: string;
   challengeLevel: 'collection' | 'incoming' | 'outgoing' | '';
   approverAddress: string;
 
   constructor(data: iChallengeTrackerIdDetails<T>) {
     super();
     this.collectionId = data.collectionId;
-    this.challengeId = data.challengeId;
+    this.challengeTrackerId = data.challengeTrackerId;
+    this.approvalId = data.approvalId;
     this.challengeLevel = data.challengeLevel;
     this.approverAddress = data.approverAddress;
   }
@@ -833,20 +896,22 @@ export class MerkleChallengeDoc<T extends NumberType> extends BaseNumberTypeClas
   _docId: string;
   _id?: string;
   collectionId: T;
-  challengeId: string;
+  challengeTrackerId: string;
   challengeLevel: 'collection' | 'incoming' | 'outgoing' | '';
   approverAddress: string;
   usedLeafIndices: T[];
+  approvalId: string;
 
   constructor(data: iMerkleChallengeDoc<T>) {
     super();
     this._docId = data._docId;
     this._id = data._id;
     this.collectionId = data.collectionId;
-    this.challengeId = data.challengeId;
+    this.challengeTrackerId = data.challengeTrackerId;
     this.challengeLevel = data.challengeLevel;
     this.approverAddress = data.approverAddress;
     this.usedLeafIndices = data.usedLeafIndices;
+    this.approvalId = data.approvalId;
   }
 
   getNumberFieldNames(): string[] {
@@ -861,20 +926,20 @@ export class MerkleChallengeDoc<T extends NumberType> extends BaseNumberTypeClas
 /**
  * @category Approvals / Transferability
  */
-export class MerkleChallengeIdDetails<T extends NumberType>
-  extends BaseNumberTypeClass<MerkleChallengeIdDetails<T>>
-  implements iMerkleChallengeIdDetails<T>
+export class MerklechallengeTrackerIdDetails<T extends NumberType>
+  extends BaseNumberTypeClass<MerklechallengeTrackerIdDetails<T>>
+  implements iMerklechallengeTrackerIdDetails<T>
 {
   collectionId: T;
-  challengeId: string;
+  challengeTrackerId: string;
   challengeLevel: 'collection' | 'incoming' | 'outgoing' | '';
   approverAddress: string;
   usedLeafIndices: T[];
 
-  constructor(data: iMerkleChallengeIdDetails<T>) {
+  constructor(data: iMerklechallengeTrackerIdDetails<T>) {
     super();
     this.collectionId = data.collectionId;
-    this.challengeId = data.challengeId;
+    this.challengeTrackerId = data.challengeTrackerId;
     this.challengeLevel = data.challengeLevel;
     this.approverAddress = data.approverAddress;
     this.usedLeafIndices = data.usedLeafIndices;
@@ -884,8 +949,8 @@ export class MerkleChallengeIdDetails<T extends NumberType>
     return ['collectionId', 'usedLeafIndices'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): MerkleChallengeIdDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as MerkleChallengeIdDetails<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): MerklechallengeTrackerIdDetails<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as MerklechallengeTrackerIdDetails<U>;
   }
 }
 
@@ -900,10 +965,11 @@ export class FetchDoc<T extends NumberType> extends BaseNumberTypeClass<FetchDoc
     | ApprovalInfoDetails<T>
     | {
         [cosmosAddressOrListId: string]: BalanceArray<T>;
-      };
+      }
+    | ChallengeDetails<T>;
   fetchedAt: T;
   fetchedAtBlock: T;
-  db: 'ApprovalInfo' | 'Metadata' | 'Balances';
+  db: 'ApprovalInfo' | 'Metadata' | 'Balances' | 'ChallengeInfo';
   isPermanent: boolean;
 
   constructor(data: iFetchDoc<T>) {
@@ -912,7 +978,7 @@ export class FetchDoc<T extends NumberType> extends BaseNumberTypeClass<FetchDoc
       data.db === 'Metadata'
         ? new Metadata(data.content as iMetadata<T>)
         : data.db === 'ApprovalInfo'
-          ? new ApprovalInfoDetails(data.content as iApprovalInfoDetails<T>)
+          ? new ApprovalInfoDetails(data.content as iApprovalInfoDetails)
           : data.db === 'Balances'
             ? Object.keys(data.content ?? {}).reduce(
                 (acc, key) => {
@@ -925,7 +991,9 @@ export class FetchDoc<T extends NumberType> extends BaseNumberTypeClass<FetchDoc
                 },
                 {} as { [cosmosAddressOrListId: string]: BalanceArray<T> }
               )
-            : undefined;
+            : data.db === 'ChallengeInfo'
+              ? new ChallengeDetails(data.content as iChallengeDetails<T>)
+              : undefined;
     this.fetchedAt = data.fetchedAt;
     this.fetchedAtBlock = data.fetchedAtBlock;
     this.db = data.db;
@@ -1072,8 +1140,10 @@ export class BlockinAuthSignatureDoc<T extends NumberType>
   image: string;
   cosmosAddress: string;
   params: BlockinChallengeParams<T>;
+  secretsProofs: SecretsProof<T>[];
   createdAt: T;
   deletedAt?: T;
+  publicKey?: string;
 
   constructor(data: iBlockinAuthSignatureDoc<T>) {
     super();
@@ -1087,6 +1157,8 @@ export class BlockinAuthSignatureDoc<T extends NumberType>
     this.deletedAt = data.deletedAt;
     this._docId = data._docId;
     this._id = data._id;
+    this.publicKey = data.publicKey;
+    this.secretsProofs = data.secretsProofs.map((secretsProof) => new SecretsProof(secretsProof));
   }
 
   getNumberFieldNames(): string[] {
@@ -1095,6 +1167,75 @@ export class BlockinAuthSignatureDoc<T extends NumberType>
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): BlockinAuthSignatureDoc<U> {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as BlockinAuthSignatureDoc<U>;
+  }
+}
+
+/**
+ * @category Off-Chain Secrets
+ */
+export class SecretDoc<T extends NumberType> extends BaseNumberTypeClass<SecretDoc<T>> implements iSecretDoc<T> {
+  _docId: string;
+  _id?: string;
+  messageFormat: 'plaintext' | 'json';
+  updateHistory: UpdateHistory<T>[];
+
+  createdBy: string;
+
+  proofOfIssuance: {
+    message: string;
+    signature: string;
+    signer: string;
+    publicKey?: string;
+  };
+
+  secretId: string;
+
+  type: string;
+  scheme: 'bbs' | 'standard';
+  secretMessages: string[];
+
+  dataIntegrityProof: {
+    signature: string;
+    signer: string;
+    publicKey?: string;
+  };
+
+  name: string;
+  image: string;
+  description: string;
+
+  viewers: string[];
+  anchors: {
+    txHash?: string;
+    message?: string;
+  }[];
+
+  constructor(data: iSecretDoc<T>) {
+    super();
+    this.updateHistory = data.updateHistory?.map((updateHistory) => new UpdateHistory(updateHistory));
+    this._docId = data._docId;
+    this._id = data._id;
+    this.createdBy = data.createdBy;
+    this.messageFormat = data.messageFormat;
+    this.secretId = data.secretId;
+    this.type = data.type;
+    this.scheme = data.scheme;
+    this.dataIntegrityProof = data.dataIntegrityProof;
+    this.viewers = data.viewers;
+    this.name = data.name;
+    this.image = data.image;
+    this.description = data.description;
+    this.proofOfIssuance = data.proofOfIssuance;
+    this.anchors = data.anchors;
+    this.secretMessages = data.secretMessages;
+  }
+
+  getNumberFieldNames(): string[] {
+    return [];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): SecretDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as SecretDoc<U>;
   }
 }
 
@@ -1135,56 +1276,24 @@ export class FollowDetailsDoc<T extends NumberType> extends BaseNumberTypeClass<
 }
 
 /**
- * @category Protocols
+ * @category Maps
  */
-export class ProtocolDoc extends CustomTypeClass<ProtocolDoc> implements iProtocolDoc {
+export class MapDoc<T extends NumberType> extends MapWithValues<T> implements iMapDoc<T> {
   _docId: string;
   _id?: string;
-  name: string;
-  uri: string;
-  customData: string;
-  createdBy: string;
-  isFrozen: boolean;
 
-  constructor(data: iProtocolDoc) {
-    super();
+  constructor(data: iMapDoc<T>) {
+    super(data);
     this._docId = data._docId;
     this._id = data._id;
-    this.name = data.name;
-    this.uri = data.uri;
-    this.customData = data.customData;
-    this.createdBy = data.createdBy;
-    this.isFrozen = data.isFrozen;
-  }
-}
-
-/**
- * @category Protocols
- */
-export class UserProtocolCollectionsDoc<T extends NumberType>
-  extends BaseNumberTypeClass<UserProtocolCollectionsDoc<T>>
-  implements iUserProtocolCollectionsDoc<T>
-{
-  _docId: string;
-  _id?: string;
-  /** The protocols set by the user */
-  protocols: {
-    [protocolName: string]: T;
-  };
-
-  constructor(data: iUserProtocolCollectionsDoc<T>) {
-    super();
-    this._docId = data._docId;
-    this._id = data._id;
-    this.protocols = data.protocols;
   }
 
   getNumberFieldNames(): string[] {
-    return ['protocols'];
+    return super.getNumberFieldNames();
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): UserProtocolCollectionsDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as UserProtocolCollectionsDoc<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): MapDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as MapDoc<U>;
   }
 }
 

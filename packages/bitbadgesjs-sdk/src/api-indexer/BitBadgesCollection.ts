@@ -33,13 +33,14 @@ import type { iCollectionPermissionsWithDetails } from '@/interfaces/badges/perm
 import type { iUserBalanceStoreWithDetails } from '@/interfaces/badges/userBalances';
 import type { BaseBitBadgesApi, PaginationInfo } from './base';
 import { ReviewDoc, TransferActivityDoc } from './docs/activity';
-import { ApprovalTrackerDoc, BalanceDocWithDetails, CollectionDoc, MerkleChallengeDoc } from './docs/docs';
+import { ApprovalTrackerDoc, BalanceDocWithDetails, CollectionDoc, MapDoc, MerkleChallengeDoc } from './docs/docs';
 import type {
   ClaimIntegrationPluginType,
   IntegrationPluginDetails,
   iApprovalTrackerDoc,
   iBalanceDocWithDetails,
   iCollectionDoc,
+  iMapDoc,
   iMerkleChallengeDoc,
   iReviewDoc,
   iTransferActivityDoc
@@ -122,6 +123,8 @@ export interface iBitBadgesCollection<T extends NumberType> extends iCollectionD
   nsfw?: { badgeIds: iUintRange<T>[]; reason: string };
   /** The badge IDs in this collection that have been reported. */
   reported?: { badgeIds: iUintRange<T>[]; reason: string };
+  /** The reserved map for the account. This is created and managed on-chain through the x/maps module. */
+  reservedMap?: iMapDoc<T>;
 
   /** The views for this collection and their pagination Doc. Views will only include the doc _ids. Use the pagination to fetch more. To be used in conjunction with activity, announcements, reviews, owners, merkleChallenges, and approvalTrackers. For example, if you want to fetch the activity for a view, you would use the view's pagination to fetch the doc _ids, then use the corresponding activity array to find the matching docs. */
   views: {
@@ -173,6 +176,8 @@ export class BitBadgesCollection<T extends NumberType>
     manualDistribution?: boolean;
   }[];
 
+  reservedMap?: MapDoc<T> | undefined;
+
   nsfw?: { badgeIds: UintRangeArray<T>; reason: string };
   reported?: { badgeIds: UintRangeArray<T>; reason: string };
 
@@ -209,6 +214,7 @@ export class BitBadgesCollection<T extends NumberType>
         manualDistribution: x.manualDistribution
       };
     });
+    this.reservedMap = data.reservedMap ? new MapDoc(data.reservedMap) : undefined;
   }
 
   getNumberFieldNames(): string[] {
@@ -735,11 +741,11 @@ export class BitBadgesCollection<T extends NumberType>
       cachedCollection.owners.find((x) => x.cosmosAddress === 'Mint') && cachedCollection.owners.find((x) => x.cosmosAddress === 'Total');
     const shouldFetchTotalAndMint = !hasTotalAndMint && options.fetchTotalAndMintBalances;
 
-    const shouldFetchMerkleChallengeIds =
+    const shouldFetchMerklechallengeTrackerIds =
       (options.challengeTrackersToFetch ?? []).find((x) => {
         const match = cachedCollection.merkleChallenges.find(
           (y) =>
-            y.challengeId === x.challengeId &&
+            y.challengeTrackerId === x.challengeTrackerId &&
             x.approverAddress === y.approverAddress &&
             x.collectionId === y.collectionId &&
             x.challengeLevel === y.challengeLevel
@@ -763,7 +769,7 @@ export class BitBadgesCollection<T extends NumberType>
       shouldFetchMetadata ||
       viewsToFetch.length > 0 ||
       shouldFetchTotalAndMint ||
-      shouldFetchMerkleChallengeIds ||
+      shouldFetchMerklechallengeTrackerIds ||
       shouldFetchAmountTrackerIds ||
       options.fetchPrivateParams
     );
@@ -778,7 +784,7 @@ export class BitBadgesCollection<T extends NumberType>
     const prunedChallengeTrackersToFetch = (options.challengeTrackersToFetch || []).filter((x) => {
       return !this.merkleChallenges.find(
         (y) =>
-          y.challengeId === x.challengeId &&
+          y.challengeTrackerId === x.challengeTrackerId &&
           x.approverAddress === y.approverAddress &&
           x.collectionId === y.collectionId &&
           x.challengeLevel === y.challengeLevel

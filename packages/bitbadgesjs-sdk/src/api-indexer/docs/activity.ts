@@ -139,6 +139,7 @@ export class ListActivityDoc<T extends NumberType> extends ActivityDoc<T> implem
  * @category Indexer
  */
 export class ClaimAlertDoc<T extends NumberType> extends ActivityDoc<T> implements iClaimAlertDoc<T> {
+  from: string;
   code?: string;
   cosmosAddresses: string[];
   collectionId: T;
@@ -146,6 +147,7 @@ export class ClaimAlertDoc<T extends NumberType> extends ActivityDoc<T> implemen
 
   constructor(data: iClaimAlertDoc<T>) {
     super(data);
+    this.from = data.from;
     this.code = data.code;
     this.cosmosAddresses = data.cosmosAddresses;
     this.collectionId = data.collectionId;

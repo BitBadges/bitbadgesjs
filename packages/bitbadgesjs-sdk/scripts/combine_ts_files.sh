@@ -6,7 +6,7 @@ combine_ts_files() {
     local output_file="$2"
 
     # Find all TypeScript files in the directory excluding the proto and node-rest-api directories
-    find "$directory" -type f -name "*.ts" -print0 | while IFS= read -r -d '' file; do
+    find "$directory" -type f \( -name "*.ts" ! -name "*.spec.ts" \)  -print0 | while IFS= read -r -d '' file; do
         # Append file content to the output file
         cat "$file" >> "$output_file"
         echo "" >> "$output_file" # Add an empty line after each file

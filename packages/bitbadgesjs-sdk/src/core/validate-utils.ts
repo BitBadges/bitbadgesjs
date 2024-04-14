@@ -31,10 +31,6 @@ export function getPotentialUpdatesForTimelineValues(times: UintRangeArray<bigin
       fromList: AddressList.AllAddresses(),
       initiatedByList: AddressList.AllAddresses(),
       approvalIdList: AddressList.AllAddresses(),
-      amountTrackerIdList: AddressList.AllAddresses(),
-      challengeTrackerIdList: AddressList.AllAddresses(),
-      usesAmountTrackerIdList: false,
-      usesChallengeTrackerIdList: false
     });
   }
 
@@ -70,8 +66,6 @@ export function getUpdateCombinationsToCheck(
         initiatedByList: detailToAdd.initiatedByList,
         ownershipTime: detailToAdd.ownershipTime,
         approvalIdList: detailToAdd.approvalIdList,
-        amountTrackerIdList: detailToAdd.amountTrackerIdList,
-        challengeTrackerIdList: detailToAdd.challengeTrackerIdList,
 
         permanentlyPermittedTimes: UintRangeArray.From([]),
         permanentlyForbiddenTimes: UintRangeArray.From([]),
@@ -92,8 +86,6 @@ export function getUpdateCombinationsToCheck(
         fromList: detailToAdd.fromList,
         initiatedByList: detailToAdd.initiatedByList,
         approvalIdList: detailToAdd.approvalIdList,
-        amountTrackerIdList: detailToAdd.amountTrackerIdList,
-        challengeTrackerIdList: detailToAdd.challengeTrackerIdList,
 
         ownershipTime: detailToAdd.ownershipTime,
         permanentlyPermittedTimes: UintRangeArray.From([]),
@@ -119,8 +111,6 @@ export function getUpdateCombinationsToCheck(
         fromList: detailToAdd.fromList,
         initiatedByList: detailToAdd.initiatedByList,
         approvalIdList: detailToAdd.approvalIdList,
-        amountTrackerIdList: detailToAdd.amountTrackerIdList,
-        challengeTrackerIdList: detailToAdd.challengeTrackerIdList,
         ownershipTime: detailToAdd.ownershipTime,
 
         permanentlyPermittedTimes: UintRangeArray.From([]),
@@ -144,10 +134,6 @@ export const AllDefaultValues: UniversalPermission = {
   toList: AddressList.AllAddresses(),
   initiatedByList: AddressList.AllAddresses(),
   approvalIdList: AddressList.AllAddresses(),
-  amountTrackerIdList: AddressList.AllAddresses(),
-  challengeTrackerIdList: AddressList.AllAddresses(),
-  usesAmountTrackerIdList: false,
-  usesChallengeTrackerIdList: false,
   usesApprovalIdList: false,
   usesBadgeIds: false,
   usesTimelineTimes: false,

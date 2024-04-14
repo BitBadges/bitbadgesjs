@@ -7,13 +7,15 @@ import { BitBadgesUserInfo } from '@/api-indexer/BitBadgesUserInfo';
 import type { PaginationInfo } from '@/api-indexer/base';
 import { EmptyResponseClass } from '@/api-indexer/base';
 import { ClaimAlertDoc, TransferActivityDoc } from '@/api-indexer/docs/activity';
-import { StatusDoc } from '@/api-indexer/docs/docs';
+import { SecretDoc, StatusDoc } from '@/api-indexer/docs/docs';
 import type {
   ClaimIntegrationPluginType,
   IntegrationPluginDetails,
   iClaimAlertDoc,
   iCustomListPage,
   iCustomPage,
+  iSecretDoc,
+  iSocialConnections,
   iStatusDoc,
   iTransferActivityDoc
 } from '@/api-indexer/docs/interfaces';
@@ -23,11 +25,12 @@ import { Metadata } from '@/api-indexer/metadata/metadata';
 import { BaseNumberTypeClass, CustomTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base';
 import type { NumberType } from '@/common/string-numbers';
 import type { SupportedChain } from '@/common/types';
+import { SecretsProof } from '@/core';
 import { IncrementedBalances, iChallengeDetails } from '@/core/approvals';
 import type { iBatchBadgeDetails } from '@/core/batch-utils';
 import type { iOffChainBalancesMap } from '@/core/transfers';
 import { UintRangeArray } from '@/core/uintRanges';
-import type { iIncrementedBalances, iUintRange } from '@/interfaces';
+import type { iIncrementedBalances, iSecretsProof, iUintRange } from '@/interfaces';
 import type { BroadcastPostBody } from '@/node-rest-api/broadcast';
 import type { DeliverTxResponse, Event } from '@cosmjs/stargate';
 import type { ChallengeParams, VerifyChallengeOptions } from 'blockin';
@@ -393,6 +396,8 @@ export interface UpdateAccountInfoRouteRequestBody {
       id: string;
     };
   };
+
+  socialConntections?: iSocialConnections<NumberType>;
 }
 
 /**
@@ -560,6 +565,10 @@ export interface iAddApprovalDetailsToOffChainStorageRouteSuccessResponse {
   result: {
     cid: string;
   };
+
+  challengeResult?: {
+    cid: string;
+  };
 }
 
 /**
@@ -573,9 +582,12 @@ export class AddApprovalDetailsToOffChainStorageRouteSuccessResponse
     cid: string;
   };
 
+  challengeResult?: { cid: string } | undefined;
+
   constructor(data: iAddApprovalDetailsToOffChainStorageRouteSuccessResponse) {
     super();
     this.result = data.result;
+    this.challengeResult = data.challengeResult;
   }
 }
 
@@ -1057,7 +1069,7 @@ export interface SendClaimAlertsRouteRequestBody {
   claimAlerts: {
     collectionId: NumberType;
     message?: string;
-    recipientAddress: string;
+    cosmosAddresses: string[];
   }[];
 }
 
@@ -1114,6 +1126,133 @@ export class GenericBlockinVerifyRouteSuccessResponse extends VerifySignInRouteS
 /**
  * @category API Requests / Responses
  */
+export interface CreateSecretRouteRequestBody {
+  proofOfIssuance: {
+    message: string;
+    signature: string;
+    signer: string;
+    publicKey?: string;
+  };
+
+  messageFormat: 'plaintext' | 'json';
+  scheme: 'bbs' | 'standard';
+  type: string;
+  secretMessages: string[];
+  dataIntegrityProof: {
+    signature: string;
+    signer: string;
+    publicKey?: string;
+  };
+
+  name: string;
+  image: string;
+  description: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iCreateSecretRouteSuccessResponse {
+  secretId: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class CreateSecretRouteSuccessResponse extends CustomTypeClass<CreateSecretRouteSuccessResponse> implements iCreateSecretRouteSuccessResponse {
+  secretId: string;
+
+  constructor(data: iCreateSecretRouteSuccessResponse) {
+    super();
+    this.secretId = data.secretId;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface GetSecretRouteRequestBody {
+  secretId: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetSecretRouteSuccessResponse<T extends NumberType> extends iSecretDoc<T> {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetSecretRouteSuccessResponse<T extends NumberType> extends SecretDoc<T> {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface DeleteSecretRouteRequestBody {
+  secretId: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iDeleteSecretRouteSuccessResponse {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class DeleteSecretRouteSuccessResponse extends EmptyResponseClass {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface UpdateSecretRouteRequestBody {
+  secretId: string;
+
+  viewersToSet?: {
+    cosmosAddress: string;
+    delete?: boolean;
+  }[];
+
+  anchorsToAdd?: {
+    txHash?: string;
+    message?: string;
+  }[];
+
+  proofOfIssuance?: {
+    message: string;
+    signer: string;
+    signature: string;
+    publicKey?: string;
+  };
+
+  scheme?: 'bbs' | 'standard';
+  messageFormat?: 'plaintext' | 'json';
+  type?: string;
+  secretMessages?: string[];
+  dataIntegrityProof?: {
+    signature: string;
+    signer: string;
+    publicKey?: string;
+  };
+
+  name?: string;
+  image?: string;
+  description?: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iUpdateSecretRouteSuccessResponse {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class UpdateSecretRouteSuccessResponse extends EmptyResponseClass {}
+
+/**
+ * @category API Requests / Responses
+ */
 export interface CreateBlockinAuthCodeRouteRequestBody {
   name: string;
   description: string;
@@ -1122,62 +1261,93 @@ export interface CreateBlockinAuthCodeRouteRequestBody {
   message: string;
   signature: string;
   publicKey?: string;
+
+  secretsProofs?: iSecretsProof<NumberType>[];
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface iCreateBlockinAuthCodeRouteSuccessResponse {}
-
-/**
- * @category API Requests / Responses
- */
-export class CreateBlockinAuthCodeRouteSuccessResponse extends EmptyResponseClass {}
-
-/**
- * @category API Requests / Responses
- */
-export interface GetBlockinAuthCodeRouteRequestBody {
-  signature: string;
-  options?: VerifyChallengeOptions;
+export interface iCreateBlockinAuthCodeRouteSuccessResponse {
+  /** Secret ID only to be given to queriers */
+  id: string;
 }
 
 /**
  * @category API Requests / Responses
  */
-export class GetBlockinAuthCodeRouteSuccessResponse
-  extends CustomTypeClass<GetBlockinAuthCodeRouteSuccessResponse>
-  implements iGetBlockinAuthCodeRouteSuccessResponse
+export class CreateBlockinAuthCodeRouteSuccessResponse
+  extends CustomTypeClass<CreateBlockinAuthCodeRouteSuccessResponse>
+  implements iCreateBlockinAuthCodeRouteSuccessResponse
 {
-  message: string;
-  verificationResponse: {
-    success: boolean;
-    errorMessage?: string;
-  };
-  params: BlockinChallengeParams<NumberType>;
-  cosmosAddress: string;
+  id: string;
 
-  constructor(data: iGetBlockinAuthCodeRouteSuccessResponse) {
+  constructor(data: iCreateBlockinAuthCodeRouteSuccessResponse) {
     super();
-    this.message = data.message;
-    this.verificationResponse = data.verificationResponse;
-    this.params = new BlockinChallengeParams(data.params);
-    this.cosmosAddress = data.cosmosAddress;
+    this.id = data.id;
   }
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface iGetBlockinAuthCodeRouteSuccessResponse {
+export interface GetBlockinAuthCodeRouteRequestBody {
+  id: string;
+  options?: VerifyChallengeOptions;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetBlockinAuthCodeRouteSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetBlockinAuthCodeRouteSuccessResponse<T>>
+  implements iGetBlockinAuthCodeRouteSuccessResponse<T>
+{
+  message: string;
+  signature: string;
+  verificationResponse: {
+    success: boolean;
+    errorMessage?: string;
+  };
+  params: BlockinChallengeParams<NumberType>;
+  cosmosAddress: string;
+  secretsProofs: SecretsProof<T>[];
+
+  constructor(data: iGetBlockinAuthCodeRouteSuccessResponse<T>) {
+    super();
+    this.message = data.message;
+    this.signature = data.signature;
+    this.verificationResponse = data.verificationResponse;
+    this.params = new BlockinChallengeParams(data.params);
+    this.cosmosAddress = data.cosmosAddress;
+    this.secretsProofs = data.secretsProofs ? data.secretsProofs.map((proof) => new SecretsProof(proof)) : [];
+  }
+
+  getNumberFieldNames(): string[] {
+    return [];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetBlockinAuthCodeRouteSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetBlockinAuthCodeRouteSuccessResponse<U>;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetBlockinAuthCodeRouteSuccessResponse<T extends NumberType> {
   /**
    * The corresponding message that was signed to obtain the signature.
    */
   message: string;
   /**
+   * The signature of the message.
+   */
+  signature: string;
+  /**
    * The converted Blockin params fort the message
    */
-  params: BlockinChallengeParams<NumberType>;
+  params: ChallengeParams<NumberType>;
   /**
    * The converted Cosmos address of params.address. This can be used as the
    * unique identifier for the user (e.g. avoid duplicate sign ins from equivalent 0x and cosmos1 addresses).
@@ -1196,13 +1366,18 @@ export interface iGetBlockinAuthCodeRouteSuccessResponse {
      */
     errorMessage?: string;
   };
+
+  /**
+   * Derived data integrity proofs for any secrets requested.
+   */
+  secretsProofs: iSecretsProof<T>[];
 }
 
 /**
  * @category API Requests / Responses
  */
 export interface DeleteBlockinAuthCodeRouteRequestBody {
-  signature: string;
+  id: string;
 }
 
 /**

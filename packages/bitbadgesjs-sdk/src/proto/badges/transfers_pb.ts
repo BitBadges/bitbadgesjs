@@ -7,6 +7,7 @@ import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialM
 import { Message, proto3 } from "@bufbuild/protobuf";
 import { Balance, MustOwnBadges, UintRange } from "./balances_pb.js";
 import { UserPermissions } from "./permissions_pb.js";
+import { Coin } from "../cosmos/base/v1beta1/coin_pb.js";
 
 /**
  *
@@ -166,6 +167,13 @@ export class MerkleChallenge extends Message<MerkleChallenge> {
    */
   customData = "";
 
+  /**
+   * The ID of this Merkle challenge for tracking the number of uses per leaf.
+   *
+   * @generated from field: string challengeTrackerId = 7;
+   */
+  challengeTrackerId = "";
+
   constructor(data?: PartialMessage<MerkleChallenge>) {
     super();
     proto3.util.initPartial(data, this);
@@ -180,6 +188,7 @@ export class MerkleChallenge extends Message<MerkleChallenge> {
     { no: 4, name: "maxUsesPerLeaf", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 5, name: "uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 6, name: "customData", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 7, name: "challengeTrackerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MerkleChallenge {
@@ -241,22 +250,6 @@ export class UserOutgoingApproval extends Message<UserOutgoingApproval> {
   ownershipTimes: UintRange[] = [];
 
   /**
-   * The ID of the amount tracker associated with this approval.
-   * We use this ID to track the number of transfers and amounts transferred.
-   *
-   * @generated from field: string amountTrackerId = 6;
-   */
-  amountTrackerId = "";
-
-  /**
-   * The ID of the challenge tracker associated with this approval.
-   * We use this ID to track the number of uses per leaf for the Merkle challenge.
-   *
-   * @generated from field: string challengeTrackerId = 7;
-   */
-  challengeTrackerId = "";
-
-  /**
    * The URI associated with this approval, optionally providing metadata about the approval.
    *
    * @generated from field: string uri = 8;
@@ -297,8 +290,6 @@ export class UserOutgoingApproval extends Message<UserOutgoingApproval> {
     { no: 3, name: "transferTimes", kind: "message", T: UintRange, repeated: true },
     { no: 4, name: "badgeIds", kind: "message", T: UintRange, repeated: true },
     { no: 5, name: "ownershipTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 6, name: "amountTrackerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 7, name: "challengeTrackerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 8, name: "uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 9, name: "customData", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 10, name: "approvalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
@@ -364,22 +355,6 @@ export class UserIncomingApproval extends Message<UserIncomingApproval> {
   ownershipTimes: UintRange[] = [];
 
   /**
-   * The ID of the amount tracker associated with this approval.
-   * We use this ID to track the number of transfers and amounts transferred.
-   *
-   * @generated from field: string amountTrackerId = 6;
-   */
-  amountTrackerId = "";
-
-  /**
-   * The ID of the challenge tracker associated with this approval.
-   * We use this ID to track the number of uses per leaf for the Merkle challenge.
-   *
-   * @generated from field: string challengeTrackerId = 7;
-   */
-  challengeTrackerId = "";
-
-  /**
    * The URI associated with this approval, optionally providing metadata about the approval.
    *
    * @generated from field: string uri = 8;
@@ -420,8 +395,6 @@ export class UserIncomingApproval extends Message<UserIncomingApproval> {
     { no: 3, name: "transferTimes", kind: "message", T: UintRange, repeated: true },
     { no: 4, name: "badgeIds", kind: "message", T: UintRange, repeated: true },
     { no: 5, name: "ownershipTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 6, name: "amountTrackerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 7, name: "challengeTrackerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 8, name: "uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 9, name: "customData", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 10, name: "approvalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
@@ -580,6 +553,13 @@ export class PredeterminedOrderCalculationMethod extends Message<PredeterminedOr
    */
   useMerkleChallengeLeafIndex = false;
 
+  /**
+   * If useMerkleChallengeLeafIndex is set, then this is the ID of the challenge tracker associated with this calculation method.
+   *
+   * @generated from field: string challengeTrackerId = 6;
+   */
+  challengeTrackerId = "";
+
   constructor(data?: PartialMessage<PredeterminedOrderCalculationMethod>) {
     super();
     proto3.util.initPartial(data, this);
@@ -593,6 +573,7 @@ export class PredeterminedOrderCalculationMethod extends Message<PredeterminedOr
     { no: 3, name: "usePerFromAddressNumTransfers", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 4, name: "usePerInitiatedByAddressNumTransfers", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 5, name: "useMerkleChallengeLeafIndex", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 6, name: "challengeTrackerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PredeterminedOrderCalculationMethod {
@@ -706,6 +687,14 @@ export class ApprovalAmounts extends Message<ApprovalAmounts> {
    */
   perInitiatedByAddressApprovalAmount = "";
 
+  /**
+   * The ID of the amount tracker associated with this approval.
+   * We use this ID to track the number of transfers and amounts transferred.
+   *
+   * @generated from field: string amountTrackerId = 6;
+   */
+  amountTrackerId = "";
+
   constructor(data?: PartialMessage<ApprovalAmounts>) {
     super();
     proto3.util.initPartial(data, this);
@@ -718,6 +707,7 @@ export class ApprovalAmounts extends Message<ApprovalAmounts> {
     { no: 2, name: "perToAddressApprovalAmount", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "perFromAddressApprovalAmount", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 4, name: "perInitiatedByAddressApprovalAmount", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 6, name: "amountTrackerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ApprovalAmounts {
@@ -774,6 +764,14 @@ export class MaxNumTransfers extends Message<MaxNumTransfers> {
    */
   perInitiatedByAddressMaxNumTransfers = "";
 
+  /**
+   * The ID of the amount tracker associated with this approval.
+   * We use this ID to track the number of transfers and amounts transferred.
+   *
+   * @generated from field: string amountTrackerId = 6;
+   */
+  amountTrackerId = "";
+
   constructor(data?: PartialMessage<MaxNumTransfers>) {
     super();
     proto3.util.initPartial(data, this);
@@ -786,6 +784,7 @@ export class MaxNumTransfers extends Message<MaxNumTransfers> {
     { no: 2, name: "perToAddressMaxNumTransfers", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "perFromAddressMaxNumTransfers", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 4, name: "perInitiatedByAddressMaxNumTransfers", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 6, name: "amountTrackerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MaxNumTransfers {
@@ -879,6 +878,13 @@ export class ZkProof extends Message<ZkProof> {
    */
   customData = "";
 
+  /**
+   * The ID of this proof
+   *
+   * @generated from field: string zkpTrackerId = 4;
+   */
+  zkpTrackerId = "";
+
   constructor(data?: PartialMessage<ZkProof>) {
     super();
     proto3.util.initPartial(data, this);
@@ -890,6 +896,7 @@ export class ZkProof extends Message<ZkProof> {
     { no: 1, name: "verificationKey", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "customData", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "zkpTrackerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ZkProof {
@@ -957,6 +964,53 @@ export class ZkProofSolution extends Message<ZkProofSolution> {
 }
 
 /**
+ * @generated from message badges.CoinTransfer
+ */
+export class CoinTransfer extends Message<CoinTransfer> {
+  /**
+   * The address of the recipient of the transfer.
+   *
+   * @generated from field: string to = 1;
+   */
+  to = "";
+
+  /**
+   * The sdk.Coins to be transferred.
+   *
+   * @generated from field: repeated cosmos.base.v1beta1.Coin coins = 2;
+   */
+  coins: Coin[] = [];
+
+  constructor(data?: PartialMessage<CoinTransfer>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.CoinTransfer";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "to", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "coins", kind: "message", T: Coin, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CoinTransfer {
+    return new CoinTransfer().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CoinTransfer {
+    return new CoinTransfer().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CoinTransfer {
+    return new CoinTransfer().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: CoinTransfer | PlainMessage<CoinTransfer> | undefined, b: CoinTransfer | PlainMessage<CoinTransfer> | undefined): boolean {
+    return proto3.util.equals(CoinTransfer, a, b);
+  }
+}
+
+/**
  * ApprovalCriteria defines the criteria for approving transfers.
  *
  * @generated from message badges.ApprovalCriteria
@@ -972,9 +1026,9 @@ export class ApprovalCriteria extends Message<ApprovalCriteria> {
   /**
    * Merkle challenge that must be satisfied for approval.
    *
-   * @generated from field: badges.MerkleChallenge merkleChallenge = 2;
+   * @generated from field: repeated badges.MerkleChallenge merkleChallenges = 2;
    */
-  merkleChallenge?: MerkleChallenge;
+  merkleChallenges: MerkleChallenge[] = [];
 
   /**
    * Predetermined balances for eeach approval.
@@ -1003,6 +1057,13 @@ export class ApprovalCriteria extends Message<ApprovalCriteria> {
    * @generated from field: repeated badges.ZkProof zkProofs = 6;
    */
   zkProofs: ZkProof[] = [];
+
+  /**
+   * The sdk.Coins that need to be transferred for approval.
+   *
+   * @generated from field: repeated badges.CoinTransfer coinTransfers = 7;
+   */
+  coinTransfers: CoinTransfer[] = [];
 
   /**
    * Require the "to" address to be equal to the "initiated by" address for approval.
@@ -1055,11 +1116,12 @@ export class ApprovalCriteria extends Message<ApprovalCriteria> {
   static readonly typeName = "badges.ApprovalCriteria";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "mustOwnBadges", kind: "message", T: MustOwnBadges, repeated: true },
-    { no: 2, name: "merkleChallenge", kind: "message", T: MerkleChallenge },
+    { no: 2, name: "merkleChallenges", kind: "message", T: MerkleChallenge, repeated: true },
     { no: 3, name: "predeterminedBalances", kind: "message", T: PredeterminedBalances },
     { no: 4, name: "approvalAmounts", kind: "message", T: ApprovalAmounts },
     { no: 5, name: "maxNumTransfers", kind: "message", T: MaxNumTransfers },
     { no: 6, name: "zkProofs", kind: "message", T: ZkProof, repeated: true },
+    { no: 7, name: "coinTransfers", kind: "message", T: CoinTransfer, repeated: true },
     { no: 9, name: "requireToEqualsInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 10, name: "requireFromEqualsInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 11, name: "requireToDoesNotEqualInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
@@ -1101,9 +1163,9 @@ export class OutgoingApprovalCriteria extends Message<OutgoingApprovalCriteria> 
   /**
    * Merkle challenge that must be satisfied for approval.
    *
-   * @generated from field: badges.MerkleChallenge merkleChallenge = 2;
+   * @generated from field: repeated badges.MerkleChallenge merkleChallenges = 2;
    */
-  merkleChallenge?: MerkleChallenge;
+  merkleChallenges: MerkleChallenge[] = [];
 
   /**
    * Predetermined balances for eeach approval.
@@ -1134,6 +1196,13 @@ export class OutgoingApprovalCriteria extends Message<OutgoingApprovalCriteria> 
   zkProofs: ZkProof[] = [];
 
   /**
+   * The sdk.Coins that need to be transferred for approval.
+   *
+   * @generated from field: repeated badges.CoinTransfer coinTransfers = 7;
+   */
+  coinTransfers: CoinTransfer[] = [];
+
+  /**
    * Require the "to" address to be equal to the "initiated by" address for approval.
    *
    * @generated from field: bool requireToEqualsInitiatedBy = 9;
@@ -1156,11 +1225,12 @@ export class OutgoingApprovalCriteria extends Message<OutgoingApprovalCriteria> 
   static readonly typeName = "badges.OutgoingApprovalCriteria";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "mustOwnBadges", kind: "message", T: MustOwnBadges, repeated: true },
-    { no: 2, name: "merkleChallenge", kind: "message", T: MerkleChallenge },
+    { no: 2, name: "merkleChallenges", kind: "message", T: MerkleChallenge, repeated: true },
     { no: 3, name: "predeterminedBalances", kind: "message", T: PredeterminedBalances },
     { no: 4, name: "approvalAmounts", kind: "message", T: ApprovalAmounts },
     { no: 5, name: "maxNumTransfers", kind: "message", T: MaxNumTransfers },
     { no: 6, name: "zkProofs", kind: "message", T: ZkProof, repeated: true },
+    { no: 7, name: "coinTransfers", kind: "message", T: CoinTransfer, repeated: true },
     { no: 9, name: "requireToEqualsInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 11, name: "requireToDoesNotEqualInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ]);
@@ -1198,9 +1268,9 @@ export class IncomingApprovalCriteria extends Message<IncomingApprovalCriteria> 
   /**
    * Merkle challenge that must be satisfied for approval.
    *
-   * @generated from field: badges.MerkleChallenge merkleChallenge = 2;
+   * @generated from field: repeated badges.MerkleChallenge merkleChallenges = 2;
    */
-  merkleChallenge?: MerkleChallenge;
+  merkleChallenges: MerkleChallenge[] = [];
 
   /**
    * Predetermined balances for eeach approval.
@@ -1231,6 +1301,13 @@ export class IncomingApprovalCriteria extends Message<IncomingApprovalCriteria> 
   zkProofs: ZkProof[] = [];
 
   /**
+   * The sdk.Coins that need to be transferred for approval.
+   *
+   * @generated from field: repeated badges.CoinTransfer coinTransfers = 7;
+   */
+  coinTransfers: CoinTransfer[] = [];
+
+  /**
    * Require the "from" address to be equal to the "initiated by" address for approval.
    *
    * @generated from field: bool requireFromEqualsInitiatedBy = 10;
@@ -1253,11 +1330,12 @@ export class IncomingApprovalCriteria extends Message<IncomingApprovalCriteria> 
   static readonly typeName = "badges.IncomingApprovalCriteria";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "mustOwnBadges", kind: "message", T: MustOwnBadges, repeated: true },
-    { no: 2, name: "merkleChallenge", kind: "message", T: MerkleChallenge },
+    { no: 2, name: "merkleChallenges", kind: "message", T: MerkleChallenge, repeated: true },
     { no: 3, name: "predeterminedBalances", kind: "message", T: PredeterminedBalances },
     { no: 4, name: "approvalAmounts", kind: "message", T: ApprovalAmounts },
     { no: 5, name: "maxNumTransfers", kind: "message", T: MaxNumTransfers },
     { no: 6, name: "zkProofs", kind: "message", T: ZkProof, repeated: true },
+    { no: 7, name: "coinTransfers", kind: "message", T: CoinTransfer, repeated: true },
     { no: 10, name: "requireFromEqualsInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 12, name: "requireFromDoesNotEqualInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ]);
@@ -1328,22 +1406,6 @@ export class CollectionApproval extends Message<CollectionApproval> {
   ownershipTimes: UintRange[] = [];
 
   /**
-   * The ID of the amount tracker associated with this approval.
-   * We use this ID to track the number of transfers and amounts transferred.
-   *
-   * @generated from field: string amountTrackerId = 7;
-   */
-  amountTrackerId = "";
-
-  /**
-   * The ID of the challenge tracker associated with this approval.
-   * We use this ID to track the number of uses per leaf for the Merkle challenge.
-   *
-   * @generated from field: string challengeTrackerId = 8;
-   */
-  challengeTrackerId = "";
-
-  /**
    * The URI associated with this approval, optionally providing metadata about the approval.
    *
    * @generated from field: string uri = 9;
@@ -1385,8 +1447,6 @@ export class CollectionApproval extends Message<CollectionApproval> {
     { no: 4, name: "transferTimes", kind: "message", T: UintRange, repeated: true },
     { no: 5, name: "badgeIds", kind: "message", T: UintRange, repeated: true },
     { no: 6, name: "ownershipTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 7, name: "amountTrackerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 8, name: "challengeTrackerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 9, name: "uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 10, name: "customData", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 11, name: "approvalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },

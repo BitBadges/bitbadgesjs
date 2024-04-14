@@ -1,4 +1,6 @@
+import { iUpdateHistory } from '@/api-indexer/docs/docs';
 import type { NumberType } from '@/common/string-numbers';
+import { iCosmosCoin } from '@/core/coin';
 
 /**
  * @category Interfaces
@@ -68,6 +70,78 @@ export interface iOffChainBalancesMetadata {
 /**
  * @category Interfaces
  */
+export interface iSecretsProof<T extends NumberType> {
+  createdBy: string;
+  scheme: 'bbs' | 'standard';
+  messageFormat: 'plaintext' | 'json';
+
+  secretMessages: string[];
+  entropies?: string[];
+
+  dataIntegrityProof: {
+    signature: string;
+    signer: string;
+    publicKey?: string;
+  };
+
+  proofOfIssuance: {
+    message: string;
+    signer: string;
+    signature: string;
+    publicKey?: string;
+  };
+
+  name: string;
+  image: string;
+  description: string;
+
+  updateHistory?: iUpdateHistory<T>[];
+  anchors?: {
+    txHash?: string;
+    message?: string;
+  }[];
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iSecret {
+  createdBy: string;
+  messageFormat: 'plaintext' | 'json';
+
+  proofOfIssuance: {
+    message: string;
+    signature: string;
+    signer: string;
+    publicKey?: string;
+  };
+
+  secretId: string;
+
+  type: string;
+  scheme: 'bbs' | 'standard';
+  secretMessages: string[];
+
+  dataIntegrityProof: {
+    signature: string;
+    signer: string;
+    publicKey?: string;
+  };
+
+  name: string;
+  image: string;
+  description: string;
+
+  viewers: string[];
+  anchors: {
+    txHash?: string;
+    message?: string;
+  }[];
+}
+
+/**
+ * @category Interfaces
+ */
 export interface iZkProof {
   /**
    * The verification key of the zkProof.
@@ -83,6 +157,11 @@ export interface iZkProof {
    * Arbitrary custom data that can be stored on-chain.
    */
   customData: string;
+
+  /**
+   * ZKP tracker ID.
+   */
+  zkpTrackerId: string;
 }
 
 /**
@@ -268,6 +347,20 @@ export interface iApprovalIdentifierDetails {
 /**
  * @category Interfaces
  */
+export interface iCoinTransfer<T extends NumberType> {
+  /**
+   * The recipient of the coin transfer. This should be a Bech32 Cosmos address.
+   */
+  to: string;
+  /**
+   * The coins
+   */
+  coins: iCosmosCoin<T>[];
+}
+
+/**
+ * @category Interfaces
+ */
 export interface iAmountTrackerIdDetails<T extends NumberType> {
   /**
    * The collection ID for the approval.
@@ -275,7 +368,12 @@ export interface iAmountTrackerIdDetails<T extends NumberType> {
   collectionId: T;
 
   /**
-   * The approval ID of the approval.
+   * The approval ID
+   */
+  approvalId: string;
+
+  /**
+   * The amount tracker ID of the approval.
    */
   amountTrackerId: string;
 
@@ -333,6 +431,11 @@ export interface iMerkleChallenge<T extends NumberType> {
    * Arbitrary custom data that can be stored on-chain.
    */
   customData: string;
+
+  /**
+   * Tracker ID details for the merkle challenge.
+   */
+  challengeTrackerId: string;
 }
 
 /**

@@ -66,7 +66,7 @@ main() {
 
     replace_text_in_directory "$directory" ": NumberType" "$new_text"
     replace_text_in_directory "$directory" ": T;" ": string | number;"
-    replace_text_in_directory "$directory" "params: ChallengeParams;" "params: ChallengeParams<string | number>;"
+    # replace_text_in_directory "$directory" "params: ChallengeParams;" "params: ChallengeParams<string | number>;"
     replace_text_in_directory "$directory" ": T\[" ": (string | number)\["
 
     # # Run typeconv recursively on all folders

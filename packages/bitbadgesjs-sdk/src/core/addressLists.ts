@@ -93,7 +93,7 @@ export class AddressList extends CustomTypeClass<AddressList> implements iAddres
       );
     }
 
-    const [remaining] = AddressList.getOverlapDetails(addresses, this);
+    const [remaining] = AddressList.getOverlapDetails(this, addresses);
     this.addresses = remaining.addresses;
     this.whitelist = remaining.whitelist;
     return this;

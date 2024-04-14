@@ -12,3 +12,4 @@ export * as protocols from './protocols/index';
 export * as solana from './solana/index';
 export * as tendermint from './tendermint/index';
 export * as wasmx from './wasmx/index';
+export * as maps from './maps/index';

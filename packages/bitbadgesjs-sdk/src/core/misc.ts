@@ -4,6 +4,7 @@ import type {
   iApprovalIdentifierDetails,
   iBadgeMetadata,
   iBadgeMetadataTimeline,
+  iCoinTransfer,
   iCollectionMetadata,
   iCollectionMetadataTimeline,
   iCustomDataTimeline,
@@ -29,6 +30,7 @@ import { GetFirstMatchOnly, getOverlapsAndNonOverlaps } from './overlaps';
 import { TimedUpdatePermission, TimedUpdateWithBadgeIdsPermission } from './permissions';
 import { UintRange, UintRangeArray } from './uintRanges';
 import { AllDefaultValues, getPotentialUpdatesForTimelineValues, getUpdateCombinationsToCheck } from './validate-utils';
+import { CosmosCoin } from './coin';
 
 /**
  * BadgeMetadata is used to represent the metadata for a range of badge IDs.
@@ -268,11 +270,13 @@ export class ZkProof extends CustomTypeClass<ZkProof> implements iZkProof {
   verificationKey: string;
   uri: string;
   customData: string;
+  zkpTrackerId: string;
 
   constructor(zkProof: iZkProof) {
     super();
     this.verificationKey = zkProof.verificationKey;
     this.uri = zkProof.uri;
+    this.zkpTrackerId = zkProof.zkpTrackerId;
     this.customData = zkProof.customData;
   }
 
@@ -290,6 +294,42 @@ export class ZkProof extends CustomTypeClass<ZkProof> implements iZkProof {
 
   static fromProto(item: proto.badges.ZkProof): ZkProof {
     return new ZkProof({ ...item });
+  }
+}
+
+/**
+ * @category Approvals / Transferability
+ */
+export class CoinTransfer<T extends NumberType> extends BaseNumberTypeClass<CoinTransfer<T>> implements iCoinTransfer<T> {
+  to: string;
+  coins: CosmosCoin<T>[];
+
+  constructor(coinTransfer: iCoinTransfer<T>) {
+    super();
+    this.to = coinTransfer.to;
+    this.coins = coinTransfer.coins.map((b) => new CosmosCoin(b));
+  }
+
+  getNumberFieldNames(): string[] {
+    return [];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): CoinTransfer<U> {
+    return new CoinTransfer<U>({
+      to: this.to,
+      coins: this.coins.map((b) => b.convert(convertFunction))
+    });
+  }
+
+  toProto(): proto.badges.CoinTransfer {
+    return new proto.badges.CoinTransfer(this.convert(Stringify));
+  }
+
+  static fromProto<U extends NumberType>(item: proto.badges.CoinTransfer, convertFunction: (item: NumberType) => U): CoinTransfer<U> {
+    return new CoinTransfer<U>({
+      to: item.to,
+      coins: item.coins.map((b) => CosmosCoin.fromProto(b, convertFunction))
+    });
   }
 }
 
@@ -382,6 +422,7 @@ export class AmountTrackerIdDetails<T extends NumberType>
 {
   collectionId: T;
   amountTrackerId: string;
+  approvalId: string;
   approvalLevel: string;
   approverAddress: string;
   trackerType: string;
@@ -395,6 +436,7 @@ export class AmountTrackerIdDetails<T extends NumberType>
     this.approverAddress = approvalIdDetails.approverAddress;
     this.trackerType = approvalIdDetails.trackerType;
     this.approvedAddress = approvalIdDetails.approvedAddress;
+    this.approvalId = approvalIdDetails.approvalId;
   }
 
   getNumberFieldNames(): string[] {
@@ -409,7 +451,8 @@ export class AmountTrackerIdDetails<T extends NumberType>
         approvalLevel: this.approvalLevel,
         approverAddress: this.approverAddress,
         trackerType: this.trackerType,
-        approvedAddress: this.approvedAddress
+        approvedAddress: this.approvedAddress,
+        approvalId: this.approvalId
       })
     );
   }
@@ -427,6 +470,7 @@ export class MerkleChallenge<T extends NumberType> extends BaseNumberTypeClass<M
   maxUsesPerLeaf: T;
   uri: string;
   customData: string;
+  challengeTrackerId: string;
 
   constructor(merkleChallenge: iMerkleChallenge<T>) {
     super();
@@ -436,6 +480,7 @@ export class MerkleChallenge<T extends NumberType> extends BaseNumberTypeClass<M
     this.maxUsesPerLeaf = merkleChallenge.maxUsesPerLeaf;
     this.uri = merkleChallenge.uri;
     this.customData = merkleChallenge.customData;
+    this.challengeTrackerId = merkleChallenge.challengeTrackerId;
   }
 
   static required(): MerkleChallenge<NumberType> {
@@ -445,7 +490,8 @@ export class MerkleChallenge<T extends NumberType> extends BaseNumberTypeClass<M
       useCreatorAddressAsLeaf: false,
       maxUsesPerLeaf: 0,
       uri: '',
-      customData: ''
+      customData: '',
+      challengeTrackerId: ''
     });
   }
 
@@ -461,7 +507,8 @@ export class MerkleChallenge<T extends NumberType> extends BaseNumberTypeClass<M
         useCreatorAddressAsLeaf: this.useCreatorAddressAsLeaf,
         maxUsesPerLeaf: convertFunction(this.maxUsesPerLeaf),
         uri: this.uri,
-        customData: this.customData
+        customData: this.customData,
+        challengeTrackerId: this.challengeTrackerId
       })
     );
   }
@@ -493,7 +540,8 @@ export class MerkleChallenge<T extends NumberType> extends BaseNumberTypeClass<M
       useCreatorAddressAsLeaf: item.useCreatorAddressAsLeaf,
       maxUsesPerLeaf: convertFunction(BigInt(item.maxUsesPerLeaf)),
       uri: item.uri,
-      customData: item.customData
+      customData: item.customData,
+      challengeTrackerId: item.challengeTrackerId
     });
   }
 }
@@ -1294,8 +1342,6 @@ export function validateCollectionMetadataUpdate<T extends NumberType>(
         fromList: AddressList.AllAddresses(),
         initiatedByList: AddressList.AllAddresses(),
         approvalIdList: AddressList.AllAddresses(),
-        amountTrackerIdList: AddressList.AllAddresses(),
-        challengeTrackerIdList: AddressList.AllAddresses(),
         permanentlyPermittedTimes: UintRangeArray.From([]),
         permanentlyForbiddenTimes: UintRangeArray.From([]),
         arbitraryValue: undefined
@@ -1315,8 +1361,6 @@ export function validateCollectionMetadataUpdate<T extends NumberType>(
           initiatedByList: AddressList.AllAddresses(),
           approvalIdList: AddressList.AllAddresses(),
 
-          amountTrackerIdList: AddressList.AllAddresses(),
-          challengeTrackerIdList: AddressList.AllAddresses(),
           permanentlyPermittedTimes: UintRangeArray.From([]),
           permanentlyForbiddenTimes: UintRangeArray.From([]),
           arbitraryValue: undefined
@@ -1382,8 +1426,6 @@ export function validateOffChainBalancesMetadataUpdate<T extends NumberType>(
         initiatedByList: AddressList.AllAddresses(),
         approvalIdList: AddressList.AllAddresses(),
 
-        amountTrackerIdList: AddressList.AllAddresses(),
-        challengeTrackerIdList: AddressList.AllAddresses(),
         permanentlyPermittedTimes: UintRangeArray.From([]),
         permanentlyForbiddenTimes: UintRangeArray.From([]),
         arbitraryValue: undefined
@@ -1403,8 +1445,6 @@ export function validateOffChainBalancesMetadataUpdate<T extends NumberType>(
           initiatedByList: AddressList.AllAddresses(),
           approvalIdList: AddressList.AllAddresses(),
 
-          amountTrackerIdList: AddressList.AllAddresses(),
-          challengeTrackerIdList: AddressList.AllAddresses(),
           permanentlyPermittedTimes: UintRangeArray.From([]),
           permanentlyForbiddenTimes: UintRangeArray.From([]),
           arbitraryValue: undefined
@@ -1445,8 +1485,6 @@ function getUpdatedStringCombinations(oldValue: any, newValue: any): UniversalPe
       initiatedByList: AddressList.AllAddresses(),
       approvalIdList: AddressList.AllAddresses(),
 
-      amountTrackerIdList: AddressList.AllAddresses(),
-      challengeTrackerIdList: AddressList.AllAddresses(),
       permanentlyPermittedTimes: UintRangeArray.From([]),
       permanentlyForbiddenTimes: UintRangeArray.From([]),
       arbitraryValue: undefined
@@ -1471,8 +1509,6 @@ function getUpdatedBoolCombinations(oldValue: any, newValue: any): UniversalPerm
         initiatedByList: AddressList.AllAddresses(),
         approvalIdList: AddressList.AllAddresses(),
 
-        amountTrackerIdList: AddressList.AllAddresses(),
-        challengeTrackerIdList: AddressList.AllAddresses(),
         permanentlyPermittedTimes: UintRangeArray.From([]),
         permanentlyForbiddenTimes: UintRangeArray.From([]),
         arbitraryValue: undefined
@@ -1586,8 +1622,6 @@ export function validateStandardsUpdate<T extends NumberType>(
             initiatedByList: AddressList.AllAddresses(),
             approvalIdList: AddressList.AllAddresses(),
 
-            amountTrackerIdList: AddressList.AllAddresses(),
-            challengeTrackerIdList: AddressList.AllAddresses(),
             permanentlyPermittedTimes: UintRangeArray.From([]),
             permanentlyForbiddenTimes: UintRangeArray.From([]),
             arbitraryValue: undefined
@@ -1605,8 +1639,6 @@ export function validateStandardsUpdate<T extends NumberType>(
             initiatedByList: AddressList.AllAddresses(),
             approvalIdList: AddressList.AllAddresses(),
 
-            amountTrackerIdList: AddressList.AllAddresses(),
-            challengeTrackerIdList: AddressList.AllAddresses(),
             permanentlyPermittedTimes: UintRangeArray.From([]),
             permanentlyForbiddenTimes: UintRangeArray.From([]),
             arbitraryValue: undefined
@@ -1625,8 +1657,7 @@ export function validateStandardsUpdate<T extends NumberType>(
                 fromList: AddressList.AllAddresses(),
                 initiatedByList: AddressList.AllAddresses(),
                 approvalIdList: AddressList.AllAddresses(),
-                amountTrackerIdList: AddressList.AllAddresses(),
-                challengeTrackerIdList: AddressList.AllAddresses(),
+
                 permanentlyPermittedTimes: UintRangeArray.From([]),
                 permanentlyForbiddenTimes: UintRangeArray.From([]),
                 arbitraryValue: undefined

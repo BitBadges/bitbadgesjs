@@ -11,7 +11,16 @@ import { BitBadgesAddressList } from './BitBadgesAddressList';
 import { BitBadgesCollection } from './BitBadgesCollection';
 import type { BaseBitBadgesApi, ErrorResponse, PaginationInfo } from './base';
 import { ClaimAlertDoc, ListActivityDoc, ReviewDoc, TransferActivityDoc } from './docs/activity';
-import { ApprovalTrackerDoc, BalanceDocWithDetails, BlockinAuthSignatureDoc, FollowDetailsDoc, MerkleChallengeDoc, ProfileDoc } from './docs/docs';
+import {
+  ApprovalTrackerDoc,
+  BalanceDocWithDetails,
+  BlockinAuthSignatureDoc,
+  FollowDetailsDoc,
+  MapDoc,
+  MerkleChallengeDoc,
+  ProfileDoc,
+  SecretDoc
+} from './docs/docs';
 import type {
   iAccountDoc,
   iApprovalTrackerDoc,
@@ -20,12 +29,13 @@ import type {
   iClaimAlertDoc,
   iFollowDetailsDoc,
   iListActivityDoc,
+  iMapDoc,
   iMerkleChallengeDoc,
   iProfileDoc,
   iReviewDoc,
+  iSecretDoc,
   iTransferActivityDoc
 } from './docs/interfaces';
-import { Protocol } from './requests/protocols';
 import { BitBadgesApiRoutes } from './requests/routes';
 
 /**
@@ -60,6 +70,11 @@ export interface iBitBadgesUserInfo<T extends NumberType> extends iProfileDoc<T>
   claimAlerts: iClaimAlertDoc<T>[];
   /** A list of auth codes for the account. Paginated and fetched as needed. To be used in conjunction with views. */
   authCodes: iBlockinAuthSignatureDoc<T>[];
+  /** A list of user secrets for the account. Paginated and fetched as needed. To be used in conjunction with views. */
+  secrets: iSecretDoc<T>[];
+
+  /** The reserved map for the account. This is created and managed on-chain through the x/maps module. */
+  reservedMap?: iMapDoc<T>;
 
   /** The native address of the account */
   address: string;
@@ -120,6 +135,8 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   addressLists: BitBadgesAddressList<T>[];
   claimAlerts: ClaimAlertDoc<T>[];
   authCodes: BlockinAuthSignatureDoc<T>[];
+  secrets: iSecretDoc<T>[];
+
   address: string;
   nsfw?: { [badgeId: string]: string };
   reported?: { [badgeId: string]: string };
@@ -136,6 +153,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     collectionId?: T;
     listId?: string;
   };
+  reservedMap?: MapDoc<T> | undefined;
 
   constructor(data: iBitBadgesUserInfo<T>) {
     super(data);
@@ -161,11 +179,13 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     this.addressLists = data.addressLists.map((list) => new BitBadgesAddressList(list));
     this.claimAlerts = data.claimAlerts.map((alert) => new ClaimAlertDoc(alert));
     this.authCodes = data.authCodes.map((auth) => new BlockinAuthSignatureDoc(auth));
+    this.secrets = data.secrets.map((secret) => new SecretDoc(secret));
     this.address = data.address;
     this.nsfw = data.nsfw;
     this.reported = data.reported;
     this.views = data.views;
     this.alias = data.alias;
+    this.reservedMap = data.reservedMap ? new MapDoc(data.reservedMap) : undefined;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): BitBadgesUserInfo<U> {
@@ -408,6 +428,12 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     }
   }
 
+  getSecretsView(viewId: string) {
+    return (this.views[viewId]?.ids.map((x) => {
+      return this.secrets.find((y) => y._docId === x);
+    }) ?? []) as SecretDoc<T>[];
+  }
+
   getAuthCodesView(viewId: string) {
     return (this.views[viewId]?.ids.map((x) => {
       return this.authCodes.find((y) => y._docId === x);
@@ -474,13 +500,6 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   }
 
   /**
-   * Fetches the collection set for a specific protocol by this user.
-   */
-  async fetchCollectionForProtocol<T extends NumberType>(api: BaseBitBadgesApi<T>, name: string) {
-    return await Protocol.GetCollectionForProtocol(api, { name, address: this.address });
-  }
-
-  /**
    * Checks if this user is on a given address list.
    */
   onList(addressList: iAddressList) {
@@ -508,6 +527,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
       collected: [],
       activity: [],
       listsActivity: [],
+      secrets: [],
       reviews: [],
       addressLists: [],
       claimAlerts: [],
@@ -542,6 +562,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
       accountNumber: -1n,
       collected: [],
       activity: [],
+      secrets: [],
       claimAlerts: [],
       reviews: [],
       merkleChallenges: [],
@@ -647,6 +668,7 @@ function updateAccountWithResponse<T extends NumberType>(
     claimAlerts: [...(cachedAccount?.claimAlerts || []), ...(account.claimAlerts || [])],
     authCodes: [...(cachedAccount?.authCodes || []), ...(account.authCodes || [])],
     listsActivity: [...(cachedAccount?.listsActivity || []), ...(account.listsActivity || [])],
+    secrets: [...(cachedAccount?.secrets || []), ...(account.secrets || [])],
     views: views,
     publicKey,
     airdropped: account.airdropped ? account.airdropped : cachedAccount?.airdropped ? cachedAccount.airdropped : false,
@@ -673,6 +695,7 @@ function updateAccountWithResponse<T extends NumberType>(
   newAccount.claimAlerts = newAccount.claimAlerts.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
   newAccount.authCodes = newAccount.authCodes.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
   newAccount.listsActivity = newAccount.listsActivity.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
+  newAccount.secrets = newAccount.secrets.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
 
   //sort in descending order
   newAccount.activity = newAccount.activity.sort((a, b) => (BigInt(b.timestamp) - BigInt(a.timestamp) > 0 ? -1 : 1));
@@ -702,7 +725,9 @@ export type AccountViewKey =
   | 'blacklists'
   | 'createdBadges'
   | 'managingBadges'
-  | 'listsActivity';
+  | 'listsActivity'
+  | 'createdSecrets'
+  | 'receivedSecrets';
 
 /**
  * This defines the options for fetching additional account details.
@@ -834,8 +859,3 @@ export class GetFollowDetailsRouteSuccessResponse<T extends NumberType>
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetFollowDetailsRouteSuccessResponse<U>;
   }
 }
-
-/**
- * @category API Requests / Responses
- */
-export type GetFollowDetailsRouteResponse<T extends NumberType> = ErrorResponse | GetFollowDetailsRouteSuccessResponse<T>;

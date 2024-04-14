@@ -336,6 +336,11 @@ export class QueryGetApprovalTrackerRequest extends Message<QueryGetApprovalTrac
   approverAddress = "";
 
   /**
+   * @generated from field: string approvalId = 7;
+   */
+  approvalId = "";
+
+  /**
    * @generated from field: string amountTrackerId = 1;
    */
   amountTrackerId = "";
@@ -363,6 +368,7 @@ export class QueryGetApprovalTrackerRequest extends Message<QueryGetApprovalTrac
     { no: 5, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "approvalLevel", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "approverAddress", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 7, name: "approvalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 1, name: "amountTrackerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 4, name: "trackerType", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 6, name: "approvedAddress", kind: "scalar", T: 9 /* ScalarType.STRING */ },
@@ -446,6 +452,11 @@ export class QueryGetChallengeTrackerRequest extends Message<QueryGetChallengeTr
   approverAddress = "";
 
   /**
+   * @generated from field: string approvalId = 6;
+   */
+  approvalId = "";
+
+  /**
    * @generated from field: string challengeTrackerId = 4;
    */
   challengeTrackerId = "";
@@ -466,6 +477,7 @@ export class QueryGetChallengeTrackerRequest extends Message<QueryGetChallengeTr
     { no: 1, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "approvalLevel", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "approverAddress", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 6, name: "approvalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 4, name: "challengeTrackerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 5, name: "leafIndex", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
