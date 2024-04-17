@@ -201,7 +201,7 @@ function removeImportLinesFromFile(filePath: string): void {
     import { Options as MerkleTreeJsOptions } from 'merkletreejs/dist/MerkleTree';
 
     export type SupportedChain = 'Bitcoin' | 'Ethereum' | 'Cosmos' | 'Solana' | 'Unknown';
-    
+
     export interface AssetDetails {
       chain: string;
       collectionId: string | number;

@@ -23,6 +23,7 @@ export type iUserOutgoingApprovalPermissionWithDetails<T extends NumberType> = O
   toList: iAddressList;
   initiatedByList: iAddressList;
 };
+
 /**
  * @category Interfaces
  * @interface

@@ -26,6 +26,7 @@ export interface iUserBalanceStore<T extends NumberType> {
 }
 
 /**
+ * @inheritDoc iUserBalanceStore
  * @category Interfaces
  */
 export interface iUserBalanceStoreWithDetails<T extends NumberType> extends iUserBalanceStore<T> {

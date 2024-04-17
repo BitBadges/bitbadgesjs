@@ -212,8 +212,7 @@ export class MigrateFromInfo extends Message<MigrateFromInfo> {
  * @generated from extension: cosmos.app.v1alpha1.ModuleDescriptor module = 57193479;
  */
 export const module = proto3.makeExtension<MessageOptions, ModuleDescriptor>(
-  "cosmos.app.v1alpha1.module", 
-  MessageOptions, 
+  "cosmos.app.v1alpha1.module",
+  MessageOptions,
   () => ({ no: 57193479, kind: "message", T: ModuleDescriptor }),
 );
-

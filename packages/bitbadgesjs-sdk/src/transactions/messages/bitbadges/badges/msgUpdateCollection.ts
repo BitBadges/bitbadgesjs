@@ -17,6 +17,7 @@ import {
 import { CollectionPermissions } from '@/core/permissions';
 import type { iMsgUpdateCollection } from './interfaces';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base';
+import { CosmosAddress } from '@/api-indexer';
 
 /**
  * MsgUpdateCollection is a transaction that can be used to update any collection. It is only executable by the manager.
@@ -30,7 +31,7 @@ import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } fro
  * @category Transactions
  */
 export class MsgUpdateCollection<T extends NumberType> extends BaseNumberTypeClass<MsgUpdateCollection<T>> implements iMsgUpdateCollection<T> {
-  creator: string;
+  creator: CosmosAddress;
   collectionId: T;
   badgesToCreate?: BalanceArray<T>;
   updateCollectionPermissions?: boolean;

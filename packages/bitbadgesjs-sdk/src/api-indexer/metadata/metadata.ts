@@ -1,6 +1,7 @@
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base';
 import type { NumberType } from '@/common/string-numbers';
 import { BigIntify } from '@/common/string-numbers';
+import { UNIXMilliTimestamp } from '../docs/interfaces';
 
 /**
  * @category Interfaces
@@ -8,16 +9,12 @@ import { BigIntify } from '@/common/string-numbers';
 export interface iMetadata<T extends NumberType> {
   /** The name of the badge or badge collection. */
   name: string;
-  /** The description of the badge or badge collection. */
+  /** The description of the badge or badge collection. Supports markdown. */
   description: string;
   /** The image of the badge or badge collection. */
   image: string;
   /** The video of the badge or badge collection. If a standard video is used, this should be a link to the video. We will use image as the poster image. If a youtube video is used, we embed it as an iframe. */
   video?: string;
-  /** The creator of the badge or badge collection. */
-  creator?: string;
-  /** The color of the badge or badge collection. */
-  color?: string;
   /** The category of the badge or badge collection (e.g. "Education", "Attendance"). */
   category?: string;
   /** The external URL of the badge or badge collection. */
@@ -46,24 +43,23 @@ export interface iMetadata<T extends NumberType> {
   /** The block the metadata was fetched at. */
   fetchedAtBlock?: T;
   /** The time the metadata was fetched. */
-  fetchedAt?: T;
+  fetchedAt?: UNIXMilliTimestamp<T>;
   /** Whether the metadata is currently being updated. */
   _isUpdating?: boolean;
 }
 
 /**
+ * @inheritDoc iMetadata
  * @category Collections
  */
 export class Metadata<T extends NumberType> extends BaseNumberTypeClass<Metadata<T>> implements iMetadata<T> {
-  fetchedAt?: T;
+  fetchedAt?: UNIXMilliTimestamp<T>;
   fetchedAtBlock?: T;
   _isUpdating?: boolean;
   name: string;
   description: string;
   image: string;
   video?: string;
-  creator?: string;
-  color?: string;
   category?: string;
   externalUrl?: string;
   tags?: string[];
@@ -92,8 +88,6 @@ export class Metadata<T extends NumberType> extends BaseNumberTypeClass<Metadata
     this.description = data.description;
     this.image = data.image;
     this.video = data.video;
-    this.creator = data.creator;
-    this.color = data.color;
     this.category = data.category;
     this.externalUrl = data.externalUrl;
     this.tags = data.tags;

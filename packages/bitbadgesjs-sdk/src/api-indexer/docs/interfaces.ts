@@ -2,7 +2,7 @@ import type { Doc } from '@/api-indexer/base';
 import type { iMetadata } from '@/api-indexer/metadata/metadata';
 import type { JSPrimitiveNumberType, NumberType } from '@/common/string-numbers';
 import type { SupportedChain } from '@/common/types';
-import type { iApprovalInfoDetails, iChallengeDetails, iChallengeInfoDetails, iUserOutgoingApprovalWithDetails } from '@/core/approvals';
+import type { iApprovalInfoDetails, iChallengeDetails, iUserOutgoingApprovalWithDetails } from '@/core/approvals';
 import type { iBatchBadgeDetails } from '@/core/batch-utils';
 import type { iCosmosCoin } from '@/core/coin';
 import type { iOffChainBalancesMap } from '@/core/transfers';
@@ -21,16 +21,53 @@ import type {
   iSecret,
   iSecretsProof,
   iStandardsTimeline,
-  iUintRange,
-  iZkProofSolution
+  iUintRange
 } from '@/interfaces/badges/core';
 import type { iCollectionPermissions, iUserPermissionsWithDetails } from '@/interfaces/badges/permissions';
 import type { iUserBalanceStore } from '@/interfaces/badges/userBalances';
 import type { AndGroup, ChallengeParams, OrGroup, OwnershipRequirements } from 'blockin';
-import { iUpdateHistory } from './docs';
 import { iMapWithValues } from '../requests/maps';
+import { iUpdateHistory } from './docs';
 
 /**
+ * Numeric timestamp - value is equal to the milliseconds since the UNIX epoch.
+ *
+ * @category Interfaces
+ */
+export type UNIXMilliTimestamp<T extends NumberType> = T;
+
+/**
+ *
+ * All supported addresses map to a Bech32 Cosmos address which is used by the BitBadges blockchain behind the scenes.
+ * For conversion, see the BitBadges documentation. If this type is used, we must always convert to a Cosmos address before using it.
+ *
+ * @category Interfaces
+ */
+export type CosmosAddress = string; // `cosmos1${string}`;
+
+/**
+ * BlockinMessage is the sign-in challenge strint to be signed by the user. It extends EIP 4361 Sign-In with Ethereum
+ * and adds additional fields for cross-chain compatibility and native asset ownership verification.
+ *
+ * For example, 'https://bitbadges.io wants you to sign in with your Ethereum address ...'
+ *
+ * @category Interfaces
+ */
+export type BlockinMessage = string;
+
+/**
+ * A native address is an address that is native to the user's chain. For example, an Ethereum address is native to Ethereum (0x...).
+ * If this type is used, we support any native address type. We do not require conversion to a Cosmos address like the CosmosAddress type.
+ *
+ * @category Interfaces
+ */
+export type NativeAddress = string;
+
+/**
+ * Social connections are tracked for each user to provide an enhanced experience.
+ * These are kept private from other users or sites using the API.
+ * Currently, there is no use for these, but they may be used in the future.
+ *
  * @category Interfaces
  */
 export interface iSocialConnections<T extends NumberType> {
@@ -38,31 +75,36 @@ export interface iSocialConnections<T extends NumberType> {
     username: string;
     id: string;
     discriminator?: string;
-    lastUpdated: T;
+    lastUpdated: UNIXMilliTimestamp<T>;
   };
   twitter?: {
     username: string;
     id: string;
-    lastUpdated: T;
+    lastUpdated: UNIXMilliTimestamp<T>;
   };
   google?: {
     username: string;
     id: string;
-    lastUpdated: T;
+    lastUpdated: UNIXMilliTimestamp<T>;
   };
   github?: {
     username: string;
     id: string;
-    lastUpdated: T;
+    lastUpdated: UNIXMilliTimestamp<T>;
   };
 }
 
 /**
+ * Details about the user's push notification preferences.
+ *
  * @category Interfaces
  */
 export interface iNotificationPreferences<T extends NumberType> {
+  /** The email to receive push notifications. */
   email?: string;
+  /** The verification status of the email. */
   emailVerification?: iEmailVerificationStatus<T>;
+  /** The preferences for the notifications. What type of notifications does the user want to receive? */
   preferences?: {
     listActivity?: boolean;
     transferActivity?: boolean;
@@ -71,25 +113,31 @@ export interface iNotificationPreferences<T extends NumberType> {
 }
 
 /**
+ * The verification status of the user's email.
+ *
  * @category Interfaces
  */
 export interface iEmailVerificationStatus<T extends NumberType> {
+  /** Whether or not the email has been verified. */
   verified?: boolean;
+  /** The email verification token. This is used for verification and unsubscription. */
   token?: string;
-  expiry?: T;
+  /** The expiry of the token for verification purposes. */
+  expiry?: UNIXMilliTimestamp<T>;
+  /** A unique code that we will send with all emails to verify that BitBadges is the one sending the email. */
   antiPhishingCode?: string;
 }
 
 /**
+ * The base document interface for all acitivity types.
+ *
  * @category Interfaces
  */
 export interface iActivityDoc<T extends NumberType> extends Doc {
-  /** The timestamp  of the activity. */
-  timestamp: T;
-
+  /** The timestamp of the activity. */
+  timestamp: UNIXMilliTimestamp<T>;
   /** The block number of the activity. */
   block: T;
-
   /** Whether or not the notifications have been handled by the indexer or not. */
   _notificationsHandled?: boolean;
 }
@@ -102,38 +150,36 @@ export interface iReviewDoc<T extends NumberType> extends iActivityDoc<T> {
   review: string;
   /** The number of stars given (1-5). */
   stars: T;
-  /** The cosmos address of the user who gave the review. */
-  from: string;
+  /** The user who gave the review. */
+  from: CosmosAddress;
   /** The collection ID of the collection that was reviewed. Only applicable to collection reviews. */
   collectionId?: T;
-  /** The cosmos address of the user who the review is for. Only applicable to user reviews. */
-  reviewedAddress?: string;
+  /** The Cosmos address of the user who the review is for. Only applicable to user reviews. */
+  reviewedAddress?: CosmosAddress;
 }
 
 /**
  * @category Interfaces
  */
 export interface iTransferActivityDoc<T extends NumberType> extends iActivityDoc<T> {
-  /** The list of cosmos addresses that were involved in the activity. */
-  to: string[];
-  /** The list of cosmos addresses that were involved in the activity. */
-  from: string;
+  /** The list of recipients. */
+  to: CosmosAddress[];
+  /** The sender of the badges. */
+  from: CosmosAddress;
   /** The list of balances and badge IDs that were transferred. */
   balances: iBalance<T>[];
-  /** The collection ID of the collection that was transferred. */
+  /** The collection ID for the badges that was transferred. */
   collectionId: T;
   /** The memo of the transfer. */
   memo?: string;
-  /** Which approval to use to precalculate the balances. */
+  /** Which approval to use to precalculate the balances? */
   precalculateBalancesFromApproval?: iApprovalIdentifierDetails;
-  /** The prioritized approvals of the transfer. */
+  /** The prioritized approvals of the transfer. This is used to check certain approvals before others to ensure intended behavior. */
   prioritizedApprovals?: iApprovalIdentifierDetails[];
-  /** Whether or not to only check prioritized approvals. */
+  /** Whether or not to only check prioritized approvals? If false, we will still check all approvals but prioritize the prioritized approvals. */
   onlyCheckPrioritizedApprovals?: boolean;
-  /**The ZK proofs for the transfer. */
-  zkProofSolutions?: iZkProofSolution[];
-  /** The cosmos address of the user who initiated the activity. */
-  initiatedBy: string;
+  /** The user who initiated the transfer transaction. */
+  initiatedBy: CosmosAddress;
   /** The transaction hash of the activity. */
   txHash?: string;
 }
@@ -142,12 +188,12 @@ export interface iTransferActivityDoc<T extends NumberType> extends iActivityDoc
  * @category Interfaces
  */
 export interface iListActivityDoc<T extends NumberType> extends iActivityDoc<T> {
-  /** The list ID of the list. */
+  /** The list ID. */
   listId: string;
-  /** Whether or not the address is included in the list. Note that this could mean added to an whitelist or a blacklist */
+  /** Whether or not the address was added to the list or removed. */
   addedToList?: boolean;
   /** The list of addresses that were added or removed from the list. */
-  addresses?: string[];
+  addresses?: CosmosAddress[];
   /** The transaction hash of the activity. */
   txHash?: string;
 }
@@ -158,10 +204,8 @@ export interface iListActivityDoc<T extends NumberType> extends iActivityDoc<T> 
 export interface iClaimAlertDoc<T extends NumberType> extends iActivityDoc<T> {
   /** The sender */
   from: string;
-  /** The code of the claim alert. */
-  code?: string;
   /** The cosmos addresses of the users that have been alerted. */
-  cosmosAddresses: string[];
+  cosmosAddresses: CosmosAddress[];
   /** The collection ID of the claim alert. */
   collectionId: T;
   /** The message of the claim alert. */
@@ -197,15 +241,15 @@ export interface iCollectionDoc<T extends NumberType> extends Doc {
   /** The default balances for users who have not interacted with the collection yet. Only used if collection has "Standard" balance type. */
   defaultBalances: iUserBalanceStore<T>;
   /** The cosmos address of the user who created this collection */
-  createdBy: string;
+  createdBy: CosmosAddress;
   /** The block number when this collection was created */
   createdBlock: T;
   /** The timestamp when this collection was created (milliseconds since epoch) */
-  createdTimestamp: T;
+  createdTimestamp: UNIXMilliTimestamp<T>;
   /** The update history of this collection */
   updateHistory: iUpdateHistory<T>[];
   /** The alias cosmos address for the collection */
-  aliasAddress: string;
+  aliasAddress: CosmosAddress;
 }
 
 /**
@@ -219,7 +263,7 @@ export interface iAccountDoc<T extends NumberType> extends Doc {
   /** The public key type of the account */
   pubKeyType: string;
   /** The Cosmos address of the account */
-  cosmosAddress: string;
+  cosmosAddress: CosmosAddress;
   /** The Eth address of the account */
   ethAddress: string;
   /** The Solana address of the account */
@@ -238,8 +282,11 @@ export interface iAccountDoc<T extends NumberType> extends Doc {
  * @category Interfaces
  */
 export interface iCustomLink {
+  /** Title of the link */
   title: string;
+  /** URL of the link */
   url: string;
+  /** Description of the link */
   image: string;
 }
 
@@ -247,8 +294,11 @@ export interface iCustomLink {
  * @category Interfaces
  */
 export interface iCustomPage<T extends NumberType> {
+  /** The title of the custom page */
   title: string;
+  /** The description of the custom page */
   description: string;
+  /** The badge IDs to display on the custom page */
   items: iBatchBadgeDetails<T>[];
 }
 
@@ -258,8 +308,11 @@ export interface iCustomPage<T extends NumberType> {
  * @category Interfaces
  */
 export interface iCustomListPage {
+  /** The title of the custom list page */
   title: string;
+  /** The description of the custom list page */
   description: string;
+  /** The list IDs to display on the custom list page */
   items: string[];
 }
 
@@ -271,9 +324,9 @@ export interface iProfileDoc<T extends NumberType> extends Doc {
   fetchedProfile?: boolean;
 
   /** The timestamp of the last activity seen for this account (milliseconds since epoch) */
-  seenActivity?: T;
+  seenActivity?: UNIXMilliTimestamp<T>;
   /** The timestamp of when this account was created (milliseconds since epoch) */
-  createdAt?: T;
+  createdAt?: UNIXMilliTimestamp<T>;
 
   /** The Discord username of the account */
   discord?: string;
@@ -344,17 +397,17 @@ export interface iQueueDoc<T extends NumberType> extends Doc {
   /** The load balance ID of the metadata to be fetched. Only the node with the same load balance ID will fetch this metadata */
   loadBalanceId: T;
   /** The timestamp of when this metadata was requested to be refreshed (milliseconds since epoch) */
-  refreshRequestTime: T;
+  refreshRequestTime: UNIXMilliTimestamp<T>;
   /** The number of times this metadata has been tried to be fetched but failed */
   numRetries: T;
   /** The timestamp of when this metadata was last fetched (milliseconds since epoch) */
-  lastFetchedAt?: T;
+  lastFetchedAt?: UNIXMilliTimestamp<T>;
   /** The error message if this metadata failed to be fetched */
   error?: string;
   /** The timestamp of when this document was deleted (milliseconds since epoch) */
-  deletedAt?: T;
+  deletedAt?: UNIXMilliTimestamp<T>;
   /** The timestamp of when this document should be fetched next (milliseconds since epoch) */
-  nextFetchTime?: T;
+  nextFetchTime?: UNIXMilliTimestamp<T>;
 
   //Only used for failed push notifications
   emailMessage?: string;
@@ -379,7 +432,7 @@ export interface iLatestBlockStatus<T extends NumberType> {
   /** The transaction index of the latest block */
   txIndex: T;
   /** The timestamp of the latest block (milliseconds since epoch) */
-  timestamp: T;
+  timestamp: UNIXMilliTimestamp<T>;
 }
 
 /**
@@ -405,7 +458,7 @@ export interface iAddressListEditKey<T extends NumberType> {
   /** The key that can be used to edit the address list */
   key: string;
   /** The expiration date of the key (milliseconds since epoch) */
-  expirationDate: T;
+  expirationDate: UNIXMilliTimestamp<T>;
   /** True if the user can only add their signed in address to the list */
   mustSignIn?: boolean;
 }
@@ -415,13 +468,13 @@ export interface iAddressListEditKey<T extends NumberType> {
  */
 export interface iAddressListDoc<T extends NumberType> extends iAddressList, Doc {
   /** The cosmos address of the user who created this list */
-  createdBy: string;
+  createdBy: CosmosAddress;
   /** The update history of this list */
   updateHistory: iUpdateHistory<T>[];
   /** The block number when this list was created */
   createdBlock: T;
   /** The timestamp of when this list was last updated (milliseconds since epoch) */
-  lastUpdated: T;
+  lastUpdated: UNIXMilliTimestamp<T>;
   /** The NSFW reason if this list is NSFW */
   nsfw?: { reason: string };
   /** The reported reason if this list is reported */
@@ -440,7 +493,7 @@ export interface iBalanceDoc<T extends NumberType> extends iUserBalanceStore<T>,
   collectionId: T;
 
   /** The Cosmos address of the user */
-  cosmosAddress: string;
+  cosmosAddress: CosmosAddress;
 
   /** True if the balances are on-chain */
   onChain: boolean;
@@ -449,7 +502,7 @@ export interface iBalanceDoc<T extends NumberType> extends iUserBalanceStore<T>,
   uri?: string;
 
   /** The timestamp of when the off-chain balances were fetched (milliseconds since epoch). For BitBadges indexer, we only populate this for Mint and Total docs. */
-  fetchedAt?: T;
+  fetchedAt?: UNIXMilliTimestamp<T>;
 
   /** The block number of when the off-chain balances were fetched. For BitBadges indexer, we only populate this for Mint and Total docs. */
   fetchedAtBlock?: T;
@@ -484,7 +537,6 @@ export type ClaimIntegrationPluginType =
   | 'github'
   | 'google'
   | 'twitter'
-  // | 'stripe'
   | 'transferTimes'
   | 'requiresProofOfAddress'
   | 'whitelist'
@@ -622,7 +674,7 @@ export interface iClaimBuilderDoc<T extends NumberType> extends Doc {
   /** The CID of the password document */
   cid: string;
   /** The cosmos address of the user who created this password */
-  createdBy: string;
+  createdBy: CosmosAddress;
   /** True if the password document is claimed by the collection */
   docClaimed: boolean;
   /** The collection ID of the password document */
@@ -673,7 +725,7 @@ export interface iChallengeTrackerIdDetails<T extends NumberType> {
   /** The challenge level (i.e. "collection", "incoming", "outgoing") */
   challengeLevel: 'collection' | 'incoming' | 'outgoing' | '';
   /** The approver address (leave blank if challengeLevel = "collection") */
-  approverAddress: string;
+  approverAddress: CosmosAddress;
 }
 
 /**
@@ -689,7 +741,7 @@ export interface iMerkleChallengeDoc<T extends NumberType> extends Doc {
   /** The challenge level (i.e. "collection", "incoming", "outgoing") */
   challengeLevel: 'collection' | 'incoming' | 'outgoing' | '';
   /** The approver address (leave blank if challengeLevel = "collection") */
-  approverAddress: string;
+  approverAddress: CosmosAddress;
   /** The used leaf indices for each challenge. A leaf index is the leaf location in the bottommost layer of the Merkle tree */
   usedLeafIndices: T[];
 }
@@ -705,7 +757,7 @@ export interface iMerklechallengeTrackerIdDetails<T extends NumberType> {
   /** The challenge level (i.e. "collection", "incoming", "outgoing") */
   challengeLevel: 'collection' | 'incoming' | 'outgoing' | '';
   /** The approver address (leave blank if challengeLevel = "collection") */
-  approverAddress: string;
+  approverAddress: CosmosAddress;
   /** The used leaf indices for each challenge. A leaf index is the leaf location in the bottommost layer of the Merkle tree */
   usedLeafIndices: T[];
 }
@@ -717,7 +769,7 @@ export interface iFetchDoc<T extends NumberType> extends Doc {
   /** The content of the fetch document. Note that we store balances in BALANCES_DB and not here to avoid double storage. */
   content?: iMetadata<T> | iApprovalInfoDetails | iOffChainBalancesMap<T> | iChallengeDetails<T>;
   /** The time the document was fetched */
-  fetchedAt: T;
+  fetchedAt: UNIXMilliTimestamp<T>;
   /** The block the document was fetched */
   fetchedAtBlock: T;
   /** The type of content fetched. This is used for querying purposes */
@@ -733,7 +785,7 @@ export interface iRefreshDoc<T extends NumberType> extends Doc {
   /** The collection ID */
   collectionId: T;
   /** The time the refresh was requested (Unix timestamp in milliseconds) */
-  refreshRequestTime: T;
+  refreshRequestTime: UNIXMilliTimestamp<T>;
 }
 
 /**
@@ -743,7 +795,7 @@ export interface iAirdropDoc<T extends NumberType> extends Doc {
   /** True if the airdrop has been completed */
   airdropped: boolean;
   /** The timestamp of when the airdrop was completed (milliseconds since epoch) */
-  timestamp: T;
+  timestamp: UNIXMilliTimestamp<T>;
   /** The hash of the airdrop transaction */
   hash?: string;
 }
@@ -769,8 +821,8 @@ export interface iComplianceDoc<T extends NumberType> extends Doc {
     reported: { listId: string; reason: string }[];
   };
   accounts: {
-    nsfw: { cosmosAddress: string; reason: string }[];
-    reported: { cosmosAddress: string; reason: string }[];
+    nsfw: { cosmosAddress: CosmosAddress; reason: string }[];
+    reported: { cosmosAddress: CosmosAddress; reason: string }[];
   };
 }
 
@@ -778,20 +830,27 @@ export interface iComplianceDoc<T extends NumberType> extends Doc {
  * @category Interfaces
  */
 export interface iBlockinAuthSignatureDoc<T extends NumberType> extends Doc {
+  /** The signature of the Blockin message with the Blockin params as the params field */
   signature: string;
+  /** The public key for the signed. Only needed for certain chains (Cosmos). */
   publicKey?: string;
 
   name: string;
   description: string;
   image: string;
 
-  cosmosAddress: string;
+  /** The Cosmos address of the signer */
+  cosmosAddress: CosmosAddress;
+  /** The sign-in params. These are all the details in the message that was signed. */
   params: ChallengeParams<T>;
 
+  /** If required, you can additionally attach proof of secrets ot the auth flow. These can be used to prove sensitive information to verifiers. */
   secretsProofs: iSecretsProof<T>[];
 
-  createdAt: T;
-  deletedAt?: T;
+  /** The timestamp of when the signature was created (milliseconds since epoch) */
+  createdAt: UNIXMilliTimestamp<T>;
+  /** If deleted, we still store temporarily for a period of time. We use a deletedAt timestamp to determine when to delete. */
+  deletedAt?: UNIXMilliTimestamp<T>;
 }
 
 /**
@@ -806,16 +865,15 @@ export interface iSecretDoc<T extends NumberType> extends Doc, iSecret {
  */
 export interface iFollowDetailsDoc<T extends NumberType> extends Doc {
   /** The Cosmos address of the user */
-  cosmosAddress: string;
+  cosmosAddress: CosmosAddress;
   /** The number of users that the user is following */
   followingCount: T;
   /** The number of users that are following the user */
   followersCount: T;
   /** The followers of the user */
-  followers: string[];
+  followers: CosmosAddress[];
   /** The following of the user */
-  following: string[];
-
+  following: CosmosAddress[];
   /** The collection ID of the following collection */
   followingCollectionId: T;
 }

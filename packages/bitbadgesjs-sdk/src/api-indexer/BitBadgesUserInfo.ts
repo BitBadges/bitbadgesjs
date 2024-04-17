@@ -37,6 +37,7 @@ import type {
   iTransferActivityDoc
 } from './docs/interfaces';
 import { BitBadgesApiRoutes } from './requests/routes';
+import { CosmosAddress, NativeAddress } from '@/combined';
 
 /**
  * @category Interfaces
@@ -77,7 +78,7 @@ export interface iBitBadgesUserInfo<T extends NumberType> extends iProfileDoc<T>
   reservedMap?: iMapDoc<T>;
 
   /** The native address of the account */
-  address: string;
+  address: NativeAddress;
 
   /** Indicates whether the account is NSFW. */
   nsfw?: { [badgeId: string]: string };
@@ -112,7 +113,7 @@ export interface iBitBadgesUserInfo<T extends NumberType> extends iProfileDoc<T>
  */
 export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> implements iBitBadgesUserInfo<T>, CustomType<BitBadgesUserInfo<T>> {
   //TODO: Can we get rid of the AccountDoc stuff too?
-  cosmosAddress: string;
+  cosmosAddress: CosmosAddress;
   ethAddress: string;
   btcAddress: string;
   solAddress: string;
@@ -137,7 +138,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   authCodes: BlockinAuthSignatureDoc<T>[];
   secrets: iSecretDoc<T>[];
 
-  address: string;
+  address: NativeAddress;
   nsfw?: { [badgeId: string]: string };
   reported?: { [badgeId: string]: string };
   views: {
@@ -607,9 +608,6 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
 
 /**
  * AccountMap is used to store the user information by address.
- *
- * @typedef {Object} AccountMap
- *
  * @category Indexer
  */
 export interface AccountMap<T extends NumberType> {
@@ -754,7 +752,9 @@ export type AccountViewKey =
  * @category API Requests / Responses
  */
 export type AccountFetchDetails = {
-  address?: string;
+  /** The address of the user. This can be their native address. Only one of address or username should be specified. */
+  address?: NativeAddress;
+  /** The username of the user. Only one of address or username should be specified. */
   username?: string;
   /** If true, we will fetch the sequence from the blockchain. */
   fetchSequence?: boolean;

@@ -7,6 +7,7 @@ import { UserPermissions } from '@/core/permissions';
 import { UserIncomingApproval, UserOutgoingApproval } from '@/core/approvals';
 import type { iMsgUpdateUserApprovals } from './interfaces';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base';
+import { CosmosAddress } from '@/api-indexer/docs/interfaces';
 
 /**
  * MsgUpdateUserApprovals represents the message for updating user approvals.
@@ -29,7 +30,7 @@ export class MsgUpdateUserApprovals<T extends NumberType>
   extends BaseNumberTypeClass<MsgUpdateUserApprovals<T>>
   implements iMsgUpdateUserApprovals<T>
 {
-  creator: string;
+  creator: CosmosAddress;
   collectionId: T;
   updateOutgoingApprovals?: boolean;
   outgoingApprovals?: UserOutgoingApproval<T>[];

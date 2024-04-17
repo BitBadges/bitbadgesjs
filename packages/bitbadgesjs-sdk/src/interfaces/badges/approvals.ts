@@ -234,7 +234,9 @@ export interface iApprovalCriteria<T extends NumberType> {
  * @category Interfaces
  */
 export interface iUserIncomingApprovalWithDetails<T extends NumberType> extends iUserIncomingApproval<T> {
+  /** The populated address list for fromListId */
   fromList: iAddressList;
+  /** The populated address list for initiatedByListId */
   initiatedByList: iAddressList;
   approvalCriteria?: iIncomingApprovalCriteriaWithDetails<T>;
 }

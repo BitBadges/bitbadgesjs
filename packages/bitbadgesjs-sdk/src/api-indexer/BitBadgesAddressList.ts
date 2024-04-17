@@ -12,6 +12,7 @@ import { Metadata } from './metadata/metadata';
 import { BitBadgesApiRoutes } from './requests/routes';
 
 /**
+ * @inheritDoc iAddressListDoc
  * @category Interfaces
  */
 export interface iBitBadgesAddressList<T extends NumberType> extends iAddressListDoc<T> {
@@ -27,14 +28,16 @@ export interface iBitBadgesAddressList<T extends NumberType> extends iAddressLis
       pagination: PaginationInfo;
     };
   };
-
+  /** The claims of the address list. */
   claims: {
     claimId: string;
+    /** Plugins are the criteria for the claim. */
     plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
   }[];
 }
 
 /**
+ * @inheritDoc iBitBadgesAddressList
  * @category Address Lists
  */
 export class BitBadgesAddressList<T extends NumberType>
@@ -333,6 +336,7 @@ export interface GetAddressListsRouteRequestBody {
       viewType: 'listActivity';
       bookmark: string;
     }[];
+    /** Certain views and details are private. If you are the creator of the list, you can fetch these details. By default, we do not fetch them. */
     fetchPrivateParams?: boolean;
   }[];
 }
@@ -367,21 +371,20 @@ export class GetAddressListsRouteSuccessResponse<T extends NumberType>
  * @category API Requests / Responses
  */
 export interface UpdateAddressListsRouteRequestBody<T extends NumberType> {
-  /**
-   * New address lists to update.
-   * Requester must be creator of the lists.
-   * Only applicable to off-chain balances.
-   */
   addressLists: (iAddressList & {
-    //Whether the list is private.
+    /** Private lists will not show up in any search results. */
     private?: boolean;
+    /**
+     * If the list is viewable with a link, anyone with the lisst ID can view details. Only applicable if private = true as well.
+     * If not viewable with a link, only the creator can view the list.
+     */
+    viewableWithLink?: boolean;
 
+    /** The claims of the address list. Use resetState on updates for resetting individual plugin state (if applicable). */
     claims: {
       claimId: string;
       plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
     }[];
-
-    viewableWithLink?: boolean;
   })[];
 }
 

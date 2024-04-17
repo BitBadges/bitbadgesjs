@@ -19,7 +19,7 @@ import * as proto from '@/proto';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 import type MerkleTree from 'merkletreejs';
 import type { Options as MerkleTreeJsOptions } from 'merkletreejs/dist/MerkleTree';
-import { ClaimIntegrationPluginType, IntegrationPluginDetails } from '..';
+import { ClaimIntegrationPluginType, IntegrationPluginDetails, iClaimDetails } from '..';
 import { BigIntify, Stringify, type NumberType } from '../common/string-numbers';
 import { AddressList } from './addressLists';
 import { Balance, BalanceArray } from './balances';
@@ -965,7 +965,9 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
  * @category Approvals / Transferability
  */
 export interface iUserOutgoingApprovalWithDetails<T extends NumberType> extends iUserOutgoingApproval<T> {
+  /** The populated address list for the toListId */
   toList: iAddressList;
+  /** The populated address list for the initiatedByListId */
   initiatedByList: iAddressList;
   approvalCriteria?: iOutgoingApprovalCriteriaWithDetails<T>;
 }
@@ -1113,12 +1115,7 @@ export interface iChallengeInfoDetails<T extends NumberType> {
   /** The challenge details of the claim / approval */
   challengeDetails: iChallengeDetails<T>;
 
-  claim?: {
-    /** The plugins of the claim / approval */
-    plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
-    claimId: string;
-    manualDistribution?: boolean;
-  };
+  claim?: iClaimDetails<T>;
 }
 
 /**
@@ -1333,9 +1330,13 @@ export class OutgoingApprovalCriteriaWithDetails<T extends NumberType>
  * @category Interfaces
  */
 export interface iCollectionApprovalWithDetails<T extends NumberType> extends iCollectionApproval<T> {
+  /** The approval metadata details */
   details?: iApprovalInfoDetails;
+  /** The populated address list for the toListId */
   toList: iAddressList;
+  /** The populated address list for the fromListId */
   fromList: iAddressList;
+  /** The populated address list for the initiatedByListId */
   initiatedByList: iAddressList;
   approvalCriteria?: iApprovalCriteriaWithDetails<T>;
 }

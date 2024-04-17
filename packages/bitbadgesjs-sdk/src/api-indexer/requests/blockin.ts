@@ -1,8 +1,8 @@
-import type { CustomType } from '@/common/base';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base';
 import type { NumberType } from '@/common/string-numbers';
 import { UintRange } from '@/core/uintRanges';
 import type { AndGroup, AssetDetails, ChallengeParams, OrGroup } from 'blockin/dist/types/verify.types';
+import { NativeAddress } from '../docs';
 
 /**
  * @category Blockin
@@ -10,7 +10,7 @@ import type { AndGroup, AssetDetails, ChallengeParams, OrGroup } from 'blockin/d
 export class BlockinChallengeParams<T extends NumberType> extends BaseNumberTypeClass<BlockinChallengeParams<T>> implements ChallengeParams<T> {
   domain: string;
   statement: string;
-  address: string;
+  address: NativeAddress;
   uri: string;
   nonce: string;
   version?: string;

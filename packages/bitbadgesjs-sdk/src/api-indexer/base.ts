@@ -5,15 +5,13 @@ import type { NumberType } from '@/common/string-numbers';
 import axios from 'axios';
 
 /**
- * Fields for the MongoDB database document
- *
  * @category Indexer
  */
 export interface Doc {
   /** A unique stringified document ID */
   _docId: string;
 
-  /** A uniuqe document ID (Mongo DB ObjectID) */
+  /** A unique document ID (Mongo DB ObjectID) */
   _id?: string;
 }
 
@@ -30,7 +28,7 @@ export interface ErrorResponse {
   /**
    * Serialized error object for debugging purposes. Technical users can use this to debug issues.
    */
-  error?: any;
+  error?: string;
   /**
    * UX-friendly error message that can be displayed to the user. Always present if error.
    */
@@ -117,13 +115,12 @@ export class EmptyResponseClass extends CustomTypeClass<EmptyResponseClass> impl
 
 /**
  * Type for pagination information.
- * @typedef {Object} PaginationInfo
- * @property {string} bookmark - The bookmark to be used to fetch the next X documents. Initially, bookmark should be '' (empty string) to fetch the first X documents. Each time the next X documents are fetched, the bookmark should be updated to the bookmark returned by the previous fetch.
- * @property {boolean} hasMore - Indicates whether there are more documents to be fetched. Once hasMore is false, all documents have been fetched.
  *
  * @category Indexer
  */
 export interface PaginationInfo {
+  /** The bookmark for the next page of results. Obtained from previous response. */
   bookmark: string;
+  /** Whether there are more results to fetch. */
   hasMore: boolean;
 }

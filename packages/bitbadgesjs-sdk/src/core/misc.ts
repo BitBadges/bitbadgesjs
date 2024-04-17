@@ -31,6 +31,7 @@ import { TimedUpdatePermission, TimedUpdateWithBadgeIdsPermission } from './perm
 import { UintRange, UintRangeArray } from './uintRanges';
 import { AllDefaultValues, getPotentialUpdatesForTimelineValues, getUpdateCombinationsToCheck } from './validate-utils';
 import { CosmosCoin } from './coin';
+import { CosmosAddress } from '..';
 
 /**
  * BadgeMetadata is used to represent the metadata for a range of badge IDs.
@@ -301,7 +302,7 @@ export class ZkProof extends CustomTypeClass<ZkProof> implements iZkProof {
  * @category Approvals / Transferability
  */
 export class CoinTransfer<T extends NumberType> extends BaseNumberTypeClass<CoinTransfer<T>> implements iCoinTransfer<T> {
-  to: string;
+  to: CosmosAddress;
   coins: CosmosCoin<T>[];
 
   constructor(coinTransfer: iCoinTransfer<T>) {
@@ -373,7 +374,7 @@ export class ZkProofSolution extends CustomTypeClass<ZkProofSolution> implements
 export class ApprovalIdentifierDetails extends CustomTypeClass<ApprovalIdentifierDetails> implements ApprovalIdentifierDetails {
   approvalId: string;
   approvalLevel: string;
-  approverAddress: string;
+  approverAddress: CosmosAddress;
 
   constructor(approvalIdDetails: iApprovalIdentifierDetails) {
     super();
@@ -424,9 +425,9 @@ export class AmountTrackerIdDetails<T extends NumberType>
   amountTrackerId: string;
   approvalId: string;
   approvalLevel: string;
-  approverAddress: string;
+  approverAddress: CosmosAddress;
   trackerType: string;
-  approvedAddress: string;
+  approvedAddress: CosmosAddress;
 
   constructor(approvalIdDetails: iAmountTrackerIdDetails<T>) {
     super();
@@ -664,7 +665,7 @@ export class TimelineItem<T extends NumberType> extends BaseNumberTypeClass<Time
  * @category Timelines
  */
 export class ManagerTimeline<T extends NumberType> extends BaseNumberTypeClass<ManagerTimeline<T>> implements iManagerTimeline<T> {
-  manager: string;
+  manager: CosmosAddress;
   timelineTimes: UintRangeArray<T>;
 
   constructor(managerTimeline: iManagerTimeline<T>) {

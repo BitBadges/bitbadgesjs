@@ -40,7 +40,9 @@ import { BlockinChallengeParams } from '../requests/blockin';
 import { MapWithValues } from '../requests/maps';
 import type {
   ClaimIntegrationPluginType,
+  CosmosAddress,
   IntegrationPluginParams,
+  UNIXMilliTimestamp,
   iAccountDoc,
   iAddressListDoc,
   iAirdropDoc,
@@ -73,6 +75,7 @@ import type {
 } from './interfaces';
 
 /**
+ * @inheritDoc iCollectionDoc
  * @category Collections
  */
 export class CollectionDoc<T extends NumberType>
@@ -93,11 +96,11 @@ export class CollectionDoc<T extends NumberType>
   standardsTimeline: StandardsTimeline<T>[];
   isArchivedTimeline: IsArchivedTimeline<T>[];
   defaultBalances: UserBalanceStore<T>;
-  createdBy: string;
+  createdBy: CosmosAddress;
   createdBlock: T;
-  createdTimestamp: T;
+  createdTimestamp: UNIXMilliTimestamp<T>;
   updateHistory: UpdateHistory<T>[];
-  aliasAddress: string;
+  aliasAddress: CosmosAddress;
 
   constructor(data: iCollectionDoc<T>) {
     super();
@@ -213,6 +216,7 @@ export class CollectionDoc<T extends NumberType>
 }
 
 /**
+ * @inheritDoc iAccountDoc
  * @category Accounts
  */
 export class AccountDoc<T extends NumberType> extends BaseNumberTypeClass<AccountDoc<T>> implements iAccountDoc<T> {
@@ -221,7 +225,7 @@ export class AccountDoc<T extends NumberType> extends BaseNumberTypeClass<Accoun
   publicKey: string;
   accountNumber: T;
   pubKeyType: string;
-  cosmosAddress: string;
+  cosmosAddress: CosmosAddress;
   ethAddress: string;
   solAddress: string;
   btcAddress: string;
@@ -258,10 +262,10 @@ export class AccountDoc<T extends NumberType> extends BaseNumberTypeClass<Accoun
 export class SocialConnectionInfo<T extends NumberType> extends BaseNumberTypeClass<SocialConnectionInfo<T>> {
   username: string;
   id: string;
-  lastUpdated: T;
+  lastUpdated: UNIXMilliTimestamp<T>;
   discriminator?: string;
 
-  constructor(data: { username: string; id: string; lastUpdated: T; discriminator?: string }) {
+  constructor(data: { username: string; id: string; lastUpdated: UNIXMilliTimestamp<T>; discriminator?: string }) {
     super();
     this.username = data.username;
     this.id = data.id;
@@ -279,6 +283,7 @@ export class SocialConnectionInfo<T extends NumberType> extends BaseNumberTypeCl
 }
 
 /**
+ * @inheritDoc iSocialConnections
  * @category Accounts
  */
 export class SocialConnections<T extends NumberType> extends BaseNumberTypeClass<SocialConnections<T>> implements iSocialConnections<T> {
@@ -305,6 +310,7 @@ export class SocialConnections<T extends NumberType> extends BaseNumberTypeClass
 }
 
 /**
+ * @inheritDoc iNotificationPreferences
  * @category Accounts
  */
 export class NotificationPreferences<T extends NumberType>
@@ -332,6 +338,7 @@ export class NotificationPreferences<T extends NumberType>
 }
 
 /**
+ * @inheritDoc iEmailVerificationStatus
  * @category Accounts
  */
 export class EmailVerificationStatus<T extends NumberType>
@@ -340,7 +347,7 @@ export class EmailVerificationStatus<T extends NumberType>
 {
   verified?: boolean;
   token?: string;
-  expiry?: T;
+  expiry?: UNIXMilliTimestamp<T>;
   antiPhishingCode?: string;
 
   constructor(data: iEmailVerificationStatus<T>) {
@@ -361,9 +368,7 @@ export class EmailVerificationStatus<T extends NumberType>
 }
 
 /**
- * CustomPage is a custom page that can be added to a profile.
- * Custom pages allow you to group, sort, and display badges in a custom way.
- *
+ * @inheritDoc iCustomPage
  * @category Accounts
  */
 export class CustomPage<T extends NumberType> extends BaseNumberTypeClass<CustomPage<T>> implements iCustomPage<T> {
@@ -384,6 +389,7 @@ export class CustomPage<T extends NumberType> extends BaseNumberTypeClass<Custom
 }
 
 /**
+ * @inheritDoc iCustomListPage
  * @category Accounts
  */
 export class CustomListPage extends CustomTypeClass<CustomListPage> implements iCustomListPage {
@@ -400,14 +406,15 @@ export class CustomListPage extends CustomTypeClass<CustomListPage> implements i
 }
 
 /**
+ * @inheritDoc iProfileDoc
  * @category Accounts
  */
 export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<ProfileDoc<T>> implements iProfileDoc<T> {
   _docId: string;
   _id?: string;
   fetchedProfile?: boolean;
-  seenActivity?: T;
-  createdAt?: T;
+  seenActivity?: UNIXMilliTimestamp<T>;
+  createdAt?: UNIXMilliTimestamp<T>;
   discord?: string;
   twitter?: string;
   github?: string;
@@ -475,6 +482,7 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
 }
 
 /**
+ * @inheritDoc iQueueDoc
  * @category Indexer
  */
 export class QueueDoc<T extends NumberType> extends BaseNumberTypeClass<QueueDoc<T>> implements iQueueDoc<T> {
@@ -483,12 +491,12 @@ export class QueueDoc<T extends NumberType> extends BaseNumberTypeClass<QueueDoc
   uri: string;
   collectionId: T;
   loadBalanceId: T;
-  refreshRequestTime: T;
+  refreshRequestTime: UNIXMilliTimestamp<T>;
   numRetries: T;
-  lastFetchedAt?: T;
+  lastFetchedAt?: UNIXMilliTimestamp<T>;
   error?: string;
-  deletedAt?: T;
-  nextFetchTime?: T;
+  deletedAt?: UNIXMilliTimestamp<T>;
+  nextFetchTime?: UNIXMilliTimestamp<T>;
   emailMessage?: string;
   recipientAddress?: string;
   activityDocId?: string;
@@ -523,12 +531,13 @@ export class QueueDoc<T extends NumberType> extends BaseNumberTypeClass<QueueDoc
 }
 
 /**
+ * @inheritDoc iLatestBlockStatus
  * @category Indexer
  */
 export class LatestBlockStatus<T extends NumberType> extends BaseNumberTypeClass<LatestBlockStatus<T>> implements iLatestBlockStatus<T> {
   height: T;
   txIndex: T;
-  timestamp: T;
+  timestamp: UNIXMilliTimestamp<T>;
 
   constructor(data: iLatestBlockStatus<T>) {
     super();
@@ -547,6 +556,7 @@ export class LatestBlockStatus<T extends NumberType> extends BaseNumberTypeClass
 }
 
 /**
+ * @inheritDoc iStatusDoc
  * @category Indexer
  */
 export class StatusDoc<T extends NumberType> extends BaseNumberTypeClass<StatusDoc<T>> implements iStatusDoc<T> {
@@ -579,15 +589,16 @@ export class StatusDoc<T extends NumberType> extends BaseNumberTypeClass<StatusD
 }
 
 /**
+ * @inheritDoc iAddressListDoc
  * @category Address Lists
  */
 export class AddressListDoc<T extends NumberType> extends AddressList implements iAddressListDoc<T>, CustomType<AddressListDoc<T>> {
   _docId: string;
   _id?: string;
-  declare createdBy: string;
+  createdBy: CosmosAddress;
   updateHistory: iUpdateHistory<T>[];
   createdBlock: T;
-  lastUpdated: T;
+  lastUpdated: UNIXMilliTimestamp<T>;
   nsfw?: { reason: string };
   reported?: { reason: string };
   private?: boolean;
@@ -633,19 +644,17 @@ export class AddressListDoc<T extends NumberType> extends AddressList implements
 }
 
 /**
- * BalanceDoc is the type of document stored in the balances database
- * Partitioned database by cosmosAddress (e.g. 1-cosmosx..., 1-cosmosy..., and so on represent the balances documents for collection 1 and user with cosmos address x and y respectively)
- *
+ * @inheritDoc iBalanceDoc
  * @category Balances
  */
 export class BalanceDoc<T extends NumberType> extends BaseNumberTypeClass<BalanceDoc<T>> implements iBalanceDoc<T> {
   _docId: string;
   _id?: string;
   collectionId: T;
-  cosmosAddress: string;
+  cosmosAddress: CosmosAddress;
   onChain: boolean;
   uri?: string;
-  fetchedAt?: T;
+  fetchedAt?: UNIXMilliTimestamp<T>;
   fetchedAtBlock?: T;
   isPermanent?: boolean;
   contentHash?: string;
@@ -691,20 +700,25 @@ export class BalanceDoc<T extends NumberType> extends BaseNumberTypeClass<Balanc
  * @category Interfaces
  */
 export interface iUpdateHistory<T extends NumberType> {
+  /** The transaction hash of the on-chain transaction that updated this. */
   txHash: string;
+  /** The block number of the on-chain transaction that updated this. */
   block: T;
-  blockTimestamp: T;
-  timestamp: T;
+  /** The timestamp of the block of the on-chain transaction that updated this. */
+  blockTimestamp: UNIXMilliTimestamp<T>;
+  /** The indexer's timestamp of the update. This is provided in some cases because the time of indexing may be inconsistent with the time of the block. */
+  timestamp: UNIXMilliTimestamp<T>;
 }
 
 /**
+ * @inheritDoc iUpdateHistory
  * @category Indexer
  */
 export class UpdateHistory<T extends NumberType> extends BaseNumberTypeClass<UpdateHistory<T>> implements iUpdateHistory<T> {
   txHash: string;
   block: T;
-  blockTimestamp: T;
-  timestamp: T;
+  blockTimestamp: UNIXMilliTimestamp<T>;
+  timestamp: UNIXMilliTimestamp<T>;
 
   constructor(data: iUpdateHistory<T>) {
     super();
@@ -724,6 +738,7 @@ export class UpdateHistory<T extends NumberType> extends BaseNumberTypeClass<Upd
 }
 
 /**
+ * @inheritDoc iBalanceDocWithDetails
  * @category Balances
  */
 export class BalanceDocWithDetails<T extends NumberType> extends BaseNumberTypeClass<BalanceDocWithDetails<T>> implements iBalanceDocWithDetails<T> {
@@ -733,10 +748,10 @@ export class BalanceDocWithDetails<T extends NumberType> extends BaseNumberTypeC
   _docId: string;
   _id?: string;
   collectionId: T;
-  cosmosAddress: string;
+  cosmosAddress: CosmosAddress;
   onChain: boolean;
   uri?: string;
-  fetchedAt?: T;
+  fetchedAt?: UNIXMilliTimestamp<T>;
   fetchedAtBlock?: T;
   isPermanent?: boolean;
   contentHash?: string;
@@ -776,13 +791,14 @@ export class BalanceDocWithDetails<T extends NumberType> extends BaseNumberTypeC
 }
 
 /**
+ * @inheritDoc iClaimBuilderDoc
  * @category Indexer
  */
 export class ClaimBuilderDoc<T extends NumberType> extends BaseNumberTypeClass<ClaimBuilderDoc<T>> implements iClaimBuilderDoc<T> {
   _docId: string;
   _id?: string;
   cid: string;
-  createdBy: string;
+  createdBy: CosmosAddress;
   docClaimed: boolean;
   collectionId: T;
   manualDistribution?: boolean;
@@ -819,6 +835,7 @@ export class ClaimBuilderDoc<T extends NumberType> extends BaseNumberTypeClass<C
 }
 
 /**
+ * @inheritDoc iApprovalTrackerDoc
  * @category Approvals / Transferability
  */
 export class ApprovalTrackerDoc<T extends NumberType> extends BaseNumberTypeClass<ApprovalTrackerDoc<T>> implements iApprovalTrackerDoc<T> {
@@ -830,9 +847,9 @@ export class ApprovalTrackerDoc<T extends NumberType> extends BaseNumberTypeClas
   approvalId: string;
   amountTrackerId: string;
   approvalLevel: string;
-  approverAddress: string;
+  approverAddress: CosmosAddress;
   trackerType: string;
-  approvedAddress: string;
+  approvedAddress: CosmosAddress;
 
   constructor(data: iApprovalTrackerDoc<T> & Doc & iAmountTrackerIdDetails<T>) {
     super();
@@ -859,6 +876,7 @@ export class ApprovalTrackerDoc<T extends NumberType> extends BaseNumberTypeClas
 }
 
 /**
+ * @inheritDoc iChallengeTrackerIdDetails
  * @category Approvals / Transferability
  */
 export class ChallengeTrackerIdDetails<T extends NumberType>
@@ -869,7 +887,7 @@ export class ChallengeTrackerIdDetails<T extends NumberType>
   approvalId: string;
   challengeTrackerId: string;
   challengeLevel: 'collection' | 'incoming' | 'outgoing' | '';
-  approverAddress: string;
+  approverAddress: CosmosAddress;
 
   constructor(data: iChallengeTrackerIdDetails<T>) {
     super();
@@ -890,6 +908,7 @@ export class ChallengeTrackerIdDetails<T extends NumberType>
 }
 
 /**
+ * @inheritDoc iMerkleChallengeDoc
  * @category Approvals / Transferability
  */
 export class MerkleChallengeDoc<T extends NumberType> extends BaseNumberTypeClass<MerkleChallengeDoc<T>> implements iMerkleChallengeDoc<T> {
@@ -898,7 +917,7 @@ export class MerkleChallengeDoc<T extends NumberType> extends BaseNumberTypeClas
   collectionId: T;
   challengeTrackerId: string;
   challengeLevel: 'collection' | 'incoming' | 'outgoing' | '';
-  approverAddress: string;
+  approverAddress: CosmosAddress;
   usedLeafIndices: T[];
   approvalId: string;
 
@@ -924,37 +943,7 @@ export class MerkleChallengeDoc<T extends NumberType> extends BaseNumberTypeClas
 }
 
 /**
- * @category Approvals / Transferability
- */
-export class MerklechallengeTrackerIdDetails<T extends NumberType>
-  extends BaseNumberTypeClass<MerklechallengeTrackerIdDetails<T>>
-  implements iMerklechallengeTrackerIdDetails<T>
-{
-  collectionId: T;
-  challengeTrackerId: string;
-  challengeLevel: 'collection' | 'incoming' | 'outgoing' | '';
-  approverAddress: string;
-  usedLeafIndices: T[];
-
-  constructor(data: iMerklechallengeTrackerIdDetails<T>) {
-    super();
-    this.collectionId = data.collectionId;
-    this.challengeTrackerId = data.challengeTrackerId;
-    this.challengeLevel = data.challengeLevel;
-    this.approverAddress = data.approverAddress;
-    this.usedLeafIndices = data.usedLeafIndices;
-  }
-
-  getNumberFieldNames(): string[] {
-    return ['collectionId', 'usedLeafIndices'];
-  }
-
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): MerklechallengeTrackerIdDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as MerklechallengeTrackerIdDetails<U>;
-  }
-}
-
-/**
+ * @inheritDoc iFetchDoc
  * @category Indexer
  */
 export class FetchDoc<T extends NumberType> extends BaseNumberTypeClass<FetchDoc<T>> implements iFetchDoc<T> {
@@ -967,7 +956,7 @@ export class FetchDoc<T extends NumberType> extends BaseNumberTypeClass<FetchDoc
         [cosmosAddressOrListId: string]: BalanceArray<T>;
       }
     | ChallengeDetails<T>;
-  fetchedAt: T;
+  fetchedAt: UNIXMilliTimestamp<T>;
   fetchedAtBlock: T;
   db: 'ApprovalInfo' | 'Metadata' | 'Balances' | 'ChallengeInfo';
   isPermanent: boolean;
@@ -1012,13 +1001,14 @@ export class FetchDoc<T extends NumberType> extends BaseNumberTypeClass<FetchDoc
 }
 
 /**
+ * @inheritDoc iRefreshDoc
  * @category Indexer
  */
 export class RefreshDoc<T extends NumberType> extends BaseNumberTypeClass<RefreshDoc<T>> implements iRefreshDoc<T> {
   _docId: string;
   _id?: string;
   collectionId: T;
-  refreshRequestTime: T;
+  refreshRequestTime: UNIXMilliTimestamp<T>;
 
   constructor(data: iRefreshDoc<T>) {
     super();
@@ -1038,13 +1028,14 @@ export class RefreshDoc<T extends NumberType> extends BaseNumberTypeClass<Refres
 }
 
 /**
+ * @inheritDoc iAirdropDoc
  * @category Indexer
  */
 export class AirdropDoc<T extends NumberType> extends BaseNumberTypeClass<AirdropDoc<T>> implements iAirdropDoc<T> {
   _docId: string;
   _id?: string;
   airdropped: boolean;
-  timestamp: T;
+  timestamp: UNIXMilliTimestamp<T>;
   hash?: string;
 
   constructor(data: iAirdropDoc<T>) {
@@ -1066,6 +1057,7 @@ export class AirdropDoc<T extends NumberType> extends BaseNumberTypeClass<Airdro
 }
 
 /**
+ * @inheritDoc iIPFSTotalsDoc
  * @category Indexer
  */
 export class IPFSTotalsDoc<T extends NumberType> extends BaseNumberTypeClass<IPFSTotalsDoc<T>> implements iIPFSTotalsDoc<T> {
@@ -1090,6 +1082,7 @@ export class IPFSTotalsDoc<T extends NumberType> extends BaseNumberTypeClass<IPF
 }
 
 /**
+ * @inheritDoc iComplianceDoc
  * @category Indexer
  */
 export class ComplianceDoc<T extends NumberType> extends BaseNumberTypeClass<ComplianceDoc<T>> implements iComplianceDoc<T> {
@@ -1104,8 +1097,8 @@ export class ComplianceDoc<T extends NumberType> extends BaseNumberTypeClass<Com
     reported: { listId: string; reason: string }[];
   };
   accounts: {
-    nsfw: { cosmosAddress: string; reason: string }[];
-    reported: { cosmosAddress: string; reason: string }[];
+    nsfw: { cosmosAddress: CosmosAddress; reason: string }[];
+    reported: { cosmosAddress: CosmosAddress; reason: string }[];
   };
 
   constructor(data: iComplianceDoc<T>) {
@@ -1126,6 +1119,7 @@ export class ComplianceDoc<T extends NumberType> extends BaseNumberTypeClass<Com
 }
 
 /**
+ * @inheritDoc iBlockinAuthSignatureDoc
  * @category Blockin
  */
 export class BlockinAuthSignatureDoc<T extends NumberType>
@@ -1138,11 +1132,11 @@ export class BlockinAuthSignatureDoc<T extends NumberType>
   name: string;
   description: string;
   image: string;
-  cosmosAddress: string;
+  cosmosAddress: CosmosAddress;
   params: BlockinChallengeParams<T>;
   secretsProofs: SecretsProof<T>[];
-  createdAt: T;
-  deletedAt?: T;
+  createdAt: UNIXMilliTimestamp<T>;
+  deletedAt?: UNIXMilliTimestamp<T>;
   publicKey?: string;
 
   constructor(data: iBlockinAuthSignatureDoc<T>) {
@@ -1171,6 +1165,7 @@ export class BlockinAuthSignatureDoc<T extends NumberType>
 }
 
 /**
+ * @inheritDoc iSecretDoc
  * @category Off-Chain Secrets
  */
 export class SecretDoc<T extends NumberType> extends BaseNumberTypeClass<SecretDoc<T>> implements iSecretDoc<T> {
@@ -1240,18 +1235,17 @@ export class SecretDoc<T extends NumberType> extends BaseNumberTypeClass<SecretD
 }
 
 /**
- * Follow details specify the number of followers and following for a user, according to the BitBadges multi-chain follow protocol.
- *
+ * @inheritDoc iFollowDetailsDoc
  * @category Protocols
  */
 export class FollowDetailsDoc<T extends NumberType> extends BaseNumberTypeClass<FollowDetailsDoc<T>> implements iFollowDetailsDoc<T> {
   _docId: string;
   _id?: string;
-  cosmosAddress: string;
+  cosmosAddress: CosmosAddress;
   followingCount: T;
   followersCount: T;
-  followers: string[];
-  following: string[];
+  followers: CosmosAddress[];
+  following: CosmosAddress[];
   followingCollectionId: T;
 
   constructor(data: iFollowDetailsDoc<T>) {
@@ -1276,6 +1270,7 @@ export class FollowDetailsDoc<T extends NumberType> extends BaseNumberTypeClass<
 }
 
 /**
+ * @inheritDoc iMapDoc
  * @category Maps
  */
 export class MapDoc<T extends NumberType> extends MapWithValues<T> implements iMapDoc<T> {

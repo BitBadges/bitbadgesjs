@@ -1,3 +1,4 @@
+import { CosmosAddress } from '@/api-indexer';
 import {
   ActionPermission,
   CollectionMetadata,
@@ -27,7 +28,7 @@ import * as maps from '@/proto/maps/tx_pb';
 export interface iValueStore {
   key: string;
   value: string;
-  lastSetBy: string;
+  lastSetBy: CosmosAddress;
 }
 
 /**
@@ -65,7 +66,7 @@ export interface iMapPermissions<T extends NumberType> {
  * @category Interfaces
  */
 export interface iMap<T extends NumberType> {
-  creator: string;
+  creator: CosmosAddress;
   mapId: string;
 
   inheritManagerTimelineFrom: T;
@@ -93,7 +94,7 @@ export interface iMapMetadataTimeline<T extends NumberType> {
  * @category Interfaces
  */
 export interface iMsgCreateMap<T extends NumberType> {
-  creator: string;
+  creator: CosmosAddress;
   mapId: string;
 
   inheritManagerTimelineFrom: T;
@@ -112,7 +113,7 @@ export interface iMsgCreateMap<T extends NumberType> {
  * @category Interfaces
  */
 export interface iMsgUpdateMap<T extends NumberType> {
-  creator: string;
+  creator: CosmosAddress;
   mapId: string;
 
   updateManagerTimeline: boolean;
@@ -129,7 +130,7 @@ export interface iMsgUpdateMap<T extends NumberType> {
  * @category Interfaces
  */
 export interface iMsgDeleteMap {
-  creator: string;
+  creator: CosmosAddress;
   mapId: string;
 }
 
@@ -137,7 +138,7 @@ export interface iMsgDeleteMap {
  * @category Interfaces
  */
 export interface iMsgSetValue {
-  creator: string;
+  creator: CosmosAddress;
   mapId: string;
   key: string;
   value: string;
@@ -157,7 +158,7 @@ export interface iSetOptions {
 export class ValueStore extends CustomTypeClass<ValueStore> implements iValueStore {
   key: string;
   value: string;
-  lastSetBy: string;
+  lastSetBy: CosmosAddress;
 
   constructor(msg: iValueStore) {
     super();
@@ -265,7 +266,7 @@ export class MapMetadataTimeline<T extends NumberType> extends BaseNumberTypeCla
  * @category Maps
  */
 export class Map<T extends NumberType> extends BaseNumberTypeClass<Map<T>> implements iMap<T> {
-  creator: string;
+  creator: CosmosAddress;
   mapId: string;
 
   inheritManagerTimelineFrom: T;
@@ -305,7 +306,7 @@ export class Map<T extends NumberType> extends BaseNumberTypeClass<Map<T>> imple
  * @category Transactions
  */
 export class MsgCreateMap<T extends NumberType> extends BaseNumberTypeClass<MsgCreateMap<T>> implements iMsgCreateMap<T> {
-  creator: string;
+  creator: CosmosAddress;
   mapId: string;
 
   inheritManagerTimelineFrom: T;
@@ -349,7 +350,7 @@ export class MsgCreateMap<T extends NumberType> extends BaseNumberTypeClass<MsgC
  * @category Transactions
  */
 export class MsgUpdateMap<T extends NumberType> extends BaseNumberTypeClass<MsgUpdateMap<T>> implements iMsgUpdateMap<T> {
-  creator: string;
+  creator: CosmosAddress;
   mapId: string;
 
   updateManagerTimeline: boolean;
@@ -390,7 +391,7 @@ export class MsgUpdateMap<T extends NumberType> extends BaseNumberTypeClass<MsgU
  * @category Transactions
  */
 export class MsgDeleteMap extends CustomTypeClass<MsgDeleteMap> implements iMsgDeleteMap {
-  creator: string;
+  creator: CosmosAddress;
   mapId: string;
 
   constructor(msg: iMsgDeleteMap) {
@@ -408,7 +409,7 @@ export class MsgDeleteMap extends CustomTypeClass<MsgDeleteMap> implements iMsgD
  * @category Transactions
  */
 export class MsgSetValue extends CustomTypeClass<MsgSetValue> implements iMsgSetValue {
-  creator: string;
+  creator: CosmosAddress;
   mapId: string;
   key: string;
   value: string;

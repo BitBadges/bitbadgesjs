@@ -130,6 +130,7 @@ import type {
   RefreshStatusRouteSuccessResponse
 } from './requests/collections';
 import { GetMapsRouteRequestBody, GetMapsRouteSuccessResponse, iGetMapsRouteSuccessResponse } from './requests/maps';
+import { NativeAddress } from '..';
 
 /**
  * This is the BitBadgesAPI class which provides all typed API calls to the BitBadges API.
@@ -255,10 +256,10 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    */
   public async getBadgeBalanceByAddress(
     collectionId: NumberType,
-    cosmosAddress: string,
+    address: NativeAddress,
     requestBody?: GetBadgeBalanceByAddressRouteRequestBody
   ): Promise<GetBadgeBalanceByAddressRouteSuccessResponse<T>> {
-    return await BitBadgesCollection.GetBadgeBalanceByAddress(this, collectionId, cosmosAddress, requestBody);
+    return await BitBadgesCollection.GetBadgeBalanceByAddress(this, collectionId, address, requestBody);
   }
 
   /**

@@ -4,6 +4,7 @@ import * as badges from '@/proto/badges/tx_pb';
 import { CustomTypeClass } from '@/common/base';
 import { AddressList } from '@/core/addressLists';
 import type { iMsgCreateAddressLists } from './interfaces';
+import { CosmosAddress } from '@/api-indexer';
 
 /**
  * MsgCreateAddressLists defines address lists on-chain. For off-chain lists, use the API, not this Msg.
@@ -13,7 +14,7 @@ import type { iMsgCreateAddressLists } from './interfaces';
  * @category Transactions
  */
 export class MsgCreateAddressLists extends CustomTypeClass<MsgCreateAddressLists> implements MsgCreateAddressLists {
-  creator: string;
+  creator: CosmosAddress;
   addressLists: AddressList[];
 
   constructor(msg: iMsgCreateAddressLists) {

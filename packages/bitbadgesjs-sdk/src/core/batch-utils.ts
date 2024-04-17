@@ -11,7 +11,9 @@ import { BaseTypedArray } from '@/common/typed-arrays';
  * @category Interfaces
  */
 export interface iBatchBadgeDetails<T extends NumberType> {
+  /** The collection ID of this element's badge details. */
   collectionId: T;
+  /** The corresponding badge IDs for this collection ID. */
   badgeIds: iUintRange<T>[];
 }
 

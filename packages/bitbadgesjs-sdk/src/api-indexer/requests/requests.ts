@@ -9,8 +9,12 @@ import { EmptyResponseClass } from '@/api-indexer/base';
 import { ClaimAlertDoc, TransferActivityDoc } from '@/api-indexer/docs/activity';
 import { SecretDoc, StatusDoc } from '@/api-indexer/docs/docs';
 import type {
+  BlockinMessage,
   ClaimIntegrationPluginType,
+  CosmosAddress,
   IntegrationPluginDetails,
+  NativeAddress,
+  UNIXMilliTimestamp,
   iClaimAlertDoc,
   iCustomListPage,
   iCustomPage,
@@ -46,12 +50,13 @@ export interface GetStatusRouteRequestBody {}
  */
 export interface iGetStatusRouteSuccessResponse<T extends NumberType> {
   /**
-   * Includes status details about the indexer / blockchain.
+   * Status details about the indexer / blockchain.
    */
   status: iStatusDoc<T>;
 }
 
 /**
+ * @inheritDoc iGetStatusRouteSuccessResponse
  * @category API Requests / Responses
  */
 export class GetStatusRouteSuccessResponse<T extends NumberType>
@@ -86,6 +91,7 @@ export interface GetSearchRouteRequestBody {
 }
 
 /**
+ *
  * @category API Requests / Responses
  */
 export interface iGetSearchRouteSuccessResponse<T extends NumberType> {
@@ -98,6 +104,7 @@ export interface iGetSearchRouteSuccessResponse<T extends NumberType> {
   }[];
 }
 /**
+ * @inheritDoc iGetSearchRouteSuccessResponse
  * @category API Requests / Responses
  */
 export class GetSearchRouteSuccessResponse<T extends NumberType>
@@ -131,68 +138,73 @@ export class GetSearchRouteSuccessResponse<T extends NumberType>
 }
 
 /**
- * Type to allow specifying codes and passwords for a merkle challenge.
- *
- * We only support storing codes and passwords for merkle challenges created by BitBadges via IPFS.
- * The IPFS CID of the merkle challenge is used to identify the merkle challenge.
- *
- * Note that we only support storing a set of codes and passwords once per unique CID.
- *
- * @category API Requests / Responses
- */
-export interface CodesAndPasswords {
-  /**
-   * The IPFS CID of the merkle challenge.
-   */
-  cid: string;
-  codes: string[];
-  password: string;
-}
-
-/**
  * @category API Requests / Responses
  */
 export interface GetClaimsRouteRequestBody {
+  /** The claim IDs to fetch. */
   claimIds: string[];
+  /** If the address list is private and viewable with the link only, you must also specify the address list ID to prove knowledge of the link. */
   listId?: string;
 }
 
 /**
- * @category API Requests / Responses
+ * @category Interfaces
  */
-export interface iGetClaimsRouteSuccessResponse<T extends NumberType> {
-  claims: {
-    claimId: string;
-    balancesToSet?: iIncrementedBalances<T>;
-    plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
-    manualDistribution?: boolean;
-  }[];
+export interface iClaimDetails<T extends NumberType> {
+  /** Unique claim ID. */
+  claimId: string;
+  /** The balances to set for the claim. Only used for claims for collections that have off-chain indexed balances and are assigning balances based on the claim. */
+  balancesToSet?: iIncrementedBalances<T>;
+  /** Claim plugins. These are the criteria that must pass for a user to claim the badge. */
+  plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
+  /** If manual distribution is enabled, we do not handle any distribution of claim codes. We leave that up to the claim creator. */
+  manualDistribution?: boolean;
 }
 
 /**
+ * @inheritDoc iClaimDetails
+ * @category API Requests / Responses
+ */
+export class ClaimDetails<T extends NumberType> extends BaseNumberTypeClass<ClaimDetails<T>> implements iClaimDetails<T> {
+  claimId: string;
+  balancesToSet?: IncrementedBalances<T>;
+  plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
+  manualDistribution?: boolean;
+
+  constructor(data: iClaimDetails<T>) {
+    super();
+    this.claimId = data.claimId;
+    this.balancesToSet = data.balancesToSet ? new IncrementedBalances(data.balancesToSet) : undefined;
+    this.plugins = data.plugins;
+    this.manualDistribution = data.manualDistribution;
+  }
+
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): ClaimDetails<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as ClaimDetails<U>;
+  }
+}
+
+/**
+ *
+ * @category API Requests / Responses
+ */
+export interface iGetClaimsRouteSuccessResponse<T extends NumberType> {
+  claims: iClaimDetails<T>[];
+}
+
+/**
+ * @inheritDoc iGetClaimsRouteSuccessResponse
  * @category API Requests / Responses
  */
 export class GetClaimsRouteSuccessResponse<T extends NumberType>
   extends BaseNumberTypeClass<GetClaimsRouteSuccessResponse<T>>
   implements iGetClaimsRouteSuccessResponse<T>
 {
-  claims: {
-    claimId: string;
-    balancesToSet?: IncrementedBalances<T>;
-    plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
-    manualDistribution?: boolean;
-  }[];
+  claims: ClaimDetails<T>[];
 
   constructor(data: iGetClaimsRouteSuccessResponse<T>) {
     super();
-    this.claims = data.claims.map((claim) => {
-      return {
-        claimId: claim.claimId,
-        balancesToSet: claim.balancesToSet ? new IncrementedBalances(claim.balancesToSet) : undefined,
-        plugins: claim.plugins,
-        manualDistribution: claim.manualDistribution
-      };
-    });
+    this.claims = data.claims.map((claim) => new ClaimDetails(claim));
   }
 
   convert<U extends NumberType>(convertFunction: (val: NumberType) => U): GetClaimsRouteSuccessResponse<U> {
@@ -204,7 +216,9 @@ export class GetClaimsRouteSuccessResponse<T extends NumberType>
  * @category API Requests / Responses
  */
 export interface CheckAndCompleteClaimRouteRequestBody {
+  /** The claim body for each unique plugin. */
   [pluginId: string]: any;
+  /** If true, we will only return the user's previous claim codes. */
   prevCodesOnly?: boolean;
 }
 
@@ -212,7 +226,9 @@ export interface CheckAndCompleteClaimRouteRequestBody {
  * @category API Requests / Responses
  */
 export interface iCheckAndCompleteClaimRouteSuccessResponse {
+  /** The new claim code for the user if the claim was successful. */
   code?: string;
+  /** The previous claim codes for the user. */
   prevCodes?: string[];
 }
 
@@ -329,10 +345,10 @@ export interface UpdateAccountInfoRouteRequestBody {
   /**
    * The last seen activity timestamp.
    */
-  seenActivity?: NumberType;
+  seenActivity?: UNIXMilliTimestamp<NumberType>;
 
   /**
-   * The README details.
+   * The README details (markdown supported).
    */
   readme?: string;
 
@@ -373,12 +389,12 @@ export interface UpdateAccountInfoRouteRequestBody {
   username?: string;
 
   /**
-   * The profile picture image file. We will then upload to our CDN.
+   * The profile picture image file to set. We will then upload to our CDN.
    */
   profilePicImageFile?: any;
 
   /**
-   * The notification preferences for the user.
+   * The notification preferences for the user. Will only be returned if user is authenticated with full access.
    */
   notifications?: {
     email?: string;
@@ -387,7 +403,7 @@ export interface UpdateAccountInfoRouteRequestBody {
   };
 
   /**
-   * Approved sign in methods
+   * Approved sign in methods. Only returned if user is authenticated with full access.
    */
   approvedSignInMethods?: {
     discord?: {
@@ -397,6 +413,9 @@ export interface UpdateAccountInfoRouteRequestBody {
     };
   };
 
+  /**
+   * The social connections for the user. Only returned if user is authenticated with full access.
+   */
   socialConntections?: iSocialConnections<NumberType>;
 }
 
@@ -457,6 +476,7 @@ export interface iAddBalancesToOffChainStorageRouteSuccessResponse {
 }
 
 /**
+ * @inheritDoc iAddBalancesToOffChainStorageRouteSuccessResponse
  * @category API Requests / Responses
  */
 export class AddBalancesToOffChainStorageRouteSuccessResponse
@@ -508,6 +528,10 @@ export interface iAddMetadataToIpfsRouteSuccessResponse {
   }[];
 }
 
+/**
+ * @inheritDoc iAddMetadataToIpfsRouteSuccessResponse
+ * @category API Requests / Responses
+ */
 export class AddMetadataToIpfsRouteSuccessResponse
   extends CustomTypeClass<AddMetadataToIpfsRouteSuccessResponse>
   implements iAddMetadataToIpfsRouteSuccessResponse
@@ -566,12 +590,16 @@ export interface iAddApprovalDetailsToOffChainStorageRouteSuccessResponse {
     cid: string;
   };
 
+  /**
+   * The result for the approval challenge details.
+   */
   challengeResult?: {
     cid: string;
   };
 }
 
 /**
+ * @inheritDoc iAddApprovalDetailsToOffChainStorageRouteSuccessResponse
  * @category API Requests / Responses
  */
 export class AddApprovalDetailsToOffChainStorageRouteSuccessResponse
@@ -601,9 +629,9 @@ export interface GetSignInChallengeRouteRequestBody {
   chain: SupportedChain;
 
   /**
-   * The user's blockchain address (their native L1 address).
+   * The user's blockchain address. This can be their native address.
    */
-  address: string;
+  address: NativeAddress;
 
   /**
    * The number of hours to be signed in for.
@@ -628,10 +656,11 @@ export interface iGetSignInChallengeRouteSuccessResponse<T extends NumberType> {
   /**
    * The Blockin challenge message to sign.
    */
-  message: string;
+  message: BlockinMessage;
 }
 
 /**
+ * @inheritDoc iGetSignInChallengeRouteSuccessResponse
  * @category API Requests / Responses
  */
 export class GetSignInChallengeRouteSuccessResponse<T extends NumberType>
@@ -640,7 +669,7 @@ export class GetSignInChallengeRouteSuccessResponse<T extends NumberType>
 {
   nonce: string;
   params: BlockinChallengeParams<T>;
-  message: string;
+  message: BlockinMessage;
 
   constructor(data: iGetSignInChallengeRouteSuccessResponse<T>) {
     super();
@@ -659,9 +688,9 @@ export class GetSignInChallengeRouteSuccessResponse<T extends NumberType>
  */
 export interface VerifySignInRouteRequestBody {
   /**
-   * The original Blockin message
+   * The original Blockin message that was signed.
    */
-  message: string;
+  message: BlockinMessage;
 
   /**
    * The signature of the Blockin message
@@ -669,7 +698,7 @@ export interface VerifySignInRouteRequestBody {
   signature: string;
 
   /**
-   * Required for some chains. The public key of the signer.
+   * Required for some chains (Cosmos) to verify signature. The public key of the signer.
    */
   publicKey?: string;
 }
@@ -701,7 +730,7 @@ export interface iCheckSignInStatusRequestSuccessResponse {
   /**
    * The Blockin message that was signed.
    */
-  message: string;
+  message: BlockinMessage;
 
   /**
    * Signed in with Discord username and discriminator?
@@ -720,15 +749,17 @@ export interface iCheckSignInStatusRequestSuccessResponse {
     username: string;
   };
 
-  // stripe?: {
-  //   id: string;
-  //   username: string;
-  // };
+  /**
+   * Signed in with GitHub username?
+   */
   github?: {
     id: string;
     username: string;
   };
 
+  /**
+   * Signed in with Google username?
+   */
   google?: {
     id: string;
     username: string;
@@ -736,6 +767,7 @@ export interface iCheckSignInStatusRequestSuccessResponse {
 }
 
 /**
+ * @inheritDoc iCheckSignInStatusRequestSuccessResponse
  * @category API Requests / Responses
  */
 export class CheckSignInStatusRequestSuccessResponse
@@ -743,7 +775,7 @@ export class CheckSignInStatusRequestSuccessResponse
   implements iCheckSignInStatusRequestSuccessResponse
 {
   signedIn: boolean;
-  message: string;
+  message: BlockinMessage;
   discord?: {
     username: string;
     discriminator: string;
@@ -777,12 +809,16 @@ export class CheckSignInStatusRequestSuccessResponse
  * @category API Requests / Responses
  */
 export interface SignOutRequestBody {
-  signOutDiscord: boolean;
-  signOutTwitter: boolean;
+  /** Sign out of Blockin, and thus the entire API. */
   signOutBlockin: boolean;
-  signOutGoogle: boolean;
-  signOutGithub: boolean;
-  // signOutStripe: boolean;
+  /** Sign out of Discord. */
+  signOutDiscord?: boolean;
+  /** Sign out of Twitter. */
+  signOutTwitter?: boolean;
+  /** Sign out of Google. */
+  signOutGoogle?: boolean;
+  /** Sign out of GitHub. */
+  signOutGithub?: boolean;
 }
 
 /**
@@ -887,7 +923,6 @@ export type BroadcastTxRouteRequestBody = BroadcastPostBody;
 export interface iBroadcastTxRouteSuccessResponse {
   /**
    * The response from the blockchain for the broadcasted tx.
-   * See Cosmos SDK documentation for what each field means.
    */
   tx_response: {
     code: number;
@@ -897,7 +932,6 @@ export interface iBroadcastTxRouteSuccessResponse {
     gas_wanted: string;
     gas_used: string;
     height: string;
-    Doc: string;
     logs: {
       events: { type: string; attributes: { key: string; value: string; index: boolean }[] }[];
     }[];
@@ -920,7 +954,6 @@ export class BroadcastTxRouteSuccessResponse extends CustomTypeClass<BroadcastTx
     gas_wanted: string;
     gas_used: string;
     height: string;
-    Doc: string;
     logs: {
       events: { type: string; attributes: { key: string; value: string; index: boolean }[] }[];
     }[];
@@ -959,6 +992,10 @@ export interface iSimulateTxRouteSuccessResponse {
   };
 }
 
+/**
+ * @inheritDoc iSimulateTxRouteSuccessResponse
+ * @category API Requests / Responses
+ */
 export class SimulateTxRouteSuccessResponse extends CustomTypeClass<SimulateTxRouteSuccessResponse> implements iSimulateTxRouteSuccessResponse {
   gas_info: { gas_used: string; gas_wanted: string };
   result: {
@@ -988,6 +1025,10 @@ export interface iFetchMetadataDirectlyRouteSuccessResponse<T extends NumberType
   metadata: iMetadata<T>[];
 }
 
+/**
+ * @inheritDoc iFetchMetadataDirectlyRouteSuccessResponse
+ * @category API Requests / Responses
+ */
 export class FetchMetadataDirectlyRouteSuccessResponse<T extends NumberType>
   extends BaseNumberTypeClass<FetchMetadataDirectlyRouteSuccessResponse<T>>
   implements iFetchMetadataDirectlyRouteSuccessResponse<T>
@@ -1066,10 +1107,15 @@ export class GetTokensFromFaucetRouteSuccessResponse
  * @category API Requests / Responses
  */
 export interface SendClaimAlertsRouteRequestBody {
+  /** The claim alerts to send to users. */
   claimAlerts: {
+    /** The collection ID to associate with the claim alert. If specified, you (the sender) must be the manager of the collection. This is typically used
+     * for sending claim codes. Set to 0 for unspecified. */
     collectionId: NumberType;
+    /** The message to send to the user. */
     message?: string;
-    cosmosAddresses: string[];
+    /** The addresses to send the claim alert to. */
+    cosmosAddresses: CosmosAddress[];
   }[];
 }
 
@@ -1084,7 +1130,7 @@ export interface iSendClaimAlertsRouteSuccessResponse {}
 export class SendClaimAlertsRouteSuccessResponse extends EmptyResponseClass {}
 
 /**
- * information returned by the REST API getAccount route.
+ * Information returned by the REST API getAccount route.
  *
  * Note this should be converted into AccountDoc or BitBadgesUserInfo before being returned by the BitBadges API for consistency.
  *
@@ -1096,7 +1142,7 @@ export interface CosmosAccountResponse {
   pub_key: {
     key: string;
   };
-  address: string;
+  address: CosmosAddress;
 }
 
 /**
@@ -1112,13 +1158,13 @@ export interface GenericBlockinVerifyRouteRequestBody extends VerifySignInRouteR
 }
 
 /**
+ * @inheritDoc iVerifySignInRouteSuccessResponse
  * @category API Requests / Responses
  */
 export interface iGenericBlockinVerifyRouteSuccessResponse extends iVerifySignInRouteSuccessResponse {}
 
 /**
- * Generic route to verify any Blockin request. Does not sign you in with the API. Used for custom Blockin integrations.
- *
+ * @inheritDoc iVerifySignInRouteSuccessResponse
  * @category API Requests / Responses
  */
 export class GenericBlockinVerifyRouteSuccessResponse extends VerifySignInRouteSuccessResponse {}
@@ -1127,6 +1173,13 @@ export class GenericBlockinVerifyRouteSuccessResponse extends VerifySignInRouteS
  * @category API Requests / Responses
  */
 export interface CreateSecretRouteRequestBody {
+  /**
+   * Proof of issuance is used for BBS+ signatures (scheme = bbs) only.
+   * BBS+ signatures are signed with a BBS+ key pair, but you would often want the issuer to be a native address.
+   * The prooofOfIssuance establishes a link saying that "I am the issuer of this secret signed with BBS+ key pair ___".
+   *
+   * Fields can be left blank for standard signatures.
+   */
   proofOfIssuance: {
     message: string;
     signature: string;
@@ -1134,18 +1187,38 @@ export interface CreateSecretRouteRequestBody {
     publicKey?: string;
   };
 
+  /** The message format of the secretMessages. */
   messageFormat: 'plaintext' | 'json';
+  /**
+   * The scheme of the secret. BBS+ signatures are supported and can be used where selective disclosure is a requirement.
+   * Otherwise, you can simply use your native blockchain's signature scheme.
+   */
   scheme: 'bbs' | 'standard';
+  /** The type of the secret (e.g. credential). */
   type: string;
+  /**
+   * Thesse are the secrets that are signed.
+   * For BBS+ signatures, there can be >1 secretMessages, and the signer can selectively disclose the secrets.
+   * For standard signatures, there is only 1 secretMessage.
+   */
   secretMessages: string[];
+
+  /**
+   * This is the signature and accompanying details of the secretMessages. The siganture maintains the integrity of the secretMessages.
+   *
+   * This should match the expected scheme. For example, if the scheme is BBS+, the signature should be a BBS+ signature and signer should be a BBS+ public key.
+   */
   dataIntegrityProof: {
     signature: string;
     signer: string;
     publicKey?: string;
   };
 
+  /** Metadata for the secret for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
   name: string;
+  /** Metadata for the secret for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
   image: string;
+  /** Metadata for the secret for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
   description: string;
 }
 
@@ -1153,6 +1226,7 @@ export interface CreateSecretRouteRequestBody {
  * @category API Requests / Responses
  */
 export interface iCreateSecretRouteSuccessResponse {
+  /** The secret ID. This is the ID that is given to the user to query the secret. Anyone with the ID can query it, so keep this safe and secure. */
   secretId: string;
 }
 
@@ -1172,6 +1246,7 @@ export class CreateSecretRouteSuccessResponse extends CustomTypeClass<CreateSecr
  * @category API Requests / Responses
  */
 export interface GetSecretRouteRequestBody {
+  /** The secret ID. This is the ID that is given to the user to query the secret. Anyone with the ID can query it, so keep this safe and secure. */
   secretId: string;
 }
 
@@ -1189,6 +1264,7 @@ export class GetSecretRouteSuccessResponse<T extends NumberType> extends SecretD
  * @category API Requests / Responses
  */
 export interface DeleteSecretRouteRequestBody {
+  /** The secret ID. This is the ID that is given to the user to query the secret. Anyone with the ID can query it, so keep this safe and secure. */
   secretId: string;
 }
 
@@ -1206,18 +1282,29 @@ export class DeleteSecretRouteSuccessResponse extends EmptyResponseClass {}
  * @category API Requests / Responses
  */
 export interface UpdateSecretRouteRequestBody {
+  /** The secret ID. This is the ID that is given to the user to query the secret. Anyone with the ID can query it, so keep this safe and secure. */
   secretId: string;
 
+  /** You can approve specific viewers to view the secret. */
   viewersToSet?: {
-    cosmosAddress: string;
+    cosmosAddress: CosmosAddress;
     delete?: boolean;
   }[];
 
+  /** Blockchain anchors to add to the secret. These are on-chain transactions that can be used to prove stuff about the secret, like
+   * existence at a certain point in time or to maintain data integrity. */
   anchorsToAdd?: {
     txHash?: string;
     message?: string;
   }[];
 
+  /**
+   * Proof of issuance is used for BBS+ signatures (scheme = bbs) only.
+   * BBS+ signatures are signed with a BBS+ key pair, but you would often want the issuer to be a native address.
+   * The prooofOfIssuance establishes a link saying that "I am the issuer of this secret signed with BBS+ key pair ___".
+   *
+   * Fields can be left blank for standard signatures.
+   */
   proofOfIssuance?: {
     message: string;
     signer: string;
@@ -1225,18 +1312,38 @@ export interface UpdateSecretRouteRequestBody {
     publicKey?: string;
   };
 
-  scheme?: 'bbs' | 'standard';
+  /** The message format of the secretMessages. */
   messageFormat?: 'plaintext' | 'json';
+  /**
+   * The scheme of the secret. BBS+ signatures are supported and can be used where selective disclosure is a requirement.
+   * Otherwise, you can simply use your native blockchain's signature scheme.
+   */
+  scheme?: 'bbs' | 'standard';
+  /** The type of the secret (e.g. credential). */
   type?: string;
+  /**
+   * Thesse are the secrets that are signed.
+   * For BBS+ signatures, there can be >1 secretMessages, and the signer can selectively disclose the secrets.
+   * For standard signatures, there is only 1 secretMessage.
+   */
   secretMessages?: string[];
+
+  /**
+   * This is the signature and accompanying details of the secretMessages. The siganture maintains the integrity of the secretMessages.
+   *
+   * This should match the expected scheme. For example, if the scheme is BBS+, the signature should be a BBS+ signature and signer should be a BBS+ public key.
+   */
   dataIntegrityProof?: {
     signature: string;
     signer: string;
     publicKey?: string;
   };
 
+  /** Metadata for the secret for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
   name?: string;
+  /** Metadata for the secret for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
   image?: string;
+  /** Metadata for the secret for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
   description?: string;
 }
 
@@ -1254,14 +1361,24 @@ export class UpdateSecretRouteSuccessResponse extends EmptyResponseClass {}
  * @category API Requests / Responses
  */
 export interface CreateBlockinAuthCodeRouteRequestBody {
+  /** The name of the Blockin auth code for display purposes. */
   name: string;
+  /** The description of the Blockin auth code for display purposes. */
   description: string;
+  /** The image of the Blockin auth code for display purposes. */
   image: string;
 
-  message: string;
+  /** The original Blockin message that was signed. */
+  message: BlockinMessage;
+  /** The signature of the Blockin message */
   signature: string;
+  /** The public key of the signer (if needed). Only certain chains require this. */
   publicKey?: string;
 
+  /**
+   * If required, you can additionally add proof of secrets to the authentication flow.
+   * This proves sensitive information (e.g. GPAs, SAT scores, etc.) without revealing the information itself.
+   */
   secretsProofs?: iSecretsProof<NumberType>[];
 }
 
@@ -1292,7 +1409,9 @@ export class CreateBlockinAuthCodeRouteSuccessResponse
  * @category API Requests / Responses
  */
 export interface GetBlockinAuthCodeRouteRequestBody {
+  /** The ID of the Blockin auth code. */
   id: string;
+  /** We attempt to verify the current status with each request. You can provide additional options for verification here. */
   options?: VerifyChallengeOptions;
 }
 
@@ -1303,14 +1422,14 @@ export class GetBlockinAuthCodeRouteSuccessResponse<T extends NumberType>
   extends BaseNumberTypeClass<GetBlockinAuthCodeRouteSuccessResponse<T>>
   implements iGetBlockinAuthCodeRouteSuccessResponse<T>
 {
-  message: string;
+  message: BlockinMessage;
   signature: string;
   verificationResponse: {
     success: boolean;
     errorMessage?: string;
   };
   params: BlockinChallengeParams<NumberType>;
-  cosmosAddress: string;
+  cosmosAddress: CosmosAddress;
   secretsProofs: SecretsProof<T>[];
 
   constructor(data: iGetBlockinAuthCodeRouteSuccessResponse<T>) {
@@ -1339,7 +1458,7 @@ export interface iGetBlockinAuthCodeRouteSuccessResponse<T extends NumberType> {
   /**
    * The corresponding message that was signed to obtain the signature.
    */
-  message: string;
+  message: BlockinMessage;
   /**
    * The signature of the message.
    */
@@ -1352,7 +1471,7 @@ export interface iGetBlockinAuthCodeRouteSuccessResponse<T extends NumberType> {
    * The converted Cosmos address of params.address. This can be used as the
    * unique identifier for the user (e.g. avoid duplicate sign ins from equivalent 0x and cosmos1 addresses).
    */
-  cosmosAddress: string;
+  cosmosAddress: CosmosAddress;
   /**
    * Verification response
    */
@@ -1394,9 +1513,13 @@ export class DeleteBlockinAuthCodeRouteSuccessResponse extends EmptyResponseClas
  * @category API Requests / Responses
  */
 export interface GenerateAppleWalletPassRouteRequestBody {
+  /** The name to be displayed on the pass. */
   name: string;
+  /** The description to be displayed on the pass. */
   description: string;
-  message: string;
+  /** The Blockin message of the authentication code to create the pass for. */
+  message: BlockinMessage;
+  /** The signature of the Blockin message. */
   signature: string;
 }
 /**
@@ -1427,7 +1550,9 @@ export class GenerateAppleWalletPassRouteSuccessResponse
  * @category API Requests / Responses
  */
 export interface GetClaimAlertsForCollectionRouteRequestBody {
+  /** The collection ID to get claim alerts for. */
   collectionId: NumberType;
+  /** The pagination bookmark obtained from the previous request. Leave blank for the first request. */
   bookmark: string;
 }
 

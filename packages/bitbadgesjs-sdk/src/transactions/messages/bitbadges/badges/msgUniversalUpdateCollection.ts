@@ -19,6 +19,7 @@ import type { NumberType } from '@/common/string-numbers';
 import { Stringify } from '@/common/string-numbers';
 import { Balance, BalanceArray } from '@/core/balances';
 import { UserBalanceStore } from '@/core/userBalances';
+import { CosmosAddress } from '@/api-indexer';
 
 /**
  * MsgUniversalUpdateCollection is a universal transaction that can be used to create / update any collection. It is only executable by the manager.
@@ -41,7 +42,7 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
   extends BaseNumberTypeClass<MsgUniversalUpdateCollection<T>>
   implements iMsgUniversalUpdateCollection<T>
 {
-  creator: string;
+  creator: CosmosAddress;
   collectionId: T;
   balancesType?: string;
   defaultBalances?: UserBalanceStore<T>;

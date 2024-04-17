@@ -1,3 +1,4 @@
+import { CosmosAddress } from '@/api-indexer';
 import { iUpdateHistory } from '@/api-indexer/docs/docs';
 import type { NumberType } from '@/common/string-numbers';
 import { iCosmosCoin } from '@/core/coin';
@@ -71,31 +72,66 @@ export interface iOffChainBalancesMetadata {
  * @category Interfaces
  */
 export interface iSecretsProof<T extends NumberType> {
-  createdBy: string;
-  scheme: 'bbs' | 'standard';
-  messageFormat: 'plaintext' | 'json';
-
-  secretMessages: string[];
+  /** Entropies used for certain data integrity proofs on-chain (e.g. HASH(message + entropy) = on-chain value) */
   entropies?: string[];
 
+  updateHistory?: iUpdateHistory<T>[];
+
+  /** The message format of the secretMessages. */
+  messageFormat: 'plaintext' | 'json';
+  /** The address of the user who created the secret. */
+  createdBy: CosmosAddress;
+
+  /**
+   * Proof of issuance is used for BBS+ signatures (scheme = bbs) only.
+   * BBS+ signatures are signed with a BBS+ key pair, but you would often want the issuer to be a native address.
+   * The prooofOfIssuance establishes a link saying that "I am the issuer of this secret signed with BBS+ key pair ___".
+   *
+   * Fields can be left blank for standard signatures.
+   */
+  proofOfIssuance: {
+    message: string;
+    signature: string;
+    signer: string;
+    publicKey?: string;
+  };
+
+  /**
+   * The scheme of the secret. BBS+ signatures are supported and can be used where selective disclosure is a requirement.
+   * Otherwise, you can simply use your native blockchain's signature scheme.
+   */
+  scheme: 'bbs' | 'standard';
+
+  /**
+   * Thesse are the secrets that are signed.
+   * For BBS+ signatures, there can be >1 secretMessages, and the signer can selectively disclose the secrets.
+   * For standard signatures, there is only 1 secretMessage.
+   */
+  secretMessages: string[];
+
+  /**
+   * This is the signature and accompanying details of the secretMessages. The siganture maintains the integrity of the secretMessages.
+   *
+   * This should match the expected scheme. For example, if the scheme is BBS+, the signature should be a BBS+ signature and signer should be a BBS+ public key.
+   */
   dataIntegrityProof: {
     signature: string;
     signer: string;
     publicKey?: string;
   };
 
-  proofOfIssuance: {
-    message: string;
-    signer: string;
-    signature: string;
-    publicKey?: string;
-  };
-
+  /** Metadata for the secret for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
   name: string;
+  /** Metadata for the secret for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
   image: string;
+  /** Metadata for the secret for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
   description: string;
 
-  updateHistory?: iUpdateHistory<T>[];
+  /**
+   * Anchors are on-chain transactions used to prove certain things
+   * about the secret. For example, you can anchor the secret to a
+   * transaction hash to prove that the secret existed at a certain time.
+   */
   anchors?: {
     txHash?: string;
     message?: string;
@@ -106,9 +142,18 @@ export interface iSecretsProof<T extends NumberType> {
  * @category Interfaces
  */
 export interface iSecret {
-  createdBy: string;
+  /** The message format of the secretMessages. */
   messageFormat: 'plaintext' | 'json';
+  /** The address of the user who created the secret. */
+  createdBy: CosmosAddress;
 
+  /**
+   * Proof of issuance is used for BBS+ signatures (scheme = bbs) only.
+   * BBS+ signatures are signed with a BBS+ key pair, but you would often want the issuer to be a native address.
+   * The prooofOfIssuance establishes a link saying that "I am the issuer of this secret signed with BBS+ key pair ___".
+   *
+   * Fields can be left blank for standard signatures.
+   */
   proofOfIssuance: {
     message: string;
     signature: string;
@@ -116,23 +161,50 @@ export interface iSecret {
     publicKey?: string;
   };
 
+  /** The secret ID. This is the ID that is given to the user to query the secret. Anyone with the ID can query it, so keep this safe and secure. */
   secretId: string;
 
-  type: string;
+  /**
+   * The scheme of the secret. BBS+ signatures are supported and can be used where selective disclosure is a requirement.
+   * Otherwise, you can simply use your native blockchain's signature scheme.
+   */
   scheme: 'bbs' | 'standard';
+  /** The type of the secret (e.g. credential). */
+  type: string;
+  /**
+   * Thesse are the secrets that are signed.
+   * For BBS+ signatures, there can be >1 secretMessages, and the signer can selectively disclose the secrets.
+   * For standard signatures, there is only 1 secretMessage.
+   */
   secretMessages: string[];
 
+  /**
+   * This is the signature and accompanying details of the secretMessages. The siganture maintains the integrity of the secretMessages.
+   *
+   * This should match the expected scheme. For example, if the scheme is BBS+, the signature should be a BBS+ signature and signer should be a BBS+ public key.
+   */
   dataIntegrityProof: {
     signature: string;
     signer: string;
     publicKey?: string;
   };
 
+  /** Metadata for the secret for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
   name: string;
+  /** Metadata for the secret for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
   image: string;
+  /** Metadata for the secret for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
   description: string;
 
+  /**
+   * Viewers for query purposes. These are the addresses that can query the secret.
+   */
   viewers: string[];
+  /**
+   * Anchors are on-chain transactions used to prove certain things
+   * about the secret. For example, you can anchor the secret to a
+   * transaction hash to prove that the secret existed at a certain time.
+   */
   anchors: {
     txHash?: string;
     message?: string;
@@ -244,7 +316,7 @@ export interface iAddressList {
   listId: string;
 
   /**
-   * The addresses of the address list.
+   * The addresses of the address list. If this is a tracker list, the addresses are the tracker IDs.
    */
   addresses: string[];
 
@@ -266,12 +338,12 @@ export interface iAddressList {
   /**
    * The address that created the address list.
    */
-  createdBy?: string;
+  createdBy?: CosmosAddress;
 
   /**
    * The alias cosmos address of the address list.
    */
-  aliasAddress?: string;
+  aliasAddress?: CosmosAddress;
 }
 
 /**
@@ -281,12 +353,12 @@ export interface iTransfer<T extends NumberType> {
   /**
    * The address to transfer from.
    */
-  from: string;
+  from: CosmosAddress;
 
   /**
    * The addresses to transfer to.
    */
-  toAddresses: string[];
+  toAddresses: CosmosAddress[];
 
   /**
    * The balances to transfer.
@@ -341,7 +413,7 @@ export interface iApprovalIdentifierDetails {
   /**
    * The address of the approval to check. If approvalLevel is "collection", this is blank "".
    */
-  approverAddress: string;
+  approverAddress: CosmosAddress;
 }
 
 /**
@@ -351,7 +423,7 @@ export interface iCoinTransfer<T extends NumberType> {
   /**
    * The recipient of the coin transfer. This should be a Bech32 Cosmos address.
    */
-  to: string;
+  to: CosmosAddress;
   /**
    * The coins
    */
@@ -385,7 +457,7 @@ export interface iAmountTrackerIdDetails<T extends NumberType> {
   /**
    * The address of the approval to check.
    */
-  approverAddress: string;
+  approverAddress: CosmosAddress;
 
   /**
    * The type of tracker to check "overall", "to", "from", or "initiatedBy".
@@ -395,7 +467,7 @@ export interface iAmountTrackerIdDetails<T extends NumberType> {
   /**
    * The address to check for the approval.
    */
-  approvedAddress: string;
+  approvedAddress: CosmosAddress;
 }
 
 /**
@@ -485,7 +557,7 @@ export interface iManagerTimeline<T extends NumberType> extends iTimelineItem<T>
   /**
    * The manager of the collection.
    */
-  manager: string;
+  manager: CosmosAddress;
 }
 
 /**

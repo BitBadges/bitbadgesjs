@@ -45,6 +45,7 @@ export interface iBadgeMetadataDetails<T extends NumberType> {
 }
 
 /**
+ * @inheritDoc iBadgeMetadataDetails
  * @category Collections
  */
 export class BadgeMetadataDetails<T extends NumberType> extends BaseNumberTypeClass<BadgeMetadataDetails<T>> implements iBadgeMetadataDetails<T> {

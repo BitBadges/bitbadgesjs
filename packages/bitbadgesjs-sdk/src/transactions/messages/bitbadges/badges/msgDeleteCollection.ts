@@ -4,6 +4,7 @@ import { Stringify } from '@/common/string-numbers';
 import * as badges from '@/proto/badges/tx_pb';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 import type { iMsgDeleteCollection } from './interfaces';
+import { CosmosAddress } from '@/api-indexer';
 
 /**
  * MsgDeleteCollection represents the message for deleting a collection. Once deleted, the collection cannot be recovered.
@@ -14,7 +15,7 @@ import type { iMsgDeleteCollection } from './interfaces';
  * @category Transactions
  */
 export class MsgDeleteCollection<T extends NumberType> extends BaseNumberTypeClass<MsgDeleteCollection<T>> implements iMsgDeleteCollection<T> {
-  creator: string;
+  creator: CosmosAddress;
   collectionId: T;
 
   constructor(msg: iMsgDeleteCollection<T>) {

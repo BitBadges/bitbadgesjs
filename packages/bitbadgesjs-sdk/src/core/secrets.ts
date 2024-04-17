@@ -1,12 +1,12 @@
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, CustomTypeClass } from '@/common/base';
 import { iSecret, iSecretsProof } from '@/interfaces/badges/core';
-import { NumberType, UpdateHistory } from '..';
+import { CosmosAddress, NumberType, UpdateHistory } from '..';
 
 /**
  * @category Off-Chain Secrets
  */
 export class SecretsProof<T extends NumberType> extends BaseNumberTypeClass<SecretsProof<T>> implements iSecretsProof<T> {
-  createdBy: string;
+  createdBy: CosmosAddress;
   scheme: 'bbs' | 'standard';
   messageFormat: 'plaintext' | 'json';
 
@@ -65,7 +65,7 @@ export class SecretsProof<T extends NumberType> extends BaseNumberTypeClass<Secr
  * @category Off-Chain Secrets
  */
 export class Secret extends CustomTypeClass<Secret> implements iSecret {
-  createdBy: string;
+  createdBy: CosmosAddress;
 
   proofOfIssuance: {
     message: string;

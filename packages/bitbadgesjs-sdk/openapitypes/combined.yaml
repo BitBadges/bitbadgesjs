@@ -22,7 +22,7 @@ components:
         chain:
           type: string
         collectionId:
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         assetIds:
           items:
             anyOf:
@@ -33,6 +33,11 @@ components:
           items:
             $ref: '#/components/schemas/iUintRange'
           type: array
+          examples: &ref_24
+            - - start: '1713301889'
+                end: '2000000000'
+            - - start: '1'
+                end: '18446744073709551615'
         mustOwnAmounts:
           $ref: '#/components/schemas/iUintRange'
         additionalCriteria:
@@ -70,6 +75,18 @@ components:
         - $ref: '#/components/schemas/AndGroup'
         - $ref: '#/components/schemas/OrGroup'
         - $ref: '#/components/schemas/OwnershipRequirements'
+      examples:
+        - $and:
+            - assets:
+                - chain: BitBadges
+                  collectionId: '1'
+                  assetIds:
+                    - start: '1'
+                      end: '1'
+                  mustOwnAmounts:
+                    start: '1'
+                    end: '1'
+                  ownershipTimes: []
     OwnershipRequirements:
       properties:
         assets:
@@ -79,7 +96,7 @@ components:
         options:
           properties:
             numMatchesForVerification:
-              $ref: '#components/schemas/NumberType'
+              $ref: '#/components/schemas/NumberType'
           additionalProperties: false
           type: object
       required:
@@ -90,12 +107,18 @@ components:
       properties:
         domain:
           type: string
+          examples: &ref_0
+            - https://example.com
+            - ipfs://Qm...
         statement:
           type: string
         address:
           type: string
         uri:
           type: string
+          examples: &ref_1
+            - https://example.com
+            - ipfs://Qm...
         nonce:
           type: string
         version:
@@ -104,15 +127,34 @@ components:
           type: string
         issuedAt:
           type: string
+          examples: &ref_2
+            - '2022-01-01T00:00:00Z'
         expirationDate:
           type: string
+          examples: &ref_3
+            - '2022-01-01T00:00:00Z'
         notBefore:
           type: string
+          examples: &ref_4
+            - '2022-01-01T00:00:00Z'
         resources:
           items:
             type: string
           type: array
+          examples: &ref_5
+            - - 'Full Access: Full access to all features.'
         assetOwnershipRequirements:
+          examples: &ref_6
+            - assets:
+                - chain: BitBadges
+                  collectionId: '1'
+                  assetIds:
+                    - start: '1'
+                      end: '1'
+                  mustOwnAmounts:
+                    start: '1'
+                    end: '1'
+                  ownershipTimes: []
           $ref: '#/components/schemas/AssetConditionGroup'
       required:
         - domain
@@ -128,12 +170,14 @@ components:
           properties:
             domain:
               type: string
+              examples: *ref_0
             statement:
               type: string
             address:
               type: string
             uri:
               type: string
+              examples: *ref_1
             nonce:
               type: string
             version:
@@ -142,16 +186,21 @@ components:
               type: string
             issuedAt:
               type: string
+              examples: *ref_2
             expirationDate:
               type: string
+              examples: *ref_3
             notBefore:
               type: string
+              examples: *ref_4
             resources:
               items:
                 type: string
               type: array
+              examples: *ref_5
             assetOwnershipRequirements:
               $ref: '#/components/schemas/AssetConditionGroup'
+              examples: *ref_6
           additionalProperties: false
           description: >-
             Optionally define the expected details to check. If the challenge
@@ -186,6 +235,8 @@ components:
             if you want to verify a challenge that was issued within the last
             minute, you can specify this to be 1 minute ago.
           type: string
+          examples:
+            - '2022-01-01T00:00:00Z'
         issuedAtTimeWindowMs:
           description: >-
             If set, we will verify the issuedAt is within this amount of ms ago
@@ -204,12 +255,11 @@ components:
           description: A unique stringified document ID
           type: string
         _id:
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
       required:
         - _docId
       additionalProperties: false
-      description: Fields for the MongoDB database document
       type: object
     ErrorResponse:
       properties:
@@ -217,6 +267,7 @@ components:
           description: >-
             Serialized error object for debugging purposes. Technical users can
             use this to debug issues.
+          type: string
         errorMessage:
           description: >-
             UX-friendly error message that can be displayed to the user. Always
@@ -242,8 +293,12 @@ components:
     PaginationInfo:
       properties:
         bookmark:
+          description: >-
+            The bookmark for the next page of results. Obtained from previous
+            response.
           type: string
         hasMore:
+          description: Whether there are more results to fetch.
           type: boolean
       required:
         - bookmark
@@ -254,13 +309,24 @@ components:
     iUpdateHistory:
       properties:
         txHash:
+          description: The transaction hash of the on-chain transaction that updated this.
           type: string
+          examples: &ref_7
+            - CE22D7...
         block:
-          $ref: '#components/schemas/NumberType'
+          description: The block number of the on-chain transaction that updated this.
+          $ref: '#/components/schemas/NumberType'
         blockTimestamp:
-          $ref: '#components/schemas/NumberType'
+          description: >-
+            The timestamp of the block of the on-chain transaction that updated
+            this.
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
         timestamp:
-          $ref: '#components/schemas/NumberType'
+          description: >-
+            The indexer's timestamp of the update. This is provided in some
+            cases because the time of indexing may be inconsistent with the time
+            of the block.
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
       required:
         - txHash
         - block
@@ -284,6 +350,48 @@ components:
         - function
       additionalProperties: false
       type: object
+    UNIXMilliTimestamp:
+      description: >-
+        Numeric timestamp - value is equal to the milliseconds since the UNIX
+        epoch.
+      examples:
+        - '1713301889'
+    CosmosAddress:
+      description: >-
+        All supported addresses map to a Bech32 Cosmos address which is used by
+        the BitBadges blockchain behind the scenes.
+
+        For conversion, see the BitBadges documentation. If this type is used,
+        we must always convert to a Cosmos address before using it.
+      type: string
+      examples:
+        - cosmos1...
+    BlockinMessage:
+      description: >-
+        BlockinMessage is the sign-in challenge strint to be signed by the user.
+        It extends EIP 4361 Sign-In with Ethereum
+
+        and adds additional fields for cross-chain compatibility and native
+        asset ownership verification.
+
+
+        For example, 'https://bitbadges.io wants you to sign in with your
+        Ethereum address ...'
+      type: string
+      examples:
+        - https://bitbadges.io wants you to sign in with your Cosmos address....
+    NativeAddress:
+      description: >-
+        A native address is an address that is native to the user's chain. For
+        example, an Ethereum address is native to Ethereum (0x...).
+
+        If this type is used, we support any native address type. We do not
+        require conversion to a Cosmos address like the CosmosAddress type.
+      type: string
+      examples:
+        - 0x...
+        - bc1...
+        - cosmos1...
     iSocialConnections:
       properties:
         discord:
@@ -295,7 +403,7 @@ components:
             discriminator:
               type: string
             lastUpdated:
-              $ref: '#components/schemas/NumberType'
+              $ref: '#/components/schemas/UNIXMilliTimestamp'
           required:
             - username
             - id
@@ -309,7 +417,7 @@ components:
             id:
               type: string
             lastUpdated:
-              $ref: '#components/schemas/NumberType'
+              $ref: '#/components/schemas/UNIXMilliTimestamp'
           required:
             - username
             - id
@@ -323,7 +431,7 @@ components:
             id:
               type: string
             lastUpdated:
-              $ref: '#components/schemas/NumberType'
+              $ref: '#/components/schemas/UNIXMilliTimestamp'
           required:
             - username
             - id
@@ -337,7 +445,7 @@ components:
             id:
               type: string
             lastUpdated:
-              $ref: '#components/schemas/NumberType'
+              $ref: '#/components/schemas/UNIXMilliTimestamp'
           required:
             - username
             - id
@@ -345,12 +453,22 @@ components:
           additionalProperties: false
           type: object
       additionalProperties: false
+      description: >-
+        Social connections are tracked for each user to provide an enhanced
+        experience.
+
+        These are kept private from other users or sites using the API.
+
+        Currently, there is no use for these, but they may be used in the
+        future.
       type: object
     iNotificationPreferences:
       properties:
         email:
+          description: The email to receive push notifications.
           type: string
         emailVerification:
+          description: The verification status of the email.
           $ref: '#/components/schemas/iEmailVerificationStatus'
         preferences:
           properties:
@@ -361,20 +479,33 @@ components:
             claimAlerts:
               type: boolean
           additionalProperties: false
+          description: >-
+            The preferences for the notifications. What type of notifications
+            does the user want to receive?
           type: object
       additionalProperties: false
+      description: Details about the user's push notification preferences.
       type: object
     iEmailVerificationStatus:
       properties:
         verified:
+          description: Whether or not the email has been verified.
           type: boolean
         token:
+          description: >-
+            The email verification token. This is used for verification and
+            unsubscription.
           type: string
         expiry:
-          $ref: '#components/schemas/NumberType'
+          description: The expiry of the token for verification purposes.
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
         antiPhishingCode:
+          description: >-
+            A unique code that we will send with all emails to verify that
+            BitBadges is the one sending the email.
           type: string
       additionalProperties: false
+      description: The verification status of the user's email.
       type: object
     iActivityDoc:
       properties:
@@ -382,14 +513,14 @@ components:
           description: A unique stringified document ID
           type: string
         _id:
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         timestamp:
-          description: The timestamp  of the activity.
-          $ref: '#components/schemas/NumberType'
+          description: The timestamp of the activity.
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
         block:
           description: The block number of the activity.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         _notificationsHandled:
           description: >-
             Whether or not the notifications have been handled by the indexer or
@@ -400,7 +531,7 @@ components:
         - timestamp
         - block
       additionalProperties: false
-      description: Fields for the MongoDB database document
+      description: The base document interface for all acitivity types.
       type: object
     iReviewDoc:
       properties:
@@ -408,14 +539,14 @@ components:
           description: A unique stringified document ID
           type: string
         _id:
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         timestamp:
-          description: The timestamp  of the activity.
-          $ref: '#components/schemas/NumberType'
+          description: The timestamp of the activity.
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
         block:
           description: The block number of the activity.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         _notificationsHandled:
           description: >-
             Whether or not the notifications have been handled by the indexer or
@@ -426,20 +557,20 @@ components:
           type: string
         stars:
           description: The number of stars given (1-5).
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         from:
-          description: The cosmos address of the user who gave the review.
-          type: string
+          description: The user who gave the review.
+          $ref: '#/components/schemas/CosmosAddress'
         collectionId:
           description: >-
             The collection ID of the collection that was reviewed. Only
             applicable to collection reviews.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         reviewedAddress:
           description: >-
-            The cosmos address of the user who the review is for. Only
+            The Cosmos address of the user who the review is for. Only
             applicable to user reviews.
-          type: string
+          $ref: '#/components/schemas/CosmosAddress'
       required:
         - _docId
         - timestamp
@@ -448,7 +579,7 @@ components:
         - stars
         - from
       additionalProperties: false
-      description: Fields for the MongoDB database document
+      description: ''
       type: object
     iTransferActivityDoc:
       properties:
@@ -456,14 +587,14 @@ components:
           description: A unique stringified document ID
           type: string
         _id:
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         timestamp:
-          description: The timestamp  of the activity.
-          $ref: '#components/schemas/NumberType'
+          description: The timestamp of the activity.
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
         block:
           description: The block number of the activity.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         _notificationsHandled:
           description: >-
             Whether or not the notifications have been handled by the indexer or
@@ -471,45 +602,46 @@ components:
           type: boolean
         to:
           items:
-            type: string
-          description: The list of cosmos addresses that were involved in the activity.
+            $ref: '#/components/schemas/CosmosAddress'
+          description: The list of recipients.
           type: array
         from:
-          description: The list of cosmos addresses that were involved in the activity.
-          type: string
+          description: The sender of the badges.
+          $ref: '#/components/schemas/CosmosAddress'
         balances:
           items:
             $ref: '#/components/schemas/iBalance'
           description: The list of balances and badge IDs that were transferred.
           type: array
         collectionId:
-          description: The collection ID of the collection that was transferred.
-          $ref: '#components/schemas/NumberType'
+          description: The collection ID for the badges that was transferred.
+          $ref: '#/components/schemas/NumberType'
         memo:
           description: The memo of the transfer.
           type: string
         precalculateBalancesFromApproval:
+          description: Which approval to use to precalculate the balances?
           $ref: '#/components/schemas/iApprovalIdentifierDetails'
-          description: Which approval to use to precalculate the balances.
         prioritizedApprovals:
           items:
             $ref: '#/components/schemas/iApprovalIdentifierDetails'
-          description: The prioritized approvals of the transfer.
+          description: >-
+            The prioritized approvals of the transfer. This is used to check
+            certain approvals before others to ensure intended behavior.
           type: array
         onlyCheckPrioritizedApprovals:
-          description: Whether or not to only check prioritized approvals.
+          description: >-
+            Whether or not to only check prioritized approvals? If false, we
+            will still check all approvals but prioritize the prioritized
+            approvals.
           type: boolean
-        zkProofSolutions:
-          items:
-            $ref: '#/components/schemas/iZkProofSolution'
-          description: The ZK proofs for the transfer.
-          type: array
         initiatedBy:
-          description: The cosmos address of the user who initiated the activity.
-          type: string
+          description: The user who initiated the transfer transaction.
+          $ref: '#/components/schemas/CosmosAddress'
         txHash:
           description: The transaction hash of the activity.
           type: string
+          examples: *ref_7
       required:
         - _docId
         - timestamp
@@ -520,7 +652,7 @@ components:
         - collectionId
         - initiatedBy
       additionalProperties: false
-      description: Fields for the MongoDB database document
+      description: ''
       type: object
     iListActivityDoc:
       properties:
@@ -528,42 +660,46 @@ components:
           description: A unique stringified document ID
           type: string
         _id:
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         timestamp:
-          description: The timestamp  of the activity.
-          $ref: '#components/schemas/NumberType'
+          description: The timestamp of the activity.
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
         block:
           description: The block number of the activity.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         _notificationsHandled:
           description: >-
             Whether or not the notifications have been handled by the indexer or
             not.
           type: boolean
         listId:
-          description: The list ID of the list.
+          description: The list ID.
           type: string
+          examples: &ref_10
+            - customOrReservedListId
+            - Mint
+            - All
+            - cosmos1...
         addedToList:
-          description: >-
-            Whether or not the address is included in the list. Note that this
-            could mean added to an whitelist or a blacklist
+          description: Whether or not the address was added to the list or removed.
           type: boolean
         addresses:
           items:
-            type: string
+            $ref: '#/components/schemas/CosmosAddress'
           description: The list of addresses that were added or removed from the list.
           type: array
         txHash:
           description: The transaction hash of the activity.
           type: string
+          examples: *ref_7
       required:
         - _docId
         - timestamp
         - block
         - listId
       additionalProperties: false
-      description: Fields for the MongoDB database document
+      description: ''
       type: object
     iClaimAlertDoc:
       properties:
@@ -571,14 +707,14 @@ components:
           description: A unique stringified document ID
           type: string
         _id:
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         timestamp:
-          description: The timestamp  of the activity.
-          $ref: '#components/schemas/NumberType'
+          description: The timestamp of the activity.
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
         block:
           description: The block number of the activity.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         _notificationsHandled:
           description: >-
             Whether or not the notifications have been handled by the indexer or
@@ -587,17 +723,14 @@ components:
         from:
           description: The sender
           type: string
-        code:
-          description: The code of the claim alert.
-          type: string
         cosmosAddresses:
           items:
-            type: string
+            $ref: '#/components/schemas/CosmosAddress'
           description: The cosmos addresses of the users that have been alerted.
           type: array
         collectionId:
           description: The collection ID of the claim alert.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         message:
           description: The message of the claim alert.
           type: string
@@ -609,7 +742,7 @@ components:
         - cosmosAddresses
         - collectionId
       additionalProperties: false
-      description: Fields for the MongoDB database document
+      description: ''
       type: object
     iCollectionDoc:
       properties:
@@ -617,11 +750,11 @@ components:
           description: A unique stringified document ID
           type: string
         _id:
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         collectionId:
           description: The collection ID
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         collectionMetadataTimeline:
           items:
             $ref: '#/components/schemas/iCollectionMetadataTimeline'
@@ -674,15 +807,15 @@ components:
           type: array
         createdBy:
           description: The cosmos address of the user who created this collection
-          type: string
+          $ref: '#/components/schemas/CosmosAddress'
         createdBlock:
           description: The block number when this collection was created
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         createdTimestamp:
           description: >-
             The timestamp when this collection was created (milliseconds since
             epoch)
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
         updateHistory:
           items:
             $ref: '#/components/schemas/iUpdateHistory'
@@ -690,7 +823,7 @@ components:
           type: array
         aliasAddress:
           description: The alias cosmos address for the collection
-          type: string
+          $ref: '#/components/schemas/CosmosAddress'
       required:
         - _docId
         - collectionId
@@ -709,7 +842,7 @@ components:
         - updateHistory
         - aliasAddress
       additionalProperties: false
-      description: Fields for the MongoDB database document
+      description: ''
       type: object
     iAccountDoc:
       properties:
@@ -717,35 +850,45 @@ components:
           description: A unique stringified document ID
           type: string
         _id:
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         publicKey:
           description: The public key of the account
           type: string
+          examples: &ref_12
+            - AksB.... (base64)
         accountNumber:
           description: The account number of the account
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         pubKeyType:
           description: The public key type of the account
           type: string
         cosmosAddress:
           description: The Cosmos address of the account
-          type: string
+          examples: &ref_11
+            - cosmos1...
+          $ref: '#/components/schemas/CosmosAddress'
         ethAddress:
           description: The Eth address of the account
           type: string
+          examples: &ref_17
+            - 0x...
         solAddress:
           description: The Solana address of the account
           type: string
+          examples: &ref_9
+            - 6H2af6...
         btcAddress:
           description: The Bitcoin address of the account
           type: string
+          examples: &ref_18
+            - bc1...
         sequence:
           description: The sequence of the account
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         balance:
-          $ref: '#/components/schemas/iCosmosCoin'
           description: The balance of the account
+          $ref: '#/components/schemas/iCosmosCoin'
       required:
         - _docId
         - publicKey
@@ -756,14 +899,22 @@ components:
         - solAddress
         - btcAddress
       additionalProperties: false
-      description: Fields for the MongoDB database document
+      description: ''
       type: object
     iCustomLink:
       properties:
+        title:
+          description: Title of the link
+          type: string
         url:
+          description: URL of the link
           type: string
         image:
+          description: Description of the link
           type: string
+          examples: &ref_13
+            - https://example.com/image.png
+            - ipfs://Qm...
       required:
         - title
         - url
@@ -774,10 +925,14 @@ components:
     iCustomPage:
       properties:
         description:
+          description: The description of the custom page
           type: string
+          examples: &ref_8
+            - Brief description.
         items:
           items:
             $ref: '#/components/schemas/iBatchBadgeDetails'
+          description: The badge IDs to display on the custom page
           type: array
       required:
         - title
@@ -788,10 +943,13 @@ components:
     iCustomListPage:
       properties:
         description:
+          description: The description of the custom list page
           type: string
+          examples: *ref_8
         items:
           items:
             type: string
+          description: The list IDs to display on the custom list page
           type: array
       required:
         - title
@@ -808,7 +966,7 @@ components:
           description: A unique stringified document ID
           type: string
         _id:
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         fetchedProfile:
           description: Whether we have already fetched the profile or not
@@ -817,12 +975,12 @@ components:
           description: >-
             The timestamp of the last activity seen for this account
             (milliseconds since epoch)
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
         createdAt:
           description: >-
             The timestamp of when this account was created (milliseconds since
             epoch)
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
         discord:
           description: The Discord username of the account
           type: string
@@ -888,23 +1046,27 @@ components:
         profilePicUrl:
           description: The profile picture URL of the account
           type: string
+          examples: &ref_19
+            - https://example.com
+            - ipfs://Qm...
         username:
           description: The username of the account
           type: string
         latestSignedInChain:
-          $ref: '#/components/schemas/SupportedChain'
           description: The latest chain the user signed in with
+          $ref: '#/components/schemas/SupportedChain'
         solAddress:
           description: >-
             The Solana address of the profile, if applicable (bc we need it to
             convert)
           type: string
+          examples: *ref_9
         notifications:
-          $ref: '#/components/schemas/iNotificationPreferences'
           description: The notifications of the account
+          $ref: '#/components/schemas/iNotificationPreferences'
         socialConnections:
-          $ref: '#/components/schemas/iSocialConnections'
           description: Social connections stored for the account
+          $ref: '#/components/schemas/iSocialConnections'
         approvedSignInMethods:
           properties:
             discord:
@@ -926,7 +1088,7 @@ components:
       required:
         - _docId
       additionalProperties: false
-      description: Fields for the MongoDB database document
+      description: ''
       type: object
     iQueueDoc:
       properties:
@@ -934,36 +1096,37 @@ components:
           description: A unique stringified document ID
           type: string
         _id:
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         uri:
           description: >-
             The URI of the metadata to be fetched. If {id} is present, it will
             be replaced with each individual ID in badgeIds
           type: string
+          examples: *ref_1
         collectionId:
           description: The collection ID of the metadata to be fetched
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         loadBalanceId:
           description: >-
             The load balance ID of the metadata to be fetched. Only the node
             with the same load balance ID will fetch this metadata
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         refreshRequestTime:
           description: >-
             The timestamp of when this metadata was requested to be refreshed
             (milliseconds since epoch)
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
         numRetries:
           description: >-
             The number of times this metadata has been tried to be fetched but
             failed
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         lastFetchedAt:
           description: >-
             The timestamp of when this metadata was last fetched (milliseconds
             since epoch)
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
         error:
           description: The error message if this metadata failed to be fetched
           type: string
@@ -971,12 +1134,12 @@ components:
           description: >-
             The timestamp of when this document was deleted (milliseconds since
             epoch)
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
         nextFetchTime:
           description: >-
             The timestamp of when this document should be fetched next
             (milliseconds since epoch)
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
         emailMessage:
           type: string
         recipientAddress:
@@ -993,7 +1156,7 @@ components:
         - refreshRequestTime
         - numRetries
       additionalProperties: false
-      description: Fields for the MongoDB database document
+      description: ''
       type: object
     iIndexerStatus:
       properties:
@@ -1007,13 +1170,13 @@ components:
       properties:
         height:
           description: The height of the latest block
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         txIndex:
           description: The transaction index of the latest block
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         timestamp:
           description: The timestamp of the latest block (milliseconds since epoch)
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
       required:
         - height
         - txIndex
@@ -1026,25 +1189,25 @@ components:
           description: A unique stringified document ID
           type: string
         _id:
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         block:
-          $ref: '#/components/schemas/iLatestBlockStatus'
           description: The latest synced block status (i.e. height, txIndex, timestamp)
+          $ref: '#/components/schemas/iLatestBlockStatus'
         nextCollectionId:
           description: The next collection ID to be used
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         gasPrice:
           description: The current gas price based on the average of the lastXGasAmounts
           type: number
         lastXGasAmounts:
           items:
-            $ref: '#components/schemas/NumberType'
+            $ref: '#/components/schemas/NumberType'
           description: The last X gas prices
           type: array
         lastXGasLimits:
           items:
-            $ref: '#components/schemas/NumberType'
+            $ref: '#/components/schemas/NumberType'
           description: The last X gas limits
           type: array
       required:
@@ -1055,7 +1218,7 @@ components:
         - lastXGasAmounts
         - lastXGasLimits
       additionalProperties: false
-      description: Fields for the MongoDB database document
+      description: ''
       type: object
     iAddressListEditKey:
       properties:
@@ -1064,7 +1227,8 @@ components:
           type: string
         expirationDate:
           description: The expiration date of the key (milliseconds since epoch)
-          $ref: '#components/schemas/NumberType'
+          examples: *ref_3
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
         mustSignIn:
           description: True if the user can only add their signed in address to the list
           type: boolean
@@ -1078,10 +1242,13 @@ components:
         listId:
           description: The ID of the address list.
           type: string
+          examples: *ref_10
         addresses:
           items:
             type: string
-          description: The addresses of the address list.
+          description: >-
+            The addresses of the address list. If this is a tracker list, the
+            addresses are the tracker IDs.
           type: array
         whitelist:
           description: >-
@@ -1091,20 +1258,21 @@ components:
         uri:
           description: The URI where to fetch the address list metadata from.
           type: string
+          examples: *ref_1
         customData:
           description: Arbitrary custom data that can be stored on-chain.
           type: string
         createdBy:
           description: The address that created the address list.
-          type: string
+          $ref: '#/components/schemas/CosmosAddress'
         aliasAddress:
           description: The alias cosmos address of the address list.
-          type: string
+          $ref: '#/components/schemas/CosmosAddress'
         _docId:
           description: A unique stringified document ID
           type: string
         _id:
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         updateHistory:
           items:
@@ -1113,12 +1281,12 @@ components:
           type: array
         createdBlock:
           description: The block number when this list was created
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         lastUpdated:
           description: >-
             The timestamp of when this list was last updated (milliseconds since
             epoch)
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
         nsfw:
           properties:
             reason:
@@ -1154,7 +1322,7 @@ components:
         - createdBlock
         - lastUpdated
       additionalProperties: false
-      description: Fields for the MongoDB database document
+      description: ''
       type: object
     iBalanceDoc:
       properties:
@@ -1174,8 +1342,8 @@ components:
           description: The user's outgoing approvals.
           type: array
         userPermissions:
-          $ref: '#/components/schemas/iUserPermissions'
           description: The user's permissions.
+          $ref: '#/components/schemas/iUserPermissions'
         autoApproveSelfInitiatedOutgoingTransfers:
           description: >-
             Whether the user's self-initiated outgoing transfers are
@@ -1192,31 +1360,33 @@ components:
           description: A unique stringified document ID
           type: string
         _id:
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         collectionId:
           description: The collection ID
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         cosmosAddress:
           description: The Cosmos address of the user
-          type: string
+          examples: *ref_11
+          $ref: '#/components/schemas/CosmosAddress'
         onChain:
           description: True if the balances are on-chain
           type: boolean
         uri:
           description: The URI of the off-chain balances
           type: string
+          examples: *ref_1
         fetchedAt:
           description: >-
             The timestamp of when the off-chain balances were fetched
             (milliseconds since epoch). For BitBadges indexer, we only populate
             this for Mint and Total docs.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
         fetchedAtBlock:
           description: >-
             The block number of when the off-chain balances were fetched. For
             BitBadges indexer, we only populate this for Mint and Total docs.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         isPermanent:
           description: True if the off-chain balances are using permanent storage
           type: boolean
@@ -1248,9 +1418,6 @@ components:
 
         This includes their balances, incoming approvals, outgoing approvals,
         and permissions.
-
-
-        Fields for the MongoDB database document
       type: object
     ClaimIntegrationPluginType:
       enum:
@@ -1274,20 +1441,20 @@ components:
           description: A unique stringified document ID
           type: string
         _id:
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         cid:
           description: The CID of the password document
           type: string
         createdBy:
           description: The cosmos address of the user who created this password
-          type: string
+          $ref: '#/components/schemas/CosmosAddress'
         docClaimed:
           description: True if the password document is claimed by the collection
           type: boolean
         collectionId:
           description: The collection ID of the password document
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         plugins:
           items: {}
           description: Dynamic checks to run in the form of plugins
@@ -1313,6 +1480,7 @@ components:
               $ref: '#/components/schemas/iIncrementedBalances'
             listId:
               type: string
+              examples: *ref_10
           additionalProperties: false
           description: Details for the action to perform if the criteria is correct
           type: object
@@ -1326,13 +1494,13 @@ components:
         - state
         - action
       additionalProperties: false
-      description: Fields for the MongoDB database document
+      description: ''
       type: object
     iApprovalTrackerDoc:
       properties:
         collectionId:
           description: The collection ID for the approval.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         approvalId:
           description: The approval ID
           type: string
@@ -1344,9 +1512,13 @@ components:
             The approval level of the approval "collection", "incoming", or
             "outgoing".
           type: string
+          examples: &ref_32
+            - collection
+            - incoming
+            - outgoing
         approverAddress:
           description: The address of the approval to check.
-          type: string
+          $ref: '#/components/schemas/CosmosAddress'
         trackerType:
           description: >-
             The type of tracker to check "overall", "to", "from", or
@@ -1354,16 +1526,16 @@ components:
           type: string
         approvedAddress:
           description: The address to check for the approval.
-          type: string
+          $ref: '#/components/schemas/CosmosAddress'
         _docId:
           description: A unique stringified document ID
           type: string
         _id:
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         numTransfers:
           description: The number of transfers. Is an incrementing tally.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         amounts:
           items:
             $ref: '#/components/schemas/iBalance'
@@ -1381,13 +1553,13 @@ components:
         - numTransfers
         - amounts
       additionalProperties: false
-      description: Fields for the MongoDB database document
+      description: ''
       type: object
     iChallengeTrackerIdDetails:
       properties:
         collectionId:
           description: The collection ID
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         approvalId:
           description: The approval ID
           type: string
@@ -1404,7 +1576,7 @@ components:
           type: string
         approverAddress:
           description: The approver address (leave blank if challengeLevel = "collection")
-          type: string
+          $ref: '#/components/schemas/CosmosAddress'
       required:
         - collectionId
         - approvalId
@@ -1419,11 +1591,11 @@ components:
           description: A unique stringified document ID
           type: string
         _id:
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         collectionId:
           description: The collection ID
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         challengeTrackerId:
           description: The challenge ID
           type: string
@@ -1440,10 +1612,10 @@ components:
           type: string
         approverAddress:
           description: The approver address (leave blank if challengeLevel = "collection")
-          type: string
+          $ref: '#/components/schemas/CosmosAddress'
         usedLeafIndices:
           items:
-            $ref: '#components/schemas/NumberType'
+            $ref: '#/components/schemas/NumberType'
           description: >-
             The used leaf indices for each challenge. A leaf index is the leaf
             location in the bottommost layer of the Merkle tree
@@ -1457,13 +1629,13 @@ components:
         - approverAddress
         - usedLeafIndices
       additionalProperties: false
-      description: Fields for the MongoDB database document
+      description: ''
       type: object
     iMerklechallengeTrackerIdDetails:
       properties:
         collectionId:
           description: The collection ID
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         challengeTrackerId:
           description: The challenge ID
           type: string
@@ -1477,10 +1649,10 @@ components:
           type: string
         approverAddress:
           description: The approver address (leave blank if challengeLevel = "collection")
-          type: string
+          $ref: '#/components/schemas/CosmosAddress'
         usedLeafIndices:
           items:
-            $ref: '#components/schemas/NumberType'
+            $ref: '#/components/schemas/NumberType'
           description: >-
             The used leaf indices for each challenge. A leaf index is the leaf
             location in the bottommost layer of the Merkle tree
@@ -1499,7 +1671,7 @@ components:
           description: A unique stringified document ID
           type: string
         _id:
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         content:
           anyOf:
@@ -1512,10 +1684,10 @@ components:
             BALANCES_DB and not here to avoid double storage.
         fetchedAt:
           description: The time the document was fetched
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
         fetchedAtBlock:
           description: The block the document was fetched
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         db:
           enum:
             - ApprovalInfo
@@ -1536,7 +1708,7 @@ components:
         - db
         - isPermanent
       additionalProperties: false
-      description: Fields for the MongoDB database document
+      description: ''
       type: object
     iRefreshDoc:
       properties:
@@ -1544,20 +1716,20 @@ components:
           description: A unique stringified document ID
           type: string
         _id:
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         collectionId:
           description: The collection ID
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         refreshRequestTime:
           description: The time the refresh was requested (Unix timestamp in milliseconds)
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
       required:
         - _docId
         - collectionId
         - refreshRequestTime
       additionalProperties: false
-      description: Fields for the MongoDB database document
+      description: ''
       type: object
     iAirdropDoc:
       properties:
@@ -1565,7 +1737,7 @@ components:
           description: A unique stringified document ID
           type: string
         _id:
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         airdropped:
           description: True if the airdrop has been completed
@@ -1574,7 +1746,7 @@ components:
           description: >-
             The timestamp of when the airdrop was completed (milliseconds since
             epoch)
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
         hash:
           description: The hash of the airdrop transaction
           type: string
@@ -1583,7 +1755,7 @@ components:
         - airdropped
         - timestamp
       additionalProperties: false
-      description: Fields for the MongoDB database document
+      description: ''
       type: object
     iIPFSTotalsDoc:
       properties:
@@ -1591,16 +1763,16 @@ components:
           description: A unique stringified document ID
           type: string
         _id:
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         bytesUploaded:
           description: The total bytes uploaded
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
       required:
         - _docId
         - bytesUploaded
       additionalProperties: false
-      description: Fields for the MongoDB database document
+      description: ''
       type: object
     iComplianceDoc:
       properties:
@@ -1608,7 +1780,7 @@ components:
           description: A unique stringified document ID
           type: string
         _id:
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         badges:
           properties:
@@ -1632,6 +1804,7 @@ components:
                 properties:
                   listId:
                     type: string
+                    examples: *ref_10
                   reason:
                     type: string
                 required:
@@ -1645,6 +1818,7 @@ components:
                 properties:
                   listId:
                     type: string
+                    examples: *ref_10
                   reason:
                     type: string
                 required:
@@ -1664,7 +1838,8 @@ components:
               items:
                 properties:
                   cosmosAddress:
-                    type: string
+                    $ref: '#/components/schemas/CosmosAddress'
+                    examples: *ref_11
                   reason:
                     type: string
                 required:
@@ -1677,7 +1852,8 @@ components:
               items:
                 properties:
                   cosmosAddress:
-                    type: string
+                    $ref: '#/components/schemas/CosmosAddress'
+                    examples: *ref_11
                   reason:
                     type: string
                 required:
@@ -1697,7 +1873,7 @@ components:
         - addressLists
         - accounts
       additionalProperties: false
-      description: Fields for the MongoDB database document
+      description: ''
       type: object
     iBlockinAuthSignatureDoc:
       properties:
@@ -1705,30 +1881,59 @@ components:
           description: A unique stringified document ID
           type: string
         _id:
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         signature:
+          description: >-
+            The signature of the Blockin message with the Blockin params as the
+            params field
           type: string
+          examples: &ref_14
+            - 0x...
+            - 8d42172...
         publicKey:
+          description: >-
+            The public key for the signed. Only needed for certain chains
+            (Cosmos).
           type: string
+          examples: *ref_12
         name:
           type: string
+          examples: &ref_16
+            - Name
         description:
           type: string
+          examples: *ref_8
         image:
           type: string
+          examples: *ref_13
         cosmosAddress:
-          type: string
+          description: The Cosmos address of the signer
+          examples: *ref_11
+          $ref: '#/components/schemas/CosmosAddress'
         params:
+          description: >-
+            The sign-in params. These are all the details in the message that
+            was signed.
           $ref: '#/components/schemas/ChallengeParams'
         secretsProofs:
           items:
             $ref: '#/components/schemas/iSecretsProof'
+          description: >-
+            If required, you can additionally attach proof of secrets ot the
+            auth flow. These can be used to prove sensitive information to
+            verifiers.
           type: array
         createdAt:
-          $ref: '#components/schemas/NumberType'
+          description: >-
+            The timestamp of when the signature was created (milliseconds since
+            epoch)
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
         deletedAt:
-          $ref: '#components/schemas/NumberType'
+          description: >-
+            If deleted, we still store temporarily for a period of time. We use
+            a deletedAt timestamp to determine when to delete.
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
       required:
         - _docId
         - signature
@@ -1740,7 +1945,7 @@ components:
         - secretsProofs
         - createdAt
       additionalProperties: false
-      description: Fields for the MongoDB database document
+      description: ''
       type: object
     iSecretDoc:
       properties:
@@ -1748,76 +1953,147 @@ components:
           description: A unique stringified document ID
           type: string
         _id:
-          description: A uniuqe document ID (Mongo DB ObjectID)
-          type: string
-        createdBy:
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         messageFormat:
           enum:
             - plaintext
             - json
+          description: The message format of the secretMessages.
           type: string
+        createdBy:
+          description: The address of the user who created the secret.
+          $ref: '#/components/schemas/CosmosAddress'
         proofOfIssuance:
           properties:
             message:
               type: string
             signature:
               type: string
+              examples: *ref_14
             signer:
               type: string
+              examples: &ref_15
+                - 0x...
+                - 8d42172...
             publicKey:
               type: string
+              examples: *ref_12
           required:
             - message
             - signature
             - signer
           additionalProperties: false
+          description: >-
+            Proof of issuance is used for BBS+ signatures (scheme = bbs) only.
+
+            BBS+ signatures are signed with a BBS+ key pair, but you would often
+            want the issuer to be a native address.
+
+            The prooofOfIssuance establishes a link saying that "I am the issuer
+            of this secret signed with BBS+ key pair ___".
+
+
+            Fields can be left blank for standard signatures.
           type: object
         secretId:
-          type: string
-        type:
+          description: >-
+            The secret ID. This is the ID that is given to the user to query the
+            secret. Anyone with the ID can query it, so keep this safe and
+            secure.
           type: string
         scheme:
           enum:
             - bbs
             - standard
+          description: >-
+            The scheme of the secret. BBS+ signatures are supported and can be
+            used where selective disclosure is a requirement.
+
+            Otherwise, you can simply use your native blockchain's signature
+            scheme.
+          type: string
+        type:
+          description: The type of the secret (e.g. credential).
           type: string
         secretMessages:
           items:
             type: string
+          description: >-
+            Thesse are the secrets that are signed.
+
+            For BBS+ signatures, there can be >1 secretMessages, and the signer
+            can selectively disclose the secrets.
+
+            For standard signatures, there is only 1 secretMessage.
           type: array
+          examples: &ref_23
+            - - secret message 1
+              - secret message 2
         dataIntegrityProof:
           properties:
             signature:
               type: string
+              examples: *ref_14
             signer:
               type: string
+              examples: *ref_15
             publicKey:
               type: string
+              examples: *ref_12
           required:
             - signature
             - signer
           additionalProperties: false
+          description: >-
+            This is the signature and accompanying details of the
+            secretMessages. The siganture maintains the integrity of the
+            secretMessages.
+
+
+            This should match the expected scheme. For example, if the scheme is
+            BBS+, the signature should be a BBS+ signature and signer should be
+            a BBS+ public key.
           type: object
         name:
+          description: >-
+            Metadata for the secret for display purposes. Note this should not
+            contain anything sensitive. It may be displayed to verifiers.
           type: string
+          examples: *ref_16
         image:
+          description: >-
+            Metadata for the secret for display purposes. Note this should not
+            contain anything sensitive. It may be displayed to verifiers.
           type: string
+          examples: *ref_13
         description:
+          description: >-
+            Metadata for the secret for display purposes. Note this should not
+            contain anything sensitive. It may be displayed to verifiers.
           type: string
+          examples: *ref_8
         viewers:
           items:
             type: string
+          description: >-
+            Viewers for query purposes. These are the addresses that can query
+            the secret.
           type: array
         anchors:
           items:
             properties:
               txHash:
                 type: string
+                examples: *ref_7
               message:
                 type: string
             additionalProperties: false
             type: object
+          description: |-
+            Anchors are on-chain transactions used to prove certain things
+            about the secret. For example, you can anchor the secret to a
+            transaction hash to prove that the secret existed at a certain time.
           type: array
         updateHistory:
           items:
@@ -1825,12 +2101,12 @@ components:
           type: array
       required:
         - _docId
-        - createdBy
         - messageFormat
+        - createdBy
         - proofOfIssuance
         - secretId
-        - type
         - scheme
+        - type
         - secretMessages
         - dataIntegrityProof
         - name
@@ -1840,7 +2116,7 @@ components:
         - anchors
         - updateHistory
       additionalProperties: false
-      description: Fields for the MongoDB database document
+      description: ''
       type: object
     iFollowDetailsDoc:
       properties:
@@ -1848,30 +2124,31 @@ components:
           description: A unique stringified document ID
           type: string
         _id:
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         cosmosAddress:
           description: The Cosmos address of the user
-          type: string
+          examples: *ref_11
+          $ref: '#/components/schemas/CosmosAddress'
         followingCount:
           description: The number of users that the user is following
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         followersCount:
           description: The number of users that are following the user
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         followers:
           items:
-            type: string
+            $ref: '#/components/schemas/CosmosAddress'
           description: The followers of the user
           type: array
         following:
           items:
-            type: string
+            $ref: '#/components/schemas/CosmosAddress'
           description: The following of the user
           type: array
         followingCollectionId:
           description: The collection ID of the following collection
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
       required:
         - _docId
         - cosmosAddress
@@ -1881,7 +2158,7 @@ components:
         - following
         - followingCollectionId
       additionalProperties: false
-      description: Fields for the MongoDB database document
+      description: ''
       type: object
     iMapDoc:
       properties:
@@ -1889,14 +2166,14 @@ components:
           description: A unique stringified document ID
           type: string
         _id:
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         creator:
           type: string
         mapId:
           type: string
         inheritManagerTimelineFrom:
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         managerTimeline:
           items:
             $ref: '#/components/schemas/iManagerTimeline'
@@ -1916,12 +2193,17 @@ components:
         values:
           additionalProperties:
             $ref: '#/components/schemas/iValueStore'
+          description: The (key, value) pairs for the maps that are set.
           type: object
         metadata:
+          description: The fetched metadata for the map (if any).
           $ref: '#/components/schemas/iMetadata'
         updateHistory:
           items:
             $ref: '#/components/schemas/iUpdateHistory'
+          description: >-
+            The update history for the map. Maps are maintained through
+            blockchain transactions.
           type: array
       required:
         - _docId
@@ -1937,7 +2219,7 @@ components:
         - values
         - updateHistory
       additionalProperties: false
-      description: Fields for the MongoDB database document
+      description: ''
       type: object
     iBadgeMetadataDetails:
       properties:
@@ -1945,18 +2227,22 @@ components:
           description: >-
             The metadata ID for the fetched URI. Metadata IDs map an ID to each
             unique URI. See BitBadges Docs for more information.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         badgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The badge IDs that correspond to the metadata
           type: array
+          examples: &ref_22
+            - - start: '1'
+                end: '10'
         metadata:
-          $ref: '#/components/schemas/iMetadata'
           description: The metadata fetched by the URI
+          $ref: '#/components/schemas/iMetadata'
         uri:
           description: The URI that the metadata was fetched from
           type: string
+          examples: *ref_1
         customData:
           description: Custom data
           type: string
@@ -1975,24 +2261,24 @@ components:
         name:
           description: The name of the badge or badge collection.
           type: string
+          examples: *ref_16
         description:
-          description: The description of the badge or badge collection.
+          description: The description of the badge or badge collection. Supports markdown.
           type: string
+          examples: *ref_8
         image:
           description: The image of the badge or badge collection.
           type: string
+          examples: *ref_13
         video:
           description: >-
             The video of the badge or badge collection. If a standard video is
             used, this should be a link to the video. We will use image as the
             poster image. If a youtube video is used, we embed it as an iframe.
           type: string
-        creator:
-          description: The creator of the badge or badge collection.
-          type: string
-        color:
-          description: The color of the badge or badge collection.
-          type: string
+          examples:
+            - https://www.youtube.com/embed/VIDEO_ID
+            - https://example.com/video.mp4
         category:
           description: >-
             The category of the badge or badge collection (e.g. "Education",
@@ -2033,6 +2319,7 @@ components:
                 type: string
               name:
                 type: string
+                examples: *ref_16
               value:
                 anyOf:
                   - type: string
@@ -2047,10 +2334,10 @@ components:
           type: array
         fetchedAtBlock:
           description: The block the metadata was fetched at.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         fetchedAt:
           description: The time the metadata was fetched.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
         _isUpdating:
           description: Whether the metadata is currently being updated.
           type: boolean
@@ -2065,10 +2352,13 @@ components:
         listId:
           description: The ID of the address list.
           type: string
+          examples: *ref_10
         addresses:
           items:
             type: string
-          description: The addresses of the address list.
+          description: >-
+            The addresses of the address list. If this is a tracker list, the
+            addresses are the tracker IDs.
           type: array
         whitelist:
           description: >-
@@ -2078,20 +2368,21 @@ components:
         uri:
           description: The URI where to fetch the address list metadata from.
           type: string
+          examples: *ref_1
         customData:
           description: Arbitrary custom data that can be stored on-chain.
           type: string
         createdBy:
           description: The address that created the address list.
-          type: string
+          $ref: '#/components/schemas/CosmosAddress'
         aliasAddress:
           description: The alias cosmos address of the address list.
-          type: string
+          $ref: '#/components/schemas/CosmosAddress'
         _docId:
           description: A unique stringified document ID
           type: string
         _id:
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         updateHistory:
           items:
@@ -2100,12 +2391,12 @@ components:
           type: array
         createdBlock:
           description: The block number when this list was created
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         lastUpdated:
           description: >-
             The timestamp of when this list was last updated (milliseconds since
             epoch)
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
         nsfw:
           properties:
             reason:
@@ -2131,8 +2422,8 @@ components:
           description: True if this list is viewable if queried by the list ID directly
           type: boolean
         metadata:
-          $ref: '#/components/schemas/iMetadata'
           description: The metadata of the address list.
+          $ref: '#/components/schemas/iMetadata'
         listsActivity:
           items:
             $ref: '#/components/schemas/iListActivityDoc'
@@ -2164,12 +2455,14 @@ components:
                 type: string
               plugins:
                 items: {}
+                description: Plugins are the criteria for the claim.
                 type: array
             required:
               - claimId
               - plugins
             additionalProperties: false
             type: object
+          description: The claims of the address list.
           type: array
       required:
         - listId
@@ -2185,7 +2478,7 @@ components:
         - views
         - claims
       additionalProperties: false
-      description: Fields for the MongoDB database document
+      description: ''
       type: object
     GetAddressListsRouteRequestBody:
       properties:
@@ -2194,15 +2487,20 @@ components:
             properties:
               listId:
                 type: string
+                examples: *ref_10
               viewsToFetch:
                 items:
                   properties:
                     viewId:
                       type: string
+                      examples: &ref_20
+                        - viewKey
                     viewType:
                       enum:
                         - listActivity
                       type: string
+                      examples: &ref_21
+                        - viewKey
                     bookmark:
                       type: string
                   required:
@@ -2213,6 +2511,10 @@ components:
                   type: object
                 type: array
               fetchPrivateParams:
+                description: >-
+                  Certain views and details are private. If you are the creator
+                  of the list, you can fetch these details. By default, we do
+                  not fetch them.
                 type: boolean
             required:
               - listId
@@ -2244,6 +2546,16 @@ components:
               - $ref: '#/components/schemas/iAddressList'
               - properties:
                   private:
+                    description: Private lists will not show up in any search results.
+                    type: boolean
+                  viewableWithLink:
+                    description: >-
+                      If the list is viewable with a link, anyone with the lisst
+                      ID can view details. Only applicable if private = true as
+                      well.
+
+                      If not viewable with a link, only the creator can view the
+                      list.
                     type: boolean
                   claims:
                     items:
@@ -2258,17 +2570,14 @@ components:
                         - plugins
                       additionalProperties: false
                       type: object
+                    description: >-
+                      The claims of the address list. Use resetState on updates
+                      for resetting individual plugin state (if applicable).
                     type: array
-                  viewableWithLink:
-                    type: boolean
                 required:
                   - claims
                 additionalProperties: false
                 type: object
-          description: |-
-            New address lists to update.
-            Requester must be creator of the lists.
-            Only applicable to off-chain balances.
           type: array
       required:
         - addressLists
@@ -2285,6 +2594,16 @@ components:
               - $ref: '#/components/schemas/iAddressList'
               - properties:
                   private:
+                    description: Private lists will not show up in any search results.
+                    type: boolean
+                  viewableWithLink:
+                    description: >-
+                      If the list is viewable with a link, anyone with the lisst
+                      ID can view details. Only applicable if private = true as
+                      well.
+
+                      If not viewable with a link, only the creator can view the
+                      list.
                     type: boolean
                   claims:
                     items:
@@ -2299,17 +2618,14 @@ components:
                         - plugins
                       additionalProperties: false
                       type: object
+                    description: >-
+                      The claims of the address list. Use resetState on updates
+                      for resetting individual plugin state (if applicable).
                     type: array
-                  viewableWithLink:
-                    type: boolean
                 required:
                   - claims
                 additionalProperties: false
                 type: object
-          description: |-
-            New address lists to update.
-            Requester must be creator of the lists.
-            Only applicable to off-chain balances.
           type: array
       required:
         - addressLists
@@ -2338,8 +2654,36 @@ components:
           description: A unique stringified document ID
           type: string
         _id:
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
+        publicKey:
+          description: The public key of the account
+          type: string
+          examples: *ref_12
+        accountNumber:
+          description: The account number of the account
+          $ref: '#/components/schemas/NumberType'
+        pubKeyType:
+          description: The public key type of the account
+          type: string
+        cosmosAddress:
+          description: The Cosmos address of the account
+          examples: *ref_11
+          $ref: '#/components/schemas/CosmosAddress'
+        ethAddress:
+          description: The Eth address of the account
+          type: string
+          examples: *ref_17
+        btcAddress:
+          description: The Bitcoin address of the account
+          type: string
+          examples: *ref_18
+        sequence:
+          description: The sequence of the account
+          $ref: '#/components/schemas/NumberType'
+        balance:
+          description: The balance of the account
+          $ref: '#/components/schemas/iCosmosCoin'
         fetchedProfile:
           description: Whether we have already fetched the profile or not
           type: boolean
@@ -2347,12 +2691,12 @@ components:
           description: >-
             The timestamp of the last activity seen for this account
             (milliseconds since epoch)
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
         createdAt:
           description: >-
             The timestamp of when this account was created (milliseconds since
             epoch)
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
         discord:
           description: The Discord username of the account
           type: string
@@ -2399,30 +2743,6 @@ components:
           additionalProperties: false
           description: The custom pages of the account
           type: object
-        publicKey:
-          description: The public key of the account
-          type: string
-        accountNumber:
-          description: The account number of the account
-          $ref: '#components/schemas/NumberType'
-        pubKeyType:
-          description: The public key type of the account
-          type: string
-        cosmosAddress:
-          description: The Cosmos address of the account
-          type: string
-        ethAddress:
-          description: The Eth address of the account
-          type: string
-        btcAddress:
-          description: The Bitcoin address of the account
-          type: string
-        sequence:
-          description: The sequence of the account
-          $ref: '#components/schemas/NumberType'
-        balance:
-          $ref: '#/components/schemas/iCosmosCoin'
-          description: The balance of the account
         watchlists:
           properties:
             badges:
@@ -2442,18 +2762,19 @@ components:
         profilePicUrl:
           description: The profile picture URL of the account
           type: string
+          examples: *ref_19
         username:
           description: The username of the account
           type: string
         latestSignedInChain:
-          $ref: '#/components/schemas/SupportedChain'
           description: The latest chain the user signed in with
+          $ref: '#/components/schemas/SupportedChain'
         notifications:
-          $ref: '#/components/schemas/iNotificationPreferences'
           description: The notifications of the account
+          $ref: '#/components/schemas/iNotificationPreferences'
         socialConnections:
-          $ref: '#/components/schemas/iSocialConnections'
           description: Social connections stored for the account
+          $ref: '#/components/schemas/iSocialConnections'
         approvedSignInMethods:
           properties:
             discord:
@@ -2481,9 +2802,10 @@ components:
         solAddress:
           description: The Solana address of the account.
           type: string
+          examples: *ref_9
         chain:
-          $ref: '#/components/schemas/SupportedChain'
           description: The chain of the account.
+          $ref: '#/components/schemas/SupportedChain'
         airdropped:
           description: Indicates whether the account has claimed their airdrop.
           type: boolean
@@ -2559,13 +2881,13 @@ components:
             needed. To be used in conjunction with views.
           type: array
         reservedMap:
-          $ref: '#/components/schemas/iMapDoc'
           description: >-
             The reserved map for the account. This is created and managed
             on-chain through the x/maps module.
+          $ref: '#/components/schemas/iMapDoc'
         address:
           description: The native address of the account
-          type: string
+          $ref: '#/components/schemas/NativeAddress'
         nsfw:
           additionalProperties:
             type: string
@@ -2605,9 +2927,10 @@ components:
         alias:
           properties:
             collectionId:
-              $ref: '#components/schemas/NumberType'
+              $ref: '#/components/schemas/NumberType'
             listId:
               type: string
+              examples: *ref_10
           additionalProperties: false
           description: The alias for the account.
           type: object
@@ -2634,7 +2957,7 @@ components:
         - address
         - views
       additionalProperties: false
-      description: Fields for the MongoDB database document
+      description: ''
       type: object
     AccountViewKey:
       enum:
@@ -2658,8 +2981,14 @@ components:
     AccountFetchDetails:
       properties:
         address:
+          description: >-
+            The address of the user. This can be their native address. Only one
+            of address or username should be specified.
           type: string
         username:
+          description: >-
+            The username of the user. Only one of address or username should be
+            specified.
           type: string
         fetchSequence:
           description: If true, we will fetch the sequence from the blockchain.
@@ -2678,9 +3007,11 @@ components:
                   Unique view ID. Used for pagination. All fetches w/ same ID
                   should be made with same criteria.
                 type: string
+                examples: *ref_20
               viewType:
                 $ref: '#/components/schemas/AccountViewKey'
                 description: The base view type to fetch.
+                examples: *ref_21
               specificCollections:
                 items:
                   $ref: '#/components/schemas/iBatchBadgeDetails'
@@ -2758,6 +3089,7 @@ components:
       properties:
         cosmosAddress:
           type: string
+          examples: *ref_11
         followingBookmark:
           type: string
         followersBookmark:
@@ -2776,30 +3108,31 @@ components:
           description: A unique stringified document ID
           type: string
         _id:
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         cosmosAddress:
           description: The Cosmos address of the user
-          type: string
+          examples: *ref_11
+          $ref: '#/components/schemas/CosmosAddress'
         followingCount:
           description: The number of users that the user is following
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         followersCount:
           description: The number of users that are following the user
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         followers:
           items:
-            type: string
+            $ref: '#/components/schemas/CosmosAddress'
           description: The followers of the user
           type: array
         following:
           items:
-            type: string
+            $ref: '#/components/schemas/CosmosAddress'
           description: The following of the user
           type: array
         followingCollectionId:
           description: The collection ID of the following collection
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         followersPagination:
           $ref: '#/components/schemas/PaginationInfo'
         followingPagination:
@@ -2823,13 +3156,13 @@ components:
         - activity
         - activityPagination
       additionalProperties: false
-      description: Fields for the MongoDB database document
+      description: ''
       type: object
     FilterBadgesInCollectionRequestBody:
       properties:
         collectionId:
           description: The collection ID to filter
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         badgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
@@ -2837,6 +3170,7 @@ components:
             Limit to specific badge IDs. Leave undefined to not filter by badge
             ID.
           type: array
+          examples: *ref_22
         categories:
           items:
             type: string
@@ -2866,6 +3200,7 @@ components:
             properties:
               name:
                 type: string
+                examples: *ref_16
               value:
                 anyOf:
                   - type: string
@@ -2888,6 +3223,7 @@ components:
           items:
             $ref: '#/components/schemas/iUintRange'
           type: array
+          examples: *ref_22
         pagination:
           $ref: '#/components/schemas/PaginationInfo'
       required:
@@ -2912,8 +3248,8 @@ components:
           description: Represents a list of owners balance details.
           type: array
         pagination:
-          $ref: '#/components/schemas/PaginationInfo'
           description: Represents pagination information.
+          $ref: '#/components/schemas/PaginationInfo'
       required:
         - owners
         - pagination
@@ -2940,8 +3276,8 @@ components:
           description: The user's outgoing approvals.
           type: array
         userPermissions:
-          $ref: '#/components/schemas/iUserPermissions'
           description: The user's permissions.
+          $ref: '#/components/schemas/iUserPermissions'
         autoApproveSelfInitiatedOutgoingTransfers:
           description: >-
             Whether the user's self-initiated outgoing transfers are
@@ -2958,31 +3294,33 @@ components:
           description: A unique stringified document ID
           type: string
         _id:
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         collectionId:
           description: The collection ID
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         cosmosAddress:
           description: The Cosmos address of the user
-          type: string
+          examples: *ref_11
+          $ref: '#/components/schemas/CosmosAddress'
         onChain:
           description: True if the balances are on-chain
           type: boolean
         uri:
           description: The URI of the off-chain balances
           type: string
+          examples: *ref_1
         fetchedAt:
           description: >-
             The timestamp of when the off-chain balances were fetched
             (milliseconds since epoch). For BitBadges indexer, we only populate
             this for Mint and Total docs.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
         fetchedAtBlock:
           description: >-
             The block number of when the off-chain balances were fetched. For
             BitBadges indexer, we only populate this for Mint and Total docs.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         isPermanent:
           description: True if the off-chain balances are using permanent storage
           type: boolean
@@ -3014,9 +3352,6 @@ components:
 
         This includes their balances, incoming approvals, outgoing approvals,
         and permissions.
-
-
-        Fields for the MongoDB database document
       type: object
     GetBadgeActivityRouteRequestBody:
       properties:
@@ -3035,8 +3370,8 @@ components:
           description: Array of transfer activity information.
           type: array
         pagination:
-          $ref: '#/components/schemas/PaginationInfo'
           description: Pagination information.
+          $ref: '#/components/schemas/PaginationInfo'
       required:
         - activity
         - pagination
@@ -3083,6 +3418,9 @@ components:
             And so on
 
             Learn more in documentation.
+          examples:
+            - - start: '1'
+                end: '10'
         uris:
           items:
             type: string
@@ -3102,6 +3440,7 @@ components:
           description: >-
             If present, the metadata corresponding to the specified badge IDs
             will be fetched.
+          examples: *ref_22
       additionalProperties: false
       description: Defines the options for fetching metadata.
       type: object
@@ -3122,11 +3461,13 @@ components:
               viewType:
                 $ref: '#/components/schemas/CollectionViewKey'
                 description: The base view type to fetch.
+                examples: *ref_21
               viewId:
                 description: >-
                   A unique view ID. This is used for pagination. All fetches w/
                   same ID should be made with same criteria.
                 type: string
+                examples: *ref_20
               bookmark:
                 description: A bookmark to pass in for pagination. "" for first request.
                 type: string
@@ -3206,7 +3547,6 @@ components:
     GetMetadataForCollectionRequestBody:
       properties:
         metadataToFetch:
-          $ref: '#/components/schemas/MetadataFetchOptions'
           description: >-
             If present, we will fetch the metadata corresponding to the
             specified options.
@@ -3214,6 +3554,7 @@ components:
 
             Consider using pruneMetadataToFetch for filtering out previously
             fetched metadata.
+          $ref: '#/components/schemas/MetadataFetchOptions'
       additionalProperties: false
       type: object
     GetCollectionBatchRouteRequestBody:
@@ -3224,7 +3565,7 @@ components:
               - properties:
                   collectionId:
                     description: The ID of the collection to fetch.
-                    $ref: '#components/schemas/NumberType'
+                    $ref: '#/components/schemas/NumberType'
                 required:
                   - collectionId
                 additionalProperties: false
@@ -3254,11 +3595,13 @@ components:
               viewType:
                 $ref: '#/components/schemas/CollectionViewKey'
                 description: The base view type to fetch.
+                examples: *ref_21
               viewId:
                 description: >-
                   A unique view ID. This is used for pagination. All fetches w/
                   same ID should be made with same criteria.
                 type: string
+                examples: *ref_20
               bookmark:
                 description: A bookmark to pass in for pagination. "" for first request.
                 type: string
@@ -3304,7 +3647,6 @@ components:
             parameters.
           type: boolean
         metadataToFetch:
-          $ref: '#/components/schemas/MetadataFetchOptions'
           description: >-
             If present, we will fetch the metadata corresponding to the
             specified options.
@@ -3312,6 +3654,7 @@ components:
 
             Consider using pruneMetadataToFetch for filtering out previously
             fetched metadata.
+          $ref: '#/components/schemas/MetadataFetchOptions'
       additionalProperties: false
       description: >-
 
@@ -3373,8 +3716,8 @@ components:
           description: Array of error documents corresponding to the collection.
           type: array
         refreshDoc:
-          $ref: '#/components/schemas/iRefreshDoc'
           description: The status information corresponding to the collection.
+          $ref: '#/components/schemas/iRefreshDoc'
       required:
         - inQueue
         - errorDocs
@@ -3389,8 +3732,8 @@ components:
     iGetStatusRouteSuccessResponse:
       properties:
         status:
+          description: Status details about the indexer / blockchain.
           $ref: '#/components/schemas/iStatusDoc'
-          description: Includes status details about the indexer / blockchain.
       required:
         - status
       additionalProperties: false
@@ -3411,7 +3754,7 @@ components:
           type: boolean
         specificCollectionId:
           description: If true, we will limit collection results to a single collection.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
       additionalProperties: false
       type: object
     iGetSearchRouteSuccessResponse:
@@ -3437,6 +3780,7 @@ components:
                 items:
                   $ref: '#/components/schemas/iUintRange'
                 type: array
+                examples: *ref_22
             required:
               - collection
               - badgeIds
@@ -3450,67 +3794,56 @@ components:
         - badges
       additionalProperties: false
       type: object
-    CodesAndPasswords:
-      properties:
-        cid:
-          description: The IPFS CID of the merkle challenge.
-          type: string
-        codes:
-          items:
-            type: string
-          type: array
-        password:
-          type: string
-      required:
-        - cid
-        - codes
-        - password
-      additionalProperties: false
-      description: >-
-        Type to allow specifying codes and passwords for a merkle challenge.
-
-
-        We only support storing codes and passwords for merkle challenges
-        created by BitBadges via IPFS.
-
-        The IPFS CID of the merkle challenge is used to identify the merkle
-        challenge.
-
-
-        Note that we only support storing a set of codes and passwords once per
-        unique CID.
-      type: object
     GetClaimsRouteRequestBody:
       properties:
         claimIds:
           items:
             type: string
+          description: The claim IDs to fetch.
           type: array
         listId:
+          description: >-
+            If the address list is private and viewable with the link only, you
+            must also specify the address list ID to prove knowledge of the
+            link.
           type: string
+          examples: *ref_10
       required:
         - claimIds
+      additionalProperties: false
+      type: object
+    iClaimDetails:
+      properties:
+        claimId:
+          description: Unique claim ID.
+          type: string
+        balancesToSet:
+          description: >-
+            The balances to set for the claim. Only used for claims for
+            collections that have off-chain indexed balances and are assigning
+            balances based on the claim.
+          $ref: '#/components/schemas/iIncrementedBalances'
+        plugins:
+          items: {}
+          description: >-
+            Claim plugins. These are the criteria that must pass for a user to
+            claim the badge.
+          type: array
+        manualDistribution:
+          description: >-
+            If manual distribution is enabled, we do not handle any distribution
+            of claim codes. We leave that up to the claim creator.
+          type: boolean
+      required:
+        - claimId
+        - plugins
       additionalProperties: false
       type: object
     iGetClaimsRouteSuccessResponse:
       properties:
         claims:
           items:
-            properties:
-              claimId:
-                type: string
-              balancesToSet:
-                $ref: '#/components/schemas/iIncrementedBalances'
-              plugins:
-                items: {}
-                type: array
-              manualDistribution:
-                type: boolean
-            required:
-              - claimId
-              - plugins
-            additionalProperties: false
-            type: object
+            $ref: '#/components/schemas/iClaimDetails'
           type: array
       required:
         - claims
@@ -3519,16 +3852,19 @@ components:
     CheckAndCompleteClaimRouteRequestBody:
       properties:
         prevCodesOnly:
+          description: If true, we will only return the user's previous claim codes.
           type: boolean
       additionalProperties: {}
       type: object
     iCheckAndCompleteClaimRouteSuccessResponse:
       properties:
         code:
+          description: The new claim code for the user if the claim was successful.
           type: string
         prevCodes:
           items:
             type: string
+          description: The previous claim codes for the user.
           type: array
       additionalProperties: false
       type: object
@@ -3551,7 +3887,7 @@ components:
           type: string
         stars:
           description: The star rating (1 to 5).
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
       required:
         - review
         - stars
@@ -3567,7 +3903,7 @@ components:
           type: string
         stars:
           description: The number of stars (1 to 5) for the review.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
       required:
         - review
         - stars
@@ -3592,9 +3928,9 @@ components:
           type: string
         seenActivity:
           description: The last seen activity timestamp.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
         readme:
-          description: The README details.
+          description: The README details (markdown supported).
           type: string
         hiddenBadges:
           items:
@@ -3643,11 +3979,14 @@ components:
         profilePicUrl:
           description: The profile picture URL.
           type: string
+          examples: *ref_19
         username:
           description: The username.
           type: string
         profilePicImageFile:
-          description: The profile picture image file. We will then upload to our CDN.
+          description: >-
+            The profile picture image file to set. We will then upload to our
+            CDN.
         notifications:
           properties:
             email:
@@ -3658,7 +3997,9 @@ components:
               additionalProperties: false
               type: object
           additionalProperties: false
-          description: The notification preferences for the user.
+          description: >-
+            The notification preferences for the user. Will only be returned if
+            user is authenticated with full access.
           type: object
         approvedSignInMethods:
           properties:
@@ -3676,9 +4017,14 @@ components:
               additionalProperties: false
               type: object
           additionalProperties: false
-          description: Approved sign in methods
+          description: >-
+            Approved sign in methods. Only returned if user is authenticated
+            with full access.
           type: object
         socialConntections:
+          description: >-
+            The social connections for the user. Only returned if user is
+            authenticated with full access.
           $ref: '#/components/schemas/iSocialConnections'
       additionalProperties: false
       type: object
@@ -3688,8 +4034,8 @@ components:
     AddBalancesToOffChainStorageRouteRequestBody:
       properties:
         balances:
-          $ref: '#/components/schemas/iOffChainBalancesMap'
           description: A map of Cosmos addresses or list IDs -> Balance[].
+          $ref: '#/components/schemas/iOffChainBalancesMap'
         claims:
           items:
             properties:
@@ -3715,7 +4061,7 @@ components:
           type: string
         collectionId:
           description: The collection ID.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
       required:
         - method
         - collectionId
@@ -3726,6 +4072,7 @@ components:
         uri:
           description: The URI of the stored data.
           type: string
+          examples: *ref_1
         result:
           properties:
             cid:
@@ -3740,8 +4087,8 @@ components:
     AddMetadataToIpfsRouteRequestBody:
       properties:
         collectionMetadata:
-          $ref: '#/components/schemas/iMetadata'
           description: The collection metadata to add to IPFS
+          $ref: '#/components/schemas/iMetadata'
         badgeMetadata:
           anyOf:
             - items:
@@ -3784,12 +4131,14 @@ components:
         name:
           description: The name of the approval.
           type: string
+          examples: *ref_16
         description:
           description: The description of the approval.
           type: string
+          examples: *ref_8
         challengeDetails:
-          $ref: '#/components/schemas/iChallengeDetails'
           description: The challenge details.
+          $ref: '#/components/schemas/iChallengeDetails'
         claims:
           items:
             properties:
@@ -3830,6 +4179,7 @@ components:
           required:
             - cid
           additionalProperties: false
+          description: The result for the approval challenge details.
           type: object
       required:
         - result
@@ -3838,14 +4188,14 @@ components:
     GetSignInChallengeRouteRequestBody:
       properties:
         chain:
-          $ref: '#/components/schemas/SupportedChain'
           description: The blockchain to be signed in with.
+          $ref: '#/components/schemas/SupportedChain'
         address:
-          description: The user's blockchain address (their native L1 address).
-          type: string
+          description: The user's blockchain address. This can be their native address.
+          $ref: '#/components/schemas/NativeAddress'
         hours:
           description: The number of hours to be signed in for.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
       required:
         - chain
         - address
@@ -3857,11 +4207,11 @@ components:
           description: The nonce for the challenge.
           type: string
         params:
-          $ref: '#/components/schemas/ChallengeParams'
           description: The challenge parameters.
+          $ref: '#/components/schemas/ChallengeParams'
         message:
           description: The Blockin challenge message to sign.
-          type: string
+          $ref: '#/components/schemas/BlockinMessage'
       required:
         - nonce
         - params
@@ -3871,14 +4221,18 @@ components:
     VerifySignInRouteRequestBody:
       properties:
         message:
-          description: The original Blockin message
-          type: string
+          description: The original Blockin message that was signed.
+          $ref: '#/components/schemas/BlockinMessage'
         signature:
           description: The signature of the Blockin message
           type: string
+          examples: *ref_14
         publicKey:
-          description: Required for some chains. The public key of the signer.
+          description: >-
+            Required for some chains (Cosmos) to verify signature. The public
+            key of the signer.
           type: string
+          examples: *ref_12
       required:
         - message
         - signature
@@ -3897,7 +4251,7 @@ components:
           type: boolean
         message:
           description: The Blockin message that was signed.
-          type: string
+          $ref: '#/components/schemas/BlockinMessage'
         discord:
           properties:
             username:
@@ -3935,6 +4289,7 @@ components:
             - id
             - username
           additionalProperties: false
+          description: Signed in with GitHub username?
           type: object
         google:
           properties:
@@ -3946,6 +4301,7 @@ components:
             - id
             - username
           additionalProperties: false
+          description: Signed in with Google username?
           type: object
       required:
         - signedIn
@@ -3954,22 +4310,23 @@ components:
       type: object
     SignOutRequestBody:
       properties:
+        signOutBlockin:
+          description: Sign out of Blockin, and thus the entire API.
+          type: boolean
         signOutDiscord:
+          description: Sign out of Discord.
           type: boolean
         signOutTwitter:
-          type: boolean
-        signOutBlockin:
+          description: Sign out of Twitter.
           type: boolean
         signOutGoogle:
+          description: Sign out of Google.
           type: boolean
         signOutGithub:
+          description: Sign out of GitHub.
           type: boolean
       required:
-        - signOutDiscord
-        - signOutTwitter
         - signOutBlockin
-        - signOutGoogle
-        - signOutGithub
       additionalProperties: false
       type: object
     iSignOutSuccessResponse:
@@ -4012,6 +4369,7 @@ components:
                   items:
                     $ref: '#/components/schemas/iUintRange'
                   type: array
+                  examples: *ref_22
               required:
                 - collection
                 - badgeIds
@@ -4133,9 +4491,7 @@ components:
             - tx
             - txhash
           additionalProperties: false
-          description: |-
-            The response from the blockchain for the broadcasted tx.
-            See Cosmos SDK documentation for what each field means.
+          description: The response from the blockchain for the broadcasted tx.
           type: object
       required:
         - tx_response
@@ -4232,18 +4588,27 @@ components:
           items:
             properties:
               collectionId:
-                $ref: '#components/schemas/NumberType'
+                description: >-
+                  The collection ID to associate with the claim alert. If
+                  specified, you (the sender) must be the manager of the
+                  collection. This is typically used
+
+                  for sending claim codes. Set to 0 for unspecified.
+                $ref: '#/components/schemas/NumberType'
               message:
+                description: The message to send to the user.
                 type: string
               cosmosAddresses:
                 items:
-                  type: string
+                  $ref: '#/components/schemas/CosmosAddress'
+                description: The addresses to send the claim alert to.
                 type: array
             required:
               - collectionId
               - cosmosAddresses
             additionalProperties: false
             type: object
+          description: The claim alerts to send to users.
           type: array
       required:
         - claimAlerts
@@ -4267,7 +4632,7 @@ components:
           additionalProperties: false
           type: object
         address:
-          type: string
+          $ref: '#/components/schemas/CosmosAddress'
       required:
         - account_number
         - sequence
@@ -4275,7 +4640,7 @@ components:
         - address
       additionalProperties: false
       description: >-
-        information returned by the REST API getAccount route.
+        Information returned by the REST API getAccount route.
 
 
         Note this should be converted into AccountDoc or BitBadgesUserInfo
@@ -4284,17 +4649,21 @@ components:
     GenericBlockinVerifyRouteRequestBody:
       properties:
         message:
-          description: The original Blockin message
-          type: string
+          description: The original Blockin message that was signed.
+          $ref: '#/components/schemas/BlockinMessage'
         signature:
           description: The signature of the Blockin message
           type: string
+          examples: *ref_14
         publicKey:
-          description: Required for some chains. The public key of the signer.
+          description: >-
+            Required for some chains (Cosmos) to verify signature. The public
+            key of the signer.
           type: string
+          examples: *ref_12
         options:
-          $ref: '#/components/schemas/VerifyChallengeOptions'
           description: Additional options for verifying the challenge.
+          $ref: '#/components/schemas/VerifyChallengeOptions'
       required:
         - message
         - signature
@@ -4305,6 +4674,7 @@ components:
       type: object
     iGenericBlockinVerifyRouteSuccessResponse:
       additionalProperties: false
+      description: ''
       type: object
     CreateSecretRouteRequestBody:
       properties:
@@ -4314,51 +4684,105 @@ components:
               type: string
             signature:
               type: string
+              examples: *ref_14
             signer:
               type: string
+              examples: *ref_15
             publicKey:
               type: string
+              examples: *ref_12
           required:
             - message
             - signature
             - signer
           additionalProperties: false
+          description: >-
+            Proof of issuance is used for BBS+ signatures (scheme = bbs) only.
+
+            BBS+ signatures are signed with a BBS+ key pair, but you would often
+            want the issuer to be a native address.
+
+            The prooofOfIssuance establishes a link saying that "I am the issuer
+            of this secret signed with BBS+ key pair ___".
+
+
+            Fields can be left blank for standard signatures.
           type: object
         messageFormat:
           enum:
             - plaintext
             - json
+          description: The message format of the secretMessages.
           type: string
         scheme:
           enum:
             - bbs
             - standard
+          description: >-
+            The scheme of the secret. BBS+ signatures are supported and can be
+            used where selective disclosure is a requirement.
+
+            Otherwise, you can simply use your native blockchain's signature
+            scheme.
           type: string
         type:
+          description: The type of the secret (e.g. credential).
           type: string
         secretMessages:
           items:
             type: string
+          description: >-
+            Thesse are the secrets that are signed.
+
+            For BBS+ signatures, there can be >1 secretMessages, and the signer
+            can selectively disclose the secrets.
+
+            For standard signatures, there is only 1 secretMessage.
           type: array
+          examples: *ref_23
         dataIntegrityProof:
           properties:
             signature:
               type: string
+              examples: *ref_14
             signer:
               type: string
+              examples: *ref_15
             publicKey:
               type: string
+              examples: *ref_12
           required:
             - signature
             - signer
           additionalProperties: false
+          description: >-
+            This is the signature and accompanying details of the
+            secretMessages. The siganture maintains the integrity of the
+            secretMessages.
+
+
+            This should match the expected scheme. For example, if the scheme is
+            BBS+, the signature should be a BBS+ signature and signer should be
+            a BBS+ public key.
           type: object
         name:
+          description: >-
+            Metadata for the secret for display purposes. Note this should not
+            contain anything sensitive. It may be displayed to verifiers.
           type: string
+          examples: *ref_16
         image:
+          description: >-
+            Metadata for the secret for display purposes. Note this should not
+            contain anything sensitive. It may be displayed to verifiers.
           type: string
+          examples: *ref_13
         description:
+          description: >-
+            Metadata for the secret for display purposes. Note this should not
+            contain anything sensitive. It may be displayed to verifiers.
           type: string
+          examples: *ref_8
       required:
         - proofOfIssuance
         - messageFormat
@@ -4374,6 +4798,10 @@ components:
     iCreateSecretRouteSuccessResponse:
       properties:
         secretId:
+          description: >-
+            The secret ID. This is the ID that is given to the user to query the
+            secret. Anyone with the ID can query it, so keep this safe and
+            secure.
           type: string
       required:
         - secretId
@@ -4382,6 +4810,10 @@ components:
     GetSecretRouteRequestBody:
       properties:
         secretId:
+          description: >-
+            The secret ID. This is the ID that is given to the user to query the
+            secret. Anyone with the ID can query it, so keep this safe and
+            secure.
           type: string
       required:
         - secretId
@@ -4393,76 +4825,143 @@ components:
           description: A unique stringified document ID
           type: string
         _id:
-          description: A uniuqe document ID (Mongo DB ObjectID)
-          type: string
-        createdBy:
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         messageFormat:
           enum:
             - plaintext
             - json
+          description: The message format of the secretMessages.
           type: string
+        createdBy:
+          description: The address of the user who created the secret.
+          $ref: '#/components/schemas/CosmosAddress'
         proofOfIssuance:
           properties:
             message:
               type: string
             signature:
               type: string
+              examples: *ref_14
             signer:
               type: string
+              examples: *ref_15
             publicKey:
               type: string
+              examples: *ref_12
           required:
             - message
             - signature
             - signer
           additionalProperties: false
+          description: >-
+            Proof of issuance is used for BBS+ signatures (scheme = bbs) only.
+
+            BBS+ signatures are signed with a BBS+ key pair, but you would often
+            want the issuer to be a native address.
+
+            The prooofOfIssuance establishes a link saying that "I am the issuer
+            of this secret signed with BBS+ key pair ___".
+
+
+            Fields can be left blank for standard signatures.
           type: object
         secretId:
-          type: string
-        type:
+          description: >-
+            The secret ID. This is the ID that is given to the user to query the
+            secret. Anyone with the ID can query it, so keep this safe and
+            secure.
           type: string
         scheme:
           enum:
             - bbs
             - standard
+          description: >-
+            The scheme of the secret. BBS+ signatures are supported and can be
+            used where selective disclosure is a requirement.
+
+            Otherwise, you can simply use your native blockchain's signature
+            scheme.
+          type: string
+        type:
+          description: The type of the secret (e.g. credential).
           type: string
         secretMessages:
           items:
             type: string
+          description: >-
+            Thesse are the secrets that are signed.
+
+            For BBS+ signatures, there can be >1 secretMessages, and the signer
+            can selectively disclose the secrets.
+
+            For standard signatures, there is only 1 secretMessage.
           type: array
+          examples: *ref_23
         dataIntegrityProof:
           properties:
             signature:
               type: string
+              examples: *ref_14
             signer:
               type: string
+              examples: *ref_15
             publicKey:
               type: string
+              examples: *ref_12
           required:
             - signature
             - signer
           additionalProperties: false
+          description: >-
+            This is the signature and accompanying details of the
+            secretMessages. The siganture maintains the integrity of the
+            secretMessages.
+
+
+            This should match the expected scheme. For example, if the scheme is
+            BBS+, the signature should be a BBS+ signature and signer should be
+            a BBS+ public key.
           type: object
         name:
+          description: >-
+            Metadata for the secret for display purposes. Note this should not
+            contain anything sensitive. It may be displayed to verifiers.
           type: string
+          examples: *ref_16
         image:
+          description: >-
+            Metadata for the secret for display purposes. Note this should not
+            contain anything sensitive. It may be displayed to verifiers.
           type: string
+          examples: *ref_13
         description:
+          description: >-
+            Metadata for the secret for display purposes. Note this should not
+            contain anything sensitive. It may be displayed to verifiers.
           type: string
+          examples: *ref_8
         viewers:
           items:
             type: string
+          description: >-
+            Viewers for query purposes. These are the addresses that can query
+            the secret.
           type: array
         anchors:
           items:
             properties:
               txHash:
                 type: string
+                examples: *ref_7
               message:
                 type: string
             additionalProperties: false
             type: object
+          description: |-
+            Anchors are on-chain transactions used to prove certain things
+            about the secret. For example, you can anchor the secret to a
+            transaction hash to prove that the secret existed at a certain time.
           type: array
         updateHistory:
           items:
@@ -4470,12 +4969,12 @@ components:
           type: array
       required:
         - _docId
-        - createdBy
         - messageFormat
+        - createdBy
         - proofOfIssuance
         - secretId
-        - type
         - scheme
+        - type
         - secretMessages
         - dataIntegrityProof
         - name
@@ -4485,11 +4984,15 @@ components:
         - anchors
         - updateHistory
       additionalProperties: false
-      description: Fields for the MongoDB database document
+      description: ''
       type: object
     DeleteSecretRouteRequestBody:
       properties:
         secretId:
+          description: >-
+            The secret ID. This is the ID that is given to the user to query the
+            secret. Anyone with the ID can query it, so keep this safe and
+            secure.
           type: string
       required:
         - secretId
@@ -4501,28 +5004,40 @@ components:
     UpdateSecretRouteRequestBody:
       properties:
         secretId:
+          description: >-
+            The secret ID. This is the ID that is given to the user to query the
+            secret. Anyone with the ID can query it, so keep this safe and
+            secure.
           type: string
         viewersToSet:
           items:
             properties:
               cosmosAddress:
-                type: string
+                $ref: '#/components/schemas/CosmosAddress'
+                examples: *ref_11
               delete:
                 type: boolean
             required:
               - cosmosAddress
             additionalProperties: false
             type: object
+          description: You can approve specific viewers to view the secret.
           type: array
         anchorsToAdd:
           items:
             properties:
               txHash:
                 type: string
+                examples: *ref_7
               message:
                 type: string
             additionalProperties: false
             type: object
+          description: >-
+            Blockchain anchors to add to the secret. These are on-chain
+            transactions that can be used to prove stuff about the secret, like
+
+            existence at a certain point in time or to maintain data integrity.
           type: array
         proofOfIssuance:
           properties:
@@ -4530,51 +5045,105 @@ components:
               type: string
             signer:
               type: string
+              examples: *ref_15
             signature:
               type: string
+              examples: *ref_14
             publicKey:
               type: string
+              examples: *ref_12
           required:
             - message
             - signer
             - signature
           additionalProperties: false
+          description: >-
+            Proof of issuance is used for BBS+ signatures (scheme = bbs) only.
+
+            BBS+ signatures are signed with a BBS+ key pair, but you would often
+            want the issuer to be a native address.
+
+            The prooofOfIssuance establishes a link saying that "I am the issuer
+            of this secret signed with BBS+ key pair ___".
+
+
+            Fields can be left blank for standard signatures.
           type: object
-        scheme:
-          enum:
-            - bbs
-            - standard
-          type: string
         messageFormat:
           enum:
             - plaintext
             - json
+          description: The message format of the secretMessages.
+          type: string
+        scheme:
+          enum:
+            - bbs
+            - standard
+          description: >-
+            The scheme of the secret. BBS+ signatures are supported and can be
+            used where selective disclosure is a requirement.
+
+            Otherwise, you can simply use your native blockchain's signature
+            scheme.
           type: string
         type:
+          description: The type of the secret (e.g. credential).
           type: string
         secretMessages:
           items:
             type: string
+          description: >-
+            Thesse are the secrets that are signed.
+
+            For BBS+ signatures, there can be >1 secretMessages, and the signer
+            can selectively disclose the secrets.
+
+            For standard signatures, there is only 1 secretMessage.
           type: array
+          examples: *ref_23
         dataIntegrityProof:
           properties:
             signature:
               type: string
+              examples: *ref_14
             signer:
               type: string
+              examples: *ref_15
             publicKey:
               type: string
+              examples: *ref_12
           required:
             - signature
             - signer
           additionalProperties: false
+          description: >-
+            This is the signature and accompanying details of the
+            secretMessages. The siganture maintains the integrity of the
+            secretMessages.
+
+
+            This should match the expected scheme. For example, if the scheme is
+            BBS+, the signature should be a BBS+ signature and signer should be
+            a BBS+ public key.
           type: object
         name:
+          description: >-
+            Metadata for the secret for display purposes. Note this should not
+            contain anything sensitive. It may be displayed to verifiers.
           type: string
+          examples: *ref_16
         image:
+          description: >-
+            Metadata for the secret for display purposes. Note this should not
+            contain anything sensitive. It may be displayed to verifiers.
           type: string
+          examples: *ref_13
         description:
+          description: >-
+            Metadata for the secret for display purposes. Note this should not
+            contain anything sensitive. It may be displayed to verifiers.
           type: string
+          examples: *ref_8
       required:
         - secretId
       additionalProperties: false
@@ -4585,20 +5154,39 @@ components:
     CreateBlockinAuthCodeRouteRequestBody:
       properties:
         name:
+          description: The name of the Blockin auth code for display purposes.
           type: string
+          examples: *ref_16
         description:
+          description: The description of the Blockin auth code for display purposes.
           type: string
+          examples: *ref_8
         image:
+          description: The image of the Blockin auth code for display purposes.
           type: string
+          examples: *ref_13
         message:
-          type: string
+          description: The original Blockin message that was signed.
+          $ref: '#/components/schemas/BlockinMessage'
         signature:
+          description: The signature of the Blockin message
           type: string
+          examples: *ref_14
         publicKey:
+          description: >-
+            The public key of the signer (if needed). Only certain chains
+            require this.
           type: string
+          examples: *ref_12
         secretsProofs:
           items:
             $ref: '#/components/schemas/iSecretsProof'
+          description: >-
+            If required, you can additionally add proof of secrets to the
+            authentication flow.
+
+            This proves sensitive information (e.g. GPAs, SAT scores, etc.)
+            without revealing the information itself.
           type: array
       required:
         - name
@@ -4620,8 +5208,12 @@ components:
     GetBlockinAuthCodeRouteRequestBody:
       properties:
         id:
+          description: The ID of the Blockin auth code.
           type: string
         options:
+          description: >-
+            We attempt to verify the current status with each request. You can
+            provide additional options for verification here.
           $ref: '#/components/schemas/VerifyChallengeOptions'
       required:
         - id
@@ -4631,13 +5223,14 @@ components:
       properties:
         message:
           description: The corresponding message that was signed to obtain the signature.
-          type: string
+          $ref: '#/components/schemas/BlockinMessage'
         signature:
           description: The signature of the message.
           type: string
+          examples: *ref_14
         params:
-          $ref: '#/components/schemas/ChallengeParams'
           description: The converted Blockin params fort the message
+          $ref: '#/components/schemas/ChallengeParams'
         cosmosAddress:
           description: >-
             The converted Cosmos address of params.address. This can be used as
@@ -4645,7 +5238,8 @@ components:
 
             unique identifier for the user (e.g. avoid duplicate sign ins from
             equivalent 0x and cosmos1 addresses).
-          type: string
+          examples: *ref_11
+          $ref: '#/components/schemas/CosmosAddress'
         verificationResponse:
           properties:
             success:
@@ -4689,13 +5283,22 @@ components:
     GenerateAppleWalletPassRouteRequestBody:
       properties:
         name:
+          description: The name to be displayed on the pass.
           type: string
+          examples: *ref_16
         description:
+          description: The description to be displayed on the pass.
           type: string
+          examples: *ref_8
         message:
-          type: string
+          description: >-
+            The Blockin message of the authentication code to create the pass
+            for.
+          $ref: '#/components/schemas/BlockinMessage'
         signature:
+          description: The signature of the Blockin message.
           type: string
+          examples: *ref_14
       required:
         - name
         - description
@@ -4717,8 +5320,12 @@ components:
     GetClaimAlertsForCollectionRouteRequestBody:
       properties:
         collectionId:
-          $ref: '#components/schemas/NumberType'
+          description: The collection ID to get claim alerts for.
+          $ref: '#/components/schemas/NumberType'
         bookmark:
+          description: >-
+            The pagination bookmark obtained from the previous request. Leave
+            blank for the first request.
           type: string
       required:
         - collectionId
@@ -4742,6 +5349,7 @@ components:
       properties:
         uri:
           type: string
+          examples: *ref_1
         key:
           type: string
       required:
@@ -4765,6 +5373,7 @@ components:
         mapIds:
           items:
             type: string
+          description: The IDs of the maps to fetch.
           type: array
       required:
         - mapIds
@@ -4777,7 +5386,7 @@ components:
         mapId:
           type: string
         inheritManagerTimelineFrom:
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         managerTimeline:
           items:
             $ref: '#/components/schemas/iManagerTimeline'
@@ -4797,12 +5406,17 @@ components:
         values:
           additionalProperties:
             $ref: '#/components/schemas/iValueStore'
+          description: The (key, value) pairs for the maps that are set.
           type: object
         metadata:
+          description: The fetched metadata for the map (if any).
           $ref: '#/components/schemas/iMetadata'
         updateHistory:
           items:
             $ref: '#/components/schemas/iUpdateHistory'
+          description: >-
+            The update history for the map. Maps are maintained through
+            blockchain transactions.
           type: array
       required:
         - creator
@@ -4817,6 +5431,7 @@ components:
         - values
         - updateHistory
       additionalProperties: false
+      description: ''
       type: object
     iGetMapsRouteSuccessResponse:
       properties:
@@ -4834,11 +5449,11 @@ components:
           description: A unique stringified document ID
           type: string
         _id:
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         collectionId:
           description: The collection ID
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         collectionMetadataTimeline:
           items:
             $ref: '#/components/schemas/iCollectionMetadataTimeline'
@@ -4898,15 +5513,15 @@ components:
           type: array
         createdBy:
           description: The cosmos address of the user who created this collection
-          type: string
+          $ref: '#/components/schemas/CosmosAddress'
         createdBlock:
           description: The block number when this collection was created
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         createdTimestamp:
           description: >-
             The timestamp when this collection was created (milliseconds since
             epoch)
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
         updateHistory:
           items:
             $ref: '#/components/schemas/iUpdateHistory'
@@ -4914,17 +5529,17 @@ components:
           type: array
         aliasAddress:
           description: The alias cosmos address for the collection
-          type: string
+          $ref: '#/components/schemas/CosmosAddress'
         collectionPermissions:
-          $ref: '#/components/schemas/iCollectionPermissions'
           description: >-
             The collection permissions for this collection, with off-chain
             metadata populated.
+          $ref: '#/components/schemas/iCollectionPermissions'
         cachedCollectionMetadata:
-          $ref: '#/components/schemas/iMetadata'
           description: >-
             The fetched collection metadata for this collection. Will only be
             fetched if requested. It is your responsibility to join this data.
+          $ref: '#/components/schemas/iMetadata'
         cachedBadgeMetadata:
           items:
             $ref: '#/components/schemas/iBadgeMetadataDetails'
@@ -4933,10 +5548,10 @@ components:
             if requested. It is your responsibility to join this data.
           type: array
         defaultBalances:
-          $ref: '#/components/schemas/iUserBalanceStore'
           description: >-
             The default balances for users upon genesis, with off-chain metadata
             populated.
+          $ref: '#/components/schemas/iUserBalanceStore'
         activity:
           items:
             $ref: '#/components/schemas/iTransferActivityDoc'
@@ -4983,6 +5598,7 @@ components:
               items:
                 $ref: '#/components/schemas/iUintRange'
               type: array
+              examples: *ref_22
             reason:
               type: string
           required:
@@ -4997,6 +5613,7 @@ components:
               items:
                 $ref: '#/components/schemas/iUintRange'
               type: array
+              examples: *ref_22
             reason:
               type: string
           required:
@@ -5006,10 +5623,10 @@ components:
           description: The badge IDs in this collection that have been reported.
           type: object
         reservedMap:
-          $ref: '#/components/schemas/iMapDoc'
           description: >-
             The reserved map for the account. This is created and managed
             on-chain through the x/maps module.
+          $ref: '#/components/schemas/iMapDoc'
         views:
           additionalProperties:
             properties:
@@ -5038,22 +5655,7 @@ components:
           type: object
         claims:
           items:
-            properties:
-              claimId:
-                type: string
-              plugins:
-                items: {}
-                type: array
-              balancesToSet:
-                $ref: '#/components/schemas/iIncrementedBalances'
-              manualDistribution:
-                type: boolean
-            required:
-              - claimId
-              - plugins
-              - balancesToSet
-            additionalProperties: false
-            type: object
+            $ref: '#/components/schemas/iClaimDetails'
           description: >-
             Details about any off-chain claims for this collection. Only
             applicable when outsourced to BitBadges.
@@ -5086,7 +5688,7 @@ components:
         - views
         - claims
       additionalProperties: false
-      description: Fields for the MongoDB database document
+      description: ''
       type: object
     iOffChainBalancesMap:
       additionalProperties:
@@ -5099,10 +5701,10 @@ components:
       properties:
         from:
           description: The address to transfer from.
-          type: string
+          $ref: '#/components/schemas/CosmosAddress'
         toAddresses:
           items:
-            type: string
+            $ref: '#/components/schemas/CosmosAddress'
           description: The addresses to transfer to.
           type: array
         balances:
@@ -5111,11 +5713,11 @@ components:
           description: The balances to transfer.
           type: array
         precalculateBalancesFromApproval:
-          $ref: '#/components/schemas/iApprovalIdentifierDetails'
           description: >-
             If specified, we will precalculate from this approval and override
             the balances. This can only be used when the specified approval has
             predeterminedBalances set.
+          $ref: '#/components/schemas/iApprovalIdentifierDetails'
         merkleProofs:
           items:
             $ref: '#/components/schemas/iMerkleProof'
@@ -5150,13 +5752,13 @@ components:
             The number of addresses to send the badges to. This takes priority
             over toAddresses.length (used when you don't know exact addresses
             (i.e. you know number of codes)).
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         incrementBadgeIdsBy:
           description: The number to increment the badgeIDs by for each transfer.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         incrementOwnershipTimesBy:
           description: The number to increment the ownershipTimes by for each transfer.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
       required:
         - from
         - toAddresses
@@ -5166,11 +5768,14 @@ components:
     iBatchBadgeDetails:
       properties:
         collectionId:
-          $ref: '#components/schemas/NumberType'
+          description: The collection ID of this element's badge details.
+          $ref: '#/components/schemas/NumberType'
         badgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
+          description: The corresponding badge IDs for this collection ID.
           type: array
+          examples: *ref_22
       required:
         - collectionId
         - badgeIds
@@ -5209,12 +5814,12 @@ components:
             The number of leaves in the Merkle tree. This takes priority over
             leaves.length if defined (used for buffer time between leaf
             generation and leaf length select)
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         currCode:
           description: >-
             The current code being used for the challenge. Used behind the
             scenes
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
       required:
         - leaves
         - isHashed
@@ -5249,23 +5854,10 @@ components:
     iChallengeInfoDetails:
       properties:
         challengeDetails:
-          $ref: '#/components/schemas/iChallengeDetails'
           description: The challenge details of the claim / approval
+          $ref: '#/components/schemas/iChallengeDetails'
         claim:
-          properties:
-            plugins:
-              items: {}
-              description: The plugins of the claim / approval
-              type: array
-            claimId:
-              type: string
-            manualDistribution:
-              type: boolean
-          required:
-            - plugins
-            - claimId
-          additionalProperties: false
-          type: object
+          $ref: '#/components/schemas/iClaimDetails'
       required:
         - challengeDetails
       additionalProperties: false
@@ -5275,11 +5867,13 @@ components:
         name:
           description: The name of the claim
           type: string
+          examples: *ref_16
         description:
           description: >-
             The description of the claim. This describes how to earn and claim
             the badge.
           type: string
+          examples: *ref_8
       required:
         - name
         - description
@@ -5289,9 +5883,9 @@ components:
       properties:
         amount:
           description: The amount of the coin.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         denom:
-          description: The denomination of the coin.
+          description: The denomination of the coin (e.g. "badge").
           type: string
       required:
         - amount
@@ -5340,12 +5934,12 @@ components:
           type: object
         consensus_pubkey:
           properties:
-            '''@type''':
+            "'@type'":
               type: string
             key:
               type: string
           required:
-            - '''@type'''
+            - "'@type'"
             - key
           additionalProperties: false
           type: object
@@ -5371,6 +5965,7 @@ components:
             - website
           additionalProperties: false
           type: object
+          examples: *ref_8
         jailed:
           type: boolean
         min_self_delegation:
@@ -5575,7 +6170,7 @@ components:
       properties:
         account:
           properties:
-            '''@type''':
+            "'@type'":
               type: string
             base_account:
               properties:
@@ -5583,12 +6178,12 @@ components:
                   type: string
                 pub_key:
                   properties:
-                    '''@type''':
+                    "'@type'":
                       type: string
                     key:
                       type: string
                   required:
-                    - '''@type'''
+                    - "'@type'"
                     - key
                   additionalProperties: false
                   type: object
@@ -5603,7 +6198,7 @@ components:
               additionalProperties: false
               type: object
           required:
-            - '''@type'''
+            - "'@type'"
             - base_account
           additionalProperties: false
           type: object
@@ -5651,6 +6246,7 @@ components:
           properties:
             name:
               type: string
+              examples: *ref_16
             version:
               type: string
             chainId:
@@ -5667,6 +6263,7 @@ components:
             - salt
           additionalProperties: false
           type: object
+          examples: *ref_0
         message:
           type: object
       required:
@@ -5697,7 +6294,7 @@ components:
     Sender:
       properties:
         accountAddress:
-          type: string
+          $ref: '#/components/schemas/CosmosAddress'
         sequence:
           type: number
         accountNumber:
@@ -5815,7 +6412,7 @@ components:
         managerOnly:
           type: boolean
         collectionId:
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         creatorOnly:
           type: boolean
         firstComeFirstServe:
@@ -5877,7 +6474,7 @@ components:
         mapId:
           type: string
         inheritManagerTimelineFrom:
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         managerTimeline:
           items:
             $ref: '#/components/schemas/iManagerTimeline'
@@ -5912,6 +6509,11 @@ components:
           items:
             $ref: '#/components/schemas/iUintRange'
           type: array
+          examples: &ref_29
+            - - start: '1713301889'
+                end: '2000000000'
+            - - start: '1'
+                end: '18446744073709551615'
         metadata:
           $ref: '#/components/schemas/iCollectionMetadata'
       required:
@@ -5926,7 +6528,7 @@ components:
         mapId:
           type: string
         inheritManagerTimelineFrom:
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         managerTimeline:
           items:
             $ref: '#/components/schemas/iManagerTimeline'
@@ -6053,11 +6655,11 @@ components:
             "Off-Chain - Non-Indexed" or "Non-Public"
           type: string
         defaultBalances:
-          $ref: '#/components/schemas/iUserBalanceStore'
           description: >-
             The default balances for users who have not interacted with the
             collection yet. Only can be set on initial creation. Only used if
             collection has "Standard" balance type.
+          $ref: '#/components/schemas/iUserBalanceStore'
         badgesToCreate:
           items:
             $ref: '#/components/schemas/iBalance'
@@ -6068,11 +6670,11 @@ components:
             Msg. Only used if collection has "Standard" balance type.
           type: array
         collectionPermissions:
-          $ref: '#/components/schemas/iCollectionPermissions'
           description: >-
             The new collection permissions. Must have the necessary permissions
             in future transactions to update. However, no restrictions in this
             genesis Msg.
+          $ref: '#/components/schemas/iCollectionPermissions'
         managerTimeline:
           items:
             $ref: '#/components/schemas/iManagerTimeline'
@@ -6150,7 +6752,7 @@ components:
           type: string
         collectionId:
           description: The ID of the collection to delete.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
       required:
         - creator
         - collectionId
@@ -6163,7 +6765,7 @@ components:
           type: string
         collectionId:
           description: The ID of the collection to transfer badges from.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         transfers:
           items:
             $ref: '#/components/schemas/iTransfer'
@@ -6186,11 +6788,11 @@ components:
             "Off-Chain - Non-Indexed" or "Non-Public"
           type: string
         defaultBalances:
-          $ref: '#/components/schemas/iUserBalanceStore'
           description: >-
             The default balances for users who have not interacted with the
             collection yet. Only can be set on initial creation. Only used if
             collection has "Standard" balance type.
+          $ref: '#/components/schemas/iUserBalanceStore'
         badgesToCreate:
           items:
             $ref: '#/components/schemas/iBalance'
@@ -6201,11 +6803,11 @@ components:
             Msg. Only used if collection has "Standard" balance type.
           type: array
         collectionPermissions:
-          $ref: '#/components/schemas/iCollectionPermissions'
           description: >-
             The new collection permissions. Must have the necessary permissions
             in future transactions to update. However, no restrictions in this
             genesis Msg.
+          $ref: '#/components/schemas/iCollectionPermissions'
         managerTimeline:
           items:
             $ref: '#/components/schemas/iManagerTimeline'
@@ -6274,7 +6876,7 @@ components:
           type: array
         collectionId:
           description: The ID of the collection to update.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         updateCollectionPermissions:
           description: Whether or not to update the collection permissions.
           type: boolean
@@ -6317,7 +6919,7 @@ components:
           type: string
         collectionId:
           description: The ID of the collection to transfer badges from.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         updateOutgoingApprovals:
           description: Whether or not to update the outgoing approvals.
           type: boolean
@@ -6362,10 +6964,10 @@ components:
           description: Whether or not to update the user permissions.
           type: boolean
         userPermissions:
-          $ref: '#/components/schemas/iUserPermissions'
           description: >-
             The new user permissions. Must have the necessary permissions to
             update.
+          $ref: '#/components/schemas/iUserPermissions'
       required:
         - creator
         - collectionId
@@ -6378,9 +6980,6 @@ components:
         - Cosmos
         - Solana
         - Unknown
-      description: >-
-        Safe adds two uints and returns an error if the result is invalid. Keeps
-        the right type.
       type: string
     NumberType:
       description: >-
@@ -6410,7 +7009,7 @@ components:
 
         This is the same as NumberType, but without BigInts because they are not
         a primitive.
-      $ref: '#components/schemas/NumberType'
+      $ref: '#/components/schemas/NumberType'
     iUserPermissions:
       properties:
         canUpdateOutgoingApprovals:
@@ -6453,6 +7052,11 @@ components:
         toListId:
           description: The list ID of the to addresses of the approved outgoing transfers.
           type: string
+          examples: &ref_31
+            - customOrReservedListId
+            - Mint
+            - All
+            - cosmos1...
         toList:
           $ref: '#/components/schemas/iAddressList'
         initiatedByListId:
@@ -6460,6 +7064,11 @@ components:
             The list ID of the initiatedBy addresses of the approved outgoing
             transfers.
           type: string
+          examples: &ref_25
+            - customOrReservedListId
+            - Mint
+            - All
+            - cosmos1...
         initiatedByList:
           $ref: '#/components/schemas/iAddressList'
         transferTimes:
@@ -6467,16 +7076,23 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The transfer times of the approved outgoing transfers.
           type: array
+          examples: &ref_26
+            - - start: '1713301889'
+                end: '2000000000'
+            - - start: '1'
+                end: '18446744073709551615'
         badgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The badge IDs of the approved outgoing transfers.
           type: array
+          examples: *ref_22
         ownershipTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The owned times of the approved outgoing transfers.
           type: array
+          examples: *ref_24
         approvalId:
           description: >-
             The approval ID of the approved outgoing transfers. Can use "All" to
@@ -6488,11 +7104,21 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The permitted times of the approved outgoing transfers.
           type: array
+          examples: &ref_27
+            - - start: '1713301889'
+                end: '2000000000'
+            - - start: '1'
+                end: '18446744073709551615'
         permanentlyForbiddenTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The forbidden times of the approved outgoing transfers.
           type: array
+          examples: &ref_28
+            - - start: '1713301889'
+                end: '2000000000'
+            - - start: '1'
+                end: '18446744073709551615'
       required:
         - toListId
         - toList
@@ -6513,6 +7139,11 @@ components:
             The list ID of the from addresses of the approved incoming
             transfers.
           type: string
+          examples: &ref_30
+            - customOrReservedListId
+            - Mint
+            - All
+            - cosmos1...
         fromList:
           $ref: '#/components/schemas/iAddressList'
         initiatedByListId:
@@ -6520,6 +7151,7 @@ components:
             The list ID of the initiatedBy addresses of the approved incoming
             transfers.
           type: string
+          examples: *ref_25
         initiatedByList:
           $ref: '#/components/schemas/iAddressList'
         transferTimes:
@@ -6527,16 +7159,19 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The transfer times of the approved incoming transfers.
           type: array
+          examples: *ref_26
         badgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The badge IDs of the approved incoming transfers.
           type: array
+          examples: *ref_22
         ownershipTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The owned times of the approved incoming transfers.
           type: array
+          examples: *ref_24
         approvalId:
           description: >-
             The approval ID of the approved incoming transfers. Can use "All" to
@@ -6548,11 +7183,13 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The permitted times of the approved incoming transfers.
           type: array
+          examples: *ref_27
         permanentlyForbiddenTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The forbidden times of the approved incoming transfers.
           type: array
+          examples: *ref_28
       required:
         - fromListId
         - fromList
@@ -6638,11 +7275,13 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The permitted times of the permission.
           type: array
+          examples: *ref_27
         permanentlyForbiddenTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The forbidden times of the permission.
           type: array
+          examples: *ref_28
       required:
         - permanentlyPermittedTimes
         - permanentlyForbiddenTimes
@@ -6655,16 +7294,19 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The timeline times that the permission applies to.
           type: array
+          examples: *ref_29
         permanentlyPermittedTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The permitted times of the permission.
           type: array
+          examples: *ref_27
         permanentlyForbiddenTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The forbidden times of the permission.
           type: array
+          examples: *ref_28
       required:
         - timelineTimes
         - permanentlyPermittedTimes
@@ -6678,21 +7320,25 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The badge IDs that the permission applies to.
           type: array
+          examples: *ref_22
         ownershipTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The owned times of the permission.
           type: array
+          examples: *ref_24
         permanentlyPermittedTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The permitted times of the permission.
           type: array
+          examples: *ref_27
         permanentlyForbiddenTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The forbidden times of the permission.
           type: array
+          examples: *ref_28
       required:
         - badgeIds
         - ownershipTimes
@@ -6707,21 +7353,25 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The timeline times that the permission applies to.
           type: array
+          examples: *ref_29
         badgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The badge IDs that the permission applies to.
           type: array
+          examples: *ref_22
         permanentlyPermittedTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The permitted times of the permission.
           type: array
+          examples: *ref_27
         permanentlyForbiddenTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The forbidden times of the permission.
           type: array
+          examples: *ref_28
       required:
         - timelineTimes
         - badgeIds
@@ -6734,16 +7384,19 @@ components:
         fromListId:
           description: The list ID of the from addresses of the approved transfers.
           type: string
+          examples: *ref_30
         fromList:
           $ref: '#/components/schemas/iAddressList'
         toListId:
           description: The list ID of the to addresses of the approved transfers.
           type: string
+          examples: *ref_31
         toList:
           $ref: '#/components/schemas/iAddressList'
         initiatedByListId:
           description: The list ID of the initiatedBy addresses of the approved transfers.
           type: string
+          examples: *ref_25
         initiatedByList:
           $ref: '#/components/schemas/iAddressList'
         transferTimes:
@@ -6751,16 +7404,19 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The transfer times of the approved transfers.
           type: array
+          examples: *ref_26
         badgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The badge IDs of the approved transfers.
           type: array
+          examples: *ref_22
         ownershipTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The owned times of the approved transfers.
           type: array
+          examples: *ref_24
         approvalId:
           description: >-
             The approval ID of the approved transfers. Can use "All" to
@@ -6772,11 +7428,13 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The permitted times of this permission.
           type: array
+          examples: *ref_27
         permanentlyForbiddenTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The forbidden times of this permission.
           type: array
+          examples: *ref_28
       required:
         - fromListId
         - fromList
@@ -6796,10 +7454,10 @@ components:
       properties:
         start:
           description: The start of the range.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         end:
           description: The end of the range, inclusive.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
       required:
         - start
         - end
@@ -6810,11 +7468,13 @@ components:
         uri:
           description: The URI where to fetch the badge metadata from.
           type: string
+          examples: *ref_1
         badgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The badge IDs corresponding to the URI.
           type: array
+          examples: *ref_22
         customData:
           description: Arbitrary custom data that can be stored on-chain
           type: string
@@ -6829,6 +7489,7 @@ components:
         uri:
           description: The URI where to fetch the collection metadata from.
           type: string
+          examples: *ref_1
         customData:
           description: Arbitrary custom data that can be stored on-chain
           type: string
@@ -6842,6 +7503,7 @@ components:
         uri:
           description: The URI where to fetch the off-chain balances metadata from.
           type: string
+          examples: *ref_1
         customData:
           description: Arbitrary custom data that can be stored on-chain
           type: string
@@ -6852,82 +7514,144 @@ components:
       type: object
     iSecretsProof:
       properties:
-        createdBy:
-          type: string
-        scheme:
-          enum:
-            - bbs
-            - standard
-          type: string
-        messageFormat:
-          enum:
-            - plaintext
-            - json
-          type: string
-        secretMessages:
-          items:
-            type: string
-          type: array
         entropies:
           items:
             type: string
+          description: >-
+            Entropies used for certain data integrity proofs on-chain (e.g.
+            HASH(message + entropy) = on-chain value)
           type: array
-        dataIntegrityProof:
-          properties:
-            signature:
-              type: string
-            signer:
-              type: string
-            publicKey:
-              type: string
-          required:
-            - signature
-            - signer
-          additionalProperties: false
-          type: object
-        proofOfIssuance:
-          properties:
-            message:
-              type: string
-            signer:
-              type: string
-            signature:
-              type: string
-            publicKey:
-              type: string
-          required:
-            - message
-            - signer
-            - signature
-          additionalProperties: false
-          type: object
-        name:
-          type: string
-        image:
-          type: string
-        description:
-          type: string
         updateHistory:
           items:
             $ref: '#/components/schemas/iUpdateHistory'
           type: array
+        messageFormat:
+          enum:
+            - plaintext
+            - json
+          description: The message format of the secretMessages.
+          type: string
+        createdBy:
+          description: The address of the user who created the secret.
+          $ref: '#/components/schemas/CosmosAddress'
+        proofOfIssuance:
+          properties:
+            message:
+              type: string
+            signature:
+              type: string
+              examples: *ref_14
+            signer:
+              type: string
+              examples: *ref_15
+            publicKey:
+              type: string
+              examples: *ref_12
+          required:
+            - message
+            - signature
+            - signer
+          additionalProperties: false
+          description: >-
+            Proof of issuance is used for BBS+ signatures (scheme = bbs) only.
+
+            BBS+ signatures are signed with a BBS+ key pair, but you would often
+            want the issuer to be a native address.
+
+            The prooofOfIssuance establishes a link saying that "I am the issuer
+            of this secret signed with BBS+ key pair ___".
+
+
+            Fields can be left blank for standard signatures.
+          type: object
+        scheme:
+          enum:
+            - bbs
+            - standard
+          description: >-
+            The scheme of the secret. BBS+ signatures are supported and can be
+            used where selective disclosure is a requirement.
+
+            Otherwise, you can simply use your native blockchain's signature
+            scheme.
+          type: string
+        secretMessages:
+          items:
+            type: string
+          description: >-
+            Thesse are the secrets that are signed.
+
+            For BBS+ signatures, there can be >1 secretMessages, and the signer
+            can selectively disclose the secrets.
+
+            For standard signatures, there is only 1 secretMessage.
+          type: array
+          examples: *ref_23
+        dataIntegrityProof:
+          properties:
+            signature:
+              type: string
+              examples: *ref_14
+            signer:
+              type: string
+              examples: *ref_15
+            publicKey:
+              type: string
+              examples: *ref_12
+          required:
+            - signature
+            - signer
+          additionalProperties: false
+          description: >-
+            This is the signature and accompanying details of the
+            secretMessages. The siganture maintains the integrity of the
+            secretMessages.
+
+
+            This should match the expected scheme. For example, if the scheme is
+            BBS+, the signature should be a BBS+ signature and signer should be
+            a BBS+ public key.
+          type: object
+        name:
+          description: >-
+            Metadata for the secret for display purposes. Note this should not
+            contain anything sensitive. It may be displayed to verifiers.
+          type: string
+          examples: *ref_16
+        image:
+          description: >-
+            Metadata for the secret for display purposes. Note this should not
+            contain anything sensitive. It may be displayed to verifiers.
+          type: string
+          examples: *ref_13
+        description:
+          description: >-
+            Metadata for the secret for display purposes. Note this should not
+            contain anything sensitive. It may be displayed to verifiers.
+          type: string
+          examples: *ref_8
         anchors:
           items:
             properties:
               txHash:
                 type: string
+                examples: *ref_7
               message:
                 type: string
             additionalProperties: false
             type: object
+          description: |-
+            Anchors are on-chain transactions used to prove certain things
+            about the secret. For example, you can anchor the secret to a
+            transaction hash to prove that the secret existed at a certain time.
           type: array
       required:
-        - createdBy
-        - scheme
         - messageFormat
+        - createdBy
+        - proofOfIssuance
+        - scheme
         - secretMessages
         - dataIntegrityProof
-        - proofOfIssuance
         - name
         - image
         - description
@@ -6935,82 +7659,149 @@ components:
       type: object
     iSecret:
       properties:
-        createdBy:
-          type: string
         messageFormat:
           enum:
             - plaintext
             - json
+          description: The message format of the secretMessages.
           type: string
+        createdBy:
+          description: The address of the user who created the secret.
+          $ref: '#/components/schemas/CosmosAddress'
         proofOfIssuance:
           properties:
             message:
               type: string
             signature:
               type: string
+              examples: *ref_14
             signer:
               type: string
+              examples: *ref_15
             publicKey:
               type: string
+              examples: *ref_12
           required:
             - message
             - signature
             - signer
           additionalProperties: false
+          description: >-
+            Proof of issuance is used for BBS+ signatures (scheme = bbs) only.
+
+            BBS+ signatures are signed with a BBS+ key pair, but you would often
+            want the issuer to be a native address.
+
+            The prooofOfIssuance establishes a link saying that "I am the issuer
+            of this secret signed with BBS+ key pair ___".
+
+
+            Fields can be left blank for standard signatures.
           type: object
         secretId:
-          type: string
-        type:
+          description: >-
+            The secret ID. This is the ID that is given to the user to query the
+            secret. Anyone with the ID can query it, so keep this safe and
+            secure.
           type: string
         scheme:
           enum:
             - bbs
             - standard
+          description: >-
+            The scheme of the secret. BBS+ signatures are supported and can be
+            used where selective disclosure is a requirement.
+
+            Otherwise, you can simply use your native blockchain's signature
+            scheme.
+          type: string
+        type:
+          description: The type of the secret (e.g. credential).
           type: string
         secretMessages:
           items:
             type: string
+          description: >-
+            Thesse are the secrets that are signed.
+
+            For BBS+ signatures, there can be >1 secretMessages, and the signer
+            can selectively disclose the secrets.
+
+            For standard signatures, there is only 1 secretMessage.
           type: array
+          examples: *ref_23
         dataIntegrityProof:
           properties:
             signature:
               type: string
+              examples: *ref_14
             signer:
               type: string
+              examples: *ref_15
             publicKey:
               type: string
+              examples: *ref_12
           required:
             - signature
             - signer
           additionalProperties: false
+          description: >-
+            This is the signature and accompanying details of the
+            secretMessages. The siganture maintains the integrity of the
+            secretMessages.
+
+
+            This should match the expected scheme. For example, if the scheme is
+            BBS+, the signature should be a BBS+ signature and signer should be
+            a BBS+ public key.
           type: object
         name:
+          description: >-
+            Metadata for the secret for display purposes. Note this should not
+            contain anything sensitive. It may be displayed to verifiers.
           type: string
+          examples: *ref_16
         image:
+          description: >-
+            Metadata for the secret for display purposes. Note this should not
+            contain anything sensitive. It may be displayed to verifiers.
           type: string
+          examples: *ref_13
         description:
+          description: >-
+            Metadata for the secret for display purposes. Note this should not
+            contain anything sensitive. It may be displayed to verifiers.
           type: string
+          examples: *ref_8
         viewers:
           items:
             type: string
+          description: >-
+            Viewers for query purposes. These are the addresses that can query
+            the secret.
           type: array
         anchors:
           items:
             properties:
               txHash:
                 type: string
+                examples: *ref_7
               message:
                 type: string
             additionalProperties: false
             type: object
+          description: |-
+            Anchors are on-chain transactions used to prove certain things
+            about the secret. For example, you can anchor the secret to a
+            transaction hash to prove that the secret existed at a certain time.
           type: array
       required:
-        - createdBy
         - messageFormat
+        - createdBy
         - proofOfIssuance
         - secretId
-        - type
         - scheme
+        - type
         - secretMessages
         - dataIntegrityProof
         - name
@@ -7028,13 +7819,18 @@ components:
         uri:
           description: The URI where to fetch the zkProof metadata from.
           type: string
+          examples: *ref_1
         customData:
           description: Arbitrary custom data that can be stored on-chain.
+          type: string
+        zkpTrackerId:
+          description: ZKP tracker ID.
           type: string
       required:
         - verificationKey
         - uri
         - customData
+        - zkpTrackerId
       additionalProperties: false
       type: object
     iZkProofSolution:
@@ -7054,22 +7850,24 @@ components:
       properties:
         collectionId:
           description: The collection ID of the badges to own.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         amountRange:
-          $ref: '#/components/schemas/iUintRange'
           description: >-
             The min/max acceptable amount of badges that must be owned (can be
             any values, including 0-0).
+          $ref: '#/components/schemas/iUintRange'
         ownershipTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The range of the times that the badges must be owned.
           type: array
+          examples: *ref_24
         badgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The range of the badge IDs that must be owned.
           type: array
+          examples: *ref_22
         overrideWithCurrentTime:
           description: Whether or not to override the ownershipTimes with the current time.
           type: boolean
@@ -7091,17 +7889,19 @@ components:
       properties:
         amount:
           description: The amount or balance of the owned badge.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         badgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The badge IDs corresponding to the balance.
           type: array
+          examples: *ref_22
         ownershipTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The times that the badge is owned from.
           type: array
+          examples: *ref_24
       required:
         - amount
         - badgeIds
@@ -7113,10 +7913,13 @@ components:
         listId:
           description: The ID of the address list.
           type: string
+          examples: *ref_10
         addresses:
           items:
             type: string
-          description: The addresses of the address list.
+          description: >-
+            The addresses of the address list. If this is a tracker list, the
+            addresses are the tracker IDs.
           type: array
         whitelist:
           description: >-
@@ -7126,15 +7929,16 @@ components:
         uri:
           description: The URI where to fetch the address list metadata from.
           type: string
+          examples: *ref_1
         customData:
           description: Arbitrary custom data that can be stored on-chain.
           type: string
         createdBy:
           description: The address that created the address list.
-          type: string
+          $ref: '#/components/schemas/CosmosAddress'
         aliasAddress:
           description: The alias cosmos address of the address list.
-          type: string
+          $ref: '#/components/schemas/CosmosAddress'
       required:
         - listId
         - addresses
@@ -7147,10 +7951,10 @@ components:
       properties:
         from:
           description: The address to transfer from.
-          type: string
+          $ref: '#/components/schemas/CosmosAddress'
         toAddresses:
           items:
-            type: string
+            $ref: '#/components/schemas/CosmosAddress'
           description: The addresses to transfer to.
           type: array
         balances:
@@ -7159,11 +7963,11 @@ components:
           description: The balances to transfer.
           type: array
         precalculateBalancesFromApproval:
-          $ref: '#/components/schemas/iApprovalIdentifierDetails'
           description: >-
             If specified, we will precalculate from this approval and override
             the balances. This can only be used when the specified approval has
             predeterminedBalances set.
+          $ref: '#/components/schemas/iApprovalIdentifierDetails'
         merkleProofs:
           items:
             $ref: '#/components/schemas/iMerkleProof'
@@ -7209,11 +8013,12 @@ components:
             The approval level of the approval "collection", "incoming", or
             "outgoing".
           type: string
+          examples: *ref_32
         approverAddress:
           description: >-
             The address of the approval to check. If approvalLevel is
             "collection", this is blank "".
-          type: string
+          $ref: '#/components/schemas/CosmosAddress'
       required:
         - approvalId
         - approvalLevel
@@ -7223,8 +8028,10 @@ components:
     iCoinTransfer:
       properties:
         to:
-          description: The recipient of the coin transfer.
-          type: string
+          description: >-
+            The recipient of the coin transfer. This should be a Bech32 Cosmos
+            address.
+          $ref: '#/components/schemas/CosmosAddress'
         coins:
           items:
             $ref: '#/components/schemas/iCosmosCoin'
@@ -7239,7 +8046,7 @@ components:
       properties:
         collectionId:
           description: The collection ID for the approval.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         approvalId:
           description: The approval ID
           type: string
@@ -7251,9 +8058,10 @@ components:
             The approval level of the approval "collection", "incoming", or
             "outgoing".
           type: string
+          examples: *ref_32
         approverAddress:
           description: The address of the approval to check.
-          type: string
+          $ref: '#/components/schemas/CosmosAddress'
         trackerType:
           description: >-
             The type of tracker to check "overall", "to", "from", or
@@ -7261,7 +8069,7 @@ components:
           type: string
         approvedAddress:
           description: The address to check for the approval.
-          type: string
+          $ref: '#/components/schemas/CosmosAddress'
       required:
         - collectionId
         - approvalId
@@ -7279,7 +8087,7 @@ components:
           type: string
         expectedProofLength:
           description: The expected proof length of the merkle proof.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         useCreatorAddressAsLeaf:
           description: >-
             Whether or not to override any leaf value and use the creator
@@ -7289,10 +8097,11 @@ components:
           description: >-
             Whether or not to enforce max uses per leaf. Used to prevent replay
             attacks.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         uri:
           description: The URI where to fetch the merkle challenge metadata from.
           type: string
+          examples: *ref_1
         customData:
           description: Arbitrary custom data that can be stored on-chain.
           type: string
@@ -7346,6 +8155,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The times of the timeline item. Times in a timeline cannot overlap.
           type: array
+          examples: *ref_29
       required:
         - timelineTimes
       additionalProperties: false
@@ -7357,9 +8167,10 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The times of the timeline item. Times in a timeline cannot overlap.
           type: array
+          examples: *ref_29
         manager:
           description: The manager of the collection.
-          type: string
+          $ref: '#/components/schemas/CosmosAddress'
       required:
         - timelineTimes
         - manager
@@ -7372,9 +8183,10 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The times of the timeline item. Times in a timeline cannot overlap.
           type: array
+          examples: *ref_29
         collectionMetadata:
-          $ref: '#/components/schemas/iCollectionMetadata'
           description: The collection metadata.
+          $ref: '#/components/schemas/iCollectionMetadata'
       required:
         - timelineTimes
         - collectionMetadata
@@ -7387,6 +8199,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The times of the timeline item. Times in a timeline cannot overlap.
           type: array
+          examples: *ref_29
         badgeMetadata:
           items:
             $ref: '#/components/schemas/iBadgeMetadata'
@@ -7404,9 +8217,10 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The times of the timeline item. Times in a timeline cannot overlap.
           type: array
+          examples: *ref_29
         offChainBalancesMetadata:
-          $ref: '#/components/schemas/iOffChainBalancesMetadata'
           description: The off-chain balances metadata.
+          $ref: '#/components/schemas/iOffChainBalancesMetadata'
       required:
         - timelineTimes
         - offChainBalancesMetadata
@@ -7419,6 +8233,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The times of the timeline item. Times in a timeline cannot overlap.
           type: array
+          examples: *ref_29
         customData:
           description: Arbitrary custom data.
           type: string
@@ -7434,6 +8249,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The times of the timeline item. Times in a timeline cannot overlap.
           type: array
+          examples: *ref_29
         standards:
           items:
             type: string
@@ -7451,6 +8267,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The times of the timeline item. Times in a timeline cannot overlap.
           type: array
+          examples: *ref_29
         isArchived:
           description: Whether the collection is archived.
           type: boolean
@@ -7463,28 +8280,34 @@ components:
       properties:
         toListId:
           type: string
+          examples: *ref_31
         toList:
           $ref: '#/components/schemas/iAddressList'
         initiatedByListId:
           type: string
+          examples: *ref_25
         initiatedByList:
           $ref: '#/components/schemas/iAddressList'
         transferTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           type: array
+          examples: *ref_26
         badgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
           type: array
+          examples: *ref_22
         ownershipTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           type: array
+          examples: *ref_24
         approvalId:
           type: string
         uri:
           type: string
+          examples: *ref_1
         customData:
           type: string
         approvalCriteria:
@@ -7525,14 +8348,14 @@ components:
           description: The list of merkle challenges that need valid proofs to be approved.
           type: array
         predeterminedBalances:
-          $ref: '#/components/schemas/iPredeterminedBalances'
           description: The predetermined balances for each transfer.
+          $ref: '#/components/schemas/iPredeterminedBalances'
         approvalAmounts:
-          $ref: '#/components/schemas/iApprovalAmounts'
           description: The maximum approved amounts for this approval.
+          $ref: '#/components/schemas/iApprovalAmounts'
         maxNumTransfers:
-          $ref: '#/components/schemas/iMaxNumTransfers'
           description: The max num transfers for this approval.
+          $ref: '#/components/schemas/iMaxNumTransfers'
         requireToEqualsInitiatedBy:
           description: Whether the to address must equal the initiatedBy address.
           type: boolean
@@ -7552,15 +8375,15 @@ components:
             balance in the array.
           type: array
         incrementedBalances:
-          $ref: '#/components/schemas/iIncrementedBalances'
           description: >-
             Define a starting balance and increment the badge IDs and owned
             times by a certain amount after each transfer. Cannot be used with
             manualBalances. Order number corresponds to number of times we
             increment.
+          $ref: '#/components/schemas/iIncrementedBalances'
         orderCalculationMethod:
-          $ref: '#/components/schemas/iPredeterminedOrderCalculationMethod'
           description: The order calculation method.
+          $ref: '#/components/schemas/iPredeterminedOrderCalculationMethod'
       required:
         - manualBalances
         - incrementedBalances
@@ -7591,10 +8414,10 @@ components:
           type: array
         incrementBadgeIdsBy:
           description: The amount to increment the badge IDs by after each transfer.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         incrementOwnershipTimesBy:
           description: The amount to increment the owned times by after each transfer.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
       required:
         - startBalances
         - incrementBadgeIdsBy
@@ -7664,25 +8487,25 @@ components:
             The overall maximum amount approved for the badgeIDs and
             ownershipTimes. Running tally that includes all transfers that match
             this approval.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         perToAddressApprovalAmount:
           description: >-
             The maximum amount approved for the badgeIDs and ownershipTimes for
             each to address. Running tally that includes all transfers from each
             unique to address that match this approval.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         perFromAddressApprovalAmount:
           description: >-
             The maximum amount approved for the badgeIDs and ownershipTimes for
             each from address. Running tally that includes all transfers from
             each unique from address that match this approval.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         perInitiatedByAddressApprovalAmount:
           description: >-
             The maximum amount approved for the badgeIDs and ownershipTimes for
             each initiated by address. Running tally that includes all transfers
             from each unique initiated by address that match this approval.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         amountTrackerId:
           description: >-
             The ID of the approval tracker. This is the key used to track
@@ -7703,26 +8526,26 @@ components:
             The overall maximum number of transfers for the badgeIDs and
             ownershipTimes. Running tally that includes all transfers that match
             this approval.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         perToAddressMaxNumTransfers:
           description: >-
             The maximum number of transfers for the badgeIDs and ownershipTimes
             for each to address. Running tally that includes all transfers from
             each unique to address that match this approval.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         perFromAddressMaxNumTransfers:
           description: >-
             The maximum number of transfers for the badgeIDs and ownershipTimes
             for each from address. Running tally that includes all transfers
             from each unique from address that match this approval.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         perInitiatedByAddressMaxNumTransfers:
           description: >-
             The maximum number of transfers for the badgeIDs and ownershipTimes
             for each initiated by address. Running tally that includes all
             transfers from each unique initiated by address that match this
             approval.
-          $ref: '#components/schemas/NumberType'
+          $ref: '#/components/schemas/NumberType'
         amountTrackerId:
           description: >-
             The ID of the approval tracker. This is the key used to track
@@ -7741,11 +8564,13 @@ components:
         fromListId:
           description: The list ID for the user(s) who is sending the badges.
           type: string
+          examples: *ref_30
         fromList:
           $ref: '#/components/schemas/iAddressList'
         initiatedByListId:
           description: The list ID for the user(s) who initiate the transfer.
           type: string
+          examples: *ref_25
         initiatedByList:
           $ref: '#/components/schemas/iAddressList'
         transferTimes:
@@ -7753,16 +8578,19 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The times of the transfer transaction.
           type: array
+          examples: *ref_26
         badgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The badge IDs to be transferred.
           type: array
+          examples: *ref_22
         ownershipTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The ownership times of the badges being transferred.
           type: array
+          examples: *ref_24
         approvalId:
           description: >-
             The ID of the approval. Must not be a duplicate of another approval
@@ -7771,16 +8599,17 @@ components:
         uri:
           description: The URI of the approval.
           type: string
+          examples: *ref_1
         customData:
           description: Arbitrary custom data of the approval
           type: string
         approvalCriteria:
-          $ref: '#/components/schemas/iIncomingApprovalCriteria'
           description: >-
             For allowed combinations, we also must check the details of the
             approval. These represent the restrictions that must be obeyed such
             as the total amount approved, max num transfers, merkle challenges,
             must own badges, etc.
+          $ref: '#/components/schemas/iIncomingApprovalCriteria'
       required:
         - fromListId
         - fromList
@@ -7817,14 +8646,14 @@ components:
           description: The list of merkle challenges that need valid proofs to be approved.
           type: array
         predeterminedBalances:
-          $ref: '#/components/schemas/iPredeterminedBalances'
           description: The predetermined balances for each transfer using this approval.
+          $ref: '#/components/schemas/iPredeterminedBalances'
         approvalAmounts:
-          $ref: '#/components/schemas/iApprovalAmounts'
           description: The maximum approved amounts for this approval.
+          $ref: '#/components/schemas/iApprovalAmounts'
         maxNumTransfers:
-          $ref: '#/components/schemas/iMaxNumTransfers'
           description: The max num transfers for this approval.
+          $ref: '#/components/schemas/iMaxNumTransfers'
         requireFromEqualsInitiatedBy:
           description: Whether the from address must equal the initiatedBy address.
           type: boolean
@@ -7838,16 +8667,19 @@ components:
         toListId:
           description: The list ID for the user(s) who is receiving the badges.
           type: string
+          examples: *ref_31
         toList:
           $ref: '#/components/schemas/iAddressList'
         fromListId:
           description: The list ID for the user(s) who is sending the badges.
           type: string
+          examples: *ref_30
         fromList:
           $ref: '#/components/schemas/iAddressList'
         initiatedByListId:
           description: The list ID for the user(s) who initiate the transfer.
           type: string
+          examples: *ref_25
         initiatedByList:
           $ref: '#/components/schemas/iAddressList'
         transferTimes:
@@ -7855,16 +8687,19 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The times of the transfer transaction.
           type: array
+          examples: *ref_26
         badgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The badge IDs to be transferred.
           type: array
+          examples: *ref_22
         ownershipTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The ownership times of the badges being transferred.
           type: array
+          examples: *ref_24
         approvalId:
           description: >-
             The ID of the approval. Must not be a duplicate of another approval
@@ -7873,16 +8708,17 @@ components:
         uri:
           description: The URI of the approval.
           type: string
+          examples: *ref_1
         customData:
           description: Arbitrary custom data of the approval
           type: string
         approvalCriteria:
-          $ref: '#/components/schemas/iApprovalCriteria'
           description: >-
             For allowed combinations, we also must check the details of the
             approval. These represent the restrictions that must be obeyed such
             as the total amount approved, max num transfers, merkle challenges,
             must own badges, etc.
+          $ref: '#/components/schemas/iApprovalCriteria'
       required:
         - toListId
         - toList
@@ -7921,14 +8757,14 @@ components:
           description: The list of merkle challenges that need valid proofs to be approved.
           type: array
         predeterminedBalances:
-          $ref: '#/components/schemas/iPredeterminedBalances'
           description: The predetermined balances for each transfer.
+          $ref: '#/components/schemas/iPredeterminedBalances'
         approvalAmounts:
-          $ref: '#/components/schemas/iApprovalAmounts'
           description: The maximum approved amounts for this approval.
+          $ref: '#/components/schemas/iApprovalAmounts'
         maxNumTransfers:
-          $ref: '#/components/schemas/iMaxNumTransfers'
           description: The max num transfers for this approval.
+          $ref: '#/components/schemas/iMaxNumTransfers'
         requireToEqualsInitiatedBy:
           description: Whether the to address must equal the initiatedBy address.
           type: boolean
@@ -7971,8 +8807,8 @@ components:
           description: The user's outgoing approvals.
           type: array
         userPermissions:
-          $ref: '#/components/schemas/iUserPermissions'
           description: The user's permissions.
+          $ref: '#/components/schemas/iUserPermissions'
         autoApproveSelfInitiatedOutgoingTransfers:
           description: >-
             Whether the user's self-initiated outgoing transfers are

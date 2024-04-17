@@ -1,7 +1,8 @@
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, deepCopyPrimitives, getConverterFunction } from '@/common/base';
-import type { iBalance, iTransfer, iZkProofSolution } from '@/interfaces/badges/core';
+import type { iBalance, iTransfer } from '@/interfaces/badges/core';
 import * as proto from '@/proto';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
+import { CosmosAddress } from '..';
 import { convertToCosmosAddress } from '../address-converter/converter';
 import { GO_MAX_UINT_64, safeAddKeepLeft, safeMultiplyKeepLeft } from '../common/math';
 import type { NumberType } from '../common/string-numbers';
@@ -16,8 +17,8 @@ import { UintRangeArray } from './uintRanges';
  * @category Approvals / Transferability
  */
 export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer<T>> implements iTransfer<T> {
-  from: string;
-  toAddresses: string[];
+  from: CosmosAddress;
+  toAddresses: CosmosAddress[];
   balances: BalanceArray<T>;
   precalculateBalancesFromApproval?: ApprovalIdentifierDetails;
   merkleProofs?: MerkleProof[];
@@ -164,8 +165,8 @@ export class TransferWithIncrements<T extends NumberType>
   toAddressesLength?: T;
   incrementBadgeIdsBy?: T;
   incrementOwnershipTimesBy?: T;
-  from: string;
-  toAddresses: string[];
+  from: CosmosAddress;
+  toAddresses: CosmosAddress[];
   balances: BalanceArray<T>;
   precalculateBalancesFromApproval?: ApprovalIdentifierDetails;
   merkleProofs?: MerkleProof[];

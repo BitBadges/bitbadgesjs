@@ -17,6 +17,7 @@ import type { iMsgCreateCollection } from './interfaces';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base';
 import * as badges from '@/proto/badges/tx_pb';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
+import { CosmosAddress } from '@/api-indexer';
 
 /**
  * MsgCreateCollection is a transaction that can be used to create a collection.
@@ -27,7 +28,7 @@ import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
  * @category Transactions
  */
 export class MsgCreateCollection<T extends NumberType> extends BaseNumberTypeClass<MsgCreateCollection<T>> implements iMsgCreateCollection<T> {
-  creator: string;
+  creator: CosmosAddress;
   balancesType?: string;
   defaultBalances?: UserBalanceStore<T>;
   badgesToCreate?: BalanceArray<T>;

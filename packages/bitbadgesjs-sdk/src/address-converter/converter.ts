@@ -139,7 +139,7 @@ export function mustConvertToCosmosAddress(address: string) {
 /**
  * Converts an address from a supported chain to a Ethereum address. Throws when cannot convert.
  *
- *@category Address Utils
+ * @category Address Utils
  */
 export function mustConvertToEthAddress(address: string) {
   const bech32Address = convertToEthAddress(address);
@@ -164,7 +164,7 @@ export function mustConvertToBtcAddress(address: string) {
  * Converts an address from a supported chain to an Ethereum address
  * If we are unable to convert the address, we return an empty string
  *
- *@category Address Utils
+ * @category Address Utils
  */
 export function convertToEthAddress(address: string) {
   try {
@@ -178,7 +178,7 @@ export function convertToEthAddress(address: string) {
  * Converts an address from a supported chain to a Bitcoin address
  * If we are unable to convert the address, we return an empty string
  *
- *@category Address Utils
+ * @category Address Utils
  */
 export function convertToBtcAddress(address: string) {
   try {

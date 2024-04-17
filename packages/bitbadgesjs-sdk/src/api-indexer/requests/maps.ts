@@ -9,19 +9,25 @@ import { iUpdateHistory, UpdateHistory } from '../docs/docs';
  * @category API Requests / Responses
  */
 export interface GetMapsRouteRequestBody {
+  /** The IDs of the maps to fetch. */
   mapIds: string[];
 }
 
 /**
+ * @inheritDoc iMap
  * @category Interfaces
  */
 export interface iMapWithValues<T extends NumberType> extends iMap<T> {
+  /** The (key, value) pairs for the maps that are set. */
   values: { [key: string]: iValueStore };
+  /** The fetched metadata for the map (if any). */
   metadata?: iMetadata<T>;
+  /** The update history for the map. Maps are maintained through blockchain transactions. */
   updateHistory: iUpdateHistory<T>[];
 }
 
 /**
+ * @inheritDoc iMapWithValues
  * @category Maps
  */
 export class MapWithValues<T extends NumberType> extends Map<T> implements iMapWithValues<T> {

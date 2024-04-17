@@ -1,17 +1,23 @@
-import { BalanceArray } from '@/core/balances';
-import type { NumberType } from '@/common/string-numbers';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base';
-import { ApprovalIdentifierDetails, ZkProofSolution } from '@/proto/badges/transfers_pb';
-import type { iActivityDoc, iClaimAlertDoc, iListActivityDoc, iReviewDoc, iTransferActivityDoc } from './interfaces';
-import { iZkProofSolution } from '@/interfaces';
+import type { NumberType } from '@/common/string-numbers';
+import { BalanceArray } from '@/core/balances';
+import { ApprovalIdentifierDetails } from '@/proto/badges/transfers_pb';
+import type {
+  CosmosAddress,
+  UNIXMilliTimestamp,
+  iActivityDoc,
+  iClaimAlertDoc,
+  iListActivityDoc,
+  iReviewDoc,
+  iTransferActivityDoc
+} from './interfaces';
 
 /**
- * Base activity item interface. All activity items should extend this interface.
- *
+ * @inheritDoc iActivityDoc
  * @category Indexer
  */
 export class ActivityDoc<T extends NumberType> extends BaseNumberTypeClass<ActivityDoc<T>> implements iActivityDoc<T> {
-  timestamp: T;
+  timestamp: UNIXMilliTimestamp<T>;
   block: T;
   _notificationsHandled?: boolean;
   _docId: string;
@@ -36,16 +42,15 @@ export class ActivityDoc<T extends NumberType> extends BaseNumberTypeClass<Activ
 }
 
 /**
- * Type for review activity items that extends the base ActivityDoc interface.
- *
+ * @inheritDoc iReviewDoc
  * @category Indexer
  */
 export class ReviewDoc<T extends NumberType> extends ActivityDoc<T> implements iReviewDoc<T> {
   review: string;
   stars: T;
-  from: string;
+  from: CosmosAddress;
   collectionId?: T;
-  reviewedAddress?: string;
+  reviewedAddress?: CosmosAddress;
 
   constructor(data: iReviewDoc<T>) {
     super(data);
@@ -66,21 +71,19 @@ export class ReviewDoc<T extends NumberType> extends ActivityDoc<T> implements i
 }
 
 /**
- * Type for transfer activity items that extends the base ActivityDoc interface.
- *
+ * @inheritDoc iTransferActivityDoc
  * @category Indexer
  */
 export class TransferActivityDoc<T extends NumberType> extends ActivityDoc<T> implements iTransferActivityDoc<T> {
-  to: string[];
-  from: string;
+  to: CosmosAddress[];
+  from: CosmosAddress;
   balances: BalanceArray<T>;
   collectionId: T;
   memo?: string;
   precalculateBalancesFromApproval?: ApprovalIdentifierDetails;
   prioritizedApprovals?: ApprovalIdentifierDetails[];
   onlyCheckPrioritizedApprovals?: boolean;
-  zkProofSolutions?: ZkProofSolution[];
-  initiatedBy: string;
+  initiatedBy: CosmosAddress;
   txHash?: string;
 
   constructor(data: iTransferActivityDoc<T>) {
@@ -90,7 +93,6 @@ export class TransferActivityDoc<T extends NumberType> extends ActivityDoc<T> im
     this.balances = BalanceArray.From(data.balances);
     this.collectionId = data.collectionId;
     this.memo = data.memo;
-    this.zkProofSolutions = data.zkProofSolutions ? data.zkProofSolutions.map((x) => new ZkProofSolution(x)) : undefined;
     this.precalculateBalancesFromApproval = data.precalculateBalancesFromApproval
       ? new ApprovalIdentifierDetails(data.precalculateBalancesFromApproval)
       : undefined;
@@ -110,8 +112,7 @@ export class TransferActivityDoc<T extends NumberType> extends ActivityDoc<T> im
 }
 
 /**
- * Type for list activity items that extends the base ActivityDoc interface.
- *
+ * @inheritDoc iListActivityDoc
  * @category Indexer
  */
 export class ListActivityDoc<T extends NumberType> extends ActivityDoc<T> implements iListActivityDoc<T> {
@@ -134,21 +135,18 @@ export class ListActivityDoc<T extends NumberType> extends ActivityDoc<T> implem
 }
 
 /**
- * Type for claim alert activity items that extends the base ActivityDoc interface.
- *
+ * @inheritDoc iClaimAlertDoc
  * @category Indexer
  */
 export class ClaimAlertDoc<T extends NumberType> extends ActivityDoc<T> implements iClaimAlertDoc<T> {
-  from: string;
-  code?: string;
-  cosmosAddresses: string[];
+  from: CosmosAddress;
+  cosmosAddresses: CosmosAddress[];
   collectionId: T;
   message?: string;
 
   constructor(data: iClaimAlertDoc<T>) {
     super(data);
     this.from = data.from;
-    this.code = data.code;
     this.cosmosAddresses = data.cosmosAddresses;
     this.collectionId = data.collectionId;
     this.message = data.message;

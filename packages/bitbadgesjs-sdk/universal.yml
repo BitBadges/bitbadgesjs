@@ -262,15 +262,13 @@
           type: string
         _id:
           title: Doc._id
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
       required:
         - _docId
       additionalProperties: false
       title: Doc
-      description: |-
-        Fields for the MongoDB database document
-        @category Indexer
+      description: '@category Indexer'
       type: object
     ErrorResponse:
       properties:
@@ -279,6 +277,7 @@
           description: >-
             Serialized error object for debugging purposes. Technical users can
             use this to debug issues.
+          type: string
         errorMessage:
           title: ErrorResponse.errorMessage
           description: >-
@@ -310,9 +309,13 @@
       properties:
         bookmark:
           title: PaginationInfo.bookmark
+          description: >-
+            The bookmark for the next page of results. Obtained from previous
+            response.
           type: string
         hasMore:
           title: PaginationInfo.hasMore
+          description: Whether there are more results to fetch.
           type: boolean
       required:
         - bookmark
@@ -327,22 +330,27 @@
       properties:
         txHash:
           title: iUpdateHistory.txHash
+          description: The transaction hash of the on-chain transaction that updated this.
           type: string
         block:
           title: iUpdateHistory.block
+          description: The block number of the on-chain transaction that updated this.
           anyOf:
             - type: string
             - type: number
         blockTimestamp:
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
           title: iUpdateHistory.blockTimestamp
-          anyOf:
-            - type: string
-            - type: number
+          description: >-
+            The timestamp of the block of the on-chain transaction that updated
+            this.
         timestamp:
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
           title: iUpdateHistory.timestamp
-          anyOf:
-            - type: string
-            - type: number
+          description: >-
+            The indexer's timestamp of the update. This is provided in some
+            cases because the time of indexing may be inconsistent with the time
+            of the block.
       required:
         - txHash
         - block
@@ -374,6 +382,53 @@
       title: ErrorDoc
       description: '@category Indexer'
       type: object
+    UNIXMilliTimestamp:
+      title: UNIXMilliTimestamp
+      description: >-
+        Numeric timestamp - value is equal to the milliseconds since the UNIX
+        epoch.
+
+        @category Interfaces
+      anyOf:
+        - type: string
+        - type: number
+    CosmosAddress:
+      title: CosmosAddress
+      description: >-
+        All supported addresses map to a Bech32 Cosmos address which is used by
+        the BitBadges blockchain behind the scenes.
+
+        For conversion, see the BitBadges documentation. If this type is used,
+        we must always convert to a Cosmos address before using it.
+
+        @category Interfaces
+      type: string
+    BlockinMessage:
+      title: BlockinMessage
+      description: >-
+        BlockinMessage is the sign-in challenge strint to be signed by the user.
+        It extends EIP 4361 Sign-In with Ethereum
+
+        and adds additional fields for cross-chain compatibility and native
+        asset ownership verification.
+
+
+        For example, 'https://bitbadges.io wants you to sign in with your
+        Ethereum address ...'
+
+        @category Interfaces
+      type: string
+    NativeAddress:
+      title: NativeAddress
+      description: >-
+        A native address is an address that is native to the user's chain. For
+        example, an Ethereum address is native to Ethereum (0x...).
+
+        If this type is used, we support any native address type. We do not
+        require conversion to a Cosmos address like the CosmosAddress type.
+
+        @category Interfaces
+      type: string
     iSocialConnections:
       properties:
         discord:
@@ -388,10 +443,8 @@
               title: iSocialConnections.discord.discriminator
               type: string
             lastUpdated:
+              $ref: '#/components/schemas/UNIXMilliTimestamp'
               title: iSocialConnections.discord.lastUpdated
-              anyOf:
-                - type: string
-                - type: number
           required:
             - username
             - id
@@ -408,10 +461,8 @@
               title: iSocialConnections.twitter.id
               type: string
             lastUpdated:
+              $ref: '#/components/schemas/UNIXMilliTimestamp'
               title: iSocialConnections.twitter.lastUpdated
-              anyOf:
-                - type: string
-                - type: number
           required:
             - username
             - id
@@ -428,10 +479,8 @@
               title: iSocialConnections.google.id
               type: string
             lastUpdated:
+              $ref: '#/components/schemas/UNIXMilliTimestamp'
               title: iSocialConnections.google.lastUpdated
-              anyOf:
-                - type: string
-                - type: number
           required:
             - username
             - id
@@ -448,10 +497,8 @@
               title: iSocialConnections.github.id
               type: string
             lastUpdated:
+              $ref: '#/components/schemas/UNIXMilliTimestamp'
               title: iSocialConnections.github.lastUpdated
-              anyOf:
-                - type: string
-                - type: number
           required:
             - username
             - id
@@ -461,16 +508,27 @@
           type: object
       additionalProperties: false
       title: iSocialConnections
-      description: '@category Interfaces'
+      description: >-
+        Social connections are tracked for each user to provide an enhanced
+        experience.
+
+        These are kept private from other users or sites using the API.
+
+        Currently, there is no use for these, but they may be used in the
+        future.
+
+        @category Interfaces
       type: object
     iNotificationPreferences:
       properties:
         email:
           title: iNotificationPreferences.email
+          description: The email to receive push notifications.
           type: string
         emailVerification:
           $ref: '#/components/schemas/iEmailVerificationStatus'
           title: iNotificationPreferences.emailVerification
+          description: The verification status of the email.
         preferences:
           properties:
             listActivity:
@@ -484,30 +542,43 @@
               type: boolean
           additionalProperties: false
           title: iNotificationPreferences.preferences
+          description: >-
+            The preferences for the notifications. What type of notifications
+            does the user want to receive?
           type: object
       additionalProperties: false
       title: iNotificationPreferences
-      description: '@category Interfaces'
+      description: |-
+        Details about the user's push notification preferences.
+        @category Interfaces
       type: object
     iEmailVerificationStatus:
       properties:
         verified:
           title: iEmailVerificationStatus.verified
+          description: Whether or not the email has been verified.
           type: boolean
         token:
           title: iEmailVerificationStatus.token
+          description: >-
+            The email verification token. This is used for verification and
+            unsubscription.
           type: string
         expiry:
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
           title: iEmailVerificationStatus.expiry
-          anyOf:
-            - type: string
-            - type: number
+          description: The expiry of the token for verification purposes.
         antiPhishingCode:
           title: iEmailVerificationStatus.antiPhishingCode
+          description: >-
+            A unique code that we will send with all emails to verify that
+            BitBadges is the one sending the email.
           type: string
       additionalProperties: false
       title: iEmailVerificationStatus
-      description: '@category Interfaces'
+      description: |-
+        The verification status of the user's email.
+        @category Interfaces
       type: object
     iActivityDoc:
       properties:
@@ -517,14 +588,12 @@
           type: string
         _id:
           title: Doc._id
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         timestamp:
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
           title: iActivityDoc.timestamp
-          description: The timestamp  of the activity.
-          anyOf:
-            - type: string
-            - type: number
+          description: The timestamp of the activity.
         block:
           title: iActivityDoc.block
           description: The block number of the activity.
@@ -544,8 +613,8 @@
       additionalProperties: false
       title: iActivityDoc, Doc
       description: |-
+        The base document interface for all acitivity types.
         @category Interfaces
-        Fields for the MongoDB database document
         @category Indexer
       type: object
     iReviewDoc:
@@ -556,14 +625,12 @@
           type: string
         _id:
           title: Doc._id
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         timestamp:
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
           title: iActivityDoc.timestamp
-          description: The timestamp  of the activity.
-          anyOf:
-            - type: string
-            - type: number
+          description: The timestamp of the activity.
         block:
           title: iActivityDoc.block
           description: The block number of the activity.
@@ -587,9 +654,9 @@
             - type: string
             - type: number
         from:
+          $ref: '#/components/schemas/CosmosAddress'
           title: iReviewDoc.from
-          description: The cosmos address of the user who gave the review.
-          type: string
+          description: The user who gave the review.
         collectionId:
           title: iReviewDoc.collectionId
           description: >-
@@ -599,11 +666,11 @@
             - type: string
             - type: number
         reviewedAddress:
+          $ref: '#/components/schemas/CosmosAddress'
           title: iReviewDoc.reviewedAddress
           description: >-
-            The cosmos address of the user who the review is for. Only
+            The Cosmos address of the user who the review is for. Only
             applicable to user reviews.
-          type: string
       required:
         - _docId
         - timestamp
@@ -615,7 +682,6 @@
       title: iReviewDoc, Doc
       description: |-
         @category Interfaces
-        Fields for the MongoDB database document
         @category Indexer
       type: object
     iTransferActivityDoc:
@@ -626,14 +692,12 @@
           type: string
         _id:
           title: Doc._id
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         timestamp:
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
           title: iActivityDoc.timestamp
-          description: The timestamp  of the activity.
-          anyOf:
-            - type: string
-            - type: number
+          description: The timestamp of the activity.
         block:
           title: iActivityDoc.block
           description: The block number of the activity.
@@ -648,15 +712,15 @@
           type: boolean
         to:
           items:
+            $ref: '#/components/schemas/CosmosAddress'
             title: iTransferActivityDoc.to.[]
-            type: string
           title: iTransferActivityDoc.to
-          description: The list of cosmos addresses that were involved in the activity.
+          description: The list of recipients.
           type: array
         from:
+          $ref: '#/components/schemas/CosmosAddress'
           title: iTransferActivityDoc.from
-          description: The list of cosmos addresses that were involved in the activity.
-          type: string
+          description: The sender of the badges.
         balances:
           items:
             $ref: '#/components/schemas/iBalance'
@@ -666,7 +730,7 @@
           type: array
         collectionId:
           title: iTransferActivityDoc.collectionId
-          description: The collection ID of the collection that was transferred.
+          description: The collection ID for the badges that was transferred.
           anyOf:
             - type: string
             - type: number
@@ -677,29 +741,27 @@
         precalculateBalancesFromApproval:
           $ref: '#/components/schemas/iApprovalIdentifierDetails'
           title: iTransferActivityDoc.precalculateBalancesFromApproval
-          description: Which approval to use to precalculate the balances.
+          description: Which approval to use to precalculate the balances?
         prioritizedApprovals:
           items:
             $ref: '#/components/schemas/iApprovalIdentifierDetails'
             title: iTransferActivityDoc.prioritizedApprovals.[]
           title: iTransferActivityDoc.prioritizedApprovals
-          description: The prioritized approvals of the transfer.
+          description: >-
+            The prioritized approvals of the transfer. This is used to check
+            certain approvals before others to ensure intended behavior.
           type: array
         onlyCheckPrioritizedApprovals:
           title: iTransferActivityDoc.onlyCheckPrioritizedApprovals
-          description: Whether or not to only check prioritized approvals.
+          description: >-
+            Whether or not to only check prioritized approvals? If false, we
+            will still check all approvals but prioritize the prioritized
+            approvals.
           type: boolean
-        zkProofSolutions:
-          items:
-            $ref: '#/components/schemas/iZkProofSolution'
-            title: iTransferActivityDoc.zkProofSolutions.[]
-          title: iTransferActivityDoc.zkProofSolutions
-          description: The ZK proofs for the transfer.
-          type: array
         initiatedBy:
+          $ref: '#/components/schemas/CosmosAddress'
           title: iTransferActivityDoc.initiatedBy
-          description: The cosmos address of the user who initiated the activity.
-          type: string
+          description: The user who initiated the transfer transaction.
         txHash:
           title: iTransferActivityDoc.txHash
           description: The transaction hash of the activity.
@@ -717,7 +779,6 @@
       title: iTransferActivityDoc, Doc
       description: |-
         @category Interfaces
-        Fields for the MongoDB database document
         @category Indexer
       type: object
     iListActivityDoc:
@@ -728,14 +789,12 @@
           type: string
         _id:
           title: Doc._id
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         timestamp:
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
           title: iActivityDoc.timestamp
-          description: The timestamp  of the activity.
-          anyOf:
-            - type: string
-            - type: number
+          description: The timestamp of the activity.
         block:
           title: iActivityDoc.block
           description: The block number of the activity.
@@ -750,18 +809,16 @@
           type: boolean
         listId:
           title: iListActivityDoc.listId
-          description: The list ID of the list.
+          description: The list ID.
           type: string
         addedToList:
           title: iListActivityDoc.addedToList
-          description: >-
-            Whether or not the address is included in the list. Note that this
-            could mean added to an whitelist or a blacklist
+          description: Whether or not the address was added to the list or removed.
           type: boolean
         addresses:
           items:
+            $ref: '#/components/schemas/CosmosAddress'
             title: iListActivityDoc.addresses.[]
-            type: string
           title: iListActivityDoc.addresses
           description: The list of addresses that were added or removed from the list.
           type: array
@@ -778,7 +835,6 @@
       title: iListActivityDoc, Doc
       description: |-
         @category Interfaces
-        Fields for the MongoDB database document
         @category Indexer
       type: object
     iClaimAlertDoc:
@@ -789,14 +845,12 @@
           type: string
         _id:
           title: Doc._id
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         timestamp:
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
           title: iActivityDoc.timestamp
-          description: The timestamp  of the activity.
-          anyOf:
-            - type: string
-            - type: number
+          description: The timestamp of the activity.
         block:
           title: iActivityDoc.block
           description: The block number of the activity.
@@ -813,14 +867,10 @@
           title: iClaimAlertDoc.from
           description: The sender
           type: string
-        code:
-          title: iClaimAlertDoc.code
-          description: The code of the claim alert.
-          type: string
         cosmosAddresses:
           items:
+            $ref: '#/components/schemas/CosmosAddress'
             title: iClaimAlertDoc.cosmosAddresses.[]
-            type: string
           title: iClaimAlertDoc.cosmosAddresses
           description: The cosmos addresses of the users that have been alerted.
           type: array
@@ -845,7 +895,6 @@
       title: iClaimAlertDoc, Doc
       description: |-
         @category Interfaces
-        Fields for the MongoDB database document
         @category Indexer
       type: object
     iCollectionDoc:
@@ -856,7 +905,7 @@
           type: string
         _id:
           title: Doc._id
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         collectionId:
           title: iCollectionDoc.collectionId
@@ -932,9 +981,9 @@
           description: The is archived timeline
           type: array
         createdBy:
+          $ref: '#/components/schemas/CosmosAddress'
           title: iCollectionDoc.createdBy
           description: The cosmos address of the user who created this collection
-          type: string
         createdBlock:
           title: iCollectionDoc.createdBlock
           description: The block number when this collection was created
@@ -942,13 +991,11 @@
             - type: string
             - type: number
         createdTimestamp:
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
           title: iCollectionDoc.createdTimestamp
           description: >-
             The timestamp when this collection was created (milliseconds since
             epoch)
-          anyOf:
-            - type: string
-            - type: number
         updateHistory:
           items:
             $ref: '#/components/schemas/iUpdateHistory'
@@ -957,9 +1004,9 @@
           description: The update history of this collection
           type: array
         aliasAddress:
+          $ref: '#/components/schemas/CosmosAddress'
           title: iCollectionDoc.aliasAddress
           description: The alias cosmos address for the collection
-          type: string
       required:
         - _docId
         - collectionId
@@ -981,7 +1028,6 @@
       title: iCollectionDoc, Doc
       description: |-
         @category Interfaces
-        Fields for the MongoDB database document
         @category Indexer
       type: object
     iAccountDoc:
@@ -992,7 +1038,7 @@
           type: string
         _id:
           title: Doc._id
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         publicKey:
           title: iAccountDoc.publicKey
@@ -1009,9 +1055,9 @@
           description: The public key type of the account
           type: string
         cosmosAddress:
+          $ref: '#/components/schemas/CosmosAddress'
           title: iAccountDoc.cosmosAddress
           description: The Cosmos address of the account
-          type: string
         ethAddress:
           title: iAccountDoc.ethAddress
           description: The Eth address of the account
@@ -1047,19 +1093,21 @@
       title: iAccountDoc, Doc
       description: |-
         @category Interfaces
-        Fields for the MongoDB database document
         @category Indexer
       type: object
     iCustomLink:
       properties:
         title:
           title: iCustomLink.title
+          description: Title of the link
           type: string
         url:
           title: iCustomLink.url
+          description: URL of the link
           type: string
         image:
           title: iCustomLink.image
+          description: Description of the link
           type: string
       required:
         - title
@@ -1075,15 +1123,18 @@
       properties:
         title:
           title: iCustomPage.title
+          description: The title of the custom page
           type: string
         description:
           title: iCustomPage.description
+          description: The description of the custom page
           type: string
         items:
           items:
             $ref: '#/components/schemas/iBatchBadgeDetails'
             title: iCustomPage.items.[]
           title: iCustomPage.items
+          description: The badge IDs to display on the custom page
           type: array
       required:
         - title
@@ -1097,15 +1148,18 @@
       properties:
         title:
           title: iCustomListPage.title
+          description: The title of the custom list page
           type: string
         description:
           title: iCustomListPage.description
+          description: The description of the custom list page
           type: string
         items:
           items:
             title: iCustomListPage.items.[]
             type: string
           title: iCustomListPage.items
+          description: The list IDs to display on the custom list page
           type: array
       required:
         - title
@@ -1127,28 +1181,24 @@
           type: string
         _id:
           title: Doc._id
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         fetchedProfile:
           title: iProfileDoc.fetchedProfile
           description: Whether we have already fetched the profile or not
           type: boolean
         seenActivity:
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
           title: iProfileDoc.seenActivity
           description: >-
             The timestamp of the last activity seen for this account
             (milliseconds since epoch)
-          anyOf:
-            - type: string
-            - type: number
         createdAt:
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
           title: iProfileDoc.createdAt
           description: >-
             The timestamp of when this account was created (milliseconds since
             epoch)
-          anyOf:
-            - type: string
-            - type: number
         discord:
           title: iProfileDoc.discord
           description: The Discord username of the account
@@ -1287,7 +1337,6 @@
       title: iProfileDoc, Doc
       description: |-
         @category Interfaces
-        Fields for the MongoDB database document
         @category Indexer
       type: object
     iQueueDoc:
@@ -1298,7 +1347,7 @@
           type: string
         _id:
           title: Doc._id
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         uri:
           title: iQueueDoc.uri
@@ -1321,13 +1370,11 @@
             - type: string
             - type: number
         refreshRequestTime:
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
           title: iQueueDoc.refreshRequestTime
           description: >-
             The timestamp of when this metadata was requested to be refreshed
             (milliseconds since epoch)
-          anyOf:
-            - type: string
-            - type: number
         numRetries:
           title: iQueueDoc.numRetries
           description: >-
@@ -1337,33 +1384,27 @@
             - type: string
             - type: number
         lastFetchedAt:
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
           title: iQueueDoc.lastFetchedAt
           description: >-
             The timestamp of when this metadata was last fetched (milliseconds
             since epoch)
-          anyOf:
-            - type: string
-            - type: number
         error:
           title: iQueueDoc.error
           description: The error message if this metadata failed to be fetched
           type: string
         deletedAt:
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
           title: iQueueDoc.deletedAt
           description: >-
             The timestamp of when this document was deleted (milliseconds since
             epoch)
-          anyOf:
-            - type: string
-            - type: number
         nextFetchTime:
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
           title: iQueueDoc.nextFetchTime
           description: >-
             The timestamp of when this document should be fetched next
             (milliseconds since epoch)
-          anyOf:
-            - type: string
-            - type: number
         emailMessage:
           title: iQueueDoc.emailMessage
           type: string
@@ -1387,7 +1428,6 @@
       title: iQueueDoc, Doc
       description: |-
         @category Interfaces
-        Fields for the MongoDB database document
         @category Indexer
       type: object
     iIndexerStatus:
@@ -1416,11 +1456,9 @@
             - type: string
             - type: number
         timestamp:
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
           title: iLatestBlockStatus.timestamp
           description: The timestamp of the latest block (milliseconds since epoch)
-          anyOf:
-            - type: string
-            - type: number
       required:
         - height
         - txIndex
@@ -1437,7 +1475,7 @@
           type: string
         _id:
           title: Doc._id
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         block:
           $ref: '#/components/schemas/iLatestBlockStatus'
@@ -1482,7 +1520,6 @@
       title: iStatusDoc, Doc
       description: |-
         @category Interfaces
-        Fields for the MongoDB database document
         @category Indexer
       type: object
     iAddressListEditKey:
@@ -1492,11 +1529,9 @@
           description: The key that can be used to edit the address list
           type: string
         expirationDate:
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
           title: iAddressListEditKey.expirationDate
           description: The expiration date of the key (milliseconds since epoch)
-          anyOf:
-            - type: string
-            - type: number
         mustSignIn:
           title: iAddressListEditKey.mustSignIn
           description: True if the user can only add their signed in address to the list
@@ -1519,7 +1554,9 @@
             title: iAddressList.addresses.[]
             type: string
           title: iAddressList.addresses
-          description: The addresses of the address list.
+          description: >-
+            The addresses of the address list. If this is a tracker list, the
+            addresses are the tracker IDs.
           type: array
         whitelist:
           title: iAddressList.whitelist
@@ -1536,20 +1573,20 @@
           description: Arbitrary custom data that can be stored on-chain.
           type: string
         createdBy:
+          $ref: '#/components/schemas/CosmosAddress'
           title: iAddressList.createdBy
           description: The address that created the address list.
-          type: string
         aliasAddress:
+          $ref: '#/components/schemas/CosmosAddress'
           title: iAddressList.aliasAddress
           description: The alias cosmos address of the address list.
-          type: string
         _docId:
           title: Doc._docId
           description: A unique stringified document ID
           type: string
         _id:
           title: Doc._id
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         updateHistory:
           items:
@@ -1565,13 +1602,11 @@
             - type: string
             - type: number
         lastUpdated:
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
           title: iAddressListDoc.lastUpdated
           description: >-
             The timestamp of when this list was last updated (milliseconds since
             epoch)
-          anyOf:
-            - type: string
-            - type: number
         nsfw:
           properties:
             reason:
@@ -1617,7 +1652,6 @@
       description: |-
         @category Interfaces
         @category Interfaces
-        Fields for the MongoDB database document
         @category Indexer
       type: object
     iBalanceDoc:
@@ -1667,7 +1701,7 @@
           type: string
         _id:
           title: Doc._id
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         collectionId:
           title: iBalanceDoc.collectionId
@@ -1676,9 +1710,9 @@
             - type: string
             - type: number
         cosmosAddress:
+          $ref: '#/components/schemas/CosmosAddress'
           title: iBalanceDoc.cosmosAddress
           description: The Cosmos address of the user
-          type: string
         onChain:
           title: iBalanceDoc.onChain
           description: True if the balances are on-chain
@@ -1688,14 +1722,12 @@
           description: The URI of the off-chain balances
           type: string
         fetchedAt:
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
           title: iBalanceDoc.fetchedAt
           description: >-
             The timestamp of when the off-chain balances were fetched
             (milliseconds since epoch). For BitBadges indexer, we only populate
             this for Mint and Total docs.
-          anyOf:
-            - type: string
-            - type: number
         fetchedAtBlock:
           title: iBalanceDoc.fetchedAtBlock
           description: >-
@@ -1744,8 +1776,6 @@
 
         @category Interfaces
 
-        Fields for the MongoDB database document
-
         @category Indexer
       type: object
     ClaimIntegrationPluginType:
@@ -1773,16 +1803,16 @@
           type: string
         _id:
           title: Doc._id
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         cid:
           title: iClaimBuilderDoc.cid
           description: The CID of the password document
           type: string
         createdBy:
+          $ref: '#/components/schemas/CosmosAddress'
           title: iClaimBuilderDoc.createdBy
           description: The cosmos address of the user who created this password
-          type: string
         docClaimed:
           title: iClaimBuilderDoc.docClaimed
           description: True if the password document is claimed by the collection
@@ -1844,7 +1874,6 @@
       title: iClaimBuilderDoc, Doc
       description: |-
         @category Interfaces
-        Fields for the MongoDB database document
         @category Indexer
       type: object
     iApprovalTrackerDoc:
@@ -1870,9 +1899,9 @@
             "outgoing".
           type: string
         approverAddress:
+          $ref: '#/components/schemas/CosmosAddress'
           title: iAmountTrackerIdDetails.approverAddress
           description: The address of the approval to check.
-          type: string
         trackerType:
           title: iAmountTrackerIdDetails.trackerType
           description: >-
@@ -1880,16 +1909,16 @@
             "initiatedBy".
           type: string
         approvedAddress:
+          $ref: '#/components/schemas/CosmosAddress'
           title: iAmountTrackerIdDetails.approvedAddress
           description: The address to check for the approval.
-          type: string
         _docId:
           title: Doc._docId
           description: A unique stringified document ID
           type: string
         _id:
           title: Doc._id
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         numTransfers:
           title: iApprovalTrackerDoc.numTransfers
@@ -1920,7 +1949,6 @@
       description: |-
         @category Interfaces
         @category Interfaces
-        Fields for the MongoDB database document
         @category Indexer
       type: object
     iChallengeTrackerIdDetails:
@@ -1949,9 +1977,9 @@
           description: The challenge level (i.e. "collection", "incoming", "outgoing")
           type: string
         approverAddress:
+          $ref: '#/components/schemas/CosmosAddress'
           title: iChallengeTrackerIdDetails.approverAddress
           description: The approver address (leave blank if challengeLevel = "collection")
-          type: string
       required:
         - collectionId
         - approvalId
@@ -1970,7 +1998,7 @@
           type: string
         _id:
           title: Doc._id
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         collectionId:
           title: iMerkleChallengeDoc.collectionId
@@ -1996,9 +2024,9 @@
           description: The challenge level (i.e. "collection", "incoming", "outgoing")
           type: string
         approverAddress:
+          $ref: '#/components/schemas/CosmosAddress'
           title: iMerkleChallengeDoc.approverAddress
           description: The approver address (leave blank if challengeLevel = "collection")
-          type: string
         usedLeafIndices:
           items:
             title: iMerkleChallengeDoc.usedLeafIndices.[]
@@ -2022,7 +2050,6 @@
       title: iMerkleChallengeDoc, Doc
       description: |-
         @category Interfaces
-        Fields for the MongoDB database document
         @category Indexer
       type: object
     iMerklechallengeTrackerIdDetails:
@@ -2047,9 +2074,9 @@
           description: The challenge level (i.e. "collection", "incoming", "outgoing")
           type: string
         approverAddress:
+          $ref: '#/components/schemas/CosmosAddress'
           title: iMerklechallengeTrackerIdDetails.approverAddress
           description: The approver address (leave blank if challengeLevel = "collection")
-          type: string
         usedLeafIndices:
           items:
             title: iMerklechallengeTrackerIdDetails.usedLeafIndices.[]
@@ -2079,7 +2106,7 @@
           type: string
         _id:
           title: Doc._id
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         content:
           anyOf:
@@ -2096,11 +2123,9 @@
             The content of the fetch document. Note that we store balances in
             BALANCES_DB and not here to avoid double storage.
         fetchedAt:
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
           title: iFetchDoc.fetchedAt
           description: The time the document was fetched
-          anyOf:
-            - type: string
-            - type: number
         fetchedAtBlock:
           title: iFetchDoc.fetchedAtBlock
           description: The block the document was fetched
@@ -2132,7 +2157,6 @@
       title: iFetchDoc, Doc
       description: |-
         @category Interfaces
-        Fields for the MongoDB database document
         @category Indexer
       type: object
     iRefreshDoc:
@@ -2143,7 +2167,7 @@
           type: string
         _id:
           title: Doc._id
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         collectionId:
           title: iRefreshDoc.collectionId
@@ -2152,11 +2176,9 @@
             - type: string
             - type: number
         refreshRequestTime:
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
           title: iRefreshDoc.refreshRequestTime
           description: The time the refresh was requested (Unix timestamp in milliseconds)
-          anyOf:
-            - type: string
-            - type: number
       required:
         - _docId
         - collectionId
@@ -2165,7 +2187,6 @@
       title: iRefreshDoc, Doc
       description: |-
         @category Interfaces
-        Fields for the MongoDB database document
         @category Indexer
       type: object
     iAirdropDoc:
@@ -2176,20 +2197,18 @@
           type: string
         _id:
           title: Doc._id
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         airdropped:
           title: iAirdropDoc.airdropped
           description: True if the airdrop has been completed
           type: boolean
         timestamp:
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
           title: iAirdropDoc.timestamp
           description: >-
             The timestamp of when the airdrop was completed (milliseconds since
             epoch)
-          anyOf:
-            - type: string
-            - type: number
         hash:
           title: iAirdropDoc.hash
           description: The hash of the airdrop transaction
@@ -2202,7 +2221,6 @@
       title: iAirdropDoc, Doc
       description: |-
         @category Interfaces
-        Fields for the MongoDB database document
         @category Indexer
       type: object
     iIPFSTotalsDoc:
@@ -2213,7 +2231,7 @@
           type: string
         _id:
           title: Doc._id
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         bytesUploaded:
           title: iIPFSTotalsDoc.bytesUploaded
@@ -2228,7 +2246,6 @@
       title: iIPFSTotalsDoc, Doc
       description: |-
         @category Interfaces
-        Fields for the MongoDB database document
         @category Indexer
       type: object
     iComplianceDoc:
@@ -2239,7 +2256,7 @@
           type: string
         _id:
           title: Doc._id
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         badges:
           properties:
@@ -2309,8 +2326,8 @@
               items:
                 properties:
                   cosmosAddress:
+                    $ref: '#/components/schemas/CosmosAddress'
                     title: iComplianceDoc.accounts.nsfw.[].cosmosAddress
-                    type: string
                   reason:
                     title: iComplianceDoc.accounts.nsfw.[].reason
                     type: string
@@ -2326,8 +2343,8 @@
               items:
                 properties:
                   cosmosAddress:
+                    $ref: '#/components/schemas/CosmosAddress'
                     title: iComplianceDoc.accounts.reported.[].cosmosAddress
-                    type: string
                   reason:
                     title: iComplianceDoc.accounts.reported.[].reason
                     type: string
@@ -2354,7 +2371,6 @@
       title: iComplianceDoc, Doc
       description: |-
         @category Interfaces
-        Fields for the MongoDB database document
         @category Indexer
       type: object
     iBlockinAuthSignatureDoc:
@@ -2365,13 +2381,19 @@
           type: string
         _id:
           title: Doc._id
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         signature:
           title: iBlockinAuthSignatureDoc.signature
+          description: >-
+            The signature of the Blockin message with the Blockin params as the
+            params field
           type: string
         publicKey:
           title: iBlockinAuthSignatureDoc.publicKey
+          description: >-
+            The public key for the signed. Only needed for certain chains
+            (Cosmos).
           type: string
         name:
           title: iBlockinAuthSignatureDoc.name
@@ -2383,27 +2405,37 @@
           title: iBlockinAuthSignatureDoc.image
           type: string
         cosmosAddress:
+          $ref: '#/components/schemas/CosmosAddress'
           title: iBlockinAuthSignatureDoc.cosmosAddress
-          type: string
+          description: The Cosmos address of the signer
         params:
           $ref: '#/components/schemas/ChallengeParams'
           title: iBlockinAuthSignatureDoc.params
+          description: >-
+            The sign-in params. These are all the details in the message that
+            was signed.
         secretsProofs:
           items:
             $ref: '#/components/schemas/iSecretsProof'
             title: iBlockinAuthSignatureDoc.secretsProofs.[]
           title: iBlockinAuthSignatureDoc.secretsProofs
+          description: >-
+            If required, you can additionally attach proof of secrets ot the
+            auth flow. These can be used to prove sensitive information to
+            verifiers.
           type: array
         createdAt:
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
           title: iBlockinAuthSignatureDoc.createdAt
-          anyOf:
-            - type: string
-            - type: number
+          description: >-
+            The timestamp of when the signature was created (milliseconds since
+            epoch)
         deletedAt:
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
           title: iBlockinAuthSignatureDoc.deletedAt
-          anyOf:
-            - type: string
-            - type: number
+          description: >-
+            If deleted, we still store temporarily for a period of time. We use
+            a deletedAt timestamp to determine when to delete.
       required:
         - _docId
         - signature
@@ -2418,7 +2450,6 @@
       title: iBlockinAuthSignatureDoc, Doc
       description: |-
         @category Interfaces
-        Fields for the MongoDB database document
         @category Indexer
       type: object
     iSecretDoc:
@@ -2429,17 +2460,19 @@
           type: string
         _id:
           title: Doc._id
-          description: A uniuqe document ID (Mongo DB ObjectID)
-          type: string
-        createdBy:
-          title: iSecret.createdBy
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         messageFormat:
           enum:
             - plaintext
             - json
           title: iSecret.messageFormat
+          description: The message format of the secretMessages.
           type: string
+        createdBy:
+          $ref: '#/components/schemas/CosmosAddress'
+          title: iSecret.createdBy
+          description: The address of the user who created the secret.
         proofOfIssuance:
           properties:
             message:
@@ -2460,24 +2493,53 @@
             - signer
           additionalProperties: false
           title: iSecret.proofOfIssuance
+          description: >-
+            Proof of issuance is used for BBS+ signatures (scheme = bbs) only.
+
+            BBS+ signatures are signed with a BBS+ key pair, but you would often
+            want the issuer to be a native address.
+
+            The prooofOfIssuance establishes a link saying that "I am the issuer
+            of this secret signed with BBS+ key pair ___".
+
+
+            Fields can be left blank for standard signatures.
           type: object
         secretId:
           title: iSecret.secretId
-          type: string
-        type:
-          title: iSecret.type
+          description: >-
+            The secret ID. This is the ID that is given to the user to query the
+            secret. Anyone with the ID can query it, so keep this safe and
+            secure.
           type: string
         scheme:
           enum:
             - bbs
             - standard
           title: iSecret.scheme
+          description: >-
+            The scheme of the secret. BBS+ signatures are supported and can be
+            used where selective disclosure is a requirement.
+
+            Otherwise, you can simply use your native blockchain's signature
+            scheme.
+          type: string
+        type:
+          title: iSecret.type
+          description: The type of the secret (e.g. credential).
           type: string
         secretMessages:
           items:
             title: iSecret.secretMessages.[]
             type: string
           title: iSecret.secretMessages
+          description: >-
+            Thesse are the secrets that are signed.
+
+            For BBS+ signatures, there can be >1 secretMessages, and the signer
+            can selectively disclose the secrets.
+
+            For standard signatures, there is only 1 secretMessage.
           type: array
         dataIntegrityProof:
           properties:
@@ -2495,21 +2557,42 @@
             - signer
           additionalProperties: false
           title: iSecret.dataIntegrityProof
+          description: >-
+            This is the signature and accompanying details of the
+            secretMessages. The siganture maintains the integrity of the
+            secretMessages.
+
+
+            This should match the expected scheme. For example, if the scheme is
+            BBS+, the signature should be a BBS+ signature and signer should be
+            a BBS+ public key.
           type: object
         name:
           title: iSecret.name
+          description: >-
+            Metadata for the secret for display purposes. Note this should not
+            contain anything sensitive. It may be displayed to verifiers.
           type: string
         image:
           title: iSecret.image
+          description: >-
+            Metadata for the secret for display purposes. Note this should not
+            contain anything sensitive. It may be displayed to verifiers.
           type: string
         description:
           title: iSecret.description
+          description: >-
+            Metadata for the secret for display purposes. Note this should not
+            contain anything sensitive. It may be displayed to verifiers.
           type: string
         viewers:
           items:
             title: iSecret.viewers.[]
             type: string
           title: iSecret.viewers
+          description: >-
+            Viewers for query purposes. These are the addresses that can query
+            the secret.
           type: array
         anchors:
           items:
@@ -2524,6 +2607,10 @@
             title: iSecret.anchors.[]
             type: object
           title: iSecret.anchors
+          description: |-
+            Anchors are on-chain transactions used to prove certain things
+            about the secret. For example, you can anchor the secret to a
+            transaction hash to prove that the secret existed at a certain time.
           type: array
         updateHistory:
           items:
@@ -2533,12 +2620,12 @@
           type: array
       required:
         - _docId
-        - createdBy
         - messageFormat
+        - createdBy
         - proofOfIssuance
         - secretId
-        - type
         - scheme
+        - type
         - secretMessages
         - dataIntegrityProof
         - name
@@ -2551,7 +2638,6 @@
       title: iSecretDoc, Doc, iSecret
       description: |-
         @category Interfaces
-        Fields for the MongoDB database document
         @category Indexer
         @category Interfaces
       type: object
@@ -2563,12 +2649,12 @@
           type: string
         _id:
           title: Doc._id
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         cosmosAddress:
+          $ref: '#/components/schemas/CosmosAddress'
           title: iFollowDetailsDoc.cosmosAddress
           description: The Cosmos address of the user
-          type: string
         followingCount:
           title: iFollowDetailsDoc.followingCount
           description: The number of users that the user is following
@@ -2583,15 +2669,15 @@
             - type: number
         followers:
           items:
+            $ref: '#/components/schemas/CosmosAddress'
             title: iFollowDetailsDoc.followers.[]
-            type: string
           title: iFollowDetailsDoc.followers
           description: The followers of the user
           type: array
         following:
           items:
+            $ref: '#/components/schemas/CosmosAddress'
             title: iFollowDetailsDoc.following.[]
-            type: string
           title: iFollowDetailsDoc.following
           description: The following of the user
           type: array
@@ -2613,7 +2699,6 @@
       title: iFollowDetailsDoc, Doc
       description: |-
         @category Interfaces
-        Fields for the MongoDB database document
         @category Indexer
       type: object
     iMapDoc:
@@ -2624,7 +2709,7 @@
           type: string
         _id:
           title: Doc._id
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         creator:
           title: iMap.creator
@@ -2665,15 +2750,20 @@
           additionalProperties:
             $ref: '#/components/schemas/iValueStore'
           title: iMapWithValues.values
+          description: The (key, value) pairs for the maps that are set.
           type: object
         metadata:
           $ref: '#/components/schemas/iMetadata'
           title: iMapWithValues.metadata
+          description: The fetched metadata for the map (if any).
         updateHistory:
           items:
             $ref: '#/components/schemas/iUpdateHistory'
             title: iMapWithValues.updateHistory.[]
           title: iMapWithValues.updateHistory
+          description: >-
+            The update history for the map. Maps are maintained through
+            blockchain transactions.
           type: array
       required:
         - _docId
@@ -2692,7 +2782,6 @@
       title: iMapDoc, Doc, iMap
       description: |-
         @category Interfaces
-        Fields for the MongoDB database document
         @category Indexer
         @category Interfaces
       type: object
@@ -2746,7 +2835,7 @@
           type: string
         description:
           title: iMetadata.description
-          description: The description of the badge or badge collection.
+          description: The description of the badge or badge collection. Supports markdown.
           type: string
         image:
           title: iMetadata.image
@@ -2758,14 +2847,6 @@
             The video of the badge or badge collection. If a standard video is
             used, this should be a link to the video. We will use image as the
             poster image. If a youtube video is used, we embed it as an iframe.
-          type: string
-        creator:
-          title: iMetadata.creator
-          description: The creator of the badge or badge collection.
-          type: string
-        color:
-          title: iMetadata.color
-          description: The color of the badge or badge collection.
           type: string
         category:
           title: iMetadata.category
@@ -2839,11 +2920,9 @@
             - type: string
             - type: number
         fetchedAt:
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
           title: iMetadata.fetchedAt
           description: The time the metadata was fetched.
-          anyOf:
-            - type: string
-            - type: number
         _isUpdating:
           title: iMetadata._isUpdating
           description: Whether the metadata is currently being updated.
@@ -2867,7 +2946,9 @@
             title: iAddressList.addresses.[]
             type: string
           title: iAddressList.addresses
-          description: The addresses of the address list.
+          description: >-
+            The addresses of the address list. If this is a tracker list, the
+            addresses are the tracker IDs.
           type: array
         whitelist:
           title: iAddressList.whitelist
@@ -2884,20 +2965,20 @@
           description: Arbitrary custom data that can be stored on-chain.
           type: string
         createdBy:
+          $ref: '#/components/schemas/CosmosAddress'
           title: iAddressList.createdBy
           description: The address that created the address list.
-          type: string
         aliasAddress:
+          $ref: '#/components/schemas/CosmosAddress'
           title: iAddressList.aliasAddress
           description: The alias cosmos address of the address list.
-          type: string
         _docId:
           title: Doc._docId
           description: A unique stringified document ID
           type: string
         _id:
           title: Doc._id
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         updateHistory:
           items:
@@ -2913,13 +2994,11 @@
             - type: string
             - type: number
         lastUpdated:
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
           title: iAddressListDoc.lastUpdated
           description: >-
             The timestamp of when this list was last updated (milliseconds since
             epoch)
-          anyOf:
-            - type: string
-            - type: number
         nsfw:
           properties:
             reason:
@@ -2995,6 +3074,7 @@
                 items:
                   title: iBitBadgesAddressList.claims.[].plugins.[]
                 title: iBitBadgesAddressList.claims.[].plugins
+                description: Plugins are the criteria for the claim.
                 type: array
             required:
               - claimId
@@ -3003,6 +3083,7 @@
             title: iBitBadgesAddressList.claims.[]
             type: object
           title: iBitBadgesAddressList.claims
+          description: The claims of the address list.
           type: array
       required:
         - listId
@@ -3020,9 +3101,9 @@
       additionalProperties: false
       title: iBitBadgesAddressList, iAddressList, Doc
       description: |-
+        @inheritDoc iAddressListDoc
         @category Interfaces
         @category Interfaces
-        Fields for the MongoDB database document
         @category Indexer
       type: object
     GetAddressListsRouteRequestBody:
@@ -3063,6 +3144,10 @@
               fetchPrivateParams:
                 title: >-
                   GetAddressListsRouteRequestBody.listsToFetch.[].fetchPrivateParams
+                description: >-
+                  Certain views and details are private. If you are the creator
+                  of the list, you can fetch these details. By default, we do
+                  not fetch them.
                 type: boolean
             required:
               - listId
@@ -3103,6 +3188,17 @@
               - properties:
                   private:
                     title: private
+                    description: Private lists will not show up in any search results.
+                    type: boolean
+                  viewableWithLink:
+                    title: viewableWithLink
+                    description: >-
+                      If the list is viewable with a link, anyone with the lisst
+                      ID can view details. Only applicable if private = true as
+                      well.
+
+                      If not viewable with a link, only the creator can view the
+                      list.
                     type: boolean
                   claims:
                     items:
@@ -3122,19 +3218,15 @@
                       title: claims.[]
                       type: object
                     title: claims
+                    description: >-
+                      The claims of the address list. Use resetState on updates
+                      for resetting individual plugin state (if applicable).
                     type: array
-                  viewableWithLink:
-                    title: viewableWithLink
-                    type: boolean
                 required:
                   - claims
                 additionalProperties: false
                 type: object
           title: UpdateAddressListsRouteRequestBody.addressLists
-          description: |-
-            New address lists to update.
-            Requester must be creator of the lists.
-            Only applicable to off-chain balances.
           type: array
       required:
         - addressLists
@@ -3156,6 +3248,17 @@
               - properties:
                   private:
                     title: private
+                    description: Private lists will not show up in any search results.
+                    type: boolean
+                  viewableWithLink:
+                    title: viewableWithLink
+                    description: >-
+                      If the list is viewable with a link, anyone with the lisst
+                      ID can view details. Only applicable if private = true as
+                      well.
+
+                      If not viewable with a link, only the creator can view the
+                      list.
                     type: boolean
                   claims:
                     items:
@@ -3175,19 +3278,15 @@
                       title: claims.[]
                       type: object
                     title: claims
+                    description: >-
+                      The claims of the address list. Use resetState on updates
+                      for resetting individual plugin state (if applicable).
                     type: array
-                  viewableWithLink:
-                    title: viewableWithLink
-                    type: boolean
                 required:
                   - claims
                 additionalProperties: false
                 type: object
           title: UpdateAddressListsRouteRequestBody.addressLists
-          description: |-
-            New address lists to update.
-            Requester must be creator of the lists.
-            Only applicable to off-chain balances.
           type: array
       required:
         - addressLists
@@ -3228,28 +3327,60 @@
           type: string
         _id:
           title: Doc._id
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
+        publicKey:
+          title: iBitBadgesUserInfo.publicKey
+          description: The public key of the account
+          type: string
+        accountNumber:
+          title: iBitBadgesUserInfo.accountNumber
+          description: The account number of the account
+          anyOf:
+            - type: string
+            - type: number
+        pubKeyType:
+          title: iBitBadgesUserInfo.pubKeyType
+          description: The public key type of the account
+          type: string
+        cosmosAddress:
+          $ref: '#/components/schemas/CosmosAddress'
+          title: iBitBadgesUserInfo.cosmosAddress
+          description: The Cosmos address of the account
+        ethAddress:
+          title: iBitBadgesUserInfo.ethAddress
+          description: The Eth address of the account
+          type: string
+        btcAddress:
+          title: iBitBadgesUserInfo.btcAddress
+          description: The Bitcoin address of the account
+          type: string
+        sequence:
+          title: iBitBadgesUserInfo.sequence
+          description: The sequence of the account
+          anyOf:
+            - type: string
+            - type: number
+        balance:
+          $ref: '#/components/schemas/iCosmosCoin'
+          title: iBitBadgesUserInfo.balance
+          description: The balance of the account
         fetchedProfile:
           title: iBitBadgesUserInfo.fetchedProfile
           description: Whether we have already fetched the profile or not
           type: boolean
         seenActivity:
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
           title: iBitBadgesUserInfo.seenActivity
           description: >-
             The timestamp of the last activity seen for this account
             (milliseconds since epoch)
-          anyOf:
-            - type: string
-            - type: number
         createdAt:
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
           title: iBitBadgesUserInfo.createdAt
           description: >-
             The timestamp of when this account was created (milliseconds since
             epoch)
-          anyOf:
-            - type: string
-            - type: number
         discord:
           title: iBitBadgesUserInfo.discord
           description: The Discord username of the account
@@ -3312,42 +3443,6 @@
           title: iBitBadgesUserInfo.customPages
           description: The custom pages of the account
           type: object
-        publicKey:
-          title: iBitBadgesUserInfo.publicKey
-          description: The public key of the account
-          type: string
-        accountNumber:
-          title: iBitBadgesUserInfo.accountNumber
-          description: The account number of the account
-          anyOf:
-            - type: string
-            - type: number
-        pubKeyType:
-          title: iBitBadgesUserInfo.pubKeyType
-          description: The public key type of the account
-          type: string
-        cosmosAddress:
-          title: iBitBadgesUserInfo.cosmosAddress
-          description: The Cosmos address of the account
-          type: string
-        ethAddress:
-          title: iBitBadgesUserInfo.ethAddress
-          description: The Eth address of the account
-          type: string
-        btcAddress:
-          title: iBitBadgesUserInfo.btcAddress
-          description: The Bitcoin address of the account
-          type: string
-        sequence:
-          title: iBitBadgesUserInfo.sequence
-          description: The sequence of the account
-          anyOf:
-            - type: string
-            - type: number
-        balance:
-          $ref: '#/components/schemas/iCosmosCoin'
-          title: iBitBadgesUserInfo.balance
-          description: The balance of the account
         watchlists:
           properties:
             badges:
@@ -3531,9 +3626,9 @@
             The reserved map for the account. This is created and managed
             on-chain through the x/maps module.
         address:
+          $ref: '#/components/schemas/NativeAddress'
           title: iBitBadgesUserInfo.address
           description: The native address of the account
-          type: string
         nsfw:
           additionalProperties:
             type: string
@@ -3617,7 +3712,6 @@
       title: iBitBadgesUserInfo, Doc
       description: |-
         @category Interfaces
-        Fields for the MongoDB database document
         @category Indexer
       type: object
     AccountViewKey:
@@ -3646,9 +3740,15 @@
       properties:
         address:
           title: AccountFetchDetails.address
+          description: >-
+            The address of the user. This can be their native address. Only one
+            of address or username should be specified.
           type: string
         username:
           title: AccountFetchDetails.username
+          description: >-
+            The username of the user. Only one of address or username should be
+            specified.
           type: string
         fetchSequence:
           title: AccountFetchDetails.fetchSequence
@@ -3798,12 +3898,12 @@
           type: string
         _id:
           title: Doc._id
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         cosmosAddress:
+          $ref: '#/components/schemas/CosmosAddress'
           title: iFollowDetailsDoc.cosmosAddress
           description: The Cosmos address of the user
-          type: string
         followingCount:
           title: iFollowDetailsDoc.followingCount
           description: The number of users that the user is following
@@ -3818,15 +3918,15 @@
             - type: number
         followers:
           items:
+            $ref: '#/components/schemas/CosmosAddress'
             title: iFollowDetailsDoc.followers.[]
-            type: string
           title: iFollowDetailsDoc.followers
           description: The followers of the user
           type: array
         following:
           items:
+            $ref: '#/components/schemas/CosmosAddress'
             title: iFollowDetailsDoc.following.[]
-            type: string
           title: iFollowDetailsDoc.following
           description: The following of the user
           type: array
@@ -3867,7 +3967,6 @@
       title: iGetFollowDetailsRouteSuccessResponse, Doc
       description: |-
         @category API Requests / Responses
-        Fields for the MongoDB database document
         @category Indexer
       type: object
     FilterBadgesInCollectionRequestBody:
@@ -4046,7 +4145,7 @@
           type: string
         _id:
           title: Doc._id
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         collectionId:
           title: iBalanceDoc.collectionId
@@ -4055,9 +4154,9 @@
             - type: string
             - type: number
         cosmosAddress:
+          $ref: '#/components/schemas/CosmosAddress'
           title: iBalanceDoc.cosmosAddress
           description: The Cosmos address of the user
-          type: string
         onChain:
           title: iBalanceDoc.onChain
           description: True if the balances are on-chain
@@ -4067,14 +4166,12 @@
           description: The URI of the off-chain balances
           type: string
         fetchedAt:
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
           title: iBalanceDoc.fetchedAt
           description: >-
             The timestamp of when the off-chain balances were fetched
             (milliseconds since epoch). For BitBadges indexer, we only populate
             this for Mint and Total docs.
-          anyOf:
-            - type: string
-            - type: number
         fetchedAtBlock:
           title: iBalanceDoc.fetchedAtBlock
           description: >-
@@ -4122,8 +4219,6 @@
         and permissions.
 
         @category Interfaces
-
-        Fields for the MongoDB database document
 
         @category Indexer
       type: object
@@ -4612,7 +4707,7 @@
         status:
           $ref: '#/components/schemas/iStatusDoc'
           title: iGetStatusRouteSuccessResponse.status
-          description: Includes status details about the indexer / blockchain.
+          description: Status details about the indexer / blockchain.
       required:
         - status
       additionalProperties: false
@@ -4696,43 +4791,6 @@
       title: iGetSearchRouteSuccessResponse
       description: '@category API Requests / Responses'
       type: object
-    CodesAndPasswords:
-      properties:
-        cid:
-          title: CodesAndPasswords.cid
-          description: The IPFS CID of the merkle challenge.
-          type: string
-        codes:
-          items:
-            title: CodesAndPasswords.codes.[]
-            type: string
-          title: CodesAndPasswords.codes
-          type: array
-        password:
-          title: CodesAndPasswords.password
-          type: string
-      required:
-        - cid
-        - codes
-        - password
-      additionalProperties: false
-      title: CodesAndPasswords
-      description: >-
-        Type to allow specifying codes and passwords for a merkle challenge.
-
-
-        We only support storing codes and passwords for merkle challenges
-        created by BitBadges via IPFS.
-
-        The IPFS CID of the merkle challenge is used to identify the merkle
-        challenge.
-
-
-        Note that we only support storing a set of codes and passwords once per
-        unique CID.
-
-        @category API Requests / Responses
-      type: object
     GetClaimsRouteRequestBody:
       properties:
         claimIds:
@@ -4740,9 +4798,14 @@
             title: GetClaimsRouteRequestBody.claimIds.[]
             type: string
           title: GetClaimsRouteRequestBody.claimIds
+          description: The claim IDs to fetch.
           type: array
         listId:
           title: GetClaimsRouteRequestBody.listId
+          description: >-
+            If the address list is private and viewable with the link only, you
+            must also specify the address list ID to prove knowledge of the
+            link.
           type: string
       required:
         - claimIds
@@ -4750,31 +4813,46 @@
       title: GetClaimsRouteRequestBody
       description: '@category API Requests / Responses'
       type: object
+    iClaimDetails:
+      properties:
+        claimId:
+          title: iClaimDetails.claimId
+          description: Unique claim ID.
+          type: string
+        balancesToSet:
+          $ref: '#/components/schemas/iIncrementedBalances'
+          title: iClaimDetails.balancesToSet
+          description: >-
+            The balances to set for the claim. Only used for claims for
+            collections that have off-chain indexed balances and are assigning
+            balances based on the claim.
+        plugins:
+          items:
+            title: iClaimDetails.plugins.[]
+          title: iClaimDetails.plugins
+          description: >-
+            Claim plugins. These are the criteria that must pass for a user to
+            claim the badge.
+          type: array
+        manualDistribution:
+          title: iClaimDetails.manualDistribution
+          description: >-
+            If manual distribution is enabled, we do not handle any distribution
+            of claim codes. We leave that up to the claim creator.
+          type: boolean
+      required:
+        - claimId
+        - plugins
+      additionalProperties: false
+      title: iClaimDetails
+      description: '@category Interfaces'
+      type: object
     iGetClaimsRouteSuccessResponse:
       properties:
         claims:
           items:
-            properties:
-              claimId:
-                title: iGetClaimsRouteSuccessResponse.claims.[].claimId
-                type: string
-              balancesToSet:
-                $ref: '#/components/schemas/iIncrementedBalances'
-                title: iGetClaimsRouteSuccessResponse.claims.[].balancesToSet
-              plugins:
-                items:
-                  title: iGetClaimsRouteSuccessResponse.claims.[].plugins.[]
-                title: iGetClaimsRouteSuccessResponse.claims.[].plugins
-                type: array
-              manualDistribution:
-                title: iGetClaimsRouteSuccessResponse.claims.[].manualDistribution
-                type: boolean
-            required:
-              - claimId
-              - plugins
-            additionalProperties: false
+            $ref: '#/components/schemas/iClaimDetails'
             title: iGetClaimsRouteSuccessResponse.claims.[]
-            type: object
           title: iGetClaimsRouteSuccessResponse.claims
           type: array
       required:
@@ -4787,6 +4865,7 @@
       properties:
         prevCodesOnly:
           title: CheckAndCompleteClaimRouteRequestBody.prevCodesOnly
+          description: If true, we will only return the user's previous claim codes.
           type: boolean
       additionalProperties: {}
       title: CheckAndCompleteClaimRouteRequestBody
@@ -4796,12 +4875,14 @@
       properties:
         code:
           title: iCheckAndCompleteClaimRouteSuccessResponse.code
+          description: The new claim code for the user if the claim was successful.
           type: string
         prevCodes:
           items:
             title: iCheckAndCompleteClaimRouteSuccessResponse.prevCodes.[]
             type: string
           title: iCheckAndCompleteClaimRouteSuccessResponse.prevCodes
+          description: The previous claim codes for the user.
           type: array
       additionalProperties: false
       title: iCheckAndCompleteClaimRouteSuccessResponse
@@ -4891,14 +4972,12 @@
           description: The Telegram username.
           type: string
         seenActivity:
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
           title: UpdateAccountInfoRouteRequestBody.seenActivity
           description: The last seen activity timestamp.
-          anyOf:
-            - type: string
-            - type: number
         readme:
           title: UpdateAccountInfoRouteRequestBody.readme
-          description: The README details.
+          description: The README details (markdown supported).
           type: string
         hiddenBadges:
           items:
@@ -4968,7 +5047,9 @@
           type: string
         profilePicImageFile:
           title: UpdateAccountInfoRouteRequestBody.profilePicImageFile
-          description: The profile picture image file. We will then upload to our CDN.
+          description: >-
+            The profile picture image file to set. We will then upload to our
+            CDN.
         notifications:
           properties:
             email:
@@ -4983,7 +5064,9 @@
               type: object
           additionalProperties: false
           title: UpdateAccountInfoRouteRequestBody.notifications
-          description: The notification preferences for the user.
+          description: >-
+            The notification preferences for the user. Will only be returned if
+            user is authenticated with full access.
           type: object
         approvedSignInMethods:
           properties:
@@ -5009,11 +5092,16 @@
               type: object
           additionalProperties: false
           title: UpdateAccountInfoRouteRequestBody.approvedSignInMethods
-          description: Approved sign in methods
+          description: >-
+            Approved sign in methods. Only returned if user is authenticated
+            with full access.
           type: object
         socialConntections:
           $ref: '#/components/schemas/iSocialConnections'
           title: UpdateAccountInfoRouteRequestBody.socialConntections
+          description: >-
+            The social connections for the user. Only returned if user is
+            authenticated with full access.
       additionalProperties: false
       title: UpdateAccountInfoRouteRequestBody
       description: '@category API Requests / Responses'
@@ -5227,6 +5315,7 @@
           additionalProperties: false
           title: >-
             iAddApprovalDetailsToOffChainStorageRouteSuccessResponse.challengeResult
+          description: The result for the approval challenge details.
           type: object
       required:
         - result
@@ -5241,9 +5330,9 @@
           title: GetSignInChallengeRouteRequestBody.chain
           description: The blockchain to be signed in with.
         address:
+          $ref: '#/components/schemas/NativeAddress'
           title: GetSignInChallengeRouteRequestBody.address
-          description: The user's blockchain address (their native L1 address).
-          type: string
+          description: The user's blockchain address. This can be their native address.
         hours:
           title: GetSignInChallengeRouteRequestBody.hours
           description: The number of hours to be signed in for.
@@ -5268,9 +5357,9 @@
           title: iGetSignInChallengeRouteSuccessResponse.params
           description: The challenge parameters.
         message:
+          $ref: '#/components/schemas/BlockinMessage'
           title: iGetSignInChallengeRouteSuccessResponse.message
           description: The Blockin challenge message to sign.
-          type: string
       required:
         - nonce
         - params
@@ -5282,16 +5371,18 @@
     VerifySignInRouteRequestBody:
       properties:
         message:
+          $ref: '#/components/schemas/BlockinMessage'
           title: VerifySignInRouteRequestBody.message
-          description: The original Blockin message
-          type: string
+          description: The original Blockin message that was signed.
         signature:
           title: VerifySignInRouteRequestBody.signature
           description: The signature of the Blockin message
           type: string
         publicKey:
           title: VerifySignInRouteRequestBody.publicKey
-          description: Required for some chains. The public key of the signer.
+          description: >-
+            Required for some chains (Cosmos) to verify signature. The public
+            key of the signer.
           type: string
       required:
         - message
@@ -5317,9 +5408,9 @@
           description: Indicates whether the user is signed in.
           type: boolean
         message:
+          $ref: '#/components/schemas/BlockinMessage'
           title: iCheckSignInStatusRequestSuccessResponse.message
           description: The Blockin message that was signed.
-          type: string
         discord:
           properties:
             username:
@@ -5367,6 +5458,7 @@
             - username
           additionalProperties: false
           title: iCheckSignInStatusRequestSuccessResponse.github
+          description: Signed in with GitHub username?
           type: object
         google:
           properties:
@@ -5381,6 +5473,7 @@
             - username
           additionalProperties: false
           title: iCheckSignInStatusRequestSuccessResponse.google
+          description: Signed in with Google username?
           type: object
       required:
         - signedIn
@@ -5391,27 +5484,28 @@
       type: object
     SignOutRequestBody:
       properties:
+        signOutBlockin:
+          title: SignOutRequestBody.signOutBlockin
+          description: Sign out of Blockin, and thus the entire API.
+          type: boolean
         signOutDiscord:
           title: SignOutRequestBody.signOutDiscord
+          description: Sign out of Discord.
           type: boolean
         signOutTwitter:
           title: SignOutRequestBody.signOutTwitter
-          type: boolean
-        signOutBlockin:
-          title: SignOutRequestBody.signOutBlockin
+          description: Sign out of Twitter.
           type: boolean
         signOutGoogle:
           title: SignOutRequestBody.signOutGoogle
+          description: Sign out of Google.
           type: boolean
         signOutGithub:
           title: SignOutRequestBody.signOutGithub
+          description: Sign out of GitHub.
           type: boolean
       required:
-        - signOutDiscord
-        - signOutTwitter
         - signOutBlockin
-        - signOutGoogle
-        - signOutGithub
       additionalProperties: false
       title: SignOutRequestBody
       description: '@category API Requests / Responses'
@@ -5646,9 +5740,7 @@
             - txhash
           additionalProperties: false
           title: iBroadcastTxRouteSuccessResponse.tx_response
-          description: |-
-            The response from the blockchain for the broadcasted tx.
-            See Cosmos SDK documentation for what each field means.
+          description: The response from the blockchain for the broadcasted tx.
           type: object
       required:
         - tx_response
@@ -5783,18 +5875,26 @@
             properties:
               collectionId:
                 title: SendClaimAlertsRouteRequestBody.claimAlerts.[].collectionId
+                description: >-
+                  The collection ID to associate with the claim alert. If
+                  specified, you (the sender) must be the manager of the
+                  collection. This is typically used
+
+                  for sending claim codes. Set to 0 for unspecified.
                 anyOf:
                   - type: string
                   - type: number
               message:
                 title: SendClaimAlertsRouteRequestBody.claimAlerts.[].message
+                description: The message to send to the user.
                 type: string
               cosmosAddresses:
                 items:
+                  $ref: '#/components/schemas/CosmosAddress'
                   title: >-
                     SendClaimAlertsRouteRequestBody.claimAlerts.[].cosmosAddresses.[]
-                  type: string
                 title: SendClaimAlertsRouteRequestBody.claimAlerts.[].cosmosAddresses
+                description: The addresses to send the claim alert to.
                 type: array
             required:
               - collectionId
@@ -5803,6 +5903,7 @@
             title: SendClaimAlertsRouteRequestBody.claimAlerts.[]
             type: object
           title: SendClaimAlertsRouteRequestBody.claimAlerts
+          description: The claim alerts to send to users.
           type: array
       required:
         - claimAlerts
@@ -5834,8 +5935,8 @@
           title: CosmosAccountResponse.pub_key
           type: object
         address:
+          $ref: '#/components/schemas/CosmosAddress'
           title: CosmosAccountResponse.address
-          type: string
       required:
         - account_number
         - sequence
@@ -5844,7 +5945,7 @@
       additionalProperties: false
       title: CosmosAccountResponse
       description: >-
-        information returned by the REST API getAccount route.
+        Information returned by the REST API getAccount route.
 
 
         Note this should be converted into AccountDoc or BitBadgesUserInfo
@@ -5855,16 +5956,18 @@
     GenericBlockinVerifyRouteRequestBody:
       properties:
         message:
+          $ref: '#/components/schemas/BlockinMessage'
           title: VerifySignInRouteRequestBody.message
-          description: The original Blockin message
-          type: string
+          description: The original Blockin message that was signed.
         signature:
           title: VerifySignInRouteRequestBody.signature
           description: The signature of the Blockin message
           type: string
         publicKey:
           title: VerifySignInRouteRequestBody.publicKey
-          description: Required for some chains. The public key of the signer.
+          description: >-
+            Required for some chains (Cosmos) to verify signature. The public
+            key of the signer.
           type: string
         options:
           $ref: '#/components/schemas/VerifyChallengeOptions'
@@ -5888,7 +5991,10 @@
       title: >-
         iGenericBlockinVerifyRouteSuccessResponse,
         iVerifySignInRouteSuccessResponse
-      description: '@category API Requests / Responses'
+      description: |-
+        @inheritDoc iVerifySignInRouteSuccessResponse
+        @category API Requests / Responses
+        @category API Requests / Responses
       type: object
     CreateSecretRouteRequestBody:
       properties:
@@ -5912,27 +6018,53 @@
             - signer
           additionalProperties: false
           title: CreateSecretRouteRequestBody.proofOfIssuance
+          description: >-
+            Proof of issuance is used for BBS+ signatures (scheme = bbs) only.
+
+            BBS+ signatures are signed with a BBS+ key pair, but you would often
+            want the issuer to be a native address.
+
+            The prooofOfIssuance establishes a link saying that "I am the issuer
+            of this secret signed with BBS+ key pair ___".
+
+
+            Fields can be left blank for standard signatures.
           type: object
         messageFormat:
           enum:
             - plaintext
             - json
           title: CreateSecretRouteRequestBody.messageFormat
+          description: The message format of the secretMessages.
           type: string
         scheme:
           enum:
             - bbs
             - standard
           title: CreateSecretRouteRequestBody.scheme
+          description: >-
+            The scheme of the secret. BBS+ signatures are supported and can be
+            used where selective disclosure is a requirement.
+
+            Otherwise, you can simply use your native blockchain's signature
+            scheme.
           type: string
         type:
           title: CreateSecretRouteRequestBody.type
+          description: The type of the secret (e.g. credential).
           type: string
         secretMessages:
           items:
             title: CreateSecretRouteRequestBody.secretMessages.[]
             type: string
           title: CreateSecretRouteRequestBody.secretMessages
+          description: >-
+            Thesse are the secrets that are signed.
+
+            For BBS+ signatures, there can be >1 secretMessages, and the signer
+            can selectively disclose the secrets.
+
+            For standard signatures, there is only 1 secretMessage.
           type: array
         dataIntegrityProof:
           properties:
@@ -5950,15 +6082,33 @@
             - signer
           additionalProperties: false
           title: CreateSecretRouteRequestBody.dataIntegrityProof
+          description: >-
+            This is the signature and accompanying details of the
+            secretMessages. The siganture maintains the integrity of the
+            secretMessages.
+
+
+            This should match the expected scheme. For example, if the scheme is
+            BBS+, the signature should be a BBS+ signature and signer should be
+            a BBS+ public key.
           type: object
         name:
           title: CreateSecretRouteRequestBody.name
+          description: >-
+            Metadata for the secret for display purposes. Note this should not
+            contain anything sensitive. It may be displayed to verifiers.
           type: string
         image:
           title: CreateSecretRouteRequestBody.image
+          description: >-
+            Metadata for the secret for display purposes. Note this should not
+            contain anything sensitive. It may be displayed to verifiers.
           type: string
         description:
           title: CreateSecretRouteRequestBody.description
+          description: >-
+            Metadata for the secret for display purposes. Note this should not
+            contain anything sensitive. It may be displayed to verifiers.
           type: string
       required:
         - proofOfIssuance
@@ -5978,6 +6128,10 @@
       properties:
         secretId:
           title: iCreateSecretRouteSuccessResponse.secretId
+          description: >-
+            The secret ID. This is the ID that is given to the user to query the
+            secret. Anyone with the ID can query it, so keep this safe and
+            secure.
           type: string
       required:
         - secretId
@@ -5989,6 +6143,10 @@
       properties:
         secretId:
           title: GetSecretRouteRequestBody.secretId
+          description: >-
+            The secret ID. This is the ID that is given to the user to query the
+            secret. Anyone with the ID can query it, so keep this safe and
+            secure.
           type: string
       required:
         - secretId
@@ -6004,17 +6162,19 @@
           type: string
         _id:
           title: Doc._id
-          description: A uniuqe document ID (Mongo DB ObjectID)
-          type: string
-        createdBy:
-          title: iSecret.createdBy
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         messageFormat:
           enum:
             - plaintext
             - json
           title: iSecret.messageFormat
+          description: The message format of the secretMessages.
           type: string
+        createdBy:
+          $ref: '#/components/schemas/CosmosAddress'
+          title: iSecret.createdBy
+          description: The address of the user who created the secret.
         proofOfIssuance:
           properties:
             message:
@@ -6035,24 +6195,53 @@
             - signer
           additionalProperties: false
           title: iSecret.proofOfIssuance
+          description: >-
+            Proof of issuance is used for BBS+ signatures (scheme = bbs) only.
+
+            BBS+ signatures are signed with a BBS+ key pair, but you would often
+            want the issuer to be a native address.
+
+            The prooofOfIssuance establishes a link saying that "I am the issuer
+            of this secret signed with BBS+ key pair ___".
+
+
+            Fields can be left blank for standard signatures.
           type: object
         secretId:
           title: iSecret.secretId
-          type: string
-        type:
-          title: iSecret.type
+          description: >-
+            The secret ID. This is the ID that is given to the user to query the
+            secret. Anyone with the ID can query it, so keep this safe and
+            secure.
           type: string
         scheme:
           enum:
             - bbs
             - standard
           title: iSecret.scheme
+          description: >-
+            The scheme of the secret. BBS+ signatures are supported and can be
+            used where selective disclosure is a requirement.
+
+            Otherwise, you can simply use your native blockchain's signature
+            scheme.
+          type: string
+        type:
+          title: iSecret.type
+          description: The type of the secret (e.g. credential).
           type: string
         secretMessages:
           items:
             title: iSecret.secretMessages.[]
             type: string
           title: iSecret.secretMessages
+          description: >-
+            Thesse are the secrets that are signed.
+
+            For BBS+ signatures, there can be >1 secretMessages, and the signer
+            can selectively disclose the secrets.
+
+            For standard signatures, there is only 1 secretMessage.
           type: array
         dataIntegrityProof:
           properties:
@@ -6070,21 +6259,42 @@
             - signer
           additionalProperties: false
           title: iSecret.dataIntegrityProof
+          description: >-
+            This is the signature and accompanying details of the
+            secretMessages. The siganture maintains the integrity of the
+            secretMessages.
+
+
+            This should match the expected scheme. For example, if the scheme is
+            BBS+, the signature should be a BBS+ signature and signer should be
+            a BBS+ public key.
           type: object
         name:
           title: iSecret.name
+          description: >-
+            Metadata for the secret for display purposes. Note this should not
+            contain anything sensitive. It may be displayed to verifiers.
           type: string
         image:
           title: iSecret.image
+          description: >-
+            Metadata for the secret for display purposes. Note this should not
+            contain anything sensitive. It may be displayed to verifiers.
           type: string
         description:
           title: iSecret.description
+          description: >-
+            Metadata for the secret for display purposes. Note this should not
+            contain anything sensitive. It may be displayed to verifiers.
           type: string
         viewers:
           items:
             title: iSecret.viewers.[]
             type: string
           title: iSecret.viewers
+          description: >-
+            Viewers for query purposes. These are the addresses that can query
+            the secret.
           type: array
         anchors:
           items:
@@ -6099,6 +6309,10 @@
             title: iSecret.anchors.[]
             type: object
           title: iSecret.anchors
+          description: |-
+            Anchors are on-chain transactions used to prove certain things
+            about the secret. For example, you can anchor the secret to a
+            transaction hash to prove that the secret existed at a certain time.
           type: array
         updateHistory:
           items:
@@ -6108,12 +6322,12 @@
           type: array
       required:
         - _docId
-        - createdBy
         - messageFormat
+        - createdBy
         - proofOfIssuance
         - secretId
-        - type
         - scheme
+        - type
         - secretMessages
         - dataIntegrityProof
         - name
@@ -6126,7 +6340,6 @@
       title: iGetSecretRouteSuccessResponse, Doc, iSecret
       description: |-
         @category API Requests / Responses
-        Fields for the MongoDB database document
         @category Indexer
         @category Interfaces
       type: object
@@ -6134,6 +6347,10 @@
       properties:
         secretId:
           title: DeleteSecretRouteRequestBody.secretId
+          description: >-
+            The secret ID. This is the ID that is given to the user to query the
+            secret. Anyone with the ID can query it, so keep this safe and
+            secure.
           type: string
       required:
         - secretId
@@ -6150,13 +6367,17 @@
       properties:
         secretId:
           title: UpdateSecretRouteRequestBody.secretId
+          description: >-
+            The secret ID. This is the ID that is given to the user to query the
+            secret. Anyone with the ID can query it, so keep this safe and
+            secure.
           type: string
         viewersToSet:
           items:
             properties:
               cosmosAddress:
+                $ref: '#/components/schemas/CosmosAddress'
                 title: UpdateSecretRouteRequestBody.viewersToSet.[].cosmosAddress
-                type: string
               delete:
                 title: UpdateSecretRouteRequestBody.viewersToSet.[].delete
                 type: boolean
@@ -6166,6 +6387,7 @@
             title: UpdateSecretRouteRequestBody.viewersToSet.[]
             type: object
           title: UpdateSecretRouteRequestBody.viewersToSet
+          description: You can approve specific viewers to view the secret.
           type: array
         anchorsToAdd:
           items:
@@ -6180,6 +6402,11 @@
             title: UpdateSecretRouteRequestBody.anchorsToAdd.[]
             type: object
           title: UpdateSecretRouteRequestBody.anchorsToAdd
+          description: >-
+            Blockchain anchors to add to the secret. These are on-chain
+            transactions that can be used to prove stuff about the secret, like
+
+            existence at a certain point in time or to maintain data integrity.
           type: array
         proofOfIssuance:
           properties:
@@ -6201,27 +6428,53 @@
             - signature
           additionalProperties: false
           title: UpdateSecretRouteRequestBody.proofOfIssuance
+          description: >-
+            Proof of issuance is used for BBS+ signatures (scheme = bbs) only.
+
+            BBS+ signatures are signed with a BBS+ key pair, but you would often
+            want the issuer to be a native address.
+
+            The prooofOfIssuance establishes a link saying that "I am the issuer
+            of this secret signed with BBS+ key pair ___".
+
+
+            Fields can be left blank for standard signatures.
           type: object
-        scheme:
-          enum:
-            - bbs
-            - standard
-          title: UpdateSecretRouteRequestBody.scheme
-          type: string
         messageFormat:
           enum:
             - plaintext
             - json
           title: UpdateSecretRouteRequestBody.messageFormat
+          description: The message format of the secretMessages.
+          type: string
+        scheme:
+          enum:
+            - bbs
+            - standard
+          title: UpdateSecretRouteRequestBody.scheme
+          description: >-
+            The scheme of the secret. BBS+ signatures are supported and can be
+            used where selective disclosure is a requirement.
+
+            Otherwise, you can simply use your native blockchain's signature
+            scheme.
           type: string
         type:
           title: UpdateSecretRouteRequestBody.type
+          description: The type of the secret (e.g. credential).
           type: string
         secretMessages:
           items:
             title: UpdateSecretRouteRequestBody.secretMessages.[]
             type: string
           title: UpdateSecretRouteRequestBody.secretMessages
+          description: >-
+            Thesse are the secrets that are signed.
+
+            For BBS+ signatures, there can be >1 secretMessages, and the signer
+            can selectively disclose the secrets.
+
+            For standard signatures, there is only 1 secretMessage.
           type: array
         dataIntegrityProof:
           properties:
@@ -6239,15 +6492,33 @@
             - signer
           additionalProperties: false
           title: UpdateSecretRouteRequestBody.dataIntegrityProof
+          description: >-
+            This is the signature and accompanying details of the
+            secretMessages. The siganture maintains the integrity of the
+            secretMessages.
+
+
+            This should match the expected scheme. For example, if the scheme is
+            BBS+, the signature should be a BBS+ signature and signer should be
+            a BBS+ public key.
           type: object
         name:
           title: UpdateSecretRouteRequestBody.name
+          description: >-
+            Metadata for the secret for display purposes. Note this should not
+            contain anything sensitive. It may be displayed to verifiers.
           type: string
         image:
           title: UpdateSecretRouteRequestBody.image
+          description: >-
+            Metadata for the secret for display purposes. Note this should not
+            contain anything sensitive. It may be displayed to verifiers.
           type: string
         description:
           title: UpdateSecretRouteRequestBody.description
+          description: >-
+            Metadata for the secret for display purposes. Note this should not
+            contain anything sensitive. It may be displayed to verifiers.
           type: string
       required:
         - secretId
@@ -6264,27 +6535,41 @@
       properties:
         name:
           title: CreateBlockinAuthCodeRouteRequestBody.name
+          description: The name of the Blockin auth code for display purposes.
           type: string
         description:
           title: CreateBlockinAuthCodeRouteRequestBody.description
+          description: The description of the Blockin auth code for display purposes.
           type: string
         image:
           title: CreateBlockinAuthCodeRouteRequestBody.image
+          description: The image of the Blockin auth code for display purposes.
           type: string
         message:
+          $ref: '#/components/schemas/BlockinMessage'
           title: CreateBlockinAuthCodeRouteRequestBody.message
-          type: string
+          description: The original Blockin message that was signed.
         signature:
           title: CreateBlockinAuthCodeRouteRequestBody.signature
+          description: The signature of the Blockin message
           type: string
         publicKey:
           title: CreateBlockinAuthCodeRouteRequestBody.publicKey
+          description: >-
+            The public key of the signer (if needed). Only certain chains
+            require this.
           type: string
         secretsProofs:
           items:
             $ref: '#/components/schemas/iSecretsProof'
             title: CreateBlockinAuthCodeRouteRequestBody.secretsProofs.[]
           title: CreateBlockinAuthCodeRouteRequestBody.secretsProofs
+          description: >-
+            If required, you can additionally add proof of secrets to the
+            authentication flow.
+
+            This proves sensitive information (e.g. GPAs, SAT scores, etc.)
+            without revealing the information itself.
           type: array
       required:
         - name
@@ -6312,10 +6597,14 @@
       properties:
         id:
           title: GetBlockinAuthCodeRouteRequestBody.id
+          description: The ID of the Blockin auth code.
           type: string
         options:
           $ref: '#/components/schemas/VerifyChallengeOptions'
           title: GetBlockinAuthCodeRouteRequestBody.options
+          description: >-
+            We attempt to verify the current status with each request. You can
+            provide additional options for verification here.
       required:
         - id
       additionalProperties: false
@@ -6325,9 +6614,9 @@
     iGetBlockinAuthCodeRouteSuccessResponse:
       properties:
         message:
+          $ref: '#/components/schemas/BlockinMessage'
           title: iGetBlockinAuthCodeRouteSuccessResponse.message
           description: The corresponding message that was signed to obtain the signature.
-          type: string
         signature:
           title: iGetBlockinAuthCodeRouteSuccessResponse.signature
           description: The signature of the message.
@@ -6337,6 +6626,7 @@
           title: iGetBlockinAuthCodeRouteSuccessResponse.params
           description: The converted Blockin params fort the message
         cosmosAddress:
+          $ref: '#/components/schemas/CosmosAddress'
           title: iGetBlockinAuthCodeRouteSuccessResponse.cosmosAddress
           description: >-
             The converted Cosmos address of params.address. This can be used as
@@ -6344,7 +6634,6 @@
 
             unique identifier for the user (e.g. avoid duplicate sign ins from
             equivalent 0x and cosmos1 addresses).
-          type: string
         verificationResponse:
           properties:
             success:
@@ -6403,15 +6692,21 @@
       properties:
         name:
           title: GenerateAppleWalletPassRouteRequestBody.name
+          description: The name to be displayed on the pass.
           type: string
         description:
           title: GenerateAppleWalletPassRouteRequestBody.description
+          description: The description to be displayed on the pass.
           type: string
         message:
+          $ref: '#/components/schemas/BlockinMessage'
           title: GenerateAppleWalletPassRouteRequestBody.message
-          type: string
+          description: >-
+            The Blockin message of the authentication code to create the pass
+            for.
         signature:
           title: GenerateAppleWalletPassRouteRequestBody.signature
+          description: The signature of the Blockin message.
           type: string
       required:
         - name
@@ -6441,11 +6736,15 @@
       properties:
         collectionId:
           title: GetClaimAlertsForCollectionRouteRequestBody.collectionId
+          description: The collection ID to get claim alerts for.
           anyOf:
             - type: string
             - type: number
         bookmark:
           title: GetClaimAlertsForCollectionRouteRequestBody.bookmark
+          description: >-
+            The pagination bookmark obtained from the previous request. Leave
+            blank for the first request.
           type: string
       required:
         - collectionId
@@ -6509,6 +6808,7 @@
             title: GetMapsRouteRequestBody.mapIds.[]
             type: string
           title: GetMapsRouteRequestBody.mapIds
+          description: The IDs of the maps to fetch.
           type: array
       required:
         - mapIds
@@ -6557,15 +6857,20 @@
           additionalProperties:
             $ref: '#/components/schemas/iValueStore'
           title: iMapWithValues.values
+          description: The (key, value) pairs for the maps that are set.
           type: object
         metadata:
           $ref: '#/components/schemas/iMetadata'
           title: iMapWithValues.metadata
+          description: The fetched metadata for the map (if any).
         updateHistory:
           items:
             $ref: '#/components/schemas/iUpdateHistory'
             title: iMapWithValues.updateHistory.[]
           title: iMapWithValues.updateHistory
+          description: >-
+            The update history for the map. Maps are maintained through
+            blockchain transactions.
           type: array
       required:
         - creator
@@ -6581,7 +6886,10 @@
         - updateHistory
       additionalProperties: false
       title: iMapWithValues, iMap
-      description: '@category Interfaces'
+      description: |-
+        @inheritDoc iMap
+        @category Interfaces
+        @category Interfaces
       type: object
     iGetMapsRouteSuccessResponse:
       properties:
@@ -6605,7 +6913,7 @@
           type: string
         _id:
           title: Doc._id
-          description: A uniuqe document ID (Mongo DB ObjectID)
+          description: A unique document ID (Mongo DB ObjectID)
           type: string
         collectionId:
           title: iCollectionDoc.collectionId
@@ -6690,9 +6998,9 @@
           description: The is archived timeline
           type: array
         createdBy:
+          $ref: '#/components/schemas/CosmosAddress'
           title: iCollectionDoc.createdBy
           description: The cosmos address of the user who created this collection
-          type: string
         createdBlock:
           title: iCollectionDoc.createdBlock
           description: The block number when this collection was created
@@ -6700,13 +7008,11 @@
             - type: string
             - type: number
         createdTimestamp:
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
           title: iCollectionDoc.createdTimestamp
           description: >-
             The timestamp when this collection was created (milliseconds since
             epoch)
-          anyOf:
-            - type: string
-            - type: number
         updateHistory:
           items:
             $ref: '#/components/schemas/iUpdateHistory'
@@ -6715,9 +7021,9 @@
           description: The update history of this collection
           type: array
         aliasAddress:
+          $ref: '#/components/schemas/CosmosAddress'
           title: iCollectionDoc.aliasAddress
           description: The alias cosmos address for the collection
-          type: string
         collectionPermissions:
           $ref: '#/components/schemas/iCollectionPermissions'
           title: iBitBadgesCollection.collectionPermissions
@@ -6870,28 +7176,8 @@
           type: object
         claims:
           items:
-            properties:
-              claimId:
-                title: iBitBadgesCollection.claims.[].claimId
-                type: string
-              plugins:
-                items:
-                  title: iBitBadgesCollection.claims.[].plugins.[]
-                title: iBitBadgesCollection.claims.[].plugins
-                type: array
-              balancesToSet:
-                $ref: '#/components/schemas/iIncrementedBalances'
-                title: iBitBadgesCollection.claims.[].balancesToSet
-              manualDistribution:
-                title: iBitBadgesCollection.claims.[].manualDistribution
-                type: boolean
-            required:
-              - claimId
-              - plugins
-              - balancesToSet
-            additionalProperties: false
+            $ref: '#/components/schemas/iClaimDetails'
             title: iBitBadgesCollection.claims.[]
-            type: object
           title: iBitBadgesCollection.claims
           description: >-
             Details about any off-chain claims for this collection. Only
@@ -6928,7 +7214,6 @@
       title: iBitBadgesCollection, Doc
       description: |-
         @category Interfaces
-        Fields for the MongoDB database document
         @category Indexer
       type: object
     iOffChainBalancesMap:
@@ -6946,13 +7231,13 @@
     iTransferWithIncrements:
       properties:
         from:
+          $ref: '#/components/schemas/CosmosAddress'
           title: iTransfer.from
           description: The address to transfer from.
-          type: string
         toAddresses:
           items:
+            $ref: '#/components/schemas/CosmosAddress'
             title: iTransfer.toAddresses.[]
-            type: string
           title: iTransfer.toAddresses
           description: The addresses to transfer to.
           type: array
@@ -7040,6 +7325,7 @@
       properties:
         collectionId:
           title: iBatchBadgeDetails.collectionId
+          description: The collection ID of this element's badge details.
           anyOf:
             - type: string
             - type: number
@@ -7048,6 +7334,7 @@
             $ref: '#/components/schemas/iUintRange'
             title: iBatchBadgeDetails.badgeIds.[]
           title: iBatchBadgeDetails.badgeIds
+          description: The corresponding badge IDs for this collection ID.
           type: array
       required:
         - collectionId
@@ -7149,25 +7436,8 @@
           title: iChallengeInfoDetails.challengeDetails
           description: The challenge details of the claim / approval
         claim:
-          properties:
-            plugins:
-              items:
-                title: iChallengeInfoDetails.claim.plugins.[]
-              title: iChallengeInfoDetails.claim.plugins
-              description: The plugins of the claim / approval
-              type: array
-            claimId:
-              title: iChallengeInfoDetails.claim.claimId
-              type: string
-            manualDistribution:
-              title: iChallengeInfoDetails.claim.manualDistribution
-              type: boolean
-          required:
-            - plugins
-            - claimId
-          additionalProperties: false
+          $ref: '#/components/schemas/iClaimDetails'
           title: iChallengeInfoDetails.claim
-          type: object
       required:
         - challengeDetails
       additionalProperties: false
@@ -7203,7 +7473,7 @@
             - type: number
         denom:
           title: iCosmosCoin.denom
-          description: The denomination of the coin.
+          description: The denomination of the coin (e.g. "badge").
           type: string
       required:
         - amount
@@ -7722,8 +7992,8 @@
     Sender:
       properties:
         accountAddress:
+          $ref: '#/components/schemas/CosmosAddress'
           title: Sender.accountAddress
-          type: string
         sequence:
           title: Sender.sequence
           type: number
@@ -8624,11 +8894,6 @@
         - Solana
         - Unknown
       title: SupportedChainType
-      description: >-
-        Safe adds two uints and returns an error if the result is invalid. Keeps
-        the right type.
-
-        @category Math
       type: string
     NumberType:
       title: NumberType
@@ -9251,32 +9516,88 @@
       type: object
     iSecretsProof:
       properties:
-        createdBy:
-          title: iSecretsProof.createdBy
-          type: string
-        scheme:
-          enum:
-            - bbs
-            - standard
-          title: iSecretsProof.scheme
-          type: string
+        entropies:
+          items:
+            title: iSecretsProof.entropies.[]
+            type: string
+          title: iSecretsProof.entropies
+          description: >-
+            Entropies used for certain data integrity proofs on-chain (e.g.
+            HASH(message + entropy) = on-chain value)
+          type: array
+        updateHistory:
+          items:
+            $ref: '#/components/schemas/iUpdateHistory'
+            title: iSecretsProof.updateHistory.[]
+          title: iSecretsProof.updateHistory
+          type: array
         messageFormat:
           enum:
             - plaintext
             - json
           title: iSecretsProof.messageFormat
+          description: The message format of the secretMessages.
+          type: string
+        createdBy:
+          $ref: '#/components/schemas/CosmosAddress'
+          title: iSecretsProof.createdBy
+          description: The address of the user who created the secret.
+        proofOfIssuance:
+          properties:
+            message:
+              title: iSecretsProof.proofOfIssuance.message
+              type: string
+            signature:
+              title: iSecretsProof.proofOfIssuance.signature
+              type: string
+            signer:
+              title: iSecretsProof.proofOfIssuance.signer
+              type: string
+            publicKey:
+              title: iSecretsProof.proofOfIssuance.publicKey
+              type: string
+          required:
+            - message
+            - signature
+            - signer
+          additionalProperties: false
+          title: iSecretsProof.proofOfIssuance
+          description: >-
+            Proof of issuance is used for BBS+ signatures (scheme = bbs) only.
+
+            BBS+ signatures are signed with a BBS+ key pair, but you would often
+            want the issuer to be a native address.
+
+            The prooofOfIssuance establishes a link saying that "I am the issuer
+            of this secret signed with BBS+ key pair ___".
+
+
+            Fields can be left blank for standard signatures.
+          type: object
+        scheme:
+          enum:
+            - bbs
+            - standard
+          title: iSecretsProof.scheme
+          description: >-
+            The scheme of the secret. BBS+ signatures are supported and can be
+            used where selective disclosure is a requirement.
+
+            Otherwise, you can simply use your native blockchain's signature
+            scheme.
           type: string
         secretMessages:
           items:
             title: iSecretsProof.secretMessages.[]
             type: string
           title: iSecretsProof.secretMessages
-          type: array
-        entropies:
-          items:
-            title: iSecretsProof.entropies.[]
-            type: string
-          title: iSecretsProof.entropies
+          description: >-
+            Thesse are the secrets that are signed.
+
+            For BBS+ signatures, there can be >1 secretMessages, and the signer
+            can selectively disclose the secrets.
+
+            For standard signatures, there is only 1 secretMessage.
           type: array
         dataIntegrityProof:
           properties:
@@ -9294,43 +9615,34 @@
             - signer
           additionalProperties: false
           title: iSecretsProof.dataIntegrityProof
-          type: object
-        proofOfIssuance:
-          properties:
-            message:
-              title: iSecretsProof.proofOfIssuance.message
-              type: string
-            signer:
-              title: iSecretsProof.proofOfIssuance.signer
-              type: string
-            signature:
-              title: iSecretsProof.proofOfIssuance.signature
-              type: string
-            publicKey:
-              title: iSecretsProof.proofOfIssuance.publicKey
-              type: string
-          required:
-            - message
-            - signer
-            - signature
-          additionalProperties: false
-          title: iSecretsProof.proofOfIssuance
+          description: >-
+            This is the signature and accompanying details of the
+            secretMessages. The siganture maintains the integrity of the
+            secretMessages.
+
+
+            This should match the expected scheme. For example, if the scheme is
+            BBS+, the signature should be a BBS+ signature and signer should be
+            a BBS+ public key.
           type: object
         name:
           title: iSecretsProof.name
+          description: >-
+            Metadata for the secret for display purposes. Note this should not
+            contain anything sensitive. It may be displayed to verifiers.
           type: string
         image:
           title: iSecretsProof.image
+          description: >-
+            Metadata for the secret for display purposes. Note this should not
+            contain anything sensitive. It may be displayed to verifiers.
           type: string
         description:
           title: iSecretsProof.description
+          description: >-
+            Metadata for the secret for display purposes. Note this should not
+            contain anything sensitive. It may be displayed to verifiers.
           type: string
-        updateHistory:
-          items:
-            $ref: '#/components/schemas/iUpdateHistory'
-            title: iSecretsProof.updateHistory.[]
-          title: iSecretsProof.updateHistory
-          type: array
         anchors:
           items:
             properties:
@@ -9344,14 +9656,18 @@
             title: iSecretsProof.anchors.[]
             type: object
           title: iSecretsProof.anchors
+          description: |-
+            Anchors are on-chain transactions used to prove certain things
+            about the secret. For example, you can anchor the secret to a
+            transaction hash to prove that the secret existed at a certain time.
           type: array
       required:
-        - createdBy
-        - scheme
         - messageFormat
+        - createdBy
+        - proofOfIssuance
+        - scheme
         - secretMessages
         - dataIntegrityProof
-        - proofOfIssuance
         - name
         - image
         - description
@@ -9361,15 +9677,17 @@
       type: object
     iSecret:
       properties:
-        createdBy:
-          title: iSecret.createdBy
-          type: string
         messageFormat:
           enum:
             - plaintext
             - json
           title: iSecret.messageFormat
+          description: The message format of the secretMessages.
           type: string
+        createdBy:
+          $ref: '#/components/schemas/CosmosAddress'
+          title: iSecret.createdBy
+          description: The address of the user who created the secret.
         proofOfIssuance:
           properties:
             message:
@@ -9390,24 +9708,53 @@
             - signer
           additionalProperties: false
           title: iSecret.proofOfIssuance
+          description: >-
+            Proof of issuance is used for BBS+ signatures (scheme = bbs) only.
+
+            BBS+ signatures are signed with a BBS+ key pair, but you would often
+            want the issuer to be a native address.
+
+            The prooofOfIssuance establishes a link saying that "I am the issuer
+            of this secret signed with BBS+ key pair ___".
+
+
+            Fields can be left blank for standard signatures.
           type: object
         secretId:
           title: iSecret.secretId
-          type: string
-        type:
-          title: iSecret.type
+          description: >-
+            The secret ID. This is the ID that is given to the user to query the
+            secret. Anyone with the ID can query it, so keep this safe and
+            secure.
           type: string
         scheme:
           enum:
             - bbs
             - standard
           title: iSecret.scheme
+          description: >-
+            The scheme of the secret. BBS+ signatures are supported and can be
+            used where selective disclosure is a requirement.
+
+            Otherwise, you can simply use your native blockchain's signature
+            scheme.
+          type: string
+        type:
+          title: iSecret.type
+          description: The type of the secret (e.g. credential).
           type: string
         secretMessages:
           items:
             title: iSecret.secretMessages.[]
             type: string
           title: iSecret.secretMessages
+          description: >-
+            Thesse are the secrets that are signed.
+
+            For BBS+ signatures, there can be >1 secretMessages, and the signer
+            can selectively disclose the secrets.
+
+            For standard signatures, there is only 1 secretMessage.
           type: array
         dataIntegrityProof:
           properties:
@@ -9425,21 +9772,42 @@
             - signer
           additionalProperties: false
           title: iSecret.dataIntegrityProof
+          description: >-
+            This is the signature and accompanying details of the
+            secretMessages. The siganture maintains the integrity of the
+            secretMessages.
+
+
+            This should match the expected scheme. For example, if the scheme is
+            BBS+, the signature should be a BBS+ signature and signer should be
+            a BBS+ public key.
           type: object
         name:
           title: iSecret.name
+          description: >-
+            Metadata for the secret for display purposes. Note this should not
+            contain anything sensitive. It may be displayed to verifiers.
           type: string
         image:
           title: iSecret.image
+          description: >-
+            Metadata for the secret for display purposes. Note this should not
+            contain anything sensitive. It may be displayed to verifiers.
           type: string
         description:
           title: iSecret.description
+          description: >-
+            Metadata for the secret for display purposes. Note this should not
+            contain anything sensitive. It may be displayed to verifiers.
           type: string
         viewers:
           items:
             title: iSecret.viewers.[]
             type: string
           title: iSecret.viewers
+          description: >-
+            Viewers for query purposes. These are the addresses that can query
+            the secret.
           type: array
         anchors:
           items:
@@ -9454,14 +9822,18 @@
             title: iSecret.anchors.[]
             type: object
           title: iSecret.anchors
+          description: |-
+            Anchors are on-chain transactions used to prove certain things
+            about the secret. For example, you can anchor the secret to a
+            transaction hash to prove that the secret existed at a certain time.
           type: array
       required:
-        - createdBy
         - messageFormat
+        - createdBy
         - proofOfIssuance
         - secretId
-        - type
         - scheme
+        - type
         - secretMessages
         - dataIntegrityProof
         - name
@@ -9487,10 +9859,15 @@
           title: iZkProof.customData
           description: Arbitrary custom data that can be stored on-chain.
           type: string
+        zkpTrackerId:
+          title: iZkProof.zkpTrackerId
+          description: ZKP tracker ID.
+          type: string
       required:
         - verificationKey
         - uri
         - customData
+        - zkpTrackerId
       additionalProperties: false
       title: iZkProof
       description: '@category Interfaces'
@@ -9602,7 +9979,9 @@
             title: iAddressList.addresses.[]
             type: string
           title: iAddressList.addresses
-          description: The addresses of the address list.
+          description: >-
+            The addresses of the address list. If this is a tracker list, the
+            addresses are the tracker IDs.
           type: array
         whitelist:
           title: iAddressList.whitelist
@@ -9619,13 +9998,13 @@
           description: Arbitrary custom data that can be stored on-chain.
           type: string
         createdBy:
+          $ref: '#/components/schemas/CosmosAddress'
           title: iAddressList.createdBy
           description: The address that created the address list.
-          type: string
         aliasAddress:
+          $ref: '#/components/schemas/CosmosAddress'
           title: iAddressList.aliasAddress
           description: The alias cosmos address of the address list.
-          type: string
       required:
         - listId
         - addresses
@@ -9639,13 +10018,13 @@
     iTransfer:
       properties:
         from:
+          $ref: '#/components/schemas/CosmosAddress'
           title: iTransfer.from
           description: The address to transfer from.
-          type: string
         toAddresses:
           items:
+            $ref: '#/components/schemas/CosmosAddress'
             title: iTransfer.toAddresses.[]
-            type: string
           title: iTransfer.toAddresses
           description: The addresses to transfer to.
           type: array
@@ -9721,11 +10100,11 @@
             "outgoing".
           type: string
         approverAddress:
+          $ref: '#/components/schemas/CosmosAddress'
           title: iApprovalIdentifierDetails.approverAddress
           description: >-
             The address of the approval to check. If approvalLevel is
             "collection", this is blank "".
-          type: string
       required:
         - approvalId
         - approvalLevel
@@ -9737,9 +10116,11 @@
     iCoinTransfer:
       properties:
         to:
+          $ref: '#/components/schemas/CosmosAddress'
           title: iCoinTransfer.to
-          description: The recipient of the coin transfer.
-          type: string
+          description: >-
+            The recipient of the coin transfer. This should be a Bech32 Cosmos
+            address.
         coins:
           items:
             $ref: '#/components/schemas/iCosmosCoin'
@@ -9777,9 +10158,9 @@
             "outgoing".
           type: string
         approverAddress:
+          $ref: '#/components/schemas/CosmosAddress'
           title: iAmountTrackerIdDetails.approverAddress
           description: The address of the approval to check.
-          type: string
         trackerType:
           title: iAmountTrackerIdDetails.trackerType
           description: >-
@@ -9787,9 +10168,9 @@
             "initiatedBy".
           type: string
         approvedAddress:
+          $ref: '#/components/schemas/CosmosAddress'
           title: iAmountTrackerIdDetails.approvedAddress
           description: The address to check for the approval.
-          type: string
       required:
         - collectionId
         - approvalId
@@ -9916,9 +10297,9 @@
           description: The times of the timeline item. Times in a timeline cannot overlap.
           type: array
         manager:
+          $ref: '#/components/schemas/CosmosAddress'
           title: iManagerTimeline.manager
           description: The manager of the collection.
-          type: string
       required:
         - timelineTimes
         - manager

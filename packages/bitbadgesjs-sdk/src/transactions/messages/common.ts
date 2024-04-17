@@ -1,4 +1,5 @@
 import type { SupportedChain } from '@/common/types';
+import { CosmosAddress } from '@/index';
 
 /**
  * EI712ToSign represents a signable EIP-712 payload that can be signed using MetaMask or Keplr.
@@ -39,7 +40,7 @@ export interface Fee {
  * @category Transactions
  */
 export interface Sender {
-  accountAddress: string;
+  accountAddress: CosmosAddress;
   sequence: number;
   accountNumber: number;
   pubkey: string;

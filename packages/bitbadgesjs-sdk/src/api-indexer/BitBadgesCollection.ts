@@ -86,6 +86,7 @@ import {
 } from './requests/collections';
 import { BitBadgesApiRoutes } from './requests/routes';
 import { iIncrementedBalances } from '@/interfaces/badges/approvals';
+import { ClaimDetails, iClaimDetails } from './requests';
 
 const { batchUpdateBadgeMetadata, getMetadataDetailsForBadgeId, getMetadataForBadgeId } = BadgeMetadataDetails;
 
@@ -104,10 +105,8 @@ export interface iBitBadgesCollection<T extends NumberType> extends iCollectionD
   cachedCollectionMetadata?: iMetadata<T>;
   /** The fetched badge metadata for this collection. Will only be fetched if requested. It is your responsibility to join this data. */
   cachedBadgeMetadata: iBadgeMetadataDetails<T>[];
-
   /** The default balances for users upon genesis, with off-chain metadata populated. */
   defaultBalances: iUserBalanceStoreWithDetails<T>;
-
   /** The fetched activity for this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views. */
   activity: iTransferActivityDoc<T>[];
   /** The fetched reviews for this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views. */
@@ -138,12 +137,7 @@ export interface iBitBadgesCollection<T extends NumberType> extends iCollectionD
   };
 
   /** Details about any off-chain claims for this collection. Only applicable when outsourced to BitBadges. */
-  claims: {
-    claimId: string;
-    plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
-    balancesToSet: iIncrementedBalances<T>;
-    manualDistribution?: boolean;
-  }[];
+  claims: iClaimDetails<T>[];
 }
 
 /**
@@ -169,12 +163,7 @@ export class BitBadgesCollection<T extends NumberType>
   merkleChallenges: MerkleChallengeDoc<T>[];
   approvalTrackers: ApprovalTrackerDoc<T>[];
 
-  claims: {
-    claimId: string;
-    plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
-    balancesToSet: IncrementedBalances<T>;
-    manualDistribution?: boolean;
-  }[];
+  claims: ClaimDetails<T>[];
 
   reservedMap?: MapDoc<T> | undefined;
 
@@ -206,14 +195,7 @@ export class BitBadgesCollection<T extends NumberType>
     this.nsfw = data.nsfw ? { ...data.nsfw, badgeIds: UintRangeArray.From(data.nsfw.badgeIds) } : undefined;
     this.reported = data.reported ? { ...data.reported, badgeIds: UintRangeArray.From(data.reported.badgeIds) } : undefined;
     this.views = data.views;
-    this.claims = data.claims.map((x) => {
-      return {
-        claimId: x.claimId,
-        plugins: x.plugins,
-        balancesToSet: new IncrementedBalances(x.balancesToSet),
-        manualDistribution: x.manualDistribution
-      };
-    });
+    this.claims = data.claims.map((x) => new ClaimDetails(x));
     this.reservedMap = data.reservedMap ? new MapDoc(data.reservedMap) : undefined;
   }
 

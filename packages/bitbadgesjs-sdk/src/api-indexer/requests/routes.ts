@@ -22,8 +22,6 @@ export class BitBadgesApiRoutes {
   static GetBadgeActivityRoute = (collectionId: NumberType, badgeId: NumberType) =>
     `/api/v0/collection/${collectionId.toString()}/${badgeId.toString()}/activity`;
   static RefreshMetadataRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/refresh`;
-  static RefreshBadgeMetadataRoute = (collectionId: NumberType, badgeId: NumberType) =>
-    `/api/v0/collection/${collectionId.toString()}/${badgeId.toString()}/refresh`;
   static GetRefreshStatusRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/refreshStatus`;
 
   static CheckAndCompleteClaimRoute = (claimId: string, cosmosAddress: string) => `/api/v0/claims/${claimId.toString()}/${cosmosAddress}`;

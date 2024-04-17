@@ -14,13 +14,14 @@ import type {
   iAddressList
 } from '../../../../interfaces/badges/core';
 import type { iUserBalanceStore } from '../../../../interfaces/badges/userBalances';
+import { CosmosAddress } from '@/api-indexer/docs/interfaces';
 
 /**
  * @category Interfaces
  */
 export interface iMsgCreateAddressLists {
   /** The creator of the transaction. */
-  creator: string;
+  creator: CosmosAddress;
   /** The address lists to create. */
   addressLists: iAddressList[];
 }
@@ -30,7 +31,7 @@ export interface iMsgCreateAddressLists {
  */
 export interface iMsgCreateCollection<T extends NumberType> {
   /** The creator of the transaction. */
-  creator: string;
+  creator: CosmosAddress;
 
   /** The balances type. Either "Standard", "Off-Chain - Indexed", "Off-Chain - Non-Indexed" or "Non-Public" */
   balancesType?: string;
@@ -74,7 +75,7 @@ export interface iMsgCreateCollection<T extends NumberType> {
  */
 export interface iMsgDeleteCollection<T extends NumberType> {
   /** The creator of the transaction. */
-  creator: string;
+  creator: CosmosAddress;
   /** The ID of the collection to delete. */
   collectionId: T;
 }
@@ -84,7 +85,7 @@ export interface iMsgDeleteCollection<T extends NumberType> {
  */
 export interface iMsgTransferBadges<T extends NumberType> {
   /** The creator of the transaction. */
-  creator: string;
+  creator: CosmosAddress;
   /** The ID of the collection to transfer badges from. */
   collectionId: T;
   /** The transfers to perform. */
@@ -127,7 +128,7 @@ export interface iMsgUpdateCollection<T extends NumberType> extends Omit<iMsgUni
  */
 export interface iMsgUpdateUserApprovals<T extends NumberType> {
   /** The creator of the transaction. */
-  creator: string;
+  creator: CosmosAddress;
   /** The ID of the collection to transfer badges from. */
   collectionId: T;
   /** Whether or not to update the outgoing approvals. */
