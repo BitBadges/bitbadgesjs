@@ -123,12 +123,7 @@ export class BadgeMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
 
     currBadgeMetadata = currBadgeMetadata.filter((val) => val && val.badgeIds.length > 0);
 
-    const hashTable = new Map<string, number>();
-    for (let i = 0; i < currBadgeMetadata.length; i++) {
-      const metadataDetails = currBadgeMetadata[i];
-      const hashedMetadata = SHA256(JSON.stringify(metadataDetails.metadata)).toString();
-      hashTable.set(hashedMetadata, i);
-    }
+    const currMetadataStrs = currBadgeMetadata.map((x) => JSON.stringify(x.metadata)).sort();
 
     for (const newBadgeMetadataDetails of newBadgeMetadataDetailsArr) {
       const currentMetadata = newBadgeMetadataDetails.metadata;
@@ -138,8 +133,10 @@ export class BadgeMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
 
         //If the metadata we are updating is already in the array (with matching uri and id), we can just insert the badge IDs
         let currBadgeMetadataExists = false;
-        const idx = hashTable.get(SHA256(JSON.stringify(currentMetadata)).toString());
-        if (idx) {
+        const currStr = JSON.stringify(currentMetadata);
+        const idx = currMetadataStrs.indexOf(currStr);
+
+        if (idx !== -1) {
           const val = currBadgeMetadata[idx];
           if (!val) continue; //For TS
 
@@ -182,8 +179,9 @@ export class BadgeMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
             })
           );
 
-          const hashedMetadata = SHA256(JSON.stringify(newBadgeMetadataDetails.metadata)).toString();
-          hashTable.set(hashedMetadata, currBadgeMetadata.length - 1);
+          const hashedMetadataStr = JSON.stringify(newBadgeMetadataDetails.metadata);
+          currMetadataStrs.push(hashedMetadataStr);
+          currMetadataStrs.sort();
         }
       }
     }

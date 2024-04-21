@@ -102,6 +102,8 @@ export interface iSocialConnections<T extends NumberType> {
 export interface iNotificationPreferences<T extends NumberType> {
   /** The email to receive push notifications. */
   email?: string;
+  /** The Discord ID to receive push notifications. */
+  discord?: { id: string; username: string; discriminator: string | undefined, token: string } | undefined;
   /** The verification status of the email. */
   emailVerification?: iEmailVerificationStatus<T>;
   /** The preferences for the notifications. What type of notifications does the user want to receive? */
@@ -378,11 +380,10 @@ export interface iProfileDoc<T extends NumberType> extends Doc {
 
   /** Approved ways to sign in (rather than Blockin) */
   approvedSignInMethods?: {
-    discord?: {
-      username: string;
-      discriminator?: string;
-      id: string;
-    };
+    discord?: { username: string; discriminator?: string | undefined; id: string } | undefined;
+    github?: { username: string; id: string } | undefined;
+    google?: { username: string; id: string } | undefined;
+    twitter?: { username: string; id: string } | undefined;
   };
 }
 
@@ -529,6 +530,9 @@ export interface iBalanceDocWithDetails<T extends NumberType> extends iBalanceDo
   userPermissions: iUserPermissionsWithDetails<T>;
 }
 
+/**
+ * @category Claims
+ */
 export type ClaimIntegrationPluginType =
   | 'password'
   | 'numUses'
@@ -544,75 +548,97 @@ export type ClaimIntegrationPluginType =
   | 'api'
   | 'email';
 
+/**
+ * @category Claims
+ */
 export type JsonBodyInputWithValue = {
   key: string;
   label: string;
   type?: 'date' | 'url';
   value: string | number | boolean;
 };
+
+/**
+ * @category Claims
+ */
 export type JsonBodyInputSchema = { key: string; label: string; type: 'date' | 'url' | 'string' | 'number' | 'boolean'; helper?: string };
 
-type OauthAppName = 'twitter' | 'stripe' | 'github' | 'google' | 'email';
+type OauthAppName = 'twitter' | 'stripe' | 'github' | 'google' | 'email' | 'discord';
+
+/**
+ * Public params are params that are visible to the public. For example, the number of uses for a claim code.
+ *
+ * @category Claims
+ */
 export type ClaimIntegrationPublicParamsType<T extends ClaimIntegrationPluginType> = T extends 'numUses'
   ? {
       maxUses: number;
       maxUsesPerAddress?: number;
       assignMethod: 'firstComeFirstServe' | 'codeIdx';
     }
-  : T extends 'discord'
+  : T extends 'codes'
     ? {
-        users?: string[];
-        serverId?: string;
-        serverName?: string;
-        maxUsesPerUser?: number;
-        hasPrivateList: boolean;
-        listUrl?: string;
+        numCodes: number;
       }
-    : T extends 'codes'
+    : T extends OauthAppName
       ? {
-          numCodes: number;
+          hasPrivateList: boolean;
+          users?: string[];
+          maxUsesPerUser?: number;
+          listUrl?: string;
         }
-      : T extends OauthAppName
+      : T extends 'transferTimes'
         ? {
-            hasPrivateList: boolean;
-            users?: string[];
-            maxUsesPerUser?: number;
-            listUrl?: string;
+            transferTimes: iUintRange<JSPrimitiveNumberType>[];
           }
-        : T extends 'transferTimes'
+        : T extends 'whitelist'
           ? {
-              transferTimes: iUintRange<JSPrimitiveNumberType>[];
+              listId?: string;
+              list?: iAddressList;
             }
-          : T extends 'whitelist'
+          : T extends 'mustOwnBadges'
             ? {
-                listId?: string;
-                list?: iAddressList;
+                ownershipRequirements?: AndGroup<NumberType> | OrGroup<NumberType> | OwnershipRequirements<NumberType>;
               }
-            : T extends 'mustOwnBadges'
+            : T extends 'api'
               ? {
-                  ownershipRequirements?: AndGroup<NumberType> | OrGroup<NumberType> | OwnershipRequirements<NumberType>;
+                  apiCalls: ClaimApiCallInfo[];
                 }
-              : T extends 'api'
-                ? {
-                    apiCalls: ClaimApiCallInfo[];
-                  }
-                : {};
+              : {};
 
+/**
+ * @category Claims
+ */
 export interface ClaimApiCallInfo {
+  /** The method of the API call */
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  /** The URI to call */
   uri: string;
   name: string;
   description?: string;
+  /** Whether or not to pass the user's address to this call */
   passAddress?: boolean;
+  /** Whether or not to pass the user's email to this call */
   passEmail?: boolean;
+  /** Whether or not to pass the user's Discord to this call */
   passDiscord?: boolean;
-  // passStripe?: boolean;
+  /** Whether or not to pass the user's Twitter to this call */
   passTwitter?: boolean;
+  /** Whether or not to pass the user's Github to this call */
   passGithub?: boolean;
+  /** Whether or not to pass the user's Google to this call */
   passGoogle?: boolean;
+  /** The body parameters to pass to the API call. These are the hardcoded values passed to every call. */
   bodyParams?: any;
+  /** The expected user inputs for the API call. */
   userInputsSchema: Array<JsonBodyInputSchema>;
 }
 
+/**
+ * Private params are params that are not visible to the public. For example, the password for a claim code.
+ *
+ * @category Claims
+ */
 export type ClaimIntegrationPrivateParamsType<T extends ClaimIntegrationPluginType> = T extends 'password'
   ? {
       password: string;
@@ -631,18 +657,17 @@ export type ClaimIntegrationPrivateParamsType<T extends ClaimIntegrationPluginTy
         ? {
             users?: string[];
           }
-        : T extends 'discord'
+        : T extends 'mustOwnBadges'
           ? {
-              users?: string[];
-              serverId?: string;
-              serverName?: string;
+              ownershipRequirements?: AndGroup<NumberType> | OrGroup<NumberType> | OwnershipRequirements<NumberType>;
             }
-          : T extends 'mustOwnBadges'
-            ? {
-                ownershipRequirements?: AndGroup<NumberType> | OrGroup<NumberType> | OwnershipRequirements<NumberType>;
-              }
-            : {};
+          : {};
 
+/**
+ * Public state is the current state of the claim integration that is visible to the public. For example, the number of times a claim code has been used.
+ *
+ * @category Claims
+ */
 export type ClaimIntegrationPublicStateType<T extends ClaimIntegrationPluginType> = T extends 'numUses'
   ? {
       numUses: number;
@@ -656,14 +681,25 @@ export type ClaimIntegrationPublicStateType<T extends ClaimIntegrationPluginType
       }
     : {};
 
+/**
+ * @category Claims
+ */
 export interface IntegrationPluginParams<T extends ClaimIntegrationPluginType> {
+  /** The ID of the plugin */
   id: T;
+  /** The parameters of the plugin that are visible to the public */
   publicParams: ClaimIntegrationPublicParamsType<T>;
+  /** The parameters of the plugin that are not visible to the public */
   privateParams: ClaimIntegrationPrivateParamsType<T>;
 }
 
+/**
+ * @category Claims
+ */
 export interface IntegrationPluginDetails<T extends ClaimIntegrationPluginType> extends IntegrationPluginParams<T> {
+  /** The current state of the plugin */
   publicState: ClaimIntegrationPublicStateType<T>;
+  /** If resetState = true, we will reset the state of the plugin back to default. If false, we will keep the current state. */
   resetState?: boolean;
 }
 
@@ -723,8 +759,8 @@ export interface iChallengeTrackerIdDetails<T extends NumberType> {
   /** The challenge ID */
   challengeTrackerId: string;
   /** The challenge level (i.e. "collection", "incoming", "outgoing") */
-  challengeLevel: 'collection' | 'incoming' | 'outgoing' | '';
-  /** The approver address (leave blank if challengeLevel = "collection") */
+  approvalLevel: 'collection' | 'incoming' | 'outgoing' | '';
+  /** The approver address (leave blank if approvalLevel = "collection") */
   approverAddress: CosmosAddress;
 }
 
@@ -739,8 +775,8 @@ export interface iMerkleChallengeDoc<T extends NumberType> extends Doc {
   /** The approval ID */
   approvalId: string;
   /** The challenge level (i.e. "collection", "incoming", "outgoing") */
-  challengeLevel: 'collection' | 'incoming' | 'outgoing' | '';
-  /** The approver address (leave blank if challengeLevel = "collection") */
+  approvalLevel: 'collection' | 'incoming' | 'outgoing' | '';
+  /** The approver address (leave blank if approvalLevel = "collection") */
   approverAddress: CosmosAddress;
   /** The used leaf indices for each challenge. A leaf index is the leaf location in the bottommost layer of the Merkle tree */
   usedLeafIndices: T[];
@@ -755,8 +791,8 @@ export interface iMerklechallengeTrackerIdDetails<T extends NumberType> {
   /** The challenge ID */
   challengeTrackerId: string;
   /** The challenge level (i.e. "collection", "incoming", "outgoing") */
-  challengeLevel: 'collection' | 'incoming' | 'outgoing' | '';
-  /** The approver address (leave blank if challengeLevel = "collection") */
+  approvalLevel: 'collection' | 'incoming' | 'outgoing' | '';
+  /** The approver address (leave blank if approvalLevel = "collection") */
   approverAddress: CosmosAddress;
   /** The used leaf indices for each challenge. A leaf index is the leaf location in the bottommost layer of the Merkle tree */
   usedLeafIndices: T[];

@@ -298,7 +298,7 @@ export interface GetMetadataForCollectionRequestBody {
 /**
  * @category API Requests / Responses
  */
-export interface GetCollectionBatchRouteRequestBody {
+export interface GetCollectionsRouteRequestBody {
   collectionsToFetch: ({
     /**
      * The ID of the collection to fetch.
@@ -311,23 +311,23 @@ export interface GetCollectionBatchRouteRequestBody {
 /**
  * @category API Requests / Responses
  */
-export interface iGetCollectionBatchRouteSuccessResponse<T extends NumberType> {
+export interface iGetCollectionsRouteSuccessResponse<T extends NumberType> {
   collections: iBitBadgesCollection<T>[];
 }
 
-export class GetCollectionBatchRouteSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetCollectionBatchRouteSuccessResponse<T>>
-  implements iGetCollectionBatchRouteSuccessResponse<T>
+export class GetCollectionsRouteSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetCollectionsRouteSuccessResponse<T>>
+  implements iGetCollectionsRouteSuccessResponse<T>
 {
   collections: BitBadgesCollection<T>[];
 
-  constructor(data: iGetCollectionBatchRouteSuccessResponse<T>) {
+  constructor(data: iGetCollectionsRouteSuccessResponse<T>) {
     super();
     this.collections = data.collections.map((collection) => new BitBadgesCollection(collection));
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetCollectionBatchRouteSuccessResponse<U> {
-    return new GetCollectionBatchRouteSuccessResponse(
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetCollectionsRouteSuccessResponse<U> {
+    return new GetCollectionsRouteSuccessResponse(
       deepCopyPrimitives({
         collections: this.collections.map((collection) => collection.convert(convertFunction))
       })

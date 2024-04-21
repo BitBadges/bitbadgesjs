@@ -272,7 +272,7 @@ export class DeleteReviewRouteSuccessResponse extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export interface AddReviewForCollectionRouteRequestBody {
+export interface AddReviewRouteRequestBody {
   /**
    * The review text (1 to 2048 characters).
    */
@@ -282,41 +282,27 @@ export interface AddReviewForCollectionRouteRequestBody {
    * The star rating (1 to 5).
    */
   stars: NumberType;
+
+  /**
+   * The address you are reviewing. One of cosmosAddress or collectionId must be provided.
+   */
+  cosmosAddress?: CosmosAddress;
+
+  /**
+   * The collection ID that you are reviewing. One of cosmosAddress or collectionId must be provided.
+   */
+  collectionId?: NumberType;
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface iAddReviewForCollectionRouteSuccessResponse {}
+export interface iAddReviewRouteSuccessResponse {}
 
 /**
  * @category API Requests / Responses
  */
-export class AddReviewForCollectionRouteSuccessResponse extends EmptyResponseClass {}
-
-/**
- * @category API Requests / Responses
- */
-export interface AddReviewForUserRouteRequestBody {
-  /**
-   * The review text (1 to 2048 characters).
-   */
-  review: string;
-
-  /**
-   * The number of stars (1 to 5) for the review.
-   */
-  stars: NumberType;
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iAddReviewForUserRouteSuccessResponse {}
-/**
- * @category API Requests / Responses
- */
-export class AddReviewForUserRouteSuccessResponse extends EmptyResponseClass {}
+export class AddReviewRouteSuccessResponse extends EmptyResponseClass {}
 
 /**
  * @category API Requests / Responses
@@ -398,6 +384,7 @@ export interface UpdateAccountInfoRouteRequestBody {
    */
   notifications?: {
     email?: string;
+    discord?: { id: string; username: string; discriminator: string | undefined } | undefined;
     antiPhishingCode?: string;
     preferences?: {};
   };
@@ -406,17 +393,16 @@ export interface UpdateAccountInfoRouteRequestBody {
    * Approved sign in methods. Only returned if user is authenticated with full access.
    */
   approvedSignInMethods?: {
-    discord?: {
-      username: string;
-      discriminator?: string;
-      id: string;
-    };
+    discord?: { username: string; discriminator?: string | undefined; id: string } | undefined;
+    github?: { username: string; id: string } | undefined;
+    google?: { username: string; id: string } | undefined;
+    twitter?: { username: string; id: string } | undefined;
   };
 
   /**
    * The social connections for the user. Only returned if user is authenticated with full access.
    */
-  socialConntections?: iSocialConnections<NumberType>;
+  socialConnections?: iSocialConnections<NumberType>;
 }
 
 /**
@@ -1285,8 +1271,8 @@ export interface UpdateSecretRouteRequestBody {
   /** The secret ID. This is the ID that is given to the user to query the secret. Anyone with the ID can query it, so keep this safe and secure. */
   secretId: string;
 
-  /** You can approve specific viewers to view the secret. */
-  viewersToSet?: {
+  /** Holders can use the secret to prove something about themselves. This is a list of holders that have added this secret to their profile. */
+  holdersToSet?: {
     cosmosAddress: CosmosAddress;
     delete?: boolean;
   }[];

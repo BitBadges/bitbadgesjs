@@ -62,7 +62,7 @@ import type {
   GetAdditionalCollectionDetailsRequestBody,
   GetBadgeActivityRouteRequestBody,
   GetBadgeBalanceByAddressRouteRequestBody,
-  GetCollectionBatchRouteRequestBody,
+  GetCollectionsRouteRequestBody,
   GetMetadataForCollectionRequestBody,
   GetOwnersForBadgeRouteRequestBody,
   MetadataFetchOptions,
@@ -70,7 +70,7 @@ import type {
   iFilterBadgesInCollectionSuccessResponse,
   iGetBadgeActivityRouteSuccessResponse,
   iGetBadgeBalanceByAddressRouteSuccessResponse,
-  iGetCollectionBatchRouteSuccessResponse,
+  iGetCollectionsRouteSuccessResponse,
   iGetOwnersForBadgeRouteSuccessResponse,
   iRefreshMetadataRouteSuccessResponse,
   iRefreshStatusRouteSuccessResponse
@@ -79,7 +79,7 @@ import {
   FilterBadgesInCollectionSuccessResponse,
   GetBadgeActivityRouteSuccessResponse,
   GetBadgeBalanceByAddressRouteSuccessResponse,
-  GetCollectionBatchRouteSuccessResponse,
+  GetCollectionsRouteSuccessResponse,
   GetOwnersForBadgeRouteSuccessResponse,
   RefreshMetadataRouteSuccessResponse,
   RefreshStatusRouteSuccessResponse
@@ -645,13 +645,13 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Gets collections from the API. Must pass in a valid API instance.
    */
-  static async GetCollections<T extends NumberType>(api: BaseBitBadgesApi<T>, requestBody: GetCollectionBatchRouteRequestBody) {
+  static async GetCollections<T extends NumberType>(api: BaseBitBadgesApi<T>, requestBody: GetCollectionsRouteRequestBody) {
     try {
-      const response = await api.axios.post<iGetCollectionBatchRouteSuccessResponse<string>>(
-        `${api.BACKEND_URL}${BitBadgesApiRoutes.GetCollectionBatchRoute()}`,
+      const response = await api.axios.post<iGetCollectionsRouteSuccessResponse<string>>(
+        `${api.BACKEND_URL}${BitBadgesApiRoutes.GetCollectionsRoute()}`,
         requestBody
       );
-      return new GetCollectionBatchRouteSuccessResponse(response.data).convert(api.ConvertFunction);
+      return new GetCollectionsRouteSuccessResponse(response.data).convert(api.ConvertFunction);
     } catch (error) {
       await api.handleApiError(error);
       return Promise.reject(error);
@@ -730,7 +730,7 @@ export class BitBadgesCollection<T extends NumberType>
             y.challengeTrackerId === x.challengeTrackerId &&
             x.approverAddress === y.approverAddress &&
             x.collectionId === y.collectionId &&
-            x.challengeLevel === y.challengeLevel
+            x.approvalLevel === y.approvalLevel
         );
         return !match;
       }) !== undefined;
@@ -769,7 +769,7 @@ export class BitBadgesCollection<T extends NumberType>
           y.challengeTrackerId === x.challengeTrackerId &&
           x.approverAddress === y.approverAddress &&
           x.collectionId === y.collectionId &&
-          x.challengeLevel === y.challengeLevel
+          x.approvalLevel === y.approvalLevel
       );
     });
     const prunedApprovalTrackersToFetch = (options.approvalTrackersToFetch || []).filter((x) => {

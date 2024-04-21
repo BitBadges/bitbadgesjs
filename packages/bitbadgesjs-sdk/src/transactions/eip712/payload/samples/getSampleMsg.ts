@@ -137,20 +137,6 @@ const approvalCriteria = new OutgoingApprovalCriteria({
 }).toJson({ emitDefaultValues: true }) as object;
 
 const approvalCriteriaForPopulatingUndefined = new OutgoingApprovalCriteria({
-  merkleChallenges: [
-    new MerkleChallenge({
-      expectedProofLength: '0',
-      maxUsesPerLeaf: '0'
-    })
-  ],
-  zkProofs: [
-    new ZkProof({
-      verificationKey: '',
-      uri: '',
-      customData: '',
-      zkpTrackerId: ''
-    })
-  ],
   predeterminedBalances: new PredeterminedBalances({
     orderCalculationMethod: new PredeterminedOrderCalculationMethod(),
     incrementedBalances: new IncrementedBalances({

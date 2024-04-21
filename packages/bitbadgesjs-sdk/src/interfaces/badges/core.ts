@@ -197,9 +197,10 @@ export interface iSecret {
   description: string;
 
   /**
-   * Viewers for query purposes. These are the addresses that can query the secret.
+   * Holders are the addresses that have been given the secret.
    */
-  viewers: string[];
+  holders: string[];
+  
   /**
    * Anchors are on-chain transactions used to prove certain things
    * about the secret. For example, you can anchor the secret to a

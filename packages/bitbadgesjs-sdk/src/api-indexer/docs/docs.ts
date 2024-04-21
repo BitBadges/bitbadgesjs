@@ -318,6 +318,7 @@ export class NotificationPreferences<T extends NumberType>
   implements iNotificationPreferences<T>
 {
   email?: string;
+  discord?: { id: string; username: string; discriminator: string | undefined; token: string } | undefined;
   emailVerification?: EmailVerificationStatus<T>;
   preferences?: {
     listActivity?: boolean;
@@ -330,6 +331,7 @@ export class NotificationPreferences<T extends NumberType>
     this.email = data.email;
     this.emailVerification = data.emailVerification ? new EmailVerificationStatus(data.emailVerification) : undefined;
     this.preferences = data.preferences;
+    this.discord = data.discord;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): NotificationPreferences<U> {
@@ -434,7 +436,14 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
   solAddress?: string;
   notifications?: NotificationPreferences<T>;
   socialConnections?: SocialConnections<T>;
-  approvedSignInMethods?: { discord?: { username: string; discriminator?: string | undefined; id: string } | undefined } | undefined;
+  approvedSignInMethods?:
+    | {
+        discord?: { username: string; discriminator?: string | undefined; id: string } | undefined;
+        github?: { username: string; id: string } | undefined;
+        google?: { username: string; id: string } | undefined;
+        twitter?: { username: string; id: string } | undefined;
+      }
+    | undefined;
 
   constructor(data: iProfileDoc<T>) {
     super();
@@ -886,7 +895,7 @@ export class ChallengeTrackerIdDetails<T extends NumberType>
   collectionId: T;
   approvalId: string;
   challengeTrackerId: string;
-  challengeLevel: 'collection' | 'incoming' | 'outgoing' | '';
+  approvalLevel: 'collection' | 'incoming' | 'outgoing' | '';
   approverAddress: CosmosAddress;
 
   constructor(data: iChallengeTrackerIdDetails<T>) {
@@ -894,7 +903,7 @@ export class ChallengeTrackerIdDetails<T extends NumberType>
     this.collectionId = data.collectionId;
     this.challengeTrackerId = data.challengeTrackerId;
     this.approvalId = data.approvalId;
-    this.challengeLevel = data.challengeLevel;
+    this.approvalLevel = data.approvalLevel;
     this.approverAddress = data.approverAddress;
   }
 
@@ -916,7 +925,7 @@ export class MerkleChallengeDoc<T extends NumberType> extends BaseNumberTypeClas
   _id?: string;
   collectionId: T;
   challengeTrackerId: string;
-  challengeLevel: 'collection' | 'incoming' | 'outgoing' | '';
+  approvalLevel: 'collection' | 'incoming' | 'outgoing' | '';
   approverAddress: CosmosAddress;
   usedLeafIndices: T[];
   approvalId: string;
@@ -927,7 +936,7 @@ export class MerkleChallengeDoc<T extends NumberType> extends BaseNumberTypeClas
     this._id = data._id;
     this.collectionId = data.collectionId;
     this.challengeTrackerId = data.challengeTrackerId;
-    this.challengeLevel = data.challengeLevel;
+    this.approvalLevel = data.approvalLevel;
     this.approverAddress = data.approverAddress;
     this.usedLeafIndices = data.usedLeafIndices;
     this.approvalId = data.approvalId;
@@ -1199,7 +1208,7 @@ export class SecretDoc<T extends NumberType> extends BaseNumberTypeClass<SecretD
   image: string;
   description: string;
 
-  viewers: string[];
+  holders: string[];
   anchors: {
     txHash?: string;
     message?: string;
@@ -1216,7 +1225,7 @@ export class SecretDoc<T extends NumberType> extends BaseNumberTypeClass<SecretD
     this.type = data.type;
     this.scheme = data.scheme;
     this.dataIntegrityProof = data.dataIntegrityProof;
-    this.viewers = data.viewers;
+    this.holders = data.holders;
     this.name = data.name;
     this.image = data.image;
     this.description = data.description;

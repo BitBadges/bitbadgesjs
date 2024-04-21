@@ -66,31 +66,17 @@ main() {
 
     replace_text_in_directory "$directory" ": NumberType" "$new_text"
     replace_text_in_directory "$directory" ": T;" ": string | number;"
-    # replace_text_in_directory "$directory" "params: ChallengeParams;" "params: ChallengeParams<string | number>;"
     replace_text_in_directory "$directory" ": T\[" ": (string | number)\["
-
-    # # Run typeconv recursively on all folders
-    # find "$directory" -type f -name "*.ts" -not -path "src/proto/*" -int0 | while IFS= read -r -d '' file; do
-    #     npx typeconv -f ts -t oapi -o openapitypes "$file"
-    #     echo "Type conversion completed on '$file'."
-    # done
-    # npx typeconv -f ts -t oapi -o openapitypes "$file"pr
-
-
+    replace_text_in_directory "$directory" "<JSPrimitiveNumberType>" ""
+    replace_text_in_directory "$directory" "<bigint>" ""
+    replace_text_in_directory "$directory" "UNIXMilliTimestamp = T" "UNIXMilliTimestamp = string | number"
+    replace_text_in_directory "$directory" "ClaimIntegrationPublicParamsType;" "ClaimIntegrationPublicParamsType<T>;"
+    replace_text_in_directory "$directory" "ClaimIntegrationPrivateParamsType;" "ClaimIntegrationPrivateParamsType<T>;"
+    replace_text_in_directory "$directory" "extends IntegrationPluginParams {" "extends IntegrationPluginParams<T> {"
+    replace_text_in_directory "$directory" "ClaimIntegrationPublicStateType;" "ClaimIntegrationPublicStateType<T>;"
 
     npx typeconv -f ts -t oapi -o openapitypes "src/combined.ts"
     echo "Type conversion completed recursively on all folders within '$directory'."
-
-    local temp_file="$(mktemp)"
-    local output_file="universal.yml"
-
-    # Combine schemas into one file
-    find "openapitypes" -type f -name "*.yaml" -print0 | while IFS= read -r -d '' schema_file; do
-        awk '/schemas:/ {p=1} p' "$schema_file" >> "$temp_file"
-    done
-
-    # Add schemas to the output file
-    mv "$temp_file" "$output_file"
 }
 
 # Execute main function

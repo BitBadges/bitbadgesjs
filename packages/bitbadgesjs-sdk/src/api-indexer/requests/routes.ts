@@ -14,7 +14,7 @@ import type { NumberType } from '@/common/string-numbers';
 export class BitBadgesApiRoutes {
   static GetStatusRoute = () => '/api/v0/status';
   static GetSearchRoute = (searchValue: string) => `/api/v0/search/${searchValue}`;
-  static GetCollectionBatchRoute = () => '/api/v0/collection/batch';
+  static GetCollectionsRoute = () => '/api/v0/collection/batch';
   static GetOwnersForBadgeRoute = (collectionId: NumberType, badgeId: NumberType) =>
     `/api/v0/collection/${collectionId.toString()}/${badgeId.toString()}/owners`;
   static GetBadgeBalanceByAddressRoute = (collectionId: NumberType, cosmosAddress: string) =>
@@ -27,8 +27,9 @@ export class BitBadgesApiRoutes {
   static CheckAndCompleteClaimRoute = (claimId: string, cosmosAddress: string) => `/api/v0/claims/${claimId.toString()}/${cosmosAddress}`;
   static GetClaimsRoute = () => `/api/v0/claims`;
 
-  static AddReviewForCollectionRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/addReview`;
-  static DeleteReviewRoute = (reviewId: string) => `/api/v0/deleteReview/${reviewId}`;
+  static AddReviewRoute = () => '/api/v0/reviews/add';
+  static DeleteReviewRoute = (reviewId: string) => `/api/v0/reviews/delete/${reviewId}`;
+
   static FilterBadgesInCollectionRoute = () => '/api/v0/collections/filter';
 
   static GetAddressListsRoute = () => '/api/v0/addressLists';
@@ -37,7 +38,6 @@ export class BitBadgesApiRoutes {
   static DeleteAddressListRoute = () => '/api/v0/addressLists/delete';
   static GetAccountsRoute = () => '/api/v0/user/batch';
 
-  static AddReviewForUserRoute = (addressOrUsername: string) => `/api/v0/user/${addressOrUsername}/addReview`;
   static UpdateAccountInfoRoute = () => '/api/v0/user/updateAccount';
   static AddMetadataToIpfsRoute = () => '/api/v0/addMetadataToIpfs';
   static AddApprovalDetailsToOffChainStorageRoute = () => '/api/v0/addApprovalDetailsToOffChainStorage';

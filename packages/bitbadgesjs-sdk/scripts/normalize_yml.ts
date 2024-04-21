@@ -18,7 +18,6 @@ fs.readFile(filePath, 'utf8', (err, data) => {
     addExamples(yamlData);
     orderDescriptionsAndRefs(yamlData);
     removeTimestampLinks(yamlData);
-    removeOrphanedRefs(yamlData);
 
     // Convert the modified YAML data back to string
     let modifiedYamlContent = yaml.dump(yamlData);

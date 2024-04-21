@@ -91,7 +91,7 @@ export class Secret extends CustomTypeClass<Secret> implements iSecret {
   image: string;
   description: string;
 
-  viewers: string[];
+  holders: string[];
   anchors: {
     txHash?: string;
     message?: string;
@@ -110,7 +110,7 @@ export class Secret extends CustomTypeClass<Secret> implements iSecret {
     this.name = data.name;
     this.image = data.image;
     this.description = data.description;
-    this.viewers = data.viewers;
+    this.holders = data.holders;
     this.anchors = data.anchors;
   }
 }

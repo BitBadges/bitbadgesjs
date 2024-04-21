@@ -218,6 +218,8 @@ export interface iSocialConnections {
 export interface iNotificationPreferences {
   /** The email to receive push notifications. */
   email?: string;
+  /** The Discord username to receive notifications */
+  discord?: { id: string; username: string; discriminator: string | undefined } | undefined;
   /** The verification status of the email. */
   emailVerification?: iEmailVerificationStatus;
   /** The preferences for the notifications. What type of notifications does the user want to receive? */
@@ -698,8 +700,8 @@ export interface iChallengeTrackerIdDetails {
   /** The challenge ID */
   challengeTrackerId: string;
   /** The challenge level (i.e. "collection", "incoming", "outgoing") */
-  challengeLevel: 'collection' | 'incoming' | 'outgoing' | '';
-  /** The approver address (leave blank if challengeLevel = "collection") */
+  approvalLevel: 'collection' | 'incoming' | 'outgoing' | '';
+  /** The approver address (leave blank if approvalLevel = "collection") */
   approverAddress: CosmosAddress;
 }
 
@@ -714,8 +716,8 @@ export interface iMerkleChallengeDoc extends Doc {
   /** The approval ID */
   approvalId: string;
   /** The challenge level (i.e. "collection", "incoming", "outgoing") */
-  challengeLevel: 'collection' | 'incoming' | 'outgoing' | '';
-  /** The approver address (leave blank if challengeLevel = "collection") */
+  approvalLevel: 'collection' | 'incoming' | 'outgoing' | '';
+  /** The approver address (leave blank if approvalLevel = "collection") */
   approverAddress: CosmosAddress;
   /** The used leaf indices for each challenge. A leaf index is the leaf location in the bottommost layer of the Merkle tree */
   usedLeafIndices: (string | number)[];
@@ -730,8 +732,8 @@ export interface iMerklechallengeTrackerIdDetails {
   /** The challenge ID */
   challengeTrackerId: string;
   /** The challenge level (i.e. "collection", "incoming", "outgoing") */
-  challengeLevel: 'collection' | 'incoming' | 'outgoing' | '';
-  /** The approver address (leave blank if challengeLevel = "collection") */
+  approvalLevel: 'collection' | 'incoming' | 'outgoing' | '';
+  /** The approver address (leave blank if approvalLevel = "collection") */
   approverAddress: CosmosAddress;
   /** The used leaf indices for each challenge. A leaf index is the leaf location in the bottommost layer of the Merkle tree */
   usedLeafIndices: (string | number)[];
@@ -1174,6 +1176,7 @@ export type AccountViewKey =
   | 'reviews'
   | 'badgesCollected'
   | 'claimAlerts'
+  | 'sentClaimAlerts'
   | 'allLists'
   | 'whitelists'
   | 'blacklists'
@@ -1488,7 +1491,7 @@ export interface GetMetadataForCollectionRequestBody {
 /**
  * @category API Requests / Responses
  */
-export interface GetCollectionBatchRouteRequestBody {
+export interface GetCollectionsRouteRequestBody {
   collectionsToFetch: ({
     /**
      * The ID of the collection to fetch.
@@ -1501,7 +1504,7 @@ export interface GetCollectionBatchRouteRequestBody {
 /**
  * @category API Requests / Responses
  */
-export interface iGetCollectionBatchRouteSuccessResponse {
+export interface iGetCollectionsRouteSuccessResponse {
   collections: iBitBadgesCollection[];
 }
 
@@ -1673,6 +1676,16 @@ export interface AddReviewForCollectionRouteRequestBody {
    * The star rating (1 to 5).
    */
   stars: string | number;
+
+  /**
+   * The address you are reviewing.
+   */
+  cosmosAddress: CosmosAddress;
+
+  /**
+   * The collection ID that you are reviewing
+   */
+  collectionId: string | number;
 }
 
 /**
@@ -1779,6 +1792,7 @@ export interface UpdateAccountInfoRouteRequestBody {
    */
   notifications?: {
     email?: string;
+    discord?: { id: string; username: string; discriminator: string | undefined } | undefined;
     antiPhishingCode?: string;
     preferences?: {};
   };
@@ -2318,8 +2332,8 @@ export interface UpdateSecretRouteRequestBody {
   /** The secret ID. This is the ID that is given to the user to query the secret. Anyone with the ID can query it, so keep this safe and secure. */
   secretId: string;
 
-  /** You can approve specific viewers to view the secret. */
-  viewersToSet?: {
+  /** Holders can be added or removed from the secret. They can use the secret to prove something about themselves to verifiers. */
+  holdersToSet?: {
     cosmosAddress: CosmosAddress;
     delete?: boolean;
   }[];
@@ -3801,9 +3815,10 @@ export interface iSecret {
   description: string;
 
   /**
-   * Viewers for query purposes. These are the addresses that can query the secret.
+   * Holders for query purposes. These are the addresses that "hold" the secret (i.e. have it added to their account
    */
-  viewers: string[];
+  holders: string[];
+
   /**
    * Anchors are on-chain transactions used to prove certain things
    * about the secret. For example, you can anchor the secret to a

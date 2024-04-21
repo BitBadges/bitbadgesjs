@@ -717,6 +717,7 @@ export type AccountViewKey =
   | 'transferActivity'
   | 'reviews'
   | 'badgesCollected'
+  | 'sentClaimAlerts'
   | 'claimAlerts'
   | 'allLists'
   | 'whitelists'

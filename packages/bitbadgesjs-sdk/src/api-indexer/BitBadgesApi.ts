@@ -1,17 +1,17 @@
-import Joi from 'joi';
 import type { NumberType } from '@/common/string-numbers';
+import Joi from 'joi';
 import { BitBadgesCollection } from './BitBadgesCollection';
 
-import { BaseBitBadgesApi } from './base';
+import { NativeAddress } from '..';
 import type {
-  UpdateAddressListsRouteRequestBody,
-  UpdateAddressListsRouteSuccessResponse,
-  CreateAddressListsRouteSuccessResponse,
   CreateAddressListsRouteRequestBody,
+  CreateAddressListsRouteSuccessResponse,
+  DeleteAddressListsRouteRequestBody,
+  DeleteAddressListsRouteSuccessResponse,
   GetAddressListsRouteRequestBody,
   GetAddressListsRouteSuccessResponse,
-  DeleteAddressListsRouteRequestBody,
-  DeleteAddressListsRouteSuccessResponse
+  UpdateAddressListsRouteRequestBody,
+  UpdateAddressListsRouteSuccessResponse
 } from './BitBadgesAddressList';
 import { BitBadgesAddressList } from './BitBadgesAddressList';
 import type {
@@ -21,99 +21,8 @@ import type {
   GetFollowDetailsRouteSuccessResponse
 } from './BitBadgesUserInfo';
 import { BitBadgesUserInfo } from './BitBadgesUserInfo';
-import {
-  iGetStatusRouteSuccessResponse,
-  GetSearchRouteRequestBody,
-  iGetSearchRouteSuccessResponse,
-  CheckAndCompleteClaimRouteRequestBody,
-  iCheckAndCompleteClaimRouteSuccessResponse,
-  DeleteReviewRouteRequestBody,
-  AddReviewForCollectionRouteRequestBody,
-  AddReviewForUserRouteRequestBody,
-  iAddReviewForUserRouteSuccessResponse,
-  UpdateAccountInfoRouteRequestBody,
-  iUpdateAccountInfoRouteSuccessResponse,
-  AddBalancesToOffChainStorageRouteRequestBody,
-  iAddBalancesToOffChainStorageRouteSuccessResponse,
-  AddMetadataToIpfsRouteRequestBody,
-  iAddMetadataToIpfsRouteSuccessResponse,
-  AddApprovalDetailsToOffChainStorageRouteRequestBody,
-  iAddApprovalDetailsToOffChainStorageRouteSuccessResponse,
-  GetSignInChallengeRouteRequestBody,
-  iGetSignInChallengeRouteSuccessResponse,
-  VerifySignInRouteRequestBody,
-  iVerifySignInRouteSuccessResponse,
-  CheckSignInStatusRequestBody,
-  iCheckSignInStatusRequestSuccessResponse,
-  SignOutRequestBody,
-  iSignOutSuccessResponse,
-  GetBrowseCollectionsRouteRequestBody,
-  iGetBrowseCollectionsRouteSuccessResponse,
-  BroadcastTxRouteRequestBody,
-  iBroadcastTxRouteSuccessResponse,
-  SimulateTxRouteRequestBody,
-  iSimulateTxRouteSuccessResponse,
-  FetchMetadataDirectlyRouteRequestBody,
-  iFetchMetadataDirectlyRouteSuccessResponse,
-  GetTokensFromFaucetRouteRequestBody,
-  iGetTokensFromFaucetRouteSuccessResponse,
-  GetBlockinAuthCodeRouteRequestBody,
-  iGetBlockinAuthCodeRouteSuccessResponse,
-  CreateBlockinAuthCodeRouteRequestBody,
-  iCreateBlockinAuthCodeRouteSuccessResponse,
-  DeleteBlockinAuthCodeRouteRequestBody,
-  iDeleteBlockinAuthCodeRouteSuccessResponse,
-  GenericBlockinVerifyRouteRequestBody,
-  iGenericBlockinVerifyRouteSuccessResponse,
-  SendClaimAlertsRouteRequestBody,
-  iSendClaimAlertsRouteSuccessResponse,
-  GetClaimAlertsForCollectionRouteRequestBody,
-  iGetClaimAlertsForCollectionRouteSuccessResponse,
-  iDeleteReviewRouteSuccessResponse,
-  GenerateAppleWalletPassRouteRequestBody,
-  GetClaimsRouteRequestBody,
-  GetClaimsRouteSuccessResponse,
-  GetExternalCallRouteRequestBody,
-  GetExternalCallRouteSuccessResponse,
-  GetSecretRouteRequestBody,
-  GetSecretRouteSuccessResponse,
-  CreateSecretRouteRequestBody,
-  CreateSecretRouteSuccessResponse,
-  DeleteSecretRouteRequestBody,
-  DeleteSecretRouteSuccessResponse,
-  UpdateSecretRouteRequestBody,
-  UpdateSecretRouteSuccessResponse
-} from './requests/requests';
-import {
-  GetStatusRouteSuccessResponse,
-  GetSearchRouteSuccessResponse,
-  CheckAndCompleteClaimRouteSuccessResponse,
-  DeleteReviewRouteSuccessResponse,
-  AddReviewForCollectionRouteSuccessResponse,
-  AddReviewForUserRouteSuccessResponse,
-  UpdateAccountInfoRouteSuccessResponse,
-  AddBalancesToOffChainStorageRouteSuccessResponse,
-  AddMetadataToIpfsRouteSuccessResponse,
-  AddApprovalDetailsToOffChainStorageRouteSuccessResponse,
-  GetSignInChallengeRouteSuccessResponse,
-  VerifySignInRouteSuccessResponse,
-  CheckSignInStatusRequestSuccessResponse,
-  SignOutSuccessResponse,
-  GetBrowseCollectionsRouteSuccessResponse,
-  BroadcastTxRouteSuccessResponse,
-  SimulateTxRouteSuccessResponse,
-  FetchMetadataDirectlyRouteSuccessResponse,
-  GetTokensFromFaucetRouteSuccessResponse,
-  GetBlockinAuthCodeRouteSuccessResponse,
-  CreateBlockinAuthCodeRouteSuccessResponse,
-  DeleteBlockinAuthCodeRouteSuccessResponse,
-  GenericBlockinVerifyRouteSuccessResponse,
-  SendClaimAlertsRouteSuccessResponse,
-  GetClaimAlertsForCollectionRouteSuccessResponse,
-  GenerateAppleWalletPassRouteSuccessResponse
-} from './requests/requests';
-import { BitBadgesApiRoutes } from './requests/routes';
 import type { iBitBadgesApi } from './base';
+import { BaseBitBadgesApi } from './base';
 import type {
   FilterBadgesInCollectionRequestBody,
   FilterBadgesInCollectionSuccessResponse,
@@ -121,8 +30,8 @@ import type {
   GetBadgeActivityRouteSuccessResponse,
   GetBadgeBalanceByAddressRouteRequestBody,
   GetBadgeBalanceByAddressRouteSuccessResponse,
-  GetCollectionBatchRouteRequestBody,
-  GetCollectionBatchRouteSuccessResponse,
+  GetCollectionsRouteRequestBody,
+  GetCollectionsRouteSuccessResponse,
   GetOwnersForBadgeRouteRequestBody,
   GetOwnersForBadgeRouteSuccessResponse,
   RefreshMetadataRouteRequestBody,
@@ -130,7 +39,93 @@ import type {
   RefreshStatusRouteSuccessResponse
 } from './requests/collections';
 import { GetMapsRouteRequestBody, GetMapsRouteSuccessResponse, iGetMapsRouteSuccessResponse } from './requests/maps';
-import { NativeAddress } from '..';
+import {
+  AddApprovalDetailsToOffChainStorageRouteRequestBody,
+  AddApprovalDetailsToOffChainStorageRouteSuccessResponse,
+  AddBalancesToOffChainStorageRouteRequestBody,
+  AddBalancesToOffChainStorageRouteSuccessResponse,
+  AddMetadataToIpfsRouteRequestBody,
+  AddMetadataToIpfsRouteSuccessResponse,
+  AddReviewRouteRequestBody,
+  AddReviewRouteSuccessResponse,
+  BroadcastTxRouteRequestBody,
+  BroadcastTxRouteSuccessResponse,
+  CheckAndCompleteClaimRouteRequestBody,
+  CheckAndCompleteClaimRouteSuccessResponse,
+  CheckSignInStatusRequestBody,
+  CheckSignInStatusRequestSuccessResponse,
+  CreateBlockinAuthCodeRouteRequestBody,
+  CreateBlockinAuthCodeRouteSuccessResponse,
+  CreateSecretRouteRequestBody,
+  CreateSecretRouteSuccessResponse,
+  DeleteBlockinAuthCodeRouteRequestBody,
+  DeleteBlockinAuthCodeRouteSuccessResponse,
+  DeleteReviewRouteRequestBody,
+  DeleteReviewRouteSuccessResponse,
+  DeleteSecretRouteRequestBody,
+  DeleteSecretRouteSuccessResponse,
+  FetchMetadataDirectlyRouteRequestBody,
+  FetchMetadataDirectlyRouteSuccessResponse,
+  GenerateAppleWalletPassRouteRequestBody,
+  GenerateAppleWalletPassRouteSuccessResponse,
+  GenericBlockinVerifyRouteRequestBody,
+  GenericBlockinVerifyRouteSuccessResponse,
+  GetBlockinAuthCodeRouteRequestBody,
+  GetBlockinAuthCodeRouteSuccessResponse,
+  GetBrowseCollectionsRouteRequestBody,
+  GetBrowseCollectionsRouteSuccessResponse,
+  GetClaimAlertsForCollectionRouteRequestBody,
+  GetClaimAlertsForCollectionRouteSuccessResponse,
+  GetClaimsRouteRequestBody,
+  GetClaimsRouteSuccessResponse,
+  GetExternalCallRouteRequestBody,
+  GetExternalCallRouteSuccessResponse,
+  GetSearchRouteRequestBody,
+  GetSearchRouteSuccessResponse,
+  GetSecretRouteRequestBody,
+  GetSecretRouteSuccessResponse,
+  GetSignInChallengeRouteRequestBody,
+  GetSignInChallengeRouteSuccessResponse,
+  GetStatusRouteSuccessResponse,
+  GetTokensFromFaucetRouteRequestBody,
+  GetTokensFromFaucetRouteSuccessResponse,
+  SendClaimAlertsRouteRequestBody,
+  SendClaimAlertsRouteSuccessResponse,
+  SignOutRequestBody,
+  SignOutSuccessResponse,
+  SimulateTxRouteRequestBody,
+  SimulateTxRouteSuccessResponse,
+  UpdateAccountInfoRouteRequestBody,
+  UpdateAccountInfoRouteSuccessResponse,
+  UpdateSecretRouteRequestBody,
+  UpdateSecretRouteSuccessResponse,
+  VerifySignInRouteRequestBody,
+  VerifySignInRouteSuccessResponse,
+  iAddApprovalDetailsToOffChainStorageRouteSuccessResponse,
+  iAddBalancesToOffChainStorageRouteSuccessResponse,
+  iAddMetadataToIpfsRouteSuccessResponse,
+  iBroadcastTxRouteSuccessResponse,
+  iCheckAndCompleteClaimRouteSuccessResponse,
+  iCheckSignInStatusRequestSuccessResponse,
+  iCreateBlockinAuthCodeRouteSuccessResponse,
+  iDeleteBlockinAuthCodeRouteSuccessResponse,
+  iDeleteReviewRouteSuccessResponse,
+  iFetchMetadataDirectlyRouteSuccessResponse,
+  iGenericBlockinVerifyRouteSuccessResponse,
+  iGetBlockinAuthCodeRouteSuccessResponse,
+  iGetBrowseCollectionsRouteSuccessResponse,
+  iGetClaimAlertsForCollectionRouteSuccessResponse,
+  iGetSearchRouteSuccessResponse,
+  iGetSignInChallengeRouteSuccessResponse,
+  iGetStatusRouteSuccessResponse,
+  iGetTokensFromFaucetRouteSuccessResponse,
+  iSendClaimAlertsRouteSuccessResponse,
+  iSignOutSuccessResponse,
+  iSimulateTxRouteSuccessResponse,
+  iUpdateAccountInfoRouteSuccessResponse,
+  iVerifySignInRouteSuccessResponse
+} from './requests/requests';
+import { BitBadgesApiRoutes } from './requests/routes';
 
 /**
  * This is the BitBadgesAPI class which provides all typed API calls to the BitBadges API.
@@ -216,7 +211,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * const collection = res.collections[0];
    * ```
    */
-  public async getCollections(requestBody: GetCollectionBatchRouteRequestBody): Promise<GetCollectionBatchRouteSuccessResponse<T>> {
+  public async getCollections(requestBody: GetCollectionsRouteRequestBody): Promise<GetCollectionsRouteSuccessResponse<T>> {
     return await BitBadgesCollection.GetCollections(this, requestBody);
   }
 
@@ -371,28 +366,23 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
-   * Adds a new review for a collection.
+   * Adds a new review for a collection or address.
    *
    * @remarks
    * - **API Route**: `POST /api/v0/collection/:collectionId/addReview`
-   * - **SDK Function Call**: `await BitBadgesApi.addReviewForCollection(collectionId, requestBody);`
+   * - **SDK Function Call**: `await BitBadgesApi.addReview(collectionId, requestBody);`
    * - **Authentication**: Must be signed in.
    *
    * @example
    * ```typescript
-   * const res = await BitBadgesApi.addReviewForCollection(collectionId, requestBody);
+   * const res = await BitBadgesApi.addReview(collectionId, requestBody);
    * console.log(res);
    * ```
    */
-  public async addReviewForCollection(
-    collectionId: NumberType,
-    requestBody: AddReviewForCollectionRouteRequestBody
-  ): Promise<AddReviewForCollectionRouteSuccessResponse> {
+  public async addReview(requestBody: AddReviewRouteRequestBody): Promise<AddReviewRouteSuccessResponse> {
     try {
-      this.assertPositiveInteger(collectionId);
-
-      const response = await this.axios.post(`${this.BACKEND_URL}${BitBadgesApiRoutes.AddReviewForCollectionRoute(collectionId)}`, requestBody);
-      return new AddReviewForCollectionRouteSuccessResponse(response.data);
+      const response = await this.axios.post(`${this.BACKEND_URL}${BitBadgesApiRoutes.AddReviewRoute()}`, requestBody);
+      return new AddReviewRouteSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -420,36 +410,6 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    */
   public async getAccounts(requestBody: GetAccountsRouteRequestBody): Promise<GetAccountsRouteSuccessResponse<T>> {
     return await BitBadgesUserInfo.GetAccounts(this, requestBody);
-  }
-
-  /**
-   * Adds a review for a user.
-   *
-   * @remarks
-   * - **API Route**: `POST /api/v0/user/:addressOrUsername/addReview`
-   * - **SDK Function Call**: `await BitBadgesApi.addReviewForUser(addressOrUsername, requestBody);`
-   * - **Authentication**: Must be signed in.
-   *
-   * @example
-   * ```typescript
-   * const res = await BitBadgesApi.addReviewForUser(addressOrUsername, requestBody);
-   * console.log(res);
-   * ```
-   */
-  public async addReviewForUser(
-    addressOrUsername: string,
-    requestBody: AddReviewForUserRouteRequestBody
-  ): Promise<AddReviewForUserRouteSuccessResponse> {
-    try {
-      const response = await this.axios.post<iAddReviewForUserRouteSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.AddReviewForUserRoute(addressOrUsername)}`,
-        requestBody
-      );
-      return new AddReviewForUserRouteSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
   }
 
   /**
