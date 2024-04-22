@@ -429,6 +429,48 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     }
   }
 
+  /**
+   * Type agnostic get view function. Uses the viewType to determine the type of view to fetch and docs to return.
+   */
+  getView<KeyType extends AccountViewKey>(viewType: KeyType, viewId: string): AccountViewData<T>[KeyType] {
+    switch (viewType) {
+      case 'createdLists':
+        return this.getAccountAddressListsView(viewId) as AccountViewData<T>[KeyType];
+      case 'privateLists':
+        return this.getAccountAddressListsView(viewId) as AccountViewData<T>[KeyType];
+      case 'authCodes':
+        return this.getAuthCodesView(viewId) as AccountViewData<T>[KeyType];
+      case 'transferActivity':
+        return this.getAccountActivityView(viewId) as AccountViewData<T>[KeyType];
+      case 'reviews':
+        return this.getAccountReviewsView(viewId) as AccountViewData<T>[KeyType];
+      case 'badgesCollected':
+        return this.getAccountBalancesView(viewId) as AccountViewData<T>[KeyType];
+      case 'sentClaimAlerts':
+        return this.getAccountClaimAlertsView(viewId) as AccountViewData<T>[KeyType];
+      case 'claimAlerts':
+        return this.getAccountClaimAlertsView(viewId) as AccountViewData<T>[KeyType];
+      case 'allLists':
+        return this.getAccountAddressListsView(viewId) as AccountViewData<T>[KeyType];
+      case 'whitelists':
+        return this.getAccountAddressListsView(viewId) as AccountViewData<T>[KeyType];
+      case 'blacklists':
+        return this.getAccountAddressListsView(viewId) as AccountViewData<T>[KeyType];
+      case 'createdBadges':
+        return this.getAccountBalancesView(viewId) as AccountViewData<T>[KeyType];
+      case 'managingBadges':
+        return this.getAccountBalancesView(viewId) as AccountViewData<T>[KeyType];
+      case 'listsActivity':
+        return this.getAccountListsActivityView(viewId) as AccountViewData<T>[KeyType];
+      case 'createdSecrets':
+        return this.getSecretsView(viewId) as AccountViewData<T>[KeyType];
+      case 'receivedSecrets':
+        return this.getSecretsView(viewId) as AccountViewData<T>[KeyType];
+      default:
+        throw new Error('Invalid view type');
+    }
+  }
+
   getSecretsView(viewId: string) {
     return (this.views[viewId]?.ids.map((x) => {
       return this.secrets.find((y) => y._docId === x);
@@ -605,6 +647,25 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   //   return result;
   // }
 }
+
+type AccountViewData<T extends NumberType> = {
+  createdLists: BitBadgesAddressList<T>[];
+  privateLists: BitBadgesAddressList<T>[];
+  authCodes: BlockinAuthSignatureDoc<T>[];
+  transferActivity: TransferActivityDoc<T>[];
+  reviews: ReviewDoc<T>[];
+  badgesCollected: BalanceDocWithDetails<T>[];
+  sentClaimAlerts: ClaimAlertDoc<T>[];
+  claimAlerts: ClaimAlertDoc<T>[];
+  allLists: BitBadgesAddressList<T>[];
+  whitelists: BitBadgesAddressList<T>[];
+  blacklists: BitBadgesAddressList<T>[];
+  createdBadges: BalanceDocWithDetails<T>[];
+  managingBadges: BalanceDocWithDetails<T>[];
+  listsActivity: ListActivityDoc<T>[];
+  createdSecrets: SecretDoc<T>[];
+  receivedSecrets: SecretDoc<T>[];
+};
 
 /**
  * AccountMap is used to store the user information by address.
