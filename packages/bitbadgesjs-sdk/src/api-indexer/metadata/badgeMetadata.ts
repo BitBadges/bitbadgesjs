@@ -2,10 +2,10 @@ import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } fro
 import { bigIntMin, safeAddKeepLeft } from '@/common/math';
 import type { NumberType } from '@/common/string-numbers';
 import { UintRange, UintRangeArray } from '@/core/uintRanges';
+import { Stringify, proto } from '@/index';
 import type { iUintRange } from '@/interfaces/badges/core';
 import type { iMetadata } from './metadata';
 import { Metadata } from './metadata';
-import { Stringify, proto } from '@/index';
 
 //TODO: Make an Array wrapper class for the util functions? Also add to BitBadgesCollection?
 
@@ -115,12 +115,13 @@ export class BadgeMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
     currBadgeMetadata: BadgeMetadataDetails<T>[],
     newBadgeMetadataDetailsArr: BadgeMetadataDetails<T>[]
   ) => {
-    const allBadgeIds = UintRangeArray.From(newBadgeMetadataDetailsArr.map((x) => x.badgeIds).flat()).sortAndMerge();
+
+    const allBadgeIdsToBeUpdated = UintRangeArray.From(newBadgeMetadataDetailsArr.map((x) => (x.metadata ? x.badgeIds : [])).flat()).sortAndMerge();
     for (let i = 0; i < currBadgeMetadata.length; i++) {
       const val = currBadgeMetadata[i];
       if (!val) continue; //For TS
 
-      val.badgeIds.remove(allBadgeIds);
+      val.badgeIds.remove(allBadgeIdsToBeUpdated);
     }
 
     currBadgeMetadata = currBadgeMetadata.filter((val) => val && val.badgeIds.length > 0);
@@ -128,7 +129,11 @@ export class BadgeMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
     const currMetadataStrs = currBadgeMetadata.map((x) => JSON.stringify(x.metadata)).sort();
 
     for (const newBadgeMetadataDetails of newBadgeMetadataDetailsArr) {
-      const currentMetadata = newBadgeMetadataDetails.metadata ?? new Metadata<T>({ name: '', description: '', image: '' });
+      const currentMetadata = newBadgeMetadataDetails.metadata;
+      if (!currentMetadata) {
+        continue;
+      }
+
       for (const badgeUintRange of newBadgeMetadataDetails.badgeIds) {
         const startBadgeId = badgeUintRange.start;
         const endBadgeId = badgeUintRange.end;
@@ -147,7 +152,8 @@ export class BadgeMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
             val.metadataId === newBadgeMetadataDetails.metadataId &&
             val.customData === newBadgeMetadataDetails.customData &&
             val.toUpdate === newBadgeMetadataDetails.toUpdate &&
-            val.metadata?.equals(currentMetadata)
+            JSON.stringify(val.metadata) === currStr
+            // val.metadata?.equals(currentMetadata)
           ) {
             currBadgeMetadataExists = true;
             const newUintRange = new UintRange({ start: startBadgeId, end: endBadgeId });

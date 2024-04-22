@@ -266,7 +266,7 @@ export class BitBadgesCollection<T extends NumberType>
   }
 
   getCurrentBadgeMetadata() {
-    return getCurrentValueForTimeline(this.badgeMetadataTimeline)?.badgeMetadata ?? [];
+    return getCurrentValueForTimeline(this.badgeMetadataTimeline)?.badgeMetadata.map((x) => x.clone()) ?? [];
   }
 
   /**
