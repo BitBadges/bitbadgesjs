@@ -897,6 +897,26 @@ export class BitBadgesCollection<T extends NumberType>
   }
 
   /**
+   * Type agnostic get view function. Uses the viewType to determine the type of view to fetch.
+   */
+  getView<KeyType extends CollectionViewKey>(viewType: KeyType, viewId: string): CollectionViewData<T>[KeyType] {
+    switch (viewType) {
+      case 'transferActivity':
+        return this.getActivityView(viewId) as CollectionViewData<T>[KeyType];
+      case 'reviews':
+        return this.getReviewsView(viewId) as CollectionViewData<T>[KeyType];
+      case 'owners':
+        return this.getOwnersView(viewId) as CollectionViewData<T>[KeyType];
+      case 'amountTrackers':
+        return this.getApprovalTrackersView(viewId) as CollectionViewData<T>[KeyType];
+      case 'challengeTrackers':
+        return this.getMerkleChallengesView(viewId) as CollectionViewData<T>[KeyType];
+      default:
+        throw new Error(`Unknown view type: ${viewType}`);
+    }
+  }
+
+  /**
    * Gets the documents for a specific view.
    */
   getActivityView(viewId: string) {
@@ -1156,6 +1176,14 @@ export class BitBadgesCollection<T extends NumberType>
     return getUrisForMetadataIds(metadataIds, collectionMetadata?.uri || '', badgeMetadata);
   }
 }
+
+type CollectionViewData<T extends NumberType> = {
+  transferActivity: TransferActivityDoc<T>[];
+  reviews: ReviewDoc<T>[];
+  owners: BalanceDocWithDetails<T>[];
+  amountTrackers: ApprovalTrackerDoc<T>[];
+  challengeTrackers: MerkleChallengeDoc<T>[];
+};
 
 /**
   Used by the frontend for dynamically fetching data from the DB as needed

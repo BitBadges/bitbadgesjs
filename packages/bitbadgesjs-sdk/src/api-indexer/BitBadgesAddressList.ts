@@ -177,6 +177,13 @@ export class BitBadgesAddressList<T extends NumberType>
   }
 
   /**
+   * Type safe method to get the documents array for a specific view.
+   */
+  getView(viewType: 'listActivity', viewId: string): ListActivityDoc<T>[] {
+    return this.getActivityView(viewId);
+  }
+
+  /**
    * Gets the documents array for a specific view.
    */
   getActivityView(viewId: string) {
