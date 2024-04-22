@@ -1,12 +1,15 @@
-import { BaseNumberTypeClass, CustomTypeClass, deepCopyPrimitives } from '@/common/base';
+import { BaseNumberTypeClass, CustomType, CustomTypeClass, deepCopyPrimitives } from '@/common/base';
 import type {
   iAmountTrackerIdDetails,
   iApprovalIdentifierDetails,
   iBadgeMetadata,
   iBadgeMetadataTimeline,
+  iBadgeMetadataTimelineWithDetails,
   iCoinTransfer,
   iCollectionMetadata,
   iCollectionMetadataTimeline,
+  iCollectionMetadataTimelineWithDetails,
+  iCollectionMetadataWithDetails,
   iCustomDataTimeline,
   iIsArchivedTimeline,
   iManagerTimeline,
@@ -31,7 +34,7 @@ import { TimedUpdatePermission, TimedUpdateWithBadgeIdsPermission } from './perm
 import { UintRange, UintRangeArray } from './uintRanges';
 import { AllDefaultValues, getPotentialUpdatesForTimelineValues, getUpdateCombinationsToCheck } from './validate-utils';
 import { CosmosCoin } from './coin';
-import { CosmosAddress } from '..';
+import { BadgeMetadataDetails, CosmosAddress, Metadata } from '..';
 
 /**
  * BadgeMetadata is used to represent the metadata for a range of badge IDs.
@@ -148,6 +151,43 @@ export class CollectionMetadata extends CustomTypeClass<CollectionMetadata> impl
       uri: item.uri,
       customData: item.customData
     });
+  }
+}
+
+/**
+ * @category Collections
+ */
+export class CollectionMetadataWithDetails<T extends NumberType>
+  extends BaseNumberTypeClass<CollectionMetadataWithDetails<T>>
+  implements iCollectionMetadataWithDetails<T>
+{
+  uri: string;
+  customData: string;
+  metadata?: Metadata<T>;
+
+  constructor(collectionMetadata: iCollectionMetadataWithDetails<T>) {
+    super();
+    this.uri = collectionMetadata.uri;
+    this.customData = collectionMetadata.customData;
+    this.metadata = collectionMetadata.metadata ? new Metadata(collectionMetadata.metadata) : undefined;
+  }
+
+  clone(): CollectionMetadataWithDetails<T> {
+    return new CollectionMetadataWithDetails({ ...this });
+  }
+
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): CollectionMetadataWithDetails<U> {
+    return new CollectionMetadataWithDetails<U>(
+      deepCopyPrimitives({
+        uri: this.uri,
+        customData: this.customData,
+        metadata: this.metadata ? this.metadata.convert(convertFunction) : undefined
+      })
+    );
+  }
+
+  toProto(): proto.badges.CollectionMetadata {
+    return new proto.badges.CollectionMetadata(this.clone().toJson());
   }
 }
 
@@ -734,6 +774,36 @@ export class ManagerTimeline<T extends NumberType> extends BaseNumberTypeClass<M
 }
 
 /**
+ * @category Timelines
+ */
+export class CollectionMetadataTimelineWithDetails<T extends NumberType>
+  extends BaseNumberTypeClass<CollectionMetadataTimelineWithDetails<T>>
+  implements iCollectionMetadataTimelineWithDetails<T>
+{
+  collectionMetadata: CollectionMetadataWithDetails<T>;
+  timelineTimes: UintRangeArray<T>;
+
+  constructor(collectionMetadataTimeline: iCollectionMetadataTimelineWithDetails<T>) {
+    super();
+    this.collectionMetadata = new CollectionMetadataWithDetails(collectionMetadataTimeline.collectionMetadata);
+    this.timelineTimes = UintRangeArray.From(collectionMetadataTimeline.timelineTimes);
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): CollectionMetadataTimelineWithDetails<U> {
+    return new CollectionMetadataTimelineWithDetails<U>(
+      deepCopyPrimitives({
+        collectionMetadata: this.collectionMetadata.convert(convertFunction),
+        timelineTimes: this.timelineTimes.map((b) => b.convert(convertFunction))
+      })
+    );
+  }
+
+  toProto(): proto.badges.CollectionMetadataTimeline {
+    return new proto.badges.CollectionMetadataTimeline(this.convert(Stringify));
+  }
+}
+
+/**
  * CollectionMetadataTimeline represents the value of the collection metadata over time
  *
  * @category Timelines
@@ -807,6 +877,36 @@ export class CollectionMetadataTimeline<T extends NumberType>
       newCollectionMetadata.map((b) => b.convert(BigIntify)),
       canUpdateCollectionMetadata.map((b) => b.convert(BigIntify))
     );
+  }
+}
+
+/**
+ * @category Timelines
+ */
+export class BadgeMetadataTimelineWithDetails<T extends NumberType>
+  extends BaseNumberTypeClass<BadgeMetadataTimelineWithDetails<T>>
+  implements iBadgeMetadataTimelineWithDetails<T>
+{
+  badgeMetadata: BadgeMetadataDetails<T>[];
+  timelineTimes: UintRangeArray<T>;
+
+  constructor(badgeMetadataTimeline: iBadgeMetadataTimelineWithDetails<T>) {
+    super();
+    this.timelineTimes = UintRangeArray.From(badgeMetadataTimeline.timelineTimes);
+    this.badgeMetadata = badgeMetadataTimeline.badgeMetadata.map((b) => new BadgeMetadataDetails(b));
+  }
+
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): BadgeMetadataTimelineWithDetails<U> {
+    return new BadgeMetadataTimelineWithDetails<U>(
+      deepCopyPrimitives({
+        badgeMetadata: this.badgeMetadata.map((b) => b.convert(convertFunction)),
+        timelineTimes: this.timelineTimes.map((b) => b.convert(convertFunction))
+      })
+    );
+  }
+
+  toProto(): proto.badges.BadgeMetadataTimeline {
+    return new proto.badges.BadgeMetadataTimeline(this.convert(Stringify));
   }
 }
 

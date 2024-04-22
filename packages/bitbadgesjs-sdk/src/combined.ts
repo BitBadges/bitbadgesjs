@@ -227,6 +227,7 @@ export interface iNotificationPreferences {
     listActivity?: boolean;
     transferActivity?: boolean;
     claimAlerts?: boolean;
+    ignoreIfInitiator?: boolean;
   };
 }
 
@@ -308,6 +309,8 @@ export interface iTransferActivityDoc extends iActivityDoc {
 export interface iListActivityDoc extends iActivityDoc {
   /** The list ID. */
   listId: string;
+  /** Initiator of the activity. */
+  initiatedBy: CosmosAddress;
   /** Whether or not the address was added to the list or removed. */
   addedToList?: boolean;
   /** The list of addresses that were added or removed from the list. */
@@ -869,7 +872,7 @@ export interface iBadgeMetadataDetails {
   /** The badge IDs that correspond to the metadata */
   badgeIds: iUintRange[];
   /** The metadata fetched by the URI */
-  metadata: iMetadata;
+  metadata?: iMetadata;
   /** The URI that the metadata was fetched from */
   uri?: string;
   /** Custom data */

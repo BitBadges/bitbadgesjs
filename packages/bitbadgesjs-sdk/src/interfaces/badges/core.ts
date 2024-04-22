@@ -1,4 +1,4 @@
-import { CosmosAddress } from '@/api-indexer';
+import { CosmosAddress, iBadgeMetadataDetails, iMetadata } from '@/api-indexer';
 import { iUpdateHistory } from '@/api-indexer/docs/docs';
 import type { NumberType } from '@/common/string-numbers';
 import { iCosmosCoin } from '@/core/coin';
@@ -51,6 +51,26 @@ export interface iCollectionMetadata {
    * Arbitrary custom data that can be stored on-chain
    */
   customData: string;
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iCollectionMetadataWithDetails<T extends NumberType> {
+  /**
+   * The URI where to fetch the collection metadata from.
+   */
+  uri: string;
+
+  /**
+   * Arbitrary custom data that can be stored on-chain
+   */
+  customData: string;
+
+  /**
+   * The collection metadata.
+   */
+  metadata?: iMetadata<T>;
 }
 
 /**
@@ -200,7 +220,7 @@ export interface iSecret {
    * Holders are the addresses that have been given the secret.
    */
   holders: string[];
-  
+
   /**
    * Anchors are on-chain transactions used to prove certain things
    * about the secret. For example, you can anchor the secret to a
@@ -574,11 +594,31 @@ export interface iCollectionMetadataTimeline<T extends NumberType> extends iTime
 /**
  * @category Interfaces
  */
+export interface iCollectionMetadataTimelineWithDetails<T extends NumberType> extends iTimelineItem<T> {
+  /**
+   * The collection metadata, with off-chain details populated.
+   */
+  collectionMetadata: iCollectionMetadataWithDetails<T>;
+}
+
+/**
+ * @category Interfaces
+ */
 export interface iBadgeMetadataTimeline<T extends NumberType> extends iTimelineItem<T> {
   /**
    * The badge metadata.
    */
   badgeMetadata: iBadgeMetadata<T>[];
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iBadgeMetadataTimelineWithDetails<T extends NumberType> extends iTimelineItem<T> {
+  /**
+   * The badge metadata, with off-chain details populated.
+   */
+  badgeMetadata: iBadgeMetadataDetails<T>[];
 }
 
 /**

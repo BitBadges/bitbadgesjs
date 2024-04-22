@@ -3,9 +3,9 @@ import { bigIntMin, safeAddKeepLeft } from '@/common/math';
 import type { NumberType } from '@/common/string-numbers';
 import { UintRange, UintRangeArray } from '@/core/uintRanges';
 import type { iUintRange } from '@/interfaces/badges/core';
-import { SHA256 } from 'crypto-js';
 import type { iMetadata } from './metadata';
 import { Metadata } from './metadata';
+import { Stringify, proto } from '@/index';
 
 //TODO: Make an Array wrapper class for the util functions? Also add to BitBadgesCollection?
 
@@ -35,11 +35,11 @@ export interface iBadgeMetadataDetails<T extends NumberType> {
   /** The badge IDs that correspond to the metadata */
   badgeIds: iUintRange<T>[];
   /** The metadata fetched by the URI */
-  metadata: iMetadata<T>;
+  metadata?: iMetadata<T>;
   /** The URI that the metadata was fetched from */
-  uri?: string;
+  uri: string;
   /** Custom data */
-  customData?: string;
+  customData: string;
   /** Flag to denote if the metadata is new and should be updated. Used internally. */
   toUpdate?: boolean;
 }
@@ -51,16 +51,16 @@ export interface iBadgeMetadataDetails<T extends NumberType> {
 export class BadgeMetadataDetails<T extends NumberType> extends BaseNumberTypeClass<BadgeMetadataDetails<T>> implements iBadgeMetadataDetails<T> {
   metadataId?: T;
   badgeIds: UintRangeArray<T>;
-  metadata: Metadata<T>;
-  uri?: string;
-  customData?: string;
+  metadata?: Metadata<T>;
+  uri: string;
+  customData: string;
   toUpdate?: boolean;
 
   constructor(data: iBadgeMetadataDetails<T>) {
     super();
     this.metadataId = data.metadataId;
     this.badgeIds = UintRangeArray.From(data.badgeIds);
-    this.metadata = new Metadata(data.metadata);
+    this.metadata = data.metadata ? new Metadata(data.metadata) : undefined;
     this.uri = data.uri;
     this.customData = data.customData;
     this.toUpdate = data.toUpdate;
@@ -87,11 +87,13 @@ export class BadgeMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
     });
     const uniqueBadgeMetadataDetails = new BadgeMetadataDetails<T>({
       metadata: dummyMetadata,
-      badgeIds
+      badgeIds,
+      uri: '',
+      customData: ''
     });
     const newBadgeMetadata = BadgeMetadataDetails.updateBadgeMetadata(currBadgeMetadata, uniqueBadgeMetadataDetails);
 
-    return newBadgeMetadata.filter((val) => val && val.metadata.name !== 'metadataToRemove');
+    return newBadgeMetadata.filter((val) => val && val.metadata?.name !== 'metadataToRemove');
   };
 
   /**
@@ -126,7 +128,7 @@ export class BadgeMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
     const currMetadataStrs = currBadgeMetadata.map((x) => JSON.stringify(x.metadata)).sort();
 
     for (const newBadgeMetadataDetails of newBadgeMetadataDetailsArr) {
-      const currentMetadata = newBadgeMetadataDetails.metadata;
+      const currentMetadata = newBadgeMetadataDetails.metadata ?? new Metadata<T>({ name: '', description: '', image: '' });
       for (const badgeUintRange of newBadgeMetadataDetails.badgeIds) {
         const startBadgeId = badgeUintRange.start;
         const endBadgeId = badgeUintRange.end;
@@ -145,7 +147,7 @@ export class BadgeMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
             val.metadataId === newBadgeMetadataDetails.metadataId &&
             val.customData === newBadgeMetadataDetails.customData &&
             val.toUpdate === newBadgeMetadataDetails.toUpdate &&
-            val.metadata.equals(currentMetadata)
+            val.metadata?.equals(currentMetadata)
           ) {
             currBadgeMetadataExists = true;
             const newUintRange = new UintRange({ start: startBadgeId, end: endBadgeId });
@@ -237,14 +239,14 @@ export class BadgeMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
       //We are updating a specific key value pair for each
       for (let id = badgeUintRange.start; id <= badgeUintRange.end; id = safeAddKeepLeft(id, 1)) {
         let newMetadata = {} as Metadata<T>;
-        let uri = undefined;
+        let uri = '';
         let metadataId: T | undefined = undefined;
-        let customData = undefined;
+        let customData = '';
         const uintRangeToUpdate = new UintRange<T>({ start: id, end: id });
 
         for (let i = 0; i < metadataArr.length; i++) {
           const val = metadataArr[i];
-          if (!val) continue; //For TS
+          if (!val || !val.metadata) continue; //For TS
 
           //Find the idx where id is in the badgeIds array
           const [idx, found] = val.badgeIds.search(id);
@@ -281,4 +283,8 @@ export class BadgeMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
 
     return metadataArr;
   };
+
+  toProto(): proto.badges.BadgeMetadata {
+    return new proto.badges.BadgeMetadata(this.convert(Stringify));
+  }
 }

@@ -10,6 +10,8 @@ import { CollectionApprovalWithDetails } from '@/core/approvals';
 import { BalanceArray } from '@/core/balances';
 import {
   BadgeMetadataTimeline,
+  BadgeMetadataTimelineWithDetails,
+  CollectionMetadataTimelineWithDetails,
   CustomDataTimeline,
   IsArchivedTimeline,
   ManagerTimeline,
@@ -28,7 +30,13 @@ import {
 } from '@/core/permissions';
 import { UintRange, UintRangeArray } from '@/core/uintRanges';
 import { UserBalanceStoreWithDetails } from '@/core/userBalances';
-import type { iAddressList, iBalance, iUintRange } from '@/interfaces/badges/core';
+import type {
+  iAddressList,
+  iBadgeMetadataTimelineWithDetails,
+  iBalance,
+  iCollectionMetadataTimelineWithDetails,
+  iUintRange
+} from '@/interfaces/badges/core';
 import type { iCollectionPermissionsWithDetails } from '@/interfaces/badges/permissions';
 import type { iUserBalanceStoreWithDetails } from '@/interfaces/badges/userBalances';
 import type { BaseBitBadgesApi, PaginationInfo } from './base';
@@ -87,6 +95,7 @@ import {
 import { BitBadgesApiRoutes } from './requests/routes';
 import { iIncrementedBalances } from '@/interfaces/badges/approvals';
 import { ClaimDetails, iClaimDetails } from './requests';
+import { getCurrentValueForTimeline } from '@/core/timelines';
 
 const { batchUpdateBadgeMetadata, getMetadataDetailsForBadgeId, getMetadataForBadgeId } = BadgeMetadataDetails;
 
@@ -101,10 +110,11 @@ export interface iBitBadgesCollection<T extends NumberType> extends iCollectionD
   /** The collection permissions for this collection, with off-chain metadata populated. */
   collectionPermissions: iCollectionPermissionsWithDetails<T>;
 
-  /** The fetched collection metadata for this collection. Will only be fetched if requested. It is your responsibility to join this data. */
-  cachedCollectionMetadata?: iMetadata<T>;
-  /** The fetched badge metadata for this collection. Will only be fetched if requested. It is your responsibility to join this data. */
-  cachedBadgeMetadata: iBadgeMetadataDetails<T>[];
+  /** The collection metadata timeline for this collection, with off-chain metadata populated. */
+  collectionMetadataTimeline: iCollectionMetadataTimelineWithDetails<T>[];
+  /** The badge metadata timeline for this collection, with off-chain metadata populated. */
+  badgeMetadataTimeline: iBadgeMetadataTimelineWithDetails<T>[];
+
   /** The default balances for users upon genesis, with off-chain metadata populated. */
   defaultBalances: iUserBalanceStoreWithDetails<T>;
   /** The fetched activity for this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views. */
@@ -154,8 +164,8 @@ export class BitBadgesCollection<T extends NumberType>
   collectionPermissions: CollectionPermissionsWithDetails<T>;
   defaultBalances: UserBalanceStoreWithDetails<T>;
 
-  cachedCollectionMetadata?: Metadata<T>;
-  cachedBadgeMetadata: BadgeMetadataDetails<T>[];
+  collectionMetadataTimeline: CollectionMetadataTimelineWithDetails<T>[];
+  badgeMetadataTimeline: BadgeMetadataTimelineWithDetails<T>[];
 
   activity: TransferActivityDoc<T>[];
   reviews: ReviewDoc<T>[];
@@ -185,8 +195,10 @@ export class BitBadgesCollection<T extends NumberType>
     this.collectionApprovals = data.collectionApprovals.map((collectionApproval) => new CollectionApprovalWithDetails(collectionApproval));
     this.collectionPermissions = new CollectionPermissionsWithDetails(data.collectionPermissions);
     this.defaultBalances = new UserBalanceStoreWithDetails(data.defaultBalances);
-    this.cachedCollectionMetadata = data.cachedCollectionMetadata ? new Metadata(data.cachedCollectionMetadata) : undefined;
-    this.cachedBadgeMetadata = data.cachedBadgeMetadata.map((metadata) => new BadgeMetadataDetails(metadata));
+    this.collectionMetadataTimeline = data.collectionMetadataTimeline.map(
+      (collectionMetadata) => new CollectionMetadataTimelineWithDetails(collectionMetadata)
+    );
+    this.badgeMetadataTimeline = data.badgeMetadataTimeline.map((badgeMetadata) => new BadgeMetadataTimelineWithDetails(badgeMetadata));
     this.activity = data.activity.map((activityItem) => new TransferActivityDoc(activityItem));
     this.reviews = data.reviews.map((activityItem) => new ReviewDoc(activityItem));
     this.owners = data.owners.map((balance) => new BalanceDocWithDetails(balance));
@@ -222,7 +234,39 @@ export class BitBadgesCollection<T extends NumberType>
    * ```
    */
   getCollectionMetadata() {
-    return this.cachedCollectionMetadata;
+    return getCurrentValueForTimeline(this.collectionMetadataTimeline)?.collectionMetadata.metadata;
+  }
+
+  withNewCollectionMetadata(metadata: Metadata<T>) {
+    const fullTimeline = this.collectionMetadataTimeline.map((x) => x.clone());
+
+    for (const timeline of fullTimeline) {
+      if (timeline.timelineTimes.searchIfExists(BigInt(Date.now()))) {
+        timeline.collectionMetadata.metadata = metadata;
+      } else {
+        timeline.collectionMetadata.metadata = undefined;
+      }
+    }
+
+    return fullTimeline;
+  }
+
+  withNewBadgeMetadata(metadata: BadgeMetadataDetails<T>[]) {
+    const fullTimeline = this.badgeMetadataTimeline.map((x) => x.clone());
+
+    for (const timeline of fullTimeline) {
+      if (timeline.timelineTimes.searchIfExists(BigInt(Date.now()))) {
+        timeline.badgeMetadata = metadata;
+      } else {
+        timeline.badgeMetadata = [];
+      }
+    }
+
+    return fullTimeline;
+  }
+
+  getCurrentBadgeMetadata() {
+    return getCurrentValueForTimeline(this.badgeMetadataTimeline)?.badgeMetadata ?? [];
   }
 
   /**
@@ -240,7 +284,7 @@ export class BitBadgesCollection<T extends NumberType>
    * ```
    */
   getBadgeMetadata(badgeId: T) {
-    return getMetadataForBadgeId(badgeId, this.cachedBadgeMetadata);
+    return getMetadataForBadgeId(badgeId, this.getCurrentBadgeMetadata());
   }
 
   /**
@@ -249,7 +293,7 @@ export class BitBadgesCollection<T extends NumberType>
    * If you only want the metadata, use getBadgeMetadata, or you can access it via result.metadata.
    */
   getBadgeMetadataDetails(badgeId: T) {
-    return getMetadataDetailsForBadgeId(badgeId, this.cachedBadgeMetadata);
+    return getMetadataDetailsForBadgeId(badgeId, this.getCurrentBadgeMetadata());
   }
 
   /**
@@ -716,6 +760,7 @@ export class BitBadgesCollection<T extends NumberType>
     const cachedCollection = this.convert(BigIntify);
 
     const prunedMetadataToFetch: MetadataFetchOptions = pruneMetadataToFetch(cachedCollection, options.metadataToFetch);
+    console.log(prunedMetadataToFetch);
     const shouldFetchMetadata =
       (prunedMetadataToFetch.uris && prunedMetadataToFetch.uris.length > 0) || !prunedMetadataToFetch.doNotFetchCollectionMetadata;
     const viewsToFetch = (options.viewsToFetch || []).filter((x) => this.viewHasMore(x.viewId));
@@ -1187,7 +1232,7 @@ const pruneMetadataToFetch = <T extends NumberType>(cachedCollection: BitBadgesC
   if (!cachedCollection) throw new Error('Collection does not exist');
 
   const metadataToFetch: Required<MetadataFetchOptions> = {
-    doNotFetchCollectionMetadata: cachedCollection.cachedCollectionMetadata !== undefined || metadataFetchReq?.doNotFetchCollectionMetadata || false,
+    doNotFetchCollectionMetadata: cachedCollection.getCollectionMetadata() !== undefined || metadataFetchReq?.doNotFetchCollectionMetadata || false,
     uris: [],
     badgeIds: [],
     metadataIds: []
@@ -1200,7 +1245,7 @@ const pruneMetadataToFetch = <T extends NumberType>(cachedCollection: BitBadgesC
     //See if we already have the metadata corresponding to the uris
     if (metadataFetchReq.uris) {
       for (const uri of metadataFetchReq.uris) {
-        if (!cachedCollection.cachedBadgeMetadata.find((x) => x.uri === uri)) {
+        if (uri && !cachedCollection.getCurrentBadgeMetadata().find((x) => x.uri && x.uri === uri && x.metadata !== undefined)) {
           metadataToFetch.uris.push(uri);
         }
       }
@@ -1260,8 +1305,8 @@ const pruneMetadataToFetch = <T extends NumberType>(cachedCollection: BitBadgesC
     //Check if we have the URIs yet in the cached metadata. If not, add to the list of URIs to fetch
     const uris = getUrisForMetadataIds(metadataIdsToCheck, collectionMetadata?.uri || '', badgeMetadata);
     for (const uri of uris) {
-      const existingMetadata = cachedCollection.cachedBadgeMetadata.find((x) => x.uri === uri);
-      if (!existingMetadata) metadataToFetch.uris.push(uri);
+      const existingMetadata = cachedCollection.getCurrentBadgeMetadata().find((x) => x.uri && x.uri === uri && x.metadata !== undefined);
+      if (!existingMetadata && uri) metadataToFetch.uris.push(uri);
     }
   }
 
@@ -1284,13 +1329,14 @@ function updateCollectionWithResponse<T extends NumberType>(
   if (!cachedCollection) return newCollectionResponse;
 
   const newCollection = newCollectionResponse;
+
   const newBadgeMetadata =
-    newCollection.cachedBadgeMetadata && newCollection.cachedBadgeMetadata.length > 0
+    newCollection.getCurrentBadgeMetadata() && newCollection.getCurrentBadgeMetadata().length > 0
       ? batchUpdateBadgeMetadata(
-          cachedCollection.cachedBadgeMetadata,
-          newCollection.cachedBadgeMetadata.map((x) => x.convert(convertFunction))
+          cachedCollection.getCurrentBadgeMetadata(),
+          newCollection.getCurrentBadgeMetadata().map((x) => x.convert(convertFunction))
         )
-      : cachedCollection.cachedBadgeMetadata;
+      : cachedCollection.getCurrentBadgeMetadata();
 
   const newViews = cachedCollection?.views || {};
 
@@ -1363,12 +1409,27 @@ function updateCollectionWithResponse<T extends NumberType>(
     }
   }
 
+  const newCollectionMetadata = newCollection.getCollectionMetadata() || cachedCollection?.getCollectionMetadata();
+  const newCollectionMetadataTimeline = newCollection.collectionMetadataTimeline || cachedCollection?.collectionMetadataTimeline;
+  for (const timelineTime of newCollectionMetadataTimeline) {
+    if (timelineTime.timelineTimes.searchIfExists(BigInt(Date.now()))) {
+      timelineTime.collectionMetadata.metadata = newCollectionMetadata;
+    }
+  }
+
+  const newBadgeMetadataTimeline = newCollection.badgeMetadataTimeline || cachedCollection?.badgeMetadataTimeline;
+  for (const timelineTime of newBadgeMetadataTimeline) {
+    if (timelineTime.timelineTimes.searchIfExists(BigInt(Date.now()))) {
+      timelineTime.badgeMetadata = newBadgeMetadata;
+    }
+  }
+
   //Update details accordingly. Note that there are certain fields which are always returned like collectionId, collectionUri, badgeUris, etc. We just ...spread these from the new response.
   cachedCollection = new BitBadgesCollection({
     ...cachedCollection,
     ...newCollection,
-    cachedCollectionMetadata: newCollection.cachedCollectionMetadata || cachedCollection?.cachedCollectionMetadata,
-    cachedBadgeMetadata: newBadgeMetadata,
+    collectionMetadataTimeline: newCollectionMetadataTimeline,
+    badgeMetadataTimeline: newBadgeMetadataTimeline,
     reviews,
     activity,
     owners,
@@ -1378,12 +1439,16 @@ function updateCollectionWithResponse<T extends NumberType>(
   });
 
   if (cachedCollection.collectionId === NEW_COLLECTION_ID) {
-    //Filter out fetchedAt and fetchedAtBlock for preview collections
-    delete cachedCollection.cachedCollectionMetadata?.fetchedAt;
-    delete cachedCollection.cachedCollectionMetadata?.fetchedAtBlock;
-    for (const metadataDetails of cachedCollection.cachedBadgeMetadata) {
-      delete metadataDetails.metadata?.fetchedAt;
-      delete metadataDetails.metadata?.fetchedAtBlock;
+    for (const timelineItem of cachedCollection.collectionMetadataTimeline) {
+      delete timelineItem.collectionMetadata?.metadata?.fetchedAt;
+      delete timelineItem.collectionMetadata?.metadata?.fetchedAtBlock;
+    }
+
+    for (const metadataDetails of cachedCollection.badgeMetadataTimeline) {
+      for (const metadata of metadataDetails.badgeMetadata) {
+        delete metadata.metadata?.fetchedAt;
+        delete metadata.metadata?.fetchedAtBlock;
+      }
     }
   }
 
