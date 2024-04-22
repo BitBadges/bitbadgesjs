@@ -120,6 +120,7 @@ export class ListActivityDoc<T extends NumberType> extends ActivityDoc<T> implem
   addedToList?: boolean;
   addresses?: string[];
   txHash?: string;
+  initiatedBy: CosmosAddress;
 
   constructor(data: iListActivityDoc<T>) {
     super(data);
@@ -127,6 +128,7 @@ export class ListActivityDoc<T extends NumberType> extends ActivityDoc<T> implem
     this.addedToList = data.addedToList;
     this.addresses = data.addresses;
     this.txHash = data.txHash;
+    this.initiatedBy = data.initiatedBy;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ListActivityDoc<U> {

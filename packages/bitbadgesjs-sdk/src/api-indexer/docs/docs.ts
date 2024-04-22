@@ -324,6 +324,7 @@ export class NotificationPreferences<T extends NumberType>
     listActivity?: boolean;
     transferActivity?: boolean;
     claimAlerts?: boolean;
+    ignoreIfInitiator?: boolean;
   };
 
   constructor(data: iNotificationPreferences<T>) {

@@ -16,6 +16,7 @@ import type {
   NativeAddress,
   UNIXMilliTimestamp,
   iClaimAlertDoc,
+  iCustomLink,
   iCustomListPage,
   iCustomPage,
   iSecretDoc,
@@ -349,6 +350,11 @@ export interface UpdateAccountInfoRouteRequestBody {
   hiddenLists?: string[];
 
   /**
+   * Custom URL links to display on the user's portfolio.
+   */
+  customLinks?: iCustomLink[];
+
+  /**
    * An array of custom pages on the user's portolio. Used to customize, sort, and group badges / lists into pages.
    */
   customPages?: {
@@ -386,7 +392,7 @@ export interface UpdateAccountInfoRouteRequestBody {
     email?: string;
     discord?: { id: string; username: string; discriminator: string | undefined } | undefined;
     antiPhishingCode?: string;
-    preferences?: {};
+    preferences?: { listActivity?: boolean; transferActivity?: boolean; claimAlerts?: boolean; ignoreIfInitiator?: boolean };
   };
 
   /**

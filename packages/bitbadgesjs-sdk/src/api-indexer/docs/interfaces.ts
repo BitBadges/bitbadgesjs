@@ -103,7 +103,7 @@ export interface iNotificationPreferences<T extends NumberType> {
   /** The email to receive push notifications. */
   email?: string;
   /** The Discord ID to receive push notifications. */
-  discord?: { id: string; username: string; discriminator: string | undefined, token: string } | undefined;
+  discord?: { id: string; username: string; discriminator: string | undefined; token: string } | undefined;
   /** The verification status of the email. */
   emailVerification?: iEmailVerificationStatus<T>;
   /** The preferences for the notifications. What type of notifications does the user want to receive? */
@@ -111,6 +111,7 @@ export interface iNotificationPreferences<T extends NumberType> {
     listActivity?: boolean;
     transferActivity?: boolean;
     claimAlerts?: boolean;
+    ignoreIfInitiator?: boolean;
   };
 }
 
@@ -192,6 +193,8 @@ export interface iTransferActivityDoc<T extends NumberType> extends iActivityDoc
 export interface iListActivityDoc<T extends NumberType> extends iActivityDoc<T> {
   /** The list ID. */
   listId: string;
+  /** Initiator of the list activity. */
+  initiatedBy: CosmosAddress;
   /** Whether or not the address was added to the list or removed. */
   addedToList?: boolean;
   /** The list of addresses that were added or removed from the list. */
