@@ -24,7 +24,7 @@ import type {
   iStatusDoc,
   iTransferActivityDoc
 } from '@/api-indexer/docs/interfaces';
-import type { iBadgeMetadataDetails } from '@/api-indexer/metadata/badgeMetadata';
+import type { iBadgeMetadataDetails, iCollectionMetadataDetails } from '@/api-indexer/metadata/badgeMetadata';
 import type { iMetadata } from '@/api-indexer/metadata/metadata';
 import { Metadata } from '@/api-indexer/metadata/metadata';
 import { BaseNumberTypeClass, CustomTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base';
@@ -492,13 +492,9 @@ export class AddBalancesToOffChainStorageRouteSuccessResponse
  */
 export interface AddMetadataToIpfsRouteRequestBody {
   /**
-   * The collection metadata to add to IPFS
+   * The metadata to add to IPFS
    */
-  collectionMetadata?: iMetadata<NumberType>;
-  /**
-   * The badge metadata to add to IPFS
-   */
-  badgeMetadata?: iBadgeMetadataDetails<NumberType>[] | iMetadata<NumberType>[];
+  metadata?: (iBadgeMetadataDetails<NumberType> | iMetadata<NumberType> | iCollectionMetadataDetails<NumberType>)[];
 }
 
 /**
@@ -506,16 +502,9 @@ export interface AddMetadataToIpfsRouteRequestBody {
  */
 export interface iAddMetadataToIpfsRouteSuccessResponse {
   /**
-   * The result for collection metadata.
-   */
-  collectionMetadataResult?: {
-    cid: string;
-  };
-
-  /**
    * An array of badge metadata results, if applicable.
    */
-  badgeMetadataResults: {
+  results: {
     cid: string;
   }[];
 }
@@ -528,17 +517,14 @@ export class AddMetadataToIpfsRouteSuccessResponse
   extends CustomTypeClass<AddMetadataToIpfsRouteSuccessResponse>
   implements iAddMetadataToIpfsRouteSuccessResponse
 {
-  collectionMetadataResult?: {
-    cid: string;
-  };
-  badgeMetadataResults: {
+  results: {
     cid: string;
   }[];
 
   constructor(data: iAddMetadataToIpfsRouteSuccessResponse) {
     super();
-    this.collectionMetadataResult = data.collectionMetadataResult;
-    this.badgeMetadataResults = data.badgeMetadataResults;
+
+    this.results = data.results;
   }
 }
 

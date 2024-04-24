@@ -12,7 +12,7 @@ import { Metadata } from './metadata';
 /**
  * To keep track of metadata for badges and load it dynamically, we store it in an array: BadgeMetadataDetails<T>[].
  *
- * The values are { metadata, uri, badgeIds, metadataId } where this object represents the metadata fetched by a uri or metadataId
+ * The values are { metadata, uri, badgeIds, } where this object represents the metadata fetched by a uri
  * which correspond to the badgeIds.
  *
  * Keeping track of metadata in this way allows us to load metadata dynamically and only when needed.
@@ -30,18 +30,70 @@ import { Metadata } from './metadata';
  * @category Interfaces
  */
 export interface iBadgeMetadataDetails<T extends NumberType> {
-  /** The metadata ID for the fetched URI. Metadata IDs map an ID to each unique URI. See BitBadges Docs for more information. */
-  metadataId?: T;
   /** The badge IDs that correspond to the metadata */
   badgeIds: iUintRange<T>[];
   /** The metadata fetched by the URI */
   metadata?: iMetadata<T>;
-  /** The URI that the metadata was fetched from */
+  /** The URI that the metadata was fetched from. This is the original on-chain URI, so may still have placeholders (i.e. {id} or {address}) */
   uri: string;
+  /** The URI that the metadata was fetched from with placeholders replaced. */
+  fetchedUri?: string;
   /** Custom data */
   customData: string;
   /** Flag to denote if the metadata is new and should be updated. Used internally. */
-  toUpdate?: boolean;
+  toUploadToIpfs?: boolean;
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iCollectionMetadataDetails<T extends NumberType> {
+  /** The metadata fetched by the URI */
+  metadata?: iMetadata<T>;
+  /** The URI that the metadata was fetched from. This is the original on-chain URI, so may still have placeholders (i.e. {id} or {address}) */
+  uri: string;
+  /** The URI that the metadata was fetched from with placeholders replaced. */
+  fetchedUri?: string;
+  /** Custom data */
+  customData: string;
+  /** Flag to denote if the metadata is new and should be updated. Used internally. */
+  toUploadToIpfs?: boolean;
+}
+
+/**
+ * @inheritDoc iCollectionMetadataDetails
+ * @category Collections
+ */
+export class CollectionMetadataDetails<T extends NumberType>
+  extends BaseNumberTypeClass<CollectionMetadataDetails<T>>
+  implements iCollectionMetadataDetails<T>
+{
+  metadata?: Metadata<T>;
+  uri: string;
+  fetchedUri?: string | undefined;
+  customData: string;
+  toUploadToIpfs?: boolean;
+
+  constructor(data: iCollectionMetadataDetails<T>) {
+    super();
+    this.metadata = data.metadata ? new Metadata(data.metadata) : undefined;
+    this.uri = data.uri;
+    this.fetchedUri = data.fetchedUri;
+    this.customData = data.customData;
+    this.toUploadToIpfs = data.toUploadToIpfs;
+  }
+
+  getNumberFieldNames(): string[] {
+    return [];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): CollectionMetadataDetails<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as CollectionMetadataDetails<U>;
+  }
+
+  toProto(): proto.badges.CollectionMetadata {
+    return new proto.badges.CollectionMetadata(this.convert(Stringify));
+  }
 }
 
 /**
@@ -49,25 +101,25 @@ export interface iBadgeMetadataDetails<T extends NumberType> {
  * @category Collections
  */
 export class BadgeMetadataDetails<T extends NumberType> extends BaseNumberTypeClass<BadgeMetadataDetails<T>> implements iBadgeMetadataDetails<T> {
-  metadataId?: T;
   badgeIds: UintRangeArray<T>;
   metadata?: Metadata<T>;
   uri: string;
+  fetchedUri?: string | undefined;
   customData: string;
-  toUpdate?: boolean;
+  toUploadToIpfs?: boolean;
 
   constructor(data: iBadgeMetadataDetails<T>) {
     super();
-    this.metadataId = data.metadataId;
     this.badgeIds = UintRangeArray.From(data.badgeIds);
     this.metadata = data.metadata ? new Metadata(data.metadata) : undefined;
     this.uri = data.uri;
+    this.fetchedUri = data.fetchedUri;
     this.customData = data.customData;
-    this.toUpdate = data.toUpdate;
+    this.toUploadToIpfs = data.toUploadToIpfs;
   }
 
   getNumberFieldNames(): string[] {
-    return ['metadataId'];
+    return [];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): BadgeMetadataDetails<U> {
@@ -115,8 +167,7 @@ export class BadgeMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
     currBadgeMetadata: BadgeMetadataDetails<T>[],
     newBadgeMetadataDetailsArr: BadgeMetadataDetails<T>[]
   ) => {
-
-    const allBadgeIdsToBeUpdated = UintRangeArray.From(newBadgeMetadataDetailsArr.map((x) => (x.metadata ? x.badgeIds : [])).flat()).sortAndMerge();
+    const allBadgeIdsToBeUpdated = UintRangeArray.From(newBadgeMetadataDetailsArr.map((x) => x.badgeIds).flat()).sortAndMerge();
     for (let i = 0; i < currBadgeMetadata.length; i++) {
       const val = currBadgeMetadata[i];
       if (!val) continue; //For TS
@@ -130,9 +181,6 @@ export class BadgeMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
 
     for (const newBadgeMetadataDetails of newBadgeMetadataDetailsArr) {
       const currentMetadata = newBadgeMetadataDetails.metadata;
-      if (!currentMetadata) {
-        continue;
-      }
 
       for (const badgeUintRange of newBadgeMetadataDetails.badgeIds) {
         const startBadgeId = badgeUintRange.start;
@@ -149,11 +197,10 @@ export class BadgeMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
 
           if (
             val.uri === newBadgeMetadataDetails.uri &&
-            val.metadataId === newBadgeMetadataDetails.metadataId &&
             val.customData === newBadgeMetadataDetails.customData &&
-            val.toUpdate === newBadgeMetadataDetails.toUpdate &&
-            JSON.stringify(val.metadata) === currStr
-            // val.metadata?.equals(currentMetadata)
+            val.toUploadToIpfs === newBadgeMetadataDetails.toUploadToIpfs &&
+            val.fetchedUri === newBadgeMetadataDetails.fetchedUri &&
+            ((currentMetadata === undefined && undefined === val.metadata) || val.metadata?.equals(currentMetadata))
           ) {
             currBadgeMetadataExists = true;
             const newUintRange = new UintRange({ start: startBadgeId, end: endBadgeId });
@@ -173,7 +220,7 @@ export class BadgeMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
         if (!currBadgeMetadataExists) {
           currBadgeMetadata.push(
             new BadgeMetadataDetails({
-              metadata: { ...currentMetadata },
+              metadata: currentMetadata ? { ...currentMetadata } : undefined,
               badgeIds: [
                 {
                   start: startBadgeId,
@@ -181,9 +228,9 @@ export class BadgeMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
                 }
               ],
               uri: newBadgeMetadataDetails.uri,
-              metadataId: newBadgeMetadataDetails.metadataId,
+              fetchedUri: newBadgeMetadataDetails.fetchedUri,
               customData: newBadgeMetadataDetails.customData,
-              toUpdate: newBadgeMetadataDetails.toUpdate
+              toUploadToIpfs: newBadgeMetadataDetails.toUploadToIpfs
             })
           );
 
@@ -240,13 +287,12 @@ export class BadgeMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
     key: string,
     value: any
   ) => {
-    const toUpdateDetails: BadgeMetadataDetails<T>[] = [];
+    const toUploadToIpfsDetails: BadgeMetadataDetails<T>[] = [];
     for (const badgeUintRange of badgeIds) {
       //We are updating a specific key value pair for each
       for (let id = badgeUintRange.start; id <= badgeUintRange.end; id = safeAddKeepLeft(id, 1)) {
         let newMetadata = {} as Metadata<T>;
         let uri = '';
-        let metadataId: T | undefined = undefined;
         let customData = '';
         const uintRangeToUpdate = new UintRange<T>({ start: id, end: id });
 
@@ -267,25 +313,23 @@ export class BadgeMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
 
             newMetadata = new Metadata({ ...val.metadata, [key]: value });
             uri = val.uri;
-            metadataId = val.metadataId;
             customData = val.customData;
             break;
           }
         }
         // console.log(metadataArr);
-        toUpdateDetails.push(
+        toUploadToIpfsDetails.push(
           new BadgeMetadataDetails<T>({
             metadata: newMetadata,
             badgeIds: [uintRangeToUpdate],
             uri,
-            metadataId,
             customData,
-            toUpdate: true
+            toUploadToIpfs: true
           })
         );
       }
     }
-    metadataArr = BadgeMetadataDetails.batchUpdateBadgeMetadata<T>(metadataArr, toUpdateDetails);
+    metadataArr = BadgeMetadataDetails.batchUpdateBadgeMetadata<T>(metadataArr, toUploadToIpfsDetails);
 
     return metadataArr;
   };

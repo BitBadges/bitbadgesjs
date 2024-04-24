@@ -190,22 +190,6 @@ export interface MetadataFetchOptions {
    */
   doNotFetchCollectionMetadata?: boolean;
   /**
-   * If present, the metadata corresponding to the specified metadata IDs will be fetched.
-   * Metadata IDs are helpful when determining UNQIUE URIs to be fetched.
-   *
-   * If badges 1-10000 all share the same URI, they will have the same single metadata ID.
-   * If badge 1 has a different URI than badges 2-10000, badge 1 will have a different metadata ID than the rest/
-   *
-   * We scan in increasing order of badge IDs, so metadata ID 1 will be for badge 1-X, metadata ID 2 will be for badge X+1-Y, etc.
-   *
-   * ID 0 = Collection metadata fetch
-   * ID 1 = First badge metadata fetch
-   * ID 2 = Second badge metadata fetch (if present)
-   * And so on
-   * Learn more in documentation.
-   */
-  metadataIds?: NumberType[] | iUintRange<NumberType>[];
-  /**
    * If present, the metadata corresponding to the specified URIs will be fetched.
    */
   uris?: string[];

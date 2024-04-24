@@ -1,4 +1,4 @@
-import { CosmosAddress, iBadgeMetadataDetails, iMetadata } from '@/api-indexer';
+import { CosmosAddress, iBadgeMetadataDetails, iCollectionMetadataDetails } from '@/api-indexer';
 import { iUpdateHistory } from '@/api-indexer/docs/docs';
 import type { NumberType } from '@/common/string-numbers';
 import { iCosmosCoin } from '@/core/coin';
@@ -51,26 +51,6 @@ export interface iCollectionMetadata {
    * Arbitrary custom data that can be stored on-chain
    */
   customData: string;
-}
-
-/**
- * @category Interfaces
- */
-export interface iCollectionMetadataWithDetails<T extends NumberType> {
-  /**
-   * The URI where to fetch the collection metadata from.
-   */
-  uri: string;
-
-  /**
-   * Arbitrary custom data that can be stored on-chain
-   */
-  customData: string;
-
-  /**
-   * The collection metadata.
-   */
-  metadata?: iMetadata<T>;
 }
 
 /**
@@ -598,7 +578,7 @@ export interface iCollectionMetadataTimelineWithDetails<T extends NumberType> ex
   /**
    * The collection metadata, with off-chain details populated.
    */
-  collectionMetadata: iCollectionMetadataWithDetails<T>;
+  collectionMetadata: iCollectionMetadataDetails<T>;
 }
 
 /**

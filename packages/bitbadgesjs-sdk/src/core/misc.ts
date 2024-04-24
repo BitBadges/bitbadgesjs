@@ -9,7 +9,6 @@ import type {
   iCollectionMetadata,
   iCollectionMetadataTimeline,
   iCollectionMetadataTimelineWithDetails,
-  iCollectionMetadataWithDetails,
   iCustomDataTimeline,
   iIsArchivedTimeline,
   iManagerTimeline,
@@ -34,7 +33,7 @@ import { TimedUpdatePermission, TimedUpdateWithBadgeIdsPermission } from './perm
 import { UintRange, UintRangeArray } from './uintRanges';
 import { AllDefaultValues, getPotentialUpdatesForTimelineValues, getUpdateCombinationsToCheck } from './validate-utils';
 import { CosmosCoin } from './coin';
-import { BadgeMetadataDetails, CosmosAddress, Metadata } from '..';
+import { BadgeMetadataDetails, CollectionMetadataDetails, CosmosAddress, Metadata } from '..';
 
 /**
  * BadgeMetadata is used to represent the metadata for a range of badge IDs.
@@ -151,43 +150,6 @@ export class CollectionMetadata extends CustomTypeClass<CollectionMetadata> impl
       uri: item.uri,
       customData: item.customData
     });
-  }
-}
-
-/**
- * @category Collections
- */
-export class CollectionMetadataWithDetails<T extends NumberType>
-  extends BaseNumberTypeClass<CollectionMetadataWithDetails<T>>
-  implements iCollectionMetadataWithDetails<T>
-{
-  uri: string;
-  customData: string;
-  metadata?: Metadata<T>;
-
-  constructor(collectionMetadata: iCollectionMetadataWithDetails<T>) {
-    super();
-    this.uri = collectionMetadata.uri;
-    this.customData = collectionMetadata.customData;
-    this.metadata = collectionMetadata.metadata ? new Metadata(collectionMetadata.metadata) : undefined;
-  }
-
-  clone(): CollectionMetadataWithDetails<T> {
-    return new CollectionMetadataWithDetails({ ...this });
-  }
-
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): CollectionMetadataWithDetails<U> {
-    return new CollectionMetadataWithDetails<U>(
-      deepCopyPrimitives({
-        uri: this.uri,
-        customData: this.customData,
-        metadata: this.metadata ? this.metadata.convert(convertFunction) : undefined
-      })
-    );
-  }
-
-  toProto(): proto.badges.CollectionMetadata {
-    return new proto.badges.CollectionMetadata(this.clone().toJson());
   }
 }
 
@@ -780,12 +742,12 @@ export class CollectionMetadataTimelineWithDetails<T extends NumberType>
   extends BaseNumberTypeClass<CollectionMetadataTimelineWithDetails<T>>
   implements iCollectionMetadataTimelineWithDetails<T>
 {
-  collectionMetadata: CollectionMetadataWithDetails<T>;
+  collectionMetadata: CollectionMetadataDetails<T>;
   timelineTimes: UintRangeArray<T>;
 
   constructor(collectionMetadataTimeline: iCollectionMetadataTimelineWithDetails<T>) {
     super();
-    this.collectionMetadata = new CollectionMetadataWithDetails(collectionMetadataTimeline.collectionMetadata);
+    this.collectionMetadata = new CollectionMetadataDetails(collectionMetadataTimeline.collectionMetadata);
     this.timelineTimes = UintRangeArray.From(collectionMetadataTimeline.timelineTimes);
   }
 
