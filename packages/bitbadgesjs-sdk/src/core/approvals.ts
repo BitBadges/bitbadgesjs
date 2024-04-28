@@ -1387,7 +1387,19 @@ export class CollectionApprovalWithDetails<T extends NumberType> extends Collect
       usesOwnershipTimes: true,
       arbitraryValue: {
         approvalId: this.approvalId,
-        approvalCriteria: this.approvalCriteria
+        //Don't want to include the off-chain additional details we have because these are not on-chain and
+        //will not be checked on-chain for comparisons
+        approvalCriteria: {
+          ...this.approvalCriteria,
+          merkleChallenges: this.approvalCriteria?.merkleChallenges
+            ?.map((x) => x.convert(BigIntify))
+            .map((x) => {
+              return {
+                ...x,
+                challengeInfoDetails: undefined
+              };
+            })
+        }
       }
     };
   }
@@ -1443,7 +1455,7 @@ interface ApprovalCriteriaWithIsApproved {
  * @hidden
  */
 export function getFirstMatchOnlyWithApprovalCriteria(permissions: UniversalPermission[]): UniversalPermissionDetails[] {
-  const handled: UniversalPermissionDetails[] = [];
+  let handled: UniversalPermissionDetails[] = [];
 
   for (const permission of permissions) {
     const badgeIds = GetUintRangesWithOptions(permission.badgeIds, permission.usesBadgeIds);
@@ -1458,6 +1470,7 @@ export function getFirstMatchOnlyWithApprovalCriteria(permissions: UniversalPerm
         for (const transferTime of transferTimes) {
           for (const ownershipTime of ownershipTimes) {
             const approvalCriteria: ApprovalCriteria<bigint>[] = [permission.arbitraryValue.approvalCriteria ?? null];
+
             const isApproved: boolean = permission.arbitraryValue.isApproved;
             const arbValue: ApprovalCriteriaWithIsApproved = {
               isApproved: isApproved,
@@ -1481,7 +1494,7 @@ export function getFirstMatchOnlyWithApprovalCriteria(permissions: UniversalPerm
             ];
 
             const [overlaps, inBrokenDownButNotHandled, inHandledButNotBrokenDown] = getOverlapsAndNonOverlaps(brokenDown, handled);
-            handled.length = 0;
+            handled = [];
 
             handled.push(...inHandledButNotBrokenDown);
             handled.push(...inBrokenDownButNotHandled);
@@ -1620,7 +1633,6 @@ export function validateCollectionApprovalsUpdate<T extends NumberType>(
 
   const details = detailsToCheck.map((x) => {
     const result = {
-      timelineTimes: UintRangeArray.From([x.timelineTime]),
       badgeIds: UintRangeArray.From([x.badgeId]),
       ownershipTimes: UintRangeArray.From([x.ownershipTime]),
       transferTimes: UintRangeArray.From([x.transferTime]),

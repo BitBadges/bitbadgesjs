@@ -780,7 +780,6 @@ export class BitBadgesCollection<T extends NumberType>
     const cachedCollection = this.convert(BigIntify);
 
     const prunedMetadataToFetch: MetadataFetchOptions = pruneMetadataToFetch(cachedCollection, options.metadataToFetch);
-    console.log(prunedMetadataToFetch);
     const shouldFetchMetadata =
       (prunedMetadataToFetch.uris && prunedMetadataToFetch.uris.length > 0) || !prunedMetadataToFetch.doNotFetchCollectionMetadata;
     const viewsToFetch = (options.viewsToFetch || []).filter((x) => this.viewHasMore(x.viewId));

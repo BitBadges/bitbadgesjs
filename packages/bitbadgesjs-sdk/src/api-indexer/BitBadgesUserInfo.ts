@@ -22,6 +22,8 @@ import {
   SecretDoc
 } from './docs/docs';
 import type {
+  CosmosAddress,
+  NativeAddress,
   iAccountDoc,
   iApprovalTrackerDoc,
   iBalanceDocWithDetails,
@@ -37,8 +39,6 @@ import type {
   iTransferActivityDoc
 } from './docs/interfaces';
 import { BitBadgesApiRoutes } from './requests/routes';
-import { CosmosAddress, NativeAddress } from '@/combined';
-
 /**
  * @category Interfaces
  */

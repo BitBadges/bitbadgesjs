@@ -31,7 +31,7 @@ import { BaseNumberTypeClass, CustomTypeClass, convertClassPropertiesAndMaintain
 import type { NumberType } from '@/common/string-numbers';
 import type { SupportedChain } from '@/common/types';
 import { SecretsProof } from '@/core';
-import { IncrementedBalances, iChallengeDetails } from '@/core/approvals';
+import { IncrementedBalances, iChallengeInfoDetails } from '@/core/approvals';
 import type { iBatchBadgeDetails } from '@/core/batch-utils';
 import type { iOffChainBalancesMap } from '@/core/transfers';
 import { UintRangeArray } from '@/core/uintRanges';
@@ -160,6 +160,8 @@ export interface iClaimDetails<T extends NumberType> {
   plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
   /** If manual distribution is enabled, we do not handle any distribution of claim codes. We leave that up to the claim creator. */
   manualDistribution?: boolean;
+  /** Seed code for the claim. */
+  seedCode?: string;
 }
 
 /**
@@ -171,6 +173,7 @@ export class ClaimDetails<T extends NumberType> extends BaseNumberTypeClass<Clai
   balancesToSet?: IncrementedBalances<T>;
   plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
   manualDistribution?: boolean;
+  seedCode?: string | undefined;
 
   constructor(data: iClaimDetails<T>) {
     super();
@@ -178,6 +181,7 @@ export class ClaimDetails<T extends NumberType> extends BaseNumberTypeClass<Clai
     this.balancesToSet = data.balancesToSet ? new IncrementedBalances(data.balancesToSet) : undefined;
     this.plugins = data.plugins;
     this.manualDistribution = data.manualDistribution;
+    this.seedCode = data.seedCode;
   }
 
   convert<U extends NumberType>(convertFunction: (val: NumberType) => U): ClaimDetails<U> {
@@ -427,11 +431,21 @@ export class UpdateAccountInfoRouteSuccessResponse extends EmptyResponseClass {}
 export interface AddBalancesToOffChainStorageRouteRequestBody {
   /**
    * A map of Cosmos addresses or list IDs -> Balance<NumberType>[].
+   * This will be set first. If undefined, we leave the existing balances map as is.
+   * For genesis, this must be set (even if empty {}), so we create the unique URL.
    */
   balances?: iOffChainBalancesMap<NumberType>;
 
   /**
-   * The claim details
+   * The new set of claims for the collection. This should be ALL claims. We currently do not support fine-grained claim updates.
+   *
+   * If undefined, we leave the existing claims as is. If defined, we set the new claims to what is provided.
+   *
+   * If a claim has existing state, you can reset the individual plugin's state
+   * with plugin.resetState = true. Or, claims with new, unique IDs have blank state for all plugins.
+   *
+   * We soft delete any claims that are no longer in the claims array. By soft delete, we mean that we will flag it as deleted,
+   * but if you want to reinstate it, you can do so by adding it back with the same claim ID.
    */
   claims?: {
     claimId: string;
@@ -458,13 +472,6 @@ export interface iAddBalancesToOffChainStorageRouteSuccessResponse {
    * The URI of the stored data.
    */
   uri?: string;
-
-  /**
-   * The result object with CID.
-   */
-  result: {
-    cid?: string;
-  };
 }
 
 /**
@@ -476,14 +483,10 @@ export class AddBalancesToOffChainStorageRouteSuccessResponse
   implements iAddBalancesToOffChainStorageRouteSuccessResponse
 {
   uri?: string;
-  result: {
-    cid?: string;
-  };
 
   constructor(data: iAddBalancesToOffChainStorageRouteSuccessResponse) {
     super();
     this.uri = data.uri;
-    this.result = data.result;
   }
 }
 
@@ -532,28 +535,19 @@ export class AddMetadataToIpfsRouteSuccessResponse
  * @category API Requests / Responses
  */
 export interface AddApprovalDetailsToOffChainStorageRouteRequestBody {
-  /**
-   * The name of the approval.
-   */
-  name: string;
-
-  /**
-   * The description of the approval.
-   */
-  description: string;
-
-  /**
-   * The challenge details.
-   */
-  challengeDetails?: iChallengeDetails<NumberType>;
-
-  claims?: {
+  approvalDetails: {
     /**
-     * The plugins for the approval.
+     * The name of the approval.
      */
-    plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
-    claimId: string;
-    manualDistribution?: boolean;
+    name: string;
+
+    /**
+     * The description of the approval.
+     */
+    description: string;
+
+    /** For any merkle challenge claims that we are implementing */
+    challengeInfoDetails?: iChallengeInfoDetails<NumberType>[];
   }[];
 }
 
@@ -561,19 +555,21 @@ export interface AddApprovalDetailsToOffChainStorageRouteRequestBody {
  * @category API Requests / Responses
  */
 export interface iAddApprovalDetailsToOffChainStorageRouteSuccessResponse {
-  /**
-   * The result with CID for IPFS.
-   */
-  result: {
-    cid: string;
-  };
+  approvalResults: {
+    /**
+     * The result for name / description (if applicable).
+     */
+    metadataResult: {
+      cid: string;
+    };
 
-  /**
-   * The result for the approval challenge details.
-   */
-  challengeResult?: {
-    cid: string;
-  };
+    /**
+     * The result for the approval challenge details (if applicable).
+     */
+    challengeResults?: {
+      cid: string;
+    }[];
+  }[];
 }
 
 /**
@@ -584,16 +580,23 @@ export class AddApprovalDetailsToOffChainStorageRouteSuccessResponse
   extends CustomTypeClass<AddApprovalDetailsToOffChainStorageRouteSuccessResponse>
   implements iAddApprovalDetailsToOffChainStorageRouteSuccessResponse
 {
-  result: {
-    cid: string;
-  };
-
-  challengeResult?: { cid: string } | undefined;
+  approvalResults: {
+    metadataResult: {
+      cid: string;
+    };
+    challengeResults?: {
+      cid: string;
+    }[];
+  }[];
 
   constructor(data: iAddApprovalDetailsToOffChainStorageRouteSuccessResponse) {
     super();
-    this.result = data.result;
-    this.challengeResult = data.challengeResult;
+    this.approvalResults = data.approvalResults.map((approvalResult) => {
+      return {
+        metadataResult: approvalResult.metadataResult,
+        challengeResults: approvalResult.challengeResults
+      };
+    });
   }
 }
 

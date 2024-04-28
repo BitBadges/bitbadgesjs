@@ -710,14 +710,21 @@ export interface IntegrationPluginDetails<T extends ClaimIntegrationPluginType> 
  * @category Interfaces
  */
 export interface iClaimBuilderDoc<T extends NumberType> extends Doc {
-  /** The CID of the password document */
+  /** The CID (content ID) of the document. This is used behind the scenes to handle off-chain vs on-chain data races. */
   cid: string;
+
   /** The cosmos address of the user who created this password */
   createdBy: CosmosAddress;
-  /** True if the password document is claimed by the collection */
+  /** True if the document is claimed by the collection */
   docClaimed: boolean;
-  /** The collection ID of the password document */
+  /** The collection ID of the document */
   collectionId: T;
+
+  /** Which challenge tracker is it tied to */
+  trackerDetails?: iChallengeTrackerIdDetails<T>;
+
+  /** Deleted at timestamp */
+  deletedAt?: UNIXMilliTimestamp<T>;
 
   /** Dynamic checks to run in the form of plugins */
   plugins: IntegrationPluginParams<ClaimIntegrationPluginType>[];

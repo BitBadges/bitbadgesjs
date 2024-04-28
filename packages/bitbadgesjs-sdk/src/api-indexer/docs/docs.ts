@@ -811,16 +811,19 @@ export class ClaimBuilderDoc<T extends NumberType> extends BaseNumberTypeClass<C
   createdBy: CosmosAddress;
   docClaimed: boolean;
   collectionId: T;
+  deletedAt?: T | undefined;
   manualDistribution?: boolean;
   plugins: IntegrationPluginParams<ClaimIntegrationPluginType>[];
   state: { [pluginId: string]: any };
   action: { codes?: string[] | undefined; seedCode?: string; balancesToSet?: IncrementedBalances<T> | undefined; listId?: string };
+  trackerDetails?: iChallengeTrackerIdDetails<T> | undefined;
 
   constructor(data: iClaimBuilderDoc<T>) {
     super();
     this._docId = data._docId;
     this._id = data._id;
     this.cid = data.cid;
+    this.deletedAt = data.deletedAt;
     this.createdBy = data.createdBy;
     this.docClaimed = data.docClaimed;
     this.collectionId = data.collectionId;
@@ -833,10 +836,11 @@ export class ClaimBuilderDoc<T extends NumberType> extends BaseNumberTypeClass<C
       seedCode: data.action.seedCode,
       listId: data.action.listId
     };
+    this.trackerDetails = data.trackerDetails ? new ChallengeTrackerIdDetails(data.trackerDetails) : undefined;
   }
 
   getNumberFieldNames(): string[] {
-    return ['collectionId'];
+    return ['collectionId', 'deletedAt'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ClaimBuilderDoc<U> {
