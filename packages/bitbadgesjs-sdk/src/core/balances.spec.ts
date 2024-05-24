@@ -1,4 +1,3 @@
-import { safeAdd, GO_MAX_UINT_64, safeSubtract } from '.';
 import {
   BalanceArray,
   areBalancesEqual,
@@ -11,6 +10,7 @@ import {
 import { UserPermissions } from './permissions';
 import { UintRangeArray } from './uintRanges';
 import { UserBalanceStore } from './userBalances';
+import { safeAdd, GO_MAX_UINT_64, safeSubtract } from '../common/math';
 
 BigInt.prototype.toJSON = function () {
   return this.toString();

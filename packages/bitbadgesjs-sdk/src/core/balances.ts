@@ -688,6 +688,9 @@ export function cleanBalances<T extends NumberType>(balancesArr: iBalance<T>[]) 
   return newBalances;
 }
 
+/**
+ * @category Uint Ranges
+ */
 export function uintRangeArrsEqual<T extends NumberType>(arr1: UintRangeArray<T>, arr2: UintRangeArray<T>) {
   if (arr1.length !== arr2.length) {
     return false;

@@ -24,7 +24,9 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
   merkleProofs?: MerkleProof[];
   memo?: string;
   prioritizedApprovals?: ApprovalIdentifierDetails[];
-  onlyCheckPrioritizedApprovals?: boolean;
+  onlyCheckPrioritizedCollectionApprovals?: boolean | undefined;
+  onlyCheckPrioritizedIncomingApprovals?: boolean | undefined;
+  onlyCheckPrioritizedOutgoingApprovals?: boolean | undefined;
   zkProofSolutions?: ZkProofSolution[] | undefined;
 
   constructor(transfer: iTransfer<T>) {
@@ -40,7 +42,10 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
     this.prioritizedApprovals = transfer.prioritizedApprovals
       ? transfer.prioritizedApprovals.map((b) => new ApprovalIdentifierDetails(b))
       : undefined;
-    this.onlyCheckPrioritizedApprovals = transfer.onlyCheckPrioritizedApprovals;
+    this.onlyCheckPrioritizedCollectionApprovals = transfer.onlyCheckPrioritizedCollectionApprovals;
+
+    this.onlyCheckPrioritizedIncomingApprovals = transfer.onlyCheckPrioritizedIncomingApprovals;
+    this.onlyCheckPrioritizedOutgoingApprovals = transfer.onlyCheckPrioritizedOutgoingApprovals;
     this.zkProofSolutions = transfer.zkProofSolutions ? transfer.zkProofSolutions.map((b) => new ZkProofSolution(b)) : undefined;
   }
 
@@ -54,7 +59,12 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
         merkleProofs: this.merkleProofs ? this.merkleProofs : undefined,
         memo: this.memo ? this.memo : undefined,
         prioritizedApprovals: this.prioritizedApprovals ? this.prioritizedApprovals : undefined,
-        onlyCheckPrioritizedApprovals: this.onlyCheckPrioritizedApprovals ? this.onlyCheckPrioritizedApprovals : undefined,
+        onlyCheckPrioritizedCollectionApprovals: this.onlyCheckPrioritizedCollectionApprovals
+          ? this.onlyCheckPrioritizedCollectionApprovals
+          : undefined,
+        onlyCheckPrioritizedIncomingApprovals: this.onlyCheckPrioritizedIncomingApprovals ? this.onlyCheckPrioritizedIncomingApprovals : undefined,
+        onlyCheckPrioritizedOutgoingApprovals: this.onlyCheckPrioritizedOutgoingApprovals ? this.onlyCheckPrioritizedOutgoingApprovals : undefined,
+
         zkProofSolutions: this.zkProofSolutions ? this.zkProofSolutions : undefined
       })
     );
@@ -91,8 +101,11 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
       merkleProofs: item.merkleProofs ? item.merkleProofs.map((b) => MerkleProof.fromProto(b)) : undefined,
       memo: item.memo ? item.memo : undefined,
       prioritizedApprovals: item.prioritizedApprovals ? item.prioritizedApprovals.map((b) => ApprovalIdentifierDetails.fromProto(b)) : undefined,
-      onlyCheckPrioritizedApprovals: item.onlyCheckPrioritizedApprovals ? item.onlyCheckPrioritizedApprovals : undefined,
-      zkProofSolutions: item.zkProofSolutions ? item.zkProofSolutions.map((b) => ZkProofSolution.fromProto(b)) : undefined
+
+      zkProofSolutions: item.zkProofSolutions ? item.zkProofSolutions.map((b) => ZkProofSolution.fromProto(b)) : undefined,
+      onlyCheckPrioritizedCollectionApprovals: item.onlyCheckPrioritizedCollectionApprovals,
+      onlyCheckPrioritizedIncomingApprovals: item.onlyCheckPrioritizedIncomingApprovals,
+      onlyCheckPrioritizedOutgoingApprovals: item.onlyCheckPrioritizedOutgoingApprovals
     });
   }
 }
@@ -172,7 +185,9 @@ export class TransferWithIncrements<T extends NumberType>
   merkleProofs?: MerkleProof[];
   memo?: string;
   prioritizedApprovals?: ApprovalIdentifierDetails[];
-  onlyCheckPrioritizedApprovals?: boolean;
+  onlyCheckPrioritizedCollectionApprovals?: boolean | undefined;
+  onlyCheckPrioritizedIncomingApprovals?: boolean | undefined;
+  onlyCheckPrioritizedOutgoingApprovals?: boolean | undefined;
   zkProofSolutions?: ZkProofSolution[] | undefined;
 
   constructor(data: iTransferWithIncrements<T>) {
@@ -189,7 +204,9 @@ export class TransferWithIncrements<T extends NumberType>
     this.merkleProofs = data.merkleProofs ? data.merkleProofs.map((b) => new MerkleProof(b)) : undefined;
     this.memo = data.memo;
     this.prioritizedApprovals = data.prioritizedApprovals ? data.prioritizedApprovals.map((b) => new ApprovalIdentifierDetails(b)) : undefined;
-    this.onlyCheckPrioritizedApprovals = data.onlyCheckPrioritizedApprovals;
+    this.onlyCheckPrioritizedCollectionApprovals = data.onlyCheckPrioritizedCollectionApprovals;
+    this.onlyCheckPrioritizedCollectionApprovals = data.onlyCheckPrioritizedCollectionApprovals;
+    this.onlyCheckPrioritizedCollectionApprovals = data.onlyCheckPrioritizedCollectionApprovals;
     this.zkProofSolutions = data.zkProofSolutions ? data.zkProofSolutions.map((b) => new ZkProofSolution(b)) : undefined;
   }
 

@@ -13,4 +13,7 @@ export enum SupportedChain {
   UNKNOWN = 'Unknown' //If unknown address, we don't officially know the chain yet.
 }
 
+/**
+ * @category Address Utils
+ */
 export type SupportedChainType = 'Bitcoin' | 'Ethereum' | 'Cosmos' | 'Solana' | 'Unknown';

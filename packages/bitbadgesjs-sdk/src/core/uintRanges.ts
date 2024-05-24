@@ -449,6 +449,10 @@ export class UintRangeArray<T extends NumberType> extends BaseTypedArray<UintRan
    */
   search(id: NumberType): [bigint, boolean] {
     const ranges = this.clone().sortAndMerge();
+    if (ranges.length === 0) {
+      return [BigInt(-1), false];
+    }
+
     const converterFunction = getConverterFunction(ranges[0].start);
     id = converterFunction(id);
 

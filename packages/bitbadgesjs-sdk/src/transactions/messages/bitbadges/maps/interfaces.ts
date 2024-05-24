@@ -1,18 +1,9 @@
 import { CosmosAddress } from '@/api-indexer';
-import {
-  ActionPermission,
-  CollectionMetadata,
-  ManagerTimeline,
-  NumberType,
-  Stringify,
-  TimedUpdatePermission,
-  UintRange,
-  UintRangeArray
-} from '@/core';
+import { NumberType, Stringify } from '@/common/string-numbers';
+import { ActionPermission, CollectionMetadata, ManagerTimeline, TimedUpdatePermission, UintRangeArray } from '@/core';
 import {
   BaseNumberTypeClass,
   convertClassPropertiesAndMaintainNumberTypes,
-  CustomType,
   CustomTypeClass,
   iActionPermission,
   iCollectionMetadata,

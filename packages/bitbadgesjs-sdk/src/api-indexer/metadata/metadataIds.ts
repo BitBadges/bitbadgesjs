@@ -1,5 +1,5 @@
-import type { NumberType } from '@/core';
-import { BigIntify, safeAddKeepLeft, safeAddKeepRight, safeSubtractKeepLeft } from '@/core';
+import { safeSubtractKeepLeft, safeAddKeepRight, safeAddKeepLeft } from '@/common/math';
+import { BigIntify, NumberType } from '@/common/string-numbers';
 import type { BadgeMetadata } from '@/core/misc';
 import type { UintRange } from '@/core/uintRanges';
 import { UintRangeArray } from '@/core/uintRanges';

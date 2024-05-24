@@ -19,7 +19,7 @@ export interface Doc {
  * If an error occurs, the response will be an ErrorResponse.
  *
  * 400 - Bad Request (e.g. invalid request body)
- * 401 - Unauthorized (e.g. invalid session cookie; must sign in with Blockin)
+ * 401 - Unauthorized
  * 500 - Internal Server Error
  *
  * @category API Requests / Responses
@@ -64,6 +64,7 @@ export class BaseBitBadgesApi<T extends NumberType> {
   BACKEND_URL = process.env.BITBADGES_API_URL || 'https://api.bitbadges.io';
   ConvertFunction: (num: NumberType) => T;
   apiKey = process.env.BITBADGES_API_KEY;
+  accessToken = '';
 
   constructor(apiDetails: iBitBadgesApi<T>) {
     this.BACKEND_URL = apiDetails.apiUrl || this.BACKEND_URL;
@@ -76,6 +77,17 @@ export class BaseBitBadgesApi<T extends NumberType> {
         'x-api-key': this.apiKey
       }
     });
+    this.accessToken = '';
+  }
+
+  setAccessToken(token: string) {
+    this.accessToken = token;
+    this.axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  }
+
+  unsetAccessToken() {
+    this.accessToken = '';
+    delete this.axios.defaults.headers.common['Authorization'];
   }
 
   async handleApiError(error: any): Promise<void> {

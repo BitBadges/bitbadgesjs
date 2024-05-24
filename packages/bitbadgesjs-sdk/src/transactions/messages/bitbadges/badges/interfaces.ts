@@ -133,7 +133,7 @@ export interface iMsgUpdateUserApprovals<T extends NumberType> {
   collectionId: T;
   /** Whether or not to update the outgoing approvals. */
   updateOutgoingApprovals?: boolean;
-  /** The new outgoing approvals. Must have the necessary permissions to update. */
+  /** The new outgoing approvals. Must have the necessary permissions to update.  */
   outgoingApprovals?: iUserOutgoingApproval<T>[];
   /** Whether or not to update the incoming approvals. */
   updateIncomingApprovals?: boolean;

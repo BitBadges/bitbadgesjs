@@ -22,6 +22,7 @@ import { createTxRaw, createTxRawWithExtension } from './txRaw';
 import { signatureToWeb3ExtensionBitcoin, signatureToWeb3ExtensionSolana, signatureToWeb3ExtensionEthereum } from './web3Extension';
 import { createTypedData } from '@/transactions/eip712/payload/createTypedData';
 import type { MessageGenerated } from './utils';
+import CryptoJS from 'crypto-js';
 
 /**
  * TxContext is the transaction context for a SignDoc that is independent
@@ -143,6 +144,7 @@ export interface TransactionPayload {
   };
   eipToSign: EIP712TypedData;
   jsonToSign: string;
+  humanReadableMessage: string;
 }
 
 /**
@@ -187,12 +189,16 @@ export const createTransactionPayload = (context: TxContext, messages: Message |
   const eipTxn = createEIP712TypedData(context, generatedMsgs);
   const sortedEipMessage = recursivelySort(eipTxn.message);
   const message = JSON.stringify(sortedEipMessage);
+  const sha256Message = CryptoJS.SHA256(message).toString();
+
+  const humanReadableMessage = 'This is a BitBadges transaction with the content hash: ' + sha256Message;
 
   return {
     signDirect: createCosmosPayload(context, generatedMsgs).signDirect,
     legacyAmino: createCosmosPayload(context, generatedMsgs).legacyAmino,
     eipToSign: createEIP712TypedData(context, generatedMsgs),
-    jsonToSign: message
+    jsonToSign: message,
+    humanReadableMessage: humanReadableMessage
   };
 };
 

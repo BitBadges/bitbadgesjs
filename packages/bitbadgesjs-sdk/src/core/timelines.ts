@@ -32,7 +32,7 @@ export function getCurrentIdxForTimeline<U extends NumberType, T extends Timelin
  * @category Timelines
  */
 export function getValueAtTimeForTimeline<U extends NumberType, T extends TimelineItem<U>>(timeline: T[], time?: NumberType): T | undefined {
-  if (timeline.length === 0) {
+  if (timeline.length === 0 || timeline[0].timelineTimes.length === 0) {
     return undefined;
   }
 

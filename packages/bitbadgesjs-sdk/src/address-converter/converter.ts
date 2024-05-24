@@ -4,6 +4,33 @@ import { sha256 } from '@cosmjs/crypto';
 import { ethers } from 'ethers';
 import { SupportedChain } from '@/common/types';
 import bs58 from 'bs58';
+import EthDriver from 'blockin-eth-driver';
+import CosmosDriver from 'blockin-cosmos-driver';
+import SolDriver from 'blockin-sol-driver';
+import BtcDriver from 'blockin-btc-driver';
+
+const ethDriver = new EthDriver('0x1', undefined);
+const solDriver = new SolDriver('');
+const cosmosDriver = new CosmosDriver('bitbadges_1-1');
+const btcDriver = new BtcDriver('Bitcoin');
+
+/**
+ * @category Address Utils
+ */
+export const getChainDriver = (chain: string) => {
+  switch (chain) {
+    case 'Cosmos':
+      return cosmosDriver;
+    case 'Ethereum':
+      return ethDriver;
+    case 'Solana':
+      return solDriver;
+    case 'Bitcoin':
+      return btcDriver;
+    default:
+      return ethDriver;
+  }
+};
 
 const BITCOIN_WITNESS_VERSION_SEPARATOR_BYTE = 0;
 
@@ -229,6 +256,18 @@ export function getAbbreviatedAddress(address: string) {
   if (address.length < 13) return address;
 
   return address.substring(0, 10) + '...' + address.substring(address.length - 4, address.length);
+}
+
+/**
+ * Verifies a (message, signature) pair using any native chain's supported signature verification method.
+ *
+ * For certain chains (Cosmos), we also additionally need th epublicKey or else the function will fail.
+ *
+ * @category Address Utils
+ */
+export function verifySignature(chain: SupportedChain, address: string, message: string, signature: string, publicKey?: string) {
+  const driver = getChainDriver(chain);
+  return driver.verifySignature(address, message, signature, publicKey);
 }
 
 /**

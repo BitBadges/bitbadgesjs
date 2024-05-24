@@ -7,18 +7,25 @@ import { BitBadgesUserInfo } from '@/api-indexer/BitBadgesUserInfo';
 import type { PaginationInfo } from '@/api-indexer/base';
 import { EmptyResponseClass } from '@/api-indexer/base';
 import { ClaimAlertDoc, TransferActivityDoc } from '@/api-indexer/docs/activity';
-import { SecretDoc, StatusDoc } from '@/api-indexer/docs/docs';
+import { AccessTokenDoc, DeveloperAppDoc, PluginDoc, SecretDoc, StatusDoc } from '@/api-indexer/docs/docs';
 import type {
   BlockinMessage,
+  ClaimIntegrationPluginCustomBodyType,
   ClaimIntegrationPluginType,
   CosmosAddress,
   IntegrationPluginDetails,
+  JsonBodyInputSchema,
+  JsonBodyInputWithValue,
   NativeAddress,
+  PluginPresetType,
   UNIXMilliTimestamp,
+  iAccessTokenDoc,
+  iDeveloperAppDoc,
   iClaimAlertDoc,
   iCustomLink,
   iCustomListPage,
   iCustomPage,
+  iPluginDoc,
   iSecretDoc,
   iSocialConnections,
   iStatusDoc,
@@ -30,26 +37,27 @@ import { Metadata } from '@/api-indexer/metadata/metadata';
 import { BaseNumberTypeClass, CustomTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base';
 import type { NumberType } from '@/common/string-numbers';
 import type { SupportedChain } from '@/common/types';
-import { SecretsProof } from '@/core';
-import { IncrementedBalances, iChallengeInfoDetails } from '@/core/approvals';
+import { PredeterminedBalances, iChallengeDetails, iChallengeInfoDetails } from '@/core/approvals';
 import type { iBatchBadgeDetails } from '@/core/batch-utils';
+import { BlockinChallenge, iBlockinChallenge } from '@/core/blockin';
+import { SecretsProof } from '@/core/secrets';
 import type { iOffChainBalancesMap } from '@/core/transfers';
 import { UintRangeArray } from '@/core/uintRanges';
-import type { iIncrementedBalances, iSecretsProof, iUintRange } from '@/interfaces';
+import type { iPredeterminedBalances, iSecretsProof, iUintRange } from '@/interfaces';
 import type { BroadcastPostBody } from '@/node-rest-api/broadcast';
 import type { DeliverTxResponse, Event } from '@cosmjs/stargate';
-import type { ChallengeParams, VerifyChallengeOptions } from 'blockin';
+import type { AssetConditionGroup, ChallengeParams, VerifyChallengeOptions } from 'blockin';
 import { BlockinChallengeParams } from './blockin';
 
 /**
  * @category API Requests / Responses
  */
-export interface GetStatusRouteRequestBody {}
+export interface GetStatusBody {}
 
 /**
  * @category API Requests / Responses
  */
-export interface iGetStatusRouteSuccessResponse<T extends NumberType> {
+export interface iGetStatusSuccessResponse<T extends NumberType> {
   /**
    * Status details about the indexer / blockchain.
    */
@@ -57,28 +65,28 @@ export interface iGetStatusRouteSuccessResponse<T extends NumberType> {
 }
 
 /**
- * @inheritDoc iGetStatusRouteSuccessResponse
+ * @inheritDoc iGetStatusSuccessResponse
  * @category API Requests / Responses
  */
-export class GetStatusRouteSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetStatusRouteSuccessResponse<T>>
-  implements iGetStatusRouteSuccessResponse<T>
+export class GetStatusSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetStatusSuccessResponse<T>>
+  implements iGetStatusSuccessResponse<T>
 {
   status: StatusDoc<T>;
-  constructor(data: iGetStatusRouteSuccessResponse<T>) {
+  constructor(data: iGetStatusSuccessResponse<T>) {
     super();
     this.status = new StatusDoc(data.status);
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetStatusRouteSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetStatusRouteSuccessResponse<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetStatusSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetStatusSuccessResponse<U>;
   }
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface GetSearchRouteRequestBody {
+export interface GetSearchBody {
   /** If true, we will skip all collection queries. */
   noCollections?: boolean;
   /** If true, we will skip all account queries. */
@@ -95,7 +103,7 @@ export interface GetSearchRouteRequestBody {
  *
  * @category API Requests / Responses
  */
-export interface iGetSearchRouteSuccessResponse<T extends NumberType> {
+export interface iGetSearchSuccessResponse<T extends NumberType> {
   collections: iBitBadgesCollection<T>[];
   accounts: iBitBadgesUserInfo<T>[];
   addressLists: iBitBadgesAddressList<T>[];
@@ -105,12 +113,12 @@ export interface iGetSearchRouteSuccessResponse<T extends NumberType> {
   }[];
 }
 /**
- * @inheritDoc iGetSearchRouteSuccessResponse
+ * @inheritDoc iGetSearchSuccessResponse
  * @category API Requests / Responses
  */
-export class GetSearchRouteSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetSearchRouteSuccessResponse<T>>
-  implements iGetSearchRouteSuccessResponse<T>
+export class GetSearchSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetSearchSuccessResponse<T>>
+  implements iGetSearchSuccessResponse<T>
 {
   collections: BitBadgesCollection<T>[];
   accounts: BitBadgesUserInfo<T>[];
@@ -120,7 +128,7 @@ export class GetSearchRouteSuccessResponse<T extends NumberType>
     badgeIds: UintRangeArray<T>;
   }[];
 
-  constructor(data: iGetSearchRouteSuccessResponse<T>) {
+  constructor(data: iGetSearchSuccessResponse<T>) {
     super();
     this.collections = data.collections.map((collection) => new BitBadgesCollection(collection));
     this.accounts = data.accounts.map((account) => new BitBadgesUserInfo(account));
@@ -133,15 +141,15 @@ export class GetSearchRouteSuccessResponse<T extends NumberType>
     });
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetSearchRouteSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetSearchRouteSuccessResponse<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetSearchSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetSearchSuccessResponse<U>;
   }
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface GetClaimsRouteRequestBody {
+export interface GetClaimsBody {
   /** The claim IDs to fetch. */
   claimIds: string[];
   /** If the address list is private and viewable with the link only, you must also specify the address list ID to prove knowledge of the link. */
@@ -155,13 +163,17 @@ export interface iClaimDetails<T extends NumberType> {
   /** Unique claim ID. */
   claimId: string;
   /** The balances to set for the claim. Only used for claims for collections that have off-chain indexed balances and are assigning balances based on the claim. */
-  balancesToSet?: iIncrementedBalances<T>;
+  balancesToSet?: iPredeterminedBalances<T>;
   /** Claim plugins. These are the criteria that must pass for a user to claim the badge. */
   plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
   /** If manual distribution is enabled, we do not handle any distribution of claim codes. We leave that up to the claim creator. */
   manualDistribution?: boolean;
+  /** Whether the claim is expected to be automatically triggered by someone (not the user). */
+  automatic?: boolean;
   /** Seed code for the claim. */
   seedCode?: string;
+  /** Metadata for the claim. */
+  metadata?: iMetadata<T>;
 }
 
 /**
@@ -170,18 +182,22 @@ export interface iClaimDetails<T extends NumberType> {
  */
 export class ClaimDetails<T extends NumberType> extends BaseNumberTypeClass<ClaimDetails<T>> implements iClaimDetails<T> {
   claimId: string;
-  balancesToSet?: IncrementedBalances<T>;
+  balancesToSet?: PredeterminedBalances<T>;
   plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
   manualDistribution?: boolean;
+  automatic?: boolean;
   seedCode?: string | undefined;
+  metadata?: Metadata<T> | undefined;
 
   constructor(data: iClaimDetails<T>) {
     super();
     this.claimId = data.claimId;
-    this.balancesToSet = data.balancesToSet ? new IncrementedBalances(data.balancesToSet) : undefined;
+    this.balancesToSet = data.balancesToSet ? new PredeterminedBalances(data.balancesToSet) : undefined;
     this.plugins = data.plugins;
     this.manualDistribution = data.manualDistribution;
+    this.automatic = data.automatic;
     this.seedCode = data.seedCode;
+    this.metadata = data.metadata ? new Metadata(data.metadata) : undefined;
   }
 
   convert<U extends NumberType>(convertFunction: (val: NumberType) => U): ClaimDetails<U> {
@@ -193,44 +209,135 @@ export class ClaimDetails<T extends NumberType> extends BaseNumberTypeClass<Clai
  *
  * @category API Requests / Responses
  */
-export interface iGetClaimsRouteSuccessResponse<T extends NumberType> {
+export interface iGetClaimsSuccessResponse<T extends NumberType> {
   claims: iClaimDetails<T>[];
 }
 
 /**
- * @inheritDoc iGetClaimsRouteSuccessResponse
+ * @inheritDoc iGetClaimsSuccessResponse
  * @category API Requests / Responses
  */
-export class GetClaimsRouteSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetClaimsRouteSuccessResponse<T>>
-  implements iGetClaimsRouteSuccessResponse<T>
+export class GetClaimsSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetClaimsSuccessResponse<T>>
+  implements iGetClaimsSuccessResponse<T>
 {
   claims: ClaimDetails<T>[];
 
-  constructor(data: iGetClaimsRouteSuccessResponse<T>) {
+  constructor(data: iGetClaimsSuccessResponse<T>) {
     super();
     this.claims = data.claims.map((claim) => new ClaimDetails(claim));
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): GetClaimsRouteSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetClaimsRouteSuccessResponse<U>;
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): GetClaimsSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetClaimsSuccessResponse<U>;
   }
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface CheckAndCompleteClaimRouteRequestBody {
+export interface CompleteClaimBody {
+  /** If provided, we will check that no plugins or claims have been updated since the last time the user fetched the claim. */
+  _fetchedAt?: number;
+
   /** The claim body for each unique plugin. */
-  [pluginId: string]: any;
-  /** If true, we will only return the user's previous claim codes. */
-  prevCodesOnly?: boolean;
+  [customPluginId: string]: ClaimIntegrationPluginCustomBodyType<ClaimIntegrationPluginType> | any | undefined;
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface iCheckAndCompleteClaimRouteSuccessResponse {
+export interface iCompleteClaimSuccessResponse {
+  /** The transaction ID to track the claim. */
+  claimAttemptId: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class CompleteClaimSuccessResponse extends CustomTypeClass<CompleteClaimSuccessResponse> implements iCompleteClaimSuccessResponse {
+  claimAttemptId: string;
+
+  constructor(data: iCompleteClaimSuccessResponse) {
+    super();
+    this.claimAttemptId = data.claimAttemptId;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface GetClaimAttemptStatusBody {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetClaimAttemptStatusSuccessResponse {
+  success: boolean;
+  error: string;
+  code?: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetClaimAttemptStatusSuccessResponse
+  extends CustomTypeClass<GetClaimAttemptStatusSuccessResponse>
+  implements iGetClaimAttemptStatusSuccessResponse
+{
+  success: boolean;
+  error: string;
+  code?: string;
+
+  constructor(data: iGetClaimAttemptStatusSuccessResponse) {
+    super();
+    this.success = data.success;
+    this.error = data.error;
+    this.code = data.code;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface SimulateClaimBody {
+  /** If provided, we will check that no plugins or claims have been updated since the last time the user fetched the claim. */
+  _fetchedAt?: number;
+
+  /** The claim body for each unique plugin. */
+  [customPluginId: string]: ClaimIntegrationPluginCustomBodyType<ClaimIntegrationPluginType> | any | undefined;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iSimulateClaimSuccessResponse {
+  /** The transaction ID to track the claim. This is just a simulated value for compatibility purposes. */
+  claimAttemptId: string;
+}
+
+/**
+ * @inheritDoc iSimulateClaimSuccessResponse
+ * @category API Requests / Responses
+ */
+export class SimulateClaimSuccessResponse extends CustomTypeClass<SimulateClaimSuccessResponse> implements iSimulateClaimSuccessResponse {
+  claimAttemptId: string;
+
+  constructor(data: iSimulateClaimSuccessResponse) {
+    super();
+    this.claimAttemptId = data.claimAttemptId;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface GetReservedClaimCodesBody {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetReservedClaimCodesSuccessResponse {
   /** The new claim code for the user if the claim was successful. */
   code?: string;
   /** The previous claim codes for the user. */
@@ -238,16 +345,17 @@ export interface iCheckAndCompleteClaimRouteSuccessResponse {
 }
 
 /**
+ * @inheritDoc iGetReservedClaimCodesSuccessResponse
  * @category API Requests / Responses
  */
-export class CheckAndCompleteClaimRouteSuccessResponse
-  extends CustomTypeClass<CheckAndCompleteClaimRouteSuccessResponse>
-  implements iCheckAndCompleteClaimRouteSuccessResponse
+export class GetReservedClaimCodesSuccessResponse
+  extends CustomTypeClass<GetReservedClaimCodesSuccessResponse>
+  implements iGetReservedClaimCodesSuccessResponse
 {
   code?: string;
   prevCodes?: string[] | undefined;
 
-  constructor(data: iCheckAndCompleteClaimRouteSuccessResponse) {
+  constructor(data: iGetReservedClaimCodesSuccessResponse) {
     super();
     this.code = data.code;
     this.prevCodes = data.prevCodes;
@@ -257,7 +365,7 @@ export class CheckAndCompleteClaimRouteSuccessResponse
 /**
  * @category API Requests / Responses
  */
-export interface DeleteReviewRouteRequestBody {
+export interface DeleteReviewBody {
   /**
    * The review ID to delete.
    */
@@ -267,17 +375,17 @@ export interface DeleteReviewRouteRequestBody {
 /**
  * @category API Requests / Responses
  */
-export interface iDeleteReviewRouteSuccessResponse {}
+export interface iDeleteReviewSuccessResponse {}
 
 /**
  * @category API Requests / Responses
  */
-export class DeleteReviewRouteSuccessResponse extends EmptyResponseClass {}
+export class DeleteReviewSuccessResponse extends EmptyResponseClass {}
 
 /**
  * @category API Requests / Responses
  */
-export interface AddReviewRouteRequestBody {
+export interface AddReviewBody {
   /**
    * The review text (1 to 2048 characters).
    */
@@ -302,17 +410,17 @@ export interface AddReviewRouteRequestBody {
 /**
  * @category API Requests / Responses
  */
-export interface iAddReviewRouteSuccessResponse {}
+export interface iAddReviewSuccessResponse {}
 
 /**
  * @category API Requests / Responses
  */
-export class AddReviewRouteSuccessResponse extends EmptyResponseClass {}
+export class AddReviewSuccessResponse extends EmptyResponseClass {}
 
 /**
  * @category API Requests / Responses
  */
-export interface UpdateAccountInfoRouteRequestBody {
+export interface UpdateAccountInfoBody {
   /**
    * The Discord username.
    */
@@ -418,17 +526,17 @@ export interface UpdateAccountInfoRouteRequestBody {
 /**
  * @category API Requests / Responses
  */
-export interface iUpdateAccountInfoRouteSuccessResponse {}
+export interface iUpdateAccountInfoSuccessResponse {}
 
 /**
  * @category API Requests / Responses
  */
-export class UpdateAccountInfoRouteSuccessResponse extends EmptyResponseClass {}
+export class UpdateAccountInfoSuccessResponse extends EmptyResponseClass {}
 
 /**
  * @category API Requests / Responses
  */
-export interface AddBalancesToOffChainStorageRouteRequestBody {
+export interface AddBalancesToOffChainStorageBody {
   /**
    * A map of Cosmos addresses or list IDs -> Balance<NumberType>[].
    * This will be set first. If undefined, we leave the existing balances map as is.
@@ -450,7 +558,7 @@ export interface AddBalancesToOffChainStorageRouteRequestBody {
   claims?: {
     claimId: string;
     plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
-    balancesToSet?: iIncrementedBalances<NumberType>;
+    balancesToSet?: iPredeterminedBalances<NumberType>;
   }[];
 
   /**
@@ -462,12 +570,17 @@ export interface AddBalancesToOffChainStorageRouteRequestBody {
    * The collection ID.
    */
   collectionId: NumberType;
+
+  /**
+   * Whether this is for a non-indexed collection. Bypasses some validation.
+   */
+  isNonIndexed?: boolean;
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface iAddBalancesToOffChainStorageRouteSuccessResponse {
+export interface iAddBalancesToOffChainStorageSuccessResponse {
   /**
    * The URI of the stored data.
    */
@@ -475,16 +588,16 @@ export interface iAddBalancesToOffChainStorageRouteSuccessResponse {
 }
 
 /**
- * @inheritDoc iAddBalancesToOffChainStorageRouteSuccessResponse
+ * @inheritDoc iAddBalancesToOffChainStorageSuccessResponse
  * @category API Requests / Responses
  */
-export class AddBalancesToOffChainStorageRouteSuccessResponse
-  extends CustomTypeClass<AddBalancesToOffChainStorageRouteSuccessResponse>
-  implements iAddBalancesToOffChainStorageRouteSuccessResponse
+export class AddBalancesToOffChainStorageSuccessResponse
+  extends CustomTypeClass<AddBalancesToOffChainStorageSuccessResponse>
+  implements iAddBalancesToOffChainStorageSuccessResponse
 {
   uri?: string;
 
-  constructor(data: iAddBalancesToOffChainStorageRouteSuccessResponse) {
+  constructor(data: iAddBalancesToOffChainStorageSuccessResponse) {
     super();
     this.uri = data.uri;
   }
@@ -493,17 +606,17 @@ export class AddBalancesToOffChainStorageRouteSuccessResponse
 /**
  * @category API Requests / Responses
  */
-export interface AddMetadataToIpfsRouteRequestBody {
+export interface AddToIpfsBody {
   /**
-   * The metadata to add to IPFS
+   * The stuff to add to IPFS
    */
-  metadata?: (iBadgeMetadataDetails<NumberType> | iMetadata<NumberType> | iCollectionMetadataDetails<NumberType>)[];
+  contents?: (iBadgeMetadataDetails<NumberType> | iMetadata<NumberType> | iCollectionMetadataDetails<NumberType> | iChallengeDetails<NumberType>)[];
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface iAddMetadataToIpfsRouteSuccessResponse {
+export interface iAddToIpfsSuccessResponse {
   /**
    * An array of badge metadata results, if applicable.
    */
@@ -513,18 +626,15 @@ export interface iAddMetadataToIpfsRouteSuccessResponse {
 }
 
 /**
- * @inheritDoc iAddMetadataToIpfsRouteSuccessResponse
+ * @inheritDoc iAddToIpfsSuccessResponse
  * @category API Requests / Responses
  */
-export class AddMetadataToIpfsRouteSuccessResponse
-  extends CustomTypeClass<AddMetadataToIpfsRouteSuccessResponse>
-  implements iAddMetadataToIpfsRouteSuccessResponse
-{
+export class AddToIpfsSuccessResponse extends CustomTypeClass<AddToIpfsSuccessResponse> implements iAddToIpfsSuccessResponse {
   results: {
     cid: string;
   }[];
 
-  constructor(data: iAddMetadataToIpfsRouteSuccessResponse) {
+  constructor(data: iAddToIpfsSuccessResponse) {
     super();
 
     this.results = data.results;
@@ -534,7 +644,7 @@ export class AddMetadataToIpfsRouteSuccessResponse
 /**
  * @category API Requests / Responses
  */
-export interface AddApprovalDetailsToOffChainStorageRouteRequestBody {
+export interface AddApprovalDetailsToOffChainStorageBody {
   approvalDetails: {
     /**
      * The name of the approval.
@@ -554,7 +664,7 @@ export interface AddApprovalDetailsToOffChainStorageRouteRequestBody {
 /**
  * @category API Requests / Responses
  */
-export interface iAddApprovalDetailsToOffChainStorageRouteSuccessResponse {
+export interface iAddApprovalDetailsToOffChainStorageSuccessResponse {
   approvalResults: {
     /**
      * The result for name / description (if applicable).
@@ -573,12 +683,12 @@ export interface iAddApprovalDetailsToOffChainStorageRouteSuccessResponse {
 }
 
 /**
- * @inheritDoc iAddApprovalDetailsToOffChainStorageRouteSuccessResponse
+ * @inheritDoc iAddApprovalDetailsToOffChainStorageSuccessResponse
  * @category API Requests / Responses
  */
-export class AddApprovalDetailsToOffChainStorageRouteSuccessResponse
-  extends CustomTypeClass<AddApprovalDetailsToOffChainStorageRouteSuccessResponse>
-  implements iAddApprovalDetailsToOffChainStorageRouteSuccessResponse
+export class AddApprovalDetailsToOffChainStorageSuccessResponse
+  extends CustomTypeClass<AddApprovalDetailsToOffChainStorageSuccessResponse>
+  implements iAddApprovalDetailsToOffChainStorageSuccessResponse
 {
   approvalResults: {
     metadataResult: {
@@ -589,7 +699,7 @@ export class AddApprovalDetailsToOffChainStorageRouteSuccessResponse
     }[];
   }[];
 
-  constructor(data: iAddApprovalDetailsToOffChainStorageRouteSuccessResponse) {
+  constructor(data: iAddApprovalDetailsToOffChainStorageSuccessResponse) {
     super();
     this.approvalResults = data.approvalResults.map((approvalResult) => {
       return {
@@ -603,7 +713,7 @@ export class AddApprovalDetailsToOffChainStorageRouteSuccessResponse
 /**
  * @category API Requests / Responses
  */
-export interface GetSignInChallengeRouteRequestBody {
+export interface GetSignInChallengeBody {
   /**
    * The blockchain to be signed in with.
    */
@@ -613,17 +723,12 @@ export interface GetSignInChallengeRouteRequestBody {
    * The user's blockchain address. This can be their native address.
    */
   address: NativeAddress;
-
-  /**
-   * The number of hours to be signed in for.
-   */
-  hours?: NumberType;
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface iGetSignInChallengeRouteSuccessResponse<T extends NumberType> {
+export interface iGetSignInChallengeSuccessResponse<T extends NumberType> {
   /**
    * The nonce for the challenge.
    */
@@ -635,46 +740,46 @@ export interface iGetSignInChallengeRouteSuccessResponse<T extends NumberType> {
   params: ChallengeParams<T>;
 
   /**
-   * The Blockin challenge message to sign.
+   * The challenge message to sign.
    */
   message: BlockinMessage;
 }
 
 /**
- * @inheritDoc iGetSignInChallengeRouteSuccessResponse
+ * @inheritDoc iGetSignInChallengeSuccessResponse
  * @category API Requests / Responses
  */
-export class GetSignInChallengeRouteSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetSignInChallengeRouteSuccessResponse<T>>
-  implements iGetSignInChallengeRouteSuccessResponse<T>
+export class GetSignInChallengeSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetSignInChallengeSuccessResponse<T>>
+  implements iGetSignInChallengeSuccessResponse<T>
 {
   nonce: string;
   params: BlockinChallengeParams<T>;
   message: BlockinMessage;
 
-  constructor(data: iGetSignInChallengeRouteSuccessResponse<T>) {
+  constructor(data: iGetSignInChallengeSuccessResponse<T>) {
     super();
     this.nonce = data.nonce;
     this.params = new BlockinChallengeParams(data.params);
     this.message = data.message;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetSignInChallengeRouteSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetSignInChallengeRouteSuccessResponse<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetSignInChallengeSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetSignInChallengeSuccessResponse<U>;
   }
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface VerifySignInRouteRequestBody {
+export interface VerifySignInBody {
   /**
-   * The original Blockin message that was signed.
+   * The original message that was signed.
    */
   message: BlockinMessage;
 
   /**
-   * The signature of the Blockin message
+   * The signature of the message
    */
   signature: string;
 
@@ -687,29 +792,29 @@ export interface VerifySignInRouteRequestBody {
 /**
  * @category API Requests / Responses
  */
-export interface iVerifySignInRouteSuccessResponse {}
+export interface iVerifySignInSuccessResponse {}
 
 /**
  * @category API Requests / Responses
  */
-export class VerifySignInRouteSuccessResponse extends EmptyResponseClass {}
+export class VerifySignInSuccessResponse extends EmptyResponseClass {}
 
 /**
  * @category API Requests / Responses
  */
-export interface CheckSignInStatusRequestBody {}
+export interface CheckSignInStatusBody {}
 
 /**
  * @category API Requests / Responses
  */
-export interface iCheckSignInStatusRequestSuccessResponse {
+export interface iCheckSignInStatusSuccessResponse {
   /**
    * Indicates whether the user is signed in.
    */
   signedIn: boolean;
 
   /**
-   * The Blockin message that was signed.
+   * The message that was signed.
    */
   message: BlockinMessage;
 
@@ -748,13 +853,10 @@ export interface iCheckSignInStatusRequestSuccessResponse {
 }
 
 /**
- * @inheritDoc iCheckSignInStatusRequestSuccessResponse
+ * @inheritDoc iCheckSignInStatusSuccessResponse
  * @category API Requests / Responses
  */
-export class CheckSignInStatusRequestSuccessResponse
-  extends CustomTypeClass<CheckSignInStatusRequestSuccessResponse>
-  implements iCheckSignInStatusRequestSuccessResponse
-{
+export class CheckSignInStatusSuccessResponse extends CustomTypeClass<CheckSignInStatusSuccessResponse> implements iCheckSignInStatusSuccessResponse {
   signedIn: boolean;
   message: BlockinMessage;
   discord?: {
@@ -775,7 +877,7 @@ export class CheckSignInStatusRequestSuccessResponse
     username: string;
   };
 
-  constructor(data: iCheckSignInStatusRequestSuccessResponse) {
+  constructor(data: iCheckSignInStatusSuccessResponse) {
     super();
     this.signedIn = data.signedIn;
     this.message = data.message;
@@ -789,7 +891,7 @@ export class CheckSignInStatusRequestSuccessResponse
 /**
  * @category API Requests / Responses
  */
-export interface SignOutRequestBody {
+export interface SignOutBody {
   /** Sign out of Blockin, and thus the entire API. */
   signOutBlockin: boolean;
   /** Sign out of Discord. */
@@ -814,12 +916,12 @@ export class SignOutSuccessResponse extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export interface GetBrowseCollectionsRouteRequestBody {}
+export interface GetBrowseCollectionsBody {}
 
 /**
  * @category API Requests / Responses
  */
-export interface iGetBrowseCollectionsRouteSuccessResponse<T extends NumberType> {
+export interface iGetBrowseCollectionsSuccessResponse<T extends NumberType> {
   collections: { [category: string]: iBitBadgesCollection<T>[] };
   addressLists: { [category: string]: iBitBadgesAddressList<T>[] };
   profiles: { [category: string]: iBitBadgesUserInfo<T>[] };
@@ -835,9 +937,9 @@ export interface iGetBrowseCollectionsRouteSuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export class GetBrowseCollectionsRouteSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetBrowseCollectionsRouteSuccessResponse<T>>
-  implements iGetBrowseCollectionsRouteSuccessResponse<T>
+export class GetBrowseCollectionsSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetBrowseCollectionsSuccessResponse<T>>
+  implements iGetBrowseCollectionsSuccessResponse<T>
 {
   collections: { [category: string]: BitBadgesCollection<T>[] };
   addressLists: { [category: string]: BitBadgesAddressList<T>[] };
@@ -850,7 +952,7 @@ export class GetBrowseCollectionsRouteSuccessResponse<T extends NumberType>
     }[];
   };
 
-  constructor(data: iGetBrowseCollectionsRouteSuccessResponse<T>) {
+  constructor(data: iGetBrowseCollectionsSuccessResponse<T>) {
     super();
     this.collections = Object.keys(data.collections).reduce(
       (acc, category) => {
@@ -888,20 +990,20 @@ export class GetBrowseCollectionsRouteSuccessResponse<T extends NumberType>
     );
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetBrowseCollectionsRouteSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetBrowseCollectionsRouteSuccessResponse<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetBrowseCollectionsSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetBrowseCollectionsSuccessResponse<U>;
   }
 }
 
 /**
  * @category API Requests / Responses
  */
-export type BroadcastTxRouteRequestBody = BroadcastPostBody;
+export type BroadcastTxBody = BroadcastPostBody;
 
 /**
  * @category API Requests / Responses
  */
-export interface iBroadcastTxRouteSuccessResponse {
+export interface iBroadcastTxSuccessResponse {
   /**
    * The response from the blockchain for the broadcasted tx.
    */
@@ -926,7 +1028,7 @@ export interface iBroadcastTxRouteSuccessResponse {
 /**
  * @category API Requests / Responses
  */
-export class BroadcastTxRouteSuccessResponse extends CustomTypeClass<BroadcastTxRouteSuccessResponse> implements iBroadcastTxRouteSuccessResponse {
+export class BroadcastTxSuccessResponse extends CustomTypeClass<BroadcastTxSuccessResponse> implements iBroadcastTxSuccessResponse {
   tx_response: {
     code: number;
     codespace: string;
@@ -944,7 +1046,7 @@ export class BroadcastTxRouteSuccessResponse extends CustomTypeClass<BroadcastTx
     txhash: string;
   };
 
-  constructor(data: iBroadcastTxRouteSuccessResponse) {
+  constructor(data: iBroadcastTxSuccessResponse) {
     super();
     this.tx_response = data.tx_response;
   }
@@ -953,12 +1055,12 @@ export class BroadcastTxRouteSuccessResponse extends CustomTypeClass<BroadcastTx
 /**
  * @category API Requests / Responses
  */
-export type SimulateTxRouteRequestBody = BroadcastPostBody;
+export type SimulateTxBody = BroadcastPostBody;
 
 /**
  * @category API Requests / Responses
  */
-export interface iSimulateTxRouteSuccessResponse {
+export interface iSimulateTxSuccessResponse {
   /**
    * How much gas was used in the simulation.
    */
@@ -974,10 +1076,10 @@ export interface iSimulateTxRouteSuccessResponse {
 }
 
 /**
- * @inheritDoc iSimulateTxRouteSuccessResponse
+ * @inheritDoc iSimulateTxSuccessResponse
  * @category API Requests / Responses
  */
-export class SimulateTxRouteSuccessResponse extends CustomTypeClass<SimulateTxRouteSuccessResponse> implements iSimulateTxRouteSuccessResponse {
+export class SimulateTxSuccessResponse extends CustomTypeClass<SimulateTxSuccessResponse> implements iSimulateTxSuccessResponse {
   gas_info: { gas_used: string; gas_wanted: string };
   result: {
     data: string;
@@ -985,7 +1087,7 @@ export class SimulateTxRouteSuccessResponse extends CustomTypeClass<SimulateTxRo
     events: { type: string; attributes: { key: string; value: string; index: boolean }[] }[];
   };
 
-  constructor(data: iSimulateTxRouteSuccessResponse) {
+  constructor(data: iSimulateTxSuccessResponse) {
     super();
     this.gas_info = data.gas_info;
     this.result = data.result;
@@ -995,53 +1097,53 @@ export class SimulateTxRouteSuccessResponse extends CustomTypeClass<SimulateTxRo
 /**
  * @category API Requests / Responses
  */
-export interface FetchMetadataDirectlyRouteRequestBody {
+export interface FetchMetadataDirectlyBody {
   uris: string[];
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface iFetchMetadataDirectlyRouteSuccessResponse<T extends NumberType> {
+export interface iFetchMetadataDirectlySuccessResponse<T extends NumberType> {
   metadata: iMetadata<T>[];
 }
 
 /**
- * @inheritDoc iFetchMetadataDirectlyRouteSuccessResponse
+ * @inheritDoc iFetchMetadataDirectlySuccessResponse
  * @category API Requests / Responses
  */
-export class FetchMetadataDirectlyRouteSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<FetchMetadataDirectlyRouteSuccessResponse<T>>
-  implements iFetchMetadataDirectlyRouteSuccessResponse<T>
+export class FetchMetadataDirectlySuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<FetchMetadataDirectlySuccessResponse<T>>
+  implements iFetchMetadataDirectlySuccessResponse<T>
 {
   metadata: Metadata<T>[];
 
-  constructor(data: iFetchMetadataDirectlyRouteSuccessResponse<T>) {
+  constructor(data: iFetchMetadataDirectlySuccessResponse<T>) {
     super();
     this.metadata = data.metadata.map((metadata) => new Metadata(metadata));
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): FetchMetadataDirectlyRouteSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as FetchMetadataDirectlyRouteSuccessResponse<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): FetchMetadataDirectlySuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as FetchMetadataDirectlySuccessResponse<U>;
   }
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface GetTokensFromFaucetRouteRequestBody {}
+export interface GetTokensFromFaucetBody {}
 
 /**
  * @category API Requests / Responses
  */
-export type iGetTokensFromFaucetRouteSuccessResponse = DeliverTxResponse;
+export type iGetTokensFromFaucetSuccessResponse = DeliverTxResponse;
 
 /**
  * @category API Requests / Responses
  */
-export class GetTokensFromFaucetRouteSuccessResponse
-  extends CustomTypeClass<GetTokensFromFaucetRouteSuccessResponse>
-  implements iGetTokensFromFaucetRouteSuccessResponse
+export class GetTokensFromFaucetSuccessResponse
+  extends CustomTypeClass<GetTokensFromFaucetSuccessResponse>
+  implements iGetTokensFromFaucetSuccessResponse
 {
   readonly height: number;
   /** The position of the transaction within the block. This is a 0-based index. */
@@ -1070,7 +1172,7 @@ export class GetTokensFromFaucetRouteSuccessResponse
   readonly gasUsed: bigint;
   readonly gasWanted: bigint;
 
-  constructor(data: iGetTokensFromFaucetRouteSuccessResponse) {
+  constructor(data: iGetTokensFromFaucetSuccessResponse) {
     super();
     this.height = data.height;
     this.txIndex = data.txIndex;
@@ -1087,7 +1189,7 @@ export class GetTokensFromFaucetRouteSuccessResponse
 /**
  * @category API Requests / Responses
  */
-export interface SendClaimAlertsRouteRequestBody {
+export interface SendClaimAlertsBody {
   /** The claim alerts to send to users. */
   claimAlerts: {
     /** The collection ID to associate with the claim alert. If specified, you (the sender) must be the manager of the collection. This is typically used
@@ -1103,12 +1205,12 @@ export interface SendClaimAlertsRouteRequestBody {
 /**
  * @category API Requests / Responses
  */
-export interface iSendClaimAlertsRouteSuccessResponse {}
+export interface iSendClaimAlertsSuccessResponse {}
 
 /**
  * @category API Requests / Responses
  */
-export class SendClaimAlertsRouteSuccessResponse extends EmptyResponseClass {}
+export class SendClaimAlertsSuccessResponse extends EmptyResponseClass {}
 
 /**
  * Information returned by the REST API getAccount route.
@@ -1127,33 +1229,65 @@ export interface CosmosAccountResponse {
 }
 
 /**
- * Generic route to verify any Blockin request. Does not sign you in with the API. Used for custom Blockin integrations.
+ * Generic route to verify any asset ownership requirements.
  *
  * @category API Requests / Responses
  */
-export interface GenericBlockinVerifyRouteRequestBody extends VerifySignInRouteRequestBody {
+export interface GenericVerifyAssetsBody {
+  /**
+   * The address to check
+   */
+  cosmosAddress: CosmosAddress;
+
+  /**
+   * The asset requirements to verify.
+   */
+  assetOwnershipRequirements: AssetConditionGroup<NumberType>;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGenericVerifyAssetsSuccessResponse {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GenericVerifyAssetsSuccessResponse extends EmptyResponseClass {}
+
+/**
+ * Generic route to verify any SIWBB request. Does not sign you in with the API. Used for custom SIWBB implementations.
+ *
+ * @category API Requests / Responses
+ */
+export interface GenericBlockinVerifyBody extends VerifySignInBody {
   /**
    * Additional options for verifying the challenge.
    */
   options?: VerifyChallengeOptions;
+
+  /**
+   * Additional secrets to verify in the challenge.
+   */
+  secretsPresentations?: SecretsProof<NumberType>[];
 }
 
 /**
- * @inheritDoc iVerifySignInRouteSuccessResponse
+ * @inheritDoc iVerifySignInSuccessResponse
  * @category API Requests / Responses
  */
-export interface iGenericBlockinVerifyRouteSuccessResponse extends iVerifySignInRouteSuccessResponse {}
+export interface iGenericBlockinVerifySuccessResponse extends iVerifySignInSuccessResponse {}
 
 /**
- * @inheritDoc iVerifySignInRouteSuccessResponse
+ * @inheritDoc iVerifySignInSuccessResponse
  * @category API Requests / Responses
  */
-export class GenericBlockinVerifyRouteSuccessResponse extends VerifySignInRouteSuccessResponse {}
+export class GenericBlockinVerifySuccessResponse extends VerifySignInSuccessResponse {}
 
 /**
  * @category API Requests / Responses
  */
-export interface CreateSecretRouteRequestBody {
+export interface CreateSecretBody {
   /**
    * Proof of issuance is used for BBS+ signatures (scheme = bbs) only.
    * BBS+ signatures are signed with a BBS+ key pair, but you would often want the issuer to be a native address.
@@ -1206,7 +1340,7 @@ export interface CreateSecretRouteRequestBody {
 /**
  * @category API Requests / Responses
  */
-export interface iCreateSecretRouteSuccessResponse {
+export interface iCreateSecretSuccessResponse {
   /** The secret ID. This is the ID that is given to the user to query the secret. Anyone with the ID can query it, so keep this safe and secure. */
   secretId: string;
 }
@@ -1214,10 +1348,10 @@ export interface iCreateSecretRouteSuccessResponse {
 /**
  * @category API Requests / Responses
  */
-export class CreateSecretRouteSuccessResponse extends CustomTypeClass<CreateSecretRouteSuccessResponse> implements iCreateSecretRouteSuccessResponse {
+export class CreateSecretSuccessResponse extends CustomTypeClass<CreateSecretSuccessResponse> implements iCreateSecretSuccessResponse {
   secretId: string;
 
-  constructor(data: iCreateSecretRouteSuccessResponse) {
+  constructor(data: iCreateSecretSuccessResponse) {
     super();
     this.secretId = data.secretId;
   }
@@ -1226,7 +1360,7 @@ export class CreateSecretRouteSuccessResponse extends CustomTypeClass<CreateSecr
 /**
  * @category API Requests / Responses
  */
-export interface GetSecretRouteRequestBody {
+export interface GetSecretBody {
   /** The secret ID. This is the ID that is given to the user to query the secret. Anyone with the ID can query it, so keep this safe and secure. */
   secretId: string;
 }
@@ -1234,17 +1368,17 @@ export interface GetSecretRouteRequestBody {
 /**
  * @category API Requests / Responses
  */
-export interface iGetSecretRouteSuccessResponse<T extends NumberType> extends iSecretDoc<T> {}
+export interface iGetSecretSuccessResponse<T extends NumberType> extends iSecretDoc<T> {}
 
 /**
  * @category API Requests / Responses
  */
-export class GetSecretRouteSuccessResponse<T extends NumberType> extends SecretDoc<T> {}
+export class GetSecretSuccessResponse<T extends NumberType> extends SecretDoc<T> {}
 
 /**
  * @category API Requests / Responses
  */
-export interface DeleteSecretRouteRequestBody {
+export interface DeleteSecretBody {
   /** The secret ID. This is the ID that is given to the user to query the secret. Anyone with the ID can query it, so keep this safe and secure. */
   secretId: string;
 }
@@ -1252,17 +1386,17 @@ export interface DeleteSecretRouteRequestBody {
 /**
  * @category API Requests / Responses
  */
-export interface iDeleteSecretRouteSuccessResponse {}
+export interface iDeleteSecretSuccessResponse {}
 
 /**
  * @category API Requests / Responses
  */
-export class DeleteSecretRouteSuccessResponse extends EmptyResponseClass {}
+export class DeleteSecretSuccessResponse extends EmptyResponseClass {}
 
 /**
  * @category API Requests / Responses
  */
-export interface UpdateSecretRouteRequestBody {
+export interface UpdateSecretBody {
   /** The secret ID. This is the ID that is given to the user to query the secret. Anyone with the ID can query it, so keep this safe and secure. */
   secretId: string;
 
@@ -1331,27 +1465,27 @@ export interface UpdateSecretRouteRequestBody {
 /**
  * @category API Requests / Responses
  */
-export interface iUpdateSecretRouteSuccessResponse {}
+export interface iUpdateSecretSuccessResponse {}
 
 /**
  * @category API Requests / Responses
  */
-export class UpdateSecretRouteSuccessResponse extends EmptyResponseClass {}
+export class UpdateSecretSuccessResponse extends EmptyResponseClass {}
 
 /**
  * @category API Requests / Responses
  */
-export interface CreateBlockinAuthCodeRouteRequestBody {
-  /** The name of the Blockin auth code for display purposes. */
+export interface CreateSIWBBRequestBody {
+  /** The name of the SIWBB request for display purposes. */
   name: string;
-  /** The description of the Blockin auth code for display purposes. */
+  /** The description of the SIWBB request for display purposes. */
   description: string;
-  /** The image of the Blockin auth code for display purposes. */
+  /** The image of the SIWBB request for display purposes. */
   image: string;
 
-  /** The original Blockin message that was signed. */
+  /** The original message that was signed. */
   message: BlockinMessage;
-  /** The signature of the Blockin message */
+  /** The signature of the message */
   signature: string;
   /** The public key of the signer (if needed). Only certain chains require this. */
   publicKey?: string;
@@ -1360,167 +1494,175 @@ export interface CreateBlockinAuthCodeRouteRequestBody {
    * If required, you can additionally add proof of secrets to the authentication flow.
    * This proves sensitive information (e.g. GPAs, SAT scores, etc.) without revealing the information itself.
    */
-  secretsProofs?: iSecretsProof<NumberType>[];
+  secretsPresentations?: iSecretsProof<NumberType>[];
+
+  /** Client ID for the SIWBB request. */
+  clientId: string;
+
+  /** If defined, we will store the current sign-in details for these web2 connections along with the code */
+  otherSignIns?: ('discord' | 'twitter' | 'google' | 'github')[];
+
+  /** Redirect URI if redirected after successful sign-in. */
+  redirectUri?: string;
+
+  /** State to be passed back to the redirect URI. */
+  state?: string;
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface iCreateBlockinAuthCodeRouteSuccessResponse {
-  /** Secret ID only to be given to queriers */
-  id: string;
+export interface iCreateSIWBBRequestSuccessResponse {
+  /** Secret code which can be exchanged for the SIWBB request details. */
+  code: string;
 }
 
 /**
  * @category API Requests / Responses
  */
-export class CreateBlockinAuthCodeRouteSuccessResponse
-  extends CustomTypeClass<CreateBlockinAuthCodeRouteSuccessResponse>
-  implements iCreateBlockinAuthCodeRouteSuccessResponse
+export class CreateSIWBBRequestSuccessResponse
+  extends CustomTypeClass<CreateSIWBBRequestSuccessResponse>
+  implements iCreateSIWBBRequestSuccessResponse
 {
-  id: string;
+  code: string;
 
-  constructor(data: iCreateBlockinAuthCodeRouteSuccessResponse) {
+  constructor(data: iCreateSIWBBRequestSuccessResponse) {
     super();
-    this.id = data.id;
+    this.code = data.code;
   }
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface GetBlockinAuthCodeRouteRequestBody {
-  /** The ID of the Blockin auth code. */
-  id: string;
-  /** We attempt to verify the current status with each request. You can provide additional options for verification here. */
-  options?: VerifyChallengeOptions;
+export interface GetAndVerifySIWBBRequestsForDeveloperAppBody {
+  /** The bookmark for pagination. */
+  bookmark?: string;
+  /** The client ID to fetch for */
+  clientId: string;
+
+  //TODO: Add client secret to allow non-creator to fetch it?
 }
 
 /**
  * @category API Requests / Responses
  */
-export class GetBlockinAuthCodeRouteSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetBlockinAuthCodeRouteSuccessResponse<T>>
-  implements iGetBlockinAuthCodeRouteSuccessResponse<T>
-{
-  message: BlockinMessage;
-  signature: string;
-  verificationResponse: {
-    success: boolean;
-    errorMessage?: string;
-  };
-  params: BlockinChallengeParams<NumberType>;
-  cosmosAddress: CosmosAddress;
-  secretsProofs: SecretsProof<T>[];
+export interface iGetAndVerifySIWBBRequestsForDeveloperAppSuccessResponse<T extends NumberType> {
+  siwbbRequests: iBlockinChallenge<T>[];
 
-  constructor(data: iGetBlockinAuthCodeRouteSuccessResponse<T>) {
+  pagination: PaginationInfo;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetAndVerifySIWBBRequestsForDeveloperAppSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetAndVerifySIWBBRequestsForDeveloperAppSuccessResponse<T>>
+  implements iGetAndVerifySIWBBRequestsForDeveloperAppSuccessResponse<T>
+{
+  siwbbRequests: BlockinChallenge<T>[];
+  pagination: PaginationInfo;
+
+  constructor(data: iGetAndVerifySIWBBRequestsForDeveloperAppSuccessResponse<T>) {
     super();
-    this.message = data.message;
-    this.signature = data.signature;
-    this.verificationResponse = data.verificationResponse;
-    this.params = new BlockinChallengeParams(data.params);
-    this.cosmosAddress = data.cosmosAddress;
-    this.secretsProofs = data.secretsProofs ? data.secretsProofs.map((proof) => new SecretsProof(proof)) : [];
+    this.siwbbRequests = data.siwbbRequests.map((SIWBBRequest) => new BlockinChallenge<T>(SIWBBRequest));
+    this.pagination = data.pagination;
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetAndVerifySIWBBRequestsForDeveloperAppSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetAndVerifySIWBBRequestsForDeveloperAppSuccessResponse<U>;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface GetAndVerifySIWBBRequestBody {
+  /** The SIWBB request. */
+  code: string;
+  /** We attempt to verify the current status with each request. You can provide additional options for verification here. */
+  options?: VerifyChallengeOptions;
+
+  /** Client secret for the SIWBB request. */
+  clientSecret?: string;
+  /** Client ID for the SIWBB request. */
+  clientId?: string;
+  /** The redirect URI for the SIWBB request. Only required if the code was created with a redirect URI. */
+  redirectUri?: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetAndVerifySIWBBRequestSuccessResponse<T extends NumberType> extends BaseNumberTypeClass<GetAndVerifySIWBBRequestSuccessResponse<T>> {
+  blockin: BlockinChallenge<NumberType>;
+
+  constructor(data: iGetAndVerifySIWBBRequestSuccessResponse<T>) {
+    super();
+    this.blockin = new BlockinChallenge(data.blockin);
   }
 
   getNumberFieldNames(): string[] {
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetBlockinAuthCodeRouteSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetBlockinAuthCodeRouteSuccessResponse<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetAndVerifySIWBBRequestSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetAndVerifySIWBBRequestSuccessResponse<U>;
   }
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface iGetBlockinAuthCodeRouteSuccessResponse<T extends NumberType> {
+export interface iGetAndVerifySIWBBRequestSuccessResponse<T extends NumberType> {
   /**
-   * The corresponding message that was signed to obtain the signature.
+   * Class that contains all details about the SIWBB request.
    */
-  message: BlockinMessage;
-  /**
-   * The signature of the message.
-   */
-  signature: string;
-  /**
-   * The converted Blockin params fort the message
-   */
-  params: ChallengeParams<NumberType>;
-  /**
-   * The converted Cosmos address of params.address. This can be used as the
-   * unique identifier for the user (e.g. avoid duplicate sign ins from equivalent 0x and cosmos1 addresses).
-   */
-  cosmosAddress: CosmosAddress;
-  /**
-   * Verification response
-   */
-  verificationResponse: {
-    /**
-     * Returns whether the current (message, signature) pair is valid and verified (i.e. signature is valid and any assets are owned).
-     */
-    success: boolean;
-    /**
-     * Returns the response message returned from Blockin verification.
-     */
-    errorMessage?: string;
-  };
-
-  /**
-   * Derived data integrity proofs for any secrets requested.
-   */
-  secretsProofs: iSecretsProof<T>[];
+  blockin: iBlockinChallenge<T>;
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface DeleteBlockinAuthCodeRouteRequestBody {
-  id: string;
+export interface DeleteSIWBBRequestBody {
+  code: string;
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface iDeleteBlockinAuthCodeRouteSuccessResponse {}
+export interface iDeleteSIWBBRequestSuccessResponse {}
 
 /**
  * @category API Requests / Responses
  */
-export class DeleteBlockinAuthCodeRouteSuccessResponse extends EmptyResponseClass {}
+export class DeleteSIWBBRequestSuccessResponse extends EmptyResponseClass {}
 
 /**
  * @category API Requests / Responses
  */
-export interface GenerateAppleWalletPassRouteRequestBody {
-  /** The name to be displayed on the pass. */
-  name: string;
-  /** The description to be displayed on the pass. */
-  description: string;
-  /** The Blockin message of the authentication code to create the pass for. */
-  message: BlockinMessage;
-  /** The signature of the Blockin message. */
-  signature: string;
+export interface GenerateAppleWalletPassBody {
+  /** The signature of the message. */
+  code: string;
 }
 /**
  * @category API Requests / Responses
  */
-export interface iGenerateAppleWalletPassRouteSuccessResponse {
+export interface iGenerateAppleWalletPassSuccessResponse {
   type: string;
   data: string;
 }
 /**
  * @category API Requests / Responses
  */
-export class GenerateAppleWalletPassRouteSuccessResponse
-  extends CustomTypeClass<GenerateAppleWalletPassRouteSuccessResponse>
-  implements iGenerateAppleWalletPassRouteSuccessResponse
+export class GenerateAppleWalletPassSuccessResponse
+  extends CustomTypeClass<GenerateAppleWalletPassSuccessResponse>
+  implements iGenerateAppleWalletPassSuccessResponse
 {
   type: string;
   data: string;
 
-  constructor(data: iGenerateAppleWalletPassRouteSuccessResponse) {
+  constructor(data: iGenerateAppleWalletPassSuccessResponse) {
     super();
     this.type = data.type;
     this.data = data.data;
@@ -1530,7 +1672,7 @@ export class GenerateAppleWalletPassRouteSuccessResponse
 /**
  * @category API Requests / Responses
  */
-export interface GetClaimAlertsForCollectionRouteRequestBody {
+export interface GetClaimAlertsForCollectionBody {
   /** The collection ID to get claim alerts for. */
   collectionId: NumberType;
   /** The pagination bookmark obtained from the previous request. Leave blank for the first request. */
@@ -1540,33 +1682,33 @@ export interface GetClaimAlertsForCollectionRouteRequestBody {
 /**
  * @category API Requests / Responses
  */
-export interface iGetClaimAlertsForCollectionRouteSuccessResponse<T extends NumberType> {
+export interface iGetClaimAlertsForCollectionSuccessResponse<T extends NumberType> {
   claimAlerts: iClaimAlertDoc<T>[];
   pagination: PaginationInfo;
 }
 
-export class GetClaimAlertsForCollectionRouteSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetClaimAlertsForCollectionRouteSuccessResponse<T>>
-  implements iGetClaimAlertsForCollectionRouteSuccessResponse<T>
+export class GetClaimAlertsForCollectionSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetClaimAlertsForCollectionSuccessResponse<T>>
+  implements iGetClaimAlertsForCollectionSuccessResponse<T>
 {
   claimAlerts: ClaimAlertDoc<T>[];
   pagination: PaginationInfo;
 
-  constructor(data: iGetClaimAlertsForCollectionRouteSuccessResponse<T>) {
+  constructor(data: iGetClaimAlertsForCollectionSuccessResponse<T>) {
     super();
     this.claimAlerts = data.claimAlerts.map((claimAlert) => new ClaimAlertDoc(claimAlert));
     this.pagination = data.pagination;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetClaimAlertsForCollectionRouteSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetClaimAlertsForCollectionRouteSuccessResponse<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetClaimAlertsForCollectionSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetClaimAlertsForCollectionSuccessResponse<U>;
   }
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface GetExternalCallRouteRequestBody {
+export interface GetExternalCallBody {
   uri: string;
   key: string;
 }
@@ -1574,7 +1716,7 @@ export interface GetExternalCallRouteRequestBody {
 /**
  * @category API Requests / Responses
  */
-export interface iGetExternalCallRouteSuccessResponse {
+export interface iGetExternalCallSuccessResponse {
   key: string;
   timestamp: number;
 }
@@ -1582,16 +1724,378 @@ export interface iGetExternalCallRouteSuccessResponse {
 /**
  * @category API Requests / Responses
  */
-export class GetExternalCallRouteSuccessResponse
-  extends CustomTypeClass<GetExternalCallRouteSuccessResponse>
-  implements iGetExternalCallRouteSuccessResponse
-{
+export class GetExternalCallSuccessResponse extends CustomTypeClass<GetExternalCallSuccessResponse> implements iGetExternalCallSuccessResponse {
   key: string;
   timestamp: number;
 
-  constructor(data: iGetExternalCallRouteSuccessResponse) {
+  constructor(data: iGetExternalCallSuccessResponse) {
     super();
     this.key = data.key;
     this.timestamp = data.timestamp;
   }
 }
+
+/**
+ * @category API Requests / Responses
+ */
+export interface CreateDeveloperAppBody {
+  /** Metadata for the secret for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
+  name: string;
+  /** Description of the app. */
+  description: string;
+  /** Image for the app. */
+  image: string;
+  /** Redirect URIs for the app. */
+  redirectUris: string[];
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iCreateDeveloperAppSuccessResponse {
+  /** Client ID for the app. */
+  clientId: string;
+  /** Client secret for the app. */
+  clientSecret: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class CreateDeveloperAppSuccessResponse
+  extends CustomTypeClass<CreateDeveloperAppSuccessResponse>
+  implements iCreateDeveloperAppSuccessResponse
+{
+  clientId: string;
+  clientSecret: string;
+
+  constructor(data: iCreateDeveloperAppSuccessResponse) {
+    super();
+    this.clientId = data.clientId;
+    this.clientSecret = data.clientSecret;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface GetActiveAuthorizationsBody {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetActiveAuthorizationsSuccessResponse {
+  authorizations: iAccessTokenDoc[];
+  developerApps: iDeveloperAppDoc[];
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetActiveAuthorizationsSuccessResponse
+  extends CustomTypeClass<GetActiveAuthorizationsSuccessResponse>
+  implements iGetActiveAuthorizationsSuccessResponse
+{
+  authorizations: AccessTokenDoc[];
+  developerApps: DeveloperAppDoc[];
+
+  constructor(data: iGetActiveAuthorizationsSuccessResponse) {
+    super();
+    this.authorizations = data.authorizations.map((authorization) => new AccessTokenDoc(authorization));
+    this.developerApps = data.developerApps.map((developerApp) => new DeveloperAppDoc(developerApp));
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface GetDeveloperAppBody {
+  /** If you want to get a specific app, specify the client ID here (will not return the client secret). */
+  clientId?: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetDeveloperAppSuccessResponse {
+  developerApps: iDeveloperAppDoc[];
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetDeveloperAppSuccessResponse extends CustomTypeClass<GetDeveloperAppSuccessResponse> implements iGetDeveloperAppSuccessResponse {
+  developerApps: DeveloperAppDoc[];
+
+  constructor(data: iGetDeveloperAppSuccessResponse) {
+    super();
+    this.developerApps = data.developerApps.map((developerApp) => new DeveloperAppDoc(developerApp));
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface DeleteDeveloperAppBody {
+  /** The client ID of the app to delete. */
+  clientId: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iDeleteDeveloperAppSuccessResponse {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class DeleteDeveloperAppSuccessResponse extends EmptyResponseClass {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface UpdateDeveloperAppBody {
+  /** Client ID for the app to update. */
+  clientId: string;
+  /** Metadata for for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
+  name?: string;
+  /** Description of the app. */
+  description?: string;
+  /** Image for the app. */
+  image?: string;
+  /** Redirect URIs for the app. */
+  redirectUris?: string[];
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iUpdateDeveloperAppSuccessResponse {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class UpdateDeveloperAppSuccessResponse extends EmptyResponseClass {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface CreatePluginBody {
+  /** The unique plugin ID */
+  pluginId: string;
+
+  /** Preset type for how the plugin state is to be maintained. */
+  stateFunctionPreset: PluginPresetType;
+
+  /** Whether it makes sense for multiple of this plugin to be allowed */
+  duplicatesAllowed: boolean;
+
+  /** This means that the plugin can be used w/o any session cookies or authentication. */
+  requiresSessions: boolean;
+
+  /** Reuse for non-indexed? */
+  reuseForNonIndexed: boolean;
+
+  /** This is a flag for being compatible with auto-triggered claims, meaning no user interaction is needed. */
+  requiresUserInputs: boolean;
+
+  metadata: {
+    /** The name of the plugin */
+    name: string;
+    /** Description of the plugin */
+    description: string;
+    /** The image of the plugin */
+    image: string;
+    /** Documentation for the plugin */
+    documentation?: string;
+    /** Source code for the plugin */
+    sourceCode?: string;
+    /** Support link for the plugin */
+    supportLink?: string;
+    /** The creator of the plugin */
+    createdBy: CosmosAddress;
+  };
+
+  userInputsSchema: Array<JsonBodyInputSchema>;
+  publicParamsSchema: Array<JsonBodyInputSchema | { key: string; label: string; type: 'ownershipRequirements' }>;
+  privateParamsSchema: Array<JsonBodyInputSchema | { key: string; label: string; type: 'ownershipRequirements' }>;
+
+  /** The verification URL */
+  verificationCall?: {
+    uri: string;
+    method: 'POST' | 'GET' | 'PUT' | 'DELETE';
+    hardcodedInputs: Array<JsonBodyInputWithValue>;
+
+    passAddress: boolean;
+    passDiscord: boolean;
+    // passEmail: boolean;
+    passTwitter: boolean;
+    passGoogle: boolean;
+    passGithub: boolean;
+  };
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iCreatePluginSuccessResponse {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class CreatePluginSuccessResponse extends EmptyResponseClass {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface GetPluginBody {
+  createdPluginsOnly?: boolean;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetPluginSuccessResponse<T extends NumberType> {
+  plugins: iPluginDoc<T>[];
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetPluginSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetPluginSuccessResponse<T>>
+  implements iGetPluginSuccessResponse<T>
+{
+  plugins: PluginDoc<T>[];
+
+  constructor(data: iGetPluginSuccessResponse<T>) {
+    super();
+    this.plugins = data.plugins.map((developerApp) => new PluginDoc(developerApp));
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetPluginSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetPluginSuccessResponse<U>;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface DeleteClaimBody {
+  /** The claim ID to delete. */
+  claimIds: string[];
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iDeleteClaimSuccessResponse {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class DeleteClaimSuccessResponse extends EmptyResponseClass {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface UpdateClaimBody<T extends NumberType> {
+  claims: Omit<iClaimDetails<T>, 'seedCode'>[];
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iUpdateClaimSuccessResponse {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class UpdateClaimSuccessResponse extends EmptyResponseClass {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface CreateClaimBody<T extends NumberType> {
+  claims: (iClaimDetails<T> & { listId?: string; collectionId?: T; cid?: string })[];
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iCreateClaimSuccessResponse {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class CreateClaimSuccessResponse extends EmptyResponseClass {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface OauthAuthorizeBody {
+  response_type: string;
+  client_id: string;
+  redirect_uri: string;
+  scope: string;
+  state?: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iOauthAuthorizeSuccessResponse {
+  code: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class OauthAuthorizeSuccessResponse extends CustomTypeClass<OauthAuthorizeSuccessResponse> implements iOauthAuthorizeSuccessResponse {
+  code: string;
+
+  constructor(data: iOauthAuthorizeSuccessResponse) {
+    super();
+    this.code = data.code;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface OauthTokenBody {
+  grant_type: string;
+  client_id: string;
+  client_secret: string;
+  code?: string;
+  redirect_uri?: string;
+  refresh_token?: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iOauthTokenSuccessResponse extends iAccessTokenDoc {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class OauthTokenSuccessResponse extends AccessTokenDoc {}
+
+/**
+ *
+ * @category API Requests / Responses
+ */
+export interface OauthRevokeBody {
+  token: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iOauthRevokeSuccessResponse {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class OauthRevokeSuccessResponse extends EmptyResponseClass {}

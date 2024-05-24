@@ -1,4 +1,4 @@
-import { GO_MAX_UINT_64 } from '.';
+import { GO_MAX_UINT_64 } from '../common/math';
 import { UintRange, UintRangeArray } from './uintRanges';
 
 describe('UintRange and UintRangeArray', () => {

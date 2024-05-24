@@ -1,4 +1,5 @@
-import { BaseNumberTypeClass, CustomType, CustomTypeClass, deepCopyPrimitives } from '@/common/base';
+import { CosmosAddress } from '@/api-indexer/docs/interfaces';
+import { BaseNumberTypeClass, CustomTypeClass, deepCopyPrimitives } from '@/common/base';
 import type {
   iAmountTrackerIdDetails,
   iApprovalIdentifierDetails,
@@ -27,13 +28,13 @@ import * as proto from '@/proto';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 import { BigIntify, Stringify, type NumberType } from '../common/string-numbers';
 import { AddressList } from './addressLists';
+import { CosmosCoin } from './coin';
 import type { UniversalPermission, UniversalPermissionDetails } from './overlaps';
 import { GetFirstMatchOnly, getOverlapsAndNonOverlaps } from './overlaps';
 import { TimedUpdatePermission, TimedUpdateWithBadgeIdsPermission } from './permissions';
 import { UintRange, UintRangeArray } from './uintRanges';
 import { AllDefaultValues, getPotentialUpdatesForTimelineValues, getUpdateCombinationsToCheck } from './validate-utils';
-import { CosmosCoin } from './coin';
-import { BadgeMetadataDetails, CollectionMetadataDetails, CosmosAddress, Metadata } from '..';
+import { BadgeMetadataDetails, CollectionMetadataDetails } from '@/api-indexer/metadata/badgeMetadata';
 
 /**
  * BadgeMetadata is used to represent the metadata for a range of badge IDs.
@@ -269,6 +270,9 @@ export class MustOwnBadges<T extends NumberType> extends BaseNumberTypeClass<Mus
   }
 }
 
+/**
+ * @category Approvals / Transferability
+ */
 export class ZkProof extends CustomTypeClass<ZkProof> implements iZkProof {
   verificationKey: string;
   uri: string;

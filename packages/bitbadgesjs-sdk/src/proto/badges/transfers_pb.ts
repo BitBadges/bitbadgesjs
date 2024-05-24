@@ -1589,14 +1589,32 @@ export class Transfer extends Message<Transfer> {
    * If true, we will only check the prioritized approvals and fail if none of them match (i.e. do not check any non-prioritized approvals).
    * If false, we will check the prioritized approvals first and then scan through the rest of the approvals. 
    *
-   * @generated from field: bool onlyCheckPrioritizedApprovals = 8;
+   * @generated from field: bool onlyCheckPrioritizedCollectionApprovals = 8;
    */
-  onlyCheckPrioritizedApprovals = false;
+  onlyCheckPrioritizedCollectionApprovals = false;
+
+  /**
+   * Whether to only check prioritized approvals for the transfer. 
+   * If true, we will only check the prioritized approvals and fail if none of them match (i.e. do not check any non-prioritized approvals).
+   * If false, we will check the prioritized approvals first and then scan through the rest of the approvals. 
+   *
+   * @generated from field: bool onlyCheckPrioritizedIncomingApprovals = 9;
+   */
+  onlyCheckPrioritizedIncomingApprovals = false;
+
+  /**
+   * Whether to only check prioritized approvals for the transfer. 
+   * If true, we will only check the prioritized approvals and fail if none of them match (i.e. do not check any non-prioritized approvals).
+   * If false, we will check the prioritized approvals first and then scan through the rest of the approvals. 
+   *
+   * @generated from field: bool onlyCheckPrioritizedOutgoingApprovals = 10;
+   */
+  onlyCheckPrioritizedOutgoingApprovals = false;
 
   /**
    * The ZKPs that need to be solved for approval.
    *
-   * @generated from field: repeated badges.ZkProofSolution zkProofSolutions = 9;
+   * @generated from field: repeated badges.ZkProofSolution zkProofSolutions = 11;
    */
   zkProofSolutions: ZkProofSolution[] = [];
 
@@ -1615,8 +1633,10 @@ export class Transfer extends Message<Transfer> {
     { no: 5, name: "merkleProofs", kind: "message", T: MerkleProof, repeated: true },
     { no: 6, name: "memo", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 7, name: "prioritizedApprovals", kind: "message", T: ApprovalIdentifierDetails, repeated: true },
-    { no: 8, name: "onlyCheckPrioritizedApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 9, name: "zkProofSolutions", kind: "message", T: ZkProofSolution, repeated: true },
+    { no: 8, name: "onlyCheckPrioritizedCollectionApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 9, name: "onlyCheckPrioritizedIncomingApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 10, name: "onlyCheckPrioritizedOutgoingApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 11, name: "zkProofSolutions", kind: "message", T: ZkProofSolution, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Transfer {

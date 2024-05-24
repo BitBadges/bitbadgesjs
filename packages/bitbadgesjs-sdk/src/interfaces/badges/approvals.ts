@@ -1,6 +1,6 @@
 import type { NumberType } from '@/common/string-numbers';
 import type { iUintRange, iMustOwnBadges, iMerkleChallenge, iBalance, iAddressList, iZkProof, iCoinTransfer } from './core';
-import { iIncomingApprovalCriteriaWithDetails } from '@/core';
+import { iApprovalInfoDetails, iIncomingApprovalCriteriaWithDetails } from '@/core';
 
 /**
  * @category Interfaces
@@ -239,4 +239,5 @@ export interface iUserIncomingApprovalWithDetails<T extends NumberType> extends 
   /** The populated address list for initiatedByListId */
   initiatedByList: iAddressList;
   approvalCriteria?: iIncomingApprovalCriteriaWithDetails<T>;
+  details?: iApprovalInfoDetails;
 }

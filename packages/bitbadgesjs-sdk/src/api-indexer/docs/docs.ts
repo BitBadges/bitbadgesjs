@@ -8,7 +8,7 @@ import {
   ApprovalInfoDetails,
   ChallengeDetails,
   CollectionApproval,
-  IncrementedBalances,
+  PredeterminedBalances,
   UserIncomingApproval,
   UserIncomingApprovalWithDetails,
   UserOutgoingApproval,
@@ -42,14 +42,20 @@ import type {
   ClaimIntegrationPluginType,
   CosmosAddress,
   IntegrationPluginParams,
+  JsonBodyInputSchema,
+  JsonBodyInputWithValue,
+  PluginPresetType,
   UNIXMilliTimestamp,
+  iAccessTokenDoc,
   iAccountDoc,
   iAddressListDoc,
   iAirdropDoc,
   iApprovalTrackerDoc,
+  iDeveloperAppDoc,
+  iAuthorizationCodeDoc,
   iBalanceDoc,
   iBalanceDocWithDetails,
-  iBlockinAuthSignatureDoc,
+  iSIWBBRequestDoc,
   iChallengeTrackerIdDetails,
   iClaimBuilderDoc,
   iCollectionDoc,
@@ -64,15 +70,17 @@ import type {
   iLatestBlockStatus,
   iMapDoc,
   iMerkleChallengeDoc,
-  iMerklechallengeTrackerIdDetails,
   iNotificationPreferences,
+  iPluginDoc,
   iProfileDoc,
   iQueueDoc,
   iRefreshDoc,
   iSecretDoc,
   iSocialConnections,
-  iStatusDoc
+  iStatusDoc,
+  iUsedLeafStatus
 } from './interfaces';
+import { VerifyChallengeOptions } from 'blockin';
 
 /**
  * @inheritDoc iCollectionDoc
@@ -511,6 +519,7 @@ export class QueueDoc<T extends NumberType> extends BaseNumberTypeClass<QueueDoc
   recipientAddress?: string;
   activityDocId?: string;
   notificationType?: string;
+  claimInfo?: { session: any; body: any; claimId: string; cosmosAddress: string } | undefined;
 
   constructor(data: iQueueDoc<T>) {
     super();
@@ -529,6 +538,7 @@ export class QueueDoc<T extends NumberType> extends BaseNumberTypeClass<QueueDoc
     this.recipientAddress = data.recipientAddress;
     this.activityDocId = data.activityDocId;
     this.notificationType = data.notificationType;
+    this.claimInfo = data.claimInfo;
   }
 
   getNumberFieldNames(): string[] {
@@ -812,11 +822,14 @@ export class ClaimBuilderDoc<T extends NumberType> extends BaseNumberTypeClass<C
   docClaimed: boolean;
   collectionId: T;
   deletedAt?: T | undefined;
+  automatic?: boolean | undefined;
   manualDistribution?: boolean;
   plugins: IntegrationPluginParams<ClaimIntegrationPluginType>[];
   state: { [pluginId: string]: any };
-  action: { codes?: string[] | undefined; seedCode?: string; balancesToSet?: IncrementedBalances<T> | undefined; listId?: string };
-  trackerDetails?: iChallengeTrackerIdDetails<T> | undefined;
+  action: { codes?: string[] | undefined; seedCode?: string; balancesToSet?: PredeterminedBalances<T> | undefined; listId?: string };
+  trackerDetails?: ChallengeTrackerIdDetails<T> | undefined;
+  metadata?: Metadata<T> | undefined;
+  lastUpdated: T;
 
   constructor(data: iClaimBuilderDoc<T>) {
     super();
@@ -829,18 +842,21 @@ export class ClaimBuilderDoc<T extends NumberType> extends BaseNumberTypeClass<C
     this.collectionId = data.collectionId;
     this.plugins = data.plugins;
     this.state = data.state;
+    this.automatic = data.automatic;
+    this.lastUpdated = data.lastUpdated;
     this.manualDistribution = data.manualDistribution;
     this.action = {
       codes: data.action.codes,
-      balancesToSet: data.action.balancesToSet ? new IncrementedBalances(data.action.balancesToSet) : undefined,
+      balancesToSet: data.action.balancesToSet ? new PredeterminedBalances(data.action.balancesToSet) : undefined,
       seedCode: data.action.seedCode,
       listId: data.action.listId
     };
     this.trackerDetails = data.trackerDetails ? new ChallengeTrackerIdDetails(data.trackerDetails) : undefined;
+    this.metadata = data.metadata ? new Metadata(data.metadata) : undefined;
   }
 
   getNumberFieldNames(): string[] {
-    return ['collectionId', 'deletedAt'];
+    return ['collectionId', 'deletedAt', 'lastUpdated'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ClaimBuilderDoc<U> {
@@ -925,6 +941,29 @@ export class ChallengeTrackerIdDetails<T extends NumberType>
  * @inheritDoc iMerkleChallengeDoc
  * @category Approvals / Transferability
  */
+export class UsedLeafStatus<T extends NumberType> extends BaseNumberTypeClass<UsedLeafStatus<T>> implements iUsedLeafStatus<T> {
+  leafIndex: T;
+  usedBy: CosmosAddress;
+
+  constructor(data: iUsedLeafStatus<T>) {
+    super();
+    this.leafIndex = data.leafIndex;
+    this.usedBy = data.usedBy;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['leafIndex'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): UsedLeafStatus<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as UsedLeafStatus<U>;
+  }
+}
+
+/**
+ * @inheritDoc iMerkleChallengeDoc
+ * @category Approvals / Transferability
+ */
 export class MerkleChallengeDoc<T extends NumberType> extends BaseNumberTypeClass<MerkleChallengeDoc<T>> implements iMerkleChallengeDoc<T> {
   _docId: string;
   _id?: string;
@@ -932,7 +971,7 @@ export class MerkleChallengeDoc<T extends NumberType> extends BaseNumberTypeClas
   challengeTrackerId: string;
   approvalLevel: 'collection' | 'incoming' | 'outgoing' | '';
   approverAddress: CosmosAddress;
-  usedLeafIndices: T[];
+  usedLeafIndices: UsedLeafStatus<T>[];
   approvalId: string;
 
   constructor(data: iMerkleChallengeDoc<T>) {
@@ -943,12 +982,12 @@ export class MerkleChallengeDoc<T extends NumberType> extends BaseNumberTypeClas
     this.challengeTrackerId = data.challengeTrackerId;
     this.approvalLevel = data.approvalLevel;
     this.approverAddress = data.approverAddress;
-    this.usedLeafIndices = data.usedLeafIndices;
+    this.usedLeafIndices = data.usedLeafIndices.map((usedLeafStatus) => new UsedLeafStatus(usedLeafStatus));
     this.approvalId = data.approvalId;
   }
 
   getNumberFieldNames(): string[] {
-    return ['collectionId', 'usedLeafIndices'];
+    return ['collectionId'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): MerkleChallengeDoc<U> {
@@ -1133,27 +1172,230 @@ export class ComplianceDoc<T extends NumberType> extends BaseNumberTypeClass<Com
 }
 
 /**
- * @inheritDoc iBlockinAuthSignatureDoc
+ * @inheritDoc iAuthorizationCodeDoc
+ * @category OAuth
+ */
+export class AuthorizationCodeDoc extends CustomTypeClass<AuthorizationCodeDoc> implements iAuthorizationCodeDoc {
+  _docId: string;
+  clientId: string;
+  redirectUri: string;
+  scopes: string[];
+  address: string;
+  cosmosAddress: string;
+  expiresAt: number;
+
+  constructor(data: iAuthorizationCodeDoc) {
+    super();
+    this._docId = data._docId;
+    this.clientId = data.clientId;
+    this.redirectUri = data.redirectUri;
+    this.scopes = data.scopes;
+    this.address = data.address;
+    this.cosmosAddress = data.cosmosAddress;
+    this.expiresAt = data.expiresAt;
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): AuthorizationCodeDoc {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as AuthorizationCodeDoc;
+  }
+
+  clone(): AuthorizationCodeDoc {
+    return super.clone() as AuthorizationCodeDoc;
+  }
+}
+
+/**
+ * @inheritDoc iAccessTokenDoc
+ * @category OAuth
+ */
+export class AccessTokenDoc extends CustomTypeClass<AccessTokenDoc> implements iAccessTokenDoc {
+  _docId: string;
+  accessToken: string;
+  clientId: string;
+  tokenType: string;
+  refreshToken: string;
+  cosmosAddress: string;
+  address: string;
+  scopes: string[];
+  refreshTokenExpiresAt: number;
+  accessTokenExpiresAt: number;
+
+  constructor(data: iAccessTokenDoc) {
+    super();
+    this._docId = data._docId;
+    this.accessToken = data.accessToken;
+    this.tokenType = data.tokenType;
+    this.clientId = data.clientId;
+    this.refreshToken = data.refreshToken;
+    this.cosmosAddress = data.cosmosAddress;
+    this.address = data.address;
+    this.refreshTokenExpiresAt = data.refreshTokenExpiresAt;
+    this.accessTokenExpiresAt = data.accessTokenExpiresAt;
+    this.scopes = data.scopes;
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): AccessTokenDoc {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as AccessTokenDoc;
+  }
+
+  clone(): AccessTokenDoc {
+    return super.clone() as AccessTokenDoc;
+  }
+}
+
+/**
+ * @inheritDoc iDeveloperAppDoc
  * @category Blockin
  */
-export class BlockinAuthSignatureDoc<T extends NumberType>
-  extends BaseNumberTypeClass<BlockinAuthSignatureDoc<T>>
-  implements iBlockinAuthSignatureDoc<T>
-{
+export class DeveloperAppDoc extends CustomTypeClass<DeveloperAppDoc> implements iDeveloperAppDoc {
+  _docId: string;
+  _id?: string | undefined;
+  name: string;
+  clientId: string;
+  clientSecret: string;
+  redirectUris: string[];
+  createdBy: string;
+  description: string;
+  image: string;
+
+  constructor(data: iDeveloperAppDoc) {
+    super();
+    this.description = data.description;
+    this.image = data.image;
+    this.name = data.name;
+    this.clientId = data.clientId;
+    this.clientSecret = data.clientSecret;
+    this.redirectUris = data.redirectUris;
+    this._docId = data._docId;
+    this.createdBy = data.createdBy;
+    this._id = data._id;
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): DeveloperAppDoc {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as DeveloperAppDoc;
+  }
+
+  clone(): DeveloperAppDoc {
+    return super.clone() as DeveloperAppDoc;
+  }
+}
+
+/**
+ * @inheritDoc iPluginDoc
+ * @category Plugins
+ */
+export class PluginDoc<T extends NumberType> extends BaseNumberTypeClass<PluginDoc<T>> implements iPluginDoc<T> {
+  _docId: string;
+  _id?: string | undefined;
+  pluginId: string;
+  pluginSecret?: string;
+  reviewCompleted: boolean;
+
+  stateFunctionPreset: PluginPresetType;
+  duplicatesAllowed: boolean;
+  requiresSessions: boolean;
+  requiresUserInputs: boolean;
+  reuseForNonIndexed: boolean;
+
+  createdBy: CosmosAddress;
+  metadata: {
+    createdBy: string;
+    name: string;
+    description: string;
+    image: string;
+    documentation?: string;
+    sourceCode?: string;
+    supportLink?: string;
+  };
+
+  userInputsSchema: Array<JsonBodyInputSchema>;
+  publicParamsSchema: Array<JsonBodyInputSchema | { key: string; label: string; type: 'ownershipRequirements' }>;
+  privateParamsSchema: Array<JsonBodyInputSchema | { key: string; label: string; type: 'ownershipRequirements' }>;
+
+  verificationCall?: {
+    uri: string;
+    method: 'POST' | 'GET' | 'PUT' | 'DELETE';
+    hardcodedInputs: Array<JsonBodyInputWithValue>;
+
+    passAddress: boolean;
+    passDiscord: boolean;
+    // passEmail: boolean;
+    passTwitter: boolean;
+    passGoogle: boolean;
+    passGithub: boolean;
+  };
+
+  lastUpdated: UNIXMilliTimestamp<T>;
+
+  constructor(data: iPluginDoc<T>) {
+    super();
+    this.createdBy = data.createdBy;
+    this.pluginId = data.pluginId;
+    this.pluginSecret = data.pluginSecret;
+    this.reviewCompleted = data.reviewCompleted;
+    this.stateFunctionPreset = data.stateFunctionPreset;
+    this.duplicatesAllowed = data.duplicatesAllowed;
+    this.requiresSessions = data.requiresSessions;
+    this.reuseForNonIndexed = data.reuseForNonIndexed;
+    this.requiresUserInputs = data.requiresUserInputs;
+    this.metadata = {
+      createdBy: data.metadata.createdBy,
+      name: data.metadata.name,
+      description: data.metadata.description,
+      image: data.metadata.image,
+      documentation: data.metadata.documentation,
+      sourceCode: data.metadata.sourceCode,
+      supportLink: data.metadata.supportLink
+    };
+    this.userInputsSchema = data.userInputsSchema;
+    this.publicParamsSchema = data.publicParamsSchema;
+    this.privateParamsSchema = data.privateParamsSchema;
+    this.verificationCall = data.verificationCall;
+    this._docId = data._docId;
+    this._id = data._id;
+    this.lastUpdated = data.lastUpdated;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['lastUpdated'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): PluginDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as PluginDoc<U>;
+  }
+
+  clone(): PluginDoc<T> {
+    return super.clone() as PluginDoc<T>;
+  }
+}
+
+/**
+ * @inheritDoc iSIWBBRequestDoc
+ * @category Blockin
+ */
+export class SIWBBRequestDoc<T extends NumberType> extends BaseNumberTypeClass<SIWBBRequestDoc<T>> implements iSIWBBRequestDoc<T> {
   _docId: string;
   _id?: string;
+  clientId: string;
   signature: string;
   name: string;
   description: string;
   image: string;
   cosmosAddress: CosmosAddress;
   params: BlockinChallengeParams<T>;
-  secretsProofs: SecretsProof<T>[];
+  secretsPresentations: SecretsProof<T>[];
   createdAt: UNIXMilliTimestamp<T>;
   deletedAt?: UNIXMilliTimestamp<T>;
   publicKey?: string;
+  otherSignIns?: {
+    discord?: { username: string; discriminator?: string | undefined; id: string } | undefined;
+    github?: { username: string; id: string } | undefined;
+    google?: { username: string; id: string } | undefined;
+    twitter?: { username: string; id: string } | undefined;
+  };
+  redirectUri?: string | undefined;
 
-  constructor(data: iBlockinAuthSignatureDoc<T>) {
+  constructor(data: iSIWBBRequestDoc<T>) {
     super();
     this.signature = data.signature;
     this.name = data.name;
@@ -1166,15 +1408,18 @@ export class BlockinAuthSignatureDoc<T extends NumberType>
     this._docId = data._docId;
     this._id = data._id;
     this.publicKey = data.publicKey;
-    this.secretsProofs = data.secretsProofs.map((secretsProof) => new SecretsProof(secretsProof));
+    this.secretsPresentations = data.secretsPresentations.map((secretsProof) => new SecretsProof(secretsProof));
+    this.clientId = data.clientId;
+    this.otherSignIns = data.otherSignIns;
+    this.redirectUri = data.redirectUri;
   }
 
   getNumberFieldNames(): string[] {
     return ['createdAt', 'deletedAt'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): BlockinAuthSignatureDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as BlockinAuthSignatureDoc<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): SIWBBRequestDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as SIWBBRequestDoc<U>;
   }
 }
 

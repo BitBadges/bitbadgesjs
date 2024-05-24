@@ -82,7 +82,6 @@ export class TransferActivityDoc<T extends NumberType> extends ActivityDoc<T> im
   memo?: string;
   precalculateBalancesFromApproval?: ApprovalIdentifierDetails;
   prioritizedApprovals?: ApprovalIdentifierDetails[];
-  onlyCheckPrioritizedApprovals?: boolean;
   initiatedBy: CosmosAddress;
   txHash?: string;
 
@@ -97,7 +96,6 @@ export class TransferActivityDoc<T extends NumberType> extends ActivityDoc<T> im
       ? new ApprovalIdentifierDetails(data.precalculateBalancesFromApproval)
       : undefined;
     this.prioritizedApprovals = data.prioritizedApprovals ? data.prioritizedApprovals.map((x) => new ApprovalIdentifierDetails(x)) : undefined;
-    this.onlyCheckPrioritizedApprovals = data.onlyCheckPrioritizedApprovals;
     this.initiatedBy = data.initiatedBy;
     this.txHash = data.txHash;
   }

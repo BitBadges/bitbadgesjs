@@ -138,7 +138,7 @@ export function getUnhandledCollectionApprovals(
 
         //TODO: Is this right?
         approvalId: match.arbitraryValue.approvalId,
-        approvalCriteria: match.arbitraryValue.approvalCriteria
+        approvalCriteria: match.arbitraryValue.approvalCriteriaWithDetails
       })
     );
   }

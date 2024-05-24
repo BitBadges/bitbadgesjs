@@ -5,7 +5,7 @@ module.exports = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
 
-    '^(..?/.+).js$': '$1'
+    '^(..?/.+)\\.js$': '$1'
   },
   transform: {
     '\\.[jt]sx?$': 'ts-jest'

@@ -9,12 +9,12 @@ import { SupportedChain } from '../common/types';
 import type { iBitBadgesAddressList } from './BitBadgesAddressList';
 import { BitBadgesAddressList } from './BitBadgesAddressList';
 import { BitBadgesCollection } from './BitBadgesCollection';
-import type { BaseBitBadgesApi, ErrorResponse, PaginationInfo } from './base';
+import type { BaseBitBadgesApi, PaginationInfo } from './base';
 import { ClaimAlertDoc, ListActivityDoc, ReviewDoc, TransferActivityDoc } from './docs/activity';
 import {
   ApprovalTrackerDoc,
   BalanceDocWithDetails,
-  BlockinAuthSignatureDoc,
+  SIWBBRequestDoc,
   FollowDetailsDoc,
   MapDoc,
   MerkleChallengeDoc,
@@ -27,7 +27,7 @@ import type {
   iAccountDoc,
   iApprovalTrackerDoc,
   iBalanceDocWithDetails,
-  iBlockinAuthSignatureDoc,
+  iSIWBBRequestDoc,
   iClaimAlertDoc,
   iFollowDetailsDoc,
   iListActivityDoc,
@@ -39,6 +39,7 @@ import type {
   iTransferActivityDoc
 } from './docs/interfaces';
 import { BitBadgesApiRoutes } from './requests/routes';
+
 /**
  * @category Interfaces
  */
@@ -69,8 +70,8 @@ export interface iBitBadgesUserInfo<T extends NumberType> extends iProfileDoc<T>
   addressLists: iBitBadgesAddressList<T>[];
   /** A list of claim alerts for the account. Paginated and fetched as needed. To be used in conjunction with views. */
   claimAlerts: iClaimAlertDoc<T>[];
-  /** A list of auth codes for the account. Paginated and fetched as needed. To be used in conjunction with views. */
-  authCodes: iBlockinAuthSignatureDoc<T>[];
+  /** A list of SIWBB requests for the account. Paginated and fetched as needed. To be used in conjunction with views. */
+  siwbbRequests: iSIWBBRequestDoc<T>[];
   /** A list of user secrets for the account. Paginated and fetched as needed. To be used in conjunction with views. */
   secrets: iSecretDoc<T>[];
 
@@ -135,7 +136,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   approvalTrackers: ApprovalTrackerDoc<T>[];
   addressLists: BitBadgesAddressList<T>[];
   claimAlerts: ClaimAlertDoc<T>[];
-  authCodes: BlockinAuthSignatureDoc<T>[];
+  siwbbRequests: SIWBBRequestDoc<T>[];
   secrets: iSecretDoc<T>[];
 
   address: NativeAddress;
@@ -179,7 +180,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     this.approvalTrackers = data.approvalTrackers.map((tracker) => new ApprovalTrackerDoc(tracker));
     this.addressLists = data.addressLists.map((list) => new BitBadgesAddressList(list));
     this.claimAlerts = data.claimAlerts.map((alert) => new ClaimAlertDoc(alert));
-    this.authCodes = data.authCodes.map((auth) => new BlockinAuthSignatureDoc(auth));
+    this.siwbbRequests = data.siwbbRequests.map((auth) => new SIWBBRequestDoc(auth));
     this.secrets = data.secrets.map((secret) => new SecretDoc(secret));
     this.address = data.address;
     this.nsfw = data.nsfw;
@@ -220,13 +221,10 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   /**
    * Gets accounts by address or username from the API.
    */
-  static async GetAccounts<T extends NumberType>(api: BaseBitBadgesApi<T>, requestBody: GetAccountsRouteRequestBody) {
+  static async GetAccounts<T extends NumberType>(api: BaseBitBadgesApi<T>, Body: GetAccountsBody) {
     try {
-      const response = await api.axios.post<iGetAccountsRouteSuccessResponse<string>>(
-        `${api.BACKEND_URL}${BitBadgesApiRoutes.GetAccountsRoute()}`,
-        requestBody
-      );
-      return new GetAccountsRouteSuccessResponse(response.data).convert(api.ConvertFunction);
+      const response = await api.axios.post<iGetAccountsSuccessResponse<string>>(`${api.BACKEND_URL}${BitBadgesApiRoutes.GetAccountsRoute()}`, Body);
+      return new GetAccountsSuccessResponse(response.data).convert(api.ConvertFunction);
     } catch (error) {
       await api.handleApiError(error);
       return Promise.reject(error);
@@ -319,7 +317,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
    */
   isRedundantRequest(options: Omit<AccountFetchDetails, 'address' | 'username'>) {
     //Do not fetch views where hasMore is false (i.e. we alreay have everything)
-    options = this.pruneRequestBody(options);
+    options = this.pruneBody(options);
 
     //Check if we need to fetch anything at all
     const needToFetch =
@@ -338,7 +336,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   /**
    * Prunes the request body to remove any redundant fetches.
    */
-  pruneRequestBody(options: Omit<AccountFetchDetails, 'address' | 'username'>) {
+  pruneBody(options: Omit<AccountFetchDetails, 'address' | 'username'>) {
     const viewsToFetch = options.viewsToFetch?.filter((x) => this.viewHasMore(x.viewId));
     return {
       ...options,
@@ -356,7 +354,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   async fetchAndUpdate(api: BaseBitBadgesApi<T>, options: Omit<AccountFetchDetails, 'address' | 'username'>, forceful?: boolean) {
     if (!forceful) {
       if (this.isRedundantRequest(options)) return;
-      options = this.pruneRequestBody(options);
+      options = this.pruneBody(options);
     }
 
     const account = await BitBadgesUserInfo.GetAccounts(api, {
@@ -438,8 +436,8 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
         return this.getAccountAddressListsView(viewId) as AccountViewData<T>[KeyType];
       case 'privateLists':
         return this.getAccountAddressListsView(viewId) as AccountViewData<T>[KeyType];
-      case 'authCodes':
-        return this.getAuthCodesView(viewId) as AccountViewData<T>[KeyType];
+      case 'siwbbRequests':
+        return this.getSIWBBRequestsView(viewId) as AccountViewData<T>[KeyType];
       case 'transferActivity':
         return this.getAccountActivityView(viewId) as AccountViewData<T>[KeyType];
       case 'reviews':
@@ -477,10 +475,10 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     }) ?? []) as SecretDoc<T>[];
   }
 
-  getAuthCodesView(viewId: string) {
+  getSIWBBRequestsView(viewId: string) {
     return (this.views[viewId]?.ids.map((x) => {
-      return this.authCodes.find((y) => y._docId === x);
-    }) ?? []) as BlockinAuthSignatureDoc<T>[];
+      return this.siwbbRequests.find((y) => y._docId === x);
+    }) ?? []) as SIWBBRequestDoc<T>[];
   }
 
   getAccountActivityView(viewId: string) {
@@ -524,18 +522,18 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
    */
   async fetchFollowDetails<T extends NumberType>(
     api: BaseBitBadgesApi<T>,
-    body: Omit<GetFollowDetailsRouteRequestBody, 'address' | 'cosmosAddress'>
+    body: Omit<GetFollowDetailsBody, 'address' | 'cosmosAddress'>
   ): Promise<FollowDetailsDoc<T>> {
     return await BitBadgesUserInfo.GetFollowDetails(api, { ...body, cosmosAddress: this.cosmosAddress });
   }
 
-  static async GetFollowDetails<T extends NumberType>(api: BaseBitBadgesApi<T>, body: GetFollowDetailsRouteRequestBody) {
+  static async GetFollowDetails<T extends NumberType>(api: BaseBitBadgesApi<T>, body: GetFollowDetailsBody) {
     try {
-      const response = await api.axios.post<iGetFollowDetailsRouteSuccessResponse<string>>(
+      const response = await api.axios.post<iGetFollowDetailsSuccessResponse<string>>(
         `${api.BACKEND_URL}${BitBadgesApiRoutes.GetFollowDetailsRoute()}`,
         body
       );
-      return new GetFollowDetailsRouteSuccessResponse(response.data).convert(api.ConvertFunction);
+      return new GetFollowDetailsSuccessResponse(response.data).convert(api.ConvertFunction);
     } catch (error) {
       await api.handleApiError(error);
       return Promise.reject(error);
@@ -576,7 +574,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
       claimAlerts: [],
       merkleChallenges: [],
       approvalTrackers: [],
-      authCodes: [],
+      siwbbRequests: [],
       seenActivity: 0n,
       createdAt: 0n,
       views: {},
@@ -612,7 +610,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
       approvalTrackers: [],
       addressLists: [],
       listsActivity: [],
-      authCodes: [],
+      siwbbRequests: [],
       seenActivity: 0n,
       createdAt: 0n,
       views: {}
@@ -651,7 +649,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
 type AccountViewData<T extends NumberType> = {
   createdLists: BitBadgesAddressList<T>[];
   privateLists: BitBadgesAddressList<T>[];
-  authCodes: BlockinAuthSignatureDoc<T>[];
+  siwbbRequests: SIWBBRequestDoc<T>[];
   transferActivity: TransferActivityDoc<T>[];
   reviews: ReviewDoc<T>[];
   badgesCollected: BalanceDocWithDetails<T>[];
@@ -725,7 +723,7 @@ function updateAccountWithResponse<T extends NumberType>(
     activity: [...(cachedAccount?.activity || []), ...(account.activity || [])],
     addressLists: [...(cachedAccount?.addressLists || []), ...(account.addressLists || [])],
     claimAlerts: [...(cachedAccount?.claimAlerts || []), ...(account.claimAlerts || [])],
-    authCodes: [...(cachedAccount?.authCodes || []), ...(account.authCodes || [])],
+    siwbbRequests: [...(cachedAccount?.siwbbRequests || []), ...(account.siwbbRequests || [])],
     listsActivity: [...(cachedAccount?.listsActivity || []), ...(account.listsActivity || [])],
     secrets: [...(cachedAccount?.secrets || []), ...(account.secrets || [])],
     views: views,
@@ -752,7 +750,7 @@ function updateAccountWithResponse<T extends NumberType>(
   newAccount.activity = newAccount.activity.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
   newAccount.addressLists = newAccount.addressLists.filter((x, index, self) => index === self.findIndex((t) => t.listId === x.listId));
   newAccount.claimAlerts = newAccount.claimAlerts.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
-  newAccount.authCodes = newAccount.authCodes.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
+  newAccount.siwbbRequests = newAccount.siwbbRequests.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
   newAccount.listsActivity = newAccount.listsActivity.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
   newAccount.secrets = newAccount.secrets.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
 
@@ -760,7 +758,7 @@ function updateAccountWithResponse<T extends NumberType>(
   newAccount.activity = newAccount.activity.sort((a, b) => (BigInt(b.timestamp) - BigInt(a.timestamp) > 0 ? -1 : 1));
   newAccount.reviews = newAccount.reviews.sort((a, b) => (BigInt(b.timestamp) - BigInt(a.timestamp) > 0 ? -1 : 1));
   newAccount.claimAlerts = newAccount.claimAlerts.sort((a, b) => (BigInt(b.timestamp) - BigInt(a.timestamp) > 0 ? -1 : 1));
-  newAccount.authCodes = newAccount.authCodes.sort((a, b) => (BigInt(b.createdAt) - BigInt(a.createdAt) > 0 ? -1 : 1));
+  newAccount.siwbbRequests = newAccount.siwbbRequests.sort((a, b) => (BigInt(b.createdAt) - BigInt(a.createdAt) > 0 ? -1 : 1));
   newAccount.listsActivity = newAccount.listsActivity.sort((a, b) => (BigInt(b.timestamp) - BigInt(a.timestamp) > 0 ? -1 : 1));
 
   return newAccount;
@@ -774,7 +772,7 @@ function updateAccountWithResponse<T extends NumberType>(
 export type AccountViewKey =
   | 'createdLists'
   | 'privateLists'
-  | 'authCodes'
+  | 'siwbbRequests'
   | 'transferActivity'
   | 'reviews'
   | 'badgesCollected'
@@ -844,40 +842,40 @@ export type AccountFetchDetails = {
 /**
  * @category API Requests / Responses
  */
-export interface GetAccountsRouteRequestBody {
+export interface GetAccountsBody {
   accountsToFetch: AccountFetchDetails[];
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface iGetAccountsRouteSuccessResponse<T extends NumberType> {
+export interface iGetAccountsSuccessResponse<T extends NumberType> {
   accounts: iBitBadgesUserInfo<T>[];
 }
 
 /**
  * @category API Requests / Responses
  */
-export class GetAccountsRouteSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetAccountsRouteSuccessResponse<T>>
-  implements iGetAccountsRouteSuccessResponse<T>
+export class GetAccountsSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetAccountsSuccessResponse<T>>
+  implements iGetAccountsSuccessResponse<T>
 {
   accounts: BitBadgesUserInfo<T>[];
 
-  constructor(data: iGetAccountsRouteSuccessResponse<T>) {
+  constructor(data: iGetAccountsSuccessResponse<T>) {
     super();
     this.accounts = data.accounts.map((account) => new BitBadgesUserInfo(account));
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetAccountsRouteSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetAccountsRouteSuccessResponse<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetAccountsSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetAccountsSuccessResponse<U>;
   }
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface GetFollowDetailsRouteRequestBody {
+export interface GetFollowDetailsBody {
   cosmosAddress: string;
 
   followingBookmark?: string;
@@ -890,7 +888,7 @@ export interface GetFollowDetailsRouteRequestBody {
 /**
  * @category API Requests / Responses
  */
-export interface iGetFollowDetailsRouteSuccessResponse<T extends NumberType> extends iFollowDetailsDoc<T> {
+export interface iGetFollowDetailsSuccessResponse<T extends NumberType> extends iFollowDetailsDoc<T> {
   followersPagination: PaginationInfo;
   followingPagination: PaginationInfo;
 
@@ -900,16 +898,13 @@ export interface iGetFollowDetailsRouteSuccessResponse<T extends NumberType> ext
 /**
  * @category API Requests / Responses
  */
-export class GetFollowDetailsRouteSuccessResponse<T extends NumberType>
-  extends FollowDetailsDoc<T>
-  implements iGetFollowDetailsRouteSuccessResponse<T>
-{
+export class GetFollowDetailsSuccessResponse<T extends NumberType> extends FollowDetailsDoc<T> implements iGetFollowDetailsSuccessResponse<T> {
   followersPagination: PaginationInfo;
   followingPagination: PaginationInfo;
   activity: TransferActivityDoc<T>[];
   activityPagination: PaginationInfo;
 
-  constructor(data: iGetFollowDetailsRouteSuccessResponse<T>) {
+  constructor(data: iGetFollowDetailsSuccessResponse<T>) {
     super(data);
     this.followersPagination = data.followersPagination;
     this.followingPagination = data.followingPagination;
@@ -917,7 +912,7 @@ export class GetFollowDetailsRouteSuccessResponse<T extends NumberType>
     this.activityPagination = data.activityPagination;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetFollowDetailsRouteSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetFollowDetailsRouteSuccessResponse<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetFollowDetailsSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetFollowDetailsSuccessResponse<U>;
   }
 }

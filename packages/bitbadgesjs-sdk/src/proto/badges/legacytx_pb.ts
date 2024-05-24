@@ -235,6 +235,13 @@ export class MsgNewCollection extends Message<MsgNewCollection> {
    */
   defaultDisapproveSelfInitiated = false;
 
+  /**
+   * The default balances for the user
+   *
+   * @generated from field: repeated badges.Balance defaultBalances = 18;
+   */
+  defaultBalances: Balance[] = [];
+
   constructor(data?: PartialMessage<MsgNewCollection>) {
     super();
     proto3.util.initPartial(data, this);
@@ -259,6 +266,7 @@ export class MsgNewCollection extends Message<MsgNewCollection> {
     { no: 15, name: "defaultOutgoingApprovals", kind: "message", T: UserOutgoingApproval, repeated: true },
     { no: 16, name: "defaultIncomingApprovals", kind: "message", T: UserIncomingApproval, repeated: true },
     { no: 17, name: "defaultDisapproveSelfInitiated", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 18, name: "defaultBalances", kind: "message", T: Balance, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgNewCollection {

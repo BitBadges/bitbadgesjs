@@ -388,8 +388,24 @@ export interface iTransfer<T extends NumberType> {
 
   /**
    * Whether or not to only check the prioritized approvals. If false, we will check all approvals with any prioritized first.
+   *
+   * This only applies to the "collection" level approvals specified.
    */
-  onlyCheckPrioritizedApprovals?: boolean;
+  onlyCheckPrioritizedCollectionApprovals?: boolean;
+
+  /**
+   * Whether or not to only check the prioritized approvals. If false, we will check all approvals with any prioritized first.
+   *
+   * This only applies to the "incoming" level approvals specified.
+   */
+  onlyCheckPrioritizedIncomingApprovals?: boolean;
+
+  /**
+   * Whether or not to only check the prioritized approvals. If false, we will check all approvals with any prioritized first.
+   *
+   * This only applies to the "outgoing" level approvals specified.
+   */
+  onlyCheckPrioritizedOutgoingApprovals?: boolean;
 
   /**
    * The zk proof solutions for approvals.

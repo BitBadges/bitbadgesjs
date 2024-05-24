@@ -970,6 +970,7 @@ export interface iUserOutgoingApprovalWithDetails<T extends NumberType> extends 
   /** The populated address list for the initiatedByListId */
   initiatedByList: iAddressList;
   approvalCriteria?: iOutgoingApprovalCriteriaWithDetails<T>;
+  details?: iApprovalInfoDetails;
 }
 
 /**
@@ -979,16 +980,22 @@ export class UserOutgoingApprovalWithDetails<T extends NumberType> extends UserO
   toList: AddressList;
   initiatedByList: AddressList;
   approvalCriteria?: OutgoingApprovalCriteriaWithDetails<T> | undefined;
+  details?: iApprovalInfoDetails | undefined;
 
   constructor(data: iUserOutgoingApprovalWithDetails<T>) {
     super(data);
     this.toList = new AddressList(data.toList);
     this.initiatedByList = new AddressList(data.initiatedByList);
     this.approvalCriteria = data.approvalCriteria ? new OutgoingApprovalCriteriaWithDetails(data.approvalCriteria) : undefined;
+    this.details = data.details ? new ApprovalInfoDetails(data.details) : undefined;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): UserOutgoingApprovalWithDetails<U> {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as UserOutgoingApprovalWithDetails<U>;
+  }
+
+  clone(): UserOutgoingApprovalWithDetails<T> {
+    return super.clone() as UserOutgoingApprovalWithDetails<T>;
   }
 
   castToCollectionTransfer(fromAddress: string): CollectionApprovalWithDetails<T> {
@@ -1009,12 +1016,14 @@ export class UserOutgoingApprovalWithDetails<T extends NumberType> extends UserO
  * @category Approvals / Transferability
  */
 export class UserIncomingApprovalWithDetails<T extends NumberType> extends UserIncomingApproval<T> implements iUserIncomingApprovalWithDetails<T> {
+  details?: ApprovalInfoDetails<T>;
   fromList: AddressList;
   initiatedByList: AddressList;
   approvalCriteria?: IncomingApprovalCriteriaWithDetails<T> | undefined;
 
   constructor(data: iUserIncomingApprovalWithDetails<T>) {
     super(data);
+    this.details = data.details ? new ApprovalInfoDetails(data.details) : undefined;
     this.fromList = new AddressList(data.fromList);
     this.initiatedByList = new AddressList(data.initiatedByList);
     this.approvalCriteria = data.approvalCriteria ? new IncomingApprovalCriteriaWithDetails(data.approvalCriteria) : undefined;
@@ -1138,6 +1147,7 @@ export class ChallengeInfoDetails<T extends NumberType> extends BaseNumberTypeCl
     plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
     claimId: string;
     manualDistribution?: boolean;
+    automatic?: boolean;
   };
 
   constructor(data: iChallengeInfoDetails<T>) {
@@ -1399,7 +1409,8 @@ export class CollectionApprovalWithDetails<T extends NumberType> extends Collect
                 challengeInfoDetails: undefined
               };
             })
-        }
+        },
+        approvalCriteriaWithDetails: this.approvalCriteria?.convert(BigIntify)
       }
     };
   }

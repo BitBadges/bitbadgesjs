@@ -218,13 +218,13 @@ export class BitBadgesAddressList<T extends NumberType>
   /**
    * Gets address lists from the API.
    */
-  static async GetAddressLists<T extends NumberType>(api: BaseBitBadgesApi<T>, options: GetAddressListsRouteRequestBody) {
+  static async GetAddressLists<T extends NumberType>(api: BaseBitBadgesApi<T>, options: GetAddressListsBody) {
     try {
-      const response = await api.axios.post<iGetAddressListsRouteSuccessResponse<T>>(
+      const response = await api.axios.post<iGetAddressListsSuccessResponse<T>>(
         `${api.BACKEND_URL}${BitBadgesApiRoutes.GetAddressListsRoute()}`,
         options
       );
-      return new GetAddressListsRouteSuccessResponse(response.data);
+      return new GetAddressListsSuccessResponse(response.data);
     } catch (error) {
       await api.handleApiError(error);
       return Promise.reject(error);
@@ -236,13 +236,13 @@ export class BitBadgesAddressList<T extends NumberType>
    *
    * Behind the scenes, this is just an alias for UpdateAddressList.
    */
-  static async CreateAddressList<T extends NumberType>(api: BaseBitBadgesApi<T>, options: CreateAddressListsRouteRequestBody) {
+  static async CreateAddressList<T extends NumberType>(api: BaseBitBadgesApi<T>, options: CreateAddressListsBody) {
     try {
-      const response = await api.axios.post<iCreateAddressListsRouteSuccessResponse>(
+      const response = await api.axios.post<iCreateAddressListsSuccessResponse>(
         `${api.BACKEND_URL}${BitBadgesApiRoutes.CreateAddressListRoute()}`,
         options
       );
-      return new CreateAddressListsRouteSuccessResponse(response.data);
+      return new CreateAddressListsSuccessResponse(response.data);
     } catch (error) {
       await api.handleApiError(error);
       return Promise.reject(error);
@@ -252,13 +252,13 @@ export class BitBadgesAddressList<T extends NumberType>
   /**
    * Updates an off-chain address list. On-chain lists are updated through blockchain transactions.
    */
-  static async UpdateAddressList<T extends NumberType>(api: BaseBitBadgesApi<T>, options: UpdateAddressListsRouteRequestBody<T>) {
+  static async UpdateAddressList<T extends NumberType>(api: BaseBitBadgesApi<T>, options: UpdateAddressListsBody<T>) {
     try {
-      const response = await api.axios.post<iUpdateAddressListsRouteSuccessResponse>(
+      const response = await api.axios.post<iUpdateAddressListsSuccessResponse>(
         `${api.BACKEND_URL}${BitBadgesApiRoutes.UpdateAddressListRoute()}`,
         options
       );
-      return new UpdateAddressListsRouteSuccessResponse(response.data);
+      return new UpdateAddressListsSuccessResponse(response.data);
     } catch (error) {
       await api.handleApiError(error);
       return Promise.reject(error);
@@ -268,13 +268,13 @@ export class BitBadgesAddressList<T extends NumberType>
   /**
    * Deletes an off-chain address list. On-chain lists are deleted through blockchain transactions.
    */
-  static async DeleteAddressList<T extends NumberType>(api: BaseBitBadgesApi<T>, options: DeleteAddressListsRouteRequestBody) {
+  static async DeleteAddressList<T extends NumberType>(api: BaseBitBadgesApi<T>, options: DeleteAddressListsBody) {
     try {
-      const response = await api.axios.post<iDeleteAddressListsRouteSuccessResponse>(
+      const response = await api.axios.post<iDeleteAddressListsSuccessResponse>(
         `${api.BACKEND_URL}${BitBadgesApiRoutes.DeleteAddressListRoute()}`,
         options
       );
-      return new DeleteAddressListsRouteSuccessResponse(response.data);
+      return new DeleteAddressListsSuccessResponse(response.data);
     } catch (error) {
       await api.handleApiError(error);
       return Promise.reject(error);
@@ -332,7 +332,7 @@ const updateAddressListWithResponse = <T extends NumberType>(
 /**
  * @category API Requests / Responses
  */
-export interface GetAddressListsRouteRequestBody {
+export interface GetAddressListsBody {
   /**
    * The lists and accompanyin details to fetch. Supports on-chain, off-chain, and reserved lists.
    */
@@ -351,34 +351,37 @@ export interface GetAddressListsRouteRequestBody {
 /**
  * @category API Requests / Responses
  */
-export interface iGetAddressListsRouteSuccessResponse<T extends NumberType> {
+export interface iGetAddressListsSuccessResponse<T extends NumberType> {
   addressLists: iBitBadgesAddressList<T>[];
 }
 
 /**
  * @category API Requests / Responses
  */
-export class GetAddressListsRouteSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetAddressListsRouteSuccessResponse<T>>
-  implements iGetAddressListsRouteSuccessResponse<T>, CustomType<GetAddressListsRouteSuccessResponse<T>>
+export class GetAddressListsSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetAddressListsSuccessResponse<T>>
+  implements iGetAddressListsSuccessResponse<T>, CustomType<GetAddressListsSuccessResponse<T>>
 {
   addressLists: BitBadgesAddressList<T>[];
 
-  constructor(data: iGetAddressListsRouteSuccessResponse<T>) {
+  constructor(data: iGetAddressListsSuccessResponse<T>) {
     super();
     this.addressLists = data.addressLists.map((addressList) => new BitBadgesAddressList(addressList));
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetAddressListsRouteSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetAddressListsRouteSuccessResponse<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetAddressListsSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetAddressListsSuccessResponse<U>;
   }
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface UpdateAddressListsRouteRequestBody<T extends NumberType> {
+export interface UpdateAddressListsBody<T extends NumberType> {
   addressLists: (iAddressList & {
+    /** Flag to update addresses? */
+    updateAddresses?: boolean;
+
     /** Private lists will not show up in any search results. */
     private?: boolean;
     /**
@@ -398,31 +401,31 @@ export interface UpdateAddressListsRouteRequestBody<T extends NumberType> {
 /**
  * @category API Requests / Responses
  */
-export interface iUpdateAddressListsRouteSuccessResponse {}
+export interface iUpdateAddressListsSuccessResponse {}
 /**
  * @category API Requests / Responses
  */
-export class UpdateAddressListsRouteSuccessResponse extends EmptyResponseClass {}
+export class UpdateAddressListsSuccessResponse extends EmptyResponseClass {}
 
 /**
  * @category API Requests / Responses
  */
-export interface CreateAddressListsRouteRequestBody extends UpdateAddressListsRouteRequestBody<NumberType> {}
+export interface CreateAddressListsBody extends UpdateAddressListsBody<NumberType> {}
 
 /**
  * @category API Requests / Responses
  */
-export interface iCreateAddressListsRouteSuccessResponse {}
+export interface iCreateAddressListsSuccessResponse {}
 
 /**
  * @category API Requests / Responses
  */
-export class CreateAddressListsRouteSuccessResponse extends EmptyResponseClass {}
+export class CreateAddressListsSuccessResponse extends EmptyResponseClass {}
 
 /**
  * @category API Requests / Responses
  */
-export interface DeleteAddressListsRouteRequestBody {
+export interface DeleteAddressListsBody {
   /**
    * The list IDs to delete.
    */
@@ -431,8 +434,8 @@ export interface DeleteAddressListsRouteRequestBody {
 /**
  * @category API Requests / Responses
  */
-export interface iDeleteAddressListsRouteSuccessResponse {}
+export interface iDeleteAddressListsSuccessResponse {}
 /**
  * @category API Requests / Responses
  */
-export class DeleteAddressListsRouteSuccessResponse extends EmptyResponseClass {}
+export class DeleteAddressListsSuccessResponse extends EmptyResponseClass {}

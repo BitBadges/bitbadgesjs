@@ -8,7 +8,7 @@ import { iUpdateHistory, UpdateHistory } from '../docs/docs';
 /**
  * @category API Requests / Responses
  */
-export interface GetMapsRouteRequestBody {
+export interface GetMapsBody {
   /** The IDs of the maps to fetch. */
   mapIds: string[];
 }
@@ -54,20 +54,20 @@ export class MapWithValues<T extends NumberType> extends Map<T> implements iMapW
 /**
  * @category API Requests / Responses
  */
-export interface iGetMapsRouteSuccessResponse<T extends NumberType> {
+export interface iGetMapsSuccessResponse<T extends NumberType> {
   maps: iMapWithValues<T>[];
 }
 
 /**
  * @category API Requests / Responses
  */
-export class GetMapsRouteSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetMapsRouteSuccessResponse<T>>
-  implements iGetMapsRouteSuccessResponse<T>, CustomType<GetMapsRouteSuccessResponse<T>>
+export class GetMapsSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetMapsSuccessResponse<T>>
+  implements iGetMapsSuccessResponse<T>, CustomType<GetMapsSuccessResponse<T>>
 {
   maps: MapWithValues<T>[];
 
-  constructor(data: iGetMapsRouteSuccessResponse<T>) {
+  constructor(data: iGetMapsSuccessResponse<T>) {
     super();
     this.maps = data.maps.map((map) => new MapWithValues(map));
   }
@@ -76,7 +76,7 @@ export class GetMapsRouteSuccessResponse<T extends NumberType>
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): GetMapsRouteSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetMapsRouteSuccessResponse<U>;
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): GetMapsSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetMapsSuccessResponse<U>;
   }
 }

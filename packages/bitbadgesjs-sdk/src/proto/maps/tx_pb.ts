@@ -9,6 +9,63 @@ import { ActionPermission, TimedUpdatePermission } from "./permissions_pb.js";
 import { ManagerTimeline, MapMetadataTimeline } from "./timelines_pb.js";
 
 /**
+ * Used for WASM bindings and JSON parsing
+ *
+ * @generated from message maps.MapCustomMsgType
+ */
+export class MapCustomMsgType extends Message<MapCustomMsgType> {
+  /**
+   * @generated from field: maps.MsgSetValue setValueMsg = 1;
+   */
+  setValueMsg?: MsgSetValue;
+
+  /**
+   * @generated from field: maps.MsgCreateMap createMapMsg = 2;
+   */
+  createMapMsg?: MsgCreateMap;
+
+  /**
+   * @generated from field: maps.MsgUpdateMap updateMapMsg = 3;
+   */
+  updateMapMsg?: MsgUpdateMap;
+
+  /**
+   * @generated from field: maps.MsgDeleteMap deleteMapMsg = 4;
+   */
+  deleteMapMsg?: MsgDeleteMap;
+
+  constructor(data?: PartialMessage<MapCustomMsgType>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "maps.MapCustomMsgType";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "setValueMsg", kind: "message", T: MsgSetValue },
+    { no: 2, name: "createMapMsg", kind: "message", T: MsgCreateMap },
+    { no: 3, name: "updateMapMsg", kind: "message", T: MsgUpdateMap },
+    { no: 4, name: "deleteMapMsg", kind: "message", T: MsgDeleteMap },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MapCustomMsgType {
+    return new MapCustomMsgType().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MapCustomMsgType {
+    return new MapCustomMsgType().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MapCustomMsgType {
+    return new MapCustomMsgType().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MapCustomMsgType | PlainMessage<MapCustomMsgType> | undefined, b: MapCustomMsgType | PlainMessage<MapCustomMsgType> | undefined): boolean {
+    return proto3.util.equals(MapCustomMsgType, a, b);
+  }
+}
+
+/**
  * @generated from message maps.ValueStore
  */
 export class ValueStore extends Message<ValueStore> {

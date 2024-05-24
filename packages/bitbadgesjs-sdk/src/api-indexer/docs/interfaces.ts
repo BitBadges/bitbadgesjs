@@ -6,7 +6,7 @@ import type { iApprovalInfoDetails, iChallengeDetails, iUserOutgoingApprovalWith
 import type { iBatchBadgeDetails } from '@/core/batch-utils';
 import type { iCosmosCoin } from '@/core/coin';
 import type { iOffChainBalancesMap } from '@/core/transfers';
-import type { iCollectionApproval, iIncrementedBalances, iUserIncomingApprovalWithDetails } from '@/interfaces/badges/approvals';
+import type { iCollectionApproval, iPredeterminedBalances, iUserIncomingApprovalWithDetails } from '@/interfaces/badges/approvals';
 import type {
   iAddressList,
   iAmountTrackerIdDetails,
@@ -25,7 +25,7 @@ import type {
 } from '@/interfaces/badges/core';
 import type { iCollectionPermissions, iUserPermissionsWithDetails } from '@/interfaces/badges/permissions';
 import type { iUserBalanceStore } from '@/interfaces/badges/userBalances';
-import type { AndGroup, ChallengeParams, OrGroup, OwnershipRequirements } from 'blockin';
+import type { ChallengeParams } from 'blockin';
 import { iMapWithValues } from '../requests/maps';
 import { iUpdateHistory } from './docs';
 
@@ -179,8 +179,6 @@ export interface iTransferActivityDoc<T extends NumberType> extends iActivityDoc
   precalculateBalancesFromApproval?: iApprovalIdentifierDetails;
   /** The prioritized approvals of the transfer. This is used to check certain approvals before others to ensure intended behavior. */
   prioritizedApprovals?: iApprovalIdentifierDetails[];
-  /** Whether or not to only check prioritized approvals? If false, we will still check all approvals but prioritize the prioritized approvals. */
-  onlyCheckPrioritizedApprovals?: boolean;
   /** The user who initiated the transfer transaction. */
   initiatedBy: CosmosAddress;
   /** The transaction hash of the activity. */
@@ -381,7 +379,7 @@ export interface iProfileDoc<T extends NumberType> extends Doc {
   /** Social connections stored for the account */
   socialConnections?: iSocialConnections<T>;
 
-  /** Approved ways to sign in (rather than Blockin) */
+  /** Approved ways to sign in */
   approvedSignInMethods?: {
     discord?: { username: string; discriminator?: string | undefined; id: string } | undefined;
     github?: { username: string; id: string } | undefined;
@@ -418,6 +416,13 @@ export interface iQueueDoc<T extends NumberType> extends Doc {
   recipientAddress?: string;
   activityDocId?: string;
   notificationType?: string;
+
+  claimInfo?: {
+    session: any;
+    body: any;
+    claimId: string;
+    cosmosAddress: CosmosAddress;
+  };
 }
 
 /**
@@ -545,11 +550,10 @@ export type ClaimIntegrationPluginType =
   | 'google'
   | 'twitter'
   | 'transferTimes'
-  | 'requiresProofOfAddress'
+  | 'initiatedBy'
   | 'whitelist'
-  | 'mustOwnBadges'
-  | 'api'
-  | 'email';
+  | 'email'
+  | string;
 
 /**
  * @category Claims
@@ -569,6 +573,19 @@ export type JsonBodyInputSchema = { key: string; label: string; type: 'date' | '
 type OauthAppName = 'twitter' | 'stripe' | 'github' | 'google' | 'email' | 'discord';
 
 /**
+ * @category Claims
+ */
+export type ClaimIntegrationPluginCustomBodyType<T extends ClaimIntegrationPluginType> = T extends 'codes'
+  ? {
+      code: string;
+    }
+  : T extends 'password'
+    ? {
+        password: string;
+      }
+    : {};
+
+/**
  * Public params are params that are visible to the public. For example, the number of uses for a claim code.
  *
  * @category Claims
@@ -586,7 +603,6 @@ export type ClaimIntegrationPublicParamsType<T extends ClaimIntegrationPluginTyp
     : T extends OauthAppName
       ? {
           hasPrivateList: boolean;
-          users?: string[];
           maxUsesPerUser?: number;
           listUrl?: string;
         }
@@ -599,43 +615,7 @@ export type ClaimIntegrationPublicParamsType<T extends ClaimIntegrationPluginTyp
               listId?: string;
               list?: iAddressList;
             }
-          : T extends 'mustOwnBadges'
-            ? {
-                ownershipRequirements?: AndGroup<NumberType> | OrGroup<NumberType> | OwnershipRequirements<NumberType>;
-              }
-            : T extends 'api'
-              ? {
-                  apiCalls: ClaimApiCallInfo[];
-                }
-              : {};
-
-/**
- * @category Claims
- */
-export interface ClaimApiCallInfo {
-  /** The method of the API call */
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE';
-  /** The URI to call */
-  uri: string;
-  name: string;
-  description?: string;
-  /** Whether or not to pass the user's address to this call */
-  passAddress?: boolean;
-  /** Whether or not to pass the user's email to this call */
-  passEmail?: boolean;
-  /** Whether or not to pass the user's Discord to this call */
-  passDiscord?: boolean;
-  /** Whether or not to pass the user's Twitter to this call */
-  passTwitter?: boolean;
-  /** Whether or not to pass the user's Github to this call */
-  passGithub?: boolean;
-  /** Whether or not to pass the user's Google to this call */
-  passGoogle?: boolean;
-  /** The body parameters to pass to the API call. These are the hardcoded values passed to every call. */
-  bodyParams?: any;
-  /** The expected user inputs for the API call. */
-  userInputsSchema: Array<JsonBodyInputSchema>;
-}
+          : {};
 
 /**
  * Private params are params that are not visible to the public. For example, the password for a claim code.
@@ -658,13 +638,10 @@ export type ClaimIntegrationPrivateParamsType<T extends ClaimIntegrationPluginTy
         }
       : T extends OauthAppName
         ? {
-            users?: string[];
+            usernames?: string[];
+            ids?: string[];
           }
-        : T extends 'mustOwnBadges'
-          ? {
-              ownershipRequirements?: AndGroup<NumberType> | OrGroup<NumberType> | OwnershipRequirements<NumberType>;
-            }
-          : {};
+        : {};
 
 /**
  * Public state is the current state of the claim integration that is visible to the public. For example, the number of times a claim code has been used.
@@ -685,11 +662,25 @@ export type ClaimIntegrationPublicStateType<T extends ClaimIntegrationPluginType
     : {};
 
 /**
+ * Private state is the current state of the claim integration that is visible to only those who can fetch private parameters.
+ *
+ * @category Claims
+ */
+export type ClaimIntegrationPrivateStateType<T extends ClaimIntegrationPluginType> = T extends OauthAppName | 'whitelist'
+  ? {
+      ids: { [id: string]: number };
+      usernames: { [username: string]: string };
+    }
+  : {};
+
+/**
  * @category Claims
  */
 export interface IntegrationPluginParams<T extends ClaimIntegrationPluginType> {
   /** The ID of the plugin */
-  id: T;
+  id: string;
+  /** The type of the plugin */
+  type: T;
   /** The parameters of the plugin that are visible to the public */
   publicParams: ClaimIntegrationPublicParamsType<T>;
   /** The parameters of the plugin that are not visible to the public */
@@ -702,8 +693,16 @@ export interface IntegrationPluginParams<T extends ClaimIntegrationPluginType> {
 export interface IntegrationPluginDetails<T extends ClaimIntegrationPluginType> extends IntegrationPluginParams<T> {
   /** The current state of the plugin */
   publicState: ClaimIntegrationPublicStateType<T>;
-  /** If resetState = true, we will reset the state of the plugin back to default. If false, we will keep the current state. */
+  /** The private state of the plugin */
+  privateState?: ClaimIntegrationPrivateStateType<T>;
+  /** If resetState = true, we will reset the state of the plugin back to default. If false, we will keep the current state. Incompatible with newState. */
   resetState?: boolean;
+  /**
+   * If newState is present, we will set the state to the new state. Incompatible with resetState.
+   *
+   * Warning: This is an advanced feature and should be used with caution. Misconfiguring this can lead to unexpected behavior of this plugin.
+   */
+  newState?: ClaimIntegrationPublicStateType<T>;
 }
 
 /**
@@ -732,6 +731,12 @@ export interface iClaimBuilderDoc<T extends NumberType> extends Doc {
   /** If true, the claim codes are to be distributed manually. This doc will only be used for storage purposes. */
   manualDistribution?: boolean;
 
+  /** If true, the claim has been designated to be completed automatically for users. */
+  automatic?: boolean;
+
+  /** Metadata for the claim */
+  metadata?: iMetadata<T>;
+
   /** The current state of each plugin */
   state: {
     [pluginId: string]: any;
@@ -741,9 +746,11 @@ export interface iClaimBuilderDoc<T extends NumberType> extends Doc {
   action: {
     codes?: string[];
     seedCode?: string;
-    balancesToSet?: iIncrementedBalances<T>;
+    balancesToSet?: iPredeterminedBalances<T>;
     listId?: string;
   };
+
+  lastUpdated: UNIXMilliTimestamp<T>;
 }
 
 /**
@@ -789,23 +796,17 @@ export interface iMerkleChallengeDoc<T extends NumberType> extends Doc {
   /** The approver address (leave blank if approvalLevel = "collection") */
   approverAddress: CosmosAddress;
   /** The used leaf indices for each challenge. A leaf index is the leaf location in the bottommost layer of the Merkle tree */
-  usedLeafIndices: T[];
+  usedLeafIndices: iUsedLeafStatus<T>[];
 }
 
 /**
  * @category Interfaces
  */
-export interface iMerklechallengeTrackerIdDetails<T extends NumberType> {
-  /** The collection ID */
-  collectionId: T;
-  /** The challenge ID */
-  challengeTrackerId: string;
-  /** The challenge level (i.e. "collection", "incoming", "outgoing") */
-  approvalLevel: 'collection' | 'incoming' | 'outgoing' | '';
-  /** The approver address (leave blank if approvalLevel = "collection") */
-  approverAddress: CosmosAddress;
-  /** The used leaf indices for each challenge. A leaf index is the leaf location in the bottommost layer of the Merkle tree */
-  usedLeafIndices: T[];
+export interface iUsedLeafStatus<T extends NumberType> {
+  /** The leaf index */
+  leafIndex: T;
+  /** The address that used the leaf */
+  usedBy: CosmosAddress;
 }
 
 /**
@@ -871,12 +872,145 @@ export interface iComplianceDoc<T extends NumberType> extends Doc {
     reported: { cosmosAddress: CosmosAddress; reason: string }[];
   };
 }
+/**
+ * @category Interfaces
+ */
+export interface iDeveloperAppDoc extends Doc {
+  /** Creator of the app */
+  createdBy: CosmosAddress;
+  /** The name of the app */
+  name: string;
+  /** The description of the app */
+  description: string;
+  /** The image of the app */
+  image: string;
+  /** The client ID of the app */
+  clientId: string;
+  /** The client secret of the app */
+  clientSecret: string;
+  /** The redirect URI of the app */
+  redirectUris: string[];
+}
 
 /**
  * @category Interfaces
  */
-export interface iBlockinAuthSignatureDoc<T extends NumberType> extends Doc {
-  /** The signature of the Blockin message with the Blockin params as the params field */
+export interface iAuthorizationCodeDoc {
+  _docId: string;
+  clientId: string;
+  redirectUri: string;
+  scopes: string[];
+  address: string;
+  cosmosAddress: string;
+  expiresAt: number;
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iAccessTokenDoc {
+  _docId: string;
+  accessToken: string;
+  tokenType: string;
+  clientId: string;
+  accessTokenExpiresAt: number;
+
+  refreshToken: string;
+  refreshTokenExpiresAt: number;
+
+  cosmosAddress: string;
+  address: string;
+  scopes: string[];
+}
+
+/**
+ * @category Claims
+ */
+export enum PluginPresetType {
+  Stateless = 'Stateless',
+  Usernames = 'Usernames',
+  ClaimToken = 'ClaimToken',
+  CustomResponseHandler = 'CustomResponseHandler',
+  CompletelyCustom = 'CompletelyCustom'
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iPluginDoc<T extends NumberType> extends Doc {
+  /** The Cosmos address who created the plugin doc */
+  createdBy: CosmosAddress;
+  /** The unique plugin ID */
+  pluginId: string;
+  /** The client secret of the plugin */
+  pluginSecret?: string;
+  /** Review process completed */
+  reviewCompleted: boolean;
+
+  /** Reuse for nonindexed balances? Only applicable if is stateless, requires no user inputs, and requires no sessions. */
+  reuseForNonIndexed: boolean;
+
+  /** Preset type for how the plugin state is to be maintained. */
+  stateFunctionPreset: PluginPresetType;
+
+  /** Whether it makes sense for multiple of this plugin to be allowed */
+  duplicatesAllowed: boolean;
+
+  /** This means that the plugin can be used w/o any session cookies or authentication. */
+  requiresSessions: boolean;
+
+  /** This is a flag for being compatible with auto-triggered claims, meaning no user interaction is needed. */
+  requiresUserInputs: boolean;
+
+  metadata: {
+    /** Creator of the plugin */
+    createdBy: string;
+    /** The name of the plugin */
+    name: string;
+    /** Description of the plugin */
+    description: string;
+    /** The image of the plugin */
+    image: string;
+    /** Documentation for the plugin */
+    documentation?: string;
+    /** Source code for the plugin */
+    sourceCode?: string;
+    /** Support link for the plugin */
+    supportLink?: string;
+  };
+
+  frontendCustomization?: {
+    customCreateNode?: boolean;
+    customEditNode?: boolean;
+    customDisplayNode?: boolean;
+  };
+
+  userInputsSchema: Array<JsonBodyInputSchema>;
+  publicParamsSchema: Array<JsonBodyInputSchema | { key: string; label: string; type: 'ownershipRequirements' }>;
+  privateParamsSchema: Array<JsonBodyInputSchema | { key: string; label: string; type: 'ownershipRequirements' }>;
+
+  /** The verification URL */
+  verificationCall?: {
+    uri: string;
+    method: 'POST' | 'GET' | 'PUT' | 'DELETE';
+    hardcodedInputs: Array<JsonBodyInputWithValue>;
+
+    passAddress: boolean;
+    passDiscord: boolean;
+    // passEmail: boolean;
+    passTwitter: boolean;
+    passGoogle: boolean;
+    passGithub: boolean;
+  };
+
+  lastUpdated: UNIXMilliTimestamp<T>;
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iSIWBBRequestDoc<T extends NumberType> extends Doc {
+  /** The signature of the challenge message */
   signature: string;
   /** The public key for the signed. Only needed for certain chains (Cosmos). */
   publicKey?: string;
@@ -891,12 +1025,25 @@ export interface iBlockinAuthSignatureDoc<T extends NumberType> extends Doc {
   params: ChallengeParams<T>;
 
   /** If required, you can additionally attach proof of secrets ot the auth flow. These can be used to prove sensitive information to verifiers. */
-  secretsProofs: iSecretsProof<T>[];
+  secretsPresentations: iSecretsProof<T>[];
 
   /** The timestamp of when the signature was created (milliseconds since epoch) */
   createdAt: UNIXMilliTimestamp<T>;
   /** If deleted, we still store temporarily for a period of time. We use a deletedAt timestamp to determine when to delete. */
   deletedAt?: UNIXMilliTimestamp<T>;
+
+  /** The client ID of the app that requested the signature */
+  clientId: string;
+
+  /** Other approved sign-ins at the time of this sign-in */
+  otherSignIns?: {
+    discord?: { username: string; discriminator?: string | undefined; id: string } | undefined;
+    github?: { username: string; id: string } | undefined;
+    google?: { username: string; id: string } | undefined;
+    twitter?: { username: string; id: string } | undefined;
+  };
+  /** The redirect URI of the app  */
+  redirectUri?: string;
 }
 
 /**

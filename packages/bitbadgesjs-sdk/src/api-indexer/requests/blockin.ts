@@ -1,7 +1,13 @@
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base';
 import type { NumberType } from '@/common/string-numbers';
 import { UintRange } from '@/core/uintRanges';
-import type { AndGroup, AssetDetails, ChallengeParams, OrGroup } from 'blockin/dist/types/verify.types';
+import type {
+  AndGroup,
+  AssetDetails,
+  ChallengeParams,
+  OrGroup,
+  OwnershipRequirements as BlockinOwnershipRequirements
+} from 'blockin/dist/types/verify.types';
 import { NativeAddress } from '../docs';
 
 /**
@@ -166,7 +172,7 @@ export class OwnershipRequirements<T extends NumberType> extends BaseNumberTypeC
     numMatchesForVerification?: T;
   };
 
-  constructor(data: OwnershipRequirements<T>) {
+  constructor(data: BlockinOwnershipRequirements<T>) {
     super();
     this.assets = data.assets.map((item) => new BlockinAssetDetails(item));
     this.options = data.options;

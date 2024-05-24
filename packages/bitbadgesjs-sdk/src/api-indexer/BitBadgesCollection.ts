@@ -57,35 +57,33 @@ import { getCurrentValueForTimeline } from '@/core/timelines';
 import { ClaimDetails, iClaimDetails } from './requests';
 import type {
   CollectionViewKey,
-  FilterBadgesInCollectionRequestBody,
-  GetAdditionalCollectionDetailsRequestBody,
-  GetBadgeActivityRouteRequestBody,
-  GetBadgeBalanceByAddressRouteRequestBody,
-  GetCollectionsRouteRequestBody,
-  GetMetadataForCollectionRequestBody,
-  GetOwnersForBadgeRouteRequestBody,
+  FilterBadgesInCollectionBody,
+  GetAdditionalCollectionDetailsBody,
+  GetBadgeActivityBody,
+  GetBadgeBalanceByAddressBody,
+  GetCollectionsBody,
+  GetMetadataForCollectionBody,
+  GetOwnersForBadgeBody,
   MetadataFetchOptions,
-  RefreshMetadataRouteRequestBody,
+  RefreshMetadataBody,
   iFilterBadgesInCollectionSuccessResponse,
-  iGetBadgeActivityRouteSuccessResponse,
-  iGetBadgeBalanceByAddressRouteSuccessResponse,
-  iGetCollectionsRouteSuccessResponse,
-  iGetOwnersForBadgeRouteSuccessResponse,
-  iRefreshMetadataRouteSuccessResponse,
-  iRefreshStatusRouteSuccessResponse
+  iGetBadgeActivitySuccessResponse,
+  iGetBadgeBalanceByAddressSuccessResponse,
+  iGetCollectionsSuccessResponse,
+  iGetOwnersForBadgeSuccessResponse,
+  iRefreshMetadataSuccessResponse,
+  iRefreshStatusSuccessResponse
 } from './requests/collections';
 import {
   FilterBadgesInCollectionSuccessResponse,
-  GetBadgeActivityRouteSuccessResponse,
-  GetBadgeBalanceByAddressRouteSuccessResponse,
-  GetCollectionsRouteSuccessResponse,
-  GetOwnersForBadgeRouteSuccessResponse,
-  RefreshMetadataRouteSuccessResponse,
-  RefreshStatusRouteSuccessResponse
+  GetBadgeActivitySuccessResponse,
+  GetBadgeBalanceByAddressSuccessResponse,
+  GetCollectionsSuccessResponse,
+  GetOwnersForBadgeSuccessResponse,
+  RefreshMetadataSuccessResponse,
+  RefreshStatusSuccessResponse
 } from './requests/collections';
 import { BitBadgesApiRoutes } from './requests/routes';
-
-const { batchUpdateBadgeMetadata, getMetadataDetailsForBadgeId, getMetadataForBadgeId } = BadgeMetadataDetails;
 
 const NEW_COLLECTION_ID = 0n;
 
@@ -304,7 +302,7 @@ export class BitBadgesCollection<T extends NumberType>
    * ```
    */
   getBadgeMetadata(badgeId: T) {
-    return getMetadataForBadgeId(badgeId, this.getCurrentBadgeMetadata());
+    return BadgeMetadataDetails.getMetadataForBadgeId(badgeId, this.getCurrentBadgeMetadata());
   }
 
   /**
@@ -313,7 +311,7 @@ export class BitBadgesCollection<T extends NumberType>
    * If you only want the metadata, use getBadgeMetadata, or you can access it via result.metadata.
    */
   getBadgeMetadataDetails(badgeId: T) {
-    return getMetadataDetailsForBadgeId(badgeId, this.getCurrentBadgeMetadata());
+    return BadgeMetadataDetails.getMetadataDetailsForBadgeId(badgeId, this.getCurrentBadgeMetadata());
   }
 
   /**
@@ -700,7 +698,7 @@ export class BitBadgesCollection<T extends NumberType>
    */
   static async FetchAndInitialize<T extends NumberType>(
     api: BaseBitBadgesApi<T>,
-    options: { collectionId: NumberType } & GetMetadataForCollectionRequestBody & GetAdditionalCollectionDetailsRequestBody
+    options: { collectionId: NumberType } & GetMetadataForCollectionBody & GetAdditionalCollectionDetailsBody
   ) {
     const collection = await BitBadgesCollection.GetCollections(api, { collectionsToFetch: [options] }).then((x) => x.collections[0]);
     return new BitBadgesCollection(collection);
@@ -709,13 +707,13 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Gets collections from the API. Must pass in a valid API instance.
    */
-  static async GetCollections<T extends NumberType>(api: BaseBitBadgesApi<T>, requestBody: GetCollectionsRouteRequestBody) {
+  static async GetCollections<T extends NumberType>(api: BaseBitBadgesApi<T>, body: GetCollectionsBody) {
     try {
-      const response = await api.axios.post<iGetCollectionsRouteSuccessResponse<string>>(
+      const response = await api.axios.post<iGetCollectionsSuccessResponse<string>>(
         `${api.BACKEND_URL}${BitBadgesApiRoutes.GetCollectionsRoute()}`,
-        requestBody
+        body
       );
-      return new GetCollectionsRouteSuccessResponse(response.data).convert(api.ConvertFunction);
+      return new GetCollectionsSuccessResponse(response.data).convert(api.ConvertFunction);
     } catch (error) {
       await api.handleApiError(error);
       return Promise.reject(error);
@@ -729,16 +727,16 @@ export class BitBadgesCollection<T extends NumberType>
     api: BaseBitBadgesApi<T>,
     collectionId: NumberType,
     cosmosAddress: string,
-    requestBody?: GetBadgeBalanceByAddressRouteRequestBody
-  ): Promise<GetBadgeBalanceByAddressRouteSuccessResponse<T>> {
+    body?: GetBadgeBalanceByAddressBody
+  ): Promise<GetBadgeBalanceByAddressSuccessResponse<T>> {
     try {
       api.assertPositiveInteger(collectionId);
 
-      const response = await api.axios.post<iGetBadgeBalanceByAddressRouteSuccessResponse<string>>(
+      const response = await api.axios.post<iGetBadgeBalanceByAddressSuccessResponse<string>>(
         `${api.BACKEND_URL}${BitBadgesApiRoutes.GetBadgeBalanceByAddressRoute(collectionId, cosmosAddress)}`,
-        requestBody
+        body
       );
-      return new GetBadgeBalanceByAddressRouteSuccessResponse(response.data).convert(api.ConvertFunction);
+      return new GetBadgeBalanceByAddressSuccessResponse(response.data).convert(api.ConvertFunction);
     } catch (error) {
       await api.handleApiError(error);
       return Promise.reject(error);
@@ -750,7 +748,7 @@ export class BitBadgesCollection<T extends NumberType>
    */
   static async FetchAndInitializeBatch<T extends NumberType>(
     api: BaseBitBadgesApi<T>,
-    collectionsToFetch: ({ collectionId: NumberType } & GetMetadataForCollectionRequestBody & GetAdditionalCollectionDetailsRequestBody)[]
+    collectionsToFetch: ({ collectionId: NumberType } & GetMetadataForCollectionBody & GetAdditionalCollectionDetailsBody)[]
   ) {
     const collection = await BitBadgesCollection.GetCollections(api, { collectionsToFetch: collectionsToFetch });
     return collection.collections.map((x) => new BitBadgesCollection(x));
@@ -775,8 +773,8 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Returns if a new collection API request body is redundant (meaning we already have the data cached).
    */
-  isRedundantRequest(options: GetMetadataForCollectionRequestBody & GetAdditionalCollectionDetailsRequestBody) {
-    options = this.pruneRequestBody(options);
+  isRedundantRequest(options: GetMetadataForCollectionBody & GetAdditionalCollectionDetailsBody) {
+    options = this.pruneBody(options);
     const cachedCollection = this.convert(BigIntify);
 
     const prunedMetadataToFetch: MetadataFetchOptions = pruneMetadataToFetch(cachedCollection, options.metadataToFetch);
@@ -824,7 +822,7 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Prunes a new collection API request body to only request the data that is not already fetched.
    */
-  pruneRequestBody(options: GetMetadataForCollectionRequestBody & GetAdditionalCollectionDetailsRequestBody) {
+  pruneBody(options: GetMetadataForCollectionBody & GetAdditionalCollectionDetailsBody) {
     const prunedMetadataToFetch: MetadataFetchOptions = pruneMetadataToFetch(this.convert(BigIntify), options.metadataToFetch);
     const prunedViewsToFetch = (options.viewsToFetch || []).filter((x) => this.viewHasMore(x.viewId));
     const prunedChallengeTrackersToFetch = (options.challengeTrackersToFetch || []).filter((x) => {
@@ -858,21 +856,17 @@ export class BitBadgesCollection<T extends NumberType>
       challengeTrackersToFetch: prunedChallengeTrackersToFetch,
       approvalTrackersToFetch: prunedApprovalTrackersToFetch,
       fetchTotalAndMintBalances: shouldFetchTotalAndMint
-    } as GetMetadataForCollectionRequestBody & GetAdditionalCollectionDetailsRequestBody & { collectionId: T };
+    } as GetMetadataForCollectionBody & GetAdditionalCollectionDetailsBody & { collectionId: T };
   }
 
   /**
    * Specify a new fetch request for the current collection. This will update the current collection with the new response information.
    * For example, paginations, metadata, views, etc. will all be handled automatically.
    */
-  async fetchAndUpdate(
-    api: BaseBitBadgesApi<T>,
-    options: GetMetadataForCollectionRequestBody & GetAdditionalCollectionDetailsRequestBody,
-    forceful?: boolean
-  ) {
+  async fetchAndUpdate(api: BaseBitBadgesApi<T>, options: GetMetadataForCollectionBody & GetAdditionalCollectionDetailsBody, forceful?: boolean) {
     if (!forceful) {
       if (this.isRedundantRequest(options)) return;
-      options = this.pruneRequestBody(options);
+      options = this.pruneBody(options);
     }
 
     const collection = await BitBadgesCollection.GetCollections(api, {
@@ -900,7 +894,7 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Wrapper for {@link fetchAndUpdate} that fetches collection metadata.
    */
-  async fetchMetadata(api: BaseBitBadgesApi<T>, options: GetMetadataForCollectionRequestBody, forceful?: boolean) {
+  async fetchMetadata(api: BaseBitBadgesApi<T>, options: GetMetadataForCollectionBody, forceful?: boolean) {
     if (!forceful) {
       if (options.metadataToFetch) options.metadataToFetch = this.pruneMetadataToFetch(options.metadataToFetch);
     }
@@ -934,7 +928,7 @@ export class BitBadgesCollection<T extends NumberType>
    *
    * If the view has no more pages, this will do nothing.
    */
-  async fetchNextForView(api: BaseBitBadgesApi<T>, viewType: CollectionViewKey, viewId: string) {
+  async fetchNextForView(api: BaseBitBadgesApi<T>, viewType: CollectionViewKey, viewId: string, oldestFirst?: boolean, cosmosAddress?: string) {
     if (!this.viewHasMore(viewId)) return;
 
     await this.fetchAndUpdate(api, {
@@ -942,7 +936,9 @@ export class BitBadgesCollection<T extends NumberType>
         {
           viewType: viewType,
           viewId: viewId,
-          bookmark: this.views[viewId]?.pagination?.bookmark || ''
+          bookmark: this.views[viewId]?.pagination?.bookmark || '',
+          oldestFirst: oldestFirst,
+          cosmosAddress: cosmosAddress
         }
       ]
     });
@@ -953,9 +949,9 @@ export class BitBadgesCollection<T extends NumberType>
    *
    * There is a 1 second delay between each page fetch to prevent rate limiting.
    */
-  async fetchAllForView(api: BaseBitBadgesApi<T>, viewType: CollectionViewKey, viewId: string) {
+  async fetchAllForView(api: BaseBitBadgesApi<T>, viewType: CollectionViewKey, viewId: string, oldestFirst?: boolean, cosmosAddress?: string) {
     while (this.viewHasMore(viewId)) {
-      await this.fetchNextForView(api, viewType, viewId);
+      await this.fetchNextForView(api, viewType, viewId, oldestFirst, cosmosAddress);
       await new Promise((r) => setTimeout(r, 1000));
     }
   }
@@ -1070,10 +1066,10 @@ export class BitBadgesCollection<T extends NumberType>
     try {
       api.assertPositiveInteger(collectionId);
 
-      const response = await api.axios.post<iRefreshStatusRouteSuccessResponse<string>>(
+      const response = await api.axios.post<iRefreshStatusSuccessResponse<string>>(
         `${api.BACKEND_URL}${BitBadgesApiRoutes.GetRefreshStatusRoute(collectionId)}`
       );
-      return new RefreshStatusRouteSuccessResponse(response.data).convert(api.ConvertFunction);
+      return new RefreshStatusSuccessResponse(response.data).convert(api.ConvertFunction);
     } catch (error) {
       await api.handleApiError(error);
       return Promise.reject(error);
@@ -1090,15 +1086,15 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Trigger a refresh for the collection via the API. Note there is a cooldown period for refreshing.
    */
-  static async RefreshMetadata<T extends NumberType>(api: BaseBitBadgesApi<T>, collectionId: T, requestBody?: RefreshMetadataRouteRequestBody) {
+  static async RefreshMetadata<T extends NumberType>(api: BaseBitBadgesApi<T>, collectionId: T, body?: RefreshMetadataBody) {
     try {
       api.assertPositiveInteger(collectionId);
 
-      const response = await api.axios.post<iRefreshMetadataRouteSuccessResponse>(
+      const response = await api.axios.post<iRefreshMetadataSuccessResponse>(
         `${api.BACKEND_URL}${BitBadgesApiRoutes.RefreshMetadataRoute(collectionId)}`,
-        requestBody
+        body
       );
-      return new RefreshMetadataRouteSuccessResponse(response.data);
+      return new RefreshMetadataSuccessResponse(response.data);
     } catch (error) {
       await api.handleApiError(error);
       return Promise.reject(error);
@@ -1119,17 +1115,17 @@ export class BitBadgesCollection<T extends NumberType>
     api: BaseBitBadgesApi<T>,
     collectionId: NumberType,
     badgeId: NumberType,
-    requestBody: GetBadgeActivityRouteRequestBody
+    body: GetBadgeActivityBody
   ) {
     try {
       api.assertPositiveInteger(collectionId);
       api.assertPositiveInteger(badgeId);
 
-      const response = await api.axios.post<iGetBadgeActivityRouteSuccessResponse<string>>(
+      const response = await api.axios.post<iGetBadgeActivitySuccessResponse<string>>(
         `${api.BACKEND_URL}${BitBadgesApiRoutes.GetBadgeActivityRoute(collectionId, badgeId)}`,
-        requestBody
+        body
       );
-      return new GetBadgeActivityRouteSuccessResponse(response.data).convert(api.ConvertFunction);
+      return new GetBadgeActivitySuccessResponse(response.data).convert(api.ConvertFunction);
     } catch (error) {
       await api.handleApiError(error);
       return Promise.reject(error);
@@ -1139,7 +1135,7 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Get the badge activity for a specific badge ID. You have to handle the pagination yourself.
    */
-  async getBadgeActivity(api: BaseBitBadgesApi<T>, badgeId: T, body: GetBadgeActivityRouteRequestBody) {
+  async getBadgeActivity(api: BaseBitBadgesApi<T>, badgeId: T, body: GetBadgeActivityBody) {
     return await BitBadgesCollection.GetBadgeActivity(api, this.collectionId, badgeId, body);
   }
 
@@ -1150,17 +1146,17 @@ export class BitBadgesCollection<T extends NumberType>
     api: BaseBitBadgesApi<T>,
     collectionId: NumberType,
     badgeId: NumberType,
-    requestBody: GetOwnersForBadgeRouteRequestBody
+    body: GetOwnersForBadgeBody
   ) {
     try {
       api.assertPositiveInteger(collectionId);
       api.assertPositiveInteger(badgeId);
 
-      const response = await api.axios.post<iGetOwnersForBadgeRouteSuccessResponse<string>>(
+      const response = await api.axios.post<iGetOwnersForBadgeSuccessResponse<string>>(
         `${api.BACKEND_URL}${BitBadgesApiRoutes.GetOwnersForBadgeRoute(collectionId, badgeId)}`,
-        requestBody
+        body
       );
-      return new GetOwnersForBadgeRouteSuccessResponse(response.data).convert(api.ConvertFunction);
+      return new GetOwnersForBadgeSuccessResponse(response.data).convert(api.ConvertFunction);
     } catch (error) {
       await api.handleApiError(error);
       return Promise.reject(error);
@@ -1170,18 +1166,18 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Gets the owners for a specific badge. You have to handle the pagination yourself.
    */
-  async getOwnersForBadge(api: BaseBitBadgesApi<T>, badgeId: T, body: GetOwnersForBadgeRouteRequestBody) {
+  async getOwnersForBadge(api: BaseBitBadgesApi<T>, badgeId: T, body: GetOwnersForBadgeBody) {
     return await BitBadgesCollection.GetOwnersForBadge(api, this.collectionId, badgeId, body);
   }
 
   /**
    * Execute a filter query for the collection. You have to handle the pagination yourself.
    */
-  static async FilterBadgesInCollection<T extends NumberType>(api: BaseBitBadgesApi<T>, requestBody: FilterBadgesInCollectionRequestBody) {
+  static async FilterBadgesInCollection<T extends NumberType>(api: BaseBitBadgesApi<T>, body: FilterBadgesInCollectionBody) {
     try {
       const response = await api.axios.post<iFilterBadgesInCollectionSuccessResponse<string>>(
         `${api.BACKEND_URL}${BitBadgesApiRoutes.FilterBadgesInCollectionRoute()}`,
-        requestBody
+        body
       );
       return new FilterBadgesInCollectionSuccessResponse(response.data).convert(api.ConvertFunction);
     } catch (error) {
@@ -1193,7 +1189,7 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Execute a filter query for the collection. You have to handle the pagination yourself.
    */
-  async filterBadgesInCollection(api: BaseBitBadgesApi<T>, bodyOptions: Omit<FilterBadgesInCollectionRequestBody, 'collectionId'>) {
+  async filterBadgesInCollection(api: BaseBitBadgesApi<T>, bodyOptions: Omit<FilterBadgesInCollectionBody, 'collectionId'>) {
     return await BitBadgesCollection.FilterBadgesInCollection(api, { collectionId: this.collectionId, ...bodyOptions });
   }
 
@@ -1361,7 +1357,7 @@ function updateCollectionWithResponse<T extends NumberType>(
 
   const newBadgeMetadata =
     newCollection.getCurrentBadgeMetadata() && newCollection.getCurrentBadgeMetadata().length > 0
-      ? batchUpdateBadgeMetadata(
+      ? BadgeMetadataDetails.batchUpdateBadgeMetadata(
           cachedCollection.getCurrentBadgeMetadata(),
           newCollection
             .getCurrentBadgeMetadata()

@@ -7,6 +7,45 @@ import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialM
 import { Message, proto3 } from "@bufbuild/protobuf";
 
 /**
+ * Used for WASM bindings and JSON parsing
+ *
+ * @generated from message anchor.AnchorCustomMsgType
+ */
+export class AnchorCustomMsgType extends Message<AnchorCustomMsgType> {
+  /**
+   * @generated from field: anchor.MsgAddCustomData addCustomDataMsg = 1;
+   */
+  addCustomDataMsg?: MsgAddCustomData;
+
+  constructor(data?: PartialMessage<AnchorCustomMsgType>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "anchor.AnchorCustomMsgType";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "addCustomDataMsg", kind: "message", T: MsgAddCustomData },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AnchorCustomMsgType {
+    return new AnchorCustomMsgType().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): AnchorCustomMsgType {
+    return new AnchorCustomMsgType().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): AnchorCustomMsgType {
+    return new AnchorCustomMsgType().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: AnchorCustomMsgType | PlainMessage<AnchorCustomMsgType> | undefined, b: AnchorCustomMsgType | PlainMessage<AnchorCustomMsgType> | undefined): boolean {
+    return proto3.util.equals(AnchorCustomMsgType, a, b);
+  }
+}
+
+/**
  * @generated from message anchor.AnchorData
  */
 export class AnchorData extends Message<AnchorData> {

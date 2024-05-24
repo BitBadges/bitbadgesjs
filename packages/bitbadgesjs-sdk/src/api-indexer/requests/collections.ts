@@ -13,7 +13,7 @@ import type { iBalanceDocWithDetails, iChallengeTrackerIdDetails, iQueueDoc, iRe
 /**
  * @category API Requests / Responses
  */
-export interface FilterBadgesInCollectionRequestBody {
+export interface FilterBadgesInCollectionBody {
   /** The collection ID to filter */
   collectionId: NumberType;
   /** Limit to specific badge IDs. Leave undefined to not filter by badge ID. */
@@ -67,7 +67,7 @@ export class FilterBadgesInCollectionSuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export interface GetOwnersForBadgeRouteRequestBody {
+export interface GetOwnersForBadgeBody {
   /**
    * The pagination bookmark for where to start the request. Bookmarks are obtained via the previous response. "" for first request.
    */
@@ -77,7 +77,7 @@ export interface GetOwnersForBadgeRouteRequestBody {
 /**
  * @category API Requests / Responses
  */
-export interface iGetOwnersForBadgeRouteSuccessResponse<T extends NumberType> {
+export interface iGetOwnersForBadgeSuccessResponse<T extends NumberType> {
   /**
    * Represents a list of owners balance details.
    */
@@ -91,21 +91,21 @@ export interface iGetOwnersForBadgeRouteSuccessResponse<T extends NumberType> {
 /**
  * @category API Requests / Responses
  */
-export class GetOwnersForBadgeRouteSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetOwnersForBadgeRouteSuccessResponse<T>>
-  implements iGetOwnersForBadgeRouteSuccessResponse<T>
+export class GetOwnersForBadgeSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetOwnersForBadgeSuccessResponse<T>>
+  implements iGetOwnersForBadgeSuccessResponse<T>
 {
   owners: BalanceDocWithDetails<T>[];
   pagination: PaginationInfo;
 
-  constructor(data: iGetOwnersForBadgeRouteSuccessResponse<T>) {
+  constructor(data: iGetOwnersForBadgeSuccessResponse<T>) {
     super();
     this.owners = data.owners.map((balance) => new BalanceDocWithDetails(balance));
     this.pagination = data.pagination;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetOwnersForBadgeRouteSuccessResponse<U> {
-    return new GetOwnersForBadgeRouteSuccessResponse(
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetOwnersForBadgeSuccessResponse<U> {
+    return new GetOwnersForBadgeSuccessResponse(
       deepCopyPrimitives({
         owners: this.owners.map((balance) => balance.convert(convertFunction)),
         pagination: this.pagination
@@ -117,29 +117,35 @@ export class GetOwnersForBadgeRouteSuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export interface GetBadgeBalanceByAddressRouteRequestBody {}
-
-/**
- * @category API Requests / Responses
- */
-export interface iGetBadgeBalanceByAddressRouteSuccessResponse<T extends NumberType> extends iBalanceDocWithDetails<T> {}
-
-export class GetBadgeBalanceByAddressRouteSuccessResponse<T extends NumberType> extends BalanceDocWithDetails<T> {}
-
-/**
- * @category API Requests / Responses
- */
-export interface GetBadgeActivityRouteRequestBody {
-  /**
-   * An optional bookmark for pagination. Bookmarks are obtained via the previous response. "" for first request.
-   */
-  bookmark?: string;
+export interface GetBadgeBalanceByAddressBody {
+  fetchPrivateParams?: boolean;
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface iGetBadgeActivityRouteSuccessResponse<T extends NumberType> {
+export interface iGetBadgeBalanceByAddressSuccessResponse<T extends NumberType> extends iBalanceDocWithDetails<T> {}
+
+export class GetBadgeBalanceByAddressSuccessResponse<T extends NumberType> extends BalanceDocWithDetails<T> {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface GetBadgeActivityBody {
+  /**
+   * An optional bookmark for pagination. Bookmarks are obtained via the previous response. "" for first request.
+   */
+  bookmark?: string;
+  /**
+   * Specific address to filter by. If not present, all activity will be returned.
+   */
+  cosmosAddress?: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetBadgeActivitySuccessResponse<T extends NumberType> {
   /**
    * Array of transfer activity information.
    */
@@ -150,21 +156,21 @@ export interface iGetBadgeActivityRouteSuccessResponse<T extends NumberType> {
   pagination: PaginationInfo;
 }
 
-export class GetBadgeActivityRouteSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetBadgeActivityRouteSuccessResponse<T>>
-  implements iGetBadgeActivityRouteSuccessResponse<T>
+export class GetBadgeActivitySuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetBadgeActivitySuccessResponse<T>>
+  implements iGetBadgeActivitySuccessResponse<T>
 {
   activity: TransferActivityDoc<T>[];
   pagination: PaginationInfo;
 
-  constructor(data: iGetBadgeActivityRouteSuccessResponse<T>) {
+  constructor(data: iGetBadgeActivitySuccessResponse<T>) {
     super();
     this.activity = data.activity.map((activity) => new TransferActivityDoc(activity));
     this.pagination = data.pagination;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetBadgeActivityRouteSuccessResponse<U> {
-    return new GetBadgeActivityRouteSuccessResponse(
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetBadgeActivitySuccessResponse<U> {
+    return new GetBadgeActivitySuccessResponse(
       deepCopyPrimitives({
         activity: this.activity.map((activity) => activity.convert(convertFunction)),
         pagination: this.pagination
@@ -221,14 +227,14 @@ export type CollectionViewKey = 'transferActivity' | 'reviews' | 'owners' | 'amo
  * - `merkleChallenges` - Fetches the merkle challenges for the collection in random order.
  * - `approvalTrackers` - Fetches the approvals trackers for the collection in random order.
  *
- * @typedef {Object} GetAdditionalCollectionDetailsRequestBody
+ * @typedef {Object} GetAdditionalCollectionDetailsBody
  * @property {{ viewType: string, bookmark: string }[]} [viewsToFetch] - If present, the specified views will be fetched.
  * @property {boolean} [fetchTotalAndMintBalances] - If true, the total and mint balances will be fetched.
  * @property {string[]} [challengeTrackersToFetch] - If present, the merkle challenges corresponding to the specified merkle challenge IDs will be fetched.
  * @property {AmountTrackerIdDetails<NumberType>[]} [approvalTrackersToFetch] - If present, the approvals trackers corresponding to the specified approvals tracker IDs will be fetched.
  * @category API Requests / Responses
  */
-export interface GetAdditionalCollectionDetailsRequestBody {
+export interface GetAdditionalCollectionDetailsBody {
   /**
    * If present, the specified views will be fetched.
    */
@@ -241,6 +247,8 @@ export interface GetAdditionalCollectionDetailsRequestBody {
     bookmark: string;
     /** If defined, we will return the oldest items first. */
     oldestFirst?: boolean;
+    /** If specified, we will only fetch this users' activity. */
+    cosmosAddress?: string;
   }[];
 
   /**
@@ -270,7 +278,7 @@ export interface GetAdditionalCollectionDetailsRequestBody {
 /**
  * @category API Requests / Responses
  */
-export interface GetMetadataForCollectionRequestBody {
+export interface GetMetadataForCollectionBody {
   /**
    * If present, we will fetch the metadata corresponding to the specified options.
    *
@@ -282,36 +290,36 @@ export interface GetMetadataForCollectionRequestBody {
 /**
  * @category API Requests / Responses
  */
-export interface GetCollectionsRouteRequestBody {
+export interface GetCollectionsBody {
   collectionsToFetch: ({
     /**
      * The ID of the collection to fetch.
      */
     collectionId: NumberType;
-  } & GetMetadataForCollectionRequestBody &
-    GetAdditionalCollectionDetailsRequestBody)[];
+  } & GetMetadataForCollectionBody &
+    GetAdditionalCollectionDetailsBody)[];
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface iGetCollectionsRouteSuccessResponse<T extends NumberType> {
+export interface iGetCollectionsSuccessResponse<T extends NumberType> {
   collections: iBitBadgesCollection<T>[];
 }
 
-export class GetCollectionsRouteSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetCollectionsRouteSuccessResponse<T>>
-  implements iGetCollectionsRouteSuccessResponse<T>
+export class GetCollectionsSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetCollectionsSuccessResponse<T>>
+  implements iGetCollectionsSuccessResponse<T>
 {
   collections: BitBadgesCollection<T>[];
 
-  constructor(data: iGetCollectionsRouteSuccessResponse<T>) {
+  constructor(data: iGetCollectionsSuccessResponse<T>) {
     super();
     this.collections = data.collections.map((collection) => new BitBadgesCollection(collection));
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetCollectionsRouteSuccessResponse<U> {
-    return new GetCollectionsRouteSuccessResponse(
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetCollectionsSuccessResponse<U> {
+    return new GetCollectionsSuccessResponse(
       deepCopyPrimitives({
         collections: this.collections.map((collection) => collection.convert(convertFunction))
       })
@@ -322,28 +330,28 @@ export class GetCollectionsRouteSuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export interface GetCollectionByIdRouteRequestBody extends GetAdditionalCollectionDetailsRequestBody, GetMetadataForCollectionRequestBody {}
+export interface GetCollectionByIdBody extends GetAdditionalCollectionDetailsBody, GetMetadataForCollectionBody {}
 
 /**
  * @category API Requests / Responses
  */
-export interface iGetCollectionByIdRouteSuccessResponse<T extends NumberType> {
+export interface iGetCollectionByIdSuccessResponse<T extends NumberType> {
   collection: iBitBadgesCollection<T>;
 }
 
-export class GetCollectionByIdRouteSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetCollectionByIdRouteSuccessResponse<T>>
-  implements iGetCollectionByIdRouteSuccessResponse<T>
+export class GetCollectionByIdSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetCollectionByIdSuccessResponse<T>>
+  implements iGetCollectionByIdSuccessResponse<T>
 {
   collection: BitBadgesCollection<T>;
 
-  constructor(data: iGetCollectionByIdRouteSuccessResponse<T>) {
+  constructor(data: iGetCollectionByIdSuccessResponse<T>) {
     super();
     this.collection = new BitBadgesCollection(data.collection);
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetCollectionByIdRouteSuccessResponse<U> {
-    return new GetCollectionByIdRouteSuccessResponse(
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetCollectionByIdSuccessResponse<U> {
+    return new GetCollectionByIdSuccessResponse(
       deepCopyPrimitives({
         collection: this.collection.convert(convertFunction)
       })
@@ -354,26 +362,26 @@ export class GetCollectionByIdRouteSuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export interface RefreshMetadataRouteRequestBody {}
+export interface RefreshMetadataBody {}
 
 /**
  * @category API Requests / Responses
  */
-export interface iRefreshMetadataRouteSuccessResponse {}
+export interface iRefreshMetadataSuccessResponse {}
 /**
  * @category API Requests / Responses
  */
-export class RefreshMetadataRouteSuccessResponse extends EmptyResponseClass {}
+export class RefreshMetadataSuccessResponse extends EmptyResponseClass {}
 
 /**
  * @category API Requests / Responses
  */
-export interface RefreshStatusRouteRequestBody {}
+export interface RefreshStatusBody {}
 
 /**
  * @category API Requests / Responses
  */
-export interface iRefreshStatusRouteSuccessResponse<T extends NumberType> {
+export interface iRefreshStatusSuccessResponse<T extends NumberType> {
   /**
    * Boolean indicating if the collection is currently in the queue.
    */
@@ -391,23 +399,23 @@ export interface iRefreshStatusRouteSuccessResponse<T extends NumberType> {
 /**
  * @category API Requests / Responses
  */
-export class RefreshStatusRouteSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<RefreshStatusRouteSuccessResponse<T>>
-  implements iRefreshStatusRouteSuccessResponse<T>
+export class RefreshStatusSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<RefreshStatusSuccessResponse<T>>
+  implements iRefreshStatusSuccessResponse<T>
 {
   inQueue: boolean;
   errorDocs: QueueDoc<T>[];
   refreshDoc: RefreshDoc<T>;
 
-  constructor(data: iRefreshStatusRouteSuccessResponse<T>) {
+  constructor(data: iRefreshStatusSuccessResponse<T>) {
     super();
     this.inQueue = data.inQueue;
     this.errorDocs = data.errorDocs.map((errorDoc) => new QueueDoc(errorDoc));
     this.refreshDoc = new RefreshDoc(data.refreshDoc);
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): RefreshStatusRouteSuccessResponse<U> {
-    return new RefreshStatusRouteSuccessResponse(
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): RefreshStatusSuccessResponse<U> {
+    return new RefreshStatusSuccessResponse(
       deepCopyPrimitives({
         inQueue: this.inQueue,
         errorDocs: this.errorDocs.map((errorDoc) => errorDoc.convert(convertFunction)),

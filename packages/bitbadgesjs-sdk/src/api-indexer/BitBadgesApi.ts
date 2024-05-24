@@ -4,126 +4,159 @@ import { BitBadgesCollection } from './BitBadgesCollection';
 
 import { NativeAddress } from '..';
 import type {
-  CreateAddressListsRouteRequestBody,
-  CreateAddressListsRouteSuccessResponse,
-  DeleteAddressListsRouteRequestBody,
-  DeleteAddressListsRouteSuccessResponse,
-  GetAddressListsRouteRequestBody,
-  GetAddressListsRouteSuccessResponse,
-  UpdateAddressListsRouteRequestBody,
-  UpdateAddressListsRouteSuccessResponse
+  CreateAddressListsBody,
+  CreateAddressListsSuccessResponse,
+  DeleteAddressListsBody,
+  DeleteAddressListsSuccessResponse,
+  GetAddressListsBody,
+  GetAddressListsSuccessResponse,
+  UpdateAddressListsBody,
+  UpdateAddressListsSuccessResponse
 } from './BitBadgesAddressList';
 import { BitBadgesAddressList } from './BitBadgesAddressList';
-import type {
-  GetAccountsRouteRequestBody,
-  GetAccountsRouteSuccessResponse,
-  GetFollowDetailsRouteRequestBody,
-  GetFollowDetailsRouteSuccessResponse
-} from './BitBadgesUserInfo';
+import type { GetAccountsBody, GetAccountsSuccessResponse, GetFollowDetailsBody, GetFollowDetailsSuccessResponse } from './BitBadgesUserInfo';
 import { BitBadgesUserInfo } from './BitBadgesUserInfo';
 import type { iBitBadgesApi } from './base';
 import { BaseBitBadgesApi } from './base';
 import type {
-  FilterBadgesInCollectionRequestBody,
+  FilterBadgesInCollectionBody,
   FilterBadgesInCollectionSuccessResponse,
-  GetBadgeActivityRouteRequestBody,
-  GetBadgeActivityRouteSuccessResponse,
-  GetBadgeBalanceByAddressRouteRequestBody,
-  GetBadgeBalanceByAddressRouteSuccessResponse,
-  GetCollectionsRouteRequestBody,
-  GetCollectionsRouteSuccessResponse,
-  GetOwnersForBadgeRouteRequestBody,
-  GetOwnersForBadgeRouteSuccessResponse,
-  RefreshMetadataRouteRequestBody,
-  RefreshMetadataRouteSuccessResponse,
-  RefreshStatusRouteSuccessResponse
+  GetBadgeActivityBody,
+  GetBadgeActivitySuccessResponse,
+  GetBadgeBalanceByAddressBody,
+  GetBadgeBalanceByAddressSuccessResponse,
+  GetCollectionsBody,
+  GetCollectionsSuccessResponse,
+  GetOwnersForBadgeBody,
+  GetOwnersForBadgeSuccessResponse,
+  RefreshMetadataBody,
+  RefreshMetadataSuccessResponse,
+  RefreshStatusSuccessResponse
 } from './requests/collections';
-import { GetMapsRouteRequestBody, GetMapsRouteSuccessResponse, iGetMapsRouteSuccessResponse } from './requests/maps';
+import { GetMapsBody, GetMapsSuccessResponse, iGetMapsSuccessResponse } from './requests/maps';
 import {
-  AddApprovalDetailsToOffChainStorageRouteRequestBody,
-  AddApprovalDetailsToOffChainStorageRouteSuccessResponse,
-  AddBalancesToOffChainStorageRouteRequestBody,
-  AddBalancesToOffChainStorageRouteSuccessResponse,
-  AddMetadataToIpfsRouteRequestBody,
-  AddMetadataToIpfsRouteSuccessResponse,
-  AddReviewRouteRequestBody,
-  AddReviewRouteSuccessResponse,
-  BroadcastTxRouteRequestBody,
-  BroadcastTxRouteSuccessResponse,
-  CheckAndCompleteClaimRouteRequestBody,
-  CheckAndCompleteClaimRouteSuccessResponse,
-  CheckSignInStatusRequestBody,
-  CheckSignInStatusRequestSuccessResponse,
-  CreateBlockinAuthCodeRouteRequestBody,
-  CreateBlockinAuthCodeRouteSuccessResponse,
-  CreateSecretRouteRequestBody,
-  CreateSecretRouteSuccessResponse,
-  DeleteBlockinAuthCodeRouteRequestBody,
-  DeleteBlockinAuthCodeRouteSuccessResponse,
-  DeleteReviewRouteRequestBody,
-  DeleteReviewRouteSuccessResponse,
-  DeleteSecretRouteRequestBody,
-  DeleteSecretRouteSuccessResponse,
-  FetchMetadataDirectlyRouteRequestBody,
-  FetchMetadataDirectlyRouteSuccessResponse,
-  GenerateAppleWalletPassRouteRequestBody,
-  GenerateAppleWalletPassRouteSuccessResponse,
-  GenericBlockinVerifyRouteRequestBody,
-  GenericBlockinVerifyRouteSuccessResponse,
-  GetBlockinAuthCodeRouteRequestBody,
-  GetBlockinAuthCodeRouteSuccessResponse,
-  GetBrowseCollectionsRouteRequestBody,
-  GetBrowseCollectionsRouteSuccessResponse,
-  GetClaimAlertsForCollectionRouteRequestBody,
-  GetClaimAlertsForCollectionRouteSuccessResponse,
-  GetClaimsRouteRequestBody,
-  GetClaimsRouteSuccessResponse,
-  GetExternalCallRouteRequestBody,
-  GetExternalCallRouteSuccessResponse,
-  GetSearchRouteRequestBody,
-  GetSearchRouteSuccessResponse,
-  GetSecretRouteRequestBody,
-  GetSecretRouteSuccessResponse,
-  GetSignInChallengeRouteRequestBody,
-  GetSignInChallengeRouteSuccessResponse,
-  GetStatusRouteSuccessResponse,
-  GetTokensFromFaucetRouteRequestBody,
-  GetTokensFromFaucetRouteSuccessResponse,
-  SendClaimAlertsRouteRequestBody,
-  SendClaimAlertsRouteSuccessResponse,
-  SignOutRequestBody,
+  AddApprovalDetailsToOffChainStorageBody,
+  AddApprovalDetailsToOffChainStorageSuccessResponse,
+  AddBalancesToOffChainStorageBody,
+  AddBalancesToOffChainStorageSuccessResponse,
+  AddReviewBody,
+  AddReviewSuccessResponse,
+  AddToIpfsBody,
+  AddToIpfsSuccessResponse,
+  BroadcastTxBody,
+  BroadcastTxSuccessResponse,
+  CheckSignInStatusBody,
+  CheckSignInStatusSuccessResponse,
+  CompleteClaimBody,
+  CompleteClaimSuccessResponse,
+  CreateDeveloperAppBody,
+  CreateDeveloperAppSuccessResponse,
+  CreateSIWBBRequestBody,
+  CreateSIWBBRequestSuccessResponse,
+  CreateClaimBody,
+  CreateClaimSuccessResponse,
+  CreatePluginBody,
+  CreatePluginSuccessResponse,
+  CreateSecretBody,
+  CreateSecretSuccessResponse,
+  DeleteDeveloperAppBody,
+  DeleteDeveloperAppSuccessResponse,
+  DeleteSIWBBRequestBody,
+  DeleteSIWBBRequestSuccessResponse,
+  DeleteClaimBody,
+  DeleteClaimSuccessResponse,
+  DeleteReviewBody,
+  DeleteReviewSuccessResponse,
+  DeleteSecretBody,
+  DeleteSecretSuccessResponse,
+  FetchMetadataDirectlyBody,
+  FetchMetadataDirectlySuccessResponse,
+  GenerateAppleWalletPassBody,
+  GenerateAppleWalletPassSuccessResponse,
+  GenericBlockinVerifyBody,
+  GenericBlockinVerifySuccessResponse,
+  GenericVerifyAssetsBody,
+  GenericVerifyAssetsSuccessResponse,
+  GetActiveAuthorizationsBody,
+  GetActiveAuthorizationsSuccessResponse,
+  GetDeveloperAppBody,
+  GetDeveloperAppSuccessResponse,
+  GetAndVerifySIWBBRequestBody,
+  GetAndVerifySIWBBRequestSuccessResponse,
+  GetAndVerifySIWBBRequestsForDeveloperAppBody,
+  GetAndVerifySIWBBRequestsForDeveloperAppSuccessResponse,
+  GetBrowseCollectionsBody,
+  GetBrowseCollectionsSuccessResponse,
+  GetClaimAlertsForCollectionBody,
+  GetClaimAlertsForCollectionSuccessResponse,
+  GetClaimAttemptStatusSuccessResponse,
+  GetClaimsBody,
+  GetClaimsSuccessResponse,
+  GetPluginBody,
+  GetPluginSuccessResponse,
+  GetReservedClaimCodesBody,
+  GetReservedClaimCodesSuccessResponse,
+  GetSearchBody,
+  GetSearchSuccessResponse,
+  GetSecretBody,
+  GetSecretSuccessResponse,
+  GetSignInChallengeBody,
+  GetSignInChallengeSuccessResponse,
+  GetStatusSuccessResponse,
+  GetTokensFromFaucetBody,
+  GetTokensFromFaucetSuccessResponse,
+  OauthAuthorizeBody,
+  OauthAuthorizeSuccessResponse,
+  OauthRevokeBody,
+  OauthRevokeSuccessResponse,
+  OauthTokenBody,
+  OauthTokenSuccessResponse,
+  SendClaimAlertsBody,
+  SendClaimAlertsSuccessResponse,
+  SignOutBody,
   SignOutSuccessResponse,
-  SimulateTxRouteRequestBody,
-  SimulateTxRouteSuccessResponse,
-  UpdateAccountInfoRouteRequestBody,
-  UpdateAccountInfoRouteSuccessResponse,
-  UpdateSecretRouteRequestBody,
-  UpdateSecretRouteSuccessResponse,
-  VerifySignInRouteRequestBody,
-  VerifySignInRouteSuccessResponse,
-  iAddApprovalDetailsToOffChainStorageRouteSuccessResponse,
-  iAddBalancesToOffChainStorageRouteSuccessResponse,
-  iAddMetadataToIpfsRouteSuccessResponse,
-  iBroadcastTxRouteSuccessResponse,
-  iCheckAndCompleteClaimRouteSuccessResponse,
-  iCheckSignInStatusRequestSuccessResponse,
-  iCreateBlockinAuthCodeRouteSuccessResponse,
-  iDeleteBlockinAuthCodeRouteSuccessResponse,
-  iDeleteReviewRouteSuccessResponse,
-  iFetchMetadataDirectlyRouteSuccessResponse,
-  iGenericBlockinVerifyRouteSuccessResponse,
-  iGetBlockinAuthCodeRouteSuccessResponse,
-  iGetBrowseCollectionsRouteSuccessResponse,
-  iGetClaimAlertsForCollectionRouteSuccessResponse,
-  iGetSearchRouteSuccessResponse,
-  iGetSignInChallengeRouteSuccessResponse,
-  iGetStatusRouteSuccessResponse,
-  iGetTokensFromFaucetRouteSuccessResponse,
-  iSendClaimAlertsRouteSuccessResponse,
+  SimulateClaimBody,
+  SimulateClaimSuccessResponse,
+  SimulateTxBody,
+  SimulateTxSuccessResponse,
+  UpdateAccountInfoBody,
+  UpdateAccountInfoSuccessResponse,
+  UpdateDeveloperAppBody,
+  UpdateDeveloperAppSuccessResponse,
+  UpdateClaimBody,
+  UpdateClaimSuccessResponse,
+  UpdateSecretBody,
+  UpdateSecretSuccessResponse,
+  VerifySignInBody,
+  VerifySignInSuccessResponse,
+  iAddApprovalDetailsToOffChainStorageSuccessResponse,
+  iAddBalancesToOffChainStorageSuccessResponse,
+  iAddToIpfsSuccessResponse,
+  iBroadcastTxSuccessResponse,
+  iCheckSignInStatusSuccessResponse,
+  iCompleteClaimSuccessResponse,
+  iCreateSIWBBRequestSuccessResponse,
+  iDeleteSIWBBRequestSuccessResponse,
+  iDeleteReviewSuccessResponse,
+  iFetchMetadataDirectlySuccessResponse,
+  iGenericBlockinVerifySuccessResponse,
+  iGenericVerifyAssetsSuccessResponse,
+  iGetAndVerifySIWBBRequestSuccessResponse,
+  iGetAndVerifySIWBBRequestsForDeveloperAppSuccessResponse,
+  iGetBrowseCollectionsSuccessResponse,
+  iGetClaimAlertsForCollectionSuccessResponse,
+  iGetClaimAttemptStatusSuccessResponse,
+  iGetReservedClaimCodesSuccessResponse,
+  iGetSearchSuccessResponse,
+  iGetSignInChallengeSuccessResponse,
+  iGetStatusSuccessResponse,
+  iGetTokensFromFaucetSuccessResponse,
+  iSendClaimAlertsSuccessResponse,
   iSignOutSuccessResponse,
-  iSimulateTxRouteSuccessResponse,
-  iUpdateAccountInfoRouteSuccessResponse,
-  iVerifySignInRouteSuccessResponse
+  iSimulateClaimSuccessResponse,
+  iSimulateTxSuccessResponse,
+  iUpdateAccountInfoSuccessResponse,
+  iVerifySignInSuccessResponse
 } from './requests/requests';
 import { BitBadgesApiRoutes } from './requests/routes';
 
@@ -162,10 +195,10 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * console.log(res);
    * ```
    * */
-  public async getStatus(): Promise<GetStatusRouteSuccessResponse<T>> {
+  public async getStatus(): Promise<GetStatusSuccessResponse<T>> {
     try {
-      const response = await this.axios.post<iGetStatusRouteSuccessResponse<string>>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetStatusRoute()}`);
-      return new GetStatusRouteSuccessResponse(response.data).convert(this.ConvertFunction);
+      const response = await this.axios.post<iGetStatusSuccessResponse<string>>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetStatusRoute()}`);
+      return new GetStatusSuccessResponse(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -185,13 +218,13 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * console.log(res);
    * ```
    */
-  public async getSearchResults(searchValue: string, requestBody?: GetSearchRouteRequestBody): Promise<GetSearchRouteSuccessResponse<T>> {
+  public async getSearchResults(searchValue: string, body?: GetSearchBody): Promise<GetSearchSuccessResponse<T>> {
     try {
-      const response = await this.axios.post<iGetSearchRouteSuccessResponse<string>>(
+      const response = await this.axios.post<iGetSearchSuccessResponse<string>>(
         `${this.BACKEND_URL}${BitBadgesApiRoutes.GetSearchRoute(searchValue)}`,
-        requestBody
+        body
       );
-      return new GetSearchRouteSuccessResponse(response.data).convert(this.ConvertFunction);
+      return new GetSearchSuccessResponse(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -211,8 +244,8 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * const collection = res.collections[0];
    * ```
    */
-  public async getCollections(requestBody: GetCollectionsRouteRequestBody): Promise<GetCollectionsRouteSuccessResponse<T>> {
-    return await BitBadgesCollection.GetCollections(this, requestBody);
+  public async getCollections(body: GetCollectionsBody): Promise<GetCollectionsSuccessResponse<T>> {
+    return await BitBadgesCollection.GetCollections(this, body);
   }
 
   /**
@@ -220,7 +253,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @remarks
    * - **API Route**: `POST /api/v0/collection/:collectionId/:badgeId/owners`
-   * - **SDK Function Call**: `await BitBadgesApi.getOwnersForBadge(collectionId, badgeId, requestBody);`
+   * - **SDK Function Call**: `await BitBadgesApi.getOwnersForBadge(collectionId, badgeId, body);`
    *
    * @example
    * ```typescript
@@ -231,9 +264,9 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   public async getOwnersForBadge(
     collectionId: NumberType,
     badgeId: NumberType,
-    requestBody: GetOwnersForBadgeRouteRequestBody
-  ): Promise<GetOwnersForBadgeRouteSuccessResponse<T>> {
-    return await BitBadgesCollection.GetOwnersForBadge<T>(this, collectionId, badgeId, requestBody);
+    body: GetOwnersForBadgeBody
+  ): Promise<GetOwnersForBadgeSuccessResponse<T>> {
+    return await BitBadgesCollection.GetOwnersForBadge<T>(this, collectionId, badgeId, body);
   }
 
   /**
@@ -252,9 +285,9 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   public async getBadgeBalanceByAddress(
     collectionId: NumberType,
     address: NativeAddress,
-    requestBody?: GetBadgeBalanceByAddressRouteRequestBody
-  ): Promise<GetBadgeBalanceByAddressRouteSuccessResponse<T>> {
-    return await BitBadgesCollection.GetBadgeBalanceByAddress(this, collectionId, address, requestBody);
+    body?: GetBadgeBalanceByAddressBody
+  ): Promise<GetBadgeBalanceByAddressSuccessResponse<T>> {
+    return await BitBadgesCollection.GetBadgeBalanceByAddress(this, collectionId, address, body);
   }
 
   /**
@@ -262,7 +295,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @remarks
    * - **API Route**: `POST /api/v0/collection/:collectionId/:badgeId/activity`
-   * - **SDK Function Call**: `await BitBadgesApi.getBadgeActivity(collectionId, badgeId, requestBody);`
+   * - **SDK Function Call**: `await BitBadgesApi.getBadgeActivity(collectionId, badgeId, body);`
    *
    * @example
    * ```typescript
@@ -273,9 +306,9 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   public async getBadgeActivity(
     collectionId: NumberType,
     badgeId: NumberType,
-    requestBody: GetBadgeActivityRouteRequestBody
-  ): Promise<GetBadgeActivityRouteSuccessResponse<T>> {
-    return await BitBadgesCollection.GetBadgeActivity<T>(this, collectionId, badgeId, requestBody);
+    body: GetBadgeActivityBody
+  ): Promise<GetBadgeActivitySuccessResponse<T>> {
+    return await BitBadgesCollection.GetBadgeActivity<T>(this, collectionId, badgeId, body);
   }
 
   /**
@@ -285,7 +318,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @remarks
    * - **API Route**: `POST /api/v0/collection/:collectionId/refresh`
-   * - **SDK Function Call**: `await BitBadgesApi.refreshMetadata(collectionId, requestBody);`
+   * - **SDK Function Call**: `await BitBadgesApi.refreshMetadata(collectionId, body);`
    *
    * @example
    * ```typescript
@@ -293,11 +326,8 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * console.log(res);
    * ```
    */
-  public async refreshMetadata(
-    collectionId: NumberType,
-    requestBody?: RefreshMetadataRouteRequestBody
-  ): Promise<RefreshMetadataRouteSuccessResponse> {
-    return await BitBadgesCollection.RefreshMetadata(this, collectionId, requestBody);
+  public async refreshMetadata(collectionId: NumberType, body?: RefreshMetadataBody): Promise<RefreshMetadataSuccessResponse> {
+    return await BitBadgesCollection.RefreshMetadata(this, collectionId, body);
   }
 
   /**
@@ -307,31 +337,122 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * Each address is limited to one code per password. If the password is provided again, they will receive the same code.
    *
    * @remarks
-   * - **API Route**: `POST /api/v0/claims/:claimId/:cosmosAddress`
-   * - **SDK Function Call**: `await BitBadgesApi.checkAndCompleteClaim(collectionId, cid, password);`
+   * - **API Route**: `POST /api/v0/claims/complete/:claimId/:cosmosAddress`
+   * - **SDK Function Call**: `await BitBadgesApi.completeClaim(claimId, address, { ...body });`
    * - **Authentication**: Must be signed in.
    *
    * @example
    * ```typescript
-   * const res = await BitBadgesApi.checkAndCompleteClaim(collectionId, cid, password);
+   * const res = await BitBadgesApi.completeClaim(claimId, address, { ...body });
    * console.log(res);
    * ```
    */
-  public async checkAndCompleteClaim(
-    claimId: string,
-    cosmosAddress: string,
-    requestBody: CheckAndCompleteClaimRouteRequestBody
-  ): Promise<CheckAndCompleteClaimRouteSuccessResponse> {
+  public async completeClaim(claimId: string, cosmosAddress: string, body: CompleteClaimBody): Promise<CompleteClaimSuccessResponse> {
     try {
       if (!claimId) {
         throw new Error('claimId is required');
       }
 
-      const response = await this.axios.post<iCheckAndCompleteClaimRouteSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.CheckAndCompleteClaimRoute(claimId, cosmosAddress)}`,
-        requestBody
+      const response = await this.axios.post<iCompleteClaimSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.CompleteClaimRoute(claimId, cosmosAddress)}`,
+        body
       );
-      return new CheckAndCompleteClaimRouteSuccessResponse(response.data);
+      return new CompleteClaimSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Simulates a claim attempt. A success response means the claim is valid and can be completed.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/claims/simulate/:claimId/:cosmosAddress`
+   * - **SDK Function Call**: `await BitBadgesApi.simulateClaim(claimId, address, { ...body });`
+   * - **Authentication**: Must be signed in.
+   *
+   * @example
+   * ```typescript
+   * const res = await BitBadgesApi.simulateClaim(claimId, address, { ...body });
+   * console.log(res);
+   * ```
+   */
+  public async simulateClaim(claimId: string, cosmosAddress: string, body: SimulateClaimBody): Promise<SimulateClaimSuccessResponse> {
+    try {
+      if (!claimId) {
+        throw new Error('claimId is required');
+      }
+
+      const response = await this.axios.post<iSimulateClaimSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.SimulateClaimRoute(claimId, cosmosAddress)}`,
+        body
+      );
+      return new SimulateClaimSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * For on-chain claims where codes are "reserved" for a specific address, this function will return all codes reserved.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/claims/reserved/:claimId/:cosmosAddress`
+   * - **SDK Function Call**: `await BitBadgesApi.getReservedClaimCodes(claimId, address, { ...body });`
+   * - **Authentication**: Must be signed in.
+   *
+   * @example
+   * ```typescript
+   * const res = await BitBadgesApi.getReservedClaimCodes(claimId, address, { ...body });
+   * console.log(res);
+   * ```
+   */
+  public async getReservedClaimCodes(
+    claimId: string,
+    cosmosAddress: string,
+    body: GetReservedClaimCodesBody
+  ): Promise<GetReservedClaimCodesSuccessResponse> {
+    try {
+      if (!claimId) {
+        throw new Error('claimId is required');
+      }
+
+      const response = await this.axios.post<iGetReservedClaimCodesSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetReservedClaimCodesRoute(claimId, cosmosAddress)}`,
+        body
+      );
+      return new GetReservedClaimCodesSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Gets the status of a claim attempt.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/claims/status/:claimId`
+   * - **SDK Function Call**: `await BitBadgesApi.getClaimAttemptStatus(claimAttemptId);`
+   *
+   * @example
+   * ```typescript
+   * const res = await BitBadgesApi.getClaimAttemptStatus(claimAttemptId);
+   * console.log(res);
+   * ```
+   */
+  public async getClaimAttemptStatus(claimAttemptId: string): Promise<GetClaimAttemptStatusSuccessResponse> {
+    try {
+      if (!claimAttemptId) {
+        throw new Error('claimAttemptId is required');
+      }
+
+      const response = await this.axios.post<iGetClaimAttemptStatusSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetClaimAttemptStatusRoute(claimAttemptId)}`
+      );
+      return new GetClaimAttemptStatusSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -343,7 +464,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @remarks
    * - **API Route**: `POST /api/v0/deleteReview/:reviewId`
-   * - **SDK Function Call**: `await BitBadgesApi.deleteReview(reviewId, requestBody);`
+   * - **SDK Function Call**: `await BitBadgesApi.deleteReview(reviewId, body);`
    * - **Authentication**: Must be signed in and the owner of the review.
    *
    * @example
@@ -352,13 +473,13 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * console.log(res);
    * ```
    */
-  public async deleteReview(reviewId: string, requestBody?: DeleteReviewRouteRequestBody): Promise<DeleteReviewRouteSuccessResponse> {
+  public async deleteReview(reviewId: string, body?: DeleteReviewBody): Promise<DeleteReviewSuccessResponse> {
     try {
-      const response = await this.axios.post<iDeleteReviewRouteSuccessResponse>(
+      const response = await this.axios.post<iDeleteReviewSuccessResponse>(
         `${this.BACKEND_URL}${BitBadgesApiRoutes.DeleteReviewRoute(reviewId)}`,
-        requestBody
+        body
       );
-      return new DeleteReviewRouteSuccessResponse(response.data);
+      return new DeleteReviewSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -370,19 +491,19 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @remarks
    * - **API Route**: `POST /api/v0/collection/:collectionId/addReview`
-   * - **SDK Function Call**: `await BitBadgesApi.addReview(collectionId, requestBody);`
+   * - **SDK Function Call**: `await BitBadgesApi.addReview(collectionId, body);`
    * - **Authentication**: Must be signed in.
    *
    * @example
    * ```typescript
-   * const res = await BitBadgesApi.addReview(collectionId, requestBody);
+   * const res = await BitBadgesApi.addReview(collectionId, body);
    * console.log(res);
    * ```
    */
-  public async addReview(requestBody: AddReviewRouteRequestBody): Promise<AddReviewRouteSuccessResponse> {
+  public async addReview(body: AddReviewBody): Promise<AddReviewSuccessResponse> {
     try {
-      const response = await this.axios.post(`${this.BACKEND_URL}${BitBadgesApiRoutes.AddReviewRoute()}`, requestBody);
-      return new AddReviewRouteSuccessResponse(response.data);
+      const response = await this.axios.post(`${this.BACKEND_URL}${BitBadgesApiRoutes.AddReviewRoute()}`, body);
+      return new AddReviewSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -394,7 +515,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @remarks
    * - **API Route**: `POST /api/v0/user/batch`
-   * - **SDK Function Call**: `await BitBadgesApi.getAccounts(requestBody);`
+   * - **SDK Function Call**: `await BitBadgesApi.getAccounts(Body);`
    * - **Tutorial**: See the [Fetching Accounts tutoral](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/fetching-accounts) on the official docs.
    * - **Authentication**: Must be signed in, if fetching private information such as private lists or auth codes. If fetching public information only, no sign in required.
    *
@@ -408,8 +529,8 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * This function is used to fetch accounts and their details. It is your responsibility to join the data together (paginations, etc).
    * Use getAccountsAndUpdate for a more convenient way to handle paginations and appending metadata.
    */
-  public async getAccounts(requestBody: GetAccountsRouteRequestBody): Promise<GetAccountsRouteSuccessResponse<T>> {
-    return await BitBadgesUserInfo.GetAccounts(this, requestBody);
+  public async getAccounts(body: GetAccountsBody): Promise<GetAccountsSuccessResponse<T>> {
+    return await BitBadgesUserInfo.GetAccounts(this, body);
   }
 
   /**
@@ -417,22 +538,22 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @remarks
    * - **API Route**: `POST /api/v0/user/updateAccount`
-   * - **SDK Function Call**: `await BitBadgesApi.updateAccountInfo(requestBody);`
+   * - **SDK Function Call**: `await BitBadgesApi.updateAccountInfo(Body);`
    * - **Authentication**: Must be signed in.
    *
    * @example
    * ```typescript
-   * const res = await BitBadgesApi.updateAccountInfo(requestBody);
+   * const res = await BitBadgesApi.updateAccountInfo(Body);
    * console.log(res);
    * ```
    */
-  public async updateAccountInfo(requestBody: UpdateAccountInfoRouteRequestBody): Promise<UpdateAccountInfoRouteSuccessResponse> {
+  public async updateAccountInfo(body: UpdateAccountInfoBody): Promise<UpdateAccountInfoSuccessResponse> {
     try {
-      const response = await this.axios.post<iUpdateAccountInfoRouteSuccessResponse>(
+      const response = await this.axios.post<iUpdateAccountInfoSuccessResponse>(
         `${this.BACKEND_URL}${BitBadgesApiRoutes.UpdateAccountInfoRoute()}`,
-        requestBody
+        body
       );
-      return new UpdateAccountInfoRouteSuccessResponse(response.data);
+      return new UpdateAccountInfoSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -444,24 +565,22 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @remarks
    * - **API Route**: `POST /api/v0/addBalancesToOffChainStorage`
-   * - **SDK Function Call**: `await BitBadgesApi.addBalancesToOffChainStorage(requestBody);`
+   * - **SDK Function Call**: `await BitBadgesApi.addBalancesToOffChainStorage(Body);`
    * - **CORS**: Restricted to only BitBadges official site. Otherwise, you will need to self-host.
    *
    * @example
    * ```typescript
-   * const res = await BitBadgesApi.addBalancesToOffChainStorage(requestBody);
+   * const res = await BitBadgesApi.addBalancesToOffChainStorage(Body);
    * console.log(res);
    * ```
    */
-  public async addBalancesToOffChainStorage(
-    requestBody: AddBalancesToOffChainStorageRouteRequestBody
-  ): Promise<AddBalancesToOffChainStorageRouteSuccessResponse> {
+  public async addBalancesToOffChainStorage(body: AddBalancesToOffChainStorageBody): Promise<AddBalancesToOffChainStorageSuccessResponse> {
     try {
-      const response = await this.axios.post<iAddBalancesToOffChainStorageRouteSuccessResponse>(
+      const response = await this.axios.post<iAddBalancesToOffChainStorageSuccessResponse>(
         `${this.BACKEND_URL}${BitBadgesApiRoutes.AddBalancesToOffChainStorageRoute()}`,
-        requestBody
+        body
       );
-      return new AddBalancesToOffChainStorageRouteSuccessResponse(response.data);
+      return new AddBalancesToOffChainStorageSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -471,23 +590,20 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * Adds metadata to IPFS.
    *
    * @remarks
-   * - **API Route**: `POST /api/v0/addMetadataToIpfs`
-   * - **SDK Function Call**: `await BitBadgesApi.addMetadataToIpfs(requestBody);`
+   * - **API Route**: `POST /api/v0/addToIpfs`
+   * - **SDK Function Call**: `await BitBadgesApi.addToIpfs(Body);`
    * - **CORS**: Restricted to only BitBadges official site. Otherwise, you will need to self-host.
    *
    * @example
    * ```typescript
-   * const res = await BitBadgesApi.addMetadataToIpfs(requestBody);
+   * const res = await BitBadgesApi.addToIpfs(Body);
    * console.log(res);
    * ```
    */
-  public async addMetadataToIpfs(requestBody: AddMetadataToIpfsRouteRequestBody): Promise<AddMetadataToIpfsRouteSuccessResponse> {
+  public async addToIpfs(body: AddToIpfsBody): Promise<AddToIpfsSuccessResponse> {
     try {
-      const response = await this.axios.post<iAddMetadataToIpfsRouteSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.AddMetadataToIpfsRoute()}`,
-        requestBody
-      );
-      return new AddMetadataToIpfsRouteSuccessResponse(response.data);
+      const response = await this.axios.post<iAddToIpfsSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.AddToIpfsRoute()}`, body);
+      return new AddToIpfsSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -499,24 +615,24 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @remarks
    * - **API Route**: `POST /api/v0/addApprovalDetailsToOffChainStorage`
-   * - **SDK Function Call**: `await BitBadgesApi.addApprovalDetailsToOffChainStorage(requestBody);`
+   * - **SDK Function Call**: `await BitBadgesApi.addApprovalDetailsToOffChainStorage(Body);`
    * - **CORS**: Restricted to only BitBadges official site. Otherwise, you will need to self-host.
    *
    * @example
    * ```typescript
-   * const res = await BitBadgesApi.addApprovalDetailsToOffChainStorage(requestBody);
+   * const res = await BitBadgesApi.addApprovalDetailsToOffChainStorage(Body);
    * console.log(res);
    * ```
    */
   public async addApprovalDetailsToOffChainStorage(
-    requestBody: AddApprovalDetailsToOffChainStorageRouteRequestBody
-  ): Promise<AddApprovalDetailsToOffChainStorageRouteSuccessResponse> {
+    body: AddApprovalDetailsToOffChainStorageBody
+  ): Promise<AddApprovalDetailsToOffChainStorageSuccessResponse> {
     try {
-      const response = await this.axios.post<iAddApprovalDetailsToOffChainStorageRouteSuccessResponse>(
+      const response = await this.axios.post<iAddApprovalDetailsToOffChainStorageSuccessResponse>(
         `${this.BACKEND_URL}${BitBadgesApiRoutes.AddApprovalDetailsToOffChainStorageRoute()}`,
-        requestBody
+        body
       );
-      return new AddApprovalDetailsToOffChainStorageRouteSuccessResponse(response.data);
+      return new AddApprovalDetailsToOffChainStorageSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -528,22 +644,22 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @remarks
    * - **API Route**: `POST /api/v0/auth/getChallenge`
-   * - **SDK Function Call**: `await BitBadgesApi.getSignInChallenge(requestBody);`
+   * - **SDK Function Call**: `await BitBadgesApi.getSignInChallenge(Body);`
    * - **Tutorial**: See Authentication tutorial on the official docs.
    *
    * @example
    * ```typescript
-   * const res = await BitBadgesApi.getSignInChallenge(requestBody);
+   * const res = await BitBadgesApi.getSignInChallenge(Body);
    * console.log(res);
    * ```
    */
-  public async getSignInChallenge(requestBody: GetSignInChallengeRouteRequestBody): Promise<GetSignInChallengeRouteSuccessResponse<T>> {
+  public async getSignInChallenge(body: GetSignInChallengeBody): Promise<GetSignInChallengeSuccessResponse<T>> {
     try {
-      const response = await this.axios.post<iGetSignInChallengeRouteSuccessResponse<string>>(
+      const response = await this.axios.post<iGetSignInChallengeSuccessResponse<string>>(
         `${this.BACKEND_URL}${BitBadgesApiRoutes.GetSignInChallengeRoute()}`,
-        requestBody
+        body
       );
-      return new GetSignInChallengeRouteSuccessResponse(response.data).convert(this.ConvertFunction);
+      return new GetSignInChallengeSuccessResponse(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -555,20 +671,19 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @remarks
    * - **API Route**: `POST /api/v0/auth/verify`
-   * - **SDK Function Call**: `await BitBadgesApi.verifySignIn(requestBody);`
+   * - **SDK Function Call**: `await BitBadgesApi.verifySignIn(Body);`
    * - **Tutorial**: See Authentication tutorial on the official docs.
    *
    * @example
    * ```typescript
-   * const res = await BitBadgesApi.verifySignIn(requestBody);
+   * const res = await BitBadgesApi.verifySignIn(Body);
    * console.log(res);
    * ```
    */
-  public async verifySignIn(requestBody: VerifySignInRouteRequestBody): Promise<VerifySignInRouteSuccessResponse> {
+  public async verifySignIn(body: VerifySignInBody): Promise<VerifySignInSuccessResponse> {
     try {
-      const body = requestBody;
-      const response = await this.axios.post<iVerifySignInRouteSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.VerifySignInRoute()}`, body);
-      return new VerifySignInRouteSuccessResponse(response.data);
+      const response = await this.axios.post<iVerifySignInSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.VerifySignInRoute()}`, body);
+      return new VerifySignInSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -580,17 +695,16 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @remarks
    * - **API Route**: `POST /api/v0/auth/status`
-   * - **SDK Function Call**: `await BitBadgesApi.checkIfSignedIn(requestBody);`
+   * - **SDK Function Call**: `await BitBadgesApi.checkIfSignedIn(Body);`
    * - **Tutorial**: See Authentication tutorial on the official docs.
    */
-  public async checkIfSignedIn(requestBody: CheckSignInStatusRequestBody): Promise<CheckSignInStatusRequestSuccessResponse> {
+  public async checkIfSignedIn(body: CheckSignInStatusBody): Promise<CheckSignInStatusSuccessResponse> {
     try {
-      const body = requestBody;
-      const response = await this.axios.post<iCheckSignInStatusRequestSuccessResponse>(
+      const response = await this.axios.post<iCheckSignInStatusSuccessResponse>(
         `${this.BACKEND_URL}${BitBadgesApiRoutes.CheckIfSignedInRoute()}`,
         body
       );
-      return new CheckSignInStatusRequestSuccessResponse(response.data);
+      return new CheckSignInStatusSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -602,12 +716,12 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @remarks
    * - **API Route**: `POST /api/v0/auth/logout`
-   * - **SDK Function Call**: `await BitBadgesApi.signOut(requestBody);`
+   * - **SDK Function Call**: `await BitBadgesApi.signOut(Body);`
    * - **Tutorial**: See Authentication tutorial on the official docs.
    */
-  public async signOut(requestBody?: SignOutRequestBody): Promise<SignOutSuccessResponse> {
+  public async signOut(body?: SignOutBody): Promise<SignOutSuccessResponse> {
     try {
-      const response = await this.axios.post<iSignOutSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.SignOutRoute()}`, requestBody);
+      const response = await this.axios.post<iSignOutSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.SignOutRoute()}`, body);
       return new SignOutSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
@@ -620,15 +734,15 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @remarks
    * - **API Route**: `POST /api/v0/browse`
-   * - **SDK Function Call**: `await BitBadgesApi.getBrowseCollections(requestBody);`
+   * - **SDK Function Call**: `await BitBadgesApi.getBrowseCollections(Body);`
    */
-  public async getBrowseCollections(requestBody?: GetBrowseCollectionsRouteRequestBody): Promise<GetBrowseCollectionsRouteSuccessResponse<T>> {
+  public async getBrowseCollections(body?: GetBrowseCollectionsBody): Promise<GetBrowseCollectionsSuccessResponse<T>> {
     try {
-      const response = await this.axios.post<iGetBrowseCollectionsRouteSuccessResponse<string>>(
+      const response = await this.axios.post<iGetBrowseCollectionsSuccessResponse<string>>(
         `${this.BACKEND_URL}${BitBadgesApiRoutes.GetBrowseCollectionsRoute()}`,
-        requestBody
+        body
       );
-      return new GetBrowseCollectionsRouteSuccessResponse(response.data).convert(this.ConvertFunction);
+      return new GetBrowseCollectionsSuccessResponse(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -640,18 +754,15 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @remarks
    * - **API Route**: `POST /api/v0/broadcast`
-   * - **SDK Function Call**: `await BitBadgesApi.broadcastTx(requestBody);`
+   * - **SDK Function Call**: `await BitBadgesApi.broadcastTx(Body);`
    * - **Tutorial**: See Broadcasting Transactions tutorial on the official docs.
    *
    * Also, consider checking out [Broadcast UI](https://bitbadges.io/dev/broadcast), so you can simply copy and paste your transaction to a UI. All signing, API communication, etc is outsourced to the UI.
    */
-  public async broadcastTx(requestBody: BroadcastTxRouteRequestBody | string): Promise<BroadcastTxRouteSuccessResponse> {
+  public async broadcastTx(body: BroadcastTxBody | string): Promise<BroadcastTxSuccessResponse> {
     try {
-      const response = await this.axios.post<iBroadcastTxRouteSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.BroadcastTxRoute()}`,
-        requestBody
-      );
-      return new BroadcastTxRouteSuccessResponse(response.data);
+      const response = await this.axios.post<iBroadcastTxSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.BroadcastTxRoute()}`, body);
+      return new BroadcastTxSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -663,18 +774,15 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @remarks
    * - **API Route**: `POST /api/v0/simulate`
-   * - **SDK Function Call**: `await BitBadgesApi.simulateTx(requestBody);`
+   * - **SDK Function Call**: `await BitBadgesApi.simulateTx(Body);`
    * - **Tutorial**: See Broadcasting Transactions tutorial on the official docs.
    *
    * This means that it will return the gas used and any errors that occur on a dry run. Should be used before broadcasting a transaction. Does not require signatures.
    */
-  public async simulateTx(requestBody: SimulateTxRouteRequestBody | string): Promise<SimulateTxRouteSuccessResponse> {
+  public async simulateTx(body: SimulateTxBody | string): Promise<SimulateTxSuccessResponse> {
     try {
-      const response = await this.axios.post<iSimulateTxRouteSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.SimulateTxRoute()}`,
-        requestBody
-      );
-      return new SimulateTxRouteSuccessResponse(response.data);
+      const response = await this.axios.post<iSimulateTxSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.SimulateTxRoute()}`, body);
+      return new SimulateTxSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -686,21 +794,21 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @remarks
    * - **API Route**: `POST /api/v0/metadata`
-   * - **SDK Function Call**: `await BitBadgesApi.fetchMetadataDirectly(requestBody);`
+   * - **SDK Function Call**: `await BitBadgesApi.fetchMetadataDirectly(Body);`
    * - **CORS**: Restricted to only BitBadges official site.
    */
-  public async fetchMetadataDirectly(requestBody: FetchMetadataDirectlyRouteRequestBody): Promise<FetchMetadataDirectlyRouteSuccessResponse<T>> {
+  public async fetchMetadataDirectly(body: FetchMetadataDirectlyBody): Promise<FetchMetadataDirectlySuccessResponse<T>> {
     try {
-      const error = requestBody.uris.find((uri) => Joi.string().uri().required().validate(uri).error);
+      const error = body.uris.find((uri) => Joi.string().uri().required().validate(uri).error);
       if (error) {
         throw `Invalid URIs`;
       }
 
-      const response = await this.axios.post<iFetchMetadataDirectlyRouteSuccessResponse<string>>(
+      const response = await this.axios.post<iFetchMetadataDirectlySuccessResponse<string>>(
         `${this.BACKEND_URL}${BitBadgesApiRoutes.FetchMetadataDirectlyRoute()}`,
-        requestBody
+        body
       );
-      return new FetchMetadataDirectlyRouteSuccessResponse(response.data).convert(this.ConvertFunction);
+      return new FetchMetadataDirectlySuccessResponse(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -712,16 +820,16 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @remarks
    * - **API Route**: `POST /api/v0/faucet`
-   * - **SDK Function Call**: `await BitBadgesApi.getTokensFromFaucet(requestBody);`
+   * - **SDK Function Call**: `await BitBadgesApi.getTokensFromFaucet(Body);`
    * - **Authentication**: Must be signed in.
    */
-  public async getTokensFromFaucet(requestBody?: GetTokensFromFaucetRouteRequestBody): Promise<GetTokensFromFaucetRouteSuccessResponse> {
+  public async getTokensFromFaucet(body?: GetTokensFromFaucetBody): Promise<GetTokensFromFaucetSuccessResponse> {
     try {
-      const response = await this.axios.post<iGetTokensFromFaucetRouteSuccessResponse>(
+      const response = await this.axios.post<iGetTokensFromFaucetSuccessResponse>(
         `${this.BACKEND_URL}${BitBadgesApiRoutes.GetTokensFromFaucetRoute()}`,
-        requestBody
+        body
       );
-      return new GetTokensFromFaucetRouteSuccessResponse(response.data);
+      return new GetTokensFromFaucetSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -733,24 +841,24 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @remarks
    * - **API Route**: `POST /api/v0/addressList/update`
-   * - **SDK Function Call**: `await BitBadgesApi.updateAddressLists(requestBody);`
+   * - **SDK Function Call**: `await BitBadgesApi.updateAddressLists(Body);`
    *
    * Must be created off-chain. For on-chain, they must be created through MsgCreateAddressMappings. Creator can update their created lists with no restrictions. Else, requires an edit key.
    */
-  public async createAddressLists(requestBody: CreateAddressListsRouteRequestBody): Promise<CreateAddressListsRouteSuccessResponse> {
-    return await BitBadgesAddressList.CreateAddressList(this, requestBody);
+  public async createAddressLists(body: CreateAddressListsBody): Promise<CreateAddressListsSuccessResponse> {
+    return await BitBadgesAddressList.CreateAddressList(this, body);
   }
   /**
    * Updates address lists stored by BitBadges centralized servers.
    *
    * @remarks
    * - **API Route**: `POST /api/v0/addressList/update`
-   * - **SDK Function Call**: `await BitBadgesApi.updateAddressLists(requestBody);`
+   * - **SDK Function Call**: `await BitBadgesApi.updateAddressLists(Body);`
    *
    * Must be created off-chain. For on-chain, they must be created through MsgCreateAddressMappings. Creator can update their created lists with no restrictions. Else, requires an edit key.
    */
-  public async updateAddressLists(requestBody: UpdateAddressListsRouteRequestBody<NumberType>): Promise<UpdateAddressListsRouteSuccessResponse> {
-    return await BitBadgesAddressList.UpdateAddressList(this, requestBody);
+  public async updateAddressLists(body: UpdateAddressListsBody<NumberType>): Promise<UpdateAddressListsSuccessResponse> {
+    return await BitBadgesAddressList.UpdateAddressList(this, body);
   }
 
   /**
@@ -758,12 +866,12 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @remarks
    * - **API Route**: `POST /api/v0/addressList`
-   * - **SDK Function Call**: `await BitBadgesApi.getAddressLists(requestBody);`
+   * - **SDK Function Call**: `await BitBadgesApi.getAddressLists(Body);`
    *
    * Note for reserved lists, you can use getReservedAddressList from the SDK.
    */
-  public async getAddressLists(requestBody: GetAddressListsRouteRequestBody): Promise<GetAddressListsRouteSuccessResponse<T>> {
-    return await BitBadgesAddressList.GetAddressLists(this, requestBody);
+  public async getAddressLists(body: GetAddressListsBody): Promise<GetAddressListsSuccessResponse<T>> {
+    return await BitBadgesAddressList.GetAddressLists(this, body);
   }
 
   /**
@@ -771,27 +879,27 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @remarks
    * - **API Route**: `POST /api/v0/addressList/delete`
-   * - **SDK Function Call**: `await BitBadgesApi.deleteAddressLists(requestBody);`
+   * - **SDK Function Call**: `await BitBadgesApi.deleteAddressLists(Body);`
    * - **Authentication**: Must be signed in and the creator of the address list.
    */
-  public async deleteAddressLists(requestBody: DeleteAddressListsRouteRequestBody): Promise<DeleteAddressListsRouteSuccessResponse> {
-    return await BitBadgesAddressList.DeleteAddressList(this, requestBody);
+  public async deleteAddressLists(body: DeleteAddressListsBody): Promise<DeleteAddressListsSuccessResponse> {
+    return await BitBadgesAddressList.DeleteAddressList(this, body);
   }
 
   /**
-   * Gets a Blockin authentication code. This is used for signing in with Blockin at in-person events. Anyone with the signature is able to fetch the preimage message.
+   * Gets and verifies a SIWBB request.
    *
    * @remarks
-   * - **API Route**: `POST /api/v0/authCode`
-   * - **SDK Function Call**: `await BitBadgesApi.getAuthCode(requestBody);`
+   * - **API Route**: `POST /api/v0/siwbbRequest`
+   * - **SDK Function Call**: `await BitBadgesApi.getAndVerifySIWBBRequest(Body);`
    */
-  public async getAuthCode(requestBody?: GetBlockinAuthCodeRouteRequestBody): Promise<GetBlockinAuthCodeRouteSuccessResponse<T>> {
+  public async getAndVerifySIWBBRequest(body?: GetAndVerifySIWBBRequestBody): Promise<GetAndVerifySIWBBRequestSuccessResponse<T>> {
     try {
-      const response = await this.axios.post<iGetBlockinAuthCodeRouteSuccessResponse<string>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetAuthCodeRoute()}`,
-        requestBody
+      const response = await this.axios.post<iGetAndVerifySIWBBRequestSuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetAndVerifySIWBBRequestRoute()}`,
+        body
       );
-      return new GetBlockinAuthCodeRouteSuccessResponse(response.data).convert(this.ConvertFunction);
+      return new GetAndVerifySIWBBRequestSuccessResponse(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -799,19 +907,21 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
-   * Creates a Blockin authentication code. This is used for signing in with Blockin at in-person events.
+   * Gets the SIWBB requests for a specific developer app.
    *
    * @remarks
-   * - **API Route**: `POST /api/v0/authCode/create`
-   * - **SDK Function Call**: `await BitBadgesApi.createAuthCode(requestBody);`
+   * - **API Route**: `POST /api/v0/siwbbRequestsForDeveloperApp`
+   * - **SDK Function Call**: `await BitBadgesApi.getSIWBBRequestsForDeveloperApp(Body);`
    */
-  public async createAuthCode(requestBody?: CreateBlockinAuthCodeRouteRequestBody): Promise<CreateBlockinAuthCodeRouteSuccessResponse> {
+  public async getSIWBBRequestsForDeveloperApp(
+    body: GetAndVerifySIWBBRequestsForDeveloperAppBody
+  ): Promise<GetAndVerifySIWBBRequestsForDeveloperAppSuccessResponse<T>> {
     try {
-      const response = await this.axios.post<iCreateBlockinAuthCodeRouteSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.CreateAuthCodeRoute()}`,
-        requestBody
+      const response = await this.axios.post<iGetAndVerifySIWBBRequestsForDeveloperAppSuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetSIWBBRequestsForDeveloperAppRoute()}`,
+        body
       );
-      return new CreateBlockinAuthCodeRouteSuccessResponse(response.data);
+      return new GetAndVerifySIWBBRequestsForDeveloperAppSuccessResponse(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -819,20 +929,19 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
-   * Deletes a Blockin authentication code. This is used for signing in with Blockin at in-person events.
+   * Creates a SIWBB request.
    *
    * @remarks
-   * - **API Route**: `POST /api/v0/authCode/delete`
-   * - **SDK Function Call**: `await BitBadgesApi.deleteAuthCode(requestBody);`
-   * - **Authentication**: Must be signed in and the owner of the auth code.
+   * - **API Route**: `POST /api/v0/siwbbRequest/create`
+   * - **SDK Function Call**: `await BitBadgesApi.createSIWBBRequest(Body);`
    */
-  public async deleteAuthCode(requestBody?: DeleteBlockinAuthCodeRouteRequestBody): Promise<DeleteBlockinAuthCodeRouteSuccessResponse> {
+  public async createSIWBBRequest(body?: CreateSIWBBRequestBody): Promise<CreateSIWBBRequestSuccessResponse> {
     try {
-      const response = await this.axios.post<iDeleteBlockinAuthCodeRouteSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.DeleteAuthCodeRoute()}`,
-        requestBody
+      const response = await this.axios.post<iCreateSIWBBRequestSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.CreateSIWBBRequestRoute()}`,
+        body
       );
-      return new DeleteBlockinAuthCodeRouteSuccessResponse(response.data);
+      return new CreateSIWBBRequestSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -840,20 +949,60 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
-   * A generic route for verifying Blockin sign in requests. Used as a helper if implementing Blockin on your own.
+   * Deletes a SIWBB request.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/siwbbRequest/delete`
+   * - **SDK Function Call**: `await BitBadgesApi.deleteSIWBBRequest(Body);`
+   * - **Authentication**: Must be signed in and the owner of the requesy.
+   */
+  public async deleteSIWBBRequest(body?: DeleteSIWBBRequestBody): Promise<DeleteSIWBBRequestSuccessResponse> {
+    try {
+      const response = await this.axios.post<iDeleteSIWBBRequestSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.DeleteSIWBBRequestRoute()}`,
+        body
+      );
+      return new DeleteSIWBBRequestSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * A generic route for verifying SIWBB requests. Used as a helper if implementing on your own.
    *
    * @remarks
    * - **API Route**: `POST /api/v0/auth/verifyGeneric`
-   * - **SDK Function Call**: `await BitBadgesApi.verifySignInGeneric(requestBody);`
+   * - **SDK Function Call**: `await BitBadgesApi.verifySIWBBRequest(Body);`
    */
-  public async verifySignInGeneric(requestBody: GenericBlockinVerifyRouteRequestBody): Promise<GenericBlockinVerifyRouteSuccessResponse> {
+  public async verifySIWBBRequest(body: GenericBlockinVerifyBody): Promise<GenericBlockinVerifySuccessResponse> {
     try {
-      const body = requestBody;
-      const response = await this.axios.post<iGenericBlockinVerifyRouteSuccessResponse>(
+      const response = await this.axios.post<iGenericBlockinVerifySuccessResponse>(
         `${this.BACKEND_URL}${BitBadgesApiRoutes.GenericVerifyRoute()}`,
         body
       );
-      return new GenericBlockinVerifyRouteSuccessResponse(response.data);
+      return new GenericBlockinVerifySuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * A generic route for verifying asset ownership requirements. Asset requirements support AND / OR / NOT logic.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/auth/verifyOwnershipRequirements`
+   * - **SDK Function Call**: `await BitBadgesApi.verifyOwnershipRequirements(Body);`
+   */
+  public async verifyOwnershipRequirements(body: GenericVerifyAssetsBody): Promise<GenericVerifyAssetsSuccessResponse> {
+    try {
+      const response = await this.axios.post<iGenericVerifyAssetsSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GenericVerifyAssetsRoute()}`,
+        body
+      );
+      return new GenericVerifyAssetsSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -865,17 +1014,14 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @remarks
    * - **API Route**: `POST /api/v0/sendClaimAlerts`
-   * - **SDK Function Call**: `await BitBadgesApi.sendClaimAlert(requestBody);`
+   * - **SDK Function Call**: `await BitBadgesApi.sendClaimAlert(Body);`
    * - **Authentication**: Must be signed in and the manager of the collection.
    * - **CORS**: Restricted to only BitBadges official site.
    */
-  public async sendClaimAlert(requestBody: SendClaimAlertsRouteRequestBody): Promise<SendClaimAlertsRouteSuccessResponse> {
+  public async sendClaimAlert(body: SendClaimAlertsBody): Promise<SendClaimAlertsSuccessResponse> {
     try {
-      const response = await this.axios.post<iSendClaimAlertsRouteSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.SendClaimAlertRoute()}`,
-        requestBody
-      );
-      return new SendClaimAlertsRouteSuccessResponse(response.data);
+      const response = await this.axios.post<iSendClaimAlertsSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.SendClaimAlertRoute()}`, body);
+      return new SendClaimAlertsSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -887,10 +1033,10 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @remarks
    * - **API Route**: `POST /api/v0/getFollowDetails`
-   * - **SDK Function Call**: `await BitBadgesApi.getFollowDetails(requestBody);`
+   * - **SDK Function Call**: `await BitBadgesApi.getFollowDetails(Body);`
    */
-  public async getFollowDetails(requestBody: GetFollowDetailsRouteRequestBody): Promise<GetFollowDetailsRouteSuccessResponse<T>> {
-    return await BitBadgesUserInfo.GetFollowDetails(this, requestBody);
+  public async getFollowDetails(body: GetFollowDetailsBody): Promise<GetFollowDetailsSuccessResponse<T>> {
+    return await BitBadgesUserInfo.GetFollowDetails(this, body);
   }
 
   /**
@@ -898,16 +1044,16 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @remarks
    * - **API Route**: `POST /api/v0/getClaimAlerts`
-   * - **SDK Function Call**: `await BitBadgesApi.getClaimAlerts(requestBody);`
+   * - **SDK Function Call**: `await BitBadgesApi.getClaimAlerts(Body);`
    * - **Authentication**: Must be signed in and the manager of the collection.
    */
-  public async getClaimAlerts(requestBody: GetClaimAlertsForCollectionRouteRequestBody): Promise<GetClaimAlertsForCollectionRouteSuccessResponse<T>> {
+  public async getClaimAlerts(body: GetClaimAlertsForCollectionBody): Promise<GetClaimAlertsForCollectionSuccessResponse<T>> {
     try {
-      const response = await this.axios.post<iGetClaimAlertsForCollectionRouteSuccessResponse<string>>(
+      const response = await this.axios.post<iGetClaimAlertsForCollectionSuccessResponse<string>>(
         `${this.BACKEND_URL}${BitBadgesApiRoutes.GetClaimAlertsRoute()}`,
-        requestBody
+        body
       );
-      return new GetClaimAlertsForCollectionRouteSuccessResponse(response.data).convert(this.ConvertFunction);
+      return new GetClaimAlertsForCollectionSuccessResponse(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -919,9 +1065,9 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @remarks
    * - **API Route**: `POST /api/v0/getRefreshStatus`
-   * - **SDK Function Call**: `await BitBadgesApi.getRefreshStatus(requestBody);`
+   * - **SDK Function Call**: `await BitBadgesApi.getRefreshStatus(Body);`
    */
-  public async getRefreshStatus(collectionId: NumberType): Promise<RefreshStatusRouteSuccessResponse<NumberType>> {
+  public async getRefreshStatus(collectionId: NumberType): Promise<RefreshStatusSuccessResponse<NumberType>> {
     return await BitBadgesCollection.GetRefreshStatus(this, collectionId);
   }
 
@@ -930,15 +1076,12 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @remarks
    * - **API Route**: `POST /api/v0/maps`
-   * - **SDK Function Call**: `await BitBadgesApi.getMaps(requestBody);`
+   * - **SDK Function Call**: `await BitBadgesApi.getMaps(Body);`
    */
-  public async getMaps(requestBody: GetMapsRouteRequestBody): Promise<GetMapsRouteSuccessResponse<T>> {
+  public async getMaps(body: GetMapsBody): Promise<GetMapsSuccessResponse<T>> {
     try {
-      const response = await this.axios.post<iGetMapsRouteSuccessResponse<string>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetMapsRoute()}`,
-        requestBody
-      );
-      return new GetMapsRouteSuccessResponse(response.data).convert(this.ConvertFunction);
+      const response = await this.axios.post<iGetMapsSuccessResponse<string>>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetMapsRoute()}`, body);
+      return new GetMapsSuccessResponse(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -950,10 +1093,10 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @remarks
    * - **API Route**: `POST /api/v0/filterBadgesInCollection`
-   * - **SDK Function Call**: `await BitBadgesApi.filterBadgesInCollection(requestBody);`
+   * - **SDK Function Call**: `await BitBadgesApi.filterBadgesInCollection(Body);`
    */
-  public async filterBadgesInCollection(requestBody: FilterBadgesInCollectionRequestBody): Promise<FilterBadgesInCollectionSuccessResponse<T>> {
-    return await BitBadgesCollection.FilterBadgesInCollection(this, requestBody);
+  public async filterBadgesInCollection(body: FilterBadgesInCollectionBody): Promise<FilterBadgesInCollectionSuccessResponse<T>> {
+    return await BitBadgesCollection.FilterBadgesInCollection(this, body);
   }
 
   /**
@@ -963,11 +1106,11 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @remarks
    * - **API Route**: `POST /api/v0/appleWalletPass`
-   * - **SDK Function Call**: `await BitBadgesApi.generateAppleWalletPass(requestBody);`
+   * - **SDK Function Call**: `await BitBadgesApi.generateAppleWalletPass(Body);`
    *
    * @example
    * ```typescript
-   * const res = await BitBadgesApi.generateAppleWalletPass(requestBody);
+   * const res = await BitBadgesApi.generateAppleWalletPass(Body);
    * console.log(res);
    * ```
    *
@@ -985,13 +1128,13 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * }
    * ```
    */
-  public async generateAppleWalletPass(requestBody: GenerateAppleWalletPassRouteRequestBody): Promise<GenerateAppleWalletPassRouteSuccessResponse> {
+  public async generateAppleWalletPass(body: GenerateAppleWalletPassBody): Promise<GenerateAppleWalletPassSuccessResponse> {
     try {
-      const response = await this.axios.post<GenerateAppleWalletPassRouteSuccessResponse>(
+      const response = await this.axios.post<GenerateAppleWalletPassSuccessResponse>(
         `${this.BACKEND_URL}${BitBadgesApiRoutes.GenerateAppleWalletPassRoute()}`,
-        requestBody
+        body
       );
-      return new GenerateAppleWalletPassRouteSuccessResponse(response.data);
+      return new GenerateAppleWalletPassSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -1003,41 +1146,18 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @remarks
    * - **API Route**: `POST /api/v0/claims`
-   * - **SDK Function Call**: `await BitBadgesApi.getClaims(requestBody);`
+   * - **SDK Function Call**: `await BitBadgesApi.getClaims(Body);`
    *
    * @example
    * ```typescript
-   * const res = await BitBadgesApi.getClaims(requestBody);
+   * const res = await BitBadgesApi.getClaims(Body);
    * console.log(res);
    * ```
    */
-  public async getClaims(requestBody: GetClaimsRouteRequestBody): Promise<GetClaimsRouteSuccessResponse<T>> {
+  public async getClaims(body: GetClaimsBody): Promise<GetClaimsSuccessResponse<T>> {
     try {
-      const response = await this.axios.post<GetClaimsRouteSuccessResponse<T>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetClaimsRoute()}`,
-        requestBody
-      );
-      return new GetClaimsRouteSuccessResponse(response.data).convert(this.ConvertFunction);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Gets a key + timestamp pair for an API external call to prove it is actually coming from BitBadges.
-   *
-   * @remarks
-   * - **API Route**: `POST /api/v0/externalCallKey`
-   * - **SDK Function Call**: `await BitBadgesApi.getExternalCallKey(requestBody);`
-   */
-  public async getExternalCallKey(requestBody: GetExternalCallRouteRequestBody): Promise<GetExternalCallRouteSuccessResponse> {
-    try {
-      const response = await this.axios.post<GetExternalCallRouteSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetExternalCallKeyRoute()}`,
-        requestBody
-      );
-      return new GetExternalCallRouteSuccessResponse(response.data);
+      const response = await this.axios.post<GetClaimsSuccessResponse<T>>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetClaimsRoute()}`, body);
+      return new GetClaimsSuccessResponse(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -1049,15 +1169,12 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @remarks
    * - **API Route**: `POST /api/v0/secret`
-   * - **SDK Function Call**: `await BitBadgesApi.getSecret(requestBody);`
+   * - **SDK Function Call**: `await BitBadgesApi.getSecret(Body);`
    */
-  public async getSecret(requestBody: GetSecretRouteRequestBody): Promise<GetSecretRouteSuccessResponse<T>> {
+  public async getSecret(body: GetSecretBody): Promise<GetSecretSuccessResponse<T>> {
     try {
-      const response = await this.axios.post<GetSecretRouteSuccessResponse<T>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetSecretRoute()}`,
-        requestBody
-      );
-      return new GetSecretRouteSuccessResponse(response.data).convert(this.ConvertFunction);
+      const response = await this.axios.post<GetSecretSuccessResponse<T>>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetSecretRoute()}`, body);
+      return new GetSecretSuccessResponse(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -1069,16 +1186,13 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @remarks
    * - **API Route**: `POST /api/v0/secret/create`
-   * - **SDK Function Call**: `await BitBadgesApi.createSecret(requestBody);`
+   * - **SDK Function Call**: `await BitBadgesApi.createSecret(Body);`
    * - **Authentication**: Must be signed in.
    */
-  public async createSecret(requestBody: CreateSecretRouteRequestBody): Promise<CreateSecretRouteSuccessResponse> {
+  public async createSecret(body: CreateSecretBody): Promise<CreateSecretSuccessResponse> {
     try {
-      const response = await this.axios.post<CreateSecretRouteSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.CreateSecretRoute()}`,
-        requestBody
-      );
-      return new CreateSecretRouteSuccessResponse(response.data);
+      const response = await this.axios.post<CreateSecretSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.CreateSecretRoute()}`, body);
+      return new CreateSecretSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -1090,16 +1204,13 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @remarks
    * - **API Route**: `POST /api/v0/secret/delete`
-   * - **SDK Function Call**: `await BitBadgesApi.deleteSecret(requestBody);`
+   * - **SDK Function Call**: `await BitBadgesApi.deleteSecret(Body);`
    * - **Authentication**: Must be signed in.
    */
-  public async deleteSecret(requestBody: DeleteSecretRouteRequestBody): Promise<DeleteSecretRouteSuccessResponse> {
+  public async deleteSecret(body: DeleteSecretBody): Promise<DeleteSecretSuccessResponse> {
     try {
-      const response = await this.axios.post<DeleteSecretRouteSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.DeleteSecretRoute()}`,
-        requestBody
-      );
-      return new DeleteSecretRouteSuccessResponse(response.data);
+      const response = await this.axios.post<DeleteSecretSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.DeleteSecretRoute()}`, body);
+      return new DeleteSecretSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -1111,16 +1222,264 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @remarks
    * - **API Route**: `POST /api/v0/user/secrets`
-   * - **SDK Function Call**: `await BitBadgesApi.updateUserSecrets(requestBody);`
+   * - **SDK Function Call**: `await BitBadgesApi.updateUserSecrets(Body);`
    * - **Authentication**: Must be signed in.
    */
-  public async updateSecret(requestBody: UpdateSecretRouteRequestBody): Promise<UpdateSecretRouteSuccessResponse> {
+  public async updateSecret(body: UpdateSecretBody): Promise<UpdateSecretSuccessResponse> {
     try {
-      const response = await this.axios.post<UpdateSecretRouteSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.UpdateSecretRoute()}`,
-        requestBody
+      const response = await this.axios.post<UpdateSecretSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.UpdateSecretRoute()}`, body);
+      return new UpdateSecretSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Get all developer apps for a user.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/developerApp`
+   * - **SDK Function Call**: `await BitBadgesApi.getDeveloperApp(Body);`
+   */
+  public async getDeveloperApps(body: GetDeveloperAppBody): Promise<GetDeveloperAppSuccessResponse> {
+    try {
+      const response = await this.axios.post<GetDeveloperAppSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetDeveloperAppRoute()}`, body);
+      return new GetDeveloperAppSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Creates an developer app.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/developerApp/create`
+   * - **SDK Function Call**: `await BitBadgesApi.createDeveloperApp(Body);`
+   * - **Authentication**: Must be signed in.
+   */
+  public async createDeveloperApp(body: CreateDeveloperAppBody): Promise<CreateDeveloperAppSuccessResponse> {
+    try {
+      const response = await this.axios.post<CreateDeveloperAppSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.CreateDeveloperAppRoute()}`,
+        body
       );
-      return new UpdateSecretRouteSuccessResponse(response.data);
+      return new CreateDeveloperAppSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Deletes an developer app.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/developerApp/delete`
+   * - **SDK Function Call**: `await BitBadgesApi.deleteDeveloperApp(Body);`
+   * - **Authentication**: Must be signed in.
+   */
+  public async deleteDeveloperApp(body: DeleteDeveloperAppBody): Promise<DeleteDeveloperAppSuccessResponse> {
+    try {
+      const response = await this.axios.post<DeleteDeveloperAppSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.DeleteDeveloperAppRoute()}`,
+        body
+      );
+      return new DeleteDeveloperAppSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Update an developer app.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/developerApp/update`
+   * - **SDK Function Call**: `await BitBadgesApi.updateUserDeveloperApps(Body);`
+   * - **Authentication**: Must be signed in.
+   */
+  public async updateDeveloperApp(body: UpdateDeveloperAppBody): Promise<UpdateDeveloperAppSuccessResponse> {
+    try {
+      const response = await this.axios.post<UpdateDeveloperAppSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.UpdateDeveloperAppRoute()}`,
+        body
+      );
+      return new UpdateDeveloperAppSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Get all developer apps for a user.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/plugins`
+   * - **SDK Function Call**: `await BitBadgesApi.getPlugins(Body);`
+   */
+  public async getPlugins(body: GetPluginBody): Promise<GetPluginSuccessResponse<T>> {
+    try {
+      const response = await this.axios.post<GetPluginSuccessResponse<T>>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetPluginRoute()}`, body);
+      return new GetPluginSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Creates an developer app.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/developerApp/create`
+   * - **SDK Function Call**: `await BitBadgesApi.createPlugin(Body);`
+   * - **Authentication**: Must be signed in.
+   */
+  public async createPlugin(body: CreatePluginBody): Promise<CreatePluginSuccessResponse> {
+    try {
+      const response = await this.axios.post<CreatePluginSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.CreatePluginRoute()}`, body);
+      return new CreatePluginSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Creates a claim.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/claims/create`
+   * - **SDK Function Call**: `await BitBadgesApi.createClaim(Body);`
+   * - **Authentication**: Must be signed in.
+   */
+  public async createClaim(body: CreateClaimBody<T>): Promise<CreateClaimSuccessResponse> {
+    try {
+      const response = await this.axios.post<CreateClaimSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.CreateClaimRoute()}`, body);
+      return new CreateClaimSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Deletes a claim.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/claims/delete`
+   * - **SDK Function Call**: `await BitBadgesApi.deleteClaim(Body);`
+   * - **Authentication**: Must be signed in.
+   */
+  public async deleteClaim(body: DeleteClaimBody): Promise<DeleteClaimSuccessResponse> {
+    try {
+      const response = await this.axios.post<DeleteClaimSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.DeleteClaimRoute()}`, body);
+      return new DeleteClaimSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Update an claim.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/claims/update`
+   * - **SDK Function Call**: `await BitBadgesApi.updateClaim(Body);`
+   * - **Authentication**: Must be signed in.
+   */
+  public async updateClaim(body: UpdateClaimBody<T>): Promise<UpdateClaimSuccessResponse> {
+    try {
+      const response = await this.axios.post<UpdateClaimSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.UpdateClaimRoute()}`, body);
+      return new UpdateClaimSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Gets all active authorizations for a user.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/authorizations`
+   * - **SDK Function Call**: `await BitBadgesApi.getActiveAuthorizations(Body);`
+   * - **Authentication**: Must be signed in.
+   *
+   * @example
+   * ```typescript
+   * const res = await BitBadgesApi.getActiveAuthorizations(Body);
+   * console.log(res);
+   * ```
+   *
+   */
+  public async getActiveAuthorizations(body: GetActiveAuthorizationsBody): Promise<GetActiveAuthorizationsSuccessResponse> {
+    try {
+      const response = await this.axios.post<GetActiveAuthorizationsSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetActiveAuthorizationsRoute()}`,
+        body
+      );
+      return new GetActiveAuthorizationsSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Authorizes a user for a specific scope.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/oauth/authorize`
+   * - **SDK Function Call**: `await BitBadgesApi.oauthAuthorize(Body);`
+   * - **Authentication**: Must be signed in.
+   */
+  public async getOauthAuthorizationCode(body: OauthAuthorizeBody): Promise<OauthAuthorizeSuccessResponse> {
+    try {
+      const response = await this.axios.post<OauthAuthorizeSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.OauthAuthorizeRoute()}`, body);
+      console.log(response.data);
+
+      return new OauthAuthorizeSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Exchange either an authorization code or a refresh token for an access token.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/oauth/token`
+   * - **SDK Function Call**: `await BitBadgesApi.oauthToken(Body);`
+   */
+  public async getOauthAccessToken(body: OauthTokenBody): Promise<OauthTokenSuccessResponse> {
+    try {
+      const response = await this.axios.post<OauthTokenSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.OauthTokenRoute()}`, body);
+      return new OauthTokenSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Revokes an access token for a user.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/oauth/token/revoke`
+   * - **SDK Function Call**: `await BitBadgesApi.oauthRevoke(Body);`
+   */
+  public async revokeOauthAuthorization(body: OauthRevokeBody): Promise<OauthRevokeSuccessResponse> {
+    try {
+      const response = await this.axios.post<OauthRevokeSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.OauthRevokeRoute()}`, body);
+      return new OauthRevokeSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
