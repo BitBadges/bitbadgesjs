@@ -13,9 +13,7 @@ import type { iBalanceDocWithDetails, iChallengeTrackerIdDetails, iQueueDoc, iRe
 /**
  * @category API Requests / Responses
  */
-export interface FilterBadgesInCollectionBody {
-  /** The collection ID to filter */
-  collectionId: NumberType;
+export interface FilterBadgesInCollectionPayload {
   /** Limit to specific badge IDs. Leave undefined to not filter by badge ID. */
   badgeIds?: iUintRange<NumberType>[];
   /** Limit to specific lists. Leave undefined to not filter by list. */
@@ -67,7 +65,7 @@ export class FilterBadgesInCollectionSuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export interface GetOwnersForBadgeBody {
+export interface GetOwnersForBadgePayload {
   /**
    * The pagination bookmark for where to start the request. Bookmarks are obtained via the previous response. "" for first request.
    */
@@ -117,7 +115,7 @@ export class GetOwnersForBadgeSuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export interface GetBadgeBalanceByAddressBody {
+export interface GetBadgeBalanceByAddressPayload {
   fetchPrivateParams?: boolean;
 }
 
@@ -131,7 +129,7 @@ export class GetBadgeBalanceByAddressSuccessResponse<T extends NumberType> exten
 /**
  * @category API Requests / Responses
  */
-export interface GetBadgeActivityBody {
+export interface GetBadgeActivityPayload {
   /**
    * An optional bookmark for pagination. Bookmarks are obtained via the previous response. "" for first request.
    */
@@ -234,7 +232,7 @@ export type CollectionViewKey = 'transferActivity' | 'reviews' | 'owners' | 'amo
  * @property {AmountTrackerIdDetails<NumberType>[]} [approvalTrackersToFetch] - If present, the approvals trackers corresponding to the specified approvals tracker IDs will be fetched.
  * @category API Requests / Responses
  */
-export interface GetAdditionalCollectionDetailsBody {
+export interface GetAdditionalCollectionDetailsPayload {
   /**
    * If present, the specified views will be fetched.
    */
@@ -278,7 +276,7 @@ export interface GetAdditionalCollectionDetailsBody {
 /**
  * @category API Requests / Responses
  */
-export interface GetMetadataForCollectionBody {
+export interface GetMetadataForCollectionPayload {
   /**
    * If present, we will fetch the metadata corresponding to the specified options.
    *
@@ -288,16 +286,15 @@ export interface GetMetadataForCollectionBody {
 }
 
 /**
+ * @category Interfaces
+ */
+export type GetCollectionRequestBody = GetAdditionalCollectionDetailsPayload & GetMetadataForCollectionPayload & { collectionId: NumberType };
+
+/**
  * @category API Requests / Responses
  */
-export interface GetCollectionsBody {
-  collectionsToFetch: ({
-    /**
-     * The ID of the collection to fetch.
-     */
-    collectionId: NumberType;
-  } & GetMetadataForCollectionBody &
-    GetAdditionalCollectionDetailsBody)[];
+export interface GetCollectionsPayload {
+  collectionsToFetch: GetCollectionRequestBody[];
 }
 
 /**
@@ -330,7 +327,7 @@ export class GetCollectionsSuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export interface GetCollectionByIdBody extends GetAdditionalCollectionDetailsBody, GetMetadataForCollectionBody {}
+export interface GetCollectionByIdBody extends GetAdditionalCollectionDetailsPayload, GetMetadataForCollectionPayload {}
 
 /**
  * @category API Requests / Responses
@@ -362,7 +359,7 @@ export class GetCollectionByIdSuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export interface RefreshMetadataBody {}
+export interface RefreshMetadataPayload {}
 
 /**
  * @category API Requests / Responses
@@ -376,7 +373,7 @@ export class RefreshMetadataSuccessResponse extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export interface RefreshStatusBody {}
+export interface RefreshStatusPayload {}
 
 /**
  * @category API Requests / Responses

@@ -83,6 +83,7 @@
     "merkletreejs": "^0.3.11",
     "mongoose": "^8.0.3",
     "nano": "^10.1.2",
-    "protoc-gen-ts": "^0.8.7"
+    "protoc-gen-ts": "^0.8.7",
+    "qs": "^6.12.1"
   }
 }

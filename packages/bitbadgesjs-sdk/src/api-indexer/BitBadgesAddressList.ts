@@ -218,10 +218,10 @@ export class BitBadgesAddressList<T extends NumberType>
   /**
    * Gets address lists from the API.
    */
-  static async GetAddressLists<T extends NumberType>(api: BaseBitBadgesApi<T>, options: GetAddressListsBody) {
+  static async GetAddressLists<T extends NumberType>(api: BaseBitBadgesApi<T>, options: GetAddressListsPayload) {
     try {
       const response = await api.axios.post<iGetAddressListsSuccessResponse<T>>(
-        `${api.BACKEND_URL}${BitBadgesApiRoutes.GetAddressListsRoute()}`,
+        `${api.BACKEND_URL}${BitBadgesApiRoutes.CRUDAddressListsRoute()}`,
         options
       );
       return new GetAddressListsSuccessResponse(response.data);
@@ -236,10 +236,10 @@ export class BitBadgesAddressList<T extends NumberType>
    *
    * Behind the scenes, this is just an alias for UpdateAddressList.
    */
-  static async CreateAddressList<T extends NumberType>(api: BaseBitBadgesApi<T>, options: CreateAddressListsBody) {
+  static async CreateAddressList<T extends NumberType>(api: BaseBitBadgesApi<T>, options: CreateAddressListsPayload) {
     try {
       const response = await api.axios.post<iCreateAddressListsSuccessResponse>(
-        `${api.BACKEND_URL}${BitBadgesApiRoutes.CreateAddressListRoute()}`,
+        `${api.BACKEND_URL}${BitBadgesApiRoutes.CRUDAddressListsRoute()}`,
         options
       );
       return new CreateAddressListsSuccessResponse(response.data);
@@ -252,10 +252,10 @@ export class BitBadgesAddressList<T extends NumberType>
   /**
    * Updates an off-chain address list. On-chain lists are updated through blockchain transactions.
    */
-  static async UpdateAddressList<T extends NumberType>(api: BaseBitBadgesApi<T>, options: UpdateAddressListsBody<T>) {
+  static async UpdateAddressList<T extends NumberType>(api: BaseBitBadgesApi<T>, options: UpdateAddressListsPayload) {
     try {
-      const response = await api.axios.post<iUpdateAddressListsSuccessResponse>(
-        `${api.BACKEND_URL}${BitBadgesApiRoutes.UpdateAddressListRoute()}`,
+      const response = await api.axios.put<iUpdateAddressListsSuccessResponse>(
+        `${api.BACKEND_URL}${BitBadgesApiRoutes.CRUDAddressListsRoute()}`,
         options
       );
       return new UpdateAddressListsSuccessResponse(response.data);
@@ -268,12 +268,11 @@ export class BitBadgesAddressList<T extends NumberType>
   /**
    * Deletes an off-chain address list. On-chain lists are deleted through blockchain transactions.
    */
-  static async DeleteAddressList<T extends NumberType>(api: BaseBitBadgesApi<T>, options: DeleteAddressListsBody) {
+  static async DeleteAddressList<T extends NumberType>(api: BaseBitBadgesApi<T>, options: DeleteAddressListsPayload) {
     try {
-      const response = await api.axios.post<iDeleteAddressListsSuccessResponse>(
-        `${api.BACKEND_URL}${BitBadgesApiRoutes.DeleteAddressListRoute()}`,
-        options
-      );
+      const response = await api.axios.delete<iDeleteAddressListsSuccessResponse>(`${api.BACKEND_URL}${BitBadgesApiRoutes.CRUDAddressListsRoute()}`, {
+        data: options
+      });
       return new DeleteAddressListsSuccessResponse(response.data);
     } catch (error) {
       await api.handleApiError(error);
@@ -332,7 +331,7 @@ const updateAddressListWithResponse = <T extends NumberType>(
 /**
  * @category API Requests / Responses
  */
-export interface GetAddressListsBody {
+export interface GetAddressListsPayload {
   /**
    * The lists and accompanyin details to fetch. Supports on-chain, off-chain, and reserved lists.
    */
@@ -375,27 +374,32 @@ export class GetAddressListsSuccessResponse<T extends NumberType>
 }
 
 /**
+ * @category Interfaces
+ */
+export type iAddressListCreateObject = iAddressList & {
+  /** Flag to update addresses? */
+  updateAddresses?: boolean;
+
+  /** Private lists will not show up in any search results. */
+  private?: boolean;
+  /**
+   * If the list is viewable with a link, anyone with the list ID can view details. Only applicable if private = true as well.
+   * If not viewable with a link, only the creator can view the list.
+   */
+  viewableWithLink?: boolean;
+
+  /** The claims of the address list. Use resetState on updates for resetting individual plugin state (if applicable). */
+  claims: {
+    claimId: string;
+    plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
+  }[];
+};
+
+/**
  * @category API Requests / Responses
  */
-export interface UpdateAddressListsBody<T extends NumberType> {
-  addressLists: (iAddressList & {
-    /** Flag to update addresses? */
-    updateAddresses?: boolean;
-
-    /** Private lists will not show up in any search results. */
-    private?: boolean;
-    /**
-     * If the list is viewable with a link, anyone with the lisst ID can view details. Only applicable if private = true as well.
-     * If not viewable with a link, only the creator can view the list.
-     */
-    viewableWithLink?: boolean;
-
-    /** The claims of the address list. Use resetState on updates for resetting individual plugin state (if applicable). */
-    claims: {
-      claimId: string;
-      plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
-    }[];
-  })[];
+export interface UpdateAddressListsPayload {
+  addressLists: iAddressListCreateObject[];
 }
 
 /**
@@ -410,7 +414,7 @@ export class UpdateAddressListsSuccessResponse extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export interface CreateAddressListsBody extends UpdateAddressListsBody<NumberType> {}
+export interface CreateAddressListsPayload extends UpdateAddressListsPayload {}
 
 /**
  * @category API Requests / Responses
@@ -425,7 +429,7 @@ export class CreateAddressListsSuccessResponse extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export interface DeleteAddressListsBody {
+export interface DeleteAddressListsPayload {
   /**
    * The list IDs to delete.
    */

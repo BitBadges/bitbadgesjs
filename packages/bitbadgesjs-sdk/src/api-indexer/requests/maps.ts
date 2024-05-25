@@ -8,7 +8,7 @@ import { iUpdateHistory, UpdateHistory } from '../docs/docs';
 /**
  * @category API Requests / Responses
  */
-export interface GetMapsBody {
+export interface GetMapsPayload {
   /** The IDs of the maps to fetch. */
   mapIds: string[];
 }

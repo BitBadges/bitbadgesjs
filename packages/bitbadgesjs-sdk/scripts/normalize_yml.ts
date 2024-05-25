@@ -19,6 +19,38 @@ fs.readFile(filePath, 'utf8', (err, data) => {
     orderDescriptionsAndRefs(yamlData);
     removeTimestampLinks(yamlData);
 
+    const postToGetRoutes = [
+      { route: '/users', schema: 'GetAccountsPayload' },
+      { route: '/status', schema: '' },
+      { route: '/search/{searchValue}', schema: 'GetSearchPayload' },
+      { route: '/collections', schema: 'GetCollectionsPayload' },
+      { route: '/collection/{collectionId}/balance/{cosmosAddress}', schema: 'GetBadgeBalanceByAddressPayload' },
+      { route: '/collection/{collectionId}/{badgeId}/activity', schema: 'GetBadgeActivityPayload' },
+      { route: '/collection/{collectionId}/{badgeId}/owners', schema: 'GetOwnersForBadgePayload' },
+      { route: '/claims/reserved/{claimId}/{cosmosAddress}', schema: 'GetReservedCodesPayload' },
+      { route: '/claims/status/{claimAttemptId}', schema: '' },
+      { route: '/browse', schema: 'GetBrowseCollectionsPayload' },
+      { route: '/addressLists/fetch', schema: 'GetAddressListsPayload' },
+      { route: '/siwbbRequest/fetch', schema: 'GetAndVerifySIWBBRequestPayload' },
+      { route: '/developerApp/siwbbRequests', schema: 'GetAndVerifySIWBBRequestsForDeveloperAppPayload' },
+      { route: '/siwbbRequest/verify', schema: 'GenericBlockinVerifyPayload' },
+      { route: '/verifyOwnershipRequirements', schema: 'GenericVerifyAssetsPayload' },
+      { route: '/follow-protocol', schema: 'GetFollowDetailsPayload' },
+      { route: '/claimAlerts', schema: 'GetClaimAlertsForCollectionPayload' },
+      { route: '/collection/{collectionId}/refreshStatus', schema: '' },
+      { route: '/maps', schema: 'GetMapsPayload' },
+      { route: '/secret/fetch', schema: 'GetSecretPayload' },
+      { route: '/collection/{collectionId}/filter', schema: 'FilterBadgesInCollectionPayload' },
+      { route: '/siwbbRequest/appleWalletPass', schema: 'GenerateAppleWalletPassPayload' },
+      { route: '/claims/fetch', schema: 'GetClaimsPayload' },
+      { route: '/oauth/token', schema: 'OauthTokenPayload' }
+    ];
+    for (const obj of postToGetRoutes) {
+      if ((yamlData as any).paths[obj.route]) {
+        convertToGetRequestParams((yamlData as any).paths[obj.route], obj.schema, yamlData);
+      }
+    }
+
     // Convert the modified YAML data back to string
     let modifiedYamlContent = yaml.dump(yamlData);
 
@@ -60,6 +92,10 @@ fs.readFile(filePath, 'utf8', (err, data) => {
 // Function to remove all 'title' properties recursively
 function removeTitleProperties(obj: any, parentKey: string) {
   for (const key in obj) {
+    if (key === 'info') {
+      continue;
+    }
+
     if (typeof obj[key] === 'object' && obj[key] !== null) {
       removeTitleProperties(obj[key], key); // Recursive call
     }
@@ -67,6 +103,55 @@ function removeTitleProperties(obj: any, parentKey: string) {
       delete obj[key];
     }
   }
+}
+
+function convertToGetRequestParams(obj: any, schemaName: string, originalObj: any) {
+  const postObj = obj.post;
+  console.log(schemaName, obj);
+
+  // requestBody:
+  // required: true
+  // content:
+  //   application/json:
+  //     schema:
+  //       $ref: '#/components/schemas/CreateClaimPayload'
+
+  if (postObj.requestBody) delete postObj.requestBody;
+  postObj.parameters = postObj.parameters || [];
+  postObj.parameters = postObj.parameters.filter((param: any) => param.in !== 'query');
+
+  if (schemaName === '') {
+    return;
+  }
+
+  postObj.requestBody = {
+    required: true,
+    content: {
+      'application/json': {
+        schema: {
+          $ref: `#/components/schemas/${schemaName}`
+        }
+      }
+    }
+  };
+
+  // const schemaRef = schemaName ? originalObj.components.schemas[schemaName] : undefined;
+  // const referencedObj = schemaRef ? originalObj.components.schemas[schemaName] : undefined;
+  // if (referencedObj) {
+  //   const properties = referencedObj.properties;
+  //   const required = referencedObj.required;
+
+  //   for (const key in properties) {
+  //     const queryParamObj = {
+  //       name: key,
+  //       in: 'query',
+  //       schema: properties[key],
+  //       required: required?.includes(key)
+  //     };
+
+  //     postObj.parameters.push(queryParamObj);
+  //   }
+  // }
 }
 
 function addExamples(obj: any) {

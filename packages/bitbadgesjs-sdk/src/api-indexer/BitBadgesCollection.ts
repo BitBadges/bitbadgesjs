@@ -57,15 +57,15 @@ import { getCurrentValueForTimeline } from '@/core/timelines';
 import { ClaimDetails, iClaimDetails } from './requests';
 import type {
   CollectionViewKey,
-  FilterBadgesInCollectionBody,
-  GetAdditionalCollectionDetailsBody,
-  GetBadgeActivityBody,
-  GetBadgeBalanceByAddressBody,
-  GetCollectionsBody,
-  GetMetadataForCollectionBody,
-  GetOwnersForBadgeBody,
+  FilterBadgesInCollectionPayload,
+  GetAdditionalCollectionDetailsPayload,
+  GetBadgeActivityPayload,
+  GetBadgeBalanceByAddressPayload,
+  GetCollectionsPayload,
+  GetMetadataForCollectionPayload,
+  GetOwnersForBadgePayload,
   MetadataFetchOptions,
-  RefreshMetadataBody,
+  RefreshMetadataPayload,
   iFilterBadgesInCollectionSuccessResponse,
   iGetBadgeActivitySuccessResponse,
   iGetBadgeBalanceByAddressSuccessResponse,
@@ -698,7 +698,7 @@ export class BitBadgesCollection<T extends NumberType>
    */
   static async FetchAndInitialize<T extends NumberType>(
     api: BaseBitBadgesApi<T>,
-    options: { collectionId: NumberType } & GetMetadataForCollectionBody & GetAdditionalCollectionDetailsBody
+    options: { collectionId: NumberType } & GetMetadataForCollectionPayload & GetAdditionalCollectionDetailsPayload
   ) {
     const collection = await BitBadgesCollection.GetCollections(api, { collectionsToFetch: [options] }).then((x) => x.collections[0]);
     return new BitBadgesCollection(collection);
@@ -707,7 +707,7 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Gets collections from the API. Must pass in a valid API instance.
    */
-  static async GetCollections<T extends NumberType>(api: BaseBitBadgesApi<T>, body: GetCollectionsBody) {
+  static async GetCollections<T extends NumberType>(api: BaseBitBadgesApi<T>, body: GetCollectionsPayload) {
     try {
       const response = await api.axios.post<iGetCollectionsSuccessResponse<string>>(
         `${api.BACKEND_URL}${BitBadgesApiRoutes.GetCollectionsRoute()}`,
@@ -727,7 +727,7 @@ export class BitBadgesCollection<T extends NumberType>
     api: BaseBitBadgesApi<T>,
     collectionId: NumberType,
     cosmosAddress: string,
-    body?: GetBadgeBalanceByAddressBody
+    body?: GetBadgeBalanceByAddressPayload
   ): Promise<GetBadgeBalanceByAddressSuccessResponse<T>> {
     try {
       api.assertPositiveInteger(collectionId);
@@ -748,7 +748,7 @@ export class BitBadgesCollection<T extends NumberType>
    */
   static async FetchAndInitializeBatch<T extends NumberType>(
     api: BaseBitBadgesApi<T>,
-    collectionsToFetch: ({ collectionId: NumberType } & GetMetadataForCollectionBody & GetAdditionalCollectionDetailsBody)[]
+    collectionsToFetch: ({ collectionId: NumberType } & GetMetadataForCollectionPayload & GetAdditionalCollectionDetailsPayload)[]
   ) {
     const collection = await BitBadgesCollection.GetCollections(api, { collectionsToFetch: collectionsToFetch });
     return collection.collections.map((x) => new BitBadgesCollection(x));
@@ -773,8 +773,8 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Returns if a new collection API request body is redundant (meaning we already have the data cached).
    */
-  isRedundantRequest(options: GetMetadataForCollectionBody & GetAdditionalCollectionDetailsBody) {
-    options = this.pruneBody(options);
+  isRedundantRequest(options: GetMetadataForCollectionPayload & GetAdditionalCollectionDetailsPayload) {
+    options = this.prunePayload(options);
     const cachedCollection = this.convert(BigIntify);
 
     const prunedMetadataToFetch: MetadataFetchOptions = pruneMetadataToFetch(cachedCollection, options.metadataToFetch);
@@ -822,7 +822,7 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Prunes a new collection API request body to only request the data that is not already fetched.
    */
-  pruneBody(options: GetMetadataForCollectionBody & GetAdditionalCollectionDetailsBody) {
+  prunePayload(options: GetMetadataForCollectionPayload & GetAdditionalCollectionDetailsPayload) {
     const prunedMetadataToFetch: MetadataFetchOptions = pruneMetadataToFetch(this.convert(BigIntify), options.metadataToFetch);
     const prunedViewsToFetch = (options.viewsToFetch || []).filter((x) => this.viewHasMore(x.viewId));
     const prunedChallengeTrackersToFetch = (options.challengeTrackersToFetch || []).filter((x) => {
@@ -856,17 +856,21 @@ export class BitBadgesCollection<T extends NumberType>
       challengeTrackersToFetch: prunedChallengeTrackersToFetch,
       approvalTrackersToFetch: prunedApprovalTrackersToFetch,
       fetchTotalAndMintBalances: shouldFetchTotalAndMint
-    } as GetMetadataForCollectionBody & GetAdditionalCollectionDetailsBody & { collectionId: T };
+    } as GetMetadataForCollectionPayload & GetAdditionalCollectionDetailsPayload & { collectionId: T };
   }
 
   /**
    * Specify a new fetch request for the current collection. This will update the current collection with the new response information.
    * For example, paginations, metadata, views, etc. will all be handled automatically.
    */
-  async fetchAndUpdate(api: BaseBitBadgesApi<T>, options: GetMetadataForCollectionBody & GetAdditionalCollectionDetailsBody, forceful?: boolean) {
+  async fetchAndUpdate(
+    api: BaseBitBadgesApi<T>,
+    options: GetMetadataForCollectionPayload & GetAdditionalCollectionDetailsPayload,
+    forceful?: boolean
+  ) {
     if (!forceful) {
       if (this.isRedundantRequest(options)) return;
-      options = this.pruneBody(options);
+      options = this.prunePayload(options);
     }
 
     const collection = await BitBadgesCollection.GetCollections(api, {
@@ -894,7 +898,7 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Wrapper for {@link fetchAndUpdate} that fetches collection metadata.
    */
-  async fetchMetadata(api: BaseBitBadgesApi<T>, options: GetMetadataForCollectionBody, forceful?: boolean) {
+  async fetchMetadata(api: BaseBitBadgesApi<T>, options: GetMetadataForCollectionPayload, forceful?: boolean) {
     if (!forceful) {
       if (options.metadataToFetch) options.metadataToFetch = this.pruneMetadataToFetch(options.metadataToFetch);
     }
@@ -1086,7 +1090,7 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Trigger a refresh for the collection via the API. Note there is a cooldown period for refreshing.
    */
-  static async RefreshMetadata<T extends NumberType>(api: BaseBitBadgesApi<T>, collectionId: T, body?: RefreshMetadataBody) {
+  static async RefreshMetadata<T extends NumberType>(api: BaseBitBadgesApi<T>, collectionId: T, body?: RefreshMetadataPayload) {
     try {
       api.assertPositiveInteger(collectionId);
 
@@ -1115,7 +1119,7 @@ export class BitBadgesCollection<T extends NumberType>
     api: BaseBitBadgesApi<T>,
     collectionId: NumberType,
     badgeId: NumberType,
-    body: GetBadgeActivityBody
+    body: GetBadgeActivityPayload
   ) {
     try {
       api.assertPositiveInteger(collectionId);
@@ -1135,7 +1139,7 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Get the badge activity for a specific badge ID. You have to handle the pagination yourself.
    */
-  async getBadgeActivity(api: BaseBitBadgesApi<T>, badgeId: T, body: GetBadgeActivityBody) {
+  async getBadgeActivity(api: BaseBitBadgesApi<T>, badgeId: T, body: GetBadgeActivityPayload) {
     return await BitBadgesCollection.GetBadgeActivity(api, this.collectionId, badgeId, body);
   }
 
@@ -1146,7 +1150,7 @@ export class BitBadgesCollection<T extends NumberType>
     api: BaseBitBadgesApi<T>,
     collectionId: NumberType,
     badgeId: NumberType,
-    body: GetOwnersForBadgeBody
+    body: GetOwnersForBadgePayload
   ) {
     try {
       api.assertPositiveInteger(collectionId);
@@ -1166,17 +1170,17 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Gets the owners for a specific badge. You have to handle the pagination yourself.
    */
-  async getOwnersForBadge(api: BaseBitBadgesApi<T>, badgeId: T, body: GetOwnersForBadgeBody) {
+  async getOwnersForBadge(api: BaseBitBadgesApi<T>, badgeId: T, body: GetOwnersForBadgePayload) {
     return await BitBadgesCollection.GetOwnersForBadge(api, this.collectionId, badgeId, body);
   }
 
   /**
    * Execute a filter query for the collection. You have to handle the pagination yourself.
    */
-  static async FilterBadgesInCollection<T extends NumberType>(api: BaseBitBadgesApi<T>, body: FilterBadgesInCollectionBody) {
+  static async FilterBadgesInCollection<T extends NumberType>(api: BaseBitBadgesApi<T>, collectionId: T, body: FilterBadgesInCollectionPayload) {
     try {
       const response = await api.axios.post<iFilterBadgesInCollectionSuccessResponse<string>>(
-        `${api.BACKEND_URL}${BitBadgesApiRoutes.FilterBadgesInCollectionRoute()}`,
+        `${api.BACKEND_URL}${BitBadgesApiRoutes.FilterBadgesInCollectionRoute(collectionId)}`,
         body
       );
       return new FilterBadgesInCollectionSuccessResponse(response.data).convert(api.ConvertFunction);
@@ -1189,8 +1193,8 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Execute a filter query for the collection. You have to handle the pagination yourself.
    */
-  async filterBadgesInCollection(api: BaseBitBadgesApi<T>, bodyOptions: Omit<FilterBadgesInCollectionBody, 'collectionId'>) {
-    return await BitBadgesCollection.FilterBadgesInCollection(api, { collectionId: this.collectionId, ...bodyOptions });
+  async filterBadgesInCollection(api: BaseBitBadgesApi<T>, bodyOptions: Omit<FilterBadgesInCollectionPayload, 'collectionId'>) {
+    return await BitBadgesCollection.FilterBadgesInCollection(api, this.collectionId, bodyOptions);
   }
 
   //TODO: fetchOffChainBalancesFromSource

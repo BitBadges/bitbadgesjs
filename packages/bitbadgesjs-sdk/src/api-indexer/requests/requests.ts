@@ -20,11 +20,11 @@ import type {
   PluginPresetType,
   UNIXMilliTimestamp,
   iAccessTokenDoc,
-  iDeveloperAppDoc,
   iClaimAlertDoc,
   iCustomLink,
   iCustomListPage,
   iCustomPage,
+  iDeveloperAppDoc,
   iPluginDoc,
   iSecretDoc,
   iSocialConnections,
@@ -44,15 +44,15 @@ import { SecretsProof } from '@/core/secrets';
 import type { iOffChainBalancesMap } from '@/core/transfers';
 import { UintRangeArray } from '@/core/uintRanges';
 import type { iPredeterminedBalances, iSecretsProof, iUintRange } from '@/interfaces';
-import type { BroadcastPostBody } from '@/node-rest-api/broadcast';
 import type { DeliverTxResponse, Event } from '@cosmjs/stargate';
 import type { AssetConditionGroup, ChallengeParams, VerifyChallengeOptions } from 'blockin';
 import { BlockinChallengeParams } from './blockin';
+import { BroadcastPostBody } from '@/node-rest-api';
 
 /**
  * @category API Requests / Responses
  */
-export interface GetStatusBody {}
+export interface GetStatusPayload {}
 
 /**
  * @category API Requests / Responses
@@ -86,7 +86,7 @@ export class GetStatusSuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export interface GetSearchBody {
+export interface GetSearchPayload {
   /** If true, we will skip all collection queries. */
   noCollections?: boolean;
   /** If true, we will skip all account queries. */
@@ -149,7 +149,7 @@ export class GetSearchSuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export interface GetClaimsBody {
+export interface GetClaimsPayload {
   /** The claim IDs to fetch. */
   claimIds: string[];
   /** If the address list is private and viewable with the link only, you must also specify the address list ID to prove knowledge of the link. */
@@ -236,7 +236,7 @@ export class GetClaimsSuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export interface CompleteClaimBody {
+export interface CompleteClaimPayload {
   /** If provided, we will check that no plugins or claims have been updated since the last time the user fetched the claim. */
   _fetchedAt?: number;
 
@@ -267,7 +267,7 @@ export class CompleteClaimSuccessResponse extends CustomTypeClass<CompleteClaimS
 /**
  * @category API Requests / Responses
  */
-export interface GetClaimAttemptStatusBody {}
+export interface GetClaimAttemptStatusPayload {}
 
 /**
  * @category API Requests / Responses
@@ -300,7 +300,7 @@ export class GetClaimAttemptStatusSuccessResponse
 /**
  * @category API Requests / Responses
  */
-export interface SimulateClaimBody {
+export interface SimulateClaimPayload {
   /** If provided, we will check that no plugins or claims have been updated since the last time the user fetched the claim. */
   _fetchedAt?: number;
 
@@ -332,7 +332,7 @@ export class SimulateClaimSuccessResponse extends CustomTypeClass<SimulateClaimS
 /**
  * @category API Requests / Responses
  */
-export interface GetReservedClaimCodesBody {}
+export interface GetReservedClaimCodesPayload {}
 
 /**
  * @category API Requests / Responses
@@ -365,7 +365,7 @@ export class GetReservedClaimCodesSuccessResponse
 /**
  * @category API Requests / Responses
  */
-export interface DeleteReviewBody {
+export interface DeleteReviewPayload {
   /**
    * The review ID to delete.
    */
@@ -385,7 +385,7 @@ export class DeleteReviewSuccessResponse extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export interface AddReviewBody {
+export interface AddReviewPayload {
   /**
    * The review text (1 to 2048 characters).
    */
@@ -420,7 +420,7 @@ export class AddReviewSuccessResponse extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export interface UpdateAccountInfoBody {
+export interface UpdateAccountInfoPayload {
   /**
    * The Discord username.
    */
@@ -511,10 +511,10 @@ export interface UpdateAccountInfoBody {
    * Approved sign in methods. Only returned if user is authenticated with full access.
    */
   approvedSignInMethods?: {
-    discord?: { username: string; discriminator?: string | undefined; id: string } | undefined;
-    github?: { username: string; id: string } | undefined;
-    google?: { username: string; id: string } | undefined;
-    twitter?: { username: string; id: string } | undefined;
+    discord?: { scopes: string[]; username: string; discriminator?: string | undefined; id: string } | undefined;
+    github?: { scopes: string[]; username: string; id: string } | undefined;
+    google?: { scopes: string[]; username: string; id: string } | undefined;
+    twitter?: { scopes: string[]; username: string; id: string } | undefined;
   };
 
   /**
@@ -536,7 +536,7 @@ export class UpdateAccountInfoSuccessResponse extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export interface AddBalancesToOffChainStorageBody {
+export interface AddBalancesToOffChainStoragePayload {
   /**
    * A map of Cosmos addresses or list IDs -> Balance<NumberType>[].
    * This will be set first. If undefined, we leave the existing balances map as is.
@@ -606,7 +606,7 @@ export class AddBalancesToOffChainStorageSuccessResponse
 /**
  * @category API Requests / Responses
  */
-export interface AddToIpfsBody {
+export interface AddToIpfsPayload {
   /**
    * The stuff to add to IPFS
    */
@@ -644,7 +644,7 @@ export class AddToIpfsSuccessResponse extends CustomTypeClass<AddToIpfsSuccessRe
 /**
  * @category API Requests / Responses
  */
-export interface AddApprovalDetailsToOffChainStorageBody {
+export interface AddApprovalDetailsToOffChainStoragePayload {
   approvalDetails: {
     /**
      * The name of the approval.
@@ -713,7 +713,7 @@ export class AddApprovalDetailsToOffChainStorageSuccessResponse
 /**
  * @category API Requests / Responses
  */
-export interface GetSignInChallengeBody {
+export interface GetSignInChallengePayload {
   /**
    * The blockchain to be signed in with.
    */
@@ -772,7 +772,7 @@ export class GetSignInChallengeSuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export interface VerifySignInBody {
+export interface VerifySignInPayload {
   /**
    * The original message that was signed.
    */
@@ -802,7 +802,7 @@ export class VerifySignInSuccessResponse extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export interface CheckSignInStatusBody {}
+export interface CheckSignInStatusPayload {}
 
 /**
  * @category API Requests / Responses
@@ -891,7 +891,7 @@ export class CheckSignInStatusSuccessResponse extends CustomTypeClass<CheckSignI
 /**
  * @category API Requests / Responses
  */
-export interface SignOutBody {
+export interface SignOutPayload {
   /** Sign out of Blockin, and thus the entire API. */
   signOutBlockin: boolean;
   /** Sign out of Discord. */
@@ -916,7 +916,7 @@ export class SignOutSuccessResponse extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export interface GetBrowseCollectionsBody {}
+export interface GetBrowseCollectionsPayload {}
 
 /**
  * @category API Requests / Responses
@@ -998,7 +998,7 @@ export class GetBrowseCollectionsSuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export type BroadcastTxBody = BroadcastPostBody;
+export type BroadcastTxPayload = BroadcastPostBody;
 
 /**
  * @category API Requests / Responses
@@ -1055,7 +1055,7 @@ export class BroadcastTxSuccessResponse extends CustomTypeClass<BroadcastTxSucce
 /**
  * @category API Requests / Responses
  */
-export type SimulateTxBody = BroadcastPostBody;
+export type SimulateTxPayload = BroadcastPostBody;
 
 /**
  * @category API Requests / Responses
@@ -1097,7 +1097,7 @@ export class SimulateTxSuccessResponse extends CustomTypeClass<SimulateTxSuccess
 /**
  * @category API Requests / Responses
  */
-export interface FetchMetadataDirectlyBody {
+export interface FetchMetadataDirectlyPayload {
   uris: string[];
 }
 
@@ -1131,7 +1131,7 @@ export class FetchMetadataDirectlySuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export interface GetTokensFromFaucetBody {}
+export interface GetTokensFromFaucetPayload {}
 
 /**
  * @category API Requests / Responses
@@ -1189,7 +1189,7 @@ export class GetTokensFromFaucetSuccessResponse
 /**
  * @category API Requests / Responses
  */
-export interface SendClaimAlertsBody {
+export interface SendClaimAlertsPayload {
   /** The claim alerts to send to users. */
   claimAlerts: {
     /** The collection ID to associate with the claim alert. If specified, you (the sender) must be the manager of the collection. This is typically used
@@ -1233,7 +1233,7 @@ export interface CosmosAccountResponse {
  *
  * @category API Requests / Responses
  */
-export interface GenericVerifyAssetsBody {
+export interface GenericVerifyAssetsPayload {
   /**
    * The address to check
    */
@@ -1260,7 +1260,7 @@ export class GenericVerifyAssetsSuccessResponse extends EmptyResponseClass {}
  *
  * @category API Requests / Responses
  */
-export interface GenericBlockinVerifyBody extends VerifySignInBody {
+export interface GenericBlockinVerifyPayload extends VerifySignInPayload {
   /**
    * Additional options for verifying the challenge.
    */
@@ -1287,7 +1287,7 @@ export class GenericBlockinVerifySuccessResponse extends VerifySignInSuccessResp
 /**
  * @category API Requests / Responses
  */
-export interface CreateSecretBody {
+export interface CreateSecretPayload {
   /**
    * Proof of issuance is used for BBS+ signatures (scheme = bbs) only.
    * BBS+ signatures are signed with a BBS+ key pair, but you would often want the issuer to be a native address.
@@ -1360,7 +1360,7 @@ export class CreateSecretSuccessResponse extends CustomTypeClass<CreateSecretSuc
 /**
  * @category API Requests / Responses
  */
-export interface GetSecretBody {
+export interface GetSecretPayload {
   /** The secret ID. This is the ID that is given to the user to query the secret. Anyone with the ID can query it, so keep this safe and secure. */
   secretId: string;
 }
@@ -1378,7 +1378,7 @@ export class GetSecretSuccessResponse<T extends NumberType> extends SecretDoc<T>
 /**
  * @category API Requests / Responses
  */
-export interface DeleteSecretBody {
+export interface DeleteSecretPayload {
   /** The secret ID. This is the ID that is given to the user to query the secret. Anyone with the ID can query it, so keep this safe and secure. */
   secretId: string;
 }
@@ -1396,7 +1396,7 @@ export class DeleteSecretSuccessResponse extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export interface UpdateSecretBody {
+export interface UpdateSecretPayload {
   /** The secret ID. This is the ID that is given to the user to query the secret. Anyone with the ID can query it, so keep this safe and secure. */
   secretId: string;
 
@@ -1475,7 +1475,7 @@ export class UpdateSecretSuccessResponse extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export interface CreateSIWBBRequestBody {
+export interface CreateSIWBBRequestPayload {
   /** The name of the SIWBB request for display purposes. */
   name: string;
   /** The description of the SIWBB request for display purposes. */
@@ -1489,6 +1489,9 @@ export interface CreateSIWBBRequestBody {
   signature: string;
   /** The public key of the signer (if needed). Only certain chains require this. */
   publicKey?: string;
+
+  /** Whether or not we should allow reuse of BitBadges sign-in in replacement of the signature */
+  allowReuseOfBitBadgesSignIn: boolean;
 
   /**
    * If required, you can additionally add proof of secrets to the authentication flow.
@@ -1535,7 +1538,7 @@ export class CreateSIWBBRequestSuccessResponse
 /**
  * @category API Requests / Responses
  */
-export interface GetAndVerifySIWBBRequestsForDeveloperAppBody {
+export interface GetAndVerifySIWBBRequestsForDeveloperAppPayload {
   /** The bookmark for pagination. */
   bookmark?: string;
   /** The client ID to fetch for */
@@ -1577,7 +1580,7 @@ export class GetAndVerifySIWBBRequestsForDeveloperAppSuccessResponse<T extends N
 /**
  * @category API Requests / Responses
  */
-export interface GetAndVerifySIWBBRequestBody {
+export interface GetAndVerifySIWBBRequestPayload {
   /** The SIWBB request. */
   code: string;
   /** We attempt to verify the current status with each request. You can provide additional options for verification here. */
@@ -1624,7 +1627,7 @@ export interface iGetAndVerifySIWBBRequestSuccessResponse<T extends NumberType> 
 /**
  * @category API Requests / Responses
  */
-export interface DeleteSIWBBRequestBody {
+export interface DeleteSIWBBRequestPayload {
   code: string;
 }
 
@@ -1641,7 +1644,7 @@ export class DeleteSIWBBRequestSuccessResponse extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export interface GenerateAppleWalletPassBody {
+export interface GenerateAppleWalletPassPayload {
   /** The signature of the message. */
   code: string;
 }
@@ -1672,7 +1675,7 @@ export class GenerateAppleWalletPassSuccessResponse
 /**
  * @category API Requests / Responses
  */
-export interface GetClaimAlertsForCollectionBody {
+export interface GetClaimAlertsForCollectionPayload {
   /** The collection ID to get claim alerts for. */
   collectionId: NumberType;
   /** The pagination bookmark obtained from the previous request. Leave blank for the first request. */
@@ -1708,7 +1711,7 @@ export class GetClaimAlertsForCollectionSuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export interface GetExternalCallBody {
+export interface GetExternalCallPayload {
   uri: string;
   key: string;
 }
@@ -1738,7 +1741,7 @@ export class GetExternalCallSuccessResponse extends CustomTypeClass<GetExternalC
 /**
  * @category API Requests / Responses
  */
-export interface CreateDeveloperAppBody {
+export interface CreateDeveloperAppPayload {
   /** Metadata for the secret for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
   name: string;
   /** Description of the app. */
@@ -1779,7 +1782,7 @@ export class CreateDeveloperAppSuccessResponse
 /**
  * @category API Requests / Responses
  */
-export interface GetActiveAuthorizationsBody {}
+export interface GetActiveAuthorizationsPayload {}
 
 /**
  * @category API Requests / Responses
@@ -1809,7 +1812,7 @@ export class GetActiveAuthorizationsSuccessResponse
 /**
  * @category API Requests / Responses
  */
-export interface GetDeveloperAppBody {
+export interface GetDeveloperAppPayload {
   /** If you want to get a specific app, specify the client ID here (will not return the client secret). */
   clientId?: string;
 }
@@ -1836,7 +1839,7 @@ export class GetDeveloperAppSuccessResponse extends CustomTypeClass<GetDeveloper
 /**
  * @category API Requests / Responses
  */
-export interface DeleteDeveloperAppBody {
+export interface DeleteDeveloperAppPayload {
   /** The client ID of the app to delete. */
   clientId: string;
 }
@@ -1854,7 +1857,7 @@ export class DeleteDeveloperAppSuccessResponse extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export interface UpdateDeveloperAppBody {
+export interface UpdateDeveloperAppPayload {
   /** Client ID for the app to update. */
   clientId: string;
   /** Metadata for for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
@@ -1880,7 +1883,7 @@ export class UpdateDeveloperAppSuccessResponse extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export interface CreatePluginBody {
+export interface CreatePluginPayload {
   /** The unique plugin ID */
   pluginId: string;
 
@@ -1948,7 +1951,7 @@ export class CreatePluginSuccessResponse extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export interface GetPluginBody {
+export interface GetPluginPayload {
   createdPluginsOnly?: boolean;
 }
 
@@ -1981,7 +1984,7 @@ export class GetPluginSuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export interface DeleteClaimBody {
+export interface DeleteClaimPayload {
   /** The claim ID to delete. */
   claimIds: string[];
 }
@@ -1999,8 +2002,8 @@ export class DeleteClaimSuccessResponse extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export interface UpdateClaimBody<T extends NumberType> {
-  claims: Omit<iClaimDetails<T>, 'seedCode'>[];
+export interface UpdateClaimPayload {
+  claims: Omit<iClaimDetails<NumberType>, 'seedCode'>[];
 }
 
 /**
@@ -2014,10 +2017,15 @@ export interface iUpdateClaimSuccessResponse {}
 export class UpdateClaimSuccessResponse extends EmptyResponseClass {}
 
 /**
+ * @category Interfaces
+ */
+export type CreateClaimRequest<T extends NumberType> = iClaimDetails<T> & { listId?: string; collectionId?: T; cid?: string };
+
+/**
  * @category API Requests / Responses
  */
-export interface CreateClaimBody<T extends NumberType> {
-  claims: (iClaimDetails<T> & { listId?: string; collectionId?: T; cid?: string })[];
+export interface CreateClaimPayload {
+  claims: CreateClaimRequest<NumberType>[];
 }
 
 /**
@@ -2033,7 +2041,7 @@ export class CreateClaimSuccessResponse extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export interface OauthAuthorizeBody {
+export interface OauthAuthorizePayload {
   response_type: string;
   client_id: string;
   redirect_uri: string;
@@ -2063,7 +2071,7 @@ export class OauthAuthorizeSuccessResponse extends CustomTypeClass<OauthAuthoriz
 /**
  * @category API Requests / Responses
  */
-export interface OauthTokenBody {
+export interface OauthTokenPayload {
   grant_type: string;
   client_id: string;
   client_secret: string;
@@ -2086,7 +2094,7 @@ export class OauthTokenSuccessResponse extends AccessTokenDoc {}
  *
  * @category API Requests / Responses
  */
-export interface OauthRevokeBody {
+export interface OauthRevokePayload {
   token: string;
 }
 

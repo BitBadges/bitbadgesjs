@@ -447,10 +447,10 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
   socialConnections?: SocialConnections<T>;
   approvedSignInMethods?:
     | {
-        discord?: { username: string; discriminator?: string | undefined; id: string } | undefined;
-        github?: { username: string; id: string } | undefined;
-        google?: { username: string; id: string } | undefined;
-        twitter?: { username: string; id: string } | undefined;
+        discord?: { scopes: string[], username: string; discriminator?: string | undefined; id: string } | undefined;
+        github?: { scopes: string[], username: string; id: string } | undefined;
+        google?: { scopes: string[], username: string; id: string } | undefined;
+        twitter?: { scopes: string[], username: string; id: string } | undefined;
       }
     | undefined;
 
@@ -1387,6 +1387,7 @@ export class SIWBBRequestDoc<T extends NumberType> extends BaseNumberTypeClass<S
   createdAt: UNIXMilliTimestamp<T>;
   deletedAt?: UNIXMilliTimestamp<T>;
   publicKey?: string;
+  allowReuseOfBitBadgesSignIn: boolean;
   otherSignIns?: {
     discord?: { username: string; discriminator?: string | undefined; id: string } | undefined;
     github?: { username: string; id: string } | undefined;
@@ -1407,6 +1408,7 @@ export class SIWBBRequestDoc<T extends NumberType> extends BaseNumberTypeClass<S
     this.deletedAt = data.deletedAt;
     this._docId = data._docId;
     this._id = data._id;
+    this.allowReuseOfBitBadgesSignIn = data.allowReuseOfBitBadgesSignIn;
     this.publicKey = data.publicKey;
     this.secretsPresentations = data.secretsPresentations.map((secretsProof) => new SecretsProof(secretsProof));
     this.clientId = data.clientId;

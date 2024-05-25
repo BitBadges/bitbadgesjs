@@ -221,9 +221,12 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   /**
    * Gets accounts by address or username from the API.
    */
-  static async GetAccounts<T extends NumberType>(api: BaseBitBadgesApi<T>, Body: GetAccountsBody) {
+  static async GetAccounts<T extends NumberType>(api: BaseBitBadgesApi<T>, params: GetAccountsPayload) {
     try {
-      const response = await api.axios.post<iGetAccountsSuccessResponse<string>>(`${api.BACKEND_URL}${BitBadgesApiRoutes.GetAccountsRoute()}`, Body);
+      const response = await api.axios.post<iGetAccountsSuccessResponse<string>>(
+        `${api.BACKEND_URL}${BitBadgesApiRoutes.GetAccountsRoute()}`,
+        params
+      );
       return new GetAccountsSuccessResponse(response.data).convert(api.ConvertFunction);
     } catch (error) {
       await api.handleApiError(error);
@@ -522,12 +525,12 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
    */
   async fetchFollowDetails<T extends NumberType>(
     api: BaseBitBadgesApi<T>,
-    body: Omit<GetFollowDetailsBody, 'address' | 'cosmosAddress'>
+    body: Omit<GetFollowDetailsPayload, 'address' | 'cosmosAddress'>
   ): Promise<FollowDetailsDoc<T>> {
     return await BitBadgesUserInfo.GetFollowDetails(api, { ...body, cosmosAddress: this.cosmosAddress });
   }
 
-  static async GetFollowDetails<T extends NumberType>(api: BaseBitBadgesApi<T>, body: GetFollowDetailsBody) {
+  static async GetFollowDetails<T extends NumberType>(api: BaseBitBadgesApi<T>, body: GetFollowDetailsPayload) {
     try {
       const response = await api.axios.post<iGetFollowDetailsSuccessResponse<string>>(
         `${api.BACKEND_URL}${BitBadgesApiRoutes.GetFollowDetailsRoute()}`,
@@ -842,7 +845,7 @@ export type AccountFetchDetails = {
 /**
  * @category API Requests / Responses
  */
-export interface GetAccountsBody {
+export interface GetAccountsPayload {
   accountsToFetch: AccountFetchDetails[];
 }
 
@@ -875,7 +878,7 @@ export class GetAccountsSuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export interface GetFollowDetailsBody {
+export interface GetFollowDetailsPayload {
   cosmosAddress: string;
 
   followingBookmark?: string;

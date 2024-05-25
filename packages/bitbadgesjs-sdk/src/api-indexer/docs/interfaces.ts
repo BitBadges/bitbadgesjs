@@ -381,10 +381,10 @@ export interface iProfileDoc<T extends NumberType> extends Doc {
 
   /** Approved ways to sign in */
   approvedSignInMethods?: {
-    discord?: { username: string; discriminator?: string | undefined; id: string } | undefined;
-    github?: { username: string; id: string } | undefined;
-    google?: { username: string; id: string } | undefined;
-    twitter?: { username: string; id: string } | undefined;
+    discord?: { scopes: string[]; username: string; discriminator?: string | undefined; id: string } | undefined;
+    github?: { scopes: string[]; username: string; id: string } | undefined;
+    google?: { scopes: string[]; username: string; id: string } | undefined;
+    twitter?: { scopes: string[]; username: string; id: string } | undefined;
   };
 }
 
@@ -1014,6 +1014,9 @@ export interface iSIWBBRequestDoc<T extends NumberType> extends Doc {
   signature: string;
   /** The public key for the signed. Only needed for certain chains (Cosmos). */
   publicKey?: string;
+
+  /** Whether or not we should allow reuse of BitBadges sign-in in replacement of the signature */
+  allowReuseOfBitBadgesSignIn: boolean;
 
   name: string;
   description: string;

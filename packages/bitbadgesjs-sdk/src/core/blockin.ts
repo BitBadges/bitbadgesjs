@@ -1,7 +1,7 @@
 import BitBadgesApi from '@/api-indexer/BitBadgesApi';
 import { BlockinMessage, CosmosAddress } from '@/api-indexer/docs/interfaces';
 import { BlockinChallengeParams } from '@/api-indexer/requests/blockin';
-import { GetAndVerifySIWBBRequestBody } from '@/api-indexer/requests/requests';
+import { GetAndVerifySIWBBRequestPayload } from '@/api-indexer/requests/requests';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base';
 import { NumberType } from '@/common/string-numbers';
 import { SupportedChain } from '@/common/types';
@@ -67,6 +67,9 @@ export interface iBlockinChallenge<T extends NumberType> {
     google?: { username: string; id: string } | undefined;
     twitter?: { username: string; id: string } | undefined;
   };
+
+  /** Whether to allow reuse of BitBadges sign in */
+  allowReuseOfBitBadgesSignIn?: boolean;
 }
 
 /**
@@ -86,6 +89,7 @@ export class BlockinChallenge<T extends NumberType> extends BaseNumberTypeClass<
     errorMessage?: string;
   };
   secretsPresentations?: SecretsProof<T>[];
+  allowReuseOfBitBadgesSignIn?: boolean;
   otherSignIns?: {
     discord?: { username: string; discriminator?: string | undefined; id: string } | undefined;
     github?: { username: string; id: string } | undefined;
@@ -105,10 +109,11 @@ export class BlockinChallenge<T extends NumberType> extends BaseNumberTypeClass<
     this.publicKey = data.publicKey;
     this.verificationResponse = data.verificationResponse;
     this.otherSignIns = data.otherSignIns;
+    this.allowReuseOfBitBadgesSignIn = data.allowReuseOfBitBadgesSignIn;
     this.secretsPresentations = data.secretsPresentations?.map((proof) => new SecretsProof(proof));
   }
 
-  static async FromSIWBBRequestId<T extends NumberType>(api: BitBadgesApi<T>, body: GetAndVerifySIWBBRequestBody) {
+  static async FromSIWBBRequestId<T extends NumberType>(api: BitBadgesApi<T>, body: GetAndVerifySIWBBRequestPayload) {
     const SIWBBRequestRes = await api.getAndVerifySIWBBRequest(body);
     return SIWBBRequestRes.blockin;
   }
@@ -377,6 +382,8 @@ export interface CodeGenQueryParams {
   state?: string;
 
   expectSecretsPresentations?: boolean;
+
+  allowReuseOfBitBadgesSignIn?: boolean;
 }
 
 /**
