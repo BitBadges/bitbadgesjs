@@ -156,7 +156,11 @@ import {
   iSimulateClaimSuccessResponse,
   iSimulateTxSuccessResponse,
   iUpdateAccountInfoSuccessResponse,
-  iVerifySignInSuccessResponse
+  iVerifySignInSuccessResponse,
+  DeletePluginPayload,
+  DeletePluginSuccessResponse,
+  UpdatePluginPayload,
+  UpdatePluginSuccessResponse
 } from './requests/requests';
 import { BitBadgesApiRoutes } from './requests/routes';
 
@@ -895,7 +899,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   public async getAndVerifySIWBBRequest(payload?: GetAndVerifySIWBBRequestPayload): Promise<GetAndVerifySIWBBRequestSuccessResponse<T>> {
     try {
       const response = await this.axios.post<iGetAndVerifySIWBBRequestSuccessResponse<string>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDSIWBBRequestRoute()}`,
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetAndVerifySIWBBRequestsRoute()}`,
         payload
       );
       return new GetAndVerifySIWBBRequestSuccessResponse(response.data).convert(this.ConvertFunction);
@@ -1161,7 +1165,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    */
   public async getClaims(payload: GetClaimsPayload): Promise<GetClaimsSuccessResponse<T>> {
     try {
-      const response = await this.axios.post<GetClaimsSuccessResponse<T>>(`${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDClaimsRoute()}`, payload);
+      const response = await this.axios.post<GetClaimsSuccessResponse<T>>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetClaimsRoute()}`, payload);
       return new GetClaimsSuccessResponse(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
@@ -1178,7 +1182,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    */
   public async getSecret(payload: GetSecretPayload): Promise<GetSecretSuccessResponse<T>> {
     try {
-      const response = await this.axios.post<GetSecretSuccessResponse<T>>(`${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDSecretRoute()}`, payload);
+      const response = await this.axios.post<GetSecretSuccessResponse<T>>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetSecretsRoute()}`, payload);
       return new GetSecretSuccessResponse(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
@@ -1252,7 +1256,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   public async getDeveloperApps(payload: GetDeveloperAppPayload): Promise<GetDeveloperAppSuccessResponse> {
     try {
       const response = await this.axios.post<GetDeveloperAppSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDDeveloperAppRoute()}`,
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetDeveloperAppsRoute()}`,
         payload
       );
       return new GetDeveloperAppSuccessResponse(response.data);
@@ -1334,7 +1338,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    */
   public async getPlugins(payload: GetPluginPayload): Promise<GetPluginSuccessResponse<T>> {
     try {
-      const response = await this.axios.post<GetPluginSuccessResponse<T>>(`${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDPluginRoute()}`, payload);
+      const response = await this.axios.post<GetPluginSuccessResponse<T>>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetPluginRoute()}`, payload);
       return new GetPluginSuccessResponse(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
@@ -1343,10 +1347,10 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
-   * Creates an developer app.
+   * Creates a plugin.
    *
    * @remarks
-   * - **API Route**: `POST /api/v0/developerApp`
+   * - **API Route**: `POST /api/v0/plugins`
    * - **SDK Function Call**: `await BitBadgesApi.createPlugin(payload);`
    * - **Authentication**: Must be signed in.
    */
@@ -1354,6 +1358,42 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
     try {
       const response = await this.axios.post<CreatePluginSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDPluginRoute()}`, payload);
       return new CreatePluginSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Updates a plugin.
+   *
+   * @remarks
+   * - **API Route**: `PUT /api/v0/plugins`
+   * - **SDK Function Call**: `await BitBadgesApi.updatePlugin(payload);`
+   * - **Authentication**: Must be signed in.
+   */
+  public async updatePlugin(payload: UpdatePluginPayload): Promise<UpdatePluginSuccessResponse> {
+    try {
+      const response = await this.axios.post<UpdatePluginSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDPluginRoute()}`, payload);
+      return new UpdatePluginSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Deletes a plugin.
+   *
+   * @remarks
+   * - **API Route**: `DELETE /api/v0/plugins`
+   * - **SDK Function Call**: `await BitBadgesApi.deletePlugin(payload);`
+   * - **Authentication**: Must be signed in.
+   */
+  public async deletePlugin(payload: DeletePluginPayload): Promise<DeletePluginSuccessResponse> {
+    try {
+      const response = await this.axios.post<DeletePluginSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDPluginRoute()}`, payload);
+      return new DeletePluginSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);

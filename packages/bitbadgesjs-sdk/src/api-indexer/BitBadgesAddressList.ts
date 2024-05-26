@@ -221,7 +221,7 @@ export class BitBadgesAddressList<T extends NumberType>
   static async GetAddressLists<T extends NumberType>(api: BaseBitBadgesApi<T>, options: GetAddressListsPayload) {
     try {
       const response = await api.axios.post<iGetAddressListsSuccessResponse<T>>(
-        `${api.BACKEND_URL}${BitBadgesApiRoutes.CRUDAddressListsRoute()}`,
+        `${api.BACKEND_URL}${BitBadgesApiRoutes.GetAddressListsRoute()}`,
         options
       );
       return new GetAddressListsSuccessResponse(response.data);

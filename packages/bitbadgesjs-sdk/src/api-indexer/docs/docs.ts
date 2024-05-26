@@ -447,10 +447,10 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
   socialConnections?: SocialConnections<T>;
   approvedSignInMethods?:
     | {
-        discord?: { scopes: string[], username: string; discriminator?: string | undefined; id: string } | undefined;
-        github?: { scopes: string[], username: string; id: string } | undefined;
-        google?: { scopes: string[], username: string; id: string } | undefined;
-        twitter?: { scopes: string[], username: string; id: string } | undefined;
+        discord?: { scopes: string[]; username: string; discriminator?: string | undefined; id: string } | undefined;
+        github?: { scopes: string[]; username: string; id: string } | undefined;
+        google?: { scopes: string[]; username: string; id: string } | undefined;
+        twitter?: { scopes: string[]; username: string; id: string } | undefined;
       }
     | undefined;
 
@@ -830,6 +830,7 @@ export class ClaimBuilderDoc<T extends NumberType> extends BaseNumberTypeClass<C
   trackerDetails?: ChallengeTrackerIdDetails<T> | undefined;
   metadata?: Metadata<T> | undefined;
   lastUpdated: T;
+  createdAt: T;
 
   constructor(data: iClaimBuilderDoc<T>) {
     super();
@@ -853,10 +854,11 @@ export class ClaimBuilderDoc<T extends NumberType> extends BaseNumberTypeClass<C
     };
     this.trackerDetails = data.trackerDetails ? new ChallengeTrackerIdDetails(data.trackerDetails) : undefined;
     this.metadata = data.metadata ? new Metadata(data.metadata) : undefined;
+    this.createdAt = data.createdAt;
   }
 
   getNumberFieldNames(): string[] {
-    return ['collectionId', 'deletedAt', 'lastUpdated'];
+    return ['collectionId', 'deletedAt', 'lastUpdated', 'createdAt'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ClaimBuilderDoc<U> {
@@ -1289,6 +1291,7 @@ export class PluginDoc<T extends NumberType> extends BaseNumberTypeClass<PluginD
   _id?: string | undefined;
   pluginId: string;
   pluginSecret?: string;
+  toPublish: boolean;
   reviewCompleted: boolean;
 
   stateFunctionPreset: PluginPresetType;
@@ -1325,7 +1328,12 @@ export class PluginDoc<T extends NumberType> extends BaseNumberTypeClass<PluginD
     passGithub: boolean;
   };
 
+  claimCreatorRedirect?: { baseUri: string } | undefined;
+  userInputRedirect?: { baseUri: string } | undefined;
+
   lastUpdated: UNIXMilliTimestamp<T>;
+  createdAt: UNIXMilliTimestamp<T>;
+  deletedAt?: UNIXMilliTimestamp<T>;
 
   constructor(data: iPluginDoc<T>) {
     super();
@@ -1333,6 +1341,7 @@ export class PluginDoc<T extends NumberType> extends BaseNumberTypeClass<PluginD
     this.pluginId = data.pluginId;
     this.pluginSecret = data.pluginSecret;
     this.reviewCompleted = data.reviewCompleted;
+    this.toPublish = data.toPublish;
     this.stateFunctionPreset = data.stateFunctionPreset;
     this.duplicatesAllowed = data.duplicatesAllowed;
     this.requiresSessions = data.requiresSessions;
@@ -1354,10 +1363,14 @@ export class PluginDoc<T extends NumberType> extends BaseNumberTypeClass<PluginD
     this._docId = data._docId;
     this._id = data._id;
     this.lastUpdated = data.lastUpdated;
+    this.userInputRedirect = data.userInputRedirect;
+    this.claimCreatorRedirect = data.claimCreatorRedirect;
+    this.createdAt = data.createdAt;
+    this.deletedAt = data.deletedAt;
   }
 
   getNumberFieldNames(): string[] {
-    return ['lastUpdated'];
+    return ['lastUpdated', 'createdAt', 'deletedAt'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): PluginDoc<U> {

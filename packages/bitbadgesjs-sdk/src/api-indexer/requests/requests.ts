@@ -1893,9 +1893,6 @@ export interface CreatePluginPayload {
   /** Whether it makes sense for multiple of this plugin to be allowed */
   duplicatesAllowed: boolean;
 
-  /** This means that the plugin can be used w/o any session cookies or authentication. */
-  requiresSessions: boolean;
-
   /** Reuse for non-indexed? */
   reuseForNonIndexed: boolean;
 
@@ -1919,23 +1916,34 @@ export interface CreatePluginPayload {
     createdBy: CosmosAddress;
   };
 
-  userInputsSchema: Array<JsonBodyInputSchema>;
-  publicParamsSchema: Array<JsonBodyInputSchema | { key: string; label: string; type: 'ownershipRequirements' }>;
-  privateParamsSchema: Array<JsonBodyInputSchema | { key: string; label: string; type: 'ownershipRequirements' }>;
+  userInputRedirect?: {
+    baseUri: string;
+  };
+
+  claimCreatorRedirect?: {
+    baseUri: string;
+  };
+
+  // userInputsSchema: Array<JsonBodyInputSchema>;
+  // publicParamsSchema: Array<JsonBodyInputSchema | { key: string; label: string; type: 'ownershipRequirements' }>;
+  // privateParamsSchema: Array<JsonBodyInputSchema | { key: string; label: string; type: 'ownershipRequirements' }>;
 
   /** The verification URL */
   verificationCall?: {
     uri: string;
     method: 'POST' | 'GET' | 'PUT' | 'DELETE';
-    hardcodedInputs: Array<JsonBodyInputWithValue>;
+    // hardcodedInputs: Array<JsonBodyInputWithValue>;
 
-    passAddress: boolean;
-    passDiscord: boolean;
-    // passEmail: boolean;
-    passTwitter: boolean;
-    passGoogle: boolean;
-    passGithub: boolean;
+    // passAddress: boolean;
+    // passDiscord: boolean;
+    // // passEmail: boolean;
+    // passTwitter: boolean;
+    // passGoogle: boolean;
+    // passGithub: boolean;
   };
+
+  /** To publish in the directory. This will trigger the start of the review process. */
+  toPublish: boolean;
 }
 
 /**
@@ -1951,8 +1959,102 @@ export class CreatePluginSuccessResponse extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
+export interface UpdatePluginPayload {
+  /** The unique plugin ID */
+  pluginId: string;
+
+  /** Whether it makes sense for multiple of this plugin to be allowed */
+  duplicatesAllowed?: boolean;
+
+  /** Reuse for non-indexed? */
+  reuseForNonIndexed?: boolean;
+
+  /** This is a flag for being compatible with auto-triggered claims, meaning no user interaction is needed. */
+  requiresUserInputs?: boolean;
+
+  metadata?: {
+    /** The name of the plugin */
+    name: string;
+    /** Description of the plugin */
+    description: string;
+    /** The image of the plugin */
+    image: string;
+    /** Documentation for the plugin */
+    documentation?: string;
+    /** Source code for the plugin */
+    sourceCode?: string;
+    /** Support link for the plugin */
+    supportLink?: string;
+    // /** The creator of the plugin */
+    // createdBy: CosmosAddress;
+  };
+
+  userInputRedirect?: {
+    baseUri: string;
+  };
+
+  claimCreatorRedirect?: {
+    baseUri: string;
+  };
+
+  // userInputsSchema: Array<JsonBodyInputSchema>;
+  // publicParamsSchema: Array<JsonBodyInputSchema | { key: string; label: string; type: 'ownershipRequirements' }>;
+  // privateParamsSchema: Array<JsonBodyInputSchema | { key: string; label: string; type: 'ownershipRequirements' }>;
+
+  /** The verification URL */
+  verificationCall?: {
+    uri: string;
+    method: 'POST' | 'GET' | 'PUT' | 'DELETE';
+    // hardcodedInputs: Array<JsonBodyInputWithValue>;
+
+    // passAddress: boolean;
+    // passDiscord: boolean;
+    // // passEmail: boolean;
+    // passTwitter: boolean;
+    // passGoogle: boolean;
+    // passGithub: boolean;
+  };
+
+  /** To publish in the directory. This will trigger the start of the review process. */
+  toPublish: boolean;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iUpdatePluginSuccessResponse {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class UpdatePluginSuccessResponse extends EmptyResponseClass {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface DeletePluginPayload {
+  /** The unique plugin ID */
+  pluginId: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iDeletePluginSuccessResponse {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class DeletePluginSuccessResponse extends EmptyResponseClass {}
+
+/**
+ * @category API Requests / Responses
+ */
 export interface GetPluginPayload {
+  /** If true, we will fetch all plugins for the authenticated user (with plugin secrets). */
   createdPluginsOnly?: boolean;
+  /** If true, we will fetch only the specific plugin with the plugin ID (no secrets). */
+  pluginId?: string;
 }
 
 /**

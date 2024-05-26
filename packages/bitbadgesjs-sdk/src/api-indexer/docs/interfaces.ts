@@ -751,6 +751,7 @@ export interface iClaimBuilderDoc<T extends NumberType> extends Doc {
   };
 
   lastUpdated: UNIXMilliTimestamp<T>;
+  createdAt: UNIXMilliTimestamp<T>;
 }
 
 /**
@@ -940,10 +941,16 @@ export enum PluginPresetType {
 export interface iPluginDoc<T extends NumberType> extends Doc {
   /** The Cosmos address who created the plugin doc */
   createdBy: CosmosAddress;
+
   /** The unique plugin ID */
   pluginId: string;
+
   /** The client secret of the plugin */
   pluginSecret?: string;
+
+  /** To publish to directory? */
+  toPublish: boolean;
+
   /** Review process completed */
   reviewCompleted: boolean;
 
@@ -979,15 +986,17 @@ export interface iPluginDoc<T extends NumberType> extends Doc {
     supportLink?: string;
   };
 
-  frontendCustomization?: {
-    customCreateNode?: boolean;
-    customEditNode?: boolean;
-    customDisplayNode?: boolean;
-  };
-
   userInputsSchema: Array<JsonBodyInputSchema>;
   publicParamsSchema: Array<JsonBodyInputSchema | { key: string; label: string; type: 'ownershipRequirements' }>;
   privateParamsSchema: Array<JsonBodyInputSchema | { key: string; label: string; type: 'ownershipRequirements' }>;
+
+  userInputRedirect?: {
+    baseUri: string;
+  };
+
+  claimCreatorRedirect?: {
+    baseUri: string;
+  };
 
   /** The verification URL */
   verificationCall?: {
@@ -1004,6 +1013,9 @@ export interface iPluginDoc<T extends NumberType> extends Doc {
   };
 
   lastUpdated: UNIXMilliTimestamp<T>;
+
+  createdAt: UNIXMilliTimestamp<T>;
+  deletedAt?: UNIXMilliTimestamp<T>;
 }
 
 /**
