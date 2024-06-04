@@ -60,7 +60,7 @@
     "typescript": "^5.3.0"
   },
   "dependencies": {
-    "@bufbuild/protobuf": "^1.7.2",
+    "@bufbuild/protobuf": "^1.9.0",
     "@cosmjs/cosmwasm-stargate": "^0.32.2",
     "@cosmjs/crypto": "^0.32.2",
     "@cosmjs/stargate": "^0.32.2",
