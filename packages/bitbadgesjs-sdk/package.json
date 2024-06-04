@@ -79,7 +79,7 @@
     "bs58": "^5.0.0",
     "crypto-addr-codec": "^0.1.7",
     "ethers": "^5.7.0",
-    "joi": "^17.10.1",
+    "joi": "^17.13.1",
     "merkletreejs": "^0.3.11",
     "mongoose": "^8.0.3",
     "nano": "^10.1.2",
