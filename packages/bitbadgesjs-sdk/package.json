@@ -81,7 +81,7 @@
     "ethers": "^5.7.0",
     "joi": "^17.10.1",
     "merkletreejs": "^0.3.11",
-    "mongoose": "^8.0.3",
+    "mongoose": "^8.3.4",
     "nano": "^10.1.2",
     "protoc-gen-ts": "^0.8.7",
     "qs": "^6.12.1"
