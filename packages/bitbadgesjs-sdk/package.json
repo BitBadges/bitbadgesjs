@@ -62,7 +62,7 @@
   "dependencies": {
     "@bufbuild/protobuf": "^1.7.2",
     "@cosmjs/cosmwasm-stargate": "^0.32.2",
-    "@cosmjs/crypto": "^0.32.2",
+    "@cosmjs/crypto": "^0.32.3",
     "@cosmjs/stargate": "^0.32.2",
     "@digitalbazaar/bbs-2023-cryptosuite": "^1.1.1",
     "@digitalbazaar/bls12-381-multikey": "^1.2.0",
