@@ -1,15 +1,16 @@
 import BitBadgesApi from '@/api-indexer/BitBadgesApi';
-import { BlockinMessage, CosmosAddress } from '@/api-indexer/docs/interfaces';
-import { BlockinChallengeParams } from '@/api-indexer/requests/blockin';
-import { GetAndVerifySIWBBRequestPayload } from '@/api-indexer/requests/requests';
+import { CosmosAddress } from '@/api-indexer/docs/interfaces';
+import { BlockinAndGroup, BlockinAssetConditionGroup, BlockinOrGroup, OwnershipRequirements } from '@/api-indexer/requests/blockin';
+import { ExchangeSIWBBAuthorizationCodePayload } from '@/api-indexer/requests/requests';
+import { getChainDriver } from '@/chain-drivers/verifySig';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base';
 import { NumberType } from '@/common/string-numbers';
 import { SupportedChain } from '@/common/types';
-import { iSecretsProof } from '@/interfaces/badges/core';
+import { iAttestationsProof } from '@/interfaces/badges/core';
 import { blsCreateProof, blsVerify, blsVerifyProof } from '@trevormil/bbs-signatures';
-import { ChallengeParams, IChainDriver, VerifyChallengeOptions, verifyChallenge } from 'blockin';
-import { convertToCosmosAddress, getChainDriver, getChainForAddress, verifySignature } from '../address-converter/converter';
-import { SecretsProof } from './secrets';
+import { AndGroup, AssetConditionGroup, ChallengeParams, OrGroup } from 'blockin';
+import { convertToCosmosAddress, getChainForAddress } from '../address-converter/converter';
+import { AttestationsProof } from './secrets';
 
 /**
  * @category Interfaces
@@ -19,20 +20,8 @@ export interface iBlockinChallenge<T extends NumberType> {
   address: string;
   /** The chain of the address */
   chain: SupportedChain;
-  /** Some chains require the public key as well to verify signatures */
-  publicKey?: string;
-  /**
-   * The corresponding message that was signed to obtain the signature.
-   */
-  message: BlockinMessage;
-  /**
-   * The signature of the message.
-   */
-  signature?: string;
-  /**
-   * The converted params for the message
-   */
-  params: ChallengeParams<T>;
+  /** The ownership requirements for the user */
+  ownershipRequirements?: AssetConditionGroup<T>;
   /**
    * The converted Cosmos address of params.address. This can be used as the
    * unique identifier for the user (e.g. avoid duplicate sign ins from equivalent 0x and cosmos1 addresses).
@@ -53,12 +42,10 @@ export interface iBlockinChallenge<T extends NumberType> {
     errorMessage?: string;
   };
 
-  options?: VerifyChallengeOptions;
-
   /**
-   * Derived data integrity proofs for any secrets requested.
+   * Derived data integrity proofs for any attestations requested.
    */
-  secretsPresentations?: iSecretsProof<T>[];
+  attestationsPresentations?: iAttestationsProof<T>[];
 
   /** Other sign-ins that were requested */
   otherSignIns?: {
@@ -67,9 +54,6 @@ export interface iBlockinChallenge<T extends NumberType> {
     google?: { username: string; id: string } | undefined;
     twitter?: { username: string; id: string } | undefined;
   };
-
-  /** Whether to allow reuse of BitBadges sign in */
-  allowReuseOfBitBadgesSignIn?: boolean;
 }
 
 /**
@@ -78,18 +62,13 @@ export interface iBlockinChallenge<T extends NumberType> {
 export class BlockinChallenge<T extends NumberType> extends BaseNumberTypeClass<BlockinChallenge<T>> implements iBlockinChallenge<T> {
   address: string;
   chain: SupportedChain;
-  publicKey?: string;
-  message: BlockinMessage;
-  signature?: string;
-  params: BlockinChallengeParams<T>;
-  options?: VerifyChallengeOptions;
+  ownershipRequirements?: BlockinAssetConditionGroup<T>;
   cosmosAddress: CosmosAddress;
   verificationResponse?: {
     success: boolean;
     errorMessage?: string;
   };
-  secretsPresentations?: SecretsProof<T>[];
-  allowReuseOfBitBadgesSignIn?: boolean;
+  attestationsPresentations?: AttestationsProof<T>[];
   otherSignIns?: {
     discord?: { username: string; discriminator?: string | undefined; id: string } | undefined;
     github?: { username: string; id: string } | undefined;
@@ -99,88 +78,20 @@ export class BlockinChallenge<T extends NumberType> extends BaseNumberTypeClass<
 
   constructor(data: iBlockinChallenge<T>) {
     super();
-    this.params = new BlockinChallengeParams(data.params);
-    this.signature = data.signature;
-    this.message = data.message;
     this.address = data.address;
     this.cosmosAddress = data.cosmosAddress;
     this.chain = data.chain;
-    this.options = data.options;
-    this.publicKey = data.publicKey;
     this.verificationResponse = data.verificationResponse;
     this.otherSignIns = data.otherSignIns;
-    this.allowReuseOfBitBadgesSignIn = data.allowReuseOfBitBadgesSignIn;
-    this.secretsPresentations = data.secretsPresentations?.map((proof) => new SecretsProof(proof));
-  }
-
-  static async FromSIWBBRequestId<T extends NumberType>(api: BitBadgesApi<T>, body: GetAndVerifySIWBBRequestPayload) {
-    const SIWBBRequestRes = await api.getAndVerifySIWBBRequest(body);
-    return SIWBBRequestRes.blockin;
-  }
-
-  /**
-   * Verify function with all features (including asset ownership verification). This requires a call to the BitBadges API.
-   *
-   * Sets verificationResponse to the response from the API.
-   */
-  async verify(api: BitBadgesApi<T>, options: VerifyChallengeOptions) {
-    try {
-      await api.verifySIWBBRequest({
-        message: this.message,
-        signature: this.signature ?? '',
-        publicKey: this.publicKey,
-        secretsPresentations: this.secretsPresentations,
-        options
-      });
-
-      this.options = options;
-      this.verificationResponse = { success: true };
-      return true;
-    } catch (e: any) {
-      console.error(e);
-      this.verificationResponse = {
-        success: false,
-        errorMessage: e.errorMessage
-      };
-
-      return false;
-    }
-  }
-
-  /**
-   * Verify function with all offline features (no asset ownership verification). This does not require a call to the BitBadges API.
-   *
-   * Sets verificationResponse to the response.
-   */
-  async verifyOffline(options: VerifyChallengeOptions) {
-    const chainDriver = getChainDriver(this.chain);
-    try {
-      const res = await verifyChallenge(
-        chainDriver as IChainDriver<NumberType>,
-        this.message,
-        this.signature ?? '',
-        {
-          ...options,
-          skipAssetVerification: true
-        },
-        this.publicKey
-      );
-
-      this.options = {
-        ...options,
-        skipAssetVerification: true
-      };
-      this.verificationResponse = res;
-
-      return res.success;
-    } catch (e: any) {
-      console.error(e);
-      this.verificationResponse = {
-        success: false,
-        errorMessage: e.errorMessage
-      };
-
-      return false;
+    this.attestationsPresentations = data.attestationsPresentations?.map((proof) => new AttestationsProof(proof));
+    if (data.ownershipRequirements) {
+      if ((data.ownershipRequirements as AndGroup<T>)['$and']) {
+        this.ownershipRequirements = new BlockinAndGroup(data.ownershipRequirements as AndGroup<T>);
+      } else if ((data.ownershipRequirements as OrGroup<T>)['$or']) {
+        this.ownershipRequirements = new BlockinOrGroup(data.ownershipRequirements as OrGroup<T>);
+      } else {
+        this.ownershipRequirements = new OwnershipRequirements(data.ownershipRequirements as OwnershipRequirements<T>);
+      }
     }
   }
 
@@ -190,14 +101,14 @@ export class BlockinChallenge<T extends NumberType> extends BaseNumberTypeClass<
    * Does not set verificationResponse.
    */
   async verifyAssets(api: BitBadgesApi<T>) {
-    if (!this.params.assetOwnershipRequirements) {
+    if (!this.ownershipRequirements) {
       return true;
     }
 
     try {
       await api.verifyOwnershipRequirements({
-        cosmosAddress: this.cosmosAddress,
-        assetOwnershipRequirements: this.params.assetOwnershipRequirements
+        address: this.address,
+        assetOwnershipRequirements: this.ownershipRequirements
       });
 
       return true;
@@ -208,35 +119,18 @@ export class BlockinChallenge<T extends NumberType> extends BaseNumberTypeClass<
   }
 
   /**
-   * Verifies the signature only. This does not require a call to the BitBadges API. Does not set verificationResponse.
-   */
-  async verifySignature() {
-    if (!this.signature) {
-      throw new Error('Signature must be set with setSignature before calling verifySignature');
-    }
-
-    try {
-      await verifySignature(this.chain, this.address, this.message, this.signature, this.publicKey);
-      return true;
-    } catch (e: any) {
-      console.error(e);
-      return false;
-    }
-  }
-
-  /**
-   * Verifies the secrets proofs only. This does not require a call to the BitBadges API. Does not set verificationResponse.
+   * Verifies the attestations proofs only. This does not require a call to the BitBadges API. Does not set verificationResponse.
    *
    * Note this only verifies the signatures / validity of the proofs. You are responsible for checking the contents of the proofs.
    */
-  async verifySecretsPresentationSignatures() {
-    if (!this.secretsPresentations) {
-      throw new Error('Secrets proofs must be set with setsecretsPresentations before calling verifySecretsPresentationSignatures');
+  async verifyAttestationsPresentationSignatures() {
+    if (!this.attestationsPresentations) {
+      throw new Error('Attestations proofs must be set with setattestationsPresentations before calling verifyAttestationsPresentationSignatures');
     }
 
     try {
-      for (const proof of this.secretsPresentations) {
-        await verifySecretsPresentationSignatures(proof, true);
+      for (const proof of this.attestationsPresentations) {
+        await verifyAttestationsPresentationSignatures(proof, true);
       }
 
       return true;
@@ -252,28 +146,28 @@ export class BlockinChallenge<T extends NumberType> extends BaseNumberTypeClass<
 }
 
 /**
- * Creates a secrets proof that is well-formed according to the BitBadges expected format
+ * Creates a attestations proof that is well-formed according to the BitBadges expected format
  *
  * @category SIWBB Authentication
  */
-export const createSecretsProof = blsCreateProof;
+export const createAttestationsProof = blsCreateProof;
 
 /**
- * Verifies the secrets proofs well-formedness and signatures. This does not require a call to the BitBadges API.  Note this only verifies the signatures / validity of the proofs.
+ * Verifies the attestations proofs well-formedness and signatures. This does not require a call to the BitBadges API.  Note this only verifies the signatures / validity of the proofs.
  * You are responsible for checking the contents of the proofs.
  *
  * @category SIWBB Authentication
  */
-export const verifySecretsPresentationSignatures = async (
-  body: Omit<iSecretsProof<NumberType>, 'anchors' | 'holders' | 'updateHistory' | 'credential' | 'entropies'>,
+export const verifyAttestationsPresentationSignatures = async (
+  body: Omit<iAttestationsProof<NumberType>, 'anchors' | 'holders' | 'updateHistory' | 'credential' | 'entropies'>,
   derivedProof?: boolean
 ) => {
-  if (!body.secretMessages.length || body.secretMessages.some((m) => !m)) {
+  if (!body.attestationMessages.length || body.attestationMessages.some((m) => !m)) {
     throw new Error('Messages are required and cannot be empty');
   }
 
   if (body.messageFormat === 'json') {
-    for (const message of body.secretMessages) {
+    for (const message of body.attestationMessages) {
       try {
         JSON.parse(message);
       } catch (e) {
@@ -293,7 +187,7 @@ export const verifySecretsPresentationSignatures = async (
       const chain = getChainForAddress(address);
       await getChainDriver(chain).verifySignature(
         address,
-        body.secretMessages?.[0] ?? '',
+        body.attestationMessages?.[0] ?? '',
         body.dataIntegrityProof.signature,
         body.dataIntegrityProof.publicKey
       );
@@ -302,16 +196,16 @@ export const verifySecretsPresentationSignatures = async (
         throw new Error('Proof of issuance is required for BBS scheme');
       }
 
-      //proofOfIssuance is used for BBS secrets to establish the link between the signer and the secret
-      //The actual secret is signed by a BBS key pair (not the creator's native key pair). This is done because BBS
+      //proofOfIssuance is used for BBS attestations to establish the link between the signer and the attestation
+      //The actual attestation is signed by a BBS key pair (not the creator's native key pair). This is done because BBS
       //signatures offer uniuqe properties like selective disclosure.
       //To establish the link between the actual creator and the BBS signer, we use the proofOfIssuance to basically say
-      //"I approve the issuance of secrets signed with BBS+ <BBS public key> as my own."
+      //"I approve the issuance of attestations signed with BBS+ <BBS public key> as my own."
 
-      //Make sure the proof of issuance message contents actually establish the link between the signer and the secret
+      //Make sure the proof of issuance message contents actually establish the link between the signer and the attestation
       //Make sure the signer is the same as the proof signer
       //Note this may be different if you have a custom implementation
-      //For BitBadges, we do this with the following message: "message": "I approve the issuance of secrets signed with BBS+ a5159099a24a8993b5eb8e62d04f6309bbcf360ae03135d42a89b3d94cbc2bc678f68926373b9ded9b8b9a27348bc755177209bf2074caea9a007a6c121655cd4dda5a6618bfc9cb38052d32807c6d5288189913aa76f6d49844c3648d4e6167 as my own.\n\n",
+      //For BitBadges, we do this with the following message: "message": "I approve the issuance of attestations signed with BBS+ a5159099a24a8993b5eb8e62d04f6309bbcf360ae03135d42a89b3d94cbc2bc678f68926373b9ded9b8b9a27348bc755177209bf2074caea9a007a6c121655cd4dda5a6618bfc9cb38052d32807c6d5288189913aa76f6d49844c3648d4e6167 as my own.\n\n",
       const bbsSigner = body.proofOfIssuance.message.split(' ')[9];
       if (bbsSigner !== body.dataIntegrityProof.signer) {
         throw new Error('Proof signer does not match proof of issuance');
@@ -334,7 +228,7 @@ export const verifySecretsPresentationSignatures = async (
         const isProofVerified = await blsVerify({
           signature: Uint8Array.from(Buffer.from(body.dataIntegrityProof.signature, 'hex')),
           publicKey: Uint8Array.from(Buffer.from(body.dataIntegrityProof.signer, 'hex')),
-          messages: body.secretMessages.map((message) => Uint8Array.from(Buffer.from(message, 'utf-8')))
+          messages: body.attestationMessages.map((message) => Uint8Array.from(Buffer.from(message, 'utf-8')))
         });
 
         if (!isProofVerified.verified) {
@@ -344,7 +238,7 @@ export const verifySecretsPresentationSignatures = async (
         const isProofVerified = await blsVerifyProof({
           proof: Uint8Array.from(Buffer.from(body.dataIntegrityProof.signature, 'hex')),
           publicKey: Uint8Array.from(Buffer.from(body.dataIntegrityProof.signer, 'hex')),
-          messages: body.secretMessages.map((message) => Uint8Array.from(Buffer.from(message, 'utf-8'))),
+          messages: body.attestationMessages.map((message) => Uint8Array.from(Buffer.from(message, 'utf-8'))),
           nonce: Uint8Array.from(Buffer.from('nonce', 'utf8'))
         });
         if (!isProofVerified.verified) {
@@ -362,35 +256,43 @@ export const verifySecretsPresentationSignatures = async (
 /**
  * @category SIWBB Authentication
  */
+export interface VerifySIWBBOptions {
+  /** The expected ownership requirements for the user */
+  ownershipRequirements?: AssetConditionGroup<NumberType>;
+  /** The expected socials sign ins for the user */
+  otherSignIns?: ('discord' | 'twitter' | 'github' | 'google')[];
+  /** How recent the challenge must be in milliseconds. Defaults to 10 minutes */
+  issuedAtTimeWindowMs?: number;
+  /** Skip asset verification. This may be useful for simulations or testing */
+  skipAssetVerification?: boolean;
+}
+
+/**
+ * @category SIWBB Authentication
+ */
 export interface CodeGenQueryParams {
-  challengeParams: ChallengeParams<NumberType>;
-
-  name: string;
-  description: string;
-  image: string;
-
-  allowAddressSelect?: boolean;
-  autoGenerateNonce?: boolean;
-
-  verifyOptions?: VerifyChallengeOptions;
+  ownershipRequirements?: AssetConditionGroup<NumberType>;
   expectVerifySuccess?: boolean;
+
+  name?: string;
+  description?: string;
+  image?: string;
 
   otherSignIns?: ('discord' | 'twitter' | 'github' | 'google')[];
 
-  redirectUri?: string;
-  clientId: string;
+  redirect_uri?: string;
+  client_id: string;
   state?: string;
+  scope?: string;
 
-  expectSecretsPresentations?: boolean;
-
-  allowReuseOfBitBadgesSignIn?: boolean;
+  expectAttestationsPresentations?: boolean;
 }
 
 /**
  * @category SIWBB Authentication
  */
 export const generateBitBadgesAuthUrl = (params: CodeGenQueryParams) => {
-  let url = `https://bitbadges.io/auth/codegen?`;
+  let url = `https://bitbadges.io/siwbb/authorize?`;
   for (const [key, value] of Object.entries(params)) {
     if (value) {
       if (typeof value === 'object') {

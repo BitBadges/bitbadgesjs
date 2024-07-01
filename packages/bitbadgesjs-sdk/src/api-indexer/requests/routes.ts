@@ -26,6 +26,7 @@ export class BitBadgesApiRoutes {
   static RefreshMetadataRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/refresh`;
   static GetRefreshStatusRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/refreshStatus`;
   static FilterBadgesInCollectionRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/filter`;
+  static FilterSuggestionsRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/filterSuggestions`;
 
   static GenericVerifyAssetsRoute = () => '/api/v0/verifyOwnershipRequirements';
 
@@ -65,16 +66,19 @@ export class BitBadgesApiRoutes {
   static SendClaimAlertRoute = () => '/api/v0/claimAlerts/send';
   static GetClaimAlertsRoute = () => '/api/v0/claimAlerts';
 
-  static GetAndVerifySIWBBRequestsRoute = () => '/api/v0/siwbbRequest/fetch';
+  static ExchangeSIWBBAuthorizationCodesRoute = () => '/api/v0/siwbb/token';
   static CRUDSIWBBRequestRoute = () => '/api/v0/siwbbRequest';
+  static RotateSIWBBRequestRoute = () => '/api/v0/siwbbRequest/rotate';
   static GenericVerifyRoute = () => '/api/v0/siwbbRequest/verify';
 
-  static GetFollowDetailsRoute = () => '/api/v0/follow-protocol';
-
   static GenerateAppleWalletPassRoute = () => '/api/v0/siwbbRequest/appleWalletPass';
+  static GenerateGoogleWalletPassRoute = () => '/api/v0/siwbbRequest/googleWalletPass';
 
-  static GetSecretsRoute = () => '/api/v0/secret/fetch';
-  static CRUDSecretRoute = () => '/api/v0/secret';
+  static GetAttestationsRoute = () => '/api/v0/attestation/fetch';
+  static CRUDAttestationRoute = () => '/api/v0/attestation';
+
+  static GetAttestationProofsRoute = () => '/api/v0/attestationProof/fetch';
+  static CRUDAttestationProofRoute = () => '/api/v0/attestationProof';
 
   static GetDeveloperAppsRoute = () => '/api/v0/developerApp/fetch';
   static CRUDDeveloperAppRoute = () => '/api/v0/developerApp';
@@ -84,9 +88,8 @@ export class BitBadgesApiRoutes {
   static CRUDPluginRoute = () => '/api/v0/plugins';
 
   static GetMapsRoute = () => '/api/v0/maps';
+  static GetMapValuesRoute = () => '/api/v0/mapValues';
 
   static GetActiveAuthorizationsRoute = () => '/api/v0/oauth/authorizations';
-  static OauthAuthorizeRoute = () => '/api/v0/oauth/authorize';
-  static OauthTokenRoute = () => '/api/v0/oauth/token';
-  static OauthRevokeRoute = () => '/api/v0/oauth/token/revoke';
+  static OauthRevokeRoute = () => '/api/v0/siwbb/token/revoke';
 }

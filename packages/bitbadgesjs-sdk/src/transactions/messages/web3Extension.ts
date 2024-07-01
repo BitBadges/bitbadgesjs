@@ -60,7 +60,7 @@ export function signatureToWeb3ExtensionBitcoin(chain: Chain, sender: Sender, he
  * This function is used to create a web3 extension for an Ethereum EIP712 transaction.
  * We use extensions to tell the chain to parse and check the signatures using EIP712 format instead of the default format.
  *
- * @param chainId The chain id of the chain you are using. For mainnet (bitbadges_1-1, this is 1). For testnets / betanet (bitbadges_1-2, this is 2 and so on).
+ * @param chainId The chain id of the chain you are using. For mainnet (bitbadges_1-1, this is 1). For testnets (bitbadges_1-2, this is 2 and so on).
  * @param feePayer The Cosmos address of the fee payer.
  * @param feePayerSig The signature of the signed EIP message. Must resolve to the fee payer address.
  *
@@ -81,7 +81,7 @@ export function createWeb3ExtensionEthereum(chainId: number | bigint, feePayer: 
 /**
  * This function is used to create a web3 extension for a Solana transaction.
  *
- * @param chainId The chain id of the chain you are using. For mainnet (bitbadges_1-1, this is 1). For testnets / betanet (bitbadges_1-2, this is 2 and so on).
+ * @param chainId The chain id of the chain you are using. For mainnet (bitbadges_1-1, this is 1). For testnets (bitbadges_1-2, this is 2 and so on).
  * @param feePayer The mapped Cosmos address of the fee payer. This is the address that signed the transaction. Use solanaToCosmos(...)
  * @param feePayerSig The signature of the signed message. Must resolve to the fee payer address.
  * @param solanaAddress The address of the Solana account. Must map to the Cosmos address for feePayer.
@@ -105,7 +105,7 @@ export function createWeb3ExtensionSolana(chainId: number | bigint, feePayer: st
 /**
  * This function is used to create a web3 extension for a Bitcoin transaction.
  *
- * @param chainId The chain id of the chain you are using. For mainnet (bitbadges_1-1, this is 1). For testnets / betanet (bitbadges_1-2, this is 2 and so on).
+ * @param chainId The chain id of the chain you are using. For mainnet (bitbadges_1-1, this is 1). For testnets (bitbadges_1-2, this is 2 and so on).
  * @param feePayer The mapped Cosmos address of the fee payer. This is the address that signed the transaction. Use solanaToCosmos(...)
  * @param feePayerSig The signature of the signed message. Must resolve to the fee payer address.
  *

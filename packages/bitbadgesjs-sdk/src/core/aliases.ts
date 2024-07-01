@@ -83,6 +83,8 @@ export function getAliasDerivationKeysForCollection(collectionId: NumberType) {
 /**
  * Derivation keys for a list alias to be used in `generateAlias`.
  *
+ * For this, we use an incrementing ID, similar to collections on-chain.
+ *
  * @category Aliases
  */
 export function getAliasDerivationKeysForList(id: NumberType) {

@@ -10,6 +10,7 @@ import type { ClaimIntegrationPluginType, IntegrationPluginDetails, iAddressList
 import type { iMetadata } from './metadata/metadata';
 import { Metadata } from './metadata/metadata';
 import { BitBadgesApiRoutes } from './requests/routes';
+import typia from 'typia';
 
 /**
  * @inheritDoc iAddressListDoc
@@ -33,6 +34,8 @@ export interface iBitBadgesAddressList<T extends NumberType> extends iAddressLis
     claimId: string;
     /** Plugins are the criteria for the claim. */
     plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
+
+    approach?: string;
   }[];
 }
 
@@ -53,7 +56,7 @@ export class BitBadgesAddressList<T extends NumberType>
       pagination: PaginationInfo;
     };
   };
-  claims: { plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[]; claimId: string }[];
+  claims: { plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[]; claimId: string; approach?: string }[];
 
   constructor(data: iBitBadgesAddressList<T>) {
     super(data);
@@ -218,11 +221,16 @@ export class BitBadgesAddressList<T extends NumberType>
   /**
    * Gets address lists from the API.
    */
-  static async GetAddressLists<T extends NumberType>(api: BaseBitBadgesApi<T>, options: GetAddressListsPayload) {
+  static async GetAddressLists<T extends NumberType>(api: BaseBitBadgesApi<T>, payload: GetAddressListsPayload) {
     try {
+      const validateRes: typia.IValidation<GetAddressListsPayload> = typia.validate<GetAddressListsPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
       const response = await api.axios.post<iGetAddressListsSuccessResponse<T>>(
         `${api.BACKEND_URL}${BitBadgesApiRoutes.GetAddressListsRoute()}`,
-        options
+        payload
       );
       return new GetAddressListsSuccessResponse(response.data);
     } catch (error) {
@@ -236,11 +244,16 @@ export class BitBadgesAddressList<T extends NumberType>
    *
    * Behind the scenes, this is just an alias for UpdateAddressList.
    */
-  static async CreateAddressList<T extends NumberType>(api: BaseBitBadgesApi<T>, options: CreateAddressListsPayload) {
+  static async CreateAddressList<T extends NumberType>(api: BaseBitBadgesApi<T>, payload: CreateAddressListsPayload) {
     try {
+      const validateRes: typia.IValidation<CreateAddressListsPayload> = typia.validate<CreateAddressListsPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
       const response = await api.axios.post<iCreateAddressListsSuccessResponse>(
         `${api.BACKEND_URL}${BitBadgesApiRoutes.CRUDAddressListsRoute()}`,
-        options
+        payload
       );
       return new CreateAddressListsSuccessResponse(response.data);
     } catch (error) {
@@ -252,11 +265,16 @@ export class BitBadgesAddressList<T extends NumberType>
   /**
    * Updates an off-chain address list. On-chain lists are updated through blockchain transactions.
    */
-  static async UpdateAddressList<T extends NumberType>(api: BaseBitBadgesApi<T>, options: UpdateAddressListsPayload) {
+  static async UpdateAddressList<T extends NumberType>(api: BaseBitBadgesApi<T>, payload: UpdateAddressListsPayload) {
     try {
+      const validateRes: typia.IValidation<UpdateAddressListsPayload> = typia.validate<UpdateAddressListsPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
       const response = await api.axios.put<iUpdateAddressListsSuccessResponse>(
         `${api.BACKEND_URL}${BitBadgesApiRoutes.CRUDAddressListsRoute()}`,
-        options
+        payload
       );
       return new UpdateAddressListsSuccessResponse(response.data);
     } catch (error) {
@@ -268,10 +286,15 @@ export class BitBadgesAddressList<T extends NumberType>
   /**
    * Deletes an off-chain address list. On-chain lists are deleted through blockchain transactions.
    */
-  static async DeleteAddressList<T extends NumberType>(api: BaseBitBadgesApi<T>, options: DeleteAddressListsPayload) {
+  static async DeleteAddressList<T extends NumberType>(api: BaseBitBadgesApi<T>, payload: DeleteAddressListsPayload) {
     try {
+      const validateRes: typia.IValidation<DeleteAddressListsPayload> = typia.validate<DeleteAddressListsPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
       const response = await api.axios.delete<iDeleteAddressListsSuccessResponse>(`${api.BACKEND_URL}${BitBadgesApiRoutes.CRUDAddressListsRoute()}`, {
-        data: options
+        data: payload
       });
       return new DeleteAddressListsSuccessResponse(response.data);
     } catch (error) {
@@ -392,6 +415,7 @@ export type iAddressListCreateObject = iAddressList & {
   claims: {
     claimId: string;
     plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
+    approach?: string;
   }[];
 };
 

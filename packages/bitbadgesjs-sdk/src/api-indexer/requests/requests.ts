@@ -7,15 +7,13 @@ import { BitBadgesUserInfo } from '@/api-indexer/BitBadgesUserInfo';
 import type { PaginationInfo } from '@/api-indexer/base';
 import { EmptyResponseClass } from '@/api-indexer/base';
 import { ClaimAlertDoc, TransferActivityDoc } from '@/api-indexer/docs/activity';
-import { AccessTokenDoc, DeveloperAppDoc, PluginDoc, SecretDoc, StatusDoc } from '@/api-indexer/docs/docs';
+import { AccessTokenDoc, DeveloperAppDoc, PluginDoc, AttestationDoc, StatusDoc, AttestationProofDoc } from '@/api-indexer/docs/docs';
 import type {
   BlockinMessage,
   ClaimIntegrationPluginCustomBodyType,
   ClaimIntegrationPluginType,
   CosmosAddress,
   IntegrationPluginDetails,
-  JsonBodyInputSchema,
-  JsonBodyInputWithValue,
   NativeAddress,
   PluginPresetType,
   UNIXMilliTimestamp,
@@ -26,10 +24,12 @@ import type {
   iCustomPage,
   iDeveloperAppDoc,
   iPluginDoc,
-  iSecretDoc,
+  iAttestationDoc,
   iSocialConnections,
   iStatusDoc,
-  iTransferActivityDoc
+  iTransferActivityDoc,
+  iAttestationProofDoc,
+  JsonBodyInputSchema
 } from '@/api-indexer/docs/interfaces';
 import type { iBadgeMetadataDetails, iCollectionMetadataDetails } from '@/api-indexer/metadata/badgeMetadata';
 import type { iMetadata } from '@/api-indexer/metadata/metadata';
@@ -39,15 +39,89 @@ import type { NumberType } from '@/common/string-numbers';
 import type { SupportedChain } from '@/common/types';
 import { PredeterminedBalances, iChallengeDetails, iChallengeInfoDetails } from '@/core/approvals';
 import type { iBatchBadgeDetails } from '@/core/batch-utils';
-import { BlockinChallenge, iBlockinChallenge } from '@/core/blockin';
-import { SecretsProof } from '@/core/secrets';
+import { BlockinChallenge, VerifySIWBBOptions, iBlockinChallenge } from '@/core/blockin';
+import { AttestationsProof } from '@/core/secrets';
 import type { iOffChainBalancesMap } from '@/core/transfers';
 import { UintRangeArray } from '@/core/uintRanges';
-import type { iPredeterminedBalances, iSecretsProof, iUintRange } from '@/interfaces';
-import type { DeliverTxResponse, Event } from '@cosmjs/stargate';
-import type { AssetConditionGroup, ChallengeParams, VerifyChallengeOptions } from 'blockin';
-import { BlockinChallengeParams } from './blockin';
+import type { iPredeterminedBalances, iAttestationsProof, iUintRange } from '@/interfaces';
 import { BroadcastPostBody } from '@/node-rest-api';
+import { AndGroup, OrGroup, type AssetConditionGroup, type ChallengeParams, type VerifyChallengeOptions } from 'blockin';
+import { BlockinAndGroup, BlockinAssetConditionGroup, BlockinChallengeParams, BlockinOrGroup, OwnershipRequirements } from './blockin';
+
+/**
+ * The response after successfully broadcasting a transaction.
+ * Success or failure refer to the execution result.
+ */
+export interface DeliverTxResponse {
+  readonly height: number;
+  /** The position of the transaction within the block. This is a 0-based index. */
+  readonly txIndex: number;
+  /** Error code. The transaction suceeded if and only if code is 0. */
+  readonly code: number;
+  readonly transactionHash: string;
+  readonly events: readonly Event[];
+  /**
+   * A string-based log document.
+   *
+   * This currently seems to merge attributes of multiple events into one event per type
+   * (https://github.com/tendermint/tendermint/issues/9595). You might want to use the `events`
+   * field instead.
+   *
+   * @deprecated This field is not filled anymore in Cosmos SDK 0.50+ (https://github.com/cosmos/cosmos-sdk/pull/15845).
+   * Please consider using `events` instead.
+   */
+  readonly rawLog?: string;
+  /** @deprecated Use `msgResponses` instead. */
+  readonly data?: readonly {
+    msgType: string;
+    data: Uint8Array;
+  }[];
+  /**
+   * The message responses of the [TxMsgData](https://github.com/cosmos/cosmos-sdk/blob/v0.46.3/proto/cosmos/base/abci/v1beta1/abci.proto#L128-L140)
+   * as `Any`s.
+   * This field is an empty list for chains running Cosmos SDK < 0.46.
+   */
+  readonly msgResponses: Array<{
+    readonly typeUrl: string;
+    readonly value: Uint8Array;
+  }>;
+  readonly gasUsed: bigint;
+  readonly gasWanted: bigint;
+}
+
+/**
+ * An event attribute.
+ *
+ * This is the same attribute type as tendermint34.Attribute and tendermint35.EventAttribute
+ * but `key` and `value` are unified to strings. The conversion
+ * from bytes to string in the Tendermint 0.34 case should be done by performing
+ * [lossy] UTF-8 decoding.
+ *
+ * [lossy]: https://doc.rust-lang.org/stable/std/string/struct.String.html#method.from_utf8_lossy
+ *
+ *
+ *
+ *  @category API Requests / Responses
+ */
+export interface Attribute {
+  readonly key: string;
+  readonly value: string;
+}
+
+/**
+ * The same event type as tendermint34.Event and tendermint35.Event
+ * but attribute keys and values are unified to strings. The conversion
+ * from bytes to string in the Tendermint 0.34 case should be done by performing
+ * [lossy] UTF-8 decoding.
+ *
+ * [lossy]: https://doc.rust-lang.org/stable/std/string/struct.String.html#method.from_utf8_lossy
+ *
+ * @category API Requests / Responses
+ */
+export interface Event {
+  readonly type: string;
+  readonly attributes: readonly Attribute[];
+}
 
 /**
  * @category API Requests / Responses
@@ -169,11 +243,13 @@ export interface iClaimDetails<T extends NumberType> {
   /** If manual distribution is enabled, we do not handle any distribution of claim codes. We leave that up to the claim creator. */
   manualDistribution?: boolean;
   /** Whether the claim is expected to be automatically triggered by someone (not the user). */
-  automatic?: boolean;
+  approach?: string; //'in-site' | 'api' | 'zapier';
   /** Seed code for the claim. */
   seedCode?: string;
   /** Metadata for the claim. */
   metadata?: iMetadata<T>;
+  /** Algorithm to determine the claim number order */
+  assignMethod?: string;
 }
 
 /**
@@ -185,9 +261,10 @@ export class ClaimDetails<T extends NumberType> extends BaseNumberTypeClass<Clai
   balancesToSet?: PredeterminedBalances<T>;
   plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
   manualDistribution?: boolean;
-  automatic?: boolean;
+  approach?: string;
   seedCode?: string | undefined;
   metadata?: Metadata<T> | undefined;
+  assignMethod?: string | undefined;
 
   constructor(data: iClaimDetails<T>) {
     super();
@@ -195,9 +272,10 @@ export class ClaimDetails<T extends NumberType> extends BaseNumberTypeClass<Clai
     this.balancesToSet = data.balancesToSet ? new PredeterminedBalances(data.balancesToSet) : undefined;
     this.plugins = data.plugins;
     this.manualDistribution = data.manualDistribution;
-    this.automatic = data.automatic;
+    this.approach = data.approach;
     this.seedCode = data.seedCode;
     this.metadata = data.metadata ? new Metadata(data.metadata) : undefined;
+    this.assignMethod = data.assignMethod;
   }
 
   convert<U extends NumberType>(convertFunction: (val: NumberType) => U): ClaimDetails<U> {
@@ -303,6 +381,9 @@ export class GetClaimAttemptStatusSuccessResponse
 export interface SimulateClaimPayload {
   /** If provided, we will check that no plugins or claims have been updated since the last time the user fetched the claim. */
   _fetchedAt?: number;
+
+  /** If provided, we will only simulate the claim for the specific plugins w/ the provided instance IDs. */
+  _specificInstanceIds?: string[];
 
   /** The claim body for each unique plugin. */
   [customPluginId: string]: ClaimIntegrationPluginCustomBodyType<ClaimIntegrationPluginType> | any | undefined;
@@ -472,6 +553,7 @@ export interface UpdateAccountInfoPayload {
   customPages?: {
     badges: iCustomPage<NumberType>[];
     lists: iCustomListPage[];
+    attestations: iCustomListPage[];
   };
 
   /**
@@ -480,6 +562,7 @@ export interface UpdateAccountInfoPayload {
   watchlists?: {
     badges: iCustomPage<NumberType>[];
     lists: iCustomListPage[];
+    attestations: iCustomListPage[];
   };
 
   /**
@@ -511,10 +594,10 @@ export interface UpdateAccountInfoPayload {
    * Approved sign in methods. Only returned if user is authenticated with full access.
    */
   approvedSignInMethods?: {
-    discord?: { scopes: string[]; username: string; discriminator?: string | undefined; id: string } | undefined;
-    github?: { scopes: string[]; username: string; id: string } | undefined;
-    google?: { scopes: string[]; username: string; id: string } | undefined;
-    twitter?: { scopes: string[]; username: string; id: string } | undefined;
+    discord?: { scopes: OAuthScopeDetails[]; username: string; discriminator?: string | undefined; id: string } | undefined;
+    github?: { scopes: OAuthScopeDetails[]; username: string; id: string } | undefined;
+    google?: { scopes: OAuthScopeDetails[]; username: string; id: string } | undefined;
+    twitter?: { scopes: OAuthScopeDetails[]; username: string; id: string } | undefined;
   };
 
   /**
@@ -541,6 +624,8 @@ export interface AddBalancesToOffChainStoragePayload {
    * A map of Cosmos addresses or list IDs -> Balance<NumberType>[].
    * This will be set first. If undefined, we leave the existing balances map as is.
    * For genesis, this must be set (even if empty {}), so we create the unique URL.
+   *
+   * If defined, this will overwrite for the entire collection. You must provide ALL balances for the collection.
    */
   balances?: iOffChainBalancesMap<NumberType>;
 
@@ -559,6 +644,7 @@ export interface AddBalancesToOffChainStoragePayload {
     claimId: string;
     plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
     balancesToSet?: iPredeterminedBalances<NumberType>;
+    approach?: string;
   }[];
 
   /**
@@ -802,7 +888,9 @@ export class VerifySignInSuccessResponse extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export interface CheckSignInStatusPayload {}
+export interface CheckSignInStatusPayload {
+  validateAccessTokens?: boolean;
+}
 
 /**
  * @category API Requests / Responses
@@ -812,6 +900,11 @@ export interface iCheckSignInStatusSuccessResponse {
    * Indicates whether the user is signed in.
    */
   signedIn: boolean;
+
+  /**
+   * Approved scopes
+   */
+  scopes: OAuthScopeDetails[];
 
   /**
    * The message that was signed.
@@ -850,6 +943,14 @@ export interface iCheckSignInStatusSuccessResponse {
     id: string;
     username: string;
   };
+
+  /**
+   * Signed in with Twitch?
+   */
+  twitch?: {
+    id: string;
+    username: string;
+  };
 }
 
 /**
@@ -859,6 +960,7 @@ export interface iCheckSignInStatusSuccessResponse {
 export class CheckSignInStatusSuccessResponse extends CustomTypeClass<CheckSignInStatusSuccessResponse> implements iCheckSignInStatusSuccessResponse {
   signedIn: boolean;
   message: BlockinMessage;
+  scopes: OAuthScopeDetails[];
   discord?: {
     username: string;
     discriminator: string;
@@ -876,6 +978,7 @@ export class CheckSignInStatusSuccessResponse extends CustomTypeClass<CheckSignI
     id: string;
     username: string;
   };
+  twitch?: { id: string; username: string } | undefined;
 
   constructor(data: iCheckSignInStatusSuccessResponse) {
     super();
@@ -883,8 +986,10 @@ export class CheckSignInStatusSuccessResponse extends CustomTypeClass<CheckSignI
     this.message = data.message;
     this.discord = data.discord;
     this.twitter = data.twitter;
+    this.scopes = data.scopes;
     this.github = data.github;
     this.google = data.google;
+    this.twitch = data.twitch;
   }
 }
 
@@ -902,6 +1007,8 @@ export interface SignOutPayload {
   signOutGoogle?: boolean;
   /** Sign out of GitHub. */
   signOutGithub?: boolean;
+  /** Sign out of Twitch. */
+  signOutTwitch?: boolean;
 }
 
 /**
@@ -1237,7 +1344,7 @@ export interface GenericVerifyAssetsPayload {
   /**
    * The address to check
    */
-  cosmosAddress: CosmosAddress;
+  address: NativeAddress;
 
   /**
    * The asset requirements to verify.
@@ -1248,12 +1355,33 @@ export interface GenericVerifyAssetsPayload {
 /**
  * @category API Requests / Responses
  */
-export interface iGenericVerifyAssetsSuccessResponse {}
+export interface iGenericVerifyAssetsSuccessResponse {
+  /**
+   * Success response of the verification check. Use this to determine if the verification was successful.
+   *
+   * Status code will be 200 both if the user meets or does not meet requirements, so you must check this success field to determine the result.
+   */
+  success: boolean;
+
+  errorMessage?: string;
+}
 
 /**
  * @category API Requests / Responses
  */
-export class GenericVerifyAssetsSuccessResponse extends EmptyResponseClass {}
+export class GenericVerifyAssetsSuccessResponse
+  extends CustomTypeClass<GenericVerifyAssetsSuccessResponse>
+  implements iGenericVerifyAssetsSuccessResponse
+{
+  success: boolean;
+  errorMessage?: string;
+
+  constructor(data: iGenericVerifyAssetsSuccessResponse) {
+    super();
+    this.success = data.success;
+    this.errorMessage = data.errorMessage;
+  }
+}
 
 /**
  * Generic route to verify any SIWBB request. Does not sign you in with the API. Used for custom SIWBB implementations.
@@ -1267,9 +1395,9 @@ export interface GenericBlockinVerifyPayload extends VerifySignInPayload {
   options?: VerifyChallengeOptions;
 
   /**
-   * Additional secrets to verify in the challenge.
+   * Additional attestations to verify in the challenge.
    */
-  secretsPresentations?: SecretsProof<NumberType>[];
+  attestationsPresentations?: AttestationsProof<NumberType>[];
 }
 
 /**
@@ -1287,11 +1415,11 @@ export class GenericBlockinVerifySuccessResponse extends VerifySignInSuccessResp
 /**
  * @category API Requests / Responses
  */
-export interface CreateSecretPayload {
+export interface CreateAttestationPayload {
   /**
    * Proof of issuance is used for BBS+ signatures (scheme = bbs) only.
    * BBS+ signatures are signed with a BBS+ key pair, but you would often want the issuer to be a native address.
-   * The prooofOfIssuance establishes a link saying that "I am the issuer of this secret signed with BBS+ key pair ___".
+   * The prooofOfIssuance establishes a link saying that "I am the issuer of this attestation signed with BBS+ key pair ___".
    *
    * Fields can be left blank for standard signatures.
    */
@@ -1302,24 +1430,24 @@ export interface CreateSecretPayload {
     publicKey?: string;
   };
 
-  /** The message format of the secretMessages. */
+  /** The message format of the attestationMessages. */
   messageFormat: 'plaintext' | 'json';
   /**
-   * The scheme of the secret. BBS+ signatures are supported and can be used where selective disclosure is a requirement.
+   * The scheme of the attestation. BBS+ signatures are supported and can be used where selective disclosure is a requirement.
    * Otherwise, you can simply use your native blockchain's signature scheme.
    */
   scheme: 'bbs' | 'standard';
-  /** The type of the secret (e.g. credential). */
+  /** The type of the attestation (e.g. credential). */
   type: string;
   /**
-   * Thesse are the secrets that are signed.
-   * For BBS+ signatures, there can be >1 secretMessages, and the signer can selectively disclose the secrets.
-   * For standard signatures, there is only 1 secretMessage.
+   * Thesse are the attestations that are signed.
+   * For BBS+ signatures, there can be >1 attestationMessages, and the signer can selectively disclose the attestations.
+   * For standard signatures, there is only 1 attestationMessage.
    */
-  secretMessages: string[];
+  attestationMessages: string[];
 
   /**
-   * This is the signature and accompanying details of the secretMessages. The siganture maintains the integrity of the secretMessages.
+   * This is the signature and accompanying details of the attestationMessages. The siganture maintains the integrity of the attestationMessages.
    *
    * This should match the expected scheme. For example, if the scheme is BBS+, the signature should be a BBS+ signature and signer should be a BBS+ public key.
    */
@@ -1329,84 +1457,93 @@ export interface CreateSecretPayload {
     publicKey?: string;
   };
 
-  /** Metadata for the secret for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
+  /** Metadata for the attestation for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
   name: string;
-  /** Metadata for the secret for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
+  /** Metadata for the attestation for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
   image: string;
-  /** Metadata for the secret for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
+  /** Metadata for the attestation for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
   description: string;
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface iCreateSecretSuccessResponse {
-  /** The secret ID. This is the ID that is given to the user to query the secret. Anyone with the ID can query it, so keep this safe and secure. */
-  secretId: string;
+export interface iCreateAttestationSuccessResponse {
+  /** The attestation ID. This is the ID that is given to the user to query the attestation. Anyone with the ID can query it, so keep this safe and secure. */
+  addKey: string;
 }
 
 /**
  * @category API Requests / Responses
  */
-export class CreateSecretSuccessResponse extends CustomTypeClass<CreateSecretSuccessResponse> implements iCreateSecretSuccessResponse {
-  secretId: string;
+export class CreateAttestationSuccessResponse extends CustomTypeClass<CreateAttestationSuccessResponse> implements iCreateAttestationSuccessResponse {
+  addKey: string;
 
-  constructor(data: iCreateSecretSuccessResponse) {
+  constructor(data: iCreateAttestationSuccessResponse) {
     super();
-    this.secretId = data.secretId;
+    this.addKey = data.addKey;
   }
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface GetSecretPayload {
-  /** The secret ID. This is the ID that is given to the user to query the secret. Anyone with the ID can query it, so keep this safe and secure. */
-  secretId: string;
+export interface GetAttestationPayload {
+  /** The attestation key received from the original attestation creation.  */
+  addKey?: string;
+
+  /** The attestation ID. You can use this if you are the creator or a holder of the attestation. */
+  attestationId?: string;
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface iGetSecretSuccessResponse<T extends NumberType> extends iSecretDoc<T> {}
+export interface iGetAttestationSuccessResponse<T extends NumberType> extends iAttestationDoc<T> {}
 
 /**
  * @category API Requests / Responses
  */
-export class GetSecretSuccessResponse<T extends NumberType> extends SecretDoc<T> {}
+export class GetAttestationSuccessResponse<T extends NumberType> extends AttestationDoc<T> {}
 
 /**
  * @category API Requests / Responses
  */
-export interface DeleteSecretPayload {
-  /** The secret ID. This is the ID that is given to the user to query the secret. Anyone with the ID can query it, so keep this safe and secure. */
-  secretId: string;
+export interface DeleteAttestationPayload {
+  /** The attestation ID. This is the ID that is given to the user to query the attestation. Anyone with the ID can query it, so keep this safe and secure. */
+  attestationId: string;
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface iDeleteSecretSuccessResponse {}
+export interface iDeleteAttestationSuccessResponse {}
 
 /**
  * @category API Requests / Responses
  */
-export class DeleteSecretSuccessResponse extends EmptyResponseClass {}
+export class DeleteAttestationSuccessResponse extends EmptyResponseClass {}
 
 /**
  * @category API Requests / Responses
  */
-export interface UpdateSecretPayload {
-  /** The secret ID. This is the ID that is given to the user to query the secret. Anyone with the ID can query it, so keep this safe and secure. */
-  secretId: string;
+export interface UpdateAttestationPayload {
+  /** The attestation ID. If you are the owner, you can simply use the attestationId to update the attestation. One of addKey or attestationId must be provided. */
+  attestationId?: string;
 
-  /** Holders can use the secret to prove something about themselves. This is a list of holders that have added this secret to their profile. */
+  /** The key to add oneself as a holder to the attestation. This is given to the holder themselves. One of addKey or attestationId must be provided. */
+  addKey?: string;
+
+  /** Whether or not to rotate the add key. */
+  rotateAddKey?: boolean;
+
+  /** Holders can use the attestation to prove something about themselves. This is a list of holders that have added this attestation to their profile. */
   holdersToSet?: {
     cosmosAddress: CosmosAddress;
     delete?: boolean;
   }[];
 
-  /** Blockchain anchors to add to the secret. These are on-chain transactions that can be used to prove stuff about the secret, like
+  /** Blockchain anchors to add to the attestation. These are on-chain transactions that can be used to prove stuff about the attestation, like
    * existence at a certain point in time or to maintain data integrity. */
   anchorsToAdd?: {
     txHash?: string;
@@ -1416,7 +1553,7 @@ export interface UpdateSecretPayload {
   /**
    * Proof of issuance is used for BBS+ signatures (scheme = bbs) only.
    * BBS+ signatures are signed with a BBS+ key pair, but you would often want the issuer to be a native address.
-   * The prooofOfIssuance establishes a link saying that "I am the issuer of this secret signed with BBS+ key pair ___".
+   * The prooofOfIssuance establishes a link saying that "I am the issuer of this attestation signed with BBS+ key pair ___".
    *
    * Fields can be left blank for standard signatures.
    */
@@ -1427,24 +1564,24 @@ export interface UpdateSecretPayload {
     publicKey?: string;
   };
 
-  /** The message format of the secretMessages. */
+  /** The message format of the attestationMessages. */
   messageFormat?: 'plaintext' | 'json';
   /**
-   * The scheme of the secret. BBS+ signatures are supported and can be used where selective disclosure is a requirement.
+   * The scheme of the attestation. BBS+ signatures are supported and can be used where selective disclosure is a requirement.
    * Otherwise, you can simply use your native blockchain's signature scheme.
    */
   scheme?: 'bbs' | 'standard';
-  /** The type of the secret (e.g. credential). */
+  /** The type of the attestation (e.g. credential). */
   type?: string;
   /**
-   * Thesse are the secrets that are signed.
-   * For BBS+ signatures, there can be >1 secretMessages, and the signer can selectively disclose the secrets.
-   * For standard signatures, there is only 1 secretMessage.
+   * Thesse are the attestations that are signed.
+   * For BBS+ signatures, there can be >1 attestationMessages, and the signer can selectively disclose the attestations.
+   * For standard signatures, there is only 1 attestationMessage.
    */
-  secretMessages?: string[];
+  attestationMessages?: string[];
 
   /**
-   * This is the signature and accompanying details of the secretMessages. The siganture maintains the integrity of the secretMessages.
+   * This is the signature and accompanying details of the attestationMessages. The siganture maintains the integrity of the attestationMessages.
    *
    * This should match the expected scheme. For example, if the scheme is BBS+, the signature should be a BBS+ signature and signer should be a BBS+ public key.
    */
@@ -1454,59 +1591,66 @@ export interface UpdateSecretPayload {
     publicKey?: string;
   };
 
-  /** Metadata for the secret for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
+  /** Metadata for the attestation for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
   name?: string;
-  /** Metadata for the secret for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
+  /** Metadata for the attestation for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
   image?: string;
-  /** Metadata for the secret for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
+  /** Metadata for the attestation for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
   description?: string;
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface iUpdateSecretSuccessResponse {}
+export interface iUpdateAttestationSuccessResponse {
+  addKey: string;
+}
 
 /**
  * @category API Requests / Responses
  */
-export class UpdateSecretSuccessResponse extends EmptyResponseClass {}
+export class UpdateAttestationSuccessResponse extends CustomTypeClass<UpdateAttestationSuccessResponse> implements iUpdateAttestationSuccessResponse {
+  addKey: string;
+
+  constructor(data: iUpdateAttestationSuccessResponse) {
+    super();
+    this.addKey = data.addKey;
+  }
+}
 
 /**
  * @category API Requests / Responses
  */
 export interface CreateSIWBBRequestPayload {
+  /** The response type for the SIWBB request. */
+  response_type: string;
+  /** The scopes to request. */
+  scopes: OAuthScopeDetails[];
+
   /** The name of the SIWBB request for display purposes. */
-  name: string;
+  name?: string;
   /** The description of the SIWBB request for display purposes. */
-  description: string;
+  description?: string;
   /** The image of the SIWBB request for display purposes. */
-  image: string;
+  image?: string;
 
-  /** The original message that was signed. */
-  message: BlockinMessage;
-  /** The signature of the message */
-  signature: string;
-  /** The public key of the signer (if needed). Only certain chains require this. */
-  publicKey?: string;
-
-  /** Whether or not we should allow reuse of BitBadges sign-in in replacement of the signature */
-  allowReuseOfBitBadgesSignIn: boolean;
+  /** The ownership requirements for the asset. */
+  ownershipRequirements?: AssetConditionGroup<NumberType>;
 
   /**
-   * If required, you can additionally add proof of secrets to the authentication flow.
+   * If required, you can additionally add proof of attestations to the authentication flow.
    * This proves sensitive information (e.g. GPAs, SAT scores, etc.) without revealing the information itself.
    */
-  secretsPresentations?: iSecretsProof<NumberType>[];
+  attestationsPresentations?: iAttestationsProof<NumberType>[];
 
   /** Client ID for the SIWBB request. */
-  clientId: string;
+  client_id: string;
 
   /** If defined, we will store the current sign-in details for these web2 connections along with the code */
   otherSignIns?: ('discord' | 'twitter' | 'google' | 'github')[];
 
   /** Redirect URI if redirected after successful sign-in. */
-  redirectUri?: string;
+  redirect_uri?: string;
 
   /** State to be passed back to the redirect URI. */
   state?: string;
@@ -1518,6 +1662,37 @@ export interface CreateSIWBBRequestPayload {
 export interface iCreateSIWBBRequestSuccessResponse {
   /** Secret code which can be exchanged for the SIWBB request details. */
   code: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface RotateSIWBBRequestPayload {
+  /** The code of the SIWBB request to rotate. */
+  code: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iRotateSIWBBRequestSuccessResponse {
+  /** The new code for the SIWBB request. */
+  code: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class RotateSIWBBRequestSuccessResponse
+  extends CustomTypeClass<RotateSIWBBRequestSuccessResponse>
+  implements iRotateSIWBBRequestSuccessResponse
+{
+  code: string;
+
+  constructor(data: iRotateSIWBBRequestSuccessResponse) {
+    super();
+    this.code = data.code;
+  }
 }
 
 /**
@@ -1538,7 +1713,7 @@ export class CreateSIWBBRequestSuccessResponse
 /**
  * @category API Requests / Responses
  */
-export interface GetAndVerifySIWBBRequestsForDeveloperAppPayload {
+export interface GetSIWBBRequestsForDeveloperAppPayload {
   /** The bookmark for pagination. */
   bookmark?: string;
   /** The client ID to fetch for */
@@ -1550,7 +1725,7 @@ export interface GetAndVerifySIWBBRequestsForDeveloperAppPayload {
 /**
  * @category API Requests / Responses
  */
-export interface iGetAndVerifySIWBBRequestsForDeveloperAppSuccessResponse<T extends NumberType> {
+export interface iGetSIWBBRequestsForDeveloperAppSuccessResponse<T extends NumberType> {
   siwbbRequests: iBlockinChallenge<T>[];
 
   pagination: PaginationInfo;
@@ -1559,69 +1734,127 @@ export interface iGetAndVerifySIWBBRequestsForDeveloperAppSuccessResponse<T exte
 /**
  * @category API Requests / Responses
  */
-export class GetAndVerifySIWBBRequestsForDeveloperAppSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetAndVerifySIWBBRequestsForDeveloperAppSuccessResponse<T>>
-  implements iGetAndVerifySIWBBRequestsForDeveloperAppSuccessResponse<T>
+export class GetSIWBBRequestsForDeveloperAppSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetSIWBBRequestsForDeveloperAppSuccessResponse<T>>
+  implements iGetSIWBBRequestsForDeveloperAppSuccessResponse<T>
 {
   siwbbRequests: BlockinChallenge<T>[];
   pagination: PaginationInfo;
 
-  constructor(data: iGetAndVerifySIWBBRequestsForDeveloperAppSuccessResponse<T>) {
+  constructor(data: iGetSIWBBRequestsForDeveloperAppSuccessResponse<T>) {
     super();
     this.siwbbRequests = data.siwbbRequests.map((SIWBBRequest) => new BlockinChallenge<T>(SIWBBRequest));
     this.pagination = data.pagination;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetAndVerifySIWBBRequestsForDeveloperAppSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetAndVerifySIWBBRequestsForDeveloperAppSuccessResponse<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetSIWBBRequestsForDeveloperAppSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetSIWBBRequestsForDeveloperAppSuccessResponse<U>;
   }
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface GetAndVerifySIWBBRequestPayload {
+export interface ExchangeSIWBBAuthorizationCodePayload {
   /** The SIWBB request. */
-  code: string;
+  code?: string;
   /** We attempt to verify the current status with each request. You can provide additional options for verification here. */
-  options?: VerifyChallengeOptions;
+  options?: VerifySIWBBOptions;
 
   /** Client secret for the SIWBB request. */
-  clientSecret?: string;
+  client_secret?: string;
   /** Client ID for the SIWBB request. */
-  clientId?: string;
+  client_id?: string;
   /** The redirect URI for the SIWBB request. Only required if the code was created with a redirect URI. */
-  redirectUri?: string;
+  redirect_uri?: string;
+  /** The grant type for the SIWBB request. */
+  grant_type?: 'authorization_code' | 'refresh_token';
+  /** The refresh token to use for the SIWBB request. */
+  refresh_token?: string;
 }
 
 /**
  * @category API Requests / Responses
  */
-export class GetAndVerifySIWBBRequestSuccessResponse<T extends NumberType> extends BaseNumberTypeClass<GetAndVerifySIWBBRequestSuccessResponse<T>> {
-  blockin: BlockinChallenge<NumberType>;
+export class ExchangeSIWBBAuthorizationCodeSuccessResponse<T extends NumberType> extends BaseNumberTypeClass<
+  ExchangeSIWBBAuthorizationCodeSuccessResponse<T>
+> {
+  address: string;
+  chain: SupportedChain;
+  ownershipRequirements?: BlockinAssetConditionGroup<T>;
+  cosmosAddress: CosmosAddress;
+  verificationResponse?: {
+    success: boolean;
+    errorMessage?: string;
+  };
+  attestationsPresentations?: AttestationsProof<T>[];
+  otherSignIns?: {
+    discord?: { username: string; discriminator?: string | undefined; id: string } | undefined;
+    github?: { username: string; id: string } | undefined;
+    google?: { username: string; id: string } | undefined;
+    twitter?: { username: string; id: string } | undefined;
+  };
 
-  constructor(data: iGetAndVerifySIWBBRequestSuccessResponse<T>) {
+  access_token: string;
+  token_type: string = 'Bearer';
+  access_token_expires_at?: UNIXMilliTimestamp<T>;
+
+  refresh_token?: string;
+  refresh_token_expires_at?: UNIXMilliTimestamp<T>;
+
+  constructor(data: iExchangeSIWBBAuthorizationCodeSuccessResponse<T>) {
     super();
-    this.blockin = new BlockinChallenge(data.blockin);
+    this.access_token = data.access_token;
+    this.token_type = 'Bearer';
+    this.access_token_expires_at = data.access_token_expires_at;
+    this.refresh_token = data.refresh_token;
+    this.refresh_token_expires_at = data.refresh_token_expires_at ? data.refresh_token_expires_at : undefined;
+    this.address = data.address;
+    this.chain = data.chain;
+    this.cosmosAddress = data.cosmosAddress;
+    this.verificationResponse = data.verificationResponse;
+    this.attestationsPresentations = data.attestationsPresentations?.map((proof) => new AttestationsProof(proof));
+    if (data.ownershipRequirements) {
+      if ((data.ownershipRequirements as AndGroup<T>)['$and']) {
+        this.ownershipRequirements = new BlockinAndGroup(data.ownershipRequirements as AndGroup<T>);
+      } else if ((data.ownershipRequirements as OrGroup<T>)['$or']) {
+        this.ownershipRequirements = new BlockinOrGroup(data.ownershipRequirements as OrGroup<T>);
+      } else {
+        this.ownershipRequirements = new OwnershipRequirements(data.ownershipRequirements as OwnershipRequirements<T>);
+      }
+    }
+    this.otherSignIns = data.otherSignIns;
   }
 
   getNumberFieldNames(): string[] {
-    return [];
+    return ['access_token_expires_at', 'refresh_token_expires_at'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetAndVerifySIWBBRequestSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetAndVerifySIWBBRequestSuccessResponse<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ExchangeSIWBBAuthorizationCodeSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as ExchangeSIWBBAuthorizationCodeSuccessResponse<U>;
   }
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface iGetAndVerifySIWBBRequestSuccessResponse<T extends NumberType> {
+export interface iExchangeSIWBBAuthorizationCodeSuccessResponse<T extends NumberType> extends iBlockinChallenge<T> {
   /**
-   * Class that contains all details about the SIWBB request.
+   * The access token to use for the SIWBB request.
    */
-  blockin: iBlockinChallenge<T>;
+  access_token: string;
+
+  /** The token type */
+  token_type: string;
+
+  /** The time at which the access token expires. */
+  access_token_expires_at?: UNIXMilliTimestamp<T>;
+
+  /** The refresh token to use for the SIWBB request. */
+  refresh_token?: string;
+
+  /** The time at which the refresh token expires. */
+  refresh_token_expires_at?: UNIXMilliTimestamp<T>;
 }
 
 /**
@@ -1645,7 +1878,7 @@ export class DeleteSIWBBRequestSuccessResponse extends EmptyResponseClass {}
  * @category API Requests / Responses
  */
 export interface GenerateAppleWalletPassPayload {
-  /** The signature of the message. */
+  /** The authentication code. */
   code: string;
 }
 /**
@@ -1669,6 +1902,34 @@ export class GenerateAppleWalletPassSuccessResponse
     super();
     this.type = data.type;
     this.data = data.data;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface GenerateGoogleWalletPayload {
+  /** The authentication code. */
+  code: string;
+}
+/**
+ * @category API Requests / Responses
+ */
+export interface iGenerateGoogleWalletSuccessResponse {
+  saveUrl: string;
+}
+/**
+ * @category API Requests / Responses
+ */
+export class GenerateGoogleWalletSuccessResponse
+  extends CustomTypeClass<GenerateGoogleWalletSuccessResponse>
+  implements iGenerateGoogleWalletSuccessResponse
+{
+  saveUrl: string;
+
+  constructor(data: iGenerateGoogleWalletSuccessResponse) {
+    super();
+    this.saveUrl = data.saveUrl;
   }
 }
 
@@ -1842,6 +2103,11 @@ export class GetDeveloperAppSuccessResponse extends CustomTypeClass<GetDeveloper
 export interface DeleteDeveloperAppPayload {
   /** The client ID of the app to delete. */
   clientId: string;
+  /**
+   * The client secret of the app to delete. This is only needed for temporary developer apps (not linked to a user).
+   * For non-temporary developer apps, the client secret is not needed, but you must be signed in and the owner of the app.
+   */
+  clientSecret?: string;
 }
 
 /**
@@ -1868,17 +2134,34 @@ export interface UpdateDeveloperAppPayload {
   image?: string;
   /** Redirect URIs for the app. */
   redirectUris?: string[];
+  /** Rotate the client secret? */
+  rotateClientSecret?: boolean;
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface iUpdateDeveloperAppSuccessResponse {}
+export interface iUpdateDeveloperAppSuccessResponse {
+  success: boolean;
+  clientSecret?: string;
+}
 
 /**
  * @category API Requests / Responses
  */
-export class UpdateDeveloperAppSuccessResponse extends EmptyResponseClass {}
+export class UpdateDeveloperAppSuccessResponse
+  extends CustomTypeClass<UpdateDeveloperAppSuccessResponse>
+  implements iUpdateDeveloperAppSuccessResponse
+{
+  success: boolean;
+  clientSecret?: string;
+
+  constructor(data: iUpdateDeveloperAppSuccessResponse) {
+    super();
+    this.success = data.success;
+    this.clientSecret = data.clientSecret;
+  }
+}
 
 /**
  * @category API Requests / Responses
@@ -1895,6 +2178,9 @@ export interface CreatePluginPayload {
 
   /** Reuse for non-indexed? */
   reuseForNonIndexed: boolean;
+
+  /** Reuse for lists? */
+  reuseForLists: boolean;
 
   /** This is a flag for being compatible with auto-triggered claims, meaning no user interaction is needed. */
   requiresUserInputs: boolean;
@@ -1920,6 +2206,8 @@ export interface CreatePluginPayload {
     baseUri: string;
   };
 
+  userInputsSchema?: Array<JsonBodyInputSchema>;
+
   claimCreatorRedirect?: {
     baseUri: string;
   };
@@ -1934,16 +2222,20 @@ export interface CreatePluginPayload {
     method: 'POST' | 'GET' | 'PUT' | 'DELETE';
     // hardcodedInputs: Array<JsonBodyInputWithValue>;
 
-    // passAddress: boolean;
-    // passDiscord: boolean;
-    // // passEmail: boolean;
-    // passTwitter: boolean;
-    // passGoogle: boolean;
-    // passGithub: boolean;
+    passAddress?: boolean;
+    passDiscord?: boolean;
+    passEmail?: boolean;
+    passTwitter?: boolean;
+    passGoogle?: boolean;
+    passGithub?: boolean;
+    passTwitch?: boolean;
   };
 
   /** To publish in the directory. This will trigger the start of the review process. */
   toPublish: boolean;
+
+  /** The addresses that are allowed to use this plugin. */
+  approvedUsers?: NativeAddress[];
 }
 
 /**
@@ -1969,6 +2261,9 @@ export interface UpdatePluginPayload {
   /** Reuse for non-indexed? */
   reuseForNonIndexed?: boolean;
 
+  /** Reuse for lists? */
+  reuseForLists?: boolean;
+
   /** This is a flag for being compatible with auto-triggered claims, meaning no user interaction is needed. */
   requiresUserInputs?: boolean;
 
@@ -1989,6 +2284,8 @@ export interface UpdatePluginPayload {
     // createdBy: CosmosAddress;
   };
 
+  userInputsSchema?: Array<JsonBodyInputSchema>;
+
   userInputRedirect?: {
     baseUri: string;
   };
@@ -2007,16 +2304,23 @@ export interface UpdatePluginPayload {
     method: 'POST' | 'GET' | 'PUT' | 'DELETE';
     // hardcodedInputs: Array<JsonBodyInputWithValue>;
 
-    // passAddress: boolean;
-    // passDiscord: boolean;
-    // // passEmail: boolean;
-    // passTwitter: boolean;
-    // passGoogle: boolean;
-    // passGithub: boolean;
+    passAddress?: boolean;
+    passDiscord?: boolean;
+    passEmail?: boolean;
+    passTwitter?: boolean;
+    passGoogle?: boolean;
+    passGithub?: boolean;
+    passTwitch?: boolean;
   };
 
   /** To publish in the directory. This will trigger the start of the review process. */
-  toPublish: boolean;
+  toPublish?: boolean;
+
+  /** The addresses that are allowed to use this plugin. */
+  approvedUsers?: NativeAddress[];
+
+  /** Rotate the plugin secret? */
+  rotatePluginSecret?: boolean;
 }
 
 /**
@@ -2121,7 +2425,25 @@ export class UpdateClaimSuccessResponse extends EmptyResponseClass {}
 /**
  * @category Interfaces
  */
-export type CreateClaimRequest<T extends NumberType> = iClaimDetails<T> & { listId?: string; collectionId?: T; cid?: string };
+export type ManagePluginRequest = Omit<IntegrationPluginDetails<ClaimIntegrationPluginType>, 'publicState' | 'privateState'>;
+
+/**
+ * @category Interfaces
+ */
+export type CreateClaimRequest<T extends NumberType> = Omit<iClaimDetails<T>, 'plugins'> & { listId?: string; collectionId?: T; cid?: string } & {
+  plugins: ManagePluginRequest[];
+};
+
+/**
+ * @category Interfaces
+ */
+export type UpdateClaimRequest<T extends NumberType> = Omit<iClaimDetails<T>, 'seedCode' | 'plugins' | 'assignMethod'> & {
+  listId?: string;
+  collectionId?: T;
+  cid?: string;
+} & {
+  plugins: ManagePluginRequest[];
+};
 
 /**
  * @category API Requests / Responses
@@ -2143,54 +2465,10 @@ export class CreateClaimSuccessResponse extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export interface OauthAuthorizePayload {
-  response_type: string;
-  client_id: string;
-  redirect_uri: string;
-  scope: string;
-  state?: string;
+export interface OAuthScopeDetails {
+  scopeName: string;
+  options?: object;
 }
-
-/**
- * @category API Requests / Responses
- */
-export interface iOauthAuthorizeSuccessResponse {
-  code: string;
-}
-
-/**
- * @category API Requests / Responses
- */
-export class OauthAuthorizeSuccessResponse extends CustomTypeClass<OauthAuthorizeSuccessResponse> implements iOauthAuthorizeSuccessResponse {
-  code: string;
-
-  constructor(data: iOauthAuthorizeSuccessResponse) {
-    super();
-    this.code = data.code;
-  }
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface OauthTokenPayload {
-  grant_type: string;
-  client_id: string;
-  client_secret: string;
-  code?: string;
-  redirect_uri?: string;
-  refresh_token?: string;
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iOauthTokenSuccessResponse extends iAccessTokenDoc {}
-
-/**
- * @category API Requests / Responses
- */
-export class OauthTokenSuccessResponse extends AccessTokenDoc {}
 
 /**
  *
@@ -2209,3 +2487,69 @@ export interface iOauthRevokeSuccessResponse {}
  * @category API Requests / Responses
  */
 export class OauthRevokeSuccessResponse extends EmptyResponseClass {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface CreateAttestationProofPayload extends iAttestationsProof<NumberType> {
+  displayOnProfile: boolean;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iCreateAttestationProofSuccessResponse {
+  /** The proof ID. This is the ID that is given to the user to query the attestation. Anyone with the ID can query it, so keep this safe and secure. */
+  id: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class CreateAttestationProofSuccessResponse
+  extends CustomTypeClass<CreateAttestationProofSuccessResponse>
+  implements iCreateAttestationProofSuccessResponse
+{
+  id: string;
+
+  constructor(data: iCreateAttestationProofSuccessResponse) {
+    super();
+    this.id = data.id;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface GetAttestationProofPayload {
+  /** The attestation proof ID. */
+  id: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetAttestationProofSuccessResponse<T extends NumberType> extends iAttestationProofDoc<T> {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetAttestationProofSuccessResponse<T extends NumberType> extends AttestationProofDoc<T> {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface DeleteAttestationProofPayload {
+  /** The attestation proof ID. */
+  id: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iDeleteAttestationProofSuccessResponse {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class DeleteAttestationProofSuccessResponse extends EmptyResponseClass {}

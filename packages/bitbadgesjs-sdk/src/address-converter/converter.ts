@@ -1,36 +1,22 @@
-import { isValidChecksumAddress, stripHexPrefix, toChecksumAddress } from 'crypto-addr-codec';
-import { bech32 } from 'bech32';
-import { sha256 } from '@cosmjs/crypto';
-import { ethers } from 'ethers';
 import { SupportedChain } from '@/common/types';
+import { sha256 as nobleSha256 } from '@noble/hashes/sha256';
+import { bech32 } from 'bech32';
 import bs58 from 'bs58';
-import EthDriver from 'blockin-eth-driver';
-import CosmosDriver from 'blockin-cosmos-driver';
-import SolDriver from 'blockin-sol-driver';
-import BtcDriver from 'blockin-btc-driver';
+import { isValidChecksumAddress, stripHexPrefix, toChecksumAddress } from 'crypto-addr-codec';
+import { isAddress as _isAddress } from 'ethers';
 
-const ethDriver = new EthDriver('0x1', undefined);
-const solDriver = new SolDriver('');
-const cosmosDriver = new CosmosDriver('bitbadges_1-1');
-const btcDriver = new BtcDriver('Bitcoin');
+// Typescript was weird about this import
+function isAddress(address: string): boolean {
+  return _isAddress(address);
+}
 
-/**
- * @category Address Utils
- */
-export const getChainDriver = (chain: string) => {
-  switch (chain) {
-    case 'Cosmos':
-      return cosmosDriver;
-    case 'Ethereum':
-      return ethDriver;
-    case 'Solana':
-      return solDriver;
-    case 'Bitcoin':
-      return btcDriver;
-    default:
-      return ethDriver;
-  }
+const sha256 = (data: Uint8Array): Uint8Array => {
+  const hash = nobleSha256.create();
+  hash.update(data);
+  return hash.digest();
 };
+
+// nobleSha256.create().digest
 
 const BITCOIN_WITNESS_VERSION_SEPARATOR_BYTE = 0;
 
@@ -60,6 +46,7 @@ function makeBech32Encoder(prefix: string) {
   return (data: Buffer) => {
     const words = bech32.toWords(data);
     const wordsToEncode = prefix == 'bc' ? [BITCOIN_WITNESS_VERSION_SEPARATOR_BYTE, ...words] : words;
+
     const encodedAddress = bech32.encode(prefix, wordsToEncode);
 
     return encodedAddress;
@@ -134,7 +121,7 @@ export function convertToCosmosAddress(address: string) {
     cosmosToEth(address); //throws on failure
     bech32Address = address;
   } catch {
-    if (ethers.utils.isAddress(address)) {
+    if (isAddress(address)) {
       bech32Address = ethToCosmos(address);
     } else if (address.length == 44) {
       try {
@@ -225,7 +212,7 @@ export function getChainForAddress(address: string) {
     cosmosToEth(address); //throws on failure
     return SupportedChain.COSMOS;
   } catch {
-    if (ethers.utils.isAddress(address)) {
+    if (isAddress(address)) {
       return SupportedChain.ETH;
     }
   }
@@ -259,18 +246,6 @@ export function getAbbreviatedAddress(address: string) {
 }
 
 /**
- * Verifies a (message, signature) pair using any native chain's supported signature verification method.
- *
- * For certain chains (Cosmos), we also additionally need th epublicKey or else the function will fail.
- *
- * @category Address Utils
- */
-export function verifySignature(chain: SupportedChain, address: string, message: string, signature: string, publicKey?: string) {
-  const driver = getChainDriver(chain);
-  return driver.verifySignature(address, message, signature, publicKey);
-}
-
-/**
  * Checks if an address is validly formatted. If a chain is not provided, we will try to determine the chain from the address.
  *
  * @category Address Utils
@@ -291,7 +266,7 @@ export function isAddressValid(address: string, chain?: SupportedChain) {
   switch (chain) {
     case SupportedChain.ETH:
     case SupportedChain.UNKNOWN:
-      isValidAddress = ethers.utils.isAddress(address);
+      isValidAddress = isAddress(address);
       break;
     case SupportedChain.COSMOS:
       try {

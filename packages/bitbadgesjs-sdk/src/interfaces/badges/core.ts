@@ -1,4 +1,4 @@
-import { CosmosAddress, iBadgeMetadataDetails, iCollectionMetadataDetails } from '@/api-indexer';
+import { CosmosAddress, UNIXMilliTimestamp, iBadgeMetadataDetails, iCollectionMetadataDetails } from '@/api-indexer';
 import { iUpdateHistory } from '@/api-indexer/docs/docs';
 import type { NumberType } from '@/common/string-numbers';
 import { iCosmosCoin } from '@/core/coin';
@@ -71,21 +71,23 @@ export interface iOffChainBalancesMetadata {
 /**
  * @category Interfaces
  */
-export interface iSecretsProof<T extends NumberType> {
+export interface iAttestationsProof<T extends NumberType> {
   /** Entropies used for certain data integrity proofs on-chain (e.g. HASH(message + entropy) = on-chain value) */
   entropies?: string[];
 
   updateHistory?: iUpdateHistory<T>[];
 
-  /** The message format of the secretMessages. */
+  /** The message format of the attestationMessages. */
   messageFormat: 'plaintext' | 'json';
-  /** The address of the user who created the secret. */
+  /** The address of the user who created the attestation. */
   createdBy: CosmosAddress;
+  /** When the attestation was created. */
+  createdAt: UNIXMilliTimestamp<T>;
 
   /**
    * Proof of issuance is used for BBS+ signatures (scheme = bbs) only.
    * BBS+ signatures are signed with a BBS+ key pair, but you would often want the issuer to be a native address.
-   * The prooofOfIssuance establishes a link saying that "I am the issuer of this secret signed with BBS+ key pair ___".
+   * The prooofOfIssuance establishes a link saying that "I am the issuer of this attestation signed with BBS+ key pair ___".
    *
    * Fields can be left blank for standard signatures.
    */
@@ -97,20 +99,20 @@ export interface iSecretsProof<T extends NumberType> {
   };
 
   /**
-   * The scheme of the secret. BBS+ signatures are supported and can be used where selective disclosure is a requirement.
+   * The scheme of the attestation. BBS+ signatures are supported and can be used where selective disclosure is a requirement.
    * Otherwise, you can simply use your native blockchain's signature scheme.
    */
   scheme: 'bbs' | 'standard';
 
   /**
-   * Thesse are the secrets that are signed.
-   * For BBS+ signatures, there can be >1 secretMessages, and the signer can selectively disclose the secrets.
-   * For standard signatures, there is only 1 secretMessage.
+   * Thesse are the attestations that are signed.
+   * For BBS+ signatures, there can be >1 attestationMessages, and the signer can selectively disclose the attestations.
+   * For standard signatures, there is only 1 attestationMessage.
    */
-  secretMessages: string[];
+  attestationMessages: string[];
 
   /**
-   * This is the signature and accompanying details of the secretMessages. The siganture maintains the integrity of the secretMessages.
+   * This is the signature and accompanying details of the attestationMessages. The siganture maintains the integrity of the attestationMessages.
    *
    * This should match the expected scheme. For example, if the scheme is BBS+, the signature should be a BBS+ signature and signer should be a BBS+ public key.
    */
@@ -120,17 +122,17 @@ export interface iSecretsProof<T extends NumberType> {
     publicKey?: string;
   };
 
-  /** Metadata for the secret for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
+  /** Metadata for the attestation for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
   name: string;
-  /** Metadata for the secret for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
+  /** Metadata for the attestation for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
   image: string;
-  /** Metadata for the secret for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
+  /** Metadata for the attestation for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
   description: string;
 
   /**
    * Anchors are on-chain transactions used to prove certain things
-   * about the secret. For example, you can anchor the secret to a
-   * transaction hash to prove that the secret existed at a certain time.
+   * about the attestation. For example, you can anchor the attestation to a
+   * transaction hash to prove that the attestation existed at a certain time.
    */
   anchors?: {
     txHash?: string;
@@ -141,16 +143,18 @@ export interface iSecretsProof<T extends NumberType> {
 /**
  * @category Interfaces
  */
-export interface iSecret {
-  /** The message format of the secretMessages. */
+export interface iAttestation<T extends NumberType> {
+  /** The message format of the attestationMessages. */
   messageFormat: 'plaintext' | 'json';
-  /** The address of the user who created the secret. */
+  /** The address of the user who created the attestation. */
   createdBy: CosmosAddress;
+  /** When the attestation was created. */
+  createdAt: UNIXMilliTimestamp<T>;
 
   /**
    * Proof of issuance is used for BBS+ signatures (scheme = bbs) only.
    * BBS+ signatures are signed with a BBS+ key pair, but you would often want the issuer to be a native address.
-   * The prooofOfIssuance establishes a link saying that "I am the issuer of this secret signed with BBS+ key pair ___".
+   * The prooofOfIssuance establishes a link saying that "I am the issuer of this attestation signed with BBS+ key pair ___".
    *
    * Fields can be left blank for standard signatures.
    */
@@ -161,25 +165,29 @@ export interface iSecret {
     publicKey?: string;
   };
 
-  /** The secret ID. This is the ID that is given to the user to query the secret. Anyone with the ID can query it, so keep this safe and secure. */
-  secretId: string;
+  /** The attestation ID. This is the constan ID that is given to the attestation.  */
+  attestationId: string;
+
+  /** The addKey is used to add the attestation to the user's wallet. Anyone with the key can query it, so keep this safe and secure. */
+  addKey: string;
 
   /**
-   * The scheme of the secret. BBS+ signatures are supported and can be used where selective disclosure is a requirement.
+   * The scheme of the attestation. BBS+ signatures are supported and can be used where selective disclosure is a requirement.
    * Otherwise, you can simply use your native blockchain's signature scheme.
    */
   scheme: 'bbs' | 'standard';
-  /** The type of the secret (e.g. credential). */
+  /** The type of the attestation (e.g. credential). */
   type: string;
-  /**
-   * Thesse are the secrets that are signed.
-   * For BBS+ signatures, there can be >1 secretMessages, and the signer can selectively disclose the secrets.
-   * For standard signatures, there is only 1 secretMessage.
-   */
-  secretMessages: string[];
 
   /**
-   * This is the signature and accompanying details of the secretMessages. The siganture maintains the integrity of the secretMessages.
+   * Thesse are the attestations that are signed.
+   * For BBS+ signatures, there can be >1 attestationMessages, and the signer can selectively disclose the attestations.
+   * For standard signatures, there is only 1 attestationMessage.
+   */
+  attestationMessages: string[];
+
+  /**
+   * This is the signature and accompanying details of the attestationMessages. The siganture maintains the integrity of the attestationMessages.
    *
    * This should match the expected scheme. For example, if the scheme is BBS+, the signature should be a BBS+ signature and signer should be a BBS+ public key.
    */
@@ -189,22 +197,22 @@ export interface iSecret {
     publicKey?: string;
   };
 
-  /** Metadata for the secret for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
+  /** Metadata for the attestation for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
   name: string;
-  /** Metadata for the secret for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
+  /** Metadata for the attestation for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
   image: string;
-  /** Metadata for the secret for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
+  /** Metadata for the attestation for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
   description: string;
 
   /**
-   * Holders are the addresses that have been given the secret.
+   * Holders are the addresses that have been given the attestation.
    */
   holders: string[];
 
   /**
    * Anchors are on-chain transactions used to prove certain things
-   * about the secret. For example, you can anchor the secret to a
-   * transaction hash to prove that the secret existed at a certain time.
+   * about the attestation. For example, you can anchor the attestation to a
+   * transaction hash to prove that the attestation existed at a certain time.
    */
   anchors: {
     txHash?: string;

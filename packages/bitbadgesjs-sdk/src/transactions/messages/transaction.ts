@@ -1,15 +1,14 @@
-import { Keccak } from 'sha3';
-import type { Any } from '@bufbuild/protobuf';
-import type { StdFee } from '@cosmjs/amino';
-import { makeSignDoc, serializeSignDoc } from '@cosmjs/amino';
-import { PubKey } from '@/proto/ethereum/ethsecp256k1/keys_pb';
 import { Coin } from '@/proto/cosmos/base/v1beta1/coin_pb';
-import { SignMode } from '@/proto/cosmos/tx/signing/v1beta1/signing_pb';
-import { TxBody, Fee, SignerInfo, ModeInfo, ModeInfo_Single, AuthInfo, SignDoc } from '@/proto/cosmos/tx/v1beta1/tx_pb';
-import { PubKey as SECP256k1 } from '@/proto/cosmos/crypto/secp256k1/keys_pb';
 import { PubKey as PubKeySolana } from '@/proto/cosmos/crypto/ed25519/keys_pb';
+import { PubKey as SECP256k1 } from '@/proto/cosmos/crypto/secp256k1/keys_pb';
+import { SignMode } from '@/proto/cosmos/tx/signing/v1beta1/signing_pb';
+import { AuthInfo, Fee, ModeInfo, ModeInfo_Single, SignDoc, SignerInfo, TxBody } from '@/proto/cosmos/tx/v1beta1/tx_pb';
+import { PubKey } from '@/proto/ethereum/ethsecp256k1/keys_pb';
 import { convertProtoMessageToObject } from '@/transactions/amino/objectConverter';
 import { AminoTypes } from '@/transactions/amino/registry';
+import type { Any } from '@bufbuild/protobuf';
+import { Keccak } from 'sha3';
+import { makeSignDoc, serializeSignDoc, StdFee } from './signDoc';
 import type { MessageGenerated } from './utils';
 import { createAnyMessage } from './utils';
 

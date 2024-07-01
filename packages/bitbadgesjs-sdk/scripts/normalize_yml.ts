@@ -31,19 +31,18 @@ fs.readFile(filePath, 'utf8', (err, data) => {
       { route: '/claims/status/{claimAttemptId}', schema: '' },
       { route: '/browse', schema: 'GetBrowseCollectionsPayload' },
       { route: '/addressLists/fetch', schema: 'GetAddressListsPayload' },
-      { route: '/siwbbRequest/fetch', schema: 'GetAndVerifySIWBBRequestPayload' },
-      { route: '/developerApp/siwbbRequests', schema: 'GetAndVerifySIWBBRequestsForDeveloperAppPayload' },
+      { route: '/siwbb/token', schema: 'ExchangeSIWBBAuthorizationCodePayload' },
+      { route: '/developerApp/siwbbRequests', schema: 'GetSIWBBRequestsForDeveloperAppPayload' },
       { route: '/siwbbRequest/verify', schema: 'GenericBlockinVerifyPayload' },
       { route: '/verifyOwnershipRequirements', schema: 'GenericVerifyAssetsPayload' },
-      { route: '/follow-protocol', schema: 'GetFollowDetailsPayload' },
       { route: '/claimAlerts', schema: 'GetClaimAlertsForCollectionPayload' },
       { route: '/collection/{collectionId}/refreshStatus', schema: '' },
       { route: '/maps', schema: 'GetMapsPayload' },
-      { route: '/secret/fetch', schema: 'GetSecretPayload' },
+      { route: '/attestation/fetch', schema: 'GetAttestationPayload' },
       { route: '/collection/{collectionId}/filter', schema: 'FilterBadgesInCollectionPayload' },
       { route: '/siwbbRequest/appleWalletPass', schema: 'GenerateAppleWalletPassPayload' },
       { route: '/claims/fetch', schema: 'GetClaimsPayload' },
-      { route: '/oauth/token', schema: 'OauthTokenPayload' }
+      { route: '/siwbb/token', schema: 'OauthTokenPayload' }
     ];
     for (const obj of postToGetRoutes) {
       if ((yamlData as any).paths[obj.route]) {
@@ -194,7 +193,7 @@ function addExamples(obj: any) {
   addExamples(obj, 'earliestIssuedAt', ['2022-01-01T00:00:00Z']);
 
   addExamples(obj, 'resources', [['Full Access: Full access to all features.']]);
-  addExamples(obj, 'secretMessages', [['secret message 1', 'secret message 2']]);
+  addExamples(obj, 'attestationMessages', [['attestation message 1', 'attestation message 2']]);
 
   addExamples(obj, 'viewId', ['viewKey']);
   addExamples(obj, 'viewType', ['viewKey']);

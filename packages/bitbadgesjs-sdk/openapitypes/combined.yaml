@@ -1153,9 +1153,9 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/GetAddressListsPayload'
-  /siwbbRequest/fetch:
+  /siwbb/token:
     post:
-      operationId: getAndVerifySIWBBRequest
+      operationId: exchangeSIWBBAuthorizationCode
       summary: Get And Verify Siwbb Request
       tags:
         - Sign In with BitBadges
@@ -1175,7 +1175,7 @@ paths:
 
         const options: VerifyChallengeOptions = { ... }
 
-        const res = await BitBadgesApi.getAndVerifySIWBBRequest({
+        const res = await BitBadgesApi.exchangeSIWBBAuthorizationCode({
             code,
             options,
             clientSecret: '...',
@@ -1201,7 +1201,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/iGetAndVerifySIWBBRequestSuccessResponse'
+                $ref: '#/components/schemas/iExchangeSIWBBAuthorizationCodeSuccessResponse'
         '400':
           $ref: '#/components/responses/BadRequestResponse'
         '401':
@@ -1221,7 +1221,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GetAndVerifySIWBBRequestPayload'
+              $ref: '#/components/schemas/ExchangeSIWBBAuthorizationCodePayload'
   /siwbbRequest:
     delete:
       operationId: deleteSIWBBRequest
@@ -1337,7 +1337,7 @@ paths:
             application/json:
               schema:
                 $ref: >-
-                  #/components/schemas/iGetAndVerifySIWBBRequestsForDeveloperAppSuccessResponse
+                  #/components/schemas/iGetSIWBBRequestsForDeveloperAppSuccessResponse
         '400':
           $ref: '#/components/responses/BadRequestResponse'
         '401':
@@ -1359,7 +1359,7 @@ paths:
           application/json:
             schema:
               $ref: >-
-                #/components/schemas/GetAndVerifySIWBBRequestsForDeveloperAppPayload
+                #/components/schemas/GetSIWBBRequestsForDeveloperAppPayload
   /siwbbRequest/verify:
     post:
       operationId: verifySIWBBRequest
@@ -1375,7 +1375,7 @@ paths:
         for you.
 
         Note that you can also implement this yourself or use the
-        getAndVerifySIWBBRequest route.
+        exchangeSIWBBAuthorizationCode route.
 
 
 
@@ -2189,7 +2189,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/GenerateAppleWalletPassPayload'
-  /oauth/token:
+  /siwbb/token:
     post:
       operationId: getOauthAccessToken
       summary: Get OAuth Access Token
@@ -2214,7 +2214,7 @@ paths:
 
         ```tsx
 
-        // POST https://api.bitbadges.io/api/v0/oauth/token
+        // POST https://api.bitbadges.io/api/v0/siwbb/token
 
         const res = await BitBadgesApi.getOauthAccessToken({
             client_id,
@@ -2269,7 +2269,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/OauthTokenPayload'
-  /oauth/token/revoke:
+  /siwbb/token/revoke:
     post:
       operationId: revokeOauthAuthorization
       summary: Revoke Authorization
@@ -8220,7 +8220,7 @@ components:
         - code
       additionalProperties: false
       type: object
-    GetAndVerifySIWBBRequestsForDeveloperAppPayload:
+    GetSIWBBRequestsForDeveloperAppPayload:
       properties:
         bookmark:
           description: The bookmark for pagination.
@@ -8232,7 +8232,7 @@ components:
         - clientId
       additionalProperties: false
       type: object
-    iGetAndVerifySIWBBRequestsForDeveloperAppSuccessResponse:
+    iGetSIWBBRequestsForDeveloperAppSuccessResponse:
       properties:
         siwbbRequests:
           items:
@@ -8245,7 +8245,7 @@ components:
         - pagination
       additionalProperties: false
       type: object
-    GetAndVerifySIWBBRequestPayload:
+    ExchangeSIWBBAuthorizationCodePayload:
       properties:
         code:
           description: The Blockin Siwbb request.
@@ -8270,7 +8270,7 @@ components:
         - code
       additionalProperties: false
       type: object
-    iGetAndVerifySIWBBRequestSuccessResponse:
+    iExchangeSIWBBAuthorizationCodeSuccessResponse:
       properties:
         blockin:
           description: >-

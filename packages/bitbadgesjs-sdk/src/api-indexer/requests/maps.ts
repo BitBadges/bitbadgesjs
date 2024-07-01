@@ -1,9 +1,9 @@
 import type { CustomType } from '@/common/base';
-import { BaseNumberTypeClass, CustomTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base';
 import type { NumberType } from '@/common/string-numbers';
-import { iMap, iValueStore, Map, ValueStore } from '@/transactions/messages/bitbadges/maps';
-import { iMetadata, Metadata } from '../metadata';
-import { iUpdateHistory, UpdateHistory } from '../docs/docs';
+import { Map, ValueStore, iMap, iValueStore } from '@/transactions/messages/bitbadges/maps';
+import { UpdateHistory, iUpdateHistory } from '../docs/docs';
+import { Metadata, iMetadata } from '../metadata';
 
 /**
  * @category API Requests / Responses
@@ -78,5 +78,46 @@ export class GetMapsSuccessResponse<T extends NumberType>
 
   convert<U extends NumberType>(convertFunction: (val: NumberType) => U): GetMapsSuccessResponse<U> {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetMapsSuccessResponse<U>;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface GetMapValuesPayload {
+  /** The values to fetch for each map. */
+  valuesToFetch: { mapId: string; keys: string[] }[];
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetMapValuesSuccessResponse {
+  values: { mapId: string; values: { [key: string]: iValueStore } }[];
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetMapValuesSuccessResponse
+  extends BaseNumberTypeClass<GetMapValuesSuccessResponse>
+  implements iGetMapValuesSuccessResponse, CustomType<GetMapValuesSuccessResponse>
+{
+  values: { mapId: string; values: { [key: string]: ValueStore } }[];
+
+  constructor(data: iGetMapValuesSuccessResponse) {
+    super();
+    this.values = data.values.map((value) => ({
+      mapId: value.mapId,
+      values: Object.fromEntries(Object.entries(value.values).map(([key, value]) => [key, new ValueStore(value)]))
+    }));
+  }
+
+  getNumberFieldNames(): string[] {
+    return [];
+  }
+
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): GetMapValuesSuccessResponse {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetMapValuesSuccessResponse;
   }
 }

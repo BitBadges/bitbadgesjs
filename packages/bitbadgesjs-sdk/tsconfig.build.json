@@ -2,14 +2,21 @@
   "compilerOptions": {
     "baseUrl": "src",
     "paths": {
-      "@/*": ["*"]
+      "@/*": [
+        "*"
+      ]
     },
     "target": "ESNext",
     "module": "commonjs",
     "moduleResolution": "node",
-
     "outDir": "dist",
-    "lib": ["DOM", "es2019", "es2021", "es2022", "es2023"],
+    "lib": [
+      "DOM",
+      "es2019",
+      "es2021",
+      "es2022",
+      "es2023"
+    ],
     "strict": true,
     // "noUnusedLocals": true,
     // "noUnusedParameters": true,
@@ -23,8 +30,26 @@
     "incremental": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "types": ["node", "jest"]
+    "types": [
+      "node",
+      "jest"
+    ],
+    "plugins": [
+      {
+        "transform": "typia/lib/transform"
+      }
+    ],
+    "strictNullChecks": true
   },
-  "exclude": ["node_modules", "dist", "docs", "./dist"],
-  "include": ["src", "**/*.test.ts", "**/*.spec.ts"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "docs",
+    "./dist"
+  ],
+  "include": [
+    "src",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ]
 }

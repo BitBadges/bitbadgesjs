@@ -5,6 +5,7 @@ export const genTestAddress = () => {
   const ethAddress = ethers.Wallet.createRandom().address;
   return convertToCosmosAddress(ethAddress);
 };
+
 const addressList = new AddressList({
   listId: '1',
   addresses: [genTestAddress()],

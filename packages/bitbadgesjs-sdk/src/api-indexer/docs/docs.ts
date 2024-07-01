@@ -3,7 +3,7 @@ import { BaseNumberTypeClass, CustomTypeClass, convertClassPropertiesAndMaintain
 import type { NumberType } from '@/common/string-numbers';
 import { BigIntify } from '@/common/string-numbers';
 import type { SupportedChain } from '@/common/types';
-import { AddressList, SecretsProof, getValueAtTimeForTimeline } from '@/core';
+import { AddressList, AttestationsProof, getValueAtTimeForTimeline } from '@/core';
 import {
   ApprovalInfoDetails,
   ChallengeDetails,
@@ -36,7 +36,7 @@ import type { iUserBalanceStore } from '@/interfaces/badges/userBalances';
 import type { Doc } from '../base';
 import type { iMetadata } from '../metadata/metadata';
 import { Metadata } from '../metadata/metadata';
-import { BlockinChallengeParams } from '../requests/blockin';
+import { BlockinAndGroup, BlockinAssetConditionGroup, BlockinChallengeParams, BlockinOrGroup, OwnershipRequirements } from '../requests/blockin';
 import { MapWithValues } from '../requests/maps';
 import type {
   ClaimIntegrationPluginType,
@@ -65,7 +65,6 @@ import type {
   iCustomPage,
   iEmailVerificationStatus,
   iFetchDoc,
-  iFollowDetailsDoc,
   iIPFSTotalsDoc,
   iLatestBlockStatus,
   iMapDoc,
@@ -75,12 +74,15 @@ import type {
   iProfileDoc,
   iQueueDoc,
   iRefreshDoc,
-  iSecretDoc,
+  iAttestationDoc,
   iSocialConnections,
   iStatusDoc,
-  iUsedLeafStatus
+  iUsedLeafStatus,
+  NativeAddress,
+  iAttestationProofDoc
 } from './interfaces';
-import { VerifyChallengeOptions } from 'blockin';
+import { OAuthScopeDetails } from '../requests/requests';
+import { AndGroup, OrGroup } from 'blockin';
 
 /**
  * @inheritDoc iCollectionDoc
@@ -299,12 +301,14 @@ export class SocialConnections<T extends NumberType> extends BaseNumberTypeClass
   twitter?: SocialConnectionInfo<T> | undefined;
   github?: SocialConnectionInfo<T> | undefined;
   google?: SocialConnectionInfo<T> | undefined;
+  twitch?: SocialConnectionInfo<T> | undefined;
 
   constructor(data: iSocialConnections<T>) {
     super();
     this.discord = data.discord ? new SocialConnectionInfo(data.discord) : undefined;
     this.twitter = data.twitter ? new SocialConnectionInfo(data.twitter) : undefined;
     this.github = data.github ? new SocialConnectionInfo(data.github) : undefined;
+    this.twitch = data.twitch ? new SocialConnectionInfo(data.twitch) : undefined;
     this.google = data.google ? new SocialConnectionInfo(data.google) : undefined;
   }
 
@@ -357,6 +361,7 @@ export class EmailVerificationStatus<T extends NumberType>
   implements iEmailVerificationStatus<T>
 {
   verified?: boolean;
+  verifiedAt?: UNIXMilliTimestamp<T> | undefined;
   token?: string;
   expiry?: UNIXMilliTimestamp<T>;
   antiPhishingCode?: string;
@@ -367,10 +372,11 @@ export class EmailVerificationStatus<T extends NumberType>
     this.token = data.token;
     this.expiry = data.expiry;
     this.antiPhishingCode = data.antiPhishingCode;
+    this.verifiedAt = data.verifiedAt;
   }
 
   getNumberFieldNames(): string[] {
-    return ['expiry'];
+    return ['expiry', 'verifiedAt'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): EmailVerificationStatus<U> {
@@ -437,8 +443,9 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
   customPages?: {
     badges: CustomPage<T>[];
     lists: CustomListPage[];
+    attestations: CustomListPage[];
   };
-  watchlists?: { badges: CustomPage<T>[]; lists: CustomListPage[] };
+  watchlists?: { badges: CustomPage<T>[]; lists: CustomListPage[]; attestations: CustomListPage[] };
   profilePicUrl?: string;
   username?: string;
   latestSignedInChain?: SupportedChain;
@@ -447,10 +454,10 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
   socialConnections?: SocialConnections<T>;
   approvedSignInMethods?:
     | {
-        discord?: { scopes: string[]; username: string; discriminator?: string | undefined; id: string } | undefined;
-        github?: { scopes: string[]; username: string; id: string } | undefined;
-        google?: { scopes: string[]; username: string; id: string } | undefined;
-        twitter?: { scopes: string[]; username: string; id: string } | undefined;
+        discord?: { scopes: OAuthScopeDetails[]; username: string; discriminator?: string | undefined; id: string } | undefined;
+        github?: { scopes: OAuthScopeDetails[]; username: string; id: string } | undefined;
+        google?: { scopes: OAuthScopeDetails[]; username: string; id: string } | undefined;
+        twitter?: { scopes: OAuthScopeDetails[]; username: string; id: string } | undefined;
       }
     | undefined;
 
@@ -472,13 +479,15 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
     this.customPages = data.customPages
       ? {
           badges: data.customPages.badges.map((customPage) => new CustomPage(customPage)),
-          lists: data.customPages.lists.map((customListPage) => new CustomListPage(customListPage))
+          lists: data.customPages.lists.map((customListPage) => new CustomListPage(customListPage)),
+          attestations: data.customPages.attestations.map((customListPage) => new CustomListPage(customListPage))
         }
       : undefined;
     this.watchlists = data.watchlists
       ? {
           badges: data.watchlists.badges.map((customPage) => new CustomPage(customPage)),
-          lists: data.watchlists.lists.map((customListPage) => new CustomListPage(customListPage))
+          lists: data.watchlists.lists.map((customListPage) => new CustomListPage(customListPage)),
+          attestations: data.watchlists.attestations.map((customListPage) => new CustomListPage(customListPage))
         }
       : undefined;
     this.profilePicUrl = data.profilePicUrl;
@@ -519,7 +528,8 @@ export class QueueDoc<T extends NumberType> extends BaseNumberTypeClass<QueueDoc
   recipientAddress?: string;
   activityDocId?: string;
   notificationType?: string;
-  claimInfo?: { session: any; body: any; claimId: string; cosmosAddress: string } | undefined;
+  claimInfo?: { session: any; body: any; claimId: string; cosmosAddress: string; ip: string | undefined } | undefined;
+  faucetInfo?: { txHash: string; recipient: string; amount: NumberType } | undefined;
 
   constructor(data: iQueueDoc<T>) {
     super();
@@ -539,6 +549,7 @@ export class QueueDoc<T extends NumberType> extends BaseNumberTypeClass<QueueDoc
     this.activityDocId = data.activityDocId;
     this.notificationType = data.notificationType;
     this.claimInfo = data.claimInfo;
+    this.faucetInfo = data.faucetInfo;
   }
 
   getNumberFieldNames(): string[] {
@@ -822,7 +833,7 @@ export class ClaimBuilderDoc<T extends NumberType> extends BaseNumberTypeClass<C
   docClaimed: boolean;
   collectionId: T;
   deletedAt?: T | undefined;
-  automatic?: boolean | undefined;
+  approach?: string;
   manualDistribution?: boolean;
   plugins: IntegrationPluginParams<ClaimIntegrationPluginType>[];
   state: { [pluginId: string]: any };
@@ -831,6 +842,7 @@ export class ClaimBuilderDoc<T extends NumberType> extends BaseNumberTypeClass<C
   metadata?: Metadata<T> | undefined;
   lastUpdated: T;
   createdAt: T;
+  assignMethod?: string | undefined;
 
   constructor(data: iClaimBuilderDoc<T>) {
     super();
@@ -843,7 +855,7 @@ export class ClaimBuilderDoc<T extends NumberType> extends BaseNumberTypeClass<C
     this.collectionId = data.collectionId;
     this.plugins = data.plugins;
     this.state = data.state;
-    this.automatic = data.automatic;
+    this.approach = data.approach;
     this.lastUpdated = data.lastUpdated;
     this.manualDistribution = data.manualDistribution;
     this.action = {
@@ -855,6 +867,7 @@ export class ClaimBuilderDoc<T extends NumberType> extends BaseNumberTypeClass<C
     this.trackerDetails = data.trackerDetails ? new ChallengeTrackerIdDetails(data.trackerDetails) : undefined;
     this.metadata = data.metadata ? new Metadata(data.metadata) : undefined;
     this.createdAt = data.createdAt;
+    this.assignMethod = data.assignMethod;
   }
 
   getNumberFieldNames(): string[] {
@@ -1179,9 +1192,10 @@ export class ComplianceDoc<T extends NumberType> extends BaseNumberTypeClass<Com
  */
 export class AuthorizationCodeDoc extends CustomTypeClass<AuthorizationCodeDoc> implements iAuthorizationCodeDoc {
   _docId: string;
+  _id?: string;
   clientId: string;
   redirectUri: string;
-  scopes: string[];
+  scopes: OAuthScopeDetails[];
   address: string;
   cosmosAddress: string;
   expiresAt: number;
@@ -1189,6 +1203,7 @@ export class AuthorizationCodeDoc extends CustomTypeClass<AuthorizationCodeDoc> 
   constructor(data: iAuthorizationCodeDoc) {
     super();
     this._docId = data._docId;
+    this._id = data._id;
     this.clientId = data.clientId;
     this.redirectUri = data.redirectUri;
     this.scopes = data.scopes;
@@ -1212,19 +1227,21 @@ export class AuthorizationCodeDoc extends CustomTypeClass<AuthorizationCodeDoc> 
  */
 export class AccessTokenDoc extends CustomTypeClass<AccessTokenDoc> implements iAccessTokenDoc {
   _docId: string;
+  _id?: string;
   accessToken: string;
   clientId: string;
   tokenType: string;
   refreshToken: string;
   cosmosAddress: string;
   address: string;
-  scopes: string[];
+  scopes: OAuthScopeDetails[];
   refreshTokenExpiresAt: number;
   accessTokenExpiresAt: number;
 
   constructor(data: iAccessTokenDoc) {
     super();
     this._docId = data._docId;
+    this._id = data._id;
     this.accessToken = data.accessToken;
     this.tokenType = data.tokenType;
     this.clientId = data.clientId;
@@ -1299,6 +1316,9 @@ export class PluginDoc<T extends NumberType> extends BaseNumberTypeClass<PluginD
   requiresSessions: boolean;
   requiresUserInputs: boolean;
   reuseForNonIndexed: boolean;
+  reuseForLists: boolean;
+
+  approvedUsers: NativeAddress[];
 
   createdBy: CosmosAddress;
   metadata: {
@@ -1322,10 +1342,11 @@ export class PluginDoc<T extends NumberType> extends BaseNumberTypeClass<PluginD
 
     passAddress: boolean;
     passDiscord: boolean;
-    // passEmail: boolean;
+    passEmail: boolean;
     passTwitter: boolean;
     passGoogle: boolean;
     passGithub: boolean;
+    passTwitch: boolean;
   };
 
   claimCreatorRedirect?: { baseUri: string } | undefined;
@@ -1346,7 +1367,9 @@ export class PluginDoc<T extends NumberType> extends BaseNumberTypeClass<PluginD
     this.duplicatesAllowed = data.duplicatesAllowed;
     this.requiresSessions = data.requiresSessions;
     this.reuseForNonIndexed = data.reuseForNonIndexed;
+    this.reuseForLists = data.reuseForLists;
     this.requiresUserInputs = data.requiresUserInputs;
+    this.approvedUsers = data.approvedUsers;
     this.metadata = {
       createdBy: data.metadata.createdBy,
       name: data.metadata.name,
@@ -1389,44 +1412,57 @@ export class PluginDoc<T extends NumberType> extends BaseNumberTypeClass<PluginD
 export class SIWBBRequestDoc<T extends NumberType> extends BaseNumberTypeClass<SIWBBRequestDoc<T>> implements iSIWBBRequestDoc<T> {
   _docId: string;
   _id?: string;
+  code: string;
   clientId: string;
-  signature: string;
-  name: string;
-  description: string;
-  image: string;
+  name?: string;
+  description?: string;
+  image?: string;
   cosmosAddress: CosmosAddress;
-  params: BlockinChallengeParams<T>;
-  secretsPresentations: SecretsProof<T>[];
+  ownershipRequirements?: BlockinAssetConditionGroup<T> | undefined;
+  attestationsPresentations: AttestationsProof<T>[];
   createdAt: UNIXMilliTimestamp<T>;
+  scopes: OAuthScopeDetails[];
+  expiresAt: UNIXMilliTimestamp<T>;
   deletedAt?: UNIXMilliTimestamp<T>;
-  publicKey?: string;
-  allowReuseOfBitBadgesSignIn: boolean;
   otherSignIns?: {
     discord?: { username: string; discriminator?: string | undefined; id: string } | undefined;
     github?: { username: string; id: string } | undefined;
     google?: { username: string; id: string } | undefined;
+    twitch?: { username: string; id: string } | undefined;
     twitter?: { username: string; id: string } | undefined;
   };
   redirectUri?: string | undefined;
+  address: string;
+  chain: SupportedChain;
 
   constructor(data: iSIWBBRequestDoc<T>) {
     super();
-    this.signature = data.signature;
+    this.address = data.address;
+    this.chain = data.chain;
+    this.code = data.code;
+    this.createdAt = data.createdAt;
+    this.deletedAt = data.deletedAt;
     this.name = data.name;
     this.description = data.description;
     this.image = data.image;
-    this.cosmosAddress = data.cosmosAddress;
-    this.params = new BlockinChallengeParams(data.params);
-    this.createdAt = data.createdAt;
-    this.deletedAt = data.deletedAt;
     this._docId = data._docId;
     this._id = data._id;
-    this.allowReuseOfBitBadgesSignIn = data.allowReuseOfBitBadgesSignIn;
-    this.publicKey = data.publicKey;
-    this.secretsPresentations = data.secretsPresentations.map((secretsProof) => new SecretsProof(secretsProof));
+    this.attestationsPresentations = data.attestationsPresentations.map((attestationsProof) => new AttestationsProof(attestationsProof));
     this.clientId = data.clientId;
+    this.scopes = data.scopes;
+    this.expiresAt = data.expiresAt;
     this.otherSignIns = data.otherSignIns;
+    this.cosmosAddress = data.cosmosAddress;
     this.redirectUri = data.redirectUri;
+    if (data.ownershipRequirements) {
+      if ((data.ownershipRequirements as AndGroup<T>)['$and']) {
+        this.ownershipRequirements = new BlockinAndGroup(data.ownershipRequirements as AndGroup<T>);
+      } else if ((data.ownershipRequirements as OrGroup<T>)['$or']) {
+        this.ownershipRequirements = new BlockinOrGroup(data.ownershipRequirements as OrGroup<T>);
+      } else {
+        this.ownershipRequirements = new OwnershipRequirements(data.ownershipRequirements as OwnershipRequirements<T>);
+      }
+    }
   }
 
   getNumberFieldNames(): string[] {
@@ -1439,16 +1475,17 @@ export class SIWBBRequestDoc<T extends NumberType> extends BaseNumberTypeClass<S
 }
 
 /**
- * @inheritDoc iSecretDoc
- * @category Off-Chain Secrets
+ * @inheritDoc iAttestationProofDoc
+ * @category Off-Chain Attestations
  */
-export class SecretDoc<T extends NumberType> extends BaseNumberTypeClass<SecretDoc<T>> implements iSecretDoc<T> {
+export class AttestationProofDoc<T extends NumberType> extends BaseNumberTypeClass<AttestationProofDoc<T>> implements iAttestationProofDoc<T> {
   _docId: string;
   _id?: string;
+  entropies?: string[] | undefined;
+  updateHistory?: UpdateHistory<T>[] | undefined;
   messageFormat: 'plaintext' | 'json';
-  updateHistory: UpdateHistory<T>[];
-
-  createdBy: string;
+  createdBy: CosmosAddress;
+  createdAt: UNIXMilliTimestamp<T>;
 
   proofOfIssuance: {
     message: string;
@@ -1457,11 +1494,76 @@ export class SecretDoc<T extends NumberType> extends BaseNumberTypeClass<SecretD
     publicKey?: string;
   };
 
-  secretId: string;
+  scheme: 'bbs' | 'standard';
+  attestationMessages: string[];
+
+  dataIntegrityProof: {
+    signature: string;
+    signer: string;
+    publicKey?: string;
+  };
+
+  name: string;
+  image: string;
+  description: string;
+
+  displayOnProfile: boolean;
+
+  constructor(data: iAttestationProofDoc<T>) {
+    super();
+    this.entropies = data.entropies;
+    this.updateHistory = data.updateHistory?.map((updateHistory) => new UpdateHistory(updateHistory));
+    this._docId = data._docId;
+    this._id = data._id;
+    this.createdBy = data.createdBy;
+    this.messageFormat = data.messageFormat;
+
+    this.scheme = data.scheme;
+    this.dataIntegrityProof = data.dataIntegrityProof;
+    this.name = data.name;
+    this.image = data.image;
+    this.description = data.description;
+    this.proofOfIssuance = data.proofOfIssuance;
+    this.attestationMessages = data.attestationMessages;
+    this.createdAt = data.createdAt;
+    this.displayOnProfile = data.displayOnProfile;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['createdAt'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): AttestationProofDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as AttestationProofDoc<U>;
+  }
+}
+
+/**
+ * @inheritDoc iAttestationDoc
+ * @category Off-Chain Attestations
+ */
+export class AttestationDoc<T extends NumberType> extends BaseNumberTypeClass<AttestationDoc<T>> implements iAttestationDoc<T> {
+  _docId: string;
+  _id?: string;
+  messageFormat: 'plaintext' | 'json';
+  updateHistory: UpdateHistory<T>[];
+
+  createdBy: string;
+  createdAt: UNIXMilliTimestamp<T>;
+
+  proofOfIssuance: {
+    message: string;
+    signature: string;
+    signer: string;
+    publicKey?: string;
+  };
+
+  attestationId: string;
+  addKey: string;
 
   type: string;
   scheme: 'bbs' | 'standard';
-  secretMessages: string[];
+  attestationMessages: string[];
 
   dataIntegrityProof: {
     signature: string;
@@ -1479,14 +1581,15 @@ export class SecretDoc<T extends NumberType> extends BaseNumberTypeClass<SecretD
     message?: string;
   }[];
 
-  constructor(data: iSecretDoc<T>) {
+  constructor(data: iAttestationDoc<T>) {
     super();
     this.updateHistory = data.updateHistory?.map((updateHistory) => new UpdateHistory(updateHistory));
     this._docId = data._docId;
     this._id = data._id;
     this.createdBy = data.createdBy;
     this.messageFormat = data.messageFormat;
-    this.secretId = data.secretId;
+    this.attestationId = data.attestationId;
+    this.addKey = data.addKey;
     this.type = data.type;
     this.scheme = data.scheme;
     this.dataIntegrityProof = data.dataIntegrityProof;
@@ -1496,50 +1599,16 @@ export class SecretDoc<T extends NumberType> extends BaseNumberTypeClass<SecretD
     this.description = data.description;
     this.proofOfIssuance = data.proofOfIssuance;
     this.anchors = data.anchors;
-    this.secretMessages = data.secretMessages;
+    this.attestationMessages = data.attestationMessages;
+    this.createdAt = data.createdAt;
   }
 
   getNumberFieldNames(): string[] {
-    return [];
+    return ['createdAt'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): SecretDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as SecretDoc<U>;
-  }
-}
-
-/**
- * @inheritDoc iFollowDetailsDoc
- * @category Protocols
- */
-export class FollowDetailsDoc<T extends NumberType> extends BaseNumberTypeClass<FollowDetailsDoc<T>> implements iFollowDetailsDoc<T> {
-  _docId: string;
-  _id?: string;
-  cosmosAddress: CosmosAddress;
-  followingCount: T;
-  followersCount: T;
-  followers: CosmosAddress[];
-  following: CosmosAddress[];
-  followingCollectionId: T;
-
-  constructor(data: iFollowDetailsDoc<T>) {
-    super();
-    this.cosmosAddress = data.cosmosAddress;
-    this.followingCount = data.followingCount;
-    this.followersCount = data.followersCount;
-    this.followers = data.followers;
-    this.following = data.following;
-    this.followingCollectionId = data.followingCollectionId;
-    this._docId = data._docId;
-    this._id = data._id;
-  }
-
-  getNumberFieldNames(): string[] {
-    return ['followingCount', 'followersCount', 'followingCollectionId'];
-  }
-
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): FollowDetailsDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as FollowDetailsDoc<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): AttestationDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as AttestationDoc<U>;
   }
 }
 

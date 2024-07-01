@@ -1,16 +1,17 @@
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, CustomTypeClass } from '@/common/base';
-import { iSecret, iSecretsProof } from '@/interfaces/badges/core';
-import { CosmosAddress, NumberType, UpdateHistory } from '..';
+import { iAttestation, iAttestationsProof } from '@/interfaces/badges/core';
+import { CosmosAddress, NumberType, UNIXMilliTimestamp, UpdateHistory } from '..';
 
 /**
- * @category Off-Chain Secrets
+ * @category Off-Chain Attestations
  */
-export class SecretsProof<T extends NumberType> extends BaseNumberTypeClass<SecretsProof<T>> implements iSecretsProof<T> {
+export class AttestationsProof<T extends NumberType> extends BaseNumberTypeClass<AttestationsProof<T>> implements iAttestationsProof<T> {
   createdBy: CosmosAddress;
+  createdAt: UNIXMilliTimestamp<T>;
   scheme: 'bbs' | 'standard';
   messageFormat: 'plaintext' | 'json';
 
-  secretMessages: string[];
+  attestationMessages: string[];
 
   dataIntegrityProof: {
     signature: string;
@@ -36,36 +37,38 @@ export class SecretsProof<T extends NumberType> extends BaseNumberTypeClass<Secr
     message?: string;
   }[];
 
-  constructor(data: iSecretsProof<T>) {
+  constructor(data: iAttestationsProof<T>) {
     super();
     this.messageFormat = data.messageFormat;
     this.updateHistory = data.updateHistory?.map((update) => new UpdateHistory(update));
     this.createdBy = data.createdBy;
     this.scheme = data.scheme;
-    this.secretMessages = data.secretMessages;
+    this.attestationMessages = data.attestationMessages;
     this.entropies = data.entropies;
     this.dataIntegrityProof = data.dataIntegrityProof;
     this.proofOfIssuance = data.proofOfIssuance;
     this.name = data.name;
     this.image = data.image;
     this.description = data.description;
+    this.createdAt = data.createdAt;
     this.anchors = data.anchors;
   }
 
   getNumberFieldNames(): string[] {
-    return [];
+    return ['createdAt'];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): SecretsProof<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as SecretsProof<U>;
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): AttestationsProof<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as AttestationsProof<U>;
   }
 }
 
 /**
- * @category Off-Chain Secrets
+ * @category Off-Chain Attestations
  */
-export class Secret extends CustomTypeClass<Secret> implements iSecret {
+export class Attestation<T extends NumberType> extends CustomTypeClass<Attestation<T>> implements iAttestation<T> {
   createdBy: CosmosAddress;
+  createdAt: UNIXMilliTimestamp<T>;
 
   proofOfIssuance: {
     message: string;
@@ -74,12 +77,13 @@ export class Secret extends CustomTypeClass<Secret> implements iSecret {
     publicKey?: string;
   };
 
-  secretId: string;
+  attestationId: string;
+  addKey: string;
 
   type: string;
   scheme: 'bbs' | 'standard';
   messageFormat: 'plaintext' | 'json';
-  secretMessages: string[];
+  attestationMessages: string[];
 
   dataIntegrityProof: {
     signature: string;
@@ -97,20 +101,30 @@ export class Secret extends CustomTypeClass<Secret> implements iSecret {
     message?: string;
   }[];
 
-  constructor(data: iSecret) {
+  constructor(data: iAttestation<T>) {
     super();
     this.createdBy = data.createdBy;
     this.messageFormat = data.messageFormat;
     this.proofOfIssuance = data.proofOfIssuance;
-    this.secretId = data.secretId;
+    this.addKey = data.addKey;
+    this.attestationId = data.attestationId;
     this.type = data.type;
     this.scheme = data.scheme;
-    this.secretMessages = data.secretMessages;
+    this.attestationMessages = data.attestationMessages;
     this.dataIntegrityProof = data.dataIntegrityProof;
     this.name = data.name;
     this.image = data.image;
     this.description = data.description;
     this.holders = data.holders;
     this.anchors = data.anchors;
+    this.createdAt = data.createdAt;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['createdAt'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): Attestation<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as Attestation<U>;
   }
 }

@@ -5,7 +5,7 @@
  */
 export const BETANET_CHAIN_DETAILS = {
   chainId: 1,
-  cosmosChainId: 'bitbadges_1-2'
+  cosmosChainId: 'bitbadges_1-1'
 };
 
 /**
@@ -34,7 +34,7 @@ export const MAINNET_CHAIN_DETAILS = {
  * @category Chain Details
  */
 export const BitBadgesKeplrSuggestBetanetChainInfo = {
-  chainId: 'bitbadges_1-2',
+  chainId: 'bitbadges_1-1',
   chainName: 'BitBadges',
   chainSymbolImageUrl: 'https://avatars.githubusercontent.com/u/86890740',
   coinImageUrl: 'https://avatars.githubusercontent.com/u/86890740',
@@ -54,8 +54,15 @@ export const BitBadgesKeplrSuggestBetanetChainInfo = {
   currencies: [
     {
       coinDenom: 'BADGE',
-      coinMinimalDenom: 'badge',
-      coinDecimals: 0,
+      coinMinimalDenom: 'ubadge',
+      coinDecimals: 9,
+      coinGeckoId: 'cosmos',
+      coinImageUrl: 'https://avatars.githubusercontent.com/u/86890740'
+    },
+    {
+      coinDenom: 'STAKE',
+      coinMinimalDenom: 'ustake',
+      coinDecimals: 9,
       coinGeckoId: 'cosmos',
       coinImageUrl: 'https://avatars.githubusercontent.com/u/86890740'
     }
@@ -63,8 +70,8 @@ export const BitBadgesKeplrSuggestBetanetChainInfo = {
   feeCurrencies: [
     {
       coinDenom: 'BADGE',
-      coinMinimalDenom: 'badge',
-      coinDecimals: 0,
+      coinMinimalDenom: 'ubadge',
+      coinDecimals: 9,
       coinGeckoId: 'cosmos',
       gasPriceStep: {
         low: 0.000000000001,
@@ -75,9 +82,9 @@ export const BitBadgesKeplrSuggestBetanetChainInfo = {
     }
   ],
   stakeCurrency: {
-    coinDenom: 'BADGE',
-    coinMinimalDenom: 'badge',
-    coinDecimals: 0,
+    coinDenom: 'STAKE',
+    coinMinimalDenom: 'ustake',
+    coinDecimals: 9,
     coinGeckoId: 'cosmos',
     coinImageUrl: 'https://avatars.githubusercontent.com/u/86890740'
   }

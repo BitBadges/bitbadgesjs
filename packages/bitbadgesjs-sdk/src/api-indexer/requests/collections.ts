@@ -13,6 +13,37 @@ import type { iBalanceDocWithDetails, iChallengeTrackerIdDetails, iQueueDoc, iRe
 /**
  * @category API Requests / Responses
  */
+export interface FilterSuggestionsPayload {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iFilterSuggestionsSuccessResponse {
+  attributes: {
+    name: string;
+    value: string | number | boolean;
+    count: number;
+  }[];
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class FilterSuggestionsSuccessResponse
+  extends BaseNumberTypeClass<FilterSuggestionsSuccessResponse>
+  implements iFilterSuggestionsSuccessResponse
+{
+  attributes: { name: string; value: string | number | boolean; count: number; type?: 'date' | 'url' | undefined }[];
+
+  constructor(data: iFilterSuggestionsSuccessResponse) {
+    super();
+    this.attributes = data.attributes;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
 export interface FilterBadgesInCollectionPayload {
   /** Limit to specific badge IDs. Leave undefined to not filter by badge ID. */
   badgeIds?: iUintRange<NumberType>[];

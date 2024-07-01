@@ -1067,12 +1067,12 @@ export class UserIncomingApprovalWithDetails<T extends NumberType> extends UserI
  * @category Interfaces
  */
 export interface iChallengeDetails<T extends NumberType> {
-  /** The leaves of the Merkle tree. Leaves should be considered public. Use preimages for the secrets + isHashed. For whitelist trees, these can be the plaintext Cosmos addresses. */
+  /** The leaves of the Merkle tree. Leaves should be considered public. Use preimages for the private codes + isHashed. For whitelist trees, these can be the plaintext Cosmos addresses. */
   leaves: string[];
   /** True if the leaves are hashed. Hash(preimage[i]) = leaves[i] */
   isHashed: boolean;
 
-  /** The preimages of the leaves (only used if isHashed = true). Oftentimes, this is used for secret codes so should not be present when user-facing. */
+  /** The preimages of the leaves (only used if isHashed = true). Oftentimes, this is used for private codes so should not be present when user-facing. */
   preimages?: string[];
   /** Seed code for generating the leaves */
   seedCode?: string;
@@ -1147,7 +1147,7 @@ export class ChallengeInfoDetails<T extends NumberType> extends BaseNumberTypeCl
     plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
     claimId: string;
     manualDistribution?: boolean;
-    automatic?: boolean;
+    approach?: string;
   };
 
   constructor(data: iChallengeInfoDetails<T>) {

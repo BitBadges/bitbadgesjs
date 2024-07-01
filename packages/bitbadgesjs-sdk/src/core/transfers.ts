@@ -7,7 +7,7 @@ import { convertToCosmosAddress } from '../address-converter/converter';
 import { GO_MAX_UINT_64, safeAddKeepLeft, safeMultiplyKeepLeft } from '../common/math';
 import type { NumberType } from '../common/string-numbers';
 import { BigIntify, Stringify } from '../common/string-numbers';
-import { Balance, BalanceArray } from './balances';
+import { Balance, BalanceArray, cleanBalances } from './balances';
 import { ApprovalIdentifierDetails, MerkleProof, ZkProofSolution } from './misc';
 import { UintRangeArray } from './uintRanges';
 
@@ -224,7 +224,7 @@ export class TransferWithIncrements<T extends NumberType>
  *
  * @category Balances
  */
-export const createBalanceMapForOffChainBalances = async <T extends NumberType>(transfersWithIncrements: iTransferWithIncrements<T>[]) => {
+export const createBalanceMapForOffChainBalances = <T extends NumberType>(transfersWithIncrements: iTransferWithIncrements<T>[]) => {
   const balanceMap: OffChainBalancesMap<T> = {};
 
   const transfers = getTransfersFromTransfersWithIncrements(transfersWithIncrements);
@@ -404,7 +404,7 @@ export const getBalanceAfterTransfer = <T extends NumberType>(
     !!allowUnderflow
   );
 
-  return balanceCopy;
+  return cleanBalances(balanceCopy);
 };
 
 /**
@@ -517,5 +517,5 @@ export const getBalancesAfterTransfers = <T extends NumberType>(
     }
   }
 
-  return endBalances.filterZeroBalances();
+  return cleanBalances(endBalances.filterZeroBalances());
 };

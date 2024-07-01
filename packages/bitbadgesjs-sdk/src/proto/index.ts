@@ -6,7 +6,6 @@ export * as cosmwasm from './cosmwasm/index';
 export * as ethereum from './ethereum/index';
 export * as anchor from './anchor/index';
 export * as google from './google/index';
-export * as ibc from './ibc/index';
 export * from './proofs_pb';
 export * as protocols from './protocols/index';
 export * as solana from './solana/index';

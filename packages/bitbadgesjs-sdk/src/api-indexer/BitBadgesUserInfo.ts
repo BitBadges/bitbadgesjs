@@ -5,6 +5,7 @@ import { AddressList } from '@/core/addressLists';
 import type { BatchBadgeDetails, iBatchBadgeDetails } from '@/core/batch-utils';
 import { CosmosCoin } from '@/core/coin';
 import type { iAddressList } from '@/interfaces/badges/core';
+import typia from 'typia';
 import { SupportedChain } from '../common/types';
 import type { iBitBadgesAddressList } from './BitBadgesAddressList';
 import { BitBadgesAddressList } from './BitBadgesAddressList';
@@ -13,29 +14,29 @@ import type { BaseBitBadgesApi, PaginationInfo } from './base';
 import { ClaimAlertDoc, ListActivityDoc, ReviewDoc, TransferActivityDoc } from './docs/activity';
 import {
   ApprovalTrackerDoc,
+  AttestationDoc,
+  AttestationProofDoc,
   BalanceDocWithDetails,
-  SIWBBRequestDoc,
-  FollowDetailsDoc,
   MapDoc,
   MerkleChallengeDoc,
   ProfileDoc,
-  SecretDoc
+  SIWBBRequestDoc
 } from './docs/docs';
 import type {
   CosmosAddress,
   NativeAddress,
   iAccountDoc,
   iApprovalTrackerDoc,
+  iAttestationDoc,
+  iAttestationProofDoc,
   iBalanceDocWithDetails,
-  iSIWBBRequestDoc,
   iClaimAlertDoc,
-  iFollowDetailsDoc,
   iListActivityDoc,
   iMapDoc,
   iMerkleChallengeDoc,
   iProfileDoc,
   iReviewDoc,
-  iSecretDoc,
+  iSIWBBRequestDoc,
   iTransferActivityDoc
 } from './docs/interfaces';
 import { BitBadgesApiRoutes } from './requests/routes';
@@ -72,8 +73,10 @@ export interface iBitBadgesUserInfo<T extends NumberType> extends iProfileDoc<T>
   claimAlerts: iClaimAlertDoc<T>[];
   /** A list of SIWBB requests for the account. Paginated and fetched as needed. To be used in conjunction with views. */
   siwbbRequests: iSIWBBRequestDoc<T>[];
-  /** A list of user secrets for the account. Paginated and fetched as needed. To be used in conjunction with views. */
-  secrets: iSecretDoc<T>[];
+  /** A list of user attestations for the account. Paginated and fetched as needed. To be used in conjunction with views. */
+  attestations: iAttestationDoc<T>[];
+  /** A list of atestation proofs for the account. Paginated and fetched as needed. To be used in conjunction with views. */
+  attestationProofs: iAttestationProofDoc<T>[];
 
   /** The reserved map for the account. This is created and managed on-chain through the x/maps module. */
   reservedMap?: iMapDoc<T>;
@@ -136,8 +139,9 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   approvalTrackers: ApprovalTrackerDoc<T>[];
   addressLists: BitBadgesAddressList<T>[];
   claimAlerts: ClaimAlertDoc<T>[];
+  attestationProofs: AttestationProofDoc<T>[];
   siwbbRequests: SIWBBRequestDoc<T>[];
-  secrets: iSecretDoc<T>[];
+  attestations: iAttestationDoc<T>[];
 
   address: NativeAddress;
   nsfw?: { [badgeId: string]: string };
@@ -181,7 +185,8 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     this.addressLists = data.addressLists.map((list) => new BitBadgesAddressList(list));
     this.claimAlerts = data.claimAlerts.map((alert) => new ClaimAlertDoc(alert));
     this.siwbbRequests = data.siwbbRequests.map((auth) => new SIWBBRequestDoc(auth));
-    this.secrets = data.secrets.map((secret) => new SecretDoc(secret));
+    this.attestations = data.attestations.map((attestation) => new AttestationDoc(attestation));
+    this.attestationProofs = data.attestationProofs.map((proof) => new AttestationProofDoc(proof));
     this.address = data.address;
     this.nsfw = data.nsfw;
     this.reported = data.reported;
@@ -223,6 +228,11 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
    */
   static async GetAccounts<T extends NumberType>(api: BaseBitBadgesApi<T>, params: GetAccountsPayload) {
     try {
+      const validateRes: typia.IValidation<GetAccountsPayload> = typia.validate<GetAccountsPayload>(params ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
       const response = await api.axios.post<iGetAccountsSuccessResponse<string>>(
         `${api.BACKEND_URL}${BitBadgesApiRoutes.GetAccountsRoute()}`,
         params
@@ -463,19 +473,29 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
         return this.getAccountBalancesView(viewId) as AccountViewData<T>[KeyType];
       case 'listsActivity':
         return this.getAccountListsActivityView(viewId) as AccountViewData<T>[KeyType];
-      case 'createdSecrets':
-        return this.getSecretsView(viewId) as AccountViewData<T>[KeyType];
-      case 'receivedSecrets':
-        return this.getSecretsView(viewId) as AccountViewData<T>[KeyType];
+      case 'createdAttestations':
+        return this.getAttestationsView(viewId) as AccountViewData<T>[KeyType];
+      case 'receivedAttestations':
+        return this.getAttestationsView(viewId) as AccountViewData<T>[KeyType];
+      case 'attestationProofs':
+        return this.getAttestationProofsView(viewId) as AccountViewData<T>[KeyType];
+      case 'publicAttestationProofs':
+        return this.getAttestationProofsView(viewId) as AccountViewData<T>[KeyType];
       default:
         throw new Error('Invalid view type');
     }
   }
 
-  getSecretsView(viewId: string) {
+  getAttestationsView(viewId: string) {
     return (this.views[viewId]?.ids.map((x) => {
-      return this.secrets.find((y) => y._docId === x);
-    }) ?? []) as SecretDoc<T>[];
+      return this.attestations.find((y) => y._docId === x);
+    }) ?? []) as AttestationDoc<T>[];
+  }
+
+  getAttestationProofsView(viewId: string) {
+    return (this.views[viewId]?.ids.map((x) => {
+      return this.attestationProofs.find((y) => y._docId === x);
+    }) ?? []) as AttestationProofDoc<T>[];
   }
 
   getSIWBBRequestsView(viewId: string) {
@@ -521,29 +541,6 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   }
 
   /**
-   * Fetches the BitBadges follow protocol details for a user.
-   */
-  async fetchFollowDetails<T extends NumberType>(
-    api: BaseBitBadgesApi<T>,
-    body: Omit<GetFollowDetailsPayload, 'address' | 'cosmosAddress'>
-  ): Promise<FollowDetailsDoc<T>> {
-    return await BitBadgesUserInfo.GetFollowDetails(api, { ...body, cosmosAddress: this.cosmosAddress });
-  }
-
-  static async GetFollowDetails<T extends NumberType>(api: BaseBitBadgesApi<T>, body: GetFollowDetailsPayload) {
-    try {
-      const response = await api.axios.post<iGetFollowDetailsSuccessResponse<string>>(
-        `${api.BACKEND_URL}${BitBadgesApiRoutes.GetFollowDetailsRoute()}`,
-        body
-      );
-      return new GetFollowDetailsSuccessResponse(response.data).convert(api.ConvertFunction);
-    } catch (error) {
-      await api.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
    * Checks if this user is on a given address list.
    */
   onList(addressList: iAddressList) {
@@ -571,7 +568,8 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
       collected: [],
       activity: [],
       listsActivity: [],
-      secrets: [],
+      attestations: [],
+      attestationProofs: [],
       reviews: [],
       addressLists: [],
       claimAlerts: [],
@@ -606,7 +604,8 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
       accountNumber: -1n,
       collected: [],
       activity: [],
-      secrets: [],
+      attestations: [],
+      attestationProofs: [],
       claimAlerts: [],
       reviews: [],
       merkleChallenges: [],
@@ -664,8 +663,10 @@ type AccountViewData<T extends NumberType> = {
   createdBadges: BalanceDocWithDetails<T>[];
   managingBadges: BalanceDocWithDetails<T>[];
   listsActivity: ListActivityDoc<T>[];
-  createdSecrets: SecretDoc<T>[];
-  receivedSecrets: SecretDoc<T>[];
+  createdAttestations: AttestationDoc<T>[];
+  receivedAttestations: AttestationDoc<T>[];
+  attestationProofs: AttestationProofDoc<T>[];
+  publicAttestationProofs: AttestationProofDoc<T>[];
 };
 
 /**
@@ -728,7 +729,8 @@ function updateAccountWithResponse<T extends NumberType>(
     claimAlerts: [...(cachedAccount?.claimAlerts || []), ...(account.claimAlerts || [])],
     siwbbRequests: [...(cachedAccount?.siwbbRequests || []), ...(account.siwbbRequests || [])],
     listsActivity: [...(cachedAccount?.listsActivity || []), ...(account.listsActivity || [])],
-    secrets: [...(cachedAccount?.secrets || []), ...(account.secrets || [])],
+    attestations: [...(cachedAccount?.attestations || []), ...(account.attestations || [])],
+    attestationProofs: [...(cachedAccount?.attestationProofs || []), ...(account.attestationProofs || [])],
     views: views,
     publicKey,
     airdropped: account.airdropped ? account.airdropped : cachedAccount?.airdropped ? cachedAccount.airdropped : false,
@@ -755,7 +757,8 @@ function updateAccountWithResponse<T extends NumberType>(
   newAccount.claimAlerts = newAccount.claimAlerts.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
   newAccount.siwbbRequests = newAccount.siwbbRequests.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
   newAccount.listsActivity = newAccount.listsActivity.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
-  newAccount.secrets = newAccount.secrets.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
+  newAccount.attestations = newAccount.attestations.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
+  newAccount.attestationProofs = newAccount.attestationProofs.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
 
   //sort in descending order
   newAccount.activity = newAccount.activity.sort((a, b) => (BigInt(b.timestamp) - BigInt(a.timestamp) > 0 ? -1 : 1));
@@ -787,8 +790,10 @@ export type AccountViewKey =
   | 'createdBadges'
   | 'managingBadges'
   | 'listsActivity'
-  | 'createdSecrets'
-  | 'receivedSecrets';
+  | 'createdAttestations'
+  | 'receivedAttestations'
+  | 'attestationProofs'
+  | 'publicAttestationProofs';
 
 /**
  * This defines the options for fetching additional account details.
@@ -872,50 +877,5 @@ export class GetAccountsSuccessResponse<T extends NumberType>
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetAccountsSuccessResponse<U> {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetAccountsSuccessResponse<U>;
-  }
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface GetFollowDetailsPayload {
-  cosmosAddress: string;
-
-  followingBookmark?: string;
-  followersBookmark?: string;
-
-  protocol?: string;
-  activityBookmark?: string;
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iGetFollowDetailsSuccessResponse<T extends NumberType> extends iFollowDetailsDoc<T> {
-  followersPagination: PaginationInfo;
-  followingPagination: PaginationInfo;
-
-  activity: iTransferActivityDoc<T>[];
-  activityPagination: PaginationInfo;
-}
-/**
- * @category API Requests / Responses
- */
-export class GetFollowDetailsSuccessResponse<T extends NumberType> extends FollowDetailsDoc<T> implements iGetFollowDetailsSuccessResponse<T> {
-  followersPagination: PaginationInfo;
-  followingPagination: PaginationInfo;
-  activity: TransferActivityDoc<T>[];
-  activityPagination: PaginationInfo;
-
-  constructor(data: iGetFollowDetailsSuccessResponse<T>) {
-    super(data);
-    this.followersPagination = data.followersPagination;
-    this.followingPagination = data.followingPagination;
-    this.activity = data.activity.map((activity) => new TransferActivityDoc(activity));
-    this.activityPagination = data.activityPagination;
-  }
-
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetFollowDetailsSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetFollowDetailsSuccessResponse<U>;
   }
 }

@@ -18,16 +18,17 @@ import type {
   iIsArchivedTimeline,
   iManagerTimeline,
   iOffChainBalancesMetadataTimeline,
-  iSecret,
-  iSecretsProof,
+  iAttestation,
+  iAttestationsProof,
   iStandardsTimeline,
   iUintRange
 } from '@/interfaces/badges/core';
 import type { iCollectionPermissions, iUserPermissionsWithDetails } from '@/interfaces/badges/permissions';
 import type { iUserBalanceStore } from '@/interfaces/badges/userBalances';
-import type { ChallengeParams } from 'blockin';
+import type { AssetConditionGroup, ChallengeParams } from 'blockin';
 import { iMapWithValues } from '../requests/maps';
 import { iUpdateHistory } from './docs';
+import { OAuthScopeDetails } from '../requests/requests';
 
 /**
  * Numeric timestamp - value is equal to the milliseconds since the UNIX epoch.
@@ -92,6 +93,11 @@ export interface iSocialConnections<T extends NumberType> {
     id: string;
     lastUpdated: UNIXMilliTimestamp<T>;
   };
+  twitch?: {
+    username: string;
+    id: string;
+    lastUpdated: UNIXMilliTimestamp<T>;
+  };
 }
 
 /**
@@ -123,6 +129,8 @@ export interface iNotificationPreferences<T extends NumberType> {
 export interface iEmailVerificationStatus<T extends NumberType> {
   /** Whether or not the email has been verified. */
   verified?: boolean;
+  /** Verified at timestamp. */
+  verifiedAt?: UNIXMilliTimestamp<T>;
   /** The email verification token. This is used for verification and unsubscription. */
   token?: string;
   /** The expiry of the token for verification purposes. */
@@ -354,12 +362,14 @@ export interface iProfileDoc<T extends NumberType> extends Doc {
   customPages?: {
     badges: iCustomPage<T>[];
     lists: iCustomListPage[];
+    attestations: iCustomListPage[];
   };
 
   /** The watched lists of the account's portfolio */
   watchlists?: {
     badges: iCustomPage<T>[];
     lists: iCustomListPage[];
+    attestations: iCustomListPage[];
   };
 
   /** The profile picture URL of the account */
@@ -381,10 +391,10 @@ export interface iProfileDoc<T extends NumberType> extends Doc {
 
   /** Approved ways to sign in */
   approvedSignInMethods?: {
-    discord?: { scopes: string[]; username: string; discriminator?: string | undefined; id: string } | undefined;
-    github?: { scopes: string[]; username: string; id: string } | undefined;
-    google?: { scopes: string[]; username: string; id: string } | undefined;
-    twitter?: { scopes: string[]; username: string; id: string } | undefined;
+    discord?: { scopes: OAuthScopeDetails[]; username: string; discriminator?: string | undefined; id: string } | undefined;
+    github?: { scopes: OAuthScopeDetails[]; username: string; id: string } | undefined;
+    google?: { scopes: OAuthScopeDetails[]; username: string; id: string } | undefined;
+    twitter?: { scopes: OAuthScopeDetails[]; username: string; id: string } | undefined;
   };
 }
 
@@ -422,6 +432,13 @@ export interface iQueueDoc<T extends NumberType> extends Doc {
     body: any;
     claimId: string;
     cosmosAddress: CosmosAddress;
+    ip: string | undefined;
+  };
+
+  faucetInfo?: {
+    txHash: string;
+    amount: NumberType;
+    recipient: CosmosAddress;
   };
 }
 
@@ -548,11 +565,13 @@ export type ClaimIntegrationPluginType =
   | 'codes'
   | 'github'
   | 'google'
+  | 'twitch'
   | 'twitter'
   | 'transferTimes'
   | 'initiatedBy'
   | 'whitelist'
   | 'email'
+  | 'ip'
   | string;
 
 /**
@@ -570,7 +589,7 @@ export type JsonBodyInputWithValue = {
  */
 export type JsonBodyInputSchema = { key: string; label: string; type: 'date' | 'url' | 'string' | 'number' | 'boolean'; helper?: string };
 
-type OauthAppName = 'twitter' | 'stripe' | 'github' | 'google' | 'email' | 'discord';
+type OauthAppName = 'twitter' | 'github' | 'google' | 'email' | 'discord' | 'twitch';
 
 /**
  * @category Claims
@@ -583,7 +602,11 @@ export type ClaimIntegrationPluginCustomBodyType<T extends ClaimIntegrationPlugi
     ? {
         password: string;
       }
-    : {};
+    : T extends 'email'
+      ? {
+          token?: string;
+        }
+      : {};
 
 /**
  * Public params are params that are visible to the public. For example, the number of uses for a claim code.
@@ -593,29 +616,38 @@ export type ClaimIntegrationPluginCustomBodyType<T extends ClaimIntegrationPlugi
 export type ClaimIntegrationPublicParamsType<T extends ClaimIntegrationPluginType> = T extends 'numUses'
   ? {
       maxUses: number;
-      maxUsesPerAddress?: number;
-      assignMethod: 'firstComeFirstServe' | 'codeIdx';
     }
   : T extends 'codes'
     ? {
         numCodes: number;
       }
-    : T extends OauthAppName
+    : T extends 'ip'
       ? {
-          hasPrivateList: boolean;
-          maxUsesPerUser?: number;
-          listUrl?: string;
+          maxUsesPerIp: number;
         }
-      : T extends 'transferTimes'
+      : T extends OauthAppName
         ? {
-            transferTimes: iUintRange<JSPrimitiveNumberType>[];
+            hasPrivateList: boolean;
+            maxUsesPerUser?: number;
+            listUrl?: string;
           }
-        : T extends 'whitelist'
+        : T extends 'transferTimes'
           ? {
-              listId?: string;
-              list?: iAddressList;
+              transferTimes: iUintRange<JSPrimitiveNumberType>[];
             }
-          : {};
+          : T extends 'whitelist'
+            ? {
+                listId?: string;
+                list?: iAddressList;
+                maxUsesPerAddress?: number;
+              }
+            : T extends 'geolocation'
+              ? {
+                  pindrop?: { latitude: number; longitude: number; radius: number };
+                  allowedCountryCodes?: string[];
+                  disallowedCountryCodes?: string[];
+                }
+              : {};
 
 /**
  * Private params are params that are not visible to the public. For example, the password for a claim code.
@@ -666,21 +698,31 @@ export type ClaimIntegrationPublicStateType<T extends ClaimIntegrationPluginType
  *
  * @category Claims
  */
-export type ClaimIntegrationPrivateStateType<T extends ClaimIntegrationPluginType> = T extends OauthAppName | 'whitelist'
+export type ClaimIntegrationPrivateStateType<T extends ClaimIntegrationPluginType> = T extends OauthAppName
   ? {
       ids: { [id: string]: number };
       usernames: { [username: string]: string };
     }
-  : {};
+  : T extends 'whitelist'
+    ? {
+        addresses: { [address: string]: number };
+      }
+    : {};
 
 /**
  * @category Claims
  */
 export interface IntegrationPluginParams<T extends ClaimIntegrationPluginType> {
-  /** The ID of the plugin */
-  id: string;
+  /**
+   * The ID of the plugin instance. This is a unique identifier for referencing this instance of the plugin within this claim
+   * (e.g. differentiate between duplicates of the same plugin type).
+   *
+   * This is different from the pluginId, which is a unique identifier for the plugin itself. All instances of the same plugin
+   * will have the same pluginId.
+   */
+  instanceId: string;
   /** The type of the plugin */
-  type: T;
+  pluginId: T;
   /** The parameters of the plugin that are visible to the public */
   publicParams: ClaimIntegrationPublicParamsType<T>;
   /** The parameters of the plugin that are not visible to the public */
@@ -698,11 +740,21 @@ export interface IntegrationPluginDetails<T extends ClaimIntegrationPluginType> 
   /** If resetState = true, we will reset the state of the plugin back to default. If false, we will keep the current state. Incompatible with newState. */
   resetState?: boolean;
   /**
-   * If newState is present, we will set the state to the new state. Incompatible with resetState.
+   * If newState is present, we will set the state to the new state. Incompatible with resetState. Can be used alongside onlyUpdateProvidedNewState.
+   * By default, we will overwrite the whole state. If onlyUpdateProvidedNewState is true, we will only update the specific provided fields.
    *
    * Warning: This is an advanced feature and should be used with caution. Misconfiguring this can lead to unexpected behavior of this plugin.
    */
   newState?: ClaimIntegrationPublicStateType<T>;
+  /**
+   * If true, we will only update the specific fields provided in newState. If falsy, we will overwrite the whole state with newState.
+   *
+   * Only applicable if newState is present.
+   *
+   * Note that we do this on a recursive level. If you have nested objects, we will only update the specific fields provided for those nested objects
+   * and leave all else as-is.
+   */
+  onlyUpdateProvidedNewState?: boolean;
 }
 
 /**
@@ -731,8 +783,8 @@ export interface iClaimBuilderDoc<T extends NumberType> extends Doc {
   /** If true, the claim codes are to be distributed manually. This doc will only be used for storage purposes. */
   manualDistribution?: boolean;
 
-  /** If true, the claim has been designated to be completed automatically for users. */
-  automatic?: boolean;
+  /** If the claim has been designated to be completed automatically for users. */
+  approach?: string;
 
   /** Metadata for the claim */
   metadata?: iMetadata<T>;
@@ -741,6 +793,9 @@ export interface iClaimBuilderDoc<T extends NumberType> extends Doc {
   state: {
     [pluginId: string]: any;
   };
+
+  /** Algorithm to determine the claaim number indices */
+  assignMethod?: string;
 
   /** Details for the action to perform if the criteria is correct */
   action: {
@@ -873,6 +928,7 @@ export interface iComplianceDoc<T extends NumberType> extends Doc {
     reported: { cosmosAddress: CosmosAddress; reason: string }[];
   };
 }
+
 /**
  * @category Interfaces
  */
@@ -896,11 +952,11 @@ export interface iDeveloperAppDoc extends Doc {
 /**
  * @category Interfaces
  */
-export interface iAuthorizationCodeDoc {
+export interface iAuthorizationCodeDoc extends Doc {
   _docId: string;
   clientId: string;
   redirectUri: string;
-  scopes: string[];
+  scopes: OAuthScopeDetails[];
   address: string;
   cosmosAddress: string;
   expiresAt: number;
@@ -909,7 +965,7 @@ export interface iAuthorizationCodeDoc {
 /**
  * @category Interfaces
  */
-export interface iAccessTokenDoc {
+export interface iAccessTokenDoc extends Doc {
   _docId: string;
   accessToken: string;
   tokenType: string;
@@ -921,7 +977,7 @@ export interface iAccessTokenDoc {
 
   cosmosAddress: string;
   address: string;
-  scopes: string[];
+  scopes: OAuthScopeDetails[];
 }
 
 /**
@@ -932,7 +988,9 @@ export enum PluginPresetType {
   Usernames = 'Usernames',
   ClaimToken = 'ClaimToken',
   CustomResponseHandler = 'CustomResponseHandler',
-  CompletelyCustom = 'CompletelyCustom'
+  CompletelyCustom = 'CompletelyCustom',
+  ClaimNumbers = 'ClaimNumbers',
+  StateTransitions = 'StateTransitions'
 }
 
 /**
@@ -956,6 +1014,9 @@ export interface iPluginDoc<T extends NumberType> extends Doc {
 
   /** Reuse for nonindexed balances? Only applicable if is stateless, requires no user inputs, and requires no sessions. */
   reuseForNonIndexed: boolean;
+
+  /** Reuse for address list claims? Address list claims are similar to standard badge claims and supports all features, except order of claims (claim numbers) do not matter. */
+  reuseForLists: boolean;
 
   /** Preset type for how the plugin state is to be maintained. */
   stateFunctionPreset: PluginPresetType;
@@ -1006,41 +1067,47 @@ export interface iPluginDoc<T extends NumberType> extends Doc {
 
     passAddress: boolean;
     passDiscord: boolean;
-    // passEmail: boolean;
+    passEmail: boolean;
     passTwitter: boolean;
     passGoogle: boolean;
     passGithub: boolean;
+    passTwitch: boolean;
   };
 
   lastUpdated: UNIXMilliTimestamp<T>;
 
   createdAt: UNIXMilliTimestamp<T>;
   deletedAt?: UNIXMilliTimestamp<T>;
+
+  approvedUsers: NativeAddress[];
 }
 
 /**
  * @category Interfaces
  */
 export interface iSIWBBRequestDoc<T extends NumberType> extends Doc {
-  /** The signature of the challenge message */
-  signature: string;
-  /** The public key for the signed. Only needed for certain chains (Cosmos). */
-  publicKey?: string;
-
-  /** Whether or not we should allow reuse of BitBadges sign-in in replacement of the signature */
-  allowReuseOfBitBadgesSignIn: boolean;
-
-  name: string;
-  description: string;
-  image: string;
+  /** The actual code itself */
+  code: string;
 
   /** The Cosmos address of the signer */
   cosmosAddress: CosmosAddress;
-  /** The sign-in params. These are all the details in the message that was signed. */
-  params: ChallengeParams<T>;
+  /**The native address of the signer */
+  address: NativeAddress;
+  /** The native chain for the user */
+  chain: SupportedChain;
 
-  /** If required, you can additionally attach proof of secrets ot the auth flow. These can be used to prove sensitive information to verifiers. */
-  secretsPresentations: iSecretsProof<T>[];
+  name?: string;
+  description?: string;
+  image?: string;
+
+  scopes: OAuthScopeDetails[];
+  expiresAt: UNIXMilliTimestamp<T>;
+
+  /** The badges / assets that must be owned by the user */
+  ownershipRequirements?: AssetConditionGroup<T>;
+
+  /** If required, you can additionally attach proof of attestations ot the auth flow. These can be used to prove sensitive information to verifiers. */
+  attestationsPresentations: iAttestationsProof<T>[];
 
   /** The timestamp of when the signature was created (milliseconds since epoch) */
   createdAt: UNIXMilliTimestamp<T>;
@@ -1057,6 +1124,7 @@ export interface iSIWBBRequestDoc<T extends NumberType> extends Doc {
     google?: { username: string; id: string } | undefined;
     twitter?: { username: string; id: string } | undefined;
   };
+
   /** The redirect URI of the app  */
   redirectUri?: string;
 }
@@ -1064,26 +1132,15 @@ export interface iSIWBBRequestDoc<T extends NumberType> extends Doc {
 /**
  * @category Interfaces
  */
-export interface iSecretDoc<T extends NumberType> extends Doc, iSecret {
+export interface iAttestationDoc<T extends NumberType> extends Doc, iAttestation<T> {
   updateHistory: iUpdateHistory<T>[];
 }
 
 /**
  * @category Interfaces
  */
-export interface iFollowDetailsDoc<T extends NumberType> extends Doc {
-  /** The Cosmos address of the user */
-  cosmosAddress: CosmosAddress;
-  /** The number of users that the user is following */
-  followingCount: T;
-  /** The number of users that are following the user */
-  followersCount: T;
-  /** The followers of the user */
-  followers: CosmosAddress[];
-  /** The following of the user */
-  following: CosmosAddress[];
-  /** The collection ID of the following collection */
-  followingCollectionId: T;
+export interface iAttestationProofDoc<T extends NumberType> extends Doc, iAttestationsProof<T> {
+  displayOnProfile: boolean;
 }
 
 /**

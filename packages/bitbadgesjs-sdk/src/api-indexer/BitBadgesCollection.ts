@@ -84,6 +84,8 @@ import {
   RefreshStatusSuccessResponse
 } from './requests/collections';
 import { BitBadgesApiRoutes } from './requests/routes';
+import { convertToCosmosAddress } from '..';
+import typia from 'typia';
 
 const NEW_COLLECTION_ID = 0n;
 
@@ -322,7 +324,8 @@ export class BitBadgesCollection<T extends NumberType>
   }
 
   private getBalanceInfo(address: string, throwIfNotFound = true) {
-    const owner = this.owners.find((x) => x.cosmosAddress === address);
+    const convertedAddress = address === 'Mint' || address === 'Total' ? address : convertToCosmosAddress(address);
+    const owner = this.owners.find((x) => x.cosmosAddress === convertedAddress);
     if (!owner && throwIfNotFound)
       throw new Error(`Owner not found for address ${address}. Balance not fetched yet. Missing doc for '${address}' in owners.`);
 
@@ -709,6 +712,11 @@ export class BitBadgesCollection<T extends NumberType>
    */
   static async GetCollections<T extends NumberType>(api: BaseBitBadgesApi<T>, body: GetCollectionsPayload) {
     try {
+      const validateRes: typia.IValidation<GetCollectionsPayload> = typia.validate<GetCollectionsPayload>(body ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
       const response = await api.axios.post<iGetCollectionsSuccessResponse<string>>(
         `${api.BACKEND_URL}${BitBadgesApiRoutes.GetCollectionsRoute()}`,
         body
@@ -730,6 +738,11 @@ export class BitBadgesCollection<T extends NumberType>
     body?: GetBadgeBalanceByAddressPayload
   ): Promise<GetBadgeBalanceByAddressSuccessResponse<T>> {
     try {
+      const validateRes: typia.IValidation<GetBadgeBalanceByAddressPayload> = typia.validate<GetBadgeBalanceByAddressPayload>(body ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
       api.assertPositiveInteger(collectionId);
 
       const response = await api.axios.post<iGetBadgeBalanceByAddressSuccessResponse<string>>(
@@ -1092,6 +1105,11 @@ export class BitBadgesCollection<T extends NumberType>
    */
   static async RefreshMetadata<T extends NumberType>(api: BaseBitBadgesApi<T>, collectionId: T, body?: RefreshMetadataPayload) {
     try {
+      const validateRes: typia.IValidation<RefreshMetadataPayload> = typia.validate<RefreshMetadataPayload>(body ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
       api.assertPositiveInteger(collectionId);
 
       const response = await api.axios.post<iRefreshMetadataSuccessResponse>(
@@ -1122,6 +1140,11 @@ export class BitBadgesCollection<T extends NumberType>
     body: GetBadgeActivityPayload
   ) {
     try {
+      const validateRes: typia.IValidation<GetBadgeActivityPayload> = typia.validate<GetBadgeActivityPayload>(body ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
       api.assertPositiveInteger(collectionId);
       api.assertPositiveInteger(badgeId);
 
@@ -1153,6 +1176,11 @@ export class BitBadgesCollection<T extends NumberType>
     body: GetOwnersForBadgePayload
   ) {
     try {
+      const validateRes: typia.IValidation<GetOwnersForBadgePayload> = typia.validate<GetOwnersForBadgePayload>(body ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
       api.assertPositiveInteger(collectionId);
       api.assertPositiveInteger(badgeId);
 
@@ -1179,6 +1207,11 @@ export class BitBadgesCollection<T extends NumberType>
    */
   static async FilterBadgesInCollection<T extends NumberType>(api: BaseBitBadgesApi<T>, collectionId: T, body: FilterBadgesInCollectionPayload) {
     try {
+      const validateRes: typia.IValidation<FilterBadgesInCollectionPayload> = typia.validate<FilterBadgesInCollectionPayload>(body ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
       const response = await api.axios.post<iFilterBadgesInCollectionSuccessResponse<string>>(
         `${api.BACKEND_URL}${BitBadgesApiRoutes.FilterBadgesInCollectionRoute(collectionId)}`,
         body
