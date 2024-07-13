@@ -630,6 +630,7 @@ export type ClaimIntegrationPublicParamsType<T extends ClaimIntegrationPluginTyp
             hasPrivateList: boolean;
             maxUsesPerUser?: number;
             listUrl?: string;
+            blacklist?: boolean;
           }
         : T extends 'transferTimes'
           ? {
@@ -727,6 +728,8 @@ export interface IntegrationPluginParams<T extends ClaimIntegrationPluginType> {
   publicParams: ClaimIntegrationPublicParamsType<T>;
   /** The parameters of the plugin that are not visible to the public */
   privateParams: ClaimIntegrationPrivateParamsType<T>;
+  /** Custom display metadata for the plugin */
+  metadata?: { name: string; description: string };
 }
 
 /**
@@ -953,7 +956,6 @@ export interface iDeveloperAppDoc extends Doc {
  * @category Interfaces
  */
 export interface iAuthorizationCodeDoc extends Doc {
-  _docId: string;
   clientId: string;
   redirectUri: string;
   scopes: OAuthScopeDetails[];
@@ -966,7 +968,6 @@ export interface iAuthorizationCodeDoc extends Doc {
  * @category Interfaces
  */
 export interface iAccessTokenDoc extends Doc {
-  _docId: string;
   accessToken: string;
   tokenType: string;
   clientId: string;

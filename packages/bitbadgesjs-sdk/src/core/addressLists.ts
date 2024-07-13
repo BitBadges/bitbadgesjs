@@ -1,7 +1,7 @@
 import { CustomTypeClass } from '@/common/base';
 import type { iAddressList } from '@/interfaces/badges/core';
-import * as proto from '@/proto';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
+import { AddressList as ProtoAddressList } from '@/proto/badges';
 import { convertToCosmosAddress, isAddressValid } from '../address-converter/converter';
 
 /**
@@ -362,19 +362,19 @@ export class AddressList extends CustomTypeClass<AddressList> implements iAddres
     return listId;
   };
 
-  toProto(): proto.badges.AddressList {
-    return new proto.badges.AddressList(this.clone().toJson());
+  toProto(): ProtoAddressList {
+    return new ProtoAddressList(this.clone().toJson());
   }
 
   static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): AddressList {
-    return AddressList.fromProto(proto.badges.AddressList.fromJson(jsonValue, options));
+    return AddressList.fromProto(ProtoAddressList.fromJson(jsonValue, options));
   }
 
   static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): AddressList {
-    return AddressList.fromProto(proto.badges.AddressList.fromJsonString(jsonString, options));
+    return AddressList.fromProto(ProtoAddressList.fromJsonString(jsonString, options));
   }
 
-  static fromProto(item: proto.badges.AddressList): AddressList {
+  static fromProto(item: ProtoAddressList): AddressList {
     return new AddressList({ ...item });
   }
 }

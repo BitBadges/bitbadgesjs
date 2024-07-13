@@ -3,12 +3,7 @@ import { sha256 as nobleSha256 } from '@noble/hashes/sha256';
 import { bech32 } from 'bech32';
 import bs58 from 'bs58';
 import { isValidChecksumAddress, stripHexPrefix, toChecksumAddress } from 'crypto-addr-codec';
-import { isAddress as _isAddress } from 'ethers';
-
-// Typescript was weird about this import
-function isAddress(address: string): boolean {
-  return _isAddress(address);
-}
+import { isAddress } from 'web3-validator';
 
 const sha256 = (data: Uint8Array): Uint8Array => {
   const hash = nobleSha256.create();
@@ -121,7 +116,7 @@ export function convertToCosmosAddress(address: string) {
     cosmosToEth(address); //throws on failure
     bech32Address = address;
   } catch {
-    if (isAddress(address)) {
+    if (isAddress(address, true)) {
       bech32Address = ethToCosmos(address);
     } else if (address.length == 44) {
       try {

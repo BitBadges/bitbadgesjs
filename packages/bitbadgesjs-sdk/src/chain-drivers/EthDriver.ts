@@ -1,8 +1,8 @@
-import { NumberType } from '@/common/string-numbers';
-import { IChainDriver } from 'blockin';
+import type { NumberType } from '@/common/string-numbers';
+import type { IChainDriver } from 'blockin';
 import { AssetConditionGroup } from 'blockin/dist/types/verify.types';
-import { recoverPersonalSignature } from 'eth-sig-util';
-import { isAddress } from 'ethers';
+import { recoverPersonalSignature } from '@metamask/eth-sig-util';
+import { isAddress } from 'web3-validator';
 
 /**
  * Ethereum implementation of the IChainDriver interface. This implementation is based off the Moralis API
@@ -30,13 +30,13 @@ export default class EthDriver implements IChainDriver<bigint> {
   }
 
   isValidAddress(address: string) {
-    return isAddress(address);
+    return isAddress(address, true);
   }
 
   async verifySignature(address: string, message: string, signature: string) {
     const recoveredAddr = recoverPersonalSignature({
       data: message,
-      sig: signature
+      signature: signature
     });
     if (recoveredAddr.toLowerCase() !== address.toLowerCase()) {
       throw new Error(`Signature Invalid: Expected ${address} but got ${recoveredAddr}`);

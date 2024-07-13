@@ -1,4 +1,5 @@
 export * from './addressLists';
+export * from './attestations';
 export * from './aliases';
 export * from './approvals';
 export * from './approval-utils';
@@ -13,5 +14,6 @@ export * from './transfers';
 export * from './uintRanges';
 export * from './userBalances';
 export * from './secrets';
+export * from './overlaps';
 
 export * from './blockin';

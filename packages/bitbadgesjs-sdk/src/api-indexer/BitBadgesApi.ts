@@ -1,5 +1,4 @@
 import type { NumberType } from '@/common/string-numbers';
-import Joi from 'joi';
 import { BitBadgesCollection } from './BitBadgesCollection';
 
 import typia from 'typia';
@@ -1762,11 +1761,6 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
       const validateRes: typia.IValidation<FetchMetadataDirectlyPayload> = typia.validate<FetchMetadataDirectlyPayload>(payload ?? {});
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const error = payload.uris.find((uri) => Joi.string().uri().required().validate(uri).error);
-      if (error) {
-        throw `Invalid URIs`;
       }
 
       const response = await this.axios.post<iFetchMetadataDirectlySuccessResponse<string>>(
