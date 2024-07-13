@@ -1397,7 +1397,7 @@ export interface GenericBlockinVerifyPayload extends VerifySignInPayload {
   /**
    * Additional attestations to verify in the challenge.
    */
-  attestationsPresentations?: AttestationsProof<NumberType>[];
+  attestationsPresentations?: iAttestationsProof<NumberType>[];
 }
 
 /**

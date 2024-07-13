@@ -10,6 +10,14 @@ info:
 paths: {}
 components:
   schemas:
+    SupportedChain:
+      enum:
+        - Bitcoin
+        - Ethereum
+        - Cosmos
+        - Solana
+        - Unknown
+      type: string
     AssetDetails:
       properties:
         chain:
@@ -63,6 +71,23 @@ components:
         - $or
       additionalProperties: false
       type: object
+    AssetConditionGroup:
+      anyOf:
+        - $ref: '#/components/schemas/AndGroup'
+        - $ref: '#/components/schemas/OrGroup'
+        - $ref: '#/components/schemas/OwnershipRequirements'
+      examples:
+        - $and:
+            - assets:
+                - chain: BitBadges
+                  collectionId: '1'
+                  assetIds:
+                    - start: '1'
+                      end: '1'
+                  mustOwnAmounts:
+                    start: '1'
+                    end: '1'
+                  ownershipTimes: []
     OwnershipRequirements:
       properties:
         assets:
@@ -225,31 +250,6 @@ components:
           type: boolean
       additionalProperties: false
       type: object
-    SupportedChain:
-      enum:
-        - Bitcoin
-        - Ethereum
-        - Cosmos
-        - Solana
-        - Unknown
-      type: string
-    AssetConditionGroup:
-      anyOf:
-        - $ref: '#/components/schemas/AndGroup'
-        - $ref: '#/components/schemas/OrGroup'
-        - $ref: '#/components/schemas/OwnershipRequirements'
-      examples:
-        - $and:
-            - assets:
-                - chain: BitBadges
-                  collectionId: '1'
-                  assetIds:
-                    - start: '1'
-                      end: '1'
-                  mustOwnAmounts:
-                    start: '1'
-                    end: '1'
-                  ownershipTimes: []
     Doc:
       properties:
         _docId:
@@ -954,7 +954,7 @@ components:
         image:
           description: Description of the link
           type: string
-          examples: &ref_13
+          examples: &ref_14
             - https://example.com/image.png
             - ipfs://Qm...
       required:
@@ -1614,6 +1614,139 @@ components:
         - type
       additionalProperties: false
       type: object
+    ClaimIntegrationPluginCustomBodyType:
+    any:
+      description: >-
+        Private state is the current state of the claim integration that is
+        visible to only those who can fetch private parameters.
+
+    IntegrationPluginParams:
+      properties:
+        instanceId:
+          description: >-
+            The ID of the plugin instance. This is a unique identifier for
+            referencing this instance of the plugin within this claim
+
+            (e.g. differentiate between duplicates of the same plugin type).
+
+
+            This is different from the pluginId, which is a unique identifier
+            for the plugin itself. All instances of the same plugin
+
+            will have the same pluginId.
+          type: string
+        pluginId:
+          description: The type of the plugin
+          $ref: '#/components/schemas/NumberType'
+        publicParams:
+          description: The parameters of the plugin that are visible to the public
+        privateParams:
+          description: The parameters of the plugin that are not visible to the public
+        metadata:
+          properties:
+            name:
+              type: string
+              examples: &ref_12
+                - Name
+            description:
+              type: string
+              examples: *ref_8
+          required:
+            - name
+            - description
+          additionalProperties: false
+          description: Custom display metadata for the plugin
+          type: object
+      required:
+        - instanceId
+        - pluginId
+        - publicParams
+        - privateParams
+      additionalProperties: false
+      type: object
+    IntegrationPluginDetails:
+      properties:
+        instanceId:
+          description: >-
+            The ID of the plugin instance. This is a unique identifier for
+            referencing this instance of the plugin within this claim
+
+            (e.g. differentiate between duplicates of the same plugin type).
+
+
+            This is different from the pluginId, which is a unique identifier
+            for the plugin itself. All instances of the same plugin
+
+            will have the same pluginId.
+          type: string
+        pluginId:
+          description: The type of the plugin
+          $ref: '#/components/schemas/NumberType'
+        publicParams:
+          description: The parameters of the plugin that are visible to the public
+        privateParams:
+          description: The parameters of the plugin that are not visible to the public
+        metadata:
+          properties:
+            name:
+              type: string
+              examples: *ref_12
+            description:
+              type: string
+              examples: *ref_8
+          required:
+            - name
+            - description
+          additionalProperties: false
+          description: Custom display metadata for the plugin
+          type: object
+        publicState:
+          description: The current state of the plugin
+        privateState:
+          description: The private state of the plugin
+        resetState:
+          description: >-
+            If resetState = true, we will reset the state of the plugin back to
+            default. If false, we will keep the current state. Incompatible with
+            newState.
+          type: boolean
+        newState:
+          description: >-
+            If newState is present, we will set the state to the new state.
+            Incompatible with resetState. Can be used alongside
+            onlyUpdateProvidedNewState.
+
+            By default, we will overwrite the whole state. If
+            onlyUpdateProvidedNewState is true, we will only update the specific
+            provided fields.
+
+
+            Warning: This is an advanced feature and should be used with
+            caution. Misconfiguring this can lead to unexpected behavior of this
+            plugin.
+        onlyUpdateProvidedNewState:
+          description: >-
+            If true, we will only update the specific fields provided in
+            newState. If falsy, we will overwrite the whole state with newState.
+
+
+            Only applicable if newState is present.
+
+
+            Note that we do this on a recursive level. If you have nested
+            objects, we will only update the specific fields provided for those
+            nested objects
+
+            and leave all else as-is.
+          type: boolean
+      required:
+        - instanceId
+        - pluginId
+        - publicParams
+        - privateParams
+        - publicState
+      additionalProperties: false
+      type: object
     iClaimBuilderDoc:
       properties:
         _docId:
@@ -1643,7 +1776,8 @@ components:
           description: Deleted at timestamp
           $ref: '#/components/schemas/UNIXMilliTimestamp'
         plugins:
-          items: {}
+          items:
+            $ref: '#/components/schemas/IntegrationPluginParams'
           description: Dynamic checks to run in the form of plugins
           type: array
         manualDistribution:
@@ -1716,7 +1850,7 @@ components:
             The approval level of the approval "collection", "incoming", or
             "outgoing".
           type: string
-          examples: &ref_12
+          examples: &ref_13
             - collection
             - incoming
             - outgoing
@@ -1778,7 +1912,7 @@ components:
             - ''
           description: The challenge level (i.e. "collection", "incoming", "outgoing")
           type: string
-          examples: *ref_12
+          examples: *ref_13
         approverAddress:
           description: The approver address (leave blank if approvalLevel = "collection")
           $ref: '#/components/schemas/CosmosAddress'
@@ -1815,7 +1949,7 @@ components:
             - ''
           description: The challenge level (i.e. "collection", "incoming", "outgoing")
           type: string
-          examples: *ref_12
+          examples: *ref_13
         approverAddress:
           description: The approver address (leave blank if approvalLevel = "collection")
           $ref: '#/components/schemas/CosmosAddress'
@@ -2074,8 +2208,7 @@ components:
         name:
           description: The name of the app
           type: string
-          examples: &ref_14
-            - Name
+          examples: *ref_12
         description:
           description: The description of the app
           type: string
@@ -2083,7 +2216,7 @@ components:
         image:
           description: The image of the app
           type: string
-          examples: *ref_13
+          examples: *ref_14
         clientId:
           description: The client ID of the app
           type: string
@@ -2241,7 +2374,7 @@ components:
             name:
               description: The name of the plugin
               type: string
-              examples: *ref_14
+              examples: *ref_12
             description:
               description: Description of the plugin
               type: string
@@ -2249,7 +2382,7 @@ components:
             image:
               description: The image of the plugin
               type: string
-              examples: *ref_13
+              examples: *ref_14
             documentation:
               description: Documentation for the plugin
               type: string
@@ -2425,13 +2558,13 @@ components:
           $ref: '#/components/schemas/SupportedChain'
         name:
           type: string
-          examples: *ref_14
+          examples: *ref_12
         description:
           type: string
           examples: *ref_8
         image:
           type: string
-          examples: *ref_13
+          examples: *ref_14
         scopes:
           items:
             $ref: '#/components/schemas/OAuthScopeDetails'
@@ -2652,13 +2785,13 @@ components:
             Metadata for the attestation for display purposes. Note this should
             not contain anything sensitive. It may be displayed to verifiers.
           type: string
-          examples: *ref_14
+          examples: *ref_12
         image:
           description: >-
             Metadata for the attestation for display purposes. Note this should
             not contain anything sensitive. It may be displayed to verifiers.
           type: string
-          examples: *ref_13
+          examples: *ref_14
         description:
           description: >-
             Metadata for the attestation for display purposes. Note this should
@@ -2828,13 +2961,13 @@ components:
             Metadata for the attestation for display purposes. Note this should
             not contain anything sensitive. It may be displayed to verifiers.
           type: string
-          examples: *ref_14
+          examples: *ref_12
         image:
           description: >-
             Metadata for the attestation for display purposes. Note this should
             not contain anything sensitive. It may be displayed to verifiers.
           type: string
-          examples: *ref_13
+          examples: *ref_14
         description:
           description: >-
             Metadata for the attestation for display purposes. Note this should
@@ -3013,7 +3146,7 @@ components:
         name:
           description: The name of the badge or badge collection.
           type: string
-          examples: *ref_14
+          examples: *ref_12
         description:
           description: The description of the badge or badge collection. Supports markdown.
           type: string
@@ -3021,7 +3154,7 @@ components:
         image:
           description: The image of the badge or badge collection.
           type: string
-          examples: *ref_13
+          examples: *ref_14
         video:
           description: >-
             The video of the badge or badge collection. If a standard video is
@@ -3071,7 +3204,7 @@ components:
                 type: string
               name:
                 type: string
-                examples: *ref_14
+                examples: *ref_12
               value:
                 anyOf:
                   - type: string
@@ -3101,12 +3234,6 @@ components:
       type: object
     iBitBadgesAddressList:
       properties:
-        _docId:
-          description: A unique stringified document ID
-          type: string
-        _id:
-          description: A unique document ID (Mongo DB ObjectID)
-          type: string
         listId:
           description: The ID of the address list.
           type: string
@@ -3136,6 +3263,12 @@ components:
         aliasAddress:
           description: The alias cosmos address of the address list.
           $ref: '#/components/schemas/CosmosAddress'
+        _docId:
+          description: A unique stringified document ID
+          type: string
+        _id:
+          description: A unique document ID (Mongo DB ObjectID)
+          type: string
         updateHistory:
           items:
             $ref: '#/components/schemas/iUpdateHistory'
@@ -3206,7 +3339,8 @@ components:
               claimId:
                 type: string
               plugins:
-                items: {}
+                items:
+                  $ref: '#/components/schemas/IntegrationPluginDetails'
                 description: Plugins are the criteria for the claim.
                 type: array
               approach:
@@ -3219,12 +3353,12 @@ components:
           description: The claims of the address list.
           type: array
       required:
-        - _docId
         - listId
         - addresses
         - whitelist
         - uri
         - customData
+        - _docId
         - updateHistory
         - createdBlock
         - lastUpdated
@@ -3342,7 +3476,8 @@ components:
               claimId:
                 type: string
               plugins:
-                items: {}
+                items:
+                  $ref: '#/components/schemas/IntegrationPluginDetails'
                 type: array
               approach:
                 type: string
@@ -3927,7 +4062,7 @@ components:
             properties:
               name:
                 type: string
-                examples: *ref_14
+                examples: *ref_12
               value:
                 anyOf:
                   - type: string
@@ -3985,7 +4120,7 @@ components:
             properties:
               name:
                 type: string
-                examples: *ref_14
+                examples: *ref_12
               value:
                 anyOf:
                   - type: string
@@ -4816,7 +4951,8 @@ components:
             balances based on the claim.
           $ref: '#/components/schemas/iPredeterminedBalances'
         plugins:
-          items: {}
+          items:
+            $ref: '#/components/schemas/IntegrationPluginDetails'
           description: >-
             Claim plugins. These are the criteria that must pass for a user to
             claim the badge.
@@ -5202,7 +5338,8 @@ components:
               claimId:
                 type: string
               plugins:
-                items: {}
+                items:
+                  $ref: '#/components/schemas/IntegrationPluginDetails'
                 type: array
               balancesToSet:
                 $ref: '#/components/schemas/iPredeterminedBalances'
@@ -5300,7 +5437,7 @@ components:
               name:
                 description: The name of the approval.
                 type: string
-                examples: *ref_14
+                examples: *ref_12
               description:
                 description: The description of the approval.
                 type: string
@@ -6000,13 +6137,13 @@ components:
             Metadata for the attestation for display purposes. Note this should
             not contain anything sensitive. It may be displayed to verifiers.
           type: string
-          examples: *ref_14
+          examples: *ref_12
         image:
           description: >-
             Metadata for the attestation for display purposes. Note this should
             not contain anything sensitive. It may be displayed to verifiers.
           type: string
-          examples: *ref_13
+          examples: *ref_14
         description:
           description: >-
             Metadata for the attestation for display purposes. Note this should
@@ -6165,13 +6302,13 @@ components:
             Metadata for the attestation for display purposes. Note this should
             not contain anything sensitive. It may be displayed to verifiers.
           type: string
-          examples: *ref_14
+          examples: *ref_12
         image:
           description: >-
             Metadata for the attestation for display purposes. Note this should
             not contain anything sensitive. It may be displayed to verifiers.
           type: string
-          examples: *ref_13
+          examples: *ref_14
         description:
           description: >-
             Metadata for the attestation for display purposes. Note this should
@@ -6385,13 +6522,13 @@ components:
             Metadata for the attestation for display purposes. Note this should
             not contain anything sensitive. It may be displayed to verifiers.
           type: string
-          examples: *ref_14
+          examples: *ref_12
         image:
           description: >-
             Metadata for the attestation for display purposes. Note this should
             not contain anything sensitive. It may be displayed to verifiers.
           type: string
-          examples: *ref_13
+          examples: *ref_14
         description:
           description: >-
             Metadata for the attestation for display purposes. Note this should
@@ -6421,7 +6558,7 @@ components:
         name:
           description: The name of the SIWBB request for display purposes.
           type: string
-          examples: *ref_14
+          examples: *ref_12
         description:
           description: The description of the SIWBB request for display purposes.
           type: string
@@ -6429,7 +6566,7 @@ components:
         image:
           description: The image of the SIWBB request for display purposes.
           type: string
-          examples: *ref_13
+          examples: *ref_14
         ownershipRequirements:
           description: The ownership requirements for the asset.
           $ref: '#/components/schemas/AssetConditionGroup'
@@ -6776,7 +6913,7 @@ components:
             Metadata for the secret for display purposes. Note this should not
             contain anything sensitive. It may be displayed to verifiers.
           type: string
-          examples: *ref_14
+          examples: *ref_12
         description:
           description: Description of the app.
           type: string
@@ -6784,7 +6921,7 @@ components:
         image:
           description: Image for the app.
           type: string
-          examples: *ref_13
+          examples: *ref_14
         redirectUris:
           items:
             type: string
@@ -6877,7 +7014,7 @@ components:
             Metadata for for display purposes. Note this should not contain
             anything sensitive. It may be displayed to verifiers.
           type: string
-          examples: *ref_14
+          examples: *ref_12
         description:
           description: Description of the app.
           type: string
@@ -6885,7 +7022,7 @@ components:
         image:
           description: Image for the app.
           type: string
-          examples: *ref_13
+          examples: *ref_14
         redirectUris:
           items:
             type: string
@@ -6934,7 +7071,7 @@ components:
             name:
               description: The name of the plugin
               type: string
-              examples: *ref_14
+              examples: *ref_12
             description:
               description: Description of the plugin
               type: string
@@ -6942,7 +7079,7 @@ components:
             image:
               description: The image of the plugin
               type: string
-              examples: *ref_13
+              examples: *ref_14
             documentation:
               description: Documentation for the plugin
               type: string
@@ -7062,7 +7199,7 @@ components:
             name:
               description: The name of the plugin
               type: string
-              examples: *ref_14
+              examples: *ref_12
             description:
               description: Description of the plugin
               type: string
@@ -7070,7 +7207,7 @@ components:
             image:
               description: The image of the plugin
               type: string
-              examples: *ref_13
+              examples: *ref_14
             documentation:
               description: Documentation for the plugin
               type: string
@@ -7223,7 +7360,8 @@ components:
                   collections that have off-chain indexed balances and are
                   assigning balances based on the claim.
               plugins:
-                items: {}
+                items:
+                  $ref: '#/components/schemas/IntegrationPluginDetails'
                 description: >-
                   Claim plugins. These are the criteria that must pass for a
                   user to claim the badge.
@@ -7259,6 +7397,84 @@ components:
       additionalProperties: false
       type: object
     ManagePluginRequest:
+      properties:
+        instanceId:
+          description: >-
+            The ID of the plugin instance. This is a unique identifier for
+            referencing this instance of the plugin within this claim
+
+            (e.g. differentiate between duplicates of the same plugin type).
+
+
+            This is different from the pluginId, which is a unique identifier
+            for the plugin itself. All instances of the same plugin
+
+            will have the same pluginId.
+          type: string
+        pluginId:
+          description: The type of the plugin
+          $ref: '#/components/schemas/NumberType'
+        publicParams:
+          description: The parameters of the plugin that are visible to the public
+        privateParams:
+          description: The parameters of the plugin that are not visible to the public
+        metadata:
+          properties:
+            name:
+              type: string
+              examples: *ref_12
+            description:
+              type: string
+              examples: *ref_8
+          required:
+            - name
+            - description
+          additionalProperties: false
+          description: Custom display metadata for the plugin
+          type: object
+        resetState:
+          description: >-
+            If resetState = true, we will reset the state of the plugin back to
+            default. If false, we will keep the current state. Incompatible with
+            newState.
+          type: boolean
+        newState:
+          description: >-
+            If newState is present, we will set the state to the new state.
+            Incompatible with resetState. Can be used alongside
+            onlyUpdateProvidedNewState.
+
+            By default, we will overwrite the whole state. If
+            onlyUpdateProvidedNewState is true, we will only update the specific
+            provided fields.
+
+
+            Warning: This is an advanced feature and should be used with
+            caution. Misconfiguring this can lead to unexpected behavior of this
+            plugin.
+        onlyUpdateProvidedNewState:
+          description: >-
+            If true, we will only update the specific fields provided in
+            newState. If falsy, we will overwrite the whole state with newState.
+
+
+            Only applicable if newState is present.
+
+
+            Note that we do this on a recursive level. If you have nested
+            objects, we will only update the specific fields provided for those
+            nested objects
+
+            and leave all else as-is.
+          type: boolean
+      required:
+        - instanceId
+        - pluginId
+        - publicParams
+        - privateParams
+      additionalProperties: false
+      description: |-
+      type: object
     CreateClaimRequest:
       properties:
         claimId:
@@ -7487,13 +7703,13 @@ components:
             Metadata for the attestation for display purposes. Note this should
             not contain anything sensitive. It may be displayed to verifiers.
           type: string
-          examples: *ref_14
+          examples: *ref_12
         image:
           description: >-
             Metadata for the attestation for display purposes. Note this should
             not contain anything sensitive. It may be displayed to verifiers.
           type: string
-          examples: *ref_13
+          examples: *ref_14
         description:
           description: >-
             Metadata for the attestation for display purposes. Note this should
@@ -7671,13 +7887,13 @@ components:
             Metadata for the attestation for display purposes. Note this should
             not contain anything sensitive. It may be displayed to verifiers.
           type: string
-          examples: *ref_14
+          examples: *ref_12
         image:
           description: >-
             Metadata for the attestation for display purposes. Note this should
             not contain anything sensitive. It may be displayed to verifiers.
           type: string
-          examples: *ref_13
+          examples: *ref_14
         description:
           description: >-
             Metadata for the attestation for display purposes. Note this should
@@ -7863,15 +8079,29 @@ components:
           description: The collection ID
           $ref: '#/components/schemas/NumberType'
         collectionMetadataTimeline:
-          items:
-            $ref: '#/components/schemas/iCollectionMetadataTimeline'
-          description: The collection metadata timeline
-          type: array
+          allOf:
+            - items:
+                $ref: '#/components/schemas/iCollectionMetadataTimeline'
+              description: The collection metadata timeline
+              type: array
+            - items:
+                $ref: '#/components/schemas/iCollectionMetadataTimeline'
+              description: >-
+                The collection metadata timeline for this collection, with
+                off-chain metadata populated.
+              type: array
         badgeMetadataTimeline:
-          items:
-            $ref: '#/components/schemas/iBadgeMetadataTimeline'
-          description: The badge metadata timeline
-          type: array
+          allOf:
+            - items:
+                $ref: '#/components/schemas/iBadgeMetadataTimeline'
+              description: The badge metadata timeline
+              type: array
+            - items:
+                $ref: '#/components/schemas/iBadgeMetadataTimeline'
+              description: >-
+                The badge metadata timeline for this collection, with off-chain
+                metadata populated.
+              type: array
         balancesType:
           enum:
             - Standard
@@ -7898,10 +8128,17 @@ components:
           description: The manager timeline
           type: array
         collectionApprovals:
-          items:
-            $ref: '#/components/schemas/iCollectionApproval'
-          description: The collection approved transfers timeline
-          type: array
+          allOf:
+            - items:
+                $ref: '#/components/schemas/iCollectionApproval'
+              description: The collection approved transfers timeline
+              type: array
+            - items:
+                $ref: '#/components/schemas/iCollectionApproval'
+              description: >-
+                The collection approvals for this collection, with off-chain
+                metadata populated.
+              type: array
         standardsTimeline:
           items:
             $ref: '#/components/schemas/iStandardsTimeline'
@@ -8212,13 +8449,13 @@ components:
           type: boolean
         name:
           type: string
-          examples: *ref_14
+          examples: *ref_12
         description:
           type: string
           examples: *ref_8
         image:
           type: string
-          examples: *ref_13
+          examples: *ref_14
         otherSignIns:
           items:
             enum:
@@ -8437,7 +8674,7 @@ components:
         name:
           description: The name of the claim
           type: string
-          examples: *ref_14
+          examples: *ref_12
         description:
           description: >-
             The description of the claim. This describes how to earn and claim
@@ -8808,6 +9045,10 @@ components:
         - fromAmino
       additionalProperties: false
       type: object
+    AminoConverters:
+      description: >-
+        A map from protobuf type URL to the AminoConverter implementation if
+        supported on chain
     TxContext:
       properties:
         chain:
@@ -8838,7 +9079,7 @@ components:
           properties:
             name:
               type: string
-              examples: *ref_14
+              examples: *ref_12
             version:
               type: string
             chainId:
@@ -10278,13 +10519,13 @@ components:
             Metadata for the attestation for display purposes. Note this should
             not contain anything sensitive. It may be displayed to verifiers.
           type: string
-          examples: *ref_14
+          examples: *ref_12
         image:
           description: >-
             Metadata for the attestation for display purposes. Note this should
             not contain anything sensitive. It may be displayed to verifiers.
           type: string
-          examples: *ref_13
+          examples: *ref_14
         description:
           description: >-
             Metadata for the attestation for display purposes. Note this should
@@ -10433,13 +10674,13 @@ components:
             Metadata for the attestation for display purposes. Note this should
             not contain anything sensitive. It may be displayed to verifiers.
           type: string
-          examples: *ref_14
+          examples: *ref_12
         image:
           description: >-
             Metadata for the attestation for display purposes. Note this should
             not contain anything sensitive. It may be displayed to verifiers.
           type: string
-          examples: *ref_13
+          examples: *ref_14
         description:
           description: >-
             Metadata for the attestation for display purposes. Note this should
@@ -10709,7 +10950,7 @@ components:
             The approval level of the approval "collection", "incoming", or
             "outgoing".
           type: string
-          examples: *ref_12
+          examples: *ref_13
         approverAddress:
           description: >-
             The address of the approval to check. If approvalLevel is
@@ -10754,7 +10995,7 @@ components:
             The approval level of the approval "collection", "incoming", or
             "outgoing".
           type: string
-          examples: *ref_12
+          examples: *ref_13
         approverAddress:
           description: The address of the approval to check.
           $ref: '#/components/schemas/CosmosAddress'

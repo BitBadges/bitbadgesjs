@@ -6,10 +6,11 @@ function removeImports(data: string): string {
   const newLines: string[] = [];
   for (let i = 0; i < lines.length; i++) {
     if (
-      lines[i].trim().startsWith('import') ||
-      lines[i].trim().startsWith('export *') ||
-      lines[i].trim().startsWith('export default') ||
-      lines[i].trim().startsWith('export {')
+      (lines[i].trim().startsWith('import') ||
+        lines[i].trim().startsWith('export *') ||
+        lines[i].trim().startsWith('export default') ||
+        lines[i].trim().startsWith('export {')) &&
+      !lines[i].trim().startsWith('export default class')
     ) {
       while (lines[i] && lines[i].trim() !== '') {
         i++;
@@ -75,6 +76,13 @@ function removeClasses(data: string): string {
       'OffChainBalancesMap',
       'TransactionPayload',
       'iBitBadgesApi',
+      'AccountViewData',
+      'CollectionViewData',
+      // 'ClaimIntegrationPluginCustomBodyType',
+      // 'ClaimIntegrationPublicStateType',
+      // 'ClaimIntegrationPrivateStateType',
+      // 'ClaimIntegrationPublicParamsType',
+      // 'ClaimIntegrationPrivateParamsType',
       ...withDetailsInterfaces.map((interfaceName) => `${interfaceName}WithDetails`)
     ];
     const startsWithProblemInterface = problemInterfaces.some(
@@ -85,7 +93,7 @@ function removeClasses(data: string): string {
         lines[i].trim().startsWith(`type ${problemInterface}`)
     );
 
-    const safeEnums = ['BroadcastMode', 'SupportedChain'];
+    const safeEnums = ['BroadcastMode'];
     const startsWithUnsafeEnum =
       (lines[i].trim().startsWith('enum ') && !safeEnums.some((safeEnum) => lines[i].includes(safeEnum))) ||
       (lines[i].trim().startsWith('export enum ') && !safeEnums.some((safeEnum) => lines[i].includes(safeEnum)));
@@ -96,6 +104,7 @@ function removeClasses(data: string): string {
       lines[i].trim().startsWith('export function ') ||
       lines[i].trim().startsWith('abstract class ') ||
       lines[i].trim().startsWith('export abstract class ') ||
+      lines[i].trim().startsWith('export default class ') ||
       lines[i].trim().startsWith('function ') ||
       lines[i].trim().startsWith('proto3.util') ||
       lines[i].trim().startsWith('proto2.util') ||
@@ -195,7 +204,7 @@ function removeImportLinesFromFile(filePath: string): void {
     modifiedContent = modifiedContent.replace(new RegExp('WithDetails', 'g'), '');
 
     modifiedContent =
-      `import { DeliverTxResponse } from '@cosmjs/stargate';
+      `
     import MerkleTree from 'merkletreejs';
     import { BlockinAndGroup, BlockinOrGroup } from './api-indexer';
     import { Options as MerkleTreeJsOptions } from 'merkletreejs/dist/MerkleTree';
@@ -237,6 +246,17 @@ function removeImportLinesFromFile(filePath: string): void {
       resources?: string[];
       assetOwnershipRequirements?: AssetConditionGroup;
     }
+
+    export enum PluginPresetType {
+      Stateless = 'Stateless',
+      Usernames = 'Usernames',
+      ClaimToken = 'ClaimToken',
+      CustomResponseHandler = 'CustomResponseHandler',
+      CompletelyCustom = 'CompletelyCustom',
+      ClaimNumbers = 'ClaimNumbers',
+      StateTransitions = 'StateTransitions'
+    }
+
     export interface VerifyChallengeOptions {
       /**
        * Optionally define the expected details to check. If the challenge was edited and the details
@@ -271,10 +291,83 @@ function removeImportLinesFromFile(filePath: string): void {
       skipSignatureVerification?: boolean;
     }\n\n` + modifiedContent;
 
+    // remove the two lines BELOW export interface iAddressListDoc
+    const lineIdx = modifiedContent.split('\n').findIndex((line) => line.includes('export interface iAddressListDoc'));
+    modifiedContent = modifiedContent
+      .split('\n')
+      .filter((_, idx) => idx !== lineIdx + 1 && idx !== lineIdx + 2)
+      .join('\n');
+
+    //Note that this only gets first instance (which should be collectionDoc not BitBadgesCollecttion)
+    const defaultBalancesLine = modifiedContent.split('\n').findIndex((line) => line.includes('defaultBalances: iUserBalanceStore'));
+    const permLine = modifiedContent.split('\n').findIndex((line) => line.includes('collectionPermissions: iCollectionPermissions'));
+    modifiedContent = modifiedContent
+      .split('\n')
+      .filter(
+        (_, idx) =>
+          idx !== defaultBalancesLine &&
+          idx !== permLine &&
+          //and the comments above them 1 line
+          idx !== defaultBalancesLine - 1 &&
+          idx !== permLine - 1
+      )
+      .join('\n');
+
+    const accountDocLines = getInBetweenBraces('export interface iAccountDoc', modifiedContent.split('\n')).filter(
+      (x) => !(x.includes('solAddress') || x.includes('Solana address'))
+    );
+    const profileDocLines = getInBetweenBraces('export interface iProfileDoc', modifiedContent.split('\n')).filter(
+      (x) => !(x.includes('solAddress') || x.includes('Solana address'))
+    );
+
+    const bitbadgesuserInfoIdx = modifiedContent.split('\n').findIndex((line) => line.includes('export interface iBitBadgesUserInfo'));
+    modifiedContent = modifiedContent
+      .split('\n')
+      .map((x, idx) => {
+        if (idx === bitbadgesuserInfoIdx) {
+          return `export interface iBitBadgesUserInfo extends Doc {\n` + accountDocLines.join('\n') + '\n' + profileDocLines.join('\n') + `\n`;
+        }
+        return x;
+      })
+      .join('\n');
+
+    // replace export type ManagePluginRequest = Omit with export type ManagePluginRequest = IntegrationPluginParams &  Omit
+    const managePluginRequestIdx = modifiedContent.split('\n').findIndex((line) => line.includes('export type ManagePluginRequest'));
+    modifiedContent = modifiedContent
+      .split('\n')
+      .map((x, idx) => {
+        if (idx === managePluginRequestIdx) {
+          return x.replace('Omit<', 'IntegrationPluginParams & Omit<');
+        }
+        return x;
+      })
+      .join('\n');
+
     // Write the modified content back to the file
     fs.writeFileSync(filePath, modifiedContent, 'utf8');
   });
 }
+
+const getInBetweenBraces = (startLineSubstring: string, lines: string[]) => {
+  let i = lines.findIndex((line) => line.includes(startLineSubstring));
+  let innerLines: string[] = [];
+
+  if (lines[i].trim().endsWith('{}') || lines[i].trim().endsWith(';')) {
+    return [];
+  } else {
+    i++;
+    //go until the end of the class
+    while (!(lines[i].replace('};', '}').startsWith('}') && lines[i].replace('};', '}').endsWith('}'))) {
+      // console.log('removing class:', lines[i]);
+      innerLines.push(lines[i]);
+      i++;
+    }
+
+    console.log(lines[i]);
+  }
+
+  return innerLines;
+};
 
 const filePath = process.argv[2];
 if (!filePath) {

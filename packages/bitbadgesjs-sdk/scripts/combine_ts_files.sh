@@ -7,6 +7,11 @@ combine_ts_files() {
 
     # Find all TypeScript files in the directory excluding the proto and node-rest-api directories
     find "$directory" -type f \( -name "*.ts" ! -name "*.spec.ts" \)  -print0 | while IFS= read -r -d '' file; do
+        # If the nextJS auth file (auth.ts) is found, skip it
+        if [[ "$file" == *"/auth.ts" ]]; then
+            continue
+        fi
+
         # Append file content to the output file
         cat "$file" >> "$output_file"
         echo "" >> "$output_file" # Add an empty line after each file

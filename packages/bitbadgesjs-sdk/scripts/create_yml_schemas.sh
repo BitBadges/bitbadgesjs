@@ -74,6 +74,17 @@ main() {
     replace_text_in_directory "$directory" "ClaimIntegrationPrivateParamsType;" "ClaimIntegrationPrivateParamsType<T>;"
     replace_text_in_directory "$directory" "extends IntegrationPluginParams {" "extends IntegrationPluginParams<T> {"
     replace_text_in_directory "$directory" "ClaimIntegrationPublicStateType;" "ClaimIntegrationPublicStateType<T>;"
+    replace_text_in_directory "$directory" "ClaimIntegrationPrivateStateType;" "ClaimIntegrationPrivateStateType<T>;"
+    replace_text_in_directory "$directory" " iBadgeMetadata<T>\[\];" " iBadgeMetadaataDetails<T>\[\];"
+    replace_text_in_directory "$directory" " iCollectionMetadata<T>\[\];" " iCollectionMetadataDetails<T>\[\];"
+    replace_text_in_directory "$directory" "<T extends ClaimIntegrationPluginType>" ""
+    replace_text_in_directory "$directory" "<T>" ""
+    replace_text_in_directory "$directory" "ClaimIntegrationPublicStateType" "any"
+    replace_text_in_directory "$directory" "ClaimIntegrationPrivateStateType" "any"
+    replace_text_in_directory "$directory" "ClaimIntegrationPublicParamsType" "any"
+    replace_text_in_directory "$directory" "ClaimIntegrationPrivateParamsType" "any"
+    replace_text_in_directory "$directory" "<ClaimIntegrationPluginType>" ""
+
 
     npx typeconv -f ts -t oapi -o openapitypes "src/combined.ts"
     echo "Type conversion completed recursively on all folders within '$directory'."
