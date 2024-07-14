@@ -5,15 +5,12 @@ module.exports = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
 
-    '^(..?/.+)\\.js$': '$1'
+    '^(..?/.+)\\.js$': '$1',
+    '^(..?/.+)\\.ts$': '$1'
   },
+  resolver: 'ts-jest-resolver',
   transform: {
-    '\\.[jt]sx?$': 'ts-jest'
-  },
-  globals: {
-    'ts-jest': {
-      useESM: true
-    }
-  },
-  extensionsToTreatAsEsm: ['.ts']
+    '^.+\\.(ts|tsx)?$': 'ts-jest',
+    '^.+\\.(js|jsx)$': 'babel-jest'
+  }
 };
