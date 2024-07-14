@@ -1,1 +1,1 @@
-export * from './genesis_pb';
+export * from './genesis_pb.js';

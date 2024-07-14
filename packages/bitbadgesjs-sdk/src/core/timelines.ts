@@ -7,10 +7,12 @@ import type {
   OffChainBalancesMetadataTimeline,
   StandardsTimeline,
   TimelineItem
-} from './misc';
-import type { NumberType } from '../common/string-numbers';
-import { UintRangeArray } from './uintRanges';
-import { GO_MAX_UINT_64, Metadata, getConverterFunction } from '..';
+} from './misc.js';
+import type { NumberType } from '../common/string-numbers.js';
+import { UintRangeArray } from './uintRanges.js';
+import { getConverterFunction } from '@/interfaces/index.js';
+import { GO_MAX_UINT_64 } from '@/common/math.js';
+import { Metadata } from '@/api-indexer/metadata/metadata.js';
 
 /**
  * @category Timelines

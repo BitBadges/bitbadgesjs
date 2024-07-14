@@ -1,2 +1,2 @@
-export * from './query_pb';
-export * from './tx_pb';
+export * from './query_pb.js';
+export * from './tx_pb.js';

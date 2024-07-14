@@ -1,15 +1,15 @@
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, deepCopyPrimitives, getConverterFunction } from '@/common/base';
-import type { iBalance, iTransfer } from '@/interfaces/badges/core';
-import * as proto from '@/proto';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, deepCopyPrimitives, getConverterFunction } from '@/common/base.js';
+import type { iBalance, iTransfer } from '@/interfaces/badges/core.js';
+import * as proto from '@/proto/index.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
-import { CosmosAddress } from '..';
-import { convertToCosmosAddress } from '../address-converter/converter';
-import { GO_MAX_UINT_64, safeAddKeepLeft, safeMultiplyKeepLeft } from '../common/math';
-import type { NumberType } from '../common/string-numbers';
-import { BigIntify, Stringify } from '../common/string-numbers';
-import { Balance, BalanceArray, cleanBalances } from './balances';
-import { ApprovalIdentifierDetails, MerkleProof, ZkProofSolution } from './misc';
-import { UintRangeArray } from './uintRanges';
+import { convertToCosmosAddress } from '../address-converter/converter.js';
+import { GO_MAX_UINT_64, safeAddKeepLeft, safeMultiplyKeepLeft } from '../common/math.js';
+import type { NumberType } from '../common/string-numbers.js';
+import { BigIntify, Stringify } from '../common/string-numbers.js';
+import { Balance, BalanceArray, cleanBalances } from './balances.js';
+import { ApprovalIdentifierDetails, MerkleProof, ZkProofSolution } from './misc.js';
+import { UintRangeArray } from './uintRanges.js';
+import { CosmosAddress } from '@/api-indexer/docs/interfaces.js';
 
 /**
  * Transfer is used to represent a transfer of badges. This is compatible with the MsgTransferBadges message.

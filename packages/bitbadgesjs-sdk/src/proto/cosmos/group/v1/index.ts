@@ -1,6 +1,6 @@
-export * from './events_pb';
-export * from './genesis_pb';
+export * from './events_pb.js';
+export * from './genesis_pb.js';
 
-export * from './query_pb';
-export * from './tx_pb';
-export * from './types_pb';
+export * from './query_pb.js';
+export * from './tx_pb.js';
+export * from './types_pb.js';

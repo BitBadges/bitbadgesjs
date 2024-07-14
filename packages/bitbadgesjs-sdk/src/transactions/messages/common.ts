@@ -1,5 +1,5 @@
-import type { SupportedChain } from '@/common/types';
-import { CosmosAddress } from '@/index';
+import type { SupportedChain } from '@/common/types.js';
+import { CosmosAddress } from '@/index.js';
 
 /**
  * EI712ToSign represents a signable EIP-712 payload that can be signed using MetaMask or Keplr.

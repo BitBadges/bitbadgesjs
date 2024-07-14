@@ -1,9 +1,9 @@
-import { safeSubtractKeepLeft, safeAddKeepRight, safeAddKeepLeft } from '@/common/math';
-import { BigIntify, NumberType } from '@/common/string-numbers';
-import type { BadgeMetadata } from '@/core/misc';
-import type { UintRange } from '@/core/uintRanges';
-import { UintRangeArray } from '@/core/uintRanges';
-import { getConverterFunction } from '@/interfaces';
+import { safeSubtractKeepLeft, safeAddKeepRight, safeAddKeepLeft } from '@/common/math.js';
+import { BigIntify, NumberType } from '@/common/string-numbers.js';
+import type { BadgeMetadata } from '@/core/misc.js';
+import type { UintRange } from '@/core/uintRanges.js';
+import { UintRangeArray } from '@/core/uintRanges.js';
+import { getConverterFunction } from '@/interfaces/index.js';
 
 /**
  * This function returns the [Metadata ID](https://docs.bitbadges.io/for-developers/bitbadges-sdk/common-snippets/metadata-ids)

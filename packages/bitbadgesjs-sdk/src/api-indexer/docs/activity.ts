@@ -1,7 +1,7 @@
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base';
-import type { NumberType } from '@/common/string-numbers';
-import { BalanceArray } from '@/core/balances';
-import { ApprovalIdentifierDetails } from '@/proto/badges/transfers_pb';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
+import type { NumberType } from '@/common/string-numbers.js';
+import { BalanceArray } from '@/core/balances.js';
+import { ApprovalIdentifierDetails } from '@/proto/badges/transfers_pb.js';
 import type {
   CosmosAddress,
   UNIXMilliTimestamp,
@@ -10,7 +10,7 @@ import type {
   iListActivityDoc,
   iReviewDoc,
   iTransferActivityDoc
-} from './interfaces';
+} from './interfaces.js';
 
 /**
  * @inheritDoc iActivityDoc

@@ -6,11 +6,11 @@ import {
   doBalancesExceedThreshold,
   addBalancesAndCheckIfExceedsThreshold,
   handleDuplicateBadgeIdsInBalances
-} from './balances';
-import { UserPermissions } from './permissions';
-import { UintRangeArray } from './uintRanges';
-import { UserBalanceStore } from './userBalances';
-import { safeAdd, GO_MAX_UINT_64, safeSubtract } from '../common/math';
+} from './balances.js';
+import { UserPermissions } from './permissions.js';
+import { UintRangeArray } from './uintRanges.js';
+import { UserBalanceStore } from './userBalances.js';
+import { safeAdd, GO_MAX_UINT_64, safeSubtract } from '../common/math.js';
 
 BigInt.prototype.toJSON = function () {
   return this.toString();

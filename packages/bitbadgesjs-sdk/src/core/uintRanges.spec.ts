@@ -1,5 +1,5 @@
-import { GO_MAX_UINT_64 } from '../common/math';
-import { UintRange, UintRangeArray } from './uintRanges';
+import { GO_MAX_UINT_64 } from '../common/math.js';
+import { UintRange, UintRangeArray } from './uintRanges.js';
 
 describe('UintRange and UintRangeArray', () => {
   // Singular range functions

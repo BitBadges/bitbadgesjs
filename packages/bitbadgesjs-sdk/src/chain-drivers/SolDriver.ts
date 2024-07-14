@@ -2,7 +2,7 @@ import { IChainDriver } from 'blockin';
 import { AssetConditionGroup } from 'blockin/dist/types/verify.types';
 import bs58 from 'bs58';
 import nacl from 'tweetnacl';
-import { NumberType } from '@/common/string-numbers';
+import { NumberType } from '@/common/string-numbers.js';
 
 
 /**

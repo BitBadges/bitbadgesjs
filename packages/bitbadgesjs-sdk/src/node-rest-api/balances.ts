@@ -1,4 +1,4 @@
-import type { CosmosCoin } from '@/core/coin';
+import type { CosmosCoin } from '@/core/coin.js';
 
 // TODO: add pagination to the request
 export function generateEndpointBalances(address: string) {

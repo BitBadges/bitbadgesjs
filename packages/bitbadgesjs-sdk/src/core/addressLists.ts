@@ -1,8 +1,8 @@
-import { CustomTypeClass } from '@/common/base';
-import type { iAddressList } from '@/interfaces/badges/core';
+import { CustomTypeClass } from '@/common/base.js';
+import type { iAddressList } from '@/interfaces/badges/core.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
-import { AddressList as ProtoAddressList } from '@/proto/badges';
-import { convertToCosmosAddress, isAddressValid } from '../address-converter/converter';
+import { AddressList as ProtoAddressList } from '@/proto/badges/index.js';
+import { convertToCosmosAddress, isAddressValid } from '../address-converter/converter.js';
 
 /**
  * AddressLists represent a list of addresses, identified by a unique ID.

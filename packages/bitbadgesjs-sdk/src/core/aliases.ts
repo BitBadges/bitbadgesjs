@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import { bech32 } from 'bech32';
-import type { NumberType } from '../common/string-numbers';
+import type { NumberType } from '../common/string-numbers.js';
 
 const AddressGenerationPrefix = 0x09;
 const AccountGenerationPrefix = 0x08;

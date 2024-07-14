@@ -1,10 +1,10 @@
-import type { NumberType } from '@/common/string-numbers';
-import { Stringify } from '@/common/string-numbers';
-import * as badges from '@/proto/badges/tx_pb';
+import type { NumberType } from '@/common/string-numbers.js';
+import { Stringify } from '@/common/string-numbers.js';
+import * as badges from '@/proto/badges/tx_pb.js';
 
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
-import { CollectionApproval } from '@/core/approvals';
-import { Balance, BalanceArray } from '@/core/balances';
+import { CollectionApproval } from '@/core/approvals.js';
+import { Balance, BalanceArray } from '@/core/balances.js';
 import {
   BadgeMetadataTimeline,
   CollectionMetadataTimeline,
@@ -13,11 +13,11 @@ import {
   ManagerTimeline,
   OffChainBalancesMetadataTimeline,
   StandardsTimeline
-} from '@/core/misc';
-import { CollectionPermissions } from '@/core/permissions';
-import type { iMsgUpdateCollection } from './interfaces';
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base';
-import { CosmosAddress } from '@/api-indexer';
+} from '@/core/misc.js';
+import { CollectionPermissions } from '@/core/permissions.js';
+import type { iMsgUpdateCollection } from './interfaces.js';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
+import { CosmosAddress } from '@/api-indexer/index.js';
 
 /**
  * MsgUpdateCollection is a transaction that can be used to update any collection. It is only executable by the manager.

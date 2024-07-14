@@ -1,8 +1,8 @@
 //TODO: This file should probably be refactored a lot, but it currently works.
 //			It is also not user-facing or dev-facing, so I am okay with how it is now
-import { BigIntify } from '../common/string-numbers';
-import { AddressList } from './addressLists';
-import { UintRange, UintRangeArray } from './uintRanges';
+import { BigIntify } from '../common/string-numbers.js';
+import { AddressList } from './addressLists.js';
+import { UintRange, UintRangeArray } from './uintRanges.js';
 
 const { getReservedTrackerList } = AddressList;
 

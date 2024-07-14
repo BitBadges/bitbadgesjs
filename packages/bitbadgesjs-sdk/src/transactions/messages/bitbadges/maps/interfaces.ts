@@ -1,6 +1,6 @@
-import { CosmosAddress } from '@/api-indexer';
-import { NumberType, Stringify } from '@/common/string-numbers';
-import { ActionPermission, CollectionMetadata, ManagerTimeline, TimedUpdatePermission, UintRangeArray } from '@/core';
+import { CosmosAddress } from '@/api-indexer/index.js';
+import { NumberType, Stringify } from '@/common/string-numbers.js';
+import { ActionPermission, CollectionMetadata, ManagerTimeline, TimedUpdatePermission, UintRangeArray } from '@/core/index.js';
 import {
   BaseNumberTypeClass,
   convertClassPropertiesAndMaintainNumberTypes,
@@ -10,8 +10,8 @@ import {
   iManagerTimeline,
   iTimedUpdatePermission,
   iUintRange
-} from '@/interfaces';
-import * as maps from '@/proto/maps/tx_pb';
+} from '@/interfaces/index.js';
+import * as maps from '@/proto/maps/tx_pb.js';
 
 /**
  * @category Interfaces

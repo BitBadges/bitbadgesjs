@@ -1,5 +1,5 @@
-import type { NumberType } from './string-numbers';
-import { BigIntify, Numberify, Stringify } from './string-numbers';
+import type { NumberType } from './string-numbers.js';
+import { BigIntify, Numberify, Stringify } from './string-numbers.js';
 import type { JsonObject } from '@bufbuild/protobuf';
 
 /**

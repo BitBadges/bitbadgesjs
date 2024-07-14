@@ -1,3 +1,3 @@
-export * from './msgExecuteContractCompat';
-export * from './msgInstantiateContractCompat';
-export * from './interfaces';
+export * from './msgExecuteContractCompat.js';
+export * from './msgInstantiateContractCompat.js';
+export * from './interfaces.js';

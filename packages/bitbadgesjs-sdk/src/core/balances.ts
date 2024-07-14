@@ -1,15 +1,15 @@
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
-import type { iBalance, iUintRange } from '@/interfaces/badges/core';
-import { BaseNumberTypeClass, deepCopyPrimitives, getConverterFunction } from '@/common/base';
-import * as proto from '@/proto';
-import { AddressList } from './addressLists';
-import { castNumberType, safeAdd, safeSubtract } from '../common/math';
-import type { UniversalPermissionDetails } from './overlaps';
-import { getOverlapsAndNonOverlaps } from './overlaps';
-import type { NumberType } from '../common/string-numbers';
-import { BigIntify, Stringify } from '../common/string-numbers';
-import { UintRange, UintRangeArray } from './uintRanges';
-import { BaseTypedArray } from '@/common/typed-arrays';
+import type { iBalance, iUintRange } from '@/interfaces/badges/core.js';
+import { BaseNumberTypeClass, deepCopyPrimitives, getConverterFunction } from '@/common/base.js';
+import * as proto from '@/proto/index.js';
+import { AddressList } from './addressLists.js';
+import { castNumberType, safeAdd, safeSubtract } from '../common/math.js';
+import type { UniversalPermissionDetails } from './overlaps.js';
+import { getOverlapsAndNonOverlaps } from './overlaps.js';
+import type { NumberType } from '../common/string-numbers.js';
+import { BigIntify, Stringify } from '../common/string-numbers.js';
+import { UintRange, UintRangeArray } from './uintRanges.js';
+import { BaseTypedArray } from '@/common/typed-arrays.js';
 
 /**
  * Balance is used to represent a balance of a badge.

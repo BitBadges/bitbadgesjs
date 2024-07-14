@@ -1,4 +1,4 @@
-import { SupportedChain } from '@/common/types';
+import { SupportedChain } from '@/common/types.js';
 import { sha256 as nobleSha256 } from '@noble/hashes/sha256';
 import { bech32 } from 'bech32';
 import bs58 from 'bs58';

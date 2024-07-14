@@ -1,6 +1,6 @@
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base';
-import type { NumberType } from '@/common/string-numbers';
-import { UintRange } from '@/core/uintRanges';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
+import type { NumberType } from '@/common/string-numbers.js';
+import { UintRange } from '@/core/uintRanges.js';
 import type {
   AndGroup,
   AssetDetails,
@@ -8,7 +8,7 @@ import type {
   OrGroup,
   OwnershipRequirements as BlockinOwnershipRequirements
 } from 'blockin/dist/types/verify.types';
-import { NativeAddress } from '../docs';
+import { NativeAddress } from '../docs/index.js';
 
 /**
  * @category Blockin

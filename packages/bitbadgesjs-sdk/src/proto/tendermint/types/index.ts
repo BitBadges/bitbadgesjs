@@ -1,6 +1,6 @@
-export * from './block_pb';
-export * from './evidence_pb';
+export * from './block_pb.js';
+export * from './evidence_pb.js';
 
-export * from './params_pb';
-export * from './types_pb';
-export * from './validator_pb';
+export * from './params_pb.js';
+export * from './types_pb.js';
+export * from './validator_pb.js';

@@ -1,15 +1,15 @@
-import type { CustomType } from '@/common/base';
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, getConverterFunction } from '@/common/base';
-import type { NumberType } from '@/common/string-numbers';
-import type { iAddressList } from '@/interfaces/badges/core';
-import type { BaseBitBadgesApi, PaginationInfo } from './base';
-import { EmptyResponseClass } from './base';
-import { ListActivityDoc } from './docs/activity';
-import { AddressListDoc } from './docs/docs';
-import type { ClaimIntegrationPluginType, IntegrationPluginDetails, iAddressListDoc, iListActivityDoc } from './docs/interfaces';
-import type { iMetadata } from './metadata/metadata';
-import { Metadata } from './metadata/metadata';
-import { BitBadgesApiRoutes } from './requests/routes';
+import type { CustomType } from '@/common/base.js';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, getConverterFunction } from '@/common/base.js';
+import type { NumberType } from '@/common/string-numbers.js';
+import type { iAddressList } from '@/interfaces/badges/core.js';
+import type { BaseBitBadgesApi, PaginationInfo } from './base.js';
+import { EmptyResponseClass } from './base.js';
+import { ListActivityDoc } from './docs/activity.js';
+import { AddressListDoc } from './docs/docs.js';
+import type { ClaimIntegrationPluginType, IntegrationPluginDetails, iAddressListDoc, iListActivityDoc } from './docs/interfaces.js';
+import type { iMetadata } from './metadata/metadata.js';
+import { Metadata } from './metadata/metadata.js';
+import { BitBadgesApiRoutes } from './requests/routes.js';
 import typia from 'typia';
 
 /**

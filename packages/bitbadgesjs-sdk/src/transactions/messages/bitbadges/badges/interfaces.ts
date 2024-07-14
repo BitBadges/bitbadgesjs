@@ -1,6 +1,6 @@
-import type { NumberType } from '@/common/string-numbers';
-import type { iCollectionApproval, iUserOutgoingApproval, iUserIncomingApproval } from '../../../../interfaces/badges/approvals';
-import type { iCollectionPermissions, iUserPermissions } from '../../../../interfaces/badges/permissions';
+import type { NumberType } from '@/common/string-numbers.js';
+import type { iCollectionApproval, iUserOutgoingApproval, iUserIncomingApproval } from '../../../../interfaces/badges/approvals.js';
+import type { iCollectionPermissions, iUserPermissions } from '../../../../interfaces/badges/permissions.js';
 import type {
   iBalance,
   iManagerTimeline,
@@ -12,9 +12,9 @@ import type {
   iIsArchivedTimeline,
   iTransfer,
   iAddressList
-} from '../../../../interfaces/badges/core';
-import type { iUserBalanceStore } from '../../../../interfaces/badges/userBalances';
-import { CosmosAddress } from '@/api-indexer/docs/interfaces';
+} from '../../../../interfaces/badges/core.js';
+import type { iUserBalanceStore } from '../../../../interfaces/badges/userBalances.js';
+import { CosmosAddress } from '@/api-indexer/docs/interfaces.js';
 
 /**
  * @category Interfaces

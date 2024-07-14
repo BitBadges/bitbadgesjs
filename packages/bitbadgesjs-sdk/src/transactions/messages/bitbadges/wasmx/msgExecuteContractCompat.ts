@@ -1,7 +1,7 @@
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
-import * as wasmx from '@/proto/wasmx/tx_pb';
-import { CustomTypeClass } from '@/common/base';
-import type { iMsgExecuteContractCompat } from './interfaces';
+import * as wasmx from '@/proto/wasmx/tx_pb.js';
+import { CustomTypeClass } from '@/common/base.js';
+import type { iMsgExecuteContractCompat } from './interfaces.js';
 
 /**
  * MsgExecuteContractCompat defines a ExecuteContractCompat message.

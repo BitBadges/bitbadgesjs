@@ -1,1 +1,1 @@
-export * from './pagination_pb';
+export * from './pagination_pb.js';

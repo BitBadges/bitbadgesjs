@@ -1,1 +1,1 @@
-export * from './schema_pb';
+export * from './schema_pb.js';

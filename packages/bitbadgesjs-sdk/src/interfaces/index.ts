@@ -1,2 +1,2 @@
-export * from './badges/index';
-export * from '../common/base';
+export * from './badges/index.js';
+export * from '../common/base.js';

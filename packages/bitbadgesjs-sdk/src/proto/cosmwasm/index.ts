@@ -1,1 +1,1 @@
-export * as wasm from './wasm/index';
+export * as wasm from './wasm/index.js';

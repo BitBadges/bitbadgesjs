@@ -1,4 +1,4 @@
-import type { NumberType } from './string-numbers';
+import type { NumberType } from './string-numbers.js';
 
 /**
  * Max value for a uint64.

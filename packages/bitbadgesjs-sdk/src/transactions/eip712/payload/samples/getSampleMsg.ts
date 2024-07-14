@@ -62,10 +62,10 @@ import {
   MerklePathItem,
   ZkProof,
   CoinTransfer
-} from '@/proto/badges';
-import { MsgCreateProtocol, MsgDeleteProtocol, MsgSetCollectionForProtocol, MsgUpdateProtocol } from '@/proto/protocols/tx_pb';
-import { deepCopyPrimitives } from '@/common/base';
-import { MapPermissions, MapUpdateCriteria, MsgCreateMap, MsgDeleteMap, MsgSetValue, MsgUpdateMap, ValueOptions } from '@/proto/maps/tx_pb';
+} from '@/proto/badges/index.js';
+import { MsgCreateProtocol, MsgDeleteProtocol, MsgSetCollectionForProtocol, MsgUpdateProtocol } from '@/proto/protocols/tx_pb.js';
+import { deepCopyPrimitives } from '@/common/base.js';
+import { MapPermissions, MapUpdateCriteria, MsgCreateMap, MsgDeleteMap, MsgSetValue, MsgUpdateMap, ValueOptions } from '@/proto/maps/tx_pb.js';
 
 const approvalCriteria = new OutgoingApprovalCriteria({
   mustOwnBadges: [

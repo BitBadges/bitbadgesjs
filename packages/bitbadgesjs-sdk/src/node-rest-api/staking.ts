@@ -1,4 +1,4 @@
-import type { CosmosCoin } from '@/core/coin';
+import type { CosmosCoin } from '@/core/coin.js';
 
 export function generateEndpointDistributionRewardsByAddress(address: string) {
   return `/cosmos/distribution/v1beta1/delegators/${address}/rewards`;

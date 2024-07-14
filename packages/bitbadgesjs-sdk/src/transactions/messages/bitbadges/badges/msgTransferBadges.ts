@@ -1,12 +1,12 @@
-import type { NumberType } from '@/common/string-numbers';
-import { Stringify } from '@/common/string-numbers';
-import type { iMsgTransferBadges } from './interfaces';
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base';
-import * as badges from '@/proto/badges/tx_pb';
+import type { NumberType } from '@/common/string-numbers.js';
+import { Stringify } from '@/common/string-numbers.js';
+import type { iMsgTransferBadges } from './interfaces.js';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
+import * as badges from '@/proto/badges/tx_pb.js';
 
-import { Transfer } from '@/core/transfers';
+import { Transfer } from '@/core/transfers.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
-import { CosmosAddress } from '@/api-indexer';
+import { CosmosAddress } from '@/api-indexer/index.js';
 
 /**
  * MsgTransferBadges represents a message to transfer badges from one user to another.

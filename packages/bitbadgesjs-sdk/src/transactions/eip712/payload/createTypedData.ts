@@ -1,7 +1,7 @@
-import type { JSONObject } from './types';
-import createDomain from './createDomain';
-import createTypes from './createTypes/parsePayload';
-import flattenPayload from './flattenPayload';
+import type { JSONObject } from './types.js';
+import createDomain from './createDomain.js';
+import createTypes from './createTypes/parsePayload.js';
+import flattenPayload from './flattenPayload.js';
 
 // TODO: Add integration tests against a network.
 

@@ -1,4 +1,4 @@
-import type { CosmosCoin } from '@/core/coin';
+import type { CosmosCoin } from '@/core/coin.js';
 
 export enum ProposalStatus {
   Unspecified = 'PROPOSAL_STATUS_UNSPECIFIED',

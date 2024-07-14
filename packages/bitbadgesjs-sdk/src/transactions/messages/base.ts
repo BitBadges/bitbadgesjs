@@ -5,23 +5,23 @@ import {
   MsgUniversalUpdateCollection,
   MsgUpdateCollection,
   MsgUpdateUserApprovals
-} from '@/proto/badges/tx_pb';
-import type { TxBody, AuthInfo, TxRaw } from '@/proto/cosmos/tx/v1beta1/tx_pb';
-import type { Chain, Fee, Sender } from './common';
-import { createStdFee, createStdSignDocFromProto, createTransactionWithMultipleMessages } from './transaction';
-import { SupportedChain } from '@/common/types';
-import { generatePostBodyBroadcast } from '@/node-rest-api/broadcast';
+} from '@/proto/badges/tx_pb.js';
+import type { TxBody, AuthInfo, TxRaw } from '@/proto/cosmos/tx/v1beta1/tx_pb.js';
+import type { Chain, Fee, Sender } from './common.js';
+import { createStdFee, createStdSignDocFromProto, createTransactionWithMultipleMessages } from './transaction.js';
+import { SupportedChain } from '@/common/types.js';
+import { generatePostBodyBroadcast } from '@/node-rest-api/broadcast.js';
 import {
   populateUndefinedForMsgUpdateCollection,
   populateUndefinedForMsgUpdateUserApprovals,
   populateUndefinedForMsgTransferBadges,
   populateUndefinedForMsgCreateCollection,
   populateUndefinedForMsgUniversalUpdateCollection
-} from '@/transactions/eip712/payload/samples/getSampleMsg';
-import { createTxRaw, createTxRawWithExtension } from './txRaw';
-import { signatureToWeb3ExtensionBitcoin, signatureToWeb3ExtensionSolana, signatureToWeb3ExtensionEthereum } from './web3Extension';
-import { createTypedData } from '@/transactions/eip712/payload/createTypedData';
-import type { MessageGenerated } from './utils';
+} from '@/transactions/eip712/payload/samples/getSampleMsg.js';
+import { createTxRaw, createTxRawWithExtension } from './txRaw.js';
+import { signatureToWeb3ExtensionBitcoin, signatureToWeb3ExtensionSolana, signatureToWeb3ExtensionEthereum } from './web3Extension.js';
+import { createTypedData } from '@/transactions/eip712/payload/createTypedData.js';
+import type { MessageGenerated } from './utils.js';
 import CryptoJS from 'crypto-js';
 
 /**

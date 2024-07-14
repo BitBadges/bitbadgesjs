@@ -1,6 +1,6 @@
-import { convertToCosmosAddress, getChainForAddress } from '@/address-converter/converter';
-import { getChainDriver } from '@/chain-drivers/verifySig';
-import { iAttestationsProof } from '@/interfaces/badges/core';
+import { convertToCosmosAddress, getChainForAddress } from '@/address-converter/converter.js';
+import { getChainDriver } from '@/chain-drivers/verifySig.js';
+import { iAttestationsProof } from '@/interfaces/badges/core.js';
 import { blsCreateProof, blsVerify, blsVerifyProof } from '@trevormil/bbs-signatures';
 import { NumberType } from 'blockin/dist/types/verify.types';
 

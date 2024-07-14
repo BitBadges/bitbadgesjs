@@ -1,1 +1,1 @@
-export * as bits from './bits/index';
+export * as bits from './bits/index.js';

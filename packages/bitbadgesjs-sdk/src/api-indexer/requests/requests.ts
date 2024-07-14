@@ -1,13 +1,13 @@
-import type { iBitBadgesAddressList } from '@/api-indexer/BitBadgesAddressList';
-import { BitBadgesAddressList } from '@/api-indexer/BitBadgesAddressList';
-import type { iBitBadgesCollection } from '@/api-indexer/BitBadgesCollection';
-import { BitBadgesCollection } from '@/api-indexer/BitBadgesCollection';
-import type { iBitBadgesUserInfo } from '@/api-indexer/BitBadgesUserInfo';
-import { BitBadgesUserInfo } from '@/api-indexer/BitBadgesUserInfo';
-import type { PaginationInfo } from '@/api-indexer/base';
-import { EmptyResponseClass } from '@/api-indexer/base';
-import { ClaimAlertDoc, TransferActivityDoc } from '@/api-indexer/docs/activity';
-import { AccessTokenDoc, DeveloperAppDoc, PluginDoc, AttestationDoc, StatusDoc, AttestationProofDoc } from '@/api-indexer/docs/docs';
+import type { iBitBadgesAddressList } from '@/api-indexer/BitBadgesAddressList.js';
+import { BitBadgesAddressList } from '@/api-indexer/BitBadgesAddressList.js';
+import type { iBitBadgesCollection } from '@/api-indexer/BitBadgesCollection.js';
+import { BitBadgesCollection } from '@/api-indexer/BitBadgesCollection.js';
+import type { iBitBadgesUserInfo } from '@/api-indexer/BitBadgesUserInfo.js';
+import { BitBadgesUserInfo } from '@/api-indexer/BitBadgesUserInfo.js';
+import type { PaginationInfo } from '@/api-indexer/base.js';
+import { EmptyResponseClass } from '@/api-indexer/base.js';
+import { ClaimAlertDoc, TransferActivityDoc } from '@/api-indexer/docs/activity.js';
+import { AccessTokenDoc, DeveloperAppDoc, PluginDoc, AttestationDoc, StatusDoc, AttestationProofDoc } from '@/api-indexer/docs/docs.js';
 import type {
   BlockinMessage,
   ClaimIntegrationPluginCustomBodyType,
@@ -30,23 +30,23 @@ import type {
   iTransferActivityDoc,
   iAttestationProofDoc,
   JsonBodyInputSchema
-} from '@/api-indexer/docs/interfaces';
-import type { iBadgeMetadataDetails, iCollectionMetadataDetails } from '@/api-indexer/metadata/badgeMetadata';
-import type { iMetadata } from '@/api-indexer/metadata/metadata';
-import { Metadata } from '@/api-indexer/metadata/metadata';
-import { BaseNumberTypeClass, CustomTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base';
-import type { NumberType } from '@/common/string-numbers';
-import type { SupportedChain } from '@/common/types';
-import { PredeterminedBalances, iChallengeDetails, iChallengeInfoDetails } from '@/core/approvals';
-import type { iBatchBadgeDetails } from '@/core/batch-utils';
-import { BlockinChallenge, VerifySIWBBOptions, iBlockinChallenge } from '@/core/blockin';
-import { AttestationsProof } from '@/core/secrets';
-import type { iOffChainBalancesMap } from '@/core/transfers';
-import { UintRangeArray } from '@/core/uintRanges';
-import type { iPredeterminedBalances, iAttestationsProof, iUintRange } from '@/interfaces';
-import { BroadcastPostBody } from '@/node-rest-api';
+} from '@/api-indexer/docs/interfaces.js';
+import type { iBadgeMetadataDetails, iCollectionMetadataDetails } from '@/api-indexer/metadata/badgeMetadata.js';
+import type { iMetadata } from '@/api-indexer/metadata/metadata.js';
+import { Metadata } from '@/api-indexer/metadata/metadata.js';
+import { BaseNumberTypeClass, CustomTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
+import type { NumberType } from '@/common/string-numbers.js';
+import type { SupportedChain } from '@/common/types.js';
+import { PredeterminedBalances, iChallengeDetails, iChallengeInfoDetails } from '@/core/approvals.js';
+import type { iBatchBadgeDetails } from '@/core/batch-utils.js';
+import { BlockinChallenge, VerifySIWBBOptions, iBlockinChallenge } from '@/core/blockin.js';
+import { AttestationsProof } from '@/core/secrets.js';
+import type { iOffChainBalancesMap } from '@/core/transfers.js';
+import { UintRangeArray } from '@/core/uintRanges.js';
+import type { iPredeterminedBalances, iAttestationsProof, iUintRange } from '@/interfaces/index.js';
+import { BroadcastPostBody } from '@/node-rest-api/index.js';
 import { AndGroup, OrGroup, type AssetConditionGroup, type ChallengeParams, type VerifyChallengeOptions } from 'blockin';
-import { BlockinAndGroup, BlockinAssetConditionGroup, BlockinChallengeParams, BlockinOrGroup, OwnershipRequirements } from './blockin';
+import { BlockinAndGroup, BlockinAssetConditionGroup, BlockinChallengeParams, BlockinOrGroup, OwnershipRequirements } from './blockin.js';
 
 /**
  * The response after successfully broadcasting a transaction.

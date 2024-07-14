@@ -1,2 +1,2 @@
-export * from './query_pb';
-export * from './types_pb';
+export * from './query_pb.js';
+export * from './types_pb.js';

@@ -1,11 +1,11 @@
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base';
-import { bigIntMin, safeAddKeepLeft } from '@/common/math';
-import type { NumberType } from '@/common/string-numbers';
-import { UintRange, UintRangeArray } from '@/core/uintRanges';
-import { Stringify, proto } from '@/index';
-import type { iUintRange } from '@/interfaces/badges/core';
-import type { iMetadata } from './metadata';
-import { Metadata } from './metadata';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
+import { bigIntMin, safeAddKeepLeft } from '@/common/math.js';
+import { Stringify, type NumberType } from '@/common/string-numbers.js';
+import { UintRange, UintRangeArray } from '@/core/uintRanges.js';
+import { badges } from '@/proto/index.js';
+import type { iUintRange } from '@/interfaces/badges/core.js';
+import type { iMetadata } from './metadata.js';
+import { Metadata } from './metadata.js';
 
 //TODO: Make an Array wrapper class for the util functions? Also add to BitBadgesCollection?
 
@@ -91,8 +91,8 @@ export class CollectionMetadataDetails<T extends NumberType>
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as CollectionMetadataDetails<U>;
   }
 
-  toProto(): proto.badges.CollectionMetadata {
-    return new proto.badges.CollectionMetadata(this.convert(Stringify));
+  toProto(): badges.CollectionMetadata {
+    return new badges.CollectionMetadata(this.convert(Stringify));
   }
 }
 
@@ -334,7 +334,7 @@ export class BadgeMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
     return metadataArr;
   };
 
-  toProto(): proto.badges.BadgeMetadata {
-    return new proto.badges.BadgeMetadata(this.convert(Stringify));
+  toProto(): badges.BadgeMetadata {
+    return new badges.BadgeMetadata(this.convert(Stringify));
   }
 }

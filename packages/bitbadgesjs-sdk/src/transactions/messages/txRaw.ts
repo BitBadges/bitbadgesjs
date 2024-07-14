@@ -1,7 +1,7 @@
-import { AuthInfo, TxBody } from '@/proto/cosmos/tx/v1beta1/tx_pb';
-import { TxRaw } from '@/proto/cosmos/tx/v1beta1/tx_pb';
-import type { MessageGenerated } from './utils';
-import { createAnyMessage } from './utils';
+import { AuthInfo, TxBody } from '@/proto/cosmos/tx/v1beta1/tx_pb.js';
+import { TxRaw } from '@/proto/cosmos/tx/v1beta1/tx_pb.js';
+import type { MessageGenerated } from './utils.js';
+import { createAnyMessage } from './utils.js';
 
 export function bytesToTxRaw(bytes: Uint8Array) {
   return TxRaw.fromBinary(bytes);

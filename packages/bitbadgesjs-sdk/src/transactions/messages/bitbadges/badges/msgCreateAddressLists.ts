@@ -1,10 +1,10 @@
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
-import * as badges from '@/proto/badges/tx_pb';
+import * as badges from '@/proto/badges/tx_pb.js';
 
-import { CustomTypeClass } from '@/common/base';
-import { AddressList } from '@/core/addressLists';
-import type { iMsgCreateAddressLists } from './interfaces';
-import { CosmosAddress } from '@/api-indexer';
+import { CustomTypeClass } from '@/common/base.js';
+import { AddressList } from '@/core/addressLists.js';
+import type { iMsgCreateAddressLists } from './interfaces.js';
+import { CosmosAddress } from '@/api-indexer/index.js';
 
 /**
  * MsgCreateAddressLists defines address lists on-chain. For off-chain lists, use the API, not this Msg.

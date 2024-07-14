@@ -1,12 +1,12 @@
-import type { Doc } from '@/api-indexer/base';
-import type { iMetadata } from '@/api-indexer/metadata/metadata';
-import type { JSPrimitiveNumberType, NumberType } from '@/common/string-numbers';
-import type { SupportedChain } from '@/common/types';
-import type { iApprovalInfoDetails, iChallengeDetails, iUserOutgoingApprovalWithDetails } from '@/core/approvals';
-import type { iBatchBadgeDetails } from '@/core/batch-utils';
-import type { iCosmosCoin } from '@/core/coin';
-import type { iOffChainBalancesMap } from '@/core/transfers';
-import type { iCollectionApproval, iPredeterminedBalances, iUserIncomingApprovalWithDetails } from '@/interfaces/badges/approvals';
+import type { Doc } from '@/api-indexer/base.js';
+import type { iMetadata } from '@/api-indexer/metadata/metadata.js';
+import type { JSPrimitiveNumberType, NumberType } from '@/common/string-numbers.js';
+import type { SupportedChain } from '@/common/types.js';
+import type { iApprovalInfoDetails, iChallengeDetails, iUserOutgoingApprovalWithDetails } from '@/core/approvals.js';
+import type { iBatchBadgeDetails } from '@/core/batch-utils.js';
+import type { iCosmosCoin } from '@/core/coin.js';
+import type { iOffChainBalancesMap } from '@/core/transfers.js';
+import type { iCollectionApproval, iPredeterminedBalances, iUserIncomingApprovalWithDetails } from '@/interfaces/badges/approvals.js';
 import type {
   iAddressList,
   iAmountTrackerIdDetails,
@@ -22,13 +22,13 @@ import type {
   iAttestationsProof,
   iStandardsTimeline,
   iUintRange
-} from '@/interfaces/badges/core';
-import type { iCollectionPermissions, iUserPermissionsWithDetails } from '@/interfaces/badges/permissions';
-import type { iUserBalanceStore } from '@/interfaces/badges/userBalances';
+} from '@/interfaces/badges/core.js';
+import type { iCollectionPermissions, iUserPermissionsWithDetails } from '@/interfaces/badges/permissions.js';
+import type { iUserBalanceStore } from '@/interfaces/badges/userBalances.js';
 import type { AssetConditionGroup, ChallengeParams } from 'blockin';
-import { iMapWithValues } from '../requests/maps';
-import { iUpdateHistory } from './docs';
-import { OAuthScopeDetails } from '../requests/requests';
+import { iMapWithValues } from '../requests/maps.js';
+import { iUpdateHistory } from './docs.js';
+import { OAuthScopeDetails } from '../requests/requests.js';
 
 /**
  * Numeric timestamp - value is equal to the milliseconds since the UNIX epoch.

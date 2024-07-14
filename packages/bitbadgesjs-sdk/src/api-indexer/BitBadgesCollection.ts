@@ -1,12 +1,12 @@
-import type { CustomType } from '@/common/base';
-import { convertClassPropertiesAndMaintainNumberTypes, getConverterFunction } from '@/common/base';
-import type { NumberType } from '@/common/string-numbers';
-import { BigIntify } from '@/common/string-numbers';
-import { AddressList } from '@/core/addressLists';
-import { generateAlias, getAliasDerivationKeysForBadge } from '@/core/aliases';
-import { getMintApprovals, getNonMintApprovals, getUnhandledCollectionApprovals } from '@/core/approval-utils';
-import { CollectionApprovalWithDetails, iCollectionApprovalWithDetails } from '@/core/approvals';
-import { BalanceArray } from '@/core/balances';
+import type { CustomType } from '@/common/base.js';
+import { convertClassPropertiesAndMaintainNumberTypes, getConverterFunction } from '@/common/base.js';
+import type { NumberType } from '@/common/string-numbers.js';
+import { BigIntify } from '@/common/string-numbers.js';
+import { AddressList } from '@/core/addressLists.js';
+import { generateAlias, getAliasDerivationKeysForBadge } from '@/core/aliases.js';
+import { getMintApprovals, getNonMintApprovals, getUnhandledCollectionApprovals } from '@/core/approval-utils.js';
+import { CollectionApprovalWithDetails, iCollectionApprovalWithDetails } from '@/core/approvals.js';
+import { BalanceArray } from '@/core/balances.js';
 import {
   BadgeMetadataTimeline,
   BadgeMetadataTimelineWithDetails,
@@ -16,9 +16,9 @@ import {
   ManagerTimeline,
   OffChainBalancesMetadataTimeline,
   StandardsTimeline
-} from '@/core/misc';
-import type { PermissionNameString } from '@/core/permission-utils';
-import { getPermissionVariablesFromName } from '@/core/permission-utils';
+} from '@/core/misc.js';
+import type { PermissionNameString } from '@/core/permission-utils.js';
+import { getPermissionVariablesFromName } from '@/core/permission-utils.js';
 import {
   ActionPermission,
   BalancesActionPermission,
@@ -26,21 +26,21 @@ import {
   CollectionPermissionsWithDetails,
   TimedUpdatePermission,
   TimedUpdateWithBadgeIdsPermission
-} from '@/core/permissions';
-import { UintRange, UintRangeArray } from '@/core/uintRanges';
-import { UserBalanceStoreWithDetails } from '@/core/userBalances';
+} from '@/core/permissions.js';
+import { UintRange, UintRangeArray } from '@/core/uintRanges.js';
+import { UserBalanceStoreWithDetails } from '@/core/userBalances.js';
 import type {
   iAddressList,
   iBadgeMetadataTimelineWithDetails,
   iBalance,
   iCollectionMetadataTimelineWithDetails,
   iUintRange
-} from '@/interfaces/badges/core';
-import type { iCollectionPermissionsWithDetails } from '@/interfaces/badges/permissions';
-import type { iUserBalanceStoreWithDetails } from '@/interfaces/badges/userBalances';
-import type { BaseBitBadgesApi, PaginationInfo } from './base';
-import { ReviewDoc, TransferActivityDoc } from './docs/activity';
-import { ApprovalTrackerDoc, BalanceDocWithDetails, CollectionDoc, MapDoc, MerkleChallengeDoc } from './docs/docs';
+} from '@/interfaces/badges/core.js';
+import type { iCollectionPermissionsWithDetails } from '@/interfaces/badges/permissions.js';
+import type { iUserBalanceStoreWithDetails } from '@/interfaces/badges/userBalances.js';
+import type { BaseBitBadgesApi, PaginationInfo } from './base.js';
+import { ReviewDoc, TransferActivityDoc } from './docs/activity.js';
+import { ApprovalTrackerDoc, BalanceDocWithDetails, CollectionDoc, MapDoc, MerkleChallengeDoc } from './docs/docs.js';
 import type {
   iApprovalTrackerDoc,
   iBalanceDocWithDetails,
@@ -49,12 +49,12 @@ import type {
   iMerkleChallengeDoc,
   iReviewDoc,
   iTransferActivityDoc
-} from './docs/interfaces';
-import { BadgeMetadataDetails, CollectionMetadataDetails } from './metadata/badgeMetadata';
+} from './docs/interfaces.js';
+import { BadgeMetadataDetails, CollectionMetadataDetails } from './metadata/badgeMetadata.js';
 
-import { GO_MAX_UINT_64 } from '@/common/math';
-import { getCurrentValueForTimeline } from '@/core/timelines';
-import { ClaimDetails, iClaimDetails } from './requests';
+import { GO_MAX_UINT_64 } from '@/common/math.js';
+import { getCurrentValueForTimeline } from '@/core/timelines.js';
+import { ClaimDetails, iClaimDetails } from './requests/index.js';
 import type {
   CollectionViewKey,
   FilterBadgesInCollectionPayload,
@@ -73,7 +73,7 @@ import type {
   iGetOwnersForBadgeSuccessResponse,
   iRefreshMetadataSuccessResponse,
   iRefreshStatusSuccessResponse
-} from './requests/collections';
+} from './requests/collections.js';
 import {
   FilterBadgesInCollectionSuccessResponse,
   GetBadgeActivitySuccessResponse,
@@ -82,10 +82,10 @@ import {
   GetOwnersForBadgeSuccessResponse,
   RefreshMetadataSuccessResponse,
   RefreshStatusSuccessResponse
-} from './requests/collections';
-import { BitBadgesApiRoutes } from './requests/routes';
-import { convertToCosmosAddress } from '..';
+} from './requests/collections.js';
+import { BitBadgesApiRoutes } from './requests/routes.js';
 import typia from 'typia';
+import { convertToCosmosAddress } from '@/address-converter/converter.js';
 
 const NEW_COLLECTION_ID = 0n;
 

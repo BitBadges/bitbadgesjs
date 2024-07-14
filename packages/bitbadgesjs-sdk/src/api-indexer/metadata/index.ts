@@ -1,3 +1,3 @@
-export * from './badgeMetadata';
-export * from './metadataIds';
-export * from './metadata';
+export * from './badgeMetadata.js';
+export * from './metadataIds.js';
+export * from './metadata.js';

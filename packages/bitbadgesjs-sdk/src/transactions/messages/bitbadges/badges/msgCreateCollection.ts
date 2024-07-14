@@ -1,5 +1,5 @@
-import { CollectionApproval } from '@/core/approvals';
-import { Balance, BalanceArray } from '@/core/balances';
+import { CollectionApproval } from '@/core/approvals.js';
+import { Balance, BalanceArray } from '@/core/balances.js';
 import {
   BadgeMetadataTimeline,
   CollectionMetadataTimeline,
@@ -8,16 +8,16 @@ import {
   ManagerTimeline,
   OffChainBalancesMetadataTimeline,
   StandardsTimeline
-} from '@/core/misc';
-import { CollectionPermissions } from '@/core/permissions';
-import type { NumberType } from '@/common/string-numbers';
-import { Stringify } from '@/common/string-numbers';
-import { UserBalanceStore } from '@/core/userBalances';
-import type { iMsgCreateCollection } from './interfaces';
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base';
-import * as badges from '@/proto/badges/tx_pb';
+} from '@/core/misc.js';
+import { CollectionPermissions } from '@/core/permissions.js';
+import type { NumberType } from '@/common/string-numbers.js';
+import { Stringify } from '@/common/string-numbers.js';
+import { UserBalanceStore } from '@/core/userBalances.js';
+import type { iMsgCreateCollection } from './interfaces.js';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
+import * as badges from '@/proto/badges/tx_pb.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
-import { CosmosAddress } from '@/api-indexer';
+import { CosmosAddress } from '@/api-indexer/index.js';
 
 /**
  * MsgCreateCollection is a transaction that can be used to create a collection.

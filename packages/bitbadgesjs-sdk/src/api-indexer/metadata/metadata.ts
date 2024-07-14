@@ -1,7 +1,7 @@
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base';
-import type { NumberType } from '@/common/string-numbers';
-import { BigIntify } from '@/common/string-numbers';
-import { UNIXMilliTimestamp } from '../docs/interfaces';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
+import type { NumberType } from '@/common/string-numbers.js';
+import { BigIntify } from '@/common/string-numbers.js';
+import { UNIXMilliTimestamp } from '../docs/interfaces.js';
 
 /**
  * @category Interfaces

@@ -15,12 +15,14 @@ if (typeof process === 'undefined') {
   process.env.BBS_SIGNATURES_MODE = 'WASM';
 }
 
-export * from './core/index';
-export * from './api-indexer/index';
-export * from './common/index';
-export * from './interfaces/index';
-export * as proto from './proto/index';
+export * from './core/index.js';
+export * from './api-indexer/index.js';
+export * from './common/index.js';
+export * from './interfaces/index.js';
+export * as proto from './proto/index.js';
+export * from './proto/index.js';
 
-export * from './transactions/index';
-export * from './address-converter/index';
-export * from './auth/index';
+export * from './transactions/index.js';
+export * from './address-converter/index.js';
+export * from './auth/index.js';
+export * from './node-rest-api/index.js';

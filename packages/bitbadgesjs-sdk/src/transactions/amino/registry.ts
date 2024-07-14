@@ -1,4 +1,4 @@
-import { MsgAddCustomData } from '@/proto/anchor/tx_pb';
+import { MsgAddCustomData } from '@/proto/anchor/tx_pb.js';
 import {
   MsgCreateAddressLists,
   MsgCreateCollection,
@@ -8,24 +8,24 @@ import {
   MsgUniversalUpdateCollection,
   MsgUpdateCollection,
   MsgUpdateUserApprovals
-} from '@/proto/badges/tx_pb';
-import { MsgExecuteContract, MsgInstantiateContract, MsgStoreCode } from '@/proto/cosmwasm/wasm/v1/tx_pb';
-import { MsgCreateMap, MsgDeleteMap, MsgSetValue, MsgUpdateMap } from '@/proto/maps/tx_pb';
-import { MsgExecuteContractCompat, MsgInstantiateContractCompat } from '@/proto/wasmx/tx_pb';
-import { AminoMsg } from '../messages/signDoc';
-import { createAminoConverter } from './objectConverter';
+} from '@/proto/badges/tx_pb.js';
+import { MsgExecuteContract, MsgInstantiateContract, MsgStoreCode } from '@/proto/cosmwasm/wasm/v1/tx_pb.js';
+import { MsgCreateMap, MsgDeleteMap, MsgSetValue, MsgUpdateMap } from '@/proto/maps/tx_pb.js';
+import { MsgExecuteContractCompat, MsgInstantiateContractCompat } from '@/proto/wasmx/tx_pb.js';
+import { AminoMsg } from '../messages/signDoc.js';
+import { createAminoConverter } from './objectConverter.js';
 
-import { MsgMultiSend, MsgSend } from '@/proto/cosmos/bank/v1beta1';
+import { MsgMultiSend, MsgSend } from '@/proto/cosmos/bank/v1beta1/index.js';
 import {
   MsgFundCommunityPool,
   MsgSetWithdrawAddress,
   MsgWithdrawDelegatorReward,
   MsgWithdrawValidatorCommission
-} from '@/proto/cosmos/distribution/v1beta1';
-import { MsgDeposit, MsgSubmitProposal, MsgVote, MsgVoteWeighted } from '@/proto/cosmos/gov/v1';
-import { MsgBeginRedelegate, MsgCreateValidator, MsgDelegate, MsgEditValidator, MsgUndelegate } from '@/proto/cosmos/staking/v1beta1';
+} from '@/proto/cosmos/distribution/v1beta1/index.js';
+import { MsgDeposit, MsgSubmitProposal, MsgVote, MsgVoteWeighted } from '@/proto/cosmos/gov/v1/index.js';
+import { MsgBeginRedelegate, MsgCreateValidator, MsgDelegate, MsgEditValidator, MsgUndelegate } from '@/proto/cosmos/staking/v1beta1/index.js';
 
-import { MsgCreateVestingAccount } from '@/proto/cosmos/vesting/v1beta1';
+import { MsgCreateVestingAccount } from '@/proto/cosmos/vesting/v1beta1/index.js';
 
 export interface EncodeObject {
   readonly typeUrl: string;

@@ -1,6 +1,6 @@
-import type { CustomType } from '@/common/base';
-import { CustomTypeClass } from '@/common/base';
-import type { NumberType } from '@/common/string-numbers';
+import type { CustomType } from '@/common/base.js';
+import { CustomTypeClass } from '@/common/base.js';
+import type { NumberType } from '@/common/string-numbers.js';
 
 import axios from 'axios';
 

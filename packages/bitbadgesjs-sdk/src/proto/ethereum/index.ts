@@ -1,3 +1,3 @@
-export * as ethsecp256k1 from './ethsecp256k1/index';
+export * from './ethsecp256k1/index.js';
 
-export * from './web3_pb';
+export * from './web3_pb.js';

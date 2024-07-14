@@ -1,5 +1,5 @@
-import type { NumberType } from '@/common/string-numbers';
-import { NativeAddress } from '../docs';
+import type { NumberType } from '@/common/string-numbers.js';
+import { NativeAddress } from '../docs/index.js';
 
 /**
  * Exports static methods that return the routes for the BitBadges API. Append this to the base URL of the API to get the full URL.

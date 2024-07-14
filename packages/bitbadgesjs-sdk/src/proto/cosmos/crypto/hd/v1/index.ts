@@ -1,1 +1,1 @@
-export * from './hd_pb';
+export * from './hd_pb.js';

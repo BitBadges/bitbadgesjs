@@ -1,7 +1,7 @@
-import * as badges from '@/proto/badges/tx_pb';
+import * as badges from '@/proto/badges/tx_pb.js';
 
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
-import { CollectionApproval } from '@/core/approvals';
+import { CollectionApproval } from '@/core/approvals.js';
 import {
   BadgeMetadataTimeline,
   CollectionMetadataTimeline,
@@ -10,16 +10,16 @@ import {
   ManagerTimeline,
   OffChainBalancesMetadataTimeline,
   StandardsTimeline
-} from '@/core/misc';
-import { CollectionPermissions } from '@/core/permissions';
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base';
+} from '@/core/misc.js';
+import { CollectionPermissions } from '@/core/permissions.js';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
 
-import type { iMsgUniversalUpdateCollection } from './interfaces';
-import type { NumberType } from '@/common/string-numbers';
-import { Stringify } from '@/common/string-numbers';
-import { Balance, BalanceArray } from '@/core/balances';
-import { UserBalanceStore } from '@/core/userBalances';
-import { CosmosAddress } from '@/api-indexer';
+import type { iMsgUniversalUpdateCollection } from './interfaces.js';
+import type { NumberType } from '@/common/string-numbers.js';
+import { Stringify } from '@/common/string-numbers.js';
+import { Balance, BalanceArray } from '@/core/balances.js';
+import { UserBalanceStore } from '@/core/userBalances.js';
+import { CosmosAddress } from '@/api-indexer/index.js';
 
 /**
  * MsgUniversalUpdateCollection is a universal transaction that can be used to create / update any collection. It is only executable by the manager.

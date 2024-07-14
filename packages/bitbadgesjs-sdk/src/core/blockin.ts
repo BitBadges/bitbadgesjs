@@ -1,12 +1,12 @@
-import BitBadgesApi from '@/api-indexer/BitBadgesApi';
-import { CosmosAddress } from '@/api-indexer/docs/interfaces';
-import { BlockinAndGroup, BlockinAssetConditionGroup, BlockinOrGroup, OwnershipRequirements } from '@/api-indexer/requests/blockin';
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base';
-import { NumberType } from '@/common/string-numbers';
-import { SupportedChain } from '@/common/types';
-import { iAttestationsProof } from '@/interfaces/badges/core';
+import BitBadgesApi from '@/api-indexer/BitBadgesApi.js';
+import { CosmosAddress } from '@/api-indexer/docs/interfaces.js';
+import { BlockinAndGroup, BlockinAssetConditionGroup, BlockinOrGroup, OwnershipRequirements } from '@/api-indexer/requests/blockin.js';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
+import { NumberType } from '@/common/string-numbers.js';
+import { SupportedChain } from '@/common/types.js';
+import { iAttestationsProof } from '@/interfaces/badges/core.js';
 import { AndGroup, AssetConditionGroup, OrGroup } from 'blockin';
-import { AttestationsProof } from './secrets';
+import { AttestationsProof } from './secrets.js';
 
 /**
  * @category Interfaces

@@ -14,16 +14,16 @@ import type {
   iUserOutgoingApprovalPermissionWithDetails,
   iUserPermissions,
   iUserPermissionsWithDetails
-} from '@/interfaces/badges/permissions';
-import type { CustomType } from '@/common/base';
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, deepCopyPrimitives } from '@/common/base';
-import { badges } from '@/proto';
-import { AddressList } from './addressLists';
-import type { UniversalPermission, UniversalPermissionDetails } from './overlaps';
-import { GetFirstMatchOnly, getOverlapsAndNonOverlaps, universalRemoveOverlaps } from './overlaps';
-import { BigIntify, Stringify, type NumberType } from '../common/string-numbers';
-import { UintRange, UintRangeArray } from './uintRanges';
-import { AllDefaultValues } from './validate-utils';
+} from '@/interfaces/badges/permissions.js';
+import type { CustomType } from '@/common/base.js';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, deepCopyPrimitives } from '@/common/base.js';
+import { badges } from '@/proto/index.js';
+import { AddressList } from './addressLists.js';
+import type { UniversalPermission, UniversalPermissionDetails } from './overlaps.js';
+import { GetFirstMatchOnly, getOverlapsAndNonOverlaps, universalRemoveOverlaps } from './overlaps.js';
+import { BigIntify, Stringify, type NumberType } from '../common/string-numbers.js';
+import { UintRange, UintRangeArray } from './uintRanges.js';
+import { AllDefaultValues } from './validate-utils.js';
 
 /**
  * UserPermissions represents the permissions of a user and what they can update about their approvals.
@@ -1023,7 +1023,7 @@ export class CollectionApprovalPermission<T extends NumberType>
               toList: detail.toList,
               fromList: detail.fromList,
               initiatedByList: detail.initiatedByList,
-              approvalIdList: detail.approvalIdList,
+              approvalIdList: detail.approvalIdList
             });
           }
         }

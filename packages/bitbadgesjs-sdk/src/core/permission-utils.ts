@@ -1,20 +1,20 @@
-import { CollectionApprovalWithDetails } from './approvals';
-import { BadgeMetadataTimeline, CollectionMetadataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadataTimeline } from './misc';
-import type { UsedFlags } from './overlaps';
+import { CollectionApprovalWithDetails } from './approvals.js';
+import { BadgeMetadataTimeline, CollectionMetadataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadataTimeline } from './misc.js';
+import type { UsedFlags } from './overlaps.js';
 import {
   ActionPermissionUsedFlags,
   ApprovalPermissionUsedFlags,
   BalancesActionPermissionUsedFlags,
   TimedUpdatePermissionUsedFlags,
   TimedUpdateWithBadgeIdsPermissionUsedFlags
-} from './overlaps';
+} from './overlaps.js';
 import {
   ActionPermission,
   BalancesActionPermission,
   CollectionApprovalPermission,
   TimedUpdatePermission,
   TimedUpdateWithBadgeIdsPermission
-} from './permissions';
+} from './permissions.js';
 
 /**
  * @category Permissions

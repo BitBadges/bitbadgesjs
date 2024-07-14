@@ -1,14 +1,14 @@
-import type { NumberType } from '@/common/string-numbers';
-import type { iBitBadgesCollection } from '../BitBadgesCollection';
-import { BitBadgesCollection } from '../BitBadgesCollection';
-import type { iAmountTrackerIdDetails, iUintRange } from '@/interfaces/badges/core';
-import type { PaginationInfo } from '../base';
-import { EmptyResponseClass } from '../base';
-import { UintRangeArray } from '@/core/uintRanges';
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, deepCopyPrimitives } from '@/common/base';
-import { BalanceDocWithDetails, QueueDoc, RefreshDoc } from '../docs/docs';
-import { TransferActivityDoc } from '../docs/activity';
-import type { iBalanceDocWithDetails, iChallengeTrackerIdDetails, iQueueDoc, iRefreshDoc, iTransferActivityDoc } from '../docs/interfaces';
+import type { NumberType } from '@/common/string-numbers.js';
+import type { iBitBadgesCollection } from '../BitBadgesCollection.js';
+import { BitBadgesCollection } from '../BitBadgesCollection.js';
+import type { iAmountTrackerIdDetails, iUintRange } from '@/interfaces/badges/core.js';
+import type { PaginationInfo } from '../base.js';
+import { EmptyResponseClass } from '../base.js';
+import { UintRangeArray } from '@/core/uintRanges.js';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, deepCopyPrimitives } from '@/common/base.js';
+import { BalanceDocWithDetails, QueueDoc, RefreshDoc } from '../docs/docs.js';
+import { TransferActivityDoc } from '../docs/activity.js';
+import type { iBalanceDocWithDetails, iChallengeTrackerIdDetails, iQueueDoc, iRefreshDoc, iTransferActivityDoc } from '../docs/interfaces.js';
 
 /**
  * @category API Requests / Responses

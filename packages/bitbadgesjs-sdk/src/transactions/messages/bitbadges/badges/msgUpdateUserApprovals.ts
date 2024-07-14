@@ -1,13 +1,13 @@
-import * as badges from '@/proto/badges/tx_pb';
+import * as badges from '@/proto/badges/tx_pb.js';
 
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
-import type { NumberType } from '@/common/string-numbers';
-import { Stringify } from '@/common/string-numbers';
-import { UserPermissions } from '@/core/permissions';
-import { UserIncomingApproval, UserOutgoingApproval } from '@/core/approvals';
-import type { iMsgUpdateUserApprovals } from './interfaces';
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base';
-import { CosmosAddress } from '@/api-indexer/docs/interfaces';
+import type { NumberType } from '@/common/string-numbers.js';
+import { Stringify } from '@/common/string-numbers.js';
+import { UserPermissions } from '@/core/permissions.js';
+import { UserIncomingApproval, UserOutgoingApproval } from '@/core/approvals.js';
+import type { iMsgUpdateUserApprovals } from './interfaces.js';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
+import { CosmosAddress } from '@/api-indexer/docs/interfaces.js';
 
 /**
  * MsgUpdateUserApprovals represents the message for updating user approvals.

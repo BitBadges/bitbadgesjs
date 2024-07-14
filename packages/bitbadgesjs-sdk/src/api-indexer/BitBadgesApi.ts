@@ -1,8 +1,7 @@
-import type { NumberType } from '@/common/string-numbers';
-import { BitBadgesCollection } from './BitBadgesCollection';
+import type { NumberType } from '@/common/string-numbers.js';
+import { BitBadgesCollection } from './BitBadgesCollection.js';
 
 import typia from 'typia';
-import { NativeAddress } from '..';
 import type {
   CreateAddressListsPayload,
   CreateAddressListsSuccessResponse,
@@ -12,12 +11,12 @@ import type {
   GetAddressListsSuccessResponse,
   UpdateAddressListsPayload,
   UpdateAddressListsSuccessResponse
-} from './BitBadgesAddressList';
-import { BitBadgesAddressList } from './BitBadgesAddressList';
-import type { GetAccountsPayload, GetAccountsSuccessResponse } from './BitBadgesUserInfo';
-import { BitBadgesUserInfo } from './BitBadgesUserInfo';
-import type { iBitBadgesApi } from './base';
-import { BaseBitBadgesApi } from './base';
+} from './BitBadgesAddressList.js';
+import { BitBadgesAddressList } from './BitBadgesAddressList.js';
+import type { GetAccountsPayload, GetAccountsSuccessResponse } from './BitBadgesUserInfo.js';
+import { BitBadgesUserInfo } from './BitBadgesUserInfo.js';
+import type { iBitBadgesApi } from './base.js';
+import { BaseBitBadgesApi } from './base.js';
 import type {
   FilterBadgesInCollectionPayload,
   FilterBadgesInCollectionSuccessResponse,
@@ -34,9 +33,9 @@ import type {
   RefreshMetadataSuccessResponse,
   RefreshStatusSuccessResponse,
   iFilterSuggestionsSuccessResponse
-} from './requests/collections';
-import { FilterSuggestionsSuccessResponse } from './requests/collections';
-import { GetMapValuesPayload, GetMapValuesSuccessResponse, GetMapsPayload, GetMapsSuccessResponse, iGetMapValuesSuccessResponse, iGetMapsSuccessResponse } from './requests/maps';
+} from './requests/collections.js';
+import { FilterSuggestionsSuccessResponse } from './requests/collections.js';
+import { GetMapValuesPayload, GetMapValuesSuccessResponse, GetMapsPayload, GetMapsSuccessResponse, iGetMapValuesSuccessResponse, iGetMapsSuccessResponse } from './requests/maps.js';
 import {
   AddApprovalDetailsToOffChainStoragePayload,
   AddApprovalDetailsToOffChainStorageSuccessResponse,
@@ -172,8 +171,9 @@ import {
   iSimulateTxSuccessResponse,
   iUpdateAccountInfoSuccessResponse,
   iVerifySignInSuccessResponse
-} from './requests/requests';
-import { BitBadgesApiRoutes } from './requests/routes';
+} from './requests/requests.js';
+import { BitBadgesApiRoutes } from './requests/routes.js';
+import { NativeAddress } from './docs/interfaces.js';
 
 /**
  * This is the BitBadgesAPI class which provides all typed API calls to the BitBadges API.

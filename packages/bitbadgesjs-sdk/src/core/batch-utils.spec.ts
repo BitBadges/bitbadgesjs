@@ -1,4 +1,4 @@
-import { BatchBadgeDetailsArray } from './batch-utils';
+import { BatchBadgeDetailsArray } from './batch-utils.js';
 
 describe('BatchBadgeDetails', () => {
   it('should create an instance', () => {

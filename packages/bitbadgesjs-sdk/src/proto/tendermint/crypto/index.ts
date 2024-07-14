@@ -1,2 +1,2 @@
-export * from './keys_pb';
-export * from './proof_pb';
+export * from './keys_pb.js';
+export * from './proof_pb.js';

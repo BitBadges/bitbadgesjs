@@ -1,1 +1,1 @@
-export * from './snapshot_pb';
+export * from './snapshot_pb.js';

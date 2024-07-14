@@ -1,8 +1,8 @@
-import type { NumberType } from '../common/string-numbers';
-import { AddressList } from './addressLists';
-import { CollectionApprovalWithDetails, UserIncomingApprovalWithDetails, UserOutgoingApprovalWithDetails } from './approvals';
-import { GetFirstMatchOnly, MergeUniversalPermissionDetails } from './overlaps';
-import { UintRange } from './uintRanges';
+import type { NumberType } from '../common/string-numbers.js';
+import { AddressList } from './addressLists.js';
+import { CollectionApprovalWithDetails, UserIncomingApprovalWithDetails, UserOutgoingApprovalWithDetails } from './approvals.js';
+import { GetFirstMatchOnly, MergeUniversalPermissionDetails } from './overlaps.js';
+import { UintRange } from './uintRanges.js';
 
 const { generateReservedListId, getReservedAddressList } = AddressList;
 

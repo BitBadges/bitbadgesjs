@@ -1,17 +1,17 @@
-import type { CustomType } from '@/common/base';
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, getConverterFunction } from '@/common/base';
-import type { NumberType } from '@/common/string-numbers';
-import { AddressList } from '@/core/addressLists';
-import type { BatchBadgeDetails, iBatchBadgeDetails } from '@/core/batch-utils';
-import { CosmosCoin } from '@/core/coin';
-import type { iAddressList } from '@/interfaces/badges/core';
+import type { CustomType } from '@/common/base.js';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, getConverterFunction } from '@/common/base.js';
+import type { NumberType } from '@/common/string-numbers.js';
+import { AddressList } from '@/core/addressLists.js';
+import type { BatchBadgeDetails, iBatchBadgeDetails } from '@/core/batch-utils.js';
+import { CosmosCoin } from '@/core/coin.js';
+import type { iAddressList } from '@/interfaces/badges/core.js';
 import typia from 'typia';
-import { SupportedChain } from '../common/types';
-import type { iBitBadgesAddressList } from './BitBadgesAddressList';
-import { BitBadgesAddressList } from './BitBadgesAddressList';
-import { BitBadgesCollection } from './BitBadgesCollection';
-import type { BaseBitBadgesApi, PaginationInfo } from './base';
-import { ClaimAlertDoc, ListActivityDoc, ReviewDoc, TransferActivityDoc } from './docs/activity';
+import { SupportedChain } from '../common/types.js';
+import type { iBitBadgesAddressList } from './BitBadgesAddressList.js';
+import { BitBadgesAddressList } from './BitBadgesAddressList.js';
+import { BitBadgesCollection } from './BitBadgesCollection.js';
+import type { BaseBitBadgesApi, PaginationInfo } from './base.js';
+import { ClaimAlertDoc, ListActivityDoc, ReviewDoc, TransferActivityDoc } from './docs/activity.js';
 import {
   ApprovalTrackerDoc,
   AttestationDoc,
@@ -21,7 +21,7 @@ import {
   MerkleChallengeDoc,
   ProfileDoc,
   SIWBBRequestDoc
-} from './docs/docs';
+} from './docs/docs.js';
 import type {
   CosmosAddress,
   NativeAddress,
@@ -38,8 +38,8 @@ import type {
   iReviewDoc,
   iSIWBBRequestDoc,
   iTransferActivityDoc
-} from './docs/interfaces';
-import { BitBadgesApiRoutes } from './requests/routes';
+} from './docs/interfaces.js';
+import { BitBadgesApiRoutes } from './requests/routes.js';
 
 /**
  * @category Interfaces

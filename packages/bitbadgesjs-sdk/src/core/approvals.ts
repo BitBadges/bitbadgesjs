@@ -1,4 +1,4 @@
-import { BaseNumberTypeClass, CustomTypeClass, convertClassPropertiesAndMaintainNumberTypes, deepCopyPrimitives } from '@/common/base';
+import { BaseNumberTypeClass, CustomTypeClass, convertClassPropertiesAndMaintainNumberTypes, deepCopyPrimitives } from '@/common/base.js';
 import type {
   iApprovalAmounts,
   iApprovalCriteria,
@@ -13,23 +13,24 @@ import type {
   iUserIncomingApproval,
   iUserIncomingApprovalWithDetails,
   iUserOutgoingApproval
-} from '@/interfaces/badges/approvals';
-import type { iAddressList, iCoinTransfer, iMerkleChallenge } from '@/interfaces/badges/core';
-import * as proto from '@/proto';
+} from '@/interfaces/badges/approvals.js';
+import type { iAddressList, iCoinTransfer, iMerkleChallenge } from '@/interfaces/badges/core.js';
+import * as proto from '@/proto/index.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 import type MerkleTree from 'merkletreejs';
 import type { Options as MerkleTreeJsOptions } from 'merkletreejs/dist/MerkleTree';
-import { ClaimIntegrationPluginType, IntegrationPluginDetails, iClaimDetails } from '..';
-import { BigIntify, Stringify, type NumberType } from '../common/string-numbers';
-import { AddressList } from './addressLists';
-import { Balance, BalanceArray } from './balances';
-import { CoinTransfer, MerkleChallenge, MustOwnBadges, ZkProof } from './misc';
-import type { UniversalPermission, UniversalPermissionDetails } from './overlaps';
-import { GetListIdWithOptions, GetListWithOptions, GetUintRangesWithOptions, getOverlapsAndNonOverlaps } from './overlaps';
-import type { CollectionApprovalPermissionWithDetails } from './permissions';
-import { CollectionApprovalPermission } from './permissions';
-import { UintRange, UintRangeArray } from './uintRanges';
-import { AllDefaultValues, getPotentialUpdatesForTimelineValues, getUpdateCombinationsToCheck } from './validate-utils';
+import { BigIntify, Stringify, type NumberType } from '../common/string-numbers.js';
+import { AddressList } from './addressLists.js';
+import { Balance, BalanceArray } from './balances.js';
+import { CoinTransfer, MerkleChallenge, MustOwnBadges, ZkProof } from './misc.js';
+import type { UniversalPermission, UniversalPermissionDetails } from './overlaps.js';
+import { GetListIdWithOptions, GetListWithOptions, GetUintRangesWithOptions, getOverlapsAndNonOverlaps } from './overlaps.js';
+import type { CollectionApprovalPermissionWithDetails } from './permissions.js';
+import { CollectionApprovalPermission } from './permissions.js';
+import { UintRange, UintRangeArray } from './uintRanges.js';
+import { AllDefaultValues, getPotentialUpdatesForTimelineValues, getUpdateCombinationsToCheck } from './validate-utils.js';
+import { iClaimDetails } from '@/api-indexer/requests/requests.js';
+import { ClaimIntegrationPluginType, IntegrationPluginDetails } from '@/api-indexer/docs/interfaces.js';
 
 const { getReservedAddressList, getReservedTrackerList } = AddressList;
 

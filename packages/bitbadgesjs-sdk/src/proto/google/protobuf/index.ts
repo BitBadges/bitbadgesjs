@@ -1,2 +1,2 @@
-export * from './any_pb';
-export * from './descriptor_pb';
+export * from './any_pb.js';
+export * from './descriptor_pb.js';

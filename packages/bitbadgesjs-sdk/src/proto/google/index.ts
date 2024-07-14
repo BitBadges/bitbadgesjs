@@ -1,3 +1,3 @@
-export * as api from './api/index';
+export * as api from './api/index.js';
 
-export * as protobuf from './protobuf/index';
+export * as protobuf from './protobuf/index.js';

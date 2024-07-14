@@ -1,5 +1,5 @@
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base';
-import type { NumberType } from '../common/string-numbers';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
+import type { NumberType } from '../common/string-numbers.js';
 
 /**
  * @category Interfaces

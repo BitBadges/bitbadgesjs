@@ -1,12 +1,12 @@
-import type { iUserBalanceStore, iUserBalanceStoreWithDetails } from '@/interfaces/badges/userBalances';
-import type { CustomType } from '@/common/base';
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base';
-import * as proto from '@/proto';
-import { UserIncomingApproval, UserIncomingApprovalWithDetails, UserOutgoingApproval, UserOutgoingApprovalWithDetails } from './approvals';
-import { UserPermissions, UserPermissionsWithDetails } from './permissions';
-import type { NumberType } from '../common/string-numbers';
-import { Stringify } from '../common/string-numbers';
-import { BalanceArray, Balance } from './balances';
+import type { iUserBalanceStore, iUserBalanceStoreWithDetails } from '@/interfaces/badges/userBalances.js';
+import type { CustomType } from '@/common/base.js';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
+import * as proto from '@/proto/index.js';
+import { UserIncomingApproval, UserIncomingApprovalWithDetails, UserOutgoingApproval, UserOutgoingApprovalWithDetails } from './approvals.js';
+import { UserPermissions, UserPermissionsWithDetails } from './permissions.js';
+import type { NumberType } from '../common/string-numbers.js';
+import { Stringify } from '../common/string-numbers.js';
+import { BalanceArray, Balance } from './balances.js';
 
 /**
  * @category Balances

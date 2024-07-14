@@ -1,11 +1,11 @@
-import type { NumberType } from '../common/string-numbers';
-import { BigIntify } from '../common/string-numbers';
+import type { NumberType } from '../common/string-numbers.js';
+import { BigIntify } from '../common/string-numbers.js';
 
-import type { iUintRange } from '@/interfaces/badges/core';
-import { bigIntMin } from '../common/math';
-import { BaseNumberTypeClass, getConverterFunction } from '@/common/base';
-import { UintRangeArray, UintRange } from './uintRanges';
-import { BaseTypedArray } from '@/common/typed-arrays';
+import type { iUintRange } from '@/interfaces/badges/core.js';
+import { bigIntMin } from '../common/math.js';
+import { BaseNumberTypeClass, getConverterFunction } from '@/common/base.js';
+import { UintRangeArray, UintRange } from './uintRanges.js';
+import { BaseTypedArray } from '@/common/typed-arrays.js';
 
 /**
  * @category Interfaces

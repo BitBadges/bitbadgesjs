@@ -1,8 +1,8 @@
-import BtcDriver from '@/chain-drivers/BtcDriver';
-import CosmosDriver from '@/chain-drivers/CosmosDriver';
-import EthDriver from '@/chain-drivers/EthDriver';
-import SolDriver from '@/chain-drivers/SolDriver';
-import { SupportedChain } from '@/common/types';
+import BtcDriver from '@/chain-drivers/BtcDriver.js';
+import CosmosDriver from '@/chain-drivers/CosmosDriver.js';
+import EthDriver from '@/chain-drivers/EthDriver.js';
+import SolDriver from '@/chain-drivers/SolDriver.js';
+import { SupportedChain } from '@/common/types.js';
 
 const ethDriver = new EthDriver('0x1', undefined);
 const solDriver = new SolDriver('');

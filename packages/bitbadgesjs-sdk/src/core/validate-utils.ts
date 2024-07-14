@@ -1,7 +1,7 @@
-import { AddressList } from './addressLists';
-import type { UniversalPermission, UniversalPermissionDetails } from './overlaps';
-import { GetFirstMatchOnly, getOverlapsAndNonOverlaps } from './overlaps';
-import { UintRangeArray } from './uintRanges';
+import { AddressList } from './addressLists.js';
+import type { UniversalPermission, UniversalPermissionDetails } from './overlaps.js';
+import { GetFirstMatchOnly, getOverlapsAndNonOverlaps } from './overlaps.js';
+import { UintRangeArray } from './uintRanges.js';
 
 /**
  * @category Validate Updates

@@ -1,4 +1,4 @@
-import type { NumberType } from '@/common/string-numbers';
+import type { NumberType } from '@/common/string-numbers.js';
 import type { IChainDriver } from 'blockin';
 import { AssetConditionGroup } from 'blockin/dist/types/verify.types';
 import { recoverPersonalSignature } from '@metamask/eth-sig-util';

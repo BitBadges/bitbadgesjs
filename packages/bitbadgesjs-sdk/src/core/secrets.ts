@@ -1,6 +1,8 @@
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, CustomTypeClass } from '@/common/base';
-import { iAttestation, iAttestationsProof } from '@/interfaces/badges/core';
-import { CosmosAddress, NumberType, UNIXMilliTimestamp, UpdateHistory } from '..';
+import { UpdateHistory } from '@/api-indexer/docs/docs.js';
+import { CosmosAddress, UNIXMilliTimestamp } from '@/api-indexer/docs/interfaces.js';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, CustomTypeClass } from '@/common/base.js';
+import { NumberType } from '@/common/string-numbers.js';
+import { iAttestation, iAttestationsProof } from '@/interfaces/badges/core.js';
 
 /**
  * @category Off-Chain Attestations

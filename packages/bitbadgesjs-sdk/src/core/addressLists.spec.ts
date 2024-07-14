@@ -1,5 +1,6 @@
+import { convertToCosmosAddress } from '@/address-converter/converter.js';
 import { ethers } from 'ethers';
-import { AddressList, convertToCosmosAddress } from '..';
+import { AddressList } from './addressLists.js';
 
 export const genTestAddress = () => {
   const ethAddress = ethers.Wallet.createRandom().address;

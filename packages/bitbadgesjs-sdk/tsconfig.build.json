@@ -31,5 +31,9 @@
     "strictNullChecks": true
   },
   "exclude": ["node_modules", "dist", "docs", "./dist"],
-  "include": ["src", "**/*.test.ts", "**/*.spec.ts"]
+  "include": ["src", "**/*.test.ts", "**/*.spec.ts"],
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node"
+  }
 }

@@ -1,10 +1,10 @@
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base';
-import type { NumberType } from '@/common/string-numbers';
-import { Stringify } from '@/common/string-numbers';
-import * as badges from '@/proto/badges/tx_pb';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
+import type { NumberType } from '@/common/string-numbers.js';
+import { Stringify } from '@/common/string-numbers.js';
+import * as badges from '@/proto/badges/tx_pb.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
-import type { iMsgDeleteCollection } from './interfaces';
-import { CosmosAddress } from '@/api-indexer';
+import type { iMsgDeleteCollection } from './interfaces.js';
+import { CosmosAddress } from '@/api-indexer/index.js';
 
 /**
  * MsgDeleteCollection represents the message for deleting a collection. Once deleted, the collection cannot be recovered.

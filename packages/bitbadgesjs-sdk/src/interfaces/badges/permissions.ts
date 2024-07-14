@@ -1,5 +1,5 @@
-import type { NumberType } from '@/common/string-numbers';
-import type { iAddressList, iUintRange } from './core';
+import type { NumberType } from '@/common/string-numbers.js';
+import type { iAddressList, iUintRange } from './core.js';
 
 /**
  * @category Interfaces

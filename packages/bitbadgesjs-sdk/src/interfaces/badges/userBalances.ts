@@ -1,8 +1,8 @@
-import type { iUserOutgoingApprovalWithDetails } from '@/core/approvals';
-import type { NumberType } from '@/common/string-numbers';
-import type { iUserIncomingApproval, iUserOutgoingApproval, iUserIncomingApprovalWithDetails } from './approvals';
-import type { iUserPermissions, iUserPermissionsWithDetails } from './permissions';
-import type { iBalance } from './core';
+import type { iUserOutgoingApprovalWithDetails } from '@/core/approvals.js';
+import type { NumberType } from '@/common/string-numbers.js';
+import type { iUserIncomingApproval, iUserOutgoingApproval, iUserIncomingApprovalWithDetails } from './approvals.js';
+import type { iUserPermissions, iUserPermissionsWithDetails } from './permissions.js';
+import type { iBalance } from './core.js';
 
 /**
  * This stores everythign about a user's balances for a specific collection ID.

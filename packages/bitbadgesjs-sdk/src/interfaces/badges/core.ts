@@ -1,7 +1,7 @@
-import { CosmosAddress, UNIXMilliTimestamp, iBadgeMetadataDetails, iCollectionMetadataDetails } from '@/api-indexer';
-import { iUpdateHistory } from '@/api-indexer/docs/docs';
-import type { NumberType } from '@/common/string-numbers';
-import { iCosmosCoin } from '@/core/coin';
+import { CosmosAddress, UNIXMilliTimestamp, iBadgeMetadataDetails, iCollectionMetadataDetails } from '@/api-indexer/index.js';
+import { iUpdateHistory } from '@/api-indexer/docs/docs.js';
+import type { NumberType } from '@/common/string-numbers.js';
+import { iCosmosCoin } from '@/core/coin.js';
 
 /**
  * @category Interfaces

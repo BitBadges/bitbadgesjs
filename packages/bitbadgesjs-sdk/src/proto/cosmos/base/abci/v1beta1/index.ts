@@ -1,1 +1,1 @@
-export * from './abci_pb';
+export * from './abci_pb.js';

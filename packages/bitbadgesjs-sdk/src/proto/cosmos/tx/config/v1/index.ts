@@ -1,1 +1,1 @@
-export * from './config_pb';
+export * from './config_pb.js';

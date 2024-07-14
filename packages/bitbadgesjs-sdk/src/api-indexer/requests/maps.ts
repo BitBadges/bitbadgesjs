@@ -1,9 +1,9 @@
-import type { CustomType } from '@/common/base';
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base';
-import type { NumberType } from '@/common/string-numbers';
-import { Map, ValueStore, iMap, iValueStore } from '@/transactions/messages/bitbadges/maps';
-import { UpdateHistory, iUpdateHistory } from '../docs/docs';
-import { Metadata, iMetadata } from '../metadata';
+import type { CustomType } from '@/common/base.js';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
+import type { NumberType } from '@/common/string-numbers.js';
+import { Map, ValueStore, iMap, iValueStore } from '@/transactions/messages/bitbadges/maps/index.js';
+import { UpdateHistory, iUpdateHistory } from '../docs/docs.js';
+import { Metadata, iMetadata } from '../metadata/index.js';
 
 /**
  * @category API Requests / Responses

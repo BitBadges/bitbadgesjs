@@ -1,2 +1,2 @@
-export * from './tx_pb';
-export * from './vesting_pb';
+export * from './tx_pb.js';
+export * from './vesting_pb.js';

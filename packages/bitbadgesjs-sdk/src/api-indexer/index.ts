@@ -1,10 +1,10 @@
-export * from './base';
+export * from './base.js';
 
-export * from './metadata/index';
+export * from './metadata/index.js';
 
-export * from './docs/index';
-export * from './BitBadgesAddressList';
-export * from './BitBadgesApi';
-export * from './BitBadgesCollection';
-export * from './BitBadgesUserInfo';
-export * from './requests/index';
+export * from './docs/index.js';
+export * from './BitBadgesAddressList.js';
+export * from './BitBadgesApi.js';
+export * from './BitBadgesCollection.js';
+export * from './BitBadgesUserInfo.js';
+export * from './requests/index.js';

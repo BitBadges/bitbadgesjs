@@ -1,1 +1,1 @@
-export * from './cosmos_pb';
+export * from './cosmos_pb.js';

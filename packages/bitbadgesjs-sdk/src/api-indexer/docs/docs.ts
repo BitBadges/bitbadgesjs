@@ -1,9 +1,9 @@
-import type { CustomType } from '@/common/base';
-import { BaseNumberTypeClass, CustomTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base';
-import type { NumberType } from '@/common/string-numbers';
-import { BigIntify } from '@/common/string-numbers';
-import type { SupportedChain } from '@/common/types';
-import { AddressList, AttestationsProof, getValueAtTimeForTimeline } from '@/core';
+import type { CustomType } from '@/common/base.js';
+import { BaseNumberTypeClass, CustomTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
+import type { NumberType } from '@/common/string-numbers.js';
+import { BigIntify } from '@/common/string-numbers.js';
+import type { SupportedChain } from '@/common/types.js';
+import { AddressList, AttestationsProof, getValueAtTimeForTimeline } from '@/core/index.js';
 import {
   ApprovalInfoDetails,
   ChallengeDetails,
@@ -15,10 +15,10 @@ import {
   UserOutgoingApprovalWithDetails,
   iApprovalInfoDetails,
   iChallengeDetails
-} from '@/core/approvals';
-import { BalanceArray } from '@/core/balances';
-import { BatchBadgeDetailsArray } from '@/core/batch-utils';
-import { CosmosCoin } from '@/core/coin';
+} from '@/core/approvals.js';
+import { BalanceArray } from '@/core/balances.js';
+import { BatchBadgeDetailsArray } from '@/core/batch-utils.js';
+import { CosmosCoin } from '@/core/coin.js';
 import {
   BadgeMetadataTimeline,
   CollectionMetadataTimeline,
@@ -27,17 +27,17 @@ import {
   ManagerTimeline,
   OffChainBalancesMetadataTimeline,
   StandardsTimeline
-} from '@/core/misc';
-import { CollectionPermissions, UserPermissions, UserPermissionsWithDetails } from '@/core/permissions';
-import type { iOffChainBalancesMap } from '@/core/transfers';
-import { UserBalanceStore } from '@/core/userBalances';
-import type { iAmountTrackerIdDetails } from '@/interfaces/badges/core';
-import type { iUserBalanceStore } from '@/interfaces/badges/userBalances';
-import type { Doc } from '../base';
-import type { iMetadata } from '../metadata/metadata';
-import { Metadata } from '../metadata/metadata';
-import { BlockinAndGroup, BlockinAssetConditionGroup, BlockinChallengeParams, BlockinOrGroup, OwnershipRequirements } from '../requests/blockin';
-import { MapWithValues } from '../requests/maps';
+} from '@/core/misc.js';
+import { CollectionPermissions, UserPermissions, UserPermissionsWithDetails } from '@/core/permissions.js';
+import type { iOffChainBalancesMap } from '@/core/transfers.js';
+import { UserBalanceStore } from '@/core/userBalances.js';
+import type { iAmountTrackerIdDetails } from '@/interfaces/badges/core.js';
+import type { iUserBalanceStore } from '@/interfaces/badges/userBalances.js';
+import type { Doc } from '../base.js';
+import type { iMetadata } from '../metadata/metadata.js';
+import { Metadata } from '../metadata/metadata.js';
+import { BlockinAndGroup, BlockinAssetConditionGroup, BlockinChallengeParams, BlockinOrGroup, OwnershipRequirements } from '../requests/blockin.js';
+import { MapWithValues } from '../requests/maps.js';
 import type {
   ClaimIntegrationPluginType,
   CosmosAddress,
@@ -80,8 +80,8 @@ import type {
   iUsedLeafStatus,
   NativeAddress,
   iAttestationProofDoc
-} from './interfaces';
-import { OAuthScopeDetails } from '../requests/requests';
+} from './interfaces.js';
+import { OAuthScopeDetails } from '../requests/requests.js';
 import { AndGroup, OrGroup } from 'blockin';
 
 /**

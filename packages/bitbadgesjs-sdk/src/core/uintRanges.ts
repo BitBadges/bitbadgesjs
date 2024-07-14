@@ -1,11 +1,11 @@
 import type { JsonValue, JsonReadOptions } from '@bufbuild/protobuf';
-import type { iUintRange } from '@/interfaces/badges/core';
-import { BaseNumberTypeClass, deepCopyPrimitives, getConverterFunction } from '@/common/base';
-import { safeSubtract, safeAddKeepLeft, GO_MAX_UINT_64, safeSubtractKeepLeft, bigIntMin, castNumberType, bigIntMax } from '../common/math';
-import type { NumberType } from '../common/string-numbers';
-import { Stringify } from '../common/string-numbers';
-import * as proto from '@/proto';
-import { BaseTypedArray } from '@/common/typed-arrays';
+import type { iUintRange } from '@/interfaces/badges/core.js';
+import { BaseNumberTypeClass, deepCopyPrimitives, getConverterFunction } from '@/common/base.js';
+import { safeSubtract, safeAddKeepLeft, GO_MAX_UINT_64, safeSubtractKeepLeft, bigIntMin, castNumberType, bigIntMax } from '../common/math.js';
+import type { NumberType } from '../common/string-numbers.js';
+import { Stringify } from '../common/string-numbers.js';
+import * as proto from '@/proto/index.js';
+import { BaseTypedArray } from '@/common/typed-arrays.js';
 
 /**
  * UintRange represents a range of numbers from some start ID to some end ID, inclusive.

@@ -1,12 +1,12 @@
-import { genTestAddress } from './addressLists.spec';
+import { genTestAddress } from './addressLists.spec.js';
 import {
   createBalanceMapForOffChainBalances,
   getAllBadgeIdsToBeTransferred,
   getAllBalancesToBeTransferred,
   getBalancesAfterTransfers,
   iTransferWithIncrements
-} from './transfers';
-import { UintRangeArray } from './uintRanges';
+} from './transfers.js';
+import { UintRangeArray } from './uintRanges.js';
 
 BigInt.prototype.toJSON = function () {
   return this.toString();

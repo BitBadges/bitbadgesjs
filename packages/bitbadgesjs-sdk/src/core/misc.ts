@@ -1,5 +1,5 @@
-import { CosmosAddress } from '@/api-indexer/docs/interfaces';
-import { BaseNumberTypeClass, CustomTypeClass, deepCopyPrimitives } from '@/common/base';
+import { CosmosAddress } from '@/api-indexer/docs/interfaces.js';
+import { BaseNumberTypeClass, CustomTypeClass, deepCopyPrimitives } from '@/common/base.js';
 import type {
   iAmountTrackerIdDetails,
   iApprovalIdentifierDetails,
@@ -23,18 +23,18 @@ import type {
   iTimelineItem,
   iZkProof,
   iZkProofSolution
-} from '@/interfaces/badges/core';
-import * as proto from '@/proto';
+} from '@/interfaces/badges/core.js';
+import * as proto from '@/proto/index.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
-import { BigIntify, Stringify, type NumberType } from '../common/string-numbers';
-import { AddressList } from './addressLists';
-import { CosmosCoin } from './coin';
-import type { UniversalPermission, UniversalPermissionDetails } from './overlaps';
-import { GetFirstMatchOnly, getOverlapsAndNonOverlaps } from './overlaps';
-import { TimedUpdatePermission, TimedUpdateWithBadgeIdsPermission } from './permissions';
-import { UintRange, UintRangeArray } from './uintRanges';
-import { AllDefaultValues, getPotentialUpdatesForTimelineValues, getUpdateCombinationsToCheck } from './validate-utils';
-import { BadgeMetadataDetails, CollectionMetadataDetails } from '@/api-indexer/metadata/badgeMetadata';
+import { BigIntify, Stringify, type NumberType } from '../common/string-numbers.js';
+import { AddressList } from './addressLists.js';
+import { CosmosCoin } from './coin.js';
+import type { UniversalPermission, UniversalPermissionDetails } from './overlaps.js';
+import { GetFirstMatchOnly, getOverlapsAndNonOverlaps } from './overlaps.js';
+import { TimedUpdatePermission, TimedUpdateWithBadgeIdsPermission } from './permissions.js';
+import { UintRange, UintRangeArray } from './uintRanges.js';
+import { AllDefaultValues, getPotentialUpdatesForTimelineValues, getUpdateCombinationsToCheck } from './validate-utils.js';
+import { BadgeMetadataDetails, CollectionMetadataDetails } from '@/api-indexer/metadata/badgeMetadata.js';
 
 /**
  * BadgeMetadata is used to represent the metadata for a range of badge IDs.

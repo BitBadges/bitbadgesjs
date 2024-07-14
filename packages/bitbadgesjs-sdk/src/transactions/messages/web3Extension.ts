@@ -1,7 +1,7 @@
-import type { Chain, Sender } from './common';
-import * as web3 from '@/proto/ethereum/web3_pb';
-import * as web3Sol from '@/proto/solana/web3_pb';
-import * as web3Btc from '@/proto/bitcoin/web3_pb';
+import type { Chain, Sender } from './common.js';
+import * as web3 from '@/proto/ethereum/web3_pb.js';
+import * as web3Sol from '@/proto/solana/web3_pb.js';
+import * as web3Btc from '@/proto/bitcoin/web3_pb.js';
 
 /**
  * This function is used to convert a signature to a web3 extension for an Ethereum EIP712 transaction.
