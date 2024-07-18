@@ -19,8 +19,6 @@
     "declarationMap": true,
     "sourceMap": true,
     "esModuleInterop": true,
-
-    "incremental": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "types": ["node", "jest"],

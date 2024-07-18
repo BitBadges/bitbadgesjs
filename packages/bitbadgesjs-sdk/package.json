@@ -1,18 +1,17 @@
 {
   "name": "bitbadgesjs-sdk",
   "description": "SDK for BitBadges development",
-  "version": "0.3.116",
+  "version": "0.3.129",
   "license": "MIT",
   "eslintIgnore": [
     "src/proto/**/*.ts"
   ],
-  "type": "module",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "exports": {
     ".": {
-      "require": "./dist/cjs/index.js",
-      "import": "./dist/esm/index.js"
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
     }
   },
   "files": [
@@ -21,9 +20,9 @@
   "sideEffects": false,
   "scripts": {
     "alias": "tsc-alias -p tsconfig.build.json && tsc-alias -p tsconfig-esm.build.json",
-    "build": "rm -rf dist && tsc --build tsconfig.build.json && tsc --build tsconfig-esm.build.json && npm run alias",
+    "build": "rm -rf dist && tsc --build tsconfig.build.json && tsc --build tsconfig-esm.build.json && npm run alias && npm run fixup",
     "clean": "tsc --build tsconfig.build.json --clean  && shx rm -rf coverage *.log junit.xml dist && jest --clearCache",
-    "fixup": "source ./scripts/fixup.sh",
+    "fixup": "./scripts/fixup.sh",
     "test": "jest ./src/**/*.spec.ts",
     "test:unit": "jest test/unit",
     "test:integration": "jest test/unit",
@@ -33,7 +32,8 @@
     "dev": "ts-node-dev -r tsconfig-paths/register src/index.ts",
     "start": "node dist/index.js",
     "format": "prettier --write './**/*.{js,jsx,ts,tsx,css,md,json}' --config ./.prettierrc",
-    "prepare": "ts-patch install && typia patch"
+    "prepare": "ts-patch install && typia patch",
+    "bundle": "tsup src/index.ts --minify --dts --format cjs,esm --out-dir dist"
   },
   "devDependencies": {
     "@babel/core": "^7.24.8",
