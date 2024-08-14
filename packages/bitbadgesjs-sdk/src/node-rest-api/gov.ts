@@ -9,8 +9,6 @@ export enum ProposalStatus {
   Failed = 'PROPOSAL_STATUS_FAILED'
 }
 
-// NOTE: this returns all the proposals
-// TODO: add pagination to the request
 export function generateEndpointProposals() {
   return `/cosmos/gov/v1beta1/proposals`;
 }

@@ -160,7 +160,6 @@ export function createStdSignDigestFromProto(
   }
 }
 
-// TODO: messages should be typed as MessageGenerated
 export function createTransactionWithMultipleMessages(
   messages: any,
   memo: string,

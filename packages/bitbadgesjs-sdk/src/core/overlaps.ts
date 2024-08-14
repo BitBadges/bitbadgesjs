@@ -391,14 +391,14 @@ export const TimedUpdateWithBadgeIdsPermissionUsedFlags: UsedFlags = {
   usesChallengeTrackerIdList: false
 };
 
-export const BalancesActionPermissionUsedFlags: UsedFlags = {
+export const BadgeIdsActionPermissionUsedFlags: UsedFlags = {
   usesBadgeIds: true,
   usesTimelineTimes: false,
   usesTransferTimes: false,
   usesToList: false,
   usesFromList: false,
   usesInitiatedByList: false,
-  usesOwnershipTimes: true,
+  usesOwnershipTimes: false,
   usesApprovalIdList: false,
   usesAmountTrackerIdList: false,
   usesChallengeTrackerIdList: false

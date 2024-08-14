@@ -49,10 +49,6 @@ export interface Sender {
 /**
  * Chain represents the base chain's chainID.
  *
- * @remarks
- * chainId corresponds to a numerical Ethereum ChainID (e.g. 9001)
- * cosmosChainId corresponds to a Cosmos SDK string ChainID (e.g. 'bitbadges_1-1')
- *
  * @category Transactions
  */
 export interface Chain {

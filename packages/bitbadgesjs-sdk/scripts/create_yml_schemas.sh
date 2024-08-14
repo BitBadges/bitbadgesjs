@@ -83,6 +83,7 @@ main() {
     replace_text_in_directory "$directory" "ClaimIntegrationPrivateStateType" "any"
     replace_text_in_directory "$directory" "ClaimIntegrationPublicParamsType" "any"
     replace_text_in_directory "$directory" "ClaimIntegrationPrivateParamsType" "any"
+    replace_text_in_directory "$directory" "ClaimIntegrationPluginCustomBodyType" "any"
     replace_text_in_directory "$directory" "<ClaimIntegrationPluginType>" ""
 
 

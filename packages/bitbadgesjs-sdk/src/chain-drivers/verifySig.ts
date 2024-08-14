@@ -6,7 +6,7 @@ import { SupportedChain } from '@/common/types.js';
 
 const ethDriver = new EthDriver('0x1', undefined);
 const solDriver = new SolDriver('');
-const cosmosDriver = new CosmosDriver('bitbadges_1-1');
+const cosmosDriver = new CosmosDriver('bitbadges-1');
 const btcDriver = new BtcDriver('Bitcoin');
 
 /**

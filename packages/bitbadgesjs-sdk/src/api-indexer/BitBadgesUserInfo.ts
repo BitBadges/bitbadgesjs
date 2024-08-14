@@ -11,7 +11,7 @@ import type { iBitBadgesAddressList } from './BitBadgesAddressList.js';
 import { BitBadgesAddressList } from './BitBadgesAddressList.js';
 import { BitBadgesCollection } from './BitBadgesCollection.js';
 import type { BaseBitBadgesApi, PaginationInfo } from './base.js';
-import { ClaimAlertDoc, ListActivityDoc, ReviewDoc, TransferActivityDoc } from './docs/activity.js';
+import { ClaimAlertDoc, ListActivityDoc, TransferActivityDoc } from './docs/activity.js';
 import {
   ApprovalTrackerDoc,
   AttestationDoc,
@@ -49,6 +49,8 @@ export interface iBitBadgesUserInfo<T extends NumberType> extends iProfileDoc<T>
   resolvedName?: string;
   /** The avatar of the account. */
   avatar?: string;
+  /** In-site USD balance of the account. */
+  usdBalance?: T;
   /** The Solana address of the account. */
   solAddress: string;
   /** The chain of the account. */
@@ -61,8 +63,6 @@ export interface iBitBadgesUserInfo<T extends NumberType> extends iProfileDoc<T>
   activity: iTransferActivityDoc<T>[];
   /** A list of list activity items for the account. Paginated and fetched as needed. To be used in conjunction with views. */
   listsActivity: iListActivityDoc<T>[];
-  /** A list of review activity items for the account. Paginated and fetched as needed. To be used in conjunction with views. */
-  reviews: iReviewDoc<T>[];
   /** A list of merkle challenge activity items for the account. Paginated and fetched as needed. To be used in conjunction with views. */
   merkleChallenges: iMerkleChallengeDoc<T>[];
   /** A list of approvals tracker activity items for the account. Paginated and fetched as needed. To be used in conjunction with views. */
@@ -116,7 +116,6 @@ export interface iBitBadgesUserInfo<T extends NumberType> extends iProfileDoc<T>
  * @category Accounts
  */
 export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> implements iBitBadgesUserInfo<T>, CustomType<BitBadgesUserInfo<T>> {
-  //TODO: Can we get rid of the AccountDoc stuff too?
   cosmosAddress: CosmosAddress;
   ethAddress: string;
   btcAddress: string;
@@ -124,6 +123,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   accountNumber: T;
   sequence?: T;
   balance?: CosmosCoin<T>;
+  usdBalance?: T;
   pubKeyType: string;
   publicKey: string;
 
@@ -134,7 +134,6 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   collected: BalanceDocWithDetails<T>[];
   activity: TransferActivityDoc<T>[];
   listsActivity: ListActivityDoc<T>[];
-  reviews: ReviewDoc<T>[];
   merkleChallenges: MerkleChallengeDoc<T>[];
   approvalTrackers: ApprovalTrackerDoc<T>[];
   addressLists: BitBadgesAddressList<T>[];
@@ -179,7 +178,6 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     this.collected = data.collected.map((balance) => new BalanceDocWithDetails(balance));
     this.activity = data.activity.map((activity) => new TransferActivityDoc(activity));
     this.listsActivity = data.listsActivity.map((activity) => new ListActivityDoc(activity));
-    this.reviews = data.reviews.map((review) => new ReviewDoc(review));
     this.merkleChallenges = data.merkleChallenges.map((challenge) => new MerkleChallengeDoc(challenge));
     this.approvalTrackers = data.approvalTrackers.map((tracker) => new ApprovalTrackerDoc(tracker));
     this.addressLists = data.addressLists.map((list) => new BitBadgesAddressList(list));
@@ -193,6 +191,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     this.views = data.views;
     this.alias = data.alias;
     this.reservedMap = data.reservedMap ? new MapDoc(data.reservedMap) : undefined;
+    this.usdBalance = data.usdBalance;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): BitBadgesUserInfo<U> {
@@ -204,7 +203,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   }
 
   getNumberFieldNames(): string[] {
-    return ['accountNumber', 'sequence'];
+    return ['accountNumber', 'sequence', 'usdBalance'];
   }
 
   /**
@@ -453,8 +452,6 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
         return this.getSIWBBRequestsView(viewId) as AccountViewData<T>[KeyType];
       case 'transferActivity':
         return this.getAccountActivityView(viewId) as AccountViewData<T>[KeyType];
-      case 'reviews':
-        return this.getAccountReviewsView(viewId) as AccountViewData<T>[KeyType];
       case 'badgesCollected':
         return this.getAccountBalancesView(viewId) as AccountViewData<T>[KeyType];
       case 'sentClaimAlerts':
@@ -516,12 +513,6 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     }) ?? []) as ListActivityDoc<T>[];
   }
 
-  getAccountReviewsView(viewId: string) {
-    return (this.views[viewId]?.ids.map((x) => {
-      return this.reviews.find((y) => y._docId === x);
-    }) ?? []) as ReviewDoc<T>[];
-  }
-
   getAccountBalancesView(viewId: string) {
     return (this.views[viewId]?.ids.map((x) => {
       return this.collected.find((y) => y._docId === x);
@@ -570,7 +561,6 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
       listsActivity: [],
       attestations: [],
       attestationProofs: [],
-      reviews: [],
       addressLists: [],
       claimAlerts: [],
       merkleChallenges: [],
@@ -607,7 +597,6 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
       attestations: [],
       attestationProofs: [],
       claimAlerts: [],
-      reviews: [],
       merkleChallenges: [],
       approvalTrackers: [],
       addressLists: [],
@@ -618,34 +607,6 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
       views: {}
     });
   }
-
-  //TODO: A little weird bc it is by collected doc not on base
-  // validatePermissionsUpdate(newPermissions: UserPermissionsWithDetails<T>): Error | null {
-  //   const result = validatePermissionsUpdate(this.convert(BigIntify).collectionPermissions, newPermissions.convert(BigIntify));
-  //   return result;
-  // }
-
-  // validatePermissionUpdate(permissionName: PermissionNameString, newPermissions: any[]): Error | null {
-  //   const { validatePermissionUpdateFunction } = getPermissionVariablesFromName(permissionName);
-  //   const oldPermissions = this.[permissionName as keyof UserPermissions<T>];
-  //   const result: Error | null = validatePermissionUpdateFunction(oldPermissions, newPermissions);
-  //   return result;
-  // }
-
-  // validateCollectionApprovalsUpdate(newApprovals: CollectionApprovalWithDetails<T>[]): Error | null {
-  //   const result = validateCollectionApprovalsUpdate(this.convert(BigIntify).collectionApprovals, newApprovals.map(x => x.convert(BigIntify)), this.convert(BigIntify).collectionPermissions.canUpdateCollectionApprovals);
-  //   return result;
-  // }
-
-  // validateBadgeMetadataUpdate(newBadgeMetadata: BadgeMetadataTimeline<T>[]): Error | null {
-  //   const result = validateBadgeMetadataUpdate(this.convert(BigIntify).badgeMetadataTimeline, newBadgeMetadata.map(x => x.convert(BigIntify)), this.convert(BigIntify).collectionPermissions.canUpdateBadgeMetadata);
-  //   return result;
-  // }
-
-  // validateOffChainBalancesMetadataUpdate(newOffChainBalancesMetadata: OffChainBalancesMetadataTimeline<T>[]): Error | null {
-  //   const result = validateOffChainBalancesMetadataUpdate(this.convert(BigIntify).offChainBalancesMetadataTimeline, newOffChainBalancesMetadata.map(x => x.convert(BigIntify)), this.convert(BigIntify).collectionPermissions.canUpdateOffChainBalancesMetadata);
-  //   return result;
-  // }
 }
 
 type AccountViewData<T extends NumberType> = {
@@ -653,7 +614,6 @@ type AccountViewData<T extends NumberType> = {
   privateLists: BitBadgesAddressList<T>[];
   siwbbRequests: SIWBBRequestDoc<T>[];
   transferActivity: TransferActivityDoc<T>[];
-  reviews: ReviewDoc<T>[];
   badgesCollected: BalanceDocWithDetails<T>[];
   sentClaimAlerts: ClaimAlertDoc<T>[];
   claimAlerts: ClaimAlertDoc<T>[];
@@ -722,7 +682,6 @@ function updateAccountWithResponse<T extends NumberType>(
     ...cachedAccount,
     ...account,
 
-    reviews: [...(cachedAccount?.reviews || []), ...(account.reviews || [])],
     collected: [...(cachedAccount?.collected || []), ...(account.collected || [])],
     activity: [...(cachedAccount?.activity || []), ...(account.activity || [])],
     addressLists: [...(cachedAccount?.addressLists || []), ...(account.addressLists || [])],
@@ -750,7 +709,6 @@ function updateAccountWithResponse<T extends NumberType>(
   });
 
   //Filter duplicates
-  newAccount.reviews = newAccount.reviews.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
   newAccount.collected = newAccount.collected.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
   newAccount.activity = newAccount.activity.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
   newAccount.addressLists = newAccount.addressLists.filter((x, index, self) => index === self.findIndex((t) => t.listId === x.listId));
@@ -762,7 +720,6 @@ function updateAccountWithResponse<T extends NumberType>(
 
   //sort in descending order
   newAccount.activity = newAccount.activity.sort((a, b) => (BigInt(b.timestamp) - BigInt(a.timestamp) > 0 ? -1 : 1));
-  newAccount.reviews = newAccount.reviews.sort((a, b) => (BigInt(b.timestamp) - BigInt(a.timestamp) > 0 ? -1 : 1));
   newAccount.claimAlerts = newAccount.claimAlerts.sort((a, b) => (BigInt(b.timestamp) - BigInt(a.timestamp) > 0 ? -1 : 1));
   newAccount.siwbbRequests = newAccount.siwbbRequests.sort((a, b) => (BigInt(b.createdAt) - BigInt(a.createdAt) > 0 ? -1 : 1));
   newAccount.listsActivity = newAccount.listsActivity.sort((a, b) => (BigInt(b.timestamp) - BigInt(a.timestamp) > 0 ? -1 : 1));
@@ -780,7 +737,6 @@ export type AccountViewKey =
   | 'privateLists'
   | 'siwbbRequests'
   | 'transferActivity'
-  | 'reviews'
   | 'badgesCollected'
   | 'sentClaimAlerts'
   | 'claimAlerts'

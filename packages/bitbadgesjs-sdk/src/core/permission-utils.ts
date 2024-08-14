@@ -4,13 +4,13 @@ import type { UsedFlags } from './overlaps.js';
 import {
   ActionPermissionUsedFlags,
   ApprovalPermissionUsedFlags,
-  BalancesActionPermissionUsedFlags,
+  BadgeIdsActionPermissionUsedFlags,
   TimedUpdatePermissionUsedFlags,
   TimedUpdateWithBadgeIdsPermissionUsedFlags
 } from './overlaps.js';
 import {
   ActionPermission,
-  BalancesActionPermission,
+  BadgeIdsActionPermission,
   CollectionApprovalPermission,
   TimedUpdatePermission,
   TimedUpdateWithBadgeIdsPermission
@@ -25,7 +25,7 @@ export type PermissionNameString =
   | 'canUpdateOffChainBalancesMetadata'
   | 'canUpdateBadgeMetadata'
   | 'canUpdateCollectionMetadata'
-  | 'canCreateMoreBadges'
+  | 'canUpdateValidBadgeIds'
   | 'canUpdateCollectionApprovals'
   | 'canUpdateAutoApproveSelfInitiatedIncomingTransfers'
   | 'canUpdateAutoApproveSelfInitiatedOutgoingTransfers'
@@ -80,8 +80,8 @@ export const getPermissionVariablesFromName = (permissionName: PermissionNameStr
     case 'canUpdateCollectionMetadata':
       validatePermissionUpdateFunction = TimedUpdatePermission.validateUpdate;
       break;
-    case 'canCreateMoreBadges':
-      validatePermissionUpdateFunction = BalancesActionPermission.validateUpdate;
+    case 'canUpdateValidBadgeIds':
+      validatePermissionUpdateFunction = BadgeIdsActionPermission.validateUpdate;
 
       break;
     case 'canUpdateBadgeMetadata':
@@ -117,7 +117,7 @@ export const getPermissionVariablesFromName = (permissionName: PermissionNameStr
     case 'canUpdateCollectionMetadata':
       question = 'Can update the collection metadata?';
       break;
-    case 'canCreateMoreBadges':
+    case 'canUpdateValidBadgeIds':
       question = 'Can create more badges?';
       break;
     case 'canUpdateBadgeMetadata':
@@ -149,8 +149,8 @@ export const getPermissionVariablesFromName = (permissionName: PermissionNameStr
     case 'canUpdateCollectionMetadata':
       flags = TimedUpdatePermissionUsedFlags;
       break;
-    case 'canCreateMoreBadges':
-      flags = BalancesActionPermissionUsedFlags;
+    case 'canUpdateValidBadgeIds':
+      flags = BadgeIdsActionPermissionUsedFlags;
       break;
     case 'canUpdateBadgeMetadata':
       // case 'canUpdateInheritedBalances':

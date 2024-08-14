@@ -239,7 +239,7 @@ export interface MetadataFetchOptions {
  *
  * @category API Requests / Responses
  */
-export type CollectionViewKey = 'transferActivity' | 'reviews' | 'owners' | 'amountTrackers' | 'challengeTrackers';
+export type CollectionViewKey = 'transferActivity' | 'owners' | 'amountTrackers' | 'challengeTrackers';
 
 /**
  * Defines the options for fetching additional collection details.
@@ -258,7 +258,7 @@ export type CollectionViewKey = 'transferActivity' | 'reviews' | 'owners' | 'amo
  *
  * @typedef {Object} GetAdditionalCollectionDetailsBody
  * @property {{ viewType: string, bookmark: string }[]} [viewsToFetch] - If present, the specified views will be fetched.
- * @property {boolean} [fetchTotalAndMintBalances] - If true, the total and mint balances will be fetched.
+ * @property {boolean} [fetchTotalBalances] - If true, the total and mint balances will be fetched.
  * @property {string[]} [challengeTrackersToFetch] - If present, the merkle challenges corresponding to the specified merkle challenge IDs will be fetched.
  * @property {AmountTrackerIdDetails<NumberType>[]} [approvalTrackersToFetch] - If present, the approvals trackers corresponding to the specified approvals tracker IDs will be fetched.
  * @category API Requests / Responses
@@ -277,7 +277,7 @@ export interface GetAdditionalCollectionDetailsPayload {
     /** If defined, we will return the oldest items first. */
     oldestFirst?: boolean;
     /** If specified, we will only fetch this users' activity. */
-    cosmosAddress?: string;
+    address?: string;
   }[];
 
   /**
@@ -285,7 +285,7 @@ export interface GetAdditionalCollectionDetailsPayload {
    *
    * collection.owners.find(x => x.cosmosAddresss === 'Mint')
    */
-  fetchTotalAndMintBalances?: boolean;
+  fetchTotalBalances?: boolean;
   /**
    * If present, the merkle challenges corresponding to the specified merkle challenge IDs will be fetched.
    */

@@ -4,6 +4,7 @@ import { bech32 } from 'bech32';
 import bs58 from 'bs58';
 import { isValidChecksumAddress, stripHexPrefix, toChecksumAddress } from 'crypto-addr-codec';
 import { isAddress } from 'web3-validator';
+import { PublicKey } from '@solana/web3.js';
 
 const sha256 = (data: Uint8Array): Uint8Array => {
   const hash = nobleSha256.create();
@@ -270,10 +271,15 @@ export function isAddressValid(address: string, chain?: SupportedChain) {
         isValidAddress = false;
       }
       break;
-    // TODO:
-    // case SupportedChain.SOLANA:
-    //   isValidAddress = address.length == 44;
-    //   break;
+    case SupportedChain.SOLANA:
+      try {
+        let isOnCurve = PublicKey.isOnCurve(new PublicKey(address));
+        isValidAddress = !!isOnCurve;
+      } catch (e) {
+        isValidAddress = false;
+      }
+
+      break;
     case SupportedChain.BTC:
       try {
         cosmosToEth(btcToCosmos(address)); //throws on failure
@@ -283,7 +289,6 @@ export function isAddressValid(address: string, chain?: SupportedChain) {
 
       break;
     default:
-      isValidAddress = address.length == 44; //Solana address
       break;
   }
 

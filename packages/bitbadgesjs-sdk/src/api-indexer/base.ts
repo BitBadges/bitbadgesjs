@@ -46,6 +46,7 @@ export interface iBitBadgesApi<T extends NumberType> {
   apiUrl?: string;
   apiKey?: string;
   convertFunction: (num: NumberType) => T;
+  appendedHeaders?: Record<string, string>;
 }
 
 /**
@@ -65,16 +66,19 @@ export class BaseBitBadgesApi<T extends NumberType> {
   ConvertFunction: (num: NumberType) => T;
   apiKey = process.env.BITBADGES_API_KEY;
   accessToken = '';
+  appendedHeaders: Record<string, string> = {};
 
   constructor(apiDetails: iBitBadgesApi<T>) {
     this.BACKEND_URL = apiDetails.apiUrl || this.BACKEND_URL;
     this.ConvertFunction = apiDetails.convertFunction;
     this.apiKey = apiDetails.apiKey || this.apiKey;
+    this.appendedHeaders = apiDetails.appendedHeaders || {};
     this.axios = axios.create({
       withCredentials: true,
       headers: {
         'Content-type': 'application/json',
-        'x-api-key': this.apiKey
+        'x-api-key': this.apiKey,
+        ...apiDetails.appendedHeaders
       }
     });
     this.accessToken = '';

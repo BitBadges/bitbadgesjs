@@ -15,6 +15,8 @@ import { AnchorData } from "./tx_pb.js";
  */
 export class GenesisState extends Message<GenesisState> {
   /**
+   * params defines all the parameters of the module.
+   *
    * @generated from field: anchor.Params params = 1;
    */
   params?: Params;

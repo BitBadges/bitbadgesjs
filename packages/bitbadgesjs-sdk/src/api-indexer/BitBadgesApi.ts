@@ -17,6 +17,7 @@ import type { GetAccountsPayload, GetAccountsSuccessResponse } from './BitBadges
 import { BitBadgesUserInfo } from './BitBadgesUserInfo.js';
 import type { iBitBadgesApi } from './base.js';
 import { BaseBitBadgesApi } from './base.js';
+import { NativeAddress } from './docs/interfaces.js';
 import type {
   FilterBadgesInCollectionPayload,
   FilterBadgesInCollectionSuccessResponse,
@@ -35,14 +36,19 @@ import type {
   iFilterSuggestionsSuccessResponse
 } from './requests/collections.js';
 import { FilterSuggestionsSuccessResponse } from './requests/collections.js';
-import { GetMapValuesPayload, GetMapValuesSuccessResponse, GetMapsPayload, GetMapsSuccessResponse, iGetMapValuesSuccessResponse, iGetMapsSuccessResponse } from './requests/maps.js';
+import {
+  GetMapValuesPayload,
+  GetMapValuesSuccessResponse,
+  GetMapsPayload,
+  GetMapsSuccessResponse,
+  iGetMapValuesSuccessResponse,
+  iGetMapsSuccessResponse
+} from './requests/maps.js';
 import {
   AddApprovalDetailsToOffChainStoragePayload,
   AddApprovalDetailsToOffChainStorageSuccessResponse,
   AddBalancesToOffChainStoragePayload,
   AddBalancesToOffChainStorageSuccessResponse,
-  AddReviewPayload,
-  AddReviewSuccessResponse,
   AddToIpfsPayload,
   AddToIpfsSuccessResponse,
   BroadcastTxPayload,
@@ -59,6 +65,8 @@ import {
   CreateClaimSuccessResponse,
   CreateDeveloperAppPayload,
   CreateDeveloperAppSuccessResponse,
+  CreatePaymentIntentPayload,
+  CreatePaymentIntentSuccessResponse,
   CreatePluginPayload,
   CreatePluginSuccessResponse,
   CreateSIWBBRequestPayload,
@@ -73,8 +81,6 @@ import {
   DeleteDeveloperAppSuccessResponse,
   DeletePluginPayload,
   DeletePluginSuccessResponse,
-  DeleteReviewPayload,
-  DeleteReviewSuccessResponse,
   DeleteSIWBBRequestPayload,
   DeleteSIWBBRequestSuccessResponse,
   ExchangeSIWBBAuthorizationCodePayload,
@@ -148,8 +154,8 @@ import {
   iBroadcastTxSuccessResponse,
   iCheckSignInStatusSuccessResponse,
   iCompleteClaimSuccessResponse,
+  iCreatePaymentIntentSuccessResponse,
   iCreateSIWBBRequestSuccessResponse,
-  iDeleteReviewSuccessResponse,
   iDeleteSIWBBRequestSuccessResponse,
   iExchangeSIWBBAuthorizationCodeSuccessResponse,
   iFetchMetadataDirectlySuccessResponse,
@@ -158,6 +164,7 @@ import {
   iGetBrowseCollectionsSuccessResponse,
   iGetClaimAlertsForCollectionSuccessResponse,
   iGetClaimAttemptStatusSuccessResponse,
+  iGetClaimsSuccessResponse,
   iGetReservedClaimCodesSuccessResponse,
   iGetSIWBBRequestsForDeveloperAppSuccessResponse,
   iGetSearchSuccessResponse,
@@ -173,7 +180,6 @@ import {
   iVerifySignInSuccessResponse
 } from './requests/requests.js';
 import { BitBadgesApiRoutes } from './requests/routes.js';
-import { NativeAddress } from './docs/interfaces.js';
 
 /**
  * This is the BitBadgesAPI class which provides all typed API calls to the BitBadges API.
@@ -298,12 +304,12 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * Gets the balance of a specific badge for a specific address
    *
    * @remarks
-   * - **API Route**: `POST /api/v0/collection/:collectionId/balance/:cosmosAddress`
-   * - **SDK Function Call**: `await BitBadgesApi.getBadgeBalanceByAddress(collectionId, cosmosAddress);`
+   * - **API Route**: `POST /api/v0/collection/:collectionId/balance/:address`
+   * - **SDK Function Call**: `await BitBadgesApi.getBadgeBalanceByAddress(collectionId, address);`
    *
    * @example
    * ```typescript
-   * const res = await BitBadgesApi.getBadgeBalanceByAddress(collectionId, cosmosAddress);
+   * const res = await BitBadgesApi.getBadgeBalanceByAddress(collectionId, address);
    * console.log(res);
    * ```
    */
@@ -362,7 +368,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * Each address is limited to one code per password. If the password is provided again, they will receive the same code.
    *
    * @remarks
-   * - **API Route**: `POST /api/v0/claims/complete/:claimId/:cosmosAddress`
+   * - **API Route**: `POST /api/v0/claims/complete/:claimId/:address`
    * - **SDK Function Call**: `await BitBadgesApi.completeClaim(claimId, address, { ...body });`
    * - **Authentication**: Must be signed in.
    *
@@ -372,7 +378,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * console.log(res);
    * ```
    */
-  public async completeClaim(claimId: string, cosmosAddress: string, payload: CompleteClaimPayload): Promise<CompleteClaimSuccessResponse> {
+  public async completeClaim(claimId: string, address: string, payload: CompleteClaimPayload): Promise<CompleteClaimSuccessResponse> {
     try {
       const validateRes: typia.IValidation<CompleteClaimPayload> = typia.validate<CompleteClaimPayload>(payload ?? {});
       if (!validateRes.success) {
@@ -384,7 +390,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
       }
 
       const response = await this.axios.post<iCompleteClaimSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.CompleteClaimRoute(claimId, cosmosAddress)}`,
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.CompleteClaimRoute(claimId, address)}`,
         payload
       );
       return new CompleteClaimSuccessResponse(response.data);
@@ -398,7 +404,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * Simulates a claim attempt. A success response means the claim is valid and can be completed.
    *
    * @remarks
-   * - **API Route**: `POST /api/v0/claims/simulate/:claimId/:cosmosAddress`
+   * - **API Route**: `POST /api/v0/claims/simulate/:claimId/:address`
    * - **SDK Function Call**: `await BitBadgesApi.simulateClaim(claimId, address, { ...body });`
    * - **Authentication**: Must be signed in.
    *
@@ -408,7 +414,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * console.log(res);
    * ```
    */
-  public async simulateClaim(claimId: string, cosmosAddress: string, payload: SimulateClaimPayload): Promise<SimulateClaimSuccessResponse> {
+  public async simulateClaim(claimId: string, address: string, payload: SimulateClaimPayload): Promise<SimulateClaimSuccessResponse> {
     try {
       const validateRes: typia.IValidation<SimulateClaimPayload> = typia.validate<SimulateClaimPayload>(payload ?? {});
       if (!validateRes.success) {
@@ -420,7 +426,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
       }
 
       const response = await this.axios.post<iSimulateClaimSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.SimulateClaimRoute(claimId, cosmosAddress)}`,
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.SimulateClaimRoute(claimId, address)}`,
         payload
       );
       return new SimulateClaimSuccessResponse(response.data);
@@ -434,7 +440,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * For on-chain claims where codes are "reserved" for a specific address, this function will return all codes reserved.
    *
    * @remarks
-   * - **API Route**: `POST /api/v0/claims/reserved/:claimId/:cosmosAddress`
+   * - **API Route**: `POST /api/v0/claims/reserved/:claimId/:address`
    * - **SDK Function Call**: `await BitBadgesApi.getReservedClaimCodes(claimId, address, { ...body });`
    * - **Authentication**: Must be signed in.
    *
@@ -446,7 +452,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    */
   public async getReservedClaimCodes(
     claimId: string,
-    cosmosAddress: string,
+    address: string,
     payload: GetReservedClaimCodesPayload
   ): Promise<GetReservedClaimCodesSuccessResponse> {
     try {
@@ -460,7 +466,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
       }
 
       const response = await this.axios.post<iGetReservedClaimCodesSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetReservedClaimCodesRoute(claimId, cosmosAddress)}`,
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetReservedClaimCodesRoute(claimId, address)}`,
         payload
       );
       return new GetReservedClaimCodesSuccessResponse(response.data);
@@ -494,66 +500,6 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
         `${this.BACKEND_URL}${BitBadgesApiRoutes.GetClaimAttemptStatusRoute(claimAttemptId)}`
       );
       return new GetClaimAttemptStatusSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Deletes a review.
-   *
-   * @remarks
-   * - **API Route**: `DELETE /api/v0/deleteReview/:reviewId`
-   * - **SDK Function Call**: `await BitBadgesApi.deleteReview(reviewId, payload);`
-   * - **Authentication**: Must be signed in and the owner of the review.
-   *
-   * @example
-   * ```typescript
-   * const res = await BitBadgesApi.deleteReview(reviewId);
-   * console.log(res);
-   * ```
-   */
-  public async deleteReview(reviewId: string, payload?: DeleteReviewPayload): Promise<DeleteReviewSuccessResponse> {
-    try {
-      const validateRes: typia.IValidation<DeleteReviewPayload> = typia.validate<DeleteReviewPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.delete<iDeleteReviewSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.DeleteReviewRoute(reviewId)}`, {
-        data: payload
-      });
-      return new DeleteReviewSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Adds a new review for a collection or address.
-   *
-   * @remarks
-   * - **API Route**: `POST /api/v0/reviews/add`
-   * - **SDK Function Call**: `await BitBadgesApi.addReview(collectionId, payload);`
-   * - **Authentication**: Must be signed in.
-   *
-   * @example
-   * ```typescript
-   * const res = await BitBadgesApi.addReview(collectionId, payload);
-   * console.log(res);
-   * ```
-   */
-  public async addReview(payload: AddReviewPayload): Promise<AddReviewSuccessResponse> {
-    try {
-      const validateRes: typia.IValidation<AddReviewPayload> = typia.validate<AddReviewPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.post(`${this.BACKEND_URL}${BitBadgesApiRoutes.AddReviewRoute()}`, payload);
-      return new AddReviewSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -1117,7 +1063,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      const response = await this.axios.post<GetClaimsSuccessResponse<T>>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetClaimsRoute()}`, payload);
+      const response = await this.axios.post<iGetClaimsSuccessResponse<T>>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetClaimsRoute()}`, payload);
       return new GetClaimsSuccessResponse(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
@@ -1235,7 +1181,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * - **SDK Function Call**: `await BitBadgesApi.createClaim(payload);`
    * - **Authentication**: Must be signed in.
    */
-  public async createClaim(payload: CreateClaimPayload): Promise<CreateClaimSuccessResponse> {
+  public async createClaims(payload: CreateClaimPayload): Promise<CreateClaimSuccessResponse> {
     try {
       const validateRes: typia.IValidation<CreateClaimPayload> = typia.validate<CreateClaimPayload>(payload ?? {});
       if (!validateRes.success) {
@@ -1258,7 +1204,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * - **SDK Function Call**: `await BitBadgesApi.deleteClaim(payload);`
    * - **Authentication**: Must be signed in.
    */
-  public async deleteClaim(payload: DeleteClaimPayload): Promise<DeleteClaimSuccessResponse> {
+  public async deleteClaims(payload: DeleteClaimPayload): Promise<DeleteClaimSuccessResponse> {
     try {
       const validateRes: typia.IValidation<DeleteClaimPayload> = typia.validate<DeleteClaimPayload>(payload ?? {});
       if (!validateRes.success) {
@@ -1283,7 +1229,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * - **SDK Function Call**: `await BitBadgesApi.updateClaim(payload);`
    * - **Authentication**: Must be signed in.
    */
-  public async updateClaim(payload: UpdateClaimPayload): Promise<UpdateClaimSuccessResponse> {
+  public async updateClaims(payload: UpdateClaimPayload): Promise<UpdateClaimSuccessResponse> {
     try {
       const validateRes: typia.IValidation<UpdateClaimPayload> = typia.validate<UpdateClaimPayload>(payload ?? {});
       if (!validateRes.success) {
@@ -1866,7 +1812,7 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
   }
 
   /**
-   * Gets the Blockin sign in challenge to be signed for authentication. The returned blockinMessage is the message to be signed by the user.
+   * Gets the sign in challenge to be signed for authentication. The returned is the message to be signed by the user.
    *
    * @remarks
    * - **API Route**: `POST /api/v0/auth/getChallenge`
@@ -1943,6 +1889,26 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
 
       const response = await this.axios.post<iSignOutSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.SignOutRoute()}`, payload);
       return new SignOutSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Creates a payment intent for the user to pay.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/createPaymentIntent`
+   * - **SDK Function Call**: `await BitBadgesApi.createPaymentIntent(payload);`
+   */
+  public async createPaymentIntent(payload: CreatePaymentIntentPayload): Promise<CreatePaymentIntentSuccessResponse> {
+    try {
+      const response = await this.axios.post<iCreatePaymentIntentSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.CreatePaymentIntentRoute()}`,
+        payload
+      );
+      return new CreatePaymentIntentSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);

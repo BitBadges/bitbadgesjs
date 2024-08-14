@@ -5,8 +5,82 @@
 
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
 import { Message, proto3 } from "@bufbuild/protobuf";
-import { Params } from "./wasmx_pb.js";
+import { Params } from "./params_pb.js";
 import { GenesisState } from "./genesis_pb.js";
+
+/**
+ * QueryParamsRequest is request type for the Query/Params RPC method.
+ *
+ * @generated from message wasmx.QueryParamsRequest
+ */
+export class QueryParamsRequest extends Message<QueryParamsRequest> {
+  constructor(data?: PartialMessage<QueryParamsRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "wasmx.QueryParamsRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryParamsRequest {
+    return new QueryParamsRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryParamsRequest {
+    return new QueryParamsRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryParamsRequest {
+    return new QueryParamsRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: QueryParamsRequest | PlainMessage<QueryParamsRequest> | undefined, b: QueryParamsRequest | PlainMessage<QueryParamsRequest> | undefined): boolean {
+    return proto3.util.equals(QueryParamsRequest, a, b);
+  }
+}
+
+/**
+ * QueryParamsResponse is response type for the Query/Params RPC method.
+ *
+ * @generated from message wasmx.QueryParamsResponse
+ */
+export class QueryParamsResponse extends Message<QueryParamsResponse> {
+  /**
+   * params holds all the parameters of this module.
+   *
+   * @generated from field: wasmx.Params params = 1;
+   */
+  params?: Params;
+
+  constructor(data?: PartialMessage<QueryParamsResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "wasmx.QueryParamsResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "params", kind: "message", T: Params },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryParamsResponse {
+    return new QueryParamsResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryParamsResponse {
+    return new QueryParamsResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryParamsResponse {
+    return new QueryParamsResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: QueryParamsResponse | PlainMessage<QueryParamsResponse> | undefined, b: QueryParamsResponse | PlainMessage<QueryParamsResponse> | undefined): boolean {
+    return proto3.util.equals(QueryParamsResponse, a, b);
+  }
+}
 
 /**
  * QueryWasmxParamsRequest is the request type for the Query/WasmxParams RPC method.

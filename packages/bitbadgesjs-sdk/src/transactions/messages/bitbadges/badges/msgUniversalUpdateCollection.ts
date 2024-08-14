@@ -1,6 +1,6 @@
 import * as badges from '@/proto/badges/tx_pb.js';
 
-import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
 import { CollectionApproval } from '@/core/approvals.js';
 import {
   BadgeMetadataTimeline,
@@ -12,14 +12,14 @@ import {
   StandardsTimeline
 } from '@/core/misc.js';
 import { CollectionPermissions } from '@/core/permissions.js';
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
+import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 
-import type { iMsgUniversalUpdateCollection } from './interfaces.js';
+import { CosmosAddress } from '@/api-indexer/index.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import { Stringify } from '@/common/string-numbers.js';
-import { Balance, BalanceArray } from '@/core/balances.js';
+import { UintRange, UintRangeArray } from '@/core/uintRanges.js';
 import { UserBalanceStore } from '@/core/userBalances.js';
-import { CosmosAddress } from '@/api-indexer/index.js';
+import type { iMsgUniversalUpdateCollection } from './interfaces.js';
 
 /**
  * MsgUniversalUpdateCollection is a universal transaction that can be used to create / update any collection. It is only executable by the manager.
@@ -46,7 +46,7 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
   collectionId: T;
   balancesType?: string;
   defaultBalances?: UserBalanceStore<T>;
-  badgesToCreate?: BalanceArray<T>;
+  badgeIdsToAdd?: UintRangeArray<T>;
   updateCollectionPermissions?: boolean;
   collectionPermissions?: CollectionPermissions<T>;
   updateManagerTimeline?: boolean;
@@ -72,7 +72,7 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
     this.collectionId = msg.collectionId;
     this.balancesType = msg.balancesType;
     this.defaultBalances = msg.defaultBalances ? new UserBalanceStore(msg.defaultBalances) : undefined;
-    this.badgesToCreate = msg.badgesToCreate ? BalanceArray.From(msg.badgesToCreate) : undefined;
+    this.badgeIdsToAdd = msg.badgeIdsToAdd ? UintRangeArray.From(msg.badgeIdsToAdd) : undefined;
     this.updateCollectionPermissions = msg.updateCollectionPermissions;
     this.collectionPermissions = msg.collectionPermissions ? new CollectionPermissions(msg.collectionPermissions) : undefined;
     this.updateManagerTimeline = msg.updateManagerTimeline;
@@ -130,7 +130,7 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
       collectionId: convertFunction(protoMsg.collectionId),
       balancesType: protoMsg.balancesType,
       defaultBalances: protoMsg.defaultBalances ? UserBalanceStore.fromProto(protoMsg.defaultBalances, convertFunction) : undefined,
-      badgesToCreate: protoMsg.badgesToCreate ? protoMsg.badgesToCreate.map((x) => Balance.fromProto(x, convertFunction)) : undefined,
+      badgeIdsToAdd: protoMsg.badgeIdsToAdd ? protoMsg.badgeIdsToAdd.map((x) => UintRange.fromProto(x, convertFunction)) : undefined,
       updateCollectionPermissions: protoMsg.updateCollectionPermissions,
       collectionPermissions: protoMsg.collectionPermissions
         ? CollectionPermissions.fromProto(protoMsg.collectionPermissions, convertFunction)

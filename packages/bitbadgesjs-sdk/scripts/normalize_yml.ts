@@ -24,10 +24,10 @@ fs.readFile(filePath, 'utf8', (err, data) => {
       { route: '/status', schema: '' },
       { route: '/search/{searchValue}', schema: 'GetSearchPayload' },
       { route: '/collections', schema: 'GetCollectionsPayload' },
-      { route: '/collection/{collectionId}/balance/{cosmosAddress}', schema: 'GetBadgeBalanceByAddressPayload' },
+      { route: '/collection/{collectionId}/balance/{address}', schema: 'GetBadgeBalanceByAddressPayload' },
       { route: '/collection/{collectionId}/{badgeId}/activity', schema: 'GetBadgeActivityPayload' },
       { route: '/collection/{collectionId}/{badgeId}/owners', schema: 'GetOwnersForBadgePayload' },
-      { route: '/claims/reserved/{claimId}/{cosmosAddress}', schema: 'GetReservedCodesPayload' },
+      { route: '/claims/reserved/{claimId}/{address}', schema: 'GetReservedCodesPayload' },
       { route: '/claims/status/{claimAttemptId}', schema: '' },
       { route: '/browse', schema: 'GetBrowseCollectionsPayload' },
       { route: '/addressLists/fetch', schema: 'GetAddressListsPayload' },
@@ -80,6 +80,19 @@ fs.readFile(filePath, 'utf8', (err, data) => {
     }
 
     modifiedYamlContent = newLines.join('\n');
+
+    // We now have all schemas
+    const schemaYamlContent = yaml.load(modifiedYamlContent) as any;
+
+    const routesYamlFile = './openapitypes/routes.yaml';
+    const routesYamlContent = fs.readFileSync(routesYamlFile, 'utf8');
+    const routesYamlData = yaml.load(routesYamlContent) as any;
+
+    // Add the new schemas to the routes.yaml file
+    routesYamlData.components.schemas = schemaYamlContent.components.schemas;
+
+    // Convert the modified YAML data back to string
+    modifiedYamlContent = yaml.dump(routesYamlData);
 
     // Write the modified content back to the file
     fs.writeFileSync(filePath, modifiedYamlContent, 'utf8');
@@ -256,7 +269,7 @@ function addExamples(obj: any) {
       examples: ['0x...', 'bc1...', 'cosmos1...']
     },
     {
-      key: 'BlockinMessage',
+      key: 'SiwbbMessage',
       example: 'https://bitbadges.io wants you to sign in with your Cosmos address....'
     }
   ];

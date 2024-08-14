@@ -25,7 +25,9 @@ import {
 import { MsgDeposit, MsgSubmitProposal, MsgVote, MsgVoteWeighted } from '@/proto/cosmos/gov/v1/index.js';
 import { MsgBeginRedelegate, MsgCreateValidator, MsgDelegate, MsgEditValidator, MsgUndelegate } from '@/proto/cosmos/staking/v1beta1/index.js';
 
+import { MsgExec } from '@/proto/cosmos/authz/v1beta1/tx_pb.js';
 import { MsgCreateVestingAccount } from '@/proto/cosmos/vesting/v1beta1/index.js';
+import { createRegistry } from '@bufbuild/protobuf';
 
 export interface EncodeObject {
   readonly typeUrl: string;
@@ -49,7 +51,8 @@ export function createDefaultCosmosAminoConverters(): AminoConverters {
     ...createAminoConverter(MsgDelegate, 'cosmos-sdk/MsgDelegate'),
     ...createAminoConverter(MsgEditValidator, 'cosmos-sdk/MsgEditValidator'),
     ...createAminoConverter(MsgUndelegate, 'cosmos-sdk/MsgUndelegate'),
-    ...createAminoConverter(MsgCreateVestingAccount, 'cosmos-sdk/MsgCreateVestingAccount')
+    ...createAminoConverter(MsgCreateVestingAccount, 'cosmos-sdk/MsgCreateVestingAccount'),
+    ...createAminoConverter(MsgExec, 'cosmos-sdk/MsgExec')
   };
 }
 
@@ -86,11 +89,42 @@ export class AminoTypesClass {
           'If you think this message type should be included by default, please open an issue at https://github.com/cosmos/cosmjs/issues.'
       );
     }
+
+    const initialJson = converter.toAmino(value);
+    const finalJson = this.recursivelyHandleTypeUrl(initialJson, converter.toAmino);
+
     return {
       type: converter.aminoType,
-      value: converter.toAmino(value)
+      value: finalJson
     };
   }
+
+  //This is a helper function to handle google.protobuf.Any type
+  //When we stringify the proto object, the Any type is converted with the format:
+  //{ "@type": "type.googleapis.com/cosmos.bank.v1beta1.MsgSend", ...value }
+  //
+  //To handle this, we need to catch this and format it back into the correct amino format
+  private recursivelyHandleTypeUrl = (json: any, converter: (json: any) => any): any => {
+    if (Array.isArray(json)) {
+      return json.map((item) => this.recursivelyHandleTypeUrl(item, converter));
+    } else if (typeof json === 'object') {
+      if (json[`@type`]) {
+        let newJsonValue = json;
+        const typeUrl = '/' + json[`@type`].split('/')[1];
+        delete newJsonValue[`@type`];
+
+        return this.toAmino({ typeUrl, value: newJsonValue });
+      } else {
+        const result: any = {};
+        for (const key in json) {
+          result[key] = this.recursivelyHandleTypeUrl(json[key], converter);
+        }
+        return result;
+      }
+    } else {
+      return json;
+    }
+  };
 
   public fromAmino({ type, value }: AminoMsg): EncodeObject {
     const matches = Object.entries(this.register).filter(([_typeUrl, { aminoType }]) => aminoType === type);
@@ -115,7 +149,7 @@ export class AminoTypesClass {
           `Multiple types are registered with Amino type identifier '${type}': '` +
             matches
               .map(([key, _value]) => key)
-              .sort()
+              .sort((a, b) => a.localeCompare(b))
               .join("', '") +
             "'. Thus fromAmino cannot be performed."
         );
@@ -172,3 +206,41 @@ export function createDefaultAminoConverters() {
 }
 
 export const AminoTypes = new AminoTypesClass(createDefaultAminoConverters());
+
+export const ProtoTypeRegistry = createRegistry(
+  MsgSend,
+  MsgMultiSend,
+  MsgFundCommunityPool,
+  MsgSetWithdrawAddress,
+  MsgWithdrawDelegatorReward,
+  MsgWithdrawValidatorCommission,
+  MsgDeposit,
+  MsgVote,
+  MsgVoteWeighted,
+  MsgSubmitProposal,
+  MsgBeginRedelegate,
+  MsgCreateValidator,
+  MsgDelegate,
+  MsgEditValidator,
+  MsgUndelegate,
+  MsgCreateVestingAccount,
+  MsgExec,
+  MsgDeleteCollection,
+  MsgTransferBadges,
+  MsgUpdateCollection,
+  MsgUpdateUserApprovals,
+  MsgCreateAddressLists,
+  MsgCreateCollection,
+  MsgUniversalUpdateCollection,
+  MsgGlobalArchive,
+  MsgExecuteContractCompat,
+  MsgInstantiateContractCompat,
+  MsgExecuteContract,
+  MsgStoreCode,
+  MsgInstantiateContract,
+  MsgCreateMap,
+  MsgDeleteMap,
+  MsgSetValue,
+  MsgUpdateMap,
+  MsgAddCustomData
+);

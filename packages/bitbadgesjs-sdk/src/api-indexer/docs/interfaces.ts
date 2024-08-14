@@ -25,7 +25,6 @@ import type {
 } from '@/interfaces/badges/core.js';
 import type { iCollectionPermissions, iUserPermissionsWithDetails } from '@/interfaces/badges/permissions.js';
 import type { iUserBalanceStore } from '@/interfaces/badges/userBalances.js';
-import type { AssetConditionGroup, ChallengeParams } from 'blockin';
 import { iMapWithValues } from '../requests/maps.js';
 import { iUpdateHistory } from './docs.js';
 import { OAuthScopeDetails } from '../requests/requests.js';
@@ -47,14 +46,14 @@ export type UNIXMilliTimestamp<T extends NumberType> = T;
 export type CosmosAddress = string; // `cosmos1${string}`;
 
 /**
- * BlockinMessage is the sign-in challenge strint to be signed by the user. It extends EIP 4361 Sign-In with Ethereum
+ * SiwbbMessage is the sign-in challenge strint to be signed by the user. It extends EIP 4361 Sign-In with Ethereum
  * and adds additional fields for cross-chain compatibility and native asset ownership verification.
  *
  * For example, 'https://bitbadges.io wants you to sign in with your Ethereum address ...'
  *
  * @category Interfaces
  */
-export type BlockinMessage = string;
+export type SiwbbMessage = string;
 
 /**
  * A native address is an address that is native to the user's chain. For example, an Ethereum address is native to Ethereum (0x...).
@@ -261,6 +260,8 @@ export interface iCollectionDoc<T extends NumberType> extends Doc {
   updateHistory: iUpdateHistory<T>[];
   /** The alias cosmos address for the collection */
   aliasAddress: CosmosAddress;
+  /** Valid badge IDs for the collection */
+  validBadgeIds: iUintRange<T>[];
 }
 
 /**
@@ -572,6 +573,8 @@ export type ClaimIntegrationPluginType =
   | 'whitelist'
   | 'email'
   | 'ip'
+  | 'webhooks'
+  | 'payments'
   | string;
 
 /**
@@ -606,7 +609,7 @@ export type ClaimIntegrationPluginCustomBodyType<T extends ClaimIntegrationPlugi
       ? {
           token?: string;
         }
-      : {};
+      : Record<string, any>;
 
 /**
  * Public params are params that are visible to the public. For example, the number of uses for a claim code.
@@ -629,7 +632,6 @@ export type ClaimIntegrationPublicParamsType<T extends ClaimIntegrationPluginTyp
         ? {
             hasPrivateList: boolean;
             maxUsesPerUser?: number;
-            listUrl?: string;
             blacklist?: boolean;
           }
         : T extends 'transferTimes'
@@ -648,7 +650,12 @@ export type ClaimIntegrationPublicParamsType<T extends ClaimIntegrationPluginTyp
                   allowedCountryCodes?: string[];
                   disallowedCountryCodes?: string[];
                 }
-              : {};
+              : T extends 'payments'
+                ? {
+                    usdAmount: number;
+                    paymentAddress: CosmosAddress;
+                  }
+                : Record<string, any>;
 
 /**
  * Private params are params that are not visible to the public. For example, the password for a claim code.
@@ -674,7 +681,12 @@ export type ClaimIntegrationPrivateParamsType<T extends ClaimIntegrationPluginTy
             usernames?: string[];
             ids?: string[];
           }
-        : {};
+        : T extends 'webhooks'
+          ? {
+              webhookUrl: string;
+              webhookSecret: string;
+            }
+          : {};
 
 /**
  * Public state is the current state of the claim integration that is visible to the public. For example, the number of times a claim code has been used.
@@ -692,7 +704,7 @@ export type ClaimIntegrationPublicStateType<T extends ClaimIntegrationPluginType
     ? {
         usedCodeIndices: string[];
       }
-    : {};
+    : Record<string, any>;
 
 /**
  * Private state is the current state of the claim integration that is visible to only those who can fetch private parameters.
@@ -708,7 +720,7 @@ export type ClaimIntegrationPrivateStateType<T extends ClaimIntegrationPluginTyp
     ? {
         addresses: { [address: string]: number };
       }
-    : {};
+    : Record<string, any>;
 
 /**
  * @category Claims
@@ -904,6 +916,8 @@ export interface iAirdropDoc<T extends NumberType> extends Doc {
   timestamp: UNIXMilliTimestamp<T>;
   /** The hash of the airdrop transaction */
   hash?: string;
+
+  ip?: string;
 }
 
 /**
@@ -955,18 +969,6 @@ export interface iDeveloperAppDoc extends Doc {
 /**
  * @category Interfaces
  */
-export interface iAuthorizationCodeDoc extends Doc {
-  clientId: string;
-  redirectUri: string;
-  scopes: OAuthScopeDetails[];
-  address: string;
-  cosmosAddress: string;
-  expiresAt: number;
-}
-
-/**
- * @category Interfaces
- */
 export interface iAccessTokenDoc extends Doc {
   accessToken: string;
   tokenType: string;
@@ -1006,6 +1008,9 @@ export interface iPluginDoc<T extends NumberType> extends Doc {
 
   /** The client secret of the plugin */
   pluginSecret?: string;
+
+  /** Invite code for the plugin */
+  inviteCode?: string;
 
   /** To publish to directory? */
   toPublish: boolean;
@@ -1057,7 +1062,8 @@ export interface iPluginDoc<T extends NumberType> extends Doc {
   };
 
   claimCreatorRedirect?: {
-    baseUri: string;
+    toolUri?: string;
+    tutorialUri?: string;
   };
 
   /** The verification URL */
@@ -1073,6 +1079,8 @@ export interface iPluginDoc<T extends NumberType> extends Doc {
     passGoogle: boolean;
     passGithub: boolean;
     passTwitch: boolean;
+
+    postProcessingJs: string;
   };
 
   lastUpdated: UNIXMilliTimestamp<T>;
@@ -1081,6 +1089,16 @@ export interface iPluginDoc<T extends NumberType> extends Doc {
   deletedAt?: UNIXMilliTimestamp<T>;
 
   approvedUsers: NativeAddress[];
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iDepositBalanceDoc<T extends NumberType> extends Doc {
+  /** The cosmos address of the user */
+  cosmosAddress: CosmosAddress;
+  /** The USD balance of the user multiplied by 100 to account for decimals. Ex: usdBalance = 1000 means $10 USD */
+  usdBalance: T;
 }
 
 /**
@@ -1103,9 +1121,6 @@ export interface iSIWBBRequestDoc<T extends NumberType> extends Doc {
 
   scopes: OAuthScopeDetails[];
   expiresAt: UNIXMilliTimestamp<T>;
-
-  /** The badges / assets that must be owned by the user */
-  ownershipRequirements?: AssetConditionGroup<T>;
 
   /** If required, you can additionally attach proof of attestations ot the auth flow. These can be used to prove sensitive information to verifiers. */
   attestationsPresentations: iAttestationsProof<T>[];
@@ -1148,3 +1163,17 @@ export interface iAttestationProofDoc<T extends NumberType> extends Doc, iAttest
  * @category Interfaces
  */
 export interface iMapDoc<T extends NumberType> extends Doc, iMapWithValues<T> {}
+
+/**
+ * @category Interfaces
+ */
+export interface iEventDoc<T extends NumberType> extends Doc {
+  name: string;
+  description: string;
+  image: string;
+  createdBy: CosmosAddress;
+
+  externalUrl: string;
+
+  createdAt: UNIXMilliTimestamp<T>;
+}

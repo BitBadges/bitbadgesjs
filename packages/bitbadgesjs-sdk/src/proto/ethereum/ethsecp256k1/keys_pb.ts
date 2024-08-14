@@ -11,8 +11,6 @@ import { Message, proto3 } from "@bufbuild/protobuf";
  * Tendermint's PubKey interface. It represents the 33-byte compressed public
  * key format.
  *
- * option (gogoproto.goproto_stringer) = false;
- *
  * @generated from message ethereum.PubKey
  */
 export class PubKey extends Message<PubKey> {

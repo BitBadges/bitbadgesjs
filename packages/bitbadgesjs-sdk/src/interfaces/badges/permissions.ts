@@ -96,7 +96,7 @@ export interface iCollectionPermissions<T extends NumberType> {
   /** The permissions for updating the collection metadata. */
   canUpdateCollectionMetadata: iTimedUpdatePermission<T>[];
   /** The permissions for creating more badges. */
-  canCreateMoreBadges: iBalancesActionPermission<T>[];
+  canUpdateValidBadgeIds: iBadgeIdsActionPermission<T>[];
   /** The permissions for updating the badge metadata. */
   canUpdateBadgeMetadata: iTimedUpdateWithBadgeIdsPermission<T>[];
   /** The permissions for updating the collection approved transfers. */
@@ -128,11 +128,9 @@ export interface iTimedUpdatePermission<T extends NumberType> {
 /**
  * @category Interfaces
  */
-export interface iBalancesActionPermission<T extends NumberType> {
+export interface iBadgeIdsActionPermission<T extends NumberType> {
   /** The badge IDs that the permission applies to. */
   badgeIds: iUintRange<T>[];
-  /** The owned times of the permission. */
-  ownershipTimes: iUintRange<T>[];
   /** The permitted times of the permission. */
   permanentlyPermittedTimes: iUintRange<T>[];
   /** The forbidden times of the permission. */

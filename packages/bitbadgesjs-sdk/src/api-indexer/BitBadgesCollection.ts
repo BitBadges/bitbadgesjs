@@ -6,7 +6,6 @@ import { AddressList } from '@/core/addressLists.js';
 import { generateAlias, getAliasDerivationKeysForBadge } from '@/core/aliases.js';
 import { getMintApprovals, getNonMintApprovals, getUnhandledCollectionApprovals } from '@/core/approval-utils.js';
 import { CollectionApprovalWithDetails, iCollectionApprovalWithDetails } from '@/core/approvals.js';
-import { BalanceArray } from '@/core/balances.js';
 import {
   BadgeMetadataTimeline,
   BadgeMetadataTimelineWithDetails,
@@ -21,7 +20,7 @@ import type { PermissionNameString } from '@/core/permission-utils.js';
 import { getPermissionVariablesFromName } from '@/core/permission-utils.js';
 import {
   ActionPermission,
-  BalancesActionPermission,
+  BadgeIdsActionPermission,
   CollectionApprovalPermissionWithDetails,
   CollectionPermissionsWithDetails,
   TimedUpdatePermission,
@@ -32,14 +31,13 @@ import { UserBalanceStoreWithDetails } from '@/core/userBalances.js';
 import type {
   iAddressList,
   iBadgeMetadataTimelineWithDetails,
-  iBalance,
   iCollectionMetadataTimelineWithDetails,
   iUintRange
 } from '@/interfaces/badges/core.js';
 import type { iCollectionPermissionsWithDetails } from '@/interfaces/badges/permissions.js';
 import type { iUserBalanceStoreWithDetails } from '@/interfaces/badges/userBalances.js';
 import type { BaseBitBadgesApi, PaginationInfo } from './base.js';
-import { ReviewDoc, TransferActivityDoc } from './docs/activity.js';
+import { TransferActivityDoc } from './docs/activity.js';
 import { ApprovalTrackerDoc, BalanceDocWithDetails, CollectionDoc, MapDoc, MerkleChallengeDoc } from './docs/docs.js';
 import type {
   iApprovalTrackerDoc,
@@ -47,14 +45,15 @@ import type {
   iCollectionDoc,
   iMapDoc,
   iMerkleChallengeDoc,
-  iReviewDoc,
-  iTransferActivityDoc
+  iTransferActivityDoc,
+  NativeAddress
 } from './docs/interfaces.js';
 import { BadgeMetadataDetails, CollectionMetadataDetails } from './metadata/badgeMetadata.js';
 
+import { convertToCosmosAddress } from '@/address-converter/converter.js';
 import { GO_MAX_UINT_64 } from '@/common/math.js';
 import { getCurrentValueForTimeline } from '@/core/timelines.js';
-import { ClaimDetails, iClaimDetails } from './requests/index.js';
+import typia from 'typia';
 import type {
   CollectionViewKey,
   FilterBadgesInCollectionPayload,
@@ -64,15 +63,15 @@ import type {
   GetCollectionsPayload,
   GetMetadataForCollectionPayload,
   GetOwnersForBadgePayload,
-  MetadataFetchOptions,
-  RefreshMetadataPayload,
   iFilterBadgesInCollectionSuccessResponse,
   iGetBadgeActivitySuccessResponse,
   iGetBadgeBalanceByAddressSuccessResponse,
   iGetCollectionsSuccessResponse,
   iGetOwnersForBadgeSuccessResponse,
   iRefreshMetadataSuccessResponse,
-  iRefreshStatusSuccessResponse
+  iRefreshStatusSuccessResponse,
+  MetadataFetchOptions,
+  RefreshMetadataPayload
 } from './requests/collections.js';
 import {
   FilterBadgesInCollectionSuccessResponse,
@@ -83,9 +82,8 @@ import {
   RefreshMetadataSuccessResponse,
   RefreshStatusSuccessResponse
 } from './requests/collections.js';
+import { ClaimDetails, iClaimDetails } from './requests/index.js';
 import { BitBadgesApiRoutes } from './requests/routes.js';
-import typia from 'typia';
-import { convertToCosmosAddress } from '@/address-converter/converter.js';
 
 const NEW_COLLECTION_ID = 0n;
 
@@ -107,8 +105,6 @@ export interface iBitBadgesCollection<T extends NumberType> extends iCollectionD
   defaultBalances: iUserBalanceStoreWithDetails<T>;
   /** The fetched activity for this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views. */
   activity: iTransferActivityDoc<T>[];
-  /** The fetched reviews for this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views. */
-  reviews: iReviewDoc<T>[];
   /** The fetched owners of this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views. */
   owners: iBalanceDocWithDetails<T>[];
   /** The fetched merkle challenges for this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views. */
@@ -156,7 +152,6 @@ export class BitBadgesCollection<T extends NumberType>
   badgeMetadataTimeline: BadgeMetadataTimelineWithDetails<T>[];
 
   activity: TransferActivityDoc<T>[];
-  reviews: ReviewDoc<T>[];
   owners: BalanceDocWithDetails<T>[];
   merkleChallenges: MerkleChallengeDoc<T>[];
   approvalTrackers: ApprovalTrackerDoc<T>[];
@@ -188,7 +183,6 @@ export class BitBadgesCollection<T extends NumberType>
     );
     this.badgeMetadataTimeline = data.badgeMetadataTimeline.map((badgeMetadata) => new BadgeMetadataTimelineWithDetails(badgeMetadata));
     this.activity = data.activity.map((activityItem) => new TransferActivityDoc(activityItem));
-    this.reviews = data.reviews.map((activityItem) => new ReviewDoc(activityItem));
     this.owners = data.owners.map((balance) => new BalanceDocWithDetails(balance));
     this.merkleChallenges = data.merkleChallenges.map((merkleChallenge) => new MerkleChallengeDoc(merkleChallenge));
     this.approvalTrackers = data.approvalTrackers.map((approvalTracker) => new ApprovalTrackerDoc(approvalTracker));
@@ -323,7 +317,7 @@ export class BitBadgesCollection<T extends NumberType>
     return UintRangeArray.From([{ start: 1n, end: this.getMaxBadgeId() }]);
   }
 
-  private getBalanceInfo(address: string, throwIfNotFound = true) {
+  private getBalanceInfo(address: NativeAddress, throwIfNotFound = true) {
     const convertedAddress = address === 'Mint' || address === 'Total' ? address : convertToCosmosAddress(address);
     const owner = this.owners.find((x) => x.cosmosAddress === convertedAddress);
     if (!owner && throwIfNotFound)
@@ -396,15 +390,10 @@ export class BitBadgesCollection<T extends NumberType>
    * Precondition: The Total balance must be fetched.
    */
   getMaxBadgeId(): bigint {
-    const totalSupplyBalance = this.getBadgeBalances('Total')?.map((balance) => balance.convert(BigIntify)) ?? [];
-    const defaultBalances = this.defaultBalances.balances.map((balance) => balance.convert(BigIntify));
-
     let maxBadgeId = 0n;
-    for (const balance of [...totalSupplyBalance, ...defaultBalances]) {
-      for (const badgeIdRange of balance.badgeIds) {
-        if (badgeIdRange.end > maxBadgeId) {
-          maxBadgeId = badgeIdRange.end;
-        }
+    for (const badgeIdRange of this.validBadgeIds.convert(BigIntify)) {
+      if (badgeIdRange.end > maxBadgeId) {
+        maxBadgeId = badgeIdRange.end;
       }
     }
 
@@ -627,14 +616,12 @@ export class BitBadgesCollection<T extends NumberType>
    *
    * Wrapper for {@link TimedUpdatePermission.check}.
    */
-  checkCanCreateMoreBadges(balances: iBalance<T>[], time?: NumberType) {
-    return BalancesActionPermission.check(
-      BalanceArray.From(balances)
-        .convert(BigIntify)
-        .map((x) => {
-          return { badgeIds: x.badgeIds, ownershipTimes: x.ownershipTimes };
-        }),
-      this.convert(BigIntify).collectionPermissions.canCreateMoreBadges,
+  checkCanUpdateValidBadgeIds(badgeIds: iUintRange<T>[], time?: NumberType) {
+    return BadgeIdsActionPermission.check(
+      badgeIds.map((x) => {
+        return { badgeIds: UintRangeArray.From([x]).convert(BigIntify) };
+      }),
+      this.convert(BigIntify).collectionPermissions.canUpdateValidBadgeIds,
       time ? BigInt(time) : BigInt(Date.now())
     );
   }
@@ -734,7 +721,7 @@ export class BitBadgesCollection<T extends NumberType>
   static async GetBadgeBalanceByAddress<T extends NumberType>(
     api: BaseBitBadgesApi<T>,
     collectionId: NumberType,
-    cosmosAddress: string,
+    address: string,
     body?: GetBadgeBalanceByAddressPayload
   ): Promise<GetBadgeBalanceByAddressSuccessResponse<T>> {
     try {
@@ -746,7 +733,7 @@ export class BitBadgesCollection<T extends NumberType>
       api.assertPositiveInteger(collectionId);
 
       const response = await api.axios.post<iGetBadgeBalanceByAddressSuccessResponse<string>>(
-        `${api.BACKEND_URL}${BitBadgesApiRoutes.GetBadgeBalanceByAddressRoute(collectionId, cosmosAddress)}`,
+        `${api.BACKEND_URL}${BitBadgesApiRoutes.GetBadgeBalanceByAddressRoute(collectionId, address)}`,
         body
       );
       return new GetBadgeBalanceByAddressSuccessResponse(response.data).convert(api.ConvertFunction);
@@ -773,7 +760,7 @@ export class BitBadgesCollection<T extends NumberType>
    * @remarks
    * Returns the cached value if already fetched. Use forceful to force a new fetch.
    */
-  async fetchBadgeBalances(api: BaseBitBadgesApi<T>, address: string, forceful?: boolean) {
+  async fetchBadgeBalances(api: BaseBitBadgesApi<T>, address: NativeAddress, forceful?: boolean) {
     const currOwnerInfo = this.getBadgeBalanceInfo(address);
     if (currOwnerInfo && !forceful) return currOwnerInfo;
 
@@ -794,9 +781,8 @@ export class BitBadgesCollection<T extends NumberType>
     const shouldFetchMetadata =
       (prunedMetadataToFetch.uris && prunedMetadataToFetch.uris.length > 0) || !prunedMetadataToFetch.doNotFetchCollectionMetadata;
     const viewsToFetch = (options.viewsToFetch || []).filter((x) => this.viewHasMore(x.viewId));
-    const hasTotalAndMint =
-      cachedCollection.owners.find((x) => x.cosmosAddress === 'Mint') && cachedCollection.owners.find((x) => x.cosmosAddress === 'Total');
-    const shouldFetchTotalAndMint = !hasTotalAndMint && options.fetchTotalAndMintBalances;
+    const hasTotal = cachedCollection.owners.find((x) => x.cosmosAddress === 'Total');
+    const shouldFetchTotal = !hasTotal && options.fetchTotalBalances;
 
     const shouldFetchMerklechallengeTrackerIds =
       (options.challengeTrackersToFetch ?? []).find((x) => {
@@ -825,7 +811,7 @@ export class BitBadgesCollection<T extends NumberType>
     return !(
       shouldFetchMetadata ||
       viewsToFetch.length > 0 ||
-      shouldFetchTotalAndMint ||
+      shouldFetchTotal ||
       shouldFetchMerklechallengeTrackerIds ||
       shouldFetchAmountTrackerIds ||
       options.fetchPrivateParams
@@ -857,9 +843,7 @@ export class BitBadgesCollection<T extends NumberType>
           y.trackerType === x.trackerType
       );
     });
-    const shouldFetchTotalAndMint =
-      (!this.owners.find((x) => x.cosmosAddress === 'Mint') || !this.owners.find((x) => x.cosmosAddress === 'Total')) &&
-      options.fetchTotalAndMintBalances;
+    const shouldFetchTotal = !this.owners.find((x) => x.cosmosAddress === 'Total') && options.fetchTotalBalances;
 
     return {
       collectionId: this.collectionId,
@@ -868,7 +852,7 @@ export class BitBadgesCollection<T extends NumberType>
       viewsToFetch: prunedViewsToFetch,
       challengeTrackersToFetch: prunedChallengeTrackersToFetch,
       approvalTrackersToFetch: prunedApprovalTrackersToFetch,
-      fetchTotalAndMintBalances: shouldFetchTotalAndMint
+      fetchTotalBalances: shouldFetchTotal
     } as GetMetadataForCollectionPayload & GetAdditionalCollectionDetailsPayload & { collectionId: T };
   }
 
@@ -945,7 +929,7 @@ export class BitBadgesCollection<T extends NumberType>
    *
    * If the view has no more pages, this will do nothing.
    */
-  async fetchNextForView(api: BaseBitBadgesApi<T>, viewType: CollectionViewKey, viewId: string, oldestFirst?: boolean, cosmosAddress?: string) {
+  async fetchNextForView(api: BaseBitBadgesApi<T>, viewType: CollectionViewKey, viewId: string, oldestFirst?: boolean, address?: string) {
     if (!this.viewHasMore(viewId)) return;
 
     await this.fetchAndUpdate(api, {
@@ -955,7 +939,7 @@ export class BitBadgesCollection<T extends NumberType>
           viewId: viewId,
           bookmark: this.views[viewId]?.pagination?.bookmark || '',
           oldestFirst: oldestFirst,
-          cosmosAddress: cosmosAddress
+          address: address
         }
       ]
     });
@@ -966,9 +950,9 @@ export class BitBadgesCollection<T extends NumberType>
    *
    * There is a 1 second delay between each page fetch to prevent rate limiting.
    */
-  async fetchAllForView(api: BaseBitBadgesApi<T>, viewType: CollectionViewKey, viewId: string, oldestFirst?: boolean, cosmosAddress?: string) {
+  async fetchAllForView(api: BaseBitBadgesApi<T>, viewType: CollectionViewKey, viewId: string, oldestFirst?: boolean, address?: string) {
     while (this.viewHasMore(viewId)) {
-      await this.fetchNextForView(api, viewType, viewId, oldestFirst, cosmosAddress);
+      await this.fetchNextForView(api, viewType, viewId, oldestFirst, address);
       await new Promise((r) => setTimeout(r, 1000));
     }
   }
@@ -980,8 +964,6 @@ export class BitBadgesCollection<T extends NumberType>
     switch (viewType) {
       case 'transferActivity':
         return this.getActivityView(viewId) as CollectionViewData<T>[KeyType];
-      case 'reviews':
-        return this.getReviewsView(viewId) as CollectionViewData<T>[KeyType];
       case 'owners':
         return this.getOwnersView(viewId) as CollectionViewData<T>[KeyType];
       case 'amountTrackers':
@@ -1000,15 +982,6 @@ export class BitBadgesCollection<T extends NumberType>
     return (this.views[viewId]?.ids.map((x) => {
       return this.activity.find((y) => y._docId === x);
     }) ?? []) as TransferActivityDoc<T>[];
-  }
-
-  /**
-   * Gets the documents for a specific view.
-   */
-  getReviewsView(viewId: string) {
-    return (this.views[viewId]?.ids.map((x) => {
-      return this.reviews.find((y) => y._docId === x);
-    }) ?? []) as ReviewDoc<T>[];
   }
 
   /**
@@ -1229,13 +1202,10 @@ export class BitBadgesCollection<T extends NumberType>
   async filterBadgesInCollection(api: BaseBitBadgesApi<T>, bodyOptions: Omit<FilterBadgesInCollectionPayload, 'collectionId'>) {
     return await BitBadgesCollection.FilterBadgesInCollection(api, this.collectionId, bodyOptions);
   }
-
-  //TODO: fetchOffChainBalancesFromSource
 }
 
 type CollectionViewData<T extends NumberType> = {
   transferActivity: TransferActivityDoc<T>[];
-  reviews: ReviewDoc<T>[];
   owners: BalanceDocWithDetails<T>[];
   amountTrackers: ApprovalTrackerDoc<T>[];
   challengeTrackers: MerkleChallengeDoc<T>[];
@@ -1419,17 +1389,6 @@ function updateCollectionWithResponse<T extends NumberType>(
     }
   }
 
-  const reviews = cachedCollection.reviews || [];
-  for (const newReview of newCollection.reviews || []) {
-    //If we already have the review, replace it (we want newer data)
-    const existingReview = reviews.findIndex((x) => x._docId === newReview._docId);
-    if (existingReview !== -1) {
-      reviews[existingReview] = newReview;
-    } else {
-      reviews.push(newReview);
-    }
-  }
-
   const activity = cachedCollection.activity || [];
   for (const newActivity of newCollection.activity || []) {
     //If we already have the activity, replace it (we want newer data)
@@ -1495,7 +1454,6 @@ function updateCollectionWithResponse<T extends NumberType>(
     ...newCollection,
     collectionMetadataTimeline: newCollectionMetadataTimeline,
     badgeMetadataTimeline: newBadgeMetadataTimeline,
-    reviews,
     activity,
     owners,
     merkleChallenges,

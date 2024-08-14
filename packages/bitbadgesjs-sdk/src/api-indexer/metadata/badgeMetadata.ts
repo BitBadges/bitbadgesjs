@@ -177,7 +177,7 @@ export class BadgeMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
 
     currBadgeMetadata = currBadgeMetadata.filter((val) => val && val.badgeIds.length > 0);
 
-    const currMetadataStrs = currBadgeMetadata.map((x) => JSON.stringify(x.metadata)).sort();
+    const currMetadataStrs = currBadgeMetadata.map((x) => JSON.stringify(x.metadata)).sort((a, b) => a.localeCompare(b));
 
     for (const newBadgeMetadataDetails of newBadgeMetadataDetailsArr) {
       const currentMetadata = newBadgeMetadataDetails.metadata;
@@ -236,7 +236,7 @@ export class BadgeMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
 
           const hashedMetadataStr = JSON.stringify(newBadgeMetadataDetails.metadata);
           currMetadataStrs.push(hashedMetadataStr);
-          currMetadataStrs.sort();
+          currMetadataStrs.sort((a, b) => a.localeCompare(b));
         }
       }
     }

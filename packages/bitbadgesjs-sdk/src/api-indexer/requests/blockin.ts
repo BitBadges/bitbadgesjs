@@ -11,9 +11,9 @@ import type {
 import { NativeAddress } from '../docs/index.js';
 
 /**
- * @category Blockin
+ * @category SIWBB
  */
-export class BlockinChallengeParams<T extends NumberType> extends BaseNumberTypeClass<BlockinChallengeParams<T>> implements ChallengeParams<T> {
+export class SiwbbChallengeParams<T extends NumberType> extends BaseNumberTypeClass<SiwbbChallengeParams<T>> implements ChallengeParams<T> {
   domain: string;
   statement: string;
   address: NativeAddress;
@@ -25,7 +25,7 @@ export class BlockinChallengeParams<T extends NumberType> extends BaseNumberType
   expirationDate?: string;
   notBefore?: string;
   resources?: string[];
-  assetOwnershipRequirements?: BlockinAssetConditionGroup<T>;
+  assetOwnershipRequirements?: SiwbbAssetConditionGroup<T>;
 
   constructor(data: ChallengeParams<T>) {
     super();
@@ -42,9 +42,9 @@ export class BlockinChallengeParams<T extends NumberType> extends BaseNumberType
     this.resources = data.resources;
     if (data.assetOwnershipRequirements) {
       if ((data.assetOwnershipRequirements as AndGroup<T>)['$and']) {
-        this.assetOwnershipRequirements = new BlockinAndGroup(data.assetOwnershipRequirements as AndGroup<T>);
+        this.assetOwnershipRequirements = new SiwbbAndGroup(data.assetOwnershipRequirements as AndGroup<T>);
       } else if ((data.assetOwnershipRequirements as OrGroup<T>)['$or']) {
-        this.assetOwnershipRequirements = new BlockinOrGroup(data.assetOwnershipRequirements as OrGroup<T>);
+        this.assetOwnershipRequirements = new SiwbbOrGroup(data.assetOwnershipRequirements as OrGroup<T>);
       } else {
         this.assetOwnershipRequirements = new OwnershipRequirements(data.assetOwnershipRequirements as OwnershipRequirements<T>);
       }
@@ -55,15 +55,15 @@ export class BlockinChallengeParams<T extends NumberType> extends BaseNumberType
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): BlockinChallengeParams<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as BlockinChallengeParams<U>;
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): SiwbbChallengeParams<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as SiwbbChallengeParams<U>;
   }
 }
 
 /**
- * @category Blockin
+ * @category SIWBB
  */
-export class BlockinAssetDetails<T extends NumberType> extends BaseNumberTypeClass<BlockinAssetDetails<T>> implements AssetDetails<T> {
+export class SiwbbAssetDetails<T extends NumberType> extends BaseNumberTypeClass<SiwbbAssetDetails<T>> implements AssetDetails<T> {
   chain: string;
   collectionId: T | string;
   assetIds: (string | UintRange<T>)[];
@@ -102,24 +102,24 @@ export class BlockinAssetDetails<T extends NumberType> extends BaseNumberTypeCla
     }
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): BlockinAssetDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as BlockinAssetDetails<U>;
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): SiwbbAssetDetails<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as SiwbbAssetDetails<U>;
   }
 }
 
 /**
- * @category Blockin
+ * @category SIWBB
  */
-export class BlockinAndGroup<T extends NumberType> extends BaseNumberTypeClass<BlockinAndGroup<T>> implements AndGroup<T> {
-  $and: BlockinAssetConditionGroup<T>[];
+export class SiwbbAndGroup<T extends NumberType> extends BaseNumberTypeClass<SiwbbAndGroup<T>> implements AndGroup<T> {
+  $and: SiwbbAssetConditionGroup<T>[];
 
   constructor(data: AndGroup<T>) {
     super();
     this.$and = data.$and.map((item) => {
       if ((item as AndGroup<T>)['$and']) {
-        return new BlockinAndGroup(item as AndGroup<T>);
+        return new SiwbbAndGroup(item as AndGroup<T>);
       } else if ((item as OrGroup<T>)['$or']) {
-        return new BlockinOrGroup(item as OrGroup<T>);
+        return new SiwbbOrGroup(item as OrGroup<T>);
       } else {
         return new OwnershipRequirements(item as OwnershipRequirements<T>);
       }
@@ -130,24 +130,24 @@ export class BlockinAndGroup<T extends NumberType> extends BaseNumberTypeClass<B
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): BlockinAndGroup<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as BlockinAndGroup<U>;
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): SiwbbAndGroup<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as SiwbbAndGroup<U>;
   }
 }
 
 /**
- * @category Blockin
+ * @category SIWBB
  */
-export class BlockinOrGroup<T extends NumberType> extends BaseNumberTypeClass<BlockinOrGroup<T>> implements OrGroup<T> {
-  $or: BlockinAssetConditionGroup<T>[];
+export class SiwbbOrGroup<T extends NumberType> extends BaseNumberTypeClass<SiwbbOrGroup<T>> implements OrGroup<T> {
+  $or: SiwbbAssetConditionGroup<T>[];
 
   constructor(data: OrGroup<T>) {
     super();
     this.$or = data.$or.map((item) => {
       if ((item as AndGroup<T>)['$and']) {
-        return new BlockinAndGroup(item as AndGroup<T>);
+        return new SiwbbAndGroup(item as AndGroup<T>);
       } else if ((item as OrGroup<T>)['$or']) {
-        return new BlockinOrGroup(item as OrGroup<T>);
+        return new SiwbbOrGroup(item as OrGroup<T>);
       } else {
         return new OwnershipRequirements(item as OwnershipRequirements<T>);
       }
@@ -158,23 +158,23 @@ export class BlockinOrGroup<T extends NumberType> extends BaseNumberTypeClass<Bl
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): BlockinOrGroup<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as BlockinOrGroup<U>;
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): SiwbbOrGroup<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as SiwbbOrGroup<U>;
   }
 }
 
 /**
- * @category Blockin
+ * @category SIWBB
  */
 export class OwnershipRequirements<T extends NumberType> extends BaseNumberTypeClass<OwnershipRequirements<T>> implements OwnershipRequirements<T> {
-  assets: BlockinAssetDetails<T>[];
+  assets: SiwbbAssetDetails<T>[];
   options?: {
     numMatchesForVerification?: T;
   };
 
   constructor(data: BlockinOwnershipRequirements<T>) {
     super();
-    this.assets = data.assets.map((item) => new BlockinAssetDetails(item));
+    this.assets = data.assets.map((item) => new SiwbbAssetDetails(item));
     this.options = data.options;
   }
 
@@ -188,6 +188,6 @@ export class OwnershipRequirements<T extends NumberType> extends BaseNumberTypeC
 }
 
 /**
- * @category Blockin
+ * @category SIWBB
  */
-export type BlockinAssetConditionGroup<T extends NumberType> = BlockinAndGroup<T> | BlockinOrGroup<T> | OwnershipRequirements<T>;
+export type SiwbbAssetConditionGroup<T extends NumberType> = SiwbbAndGroup<T> | SiwbbOrGroup<T> | OwnershipRequirements<T>;

@@ -8,7 +8,6 @@ import type {
   iActivityDoc,
   iClaimAlertDoc,
   iListActivityDoc,
-  iReviewDoc,
   iTransferActivityDoc
 } from './interfaces.js';
 
@@ -38,35 +37,6 @@ export class ActivityDoc<T extends NumberType> extends BaseNumberTypeClass<Activ
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ActivityDoc<U> {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as ActivityDoc<U>;
-  }
-}
-
-/**
- * @inheritDoc iReviewDoc
- * @category Indexer
- */
-export class ReviewDoc<T extends NumberType> extends ActivityDoc<T> implements iReviewDoc<T> {
-  review: string;
-  stars: T;
-  from: CosmosAddress;
-  collectionId?: T;
-  reviewedAddress?: CosmosAddress;
-
-  constructor(data: iReviewDoc<T>) {
-    super(data);
-    this.review = data.review;
-    this.stars = data.stars;
-    this.from = data.from;
-    this.collectionId = data.collectionId;
-    this.reviewedAddress = data.reviewedAddress;
-  }
-
-  getNumberFieldNames(): string[] {
-    return [...super.getNumberFieldNames(), 'stars', 'collectionId'];
-  }
-
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ReviewDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as ReviewDoc<U>;
   }
 }
 

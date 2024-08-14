@@ -136,7 +136,6 @@ export function getUnhandledCollectionApprovals(
         transferTimes: match.transferTimes,
         ownershipTimes: match.ownershipTimes,
 
-        //TODO: Is this right?
         approvalId: match.arbitraryValue.approvalId,
         approvalCriteria: match.arbitraryValue.approvalCriteriaWithDetails
       })

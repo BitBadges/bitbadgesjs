@@ -1,4 +1,5 @@
-import type { JsonWriteOptions, Message, AnyMessage } from '@bufbuild/protobuf';
+import { type AnyMessage, type JsonWriteOptions, type Message, type JsonReadOptions } from '@bufbuild/protobuf';
+import { ProtoTypeRegistry } from './registry.js';
 
 /**
  * Set of utilities to convert between wrapped Protobuf Messages, Protobuf-
@@ -12,21 +13,27 @@ interface ProtobufObject {
   value: AnyJSON;
 }
 
-export const AminoJSONOptions: JsonWriteOptions = {
+const ProtoJSONOption: JsonWriteOptions = {
   emitDefaultValues: true,
   enumAsInteger: true,
-  useProtoFieldName: true
+  useProtoFieldName: true,
+  typeRegistry: ProtoTypeRegistry
+};
+
+const ProtoJSONReadOption: JsonReadOptions = {
+  ignoreUnknownFields: true,
+  typeRegistry: ProtoTypeRegistry
 };
 
 export function convertProtoMessageToObject<T extends Message<T> = AnyMessage>(msg: Message<T>): ProtobufObject {
   return {
     typeUrl: `/${msg.getType().typeName}`,
-    value: msg.toJson({ emitDefaultValues: true })
+    value: msg.toJson({ emitDefaultValues: true, typeRegistry: ProtoJSONOption.typeRegistry })
   };
 }
 
 export function convertProtoValueToMessage<T extends Message<T> = AnyMessage>(protoValue: any, ProtoMessage: typeof Message<T>): Message<T> {
-  return new ProtoMessage().fromJson(protoValue);
+  return new ProtoMessage().fromJson(protoValue, ProtoJSONReadOption);
 }
 
 // Converts a Protobuf message into a default Amino-formatted JSON
@@ -34,7 +41,7 @@ export function convertProtoValueToMessage<T extends Message<T> = AnyMessage>(pr
 // messages, others will require custom logic.
 export function convertProtoValueToDefaultAmino<T extends Message<T> = AnyMessage>(protoValue: any, ProtoMessage: typeof Message<T>): AnyJSON {
   const protoMessage = convertProtoValueToMessage(protoValue, ProtoMessage);
-  return protoMessage.toJson(AminoJSONOptions);
+  return protoMessage.toJson(ProtoJSONOption);
 }
 
 export const snakeToCamelCase = (str: string) => str.replace(/_[a-zA-Z]/g, (substr) => substr[1].toUpperCase());

@@ -7,9 +7,9 @@ import { BitBadgesUserInfo } from '@/api-indexer/BitBadgesUserInfo.js';
 import type { PaginationInfo } from '@/api-indexer/base.js';
 import { EmptyResponseClass } from '@/api-indexer/base.js';
 import { ClaimAlertDoc, TransferActivityDoc } from '@/api-indexer/docs/activity.js';
-import { AccessTokenDoc, DeveloperAppDoc, PluginDoc, AttestationDoc, StatusDoc, AttestationProofDoc } from '@/api-indexer/docs/docs.js';
+import { AccessTokenDoc, DeveloperAppDoc, PluginDoc, AttestationDoc, StatusDoc, AttestationProofDoc, EventDoc } from '@/api-indexer/docs/docs.js';
 import type {
-  BlockinMessage,
+  SiwbbMessage,
   ClaimIntegrationPluginCustomBodyType,
   ClaimIntegrationPluginType,
   CosmosAddress,
@@ -29,7 +29,8 @@ import type {
   iStatusDoc,
   iTransferActivityDoc,
   iAttestationProofDoc,
-  JsonBodyInputSchema
+  JsonBodyInputSchema,
+  iEventDoc
 } from '@/api-indexer/docs/interfaces.js';
 import type { iBadgeMetadataDetails, iCollectionMetadataDetails } from '@/api-indexer/metadata/badgeMetadata.js';
 import type { iMetadata } from '@/api-indexer/metadata/metadata.js';
@@ -39,14 +40,15 @@ import type { NumberType } from '@/common/string-numbers.js';
 import type { SupportedChain } from '@/common/types.js';
 import { PredeterminedBalances, iChallengeDetails, iChallengeInfoDetails } from '@/core/approvals.js';
 import type { iBatchBadgeDetails } from '@/core/batch-utils.js';
-import { BlockinChallenge, VerifySIWBBOptions, iBlockinChallenge } from '@/core/blockin.js';
+import { SiwbbChallenge, VerifySIWBBOptions, iSiwbbChallenge } from '@/core/blockin.js';
 import { AttestationsProof } from '@/core/secrets.js';
 import type { iOffChainBalancesMap } from '@/core/transfers.js';
 import { UintRangeArray } from '@/core/uintRanges.js';
 import type { iPredeterminedBalances, iAttestationsProof, iUintRange } from '@/interfaces/index.js';
 import { BroadcastPostBody } from '@/node-rest-api/index.js';
 import { AndGroup, OrGroup, type AssetConditionGroup, type ChallengeParams, type VerifyChallengeOptions } from 'blockin';
-import { BlockinAndGroup, BlockinAssetConditionGroup, BlockinChallengeParams, BlockinOrGroup, OwnershipRequirements } from './blockin.js';
+import { SiwbbAndGroup, SiwbbAssetConditionGroup, SiwbbChallengeParams, SiwbbOrGroup, OwnershipRequirements } from './blockin.js';
+import { iMapWithValues, MapWithValues } from './maps.js';
 
 /**
  * The response after successfully broadcasting a transaction.
@@ -169,6 +171,8 @@ export interface GetSearchPayload {
   noAddressLists?: boolean;
   /** If true, we will skip all badge queries. */
   noBadges?: boolean;
+  /** If true, we will skip all map queries. */
+  noMaps?: boolean;
   /** If true, we will limit collection results to a single collection. */
   specificCollectionId?: NumberType;
 }
@@ -185,6 +189,7 @@ export interface iGetSearchSuccessResponse<T extends NumberType> {
     collection: iBitBadgesCollection<T>;
     badgeIds: iUintRange<T>[];
   }[];
+  maps: iMapWithValues<T>[];
 }
 /**
  * @inheritDoc iGetSearchSuccessResponse
@@ -201,6 +206,7 @@ export class GetSearchSuccessResponse<T extends NumberType>
     collection: BitBadgesCollection<T>;
     badgeIds: UintRangeArray<T>;
   }[];
+  maps: iMapWithValues<T>[];
 
   constructor(data: iGetSearchSuccessResponse<T>) {
     super();
@@ -213,6 +219,7 @@ export class GetSearchSuccessResponse<T extends NumberType>
         badgeIds: UintRangeArray.From(badge.badgeIds)
       };
     });
+    this.maps = data.maps.map((map) => new MapWithValues(map));
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetSearchSuccessResponse<U> {
@@ -243,13 +250,15 @@ export interface iClaimDetails<T extends NumberType> {
   /** If manual distribution is enabled, we do not handle any distribution of claim codes. We leave that up to the claim creator. */
   manualDistribution?: boolean;
   /** Whether the claim is expected to be automatically triggered by someone (not the user). */
-  approach?: string; //'in-site' | 'api' | 'zapier';
+  approach?: string; // 'in-site' | 'api' | 'zapier';
   /** Seed code for the claim. */
   seedCode?: string;
   /** Metadata for the claim. */
   metadata?: iMetadata<T>;
   /** Algorithm to determine the claim number order */
   assignMethod?: string;
+  /** Last updated timestamp for the claim. */
+  lastUpdated?: T;
 }
 
 /**
@@ -265,6 +274,7 @@ export class ClaimDetails<T extends NumberType> extends BaseNumberTypeClass<Clai
   seedCode?: string | undefined;
   metadata?: Metadata<T> | undefined;
   assignMethod?: string | undefined;
+  lastUpdated?: T | undefined;
 
   constructor(data: iClaimDetails<T>) {
     super();
@@ -276,10 +286,15 @@ export class ClaimDetails<T extends NumberType> extends BaseNumberTypeClass<Clai
     this.seedCode = data.seedCode;
     this.metadata = data.metadata ? new Metadata(data.metadata) : undefined;
     this.assignMethod = data.assignMethod;
+    this.lastUpdated = data.lastUpdated;
   }
 
   convert<U extends NumberType>(convertFunction: (val: NumberType) => U): ClaimDetails<U> {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as ClaimDetails<U>;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['lastUpdated'];
   }
 }
 
@@ -354,6 +369,7 @@ export interface iGetClaimAttemptStatusSuccessResponse {
   success: boolean;
   error: string;
   code?: string;
+  cosmosAddress: string;
 }
 
 /**
@@ -366,12 +382,15 @@ export class GetClaimAttemptStatusSuccessResponse
   success: boolean;
   error: string;
   code?: string;
+  cosmosAddress: string;
 
   constructor(data: iGetClaimAttemptStatusSuccessResponse) {
     super();
     this.success = data.success;
     this.error = data.error;
+
     this.code = data.code;
+    this.cosmosAddress = data.cosmosAddress;
   }
 }
 
@@ -442,62 +461,6 @@ export class GetReservedClaimCodesSuccessResponse
     this.prevCodes = data.prevCodes;
   }
 }
-
-/**
- * @category API Requests / Responses
- */
-export interface DeleteReviewPayload {
-  /**
-   * The review ID to delete.
-   */
-  reviewId: string;
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iDeleteReviewSuccessResponse {}
-
-/**
- * @category API Requests / Responses
- */
-export class DeleteReviewSuccessResponse extends EmptyResponseClass {}
-
-/**
- * @category API Requests / Responses
- */
-export interface AddReviewPayload {
-  /**
-   * The review text (1 to 2048 characters).
-   */
-  review: string;
-
-  /**
-   * The star rating (1 to 5).
-   */
-  stars: NumberType;
-
-  /**
-   * The address you are reviewing. One of cosmosAddress or collectionId must be provided.
-   */
-  cosmosAddress?: CosmosAddress;
-
-  /**
-   * The collection ID that you are reviewing. One of cosmosAddress or collectionId must be provided.
-   */
-  collectionId?: NumberType;
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iAddReviewSuccessResponse {}
-
-/**
- * @category API Requests / Responses
- */
-export class AddReviewSuccessResponse extends EmptyResponseClass {}
-
 /**
  * @category API Requests / Responses
  */
@@ -828,7 +791,7 @@ export interface iGetSignInChallengeSuccessResponse<T extends NumberType> {
   /**
    * The challenge message to sign.
    */
-  message: BlockinMessage;
+  message: SiwbbMessage;
 }
 
 /**
@@ -840,13 +803,13 @@ export class GetSignInChallengeSuccessResponse<T extends NumberType>
   implements iGetSignInChallengeSuccessResponse<T>
 {
   nonce: string;
-  params: BlockinChallengeParams<T>;
-  message: BlockinMessage;
+  params: SiwbbChallengeParams<T>;
+  message: SiwbbMessage;
 
   constructor(data: iGetSignInChallengeSuccessResponse<T>) {
     super();
     this.nonce = data.nonce;
-    this.params = new BlockinChallengeParams(data.params);
+    this.params = new SiwbbChallengeParams(data.params);
     this.message = data.message;
   }
 
@@ -862,7 +825,7 @@ export interface VerifySignInPayload {
   /**
    * The original message that was signed.
    */
-  message: BlockinMessage;
+  message: SiwbbMessage;
 
   /**
    * The signature of the message
@@ -909,7 +872,7 @@ export interface iCheckSignInStatusSuccessResponse {
   /**
    * The message that was signed.
    */
-  message: BlockinMessage;
+  message: SiwbbMessage;
 
   /**
    * Signed in with Discord username and discriminator?
@@ -959,7 +922,7 @@ export interface iCheckSignInStatusSuccessResponse {
  */
 export class CheckSignInStatusSuccessResponse extends CustomTypeClass<CheckSignInStatusSuccessResponse> implements iCheckSignInStatusSuccessResponse {
   signedIn: boolean;
-  message: BlockinMessage;
+  message: SiwbbMessage;
   scopes: OAuthScopeDetails[];
   discord?: {
     username: string;
@@ -1039,6 +1002,9 @@ export interface iGetBrowseCollectionsSuccessResponse<T extends NumberType> {
       badgeIds: iUintRange<T>[];
     }[];
   };
+  events: { [category: string]: iEventDoc<T>[] };
+  attestationProofs: { [category: string]: iAttestationProofDoc<T>[] };
+  maps: { [category: string]: iMapWithValues<T>[] };
 }
 
 /**
@@ -1058,6 +1024,9 @@ export class GetBrowseCollectionsSuccessResponse<T extends NumberType>
       badgeIds: UintRangeArray<T>;
     }[];
   };
+  events: { [category: string]: EventDoc<T>[] };
+  maps: { [category: string]: iMapWithValues<T>[] };
+  attestationProofs: { [category: string]: AttestationProofDoc<T>[] };
 
   constructor(data: iGetBrowseCollectionsSuccessResponse<T>) {
     super();
@@ -1094,6 +1063,27 @@ export class GetBrowseCollectionsSuccessResponse<T extends NumberType>
         return acc;
       },
       {} as { [category: string]: { collection: BitBadgesCollection<T>; badgeIds: UintRangeArray<T> }[] }
+    );
+    this.events = Object.keys(data.events).reduce(
+      (acc, category) => {
+        acc[category] = data.events[category].map((event) => new EventDoc(event));
+        return acc;
+      },
+      {} as { [category: string]: EventDoc<T>[] }
+    );
+    this.attestationProofs = Object.keys(data.attestationProofs).reduce(
+      (acc, category) => {
+        acc[category] = data.attestationProofs[category].map((attestationProof) => new AttestationProofDoc(attestationProof));
+        return acc;
+      },
+      {} as { [category: string]: AttestationProofDoc<T>[] }
+    );
+    this.maps = Object.keys(data.maps).reduce(
+      (acc, category) => {
+        acc[category] = data.maps[category].map((map) => new MapWithValues(map));
+        return acc;
+      },
+      {} as { [category: string]: MapWithValues<T>[] }
     );
   }
 
@@ -1243,55 +1233,12 @@ export interface GetTokensFromFaucetPayload {}
 /**
  * @category API Requests / Responses
  */
-export type iGetTokensFromFaucetSuccessResponse = DeliverTxResponse;
+export interface iGetTokensFromFaucetSuccessResponse {}
 
 /**
  * @category API Requests / Responses
  */
-export class GetTokensFromFaucetSuccessResponse
-  extends CustomTypeClass<GetTokensFromFaucetSuccessResponse>
-  implements iGetTokensFromFaucetSuccessResponse
-{
-  readonly height: number;
-  /** The position of the transaction within the block. This is a 0-based index. */
-  readonly txIndex: number;
-  /** Error code. The transaction suceeded iff code is 0. */
-  readonly code: number;
-  readonly transactionHash: string;
-  readonly events: readonly Event[];
-  /**
-   * A string-based log document.
-   *
-   * This currently seems to merge attributes of multiple events into one event per type
-   * (https://github.com/tendermint/tendermint/issues/9595). You might want to use the `events`
-   * field instead.
-   */
-  readonly rawLog?: string;
-  /**
-   * The message responses of the [TxMsgData](https://github.com/cosmos/cosmos-sdk/blob/v0.46.3/proto/cosmos/base/abci/v1beta1/abci.proto#L128-L140)
-   * as `Any`s.
-   * This field is an empty list for chains running Cosmos SDK < 0.46.
-   */
-  readonly msgResponses: Array<{
-    readonly typeUrl: string;
-    readonly value: Uint8Array;
-  }>;
-  readonly gasUsed: bigint;
-  readonly gasWanted: bigint;
-
-  constructor(data: iGetTokensFromFaucetSuccessResponse) {
-    super();
-    this.height = data.height;
-    this.txIndex = data.txIndex;
-    this.code = data.code;
-    this.transactionHash = data.transactionHash;
-    this.events = data.events;
-    this.rawLog = data.rawLog;
-    this.msgResponses = data.msgResponses;
-    this.gasUsed = data.gasUsed;
-    this.gasWanted = data.gasWanted;
-  }
-}
+export class GetTokensFromFaucetSuccessResponse extends EmptyResponseClass {}
 
 /**
  * @category API Requests / Responses
@@ -1470,18 +1417,18 @@ export interface CreateAttestationPayload {
  */
 export interface iCreateAttestationSuccessResponse {
   /** The attestation ID. This is the ID that is given to the user to query the attestation. Anyone with the ID can query it, so keep this safe and secure. */
-  addKey: string;
+  inviteCode: string;
 }
 
 /**
  * @category API Requests / Responses
  */
 export class CreateAttestationSuccessResponse extends CustomTypeClass<CreateAttestationSuccessResponse> implements iCreateAttestationSuccessResponse {
-  addKey: string;
+  inviteCode: string;
 
   constructor(data: iCreateAttestationSuccessResponse) {
     super();
-    this.addKey = data.addKey;
+    this.inviteCode = data.inviteCode;
   }
 }
 
@@ -1490,7 +1437,7 @@ export class CreateAttestationSuccessResponse extends CustomTypeClass<CreateAtte
  */
 export interface GetAttestationPayload {
   /** The attestation key received from the original attestation creation.  */
-  addKey?: string;
+  inviteCode?: string;
 
   /** The attestation ID. You can use this if you are the creator or a holder of the attestation. */
   attestationId?: string;
@@ -1528,14 +1475,14 @@ export class DeleteAttestationSuccessResponse extends EmptyResponseClass {}
  * @category API Requests / Responses
  */
 export interface UpdateAttestationPayload {
-  /** The attestation ID. If you are the owner, you can simply use the attestationId to update the attestation. One of addKey or attestationId must be provided. */
+  /** The attestation ID. If you are the owner, you can simply use the attestationId to update the attestation. One of inviteCode or attestationId must be provided. */
   attestationId?: string;
 
-  /** The key to add oneself as a holder to the attestation. This is given to the holder themselves. One of addKey or attestationId must be provided. */
-  addKey?: string;
+  /** The key to add oneself as a holder to the attestation. This is given to the holder themselves. One of inviteCode or attestationId must be provided. */
+  inviteCode?: string;
 
-  /** Whether or not to rotate the add key. */
-  rotateAddKey?: boolean;
+  /** Whether or not to rotate the invite code. */
+  rotateInviteCode?: boolean;
 
   /** Holders can use the attestation to prove something about themselves. This is a list of holders that have added this attestation to their profile. */
   holdersToSet?: {
@@ -1603,18 +1550,18 @@ export interface UpdateAttestationPayload {
  * @category API Requests / Responses
  */
 export interface iUpdateAttestationSuccessResponse {
-  addKey: string;
+  inviteCode: string;
 }
 
 /**
  * @category API Requests / Responses
  */
 export class UpdateAttestationSuccessResponse extends CustomTypeClass<UpdateAttestationSuccessResponse> implements iUpdateAttestationSuccessResponse {
-  addKey: string;
+  inviteCode: string;
 
   constructor(data: iUpdateAttestationSuccessResponse) {
     super();
-    this.addKey = data.addKey;
+    this.inviteCode = data.inviteCode;
   }
 }
 
@@ -1633,9 +1580,6 @@ export interface CreateSIWBBRequestPayload {
   description?: string;
   /** The image of the SIWBB request for display purposes. */
   image?: string;
-
-  /** The ownership requirements for the asset. */
-  ownershipRequirements?: AssetConditionGroup<NumberType>;
 
   /**
    * If required, you can additionally add proof of attestations to the authentication flow.
@@ -1726,7 +1670,7 @@ export interface GetSIWBBRequestsForDeveloperAppPayload {
  * @category API Requests / Responses
  */
 export interface iGetSIWBBRequestsForDeveloperAppSuccessResponse<T extends NumberType> {
-  siwbbRequests: iBlockinChallenge<T>[];
+  siwbbRequests: iSiwbbChallenge<T>[];
 
   pagination: PaginationInfo;
 }
@@ -1738,12 +1682,12 @@ export class GetSIWBBRequestsForDeveloperAppSuccessResponse<T extends NumberType
   extends BaseNumberTypeClass<GetSIWBBRequestsForDeveloperAppSuccessResponse<T>>
   implements iGetSIWBBRequestsForDeveloperAppSuccessResponse<T>
 {
-  siwbbRequests: BlockinChallenge<T>[];
+  siwbbRequests: SiwbbChallenge<T>[];
   pagination: PaginationInfo;
 
   constructor(data: iGetSIWBBRequestsForDeveloperAppSuccessResponse<T>) {
     super();
-    this.siwbbRequests = data.siwbbRequests.map((SIWBBRequest) => new BlockinChallenge<T>(SIWBBRequest));
+    this.siwbbRequests = data.siwbbRequests.map((SIWBBRequest) => new SiwbbChallenge<T>(SIWBBRequest));
     this.pagination = data.pagination;
   }
 
@@ -1781,7 +1725,7 @@ export class ExchangeSIWBBAuthorizationCodeSuccessResponse<T extends NumberType>
 > {
   address: string;
   chain: SupportedChain;
-  ownershipRequirements?: BlockinAssetConditionGroup<T>;
+  ownershipRequirements?: SiwbbAssetConditionGroup<T>;
   cosmosAddress: CosmosAddress;
   verificationResponse?: {
     success: boolean;
@@ -1816,9 +1760,9 @@ export class ExchangeSIWBBAuthorizationCodeSuccessResponse<T extends NumberType>
     this.attestationsPresentations = data.attestationsPresentations?.map((proof) => new AttestationsProof(proof));
     if (data.ownershipRequirements) {
       if ((data.ownershipRequirements as AndGroup<T>)['$and']) {
-        this.ownershipRequirements = new BlockinAndGroup(data.ownershipRequirements as AndGroup<T>);
+        this.ownershipRequirements = new SiwbbAndGroup(data.ownershipRequirements as AndGroup<T>);
       } else if ((data.ownershipRequirements as OrGroup<T>)['$or']) {
-        this.ownershipRequirements = new BlockinOrGroup(data.ownershipRequirements as OrGroup<T>);
+        this.ownershipRequirements = new SiwbbOrGroup(data.ownershipRequirements as OrGroup<T>);
       } else {
         this.ownershipRequirements = new OwnershipRequirements(data.ownershipRequirements as OwnershipRequirements<T>);
       }
@@ -1838,7 +1782,7 @@ export class ExchangeSIWBBAuthorizationCodeSuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export interface iExchangeSIWBBAuthorizationCodeSuccessResponse<T extends NumberType> extends iBlockinChallenge<T> {
+export interface iExchangeSIWBBAuthorizationCodeSuccessResponse<T extends NumberType> extends iSiwbbChallenge<T> {
   /**
    * The access token to use for the SIWBB request.
    */
@@ -2176,6 +2120,9 @@ export interface CreatePluginPayload {
   /** Whether it makes sense for multiple of this plugin to be allowed */
   duplicatesAllowed: boolean;
 
+  /** Invite code for the plugin */
+  inviteCode?: string;
+
   /** Reuse for non-indexed? */
   reuseForNonIndexed: boolean;
 
@@ -2209,12 +2156,12 @@ export interface CreatePluginPayload {
   userInputsSchema?: Array<JsonBodyInputSchema>;
 
   claimCreatorRedirect?: {
-    baseUri: string;
+    toolUri?: string;
+    tutorialUri?: string;
   };
 
-  // userInputsSchema: Array<JsonBodyInputSchema>;
-  // publicParamsSchema: Array<JsonBodyInputSchema | { key: string; label: string; type: 'ownershipRequirements' }>;
-  // privateParamsSchema: Array<JsonBodyInputSchema | { key: string; label: string; type: 'ownershipRequirements' }>;
+  publicParamsSchema?: Array<JsonBodyInputSchema>;
+  privateParamsSchema?: Array<JsonBodyInputSchema>;
 
   /** The verification URL */
   verificationCall?: {
@@ -2229,6 +2176,8 @@ export interface CreatePluginPayload {
     passGoogle?: boolean;
     passGithub?: boolean;
     passTwitch?: boolean;
+
+    postProcessingJs: string;
   };
 
   /** To publish in the directory. This will trigger the start of the review process. */
@@ -2261,6 +2210,12 @@ export interface UpdatePluginPayload {
   /** Reuse for non-indexed? */
   reuseForNonIndexed?: boolean;
 
+  /** Invite code for the plugin */
+  inviteCode?: string;
+
+  /** Remove self from approved users? */
+  removeSelfFromApprovedUsers?: boolean;
+
   /** Reuse for lists? */
   reuseForLists?: boolean;
 
@@ -2291,12 +2246,12 @@ export interface UpdatePluginPayload {
   };
 
   claimCreatorRedirect?: {
-    baseUri: string;
+    toolUri?: string;
+    tutorialUri?: string;
   };
 
-  // userInputsSchema: Array<JsonBodyInputSchema>;
-  // publicParamsSchema: Array<JsonBodyInputSchema | { key: string; label: string; type: 'ownershipRequirements' }>;
-  // privateParamsSchema: Array<JsonBodyInputSchema | { key: string; label: string; type: 'ownershipRequirements' }>;
+  publicParamsSchema?: Array<JsonBodyInputSchema>;
+  privateParamsSchema?: Array<JsonBodyInputSchema>;
 
   /** The verification URL */
   verificationCall?: {
@@ -2311,6 +2266,8 @@ export interface UpdatePluginPayload {
     passGoogle?: boolean;
     passGithub?: boolean;
     passTwitch?: boolean;
+
+    postProcessingJs: string;
   };
 
   /** To publish in the directory. This will trigger the start of the review process. */
@@ -2359,6 +2316,41 @@ export interface GetPluginPayload {
   createdPluginsOnly?: boolean;
   /** If true, we will fetch only the specific plugin with the plugin ID (no secrets). */
   pluginId?: string;
+  /** Invite code to fetch the plugin with. */
+  inviteCode?: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface CreatePaymentIntentPayload {
+  /** The amount in USD to pay */
+  amount: number;
+  /** Purpose of the payment */
+  purpose: 'credits' | 'deposit';
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iCreatePaymentIntentSuccessResponse {
+  /** The payment intent client secret */
+  clientSecret: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class CreatePaymentIntentSuccessResponse
+  extends CustomTypeClass<CreatePaymentIntentSuccessResponse>
+  implements iCreatePaymentIntentSuccessResponse
+{
+  clientSecret: string;
+
+  constructor(data: iCreatePaymentIntentSuccessResponse) {
+    super();
+    this.clientSecret = data.clientSecret;
+  }
 }
 
 /**

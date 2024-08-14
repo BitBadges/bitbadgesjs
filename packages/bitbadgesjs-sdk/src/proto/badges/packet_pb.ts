@@ -15,8 +15,6 @@ export class BadgesPacketData extends Message<BadgesPacketData> {
    */
   packet: {
     /**
-     * this line is used by starport scaffolding # ibc/packet/proto/field
-     *
      * @generated from field: badges.NoData noData = 1;
      */
     value: NoData;

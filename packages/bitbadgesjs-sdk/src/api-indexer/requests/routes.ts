@@ -92,4 +92,7 @@ export class BitBadgesApiRoutes {
 
   static GetActiveAuthorizationsRoute = () => '/api/v0/oauth/authorizations';
   static OauthRevokeRoute = () => '/api/v0/siwbb/token/revoke';
+
+  
+  static CreatePaymentIntentRoute = () => '/api/v0/stripe/createPaymentIntent';
 }

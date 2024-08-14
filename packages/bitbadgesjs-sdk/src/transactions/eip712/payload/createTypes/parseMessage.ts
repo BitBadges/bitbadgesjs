@@ -175,7 +175,7 @@ const addPayloadTypes = (payloadParams: ParseJSONParams) => {
 
   // Sort the payload keys for deterministic results.
   const keys = Object.keys(payload);
-  keys.sort();
+  keys.sort((a, b) => a.localeCompare(b));
   keys.reverse();
 
   const newTypes: EIP712Type[] = [];

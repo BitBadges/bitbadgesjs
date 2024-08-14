@@ -8,6 +8,7 @@ import { Message, proto3 } from "@bufbuild/protobuf";
 import { BadgeMetadataTimeline, CollectionMetadataTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadataTimeline, StandardsTimeline } from "./timelines_pb.js";
 import { CollectionPermissions } from "./permissions_pb.js";
 import { CollectionApproval, UserBalanceStore } from "./transfers_pb.js";
+import { UintRange } from "./balances_pb.js";
 
 /**
  *
@@ -132,6 +133,13 @@ export class BadgeCollection extends Message<BadgeCollection> {
    */
   aliasAddress = "";
 
+  /**
+   * The valid badge IDs for this collection.
+   *
+   * @generated from field: repeated badges.UintRange validBadgeIds = 16;
+   */
+  validBadgeIds: UintRange[] = [];
+
   constructor(data?: PartialMessage<BadgeCollection>) {
     super();
     proto3.util.initPartial(data, this);
@@ -154,6 +162,7 @@ export class BadgeCollection extends Message<BadgeCollection> {
     { no: 13, name: "defaultBalances", kind: "message", T: UserBalanceStore },
     { no: 14, name: "createdBy", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 15, name: "aliasAddress", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 16, name: "validBadgeIds", kind: "message", T: UintRange, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BadgeCollection {

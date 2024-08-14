@@ -1,6 +1,5 @@
 import type { CosmosCoin } from '@/core/coin.js';
 
-// TODO: add pagination to the request
 export function generateEndpointBalances(address: string) {
   return `/cosmos/bank/v1beta1/balances/${address}`;
 }

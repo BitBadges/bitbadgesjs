@@ -44,7 +44,7 @@ function sortedObject(obj: any): any {
   if (Array.isArray(obj)) {
     return obj.map(sortedObject);
   }
-  const sortedKeys = Object.keys(obj).sort();
+  const sortedKeys = Object.keys(obj).sort((a, b) => a.localeCompare(b));
   const result: Record<string, any> = {};
   // NOTE: Use forEach instead of reduce for performance with large objects eg Wasm code
   sortedKeys.forEach((key) => {

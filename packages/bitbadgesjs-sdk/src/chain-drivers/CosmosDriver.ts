@@ -25,6 +25,7 @@ export default class CosmosDriver implements IChainDriver<NumberType> {
   getPublicKeyFromAddress(address: string) {
     throw 'Not implemented';
   }
+  
   async verifySignature(address: string, message: string, signature: string, publicKey?: string) {
     const prefix = 'cosmos';
     if (!publicKey) {

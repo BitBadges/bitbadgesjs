@@ -80,7 +80,7 @@ export class Attestation<T extends NumberType> extends CustomTypeClass<Attestati
   };
 
   attestationId: string;
-  addKey: string;
+  inviteCode: string;
 
   type: string;
   scheme: 'bbs' | 'standard';
@@ -108,7 +108,7 @@ export class Attestation<T extends NumberType> extends CustomTypeClass<Attestati
     this.createdBy = data.createdBy;
     this.messageFormat = data.messageFormat;
     this.proofOfIssuance = data.proofOfIssuance;
-    this.addKey = data.addKey;
+    this.inviteCode = data.inviteCode;
     this.attestationId = data.attestationId;
     this.type = data.type;
     this.scheme = data.scheme;

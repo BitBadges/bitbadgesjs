@@ -5,11 +5,97 @@
 
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
 import { Message, proto3 } from "@bufbuild/protobuf";
+import { Params } from "./params_pb.js";
 import { CollectionApproval, Transfer, UserBalanceStore, UserIncomingApproval, UserOutgoingApproval } from "./transfers_pb.js";
-import { Balance } from "./balances_pb.js";
+import { UintRange } from "./balances_pb.js";
 import { CollectionPermissions, UserPermissions } from "./permissions_pb.js";
 import { BadgeMetadataTimeline, CollectionMetadataTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadataTimeline, StandardsTimeline } from "./timelines_pb.js";
 import { AddressList } from "./address_lists_pb.js";
+
+/**
+ * MsgUpdateParams is the Msg/UpdateParams request type.
+ *
+ * @generated from message badges.MsgUpdateParams
+ */
+export class MsgUpdateParams extends Message<MsgUpdateParams> {
+  /**
+   * authority is the address that controls the module (defaults to x/gov unless overwritten).
+   *
+   * @generated from field: string authority = 1;
+   */
+  authority = "";
+
+  /**
+   * params defines the module parameters to update.
+   *
+   * NOTE: All parameters must be supplied.
+   *
+   * @generated from field: badges.Params params = 2;
+   */
+  params?: Params;
+
+  constructor(data?: PartialMessage<MsgUpdateParams>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MsgUpdateParams";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "authority", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "params", kind: "message", T: Params },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUpdateParams {
+    return new MsgUpdateParams().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgUpdateParams {
+    return new MsgUpdateParams().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgUpdateParams {
+    return new MsgUpdateParams().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgUpdateParams | PlainMessage<MsgUpdateParams> | undefined, b: MsgUpdateParams | PlainMessage<MsgUpdateParams> | undefined): boolean {
+    return proto3.util.equals(MsgUpdateParams, a, b);
+  }
+}
+
+/**
+ * MsgUpdateParamsResponse defines the response structure for executing a
+ * MsgUpdateParams message.
+ *
+ * @generated from message badges.MsgUpdateParamsResponse
+ */
+export class MsgUpdateParamsResponse extends Message<MsgUpdateParamsResponse> {
+  constructor(data?: PartialMessage<MsgUpdateParamsResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MsgUpdateParamsResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUpdateParamsResponse {
+    return new MsgUpdateParamsResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgUpdateParamsResponse {
+    return new MsgUpdateParamsResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgUpdateParamsResponse {
+    return new MsgUpdateParamsResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgUpdateParamsResponse | PlainMessage<MsgUpdateParamsResponse> | undefined, b: MsgUpdateParamsResponse | PlainMessage<MsgUpdateParamsResponse> | undefined): boolean {
+    return proto3.util.equals(MsgUpdateParamsResponse, a, b);
+  }
+}
 
 /**
  * Used for WASM bindings and JSON parsing
@@ -129,11 +215,11 @@ export class MsgUniversalUpdateCollection extends Message<MsgUniversalUpdateColl
   defaultBalances?: UserBalanceStore;
 
   /**
-   * Balances to create for the collection. Will be sent to the "Mint" address.
+   * New badge IDs to add to this collection
    *
-   * @generated from field: repeated badges.Balance badgesToCreate = 6;
+   * @generated from field: repeated badges.UintRange badgeIdsToAdd = 6;
    */
-  badgesToCreate: Balance[] = [];
+  badgeIdsToAdd: UintRange[] = [];
 
   /**
    * Indicates if collection permissions should be updated. If true, we set to value in this Msg. If false, we keep existing value.
@@ -273,7 +359,7 @@ export class MsgUniversalUpdateCollection extends Message<MsgUniversalUpdateColl
     { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "balancesType", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 4, name: "defaultBalances", kind: "message", T: UserBalanceStore },
-    { no: 6, name: "badgesToCreate", kind: "message", T: Balance, repeated: true },
+    { no: 6, name: "badgeIdsToAdd", kind: "message", T: UintRange, repeated: true },
     { no: 7, name: "updateCollectionPermissions", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 8, name: "collectionPermissions", kind: "message", T: CollectionPermissions },
     { no: 9, name: "updateManagerTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
@@ -373,11 +459,11 @@ export class MsgUpdateCollection extends Message<MsgUpdateCollection> {
   collectionId = "";
 
   /**
-   * Balances to create for the collection. Will be sent to the "Mint" address.
+   * New badge IDs to add to this collection
    *
-   * @generated from field: repeated badges.Balance badgesToCreate = 6;
+   * @generated from field: repeated badges.UintRange badgeIdsToAdd = 6;
    */
-  badgesToCreate: Balance[] = [];
+  badgeIdsToAdd: UintRange[] = [];
 
   /**
    * Indicates if collection permissions should be updated. If true, we set to value in this Msg. If false, we keep existing value.
@@ -515,7 +601,7 @@ export class MsgUpdateCollection extends Message<MsgUpdateCollection> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 6, name: "badgesToCreate", kind: "message", T: Balance, repeated: true },
+    { no: 6, name: "badgeIdsToAdd", kind: "message", T: UintRange, repeated: true },
     { no: 7, name: "updateCollectionPermissions", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 8, name: "collectionPermissions", kind: "message", T: CollectionPermissions },
     { no: 9, name: "updateManagerTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
@@ -622,11 +708,11 @@ export class MsgCreateCollection extends Message<MsgCreateCollection> {
   defaultBalances?: UserBalanceStore;
 
   /**
-   * Balances to create for the collection. Will be sent to the "Mint" address.
+   * New badge IDs to add to this collection
    *
-   * @generated from field: repeated badges.Balance badgesToCreate = 5;
+   * @generated from field: repeated badges.UintRange badgeIdsToAdd = 5;
    */
-  badgesToCreate: Balance[] = [];
+  badgeIdsToAdd: UintRange[] = [];
 
   /**
    * Collection permissions.
@@ -702,7 +788,7 @@ export class MsgCreateCollection extends Message<MsgCreateCollection> {
     { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "balancesType", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 4, name: "defaultBalances", kind: "message", T: UserBalanceStore },
-    { no: 5, name: "badgesToCreate", kind: "message", T: Balance, repeated: true },
+    { no: 5, name: "badgeIdsToAdd", kind: "message", T: UintRange, repeated: true },
     { no: 6, name: "collectionPermissions", kind: "message", T: CollectionPermissions },
     { no: 7, name: "managerTimeline", kind: "message", T: ManagerTimeline, repeated: true },
     { no: 8, name: "collectionMetadataTimeline", kind: "message", T: CollectionMetadataTimeline, repeated: true },

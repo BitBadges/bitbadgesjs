@@ -1,20 +1,20 @@
-import type { NumberType } from '@/common/string-numbers.js';
-import type { iCollectionApproval, iUserOutgoingApproval, iUserIncomingApproval } from '../../../../interfaces/badges/approvals.js';
-import type { iCollectionPermissions, iUserPermissions } from '../../../../interfaces/badges/permissions.js';
-import type {
-  iBalance,
-  iManagerTimeline,
-  iCollectionMetadataTimeline,
-  iBadgeMetadataTimeline,
-  iOffChainBalancesMetadataTimeline,
-  iCustomDataTimeline,
-  iStandardsTimeline,
-  iIsArchivedTimeline,
-  iTransfer,
-  iAddressList
-} from '../../../../interfaces/badges/core.js';
-import type { iUserBalanceStore } from '../../../../interfaces/badges/userBalances.js';
 import { CosmosAddress } from '@/api-indexer/docs/interfaces.js';
+import type { NumberType } from '@/common/string-numbers.js';
+import type { iCollectionApproval, iUserIncomingApproval, iUserOutgoingApproval } from '../../../../interfaces/badges/approvals.js';
+import type {
+  iAddressList,
+  iBadgeMetadataTimeline,
+  iCollectionMetadataTimeline,
+  iCustomDataTimeline,
+  iIsArchivedTimeline,
+  iManagerTimeline,
+  iOffChainBalancesMetadataTimeline,
+  iStandardsTimeline,
+  iTransfer,
+  iUintRange
+} from '../../../../interfaces/badges/core.js';
+import type { iCollectionPermissions, iUserPermissions } from '../../../../interfaces/badges/permissions.js';
+import type { iUserBalanceStore } from '../../../../interfaces/badges/userBalances.js';
 
 /**
  * @category Interfaces
@@ -40,7 +40,7 @@ export interface iMsgCreateCollection<T extends NumberType> {
   defaultBalances?: iUserBalanceStore<T>;
 
   /** The badges to create. Newly created badges will be sent to the "Mint" address. Must have necessary permissions in future transactions to update. However, no restrictions in this genesis Msg. Only used if collection has "Standard" balance type. */
-  badgesToCreate?: iBalance<T>[];
+  badgeIdsToAdd?: iUintRange<T>[];
 
   /** The new collection permissions. Must have the necessary permissions in future transactions to update. However, no restrictions in this genesis Msg. */
   collectionPermissions?: iCollectionPermissions<T>;

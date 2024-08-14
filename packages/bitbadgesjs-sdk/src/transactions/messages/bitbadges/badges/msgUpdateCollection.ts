@@ -18,6 +18,7 @@ import { CollectionPermissions } from '@/core/permissions.js';
 import type { iMsgUpdateCollection } from './interfaces.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
 import { CosmosAddress } from '@/api-indexer/index.js';
+import { UintRange, UintRangeArray } from '@/core/uintRanges.js';
 
 /**
  * MsgUpdateCollection is a transaction that can be used to update any collection. It is only executable by the manager.
@@ -33,7 +34,7 @@ import { CosmosAddress } from '@/api-indexer/index.js';
 export class MsgUpdateCollection<T extends NumberType> extends BaseNumberTypeClass<MsgUpdateCollection<T>> implements iMsgUpdateCollection<T> {
   creator: CosmosAddress;
   collectionId: T;
-  badgesToCreate?: BalanceArray<T>;
+  badgeIdsToAdd?: UintRangeArray<T>;
   updateCollectionPermissions?: boolean;
   collectionPermissions?: CollectionPermissions<T>;
   updateManagerTimeline?: boolean;
@@ -57,7 +58,7 @@ export class MsgUpdateCollection<T extends NumberType> extends BaseNumberTypeCla
     super();
     this.creator = msg.creator;
     this.collectionId = msg.collectionId;
-    this.badgesToCreate = msg.badgesToCreate ? BalanceArray.From(msg.badgesToCreate) : undefined;
+    this.badgeIdsToAdd = msg.badgeIdsToAdd ? UintRangeArray.From(msg.badgeIdsToAdd) : undefined;
     this.updateCollectionPermissions = msg.updateCollectionPermissions;
     this.collectionPermissions = msg.collectionPermissions ? new CollectionPermissions(msg.collectionPermissions) : undefined;
     this.updateManagerTimeline = msg.updateManagerTimeline;
@@ -114,7 +115,7 @@ export class MsgUpdateCollection<T extends NumberType> extends BaseNumberTypeCla
     return new MsgUpdateCollection({
       creator: protoMsg.creator,
       collectionId: convertFunction(protoMsg.collectionId),
-      badgesToCreate: protoMsg.badgesToCreate?.map((x) => Balance.fromProto(x, convertFunction)),
+      badgeIdsToAdd: protoMsg.badgeIdsToAdd?.map((x) => UintRange.fromProto(x, convertFunction)),
       updateCollectionPermissions: protoMsg.updateCollectionPermissions,
       collectionPermissions: protoMsg.collectionPermissions
         ? CollectionPermissions.fromProto(protoMsg.collectionPermissions, convertFunction)

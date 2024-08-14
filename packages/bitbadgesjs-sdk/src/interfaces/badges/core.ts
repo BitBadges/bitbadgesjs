@@ -168,8 +168,8 @@ export interface iAttestation<T extends NumberType> {
   /** The attestation ID. This is the constan ID that is given to the attestation.  */
   attestationId: string;
 
-  /** The addKey is used to add the attestation to the user's wallet. Anyone with the key can query it, so keep this safe and secure. */
-  addKey: string;
+  /** The inviteCode is used to add the attestation to the user's wallet. Anyone with the key can query it, so keep this safe and secure. */
+  inviteCode: string;
 
   /**
    * The scheme of the attestation. BBS+ signatures are supported and can be used where selective disclosure is a requirement.

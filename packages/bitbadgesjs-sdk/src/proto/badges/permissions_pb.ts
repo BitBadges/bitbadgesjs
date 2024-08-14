@@ -11,13 +11,13 @@ import { UintRange } from "./balances_pb.js";
  *
  * CollectionPermissions defines the permissions for the collection (i.e., what the manager can and cannot do).
  *
- * There are five types of permissions for a collection: ActionPermission, TimedUpdatePermission, TimedUpdateWithBadgeIdsPermission, BalancesActionPermission, and CollectionApprovalPermission.
+ * There are five types of permissions for a collection: ActionPermission, TimedUpdatePermission, TimedUpdateWithBadgeIdsPermission, BadgeIdsActionPermission, and CollectionApprovalPermission.
  *
  * The permission type allows fine-grained access control for each action.
  * - ActionPermission: defines when the manager can perform an action.
  * - TimedUpdatePermission: defines when the manager can update a timeline-based field and what times of the timeline can be updated.
  * - TimedUpdateWithBadgeIdsPermission: defines when the manager can update a timeline-based field for specific badges and what times of the timeline can be updated.
- * - BalancesActionPermission: defines when the manager can perform an action for specific badges and specific badge ownership times.
+ * - BadgeIdsActionPermission: defines when the manager can perform an action for specific badges
  * - CollectionApprovalPermission: defines when the manager can update the transferability of the collection and what transfers can be updated vs. locked.
  *
  * Note there are a few different times here which could get confusing:
@@ -88,9 +88,9 @@ export class CollectionPermissions extends Message<CollectionPermissions> {
   /**
    * Permissions related to creating more badges for the collection.
    *
-   * @generated from field: repeated badges.BalancesActionPermission canCreateMoreBadges = 8;
+   * @generated from field: repeated badges.BadgeIdsActionPermission canUpdateValidBadgeIds = 8;
    */
-  canCreateMoreBadges: BalancesActionPermission[] = [];
+  canUpdateValidBadgeIds: BadgeIdsActionPermission[] = [];
 
   /**
    * Permissions related to updating badge metadata for specific badges.
@@ -121,7 +121,7 @@ export class CollectionPermissions extends Message<CollectionPermissions> {
     { no: 5, name: "canUpdateCustomData", kind: "message", T: TimedUpdatePermission, repeated: true },
     { no: 6, name: "canUpdateManager", kind: "message", T: TimedUpdatePermission, repeated: true },
     { no: 7, name: "canUpdateCollectionMetadata", kind: "message", T: TimedUpdatePermission, repeated: true },
-    { no: 8, name: "canCreateMoreBadges", kind: "message", T: BalancesActionPermission, repeated: true },
+    { no: 8, name: "canUpdateValidBadgeIds", kind: "message", T: BadgeIdsActionPermission, repeated: true },
     { no: 9, name: "canUpdateBadgeMetadata", kind: "message", T: TimedUpdateWithBadgeIdsPermission, repeated: true },
     { no: 10, name: "canUpdateCollectionApprovals", kind: "message", T: CollectionApprovalPermission, repeated: true },
   ]);
@@ -544,15 +544,15 @@ export class UserIncomingApprovalPermission extends Message<UserIncomingApproval
 
 /**
  *
- * BalancesActionPermission defines the permissions for updating a timeline-based field for specific badges and specific badge ownership times.
+ * BadgeIdsActionPermission defines the permissions for updating a timeline-based field for specific badges and specific badge ownership times.
  * Currently, this is only used for creating new badges.
  *
  * Ex: If you want to lock the ability to create new badges for badgeIds [1,2] at ownershipTimes 1/1/2020 - 1/1/2021, 
  * you could set the combination (badgeIds: [1,2], ownershipTimelineTimes: [1/1/2020 - 1/1/2021]) to always be forbidden.
  *
- * @generated from message badges.BalancesActionPermission
+ * @generated from message badges.BadgeIdsActionPermission
  */
-export class BalancesActionPermission extends Message<BalancesActionPermission> {
+export class BadgeIdsActionPermission extends Message<BadgeIdsActionPermission> {
   /**
    * Specifies the badge IDs involved in the transfer.
    *
@@ -561,54 +561,46 @@ export class BalancesActionPermission extends Message<BalancesActionPermission> 
   badgeIds: UintRange[] = [];
 
   /**
-   * Specifies the ownership times for the badges in the transfer.
-   *
-   * @generated from field: repeated badges.UintRange ownershipTimes = 2;
-   */
-  ownershipTimes: UintRange[] = [];
-
-  /**
    * Specifies the times when this permission is permitted. Can not overlap with permanentlyForbiddenTimes.
    *
-   * @generated from field: repeated badges.UintRange permanentlyPermittedTimes = 3;
+   * @generated from field: repeated badges.UintRange permanentlyPermittedTimes = 2;
    */
   permanentlyPermittedTimes: UintRange[] = [];
 
   /**
    * Specifies the times when this permission is forbidden. Can not overlap with permanentlyPermittedTimes.
    *
-   * @generated from field: repeated badges.UintRange permanentlyForbiddenTimes = 4;
+   * @generated from field: repeated badges.UintRange permanentlyForbiddenTimes = 3;
    */
   permanentlyForbiddenTimes: UintRange[] = [];
 
-  constructor(data?: PartialMessage<BalancesActionPermission>) {
+  constructor(data?: PartialMessage<BadgeIdsActionPermission>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.BalancesActionPermission";
+  static readonly typeName = "badges.BadgeIdsActionPermission";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "badgeIds", kind: "message", T: UintRange, repeated: true },
-    { no: 2, name: "ownershipTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 3, name: "permanentlyPermittedTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 4, name: "permanentlyForbiddenTimes", kind: "message", T: UintRange, repeated: true },
+    { no: 2, name: "permanentlyPermittedTimes", kind: "message", T: UintRange, repeated: true },
+    { no: 3, name: "permanentlyForbiddenTimes", kind: "message", T: UintRange, repeated: true },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BalancesActionPermission {
-    return new BalancesActionPermission().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BadgeIdsActionPermission {
+    return new BadgeIdsActionPermission().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): BalancesActionPermission {
-    return new BalancesActionPermission().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): BadgeIdsActionPermission {
+    return new BadgeIdsActionPermission().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): BalancesActionPermission {
-    return new BalancesActionPermission().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): BadgeIdsActionPermission {
+    return new BadgeIdsActionPermission().fromJsonString(jsonString, options);
   }
 
-  static equals(a: BalancesActionPermission | PlainMessage<BalancesActionPermission> | undefined, b: BalancesActionPermission | PlainMessage<BalancesActionPermission> | undefined): boolean {
-    return proto3.util.equals(BalancesActionPermission, a, b);
+  static equals(a: BadgeIdsActionPermission | PlainMessage<BadgeIdsActionPermission> | undefined, b: BadgeIdsActionPermission | PlainMessage<BadgeIdsActionPermission> | undefined): boolean {
+    return proto3.util.equals(BadgeIdsActionPermission, a, b);
   }
 }
 

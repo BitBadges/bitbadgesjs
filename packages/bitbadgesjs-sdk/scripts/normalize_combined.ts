@@ -206,7 +206,7 @@ function removeImportLinesFromFile(filePath: string): void {
     modifiedContent =
       `
     import MerkleTree from 'merkletreejs';
-    import { BlockinAndGroup, BlockinOrGroup } from './api-indexer';
+    import { SiwbbAndGroup, SiwbbOrGroup } from './api-indexer';
     import { Options as MerkleTreeJsOptions } from 'merkletreejs/dist/MerkleTree';
 
     export type SupportedChain = 'Bitcoin' | 'Ethereum' | 'Cosmos' | 'Solana' | 'Unknown';

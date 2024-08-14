@@ -1,6 +1,6 @@
 import BitBadgesApi from '@/api-indexer/BitBadgesApi.js';
 import { CosmosAddress } from '@/api-indexer/docs/interfaces.js';
-import { BlockinAndGroup, BlockinAssetConditionGroup, BlockinOrGroup, OwnershipRequirements } from '@/api-indexer/requests/blockin.js';
+import { SiwbbAndGroup, SiwbbAssetConditionGroup, SiwbbOrGroup, OwnershipRequirements } from '@/api-indexer/requests/blockin.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
 import { NumberType } from '@/common/string-numbers.js';
 import { SupportedChain } from '@/common/types.js';
@@ -11,7 +11,7 @@ import { AttestationsProof } from './secrets.js';
 /**
  * @category Interfaces
  */
-export interface iBlockinChallenge<T extends NumberType> {
+export interface iSiwbbChallenge<T extends NumberType> {
   /** The user's address */
   address: string;
   /** The chain of the address */
@@ -55,10 +55,10 @@ export interface iBlockinChallenge<T extends NumberType> {
 /**
  * @category SIWBB Authentication
  */
-export class BlockinChallenge<T extends NumberType> extends BaseNumberTypeClass<BlockinChallenge<T>> implements iBlockinChallenge<T> {
+export class SiwbbChallenge<T extends NumberType> extends BaseNumberTypeClass<SiwbbChallenge<T>> implements iSiwbbChallenge<T> {
   address: string;
   chain: SupportedChain;
-  ownershipRequirements?: BlockinAssetConditionGroup<T>;
+  ownershipRequirements?: SiwbbAssetConditionGroup<T>;
   cosmosAddress: CosmosAddress;
   verificationResponse?: {
     success: boolean;
@@ -72,7 +72,7 @@ export class BlockinChallenge<T extends NumberType> extends BaseNumberTypeClass<
     twitter?: { username: string; id: string } | undefined;
   };
 
-  constructor(data: iBlockinChallenge<T>) {
+  constructor(data: iSiwbbChallenge<T>) {
     super();
     this.address = data.address;
     this.cosmosAddress = data.cosmosAddress;
@@ -82,9 +82,9 @@ export class BlockinChallenge<T extends NumberType> extends BaseNumberTypeClass<
     this.attestationsPresentations = data.attestationsPresentations?.map((proof) => new AttestationsProof(proof));
     if (data.ownershipRequirements) {
       if ((data.ownershipRequirements as AndGroup<T>)['$and']) {
-        this.ownershipRequirements = new BlockinAndGroup(data.ownershipRequirements as AndGroup<T>);
+        this.ownershipRequirements = new SiwbbAndGroup(data.ownershipRequirements as AndGroup<T>);
       } else if ((data.ownershipRequirements as OrGroup<T>)['$or']) {
-        this.ownershipRequirements = new BlockinOrGroup(data.ownershipRequirements as OrGroup<T>);
+        this.ownershipRequirements = new SiwbbOrGroup(data.ownershipRequirements as OrGroup<T>);
       } else {
         this.ownershipRequirements = new OwnershipRequirements(data.ownershipRequirements as OwnershipRequirements<T>);
       }
@@ -114,9 +114,8 @@ export class BlockinChallenge<T extends NumberType> extends BaseNumberTypeClass<
     }
   }
 
-
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): BlockinChallenge<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as BlockinChallenge<U>;
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): SiwbbChallenge<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as SiwbbChallenge<U>;
   }
 }
 
@@ -126,9 +125,7 @@ export class BlockinChallenge<T extends NumberType> extends BaseNumberTypeClass<
 export interface VerifySIWBBOptions {
   /** The expected ownership requirements for the user */
   ownershipRequirements?: AssetConditionGroup<NumberType>;
-  /** The expected socials sign ins for the user */
-  otherSignIns?: ('discord' | 'twitter' | 'github' | 'google')[];
-  /** How recent the challenge must be in milliseconds. Defaults to 10 minutes */
+  /** How recent the challenge must be in milliseconds. Defaults to 10 minutes. If 0, we will not check the time. */
   issuedAtTimeWindowMs?: number;
   /** Skip asset verification. This may be useful for simulations or testing */
   skipAssetVerification?: boolean;

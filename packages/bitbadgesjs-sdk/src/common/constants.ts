@@ -5,17 +5,17 @@
  */
 export const BETANET_CHAIN_DETAILS = {
   chainId: 1,
-  cosmosChainId: 'bitbadges_1-1'
+  cosmosChainId: 'bitbadges-1'
 };
 
 /**
- * BitBadges Testnet chain details. This is the same as the Betanet chain details for now.
+ * BitBadges Testnet chain details.
  *
  * @category Chain Details
  */
 export const TESTNET_CHAIN_DETAILS = {
-  chainId: 1,
-  cosmosChainId: 'bitbadges_1-2'
+  chainId: 2,
+  cosmosChainId: 'bitbadges-2'
 };
 
 /**
@@ -23,10 +23,7 @@ export const TESTNET_CHAIN_DETAILS = {
  *
  * @category Chain Details
  */
-export const MAINNET_CHAIN_DETAILS = {
-  chainId: 1,
-  cosmosChainId: 'bitbadges_1-1'
-};
+export const MAINNET_CHAIN_DETAILS = BETANET_CHAIN_DETAILS;
 
 /**
  * BitBadges Betanet chain details to suggest to Keplr.
@@ -34,7 +31,7 @@ export const MAINNET_CHAIN_DETAILS = {
  * @category Chain Details
  */
 export const BitBadgesKeplrSuggestBetanetChainInfo = {
-  chainId: 'bitbadges_1-1',
+  chainId: 'bitbadges-1',
   chainName: 'BitBadges',
   chainSymbolImageUrl: 'https://avatars.githubusercontent.com/u/86890740',
   coinImageUrl: 'https://avatars.githubusercontent.com/u/86890740',
@@ -88,4 +85,18 @@ export const BitBadgesKeplrSuggestBetanetChainInfo = {
     coinGeckoId: 'cosmos',
     coinImageUrl: 'https://avatars.githubusercontent.com/u/86890740'
   }
+};
+
+/**
+ * BitBadges testnet chain details to suggest to Keplr.
+ *
+ * @category Chain Details
+ */
+export const BitBadgesKeplrSuggestTestnetChainInfo = {
+  ...BitBadgesKeplrSuggestBetanetChainInfo,
+  chainId: 'bitbadges-2',
+  chainName: 'BitBadges Testnet',
+
+  rpc: 'http://138.197.10.8:26657',
+  rest: 'http://138.197.10.8:1317'
 };

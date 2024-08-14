@@ -1,7 +1,7 @@
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 import type {
   iActionPermission,
-  iBalancesActionPermission,
+  iBadgeIdsActionPermission,
   iCollectionApprovalPermission,
   iCollectionApprovalPermissionWithDetails,
   iCollectionPermissions,
@@ -370,7 +370,7 @@ export class CollectionPermissions<T extends NumberType> extends BaseNumberTypeC
   canUpdateCustomData: TimedUpdatePermission<T>[];
   canUpdateManager: TimedUpdatePermission<T>[];
   canUpdateCollectionMetadata: TimedUpdatePermission<T>[];
-  canCreateMoreBadges: BalancesActionPermission<T>[];
+  canUpdateValidBadgeIds: BadgeIdsActionPermission<T>[];
   canUpdateBadgeMetadata: TimedUpdateWithBadgeIdsPermission<T>[];
   canUpdateCollectionApprovals: CollectionApprovalPermission<T>[];
 
@@ -383,7 +383,7 @@ export class CollectionPermissions<T extends NumberType> extends BaseNumberTypeC
     this.canUpdateCustomData = msg.canUpdateCustomData.map((x) => new TimedUpdatePermission(x));
     this.canUpdateManager = msg.canUpdateManager.map((x) => new TimedUpdatePermission(x));
     this.canUpdateCollectionMetadata = msg.canUpdateCollectionMetadata.map((x) => new TimedUpdatePermission(x));
-    this.canCreateMoreBadges = msg.canCreateMoreBadges.map((x) => new BalancesActionPermission(x));
+    this.canUpdateValidBadgeIds = msg.canUpdateValidBadgeIds.map((x) => new BadgeIdsActionPermission(x));
     this.canUpdateBadgeMetadata = msg.canUpdateBadgeMetadata.map((x) => new TimedUpdateWithBadgeIdsPermission(x));
     this.canUpdateCollectionApprovals = msg.canUpdateCollectionApprovals.map((x) => new CollectionApprovalPermission(x));
   }
@@ -398,7 +398,7 @@ export class CollectionPermissions<T extends NumberType> extends BaseNumberTypeC
         canUpdateCustomData: this.canUpdateCustomData.map((x) => x.convert(convertFunction)),
         canUpdateManager: this.canUpdateManager.map((x) => x.convert(convertFunction)),
         canUpdateCollectionMetadata: this.canUpdateCollectionMetadata.map((x) => x.convert(convertFunction)),
-        canCreateMoreBadges: this.canCreateMoreBadges.map((x) => x.convert(convertFunction)),
+        canUpdateValidBadgeIds: this.canUpdateValidBadgeIds.map((x) => x.convert(convertFunction)),
         canUpdateBadgeMetadata: this.canUpdateBadgeMetadata.map((x) => x.convert(convertFunction)),
         canUpdateCollectionApprovals: this.canUpdateCollectionApprovals.map((x) => x.convert(convertFunction))
       })
@@ -434,7 +434,7 @@ export class CollectionPermissions<T extends NumberType> extends BaseNumberTypeC
       canUpdateCustomData: protoMsg.canUpdateCustomData.map((x) => TimedUpdatePermission.fromProto(x, convertFunction)),
       canUpdateManager: protoMsg.canUpdateManager.map((x) => TimedUpdatePermission.fromProto(x, convertFunction)),
       canUpdateCollectionMetadata: protoMsg.canUpdateCollectionMetadata.map((x) => TimedUpdatePermission.fromProto(x, convertFunction)),
-      canCreateMoreBadges: protoMsg.canCreateMoreBadges.map((x) => BalancesActionPermission.fromProto(x, convertFunction)),
+      canUpdateValidBadgeIds: protoMsg.canUpdateValidBadgeIds.map((x) => BadgeIdsActionPermission.fromProto(x, convertFunction)),
       canUpdateBadgeMetadata: protoMsg.canUpdateBadgeMetadata.map((x) => TimedUpdateWithBadgeIdsPermission.fromProto(x, convertFunction)),
       canUpdateCollectionApprovals: protoMsg.canUpdateCollectionApprovals.map((x) => CollectionApprovalPermission.fromProto(x, convertFunction))
     });
@@ -452,7 +452,7 @@ export class CollectionPermissions<T extends NumberType> extends BaseNumberTypeC
       TimedUpdatePermission.validateUpdate(oldPermissions.canArchiveCollection, newPermissions.canArchiveCollection),
       TimedUpdatePermission.validateUpdate(oldPermissions.canUpdateOffChainBalancesMetadata, newPermissions.canUpdateOffChainBalancesMetadata),
       TimedUpdatePermission.validateUpdate(oldPermissions.canUpdateCollectionMetadata, newPermissions.canUpdateCollectionMetadata),
-      BalancesActionPermission.validateUpdate(oldPermissions.canCreateMoreBadges, newPermissions.canCreateMoreBadges),
+      BadgeIdsActionPermission.validateUpdate(oldPermissions.canUpdateValidBadgeIds, newPermissions.canUpdateValidBadgeIds),
       TimedUpdateWithBadgeIdsPermission.validateUpdate(oldPermissions.canUpdateBadgeMetadata, newPermissions.canUpdateBadgeMetadata),
       CollectionApprovalPermission.validateUpdate(oldPermissions.canUpdateCollectionApprovals, newPermissions.canUpdateCollectionApprovals)
     ];
@@ -469,7 +469,7 @@ export class CollectionPermissions<T extends NumberType> extends BaseNumberTypeC
       canUpdateCustomData: [],
       canUpdateManager: [],
       canUpdateCollectionMetadata: [],
-      canCreateMoreBadges: [],
+      canUpdateValidBadgeIds: [],
       canUpdateBadgeMetadata: [],
       canUpdateCollectionApprovals: []
     });
@@ -674,85 +674,79 @@ const AllDefaultDetailsValues: UniversalPermissionDetails = {
 };
 
 /**
- * BalancesActionPermission represents a permission that allows updating a balances action.
+ * BadgeIdsActionPermission represents a permission that allows updating a balances action.
  *
  * @category Permissions
  */
-export class BalancesActionPermission<T extends NumberType>
-  extends BaseNumberTypeClass<BalancesActionPermission<T>>
-  implements iBalancesActionPermission<T>
+export class BadgeIdsActionPermission<T extends NumberType>
+  extends BaseNumberTypeClass<BadgeIdsActionPermission<T>>
+  implements iBadgeIdsActionPermission<T>
 {
   badgeIds: UintRangeArray<T>;
-  ownershipTimes: UintRangeArray<T>;
   permanentlyPermittedTimes: UintRangeArray<T>;
   permanentlyForbiddenTimes: UintRangeArray<T>;
 
-  constructor(msg: iBalancesActionPermission<T>) {
+  constructor(msg: iBadgeIdsActionPermission<T>) {
     super();
     this.badgeIds = UintRangeArray.From(msg.badgeIds);
-    this.ownershipTimes = UintRangeArray.From(msg.ownershipTimes);
     this.permanentlyPermittedTimes = UintRangeArray.From(msg.permanentlyPermittedTimes);
     this.permanentlyForbiddenTimes = UintRangeArray.From(msg.permanentlyForbiddenTimes);
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): BalancesActionPermission<U> {
-    return new BalancesActionPermission(
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): BadgeIdsActionPermission<U> {
+    return new BadgeIdsActionPermission(
       deepCopyPrimitives({
         badgeIds: this.badgeIds.map((x) => x.convert(convertFunction)),
-        ownershipTimes: this.ownershipTimes.map((x) => x.convert(convertFunction)),
         permanentlyPermittedTimes: this.permanentlyPermittedTimes.map((x) => x.convert(convertFunction)),
         permanentlyForbiddenTimes: this.permanentlyForbiddenTimes.map((x) => x.convert(convertFunction))
       })
     );
   }
 
-  toProto(): badges.BalancesActionPermission {
-    return new badges.BalancesActionPermission(this.convert(Stringify));
+  toProto(): badges.BadgeIdsActionPermission {
+    return new badges.BadgeIdsActionPermission(this.convert(Stringify));
   }
 
   static fromJson<U extends NumberType>(
     jsonValue: JsonValue,
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
-  ): BalancesActionPermission<U> {
-    return BalancesActionPermission.fromProto(badges.BalancesActionPermission.fromJson(jsonValue, options), convertFunction);
+  ): BadgeIdsActionPermission<U> {
+    return BadgeIdsActionPermission.fromProto(badges.BadgeIdsActionPermission.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
     jsonString: string,
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
-  ): BalancesActionPermission<U> {
-    return BalancesActionPermission.fromProto(badges.BalancesActionPermission.fromJsonString(jsonString, options), convertFunction);
+  ): BadgeIdsActionPermission<U> {
+    return BadgeIdsActionPermission.fromProto(badges.BadgeIdsActionPermission.fromJsonString(jsonString, options), convertFunction);
   }
 
   static fromProto<U extends NumberType>(
-    protoMsg: badges.BalancesActionPermission,
+    protoMsg: badges.BadgeIdsActionPermission,
     convertFunction: (item: NumberType) => U
-  ): BalancesActionPermission<U> {
-    return new BalancesActionPermission({
+  ): BadgeIdsActionPermission<U> {
+    return new BadgeIdsActionPermission({
       badgeIds: protoMsg.badgeIds.map((x) => UintRange.fromProto(x, convertFunction)),
-      ownershipTimes: protoMsg.ownershipTimes.map((x) => UintRange.fromProto(x, convertFunction)),
       permanentlyPermittedTimes: protoMsg.permanentlyPermittedTimes.map((x) => UintRange.fromProto(x, convertFunction)),
       permanentlyForbiddenTimes: protoMsg.permanentlyForbiddenTimes.map((x) => UintRange.fromProto(x, convertFunction))
     });
   }
 
-  castToUniversalPermission(): UniversalPermission {
+
+castToUniversalPermission(): UniversalPermission {
     return {
       ...AllDefaultValues,
       badgeIds: this.badgeIds.convert(BigIntify),
-      ownershipTimes: this.ownershipTimes.convert(BigIntify),
       permanentlyPermittedTimes: this.permanentlyPermittedTimes.convert(BigIntify),
       permanentlyForbiddenTimes: this.permanentlyForbiddenTimes.convert(BigIntify),
-      usesBadgeIds: true,
-      usesOwnershipTimes: true
+      usesBadgeIds: true
     };
   }
-
   static validateUpdate<U extends NumberType>(
-    permissions: BalancesActionPermission<U>[],
-    newPermission: BalancesActionPermission<U>[]
+    permissions: BadgeIdsActionPermission<U>[],
+    newPermission: BadgeIdsActionPermission<U>[]
   ): Error | null {
     const castedPermissions: UniversalPermission[] = permissions.map((x) => x.castToUniversalPermission());
     const castedNewPermissions: UniversalPermission[] = newPermission.map((x) => x.castToUniversalPermission());
@@ -761,22 +755,18 @@ export class BalancesActionPermission<T extends NumberType>
 
   static check<U extends NumberType>(
     details: {
-      ownershipTimes: UintRangeArray<U>;
       badgeIds: UintRangeArray<U>;
     }[],
-    permissions: BalancesActionPermission<U>[],
+    permissions: BadgeIdsActionPermission<U>[],
     time?: U
   ): Error | null {
     const detailsToCheck: UniversalPermissionDetails[] = [];
     for (const detail of details) {
-      for (const ownershipTime of detail.ownershipTimes) {
-        for (const badgeId of detail.badgeIds) {
-          detailsToCheck.push({
-            ...AllDefaultDetailsValues,
-            ownershipTime: ownershipTime.convert(BigIntify),
-            badgeId: badgeId.convert(BigIntify)
-          });
-        }
+      for (const badgeId of detail.badgeIds) {
+        detailsToCheck.push({
+          ...AllDefaultDetailsValues,
+          badgeId: badgeId.convert(BigIntify)
+        });
       }
     }
 
@@ -1327,7 +1317,6 @@ function checkNotForbiddenForAllOverlaps(
             errStr += ` for the initiated by lists ${permissionDetail.initiatedByList.listId}`;
           }
 
-          //TODO: this won't be right
           if (usesApprovalIdLists) {
             errStr += ` for the approval id ${permissionDetail.approvalIdList.listId}`;
           }

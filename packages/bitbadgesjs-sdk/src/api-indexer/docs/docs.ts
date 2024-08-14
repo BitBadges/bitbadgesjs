@@ -3,7 +3,7 @@ import { BaseNumberTypeClass, CustomTypeClass, convertClassPropertiesAndMaintain
 import type { NumberType } from '@/common/string-numbers.js';
 import { BigIntify } from '@/common/string-numbers.js';
 import type { SupportedChain } from '@/common/types.js';
-import { AddressList, AttestationsProof, getValueAtTimeForTimeline } from '@/core/index.js';
+import { AddressList, AttestationsProof, UintRangeArray, getValueAtTimeForTimeline } from '@/core/index.js';
 import {
   ApprovalInfoDetails,
   ChallengeDetails,
@@ -31,12 +31,11 @@ import {
 import { CollectionPermissions, UserPermissions, UserPermissionsWithDetails } from '@/core/permissions.js';
 import type { iOffChainBalancesMap } from '@/core/transfers.js';
 import { UserBalanceStore } from '@/core/userBalances.js';
-import type { iAmountTrackerIdDetails } from '@/interfaces/badges/core.js';
+import type { iAmountTrackerIdDetails, iUintRange } from '@/interfaces/badges/core.js';
 import type { iUserBalanceStore } from '@/interfaces/badges/userBalances.js';
 import type { Doc } from '../base.js';
 import type { iMetadata } from '../metadata/metadata.js';
 import { Metadata } from '../metadata/metadata.js';
-import { BlockinAndGroup, BlockinAssetConditionGroup, BlockinChallengeParams, BlockinOrGroup, OwnershipRequirements } from '../requests/blockin.js';
 import { MapWithValues } from '../requests/maps.js';
 import type {
   ClaimIntegrationPluginType,
@@ -52,7 +51,6 @@ import type {
   iAirdropDoc,
   iApprovalTrackerDoc,
   iDeveloperAppDoc,
-  iAuthorizationCodeDoc,
   iBalanceDoc,
   iBalanceDocWithDetails,
   iSIWBBRequestDoc,
@@ -79,10 +77,11 @@ import type {
   iStatusDoc,
   iUsedLeafStatus,
   NativeAddress,
-  iAttestationProofDoc
+  iAttestationProofDoc,
+  iEventDoc,
+  iDepositBalanceDoc
 } from './interfaces.js';
 import { OAuthScopeDetails } from '../requests/requests.js';
-import { AndGroup, OrGroup } from 'blockin';
 
 /**
  * @inheritDoc iCollectionDoc
@@ -111,6 +110,7 @@ export class CollectionDoc<T extends NumberType>
   createdTimestamp: UNIXMilliTimestamp<T>;
   updateHistory: UpdateHistory<T>[];
   aliasAddress: CosmosAddress;
+  validBadgeIds: UintRangeArray<T>;
 
   constructor(data: iCollectionDoc<T>) {
     super();
@@ -137,6 +137,8 @@ export class CollectionDoc<T extends NumberType>
     this.createdTimestamp = data.createdTimestamp;
     this.updateHistory = data.updateHistory.map((updateHistory) => new UpdateHistory(updateHistory));
     this.aliasAddress = data.aliasAddress;
+
+    this.validBadgeIds = UintRangeArray.From(data.validBadgeIds);
   }
 
   private getTimelineValuesAtTime(time?: NumberType) {
@@ -1105,6 +1107,7 @@ export class AirdropDoc<T extends NumberType> extends BaseNumberTypeClass<Airdro
   airdropped: boolean;
   timestamp: UNIXMilliTimestamp<T>;
   hash?: string;
+  ip?: string;
 
   constructor(data: iAirdropDoc<T>) {
     super();
@@ -1113,6 +1116,7 @@ export class AirdropDoc<T extends NumberType> extends BaseNumberTypeClass<Airdro
     this.airdropped = data.airdropped;
     this.timestamp = data.timestamp;
     this.hash = data.hash;
+    this.ip = data.ip;
   }
 
   getNumberFieldNames(): string[] {
@@ -1187,41 +1191,6 @@ export class ComplianceDoc<T extends NumberType> extends BaseNumberTypeClass<Com
 }
 
 /**
- * @inheritDoc iAuthorizationCodeDoc
- * @category OAuth
- */
-export class AuthorizationCodeDoc extends CustomTypeClass<AuthorizationCodeDoc> implements iAuthorizationCodeDoc {
-  _docId: string;
-  _id?: string;
-  clientId: string;
-  redirectUri: string;
-  scopes: OAuthScopeDetails[];
-  address: string;
-  cosmosAddress: string;
-  expiresAt: number;
-
-  constructor(data: iAuthorizationCodeDoc) {
-    super();
-    this._docId = data._docId;
-    this._id = data._id;
-    this.clientId = data.clientId;
-    this.redirectUri = data.redirectUri;
-    this.scopes = data.scopes;
-    this.address = data.address;
-    this.cosmosAddress = data.cosmosAddress;
-    this.expiresAt = data.expiresAt;
-  }
-
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): AuthorizationCodeDoc {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as AuthorizationCodeDoc;
-  }
-
-  clone(): AuthorizationCodeDoc {
-    return super.clone() as AuthorizationCodeDoc;
-  }
-}
-
-/**
  * @inheritDoc iAccessTokenDoc
  * @category OAuth
  */
@@ -1264,7 +1233,7 @@ export class AccessTokenDoc extends CustomTypeClass<AccessTokenDoc> implements i
 
 /**
  * @inheritDoc iDeveloperAppDoc
- * @category Blockin
+ * @category SIWBB
  */
 export class DeveloperAppDoc extends CustomTypeClass<DeveloperAppDoc> implements iDeveloperAppDoc {
   _docId: string;
@@ -1300,6 +1269,37 @@ export class DeveloperAppDoc extends CustomTypeClass<DeveloperAppDoc> implements
 }
 
 /**
+ * @inheritDoc iDepositBalanceDoc
+ * @category Indexer
+ */
+export class DepositBalanceDoc<T extends NumberType> extends BaseNumberTypeClass<DepositBalanceDoc<T>> implements iDepositBalanceDoc<T> {
+  _docId: string;
+  _id?: string;
+  cosmosAddress: CosmosAddress;
+  usdBalance: T;
+
+  constructor(data: iDepositBalanceDoc<T>) {
+    super();
+    this.cosmosAddress = data.cosmosAddress;
+    this.usdBalance = data.usdBalance;
+    this._docId = data._docId;
+    this._id = data._id;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['usdBalance'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): DepositBalanceDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as DepositBalanceDoc<U>;
+  }
+
+  clone(): DepositBalanceDoc<T> {
+    return super.clone() as DepositBalanceDoc<T>;
+  }
+}
+
+/**
  * @inheritDoc iPluginDoc
  * @category Plugins
  */
@@ -1310,6 +1310,7 @@ export class PluginDoc<T extends NumberType> extends BaseNumberTypeClass<PluginD
   pluginSecret?: string;
   toPublish: boolean;
   reviewCompleted: boolean;
+  inviteCode?: string | undefined;
 
   stateFunctionPreset: PluginPresetType;
   duplicatesAllowed: boolean;
@@ -1347,9 +1348,11 @@ export class PluginDoc<T extends NumberType> extends BaseNumberTypeClass<PluginD
     passGoogle: boolean;
     passGithub: boolean;
     passTwitch: boolean;
+
+    postProcessingJs: string;
   };
 
-  claimCreatorRedirect?: { baseUri: string } | undefined;
+  claimCreatorRedirect?: { toolUri?: string; tutorialUri?: string } | undefined;
   userInputRedirect?: { baseUri: string } | undefined;
 
   lastUpdated: UNIXMilliTimestamp<T>;
@@ -1390,6 +1393,7 @@ export class PluginDoc<T extends NumberType> extends BaseNumberTypeClass<PluginD
     this.claimCreatorRedirect = data.claimCreatorRedirect;
     this.createdAt = data.createdAt;
     this.deletedAt = data.deletedAt;
+    this.inviteCode = data.inviteCode;
   }
 
   getNumberFieldNames(): string[] {
@@ -1407,7 +1411,7 @@ export class PluginDoc<T extends NumberType> extends BaseNumberTypeClass<PluginD
 
 /**
  * @inheritDoc iSIWBBRequestDoc
- * @category Blockin
+ * @category SIWBB
  */
 export class SIWBBRequestDoc<T extends NumberType> extends BaseNumberTypeClass<SIWBBRequestDoc<T>> implements iSIWBBRequestDoc<T> {
   _docId: string;
@@ -1418,7 +1422,6 @@ export class SIWBBRequestDoc<T extends NumberType> extends BaseNumberTypeClass<S
   description?: string;
   image?: string;
   cosmosAddress: CosmosAddress;
-  ownershipRequirements?: BlockinAssetConditionGroup<T> | undefined;
   attestationsPresentations: AttestationsProof<T>[];
   createdAt: UNIXMilliTimestamp<T>;
   scopes: OAuthScopeDetails[];
@@ -1454,15 +1457,6 @@ export class SIWBBRequestDoc<T extends NumberType> extends BaseNumberTypeClass<S
     this.otherSignIns = data.otherSignIns;
     this.cosmosAddress = data.cosmosAddress;
     this.redirectUri = data.redirectUri;
-    if (data.ownershipRequirements) {
-      if ((data.ownershipRequirements as AndGroup<T>)['$and']) {
-        this.ownershipRequirements = new BlockinAndGroup(data.ownershipRequirements as AndGroup<T>);
-      } else if ((data.ownershipRequirements as OrGroup<T>)['$or']) {
-        this.ownershipRequirements = new BlockinOrGroup(data.ownershipRequirements as OrGroup<T>);
-      } else {
-        this.ownershipRequirements = new OwnershipRequirements(data.ownershipRequirements as OwnershipRequirements<T>);
-      }
-    }
   }
 
   getNumberFieldNames(): string[] {
@@ -1559,7 +1553,7 @@ export class AttestationDoc<T extends NumberType> extends BaseNumberTypeClass<At
   };
 
   attestationId: string;
-  addKey: string;
+  inviteCode: string;
 
   type: string;
   scheme: 'bbs' | 'standard';
@@ -1589,7 +1583,7 @@ export class AttestationDoc<T extends NumberType> extends BaseNumberTypeClass<At
     this.createdBy = data.createdBy;
     this.messageFormat = data.messageFormat;
     this.attestationId = data.attestationId;
-    this.addKey = data.addKey;
+    this.inviteCode = data.inviteCode;
     this.type = data.type;
     this.scheme = data.scheme;
     this.dataIntegrityProof = data.dataIntegrityProof;
@@ -1643,4 +1637,41 @@ export interface ErrorDoc {
   _id?: string;
   error: string;
   function: string;
+}
+
+/**
+ * @inheritDoc iEventDoc
+ * @category Events
+ */
+export class EventDoc<T extends NumberType> extends BaseNumberTypeClass<EventDoc<T>> implements iEventDoc<T> {
+  _docId: string;
+  _id?: string;
+  name: string;
+  description: string;
+  image: string;
+  createdBy: CosmosAddress;
+
+  externalUrl: string;
+
+  createdAt: UNIXMilliTimestamp<T>;
+
+  constructor(data: iEventDoc<T>) {
+    super();
+    this._docId = data._docId;
+    this._id = data._id;
+    this.name = data.name;
+    this.description = data.description;
+    this.image = data.image;
+    this.createdBy = data.createdBy;
+    this.externalUrl = data.externalUrl;
+    this.createdAt = data.createdAt;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['createdAt'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): EventDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as EventDoc<U>;
+  }
 }

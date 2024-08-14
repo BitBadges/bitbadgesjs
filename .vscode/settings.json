@@ -8,5 +8,9 @@
     "activityBar.background": "#09304B",
     "titleBar.activeBackground": "#0D4369",
     "titleBar.activeForeground": "#F9FCFE"
+  },
+  "sonarlint.connectedMode.project": {
+    "connectionId": "http-localhost-9000",
+    "projectKey": "bitbadgesjs"
   }
 }

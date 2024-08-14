@@ -92,12 +92,16 @@ export class BaseTypedArray<ArrayType extends ElementType[], ElementType> extend
   toSpliced(start: number, deleteCount?: number): ArrayType {
     return super.splice(start, deleteCount) as ArrayType;
   }
+
   /**
    * @hidden
    */
-  every(callbackfn: (value: ElementType, index: number, array: ArrayType) => unknown, thisArg?: any): boolean {
-    return super.every(callbackfn as any, thisArg);
+  every<S extends ElementType>(predicate: (value: ElementType, index: number, array: ArrayType) => value is S, thisArg?: any): this is S[];
+  every(predicate: (value: ElementType, index: number, array: ArrayType) => unknown, thisArg?: any): boolean;
+  every(predicate: unknown, thisArg?: unknown): boolean {
+    return super.every(predicate as any, thisArg);
   }
+
   /**
    * @hidden
    */

@@ -1,4 +1,8 @@
-import type { AnyMessage, Message } from '@bufbuild/protobuf';
+import { convertToCosmosAddress, getChainForAddress } from '@/address-converter/converter.js';
+import { NativeAddress } from '@/api-indexer/index.js';
+import { MAINNET_CHAIN_DETAILS, TESTNET_CHAIN_DETAILS } from '@/common/constants.js';
+import { SupportedChain } from '@/common/types.js';
+import { generatePostBodyBroadcast } from '@/node-rest-api/broadcast.js';
 import {
   MsgCreateCollection,
   MsgTransferBadges,
@@ -6,35 +10,61 @@ import {
   MsgUpdateCollection,
   MsgUpdateUserApprovals
 } from '@/proto/badges/tx_pb.js';
-import type { TxBody, AuthInfo, TxRaw } from '@/proto/cosmos/tx/v1beta1/tx_pb.js';
+import { type AuthInfo, type TxBody, type TxRaw, SignDoc } from '@/proto/cosmos/tx/v1beta1/tx_pb.js';
+import { createTypedData } from '@/transactions/eip712/payload/createTypedData.js';
+import {
+  populateUndefinedForMsgCreateCollection,
+  populateUndefinedForMsgTransferBadges,
+  populateUndefinedForMsgUniversalUpdateCollection,
+  populateUndefinedForMsgUpdateCollection,
+  populateUndefinedForMsgUpdateUserApprovals
+} from '@/transactions/eip712/payload/samples/getSampleMsg.js';
+import type { AnyMessage, Message } from '@bufbuild/protobuf';
+import bs58 from 'bs58';
+import CryptoJS from 'crypto-js';
+import elliptic from 'elliptic';
+import { SigningKey, getBytes, hashMessage, sha256 } from 'ethers';
 import type { Chain, Fee, Sender } from './common.js';
 import { createStdFee, createStdSignDocFromProto, createTransactionWithMultipleMessages } from './transaction.js';
-import { SupportedChain } from '@/common/types.js';
-import { generatePostBodyBroadcast } from '@/node-rest-api/broadcast.js';
-import {
-  populateUndefinedForMsgUpdateCollection,
-  populateUndefinedForMsgUpdateUserApprovals,
-  populateUndefinedForMsgTransferBadges,
-  populateUndefinedForMsgCreateCollection,
-  populateUndefinedForMsgUniversalUpdateCollection
-} from '@/transactions/eip712/payload/samples/getSampleMsg.js';
 import { createTxRaw, createTxRawWithExtension } from './txRaw.js';
-import { signatureToWeb3ExtensionBitcoin, signatureToWeb3ExtensionSolana, signatureToWeb3ExtensionEthereum } from './web3Extension.js';
-import { createTypedData } from '@/transactions/eip712/payload/createTypedData.js';
 import type { MessageGenerated } from './utils.js';
-import CryptoJS from 'crypto-js';
+import { signatureToWeb3ExtensionBitcoin, signatureToWeb3ExtensionEthereum, signatureToWeb3ExtensionSolana } from './web3Extension.js';
 
-/**
- * TxContext is the transaction context for a SignDoc that is independent
- * from the transaction payload.
- *
- * @category Transactions
- */
-export interface TxContext {
+const secp256k1 = new elliptic.ec('secp256k1');
+
+interface LegacyTxContext {
   chain: Chain;
   sender: Sender;
   fee: Fee;
   memo: string;
+}
+
+/**
+ * LegacyTxContext is the transaction context for the transaction payload.
+ *
+ * @category Transactions
+ */
+export interface TxContext {
+  /** Use the BitBadges testnet? Usee mainnet by default. */
+  testnet?: boolean;
+  /** Override the chain ID to a custom value. Uses BitBadges mainnet by default. */
+  chainIdOverride?: string;
+
+  /**
+   * Details about the sender of this transaction. Address should be in their NATIVE format.
+   * We use this to determine the approach.
+   *
+   * Public key is ONLY needed for Cosmos based signatures.
+   */
+  sender: {
+    address: NativeAddress;
+    sequence: number;
+    accountNumber: number;
+    publicKey?: string;
+  };
+
+  fee: Fee;
+  memo?: string;
 }
 
 /**
@@ -70,7 +100,7 @@ function createProtoMsg<T extends Message<T> = AnyMessage>(msg: T) {
   };
 }
 
-const createEIP712TypedData = (context: TxContext, protoMsgs: MessageGenerated | MessageGenerated[]) => {
+const createEIP712TypedData = (context: LegacyTxContext, protoMsgs: MessageGenerated | MessageGenerated[]) => {
   const { fee, sender, chain, memo } = context;
   const protoMsgsArray = wrapTypeToArray(protoMsgs);
 
@@ -84,10 +114,7 @@ const createEIP712TypedData = (context: TxContext, protoMsgs: MessageGenerated |
   }
 };
 
-const createCosmosPayload = (
-  context: TxContext,
-  cosmosPayload: any | any[] // TODO: re-export Protobuf Message type from /proto
-) => {
+const createCosmosPayload = (context: LegacyTxContext, cosmosPayload: any | any[]) => {
   const { fee, sender, chain, memo } = context;
 
   const messages = wrapTypeToArray(cosmosPayload);
@@ -111,7 +138,7 @@ function recursivelySort(obj: any): any {
     return obj.map(recursivelySort);
   } else if (typeof obj === 'object' && obj !== null) {
     return Object.keys(obj)
-      .sort()
+      .sort((a, b) => a.localeCompare(b))
       .reduce((result, key) => {
         result[key] = recursivelySort(obj[key] as any);
         return result;
@@ -142,22 +169,64 @@ export interface TransactionPayload {
     authInfo: AuthInfo;
     signBytes: string;
   };
-  eipToSign: EIP712TypedData;
-  jsonToSign: string;
-  humanReadableMessage: string;
+  txnString: string;
+  txnJson: Record<string, any>;
 }
+
+const wrapExternalTxContext = (context: TxContext): LegacyTxContext => {
+  const chain = getChainForAddress(context.sender.address);
+  let cosmosChainId = context.testnet ? TESTNET_CHAIN_DETAILS.cosmosChainId : MAINNET_CHAIN_DETAILS.cosmosChainId;
+  let chainId = context.testnet ? TESTNET_CHAIN_DETAILS.chainId : MAINNET_CHAIN_DETAILS.chainId;
+  if (context.chainIdOverride) {
+    chainId = Number(context.chainIdOverride.split('-')[1]);
+    cosmosChainId = context.chainIdOverride;
+  }
+
+  const txContext: LegacyTxContext = {
+    chain: { chain, cosmosChainId, chainId },
+    sender: {
+      accountAddress: convertToCosmosAddress(context.sender.address),
+      pubkey: context.sender.publicKey || '',
+      sequence: context.sender.sequence,
+      accountNumber: context.sender.accountNumber
+    },
+    fee: context.fee,
+    memo: context.memo || ''
+  };
+
+  if (txContext.sender.accountAddress === '' || !txContext.sender.accountAddress.startsWith('cosmos')) {
+    throw new Error('Account address must be a validly formatted Cosmos address');
+  }
+
+  if (txContext.sender.accountNumber <= 0) {
+    throw new Error(
+      'Account number must be greater than 0. This means the user is unregistered on the blockchain. Users can be registered by sending them any amount of $BADGE. This is a pre-requisite because the user needs to be able to pay for the transaction fees.'
+    );
+  }
+
+  if (txContext.sender.sequence < 0) {
+    throw new Error('Sequence must be greater than or equal to 0');
+  }
+
+  return txContext;
+};
 
 /**
  * createTransactionPayload creates a transaction payload for a given transaction context and messages.
  *
- * It returns the payload in the following format: { signDirect, legacyAmino, eipToSign, jsonToSign }
+ * It returns the payload in the following format: { signDirect, legacyAmino, txnString }
  * signDirect and legacyAmino are the payloads for signing with the respective signing methods from the Cosmos SDK.
- * eipToSign is the payload to sign for Ethereum EIP-712 signing.
- * jsonToSign is the payload to sign for Solana signing.
+ * txnString is the human-readable string to sign for Ethereum, Solana, and Bitcoin.
  *
  * @category Transactions
  */
 export const createTransactionPayload = (context: TxContext, messages: Message | Message[]): TransactionPayload => {
+  const txContext: LegacyTxContext = wrapExternalTxContext(context);
+
+  return createTransactionPayloadFromTxContext(txContext, messages);
+};
+
+const createTransactionPayloadFromTxContext = (txContext: LegacyTxContext, messages: Message | Message[]) => {
   messages = wrapTypeToArray(messages);
 
   //Don't do anything with these msgs like setShowJson bc they are simulated messages, not final ones
@@ -167,38 +236,17 @@ export const createTransactionPayload = (context: TxContext, messages: Message |
   }
   generatedMsgs = normalizeMessagesIfNecessary(generatedMsgs);
 
-  if (context.sender.accountAddress === '' || !context.sender.accountAddress.startsWith('cosmos')) {
-    throw new Error('Account address must be a validly formatted Cosmos address');
-  }
-
-  if (context.sender.accountNumber <= 0) {
-    throw new Error(
-      'Account number must be greater than 0. This means the user is unregistered on the blockchain. Users can be registered by sending them any amount of $BADGE. This is a pre-requisite because the user needs to be able to pay for the transaction fees.'
-    );
-  }
-
-  if (context.sender.sequence < 0) {
-    throw new Error('Sequence must be greater than or equal to 0');
-  }
-
-  // Fails for simulations, I believe
-  // if (context.sender.pubkey === '') {
-  //   throw new Error('Public key must be a validly formatted public key')
-  // }
-
-  const eipTxn = createEIP712TypedData(context, generatedMsgs);
+  const eipTxn = createEIP712TypedData(txContext, generatedMsgs);
   const sortedEipMessage = recursivelySort(eipTxn.message);
   const message = JSON.stringify(sortedEipMessage);
   const sha256Message = CryptoJS.SHA256(message).toString();
-
   const humanReadableMessage = 'This is a BitBadges transaction with the content hash: ' + sha256Message;
 
   return {
-    signDirect: createCosmosPayload(context, generatedMsgs).signDirect,
-    legacyAmino: createCosmosPayload(context, generatedMsgs).legacyAmino,
-    eipToSign: createEIP712TypedData(context, generatedMsgs),
-    jsonToSign: message,
-    humanReadableMessage: humanReadableMessage
+    signDirect: createCosmosPayload(txContext, generatedMsgs).signDirect,
+    legacyAmino: createCosmosPayload(txContext, generatedMsgs).legacyAmino,
+    txnString: humanReadableMessage,
+    txnJson: sortedEipMessage
   };
 };
 
@@ -230,7 +278,7 @@ const normalizeMessagesIfNecessary = (messages: MessageGenerated[]) => {
 };
 
 function createTxRawBitcoin(
-  context: TxContext,
+  context: LegacyTxContext,
   payload: TransactionPayload,
   signature: string
 ): {
@@ -240,7 +288,6 @@ function createTxRawBitcoin(
   const { chain, sender } = context;
 
   const txnExtension = signatureToWeb3ExtensionBitcoin(chain, sender, signature);
-  // Create the txRaw
   const rawTx = createTxRawWithExtension(payload.legacyAmino.body, payload.legacyAmino.authInfo, txnExtension);
 
   return rawTx;
@@ -258,32 +305,86 @@ function createTxRawBitcoin(
  *
  * @category Transactions
  */
-export function createTxBroadcastBody(context: TxContext, payload: TransactionPayload, signature: string, solAddress?: string) {
+export function createTxBroadcastBody(txContext: TxContext, messages: Message | Message[], signature: string, solAddress?: string) {
+  const context = wrapExternalTxContext(txContext);
   const chain = context.chain.chain;
 
+  const isCosmosSignature = chain === SupportedChain.COSMOS;
+  if (isCosmosSignature && !context.sender.pubkey) {
+    throw new Error('Public key must be provided for Cosmos signatures');
+  }
+
   if (chain === SupportedChain.BTC) {
-    return createTxBroadcastBodyBitcoin(context, payload, signature);
+    return createTxBroadcastBodyBitcoin(context, messages, signature);
   } else if (chain === SupportedChain.SOLANA) {
     if (!solAddress) {
       throw new Error('Solana address must be provided');
     }
-    return createTxBroadcastBodySolana(context, payload, signature, solAddress);
+    return createTxBroadcastBodySolana(context, messages, signature, solAddress);
   } else if (chain === SupportedChain.ETH) {
-    return createTxBroadcastBodyEthereum(context, payload, signature);
+    return createTxBroadcastBodyEthereum(context, messages, signature);
   } else {
-    return createTxBroadcastBodyCosmos(payload, [Uint8Array.from(Buffer.from(signature, 'hex'))]);
+    return createTxBroadcastBodyCosmos(createTransactionPayload(txContext, messages), [Uint8Array.from(Buffer.from(signature, 'hex'))]);
   }
 }
+
+//TODO: We should eventually get Cosmos keys via the signature itself
+//      but current Cosmos implementations are kinda stupid.
+//      The public key is in the sign doc, so you are signing your own public key
+//      which I think makes it impossible to recover the public key from just a signature
+//      because you do not know the message that was signed (since you dont know the pubkey).
+const getCosmosPublicKey = (txContext: TxContext, messages: Message | Message[], signature: string) => {
+  if (!signature) return '';
+
+  const wrappedTxContext = wrapExternalTxContext(txContext);
+
+  const signDoc = new SignDoc({
+    accountNumber: BigInt(txContext.sender.accountNumber),
+    chainId: wrappedTxContext.chain.cosmosChainId,
+    bodyBytes: createTransactionPayload(txContext, messages).signDirect.body.toBinary(),
+    authInfoBytes: createTransactionPayload(txContext, messages).signDirect.authInfo.toBinary()
+  });
+
+  return getCosmosPublicKeyFromSignDoc(signDoc, signature);
+};
+
+const getCosmosPublicKeyFromSignDoc = (signDoc: SignDoc, signature: string) => {
+  const msgHash = Buffer.from(sha256(signDoc.toBinary()).substring(2), 'hex');
+  const pubKey = SigningKey.recoverPublicKey(msgHash, '0x' + signature);
+  const pubKeyHex = pubKey.substring(2);
+  const compressedPublicKey = compressSecp256Pubkey(new Uint8Array(Buffer.from(pubKeyHex, 'hex')));
+  const base64PubKey = Buffer.from(compressedPublicKey).toString('base64');
+
+  return base64PubKey;
+};
 
 /**
  * Given the transaction context, payload, and signature, create the raw transaction to be sent to the blockchain.
  */
-function createTxBroadcastBodyBitcoin(context: TxContext, payload: TransactionPayload, signature: string) {
-  return generatePostBodyBroadcast(createTxRawBitcoin(context, payload, signature));
+function createTxBroadcastBodyBitcoin(context: LegacyTxContext, messages: Message | Message[], signature: string) {
+  const publicKey = signature.slice(-66); //BIP322 appends the public key to the signature
+
+  const base64PublicKey = Buffer.from(publicKey, 'hex').toString('base64');
+
+  context.sender.pubkey = base64PublicKey;
+
+  return generatePostBodyBroadcast(
+    createTxRawBitcoin(
+      {
+        ...context,
+        sender: {
+          ...context.sender,
+          pubkey: base64PublicKey
+        }
+      },
+      createTransactionPayloadFromTxContext(context, messages),
+      signature
+    )
+  );
 }
 
 function createTxRawSolana(
-  context: TxContext,
+  context: LegacyTxContext,
   payload: TransactionPayload,
   signature: string,
   solanaAddress: string
@@ -291,21 +392,31 @@ function createTxRawSolana(
   message: TxRaw;
   path: string;
 } {
-  const { chain, sender } = context;
+  const { chain } = context;
+  const txnExtension = signatureToWeb3ExtensionSolana(chain, context.sender, signature, solanaAddress);
 
-  const txnExtension = signatureToWeb3ExtensionSolana(chain, sender, signature, solanaAddress);
-  // Create the txRaw
   const rawTx = createTxRawWithExtension(payload.legacyAmino.body, payload.legacyAmino.authInfo, txnExtension);
-
   return rawTx;
 }
 
-function createTxBroadcastBodySolana(context: TxContext, payload: TransactionPayload, signature: string, solanaAddress: string) {
-  return generatePostBodyBroadcast(createTxRawSolana(context, payload, signature, solanaAddress));
+function createTxBroadcastBodySolana(context: LegacyTxContext, messages: Message | Message[], signature: string, solanaAddress: string) {
+  if (!solanaAddress) {
+    throw new Error('Solana address must be provided');
+  }
+
+  //Pre: get provider from Phantom wallet
+
+  const solanaPublicKeyBase58 = solanaAddress;
+  const solanaPublicKeyBuffer = bs58.decode(solanaPublicKeyBase58);
+  const publicKeyToSet = Buffer.from(solanaPublicKeyBuffer).toString('base64');
+
+  context.sender.pubkey = publicKeyToSet;
+
+  return generatePostBodyBroadcast(createTxRawSolana(context, createTransactionPayloadFromTxContext(context, messages), signature, solanaAddress));
 }
 
 function createTxRawEthereum(
-  context: TxContext,
+  context: LegacyTxContext,
   payload: TransactionPayload,
   signature: string
 ): {
@@ -315,14 +426,37 @@ function createTxRawEthereum(
   const { chain, sender } = context;
 
   const txnExtension = signatureToWeb3ExtensionEthereum(chain, sender, signature);
-  // Create the txRaw
   const rawTx = createTxRawWithExtension(payload.legacyAmino.body, payload.legacyAmino.authInfo, txnExtension);
 
   return rawTx;
 }
 
-function createTxBroadcastBodyEthereum(context: TxContext, payload: TransactionPayload, signature: string) {
-  return generatePostBodyBroadcast(createTxRawEthereum(context, payload, signature));
+const compressSecp256Pubkey = (pubkey: Uint8Array) => {
+  switch (pubkey.length) {
+    case 33:
+      return pubkey;
+    case 65:
+      return Uint8Array.from(secp256k1.keyFromPublic(pubkey).getPublic(true, 'array'));
+    default:
+      throw new Error('Invalid pubkey length');
+  }
+};
+
+function createTxBroadcastBodyEthereum(context: LegacyTxContext, messages: Message | Message[], signature: string) {
+  let publicKey = '';
+  if (signature) {
+    const msgHash = hashMessage(createTransactionPayloadFromTxContext(context, messages).txnString);
+    const msgHashBytes = getBytes(msgHash);
+    const pubKey = SigningKey.recoverPublicKey(msgHashBytes, signature);
+
+    const pubKeyHex = pubKey.substring(2);
+    const compressedPublicKey = compressSecp256Pubkey(new Uint8Array(Buffer.from(pubKeyHex, 'hex')));
+    const base64PubKey = Buffer.from(compressedPublicKey).toString('base64');
+    publicKey = base64PubKey;
+  }
+  context.sender.pubkey = publicKey;
+
+  return generatePostBodyBroadcast(createTxRawEthereum(context, createTransactionPayloadFromTxContext(context, messages), signature));
 }
 
 function createTxRawCosmos(payload: TransactionPayload, signatures: Uint8Array[]) {

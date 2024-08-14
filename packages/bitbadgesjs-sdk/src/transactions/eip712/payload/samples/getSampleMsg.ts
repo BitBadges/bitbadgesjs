@@ -51,7 +51,7 @@ import {
   IsArchivedTimeline,
   CollectionApproval,
   TimedUpdatePermission,
-  BalancesActionPermission,
+  BadgeIdsActionPermission,
   TimedUpdateWithBadgeIdsPermission,
   CollectionApprovalPermission,
   MsgDeleteCollection,
@@ -520,12 +520,11 @@ const universalParams = {
         timelineTimes: [new UintRange()]
       })
     ],
-    canCreateMoreBadges: [
-      new BalancesActionPermission({
+    canUpdateValidBadgeIds: [
+      new BadgeIdsActionPermission({
         permanentlyPermittedTimes: [new UintRange()],
         permanentlyForbiddenTimes: [new UintRange()],
-        badgeIds: [new UintRange()],
-        ownershipTimes: [new UintRange()]
+        badgeIds: [new UintRange()]
       })
     ],
     canUpdateBadgeMetadata: [
