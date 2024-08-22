@@ -304,6 +304,7 @@ export class SocialConnections<T extends NumberType> extends BaseNumberTypeClass
   github?: SocialConnectionInfo<T> | undefined;
   google?: SocialConnectionInfo<T> | undefined;
   twitch?: SocialConnectionInfo<T> | undefined;
+  strava?: SocialConnectionInfo<T> | undefined;
 
   constructor(data: iSocialConnections<T>) {
     super();
@@ -312,6 +313,7 @@ export class SocialConnections<T extends NumberType> extends BaseNumberTypeClass
     this.github = data.github ? new SocialConnectionInfo(data.github) : undefined;
     this.twitch = data.twitch ? new SocialConnectionInfo(data.twitch) : undefined;
     this.google = data.google ? new SocialConnectionInfo(data.google) : undefined;
+    this.strava = data.strava ? new SocialConnectionInfo(data.strava) : undefined;
   }
 
   getNumberFieldNames(): string[] {
@@ -460,6 +462,10 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
         github?: { scopes: OAuthScopeDetails[]; username: string; id: string } | undefined;
         google?: { scopes: OAuthScopeDetails[]; username: string; id: string } | undefined;
         twitter?: { scopes: OAuthScopeDetails[]; username: string; id: string } | undefined;
+        addresses?: {
+          address: NativeAddress;
+          scopes: OAuthScopeDetails[];
+        }[];
       }
     | undefined;
 
@@ -845,7 +851,8 @@ export class ClaimBuilderDoc<T extends NumberType> extends BaseNumberTypeClass<C
   lastUpdated: T;
   createdAt: T;
   assignMethod?: string | undefined;
-
+  version: T;
+  testOnly?: boolean;
   constructor(data: iClaimBuilderDoc<T>) {
     super();
     this._docId = data._docId;
@@ -869,11 +876,13 @@ export class ClaimBuilderDoc<T extends NumberType> extends BaseNumberTypeClass<C
     this.trackerDetails = data.trackerDetails ? new ChallengeTrackerIdDetails(data.trackerDetails) : undefined;
     this.metadata = data.metadata ? new Metadata(data.metadata) : undefined;
     this.createdAt = data.createdAt;
+    this.version = data.version;
+    this.testOnly = data.testOnly;
     this.assignMethod = data.assignMethod;
   }
 
   getNumberFieldNames(): string[] {
-    return ['collectionId', 'deletedAt', 'lastUpdated', 'createdAt'];
+    return ['collectionId', 'deletedAt', 'lastUpdated', 'createdAt', 'version'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ClaimBuilderDoc<U> {
@@ -1276,18 +1285,16 @@ export class DepositBalanceDoc<T extends NumberType> extends BaseNumberTypeClass
   _docId: string;
   _id?: string;
   cosmosAddress: CosmosAddress;
-  usdBalance: T;
 
   constructor(data: iDepositBalanceDoc<T>) {
     super();
     this.cosmosAddress = data.cosmosAddress;
-    this.usdBalance = data.usdBalance;
     this._docId = data._docId;
     this._id = data._id;
   }
 
   getNumberFieldNames(): string[] {
-    return ['usdBalance'];
+    return [];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): DepositBalanceDoc<U> {
@@ -1311,7 +1318,7 @@ export class PluginDoc<T extends NumberType> extends BaseNumberTypeClass<PluginD
   toPublish: boolean;
   reviewCompleted: boolean;
   inviteCode?: string | undefined;
-
+  version: T;
   stateFunctionPreset: PluginPresetType;
   duplicatesAllowed: boolean;
   requiresSessions: boolean;
@@ -1333,21 +1340,22 @@ export class PluginDoc<T extends NumberType> extends BaseNumberTypeClass<PluginD
   };
 
   userInputsSchema: Array<JsonBodyInputSchema>;
-  publicParamsSchema: Array<JsonBodyInputSchema | { key: string; label: string; type: 'ownershipRequirements' }>;
-  privateParamsSchema: Array<JsonBodyInputSchema | { key: string; label: string; type: 'ownershipRequirements' }>;
+  publicParamsSchema: Array<JsonBodyInputSchema | { key: string; label: string; type: 'ownershipRequirements'; headerField?: boolean }>;
+  privateParamsSchema: Array<JsonBodyInputSchema | { key: string; label: string; type: 'ownershipRequirements'; headerField?: boolean }>;
 
   verificationCall?: {
     uri: string;
     method: 'POST' | 'GET' | 'PUT' | 'DELETE';
     hardcodedInputs: Array<JsonBodyInputWithValue>;
 
-    passAddress: boolean;
-    passDiscord: boolean;
-    passEmail: boolean;
-    passTwitter: boolean;
-    passGoogle: boolean;
-    passGithub: boolean;
-    passTwitch: boolean;
+    passAddress?: boolean;
+    passDiscord?: boolean;
+    passEmail?: boolean;
+    passTwitter?: boolean;
+    passGoogle?: boolean;
+    passGithub?: boolean;
+    passTwitch?: boolean;
+    passStrava?: boolean;
 
     postProcessingJs: string;
   };
@@ -1394,10 +1402,11 @@ export class PluginDoc<T extends NumberType> extends BaseNumberTypeClass<PluginD
     this.createdAt = data.createdAt;
     this.deletedAt = data.deletedAt;
     this.inviteCode = data.inviteCode;
+    this.version = data.version;
   }
 
   getNumberFieldNames(): string[] {
-    return ['lastUpdated', 'createdAt', 'deletedAt'];
+    return ['lastUpdated', 'createdAt', 'deletedAt', 'version'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): PluginDoc<U> {

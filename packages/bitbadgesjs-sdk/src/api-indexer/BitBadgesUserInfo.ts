@@ -49,8 +49,6 @@ export interface iBitBadgesUserInfo<T extends NumberType> extends iProfileDoc<T>
   resolvedName?: string;
   /** The avatar of the account. */
   avatar?: string;
-  /** In-site USD balance of the account. */
-  usdBalance?: T;
   /** The Solana address of the account. */
   solAddress: string;
   /** The chain of the account. */
@@ -123,7 +121,6 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   accountNumber: T;
   sequence?: T;
   balance?: CosmosCoin<T>;
-  usdBalance?: T;
   pubKeyType: string;
   publicKey: string;
 
@@ -191,7 +188,6 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     this.views = data.views;
     this.alias = data.alias;
     this.reservedMap = data.reservedMap ? new MapDoc(data.reservedMap) : undefined;
-    this.usdBalance = data.usdBalance;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): BitBadgesUserInfo<U> {
@@ -203,7 +199,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   }
 
   getNumberFieldNames(): string[] {
-    return ['accountNumber', 'sequence', 'usdBalance'];
+    return ['accountNumber', 'sequence'];
   }
 
   /**

@@ -1,7 +1,7 @@
 /**
- * This file is used to generate sample Msgs for EIP712 type generation.
+ * This file is used to generate sample Msgs for type generation.
  *
- * This is needed because the EIP712 type generation doesn't natively support optional types.
+ * This is needed because the type generation doesn't natively support optional types.
  * Our solution is to always generate Msgs with all optional types populated with a default empty value (e.g. "", [], 0, etc.)
  * For primitive types and primitive type arrays, we don't need to add bc protobuf automatically adds a default value, but for objects we do.
  * For all Number type values (cosmos.Uint), we use strings and bigints (not numbers), so we need to add a default value of "0"

@@ -1,3 +1,4 @@
+import { ClaimDetails, iClaimDetails } from '@/api-indexer/requests/requests.js';
 import { BaseNumberTypeClass, CustomTypeClass, convertClassPropertiesAndMaintainNumberTypes, deepCopyPrimitives } from '@/common/base.js';
 import type {
   iApprovalAmounts,
@@ -29,8 +30,6 @@ import type { CollectionApprovalPermissionWithDetails } from './permissions.js';
 import { CollectionApprovalPermission } from './permissions.js';
 import { UintRange, UintRangeArray } from './uintRanges.js';
 import { AllDefaultValues, getPotentialUpdatesForTimelineValues, getUpdateCombinationsToCheck } from './validate-utils.js';
-import { iClaimDetails } from '@/api-indexer/requests/requests.js';
-import { ClaimIntegrationPluginType, IntegrationPluginDetails } from '@/api-indexer/docs/interfaces.js';
 
 const { getReservedAddressList, getReservedTrackerList } = AddressList;
 
@@ -1144,24 +1143,20 @@ export interface iApprovalInfoDetails {
  */
 export class ChallengeInfoDetails<T extends NumberType> extends BaseNumberTypeClass<ChallengeInfoDetails<T>> implements iChallengeInfoDetails<T> {
   challengeDetails: ChallengeDetails<T>;
-  claim?: {
-    plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
-    claimId: string;
-    manualDistribution?: boolean;
-    approach?: string;
-  };
+  claim?: ClaimDetails<T>;
 
   constructor(data: iChallengeInfoDetails<T>) {
     super();
     this.challengeDetails = new ChallengeDetails(data.challengeDetails);
-    this.claim = data.claim;
+    this.claim = data.claim ? new ClaimDetails(data.claim) : undefined;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ChallengeInfoDetails<U> {
     return new ChallengeInfoDetails(
       deepCopyPrimitives({
         ...this,
-        challengeDetails: this.challengeDetails.convert(convertFunction)
+        challengeDetails: this.challengeDetails.convert(convertFunction),
+        claim: this.claim ? this.claim.convert(convertFunction) : undefined
       })
     );
   }

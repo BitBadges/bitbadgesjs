@@ -4,8 +4,8 @@ import * as web3Sol from '@/proto/solana/web3_pb.js';
 import * as web3Btc from '@/proto/bitcoin/web3_pb.js';
 
 /**
- * This function is used to convert a signature to a web3 extension for an Ethereum EIP712 transaction.
- * We use extensions to tell the chain to parse and check the signatures using EIP712 format instead of the default format.
+ * This function is used to convert a signature to a web3 extension for an Ethereum transaction.
+ * We use extensions to tell the chain to parse and check the signatures using Ethereum format instead of the default format.
  *
  * @param chain - The details of the chain you are using.
  * @param sender - The sender details for the transaction. sender.accountAddress must be the mapped Cosmos address of the Ethereum address.
@@ -57,8 +57,8 @@ export function signatureToWeb3ExtensionBitcoin(chain: Chain, sender: Sender, he
 }
 
 /**
- * This function is used to create a web3 extension for an Ethereum EIP712 transaction.
- * We use extensions to tell the chain to parse and check the signatures using EIP712 format instead of the default format.
+ * This function is used to create a web3 extension for an Ethereum transaction.
+ * We use extensions to tell the chain to parse and check the signatures using Ethereum format instead of the default format.
  *
  * @param chainId The chain id of the chain you are using. For mainnet (bitbadges-1, this is 1). For testnets (bitbadges-2, this is 2 and so on).
  * @param feePayer The Cosmos address of the fee payer.

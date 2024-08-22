@@ -7,30 +7,31 @@ import { BitBadgesUserInfo } from '@/api-indexer/BitBadgesUserInfo.js';
 import type { PaginationInfo } from '@/api-indexer/base.js';
 import { EmptyResponseClass } from '@/api-indexer/base.js';
 import { ClaimAlertDoc, TransferActivityDoc } from '@/api-indexer/docs/activity.js';
-import { AccessTokenDoc, DeveloperAppDoc, PluginDoc, AttestationDoc, StatusDoc, AttestationProofDoc, EventDoc } from '@/api-indexer/docs/docs.js';
+import { AccessTokenDoc, AttestationDoc, AttestationProofDoc, DeveloperAppDoc, EventDoc, PluginDoc, StatusDoc } from '@/api-indexer/docs/docs.js';
 import type {
-  SiwbbMessage,
   ClaimIntegrationPluginCustomBodyType,
   ClaimIntegrationPluginType,
   CosmosAddress,
   IntegrationPluginDetails,
+  JsonBodyInputSchema,
+  JsonBodyInputWithValue,
   NativeAddress,
   PluginPresetType,
+  SiwbbMessage,
   UNIXMilliTimestamp,
   iAccessTokenDoc,
+  iAttestationDoc,
+  iAttestationProofDoc,
   iClaimAlertDoc,
   iCustomLink,
   iCustomListPage,
   iCustomPage,
   iDeveloperAppDoc,
+  iEventDoc,
   iPluginDoc,
-  iAttestationDoc,
   iSocialConnections,
   iStatusDoc,
-  iTransferActivityDoc,
-  iAttestationProofDoc,
-  JsonBodyInputSchema,
-  iEventDoc
+  iTransferActivityDoc
 } from '@/api-indexer/docs/interfaces.js';
 import type { iBadgeMetadataDetails, iCollectionMetadataDetails } from '@/api-indexer/metadata/badgeMetadata.js';
 import type { iMetadata } from '@/api-indexer/metadata/metadata.js';
@@ -44,11 +45,11 @@ import { SiwbbChallenge, VerifySIWBBOptions, iSiwbbChallenge } from '@/core/bloc
 import { AttestationsProof } from '@/core/secrets.js';
 import type { iOffChainBalancesMap } from '@/core/transfers.js';
 import { UintRangeArray } from '@/core/uintRanges.js';
-import type { iPredeterminedBalances, iAttestationsProof, iUintRange } from '@/interfaces/index.js';
+import type { iAttestationsProof, iPredeterminedBalances, iUintRange } from '@/interfaces/index.js';
 import { BroadcastPostBody } from '@/node-rest-api/index.js';
 import { AndGroup, OrGroup, type AssetConditionGroup, type ChallengeParams, type VerifyChallengeOptions } from 'blockin';
-import { SiwbbAndGroup, SiwbbAssetConditionGroup, SiwbbChallengeParams, SiwbbOrGroup, OwnershipRequirements } from './blockin.js';
-import { iMapWithValues, MapWithValues } from './maps.js';
+import { OwnershipRequirements, SiwbbAndGroup, SiwbbAssetConditionGroup, SiwbbChallengeParams, SiwbbOrGroup } from './blockin.js';
+import { MapWithValues, iMapWithValues } from './maps.js';
 
 /**
  * The response after successfully broadcasting a transaction.
@@ -259,6 +260,8 @@ export interface iClaimDetails<T extends NumberType> {
   assignMethod?: string;
   /** Last updated timestamp for the claim. */
   lastUpdated?: T;
+  /** The version of the claim. */
+  version: T;
 }
 
 /**
@@ -275,7 +278,7 @@ export class ClaimDetails<T extends NumberType> extends BaseNumberTypeClass<Clai
   metadata?: Metadata<T> | undefined;
   assignMethod?: string | undefined;
   lastUpdated?: T | undefined;
-
+  version: T;
   constructor(data: iClaimDetails<T>) {
     super();
     this.claimId = data.claimId;
@@ -287,6 +290,7 @@ export class ClaimDetails<T extends NumberType> extends BaseNumberTypeClass<Clai
     this.metadata = data.metadata ? new Metadata(data.metadata) : undefined;
     this.assignMethod = data.assignMethod;
     this.lastUpdated = data.lastUpdated;
+    this.version = data.version;
   }
 
   convert<U extends NumberType>(convertFunction: (val: NumberType) => U): ClaimDetails<U> {
@@ -294,7 +298,7 @@ export class ClaimDetails<T extends NumberType> extends BaseNumberTypeClass<Clai
   }
 
   getNumberFieldNames(): string[] {
-    return ['lastUpdated'];
+    return ['lastUpdated', 'version'];
   }
 }
 
@@ -330,8 +334,8 @@ export class GetClaimsSuccessResponse<T extends NumberType>
  * @category API Requests / Responses
  */
 export interface CompleteClaimPayload {
-  /** If provided, we will check that no plugins or claims have been updated since the last time the user fetched the claim. */
-  _fetchedAt?: number;
+  /** Needs to be provided so we check that no plugins or claims have been updated since the claim was fetched. */
+  _expectedVersion: number;
 
   /** The claim body for each unique plugin. */
   [customPluginId: string]: ClaimIntegrationPluginCustomBodyType<ClaimIntegrationPluginType> | any | undefined;
@@ -398,8 +402,8 @@ export class GetClaimAttemptStatusSuccessResponse
  * @category API Requests / Responses
  */
 export interface SimulateClaimPayload {
-  /** If provided, we will check that no plugins or claims have been updated since the last time the user fetched the claim. */
-  _fetchedAt?: number;
+  /** Will fail if the claim version is not the expected version.*/
+  _expectedVersion: number;
 
   /** If provided, we will only simulate the claim for the specific plugins w/ the provided instance IDs. */
   _specificInstanceIds?: string[];
@@ -561,6 +565,10 @@ export interface UpdateAccountInfoPayload {
     github?: { scopes: OAuthScopeDetails[]; username: string; id: string } | undefined;
     google?: { scopes: OAuthScopeDetails[]; username: string; id: string } | undefined;
     twitter?: { scopes: OAuthScopeDetails[]; username: string; id: string } | undefined;
+    addresses?: {
+      address: NativeAddress;
+      scopes: OAuthScopeDetails[];
+    }[];
   };
 
   /**
@@ -833,6 +841,11 @@ export interface VerifySignInPayload {
   signature: string;
 
   /**
+   * The address that signed the message on behalf of another address.
+   */
+  altSigner?: NativeAddress;
+
+  /**
    * Required for some chains (Cosmos) to verify signature. The public key of the signer.
    */
   publicKey?: string;
@@ -914,6 +927,14 @@ export interface iCheckSignInStatusSuccessResponse {
     id: string;
     username: string;
   };
+
+  /**
+   * Signed in with Strava?
+   */
+  strava?: {
+    username: string;
+    id: string;
+  };
 }
 
 /**
@@ -942,6 +963,7 @@ export class CheckSignInStatusSuccessResponse extends CustomTypeClass<CheckSignI
     username: string;
   };
   twitch?: { id: string; username: string } | undefined;
+  strava?: { username: string; id: string } | undefined;
 
   constructor(data: iCheckSignInStatusSuccessResponse) {
     super();
@@ -953,6 +975,7 @@ export class CheckSignInStatusSuccessResponse extends CustomTypeClass<CheckSignI
     this.github = data.github;
     this.google = data.google;
     this.twitch = data.twitch;
+    this.strava = data.strava;
   }
 }
 
@@ -972,6 +995,8 @@ export interface SignOutPayload {
   signOutGithub?: boolean;
   /** Sign out of Twitch. */
   signOutTwitch?: boolean;
+  /** Sign out of Strava. */
+  signOutStrava?: boolean;
 }
 
 /**
@@ -2167,7 +2192,7 @@ export interface CreatePluginPayload {
   verificationCall?: {
     uri: string;
     method: 'POST' | 'GET' | 'PUT' | 'DELETE';
-    // hardcodedInputs: Array<JsonBodyInputWithValue>;
+    hardcodedInputs: Array<JsonBodyInputWithValue>;
 
     passAddress?: boolean;
     passDiscord?: boolean;
@@ -2175,6 +2200,7 @@ export interface CreatePluginPayload {
     passTwitter?: boolean;
     passGoogle?: boolean;
     passGithub?: boolean;
+    passStrava?: boolean;
     passTwitch?: boolean;
 
     postProcessingJs: string;
@@ -2257,7 +2283,7 @@ export interface UpdatePluginPayload {
   verificationCall?: {
     uri: string;
     method: 'POST' | 'GET' | 'PUT' | 'DELETE';
-    // hardcodedInputs: Array<JsonBodyInputWithValue>;
+    hardcodedInputs: Array<JsonBodyInputWithValue>;
 
     passAddress?: boolean;
     passDiscord?: boolean;
@@ -2266,6 +2292,7 @@ export interface UpdatePluginPayload {
     passGoogle?: boolean;
     passGithub?: boolean;
     passTwitch?: boolean;
+    passStrava?: boolean;
 
     postProcessingJs: string;
   };
@@ -2318,6 +2345,8 @@ export interface GetPluginPayload {
   pluginId?: string;
   /** Invite code to fetch the plugin with. */
   inviteCode?: string;
+  /** Bookmark for pagination of the plugins. */
+  bookmark?: string;
 }
 
 /**
@@ -2358,6 +2387,9 @@ export class CreatePaymentIntentSuccessResponse
  */
 export interface iGetPluginSuccessResponse<T extends NumberType> {
   plugins: iPluginDoc<T>[];
+
+  /** Bookmark for pagination of the plugins. Only applicable if fetching the directory. */
+  bookmark?: string;
 }
 
 /**
@@ -2368,10 +2400,12 @@ export class GetPluginSuccessResponse<T extends NumberType>
   implements iGetPluginSuccessResponse<T>
 {
   plugins: PluginDoc<T>[];
+  bookmark?: string;
 
   constructor(data: iGetPluginSuccessResponse<T>) {
     super();
     this.plugins = data.plugins.map((developerApp) => new PluginDoc(developerApp));
+    this.bookmark = data.bookmark;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetPluginSuccessResponse<U> {
@@ -2401,7 +2435,7 @@ export class DeleteClaimSuccessResponse extends EmptyResponseClass {}
  * @category API Requests / Responses
  */
 export interface UpdateClaimPayload {
-  claims: Omit<iClaimDetails<NumberType>, 'seedCode'>[];
+  claims: Omit<iClaimDetails<NumberType>, 'seedCode' | 'version'>[];
 }
 
 /**
@@ -2422,14 +2456,18 @@ export type ManagePluginRequest = Omit<IntegrationPluginDetails<ClaimIntegration
 /**
  * @category Interfaces
  */
-export type CreateClaimRequest<T extends NumberType> = Omit<iClaimDetails<T>, 'plugins'> & { listId?: string; collectionId?: T; cid?: string } & {
+export type CreateClaimRequest<T extends NumberType> = Omit<iClaimDetails<T>, 'plugins' | 'version'> & {
+  listId?: string;
+  collectionId?: T;
+  cid?: string;
+} & {
   plugins: ManagePluginRequest[];
 };
 
 /**
  * @category Interfaces
  */
-export type UpdateClaimRequest<T extends NumberType> = Omit<iClaimDetails<T>, 'seedCode' | 'plugins' | 'assignMethod'> & {
+export type UpdateClaimRequest<T extends NumberType> = Omit<iClaimDetails<T>, 'seedCode' | 'plugins' | 'assignMethod' | 'version'> & {
   listId?: string;
   collectionId?: T;
   cid?: string;
@@ -2442,6 +2480,8 @@ export type UpdateClaimRequest<T extends NumberType> = Omit<iClaimDetails<T>, 's
  */
 export interface CreateClaimPayload {
   claims: CreateClaimRequest<NumberType>[];
+
+  testClaims?: boolean;
 }
 
 /**

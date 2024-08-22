@@ -15,7 +15,7 @@ import { MsgExecuteContractCompat, MsgInstantiateContractCompat } from '@/proto/
 import { AminoMsg } from '../messages/signDoc.js';
 import { createAminoConverter } from './objectConverter.js';
 
-import { MsgMultiSend, MsgSend } from '@/proto/cosmos/bank/v1beta1/index.js';
+import { MsgMultiSend, MsgSend, SendAuthorization } from '@/proto/cosmos/bank/v1beta1/index.js';
 import {
   MsgFundCommunityPool,
   MsgSetWithdrawAddress,
@@ -23,11 +23,18 @@ import {
   MsgWithdrawValidatorCommission
 } from '@/proto/cosmos/distribution/v1beta1/index.js';
 import { MsgDeposit, MsgSubmitProposal, MsgVote, MsgVoteWeighted } from '@/proto/cosmos/gov/v1/index.js';
-import { MsgBeginRedelegate, MsgCreateValidator, MsgDelegate, MsgEditValidator, MsgUndelegate } from '@/proto/cosmos/staking/v1beta1/index.js';
+import {
+  MsgBeginRedelegate,
+  MsgCreateValidator,
+  MsgDelegate,
+  MsgEditValidator,
+  MsgUndelegate,
+  StakeAuthorization
+} from '@/proto/cosmos/staking/v1beta1/index.js';
 
-import { MsgExec } from '@/proto/cosmos/authz/v1beta1/tx_pb.js';
+import { GenericAuthorization } from '@/proto/cosmos/authz/v1beta1/authz_pb.js';
+import { MsgExec, MsgGrant, MsgRevoke } from '@/proto/cosmos/authz/v1beta1/tx_pb.js';
 import { MsgCreateVestingAccount } from '@/proto/cosmos/vesting/v1beta1/index.js';
-import { createRegistry } from '@bufbuild/protobuf';
 
 export interface EncodeObject {
   readonly typeUrl: string;
@@ -52,7 +59,13 @@ export function createDefaultCosmosAminoConverters(): AminoConverters {
     ...createAminoConverter(MsgEditValidator, 'cosmos-sdk/MsgEditValidator'),
     ...createAminoConverter(MsgUndelegate, 'cosmos-sdk/MsgUndelegate'),
     ...createAminoConverter(MsgCreateVestingAccount, 'cosmos-sdk/MsgCreateVestingAccount'),
-    ...createAminoConverter(MsgExec, 'cosmos-sdk/MsgExec')
+    ...createAminoConverter(MsgExec, 'cosmos-sdk/MsgExec'),
+    ...createAminoConverter(MsgGrant, 'cosmos-sdk/MsgGrant'),
+    ...createAminoConverter(MsgRevoke, 'cosmos-sdk/MsgRevoke'),
+
+    ...createAminoConverter(GenericAuthorization, 'cosmos-sdk/GenericAuthorization'),
+    ...createAminoConverter(SendAuthorization, 'cosmos-sdk/SendAuthorization'),
+    ...createAminoConverter(StakeAuthorization, 'cosmos-sdk/StakeAuthorization')
   };
 }
 
@@ -206,41 +219,3 @@ export function createDefaultAminoConverters() {
 }
 
 export const AminoTypes = new AminoTypesClass(createDefaultAminoConverters());
-
-export const ProtoTypeRegistry = createRegistry(
-  MsgSend,
-  MsgMultiSend,
-  MsgFundCommunityPool,
-  MsgSetWithdrawAddress,
-  MsgWithdrawDelegatorReward,
-  MsgWithdrawValidatorCommission,
-  MsgDeposit,
-  MsgVote,
-  MsgVoteWeighted,
-  MsgSubmitProposal,
-  MsgBeginRedelegate,
-  MsgCreateValidator,
-  MsgDelegate,
-  MsgEditValidator,
-  MsgUndelegate,
-  MsgCreateVestingAccount,
-  MsgExec,
-  MsgDeleteCollection,
-  MsgTransferBadges,
-  MsgUpdateCollection,
-  MsgUpdateUserApprovals,
-  MsgCreateAddressLists,
-  MsgCreateCollection,
-  MsgUniversalUpdateCollection,
-  MsgGlobalArchive,
-  MsgExecuteContractCompat,
-  MsgInstantiateContractCompat,
-  MsgExecuteContract,
-  MsgStoreCode,
-  MsgInstantiateContract,
-  MsgCreateMap,
-  MsgDeleteMap,
-  MsgSetValue,
-  MsgUpdateMap,
-  MsgAddCustomData
-);

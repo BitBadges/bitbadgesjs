@@ -1,5 +1,80 @@
-import { type AnyMessage, type JsonWriteOptions, type Message, type JsonReadOptions } from '@bufbuild/protobuf';
-import { ProtoTypeRegistry } from './registry.js';
+import { MsgAddCustomData } from '@/proto/anchor/index.js';
+import { MsgExec, MsgGrant, MsgRevoke, GenericAuthorization } from '@/proto/cosmos/authz/v1beta1/index.js';
+import { MsgSend, MsgMultiSend, SendAuthorization } from '@/proto/cosmos/bank/v1beta1/index.js';
+import {
+  MsgFundCommunityPool,
+  MsgSetWithdrawAddress,
+  MsgWithdrawDelegatorReward,
+  MsgWithdrawValidatorCommission
+} from '@/proto/cosmos/distribution/v1beta1/index.js';
+import { MsgDeposit, MsgVote, MsgVoteWeighted, MsgSubmitProposal } from '@/proto/cosmos/gov/v1/index.js';
+import {
+  MsgBeginRedelegate,
+  MsgCreateValidator,
+  MsgDelegate,
+  MsgEditValidator,
+  MsgUndelegate,
+  StakeAuthorization
+} from '@/proto/cosmos/staking/v1beta1/index.js';
+import { MsgCreateVestingAccount } from '@/proto/cosmos/vesting/v1beta1/index.js';
+import { type AnyMessage, type JsonWriteOptions, type Message, type JsonReadOptions, createRegistry } from '@bufbuild/protobuf';
+import {
+  MsgCreateAddressLists,
+  MsgCreateCollection,
+  MsgDeleteCollection,
+  MsgGlobalArchive,
+  MsgTransferBadges,
+  MsgUniversalUpdateCollection,
+  MsgUpdateCollection,
+  MsgUpdateUserApprovals
+} from '@/proto/badges/index.js';
+
+import { MsgExecuteContract, MsgInstantiateContract, MsgStoreCode } from '@/proto/cosmwasm/wasm/v1/index.js';
+import { MsgCreateMap, MsgDeleteMap, MsgSetValue, MsgUpdateMap } from '@/proto/maps/index.js';
+import { MsgExecuteContractCompat, MsgInstantiateContractCompat } from '@/proto/wasmx/index.js';
+
+export const ProtoTypeRegistry = createRegistry(
+  MsgSend,
+  MsgMultiSend,
+  MsgFundCommunityPool,
+  MsgSetWithdrawAddress,
+  MsgWithdrawDelegatorReward,
+  MsgWithdrawValidatorCommission,
+  MsgDeposit,
+  MsgVote,
+  MsgVoteWeighted,
+  MsgSubmitProposal,
+  MsgBeginRedelegate,
+  MsgCreateValidator,
+  MsgDelegate,
+  MsgEditValidator,
+  MsgUndelegate,
+  MsgCreateVestingAccount,
+  MsgExec,
+  MsgDeleteCollection,
+  MsgTransferBadges,
+  MsgUpdateCollection,
+  MsgUpdateUserApprovals,
+  MsgCreateAddressLists,
+  MsgCreateCollection,
+  MsgUniversalUpdateCollection,
+  MsgGlobalArchive,
+  MsgExecuteContractCompat,
+  MsgInstantiateContractCompat,
+  MsgExecuteContract,
+  MsgStoreCode,
+  MsgInstantiateContract,
+  MsgCreateMap,
+  MsgDeleteMap,
+  MsgSetValue,
+  MsgUpdateMap,
+  MsgAddCustomData,
+  MsgGrant,
+  MsgRevoke,
+  GenericAuthorization,
+  SendAuthorization,
+  StakeAuthorization
+);
 
 /**
  * Set of utilities to convert between wrapped Protobuf Messages, Protobuf-

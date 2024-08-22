@@ -110,7 +110,7 @@ const createEIP712TypedData = (context: LegacyTxContext, protoMsgs: MessageGener
     return createTypedData(chain.chainId, stdSignDoc);
   } catch (e) {
     console.log(e);
-    throw new Error('Error creating EIP712 typed data');
+    throw new Error('Error creating typed data');
   }
 };
 
@@ -200,7 +200,7 @@ const wrapExternalTxContext = (context: TxContext): LegacyTxContext => {
 
   if (txContext.sender.accountNumber <= 0) {
     throw new Error(
-      'Account number must be greater than 0. This means the user is unregistered on the blockchain. Users can be registered by sending them any amount of $BADGE. This is a pre-requisite because the user needs to be able to pay for the transaction fees.'
+      'Account number must be greater than 0. This means the user is unregistered on the blockchain. Users can be registered by sending them any amount of $BADGE.'
     );
   }
 
@@ -250,7 +250,7 @@ const createTransactionPayloadFromTxContext = (txContext: LegacyTxContext, messa
   };
 };
 
-//Because the current eip712 and other code doesn't support Msgs with optional / empty fields,
+//Because the current and other code doesn't support Msgs with optional / empty fields,
 //we need to populate undefined fields with empty default values
 const normalizeMessagesIfNecessary = (messages: MessageGenerated[]) => {
   const newMessages = messages.map((msg) => {

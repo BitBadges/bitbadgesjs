@@ -2,6 +2,7 @@ import type { CustomType } from '@/common/base.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, getConverterFunction } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import type { iAddressList } from '@/interfaces/badges/core.js';
+import typia from 'typia';
 import type { BaseBitBadgesApi, PaginationInfo } from './base.js';
 import { EmptyResponseClass } from './base.js';
 import { ListActivityDoc } from './docs/activity.js';
@@ -9,8 +10,8 @@ import { AddressListDoc } from './docs/docs.js';
 import type { ClaimIntegrationPluginType, IntegrationPluginDetails, iAddressListDoc, iListActivityDoc } from './docs/interfaces.js';
 import type { iMetadata } from './metadata/metadata.js';
 import { Metadata } from './metadata/metadata.js';
+import { ClaimDetails, iClaimDetails } from './requests/index.js';
 import { BitBadgesApiRoutes } from './requests/routes.js';
-import typia from 'typia';
 
 /**
  * @inheritDoc iAddressListDoc
@@ -30,13 +31,7 @@ export interface iBitBadgesAddressList<T extends NumberType> extends iAddressLis
     };
   };
   /** The claims of the address list. */
-  claims: {
-    claimId: string;
-    /** Plugins are the criteria for the claim. */
-    plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
-
-    approach?: string;
-  }[];
+  claims: iClaimDetails<T>[];
 }
 
 /**
@@ -56,14 +51,14 @@ export class BitBadgesAddressList<T extends NumberType>
       pagination: PaginationInfo;
     };
   };
-  claims: { plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[]; claimId: string; approach?: string }[];
+  claims: ClaimDetails<T>[];
 
   constructor(data: iBitBadgesAddressList<T>) {
     super(data);
     this.metadata = data.metadata ? new Metadata(data.metadata) : undefined;
     this.listsActivity = data.listsActivity.map((activity) => new ListActivityDoc(activity));
     this.views = data.views;
-    this.claims = data.claims;
+    this.claims = data.claims.map((claim) => new ClaimDetails(claim));
   }
 
   getNumberFieldNames(): string[] {

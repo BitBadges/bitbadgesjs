@@ -97,6 +97,11 @@ export interface iSocialConnections<T extends NumberType> {
     id: string;
     lastUpdated: UNIXMilliTimestamp<T>;
   };
+  strava?: {
+    username: string;
+    id: string;
+    lastUpdated: UNIXMilliTimestamp<T>;
+  };
 }
 
 /**
@@ -396,6 +401,10 @@ export interface iProfileDoc<T extends NumberType> extends Doc {
     github?: { scopes: OAuthScopeDetails[]; username: string; id: string } | undefined;
     google?: { scopes: OAuthScopeDetails[]; username: string; id: string } | undefined;
     twitter?: { scopes: OAuthScopeDetails[]; username: string; id: string } | undefined;
+    addresses?: {
+      address: NativeAddress;
+      scopes: OAuthScopeDetails[];
+    }[];
   };
 }
 
@@ -568,6 +577,7 @@ export type ClaimIntegrationPluginType =
   | 'google'
   | 'twitch'
   | 'twitter'
+  | 'strava'
   | 'transferTimes'
   | 'initiatedBy'
   | 'whitelist'
@@ -585,14 +595,29 @@ export type JsonBodyInputWithValue = {
   label: string;
   type?: 'date' | 'url';
   value: string | number | boolean;
+  headerField?: boolean;
 };
 
 /**
  * @category Claims
  */
-export type JsonBodyInputSchema = { key: string; label: string; type: 'date' | 'url' | 'string' | 'number' | 'boolean'; helper?: string };
+export type JsonBodyInputSchema = {
+  key: string;
+  label: string;
+  type: 'date' | 'url' | 'string' | 'number' | 'boolean';
+  helper?: string;
+  headerField?: boolean;
 
-type OauthAppName = 'twitter' | 'github' | 'google' | 'email' | 'discord' | 'twitch';
+  required?: boolean;
+  defaultValue?: string | number | boolean;
+  options?: {
+    label: string;
+    value: string | number | boolean;
+  }[];
+  arrayField?: boolean;
+};
+
+type OauthAppName = 'twitter' | 'github' | 'google' | 'email' | 'discord' | 'twitch' | 'strava';
 
 /**
  * @category Claims
@@ -822,6 +847,10 @@ export interface iClaimBuilderDoc<T extends NumberType> extends Doc {
 
   lastUpdated: UNIXMilliTimestamp<T>;
   createdAt: UNIXMilliTimestamp<T>;
+
+  version: T;
+
+  testOnly?: boolean;
 }
 
 /**
@@ -1018,6 +1047,37 @@ export interface iPluginDoc<T extends NumberType> extends Doc {
   /** Review process completed */
   reviewCompleted: boolean;
 
+  metadata: {
+    /** Creator of the plugin */
+    createdBy: string;
+    /** The name of the plugin */
+    name: string;
+    /** Description of the plugin */
+    description: string;
+    /** The image of the plugin */
+    image: string;
+    /** Documentation for the plugin */
+    documentation?: string;
+    /** Source code for the plugin */
+    sourceCode?: string;
+    /** Support link for the plugin */
+    supportLink?: string;
+  };
+
+  lastUpdated: UNIXMilliTimestamp<T>;
+
+  createdAt: UNIXMilliTimestamp<T>;
+  deletedAt?: UNIXMilliTimestamp<T>;
+
+  approvedUsers: NativeAddress[];
+
+
+  // ----- Everything below this line should be version controlled -----
+
+
+  /** Version of the plugin */
+  version: T;
+
   /** Reuse for nonindexed balances? Only applicable if is stateless, requires no user inputs, and requires no sessions. */
   reuseForNonIndexed: boolean;
 
@@ -1036,26 +1096,9 @@ export interface iPluginDoc<T extends NumberType> extends Doc {
   /** This is a flag for being compatible with auto-triggered claims, meaning no user interaction is needed. */
   requiresUserInputs: boolean;
 
-  metadata: {
-    /** Creator of the plugin */
-    createdBy: string;
-    /** The name of the plugin */
-    name: string;
-    /** Description of the plugin */
-    description: string;
-    /** The image of the plugin */
-    image: string;
-    /** Documentation for the plugin */
-    documentation?: string;
-    /** Source code for the plugin */
-    sourceCode?: string;
-    /** Support link for the plugin */
-    supportLink?: string;
-  };
-
   userInputsSchema: Array<JsonBodyInputSchema>;
-  publicParamsSchema: Array<JsonBodyInputSchema | { key: string; label: string; type: 'ownershipRequirements' }>;
-  privateParamsSchema: Array<JsonBodyInputSchema | { key: string; label: string; type: 'ownershipRequirements' }>;
+  publicParamsSchema: Array<JsonBodyInputSchema | { key: string; label: string; type: 'ownershipRequirements'; headerField?: boolean }>;
+  privateParamsSchema: Array<JsonBodyInputSchema | { key: string; label: string; type: 'ownershipRequirements'; headerField?: boolean }>;
 
   userInputRedirect?: {
     baseUri: string;
@@ -1072,24 +1115,20 @@ export interface iPluginDoc<T extends NumberType> extends Doc {
     method: 'POST' | 'GET' | 'PUT' | 'DELETE';
     hardcodedInputs: Array<JsonBodyInputWithValue>;
 
-    passAddress: boolean;
-    passDiscord: boolean;
-    passEmail: boolean;
-    passTwitter: boolean;
-    passGoogle: boolean;
-    passGithub: boolean;
-    passTwitch: boolean;
+    passAddress?: boolean;
+    passDiscord?: boolean;
+    passEmail?: boolean;
+    passTwitter?: boolean;
+    passGoogle?: boolean;
+    passGithub?: boolean;
+    passTwitch?: boolean;
+    passStrava?: boolean;
 
     postProcessingJs: string;
   };
-
-  lastUpdated: UNIXMilliTimestamp<T>;
-
-  createdAt: UNIXMilliTimestamp<T>;
-  deletedAt?: UNIXMilliTimestamp<T>;
-
-  approvedUsers: NativeAddress[];
 }
+
+
 
 /**
  * @category Interfaces
@@ -1097,8 +1136,6 @@ export interface iPluginDoc<T extends NumberType> extends Doc {
 export interface iDepositBalanceDoc<T extends NumberType> extends Doc {
   /** The cosmos address of the user */
   cosmosAddress: CosmosAddress;
-  /** The USD balance of the user multiplied by 100 to account for decimals. Ex: usdBalance = 1000 means $10 USD */
-  usdBalance: T;
 }
 
 /**
