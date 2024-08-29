@@ -2883,6 +2883,20 @@ components:
             - lastUpdated
           additionalProperties: false
           type: object
+        strava:
+          properties:
+            username:
+              type: string
+            id:
+              type: string
+            lastUpdated:
+              $ref: '#/components/schemas/UNIXMilliTimestamp'
+          required:
+            - username
+            - id
+            - lastUpdated
+          additionalProperties: false
+          type: object
       additionalProperties: false
       description: >-
         Social connections are tracked for each user to provide an enhanced
@@ -3609,6 +3623,21 @@ components:
                 - id
               additionalProperties: false
               type: object
+            addresses:
+              items:
+                properties:
+                  address:
+                    $ref: '#/components/schemas/NativeAddress'
+                  scopes:
+                    items:
+                      $ref: '#/components/schemas/OAuthScopeDetails'
+                    type: array
+                required:
+                  - address
+                  - scopes
+                additionalProperties: false
+                type: object
+              type: array
           additionalProperties: false
           description: Approved ways to sign in
           type: object
@@ -3998,6 +4027,8 @@ components:
             - type: string
             - type: number
             - type: boolean
+        headerField:
+          type: boolean
       required:
         - key
         - label
@@ -4020,6 +4051,33 @@ components:
           type: string
         helper:
           type: string
+        headerField:
+          type: boolean
+        required:
+          type: boolean
+        defaultValue:
+          anyOf:
+            - type: string
+            - type: number
+            - type: boolean
+        options:
+          items:
+            properties:
+              label:
+                type: string
+              value:
+                anyOf:
+                  - type: string
+                  - type: number
+                  - type: boolean
+            required:
+              - label
+              - value
+            additionalProperties: false
+            type: object
+          type: array
+        arrayField:
+          type: boolean
       required:
         - key
         - label
@@ -4048,6 +4106,9 @@ components:
         pluginId:
           description: The type of the plugin
           $ref: '#/components/schemas/NumberType'
+        version:
+          description: The version of the plugin
+          type: string
         publicParams:
           description: The parameters of the plugin that are visible to the public
         privateParams:
@@ -4070,6 +4131,7 @@ components:
       required:
         - instanceId
         - pluginId
+        - version
         - publicParams
         - privateParams
       additionalProperties: false
@@ -4092,6 +4154,9 @@ components:
         pluginId:
           description: The type of the plugin
           $ref: '#/components/schemas/NumberType'
+        version:
+          description: The version of the plugin
+          type: string
         publicParams:
           description: The parameters of the plugin that are visible to the public
         privateParams:
@@ -4152,6 +4217,7 @@ components:
       required:
         - instanceId
         - pluginId
+        - version
         - publicParams
         - privateParams
         - publicState
@@ -4223,6 +4289,8 @@ components:
             listId:
               type: string
               examples: *ref_11
+            siwbbClaim:
+              type: boolean
           additionalProperties: false
           description: Details for the action to perform if the criteria is correct
           type: object
@@ -4230,6 +4298,10 @@ components:
           $ref: '#/components/schemas/UNIXMilliTimestamp'
         createdAt:
           $ref: '#/components/schemas/UNIXMilliTimestamp'
+        version:
+          $ref: '#/components/schemas/NumberType'
+        testOnly:
+          type: boolean
       required:
         - _docId
         - cid
@@ -4241,6 +4313,7 @@ components:
         - action
         - lastUpdated
         - createdAt
+        - version
       additionalProperties: false
       description: ''
       type: object
@@ -4479,6 +4552,8 @@ components:
         hash:
           description: The hash of the airdrop transaction
           type: string
+        ip:
+          type: string
       required:
         - _docId
         - airdropped
@@ -4650,40 +4725,6 @@ components:
       additionalProperties: false
       description: ''
       type: object
-    iAuthorizationCodeDoc:
-      properties:
-        _docId:
-          description: A unique stringified document ID
-          type: string
-        _id:
-          description: A unique document ID (Mongo DB ObjectID)
-          type: string
-        clientId:
-          type: string
-        redirectUri:
-          type: string
-        scopes:
-          items:
-            $ref: '#/components/schemas/OAuthScopeDetails'
-          type: array
-        address:
-          type: string
-        cosmosAddress:
-          type: string
-          examples: *ref_10
-        expiresAt:
-          type: number
-      required:
-        - _docId
-        - clientId
-        - redirectUri
-        - scopes
-        - address
-        - cosmosAddress
-        - expiresAt
-      additionalProperties: false
-      description: ''
-      type: object
     iAccessTokenDoc:
       properties:
         _docId:
@@ -4742,7 +4783,7 @@ components:
           description: The unique plugin ID
           type: string
         pluginSecret:
-          description: The client secret of the plugin
+          description: The secret of the plugin
           type: string
         inviteCode:
           description: Invite code for the plugin
@@ -4752,32 +4793,6 @@ components:
           type: boolean
         reviewCompleted:
           description: Review process completed
-          type: boolean
-        reuseForNonIndexed:
-          description: >-
-            Reuse for nonindexed balances? Only applicable if is stateless,
-            requires no user inputs, and requires no sessions.
-          type: boolean
-        reuseForLists:
-          description: >-
-            Reuse for address list claims? Address list claims are similar to
-            standard badge claims and supports all features, except order of
-            claims (claim numbers) do not matter.
-          type: boolean
-        stateFunctionPreset:
-          description: Preset type for how the plugin state is to be maintained.
-        duplicatesAllowed:
-          description: Whether it makes sense for multiple of this plugin to be allowed
-          type: boolean
-        requiresSessions:
-          description: >-
-            This means that the plugin can be used w/o any session cookies or
-            authentication.
-          type: boolean
-        requiresUserInputs:
-          description: >-
-            This is a flag for being compatible with auto-triggered claims,
-            meaning no user interaction is needed.
           type: boolean
         metadata:
           properties:
@@ -4812,49 +4827,80 @@ components:
             - image
           additionalProperties: false
           type: object
+        lastUpdated:
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
+        createdAt:
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
+        deletedAt:
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
+        approvedUsers:
+          items:
+            $ref: '#/components/schemas/NativeAddress'
+          type: array
+        versions:
+          items:
+            $ref: '#/components/schemas/iPluginVersionConfig'
+          description: Array of version-controlled plugin configurations
+          type: array
+      required:
+        - _docId
+        - createdBy
+        - pluginId
+        - toPublish
+        - reviewCompleted
+        - metadata
+        - lastUpdated
+        - createdAt
+        - approvedUsers
+        - versions
+      additionalProperties: false
+      description: ''
+      type: object
+    iPluginVersionConfig:
+      properties:
+        version:
+          description: Version of the plugin
+          $ref: '#/components/schemas/NumberType'
+        finalized:
+          description: True if the version is finalized
+          type: boolean
+        createdAt:
+          description: The time the version was created
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
+        lastUpdated:
+          description: The time the version was last updated
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
+        reuseForNonIndexed:
+          description: >-
+            Reuse for nonindexed balances? Only applicable if is stateless,
+            requires no user inputs, and requires no sessions.
+          type: boolean
+        stateFunctionPreset:
+          description: Preset type for how the plugin state is to be maintained.
+        duplicatesAllowed:
+          description: Whether it makes sense for multiple of this plugin to be allowed
+          type: boolean
+        requiresSessions:
+          description: >-
+            This means that the plugin can be used w/o any session cookies or
+            authentication.
+          type: boolean
+        requiresUserInputs:
+          description: >-
+            This is a flag for being compatible with auto-triggered claims,
+            meaning no user interaction is needed.
+          type: boolean
         userInputsSchema:
           items:
             $ref: '#/components/schemas/JsonBodyInputSchema'
           type: array
         publicParamsSchema:
           items:
-            anyOf:
-              - $ref: '#/components/schemas/JsonBodyInputSchema'
-              - properties:
-                  key:
-                    type: string
-                  label:
-                    type: string
-                  type:
-                    enum:
-                      - ownershipRequirements
-                    type: string
-                required:
-                  - key
-                  - label
-                  - type
-                additionalProperties: false
-                type: object
+            $ref: '#/components/schemas/JsonBodyInputSchema'
           type: array
         privateParamsSchema:
           items:
-            anyOf:
-              - $ref: '#/components/schemas/JsonBodyInputSchema'
-              - properties:
-                  key:
-                    type: string
-                  label:
-                    type: string
-                  type:
-                    enum:
-                      - ownershipRequirements
-                    type: string
-                required:
-                  - key
-                  - label
-                  - type
-                additionalProperties: false
-                type: object
+            $ref: '#/components/schemas/JsonBodyInputSchema'
           type: array
         userInputRedirect:
           properties:
@@ -4866,10 +4912,10 @@ components:
           type: object
         claimCreatorRedirect:
           properties:
-            baseUri:
+            toolUri:
               type: string
-          required:
-            - baseUri
+            tutorialUri:
+              type: string
           additionalProperties: false
           type: object
         verificationCall:
@@ -4902,49 +4948,48 @@ components:
               type: boolean
             passTwitch:
               type: boolean
+            passStrava:
+              type: boolean
+            postProcessingJs:
+              type: string
           required:
             - uri
             - method
             - hardcodedInputs
-            - passAddress
-            - passDiscord
-            - passEmail
-            - passTwitter
-            - passGoogle
-            - passGithub
-            - passTwitch
+            - postProcessingJs
           additionalProperties: false
           description: The verification URL
           type: object
-        lastUpdated:
-          $ref: '#/components/schemas/UNIXMilliTimestamp'
-        createdAt:
-          $ref: '#/components/schemas/UNIXMilliTimestamp'
-        deletedAt:
-          $ref: '#/components/schemas/UNIXMilliTimestamp'
-        approvedUsers:
-          items:
-            $ref: '#/components/schemas/NativeAddress'
-          type: array
       required:
-        - _docId
-        - createdBy
-        - pluginId
-        - toPublish
-        - reviewCompleted
+        - version
+        - finalized
+        - createdAt
+        - lastUpdated
         - reuseForNonIndexed
-        - reuseForLists
         - stateFunctionPreset
         - duplicatesAllowed
         - requiresSessions
         - requiresUserInputs
-        - metadata
         - userInputsSchema
         - publicParamsSchema
         - privateParamsSchema
-        - lastUpdated
-        - createdAt
-        - approvedUsers
+      additionalProperties: false
+      type: object
+    iDepositBalanceDoc:
+      properties:
+        _docId:
+          description: A unique stringified document ID
+          type: string
+        _id:
+          description: A unique document ID (Mongo DB ObjectID)
+          type: string
+        cosmosAddress:
+          description: The cosmos address of the user
+          examples: *ref_10
+          $ref: '#/components/schemas/CosmosAddress'
+      required:
+        - _docId
+        - cosmosAddress
       additionalProperties: false
       description: ''
       type: object
@@ -5779,21 +5824,7 @@ components:
           type: object
         claims:
           items:
-            properties:
-              claimId:
-                type: string
-              plugins:
-                items:
-                  $ref: '#/components/schemas/IntegrationPluginDetails'
-                description: Plugins are the criteria for the claim.
-                type: array
-              approach:
-                type: string
-            required:
-              - claimId
-              - plugins
-            additionalProperties: false
-            type: object
+            $ref: '#/components/schemas/iClaimDetails'
           description: The claims of the address list.
           type: array
       required:
@@ -6188,6 +6219,21 @@ components:
                 - id
               additionalProperties: false
               type: object
+            addresses:
+              items:
+                properties:
+                  address:
+                    $ref: '#/components/schemas/NativeAddress'
+                  scopes:
+                    items:
+                      $ref: '#/components/schemas/OAuthScopeDetails'
+                    type: array
+                required:
+                  - address
+                  - scopes
+                additionalProperties: false
+                type: object
+              type: array
           additionalProperties: false
           description: Approved ways to sign in
           type: object
@@ -7297,6 +7343,9 @@ components:
         noBadges:
           description: If true, we will skip all badge queries.
           type: boolean
+        noMaps:
+          description: If true, we will skip all map queries.
+          type: boolean
         specificCollectionId:
           description: If true, we will limit collection results to a single collection.
           $ref: '#/components/schemas/NumberType'
@@ -7332,11 +7381,16 @@ components:
             additionalProperties: false
             type: object
           type: array
+        maps:
+          items:
+            $ref: '#/components/schemas/iMapWithValues'
+          type: array
       required:
         - collections
         - accounts
         - addressLists
         - badges
+        - maps
       additionalProperties: false
       type: object
     GetClaimsPayload:
@@ -7353,8 +7407,11 @@ components:
             link.
           type: string
           examples: *ref_11
-      required:
-        - claimIds
+        siwbbClaimsOnly:
+          description: >-
+            If true, we will return all claims that were created by the signed
+            in address.
+          type: boolean
       additionalProperties: false
       type: object
     iClaimDetails:
@@ -7392,11 +7449,20 @@ components:
           description: Metadata for the claim.
           $ref: '#/components/schemas/iMetadata'
         assignMethod:
-          description: Algorithm to determine the claim number order
+          description: >-
+            Algorithm to determine the claim number order. Blank is just
+            incrementing claim numbers.
           type: string
+        lastUpdated:
+          description: Last updated timestamp for the claim.
+          $ref: '#/components/schemas/NumberType'
+        version:
+          description: The version of the claim.
+          $ref: '#/components/schemas/NumberType'
       required:
         - claimId
         - plugins
+        - version
       additionalProperties: false
       type: object
     iGetClaimsSuccessResponse:
@@ -7411,11 +7477,13 @@ components:
       type: object
     CompleteClaimPayload:
       properties:
-        _fetchedAt:
+        _expectedVersion:
           description: >-
-            If provided, we will check that no plugins or claims have been
-            updated since the last time the user fetched the claim.
+            Needs to be provided so we check that no plugins or claims have been
+            updated since the claim was fetched.
           type: number
+      required:
+        - _expectedVersion
       additionalProperties: {}
       type: object
     iCompleteClaimSuccessResponse:
@@ -7449,18 +7517,18 @@ components:
       type: object
     SimulateClaimPayload:
       properties:
-        _fetchedAt:
-          description: >-
-            If provided, we will check that no plugins or claims have been
-            updated since the last time the user fetched the claim.
+        _expectedVersion:
+          description: Will fail if the claim version is not the expected version.
           type: number
-        specificInstanceIds:
+        _specificInstanceIds:
           items:
             type: string
           description: >-
             If provided, we will only simulate the claim for the specific
             plugins w/ the provided instance IDs.
           type: array
+      required:
+        - _expectedVersion
       additionalProperties: {}
       type: object
     iSimulateClaimSuccessResponse:
@@ -7684,6 +7752,21 @@ components:
                 - id
               additionalProperties: false
               type: object
+            addresses:
+              items:
+                properties:
+                  address:
+                    $ref: '#/components/schemas/NativeAddress'
+                  scopes:
+                    items:
+                      $ref: '#/components/schemas/OAuthScopeDetails'
+                    type: array
+                required:
+                  - address
+                  - scopes
+                additionalProperties: false
+                type: object
+              type: array
           additionalProperties: false
           description: >-
             Approved sign in methods. Only returned if user is authenticated
@@ -7914,6 +7997,9 @@ components:
           description: The signature of the message
           type: string
           examples: *ref_16
+        altSigner:
+          description: The address that signed the message on behalf of another address.
+          $ref: '#/components/schemas/NativeAddress'
         publicKey:
           description: >-
             Required for some chains (Cosmos) to verify signature. The public
@@ -8010,6 +8096,18 @@ components:
           additionalProperties: false
           description: Signed in with Twitch?
           type: object
+        strava:
+          properties:
+            username:
+              type: string
+            id:
+              type: string
+          required:
+            - username
+            - id
+          additionalProperties: false
+          description: Signed in with Strava?
+          type: object
       required:
         - signedIn
         - scopes
@@ -8035,6 +8133,9 @@ components:
           type: boolean
         signOutTwitch:
           description: Sign out of Twitch.
+          type: boolean
+        signOutStrava:
+          description: Sign out of Strava.
           type: boolean
       required:
         - signOutBlockin
@@ -8100,6 +8201,12 @@ components:
               $ref: '#/components/schemas/iAttestationProofDoc'
             type: array
           type: object
+        maps:
+          additionalProperties:
+            items:
+              $ref: '#/components/schemas/iMapWithValues'
+            type: array
+          type: object
       required:
         - collections
         - addressLists
@@ -8108,6 +8215,7 @@ components:
         - badges
         - events
         - attestationProofs
+        - maps
       additionalProperties: false
       type: object
     BroadcastTxPayload:
@@ -8304,7 +8412,8 @@ components:
       additionalProperties: false
       type: object
     iGetTokensFromFaucetSuccessResponse:
-      $ref: '#/components/schemas/DeliverTxResponse'
+      additionalProperties: false
+      type: object
     SendClaimAlertsPayload:
       properties:
         claimAlerts:
@@ -8411,6 +8520,9 @@ components:
           description: The signature of the message
           type: string
           examples: *ref_16
+        altSigner:
+          description: The address that signed the message on behalf of another address.
+          $ref: '#/components/schemas/NativeAddress'
         publicKey:
           description: >-
             Required for some chains (Cosmos) to verify signature. The public
@@ -9435,30 +9547,110 @@ components:
         - success
       additionalProperties: false
       type: object
-    CreatePluginPayload:
+    PluginVersionConfigPayload:
       properties:
-        pluginId:
-          description: The unique plugin ID
-          type: string
+        finalized:
+          description: Finalized
+          type: boolean
         stateFunctionPreset:
           description: Preset type for how the plugin state is to be maintained.
         duplicatesAllowed:
           description: Whether it makes sense for multiple of this plugin to be allowed
           type: boolean
-        inviteCode:
-          description: Invite code for the plugin
-          type: string
         reuseForNonIndexed:
           description: Reuse for non-indexed?
-          type: boolean
-        reuseForLists:
-          description: Reuse for lists?
           type: boolean
         requiresUserInputs:
           description: >-
             This is a flag for being compatible with auto-triggered claims,
             meaning no user interaction is needed.
           type: boolean
+        userInputRedirect:
+          properties:
+            baseUri:
+              type: string
+          required:
+            - baseUri
+          additionalProperties: false
+          type: object
+        userInputsSchema:
+          items:
+            $ref: '#/components/schemas/JsonBodyInputSchema'
+          type: array
+        claimCreatorRedirect:
+          properties:
+            toolUri:
+              type: string
+            tutorialUri:
+              type: string
+          additionalProperties: false
+          type: object
+        publicParamsSchema:
+          items:
+            $ref: '#/components/schemas/JsonBodyInputSchema'
+          type: array
+        privateParamsSchema:
+          items:
+            $ref: '#/components/schemas/JsonBodyInputSchema'
+          type: array
+        verificationCall:
+          properties:
+            uri:
+              type: string
+              examples: *ref_1
+            method:
+              enum:
+                - POST
+                - GET
+                - PUT
+                - DELETE
+              type: string
+            hardcodedInputs:
+              items:
+                $ref: '#/components/schemas/JsonBodyInputWithValue'
+              type: array
+            passAddress:
+              type: boolean
+            passDiscord:
+              type: boolean
+            passEmail:
+              type: boolean
+            passTwitter:
+              type: boolean
+            passGoogle:
+              type: boolean
+            passGithub:
+              type: boolean
+            passStrava:
+              type: boolean
+            passTwitch:
+              type: boolean
+            postProcessingJs:
+              type: string
+          required:
+            - uri
+            - method
+            - hardcodedInputs
+            - postProcessingJs
+          additionalProperties: false
+          description: The verification URL
+          type: object
+      required:
+        - finalized
+        - stateFunctionPreset
+        - duplicatesAllowed
+        - reuseForNonIndexed
+        - requiresUserInputs
+      additionalProperties: false
+      type: object
+    CreatePluginPayload:
+      properties:
+        pluginId:
+          description: The unique plugin ID
+          type: string
+        inviteCode:
+          description: Invite code for the plugin
+          type: string
         metadata:
           properties:
             name:
@@ -9492,66 +9684,6 @@ components:
             - createdBy
           additionalProperties: false
           type: object
-        userInputRedirect:
-          properties:
-            baseUri:
-              type: string
-          required:
-            - baseUri
-          additionalProperties: false
-          type: object
-        userInputsSchema:
-          items:
-            $ref: '#/components/schemas/JsonBodyInputSchema'
-          type: array
-        claimCreatorRedirect:
-          properties:
-            baseUri:
-              type: string
-          required:
-            - baseUri
-          additionalProperties: false
-          type: object
-        publicParamsSchema:
-          items:
-            $ref: '#/components/schemas/JsonBodyInputSchema'
-          type: array
-        privateParamsSchema:
-          items:
-            $ref: '#/components/schemas/JsonBodyInputSchema'
-          type: array
-        verificationCall:
-          properties:
-            uri:
-              type: string
-              examples: *ref_1
-            method:
-              enum:
-                - POST
-                - GET
-                - PUT
-                - DELETE
-              type: string
-            passAddress:
-              type: boolean
-            passDiscord:
-              type: boolean
-            passEmail:
-              type: boolean
-            passTwitter:
-              type: boolean
-            passGoogle:
-              type: boolean
-            passGithub:
-              type: boolean
-            passTwitch:
-              type: boolean
-          required:
-            - uri
-            - method
-          additionalProperties: false
-          description: The verification URL
-          type: object
         toPublish:
           description: >-
             To publish in the directory. This will trigger the start of the
@@ -9562,15 +9694,14 @@ components:
             $ref: '#/components/schemas/NativeAddress'
           description: The addresses that are allowed to use this plugin.
           type: array
+        initialVersion:
+          description: The initial version configuration
+          $ref: '#/components/schemas/PluginVersionConfigPayload'
       required:
         - pluginId
-        - stateFunctionPreset
-        - duplicatesAllowed
-        - reuseForNonIndexed
-        - reuseForLists
-        - requiresUserInputs
         - metadata
         - toPublish
+        - initialVersion
       additionalProperties: false
       type: object
     iCreatePluginSuccessResponse:
@@ -9581,25 +9712,11 @@ components:
         pluginId:
           description: The unique plugin ID
           type: string
-        duplicatesAllowed:
-          description: Whether it makes sense for multiple of this plugin to be allowed
-          type: boolean
-        reuseForNonIndexed:
-          description: Reuse for non-indexed?
-          type: boolean
         inviteCode:
           description: Invite code for the plugin
           type: string
         removeSelfFromApprovedUsers:
           description: Remove self from approved users?
-          type: boolean
-        reuseForLists:
-          description: Reuse for lists?
-          type: boolean
-        requiresUserInputs:
-          description: >-
-            This is a flag for being compatible with auto-triggered claims,
-            meaning no user interaction is needed.
           type: boolean
         metadata:
           properties:
@@ -9624,71 +9741,14 @@ components:
             supportLink:
               description: Support link for the plugin
               type: string
+            createdBy:
+              description: Creator of the plugin
+              type: string
           required:
             - name
             - description
             - image
           additionalProperties: false
-          type: object
-        userInputsSchema:
-          items:
-            $ref: '#/components/schemas/JsonBodyInputSchema'
-          type: array
-        userInputRedirect:
-          properties:
-            baseUri:
-              type: string
-          required:
-            - baseUri
-          additionalProperties: false
-          type: object
-        claimCreatorRedirect:
-          properties:
-            baseUri:
-              type: string
-          required:
-            - baseUri
-          additionalProperties: false
-          type: object
-        publicParamsSchema:
-          items:
-            $ref: '#/components/schemas/JsonBodyInputSchema'
-          type: array
-        privateParamsSchema:
-          items:
-            $ref: '#/components/schemas/JsonBodyInputSchema'
-          type: array
-        verificationCall:
-          properties:
-            uri:
-              type: string
-              examples: *ref_1
-            method:
-              enum:
-                - POST
-                - GET
-                - PUT
-                - DELETE
-              type: string
-            passAddress:
-              type: boolean
-            passDiscord:
-              type: boolean
-            passEmail:
-              type: boolean
-            passTwitter:
-              type: boolean
-            passGoogle:
-              type: boolean
-            passGithub:
-              type: boolean
-            passTwitch:
-              type: boolean
-          required:
-            - uri
-            - method
-          additionalProperties: false
-          description: The verification URL
           type: object
         toPublish:
           description: >-
@@ -9703,6 +9763,115 @@ components:
         rotatePluginSecret:
           description: Rotate the plugin secret?
           type: boolean
+        versionUpdates:
+          items:
+            properties:
+              version:
+                description: The version to update or create
+                $ref: '#/components/schemas/NumberType'
+              config:
+                properties:
+                  finalized:
+                    description: Finalized
+                    type: boolean
+                  stateFunctionPreset:
+                    description: Preset type for how the plugin state is to be maintained.
+                  duplicatesAllowed:
+                    description: >-
+                      Whether it makes sense for multiple of this plugin to be
+                      allowed
+                    type: boolean
+                  reuseForNonIndexed:
+                    description: Reuse for non-indexed?
+                    type: boolean
+                  requiresUserInputs:
+                    description: >-
+                      This is a flag for being compatible with auto-triggered
+                      claims, meaning no user interaction is needed.
+                    type: boolean
+                  userInputRedirect:
+                    properties:
+                      baseUri:
+                        type: string
+                    required:
+                      - baseUri
+                    additionalProperties: false
+                    type: object
+                  userInputsSchema:
+                    items:
+                      $ref: '#/components/schemas/JsonBodyInputSchema'
+                    type: array
+                  claimCreatorRedirect:
+                    properties:
+                      toolUri:
+                        type: string
+                      tutorialUri:
+                        type: string
+                    additionalProperties: false
+                    type: object
+                  publicParamsSchema:
+                    items:
+                      $ref: '#/components/schemas/JsonBodyInputSchema'
+                    type: array
+                  privateParamsSchema:
+                    items:
+                      $ref: '#/components/schemas/JsonBodyInputSchema'
+                    type: array
+                  verificationCall:
+                    properties:
+                      uri:
+                        type: string
+                        examples: *ref_1
+                      method:
+                        enum:
+                          - POST
+                          - GET
+                          - PUT
+                          - DELETE
+                        type: string
+                      hardcodedInputs:
+                        items:
+                          $ref: '#/components/schemas/JsonBodyInputWithValue'
+                        type: array
+                      passAddress:
+                        type: boolean
+                      passDiscord:
+                        type: boolean
+                      passEmail:
+                        type: boolean
+                      passTwitter:
+                        type: boolean
+                      passGoogle:
+                        type: boolean
+                      passGithub:
+                        type: boolean
+                      passStrava:
+                        type: boolean
+                      passTwitch:
+                        type: boolean
+                      postProcessingJs:
+                        type: string
+                    required:
+                      - uri
+                      - method
+                      - hardcodedInputs
+                      - postProcessingJs
+                    additionalProperties: false
+                    description: The verification URL
+                    type: object
+                additionalProperties: false
+                description: The configuration for this version
+                type: object
+            required:
+              - version
+              - config
+            additionalProperties: false
+            type: object
+          description: Update an existing version
+          type: array
+        versionCreate:
+          description: Create a new version
+          $ref: '#/components/schemas/PluginVersionConfigPayload'
       required:
         - pluginId
       additionalProperties: false
@@ -9737,6 +9906,37 @@ components:
         inviteCode:
           description: Invite code to fetch the plugin with.
           type: string
+        bookmark:
+          description: Bookmark for pagination of the plugins.
+          type: string
+        searchValue:
+          description: Search value
+          type: string
+      additionalProperties: false
+      type: object
+    CreatePaymentIntentPayload:
+      properties:
+        amount:
+          description: The amount in USD to pay
+          type: number
+        purpose:
+          enum:
+            - credits
+            - deposit
+          description: Purpose of the payment
+          type: string
+      required:
+        - amount
+        - purpose
+      additionalProperties: false
+      type: object
+    iCreatePaymentIntentSuccessResponse:
+      properties:
+        clientSecret:
+          description: The payment intent client secret
+          type: string
+      required:
+        - clientSecret
       additionalProperties: false
       type: object
     iGetPluginSuccessResponse:
@@ -9745,6 +9945,11 @@ components:
           items:
             $ref: '#/components/schemas/iPluginDoc'
           type: array
+        bookmark:
+          description: >-
+            Bookmark for pagination of the plugins. Only applicable if fetching
+            the directory.
+          type: string
       required:
         - plugins
       additionalProperties: false
@@ -9799,8 +10004,13 @@ components:
                 $ref: '#/components/schemas/iMetadata'
                 description: Metadata for the claim.
               assignMethod:
-                description: Algorithm to determine the claim number order
+                description: >-
+                  Algorithm to determine the claim number order. Blank is just
+                  incrementing claim numbers.
                 type: string
+              lastUpdated:
+                description: Last updated timestamp for the claim.
+                $ref: '#/components/schemas/NumberType'
             required:
               - claimId
               - plugins
@@ -9832,6 +10042,9 @@ components:
         pluginId:
           description: The type of the plugin
           $ref: '#/components/schemas/NumberType'
+        version:
+          description: The version of the plugin
+          type: string
         publicParams:
           description: The parameters of the plugin that are visible to the public
         privateParams:
@@ -9888,6 +10101,7 @@ components:
       required:
         - instanceId
         - pluginId
+        - version
         - publicParams
         - privateParams
       additionalProperties: false
@@ -9921,8 +10135,13 @@ components:
           description: Metadata for the claim.
           $ref: '#/components/schemas/iMetadata'
         assignMethod:
-          description: Algorithm to determine the claim number order
+          description: >-
+            Algorithm to determine the claim number order. Blank is just
+            incrementing claim numbers.
           type: string
+        lastUpdated:
+          description: Last updated timestamp for the claim.
+          $ref: '#/components/schemas/NumberType'
         listId:
           type: string
           examples: *ref_11
@@ -9963,6 +10182,9 @@ components:
         metadata:
           description: Metadata for the claim.
           $ref: '#/components/schemas/iMetadata'
+        lastUpdated:
+          description: Last updated timestamp for the claim.
+          $ref: '#/components/schemas/NumberType'
         listId:
           type: string
           examples: *ref_11
@@ -9985,6 +10207,10 @@ components:
           items:
             $ref: '#/components/schemas/CreateClaimRequest'
           type: array
+        testClaims:
+          type: boolean
+        siwbbClaim:
+          type: boolean
       required:
         - claims
       additionalProperties: false
@@ -10833,6 +11059,17 @@ components:
         ownershipRequirements:
           description: The expected ownership requirements for the user
           $ref: '#/components/schemas/AssetConditionGroup'
+        claimId:
+          description: Claim ID to check for.
+          type: string
+        checkClaimedMinOnce:
+          description: If true, we will only check for the existence of the claim.
+          type: boolean
+        simulateClaim:
+          description: >-
+            If true, we will simulate the claim. Only compatible with
+            non-indexed claims.
+          type: boolean
         issuedAtTimeWindowMs:
           description: >-
             How recent the challenge must be in milliseconds. Defaults to 10
@@ -10878,6 +11115,10 @@ components:
         scope:
           type: string
         expectAttestationsPresentations:
+          type: boolean
+        claimId:
+          type: string
+        hideIfAlreadyClaimed:
           type: boolean
       required:
         - client_id
@@ -11145,12 +11386,12 @@ components:
           type: object
         consensus_pubkey:
           properties:
-            "'@type'":
+            '''@type''':
               type: string
             key:
               type: string
           required:
-            - "'@type'"
+            - '''@type'''
             - key
           additionalProperties: false
           type: object
@@ -11381,7 +11622,7 @@ components:
       properties:
         account:
           properties:
-            "'@type'":
+            '''@type''':
               type: string
             base_account:
               properties:
@@ -11389,12 +11630,12 @@ components:
                   type: string
                 pub_key:
                   properties:
-                    "'@type'":
+                    '''@type''':
                       type: string
                     key:
                       type: string
                   required:
-                    - "'@type'"
+                    - '''@type'''
                     - key
                   additionalProperties: false
                   type: object
@@ -11409,7 +11650,7 @@ components:
               additionalProperties: false
               type: object
           required:
-            - "'@type'"
+            - '''@type'''
             - base_account
           additionalProperties: false
           type: object
@@ -11455,23 +11696,48 @@ components:
         supported on chain
     TxContext:
       properties:
-        chain:
-          $ref: '#/components/schemas/Chain'
+        testnet:
+          description: Use the BitBadges testnet? Usee mainnet by default.
+          type: boolean
+        chainIdOverride:
+          description: >-
+            Override the chain ID to a custom value. Uses BitBadges mainnet by
+            default.
+          type: string
         sender:
-          $ref: '#/components/schemas/Sender'
+          properties:
+            address:
+              $ref: '#/components/schemas/NativeAddress'
+            sequence:
+              type: number
+            accountNumber:
+              type: number
+            publicKey:
+              type: string
+              examples: *ref_15
+          required:
+            - address
+            - sequence
+            - accountNumber
+          additionalProperties: false
+          description: >-
+            Details about the sender of this transaction. Address should be in
+            their NATIVE format.
+
+            We use this to determine the approach.
+
+
+            Public key is ONLY needed for Cosmos based signatures.
+          type: object
         fee:
           $ref: '#/components/schemas/Fee'
         memo:
           type: string
       required:
-        - chain
         - sender
         - fee
-        - memo
       additionalProperties: false
-      description: |-
-        TxContext is the transaction context for a SignDoc that is independent
-        from the transaction payload.
+      description: LegacyTxContext is the transaction context for the transaction payload.
       type: object
     EIP712ToSign:
       properties:
@@ -11565,13 +11831,7 @@ components:
         - cosmosChainId
         - chain
       additionalProperties: false
-      description: >-
-        Chain represents the base chain's chainID.
-
-        @remarks chainId corresponds to a numerical Ethereum ChainID (e.g. 9001)
-
-        cosmosChainId corresponds to a Cosmos SDK string ChainID (e.g.
-        'bitbadges_1-1')
+      description: Chain represents the base chain's chainID.
       type: object
     AminoMsg:
       properties:

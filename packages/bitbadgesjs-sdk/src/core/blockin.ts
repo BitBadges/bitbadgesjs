@@ -125,6 +125,14 @@ export class SiwbbChallenge<T extends NumberType> extends BaseNumberTypeClass<Si
 export interface VerifySIWBBOptions {
   /** The expected ownership requirements for the user */
   ownershipRequirements?: AssetConditionGroup<NumberType>;
+
+  /** Claim ID to check for. */
+  claimId?: string;
+  /** If true, we will only check for the existence of the claim. */
+  checkClaimedMinOnce?: boolean;
+  /** If true, we will simulate the claim. Only compatible with non-indexed claims. */
+  simulateClaim?: boolean;
+
   /** How recent the challenge must be in milliseconds. Defaults to 10 minutes. If 0, we will not check the time. */
   issuedAtTimeWindowMs?: number;
   /** Skip asset verification. This may be useful for simulations or testing */
@@ -150,6 +158,9 @@ export interface CodeGenQueryParams {
   scope?: string;
 
   expectAttestationsPresentations?: boolean;
+
+  claimId?: string;
+  hideIfAlreadyClaimed?: boolean;
 }
 
 /**

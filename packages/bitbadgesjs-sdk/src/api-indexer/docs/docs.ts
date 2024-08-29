@@ -79,7 +79,9 @@ import type {
   NativeAddress,
   iAttestationProofDoc,
   iEventDoc,
-  iDepositBalanceDoc
+  iDepositBalanceDoc,
+  iPluginVersionConfig,
+  CustomTypeInputSchema
 } from './interfaces.js';
 import { OAuthScopeDetails } from '../requests/requests.js';
 
@@ -845,7 +847,13 @@ export class ClaimBuilderDoc<T extends NumberType> extends BaseNumberTypeClass<C
   manualDistribution?: boolean;
   plugins: IntegrationPluginParams<ClaimIntegrationPluginType>[];
   state: { [pluginId: string]: any };
-  action: { codes?: string[] | undefined; seedCode?: string; balancesToSet?: PredeterminedBalances<T> | undefined; listId?: string };
+  action: {
+    codes?: string[] | undefined;
+    seedCode?: string;
+    siwbbClaim?: boolean;
+    balancesToSet?: PredeterminedBalances<T> | undefined;
+    listId?: string;
+  };
   trackerDetails?: ChallengeTrackerIdDetails<T> | undefined;
   metadata?: Metadata<T> | undefined;
   lastUpdated: T;
@@ -871,7 +879,8 @@ export class ClaimBuilderDoc<T extends NumberType> extends BaseNumberTypeClass<C
       codes: data.action.codes,
       balancesToSet: data.action.balancesToSet ? new PredeterminedBalances(data.action.balancesToSet) : undefined,
       seedCode: data.action.seedCode,
-      listId: data.action.listId
+      listId: data.action.listId,
+      siwbbClaim: data.action.siwbbClaim
     };
     this.trackerDetails = data.trackerDetails ? new ChallengeTrackerIdDetails(data.trackerDetails) : undefined;
     this.metadata = data.metadata ? new Metadata(data.metadata) : undefined;
@@ -1307,6 +1316,72 @@ export class DepositBalanceDoc<T extends NumberType> extends BaseNumberTypeClass
 }
 
 /**
+ * @inheritDoc iPluginVersionConfig
+ * @category Plugins
+ */
+export class PluginVersionConfig<T extends NumberType> extends BaseNumberTypeClass<PluginVersionConfig<T>> implements iPluginVersionConfig<T> {
+  version: T;
+  finalized: boolean;
+  stateFunctionPreset: PluginPresetType;
+  duplicatesAllowed: boolean;
+  requiresSessions: boolean;
+  requiresUserInputs: boolean;
+  reuseForNonIndexed: boolean;
+  userInputsSchema: Array<JsonBodyInputSchema | CustomTypeInputSchema>;
+  publicParamsSchema: Array<JsonBodyInputSchema | CustomTypeInputSchema>;
+  privateParamsSchema: Array<JsonBodyInputSchema | CustomTypeInputSchema>;
+  verificationCall?: {
+    uri: string;
+    method: 'POST' | 'GET' | 'PUT' | 'DELETE';
+    hardcodedInputs: Array<JsonBodyInputWithValue>;
+    passAddress?: boolean;
+    passDiscord?: boolean;
+    passEmail?: boolean;
+    passTwitter?: boolean;
+    passGoogle?: boolean;
+    passGithub?: boolean;
+    passTwitch?: boolean;
+    passStrava?: boolean;
+    postProcessingJs: string;
+  };
+  claimCreatorRedirect?: { toolUri?: string; tutorialUri?: string };
+  userInputRedirect?: { baseUri: string };
+  createdAt: UNIXMilliTimestamp<T>;
+  lastUpdated: UNIXMilliTimestamp<T>;
+
+  constructor(data: iPluginVersionConfig<T>) {
+    super();
+    this.finalized = data.finalized;
+    this.version = data.version;
+    this.stateFunctionPreset = data.stateFunctionPreset;
+    this.duplicatesAllowed = data.duplicatesAllowed;
+    this.requiresSessions = data.requiresSessions;
+    this.requiresUserInputs = data.requiresUserInputs;
+    this.reuseForNonIndexed = data.reuseForNonIndexed;
+    this.userInputsSchema = data.userInputsSchema;
+    this.publicParamsSchema = data.publicParamsSchema;
+    this.privateParamsSchema = data.privateParamsSchema;
+    this.verificationCall = data.verificationCall;
+    this.claimCreatorRedirect = data.claimCreatorRedirect;
+    this.userInputRedirect = data.userInputRedirect;
+    this.createdAt = data.createdAt;
+    this.lastUpdated = data.lastUpdated;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['version', 'createdAt', 'lastUpdated'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): PluginVersionConfig<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as PluginVersionConfig<U>;
+  }
+
+  clone(): PluginVersionConfig<T> {
+    return super.clone() as PluginVersionConfig<T>;
+  }
+}
+
+/**
  * @inheritDoc iPluginDoc
  * @category Plugins
  */
@@ -1318,16 +1393,7 @@ export class PluginDoc<T extends NumberType> extends BaseNumberTypeClass<PluginD
   toPublish: boolean;
   reviewCompleted: boolean;
   inviteCode?: string | undefined;
-  version: T;
-  stateFunctionPreset: PluginPresetType;
-  duplicatesAllowed: boolean;
-  requiresSessions: boolean;
-  requiresUserInputs: boolean;
-  reuseForNonIndexed: boolean;
-  reuseForLists: boolean;
-
   approvedUsers: NativeAddress[];
-
   createdBy: CosmosAddress;
   metadata: {
     createdBy: string;
@@ -1338,49 +1404,22 @@ export class PluginDoc<T extends NumberType> extends BaseNumberTypeClass<PluginD
     sourceCode?: string;
     supportLink?: string;
   };
-
-  userInputsSchema: Array<JsonBodyInputSchema>;
-  publicParamsSchema: Array<JsonBodyInputSchema | { key: string; label: string; type: 'ownershipRequirements'; headerField?: boolean }>;
-  privateParamsSchema: Array<JsonBodyInputSchema | { key: string; label: string; type: 'ownershipRequirements'; headerField?: boolean }>;
-
-  verificationCall?: {
-    uri: string;
-    method: 'POST' | 'GET' | 'PUT' | 'DELETE';
-    hardcodedInputs: Array<JsonBodyInputWithValue>;
-
-    passAddress?: boolean;
-    passDiscord?: boolean;
-    passEmail?: boolean;
-    passTwitter?: boolean;
-    passGoogle?: boolean;
-    passGithub?: boolean;
-    passTwitch?: boolean;
-    passStrava?: boolean;
-
-    postProcessingJs: string;
-  };
-
-  claimCreatorRedirect?: { toolUri?: string; tutorialUri?: string } | undefined;
-  userInputRedirect?: { baseUri: string } | undefined;
-
   lastUpdated: UNIXMilliTimestamp<T>;
   createdAt: UNIXMilliTimestamp<T>;
   deletedAt?: UNIXMilliTimestamp<T>;
+  versions: PluginVersionConfig<T>[];
 
   constructor(data: iPluginDoc<T>) {
     super();
-    this.createdBy = data.createdBy;
+    this._docId = data._docId;
+    this._id = data._id;
     this.pluginId = data.pluginId;
     this.pluginSecret = data.pluginSecret;
-    this.reviewCompleted = data.reviewCompleted;
     this.toPublish = data.toPublish;
-    this.stateFunctionPreset = data.stateFunctionPreset;
-    this.duplicatesAllowed = data.duplicatesAllowed;
-    this.requiresSessions = data.requiresSessions;
-    this.reuseForNonIndexed = data.reuseForNonIndexed;
-    this.reuseForLists = data.reuseForLists;
-    this.requiresUserInputs = data.requiresUserInputs;
+    this.reviewCompleted = data.reviewCompleted;
+    this.inviteCode = data.inviteCode;
     this.approvedUsers = data.approvedUsers;
+    this.createdBy = data.createdBy;
     this.metadata = {
       createdBy: data.metadata.createdBy,
       name: data.metadata.name,
@@ -1390,23 +1429,14 @@ export class PluginDoc<T extends NumberType> extends BaseNumberTypeClass<PluginD
       sourceCode: data.metadata.sourceCode,
       supportLink: data.metadata.supportLink
     };
-    this.userInputsSchema = data.userInputsSchema;
-    this.publicParamsSchema = data.publicParamsSchema;
-    this.privateParamsSchema = data.privateParamsSchema;
-    this.verificationCall = data.verificationCall;
-    this._docId = data._docId;
-    this._id = data._id;
     this.lastUpdated = data.lastUpdated;
-    this.userInputRedirect = data.userInputRedirect;
-    this.claimCreatorRedirect = data.claimCreatorRedirect;
     this.createdAt = data.createdAt;
     this.deletedAt = data.deletedAt;
-    this.inviteCode = data.inviteCode;
-    this.version = data.version;
+    this.versions = data.versions.map((version) => new PluginVersionConfig(version));
   }
 
   getNumberFieldNames(): string[] {
-    return ['lastUpdated', 'createdAt', 'deletedAt', 'version'];
+    return ['lastUpdated', 'createdAt', 'deletedAt'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): PluginDoc<U> {
@@ -1415,6 +1445,10 @@ export class PluginDoc<T extends NumberType> extends BaseNumberTypeClass<PluginD
 
   clone(): PluginDoc<T> {
     return super.clone() as PluginDoc<T>;
+  }
+
+  getLatestVersion(): PluginVersionConfig<T> {
+    return this.versions[this.versions.length - 1];
   }
 }
 

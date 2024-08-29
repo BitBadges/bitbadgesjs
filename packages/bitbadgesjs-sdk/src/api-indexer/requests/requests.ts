@@ -12,6 +12,7 @@ import type {
   ClaimIntegrationPluginCustomBodyType,
   ClaimIntegrationPluginType,
   CosmosAddress,
+  CustomTypeInputSchema,
   IntegrationPluginDetails,
   JsonBodyInputSchema,
   JsonBodyInputWithValue,
@@ -233,9 +234,11 @@ export class GetSearchSuccessResponse<T extends NumberType>
  */
 export interface GetClaimsPayload {
   /** The claim IDs to fetch. */
-  claimIds: string[];
+  claimIds?: string[];
   /** If the address list is private and viewable with the link only, you must also specify the address list ID to prove knowledge of the link. */
   listId?: string;
+  /** If true, we will return all claims that were created by the signed in address. */
+  siwbbClaimsOnly?: boolean;
 }
 
 /**
@@ -256,7 +259,7 @@ export interface iClaimDetails<T extends NumberType> {
   seedCode?: string;
   /** Metadata for the claim. */
   metadata?: iMetadata<T>;
-  /** Algorithm to determine the claim number order */
+  /** Algorithm to determine the claim number order. Blank is just incrementing claim numbers. */
   assignMethod?: string;
   /** Last updated timestamp for the claim. */
   lastUpdated?: T;
@@ -2135,9 +2138,9 @@ export class UpdateDeveloperAppSuccessResponse
 /**
  * @category API Requests / Responses
  */
-export interface CreatePluginPayload {
-  /** The unique plugin ID */
-  pluginId: string;
+export interface PluginVersionConfigPayload {
+  /** Finalized */
+  finalized: boolean;
 
   /** Preset type for how the plugin state is to be maintained. */
   stateFunctionPreset: PluginPresetType;
@@ -2145,48 +2148,25 @@ export interface CreatePluginPayload {
   /** Whether it makes sense for multiple of this plugin to be allowed */
   duplicatesAllowed: boolean;
 
-  /** Invite code for the plugin */
-  inviteCode?: string;
-
   /** Reuse for non-indexed? */
   reuseForNonIndexed: boolean;
 
-  /** Reuse for lists? */
-  reuseForLists: boolean;
-
   /** This is a flag for being compatible with auto-triggered claims, meaning no user interaction is needed. */
   requiresUserInputs: boolean;
-
-  metadata: {
-    /** The name of the plugin */
-    name: string;
-    /** Description of the plugin */
-    description: string;
-    /** The image of the plugin */
-    image: string;
-    /** Documentation for the plugin */
-    documentation?: string;
-    /** Source code for the plugin */
-    sourceCode?: string;
-    /** Support link for the plugin */
-    supportLink?: string;
-    /** The creator of the plugin */
-    createdBy: CosmosAddress;
-  };
 
   userInputRedirect?: {
     baseUri: string;
   };
 
-  userInputsSchema?: Array<JsonBodyInputSchema>;
+  userInputsSchema?: Array<JsonBodyInputSchema | CustomTypeInputSchema>;
 
   claimCreatorRedirect?: {
     toolUri?: string;
     tutorialUri?: string;
   };
 
-  publicParamsSchema?: Array<JsonBodyInputSchema>;
-  privateParamsSchema?: Array<JsonBodyInputSchema>;
+  publicParamsSchema?: Array<JsonBodyInputSchema | CustomTypeInputSchema>;
+  privateParamsSchema?: Array<JsonBodyInputSchema | CustomTypeInputSchema>;
 
   /** The verification URL */
   verificationCall?: {
@@ -2205,12 +2185,43 @@ export interface CreatePluginPayload {
 
     postProcessingJs: string;
   };
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface CreatePluginPayload {
+  /** The unique plugin ID */
+  pluginId: string;
+
+  /** Invite code for the plugin */
+  inviteCode?: string;
+
+  metadata: {
+    /** The name of the plugin */
+    name: string;
+    /** Description of the plugin */
+    description: string;
+    /** The image of the plugin */
+    image: string;
+    /** Documentation for the plugin */
+    documentation?: string;
+    /** Source code for the plugin */
+    sourceCode?: string;
+    /** Support link for the plugin */
+    supportLink?: string;
+    /** The creator of the plugin */
+    createdBy: CosmosAddress;
+  };
 
   /** To publish in the directory. This will trigger the start of the review process. */
   toPublish: boolean;
 
   /** The addresses that are allowed to use this plugin. */
   approvedUsers?: NativeAddress[];
+
+  /** The initial version configuration */
+  initialVersion: PluginVersionConfigPayload;
 }
 
 /**
@@ -2230,23 +2241,11 @@ export interface UpdatePluginPayload {
   /** The unique plugin ID */
   pluginId: string;
 
-  /** Whether it makes sense for multiple of this plugin to be allowed */
-  duplicatesAllowed?: boolean;
-
-  /** Reuse for non-indexed? */
-  reuseForNonIndexed?: boolean;
-
   /** Invite code for the plugin */
   inviteCode?: string;
 
   /** Remove self from approved users? */
   removeSelfFromApprovedUsers?: boolean;
-
-  /** Reuse for lists? */
-  reuseForLists?: boolean;
-
-  /** This is a flag for being compatible with auto-triggered claims, meaning no user interaction is needed. */
-  requiresUserInputs?: boolean;
 
   metadata?: {
     /** The name of the plugin */
@@ -2261,40 +2260,8 @@ export interface UpdatePluginPayload {
     sourceCode?: string;
     /** Support link for the plugin */
     supportLink?: string;
-    // /** The creator of the plugin */
-    // createdBy: CosmosAddress;
-  };
-
-  userInputsSchema?: Array<JsonBodyInputSchema>;
-
-  userInputRedirect?: {
-    baseUri: string;
-  };
-
-  claimCreatorRedirect?: {
-    toolUri?: string;
-    tutorialUri?: string;
-  };
-
-  publicParamsSchema?: Array<JsonBodyInputSchema>;
-  privateParamsSchema?: Array<JsonBodyInputSchema>;
-
-  /** The verification URL */
-  verificationCall?: {
-    uri: string;
-    method: 'POST' | 'GET' | 'PUT' | 'DELETE';
-    hardcodedInputs: Array<JsonBodyInputWithValue>;
-
-    passAddress?: boolean;
-    passDiscord?: boolean;
-    passEmail?: boolean;
-    passTwitter?: boolean;
-    passGoogle?: boolean;
-    passGithub?: boolean;
-    passTwitch?: boolean;
-    passStrava?: boolean;
-
-    postProcessingJs: string;
+    /** Creator of the plugin */
+    createdBy?: string;
   };
 
   /** To publish in the directory. This will trigger the start of the review process. */
@@ -2305,6 +2272,17 @@ export interface UpdatePluginPayload {
 
   /** Rotate the plugin secret? */
   rotatePluginSecret?: boolean;
+
+  /** Update an existing version */
+  versionUpdates?: {
+    /** The version to update or create */
+    version: NumberType;
+    /** The configuration for this version */
+    config: Partial<PluginVersionConfigPayload>;
+  }[];
+
+  /** Create a new version */
+  versionCreate?: PluginVersionConfigPayload;
 }
 
 /**
@@ -2347,6 +2325,8 @@ export interface GetPluginPayload {
   inviteCode?: string;
   /** Bookmark for pagination of the plugins. */
   bookmark?: string;
+  /** Search value */
+  searchValue?: string;
 }
 
 /**
@@ -2482,6 +2462,8 @@ export interface CreateClaimPayload {
   claims: CreateClaimRequest<NumberType>[];
 
   testClaims?: boolean;
+
+  siwbbClaim?: boolean;
 }
 
 /**

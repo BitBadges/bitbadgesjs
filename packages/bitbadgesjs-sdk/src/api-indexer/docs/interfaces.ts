@@ -617,6 +617,18 @@ export type JsonBodyInputSchema = {
   arrayField?: boolean;
 };
 
+/**
+ * @category Claims
+ */
+export type CustomTypeInputSchema = {
+  key: string;
+  label: string;
+  type: 'ownershipRequirements' | 'attestations';
+  headerField?: boolean;
+  required?: boolean;
+  helper?: string;
+};
+
 type OauthAppName = 'twitter' | 'github' | 'google' | 'email' | 'discord' | 'twitch' | 'strava';
 
 /**
@@ -761,6 +773,8 @@ export interface IntegrationPluginParams<T extends ClaimIntegrationPluginType> {
   instanceId: string;
   /** The type of the plugin */
   pluginId: T;
+  /** The version of the plugin */
+  version: string;
   /** The parameters of the plugin that are visible to the public */
   publicParams: ClaimIntegrationPublicParamsType<T>;
   /** The parameters of the plugin that are not visible to the public */
@@ -843,6 +857,7 @@ export interface iClaimBuilderDoc<T extends NumberType> extends Doc {
     seedCode?: string;
     balancesToSet?: iPredeterminedBalances<T>;
     listId?: string;
+    siwbbClaim?: boolean;
   };
 
   lastUpdated: UNIXMilliTimestamp<T>;
@@ -1035,7 +1050,7 @@ export interface iPluginDoc<T extends NumberType> extends Doc {
   /** The unique plugin ID */
   pluginId: string;
 
-  /** The client secret of the plugin */
+  /** The secret of the plugin */
   pluginSecret?: string;
 
   /** Invite code for the plugin */
@@ -1071,18 +1086,28 @@ export interface iPluginDoc<T extends NumberType> extends Doc {
 
   approvedUsers: NativeAddress[];
 
+  /** Array of version-controlled plugin configurations */
+  versions: iPluginVersionConfig<T>[];
+}
 
-  // ----- Everything below this line should be version controlled -----
-
-
+/**
+ * @category Interfaces
+ */
+export interface iPluginVersionConfig<T extends NumberType> {
   /** Version of the plugin */
   version: T;
 
+  /** True if the version is finalized */
+  finalized: boolean;
+
+  /** The time the version was created */
+  createdAt: UNIXMilliTimestamp<T>;
+
+  /** The time the version was last updated */
+  lastUpdated: UNIXMilliTimestamp<T>;
+
   /** Reuse for nonindexed balances? Only applicable if is stateless, requires no user inputs, and requires no sessions. */
   reuseForNonIndexed: boolean;
-
-  /** Reuse for address list claims? Address list claims are similar to standard badge claims and supports all features, except order of claims (claim numbers) do not matter. */
-  reuseForLists: boolean;
 
   /** Preset type for how the plugin state is to be maintained. */
   stateFunctionPreset: PluginPresetType;
@@ -1096,9 +1121,9 @@ export interface iPluginDoc<T extends NumberType> extends Doc {
   /** This is a flag for being compatible with auto-triggered claims, meaning no user interaction is needed. */
   requiresUserInputs: boolean;
 
-  userInputsSchema: Array<JsonBodyInputSchema>;
-  publicParamsSchema: Array<JsonBodyInputSchema | { key: string; label: string; type: 'ownershipRequirements'; headerField?: boolean }>;
-  privateParamsSchema: Array<JsonBodyInputSchema | { key: string; label: string; type: 'ownershipRequirements'; headerField?: boolean }>;
+  userInputsSchema: Array<JsonBodyInputSchema | CustomTypeInputSchema>;
+  publicParamsSchema: Array<JsonBodyInputSchema | CustomTypeInputSchema>;
+  privateParamsSchema: Array<JsonBodyInputSchema | CustomTypeInputSchema>;
 
   userInputRedirect?: {
     baseUri: string;
@@ -1127,8 +1152,6 @@ export interface iPluginDoc<T extends NumberType> extends Doc {
     postProcessingJs: string;
   };
 }
-
-
 
 /**
  * @category Interfaces
