@@ -7,7 +7,17 @@ import { BitBadgesUserInfo } from '@/api-indexer/BitBadgesUserInfo.js';
 import type { PaginationInfo } from '@/api-indexer/base.js';
 import { EmptyResponseClass } from '@/api-indexer/base.js';
 import { ClaimAlertDoc, TransferActivityDoc } from '@/api-indexer/docs/activity.js';
-import { AccessTokenDoc, AttestationDoc, AttestationProofDoc, DeveloperAppDoc, EventDoc, PluginDoc, StatusDoc } from '@/api-indexer/docs/docs.js';
+import {
+  AccessTokenDoc,
+  AttestationDoc,
+  AttestationProofDoc,
+  DeveloperAppDoc,
+  EventDoc,
+  InternalActionsDoc,
+  MapWithValues,
+  PluginDoc,
+  StatusDoc
+} from '@/api-indexer/docs/docs.js';
 import type {
   ClaimIntegrationPluginCustomBodyType,
   ClaimIntegrationPluginType,
@@ -17,6 +27,7 @@ import type {
   JsonBodyInputSchema,
   JsonBodyInputWithValue,
   NativeAddress,
+  OAuthScopeDetails,
   PluginPresetType,
   SiwbbMessage,
   UNIXMilliTimestamp,
@@ -24,11 +35,14 @@ import type {
   iAttestationDoc,
   iAttestationProofDoc,
   iClaimAlertDoc,
+  iClaimDetails,
   iCustomLink,
   iCustomListPage,
   iCustomPage,
   iDeveloperAppDoc,
   iEventDoc,
+  iInternalActionsDoc,
+  iMapWithValues,
   iPluginDoc,
   iSocialConnections,
   iStatusDoc,
@@ -40,7 +54,7 @@ import { Metadata } from '@/api-indexer/metadata/metadata.js';
 import { BaseNumberTypeClass, CustomTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import type { SupportedChain } from '@/common/types.js';
-import { PredeterminedBalances, iChallengeDetails, iChallengeInfoDetails } from '@/core/approvals.js';
+import { ClaimDetails, PredeterminedBalances, iChallengeDetails, iChallengeInfoDetails } from '@/core/approvals.js';
 import type { iBatchBadgeDetails } from '@/core/batch-utils.js';
 import { SiwbbChallenge, VerifySIWBBOptions, iSiwbbChallenge } from '@/core/blockin.js';
 import { AttestationsProof } from '@/core/secrets.js';
@@ -50,7 +64,6 @@ import type { iAttestationsProof, iPredeterminedBalances, iUintRange } from '@/i
 import { BroadcastPostBody } from '@/node-rest-api/index.js';
 import { AndGroup, OrGroup, type AssetConditionGroup, type ChallengeParams, type VerifyChallengeOptions } from 'blockin';
 import { OwnershipRequirements, SiwbbAndGroup, SiwbbAssetConditionGroup, SiwbbChallengeParams, SiwbbOrGroup } from './blockin.js';
-import { MapWithValues, iMapWithValues } from './maps.js';
 
 /**
  * The response after successfully broadcasting a transaction.
@@ -239,70 +252,8 @@ export interface GetClaimsPayload {
   listId?: string;
   /** If true, we will return all claims that were created by the signed in address. */
   siwbbClaimsOnly?: boolean;
-}
-
-/**
- * @category Interfaces
- */
-export interface iClaimDetails<T extends NumberType> {
-  /** Unique claim ID. */
-  claimId: string;
-  /** The balances to set for the claim. Only used for claims for collections that have off-chain indexed balances and are assigning balances based on the claim. */
-  balancesToSet?: iPredeterminedBalances<T>;
-  /** Claim plugins. These are the criteria that must pass for a user to claim the badge. */
-  plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
-  /** If manual distribution is enabled, we do not handle any distribution of claim codes. We leave that up to the claim creator. */
-  manualDistribution?: boolean;
-  /** Whether the claim is expected to be automatically triggered by someone (not the user). */
-  approach?: string; // 'in-site' | 'api' | 'zapier';
-  /** Seed code for the claim. */
-  seedCode?: string;
-  /** Metadata for the claim. */
-  metadata?: iMetadata<T>;
-  /** Algorithm to determine the claim number order. Blank is just incrementing claim numbers. */
-  assignMethod?: string;
-  /** Last updated timestamp for the claim. */
-  lastUpdated?: T;
-  /** The version of the claim. */
-  version: T;
-}
-
-/**
- * @inheritDoc iClaimDetails
- * @category API Requests / Responses
- */
-export class ClaimDetails<T extends NumberType> extends BaseNumberTypeClass<ClaimDetails<T>> implements iClaimDetails<T> {
-  claimId: string;
-  balancesToSet?: PredeterminedBalances<T>;
-  plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
-  manualDistribution?: boolean;
-  approach?: string;
-  seedCode?: string | undefined;
-  metadata?: Metadata<T> | undefined;
-  assignMethod?: string | undefined;
-  lastUpdated?: T | undefined;
-  version: T;
-  constructor(data: iClaimDetails<T>) {
-    super();
-    this.claimId = data.claimId;
-    this.balancesToSet = data.balancesToSet ? new PredeterminedBalances(data.balancesToSet) : undefined;
-    this.plugins = data.plugins;
-    this.manualDistribution = data.manualDistribution;
-    this.approach = data.approach;
-    this.seedCode = data.seedCode;
-    this.metadata = data.metadata ? new Metadata(data.metadata) : undefined;
-    this.assignMethod = data.assignMethod;
-    this.lastUpdated = data.lastUpdated;
-    this.version = data.version;
-  }
-
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): ClaimDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as ClaimDetails<U>;
-  }
-
-  getNumberFieldNames(): string[] {
-    return ['lastUpdated', 'version'];
-  }
+  /** Bookmark to start from. Obtained from previours request. Leave blank to start from the beginning. Only applicable when no additional criteria is specified. */
+  bookmark?: string;
 }
 
 /**
@@ -311,6 +262,7 @@ export class ClaimDetails<T extends NumberType> extends BaseNumberTypeClass<Clai
  */
 export interface iGetClaimsSuccessResponse<T extends NumberType> {
   claims: iClaimDetails<T>[];
+  bookmark?: string;
 }
 
 /**
@@ -322,10 +274,12 @@ export class GetClaimsSuccessResponse<T extends NumberType>
   implements iGetClaimsSuccessResponse<T>
 {
   claims: ClaimDetails<T>[];
+  bookmark?: string;
 
   constructor(data: iGetClaimsSuccessResponse<T>) {
     super();
     this.claims = data.claims.map((claim) => new ClaimDetails(claim));
+    this.bookmark = data.bookmark;
   }
 
   convert<U extends NumberType>(convertFunction: (val: NumberType) => U): GetClaimsSuccessResponse<U> {
@@ -2148,6 +2102,9 @@ export interface PluginVersionConfigPayload {
   /** Whether it makes sense for multiple of this plugin to be allowed */
   duplicatesAllowed: boolean;
 
+  /** Whether the plugin should receive status webhooks */
+  receiveStatusWebhook: boolean;
+
   /** Reuse for non-indexed? */
   reuseForNonIndexed: boolean;
 
@@ -2437,8 +2394,6 @@ export type ManagePluginRequest = Omit<IntegrationPluginDetails<ClaimIntegration
  * @category Interfaces
  */
 export type CreateClaimRequest<T extends NumberType> = Omit<iClaimDetails<T>, 'plugins' | 'version'> & {
-  listId?: string;
-  collectionId?: T;
   cid?: string;
 } & {
   plugins: ManagePluginRequest[];
@@ -2448,8 +2403,6 @@ export type CreateClaimRequest<T extends NumberType> = Omit<iClaimDetails<T>, 'p
  * @category Interfaces
  */
 export type UpdateClaimRequest<T extends NumberType> = Omit<iClaimDetails<T>, 'seedCode' | 'plugins' | 'assignMethod' | 'version'> & {
-  listId?: string;
-  collectionId?: T;
   cid?: string;
 } & {
   plugins: ManagePluginRequest[];
@@ -2475,14 +2428,6 @@ export interface iCreateClaimSuccessResponse {}
  * @category API Requests / Responses
  */
 export class CreateClaimSuccessResponse extends EmptyResponseClass {}
-
-/**
- * @category API Requests / Responses
- */
-export interface OAuthScopeDetails {
-  scopeName: string;
-  options?: object;
-}
 
 /**
  *
@@ -2567,3 +2512,139 @@ export interface iDeleteAttestationProofSuccessResponse {}
  * @category API Requests / Responses
  */
 export class DeleteAttestationProofSuccessResponse extends EmptyResponseClass {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface CreateInternalActionPayload {
+  /** Metadata for the internal action for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
+  name: string;
+  /** Description of the internal action. */
+  description: string;
+  /** Image for the internal action. */
+  image: string;
+  /** Actions associated with the internal action */
+  actions: {
+    discord?: {
+      serverId: string;
+    };
+  };
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iCreateInternalActionSuccessResponse {
+  /** Client secret for the internal action. */
+  clientSecret: string;
+  /** Client ID for the internal action. */
+  clientId: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class CreateInternalActionSuccessResponse
+  extends CustomTypeClass<CreateInternalActionSuccessResponse>
+  implements iCreateInternalActionSuccessResponse
+{
+  clientSecret: string;
+  clientId: string;
+  constructor(data: iCreateInternalActionSuccessResponse) {
+    super();
+    this.clientSecret = data.clientSecret;
+    this.clientId = data.clientId;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface GetInternalActionPayload {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetInternalActionSuccessResponse {
+  internalActions: iInternalActionsDoc[];
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetInternalActionSuccessResponse extends CustomTypeClass<GetInternalActionSuccessResponse> implements iGetInternalActionSuccessResponse {
+  internalActions: InternalActionsDoc[];
+
+  constructor(data: iGetInternalActionSuccessResponse) {
+    super();
+    this.internalActions = data.internalActions.map((internalAction) => new InternalActionsDoc(internalAction));
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface DeleteInternalActionPayload {
+  /** Client ID for the internal action to delete. */
+  clientId: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iDeleteInternalActionSuccessResponse {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class DeleteInternalActionSuccessResponse extends EmptyResponseClass {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface UpdateInternalActionPayload {
+  /** Client ID for the internal action to update. */
+  clientId: string;
+  /** Metadata for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
+  name?: string;
+  /** Description of the internal action. */
+  description?: string;
+  /** Image for the internal action. */
+  image?: string;
+  /** Actions associated with the internal action */
+  actions?: {
+    discord?: {
+      serverId: string;
+    };
+  };
+  /** Rotate the client secret? */
+  rotateClientSecret?: boolean;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iUpdateInternalActionSuccessResponse {
+  success: boolean;
+  clientSecret?: string;
+  clientId?: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class UpdateInternalActionSuccessResponse
+  extends CustomTypeClass<UpdateInternalActionSuccessResponse>
+  implements iUpdateInternalActionSuccessResponse
+{
+  success: boolean;
+  clientSecret?: string;
+  clientId?: string;
+
+  constructor(data: iUpdateInternalActionSuccessResponse) {
+    super();
+    this.success = data.success;
+    this.clientSecret = data.clientSecret;
+    this.clientId = data.clientId;
+  }
+}

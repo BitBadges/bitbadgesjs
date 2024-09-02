@@ -7,11 +7,11 @@ import type { BaseBitBadgesApi, PaginationInfo } from './base.js';
 import { EmptyResponseClass } from './base.js';
 import { ListActivityDoc } from './docs/activity.js';
 import { AddressListDoc } from './docs/docs.js';
-import type { ClaimIntegrationPluginType, IntegrationPluginDetails, iAddressListDoc, iListActivityDoc } from './docs/interfaces.js';
+import type { ClaimIntegrationPluginType, IntegrationPluginDetails, iAddressListDoc, iClaimDetails, iListActivityDoc } from './docs/interfaces.js';
 import type { iMetadata } from './metadata/metadata.js';
 import { Metadata } from './metadata/metadata.js';
-import { ClaimDetails, iClaimDetails } from './requests/index.js';
 import { BitBadgesApiRoutes } from './requests/routes.js';
+import { ClaimDetails } from '@/core/approvals.js';
 
 /**
  * @inheritDoc iAddressListDoc

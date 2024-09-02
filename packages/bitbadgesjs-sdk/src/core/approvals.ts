@@ -1,4 +1,4 @@
-import { ClaimDetails, iClaimDetails } from '@/api-indexer/requests/requests.js';
+import { ClaimIntegrationPluginType, iClaimDetails, IntegrationPluginDetails } from '@/api-indexer/docs/interfaces.js';
 import { BaseNumberTypeClass, CustomTypeClass, convertClassPropertiesAndMaintainNumberTypes, deepCopyPrimitives } from '@/common/base.js';
 import type {
   iApprovalAmounts,
@@ -30,8 +30,54 @@ import type { CollectionApprovalPermissionWithDetails } from './permissions.js';
 import { CollectionApprovalPermission } from './permissions.js';
 import { UintRange, UintRangeArray } from './uintRanges.js';
 import { AllDefaultValues, getPotentialUpdatesForTimelineValues, getUpdateCombinationsToCheck } from './validate-utils.js';
+import { Metadata } from '@/api-indexer/metadata/metadata.js';
 
 const { getReservedAddressList, getReservedTrackerList } = AddressList;
+
+/**
+ * @inheritDoc iClaimDetails
+ * @category API Requests / Responses
+ */
+export class ClaimDetails<T extends NumberType> extends BaseNumberTypeClass<ClaimDetails<T>> implements iClaimDetails<T> {
+  claimId: string;
+  balancesToSet?: PredeterminedBalances<T>;
+  plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
+  manualDistribution?: boolean;
+  approach?: string;
+  seedCode?: string | undefined;
+  metadata?: Metadata<T> | undefined;
+  assignMethod?: string | undefined;
+  lastUpdated?: T | undefined;
+  version: T;
+  collectionId?: T;
+  siwbbClaim?: boolean;
+  listId?: string;
+
+  constructor(data: iClaimDetails<T>) {
+    super();
+    this.claimId = data.claimId;
+    this.balancesToSet = data.balancesToSet ? new PredeterminedBalances(data.balancesToSet) : undefined;
+    this.plugins = data.plugins;
+    this.manualDistribution = data.manualDistribution;
+    this.approach = data.approach;
+    this.seedCode = data.seedCode;
+    this.metadata = data.metadata ? new Metadata(data.metadata) : undefined;
+    this.assignMethod = data.assignMethod;
+    this.lastUpdated = data.lastUpdated;
+    this.version = data.version;
+    this.collectionId = data.collectionId;
+    this.siwbbClaim = data.siwbbClaim;
+    this.listId = data.listId;
+  }
+
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): ClaimDetails<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as ClaimDetails<U>;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['lastUpdated', 'version', 'collectionId'];
+  }
+}
 
 /**
  * UserOutgoingApproval defines the rules for the approval of an outgoing transfer from a user.

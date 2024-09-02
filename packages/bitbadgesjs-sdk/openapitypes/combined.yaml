@@ -2722,34 +2722,6 @@ components:
       additionalProperties: false
       description: Type for pagination information.
       type: object
-    iUpdateHistory:
-      properties:
-        txHash:
-          description: The transaction hash of the on-chain transaction that updated this.
-          type: string
-          examples: &ref_7
-            - CE22D7...
-        block:
-          description: The block number of the on-chain transaction that updated this.
-          $ref: '#/components/schemas/NumberType'
-        blockTimestamp:
-          description: >-
-            The timestamp of the block of the on-chain transaction that updated
-            this.
-          $ref: '#/components/schemas/UNIXMilliTimestamp'
-        timestamp:
-          description: >-
-            The indexer's timestamp of the update. This is provided in some
-            cases because the time of indexing may be inconsistent with the time
-            of the block.
-          $ref: '#/components/schemas/UNIXMilliTimestamp'
-      required:
-        - txHash
-        - block
-        - blockTimestamp
-        - timestamp
-      additionalProperties: false
-      type: object
     ErrorDoc:
       properties:
         _docId:
@@ -2764,6 +2736,16 @@ components:
         - _docId
         - error
         - function
+      additionalProperties: false
+      type: object
+    OAuthScopeDetails:
+      properties:
+        scopeName:
+          type: string
+        options:
+          type: object
+      required:
+        - scopeName
       additionalProperties: false
       type: object
     UNIXMilliTimestamp:
@@ -3103,7 +3085,8 @@ components:
         txHash:
           description: The transaction hash of the activity.
           type: string
-          examples: *ref_7
+          examples: &ref_7
+            - CE22D7...
       required:
         - _docId
         - timestamp
@@ -4875,6 +4858,9 @@ components:
             Reuse for nonindexed balances? Only applicable if is stateless,
             requires no user inputs, and requires no sessions.
           type: boolean
+        receiveStatusWebhook:
+          description: Whether the plugin should receive status webhooks
+          type: boolean
         stateFunctionPreset:
           description: Preset type for how the plugin state is to be maintained.
         duplicatesAllowed:
@@ -4966,6 +4952,7 @@ components:
         - createdAt
         - lastUpdated
         - reuseForNonIndexed
+        - receiveStatusWebhook
         - stateFunctionPreset
         - duplicatesAllowed
         - requiresSessions
@@ -5560,6 +5547,198 @@ components:
         - createdAt
       additionalProperties: false
       description: ''
+      type: object
+    iInternalActionsDoc:
+      properties:
+        _docId:
+          description: A unique stringified document ID
+          type: string
+        _id:
+          description: A unique document ID (Mongo DB ObjectID)
+          type: string
+        createdBy:
+          description: Creator of the internal action
+          $ref: '#/components/schemas/CosmosAddress'
+        name:
+          description: The name of the internal action
+          type: string
+          examples: *ref_12
+        description:
+          description: The description of the internal action
+          type: string
+          examples: *ref_8
+        image:
+          description: The image of the internal action
+          type: string
+          examples: *ref_14
+        clientSecret:
+          description: The client secret of the internal action
+          type: string
+        actions:
+          properties:
+            discord:
+              properties:
+                serverId:
+                  type: string
+              required:
+                - serverId
+              additionalProperties: false
+              type: object
+          additionalProperties: false
+          description: Actions associated with the internal action
+          type: object
+      required:
+        - _docId
+        - createdBy
+        - name
+        - description
+        - image
+        - clientSecret
+        - actions
+      additionalProperties: false
+      description: ''
+      type: object
+    iUpdateHistory:
+      properties:
+        txHash:
+          description: The transaction hash of the on-chain transaction that updated this.
+          type: string
+          examples: *ref_7
+        block:
+          description: The block number of the on-chain transaction that updated this.
+          $ref: '#/components/schemas/NumberType'
+        blockTimestamp:
+          description: >-
+            The timestamp of the block of the on-chain transaction that updated
+            this.
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
+        timestamp:
+          description: >-
+            The indexer's timestamp of the update. This is provided in some
+            cases because the time of indexing may be inconsistent with the time
+            of the block.
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
+      required:
+        - txHash
+        - block
+        - blockTimestamp
+        - timestamp
+      additionalProperties: false
+      type: object
+    iMapWithValues:
+      properties:
+        creator:
+          $ref: '#/components/schemas/CosmosAddress'
+        mapId:
+          type: string
+        inheritManagerTimelineFrom:
+          $ref: '#/components/schemas/NumberType'
+        managerTimeline:
+          items:
+            $ref: '#/components/schemas/iManagerTimeline'
+          type: array
+        updateCriteria:
+          $ref: '#/components/schemas/iMapUpdateCriteria'
+        valueOptions:
+          $ref: '#/components/schemas/iValueOptions'
+        defaultValue:
+          type: string
+        permissions:
+          $ref: '#/components/schemas/iMapPermissions'
+        metadataTimeline:
+          items:
+            $ref: '#/components/schemas/iMapMetadataTimeline'
+          type: array
+        values:
+          additionalProperties:
+            $ref: '#/components/schemas/iValueStore'
+          description: The (key, value) pairs for the maps that are set.
+          type: object
+        metadata:
+          description: The fetched metadata for the map (if any).
+          $ref: '#/components/schemas/iMetadata'
+        updateHistory:
+          items:
+            $ref: '#/components/schemas/iUpdateHistory'
+          description: >-
+            The update history for the map. Maps are maintained through
+            blockchain transactions.
+          type: array
+      required:
+        - creator
+        - mapId
+        - inheritManagerTimelineFrom
+        - managerTimeline
+        - updateCriteria
+        - valueOptions
+        - defaultValue
+        - permissions
+        - metadataTimeline
+        - values
+        - updateHistory
+      additionalProperties: false
+      description: ''
+      type: object
+    iClaimDetails:
+      properties:
+        claimId:
+          description: Unique claim ID.
+          type: string
+        collectionId:
+          description: Collection ID that the claim is for (if applicable).
+          $ref: '#/components/schemas/NumberType'
+        siwbbClaim:
+          description: Is intended to be used for Sign In with BitBadges.
+          type: boolean
+        listId:
+          description: Address list ID that the claim is for (if applicable).
+          type: string
+          examples: *ref_11
+        balancesToSet:
+          description: >-
+            The balances to set for the claim. Only used for claims for
+            collections that have off-chain indexed balances and are assigning
+            balances based on the claim.
+          $ref: '#/components/schemas/iPredeterminedBalances'
+        plugins:
+          items:
+            $ref: '#/components/schemas/IntegrationPluginDetails'
+          description: >-
+            Claim plugins. These are the criteria that must pass for a user to
+            claim the badge.
+          type: array
+        manualDistribution:
+          description: >-
+            If manual distribution is enabled, we do not handle any distribution
+            of claim codes. We leave that up to the claim creator.
+          type: boolean
+        approach:
+          description: >-
+            Whether the claim is expected to be automatically triggered by
+            someone (not the user).
+          type: string
+        seedCode:
+          description: Seed code for the claim.
+          type: string
+        metadata:
+          description: Metadata for the claim.
+          $ref: '#/components/schemas/iMetadata'
+        assignMethod:
+          description: >-
+            Algorithm to determine the claim number order. Blank is just
+            incrementing claim numbers.
+          type: string
+        lastUpdated:
+          description: Last updated timestamp for the claim.
+          $ref: '#/components/schemas/NumberType'
+        version:
+          description: The version of the claim.
+          $ref: '#/components/schemas/NumberType'
+      required:
+        - claimId
+        - plugins
+        - version
+      additionalProperties: false
       type: object
     iBadgeMetadataDetails:
       properties:
@@ -7034,138 +7213,6 @@ components:
         - `approvalTrackers` - Fetches the approvals trackers for the collection
         in random order.
       type: object
-    GetCollectionsPayload:
-      properties:
-        collectionsToFetch:
-          items:
-            $ref: '#/components/schemas/GetCollectionRequestBody'
-          type: array
-      required:
-        - collectionsToFetch
-      additionalProperties: false
-      type: object
-    iGetCollectionsSuccessResponse:
-      properties:
-        collections:
-          items:
-            $ref: '#/components/schemas/iBitBadgesCollection'
-          type: array
-      required:
-        - collections
-      additionalProperties: false
-      type: object
-    GetCollectionByIdBody:
-      properties:
-        viewsToFetch:
-          items:
-            properties:
-              viewType:
-                $ref: '#/components/schemas/CollectionViewKey'
-                description: The base view type to fetch.
-                examples: *ref_23
-              viewId:
-                description: >-
-                  A unique view ID. This is used for pagination. All fetches w/
-                  same ID should be made with same criteria.
-                type: string
-                examples: *ref_22
-              bookmark:
-                description: A bookmark to pass in for pagination. "" for first request.
-                type: string
-              oldestFirst:
-                description: If defined, we will return the oldest items first.
-                type: boolean
-              address:
-                description: If specified, we will only fetch this users' activity.
-                type: string
-            required:
-              - viewType
-              - viewId
-              - bookmark
-            additionalProperties: false
-            type: object
-          description: If present, the specified views will be fetched.
-          type: array
-        fetchTotalBalances:
-          description: >-
-            If true, the total and mint balances will be fetched and will be put
-            in owners[].
-
-
-            collection.owners.find(x => x.cosmosAddresss === 'Mint')
-          type: boolean
-        challengeTrackersToFetch:
-          items:
-            $ref: '#/components/schemas/iChallengeTrackerIdDetails'
-          description: >-
-            If present, the merkle challenges corresponding to the specified
-            merkle challenge IDs will be fetched.
-          type: array
-        approvalTrackersToFetch:
-          items:
-            $ref: '#/components/schemas/iAmountTrackerIdDetails'
-          description: >-
-            If present, the approvals trackers corresponding to the specified
-            approvals tracker IDs will be fetched.
-          type: array
-        handleAllAndAppendDefaults:
-          description: If true, we will append defaults with empty values.
-          type: boolean
-        fetchPrivateParams:
-          description: >-
-            Fetches private parameters for any claims in addition to public
-            parameters.
-          type: boolean
-        metadataToFetch:
-          description: >-
-            If present, we will fetch the metadata corresponding to the
-            specified options.
-
-
-            Consider using pruneMetadataToFetch for filtering out previously
-            fetched metadata.
-          $ref: '#/components/schemas/MetadataFetchOptions'
-      additionalProperties: false
-      description: >-
-
-        Defines the options for fetching additional collection details.
-
-
-        A view is a way of fetching additional details about a collection, and
-        these will be queryable in the response via the `views` property.
-
-        Each view has a bookmark that is used for pagination and must be
-        supplied to get the next page.
-
-        If the bookmark is not supplied, the first page will be returned.
-
-
-        We support the following views:
-
-        - `transferActivity` - Fetches the latest activity for the collection.
-
-        - `latestAnnouncements` - Fetches the latest announcements for the
-        collection.
-
-        - `reviews` - Fetches the latest reviews for the collection.
-
-        - `owners` - Fetches the owners of the collection sequentially in random
-        order.
-
-        - `merkleChallenges` - Fetches the merkle challenges for the collection
-        in random order.
-
-        - `approvalTrackers` - Fetches the approvals trackers for the collection
-        in random order.
-      type: object
-    iGetCollectionByIdSuccessResponse:
-      properties:
-        collection:
-          $ref: '#/components/schemas/iBitBadgesCollection'
-      required:
-        - collection
-      additionalProperties: false
-      type: object
     RefreshMetadataPayload:
       additionalProperties: false
       type: object
@@ -7412,57 +7459,12 @@ components:
             If true, we will return all claims that were created by the signed
             in address.
           type: boolean
-      additionalProperties: false
-      type: object
-    iClaimDetails:
-      properties:
-        claimId:
-          description: Unique claim ID.
+        bookmark:
+          description: >-
+            Bookmark to start from. Obtained from previours request. Leave blank
+            to start from the beginning. Only applicable when no additional
+            criteria is specified.
           type: string
-        balancesToSet:
-          description: >-
-            The balances to set for the claim. Only used for claims for
-            collections that have off-chain indexed balances and are assigning
-            balances based on the claim.
-          $ref: '#/components/schemas/iPredeterminedBalances'
-        plugins:
-          items:
-            $ref: '#/components/schemas/IntegrationPluginDetails'
-          description: >-
-            Claim plugins. These are the criteria that must pass for a user to
-            claim the badge.
-          type: array
-        manualDistribution:
-          description: >-
-            If manual distribution is enabled, we do not handle any distribution
-            of claim codes. We leave that up to the claim creator.
-          type: boolean
-        approach:
-          description: >-
-            Whether the claim is expected to be automatically triggered by
-            someone (not the user).
-          type: string
-        seedCode:
-          description: Seed code for the claim.
-          type: string
-        metadata:
-          description: Metadata for the claim.
-          $ref: '#/components/schemas/iMetadata'
-        assignMethod:
-          description: >-
-            Algorithm to determine the claim number order. Blank is just
-            incrementing claim numbers.
-          type: string
-        lastUpdated:
-          description: Last updated timestamp for the claim.
-          $ref: '#/components/schemas/NumberType'
-        version:
-          description: The version of the claim.
-          $ref: '#/components/schemas/NumberType'
-      required:
-        - claimId
-        - plugins
-        - version
       additionalProperties: false
       type: object
     iGetClaimsSuccessResponse:
@@ -7471,6 +7473,8 @@ components:
           items:
             $ref: '#/components/schemas/iClaimDetails'
           type: array
+        bookmark:
+          type: string
       required:
         - claims
       additionalProperties: false
@@ -9307,7 +9311,7 @@ components:
         - access_token
         - token_type
       additionalProperties: false
-      description: Used by the frontend for dynamically fetching data from the DB as needed
+      description: ''
       type: object
     DeleteSIWBBRequestPayload:
       properties:
@@ -9557,6 +9561,9 @@ components:
         duplicatesAllowed:
           description: Whether it makes sense for multiple of this plugin to be allowed
           type: boolean
+        receiveStatusWebhook:
+          description: Whether the plugin should receive status webhooks
+          type: boolean
         reuseForNonIndexed:
           description: Reuse for non-indexed?
           type: boolean
@@ -9639,6 +9646,7 @@ components:
         - finalized
         - stateFunctionPreset
         - duplicatesAllowed
+        - receiveStatusWebhook
         - reuseForNonIndexed
         - requiresUserInputs
       additionalProperties: false
@@ -9780,6 +9788,9 @@ components:
                     description: >-
                       Whether it makes sense for multiple of this plugin to be
                       allowed
+                    type: boolean
+                  receiveStatusWebhook:
+                    description: Whether the plugin should receive status webhooks
                     type: boolean
                   reuseForNonIndexed:
                     description: Reuse for non-indexed?
@@ -9976,6 +9987,16 @@ components:
               claimId:
                 description: Unique claim ID.
                 type: string
+              collectionId:
+                description: Collection ID that the claim is for (if applicable).
+                $ref: '#/components/schemas/NumberType'
+              siwbbClaim:
+                description: Is intended to be used for Sign In with BitBadges.
+                type: boolean
+              listId:
+                description: Address list ID that the claim is for (if applicable).
+                type: string
+                examples: *ref_11
               balancesToSet:
                 $ref: '#/components/schemas/iPredeterminedBalances'
                 description: >-
@@ -10112,6 +10133,16 @@ components:
         claimId:
           description: Unique claim ID.
           type: string
+        collectionId:
+          description: Collection ID that the claim is for (if applicable).
+          $ref: '#/components/schemas/NumberType'
+        siwbbClaim:
+          description: Is intended to be used for Sign In with BitBadges.
+          type: boolean
+        listId:
+          description: Address list ID that the claim is for (if applicable).
+          type: string
+          examples: *ref_11
         balancesToSet:
           description: >-
             The balances to set for the claim. Only used for claims for
@@ -10142,11 +10173,6 @@ components:
         lastUpdated:
           description: Last updated timestamp for the claim.
           $ref: '#/components/schemas/NumberType'
-        listId:
-          type: string
-          examples: *ref_11
-        collectionId:
-          $ref: '#/components/schemas/NumberType'
         cid:
           type: string
         plugins:
@@ -10163,6 +10189,16 @@ components:
         claimId:
           description: Unique claim ID.
           type: string
+        collectionId:
+          description: Collection ID that the claim is for (if applicable).
+          $ref: '#/components/schemas/NumberType'
+        siwbbClaim:
+          description: Is intended to be used for Sign In with BitBadges.
+          type: boolean
+        listId:
+          description: Address list ID that the claim is for (if applicable).
+          type: string
+          examples: *ref_11
         balancesToSet:
           description: >-
             The balances to set for the claim. Only used for claims for
@@ -10184,11 +10220,6 @@ components:
           $ref: '#/components/schemas/iMetadata'
         lastUpdated:
           description: Last updated timestamp for the claim.
-          $ref: '#/components/schemas/NumberType'
-        listId:
-          type: string
-          examples: *ref_11
-        collectionId:
           $ref: '#/components/schemas/NumberType'
         cid:
           type: string
@@ -10216,16 +10247,6 @@ components:
       additionalProperties: false
       type: object
     iCreateClaimSuccessResponse:
-      additionalProperties: false
-      type: object
-    OAuthScopeDetails:
-      properties:
-        scopeName:
-          type: string
-        options:
-          type: object
-      required:
-        - scopeName
       additionalProperties: false
       type: object
     OauthRevokePayload:
@@ -10593,6 +10614,132 @@ components:
     iDeleteAttestationProofSuccessResponse:
       additionalProperties: false
       type: object
+    CreateInternalActionPayload:
+      properties:
+        name:
+          description: >-
+            Metadata for the internal action for display purposes. Note this
+            should not contain anything sensitive. It may be displayed to
+            verifiers.
+          type: string
+          examples: *ref_12
+        description:
+          description: Description of the internal action.
+          type: string
+          examples: *ref_8
+        image:
+          description: Image for the internal action.
+          type: string
+          examples: *ref_14
+        actions:
+          properties:
+            discord:
+              properties:
+                serverId:
+                  type: string
+              required:
+                - serverId
+              additionalProperties: false
+              type: object
+          additionalProperties: false
+          description: Actions associated with the internal action
+          type: object
+      required:
+        - name
+        - description
+        - image
+        - actions
+      additionalProperties: false
+      type: object
+    iCreateInternalActionSuccessResponse:
+      properties:
+        clientSecret:
+          description: Client secret for the internal action.
+          type: string
+        clientId:
+          description: Client ID for the internal action.
+          type: string
+      required:
+        - clientSecret
+        - clientId
+      additionalProperties: false
+      type: object
+    GetInternalActionPayload:
+      additionalProperties: false
+      type: object
+    iGetInternalActionSuccessResponse:
+      properties:
+        internalActions:
+          items:
+            $ref: '#/components/schemas/iInternalActionsDoc'
+          type: array
+      required:
+        - internalActions
+      additionalProperties: false
+      type: object
+    DeleteInternalActionPayload:
+      properties:
+        clientId:
+          description: Client ID for the internal action to delete.
+          type: string
+      required:
+        - clientId
+      additionalProperties: false
+      type: object
+    iDeleteInternalActionSuccessResponse:
+      additionalProperties: false
+      type: object
+    UpdateInternalActionPayload:
+      properties:
+        clientId:
+          description: Client ID for the internal action to update.
+          type: string
+        name:
+          description: >-
+            Metadata for display purposes. Note this should not contain anything
+            sensitive. It may be displayed to verifiers.
+          type: string
+          examples: *ref_12
+        description:
+          description: Description of the internal action.
+          type: string
+          examples: *ref_8
+        image:
+          description: Image for the internal action.
+          type: string
+          examples: *ref_14
+        actions:
+          properties:
+            discord:
+              properties:
+                serverId:
+                  type: string
+              required:
+                - serverId
+              additionalProperties: false
+              type: object
+          additionalProperties: false
+          description: Actions associated with the internal action
+          type: object
+        rotateClientSecret:
+          description: Rotate the client secret?
+          type: boolean
+      required:
+        - clientId
+      additionalProperties: false
+      type: object
+    iUpdateInternalActionSuccessResponse:
+      properties:
+        success:
+          type: boolean
+        clientSecret:
+          type: string
+        clientId:
+          type: string
+      required:
+        - success
+      additionalProperties: false
+      type: object
     GetMapsPayload:
       properties:
         mapIds:
@@ -10603,60 +10750,6 @@ components:
       required:
         - mapIds
       additionalProperties: false
-      type: object
-    iMapWithValues:
-      properties:
-        creator:
-          $ref: '#/components/schemas/CosmosAddress'
-        mapId:
-          type: string
-        inheritManagerTimelineFrom:
-          $ref: '#/components/schemas/NumberType'
-        managerTimeline:
-          items:
-            $ref: '#/components/schemas/iManagerTimeline'
-          type: array
-        updateCriteria:
-          $ref: '#/components/schemas/iMapUpdateCriteria'
-        valueOptions:
-          $ref: '#/components/schemas/iValueOptions'
-        defaultValue:
-          type: string
-        permissions:
-          $ref: '#/components/schemas/iMapPermissions'
-        metadataTimeline:
-          items:
-            $ref: '#/components/schemas/iMapMetadataTimeline'
-          type: array
-        values:
-          additionalProperties:
-            $ref: '#/components/schemas/iValueStore'
-          description: The (key, value) pairs for the maps that are set.
-          type: object
-        metadata:
-          description: The fetched metadata for the map (if any).
-          $ref: '#/components/schemas/iMetadata'
-        updateHistory:
-          items:
-            $ref: '#/components/schemas/iUpdateHistory'
-          description: >-
-            The update history for the map. Maps are maintained through
-            blockchain transactions.
-          type: array
-      required:
-        - creator
-        - mapId
-        - inheritManagerTimelineFrom
-        - managerTimeline
-        - updateCriteria
-        - valueOptions
-        - defaultValue
-        - permissions
-        - metadataTimeline
-        - values
-        - updateHistory
-      additionalProperties: false
-      description: ''
       type: object
     iGetMapsSuccessResponse:
       properties:
@@ -10956,6 +11049,139 @@ components:
       additionalProperties: false
       description: ''
       type: object
+    GetCollectionsPayload:
+      properties:
+        collectionsToFetch:
+          items:
+            $ref: '#/components/schemas/GetCollectionRequestBody'
+          type: array
+      required:
+        - collectionsToFetch
+      additionalProperties: false
+      description: Used by the frontend for dynamically fetching data from the DB as needed
+      type: object
+    iGetCollectionsSuccessResponse:
+      properties:
+        collections:
+          items:
+            $ref: '#/components/schemas/iBitBadgesCollection'
+          type: array
+      required:
+        - collections
+      additionalProperties: false
+      type: object
+    GetCollectionByIdBody:
+      properties:
+        viewsToFetch:
+          items:
+            properties:
+              viewType:
+                $ref: '#/components/schemas/CollectionViewKey'
+                description: The base view type to fetch.
+                examples: *ref_23
+              viewId:
+                description: >-
+                  A unique view ID. This is used for pagination. All fetches w/
+                  same ID should be made with same criteria.
+                type: string
+                examples: *ref_22
+              bookmark:
+                description: A bookmark to pass in for pagination. "" for first request.
+                type: string
+              oldestFirst:
+                description: If defined, we will return the oldest items first.
+                type: boolean
+              address:
+                description: If specified, we will only fetch this users' activity.
+                type: string
+            required:
+              - viewType
+              - viewId
+              - bookmark
+            additionalProperties: false
+            type: object
+          description: If present, the specified views will be fetched.
+          type: array
+        fetchTotalBalances:
+          description: >-
+            If true, the total and mint balances will be fetched and will be put
+            in owners[].
+
+
+            collection.owners.find(x => x.cosmosAddresss === 'Mint')
+          type: boolean
+        challengeTrackersToFetch:
+          items:
+            $ref: '#/components/schemas/iChallengeTrackerIdDetails'
+          description: >-
+            If present, the merkle challenges corresponding to the specified
+            merkle challenge IDs will be fetched.
+          type: array
+        approvalTrackersToFetch:
+          items:
+            $ref: '#/components/schemas/iAmountTrackerIdDetails'
+          description: >-
+            If present, the approvals trackers corresponding to the specified
+            approvals tracker IDs will be fetched.
+          type: array
+        handleAllAndAppendDefaults:
+          description: If true, we will append defaults with empty values.
+          type: boolean
+        fetchPrivateParams:
+          description: >-
+            Fetches private parameters for any claims in addition to public
+            parameters.
+          type: boolean
+        metadataToFetch:
+          description: >-
+            If present, we will fetch the metadata corresponding to the
+            specified options.
+
+
+            Consider using pruneMetadataToFetch for filtering out previously
+            fetched metadata.
+          $ref: '#/components/schemas/MetadataFetchOptions'
+      additionalProperties: false
+      description: >-
+
+        Defines the options for fetching additional collection details.
+
+
+        A view is a way of fetching additional details about a collection, and
+        these will be queryable in the response via the `views` property.
+
+        Each view has a bookmark that is used for pagination and must be
+        supplied to get the next page.
+
+        If the bookmark is not supplied, the first page will be returned.
+
+
+        We support the following views:
+
+        - `transferActivity` - Fetches the latest activity for the collection.
+
+        - `latestAnnouncements` - Fetches the latest announcements for the
+        collection.
+
+        - `reviews` - Fetches the latest reviews for the collection.
+
+        - `owners` - Fetches the owners of the collection sequentially in random
+        order.
+
+        - `merkleChallenges` - Fetches the merkle challenges for the collection
+        in random order.
+
+        - `approvalTrackers` - Fetches the approvals trackers for the collection
+        in random order.
+      type: object
+    iGetCollectionByIdSuccessResponse:
+      properties:
+        collection:
+          $ref: '#/components/schemas/iBitBadgesCollection'
+      required:
+        - collection
+      additionalProperties: false
+      type: object
     iSiwbbChallenge:
       properties:
         address:
@@ -11052,7 +11278,6 @@ components:
         - chain
         - cosmosAddress
       additionalProperties: false
-      description: Used by the frontend for dynamically fetching data from the DB as needed
       type: object
     VerifySIWBBOptions:
       properties:

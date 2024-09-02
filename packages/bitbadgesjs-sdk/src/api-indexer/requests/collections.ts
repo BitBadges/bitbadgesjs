@@ -1,6 +1,4 @@
 import type { NumberType } from '@/common/string-numbers.js';
-import type { iBitBadgesCollection } from '../BitBadgesCollection.js';
-import { BitBadgesCollection } from '../BitBadgesCollection.js';
 import type { iAmountTrackerIdDetails, iUintRange } from '@/interfaces/badges/core.js';
 import type { PaginationInfo } from '../base.js';
 import { EmptyResponseClass } from '../base.js';
@@ -320,72 +318,6 @@ export interface GetMetadataForCollectionPayload {
  * @category Interfaces
  */
 export type GetCollectionRequestBody = GetAdditionalCollectionDetailsPayload & GetMetadataForCollectionPayload & { collectionId: NumberType };
-
-/**
- * @category API Requests / Responses
- */
-export interface GetCollectionsPayload {
-  collectionsToFetch: GetCollectionRequestBody[];
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iGetCollectionsSuccessResponse<T extends NumberType> {
-  collections: iBitBadgesCollection<T>[];
-}
-
-export class GetCollectionsSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetCollectionsSuccessResponse<T>>
-  implements iGetCollectionsSuccessResponse<T>
-{
-  collections: BitBadgesCollection<T>[];
-
-  constructor(data: iGetCollectionsSuccessResponse<T>) {
-    super();
-    this.collections = data.collections.map((collection) => new BitBadgesCollection(collection));
-  }
-
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetCollectionsSuccessResponse<U> {
-    return new GetCollectionsSuccessResponse(
-      deepCopyPrimitives({
-        collections: this.collections.map((collection) => collection.convert(convertFunction))
-      })
-    );
-  }
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface GetCollectionByIdBody extends GetAdditionalCollectionDetailsPayload, GetMetadataForCollectionPayload {}
-
-/**
- * @category API Requests / Responses
- */
-export interface iGetCollectionByIdSuccessResponse<T extends NumberType> {
-  collection: iBitBadgesCollection<T>;
-}
-
-export class GetCollectionByIdSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetCollectionByIdSuccessResponse<T>>
-  implements iGetCollectionByIdSuccessResponse<T>
-{
-  collection: BitBadgesCollection<T>;
-
-  constructor(data: iGetCollectionByIdSuccessResponse<T>) {
-    super();
-    this.collection = new BitBadgesCollection(data.collection);
-  }
-
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetCollectionByIdSuccessResponse<U> {
-    return new GetCollectionByIdSuccessResponse(
-      deepCopyPrimitives({
-        collection: this.collection.convert(convertFunction)
-      })
-    );
-  }
-}
 
 /**
  * @category API Requests / Responses

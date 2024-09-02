@@ -1,3 +1,5 @@
+//IMPORTANT: Keep all imports type-safe by using the `type` keyword. If not, this will mess up the circular dependency check.
+
 import type { Doc } from '@/api-indexer/base.js';
 import type { iMetadata } from '@/api-indexer/metadata/metadata.js';
 import type { JSPrimitiveNumberType, NumberType } from '@/common/string-numbers.js';
@@ -25,9 +27,15 @@ import type {
 } from '@/interfaces/badges/core.js';
 import type { iCollectionPermissions, iUserPermissionsWithDetails } from '@/interfaces/badges/permissions.js';
 import type { iUserBalanceStore } from '@/interfaces/badges/userBalances.js';
-import { iMapWithValues } from '../requests/maps.js';
-import { iUpdateHistory } from './docs.js';
-import { OAuthScopeDetails } from '../requests/requests.js';
+import type { iMap, iValueStore } from '@/transactions/messages/index.js';
+
+/**
+ * @category API Requests / Responses
+ */
+export interface OAuthScopeDetails {
+  scopeName: string;
+  options?: object;
+}
 
 /**
  * Numeric timestamp - value is equal to the milliseconds since the UNIX epoch.
@@ -584,6 +592,7 @@ export type ClaimIntegrationPluginType =
   | 'email'
   | 'ip'
   | 'webhooks'
+  | 'successWebhooks'
   | 'payments'
   | string;
 
@@ -718,12 +727,12 @@ export type ClaimIntegrationPrivateParamsType<T extends ClaimIntegrationPluginTy
             usernames?: string[];
             ids?: string[];
           }
-        : T extends 'webhooks'
+        : T extends 'webhooks' | 'successWebhooks'
           ? {
               webhookUrl: string;
               webhookSecret: string;
             }
-          : {};
+          : Record<string, any>;
 
 /**
  * Public state is the current state of the claim integration that is visible to the public. For example, the number of times a claim code has been used.
@@ -1109,6 +1118,9 @@ export interface iPluginVersionConfig<T extends NumberType> {
   /** Reuse for nonindexed balances? Only applicable if is stateless, requires no user inputs, and requires no sessions. */
   reuseForNonIndexed: boolean;
 
+  /** Whether the plugin should receive status webhooks */
+  receiveStatusWebhook: boolean;
+
   /** Preset type for how the plugin state is to be maintained. */
   stateFunctionPreset: PluginPresetType;
 
@@ -1236,4 +1248,85 @@ export interface iEventDoc<T extends NumberType> extends Doc {
   externalUrl: string;
 
   createdAt: UNIXMilliTimestamp<T>;
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iInternalActionsDoc extends Doc {
+  /** Creator of the internal action */
+  createdBy: CosmosAddress;
+  /** The name of the internal action */
+  name: string;
+  /** The description of the internal action */
+  description: string;
+  /** The image of the internal action */
+  image: string;
+  /** The client secret of the internal action */
+  clientSecret: string;
+  /** Actions associated with the internal action */
+  actions: {
+    discord?: {
+      serverId: string;
+    };
+  };
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iUpdateHistory<T extends NumberType> {
+  /** The transaction hash of the on-chain transaction that updated this. */
+  txHash: string;
+  /** The block number of the on-chain transaction that updated this. */
+  block: T;
+  /** The timestamp of the block of the on-chain transaction that updated this. */
+  blockTimestamp: UNIXMilliTimestamp<T>;
+  /** The indexer's timestamp of the update. This is provided in some cases because the time of indexing may be inconsistent with the time of the block. */
+  timestamp: UNIXMilliTimestamp<T>;
+}
+
+/**
+ * @inheritDoc iMap
+ * @category Interfaces
+ */
+export interface iMapWithValues<T extends NumberType> extends iMap<T> {
+  /** The (key, value) pairs for the maps that are set. */
+  values: { [key: string]: iValueStore };
+  /** The fetched metadata for the map (if any). */
+  metadata?: iMetadata<T>;
+  /** The update history for the map. Maps are maintained through blockchain transactions. */
+  updateHistory: iUpdateHistory<T>[];
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iClaimDetails<T extends NumberType> {
+  /** Unique claim ID. */
+  claimId: string;
+  /** Collection ID that the claim is for (if applicable). */
+  collectionId?: T;
+  /** Is intended to be used for Sign In with BitBadges. */
+  siwbbClaim?: boolean;
+  /** Address list ID that the claim is for (if applicable). */
+  listId?: string;
+  /** The balances to set for the claim. Only used for claims for collections that have off-chain indexed balances and are assigning balances based on the claim. */
+  balancesToSet?: iPredeterminedBalances<T>;
+  /** Claim plugins. These are the criteria that must pass for a user to claim the badge. */
+  plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
+  /** If manual distribution is enabled, we do not handle any distribution of claim codes. We leave that up to the claim creator. */
+  manualDistribution?: boolean;
+  /** Whether the claim is expected to be automatically triggered by someone (not the user). */
+  approach?: string; // 'in-site' | 'api' | 'zapier';
+  /** Seed code for the claim. */
+  seedCode?: string;
+  /** Metadata for the claim. */
+  metadata?: iMetadata<T>;
+  /** Algorithm to determine the claim number order. Blank is just incrementing claim numbers. */
+  assignMethod?: string;
+  /** Last updated timestamp for the claim. */
+  lastUpdated?: T;
+  /** The version of the claim. */
+  version: T;
 }

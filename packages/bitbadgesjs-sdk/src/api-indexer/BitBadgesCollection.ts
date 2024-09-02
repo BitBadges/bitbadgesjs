@@ -1,5 +1,5 @@
 import type { CustomType } from '@/common/base.js';
-import { convertClassPropertiesAndMaintainNumberTypes, getConverterFunction } from '@/common/base.js';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, deepCopyPrimitives, getConverterFunction } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import { BigIntify } from '@/common/string-numbers.js';
 import { AddressList } from '@/core/addressLists.js';
@@ -42,6 +42,7 @@ import { ApprovalTrackerDoc, BalanceDocWithDetails, CollectionDoc, MapDoc, Merkl
 import type {
   iApprovalTrackerDoc,
   iBalanceDocWithDetails,
+  iClaimDetails,
   iCollectionDoc,
   iMapDoc,
   iMerkleChallengeDoc,
@@ -54,36 +55,32 @@ import { convertToCosmosAddress } from '@/address-converter/converter.js';
 import { GO_MAX_UINT_64 } from '@/common/math.js';
 import { getCurrentValueForTimeline } from '@/core/timelines.js';
 import typia from 'typia';
-import type {
+import {
   CollectionViewKey,
   FilterBadgesInCollectionPayload,
   GetAdditionalCollectionDetailsPayload,
   GetBadgeActivityPayload,
   GetBadgeBalanceByAddressPayload,
-  GetCollectionsPayload,
   GetMetadataForCollectionPayload,
   GetOwnersForBadgePayload,
   iFilterBadgesInCollectionSuccessResponse,
   iGetBadgeActivitySuccessResponse,
   iGetBadgeBalanceByAddressSuccessResponse,
-  iGetCollectionsSuccessResponse,
   iGetOwnersForBadgeSuccessResponse,
   iRefreshMetadataSuccessResponse,
   iRefreshStatusSuccessResponse,
   MetadataFetchOptions,
-  RefreshMetadataPayload
-} from './requests/collections.js';
-import {
+  RefreshMetadataPayload,
   FilterBadgesInCollectionSuccessResponse,
   GetBadgeActivitySuccessResponse,
   GetBadgeBalanceByAddressSuccessResponse,
-  GetCollectionsSuccessResponse,
   GetOwnersForBadgeSuccessResponse,
   RefreshMetadataSuccessResponse,
-  RefreshStatusSuccessResponse
+  RefreshStatusSuccessResponse,
+  GetCollectionRequestBody
 } from './requests/collections.js';
-import { ClaimDetails, iClaimDetails } from './requests/index.js';
 import { BitBadgesApiRoutes } from './requests/routes.js';
+import { ClaimDetails } from '@/core/approvals.js';
 
 const NEW_COLLECTION_ID = 0n;
 
@@ -1476,4 +1473,70 @@ function updateCollectionWithResponse<T extends NumberType>(
   }
 
   return cachedCollection;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface GetCollectionsPayload {
+  collectionsToFetch: GetCollectionRequestBody[];
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetCollectionsSuccessResponse<T extends NumberType> {
+  collections: iBitBadgesCollection<T>[];
+}
+
+export class GetCollectionsSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetCollectionsSuccessResponse<T>>
+  implements iGetCollectionsSuccessResponse<T>
+{
+  collections: BitBadgesCollection<T>[];
+
+  constructor(data: iGetCollectionsSuccessResponse<T>) {
+    super();
+    this.collections = data.collections.map((collection) => new BitBadgesCollection(collection));
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetCollectionsSuccessResponse<U> {
+    return new GetCollectionsSuccessResponse(
+      deepCopyPrimitives({
+        collections: this.collections.map((collection) => collection.convert(convertFunction))
+      })
+    );
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface GetCollectionByIdBody extends GetAdditionalCollectionDetailsPayload, GetMetadataForCollectionPayload {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetCollectionByIdSuccessResponse<T extends NumberType> {
+  collection: iBitBadgesCollection<T>;
+}
+
+export class GetCollectionByIdSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetCollectionByIdSuccessResponse<T>>
+  implements iGetCollectionByIdSuccessResponse<T>
+{
+  collection: BitBadgesCollection<T>;
+
+  constructor(data: iGetCollectionByIdSuccessResponse<T>) {
+    super();
+    this.collection = new BitBadgesCollection(data.collection);
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetCollectionByIdSuccessResponse<U> {
+    return new GetCollectionByIdSuccessResponse(
+      deepCopyPrimitives({
+        collection: this.collection.convert(convertFunction)
+      })
+    );
+  }
 }

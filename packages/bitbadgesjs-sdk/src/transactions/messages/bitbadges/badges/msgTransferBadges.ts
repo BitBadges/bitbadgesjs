@@ -6,7 +6,7 @@ import * as badges from '@/proto/badges/tx_pb.js';
 
 import { Transfer } from '@/core/transfers.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
-import { CosmosAddress } from '@/api-indexer/index.js';
+import type { CosmosAddress } from '@/api-indexer/docs/interfaces.js';
 
 /**
  * MsgTransferBadges represents a message to transfer badges from one user to another.

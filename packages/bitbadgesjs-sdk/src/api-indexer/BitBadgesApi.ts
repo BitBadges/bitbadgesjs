@@ -1,5 +1,5 @@
 import type { NumberType } from '@/common/string-numbers.js';
-import { BitBadgesCollection } from './BitBadgesCollection.js';
+import { BitBadgesCollection, GetCollectionsPayload, GetCollectionsSuccessResponse } from './BitBadgesCollection.js';
 
 import typia from 'typia';
 import type {
@@ -26,8 +26,6 @@ import type {
   GetBadgeActivitySuccessResponse,
   GetBadgeBalanceByAddressPayload,
   GetBadgeBalanceByAddressSuccessResponse,
-  GetCollectionsPayload,
-  GetCollectionsSuccessResponse,
   GetOwnersForBadgePayload,
   GetOwnersForBadgeSuccessResponse,
   RefreshMetadataPayload,
@@ -65,6 +63,8 @@ import {
   CreateClaimSuccessResponse,
   CreateDeveloperAppPayload,
   CreateDeveloperAppSuccessResponse,
+  CreateInternalActionPayload,
+  CreateInternalActionSuccessResponse,
   CreatePaymentIntentPayload,
   CreatePaymentIntentSuccessResponse,
   CreatePluginPayload,
@@ -79,6 +79,8 @@ import {
   DeleteClaimSuccessResponse,
   DeleteDeveloperAppPayload,
   DeleteDeveloperAppSuccessResponse,
+  DeleteInternalActionPayload,
+  DeleteInternalActionSuccessResponse,
   DeletePluginPayload,
   DeletePluginSuccessResponse,
   DeleteSIWBBRequestPayload,
@@ -110,6 +112,8 @@ import {
   GetClaimsSuccessResponse,
   GetDeveloperAppPayload,
   GetDeveloperAppSuccessResponse,
+  GetInternalActionPayload,
+  GetInternalActionSuccessResponse,
   GetPluginPayload,
   GetPluginSuccessResponse,
   GetReservedClaimCodesPayload,
@@ -144,6 +148,8 @@ import {
   UpdateClaimSuccessResponse,
   UpdateDeveloperAppPayload,
   UpdateDeveloperAppSuccessResponse,
+  UpdateInternalActionPayload,
+  UpdateInternalActionSuccessResponse,
   UpdatePluginPayload,
   UpdatePluginSuccessResponse,
   VerifySignInPayload,
@@ -1909,6 +1915,109 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
         payload
       );
       return new CreatePaymentIntentSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Creates an internal action.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/internalAction`
+   * - **SDK Function Call**: `await BitBadgesApi.createInternalAction(payload);`
+   * - **Authentication**: Must be signed in.
+   */
+  public async createInternalAction(payload: CreateInternalActionPayload): Promise<CreateInternalActionSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<CreateInternalActionPayload> = typia.validate<CreateInternalActionPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.post<CreateInternalActionSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDInternalActionRoute()}`,
+        payload
+      );
+      return new CreateInternalActionSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Gets internal actions.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/internalAction/fetch`
+   * - **SDK Function Call**: `await BitBadgesApi.getInternalActions(payload);`
+   */
+  public async getInternalActions(payload: GetInternalActionPayload): Promise<GetInternalActionSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<GetInternalActionPayload> = typia.validate<GetInternalActionPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.post<GetInternalActionSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetInternalActionsRoute()}`,
+        payload
+      );
+      return new GetInternalActionSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Updates an internal action.
+   *
+   * @remarks
+   * - **API Route**: `PUT /api/v0/internalAction`
+   * - **SDK Function Call**: `await BitBadgesApi.updateInternalAction(payload);`
+   * - **Authentication**: Must be signed in.
+   */
+  public async updateInternalAction(payload: UpdateInternalActionPayload): Promise<UpdateInternalActionSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<UpdateInternalActionPayload> = typia.validate<UpdateInternalActionPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.put<UpdateInternalActionSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDInternalActionRoute()}`,
+        payload
+      );
+      return new UpdateInternalActionSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Deletes an internal action.
+   *
+   * @remarks
+   * - **API Route**: `DELETE /api/v0/internalAction`
+   * - **SDK Function Call**: `await BitBadgesApi.deleteInternalAction(payload);`
+   * - **Authentication**: Must be signed in.
+   */
+  public async deleteInternalAction(payload: DeleteInternalActionPayload): Promise<DeleteInternalActionSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<DeleteInternalActionPayload> = typia.validate<DeleteInternalActionPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.delete<DeleteInternalActionSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDInternalActionRoute()}`,
+        { data: payload }
+      );
+      return new DeleteInternalActionSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);

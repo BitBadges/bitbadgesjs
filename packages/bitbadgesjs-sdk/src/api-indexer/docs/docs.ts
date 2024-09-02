@@ -3,7 +3,6 @@ import { BaseNumberTypeClass, CustomTypeClass, convertClassPropertiesAndMaintain
 import type { NumberType } from '@/common/string-numbers.js';
 import { BigIntify } from '@/common/string-numbers.js';
 import type { SupportedChain } from '@/common/types.js';
-import { AddressList, AttestationsProof, UintRangeArray, getValueAtTimeForTimeline } from '@/core/index.js';
 import {
   ApprovalInfoDetails,
   ChallengeDetails,
@@ -19,6 +18,7 @@ import {
 import { BalanceArray } from '@/core/balances.js';
 import { BatchBadgeDetailsArray } from '@/core/batch-utils.js';
 import { CosmosCoin } from '@/core/coin.js';
+import { AddressList, AttestationsProof, UintRangeArray, getValueAtTimeForTimeline } from '@/core/index.js';
 import {
   BadgeMetadataTimeline,
   CollectionMetadataTimeline,
@@ -26,23 +26,26 @@ import {
   IsArchivedTimeline,
   ManagerTimeline,
   OffChainBalancesMetadataTimeline,
-  StandardsTimeline
+  StandardsTimeline,
+  UpdateHistory
 } from '@/core/misc.js';
 import { CollectionPermissions, UserPermissions, UserPermissionsWithDetails } from '@/core/permissions.js';
 import type { iOffChainBalancesMap } from '@/core/transfers.js';
 import { UserBalanceStore } from '@/core/userBalances.js';
-import type { iAmountTrackerIdDetails, iUintRange } from '@/interfaces/badges/core.js';
+import type { iAmountTrackerIdDetails } from '@/interfaces/badges/core.js';
 import type { iUserBalanceStore } from '@/interfaces/badges/userBalances.js';
 import type { Doc } from '../base.js';
 import type { iMetadata } from '../metadata/metadata.js';
 import { Metadata } from '../metadata/metadata.js';
-import { MapWithValues } from '../requests/maps.js';
 import type {
   ClaimIntegrationPluginType,
   CosmosAddress,
+  CustomTypeInputSchema,
   IntegrationPluginParams,
   JsonBodyInputSchema,
   JsonBodyInputWithValue,
+  NativeAddress,
+  OAuthScopeDetails,
   PluginPresetType,
   UNIXMilliTimestamp,
   iAccessTokenDoc,
@@ -50,10 +53,10 @@ import type {
   iAddressListDoc,
   iAirdropDoc,
   iApprovalTrackerDoc,
-  iDeveloperAppDoc,
+  iAttestationDoc,
+  iAttestationProofDoc,
   iBalanceDoc,
   iBalanceDocWithDetails,
-  iSIWBBRequestDoc,
   iChallengeTrackerIdDetails,
   iClaimBuilderDoc,
   iCollectionDoc,
@@ -61,29 +64,31 @@ import type {
   iCustomLink,
   iCustomListPage,
   iCustomPage,
+  iDepositBalanceDoc,
+  iDeveloperAppDoc,
   iEmailVerificationStatus,
+  iEventDoc,
   iFetchDoc,
   iIPFSTotalsDoc,
+  iInternalActionsDoc,
   iLatestBlockStatus,
   iMapDoc,
+  iMapWithValues,
   iMerkleChallengeDoc,
   iNotificationPreferences,
   iPluginDoc,
+  iPluginVersionConfig,
   iProfileDoc,
   iQueueDoc,
   iRefreshDoc,
-  iAttestationDoc,
+  iSIWBBRequestDoc,
   iSocialConnections,
   iStatusDoc,
-  iUsedLeafStatus,
-  NativeAddress,
-  iAttestationProofDoc,
-  iEventDoc,
-  iDepositBalanceDoc,
-  iPluginVersionConfig,
-  CustomTypeInputSchema
+  iUpdateHistory,
+  iUsedLeafStatus
 } from './interfaces.js';
-import { OAuthScopeDetails } from '../requests/requests.js';
+import { ValueStore } from 'bitbadgesjs-sdk';
+import { Map } from '@/transactions/index.js';
 
 /**
  * @inheritDoc iCollectionDoc
@@ -738,47 +743,6 @@ export class BalanceDoc<T extends NumberType> extends BaseNumberTypeClass<Balanc
 }
 
 /**
- * @category Interfaces
- */
-export interface iUpdateHistory<T extends NumberType> {
-  /** The transaction hash of the on-chain transaction that updated this. */
-  txHash: string;
-  /** The block number of the on-chain transaction that updated this. */
-  block: T;
-  /** The timestamp of the block of the on-chain transaction that updated this. */
-  blockTimestamp: UNIXMilliTimestamp<T>;
-  /** The indexer's timestamp of the update. This is provided in some cases because the time of indexing may be inconsistent with the time of the block. */
-  timestamp: UNIXMilliTimestamp<T>;
-}
-
-/**
- * @inheritDoc iUpdateHistory
- * @category Indexer
- */
-export class UpdateHistory<T extends NumberType> extends BaseNumberTypeClass<UpdateHistory<T>> implements iUpdateHistory<T> {
-  txHash: string;
-  block: T;
-  blockTimestamp: UNIXMilliTimestamp<T>;
-  timestamp: UNIXMilliTimestamp<T>;
-
-  constructor(data: iUpdateHistory<T>) {
-    super();
-    this.txHash = data.txHash;
-    this.block = data.block;
-    this.blockTimestamp = data.blockTimestamp;
-    this.timestamp = data.timestamp;
-  }
-
-  getNumberFieldNames(): string[] {
-    return ['block', 'blockTimestamp', 'timestamp'];
-  }
-
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): UpdateHistory<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as UpdateHistory<U>;
-  }
-}
-
-/**
  * @inheritDoc iBalanceDocWithDetails
  * @category Balances
  */
@@ -1327,6 +1291,7 @@ export class PluginVersionConfig<T extends NumberType> extends BaseNumberTypeCla
   requiresSessions: boolean;
   requiresUserInputs: boolean;
   reuseForNonIndexed: boolean;
+  receiveStatusWebhook: boolean;
   userInputsSchema: Array<JsonBodyInputSchema | CustomTypeInputSchema>;
   publicParamsSchema: Array<JsonBodyInputSchema | CustomTypeInputSchema>;
   privateParamsSchema: Array<JsonBodyInputSchema | CustomTypeInputSchema>;
@@ -1358,6 +1323,7 @@ export class PluginVersionConfig<T extends NumberType> extends BaseNumberTypeCla
     this.requiresSessions = data.requiresSessions;
     this.requiresUserInputs = data.requiresUserInputs;
     this.reuseForNonIndexed = data.reuseForNonIndexed;
+    this.receiveStatusWebhook = data.receiveStatusWebhook;
     this.userInputsSchema = data.userInputsSchema;
     this.publicParamsSchema = data.publicParamsSchema;
     this.privateParamsSchema = data.privateParamsSchema;
@@ -1576,6 +1542,45 @@ export class AttestationProofDoc<T extends NumberType> extends BaseNumberTypeCla
 }
 
 /**
+ * @inheritDoc iInternalActionsDoc
+ * @category Internal Actions
+ */
+export class InternalActionsDoc extends CustomTypeClass<InternalActionsDoc> implements iInternalActionsDoc {
+  _docId: string;
+  _id?: string | undefined;
+  name: string;
+  clientSecret: string;
+  createdBy: string;
+  description: string;
+  image: string;
+  actions: {
+    discord?: {
+      serverId: string;
+    };
+  };
+
+  constructor(data: iInternalActionsDoc) {
+    super();
+    this.description = data.description;
+    this.image = data.image;
+    this.name = data.name;
+    this.clientSecret = data.clientSecret;
+    this._docId = data._docId;
+    this.createdBy = data.createdBy;
+    this._id = data._id;
+    this.actions = data.actions;
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): InternalActionsDoc {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as InternalActionsDoc;
+  }
+
+  clone(): InternalActionsDoc {
+    return super.clone() as InternalActionsDoc;
+  }
+}
+
+/**
  * @inheritDoc iAttestationDoc
  * @category Off-Chain Attestations
  */
@@ -1650,29 +1655,6 @@ export class AttestationDoc<T extends NumberType> extends BaseNumberTypeClass<At
 }
 
 /**
- * @inheritDoc iMapDoc
- * @category Maps
- */
-export class MapDoc<T extends NumberType> extends MapWithValues<T> implements iMapDoc<T> {
-  _docId: string;
-  _id?: string;
-
-  constructor(data: iMapDoc<T>) {
-    super(data);
-    this._docId = data._docId;
-    this._id = data._id;
-  }
-
-  getNumberFieldNames(): string[] {
-    return super.getNumberFieldNames();
-  }
-
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): MapDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as MapDoc<U>;
-  }
-}
-
-/**
  * @category Indexer
  */
 export interface ErrorDoc {
@@ -1693,9 +1675,7 @@ export class EventDoc<T extends NumberType> extends BaseNumberTypeClass<EventDoc
   description: string;
   image: string;
   createdBy: CosmosAddress;
-
   externalUrl: string;
-
   createdAt: UNIXMilliTimestamp<T>;
 
   constructor(data: iEventDoc<T>) {
@@ -1716,5 +1696,53 @@ export class EventDoc<T extends NumberType> extends BaseNumberTypeClass<EventDoc
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): EventDoc<U> {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as EventDoc<U>;
+  }
+}
+
+/**
+ * @inheritDoc iMapWithValues
+ * @category Maps
+ */
+export class MapWithValues<T extends NumberType> extends Map<T> implements iMapWithValues<T> {
+  values: { [key: string]: ValueStore };
+  metadata?: Metadata<T>;
+  updateHistory: UpdateHistory<T>[];
+
+  constructor(data: iMapWithValues<T>) {
+    super(data);
+    this.values = Object.fromEntries(Object.entries(data.values).map(([key, value]) => [key, new ValueStore(value)]));
+    this.metadata = data.metadata ? new Metadata(data.metadata) : undefined;
+    this.updateHistory = data.updateHistory.map((update) => new UpdateHistory(update));
+  }
+
+  getNumberFieldNames(): string[] {
+    return super.getNumberFieldNames();
+  }
+
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): MapWithValues<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as MapWithValues<U>;
+  }
+}
+
+/**
+ * @inheritDoc iMapDoc
+ * @category Maps
+ */
+export class MapDoc<T extends NumberType> extends MapWithValues<T> implements iMapDoc<T> {
+  _docId: string;
+  _id?: string;
+
+  constructor(data: iMapDoc<T>) {
+    super(data);
+    this._docId = data._docId;
+    this._id = data._id;
+  }
+
+  getNumberFieldNames(): string[] {
+    return super.getNumberFieldNames();
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): MapDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as MapDoc<U>;
   }
 }

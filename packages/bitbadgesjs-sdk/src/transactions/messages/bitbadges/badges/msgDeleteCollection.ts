@@ -4,7 +4,7 @@ import { Stringify } from '@/common/string-numbers.js';
 import * as badges from '@/proto/badges/tx_pb.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 import type { iMsgDeleteCollection } from './interfaces.js';
-import { CosmosAddress } from '@/api-indexer/index.js';
+import type { CosmosAddress } from '@/api-indexer/docs/interfaces.js';
 
 /**
  * MsgDeleteCollection represents the message for deleting a collection. Once deleted, the collection cannot be recovered.

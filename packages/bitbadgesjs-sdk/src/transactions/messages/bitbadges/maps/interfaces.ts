@@ -1,4 +1,4 @@
-import { CosmosAddress } from '@/api-indexer/index.js';
+import { CosmosAddress } from '@/api-indexer/docs/interfaces.js';
 import { NumberType, Stringify } from '@/common/string-numbers.js';
 import { ActionPermission, CollectionMetadata, ManagerTimeline, TimedUpdatePermission, UintRangeArray } from '@/core/index.js';
 import {

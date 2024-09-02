@@ -1,5 +1,5 @@
 import { convertToCosmosAddress, getChainForAddress } from '@/address-converter/converter.js';
-import { NativeAddress } from '@/api-indexer/index.js';
+import type { NativeAddress } from '@/api-indexer/docs/interfaces.js';
 import { MAINNET_CHAIN_DETAILS, TESTNET_CHAIN_DETAILS } from '@/common/constants.js';
 import { SupportedChain } from '@/common/types.js';
 import { generatePostBodyBroadcast } from '@/node-rest-api/broadcast.js';

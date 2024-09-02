@@ -14,7 +14,7 @@ import {
 import { CollectionPermissions } from '@/core/permissions.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 
-import { CosmosAddress } from '@/api-indexer/index.js';
+import type { CosmosAddress } from '@/api-indexer/docs/interfaces.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import { Stringify } from '@/common/string-numbers.js';
 import { UintRange, UintRangeArray } from '@/core/uintRanges.js';

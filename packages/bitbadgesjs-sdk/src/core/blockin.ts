@@ -1,4 +1,3 @@
-import BitBadgesApi from '@/api-indexer/BitBadgesApi.js';
 import { CosmosAddress } from '@/api-indexer/docs/interfaces.js';
 import { SiwbbAndGroup, SiwbbAssetConditionGroup, SiwbbOrGroup, OwnershipRequirements } from '@/api-indexer/requests/blockin.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
@@ -88,29 +87,6 @@ export class SiwbbChallenge<T extends NumberType> extends BaseNumberTypeClass<Si
       } else {
         this.ownershipRequirements = new OwnershipRequirements(data.ownershipRequirements as OwnershipRequirements<T>);
       }
-    }
-  }
-
-  /**
-   * Verifies the asset ownership requirements only. This requires a call to the BitBadges API.
-   *
-   * Does not set verificationResponse.
-   */
-  async verifyAssets(api: BitBadgesApi<T>) {
-    if (!this.ownershipRequirements) {
-      return true;
-    }
-
-    try {
-      await api.verifyOwnershipRequirements({
-        address: this.address,
-        assetOwnershipRequirements: this.ownershipRequirements
-      });
-
-      return true;
-    } catch (e: any) {
-      console.error(e);
-      return false;
     }
   }
 

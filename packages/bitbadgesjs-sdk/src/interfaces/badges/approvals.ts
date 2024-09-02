@@ -1,6 +1,6 @@
 import type { NumberType } from '@/common/string-numbers.js';
 import type { iUintRange, iMustOwnBadges, iMerkleChallenge, iBalance, iAddressList, iZkProof, iCoinTransfer } from './core.js';
-import { iApprovalInfoDetails, iIncomingApprovalCriteriaWithDetails } from '@/core/approvals.js';
+import type { iApprovalInfoDetails, iIncomingApprovalCriteriaWithDetails } from '@/core/approvals.js';
 
 /**
  * @category Interfaces

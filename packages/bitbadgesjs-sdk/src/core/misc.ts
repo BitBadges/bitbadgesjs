@@ -1,5 +1,5 @@
-import { CosmosAddress } from '@/api-indexer/docs/interfaces.js';
-import { BaseNumberTypeClass, CustomTypeClass, deepCopyPrimitives } from '@/common/base.js';
+import { CosmosAddress, iUpdateHistory, UNIXMilliTimestamp } from '@/api-indexer/docs/interfaces.js';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, CustomTypeClass, deepCopyPrimitives } from '@/common/base.js';
 import type {
   iAmountTrackerIdDetails,
   iApprovalIdentifierDetails,
@@ -1868,4 +1868,31 @@ export function getStandardsTimesAndValues<T extends NumberType>(
   }
 
   return { times, values };
+}
+
+/**
+ * @inheritDoc iUpdateHistory
+ * @category Indexer
+ */
+export class UpdateHistory<T extends NumberType> extends BaseNumberTypeClass<UpdateHistory<T>> implements iUpdateHistory<T> {
+  txHash: string;
+  block: T;
+  blockTimestamp: UNIXMilliTimestamp<T>;
+  timestamp: UNIXMilliTimestamp<T>;
+
+  constructor(data: iUpdateHistory<T>) {
+    super();
+    this.txHash = data.txHash;
+    this.block = data.block;
+    this.blockTimestamp = data.blockTimestamp;
+    this.timestamp = data.timestamp;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['block', 'blockTimestamp', 'timestamp'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): UpdateHistory<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as UpdateHistory<U>;
+  }
 }

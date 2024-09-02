@@ -1,7 +1,9 @@
-import { CosmosAddress, UNIXMilliTimestamp, iBadgeMetadataDetails, iCollectionMetadataDetails } from '@/api-indexer/index.js';
-import { iUpdateHistory } from '@/api-indexer/docs/docs.js';
+//IMPORTANT: Keep all imports type-safe by using the `type` keyword. If not, this will mess up the circular dependency check.
+
+import type { CosmosAddress, UNIXMilliTimestamp, iBadgeMetadataDetails, iCollectionMetadataDetails } from '@/api-indexer/index.js';
+import type { iUpdateHistory } from '@/api-indexer/docs/interfaces.js';
 import type { NumberType } from '@/common/string-numbers.js';
-import { iCosmosCoin } from '@/core/coin.js';
+import type { iCosmosCoin } from '@/core/coin.js';
 
 /**
  * @category Interfaces
