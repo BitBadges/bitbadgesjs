@@ -665,10 +665,13 @@ export type ClaimIntegrationPluginCustomBodyType<T extends ClaimIntegrationPlugi
 export type ClaimIntegrationPublicParamsType<T extends ClaimIntegrationPluginType> = T extends 'numUses'
   ? {
       maxUses: number;
+      hideCurrentState?: boolean;
+      displayAsUnlimited?: boolean;
     }
   : T extends 'codes'
     ? {
         numCodes: number;
+        hideCurrentState?: boolean;
       }
     : T extends 'ip'
       ? {
@@ -741,14 +744,14 @@ export type ClaimIntegrationPrivateParamsType<T extends ClaimIntegrationPluginTy
  */
 export type ClaimIntegrationPublicStateType<T extends ClaimIntegrationPluginType> = T extends 'numUses'
   ? {
-      numUses: number;
-      claimedUsers: {
+      numUses?: number;
+      claimedUsers?: {
         [cosmosAddress: string]: number[];
       };
     }
   : T extends 'codes'
     ? {
-        usedCodeIndices: string[];
+        usedCodeIndices?: string[];
       }
     : Record<string, any>;
 

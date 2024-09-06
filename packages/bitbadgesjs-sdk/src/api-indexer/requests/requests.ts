@@ -254,6 +254,8 @@ export interface GetClaimsPayload {
   siwbbClaimsOnly?: boolean;
   /** Bookmark to start from. Obtained from previours request. Leave blank to start from the beginning. Only applicable when no additional criteria is specified. */
   bookmark?: string;
+  /** Fetch private parameters for the claim. Only applicable if you are the creator / manager of the claim. */
+  fetchPrivateParams?: boolean;
 }
 
 /**
