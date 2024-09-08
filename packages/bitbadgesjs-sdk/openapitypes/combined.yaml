@@ -7465,6 +7465,11 @@ components:
             to start from the beginning. Only applicable when no additional
             criteria is specified.
           type: string
+        fetchPrivateParams:
+          description: >-
+            Fetch private parameters for the claim. Only applicable if you are
+            the creator / manager of the claim.
+          type: boolean
       additionalProperties: false
       type: object
     iGetClaimsSuccessResponse:
@@ -9909,11 +9914,13 @@ components:
             If true, we will fetch all plugins for the authenticated user (with
             plugin secrets).
           type: boolean
-        pluginId:
+        pluginIds:
+          items:
+            type: string
           description: >-
             If true, we will fetch only the specific plugin with the plugin ID
             (no secrets).
-          type: string
+          type: array
         inviteCode:
           description: Invite code to fetch the plugin with.
           type: string

@@ -2279,7 +2279,7 @@ export interface GetPluginPayload {
   /** If true, we will fetch all plugins for the authenticated user (with plugin secrets). */
   createdPluginsOnly?: boolean;
   /** If true, we will fetch only the specific plugin with the plugin ID (no secrets). */
-  pluginId?: string;
+  pluginIds?: string[];
   /** Invite code to fetch the plugin with. */
   inviteCode?: string;
   /** Bookmark for pagination of the plugins. */
