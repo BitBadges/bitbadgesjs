@@ -352,7 +352,7 @@ export interface iAddressList {
   createdBy?: CosmosAddress;
 
   /**
-   * The alias cosmos address of the address list.
+   * The alias BitBadges address of the address list.
    */
   aliasAddress?: CosmosAddress;
 }
@@ -448,7 +448,7 @@ export interface iApprovalIdentifierDetails {
  */
 export interface iCoinTransfer<T extends NumberType> {
   /**
-   * The recipient of the coin transfer. This should be a Bech32 Cosmos address.
+   * The recipient of the coin transfer. This should be a Bech32 BitBadges address.
    */
   to: CosmosAddress;
   /**
@@ -562,7 +562,7 @@ export interface iMerkleProof {
   aunts: iMerklePathItem[];
 
   /**
-   * The leaf of the merkle proof. If useCreatorAddressAsLeaf is true, this will be populated with the creator Cosmos address.
+   * The leaf of the merkle proof. If useCreatorAddressAsLeaf is true, this will be populated with the creator BitBadges address.
    */
   leaf: string;
 }

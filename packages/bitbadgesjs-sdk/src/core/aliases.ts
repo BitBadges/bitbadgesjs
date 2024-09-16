@@ -54,7 +54,7 @@ function uint64ToBufferBE(number: NumberType): Buffer {
  */
 export function generateAlias(moduleName: string, derivationKeys: Buffer[]) {
   const address = Module(moduleName, ...derivationKeys);
-  const cosmosPrefix = 'cosmos';
+  const cosmosPrefix = 'bb';
   const words = bech32.toWords(Buffer.from(address, 'hex'));
   const bech32Address = bech32.encode(cosmosPrefix, words);
   return bech32Address;

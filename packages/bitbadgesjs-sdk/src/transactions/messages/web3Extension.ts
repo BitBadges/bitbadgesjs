@@ -8,7 +8,7 @@ import * as web3Btc from '@/proto/bitcoin/web3_pb.js';
  * We use extensions to tell the chain to parse and check the signatures using Ethereum format instead of the default format.
  *
  * @param chain - The details of the chain you are using.
- * @param sender - The sender details for the transaction. sender.accountAddress must be the mapped Cosmos address of the Ethereum address.
+ * @param sender - The sender details for the transaction. sender.accountAddress must be the mapped BitBadges address of the Ethereum address.
  * @param hexFormattedSignature - The signature of the signed EIP message. Must resolve to the address in sender.accountAddress.
  */
 export function signatureToWeb3ExtensionEthereum(chain: Chain, sender: Sender, hexFormattedSignature: string) {
@@ -25,9 +25,9 @@ export function signatureToWeb3ExtensionEthereum(chain: Chain, sender: Sender, h
  *This function is used to convert a signature to a web3 extension for a Solana transaction.
  *
  * @param chain - The details of the chain you are using.
- * @param sender - The sender details for the transaction. sender.accountAddress must be the mapped Cosmos address of the Solana address.
+ * @param sender - The sender details for the transaction. sender.accountAddress must be the mapped BitBadges address of the Solana address.
  * @param hexFormattedSignature - The signature of the signed message. Must resolve to the fee payer address.
- * @param solanaAddress - The address of the Solana account. Must map to the Cosmos address in sender.accountAddress.
+ * @param solanaAddress - The address of the Solana account. Must map to the BitBadges address in sender.accountAddress.
  */
 export function signatureToWeb3ExtensionSolana(chain: Chain, sender: Sender, hexFormattedSignature: string, solanaAddress: string) {
   let signature = hexFormattedSignature;
@@ -43,7 +43,7 @@ export function signatureToWeb3ExtensionSolana(chain: Chain, sender: Sender, hex
  *This function is used to convert a signature to a web3 extension for a Bitcoin transaction.
  *
  * @param chain - The details of the chain you are using.
- * @param sender - The sender details for the transaction. sender.accountAddress must be the mapped Cosmos address of the Bitcoin address.
+ * @param sender - The sender details for the transaction. sender.accountAddress must be the mapped BitBadges address of the Bitcoin address.
  * @param hexFormattedSignature - The signature of the signed message. Must resolve to the fee payer address.
  */
 export function signatureToWeb3ExtensionBitcoin(chain: Chain, sender: Sender, hexFormattedSignature: string) {
@@ -61,7 +61,7 @@ export function signatureToWeb3ExtensionBitcoin(chain: Chain, sender: Sender, he
  * We use extensions to tell the chain to parse and check the signatures using Ethereum format instead of the default format.
  *
  * @param chainId The chain id of the chain you are using. For mainnet (bitbadges-1, this is 1). For testnets (bitbadges-2, this is 2 and so on).
- * @param feePayer The Cosmos address of the fee payer.
+ * @param feePayer The BitBadges address of the fee payer.
  * @param feePayerSig The signature of the signed EIP message. Must resolve to the fee payer address.
  *
  * See documentation for more details:
@@ -82,9 +82,9 @@ export function createWeb3ExtensionEthereum(chainId: number | bigint, feePayer: 
  * This function is used to create a web3 extension for a Solana transaction.
  *
  * @param chainId The chain id of the chain you are using. For mainnet (bitbadges-1, this is 1). For testnets (bitbadges-2, this is 2 and so on).
- * @param feePayer The mapped Cosmos address of the fee payer. This is the address that signed the transaction. Use solanaToCosmos(...)
+ * @param feePayer The mapped BitBadges address of the fee payer. This is the address that signed the transaction. Use solanaToBitBadges(...)
  * @param feePayerSig The signature of the signed message. Must resolve to the fee payer address.
- * @param solanaAddress The address of the Solana account. Must map to the Cosmos address for feePayer.
+ * @param solanaAddress The address of the Solana account. Must map to the BitBadges address for feePayer.
  *
  * See documentation for more details:
  */
@@ -106,7 +106,7 @@ export function createWeb3ExtensionSolana(chainId: number | bigint, feePayer: st
  * This function is used to create a web3 extension for a Bitcoin transaction.
  *
  * @param chainId The chain id of the chain you are using. For mainnet (bitbadges-1, this is 1). For testnets (bitbadges-2, this is 2 and so on).
- * @param feePayer The mapped Cosmos address of the fee payer. This is the address that signed the transaction. Use solanaToCosmos(...)
+ * @param feePayer The mapped BitBadges address of the fee payer. This is the address that signed the transaction. Use solanaToBitBadges(...)
  * @param feePayerSig The signature of the signed message. Must resolve to the fee payer address.
  *
  * See documentation for more details:

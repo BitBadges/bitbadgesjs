@@ -335,7 +335,7 @@ export class BitBadgesCollection<T extends NumberType>
    * @example
    * ```ts
    * const collection: BitBadgesCollection<bigint> = { ... }
-   * const address = 'cosmos1...'
+   * const address = 'bb1...'
    * const balance = collection.getBadgeBalance(address)
    * console.log(balance?.balances)
    * console.log(balance?.outgoingApprovals)
@@ -365,7 +365,7 @@ export class BitBadgesCollection<T extends NumberType>
    * @example
    * ```ts
    * const collection: BitBadgesCollection<bigint> = { ... }
-   * const address = 'cosmos1...'
+   * const address = 'bb1...'
    * const balances = collection.getBadgeBalances(address)
    * console.log(balances)
    * ```

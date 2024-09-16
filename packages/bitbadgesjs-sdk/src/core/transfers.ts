@@ -122,7 +122,7 @@ export interface iOffChainBalancesMap<T extends NumberType> {
  *
  * @typedef {Object} OffChainBalancesMap
  *
- * OffChainBalancesMap is a map of cosmos addresses or listIDs to an array of balances. This is the expected format
+ * OffChainBalancesMap is a map of BitBadges addresses or listIDs to an array of balances. This is the expected format
  * for collections with off-chain balances. Host this on your server in JSON format.
  */
 export interface OffChainBalancesMap<T extends NumberType> {

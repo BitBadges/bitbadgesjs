@@ -194,8 +194,8 @@ const wrapExternalTxContext = (context: TxContext): LegacyTxContext => {
     memo: context.memo || ''
   };
 
-  if (txContext.sender.accountAddress === '' || !txContext.sender.accountAddress.startsWith('cosmos')) {
-    throw new Error('Account address must be a validly formatted Cosmos address');
+  if (txContext.sender.accountAddress === '' || !txContext.sender.accountAddress.startsWith('bb')) {
+    throw new Error('Account address must be a validly formatted BitBadges address');
   }
 
   if (txContext.sender.accountNumber <= 0) {

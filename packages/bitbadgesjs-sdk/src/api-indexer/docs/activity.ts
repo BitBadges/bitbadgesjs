@@ -2,14 +2,7 @@ import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } fro
 import type { NumberType } from '@/common/string-numbers.js';
 import { BalanceArray } from '@/core/balances.js';
 import { ApprovalIdentifierDetails } from '@/proto/badges/transfers_pb.js';
-import type {
-  CosmosAddress,
-  UNIXMilliTimestamp,
-  iActivityDoc,
-  iClaimAlertDoc,
-  iListActivityDoc,
-  iTransferActivityDoc
-} from './interfaces.js';
+import type { CosmosAddress, UNIXMilliTimestamp, iActivityDoc, iClaimAlertDoc, iListActivityDoc, iTransferActivityDoc } from './interfaces.js';
 
 /**
  * @inheritDoc iActivityDoc

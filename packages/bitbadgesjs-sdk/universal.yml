@@ -395,11 +395,11 @@ schemas:
   CosmosAddress:
     title: CosmosAddress
     description: >-
-      All supported addresses map to a Bech32 Cosmos address which is used by
+      All supported addresses map to a Bech32 BitBadges address which is used by
       the BitBadges blockchain behind the scenes.
 
       For conversion, see the BitBadges documentation. If this type is used,
-      we must always convert to a Cosmos address before using it.
+      we must always convert to a BitBadges address before using it.
 
       @category Interfaces
     type: string
@@ -425,7 +425,7 @@ schemas:
       example, an Ethereum address is native to Ethereum (0x...).
 
       If this type is used, we support any native address type. We do not
-      require conversion to a Cosmos address like the CosmosAddress type.
+      require conversion to a BitBadges address like the CosmosAddress type.
 
       @category Interfaces
     type: string
@@ -669,7 +669,7 @@ schemas:
         $ref: '#/components/schemas/CosmosAddress'
         title: iReviewDoc.reviewedAddress
         description: >-
-          The Cosmos address of the user who the review is for. Only
+          The BitBadges address of the user who the review is for. Only
           applicable to user reviews.
     required:
       - _docId
@@ -872,7 +872,7 @@ schemas:
           $ref: '#/components/schemas/CosmosAddress'
           title: iClaimAlertDoc.cosmosAddresses.[]
         title: iClaimAlertDoc.cosmosAddresses
-        description: The cosmos addresses of the users that have been alerted.
+        description: The BitBadges addresses of the users that have been alerted.
         type: array
       collectionId:
         title: iClaimAlertDoc.collectionId
@@ -983,7 +983,7 @@ schemas:
       createdBy:
         $ref: '#/components/schemas/CosmosAddress'
         title: iCollectionDoc.createdBy
-        description: The cosmos address of the user who created this collection
+        description: The BitBadges address of the user who created this collection
       createdBlock:
         title: iCollectionDoc.createdBlock
         description: The block number when this collection was created
@@ -1006,7 +1006,7 @@ schemas:
       aliasAddress:
         $ref: '#/components/schemas/CosmosAddress'
         title: iCollectionDoc.aliasAddress
-        description: The alias cosmos address for the collection
+        description: The alias BitBadges address for the collection
     required:
       - _docId
       - collectionId
@@ -1057,7 +1057,7 @@ schemas:
       cosmosAddress:
         $ref: '#/components/schemas/CosmosAddress'
         title: iAccountDoc.cosmosAddress
-        description: The Cosmos address of the account
+        description: The BitBadges address of the account
       ethAddress:
         title: iAccountDoc.ethAddress
         description: The Eth address of the account
@@ -1579,7 +1579,7 @@ schemas:
       aliasAddress:
         $ref: '#/components/schemas/CosmosAddress'
         title: iAddressList.aliasAddress
-        description: The alias cosmos address of the address list.
+        description: The alias BitBadges address of the address list.
       _docId:
         title: Doc._docId
         description: A unique stringified document ID
@@ -1712,7 +1712,7 @@ schemas:
       cosmosAddress:
         $ref: '#/components/schemas/CosmosAddress'
         title: iBalanceDoc.cosmosAddress
-        description: The Cosmos address of the user
+        description: The BitBadges address of the user
       onChain:
         title: iBalanceDoc.onChain
         description: True if the balances are on-chain
@@ -1812,7 +1812,7 @@ schemas:
       createdBy:
         $ref: '#/components/schemas/CosmosAddress'
         title: iClaimBuilderDoc.createdBy
-        description: The cosmos address of the user who created this password
+        description: The BitBadges address of the user who created this password
       docClaimed:
         title: iClaimBuilderDoc.docClaimed
         description: True if the password document is claimed by the collection
@@ -2407,7 +2407,7 @@ schemas:
       cosmosAddress:
         $ref: '#/components/schemas/CosmosAddress'
         title: iBlockinAuthSignatureDoc.cosmosAddress
-        description: The Cosmos address of the signer
+        description: The BitBadges address of the signer
       params:
         $ref: '#/components/schemas/ChallengeParams'
         title: iBlockinAuthSignatureDoc.params
@@ -2654,7 +2654,7 @@ schemas:
       cosmosAddress:
         $ref: '#/components/schemas/CosmosAddress'
         title: iFollowDetailsDoc.cosmosAddress
-        description: The Cosmos address of the user
+        description: The BitBadges address of the user
       followingCount:
         title: iFollowDetailsDoc.followingCount
         description: The number of users that the user is following
@@ -2971,7 +2971,7 @@ schemas:
       aliasAddress:
         $ref: '#/components/schemas/CosmosAddress'
         title: iAddressList.aliasAddress
-        description: The alias cosmos address of the address list.
+        description: The alias BitBadges address of the address list.
       _docId:
         title: Doc._docId
         description: A unique stringified document ID
@@ -3346,7 +3346,7 @@ schemas:
       cosmosAddress:
         $ref: '#/components/schemas/CosmosAddress'
         title: iBitBadgesUserInfo.cosmosAddress
-        description: The Cosmos address of the account
+        description: The BitBadges address of the account
       ethAddress:
         title: iBitBadgesUserInfo.ethAddress
         description: The Eth address of the account
@@ -3903,7 +3903,7 @@ schemas:
       cosmosAddress:
         $ref: '#/components/schemas/CosmosAddress'
         title: iFollowDetailsDoc.cosmosAddress
-        description: The Cosmos address of the user
+        description: The BitBadges address of the user
       followingCount:
         title: iFollowDetailsDoc.followingCount
         description: The number of users that the user is following
@@ -4156,7 +4156,7 @@ schemas:
       cosmosAddress:
         $ref: '#/components/schemas/CosmosAddress'
         title: iBalanceDoc.cosmosAddress
-        description: The Cosmos address of the user
+        description: The BitBadges address of the user
       onChain:
         title: iBalanceDoc.onChain
         description: True if the balances are on-chain
@@ -5116,7 +5116,7 @@ schemas:
       balances:
         $ref: '#/components/schemas/iOffChainBalancesMap'
         title: AddBalancesToOffChainStorageRouteRequestBody.balances
-        description: A map of Cosmos addresses or list IDs -> Balance[].
+        description: A map of BitBadges addresses or list IDs -> Balance[].
       claims:
         items:
           properties:
@@ -6629,11 +6629,11 @@ schemas:
         $ref: '#/components/schemas/CosmosAddress'
         title: iGetBlockinAuthCodeRouteSuccessResponse.cosmosAddress
         description: >-
-          The converted Cosmos address of params.address. This can be used as
+          The converted BitBadges address of params.address. This can be used as
           the
 
           unique identifier for the user (e.g. avoid duplicate sign ins from
-          equivalent 0x and cosmos1 addresses).
+          equivalent 0x and bb1 addresses).
       verificationResponse:
         properties:
           success:
@@ -7000,7 +7000,7 @@ schemas:
       createdBy:
         $ref: '#/components/schemas/CosmosAddress'
         title: iCollectionDoc.createdBy
-        description: The cosmos address of the user who created this collection
+        description: The BitBadges address of the user who created this collection
       createdBlock:
         title: iCollectionDoc.createdBlock
         description: The block number when this collection was created
@@ -7023,7 +7023,7 @@ schemas:
       aliasAddress:
         $ref: '#/components/schemas/CosmosAddress'
         title: iCollectionDoc.aliasAddress
-        description: The alias cosmos address for the collection
+        description: The alias BitBadges address for the collection
       collectionPermissions:
         $ref: '#/components/schemas/iCollectionPermissions'
         title: iBitBadgesCollection.collectionPermissions
@@ -7353,7 +7353,7 @@ schemas:
         description: >-
           The leaves of the Merkle tree. Leaves should be considered public.
           Use preimages for the secrets + isHashed. For whitelist trees, these
-          can be the plaintext Cosmos addresses.
+          can be the plaintext BitBadges addresses.
         type: array
       isHashed:
         title: iChallengeDetails.isHashed
@@ -10004,7 +10004,7 @@ schemas:
       aliasAddress:
         $ref: '#/components/schemas/CosmosAddress'
         title: iAddressList.aliasAddress
-        description: The alias cosmos address of the address list.
+        description: The alias BitBadges address of the address list.
     required:
       - listId
       - addresses
@@ -10263,7 +10263,7 @@ schemas:
         title: iMerkleProof.leaf
         description: >-
           The leaf of the merkle proof. If useCreatorAddressAsLeaf is true,
-          this will be populated with the creator Cosmos address.
+          this will be populated with the creator BitBadges address.
         type: string
     required:
       - aunts

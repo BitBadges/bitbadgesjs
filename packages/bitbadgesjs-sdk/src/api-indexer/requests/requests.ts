@@ -551,7 +551,7 @@ export class UpdateAccountInfoSuccessResponse extends EmptyResponseClass {}
  */
 export interface AddBalancesToOffChainStoragePayload {
   /**
-   * A map of Cosmos addresses or list IDs -> Balance<NumberType>[].
+   * A map of BitBadges addresses or list IDs -> Balance<NumberType>[].
    * This will be set first. If undefined, we leave the existing balances map as is.
    * For genesis, this must be set (even if empty {}), so we create the unique URL.
    *

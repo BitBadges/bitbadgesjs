@@ -46,12 +46,12 @@ export type UNIXMilliTimestamp<T extends NumberType> = T;
 
 /**
  *
- * All supported addresses map to a Bech32 Cosmos address which is used by the BitBadges blockchain behind the scenes.
- * For conversion, see the BitBadges documentation. If this type is used, we must always convert to a Cosmos address before using it.
+ * All supported addresses map to a Bech32 BitBadges address which is used by the BitBadges blockchain behind the scenes.
+ * For conversion, see the BitBadges documentation. If this type is used, we must always convert to a BitBadges address before using it.
  *
  * @category Interfaces
  */
-export type CosmosAddress = string; // `cosmos1${string}`;
+export type CosmosAddress = string; // `bb1${string}`;
 
 /**
  * SiwbbMessage is the sign-in challenge strint to be signed by the user. It extends EIP 4361 Sign-In with Ethereum
@@ -65,7 +65,7 @@ export type SiwbbMessage = string;
 
 /**
  * A native address is an address that is native to the user's chain. For example, an Ethereum address is native to Ethereum (0x...).
- * If this type is used, we support any native address type. We do not require conversion to a Cosmos address like the CosmosAddress type.
+ * If this type is used, we support any native address type. We do not require conversion to a BitBadges address like the CosmosAddress type.
  *
  * @category Interfaces
  */
@@ -177,7 +177,7 @@ export interface iReviewDoc<T extends NumberType> extends iActivityDoc<T> {
   from: CosmosAddress;
   /** The collection ID of the collection that was reviewed. Only applicable to collection reviews. */
   collectionId?: T;
-  /** The Cosmos address of the user who the review is for. Only applicable to user reviews. */
+  /** The BitBadges address of the user who the review is for. Only applicable to user reviews. */
   reviewedAddress?: CosmosAddress;
 }
 
@@ -227,7 +227,7 @@ export interface iListActivityDoc<T extends NumberType> extends iActivityDoc<T> 
 export interface iClaimAlertDoc<T extends NumberType> extends iActivityDoc<T> {
   /** The sender */
   from: string;
-  /** The cosmos addresses of the users that have been alerted. */
+  /** The BitBadges addresses of the users that have been alerted. */
   cosmosAddresses: CosmosAddress[];
   /** The collection ID of the claim alert. */
   collectionId: T;
@@ -263,7 +263,7 @@ export interface iCollectionDoc<T extends NumberType> extends Doc {
   isArchivedTimeline: iIsArchivedTimeline<T>[];
   /** The default balances for users who have not interacted with the collection yet. Only used if collection has "Standard" balance type. */
   defaultBalances: iUserBalanceStore<T>;
-  /** The cosmos address of the user who created this collection */
+  /** The BitBadges address of the user who created this collection */
   createdBy: CosmosAddress;
   /** The block number when this collection was created */
   createdBlock: T;
@@ -271,7 +271,7 @@ export interface iCollectionDoc<T extends NumberType> extends Doc {
   createdTimestamp: UNIXMilliTimestamp<T>;
   /** The update history of this collection */
   updateHistory: iUpdateHistory<T>[];
-  /** The alias cosmos address for the collection */
+  /** The alias BitBadges address for the collection */
   aliasAddress: CosmosAddress;
   /** Valid badge IDs for the collection */
   validBadgeIds: iUintRange<T>[];
@@ -287,7 +287,7 @@ export interface iAccountDoc<T extends NumberType> extends Doc {
   accountNumber: T;
   /** The public key type of the account */
   pubKeyType: string;
-  /** The Cosmos address of the account */
+  /** The BitBadges address of the account */
   cosmosAddress: CosmosAddress;
   /** The Eth address of the account */
   ethAddress: string;
@@ -511,7 +511,7 @@ export interface iAddressListEditKey<T extends NumberType> {
  * @category Interfaces
  */
 export interface iAddressListDoc<T extends NumberType> extends iAddressList, Doc {
-  /** The cosmos address of the user who created this list */
+  /** The BitBadges address of the user who created this list */
   createdBy: CosmosAddress;
   /** The update history of this list */
   updateHistory: iUpdateHistory<T>[];
@@ -536,7 +536,7 @@ export interface iBalanceDoc<T extends NumberType> extends iUserBalanceStore<T>,
   /** The collection ID */
   collectionId: T;
 
-  /** The Cosmos address of the user */
+  /** The BitBadges address of the user */
   cosmosAddress: CosmosAddress;
 
   /** True if the balances are on-chain */
@@ -830,7 +830,7 @@ export interface iClaimBuilderDoc<T extends NumberType> extends Doc {
   /** The CID (content ID) of the document. This is used behind the scenes to handle off-chain vs on-chain data races. */
   cid: string;
 
-  /** The cosmos address of the user who created this password */
+  /** The BitBadges address of the user who created this password */
   createdBy: CosmosAddress;
   /** True if the document is claimed by the collection */
   docClaimed: boolean;
@@ -1055,7 +1055,7 @@ export enum PluginPresetType {
  * @category Interfaces
  */
 export interface iPluginDoc<T extends NumberType> extends Doc {
-  /** The Cosmos address who created the plugin doc */
+  /** The BitBadges address who created the plugin doc */
   createdBy: CosmosAddress;
 
   /** The unique plugin ID */
@@ -1171,7 +1171,7 @@ export interface iPluginVersionConfig<T extends NumberType> {
  * @category Interfaces
  */
 export interface iDepositBalanceDoc<T extends NumberType> extends Doc {
-  /** The cosmos address of the user */
+  /** The BitBadges address of the user */
   cosmosAddress: CosmosAddress;
 }
 
@@ -1182,7 +1182,7 @@ export interface iSIWBBRequestDoc<T extends NumberType> extends Doc {
   /** The actual code itself */
   code: string;
 
-  /** The Cosmos address of the signer */
+  /** The BitBadges address of the signer */
   cosmosAddress: CosmosAddress;
   /**The native address of the signer */
   address: NativeAddress;

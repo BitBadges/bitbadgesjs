@@ -18,8 +18,8 @@ export interface iSiwbbChallenge<T extends NumberType> {
   /** The ownership requirements for the user */
   ownershipRequirements?: AssetConditionGroup<T>;
   /**
-   * The converted Cosmos address of params.address. This can be used as the
-   * unique identifier for the user (e.g. avoid duplicate sign ins from equivalent 0x and cosmos1 addresses).
+   * The converted BitBadges address of params.address. This can be used as the
+   * unique identifier for the user (e.g. avoid duplicate sign ins from equivalent 0x and bb1 addresses).
    */
   cosmosAddress: CosmosAddress;
 

@@ -1113,7 +1113,7 @@ export class UserIncomingApprovalWithDetails<T extends NumberType> extends UserI
  * @category Interfaces
  */
 export interface iChallengeDetails<T extends NumberType> {
-  /** The leaves of the Merkle tree. Leaves should be considered public. Use preimages for the private codes + isHashed. For whitelist trees, these can be the plaintext Cosmos addresses. */
+  /** The leaves of the Merkle tree. Leaves should be considered public. Use preimages for the private codes + isHashed. For whitelist trees, these can be the plaintext BitBadges addresses. */
   leaves: string[];
   /** True if the leaves are hashed. Hash(preimage[i]) = leaves[i] */
   isHashed: boolean;

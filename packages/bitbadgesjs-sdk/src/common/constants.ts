@@ -41,26 +41,26 @@ export const BitBadgesKeplrSuggestBetanetChainInfo = {
     coinType: 118
   },
   bech32Config: {
-    bech32PrefixAccAddr: 'cosmos',
-    bech32PrefixAccPub: 'cosmos' + 'pub',
-    bech32PrefixValAddr: 'cosmos' + 'valoper',
-    bech32PrefixValPub: 'cosmos' + 'valoperpub',
-    bech32PrefixConsAddr: 'cosmos' + 'valcons',
-    bech32PrefixConsPub: 'cosmos' + 'valconspub'
+    bech32PrefixAccAddr: 'bb',
+    bech32PrefixAccPub: 'bb' + 'pub',
+    bech32PrefixValAddr: 'bb' + 'valoper',
+    bech32PrefixValPub: 'bb' + 'valoperpub',
+    bech32PrefixConsAddr: 'bb' + 'valcons',
+    bech32PrefixConsPub: 'bb' + 'valconspub'
   },
   currencies: [
     {
       coinDenom: 'BADGE',
       coinMinimalDenom: 'ubadge',
       coinDecimals: 9,
-      coinGeckoId: 'cosmos',
+      coinGeckoId: '',
       coinImageUrl: 'https://avatars.githubusercontent.com/u/86890740'
     },
     {
       coinDenom: 'STAKE',
       coinMinimalDenom: 'ustake',
       coinDecimals: 9,
-      coinGeckoId: 'cosmos',
+      coinGeckoId: '',
       coinImageUrl: 'https://avatars.githubusercontent.com/u/86890740'
     }
   ],
@@ -69,7 +69,7 @@ export const BitBadgesKeplrSuggestBetanetChainInfo = {
       coinDenom: 'BADGE',
       coinMinimalDenom: 'ubadge',
       coinDecimals: 9,
-      coinGeckoId: 'cosmos',
+      coinGeckoId: '',
       gasPriceStep: {
         low: 0.000000000001,
         average: 0.000000000001,
@@ -82,7 +82,7 @@ export const BitBadgesKeplrSuggestBetanetChainInfo = {
     coinDenom: 'STAKE',
     coinMinimalDenom: 'ustake',
     coinDecimals: 9,
-    coinGeckoId: 'cosmos',
+    coinGeckoId: '',
     coinImageUrl: 'https://avatars.githubusercontent.com/u/86890740'
   }
 };
