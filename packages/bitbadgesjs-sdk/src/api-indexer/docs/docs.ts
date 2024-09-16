@@ -812,7 +812,6 @@ export class ClaimBuilderDoc<T extends NumberType> extends BaseNumberTypeClass<C
   plugins: IntegrationPluginParams<ClaimIntegrationPluginType>[];
   state: { [pluginId: string]: any };
   action: {
-    codes?: string[] | undefined;
     seedCode?: string;
     siwbbClaim?: boolean;
     balancesToSet?: PredeterminedBalances<T> | undefined;
@@ -840,7 +839,6 @@ export class ClaimBuilderDoc<T extends NumberType> extends BaseNumberTypeClass<C
     this.lastUpdated = data.lastUpdated;
     this.manualDistribution = data.manualDistribution;
     this.action = {
-      codes: data.action.codes,
       balancesToSet: data.action.balancesToSet ? new PredeterminedBalances(data.action.balancesToSet) : undefined,
       seedCode: data.action.seedCode,
       listId: data.action.listId,

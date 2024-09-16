@@ -865,7 +865,6 @@ export interface iClaimBuilderDoc<T extends NumberType> extends Doc {
 
   /** Details for the action to perform if the criteria is correct */
   action: {
-    codes?: string[];
     seedCode?: string;
     balancesToSet?: iPredeterminedBalances<T>;
     listId?: string;
