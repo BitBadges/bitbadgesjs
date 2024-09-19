@@ -638,7 +638,7 @@ export type CustomTypeInputSchema = {
   helper?: string;
 };
 
-type OauthAppName = 'twitter' | 'github' | 'google' | 'email' | 'discord' | 'twitch' | 'strava';
+type OauthAppName = 'twitter' | 'github' | 'google' | 'email' | 'discord' | 'twitch' | 'strava' | 'youtube';
 
 /**
  * @category Claims

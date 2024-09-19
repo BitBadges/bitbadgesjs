@@ -894,6 +894,14 @@ export interface iCheckSignInStatusSuccessResponse {
     username: string;
     id: string;
   };
+
+  /**
+   * Signed in with Youtube?
+   */
+  youtube?: {
+    id: string;
+    username: string;
+  };
 }
 
 /**
@@ -923,6 +931,7 @@ export class CheckSignInStatusSuccessResponse extends CustomTypeClass<CheckSignI
   };
   twitch?: { id: string; username: string } | undefined;
   strava?: { username: string; id: string } | undefined;
+  youtube?: { id: string; username: string } | undefined;
 
   constructor(data: iCheckSignInStatusSuccessResponse) {
     super();
@@ -935,6 +944,7 @@ export class CheckSignInStatusSuccessResponse extends CustomTypeClass<CheckSignI
     this.google = data.google;
     this.twitch = data.twitch;
     this.strava = data.strava;
+    this.youtube = data.youtube;
   }
 }
 
@@ -956,6 +966,8 @@ export interface SignOutPayload {
   signOutTwitch?: boolean;
   /** Sign out of Strava. */
   signOutStrava?: boolean;
+  /** Sign out of Youtube */
+  signOutYoutube?: boolean;
 }
 
 /**
