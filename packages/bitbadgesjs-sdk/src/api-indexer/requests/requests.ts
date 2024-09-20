@@ -2662,3 +2662,130 @@ export class UpdateInternalActionSuccessResponse
     this.clientId = data.clientId;
   }
 }
+
+/**
+ * @category API Requests / Responses
+ */
+export interface CreateGatedContentPayload {
+  /** The claim ID associated with this gated content */
+  claimId: string;
+  /** The content in markdown format */
+  content: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iCreateGatedContentSuccessResponse {
+  /** The unique identifier for the created gated content */
+  pageId: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class CreateGatedContentSuccessResponse
+  extends CustomTypeClass<CreateGatedContentSuccessResponse>
+  implements iCreateGatedContentSuccessResponse
+{
+  pageId: string;
+
+  constructor(data: iCreateGatedContentSuccessResponse) {
+    super();
+    this.pageId = data.pageId;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface GetGatedContentPayload {
+  /** The unique identifier of the gated content to retrieve */
+  pageIds?: string[];
+  /** The bookmark for pagination from the previous response */
+  bookmark?: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetGatedContentSuccessResponse {
+  docs: {
+    pageId: string;
+    claimId: string;
+    content: string;
+    createdBy: string;
+  }[];
+  bookmark?: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetGatedContentSuccessResponse extends CustomTypeClass<GetGatedContentSuccessResponse> implements iGetGatedContentSuccessResponse {
+  docs: {
+    pageId: string;
+    claimId: string;
+    content: string;
+    createdBy: string;
+  }[];
+  bookmark?: string;
+
+  constructor(data: iGetGatedContentSuccessResponse) {
+    super();
+    this.docs = data.docs;
+    this.bookmark = data.bookmark;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface UpdateGatedContentPayload {
+  /** The unique identifier of the gated content to update */
+  pageId: string;
+  /** The updated claim ID (optional) */
+  claimId?: string;
+  /** The updated content in markdown format (optional) */
+  content?: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iUpdateGatedContentSuccessResponse {
+  success: boolean;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class UpdateGatedContentSuccessResponse
+  extends CustomTypeClass<UpdateGatedContentSuccessResponse>
+  implements iUpdateGatedContentSuccessResponse
+{
+  success: boolean;
+
+  constructor(data: iUpdateGatedContentSuccessResponse) {
+    super();
+    this.success = data.success;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface DeleteGatedContentPayload {
+  /** The unique identifier of the gated content to delete */
+  pageId: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iDeleteGatedContentSuccessResponse {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class DeleteGatedContentSuccessResponse extends EmptyResponseClass {}

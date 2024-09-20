@@ -1024,6 +1024,22 @@ export interface iDeveloperAppDoc extends Doc {
 /**
  * @category Interfaces
  */
+export interface iGatedContentDoc<T extends NumberType> extends Doc {
+  /** Content of the gated content */
+  content: string;
+  /** Claim ID associated with the gated content */
+  claimId: string;
+  /** The time the gated content was created */
+  createdAt: UNIXMilliTimestamp<T>;
+  /** The time the gated content was last updated */
+  lastUpdated: UNIXMilliTimestamp<T>;
+  /** Creator of the gated content */
+  createdBy: CosmosAddress;
+}
+
+/**
+ * @category Interfaces
+ */
 export interface iAccessTokenDoc extends Doc {
   accessToken: string;
   tokenType: string;

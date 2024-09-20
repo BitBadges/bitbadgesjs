@@ -97,4 +97,7 @@ export class BitBadgesApiRoutes {
 
   static GetInternalActionsRoute = () => '/api/v0/internalAction/fetch';
   static CRUDInternalActionRoute = () => '/api/v0/internalAction';
+
+  static GetGatedContentRoute = () => '/api/v0/gatedContent/fetch';
+  static CRUDGatedContentRoute = () => '/api/v0/gatedContent';
 }
