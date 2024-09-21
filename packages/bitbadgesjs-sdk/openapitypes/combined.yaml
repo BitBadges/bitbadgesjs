@@ -2368,6 +2368,82 @@ paths:
           $ref: '#/components/responses/InternalServerErrorResponse'
       security:
         - apiKey: []
+  /api/codes:
+    post:
+      operationId: generateCode
+      summary: Generate Code
+      description: >
+        Generates a unique code based on a seed and a zero-based index. This is
+        used for the Codes plugin with claims.
+
+
+        ```typescript
+
+        const response = await fetch('https://api.bitbadges.io/api/codes', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            seedCode: 'mysecretcode',
+            idx: 5
+          }),
+        });
+
+        const data = await response.json();
+
+        console.log(data.code); // The generated code
+
+        ```
+
+        Documentation References / Tutorials:
+
+        - **[Codes
+        Plugin](https://docs.bitbadges.io/for-developers/claim-builder/universal-approach-claim-codes)**
+      tags:
+        - Claims
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: The generated code
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      security:
+        - apiKey: []
+      x-internal: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - seedCode
+                - idx
+              properties:
+                seedCode:
+                  type: string
+                  description: The seed used to generate the code
+                idx:
+                  type: integer
+                  minimum: 0
+                  description: A non-negative integer index
 components:
   responses:
     ErrorResponse:
@@ -4261,10 +4337,6 @@ components:
           type: string
         action:
           properties:
-            codes:
-              items:
-                type: string
-              type: array
             seedCode:
               type: string
             balancesToSet:
@@ -4705,6 +4777,39 @@ components:
         - clientId
         - clientSecret
         - redirectUris
+      additionalProperties: false
+      description: ''
+      type: object
+    iGatedContentDoc:
+      properties:
+        _docId:
+          description: A unique stringified document ID
+          type: string
+        _id:
+          description: A unique document ID (Mongo DB ObjectID)
+          type: string
+        content:
+          description: Content of the gated content
+          type: string
+        claimId:
+          description: Claim ID associated with the gated content
+          type: string
+        createdAt:
+          description: The time the gated content was created
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
+        lastUpdated:
+          description: The time the gated content was last updated
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
+        createdBy:
+          description: Creator of the gated content
+          $ref: '#/components/schemas/CosmosAddress'
+      required:
+        - _docId
+        - content
+        - claimId
+        - createdAt
+        - lastUpdated
+        - createdBy
       additionalProperties: false
       description: ''
       type: object
@@ -5884,6 +5989,27 @@ components:
             additionalProperties: false
             type: object
           description: The attributes of the badge or badge collection
+          type: array
+        utility:
+          items:
+            properties:
+              name:
+                type: string
+                examples: *ref_12
+              image:
+                type: string
+                examples: *ref_14
+              description:
+                type: string
+                examples: *ref_8
+              url:
+                type: string
+            required:
+              - name
+              - image
+              - description
+            additionalProperties: false
+            type: object
           type: array
         fetchedAtBlock:
           description: The block the metadata was fetched at.
@@ -8117,6 +8243,18 @@ components:
           additionalProperties: false
           description: Signed in with Strava?
           type: object
+        youtube:
+          properties:
+            id:
+              type: string
+            username:
+              type: string
+          required:
+            - id
+            - username
+          additionalProperties: false
+          description: Signed in with Youtube?
+          type: object
       required:
         - signedIn
         - scopes
@@ -8145,6 +8283,9 @@ components:
           type: boolean
         signOutStrava:
           description: Sign out of Strava.
+          type: boolean
+        signOutYoutube:
+          description: Sign out of Youtube
           type: boolean
       required:
         - signOutBlockin
@@ -10745,6 +10886,102 @@ components:
           type: string
       required:
         - success
+      additionalProperties: false
+      type: object
+    CreateGatedContentPayload:
+      properties:
+        claimId:
+          description: The claim ID associated with this gated content
+          type: string
+        content:
+          description: The content in markdown format
+          type: string
+      required:
+        - claimId
+        - content
+      additionalProperties: false
+      type: object
+    iCreateGatedContentSuccessResponse:
+      properties:
+        pageId:
+          description: The unique identifier for the created gated content
+          type: string
+      required:
+        - pageId
+      additionalProperties: false
+      type: object
+    GetGatedContentPayload:
+      properties:
+        pageIds:
+          items:
+            type: string
+          description: The unique identifier of the gated content to retrieve
+          type: array
+        bookmark:
+          description: The bookmark for pagination from the previous response
+          type: string
+      additionalProperties: false
+      type: object
+    iGetGatedContentSuccessResponse:
+      properties:
+        docs:
+          items:
+            properties:
+              pageId:
+                type: string
+              claimId:
+                type: string
+              content:
+                type: string
+              createdBy:
+                type: string
+            required:
+              - pageId
+              - claimId
+              - content
+              - createdBy
+            additionalProperties: false
+            type: object
+          type: array
+        bookmark:
+          type: string
+      required:
+        - docs
+      additionalProperties: false
+      type: object
+    UpdateGatedContentPayload:
+      properties:
+        pageId:
+          description: The unique identifier of the gated content to update
+          type: string
+        claimId:
+          description: The updated claim ID (optional)
+          type: string
+        content:
+          description: The updated content in markdown format (optional)
+          type: string
+      required:
+        - pageId
+      additionalProperties: false
+      type: object
+    iUpdateGatedContentSuccessResponse:
+      properties:
+        success:
+          type: boolean
+      required:
+        - success
+      additionalProperties: false
+      type: object
+    DeleteGatedContentPayload:
+      properties:
+        pageId:
+          description: The unique identifier of the gated content to delete
+          type: string
+      required:
+        - pageId
+      additionalProperties: false
+      type: object
+    iDeleteGatedContentSuccessResponse:
       additionalProperties: false
       type: object
     GetMapsPayload:
