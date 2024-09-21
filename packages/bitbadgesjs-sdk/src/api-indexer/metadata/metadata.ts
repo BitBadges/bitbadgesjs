@@ -40,6 +40,13 @@ export interface iMetadata<T extends NumberType> {
     value: string | number | boolean;
   }[];
 
+  utility?: {
+    name: string;
+    image: string;
+    description: string;
+    url?: string;
+  }[];
+
   /** The block the metadata was fetched at. */
   fetchedAtBlock?: T;
   /** The time the metadata was fetched. */
@@ -74,6 +81,13 @@ export class Metadata<T extends NumberType> extends BaseNumberTypeClass<Metadata
     value: string | number | boolean;
   }[];
 
+  utility?: {
+    name: string;
+    image: string;
+    description: string;
+    url?: string;
+  }[];
+
   offChainTransferabilityInfo?: {
     host: string;
     assignMethod: string;
@@ -94,6 +108,7 @@ export class Metadata<T extends NumberType> extends BaseNumberTypeClass<Metadata
     this.socials = data.socials;
     this.offChainTransferabilityInfo = data.offChainTransferabilityInfo;
     this.attributes = data.attributes;
+    this.utility = data.utility;
   }
 
   getNumberFieldNames(): string[] {
