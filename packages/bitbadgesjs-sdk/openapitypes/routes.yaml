@@ -2087,6 +2087,73 @@ paths:
           $ref: '#/components/responses/InternalServerErrorResponse'
       security:
         - apiKey: []
+  /api/codes:
+    post:
+      operationId: generateCode
+      summary: Generate Code
+      description: |
+        Generates a unique code based on a seed and a zero-based index. This is used for the Codes plugin with claims.
+
+        ```typescript
+        const response = await fetch('https://api.bitbadges.io/api/codes', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            seedCode: 'mysecretcode',
+            idx: 5
+          }),
+        });
+        const data = await response.json();
+        console.log(data.code); // The generated code
+        ```
+        Documentation References / Tutorials:
+        - **[Codes Plugin](https://docs.bitbadges.io/for-developers/claim-builder/universal-approach-claim-codes)**
+      tags:
+        - Claims
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: The generated code
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      security:
+        - apiKey: []
+      x-internal: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - seedCode
+                - idx
+              properties:
+                seedCode:
+                  type: string
+                  description: The seed used to generate the code
+                idx:
+                  type: integer
+                  minimum: 0
+                  description: A non-negative integer index
 components:
   responses:
     ErrorResponse:
