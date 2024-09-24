@@ -116,6 +116,8 @@ import {
   GetClaimsSuccessResponse,
   GetDeveloperAppPayload,
   GetDeveloperAppSuccessResponse,
+  GetGatedContentForClaimPayload,
+  GetGatedContentForClaimSuccessResponse,
   GetGatedContentPayload,
   GetGatedContentSuccessResponse,
   GetInternalActionPayload,
@@ -685,7 +687,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * Must be created off-chain. For on-chain, they must be created through MsgCreateAddressMappings. Creator can update their created lists with no restrictions. Else, requires an edit key.
    */
-  public async createAddressLists(payload: CreateAddressListsPayload): Promise<CreateAddressListsSuccessResponse> {
+  public async createAddressLists(payload: CreateAddressListsPayload<T>): Promise<CreateAddressListsSuccessResponse> {
     return await BitBadgesAddressList.CreateAddressList(this, payload);
   }
   /**
@@ -697,7 +699,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * Must be created off-chain. For on-chain, they must be created through MsgCreateAddressMappings. Creator can update their created lists with no restrictions. Else, requires an edit key.
    */
-  public async updateAddressLists(payload: UpdateAddressListsPayload): Promise<UpdateAddressListsSuccessResponse> {
+  public async updateAddressLists(payload: UpdateAddressListsPayload<T>): Promise<UpdateAddressListsSuccessResponse> {
     return await BitBadgesAddressList.UpdateAddressList(this, payload);
   }
 
@@ -1385,6 +1387,31 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
         }
       );
       return new DeleteAttestationProofSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Get the gated content for a claim.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/claims/gatedContent/{claimId}`
+   * - **SDK Function Call**: `await BitBadgesApi.getGatedContentForClaim(payload);`
+   * - **Authentication**: Must be signed in.
+   */
+  public async getGatedContentForClaim(claimId: string): Promise<GetGatedContentForClaimSuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<GetGatedContentForClaimPayload> = typia.validate<GetGatedContentForClaimPayload>({});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.post<GetGatedContentForClaimSuccessResponse<T>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetGatedContentForClaimRoute(claimId)}`
+      );
+      return new GetGatedContentForClaimSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);

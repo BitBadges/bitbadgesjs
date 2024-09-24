@@ -31,6 +31,7 @@ import { CollectionApprovalPermission } from './permissions.js';
 import { UintRange, UintRangeArray } from './uintRanges.js';
 import { AllDefaultValues, getPotentialUpdatesForTimelineValues, getUpdateCombinationsToCheck } from './validate-utils.js';
 import { Metadata } from '@/api-indexer/metadata/metadata.js';
+import { ClaimReward } from '@/api-indexer/docs/interfaces.js';
 
 const { getReservedAddressList, getReservedTrackerList } = AddressList;
 
@@ -52,6 +53,9 @@ export class ClaimDetails<T extends NumberType> extends BaseNumberTypeClass<Clai
   collectionId?: T;
   siwbbClaim?: boolean;
   listId?: string;
+  rewards?: ClaimReward<T>[];
+  estimatedCost?: string;
+  estimatedTime?: string;
 
   constructor(data: iClaimDetails<T>) {
     super();
@@ -68,6 +72,9 @@ export class ClaimDetails<T extends NumberType> extends BaseNumberTypeClass<Clai
     this.collectionId = data.collectionId;
     this.siwbbClaim = data.siwbbClaim;
     this.listId = data.listId;
+    this.rewards = data.rewards?.map((reward) => new ClaimReward(reward));
+    this.estimatedCost = data.estimatedCost;
+    this.estimatedTime = data.estimatedTime;
   }
 
   convert<U extends NumberType>(convertFunction: (val: NumberType) => U): ClaimDetails<U> {

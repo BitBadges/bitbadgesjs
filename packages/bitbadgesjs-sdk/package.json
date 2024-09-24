@@ -1,7 +1,7 @@
 {
   "name": "bitbadgesjs-sdk",
   "description": "SDK for BitBadges development",
-  "version": "0.4.4",
+  "version": "0.4.9",
   "license": "MIT",
   "eslintIgnore": [
     "src/proto/**/*.ts"

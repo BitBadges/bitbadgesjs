@@ -34,62 +34,63 @@ import type { iOffChainBalancesMap } from '@/core/transfers.js';
 import { UserBalanceStore } from '@/core/userBalances.js';
 import type { iAmountTrackerIdDetails } from '@/interfaces/badges/core.js';
 import type { iUserBalanceStore } from '@/interfaces/badges/userBalances.js';
+import { Map } from '@/transactions/index.js';
+import { ValueStore } from 'bitbadgesjs-sdk';
 import type { Doc } from '../base.js';
 import type { iMetadata } from '../metadata/metadata.js';
 import { Metadata } from '../metadata/metadata.js';
-import type {
-  ClaimIntegrationPluginType,
-  CosmosAddress,
-  CustomTypeInputSchema,
-  IntegrationPluginParams,
-  JsonBodyInputSchema,
-  JsonBodyInputWithValue,
-  NativeAddress,
-  OAuthScopeDetails,
-  PluginPresetType,
-  UNIXMilliTimestamp,
-  iAccessTokenDoc,
-  iAccountDoc,
-  iAddressListDoc,
-  iAirdropDoc,
-  iApprovalTrackerDoc,
-  iAttestationDoc,
-  iAttestationProofDoc,
-  iBalanceDoc,
-  iBalanceDocWithDetails,
-  iChallengeTrackerIdDetails,
-  iClaimBuilderDoc,
-  iCollectionDoc,
-  iComplianceDoc,
-  iCustomLink,
-  iCustomListPage,
-  iCustomPage,
-  iDepositBalanceDoc,
-  iDeveloperAppDoc,
-  iEmailVerificationStatus,
-  iEventDoc,
-  iFetchDoc,
-  iGatedContentDoc,
-  iIPFSTotalsDoc,
-  iInternalActionsDoc,
-  iLatestBlockStatus,
-  iMapDoc,
-  iMapWithValues,
-  iMerkleChallengeDoc,
-  iNotificationPreferences,
-  iPluginDoc,
-  iPluginVersionConfig,
-  iProfileDoc,
-  iQueueDoc,
-  iRefreshDoc,
-  iSIWBBRequestDoc,
-  iSocialConnections,
-  iStatusDoc,
-  iUpdateHistory,
-  iUsedLeafStatus
+import {
+  ClaimReward,
+  type ClaimIntegrationPluginType,
+  type CosmosAddress,
+  type CustomTypeInputSchema,
+  type IntegrationPluginParams,
+  type JsonBodyInputSchema,
+  type JsonBodyInputWithValue,
+  type NativeAddress,
+  type OAuthScopeDetails,
+  type PluginPresetType,
+  type UNIXMilliTimestamp,
+  type iAccessTokenDoc,
+  type iAccountDoc,
+  type iAddressListDoc,
+  type iAirdropDoc,
+  type iApprovalTrackerDoc,
+  type iAttestationDoc,
+  type iAttestationProofDoc,
+  type iBalanceDoc,
+  type iBalanceDocWithDetails,
+  type iChallengeTrackerIdDetails,
+  type iClaimBuilderDoc,
+  type iCollectionDoc,
+  type iComplianceDoc,
+  type iCustomLink,
+  type iCustomListPage,
+  type iCustomPage,
+  type iDepositBalanceDoc,
+  type iDeveloperAppDoc,
+  type iEmailVerificationStatus,
+  type iEventDoc,
+  type iFetchDoc,
+  type iGatedContentDoc,
+  type iIPFSTotalsDoc,
+  type iInternalActionsDoc,
+  type iLatestBlockStatus,
+  type iMapDoc,
+  type iMapWithValues,
+  type iMerkleChallengeDoc,
+  type iNotificationPreferences,
+  type iPluginDoc,
+  type iPluginVersionConfig,
+  type iProfileDoc,
+  type iQueueDoc,
+  type iRefreshDoc,
+  type iSIWBBRequestDoc,
+  type iSocialConnections,
+  type iStatusDoc,
+  type iUpdateHistory,
+  type iUsedLeafStatus
 } from './interfaces.js';
-import { ValueStore } from 'bitbadgesjs-sdk';
-import { Map } from '@/transactions/index.js';
 
 /**
  * @inheritDoc iCollectionDoc
@@ -313,6 +314,7 @@ export class SocialConnections<T extends NumberType> extends BaseNumberTypeClass
   google?: SocialConnectionInfo<T> | undefined;
   twitch?: SocialConnectionInfo<T> | undefined;
   strava?: SocialConnectionInfo<T> | undefined;
+  reddit?: SocialConnectionInfo<T> | undefined;
 
   constructor(data: iSocialConnections<T>) {
     super();
@@ -322,6 +324,7 @@ export class SocialConnections<T extends NumberType> extends BaseNumberTypeClass
     this.twitch = data.twitch ? new SocialConnectionInfo(data.twitch) : undefined;
     this.google = data.google ? new SocialConnectionInfo(data.google) : undefined;
     this.strava = data.strava ? new SocialConnectionInfo(data.strava) : undefined;
+    this.reddit = data.reddit ? new SocialConnectionInfo(data.reddit) : undefined;
   }
 
   getNumberFieldNames(): string[] {
@@ -825,6 +828,10 @@ export class ClaimBuilderDoc<T extends NumberType> extends BaseNumberTypeClass<C
   assignMethod?: string | undefined;
   version: T;
   testOnly?: boolean;
+  rewards?: ClaimReward<T>[] | undefined;
+  estimatedCost?: string | undefined;
+  estimatedTime?: string | undefined;
+
   constructor(data: iClaimBuilderDoc<T>) {
     super();
     this._docId = data._docId;
@@ -850,6 +857,9 @@ export class ClaimBuilderDoc<T extends NumberType> extends BaseNumberTypeClass<C
     this.createdAt = data.createdAt;
     this.version = data.version;
     this.testOnly = data.testOnly;
+    this.rewards = data.rewards?.map((reward) => new ClaimReward(reward));
+    this.estimatedCost = data.estimatedCost;
+    this.estimatedTime = data.estimatedTime;
     this.assignMethod = data.assignMethod;
   }
 
@@ -1343,6 +1353,7 @@ export class PluginVersionConfig<T extends NumberType> extends BaseNumberTypeCla
     passGithub?: boolean;
     passTwitch?: boolean;
     passStrava?: boolean;
+    passReddit?: boolean;
     postProcessingJs: string;
   };
   claimCreatorRedirect?: { toolUri?: string; tutorialUri?: string };

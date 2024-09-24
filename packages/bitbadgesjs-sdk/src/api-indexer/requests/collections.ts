@@ -99,6 +99,10 @@ export interface GetOwnersForBadgePayload {
    * The pagination bookmark for where to start the request. Bookmarks are obtained via the previous response. "" for first request.
    */
   bookmark?: string;
+  /**
+   * Sort by amount descending.
+   */
+  sortBy?: 'amount';
 }
 
 /**

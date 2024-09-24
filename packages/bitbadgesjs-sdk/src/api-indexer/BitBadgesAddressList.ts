@@ -7,7 +7,14 @@ import type { BaseBitBadgesApi, PaginationInfo } from './base.js';
 import { EmptyResponseClass } from './base.js';
 import { ListActivityDoc } from './docs/activity.js';
 import { AddressListDoc } from './docs/docs.js';
-import type { ClaimIntegrationPluginType, IntegrationPluginDetails, iAddressListDoc, iClaimDetails, iListActivityDoc } from './docs/interfaces.js';
+import type {
+  ClaimIntegrationPluginType,
+  ClaimReward,
+  IntegrationPluginDetails,
+  iAddressListDoc,
+  iClaimDetails,
+  iListActivityDoc
+} from './docs/interfaces.js';
 import type { iMetadata } from './metadata/metadata.js';
 import { Metadata } from './metadata/metadata.js';
 import { BitBadgesApiRoutes } from './requests/routes.js';
@@ -239,9 +246,9 @@ export class BitBadgesAddressList<T extends NumberType>
    *
    * Behind the scenes, this is just an alias for UpdateAddressList.
    */
-  static async CreateAddressList<T extends NumberType>(api: BaseBitBadgesApi<T>, payload: CreateAddressListsPayload) {
+  static async CreateAddressList<T extends NumberType>(api: BaseBitBadgesApi<T>, payload: CreateAddressListsPayload<T>) {
     try {
-      const validateRes: typia.IValidation<CreateAddressListsPayload> = typia.validate<CreateAddressListsPayload>(payload ?? {});
+      const validateRes: typia.IValidation<CreateAddressListsPayload<T>> = typia.validate<CreateAddressListsPayload<T>>(payload ?? {});
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
@@ -260,9 +267,9 @@ export class BitBadgesAddressList<T extends NumberType>
   /**
    * Updates an off-chain address list. On-chain lists are updated through blockchain transactions.
    */
-  static async UpdateAddressList<T extends NumberType>(api: BaseBitBadgesApi<T>, payload: UpdateAddressListsPayload) {
+  static async UpdateAddressList<T extends NumberType>(api: BaseBitBadgesApi<T>, payload: UpdateAddressListsPayload<T>) {
     try {
-      const validateRes: typia.IValidation<UpdateAddressListsPayload> = typia.validate<UpdateAddressListsPayload>(payload ?? {});
+      const validateRes: typia.IValidation<UpdateAddressListsPayload<T>> = typia.validate<UpdateAddressListsPayload<T>>(payload ?? {});
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
@@ -394,7 +401,7 @@ export class GetAddressListsSuccessResponse<T extends NumberType>
 /**
  * @category Interfaces
  */
-export type iAddressListCreateObject = iAddressList & {
+export type iAddressListCreateObject<T extends NumberType> = iAddressList & {
   /** Flag to update addresses? */
   updateAddresses?: boolean;
 
@@ -410,6 +417,9 @@ export type iAddressListCreateObject = iAddressList & {
   claims: {
     claimId: string;
     plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
+    rewards?: ClaimReward<T>[];
+    estimatedCost?: string;
+    estimatedTime?: string;
     approach?: string;
   }[];
 };
@@ -417,8 +427,8 @@ export type iAddressListCreateObject = iAddressList & {
 /**
  * @category API Requests / Responses
  */
-export interface UpdateAddressListsPayload {
-  addressLists: iAddressListCreateObject[];
+export interface UpdateAddressListsPayload<T extends NumberType> {
+  addressLists: iAddressListCreateObject<T>[];
 }
 
 /**
@@ -433,7 +443,7 @@ export class UpdateAddressListsSuccessResponse extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export interface CreateAddressListsPayload extends UpdateAddressListsPayload {}
+export interface CreateAddressListsPayload<T extends NumberType> extends UpdateAddressListsPayload<T> {}
 
 /**
  * @category API Requests / Responses

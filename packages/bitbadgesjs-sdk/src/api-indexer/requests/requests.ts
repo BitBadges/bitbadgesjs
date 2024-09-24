@@ -18,35 +18,37 @@ import {
   PluginDoc,
   StatusDoc
 } from '@/api-indexer/docs/docs.js';
-import type {
-  ClaimIntegrationPluginCustomBodyType,
-  ClaimIntegrationPluginType,
-  CosmosAddress,
-  CustomTypeInputSchema,
-  IntegrationPluginDetails,
-  JsonBodyInputSchema,
-  JsonBodyInputWithValue,
-  NativeAddress,
-  OAuthScopeDetails,
-  PluginPresetType,
-  SiwbbMessage,
-  UNIXMilliTimestamp,
-  iAccessTokenDoc,
-  iAttestationDoc,
-  iAttestationProofDoc,
-  iClaimAlertDoc,
-  iClaimDetails,
-  iCustomLink,
-  iCustomListPage,
-  iCustomPage,
-  iDeveloperAppDoc,
-  iEventDoc,
-  iInternalActionsDoc,
-  iMapWithValues,
-  iPluginDoc,
-  iSocialConnections,
-  iStatusDoc,
-  iTransferActivityDoc
+import {
+  ClaimReward,
+  type ClaimIntegrationPluginCustomBodyType,
+  type ClaimIntegrationPluginType,
+  type CosmosAddress,
+  type CustomTypeInputSchema,
+  type IntegrationPluginDetails,
+  type JsonBodyInputSchema,
+  type JsonBodyInputWithValue,
+  type NativeAddress,
+  type OAuthScopeDetails,
+  type PluginPresetType,
+  type SiwbbMessage,
+  type UNIXMilliTimestamp,
+  type iAccessTokenDoc,
+  type iAttestationDoc,
+  type iAttestationProofDoc,
+  type iClaimAlertDoc,
+  type iClaimDetails,
+  type iClaimReward,
+  type iCustomLink,
+  type iCustomListPage,
+  type iCustomPage,
+  type iDeveloperAppDoc,
+  type iEventDoc,
+  type iInternalActionsDoc,
+  type iMapWithValues,
+  type iPluginDoc,
+  type iSocialConnections,
+  type iStatusDoc,
+  type iTransferActivityDoc
 } from '@/api-indexer/docs/interfaces.js';
 import type { iBadgeMetadataDetails, iCollectionMetadataDetails } from '@/api-indexer/metadata/badgeMetadata.js';
 import type { iMetadata } from '@/api-indexer/metadata/metadata.js';
@@ -54,7 +56,7 @@ import { Metadata } from '@/api-indexer/metadata/metadata.js';
 import { BaseNumberTypeClass, CustomTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import type { SupportedChain } from '@/common/types.js';
-import { ClaimDetails, PredeterminedBalances, iChallengeDetails, iChallengeInfoDetails } from '@/core/approvals.js';
+import { ClaimDetails, iChallengeDetails, iChallengeInfoDetails } from '@/core/approvals.js';
 import type { iBatchBadgeDetails } from '@/core/batch-utils.js';
 import { SiwbbChallenge, VerifySIWBBOptions, iSiwbbChallenge } from '@/core/blockin.js';
 import { AttestationsProof } from '@/core/secrets.js';
@@ -573,6 +575,9 @@ export interface AddBalancesToOffChainStoragePayload {
   claims?: {
     claimId: string;
     plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
+    rewards?: iClaimReward<NumberType>[];
+    estimatedCost?: string;
+    estimatedTime?: string;
     balancesToSet?: iPredeterminedBalances<NumberType>;
     approach?: string;
   }[];
@@ -896,6 +901,14 @@ export interface iCheckSignInStatusSuccessResponse {
   };
 
   /**
+   * Signed in with Reddit?
+   */
+  reddit?: {
+    username: string;
+    id: string;
+  };
+
+  /**
    * Signed in with Youtube?
    */
   youtube?: {
@@ -932,6 +945,7 @@ export class CheckSignInStatusSuccessResponse extends CustomTypeClass<CheckSignI
   twitch?: { id: string; username: string } | undefined;
   strava?: { username: string; id: string } | undefined;
   youtube?: { id: string; username: string } | undefined;
+  reddit?: { username: string; id: string } | undefined;
 
   constructor(data: iCheckSignInStatusSuccessResponse) {
     super();
@@ -945,6 +959,7 @@ export class CheckSignInStatusSuccessResponse extends CustomTypeClass<CheckSignI
     this.twitch = data.twitch;
     this.strava = data.strava;
     this.youtube = data.youtube;
+    this.reddit = data.reddit;
   }
 }
 
@@ -968,6 +983,8 @@ export interface SignOutPayload {
   signOutStrava?: boolean;
   /** Sign out of Youtube */
   signOutYoutube?: boolean;
+  /** Sign out of Reddit */
+  signOutReddit?: boolean;
 }
 
 /**
@@ -2153,6 +2170,7 @@ export interface PluginVersionConfigPayload {
     passGithub?: boolean;
     passStrava?: boolean;
     passTwitch?: boolean;
+    passReddit?: boolean;
 
     postProcessingJs: string;
   };
@@ -2693,6 +2711,33 @@ export class CreateGatedContentSuccessResponse
   constructor(data: iCreateGatedContentSuccessResponse) {
     super();
     this.pageId = data.pageId;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface GetGatedContentForClaimPayload {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetGatedContentForClaimSuccessResponse<T extends NumberType> {
+  rewards: iClaimReward<T>[];
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetGatedContentForClaimSuccessResponse<T extends NumberType>
+  extends CustomTypeClass<GetGatedContentForClaimSuccessResponse<T>>
+  implements iGetGatedContentForClaimSuccessResponse<T>
+{
+  rewards: ClaimReward<T>[];
+
+  constructor(data: iGetGatedContentForClaimSuccessResponse<T>) {
+    super();
+    this.rewards = data.rewards.map((reward) => new ClaimReward(reward));
   }
 }
 

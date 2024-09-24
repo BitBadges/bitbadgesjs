@@ -28,6 +28,7 @@ import type {
 import type { iCollectionPermissions, iUserPermissionsWithDetails } from '@/interfaces/badges/permissions.js';
 import type { iUserBalanceStore } from '@/interfaces/badges/userBalances.js';
 import type { iMap, iValueStore } from '@/transactions/messages/index.js';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from 'bitbadgesjs-sdk';
 
 /**
  * @category API Requests / Responses
@@ -106,6 +107,11 @@ export interface iSocialConnections<T extends NumberType> {
     lastUpdated: UNIXMilliTimestamp<T>;
   };
   strava?: {
+    username: string;
+    id: string;
+    lastUpdated: UNIXMilliTimestamp<T>;
+  };
+  reddit?: {
     username: string;
     id: string;
     lastUpdated: UNIXMilliTimestamp<T>;
@@ -586,6 +592,7 @@ export type ClaimIntegrationPluginType =
   | 'twitch'
   | 'twitter'
   | 'strava'
+  | 'reddit'
   | 'transferTimes'
   | 'initiatedBy'
   | 'whitelist'
@@ -638,7 +645,7 @@ export type CustomTypeInputSchema = {
   helper?: string;
 };
 
-type OauthAppName = 'twitter' | 'github' | 'google' | 'email' | 'discord' | 'twitch' | 'strava' | 'youtube';
+type OauthAppName = 'twitter' | 'github' | 'google' | 'email' | 'discord' | 'twitch' | 'strava' | 'youtube' | 'reddit';
 
 /**
  * @category Claims
@@ -704,7 +711,19 @@ export type ClaimIntegrationPublicParamsType<T extends ClaimIntegrationPluginTyp
                     usdAmount: number;
                     paymentAddress: CosmosAddress;
                   }
-                : Record<string, any>;
+                : T extends 'webhooks' | 'successWebhooks'
+                  ? {
+                      passAddress?: boolean;
+                      passDiscord?: boolean;
+                      passEmail?: boolean;
+                      passTwitter?: boolean;
+                      passGoogle?: boolean;
+                      passGithub?: boolean;
+                      passTwitch?: boolean;
+                      passStrava?: boolean;
+                      passReddit?: boolean;
+                    }
+                  : Record<string, any>;
 
 /**
  * Private params are params that are not visible to the public. For example, the password for a claim code.
@@ -792,7 +811,7 @@ export interface IntegrationPluginParams<T extends ClaimIntegrationPluginType> {
   /** The parameters of the plugin that are not visible to the public */
   privateParams: ClaimIntegrationPrivateParamsType<T>;
   /** Custom display metadata for the plugin */
-  metadata?: { name: string; description: string };
+  metadata?: { name: string; description: string; image?: string };
 }
 
 /**
@@ -871,12 +890,98 @@ export interface iClaimBuilderDoc<T extends NumberType> extends Doc {
     siwbbClaim?: boolean;
   };
 
+  /**
+   * Rewards to be shown upon a successful claim. If you need further gating, you can do this in two-steps.
+   */
+  rewards?: iClaimReward<T>[];
+
+  /** Estimated cost for the user */
+  estimatedCost?: string;
+  /** Estimated time to satisfy the claim's requirements */
+  estimatedTime?: string;
+
   lastUpdated: UNIXMilliTimestamp<T>;
   createdAt: UNIXMilliTimestamp<T>;
 
   version: T;
 
   testOnly?: boolean;
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iClaimReward<T extends NumberType> {
+  /** The ID of the reward (either a pre-configured one or "custom") */
+  rewardId: string;
+  /** The instance ID of the reward */
+  instanceId: string;
+
+  /** Metadata for the reward. This is public-facing, so do not include any gated content here. By default, we use the associated rewardId. */
+  metadata?: {
+    name: string;
+    description: string;
+    image: string;
+  };
+
+  /** If true, the reward is automatically given to the user upon completion. */
+  automatic?: boolean;
+
+  /** The gated content to display upon completion. */
+  gatedContent: iClaimGatedContent;
+}
+
+/**
+ * @category Indexer
+ */
+export interface iClaimGatedContent {
+  /** The content (markdown supported) to be shown to successful claimers */
+  content?: string;
+  /** The URL to be shown to successful claimers */
+  url?: string;
+  /** The params to be shown to successful claimers. Only used for pre-configured rewards. */
+  params?: {
+    [key: string]: any;
+  };
+}
+
+/**
+ * @inheritDoc iClaimReward
+ * @category Indexer
+ */
+export class ClaimReward<T extends NumberType> extends BaseNumberTypeClass<ClaimReward<T>> implements iClaimReward<T> {
+  rewardId: string;
+  instanceId: string;
+  metadata?: {
+    name: string;
+    description: string;
+    image: string;
+  };
+  gatedContent: {
+    content?: string;
+    url?: string;
+    params?: {
+      [key: string]: any;
+    };
+  };
+  automatic?: boolean;
+
+  constructor(data: iClaimReward<T>) {
+    super();
+    this.rewardId = data.rewardId;
+    this.instanceId = data.instanceId;
+    this.metadata = data.metadata;
+    this.gatedContent = data.gatedContent;
+    this.automatic = data.automatic;
+  }
+
+  getNumberFieldNames(): string[] {
+    return [];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ClaimReward<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as ClaimReward<U>;
+  }
 }
 
 /**
@@ -1178,7 +1283,7 @@ export interface iPluginVersionConfig<T extends NumberType> {
     passGithub?: boolean;
     passTwitch?: boolean;
     passStrava?: boolean;
-
+    passReddit?: boolean;
     postProcessingJs: string;
   };
 }
@@ -1333,6 +1438,12 @@ export interface iClaimDetails<T extends NumberType> {
   balancesToSet?: iPredeterminedBalances<T>;
   /** Claim plugins. These are the criteria that must pass for a user to claim the badge. */
   plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
+  /** Rewards for the claim. */
+  rewards?: iClaimReward<T>[];
+  /** Estimated cost for the claim. */
+  estimatedCost?: string;
+  /** Estimated time to satisfy the claim's requirements. */
+  estimatedTime?: string;
   /** If manual distribution is enabled, we do not handle any distribution of claim codes. We leave that up to the claim creator. */
   manualDistribution?: boolean;
   /** Whether the claim is expected to be automatically triggered by someone (not the user). */
