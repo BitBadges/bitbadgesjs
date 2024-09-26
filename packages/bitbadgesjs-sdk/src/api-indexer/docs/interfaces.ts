@@ -945,6 +945,8 @@ export interface iClaimGatedContent {
   params?: {
     [key: string]: any;
   };
+  /** If true, we will send a claim alert to the user upon completion. If they have push notifications enabled, they will also receive a push notification. */
+  sendClaimAlert?: boolean;
 }
 
 /**
@@ -965,6 +967,7 @@ export class ClaimReward<T extends NumberType> extends BaseNumberTypeClass<Claim
     params?: {
       [key: string]: any;
     };
+    sendClaimAlert?: boolean;
   };
   automatic?: boolean;
 
@@ -1127,7 +1130,6 @@ export interface iDeveloperAppDoc extends Doc {
   /** The redirect URI of the app */
   redirectUris: string[];
 }
-
 
 /**
  * @category Interfaces
