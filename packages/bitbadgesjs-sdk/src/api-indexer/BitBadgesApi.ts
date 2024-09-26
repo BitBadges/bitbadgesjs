@@ -63,8 +63,6 @@ import {
   CreateClaimSuccessResponse,
   CreateDeveloperAppPayload,
   CreateDeveloperAppSuccessResponse,
-  CreateGatedContentPayload,
-  CreateGatedContentSuccessResponse,
   CreateInternalActionPayload,
   CreateInternalActionSuccessResponse,
   CreatePaymentIntentPayload,
@@ -81,8 +79,6 @@ import {
   DeleteClaimSuccessResponse,
   DeleteDeveloperAppPayload,
   DeleteDeveloperAppSuccessResponse,
-  DeleteGatedContentPayload,
-  DeleteGatedContentSuccessResponse,
   DeleteInternalActionPayload,
   DeleteInternalActionSuccessResponse,
   DeletePluginPayload,
@@ -118,8 +114,6 @@ import {
   GetDeveloperAppSuccessResponse,
   GetGatedContentForClaimPayload,
   GetGatedContentForClaimSuccessResponse,
-  GetGatedContentPayload,
-  GetGatedContentSuccessResponse,
   GetInternalActionPayload,
   GetInternalActionSuccessResponse,
   GetPluginPayload,
@@ -156,8 +150,6 @@ import {
   UpdateClaimSuccessResponse,
   UpdateDeveloperAppPayload,
   UpdateDeveloperAppSuccessResponse,
-  UpdateGatedContentPayload,
-  UpdateGatedContentSuccessResponse,
   UpdateInternalActionPayload,
   UpdateInternalActionSuccessResponse,
   UpdatePluginPayload,
@@ -2053,109 +2045,6 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
         { data: payload }
       );
       return new DeleteInternalActionSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Get all gated content for a user.
-   *
-   * @remarks
-   * - **API Route**: `POST /api/v0/gatedContent`
-   * - **SDK Function Call**: `await BitBadgesApi.getGatedContent(payload);`
-   */
-  public async getGatedContent(payload: GetGatedContentPayload): Promise<GetGatedContentSuccessResponse> {
-    try {
-      const validateRes: typia.IValidation<GetGatedContentPayload> = typia.validate<GetGatedContentPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.post<GetGatedContentSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetGatedContentRoute()}`,
-        payload
-      );
-      return new GetGatedContentSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Creates gated content.
-   *
-   * @remarks
-   * - **API Route**: `POST /api/v0/gatedContent`
-   * - **SDK Function Call**: `await BitBadgesApi.createGatedContent(payload);`
-   * - **Authentication**: Must be signed in.
-   */
-  public async createGatedContent(payload: CreateGatedContentPayload): Promise<CreateGatedContentSuccessResponse> {
-    try {
-      const validateRes: typia.IValidation<CreateGatedContentPayload> = typia.validate<CreateGatedContentPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.post<CreateGatedContentSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDGatedContentRoute()}`,
-        payload
-      );
-      return new CreateGatedContentSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Deletes gated content.
-   *
-   * @remarks
-   * - **API Route**: `DELETE /api/v0/gatedContent`
-   * - **SDK Function Call**: `await BitBadgesApi.deleteGatedContent(payload);`
-   * - **Authentication**: Must be signed in.
-   */
-  public async deleteGatedContent(payload: DeleteGatedContentPayload): Promise<DeleteGatedContentSuccessResponse> {
-    try {
-      const validateRes: typia.IValidation<DeleteGatedContentPayload> = typia.validate<DeleteGatedContentPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.delete<DeleteGatedContentSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDGatedContentRoute()}`,
-        { data: payload }
-      );
-      return new DeleteGatedContentSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Update gated content.
-   *
-   * @remarks
-   * - **API Route**: `PUT /api/v0/gatedContent`
-   * - **SDK Function Call**: `await BitBadgesApi.updateGatedContent(payload);`
-   * - **Authentication**: Must be signed in.
-   */
-  public async updateGatedContent(payload: UpdateGatedContentPayload): Promise<UpdateGatedContentSuccessResponse> {
-    try {
-      const validateRes: typia.IValidation<UpdateGatedContentPayload> = typia.validate<UpdateGatedContentPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.put<UpdateGatedContentSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDGatedContentRoute()}`,
-        payload
-      );
-      return new UpdateGatedContentSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);

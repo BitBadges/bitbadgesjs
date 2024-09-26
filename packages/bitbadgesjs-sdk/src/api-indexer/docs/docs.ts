@@ -72,7 +72,6 @@ import {
   type iEmailVerificationStatus,
   type iEventDoc,
   type iFetchDoc,
-  type iGatedContentDoc,
   type iIPFSTotalsDoc,
   type iInternalActionsDoc,
   type iLatestBlockStatus,
@@ -549,6 +548,7 @@ export class QueueDoc<T extends NumberType> extends BaseNumberTypeClass<QueueDoc
   notificationType?: string;
   claimInfo?: { session: any; body: any; claimId: string; cosmosAddress: string; ip: string | undefined } | undefined;
   faucetInfo?: { txHash: string; recipient: string; amount: NumberType } | undefined;
+  axiosPayload?: any;
 
   constructor(data: iQueueDoc<T>) {
     super();
@@ -569,6 +569,7 @@ export class QueueDoc<T extends NumberType> extends BaseNumberTypeClass<QueueDoc
     this.notificationType = data.notificationType;
     this.claimInfo = data.claimInfo;
     this.faucetInfo = data.faucetInfo;
+    this.axiosPayload = data.axiosPayload;
   }
 
   getNumberFieldNames(): string[] {
@@ -1256,43 +1257,6 @@ export class DeveloperAppDoc extends CustomTypeClass<DeveloperAppDoc> implements
 
   clone(): DeveloperAppDoc {
     return super.clone() as DeveloperAppDoc;
-  }
-}
-
-/**
- * @inheritDoc iGatedContentDoc
- * @category Indexer
- */
-export class GatedContentDoc<T extends NumberType> extends BaseNumberTypeClass<GatedContentDoc<T>> implements iGatedContentDoc<T> {
-  _docId: string;
-  _id?: string;
-  content: string;
-  claimId: string;
-  createdAt: UNIXMilliTimestamp<T>;
-  lastUpdated: UNIXMilliTimestamp<T>;
-  createdBy: CosmosAddress;
-
-  constructor(data: iGatedContentDoc<T>) {
-    super();
-    this.content = data.content;
-    this.claimId = data.claimId;
-    this.createdAt = data.createdAt;
-    this.lastUpdated = data.lastUpdated;
-    this.createdBy = data.createdBy;
-    this._docId = data._docId;
-    this._id = data._id;
-  }
-
-  getNumberFieldNames(): string[] {
-    return ['createdAt', 'lastUpdated'];
-  }
-
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GatedContentDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GatedContentDoc<U>;
-  }
-
-  clone(): GatedContentDoc<T> {
-    return super.clone() as GatedContentDoc<T>;
   }
 }
 

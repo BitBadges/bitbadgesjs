@@ -451,6 +451,8 @@ export interface iQueueDoc<T extends NumberType> extends Doc {
   activityDocId?: string;
   notificationType?: string;
 
+  axiosPayload?: any;
+
   claimInfo?: {
     session: any;
     body: any;
@@ -1126,21 +1128,6 @@ export interface iDeveloperAppDoc extends Doc {
   redirectUris: string[];
 }
 
-/**
- * @category Interfaces
- */
-export interface iGatedContentDoc<T extends NumberType> extends Doc {
-  /** Content of the gated content */
-  content: string;
-  /** Claim ID associated with the gated content */
-  claimId: string;
-  /** The time the gated content was created */
-  createdAt: UNIXMilliTimestamp<T>;
-  /** The time the gated content was last updated */
-  lastUpdated: UNIXMilliTimestamp<T>;
-  /** Creator of the gated content */
-  createdBy: CosmosAddress;
-}
 
 /**
  * @category Interfaces
