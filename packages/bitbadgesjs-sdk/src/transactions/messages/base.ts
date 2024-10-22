@@ -194,7 +194,7 @@ const wrapExternalTxContext = (context: TxContext): LegacyTxContext => {
     memo: context.memo || ''
   };
 
-  if (txContext.sender.accountAddress === '' || !txContext.sender.accountAddress.startsWith('cosmos')) {
+  if (txContext.sender.accountAddress === '' || !txContext.sender.accountAddress.startsWith('bb')) {
     throw new Error('Account address must be a validly formatted Cosmos address');
   }
 
