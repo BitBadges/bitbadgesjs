@@ -70,38 +70,38 @@ const bech32Chain = (name: string, prefix: string) => ({
   name
 });
 
-const COSMOS = bech32Chain('COSMOS', 'cosmos');
+const BITBADGES = bech32Chain('BITBADGES', 'bb');
 
-const ethToCosmos = (ethAddress: string) => {
+const ethToBitBadges = (ethAddress: string) => {
   const data = ETH.decoder(ethAddress);
-  return COSMOS.encoder(data);
+  return BITBADGES.encoder(data);
 };
 
-const cosmosToEth = (cosmosAddress: string) => {
-  const data = COSMOS.decoder(cosmosAddress);
+const bitbadgesToEth = (bitbadgesAddress: string) => {
+  const data = BITBADGES.decoder(bitbadgesAddress);
   return ETH.encoder(data);
 };
 
 const BTC = bech32Chain('BTC', 'bc');
 
-const btcToCosmos = (btcAddress: string) => {
+const btcToBitBadges = (btcAddress: string) => {
   const data = BTC.decoder(btcAddress);
-  return COSMOS.encoder(data);
+  return BITBADGES.encoder(data);
 };
 
-const cosmosToBtc = (cosmosAddress: string) => {
-  const data = COSMOS.decoder(cosmosAddress);
+const bitbadgesToBtc = (bitbadgesAddress: string) => {
+  const data = BITBADGES.decoder(bitbadgesAddress);
   return BTC.encoder(data);
 };
 
 //Note this is only one way due to how Solana addresses are
 //We can't convert from Cosmos to Solana bc Solana to Cosmsos is a hash + truncate, so we cannot reverse a hash
 
-const solanaToCosmos = (solanaAddress: string) => {
+const solanaToBitBadges = (solanaAddress: string) => {
   const solanaPublicKeyBuffer = bs58.decode(solanaAddress);
   const hash = sha256(solanaPublicKeyBuffer);
   const truncatedHash = hash.slice(0, 20);
-  const bech32Address = bech32.encode('cosmos', bech32.toWords(truncatedHash));
+  const bech32Address = bech32.encode('bb', bech32.toWords(truncatedHash));
   return bech32Address;
 };
 
@@ -111,23 +111,23 @@ const solanaToCosmos = (solanaAddress: string) => {
  *
  * @category Address Utils
  */
-export function convertToCosmosAddress(address: string) {
+export function convertToBitBadgesAddress(address: string) {
   let bech32Address = '';
   try {
-    cosmosToEth(address); //throws on failure
+    bitbadgesToEth(address); //throws on failure
     bech32Address = address;
   } catch {
     if (isAddress(address, true)) {
-      bech32Address = ethToCosmos(address);
+      bech32Address = ethToBitBadges(address);
     } else if (address.length == 44) {
       try {
         // Decode the base58 Solana public key
-        return solanaToCosmos(address);
+        return solanaToBitBadges(address);
       } catch {
         bech32Address = '';
       }
     } else if (address.startsWith('bc')) {
-      bech32Address = btcToCosmos(address);
+      bech32Address = btcToBitBadges(address);
     }
   }
 
@@ -135,12 +135,12 @@ export function convertToCosmosAddress(address: string) {
 }
 
 /**
- * Converts an address from a supported chain to a Cosmos address. Throws when cannot convert.
+ * Converts an address from a supported chain to a BitBadges address. Throws when cannot convert.
  *
  * @category Address Utils
  */
-export function mustConvertToCosmosAddress(address: string) {
-  const bech32Address = convertToCosmosAddress(address);
+export function mustConvertToBitBadgesAddress(address: string) {
+  const bech32Address = convertToBitBadgesAddress(address);
   if (!bech32Address) throw new Error('Could not convert. Please make sure inputted address is well-formed');
 
   return bech32Address;
@@ -178,7 +178,7 @@ export function mustConvertToBtcAddress(address: string) {
  */
 export function convertToEthAddress(address: string) {
   try {
-    return cosmosToEth(convertToCosmosAddress(address));
+    return bitbadgesToEth(convertToBitBadgesAddress(address));
   } catch {
     return '';
   }
@@ -192,7 +192,7 @@ export function convertToEthAddress(address: string) {
  */
 export function convertToBtcAddress(address: string) {
   try {
-    return cosmosToBtc(convertToCosmosAddress(address));
+    return bitbadgesToBtc(convertToBitBadgesAddress(address));
   } catch {
     return '';
   }
@@ -205,7 +205,7 @@ export function convertToBtcAddress(address: string) {
  */
 export function getChainForAddress(address: string) {
   try {
-    cosmosToEth(address); //throws on failure
+    bitbadgesToEth(address); //throws on failure
     return SupportedChain.COSMOS;
   } catch {
     if (isAddress(address)) {
@@ -216,7 +216,7 @@ export function getChainForAddress(address: string) {
   const addr: string = address;
   if (addr.startsWith('0x')) {
     return SupportedChain.ETH;
-  } else if (addr.startsWith('cosmos')) {
+  } else if (addr.startsWith('bb')) {
     return SupportedChain.COSMOS;
   } else if (address.length == 44) {
     return SupportedChain.SOLANA;
@@ -248,7 +248,7 @@ export function getAbbreviatedAddress(address: string) {
  *
  * @example
  * ```ts
- * const valid = isAddressValid('cosmos1xv9tklw7a7g3ll4ht2cjm6y22p2w7pk8j3w4h6');
+ * const valid = isAddressValid('bb1xv9tklw7a7g3ll4ht2cjm6y22p2w7pk8j3w4h6');
  * console.log(valid);
  * ```
  */
@@ -266,7 +266,7 @@ export function isAddressValid(address: string, chain?: SupportedChain) {
       break;
     case SupportedChain.COSMOS:
       try {
-        cosmosToEth(address); //throws on failure
+        bitbadgesToEth(address); //throws on failure
       } catch {
         isValidAddress = false;
       }
@@ -282,7 +282,7 @@ export function isAddressValid(address: string, chain?: SupportedChain) {
       break;
     case SupportedChain.BTC:
       try {
-        cosmosToEth(btcToCosmos(address)); //throws on failure
+        bitbadgesToEth(btcToBitBadges(address)); //throws on failure
       } catch {
         isValidAddress = false;
       }

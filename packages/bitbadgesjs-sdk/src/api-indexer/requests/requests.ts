@@ -22,7 +22,7 @@ import {
   ClaimReward,
   type ClaimIntegrationPluginCustomBodyType,
   type ClaimIntegrationPluginType,
-  type CosmosAddress,
+  type BitBadgesAddress,
   type IntegrationPluginDetails,
   type JsonBodyInputSchema,
   type JsonBodyInputWithValue,
@@ -336,7 +336,7 @@ export interface iGetClaimAttemptStatusSuccessResponse {
   success: boolean;
   error: string;
   code?: string;
-  cosmosAddress: string;
+  bitbadgesAddress: string;
 }
 
 /**
@@ -349,7 +349,7 @@ export class GetClaimAttemptStatusSuccessResponse
   success: boolean;
   error: string;
   code?: string;
-  cosmosAddress: string;
+  bitbadgesAddress: string;
 
   constructor(data: iGetClaimAttemptStatusSuccessResponse) {
     super();
@@ -357,7 +357,7 @@ export class GetClaimAttemptStatusSuccessResponse
     this.error = data.error;
 
     this.code = data.code;
-    this.cosmosAddress = data.cosmosAddress;
+    this.bitbadgesAddress = data.bitbadgesAddress;
   }
 }
 
@@ -560,7 +560,7 @@ export class UpdateAccountInfoSuccessResponse extends EmptyResponseClass {}
  */
 export interface AddBalancesToOffChainStoragePayload {
   /**
-   * A map of Cosmos addresses or list IDs -> Balance<NumberType>[].
+   * A map of BitBadges addresses or list IDs -> Balance<NumberType>[].
    * This will be set first. If undefined, we leave the existing balances map as is.
    * For genesis, this must be set (even if empty {}), so we create the unique URL.
    *
@@ -1340,7 +1340,7 @@ export interface SendClaimAlertsPayload {
     /** The message to send to the user. */
     message?: string;
     /** The addresses to send the claim alert to. */
-    cosmosAddresses: CosmosAddress[];
+    bitbadgesAddresses: BitBadgesAddress[];
   }[];
 }
 
@@ -1367,7 +1367,7 @@ export interface CosmosAccountResponse {
   pub_key: {
     key: string;
   };
-  address: CosmosAddress;
+  address: BitBadgesAddress;
 }
 
 /**
@@ -1574,7 +1574,7 @@ export interface UpdateAttestationPayload {
 
   /** Holders can use the attestation to prove something about themselves. This is a list of holders that have added this attestation to their profile. */
   holdersToSet?: {
-    cosmosAddress: CosmosAddress;
+    bitbadgesAddress: BitBadgesAddress;
     delete?: boolean;
   }[];
 
@@ -1814,7 +1814,7 @@ export class ExchangeSIWBBAuthorizationCodeSuccessResponse<T extends NumberType>
   address: string;
   chain: SupportedChain;
   ownershipRequirements?: SiwbbAssetConditionGroup<T>;
-  cosmosAddress: CosmosAddress;
+  bitbadgesAddress: BitBadgesAddress;
   verificationResponse?: {
     success: boolean;
     errorMessage?: string;
@@ -1843,7 +1843,7 @@ export class ExchangeSIWBBAuthorizationCodeSuccessResponse<T extends NumberType>
     this.refresh_token_expires_at = data.refresh_token_expires_at ? data.refresh_token_expires_at : undefined;
     this.address = data.address;
     this.chain = data.chain;
-    this.cosmosAddress = data.cosmosAddress;
+    this.bitbadgesAddress = data.bitbadgesAddress;
     this.verificationResponse = data.verificationResponse;
     this.attestationsPresentations = data.attestationsPresentations?.map((proof) => new AttestationsProof(proof));
     if (data.ownershipRequirements) {
@@ -2280,7 +2280,7 @@ export interface CreatePluginPayload {
     /** Support link for the plugin */
     supportLink?: string;
     /** The creator of the plugin */
-    createdBy: CosmosAddress;
+    createdBy: BitBadgesAddress;
   };
 
   /** To publish in the directory. This will trigger the start of the review process. */

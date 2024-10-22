@@ -14,7 +14,7 @@ import {
 import { CollectionPermissions } from '@/core/permissions.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 
-import type { CosmosAddress } from '@/api-indexer/docs/interfaces.js';
+import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import { Stringify } from '@/common/string-numbers.js';
 import { UintRange, UintRangeArray } from '@/core/uintRanges.js';
@@ -42,7 +42,7 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
   extends BaseNumberTypeClass<MsgUniversalUpdateCollection<T>>
   implements iMsgUniversalUpdateCollection<T>
 {
-  creator: CosmosAddress;
+  creator: BitBadgesAddress;
   collectionId: T;
   balancesType?: string;
   defaultBalances?: UserBalanceStore<T>;

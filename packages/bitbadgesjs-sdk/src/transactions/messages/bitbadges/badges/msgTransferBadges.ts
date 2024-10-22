@@ -6,7 +6,7 @@ import * as badges from '@/proto/badges/tx_pb.js';
 
 import { Transfer } from '@/core/transfers.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
-import type { CosmosAddress } from '@/api-indexer/docs/interfaces.js';
+import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
 
 /**
  * MsgTransferBadges represents a message to transfer badges from one user to another.
@@ -22,7 +22,7 @@ import type { CosmosAddress } from '@/api-indexer/docs/interfaces.js';
  * @category Transactions
  */
 export class MsgTransferBadges<T extends NumberType> extends BaseNumberTypeClass<MsgTransferBadges<T>> implements iMsgTransferBadges<T> {
-  creator: CosmosAddress;
+  creator: BitBadgesAddress;
   collectionId: T;
   transfers: Transfer<T>[];
 

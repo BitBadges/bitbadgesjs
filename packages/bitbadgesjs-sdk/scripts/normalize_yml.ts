@@ -191,13 +191,13 @@ function addExamples(obj: any) {
   addExamples(obj, 'transferTimes', [[{ start: '1713301889', end: '2000000000' }], [{ start: '1', end: '18446744073709551615' }]]);
   addExamples(obj, 'permanentlyPermittedTimes', [[{ start: '1713301889', end: '2000000000' }], [{ start: '1', end: '18446744073709551615' }]]);
   addExamples(obj, 'permanentlyForbiddenTimes', [[{ start: '1713301889', end: '2000000000' }], [{ start: '1', end: '18446744073709551615' }]]);
-  addExamples(obj, 'fromListId', ['customOrReservedListId', 'Mint', 'All', 'cosmos1...']);
-  addExamples(obj, 'toListId', ['customOrReservedListId', 'Mint', 'All', 'cosmos1...']);
-  addExamples(obj, 'initiatedByListId', ['customOrReservedListId', 'Mint', 'All', 'cosmos1...']);
-  addExamples(obj, 'listId', ['customOrReservedListId', 'Mint', 'All', 'cosmos1...']);
+  addExamples(obj, 'fromListId', ['customOrReservedListId', 'Mint', 'All', 'bb1...']);
+  addExamples(obj, 'toListId', ['customOrReservedListId', 'Mint', 'All', 'bb1...']);
+  addExamples(obj, 'initiatedByListId', ['customOrReservedListId', 'Mint', 'All', 'bb1...']);
+  addExamples(obj, 'listId', ['customOrReservedListId', 'Mint', 'All', 'bb1...']);
   addExamples(obj, 'txHash', ['CE22D7...']);
   addExamples(obj, 'ethAddress', ['0x...']);
-  addExamples(obj, 'cosmosAddress', ['cosmos1...']);
+  addExamples(obj, 'bitbadgesAddress', ['bb1...']);
   addExamples(obj, 'btcAddress', ['bc1...']);
   addExamples(obj, 'solAddress', ['6H2af6...']);
   //iso8601
@@ -262,16 +262,16 @@ function addExamples(obj: any) {
       example: '1713301889'
     },
     {
-      key: 'CosmosAddress',
-      example: 'cosmos1...'
+      key: 'BitBadgesAddress',
+      example: 'bb1...'
     },
     {
       key: 'NativeAddress',
-      examples: ['0x...', 'bc1...', 'cosmos1...']
+      examples: ['0x...', 'bc1...', 'bb1...']
     },
     {
       key: 'SiwbbMessage',
-      example: 'https://bitbadges.io wants you to sign in with your Cosmos address....'
+      example: 'https://bitbadges.io wants you to sign in with your Ethereum address....'
     }
   ];
 

@@ -60,7 +60,7 @@ export class AddressList extends Message<AddressList> {
   createdBy = "";
 
   /**
-   * The alias cosmos address for the list.
+   * The alias BitBadges address for the list.
    *
    * @generated from field: string aliasAddress = 7;
    */

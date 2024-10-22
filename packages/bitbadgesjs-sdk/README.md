@@ -18,8 +18,8 @@ npm install bitbadgesjs-sdk
 This library provides miscellaneous functionality to help you interact with BitBadges, such as types, API routes, managing metadata requests, logic with ID ranges and balances, etc.
 
 ```typescript
-const cosmosAddress = convertToCosmosAddress(address);
-const ethAddress = cosmosToEth(cosmosAddress);
+const bitbadgesAddress = convertToBitBadgesAddress(address);
+const ethAddress = bitbadgesToEth(bitbadgesAddress);
 ```
 
 It also exports functions for broadcasting transactions and interacting with the blockchain. See [Broadcasting Txs](../create-and-broadcast-txs/) for how to use.

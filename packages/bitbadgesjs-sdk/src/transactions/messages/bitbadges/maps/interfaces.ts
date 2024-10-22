@@ -1,4 +1,4 @@
-import { CosmosAddress } from '@/api-indexer/docs/interfaces.js';
+import { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
 import { NumberType, Stringify } from '@/common/string-numbers.js';
 import { ActionPermission, CollectionMetadata, ManagerTimeline, TimedUpdatePermission, UintRangeArray } from '@/core/index.js';
 import {
@@ -19,7 +19,7 @@ import * as maps from '@/proto/maps/tx_pb.js';
 export interface iValueStore {
   key: string;
   value: string;
-  lastSetBy: CosmosAddress;
+  lastSetBy: BitBadgesAddress;
 }
 
 /**
@@ -57,7 +57,7 @@ export interface iMapPermissions<T extends NumberType> {
  * @category Interfaces
  */
 export interface iMap<T extends NumberType> {
-  creator: CosmosAddress;
+  creator: BitBadgesAddress;
   mapId: string;
 
   inheritManagerTimelineFrom: T;
@@ -85,7 +85,7 @@ export interface iMapMetadataTimeline<T extends NumberType> {
  * @category Interfaces
  */
 export interface iMsgCreateMap<T extends NumberType> {
-  creator: CosmosAddress;
+  creator: BitBadgesAddress;
   mapId: string;
 
   inheritManagerTimelineFrom: T;
@@ -104,7 +104,7 @@ export interface iMsgCreateMap<T extends NumberType> {
  * @category Interfaces
  */
 export interface iMsgUpdateMap<T extends NumberType> {
-  creator: CosmosAddress;
+  creator: BitBadgesAddress;
   mapId: string;
 
   updateManagerTimeline: boolean;
@@ -121,7 +121,7 @@ export interface iMsgUpdateMap<T extends NumberType> {
  * @category Interfaces
  */
 export interface iMsgDeleteMap {
-  creator: CosmosAddress;
+  creator: BitBadgesAddress;
   mapId: string;
 }
 
@@ -129,7 +129,7 @@ export interface iMsgDeleteMap {
  * @category Interfaces
  */
 export interface iMsgSetValue {
-  creator: CosmosAddress;
+  creator: BitBadgesAddress;
   mapId: string;
   key: string;
   value: string;
@@ -149,7 +149,7 @@ export interface iSetOptions {
 export class ValueStore extends CustomTypeClass<ValueStore> implements iValueStore {
   key: string;
   value: string;
-  lastSetBy: CosmosAddress;
+  lastSetBy: BitBadgesAddress;
 
   constructor(msg: iValueStore) {
     super();
@@ -257,7 +257,7 @@ export class MapMetadataTimeline<T extends NumberType> extends BaseNumberTypeCla
  * @category Maps
  */
 export class Map<T extends NumberType> extends BaseNumberTypeClass<Map<T>> implements iMap<T> {
-  creator: CosmosAddress;
+  creator: BitBadgesAddress;
   mapId: string;
 
   inheritManagerTimelineFrom: T;
@@ -297,7 +297,7 @@ export class Map<T extends NumberType> extends BaseNumberTypeClass<Map<T>> imple
  * @category Transactions
  */
 export class MsgCreateMap<T extends NumberType> extends BaseNumberTypeClass<MsgCreateMap<T>> implements iMsgCreateMap<T> {
-  creator: CosmosAddress;
+  creator: BitBadgesAddress;
   mapId: string;
 
   inheritManagerTimelineFrom: T;
@@ -341,7 +341,7 @@ export class MsgCreateMap<T extends NumberType> extends BaseNumberTypeClass<MsgC
  * @category Transactions
  */
 export class MsgUpdateMap<T extends NumberType> extends BaseNumberTypeClass<MsgUpdateMap<T>> implements iMsgUpdateMap<T> {
-  creator: CosmosAddress;
+  creator: BitBadgesAddress;
   mapId: string;
 
   updateManagerTimeline: boolean;
@@ -382,7 +382,7 @@ export class MsgUpdateMap<T extends NumberType> extends BaseNumberTypeClass<MsgU
  * @category Transactions
  */
 export class MsgDeleteMap extends CustomTypeClass<MsgDeleteMap> implements iMsgDeleteMap {
-  creator: CosmosAddress;
+  creator: BitBadgesAddress;
   mapId: string;
 
   constructor(msg: iMsgDeleteMap) {
@@ -400,7 +400,7 @@ export class MsgDeleteMap extends CustomTypeClass<MsgDeleteMap> implements iMsgD
  * @category Transactions
  */
 export class MsgSetValue extends CustomTypeClass<MsgSetValue> implements iMsgSetValue {
-  creator: CosmosAddress;
+  creator: BitBadgesAddress;
   mapId: string;
   key: string;
   value: string;

@@ -44,7 +44,7 @@ import { Metadata } from '../metadata/metadata.js';
 import {
   ClaimReward,
   type ClaimIntegrationPluginType,
-  type CosmosAddress,
+  type BitBadgesAddress,
   type IntegrationPluginParams,
   type JsonBodyInputSchema,
   type JsonBodyInputWithValue,
@@ -113,11 +113,11 @@ export class CollectionDoc<T extends NumberType>
   standardsTimeline: StandardsTimeline<T>[];
   isArchivedTimeline: IsArchivedTimeline<T>[];
   defaultBalances: UserBalanceStore<T>;
-  createdBy: CosmosAddress;
+  createdBy: BitBadgesAddress;
   createdBlock: T;
   createdTimestamp: UNIXMilliTimestamp<T>;
   updateHistory: UpdateHistory<T>[];
-  aliasAddress: CosmosAddress;
+  aliasAddress: BitBadgesAddress;
   validBadgeIds: UintRangeArray<T>;
 
   constructor(data: iCollectionDoc<T>) {
@@ -245,7 +245,7 @@ export class AccountDoc<T extends NumberType> extends BaseNumberTypeClass<Accoun
   publicKey: string;
   accountNumber: T;
   pubKeyType: string;
-  cosmosAddress: CosmosAddress;
+  bitbadgesAddress: BitBadgesAddress;
   ethAddress: string;
   solAddress: string;
   btcAddress: string;
@@ -259,7 +259,7 @@ export class AccountDoc<T extends NumberType> extends BaseNumberTypeClass<Accoun
     this.publicKey = data.publicKey;
     this.accountNumber = data.accountNumber;
     this.pubKeyType = data.pubKeyType;
-    this.cosmosAddress = data.cosmosAddress;
+    this.bitbadgesAddress = data.bitbadgesAddress;
     this.ethAddress = data.ethAddress;
     this.solAddress = data.solAddress;
     this.btcAddress = data.btcAddress;
@@ -555,7 +555,7 @@ export class QueueDoc<T extends NumberType> extends BaseNumberTypeClass<QueueDoc
   recipientAddress?: string;
   activityDocId?: string;
   notificationType?: string;
-  claimInfo?: { session: any; body: any; claimId: string; cosmosAddress: string; ip: string | undefined } | undefined;
+  claimInfo?: { session: any; body: any; claimId: string; bitbadgesAddress: string; ip: string | undefined } | undefined;
   faucetInfo?: { txHash: string; recipient: string; amount: NumberType } | undefined;
   actionConfig?: any;
 
@@ -656,7 +656,7 @@ export class StatusDoc<T extends NumberType> extends BaseNumberTypeClass<StatusD
 export class AddressListDoc<T extends NumberType> extends AddressList implements iAddressListDoc<T>, CustomType<AddressListDoc<T>> {
   _docId: string;
   _id?: string;
-  createdBy: CosmosAddress;
+  createdBy: BitBadgesAddress;
   updateHistory: iUpdateHistory<T>[];
   createdBlock: T;
   lastUpdated: UNIXMilliTimestamp<T>;
@@ -712,7 +712,7 @@ export class BalanceDoc<T extends NumberType> extends BaseNumberTypeClass<Balanc
   _docId: string;
   _id?: string;
   collectionId: T;
-  cosmosAddress: CosmosAddress;
+  bitbadgesAddress: BitBadgesAddress;
   onChain: boolean;
   uri?: string;
   fetchedAt?: UNIXMilliTimestamp<T>;
@@ -732,7 +732,7 @@ export class BalanceDoc<T extends NumberType> extends BaseNumberTypeClass<Balanc
     this._docId = data._docId;
     this._id = data._id;
     this.collectionId = data.collectionId;
-    this.cosmosAddress = data.cosmosAddress;
+    this.bitbadgesAddress = data.bitbadgesAddress;
     this.onChain = data.onChain;
     this.uri = data.uri;
     this.fetchedAt = data.fetchedAt;
@@ -768,7 +768,7 @@ export class BalanceDocWithDetails<T extends NumberType> extends BaseNumberTypeC
   _docId: string;
   _id?: string;
   collectionId: T;
-  cosmosAddress: CosmosAddress;
+  bitbadgesAddress: BitBadgesAddress;
   onChain: boolean;
   uri?: string;
   fetchedAt?: UNIXMilliTimestamp<T>;
@@ -788,7 +788,7 @@ export class BalanceDocWithDetails<T extends NumberType> extends BaseNumberTypeC
     this.incomingApprovals = data.incomingApprovals.map((incomingApproval) => new UserIncomingApprovalWithDetails(incomingApproval));
     this.userPermissions = new UserPermissionsWithDetails(data.userPermissions);
     this.collectionId = data.collectionId;
-    this.cosmosAddress = data.cosmosAddress;
+    this.bitbadgesAddress = data.bitbadgesAddress;
     this.onChain = data.onChain;
     this.uri = data.uri;
     this.fetchedAt = data.fetchedAt;
@@ -818,7 +818,7 @@ export class ClaimBuilderDoc<T extends NumberType> extends BaseNumberTypeClass<C
   _docId: string;
   _id?: string;
   cid: string;
-  createdBy: CosmosAddress;
+  createdBy: BitBadgesAddress;
   docClaimed: boolean;
   collectionId: T;
   deletedAt?: T | undefined;
@@ -905,9 +905,9 @@ export class ApprovalTrackerDoc<T extends NumberType> extends BaseNumberTypeClas
   approvalId: string;
   amountTrackerId: string;
   approvalLevel: string;
-  approverAddress: CosmosAddress;
+  approverAddress: BitBadgesAddress;
   trackerType: string;
-  approvedAddress: CosmosAddress;
+  approvedAddress: BitBadgesAddress;
 
   constructor(data: iApprovalTrackerDoc<T> & Doc & iAmountTrackerIdDetails<T>) {
     super();
@@ -939,7 +939,7 @@ export class ApprovalTrackerDoc<T extends NumberType> extends BaseNumberTypeClas
  */
 export class UsedLeafStatus<T extends NumberType> extends BaseNumberTypeClass<UsedLeafStatus<T>> implements iUsedLeafStatus<T> {
   leafIndex: T;
-  usedBy: CosmosAddress;
+  usedBy: BitBadgesAddress;
 
   constructor(data: iUsedLeafStatus<T>) {
     super();
@@ -966,7 +966,7 @@ export class MerkleChallengeDoc<T extends NumberType> extends BaseNumberTypeClas
   collectionId: T;
   challengeTrackerId: string;
   approvalLevel: 'collection' | 'incoming' | 'outgoing' | '';
-  approverAddress: CosmosAddress;
+  approverAddress: BitBadgesAddress;
   usedLeafIndices: UsedLeafStatus<T>[];
   approvalId: string;
 
@@ -1002,7 +1002,7 @@ export class FetchDoc<T extends NumberType> extends BaseNumberTypeClass<FetchDoc
     | Metadata<T>
     | ApprovalInfoDetails<T>
     | {
-        [cosmosAddressOrListId: string]: BalanceArray<T>;
+        [bitbadgesAddressOrListId: string]: BalanceArray<T>;
       }
     | ChallengeDetails<T>;
   fetchedAt: UNIXMilliTimestamp<T>;
@@ -1027,7 +1027,7 @@ export class FetchDoc<T extends NumberType> extends BaseNumberTypeClass<FetchDoc
 
                   throw new Error('Content is undefined');
                 },
-                {} as { [cosmosAddressOrListId: string]: BalanceArray<T> }
+                {} as { [bitbadgesAddressOrListId: string]: BalanceArray<T> }
               )
             : data.db === 'ChallengeInfo'
               ? new ChallengeDetails(data.content as iChallengeDetails<T>)
@@ -1148,8 +1148,8 @@ export class ComplianceDoc<T extends NumberType> extends BaseNumberTypeClass<Com
     reported: { listId: string; reason: string }[];
   };
   accounts: {
-    nsfw: { cosmosAddress: CosmosAddress; reason: string }[];
-    reported: { cosmosAddress: CosmosAddress; reason: string }[];
+    nsfw: { bitbadgesAddress: BitBadgesAddress; reason: string }[];
+    reported: { bitbadgesAddress: BitBadgesAddress; reason: string }[];
   };
 
   constructor(data: iComplianceDoc<T>) {
@@ -1180,7 +1180,7 @@ export class AccessTokenDoc extends CustomTypeClass<AccessTokenDoc> implements i
   clientId: string;
   tokenType: string;
   refreshToken: string;
-  cosmosAddress: string;
+  bitbadgesAddress: string;
   address: string;
   scopes: OAuthScopeDetails[];
   refreshTokenExpiresAt: number;
@@ -1194,7 +1194,7 @@ export class AccessTokenDoc extends CustomTypeClass<AccessTokenDoc> implements i
     this.tokenType = data.tokenType;
     this.clientId = data.clientId;
     this.refreshToken = data.refreshToken;
-    this.cosmosAddress = data.cosmosAddress;
+    this.bitbadgesAddress = data.bitbadgesAddress;
     this.address = data.address;
     this.refreshTokenExpiresAt = data.refreshTokenExpiresAt;
     this.accessTokenExpiresAt = data.accessTokenExpiresAt;
@@ -1254,11 +1254,11 @@ export class DeveloperAppDoc extends CustomTypeClass<DeveloperAppDoc> implements
 export class DepositBalanceDoc<T extends NumberType> extends BaseNumberTypeClass<DepositBalanceDoc<T>> implements iDepositBalanceDoc<T> {
   _docId: string;
   _id?: string;
-  cosmosAddress: CosmosAddress;
+  bitbadgesAddress: BitBadgesAddress;
 
   constructor(data: iDepositBalanceDoc<T>) {
     super();
-    this.cosmosAddress = data.cosmosAddress;
+    this.bitbadgesAddress = data.bitbadgesAddress;
     this._docId = data._docId;
     this._id = data._id;
   }
@@ -1361,7 +1361,7 @@ export class PluginDoc<T extends NumberType> extends BaseNumberTypeClass<PluginD
   reviewCompleted: boolean;
   inviteCode?: string | undefined;
   approvedUsers: NativeAddress[];
-  createdBy: CosmosAddress;
+  createdBy: BitBadgesAddress;
   metadata: {
     createdBy: string;
     name: string;
@@ -1433,7 +1433,7 @@ export class SIWBBRequestDoc<T extends NumberType> extends BaseNumberTypeClass<S
   name?: string;
   description?: string;
   image?: string;
-  cosmosAddress: CosmosAddress;
+  bitbadgesAddress: BitBadgesAddress;
   attestationsPresentations: AttestationsProof<T>[];
   createdAt: UNIXMilliTimestamp<T>;
   scopes: OAuthScopeDetails[];
@@ -1467,7 +1467,7 @@ export class SIWBBRequestDoc<T extends NumberType> extends BaseNumberTypeClass<S
     this.scopes = data.scopes;
     this.expiresAt = data.expiresAt;
     this.otherSignIns = data.otherSignIns;
-    this.cosmosAddress = data.cosmosAddress;
+    this.bitbadgesAddress = data.bitbadgesAddress;
     this.redirectUri = data.redirectUri;
   }
 
@@ -1490,7 +1490,7 @@ export class AttestationProofDoc<T extends NumberType> extends BaseNumberTypeCla
   entropies?: string[] | undefined;
   updateHistory?: UpdateHistory<T>[] | undefined;
   messageFormat: 'plaintext' | 'json';
-  createdBy: CosmosAddress;
+  createdBy: BitBadgesAddress;
   createdAt: UNIXMilliTimestamp<T>;
 
   proofOfIssuance: {
@@ -1677,7 +1677,7 @@ export class EventDoc<T extends NumberType> extends BaseNumberTypeClass<EventDoc
   name: string;
   description: string;
   image: string;
-  createdBy: CosmosAddress;
+  createdBy: BitBadgesAddress;
   externalUrl: string;
   createdAt: UNIXMilliTimestamp<T>;
 

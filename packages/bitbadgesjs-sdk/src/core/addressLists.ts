@@ -2,7 +2,7 @@ import { CustomTypeClass } from '@/common/base.js';
 import type { iAddressList } from '@/interfaces/badges/core.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 import { AddressList as ProtoAddressList } from '@/proto/badges/index.js';
-import { convertToCosmosAddress, isAddressValid } from '../address-converter/converter.js';
+import { convertToBitBadgesAddress, isAddressValid } from '../address-converter/converter.js';
 
 /**
  * AddressLists represent a list of addresses, identified by a unique ID.
@@ -302,7 +302,7 @@ export class AddressList extends CustomTypeClass<AddressList> implements iAddres
       //For tracker IDs, we allow aliasses(aka non valid addresses)
       if (!allowAliases) {
         for (const address of addressesToCheck) {
-          if (address != 'Mint' && !convertToCosmosAddress(address)) {
+          if (address != 'Mint' && !convertToBitBadgesAddress(address)) {
             allAreValid = false;
           }
         }
@@ -345,14 +345,14 @@ export class AddressList extends CustomTypeClass<AddressList> implements iAddres
     // Logic to determine the listId based on the properties of addressList
     if (addressList.whitelist) {
       if (addressList.addresses.length > 0) {
-        const addresses = addressList.addresses.map((x) => (isAddressValid(x) ? convertToCosmosAddress(x) : x)).join(':');
+        const addresses = addressList.addresses.map((x) => (isAddressValid(x) ? convertToBitBadgesAddress(x) : x)).join(':');
         listId = `${addresses}`;
       } else {
         listId = 'None';
       }
     } else {
       if (addressList.addresses.length > 0) {
-        const addresses = addressList.addresses.map((x) => (isAddressValid(x) ? convertToCosmosAddress(x) : x)).join(':');
+        const addresses = addressList.addresses.map((x) => (isAddressValid(x) ? convertToBitBadgesAddress(x) : x)).join(':');
         listId = `!(${addresses})`;
       } else {
         listId = 'All';

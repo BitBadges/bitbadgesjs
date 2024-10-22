@@ -17,7 +17,7 @@ import {
 import { CollectionPermissions } from '@/core/permissions.js';
 import type { iMsgUpdateCollection } from './interfaces.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
-import type { CosmosAddress } from '@/api-indexer/docs/interfaces.js';
+import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
 import { UintRange, UintRangeArray } from '@/core/uintRanges.js';
 
 /**
@@ -32,7 +32,7 @@ import { UintRange, UintRangeArray } from '@/core/uintRanges.js';
  * @category Transactions
  */
 export class MsgUpdateCollection<T extends NumberType> extends BaseNumberTypeClass<MsgUpdateCollection<T>> implements iMsgUpdateCollection<T> {
-  creator: CosmosAddress;
+  creator: BitBadgesAddress;
   collectionId: T;
   badgeIdsToAdd?: UintRangeArray<T>;
   updateCollectionPermissions?: boolean;

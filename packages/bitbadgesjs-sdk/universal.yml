@@ -392,14 +392,14 @@ schemas:
     anyOf:
       - type: string
       - type: number
-  CosmosAddress:
-    title: CosmosAddress
+  BitBadgesAddress:
+    title: BitBadgesAddress
     description: >-
-      All supported addresses map to a Bech32 Cosmos address which is used by
+      All supported addresses map to a Bech32 BitBadges address which is used by
       the BitBadges blockchain behind the scenes.
 
       For conversion, see the BitBadges documentation. If this type is used,
-      we must always convert to a Cosmos address before using it.
+      we must always convert to a BitBadges address before using it.
 
       @category Interfaces
     type: string
@@ -425,7 +425,7 @@ schemas:
       example, an Ethereum address is native to Ethereum (0x...).
 
       If this type is used, we support any native address type. We do not
-      require conversion to a Cosmos address like the CosmosAddress type.
+      require conversion to a BitBadges address like the BitBadgesAddress type.
 
       @category Interfaces
     type: string
@@ -654,7 +654,7 @@ schemas:
           - type: string
           - type: number
       from:
-        $ref: '#/components/schemas/CosmosAddress'
+        $ref: '#/components/schemas/BitBadgesAddress'
         title: iReviewDoc.from
         description: The user who gave the review.
       collectionId:
@@ -666,10 +666,10 @@ schemas:
           - type: string
           - type: number
       reviewedAddress:
-        $ref: '#/components/schemas/CosmosAddress'
+        $ref: '#/components/schemas/BitBadgesAddress'
         title: iReviewDoc.reviewedAddress
         description: >-
-          The Cosmos address of the user who the review is for. Only
+          The BitBadges address of the user who the review is for. Only
           applicable to user reviews.
     required:
       - _docId
@@ -712,13 +712,13 @@ schemas:
         type: boolean
       to:
         items:
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
           title: iTransferActivityDoc.to.[]
         title: iTransferActivityDoc.to
         description: The list of recipients.
         type: array
       from:
-        $ref: '#/components/schemas/CosmosAddress'
+        $ref: '#/components/schemas/BitBadgesAddress'
         title: iTransferActivityDoc.from
         description: The sender of the badges.
       balances:
@@ -759,7 +759,7 @@ schemas:
           approvals.
         type: boolean
       initiatedBy:
-        $ref: '#/components/schemas/CosmosAddress'
+        $ref: '#/components/schemas/BitBadgesAddress'
         title: iTransferActivityDoc.initiatedBy
         description: The user who initiated the transfer transaction.
       txHash:
@@ -817,7 +817,7 @@ schemas:
         type: boolean
       addresses:
         items:
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
           title: iListActivityDoc.addresses.[]
         title: iListActivityDoc.addresses
         description: The list of addresses that were added or removed from the list.
@@ -867,12 +867,12 @@ schemas:
         title: iClaimAlertDoc.from
         description: The sender
         type: string
-      cosmosAddresses:
+      bitbadgesAddresses:
         items:
-          $ref: '#/components/schemas/CosmosAddress'
-          title: iClaimAlertDoc.cosmosAddresses.[]
-        title: iClaimAlertDoc.cosmosAddresses
-        description: The cosmos addresses of the users that have been alerted.
+          $ref: '#/components/schemas/BitBadgesAddress'
+          title: iClaimAlertDoc.bitbadgesAddresses.[]
+        title: iClaimAlertDoc.bitbadgesAddresses
+        description: The BitBadges addresses of the users that have been alerted.
         type: array
       collectionId:
         title: iClaimAlertDoc.collectionId
@@ -889,7 +889,7 @@ schemas:
       - timestamp
       - block
       - from
-      - cosmosAddresses
+      - bitbadgesAddresses
       - collectionId
     additionalProperties: false
     title: iClaimAlertDoc, Doc
@@ -981,9 +981,9 @@ schemas:
         description: The is archived timeline
         type: array
       createdBy:
-        $ref: '#/components/schemas/CosmosAddress'
+        $ref: '#/components/schemas/BitBadgesAddress'
         title: iCollectionDoc.createdBy
-        description: The cosmos address of the user who created this collection
+        description: The BitBadges address of the user who created this collection
       createdBlock:
         title: iCollectionDoc.createdBlock
         description: The block number when this collection was created
@@ -1004,9 +1004,9 @@ schemas:
         description: The update history of this collection
         type: array
       aliasAddress:
-        $ref: '#/components/schemas/CosmosAddress'
+        $ref: '#/components/schemas/BitBadgesAddress'
         title: iCollectionDoc.aliasAddress
-        description: The alias cosmos address for the collection
+        description: The alias BitBadges address for the collection
     required:
       - _docId
       - collectionId
@@ -1054,10 +1054,10 @@ schemas:
         title: iAccountDoc.pubKeyType
         description: The public key type of the account
         type: string
-      cosmosAddress:
-        $ref: '#/components/schemas/CosmosAddress'
-        title: iAccountDoc.cosmosAddress
-        description: The Cosmos address of the account
+      bitbadgesAddress:
+        $ref: '#/components/schemas/BitBadgesAddress'
+        title: iAccountDoc.bitbadgesAddress
+        description: The BitBadges address of the account
       ethAddress:
         title: iAccountDoc.ethAddress
         description: The Eth address of the account
@@ -1085,7 +1085,7 @@ schemas:
       - publicKey
       - accountNumber
       - pubKeyType
-      - cosmosAddress
+      - bitbadgesAddress
       - ethAddress
       - solAddress
       - btcAddress
@@ -1573,13 +1573,13 @@ schemas:
         description: Arbitrary custom data that can be stored on-chain.
         type: string
       createdBy:
-        $ref: '#/components/schemas/CosmosAddress'
+        $ref: '#/components/schemas/BitBadgesAddress'
         title: iAddressList.createdBy
         description: The address that created the address list.
       aliasAddress:
-        $ref: '#/components/schemas/CosmosAddress'
+        $ref: '#/components/schemas/BitBadgesAddress'
         title: iAddressList.aliasAddress
-        description: The alias cosmos address of the address list.
+        description: The alias BitBadges address of the address list.
       _docId:
         title: Doc._docId
         description: A unique stringified document ID
@@ -1709,10 +1709,10 @@ schemas:
         anyOf:
           - type: string
           - type: number
-      cosmosAddress:
-        $ref: '#/components/schemas/CosmosAddress'
-        title: iBalanceDoc.cosmosAddress
-        description: The Cosmos address of the user
+      bitbadgesAddress:
+        $ref: '#/components/schemas/BitBadgesAddress'
+        title: iBalanceDoc.bitbadgesAddress
+        description: The BitBadges address of the user
       onChain:
         title: iBalanceDoc.onChain
         description: True if the balances are on-chain
@@ -1760,7 +1760,7 @@ schemas:
       - autoApproveSelfInitiatedIncomingTransfers
       - _docId
       - collectionId
-      - cosmosAddress
+      - bitbadgesAddress
       - onChain
       - updateHistory
     additionalProperties: false
@@ -1810,9 +1810,9 @@ schemas:
         description: The CID of the password document
         type: string
       createdBy:
-        $ref: '#/components/schemas/CosmosAddress'
+        $ref: '#/components/schemas/BitBadgesAddress'
         title: iClaimBuilderDoc.createdBy
-        description: The cosmos address of the user who created this password
+        description: The BitBadges address of the user who created this password
       docClaimed:
         title: iClaimBuilderDoc.docClaimed
         description: True if the password document is claimed by the collection
@@ -1899,7 +1899,7 @@ schemas:
           "outgoing".
         type: string
       approverAddress:
-        $ref: '#/components/schemas/CosmosAddress'
+        $ref: '#/components/schemas/BitBadgesAddress'
         title: iAmountTrackerIdDetails.approverAddress
         description: The address of the approval to check.
       trackerType:
@@ -1909,7 +1909,7 @@ schemas:
           "initiatedBy".
         type: string
       approvedAddress:
-        $ref: '#/components/schemas/CosmosAddress'
+        $ref: '#/components/schemas/BitBadgesAddress'
         title: iAmountTrackerIdDetails.approvedAddress
         description: The address to check for the approval.
       _docId:
@@ -1977,7 +1977,7 @@ schemas:
         description: The challenge level (i.e. "collection", "incoming", "outgoing")
         type: string
       approverAddress:
-        $ref: '#/components/schemas/CosmosAddress'
+        $ref: '#/components/schemas/BitBadgesAddress'
         title: iChallengeTrackerIdDetails.approverAddress
         description: The approver address (leave blank if challengeLevel = "collection")
     required:
@@ -2024,7 +2024,7 @@ schemas:
         description: The challenge level (i.e. "collection", "incoming", "outgoing")
         type: string
       approverAddress:
-        $ref: '#/components/schemas/CosmosAddress'
+        $ref: '#/components/schemas/BitBadgesAddress'
         title: iMerkleChallengeDoc.approverAddress
         description: The approver address (leave blank if challengeLevel = "collection")
       usedLeafIndices:
@@ -2074,7 +2074,7 @@ schemas:
         description: The challenge level (i.e. "collection", "incoming", "outgoing")
         type: string
       approverAddress:
-        $ref: '#/components/schemas/CosmosAddress'
+        $ref: '#/components/schemas/BitBadgesAddress'
         title: iMerklechallengeTrackerIdDetails.approverAddress
         description: The approver address (leave blank if challengeLevel = "collection")
       usedLeafIndices:
@@ -2325,14 +2325,14 @@ schemas:
           nsfw:
             items:
               properties:
-                cosmosAddress:
-                  $ref: '#/components/schemas/CosmosAddress'
-                  title: iComplianceDoc.accounts.nsfw.[].cosmosAddress
+                bitbadgesAddress:
+                  $ref: '#/components/schemas/BitBadgesAddress'
+                  title: iComplianceDoc.accounts.nsfw.[].bitbadgesAddress
                 reason:
                   title: iComplianceDoc.accounts.nsfw.[].reason
                   type: string
               required:
-                - cosmosAddress
+                - bitbadgesAddress
                 - reason
               additionalProperties: false
               title: iComplianceDoc.accounts.nsfw.[]
@@ -2342,14 +2342,14 @@ schemas:
           reported:
             items:
               properties:
-                cosmosAddress:
-                  $ref: '#/components/schemas/CosmosAddress'
-                  title: iComplianceDoc.accounts.reported.[].cosmosAddress
+                bitbadgesAddress:
+                  $ref: '#/components/schemas/BitBadgesAddress'
+                  title: iComplianceDoc.accounts.reported.[].bitbadgesAddress
                 reason:
                   title: iComplianceDoc.accounts.reported.[].reason
                   type: string
               required:
-                - cosmosAddress
+                - bitbadgesAddress
                 - reason
               additionalProperties: false
               title: iComplianceDoc.accounts.reported.[]
@@ -2404,10 +2404,10 @@ schemas:
       image:
         title: iBlockinAuthSignatureDoc.image
         type: string
-      cosmosAddress:
-        $ref: '#/components/schemas/CosmosAddress'
-        title: iBlockinAuthSignatureDoc.cosmosAddress
-        description: The Cosmos address of the signer
+      bitbadgesAddress:
+        $ref: '#/components/schemas/BitBadgesAddress'
+        title: iBlockinAuthSignatureDoc.bitbadgesAddress
+        description: The BitBadges address of the signer
       params:
         $ref: '#/components/schemas/ChallengeParams'
         title: iBlockinAuthSignatureDoc.params
@@ -2442,7 +2442,7 @@ schemas:
       - name
       - description
       - image
-      - cosmosAddress
+      - bitbadgesAddress
       - params
       - secretsProofs
       - createdAt
@@ -2470,7 +2470,7 @@ schemas:
         description: The message format of the secretMessages.
         type: string
       createdBy:
-        $ref: '#/components/schemas/CosmosAddress'
+        $ref: '#/components/schemas/BitBadgesAddress'
         title: iSecret.createdBy
         description: The address of the user who created the secret.
       proofOfIssuance:
@@ -2651,10 +2651,10 @@ schemas:
         title: Doc._id
         description: A unique document ID (Mongo DB ObjectID)
         type: string
-      cosmosAddress:
-        $ref: '#/components/schemas/CosmosAddress'
-        title: iFollowDetailsDoc.cosmosAddress
-        description: The Cosmos address of the user
+      bitbadgesAddress:
+        $ref: '#/components/schemas/BitBadgesAddress'
+        title: iFollowDetailsDoc.bitbadgesAddress
+        description: The BitBadges address of the user
       followingCount:
         title: iFollowDetailsDoc.followingCount
         description: The number of users that the user is following
@@ -2669,14 +2669,14 @@ schemas:
           - type: number
       followers:
         items:
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
           title: iFollowDetailsDoc.followers.[]
         title: iFollowDetailsDoc.followers
         description: The followers of the user
         type: array
       following:
         items:
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
           title: iFollowDetailsDoc.following.[]
         title: iFollowDetailsDoc.following
         description: The following of the user
@@ -2689,7 +2689,7 @@ schemas:
           - type: number
     required:
       - _docId
-      - cosmosAddress
+      - bitbadgesAddress
       - followingCount
       - followersCount
       - followers
@@ -2965,13 +2965,13 @@ schemas:
         description: Arbitrary custom data that can be stored on-chain.
         type: string
       createdBy:
-        $ref: '#/components/schemas/CosmosAddress'
+        $ref: '#/components/schemas/BitBadgesAddress'
         title: iAddressList.createdBy
         description: The address that created the address list.
       aliasAddress:
-        $ref: '#/components/schemas/CosmosAddress'
+        $ref: '#/components/schemas/BitBadgesAddress'
         title: iAddressList.aliasAddress
-        description: The alias cosmos address of the address list.
+        description: The alias BitBadges address of the address list.
       _docId:
         title: Doc._docId
         description: A unique stringified document ID
@@ -3343,10 +3343,10 @@ schemas:
         title: iBitBadgesUserInfo.pubKeyType
         description: The public key type of the account
         type: string
-      cosmosAddress:
-        $ref: '#/components/schemas/CosmosAddress'
-        title: iBitBadgesUserInfo.cosmosAddress
-        description: The Cosmos address of the account
+      bitbadgesAddress:
+        $ref: '#/components/schemas/BitBadgesAddress'
+        title: iBitBadgesUserInfo.bitbadgesAddress
+        description: The BitBadges address of the account
       ethAddress:
         title: iBitBadgesUserInfo.ethAddress
         description: The Eth address of the account
@@ -3691,7 +3691,7 @@ schemas:
       - publicKey
       - accountNumber
       - pubKeyType
-      - cosmosAddress
+      - bitbadgesAddress
       - ethAddress
       - btcAddress
       - solAddress
@@ -3869,8 +3869,8 @@ schemas:
     type: object
   GetFollowDetailsRouteRequestBody:
     properties:
-      cosmosAddress:
-        title: GetFollowDetailsRouteRequestBody.cosmosAddress
+      bitbadgesAddress:
+        title: GetFollowDetailsRouteRequestBody.bitbadgesAddress
         type: string
       followingBookmark:
         title: GetFollowDetailsRouteRequestBody.followingBookmark
@@ -3885,7 +3885,7 @@ schemas:
         title: GetFollowDetailsRouteRequestBody.activityBookmark
         type: string
     required:
-      - cosmosAddress
+      - bitbadgesAddress
     additionalProperties: false
     title: GetFollowDetailsRouteRequestBody
     description: '@category API Requests / Responses'
@@ -3900,10 +3900,10 @@ schemas:
         title: Doc._id
         description: A unique document ID (Mongo DB ObjectID)
         type: string
-      cosmosAddress:
-        $ref: '#/components/schemas/CosmosAddress'
-        title: iFollowDetailsDoc.cosmosAddress
-        description: The Cosmos address of the user
+      bitbadgesAddress:
+        $ref: '#/components/schemas/BitBadgesAddress'
+        title: iFollowDetailsDoc.bitbadgesAddress
+        description: The BitBadges address of the user
       followingCount:
         title: iFollowDetailsDoc.followingCount
         description: The number of users that the user is following
@@ -3918,14 +3918,14 @@ schemas:
           - type: number
       followers:
         items:
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
           title: iFollowDetailsDoc.followers.[]
         title: iFollowDetailsDoc.followers
         description: The followers of the user
         type: array
       following:
         items:
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
           title: iFollowDetailsDoc.following.[]
         title: iFollowDetailsDoc.following
         description: The following of the user
@@ -3953,7 +3953,7 @@ schemas:
         title: iGetFollowDetailsRouteSuccessResponse.activityPagination
     required:
       - _docId
-      - cosmosAddress
+      - bitbadgesAddress
       - followingCount
       - followersCount
       - followers
@@ -4153,10 +4153,10 @@ schemas:
         anyOf:
           - type: string
           - type: number
-      cosmosAddress:
-        $ref: '#/components/schemas/CosmosAddress'
-        title: iBalanceDoc.cosmosAddress
-        description: The Cosmos address of the user
+      bitbadgesAddress:
+        $ref: '#/components/schemas/BitBadgesAddress'
+        title: iBalanceDoc.bitbadgesAddress
+        description: The BitBadges address of the user
       onChain:
         title: iBalanceDoc.onChain
         description: True if the balances are on-chain
@@ -4204,7 +4204,7 @@ schemas:
       - autoApproveSelfInitiatedIncomingTransfers
       - _docId
       - collectionId
-      - cosmosAddress
+      - bitbadgesAddress
       - onChain
       - updateHistory
     additionalProperties: false
@@ -4391,7 +4391,7 @@ schemas:
           in owners[].
 
 
-          collection.owners.find(x => x.cosmosAddresss === 'Mint')
+          collection.owners.find(x => x.bitbadgesAddresss === 'Mint')
         type: boolean
       challengeTrackersToFetch:
         items:
@@ -4558,7 +4558,7 @@ schemas:
           in owners[].
 
 
-          collection.owners.find(x => x.cosmosAddresss === 'Mint')
+          collection.owners.find(x => x.bitbadgesAddresss === 'Mint')
         type: boolean
       challengeTrackersToFetch:
         items:
@@ -5116,7 +5116,7 @@ schemas:
       balances:
         $ref: '#/components/schemas/iOffChainBalancesMap'
         title: AddBalancesToOffChainStorageRouteRequestBody.balances
-        description: A map of Cosmos addresses or list IDs -> Balance[].
+        description: A map of BitBadges addresses or list IDs -> Balance[].
       claims:
         items:
           properties:
@@ -5888,17 +5888,17 @@ schemas:
               title: SendClaimAlertsRouteRequestBody.claimAlerts.[].message
               description: The message to send to the user.
               type: string
-            cosmosAddresses:
+            bitbadgesAddresses:
               items:
-                $ref: '#/components/schemas/CosmosAddress'
+                $ref: '#/components/schemas/BitBadgesAddress'
                 title: >-
-                  SendClaimAlertsRouteRequestBody.claimAlerts.[].cosmosAddresses.[]
-              title: SendClaimAlertsRouteRequestBody.claimAlerts.[].cosmosAddresses
+                  SendClaimAlertsRouteRequestBody.claimAlerts.[].bitbadgesAddresses.[]
+              title: SendClaimAlertsRouteRequestBody.claimAlerts.[].bitbadgesAddresses
               description: The addresses to send the claim alert to.
               type: array
           required:
             - collectionId
-            - cosmosAddresses
+            - bitbadgesAddresses
           additionalProperties: false
           title: SendClaimAlertsRouteRequestBody.claimAlerts.[]
           type: object
@@ -5935,7 +5935,7 @@ schemas:
         title: CosmosAccountResponse.pub_key
         type: object
       address:
-        $ref: '#/components/schemas/CosmosAddress'
+        $ref: '#/components/schemas/BitBadgesAddress'
         title: CosmosAccountResponse.address
     required:
       - account_number
@@ -6172,7 +6172,7 @@ schemas:
         description: The message format of the secretMessages.
         type: string
       createdBy:
-        $ref: '#/components/schemas/CosmosAddress'
+        $ref: '#/components/schemas/BitBadgesAddress'
         title: iSecret.createdBy
         description: The address of the user who created the secret.
       proofOfIssuance:
@@ -6375,14 +6375,14 @@ schemas:
       viewersToSet:
         items:
           properties:
-            cosmosAddress:
-              $ref: '#/components/schemas/CosmosAddress'
-              title: UpdateSecretRouteRequestBody.viewersToSet.[].cosmosAddress
+            bitbadgesAddress:
+              $ref: '#/components/schemas/BitBadgesAddress'
+              title: UpdateSecretRouteRequestBody.viewersToSet.[].bitbadgesAddress
             delete:
               title: UpdateSecretRouteRequestBody.viewersToSet.[].delete
               type: boolean
           required:
-            - cosmosAddress
+            - bitbadgesAddress
           additionalProperties: false
           title: UpdateSecretRouteRequestBody.viewersToSet.[]
           type: object
@@ -6625,15 +6625,15 @@ schemas:
         $ref: '#/components/schemas/ChallengeParams'
         title: iGetBlockinAuthCodeRouteSuccessResponse.params
         description: The converted Blockin params fort the message
-      cosmosAddress:
-        $ref: '#/components/schemas/CosmosAddress'
-        title: iGetBlockinAuthCodeRouteSuccessResponse.cosmosAddress
+      bitbadgesAddress:
+        $ref: '#/components/schemas/BitBadgesAddress'
+        title: iGetBlockinAuthCodeRouteSuccessResponse.bitbadgesAddress
         description: >-
-          The converted Cosmos address of params.address. This can be used as
+          The converted BitBadges address of params.address. This can be used as
           the
 
           unique identifier for the user (e.g. avoid duplicate sign ins from
-          equivalent 0x and cosmos1 addresses).
+          equivalent 0x and bb1 addresses).
       verificationResponse:
         properties:
           success:
@@ -6665,7 +6665,7 @@ schemas:
       - message
       - signature
       - params
-      - cosmosAddress
+      - bitbadgesAddress
       - verificationResponse
       - secretsProofs
     additionalProperties: false
@@ -6998,9 +6998,9 @@ schemas:
         description: The is archived timeline
         type: array
       createdBy:
-        $ref: '#/components/schemas/CosmosAddress'
+        $ref: '#/components/schemas/BitBadgesAddress'
         title: iCollectionDoc.createdBy
-        description: The cosmos address of the user who created this collection
+        description: The BitBadges address of the user who created this collection
       createdBlock:
         title: iCollectionDoc.createdBlock
         description: The block number when this collection was created
@@ -7021,9 +7021,9 @@ schemas:
         description: The update history of this collection
         type: array
       aliasAddress:
-        $ref: '#/components/schemas/CosmosAddress'
+        $ref: '#/components/schemas/BitBadgesAddress'
         title: iCollectionDoc.aliasAddress
-        description: The alias cosmos address for the collection
+        description: The alias BitBadges address for the collection
       collectionPermissions:
         $ref: '#/components/schemas/iCollectionPermissions'
         title: iBitBadgesCollection.collectionPermissions
@@ -7231,12 +7231,12 @@ schemas:
   iTransferWithIncrements:
     properties:
       from:
-        $ref: '#/components/schemas/CosmosAddress'
+        $ref: '#/components/schemas/BitBadgesAddress'
         title: iTransfer.from
         description: The address to transfer from.
       toAddresses:
         items:
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
           title: iTransfer.toAddresses.[]
         title: iTransfer.toAddresses
         description: The addresses to transfer to.
@@ -7353,7 +7353,7 @@ schemas:
         description: >-
           The leaves of the Merkle tree. Leaves should be considered public.
           Use preimages for the secrets + isHashed. For whitelist trees, these
-          can be the plaintext Cosmos addresses.
+          can be the plaintext BitBadges addresses.
         type: array
       isHashed:
         title: iChallengeDetails.isHashed
@@ -7992,7 +7992,7 @@ schemas:
   Sender:
     properties:
       accountAddress:
-        $ref: '#/components/schemas/CosmosAddress'
+        $ref: '#/components/schemas/BitBadgesAddress'
         title: Sender.accountAddress
       sequence:
         title: Sender.sequence
@@ -9539,7 +9539,7 @@ schemas:
         description: The message format of the secretMessages.
         type: string
       createdBy:
-        $ref: '#/components/schemas/CosmosAddress'
+        $ref: '#/components/schemas/BitBadgesAddress'
         title: iSecretsProof.createdBy
         description: The address of the user who created the secret.
       proofOfIssuance:
@@ -9685,7 +9685,7 @@ schemas:
         description: The message format of the secretMessages.
         type: string
       createdBy:
-        $ref: '#/components/schemas/CosmosAddress'
+        $ref: '#/components/schemas/BitBadgesAddress'
         title: iSecret.createdBy
         description: The address of the user who created the secret.
       proofOfIssuance:
@@ -9998,13 +9998,13 @@ schemas:
         description: Arbitrary custom data that can be stored on-chain.
         type: string
       createdBy:
-        $ref: '#/components/schemas/CosmosAddress'
+        $ref: '#/components/schemas/BitBadgesAddress'
         title: iAddressList.createdBy
         description: The address that created the address list.
       aliasAddress:
-        $ref: '#/components/schemas/CosmosAddress'
+        $ref: '#/components/schemas/BitBadgesAddress'
         title: iAddressList.aliasAddress
-        description: The alias cosmos address of the address list.
+        description: The alias BitBadges address of the address list.
     required:
       - listId
       - addresses
@@ -10018,12 +10018,12 @@ schemas:
   iTransfer:
     properties:
       from:
-        $ref: '#/components/schemas/CosmosAddress'
+        $ref: '#/components/schemas/BitBadgesAddress'
         title: iTransfer.from
         description: The address to transfer from.
       toAddresses:
         items:
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
           title: iTransfer.toAddresses.[]
         title: iTransfer.toAddresses
         description: The addresses to transfer to.
@@ -10100,7 +10100,7 @@ schemas:
           "outgoing".
         type: string
       approverAddress:
-        $ref: '#/components/schemas/CosmosAddress'
+        $ref: '#/components/schemas/BitBadgesAddress'
         title: iApprovalIdentifierDetails.approverAddress
         description: >-
           The address of the approval to check. If approvalLevel is
@@ -10116,7 +10116,7 @@ schemas:
   iCoinTransfer:
     properties:
       to:
-        $ref: '#/components/schemas/CosmosAddress'
+        $ref: '#/components/schemas/BitBadgesAddress'
         title: iCoinTransfer.to
         description: >-
           The recipient of the coin transfer. This should be a Bech32 Cosmos
@@ -10158,7 +10158,7 @@ schemas:
           "outgoing".
         type: string
       approverAddress:
-        $ref: '#/components/schemas/CosmosAddress'
+        $ref: '#/components/schemas/BitBadgesAddress'
         title: iAmountTrackerIdDetails.approverAddress
         description: The address of the approval to check.
       trackerType:
@@ -10168,7 +10168,7 @@ schemas:
           "initiatedBy".
         type: string
       approvedAddress:
-        $ref: '#/components/schemas/CosmosAddress'
+        $ref: '#/components/schemas/BitBadgesAddress'
         title: iAmountTrackerIdDetails.approvedAddress
         description: The address to check for the approval.
     required:
@@ -10263,7 +10263,7 @@ schemas:
         title: iMerkleProof.leaf
         description: >-
           The leaf of the merkle proof. If useCreatorAddressAsLeaf is true,
-          this will be populated with the creator Cosmos address.
+          this will be populated with the creator BitBadges address.
         type: string
     required:
       - aunts
@@ -10297,7 +10297,7 @@ schemas:
         description: The times of the timeline item. Times in a timeline cannot overlap.
         type: array
       manager:
-        $ref: '#/components/schemas/CosmosAddress'
+        $ref: '#/components/schemas/BitBadgesAddress'
         title: iManagerTimeline.manager
         description: The manager of the collection.
     required:

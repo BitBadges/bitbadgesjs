@@ -46,7 +46,7 @@ paths:
           accountsToFetch: [
             {
               //example
-              address: 'cosmos1...',
+              address: 'bb1...',
               fetchSequence: true,
               fetchBalance: true,
               viewsToFetch: [
@@ -2885,16 +2885,16 @@ components:
       $ref: '#/components/schemas/NumberType'
       examples:
         - '1713301889'
-    CosmosAddress:
+    BitBadgesAddress:
       description: >-
-        All supported addresses map to a Bech32 Cosmos address which is used by
-        the BitBadges blockchain behind the scenes.
+        All supported addresses map to a Bech32 BitBadges address which is used
+        by the BitBadges blockchain behind the scenes.
 
         For conversion, see the BitBadges documentation. If this type is used,
-        we must always convert to a Cosmos address before using it.
+        we must always convert to a BitBadges address before using it.
       type: string
       examples:
-        - cosmos1...
+        - bb1...
     SiwbbMessage:
       description: >-
         SiwbbMessage is the sign-in challenge strint to be signed by the user.
@@ -2908,19 +2908,22 @@ components:
         Ethereum address ...'
       type: string
       examples:
-        - https://bitbadges.io wants you to sign in with your Cosmos address....
+        - >-
+          https://bitbadges.io wants you to sign in with your Ethereum
+          address....
     NativeAddress:
       description: >-
         A native address is an address that is native to the user's chain. For
         example, an Ethereum address is native to Ethereum (0x...).
 
         If this type is used, we support any native address type. We do not
-        require conversion to a Cosmos address like the CosmosAddress type.
+        require conversion to a BitBadges address like the BitBadgesAddress
+        type.
       type: string
       examples:
         - 0x...
         - bc1...
-        - cosmos1...
+        - bb1...
     iSocialConnections:
       properties:
         discord:
@@ -3196,7 +3199,7 @@ components:
           $ref: '#/components/schemas/NumberType'
         from:
           description: The user who gave the review.
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
         collectionId:
           description: >-
             The collection ID of the collection that was reviewed. Only
@@ -3204,9 +3207,9 @@ components:
           $ref: '#/components/schemas/NumberType'
         reviewedAddress:
           description: >-
-            The Cosmos address of the user who the review is for. Only
+            The BitBadges address of the user who the review is for. Only
             applicable to user reviews.
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
       required:
         - _docId
         - timestamp
@@ -3238,12 +3241,12 @@ components:
           type: boolean
         to:
           items:
-            $ref: '#/components/schemas/CosmosAddress'
+            $ref: '#/components/schemas/BitBadgesAddress'
           description: The list of recipients.
           type: array
         from:
           description: The sender of the badges.
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
         balances:
           items:
             $ref: '#/components/schemas/iBalance'
@@ -3267,7 +3270,7 @@ components:
           type: array
         initiatedBy:
           description: The user who initiated the transfer transaction.
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
         txHash:
           description: The transaction hash of the activity.
           type: string
@@ -3311,16 +3314,16 @@ components:
             - customOrReservedListId
             - Mint
             - All
-            - cosmos1...
+            - bb1...
         initiatedBy:
           description: Initiator of the list activity.
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
         addedToList:
           description: Whether or not the address was added to the list or removed.
           type: boolean
         addresses:
           items:
-            $ref: '#/components/schemas/CosmosAddress'
+            $ref: '#/components/schemas/BitBadgesAddress'
           description: The list of addresses that were added or removed from the list.
           type: array
         txHash:
@@ -3358,10 +3361,10 @@ components:
         from:
           description: The sender
           type: string
-        cosmosAddresses:
+        bitbadgesAddresses:
           items:
-            $ref: '#/components/schemas/CosmosAddress'
-          description: The cosmos addresses of the users that have been alerted.
+            $ref: '#/components/schemas/BitBadgesAddress'
+          description: The BitBadges addresses of the users that have been alerted.
           type: array
         collectionId:
           description: The collection ID of the claim alert.
@@ -3374,7 +3377,7 @@ components:
         - timestamp
         - block
         - from
-        - cosmosAddresses
+        - bitbadgesAddresses
         - collectionId
       additionalProperties: false
       description: ''
@@ -3441,8 +3444,8 @@ components:
           description: The is archived timeline
           type: array
         createdBy:
-          description: The cosmos address of the user who created this collection
-          $ref: '#/components/schemas/CosmosAddress'
+          description: The BitBadges address of the user who created this collection
+          $ref: '#/components/schemas/BitBadgesAddress'
         createdBlock:
           description: The block number when this collection was created
           $ref: '#/components/schemas/NumberType'
@@ -3457,8 +3460,8 @@ components:
           description: The update history of this collection
           type: array
         aliasAddress:
-          description: The alias cosmos address for the collection
-          $ref: '#/components/schemas/CosmosAddress'
+          description: The alias BitBadges address for the collection
+          $ref: '#/components/schemas/BitBadgesAddress'
         validBadgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
@@ -3504,11 +3507,11 @@ components:
         pubKeyType:
           description: The public key type of the account
           type: string
-        cosmosAddress:
-          description: The Cosmos address of the account
+        bitbadgesAddress:
+          description: The BitBadges address of the account
           examples: &ref_10
-            - cosmos1...
-          $ref: '#/components/schemas/CosmosAddress'
+            - bb1...
+          $ref: '#/components/schemas/BitBadgesAddress'
         ethAddress:
           description: The Eth address of the account
           type: string
@@ -3535,7 +3538,7 @@ components:
         - publicKey
         - accountNumber
         - pubKeyType
-        - cosmosAddress
+        - bitbadgesAddress
         - ethAddress
         - solAddress
         - btcAddress
@@ -3889,8 +3892,8 @@ components:
             body: {}
             claimId:
               type: string
-            cosmosAddress:
-              $ref: '#/components/schemas/CosmosAddress'
+            bitbadgesAddress:
+              $ref: '#/components/schemas/BitBadgesAddress'
               examples: *ref_10
             ip:
               type: string
@@ -3898,7 +3901,7 @@ components:
             - session
             - body
             - claimId
-            - cosmosAddress
+            - bitbadgesAddress
             - ip
           additionalProperties: false
           type: object
@@ -3910,7 +3913,7 @@ components:
             amount:
               $ref: '#/components/schemas/NumberType'
             recipient:
-              $ref: '#/components/schemas/CosmosAddress'
+              $ref: '#/components/schemas/BitBadgesAddress'
           required:
             - txHash
             - amount
@@ -4033,10 +4036,10 @@ components:
           type: string
         createdBy:
           description: The address that created the address list.
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
         aliasAddress:
-          description: The alias cosmos address of the address list.
-          $ref: '#/components/schemas/CosmosAddress'
+          description: The alias BitBadges address of the address list.
+          $ref: '#/components/schemas/BitBadgesAddress'
         _docId:
           description: A unique stringified document ID
           type: string
@@ -4134,10 +4137,10 @@ components:
         collectionId:
           description: The collection ID
           $ref: '#/components/schemas/NumberType'
-        cosmosAddress:
-          description: The Cosmos address of the user
+        bitbadgesAddress:
+          description: The BitBadges address of the user
           examples: *ref_10
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
         onChain:
           description: True if the balances are on-chain
           type: boolean
@@ -4176,7 +4179,7 @@ components:
         - autoApproveSelfInitiatedIncomingTransfers
         - _docId
         - collectionId
-        - cosmosAddress
+        - bitbadgesAddress
         - onChain
         - updateHistory
       additionalProperties: false
@@ -4421,9 +4424,19 @@ components:
         conditions:
           items:
             anyOf:
-              - type: number
+              - type: string
               - $ref: '#/components/schemas/iSatisfyMethod'
+          description: >-
+            Conditions can either be the instance ID string of the plugin to
+            check success for or another satisfyMethod object.
           type: array
+        options:
+          properties:
+            minNumSatisfied:
+              description: Only applicable to OR logic. Implements M of N logic.
+              type: number
+          additionalProperties: false
+          type: object
       required:
         - type
         - conditions
@@ -4444,8 +4457,8 @@ components:
             to handle off-chain vs on-chain data races.
           type: string
         createdBy:
-          description: The cosmos address of the user who created this password
-          $ref: '#/components/schemas/CosmosAddress'
+          description: The BitBadges address of the user who created this password
+          $ref: '#/components/schemas/BitBadgesAddress'
         docClaimed:
           description: True if the document is claimed by the collection
           type: boolean
@@ -4462,6 +4475,11 @@ components:
           items:
             $ref: '#/components/schemas/IntegrationPluginParams'
           description: Dynamic checks to run in the form of plugins
+          type: array
+        pluginIds:
+          items:
+            type: string
+          description: For query purposes, the plugin IDs
           type: array
         manualDistribution:
           description: >-
@@ -4484,7 +4502,9 @@ components:
           description: Algorithm to determine the claaim number indices
           type: string
         satisfyMethod:
-          description: Custom satisfaction logic
+          description: >-
+            Custom success logic. If not provided, we will default to AND logic
+            with all plugins.
           $ref: '#/components/schemas/iSatisfyMethod'
         action:
           properties:
@@ -4624,7 +4644,7 @@ components:
             - outgoing
         approverAddress:
           description: The address of the approval to check.
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
         trackerType:
           description: >-
             The type of tracker to check "overall", "to", "from", or
@@ -4632,7 +4652,7 @@ components:
           type: string
         approvedAddress:
           description: The address to check for the approval.
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
         _docId:
           description: A unique stringified document ID
           type: string
@@ -4683,7 +4703,7 @@ components:
           examples: *ref_14
         approverAddress:
           description: The approver address (leave blank if approvalLevel = "collection")
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
       required:
         - collectionId
         - approvalId
@@ -4720,7 +4740,7 @@ components:
           examples: *ref_14
         approverAddress:
           description: The approver address (leave blank if approvalLevel = "collection")
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
         usedLeafIndices:
           items:
             $ref: '#/components/schemas/iUsedLeafStatus'
@@ -4746,7 +4766,7 @@ components:
           $ref: '#/components/schemas/NumberType'
         usedBy:
           description: The address that used the leaf
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
       required:
         - leafIndex
         - usedBy
@@ -4926,13 +4946,13 @@ components:
             nsfw:
               items:
                 properties:
-                  cosmosAddress:
-                    $ref: '#/components/schemas/CosmosAddress'
+                  bitbadgesAddress:
+                    $ref: '#/components/schemas/BitBadgesAddress'
                     examples: *ref_10
                   reason:
                     type: string
                 required:
-                  - cosmosAddress
+                  - bitbadgesAddress
                   - reason
                 additionalProperties: false
                 type: object
@@ -4940,13 +4960,13 @@ components:
             reported:
               items:
                 properties:
-                  cosmosAddress:
-                    $ref: '#/components/schemas/CosmosAddress'
+                  bitbadgesAddress:
+                    $ref: '#/components/schemas/BitBadgesAddress'
                     examples: *ref_10
                   reason:
                     type: string
                 required:
-                  - cosmosAddress
+                  - bitbadgesAddress
                   - reason
                 additionalProperties: false
                 type: object
@@ -4974,7 +4994,7 @@ components:
           type: string
         createdBy:
           description: Creator of the app
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
         name:
           description: The name of the app
           type: string
@@ -5030,7 +5050,7 @@ components:
           type: string
         refreshTokenExpiresAt:
           type: number
-        cosmosAddress:
+        bitbadgesAddress:
           type: string
           examples: *ref_10
         address:
@@ -5047,7 +5067,7 @@ components:
         - accessTokenExpiresAt
         - refreshToken
         - refreshTokenExpiresAt
-        - cosmosAddress
+        - bitbadgesAddress
         - address
         - scopes
       additionalProperties: false
@@ -5062,8 +5082,8 @@ components:
           description: A unique document ID (Mongo DB ObjectID)
           type: string
         createdBy:
-          description: The Cosmos address who created the plugin doc
-          $ref: '#/components/schemas/CosmosAddress'
+          description: The BitBadges address who created the plugin doc
+          $ref: '#/components/schemas/BitBadgesAddress'
         pluginId:
           description: The unique plugin ID
           type: string
@@ -5096,6 +5116,11 @@ components:
               description: The image of the plugin
               type: string
               examples: *ref_12
+            parentApp:
+              description: >-
+                Parent app of the plugin. If blank, treated as its own app /
+                entity.
+              type: string
             documentation:
               description: Documentation for the plugin
               type: string
@@ -5280,13 +5305,13 @@ components:
         _id:
           description: A unique document ID (Mongo DB ObjectID)
           type: string
-        cosmosAddress:
-          description: The cosmos address of the user
+        bitbadgesAddress:
+          description: The BitBadges address of the user
           examples: *ref_10
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
       required:
         - _docId
-        - cosmosAddress
+        - bitbadgesAddress
       additionalProperties: false
       description: ''
       type: object
@@ -5301,10 +5326,10 @@ components:
         code:
           description: The actual code itself
           type: string
-        cosmosAddress:
-          description: The Cosmos address of the signer
+        bitbadgesAddress:
+          description: The BitBadges address of the signer
           examples: *ref_10
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
         address:
           description: The native address of the signer
           $ref: '#/components/schemas/NativeAddress'
@@ -5404,7 +5429,7 @@ components:
       required:
         - _docId
         - code
-        - cosmosAddress
+        - bitbadgesAddress
         - address
         - chain
         - scopes
@@ -5431,7 +5456,7 @@ components:
           type: string
         createdBy:
           description: The address of the user who created the attestation.
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
         createdAt:
           description: When the attestation was created.
           $ref: '#/components/schemas/UNIXMilliTimestamp'
@@ -5626,7 +5651,7 @@ components:
           type: string
         createdBy:
           description: The address of the user who created the attestation.
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
         createdAt:
           description: When the attestation was created.
           $ref: '#/components/schemas/UNIXMilliTimestamp'
@@ -5772,7 +5797,7 @@ components:
           description: A unique document ID (Mongo DB ObjectID)
           type: string
         creator:
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
         mapId:
           type: string
         inheritManagerTimelineFrom:
@@ -5842,7 +5867,7 @@ components:
           type: string
           examples: *ref_12
         createdBy:
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
         externalUrl:
           type: string
         createdAt:
@@ -5868,7 +5893,7 @@ components:
           type: string
         createdBy:
           description: Creator of the internal action
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
         name:
           description: The name of the internal action
           type: string
@@ -5938,7 +5963,7 @@ components:
     iMapWithValues:
       properties:
         creator:
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
         mapId:
           type: string
         inheritManagerTimelineFrom:
@@ -6285,10 +6310,10 @@ components:
           type: string
         createdBy:
           description: The address that created the address list.
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
         aliasAddress:
-          description: The alias cosmos address of the address list.
-          $ref: '#/components/schemas/CosmosAddress'
+          description: The alias BitBadges address of the address list.
+          $ref: '#/components/schemas/BitBadgesAddress'
         _docId:
           description: A unique stringified document ID
           type: string
@@ -6465,10 +6490,10 @@ components:
           type: string
         createdBy:
           description: The address that created the address list.
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
         aliasAddress:
-          description: The alias cosmos address of the address list.
-          $ref: '#/components/schemas/CosmosAddress'
+          description: The alias BitBadges address of the address list.
+          $ref: '#/components/schemas/BitBadgesAddress'
         updateAddresses:
           description: Flag to update addresses?
           type: boolean
@@ -6582,10 +6607,10 @@ components:
         pubKeyType:
           description: The public key type of the account
           type: string
-        cosmosAddress:
-          description: The Cosmos address of the account
+        bitbadgesAddress:
+          description: The BitBadges address of the account
           examples: *ref_10
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
         ethAddress:
           description: The Eth address of the account
           type: string
@@ -6937,7 +6962,7 @@ components:
         - publicKey
         - accountNumber
         - pubKeyType
-        - cosmosAddress
+        - bitbadgesAddress
         - ethAddress
         - btcAddress
         - solAddress
@@ -7261,10 +7286,10 @@ components:
         collectionId:
           description: The collection ID
           $ref: '#/components/schemas/NumberType'
-        cosmosAddress:
-          description: The Cosmos address of the user
+        bitbadgesAddress:
+          description: The BitBadges address of the user
           examples: *ref_10
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
         onChain:
           description: True if the balances are on-chain
           type: boolean
@@ -7303,7 +7328,7 @@ components:
         - autoApproveSelfInitiatedIncomingTransfers
         - _docId
         - collectionId
-        - cosmosAddress
+        - bitbadgesAddress
         - onChain
         - updateHistory
       additionalProperties: false
@@ -7322,7 +7347,7 @@ components:
             An optional bookmark for pagination. Bookmarks are obtained via the
             previous response. "" for first request.
           type: string
-        cosmosAddress:
+        bitbadgesAddress:
           description: >-
             Specific address to filter by. If not present, all activity will be
             returned.
@@ -7419,7 +7444,7 @@ components:
             in owners[].
 
 
-            collection.owners.find(x => x.cosmosAddresss === 'Mint')
+            collection.owners.find(x => x.bitbadgesAddresss === 'Mint')
           type: boolean
         challengeTrackersToFetch:
           items:
@@ -7526,7 +7551,7 @@ components:
             in owners[].
 
 
-            collection.owners.find(x => x.cosmosAddresss === 'Mint')
+            collection.owners.find(x => x.bitbadgesAddresss === 'Mint')
           type: boolean
         challengeTrackersToFetch:
           items:
@@ -7874,6 +7899,14 @@ components:
             Needs to be provided so we check that no plugins or claims have been
             updated since the claim was fetched.
           type: number
+        _specificInstanceIds:
+          items:
+            type: string
+          description: >-
+            If provided, we will only complete the claim for the specific
+            plugins w/ the provided instance IDs. Must be compatible with the
+            satisfaction logic.
+          type: array
       required:
         - _expectedVersion
       additionalProperties: {}
@@ -7898,13 +7931,13 @@ components:
           type: string
         code:
           type: string
-        cosmosAddress:
+        bitbadgesAddress:
           type: string
           examples: *ref_10
       required:
         - success
         - error
-        - cosmosAddress
+        - bitbadgesAddress
       additionalProperties: false
       type: object
     SimulateClaimPayload:
@@ -8183,7 +8216,7 @@ components:
       properties:
         balances:
           description: >-
-            A map of Cosmos addresses or list IDs -> Balance[].
+            A map of BitBadges addresses or list IDs -> Balance[].
 
             This will be set first. If undefined, we leave the existing balances
             map as is.
@@ -8961,14 +8994,14 @@ components:
               message:
                 description: The message to send to the user.
                 type: string
-              cosmosAddresses:
+              bitbadgesAddresses:
                 items:
-                  $ref: '#/components/schemas/CosmosAddress'
+                  $ref: '#/components/schemas/BitBadgesAddress'
                 description: The addresses to send the claim alert to.
                 type: array
             required:
               - collectionId
-              - cosmosAddresses
+              - bitbadgesAddresses
             additionalProperties: false
             type: object
           description: The claim alerts to send to users.
@@ -8995,7 +9028,7 @@ components:
           additionalProperties: false
           type: object
         address:
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
       required:
         - account_number
         - sequence
@@ -9239,7 +9272,7 @@ components:
           type: string
         createdBy:
           description: The address of the user who created the attestation.
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
         createdAt:
           description: When the attestation was created.
           $ref: '#/components/schemas/UNIXMilliTimestamp'
@@ -9436,13 +9469,13 @@ components:
         holdersToSet:
           items:
             properties:
-              cosmosAddress:
-                $ref: '#/components/schemas/CosmosAddress'
+              bitbadgesAddress:
+                $ref: '#/components/schemas/BitBadgesAddress'
                 examples: *ref_10
               delete:
                 type: boolean
             required:
-              - cosmosAddress
+              - bitbadgesAddress
             additionalProperties: false
             type: object
           description: >-
@@ -9736,15 +9769,15 @@ components:
         ownershipRequirements:
           description: The ownership requirements for the user
           $ref: '#/components/schemas/AssetConditionGroup'
-        cosmosAddress:
+        bitbadgesAddress:
           description: >-
-            The converted Cosmos address of params.address. This can be used as
-            the
+            The converted BitBadges address of params.address. This can be used
+            as the
 
             unique identifier for the user (e.g. avoid duplicate sign ins from
-            equivalent 0x and cosmos1 addresses).
+            equivalent 0x and bb1 addresses).
           examples: *ref_10
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
         verificationResponse:
           properties:
             success:
@@ -9834,7 +9867,7 @@ components:
       required:
         - address
         - chain
-        - cosmosAddress
+        - bitbadgesAddress
         - access_token
         - token_type
       additionalProperties: false
@@ -10211,6 +10244,11 @@ components:
             documentation:
               description: Documentation for the plugin
               type: string
+            parentApp:
+              description: >-
+                Parent app of the plugin. If blank, treated as its own app /
+                entity.
+              type: string
             sourceCode:
               description: Source code for the plugin
               type: string
@@ -10218,7 +10256,7 @@ components:
               description: Support link for the plugin
               type: string
             createdBy:
-              $ref: '#/components/schemas/CosmosAddress'
+              $ref: '#/components/schemas/BitBadgesAddress'
               description: The creator of the plugin
           required:
             - name
@@ -10277,6 +10315,11 @@ components:
               examples: *ref_12
             documentation:
               description: Documentation for the plugin
+              type: string
+            parentApp:
+              description: >-
+                Parent app of the plugin. If blank, treated as its own app /
+                entity.
               type: string
             sourceCode:
               description: Source code for the plugin
@@ -10838,6 +10881,11 @@ components:
         metadata:
           description: Metadata for the claim.
           $ref: '#/components/schemas/iMetadata'
+        assignMethod:
+          description: >-
+            Algorithm to determine the claim number order. Blank is just
+            incrementing claim numbers.
+          type: string
         lastUpdated:
           description: Last updated timestamp for the claim.
           $ref: '#/components/schemas/NumberType'
@@ -10904,7 +10952,7 @@ components:
           type: string
         createdBy:
           description: The address of the user who created the attestation.
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
         createdAt:
           description: When the attestation was created.
           $ref: '#/components/schemas/UNIXMilliTimestamp'
@@ -11088,7 +11136,7 @@ components:
           type: string
         createdBy:
           description: The address of the user who created the attestation.
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
         createdAt:
           description: When the attestation was created.
           $ref: '#/components/schemas/UNIXMilliTimestamp'
@@ -11523,8 +11571,8 @@ components:
           description: The is archived timeline
           type: array
         createdBy:
-          description: The cosmos address of the user who created this collection
-          $ref: '#/components/schemas/CosmosAddress'
+          description: The BitBadges address of the user who created this collection
+          $ref: '#/components/schemas/BitBadgesAddress'
         createdBlock:
           description: The block number when this collection was created
           $ref: '#/components/schemas/NumberType'
@@ -11539,8 +11587,8 @@ components:
           description: The update history of this collection
           type: array
         aliasAddress:
-          description: The alias cosmos address for the collection
-          $ref: '#/components/schemas/CosmosAddress'
+          description: The alias BitBadges address for the collection
+          $ref: '#/components/schemas/BitBadgesAddress'
         validBadgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
@@ -11744,7 +11792,7 @@ components:
             in owners[].
 
 
-            collection.owners.find(x => x.cosmosAddresss === 'Mint')
+            collection.owners.find(x => x.bitbadgesAddresss === 'Mint')
           type: boolean
         challengeTrackersToFetch:
           items:
@@ -11829,15 +11877,15 @@ components:
         ownershipRequirements:
           description: The ownership requirements for the user
           $ref: '#/components/schemas/AssetConditionGroup'
-        cosmosAddress:
+        bitbadgesAddress:
           description: >-
-            The converted Cosmos address of params.address. This can be used as
-            the
+            The converted BitBadges address of params.address. This can be used
+            as the
 
             unique identifier for the user (e.g. avoid duplicate sign ins from
-            equivalent 0x and cosmos1 addresses).
+            equivalent 0x and bb1 addresses).
           examples: *ref_10
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
         verificationResponse:
           properties:
             success:
@@ -11912,7 +11960,7 @@ components:
       required:
         - address
         - chain
-        - cosmosAddress
+        - bitbadgesAddress
       additionalProperties: false
       type: object
     VerifySIWBBOptions:
@@ -11995,10 +12043,10 @@ components:
       properties:
         from:
           description: The address to transfer from.
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
         toAddresses:
           items:
-            $ref: '#/components/schemas/CosmosAddress'
+            $ref: '#/components/schemas/BitBadgesAddress'
           description: The addresses to transfer to.
           type: array
         balances:
@@ -12102,7 +12150,7 @@ components:
           description: >-
             The leaves of the Merkle tree. Leaves should be considered public.
             Use preimages for the private codes + isHashed. For whitelist trees,
-            these can be the plaintext Cosmos addresses.
+            these can be the plaintext BitBadges addresses.
           type: array
         isHashed:
           description: True if the leaves are hashed. Hash(preimage[i]) = leaves[i]
@@ -12663,7 +12711,7 @@ components:
     Sender:
       properties:
         accountAddress:
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
         sequence:
           type: number
         accountNumber:
@@ -12819,7 +12867,7 @@ components:
         value:
           type: string
         lastSetBy:
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
       required:
         - key
         - value
@@ -12889,7 +12937,7 @@ components:
     iMap:
       properties:
         creator:
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
         mapId:
           type: string
         inheritManagerTimelineFrom:
@@ -12943,7 +12991,7 @@ components:
     iMsgCreateMap:
       properties:
         creator:
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
         mapId:
           type: string
         inheritManagerTimelineFrom:
@@ -12979,7 +13027,7 @@ components:
     iMsgUpdateMap:
       properties:
         creator:
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
         mapId:
           type: string
         updateManagerTimeline:
@@ -13012,7 +13060,7 @@ components:
     iMsgDeleteMap:
       properties:
         creator:
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
         mapId:
           type: string
       required:
@@ -13023,7 +13071,7 @@ components:
     iMsgSetValue:
       properties:
         creator:
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
         mapId:
           type: string
         key:
@@ -13052,7 +13100,7 @@ components:
       properties:
         creator:
           description: The creator of the transaction.
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
         addressLists:
           items:
             $ref: '#/components/schemas/iAddressList'
@@ -13067,7 +13115,7 @@ components:
       properties:
         creator:
           description: The creator of the transaction.
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
         balancesType:
           description: >-
             The balances type. Either "Standard", "Off-Chain - Indexed",
@@ -13168,7 +13216,7 @@ components:
       properties:
         creator:
           description: The creator of the transaction.
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
         collectionId:
           description: The ID of the collection to delete.
           $ref: '#/components/schemas/NumberType'
@@ -13181,7 +13229,7 @@ components:
       properties:
         creator:
           description: The creator of the transaction.
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
         collectionId:
           description: The ID of the collection to transfer badges from.
           $ref: '#/components/schemas/NumberType'
@@ -13200,7 +13248,7 @@ components:
       properties:
         creator:
           description: The creator of the transaction.
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
         balancesType:
           description: >-
             The balances type. Either "Standard", "Off-Chain - Indexed",
@@ -13335,7 +13383,7 @@ components:
       properties:
         creator:
           description: The creator of the transaction.
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
         collectionId:
           description: The ID of the collection to transfer badges from.
           $ref: '#/components/schemas/NumberType'
@@ -13478,7 +13526,7 @@ components:
             - customOrReservedListId
             - Mint
             - All
-            - cosmos1...
+            - bb1...
         toList:
           $ref: '#/components/schemas/iAddressList'
         initiatedByListId:
@@ -13490,7 +13538,7 @@ components:
             - customOrReservedListId
             - Mint
             - All
-            - cosmos1...
+            - bb1...
         initiatedByList:
           $ref: '#/components/schemas/iAddressList'
         transferTimes:
@@ -13565,7 +13613,7 @@ components:
             - customOrReservedListId
             - Mint
             - All
-            - cosmos1...
+            - bb1...
         fromList:
           $ref: '#/components/schemas/iAddressList'
         initiatedByListId:
@@ -13948,7 +13996,7 @@ components:
           type: string
         createdBy:
           description: The address of the user who created the attestation.
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
         createdAt:
           description: When the attestation was created.
           $ref: '#/components/schemas/UNIXMilliTimestamp'
@@ -14090,7 +14138,7 @@ components:
           type: string
         createdBy:
           description: The address of the user who created the attestation.
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
         createdAt:
           description: When the attestation was created.
           $ref: '#/components/schemas/UNIXMilliTimestamp'
@@ -14369,10 +14417,10 @@ components:
           type: string
         createdBy:
           description: The address that created the address list.
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
         aliasAddress:
-          description: The alias cosmos address of the address list.
-          $ref: '#/components/schemas/CosmosAddress'
+          description: The alias BitBadges address of the address list.
+          $ref: '#/components/schemas/BitBadgesAddress'
       required:
         - listId
         - addresses
@@ -14385,10 +14433,10 @@ components:
       properties:
         from:
           description: The address to transfer from.
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
         toAddresses:
           items:
-            $ref: '#/components/schemas/CosmosAddress'
+            $ref: '#/components/schemas/BitBadgesAddress'
           description: The addresses to transfer to.
           type: array
         balances:
@@ -14471,7 +14519,7 @@ components:
           description: >-
             The address of the approval to check. If approvalLevel is
             "collection", this is blank "".
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
       required:
         - approvalId
         - approvalLevel
@@ -14482,9 +14530,9 @@ components:
       properties:
         to:
           description: >-
-            The recipient of the coin transfer. This should be a Bech32 Cosmos
-            address.
-          $ref: '#/components/schemas/CosmosAddress'
+            The recipient of the coin transfer. This should be a Bech32
+            BitBadges address.
+          $ref: '#/components/schemas/BitBadgesAddress'
         coins:
           items:
             $ref: '#/components/schemas/iCosmosCoin'
@@ -14514,7 +14562,7 @@ components:
           examples: *ref_14
         approverAddress:
           description: The address of the approval to check.
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
         trackerType:
           description: >-
             The type of tracker to check "overall", "to", "from", or
@@ -14522,7 +14570,7 @@ components:
           type: string
         approvedAddress:
           description: The address to check for the approval.
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
       required:
         - collectionId
         - approvalId
@@ -14594,7 +14642,7 @@ components:
         leaf:
           description: >-
             The leaf of the merkle proof. If useCreatorAddressAsLeaf is true,
-            this will be populated with the creator Cosmos address.
+            this will be populated with the creator BitBadges address.
           type: string
       required:
         - aunts
@@ -14623,7 +14671,7 @@ components:
           examples: *ref_31
         manager:
           description: The manager of the collection.
-          $ref: '#/components/schemas/CosmosAddress'
+          $ref: '#/components/schemas/BitBadgesAddress'
       required:
         - timelineTimes
         - manager

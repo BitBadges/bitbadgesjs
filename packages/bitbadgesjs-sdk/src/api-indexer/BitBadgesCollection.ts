@@ -51,7 +51,7 @@ import type {
 } from './docs/interfaces.js';
 import { BadgeMetadataDetails, CollectionMetadataDetails } from './metadata/badgeMetadata.js';
 
-import { osAddress } from '@/address-converter/converter.js';
+import { convertToBitBadgesAddress } from '@/address-converter/converter.js';
 import { GO_MAX_UINT_64 } from '@/common/math.js';
 import { getCurrentValueForTimeline } from '@/core/timelines.js';
 import typia from 'typia';
@@ -315,8 +315,8 @@ export class BitBadgesCollection<T extends NumberType>
   }
 
   private getBalanceInfo(address: NativeAddress, throwIfNotFound = true) {
-    const convertedAddress = address === 'Mint' || address === 'Total' ? address : convertToCosmosAddress(address);
-    const owner = this.owners.find((x) => x.cosmosAddress === convertedAddress);
+    const convertedAddress = address === 'Mint' || address === 'Total' ? address : convertToBitBadgesAddress(address);
+    const owner = this.owners.find((x) => x.bitbadgesAddress === convertedAddress);
     if (!owner && throwIfNotFound)
       throw new Error(`Owner not found for address ${address}. Balance not fetched yet. Missing doc for '${address}' in owners.`);
 
@@ -335,7 +335,7 @@ export class BitBadgesCollection<T extends NumberType>
    * @example
    * ```ts
    * const collection: BitBadgesCollection<bigint> = { ... }
-   * const address = 'cosmos1...'
+   * const address = 'bb1...'
    * const balance = collection.getBadgeBalance(address)
    * console.log(balance?.balances)
    * console.log(balance?.outgoingApprovals)
@@ -365,7 +365,7 @@ export class BitBadgesCollection<T extends NumberType>
    * @example
    * ```ts
    * const collection: BitBadgesCollection<bigint> = { ... }
-   * const address = 'cosmos1...'
+   * const address = 'bb1...'
    * const balances = collection.getBadgeBalances(address)
    * console.log(balances)
    * ```
@@ -762,7 +762,7 @@ export class BitBadgesCollection<T extends NumberType>
     if (currOwnerInfo && !forceful) return currOwnerInfo;
 
     const newOwnerInfo = await BitBadgesCollection.GetBadgeBalanceByAddress(api, this.collectionId, address);
-    this.owners = this.owners.filter((x) => x.cosmosAddress !== newOwnerInfo.cosmosAddress);
+    this.owners = this.owners.filter((x) => x.bitbadgesAddress !== newOwnerInfo.bitbadgesAddress);
     this.owners.push(newOwnerInfo);
     return newOwnerInfo;
   }
@@ -778,7 +778,7 @@ export class BitBadgesCollection<T extends NumberType>
     const shouldFetchMetadata =
       (prunedMetadataToFetch.uris && prunedMetadataToFetch.uris.length > 0) || !prunedMetadataToFetch.doNotFetchCollectionMetadata;
     const viewsToFetch = (options.viewsToFetch || []).filter((x) => this.viewHasMore(x.viewId));
-    const hasTotal = cachedCollection.owners.find((x) => x.cosmosAddress === 'Total');
+    const hasTotal = cachedCollection.owners.find((x) => x.bitbadgesAddress === 'Total');
     const shouldFetchTotal = !hasTotal && options.fetchTotalBalances;
 
     const shouldFetchMerklechallengeTrackerIds =
@@ -840,7 +840,7 @@ export class BitBadgesCollection<T extends NumberType>
           y.trackerType === x.trackerType
       );
     });
-    const shouldFetchTotal = !this.owners.find((x) => x.cosmosAddress === 'Total') && options.fetchTotalBalances;
+    const shouldFetchTotal = !this.owners.find((x) => x.bitbadgesAddress === 'Total') && options.fetchTotalBalances;
 
     return {
       collectionId: this.collectionId,

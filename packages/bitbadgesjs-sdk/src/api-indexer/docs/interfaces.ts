@@ -47,12 +47,12 @@ export type UNIXMilliTimestamp<T extends NumberType> = T;
 
 /**
  *
- * All supported addresses map to a Bech32 Cosmos address which is used by the BitBadges blockchain behind the scenes.
- * For conversion, see the BitBadges documentation. If this type is used, we must always convert to a Cosmos address before using it.
+ * All supported addresses map to a Bech32 BitBadges address which is used by the BitBadges blockchain behind the scenes.
+ * For conversion, see the BitBadges documentation. If this type is used, we must always convert to a BitBadges address before using it.
  *
  * @category Interfaces
  */
-export type CosmosAddress = string; // `cosmos1${string}`;
+export type BitBadgesAddress = string; // `bb1${string}`;
 
 /**
  * SiwbbMessage is the sign-in challenge strint to be signed by the user. It extends EIP 4361 Sign-In with Ethereum
@@ -66,7 +66,7 @@ export type SiwbbMessage = string;
 
 /**
  * A native address is an address that is native to the user's chain. For example, an Ethereum address is native to Ethereum (0x...).
- * If this type is used, we support any native address type. We do not require conversion to a Cosmos address like the CosmosAddress type.
+ * If this type is used, we support any native address type. We do not require conversion to a BitBadges address like the BitBadgesAddress type.
  *
  * @category Interfaces
  */
@@ -195,11 +195,11 @@ export interface iReviewDoc<T extends NumberType> extends iActivityDoc<T> {
   /** The number of stars given (1-5). */
   stars: T;
   /** The user who gave the review. */
-  from: CosmosAddress;
+  from: BitBadgesAddress;
   /** The collection ID of the collection that was reviewed. Only applicable to collection reviews. */
   collectionId?: T;
-  /** The Cosmos address of the user who the review is for. Only applicable to user reviews. */
-  reviewedAddress?: CosmosAddress;
+  /** The BitBadges address of the user who the review is for. Only applicable to user reviews. */
+  reviewedAddress?: BitBadgesAddress;
 }
 
 /**
@@ -207,9 +207,9 @@ export interface iReviewDoc<T extends NumberType> extends iActivityDoc<T> {
  */
 export interface iTransferActivityDoc<T extends NumberType> extends iActivityDoc<T> {
   /** The list of recipients. */
-  to: CosmosAddress[];
+  to: BitBadgesAddress[];
   /** The sender of the badges. */
-  from: CosmosAddress;
+  from: BitBadgesAddress;
   /** The list of balances and badge IDs that were transferred. */
   balances: iBalance<T>[];
   /** The collection ID for the badges that was transferred. */
@@ -221,7 +221,7 @@ export interface iTransferActivityDoc<T extends NumberType> extends iActivityDoc
   /** The prioritized approvals of the transfer. This is used to check certain approvals before others to ensure intended behavior. */
   prioritizedApprovals?: iApprovalIdentifierDetails[];
   /** The user who initiated the transfer transaction. */
-  initiatedBy: CosmosAddress;
+  initiatedBy: BitBadgesAddress;
   /** The transaction hash of the activity. */
   txHash?: string;
 }
@@ -233,11 +233,11 @@ export interface iListActivityDoc<T extends NumberType> extends iActivityDoc<T> 
   /** The list ID. */
   listId: string;
   /** Initiator of the list activity. */
-  initiatedBy: CosmosAddress;
+  initiatedBy: BitBadgesAddress;
   /** Whether or not the address was added to the list or removed. */
   addedToList?: boolean;
   /** The list of addresses that were added or removed from the list. */
-  addresses?: CosmosAddress[];
+  addresses?: BitBadgesAddress[];
   /** The transaction hash of the activity. */
   txHash?: string;
 }
@@ -248,8 +248,8 @@ export interface iListActivityDoc<T extends NumberType> extends iActivityDoc<T> 
 export interface iClaimAlertDoc<T extends NumberType> extends iActivityDoc<T> {
   /** The sender */
   from: string;
-  /** The cosmos addresses of the users that have been alerted. */
-  cosmosAddresses: CosmosAddress[];
+  /** The BitBadges addresses of the users that have been alerted. */
+  bitbadgesAddresses: BitBadgesAddress[];
   /** The collection ID of the claim alert. */
   collectionId: T;
   /** The message of the claim alert. */
@@ -284,16 +284,16 @@ export interface iCollectionDoc<T extends NumberType> extends Doc {
   isArchivedTimeline: iIsArchivedTimeline<T>[];
   /** The default balances for users who have not interacted with the collection yet. Only used if collection has "Standard" balance type. */
   defaultBalances: iUserBalanceStore<T>;
-  /** The cosmos address of the user who created this collection */
-  createdBy: CosmosAddress;
+  /** The BitBadges address of the user who created this collection */
+  createdBy: BitBadgesAddress;
   /** The block number when this collection was created */
   createdBlock: T;
   /** The timestamp when this collection was created (milliseconds since epoch) */
   createdTimestamp: UNIXMilliTimestamp<T>;
   /** The update history of this collection */
   updateHistory: iUpdateHistory<T>[];
-  /** The alias cosmos address for the collection */
-  aliasAddress: CosmosAddress;
+  /** The alias BitBadges address for the collection */
+  aliasAddress: BitBadgesAddress;
   /** Valid badge IDs for the collection */
   validBadgeIds: iUintRange<T>[];
 }
@@ -308,8 +308,8 @@ export interface iAccountDoc<T extends NumberType> extends Doc {
   accountNumber: T;
   /** The public key type of the account */
   pubKeyType: string;
-  /** The Cosmos address of the account */
-  cosmosAddress: CosmosAddress;
+  /** The BitBadges address of the account */
+  bitbadgesAddress: BitBadgesAddress;
   /** The Eth address of the account */
   ethAddress: string;
   /** The Solana address of the account */
@@ -477,14 +477,14 @@ export interface iQueueDoc<T extends NumberType> extends Doc {
     session: any;
     body: any;
     claimId: string;
-    cosmosAddress: CosmosAddress;
+    bitbadgesAddress: BitBadgesAddress;
     ip: string | undefined;
   };
 
   faucetInfo?: {
     txHash: string;
     amount: NumberType;
-    recipient: CosmosAddress;
+    recipient: BitBadgesAddress;
   };
 }
 
@@ -539,8 +539,8 @@ export interface iAddressListEditKey<T extends NumberType> {
  * @category Interfaces
  */
 export interface iAddressListDoc<T extends NumberType> extends iAddressList, Doc {
-  /** The cosmos address of the user who created this list */
-  createdBy: CosmosAddress;
+  /** The BitBadges address of the user who created this list */
+  createdBy: BitBadgesAddress;
   /** The update history of this list */
   updateHistory: iUpdateHistory<T>[];
   /** The block number when this list was created */
@@ -564,8 +564,8 @@ export interface iBalanceDoc<T extends NumberType> extends iUserBalanceStore<T>,
   /** The collection ID */
   collectionId: T;
 
-  /** The Cosmos address of the user */
-  cosmosAddress: CosmosAddress;
+  /** The BitBadges address of the user */
+  bitbadgesAddress: BitBadgesAddress;
 
   /** True if the balances are on-chain */
   onChain: boolean;
@@ -738,7 +738,7 @@ export type ClaimIntegrationPublicParamsType<T extends ClaimIntegrationPluginTyp
               : T extends 'payments'
                 ? {
                     usdAmount: number;
-                    paymentAddress: CosmosAddress;
+                    paymentAddress: BitBadgesAddress;
                   }
                 : T extends 'webhooks' | 'successWebhooks'
                   ? {
@@ -802,7 +802,7 @@ export type ClaimIntegrationPublicStateType<T extends ClaimIntegrationPluginType
   ? {
       numUses?: number;
       claimedUsers?: {
-        [cosmosAddress: string]: number[];
+        [bitbadgesAddress: string]: number[];
       };
     }
   : T extends 'codes'
@@ -880,7 +880,6 @@ export interface IntegrationPluginDetails<T extends ClaimIntegrationPluginType> 
 }
 
 /**
- * @inheritDoc iSatisfyMethod
  * @category Indexer
  */
 export interface iSatisfyMethod {
@@ -900,8 +899,8 @@ export interface iClaimBuilderDoc<T extends NumberType> extends Doc {
   /** The CID (content ID) of the document. This is used behind the scenes to handle off-chain vs on-chain data races. */
   cid: string;
 
-  /** The cosmos address of the user who created this password */
-  createdBy: CosmosAddress;
+  /** The BitBadges address of the user who created this password */
+  createdBy: BitBadgesAddress;
   /** True if the document is claimed by the collection */
   docClaimed: boolean;
   /** The collection ID of the document */
@@ -1071,7 +1070,7 @@ export interface iChallengeTrackerIdDetails<T extends NumberType> {
   /** The challenge level (i.e. "collection", "incoming", "outgoing") */
   approvalLevel: 'collection' | 'incoming' | 'outgoing' | '';
   /** The approver address (leave blank if approvalLevel = "collection") */
-  approverAddress: CosmosAddress;
+  approverAddress: BitBadgesAddress;
 }
 
 /**
@@ -1087,7 +1086,7 @@ export interface iMerkleChallengeDoc<T extends NumberType> extends Doc {
   /** The challenge level (i.e. "collection", "incoming", "outgoing") */
   approvalLevel: 'collection' | 'incoming' | 'outgoing' | '';
   /** The approver address (leave blank if approvalLevel = "collection") */
-  approverAddress: CosmosAddress;
+  approverAddress: BitBadgesAddress;
   /** The used leaf indices for each challenge. A leaf index is the leaf location in the bottommost layer of the Merkle tree */
   usedLeafIndices: iUsedLeafStatus<T>[];
 }
@@ -1099,7 +1098,7 @@ export interface iUsedLeafStatus<T extends NumberType> {
   /** The leaf index */
   leafIndex: T;
   /** The address that used the leaf */
-  usedBy: CosmosAddress;
+  usedBy: BitBadgesAddress;
 }
 
 /**
@@ -1163,8 +1162,8 @@ export interface iComplianceDoc<T extends NumberType> extends Doc {
     reported: { listId: string; reason: string }[];
   };
   accounts: {
-    nsfw: { cosmosAddress: CosmosAddress; reason: string }[];
-    reported: { cosmosAddress: CosmosAddress; reason: string }[];
+    nsfw: { bitbadgesAddress: BitBadgesAddress; reason: string }[];
+    reported: { bitbadgesAddress: BitBadgesAddress; reason: string }[];
   };
 }
 
@@ -1173,7 +1172,7 @@ export interface iComplianceDoc<T extends NumberType> extends Doc {
  */
 export interface iDeveloperAppDoc extends Doc {
   /** Creator of the app */
-  createdBy: CosmosAddress;
+  createdBy: BitBadgesAddress;
   /** The name of the app */
   name: string;
   /** The description of the app */
@@ -1200,7 +1199,7 @@ export interface iAccessTokenDoc extends Doc {
   refreshToken: string;
   refreshTokenExpiresAt: number;
 
-  cosmosAddress: string;
+  bitbadgesAddress: string;
   address: string;
   scopes: OAuthScopeDetails[];
 }
@@ -1222,8 +1221,8 @@ export enum PluginPresetType {
  * @category Interfaces
  */
 export interface iPluginDoc<T extends NumberType> extends Doc {
-  /** The Cosmos address who created the plugin doc */
-  createdBy: CosmosAddress;
+  /** The BitBadges address who created the plugin doc */
+  createdBy: BitBadgesAddress;
 
   /** The unique plugin ID */
   pluginId: string;
@@ -1343,8 +1342,8 @@ export interface iPluginVersionConfig<T extends NumberType> {
  * @category Interfaces
  */
 export interface iDepositBalanceDoc<T extends NumberType> extends Doc {
-  /** The cosmos address of the user */
-  cosmosAddress: CosmosAddress;
+  /** The BitBadges address of the user */
+  bitbadgesAddress: BitBadgesAddress;
 }
 
 /**
@@ -1354,8 +1353,8 @@ export interface iSIWBBRequestDoc<T extends NumberType> extends Doc {
   /** The actual code itself */
   code: string;
 
-  /** The Cosmos address of the signer */
-  cosmosAddress: CosmosAddress;
+  /** The BitBadges address of the signer */
+  bitbadgesAddress: BitBadgesAddress;
   /**The native address of the signer */
   address: NativeAddress;
   /** The native chain for the user */
@@ -1417,7 +1416,7 @@ export interface iEventDoc<T extends NumberType> extends Doc {
   name: string;
   description: string;
   image: string;
-  createdBy: CosmosAddress;
+  createdBy: BitBadgesAddress;
 
   externalUrl: string;
 
@@ -1429,7 +1428,7 @@ export interface iEventDoc<T extends NumberType> extends Doc {
  */
 export interface iInternalActionsDoc extends Doc {
   /** Creator of the internal action */
-  createdBy: CosmosAddress;
+  createdBy: BitBadgesAddress;
   /** The name of the internal action */
   name: string;
   /** The description of the internal action */

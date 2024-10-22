@@ -53,14 +53,12 @@ export const BitBadgesKeplrSuggestBetanetChainInfo = {
       coinDenom: 'BADGE',
       coinMinimalDenom: 'ubadge',
       coinDecimals: 9,
-      coinGeckoId: '',
       coinImageUrl: 'https://avatars.githubusercontent.com/u/86890740'
     },
     {
       coinDenom: 'STAKE',
       coinMinimalDenom: 'ustake',
       coinDecimals: 9,
-      coinGeckoId: '',
       coinImageUrl: 'https://avatars.githubusercontent.com/u/86890740'
     }
   ],
@@ -69,7 +67,6 @@ export const BitBadgesKeplrSuggestBetanetChainInfo = {
       coinDenom: 'BADGE',
       coinMinimalDenom: 'ubadge',
       coinDecimals: 9,
-      coinGeckoId: '',
       gasPriceStep: {
         low: 0.000000000001,
         average: 0.000000000001,
@@ -82,7 +79,6 @@ export const BitBadgesKeplrSuggestBetanetChainInfo = {
     coinDenom: 'STAKE',
     coinMinimalDenom: 'ustake',
     coinDecimals: 9,
-    coinGeckoId: '',
     coinImageUrl: 'https://avatars.githubusercontent.com/u/86890740'
   }
 };

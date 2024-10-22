@@ -1,4 +1,4 @@
-import { convertToCosmosAddress, getChainForAddress } from '@/address-converter/converter.js';
+import { convertToBitBadgesAddress, getChainForAddress } from '@/address-converter/converter.js';
 import { getChainDriver } from '@/chain-drivers/verifySig.js';
 import { iAttestationsProof } from '@/interfaces/badges/core.js';
 import { blsCreateProof, blsVerify, blsVerifyProof } from '@trevormil/bbs-signatures';
@@ -39,7 +39,7 @@ export const verifyAttestationsPresentationSignatures = async (
   if (body.dataIntegrityProof) {
     if (body.scheme === 'standard') {
       const address = body.dataIntegrityProof.signer;
-      if (convertToCosmosAddress(address) !== convertToCosmosAddress(body.createdBy)) {
+      if (convertToBitBadgesAddress(address) !== convertToBitBadgesAddress(body.createdBy)) {
         throw new Error('Signer does not match creator');
       }
 
@@ -72,7 +72,7 @@ export const verifyAttestationsPresentationSignatures = async (
       const address = body.proofOfIssuance.signer;
       const chain = getChainForAddress(address);
 
-      if (convertToCosmosAddress(address) !== convertToCosmosAddress(body.createdBy)) {
+      if (convertToBitBadgesAddress(address) !== convertToBitBadgesAddress(body.createdBy)) {
         throw new Error('Signer does not match creator');
       }
 

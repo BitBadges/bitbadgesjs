@@ -3,7 +3,7 @@ import type { NumberType } from '@/common/string-numbers.js';
 import { BalanceArray } from '@/core/balances.js';
 import { ApprovalIdentifierDetails } from '@/proto/badges/transfers_pb.js';
 import type {
-  CosmosAddress,
+  BitBadgesAddress,
   UNIXMilliTimestamp,
   iActivityDoc,
   iClaimAlertDoc,
@@ -45,14 +45,14 @@ export class ActivityDoc<T extends NumberType> extends BaseNumberTypeClass<Activ
  * @category Indexer
  */
 export class TransferActivityDoc<T extends NumberType> extends ActivityDoc<T> implements iTransferActivityDoc<T> {
-  to: CosmosAddress[];
-  from: CosmosAddress;
+  to: BitBadgesAddress[];
+  from: BitBadgesAddress;
   balances: BalanceArray<T>;
   collectionId: T;
   memo?: string;
   precalculateBalancesFromApproval?: ApprovalIdentifierDetails;
   prioritizedApprovals?: ApprovalIdentifierDetails[];
-  initiatedBy: CosmosAddress;
+  initiatedBy: BitBadgesAddress;
   txHash?: string;
 
   constructor(data: iTransferActivityDoc<T>) {
@@ -88,7 +88,7 @@ export class ListActivityDoc<T extends NumberType> extends ActivityDoc<T> implem
   addedToList?: boolean;
   addresses?: string[];
   txHash?: string;
-  initiatedBy: CosmosAddress;
+  initiatedBy: BitBadgesAddress;
 
   constructor(data: iListActivityDoc<T>) {
     super(data);
@@ -109,15 +109,15 @@ export class ListActivityDoc<T extends NumberType> extends ActivityDoc<T> implem
  * @category Indexer
  */
 export class ClaimAlertDoc<T extends NumberType> extends ActivityDoc<T> implements iClaimAlertDoc<T> {
-  from: CosmosAddress;
-  cosmosAddresses: CosmosAddress[];
+  from: BitBadgesAddress;
+  bitbadgesAddresses: BitBadgesAddress[];
   collectionId: T;
   message?: string;
 
   constructor(data: iClaimAlertDoc<T>) {
     super(data);
     this.from = data.from;
-    this.cosmosAddresses = data.cosmosAddresses;
+    this.bitbadgesAddresses = data.bitbadgesAddresses;
     this.collectionId = data.collectionId;
     this.message = data.message;
   }

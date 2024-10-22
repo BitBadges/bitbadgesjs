@@ -7,7 +7,7 @@ import { UserPermissions } from '@/core/permissions.js';
 import { UserIncomingApproval, UserOutgoingApproval } from '@/core/approvals.js';
 import type { iMsgUpdateUserApprovals } from './interfaces.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
-import { CosmosAddress } from '@/api-indexer/docs/interfaces.js';
+import { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
 
 /**
  * MsgUpdateUserApprovals represents the message for updating user approvals.
@@ -30,7 +30,7 @@ export class MsgUpdateUserApprovals<T extends NumberType>
   extends BaseNumberTypeClass<MsgUpdateUserApprovals<T>>
   implements iMsgUpdateUserApprovals<T>
 {
-  creator: CosmosAddress;
+  creator: BitBadgesAddress;
   collectionId: T;
   updateOutgoingApprovals?: boolean;
   outgoingApprovals?: UserOutgoingApproval<T>[];

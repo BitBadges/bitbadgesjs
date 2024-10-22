@@ -4,7 +4,7 @@ import * as badges from '@/proto/badges/tx_pb.js';
 import { CustomTypeClass } from '@/common/base.js';
 import { AddressList } from '@/core/addressLists.js';
 import type { iMsgCreateAddressLists } from './interfaces.js';
-import type { CosmosAddress } from '@/api-indexer/docs/interfaces.js';
+import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
 
 /**
  * MsgCreateAddressLists defines address lists on-chain. For off-chain lists, use the API, not this Msg.
@@ -14,7 +14,7 @@ import type { CosmosAddress } from '@/api-indexer/docs/interfaces.js';
  * @category Transactions
  */
 export class MsgCreateAddressLists extends CustomTypeClass<MsgCreateAddressLists> implements MsgCreateAddressLists {
-  creator: CosmosAddress;
+  creator: BitBadgesAddress;
   addressLists: AddressList[];
 
   constructor(msg: iMsgCreateAddressLists) {

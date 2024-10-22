@@ -1,4 +1,4 @@
-import { CosmosAddress } from '@/api-indexer/docs/interfaces.js';
+import { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import type { iCollectionApproval, iUserIncomingApproval, iUserOutgoingApproval } from '../../../../interfaces/badges/approvals.js';
 import type {
@@ -21,7 +21,7 @@ import type { iUserBalanceStore } from '../../../../interfaces/badges/userBalanc
  */
 export interface iMsgCreateAddressLists {
   /** The creator of the transaction. */
-  creator: CosmosAddress;
+  creator: BitBadgesAddress;
   /** The address lists to create. */
   addressLists: iAddressList[];
 }
@@ -31,7 +31,7 @@ export interface iMsgCreateAddressLists {
  */
 export interface iMsgCreateCollection<T extends NumberType> {
   /** The creator of the transaction. */
-  creator: CosmosAddress;
+  creator: BitBadgesAddress;
 
   /** The balances type. Either "Standard", "Off-Chain - Indexed", "Off-Chain - Non-Indexed" or "Non-Public" */
   balancesType?: string;
@@ -75,7 +75,7 @@ export interface iMsgCreateCollection<T extends NumberType> {
  */
 export interface iMsgDeleteCollection<T extends NumberType> {
   /** The creator of the transaction. */
-  creator: CosmosAddress;
+  creator: BitBadgesAddress;
   /** The ID of the collection to delete. */
   collectionId: T;
 }
@@ -85,7 +85,7 @@ export interface iMsgDeleteCollection<T extends NumberType> {
  */
 export interface iMsgTransferBadges<T extends NumberType> {
   /** The creator of the transaction. */
-  creator: CosmosAddress;
+  creator: BitBadgesAddress;
   /** The ID of the collection to transfer badges from. */
   collectionId: T;
   /** The transfers to perform. */
@@ -128,7 +128,7 @@ export interface iMsgUpdateCollection<T extends NumberType> extends Omit<iMsgUni
  */
 export interface iMsgUpdateUserApprovals<T extends NumberType> {
   /** The creator of the transaction. */
-  creator: CosmosAddress;
+  creator: BitBadgesAddress;
   /** The ID of the collection to transfer badges from. */
   collectionId: T;
   /** Whether or not to update the outgoing approvals. */

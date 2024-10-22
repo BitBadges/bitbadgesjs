@@ -1,4 +1,4 @@
-import { CosmosAddress, UNIXMilliTimestamp } from '@/api-indexer/docs/interfaces.js';
+import { BitBadgesAddress, UNIXMilliTimestamp } from '@/api-indexer/docs/interfaces.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, CustomTypeClass } from '@/common/base.js';
 import { NumberType } from '@/common/string-numbers.js';
 import { iAttestation, iAttestationsProof } from '@/interfaces/badges/core.js';
@@ -8,7 +8,7 @@ import { UpdateHistory } from './misc.js';
  * @category Off-Chain Attestations
  */
 export class AttestationsProof<T extends NumberType> extends BaseNumberTypeClass<AttestationsProof<T>> implements iAttestationsProof<T> {
-  createdBy: CosmosAddress;
+  createdBy: BitBadgesAddress;
   createdAt: UNIXMilliTimestamp<T>;
   scheme: 'bbs' | 'standard';
   messageFormat: 'plaintext' | 'json';
@@ -69,7 +69,7 @@ export class AttestationsProof<T extends NumberType> extends BaseNumberTypeClass
  * @category Off-Chain Attestations
  */
 export class Attestation<T extends NumberType> extends CustomTypeClass<Attestation<T>> implements iAttestation<T> {
-  createdBy: CosmosAddress;
+  createdBy: BitBadgesAddress;
   createdAt: UNIXMilliTimestamp<T>;
 
   proofOfIssuance: {

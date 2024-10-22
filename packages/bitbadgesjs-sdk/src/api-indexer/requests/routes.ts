@@ -19,8 +19,8 @@ export class BitBadgesApiRoutes {
 
   static GetOwnersForBadgeRoute = (collectionId: NumberType, badgeId: NumberType) =>
     `/api/v0/collection/${collectionId.toString()}/${badgeId.toString()}/owners`;
-  static GetBadgeBalanceByAddressRoute = (collectionId: NumberType, cosmosAddress: string) =>
-    `/api/v0/collection/${collectionId.toString()}/balance/${cosmosAddress}`;
+  static GetBadgeBalanceByAddressRoute = (collectionId: NumberType, bitbadgesAddress: string) =>
+    `/api/v0/collection/${collectionId.toString()}/balance/${bitbadgesAddress}`;
   static GetBadgeActivityRoute = (collectionId: NumberType, badgeId: NumberType) =>
     `/api/v0/collection/${collectionId.toString()}/${badgeId.toString()}/activity`;
   static RefreshMetadataRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/refresh`;

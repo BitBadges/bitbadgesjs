@@ -124,7 +124,7 @@ export default function BitBadges(
         return {
           address: account.address,
           chain: account.chain,
-          id: account.cosmosAddress,
+          id: account.bitbadgesAddress,
           name: account.address
         };
       }

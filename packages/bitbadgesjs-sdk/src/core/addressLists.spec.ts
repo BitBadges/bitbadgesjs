@@ -1,10 +1,10 @@
-import { convertToCosmosAddress } from '@/address-converter/converter.js';
+import { convertToBitBadgesAddress } from '@/address-converter/converter.js';
 import { ethers } from 'ethers';
 import { AddressList } from './addressLists.js';
 
 export const genTestAddress = () => {
   const ethAddress = ethers.Wallet.createRandom().address;
-  return convertToCosmosAddress(ethAddress);
+  return convertToBitBadgesAddress(ethAddress);
 };
 
 const addressList = new AddressList({

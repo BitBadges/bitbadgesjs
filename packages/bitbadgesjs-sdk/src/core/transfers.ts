@@ -2,14 +2,14 @@ import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, deep
 import type { iBalance, iTransfer } from '@/interfaces/badges/core.js';
 import * as proto from '@/proto/index.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
-import { convertToCosmosAddress } from '../address-converter/converter.js';
+import { convertToBitBadgesAddress } from '../address-converter/converter.js';
 import { GO_MAX_UINT_64, safeAddKeepLeft, safeMultiplyKeepLeft } from '../common/math.js';
 import type { NumberType } from '../common/string-numbers.js';
 import { BigIntify, Stringify } from '../common/string-numbers.js';
 import { Balance, BalanceArray, cleanBalances } from './balances.js';
 import { ApprovalIdentifierDetails, MerkleProof, ZkProofSolution } from './misc.js';
 import { UintRangeArray } from './uintRanges.js';
-import { CosmosAddress } from '@/api-indexer/docs/interfaces.js';
+import { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
 
 /**
  * Transfer is used to represent a transfer of badges. This is compatible with the MsgTransferBadges message.
@@ -17,8 +17,8 @@ import { CosmosAddress } from '@/api-indexer/docs/interfaces.js';
  * @category Approvals / Transferability
  */
 export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer<T>> implements iTransfer<T> {
-  from: CosmosAddress;
-  toAddresses: CosmosAddress[];
+  from: BitBadgesAddress;
+  toAddresses: BitBadgesAddress[];
   balances: BalanceArray<T>;
   precalculateBalancesFromApproval?: ApprovalIdentifierDetails;
   merkleProofs?: MerkleProof[];
@@ -114,7 +114,7 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
  * @category Interfaces
  */
 export interface iOffChainBalancesMap<T extends NumberType> {
-  [cosmosAddressOrListId: string]: iBalance<T>[];
+  [bitbadgesAddressOrListId: string]: iBalance<T>[];
 }
 
 /**
@@ -122,11 +122,11 @@ export interface iOffChainBalancesMap<T extends NumberType> {
  *
  * @typedef {Object} OffChainBalancesMap
  *
- * OffChainBalancesMap is a map of cosmos addresses or listIDs to an array of balances. This is the expected format
+ * OffChainBalancesMap is a map of BitBadges addresses or listIDs to an array of balances. This is the expected format
  * for collections with off-chain balances. Host this on your server in JSON format.
  */
 export interface OffChainBalancesMap<T extends NumberType> {
-  [cosmosAddressOrListId: string]: BalanceArray<T>;
+  [bitbadgesAddressOrListId: string]: BalanceArray<T>;
 }
 
 /**
@@ -178,8 +178,8 @@ export class TransferWithIncrements<T extends NumberType>
   toAddressesLength?: T;
   incrementBadgeIdsBy?: T;
   incrementOwnershipTimesBy?: T;
-  from: CosmosAddress;
-  toAddresses: CosmosAddress[];
+  from: BitBadgesAddress;
+  toAddresses: BitBadgesAddress[];
   balances: BalanceArray<T>;
   precalculateBalancesFromApproval?: ApprovalIdentifierDetails;
   merkleProofs?: MerkleProof[];
@@ -233,12 +233,12 @@ export const createBalanceMapForOffChainBalances = <T extends NumberType>(transf
     const transfer = transfers[idx];
     for (let j = 0; j < transfer.toAddresses.length; j++) {
       const address = transfer.toAddresses[j];
-      const cosmosAddress = convertToCosmosAddress(address);
+      const bitbadgesAddress = convertToBitBadgesAddress(address);
 
       //currBalance is used as a Balance[] type to be compatible with addBalancesForUintRanges
-      const currBalances = balanceMap[cosmosAddress] ? balanceMap[cosmosAddress] : BalanceArray.From<T>([]);
+      const currBalances = balanceMap[bitbadgesAddress] ? balanceMap[bitbadgesAddress] : BalanceArray.From<T>([]);
       currBalances.addBalances(transfer.balances);
-      balanceMap[cosmosAddress] = BalanceArray.From(currBalances);
+      balanceMap[bitbadgesAddress] = BalanceArray.From(currBalances);
     }
   }
 

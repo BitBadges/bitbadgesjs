@@ -1,4 +1,4 @@
-import type { CosmosAddress } from '@/api-indexer/docs/interfaces.js';
+import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import { Stringify } from '@/common/string-numbers.js';
@@ -28,7 +28,7 @@ import type { iMsgCreateCollection } from './interfaces.js';
  * @category Transactions
  */
 export class MsgCreateCollection<T extends NumberType> extends BaseNumberTypeClass<MsgCreateCollection<T>> implements iMsgCreateCollection<T> {
-  creator: CosmosAddress;
+  creator: BitBadgesAddress;
   balancesType?: string;
   defaultBalances?: UserBalanceStore<T>;
   badgeIdsToAdd?: UintRangeArray<T>;

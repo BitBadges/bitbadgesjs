@@ -23,7 +23,7 @@ import {
   SIWBBRequestDoc
 } from './docs/docs.js';
 import type {
-  CosmosAddress,
+  BitBadgesAddress,
   NativeAddress,
   iAccountDoc,
   iApprovalTrackerDoc,
@@ -114,7 +114,7 @@ export interface iBitBadgesUserInfo<T extends NumberType> extends iProfileDoc<T>
  * @category Accounts
  */
 export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> implements iBitBadgesUserInfo<T>, CustomType<BitBadgesUserInfo<T>> {
-  cosmosAddress: CosmosAddress;
+  bitbadgesAddress: BitBadgesAddress;
   ethAddress: string;
   btcAddress: string;
   solAddress: string;
@@ -159,7 +159,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
 
   constructor(data: iBitBadgesUserInfo<T>) {
     super(data);
-    this.cosmosAddress = data.cosmosAddress;
+    this.bitbadgesAddress = data.bitbadgesAddress;
     this.ethAddress = data.ethAddress;
     this.btcAddress = data.btcAddress;
     this.solAddress = data.solAddress;
@@ -542,7 +542,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
    */
   static MintAccount() {
     return new BitBadgesUserInfo<bigint>({
-      cosmosAddress: 'Mint',
+      bitbadgesAddress: 'Mint',
       ethAddress: 'Mint',
       solAddress: 'Mint',
       btcAddress: 'Mint',
@@ -578,7 +578,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   static BlankUserInfo() {
     return new BitBadgesUserInfo<bigint>({
       _docId: '',
-      cosmosAddress: '',
+      bitbadgesAddress: '',
       ethAddress: '',
       solAddress: '',
       btcAddress: '',
@@ -630,7 +630,7 @@ type AccountViewData<T extends NumberType> = {
  * @category Indexer
  */
 export interface AccountMap<T extends NumberType> {
-  [cosmosAddress: string]: BitBadgesUserInfo<T> | undefined;
+  [bitbadgesAddress: string]: BitBadgesUserInfo<T> | undefined;
 }
 
 /**

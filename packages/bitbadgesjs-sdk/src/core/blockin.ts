@@ -1,4 +1,4 @@
-import { CosmosAddress } from '@/api-indexer/docs/interfaces.js';
+import { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
 import { SiwbbAndGroup, SiwbbAssetConditionGroup, SiwbbOrGroup, OwnershipRequirements } from '@/api-indexer/requests/blockin.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
 import { NumberType } from '@/common/string-numbers.js';
@@ -18,10 +18,10 @@ export interface iSiwbbChallenge<T extends NumberType> {
   /** The ownership requirements for the user */
   ownershipRequirements?: AssetConditionGroup<T>;
   /**
-   * The converted Cosmos address of params.address. This can be used as the
-   * unique identifier for the user (e.g. avoid duplicate sign ins from equivalent 0x and cosmos1 addresses).
+   * The converted BitBadges address of params.address. This can be used as the
+   * unique identifier for the user (e.g. avoid duplicate sign ins from equivalent 0x and bb1 addresses).
    */
-  cosmosAddress: CosmosAddress;
+  bitbadgesAddress: BitBadgesAddress;
 
   /**
    * Verification response
@@ -58,7 +58,7 @@ export class SiwbbChallenge<T extends NumberType> extends BaseNumberTypeClass<Si
   address: string;
   chain: SupportedChain;
   ownershipRequirements?: SiwbbAssetConditionGroup<T>;
-  cosmosAddress: CosmosAddress;
+  bitbadgesAddress: BitBadgesAddress;
   verificationResponse?: {
     success: boolean;
     errorMessage?: string;
@@ -74,7 +74,7 @@ export class SiwbbChallenge<T extends NumberType> extends BaseNumberTypeClass<Si
   constructor(data: iSiwbbChallenge<T>) {
     super();
     this.address = data.address;
-    this.cosmosAddress = data.cosmosAddress;
+    this.bitbadgesAddress = data.bitbadgesAddress;
     this.chain = data.chain;
     this.verificationResponse = data.verificationResponse;
     this.otherSignIns = data.otherSignIns;

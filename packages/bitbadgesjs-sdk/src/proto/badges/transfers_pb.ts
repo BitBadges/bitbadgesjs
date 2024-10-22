@@ -140,7 +140,7 @@ export class MerkleChallenge extends Message<MerkleChallenge> {
   expectedProofLength = "";
 
   /**
-   * If true, we will override the user's leaf for their proof with their creator address. Used for whitelist trees where all leaves are valid Cosmos addresses.
+   * If true, we will override the user's leaf for their proof with their creator address. Used for whitelist trees where all leaves are valid BitBadges addresses.
    *
    * @generated from field: bool useCreatorAddressAsLeaf = 3;
    */

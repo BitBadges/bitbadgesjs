@@ -1,5 +1,5 @@
 import type { SupportedChain } from '@/common/types.js';
-import { CosmosAddress } from '@/api-indexer/docs/interfaces.js';
+import { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
 
 /**
  * EI712ToSign represents a signable EIP-712 payload that can be signed using MetaMask or Keplr.
@@ -40,7 +40,7 @@ export interface Fee {
  * @category Transactions
  */
 export interface Sender {
-  accountAddress: CosmosAddress;
+  accountAddress: BitBadgesAddress;
   sequence: number;
   accountNumber: number;
   pubkey: string;

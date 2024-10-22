@@ -1,4 +1,4 @@
-import { CosmosAddress, iUpdateHistory, UNIXMilliTimestamp } from '@/api-indexer/docs/interfaces.js';
+import { BitBadgesAddress, iUpdateHistory, UNIXMilliTimestamp } from '@/api-indexer/docs/interfaces.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, CustomTypeClass, deepCopyPrimitives } from '@/common/base.js';
 import type {
   iAmountTrackerIdDetails,
@@ -308,7 +308,7 @@ export class ZkProof extends CustomTypeClass<ZkProof> implements iZkProof {
  * @category Approvals / Transferability
  */
 export class CoinTransfer<T extends NumberType> extends BaseNumberTypeClass<CoinTransfer<T>> implements iCoinTransfer<T> {
-  to: CosmosAddress;
+  to: BitBadgesAddress;
   coins: CosmosCoin<T>[];
 
   constructor(coinTransfer: iCoinTransfer<T>) {
@@ -380,7 +380,7 @@ export class ZkProofSolution extends CustomTypeClass<ZkProofSolution> implements
 export class ApprovalIdentifierDetails extends CustomTypeClass<ApprovalIdentifierDetails> implements ApprovalIdentifierDetails {
   approvalId: string;
   approvalLevel: string;
-  approverAddress: CosmosAddress;
+  approverAddress: BitBadgesAddress;
 
   constructor(approvalIdDetails: iApprovalIdentifierDetails) {
     super();
@@ -431,9 +431,9 @@ export class AmountTrackerIdDetails<T extends NumberType>
   amountTrackerId: string;
   approvalId: string;
   approvalLevel: string;
-  approverAddress: CosmosAddress;
+  approverAddress: BitBadgesAddress;
   trackerType: string;
-  approvedAddress: CosmosAddress;
+  approvedAddress: BitBadgesAddress;
 
   constructor(approvalIdDetails: iAmountTrackerIdDetails<T>) {
     super();
@@ -671,7 +671,7 @@ export class TimelineItem<T extends NumberType> extends BaseNumberTypeClass<Time
  * @category Timelines
  */
 export class ManagerTimeline<T extends NumberType> extends BaseNumberTypeClass<ManagerTimeline<T>> implements iManagerTimeline<T> {
-  manager: CosmosAddress;
+  manager: BitBadgesAddress;
   timelineTimes: UintRangeArray<T>;
 
   constructor(managerTimeline: iManagerTimeline<T>) {

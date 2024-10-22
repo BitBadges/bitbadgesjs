@@ -1,4 +1,4 @@
-import { convertToCosmosAddress, getChainForAddress } from '@/address-converter/converter.js';
+import { convertToBitBadgesAddress, getChainForAddress } from '@/address-converter/converter.js';
 import type { NativeAddress } from '@/api-indexer/docs/interfaces.js';
 import { MAINNET_CHAIN_DETAILS, TESTNET_CHAIN_DETAILS } from '@/common/constants.js';
 import { SupportedChain } from '@/common/types.js';
@@ -185,7 +185,7 @@ const wrapExternalTxContext = (context: TxContext): LegacyTxContext => {
   const txContext: LegacyTxContext = {
     chain: { chain, cosmosChainId, chainId },
     sender: {
-      accountAddress: convertToCosmosAddress(context.sender.address),
+      accountAddress: convertToBitBadgesAddress(context.sender.address),
       pubkey: context.sender.publicKey || '',
       sequence: context.sender.sequence,
       accountNumber: context.sender.accountNumber
@@ -195,7 +195,7 @@ const wrapExternalTxContext = (context: TxContext): LegacyTxContext => {
   };
 
   if (txContext.sender.accountAddress === '' || !txContext.sender.accountAddress.startsWith('bb')) {
-    throw new Error('Account address must be a validly formatted Cosmos address');
+    throw new Error('Account address must be a validly formatted BitBadges address');
   }
 
   if (txContext.sender.accountNumber <= 0) {

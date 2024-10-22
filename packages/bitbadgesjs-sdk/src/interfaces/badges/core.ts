@@ -1,6 +1,6 @@
 //IMPORTANT: Keep all imports type-safe by using the `type` keyword. If not, this will mess up the circular dependency check.
 
-import type { CosmosAddress, UNIXMilliTimestamp, iBadgeMetadataDetails, iCollectionMetadataDetails } from '@/api-indexer/index.js';
+import type { BitBadgesAddress, UNIXMilliTimestamp, iBadgeMetadataDetails, iCollectionMetadataDetails } from '@/api-indexer/index.js';
 import type { iUpdateHistory } from '@/api-indexer/docs/interfaces.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import type { iCosmosCoin } from '@/core/coin.js';
@@ -82,7 +82,7 @@ export interface iAttestationsProof<T extends NumberType> {
   /** The message format of the attestationMessages. */
   messageFormat: 'plaintext' | 'json';
   /** The address of the user who created the attestation. */
-  createdBy: CosmosAddress;
+  createdBy: BitBadgesAddress;
   /** When the attestation was created. */
   createdAt: UNIXMilliTimestamp<T>;
 
@@ -149,7 +149,7 @@ export interface iAttestation<T extends NumberType> {
   /** The message format of the attestationMessages. */
   messageFormat: 'plaintext' | 'json';
   /** The address of the user who created the attestation. */
-  createdBy: CosmosAddress;
+  createdBy: BitBadgesAddress;
   /** When the attestation was created. */
   createdAt: UNIXMilliTimestamp<T>;
 
@@ -349,12 +349,12 @@ export interface iAddressList {
   /**
    * The address that created the address list.
    */
-  createdBy?: CosmosAddress;
+  createdBy?: BitBadgesAddress;
 
   /**
-   * The alias cosmos address of the address list.
+   * The alias BitBadges address of the address list.
    */
-  aliasAddress?: CosmosAddress;
+  aliasAddress?: BitBadgesAddress;
 }
 
 /**
@@ -364,12 +364,12 @@ export interface iTransfer<T extends NumberType> {
   /**
    * The address to transfer from.
    */
-  from: CosmosAddress;
+  from: BitBadgesAddress;
 
   /**
    * The addresses to transfer to.
    */
-  toAddresses: CosmosAddress[];
+  toAddresses: BitBadgesAddress[];
 
   /**
    * The balances to transfer.
@@ -440,7 +440,7 @@ export interface iApprovalIdentifierDetails {
   /**
    * The address of the approval to check. If approvalLevel is "collection", this is blank "".
    */
-  approverAddress: CosmosAddress;
+  approverAddress: BitBadgesAddress;
 }
 
 /**
@@ -448,9 +448,9 @@ export interface iApprovalIdentifierDetails {
  */
 export interface iCoinTransfer<T extends NumberType> {
   /**
-   * The recipient of the coin transfer. This should be a Bech32 Cosmos address.
+   * The recipient of the coin transfer. This should be a Bech32 BitBadges address.
    */
-  to: CosmosAddress;
+  to: BitBadgesAddress;
   /**
    * The coins
    */
@@ -484,7 +484,7 @@ export interface iAmountTrackerIdDetails<T extends NumberType> {
   /**
    * The address of the approval to check.
    */
-  approverAddress: CosmosAddress;
+  approverAddress: BitBadgesAddress;
 
   /**
    * The type of tracker to check "overall", "to", "from", or "initiatedBy".
@@ -494,7 +494,7 @@ export interface iAmountTrackerIdDetails<T extends NumberType> {
   /**
    * The address to check for the approval.
    */
-  approvedAddress: CosmosAddress;
+  approvedAddress: BitBadgesAddress;
 }
 
 /**
@@ -562,7 +562,7 @@ export interface iMerkleProof {
   aunts: iMerklePathItem[];
 
   /**
-   * The leaf of the merkle proof. If useCreatorAddressAsLeaf is true, this will be populated with the creator Cosmos address.
+   * The leaf of the merkle proof. If useCreatorAddressAsLeaf is true, this will be populated with the creator BitBadges address.
    */
   leaf: string;
 }
@@ -584,7 +584,7 @@ export interface iManagerTimeline<T extends NumberType> extends iTimelineItem<T>
   /**
    * The manager of the collection.
    */
-  manager: CosmosAddress;
+  manager: BitBadgesAddress;
 }
 
 /**

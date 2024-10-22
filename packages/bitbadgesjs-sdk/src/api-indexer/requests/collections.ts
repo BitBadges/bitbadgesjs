@@ -171,7 +171,7 @@ export interface GetBadgeActivityPayload {
   /**
    * Specific address to filter by. If not present, all activity will be returned.
    */
-  cosmosAddress?: string;
+  bitbadgesAddress?: string;
 }
 
 /**
@@ -286,7 +286,7 @@ export interface GetAdditionalCollectionDetailsPayload {
   /**
    * If true, the total and mint balances will be fetched and will be put in owners[].
    *
-   * collection.owners.find(x => x.cosmosAddresss === 'Mint')
+   * collection.owners.find(x => x.bitbadgesAddresss === 'Mint')
    */
   fetchTotalBalances?: boolean;
   /**
