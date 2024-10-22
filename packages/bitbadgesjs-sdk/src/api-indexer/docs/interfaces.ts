@@ -13,6 +13,8 @@ import type {
   iAddressList,
   iAmountTrackerIdDetails,
   iApprovalIdentifierDetails,
+  iAttestation,
+  iAttestationsProof,
   iBadgeMetadataTimeline,
   iBalance,
   iCollectionMetadataTimeline,
@@ -20,8 +22,6 @@ import type {
   iIsArchivedTimeline,
   iManagerTimeline,
   iOffChainBalancesMetadataTimeline,
-  iAttestation,
-  iAttestationsProof,
   iStandardsTimeline,
   iUintRange
 } from '@/interfaces/badges/core.js';
@@ -112,6 +112,21 @@ export interface iSocialConnections<T extends NumberType> {
     lastUpdated: UNIXMilliTimestamp<T>;
   };
   reddit?: {
+    username: string;
+    id: string;
+    lastUpdated: UNIXMilliTimestamp<T>;
+  };
+  telegram?: {
+    username: string;
+    id: string;
+    lastUpdated: UNIXMilliTimestamp<T>;
+  };
+  farcaster?: {
+    username: string;
+    id: string;
+    lastUpdated: UNIXMilliTimestamp<T>;
+  };
+  slack?: {
     username: string;
     id: string;
     lastUpdated: UNIXMilliTimestamp<T>;
@@ -394,6 +409,9 @@ export interface iProfileDoc<T extends NumberType> extends Doc {
 
   /** The profile picture URL of the account */
   profilePicUrl?: string;
+  /** The banner image URL of the account */
+  bannerImage?: string;
+
   /** The username of the account */
   username?: string;
 
@@ -444,6 +462,8 @@ export interface iQueueDoc<T extends NumberType> extends Doc {
   deletedAt?: UNIXMilliTimestamp<T>;
   /** The timestamp of when this document should be fetched next (milliseconds since epoch) */
   nextFetchTime?: UNIXMilliTimestamp<T>;
+  /** Whether this document is pending to be fetched or not */
+  pending?: boolean;
 
   //Only used for failed push notifications
   emailMessage?: string;
@@ -451,7 +471,7 @@ export interface iQueueDoc<T extends NumberType> extends Doc {
   activityDocId?: string;
   notificationType?: string;
 
-  axiosPayload?: any;
+  actionConfig?: any;
 
   claimInfo?: {
     session: any;
@@ -595,6 +615,9 @@ export type ClaimIntegrationPluginType =
   | 'twitter'
   | 'strava'
   | 'reddit'
+  | 'telegram'
+  | 'farcaster'
+  | 'slack'
   | 'transferTimes'
   | 'initiatedBy'
   | 'whitelist'
@@ -611,7 +634,7 @@ export type ClaimIntegrationPluginType =
 export type JsonBodyInputWithValue = {
   key: string;
   label: string;
-  type?: 'date' | 'url';
+  type: string;
   value: string | number | boolean;
   headerField?: boolean;
 };
@@ -622,11 +645,15 @@ export type JsonBodyInputWithValue = {
 export type JsonBodyInputSchema = {
   key: string;
   label: string;
-  type: 'date' | 'url' | 'string' | 'number' | 'boolean';
+  type: string;
+  hyperlink?: {
+    url: string;
+    showAsGenericView?: boolean;
+  };
   helper?: string;
   headerField?: boolean;
-
   required?: boolean;
+
   defaultValue?: string | number | boolean;
   options?: {
     label: string;
@@ -635,19 +662,19 @@ export type JsonBodyInputSchema = {
   arrayField?: boolean;
 };
 
-/**
- * @category Claims
- */
-export type CustomTypeInputSchema = {
-  key: string;
-  label: string;
-  type: 'ownershipRequirements' | 'attestations';
-  headerField?: boolean;
-  required?: boolean;
-  helper?: string;
-};
-
-type OauthAppName = 'twitter' | 'github' | 'google' | 'email' | 'discord' | 'twitch' | 'strava' | 'youtube' | 'reddit';
+type OauthAppName =
+  | 'twitter'
+  | 'github'
+  | 'google'
+  | 'email'
+  | 'discord'
+  | 'twitch'
+  | 'strava'
+  | 'youtube'
+  | 'reddit'
+  | 'telegram'
+  | 'farcaster'
+  | 'slack';
 
 /**
  * @category Claims
@@ -724,6 +751,10 @@ export type ClaimIntegrationPublicParamsType<T extends ClaimIntegrationPluginTyp
                       passTwitch?: boolean;
                       passStrava?: boolean;
                       passReddit?: boolean;
+                      passTelegram?: boolean;
+                      passFarcaster?: boolean;
+                      passSlack?: boolean;
+                      userInputsSchema?: Array<JsonBodyInputSchema>;
                     }
                   : Record<string, any>;
 
@@ -756,7 +787,11 @@ export type ClaimIntegrationPrivateParamsType<T extends ClaimIntegrationPluginTy
               webhookUrl: string;
               webhookSecret: string;
             }
-          : Record<string, any>;
+          : T extends 'claimAlerts'
+            ? {
+                message: string;
+              }
+            : Record<string, any>;
 
 /**
  * Public state is the current state of the claim integration that is visible to the public. For example, the number of times a claim code has been used.
@@ -845,6 +880,20 @@ export interface IntegrationPluginDetails<T extends ClaimIntegrationPluginType> 
 }
 
 /**
+ * @inheritDoc iSatisfyMethod
+ * @category Indexer
+ */
+export interface iSatisfyMethod {
+  type: 'AND' | 'OR' | 'NOT';
+  /** Conditions can either be the instance ID string of the plugin to check success for or another satisfyMethod object. */
+  conditions: Array<string | iSatisfyMethod>;
+  options?: {
+    /** Only applicable to OR logic. Implements M of N logic. */
+    minNumSatisfied?: number;
+  };
+}
+
+/**
  * @category Interfaces
  */
 export interface iClaimBuilderDoc<T extends NumberType> extends Doc {
@@ -867,6 +916,9 @@ export interface iClaimBuilderDoc<T extends NumberType> extends Doc {
   /** Dynamic checks to run in the form of plugins */
   plugins: IntegrationPluginParams<ClaimIntegrationPluginType>[];
 
+  /** For query purposes, the plugin IDs */
+  pluginIds?: string[];
+
   /** If true, the claim codes are to be distributed manually. This doc will only be used for storage purposes. */
   manualDistribution?: boolean;
 
@@ -883,6 +935,9 @@ export interface iClaimBuilderDoc<T extends NumberType> extends Doc {
 
   /** Algorithm to determine the claaim number indices */
   assignMethod?: string;
+
+  /** Custom success logic. If not provided, we will default to AND logic with all plugins. */
+  satisfyMethod?: iSatisfyMethod;
 
   /** Details for the action to perform if the criteria is correct */
   action: {
@@ -901,6 +956,11 @@ export interface iClaimBuilderDoc<T extends NumberType> extends Doc {
   estimatedCost?: string;
   /** Estimated time to satisfy the claim's requirements */
   estimatedTime?: string;
+
+  /** If true, the claim will be shown in search results */
+  showInSearchResults?: boolean;
+  /** The categories of the claim */
+  categories?: string[];
 
   lastUpdated: UNIXMilliTimestamp<T>;
   createdAt: UNIXMilliTimestamp<T>;
@@ -945,8 +1005,6 @@ export interface iClaimGatedContent {
   params?: {
     [key: string]: any;
   };
-  /** If true, we will send a claim alert to the user upon completion. If they have push notifications enabled, they will also receive a push notification. */
-  sendClaimAlert?: boolean;
 }
 
 /**
@@ -967,7 +1025,6 @@ export class ClaimReward<T extends NumberType> extends BaseNumberTypeClass<Claim
     params?: {
       [key: string]: any;
     };
-    sendClaimAlert?: boolean;
   };
   automatic?: boolean;
 
@@ -1192,6 +1249,8 @@ export interface iPluginDoc<T extends NumberType> extends Doc {
     description: string;
     /** The image of the plugin */
     image: string;
+    /** Parent app of the plugin. If blank, treated as its own app / entity. */
+    parentApp?: string;
     /** Documentation for the plugin */
     documentation?: string;
     /** Source code for the plugin */
@@ -1245,9 +1304,9 @@ export interface iPluginVersionConfig<T extends NumberType> {
   /** This is a flag for being compatible with auto-triggered claims, meaning no user interaction is needed. */
   requiresUserInputs: boolean;
 
-  userInputsSchema: Array<JsonBodyInputSchema | CustomTypeInputSchema>;
-  publicParamsSchema: Array<JsonBodyInputSchema | CustomTypeInputSchema>;
-  privateParamsSchema: Array<JsonBodyInputSchema | CustomTypeInputSchema>;
+  userInputsSchema: Array<JsonBodyInputSchema>;
+  publicParamsSchema: Array<JsonBodyInputSchema>;
+  privateParamsSchema: Array<JsonBodyInputSchema>;
 
   userInputRedirect?: {
     baseUri: string;
@@ -1273,6 +1332,9 @@ export interface iPluginVersionConfig<T extends NumberType> {
     passTwitch?: boolean;
     passStrava?: boolean;
     passReddit?: boolean;
+    passTelegram?: boolean;
+    passFarcaster?: boolean;
+    passSlack?: boolean;
     postProcessingJs: string;
   };
 }
@@ -1423,6 +1485,8 @@ export interface iClaimDetails<T extends NumberType> {
   siwbbClaim?: boolean;
   /** Address list ID that the claim is for (if applicable). */
   listId?: string;
+  /** The tracker details for the claim. */
+  trackerDetails?: iChallengeTrackerIdDetails<T>;
   /** The balances to set for the claim. Only used for claims for collections that have off-chain indexed balances and are assigning balances based on the claim. */
   balancesToSet?: iPredeterminedBalances<T>;
   /** Claim plugins. These are the criteria that must pass for a user to claim the badge. */
@@ -1431,6 +1495,10 @@ export interface iClaimDetails<T extends NumberType> {
   rewards?: iClaimReward<T>[];
   /** Estimated cost for the claim. */
   estimatedCost?: string;
+  /** If true, the claim will be shown in search results */
+  showInSearchResults?: boolean;
+  /** The categories of the claim */
+  categories?: string[];
   /** Estimated time to satisfy the claim's requirements. */
   estimatedTime?: string;
   /** If manual distribution is enabled, we do not handle any distribution of claim codes. We leave that up to the claim creator. */
@@ -1447,4 +1515,6 @@ export interface iClaimDetails<T extends NumberType> {
   lastUpdated?: T;
   /** The version of the claim. */
   version: T;
+  /** Custom satisfaction logic */
+  satisfyMethod?: iSatisfyMethod;
 }

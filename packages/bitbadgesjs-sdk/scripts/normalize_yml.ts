@@ -182,6 +182,7 @@ function addExamples(obj: any) {
   addExamples(obj, 'uri', ['https://example.com', 'ipfs://Qm...']);
   addExamples(obj, 'approvalLevel', ['collection', 'incoming', 'outgoing']);
   addExamples(obj, 'profilePicUrl', ['https://example.com', 'ipfs://Qm...']);
+  addExamples(obj, 'bannerImage', ['https://example.com', 'ipfs://Qm...']);
   addExamples(obj, 'domain', ['https://example.com', 'ipfs://Qm...']);
   addExamples(obj, 'badgeIds', [[{ start: '1', end: '10' }]]);
   addExamples(obj, 'metadataIds', [[{ start: '1', end: '10' }]]);

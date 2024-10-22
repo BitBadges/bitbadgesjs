@@ -51,7 +51,7 @@ import type {
 } from './docs/interfaces.js';
 import { BadgeMetadataDetails, CollectionMetadataDetails } from './metadata/badgeMetadata.js';
 
-import { convertToCosmosAddress } from '@/address-converter/converter.js';
+import { osAddress } from '@/address-converter/converter.js';
 import { GO_MAX_UINT_64 } from '@/common/math.js';
 import { getCurrentValueForTimeline } from '@/core/timelines.js';
 import typia from 'typia';

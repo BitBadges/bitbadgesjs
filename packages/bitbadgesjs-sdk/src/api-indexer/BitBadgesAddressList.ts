@@ -419,6 +419,8 @@ export type iAddressListCreateObject<T extends NumberType> = iAddressList & {
     plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
     rewards?: ClaimReward<T>[];
     estimatedCost?: string;
+    showInSearchResults?: boolean;
+    categories?: string[];
     estimatedTime?: string;
     approach?: string;
   }[];

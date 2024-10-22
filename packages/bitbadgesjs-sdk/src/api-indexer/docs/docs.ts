@@ -6,8 +6,10 @@ import type { SupportedChain } from '@/common/types.js';
 import {
   ApprovalInfoDetails,
   ChallengeDetails,
+  ChallengeTrackerIdDetails,
   CollectionApproval,
   PredeterminedBalances,
+  SatisfyMethod,
   UserIncomingApproval,
   UserIncomingApprovalWithDetails,
   UserOutgoingApproval,
@@ -43,7 +45,6 @@ import {
   ClaimReward,
   type ClaimIntegrationPluginType,
   type CosmosAddress,
-  type CustomTypeInputSchema,
   type IntegrationPluginParams,
   type JsonBodyInputSchema,
   type JsonBodyInputWithValue,
@@ -60,7 +61,6 @@ import {
   type iAttestationProofDoc,
   type iBalanceDoc,
   type iBalanceDocWithDetails,
-  type iChallengeTrackerIdDetails,
   type iClaimBuilderDoc,
   type iCollectionDoc,
   type iComplianceDoc,
@@ -314,6 +314,9 @@ export class SocialConnections<T extends NumberType> extends BaseNumberTypeClass
   twitch?: SocialConnectionInfo<T> | undefined;
   strava?: SocialConnectionInfo<T> | undefined;
   reddit?: SocialConnectionInfo<T> | undefined;
+  telegram?: SocialConnectionInfo<T> | undefined;
+  farcaster?: SocialConnectionInfo<T> | undefined;
+  slack?: SocialConnectionInfo<T> | undefined;
 
   constructor(data: iSocialConnections<T>) {
     super();
@@ -324,6 +327,9 @@ export class SocialConnections<T extends NumberType> extends BaseNumberTypeClass
     this.google = data.google ? new SocialConnectionInfo(data.google) : undefined;
     this.strava = data.strava ? new SocialConnectionInfo(data.strava) : undefined;
     this.reddit = data.reddit ? new SocialConnectionInfo(data.reddit) : undefined;
+    this.telegram = data.telegram ? new SocialConnectionInfo(data.telegram) : undefined;
+    this.farcaster = data.farcaster ? new SocialConnectionInfo(data.farcaster) : undefined;
+    this.slack = data.slack ? new SocialConnectionInfo(data.slack) : undefined;
   }
 
   getNumberFieldNames(): string[] {
@@ -478,6 +484,7 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
         }[];
       }
     | undefined;
+  bannerImage?: string;
 
   constructor(data: iProfileDoc<T>) {
     super();
@@ -515,6 +522,7 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
     this.notifications = data.notifications ? new NotificationPreferences(data.notifications) : undefined;
     this.approvedSignInMethods = data.approvedSignInMethods;
     this.socialConnections = data.socialConnections ? new SocialConnections(data.socialConnections) : undefined;
+    this.bannerImage = data.bannerImage;
   }
 
   getNumberFieldNames(): string[] {
@@ -536,6 +544,7 @@ export class QueueDoc<T extends NumberType> extends BaseNumberTypeClass<QueueDoc
   uri: string;
   collectionId: T;
   loadBalanceId: T;
+  pending?: boolean;
   refreshRequestTime: UNIXMilliTimestamp<T>;
   numRetries: T;
   lastFetchedAt?: UNIXMilliTimestamp<T>;
@@ -548,7 +557,7 @@ export class QueueDoc<T extends NumberType> extends BaseNumberTypeClass<QueueDoc
   notificationType?: string;
   claimInfo?: { session: any; body: any; claimId: string; cosmosAddress: string; ip: string | undefined } | undefined;
   faucetInfo?: { txHash: string; recipient: string; amount: NumberType } | undefined;
-  axiosPayload?: any;
+  actionConfig?: any;
 
   constructor(data: iQueueDoc<T>) {
     super();
@@ -557,6 +566,7 @@ export class QueueDoc<T extends NumberType> extends BaseNumberTypeClass<QueueDoc
     this.uri = data.uri;
     this.collectionId = data.collectionId;
     this.loadBalanceId = data.loadBalanceId;
+    this.pending = data.pending;
     this.refreshRequestTime = data.refreshRequestTime;
     this.numRetries = data.numRetries;
     this.lastFetchedAt = data.lastFetchedAt;
@@ -569,7 +579,7 @@ export class QueueDoc<T extends NumberType> extends BaseNumberTypeClass<QueueDoc
     this.notificationType = data.notificationType;
     this.claimInfo = data.claimInfo;
     this.faucetInfo = data.faucetInfo;
-    this.axiosPayload = data.axiosPayload;
+    this.actionConfig = data.actionConfig;
   }
 
   getNumberFieldNames(): string[] {
@@ -815,6 +825,7 @@ export class ClaimBuilderDoc<T extends NumberType> extends BaseNumberTypeClass<C
   approach?: string;
   manualDistribution?: boolean;
   plugins: IntegrationPluginParams<ClaimIntegrationPluginType>[];
+  pluginIds?: string[];
   state: { [pluginId: string]: any };
   action: {
     seedCode?: string;
@@ -831,7 +842,11 @@ export class ClaimBuilderDoc<T extends NumberType> extends BaseNumberTypeClass<C
   testOnly?: boolean;
   rewards?: ClaimReward<T>[] | undefined;
   estimatedCost?: string | undefined;
+
+  showInSearchResults?: boolean;
+  categories?: string[];
   estimatedTime?: string | undefined;
+  satisfyMethod?: SatisfyMethod;
 
   constructor(data: iClaimBuilderDoc<T>) {
     super();
@@ -843,6 +858,7 @@ export class ClaimBuilderDoc<T extends NumberType> extends BaseNumberTypeClass<C
     this.docClaimed = data.docClaimed;
     this.collectionId = data.collectionId;
     this.plugins = data.plugins;
+    this.pluginIds = data.pluginIds;
     this.state = data.state;
     this.approach = data.approach;
     this.lastUpdated = data.lastUpdated;
@@ -860,8 +876,11 @@ export class ClaimBuilderDoc<T extends NumberType> extends BaseNumberTypeClass<C
     this.testOnly = data.testOnly;
     this.rewards = data.rewards?.map((reward) => new ClaimReward(reward));
     this.estimatedCost = data.estimatedCost;
+    this.showInSearchResults = data.showInSearchResults;
+    this.categories = data.categories;
     this.estimatedTime = data.estimatedTime;
     this.assignMethod = data.assignMethod;
+    this.satisfyMethod = data.satisfyMethod ? new SatisfyMethod(data.satisfyMethod) : undefined;
   }
 
   getNumberFieldNames(): string[] {
@@ -911,38 +930,6 @@ export class ApprovalTrackerDoc<T extends NumberType> extends BaseNumberTypeClas
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ApprovalTrackerDoc<U> {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as ApprovalTrackerDoc<U>;
-  }
-}
-
-/**
- * @inheritDoc iChallengeTrackerIdDetails
- * @category Approvals / Transferability
- */
-export class ChallengeTrackerIdDetails<T extends NumberType>
-  extends BaseNumberTypeClass<ChallengeTrackerIdDetails<T>>
-  implements iChallengeTrackerIdDetails<T>
-{
-  collectionId: T;
-  approvalId: string;
-  challengeTrackerId: string;
-  approvalLevel: 'collection' | 'incoming' | 'outgoing' | '';
-  approverAddress: CosmosAddress;
-
-  constructor(data: iChallengeTrackerIdDetails<T>) {
-    super();
-    this.collectionId = data.collectionId;
-    this.challengeTrackerId = data.challengeTrackerId;
-    this.approvalId = data.approvalId;
-    this.approvalLevel = data.approvalLevel;
-    this.approverAddress = data.approverAddress;
-  }
-
-  getNumberFieldNames(): string[] {
-    return ['collectionId'];
-  }
-
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ChallengeTrackerIdDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as ChallengeTrackerIdDetails<U>;
   }
 }
 
@@ -1302,9 +1289,9 @@ export class PluginVersionConfig<T extends NumberType> extends BaseNumberTypeCla
   requiresUserInputs: boolean;
   reuseForNonIndexed: boolean;
   receiveStatusWebhook: boolean;
-  userInputsSchema: Array<JsonBodyInputSchema | CustomTypeInputSchema>;
-  publicParamsSchema: Array<JsonBodyInputSchema | CustomTypeInputSchema>;
-  privateParamsSchema: Array<JsonBodyInputSchema | CustomTypeInputSchema>;
+  userInputsSchema: Array<JsonBodyInputSchema>;
+  publicParamsSchema: Array<JsonBodyInputSchema>;
+  privateParamsSchema: Array<JsonBodyInputSchema>;
   verificationCall?: {
     uri: string;
     method: 'POST' | 'GET' | 'PUT' | 'DELETE';
@@ -1318,6 +1305,9 @@ export class PluginVersionConfig<T extends NumberType> extends BaseNumberTypeCla
     passTwitch?: boolean;
     passStrava?: boolean;
     passReddit?: boolean;
+    passTelegram?: boolean;
+    passFarcaster?: boolean;
+    passSlack?: boolean;
     postProcessingJs: string;
   };
   claimCreatorRedirect?: { toolUri?: string; tutorialUri?: string };
@@ -1377,6 +1367,7 @@ export class PluginDoc<T extends NumberType> extends BaseNumberTypeClass<PluginD
     name: string;
     description: string;
     image: string;
+    parentApp?: string;
     documentation?: string;
     sourceCode?: string;
     supportLink?: string;
@@ -1404,7 +1395,8 @@ export class PluginDoc<T extends NumberType> extends BaseNumberTypeClass<PluginD
       image: data.metadata.image,
       documentation: data.metadata.documentation,
       sourceCode: data.metadata.sourceCode,
-      supportLink: data.metadata.supportLink
+      supportLink: data.metadata.supportLink,
+      parentApp: data.metadata.parentApp
     };
     this.lastUpdated = data.lastUpdated;
     this.createdAt = data.createdAt;

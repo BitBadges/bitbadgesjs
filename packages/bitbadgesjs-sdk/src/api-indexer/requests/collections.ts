@@ -21,6 +21,7 @@ export interface iFilterSuggestionsSuccessResponse {
     name: string;
     value: string | number | boolean;
     count: number;
+    type: string;
   }[];
 }
 
@@ -31,7 +32,7 @@ export class FilterSuggestionsSuccessResponse
   extends BaseNumberTypeClass<FilterSuggestionsSuccessResponse>
   implements iFilterSuggestionsSuccessResponse
 {
-  attributes: { name: string; value: string | number | boolean; count: number; type?: 'date' | 'url' | undefined }[];
+  attributes: { name: string; value: string | number | boolean; count: number; type: string }[];
 
   constructor(data: iFilterSuggestionsSuccessResponse) {
     super();

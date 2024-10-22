@@ -23,7 +23,6 @@ import {
   type ClaimIntegrationPluginCustomBodyType,
   type ClaimIntegrationPluginType,
   type CosmosAddress,
-  type CustomTypeInputSchema,
   type IntegrationPluginDetails,
   type JsonBodyInputSchema,
   type JsonBodyInputWithValue,
@@ -298,6 +297,9 @@ export interface CompleteClaimPayload {
   /** Needs to be provided so we check that no plugins or claims have been updated since the claim was fetched. */
   _expectedVersion: number;
 
+  /** If provided, we will only complete the claim for the specific plugins w/ the provided instance IDs. Must be compatible with the satisfaction logic. */
+  _specificInstanceIds?: string[];
+
   /** The claim body for each unique plugin. */
   [customPluginId: string]: ClaimIntegrationPluginCustomBodyType<ClaimIntegrationPluginType> | any | undefined;
 }
@@ -499,6 +501,11 @@ export interface UpdateAccountInfoPayload {
   profilePicUrl?: string;
 
   /**
+   * The banner image URL.
+   */
+  bannerImage?: string;
+
+  /**
    * The username.
    */
   username?: string;
@@ -578,6 +585,8 @@ export interface AddBalancesToOffChainStoragePayload {
     rewards?: iClaimReward<NumberType>[];
     estimatedCost?: string;
     estimatedTime?: string;
+    showInSearchResults?: boolean;
+    categories?: string[];
     balancesToSet?: iPredeterminedBalances<NumberType>;
     approach?: string;
   }[];
@@ -632,6 +641,8 @@ export interface AddToIpfsPayload {
    * The stuff to add to IPFS
    */
   contents?: (iBadgeMetadataDetails<NumberType> | iMetadata<NumberType> | iCollectionMetadataDetails<NumberType> | iChallengeDetails<NumberType>)[];
+
+  method: 'ipfs' | 'centralized';
 }
 
 /**
@@ -643,6 +654,7 @@ export interface iAddToIpfsSuccessResponse {
    */
   results: {
     cid: string;
+    uri?: string;
   }[];
 }
 
@@ -653,6 +665,7 @@ export interface iAddToIpfsSuccessResponse {
 export class AddToIpfsSuccessResponse extends CustomTypeClass<AddToIpfsSuccessResponse> implements iAddToIpfsSuccessResponse {
   results: {
     cid: string;
+    uri?: string;
   }[];
 
   constructor(data: iAddToIpfsSuccessResponse) {
@@ -676,6 +689,11 @@ export interface AddApprovalDetailsToOffChainStoragePayload {
      * The description of the approval.
      */
     description: string;
+
+    /**
+     * The image of the approval.
+     */
+    image: string;
 
     /** For any merkle challenge claims that we are implementing */
     challengeInfoDetails?: iChallengeInfoDetails<NumberType>[];
@@ -909,6 +927,30 @@ export interface iCheckSignInStatusSuccessResponse {
   };
 
   /**
+   * Signed in with Telegram?
+   */
+  telegram?: {
+    username: string;
+    id: string;
+  };
+
+  /**
+   * Signed in with Farcaster?
+   */
+  farcaster?: {
+    username: string;
+    id: string;
+  };
+
+  /**
+   * Signed in with Slack?
+   */
+  slack?: {
+    username: string;
+    id: string;
+  };
+
+  /**
    * Signed in with Youtube?
    */
   youtube?: {
@@ -946,6 +988,9 @@ export class CheckSignInStatusSuccessResponse extends CustomTypeClass<CheckSignI
   strava?: { username: string; id: string } | undefined;
   youtube?: { id: string; username: string } | undefined;
   reddit?: { username: string; id: string } | undefined;
+  telegram?: { username: string; id: string } | undefined;
+  farcaster?: { username: string; id: string } | undefined;
+  slack?: { username: string; id: string } | undefined;
 
   constructor(data: iCheckSignInStatusSuccessResponse) {
     super();
@@ -960,6 +1005,9 @@ export class CheckSignInStatusSuccessResponse extends CustomTypeClass<CheckSignI
     this.strava = data.strava;
     this.youtube = data.youtube;
     this.reddit = data.reddit;
+    this.telegram = data.telegram;
+    this.farcaster = data.farcaster;
+    this.slack = data.slack;
   }
 }
 
@@ -985,6 +1033,12 @@ export interface SignOutPayload {
   signOutYoutube?: boolean;
   /** Sign out of Reddit */
   signOutReddit?: boolean;
+  /** Sign out of Telegram */
+  signOutTelegram?: boolean;
+  /** Sign out of Farcaster */
+  signOutFarcaster?: boolean;
+  /** Sign out of Slack */
+  signOutSlack?: boolean;
 }
 
 /**
@@ -999,7 +1053,15 @@ export class SignOutSuccessResponse extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export interface GetBrowseCollectionsPayload {}
+export interface GetBrowseCollectionsPayload {
+  type: 'collections' | 'badges' | 'addressLists' | 'maps' | 'attestations' | 'claims' | 'activity';
+  filters?: {
+    category?: string;
+    sortBy?: string;
+    timeFrame?: string;
+    searchTerm?: string;
+  };
+}
 
 /**
  * @category API Requests / Responses
@@ -1018,6 +1080,7 @@ export interface iGetBrowseCollectionsSuccessResponse<T extends NumberType> {
   events: { [category: string]: iEventDoc<T>[] };
   attestationProofs: { [category: string]: iAttestationProofDoc<T>[] };
   maps: { [category: string]: iMapWithValues<T>[] };
+  claims?: { [category: string]: iClaimDetails<T>[] };
 }
 
 /**
@@ -1038,7 +1101,8 @@ export class GetBrowseCollectionsSuccessResponse<T extends NumberType>
     }[];
   };
   events: { [category: string]: EventDoc<T>[] };
-  maps: { [category: string]: iMapWithValues<T>[] };
+  maps: { [category: string]: MapWithValues<T>[] };
+  claims?: { [category: string]: ClaimDetails<T>[] };
   attestationProofs: { [category: string]: AttestationProofDoc<T>[] };
 
   constructor(data: iGetBrowseCollectionsSuccessResponse<T>) {
@@ -1098,6 +1162,17 @@ export class GetBrowseCollectionsSuccessResponse<T extends NumberType>
       },
       {} as { [category: string]: MapWithValues<T>[] }
     );
+    this.claims = data.claims
+      ? Object.keys(data.claims).reduce(
+          (acc, category) => {
+            if (data.claims) {
+              acc[category] = data.claims[category].map((claim) => new ClaimDetails(claim));
+            }
+            return acc;
+          },
+          {} as { [category: string]: ClaimDetails<T>[] }
+        )
+      : undefined;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetBrowseCollectionsSuccessResponse<U> {
@@ -2146,15 +2221,15 @@ export interface PluginVersionConfigPayload {
     baseUri: string;
   };
 
-  userInputsSchema?: Array<JsonBodyInputSchema | CustomTypeInputSchema>;
+  userInputsSchema?: Array<JsonBodyInputSchema>;
 
   claimCreatorRedirect?: {
     toolUri?: string;
     tutorialUri?: string;
   };
 
-  publicParamsSchema?: Array<JsonBodyInputSchema | CustomTypeInputSchema>;
-  privateParamsSchema?: Array<JsonBodyInputSchema | CustomTypeInputSchema>;
+  publicParamsSchema?: Array<JsonBodyInputSchema>;
+  privateParamsSchema?: Array<JsonBodyInputSchema>;
 
   /** The verification URL */
   verificationCall?: {
@@ -2171,6 +2246,9 @@ export interface PluginVersionConfigPayload {
     passStrava?: boolean;
     passTwitch?: boolean;
     passReddit?: boolean;
+    passTelegram?: boolean;
+    passFarcaster?: boolean;
+    passSlack?: boolean;
 
     postProcessingJs: string;
   };
@@ -2195,6 +2273,8 @@ export interface CreatePluginPayload {
     image: string;
     /** Documentation for the plugin */
     documentation?: string;
+    /** Parent app of the plugin. If blank, treated as its own app / entity. */
+    parentApp?: string;
     /** Source code for the plugin */
     sourceCode?: string;
     /** Support link for the plugin */
@@ -2245,6 +2325,8 @@ export interface UpdatePluginPayload {
     image: string;
     /** Documentation for the plugin */
     documentation?: string;
+    /** Parent app of the plugin. If blank, treated as its own app / entity. */
+    parentApp?: string;
     /** Source code for the plugin */
     sourceCode?: string;
     /** Support link for the plugin */
@@ -2434,7 +2516,7 @@ export type CreateClaimRequest<T extends NumberType> = Omit<iClaimDetails<T>, 'p
 /**
  * @category Interfaces
  */
-export type UpdateClaimRequest<T extends NumberType> = Omit<iClaimDetails<T>, 'seedCode' | 'plugins' | 'assignMethod' | 'version'> & {
+export type UpdateClaimRequest<T extends NumberType> = Omit<iClaimDetails<T>, 'seedCode' | 'plugins' | 'version'> & {
   cid?: string;
 } & {
   plugins: ManagePluginRequest[];

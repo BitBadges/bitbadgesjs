@@ -13,6 +13,8 @@ export interface iMetadata<T extends NumberType> {
   description: string;
   /** The image of the badge or badge collection. */
   image: string;
+  /** The banner image of the badge or badge collection. */
+  bannerImage?: string;
   /** The video of the badge or badge collection. If a standard video is used, this should be a link to the video. We will use image as the poster image. If a youtube video is used, we embed it as an iframe. */
   video?: string;
   /** The category of the badge or badge collection (e.g. "Education", "Attendance"). */
@@ -35,7 +37,7 @@ export interface iMetadata<T extends NumberType> {
 
   /** The attributes of the badge or badge collection */
   attributes?: {
-    type?: 'date' | 'url';
+    type: string;
     name: string;
     value: string | number | boolean;
   }[];
@@ -66,6 +68,7 @@ export class Metadata<T extends NumberType> extends BaseNumberTypeClass<Metadata
   name: string;
   description: string;
   image: string;
+  bannerImage?: string;
   video?: string;
   category?: string;
   externalUrl?: string;
@@ -76,7 +79,7 @@ export class Metadata<T extends NumberType> extends BaseNumberTypeClass<Metadata
   };
 
   attributes?: {
-    type?: 'date' | 'url';
+    type: string;
     name: string;
     value: string | number | boolean;
   }[];
@@ -101,6 +104,7 @@ export class Metadata<T extends NumberType> extends BaseNumberTypeClass<Metadata
     this.name = data.name;
     this.description = data.description;
     this.image = data.image;
+    this.bannerImage = data.bannerImage;
     this.video = data.video;
     this.category = data.category;
     this.externalUrl = data.externalUrl;

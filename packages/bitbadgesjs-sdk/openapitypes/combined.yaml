@@ -2583,7 +2583,7 @@ components:
           items:
             $ref: '#/components/schemas/iUintRange'
           type: array
-          examples: &ref_25
+          examples: &ref_26
             - - start: '1713301889'
                 end: '2000000000'
             - - start: '1'
@@ -3010,6 +3010,48 @@ components:
           additionalProperties: false
           type: object
         reddit:
+          properties:
+            username:
+              type: string
+            id:
+              type: string
+            lastUpdated:
+              $ref: '#/components/schemas/UNIXMilliTimestamp'
+          required:
+            - username
+            - id
+            - lastUpdated
+          additionalProperties: false
+          type: object
+        telegram:
+          properties:
+            username:
+              type: string
+            id:
+              type: string
+            lastUpdated:
+              $ref: '#/components/schemas/UNIXMilliTimestamp'
+          required:
+            - username
+            - id
+            - lastUpdated
+          additionalProperties: false
+          type: object
+        farcaster:
+          properties:
+            username:
+              type: string
+            id:
+              type: string
+            lastUpdated:
+              $ref: '#/components/schemas/UNIXMilliTimestamp'
+          required:
+            - username
+            - id
+            - lastUpdated
+          additionalProperties: false
+          type: object
+        slack:
           properties:
             username:
               type: string
@@ -3470,7 +3512,7 @@ components:
         ethAddress:
           description: The Eth address of the account
           type: string
-          examples: &ref_19
+          examples: &ref_20
             - 0x...
         solAddress:
           description: The Solana address of the account
@@ -3480,7 +3522,7 @@ components:
         btcAddress:
           description: The Bitcoin address of the account
           type: string
-          examples: &ref_20
+          examples: &ref_21
             - bc1...
         sequence:
           description: The sequence of the account
@@ -3661,7 +3703,13 @@ components:
         profilePicUrl:
           description: The profile picture URL of the account
           type: string
-          examples: &ref_21
+          examples: &ref_22
+            - https://example.com
+            - ipfs://Qm...
+        bannerImage:
+          description: The banner image URL of the account
+          type: string
+          examples: &ref_19
             - https://example.com
             - ipfs://Qm...
         username:
@@ -3823,6 +3871,9 @@ components:
             The timestamp of when this document should be fetched next
             (milliseconds since epoch)
           $ref: '#/components/schemas/UNIXMilliTimestamp'
+        pending:
+          description: Whether this document is pending to be fetched or not
+          type: boolean
         emailMessage:
           type: string
         recipientAddress:
@@ -3831,7 +3882,7 @@ components:
           type: string
         notificationType:
           type: string
-        axiosPayload: {}
+        actionConfig: {}
         claimInfo:
           properties:
             session: {}
@@ -4146,9 +4197,6 @@ components:
         label:
           type: string
         type:
-          enum:
-            - date
-            - url
           type: string
         value:
           anyOf:
@@ -4160,6 +4208,7 @@ components:
       required:
         - key
         - label
+        - type
         - value
       additionalProperties: false
       type: object
@@ -4170,13 +4219,17 @@ components:
         label:
           type: string
         type:
-          enum:
-            - date
-            - url
-            - string
-            - number
-            - boolean
           type: string
+        hyperlink:
+          properties:
+            url:
+              type: string
+            showAsGenericView:
+              type: boolean
+          required:
+            - url
+          additionalProperties: false
+          type: object
         helper:
           type: string
         headerField:
@@ -4357,6 +4410,26 @@ components:
         - publicState
       additionalProperties: false
       type: object
+    iSatisfyMethod:
+      properties:
+        type:
+          enum:
+            - AND
+            - OR
+            - NOT
+          type: string
+        conditions:
+          items:
+            anyOf:
+              - type: number
+              - $ref: '#/components/schemas/iSatisfyMethod'
+          type: array
+      required:
+        - type
+        - conditions
+      additionalProperties: false
+      description: ''
+      type: object
     iClaimBuilderDoc:
       properties:
         _docId:
@@ -4410,6 +4483,9 @@ components:
         assignMethod:
           description: Algorithm to determine the claaim number indices
           type: string
+        satisfyMethod:
+          description: Custom satisfaction logic
+          $ref: '#/components/schemas/iSatisfyMethod'
         action:
           properties:
             seedCode:
@@ -4437,6 +4513,14 @@ components:
         estimatedTime:
           description: Estimated time to satisfy the claim's requirements
           type: string
+        showInSearchResults:
+          description: If true, the claim will be shown in search results
+          type: boolean
+        categories:
+          items:
+            type: string
+          description: The categories of the claim
+          type: array
         lastUpdated:
           $ref: '#/components/schemas/UNIXMilliTimestamp'
         createdAt:
@@ -4516,12 +4600,6 @@ components:
             The params to be shown to successful claimers. Only used for
             pre-configured rewards.
           type: object
-        sendClaimAlert:
-          description: >-
-            If true, we will send a claim alert to the user upon completion. If
-            they have push notifications enabled, they will also receive a push
-            notification.
-          type: boolean
       additionalProperties: false
       type: object
     iApprovalTrackerDoc:
@@ -5161,6 +5239,12 @@ components:
             passStrava:
               type: boolean
             passReddit:
+              type: boolean
+            passTelegram:
+              type: boolean
+            passFarcaster:
+              type: boolean
+            passSlack:
               type: boolean
             postProcessingJs:
               type: string
@@ -5920,6 +6004,9 @@ components:
           description: Address list ID that the claim is for (if applicable).
           type: string
           examples: *ref_11
+        trackerDetails:
+          description: The tracker details for the claim.
+          $ref: '#/components/schemas/iChallengeTrackerIdDetails'
         balancesToSet:
           description: >-
             The balances to set for the claim. Only used for claims for
@@ -5941,6 +6028,14 @@ components:
         estimatedCost:
           description: Estimated cost for the claim.
           type: string
+        showInSearchResults:
+          description: If true, the claim will be shown in search results
+          type: boolean
+        categories:
+          items:
+            type: string
+          description: The categories of the claim
+          type: array
         estimatedTime:
           description: Estimated time to satisfy the claim's requirements.
           type: string
@@ -5971,6 +6066,9 @@ components:
         version:
           description: The version of the claim.
           $ref: '#/components/schemas/NumberType'
+        satisfyMethod:
+          description: Custom satisfaction logic
+          $ref: '#/components/schemas/iSatisfyMethod'
       required:
         - claimId
         - plugins
@@ -5984,7 +6082,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The badge IDs that correspond to the metadata
           type: array
-          examples: &ref_24
+          examples: &ref_25
             - - start: '1'
                 end: '10'
         metadata:
@@ -6060,6 +6158,10 @@ components:
           description: The image of the badge or badge collection.
           type: string
           examples: *ref_12
+        bannerImage:
+          description: The banner image of the badge or badge collection.
+          type: string
+          examples: *ref_19
         video:
           description: >-
             The video of the badge or badge collection. If a standard video is
@@ -6103,9 +6205,6 @@ components:
           items:
             properties:
               type:
-                enum:
-                  - date
-                  - url
                 type: string
               name:
                 type: string
@@ -6116,6 +6215,7 @@ components:
                   - type: number
                   - type: boolean
             required:
+              - type
               - name
               - value
             additionalProperties: false
@@ -6293,13 +6393,13 @@ components:
                   properties:
                     viewId:
                       type: string
-                      examples: &ref_22
+                      examples: &ref_23
                         - viewKey
                     viewType:
                       enum:
                         - listActivity
                       type: string
-                      examples: &ref_23
+                      examples: &ref_24
                         - viewKey
                     bookmark:
                       type: string
@@ -6396,6 +6496,12 @@ components:
                 type: array
               estimatedCost:
                 type: string
+              showInSearchResults:
+                type: boolean
+              categories:
+                items:
+                  type: string
+                type: array
               estimatedTime:
                 type: string
               approach:
@@ -6483,11 +6589,11 @@ components:
         ethAddress:
           description: The Eth address of the account
           type: string
-          examples: *ref_19
+          examples: *ref_20
         btcAddress:
           description: The Bitcoin address of the account
           type: string
-          examples: *ref_20
+          examples: *ref_21
         sequence:
           description: The sequence of the account
           $ref: '#/components/schemas/NumberType'
@@ -6582,7 +6688,11 @@ components:
         profilePicUrl:
           description: The profile picture URL of the account
           type: string
-          examples: *ref_21
+          examples: *ref_22
+        bannerImage:
+          description: The banner image URL of the account
+          type: string
+          examples: *ref_19
         username:
           description: The username of the account
           type: string
@@ -6897,11 +7007,11 @@ components:
                   Unique view ID. Used for pagination. All fetches w/ same ID
                   should be made with same criteria.
                 type: string
-                examples: *ref_22
+                examples: *ref_23
               viewType:
                 $ref: '#/components/schemas/AccountViewKey'
                 description: The base view type to fetch.
-                examples: *ref_23
+                examples: *ref_24
               specificCollections:
                 items:
                   $ref: '#/components/schemas/iBatchBadgeDetails'
@@ -6993,10 +7103,13 @@ components:
                   - type: boolean
               count:
                 type: number
+              type:
+                type: string
             required:
               - name
               - value
               - count
+              - type
             additionalProperties: false
             type: object
           type: array
@@ -7013,7 +7126,7 @@ components:
             Limit to specific badge IDs. Leave undefined to not filter by badge
             ID.
           type: array
-          examples: *ref_24
+          examples: *ref_25
         categories:
           items:
             type: string
@@ -7064,7 +7177,7 @@ components:
           items:
             $ref: '#/components/schemas/iUintRange'
           type: array
-          examples: *ref_24
+          examples: *ref_25
         pagination:
           $ref: '#/components/schemas/PaginationInfo'
       required:
@@ -7256,7 +7369,7 @@ components:
           description: >-
             If present, the metadata corresponding to the specified badge IDs
             will be fetched.
-          examples: *ref_24
+          examples: *ref_25
       additionalProperties: false
       description: Defines the options for fetching metadata.
       type: object
@@ -7276,13 +7389,13 @@ components:
               viewType:
                 $ref: '#/components/schemas/CollectionViewKey'
                 description: The base view type to fetch.
-                examples: *ref_23
+                examples: *ref_24
               viewId:
                 description: >-
                   A unique view ID. This is used for pagination. All fetches w/
                   same ID should be made with same criteria.
                 type: string
-                examples: *ref_22
+                examples: *ref_23
               bookmark:
                 description: A bookmark to pass in for pagination. "" for first request.
                 type: string
@@ -7383,13 +7496,13 @@ components:
               viewType:
                 $ref: '#/components/schemas/CollectionViewKey'
                 description: The base view type to fetch.
-                examples: *ref_23
+                examples: *ref_24
               viewId:
                 description: >-
                   A unique view ID. This is used for pagination. All fetches w/
                   same ID should be made with same criteria.
                 type: string
-                examples: *ref_22
+                examples: *ref_23
               bookmark:
                 description: A bookmark to pass in for pagination. "" for first request.
                 type: string
@@ -7691,7 +7804,7 @@ components:
                 items:
                   $ref: '#/components/schemas/iUintRange'
                 type: array
-                examples: *ref_24
+                examples: *ref_25
             required:
               - collection
               - badgeIds
@@ -7918,7 +8031,11 @@ components:
         profilePicUrl:
           description: The profile picture URL.
           type: string
-          examples: *ref_21
+          examples: *ref_22
+        bannerImage:
+          description: The banner image URL.
+          type: string
+          examples: *ref_19
         username:
           description: The username.
           type: string
@@ -8095,6 +8212,12 @@ components:
                 type: string
               estimatedTime:
                 type: string
+              showInSearchResults:
+                type: boolean
+              categories:
+                items:
+                  type: string
+                type: array
               balancesToSet:
                 $ref: '#/components/schemas/iPredeterminedBalances'
               approach:
@@ -8164,6 +8287,13 @@ components:
               - $ref: '#/components/schemas/iChallengeDetails'
           description: The stuff to add to IPFS
           type: array
+        method:
+          enum:
+            - ipfs
+            - centralized
+          type: string
+      required:
+        - method
       additionalProperties: false
       type: object
     iAddToIpfsSuccessResponse:
@@ -8173,6 +8303,9 @@ components:
             properties:
               cid:
                 type: string
+              uri:
+                type: string
+                examples: *ref_1
             required:
               - cid
             additionalProperties: false
@@ -8196,6 +8329,10 @@ components:
                 description: The description of the approval.
                 type: string
                 examples: *ref_8
+              image:
+                description: The image of the approval.
+                type: string
+                examples: *ref_12
               challengeInfoDetails:
                 items:
                   $ref: '#/components/schemas/iChallengeInfoDetails'
@@ -8204,6 +8341,7 @@ components:
             required:
               - name
               - description
+              - image
             additionalProperties: false
             type: object
           type: array
@@ -8407,6 +8545,42 @@ components:
           additionalProperties: false
           description: Signed in with Reddit?
           type: object
+        telegram:
+          properties:
+            username:
+              type: string
+            id:
+              type: string
+          required:
+            - username
+            - id
+          additionalProperties: false
+          description: Signed in with Telegram?
+          type: object
+        farcaster:
+          properties:
+            username:
+              type: string
+            id:
+              type: string
+          required:
+            - username
+            - id
+          additionalProperties: false
+          description: Signed in with Farcaster?
+          type: object
+        slack:
+          properties:
+            username:
+              type: string
+            id:
+              type: string
+          required:
+            - username
+            - id
+          additionalProperties: false
+          description: Signed in with Slack?
+          type: object
         youtube:
           properties:
             id:
@@ -8454,6 +8628,15 @@ components:
         signOutReddit:
           description: Sign out of Reddit
           type: boolean
+        signOutTelegram:
+          description: Sign out of Telegram
+          type: boolean
+        signOutFarcaster:
+          description: Sign out of Farcaster
+          type: boolean
+        signOutSlack:
+          description: Sign out of Slack
+          type: boolean
       required:
         - signOutBlockin
       additionalProperties: false
@@ -8462,6 +8645,31 @@ components:
       additionalProperties: false
       type: object
     GetBrowseCollectionsPayload:
+      properties:
+        type:
+          enum:
+            - collections
+            - badges
+            - addressLists
+            - maps
+            - attestations
+            - claims
+            - activity
+          type: string
+        filters:
+          properties:
+            category:
+              type: string
+            sortBy:
+              type: string
+            timeFrame:
+              type: string
+            searchTerm:
+              type: string
+          additionalProperties: false
+          type: object
+      required:
+        - type
       additionalProperties: false
       type: object
     iGetBrowseCollectionsSuccessResponse:
@@ -8498,7 +8706,7 @@ components:
                   items:
                     $ref: '#/components/schemas/iUintRange'
                   type: array
-                  examples: *ref_24
+                  examples: *ref_25
               required:
                 - collection
                 - badgeIds
@@ -8522,6 +8730,12 @@ components:
           additionalProperties:
             items:
               $ref: '#/components/schemas/iMapWithValues'
+            type: array
+          type: object
+        claims:
+          additionalProperties:
+            items:
+              $ref: '#/components/schemas/iClaimDetails'
             type: array
           type: object
       required:
@@ -9947,6 +10161,12 @@ components:
               type: boolean
             passReddit:
               type: boolean
+            passTelegram:
+              type: boolean
+            passFarcaster:
+              type: boolean
+            passSlack:
+              type: boolean
             postProcessingJs:
               type: string
           required:
@@ -10177,6 +10397,12 @@ components:
                         type: boolean
                       passReddit:
                         type: boolean
+                      passTelegram:
+                        type: boolean
+                      passFarcaster:
+                        type: boolean
+                      passSlack:
+                        type: boolean
                       postProcessingJs:
                         type: string
                     required:
@@ -10316,6 +10542,9 @@ components:
                 description: Address list ID that the claim is for (if applicable).
                 type: string
                 examples: *ref_11
+              trackerDetails:
+                $ref: '#/components/schemas/iChallengeTrackerIdDetails'
+                description: The tracker details for the claim.
               balancesToSet:
                 $ref: '#/components/schemas/iPredeterminedBalances'
                 description: >-
@@ -10337,6 +10566,14 @@ components:
               estimatedCost:
                 description: Estimated cost for the claim.
                 type: string
+              showInSearchResults:
+                description: If true, the claim will be shown in search results
+                type: boolean
+              categories:
+                items:
+                  type: string
+                description: The categories of the claim
+                type: array
               estimatedTime:
                 description: Estimated time to satisfy the claim's requirements.
                 type: string
@@ -10362,6 +10599,9 @@ components:
               lastUpdated:
                 description: Last updated timestamp for the claim.
                 $ref: '#/components/schemas/NumberType'
+              satisfyMethod:
+                $ref: '#/components/schemas/iSatisfyMethod'
+                description: Custom satisfaction logic
             required:
               - claimId
               - plugins
@@ -10476,6 +10716,9 @@ components:
           description: Address list ID that the claim is for (if applicable).
           type: string
           examples: *ref_11
+        trackerDetails:
+          description: The tracker details for the claim.
+          $ref: '#/components/schemas/iChallengeTrackerIdDetails'
         balancesToSet:
           description: >-
             The balances to set for the claim. Only used for claims for
@@ -10490,6 +10733,14 @@ components:
         estimatedCost:
           description: Estimated cost for the claim.
           type: string
+        showInSearchResults:
+          description: If true, the claim will be shown in search results
+          type: boolean
+        categories:
+          items:
+            type: string
+          description: The categories of the claim
+          type: array
         estimatedTime:
           description: Estimated time to satisfy the claim's requirements.
           type: string
@@ -10517,6 +10768,9 @@ components:
         lastUpdated:
           description: Last updated timestamp for the claim.
           $ref: '#/components/schemas/NumberType'
+        satisfyMethod:
+          description: Custom satisfaction logic
+          $ref: '#/components/schemas/iSatisfyMethod'
         cid:
           type: string
         plugins:
@@ -10543,6 +10797,9 @@ components:
           description: Address list ID that the claim is for (if applicable).
           type: string
           examples: *ref_11
+        trackerDetails:
+          description: The tracker details for the claim.
+          $ref: '#/components/schemas/iChallengeTrackerIdDetails'
         balancesToSet:
           description: >-
             The balances to set for the claim. Only used for claims for
@@ -10557,6 +10814,14 @@ components:
         estimatedCost:
           description: Estimated cost for the claim.
           type: string
+        showInSearchResults:
+          description: If true, the claim will be shown in search results
+          type: boolean
+        categories:
+          items:
+            type: string
+          description: The categories of the claim
+          type: array
         estimatedTime:
           description: Estimated time to satisfy the claim's requirements.
           type: string
@@ -10576,6 +10841,9 @@ components:
         lastUpdated:
           description: Last updated timestamp for the claim.
           $ref: '#/components/schemas/NumberType'
+        satisfyMethod:
+          description: Custom satisfaction logic
+          $ref: '#/components/schemas/iSatisfyMethod'
         cid:
           type: string
         plugins:
@@ -11326,7 +11594,7 @@ components:
               items:
                 $ref: '#/components/schemas/iUintRange'
               type: array
-              examples: *ref_24
+              examples: *ref_25
             reason:
               type: string
           required:
@@ -11341,7 +11609,7 @@ components:
               items:
                 $ref: '#/components/schemas/iUintRange'
               type: array
-              examples: *ref_24
+              examples: *ref_25
             reason:
               type: string
           required:
@@ -11446,13 +11714,13 @@ components:
               viewType:
                 $ref: '#/components/schemas/CollectionViewKey'
                 description: The base view type to fetch.
-                examples: *ref_23
+                examples: *ref_24
               viewId:
                 description: >-
                   A unique view ID. This is used for pagination. All fetches w/
                   same ID should be made with same criteria.
                 type: string
-                examples: *ref_22
+                examples: *ref_23
               bookmark:
                 description: A bookmark to pass in for pagination. "" for first request.
                 type: string
@@ -11820,7 +12088,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The corresponding badge IDs for this collection ID.
           type: array
-          examples: *ref_24
+          examples: *ref_25
       required:
         - collectionId
         - badgeIds
@@ -11919,9 +12187,14 @@ components:
             the badge.
           type: string
           examples: *ref_8
+        image:
+          description: The image of the claim
+          type: string
+          examples: *ref_12
       required:
         - name
         - description
+        - image
       additionalProperties: false
       type: object
     iCosmosCoin:
@@ -12655,7 +12928,7 @@ components:
           items:
             $ref: '#/components/schemas/iUintRange'
           type: array
-          examples: &ref_30
+          examples: &ref_31
             - - start: '1713301889'
                 end: '2000000000'
             - - start: '1'
@@ -13201,7 +13474,7 @@ components:
         toListId:
           description: The list ID of the to addresses of the approved outgoing transfers.
           type: string
-          examples: &ref_32
+          examples: &ref_33
             - customOrReservedListId
             - Mint
             - All
@@ -13213,7 +13486,7 @@ components:
             The list ID of the initiatedBy addresses of the approved outgoing
             transfers.
           type: string
-          examples: &ref_26
+          examples: &ref_27
             - customOrReservedListId
             - Mint
             - All
@@ -13225,7 +13498,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The transfer times of the approved outgoing transfers.
           type: array
-          examples: &ref_27
+          examples: &ref_28
             - - start: '1713301889'
                 end: '2000000000'
             - - start: '1'
@@ -13235,13 +13508,13 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The badge IDs of the approved outgoing transfers.
           type: array
-          examples: *ref_24
+          examples: *ref_25
         ownershipTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The owned times of the approved outgoing transfers.
           type: array
-          examples: *ref_25
+          examples: *ref_26
         approvalId:
           description: >-
             The approval ID of the approved outgoing transfers. Can use "All" to
@@ -13253,7 +13526,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The permitted times of the approved outgoing transfers.
           type: array
-          examples: &ref_28
+          examples: &ref_29
             - - start: '1713301889'
                 end: '2000000000'
             - - start: '1'
@@ -13263,7 +13536,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The forbidden times of the approved outgoing transfers.
           type: array
-          examples: &ref_29
+          examples: &ref_30
             - - start: '1713301889'
                 end: '2000000000'
             - - start: '1'
@@ -13288,7 +13561,7 @@ components:
             The list ID of the from addresses of the approved incoming
             transfers.
           type: string
-          examples: &ref_31
+          examples: &ref_32
             - customOrReservedListId
             - Mint
             - All
@@ -13300,7 +13573,7 @@ components:
             The list ID of the initiatedBy addresses of the approved incoming
             transfers.
           type: string
-          examples: *ref_26
+          examples: *ref_27
         initiatedByList:
           $ref: '#/components/schemas/iAddressList'
         transferTimes:
@@ -13308,19 +13581,19 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The transfer times of the approved incoming transfers.
           type: array
-          examples: *ref_27
+          examples: *ref_28
         badgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The badge IDs of the approved incoming transfers.
           type: array
-          examples: *ref_24
+          examples: *ref_25
         ownershipTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The owned times of the approved incoming transfers.
           type: array
-          examples: *ref_25
+          examples: *ref_26
         approvalId:
           description: >-
             The approval ID of the approved incoming transfers. Can use "All" to
@@ -13332,13 +13605,13 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The permitted times of the approved incoming transfers.
           type: array
-          examples: *ref_28
+          examples: *ref_29
         permanentlyForbiddenTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The forbidden times of the approved incoming transfers.
           type: array
-          examples: *ref_29
+          examples: *ref_30
       required:
         - fromListId
         - fromList
@@ -13424,13 +13697,13 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The permitted times of the permission.
           type: array
-          examples: *ref_28
+          examples: *ref_29
         permanentlyForbiddenTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The forbidden times of the permission.
           type: array
-          examples: *ref_29
+          examples: *ref_30
       required:
         - permanentlyPermittedTimes
         - permanentlyForbiddenTimes
@@ -13443,19 +13716,19 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The timeline times that the permission applies to.
           type: array
-          examples: *ref_30
+          examples: *ref_31
         permanentlyPermittedTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The permitted times of the permission.
           type: array
-          examples: *ref_28
+          examples: *ref_29
         permanentlyForbiddenTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The forbidden times of the permission.
           type: array
-          examples: *ref_29
+          examples: *ref_30
       required:
         - timelineTimes
         - permanentlyPermittedTimes
@@ -13469,19 +13742,19 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The badge IDs that the permission applies to.
           type: array
-          examples: *ref_24
+          examples: *ref_25
         permanentlyPermittedTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The permitted times of the permission.
           type: array
-          examples: *ref_28
+          examples: *ref_29
         permanentlyForbiddenTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The forbidden times of the permission.
           type: array
-          examples: *ref_29
+          examples: *ref_30
       required:
         - badgeIds
         - permanentlyPermittedTimes
@@ -13495,25 +13768,25 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The timeline times that the permission applies to.
           type: array
-          examples: *ref_30
+          examples: *ref_31
         badgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The badge IDs that the permission applies to.
           type: array
-          examples: *ref_24
+          examples: *ref_25
         permanentlyPermittedTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The permitted times of the permission.
           type: array
-          examples: *ref_28
+          examples: *ref_29
         permanentlyForbiddenTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The forbidden times of the permission.
           type: array
-          examples: *ref_29
+          examples: *ref_30
       required:
         - timelineTimes
         - badgeIds
@@ -13526,19 +13799,19 @@ components:
         fromListId:
           description: The list ID of the from addresses of the approved transfers.
           type: string
-          examples: *ref_31
+          examples: *ref_32
         fromList:
           $ref: '#/components/schemas/iAddressList'
         toListId:
           description: The list ID of the to addresses of the approved transfers.
           type: string
-          examples: *ref_32
+          examples: *ref_33
         toList:
           $ref: '#/components/schemas/iAddressList'
         initiatedByListId:
           description: The list ID of the initiatedBy addresses of the approved transfers.
           type: string
-          examples: *ref_26
+          examples: *ref_27
         initiatedByList:
           $ref: '#/components/schemas/iAddressList'
         transferTimes:
@@ -13546,19 +13819,19 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The transfer times of the approved transfers.
           type: array
-          examples: *ref_27
+          examples: *ref_28
         badgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The badge IDs of the approved transfers.
           type: array
-          examples: *ref_24
+          examples: *ref_25
         ownershipTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The owned times of the approved transfers.
           type: array
-          examples: *ref_25
+          examples: *ref_26
         approvalId:
           description: >-
             The approval ID of the approved transfers. Can use "All" to
@@ -13570,13 +13843,13 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The permitted times of this permission.
           type: array
-          examples: *ref_28
+          examples: *ref_29
         permanentlyForbiddenTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The forbidden times of this permission.
           type: array
-          examples: *ref_29
+          examples: *ref_30
       required:
         - fromListId
         - fromList
@@ -13616,7 +13889,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The badge IDs corresponding to the URI.
           type: array
-          examples: *ref_24
+          examples: *ref_25
         customData:
           description: Arbitrary custom data that can be stored on-chain
           type: string
@@ -14022,13 +14295,13 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The range of the times that the badges must be owned.
           type: array
-          examples: *ref_25
+          examples: *ref_26
         badgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The range of the badge IDs that must be owned.
           type: array
-          examples: *ref_24
+          examples: *ref_25
         overrideWithCurrentTime:
           description: Whether or not to override the ownershipTimes with the current time.
           type: boolean
@@ -14056,13 +14329,13 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The badge IDs corresponding to the balance.
           type: array
-          examples: *ref_24
+          examples: *ref_25
         ownershipTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The times that the badge is owned from.
           type: array
-          examples: *ref_25
+          examples: *ref_26
       required:
         - amount
         - badgeIds
@@ -14335,7 +14608,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The times of the timeline item. Times in a timeline cannot overlap.
           type: array
-          examples: *ref_30
+          examples: *ref_31
       required:
         - timelineTimes
       additionalProperties: false
@@ -14347,7 +14620,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The times of the timeline item. Times in a timeline cannot overlap.
           type: array
-          examples: *ref_30
+          examples: *ref_31
         manager:
           description: The manager of the collection.
           $ref: '#/components/schemas/CosmosAddress'
@@ -14363,7 +14636,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The times of the timeline item. Times in a timeline cannot overlap.
           type: array
-          examples: *ref_30
+          examples: *ref_31
         collectionMetadata:
           description: The collection metadata, with off-chain details populated.
           $ref: '#/components/schemas/iCollectionMetadataDetails'
@@ -14379,7 +14652,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The times of the timeline item. Times in a timeline cannot overlap.
           type: array
-          examples: *ref_30
+          examples: *ref_31
         badgeMetadata:
           items:
             $ref: '#/components/schemas/iBadgeMetadataDetails'
@@ -14397,7 +14670,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The times of the timeline item. Times in a timeline cannot overlap.
           type: array
-          examples: *ref_30
+          examples: *ref_31
         offChainBalancesMetadata:
           description: The off-chain balances metadata.
           $ref: '#/components/schemas/iOffChainBalancesMetadata'
@@ -14413,7 +14686,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The times of the timeline item. Times in a timeline cannot overlap.
           type: array
-          examples: *ref_30
+          examples: *ref_31
         customData:
           description: Arbitrary custom data.
           type: string
@@ -14429,7 +14702,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The times of the timeline item. Times in a timeline cannot overlap.
           type: array
-          examples: *ref_30
+          examples: *ref_31
         standards:
           items:
             type: string
@@ -14447,7 +14720,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The times of the timeline item. Times in a timeline cannot overlap.
           type: array
-          examples: *ref_30
+          examples: *ref_31
         isArchived:
           description: Whether the collection is archived.
           type: boolean
@@ -14460,29 +14733,29 @@ components:
       properties:
         toListId:
           type: string
-          examples: *ref_32
+          examples: *ref_33
         toList:
           $ref: '#/components/schemas/iAddressList'
         initiatedByListId:
           type: string
-          examples: *ref_26
+          examples: *ref_27
         initiatedByList:
           $ref: '#/components/schemas/iAddressList'
         transferTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           type: array
-          examples: *ref_27
+          examples: *ref_28
         badgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
           type: array
-          examples: *ref_24
+          examples: *ref_25
         ownershipTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           type: array
-          examples: *ref_25
+          examples: *ref_26
         approvalId:
           type: string
         uri:
@@ -14744,13 +15017,13 @@ components:
         fromListId:
           description: The list ID for the user(s) who is sending the badges.
           type: string
-          examples: *ref_31
+          examples: *ref_32
         fromList:
           $ref: '#/components/schemas/iAddressList'
         initiatedByListId:
           description: The list ID for the user(s) who initiate the transfer.
           type: string
-          examples: *ref_26
+          examples: *ref_27
         initiatedByList:
           $ref: '#/components/schemas/iAddressList'
         transferTimes:
@@ -14758,19 +15031,19 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The times of the transfer transaction.
           type: array
-          examples: *ref_27
+          examples: *ref_28
         badgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The badge IDs to be transferred.
           type: array
-          examples: *ref_24
+          examples: *ref_25
         ownershipTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The ownership times of the badges being transferred.
           type: array
-          examples: *ref_25
+          examples: *ref_26
         approvalId:
           description: >-
             The ID of the approval. Must not be a duplicate of another approval
@@ -14847,19 +15120,19 @@ components:
         toListId:
           description: The list ID for the user(s) who is receiving the badges.
           type: string
-          examples: *ref_32
+          examples: *ref_33
         toList:
           $ref: '#/components/schemas/iAddressList'
         fromListId:
           description: The list ID for the user(s) who is sending the badges.
           type: string
-          examples: *ref_31
+          examples: *ref_32
         fromList:
           $ref: '#/components/schemas/iAddressList'
         initiatedByListId:
           description: The list ID for the user(s) who initiate the transfer.
           type: string
-          examples: *ref_26
+          examples: *ref_27
         initiatedByList:
           $ref: '#/components/schemas/iAddressList'
         transferTimes:
@@ -14867,19 +15140,19 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The times of the transfer transaction.
           type: array
-          examples: *ref_27
+          examples: *ref_28
         badgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The badge IDs to be transferred.
           type: array
-          examples: *ref_24
+          examples: *ref_25
         ownershipTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The ownership times of the badges being transferred.
           type: array
-          examples: *ref_25
+          examples: *ref_26
         approvalId:
           description: >-
             The ID of the approval. Must not be a duplicate of another approval

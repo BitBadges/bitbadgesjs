@@ -1,4 +1,13 @@
-import { ClaimIntegrationPluginType, iClaimDetails, IntegrationPluginDetails } from '@/api-indexer/docs/interfaces.js';
+import {
+  ClaimIntegrationPluginType,
+  ClaimReward,
+  CosmosAddress,
+  IntegrationPluginDetails,
+  iChallengeTrackerIdDetails,
+  iClaimDetails,
+  iSatisfyMethod
+} from '@/api-indexer/docs/interfaces.js';
+import { Metadata } from '@/api-indexer/metadata/metadata.js';
 import { BaseNumberTypeClass, CustomTypeClass, convertClassPropertiesAndMaintainNumberTypes, deepCopyPrimitives } from '@/common/base.js';
 import type {
   iApprovalAmounts,
@@ -30,10 +39,58 @@ import type { CollectionApprovalPermissionWithDetails } from './permissions.js';
 import { CollectionApprovalPermission } from './permissions.js';
 import { UintRange, UintRangeArray } from './uintRanges.js';
 import { AllDefaultValues, getPotentialUpdatesForTimelineValues, getUpdateCombinationsToCheck } from './validate-utils.js';
-import { Metadata } from '@/api-indexer/metadata/metadata.js';
-import { ClaimReward } from '@/api-indexer/docs/interfaces.js';
 
 const { getReservedAddressList, getReservedTrackerList } = AddressList;
+
+/**
+ * @inheritDoc iChallengeTrackerIdDetails
+ * @category Approvals / Transferability
+ */
+export class ChallengeTrackerIdDetails<T extends NumberType>
+  extends BaseNumberTypeClass<ChallengeTrackerIdDetails<T>>
+  implements iChallengeTrackerIdDetails<T>
+{
+  collectionId: T;
+  approvalId: string;
+  challengeTrackerId: string;
+  approvalLevel: 'collection' | 'incoming' | 'outgoing' | '';
+  approverAddress: CosmosAddress;
+
+  constructor(data: iChallengeTrackerIdDetails<T>) {
+    super();
+    this.collectionId = data.collectionId;
+    this.challengeTrackerId = data.challengeTrackerId;
+    this.approvalId = data.approvalId;
+    this.approvalLevel = data.approvalLevel;
+    this.approverAddress = data.approverAddress;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['collectionId'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ChallengeTrackerIdDetails<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as ChallengeTrackerIdDetails<U>;
+  }
+}
+
+/**
+ * @inheritDoc iSatisfyMethod
+ * @category Indexer
+ */
+export class SatisfyMethod implements iSatisfyMethod {
+  type: 'AND' | 'OR' | 'NOT';
+  conditions: Array<string | SatisfyMethod>;
+  options?: {
+    minNumSatisfied?: number;
+  };
+
+  constructor(data: iSatisfyMethod) {
+    this.type = data.type;
+    this.options = data.options;
+    this.conditions = data.conditions.map((condition) => (condition instanceof SatisfyMethod ? new SatisfyMethod(condition) : condition));
+  }
+}
 
 /**
  * @inheritDoc iClaimDetails
@@ -48,6 +105,7 @@ export class ClaimDetails<T extends NumberType> extends BaseNumberTypeClass<Clai
   seedCode?: string | undefined;
   metadata?: Metadata<T> | undefined;
   assignMethod?: string | undefined;
+  satisfyMethod?: SatisfyMethod;
   lastUpdated?: T | undefined;
   version: T;
   collectionId?: T;
@@ -56,6 +114,9 @@ export class ClaimDetails<T extends NumberType> extends BaseNumberTypeClass<Clai
   rewards?: ClaimReward<T>[];
   estimatedCost?: string;
   estimatedTime?: string;
+  showInSearchResults?: boolean;
+  categories?: string[];
+  trackerDetails?: ChallengeTrackerIdDetails<T>;
 
   constructor(data: iClaimDetails<T>) {
     super();
@@ -75,6 +136,10 @@ export class ClaimDetails<T extends NumberType> extends BaseNumberTypeClass<Clai
     this.rewards = data.rewards?.map((reward) => new ClaimReward(reward));
     this.estimatedCost = data.estimatedCost;
     this.estimatedTime = data.estimatedTime;
+    this.showInSearchResults = data.showInSearchResults;
+    this.categories = data.categories;
+    this.satisfyMethod = data.satisfyMethod ? new SatisfyMethod(data.satisfyMethod) : undefined;
+    this.trackerDetails = data.trackerDetails ? new ChallengeTrackerIdDetails(data.trackerDetails) : undefined;
   }
 
   convert<U extends NumberType>(convertFunction: (val: NumberType) => U): ClaimDetails<U> {
@@ -1189,6 +1254,9 @@ export interface iApprovalInfoDetails {
 
   /** The description of the claim. This describes how to earn and claim the badge. */
   description: string;
+
+  /** The image of the claim */
+  image: string;
 }
 
 /**
@@ -1221,11 +1289,13 @@ export class ChallengeInfoDetails<T extends NumberType> extends BaseNumberTypeCl
 export class ApprovalInfoDetails<T extends NumberType> extends BaseNumberTypeClass<ApprovalInfoDetails<T>> implements iApprovalInfoDetails {
   name: string;
   description: string;
+  image: string;
 
   constructor(data: iApprovalInfoDetails) {
     super();
     this.name = data.name;
     this.description = data.description;
+    this.image = data.image;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ApprovalInfoDetails<U> {

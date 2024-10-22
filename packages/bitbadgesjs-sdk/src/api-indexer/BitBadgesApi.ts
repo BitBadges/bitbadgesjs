@@ -602,7 +602,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * - **API Route**: `POST /api/v0/browse`
    * - **SDK Function Call**: `await BitBadgesApi.getBrowseCollections(payload);`
    */
-  public async getBrowseCollections(payload?: GetBrowseCollectionsPayload): Promise<GetBrowseCollectionsSuccessResponse<T>> {
+  public async getBrowseCollections(payload: GetBrowseCollectionsPayload): Promise<GetBrowseCollectionsSuccessResponse<T>> {
     try {
       const validateRes: typia.IValidation<GetBrowseCollectionsPayload> = typia.validate<GetBrowseCollectionsPayload>(payload ?? {});
       if (!validateRes.success) {
