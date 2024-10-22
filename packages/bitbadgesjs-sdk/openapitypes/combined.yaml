@@ -46,7 +46,7 @@ paths:
           accountsToFetch: [
             {
               //example
-              address: 'cosmos...',
+              address: 'cosmos1...',
               fetchSequence: true,
               fetchBalance: true,
               viewsToFetch: [
