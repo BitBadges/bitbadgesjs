@@ -1,69 +1,8 @@
-import { BitBadgesAddress, UNIXMilliTimestamp } from '@/api-indexer/docs/interfaces.js';
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, CustomTypeClass } from '@/common/base.js';
+import { BitBadgesAddress, iUpdateHistory, UNIXMilliTimestamp } from '@/api-indexer/docs/interfaces.js';
+import { convertClassPropertiesAndMaintainNumberTypes, CustomTypeClass } from '@/common/base.js';
 import { NumberType } from '@/common/string-numbers.js';
 import { iAttestation, iAttestationsProof } from '@/interfaces/badges/core.js';
 import { UpdateHistory } from './misc.js';
-
-/**
- * @category Off-Chain Attestations
- */
-export class AttestationsProof<T extends NumberType> extends BaseNumberTypeClass<AttestationsProof<T>> implements iAttestationsProof<T> {
-  createdBy: BitBadgesAddress;
-  createdAt: UNIXMilliTimestamp<T>;
-  scheme: 'bbs' | 'standard';
-  messageFormat: 'plaintext' | 'json';
-
-  attestationMessages: string[];
-
-  dataIntegrityProof: {
-    signature: string;
-    signer: string;
-    publicKey?: string;
-  };
-
-  proofOfIssuance: {
-    message: string;
-    signer: string;
-    signature: string;
-    publicKey?: string;
-  };
-
-  name: string;
-  image: string;
-  description: string;
-
-  entropies?: string[];
-  updateHistory?: UpdateHistory<T>[];
-  anchors?: {
-    txHash?: string;
-    message?: string;
-  }[];
-
-  constructor(data: iAttestationsProof<T>) {
-    super();
-    this.messageFormat = data.messageFormat;
-    this.updateHistory = data.updateHistory?.map((update) => new UpdateHistory(update));
-    this.createdBy = data.createdBy;
-    this.scheme = data.scheme;
-    this.attestationMessages = data.attestationMessages;
-    this.entropies = data.entropies;
-    this.dataIntegrityProof = data.dataIntegrityProof;
-    this.proofOfIssuance = data.proofOfIssuance;
-    this.name = data.name;
-    this.image = data.image;
-    this.description = data.description;
-    this.createdAt = data.createdAt;
-    this.anchors = data.anchors;
-  }
-
-  getNumberFieldNames(): string[] {
-    return ['createdAt'];
-  }
-
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): AttestationsProof<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as AttestationsProof<U>;
-  }
-}
 
 /**
  * @category Off-Chain Attestations
@@ -82,15 +21,16 @@ export class Attestation<T extends NumberType> extends CustomTypeClass<Attestati
   attestationId: string;
   inviteCode: string;
 
-  type: string;
-  scheme: 'bbs' | 'standard';
+  scheme: 'bbs' | 'standard' | 'custom' | string;
+  originalProvider?: string;
   messageFormat: 'plaintext' | 'json';
-  attestationMessages: string[];
+  messages: string[];
 
   dataIntegrityProof: {
     signature: string;
     signer: string;
     publicKey?: string;
+    isDerived?: boolean;
   };
 
   name: string;
@@ -98,10 +38,14 @@ export class Attestation<T extends NumberType> extends CustomTypeClass<Attestati
   description: string;
 
   holders: string[];
+  allHolders?: string[];
   anchors: {
     txHash?: string;
     message?: string;
   }[];
+
+  entropies: string[];
+  publicVisibility?: boolean;
 
   constructor(data: iAttestation<T>) {
     super();
@@ -110,16 +54,19 @@ export class Attestation<T extends NumberType> extends CustomTypeClass<Attestati
     this.proofOfIssuance = data.proofOfIssuance;
     this.inviteCode = data.inviteCode;
     this.attestationId = data.attestationId;
-    this.type = data.type;
     this.scheme = data.scheme;
-    this.attestationMessages = data.attestationMessages;
+    this.messages = data.messages;
     this.dataIntegrityProof = data.dataIntegrityProof;
     this.name = data.name;
     this.image = data.image;
     this.description = data.description;
     this.holders = data.holders;
+    this.originalProvider = data.originalProvider;
     this.anchors = data.anchors;
+    this.allHolders = data.allHolders;
     this.createdAt = data.createdAt;
+    this.entropies = data.entropies;
+    this.publicVisibility = data.publicVisibility;
   }
 
   getNumberFieldNames(): string[] {
@@ -128,5 +75,25 @@ export class Attestation<T extends NumberType> extends CustomTypeClass<Attestati
 
   convert<U extends NumberType>(convertFunction: (val: NumberType) => U): Attestation<U> {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as Attestation<U>;
+  }
+}
+
+/**
+ * @category Off-Chain Attestations
+ */
+export class AttestationsProof<T extends NumberType> extends Attestation<T> implements iAttestationsProof<T> {
+  updateHistory: UpdateHistory<T>[];
+  _docId: string;
+  _id?: string | undefined;
+
+  constructor(data: iAttestationsProof<T>) {
+    super(data);
+    this._docId = data._docId;
+    this._id = data._id;
+    this.updateHistory = data.updateHistory.map((x) => new UpdateHistory(x));
+  }
+
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): AttestationsProof<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as AttestationsProof<U>;
   }
 }

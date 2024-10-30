@@ -1,7 +1,7 @@
 //IMPORTANT: Keep all imports type-safe by using the `type` keyword. If not, this will mess up the circular dependency check.
 
+import type { iAttestationDoc } from '@/api-indexer/docs/interfaces.js';
 import type { BitBadgesAddress, UNIXMilliTimestamp, iBadgeMetadataDetails, iCollectionMetadataDetails } from '@/api-indexer/index.js';
-import type { iUpdateHistory } from '@/api-indexer/docs/interfaces.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import type { iCosmosCoin } from '@/core/coin.js';
 
@@ -73,85 +73,24 @@ export interface iOffChainBalancesMetadata {
 /**
  * @category Interfaces
  */
-export interface iAttestationsProof<T extends NumberType> {
-  /** Entropies used for certain data integrity proofs on-chain (e.g. HASH(message + entropy) = on-chain value) */
-  entropies?: string[];
-
-  updateHistory?: iUpdateHistory<T>[];
-
-  /** The message format of the attestationMessages. */
-  messageFormat: 'plaintext' | 'json';
-  /** The address of the user who created the attestation. */
-  createdBy: BitBadgesAddress;
-  /** When the attestation was created. */
-  createdAt: UNIXMilliTimestamp<T>;
-
-  /**
-   * Proof of issuance is used for BBS+ signatures (scheme = bbs) only.
-   * BBS+ signatures are signed with a BBS+ key pair, but you would often want the issuer to be a native address.
-   * The prooofOfIssuance establishes a link saying that "I am the issuer of this attestation signed with BBS+ key pair ___".
-   *
-   * Fields can be left blank for standard signatures.
-   */
-  proofOfIssuance: {
-    message: string;
-    signature: string;
-    signer: string;
-    publicKey?: string;
-  };
-
-  /**
-   * The scheme of the attestation. BBS+ signatures are supported and can be used where selective disclosure is a requirement.
-   * Otherwise, you can simply use your native blockchain's signature scheme.
-   */
-  scheme: 'bbs' | 'standard';
-
-  /**
-   * Thesse are the attestations that are signed.
-   * For BBS+ signatures, there can be >1 attestationMessages, and the signer can selectively disclose the attestations.
-   * For standard signatures, there is only 1 attestationMessage.
-   */
-  attestationMessages: string[];
-
-  /**
-   * This is the signature and accompanying details of the attestationMessages. The siganture maintains the integrity of the attestationMessages.
-   *
-   * This should match the expected scheme. For example, if the scheme is BBS+, the signature should be a BBS+ signature and signer should be a BBS+ public key.
-   */
-  dataIntegrityProof: {
-    signature: string;
-    signer: string;
-    publicKey?: string;
-  };
-
-  /** Metadata for the attestation for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
-  name: string;
-  /** Metadata for the attestation for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
-  image: string;
-  /** Metadata for the attestation for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
-  description: string;
-
-  /**
-   * Anchors are on-chain transactions used to prove certain things
-   * about the attestation. For example, you can anchor the attestation to a
-   * transaction hash to prove that the attestation existed at a certain time.
-   */
-  anchors?: {
-    txHash?: string;
-    message?: string;
-  }[];
-}
+export interface iAttestationsProof<T extends NumberType> extends iAttestationDoc<T> {}
 
 /**
  * @category Interfaces
  */
 export interface iAttestation<T extends NumberType> {
-  /** The message format of the attestationMessages. */
+  /** The message format of the messages. */
   messageFormat: 'plaintext' | 'json';
-  /** The address of the user who created the attestation. */
+  /** The address of the user who created the attestation on BitBadges. Note this is used for permissions on BitBadges end and may not align with the signer / issuer of the attestation. */
   createdBy: BitBadgesAddress;
   /** When the attestation was created. */
   createdAt: UNIXMilliTimestamp<T>;
+
+  /** Entropies used for certain data integrity proofs on-chain (e.g. HASH(message + entropy) = on-chain value) */
+  entropies: string[];
+
+  /** Whether or not the attestation is displayable on the user's profile. if true, the attestation can be queried by anyone with the ID. */
+  publicVisibility?: boolean;
 
   /**
    * Proof of issuance is used for BBS+ signatures (scheme = bbs) only.
@@ -167,7 +106,7 @@ export interface iAttestation<T extends NumberType> {
     publicKey?: string;
   };
 
-  /** The attestation ID. This is the constan ID that is given to the attestation.  */
+  /** The attestation ID. This is the constant ID that is given to the attestation.  */
   attestationId: string;
 
   /** The inviteCode is used to add the attestation to the user's wallet. Anyone with the key can query it, so keep this safe and secure. */
@@ -177,26 +116,30 @@ export interface iAttestation<T extends NumberType> {
    * The scheme of the attestation. BBS+ signatures are supported and can be used where selective disclosure is a requirement.
    * Otherwise, you can simply use your native blockchain's signature scheme.
    */
-  scheme: 'bbs' | 'standard';
-  /** The type of the attestation (e.g. credential). */
-  type: string;
+  scheme: 'bbs' | 'standard' | 'custom' | string;
+
+  /** The original provider of the attestation. Used for third-party attestation providers. */
+  originalProvider?: string;
 
   /**
    * Thesse are the attestations that are signed.
-   * For BBS+ signatures, there can be >1 attestationMessages, and the signer can selectively disclose the attestations.
+   * For BBS+ signatures, there can be >1 messages, and the signer can selectively disclose the attestations.
    * For standard signatures, there is only 1 attestationMessage.
    */
-  attestationMessages: string[];
+  messages: string[];
 
   /**
-   * This is the signature and accompanying details of the attestationMessages. The siganture maintains the integrity of the attestationMessages.
+   * This is the signature and accompanying details of the messages. The siganture maintains the integrity of the messages.
    *
    * This should match the expected scheme. For example, if the scheme is BBS+, the signature should be a BBS+ signature and signer should be a BBS+ public key.
+   *
+   * For custom schemes, this is often left blank (because the proof is already included in the message).
    */
   dataIntegrityProof: {
     signature: string;
     signer: string;
     publicKey?: string;
+    isDerived?: boolean;
   };
 
   /** Metadata for the attestation for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
@@ -210,6 +153,12 @@ export interface iAttestation<T extends NumberType> {
    * Holders are the addresses that have been given the attestation.
    */
   holders: string[];
+
+  /**
+   * All holders are the addresses that have been given the attestation at any point in time.
+   * Used internally as an append-only audit log.
+   */
+  allHolders?: string[];
 
   /**
    * Anchors are on-chain transactions used to prove certain things

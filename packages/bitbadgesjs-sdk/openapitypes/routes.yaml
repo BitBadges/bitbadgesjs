@@ -2201,7 +2201,35 @@ paths:
       security:
         - apiKey: []
       x-internal: false
-components:
+  /api/v0/attestation/verify:
+    post:
+      operationId: verifyAttestation
+      summary: Verify Attestation
+      tags:
+        - SIWBB Authentication
+      description: |
+        Verifies the attestation proofs well-formedness and signatures.
+        This is a helper route for the verifyAttestation SDK function to outsource the verification logic
+        to the server. Only supports BitBadges native schemes (bbs, standard).
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iVerifyAttestationSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyAttestationPayload'
+      security:
+        - apiKey: []
   responses:
     ErrorResponse:
       description: An error response

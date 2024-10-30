@@ -53,13 +53,15 @@ export const BitBadgesKeplrSuggestBetanetChainInfo = {
       coinDenom: 'BADGE',
       coinMinimalDenom: 'ubadge',
       coinDecimals: 9,
-      coinImageUrl: 'https://avatars.githubusercontent.com/u/86890740'
+      coinImageUrl: 'https://avatars.githubusercontent.com/u/86890740',
+      icon: 'https://avatars.githubusercontent.com/u/86890740'
     },
     {
       coinDenom: 'STAKE',
       coinMinimalDenom: 'ustake',
       coinDecimals: 9,
-      coinImageUrl: 'https://avatars.githubusercontent.com/u/86890740'
+      coinImageUrl: 'https://avatars.githubusercontent.com/u/86890740',
+      icon: 'https://avatars.githubusercontent.com/u/86890740'
     }
   ],
   feeCurrencies: [
@@ -72,15 +74,18 @@ export const BitBadgesKeplrSuggestBetanetChainInfo = {
         average: 0.000000000001,
         high: 0.000000000001
       },
-      coinImageUrl: 'https://avatars.githubusercontent.com/u/86890740'
+      coinImageUrl: 'https://avatars.githubusercontent.com/u/86890740',
+      icon: 'https://avatars.githubusercontent.com/u/86890740'
     }
   ],
   stakeCurrency: {
     coinDenom: 'STAKE',
     coinMinimalDenom: 'ustake',
     coinDecimals: 9,
-    coinImageUrl: 'https://avatars.githubusercontent.com/u/86890740'
-  }
+    coinImageUrl: 'https://avatars.githubusercontent.com/u/86890740',
+    icon: 'https://avatars.githubusercontent.com/u/86890740'
+  },
+  image: 'https://avatars.githubusercontent.com/u/86890740'
 };
 
 /**

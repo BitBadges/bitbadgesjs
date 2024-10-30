@@ -12,30 +12,19 @@ import { BitBadgesAddressList } from './BitBadgesAddressList.js';
 import { BitBadgesCollection } from './BitBadgesCollection.js';
 import type { BaseBitBadgesApi, PaginationInfo } from './base.js';
 import { ClaimAlertDoc, ListActivityDoc, TransferActivityDoc } from './docs/activity.js';
-import {
-  ApprovalTrackerDoc,
-  AttestationDoc,
-  AttestationProofDoc,
-  BalanceDocWithDetails,
-  MapDoc,
-  MerkleChallengeDoc,
-  ProfileDoc,
-  SIWBBRequestDoc
-} from './docs/docs.js';
+import { ApprovalTrackerDoc, AttestationDoc, BalanceDocWithDetails, MapDoc, MerkleChallengeDoc, ProfileDoc, SIWBBRequestDoc } from './docs/docs.js';
 import type {
   BitBadgesAddress,
   NativeAddress,
   iAccountDoc,
   iApprovalTrackerDoc,
   iAttestationDoc,
-  iAttestationProofDoc,
   iBalanceDocWithDetails,
   iClaimAlertDoc,
   iListActivityDoc,
   iMapDoc,
   iMerkleChallengeDoc,
   iProfileDoc,
-  iReviewDoc,
   iSIWBBRequestDoc,
   iTransferActivityDoc
 } from './docs/interfaces.js';
@@ -73,8 +62,6 @@ export interface iBitBadgesUserInfo<T extends NumberType> extends iProfileDoc<T>
   siwbbRequests: iSIWBBRequestDoc<T>[];
   /** A list of user attestations for the account. Paginated and fetched as needed. To be used in conjunction with views. */
   attestations: iAttestationDoc<T>[];
-  /** A list of atestation proofs for the account. Paginated and fetched as needed. To be used in conjunction with views. */
-  attestationProofs: iAttestationProofDoc<T>[];
 
   /** The reserved map for the account. This is created and managed on-chain through the x/maps module. */
   reservedMap?: iMapDoc<T>;
@@ -135,7 +122,6 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   approvalTrackers: ApprovalTrackerDoc<T>[];
   addressLists: BitBadgesAddressList<T>[];
   claimAlerts: ClaimAlertDoc<T>[];
-  attestationProofs: AttestationProofDoc<T>[];
   siwbbRequests: SIWBBRequestDoc<T>[];
   attestations: iAttestationDoc<T>[];
 
@@ -181,7 +167,6 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     this.claimAlerts = data.claimAlerts.map((alert) => new ClaimAlertDoc(alert));
     this.siwbbRequests = data.siwbbRequests.map((auth) => new SIWBBRequestDoc(auth));
     this.attestations = data.attestations.map((attestation) => new AttestationDoc(attestation));
-    this.attestationProofs = data.attestationProofs.map((proof) => new AttestationProofDoc(proof));
     this.address = data.address;
     this.nsfw = data.nsfw;
     this.reported = data.reported;
@@ -470,10 +455,8 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
         return this.getAttestationsView(viewId) as AccountViewData<T>[KeyType];
       case 'receivedAttestations':
         return this.getAttestationsView(viewId) as AccountViewData<T>[KeyType];
-      case 'attestationProofs':
-        return this.getAttestationProofsView(viewId) as AccountViewData<T>[KeyType];
-      case 'publicAttestationProofs':
-        return this.getAttestationProofsView(viewId) as AccountViewData<T>[KeyType];
+      case 'attestations':
+        return this.getAttestationsView(viewId) as AccountViewData<T>[KeyType];
       default:
         throw new Error('Invalid view type');
     }
@@ -483,12 +466,6 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     return (this.views[viewId]?.ids.map((x) => {
       return this.attestations.find((y) => y._docId === x);
     }) ?? []) as AttestationDoc<T>[];
-  }
-
-  getAttestationProofsView(viewId: string) {
-    return (this.views[viewId]?.ids.map((x) => {
-      return this.attestationProofs.find((y) => y._docId === x);
-    }) ?? []) as AttestationProofDoc<T>[];
   }
 
   getSIWBBRequestsView(viewId: string) {
@@ -556,7 +533,6 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
       activity: [],
       listsActivity: [],
       attestations: [],
-      attestationProofs: [],
       addressLists: [],
       claimAlerts: [],
       merkleChallenges: [],
@@ -591,7 +567,6 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
       collected: [],
       activity: [],
       attestations: [],
-      attestationProofs: [],
       claimAlerts: [],
       merkleChallenges: [],
       approvalTrackers: [],
@@ -621,8 +596,7 @@ type AccountViewData<T extends NumberType> = {
   listsActivity: ListActivityDoc<T>[];
   createdAttestations: AttestationDoc<T>[];
   receivedAttestations: AttestationDoc<T>[];
-  attestationProofs: AttestationProofDoc<T>[];
-  publicAttestationProofs: AttestationProofDoc<T>[];
+  attestations: AttestationDoc<T>[];
 };
 
 /**
@@ -685,7 +659,6 @@ function updateAccountWithResponse<T extends NumberType>(
     siwbbRequests: [...(cachedAccount?.siwbbRequests || []), ...(account.siwbbRequests || [])],
     listsActivity: [...(cachedAccount?.listsActivity || []), ...(account.listsActivity || [])],
     attestations: [...(cachedAccount?.attestations || []), ...(account.attestations || [])],
-    attestationProofs: [...(cachedAccount?.attestationProofs || []), ...(account.attestationProofs || [])],
     views: views,
     publicKey,
     airdropped: account.airdropped ? account.airdropped : cachedAccount?.airdropped ? cachedAccount.airdropped : false,
@@ -712,7 +685,6 @@ function updateAccountWithResponse<T extends NumberType>(
   newAccount.siwbbRequests = newAccount.siwbbRequests.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
   newAccount.listsActivity = newAccount.listsActivity.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
   newAccount.attestations = newAccount.attestations.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
-  newAccount.attestationProofs = newAccount.attestationProofs.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
 
   //sort in descending order
   newAccount.activity = newAccount.activity.sort((a, b) => (BigInt(b.timestamp) - BigInt(a.timestamp) > 0 ? -1 : 1));
@@ -744,8 +716,7 @@ export type AccountViewKey =
   | 'listsActivity'
   | 'createdAttestations'
   | 'receivedAttestations'
-  | 'attestationProofs'
-  | 'publicAttestationProofs';
+  | 'attestations';
 
 /**
  * This defines the options for fetching additional account details.

@@ -1,8 +1,6 @@
-import { convertToBitBadgesAddress, getChainForAddress } from '@/address-converter/converter.js';
+import { getChainForAddress } from '@/address-converter/converter.js';
 import { getChainDriver } from '@/chain-drivers/verifySig.js';
-import { iAttestationsProof } from '@/interfaces/badges/core.js';
 import { blsCreateProof, blsVerify, blsVerifyProof } from '@trevormil/bbs-signatures';
-import { NumberType } from 'blockin/dist/types/verify.types';
 
 /**
  * Creates a attestations proof that is well-formed according to the BitBadges expected format
@@ -11,22 +9,55 @@ import { NumberType } from 'blockin/dist/types/verify.types';
  */
 export const createAttestationsProof = blsCreateProof;
 
+interface VerifyAttestationsPresentationSignaturesPayload {
+  scheme: 'bbs' | 'standard' | string;
+  messages: string[];
+  messageFormat: 'json' | 'plaintext';
+  dataIntegrityProof: {
+    signature: string;
+    signer: string;
+    publicKey?: string;
+    isDerived?: boolean;
+  };
+  proofOfIssuance?: {
+    message: string;
+    signature: string;
+    signer: string;
+    publicKey?: string;
+  };
+}
+
 /**
  * Verifies the attestations proofs well-formedness and signatures. This does not require a call to the BitBadges API.  Note this only verifies the signatures / validity of the proofs.
  * You are responsible for checking the contents of the proofs.
  *
+ * Alias of `verifyAttestationsPresentationSignatures`
+ *
  * @category SIWBB Authentication
  */
-export const verifyAttestationsPresentationSignatures = async (
-  body: Omit<iAttestationsProof<NumberType>, 'anchors' | 'holders' | 'updateHistory' | 'credential' | 'entropies'>,
-  derivedProof?: boolean
-) => {
-  if (!body.attestationMessages.length || body.attestationMessages.some((m) => !m)) {
+export const verifyAttestation = async (body: VerifyAttestationsPresentationSignaturesPayload) => {
+  await verifyAttestationsPresentationSignatures(body);
+};
+
+/**
+ * Verifies the attestations proofs well-formedness and signatures. This does not require a call to the BitBadges API.  Note this only verifies the signatures / validity of the proofs.
+ * You are responsible for checking the contents of the proofs.
+ *
+ * Alias of `verifyAttestation`
+ *
+ * @category SIWBB Authentication
+ */
+export const verifyAttestationsPresentationSignatures = async (body: VerifyAttestationsPresentationSignaturesPayload) => {
+  if (body.scheme !== 'bbs' && body.scheme !== 'standard') {
+    throw new Error('Invalid scheme. Only BitBadges native schemes are supported (scheme = bbs, standard)');
+  }
+
+  if (!body.messages.length || body.messages.some((m) => !m)) {
     throw new Error('Messages are required and cannot be empty');
   }
 
   if (body.messageFormat === 'json') {
-    for (const message of body.attestationMessages) {
+    for (const message of body.messages) {
       try {
         JSON.parse(message);
       } catch (e) {
@@ -39,14 +70,10 @@ export const verifyAttestationsPresentationSignatures = async (
   if (body.dataIntegrityProof) {
     if (body.scheme === 'standard') {
       const address = body.dataIntegrityProof.signer;
-      if (convertToBitBadgesAddress(address) !== convertToBitBadgesAddress(body.createdBy)) {
-        throw new Error('Signer does not match creator');
-      }
-
       const chain = getChainForAddress(address);
       await getChainDriver(chain).verifySignature(
         address,
-        body.attestationMessages?.[0] ?? '',
+        body.messages?.[0] ?? '',
         body.dataIntegrityProof.signature,
         body.dataIntegrityProof.publicKey
       );
@@ -72,10 +99,6 @@ export const verifyAttestationsPresentationSignatures = async (
       const address = body.proofOfIssuance.signer;
       const chain = getChainForAddress(address);
 
-      if (convertToBitBadgesAddress(address) !== convertToBitBadgesAddress(body.createdBy)) {
-        throw new Error('Signer does not match creator');
-      }
-
       await getChainDriver(chain).verifySignature(
         address,
         body.proofOfIssuance.message,
@@ -83,11 +106,12 @@ export const verifyAttestationsPresentationSignatures = async (
         body.proofOfIssuance.publicKey
       );
 
+      const derivedProof = body.dataIntegrityProof.isDerived;
       if (!derivedProof) {
         const isProofVerified = await blsVerify({
           signature: Uint8Array.from(Buffer.from(body.dataIntegrityProof.signature, 'hex')),
           publicKey: Uint8Array.from(Buffer.from(body.dataIntegrityProof.signer, 'hex')),
-          messages: body.attestationMessages.map((message) => Uint8Array.from(Buffer.from(message, 'utf-8')))
+          messages: body.messages.map((message) => Uint8Array.from(Buffer.from(message, 'utf-8')))
         });
 
         if (!isProofVerified.verified) {
@@ -97,7 +121,7 @@ export const verifyAttestationsPresentationSignatures = async (
         const isProofVerified = await blsVerifyProof({
           proof: Uint8Array.from(Buffer.from(body.dataIntegrityProof.signature, 'hex')),
           publicKey: Uint8Array.from(Buffer.from(body.dataIntegrityProof.signer, 'hex')),
-          messages: body.attestationMessages.map((message) => Uint8Array.from(Buffer.from(message, 'utf-8'))),
+          messages: body.messages.map((message) => Uint8Array.from(Buffer.from(message, 'utf-8'))),
           nonce: Uint8Array.from(Buffer.from('nonce', 'utf8'))
         });
         if (!isProofVerified.verified) {

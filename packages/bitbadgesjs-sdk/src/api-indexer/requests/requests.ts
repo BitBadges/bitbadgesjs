@@ -10,7 +10,6 @@ import { ClaimAlertDoc, TransferActivityDoc } from '@/api-indexer/docs/activity.
 import {
   AccessTokenDoc,
   AttestationDoc,
-  AttestationProofDoc,
   DeveloperAppDoc,
   EventDoc,
   InternalActionsDoc,
@@ -20,9 +19,9 @@ import {
 } from '@/api-indexer/docs/docs.js';
 import {
   ClaimReward,
+  type BitBadgesAddress,
   type ClaimIntegrationPluginCustomBodyType,
   type ClaimIntegrationPluginType,
-  type BitBadgesAddress,
   type IntegrationPluginDetails,
   type JsonBodyInputSchema,
   type JsonBodyInputWithValue,
@@ -32,8 +31,6 @@ import {
   type SiwbbMessage,
   type UNIXMilliTimestamp,
   type iAccessTokenDoc,
-  type iAttestationDoc,
-  type iAttestationProofDoc,
   type iClaimAlertDoc,
   type iClaimDetails,
   type iClaimReward,
@@ -1078,7 +1075,6 @@ export interface iGetBrowseCollectionsSuccessResponse<T extends NumberType> {
     }[];
   };
   events: { [category: string]: iEventDoc<T>[] };
-  attestationProofs: { [category: string]: iAttestationProofDoc<T>[] };
   maps: { [category: string]: iMapWithValues<T>[] };
   claims?: { [category: string]: iClaimDetails<T>[] };
 }
@@ -1103,7 +1099,6 @@ export class GetBrowseCollectionsSuccessResponse<T extends NumberType>
   events: { [category: string]: EventDoc<T>[] };
   maps: { [category: string]: MapWithValues<T>[] };
   claims?: { [category: string]: ClaimDetails<T>[] };
-  attestationProofs: { [category: string]: AttestationProofDoc<T>[] };
 
   constructor(data: iGetBrowseCollectionsSuccessResponse<T>) {
     super();
@@ -1147,13 +1142,6 @@ export class GetBrowseCollectionsSuccessResponse<T extends NumberType>
         return acc;
       },
       {} as { [category: string]: EventDoc<T>[] }
-    );
-    this.attestationProofs = Object.keys(data.attestationProofs).reduce(
-      (acc, category) => {
-        acc[category] = data.attestationProofs[category].map((attestationProof) => new AttestationProofDoc(attestationProof));
-        return acc;
-      },
-      {} as { [category: string]: AttestationProofDoc<T>[] }
     );
     this.maps = Object.keys(data.maps).reduce(
       (acc, category) => {
@@ -1450,62 +1438,37 @@ export class GenericBlockinVerifySuccessResponse extends VerifySignInSuccessResp
 /**
  * @category API Requests / Responses
  */
-export interface CreateAttestationPayload {
-  /**
-   * Proof of issuance is used for BBS+ signatures (scheme = bbs) only.
-   * BBS+ signatures are signed with a BBS+ key pair, but you would often want the issuer to be a native address.
-   * The prooofOfIssuance establishes a link saying that "I am the issuer of this attestation signed with BBS+ key pair ___".
-   *
-   * Fields can be left blank for standard signatures.
-   */
-  proofOfIssuance: {
-    message: string;
-    signature: string;
-    signer: string;
-    publicKey?: string;
-  };
-
-  /** The message format of the attestationMessages. */
-  messageFormat: 'plaintext' | 'json';
-  /**
-   * The scheme of the attestation. BBS+ signatures are supported and can be used where selective disclosure is a requirement.
-   * Otherwise, you can simply use your native blockchain's signature scheme.
-   */
-  scheme: 'bbs' | 'standard';
-  /** The type of the attestation (e.g. credential). */
-  type: string;
-  /**
-   * Thesse are the attestations that are signed.
-   * For BBS+ signatures, there can be >1 attestationMessages, and the signer can selectively disclose the attestations.
-   * For standard signatures, there is only 1 attestationMessage.
-   */
-  attestationMessages: string[];
-
-  /**
-   * This is the signature and accompanying details of the attestationMessages. The siganture maintains the integrity of the attestationMessages.
-   *
-   * This should match the expected scheme. For example, if the scheme is BBS+, the signature should be a BBS+ signature and signer should be a BBS+ public key.
-   */
-  dataIntegrityProof: {
-    signature: string;
-    signer: string;
-    publicKey?: string;
-  };
-
-  /** Metadata for the attestation for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
-  name: string;
-  /** Metadata for the attestation for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
-  image: string;
-  /** Metadata for the attestation for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
-  description: string;
+export interface CreateAttestationPayload
+  extends Pick<
+    AttestationDoc<NumberType>,
+    | 'originalProvider'
+    | 'proofOfIssuance'
+    | 'messageFormat'
+    | 'scheme'
+    | 'messages'
+    | 'dataIntegrityProof'
+    | 'name'
+    | 'image'
+    | 'description'
+    | 'publicVisibility'
+  > {
+  /** Blockchain anchors to add to the attestation. These are on-chain transactions that can be used to prove stuff about the attestation, like
+   * existence at a certain point in time or to maintain data integrity. */
+  anchors?: {
+    txHash?: string;
+    message?: string;
+  }[];
 }
 
 /**
  * @category API Requests / Responses
  */
 export interface iCreateAttestationSuccessResponse {
-  /** The attestation ID. This is the ID that is given to the user to query the attestation. Anyone with the ID can query it, so keep this safe and secure. */
+  /** The attestation invite code. This is the code that is given to the user to query the attestation. Anyone with the code can query it, so keep this safe and secure. */
   inviteCode: string;
+
+  /** The attestation ID. */
+  id: string;
 }
 
 /**
@@ -1513,33 +1476,51 @@ export interface iCreateAttestationSuccessResponse {
  */
 export class CreateAttestationSuccessResponse extends CustomTypeClass<CreateAttestationSuccessResponse> implements iCreateAttestationSuccessResponse {
   inviteCode: string;
+  id: string;
 
   constructor(data: iCreateAttestationSuccessResponse) {
     super();
     this.inviteCode = data.inviteCode;
+    this.id = data.id;
   }
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface GetAttestationPayload {
+export interface GetAttestationsPayload {
   /** The attestation key received from the original attestation creation.  */
   inviteCode?: string;
 
   /** The attestation ID. You can use this if you are the creator or a holder of the attestation. */
-  attestationId?: string;
+  attestationIds?: string[];
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface iGetAttestationSuccessResponse<T extends NumberType> extends iAttestationDoc<T> {}
+export interface iGetAttestationsSuccessResponse<T extends NumberType> {
+  attestations: (AttestationDoc<T> | undefined)[];
+}
 
 /**
  * @category API Requests / Responses
  */
-export class GetAttestationSuccessResponse<T extends NumberType> extends AttestationDoc<T> {}
+export class GetAttestationsSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetAttestationsSuccessResponse<T>>
+  implements iGetAttestationsSuccessResponse<T>
+{
+  attestations: (AttestationDoc<T> | undefined)[];
+
+  constructor(data: iGetAttestationsSuccessResponse<T>) {
+    super();
+    this.attestations = data.attestations.map((attestation) => (attestation ? new AttestationDoc<T>(attestation) : undefined));
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetAttestationsSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetAttestationsSuccessResponse<U>;
+  }
+}
 
 /**
  * @category API Requests / Responses
@@ -1599,24 +1580,26 @@ export interface UpdateAttestationPayload {
     publicKey?: string;
   };
 
-  /** The message format of the attestationMessages. */
+  /** The message format of the messages. */
   messageFormat?: 'plaintext' | 'json';
   /**
    * The scheme of the attestation. BBS+ signatures are supported and can be used where selective disclosure is a requirement.
    * Otherwise, you can simply use your native blockchain's signature scheme.
    */
-  scheme?: 'bbs' | 'standard';
-  /** The type of the attestation (e.g. credential). */
-  type?: string;
-  /**
-   * Thesse are the attestations that are signed.
-   * For BBS+ signatures, there can be >1 attestationMessages, and the signer can selectively disclose the attestations.
-   * For standard signatures, there is only 1 attestationMessage.
-   */
-  attestationMessages?: string[];
+  scheme?: 'bbs' | 'standard' | 'custom' | string;
+
+  /** The original provider of the attestation. Used for third-party attestation providers. */
+  originalProvider?: string;
 
   /**
-   * This is the signature and accompanying details of the attestationMessages. The siganture maintains the integrity of the attestationMessages.
+   * Thesse are the attestations that are signed.
+   * For BBS+ signatures, there can be >1 messages, and the signer can selectively disclose the attestations.
+   * For standard signatures, there is only 1 attestationMessage.
+   */
+  messages?: string[];
+
+  /**
+   * This is the signature and accompanying details of the messages. The siganture maintains the integrity of the messages.
    *
    * This should match the expected scheme. For example, if the scheme is BBS+, the signature should be a BBS+ signature and signer should be a BBS+ public key.
    */
@@ -1624,7 +1607,11 @@ export interface UpdateAttestationPayload {
     signature: string;
     signer: string;
     publicKey?: string;
+    derivedProof?: boolean;
   };
+
+  /** Whether or not the attestation is displayable on the user's profile. if true, the attestation can be queried by anyone with the ID. */
+  publicVisibility?: boolean;
 
   /** Metadata for the attestation for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
   name?: string;
@@ -1650,6 +1637,32 @@ export class UpdateAttestationSuccessResponse extends CustomTypeClass<UpdateAtte
   constructor(data: iUpdateAttestationSuccessResponse) {
     super();
     this.inviteCode = data.inviteCode;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface VerifyAttestationPayload {
+  attestation: AttestationDoc<NumberType>;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iVerifyAttestationSuccessResponse {
+  success: boolean;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class VerifyAttestationSuccessResponse extends CustomTypeClass<VerifyAttestationSuccessResponse> implements iVerifyAttestationSuccessResponse {
+  success: boolean;
+
+  constructor(data: iVerifyAttestationSuccessResponse) {
+    super();
+    this.success = data.success;
   }
 }
 
@@ -2486,7 +2499,7 @@ export class DeleteClaimSuccessResponse extends EmptyResponseClass {}
  * @category API Requests / Responses
  */
 export interface UpdateClaimPayload {
-  claims: Omit<iClaimDetails<NumberType>, 'seedCode' | 'version'>[];
+  claims: Omit<iClaimDetails<NumberType>, '_includesPrivateParams' | 'seedCode' | 'version'>[];
 }
 
 /**
@@ -2507,7 +2520,7 @@ export type ManagePluginRequest = Omit<IntegrationPluginDetails<ClaimIntegration
 /**
  * @category Interfaces
  */
-export type CreateClaimRequest<T extends NumberType> = Omit<iClaimDetails<T>, 'plugins' | 'version'> & {
+export type CreateClaimRequest<T extends NumberType> = Omit<iClaimDetails<T>, 'plugins' | 'version' | '_includesPrivateParams'> & {
   cid?: string;
 } & {
   plugins: ManagePluginRequest[];
@@ -2516,7 +2529,7 @@ export type CreateClaimRequest<T extends NumberType> = Omit<iClaimDetails<T>, 'p
 /**
  * @category Interfaces
  */
-export type UpdateClaimRequest<T extends NumberType> = Omit<iClaimDetails<T>, 'seedCode' | 'plugins' | 'version'> & {
+export type UpdateClaimRequest<T extends NumberType> = Omit<iClaimDetails<T>, 'seedCode' | 'plugins' | 'version' | '_includesPrivateParams'> & {
   cid?: string;
 } & {
   plugins: ManagePluginRequest[];
@@ -2560,72 +2573,6 @@ export interface iOauthRevokeSuccessResponse {}
  * @category API Requests / Responses
  */
 export class OauthRevokeSuccessResponse extends EmptyResponseClass {}
-
-/**
- * @category API Requests / Responses
- */
-export interface CreateAttestationProofPayload extends iAttestationsProof<NumberType> {
-  displayOnProfile: boolean;
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iCreateAttestationProofSuccessResponse {
-  /** The proof ID. This is the ID that is given to the user to query the attestation. Anyone with the ID can query it, so keep this safe and secure. */
-  id: string;
-}
-
-/**
- * @category API Requests / Responses
- */
-export class CreateAttestationProofSuccessResponse
-  extends CustomTypeClass<CreateAttestationProofSuccessResponse>
-  implements iCreateAttestationProofSuccessResponse
-{
-  id: string;
-
-  constructor(data: iCreateAttestationProofSuccessResponse) {
-    super();
-    this.id = data.id;
-  }
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface GetAttestationProofPayload {
-  /** The attestation proof ID. */
-  id: string;
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iGetAttestationProofSuccessResponse<T extends NumberType> extends iAttestationProofDoc<T> {}
-
-/**
- * @category API Requests / Responses
- */
-export class GetAttestationProofSuccessResponse<T extends NumberType> extends AttestationProofDoc<T> {}
-
-/**
- * @category API Requests / Responses
- */
-export interface DeleteAttestationProofPayload {
-  /** The attestation proof ID. */
-  id: string;
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iDeleteAttestationProofSuccessResponse {}
-
-/**
- * @category API Requests / Responses
- */
-export class DeleteAttestationProofSuccessResponse extends EmptyResponseClass {}
 
 /**
  * @category API Requests / Responses

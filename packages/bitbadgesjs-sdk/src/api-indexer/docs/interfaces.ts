@@ -485,6 +485,7 @@ export interface iQueueDoc<T extends NumberType> extends Doc {
     txHash: string;
     amount: NumberType;
     recipient: BitBadgesAddress;
+    denom: string;
   };
 }
 
@@ -1400,13 +1401,6 @@ export interface iAttestationDoc<T extends NumberType> extends Doc, iAttestation
 /**
  * @category Interfaces
  */
-export interface iAttestationProofDoc<T extends NumberType> extends Doc, iAttestationsProof<T> {
-  displayOnProfile: boolean;
-}
-
-/**
- * @category Interfaces
- */
 export interface iMapDoc<T extends NumberType> extends Doc, iMapWithValues<T> {}
 
 /**
@@ -1476,8 +1470,12 @@ export interface iMapWithValues<T extends NumberType> extends iMap<T> {
  * @category Interfaces
  */
 export interface iClaimDetails<T extends NumberType> {
+  /** Whether the claim fetch includes private params */
+  _includesPrivateParams: boolean;
   /** Unique claim ID. */
   claimId: string;
+  /** The original creator of the claim */
+  createdBy?: BitBadgesAddress;
   /** Collection ID that the claim is for (if applicable). */
   collectionId?: T;
   /** Is intended to be used for Sign In with BitBadges. */

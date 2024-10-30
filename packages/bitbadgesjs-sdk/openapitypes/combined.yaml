@@ -2498,7 +2498,38 @@ paths:
       security:
         - apiKey: []
       x-internal: false
-components:
+  /api/v0/attestation/verify:
+    post:
+      operationId: verifyAttestation
+      summary: Verify Attestation
+      tags:
+        - SIWBB Authentication
+      description: >
+        Verifies the attestation proofs well-formedness and signatures.
+
+        This is a helper route for the verifyAttestation SDK function to
+        outsource the verification logic
+
+        to the server. Only supports BitBadges native schemes (bbs, standard).
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iVerifyAttestationSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyAttestationPayload'
+      security:
+        - apiKey: []
   responses:
     ErrorResponse:
       description: An error response
@@ -2558,6 +2589,7 @@ components:
       type: http
       scheme: cookie
       description: User must be signed in and must be the owner of the requested object.
+components:
   schemas:
     SupportedChain:
       enum:
@@ -3515,7 +3547,7 @@ components:
         ethAddress:
           description: The Eth address of the account
           type: string
-          examples: &ref_20
+          examples: &ref_19
             - 0x...
         solAddress:
           description: The Solana address of the account
@@ -3525,7 +3557,7 @@ components:
         btcAddress:
           description: The Bitcoin address of the account
           type: string
-          examples: &ref_21
+          examples: &ref_20
             - bc1...
         sequence:
           description: The sequence of the account
@@ -3706,13 +3738,13 @@ components:
         profilePicUrl:
           description: The profile picture URL of the account
           type: string
-          examples: &ref_22
+          examples: &ref_21
             - https://example.com
             - ipfs://Qm...
         bannerImage:
           description: The banner image URL of the account
           type: string
-          examples: &ref_19
+          examples: &ref_18
             - https://example.com
             - ipfs://Qm...
         username:
@@ -3914,10 +3946,13 @@ components:
               $ref: '#/components/schemas/NumberType'
             recipient:
               $ref: '#/components/schemas/BitBadgesAddress'
+            denom:
+              type: string
           required:
             - txHash
             - amount
             - recipient
+            - denom
           additionalProperties: false
           type: object
       required:
@@ -4441,7 +4476,6 @@ components:
         - type
         - conditions
       additionalProperties: false
-      description: ''
       type: object
     iClaimBuilderDoc:
       properties:
@@ -5452,14 +5486,29 @@ components:
           enum:
             - plaintext
             - json
-          description: The message format of the attestationMessages.
+          description: The message format of the messages.
           type: string
         createdBy:
-          description: The address of the user who created the attestation.
+          description: >-
+            The address of the user who created the attestation on BitBadges.
+            Note this is used for permissions on BitBadges end and may not align
+            with the signer / issuer of the attestation.
           $ref: '#/components/schemas/BitBadgesAddress'
         createdAt:
           description: When the attestation was created.
           $ref: '#/components/schemas/UNIXMilliTimestamp'
+        entropies:
+          items:
+            type: string
+          description: >-
+            Entropies used for certain data integrity proofs on-chain (e.g.
+            HASH(message + entropy) = on-chain value)
+          type: array
+        publicVisibility:
+          description: >-
+            Whether or not the attestation is displayable on the user's profile.
+            if true, the attestation can be queried by anyone with the ID.
+          type: boolean
         proofOfIssuance:
           properties:
             message:
@@ -5496,7 +5545,7 @@ components:
           type: object
         attestationId:
           description: >-
-            The attestation ID. This is the constan ID that is given to the
+            The attestation ID. This is the constant ID that is given to the
             attestation.
           type: string
         inviteCode:
@@ -5505,9 +5554,6 @@ components:
             Anyone with the key can query it, so keep this safe and secure.
           type: string
         scheme:
-          enum:
-            - bbs
-            - standard
           description: >-
             The scheme of the attestation. BBS+ signatures are supported and can
             be used where selective disclosure is a requirement.
@@ -5515,21 +5561,23 @@ components:
             Otherwise, you can simply use your native blockchain's signature
             scheme.
           type: string
-        type:
-          description: The type of the attestation (e.g. credential).
+        originalProvider:
+          description: >-
+            The original provider of the attestation. Used for third-party
+            attestation providers.
           type: string
-        attestationMessages:
+        messages:
           items:
             type: string
           description: >-
             Thesse are the attestations that are signed.
 
-            For BBS+ signatures, there can be >1 attestationMessages, and the
-            signer can selectively disclose the attestations.
+            For BBS+ signatures, there can be >1 messages, and the signer can
+            selectively disclose the attestations.
 
             For standard signatures, there is only 1 attestationMessage.
           type: array
-          examples: &ref_18
+          examples: &ref_25
             - - attestation message 1
               - attestation message 2
         dataIntegrityProof:
@@ -5543,19 +5591,24 @@ components:
             publicKey:
               type: string
               examples: *ref_15
+            isDerived:
+              type: boolean
           required:
             - signature
             - signer
           additionalProperties: false
           description: >-
-            This is the signature and accompanying details of the
-            attestationMessages. The siganture maintains the integrity of the
-            attestationMessages.
+            This is the signature and accompanying details of the messages. The
+            siganture maintains the integrity of the messages.
 
 
             This should match the expected scheme. For example, if the scheme is
             BBS+, the signature should be a BBS+ signature and signer should be
             a BBS+ public key.
+
+
+            For custom schemes, this is often left blank (because the proof is
+            already included in the message).
           type: object
         name:
           description: >-
@@ -5580,6 +5633,15 @@ components:
             type: string
           description: Holders are the addresses that have been given the attestation.
           type: array
+        allHolders:
+          items:
+            type: string
+          description: >-
+            All holders are the addresses that have been given the attestation
+            at any point in time.
+
+            Used internally as an append-only audit log.
+          type: array
         anchors:
           items:
             properties:
@@ -5608,12 +5670,12 @@ components:
         - messageFormat
         - createdBy
         - createdAt
+        - entropies
         - proofOfIssuance
         - attestationId
         - inviteCode
         - scheme
-        - type
-        - attestationMessages
+        - messages
         - dataIntegrityProof
         - name
         - image
@@ -5621,170 +5683,6 @@ components:
         - holders
         - anchors
         - updateHistory
-      additionalProperties: false
-      description: ''
-      type: object
-    iAttestationProofDoc:
-      properties:
-        _docId:
-          description: A unique stringified document ID
-          type: string
-        _id:
-          description: A unique document ID (Mongo DB ObjectID)
-          type: string
-        entropies:
-          items:
-            type: string
-          description: >-
-            Entropies used for certain data integrity proofs on-chain (e.g.
-            HASH(message + entropy) = on-chain value)
-          type: array
-        updateHistory:
-          items:
-            $ref: '#/components/schemas/iUpdateHistory'
-          type: array
-        messageFormat:
-          enum:
-            - plaintext
-            - json
-          description: The message format of the attestationMessages.
-          type: string
-        createdBy:
-          description: The address of the user who created the attestation.
-          $ref: '#/components/schemas/BitBadgesAddress'
-        createdAt:
-          description: When the attestation was created.
-          $ref: '#/components/schemas/UNIXMilliTimestamp'
-        proofOfIssuance:
-          properties:
-            message:
-              type: string
-            signature:
-              type: string
-              examples: *ref_16
-            signer:
-              type: string
-              examples: *ref_17
-            publicKey:
-              type: string
-              examples: *ref_15
-          required:
-            - message
-            - signature
-            - signer
-          additionalProperties: false
-          description: >-
-            Proof of issuance is used for BBS+ signatures (scheme = bbs) only.
-
-            BBS+ signatures are signed with a BBS+ key pair, but you would often
-            want the issuer to be a native address.
-
-            The prooofOfIssuance establishes a link saying that "I am the issuer
-            of this attestation signed with BBS+ key pair ___".
-
-
-            Fields can be left blank for standard signatures.
-          type: object
-        scheme:
-          enum:
-            - bbs
-            - standard
-          description: >-
-            The scheme of the attestation. BBS+ signatures are supported and can
-            be used where selective disclosure is a requirement.
-
-            Otherwise, you can simply use your native blockchain's signature
-            scheme.
-          type: string
-        attestationMessages:
-          items:
-            type: string
-          description: >-
-            Thesse are the attestations that are signed.
-
-            For BBS+ signatures, there can be >1 attestationMessages, and the
-            signer can selectively disclose the attestations.
-
-            For standard signatures, there is only 1 attestationMessage.
-          type: array
-          examples: *ref_18
-        dataIntegrityProof:
-          properties:
-            signature:
-              type: string
-              examples: *ref_16
-            signer:
-              type: string
-              examples: *ref_17
-            publicKey:
-              type: string
-              examples: *ref_15
-          required:
-            - signature
-            - signer
-          additionalProperties: false
-          description: >-
-            This is the signature and accompanying details of the
-            attestationMessages. The siganture maintains the integrity of the
-            attestationMessages.
-
-
-            This should match the expected scheme. For example, if the scheme is
-            BBS+, the signature should be a BBS+ signature and signer should be
-            a BBS+ public key.
-          type: object
-        name:
-          description: >-
-            Metadata for the attestation for display purposes. Note this should
-            not contain anything sensitive. It may be displayed to verifiers.
-          type: string
-          examples: *ref_13
-        image:
-          description: >-
-            Metadata for the attestation for display purposes. Note this should
-            not contain anything sensitive. It may be displayed to verifiers.
-          type: string
-          examples: *ref_12
-        description:
-          description: >-
-            Metadata for the attestation for display purposes. Note this should
-            not contain anything sensitive. It may be displayed to verifiers.
-          type: string
-          examples: *ref_8
-        anchors:
-          items:
-            properties:
-              txHash:
-                type: string
-                examples: *ref_7
-              message:
-                type: string
-            additionalProperties: false
-            type: object
-          description: >-
-            Anchors are on-chain transactions used to prove certain things
-
-            about the attestation. For example, you can anchor the attestation
-            to a
-
-            transaction hash to prove that the attestation existed at a certain
-            time.
-          type: array
-        displayOnProfile:
-          type: boolean
-      required:
-        - _docId
-        - messageFormat
-        - createdBy
-        - createdAt
-        - proofOfIssuance
-        - scheme
-        - attestationMessages
-        - dataIntegrityProof
-        - name
-        - image
-        - description
-        - displayOnProfile
       additionalProperties: false
       description: ''
       type: object
@@ -6016,9 +5914,15 @@ components:
       type: object
     iClaimDetails:
       properties:
+        _includesPrivateParams:
+          description: Whether the claim fetch includes private params
+          type: boolean
         claimId:
           description: Unique claim ID.
           type: string
+        createdBy:
+          description: The original creator of the claim
+          $ref: '#/components/schemas/BitBadgesAddress'
         collectionId:
           description: Collection ID that the claim is for (if applicable).
           $ref: '#/components/schemas/NumberType'
@@ -6095,6 +5999,7 @@ components:
           description: Custom satisfaction logic
           $ref: '#/components/schemas/iSatisfyMethod'
       required:
+        - _includesPrivateParams
         - claimId
         - plugins
         - version
@@ -6107,7 +6012,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The badge IDs that correspond to the metadata
           type: array
-          examples: &ref_25
+          examples: &ref_24
             - - start: '1'
                 end: '10'
         metadata:
@@ -6186,7 +6091,7 @@ components:
         bannerImage:
           description: The banner image of the badge or badge collection.
           type: string
-          examples: *ref_19
+          examples: *ref_18
         video:
           description: >-
             The video of the badge or badge collection. If a standard video is
@@ -6418,13 +6323,13 @@ components:
                   properties:
                     viewId:
                       type: string
-                      examples: &ref_23
+                      examples: &ref_22
                         - viewKey
                     viewType:
                       enum:
                         - listActivity
                       type: string
-                      examples: &ref_24
+                      examples: &ref_23
                         - viewKey
                     bookmark:
                       type: string
@@ -6614,11 +6519,11 @@ components:
         ethAddress:
           description: The Eth address of the account
           type: string
-          examples: *ref_20
+          examples: *ref_19
         btcAddress:
           description: The Bitcoin address of the account
           type: string
-          examples: *ref_21
+          examples: *ref_20
         sequence:
           description: The sequence of the account
           $ref: '#/components/schemas/NumberType'
@@ -6713,11 +6618,11 @@ components:
         profilePicUrl:
           description: The profile picture URL of the account
           type: string
-          examples: *ref_22
+          examples: *ref_21
         bannerImage:
           description: The banner image URL of the account
           type: string
-          examples: *ref_19
+          examples: *ref_18
         username:
           description: The username of the account
           type: string
@@ -6896,13 +6801,6 @@ components:
             A list of user attestations for the account. Paginated and fetched
             as needed. To be used in conjunction with views.
           type: array
-        attestationProofs:
-          items:
-            $ref: '#/components/schemas/iAttestationProofDoc'
-          description: >-
-            A list of atestation proofs for the account. Paginated and fetched
-            as needed. To be used in conjunction with views.
-          type: array
         reservedMap:
           description: >-
             The reserved map for the account. This is created and managed
@@ -6976,7 +6874,6 @@ components:
         - claimAlerts
         - siwbbRequests
         - attestations
-        - attestationProofs
         - address
         - views
       additionalProperties: false
@@ -6999,8 +6896,7 @@ components:
         - listsActivity
         - createdAttestations
         - receivedAttestations
-        - attestationProofs
-        - publicAttestationProofs
+        - attestations
       description: The supported view keys for fetching account details.
       type: string
     AccountFetchDetails:
@@ -7032,11 +6928,11 @@ components:
                   Unique view ID. Used for pagination. All fetches w/ same ID
                   should be made with same criteria.
                 type: string
-                examples: *ref_23
+                examples: *ref_22
               viewType:
                 $ref: '#/components/schemas/AccountViewKey'
                 description: The base view type to fetch.
-                examples: *ref_24
+                examples: *ref_23
               specificCollections:
                 items:
                   $ref: '#/components/schemas/iBatchBadgeDetails'
@@ -7151,7 +7047,7 @@ components:
             Limit to specific badge IDs. Leave undefined to not filter by badge
             ID.
           type: array
-          examples: *ref_25
+          examples: *ref_24
         categories:
           items:
             type: string
@@ -7202,7 +7098,7 @@ components:
           items:
             $ref: '#/components/schemas/iUintRange'
           type: array
-          examples: *ref_25
+          examples: *ref_24
         pagination:
           $ref: '#/components/schemas/PaginationInfo'
       required:
@@ -7394,7 +7290,7 @@ components:
           description: >-
             If present, the metadata corresponding to the specified badge IDs
             will be fetched.
-          examples: *ref_25
+          examples: *ref_24
       additionalProperties: false
       description: Defines the options for fetching metadata.
       type: object
@@ -7414,13 +7310,13 @@ components:
               viewType:
                 $ref: '#/components/schemas/CollectionViewKey'
                 description: The base view type to fetch.
-                examples: *ref_24
+                examples: *ref_23
               viewId:
                 description: >-
                   A unique view ID. This is used for pagination. All fetches w/
                   same ID should be made with same criteria.
                 type: string
-                examples: *ref_23
+                examples: *ref_22
               bookmark:
                 description: A bookmark to pass in for pagination. "" for first request.
                 type: string
@@ -7521,13 +7417,13 @@ components:
               viewType:
                 $ref: '#/components/schemas/CollectionViewKey'
                 description: The base view type to fetch.
-                examples: *ref_24
+                examples: *ref_23
               viewId:
                 description: >-
                   A unique view ID. This is used for pagination. All fetches w/
                   same ID should be made with same criteria.
                 type: string
-                examples: *ref_23
+                examples: *ref_22
               bookmark:
                 description: A bookmark to pass in for pagination. "" for first request.
                 type: string
@@ -7829,7 +7725,7 @@ components:
                 items:
                   $ref: '#/components/schemas/iUintRange'
                 type: array
-                examples: *ref_25
+                examples: *ref_24
             required:
               - collection
               - badgeIds
@@ -8064,11 +7960,11 @@ components:
         profilePicUrl:
           description: The profile picture URL.
           type: string
-          examples: *ref_22
+          examples: *ref_21
         bannerImage:
           description: The banner image URL.
           type: string
-          examples: *ref_19
+          examples: *ref_18
         username:
           description: The username.
           type: string
@@ -8739,7 +8635,7 @@ components:
                   items:
                     $ref: '#/components/schemas/iUintRange'
                   type: array
-                  examples: *ref_25
+                  examples: *ref_24
               required:
                 - collection
                 - badgeIds
@@ -8751,12 +8647,6 @@ components:
           additionalProperties:
             items:
               $ref: '#/components/schemas/iEventDoc'
-            type: array
-          type: object
-        attestationProofs:
-          additionalProperties:
-            items:
-              $ref: '#/components/schemas/iAttestationProofDoc'
             type: array
           type: object
         maps:
@@ -8778,7 +8668,6 @@ components:
         - activity
         - badges
         - events
-        - attestationProofs
         - maps
       additionalProperties: false
       type: object
@@ -9115,281 +9004,6 @@ components:
       type: object
     CreateAttestationPayload:
       properties:
-        proofOfIssuance:
-          properties:
-            message:
-              type: string
-            signature:
-              type: string
-              examples: *ref_16
-            signer:
-              type: string
-              examples: *ref_17
-            publicKey:
-              type: string
-              examples: *ref_15
-          required:
-            - message
-            - signature
-            - signer
-          additionalProperties: false
-          description: >-
-            Proof of issuance is used for BBS+ signatures (scheme = bbs) only.
-
-            BBS+ signatures are signed with a BBS+ key pair, but you would often
-            want the issuer to be a native address.
-
-            The prooofOfIssuance establishes a link saying that "I am the issuer
-            of this attestation signed with BBS+ key pair ___".
-
-
-            Fields can be left blank for standard signatures.
-          type: object
-        messageFormat:
-          enum:
-            - plaintext
-            - json
-          description: The message format of the attestationMessages.
-          type: string
-        scheme:
-          enum:
-            - bbs
-            - standard
-          description: >-
-            The scheme of the attestation. BBS+ signatures are supported and can
-            be used where selective disclosure is a requirement.
-
-            Otherwise, you can simply use your native blockchain's signature
-            scheme.
-          type: string
-        type:
-          description: The type of the attestation (e.g. credential).
-          type: string
-        attestationMessages:
-          items:
-            type: string
-          description: >-
-            Thesse are the attestations that are signed.
-
-            For BBS+ signatures, there can be >1 attestationMessages, and the
-            signer can selectively disclose the attestations.
-
-            For standard signatures, there is only 1 attestationMessage.
-          type: array
-          examples: *ref_18
-        dataIntegrityProof:
-          properties:
-            signature:
-              type: string
-              examples: *ref_16
-            signer:
-              type: string
-              examples: *ref_17
-            publicKey:
-              type: string
-              examples: *ref_15
-          required:
-            - signature
-            - signer
-          additionalProperties: false
-          description: >-
-            This is the signature and accompanying details of the
-            attestationMessages. The siganture maintains the integrity of the
-            attestationMessages.
-
-
-            This should match the expected scheme. For example, if the scheme is
-            BBS+, the signature should be a BBS+ signature and signer should be
-            a BBS+ public key.
-          type: object
-        name:
-          description: >-
-            Metadata for the attestation for display purposes. Note this should
-            not contain anything sensitive. It may be displayed to verifiers.
-          type: string
-          examples: *ref_13
-        image:
-          description: >-
-            Metadata for the attestation for display purposes. Note this should
-            not contain anything sensitive. It may be displayed to verifiers.
-          type: string
-          examples: *ref_12
-        description:
-          description: >-
-            Metadata for the attestation for display purposes. Note this should
-            not contain anything sensitive. It may be displayed to verifiers.
-          type: string
-          examples: *ref_8
-      required:
-        - proofOfIssuance
-        - messageFormat
-        - scheme
-        - type
-        - attestationMessages
-        - dataIntegrityProof
-        - name
-        - image
-        - description
-      additionalProperties: false
-      type: object
-    iCreateAttestationSuccessResponse:
-      properties:
-        inviteCode:
-          description: >-
-            The attestation ID. This is the ID that is given to the user to
-            query the attestation. Anyone with the ID can query it, so keep this
-            safe and secure.
-          type: string
-      required:
-        - inviteCode
-      additionalProperties: false
-      type: object
-    GetAttestationPayload:
-      properties:
-        inviteCode:
-          description: The attestation key received from the original attestation creation.
-          type: string
-        attestationId:
-          description: >-
-            The attestation ID. You can use this if you are the creator or a
-            holder of the attestation.
-          type: string
-      additionalProperties: false
-      type: object
-    iGetAttestationSuccessResponse:
-      properties:
-        _docId:
-          description: A unique stringified document ID
-          type: string
-        _id:
-          description: A unique document ID (Mongo DB ObjectID)
-          type: string
-        messageFormat:
-          enum:
-            - plaintext
-            - json
-          description: The message format of the attestationMessages.
-          type: string
-        createdBy:
-          description: The address of the user who created the attestation.
-          $ref: '#/components/schemas/BitBadgesAddress'
-        createdAt:
-          description: When the attestation was created.
-          $ref: '#/components/schemas/UNIXMilliTimestamp'
-        proofOfIssuance:
-          properties:
-            message:
-              type: string
-            signature:
-              type: string
-              examples: *ref_16
-            signer:
-              type: string
-              examples: *ref_17
-            publicKey:
-              type: string
-              examples: *ref_15
-          required:
-            - message
-            - signature
-            - signer
-          additionalProperties: false
-          description: >-
-            Proof of issuance is used for BBS+ signatures (scheme = bbs) only.
-
-            BBS+ signatures are signed with a BBS+ key pair, but you would often
-            want the issuer to be a native address.
-
-            The prooofOfIssuance establishes a link saying that "I am the issuer
-            of this attestation signed with BBS+ key pair ___".
-
-
-            Fields can be left blank for standard signatures.
-          type: object
-        attestationId:
-          description: >-
-            The attestation ID. This is the constan ID that is given to the
-            attestation.
-          type: string
-        inviteCode:
-          description: >-
-            The inviteCode is used to add the attestation to the user's wallet.
-            Anyone with the key can query it, so keep this safe and secure.
-          type: string
-        scheme:
-          enum:
-            - bbs
-            - standard
-          description: >-
-            The scheme of the attestation. BBS+ signatures are supported and can
-            be used where selective disclosure is a requirement.
-
-            Otherwise, you can simply use your native blockchain's signature
-            scheme.
-          type: string
-        type:
-          description: The type of the attestation (e.g. credential).
-          type: string
-        attestationMessages:
-          items:
-            type: string
-          description: >-
-            Thesse are the attestations that are signed.
-
-            For BBS+ signatures, there can be >1 attestationMessages, and the
-            signer can selectively disclose the attestations.
-
-            For standard signatures, there is only 1 attestationMessage.
-          type: array
-          examples: *ref_18
-        dataIntegrityProof:
-          properties:
-            signature:
-              type: string
-              examples: *ref_16
-            signer:
-              type: string
-              examples: *ref_17
-            publicKey:
-              type: string
-              examples: *ref_15
-          required:
-            - signature
-            - signer
-          additionalProperties: false
-          description: >-
-            This is the signature and accompanying details of the
-            attestationMessages. The siganture maintains the integrity of the
-            attestationMessages.
-
-
-            This should match the expected scheme. For example, if the scheme is
-            BBS+, the signature should be a BBS+ signature and signer should be
-            a BBS+ public key.
-          type: object
-        name:
-          description: >-
-            Metadata for the attestation for display purposes. Note this should
-            not contain anything sensitive. It may be displayed to verifiers.
-          type: string
-          examples: *ref_13
-        image:
-          description: >-
-            Metadata for the attestation for display purposes. Note this should
-            not contain anything sensitive. It may be displayed to verifiers.
-          type: string
-          examples: *ref_12
-        description:
-          description: >-
-            Metadata for the attestation for display purposes. Note this should
-            not contain anything sensitive. It may be displayed to verifiers.
-          type: string
-          examples: *ref_8
-        holders:
-          items:
-            type: string
-          description: Holders are the addresses that have been given the attestation.
-          type: array
         anchors:
           items:
             properties:
@@ -9401,38 +9015,53 @@ components:
             additionalProperties: false
             type: object
           description: >-
-            Anchors are on-chain transactions used to prove certain things
+            Blockchain anchors to add to the attestation. These are on-chain
+            transactions that can be used to prove stuff about the attestation,
+            like
 
-            about the attestation. For example, you can anchor the attestation
-            to a
-
-            transaction hash to prove that the attestation existed at a certain
-            time.
+            existence at a certain point in time or to maintain data integrity.
           type: array
-        updateHistory:
+      additionalProperties: false
+      type: object
+    iCreateAttestationSuccessResponse:
+      properties:
+        inviteCode:
+          description: >-
+            The attestation invite code. This is the code that is given to the
+            user to query the attestation. Anyone with the code can query it, so
+            keep this safe and secure.
+          type: string
+        id:
+          description: The attestation ID.
+          type: string
+      required:
+        - inviteCode
+        - id
+      additionalProperties: false
+      type: object
+    GetAttestationsPayload:
+      properties:
+        inviteCode:
+          description: The attestation key received from the original attestation creation.
+          type: string
+        attestationIds:
           items:
-            $ref: '#/components/schemas/iUpdateHistory'
+            type: string
+          description: >-
+            The attestation ID. You can use this if you are the creator or a
+            holder of the attestation.
+          type: array
+      additionalProperties: false
+      type: object
+    iGetAttestationsSuccessResponse:
+      properties:
+        attestations:
+          items:
+            anyOf: []
           type: array
       required:
-        - _docId
-        - messageFormat
-        - createdBy
-        - createdAt
-        - proofOfIssuance
-        - attestationId
-        - inviteCode
-        - scheme
-        - type
-        - attestationMessages
-        - dataIntegrityProof
-        - name
-        - image
-        - description
-        - holders
-        - anchors
-        - updateHistory
+        - attestations
       additionalProperties: false
-      description: ''
       type: object
     DeleteAttestationPayload:
       properties:
@@ -9534,12 +9163,9 @@ components:
           enum:
             - plaintext
             - json
-          description: The message format of the attestationMessages.
+          description: The message format of the messages.
           type: string
         scheme:
-          enum:
-            - bbs
-            - standard
           description: >-
             The scheme of the attestation. BBS+ signatures are supported and can
             be used where selective disclosure is a requirement.
@@ -9547,21 +9173,23 @@ components:
             Otherwise, you can simply use your native blockchain's signature
             scheme.
           type: string
-        type:
-          description: The type of the attestation (e.g. credential).
+        originalProvider:
+          description: >-
+            The original provider of the attestation. Used for third-party
+            attestation providers.
           type: string
-        attestationMessages:
+        messages:
           items:
             type: string
           description: >-
             Thesse are the attestations that are signed.
 
-            For BBS+ signatures, there can be >1 attestationMessages, and the
-            signer can selectively disclose the attestations.
+            For BBS+ signatures, there can be >1 messages, and the signer can
+            selectively disclose the attestations.
 
             For standard signatures, there is only 1 attestationMessage.
           type: array
-          examples: *ref_18
+          examples: *ref_25
         dataIntegrityProof:
           properties:
             signature:
@@ -9573,20 +9201,26 @@ components:
             publicKey:
               type: string
               examples: *ref_15
+            derivedProof:
+              type: boolean
           required:
             - signature
             - signer
           additionalProperties: false
           description: >-
-            This is the signature and accompanying details of the
-            attestationMessages. The siganture maintains the integrity of the
-            attestationMessages.
+            This is the signature and accompanying details of the messages. The
+            siganture maintains the integrity of the messages.
 
 
             This should match the expected scheme. For example, if the scheme is
             BBS+, the signature should be a BBS+ signature and signer should be
             a BBS+ public key.
           type: object
+        publicVisibility:
+          description: >-
+            Whether or not the attestation is displayable on the user's profile.
+            if true, the attestation can be queried by anyone with the ID.
+          type: boolean
         name:
           description: >-
             Metadata for the attestation for display purposes. Note this should
@@ -9613,6 +9247,21 @@ components:
           type: string
       required:
         - inviteCode
+      additionalProperties: false
+      type: object
+    VerifyAttestationPayload:
+      properties:
+        attestation: {}
+      required:
+        - attestation
+      additionalProperties: false
+      type: object
+    iVerifyAttestationSuccessResponse:
+      properties:
+        success:
+          type: boolean
+      required:
+        - success
       additionalProperties: false
       type: object
     CreateSIWBBRequestPayload:
@@ -10575,6 +10224,9 @@ components:
               claimId:
                 description: Unique claim ID.
                 type: string
+              createdBy:
+                $ref: '#/components/schemas/BitBadgesAddress'
+                description: The original creator of the claim
               collectionId:
                 description: Collection ID that the claim is for (if applicable).
                 $ref: '#/components/schemas/NumberType'
@@ -10749,6 +10401,9 @@ components:
         claimId:
           description: Unique claim ID.
           type: string
+        createdBy:
+          description: The original creator of the claim
+          $ref: '#/components/schemas/BitBadgesAddress'
         collectionId:
           description: Collection ID that the claim is for (if applicable).
           $ref: '#/components/schemas/NumberType'
@@ -10830,6 +10485,9 @@ components:
         claimId:
           description: Unique claim ID.
           type: string
+        createdBy:
+          description: The original creator of the claim
+          $ref: '#/components/schemas/BitBadgesAddress'
         collectionId:
           description: Collection ID that the claim is for (if applicable).
           $ref: '#/components/schemas/NumberType'
@@ -10929,360 +10587,6 @@ components:
       additionalProperties: false
       type: object
     iOauthRevokeSuccessResponse:
-      additionalProperties: false
-      type: object
-    CreateAttestationProofPayload:
-      properties:
-        entropies:
-          items:
-            type: string
-          description: >-
-            Entropies used for certain data integrity proofs on-chain (e.g.
-            HASH(message + entropy) = on-chain value)
-          type: array
-        updateHistory:
-          items:
-            $ref: '#/components/schemas/iUpdateHistory'
-          type: array
-        messageFormat:
-          enum:
-            - plaintext
-            - json
-          description: The message format of the attestationMessages.
-          type: string
-        createdBy:
-          description: The address of the user who created the attestation.
-          $ref: '#/components/schemas/BitBadgesAddress'
-        createdAt:
-          description: When the attestation was created.
-          $ref: '#/components/schemas/UNIXMilliTimestamp'
-        proofOfIssuance:
-          properties:
-            message:
-              type: string
-            signature:
-              type: string
-              examples: *ref_16
-            signer:
-              type: string
-              examples: *ref_17
-            publicKey:
-              type: string
-              examples: *ref_15
-          required:
-            - message
-            - signature
-            - signer
-          additionalProperties: false
-          description: >-
-            Proof of issuance is used for BBS+ signatures (scheme = bbs) only.
-
-            BBS+ signatures are signed with a BBS+ key pair, but you would often
-            want the issuer to be a native address.
-
-            The prooofOfIssuance establishes a link saying that "I am the issuer
-            of this attestation signed with BBS+ key pair ___".
-
-
-            Fields can be left blank for standard signatures.
-          type: object
-        scheme:
-          enum:
-            - bbs
-            - standard
-          description: >-
-            The scheme of the attestation. BBS+ signatures are supported and can
-            be used where selective disclosure is a requirement.
-
-            Otherwise, you can simply use your native blockchain's signature
-            scheme.
-          type: string
-        attestationMessages:
-          items:
-            type: string
-          description: >-
-            Thesse are the attestations that are signed.
-
-            For BBS+ signatures, there can be >1 attestationMessages, and the
-            signer can selectively disclose the attestations.
-
-            For standard signatures, there is only 1 attestationMessage.
-          type: array
-          examples: *ref_18
-        dataIntegrityProof:
-          properties:
-            signature:
-              type: string
-              examples: *ref_16
-            signer:
-              type: string
-              examples: *ref_17
-            publicKey:
-              type: string
-              examples: *ref_15
-          required:
-            - signature
-            - signer
-          additionalProperties: false
-          description: >-
-            This is the signature and accompanying details of the
-            attestationMessages. The siganture maintains the integrity of the
-            attestationMessages.
-
-
-            This should match the expected scheme. For example, if the scheme is
-            BBS+, the signature should be a BBS+ signature and signer should be
-            a BBS+ public key.
-          type: object
-        name:
-          description: >-
-            Metadata for the attestation for display purposes. Note this should
-            not contain anything sensitive. It may be displayed to verifiers.
-          type: string
-          examples: *ref_13
-        image:
-          description: >-
-            Metadata for the attestation for display purposes. Note this should
-            not contain anything sensitive. It may be displayed to verifiers.
-          type: string
-          examples: *ref_12
-        description:
-          description: >-
-            Metadata for the attestation for display purposes. Note this should
-            not contain anything sensitive. It may be displayed to verifiers.
-          type: string
-          examples: *ref_8
-        anchors:
-          items:
-            properties:
-              txHash:
-                type: string
-                examples: *ref_7
-              message:
-                type: string
-            additionalProperties: false
-            type: object
-          description: >-
-            Anchors are on-chain transactions used to prove certain things
-
-            about the attestation. For example, you can anchor the attestation
-            to a
-
-            transaction hash to prove that the attestation existed at a certain
-            time.
-          type: array
-        displayOnProfile:
-          type: boolean
-      required:
-        - messageFormat
-        - createdBy
-        - createdAt
-        - proofOfIssuance
-        - scheme
-        - attestationMessages
-        - dataIntegrityProof
-        - name
-        - image
-        - description
-        - displayOnProfile
-      additionalProperties: false
-      description: ''
-      type: object
-    iCreateAttestationProofSuccessResponse:
-      properties:
-        id:
-          description: >-
-            The proof ID. This is the ID that is given to the user to query the
-            attestation. Anyone with the ID can query it, so keep this safe and
-            secure.
-          type: string
-      required:
-        - id
-      additionalProperties: false
-      type: object
-    GetAttestationProofPayload:
-      properties:
-        id:
-          description: The attestation proof ID.
-          type: string
-      required:
-        - id
-      additionalProperties: false
-      type: object
-    iGetAttestationProofSuccessResponse:
-      properties:
-        _docId:
-          description: A unique stringified document ID
-          type: string
-        _id:
-          description: A unique document ID (Mongo DB ObjectID)
-          type: string
-        entropies:
-          items:
-            type: string
-          description: >-
-            Entropies used for certain data integrity proofs on-chain (e.g.
-            HASH(message + entropy) = on-chain value)
-          type: array
-        updateHistory:
-          items:
-            $ref: '#/components/schemas/iUpdateHistory'
-          type: array
-        messageFormat:
-          enum:
-            - plaintext
-            - json
-          description: The message format of the attestationMessages.
-          type: string
-        createdBy:
-          description: The address of the user who created the attestation.
-          $ref: '#/components/schemas/BitBadgesAddress'
-        createdAt:
-          description: When the attestation was created.
-          $ref: '#/components/schemas/UNIXMilliTimestamp'
-        proofOfIssuance:
-          properties:
-            message:
-              type: string
-            signature:
-              type: string
-              examples: *ref_16
-            signer:
-              type: string
-              examples: *ref_17
-            publicKey:
-              type: string
-              examples: *ref_15
-          required:
-            - message
-            - signature
-            - signer
-          additionalProperties: false
-          description: >-
-            Proof of issuance is used for BBS+ signatures (scheme = bbs) only.
-
-            BBS+ signatures are signed with a BBS+ key pair, but you would often
-            want the issuer to be a native address.
-
-            The prooofOfIssuance establishes a link saying that "I am the issuer
-            of this attestation signed with BBS+ key pair ___".
-
-
-            Fields can be left blank for standard signatures.
-          type: object
-        scheme:
-          enum:
-            - bbs
-            - standard
-          description: >-
-            The scheme of the attestation. BBS+ signatures are supported and can
-            be used where selective disclosure is a requirement.
-
-            Otherwise, you can simply use your native blockchain's signature
-            scheme.
-          type: string
-        attestationMessages:
-          items:
-            type: string
-          description: >-
-            Thesse are the attestations that are signed.
-
-            For BBS+ signatures, there can be >1 attestationMessages, and the
-            signer can selectively disclose the attestations.
-
-            For standard signatures, there is only 1 attestationMessage.
-          type: array
-          examples: *ref_18
-        dataIntegrityProof:
-          properties:
-            signature:
-              type: string
-              examples: *ref_16
-            signer:
-              type: string
-              examples: *ref_17
-            publicKey:
-              type: string
-              examples: *ref_15
-          required:
-            - signature
-            - signer
-          additionalProperties: false
-          description: >-
-            This is the signature and accompanying details of the
-            attestationMessages. The siganture maintains the integrity of the
-            attestationMessages.
-
-
-            This should match the expected scheme. For example, if the scheme is
-            BBS+, the signature should be a BBS+ signature and signer should be
-            a BBS+ public key.
-          type: object
-        name:
-          description: >-
-            Metadata for the attestation for display purposes. Note this should
-            not contain anything sensitive. It may be displayed to verifiers.
-          type: string
-          examples: *ref_13
-        image:
-          description: >-
-            Metadata for the attestation for display purposes. Note this should
-            not contain anything sensitive. It may be displayed to verifiers.
-          type: string
-          examples: *ref_12
-        description:
-          description: >-
-            Metadata for the attestation for display purposes. Note this should
-            not contain anything sensitive. It may be displayed to verifiers.
-          type: string
-          examples: *ref_8
-        anchors:
-          items:
-            properties:
-              txHash:
-                type: string
-                examples: *ref_7
-              message:
-                type: string
-            additionalProperties: false
-            type: object
-          description: >-
-            Anchors are on-chain transactions used to prove certain things
-
-            about the attestation. For example, you can anchor the attestation
-            to a
-
-            transaction hash to prove that the attestation existed at a certain
-            time.
-          type: array
-        displayOnProfile:
-          type: boolean
-      required:
-        - _docId
-        - messageFormat
-        - createdBy
-        - createdAt
-        - proofOfIssuance
-        - scheme
-        - attestationMessages
-        - dataIntegrityProof
-        - name
-        - image
-        - description
-        - displayOnProfile
-      additionalProperties: false
-      description: ''
-      type: object
-    DeleteAttestationProofPayload:
-      properties:
-        id:
-          description: The attestation proof ID.
-          type: string
-      required:
-        - id
-      additionalProperties: false
-      type: object
-    iDeleteAttestationProofSuccessResponse:
       additionalProperties: false
       type: object
     CreateInternalActionPayload:
@@ -11642,7 +10946,7 @@ components:
               items:
                 $ref: '#/components/schemas/iUintRange'
               type: array
-              examples: *ref_25
+              examples: *ref_24
             reason:
               type: string
           required:
@@ -11657,7 +10961,7 @@ components:
               items:
                 $ref: '#/components/schemas/iUintRange'
               type: array
-              examples: *ref_25
+              examples: *ref_24
             reason:
               type: string
           required:
@@ -11762,13 +11066,13 @@ components:
               viewType:
                 $ref: '#/components/schemas/CollectionViewKey'
                 description: The base view type to fetch.
-                examples: *ref_24
+                examples: *ref_23
               viewId:
                 description: >-
                   A unique view ID. This is used for pagination. All fetches w/
                   same ID should be made with same criteria.
                 type: string
-                examples: *ref_23
+                examples: *ref_22
               bookmark:
                 description: A bookmark to pass in for pagination. "" for first request.
                 type: string
@@ -12136,7 +11440,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The corresponding badge IDs for this collection ID.
           type: array
-          examples: *ref_25
+          examples: *ref_24
       required:
         - collectionId
         - badgeIds
@@ -13556,7 +12860,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The badge IDs of the approved outgoing transfers.
           type: array
-          examples: *ref_25
+          examples: *ref_24
         ownershipTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
@@ -13635,7 +12939,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The badge IDs of the approved incoming transfers.
           type: array
-          examples: *ref_25
+          examples: *ref_24
         ownershipTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
@@ -13790,7 +13094,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The badge IDs that the permission applies to.
           type: array
-          examples: *ref_25
+          examples: *ref_24
         permanentlyPermittedTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
@@ -13822,7 +13126,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The badge IDs that the permission applies to.
           type: array
-          examples: *ref_25
+          examples: *ref_24
         permanentlyPermittedTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
@@ -13873,7 +13177,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The badge IDs of the approved transfers.
           type: array
-          examples: *ref_25
+          examples: *ref_24
         ownershipTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
@@ -13937,7 +13241,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The badge IDs corresponding to the URI.
           type: array
-          examples: *ref_25
+          examples: *ref_24
         customData:
           description: Arbitrary custom data that can be stored on-chain
           type: string
@@ -13977,6 +13281,27 @@ components:
       type: object
     iAttestationsProof:
       properties:
+        _docId:
+          description: A unique stringified document ID
+          type: string
+        _id:
+          description: A unique document ID (Mongo DB ObjectID)
+          type: string
+        messageFormat:
+          enum:
+            - plaintext
+            - json
+          description: The message format of the messages.
+          type: string
+        createdBy:
+          description: >-
+            The address of the user who created the attestation on BitBadges.
+            Note this is used for permissions on BitBadges end and may not align
+            with the signer / issuer of the attestation.
+          $ref: '#/components/schemas/BitBadgesAddress'
+        createdAt:
+          description: When the attestation was created.
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
         entropies:
           items:
             type: string
@@ -13984,164 +13309,11 @@ components:
             Entropies used for certain data integrity proofs on-chain (e.g.
             HASH(message + entropy) = on-chain value)
           type: array
-        updateHistory:
-          items:
-            $ref: '#/components/schemas/iUpdateHistory'
-          type: array
-        messageFormat:
-          enum:
-            - plaintext
-            - json
-          description: The message format of the attestationMessages.
-          type: string
-        createdBy:
-          description: The address of the user who created the attestation.
-          $ref: '#/components/schemas/BitBadgesAddress'
-        createdAt:
-          description: When the attestation was created.
-          $ref: '#/components/schemas/UNIXMilliTimestamp'
-        proofOfIssuance:
-          properties:
-            message:
-              type: string
-            signature:
-              type: string
-              examples: *ref_16
-            signer:
-              type: string
-              examples: *ref_17
-            publicKey:
-              type: string
-              examples: *ref_15
-          required:
-            - message
-            - signature
-            - signer
-          additionalProperties: false
+        publicVisibility:
           description: >-
-            Proof of issuance is used for BBS+ signatures (scheme = bbs) only.
-
-            BBS+ signatures are signed with a BBS+ key pair, but you would often
-            want the issuer to be a native address.
-
-            The prooofOfIssuance establishes a link saying that "I am the issuer
-            of this attestation signed with BBS+ key pair ___".
-
-
-            Fields can be left blank for standard signatures.
-          type: object
-        scheme:
-          enum:
-            - bbs
-            - standard
-          description: >-
-            The scheme of the attestation. BBS+ signatures are supported and can
-            be used where selective disclosure is a requirement.
-
-            Otherwise, you can simply use your native blockchain's signature
-            scheme.
-          type: string
-        attestationMessages:
-          items:
-            type: string
-          description: >-
-            Thesse are the attestations that are signed.
-
-            For BBS+ signatures, there can be >1 attestationMessages, and the
-            signer can selectively disclose the attestations.
-
-            For standard signatures, there is only 1 attestationMessage.
-          type: array
-          examples: *ref_18
-        dataIntegrityProof:
-          properties:
-            signature:
-              type: string
-              examples: *ref_16
-            signer:
-              type: string
-              examples: *ref_17
-            publicKey:
-              type: string
-              examples: *ref_15
-          required:
-            - signature
-            - signer
-          additionalProperties: false
-          description: >-
-            This is the signature and accompanying details of the
-            attestationMessages. The siganture maintains the integrity of the
-            attestationMessages.
-
-
-            This should match the expected scheme. For example, if the scheme is
-            BBS+, the signature should be a BBS+ signature and signer should be
-            a BBS+ public key.
-          type: object
-        name:
-          description: >-
-            Metadata for the attestation for display purposes. Note this should
-            not contain anything sensitive. It may be displayed to verifiers.
-          type: string
-          examples: *ref_13
-        image:
-          description: >-
-            Metadata for the attestation for display purposes. Note this should
-            not contain anything sensitive. It may be displayed to verifiers.
-          type: string
-          examples: *ref_12
-        description:
-          description: >-
-            Metadata for the attestation for display purposes. Note this should
-            not contain anything sensitive. It may be displayed to verifiers.
-          type: string
-          examples: *ref_8
-        anchors:
-          items:
-            properties:
-              txHash:
-                type: string
-                examples: *ref_7
-              message:
-                type: string
-            additionalProperties: false
-            type: object
-          description: >-
-            Anchors are on-chain transactions used to prove certain things
-
-            about the attestation. For example, you can anchor the attestation
-            to a
-
-            transaction hash to prove that the attestation existed at a certain
-            time.
-          type: array
-      required:
-        - messageFormat
-        - createdBy
-        - createdAt
-        - proofOfIssuance
-        - scheme
-        - attestationMessages
-        - dataIntegrityProof
-        - name
-        - image
-        - description
-      additionalProperties: false
-      type: object
-    iAttestation:
-      properties:
-        messageFormat:
-          enum:
-            - plaintext
-            - json
-          description: The message format of the attestationMessages.
-          type: string
-        createdBy:
-          description: The address of the user who created the attestation.
-          $ref: '#/components/schemas/BitBadgesAddress'
-        createdAt:
-          description: When the attestation was created.
-          $ref: '#/components/schemas/UNIXMilliTimestamp'
+            Whether or not the attestation is displayable on the user's profile.
+            if true, the attestation can be queried by anyone with the ID.
+          type: boolean
         proofOfIssuance:
           properties:
             message:
@@ -14174,7 +13346,7 @@ components:
           type: object
         attestationId:
           description: >-
-            The attestation ID. This is the constan ID that is given to the
+            The attestation ID. This is the constant ID that is given to the
             attestation.
           type: string
         inviteCode:
@@ -14183,9 +13355,6 @@ components:
             Anyone with the key can query it, so keep this safe and secure.
           type: string
         scheme:
-          enum:
-            - bbs
-            - standard
           description: >-
             The scheme of the attestation. BBS+ signatures are supported and can
             be used where selective disclosure is a requirement.
@@ -14193,21 +13362,23 @@ components:
             Otherwise, you can simply use your native blockchain's signature
             scheme.
           type: string
-        type:
-          description: The type of the attestation (e.g. credential).
+        originalProvider:
+          description: >-
+            The original provider of the attestation. Used for third-party
+            attestation providers.
           type: string
-        attestationMessages:
+        messages:
           items:
             type: string
           description: >-
             Thesse are the attestations that are signed.
 
-            For BBS+ signatures, there can be >1 attestationMessages, and the
-            signer can selectively disclose the attestations.
+            For BBS+ signatures, there can be >1 messages, and the signer can
+            selectively disclose the attestations.
 
             For standard signatures, there is only 1 attestationMessage.
           type: array
-          examples: *ref_18
+          examples: *ref_25
         dataIntegrityProof:
           properties:
             signature:
@@ -14219,19 +13390,24 @@ components:
             publicKey:
               type: string
               examples: *ref_15
+            isDerived:
+              type: boolean
           required:
             - signature
             - signer
           additionalProperties: false
           description: >-
-            This is the signature and accompanying details of the
-            attestationMessages. The siganture maintains the integrity of the
-            attestationMessages.
+            This is the signature and accompanying details of the messages. The
+            siganture maintains the integrity of the messages.
 
 
             This should match the expected scheme. For example, if the scheme is
             BBS+, the signature should be a BBS+ signature and signer should be
             a BBS+ public key.
+
+
+            For custom schemes, this is often left blank (because the proof is
+            already included in the message).
           type: object
         name:
           description: >-
@@ -14256,6 +13432,215 @@ components:
             type: string
           description: Holders are the addresses that have been given the attestation.
           type: array
+        allHolders:
+          items:
+            type: string
+          description: >-
+            All holders are the addresses that have been given the attestation
+            at any point in time.
+
+            Used internally as an append-only audit log.
+          type: array
+        anchors:
+          items:
+            properties:
+              txHash:
+                type: string
+                examples: *ref_7
+              message:
+                type: string
+            additionalProperties: false
+            type: object
+          description: >-
+            Anchors are on-chain transactions used to prove certain things
+
+            about the attestation. For example, you can anchor the attestation
+            to a
+
+            transaction hash to prove that the attestation existed at a certain
+            time.
+          type: array
+        updateHistory:
+          items:
+            $ref: '#/components/schemas/iUpdateHistory'
+          type: array
+      required:
+        - _docId
+        - messageFormat
+        - createdBy
+        - createdAt
+        - entropies
+        - proofOfIssuance
+        - attestationId
+        - inviteCode
+        - scheme
+        - messages
+        - dataIntegrityProof
+        - name
+        - image
+        - description
+        - holders
+        - anchors
+        - updateHistory
+      additionalProperties: false
+      description: ''
+      type: object
+    iAttestation:
+      properties:
+        messageFormat:
+          enum:
+            - plaintext
+            - json
+          description: The message format of the messages.
+          type: string
+        createdBy:
+          description: >-
+            The address of the user who created the attestation on BitBadges.
+            Note this is used for permissions on BitBadges end and may not align
+            with the signer / issuer of the attestation.
+          $ref: '#/components/schemas/BitBadgesAddress'
+        createdAt:
+          description: When the attestation was created.
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
+        entropies:
+          items:
+            type: string
+          description: >-
+            Entropies used for certain data integrity proofs on-chain (e.g.
+            HASH(message + entropy) = on-chain value)
+          type: array
+        publicVisibility:
+          description: >-
+            Whether or not the attestation is displayable on the user's profile.
+            if true, the attestation can be queried by anyone with the ID.
+          type: boolean
+        proofOfIssuance:
+          properties:
+            message:
+              type: string
+            signature:
+              type: string
+              examples: *ref_16
+            signer:
+              type: string
+              examples: *ref_17
+            publicKey:
+              type: string
+              examples: *ref_15
+          required:
+            - message
+            - signature
+            - signer
+          additionalProperties: false
+          description: >-
+            Proof of issuance is used for BBS+ signatures (scheme = bbs) only.
+
+            BBS+ signatures are signed with a BBS+ key pair, but you would often
+            want the issuer to be a native address.
+
+            The prooofOfIssuance establishes a link saying that "I am the issuer
+            of this attestation signed with BBS+ key pair ___".
+
+
+            Fields can be left blank for standard signatures.
+          type: object
+        attestationId:
+          description: >-
+            The attestation ID. This is the constant ID that is given to the
+            attestation.
+          type: string
+        inviteCode:
+          description: >-
+            The inviteCode is used to add the attestation to the user's wallet.
+            Anyone with the key can query it, so keep this safe and secure.
+          type: string
+        scheme:
+          description: >-
+            The scheme of the attestation. BBS+ signatures are supported and can
+            be used where selective disclosure is a requirement.
+
+            Otherwise, you can simply use your native blockchain's signature
+            scheme.
+          type: string
+        originalProvider:
+          description: >-
+            The original provider of the attestation. Used for third-party
+            attestation providers.
+          type: string
+        messages:
+          items:
+            type: string
+          description: >-
+            Thesse are the attestations that are signed.
+
+            For BBS+ signatures, there can be >1 messages, and the signer can
+            selectively disclose the attestations.
+
+            For standard signatures, there is only 1 attestationMessage.
+          type: array
+          examples: *ref_25
+        dataIntegrityProof:
+          properties:
+            signature:
+              type: string
+              examples: *ref_16
+            signer:
+              type: string
+              examples: *ref_17
+            publicKey:
+              type: string
+              examples: *ref_15
+            isDerived:
+              type: boolean
+          required:
+            - signature
+            - signer
+          additionalProperties: false
+          description: >-
+            This is the signature and accompanying details of the messages. The
+            siganture maintains the integrity of the messages.
+
+
+            This should match the expected scheme. For example, if the scheme is
+            BBS+, the signature should be a BBS+ signature and signer should be
+            a BBS+ public key.
+
+
+            For custom schemes, this is often left blank (because the proof is
+            already included in the message).
+          type: object
+        name:
+          description: >-
+            Metadata for the attestation for display purposes. Note this should
+            not contain anything sensitive. It may be displayed to verifiers.
+          type: string
+          examples: *ref_13
+        image:
+          description: >-
+            Metadata for the attestation for display purposes. Note this should
+            not contain anything sensitive. It may be displayed to verifiers.
+          type: string
+          examples: *ref_12
+        description:
+          description: >-
+            Metadata for the attestation for display purposes. Note this should
+            not contain anything sensitive. It may be displayed to verifiers.
+          type: string
+          examples: *ref_8
+        holders:
+          items:
+            type: string
+          description: Holders are the addresses that have been given the attestation.
+          type: array
+        allHolders:
+          items:
+            type: string
+          description: >-
+            All holders are the addresses that have been given the attestation
+            at any point in time.
+
+            Used internally as an append-only audit log.
+          type: array
         anchors:
           items:
             properties:
@@ -14279,12 +13664,12 @@ components:
         - messageFormat
         - createdBy
         - createdAt
+        - entropies
         - proofOfIssuance
         - attestationId
         - inviteCode
         - scheme
-        - type
-        - attestationMessages
+        - messages
         - dataIntegrityProof
         - name
         - image
@@ -14349,7 +13734,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The range of the badge IDs that must be owned.
           type: array
-          examples: *ref_25
+          examples: *ref_24
         overrideWithCurrentTime:
           description: Whether or not to override the ownershipTimes with the current time.
           type: boolean
@@ -14377,7 +13762,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The badge IDs corresponding to the balance.
           type: array
-          examples: *ref_25
+          examples: *ref_24
         ownershipTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
@@ -14798,7 +14183,7 @@ components:
           items:
             $ref: '#/components/schemas/iUintRange'
           type: array
-          examples: *ref_25
+          examples: *ref_24
         ownershipTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
@@ -15085,7 +14470,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The badge IDs to be transferred.
           type: array
-          examples: *ref_25
+          examples: *ref_24
         ownershipTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
@@ -15194,7 +14579,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The badge IDs to be transferred.
           type: array
-          examples: *ref_25
+          examples: *ref_24
         ownershipTimes:
           items:
             $ref: '#/components/schemas/iUintRange'

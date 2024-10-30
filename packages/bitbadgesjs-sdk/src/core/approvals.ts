@@ -117,9 +117,12 @@ export class ClaimDetails<T extends NumberType> extends BaseNumberTypeClass<Clai
   showInSearchResults?: boolean;
   categories?: string[];
   trackerDetails?: ChallengeTrackerIdDetails<T>;
+  createdBy?: BitBadgesAddress;
+  _includesPrivateParams: boolean;
 
   constructor(data: iClaimDetails<T>) {
     super();
+    this._includesPrivateParams = data._includesPrivateParams;
     this.claimId = data.claimId;
     this.balancesToSet = data.balancesToSet ? new PredeterminedBalances(data.balancesToSet) : undefined;
     this.plugins = data.plugins;
@@ -140,6 +143,7 @@ export class ClaimDetails<T extends NumberType> extends BaseNumberTypeClass<Clai
     this.categories = data.categories;
     this.satisfyMethod = data.satisfyMethod ? new SatisfyMethod(data.satisfyMethod) : undefined;
     this.trackerDetails = data.trackerDetails ? new ChallengeTrackerIdDetails(data.trackerDetails) : undefined;
+    this.createdBy = data.createdBy;
   }
 
   convert<U extends NumberType>(convertFunction: (val: NumberType) => U): ClaimDetails<U> {

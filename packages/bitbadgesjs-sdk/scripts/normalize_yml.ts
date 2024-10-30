@@ -89,6 +89,7 @@ fs.readFile(filePath, 'utf8', (err, data) => {
     const routesYamlData = yaml.load(routesYamlContent) as any;
 
     // Add the new schemas to the routes.yaml file
+    routesYamlData.components = routesYamlData.components ?? {};
     routesYamlData.components.schemas = schemaYamlContent.components.schemas;
 
     // Convert the modified YAML data back to string
@@ -207,7 +208,7 @@ function addExamples(obj: any) {
   addExamples(obj, 'earliestIssuedAt', ['2022-01-01T00:00:00Z']);
 
   addExamples(obj, 'resources', [['Full Access: Full access to all features.']]);
-  addExamples(obj, 'attestationMessages', [['attestation message 1', 'attestation message 2']]);
+  addExamples(obj, 'messages', [['attestation message 1', 'attestation message 2']]);
 
   addExamples(obj, 'viewId', ['viewKey']);
   addExamples(obj, 'viewType', ['viewKey']);

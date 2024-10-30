@@ -58,7 +58,6 @@ import {
   type iAirdropDoc,
   type iApprovalTrackerDoc,
   type iAttestationDoc,
-  type iAttestationProofDoc,
   type iBalanceDoc,
   type iBalanceDocWithDetails,
   type iClaimBuilderDoc,
@@ -556,7 +555,7 @@ export class QueueDoc<T extends NumberType> extends BaseNumberTypeClass<QueueDoc
   activityDocId?: string;
   notificationType?: string;
   claimInfo?: { session: any; body: any; claimId: string; bitbadgesAddress: string; ip: string | undefined } | undefined;
-  faucetInfo?: { txHash: string; recipient: string; amount: NumberType } | undefined;
+  faucetInfo?: { txHash: string; recipient: string; amount: NumberType; denom: string } | undefined;
   actionConfig?: any;
 
   constructor(data: iQueueDoc<T>) {
@@ -1481,70 +1480,6 @@ export class SIWBBRequestDoc<T extends NumberType> extends BaseNumberTypeClass<S
 }
 
 /**
- * @inheritDoc iAttestationProofDoc
- * @category Off-Chain Attestations
- */
-export class AttestationProofDoc<T extends NumberType> extends BaseNumberTypeClass<AttestationProofDoc<T>> implements iAttestationProofDoc<T> {
-  _docId: string;
-  _id?: string;
-  entropies?: string[] | undefined;
-  updateHistory?: UpdateHistory<T>[] | undefined;
-  messageFormat: 'plaintext' | 'json';
-  createdBy: BitBadgesAddress;
-  createdAt: UNIXMilliTimestamp<T>;
-
-  proofOfIssuance: {
-    message: string;
-    signature: string;
-    signer: string;
-    publicKey?: string;
-  };
-
-  scheme: 'bbs' | 'standard';
-  attestationMessages: string[];
-
-  dataIntegrityProof: {
-    signature: string;
-    signer: string;
-    publicKey?: string;
-  };
-
-  name: string;
-  image: string;
-  description: string;
-
-  displayOnProfile: boolean;
-
-  constructor(data: iAttestationProofDoc<T>) {
-    super();
-    this.entropies = data.entropies;
-    this.updateHistory = data.updateHistory?.map((updateHistory) => new UpdateHistory(updateHistory));
-    this._docId = data._docId;
-    this._id = data._id;
-    this.createdBy = data.createdBy;
-    this.messageFormat = data.messageFormat;
-
-    this.scheme = data.scheme;
-    this.dataIntegrityProof = data.dataIntegrityProof;
-    this.name = data.name;
-    this.image = data.image;
-    this.description = data.description;
-    this.proofOfIssuance = data.proofOfIssuance;
-    this.attestationMessages = data.attestationMessages;
-    this.createdAt = data.createdAt;
-    this.displayOnProfile = data.displayOnProfile;
-  }
-
-  getNumberFieldNames(): string[] {
-    return ['createdAt'];
-  }
-
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): AttestationProofDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as AttestationProofDoc<U>;
-  }
-}
-
-/**
  * @inheritDoc iInternalActionsDoc
  * @category Internal Actions
  */
@@ -1606,14 +1541,15 @@ export class AttestationDoc<T extends NumberType> extends BaseNumberTypeClass<At
   attestationId: string;
   inviteCode: string;
 
-  type: string;
-  scheme: 'bbs' | 'standard';
-  attestationMessages: string[];
+  originalProvider?: string;
+  scheme: 'bbs' | 'standard' | 'custom' | string;
+  messages: string[];
 
   dataIntegrityProof: {
     signature: string;
     signer: string;
     publicKey?: string;
+    isDerived?: boolean;
   };
 
   name: string;
@@ -1621,13 +1557,18 @@ export class AttestationDoc<T extends NumberType> extends BaseNumberTypeClass<At
   description: string;
 
   holders: string[];
+  allHolders?: string[];
   anchors: {
     txHash?: string;
     message?: string;
   }[];
 
+  entropies: string[];
+  publicVisibility?: boolean | undefined;
+
   constructor(data: iAttestationDoc<T>) {
     super();
+    this.allHolders = data.allHolders;
     this.updateHistory = data.updateHistory?.map((updateHistory) => new UpdateHistory(updateHistory));
     this._docId = data._docId;
     this._id = data._id;
@@ -1635,7 +1576,6 @@ export class AttestationDoc<T extends NumberType> extends BaseNumberTypeClass<At
     this.messageFormat = data.messageFormat;
     this.attestationId = data.attestationId;
     this.inviteCode = data.inviteCode;
-    this.type = data.type;
     this.scheme = data.scheme;
     this.dataIntegrityProof = data.dataIntegrityProof;
     this.holders = data.holders;
@@ -1644,8 +1584,11 @@ export class AttestationDoc<T extends NumberType> extends BaseNumberTypeClass<At
     this.description = data.description;
     this.proofOfIssuance = data.proofOfIssuance;
     this.anchors = data.anchors;
-    this.attestationMessages = data.attestationMessages;
+    this.messages = data.messages;
     this.createdAt = data.createdAt;
+    this.originalProvider = data.originalProvider;
+    this.entropies = data.entropies;
+    this.publicVisibility = data.publicVisibility;
   }
 
   getNumberFieldNames(): string[] {

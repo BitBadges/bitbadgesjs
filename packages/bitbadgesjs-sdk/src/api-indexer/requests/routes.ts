@@ -78,9 +78,6 @@ export class BitBadgesApiRoutes {
   static GetAttestationsRoute = () => '/api/v0/attestation/fetch';
   static CRUDAttestationRoute = () => '/api/v0/attestation';
 
-  static GetAttestationProofsRoute = () => '/api/v0/attestationProof/fetch';
-  static CRUDAttestationProofRoute = () => '/api/v0/attestationProof';
-
   static GetDeveloperAppsRoute = () => '/api/v0/developerApp/fetch';
   static CRUDDeveloperAppRoute = () => '/api/v0/developerApp';
   static GetSIWBBRequestsForDeveloperAppRoute = () => '/api/v0/developerApp/siwbbRequests';
@@ -98,4 +95,6 @@ export class BitBadgesApiRoutes {
 
   static GetInternalActionsRoute = () => '/api/v0/internalAction/fetch';
   static CRUDInternalActionRoute = () => '/api/v0/internalAction';
+
+  static VerifyAttestationRoute = () => '/api/v0/attestation/verify';
 }
