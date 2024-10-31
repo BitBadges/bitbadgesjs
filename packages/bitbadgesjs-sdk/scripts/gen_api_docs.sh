@@ -9,6 +9,12 @@ else
     # set package.json type to module
     sed -i 's/"sideEffects": false,/"sideEffects": false,\n  "type": "module",/' package.json
 
+    ts-node ./scripts/check_routes_consistency.ts ../../../bitbadges-indexer/src/indexer.ts  ./openapitypes/routes.yaml
+    if [ $? -ne 0 ]; then
+        echo "Route consistency check failed!"
+        # exit 0
+    fi
+
     source ./scripts/combine_ts_files.sh
     ts-node ./scripts/normalize_combined.ts ./src/combined.ts
     npm run format
@@ -20,5 +26,9 @@ else
     #discard all other changes
     git checkout -- .
 
+    cd ../../
+    source ./scripts/gendocs.sh
+    cd ./packages/bitbadgesjs-sdk
 
+    git add .
 fi

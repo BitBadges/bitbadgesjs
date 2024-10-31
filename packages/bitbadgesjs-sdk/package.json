@@ -1,7 +1,7 @@
 {
   "name": "bitbadgesjs-sdk",
   "description": "SDK for BitBadges development",
-  "version": "0.5.7",
+  "version": "0.5.8",
   "license": "MIT",
   "eslintIgnore": [
     "src/proto/**/*.ts"
@@ -21,6 +21,7 @@
   "scripts": {
     "alias": "tsc-alias -p tsconfig.build.json && tsc-alias -p tsconfig-esm.build.json",
     "build": "rm -rf dist && tsc --build tsconfig.build.json && tsc --build tsconfig-esm.build.json && npm run alias && npm run fixup && npm run dep-check",
+    "routes-check": "ts-node ./scripts/check_routes_consistency.ts ../../../bitbadges-indexer/src/indexer.ts  ./openapitypes/routes.yaml",
     "clean": "tsc --build tsconfig.build.json --clean  && shx rm -rf coverage *.log junit.xml dist && jest --clearCache",
     "fixup": "./scripts/fixup.sh",
     "test": "jest ./src/**/*.spec.ts",
@@ -44,7 +45,7 @@
     "@types/elliptic": "^6.4.18",
     "@types/jest": "^27.5.2",
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "^16.9.2",
+    "@types/node": "^16.18.117",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "babel-jest": "^29.7.0",

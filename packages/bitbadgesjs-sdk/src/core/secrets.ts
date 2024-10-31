@@ -11,7 +11,7 @@ export class Attestation<T extends NumberType> extends CustomTypeClass<Attestati
   createdBy: BitBadgesAddress;
   createdAt: UNIXMilliTimestamp<T>;
 
-  proofOfIssuance: {
+  proofOfIssuance?: {
     message: string;
     signature: string;
     signer: string;
@@ -26,7 +26,7 @@ export class Attestation<T extends NumberType> extends CustomTypeClass<Attestati
   messageFormat: 'plaintext' | 'json';
   messages: string[];
 
-  dataIntegrityProof: {
+  dataIntegrityProof?: {
     signature: string;
     signer: string;
     publicKey?: string;

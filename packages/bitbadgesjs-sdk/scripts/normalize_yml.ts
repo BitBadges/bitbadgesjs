@@ -89,7 +89,6 @@ fs.readFile(filePath, 'utf8', (err, data) => {
     const routesYamlData = yaml.load(routesYamlContent) as any;
 
     // Add the new schemas to the routes.yaml file
-    routesYamlData.components = routesYamlData.components ?? {};
     routesYamlData.components.schemas = schemaYamlContent.components.schemas;
 
     // Convert the modified YAML data back to string

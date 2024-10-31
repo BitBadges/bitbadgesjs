@@ -99,7 +99,7 @@ export interface iAttestation<T extends NumberType> {
    *
    * Fields can be left blank for standard signatures.
    */
-  proofOfIssuance: {
+  proofOfIssuance?: {
     message: string;
     signature: string;
     signer: string;
@@ -135,7 +135,7 @@ export interface iAttestation<T extends NumberType> {
    *
    * For custom schemes, this is often left blank (because the proof is already included in the message).
    */
-  dataIntegrityProof: {
+  dataIntegrityProof?: {
     signature: string;
     signer: string;
     publicKey?: string;

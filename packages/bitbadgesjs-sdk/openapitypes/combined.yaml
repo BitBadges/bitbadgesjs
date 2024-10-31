@@ -1625,7 +1625,7 @@ paths:
       operationId: getAttestation
       summary: Get Attestation
       tags:
-        - Verifiable Attestations
+        - Attestations
       description: >-
         Gets a verifiable attestation.
 
@@ -1640,15 +1640,15 @@ paths:
 
         Documentation References / Tutorials:
 
-        - **[Verifiable
-        Attestations](https://docs.bitbadges.io/for-developers/core-concepts/verifiable-attestations)**
+        -
+        **[Attestations](https://docs.bitbadges.io/for-developers/core-concepts/verifiable-attestations)**
       responses:
         '200':
           description: Success response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/iGetAttestationSuccessResponse'
+                $ref: '#/components/schemas/iGetAttestationsSuccessResponse'
         '400':
           $ref: '#/components/responses/BadRequestResponse'
         '500':
@@ -1661,12 +1661,12 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GetAttestationPayload'
+              $ref: '#/components/schemas/GetAttestationsPayload'
   /attestation:
     post:
       operationId: createAttestation
       tags:
-        - Verifiable Attestations
+        - Attestations
       summary: Create Attestation
       description: >-
         Creates a attestation.
@@ -1680,8 +1680,8 @@ paths:
 
         Documentation References / Tutorials:
 
-        - **[Verifiable
-        Attestations](https://docs.bitbadges.io/for-developers/core-concepts/verifiable-attestations)**
+        -
+        **[Attestations](https://docs.bitbadges.io/for-developers/core-concepts/verifiable-attestations)**
       requestBody:
         required: true
         content:
@@ -1704,7 +1704,7 @@ paths:
     put:
       operationId: updateAttestation
       tags:
-        - Verifiable Attestations
+        - Attestations
       summary: Update Attestation
       description: |-
         Updates a attestation.
@@ -1732,7 +1732,7 @@ paths:
         - apiKey: []
     delete:
       tags:
-        - Verifiable Attestations
+        - Attestations
       operationId: deleteAttestation
       summary: Delete Attestation
       description: |-
@@ -1753,103 +1753,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/iDeleteAttestationSuccessResponse'
-        '400':
-          $ref: '#/components/responses/BadRequestResponse'
-        '500':
-          $ref: '#/components/responses/InternalServerErrorResponse'
-      security:
-        - apiKey: []
-  /attestionProof/fetch:
-    post:
-      operationId: getAttestationProof
-      summary: Get Attestation Proof
-      tags:
-        - Verifiable Attestations
-      description: |-
-        Gets a verifiable attestation proof.
-
-        ```tsx
-        const res = await BitBadgesApi.getAttestationProof(...);
-        ```
-      responses:
-        '200':
-          description: Success response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/iGetAttestationProofSuccessResponse'
-        '400':
-          $ref: '#/components/responses/BadRequestResponse'
-        '500':
-          $ref: '#/components/responses/InternalServerErrorResponse'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/GetAttestationProofPayload'
-  /attestationProof:
-    post:
-      operationId: createAttestationProof
-      tags:
-        - Verifiable Attestations
-      summary: Create Attestation Proof
-      description: >-
-        Creates a attestation proof.
-
-        ```tsx
-
-        const res = await BitBadgesApi.createAttestationProof(...);
-
-        ```
-
-
-        Documentation References / Tutorials:
-
-        - **[Verifiable
-        Attestations](https://docs.bitbadges.io/for-developers/core-concepts/verifiable-attestations)**
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateAttestationProofPayload'
-      responses:
-        '200':
-          description: Success response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/iCreateAttestationProofSuccessResponse'
-        '400':
-          $ref: '#/components/responses/BadRequestResponse'
-        '500':
-          $ref: '#/components/responses/InternalServerErrorResponse'
-      security:
-        - apiKey: []
-    delete:
-      operationId: deleteAttestationProof
-      tags:
-        - Verifiable Attestations
-      summary: Delete Attestation Proof
-      description: |-
-        Deletes a attestation proof.
-        ```tsx
-        const res = await BitBadgesApi.deleteAttestationProof(...);
-        ```
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DeleteAttestationProofPayload'
-      responses:
-        '200':
-          description: Success response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/iDeleteAttestationProofSuccessResponse'
         '400':
           $ref: '#/components/responses/BadRequestResponse'
         '500':
@@ -2368,7 +2271,7 @@ paths:
           $ref: '#/components/responses/InternalServerErrorResponse'
       security:
         - apiKey: []
-  /api/codes:
+  /codes:
     post:
       operationId: generateCode
       summary: Generate Code
@@ -2444,7 +2347,7 @@ paths:
                   type: integer
                   minimum: 0
                   description: A non-negative integer index
-  /api/v0/claims/gatedContent/{claimId}:
+  /claims/gatedContent/{claimId}:
     post:
       operationId: getGatedContentForClaim
       summary: Get Gated Content for Claim
@@ -2498,12 +2401,12 @@ paths:
       security:
         - apiKey: []
       x-internal: false
-  /api/v0/attestation/verify:
+  /attestation/verify:
     post:
       operationId: verifyAttestation
       summary: Verify Attestation
       tags:
-        - SIWBB Authentication
+        - Attestations
       description: >
         Verifies the attestation proofs well-formedness and signatures.
 
@@ -2530,6 +2433,7 @@ paths:
               $ref: '#/components/schemas/VerifyAttestationPayload'
       security:
         - apiKey: []
+components:
   responses:
     ErrorResponse:
       description: An error response
@@ -2589,7 +2493,6 @@ paths:
       type: http
       scheme: cookie
       description: User must be signed in and must be the owner of the requested object.
-components:
   schemas:
     SupportedChain:
       enum:
@@ -5671,12 +5574,10 @@ components:
         - createdBy
         - createdAt
         - entropies
-        - proofOfIssuance
         - attestationId
         - inviteCode
         - scheme
         - messages
-        - dataIntegrityProof
         - name
         - image
         - description
@@ -13470,12 +13371,10 @@ components:
         - createdBy
         - createdAt
         - entropies
-        - proofOfIssuance
         - attestationId
         - inviteCode
         - scheme
         - messages
-        - dataIntegrityProof
         - name
         - image
         - description
@@ -13665,12 +13564,10 @@ components:
         - createdBy
         - createdAt
         - entropies
-        - proofOfIssuance
         - attestationId
         - inviteCode
         - scheme
         - messages
-        - dataIntegrityProof
         - name
         - image
         - description

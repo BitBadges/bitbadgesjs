@@ -13,7 +13,7 @@ interface VerifyAttestationsPresentationSignaturesPayload {
   scheme: 'bbs' | 'standard' | string;
   messages: string[];
   messageFormat: 'json' | 'plaintext';
-  dataIntegrityProof: {
+  dataIntegrityProof?: {
     signature: string;
     signer: string;
     publicKey?: string;
@@ -29,7 +29,9 @@ interface VerifyAttestationsPresentationSignaturesPayload {
 
 /**
  * Verifies the attestations proofs well-formedness and signatures. This does not require a call to the BitBadges API.  Note this only verifies the signatures / validity of the proofs.
- * You are responsible for checking the contents of the proofs.
+ * You are responsible for checking the contents of the proofs and everything else.
+ *
+ * Note this only works if scheme = 'bbs' or 'standard' (the BitBadges native ones).
  *
  * Alias of `verifyAttestationsPresentationSignatures`
  *
@@ -41,9 +43,11 @@ export const verifyAttestation = async (body: VerifyAttestationsPresentationSign
 
 /**
  * Verifies the attestations proofs well-formedness and signatures. This does not require a call to the BitBadges API.  Note this only verifies the signatures / validity of the proofs.
- * You are responsible for checking the contents of the proofs.
+ * You are responsible for checking the contents of the proofs and everything else
  *
  * Alias of `verifyAttestation`
+ *
+ * Note this only works if scheme = 'bbs' or 'standard' (the BitBadges native ones).
  *
  * @category SIWBB Authentication
  */

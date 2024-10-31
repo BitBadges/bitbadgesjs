@@ -1531,7 +1531,7 @@ export class AttestationDoc<T extends NumberType> extends BaseNumberTypeClass<At
   createdBy: string;
   createdAt: UNIXMilliTimestamp<T>;
 
-  proofOfIssuance: {
+  proofOfIssuance?: {
     message: string;
     signature: string;
     signer: string;
@@ -1545,7 +1545,7 @@ export class AttestationDoc<T extends NumberType> extends BaseNumberTypeClass<At
   scheme: 'bbs' | 'standard' | 'custom' | string;
   messages: string[];
 
-  dataIntegrityProof: {
+  dataIntegrityProof?: {
     signature: string;
     signer: string;
     publicKey?: string;

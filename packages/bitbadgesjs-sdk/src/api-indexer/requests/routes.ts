@@ -97,4 +97,6 @@ export class BitBadgesApiRoutes {
   static CRUDInternalActionRoute = () => '/api/v0/internalAction';
 
   static VerifyAttestationRoute = () => '/api/v0/attestation/verify';
+
+  static GetCodesFromSeedHelperRoute = () => '/api/v0/codes';
 }
