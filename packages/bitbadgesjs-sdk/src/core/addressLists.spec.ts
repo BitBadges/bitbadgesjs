@@ -7,16 +7,16 @@ export const genTestAddress = () => {
   return convertToBitBadgesAddress(ethAddress);
 };
 
-const addressList = new AddressList({
-  listId: '1',
-  addresses: [genTestAddress()],
-  whitelist: false,
-  createdBy: '1',
-  customData: '',
-  uri: ''
-});
-
 describe('AddressList', () => {
+  const addressList = new AddressList({
+    listId: '1',
+    addresses: [genTestAddress()],
+    whitelist: false,
+    createdBy: '1',
+    customData: '',
+    uri: ''
+  });
+
   it('should create an instance', () => {
     expect(
       new AddressList({

@@ -141,7 +141,10 @@ export interface Event {
 /**
  * @category API Requests / Responses
  */
-export interface GetStatusPayload {}
+export interface GetStatusPayload {
+  /** If true, we will check if the indexer is out of sync with the blockchain. */
+  withOutOfSyncCheck?: boolean;
+}
 
 /**
  * @category API Requests / Responses
@@ -151,6 +154,12 @@ export interface iGetStatusSuccessResponse<T extends NumberType> {
    * Status details about the indexer / blockchain.
    */
   status: iStatusDoc<T>;
+
+  /**
+   * If true, we are out of sync with the blockchain.
+   * If undefined, we did not check for out of sync.
+   */
+  outOfSync?: boolean;
 }
 
 /**
@@ -162,9 +171,12 @@ export class GetStatusSuccessResponse<T extends NumberType>
   implements iGetStatusSuccessResponse<T>
 {
   status: StatusDoc<T>;
+  outOfSync?: boolean;
+
   constructor(data: iGetStatusSuccessResponse<T>) {
     super();
     this.status = new StatusDoc(data.status);
+    this.outOfSync = data.outOfSync;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetStatusSuccessResponse<U> {
@@ -534,6 +546,12 @@ export interface UpdateAccountInfoPayload {
       address: NativeAddress;
       scopes: OAuthScopeDetails[];
     }[];
+    passwords?: {
+      passwordHash: string;
+      salt: string;
+      password?: string;
+      scopes: OAuthScopeDetails[];
+    }[];
   };
 
   /**
@@ -825,6 +843,16 @@ export interface VerifySignInPayload {
   altSigner?: NativeAddress;
 
   /**
+   * Selected social to attempt to sign in with.
+   */
+  socialSignIn?: string;
+
+  /**
+   * The password to sign in with.
+   */
+  password?: string;
+
+  /**
    * Required for some chains (Cosmos) to verify signature. The public key of the signer.
    */
   publicKey?: string;
@@ -865,6 +893,11 @@ export interface iCheckSignInStatusSuccessResponse {
    * The message that was signed.
    */
   message: SiwbbMessage;
+
+  /**
+   * The email of the session.
+   */
+  email?: string | undefined;
 
   /**
    * Signed in with Discord username and discriminator?
@@ -988,6 +1021,7 @@ export class CheckSignInStatusSuccessResponse extends CustomTypeClass<CheckSignI
   telegram?: { username: string; id: string } | undefined;
   farcaster?: { username: string; id: string } | undefined;
   slack?: { username: string; id: string } | undefined;
+  email?: string | undefined;
 
   constructor(data: iCheckSignInStatusSuccessResponse) {
     super();
@@ -1005,6 +1039,7 @@ export class CheckSignInStatusSuccessResponse extends CustomTypeClass<CheckSignI
     this.telegram = data.telegram;
     this.farcaster = data.farcaster;
     this.slack = data.slack;
+    this.email = data.email;
   }
 }
 
@@ -1036,6 +1071,8 @@ export interface SignOutPayload {
   signOutFarcaster?: boolean;
   /** Sign out of Slack */
   signOutSlack?: boolean;
+  /** Sign out of email */
+  signOutEmail?: boolean;
 }
 
 /**
@@ -2223,6 +2260,12 @@ export interface PluginVersionConfigPayload {
 
   /** Whether the plugin should receive status webhooks */
   receiveStatusWebhook: boolean;
+
+  /** Whether the plugin should skip processing webhooks. We will just auto-treat it as successful. */
+  skipProcessingWebhook?: boolean;
+
+  /** Ignore simulations? */
+  ignoreSimulations?: boolean;
 
   /** Reuse for non-indexed? */
   reuseForNonIndexed: boolean;

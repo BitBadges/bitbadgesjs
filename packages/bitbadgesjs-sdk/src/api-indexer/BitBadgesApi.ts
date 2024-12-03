@@ -17,7 +17,7 @@ import type { GetAccountsPayload, GetAccountsSuccessResponse } from './BitBadges
 import { BitBadgesUserInfo } from './BitBadgesUserInfo.js';
 import type { iBitBadgesApi } from './base.js';
 import { BaseBitBadgesApi } from './base.js';
-import { NativeAddress } from './docs/interfaces.js';
+import type { NativeAddress } from './docs/interfaces.js';
 import type {
   FilterBadgesInCollectionPayload,
   FilterBadgesInCollectionSuccessResponse,
@@ -220,14 +220,14 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * console.log(res);
    * ```
    * */
-  public async getStatus(): Promise<GetStatusSuccessResponse<T>> {
+  public async getStatus(payload?: GetStatusPayload): Promise<GetStatusSuccessResponse<T>> {
     try {
-      const validateRes: typia.IValidation<GetStatusPayload> = typia.validate<GetStatusPayload>({});
+      const validateRes: typia.IValidation<GetStatusPayload> = typia.validate<GetStatusPayload>(payload ?? {});
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      const response = await this.axios.post<iGetStatusSuccessResponse<string>>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetStatusRoute()}`);
+      const response = await this.axios.post<iGetStatusSuccessResponse<string>>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetStatusRoute()}`, payload);
       return new GetStatusSuccessResponse(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
@@ -1352,6 +1352,90 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
     }
   }
 
+  /**
+   * Gets the sign in challenge to be signed for authentication. The returned is the message to be signed by the user.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/auth/getChallenge`
+   * - **SDK Function Call**: `await BitBadgesApi.getSignInChallenge(payload);`
+   * - **Tutorial**: See Authentication tutorial on the official docs.
+   *
+   * @example
+   * ```typescript
+   * const res = await BitBadgesApi.getSignInChallenge(payload);
+   * console.log(res);
+   * ```
+   */
+  public async getSignInChallenge(payload: GetSignInChallengePayload): Promise<GetSignInChallengeSuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<GetSignInChallengePayload> = typia.validate<GetSignInChallengePayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.post<iGetSignInChallengeSuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetSignInChallengeRoute()}`,
+        payload
+      );
+      return new GetSignInChallengeSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Verifies the user signed challenge and grants them a valid session if everything checks out.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/auth/verify`
+   * - **SDK Function Call**: `await BitBadgesApi.verifySignIn(payload);`
+   * - **Tutorial**: See Authentication tutorial on the official docs.
+   *
+   * @example
+   * ```typescript
+   * const res = await BitBadgesApi.verifySignIn(payload);
+   * console.log(res);
+   * ```
+   */
+  public async verifySignIn(payload: VerifySignInPayload): Promise<VerifySignInSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<VerifySignInPayload> = typia.validate<VerifySignInPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.post<iVerifySignInSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.VerifySignInRoute()}`, payload);
+      return new VerifySignInSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Signs the user out.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/auth/logout`
+   * - **SDK Function Call**: `await BitBadgesApi.signOut(payload);`
+   * - **Tutorial**: See Authentication tutorial on the official docs.
+   */
+  public async signOut(payload?: SignOutPayload): Promise<SignOutSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<SignOutPayload> = typia.validate<SignOutPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.post<iSignOutSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.SignOutRoute()}`, payload);
+      return new SignOutSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
   /** Update Helper Functions for Pagination and Dynamic Fetches */
   public async updateUserSeenActivity() {
     return await this.updateAccountInfo({ seenActivity: Date.now() }); //Authenticated route so no need to pass in address
@@ -1780,90 +1864,6 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
         payload
       );
       return new AddApprovalDetailsToOffChainStorageSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Gets the sign in challenge to be signed for authentication. The returned is the message to be signed by the user.
-   *
-   * @remarks
-   * - **API Route**: `POST /api/v0/auth/getChallenge`
-   * - **SDK Function Call**: `await BitBadgesApi.getSignInChallenge(payload);`
-   * - **Tutorial**: See Authentication tutorial on the official docs.
-   *
-   * @example
-   * ```typescript
-   * const res = await BitBadgesApi.getSignInChallenge(payload);
-   * console.log(res);
-   * ```
-   */
-  public async getSignInChallenge(payload: GetSignInChallengePayload): Promise<GetSignInChallengeSuccessResponse<T>> {
-    try {
-      const validateRes: typia.IValidation<GetSignInChallengePayload> = typia.validate<GetSignInChallengePayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.post<iGetSignInChallengeSuccessResponse<string>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetSignInChallengeRoute()}`,
-        payload
-      );
-      return new GetSignInChallengeSuccessResponse(response.data).convert(this.ConvertFunction);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Verifies the user signed challenge and grants them a valid session if everything checks out.
-   *
-   * @remarks
-   * - **API Route**: `POST /api/v0/auth/verify`
-   * - **SDK Function Call**: `await BitBadgesApi.verifySignIn(payload);`
-   * - **Tutorial**: See Authentication tutorial on the official docs.
-   *
-   * @example
-   * ```typescript
-   * const res = await BitBadgesApi.verifySignIn(payload);
-   * console.log(res);
-   * ```
-   */
-  public async verifySignIn(payload: VerifySignInPayload): Promise<VerifySignInSuccessResponse> {
-    try {
-      const validateRes: typia.IValidation<VerifySignInPayload> = typia.validate<VerifySignInPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.post<iVerifySignInSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.VerifySignInRoute()}`, payload);
-      return new VerifySignInSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Signs the user out.
-   *
-   * @remarks
-   * - **API Route**: `POST /api/v0/auth/logout`
-   * - **SDK Function Call**: `await BitBadgesApi.signOut(payload);`
-   * - **Tutorial**: See Authentication tutorial on the official docs.
-   */
-  public async signOut(payload?: SignOutPayload): Promise<SignOutSuccessResponse> {
-    try {
-      const validateRes: typia.IValidation<SignOutPayload> = typia.validate<SignOutPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.post<iSignOutSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.SignOutRoute()}`, payload);
-      return new SignOutSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);

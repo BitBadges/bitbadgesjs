@@ -1,16 +1,11 @@
-import { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
+import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, CustomTypeClass } from '@/common/base.js';
 import { NumberType, Stringify } from '@/common/string-numbers.js';
-import { ActionPermission, CollectionMetadata, ManagerTimeline, TimedUpdatePermission, UintRangeArray } from '@/core/index.js';
-import {
-  BaseNumberTypeClass,
-  convertClassPropertiesAndMaintainNumberTypes,
-  CustomTypeClass,
-  iActionPermission,
-  iCollectionMetadata,
-  iManagerTimeline,
-  iTimedUpdatePermission,
-  iUintRange
-} from '@/interfaces/index.js';
+import { CollectionMetadata, ManagerTimeline } from '@/core/misc.js';
+import { ActionPermission } from '@/core/permissions.js';
+import { TimedUpdatePermission } from '@/core/permissions.js';
+import { UintRangeArray } from '@/core/uintRanges.js';
+import type { iActionPermission, iCollectionMetadata, iManagerTimeline, iTimedUpdatePermission, iUintRange } from '@/interfaces/index.js';
 import * as maps from '@/proto/maps/tx_pb.js';
 
 /**

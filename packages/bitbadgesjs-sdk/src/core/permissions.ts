@@ -17,7 +17,7 @@ import type {
 } from '@/interfaces/badges/permissions.js';
 import type { CustomType } from '@/common/base.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, deepCopyPrimitives } from '@/common/base.js';
-import { badges } from '@/proto/index.js';
+import * as badges from '../proto/badges/permissions_pb.js';
 import { AddressList } from './addressLists.js';
 import type { UniversalPermission, UniversalPermissionDetails } from './overlaps.js';
 import { GetFirstMatchOnly, getOverlapsAndNonOverlaps, universalRemoveOverlaps } from './overlaps.js';
@@ -734,8 +734,7 @@ export class BadgeIdsActionPermission<T extends NumberType>
     });
   }
 
-
-castToUniversalPermission(): UniversalPermission {
+  castToUniversalPermission(): UniversalPermission {
     return {
       ...AllDefaultValues,
       badgeIds: this.badgeIds.convert(BigIntify),

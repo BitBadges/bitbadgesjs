@@ -1,4 +1,4 @@
-import { BitBadgesAddress, iUpdateHistory, UNIXMilliTimestamp } from '@/api-indexer/docs/interfaces.js';
+import type { BitBadgesAddress, iUpdateHistory, UNIXMilliTimestamp } from '@/api-indexer/docs/interfaces.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, CustomTypeClass, deepCopyPrimitives } from '@/common/base.js';
 import type {
   iAmountTrackerIdDetails,
@@ -23,8 +23,8 @@ import type {
   iTimelineItem,
   iZkProof,
   iZkProofSolution
-} from '@/interfaces/badges/core.js';
-import * as proto from '@/proto/index.js';
+} from '../interfaces/badges/core.js';
+import * as badges from '../proto/badges/index.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 import { BigIntify, Stringify, type NumberType } from '../common/string-numbers.js';
 import { AddressList } from './addressLists.js';
@@ -67,8 +67,8 @@ export class BadgeMetadata<T extends NumberType> extends BaseNumberTypeClass<Bad
     );
   }
 
-  toProto(): proto.badges.BadgeMetadata {
-    return new proto.badges.BadgeMetadata({
+  toProto(): badges.BadgeMetadata {
+    return new badges.BadgeMetadata({
       uri: this.uri,
       badgeIds: this.badgeIds.map((b) => b.toProto()),
       customData: this.customData
@@ -80,7 +80,7 @@ export class BadgeMetadata<T extends NumberType> extends BaseNumberTypeClass<Bad
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): BadgeMetadata<U> {
-    return BadgeMetadata.fromProto(proto.badges.BadgeMetadata.fromJson(jsonValue, options), convertFunction);
+    return BadgeMetadata.fromProto(badges.BadgeMetadata.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -88,10 +88,10 @@ export class BadgeMetadata<T extends NumberType> extends BaseNumberTypeClass<Bad
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): BadgeMetadata<U> {
-    return BadgeMetadata.fromProto(proto.badges.BadgeMetadata.fromJsonString(jsonString, options), convertFunction);
+    return BadgeMetadata.fromProto(badges.BadgeMetadata.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: proto.badges.BadgeMetadata, convertFunction: (item: NumberType) => U): BadgeMetadata<U> {
+  static fromProto<U extends NumberType>(item: badges.BadgeMetadata, convertFunction: (item: NumberType) => U): BadgeMetadata<U> {
     return new BadgeMetadata<U>({
       uri: item.uri,
       badgeIds: item.badgeIds.map((b) => UintRange.fromProto(b, convertFunction)),
@@ -131,22 +131,22 @@ export class CollectionMetadata extends CustomTypeClass<CollectionMetadata> impl
     this.customData = collectionMetadata.customData;
   }
 
-  toProto(): proto.badges.CollectionMetadata {
-    return new proto.badges.CollectionMetadata({
+  toProto(): badges.CollectionMetadata {
+    return new badges.CollectionMetadata({
       uri: this.uri,
       customData: this.customData
     });
   }
 
   static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CollectionMetadata {
-    return CollectionMetadata.fromProto(proto.badges.CollectionMetadata.fromJson(jsonValue, options));
+    return CollectionMetadata.fromProto(badges.CollectionMetadata.fromJson(jsonValue, options));
   }
 
   static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CollectionMetadata {
-    return CollectionMetadata.fromProto(proto.badges.CollectionMetadata.fromJsonString(jsonString, options));
+    return CollectionMetadata.fromProto(badges.CollectionMetadata.fromJsonString(jsonString, options));
   }
 
-  static fromProto(item: proto.badges.CollectionMetadata): CollectionMetadata {
+  static fromProto(item: badges.CollectionMetadata): CollectionMetadata {
     return new CollectionMetadata({
       uri: item.uri,
       customData: item.customData
@@ -169,22 +169,22 @@ export class OffChainBalancesMetadata extends CustomTypeClass<OffChainBalancesMe
     this.customData = offChainBalancesMetadata.customData;
   }
 
-  toProto(): proto.badges.OffChainBalancesMetadata {
-    return new proto.badges.OffChainBalancesMetadata({
+  toProto(): badges.OffChainBalancesMetadata {
+    return new badges.OffChainBalancesMetadata({
       uri: this.uri,
       customData: this.customData
     });
   }
 
   static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): OffChainBalancesMetadata {
-    return OffChainBalancesMetadata.fromProto(proto.badges.OffChainBalancesMetadata.fromJson(jsonValue, options));
+    return OffChainBalancesMetadata.fromProto(badges.OffChainBalancesMetadata.fromJson(jsonValue, options));
   }
 
   static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): OffChainBalancesMetadata {
-    return OffChainBalancesMetadata.fromProto(proto.badges.OffChainBalancesMetadata.fromJsonString(jsonString, options));
+    return OffChainBalancesMetadata.fromProto(badges.OffChainBalancesMetadata.fromJsonString(jsonString, options));
   }
 
-  static fromProto(item: proto.badges.OffChainBalancesMetadata): OffChainBalancesMetadata {
+  static fromProto(item: badges.OffChainBalancesMetadata): OffChainBalancesMetadata {
     return new OffChainBalancesMetadata({
       uri: item.uri,
       customData: item.customData
@@ -234,8 +234,8 @@ export class MustOwnBadges<T extends NumberType> extends BaseNumberTypeClass<Mus
     );
   }
 
-  toProto(): proto.badges.MustOwnBadges {
-    return new proto.badges.MustOwnBadges(this.convert(Stringify));
+  toProto(): badges.MustOwnBadges {
+    return new badges.MustOwnBadges(this.convert(Stringify));
   }
 
   static fromJson<U extends NumberType>(
@@ -243,7 +243,7 @@ export class MustOwnBadges<T extends NumberType> extends BaseNumberTypeClass<Mus
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): MustOwnBadges<U> {
-    return MustOwnBadges.fromProto(proto.badges.MustOwnBadges.fromJson(jsonValue, options), convertFunction);
+    return MustOwnBadges.fromProto(badges.MustOwnBadges.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -251,10 +251,10 @@ export class MustOwnBadges<T extends NumberType> extends BaseNumberTypeClass<Mus
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): MustOwnBadges<U> {
-    return MustOwnBadges.fromProto(proto.badges.MustOwnBadges.fromJsonString(jsonString, options), convertFunction);
+    return MustOwnBadges.fromProto(badges.MustOwnBadges.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: proto.badges.MustOwnBadges, convertFunction: (item: NumberType) => U): MustOwnBadges<U> {
+  static fromProto<U extends NumberType>(item: badges.MustOwnBadges, convertFunction: (item: NumberType) => U): MustOwnBadges<U> {
     if (!item.amountRange) {
       throw new Error('amountRange is required');
     }
@@ -287,19 +287,19 @@ export class ZkProof extends CustomTypeClass<ZkProof> implements iZkProof {
     this.customData = zkProof.customData;
   }
 
-  toProto(): proto.badges.ZkProof {
-    return new proto.badges.ZkProof(this.clone().toJson());
+  toProto(): badges.ZkProof {
+    return new badges.ZkProof(this.clone().toJson());
   }
 
   static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ZkProof {
-    return ZkProof.fromProto(proto.badges.ZkProof.fromJson(jsonValue, options));
+    return ZkProof.fromProto(badges.ZkProof.fromJson(jsonValue, options));
   }
 
   static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ZkProof {
-    return ZkProof.fromProto(proto.badges.ZkProof.fromJsonString(jsonString, options));
+    return ZkProof.fromProto(badges.ZkProof.fromJsonString(jsonString, options));
   }
 
-  static fromProto(item: proto.badges.ZkProof): ZkProof {
+  static fromProto(item: badges.ZkProof): ZkProof {
     return new ZkProof({ ...item });
   }
 }
@@ -328,11 +328,11 @@ export class CoinTransfer<T extends NumberType> extends BaseNumberTypeClass<Coin
     });
   }
 
-  toProto(): proto.badges.CoinTransfer {
-    return new proto.badges.CoinTransfer(this.convert(Stringify));
+  toProto(): badges.CoinTransfer {
+    return new badges.CoinTransfer(this.convert(Stringify));
   }
 
-  static fromProto<U extends NumberType>(item: proto.badges.CoinTransfer, convertFunction: (item: NumberType) => U): CoinTransfer<U> {
+  static fromProto<U extends NumberType>(item: badges.CoinTransfer, convertFunction: (item: NumberType) => U): CoinTransfer<U> {
     return new CoinTransfer<U>({
       to: item.to,
       coins: item.coins.map((b) => CosmosCoin.fromProto(b, convertFunction))
@@ -355,19 +355,19 @@ export class ZkProofSolution extends CustomTypeClass<ZkProofSolution> implements
     this.publicInputs = zkProofSolution.publicInputs;
   }
 
-  toProto(): proto.badges.ZkProofSolution {
-    return new proto.badges.ZkProofSolution(this.clone().toJson());
+  toProto(): badges.ZkProofSolution {
+    return new badges.ZkProofSolution(this.clone().toJson());
   }
 
   static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ZkProofSolution {
-    return ZkProofSolution.fromProto(proto.badges.ZkProofSolution.fromJson(jsonValue, options));
+    return ZkProofSolution.fromProto(badges.ZkProofSolution.fromJson(jsonValue, options));
   }
 
   static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ZkProofSolution {
-    return ZkProofSolution.fromProto(proto.badges.ZkProofSolution.fromJsonString(jsonString, options));
+    return ZkProofSolution.fromProto(badges.ZkProofSolution.fromJsonString(jsonString, options));
   }
 
-  static fromProto(item: proto.badges.ZkProofSolution): ZkProofSolution {
+  static fromProto(item: badges.ZkProofSolution): ZkProofSolution {
     return new ZkProofSolution({ ...item });
   }
 }
@@ -397,8 +397,8 @@ export class ApprovalIdentifierDetails extends CustomTypeClass<ApprovalIdentifie
     });
   }
 
-  toProto(): proto.badges.ApprovalIdentifierDetails {
-    return new proto.badges.ApprovalIdentifierDetails(this.clone().toJson());
+  toProto(): badges.ApprovalIdentifierDetails {
+    return new badges.ApprovalIdentifierDetails(this.clone().toJson());
   }
 
   clone(): ApprovalIdentifierDetails {
@@ -406,14 +406,14 @@ export class ApprovalIdentifierDetails extends CustomTypeClass<ApprovalIdentifie
   }
 
   static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ApprovalIdentifierDetails {
-    return ApprovalIdentifierDetails.fromProto(proto.badges.ApprovalIdentifierDetails.fromJson(jsonValue, options));
+    return ApprovalIdentifierDetails.fromProto(badges.ApprovalIdentifierDetails.fromJson(jsonValue, options));
   }
 
   static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ApprovalIdentifierDetails {
-    return ApprovalIdentifierDetails.fromProto(proto.badges.ApprovalIdentifierDetails.fromJsonString(jsonString, options));
+    return ApprovalIdentifierDetails.fromProto(badges.ApprovalIdentifierDetails.fromJsonString(jsonString, options));
   }
 
-  static fromProto(item: proto.badges.ApprovalIdentifierDetails): ApprovalIdentifierDetails {
+  static fromProto(item: badges.ApprovalIdentifierDetails): ApprovalIdentifierDetails {
     return new ApprovalIdentifierDetails({ ...item });
   }
 }
@@ -520,8 +520,8 @@ export class MerkleChallenge<T extends NumberType> extends BaseNumberTypeClass<M
     );
   }
 
-  toProto(): proto.badges.MerkleChallenge {
-    return new proto.badges.MerkleChallenge(this.convert(Stringify));
+  toProto(): badges.MerkleChallenge {
+    return new badges.MerkleChallenge(this.convert(Stringify));
   }
 
   static fromJson<U extends NumberType>(
@@ -529,7 +529,7 @@ export class MerkleChallenge<T extends NumberType> extends BaseNumberTypeClass<M
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): MerkleChallenge<U> {
-    return MerkleChallenge.fromProto(proto.badges.MerkleChallenge.fromJson(jsonValue, options), convertFunction);
+    return MerkleChallenge.fromProto(badges.MerkleChallenge.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -537,10 +537,10 @@ export class MerkleChallenge<T extends NumberType> extends BaseNumberTypeClass<M
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): MerkleChallenge<U> {
-    return MerkleChallenge.fromProto(proto.badges.MerkleChallenge.fromJsonString(jsonString, options), convertFunction);
+    return MerkleChallenge.fromProto(badges.MerkleChallenge.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: proto.badges.MerkleChallenge, convertFunction: (item: NumberType) => U): MerkleChallenge<U> {
+  static fromProto<U extends NumberType>(item: badges.MerkleChallenge, convertFunction: (item: NumberType) => U): MerkleChallenge<U> {
     return new MerkleChallenge<U>({
       root: item.root,
       expectedProofLength: convertFunction(BigInt(item.expectedProofLength)),
@@ -575,8 +575,8 @@ export class MerklePathItem extends CustomTypeClass<MerklePathItem> {
     });
   }
 
-  toProto(): proto.badges.MerklePathItem {
-    return new proto.badges.MerklePathItem(this.clone().toJson());
+  toProto(): badges.MerklePathItem {
+    return new badges.MerklePathItem(this.clone().toJson());
   }
 
   clone(): MerklePathItem {
@@ -584,14 +584,14 @@ export class MerklePathItem extends CustomTypeClass<MerklePathItem> {
   }
 
   static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MerklePathItem {
-    return MerklePathItem.fromProto(proto.badges.MerklePathItem.fromJson(jsonValue, options));
+    return MerklePathItem.fromProto(badges.MerklePathItem.fromJson(jsonValue, options));
   }
 
   static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MerklePathItem {
-    return MerklePathItem.fromProto(proto.badges.MerklePathItem.fromJsonString(jsonString, options));
+    return MerklePathItem.fromProto(badges.MerklePathItem.fromJsonString(jsonString, options));
   }
 
-  static fromProto(item: proto.badges.MerklePathItem): MerklePathItem {
+  static fromProto(item: badges.MerklePathItem): MerklePathItem {
     return new MerklePathItem({ ...item });
   }
 }
@@ -619,8 +619,8 @@ export class MerkleProof extends CustomTypeClass<MerkleProof> implements MerkleP
     });
   }
 
-  toProto(): proto.badges.MerkleProof {
-    return new proto.badges.MerkleProof(this.clone().toJson());
+  toProto(): badges.MerkleProof {
+    return new badges.MerkleProof(this.clone().toJson());
   }
 
   clone(): MerkleProof {
@@ -628,14 +628,14 @@ export class MerkleProof extends CustomTypeClass<MerkleProof> implements MerkleP
   }
 
   static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MerkleProof {
-    return MerkleProof.fromProto(proto.badges.MerkleProof.fromJson(jsonValue, options));
+    return MerkleProof.fromProto(badges.MerkleProof.fromJson(jsonValue, options));
   }
 
   static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MerkleProof {
-    return MerkleProof.fromProto(proto.badges.MerkleProof.fromJsonString(jsonString, options));
+    return MerkleProof.fromProto(badges.MerkleProof.fromJsonString(jsonString, options));
   }
 
-  static fromProto(item: proto.badges.MerkleProof): MerkleProof {
+  static fromProto(item: badges.MerkleProof): MerkleProof {
     return new MerkleProof({
       aunts: item.aunts.map((b) => MerklePathItem.fromProto(b)),
       leaf: item.leaf
@@ -696,8 +696,8 @@ export class ManagerTimeline<T extends NumberType> extends BaseNumberTypeClass<M
     );
   }
 
-  toProto(): proto.badges.ManagerTimeline {
-    return new proto.badges.ManagerTimeline(this.convert(Stringify));
+  toProto(): badges.ManagerTimeline {
+    return new badges.ManagerTimeline(this.convert(Stringify));
   }
 
   static fromJson<U extends NumberType>(
@@ -705,7 +705,7 @@ export class ManagerTimeline<T extends NumberType> extends BaseNumberTypeClass<M
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): ManagerTimeline<U> {
-    return ManagerTimeline.fromProto(proto.badges.ManagerTimeline.fromJson(jsonValue, options), convertFunction);
+    return ManagerTimeline.fromProto(badges.ManagerTimeline.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -713,10 +713,10 @@ export class ManagerTimeline<T extends NumberType> extends BaseNumberTypeClass<M
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): ManagerTimeline<U> {
-    return ManagerTimeline.fromProto(proto.badges.ManagerTimeline.fromJsonString(jsonString, options), convertFunction);
+    return ManagerTimeline.fromProto(badges.ManagerTimeline.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: proto.badges.ManagerTimeline, convertFunction: (item: NumberType) => U): ManagerTimeline<U> {
+  static fromProto<U extends NumberType>(item: badges.ManagerTimeline, convertFunction: (item: NumberType) => U): ManagerTimeline<U> {
     return new ManagerTimeline<U>({
       manager: item.manager,
       timelineTimes: item.timelineTimes.map((b) => UintRange.fromProto(b, convertFunction))
@@ -764,8 +764,8 @@ export class CollectionMetadataTimelineWithDetails<T extends NumberType>
     );
   }
 
-  toProto(): proto.badges.CollectionMetadataTimeline {
-    return new proto.badges.CollectionMetadataTimeline(this.convert(Stringify));
+  toProto(): badges.CollectionMetadataTimeline {
+    return new badges.CollectionMetadataTimeline(this.convert(Stringify));
   }
 }
 
@@ -796,8 +796,8 @@ export class CollectionMetadataTimeline<T extends NumberType>
     );
   }
 
-  toProto(): proto.badges.CollectionMetadataTimeline {
-    return new proto.badges.CollectionMetadataTimeline(this.convert(Stringify));
+  toProto(): badges.CollectionMetadataTimeline {
+    return new badges.CollectionMetadataTimeline(this.convert(Stringify));
   }
 
   static fromJson<U extends NumberType>(
@@ -805,7 +805,7 @@ export class CollectionMetadataTimeline<T extends NumberType>
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): CollectionMetadataTimeline<U> {
-    return CollectionMetadataTimeline.fromProto(proto.badges.CollectionMetadataTimeline.fromJson(jsonValue, options), convertFunction);
+    return CollectionMetadataTimeline.fromProto(badges.CollectionMetadataTimeline.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -813,11 +813,11 @@ export class CollectionMetadataTimeline<T extends NumberType>
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): CollectionMetadataTimeline<U> {
-    return CollectionMetadataTimeline.fromProto(proto.badges.CollectionMetadataTimeline.fromJsonString(jsonString, options), convertFunction);
+    return CollectionMetadataTimeline.fromProto(badges.CollectionMetadataTimeline.fromJsonString(jsonString, options), convertFunction);
   }
 
   static fromProto<U extends NumberType>(
-    item: proto.badges.CollectionMetadataTimeline,
+    item: badges.CollectionMetadataTimeline,
     convertFunction: (item: NumberType) => U
   ): CollectionMetadataTimeline<U> {
     if (item.collectionMetadata === undefined) {
@@ -871,8 +871,8 @@ export class BadgeMetadataTimelineWithDetails<T extends NumberType>
     );
   }
 
-  toProto(): proto.badges.BadgeMetadataTimeline {
-    return new proto.badges.BadgeMetadataTimeline(this.convert(Stringify));
+  toProto(): badges.BadgeMetadataTimeline {
+    return new badges.BadgeMetadataTimeline(this.convert(Stringify));
   }
 }
 
@@ -907,8 +907,8 @@ export class BadgeMetadataTimeline<T extends NumberType> extends BaseNumberTypeC
     );
   }
 
-  toProto(): proto.badges.BadgeMetadataTimeline {
-    return new proto.badges.BadgeMetadataTimeline(this.convert(Stringify));
+  toProto(): badges.BadgeMetadataTimeline {
+    return new badges.BadgeMetadataTimeline(this.convert(Stringify));
   }
 
   static fromJson<U extends NumberType>(
@@ -916,7 +916,7 @@ export class BadgeMetadataTimeline<T extends NumberType> extends BaseNumberTypeC
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): BadgeMetadataTimeline<U> {
-    return BadgeMetadataTimeline.fromProto(proto.badges.BadgeMetadataTimeline.fromJson(jsonValue, options), convertFunction);
+    return BadgeMetadataTimeline.fromProto(badges.BadgeMetadataTimeline.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -924,13 +924,10 @@ export class BadgeMetadataTimeline<T extends NumberType> extends BaseNumberTypeC
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): BadgeMetadataTimeline<U> {
-    return BadgeMetadataTimeline.fromProto(proto.badges.BadgeMetadataTimeline.fromJsonString(jsonString, options), convertFunction);
+    return BadgeMetadataTimeline.fromProto(badges.BadgeMetadataTimeline.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(
-    item: proto.badges.BadgeMetadataTimeline,
-    convertFunction: (item: NumberType) => U
-  ): BadgeMetadataTimeline<U> {
+  static fromProto<U extends NumberType>(item: badges.BadgeMetadataTimeline, convertFunction: (item: NumberType) => U): BadgeMetadataTimeline<U> {
     return new BadgeMetadataTimeline<U>({
       badgeMetadata: item.badgeMetadata.map((b) => BadgeMetadata.fromProto(b, convertFunction)),
       timelineTimes: item.timelineTimes.map((b) => UintRange.fromProto(b, convertFunction))
@@ -980,8 +977,8 @@ export class OffChainBalancesMetadataTimeline<T extends NumberType>
     );
   }
 
-  toProto(): proto.badges.OffChainBalancesMetadataTimeline {
-    return new proto.badges.OffChainBalancesMetadataTimeline(this.convert(Stringify));
+  toProto(): badges.OffChainBalancesMetadataTimeline {
+    return new badges.OffChainBalancesMetadataTimeline(this.convert(Stringify));
   }
 
   static fromJson<U extends NumberType>(
@@ -989,7 +986,7 @@ export class OffChainBalancesMetadataTimeline<T extends NumberType>
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): OffChainBalancesMetadataTimeline<U> {
-    return OffChainBalancesMetadataTimeline.fromProto(proto.badges.OffChainBalancesMetadataTimeline.fromJson(jsonValue, options), convertFunction);
+    return OffChainBalancesMetadataTimeline.fromProto(badges.OffChainBalancesMetadataTimeline.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -997,14 +994,11 @@ export class OffChainBalancesMetadataTimeline<T extends NumberType>
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): OffChainBalancesMetadataTimeline<U> {
-    return OffChainBalancesMetadataTimeline.fromProto(
-      proto.badges.OffChainBalancesMetadataTimeline.fromJsonString(jsonString, options),
-      convertFunction
-    );
+    return OffChainBalancesMetadataTimeline.fromProto(badges.OffChainBalancesMetadataTimeline.fromJsonString(jsonString, options), convertFunction);
   }
 
   static fromProto<U extends NumberType>(
-    item: proto.badges.OffChainBalancesMetadataTimeline,
+    item: badges.OffChainBalancesMetadataTimeline,
     convertFunction: (item: NumberType) => U
   ): OffChainBalancesMetadataTimeline<U> {
     if (!item.offChainBalancesMetadata) {
@@ -1064,8 +1058,8 @@ export class CustomDataTimeline<T extends NumberType> extends BaseNumberTypeClas
     );
   }
 
-  toProto(): proto.badges.CustomDataTimeline {
-    return new proto.badges.CustomDataTimeline(this.convert(Stringify));
+  toProto(): badges.CustomDataTimeline {
+    return new badges.CustomDataTimeline(this.convert(Stringify));
   }
 
   static fromJson<U extends NumberType>(
@@ -1073,7 +1067,7 @@ export class CustomDataTimeline<T extends NumberType> extends BaseNumberTypeClas
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): CustomDataTimeline<U> {
-    return CustomDataTimeline.fromProto(proto.badges.CustomDataTimeline.fromJson(jsonValue, options), convertFunction);
+    return CustomDataTimeline.fromProto(badges.CustomDataTimeline.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -1081,10 +1075,10 @@ export class CustomDataTimeline<T extends NumberType> extends BaseNumberTypeClas
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): CustomDataTimeline<U> {
-    return CustomDataTimeline.fromProto(proto.badges.CustomDataTimeline.fromJsonString(jsonString, options), convertFunction);
+    return CustomDataTimeline.fromProto(badges.CustomDataTimeline.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: proto.badges.CustomDataTimeline, convertFunction: (item: NumberType) => U): CustomDataTimeline<U> {
+  static fromProto<U extends NumberType>(item: badges.CustomDataTimeline, convertFunction: (item: NumberType) => U): CustomDataTimeline<U> {
     return new CustomDataTimeline<U>({
       customData: item.customData,
       timelineTimes: item.timelineTimes.map((b) => UintRange.fromProto(b, convertFunction))
@@ -1138,8 +1132,8 @@ export class StandardsTimeline<T extends NumberType> extends BaseNumberTypeClass
     );
   }
 
-  toProto(): proto.badges.StandardsTimeline {
-    return new proto.badges.StandardsTimeline(this.convert(Stringify));
+  toProto(): badges.StandardsTimeline {
+    return new badges.StandardsTimeline(this.convert(Stringify));
   }
 
   static fromJson<U extends NumberType>(
@@ -1147,7 +1141,7 @@ export class StandardsTimeline<T extends NumberType> extends BaseNumberTypeClass
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): StandardsTimeline<U> {
-    return StandardsTimeline.fromProto(proto.badges.StandardsTimeline.fromJson(jsonValue, options), convertFunction);
+    return StandardsTimeline.fromProto(badges.StandardsTimeline.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -1155,10 +1149,10 @@ export class StandardsTimeline<T extends NumberType> extends BaseNumberTypeClass
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): StandardsTimeline<U> {
-    return StandardsTimeline.fromProto(proto.badges.StandardsTimeline.fromJsonString(jsonString, options), convertFunction);
+    return StandardsTimeline.fromProto(badges.StandardsTimeline.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: proto.badges.StandardsTimeline, convertFunction: (item: NumberType) => U): StandardsTimeline<U> {
+  static fromProto<U extends NumberType>(item: badges.StandardsTimeline, convertFunction: (item: NumberType) => U): StandardsTimeline<U> {
     return new StandardsTimeline<U>({
       standards: item.standards,
       timelineTimes: item.timelineTimes.map((b) => UintRange.fromProto(b, convertFunction))
@@ -1212,8 +1206,8 @@ export class IsArchivedTimeline<T extends NumberType> extends BaseNumberTypeClas
     );
   }
 
-  toProto(): proto.badges.IsArchivedTimeline {
-    return new proto.badges.IsArchivedTimeline(this.convert(Stringify));
+  toProto(): badges.IsArchivedTimeline {
+    return new badges.IsArchivedTimeline(this.convert(Stringify));
   }
 
   static fromJson<U extends NumberType>(
@@ -1221,7 +1215,7 @@ export class IsArchivedTimeline<T extends NumberType> extends BaseNumberTypeClas
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): IsArchivedTimeline<U> {
-    return IsArchivedTimeline.fromProto(proto.badges.IsArchivedTimeline.fromJson(jsonValue, options), convertFunction);
+    return IsArchivedTimeline.fromProto(badges.IsArchivedTimeline.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -1229,10 +1223,10 @@ export class IsArchivedTimeline<T extends NumberType> extends BaseNumberTypeClas
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): IsArchivedTimeline<U> {
-    return IsArchivedTimeline.fromProto(proto.badges.IsArchivedTimeline.fromJsonString(jsonString, options), convertFunction);
+    return IsArchivedTimeline.fromProto(badges.IsArchivedTimeline.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: proto.badges.IsArchivedTimeline, convertFunction: (item: NumberType) => U): IsArchivedTimeline<U> {
+  static fromProto<U extends NumberType>(item: badges.IsArchivedTimeline, convertFunction: (item: NumberType) => U): IsArchivedTimeline<U> {
     return new IsArchivedTimeline<U>({
       isArchived: item.isArchived,
       timelineTimes: item.timelineTimes.map((b) => UintRange.fromProto(b, convertFunction))

@@ -30,8 +30,6 @@ import { createTxRaw, createTxRawWithExtension } from './txRaw.js';
 import type { MessageGenerated } from './utils.js';
 import { signatureToWeb3ExtensionBitcoin, signatureToWeb3ExtensionEthereum, signatureToWeb3ExtensionSolana } from './web3Extension.js';
 
-const secp256k1 = new elliptic.ec('secp256k1');
-
 interface LegacyTxContext {
   chain: Chain;
   sender: Sender;
@@ -436,6 +434,7 @@ const compressSecp256Pubkey = (pubkey: Uint8Array) => {
     case 33:
       return pubkey;
     case 65:
+      const secp256k1 = new elliptic.ec('secp256k1');
       return Uint8Array.from(secp256k1.keyFromPublic(pubkey).getPublic(true, 'array'));
     default:
       throw new Error('Invalid pubkey length');

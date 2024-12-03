@@ -2,7 +2,7 @@ import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } fro
 import { bigIntMin, safeAddKeepLeft } from '@/common/math.js';
 import { Stringify, type NumberType } from '@/common/string-numbers.js';
 import { UintRange, UintRangeArray } from '@/core/uintRanges.js';
-import { badges } from '@/proto/index.js';
+import * as badges from '@/proto/badges/metadata_pb.js';
 import type { iUintRange } from '@/interfaces/badges/core.js';
 import type { iMetadata } from './metadata.js';
 import { Metadata } from './metadata.js';

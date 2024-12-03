@@ -1,6 +1,6 @@
 import type { NumberType } from '@/common/string-numbers.js';
 import type { IChainDriver } from 'blockin';
-import { AssetConditionGroup } from 'blockin/dist/types/verify.types';
+import type { AssetConditionGroup } from 'blockin/dist/types/verify.types';
 import { recoverPersonalSignature } from '@metamask/eth-sig-util';
 import { isAddress } from 'web3-validator';
 

@@ -3,7 +3,7 @@ import { BigIntify, NumberType } from '@/common/string-numbers.js';
 import type { BadgeMetadata } from '@/core/misc.js';
 import type { UintRange } from '@/core/uintRanges.js';
 import { UintRangeArray } from '@/core/uintRanges.js';
-import { getConverterFunction } from '@/interfaces/index.js';
+import { getConverterFunction } from '@/common/base.js';
 
 /**
  * This function returns the [Metadata ID](https://docs.bitbadges.io/for-developers/bitbadges-sdk/common-snippets/metadata-ids)

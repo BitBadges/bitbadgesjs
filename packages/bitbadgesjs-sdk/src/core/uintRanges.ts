@@ -4,7 +4,7 @@ import { BaseNumberTypeClass, deepCopyPrimitives, getConverterFunction } from '@
 import { safeSubtract, safeAddKeepLeft, GO_MAX_UINT_64, safeSubtractKeepLeft, bigIntMin, castNumberType, bigIntMax } from '../common/math.js';
 import type { NumberType } from '../common/string-numbers.js';
 import { Stringify } from '../common/string-numbers.js';
-import * as proto from '@/proto/index.js';
+import * as badges from '@/proto/badges/balances_pb.js';
 import { BaseTypedArray } from '@/common/typed-arrays.js';
 
 /**
@@ -37,8 +37,8 @@ export class UintRange<T extends NumberType> extends BaseNumberTypeClass<UintRan
     );
   }
 
-  toProto(): proto.badges.UintRange {
-    return new proto.badges.UintRange(this.convert(Stringify));
+  toProto(): badges.UintRange {
+    return new badges.UintRange(this.convert(Stringify));
   }
 
   static fromJson<U extends NumberType>(
@@ -46,7 +46,7 @@ export class UintRange<T extends NumberType> extends BaseNumberTypeClass<UintRan
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): UintRange<U> {
-    return UintRange.fromProto(proto.badges.UintRange.fromJson(jsonValue, options), convertFunction);
+    return UintRange.fromProto(badges.UintRange.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -54,10 +54,10 @@ export class UintRange<T extends NumberType> extends BaseNumberTypeClass<UintRan
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): UintRange<U> {
-    return UintRange.fromProto(proto.badges.UintRange.fromJsonString(jsonString, options), convertFunction);
+    return UintRange.fromProto(badges.UintRange.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: proto.badges.UintRange, convertFunction: (item: NumberType) => U): UintRange<U> {
+  static fromProto<U extends NumberType>(item: badges.UintRange, convertFunction: (item: NumberType) => U): UintRange<U> {
     return new UintRange<U>({
       start: convertFunction(BigInt(item.start)),
       end: convertFunction(BigInt(item.end))

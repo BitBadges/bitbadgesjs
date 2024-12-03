@@ -25,7 +25,6 @@ import type {
   iUserOutgoingApproval
 } from '@/interfaces/badges/approvals.js';
 import type { iAddressList, iCoinTransfer, iMerkleChallenge } from '@/interfaces/badges/core.js';
-import * as proto from '@/proto/index.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 import type MerkleTree from 'merkletreejs';
 import type { Options as MerkleTreeJsOptions } from 'merkletreejs/dist/MerkleTree';
@@ -34,6 +33,7 @@ import { AddressList } from './addressLists.js';
 import { Balance, BalanceArray } from './balances.js';
 import { CoinTransfer, MerkleChallenge, MustOwnBadges, ZkProof } from './misc.js';
 import type { UniversalPermission, UniversalPermissionDetails } from './overlaps.js';
+import * as badges from '@/proto/badges/index.js';
 import { GetListIdWithOptions, GetListWithOptions, GetUintRangesWithOptions, getOverlapsAndNonOverlaps } from './overlaps.js';
 import type { CollectionApprovalPermissionWithDetails } from './permissions.js';
 import { CollectionApprovalPermission } from './permissions.js';
@@ -188,8 +188,8 @@ export class UserOutgoingApproval<T extends NumberType> extends BaseNumberTypeCl
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as UserOutgoingApproval<U>;
   }
 
-  toProto(): proto.badges.UserOutgoingApproval {
-    return new proto.badges.UserOutgoingApproval(this.convert(Stringify));
+  toProto(): badges.UserOutgoingApproval {
+    return new badges.UserOutgoingApproval(this.convert(Stringify));
   }
 
   static fromJson<U extends NumberType>(
@@ -197,7 +197,7 @@ export class UserOutgoingApproval<T extends NumberType> extends BaseNumberTypeCl
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): UserOutgoingApproval<U> {
-    return UserOutgoingApproval.fromProto(proto.badges.UserOutgoingApproval.fromJson(jsonValue, options), convertFunction);
+    return UserOutgoingApproval.fromProto(badges.UserOutgoingApproval.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -205,10 +205,10 @@ export class UserOutgoingApproval<T extends NumberType> extends BaseNumberTypeCl
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): UserOutgoingApproval<U> {
-    return UserOutgoingApproval.fromProto(proto.badges.UserOutgoingApproval.fromJsonString(jsonString, options), convertFunction);
+    return UserOutgoingApproval.fromProto(badges.UserOutgoingApproval.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: proto.badges.UserOutgoingApproval, convertFunction: (item: NumberType) => U): UserOutgoingApproval<U> {
+  static fromProto<U extends NumberType>(item: badges.UserOutgoingApproval, convertFunction: (item: NumberType) => U): UserOutgoingApproval<U> {
     return new UserOutgoingApproval<U>({
       toListId: item.toListId,
       initiatedByListId: item.initiatedByListId,
@@ -271,8 +271,8 @@ export class OutgoingApprovalCriteria<T extends NumberType>
     );
   }
 
-  toProto(): proto.badges.OutgoingApprovalCriteria {
-    return new proto.badges.OutgoingApprovalCriteria(this.convert(Stringify));
+  toProto(): badges.OutgoingApprovalCriteria {
+    return new badges.OutgoingApprovalCriteria(this.convert(Stringify));
   }
 
   static fromJson<U extends NumberType>(
@@ -280,7 +280,7 @@ export class OutgoingApprovalCriteria<T extends NumberType>
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): OutgoingApprovalCriteria<U> {
-    return OutgoingApprovalCriteria.fromProto(proto.badges.OutgoingApprovalCriteria.fromJson(jsonValue, options), convertFunction);
+    return OutgoingApprovalCriteria.fromProto(badges.OutgoingApprovalCriteria.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -288,11 +288,11 @@ export class OutgoingApprovalCriteria<T extends NumberType>
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): OutgoingApprovalCriteria<U> {
-    return OutgoingApprovalCriteria.fromProto(proto.badges.OutgoingApprovalCriteria.fromJsonString(jsonString, options), convertFunction);
+    return OutgoingApprovalCriteria.fromProto(badges.OutgoingApprovalCriteria.fromJsonString(jsonString, options), convertFunction);
   }
 
   static fromProto<U extends NumberType>(
-    item: proto.badges.OutgoingApprovalCriteria,
+    item: badges.OutgoingApprovalCriteria,
     convertFunction: (item: NumberType) => U
   ): OutgoingApprovalCriteria<U> {
     return new OutgoingApprovalCriteria<U>({
@@ -359,8 +359,8 @@ export class PredeterminedBalances<T extends NumberType> extends BaseNumberTypeC
     );
   }
 
-  toProto(): proto.badges.PredeterminedBalances {
-    return new proto.badges.PredeterminedBalances(this.convert(Stringify));
+  toProto(): badges.PredeterminedBalances {
+    return new badges.PredeterminedBalances(this.convert(Stringify));
   }
 
   static fromJson<U extends NumberType>(
@@ -368,7 +368,7 @@ export class PredeterminedBalances<T extends NumberType> extends BaseNumberTypeC
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): PredeterminedBalances<U> {
-    return PredeterminedBalances.fromProto(proto.badges.PredeterminedBalances.fromJson(jsonValue, options), convertFunction);
+    return PredeterminedBalances.fromProto(badges.PredeterminedBalances.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -376,13 +376,10 @@ export class PredeterminedBalances<T extends NumberType> extends BaseNumberTypeC
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): PredeterminedBalances<U> {
-    return PredeterminedBalances.fromProto(proto.badges.PredeterminedBalances.fromJsonString(jsonString, options), convertFunction);
+    return PredeterminedBalances.fromProto(badges.PredeterminedBalances.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(
-    item: proto.badges.PredeterminedBalances,
-    convertFunction: (item: NumberType) => U
-  ): PredeterminedBalances<U> {
+  static fromProto<U extends NumberType>(item: badges.PredeterminedBalances, convertFunction: (item: NumberType) => U): PredeterminedBalances<U> {
     return new PredeterminedBalances<U>({
       manualBalances: item.manualBalances.map((x) => ManualBalances.fromProto(x, convertFunction)),
       incrementedBalances: item.incrementedBalances
@@ -428,8 +425,8 @@ export class ManualBalances<T extends NumberType> extends BaseNumberTypeClass<Ma
     );
   }
 
-  toProto(): proto.badges.ManualBalances {
-    return new proto.badges.ManualBalances(this.convert(Stringify));
+  toProto(): badges.ManualBalances {
+    return new badges.ManualBalances(this.convert(Stringify));
   }
 
   static fromJson<U extends NumberType>(
@@ -437,7 +434,7 @@ export class ManualBalances<T extends NumberType> extends BaseNumberTypeClass<Ma
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): ManualBalances<U> {
-    return ManualBalances.fromProto(proto.badges.ManualBalances.fromJson(jsonValue, options), convertFunction);
+    return ManualBalances.fromProto(badges.ManualBalances.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -445,10 +442,10 @@ export class ManualBalances<T extends NumberType> extends BaseNumberTypeClass<Ma
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): ManualBalances<U> {
-    return ManualBalances.fromProto(proto.badges.ManualBalances.fromJsonString(jsonString, options), convertFunction);
+    return ManualBalances.fromProto(badges.ManualBalances.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: proto.badges.ManualBalances, convertFunction: (item: NumberType) => U): ManualBalances<U> {
+  static fromProto<U extends NumberType>(item: badges.ManualBalances, convertFunction: (item: NumberType) => U): ManualBalances<U> {
     return new ManualBalances<U>({
       balances: item.balances.map((x) => Balance.fromProto(x, convertFunction))
     });
@@ -487,8 +484,8 @@ export class IncrementedBalances<T extends NumberType> extends BaseNumberTypeCla
     );
   }
 
-  toProto(): proto.badges.IncrementedBalances {
-    return new proto.badges.IncrementedBalances(this.convert(Stringify));
+  toProto(): badges.IncrementedBalances {
+    return new badges.IncrementedBalances(this.convert(Stringify));
   }
 
   static fromJson<U extends NumberType>(
@@ -496,7 +493,7 @@ export class IncrementedBalances<T extends NumberType> extends BaseNumberTypeCla
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): IncrementedBalances<U> {
-    return IncrementedBalances.fromProto(proto.badges.IncrementedBalances.fromJson(jsonValue, options), convertFunction);
+    return IncrementedBalances.fromProto(badges.IncrementedBalances.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -504,10 +501,10 @@ export class IncrementedBalances<T extends NumberType> extends BaseNumberTypeCla
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): IncrementedBalances<U> {
-    return IncrementedBalances.fromProto(proto.badges.IncrementedBalances.fromJsonString(jsonString, options), convertFunction);
+    return IncrementedBalances.fromProto(badges.IncrementedBalances.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: proto.badges.IncrementedBalances, convertFunction: (item: NumberType) => U): IncrementedBalances<U> {
+  static fromProto<U extends NumberType>(item: badges.IncrementedBalances, convertFunction: (item: NumberType) => U): IncrementedBalances<U> {
     return new IncrementedBalances<U>({
       startBalances: item.startBalances.map((x) => Balance.fromProto(x, convertFunction)),
       incrementBadgeIdsBy: convertFunction(item.incrementBadgeIdsBy),
@@ -544,8 +541,8 @@ export class PredeterminedOrderCalculationMethod
     this.challengeTrackerId = msg.challengeTrackerId;
   }
 
-  toProto(): proto.badges.PredeterminedOrderCalculationMethod {
-    return new proto.badges.PredeterminedOrderCalculationMethod(this.toJson());
+  toProto(): badges.PredeterminedOrderCalculationMethod {
+    return new badges.PredeterminedOrderCalculationMethod(this.toJson());
   }
 
   static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): PredeterminedOrderCalculationMethod {
@@ -556,7 +553,7 @@ export class PredeterminedOrderCalculationMethod
     return PredeterminedOrderCalculationMethod.fromJsonString(jsonString, options);
   }
 
-  static fromProto(item: proto.badges.PredeterminedOrderCalculationMethod): PredeterminedOrderCalculationMethod {
+  static fromProto(item: badges.PredeterminedOrderCalculationMethod): PredeterminedOrderCalculationMethod {
     return new PredeterminedOrderCalculationMethod({
       useOverallNumTransfers: item.useOverallNumTransfers,
       usePerToAddressNumTransfers: item.usePerToAddressNumTransfers,
@@ -609,8 +606,8 @@ export class ApprovalAmounts<T extends NumberType> extends BaseNumberTypeClass<A
     );
   }
 
-  toProto(): proto.badges.ApprovalAmounts {
-    return new proto.badges.ApprovalAmounts(this.convert(Stringify));
+  toProto(): badges.ApprovalAmounts {
+    return new badges.ApprovalAmounts(this.convert(Stringify));
   }
 
   static fromJson<U extends NumberType>(
@@ -618,7 +615,7 @@ export class ApprovalAmounts<T extends NumberType> extends BaseNumberTypeClass<A
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): ApprovalAmounts<U> {
-    return ApprovalAmounts.fromProto(proto.badges.ApprovalAmounts.fromJson(jsonValue, options), convertFunction);
+    return ApprovalAmounts.fromProto(badges.ApprovalAmounts.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -626,10 +623,10 @@ export class ApprovalAmounts<T extends NumberType> extends BaseNumberTypeClass<A
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): ApprovalAmounts<U> {
-    return ApprovalAmounts.fromProto(proto.badges.ApprovalAmounts.fromJsonString(jsonString, options), convertFunction);
+    return ApprovalAmounts.fromProto(badges.ApprovalAmounts.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: proto.badges.ApprovalAmounts, convertFunction: (item: NumberType) => U): ApprovalAmounts<U> {
+  static fromProto<U extends NumberType>(item: badges.ApprovalAmounts, convertFunction: (item: NumberType) => U): ApprovalAmounts<U> {
     return new ApprovalAmounts<U>({
       overallApprovalAmount: convertFunction(item.overallApprovalAmount),
       perToAddressApprovalAmount: convertFunction(item.perToAddressApprovalAmount),
@@ -683,8 +680,8 @@ export class MaxNumTransfers<T extends NumberType> extends BaseNumberTypeClass<M
     );
   }
 
-  toProto(): proto.badges.MaxNumTransfers {
-    return new proto.badges.MaxNumTransfers(this.convert(Stringify));
+  toProto(): badges.MaxNumTransfers {
+    return new badges.MaxNumTransfers(this.convert(Stringify));
   }
 
   static fromJson<U extends NumberType>(
@@ -692,7 +689,7 @@ export class MaxNumTransfers<T extends NumberType> extends BaseNumberTypeClass<M
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): MaxNumTransfers<U> {
-    return MaxNumTransfers.fromProto(proto.badges.MaxNumTransfers.fromJson(jsonValue, options), convertFunction);
+    return MaxNumTransfers.fromProto(badges.MaxNumTransfers.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -700,10 +697,10 @@ export class MaxNumTransfers<T extends NumberType> extends BaseNumberTypeClass<M
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): MaxNumTransfers<U> {
-    return MaxNumTransfers.fromProto(proto.badges.MaxNumTransfers.fromJsonString(jsonString, options), convertFunction);
+    return MaxNumTransfers.fromProto(badges.MaxNumTransfers.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: proto.badges.MaxNumTransfers, convertFunction: (item: NumberType) => U): MaxNumTransfers<U> {
+  static fromProto<U extends NumberType>(item: badges.MaxNumTransfers, convertFunction: (item: NumberType) => U): MaxNumTransfers<U> {
     return new MaxNumTransfers<U>({
       overallMaxNumTransfers: convertFunction(item.overallMaxNumTransfers),
       perToAddressMaxNumTransfers: convertFunction(item.perToAddressMaxNumTransfers),
@@ -747,8 +744,8 @@ export class UserIncomingApproval<T extends NumberType> extends BaseNumberTypeCl
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as UserIncomingApproval<U>;
   }
 
-  toProto(): proto.badges.UserIncomingApproval {
-    return new proto.badges.UserIncomingApproval(this.convert(Stringify));
+  toProto(): badges.UserIncomingApproval {
+    return new badges.UserIncomingApproval(this.convert(Stringify));
   }
 
   static fromJson<U extends NumberType>(
@@ -756,7 +753,7 @@ export class UserIncomingApproval<T extends NumberType> extends BaseNumberTypeCl
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): UserIncomingApproval<U> {
-    return UserIncomingApproval.fromProto(proto.badges.UserIncomingApproval.fromJson(jsonValue, options), convertFunction);
+    return UserIncomingApproval.fromProto(badges.UserIncomingApproval.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -764,10 +761,10 @@ export class UserIncomingApproval<T extends NumberType> extends BaseNumberTypeCl
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): UserIncomingApproval<U> {
-    return UserIncomingApproval.fromProto(proto.badges.UserIncomingApproval.fromJsonString(jsonString, options), convertFunction);
+    return UserIncomingApproval.fromProto(badges.UserIncomingApproval.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: proto.badges.UserIncomingApproval, convertFunction: (item: NumberType) => U): UserIncomingApproval<U> {
+  static fromProto<U extends NumberType>(item: badges.UserIncomingApproval, convertFunction: (item: NumberType) => U): UserIncomingApproval<U> {
     return new UserIncomingApproval<U>({
       fromListId: item.fromListId,
       initiatedByListId: item.initiatedByListId,
@@ -838,8 +835,8 @@ export class IncomingApprovalCriteria<T extends NumberType>
     );
   }
 
-  toProto(): proto.badges.IncomingApprovalCriteria {
-    return new proto.badges.IncomingApprovalCriteria(this.convert(Stringify));
+  toProto(): badges.IncomingApprovalCriteria {
+    return new badges.IncomingApprovalCriteria(this.convert(Stringify));
   }
 
   static fromJson<U extends NumberType>(
@@ -847,7 +844,7 @@ export class IncomingApprovalCriteria<T extends NumberType>
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): IncomingApprovalCriteria<U> {
-    return IncomingApprovalCriteria.fromProto(proto.badges.IncomingApprovalCriteria.fromJson(jsonValue, options), convertFunction);
+    return IncomingApprovalCriteria.fromProto(badges.IncomingApprovalCriteria.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -855,11 +852,11 @@ export class IncomingApprovalCriteria<T extends NumberType>
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): IncomingApprovalCriteria<U> {
-    return IncomingApprovalCriteria.fromProto(proto.badges.IncomingApprovalCriteria.fromJsonString(jsonString, options), convertFunction);
+    return IncomingApprovalCriteria.fromProto(badges.IncomingApprovalCriteria.fromJsonString(jsonString, options), convertFunction);
   }
 
   static fromProto<U extends NumberType>(
-    item: proto.badges.IncomingApprovalCriteria,
+    item: badges.IncomingApprovalCriteria,
     convertFunction: (item: NumberType) => U
   ): IncomingApprovalCriteria<U> {
     return new IncomingApprovalCriteria<U>({
@@ -942,8 +939,8 @@ export class CollectionApproval<T extends NumberType> extends BaseNumberTypeClas
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as CollectionApproval<U>;
   }
 
-  toProto(): proto.badges.CollectionApproval {
-    return new proto.badges.CollectionApproval(this.convert(Stringify));
+  toProto(): badges.CollectionApproval {
+    return new badges.CollectionApproval(this.convert(Stringify));
   }
 
   static fromJson<U extends NumberType>(
@@ -951,7 +948,7 @@ export class CollectionApproval<T extends NumberType> extends BaseNumberTypeClas
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): CollectionApproval<U> {
-    return CollectionApproval.fromProto(proto.badges.CollectionApproval.fromJson(jsonValue, options), convertFunction);
+    return CollectionApproval.fromProto(badges.CollectionApproval.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -959,10 +956,10 @@ export class CollectionApproval<T extends NumberType> extends BaseNumberTypeClas
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): CollectionApproval<U> {
-    return CollectionApproval.fromProto(proto.badges.CollectionApproval.fromJsonString(jsonString, options), convertFunction);
+    return CollectionApproval.fromProto(badges.CollectionApproval.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: proto.badges.CollectionApproval, convertFunction: (item: NumberType) => U): CollectionApproval<U> {
+  static fromProto<U extends NumberType>(item: badges.CollectionApproval, convertFunction: (item: NumberType) => U): CollectionApproval<U> {
     return new CollectionApproval<U>({
       toListId: item.toListId,
       fromListId: item.fromListId,
@@ -1044,8 +1041,8 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as ApprovalCriteria<U>;
   }
 
-  toProto(): proto.badges.ApprovalCriteria {
-    return new proto.badges.ApprovalCriteria(this.convert(Stringify));
+  toProto(): badges.ApprovalCriteria {
+    return new badges.ApprovalCriteria(this.convert(Stringify));
   }
 
   static fromJson<U extends NumberType>(
@@ -1053,7 +1050,7 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): ApprovalCriteria<U> {
-    return ApprovalCriteria.fromProto(proto.badges.ApprovalCriteria.fromJson(jsonValue, options), convertFunction);
+    return ApprovalCriteria.fromProto(badges.ApprovalCriteria.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -1061,10 +1058,10 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): ApprovalCriteria<U> {
-    return ApprovalCriteria.fromProto(proto.badges.ApprovalCriteria.fromJsonString(jsonString, options), convertFunction);
+    return ApprovalCriteria.fromProto(badges.ApprovalCriteria.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: proto.badges.ApprovalCriteria, convertFunction: (item: NumberType) => U): ApprovalCriteria<U> {
+  static fromProto<U extends NumberType>(item: badges.ApprovalCriteria, convertFunction: (item: NumberType) => U): ApprovalCriteria<U> {
     return new ApprovalCriteria<U>({
       mustOwnBadges: item.mustOwnBadges.map((x) => MustOwnBadges.fromProto(x, convertFunction)),
       merkleChallenges: item.merkleChallenges.map((x) => MerkleChallenge.fromProto(x, convertFunction)),

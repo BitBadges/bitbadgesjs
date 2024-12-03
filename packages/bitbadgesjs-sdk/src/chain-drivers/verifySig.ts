@@ -1,8 +1,8 @@
-import BtcDriver from '@/chain-drivers/BtcDriver.js';
 import CosmosDriver from '@/chain-drivers/CosmosDriver.js';
 import EthDriver from '@/chain-drivers/EthDriver.js';
 import SolDriver from '@/chain-drivers/SolDriver.js';
 import { SupportedChain } from '@/common/types.js';
+import BtcDriver from '@/chain-drivers/BtcDriver.js';
 
 const ethDriver = new EthDriver('0x1', undefined);
 const solDriver = new SolDriver('');
@@ -26,6 +26,7 @@ export const getChainDriver = (chain: string) => {
       return ethDriver;
   }
 };
+
 /**
  * Verifies a (message, signature) pair using any native chain's supported signature verification method.
  *

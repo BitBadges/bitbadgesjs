@@ -4,7 +4,6 @@ import { bech32 } from 'bech32';
 import bs58 from 'bs58';
 import { isValidChecksumAddress, stripHexPrefix, toChecksumAddress } from 'crypto-addr-codec';
 import { isAddress } from 'web3-validator';
-import { PublicKey } from '@solana/web3.js';
 
 const sha256 = (data: Uint8Array): Uint8Array => {
   const hash = nobleSha256.create();
@@ -273,8 +272,9 @@ export function isAddressValid(address: string, chain?: SupportedChain) {
       break;
     case SupportedChain.SOLANA:
       try {
-        let isOnCurve = PublicKey.isOnCurve(new PublicKey(address));
-        isValidAddress = !!isOnCurve;
+        // Solana addresses are 32-byte base58 strings
+        const decoded = bs58.decode(address);
+        isValidAddress = decoded.length === 32;
       } catch (e) {
         isValidAddress = false;
       }

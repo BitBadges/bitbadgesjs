@@ -7,7 +7,7 @@ import { UserPermissions } from '@/core/permissions.js';
 import { UserIncomingApproval, UserOutgoingApproval } from '@/core/approvals.js';
 import type { iMsgUpdateUserApprovals } from './interfaces.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
-import { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
+import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
 
 /**
  * MsgUpdateUserApprovals represents the message for updating user approvals.

@@ -36,15 +36,14 @@ import type { iOffChainBalancesMap } from '@/core/transfers.js';
 import { UserBalanceStore } from '@/core/userBalances.js';
 import type { iAmountTrackerIdDetails } from '@/interfaces/badges/core.js';
 import type { iUserBalanceStore } from '@/interfaces/badges/userBalances.js';
-import { Map } from '@/transactions/index.js';
-import { ValueStore } from 'bitbadgesjs-sdk';
+import { Map, ValueStore } from '@/transactions/messages/bitbadges/maps/index.js';
 import type { Doc } from '../base.js';
 import type { iMetadata } from '../metadata/metadata.js';
 import { Metadata } from '../metadata/metadata.js';
 import {
   ClaimReward,
-  type ClaimIntegrationPluginType,
   type BitBadgesAddress,
+  type ClaimIntegrationPluginType,
   type IntegrationPluginParams,
   type JsonBodyInputSchema,
   type JsonBodyInputWithValue,
@@ -449,6 +448,7 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
   _docId: string;
   _id?: string;
   fetchedProfile?: boolean;
+  embeddedWalletAddress?: string;
   seenActivity?: UNIXMilliTimestamp<T>;
   createdAt?: UNIXMilliTimestamp<T>;
   discord?: string;
@@ -481,6 +481,11 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
           address: NativeAddress;
           scopes: OAuthScopeDetails[];
         }[];
+        passwords?: {
+          passwordHash: string;
+          salt: string;
+          scopes: OAuthScopeDetails[];
+        }[];
       }
     | undefined;
   bannerImage?: string;
@@ -490,6 +495,7 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
     this._docId = data._docId;
     this._id = data._id;
     this.fetchedProfile = data.fetchedProfile;
+    this.embeddedWalletAddress = data.embeddedWalletAddress;
     this.seenActivity = data.seenActivity;
     this.createdAt = data.createdAt;
     this.discord = data.discord;
@@ -554,9 +560,19 @@ export class QueueDoc<T extends NumberType> extends BaseNumberTypeClass<QueueDoc
   recipientAddress?: string;
   activityDocId?: string;
   notificationType?: string;
-  claimInfo?: { session: any; body: any; claimId: string; bitbadgesAddress: string; ip: string | undefined } | undefined;
+  claimInfo?:
+    | {
+        session: any;
+        body: any;
+        claimId: string;
+        bitbadgesAddress: string;
+        ip: string | undefined;
+        [key: string]: any;
+      }
+    | undefined;
   faucetInfo?: { txHash: string; recipient: string; amount: NumberType; denom: string } | undefined;
   actionConfig?: any;
+  initiatedBy?: string | undefined;
 
   constructor(data: iQueueDoc<T>) {
     super();
@@ -579,6 +595,7 @@ export class QueueDoc<T extends NumberType> extends BaseNumberTypeClass<QueueDoc
     this.claimInfo = data.claimInfo;
     this.faucetInfo = data.faucetInfo;
     this.actionConfig = data.actionConfig;
+    this.initiatedBy = data.initiatedBy;
   }
 
   getNumberFieldNames(): string[] {
@@ -1287,7 +1304,9 @@ export class PluginVersionConfig<T extends NumberType> extends BaseNumberTypeCla
   requiresSessions: boolean;
   requiresUserInputs: boolean;
   reuseForNonIndexed: boolean;
+  skipProcessingWebhook?: boolean;
   receiveStatusWebhook: boolean;
+  ignoreSimulations?: boolean;
   userInputsSchema: Array<JsonBodyInputSchema>;
   publicParamsSchema: Array<JsonBodyInputSchema>;
   privateParamsSchema: Array<JsonBodyInputSchema>;
@@ -1323,7 +1342,9 @@ export class PluginVersionConfig<T extends NumberType> extends BaseNumberTypeCla
     this.requiresSessions = data.requiresSessions;
     this.requiresUserInputs = data.requiresUserInputs;
     this.reuseForNonIndexed = data.reuseForNonIndexed;
+    this.ignoreSimulations = data.ignoreSimulations;
     this.receiveStatusWebhook = data.receiveStatusWebhook;
+    this.skipProcessingWebhook = data.skipProcessingWebhook;
     this.userInputsSchema = data.userInputsSchema;
     this.publicParamsSchema = data.publicParamsSchema;
     this.privateParamsSchema = data.privateParamsSchema;

@@ -1,5 +1,4 @@
 export * from './addressLists.js';
-export * from './attestations.js';
 export * from './aliases.js';
 export * from './approvals.js';
 export * from './approval-utils.js';

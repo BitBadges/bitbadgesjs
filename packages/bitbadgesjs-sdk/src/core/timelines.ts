@@ -10,9 +10,9 @@ import type {
 } from './misc.js';
 import type { NumberType } from '../common/string-numbers.js';
 import { UintRangeArray } from './uintRanges.js';
-import { getConverterFunction } from '@/interfaces/index.js';
 import { GO_MAX_UINT_64 } from '@/common/math.js';
 import { Metadata } from '@/api-indexer/metadata/metadata.js';
+import { getConverterFunction } from '@/common/base.js';
 
 /**
  * @category Timelines

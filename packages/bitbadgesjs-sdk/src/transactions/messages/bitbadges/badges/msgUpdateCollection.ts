@@ -4,7 +4,6 @@ import * as badges from '@/proto/badges/tx_pb.js';
 
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 import { CollectionApproval } from '@/core/approvals.js';
-import { Balance, BalanceArray } from '@/core/balances.js';
 import {
   BadgeMetadataTimeline,
   CollectionMetadataTimeline,

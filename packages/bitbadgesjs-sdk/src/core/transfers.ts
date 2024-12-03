@@ -1,6 +1,6 @@
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, deepCopyPrimitives, getConverterFunction } from '@/common/base.js';
 import type { iBalance, iTransfer } from '@/interfaces/badges/core.js';
-import * as proto from '@/proto/index.js';
+import * as badges from '@/proto/badges/transfers_pb.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 import { convertToBitBadgesAddress } from '../address-converter/converter.js';
 import { GO_MAX_UINT_64, safeAddKeepLeft, safeMultiplyKeepLeft } from '../common/math.js';
@@ -9,7 +9,7 @@ import { BigIntify, Stringify } from '../common/string-numbers.js';
 import { Balance, BalanceArray, cleanBalances } from './balances.js';
 import { ApprovalIdentifierDetails, MerkleProof, ZkProofSolution } from './misc.js';
 import { UintRangeArray } from './uintRanges.js';
-import { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
+import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
 
 /**
  * Transfer is used to represent a transfer of badges. This is compatible with the MsgTransferBadges message.
@@ -70,8 +70,8 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
     );
   }
 
-  toProto(): proto.badges.Transfer {
-    return new proto.badges.Transfer(this.convert(Stringify));
+  toProto(): badges.Transfer {
+    return new badges.Transfer(this.convert(Stringify));
   }
 
   static fromJson<U extends NumberType>(
@@ -79,7 +79,7 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): Transfer<U> {
-    return Transfer.fromProto(proto.badges.Transfer.fromJson(jsonValue, options), convertFunction);
+    return Transfer.fromProto(badges.Transfer.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -87,10 +87,10 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): Transfer<U> {
-    return Transfer.fromProto(proto.badges.Transfer.fromJsonString(jsonString, options), convertFunction);
+    return Transfer.fromProto(badges.Transfer.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: proto.badges.Transfer, convertFunction: (item: NumberType) => U): Transfer<U> {
+  static fromProto<U extends NumberType>(item: badges.Transfer, convertFunction: (item: NumberType) => U): Transfer<U> {
     return new Transfer<U>({
       from: item.from,
       toAddresses: item.toAddresses,

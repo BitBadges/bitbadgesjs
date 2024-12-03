@@ -1,6 +1,6 @@
 import { verifyADR36Amino } from '@keplr-wallet/cosmos';
-import { IChainDriver } from 'blockin';
-import { AssetConditionGroup, NumberType } from 'blockin/dist/types/verify.types';
+import type { IChainDriver } from 'blockin';
+import type { AssetConditionGroup, NumberType } from 'blockin/dist/types/verify.types';
 import { Buffer } from 'buffer';
 
 /**

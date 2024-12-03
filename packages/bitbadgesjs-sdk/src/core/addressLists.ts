@@ -1,7 +1,7 @@
 import { CustomTypeClass } from '@/common/base.js';
 import type { iAddressList } from '@/interfaces/badges/core.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
-import { AddressList as ProtoAddressList } from '@/proto/badges/index.js';
+import { AddressList as ProtoAddressList } from '@/proto/badges/address_lists_pb.js';
 import { convertToBitBadgesAddress, isAddressValid } from '../address-converter/converter.js';
 
 /**

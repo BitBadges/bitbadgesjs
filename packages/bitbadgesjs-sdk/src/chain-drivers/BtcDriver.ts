@@ -1,7 +1,7 @@
 import { Verifier } from 'bip322-js';
 
-import { IChainDriver } from 'blockin';
-import { AssetConditionGroup, NumberType } from 'blockin/dist/types/verify.types';
+import type { IChainDriver } from 'blockin';
+import type { AssetConditionGroup, NumberType } from 'blockin/dist/types/verify.types';
 
 /**
  * Ethereum implementation of the IChainDriver interface. This implementation is based off the Moralis API

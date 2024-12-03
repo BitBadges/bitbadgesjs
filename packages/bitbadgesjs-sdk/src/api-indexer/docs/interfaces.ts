@@ -27,8 +27,8 @@ import type {
 } from '@/interfaces/badges/core.js';
 import type { iCollectionPermissions, iUserPermissionsWithDetails } from '@/interfaces/badges/permissions.js';
 import type { iUserBalanceStore } from '@/interfaces/badges/userBalances.js';
-import type { iMap, iValueStore } from '@/transactions/messages/index.js';
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from 'bitbadgesjs-sdk';
+import type { iMap, iValueStore } from '@/transactions/messages/bitbadges/maps/index.js';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
 
 /**
  * @category API Requests / Responses
@@ -369,6 +369,9 @@ export interface iProfileDoc<T extends NumberType> extends Doc {
   /** Whether we have already fetched the profile or not */
   fetchedProfile?: boolean;
 
+  /** Embedded wallet address */
+  embeddedWalletAddress?: string;
+
   /** The timestamp of the last activity seen for this account (milliseconds since epoch) */
   seenActivity?: UNIXMilliTimestamp<T>;
   /** The timestamp of when this account was created (milliseconds since epoch) */
@@ -437,6 +440,11 @@ export interface iProfileDoc<T extends NumberType> extends Doc {
       address: NativeAddress;
       scopes: OAuthScopeDetails[];
     }[];
+    passwords?: {
+      passwordHash: string;
+      salt: string;
+      scopes: OAuthScopeDetails[];
+    }[];
   };
 }
 
@@ -471,6 +479,9 @@ export interface iQueueDoc<T extends NumberType> extends Doc {
   activityDocId?: string;
   notificationType?: string;
 
+  /** The BitBadges address of the user who initiated this fetch */
+  initiatedBy?: BitBadgesAddress;
+
   actionConfig?: any;
 
   claimInfo?: {
@@ -479,6 +490,7 @@ export interface iQueueDoc<T extends NumberType> extends Doc {
     claimId: string;
     bitbadgesAddress: BitBadgesAddress;
     ip: string | undefined;
+    [key: string]: any;
   };
 
   faucetInfo?: {
@@ -694,6 +706,12 @@ export type ClaimIntegrationPluginCustomBodyType<T extends ClaimIntegrationPlugi
         }
       : Record<string, any>;
 
+interface OAuthAppParams {
+  hasPrivateList: boolean;
+  maxUsesPerUser?: number;
+  blacklist?: boolean;
+}
+
 /**
  * Public params are params that are visible to the public. For example, the number of uses for a claim code.
  *
@@ -714,50 +732,49 @@ export type ClaimIntegrationPublicParamsType<T extends ClaimIntegrationPluginTyp
       ? {
           maxUsesPerIp: number;
         }
-      : T extends OauthAppName
-        ? {
-            hasPrivateList: boolean;
-            maxUsesPerUser?: number;
-            blacklist?: boolean;
-          }
-        : T extends 'transferTimes'
-          ? {
-              transferTimes: iUintRange<JSPrimitiveNumberType>[];
-            }
-          : T extends 'whitelist'
+      : T extends 'email'
+        ? OAuthAppParams
+        : //  & { noVerification?: boolean }
+          T extends OauthAppName
+          ? OAuthAppParams
+          : T extends 'transferTimes'
             ? {
-                listId?: string;
-                list?: iAddressList;
-                maxUsesPerAddress?: number;
+                transferTimes: iUintRange<JSPrimitiveNumberType>[];
               }
-            : T extends 'geolocation'
+            : T extends 'whitelist'
               ? {
-                  pindrop?: { latitude: number; longitude: number; radius: number };
-                  allowedCountryCodes?: string[];
-                  disallowedCountryCodes?: string[];
+                  listId?: string;
+                  list?: iAddressList;
+                  maxUsesPerAddress?: number;
                 }
-              : T extends 'payments'
+              : T extends 'geolocation'
                 ? {
-                    usdAmount: number;
-                    paymentAddress: BitBadgesAddress;
+                    pindrop?: { latitude: number; longitude: number; radius: number };
+                    allowedCountryCodes?: string[];
+                    disallowedCountryCodes?: string[];
                   }
-                : T extends 'webhooks' | 'successWebhooks'
+                : T extends 'payments'
                   ? {
-                      passAddress?: boolean;
-                      passDiscord?: boolean;
-                      passEmail?: boolean;
-                      passTwitter?: boolean;
-                      passGoogle?: boolean;
-                      passGithub?: boolean;
-                      passTwitch?: boolean;
-                      passStrava?: boolean;
-                      passReddit?: boolean;
-                      passTelegram?: boolean;
-                      passFarcaster?: boolean;
-                      passSlack?: boolean;
-                      userInputsSchema?: Array<JsonBodyInputSchema>;
+                      usdAmount: number;
+                      paymentAddress: BitBadgesAddress;
                     }
-                  : Record<string, any>;
+                  : T extends 'webhooks' | 'successWebhooks'
+                    ? {
+                        passAddress?: boolean;
+                        passDiscord?: boolean;
+                        passEmail?: boolean;
+                        passTwitter?: boolean;
+                        passGoogle?: boolean;
+                        passGithub?: boolean;
+                        passTwitch?: boolean;
+                        passStrava?: boolean;
+                        passReddit?: boolean;
+                        passTelegram?: boolean;
+                        passFarcaster?: boolean;
+                        passSlack?: boolean;
+                        userInputsSchema?: Array<JsonBodyInputSchema>;
+                      }
+                    : Record<string, any>;
 
 /**
  * Private params are params that are not visible to the public. For example, the password for a claim code.
@@ -1213,9 +1230,7 @@ export enum PluginPresetType {
   Usernames = 'Usernames',
   ClaimToken = 'ClaimToken',
   CustomResponseHandler = 'CustomResponseHandler',
-  CompletelyCustom = 'CompletelyCustom',
-  ClaimNumbers = 'ClaimNumbers',
-  StateTransitions = 'StateTransitions'
+  ClaimNumbers = 'ClaimNumbers'
 }
 
 /**
@@ -1291,6 +1306,12 @@ export interface iPluginVersionConfig<T extends NumberType> {
 
   /** Whether the plugin should receive status webhooks */
   receiveStatusWebhook: boolean;
+
+  /** Whether the plugin should skip processing webhooks. We will just auto-treat it as successful. */
+  skipProcessingWebhook?: boolean;
+
+  /** Ignore simulations? */
+  ignoreSimulations?: boolean;
 
   /** Preset type for how the plugin state is to be maintained. */
   stateFunctionPreset: PluginPresetType;
