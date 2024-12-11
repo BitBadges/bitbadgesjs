@@ -34,6 +34,10 @@ export interface CustomType<T extends CustomType<T>> {
    * Converts the object to a different NumberType equivalent.
    */
   convert<U extends NumberType>(convertFunction?: (val: NumberType) => U): CustomType<any>;
+  /**
+   * Checks if the object has number fields.
+   */
+  hasNumberFields(): boolean;
 }
 
 /**
@@ -63,6 +67,10 @@ export class CustomTypeClass<T extends CustomType<T>> implements CustomType<T> {
 
   getNumberFieldNames(): string[] {
     return [];
+  }
+
+  hasNumberFields(): boolean {
+    return false;
   }
 
   /**
@@ -105,6 +113,10 @@ export abstract class BaseNumberTypeClass<T extends CustomType<T>> implements Cu
 
   getNumberFieldNames(): string[] {
     return [];
+  }
+
+  hasNumberFields(): boolean {
+    return true;
   }
 
   convert<U extends NumberType>(convertFunction: (val: NumberType) => U): CustomType<any> {
@@ -198,9 +210,19 @@ function deepCopyWithBigInts<T>(obj: T): T {
     return BigInt(obj) as unknown as T;
   }
 
+  // Handle Arrays with a single loop
   if (Array.isArray(obj)) {
-    // Create a deep copy of an array
-    return obj.map((item) => deepCopyWithBigInts(item)) as unknown as T;
+    const len = obj.length;
+    const copy = new Array(len);
+    for (let i = 0; i < len; i++) {
+      copy[i] = deepCopyWithBigInts(obj[i]);
+    }
+    return copy as unknown as T;
+  }
+
+  // Handle Date objects
+  if (obj instanceof Date) {
+    return new Date(obj) as unknown as T;
   }
 
   const copiedObj: Record<string, any> = {};
@@ -296,12 +318,12 @@ export function deepCopy<T extends CustomType<any>>(obj: T): T {
  */
 export function convertClassPropertiesAndMaintainNumberTypes<U extends NumberType>(
   obj: CustomType<any>,
-  convertFunction: (item: NumberType) => U
+  convertFunction: (item: NumberType) => U,
+  depth = 0
 ): CustomType<any> {
   const json: any = {};
-  //TODO: A better solution would be to do this dynamically based on the object's class.
   let numberFields: string[] = [];
-
+  const Constructor = obj.constructor as new (data?: any) => any;
   //If the object implements the numberFields() method, then we know it's a NumberTypeConvertible object itself.
   //We can apply convertFunction to the number fields.
   if (typeof obj.getNumberFieldNames === 'function') {
@@ -312,13 +334,14 @@ export function convertClassPropertiesAndMaintainNumberTypes<U extends NumberTyp
   for (const prop in object) {
     if (Object.prototype.hasOwnProperty.call(object, prop)) {
       const value = object[prop];
-      if (typeof value !== 'undefined' && typeof value !== 'function') {
+      const valueType = typeof value;
+      if (valueType !== 'undefined' && valueType !== 'function') {
         if (numberFields.includes(prop)) {
-          if (typeof value === 'bigint' || typeof value === 'number' || typeof value === 'string') {
+          if (valueType === 'bigint' || valueType === 'number' || valueType === 'string') {
             json[prop] = convertFunction(value);
           } else if (Array.isArray(value)) {
             json[prop] = value.map((item: any) => convertFunction(item));
-          } else if (typeof value === 'object' && value !== null) {
+          } else if (valueType === 'object' && value !== null) {
             for (const [key, val] of Object.entries(value)) {
               if (val !== undefined && val !== null) {
                 value[key] = convertFunction(val as NumberType);
@@ -326,11 +349,13 @@ export function convertClassPropertiesAndMaintainNumberTypes<U extends NumberTyp
             }
           }
         } else if (Array.isArray(value)) {
+          //we assume no mixed types in arrays
+
           json[prop] = value.map((item: any) =>
-            typeof item === 'object' && item !== null ? convertClassPropertiesAndMaintainNumberTypes(item, convertFunction) : item
+            typeof item === 'object' && item !== null ? convertClassPropertiesAndMaintainNumberTypes(item, convertFunction, depth + 1) : item
           );
         } else if (typeof value === 'object' && value !== null) {
-          json[prop] = convertClassPropertiesAndMaintainNumberTypes(value, convertFunction);
+          json[prop] = convertClassPropertiesAndMaintainNumberTypes(value, convertFunction, depth + 1);
         } else {
           json[prop] = value;
         }
@@ -338,6 +363,5 @@ export function convertClassPropertiesAndMaintainNumberTypes<U extends NumberTyp
     }
   }
 
-  const Constructor = obj.constructor as new (data?: any) => any;
-  return new Constructor(deepCopyPrimitives(json));
+  return depth === 0 ? new Constructor(deepCopyPrimitives(json)) : json;
 }

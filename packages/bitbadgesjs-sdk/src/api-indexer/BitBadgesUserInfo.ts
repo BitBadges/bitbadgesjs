@@ -312,12 +312,16 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     //Do not fetch views where hasMore is false (i.e. we alreay have everything)
     options = this.pruneBody(options);
 
+    const isFullRequest = !options.partialProfile;
+    const isPartialRequest = options.partialProfile;
+
     //Check if we need to fetch anything at all
     const needToFetch =
       (options.fetchSequence && (this.sequence === undefined || BigInt(this.sequence) < 0)) ||
       (options.fetchBalance && this.balance === undefined) ||
       options.viewsToFetch?.length ||
-      !this.fetchedProfile;
+      (isFullRequest && this.fetchedProfile !== 'full') || //Fetch full if we havent already
+      (isPartialRequest && !this.fetchedProfile); //Fetch partial if we havent fetched anything yet
 
     if (needToFetch) {
       return false;
@@ -753,6 +757,15 @@ export type AccountFetchDetails = {
   fetchBalance?: boolean;
   /** If true, we will avoid external API calls. */
   noExternalCalls?: boolean;
+  /**
+   * If true, we will only fetch a partial set of the document for the user.
+   *
+   * Currently includes: solAddress, username, profile pic, and latest signed in chain
+   *
+   * Pretty much, anything you need to display the address but not the full profile
+   */
+  partialProfile?: boolean;
+
   /** An array of views to fetch */
   viewsToFetch?: {
     /** Unique view ID. Used for pagination. All fetches w/ same ID should be made with same criteria. */

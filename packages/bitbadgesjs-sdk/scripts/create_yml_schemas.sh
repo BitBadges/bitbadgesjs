@@ -79,11 +79,15 @@ main() {
     replace_text_in_directory "$directory" " iCollectionMetadata<T>\[\];" " iCollectionMetadataDetails<T>\[\];"
     replace_text_in_directory "$directory" "<T extends ClaimIntegrationPluginType>" ""
     replace_text_in_directory "$directory" "<T>" ""
+    replace_text_in_directory "$directory" "<Q extends DynamicDataHandlerType>" ""
+    replace_text_in_directory "$directory" "<Q>" ""
     replace_text_in_directory "$directory" "ClaimIntegrationPublicStateType" "any"
     replace_text_in_directory "$directory" "ClaimIntegrationPrivateStateType" "any"
     replace_text_in_directory "$directory" "ClaimIntegrationPublicParamsType" "any"
     replace_text_in_directory "$directory" "ClaimIntegrationPrivateParamsType" "any"
     replace_text_in_directory "$directory" "ClaimIntegrationPluginCustomBodyType" "any"
+    replace_text_in_directory "$directory" "DynamicDataHandlerData" "any"
+    replace_text_in_directory "$directory" "DynamicDataHandlerActionPayload" "any"
     replace_text_in_directory "$directory" "<ClaimIntegrationPluginType>" ""
 
 

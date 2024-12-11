@@ -78,6 +78,8 @@ function removeClasses(data: string): string {
       'iBitBadgesApi',
       'AccountViewData',
       'CollectionViewData',
+      'DynamicDataHandlerData',
+      'DynamicDataHandlerActionPayload',
       // 'ClaimIntegrationPluginCustomBodyType',
       // 'ClaimIntegrationPublicStateType',
       // 'ClaimIntegrationPrivateStateType',

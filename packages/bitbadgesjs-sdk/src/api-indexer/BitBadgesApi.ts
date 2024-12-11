@@ -17,7 +17,7 @@ import type { GetAccountsPayload, GetAccountsSuccessResponse } from './BitBadges
 import { BitBadgesUserInfo } from './BitBadgesUserInfo.js';
 import type { iBitBadgesApi } from './base.js';
 import { BaseBitBadgesApi } from './base.js';
-import type { NativeAddress } from './docs/interfaces.js';
+import type { DynamicDataHandlerType, NativeAddress } from './docs/interfaces.js';
 import type {
   FilterBadgesInCollectionPayload,
   FilterBadgesInCollectionSuccessResponse,
@@ -49,6 +49,8 @@ import {
   AddBalancesToOffChainStorageSuccessResponse,
   AddToIpfsPayload,
   AddToIpfsSuccessResponse,
+  BatchBinActionPayload,
+  BatchBinActionSuccessResponse,
   BroadcastTxPayload,
   BroadcastTxSuccessResponse,
   CheckSignInStatusPayload,
@@ -61,6 +63,8 @@ import {
   CreateClaimSuccessResponse,
   CreateDeveloperAppPayload,
   CreateDeveloperAppSuccessResponse,
+  CreateDynamicDataBinPayload,
+  CreateDynamicDataBinSuccessResponse,
   CreateInternalActionPayload,
   CreateInternalActionSuccessResponse,
   CreatePaymentIntentPayload,
@@ -75,6 +79,8 @@ import {
   DeleteClaimSuccessResponse,
   DeleteDeveloperAppPayload,
   DeleteDeveloperAppSuccessResponse,
+  DeleteDynamicDataBinPayload,
+  DeleteDynamicDataBinSuccessResponse,
   DeleteInternalActionPayload,
   DeleteInternalActionSuccessResponse,
   DeletePluginPayload,
@@ -106,6 +112,10 @@ import {
   GetClaimsSuccessResponse,
   GetDeveloperAppPayload,
   GetDeveloperAppSuccessResponse,
+  GetDynamicDataActivityPayload,
+  GetDynamicDataActivitySuccessResponse,
+  GetDynamicDataBinsPayload,
+  GetDynamicDataBinsSuccessResponse,
   GetGatedContentForClaimPayload,
   GetGatedContentForClaimSuccessResponse,
   GetInternalActionPayload,
@@ -126,6 +136,8 @@ import {
   GetTokensFromFaucetSuccessResponse,
   OauthRevokePayload,
   OauthRevokeSuccessResponse,
+  PerformBinActionPayload,
+  PerformBinActionSuccessResponse,
   RotateSIWBBRequestPayload,
   RotateSIWBBRequestSuccessResponse,
   SendClaimAlertsPayload,
@@ -144,6 +156,8 @@ import {
   UpdateClaimSuccessResponse,
   UpdateDeveloperAppPayload,
   UpdateDeveloperAppSuccessResponse,
+  UpdateDynamicDataBinPayload,
+  UpdateDynamicDataBinSuccessResponse,
   UpdateInternalActionPayload,
   UpdateInternalActionSuccessResponse,
   UpdatePluginPayload,
@@ -158,6 +172,7 @@ import {
   iBroadcastTxSuccessResponse,
   iCheckSignInStatusSuccessResponse,
   iCompleteClaimSuccessResponse,
+  iCreateDynamicDataBinSuccessResponse,
   iCreatePaymentIntentSuccessResponse,
   iCreateSIWBBRequestSuccessResponse,
   iDeleteSIWBBRequestSuccessResponse,
@@ -169,6 +184,7 @@ import {
   iGetClaimAlertsForCollectionSuccessResponse,
   iGetClaimAttemptStatusSuccessResponse,
   iGetClaimsSuccessResponse,
+  iGetDynamicDataBinsSuccessResponse,
   iGetReservedClaimCodesSuccessResponse,
   iGetSIWBBRequestsForDeveloperAppSuccessResponse,
   iGetSearchSuccessResponse,
@@ -181,6 +197,7 @@ import {
   iSimulateClaimSuccessResponse,
   iSimulateTxSuccessResponse,
   iUpdateAccountInfoSuccessResponse,
+  iUpdateDynamicDataBinSuccessResponse,
   iVerifySignInSuccessResponse
 } from './requests/requests.js';
 import { BitBadgesApiRoutes } from './requests/routes.js';
@@ -1436,6 +1453,153 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
     }
   }
 
+  /**
+   * Performs a bin action.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/bin-actions/{actionName}/{binId}/{binSecret}`
+   * - **API Route (Body Auth)**: `POST /api/v0/bin-actions/single`
+   * - **SDK Function Call**: `await BitBadgesApi.performBinAction(payload);`
+   * - **Authentication**: Must be signed in.
+   */
+  public async performBinAction(
+    payload: PerformBinActionPayload,
+    actionName: string,
+    binId: string,
+    binSecret: string,
+    /**
+     * There are two ways to pass in the payload.
+     * 1. Body Auth: `POST /api/v0/bin-actions/single`
+     * 2. Path Auth: `POST /api/v0/bin-actions/{actionName}/{binId}/{binSecret}`
+     *
+     * Since you are calling from the API and have control over the payload, we always recommend the body auth for more security.
+     */
+    bodyAuth = true
+  ): Promise<PerformBinActionSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<PerformBinActionPayload> = typia.validate<PerformBinActionPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      if (bodyAuth) {
+        const response = await this.axios.post<PerformBinActionSuccessResponse>(
+          `${this.BACKEND_URL}${BitBadgesApiRoutes.PerformBinActionSingleWithBodyAuthRoute()}`,
+          {
+            dynamicDataId: binId,
+            dataSecret: binSecret,
+            actionName: actionName,
+            payload: payload
+          }
+        );
+        return new PerformBinActionSuccessResponse(response.data);
+      } else {
+        const response = await this.axios.post<PerformBinActionSuccessResponse>(
+          `${this.BACKEND_URL}${BitBadgesApiRoutes.PerformBinActionSingleRoute(actionName, binId, binSecret)}`,
+          payload
+        );
+        return new PerformBinActionSuccessResponse(response.data);
+      }
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Performs multiple bin actions in batch.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/bin-actions/batch/{binId}/{binSecret}`
+   * - **API Route (Body Auth)**: `POST /api/v0/bin-actions/batch`
+   * - **SDK Function Call**: `await BitBadgesApi.performBatchBinAction(payload);`
+   * - **Authentication**: Must be signed in.
+   */
+  public async performBatchBinAction(
+    payload: BatchBinActionPayload,
+    binId: string,
+    binSecret: string,
+    /**
+     * There are two ways to pass in the payload.
+     * 1. Body Auth: `POST /api/v0/bin-actions/batch`
+     * 2. Path Auth: `POST /api/v0/bin-actions/batch/{binId}/{binSecret}`
+     *
+     * Since you are calling from the API and have control over the payload, we always recommend the body auth for more security.
+     */
+    bodyAuth = true
+  ): Promise<BatchBinActionSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<BatchBinActionPayload> = typia.validate<BatchBinActionPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      if (bodyAuth) {
+        const response = await this.axios.post<BatchBinActionSuccessResponse>(
+          `${this.BACKEND_URL}${BitBadgesApiRoutes.PerformBinActionBatchWithBodyAuthRoute()}`,
+          {
+            ...payload,
+            dynamicDataId: binId,
+            dataSecret: binSecret
+          }
+        );
+        return new BatchBinActionSuccessResponse(response.data);
+      } else {
+        const response = await this.axios.post<BatchBinActionSuccessResponse>(
+          `${this.BACKEND_URL}${BitBadgesApiRoutes.PerformBinActionBatchRoute(binId, binSecret)}`,
+          payload
+        );
+        return new BatchBinActionSuccessResponse(response.data);
+      }
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Get dynamic data bin activity
+   */
+  public async getDynamicDataActivity(payload: GetDynamicDataActivityPayload): Promise<GetDynamicDataActivitySuccessResponse> {
+    try {
+      const response = await this.axios.post<GetDynamicDataActivitySuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetDynamicDataActivityRoute()}`,
+        payload
+      );
+      return new GetDynamicDataActivitySuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Gets dynamic data bins.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/dynamicData/fetch`
+   * - **SDK Function Call**: `await BitBadgesApi.getDynamicDataBins(payload);`
+   */
+  public async getDynamicDataBins<Q extends DynamicDataHandlerType>(
+    payload: GetDynamicDataBinsPayload
+  ): Promise<GetDynamicDataBinsSuccessResponse<Q>> {
+    try {
+      const validateRes: typia.IValidation<GetDynamicDataBinsPayload> = typia.validate<GetDynamicDataBinsPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.post<iGetDynamicDataBinsSuccessResponse<Q>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetDynamicDataBinsRoute()}`,
+        payload
+      );
+      return new GetDynamicDataBinsSuccessResponse<Q>(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
   /** Update Helper Functions for Pagination and Dynamic Fetches */
   public async updateUserSeenActivity() {
     return await this.updateAccountInfo({ seenActivity: Date.now() }); //Authenticated route so no need to pass in address
@@ -1891,8 +2055,85 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
   }
 
   /**
-   * Creates an internal action.
+   * Creates a dynamic data bin.
    *
+   * @remarks
+   * - **API Route**: `POST /api/v0/dynamicData`
+   * - **SDK Function Call**: `await BitBadgesApi.createDynamicDataBin(payload);`
+   */
+  public async createDynamicDataBin<Q extends DynamicDataHandlerType>(
+    payload: CreateDynamicDataBinPayload
+  ): Promise<CreateDynamicDataBinSuccessResponse<Q>> {
+    try {
+      const validateRes: typia.IValidation<CreateDynamicDataBinPayload> = typia.validate<CreateDynamicDataBinPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.post<iCreateDynamicDataBinSuccessResponse<Q>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDDynamicDataRoute()}`,
+        payload
+      );
+      return new CreateDynamicDataBinSuccessResponse<Q>(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Updates a dynamic data bin.
+   *
+   * @remarks
+   * - **API Route**: `PUT /api/v0/dynamicData`
+   * - **SDK Function Call**: `await BitBadgesApi.updateDynamicDataBin(payload);`
+   */
+  public async updateDynamicDataBin<Q extends DynamicDataHandlerType>(
+    payload: UpdateDynamicDataBinPayload
+  ): Promise<UpdateDynamicDataBinSuccessResponse<Q>> {
+    try {
+      const validateRes: typia.IValidation<UpdateDynamicDataBinPayload> = typia.validate<UpdateDynamicDataBinPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.put<iUpdateDynamicDataBinSuccessResponse<Q>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDDynamicDataRoute()}`,
+        payload
+      );
+      return new UpdateDynamicDataBinSuccessResponse<Q>(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Deletes a dynamic data bin.
+   *
+   * @remarks
+   * - **API Route**: `DELETE /api/v0/dynamicData`
+   * - **SDK Function Call**: `await BitBadgesApi.deleteDynamicDataBin(payload);`
+   */
+  public async deleteDynamicDataBin(payload: DeleteDynamicDataBinPayload): Promise<DeleteDynamicDataBinSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<DeleteDynamicDataBinPayload> = typia.validate<DeleteDynamicDataBinPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.delete<DeleteDynamicDataBinSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDDynamicDataRoute()}`,
+        { data: payload }
+      );
+      return new DeleteDynamicDataBinSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
    * @remarks
    * - **API Route**: `POST /api/v0/internalAction`
    * - **SDK Function Call**: `await BitBadgesApi.createInternalAction(payload);`

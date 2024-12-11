@@ -2433,6 +2433,371 @@ paths:
               $ref: '#/components/schemas/VerifyAttestationPayload'
       security:
         - apiKey: []
+  /bin-actions/{actionName}/{binId}/{binSecret}:
+    post:
+      operationId: performBinActionSingle
+      summary: Perform Single Bin Action (URL Auth)
+      tags:
+        - Dynamic Stores
+      description: >-
+        Performs a single action on a dynamic store using URL authentication.
+
+
+        ```typescript
+
+        const response = await
+        fetch('https://api.bitbadges.io/api/v0/bin-actions/:actionName/:binId/:binSecret',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: payload
+        });
+
+        const data = await response.json();
+
+        console.log(data);
+
+        ```
+
+
+        ```tsx
+
+        await BitBadgesApi.performBinAction(...);
+
+        ```
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iPerformBinActionSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+        - name: actionName
+          in: path
+          description: The name of the action to perform
+          required: true
+          schema:
+            type: string
+        - name: binId
+          in: path
+          description: The ID of the dynamic store
+          required: true
+          schema:
+            type: string
+        - name: binSecret
+          in: path
+          description: The secret key for the dynamic store
+          required: true
+          schema:
+            type: string
+      security:
+        - apiKey: []
+      x-internal: false
+  /bin-actions/single:
+    post:
+      operationId: performBinActionSingleWithBodyAuth
+      summary: Perform Single Bin Action (Body Auth)
+      tags:
+        - Dynamic Stores
+      description: >-
+        Performs a single action on a dynamic store using body authentication.
+
+
+        ```typescript
+
+        const response = await
+        fetch('https://api.bitbadges.io/api/v0/bin-actions/single', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: {
+            dynamicDataId: binId,
+            dataSecret: binSecret,
+            actionName: actionName,
+            payload: payload
+          }
+        });
+
+        const data = await response.json();
+
+        console.log(data);
+
+        ```
+
+
+        ```tsx
+
+        await BitBadgesApi.performBinAction(...);
+
+        ```
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iPerformBinActionSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      security:
+        - apiKey: []
+      x-internal: false
+  /bin-actions/batch/{binId}/{binSecret}:
+    post:
+      operationId: performBinActionBatch
+      summary: Perform Batch Bin Actions (URL Auth)
+      tags:
+        - Dynamic Stores
+      description: >-
+        Performs multiple actions on a dynamic store using URL authentication.
+
+
+        ```typescript
+
+        const response = await
+        fetch('https://api.bitbadges.io/api/v0/bin-actions/batch/:binId/:binSecret',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: payload
+        });
+
+        const data = await response.json();
+
+        console.log(data);
+
+        ```
+
+
+        ```tsx
+
+        await BitBadgesApi.performBatchBinAction(...);
+
+        ```
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iBatchBinActionSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+        - name: binId
+          in: path
+          description: The ID of the dynamic store
+          required: true
+          schema:
+            type: string
+        - name: binSecret
+          in: path
+          description: The secret key for the dynamic store
+          required: true
+          schema:
+            type: string
+      security:
+        - apiKey: []
+      x-internal: false
+  /bin-actions/batch:
+    post:
+      operationId: performBinActionBatchWithBodyAuth
+      summary: Perform Batch Bin Actions (Body Auth)
+      tags:
+        - Dynamic Stores
+      description: >-
+        Performs multiple actions on a dynamic store using body authentication.
+
+
+        ```typescript
+
+        const response = await
+        fetch('https://api.bitbadges.io/api/v0/bin-actions/batch', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: {
+            dynamicDataId: binId,
+            dataSecret: binSecret,
+            actions: actions
+          }
+        });
+
+        const data = await response.json();
+
+        console.log(data);
+
+        ```
+
+
+        ```tsx
+
+        await BitBadgesApi.performBatchBinAction(...);
+
+        ```
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iBatchBinActionSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      security:
+        - apiKey: []
+      x-internal: false
+  /bins/fetch:
+    post:
+      operationId: getDynamicDataBins
+      summary: Fetch Dynamic Data Bins
+      tags:
+        - Dynamic Stores
+      description: >-
+        Fetches dynamic data bins based on the provided criteria.
+
+
+        ```typescript
+
+        const response = await
+        fetch('https://api.bitbadges.io/api/v0/bins/fetch', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: payload
+        });
+
+        const data = await response.json();
+
+        console.log(data);
+
+        ```
+
+
+        ```tsx
+
+        await BitBadgesApi.getDynamicDataBins(...);
+
+        ```
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetDynamicDataBinsSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      security:
+        - apiKey: []
+      x-internal: false
+  /bins/activity:
+    post:
+      operationId: getDynamicDataActivity
+      summary: Get Dynamic Data Activity
+      tags:
+        - Dynamic Stores
+      description: >-
+        Fetches activity history for dynamic data bins.
+
+
+        ```typescript
+
+        const response = await
+        fetch('https://api.bitbadges.io/api/v0/bins/activity', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: payload
+        });
+
+        const data = await response.json();
+
+        console.log(data);
+
+        ```
+
+
+        ```tsx
+
+        await BitBadgesApi.getDynamicDataActivity(...);
+
+        ```
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetDynamicDataActivitySuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      security:
+        - apiKey: []
+      x-internal: false
 components:
   responses:
     ErrorResponse:
@@ -3554,8 +3919,14 @@ components:
           description: A unique document ID (Mongo DB ObjectID)
           type: string
         fetchedProfile:
+          enum:
+            - full
+            - partial
           description: Whether we have already fetched the profile or not
-          type: boolean
+          type: string
+        embeddedWalletAddress:
+          description: Embedded wallet address
+          type: string
         seenActivity:
           description: >-
             The timestamp of the last activity seen for this account
@@ -3751,6 +4122,24 @@ components:
                 additionalProperties: false
                 type: object
               type: array
+            passwords:
+              items:
+                properties:
+                  passwordHash:
+                    type: string
+                  salt:
+                    type: string
+                  scopes:
+                    items:
+                      $ref: '#/components/schemas/OAuthScopeDetails'
+                    type: array
+                required:
+                  - passwordHash
+                  - salt
+                  - scopes
+                additionalProperties: false
+                type: object
+              type: array
           additionalProperties: false
           description: Approved ways to sign in
           type: object
@@ -3820,6 +4209,9 @@ components:
           type: string
         notificationType:
           type: string
+        initiatedBy:
+          description: The BitBadges address of the user who initiated this fetch
+          $ref: '#/components/schemas/BitBadgesAddress'
         actionConfig: {}
         claimInfo:
           properties:
@@ -3838,7 +4230,7 @@ components:
             - claimId
             - bitbadgesAddress
             - ip
-          additionalProperties: false
+          additionalProperties: {}
           type: object
         faucetInfo:
           properties:
@@ -4176,6 +4568,9 @@ components:
         headerField:
           type: boolean
         required:
+          type: boolean
+        hideFromDetailsDisplay:
+          description: Note only applicable for public parameters input schemas
           type: boolean
         defaultValue:
           anyOf:
@@ -4967,6 +5362,12 @@ components:
       additionalProperties: false
       description: ''
       type: object
+    DynamicDataHandlerType:
+      anyOf:
+        - $ref: '#/components/schemas/OauthAppName'
+        - enum:
+            - addresses
+          type: string
     iAccessTokenDoc:
       properties:
         _docId:
@@ -5124,6 +5525,14 @@ components:
           type: boolean
         receiveStatusWebhook:
           description: Whether the plugin should receive status webhooks
+          type: boolean
+        skipProcessingWebhook:
+          description: >-
+            Whether the plugin should skip processing webhooks. We will just
+            auto-treat it as successful.
+          type: boolean
+        ignoreSimulations:
+          description: Ignore simulations?
           type: boolean
         stateFunctionPreset:
           description: Preset type for how the plugin state is to be maintained.
@@ -6432,8 +6841,14 @@ components:
           description: The balance of the account
           $ref: '#/components/schemas/iCosmosCoin'
         fetchedProfile:
+          enum:
+            - full
+            - partial
           description: Whether we have already fetched the profile or not
-          type: boolean
+          type: string
+        embeddedWalletAddress:
+          description: Embedded wallet address
+          type: string
         seenActivity:
           description: >-
             The timestamp of the last activity seen for this account
@@ -6615,6 +7030,24 @@ components:
                     type: array
                 required:
                   - address
+                  - scopes
+                additionalProperties: false
+                type: object
+              type: array
+            passwords:
+              items:
+                properties:
+                  passwordHash:
+                    type: string
+                  salt:
+                    type: string
+                  scopes:
+                    items:
+                      $ref: '#/components/schemas/OAuthScopeDetails'
+                    type: array
+                required:
+                  - passwordHash
+                  - salt
                   - scopes
                 additionalProperties: false
                 type: object
@@ -6820,6 +7253,19 @@ components:
           type: boolean
         noExternalCalls:
           description: If true, we will avoid external API calls.
+          type: boolean
+        partialProfile:
+          description: >-
+            If true, we will only fetch a partial set of the document for the
+            user.
+
+
+            Currently includes: solAddress, username, profile pic, and latest
+            signed in chain
+
+
+            Pretty much, anything you need to display the address but not the
+            full profile
           type: boolean
         viewsToFetch:
           items:
@@ -7570,6 +8016,12 @@ components:
         https://doc.rust-lang.org/stable/std/string/struct.String.html#method.from_utf8_lossy
       type: object
     GetStatusPayload:
+      properties:
+        withOutOfSyncCheck:
+          description: >-
+            If true, we will check if the indexer is out of sync with the
+            blockchain.
+          type: boolean
       additionalProperties: false
       type: object
     iGetStatusSuccessResponse:
@@ -7577,6 +8029,11 @@ components:
         status:
           description: Status details about the indexer / blockchain.
           $ref: '#/components/schemas/iStatusDoc'
+        outOfSync:
+          description: |-
+            If true, we are out of sync with the blockchain.
+            If undefined, we did not check for out of sync.
+          type: boolean
       required:
         - status
       additionalProperties: false
@@ -7993,6 +8450,26 @@ components:
                 additionalProperties: false
                 type: object
               type: array
+            passwords:
+              items:
+                properties:
+                  passwordHash:
+                    type: string
+                  salt:
+                    type: string
+                  password:
+                    type: string
+                  scopes:
+                    items:
+                      $ref: '#/components/schemas/OAuthScopeDetails'
+                    type: array
+                required:
+                  - passwordHash
+                  - salt
+                  - scopes
+                additionalProperties: false
+                type: object
+              type: array
           additionalProperties: false
           description: >-
             Approved sign in methods. Only returned if user is authenticated
@@ -8255,6 +8732,12 @@ components:
         altSigner:
           description: The address that signed the message on behalf of another address.
           $ref: '#/components/schemas/NativeAddress'
+        socialSignIn:
+          description: Selected social to attempt to sign in with.
+          type: string
+        password:
+          description: The password to sign in with.
+          type: string
         publicKey:
           description: >-
             Required for some chains (Cosmos) to verify signature. The public
@@ -8288,6 +8771,9 @@ components:
         message:
           description: The message that was signed.
           $ref: '#/components/schemas/SiwbbMessage'
+        email:
+          description: The email of the session.
+          type: string
         discord:
           properties:
             username:
@@ -8466,6 +8952,9 @@ components:
           type: boolean
         signOutSlack:
           description: Sign out of Slack
+          type: boolean
+        signOutEmail:
+          description: Sign out of email
           type: boolean
       required:
         - signOutBlockin
@@ -8877,6 +9366,12 @@ components:
         altSigner:
           description: The address that signed the message on behalf of another address.
           $ref: '#/components/schemas/NativeAddress'
+        socialSignIn:
+          description: Selected social to attempt to sign in with.
+          type: string
+        password:
+          description: The password to sign in with.
+          type: string
         publicKey:
           description: >-
             Required for some chains (Cosmos) to verify signature. The public
@@ -9674,6 +10169,14 @@ components:
         receiveStatusWebhook:
           description: Whether the plugin should receive status webhooks
           type: boolean
+        skipProcessingWebhook:
+          description: >-
+            Whether the plugin should skip processing webhooks. We will just
+            auto-treat it as successful.
+          type: boolean
+        ignoreSimulations:
+          description: Ignore simulations?
+          type: boolean
         reuseForNonIndexed:
           description: Reuse for non-indexed?
           type: boolean
@@ -9919,6 +10422,14 @@ components:
                     type: boolean
                   receiveStatusWebhook:
                     description: Whether the plugin should receive status webhooks
+                    type: boolean
+                  skipProcessingWebhook:
+                    description: >-
+                      Whether the plugin should skip processing webhooks. We
+                      will just auto-treat it as successful.
+                    type: boolean
+                  ignoreSimulations:
+                    description: Ignore simulations?
                     type: boolean
                   reuseForNonIndexed:
                     description: Reuse for non-indexed?
@@ -10627,6 +11138,283 @@ components:
           type: array
       required:
         - rewards
+      additionalProperties: false
+      type: object
+    CreateDynamicDataBinPayload:
+      properties:
+        handlerId:
+          description: The handler ID for the dynamic data bin
+          type: string
+        label:
+          description: The label of the dynamic data bin
+          type: string
+      required:
+        - handlerId
+        - label
+      additionalProperties: false
+      type: object
+    iCreateDynamicDataBinSuccessResponse:
+      properties:
+        doc: {}
+      required:
+        - doc
+      additionalProperties: false
+      type: object
+    GetDynamicDataBinsPayload:
+      properties:
+        dynamicDataId:
+          description: >-
+            The IDs to fetch. If not provided, all dynamic data bins will be
+            fetched for the current signed in address.
+          type: string
+        dataSecret:
+          description: >-
+            The data secret to fetch. Only needed if you are not signed in as
+            creator.
+          type: string
+      additionalProperties: false
+      type: object
+    iGetDynamicDataBinsSuccessResponse:
+      properties:
+        docs:
+          items: {}
+          type: array
+      required:
+        - docs
+      additionalProperties: false
+      type: object
+    UpdateDynamicDataBinPayload:
+      properties:
+        dynamicDataId:
+          description: The dynamic data ID to update
+          type: string
+        rotateDataSecret:
+          description: Whether to rotate the data secret
+          type: boolean
+        label:
+          description: The label of the dynamic data bin to update
+          type: string
+      required:
+        - dynamicDataId
+      additionalProperties: false
+      type: object
+    iUpdateDynamicDataBinSuccessResponse:
+      properties:
+        doc: {}
+      required:
+        - doc
+      additionalProperties: false
+      type: object
+    DeleteDynamicDataBinPayload:
+      properties:
+        dynamicDataId:
+          description: The dynamic data ID to delete
+          type: string
+      required:
+        - dynamicDataId
+      additionalProperties: false
+      type: object
+    iDeleteDynamicDataBinSuccessResponse:
+      properties:
+        message:
+          type: string
+      required:
+        - message
+      additionalProperties: false
+      type: object
+    PerformBinActionSingleWithBodyAuthPayload:
+      properties:
+        dynamicDataId:
+          description: The dynamic data ID
+          type: string
+        dataSecret:
+          description: The data secret
+          type: string
+        actionName:
+          description: The name of the action to perform
+          type: string
+        payload:
+          description: The payload for this specific action
+          $ref: '#/components/schemas/PerformBinActionPayload'
+      required:
+        - dynamicDataId
+        - dataSecret
+        - actionName
+        - payload
+      additionalProperties: false
+      type: object
+    iPerformBinActionSingleWithBodyAuthSuccessResponse:
+      additionalProperties: false
+      type: object
+    PerformBinActionBatchWithBodyAuthPayload:
+      properties:
+        dynamicDataId:
+          description: The dynamic data ID
+          type: string
+        dataSecret:
+          description: The data secret
+          type: string
+        actions:
+          items:
+            properties:
+              actionName:
+                description: The name of the action to perform
+                type: string
+              payload:
+                $ref: '#/components/schemas/PerformBinActionPayload'
+                description: The payload for this specific action
+            required:
+              - actionName
+              - payload
+            additionalProperties: false
+            type: object
+          description: The actions to perform
+          type: array
+      required:
+        - dynamicDataId
+        - dataSecret
+        - actions
+      additionalProperties: false
+      type: object
+    iPerformBinActionBatchWithBodyAuthSuccessResponse:
+      additionalProperties: false
+      type: object
+    PerformBinActionPayload:
+      additionalProperties: {}
+      type: object
+    PerformBinActionBodyAuthPayload:
+      properties:
+        dataSecret:
+          type: string
+      required:
+        - dataSecret
+      additionalProperties: false
+      type: object
+    iPerformBinActionSuccessResponse:
+      additionalProperties: false
+      type: object
+    BatchBinActionPayload:
+      properties:
+        actions:
+          items:
+            properties:
+              actionName:
+                description: The name of the action to perform
+                type: string
+              payload:
+                description: The payload for this specific action
+            required:
+              - actionName
+              - payload
+            additionalProperties: false
+            type: object
+          description: Array of actions to perform
+          type: array
+      required:
+        - actions
+      additionalProperties: false
+      type: object
+    iBatchBinActionSuccessResponse:
+      additionalProperties: false
+      type: object
+    BinAction:
+      properties:
+        actionName:
+          description: The name of the action to perform
+          type: string
+        payload:
+          description: The payload for this specific action
+          $ref: '#/components/schemas/PerformBinActionPayload'
+      required:
+        - actionName
+        - payload
+      additionalProperties: false
+      type: object
+    GetDynamicDataActivityPayload:
+      properties:
+        dynamicDataId:
+          description: The dynamic data ID to fetch activity for
+          type: string
+        bookmark:
+          description: The pagination bookmark to start from
+          type: string
+        dataSecret:
+          description: The data secret to fetch activity for
+          type: string
+      required:
+        - dynamicDataId
+        - dataSecret
+      additionalProperties: false
+      type: object
+    iGetDynamicDataActivitySuccessResponse:
+      properties:
+        pending:
+          items:
+            properties:
+              dynamicDataId:
+                type: string
+              handlerId:
+                type: string
+              actions:
+                items: {}
+                type: array
+              lastFetchedAt:
+                type: number
+              numRetries:
+                type: number
+              nextFetchTime:
+                type: number
+              error:
+                type: string
+            required:
+              - dynamicDataId
+              - handlerId
+              - actions
+              - lastFetchedAt
+              - numRetries
+              - nextFetchTime
+              - error
+            additionalProperties: false
+            type: object
+          type: array
+        history:
+          properties:
+            docs:
+              items:
+                properties:
+                  dynamicDataId:
+                    type: string
+                  updatedAt:
+                    type: number
+                  actions:
+                    items: {}
+                    type: array
+                required:
+                  - dynamicDataId
+                  - updatedAt
+                  - actions
+                additionalProperties: false
+                type: object
+              type: array
+            pagination:
+              properties:
+                bookmark:
+                  type: string
+                hasMore:
+                  type: boolean
+              required:
+                - bookmark
+                - hasMore
+              additionalProperties: false
+              type: object
+          required:
+            - docs
+            - pagination
+          additionalProperties: false
+          type: object
+      required:
+        - pending
+        - history
       additionalProperties: false
       type: object
     GetMapsPayload:
@@ -14619,3 +15407,18 @@ components:
         This includes their balances, incoming approvals, outgoing approvals,
         and permissions.
       type: object
+    OauthAppName:
+      enum:
+        - twitter
+        - github
+        - google
+        - email
+        - discord
+        - twitch
+        - strava
+        - youtube
+        - reddit
+        - telegram
+        - farcaster
+        - slack
+      type: string

@@ -11,6 +11,7 @@ import {
   AccessTokenDoc,
   AttestationDoc,
   DeveloperAppDoc,
+  DynamicDataDoc,
   EventDoc,
   InternalActionsDoc,
   MapWithValues,
@@ -19,6 +20,8 @@ import {
 } from '@/api-indexer/docs/docs.js';
 import {
   ClaimReward,
+  DynamicDataHandlerType,
+  iDynamicDataDoc,
   type BitBadgesAddress,
   type ClaimIntegrationPluginCustomBodyType,
   type ClaimIntegrationPluginType,
@@ -2777,5 +2780,320 @@ export class GetGatedContentForClaimSuccessResponse<T extends NumberType>
   constructor(data: iGetGatedContentForClaimSuccessResponse<T>) {
     super();
     this.rewards = data.rewards.map((reward) => new ClaimReward(reward));
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface CreateDynamicDataBinPayload {
+  /** The handler ID for the dynamic data bin */
+  handlerId: string;
+  /** The label of the dynamic data bin */
+  label: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iCreateDynamicDataBinSuccessResponse<Q extends DynamicDataHandlerType> {
+  doc: iDynamicDataDoc<Q>;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class CreateDynamicDataBinSuccessResponse<Q extends DynamicDataHandlerType>
+  extends CustomTypeClass<CreateDynamicDataBinSuccessResponse<Q>>
+  implements iCreateDynamicDataBinSuccessResponse<Q>
+{
+  doc: DynamicDataDoc<Q>;
+
+  constructor(data: iCreateDynamicDataBinSuccessResponse<Q>) {
+    super();
+    this.doc = new DynamicDataDoc(data.doc);
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface GetDynamicDataBinsPayload {
+  /** The IDs to fetch. If not provided, all dynamic data bins will be fetched for the current signed in address. */
+  dynamicDataId?: string;
+  /** The data secret to fetch. Only needed if you are not signed in as creator. */
+  dataSecret?: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetDynamicDataBinsSuccessResponse<Q extends DynamicDataHandlerType> {
+  docs: iDynamicDataDoc<Q>[];
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetDynamicDataBinsSuccessResponse<Q extends DynamicDataHandlerType>
+  extends CustomTypeClass<GetDynamicDataBinsSuccessResponse<Q>>
+  implements iGetDynamicDataBinsSuccessResponse<Q>
+{
+  docs: DynamicDataDoc<Q>[];
+
+  constructor(data: iGetDynamicDataBinsSuccessResponse<Q>) {
+    super();
+    this.docs = data.docs.map((doc) => new DynamicDataDoc(doc));
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface UpdateDynamicDataBinPayload {
+  /** The dynamic data ID to update */
+  dynamicDataId: string;
+  /** Whether to rotate the data secret */
+  rotateDataSecret?: boolean;
+  /** The label of the dynamic data bin to update */
+  label?: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iUpdateDynamicDataBinSuccessResponse<Q extends DynamicDataHandlerType> {
+  doc: iDynamicDataDoc<Q>;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class UpdateDynamicDataBinSuccessResponse<Q extends DynamicDataHandlerType>
+  extends CustomTypeClass<UpdateDynamicDataBinSuccessResponse<Q>>
+  implements iUpdateDynamicDataBinSuccessResponse<Q>
+{
+  doc: DynamicDataDoc<Q>;
+
+  constructor(data: iUpdateDynamicDataBinSuccessResponse<Q>) {
+    super();
+    this.doc = new DynamicDataDoc<Q>(data.doc);
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface DeleteDynamicDataBinPayload {
+  /** The dynamic data ID to delete */
+  dynamicDataId: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iDeleteDynamicDataBinSuccessResponse {
+  message: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class DeleteDynamicDataBinSuccessResponse
+  extends CustomTypeClass<DeleteDynamicDataBinSuccessResponse>
+  implements iDeleteDynamicDataBinSuccessResponse
+{
+  message: string;
+
+  constructor(data: iDeleteDynamicDataBinSuccessResponse) {
+    super();
+    this.message = data.message;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface PerformBinActionSingleWithBodyAuthPayload {
+  /** The dynamic data ID */
+  dynamicDataId: string;
+  /** The data secret */
+  dataSecret: string;
+  /** The name of the action to perform */
+  actionName: string;
+  /** The payload for this specific action */
+  payload: PerformBinActionPayload;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iPerformBinActionSingleWithBodyAuthSuccessResponse {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class PerformBinActionSingleWithBodyAuthSuccessResponse extends EmptyResponseClass {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface PerformBinActionBatchWithBodyAuthPayload {
+  /** The dynamic data ID */
+  dynamicDataId: string;
+  /** The data secret */
+  dataSecret: string;
+  /** The actions to perform */
+  actions: {
+    /** The name of the action to perform */
+    actionName: string;
+    /** The payload for this specific action */
+    payload: PerformBinActionPayload;
+  }[];
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iPerformBinActionBatchWithBodyAuthSuccessResponse {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class PerformBinActionBatchWithBodyAuthSuccessResponse extends EmptyResponseClass {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface PerformBinActionPayload {
+  /** Any custom payload data needed for the action */
+  [key: string]: any;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface PerformBinActionBodyAuthPayload {
+  /**
+   *
+   */
+  /** The data secret to perform the action with */
+  dataSecret: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iPerformBinActionSuccessResponse {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class PerformBinActionSuccessResponse extends EmptyResponseClass {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface BatchBinActionPayload {
+  /** Array of actions to perform */
+  actions: {
+    /** The name of the action to perform */
+    actionName: string;
+    /** The payload for this specific action */
+    payload: any;
+  }[];
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iBatchBinActionSuccessResponse {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class BatchBinActionSuccessResponse extends EmptyResponseClass {}
+
+// You might also want to add a type for individual actions in the batch
+/**
+ * @category API Requests / Responses
+ */
+export interface BinAction {
+  /** The name of the action to perform */
+  actionName: string;
+  /** The payload for this specific action */
+  payload: PerformBinActionPayload;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface GetDynamicDataActivityPayload {
+  /** The dynamic data ID to fetch activity for */
+  dynamicDataId: string;
+  /** The pagination bookmark to start from */
+  bookmark?: string;
+  /** The data secret to fetch activity for */
+  dataSecret: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetDynamicDataActivitySuccessResponse {
+  pending: {
+    dynamicDataId: string;
+    handlerId: string;
+    actions: any[];
+    lastFetchedAt: number;
+    numRetries: number;
+    nextFetchTime: number;
+    error: string;
+  }[];
+  history: {
+    docs: {
+      dynamicDataId: string;
+      updatedAt: number;
+      actions: any[];
+    }[];
+    pagination: {
+      bookmark: string;
+      hasMore: boolean;
+    };
+  };
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetDynamicDataActivitySuccessResponse
+  extends CustomTypeClass<GetDynamicDataActivitySuccessResponse>
+  implements iGetDynamicDataActivitySuccessResponse
+{
+  pending: {
+    dynamicDataId: string;
+    handlerId: string;
+    actions: any[];
+    lastFetchedAt: number;
+    numRetries: number;
+    nextFetchTime: number;
+    error: string;
+  }[];
+  history: {
+    docs: {
+      dynamicDataId: string;
+      updatedAt: number;
+      actions: any[];
+    }[];
+    pagination: {
+      bookmark: string;
+      hasMore: boolean;
+    };
+  };
+
+  constructor(data: iGetDynamicDataActivitySuccessResponse) {
+    super();
+    this.pending = data.pending;
+    this.history = data.history;
   }
 }

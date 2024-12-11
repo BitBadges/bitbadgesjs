@@ -99,4 +99,15 @@ export class BitBadgesApiRoutes {
   static VerifyAttestationRoute = () => '/api/v0/attestation/verify';
 
   static GetCodesFromSeedHelperRoute = () => '/api/v0/codes';
+
+  static GetDynamicDataBinsRoute = () => '/api/v0/bins/fetch';
+  static CRUDDynamicDataRoute = () => '/api/v0/bins';
+  static GetDynamicDataActivityRoute = () => `/api/v0/bins/activity`;
+
+  static PerformBinActionSingleRoute = (actionName: string, binId: string, binSecret: string) =>
+    `/api/v0/bin-actions/${actionName}/${binId}/${binSecret}`;
+  static PerformBinActionBatchRoute = (binId: string, binSecret: string) => `/api/v0/bin-actions/batch/${binId}/${binSecret}`;
+
+  static PerformBinActionSingleWithBodyAuthRoute = () => `/api/v0/bin-actions/single`;
+  static PerformBinActionBatchWithBodyAuthRoute = () => `/api/v0/bin-actions/batch`;
 }

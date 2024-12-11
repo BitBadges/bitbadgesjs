@@ -42,6 +42,8 @@ import type { iMetadata } from '../metadata/metadata.js';
 import { Metadata } from '../metadata/metadata.js';
 import {
   ClaimReward,
+  iDynamicDataDoc,
+  DynamicDataHandlerType,
   type BitBadgesAddress,
   type ClaimIntegrationPluginType,
   type IntegrationPluginParams,
@@ -86,7 +88,8 @@ import {
   type iSocialConnections,
   type iStatusDoc,
   type iUpdateHistory,
-  type iUsedLeafStatus
+  type iUsedLeafStatus,
+  DynamicDataHandlerData
 } from './interfaces.js';
 
 /**
@@ -447,7 +450,7 @@ export class CustomListPage extends CustomTypeClass<CustomListPage> implements i
 export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<ProfileDoc<T>> implements iProfileDoc<T> {
   _docId: string;
   _id?: string;
-  fetchedProfile?: boolean;
+  fetchedProfile?: 'full' | 'partial';
   embeddedWalletAddress?: string;
   seenActivity?: UNIXMilliTimestamp<T>;
   createdAt?: UNIXMilliTimestamp<T>;
@@ -1223,6 +1226,37 @@ export class AccessTokenDoc extends CustomTypeClass<AccessTokenDoc> implements i
 
   clone(): AccessTokenDoc {
     return super.clone() as AccessTokenDoc;
+  }
+}
+
+/**
+ * @inheritDoc iDynamicDataDoc
+ * @category Hook Bins
+ */
+export class DynamicDataDoc<Q extends DynamicDataHandlerType> extends CustomTypeClass<DynamicDataDoc<Q>> implements iDynamicDataDoc<Q> {
+  _docId: string;
+  _id?: string;
+  handlerId: Q;
+  label: string;
+  dynamicDataId: string;
+  dataSecret: string;
+  data: DynamicDataHandlerData<Q>;
+  createdBy: string;
+
+  constructor(data: iDynamicDataDoc<Q>) {
+    super();
+    this._docId = data._docId;
+    this._id = data._id;
+    this.handlerId = data.handlerId;
+    this.label = data.label;
+    this.dynamicDataId = data.dynamicDataId;
+    this.dataSecret = data.dataSecret;
+    this.data = data.data;
+    this.createdBy = data.createdBy;
+  }
+
+  clone(): DynamicDataDoc<Q> {
+    return super.clone() as DynamicDataDoc<Q>;
   }
 }
 

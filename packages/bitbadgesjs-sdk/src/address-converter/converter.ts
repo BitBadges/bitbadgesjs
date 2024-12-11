@@ -11,8 +11,6 @@ const sha256 = (data: Uint8Array): Uint8Array => {
   return hash.digest();
 };
 
-// nobleSha256.create().digest
-
 const BITCOIN_WITNESS_VERSION_SEPARATOR_BYTE = 0;
 
 function makeChecksummedHexDecoder(chainId?: number) {
@@ -43,7 +41,6 @@ function makeBech32Encoder(prefix: string) {
     const wordsToEncode = prefix == 'bc' ? [BITCOIN_WITNESS_VERSION_SEPARATOR_BYTE, ...words] : words;
 
     const encodedAddress = bech32.encode(prefix, wordsToEncode);
-
     return encodedAddress;
   };
 }
@@ -203,15 +200,6 @@ export function convertToBtcAddress(address: string) {
  * @category Address Utils
  */
 export function getChainForAddress(address: string) {
-  try {
-    bitbadgesToEth(address); //throws on failure
-    return SupportedChain.COSMOS;
-  } catch {
-    if (isAddress(address)) {
-      return SupportedChain.ETH;
-    }
-  }
-
   const addr: string = address;
   if (addr.startsWith('0x')) {
     return SupportedChain.ETH;

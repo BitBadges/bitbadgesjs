@@ -367,7 +367,7 @@ export interface iCustomListPage {
  */
 export interface iProfileDoc<T extends NumberType> extends Doc {
   /** Whether we have already fetched the profile or not */
-  fetchedProfile?: boolean;
+  fetchedProfile?: 'full' | 'partial';
 
   /** Embedded wallet address */
   embeddedWalletAddress?: string;
@@ -667,6 +667,9 @@ export type JsonBodyInputSchema = {
   headerField?: boolean;
   required?: boolean;
 
+  /** Note only applicable for public parameters input schemas */
+  hideFromDetailsDisplay?: boolean;
+
   defaultValue?: string | number | boolean;
   options?: {
     label: string;
@@ -746,6 +749,7 @@ export type ClaimIntegrationPublicParamsType<T extends ClaimIntegrationPluginTyp
                   listId?: string;
                   list?: iAddressList;
                   maxUsesPerAddress?: number;
+                  hasPrivateList?: boolean;
                 }
               : T extends 'geolocation'
                 ? {
@@ -792,11 +796,19 @@ export type ClaimIntegrationPrivateParamsType<T extends ClaimIntegrationPluginTy
       }
     : T extends 'whitelist'
       ? {
+          useDynamicStore?: boolean;
+          dynamicDataId?: string;
+          dataSecret?: string;
+
           listId?: string;
           list?: iAddressList;
         }
       : T extends OauthAppName
         ? {
+            useDynamicStore?: boolean;
+            dynamicDataId?: string;
+            dataSecret?: string;
+
             usernames?: string[];
             ids?: string[];
           }
@@ -1203,6 +1215,54 @@ export interface iDeveloperAppDoc extends Doc {
   clientSecret: string;
   /** The redirect URI of the app */
   redirectUris: string[];
+}
+
+/**
+ * @category Interfaces
+ */
+export type DynamicDataHandlerType = OauthAppName | 'addresses';
+
+/**
+ * @category Interfaces
+ */
+export type DynamicDataHandlerData<Q extends DynamicDataHandlerType> = Q extends 'email'
+  ? { emails: string[] }
+  : Q extends OauthAppName
+    ? { ids: string[]; usernames: string[] }
+    : Q extends 'addresses'
+      ? { addresses: string[] }
+      : never;
+
+/**
+ * @category Interfaces
+ */
+export type DynamicDataHandlerActionPayload<Q extends DynamicDataHandlerType> = Q extends 'email'
+  ? { email: string }
+  : Q extends OauthAppName
+    ? { id: string; username: string }
+    : Q extends 'addresses'
+      ? { address: string }
+      : never;
+
+/**
+ * @category Interfaces
+ */
+export type ActionName = string;
+/**
+ * @category Interfaces
+ */
+export type DynamicDataHandlerActionRequest = { actionName: ActionName; payload: DynamicDataHandlerActionPayload<DynamicDataHandlerType> };
+
+/**
+ * @category Interfaces
+ */
+export interface iDynamicDataDoc<Q extends DynamicDataHandlerType> extends Doc {
+  handlerId: Q;
+  dynamicDataId: string;
+  label: string;
+  dataSecret: string;
+  data: DynamicDataHandlerData<Q>;
+  createdBy: string;
 }
 
 /**
