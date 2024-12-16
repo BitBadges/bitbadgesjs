@@ -1,5 +1,5 @@
 import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, CustomTypeClass } from '@/common/base.js';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions, CustomTypeClass } from '@/common/base.js';
 import { NumberType, Stringify } from '@/common/string-numbers.js';
 import { CollectionMetadata, ManagerTimeline } from '@/core/misc.js';
 import { ActionPermission } from '@/core/permissions.js';
@@ -175,8 +175,8 @@ export class MapUpdateCriteria<T extends NumberType> extends BaseNumberTypeClass
     return ['collectionId'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): MapUpdateCriteria<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as MapUpdateCriteria<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MapUpdateCriteria<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MapUpdateCriteria<U>;
   }
 }
 
@@ -221,8 +221,8 @@ export class MapPermissions<T extends NumberType> extends BaseNumberTypeClass<Ma
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): MapPermissions<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as MapPermissions<U>;
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): MapPermissions<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MapPermissions<U>;
   }
 }
 
@@ -243,8 +243,8 @@ export class MapMetadataTimeline<T extends NumberType> extends BaseNumberTypeCla
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): MapMetadataTimeline<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as MapMetadataTimeline<U>;
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): MapMetadataTimeline<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MapMetadataTimeline<U>;
   }
 }
 
@@ -283,8 +283,8 @@ export class Map<T extends NumberType> extends BaseNumberTypeClass<Map<T>> imple
     return ['inheritManagerTimelineFrom'];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): Map<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as Map<U>;
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): Map<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as Map<U>;
   }
 }
 
@@ -323,8 +323,8 @@ export class MsgCreateMap<T extends NumberType> extends BaseNumberTypeClass<MsgC
     return ['inheritManagerTimelineFrom'];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): MsgCreateMap<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as MsgCreateMap<U>;
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): MsgCreateMap<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgCreateMap<U>;
   }
 
   toProto(): maps.MsgCreateMap {
@@ -364,8 +364,8 @@ export class MsgUpdateMap<T extends NumberType> extends BaseNumberTypeClass<MsgU
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): MsgUpdateMap<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as MsgUpdateMap<U>;
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): MsgUpdateMap<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgUpdateMap<U>;
   }
 
   toProto(): maps.MsgUpdateMap {

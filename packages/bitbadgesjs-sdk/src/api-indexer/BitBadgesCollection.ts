@@ -1,4 +1,4 @@
-import type { CustomType } from '@/common/base.js';
+import type { ConvertOptions, CustomType } from '@/common/base.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, deepCopyPrimitives, getConverterFunction } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import { BigIntify } from '@/common/string-numbers.js';
@@ -194,8 +194,8 @@ export class BitBadgesCollection<T extends NumberType>
     return [...super.getNumberFieldNames()];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): BitBadgesCollection<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as BitBadgesCollection<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): BitBadgesCollection<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as BitBadgesCollection<U>;
   }
 
   clone(): BitBadgesCollection<T> {
@@ -1500,7 +1500,7 @@ export class GetCollectionsSuccessResponse<T extends NumberType>
     this.collections = data.collections.map((collection) => new BitBadgesCollection(collection));
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetCollectionsSuccessResponse<U> {
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetCollectionsSuccessResponse<U> {
     return new GetCollectionsSuccessResponse(
       deepCopyPrimitives({
         collections: this.collections.map((collection) => collection.convert(convertFunction))
@@ -1532,7 +1532,7 @@ export class GetCollectionByIdSuccessResponse<T extends NumberType>
     this.collection = new BitBadgesCollection(data.collection);
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetCollectionByIdSuccessResponse<U> {
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetCollectionByIdSuccessResponse<U> {
     return new GetCollectionByIdSuccessResponse(
       deepCopyPrimitives({
         collection: this.collection.convert(convertFunction)

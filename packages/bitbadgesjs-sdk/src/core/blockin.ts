@@ -1,6 +1,6 @@
 import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
 import { SiwbbAndGroup, SiwbbAssetConditionGroup, SiwbbOrGroup, OwnershipRequirements } from '@/api-indexer/requests/blockin.js';
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
 import { NumberType } from '@/common/string-numbers.js';
 import { SupportedChain } from '@/common/types.js';
 import { iAttestationsProof } from '@/interfaces/badges/core.js';
@@ -90,8 +90,8 @@ export class SiwbbChallenge<T extends NumberType> extends BaseNumberTypeClass<Si
     }
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): SiwbbChallenge<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as SiwbbChallenge<U>;
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): SiwbbChallenge<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as SiwbbChallenge<U>;
   }
 }
 

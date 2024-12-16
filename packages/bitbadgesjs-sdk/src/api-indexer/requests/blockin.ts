@@ -1,4 +1,4 @@
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import { UintRange } from '@/core/uintRanges.js';
 import type {
@@ -55,8 +55,8 @@ export class SiwbbChallengeParams<T extends NumberType> extends BaseNumberTypeCl
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): SiwbbChallengeParams<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as SiwbbChallengeParams<U>;
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): SiwbbChallengeParams<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as SiwbbChallengeParams<U>;
   }
 }
 
@@ -102,8 +102,8 @@ export class SiwbbAssetDetails<T extends NumberType> extends BaseNumberTypeClass
     }
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): SiwbbAssetDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as SiwbbAssetDetails<U>;
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): SiwbbAssetDetails<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as SiwbbAssetDetails<U>;
   }
 }
 
@@ -130,8 +130,8 @@ export class SiwbbAndGroup<T extends NumberType> extends BaseNumberTypeClass<Siw
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): SiwbbAndGroup<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as SiwbbAndGroup<U>;
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): SiwbbAndGroup<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as SiwbbAndGroup<U>;
   }
 }
 
@@ -158,8 +158,8 @@ export class SiwbbOrGroup<T extends NumberType> extends BaseNumberTypeClass<Siwb
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): SiwbbOrGroup<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as SiwbbOrGroup<U>;
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): SiwbbOrGroup<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as SiwbbOrGroup<U>;
   }
 }
 
@@ -182,8 +182,8 @@ export class OwnershipRequirements<T extends NumberType> extends BaseNumberTypeC
     return ['options']; //TODO: This assumes all options are NumberType
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): OwnershipRequirements<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as OwnershipRequirements<U>;
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): OwnershipRequirements<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as OwnershipRequirements<U>;
   }
 }
 

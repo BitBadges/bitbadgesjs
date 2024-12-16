@@ -1,4 +1,4 @@
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
 import { bigIntMin, safeAddKeepLeft } from '@/common/math.js';
 import { Stringify, type NumberType } from '@/common/string-numbers.js';
 import { UintRange, UintRangeArray } from '@/core/uintRanges.js';
@@ -87,8 +87,8 @@ export class CollectionMetadataDetails<T extends NumberType>
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): CollectionMetadataDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as CollectionMetadataDetails<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CollectionMetadataDetails<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CollectionMetadataDetails<U>;
   }
 
   toProto(): badges.CollectionMetadata {
@@ -122,8 +122,8 @@ export class BadgeMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): BadgeMetadataDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as BadgeMetadataDetails<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): BadgeMetadataDetails<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as BadgeMetadataDetails<U>;
   }
 
   /**

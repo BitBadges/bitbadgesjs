@@ -1,5 +1,5 @@
 import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import { Stringify } from '@/common/string-numbers.js';
 import { CollectionApproval } from '@/core/approvals.js';
@@ -59,8 +59,8 @@ export class MsgCreateCollection<T extends NumberType> extends BaseNumberTypeCla
     this.isArchivedTimeline = msg.isArchivedTimeline?.map((x) => new IsArchivedTimeline(x));
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): MsgCreateCollection<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as MsgCreateCollection<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgCreateCollection<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgCreateCollection<U>;
   }
 
   toProto(): badges.MsgCreateCollection {

@@ -1,4 +1,4 @@
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import { Stringify } from '@/common/string-numbers.js';
 import * as badges from '@/proto/badges/tx_pb.js';
@@ -24,8 +24,8 @@ export class MsgDeleteCollection<T extends NumberType> extends BaseNumberTypeCla
     this.collectionId = msg.collectionId;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): MsgDeleteCollection<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as MsgDeleteCollection<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgDeleteCollection<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgDeleteCollection<U>;
   }
 
   getNumberFieldNames(): string[] {

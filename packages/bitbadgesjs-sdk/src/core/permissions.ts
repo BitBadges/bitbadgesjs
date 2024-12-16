@@ -15,7 +15,7 @@ import type {
   iUserPermissions,
   iUserPermissionsWithDetails
 } from '@/interfaces/badges/permissions.js';
-import type { CustomType } from '@/common/base.js';
+import type { ConvertOptions, CustomType } from '@/common/base.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, deepCopyPrimitives } from '@/common/base.js';
 import * as badges from '../proto/badges/permissions_pb.js';
 import { AddressList } from './addressLists.js';
@@ -48,8 +48,8 @@ export class UserPermissions<T extends NumberType> extends BaseNumberTypeClass<U
     );
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): UserPermissions<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as UserPermissions<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UserPermissions<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserPermissions<U>;
   }
 
   toProto(): badges.UserPermissions {
@@ -148,8 +148,8 @@ export class UserOutgoingApprovalPermission<T extends NumberType>
     this.permanentlyForbiddenTimes = UintRangeArray.From(msg.permanentlyForbiddenTimes);
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): UserOutgoingApprovalPermission<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as UserOutgoingApprovalPermission<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UserOutgoingApprovalPermission<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserOutgoingApprovalPermission<U>;
   }
 
   toProto(): badges.UserOutgoingApprovalPermission {
@@ -271,8 +271,8 @@ export class UserIncomingApprovalPermission<T extends NumberType>
     this.permanentlyForbiddenTimes = UintRangeArray.From(msg.permanentlyForbiddenTimes);
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): UserIncomingApprovalPermission<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as UserIncomingApprovalPermission<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UserIncomingApprovalPermission<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserIncomingApprovalPermission<U>;
   }
 
   toProto(): badges.UserIncomingApprovalPermission {
@@ -388,7 +388,7 @@ export class CollectionPermissions<T extends NumberType> extends BaseNumberTypeC
     this.canUpdateCollectionApprovals = msg.canUpdateCollectionApprovals.map((x) => new CollectionApprovalPermission(x));
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): CollectionPermissions<U> {
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CollectionPermissions<U> {
     return new CollectionPermissions(
       deepCopyPrimitives({
         canDeleteCollection: this.canDeleteCollection.map((x) => x.convert(convertFunction)),
@@ -491,7 +491,7 @@ export class ActionPermission<T extends NumberType> extends BaseNumberTypeClass<
     this.permanentlyForbiddenTimes = UintRangeArray.From(msg.permanentlyForbiddenTimes);
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ActionPermission<U> {
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ActionPermission<U> {
     return new ActionPermission(
       deepCopyPrimitives({
         permanentlyPermittedTimes: this.permanentlyPermittedTimes.map((x) => x.convert(convertFunction)),
@@ -576,7 +576,7 @@ export class TimedUpdatePermission<T extends NumberType> extends BaseNumberTypeC
     this.permanentlyForbiddenTimes = UintRangeArray.From(msg.permanentlyForbiddenTimes);
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): TimedUpdatePermission<U> {
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): TimedUpdatePermission<U> {
     return new TimedUpdatePermission(
       deepCopyPrimitives({
         timelineTimes: this.timelineTimes.map((x) => x.convert(convertFunction)),
@@ -693,7 +693,7 @@ export class BadgeIdsActionPermission<T extends NumberType>
     this.permanentlyForbiddenTimes = UintRangeArray.From(msg.permanentlyForbiddenTimes);
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): BadgeIdsActionPermission<U> {
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): BadgeIdsActionPermission<U> {
     return new BadgeIdsActionPermission(
       deepCopyPrimitives({
         badgeIds: this.badgeIds.map((x) => x.convert(convertFunction)),
@@ -799,7 +799,7 @@ export class TimedUpdateWithBadgeIdsPermission<T extends NumberType>
     this.permanentlyForbiddenTimes = UintRangeArray.From(msg.permanentlyForbiddenTimes);
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): TimedUpdateWithBadgeIdsPermission<U> {
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): TimedUpdateWithBadgeIdsPermission<U> {
     return new TimedUpdateWithBadgeIdsPermission(
       deepCopyPrimitives({
         timelineTimes: this.timelineTimes.map((x) => x.convert(convertFunction)),
@@ -924,7 +924,7 @@ export class CollectionApprovalPermission<T extends NumberType>
     this.permanentlyForbiddenTimes = UintRangeArray.From(msg.permanentlyForbiddenTimes);
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): CollectionApprovalPermission<U> {
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CollectionApprovalPermission<U> {
     return new CollectionApprovalPermission(
       deepCopyPrimitives({
         fromListId: this.fromListId,
@@ -1049,8 +1049,8 @@ export class CollectionApprovalPermissionWithDetails<T extends NumberType>
     return super.clone() as CollectionApprovalPermissionWithDetails<T>;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): CollectionApprovalPermissionWithDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as CollectionApprovalPermissionWithDetails<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CollectionApprovalPermissionWithDetails<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CollectionApprovalPermissionWithDetails<U>;
   }
 
   castToUniversalPermission(): UniversalPermission {
@@ -1096,8 +1096,8 @@ export class UserIncomingApprovalPermissionWithDetails<T extends NumberType>
     return super.clone() as UserIncomingApprovalPermissionWithDetails<T>;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): UserIncomingApprovalPermissionWithDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as UserIncomingApprovalPermissionWithDetails<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UserIncomingApprovalPermissionWithDetails<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserIncomingApprovalPermissionWithDetails<U>;
   }
 
   castToCollectionApprovalPermission(address: string): CollectionApprovalPermissionWithDetails<T> {
@@ -1129,8 +1129,8 @@ export class UserOutgoingApprovalPermissionWithDetails<T extends NumberType>
     return super.clone() as UserOutgoingApprovalPermissionWithDetails<T>;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): UserOutgoingApprovalPermissionWithDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as UserOutgoingApprovalPermissionWithDetails<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UserOutgoingApprovalPermissionWithDetails<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserOutgoingApprovalPermissionWithDetails<U>;
   }
 
   castToCollectionApprovalPermission(address: string): CollectionApprovalPermissionWithDetails<T> {
@@ -1158,8 +1158,8 @@ export class CollectionPermissionsWithDetails<T extends NumberType>
     );
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): CollectionPermissionsWithDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as CollectionPermissionsWithDetails<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CollectionPermissionsWithDetails<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CollectionPermissionsWithDetails<U>;
   }
 
   clone<U extends NumberType>(): CollectionPermissionsWithDetails<U> {
@@ -1199,8 +1199,8 @@ export class UserPermissionsWithDetails<T extends NumberType> extends UserPermis
     );
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): UserPermissionsWithDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as UserPermissionsWithDetails<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UserPermissionsWithDetails<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserPermissionsWithDetails<U>;
   }
 }
 

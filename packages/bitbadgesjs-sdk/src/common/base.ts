@@ -1,6 +1,6 @@
+import type { JsonObject } from '@bufbuild/protobuf';
 import type { NumberType } from './string-numbers.js';
 import { BigIntify, Numberify, Stringify } from './string-numbers.js';
-import type { JsonObject } from '@bufbuild/protobuf';
 
 /**
  * The CustomType interface is the base interface for all custom types in the SDK. It provides methods for comparing, converting, and cloning objects.
@@ -41,6 +41,19 @@ export interface CustomType<T extends CustomType<T>> {
 }
 
 /**
+ * @category Utils
+ */
+export interface ConvertOptions {
+  /**
+   * Same object as the one passed in the convert function.
+   *
+   * By default, we create a deep copy of the object, but you can specify this if you are okay updating in-place.
+   * This increases performance by a lot at scale since we don't need to deep copy the object.
+   */
+  keepOriginalObject?: boolean;
+}
+
+/**
  * Base class that implements the CustomType interface. It provides default implementations for all methods.
  * This is to be used when the class and all of its fields are of primitive types (i.e. no number types).
  *
@@ -78,7 +91,7 @@ export class CustomTypeClass<T extends CustomType<T>> implements CustomType<T> {
    * This function is unnecessary as this field has no numeric types.
    * Please use the `.clone()` method instead.
    */
-  convert<U extends NumberType>(_convertFunction?: (val: NumberType) => U): CustomType<any> {
+  convert<U extends NumberType>(_convertFunction?: (val: NumberType) => U, options?: ConvertOptions): CustomType<any> {
     return this.clone();
   }
 }
@@ -88,7 +101,7 @@ export class CustomTypeClass<T extends CustomType<T>> implements CustomType<T> {
  *
  * IMPORTANT: You must implement the `getNumberFieldNames` method yourself for this class to work properly.
  * Also, you will need to implement the `convert` method yourself if you want to use it in a typed manner. This
- * can be done by simply calling `convertClassPropertiesAndMaintainNumberTypes(this, convertFunction)` and casting the result to the correct type.
+ * can be done by simply calling `convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options)` and casting the result to the correct type.
  *
  * @category Utils
  */
@@ -119,8 +132,8 @@ export abstract class BaseNumberTypeClass<T extends CustomType<T>> implements Cu
     return true;
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): CustomType<any> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction);
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): CustomType<any> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options);
   }
 }
 
@@ -309,6 +322,39 @@ export function deepCopy<T extends CustomType<any>>(obj: T): T {
   return convertClassPropertiesAndMaintainNumberTypes(obj, (item) => deepCopyPrimitives(item)) as T;
 }
 
+//Attempt to get the current number type of the first present number field.
+function getCurrentType<T extends CustomType<T>>(obj: T): 'string' | 'number' | 'bigint' | 'unknown' {
+  let numberFields: string[] = [];
+  //If the object implements the numberFields() method, then we know it's a NumberTypeConvertible object itself.
+  //We can apply convertFunction to the number fields.
+  if (typeof obj.getNumberFieldNames === 'function') {
+    numberFields = obj.getNumberFieldNames();
+  } else {
+    return 'unknown';
+  }
+
+  for (const numberField of numberFields) {
+    const value = (obj as any)[numberField];
+    const valueType = typeof value;
+    if (valueType === 'bigint' || valueType === 'number' || valueType === 'string') {
+      return valueType;
+    }
+  }
+
+  //If we didn't find any number fields, then we recursively check the fields of the object.
+  const json: any = obj;
+  for (const prop in json) {
+    if (Object.prototype.hasOwnProperty.call(json, prop)) {
+      const valueType = typeof json[prop] === 'object' && json[prop] !== null ? getCurrentType(json[prop]) : undefined;
+      if (valueType && valueType !== 'unknown') {
+        return valueType;
+      }
+    }
+  }
+
+  return 'unknown';
+}
+
 /**
  * Converts the number fields of a class instance to their new type, while maintaining the rest of the class structure.
  *
@@ -319,17 +365,28 @@ export function deepCopy<T extends CustomType<any>>(obj: T): T {
 export function convertClassPropertiesAndMaintainNumberTypes<U extends NumberType>(
   obj: CustomType<any>,
   convertFunction: (item: NumberType) => U,
+  options?: ConvertOptions,
   depth = 0
 ): CustomType<any> {
-  const json: any = {};
   let numberFields: string[] = [];
   const Constructor = obj.constructor as new (data?: any) => any;
+
+  //One huge optimization to avoid redundant conversions is to check if we are doing a bigint -> bigint conversion
+  //Note we can't do this with string / numbers due to our NumberifyIfPossible approach)
+  //If so, we can just apply the convertFunction to the value directly.
+  const conversionType = typeof convertFunction(0);
+  const isToBigInt = conversionType === 'bigint';
+  if (depth === 0 && isToBigInt && getCurrentType(obj) === 'bigint') {
+    return options?.keepOriginalObject ? obj : new Constructor(deepCopyPrimitives(obj));
+  }
+
   //If the object implements the numberFields() method, then we know it's a NumberTypeConvertible object itself.
   //We can apply convertFunction to the number fields.
   if (typeof obj.getNumberFieldNames === 'function') {
     numberFields = obj.getNumberFieldNames();
   }
 
+  const json: any = options?.keepOriginalObject ? obj : {};
   const object = obj as any;
   for (const prop in object) {
     if (Object.prototype.hasOwnProperty.call(object, prop)) {
@@ -352,10 +409,10 @@ export function convertClassPropertiesAndMaintainNumberTypes<U extends NumberTyp
           //we assume no mixed types in arrays
 
           json[prop] = value.map((item: any) =>
-            typeof item === 'object' && item !== null ? convertClassPropertiesAndMaintainNumberTypes(item, convertFunction, depth + 1) : item
+            typeof item === 'object' && item !== null ? convertClassPropertiesAndMaintainNumberTypes(item, convertFunction, options, depth + 1) : item
           );
         } else if (typeof value === 'object' && value !== null) {
-          json[prop] = convertClassPropertiesAndMaintainNumberTypes(value, convertFunction, depth + 1);
+          json[prop] = convertClassPropertiesAndMaintainNumberTypes(value, convertFunction, options, depth + 1);
         } else {
           json[prop] = value;
         }
@@ -363,5 +420,5 @@ export function convertClassPropertiesAndMaintainNumberTypes<U extends NumberTyp
     }
   }
 
-  return depth === 0 ? new Constructor(deepCopyPrimitives(json)) : json;
+  return depth === 0 ? (options?.keepOriginalObject ? json : new Constructor(deepCopyPrimitives(json))) : json;
 }

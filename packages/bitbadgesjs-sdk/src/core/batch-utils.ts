@@ -3,7 +3,7 @@ import { BigIntify } from '../common/string-numbers.js';
 
 import type { iUintRange } from '@/interfaces/badges/core.js';
 import { bigIntMin } from '../common/math.js';
-import { BaseNumberTypeClass, getConverterFunction } from '@/common/base.js';
+import { BaseNumberTypeClass, ConvertOptions, getConverterFunction } from '@/common/base.js';
 import { UintRangeArray, UintRange } from './uintRanges.js';
 import { BaseTypedArray } from '@/common/typed-arrays.js';
 
@@ -34,7 +34,7 @@ export class BatchBadgeDetails<T extends NumberType> extends BaseNumberTypeClass
     return ['collectionId'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): BatchBadgeDetails<U> {
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): BatchBadgeDetails<U> {
     return new BatchBadgeDetails<U>({
       ...this,
       collectionId: convertFunction(this.collectionId),
@@ -121,7 +121,7 @@ export class BatchBadgeDetailsArray<T extends NumberType> extends BaseTypedArray
     return super.unshift(...items.map((i) => new BatchBadgeDetails(i)));
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): BatchBadgeDetailsArray<U> {
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): BatchBadgeDetailsArray<U> {
     return new BatchBadgeDetailsArray<U>(...this.map((x) => x.convert(convertFunction)));
   }
 

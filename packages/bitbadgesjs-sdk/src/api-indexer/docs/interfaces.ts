@@ -28,7 +28,7 @@ import type {
 import type { iCollectionPermissions, iUserPermissionsWithDetails } from '@/interfaces/badges/permissions.js';
 import type { iUserBalanceStore } from '@/interfaces/badges/userBalances.js';
 import type { iMap, iValueStore } from '@/transactions/messages/bitbadges/maps/index.js';
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
 
 /**
  * @category API Requests / Responses
@@ -1135,8 +1135,8 @@ export class ClaimReward<T extends NumberType> extends BaseNumberTypeClass<Claim
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ClaimReward<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as ClaimReward<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ClaimReward<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ClaimReward<U>;
   }
 }
 

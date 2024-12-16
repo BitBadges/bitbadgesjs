@@ -1,4 +1,4 @@
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import { BalanceArray } from '@/core/balances.js';
 import { ApprovalIdentifierDetails } from '@/proto/badges/transfers_pb.js';
@@ -36,8 +36,8 @@ export class ActivityDoc<T extends NumberType> extends BaseNumberTypeClass<Activ
     return ['timestamp', 'block'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ActivityDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as ActivityDoc<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ActivityDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ActivityDoc<U>;
   }
 }
 
@@ -75,8 +75,8 @@ export class TransferActivityDoc<T extends NumberType> extends ActivityDoc<T> im
     return [...super.getNumberFieldNames(), 'collectionId'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): TransferActivityDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as TransferActivityDoc<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): TransferActivityDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as TransferActivityDoc<U>;
   }
 }
 
@@ -100,8 +100,8 @@ export class ListActivityDoc<T extends NumberType> extends ActivityDoc<T> implem
     this.initiatedBy = data.initiatedBy;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ListActivityDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as ListActivityDoc<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ListActivityDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ListActivityDoc<U>;
   }
 }
 
@@ -127,8 +127,8 @@ export class ClaimAlertDoc<T extends NumberType> extends ActivityDoc<T> implemen
     return [...super.getNumberFieldNames(), 'collectionId'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ClaimAlertDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as ClaimAlertDoc<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ClaimAlertDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ClaimAlertDoc<U>;
   }
 }
 
@@ -152,7 +152,7 @@ export class ClaimActivityDoc<T extends NumberType> extends ActivityDoc<T> imple
     this.private = data.private;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ClaimActivityDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as ClaimActivityDoc<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ClaimActivityDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ClaimActivityDoc<U>;
   }
 }

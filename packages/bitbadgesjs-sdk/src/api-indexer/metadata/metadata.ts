@@ -1,4 +1,4 @@
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import { BigIntify } from '@/common/string-numbers.js';
 import { UNIXMilliTimestamp } from '../docs/interfaces.js';
@@ -119,8 +119,8 @@ export class Metadata<T extends NumberType> extends BaseNumberTypeClass<Metadata
     return ['fetchedAt', 'fetchedAtBlock'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): Metadata<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as Metadata<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): Metadata<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as Metadata<U>;
   }
 
   /**

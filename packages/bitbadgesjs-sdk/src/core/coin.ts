@@ -1,4 +1,4 @@
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
 import type { NumberType } from '../common/string-numbers.js';
 
 /**
@@ -30,8 +30,8 @@ export class CosmosCoin<T extends NumberType> extends BaseNumberTypeClass<Cosmos
     return ['amount'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): CosmosCoin<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as CosmosCoin<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CosmosCoin<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CosmosCoin<U>;
   }
 
   static fromProto<T extends NumberType>(data: { amount: string; denom: string }, convertFunction: (val: NumberType) => T): CosmosCoin<T> {

@@ -1,5 +1,5 @@
 import type { BitBadgesAddress, iUpdateHistory, UNIXMilliTimestamp } from '@/api-indexer/docs/interfaces.js';
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, CustomTypeClass, deepCopyPrimitives } from '@/common/base.js';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions, CustomTypeClass, deepCopyPrimitives } from '@/common/base.js';
 import type {
   iAmountTrackerIdDetails,
   iApprovalIdentifierDetails,
@@ -57,7 +57,7 @@ export class BadgeMetadata<T extends NumberType> extends BaseNumberTypeClass<Bad
     this.customData = badgeMetadata.customData;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): BadgeMetadata<U> {
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): BadgeMetadata<U> {
     return new BadgeMetadata<U>(
       deepCopyPrimitives({
         uri: this.uri,
@@ -221,7 +221,7 @@ export class MustOwnBadges<T extends NumberType> extends BaseNumberTypeClass<Mus
     return ['collectionId'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): MustOwnBadges<U> {
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MustOwnBadges<U> {
     return new MustOwnBadges<U>(
       deepCopyPrimitives({
         collectionId: convertFunction(this.collectionId),
@@ -321,7 +321,7 @@ export class CoinTransfer<T extends NumberType> extends BaseNumberTypeClass<Coin
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): CoinTransfer<U> {
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CoinTransfer<U> {
     return new CoinTransfer<U>({
       to: this.to,
       coins: this.coins.map((b) => b.convert(convertFunction))
@@ -450,7 +450,7 @@ export class AmountTrackerIdDetails<T extends NumberType>
     return ['collectionId'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): AmountTrackerIdDetails<U> {
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): AmountTrackerIdDetails<U> {
     return new AmountTrackerIdDetails<U>(
       deepCopyPrimitives({
         collectionId: convertFunction(this.collectionId),
@@ -506,7 +506,7 @@ export class MerkleChallenge<T extends NumberType> extends BaseNumberTypeClass<M
     return ['expectedProofLength', 'maxUsesPerLeaf'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): MerkleChallenge<U> {
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MerkleChallenge<U> {
     return new MerkleChallenge<U>(
       deepCopyPrimitives({
         root: this.root,
@@ -656,7 +656,7 @@ export class TimelineItem<T extends NumberType> extends BaseNumberTypeClass<Time
     this.timelineTimes = UintRangeArray.From(timelineItem.timelineTimes);
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): TimelineItem<U> {
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): TimelineItem<U> {
     return new TimelineItem<U>(
       deepCopyPrimitives({
         timelineTimes: this.timelineTimes.map((b) => b.convert(convertFunction))
@@ -687,7 +687,7 @@ export class ManagerTimeline<T extends NumberType> extends BaseNumberTypeClass<M
     });
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ManagerTimeline<U> {
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ManagerTimeline<U> {
     return new ManagerTimeline<U>(
       deepCopyPrimitives({
         manager: this.manager,
@@ -755,7 +755,7 @@ export class CollectionMetadataTimelineWithDetails<T extends NumberType>
     this.timelineTimes = UintRangeArray.From(collectionMetadataTimeline.timelineTimes);
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): CollectionMetadataTimelineWithDetails<U> {
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CollectionMetadataTimelineWithDetails<U> {
     return new CollectionMetadataTimelineWithDetails<U>(
       deepCopyPrimitives({
         collectionMetadata: this.collectionMetadata.convert(convertFunction),
@@ -787,7 +787,7 @@ export class CollectionMetadataTimeline<T extends NumberType>
     this.timelineTimes = UintRangeArray.From(collectionMetadataTimeline.timelineTimes);
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): CollectionMetadataTimeline<U> {
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CollectionMetadataTimeline<U> {
     return new CollectionMetadataTimeline<U>(
       deepCopyPrimitives({
         collectionMetadata: this.collectionMetadata,
@@ -862,7 +862,7 @@ export class BadgeMetadataTimelineWithDetails<T extends NumberType>
     this.badgeMetadata = badgeMetadataTimeline.badgeMetadata.map((b) => new BadgeMetadataDetails(b));
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): BadgeMetadataTimelineWithDetails<U> {
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): BadgeMetadataTimelineWithDetails<U> {
     return new BadgeMetadataTimelineWithDetails<U>(
       deepCopyPrimitives({
         badgeMetadata: this.badgeMetadata.map((b) => b.convert(convertFunction)),
@@ -898,7 +898,7 @@ export class BadgeMetadataTimeline<T extends NumberType> extends BaseNumberTypeC
     });
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): BadgeMetadataTimeline<U> {
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): BadgeMetadataTimeline<U> {
     return new BadgeMetadataTimeline<U>(
       deepCopyPrimitives({
         badgeMetadata: this.badgeMetadata.map((b) => b.convert(convertFunction)),
@@ -968,7 +968,7 @@ export class OffChainBalancesMetadataTimeline<T extends NumberType>
     this.timelineTimes = UintRangeArray.From(offChainBalancesMetadataTimeline.timelineTimes);
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): OffChainBalancesMetadataTimeline<U> {
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): OffChainBalancesMetadataTimeline<U> {
     return new OffChainBalancesMetadataTimeline<U>(
       deepCopyPrimitives({
         offChainBalancesMetadata: this.offChainBalancesMetadata,
@@ -1049,7 +1049,7 @@ export class CustomDataTimeline<T extends NumberType> extends BaseNumberTypeClas
     });
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): CustomDataTimeline<U> {
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CustomDataTimeline<U> {
     return new CustomDataTimeline<U>(
       deepCopyPrimitives({
         customData: this.customData,
@@ -1123,7 +1123,7 @@ export class StandardsTimeline<T extends NumberType> extends BaseNumberTypeClass
     });
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): StandardsTimeline<U> {
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): StandardsTimeline<U> {
     return new StandardsTimeline<U>(
       deepCopyPrimitives({
         standards: this.standards,
@@ -1197,7 +1197,7 @@ export class IsArchivedTimeline<T extends NumberType> extends BaseNumberTypeClas
     });
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): IsArchivedTimeline<U> {
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): IsArchivedTimeline<U> {
     return new IsArchivedTimeline<U>(
       deepCopyPrimitives({
         isArchived: this.isArchived,
@@ -1886,7 +1886,7 @@ export class UpdateHistory<T extends NumberType> extends BaseNumberTypeClass<Upd
     return ['block', 'blockTimestamp', 'timestamp'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): UpdateHistory<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as UpdateHistory<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UpdateHistory<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UpdateHistory<U>;
   }
 }

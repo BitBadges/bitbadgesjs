@@ -6,7 +6,7 @@ import { Stringify } from '@/common/string-numbers.js';
 import { UserPermissions } from '@/core/permissions.js';
 import { UserIncomingApproval, UserOutgoingApproval } from '@/core/approvals.js';
 import type { iMsgUpdateUserApprovals } from './interfaces.js';
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
 import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
 
 /**
@@ -63,8 +63,8 @@ export class MsgUpdateUserApprovals<T extends NumberType>
     return ['collectionId'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): MsgUpdateUserApprovals<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as MsgUpdateUserApprovals<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgUpdateUserApprovals<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgUpdateUserApprovals<U>;
   }
 
   toProto(): badges.MsgUpdateUserApprovals {

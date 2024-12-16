@@ -1,6 +1,6 @@
 import * as badges from '@/proto/badges/tx_pb.js';
 
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
 import { CollectionApproval } from '@/core/approvals.js';
 import {
   BadgeMetadataTimeline,
@@ -97,8 +97,8 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
     return ['collectionId'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): MsgUniversalUpdateCollection<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as MsgUniversalUpdateCollection<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgUniversalUpdateCollection<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgUniversalUpdateCollection<U>;
   }
 
   toProto(): badges.MsgUniversalUpdateCollection {

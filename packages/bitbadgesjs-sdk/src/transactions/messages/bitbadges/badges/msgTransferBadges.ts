@@ -1,7 +1,7 @@
 import type { NumberType } from '@/common/string-numbers.js';
 import { Stringify } from '@/common/string-numbers.js';
 import type { iMsgTransferBadges } from './interfaces.js';
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
 import * as badges from '@/proto/badges/tx_pb.js';
 
 import { Transfer } from '@/core/transfers.js';
@@ -33,8 +33,8 @@ export class MsgTransferBadges<T extends NumberType> extends BaseNumberTypeClass
     this.transfers = msg.transfers.map((x) => new Transfer(x));
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): MsgTransferBadges<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as MsgTransferBadges<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgTransferBadges<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgTransferBadges<U>;
   }
 
   getNumberFieldNames(): string[] {

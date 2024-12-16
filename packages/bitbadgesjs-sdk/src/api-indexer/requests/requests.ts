@@ -52,7 +52,7 @@ import {
 import type { iBadgeMetadataDetails, iCollectionMetadataDetails } from '@/api-indexer/metadata/badgeMetadata.js';
 import type { iMetadata } from '@/api-indexer/metadata/metadata.js';
 import { Metadata } from '@/api-indexer/metadata/metadata.js';
-import { BaseNumberTypeClass, CustomTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
+import { BaseNumberTypeClass, ConvertOptions, CustomTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import type { SupportedChain } from '@/common/types.js';
 import { ClaimDetails, iChallengeDetails, iChallengeInfoDetails } from '@/core/approvals.js';
@@ -182,8 +182,8 @@ export class GetStatusSuccessResponse<T extends NumberType>
     this.outOfSync = data.outOfSync;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetStatusSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetStatusSuccessResponse<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetStatusSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetStatusSuccessResponse<U>;
   }
 }
 
@@ -256,8 +256,8 @@ export class GetSearchSuccessResponse<T extends NumberType>
     this.groups = data.groups?.map((group) => new GroupDoc(group));
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetSearchSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetSearchSuccessResponse<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetSearchSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetSearchSuccessResponse<U>;
   }
 }
 
@@ -303,8 +303,8 @@ export class GetClaimsSuccessResponse<T extends NumberType>
     this.bookmark = data.bookmark;
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): GetClaimsSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetClaimsSuccessResponse<U>;
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetClaimsSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetClaimsSuccessResponse<U>;
   }
 }
 
@@ -827,8 +827,8 @@ export class GetSignInChallengeSuccessResponse<T extends NumberType>
     this.message = data.message;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetSignInChallengeSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetSignInChallengeSuccessResponse<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetSignInChallengeSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetSignInChallengeSuccessResponse<U>;
   }
 }
 
@@ -1223,8 +1223,8 @@ export class GetBrowseSuccessResponse<T extends NumberType>
     this.claimActivity = data.claimActivity?.map((claimActivity) => new ClaimActivityDoc(claimActivity));
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetBrowseSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetBrowseSuccessResponse<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetBrowseSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetBrowseSuccessResponse<U>;
   }
 }
 
@@ -1356,8 +1356,8 @@ export class FetchMetadataDirectlySuccessResponse<T extends NumberType>
     this.metadata = data.metadata.map((metadata) => new Metadata(metadata));
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): FetchMetadataDirectlySuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as FetchMetadataDirectlySuccessResponse<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): FetchMetadataDirectlySuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as FetchMetadataDirectlySuccessResponse<U>;
   }
 }
 
@@ -1577,8 +1577,8 @@ export class GetAttestationsSuccessResponse<T extends NumberType>
     this.attestations = data.attestations.map((attestation) => (attestation ? new AttestationDoc<T>(attestation) : undefined));
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetAttestationsSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetAttestationsSuccessResponse<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetAttestationsSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetAttestationsSuccessResponse<U>;
   }
 }
 
@@ -1852,8 +1852,11 @@ export class GetSIWBBRequestsForDeveloperAppSuccessResponse<T extends NumberType
     this.pagination = data.pagination;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetSIWBBRequestsForDeveloperAppSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetSIWBBRequestsForDeveloperAppSuccessResponse<U>;
+  convert<U extends NumberType>(
+    convertFunction: (item: NumberType) => U,
+    options?: ConvertOptions
+  ): GetSIWBBRequestsForDeveloperAppSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetSIWBBRequestsForDeveloperAppSuccessResponse<U>;
   }
 }
 
@@ -1935,8 +1938,11 @@ export class ExchangeSIWBBAuthorizationCodeSuccessResponse<T extends NumberType>
     return ['access_token_expires_at', 'refresh_token_expires_at'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ExchangeSIWBBAuthorizationCodeSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as ExchangeSIWBBAuthorizationCodeSuccessResponse<U>;
+  convert<U extends NumberType>(
+    convertFunction: (item: NumberType) => U,
+    options?: ConvertOptions
+  ): ExchangeSIWBBAuthorizationCodeSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ExchangeSIWBBAuthorizationCodeSuccessResponse<U>;
   }
 }
 
@@ -2069,8 +2075,8 @@ export class GetClaimAlertsForCollectionSuccessResponse<T extends NumberType>
     this.pagination = data.pagination;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetClaimAlertsForCollectionSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetClaimAlertsForCollectionSuccessResponse<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetClaimAlertsForCollectionSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetClaimAlertsForCollectionSuccessResponse<U>;
   }
 }
 
@@ -2538,8 +2544,8 @@ export class GetPluginSuccessResponse<T extends NumberType>
     this.bookmark = data.bookmark;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetPluginSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetPluginSuccessResponse<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetPluginSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetPluginSuccessResponse<U>;
   }
 }
 
@@ -3034,8 +3040,8 @@ export class GetGroupsSuccessResponse<T extends NumberType>
     this.pagination = data.pagination;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetGroupsSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetGroupsSuccessResponse<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetGroupsSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetGroupsSuccessResponse<U>;
   }
 }
 
@@ -3083,8 +3089,8 @@ export class CreateGroupSuccessResponse<T extends NumberType>
     this.doc = new GroupDoc<T>(data.doc);
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): CreateGroupSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as CreateGroupSuccessResponse<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CreateGroupSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CreateGroupSuccessResponse<U>;
   }
 }
 
@@ -3135,8 +3141,8 @@ export class UpdateGroupSuccessResponse<T extends NumberType>
     this.doc = new GroupDoc<T>(data.doc);
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): UpdateGroupSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as UpdateGroupSuccessResponse<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UpdateGroupSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UpdateGroupSuccessResponse<U>;
   }
 }
 

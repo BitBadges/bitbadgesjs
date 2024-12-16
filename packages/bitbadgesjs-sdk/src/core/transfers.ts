@@ -1,4 +1,4 @@
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, deepCopyPrimitives, getConverterFunction } from '@/common/base.js';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions, deepCopyPrimitives, getConverterFunction } from '@/common/base.js';
 import type { iBalance, iTransfer } from '@/interfaces/badges/core.js';
 import * as badges from '@/proto/badges/transfers_pb.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
@@ -49,7 +49,7 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
     this.zkProofSolutions = transfer.zkProofSolutions ? transfer.zkProofSolutions.map((b) => new ZkProofSolution(b)) : undefined;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): Transfer<U> {
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): Transfer<U> {
     return new Transfer<U>(
       deepCopyPrimitives({
         from: this.from,
@@ -214,8 +214,8 @@ export class TransferWithIncrements<T extends NumberType>
     return ['toAddressesLength', 'incrementBadgeIdsBy', 'incrementOwnershipTimesBy'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): TransferWithIncrements<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as TransferWithIncrements<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): TransferWithIncrements<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as TransferWithIncrements<U>;
   }
 }
 

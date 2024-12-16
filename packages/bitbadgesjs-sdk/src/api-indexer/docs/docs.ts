@@ -1,4 +1,4 @@
-import type { CustomType } from '@/common/base.js';
+import type { ConvertOptions, CustomType } from '@/common/base.js';
 import { BaseNumberTypeClass, CustomTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import { BigIntify } from '@/common/string-numbers.js';
@@ -227,8 +227,8 @@ export class CollectionDoc<T extends NumberType>
     return ['collectionId', 'createdBlock', 'createdTimestamp'];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): CollectionDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as CollectionDoc<U>;
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): CollectionDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CollectionDoc<U>;
   }
 
   clone(): CollectionDoc<T> {
@@ -272,8 +272,8 @@ export class AccountDoc<T extends NumberType> extends BaseNumberTypeClass<Accoun
     return ['accountNumber', 'sequence'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): AccountDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as AccountDoc<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): AccountDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as AccountDoc<U>;
   }
 }
 
@@ -298,8 +298,8 @@ export class SocialConnectionInfo<T extends NumberType> extends BaseNumberTypeCl
     return ['lastUpdated'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): SocialConnectionInfo<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as SocialConnectionInfo<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): SocialConnectionInfo<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as SocialConnectionInfo<U>;
   }
 }
 
@@ -337,8 +337,8 @@ export class SocialConnections<T extends NumberType> extends BaseNumberTypeClass
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): SocialConnections<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as SocialConnections<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): SocialConnections<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as SocialConnections<U>;
   }
 }
 
@@ -369,8 +369,8 @@ export class NotificationPreferences<T extends NumberType>
     this.discord = data.discord;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): NotificationPreferences<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as NotificationPreferences<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): NotificationPreferences<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as NotificationPreferences<U>;
   }
 }
 
@@ -401,8 +401,8 @@ export class EmailVerificationStatus<T extends NumberType>
     return ['expiry', 'verifiedAt'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): EmailVerificationStatus<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as EmailVerificationStatus<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): EmailVerificationStatus<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as EmailVerificationStatus<U>;
   }
 }
 
@@ -422,8 +422,8 @@ export class CustomPage<T extends NumberType> extends BaseNumberTypeClass<Custom
     this.items = BatchBadgeDetailsArray.From(data.items);
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): CustomPage<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as CustomPage<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CustomPage<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CustomPage<U>;
   }
 }
 
@@ -538,8 +538,8 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
     return ['seenActivity', 'createdAt'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ProfileDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as ProfileDoc<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ProfileDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ProfileDoc<U>;
   }
 }
 
@@ -606,8 +606,8 @@ export class QueueDoc<T extends NumberType> extends BaseNumberTypeClass<QueueDoc
     return ['collectionId', 'loadBalanceId', 'refreshRequestTime', 'numRetries', 'lastFetchedAt', 'deletedAt', 'nextFetchTime'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): QueueDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as QueueDoc<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): QueueDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as QueueDoc<U>;
   }
 }
 
@@ -631,8 +631,8 @@ export class LatestBlockStatus<T extends NumberType> extends BaseNumberTypeClass
     return ['height', 'txIndex', 'timestamp'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): LatestBlockStatus<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as LatestBlockStatus<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): LatestBlockStatus<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as LatestBlockStatus<U>;
   }
 }
 
@@ -664,8 +664,8 @@ export class StatusDoc<T extends NumberType> extends BaseNumberTypeClass<StatusD
     return ['nextCollectionId', 'lastXGasAmounts', 'lastXGasLimits'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): StatusDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as StatusDoc<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): StatusDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as StatusDoc<U>;
   }
 }
 
@@ -715,8 +715,8 @@ export class AddressListDoc<T extends NumberType> extends AddressList implements
     return ['createdBlock', 'lastUpdated'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): AddressListDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as AddressListDoc<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): AddressListDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as AddressListDoc<U>;
   }
 
   clone(): AddressListDoc<T> {
@@ -772,8 +772,8 @@ export class BalanceDoc<T extends NumberType> extends BaseNumberTypeClass<Balanc
     return ['fetchedAt', 'fetchedAtBlock', 'collectionId'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): BalanceDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as BalanceDoc<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): BalanceDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as BalanceDoc<U>;
   }
 }
 
@@ -825,8 +825,8 @@ export class BalanceDocWithDetails<T extends NumberType> extends BaseNumberTypeC
     return ['fetchedAt', 'fetchedAtBlock', 'collectionId'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): BalanceDocWithDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as BalanceDocWithDetails<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): BalanceDocWithDetails<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as BalanceDocWithDetails<U>;
   }
 }
 
@@ -850,8 +850,8 @@ export class Event<T extends NumberType> extends BaseNumberTypeClass<Event<T>> i
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): Event<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as Event<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): Event<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as Event<U>;
   }
 }
 
@@ -891,8 +891,8 @@ export class GroupDoc<T extends NumberType> extends BaseNumberTypeClass<GroupDoc
     return ['collectionIds'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GroupDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GroupDoc<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GroupDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GroupDoc<U>;
   }
 }
 
@@ -973,8 +973,8 @@ export class ClaimBuilderDoc<T extends NumberType> extends BaseNumberTypeClass<C
     return ['collectionId', 'deletedAt', 'lastUpdated', 'createdAt', 'version'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ClaimBuilderDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as ClaimBuilderDoc<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ClaimBuilderDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ClaimBuilderDoc<U>;
   }
 }
 
@@ -1014,8 +1014,8 @@ export class ApprovalTrackerDoc<T extends NumberType> extends BaseNumberTypeClas
     return ['numTransfers', 'collectionId'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ApprovalTrackerDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as ApprovalTrackerDoc<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ApprovalTrackerDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ApprovalTrackerDoc<U>;
   }
 }
 
@@ -1037,8 +1037,8 @@ export class UsedLeafStatus<T extends NumberType> extends BaseNumberTypeClass<Us
     return ['leafIndex'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): UsedLeafStatus<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as UsedLeafStatus<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UsedLeafStatus<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UsedLeafStatus<U>;
   }
 }
 
@@ -1072,8 +1072,8 @@ export class MerkleChallengeDoc<T extends NumberType> extends BaseNumberTypeClas
     return ['collectionId'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): MerkleChallengeDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as MerkleChallengeDoc<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MerkleChallengeDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MerkleChallengeDoc<U>;
   }
 }
 
@@ -1130,8 +1130,8 @@ export class FetchDoc<T extends NumberType> extends BaseNumberTypeClass<FetchDoc
     return ['fetchedAt', 'fetchedAtBlock'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): FetchDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as FetchDoc<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): FetchDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as FetchDoc<U>;
   }
 }
 
@@ -1157,8 +1157,8 @@ export class RefreshDoc<T extends NumberType> extends BaseNumberTypeClass<Refres
     return ['refreshRequestTime', 'collectionId'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): RefreshDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as RefreshDoc<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): RefreshDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as RefreshDoc<U>;
   }
 }
 
@@ -1188,8 +1188,8 @@ export class AirdropDoc<T extends NumberType> extends BaseNumberTypeClass<Airdro
     return ['timestamp'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): AirdropDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as AirdropDoc<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): AirdropDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as AirdropDoc<U>;
   }
 }
 
@@ -1213,8 +1213,8 @@ export class IPFSTotalsDoc<T extends NumberType> extends BaseNumberTypeClass<IPF
     return ['bytesUploaded'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): IPFSTotalsDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as IPFSTotalsDoc<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): IPFSTotalsDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as IPFSTotalsDoc<U>;
   }
 }
 
@@ -1255,8 +1255,8 @@ export class ComplianceDoc<T extends NumberType> extends BaseNumberTypeClass<Com
     this._id = data._id;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ComplianceDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as ComplianceDoc<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ComplianceDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ComplianceDoc<U>;
   }
 }
 
@@ -1292,8 +1292,8 @@ export class AccessTokenDoc extends CustomTypeClass<AccessTokenDoc> implements i
     this.scopes = data.scopes;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): AccessTokenDoc {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as AccessTokenDoc;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): AccessTokenDoc {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as AccessTokenDoc;
   }
 
   clone(): AccessTokenDoc {
@@ -1360,8 +1360,8 @@ export class DeveloperAppDoc extends CustomTypeClass<DeveloperAppDoc> implements
     this._id = data._id;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): DeveloperAppDoc {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as DeveloperAppDoc;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): DeveloperAppDoc {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as DeveloperAppDoc;
   }
 
   clone(): DeveloperAppDoc {
@@ -1389,8 +1389,8 @@ export class DepositBalanceDoc<T extends NumberType> extends BaseNumberTypeClass
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): DepositBalanceDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as DepositBalanceDoc<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): DepositBalanceDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as DepositBalanceDoc<U>;
   }
 
   clone(): DepositBalanceDoc<T> {
@@ -1465,8 +1465,8 @@ export class PluginVersionConfig<T extends NumberType> extends BaseNumberTypeCla
     return ['version', 'createdAt', 'lastUpdated'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): PluginVersionConfig<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as PluginVersionConfig<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): PluginVersionConfig<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as PluginVersionConfig<U>;
   }
 
   clone(): PluginVersionConfig<T> {
@@ -1534,8 +1534,8 @@ export class PluginDoc<T extends NumberType> extends BaseNumberTypeClass<PluginD
     return ['lastUpdated', 'createdAt', 'deletedAt'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): PluginDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as PluginDoc<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): PluginDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as PluginDoc<U>;
   }
 
   clone(): PluginDoc<T> {
@@ -1601,8 +1601,8 @@ export class SIWBBRequestDoc<T extends NumberType> extends BaseNumberTypeClass<S
     return ['createdAt', 'deletedAt'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): SIWBBRequestDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as SIWBBRequestDoc<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): SIWBBRequestDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as SIWBBRequestDoc<U>;
   }
 }
 
@@ -1683,8 +1683,8 @@ export class AttestationDoc<T extends NumberType> extends BaseNumberTypeClass<At
     return ['createdAt'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): AttestationDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as AttestationDoc<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): AttestationDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as AttestationDoc<U>;
   }
 }
 
@@ -1718,8 +1718,8 @@ export class MapWithValues<T extends NumberType> extends Map<T> implements iMapW
     return super.getNumberFieldNames();
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): MapWithValues<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as MapWithValues<U>;
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): MapWithValues<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MapWithValues<U>;
   }
 }
 
@@ -1741,7 +1741,7 @@ export class MapDoc<T extends NumberType> extends MapWithValues<T> implements iM
     return super.getNumberFieldNames();
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): MapDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as MapDoc<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MapDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MapDoc<U>;
   }
 }

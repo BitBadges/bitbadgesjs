@@ -1,6 +1,6 @@
 import type { JsonValue, JsonReadOptions } from '@bufbuild/protobuf';
 import type { iUintRange } from '@/interfaces/badges/core.js';
-import { BaseNumberTypeClass, deepCopyPrimitives, getConverterFunction } from '@/common/base.js';
+import { BaseNumberTypeClass, ConvertOptions, deepCopyPrimitives, getConverterFunction } from '@/common/base.js';
 import { safeSubtract, safeAddKeepLeft, GO_MAX_UINT_64, safeSubtractKeepLeft, bigIntMin, castNumberType, bigIntMax } from '../common/math.js';
 import type { NumberType } from '../common/string-numbers.js';
 import { Stringify } from '../common/string-numbers.js';
@@ -28,7 +28,7 @@ export class UintRange<T extends NumberType> extends BaseNumberTypeClass<UintRan
     return ['start', 'end'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): UintRange<U> {
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UintRange<U> {
     return new UintRange<U>(
       deepCopyPrimitives({
         start: convertFunction(this.start),
@@ -285,7 +285,7 @@ export class UintRangeArray<T extends NumberType> extends BaseTypedArray<UintRan
     return UintRangeArray.From(this.map((x) => x.clone()));
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): UintRangeArray<U> {
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UintRangeArray<U> {
     return UintRangeArray.From<U>(this.map((x) => x.convert(convertFunction)));
   }
 

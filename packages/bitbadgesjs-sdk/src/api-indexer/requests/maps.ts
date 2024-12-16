@@ -1,4 +1,4 @@
-import type { CustomType } from '@/common/base.js';
+import type { ConvertOptions, CustomType } from '@/common/base.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import { ValueStore, iValueStore } from '@/transactions/messages/bitbadges/maps/index.js';
@@ -38,8 +38,8 @@ export class GetMapsSuccessResponse<T extends NumberType>
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): GetMapsSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetMapsSuccessResponse<U>;
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetMapsSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetMapsSuccessResponse<U>;
   }
 }
 
@@ -79,7 +79,7 @@ export class GetMapValuesSuccessResponse
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): GetMapValuesSuccessResponse {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetMapValuesSuccessResponse;
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetMapValuesSuccessResponse {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetMapValuesSuccessResponse;
   }
 }

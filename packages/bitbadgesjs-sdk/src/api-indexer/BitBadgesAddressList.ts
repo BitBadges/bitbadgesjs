@@ -1,4 +1,4 @@
-import type { CustomType } from '@/common/base.js';
+import type { ConvertOptions, CustomType } from '@/common/base.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, getConverterFunction } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import type { iAddressList } from '@/interfaces/badges/core.js';
@@ -72,8 +72,8 @@ export class BitBadgesAddressList<T extends NumberType>
     return [...super.getNumberFieldNames(), 'createdBlock', 'lastUpdated'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): BitBadgesAddressList<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as BitBadgesAddressList<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): BitBadgesAddressList<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as BitBadgesAddressList<U>;
   }
 
   clone(): BitBadgesAddressList<T> {
@@ -393,8 +393,8 @@ export class GetAddressListsSuccessResponse<T extends NumberType>
     this.addressLists = data.addressLists.map((addressList) => new BitBadgesAddressList(addressList));
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetAddressListsSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetAddressListsSuccessResponse<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetAddressListsSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetAddressListsSuccessResponse<U>;
   }
 }
 

@@ -1,5 +1,5 @@
 import { BitBadgesAddress, iUpdateHistory, UNIXMilliTimestamp } from '@/api-indexer/docs/interfaces.js';
-import { convertClassPropertiesAndMaintainNumberTypes, CustomTypeClass } from '@/common/base.js';
+import { convertClassPropertiesAndMaintainNumberTypes, ConvertOptions, CustomTypeClass } from '@/common/base.js';
 import { NumberType } from '@/common/string-numbers.js';
 import { iAttestation, iAttestationsProof } from '@/interfaces/badges/core.js';
 import { UpdateHistory } from './misc.js';
@@ -73,8 +73,8 @@ export class Attestation<T extends NumberType> extends CustomTypeClass<Attestati
     return ['createdAt'];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): Attestation<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as Attestation<U>;
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): Attestation<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as Attestation<U>;
   }
 }
 
@@ -93,7 +93,7 @@ export class AttestationsProof<T extends NumberType> extends Attestation<T> impl
     this.updateHistory = data.updateHistory.map((x) => new UpdateHistory(x));
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): AttestationsProof<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as AttestationsProof<U>;
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): AttestationsProof<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as AttestationsProof<U>;
   }
 }

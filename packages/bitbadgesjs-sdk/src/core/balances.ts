@@ -1,6 +1,6 @@
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 import type { iBalance, iUintRange } from '@/interfaces/badges/core.js';
-import { BaseNumberTypeClass, deepCopyPrimitives, getConverterFunction } from '@/common/base.js';
+import { BaseNumberTypeClass, ConvertOptions, deepCopyPrimitives, getConverterFunction } from '@/common/base.js';
 import * as badges from '@/proto/badges/balances_pb.js';
 import { AddressList } from './addressLists.js';
 import { castNumberType, safeAdd, safeSubtract } from '../common/math.js';
@@ -35,7 +35,7 @@ export class Balance<T extends NumberType> extends BaseNumberTypeClass<Balance<T
     return ['amount'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): Balance<U> {
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): Balance<U> {
     return new Balance<U>(
       deepCopyPrimitives({
         amount: convertFunction(this.amount),
@@ -786,7 +786,7 @@ export class BalanceArray<T extends NumberType> extends BaseTypedArray<BalanceAr
     return super.unshift(...items.map((i) => new Balance(i)));
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): BalanceArray<U> {
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): BalanceArray<U> {
     return BalanceArray.From(this.map((x) => x.convert(convertFunction)));
   }
 

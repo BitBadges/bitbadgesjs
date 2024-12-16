@@ -8,7 +8,7 @@ import {
   iSatisfyMethod
 } from '@/api-indexer/docs/interfaces.js';
 import { Metadata } from '@/api-indexer/metadata/metadata.js';
-import { BaseNumberTypeClass, CustomTypeClass, convertClassPropertiesAndMaintainNumberTypes, deepCopyPrimitives } from '@/common/base.js';
+import { BaseNumberTypeClass, ConvertOptions, CustomTypeClass, convertClassPropertiesAndMaintainNumberTypes, deepCopyPrimitives } from '@/common/base.js';
 import type {
   iApprovalAmounts,
   iApprovalCriteria,
@@ -69,8 +69,8 @@ export class ChallengeTrackerIdDetails<T extends NumberType>
     return ['collectionId'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ChallengeTrackerIdDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as ChallengeTrackerIdDetails<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ChallengeTrackerIdDetails<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ChallengeTrackerIdDetails<U>;
   }
 }
 
@@ -146,8 +146,8 @@ export class ClaimDetails<T extends NumberType> extends BaseNumberTypeClass<Clai
     this.createdBy = data.createdBy;
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U): ClaimDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as ClaimDetails<U>;
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): ClaimDetails<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ClaimDetails<U>;
   }
 
   getNumberFieldNames(): string[] {
@@ -184,8 +184,8 @@ export class UserOutgoingApproval<T extends NumberType> extends BaseNumberTypeCl
     this.approvalCriteria = msg.approvalCriteria ? new OutgoingApprovalCriteria(msg.approvalCriteria) : undefined;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): UserOutgoingApproval<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as UserOutgoingApproval<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UserOutgoingApproval<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserOutgoingApproval<U>;
   }
 
   toProto(): badges.UserOutgoingApproval {
@@ -255,7 +255,7 @@ export class OutgoingApprovalCriteria<T extends NumberType>
     this.zkProofs = msg.zkProofs ? msg.zkProofs.map((x) => new ZkProof(x)) : undefined;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): OutgoingApprovalCriteria<U> {
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): OutgoingApprovalCriteria<U> {
     return new OutgoingApprovalCriteria(
       deepCopyPrimitives({
         mustOwnBadges: this.mustOwnBadges?.map((x) => x.convert(convertFunction)),
@@ -349,7 +349,7 @@ export class PredeterminedBalances<T extends NumberType> extends BaseNumberTypeC
     this.orderCalculationMethod = new PredeterminedOrderCalculationMethod(msg.orderCalculationMethod);
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): PredeterminedBalances<U> {
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): PredeterminedBalances<U> {
     return new PredeterminedBalances(
       deepCopyPrimitives({
         manualBalances: this.manualBalances.map((x) => x.convert(convertFunction)),
@@ -417,7 +417,7 @@ export class ManualBalances<T extends NumberType> extends BaseNumberTypeClass<Ma
     this.balances = BalanceArray.From(msg.balances);
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ManualBalances<U> {
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ManualBalances<U> {
     return new ManualBalances(
       deepCopyPrimitives({
         balances: this.balances.map((x) => x.convert(convertFunction))
@@ -474,7 +474,7 @@ export class IncrementedBalances<T extends NumberType> extends BaseNumberTypeCla
     return ['incrementBadgeIdsBy', 'incrementOwnershipTimesBy'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): IncrementedBalances<U> {
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): IncrementedBalances<U> {
     return new IncrementedBalances(
       deepCopyPrimitives({
         startBalances: this.startBalances.map((x) => x.convert(convertFunction)),
@@ -594,7 +594,7 @@ export class ApprovalAmounts<T extends NumberType> extends BaseNumberTypeClass<A
     return ['overallApprovalAmount', 'perToAddressApprovalAmount', 'perFromAddressApprovalAmount', 'perInitiatedByAddressApprovalAmount'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ApprovalAmounts<U> {
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ApprovalAmounts<U> {
     return new ApprovalAmounts(
       deepCopyPrimitives({
         overallApprovalAmount: convertFunction(this.overallApprovalAmount),
@@ -668,7 +668,7 @@ export class MaxNumTransfers<T extends NumberType> extends BaseNumberTypeClass<M
     return ['overallMaxNumTransfers', 'perToAddressMaxNumTransfers', 'perFromAddressMaxNumTransfers', 'perInitiatedByAddressMaxNumTransfers'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): MaxNumTransfers<U> {
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MaxNumTransfers<U> {
     return new MaxNumTransfers(
       deepCopyPrimitives({
         overallMaxNumTransfers: convertFunction(this.overallMaxNumTransfers),
@@ -740,8 +740,8 @@ export class UserIncomingApproval<T extends NumberType> extends BaseNumberTypeCl
     this.approvalCriteria = msg.approvalCriteria ? new IncomingApprovalCriteria(msg.approvalCriteria) : undefined;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): UserIncomingApproval<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as UserIncomingApproval<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UserIncomingApproval<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserIncomingApproval<U>;
   }
 
   toProto(): badges.UserIncomingApproval {
@@ -819,7 +819,7 @@ export class IncomingApprovalCriteria<T extends NumberType>
     this.coinTransfers = msg.coinTransfers ? msg.coinTransfers.map((x) => new CoinTransfer(x)) : undefined;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): IncomingApprovalCriteria<U> {
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): IncomingApprovalCriteria<U> {
     return new IncomingApprovalCriteria(
       deepCopyPrimitives({
         mustOwnBadges: this.mustOwnBadges?.map((x) => x.convert(convertFunction)),
@@ -935,8 +935,8 @@ export class CollectionApproval<T extends NumberType> extends BaseNumberTypeClas
     );
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): CollectionApproval<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as CollectionApproval<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CollectionApproval<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CollectionApproval<U>;
   }
 
   toProto(): badges.CollectionApproval {
@@ -1037,8 +1037,8 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
     this.coinTransfers = msg.coinTransfers ? msg.coinTransfers.map((x) => new CoinTransfer(x)) : undefined;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ApprovalCriteria<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as ApprovalCriteria<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ApprovalCriteria<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ApprovalCriteria<U>;
   }
 
   toProto(): badges.ApprovalCriteria {
@@ -1109,8 +1109,8 @@ export class UserOutgoingApprovalWithDetails<T extends NumberType> extends UserO
     this.details = data.details ? new ApprovalInfoDetails(data.details) : undefined;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): UserOutgoingApprovalWithDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as UserOutgoingApprovalWithDetails<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UserOutgoingApprovalWithDetails<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserOutgoingApprovalWithDetails<U>;
   }
 
   clone(): UserOutgoingApprovalWithDetails<T> {
@@ -1152,8 +1152,8 @@ export class UserIncomingApprovalWithDetails<T extends NumberType> extends UserI
     return super.clone() as UserIncomingApprovalWithDetails<T>;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): UserIncomingApprovalWithDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as UserIncomingApprovalWithDetails<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UserIncomingApprovalWithDetails<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserIncomingApprovalWithDetails<U>;
   }
 
   castToCollectionTransfer(toAddress: string): CollectionApprovalWithDetails<T> {
@@ -1231,8 +1231,8 @@ export class ChallengeDetails<T extends NumberType> extends BaseNumberTypeClass<
     return ['numLeaves'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ChallengeDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as ChallengeDetails<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ChallengeDetails<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ChallengeDetails<U>;
   }
 }
 
@@ -1273,7 +1273,7 @@ export class ChallengeInfoDetails<T extends NumberType> extends BaseNumberTypeCl
     this.claim = data.claim ? new ClaimDetails(data.claim) : undefined;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ChallengeInfoDetails<U> {
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ChallengeInfoDetails<U> {
     return new ChallengeInfoDetails(
       deepCopyPrimitives({
         ...this,
@@ -1299,7 +1299,7 @@ export class ApprovalInfoDetails<T extends NumberType> extends BaseNumberTypeCla
     this.image = data.image;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ApprovalInfoDetails<U> {
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ApprovalInfoDetails<U> {
     return new ApprovalInfoDetails(deepCopyPrimitives({ ...this }));
   }
 }
@@ -1326,8 +1326,8 @@ export class MerkleChallengeWithDetails<T extends NumberType> extends MerkleChal
     return super.getNumberFieldNames().concat(this.challengeInfoDetails.challengeDetails.getNumberFieldNames());
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): MerkleChallengeWithDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as MerkleChallengeWithDetails<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MerkleChallengeWithDetails<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MerkleChallengeWithDetails<U>;
   }
 
   clone(): MerkleChallengeWithDetails<T> {
@@ -1353,8 +1353,8 @@ export class ApprovalCriteriaWithDetails<T extends NumberType> extends ApprovalC
     this.merkleChallenges = data.merkleChallenges?.map((x) => new MerkleChallengeWithDetails(x));
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ApprovalCriteriaWithDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as ApprovalCriteriaWithDetails<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ApprovalCriteriaWithDetails<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ApprovalCriteriaWithDetails<U>;
   }
 
   clone(): ApprovalCriteriaWithDetails<T> {
@@ -1383,8 +1383,8 @@ export class IncomingApprovalCriteriaWithDetails<T extends NumberType>
     this.merkleChallenges = data.merkleChallenges?.map((x) => new MerkleChallengeWithDetails(x));
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): IncomingApprovalCriteriaWithDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as IncomingApprovalCriteriaWithDetails<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): IncomingApprovalCriteriaWithDetails<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as IncomingApprovalCriteriaWithDetails<U>;
   }
 
   clone(): IncomingApprovalCriteriaWithDetails<T> {
@@ -1430,8 +1430,8 @@ export class OutgoingApprovalCriteriaWithDetails<T extends NumberType>
     this.merkleChallenges = data.merkleChallenges?.map((x) => new MerkleChallengeWithDetails(x));
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): OutgoingApprovalCriteriaWithDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as OutgoingApprovalCriteriaWithDetails<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): OutgoingApprovalCriteriaWithDetails<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as OutgoingApprovalCriteriaWithDetails<U>;
   }
 
   clone(): OutgoingApprovalCriteriaWithDetails<T> {
@@ -1490,8 +1490,8 @@ export class CollectionApprovalWithDetails<T extends NumberType> extends Collect
     this.approvalCriteria = data.approvalCriteria ? new ApprovalCriteriaWithDetails(data.approvalCriteria) : undefined;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): CollectionApprovalWithDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as CollectionApprovalWithDetails<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CollectionApprovalWithDetails<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CollectionApprovalWithDetails<U>;
   }
 
   clone(): CollectionApprovalWithDetails<T> {

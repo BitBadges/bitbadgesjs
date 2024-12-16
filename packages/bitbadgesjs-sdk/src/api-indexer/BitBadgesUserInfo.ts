@@ -1,4 +1,4 @@
-import type { CustomType } from '@/common/base.js';
+import type { ConvertOptions, CustomType } from '@/common/base.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, getConverterFunction } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import { AddressList } from '@/core/addressLists.js';
@@ -180,8 +180,8 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     this.reservedMap = data.reservedMap ? new MapDoc(data.reservedMap) : undefined;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): BitBadgesUserInfo<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as BitBadgesUserInfo<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): BitBadgesUserInfo<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as BitBadgesUserInfo<U>;
   }
 
   clone(): BitBadgesUserInfo<T> {
@@ -834,7 +834,7 @@ export class GetAccountsSuccessResponse<T extends NumberType>
     this.accounts = data.accounts.map((account) => new BitBadgesUserInfo(account));
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetAccountsSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetAccountsSuccessResponse<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetAccountsSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetAccountsSuccessResponse<U>;
   }
 }

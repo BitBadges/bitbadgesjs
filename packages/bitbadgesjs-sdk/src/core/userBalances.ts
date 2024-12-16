@@ -1,5 +1,5 @@
 import type { iUserBalanceStore, iUserBalanceStoreWithDetails } from '@/interfaces/badges/userBalances.js';
-import type { CustomType } from '@/common/base.js';
+import type { ConvertOptions, CustomType } from '@/common/base.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
 import * as badges from '@/proto/badges/transfers_pb.js';
 import { UserIncomingApproval, UserIncomingApprovalWithDetails, UserOutgoingApproval, UserOutgoingApprovalWithDetails } from './approvals.js';
@@ -29,8 +29,8 @@ export class UserBalanceStore<T extends NumberType> extends BaseNumberTypeClass<
     this.autoApproveSelfInitiatedIncomingTransfers = data.autoApproveSelfInitiatedIncomingTransfers;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): UserBalanceStore<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as UserBalanceStore<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UserBalanceStore<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserBalanceStore<U>;
   }
 
   toProto() {
@@ -74,8 +74,8 @@ export class UserBalanceStoreWithDetails<T extends NumberType>
     this.userPermissions = new UserPermissionsWithDetails(data.userPermissions);
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): UserBalanceStoreWithDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as UserBalanceStoreWithDetails<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UserBalanceStoreWithDetails<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserBalanceStoreWithDetails<U>;
   }
 
   clone(): UserBalanceStoreWithDetails<T> {

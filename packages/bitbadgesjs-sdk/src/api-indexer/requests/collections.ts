@@ -3,7 +3,7 @@ import type { iAmountTrackerIdDetails, iUintRange } from '@/interfaces/badges/co
 import type { PaginationInfo } from '../base.js';
 import { EmptyResponseClass } from '../base.js';
 import { UintRangeArray } from '@/core/uintRanges.js';
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, deepCopyPrimitives } from '@/common/base.js';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions, deepCopyPrimitives } from '@/common/base.js';
 import { BalanceDocWithDetails, QueueDoc, RefreshDoc } from '../docs/docs.js';
 import { TransferActivityDoc } from '../docs/activity.js';
 import type { iBalanceDocWithDetails, iChallengeTrackerIdDetails, iQueueDoc, iRefreshDoc, iTransferActivityDoc } from '../docs/interfaces.js';
@@ -87,8 +87,8 @@ export class FilterBadgesInCollectionSuccessResponse<T extends NumberType>
     this.pagination = data.pagination;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): FilterBadgesInCollectionSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as FilterBadgesInCollectionSuccessResponse<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): FilterBadgesInCollectionSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as FilterBadgesInCollectionSuccessResponse<U>;
   }
 }
 
@@ -136,7 +136,7 @@ export class GetOwnersForBadgeSuccessResponse<T extends NumberType>
     this.pagination = data.pagination;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetOwnersForBadgeSuccessResponse<U> {
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetOwnersForBadgeSuccessResponse<U> {
     return new GetOwnersForBadgeSuccessResponse(
       deepCopyPrimitives({
         owners: this.owners.map((balance) => balance.convert(convertFunction)),
@@ -201,7 +201,7 @@ export class GetBadgeActivitySuccessResponse<T extends NumberType>
     this.pagination = data.pagination;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetBadgeActivitySuccessResponse<U> {
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetBadgeActivitySuccessResponse<U> {
     return new GetBadgeActivitySuccessResponse(
       deepCopyPrimitives({
         activity: this.activity.map((activity) => activity.convert(convertFunction)),
@@ -379,7 +379,7 @@ export class RefreshStatusSuccessResponse<T extends NumberType>
     this.refreshDoc = new RefreshDoc(data.refreshDoc);
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): RefreshStatusSuccessResponse<U> {
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): RefreshStatusSuccessResponse<U> {
     return new RefreshStatusSuccessResponse(
       deepCopyPrimitives({
         inQueue: this.inQueue,

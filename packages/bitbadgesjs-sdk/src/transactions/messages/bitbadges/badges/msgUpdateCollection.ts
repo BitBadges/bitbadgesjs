@@ -15,7 +15,7 @@ import {
 } from '@/core/misc.js';
 import { CollectionPermissions } from '@/core/permissions.js';
 import type { iMsgUpdateCollection } from './interfaces.js';
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
 import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
 import { UintRange, UintRangeArray } from '@/core/uintRanges.js';
 
@@ -86,8 +86,8 @@ export class MsgUpdateCollection<T extends NumberType> extends BaseNumberTypeCla
     return ['collectionId'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): MsgUpdateCollection<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as MsgUpdateCollection<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgUpdateCollection<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgUpdateCollection<U>;
   }
 
   toProto(): badges.MsgUpdateCollection {
