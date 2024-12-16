@@ -34,7 +34,7 @@ import {
 import { CollectionPermissions, UserPermissions, UserPermissionsWithDetails } from '@/core/permissions.js';
 import type { iOffChainBalancesMap } from '@/core/transfers.js';
 import { UserBalanceStore } from '@/core/userBalances.js';
-import type { iAmountTrackerIdDetails } from '@/interfaces/badges/core.js';
+import type { iAmountTrackerIdDetails, iUintRange } from '@/interfaces/badges/core.js';
 import type { iUserBalanceStore } from '@/interfaces/badges/userBalances.js';
 import { Map, ValueStore } from '@/transactions/messages/bitbadges/maps/index.js';
 import type { Doc } from '../base.js';
@@ -70,10 +70,8 @@ import {
   type iDepositBalanceDoc,
   type iDeveloperAppDoc,
   type iEmailVerificationStatus,
-  type iEventDoc,
   type iFetchDoc,
   type iIPFSTotalsDoc,
-  type iInternalActionsDoc,
   type iLatestBlockStatus,
   type iMapDoc,
   type iMapWithValues,
@@ -89,7 +87,9 @@ import {
   type iStatusDoc,
   type iUpdateHistory,
   type iUsedLeafStatus,
-  DynamicDataHandlerData
+  DynamicDataHandlerData,
+  iGroupDoc,
+  iEvent
 } from './interfaces.js';
 
 /**
@@ -357,6 +357,7 @@ export class NotificationPreferences<T extends NumberType>
     listActivity?: boolean;
     transferActivity?: boolean;
     claimAlerts?: boolean;
+    claimActivity?: boolean;
     ignoreIfInitiator?: boolean;
   };
 
@@ -830,6 +831,72 @@ export class BalanceDocWithDetails<T extends NumberType> extends BaseNumberTypeC
 }
 
 /**
+ * @inheritDoc iEvent
+ * @category Indexer
+ */
+export class Event<T extends NumberType> extends BaseNumberTypeClass<Event<T>> implements iEvent<T> {
+  metadata: iMetadata<T>;
+  eventTimes: UintRangeArray<T>;
+  eventId: string;
+
+  constructor(data: iEvent<T>) {
+    super();
+    this.metadata = data.metadata;
+    this.eventTimes = UintRangeArray.From(data.eventTimes);
+    this.eventId = data.eventId;
+  }
+
+  getNumberFieldNames(): string[] {
+    return [];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): Event<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as Event<U>;
+  }
+}
+
+/**
+ * @inheritDoc iGroupDoc
+ * @category Indexer
+ */
+export class GroupDoc<T extends NumberType> extends BaseNumberTypeClass<GroupDoc<T>> implements iGroupDoc<T> {
+  _docId: string;
+  _id?: string;
+  groupId: string;
+  createdAt: UNIXMilliTimestamp<T>;
+  createdBy: BitBadgesAddress;
+  metadata: iMetadata<T>;
+  events: Event<T>[];
+  collectionIds: T[];
+  claimIds: string[];
+  listIds: string[];
+  mapIds: string[];
+
+  constructor(data: iGroupDoc<T>) {
+    super();
+    this._docId = data._docId;
+    this._id = data._id;
+    this.groupId = data.groupId;
+    this.createdAt = data.createdAt;
+    this.createdBy = data.createdBy;
+    this.metadata = data.metadata;
+    this.events = data.events.map((event) => new Event(event));
+    this.collectionIds = data.collectionIds;
+    this.claimIds = data.claimIds;
+    this.listIds = data.listIds;
+    this.mapIds = data.mapIds;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['collectionIds'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GroupDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GroupDoc<U>;
+  }
+}
+
+/**
  * @inheritDoc iClaimBuilderDoc
  * @category Indexer
  */
@@ -1170,6 +1237,10 @@ export class ComplianceDoc<T extends NumberType> extends BaseNumberTypeClass<Com
     nsfw: { bitbadgesAddress: BitBadgesAddress; reason: string }[];
     reported: { bitbadgesAddress: BitBadgesAddress; reason: string }[];
   };
+  groups: {
+    nsfw: { groupId: string; reason: string }[];
+    reported: { groupId: string; reason: string }[];
+  };
 
   constructor(data: iComplianceDoc<T>) {
     super();
@@ -1179,6 +1250,7 @@ export class ComplianceDoc<T extends NumberType> extends BaseNumberTypeClass<Com
     };
     this.addressLists = data.addressLists;
     this.accounts = data.accounts;
+    this.groups = data.groups ?? { nsfw: [], reported: [] };
     this._docId = data._docId;
     this._id = data._id;
   }
@@ -1535,45 +1607,6 @@ export class SIWBBRequestDoc<T extends NumberType> extends BaseNumberTypeClass<S
 }
 
 /**
- * @inheritDoc iInternalActionsDoc
- * @category Internal Actions
- */
-export class InternalActionsDoc extends CustomTypeClass<InternalActionsDoc> implements iInternalActionsDoc {
-  _docId: string;
-  _id?: string | undefined;
-  name: string;
-  clientSecret: string;
-  createdBy: string;
-  description: string;
-  image: string;
-  actions: {
-    discord?: {
-      serverId: string;
-    };
-  };
-
-  constructor(data: iInternalActionsDoc) {
-    super();
-    this.description = data.description;
-    this.image = data.image;
-    this.name = data.name;
-    this.clientSecret = data.clientSecret;
-    this._docId = data._docId;
-    this.createdBy = data.createdBy;
-    this._id = data._id;
-    this.actions = data.actions;
-  }
-
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): InternalActionsDoc {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as InternalActionsDoc;
-  }
-
-  clone(): InternalActionsDoc {
-    return super.clone() as InternalActionsDoc;
-  }
-}
-
-/**
  * @inheritDoc iAttestationDoc
  * @category Off-Chain Attestations
  */
@@ -1663,41 +1696,6 @@ export interface ErrorDoc {
   _id?: string;
   error: string;
   function: string;
-}
-
-/**
- * @inheritDoc iEventDoc
- * @category Events
- */
-export class EventDoc<T extends NumberType> extends BaseNumberTypeClass<EventDoc<T>> implements iEventDoc<T> {
-  _docId: string;
-  _id?: string;
-  name: string;
-  description: string;
-  image: string;
-  createdBy: BitBadgesAddress;
-  externalUrl: string;
-  createdAt: UNIXMilliTimestamp<T>;
-
-  constructor(data: iEventDoc<T>) {
-    super();
-    this._docId = data._docId;
-    this._id = data._id;
-    this.name = data.name;
-    this.description = data.description;
-    this.image = data.image;
-    this.createdBy = data.createdBy;
-    this.externalUrl = data.externalUrl;
-    this.createdAt = data.createdAt;
-  }
-
-  getNumberFieldNames(): string[] {
-    return ['createdAt'];
-  }
-
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): EventDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as EventDoc<U>;
-  }
 }
 
 /**

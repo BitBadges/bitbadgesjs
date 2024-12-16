@@ -260,6 +260,12 @@ paths:
             type: string
       security:
         - apiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetStatusPayload'
   /search/{searchValue}:
     post:
       operationId: searchByValue
@@ -781,6 +787,12 @@ paths:
           $ref: '#/components/responses/InternalServerErrorResponse'
       security:
         - apiKey: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetClaimAttemptStatusPayload'
   /user/updateAccount:
     post:
       operationId: updateAccountInfo
@@ -828,14 +840,14 @@ paths:
       x-internal: true
   /browse:
     post:
-      operationId: getBrowseCollections
+      operationId: GetBrowse
       summary: Get Browse Collections
       tags:
         - Miscellanous
       description: |-
         Gets details for a browse/explore page.
         ```tsx
-        const res = await BitBadgesApi.getBrowseCollections(...);
+        const res = await BitBadgesApi.GetBrowse(...);
         ```
       responses:
         '200':
@@ -843,7 +855,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/iGetBrowseCollectionsSuccessResponse'
+                $ref: '#/components/schemas/iGetBrowseSuccessResponse'
         '400':
           $ref: '#/components/responses/BadRequestResponse'
         '401':
@@ -865,7 +877,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GetBrowseCollectionsPayload'
+              $ref: '#/components/schemas/GetBrowsePayload'
   /broadcast:
     post:
       operationId: broadcastTx
@@ -2401,6 +2413,12 @@ paths:
       security:
         - apiKey: []
       x-internal: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetGatedContentForClaimPayload'
   /attestation/verify:
     post:
       operationId: verifyAttestation
@@ -2506,6 +2524,12 @@ paths:
       security:
         - apiKey: []
       x-internal: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PerformBinActionPayload'
   /bin-actions/single:
     post:
       operationId: performBinActionSingleWithBodyAuth
@@ -2565,6 +2589,12 @@ paths:
       security:
         - apiKey: []
       x-internal: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PerformBinActionSingleWithBodyAuthPayload'
   /bin-actions/batch/{binId}/{binSecret}:
     post:
       operationId: performBinActionBatch
@@ -2632,6 +2662,12 @@ paths:
       security:
         - apiKey: []
       x-internal: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchBinActionPayload'
   /bin-actions/batch:
     post:
       operationId: performBinActionBatchWithBodyAuth
@@ -2690,6 +2726,12 @@ paths:
       security:
         - apiKey: []
       x-internal: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PerformBinActionBatchWithBodyAuthPayload'
   /bins/fetch:
     post:
       operationId: getDynamicDataBins
@@ -2744,6 +2786,12 @@ paths:
       security:
         - apiKey: []
       x-internal: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetDynamicDataBinsPayload'
   /bins/activity:
     post:
       operationId: getDynamicDataActivity
@@ -2798,6 +2846,187 @@ paths:
       security:
         - apiKey: []
       x-internal: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetDynamicDataActivityPayload'
+  /groups/fetch:
+    post:
+      operationId: getGroups
+      summary: Get Groups
+      tags:
+        - Groups
+      description: >-
+        Fetches groups based on the provided criteria.
+
+
+        ```typescript
+
+        const response = await
+        fetch('https://api.bitbadges.io/api/v0/groups/fetch', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: payload
+        });
+
+        const data = await response.json();
+
+        console.log(data);
+
+        ```
+
+
+        ```tsx
+
+        await BitBadgesApi.getGroups(...);
+
+        ```
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetGroupsSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      security:
+        - apiKey: []
+      x-internal: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetGroupsPayload'
+  /groups:
+    post:
+      operationId: createGroup
+      summary: Create Group
+      tags:
+        - Groups
+      description: |-
+        Creates a group.
+
+        ```tsx
+        await BitBadgesApi.createGroup(...);
+        ```
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iCreateGroupSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      security:
+        - apiKey: []
+      x-internal: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGroupPayload'
+    put:
+      operationId: updateGroup
+      summary: Update Group
+      tags:
+        - Groups
+      description: |-
+        Updates a group.
+
+        ```tsx
+        await BitBadgesApi.updateGroup(...);
+        ```
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iUpdateGroupSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      security:
+        - apiKey: []
+      x-internal: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateGroupPayload'
+    delete:
+      operationId: deleteGroup
+      summary: Delete Group
+      tags:
+        - Groups
+      description: |-
+        Deletes a group.
+
+        ```tsx
+        await BitBadgesApi.deleteGroup(...);
+        ```
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iDeleteGroupSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      security:
+        - apiKey: []
+      x-internal: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteGroupPayload'
 components:
   responses:
     ErrorResponse:
@@ -4775,6 +5004,85 @@ components:
         - conditions
       additionalProperties: false
       type: object
+    iEvent:
+      properties:
+        eventId:
+          description: The event ID
+          type: string
+        metadata:
+          description: The event metadata
+          $ref: '#/components/schemas/iMetadata'
+        eventTimes:
+          items:
+            $ref: '#/components/schemas/iUintRange'
+          description: Other event specific metadata
+          type: array
+      required:
+        - eventId
+        - metadata
+        - eventTimes
+      additionalProperties: false
+      description: '@cateogry Interfaces'
+      type: object
+    iGroupDoc:
+      properties:
+        _docId:
+          description: A unique stringified document ID
+          type: string
+        _id:
+          description: A unique document ID (Mongo DB ObjectID)
+          type: string
+        groupId:
+          description: The group ID
+          type: string
+        createdBy:
+          description: The BitBadges address of the user who created this group
+          $ref: '#/components/schemas/BitBadgesAddress'
+        createdAt:
+          description: The time the group was created
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
+        metadata:
+          description: The overall metadata for the group
+          $ref: '#/components/schemas/iMetadata'
+        events:
+          items:
+            $ref: '#/components/schemas/iEvent'
+          description: The events in the group
+          type: array
+        collectionIds:
+          items:
+            $ref: '#/components/schemas/NumberType'
+          description: The collection IDs in the group
+          type: array
+        claimIds:
+          items:
+            type: string
+          description: The claim  IDs in the group
+          type: array
+        listIds:
+          items:
+            type: string
+          description: The address list IDs in the group
+          type: array
+        mapIds:
+          items:
+            type: string
+          description: Mapping IDs in the group
+          type: array
+      required:
+        - _docId
+        - groupId
+        - createdBy
+        - createdAt
+        - metadata
+        - events
+        - collectionIds
+        - claimIds
+        - listIds
+        - mapIds
+      additionalProperties: false
+      description: '@cateogry Interfaces'
+      type: object
     iClaimBuilderDoc:
       properties:
         _docId:
@@ -5299,6 +5607,39 @@ components:
                     type: string
                 required:
                   - bitbadgesAddress
+                  - reason
+                additionalProperties: false
+                type: object
+              type: array
+          required:
+            - nsfw
+            - reported
+          additionalProperties: false
+          type: object
+        groups:
+          properties:
+            nsfw:
+              items:
+                properties:
+                  groupId:
+                    type: string
+                  reason:
+                    type: string
+                required:
+                  - groupId
+                  - reason
+                additionalProperties: false
+                type: object
+              type: array
+            reported:
+              items:
+                properties:
+                  groupId:
+                    type: string
+                  reason:
+                    type: string
+                required:
+                  - groupId
                   - reason
                 additionalProperties: false
                 type: object
@@ -6054,90 +6395,6 @@ components:
         - metadataTimeline
         - values
         - updateHistory
-      additionalProperties: false
-      description: ''
-      type: object
-    iEventDoc:
-      properties:
-        _docId:
-          description: A unique stringified document ID
-          type: string
-        _id:
-          description: A unique document ID (Mongo DB ObjectID)
-          type: string
-        name:
-          type: string
-          examples: *ref_13
-        description:
-          type: string
-          examples: *ref_8
-        image:
-          type: string
-          examples: *ref_12
-        createdBy:
-          $ref: '#/components/schemas/BitBadgesAddress'
-        externalUrl:
-          type: string
-        createdAt:
-          $ref: '#/components/schemas/UNIXMilliTimestamp'
-      required:
-        - _docId
-        - name
-        - description
-        - image
-        - createdBy
-        - externalUrl
-        - createdAt
-      additionalProperties: false
-      description: ''
-      type: object
-    iInternalActionsDoc:
-      properties:
-        _docId:
-          description: A unique stringified document ID
-          type: string
-        _id:
-          description: A unique document ID (Mongo DB ObjectID)
-          type: string
-        createdBy:
-          description: Creator of the internal action
-          $ref: '#/components/schemas/BitBadgesAddress'
-        name:
-          description: The name of the internal action
-          type: string
-          examples: *ref_13
-        description:
-          description: The description of the internal action
-          type: string
-          examples: *ref_8
-        image:
-          description: The image of the internal action
-          type: string
-          examples: *ref_12
-        clientSecret:
-          description: The client secret of the internal action
-          type: string
-        actions:
-          properties:
-            discord:
-              properties:
-                serverId:
-                  type: string
-              required:
-                - serverId
-              additionalProperties: false
-              type: object
-          additionalProperties: false
-          description: Actions associated with the internal action
-          type: object
-      required:
-        - _docId
-        - createdBy
-        - name
-        - description
-        - image
-        - clientSecret
-        - actions
       additionalProperties: false
       description: ''
       type: object
@@ -7992,7 +8249,7 @@ components:
         [lossy]:
         https://doc.rust-lang.org/stable/std/string/struct.String.html#method.from_utf8_lossy
       type: object
-    Event:
+    CosmosEvent:
       properties:
         type:
           type: string
@@ -8055,6 +8312,9 @@ components:
         noMaps:
           description: If true, we will skip all map queries.
           type: boolean
+        noGroups:
+          description: If true, we will skip all group queries.
+          type: boolean
         specificCollectionId:
           description: If true, we will limit collection results to a single collection.
           $ref: '#/components/schemas/NumberType'
@@ -8094,12 +8354,17 @@ components:
           items:
             $ref: '#/components/schemas/iMapWithValues'
           type: array
+        groups:
+          items:
+            $ref: '#/components/schemas/iGroupDoc'
+          type: array
       required:
         - collections
         - accounts
         - addressLists
         - badges
         - maps
+        - groups
       additionalProperties: false
       type: object
     GetClaimsPayload:
@@ -8963,7 +9228,7 @@ components:
     iSignOutSuccessResponse:
       additionalProperties: false
       type: object
-    GetBrowseCollectionsPayload:
+    GetBrowsePayload:
       properties:
         type:
           enum:
@@ -8974,6 +9239,7 @@ components:
             - attestations
             - claims
             - activity
+            - groups
           type: string
         filters:
           properties:
@@ -8991,7 +9257,7 @@ components:
         - type
       additionalProperties: false
       type: object
-    iGetBrowseCollectionsSuccessResponse:
+    iGetBrowseSuccessResponse:
       properties:
         collections:
           additionalProperties:
@@ -9033,10 +9299,10 @@ components:
               type: object
             type: array
           type: object
-        events:
+        groups:
           additionalProperties:
             items:
-              $ref: '#/components/schemas/iEventDoc'
+              $ref: '#/components/schemas/iGroupDoc'
             type: array
           type: object
         maps:
@@ -9057,7 +9323,6 @@ components:
         - profiles
         - activity
         - badges
-        - events
         - maps
       additionalProperties: false
       type: object
@@ -11001,132 +11266,6 @@ components:
     iOauthRevokeSuccessResponse:
       additionalProperties: false
       type: object
-    CreateInternalActionPayload:
-      properties:
-        name:
-          description: >-
-            Metadata for the internal action for display purposes. Note this
-            should not contain anything sensitive. It may be displayed to
-            verifiers.
-          type: string
-          examples: *ref_13
-        description:
-          description: Description of the internal action.
-          type: string
-          examples: *ref_8
-        image:
-          description: Image for the internal action.
-          type: string
-          examples: *ref_12
-        actions:
-          properties:
-            discord:
-              properties:
-                serverId:
-                  type: string
-              required:
-                - serverId
-              additionalProperties: false
-              type: object
-          additionalProperties: false
-          description: Actions associated with the internal action
-          type: object
-      required:
-        - name
-        - description
-        - image
-        - actions
-      additionalProperties: false
-      type: object
-    iCreateInternalActionSuccessResponse:
-      properties:
-        clientSecret:
-          description: Client secret for the internal action.
-          type: string
-        clientId:
-          description: Client ID for the internal action.
-          type: string
-      required:
-        - clientSecret
-        - clientId
-      additionalProperties: false
-      type: object
-    GetInternalActionPayload:
-      additionalProperties: false
-      type: object
-    iGetInternalActionSuccessResponse:
-      properties:
-        internalActions:
-          items:
-            $ref: '#/components/schemas/iInternalActionsDoc'
-          type: array
-      required:
-        - internalActions
-      additionalProperties: false
-      type: object
-    DeleteInternalActionPayload:
-      properties:
-        clientId:
-          description: Client ID for the internal action to delete.
-          type: string
-      required:
-        - clientId
-      additionalProperties: false
-      type: object
-    iDeleteInternalActionSuccessResponse:
-      additionalProperties: false
-      type: object
-    UpdateInternalActionPayload:
-      properties:
-        clientId:
-          description: Client ID for the internal action to update.
-          type: string
-        name:
-          description: >-
-            Metadata for display purposes. Note this should not contain anything
-            sensitive. It may be displayed to verifiers.
-          type: string
-          examples: *ref_13
-        description:
-          description: Description of the internal action.
-          type: string
-          examples: *ref_8
-        image:
-          description: Image for the internal action.
-          type: string
-          examples: *ref_12
-        actions:
-          properties:
-            discord:
-              properties:
-                serverId:
-                  type: string
-              required:
-                - serverId
-              additionalProperties: false
-              type: object
-          additionalProperties: false
-          description: Actions associated with the internal action
-          type: object
-        rotateClientSecret:
-          description: Rotate the client secret?
-          type: boolean
-      required:
-        - clientId
-      additionalProperties: false
-      type: object
-    iUpdateInternalActionSuccessResponse:
-      properties:
-        success:
-          type: boolean
-        clientSecret:
-          type: string
-        clientId:
-          type: string
-      required:
-        - success
-      additionalProperties: false
-      type: object
     GetGatedContentForClaimPayload:
       additionalProperties: false
       type: object
@@ -11164,13 +11303,19 @@ components:
       properties:
         dynamicDataId:
           description: >-
-            The IDs to fetch. If not provided, all dynamic data bins will be
-            fetched for the current signed in address.
+            The IDs to fetch. If not provided, all dynamic data stores will be
+            fetched for the current signed in address without any data
+            populated.
           type: string
         dataSecret:
           description: >-
             The data secret to fetch. Only needed if you are not signed in as
             creator.
+          type: string
+        bookmark:
+          description: >-
+            The pagination bookmark to start from. Only applicable if a single
+            dynamic data ID is provided.
           type: string
       additionalProperties: false
       type: object
@@ -11179,8 +11324,20 @@ components:
         docs:
           items: {}
           type: array
+        pagination:
+          properties:
+            bookmark:
+              type: string
+            hasMore:
+              type: boolean
+          required:
+            - bookmark
+            - hasMore
+          additionalProperties: false
+          type: object
       required:
         - docs
+        - pagination
       additionalProperties: false
       type: object
     UpdateDynamicDataBinPayload:
@@ -11415,6 +11572,154 @@ components:
       required:
         - pending
         - history
+      additionalProperties: false
+      type: object
+    GetGroupsPayload:
+      properties:
+        bookmark:
+          description: The pagination bookmark to start from
+          type: string
+        groupIds:
+          items:
+            type: string
+          description: The specific IDs to fetch
+          type: array
+      additionalProperties: false
+      type: object
+    iGetGroupsSuccessResponse:
+      properties:
+        docs:
+          items:
+            $ref: '#/components/schemas/iGroupDoc'
+          type: array
+        pagination:
+          properties:
+            bookmark:
+              type: string
+            hasMore:
+              type: boolean
+          required:
+            - bookmark
+            - hasMore
+          additionalProperties: false
+          type: object
+      required:
+        - docs
+        - pagination
+      additionalProperties: false
+      type: object
+    CreateGroupPayload:
+      properties:
+        metadata:
+          description: The overall metadata for the group
+          $ref: '#/components/schemas/iMetadata'
+        events:
+          items:
+            $ref: '#/components/schemas/iEvent'
+          description: The events in the group
+          type: array
+        collectionIds:
+          anyOf:
+            - type: string
+            - items:
+                type: number
+              type: array
+          description: The collection IDs in the group
+        claimIds:
+          items:
+            type: string
+          description: The claim  IDs in the group
+          type: array
+        listIds:
+          items:
+            type: string
+          description: The address list IDs in the group
+          type: array
+        mapIds:
+          items:
+            type: string
+          description: Mapping IDs in the group
+          type: array
+      required:
+        - metadata
+        - events
+        - collectionIds
+        - claimIds
+        - listIds
+        - mapIds
+      additionalProperties: false
+      type: object
+    iCreateGroupSuccessResponse:
+      properties:
+        doc:
+          $ref: '#/components/schemas/iGroupDoc'
+      required:
+        - doc
+      additionalProperties: false
+      type: object
+    UpdateGroupPayload:
+      properties:
+        groupId:
+          description: The group ID to update
+          type: string
+        metadata:
+          description: The overall metadata for the group
+          $ref: '#/components/schemas/iMetadata'
+        events:
+          items:
+            $ref: '#/components/schemas/iEvent'
+          description: The events in the group
+          type: array
+        collectionIds:
+          anyOf:
+            - type: string
+            - items:
+                type: number
+              type: array
+          description: The collection IDs in the group
+        claimIds:
+          items:
+            type: string
+          description: The claim  IDs in the group
+          type: array
+        listIds:
+          items:
+            type: string
+          description: The address list IDs in the group
+          type: array
+        mapIds:
+          items:
+            type: string
+          description: Mapping IDs in the group
+          type: array
+      required:
+        - groupId
+        - metadata
+        - events
+        - collectionIds
+        - claimIds
+        - listIds
+        - mapIds
+      additionalProperties: false
+      type: object
+    iUpdateGroupSuccessResponse:
+      properties:
+        doc:
+          $ref: '#/components/schemas/iGroupDoc'
+      required:
+        - doc
+      additionalProperties: false
+      type: object
+    DeleteGroupPayload:
+      properties:
+        groupId:
+          description: The group ID to delete
+          type: string
+      required:
+        - groupId
+      additionalProperties: false
+      type: object
+    iDeleteGroupSuccessResponse:
       additionalProperties: false
       type: object
     GetMapsPayload:
@@ -12293,12 +12598,12 @@ components:
           type: object
         consensus_pubkey:
           properties:
-            '''@type''':
+            "'@type'":
               type: string
             key:
               type: string
           required:
-            - '''@type'''
+            - "'@type'"
             - key
           additionalProperties: false
           type: object
@@ -12529,7 +12834,7 @@ components:
       properties:
         account:
           properties:
-            '''@type''':
+            "'@type'":
               type: string
             base_account:
               properties:
@@ -12537,12 +12842,12 @@ components:
                   type: string
                 pub_key:
                   properties:
-                    '''@type''':
+                    "'@type'":
                       type: string
                     key:
                       type: string
                   required:
-                    - '''@type'''
+                    - "'@type'"
                     - key
                   additionalProperties: false
                   type: object
@@ -12557,7 +12862,7 @@ components:
               additionalProperties: false
               type: object
           required:
-            - '''@type'''
+            - "'@type'"
             - base_account
           additionalProperties: false
           type: object

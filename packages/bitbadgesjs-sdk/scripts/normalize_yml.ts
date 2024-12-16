@@ -29,7 +29,7 @@ fs.readFile(filePath, 'utf8', (err, data) => {
       { route: '/collection/{collectionId}/{badgeId}/owners', schema: 'GetOwnersForBadgePayload' },
       { route: '/claims/reserved/{claimId}/{address}', schema: 'GetReservedCodesPayload' },
       { route: '/claims/status/{claimAttemptId}', schema: '' },
-      { route: '/browse', schema: 'GetBrowseCollectionsPayload' },
+      { route: '/browse', schema: 'GetBrowsePayload' },
       { route: '/addressLists/fetch', schema: 'GetAddressListsPayload' },
       { route: '/siwbb/token', schema: 'ExchangeSIWBBAuthorizationCodePayload' },
       { route: '/developerApp/siwbbRequests', schema: 'GetSIWBBRequestsForDeveloperAppPayload' },

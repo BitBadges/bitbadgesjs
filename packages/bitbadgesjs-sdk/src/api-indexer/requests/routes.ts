@@ -57,7 +57,7 @@ export class BitBadgesApiRoutes {
   static SignOutRoute = () => '/api/v0/auth/logout';
   static CheckIfSignedInRoute = () => '/api/v0/auth/status';
 
-  static GetBrowseCollectionsRoute = () => '/api/v0/browse';
+  static GetBrowseRoute = () => '/api/v0/browse';
 
   static BroadcastTxRoute = () => '/api/v0/broadcast';
   static SimulateTxRoute = () => '/api/v0/simulate';
@@ -93,9 +93,6 @@ export class BitBadgesApiRoutes {
 
   static CreatePaymentIntentRoute = () => '/api/v0/stripe/createPaymentIntent';
 
-  static GetInternalActionsRoute = () => '/api/v0/internalAction/fetch';
-  static CRUDInternalActionRoute = () => '/api/v0/internalAction';
-
   static VerifyAttestationRoute = () => '/api/v0/attestation/verify';
 
   static GetCodesFromSeedHelperRoute = () => '/api/v0/codes';
@@ -110,4 +107,7 @@ export class BitBadgesApiRoutes {
 
   static PerformBinActionSingleWithBodyAuthRoute = () => `/api/v0/bin-actions/single`;
   static PerformBinActionBatchWithBodyAuthRoute = () => `/api/v0/bin-actions/batch`;
+
+  static GetGroupsRoute = () => '/api/v0/groups/fetch';
+  static CRUDGroupsRoute = () => '/api/v0/groups';
 }

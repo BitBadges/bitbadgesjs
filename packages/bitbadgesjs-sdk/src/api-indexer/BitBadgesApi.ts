@@ -65,8 +65,8 @@ import {
   CreateDeveloperAppSuccessResponse,
   CreateDynamicDataBinPayload,
   CreateDynamicDataBinSuccessResponse,
-  CreateInternalActionPayload,
-  CreateInternalActionSuccessResponse,
+  CreateGroupPayload,
+  CreateGroupSuccessResponse,
   CreatePaymentIntentPayload,
   CreatePaymentIntentSuccessResponse,
   CreatePluginPayload,
@@ -81,8 +81,8 @@ import {
   DeleteDeveloperAppSuccessResponse,
   DeleteDynamicDataBinPayload,
   DeleteDynamicDataBinSuccessResponse,
-  DeleteInternalActionPayload,
-  DeleteInternalActionSuccessResponse,
+  DeleteGroupPayload,
+  DeleteGroupSuccessResponse,
   DeletePluginPayload,
   DeletePluginSuccessResponse,
   DeleteSIWBBRequestPayload,
@@ -103,8 +103,8 @@ import {
   GetActiveAuthorizationsSuccessResponse,
   GetAttestationsPayload,
   GetAttestationsSuccessResponse,
-  GetBrowseCollectionsPayload,
-  GetBrowseCollectionsSuccessResponse,
+  GetBrowsePayload,
+  GetBrowseSuccessResponse,
   GetClaimAlertsForCollectionPayload,
   GetClaimAlertsForCollectionSuccessResponse,
   GetClaimAttemptStatusSuccessResponse,
@@ -118,8 +118,8 @@ import {
   GetDynamicDataBinsSuccessResponse,
   GetGatedContentForClaimPayload,
   GetGatedContentForClaimSuccessResponse,
-  GetInternalActionPayload,
-  GetInternalActionSuccessResponse,
+  GetGroupsPayload,
+  GetGroupsSuccessResponse,
   GetPluginPayload,
   GetPluginSuccessResponse,
   GetReservedClaimCodesPayload,
@@ -158,8 +158,8 @@ import {
   UpdateDeveloperAppSuccessResponse,
   UpdateDynamicDataBinPayload,
   UpdateDynamicDataBinSuccessResponse,
-  UpdateInternalActionPayload,
-  UpdateInternalActionSuccessResponse,
+  UpdateGroupPayload,
+  UpdateGroupSuccessResponse,
   UpdatePluginPayload,
   UpdatePluginSuccessResponse,
   VerifyAttestationPayload,
@@ -180,7 +180,7 @@ import {
   iFetchMetadataDirectlySuccessResponse,
   iGenericBlockinVerifySuccessResponse,
   iGenericVerifyAssetsSuccessResponse,
-  iGetBrowseCollectionsSuccessResponse,
+  iGetBrowseSuccessResponse,
   iGetClaimAlertsForCollectionSuccessResponse,
   iGetClaimAttemptStatusSuccessResponse,
   iGetClaimsSuccessResponse,
@@ -613,20 +613,17 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @remarks
    * - **API Route**: `POST /api/v0/browse`
-   * - **SDK Function Call**: `await BitBadgesApi.getBrowseCollections(payload);`
+   * - **SDK Function Call**: `await BitBadgesApi.GetBrowse(payload);`
    */
-  public async getBrowseCollections(payload: GetBrowseCollectionsPayload): Promise<GetBrowseCollectionsSuccessResponse<T>> {
+  public async getBrowse(payload: GetBrowsePayload): Promise<GetBrowseSuccessResponse<T>> {
     try {
-      const validateRes: typia.IValidation<GetBrowseCollectionsPayload> = typia.validate<GetBrowseCollectionsPayload>(payload ?? {});
+      const validateRes: typia.IValidation<GetBrowsePayload> = typia.validate<GetBrowsePayload>(payload ?? {});
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      const response = await this.axios.post<iGetBrowseCollectionsSuccessResponse<string>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetBrowseCollectionsRoute()}`,
-        payload
-      );
-      return new GetBrowseCollectionsSuccessResponse(response.data).convert(this.ConvertFunction);
+      const response = await this.axios.post<iGetBrowseSuccessResponse<string>>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetBrowseRoute()}`, payload);
+      return new GetBrowseSuccessResponse(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -1600,7 +1597,102 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
     }
   }
 
-  /** Update Helper Functions for Pagination and Dynamic Fetches */
+  /**
+   * Gets groups.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/groups/fetch`
+   * - **SDK Function Call**: `await BitBadgesApi.getGroups(payload);`
+   */
+  public async getGroups(payload: GetGroupsPayload): Promise<GetGroupsSuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<GetGroupsPayload> = typia.validate<GetGroupsPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.post<GetGroupsSuccessResponse<T>>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetGroupsRoute()}`, payload);
+      return new GetGroupsSuccessResponse<T>(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Creates a group.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/groups`
+   * - **SDK Function Call**: `await BitBadgesApi.createGroup(payload);`
+   * - **Authentication**: Must be signed in.
+   */
+  public async createGroup(payload: CreateGroupPayload): Promise<CreateGroupSuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<CreateGroupPayload> = typia.validate<CreateGroupPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.post<CreateGroupSuccessResponse<T>>(`${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDGroupsRoute()}`, payload);
+      return new CreateGroupSuccessResponse<T>(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Updates a group.
+   *
+   * @remarks
+   * - **API Route**: `PUT /api/v0/groups`
+   * - **SDK Function Call**: `await BitBadgesApi.updateGroup(payload);`
+   * - **Authentication**: Must be signed in.
+   */
+  public async updateGroup(payload: UpdateGroupPayload): Promise<UpdateGroupSuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<UpdateGroupPayload> = typia.validate<UpdateGroupPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.put<UpdateGroupSuccessResponse<T>>(`${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDGroupsRoute()}`, payload);
+      return new UpdateGroupSuccessResponse<T>(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Deletes a group.
+   *
+   * @remarks
+   * - **API Route**: `DELETE /api/v0/groups`
+   * - **SDK Function Call**: `await BitBadgesApi.deleteGroup(payload);`
+   * - **Authentication**: Must be signed in.
+   */
+  public async deleteGroup(payload: DeleteGroupPayload): Promise<DeleteGroupSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<DeleteGroupPayload> = typia.validate<DeleteGroupPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.delete<DeleteGroupSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDGroupsRoute()}`, {
+        data: payload
+      });
+      return new DeleteGroupSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Updates the user's seen activity.
+   */
   public async updateUserSeenActivity() {
     return await this.updateAccountInfo({ seenActivity: Date.now() }); //Authenticated route so no need to pass in address
   }
@@ -2127,107 +2219,6 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
         { data: payload }
       );
       return new DeleteDynamicDataBinSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * @remarks
-   * - **API Route**: `POST /api/v0/internalAction`
-   * - **SDK Function Call**: `await BitBadgesApi.createInternalAction(payload);`
-   * - **Authentication**: Must be signed in.
-   */
-  public async createInternalAction(payload: CreateInternalActionPayload): Promise<CreateInternalActionSuccessResponse> {
-    try {
-      const validateRes: typia.IValidation<CreateInternalActionPayload> = typia.validate<CreateInternalActionPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.post<CreateInternalActionSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDInternalActionRoute()}`,
-        payload
-      );
-      return new CreateInternalActionSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Gets internal actions.
-   *
-   * @remarks
-   * - **API Route**: `POST /api/v0/internalAction/fetch`
-   * - **SDK Function Call**: `await BitBadgesApi.getInternalActions(payload);`
-   */
-  public async getInternalActions(payload: GetInternalActionPayload): Promise<GetInternalActionSuccessResponse> {
-    try {
-      const validateRes: typia.IValidation<GetInternalActionPayload> = typia.validate<GetInternalActionPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.post<GetInternalActionSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetInternalActionsRoute()}`,
-        payload
-      );
-      return new GetInternalActionSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Updates an internal action.
-   *
-   * @remarks
-   * - **API Route**: `PUT /api/v0/internalAction`
-   * - **SDK Function Call**: `await BitBadgesApi.updateInternalAction(payload);`
-   * - **Authentication**: Must be signed in.
-   */
-  public async updateInternalAction(payload: UpdateInternalActionPayload): Promise<UpdateInternalActionSuccessResponse> {
-    try {
-      const validateRes: typia.IValidation<UpdateInternalActionPayload> = typia.validate<UpdateInternalActionPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.put<UpdateInternalActionSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDInternalActionRoute()}`,
-        payload
-      );
-      return new UpdateInternalActionSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Deletes an internal action.
-   *
-   * @remarks
-   * - **API Route**: `DELETE /api/v0/internalAction`
-   * - **SDK Function Call**: `await BitBadgesApi.deleteInternalAction(payload);`
-   * - **Authentication**: Must be signed in.
-   */
-  public async deleteInternalAction(payload: DeleteInternalActionPayload): Promise<DeleteInternalActionSuccessResponse> {
-    try {
-      const validateRes: typia.IValidation<DeleteInternalActionPayload> = typia.validate<DeleteInternalActionPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.delete<DeleteInternalActionSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDInternalActionRoute()}`,
-        { data: payload }
-      );
-      return new DeleteInternalActionSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);

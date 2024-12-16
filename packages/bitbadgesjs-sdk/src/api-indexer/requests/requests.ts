@@ -6,14 +6,13 @@ import type { iBitBadgesUserInfo } from '@/api-indexer/BitBadgesUserInfo.js';
 import { BitBadgesUserInfo } from '@/api-indexer/BitBadgesUserInfo.js';
 import type { PaginationInfo } from '@/api-indexer/base.js';
 import { EmptyResponseClass } from '@/api-indexer/base.js';
-import { ClaimAlertDoc, TransferActivityDoc } from '@/api-indexer/docs/activity.js';
+import { ClaimActivityDoc, ClaimAlertDoc, TransferActivityDoc } from '@/api-indexer/docs/activity.js';
 import {
   AccessTokenDoc,
   AttestationDoc,
   DeveloperAppDoc,
   DynamicDataDoc,
-  EventDoc,
-  InternalActionsDoc,
+  GroupDoc,
   MapWithValues,
   PluginDoc,
   StatusDoc
@@ -21,7 +20,10 @@ import {
 import {
   ClaimReward,
   DynamicDataHandlerType,
+  iClaimActivityDoc,
   iDynamicDataDoc,
+  iEvent,
+  iGroupDoc,
   type BitBadgesAddress,
   type ClaimIntegrationPluginCustomBodyType,
   type ClaimIntegrationPluginType,
@@ -41,8 +43,6 @@ import {
   type iCustomListPage,
   type iCustomPage,
   type iDeveloperAppDoc,
-  type iEventDoc,
-  type iInternalActionsDoc,
   type iMapWithValues,
   type iPluginDoc,
   type iSocialConnections,
@@ -77,7 +77,7 @@ export interface DeliverTxResponse {
   /** Error code. The transaction suceeded if and only if code is 0. */
   readonly code: number;
   readonly transactionHash: string;
-  readonly events: readonly Event[];
+  readonly events: readonly CosmosEvent[];
   /**
    * A string-based log document.
    *
@@ -136,7 +136,7 @@ export interface Attribute {
  *
  * @category API Requests / Responses
  */
-export interface Event {
+export interface CosmosEvent {
   readonly type: string;
   readonly attributes: readonly Attribute[];
 }
@@ -201,6 +201,8 @@ export interface GetSearchPayload {
   noBadges?: boolean;
   /** If true, we will skip all map queries. */
   noMaps?: boolean;
+  /** If true, we will skip all group queries. */
+  noGroups?: boolean;
   /** If true, we will limit collection results to a single collection. */
   specificCollectionId?: NumberType;
 }
@@ -218,7 +220,9 @@ export interface iGetSearchSuccessResponse<T extends NumberType> {
     badgeIds: iUintRange<T>[];
   }[];
   maps: iMapWithValues<T>[];
+  groups?: iGroupDoc<T>[];
 }
+
 /**
  * @inheritDoc iGetSearchSuccessResponse
  * @category API Requests / Responses
@@ -234,7 +238,8 @@ export class GetSearchSuccessResponse<T extends NumberType>
     collection: BitBadgesCollection<T>;
     badgeIds: UintRangeArray<T>;
   }[];
-  maps: iMapWithValues<T>[];
+  maps: MapWithValues<T>[];
+  groups?: GroupDoc<T>[];
 
   constructor(data: iGetSearchSuccessResponse<T>) {
     super();
@@ -248,6 +253,7 @@ export class GetSearchSuccessResponse<T extends NumberType>
       };
     });
     this.maps = data.maps.map((map) => new MapWithValues(map));
+    this.groups = data.groups?.map((group) => new GroupDoc(group));
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetSearchSuccessResponse<U> {
@@ -1090,8 +1096,8 @@ export class SignOutSuccessResponse extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export interface GetBrowseCollectionsPayload {
-  type: 'collections' | 'badges' | 'addressLists' | 'maps' | 'attestations' | 'claims' | 'activity';
+export interface GetBrowsePayload {
+  type: 'collections' | 'badges' | 'addressLists' | 'maps' | 'attestations' | 'claims' | 'activity' | 'groups' | 'claimActivity';
   filters?: {
     category?: string;
     sortBy?: string;
@@ -1103,7 +1109,18 @@ export interface GetBrowseCollectionsPayload {
 /**
  * @category API Requests / Responses
  */
-export interface iGetBrowseCollectionsSuccessResponse<T extends NumberType> {
+interface ClaimAttempt {
+  success: boolean;
+  attemptedAt: number;
+  claimId: string;
+  bitbadgesAddress: string;
+  claimAttemptId: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetBrowseSuccessResponse<T extends NumberType> {
   collections: { [category: string]: iBitBadgesCollection<T>[] };
   addressLists: { [category: string]: iBitBadgesAddressList<T>[] };
   profiles: { [category: string]: iBitBadgesUserInfo<T>[] };
@@ -1114,17 +1131,18 @@ export interface iGetBrowseCollectionsSuccessResponse<T extends NumberType> {
       badgeIds: iUintRange<T>[];
     }[];
   };
-  events: { [category: string]: iEventDoc<T>[] };
+  groups?: { [category: string]: iGroupDoc<T>[] };
   maps: { [category: string]: iMapWithValues<T>[] };
   claims?: { [category: string]: iClaimDetails<T>[] };
+  claimActivity?: iClaimActivityDoc<T>[];
 }
 
 /**
  * @category API Requests / Responses
  */
-export class GetBrowseCollectionsSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetBrowseCollectionsSuccessResponse<T>>
-  implements iGetBrowseCollectionsSuccessResponse<T>
+export class GetBrowseSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetBrowseSuccessResponse<T>>
+  implements iGetBrowseSuccessResponse<T>
 {
   collections: { [category: string]: BitBadgesCollection<T>[] };
   addressLists: { [category: string]: BitBadgesAddressList<T>[] };
@@ -1136,11 +1154,12 @@ export class GetBrowseCollectionsSuccessResponse<T extends NumberType>
       badgeIds: UintRangeArray<T>;
     }[];
   };
-  events: { [category: string]: EventDoc<T>[] };
+  groups?: { [category: string]: GroupDoc<T>[] };
   maps: { [category: string]: MapWithValues<T>[] };
   claims?: { [category: string]: ClaimDetails<T>[] };
+  claimActivity?: ClaimActivityDoc<T>[];
 
-  constructor(data: iGetBrowseCollectionsSuccessResponse<T>) {
+  constructor(data: iGetBrowseSuccessResponse<T>) {
     super();
     this.collections = Object.keys(data.collections).reduce(
       (acc, category) => {
@@ -1176,12 +1195,12 @@ export class GetBrowseCollectionsSuccessResponse<T extends NumberType>
       },
       {} as { [category: string]: { collection: BitBadgesCollection<T>; badgeIds: UintRangeArray<T> }[] }
     );
-    this.events = Object.keys(data.events).reduce(
+    this.groups = Object.keys(data.groups ?? {}).reduce(
       (acc, category) => {
-        acc[category] = data.events[category].map((event) => new EventDoc(event));
+        acc[category] = (data.groups ?? {})[category].map((group) => new GroupDoc(group));
         return acc;
       },
-      {} as { [category: string]: EventDoc<T>[] }
+      {} as { [category: string]: GroupDoc<T>[] }
     );
     this.maps = Object.keys(data.maps).reduce(
       (acc, category) => {
@@ -1201,10 +1220,11 @@ export class GetBrowseCollectionsSuccessResponse<T extends NumberType>
           {} as { [category: string]: ClaimDetails<T>[] }
         )
       : undefined;
+    this.claimActivity = data.claimActivity?.map((claimActivity) => new ClaimActivityDoc(claimActivity));
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetBrowseCollectionsSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetBrowseCollectionsSuccessResponse<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetBrowseSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetBrowseSuccessResponse<U>;
   }
 }
 
@@ -2623,142 +2643,6 @@ export class OauthRevokeSuccessResponse extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export interface CreateInternalActionPayload {
-  /** Metadata for the internal action for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
-  name: string;
-  /** Description of the internal action. */
-  description: string;
-  /** Image for the internal action. */
-  image: string;
-  /** Actions associated with the internal action */
-  actions: {
-    discord?: {
-      serverId: string;
-    };
-  };
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iCreateInternalActionSuccessResponse {
-  /** Client secret for the internal action. */
-  clientSecret: string;
-  /** Client ID for the internal action. */
-  clientId: string;
-}
-
-/**
- * @category API Requests / Responses
- */
-export class CreateInternalActionSuccessResponse
-  extends CustomTypeClass<CreateInternalActionSuccessResponse>
-  implements iCreateInternalActionSuccessResponse
-{
-  clientSecret: string;
-  clientId: string;
-  constructor(data: iCreateInternalActionSuccessResponse) {
-    super();
-    this.clientSecret = data.clientSecret;
-    this.clientId = data.clientId;
-  }
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface GetInternalActionPayload {}
-
-/**
- * @category API Requests / Responses
- */
-export interface iGetInternalActionSuccessResponse {
-  internalActions: iInternalActionsDoc[];
-}
-
-/**
- * @category API Requests / Responses
- */
-export class GetInternalActionSuccessResponse extends CustomTypeClass<GetInternalActionSuccessResponse> implements iGetInternalActionSuccessResponse {
-  internalActions: InternalActionsDoc[];
-
-  constructor(data: iGetInternalActionSuccessResponse) {
-    super();
-    this.internalActions = data.internalActions.map((internalAction) => new InternalActionsDoc(internalAction));
-  }
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface DeleteInternalActionPayload {
-  /** Client ID for the internal action to delete. */
-  clientId: string;
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iDeleteInternalActionSuccessResponse {}
-
-/**
- * @category API Requests / Responses
- */
-export class DeleteInternalActionSuccessResponse extends EmptyResponseClass {}
-
-/**
- * @category API Requests / Responses
- */
-export interface UpdateInternalActionPayload {
-  /** Client ID for the internal action to update. */
-  clientId: string;
-  /** Metadata for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
-  name?: string;
-  /** Description of the internal action. */
-  description?: string;
-  /** Image for the internal action. */
-  image?: string;
-  /** Actions associated with the internal action */
-  actions?: {
-    discord?: {
-      serverId: string;
-    };
-  };
-  /** Rotate the client secret? */
-  rotateClientSecret?: boolean;
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iUpdateInternalActionSuccessResponse {
-  success: boolean;
-  clientSecret?: string;
-  clientId?: string;
-}
-
-/**
- * @category API Requests / Responses
- */
-export class UpdateInternalActionSuccessResponse
-  extends CustomTypeClass<UpdateInternalActionSuccessResponse>
-  implements iUpdateInternalActionSuccessResponse
-{
-  success: boolean;
-  clientSecret?: string;
-  clientId?: string;
-
-  constructor(data: iUpdateInternalActionSuccessResponse) {
-    super();
-    this.success = data.success;
-    this.clientSecret = data.clientSecret;
-    this.clientId = data.clientId;
-  }
-}
-
-/**
- * @category API Requests / Responses
- */
 export interface GetGatedContentForClaimPayload {}
 
 /**
@@ -2819,10 +2703,12 @@ export class CreateDynamicDataBinSuccessResponse<Q extends DynamicDataHandlerTyp
  * @category API Requests / Responses
  */
 export interface GetDynamicDataBinsPayload {
-  /** The IDs to fetch. If not provided, all dynamic data bins will be fetched for the current signed in address. */
+  /** The IDs to fetch. If not provided, all dynamic data stores will be fetched for the current signed in address without any data populated. */
   dynamicDataId?: string;
   /** The data secret to fetch. Only needed if you are not signed in as creator. */
   dataSecret?: string;
+  /** The pagination bookmark to start from. Only applicable if a single dynamic data ID is provided. */
+  bookmark?: string;
 }
 
 /**
@@ -2830,6 +2716,10 @@ export interface GetDynamicDataBinsPayload {
  */
 export interface iGetDynamicDataBinsSuccessResponse<Q extends DynamicDataHandlerType> {
   docs: iDynamicDataDoc<Q>[];
+  pagination: {
+    bookmark: string;
+    hasMore: boolean;
+  };
 }
 
 /**
@@ -2840,10 +2730,15 @@ export class GetDynamicDataBinsSuccessResponse<Q extends DynamicDataHandlerType>
   implements iGetDynamicDataBinsSuccessResponse<Q>
 {
   docs: DynamicDataDoc<Q>[];
+  pagination: {
+    bookmark: string;
+    hasMore: boolean;
+  };
 
   constructor(data: iGetDynamicDataBinsSuccessResponse<Q>) {
     super();
     this.docs = data.docs.map((doc) => new DynamicDataDoc(doc));
+    this.pagination = data.pagination;
   }
 }
 
@@ -3097,3 +2992,168 @@ export class GetDynamicDataActivitySuccessResponse
     this.history = data.history;
   }
 }
+
+/**
+ * @category API Requests / Responses
+ */
+export interface GetGroupsPayload {
+  /** The pagination bookmark to start from */
+  bookmark?: string;
+
+  /** The specific IDs to fetch */
+  groupIds?: string[];
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetGroupsSuccessResponse<T extends NumberType> {
+  docs: iGroupDoc<T>[];
+  pagination: {
+    bookmark: string;
+    hasMore: boolean;
+  };
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetGroupsSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetGroupsSuccessResponse<T>>
+  implements iGetGroupsSuccessResponse<T>
+{
+  docs: GroupDoc<T>[];
+  pagination: {
+    bookmark: string;
+    hasMore: boolean;
+  };
+
+  constructor(data: iGetGroupsSuccessResponse<T>) {
+    super();
+    this.docs = data.docs.map((doc) => new GroupDoc<T>(doc));
+    this.pagination = data.pagination;
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): GetGroupsSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as GetGroupsSuccessResponse<U>;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface CreateGroupPayload {
+  /** The overall metadata for the group */
+  metadata: iMetadata<NumberType>;
+
+  /** The events in the group */
+  events: iEvent<NumberType>[];
+
+  /** The collection IDs in the group */
+  collectionIds: NumberType[];
+
+  /** The claim  IDs in the group */
+  claimIds: string[];
+
+  /** The address list IDs in the group */
+  listIds: string[];
+
+  /** Mapping IDs in the group */
+  mapIds: string[];
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iCreateGroupSuccessResponse<T extends NumberType> {
+  doc: iGroupDoc<T>;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class CreateGroupSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<CreateGroupSuccessResponse<T>>
+  implements iCreateGroupSuccessResponse<T>
+{
+  doc: GroupDoc<T>;
+
+  constructor(data: iCreateGroupSuccessResponse<T>) {
+    super();
+    this.doc = new GroupDoc<T>(data.doc);
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): CreateGroupSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as CreateGroupSuccessResponse<U>;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface UpdateGroupPayload {
+  /** The group ID to update */
+  groupId: string;
+
+  /** The overall metadata for the group */
+  metadata: iMetadata<NumberType>;
+
+  /** The events in the group */
+  events: iEvent<NumberType>[];
+
+  /** The collection IDs in the group */
+  collectionIds: NumberType[];
+
+  /** The claim  IDs in the group */
+  claimIds: string[];
+
+  /** The address list IDs in the group */
+  listIds: string[];
+
+  /** Mapping IDs in the group */
+  mapIds: string[];
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iUpdateGroupSuccessResponse<T extends NumberType> {
+  doc: iGroupDoc<T>;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class UpdateGroupSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<UpdateGroupSuccessResponse<T>>
+  implements iUpdateGroupSuccessResponse<T>
+{
+  doc: GroupDoc<T>;
+
+  constructor(data: iUpdateGroupSuccessResponse<T>) {
+    super();
+    this.doc = new GroupDoc<T>(data.doc);
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): UpdateGroupSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as UpdateGroupSuccessResponse<U>;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface DeleteGroupPayload {
+  /** The group ID to delete */
+  groupId: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iDeleteGroupSuccessResponse {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class DeleteGroupSuccessResponse extends EmptyResponseClass {}

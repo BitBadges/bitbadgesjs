@@ -5515,12 +5515,12 @@ schemas:
     title: iSignOutSuccessResponse
     description: '@category API Requests / Responses'
     type: object
-  GetBrowseCollectionsRouteRequestBody:
+  GetBrowseRouteRequestBody:
     additionalProperties: false
-    title: GetBrowseCollectionsRouteRequestBody
+    title: GetBrowseRouteRequestBody
     description: '@category API Requests / Responses'
     type: object
-  iGetBrowseCollectionsRouteSuccessResponse:
+  iGetBrowseRouteSuccessResponse:
     properties:
       collections:
         additionalProperties:
@@ -5529,7 +5529,7 @@ schemas:
             title: '[]'
           title: '[]'
           type: array
-        title: iGetBrowseCollectionsRouteSuccessResponse.collections
+        title: iGetBrowseRouteSuccessResponse.collections
         type: object
       addressLists:
         additionalProperties:
@@ -5538,7 +5538,7 @@ schemas:
             title: '[]'
           title: '[]'
           type: array
-        title: iGetBrowseCollectionsRouteSuccessResponse.addressLists
+        title: iGetBrowseRouteSuccessResponse.addressLists
         type: object
       profiles:
         additionalProperties:
@@ -5547,13 +5547,13 @@ schemas:
             title: '[]'
           title: '[]'
           type: array
-        title: iGetBrowseCollectionsRouteSuccessResponse.profiles
+        title: iGetBrowseRouteSuccessResponse.profiles
         type: object
       activity:
         items:
           $ref: '#/components/schemas/iTransferActivityDoc'
-          title: iGetBrowseCollectionsRouteSuccessResponse.activity.[]
-        title: iGetBrowseCollectionsRouteSuccessResponse.activity
+          title: iGetBrowseRouteSuccessResponse.activity.[]
+        title: iGetBrowseRouteSuccessResponse.activity
         type: array
       badges:
         additionalProperties:
@@ -5576,7 +5576,7 @@ schemas:
             type: object
           title: '[]'
           type: array
-        title: iGetBrowseCollectionsRouteSuccessResponse.badges
+        title: iGetBrowseRouteSuccessResponse.badges
         type: object
     required:
       - collections
@@ -5585,7 +5585,7 @@ schemas:
       - activity
       - badges
     additionalProperties: false
-    title: iGetBrowseCollectionsRouteSuccessResponse
+    title: iGetBrowseRouteSuccessResponse
     description: '@category API Requests / Responses'
     type: object
   BroadcastTxRouteRequestBody:

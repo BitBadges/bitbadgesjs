@@ -150,6 +150,7 @@ export interface iNotificationPreferences<T extends NumberType> {
     listActivity?: boolean;
     transferActivity?: boolean;
     claimAlerts?: boolean;
+    claimActivity?: boolean;
     ignoreIfInitiator?: boolean;
   };
 }
@@ -184,6 +185,8 @@ export interface iActivityDoc<T extends NumberType> extends Doc {
   block: T;
   /** Whether or not the notifications have been handled by the indexer or not. */
   _notificationsHandled?: boolean;
+  /** Only for private purposes? */
+  private?: boolean;
 }
 
 /**
@@ -240,6 +243,22 @@ export interface iListActivityDoc<T extends NumberType> extends iActivityDoc<T> 
   addresses?: BitBadgesAddress[];
   /** The transaction hash of the activity. */
   txHash?: string;
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iClaimActivityDoc<T extends NumberType> extends iActivityDoc<T> {
+  /** Whether the claim attempt was successful or not */
+  success: boolean;
+  /** The claim ID of the claim attempt */
+  claimId: string;
+  /** The claim attempt ID of the claim attempt */
+  claimAttemptId: string;
+  /** The BitBadges address of the user who attempted the claim */
+  bitbadgesAddress: BitBadgesAddress;
+  /** Only for private purposes? */
+  private?: boolean;
 }
 
 /**
@@ -923,6 +942,52 @@ export interface iSatisfyMethod {
 }
 
 /**
+ * @cateogry Interfaces
+ */
+export interface iEvent<T extends NumberType> {
+  /** The event ID */
+  eventId: string;
+
+  /** The event metadata */
+  metadata: iMetadata<T>;
+
+  /** Other event specific metadata */
+  eventTimes: iUintRange<T>[];
+}
+
+/**
+ * @cateogry Interfaces
+ */
+export interface iGroupDoc<T extends NumberType> extends Doc {
+  /** The group ID */
+  groupId: string;
+
+  /** The BitBadges address of the user who created this group */
+  createdBy: BitBadgesAddress;
+
+  /** The time the group was created */
+  createdAt: UNIXMilliTimestamp<T>;
+
+  /** The overall metadata for the group */
+  metadata: iMetadata<T>;
+
+  /** The events in the group */
+  events: iEvent<T>[];
+
+  /** The collection IDs in the group */
+  collectionIds: T[];
+
+  /** The claim  IDs in the group */
+  claimIds: string[];
+
+  /** The address list IDs in the group */
+  listIds: string[];
+
+  /** Mapping IDs in the group */
+  mapIds: string[];
+}
+
+/**
  * @category Interfaces
  */
 export interface iClaimBuilderDoc<T extends NumberType> extends Doc {
@@ -1194,6 +1259,10 @@ export interface iComplianceDoc<T extends NumberType> extends Doc {
   accounts: {
     nsfw: { bitbadgesAddress: BitBadgesAddress; reason: string }[];
     reported: { bitbadgesAddress: BitBadgesAddress; reason: string }[];
+  };
+  groups?: {
+    nsfw: { groupId: string; reason: string }[];
+    reported: { groupId: string; reason: string }[];
   };
 }
 
@@ -1483,42 +1552,6 @@ export interface iAttestationDoc<T extends NumberType> extends Doc, iAttestation
  * @category Interfaces
  */
 export interface iMapDoc<T extends NumberType> extends Doc, iMapWithValues<T> {}
-
-/**
- * @category Interfaces
- */
-export interface iEventDoc<T extends NumberType> extends Doc {
-  name: string;
-  description: string;
-  image: string;
-  createdBy: BitBadgesAddress;
-
-  externalUrl: string;
-
-  createdAt: UNIXMilliTimestamp<T>;
-}
-
-/**
- * @category Interfaces
- */
-export interface iInternalActionsDoc extends Doc {
-  /** Creator of the internal action */
-  createdBy: BitBadgesAddress;
-  /** The name of the internal action */
-  name: string;
-  /** The description of the internal action */
-  description: string;
-  /** The image of the internal action */
-  image: string;
-  /** The client secret of the internal action */
-  clientSecret: string;
-  /** Actions associated with the internal action */
-  actions: {
-    discord?: {
-      serverId: string;
-    };
-  };
-}
 
 /**
  * @category Interfaces

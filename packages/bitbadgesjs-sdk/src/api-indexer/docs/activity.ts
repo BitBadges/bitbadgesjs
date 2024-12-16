@@ -6,6 +6,7 @@ import type {
   BitBadgesAddress,
   UNIXMilliTimestamp,
   iActivityDoc,
+  iClaimActivityDoc,
   iClaimAlertDoc,
   iListActivityDoc,
   iTransferActivityDoc
@@ -128,5 +129,30 @@ export class ClaimAlertDoc<T extends NumberType> extends ActivityDoc<T> implemen
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ClaimAlertDoc<U> {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as ClaimAlertDoc<U>;
+  }
+}
+
+/**
+ * @inheritDoc iClaimActivityDoc
+ * @category Indexer
+ */
+export class ClaimActivityDoc<T extends NumberType> extends ActivityDoc<T> implements iClaimActivityDoc<T> {
+  success: boolean;
+  claimId: string;
+  bitbadgesAddress: BitBadgesAddress;
+  claimAttemptId: string;
+  private?: boolean;
+
+  constructor(data: iClaimActivityDoc<T>) {
+    super(data);
+    this.success = data.success;
+    this.claimId = data.claimId;
+    this.bitbadgesAddress = data.bitbadgesAddress;
+    this.claimAttemptId = data.claimAttemptId;
+    this.private = data.private;
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U): ClaimActivityDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction) as ClaimActivityDoc<U>;
   }
 }

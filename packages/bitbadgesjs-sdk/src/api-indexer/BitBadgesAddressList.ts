@@ -69,7 +69,7 @@ export class BitBadgesAddressList<T extends NumberType>
   }
 
   getNumberFieldNames(): string[] {
-    return ['createdBlock', 'lastUpdated'];
+    return [...super.getNumberFieldNames(), 'createdBlock', 'lastUpdated'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U): BitBadgesAddressList<U> {
