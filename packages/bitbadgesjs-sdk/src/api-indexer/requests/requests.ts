@@ -24,6 +24,7 @@ import {
   iDynamicDataDoc,
   iEvent,
   iGroupDoc,
+  iGroupPage,
   type BitBadgesAddress,
   type ClaimIntegrationPluginCustomBodyType,
   type ClaimIntegrationPluginType,
@@ -275,6 +276,8 @@ export interface GetClaimsPayload {
   bookmark?: string;
   /** Fetch private parameters for the claim. Only applicable if you are the creator / manager of the claim. */
   fetchPrivateParams?: boolean;
+  /** If provided, we will only return claims with names that match the search value. Only applicable for fetching your own claims. */
+  searchValue?: string;
 }
 
 /**
@@ -2187,6 +2190,8 @@ export class GetActiveAuthorizationsSuccessResponse
 export interface GetDeveloperAppPayload {
   /** If you want to get a specific app, specify the client ID here (will not return the client secret). */
   clientId?: string;
+  /** Bookmark for pagination of the apps. Not compatible with clientId. */
+  bookmark?: string;
 }
 
 /**
@@ -2194,6 +2199,7 @@ export interface GetDeveloperAppPayload {
  */
 export interface iGetDeveloperAppSuccessResponse {
   developerApps: iDeveloperAppDoc[];
+  pagination: PaginationInfo;
 }
 
 /**
@@ -2201,10 +2207,12 @@ export interface iGetDeveloperAppSuccessResponse {
  */
 export class GetDeveloperAppSuccessResponse extends CustomTypeClass<GetDeveloperAppSuccessResponse> implements iGetDeveloperAppSuccessResponse {
   developerApps: DeveloperAppDoc[];
+  pagination: PaginationInfo;
 
   constructor(data: iGetDeveloperAppSuccessResponse) {
     super();
     this.developerApps = data.developerApps.map((developerApp) => new DeveloperAppDoc(developerApp));
+    this.pagination = data.pagination;
   }
 }
 
@@ -3052,20 +3060,8 @@ export interface CreateGroupPayload {
   /** The overall metadata for the group */
   metadata: iMetadata<NumberType>;
 
-  /** The events in the group */
-  events: iEvent<NumberType>[];
-
-  /** The collection IDs in the group */
-  collectionIds: NumberType[];
-
-  /** The claim  IDs in the group */
-  claimIds: string[];
-
-  /** The address list IDs in the group */
-  listIds: string[];
-
-  /** Mapping IDs in the group */
-  mapIds: string[];
+  /** The pages in the group */
+  pages: iGroupPage<NumberType>[];
 }
 
 /**
@@ -3104,20 +3100,8 @@ export interface UpdateGroupPayload {
   /** The overall metadata for the group */
   metadata: iMetadata<NumberType>;
 
-  /** The events in the group */
-  events: iEvent<NumberType>[];
-
-  /** The collection IDs in the group */
-  collectionIds: NumberType[];
-
-  /** The claim  IDs in the group */
-  claimIds: string[];
-
-  /** The address list IDs in the group */
-  listIds: string[];
-
-  /** Mapping IDs in the group */
-  mapIds: string[];
+  /** The pages in the group */
+  pages: iGroupPage<NumberType>[];
 }
 
 /**
@@ -3163,3 +3147,56 @@ export interface iDeleteGroupSuccessResponse {}
  * @category API Requests / Responses
  */
 export class DeleteGroupSuccessResponse extends EmptyResponseClass {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface CalculatePointsPayload {
+  /** The group ID to calculate points for */
+  groupId: string;
+  /** The page ID to calculate points for */
+  pageId: string;
+  /** The address to calculate points for */
+  address?: NativeAddress;
+  /** The pagination bookmark to start from */
+  bookmark?: string;
+  /** Skip the cache and calculate points from scratch */
+  skipCache?: boolean;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iPointsValue {
+  address: BitBadgesAddress;
+  points: number;
+  lastCalculatedAt: number;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iCalculatePointsSuccessResponse {
+  values: iPointsValue[];
+  pagination: {
+    bookmark: string;
+    hasMore: boolean;
+  };
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class CalculatePointsSuccessResponse extends CustomTypeClass<CalculatePointsSuccessResponse> implements iCalculatePointsSuccessResponse {
+  values: iPointsValue[];
+  pagination: {
+    bookmark: string;
+    hasMore: boolean;
+  };
+
+  constructor(data: iCalculatePointsSuccessResponse) {
+    super();
+    this.values = data.values;
+    this.pagination = data.pagination;
+  }
+}

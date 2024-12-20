@@ -132,9 +132,8 @@ export class Metadata<T extends NumberType> extends BaseNumberTypeClass<Metadata
    */
   static DefaultPlaceholderMetadata = () =>
     new Metadata({
-      name: 'Placeholder',
-      description:
-        'Placeholder metadata may be used for a few reasons, such as if the badge is not yet created or if the metadata violates the terms of service.',
+      name: 'Untitled',
+      description: 'No description provided.',
       image: 'ipfs://QmNytJNN44stkMndshtdfcCW2mzaCm6A23maiKaQvUqoj8'
     }).convert(BigIntify);
 

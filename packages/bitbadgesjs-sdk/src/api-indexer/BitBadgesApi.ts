@@ -53,6 +53,8 @@ import {
   BatchBinActionSuccessResponse,
   BroadcastTxPayload,
   BroadcastTxSuccessResponse,
+  CalculatePointsPayload,
+  CalculatePointsSuccessResponse,
   CheckSignInStatusPayload,
   CheckSignInStatusSuccessResponse,
   CompleteClaimPayload,
@@ -1684,6 +1686,26 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
         data: payload
       });
       return new DeleteGroupSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Calculates points for a page in a group and caches the result.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/groups/points`
+   * - **SDK Function Call**: `await BitBadgesApi.calculatePoints(payload);`
+   */
+  public async calculatePoints(payload: CalculatePointsPayload): Promise<CalculatePointsSuccessResponse> {
+    try {
+      const response = await this.axios.post<CalculatePointsSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.CalculatePointsRoute()}`,
+        payload
+      );
+      return new CalculatePointsSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);

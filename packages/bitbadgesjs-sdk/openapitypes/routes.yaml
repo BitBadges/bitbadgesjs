@@ -2710,6 +2710,45 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/DeleteGroupPayload'
+  /groups/points:
+    post:
+      operationId: calculatePoints
+      summary: Calculate Points
+      tags:
+        - Groups
+      description: |-
+        Calculates points for a group and page.
+
+        ```tsx
+        await BitBadgesApi.calculatePoints(...);
+        ```
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iCalculatePointsSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      security:
+        - apiKey: []
+      x-internal: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CalculatePointsPayload'
 components:
   responses:
     ErrorResponse:

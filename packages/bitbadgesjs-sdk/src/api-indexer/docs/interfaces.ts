@@ -257,8 +257,6 @@ export interface iClaimActivityDoc<T extends NumberType> extends iActivityDoc<T>
   claimAttemptId: string;
   /** The BitBadges address of the user who attempted the claim */
   bitbadgesAddress: BitBadgesAddress;
-  /** Only for private purposes? */
-  private?: boolean;
 }
 
 /**
@@ -624,6 +622,22 @@ export interface iBalanceDoc<T extends NumberType> extends iUserBalanceStore<T>,
 /**
  * @category Interfaces
  */
+export interface iPointsDoc<T extends NumberType> extends Doc {
+  /** The address to calculate points for */
+  address: BitBadgesAddress;
+  /** The points for the address */
+  points: T;
+  /** The timestamp of when the points were last calculated (milliseconds since epoch) */
+  lastCalculatedAt: UNIXMilliTimestamp<T>;
+  /** The group ID */
+  groupId: string;
+  /** The page ID */
+  pageId: string;
+}
+
+/**
+ * @category Interfaces
+ */
 export interface iBalanceDocWithDetails<T extends NumberType> extends iBalanceDoc<T> {
   /** The outgoing approvals with details like metadata and address lists. */
   outgoingApprovals: iUserOutgoingApprovalWithDetails<T>[];
@@ -956,11 +970,61 @@ export interface iEvent<T extends NumberType> {
 }
 
 /**
+ * @category Interfaces
+ */
+export interface iTierWithOptionalWeight<T extends NumberType> {
+  /** The claim ID to satisfy the tier */
+  claimId: string;
+  /** The weight of the tier */
+  weight?: T;
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iGroupPage<T extends NumberType> {
+  /** The page ID */
+  pageId: string;
+
+  /** Metadata for the page */
+  metadata: iMetadata<T>;
+
+  /** Points to display in the page */
+  points?: iTierWithOptionalWeight<T>[];
+
+  /** Tiers to display in the page */
+  tiers?: iTierWithOptionalWeight<T>[];
+
+  /** Quests to display in the page */
+  quests?: iTierWithOptionalWeight<T>[];
+
+  /** The events in the group */
+  events?: iEvent<T>[];
+
+  /** The collection IDs in the group */
+  collectionIds?: T[];
+
+  /** The claim IDs in the group */
+  claimIds?: string[];
+
+  /** The address list IDs in the group */
+  listIds?: string[];
+
+  /** Mapping IDs in the group */
+  mapIds?: string[];
+}
+
+/**
  * @cateogry Interfaces
  */
 export interface iGroupDoc<T extends NumberType> extends Doc {
   /** The group ID */
   groupId: string;
+
+  /**
+   * Type of the group
+   */
+  type: string;
 
   /** The BitBadges address of the user who created this group */
   createdBy: BitBadgesAddress;
@@ -971,20 +1035,8 @@ export interface iGroupDoc<T extends NumberType> extends Doc {
   /** The overall metadata for the group */
   metadata: iMetadata<T>;
 
-  /** The events in the group */
-  events: iEvent<T>[];
-
-  /** The collection IDs in the group */
-  collectionIds: T[];
-
-  /** The claim  IDs in the group */
-  claimIds: string[];
-
-  /** The address list IDs in the group */
-  listIds: string[];
-
-  /** Mapping IDs in the group */
-  mapIds: string[];
+  /** The pages for the group */
+  pages: iGroupPage<T>[];
 }
 
 /**

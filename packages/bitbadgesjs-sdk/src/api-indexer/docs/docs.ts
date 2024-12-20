@@ -89,7 +89,10 @@ import {
   type iUsedLeafStatus,
   DynamicDataHandlerData,
   iGroupDoc,
-  iEvent
+  iEvent,
+  iGroupPage,
+  iPointsDoc,
+  iTierWithOptionalWeight
 } from './interfaces.js';
 
 /**
@@ -831,6 +834,39 @@ export class BalanceDocWithDetails<T extends NumberType> extends BaseNumberTypeC
 }
 
 /**
+ * @inheritDoc iPointsDoc
+ * @category Indexer
+ */
+export class PointsDoc<T extends NumberType> extends BaseNumberTypeClass<PointsDoc<T>> implements iPointsDoc<T> {
+  _docId: string;
+  _id?: string;
+  address: BitBadgesAddress;
+  points: T;
+  lastCalculatedAt: UNIXMilliTimestamp<T>;
+  groupId: string;
+  pageId: string;
+
+  constructor(data: iPointsDoc<T>) {
+    super();
+    this._docId = data._docId;
+    this._id = data._id;
+    this.address = data.address;
+    this.points = data.points;
+    this.lastCalculatedAt = data.lastCalculatedAt;
+    this.groupId = data.groupId;
+    this.pageId = data.pageId;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['points', 'lastCalculatedAt'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): PointsDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as PointsDoc<U>;
+  }
+}
+
+/**
  * @inheritDoc iEvent
  * @category Indexer
  */
@@ -856,6 +892,75 @@ export class Event<T extends NumberType> extends BaseNumberTypeClass<Event<T>> i
 }
 
 /**
+ * @inheritDoc iTierWithOptionalWeight
+ * @category Indexer
+ */
+export class TierWithOptionalWeight<T extends NumberType>
+  extends BaseNumberTypeClass<TierWithOptionalWeight<T>>
+  implements iTierWithOptionalWeight<T>
+{
+  claimId: string;
+  weight?: T;
+
+  constructor(data: iTierWithOptionalWeight<T>) {
+    super();
+    this.claimId = data.claimId;
+    this.weight = data.weight;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['weight'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): TierWithOptionalWeight<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as TierWithOptionalWeight<U>;
+  }
+}
+
+/**
+ * @inheritDoc iGroupPage
+ * @category Indexer
+ */
+export class GroupPage<T extends NumberType> extends BaseNumberTypeClass<GroupPage<T>> implements iGroupPage<T> {
+  metadata: Metadata<T>;
+  pageId: string;
+  points?: TierWithOptionalWeight<T>[];
+  tiers?: TierWithOptionalWeight<T>[];
+  quests?: TierWithOptionalWeight<T>[];
+  events?: Event<T>[];
+  collectionIds?: T[];
+  claimIds?: string[];
+  listIds?: string[];
+  mapIds?: string[];
+
+  constructor(data: iGroupPage<T>) {
+    super();
+    this.metadata = new Metadata(data.metadata);
+    this.pageId = data.pageId;
+    this.tiers = data.tiers?.map((tier) => new TierWithOptionalWeight(tier));
+    this.quests = data.quests?.map((quest) => new TierWithOptionalWeight(quest));
+    this.points = data.points?.map((point) => new TierWithOptionalWeight(point));
+    this.events = data.events?.map((event) => new Event(event));
+    this.collectionIds = data.collectionIds;
+    this.claimIds = data.claimIds;
+    this.listIds = data.listIds;
+    this.mapIds = data.mapIds;
+  }
+
+  getNumberFieldNames(): string[] {
+    return [];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GroupPage<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GroupPage<U>;
+  }
+
+  clone(): GroupPage<T> {
+    return super.clone() as GroupPage<T>;
+  }
+}
+
+/**
  * @inheritDoc iGroupDoc
  * @category Indexer
  */
@@ -866,11 +971,9 @@ export class GroupDoc<T extends NumberType> extends BaseNumberTypeClass<GroupDoc
   createdAt: UNIXMilliTimestamp<T>;
   createdBy: BitBadgesAddress;
   metadata: iMetadata<T>;
-  events: Event<T>[];
-  collectionIds: T[];
-  claimIds: string[];
-  listIds: string[];
-  mapIds: string[];
+  type: string;
+
+  pages: GroupPage<T>[];
 
   constructor(data: iGroupDoc<T>) {
     super();
@@ -880,15 +983,12 @@ export class GroupDoc<T extends NumberType> extends BaseNumberTypeClass<GroupDoc
     this.createdAt = data.createdAt;
     this.createdBy = data.createdBy;
     this.metadata = data.metadata;
-    this.events = data.events.map((event) => new Event(event));
-    this.collectionIds = data.collectionIds;
-    this.claimIds = data.claimIds;
-    this.listIds = data.listIds;
-    this.mapIds = data.mapIds;
+    this.pages = data.pages.map((page) => new GroupPage(page));
+    this.type = data.type;
   }
 
   getNumberFieldNames(): string[] {
-    return ['collectionIds'];
+    return ['createdAt'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GroupDoc<U> {

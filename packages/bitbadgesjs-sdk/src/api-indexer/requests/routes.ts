@@ -110,4 +110,5 @@ export class BitBadgesApiRoutes {
 
   static GetGroupsRoute = () => '/api/v0/groups/fetch';
   static CRUDGroupsRoute = () => '/api/v0/groups';
+  static CalculatePointsRoute = () => '/api/v0/groups/points';
 }

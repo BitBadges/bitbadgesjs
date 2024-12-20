@@ -3027,6 +3027,45 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/DeleteGroupPayload'
+  /groups/points:
+    post:
+      operationId: calculatePoints
+      summary: Calculate Points
+      tags:
+        - Groups
+      description: |-
+        Calculates points for a group and page.
+
+        ```tsx
+        await BitBadgesApi.calculatePoints(...);
+        ```
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iCalculatePointsSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      security:
+        - apiKey: []
+      x-internal: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CalculatePointsPayload'
 components:
   responses:
     ErrorResponse:
@@ -3641,6 +3680,8 @@ components:
               type: boolean
             claimAlerts:
               type: boolean
+            claimActivity:
+              type: boolean
             ignoreIfInitiator:
               type: boolean
           additionalProperties: false
@@ -3694,6 +3735,9 @@ components:
             Whether or not the notifications have been handled by the indexer or
             not.
           type: boolean
+        private:
+          description: Only for private purposes?
+          type: boolean
       required:
         - _docId
         - timestamp
@@ -3719,6 +3763,9 @@ components:
           description: >-
             Whether or not the notifications have been handled by the indexer or
             not.
+          type: boolean
+        private:
+          description: Only for private purposes?
           type: boolean
         review:
           description: The review text (max 2048 characters).
@@ -3767,6 +3814,9 @@ components:
           description: >-
             Whether or not the notifications have been handled by the indexer or
             not.
+          type: boolean
+        private:
+          description: Only for private purposes?
           type: boolean
         to:
           items:
@@ -3836,6 +3886,9 @@ components:
             Whether or not the notifications have been handled by the indexer or
             not.
           type: boolean
+        private:
+          description: Only for private purposes?
+          type: boolean
         listId:
           description: The list ID.
           type: string
@@ -3868,6 +3921,53 @@ components:
       additionalProperties: false
       description: ''
       type: object
+    iClaimActivityDoc:
+      properties:
+        _docId:
+          description: A unique stringified document ID
+          type: string
+        _id:
+          description: A unique document ID (Mongo DB ObjectID)
+          type: string
+        timestamp:
+          description: The timestamp of the activity.
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
+        block:
+          description: The block number of the activity.
+          $ref: '#/components/schemas/NumberType'
+        _notificationsHandled:
+          description: >-
+            Whether or not the notifications have been handled by the indexer or
+            not.
+          type: boolean
+        private:
+          description: Only for private purposes?
+          type: boolean
+        success:
+          description: Whether the claim attempt was successful or not
+          type: boolean
+        claimId:
+          description: The claim ID of the claim attempt
+          type: string
+        claimAttemptId:
+          description: The claim attempt ID of the claim attempt
+          type: string
+        bitbadgesAddress:
+          description: The BitBadges address of the user who attempted the claim
+          examples: &ref_8
+            - bb1...
+          $ref: '#/components/schemas/BitBadgesAddress'
+      required:
+        - _docId
+        - timestamp
+        - block
+        - success
+        - claimId
+        - claimAttemptId
+        - bitbadgesAddress
+      additionalProperties: false
+      description: ''
+      type: object
     iClaimAlertDoc:
       properties:
         _docId:
@@ -3886,6 +3986,9 @@ components:
           description: >-
             Whether or not the notifications have been handled by the indexer or
             not.
+          type: boolean
+        private:
+          description: Only for private purposes?
           type: boolean
         from:
           description: The sender
@@ -4038,8 +4141,7 @@ components:
           type: string
         bitbadgesAddress:
           description: The BitBadges address of the account
-          examples: &ref_10
-            - bb1...
+          examples: *ref_8
           $ref: '#/components/schemas/BitBadgesAddress'
         ethAddress:
           description: The Eth address of the account
@@ -4049,7 +4151,7 @@ components:
         solAddress:
           description: The Solana address of the account
           type: string
-          examples: &ref_9
+          examples: &ref_10
             - 6H2af6...
         btcAddress:
           description: The Bitcoin address of the account
@@ -4103,7 +4205,7 @@ components:
         description:
           description: The description of the custom page
           type: string
-          examples: &ref_8
+          examples: &ref_9
             - Brief description.
         items:
           items:
@@ -4124,7 +4226,7 @@ components:
         description:
           description: The description of the custom list page
           type: string
-          examples: *ref_8
+          examples: *ref_9
         items:
           items:
             type: string
@@ -4261,7 +4363,7 @@ components:
             The Solana address of the profile, if applicable (bc we need it to
             convert)
           type: string
-          examples: *ref_9
+          examples: *ref_10
         notifications:
           description: The notifications of the account
           $ref: '#/components/schemas/iNotificationPreferences'
@@ -4450,7 +4552,7 @@ components:
               type: string
             bitbadgesAddress:
               $ref: '#/components/schemas/BitBadgesAddress'
-              examples: *ref_10
+              examples: *ref_8
             ip:
               type: string
           required:
@@ -4698,7 +4800,7 @@ components:
           $ref: '#/components/schemas/NumberType'
         bitbadgesAddress:
           description: The BitBadges address of the user
-          examples: *ref_10
+          examples: *ref_8
           $ref: '#/components/schemas/BitBadgesAddress'
         onChain:
           description: True if the balances are on-chain
@@ -4749,6 +4851,41 @@ components:
 
         This includes their balances, incoming approvals, outgoing approvals,
         and permissions.
+      type: object
+    iPointsDoc:
+      properties:
+        _docId:
+          description: A unique stringified document ID
+          type: string
+        _id:
+          description: A unique document ID (Mongo DB ObjectID)
+          type: string
+        address:
+          description: The address to calculate points for
+          $ref: '#/components/schemas/BitBadgesAddress'
+        points:
+          description: The points for the address
+          $ref: '#/components/schemas/NumberType'
+        lastCalculatedAt:
+          description: >-
+            The timestamp of when the points were last calculated (milliseconds
+            since epoch)
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
+        groupId:
+          description: The group ID
+          type: string
+        pageId:
+          description: The page ID
+          type: string
+      required:
+        - _docId
+        - address
+        - points
+        - lastCalculatedAt
+        - groupId
+        - pageId
+      additionalProperties: false
+      description: ''
       type: object
     ClaimIntegrationPluginType:
       type: string
@@ -4867,7 +5004,7 @@ components:
                 - Name
             description:
               type: string
-              examples: *ref_8
+              examples: *ref_9
             image:
               type: string
               examples: *ref_12
@@ -4917,7 +5054,7 @@ components:
               examples: *ref_13
             description:
               type: string
-              examples: *ref_8
+              examples: *ref_9
             image:
               type: string
               examples: *ref_12
@@ -5024,26 +5161,41 @@ components:
       additionalProperties: false
       description: '@cateogry Interfaces'
       type: object
-    iGroupDoc:
+    iTierWithOptionalWeight:
       properties:
-        _docId:
-          description: A unique stringified document ID
+        claimId:
+          description: The claim ID to satisfy the tier
           type: string
-        _id:
-          description: A unique document ID (Mongo DB ObjectID)
+        weight:
+          description: The weight of the tier
+          $ref: '#/components/schemas/NumberType'
+      required:
+        - claimId
+      additionalProperties: false
+      type: object
+    iGroupPage:
+      properties:
+        pageId:
+          description: The page ID
           type: string
-        groupId:
-          description: The group ID
-          type: string
-        createdBy:
-          description: The BitBadges address of the user who created this group
-          $ref: '#/components/schemas/BitBadgesAddress'
-        createdAt:
-          description: The time the group was created
-          $ref: '#/components/schemas/UNIXMilliTimestamp'
         metadata:
-          description: The overall metadata for the group
+          description: Metadata for the page
           $ref: '#/components/schemas/iMetadata'
+        points:
+          items:
+            $ref: '#/components/schemas/iTierWithOptionalWeight'
+          description: Points to display in the page
+          type: array
+        tiers:
+          items:
+            $ref: '#/components/schemas/iTierWithOptionalWeight'
+          description: Tiers to display in the page
+          type: array
+        quests:
+          items:
+            $ref: '#/components/schemas/iTierWithOptionalWeight'
+          description: Quests to display in the page
+          type: array
         events:
           items:
             $ref: '#/components/schemas/iEvent'
@@ -5057,7 +5209,7 @@ components:
         claimIds:
           items:
             type: string
-          description: The claim  IDs in the group
+          description: The claim IDs in the group
           type: array
         listIds:
           items:
@@ -5070,16 +5222,46 @@ components:
           description: Mapping IDs in the group
           type: array
       required:
+        - pageId
+        - metadata
+      additionalProperties: false
+      type: object
+    iGroupDoc:
+      properties:
+        _docId:
+          description: A unique stringified document ID
+          type: string
+        _id:
+          description: A unique document ID (Mongo DB ObjectID)
+          type: string
+        groupId:
+          description: The group ID
+          type: string
+        type:
+          description: Type of the group
+          type: string
+        createdBy:
+          description: The BitBadges address of the user who created this group
+          $ref: '#/components/schemas/BitBadgesAddress'
+        createdAt:
+          description: The time the group was created
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
+        metadata:
+          description: The overall metadata for the group
+          $ref: '#/components/schemas/iMetadata'
+        pages:
+          items:
+            $ref: '#/components/schemas/iGroupPage'
+          description: The pages for the group
+          type: array
+      required:
         - _docId
         - groupId
+        - type
         - createdBy
         - createdAt
         - metadata
-        - events
-        - collectionIds
-        - claimIds
-        - listIds
-        - mapIds
+        - pages
       additionalProperties: false
       description: '@cateogry Interfaces'
       type: object
@@ -5219,7 +5401,7 @@ components:
               examples: *ref_13
             description:
               type: string
-              examples: *ref_8
+              examples: *ref_9
             image:
               type: string
               examples: *ref_12
@@ -5588,7 +5770,7 @@ components:
                 properties:
                   bitbadgesAddress:
                     $ref: '#/components/schemas/BitBadgesAddress'
-                    examples: *ref_10
+                    examples: *ref_8
                   reason:
                     type: string
                 required:
@@ -5602,7 +5784,7 @@ components:
                 properties:
                   bitbadgesAddress:
                     $ref: '#/components/schemas/BitBadgesAddress'
-                    examples: *ref_10
+                    examples: *ref_8
                   reason:
                     type: string
                 required:
@@ -5675,7 +5857,7 @@ components:
         description:
           description: The description of the app
           type: string
-          examples: *ref_8
+          examples: *ref_9
         image:
           description: The image of the app
           type: string
@@ -5731,7 +5913,7 @@ components:
           type: number
         bitbadgesAddress:
           type: string
-          examples: *ref_10
+          examples: *ref_8
         address:
           type: string
         scopes:
@@ -5790,7 +5972,7 @@ components:
             description:
               description: Description of the plugin
               type: string
-              examples: *ref_8
+              examples: *ref_9
             image:
               description: The image of the plugin
               type: string
@@ -5994,7 +6176,7 @@ components:
           type: string
         bitbadgesAddress:
           description: The BitBadges address of the user
-          examples: *ref_10
+          examples: *ref_8
           $ref: '#/components/schemas/BitBadgesAddress'
       required:
         - _docId
@@ -6015,7 +6197,7 @@ components:
           type: string
         bitbadgesAddress:
           description: The BitBadges address of the signer
-          examples: *ref_10
+          examples: *ref_8
           $ref: '#/components/schemas/BitBadgesAddress'
         address:
           description: The native address of the signer
@@ -6028,7 +6210,7 @@ components:
           examples: *ref_13
         description:
           type: string
-          examples: *ref_8
+          examples: *ref_9
         image:
           type: string
           examples: *ref_12
@@ -6280,7 +6462,7 @@ components:
             Metadata for the attestation for display purposes. Note this should
             not contain anything sensitive. It may be displayed to verifiers.
           type: string
-          examples: *ref_8
+          examples: *ref_9
         holders:
           items:
             type: string
@@ -6650,7 +6832,7 @@ components:
         description:
           description: The description of the badge or badge collection. Supports markdown.
           type: string
-          examples: *ref_8
+          examples: *ref_9
         image:
           description: The image of the badge or badge collection.
           type: string
@@ -6730,7 +6912,7 @@ components:
                 examples: *ref_12
               description:
                 type: string
-                examples: *ref_8
+                examples: *ref_9
               url:
                 type: string
             required:
@@ -7081,7 +7263,7 @@ components:
           type: string
         bitbadgesAddress:
           description: The BitBadges address of the account
-          examples: *ref_10
+          examples: *ref_8
           $ref: '#/components/schemas/BitBadgesAddress'
         ethAddress:
           description: The Eth address of the account
@@ -7321,7 +7503,7 @@ components:
         solAddress:
           description: The Solana address of the account.
           type: string
-          examples: *ref_9
+          examples: *ref_10
         chain:
           description: The chain of the account.
           $ref: '#/components/schemas/SupportedChain'
@@ -7348,6 +7530,13 @@ components:
           description: >-
             A list of list activity items for the account. Paginated and fetched
             as needed. To be used in conjunction with views.
+          type: array
+        claimActivity:
+          items:
+            $ref: '#/components/schemas/iClaimActivityDoc'
+          description: >-
+            A list of claim activity items for the account. Paginated and
+            fetched as needed. To be used in conjunction with views.
           type: array
         merkleChallenges:
           items:
@@ -7488,6 +7677,8 @@ components:
         - createdAttestations
         - receivedAttestations
         - attestations
+        - publicClaimActivity
+        - allClaimActivity
       description: The supported view keys for fetching account details.
       type: string
     AccountFetchDetails:
@@ -7788,7 +7979,7 @@ components:
           $ref: '#/components/schemas/NumberType'
         bitbadgesAddress:
           description: The BitBadges address of the user
-          examples: *ref_10
+          examples: *ref_8
           $ref: '#/components/schemas/BitBadgesAddress'
         onChain:
           description: True if the balances are on-chain
@@ -7852,7 +8043,7 @@ components:
             Specific address to filter by. If not present, all activity will be
             returned.
           type: string
-          examples: *ref_10
+          examples: *ref_8
       additionalProperties: false
       type: object
     iGetBadgeActivitySuccessResponse:
@@ -8364,7 +8555,6 @@ components:
         - addressLists
         - badges
         - maps
-        - groups
       additionalProperties: false
       type: object
     GetClaimsPayload:
@@ -8397,6 +8587,11 @@ components:
             Fetch private parameters for the claim. Only applicable if you are
             the creator / manager of the claim.
           type: boolean
+        searchValue:
+          description: >-
+            If provided, we will only return claims with names that match the
+            search value. Only applicable for fetching your own claims.
+          type: string
       additionalProperties: false
       type: object
     iGetClaimsSuccessResponse:
@@ -8452,7 +8647,7 @@ components:
           type: string
         bitbadgesAddress:
           type: string
-          examples: *ref_10
+          examples: *ref_8
       required:
         - success
         - error
@@ -8900,7 +9095,7 @@ components:
               description:
                 description: The description of the approval.
                 type: string
-                examples: *ref_8
+                examples: *ref_9
               image:
                 description: The image of the approval.
                 type: string
@@ -9240,6 +9435,7 @@ components:
             - claims
             - activity
             - groups
+            - claimActivity
           type: string
         filters:
           properties:
@@ -9317,6 +9513,10 @@ components:
               $ref: '#/components/schemas/iClaimDetails'
             type: array
           type: object
+        claimActivity:
+          items:
+            $ref: '#/components/schemas/iClaimActivityDoc'
+          type: array
       required:
         - collections
         - addressLists
@@ -9761,7 +9961,7 @@ components:
             properties:
               bitbadgesAddress:
                 $ref: '#/components/schemas/BitBadgesAddress'
-                examples: *ref_10
+                examples: *ref_8
               delete:
                 type: boolean
             required:
@@ -9899,7 +10099,7 @@ components:
             Metadata for the attestation for display purposes. Note this should
             not contain anything sensitive. It may be displayed to verifiers.
           type: string
-          examples: *ref_8
+          examples: *ref_9
       additionalProperties: false
       type: object
     iUpdateAttestationSuccessResponse:
@@ -9942,7 +10142,7 @@ components:
         description:
           description: The description of the SIWBB request for display purposes.
           type: string
-          examples: *ref_8
+          examples: *ref_9
         image:
           description: The image of the SIWBB request for display purposes.
           type: string
@@ -10086,7 +10286,7 @@ components:
 
             unique identifier for the user (e.g. avoid duplicate sign ins from
             equivalent 0x and bb1 addresses).
-          examples: *ref_10
+          examples: *ref_8
           $ref: '#/components/schemas/BitBadgesAddress'
         verificationResponse:
           properties:
@@ -10293,7 +10493,7 @@ components:
         description:
           description: Description of the app.
           type: string
-          examples: *ref_8
+          examples: *ref_9
         image:
           description: Image for the app.
           type: string
@@ -10348,6 +10548,9 @@ components:
             If you want to get a specific app, specify the client ID here (will
             not return the client secret).
           type: string
+        bookmark:
+          description: Bookmark for pagination of the apps. Not compatible with clientId.
+          type: string
       additionalProperties: false
       type: object
     iGetDeveloperAppSuccessResponse:
@@ -10356,8 +10559,11 @@ components:
           items:
             $ref: '#/components/schemas/iDeveloperAppDoc'
           type: array
+        pagination:
+          $ref: '#/components/schemas/PaginationInfo'
       required:
         - developerApps
+        - pagination
       additionalProperties: false
       type: object
     DeleteDeveloperAppPayload:
@@ -10394,7 +10600,7 @@ components:
         description:
           description: Description of the app.
           type: string
-          examples: *ref_8
+          examples: *ref_9
         image:
           description: Image for the app.
           type: string
@@ -10554,7 +10760,7 @@ components:
             description:
               description: Description of the plugin
               type: string
-              examples: *ref_8
+              examples: *ref_9
             image:
               description: The image of the plugin
               type: string
@@ -10626,7 +10832,7 @@ components:
             description:
               description: Description of the plugin
               type: string
-              examples: *ref_8
+              examples: *ref_9
             image:
               description: The image of the plugin
               type: string
@@ -11019,7 +11225,7 @@ components:
               examples: *ref_13
             description:
               type: string
-              examples: *ref_8
+              examples: *ref_9
             image:
               type: string
               examples: *ref_12
@@ -11613,40 +11819,14 @@ components:
         metadata:
           description: The overall metadata for the group
           $ref: '#/components/schemas/iMetadata'
-        events:
+        pages:
           items:
-            $ref: '#/components/schemas/iEvent'
-          description: The events in the group
-          type: array
-        collectionIds:
-          anyOf:
-            - type: string
-            - items:
-                type: number
-              type: array
-          description: The collection IDs in the group
-        claimIds:
-          items:
-            type: string
-          description: The claim  IDs in the group
-          type: array
-        listIds:
-          items:
-            type: string
-          description: The address list IDs in the group
-          type: array
-        mapIds:
-          items:
-            type: string
-          description: Mapping IDs in the group
+            $ref: '#/components/schemas/iGroupPage'
+          description: The pages in the group
           type: array
       required:
         - metadata
-        - events
-        - collectionIds
-        - claimIds
-        - listIds
-        - mapIds
+        - pages
       additionalProperties: false
       type: object
     iCreateGroupSuccessResponse:
@@ -11665,41 +11845,15 @@ components:
         metadata:
           description: The overall metadata for the group
           $ref: '#/components/schemas/iMetadata'
-        events:
+        pages:
           items:
-            $ref: '#/components/schemas/iEvent'
-          description: The events in the group
-          type: array
-        collectionIds:
-          anyOf:
-            - type: string
-            - items:
-                type: number
-              type: array
-          description: The collection IDs in the group
-        claimIds:
-          items:
-            type: string
-          description: The claim  IDs in the group
-          type: array
-        listIds:
-          items:
-            type: string
-          description: The address list IDs in the group
-          type: array
-        mapIds:
-          items:
-            type: string
-          description: Mapping IDs in the group
+            $ref: '#/components/schemas/iGroupPage'
+          description: The pages in the group
           type: array
       required:
         - groupId
         - metadata
-        - events
-        - collectionIds
-        - claimIds
-        - listIds
-        - mapIds
+        - pages
       additionalProperties: false
       type: object
     iUpdateGroupSuccessResponse:
@@ -11720,6 +11874,64 @@ components:
       additionalProperties: false
       type: object
     iDeleteGroupSuccessResponse:
+      additionalProperties: false
+      type: object
+    CalculatePointsPayload:
+      properties:
+        groupId:
+          description: The group ID to calculate points for
+          type: string
+        pageId:
+          description: The page ID to calculate points for
+          type: string
+        address:
+          description: The address to calculate points for
+          $ref: '#/components/schemas/NativeAddress'
+        bookmark:
+          description: The pagination bookmark to start from
+          type: string
+        skipCache:
+          description: Skip the cache and calculate points from scratch
+          type: boolean
+      required:
+        - groupId
+        - pageId
+      additionalProperties: false
+      type: object
+    iPointsValue:
+      properties:
+        address:
+          $ref: '#/components/schemas/BitBadgesAddress'
+        points:
+          type: number
+        lastCalculatedAt:
+          type: number
+      required:
+        - address
+        - points
+        - lastCalculatedAt
+      additionalProperties: false
+      type: object
+    iCalculatePointsSuccessResponse:
+      properties:
+        values:
+          items:
+            $ref: '#/components/schemas/iPointsValue'
+          type: array
+        pagination:
+          properties:
+            bookmark:
+              type: string
+            hasMore:
+              type: boolean
+          required:
+            - bookmark
+            - hasMore
+          additionalProperties: false
+          type: object
+      required:
+        - values
+        - pagination
       additionalProperties: false
       type: object
     GetMapsPayload:
@@ -12182,7 +12394,7 @@ components:
 
             unique identifier for the user (e.g. avoid duplicate sign ins from
             equivalent 0x and bb1 addresses).
-          examples: *ref_10
+          examples: *ref_8
           $ref: '#/components/schemas/BitBadgesAddress'
         verificationResponse:
           properties:
@@ -12300,7 +12512,7 @@ components:
           examples: *ref_13
         description:
           type: string
-          examples: *ref_8
+          examples: *ref_9
         image:
           type: string
           examples: *ref_12
@@ -12532,7 +12744,7 @@ components:
             The description of the claim. This describes how to earn and claim
             the badge.
           type: string
-          examples: *ref_8
+          examples: *ref_9
         image:
           description: The image of the claim
           type: string
@@ -12598,12 +12810,12 @@ components:
           type: object
         consensus_pubkey:
           properties:
-            "'@type'":
+            '''@type''':
               type: string
             key:
               type: string
           required:
-            - "'@type'"
+            - '''@type'''
             - key
           additionalProperties: false
           type: object
@@ -12629,7 +12841,7 @@ components:
             - website
           additionalProperties: false
           type: object
-          examples: *ref_8
+          examples: *ref_9
         jailed:
           type: boolean
         min_self_delegation:
@@ -12834,7 +13046,7 @@ components:
       properties:
         account:
           properties:
-            "'@type'":
+            '''@type''':
               type: string
             base_account:
               properties:
@@ -12842,12 +13054,12 @@ components:
                   type: string
                 pub_key:
                   properties:
-                    "'@type'":
+                    '''@type''':
                       type: string
                     key:
                       type: string
                   required:
-                    - "'@type'"
+                    - '''@type'''
                     - key
                   additionalProperties: false
                   type: object
@@ -12862,7 +13074,7 @@ components:
               additionalProperties: false
               type: object
           required:
-            - "'@type'"
+            - '''@type'''
             - base_account
           additionalProperties: false
           type: object
@@ -13738,6 +13950,21 @@ components:
         - collectionId
       additionalProperties: false
       type: object
+    ConvertOptions:
+      properties:
+        keepOriginalObject:
+          description: >-
+            Same object as the one passed in the convert function.
+
+
+            By default, we create a deep copy of the object, but you can specify
+            this if you are okay updating in-place.
+
+            This increases performance by a lot at scale since we don't need to
+            deep copy the object.
+          type: boolean
+      additionalProperties: false
+      type: object
     SupportedChainType:
       enum:
         - Bitcoin
@@ -14420,7 +14647,7 @@ components:
             Metadata for the attestation for display purposes. Note this should
             not contain anything sensitive. It may be displayed to verifiers.
           type: string
-          examples: *ref_8
+          examples: *ref_9
         holders:
           items:
             type: string
@@ -14618,7 +14845,7 @@ components:
             Metadata for the attestation for display purposes. Note this should
             not contain anything sensitive. It may be displayed to verifiers.
           type: string
-          examples: *ref_8
+          examples: *ref_9
         holders:
           items:
             type: string
