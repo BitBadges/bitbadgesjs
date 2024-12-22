@@ -901,11 +901,15 @@ export class TierWithOptionalWeight<T extends NumberType>
 {
   claimId: string;
   weight?: T;
+  uncheckable?: boolean;
+  pointsCalculationMethod?: string | undefined;
 
   constructor(data: iTierWithOptionalWeight<T>) {
     super();
     this.claimId = data.claimId;
     this.weight = data.weight;
+    this.uncheckable = data.uncheckable;
+    this.pointsCalculationMethod = data.pointsCalculationMethod;
   }
 
   getNumberFieldNames(): string[] {
@@ -1516,6 +1520,7 @@ export class PluginVersionConfig<T extends NumberType> extends BaseNumberTypeCla
   userInputsSchema: Array<JsonBodyInputSchema>;
   publicParamsSchema: Array<JsonBodyInputSchema>;
   privateParamsSchema: Array<JsonBodyInputSchema>;
+  customDetailsDisplay?: string;
   verificationCall?: {
     uri: string;
     method: 'POST' | 'GET' | 'PUT' | 'DELETE';
@@ -1538,6 +1543,7 @@ export class PluginVersionConfig<T extends NumberType> extends BaseNumberTypeCla
   userInputRedirect?: { baseUri: string };
   createdAt: UNIXMilliTimestamp<T>;
   lastUpdated: UNIXMilliTimestamp<T>;
+  requireSignIn?: boolean;
 
   constructor(data: iPluginVersionConfig<T>) {
     super();
@@ -1552,6 +1558,7 @@ export class PluginVersionConfig<T extends NumberType> extends BaseNumberTypeCla
     this.receiveStatusWebhook = data.receiveStatusWebhook;
     this.skipProcessingWebhook = data.skipProcessingWebhook;
     this.userInputsSchema = data.userInputsSchema;
+    this.customDetailsDisplay = data.customDetailsDisplay;
     this.publicParamsSchema = data.publicParamsSchema;
     this.privateParamsSchema = data.privateParamsSchema;
     this.verificationCall = data.verificationCall;
@@ -1559,6 +1566,7 @@ export class PluginVersionConfig<T extends NumberType> extends BaseNumberTypeCla
     this.userInputRedirect = data.userInputRedirect;
     this.createdAt = data.createdAt;
     this.lastUpdated = data.lastUpdated;
+    this.requireSignIn = data.requireSignIn;
   }
 
   getNumberFieldNames(): string[] {

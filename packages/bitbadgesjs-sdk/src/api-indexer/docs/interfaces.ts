@@ -977,6 +977,18 @@ export interface iTierWithOptionalWeight<T extends NumberType> {
   claimId: string;
   /** The weight of the tier */
   weight?: T;
+  /**
+   * Uncheckable? If so, we will not display success or failure for this tier.
+   *
+   * We will just display the claim criteria and metadata.
+   */
+  uncheckable?: boolean;
+  /**
+   * The calculation method to use for this tier. This is used for calculating the tier weight.
+   *
+   * By default, we check if the user has met the criteria for non-indexed and for indexed, we check claimed successfully at least one time.
+   */
+  pointsCalculationMethod?: string | undefined;
 }
 
 /**
@@ -1132,11 +1144,21 @@ export interface iClaimReward<T extends NumberType> {
     image: string;
   };
 
-  /** If true, the reward is automatically given to the user upon completion. */
+  /** If true, the reward is automatically given to the user upon completion. No in-site logic is required. */
   automatic?: boolean;
 
   /** The gated content to display upon completion. */
   gatedContent: iClaimGatedContent;
+
+  /**
+   * Calculation method to use for the gated content. This is used to determine who is shown the gated content.
+   *
+   * By default, we check min 1 claim success for indexed claims and criteria met for non-indexed claims.
+   */
+  calculationMethod?: {
+    alwaysShow?: boolean;
+    minClaimSuccesses?: number;
+  };
 }
 
 /**
@@ -1147,6 +1169,7 @@ export interface iClaimGatedContent {
   content?: string;
   /** The URL to be shown to successful claimers */
   url?: string;
+
   /** The params to be shown to successful claimers. Only used for pre-configured rewards. */
   params?: {
     [key: string]: any;
@@ -1165,14 +1188,12 @@ export class ClaimReward<T extends NumberType> extends BaseNumberTypeClass<Claim
     description: string;
     image: string;
   };
-  gatedContent: {
-    content?: string;
-    url?: string;
-    params?: {
-      [key: string]: any;
-    };
-  };
+  gatedContent: iClaimGatedContent;
   automatic?: boolean;
+  calculationMethod?: {
+    alwaysShow?: boolean;
+    minClaimSuccesses?: number;
+  };
 
   constructor(data: iClaimReward<T>) {
     super();
@@ -1181,6 +1202,7 @@ export class ClaimReward<T extends NumberType> extends BaseNumberTypeClass<Claim
     this.metadata = data.metadata;
     this.gatedContent = data.gatedContent;
     this.automatic = data.automatic;
+    this.calculationMethod = data.calculationMethod;
   }
 
   getNumberFieldNames(): string[] {
@@ -1539,6 +1561,23 @@ export interface iPluginVersionConfig<T extends NumberType> {
     passSlack?: boolean;
     postProcessingJs: string;
   };
+
+  /**
+   * Custom details display for the plugin. Use {{publicParamKey}} to dynamically display the values of public parameters.
+   *
+   * Example: "This plugin checks for a minimum of {{publicBalanceParam}} balance."
+   */
+  customDetailsDisplay?: string;
+
+  /**
+   * Require BitBadges sign-in to use the plugin?
+   * This will ensure that any addresss received is actually verified by BitBadges.
+   * Otherwise, the address will be the claimee's address but it could be manually entered (if configuration allows).
+   *
+   * We recommend keeping this false to allow for non-indexed support and also be more flexible
+   * for the claim creator's implementation.
+   */
+  requireSignIn?: boolean;
 }
 
 /**

@@ -2345,6 +2345,12 @@ export interface PluginVersionConfigPayload {
 
     postProcessingJs: string;
   };
+
+  /** Require BitBadges sign-in to use the plugin? */
+  requireSignIn?: boolean;
+
+  /** Custom details display for the plugin. Use {{publicParamKey}} to dynamically display the values of public parameters. */
+  customDetailsDisplay?: string;
 }
 
 /**
@@ -2663,7 +2669,7 @@ export interface GetGatedContentForClaimPayload {}
  * @category API Requests / Responses
  */
 export interface iGetGatedContentForClaimSuccessResponse<T extends NumberType> {
-  rewards: iClaimReward<T>[];
+  rewards: (iClaimReward<T> | undefined)[];
 }
 
 /**
@@ -2673,11 +2679,11 @@ export class GetGatedContentForClaimSuccessResponse<T extends NumberType>
   extends CustomTypeClass<GetGatedContentForClaimSuccessResponse<T>>
   implements iGetGatedContentForClaimSuccessResponse<T>
 {
-  rewards: ClaimReward<T>[];
+  rewards: (ClaimReward<T> | undefined)[];
 
   constructor(data: iGetGatedContentForClaimSuccessResponse<T>) {
     super();
-    this.rewards = data.rewards.map((reward) => new ClaimReward(reward));
+    this.rewards = data.rewards.map((reward) => (reward ? new ClaimReward(reward) : undefined));
   }
 }
 

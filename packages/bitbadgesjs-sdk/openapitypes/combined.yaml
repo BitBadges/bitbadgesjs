@@ -5169,6 +5169,24 @@ components:
         weight:
           description: The weight of the tier
           $ref: '#/components/schemas/NumberType'
+        uncheckable:
+          description: >-
+            Uncheckable? If so, we will not display success or failure for this
+            tier.
+
+
+            We will just display the claim criteria and metadata.
+          type: boolean
+        pointsCalculationMethod:
+          description: >-
+            The calculation method to use for this tier. This is used for
+            calculating the tier weight.
+
+
+            By default, we check if the user has met the criteria for
+            non-indexed and for indexed, we check claimed successfully at least
+            one time.
+          type: string
       required:
         - claimId
       additionalProperties: false
@@ -5417,11 +5435,26 @@ components:
         automatic:
           description: >-
             If true, the reward is automatically given to the user upon
-            completion.
+            completion. No in-site logic is required.
           type: boolean
         gatedContent:
           description: The gated content to display upon completion.
           $ref: '#/components/schemas/iClaimGatedContent'
+        calculationMethod:
+          properties:
+            alwaysShow:
+              type: boolean
+            minClaimSuccesses:
+              type: number
+          additionalProperties: false
+          description: >-
+            Calculation method to use for the gated content. This is used to
+            determine who is shown the gated content.
+
+
+            By default, we check min 1 claim success for indexed claims and
+            criteria met for non-indexed claims.
+          type: object
       required:
         - rewardId
         - instanceId
@@ -6150,6 +6183,31 @@ components:
           additionalProperties: false
           description: The verification URL
           type: object
+        customDetailsDisplay:
+          description: >-
+            Custom details display for the plugin. Use {{publicParamKey}} to
+            dynamically display the values of public parameters.
+
+
+            Example: "This plugin checks for a minimum of {{publicBalanceParam}}
+            balance."
+          type: string
+        requireSignIn:
+          description: >-
+            Require BitBadges sign-in to use the plugin?
+
+            This will ensure that any addresss received is actually verified by
+            BitBadges.
+
+            Otherwise, the address will be the claimee's address but it could be
+            manually entered (if configuration allows).
+
+
+            We recommend keeping this false to allow for non-indexed support and
+            also be more flexible
+
+            for the claim creator's implementation.
+          type: boolean
       required:
         - version
         - finalized
@@ -10734,6 +10792,14 @@ components:
           additionalProperties: false
           description: The verification URL
           type: object
+        requireSignIn:
+          description: Require BitBadges sign-in to use the plugin?
+          type: boolean
+        customDetailsDisplay:
+          description: >-
+            Custom details display for the plugin. Use {{publicParamKey}} to
+            dynamically display the values of public parameters.
+          type: string
       required:
         - finalized
         - stateFunctionPreset
@@ -10988,6 +11054,15 @@ components:
                     additionalProperties: false
                     description: The verification URL
                     type: object
+                  requireSignIn:
+                    description: Require BitBadges sign-in to use the plugin?
+                    type: boolean
+                  customDetailsDisplay:
+                    description: >-
+                      Custom details display for the plugin. Use
+                      {{publicParamKey}} to dynamically display the values of
+                      public parameters.
+                    type: string
                 additionalProperties: false
                 description: The configuration for this version
                 type: object
