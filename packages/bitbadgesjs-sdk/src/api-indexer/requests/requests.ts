@@ -204,6 +204,8 @@ export interface GetSearchPayload {
   noMaps?: boolean;
   /** If true, we will skip all group queries. */
   noGroups?: boolean;
+  /** If true, we will skip all claim queries. */
+  noClaims?: boolean;
   /** If true, we will limit collection results to a single collection. */
   specificCollectionId?: NumberType;
 }
@@ -222,6 +224,7 @@ export interface iGetSearchSuccessResponse<T extends NumberType> {
   }[];
   maps: iMapWithValues<T>[];
   groups?: iGroupDoc<T>[];
+  claims?: iClaimDetails<T>[];
 }
 
 /**
@@ -241,6 +244,7 @@ export class GetSearchSuccessResponse<T extends NumberType>
   }[];
   maps: MapWithValues<T>[];
   groups?: GroupDoc<T>[];
+  claims?: ClaimDetails<T>[];
 
   constructor(data: iGetSearchSuccessResponse<T>) {
     super();
@@ -255,6 +259,7 @@ export class GetSearchSuccessResponse<T extends NumberType>
     });
     this.maps = data.maps.map((map) => new MapWithValues(map));
     this.groups = data.groups?.map((group) => new GroupDoc(group));
+    this.claims = data.claims?.map((claim) => new ClaimDetails(claim));
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetSearchSuccessResponse<U> {
@@ -554,6 +559,7 @@ export interface UpdateAccountInfoPayload {
     github?: { scopes: OAuthScopeDetails[]; username: string; id: string } | undefined;
     google?: { scopes: OAuthScopeDetails[]; username: string; id: string } | undefined;
     twitter?: { scopes: OAuthScopeDetails[]; username: string; id: string } | undefined;
+    facebook?: { scopes: OAuthScopeDetails[]; username: string; id: string } | undefined;
     addresses?: {
       address: NativeAddress;
       scopes: OAuthScopeDetails[];
@@ -969,6 +975,22 @@ export interface iCheckSignInStatusSuccessResponse {
   };
 
   /**
+   * Signed in with Facebook?
+   */
+  facebook?: {
+    username: string;
+    id: string;
+  };
+
+  /**
+   * Signed in with LinkedIn?
+   */
+  linkedIn?: {
+    username: string;
+    id: string;
+  };
+
+  /**
    * Signed in with Telegram?
    */
   telegram?: {
@@ -999,6 +1021,14 @@ export interface iCheckSignInStatusSuccessResponse {
     id: string;
     username: string;
   };
+
+  /**
+   * Signed in with Google Calendar?
+   */
+  googleCalendar?: {
+    id: string;
+    username: string;
+  };
 }
 
 /**
@@ -1026,13 +1056,16 @@ export class CheckSignInStatusSuccessResponse extends CustomTypeClass<CheckSignI
     id: string;
     username: string;
   };
+  googleCalendar?: { id: string; username: string } | undefined;
   twitch?: { id: string; username: string } | undefined;
   strava?: { username: string; id: string } | undefined;
   youtube?: { id: string; username: string } | undefined;
   reddit?: { username: string; id: string } | undefined;
+  facebook?: { username: string; id: string } | undefined;
   telegram?: { username: string; id: string } | undefined;
   farcaster?: { username: string; id: string } | undefined;
   slack?: { username: string; id: string } | undefined;
+  linkedIn?: { username: string; id: string } | undefined;
   email?: string | undefined;
 
   constructor(data: iCheckSignInStatusSuccessResponse) {
@@ -1048,10 +1081,13 @@ export class CheckSignInStatusSuccessResponse extends CustomTypeClass<CheckSignI
     this.strava = data.strava;
     this.youtube = data.youtube;
     this.reddit = data.reddit;
+    this.facebook = data.facebook;
+    this.googleCalendar = data.googleCalendar;
     this.telegram = data.telegram;
     this.farcaster = data.farcaster;
     this.slack = data.slack;
     this.email = data.email;
+    this.linkedIn = data.linkedIn;
   }
 }
 
@@ -1077,6 +1113,8 @@ export interface SignOutPayload {
   signOutYoutube?: boolean;
   /** Sign out of Reddit */
   signOutReddit?: boolean;
+  /** Sign out of Google Calendar */
+  signOutGoogleCalendar?: boolean;
   /** Sign out of Telegram */
   signOutTelegram?: boolean;
   /** Sign out of Farcaster */
@@ -1085,6 +1123,10 @@ export interface SignOutPayload {
   signOutSlack?: boolean;
   /** Sign out of email */
   signOutEmail?: boolean;
+  /** Sign out of Facebook */
+  signOutFacebook?: boolean;
+  /** Sign out of LinkedIn */
+  signOutLinkedIn?: boolean;
 }
 
 /**
@@ -2339,10 +2381,10 @@ export interface PluginVersionConfigPayload {
     passStrava?: boolean;
     passTwitch?: boolean;
     passReddit?: boolean;
+    passFacebook?: boolean;
     passTelegram?: boolean;
     passFarcaster?: boolean;
     passSlack?: boolean;
-
     postProcessingJs: string;
   };
 

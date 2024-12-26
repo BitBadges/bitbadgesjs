@@ -318,6 +318,9 @@ export class SocialConnections<T extends NumberType> extends BaseNumberTypeClass
   twitch?: SocialConnectionInfo<T> | undefined;
   strava?: SocialConnectionInfo<T> | undefined;
   reddit?: SocialConnectionInfo<T> | undefined;
+  facebook?: SocialConnectionInfo<T> | undefined;
+  googleCalendar?: SocialConnectionInfo<T> | undefined;
+  linkedIn?: SocialConnectionInfo<T> | undefined;
   telegram?: SocialConnectionInfo<T> | undefined;
   farcaster?: SocialConnectionInfo<T> | undefined;
   slack?: SocialConnectionInfo<T> | undefined;
@@ -331,9 +334,12 @@ export class SocialConnections<T extends NumberType> extends BaseNumberTypeClass
     this.google = data.google ? new SocialConnectionInfo(data.google) : undefined;
     this.strava = data.strava ? new SocialConnectionInfo(data.strava) : undefined;
     this.reddit = data.reddit ? new SocialConnectionInfo(data.reddit) : undefined;
+    this.facebook = data.facebook ? new SocialConnectionInfo(data.facebook) : undefined;
     this.telegram = data.telegram ? new SocialConnectionInfo(data.telegram) : undefined;
     this.farcaster = data.farcaster ? new SocialConnectionInfo(data.farcaster) : undefined;
     this.slack = data.slack ? new SocialConnectionInfo(data.slack) : undefined;
+    this.googleCalendar = data.googleCalendar ? new SocialConnectionInfo(data.googleCalendar) : undefined;
+    this.linkedIn = data.linkedIn ? new SocialConnectionInfo(data.linkedIn) : undefined;
   }
 
   getNumberFieldNames(): string[] {
@@ -484,6 +490,7 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
         github?: { scopes: OAuthScopeDetails[]; username: string; id: string } | undefined;
         google?: { scopes: OAuthScopeDetails[]; username: string; id: string } | undefined;
         twitter?: { scopes: OAuthScopeDetails[]; username: string; id: string } | undefined;
+        facebook?: { scopes: OAuthScopeDetails[]; username: string; id: string } | undefined;
         addresses?: {
           address: NativeAddress;
           scopes: OAuthScopeDetails[];
@@ -1345,6 +1352,10 @@ export class ComplianceDoc<T extends NumberType> extends BaseNumberTypeClass<Com
     nsfw: { groupId: string; reason: string }[];
     reported: { groupId: string; reason: string }[];
   };
+  claims?: {
+    nsfw: { claimId: string; reason: string }[];
+    reported: { claimId: string; reason: string }[];
+  };
 
   constructor(data: iComplianceDoc<T>) {
     super();
@@ -1357,6 +1368,7 @@ export class ComplianceDoc<T extends NumberType> extends BaseNumberTypeClass<Com
     this.groups = data.groups ?? { nsfw: [], reported: [] };
     this._docId = data._docId;
     this._id = data._id;
+    this.claims = data.claims ?? { nsfw: [], reported: [] };
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ComplianceDoc<U> {
@@ -1534,6 +1546,7 @@ export class PluginVersionConfig<T extends NumberType> extends BaseNumberTypeCla
     passTwitch?: boolean;
     passStrava?: boolean;
     passReddit?: boolean;
+    passFacebook?: boolean;
     passTelegram?: boolean;
     passFarcaster?: boolean;
     passSlack?: boolean;

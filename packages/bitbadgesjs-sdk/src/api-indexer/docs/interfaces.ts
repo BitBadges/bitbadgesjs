@@ -116,6 +116,21 @@ export interface iSocialConnections<T extends NumberType> {
     id: string;
     lastUpdated: UNIXMilliTimestamp<T>;
   };
+  facebook?: {
+    username: string;
+    id: string;
+    lastUpdated: UNIXMilliTimestamp<T>;
+  };
+  googleCalendar?: {
+    username: string;
+    id: string;
+    lastUpdated: UNIXMilliTimestamp<T>;
+  };
+  linkedIn?: {
+    username: string;
+    id: string;
+    lastUpdated: UNIXMilliTimestamp<T>;
+  };
   telegram?: {
     username: string;
     id: string;
@@ -453,6 +468,7 @@ export interface iProfileDoc<T extends NumberType> extends Doc {
     github?: { scopes: OAuthScopeDetails[]; username: string; id: string } | undefined;
     google?: { scopes: OAuthScopeDetails[]; username: string; id: string } | undefined;
     twitter?: { scopes: OAuthScopeDetails[]; username: string; id: string } | undefined;
+    facebook?: { scopes: OAuthScopeDetails[]; username: string; id: string } | undefined;
     addresses?: {
       address: NativeAddress;
       scopes: OAuthScopeDetails[];
@@ -660,7 +676,10 @@ export type ClaimIntegrationPluginType =
   | 'twitch'
   | 'twitter'
   | 'strava'
+  | 'googleCalendar'
   | 'reddit'
+  | 'facebook'
+  | 'linkedIn'
   | 'telegram'
   | 'farcaster'
   | 'slack'
@@ -721,9 +740,12 @@ type OauthAppName =
   | 'strava'
   | 'youtube'
   | 'reddit'
+  | 'facebook'
+  | 'googleCalendar'
   | 'telegram'
   | 'farcaster'
-  | 'slack';
+  | 'slack'
+  | 'linkedIn';
 
 /**
  * @category Claims
@@ -809,6 +831,7 @@ export type ClaimIntegrationPublicParamsType<T extends ClaimIntegrationPluginTyp
                         passTelegram?: boolean;
                         passFarcaster?: boolean;
                         passSlack?: boolean;
+                        passFacebook?: boolean;
                         userInputsSchema?: Array<JsonBodyInputSchema>;
                       }
                     : Record<string, any>;
@@ -1338,6 +1361,10 @@ export interface iComplianceDoc<T extends NumberType> extends Doc {
     nsfw: { groupId: string; reason: string }[];
     reported: { groupId: string; reason: string }[];
   };
+  claims?: {
+    nsfw: { claimId: string; reason: string }[];
+    reported: { claimId: string; reason: string }[];
+  };
 }
 
 /**
@@ -1556,6 +1583,7 @@ export interface iPluginVersionConfig<T extends NumberType> {
     passTwitch?: boolean;
     passStrava?: boolean;
     passReddit?: boolean;
+    passFacebook?: boolean;
     passTelegram?: boolean;
     passFarcaster?: boolean;
     passSlack?: boolean;

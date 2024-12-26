@@ -214,6 +214,9 @@ function addExamples(obj: any) {
   addExamples(obj, 'signature', ['0x...', '8d42172...']);
   addExamples(obj, 'signer', ['0x...', '8d42172...']);
 
+  addExamples(obj, 'actionName', ['add']);
+  addExamples(obj, 'handlerId', ['email', 'addresses']);
+
   addExamples(obj, 'name', ['Name']);
   addExamples(obj, 'description', ['Brief description.']);
   addExamples(obj, 'image', ['https://example.com/image.png', 'ipfs://Qm...']);
