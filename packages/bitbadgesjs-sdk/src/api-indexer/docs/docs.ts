@@ -318,9 +318,11 @@ export class SocialConnections<T extends NumberType> extends BaseNumberTypeClass
   twitch?: SocialConnectionInfo<T> | undefined;
   strava?: SocialConnectionInfo<T> | undefined;
   reddit?: SocialConnectionInfo<T> | undefined;
+  bluesky?: SocialConnectionInfo<T> | undefined;
   facebook?: SocialConnectionInfo<T> | undefined;
   googleCalendar?: SocialConnectionInfo<T> | undefined;
   linkedIn?: SocialConnectionInfo<T> | undefined;
+  shopify?: SocialConnectionInfo<T> | undefined;
   telegram?: SocialConnectionInfo<T> | undefined;
   farcaster?: SocialConnectionInfo<T> | undefined;
   slack?: SocialConnectionInfo<T> | undefined;
@@ -334,12 +336,15 @@ export class SocialConnections<T extends NumberType> extends BaseNumberTypeClass
     this.google = data.google ? new SocialConnectionInfo(data.google) : undefined;
     this.strava = data.strava ? new SocialConnectionInfo(data.strava) : undefined;
     this.reddit = data.reddit ? new SocialConnectionInfo(data.reddit) : undefined;
+    this.bluesky = data.bluesky ? new SocialConnectionInfo(data.bluesky) : undefined;
     this.facebook = data.facebook ? new SocialConnectionInfo(data.facebook) : undefined;
     this.telegram = data.telegram ? new SocialConnectionInfo(data.telegram) : undefined;
+
     this.farcaster = data.farcaster ? new SocialConnectionInfo(data.farcaster) : undefined;
     this.slack = data.slack ? new SocialConnectionInfo(data.slack) : undefined;
     this.googleCalendar = data.googleCalendar ? new SocialConnectionInfo(data.googleCalendar) : undefined;
     this.linkedIn = data.linkedIn ? new SocialConnectionInfo(data.linkedIn) : undefined;
+    this.shopify = data.shopify ? new SocialConnectionInfo(data.shopify) : undefined;
   }
 
   getNumberFieldNames(): string[] {
@@ -468,6 +473,7 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
   twitter?: string;
   github?: string;
   telegram?: string;
+  bluesky?: string;
   readme?: string;
   customLinks?: iCustomLink[];
   hiddenBadges?: BatchBadgeDetailsArray<T>;
@@ -516,6 +522,7 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
     this.twitter = data.twitter;
     this.github = data.github;
     this.telegram = data.telegram;
+    this.bluesky = data.bluesky;
     this.readme = data.readme;
     this.customLinks = data.customLinks;
     this.hiddenBadges = data.hiddenBadges ? BatchBadgeDetailsArray.From(data.hiddenBadges) : undefined;
@@ -1546,13 +1553,15 @@ export class PluginVersionConfig<T extends NumberType> extends BaseNumberTypeCla
     passTwitch?: boolean;
     passStrava?: boolean;
     passReddit?: boolean;
+    passBluesky?: boolean;
+    passShopify?: boolean;
     passFacebook?: boolean;
     passTelegram?: boolean;
     passFarcaster?: boolean;
     passSlack?: boolean;
     postProcessingJs: string;
   };
-  claimCreatorRedirect?: { toolUri?: string; tutorialUri?: string };
+  claimCreatorRedirect?: { toolUri?: string; tutorialUri?: string; testerUri?: string };
   userInputRedirect?: { baseUri: string };
   createdAt: UNIXMilliTimestamp<T>;
   lastUpdated: UNIXMilliTimestamp<T>;

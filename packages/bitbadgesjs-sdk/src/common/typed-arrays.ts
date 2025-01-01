@@ -28,38 +28,46 @@ export class BaseTypedArray<ArrayType extends ElementType[], ElementType> extend
   /**
    * @hidden
    */
-  map<U>(callbackfn: (value: ElementType, index: number, array: ArrayType) => U, thisArg?: any): U[] {
+  map<U>(callbackfn: (value: ElementType, index: number, array: ElementType[]) => U, thisArg?: any): U[] {
     return super.map(callbackfn as any, thisArg);
   }
+
   /**
    * @hidden
    */
-  find(predicate: (value: ElementType, index: number, obj: ArrayType) => unknown, thisArg?: any): ElementType | undefined {
+  find<S extends ElementType>(predicate: (value: ElementType, index: number, obj: ElementType[]) => value is S, thisArg?: any): S | undefined;
+  find(predicate: (value: ElementType, index: number, obj: ElementType[]) => unknown, thisArg?: any): ElementType | undefined;
+  find(predicate: unknown, thisArg?: unknown): ElementType | undefined {
     return super.find(predicate as any, thisArg);
   }
+
   /**
    * @hidden
    */
-  findLast(predicate: (value: ElementType, index: number, obj: ArrayType) => unknown, thisArg?: any): ElementType | undefined {
+  findLast<S extends ElementType>(predicate: (value: ElementType, index: number, array: ElementType[]) => value is S, thisArg?: any): S | undefined;
+  findLast(predicate: (value: ElementType, index: number, array: ElementType[]) => unknown, thisArg?: any): ElementType | undefined;
+  findLast(predicate: unknown, thisArg?: unknown): ElementType | undefined {
     return super.findLast(predicate as any, thisArg);
   }
+
   /**
    * @hidden
    */
-  findLastIndex(predicate: (value: ElementType, index: number, obj: ArrayType) => unknown, thisArg?: any): number {
+  findLastIndex(predicate: (value: ElementType, index: number, array: ElementType[]) => unknown, thisArg?: any): number {
     return super.findLastIndex(predicate as any, thisArg);
   }
+
   /**
    * @hidden
    */
-  findIndex(predicate: (value: ElementType, index: number, obj: ArrayType) => unknown, thisArg?: any): number {
+  findIndex(predicate: (value: ElementType, index: number, obj: ElementType[]) => unknown, thisArg?: any): number {
     return super.findIndex(predicate as any, thisArg);
   }
 
   /**
    * @hidden
    */
-  filter(predicate: (value: ElementType, index: number, array: ArrayType) => unknown, thisArg?: any): ArrayType {
+  filter(predicate: (value: ElementType, index: number, array: ElementType[]) => unknown, thisArg?: any): ArrayType {
     return super.filter(predicate as any, thisArg) as any;
   }
   /**
@@ -96,8 +104,8 @@ export class BaseTypedArray<ArrayType extends ElementType[], ElementType> extend
   /**
    * @hidden
    */
-  every<S extends ElementType>(predicate: (value: ElementType, index: number, array: ArrayType) => value is S, thisArg?: any): this is S[];
-  every(predicate: (value: ElementType, index: number, array: ArrayType) => unknown, thisArg?: any): boolean;
+  every<S extends ElementType>(predicate: (value: ElementType, index: number, array: ElementType[]) => value is S, thisArg?: any): this is S[];
+  every(predicate: (value: ElementType, index: number, array: ElementType[]) => unknown, thisArg?: any): boolean;
   every(predicate: unknown, thisArg?: unknown): boolean {
     return super.every(predicate as any, thisArg);
   }
@@ -105,15 +113,15 @@ export class BaseTypedArray<ArrayType extends ElementType[], ElementType> extend
   /**
    * @hidden
    */
-  some(callbackfn: (value: ElementType, index: number, array: ArrayType) => unknown, thisArg?: any): boolean {
-    return super.some(callbackfn as any, thisArg);
+  some(callback: (value: ElementType, index: number, array: ElementType[]) => unknown, thisArg?: any): boolean {
+    return super.some(callback as any, thisArg);
   }
 
   /**
    * @hidden
    */
-  forEach(callbackfn: (value: ElementType, index: number, array: ArrayType) => void, thisArg?: any): void {
-    super.forEach(callbackfn as any, thisArg);
+  forEach(callback: (value: ElementType, index: number, array: ElementType[]) => void, thisArg?: any): void {
+    super.forEach(callback as any, thisArg);
   }
   /**
    * @hidden
@@ -133,10 +141,22 @@ export class BaseTypedArray<ArrayType extends ElementType[], ElementType> extend
   with(index: number, value: ElementType): ArrayType {
     return super.with(index, value) as ArrayType;
   }
+
   /**
    * @hidden
    */
-  flatMap<U>(callbackfn: (value: ElementType, index: number, array: ArrayType) => U | U[], thisArg?: any): U[] {
-    return super.flatMap(callbackfn as any, thisArg);
+  flatMap<U, This = undefined>(
+    callback: (this: This, value: ElementType, index: number, array: ElementType[]) => U | readonly U[],
+    thisArg?: This | undefined
+  ): U[] {
+    return super.flatMap(callback as any, thisArg) as U[];
+  }
+
+
+  /**
+   * @hidden
+   */
+  flat<A, D extends number = 1>(this: A, depth?: D | undefined): FlatArray<A, D>[] {
+    return super.flat(depth) as FlatArray<A, D>[];
   }
 }

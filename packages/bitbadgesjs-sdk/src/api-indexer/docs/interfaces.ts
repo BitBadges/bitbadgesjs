@@ -116,6 +116,11 @@ export interface iSocialConnections<T extends NumberType> {
     id: string;
     lastUpdated: UNIXMilliTimestamp<T>;
   };
+  bluesky?: {
+    username: string;
+    id: string;
+    lastUpdated: UNIXMilliTimestamp<T>;
+  };
   facebook?: {
     username: string;
     id: string;
@@ -127,6 +132,11 @@ export interface iSocialConnections<T extends NumberType> {
     lastUpdated: UNIXMilliTimestamp<T>;
   };
   linkedIn?: {
+    username: string;
+    id: string;
+    lastUpdated: UNIXMilliTimestamp<T>;
+  };
+  shopify?: {
     username: string;
     id: string;
     lastUpdated: UNIXMilliTimestamp<T>;
@@ -417,6 +427,8 @@ export interface iProfileDoc<T extends NumberType> extends Doc {
   github?: string;
   /** The Telegram username of the account */
   telegram?: string;
+  /** The Bluesky username of the account */
+  bluesky?: string;
   /** The readme of the account */
   readme?: string;
 
@@ -678,9 +690,11 @@ export type ClaimIntegrationPluginType =
   | 'strava'
   | 'googleCalendar'
   | 'reddit'
+  | 'bluesky'
   | 'facebook'
   | 'linkedIn'
   | 'telegram'
+  | 'shopify'
   | 'farcaster'
   | 'slack'
   | 'transferTimes'
@@ -741,11 +755,13 @@ type OauthAppName =
   | 'youtube'
   | 'reddit'
   | 'facebook'
+  | 'bluesky'
   | 'googleCalendar'
   | 'telegram'
   | 'farcaster'
   | 'slack'
-  | 'linkedIn';
+  | 'linkedIn'
+  | 'shopify';
 
 /**
  * @category Claims
@@ -828,10 +844,12 @@ export type ClaimIntegrationPublicParamsType<T extends ClaimIntegrationPluginTyp
                         passTwitch?: boolean;
                         passStrava?: boolean;
                         passReddit?: boolean;
+                        passBluesky?: boolean;
                         passTelegram?: boolean;
                         passFarcaster?: boolean;
                         passSlack?: boolean;
                         passFacebook?: boolean;
+                        passShopify?: boolean;
                         userInputsSchema?: Array<JsonBodyInputSchema>;
                       }
                     : Record<string, any>;
@@ -1566,6 +1584,7 @@ export interface iPluginVersionConfig<T extends NumberType> {
   claimCreatorRedirect?: {
     toolUri?: string;
     tutorialUri?: string;
+    testerUri?: string;
   };
 
   /** The verification URL */
@@ -1583,6 +1602,8 @@ export interface iPluginVersionConfig<T extends NumberType> {
     passTwitch?: boolean;
     passStrava?: boolean;
     passReddit?: boolean;
+    passBluesky?: boolean;
+    passShopify?: boolean;
     passFacebook?: boolean;
     passTelegram?: boolean;
     passFarcaster?: boolean;

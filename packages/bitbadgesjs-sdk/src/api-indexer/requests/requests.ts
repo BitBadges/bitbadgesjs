@@ -479,6 +479,11 @@ export interface UpdateAccountInfoPayload {
   telegram?: string;
 
   /**
+   * The Bluesky username.
+   */
+  bluesky?: string;
+
+  /**
    * The last seen activity timestamp.
    */
   seenActivity?: UNIXMilliTimestamp<NumberType>;
@@ -581,12 +586,22 @@ export interface UpdateAccountInfoPayload {
 /**
  * @category API Requests / Responses
  */
-export interface iUpdateAccountInfoSuccessResponse {}
+export interface iUpdateAccountInfoSuccessResponse {
+  /** Verificatiom email sent? */
+  verificationEmailSent?: boolean;
+}
 
 /**
  * @category API Requests / Responses
  */
-export class UpdateAccountInfoSuccessResponse extends EmptyResponseClass {}
+export class UpdateAccountInfoSuccessResponse extends CustomTypeClass<UpdateAccountInfoSuccessResponse> implements iUpdateAccountInfoSuccessResponse {
+  verificationEmailSent?: boolean;
+
+  constructor(data: iUpdateAccountInfoSuccessResponse) {
+    super();
+    this.verificationEmailSent = data.verificationEmailSent;
+  }
+}
 
 /**
  * @category API Requests / Responses
@@ -975,6 +990,14 @@ export interface iCheckSignInStatusSuccessResponse {
   };
 
   /**
+   * Signed in with Bluesky?
+   */
+  bluesky?: {
+    username: string;
+    id: string;
+  };
+
+  /**
    * Signed in with Facebook?
    */
   facebook?: {
@@ -986,6 +1009,14 @@ export interface iCheckSignInStatusSuccessResponse {
    * Signed in with LinkedIn?
    */
   linkedIn?: {
+    username: string;
+    id: string;
+  };
+
+  /**
+   * Signed in with Shopify?
+   */
+  shopify?: {
     username: string;
     id: string;
   };
@@ -1061,11 +1092,13 @@ export class CheckSignInStatusSuccessResponse extends CustomTypeClass<CheckSignI
   strava?: { username: string; id: string } | undefined;
   youtube?: { id: string; username: string } | undefined;
   reddit?: { username: string; id: string } | undefined;
+  bluesky?: { username: string; id: string } | undefined;
   facebook?: { username: string; id: string } | undefined;
   telegram?: { username: string; id: string } | undefined;
   farcaster?: { username: string; id: string } | undefined;
   slack?: { username: string; id: string } | undefined;
   linkedIn?: { username: string; id: string } | undefined;
+  shopify?: { username: string; id: string } | undefined;
   email?: string | undefined;
 
   constructor(data: iCheckSignInStatusSuccessResponse) {
@@ -1082,12 +1115,14 @@ export class CheckSignInStatusSuccessResponse extends CustomTypeClass<CheckSignI
     this.youtube = data.youtube;
     this.reddit = data.reddit;
     this.facebook = data.facebook;
+    this.bluesky = data.bluesky;
     this.googleCalendar = data.googleCalendar;
     this.telegram = data.telegram;
     this.farcaster = data.farcaster;
     this.slack = data.slack;
     this.email = data.email;
     this.linkedIn = data.linkedIn;
+    this.shopify = data.shopify;
   }
 }
 
@@ -1113,6 +1148,8 @@ export interface SignOutPayload {
   signOutYoutube?: boolean;
   /** Sign out of Reddit */
   signOutReddit?: boolean;
+  /** Sign out of Bluesky */
+  signOutBluesky?: boolean;
   /** Sign out of Google Calendar */
   signOutGoogleCalendar?: boolean;
   /** Sign out of Telegram */
@@ -1127,6 +1164,8 @@ export interface SignOutPayload {
   signOutFacebook?: boolean;
   /** Sign out of LinkedIn */
   signOutLinkedIn?: boolean;
+  /** Sign out of Shopify */
+  signOutShopify?: boolean;
 }
 
 /**
@@ -2385,6 +2424,8 @@ export interface PluginVersionConfigPayload {
     passTelegram?: boolean;
     passFarcaster?: boolean;
     passSlack?: boolean;
+    passShopify?: boolean;
+    passBluesky?: boolean;
     postProcessingJs: string;
   };
 
@@ -2645,10 +2686,12 @@ export class UpdateClaimSuccessResponse extends EmptyResponseClass {}
  */
 export type ManagePluginRequest = Omit<IntegrationPluginDetails<ClaimIntegrationPluginType>, 'publicState' | 'privateState'>;
 
+type IgnoredKeys = 'plugins' | 'version' | '_includesPrivateParams' | 'createdBy' | 'siwbbClaim' | 'lastUpdated';
+
 /**
  * @category Interfaces
  */
-export type CreateClaimRequest<T extends NumberType> = Omit<iClaimDetails<T>, 'plugins' | 'version' | '_includesPrivateParams'> & {
+export type CreateClaimRequest<T extends NumberType> = Omit<iClaimDetails<T>, IgnoredKeys> & {
   cid?: string;
 } & {
   plugins: ManagePluginRequest[];
@@ -2657,7 +2700,7 @@ export type CreateClaimRequest<T extends NumberType> = Omit<iClaimDetails<T>, 'p
 /**
  * @category Interfaces
  */
-export type UpdateClaimRequest<T extends NumberType> = Omit<iClaimDetails<T>, 'seedCode' | 'plugins' | 'version' | '_includesPrivateParams'> & {
+export type UpdateClaimRequest<T extends NumberType> = Omit<iClaimDetails<T>, 'seedCode' | IgnoredKeys> & {
   cid?: string;
 } & {
   plugins: ManagePluginRequest[];
@@ -2771,6 +2814,13 @@ export interface GetDynamicDataBinsPayload {
   dataSecret?: string;
   /** The pagination bookmark to start from. Only applicable if a single dynamic data ID is provided. */
   bookmark?: string;
+  /** The options for the lookup. Only usable if you specify a dynamic data ID. */
+  options?: {
+    /** The type of lookup to perform (if applicable). Otherwise, leave blank. */
+    lookupType?: 'id' | 'username';
+    /** The item to search for. */
+    key: string;
+  };
 }
 
 /**
