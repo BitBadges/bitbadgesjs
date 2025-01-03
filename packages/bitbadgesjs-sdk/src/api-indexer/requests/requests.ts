@@ -581,6 +581,11 @@ export interface UpdateAccountInfoPayload {
    * The social connections for the user. Only returned if user is authenticated with full access.
    */
   socialConnections?: iSocialConnections<NumberType>;
+
+  /**
+   * The public social connections for the user. Will be returned for all queries and may be publicly displayed on profile
+   */
+  publicSocialConnectionsToSet?: { appName: string; toDelete?: boolean }[];
 }
 
 /**
@@ -990,6 +995,14 @@ export interface iCheckSignInStatusSuccessResponse {
   };
 
   /**
+   * Signed in with Meetup?
+   */
+  meetup?: {
+    username: string;
+    id: string;
+  };
+
+  /**
    * Signed in with Bluesky?
    */
   bluesky?: {
@@ -1092,6 +1105,7 @@ export class CheckSignInStatusSuccessResponse extends CustomTypeClass<CheckSignI
   strava?: { username: string; id: string } | undefined;
   youtube?: { id: string; username: string } | undefined;
   reddit?: { username: string; id: string } | undefined;
+  meetup?: { username: string; id: string } | undefined;
   bluesky?: { username: string; id: string } | undefined;
   facebook?: { username: string; id: string } | undefined;
   telegram?: { username: string; id: string } | undefined;
@@ -1114,6 +1128,7 @@ export class CheckSignInStatusSuccessResponse extends CustomTypeClass<CheckSignI
     this.strava = data.strava;
     this.youtube = data.youtube;
     this.reddit = data.reddit;
+    this.meetup = data.meetup;
     this.facebook = data.facebook;
     this.bluesky = data.bluesky;
     this.googleCalendar = data.googleCalendar;
@@ -1148,6 +1163,8 @@ export interface SignOutPayload {
   signOutYoutube?: boolean;
   /** Sign out of Reddit */
   signOutReddit?: boolean;
+  /** Sign out of Meetup */
+  signOutMeetup?: boolean;
   /** Sign out of Bluesky */
   signOutBluesky?: boolean;
   /** Sign out of Google Calendar */
@@ -2400,6 +2417,7 @@ export interface PluginVersionConfigPayload {
   claimCreatorRedirect?: {
     toolUri?: string;
     tutorialUri?: string;
+    testerUri?: string;
   };
 
   publicParamsSchema?: Array<JsonBodyInputSchema>;
@@ -2420,6 +2438,7 @@ export interface PluginVersionConfigPayload {
     passStrava?: boolean;
     passTwitch?: boolean;
     passReddit?: boolean;
+    passMeetup?: boolean;
     passFacebook?: boolean;
     passTelegram?: boolean;
     passFarcaster?: boolean;

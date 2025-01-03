@@ -116,6 +116,11 @@ export interface iSocialConnections<T extends NumberType> {
     id: string;
     lastUpdated: UNIXMilliTimestamp<T>;
   };
+  meetup?: {
+    username: string;
+    id: string;
+    lastUpdated: UNIXMilliTimestamp<T>;
+  };
   bluesky?: {
     username: string;
     id: string;
@@ -474,6 +479,9 @@ export interface iProfileDoc<T extends NumberType> extends Doc {
   /** Social connections stored for the account */
   socialConnections?: iSocialConnections<T>;
 
+  /** Public social connections stored for the account */
+  publicSocialConnections?: iSocialConnections<T>;
+
   /** Approved ways to sign in */
   approvedSignInMethods?: {
     discord?: { scopes: OAuthScopeDetails[]; username: string; discriminator?: string | undefined; id: string } | undefined;
@@ -690,6 +698,7 @@ export type ClaimIntegrationPluginType =
   | 'strava'
   | 'googleCalendar'
   | 'reddit'
+  | 'meetup'
   | 'bluesky'
   | 'facebook'
   | 'linkedIn'
@@ -759,6 +768,7 @@ type OauthAppName =
   | 'googleCalendar'
   | 'telegram'
   | 'farcaster'
+  | 'meetup'
   | 'slack'
   | 'linkedIn'
   | 'shopify';
@@ -778,7 +788,11 @@ export type ClaimIntegrationPluginCustomBodyType<T extends ClaimIntegrationPlugi
       ? {
           token?: string;
         }
-      : Record<string, any>;
+      : T extends 'captcha'
+        ? {
+            captchaToken: string;
+          }
+        : Record<string, any>;
 
 interface OAuthAppParams {
   hasPrivateList: boolean;
@@ -844,6 +858,7 @@ export type ClaimIntegrationPublicParamsType<T extends ClaimIntegrationPluginTyp
                         passTwitch?: boolean;
                         passStrava?: boolean;
                         passReddit?: boolean;
+                        passMeetup?: boolean;
                         passBluesky?: boolean;
                         passTelegram?: boolean;
                         passFarcaster?: boolean;
@@ -1608,6 +1623,7 @@ export interface iPluginVersionConfig<T extends NumberType> {
     passTelegram?: boolean;
     passFarcaster?: boolean;
     passSlack?: boolean;
+    passMeetup?: boolean;
     postProcessingJs: string;
   };
 

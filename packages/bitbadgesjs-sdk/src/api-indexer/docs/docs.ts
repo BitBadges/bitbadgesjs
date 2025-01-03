@@ -318,6 +318,7 @@ export class SocialConnections<T extends NumberType> extends BaseNumberTypeClass
   twitch?: SocialConnectionInfo<T> | undefined;
   strava?: SocialConnectionInfo<T> | undefined;
   reddit?: SocialConnectionInfo<T> | undefined;
+  meetup?: SocialConnectionInfo<T> | undefined;
   bluesky?: SocialConnectionInfo<T> | undefined;
   facebook?: SocialConnectionInfo<T> | undefined;
   googleCalendar?: SocialConnectionInfo<T> | undefined;
@@ -339,7 +340,7 @@ export class SocialConnections<T extends NumberType> extends BaseNumberTypeClass
     this.bluesky = data.bluesky ? new SocialConnectionInfo(data.bluesky) : undefined;
     this.facebook = data.facebook ? new SocialConnectionInfo(data.facebook) : undefined;
     this.telegram = data.telegram ? new SocialConnectionInfo(data.telegram) : undefined;
-
+    this.meetup = data.meetup ? new SocialConnectionInfo(data.meetup) : undefined;
     this.farcaster = data.farcaster ? new SocialConnectionInfo(data.farcaster) : undefined;
     this.slack = data.slack ? new SocialConnectionInfo(data.slack) : undefined;
     this.googleCalendar = data.googleCalendar ? new SocialConnectionInfo(data.googleCalendar) : undefined;
@@ -490,6 +491,7 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
   solAddress?: string;
   notifications?: NotificationPreferences<T>;
   socialConnections?: SocialConnections<T>;
+  publicSocialConnections?: SocialConnections<T>;
   approvedSignInMethods?:
     | {
         discord?: { scopes: OAuthScopeDetails[]; username: string; discriminator?: string | undefined; id: string } | undefined;
@@ -548,6 +550,7 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
     this.notifications = data.notifications ? new NotificationPreferences(data.notifications) : undefined;
     this.approvedSignInMethods = data.approvedSignInMethods;
     this.socialConnections = data.socialConnections ? new SocialConnections(data.socialConnections) : undefined;
+    this.publicSocialConnections = data.publicSocialConnections ? new SocialConnections(data.publicSocialConnections) : undefined;
     this.bannerImage = data.bannerImage;
   }
 
@@ -1553,6 +1556,7 @@ export class PluginVersionConfig<T extends NumberType> extends BaseNumberTypeCla
     passTwitch?: boolean;
     passStrava?: boolean;
     passReddit?: boolean;
+    passMeetup?: boolean;
     passBluesky?: boolean;
     passShopify?: boolean;
     passFacebook?: boolean;
