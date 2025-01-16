@@ -292,6 +292,22 @@ export interface iClaimActivityDoc<T extends NumberType> extends iActivityDoc<T>
 /**
  * @category Interfaces
  */
+export interface iPointsActivityDoc<T extends NumberType> extends iActivityDoc<T> {
+  /** The BitBadges address of the user who earned the points */
+  bitbadgesAddress: BitBadgesAddress;
+  /** The amount of points before the activity */
+  oldPoints: T;
+  /** The amount of points after the activity */
+  newPoints: T;
+  /** The group ID of the points activity */
+  groupId: string;
+  /** The page ID of the points activity */
+  pageId: string;
+}
+
+/**
+ * @category Interfaces
+ */
 export interface iClaimAlertDoc<T extends NumberType> extends iActivityDoc<T> {
   /** The sender */
   from: string;

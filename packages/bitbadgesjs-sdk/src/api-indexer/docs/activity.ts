@@ -9,6 +9,7 @@ import type {
   iClaimActivityDoc,
   iClaimAlertDoc,
   iListActivityDoc,
+  iPointsActivityDoc,
   iTransferActivityDoc
 } from './interfaces.js';
 
@@ -154,5 +155,30 @@ export class ClaimActivityDoc<T extends NumberType> extends ActivityDoc<T> imple
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ClaimActivityDoc<U> {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ClaimActivityDoc<U>;
+  }
+}
+
+/**
+ * @inheritDoc iPointsActivityDoc
+ * @category Indexer
+ */
+export class PointsActivityDoc<T extends NumberType> extends ActivityDoc<T> implements iPointsActivityDoc<T> {
+  bitbadgesAddress: BitBadgesAddress;
+  oldPoints: T;
+  newPoints: T;
+  groupId: string;
+  pageId: string;
+
+  constructor(data: iPointsActivityDoc<T>) {
+    super(data);
+    this.bitbadgesAddress = data.bitbadgesAddress;
+    this.oldPoints = data.oldPoints;
+    this.newPoints = data.newPoints;
+    this.groupId = data.groupId;
+    this.pageId = data.pageId;
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): PointsActivityDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as PointsActivityDoc<U>;
   }
 }

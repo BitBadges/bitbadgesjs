@@ -6,7 +6,7 @@ import type { iBitBadgesUserInfo } from '@/api-indexer/BitBadgesUserInfo.js';
 import { BitBadgesUserInfo } from '@/api-indexer/BitBadgesUserInfo.js';
 import type { PaginationInfo } from '@/api-indexer/base.js';
 import { EmptyResponseClass } from '@/api-indexer/base.js';
-import { ClaimActivityDoc, ClaimAlertDoc, TransferActivityDoc } from '@/api-indexer/docs/activity.js';
+import { ClaimActivityDoc, ClaimAlertDoc, PointsActivityDoc, TransferActivityDoc } from '@/api-indexer/docs/activity.js';
 import {
   AccessTokenDoc,
   AttestationDoc,
@@ -25,6 +25,7 @@ import {
   iEvent,
   iGroupDoc,
   iGroupPage,
+  iPointsActivityDoc,
   type BitBadgesAddress,
   type ClaimIntegrationPluginCustomBodyType,
   type ClaimIntegrationPluginType,
@@ -1198,7 +1199,7 @@ export class SignOutSuccessResponse extends EmptyResponseClass {}
  * @category API Requests / Responses
  */
 export interface GetBrowsePayload {
-  type: 'collections' | 'badges' | 'addressLists' | 'maps' | 'attestations' | 'claims' | 'activity' | 'groups' | 'claimActivity';
+  type: 'collections' | 'badges' | 'addressLists' | 'maps' | 'attestations' | 'claims' | 'activity' | 'groups' | 'claimActivity' | 'pointsActivity';
   filters?: {
     category?: string;
     sortBy?: string;
@@ -1236,6 +1237,7 @@ export interface iGetBrowseSuccessResponse<T extends NumberType> {
   maps: { [category: string]: iMapWithValues<T>[] };
   claims?: { [category: string]: iClaimDetails<T>[] };
   claimActivity?: iClaimActivityDoc<T>[];
+  pointsActivity?: iPointsActivityDoc<T>[];
 }
 
 /**
@@ -1259,6 +1261,7 @@ export class GetBrowseSuccessResponse<T extends NumberType>
   maps: { [category: string]: MapWithValues<T>[] };
   claims?: { [category: string]: ClaimDetails<T>[] };
   claimActivity?: ClaimActivityDoc<T>[];
+  pointsActivity?: PointsActivityDoc<T>[];
 
   constructor(data: iGetBrowseSuccessResponse<T>) {
     super();
@@ -1322,6 +1325,7 @@ export class GetBrowseSuccessResponse<T extends NumberType>
         )
       : undefined;
     this.claimActivity = data.claimActivity?.map((claimActivity) => new ClaimActivityDoc(claimActivity));
+    this.pointsActivity = data.pointsActivity?.map((pointsActivity) => new PointsActivityDoc(pointsActivity));
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetBrowseSuccessResponse<U> {
@@ -3315,5 +3319,52 @@ export class CalculatePointsSuccessResponse extends CustomTypeClass<CalculatePoi
     super();
     this.values = data.values;
     this.pagination = data.pagination;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface GetPointsActivityPayload {
+  /** The group ID to get points activity for */
+  groupId: string;
+  /** The page ID to get points activity for */
+  pageId: string;
+  /** The pagination bookmark to start from */
+  bookmark?: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetPointsActivitySuccessResponse<T extends NumberType> {
+  docs: iPointsActivityDoc<T>[];
+  pagination: {
+    bookmark: string;
+    hasMore: boolean;
+  };
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetPointsActivitySuccessResponse<T extends NumberType>
+  extends CustomTypeClass<GetPointsActivitySuccessResponse<T>>
+  implements iGetPointsActivitySuccessResponse<T>
+{
+  docs: PointsActivityDoc<T>[];
+  pagination: {
+    bookmark: string;
+    hasMore: boolean;
+  };
+
+  constructor(data: iGetPointsActivitySuccessResponse<T>) {
+    super();
+    this.docs = data.docs.map((doc) => new PointsActivityDoc<T>(doc));
+    this.pagination = data.pagination;
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetPointsActivitySuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetPointsActivitySuccessResponse<U>;
   }
 }

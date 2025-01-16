@@ -3066,6 +3066,45 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CalculatePointsPayload'
+  /groups/points/activity:
+    post:
+      operationId: getPointsActivity
+      summary: Get Points Activity
+      tags:
+        - Groups
+      description: |-
+        Fetches points activity for a group.
+
+        ```tsx
+        await BitBadgesApi.getPointsActivity(...);
+        ```
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetPointsActivitySuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      security:
+        - apiKey: []
+      x-internal: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetPointsActivityPayload'
 components:
   responses:
     ErrorResponse:
@@ -3151,7 +3190,7 @@ components:
           items:
             $ref: '#/components/schemas/iUintRange'
           type: array
-          examples: &ref_26
+          examples: &ref_28
             - - start: '1713301889'
                 end: '2000000000'
             - - start: '1'
@@ -3594,6 +3633,90 @@ components:
             - lastUpdated
           additionalProperties: false
           type: object
+        meetup:
+          properties:
+            username:
+              type: string
+            id:
+              type: string
+            lastUpdated:
+              $ref: '#/components/schemas/UNIXMilliTimestamp'
+          required:
+            - username
+            - id
+            - lastUpdated
+          additionalProperties: false
+          type: object
+        bluesky:
+          properties:
+            username:
+              type: string
+            id:
+              type: string
+            lastUpdated:
+              $ref: '#/components/schemas/UNIXMilliTimestamp'
+          required:
+            - username
+            - id
+            - lastUpdated
+          additionalProperties: false
+          type: object
+        facebook:
+          properties:
+            username:
+              type: string
+            id:
+              type: string
+            lastUpdated:
+              $ref: '#/components/schemas/UNIXMilliTimestamp'
+          required:
+            - username
+            - id
+            - lastUpdated
+          additionalProperties: false
+          type: object
+        googleCalendar:
+          properties:
+            username:
+              type: string
+            id:
+              type: string
+            lastUpdated:
+              $ref: '#/components/schemas/UNIXMilliTimestamp'
+          required:
+            - username
+            - id
+            - lastUpdated
+          additionalProperties: false
+          type: object
+        linkedIn:
+          properties:
+            username:
+              type: string
+            id:
+              type: string
+            lastUpdated:
+              $ref: '#/components/schemas/UNIXMilliTimestamp'
+          required:
+            - username
+            - id
+            - lastUpdated
+          additionalProperties: false
+          type: object
+        shopify:
+          properties:
+            username:
+              type: string
+            id:
+              type: string
+            lastUpdated:
+              $ref: '#/components/schemas/UNIXMilliTimestamp'
+          required:
+            - username
+            - id
+            - lastUpdated
+          additionalProperties: false
+          type: object
         telegram:
           properties:
             username:
@@ -3968,6 +4091,56 @@ components:
       additionalProperties: false
       description: ''
       type: object
+    iPointsActivityDoc:
+      properties:
+        _docId:
+          description: A unique stringified document ID
+          type: string
+        _id:
+          description: A unique document ID (Mongo DB ObjectID)
+          type: string
+        timestamp:
+          description: The timestamp of the activity.
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
+        block:
+          description: The block number of the activity.
+          $ref: '#/components/schemas/NumberType'
+        _notificationsHandled:
+          description: >-
+            Whether or not the notifications have been handled by the indexer or
+            not.
+          type: boolean
+        private:
+          description: Only for private purposes?
+          type: boolean
+        bitbadgesAddress:
+          description: The BitBadges address of the user who earned the points
+          examples: *ref_8
+          $ref: '#/components/schemas/BitBadgesAddress'
+        oldPoints:
+          description: The amount of points before the activity
+          $ref: '#/components/schemas/NumberType'
+        newPoints:
+          description: The amount of points after the activity
+          $ref: '#/components/schemas/NumberType'
+        groupId:
+          description: The group ID of the points activity
+          type: string
+        pageId:
+          description: The page ID of the points activity
+          type: string
+      required:
+        - _docId
+        - timestamp
+        - block
+        - bitbadgesAddress
+        - oldPoints
+        - newPoints
+        - groupId
+        - pageId
+      additionalProperties: false
+      description: ''
+      type: object
     iClaimAlertDoc:
       properties:
         _docId:
@@ -4280,6 +4453,9 @@ components:
         telegram:
           description: The Telegram username of the account
           type: string
+        bluesky:
+          description: The Bluesky username of the account
+          type: string
         readme:
           description: The readme of the account
           type: string
@@ -4370,6 +4546,9 @@ components:
         socialConnections:
           description: Social connections stored for the account
           $ref: '#/components/schemas/iSocialConnections'
+        publicSocialConnections:
+          description: Public social connections stored for the account
+          $ref: '#/components/schemas/iSocialConnections'
         approvedSignInMethods:
           properties:
             discord:
@@ -4423,6 +4602,22 @@ components:
               additionalProperties: false
               type: object
             twitter:
+              properties:
+                scopes:
+                  items:
+                    $ref: '#/components/schemas/OAuthScopeDetails'
+                  type: array
+                username:
+                  type: string
+                id:
+                  type: string
+              required:
+                - scopes
+                - username
+                - id
+              additionalProperties: false
+              type: object
+            facebook:
               properties:
                 scopes:
                   items:
@@ -5864,6 +6059,39 @@ components:
             - reported
           additionalProperties: false
           type: object
+        claims:
+          properties:
+            nsfw:
+              items:
+                properties:
+                  claimId:
+                    type: string
+                  reason:
+                    type: string
+                required:
+                  - claimId
+                  - reason
+                additionalProperties: false
+                type: object
+              type: array
+            reported:
+              items:
+                properties:
+                  claimId:
+                    type: string
+                  reason:
+                    type: string
+                required:
+                  - claimId
+                  - reason
+                additionalProperties: false
+                type: object
+              type: array
+          required:
+            - nsfw
+            - reported
+          additionalProperties: false
+          type: object
       required:
         - _docId
         - badges
@@ -6131,6 +6359,8 @@ components:
               type: string
             tutorialUri:
               type: string
+            testerUri:
+              type: string
           additionalProperties: false
           type: object
         verificationCall:
@@ -6167,11 +6397,19 @@ components:
               type: boolean
             passReddit:
               type: boolean
+            passBluesky:
+              type: boolean
+            passShopify:
+              type: boolean
+            passFacebook:
+              type: boolean
             passTelegram:
               type: boolean
             passFarcaster:
               type: boolean
             passSlack:
+              type: boolean
+            passMeetup:
               type: boolean
             postProcessingJs:
               type: string
@@ -7368,6 +7606,9 @@ components:
         telegram:
           description: The Telegram username of the account
           type: string
+        bluesky:
+          description: The Bluesky username of the account
+          type: string
         readme:
           description: The readme of the account
           type: string
@@ -7448,6 +7689,9 @@ components:
         socialConnections:
           description: Social connections stored for the account
           $ref: '#/components/schemas/iSocialConnections'
+        publicSocialConnections:
+          description: Public social connections stored for the account
+          $ref: '#/components/schemas/iSocialConnections'
         approvedSignInMethods:
           properties:
             discord:
@@ -7501,6 +7745,22 @@ components:
               additionalProperties: false
               type: object
             twitter:
+              properties:
+                scopes:
+                  items:
+                    $ref: '#/components/schemas/OAuthScopeDetails'
+                  type: array
+                username:
+                  type: string
+                id:
+                  type: string
+              required:
+                - scopes
+                - username
+                - id
+              additionalProperties: false
+              type: object
+            facebook:
               properties:
                 scopes:
                   items:
@@ -8564,6 +8824,9 @@ components:
         noGroups:
           description: If true, we will skip all group queries.
           type: boolean
+        noClaims:
+          description: If true, we will skip all claim queries.
+          type: boolean
         specificCollectionId:
           description: If true, we will limit collection results to a single collection.
           $ref: '#/components/schemas/NumberType'
@@ -8606,6 +8869,10 @@ components:
         groups:
           items:
             $ref: '#/components/schemas/iGroupDoc'
+          type: array
+        claims:
+          items:
+            $ref: '#/components/schemas/iClaimDetails'
           type: array
       required:
         - collections
@@ -8767,6 +9034,9 @@ components:
           type: string
         telegram:
           description: The Telegram username.
+          type: string
+        bluesky:
+          description: The Bluesky username.
           type: string
         seenActivity:
           description: The last seen activity timestamp.
@@ -8953,6 +9223,22 @@ components:
                 - id
               additionalProperties: false
               type: object
+            facebook:
+              properties:
+                scopes:
+                  items:
+                    $ref: '#/components/schemas/OAuthScopeDetails'
+                  type: array
+                username:
+                  type: string
+                id:
+                  type: string
+              required:
+                - scopes
+                - username
+                - id
+              additionalProperties: false
+              type: object
             addresses:
               items:
                 properties:
@@ -8998,10 +9284,29 @@ components:
             The social connections for the user. Only returned if user is
             authenticated with full access.
           $ref: '#/components/schemas/iSocialConnections'
+        publicSocialConnectionsToSet:
+          items:
+            properties:
+              appName:
+                type: string
+              toDelete:
+                type: boolean
+            required:
+              - appName
+            additionalProperties: false
+            type: object
+          description: >-
+            The public social connections for the user. Will be returned for all
+            queries and may be publicly displayed on profile
+          type: array
       additionalProperties: false
       description: ''
       type: object
     iUpdateAccountInfoSuccessResponse:
+      properties:
+        verificationEmailSent:
+          description: Verificatiom email sent?
+          type: boolean
       additionalProperties: false
       type: object
     AddBalancesToOffChainStoragePayload:
@@ -9379,6 +9684,66 @@ components:
           additionalProperties: false
           description: Signed in with Reddit?
           type: object
+        meetup:
+          properties:
+            username:
+              type: string
+            id:
+              type: string
+          required:
+            - username
+            - id
+          additionalProperties: false
+          description: Signed in with Meetup?
+          type: object
+        bluesky:
+          properties:
+            username:
+              type: string
+            id:
+              type: string
+          required:
+            - username
+            - id
+          additionalProperties: false
+          description: Signed in with Bluesky?
+          type: object
+        facebook:
+          properties:
+            username:
+              type: string
+            id:
+              type: string
+          required:
+            - username
+            - id
+          additionalProperties: false
+          description: Signed in with Facebook?
+          type: object
+        linkedIn:
+          properties:
+            username:
+              type: string
+            id:
+              type: string
+          required:
+            - username
+            - id
+          additionalProperties: false
+          description: Signed in with LinkedIn?
+          type: object
+        shopify:
+          properties:
+            username:
+              type: string
+            id:
+              type: string
+          required:
+            - username
+            - id
+          additionalProperties: false
+          description: Signed in with Shopify?
+          type: object
         telegram:
           properties:
             username:
@@ -9427,6 +9792,18 @@ components:
           additionalProperties: false
           description: Signed in with Youtube?
           type: object
+        googleCalendar:
+          properties:
+            id:
+              type: string
+            username:
+              type: string
+          required:
+            - id
+            - username
+          additionalProperties: false
+          description: Signed in with Google Calendar?
+          type: object
       required:
         - signedIn
         - scopes
@@ -9462,6 +9839,15 @@ components:
         signOutReddit:
           description: Sign out of Reddit
           type: boolean
+        signOutMeetup:
+          description: Sign out of Meetup
+          type: boolean
+        signOutBluesky:
+          description: Sign out of Bluesky
+          type: boolean
+        signOutGoogleCalendar:
+          description: Sign out of Google Calendar
+          type: boolean
         signOutTelegram:
           description: Sign out of Telegram
           type: boolean
@@ -9473,6 +9859,15 @@ components:
           type: boolean
         signOutEmail:
           description: Sign out of email
+          type: boolean
+        signOutFacebook:
+          description: Sign out of Facebook
+          type: boolean
+        signOutLinkedIn:
+          description: Sign out of LinkedIn
+          type: boolean
+        signOutShopify:
+          description: Sign out of Shopify
           type: boolean
       required:
         - signOutBlockin
@@ -9494,6 +9889,7 @@ components:
             - activity
             - groups
             - claimActivity
+            - pointsActivity
           type: string
         filters:
           properties:
@@ -9574,6 +9970,10 @@ components:
         claimActivity:
           items:
             $ref: '#/components/schemas/iClaimActivityDoc'
+          type: array
+        pointsActivity:
+          items:
+            $ref: '#/components/schemas/iPointsActivityDoc'
           type: array
       required:
         - collections
@@ -10732,6 +11132,8 @@ components:
               type: string
             tutorialUri:
               type: string
+            testerUri:
+              type: string
           additionalProperties: false
           type: object
         publicParamsSchema:
@@ -10776,11 +11178,19 @@ components:
               type: boolean
             passReddit:
               type: boolean
+            passMeetup:
+              type: boolean
+            passFacebook:
+              type: boolean
             passTelegram:
               type: boolean
             passFarcaster:
               type: boolean
             passSlack:
+              type: boolean
+            passShopify:
+              type: boolean
+            passBluesky:
               type: boolean
             postProcessingJs:
               type: string
@@ -10994,6 +11404,8 @@ components:
                         type: string
                       tutorialUri:
                         type: string
+                      testerUri:
+                        type: string
                     additionalProperties: false
                     type: object
                   publicParamsSchema:
@@ -11038,11 +11450,19 @@ components:
                         type: boolean
                       passReddit:
                         type: boolean
+                      passMeetup:
+                        type: boolean
+                      passFacebook:
+                        type: boolean
                       passTelegram:
                         type: boolean
                       passFarcaster:
                         type: boolean
                       passSlack:
+                        type: boolean
+                      passShopify:
+                        type: boolean
+                      passBluesky:
                         type: boolean
                       postProcessingJs:
                         type: string
@@ -11356,77 +11776,6 @@ components:
       type: object
     CreateClaimRequest:
       properties:
-        claimId:
-          description: Unique claim ID.
-          type: string
-        createdBy:
-          description: The original creator of the claim
-          $ref: '#/components/schemas/BitBadgesAddress'
-        collectionId:
-          description: Collection ID that the claim is for (if applicable).
-          $ref: '#/components/schemas/NumberType'
-        siwbbClaim:
-          description: Is intended to be used for Sign In with BitBadges.
-          type: boolean
-        listId:
-          description: Address list ID that the claim is for (if applicable).
-          type: string
-          examples: *ref_11
-        trackerDetails:
-          description: The tracker details for the claim.
-          $ref: '#/components/schemas/iChallengeTrackerIdDetails'
-        balancesToSet:
-          description: >-
-            The balances to set for the claim. Only used for claims for
-            collections that have off-chain indexed balances and are assigning
-            balances based on the claim.
-          $ref: '#/components/schemas/iPredeterminedBalances'
-        rewards:
-          items:
-            $ref: '#/components/schemas/iClaimReward'
-          description: Rewards for the claim.
-          type: array
-        estimatedCost:
-          description: Estimated cost for the claim.
-          type: string
-        showInSearchResults:
-          description: If true, the claim will be shown in search results
-          type: boolean
-        categories:
-          items:
-            type: string
-          description: The categories of the claim
-          type: array
-        estimatedTime:
-          description: Estimated time to satisfy the claim's requirements.
-          type: string
-        manualDistribution:
-          description: >-
-            If manual distribution is enabled, we do not handle any distribution
-            of claim codes. We leave that up to the claim creator.
-          type: boolean
-        approach:
-          description: >-
-            Whether the claim is expected to be automatically triggered by
-            someone (not the user).
-          type: string
-        seedCode:
-          description: Seed code for the claim.
-          type: string
-        metadata:
-          description: Metadata for the claim.
-          $ref: '#/components/schemas/iMetadata'
-        assignMethod:
-          description: >-
-            Algorithm to determine the claim number order. Blank is just
-            incrementing claim numbers.
-          type: string
-        lastUpdated:
-          description: Last updated timestamp for the claim.
-          $ref: '#/components/schemas/NumberType'
-        satisfyMethod:
-          description: Custom satisfaction logic
-          $ref: '#/components/schemas/iSatisfyMethod'
         cid:
           type: string
         plugins:
@@ -11434,80 +11783,11 @@ components:
             $ref: '#/components/schemas/ManagePluginRequest'
           type: array
       required:
-        - claimId
         - plugins
       additionalProperties: false
       type: object
     UpdateClaimRequest:
       properties:
-        claimId:
-          description: Unique claim ID.
-          type: string
-        createdBy:
-          description: The original creator of the claim
-          $ref: '#/components/schemas/BitBadgesAddress'
-        collectionId:
-          description: Collection ID that the claim is for (if applicable).
-          $ref: '#/components/schemas/NumberType'
-        siwbbClaim:
-          description: Is intended to be used for Sign In with BitBadges.
-          type: boolean
-        listId:
-          description: Address list ID that the claim is for (if applicable).
-          type: string
-          examples: *ref_11
-        trackerDetails:
-          description: The tracker details for the claim.
-          $ref: '#/components/schemas/iChallengeTrackerIdDetails'
-        balancesToSet:
-          description: >-
-            The balances to set for the claim. Only used for claims for
-            collections that have off-chain indexed balances and are assigning
-            balances based on the claim.
-          $ref: '#/components/schemas/iPredeterminedBalances'
-        rewards:
-          items:
-            $ref: '#/components/schemas/iClaimReward'
-          description: Rewards for the claim.
-          type: array
-        estimatedCost:
-          description: Estimated cost for the claim.
-          type: string
-        showInSearchResults:
-          description: If true, the claim will be shown in search results
-          type: boolean
-        categories:
-          items:
-            type: string
-          description: The categories of the claim
-          type: array
-        estimatedTime:
-          description: Estimated time to satisfy the claim's requirements.
-          type: string
-        manualDistribution:
-          description: >-
-            If manual distribution is enabled, we do not handle any distribution
-            of claim codes. We leave that up to the claim creator.
-          type: boolean
-        approach:
-          description: >-
-            Whether the claim is expected to be automatically triggered by
-            someone (not the user).
-          type: string
-        metadata:
-          description: Metadata for the claim.
-          $ref: '#/components/schemas/iMetadata'
-        assignMethod:
-          description: >-
-            Algorithm to determine the claim number order. Blank is just
-            incrementing claim numbers.
-          type: string
-        lastUpdated:
-          description: Last updated timestamp for the claim.
-          $ref: '#/components/schemas/NumberType'
-        satisfyMethod:
-          description: Custom satisfaction logic
-          $ref: '#/components/schemas/iSatisfyMethod'
         cid:
           type: string
         plugins:
@@ -11515,7 +11795,6 @@ components:
             $ref: '#/components/schemas/ManagePluginRequest'
           type: array
       required:
-        - claimId
         - plugins
       additionalProperties: false
       type: object
@@ -11565,6 +11844,9 @@ components:
         handlerId:
           description: The handler ID for the dynamic data bin
           type: string
+          examples: &ref_27
+            - email
+            - addresses
         label:
           description: The label of the dynamic data bin
           type: string
@@ -11598,6 +11880,26 @@ components:
             The pagination bookmark to start from. Only applicable if a single
             dynamic data ID is provided.
           type: string
+        options:
+          properties:
+            lookupType:
+              enum:
+                - id
+                - username
+              description: >-
+                The type of lookup to perform (if applicable). Otherwise, leave
+                blank.
+              type: string
+            key:
+              description: The item to search for.
+              type: string
+          required:
+            - key
+          additionalProperties: false
+          description: >-
+            The options for the lookup. Only usable if you specify a dynamic
+            data ID.
+          type: object
       additionalProperties: false
       type: object
     iGetDynamicDataBinsSuccessResponse:
@@ -11671,6 +11973,8 @@ components:
         actionName:
           description: The name of the action to perform
           type: string
+          examples: &ref_26
+            - add
         payload:
           description: The payload for this specific action
           $ref: '#/components/schemas/PerformBinActionPayload'
@@ -11698,6 +12002,7 @@ components:
               actionName:
                 description: The name of the action to perform
                 type: string
+                examples: *ref_26
               payload:
                 $ref: '#/components/schemas/PerformBinActionPayload'
                 description: The payload for this specific action
@@ -11739,6 +12044,7 @@ components:
               actionName:
                 description: The name of the action to perform
                 type: string
+                examples: *ref_26
               payload:
                 description: The payload for this specific action
             required:
@@ -11760,6 +12066,7 @@ components:
         actionName:
           description: The name of the action to perform
           type: string
+          examples: *ref_26
         payload:
           description: The payload for this specific action
           $ref: '#/components/schemas/PerformBinActionPayload'
@@ -11793,6 +12100,7 @@ components:
                 type: string
               handlerId:
                 type: string
+                examples: *ref_27
               actions:
                 items: {}
                 type: array
@@ -12006,6 +12314,44 @@ components:
           type: object
       required:
         - values
+        - pagination
+      additionalProperties: false
+      type: object
+    GetPointsActivityPayload:
+      properties:
+        groupId:
+          description: The group ID to get points activity for
+          type: string
+        pageId:
+          description: The page ID to get points activity for
+          type: string
+        bookmark:
+          description: The pagination bookmark to start from
+          type: string
+      required:
+        - groupId
+        - pageId
+      additionalProperties: false
+      type: object
+    iGetPointsActivitySuccessResponse:
+      properties:
+        docs:
+          items:
+            $ref: '#/components/schemas/iPointsActivityDoc'
+          type: array
+        pagination:
+          properties:
+            bookmark:
+              type: string
+            hasMore:
+              type: boolean
+          required:
+            - bookmark
+            - hasMore
+          additionalProperties: false
+          type: object
+      required:
+        - docs
         - pagination
       additionalProperties: false
       type: object
@@ -13561,7 +13907,7 @@ components:
           items:
             $ref: '#/components/schemas/iUintRange'
           type: array
-          examples: &ref_31
+          examples: &ref_33
             - - start: '1713301889'
                 end: '2000000000'
             - - start: '1'
@@ -14122,7 +14468,7 @@ components:
         toListId:
           description: The list ID of the to addresses of the approved outgoing transfers.
           type: string
-          examples: &ref_33
+          examples: &ref_35
             - customOrReservedListId
             - Mint
             - All
@@ -14134,7 +14480,7 @@ components:
             The list ID of the initiatedBy addresses of the approved outgoing
             transfers.
           type: string
-          examples: &ref_27
+          examples: &ref_29
             - customOrReservedListId
             - Mint
             - All
@@ -14146,7 +14492,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The transfer times of the approved outgoing transfers.
           type: array
-          examples: &ref_28
+          examples: &ref_30
             - - start: '1713301889'
                 end: '2000000000'
             - - start: '1'
@@ -14162,7 +14508,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The owned times of the approved outgoing transfers.
           type: array
-          examples: *ref_26
+          examples: *ref_28
         approvalId:
           description: >-
             The approval ID of the approved outgoing transfers. Can use "All" to
@@ -14174,7 +14520,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The permitted times of the approved outgoing transfers.
           type: array
-          examples: &ref_29
+          examples: &ref_31
             - - start: '1713301889'
                 end: '2000000000'
             - - start: '1'
@@ -14184,7 +14530,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The forbidden times of the approved outgoing transfers.
           type: array
-          examples: &ref_30
+          examples: &ref_32
             - - start: '1713301889'
                 end: '2000000000'
             - - start: '1'
@@ -14209,7 +14555,7 @@ components:
             The list ID of the from addresses of the approved incoming
             transfers.
           type: string
-          examples: &ref_32
+          examples: &ref_34
             - customOrReservedListId
             - Mint
             - All
@@ -14221,7 +14567,7 @@ components:
             The list ID of the initiatedBy addresses of the approved incoming
             transfers.
           type: string
-          examples: *ref_27
+          examples: *ref_29
         initiatedByList:
           $ref: '#/components/schemas/iAddressList'
         transferTimes:
@@ -14229,7 +14575,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The transfer times of the approved incoming transfers.
           type: array
-          examples: *ref_28
+          examples: *ref_30
         badgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
@@ -14241,7 +14587,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The owned times of the approved incoming transfers.
           type: array
-          examples: *ref_26
+          examples: *ref_28
         approvalId:
           description: >-
             The approval ID of the approved incoming transfers. Can use "All" to
@@ -14253,13 +14599,13 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The permitted times of the approved incoming transfers.
           type: array
-          examples: *ref_29
+          examples: *ref_31
         permanentlyForbiddenTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The forbidden times of the approved incoming transfers.
           type: array
-          examples: *ref_30
+          examples: *ref_32
       required:
         - fromListId
         - fromList
@@ -14345,13 +14691,13 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The permitted times of the permission.
           type: array
-          examples: *ref_29
+          examples: *ref_31
         permanentlyForbiddenTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The forbidden times of the permission.
           type: array
-          examples: *ref_30
+          examples: *ref_32
       required:
         - permanentlyPermittedTimes
         - permanentlyForbiddenTimes
@@ -14364,19 +14710,19 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The timeline times that the permission applies to.
           type: array
-          examples: *ref_31
+          examples: *ref_33
         permanentlyPermittedTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The permitted times of the permission.
           type: array
-          examples: *ref_29
+          examples: *ref_31
         permanentlyForbiddenTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The forbidden times of the permission.
           type: array
-          examples: *ref_30
+          examples: *ref_32
       required:
         - timelineTimes
         - permanentlyPermittedTimes
@@ -14396,13 +14742,13 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The permitted times of the permission.
           type: array
-          examples: *ref_29
+          examples: *ref_31
         permanentlyForbiddenTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The forbidden times of the permission.
           type: array
-          examples: *ref_30
+          examples: *ref_32
       required:
         - badgeIds
         - permanentlyPermittedTimes
@@ -14416,7 +14762,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The timeline times that the permission applies to.
           type: array
-          examples: *ref_31
+          examples: *ref_33
         badgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
@@ -14428,13 +14774,13 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The permitted times of the permission.
           type: array
-          examples: *ref_29
+          examples: *ref_31
         permanentlyForbiddenTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The forbidden times of the permission.
           type: array
-          examples: *ref_30
+          examples: *ref_32
       required:
         - timelineTimes
         - badgeIds
@@ -14447,19 +14793,19 @@ components:
         fromListId:
           description: The list ID of the from addresses of the approved transfers.
           type: string
-          examples: *ref_32
+          examples: *ref_34
         fromList:
           $ref: '#/components/schemas/iAddressList'
         toListId:
           description: The list ID of the to addresses of the approved transfers.
           type: string
-          examples: *ref_33
+          examples: *ref_35
         toList:
           $ref: '#/components/schemas/iAddressList'
         initiatedByListId:
           description: The list ID of the initiatedBy addresses of the approved transfers.
           type: string
-          examples: *ref_27
+          examples: *ref_29
         initiatedByList:
           $ref: '#/components/schemas/iAddressList'
         transferTimes:
@@ -14467,7 +14813,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The transfer times of the approved transfers.
           type: array
-          examples: *ref_28
+          examples: *ref_30
         badgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
@@ -14479,7 +14825,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The owned times of the approved transfers.
           type: array
-          examples: *ref_26
+          examples: *ref_28
         approvalId:
           description: >-
             The approval ID of the approved transfers. Can use "All" to
@@ -14491,13 +14837,13 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The permitted times of this permission.
           type: array
-          examples: *ref_29
+          examples: *ref_31
         permanentlyForbiddenTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The forbidden times of this permission.
           type: array
-          examples: *ref_30
+          examples: *ref_32
       required:
         - fromListId
         - fromList
@@ -15020,7 +15366,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The range of the times that the badges must be owned.
           type: array
-          examples: *ref_26
+          examples: *ref_28
         badgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
@@ -15060,7 +15406,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The times that the badge is owned from.
           type: array
-          examples: *ref_26
+          examples: *ref_28
       required:
         - amount
         - badgeIds
@@ -15333,7 +15679,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The times of the timeline item. Times in a timeline cannot overlap.
           type: array
-          examples: *ref_31
+          examples: *ref_33
       required:
         - timelineTimes
       additionalProperties: false
@@ -15345,7 +15691,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The times of the timeline item. Times in a timeline cannot overlap.
           type: array
-          examples: *ref_31
+          examples: *ref_33
         manager:
           description: The manager of the collection.
           $ref: '#/components/schemas/BitBadgesAddress'
@@ -15361,7 +15707,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The times of the timeline item. Times in a timeline cannot overlap.
           type: array
-          examples: *ref_31
+          examples: *ref_33
         collectionMetadata:
           description: The collection metadata, with off-chain details populated.
           $ref: '#/components/schemas/iCollectionMetadataDetails'
@@ -15377,7 +15723,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The times of the timeline item. Times in a timeline cannot overlap.
           type: array
-          examples: *ref_31
+          examples: *ref_33
         badgeMetadata:
           items:
             $ref: '#/components/schemas/iBadgeMetadataDetails'
@@ -15395,7 +15741,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The times of the timeline item. Times in a timeline cannot overlap.
           type: array
-          examples: *ref_31
+          examples: *ref_33
         offChainBalancesMetadata:
           description: The off-chain balances metadata.
           $ref: '#/components/schemas/iOffChainBalancesMetadata'
@@ -15411,7 +15757,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The times of the timeline item. Times in a timeline cannot overlap.
           type: array
-          examples: *ref_31
+          examples: *ref_33
         customData:
           description: Arbitrary custom data.
           type: string
@@ -15427,7 +15773,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The times of the timeline item. Times in a timeline cannot overlap.
           type: array
-          examples: *ref_31
+          examples: *ref_33
         standards:
           items:
             type: string
@@ -15445,7 +15791,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The times of the timeline item. Times in a timeline cannot overlap.
           type: array
-          examples: *ref_31
+          examples: *ref_33
         isArchived:
           description: Whether the collection is archived.
           type: boolean
@@ -15458,19 +15804,19 @@ components:
       properties:
         toListId:
           type: string
-          examples: *ref_33
+          examples: *ref_35
         toList:
           $ref: '#/components/schemas/iAddressList'
         initiatedByListId:
           type: string
-          examples: *ref_27
+          examples: *ref_29
         initiatedByList:
           $ref: '#/components/schemas/iAddressList'
         transferTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           type: array
-          examples: *ref_28
+          examples: *ref_30
         badgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
@@ -15480,7 +15826,7 @@ components:
           items:
             $ref: '#/components/schemas/iUintRange'
           type: array
-          examples: *ref_26
+          examples: *ref_28
         approvalId:
           type: string
         uri:
@@ -15742,13 +16088,13 @@ components:
         fromListId:
           description: The list ID for the user(s) who is sending the badges.
           type: string
-          examples: *ref_32
+          examples: *ref_34
         fromList:
           $ref: '#/components/schemas/iAddressList'
         initiatedByListId:
           description: The list ID for the user(s) who initiate the transfer.
           type: string
-          examples: *ref_27
+          examples: *ref_29
         initiatedByList:
           $ref: '#/components/schemas/iAddressList'
         transferTimes:
@@ -15756,7 +16102,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The times of the transfer transaction.
           type: array
-          examples: *ref_28
+          examples: *ref_30
         badgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
@@ -15768,7 +16114,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The ownership times of the badges being transferred.
           type: array
-          examples: *ref_26
+          examples: *ref_28
         approvalId:
           description: >-
             The ID of the approval. Must not be a duplicate of another approval
@@ -15845,19 +16191,19 @@ components:
         toListId:
           description: The list ID for the user(s) who is receiving the badges.
           type: string
-          examples: *ref_33
+          examples: *ref_35
         toList:
           $ref: '#/components/schemas/iAddressList'
         fromListId:
           description: The list ID for the user(s) who is sending the badges.
           type: string
-          examples: *ref_32
+          examples: *ref_34
         fromList:
           $ref: '#/components/schemas/iAddressList'
         initiatedByListId:
           description: The list ID for the user(s) who initiate the transfer.
           type: string
-          examples: *ref_27
+          examples: *ref_29
         initiatedByList:
           $ref: '#/components/schemas/iAddressList'
         transferTimes:
@@ -15865,7 +16211,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The times of the transfer transaction.
           type: array
-          examples: *ref_28
+          examples: *ref_30
         badgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
@@ -15877,7 +16223,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The ownership times of the badges being transferred.
           type: array
-          examples: *ref_26
+          examples: *ref_28
         approvalId:
           description: >-
             The ID of the approval. Must not be a duplicate of another approval
@@ -16025,7 +16371,13 @@ components:
         - strava
         - youtube
         - reddit
+        - facebook
+        - bluesky
+        - googleCalendar
         - telegram
         - farcaster
+        - meetup
         - slack
+        - linkedIn
+        - shopify
       type: string

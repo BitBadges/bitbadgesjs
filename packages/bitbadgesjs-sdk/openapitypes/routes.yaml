@@ -2749,6 +2749,46 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CalculatePointsPayload'
+  /groups/points/activity:
+    post:
+      operationId: getPointsActivity
+      summary: Get Points Activity
+      tags:
+        - Groups
+      description: |-
+        Fetches points activity for a group.
+
+        ```tsx
+        await BitBadgesApi.getPointsActivity(...);
+        ```
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetPointsActivitySuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      security:
+        - apiKey: []
+      x-internal: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetPointsActivityPayload'
+
 components:
   responses:
     ErrorResponse:

@@ -124,6 +124,7 @@ import {
   GetGroupsSuccessResponse,
   GetPluginPayload,
   GetPluginSuccessResponse,
+  GetPointsActivitySuccessResponse,
   GetReservedClaimCodesPayload,
   GetReservedClaimCodesSuccessResponse,
   GetSIWBBRequestsForDeveloperAppPayload,
@@ -187,6 +188,8 @@ import {
   iGetClaimAttemptStatusSuccessResponse,
   iGetClaimsSuccessResponse,
   iGetDynamicDataBinsSuccessResponse,
+  GetPointsActivityPayload,
+  iGetPointsActivitySuccessResponse,
   iGetReservedClaimCodesSuccessResponse,
   iGetSIWBBRequestsForDeveloperAppSuccessResponse,
   iGetSearchSuccessResponse,
@@ -1706,6 +1709,31 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
         payload
       );
       return new CalculatePointsSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Gets points activity for a group.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/groups/points/activity`
+   * - **SDK Function Call**: `await BitBadgesApi.getPointsActivity(payload);`
+   */
+  public async getPointsActivity<T extends NumberType>(payload: GetPointsActivityPayload): Promise<GetPointsActivitySuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<GetPointsActivityPayload> = typia.validate<GetPointsActivityPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.post<iGetPointsActivitySuccessResponse<T>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetPointsActivityRoute()}`,
+        payload
+      );
+      return new GetPointsActivitySuccessResponse<T>(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
