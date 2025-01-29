@@ -688,6 +688,7 @@ export class BitBadgesCollection<T extends NumberType>
     options: { collectionId: NumberType } & GetMetadataForCollectionPayload & GetAdditionalCollectionDetailsPayload
   ) {
     const collection = await BitBadgesCollection.GetCollections(api, { collectionsToFetch: [options] }).then((x) => x.collections[0]);
+    if (!collection) throw new Error('No collection found');
     return new BitBadgesCollection(collection);
   }
 
@@ -748,7 +749,7 @@ export class BitBadgesCollection<T extends NumberType>
     collectionsToFetch: ({ collectionId: NumberType } & GetMetadataForCollectionPayload & GetAdditionalCollectionDetailsPayload)[]
   ) {
     const collection = await BitBadgesCollection.GetCollections(api, { collectionsToFetch: collectionsToFetch });
-    return collection.collections.map((x) => new BitBadgesCollection(x));
+    return collection.collections.map((x) => (x ? new BitBadgesCollection(x) : undefined));
   }
 
   /**
@@ -870,6 +871,8 @@ export class BitBadgesCollection<T extends NumberType>
     const collection = await BitBadgesCollection.GetCollections(api, {
       collectionsToFetch: [{ collectionId: this.collectionId, ...options }]
     }).then((x) => x.collections[0]);
+    if (!collection) throw new Error('No collection found');
+
     this.updateWithNewResponse(collection, forceful);
   }
 
@@ -1486,24 +1489,24 @@ export interface GetCollectionsPayload {
  * @category API Requests / Responses
  */
 export interface iGetCollectionsSuccessResponse<T extends NumberType> {
-  collections: iBitBadgesCollection<T>[];
+  collections: (iBitBadgesCollection<T> | undefined)[];
 }
 
 export class GetCollectionsSuccessResponse<T extends NumberType>
   extends BaseNumberTypeClass<GetCollectionsSuccessResponse<T>>
   implements iGetCollectionsSuccessResponse<T>
 {
-  collections: BitBadgesCollection<T>[];
+  collections: (BitBadgesCollection<T> | undefined)[];
 
   constructor(data: iGetCollectionsSuccessResponse<T>) {
     super();
-    this.collections = data.collections.map((collection) => new BitBadgesCollection(collection));
+    this.collections = data.collections.map((collection) => (collection ? new BitBadgesCollection(collection) : undefined));
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetCollectionsSuccessResponse<U> {
     return new GetCollectionsSuccessResponse(
       deepCopyPrimitives({
-        collections: this.collections.map((collection) => collection.convert(convertFunction))
+        collections: this.collections.map((collection) => (collection ? collection.convert(convertFunction) : undefined))
       })
     );
   }

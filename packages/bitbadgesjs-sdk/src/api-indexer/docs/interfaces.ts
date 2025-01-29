@@ -2,6 +2,7 @@
 
 import type { Doc } from '@/api-indexer/base.js';
 import type { iMetadata } from '@/api-indexer/metadata/metadata.js';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
 import type { JSPrimitiveNumberType, NumberType } from '@/common/string-numbers.js';
 import type { SupportedChain } from '@/common/types.js';
 import type { iApprovalInfoDetails, iChallengeDetails, iUserOutgoingApprovalWithDetails } from '@/core/approvals.js';
@@ -28,7 +29,6 @@ import type {
 import type { iCollectionPermissions, iUserPermissionsWithDetails } from '@/interfaces/badges/permissions.js';
 import type { iUserBalanceStore } from '@/interfaces/badges/userBalances.js';
 import type { iMap, iValueStore } from '@/transactions/messages/bitbadges/maps/index.js';
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
 
 /**
  * @category API Requests / Responses
@@ -714,7 +714,6 @@ export type ClaimIntegrationPluginType =
   | 'strava'
   | 'googleCalendar'
   | 'reddit'
-  | 'meetup'
   | 'bluesky'
   | 'facebook'
   | 'linkedIn'
@@ -784,7 +783,6 @@ type OauthAppName =
   | 'googleCalendar'
   | 'telegram'
   | 'farcaster'
-  | 'meetup'
   | 'slack'
   | 'linkedIn'
   | 'shopify';
@@ -936,13 +934,18 @@ export type ClaimIntegrationPrivateParamsType<T extends ClaimIntegrationPluginTy
 export type ClaimIntegrationPublicStateType<T extends ClaimIntegrationPluginType> = T extends 'numUses'
   ? {
       numUses?: number;
+      usedClaimNumbers?: iUintRange<JSPrimitiveNumberType>[];
+      /**
+       * Note: This currently returns all users, but in the future, we will only return relevant users requested.
+       */
       claimedUsers?: {
         [bitbadgesAddress: string]: number[];
       };
     }
   : T extends 'codes'
     ? {
-        usedCodeIndices?: string[];
+        /** The ranges of the codes that have been used */
+        usedCodeRanges?: iUintRange<JSPrimitiveNumberType>[];
       }
     : Record<string, any>;
 
@@ -1081,21 +1084,27 @@ export interface iGroupPage<T extends NumberType> {
 
   /** Quests to display in the page */
   quests?: iTierWithOptionalWeight<T>[];
+}
 
-  /** The events in the group */
-  events?: iEvent<T>[];
+/**
+ * @category Interfaces
+ */
+export interface iApiKeyDoc extends Doc {
+  tier?: string;
+  label: string;
+  apiKey: string;
+  bitbadgesAddress: string;
+  numRequests: number;
+  lastRequest: number;
+  createdAt: number;
+  expiry: number;
+  intendedUse: string;
 
-  /** The collection IDs in the group */
-  collectionIds?: T[];
-
-  /** The claim IDs in the group */
-  claimIds?: string[];
-
-  /** The address list IDs in the group */
-  listIds?: string[];
-
-  /** Mapping IDs in the group */
-  mapIds?: string[];
+  // Stripe-related fields
+  stripeSubscriptionId?: string;
+  subscriptionStatus?: string;
+  currentPeriodEnd?: number;
+  cancelAtPeriodEnd?: boolean;
 }
 
 /**
@@ -1121,6 +1130,131 @@ export interface iGroupDoc<T extends NumberType> extends Doc {
 
   /** The pages for the group */
   pages: iGroupPage<T>[];
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iUtilityListingDoc<T extends NumberType> extends Doc {
+  /** The listing ID */
+  listingId: string;
+
+  /**
+   * Type of the listing
+   */
+  type: string;
+
+  /** The BitBadges address of the user who created this listing */
+  createdBy: BitBadgesAddress;
+
+  /** The direct link for the listing. If specified, we will skip the entire content / listing page. Thus, content and links should be empty []. */
+  directLink?: string | undefined;
+
+  /** The time the listing was created */
+  createdAt: UNIXMilliTimestamp<T>;
+
+  /** The overall metadata for the listing */
+  metadata: iMetadata<T>;
+
+  /** The paginated content for the listing */
+  content: iUtilityListingContent[];
+
+  /** The relevant links for the listing */
+  links: iUtilityListingLink<T>[];
+
+  /** Optional time range for when the listing should be shown */
+  displayTimes?: iUintRange<T> | undefined;
+
+  /** Visibility state of the listing */
+  visibility: 'public' | 'private' | 'unlisted';
+
+  /** The categories of the listing */
+  categories: string[];
+
+  /** Approval status - can be used for moderation */
+  approvalStatus: {
+    /** Whether the listing is approved */
+    isApproved: boolean;
+    /** Rejected or just pending */
+    rejected?: boolean;
+    /** Optional reason if not approved */
+    reason?: string;
+    /** Address of who last updated the approval status */
+    updatedBy?: BitBadgesAddress;
+  };
+
+  /** The total view count for this listing. This is updated periodically from the view tracking document. */
+  viewCount?: T;
+
+  /** Optional breakdown of views by time period for trending calculations */
+  viewsByPeriod?: {
+    /** Views in the last hour */
+    hourly: number;
+    /** Views in the last 24 hours */
+    daily: number;
+    /** Views in the last 7 days */
+    weekly: number;
+    /** Views in the last 30 days */
+    monthly: number;
+  };
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iUtilityListingContent {
+  /** The type of content */
+  type: string;
+  /** Label for the content page */
+  label: string;
+  /** The content - markdown supported */
+  content: string;
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iUtilityListingLink<T extends NumberType> {
+  /** The URL of the link */
+  url: string;
+  /** The claim ID to link to */
+  claimId?: string;
+  /** The group ID to link to */
+  groupId?: string;
+  /** The collection ID to link to */
+  collectionId?: T;
+  /** The address list ID to link to */
+  listId?: string;
+  /** The map ID to link to */
+  mapId?: string;
+  /** Metadata for the link. Only applicable if the link is to a non-BitBadges entity. In other words, not tied to a specific claim, group, collection, etc. */
+  metadata?: iMetadata<T>;
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iListingViewsDoc<T extends NumberType> extends Doc {
+  /** The listing ID this view count is for */
+  listingId: string;
+
+  /** The total number of views */
+  viewCount: T;
+
+  /** The last time this view count was updated */
+  lastUpdated: UNIXMilliTimestamp<T>;
+
+  /** Optional breakdown of views by time period for trending calculations */
+  viewsByPeriod?: {
+    /** Views in the last hour */
+    hourly: number;
+    /** Views in the last 24 hours */
+    daily: number;
+    /** Views in the last 7 days */
+    weekly: number;
+    /** Views in the last 30 days */
+    monthly: number;
+  };
 }
 
 /**
@@ -1413,6 +1547,10 @@ export interface iComplianceDoc<T extends NumberType> extends Doc {
   claims?: {
     nsfw: { claimId: string; reason: string }[];
     reported: { claimId: string; reason: string }[];
+  };
+  maps?: {
+    nsfw: { mapId: string; reason: string }[];
+    reported: { mapId: string; reason: string }[];
   };
 }
 
@@ -1765,7 +1903,7 @@ export interface iClaimDetails<T extends NumberType> {
   /** Collection ID that the claim is for (if applicable). */
   collectionId?: T;
   /** Is intended to be used for Sign In with BitBadges. */
-  siwbbClaim?: boolean;
+  standaloneClaim?: boolean;
   /** Address list ID that the claim is for (if applicable). */
   listId?: string;
   /** The tracker details for the claim. */

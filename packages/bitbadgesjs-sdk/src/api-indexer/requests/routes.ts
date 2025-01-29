@@ -34,7 +34,10 @@ export class BitBadgesApiRoutes {
   static SimulateClaimRoute = (claimId: string, address: NativeAddress) => `/api/v0/claims/simulate/${claimId.toString()}/${address}`;
   static GetReservedClaimCodesRoute = (claimId: string, address: NativeAddress) => `/api/v0/claims/reserved/${claimId.toString()}/${address}`;
   static GetClaimAttemptStatusRoute = (claimAttemptId: string) => `/api/v0/claims/status/${claimAttemptId.toString()}`;
+  static GetClaimAttemptsRoute = (claimId: string) => `/api/v0/claims/${claimId.toString()}/attempts`;
   static GetGatedContentForClaimRoute = (claimId: string) => `/api/v0/claims/gatedContent/${claimId.toString()}`;
+
+  static GetPluginErrorsRoute = () => `/api/v0/plugins/errors`;
 
   static GetClaimsRoute = () => '/api/v0/claims/fetch';
   static CRUDClaimsRoute = () => `/api/v0/claims`;
@@ -48,6 +51,9 @@ export class BitBadgesApiRoutes {
   static GetAccountsRoute = () => '/api/v0/users';
   static UpdateAccountInfoRoute = () => '/api/v0/user/updateAccount';
 
+  static GetApiKeysRoute = () => '/api/v0/apiKeys/fetch';
+  static CRUDApiKeysRoute = () => '/api/v0/apiKeys';
+  static RotateApiKeyRoute = () => '/api/v0/apiKeys/rotate';
   static AddToIpfsRoute = () => '/api/v0/addToIpfs';
   static AddApprovalDetailsToOffChainStorageRoute = () => '/api/v0/addApprovalDetailsToOffChainStorage';
   static AddBalancesToOffChainStorageRoute = () => '/api/v0/addBalancesToOffChainStorage';
@@ -112,4 +118,12 @@ export class BitBadgesApiRoutes {
   static CRUDGroupsRoute = () => '/api/v0/groups';
   static CalculatePointsRoute = () => '/api/v0/groups/points';
   static GetPointsActivityRoute = () => '/api/v0/groups/points/activity';
+
+  static GetUtilityListingsRoute = () => '/api/v0/utilityListings/fetch';
+  static CRUDUtilityListingsRoute = () => '/api/v0/utilityListings';
+
+  static GetEmbeddedWalletRoute = () => '/api/v0/embeddedWallets';
+  static SignWithEmbeddedWalletRoute = () => '/api/v0/embeddedWallets/signMessage';
+
+  static ScheduleTokenRefreshRoute = () => '/api/v0/oauth-token-refresh-schedule';
 }

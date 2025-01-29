@@ -114,10 +114,6 @@ import {
   GetClaimsSuccessResponse,
   GetDeveloperAppPayload,
   GetDeveloperAppSuccessResponse,
-  GetDynamicDataActivityPayload,
-  GetDynamicDataActivitySuccessResponse,
-  GetDynamicDataBinsPayload,
-  GetDynamicDataBinsSuccessResponse,
   GetGatedContentForClaimPayload,
   GetGatedContentForClaimSuccessResponse,
   GetGroupsPayload,
@@ -159,6 +155,10 @@ import {
   UpdateClaimSuccessResponse,
   UpdateDeveloperAppPayload,
   UpdateDeveloperAppSuccessResponse,
+  GetDynamicDataActivityPayload,
+  GetDynamicDataActivitySuccessResponse,
+  GetDynamicDataBinsPayload,
+  GetDynamicDataBinsSuccessResponse,
   UpdateDynamicDataBinPayload,
   UpdateDynamicDataBinSuccessResponse,
   UpdateGroupPayload,
@@ -203,7 +203,33 @@ import {
   iSimulateTxSuccessResponse,
   iUpdateAccountInfoSuccessResponse,
   iUpdateDynamicDataBinSuccessResponse,
-  iVerifySignInSuccessResponse
+  iVerifySignInSuccessResponse,
+  GetUtilityListingsSuccessResponse,
+  GetUtilityListingsPayload,
+  CreateUtilityListingSuccessResponse,
+  CreateUtilityListingPayload,
+  UpdateUtilityListingSuccessResponse,
+  UpdateUtilityListingPayload,
+  DeleteUtilityListingSuccessResponse,
+  DeleteUtilityListingPayload,
+  GetClaimAttemptsPayload,
+  GetClaimAttemptsSuccessResponse,
+  GetApiKeysSuccessResponse,
+  CreateApiKeySuccessResponse,
+  CreateApiKeyPayload,
+  DeleteApiKeySuccessResponse,
+  DeleteApiKeyPayload,
+  RotateApiKeySuccessResponse,
+  RotateApiKeyPayload,
+  GetApiKeysPayload,
+  GetPluginErrorsPayload,
+  GetPluginErrorsSuccessResponse,
+  GetOrCreateEmbeddedWalletPayload,
+  GetOrCreateEmbeddedWalletSuccessResponse,
+  ScheduleTokenRefreshSuccessResponse,
+  ScheduleTokenRefreshPayload,
+  SignWithEmbeddedWalletPayload,
+  SignWithEmbeddedWalletSuccessResponse
 } from './requests/requests.js';
 import { BitBadgesApiRoutes } from './requests/routes.js';
 
@@ -595,7 +621,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * - **SDK Function Call**: `await BitBadgesApi.checkIfSignedIn(payload);`
    * - **Tutorial**: See Authentication tutorial on the official docs.
    */
-  public async checkIfSignedIn(payload: CheckSignInStatusPayload): Promise<CheckSignInStatusSuccessResponse> {
+  public async checkIfSignedIn(payload?: CheckSignInStatusPayload): Promise<CheckSignInStatusSuccessResponse> {
     try {
       const validateRes: typia.IValidation<CheckSignInStatusPayload> = typia.validate<CheckSignInStatusPayload>(payload ?? {});
       if (!validateRes.success) {
@@ -1741,6 +1767,111 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
+   * Gets utility listings.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/utilityListings/fetch`
+   * - **SDK Function Call**: `await BitBadgesApi.getUtilityListings(payload);`
+   */
+  public async getUtilityListings(payload: GetUtilityListingsPayload): Promise<GetUtilityListingsSuccessResponse<T>> {
+    try {
+      const response = await this.axios.post<GetUtilityListingsSuccessResponse<T>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetUtilityListingsRoute()}`,
+        payload
+      );
+      return new GetUtilityListingsSuccessResponse<T>(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Creates a utility listing.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/utilityListings`
+   * - **SDK Function Call**: `await BitBadgesApi.createUtilityListing(payload);`
+   */
+  public async createUtilityListing(payload: CreateUtilityListingPayload<T>): Promise<CreateUtilityListingSuccessResponse<T>> {
+    try {
+      const response = await this.axios.post<CreateUtilityListingSuccessResponse<T>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDUtilityListingsRoute()}`,
+        payload
+      );
+      return new CreateUtilityListingSuccessResponse<T>(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Updates a utility listing.
+   *
+   * @remarks
+   * - **API Route**: `PUT /api/v0/utilityListings`
+   * - **SDK Function Call**: `await BitBadgesApi.updateUtilityListing(payload);`
+   */
+  public async updateUtilityListing(payload: UpdateUtilityListingPayload<T>): Promise<UpdateUtilityListingSuccessResponse<T>> {
+    try {
+      const response = await this.axios.put<UpdateUtilityListingSuccessResponse<T>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDUtilityListingsRoute()}`,
+        payload
+      );
+      return new UpdateUtilityListingSuccessResponse<T>(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Deletes a utility listing.
+   *
+   * @remarks
+   * - **API Route**: `DELETE /api/v0/utilityListings`
+   * - **SDK Function Call**: `await BitBadgesApi.deleteUtilityListing(payload);`
+   */
+  public async deleteUtilityListing(payload: DeleteUtilityListingPayload): Promise<DeleteUtilityListingSuccessResponse> {
+    try {
+      const response = await this.axios.delete<DeleteUtilityListingSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDUtilityListingsRoute()}`,
+        { data: payload }
+      );
+      return new DeleteUtilityListingSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Gets claim attempts.
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/claims/:claimId/attempts`
+   * - **SDK Function Call**: `await BitBadgesApi.getClaimAttempts(payload);`
+   */
+  public async getClaimAttempts(claimId: string, payload: GetClaimAttemptsPayload): Promise<GetClaimAttemptsSuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<GetClaimAttemptsPayload> = typia.validate<GetClaimAttemptsPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<GetClaimAttemptsSuccessResponse<T>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetClaimAttemptsRoute(claimId)}`,
+        { params: payload }
+      );
+      return new GetClaimAttemptsSuccessResponse<T>(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
    * Updates the user's seen activity.
    */
   public async updateUserSeenActivity() {
@@ -2269,6 +2400,130 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
         { data: payload }
       );
       return new DeleteDynamicDataBinSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Gets the API keys.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/apiKeys/fetch`
+   * - **SDK Function Call**: `await BitBadgesApi.getApiKeys();`
+   */
+  public async getApiKeys(payload: GetApiKeysPayload): Promise<GetApiKeysSuccessResponse> {
+    try {
+      const response = await this.axios.post<GetApiKeysSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetApiKeysRoute()}`, payload);
+      return new GetApiKeysSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Creates an API key.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/apiKeys`
+   * - **SDK Function Call**: `await BitBadgesApi.createApiKey(payload);`
+   */
+  public async createApiKey(payload: CreateApiKeyPayload): Promise<CreateApiKeySuccessResponse> {
+    try {
+      const response = await this.axios.post<CreateApiKeySuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDApiKeysRoute()}`, payload);
+      return new CreateApiKeySuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Rotates an API key.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/apiKeys/rotate`
+   * - **SDK Function Call**: `await BitBadgesApi.rotateApiKey(payload);`
+   */
+  public async rotateApiKey(payload: RotateApiKeyPayload): Promise<RotateApiKeySuccessResponse> {
+    try {
+      const response = await this.axios.post<RotateApiKeySuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.RotateApiKeyRoute()}`, payload);
+      return new RotateApiKeySuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Deletes an API key.
+   *
+   * @remarks
+   * - **API Route**: `DELETE /api/v0/apiKeys`
+   * - **SDK Function Call**: `await BitBadgesApi.deleteApiKey(payload);`
+   */
+  public async deleteApiKey(payload: DeleteApiKeyPayload): Promise<DeleteApiKeySuccessResponse> {
+    try {
+      const response = await this.axios.delete<DeleteApiKeySuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDApiKeysRoute()}`, {
+        data: payload
+      });
+      return new DeleteApiKeySuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  public async getPluginErrors(payload: GetPluginErrorsPayload): Promise<GetPluginErrorsSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<GetPluginErrorsPayload> = typia.validate<GetPluginErrorsPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<GetPluginErrorsSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetPluginErrorsRoute()}`);
+      return new GetPluginErrorsSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  public async getEmbeddedWallet(payload?: GetOrCreateEmbeddedWalletPayload): Promise<GetOrCreateEmbeddedWalletSuccessResponse> {
+    try {
+      const response = await this.axios.post<GetOrCreateEmbeddedWalletSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetEmbeddedWalletRoute()}`,
+        payload
+      );
+      return new GetOrCreateEmbeddedWalletSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  public async scheduleTokenRefresh(payload: ScheduleTokenRefreshPayload): Promise<ScheduleTokenRefreshSuccessResponse> {
+    try {
+      const response = await this.axios.post<ScheduleTokenRefreshSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.ScheduleTokenRefreshRoute()}`,
+        payload
+      );
+      return new ScheduleTokenRefreshSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  public async signWithEmbeddedWallet(payload: SignWithEmbeddedWalletPayload): Promise<SignWithEmbeddedWalletSuccessResponse> {
+    try {
+      const response = await this.axios.post<SignWithEmbeddedWalletSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.SignWithEmbeddedWalletRoute()}`,
+        payload
+      );
+      return new SignWithEmbeddedWalletSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);

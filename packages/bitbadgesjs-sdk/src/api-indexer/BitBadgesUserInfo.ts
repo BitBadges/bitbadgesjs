@@ -11,7 +11,7 @@ import type { iBitBadgesAddressList } from './BitBadgesAddressList.js';
 import { BitBadgesAddressList } from './BitBadgesAddressList.js';
 import { BitBadgesCollection } from './BitBadgesCollection.js';
 import type { BaseBitBadgesApi, PaginationInfo } from './base.js';
-import { ClaimActivityDoc, ClaimAlertDoc, ListActivityDoc, TransferActivityDoc } from './docs/activity.js';
+import { ClaimActivityDoc, ClaimAlertDoc, ListActivityDoc, PointsActivityDoc, TransferActivityDoc } from './docs/activity.js';
 import { ApprovalTrackerDoc, AttestationDoc, BalanceDocWithDetails, MapDoc, MerkleChallengeDoc, ProfileDoc, SIWBBRequestDoc } from './docs/docs.js';
 import type {
   BitBadgesAddress,
@@ -25,6 +25,7 @@ import type {
   iListActivityDoc,
   iMapDoc,
   iMerkleChallengeDoc,
+  iPointsActivityDoc,
   iProfileDoc,
   iSIWBBRequestDoc,
   iTransferActivityDoc
@@ -53,6 +54,8 @@ export interface iBitBadgesUserInfo<T extends NumberType> extends iProfileDoc<T>
   listsActivity: iListActivityDoc<T>[];
   /** A list of claim activity items for the account. Paginated and fetched as needed. To be used in conjunction with views. */
   claimActivity?: iClaimActivityDoc<T>[];
+  /** A list of points activity items for the account. Paginated and fetched as needed. To be used in conjunction with views. */
+  pointsActivity?: iPointsActivityDoc<T>[];
   /** A list of merkle challenge activity items for the account. Paginated and fetched as needed. To be used in conjunction with views. */
   merkleChallenges: iMerkleChallengeDoc<T>[];
   /** A list of approvals tracker activity items for the account. Paginated and fetched as needed. To be used in conjunction with views. */
@@ -122,6 +125,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   activity: TransferActivityDoc<T>[];
   listsActivity: ListActivityDoc<T>[];
   claimActivity?: ClaimActivityDoc<T>[];
+  pointsActivity?: PointsActivityDoc<T>[];
   merkleChallenges: MerkleChallengeDoc<T>[];
   approvalTrackers: ApprovalTrackerDoc<T>[];
   addressLists: BitBadgesAddressList<T>[];
@@ -166,6 +170,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     this.activity = data.activity.map((activity) => new TransferActivityDoc(activity));
     this.listsActivity = data.listsActivity.map((activity) => new ListActivityDoc(activity));
     this.claimActivity = data.claimActivity?.map((activity) => new ClaimActivityDoc(activity));
+    this.pointsActivity = data.pointsActivity?.map((activity) => new PointsActivityDoc(activity));
     this.merkleChallenges = data.merkleChallenges.map((challenge) => new MerkleChallengeDoc(challenge));
     this.approvalTrackers = data.approvalTrackers.map((tracker) => new ApprovalTrackerDoc(tracker));
     this.addressLists = data.addressLists.map((list) => new BitBadgesAddressList(list));
@@ -470,6 +475,8 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
         return this.getClaimActivityView(viewId) as AccountViewData<T>[KeyType];
       case 'allClaimActivity':
         return this.getClaimActivityView(viewId) as AccountViewData<T>[KeyType];
+      case 'pointsActivity':
+        return this.getPointsActivityView(viewId) as AccountViewData<T>[KeyType];
       default:
         throw new Error('Invalid view type');
     }
@@ -485,6 +492,12 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     return (this.views[viewId]?.ids.map((x) => {
       return this.claimActivity?.find((y) => y._docId === x);
     }) ?? []) as ClaimActivityDoc<T>[];
+  }
+
+  getPointsActivityView(viewId: string) {
+    return (this.views[viewId]?.ids.map((x) => {
+      return this.pointsActivity?.find((y) => y._docId === x);
+    }) ?? []) as PointsActivityDoc<T>[];
   }
 
   getSIWBBRequestsView(viewId: string) {
@@ -560,6 +573,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
       seenActivity: 0n,
       createdAt: 0n,
       claimActivity: [],
+      pointsActivity: [],
       views: {},
       _docId: 'Mint'
     });
@@ -596,6 +610,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
       seenActivity: 0n,
       createdAt: 0n,
       claimActivity: [],
+      pointsActivity: [],
       views: {}
     });
   }
@@ -620,6 +635,7 @@ type AccountViewData<T extends NumberType> = {
   attestations: AttestationDoc<T>[];
   publicClaimActivity: ClaimActivityDoc<T>[];
   allClaimActivity: ClaimActivityDoc<T>[];
+  pointsActivity: PointsActivityDoc<T>[];
 };
 
 /**
@@ -681,6 +697,7 @@ function updateAccountWithResponse<T extends NumberType>(
     claimAlerts: [...(cachedAccount?.claimAlerts || []), ...(account.claimAlerts || [])],
     siwbbRequests: [...(cachedAccount?.siwbbRequests || []), ...(account.siwbbRequests || [])],
     listsActivity: [...(cachedAccount?.listsActivity || []), ...(account.listsActivity || [])],
+    pointsActivity: [...(cachedAccount?.pointsActivity || []), ...(account.pointsActivity || [])],
     claimActivity: [...(cachedAccount?.claimActivity || []), ...(account.claimActivity || [])],
     attestations: [...(cachedAccount?.attestations || []), ...(account.attestations || [])],
     views: views,
@@ -710,6 +727,7 @@ function updateAccountWithResponse<T extends NumberType>(
   newAccount.listsActivity = newAccount.listsActivity.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
   newAccount.attestations = newAccount.attestations.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
   newAccount.claimActivity = newAccount.claimActivity?.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
+  newAccount.pointsActivity = newAccount.pointsActivity?.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
 
   //sort in descending order
   newAccount.activity = newAccount.activity.sort((a, b) => (BigInt(b.timestamp) - BigInt(a.timestamp) > 0 ? -1 : 1));
@@ -717,6 +735,7 @@ function updateAccountWithResponse<T extends NumberType>(
   newAccount.siwbbRequests = newAccount.siwbbRequests.sort((a, b) => (BigInt(b.createdAt) - BigInt(a.createdAt) > 0 ? -1 : 1));
   newAccount.listsActivity = newAccount.listsActivity.sort((a, b) => (BigInt(b.timestamp) - BigInt(a.timestamp) > 0 ? -1 : 1));
   newAccount.claimActivity = newAccount.claimActivity?.sort((a, b) => (BigInt(b.timestamp) - BigInt(a.timestamp) > 0 ? -1 : 1));
+  newAccount.pointsActivity = newAccount.pointsActivity?.sort((a, b) => (BigInt(b.timestamp) - BigInt(a.timestamp) > 0 ? -1 : 1));
   return newAccount;
 }
 
@@ -743,7 +762,8 @@ export type AccountViewKey =
   | 'receivedAttestations'
   | 'attestations'
   | 'publicClaimActivity'
-  | 'allClaimActivity';
+  | 'allClaimActivity'
+  | 'pointsActivity';
 
 /**
  * This defines the options for fetching additional account details.

@@ -9,23 +9,29 @@ import { EmptyResponseClass } from '@/api-indexer/base.js';
 import { ClaimActivityDoc, ClaimAlertDoc, PointsActivityDoc, TransferActivityDoc } from '@/api-indexer/docs/activity.js';
 import {
   AccessTokenDoc,
+  ApiKeyDoc,
   AttestationDoc,
   DeveloperAppDoc,
   DynamicDataDoc,
   GroupDoc,
   MapWithValues,
   PluginDoc,
-  StatusDoc
+  StatusDoc,
+  UtilityListingDoc
 } from '@/api-indexer/docs/docs.js';
 import {
   ClaimReward,
   DynamicDataHandlerType,
+  iApiKeyDoc,
   iClaimActivityDoc,
   iDynamicDataDoc,
   iEvent,
   iGroupDoc,
   iGroupPage,
   iPointsActivityDoc,
+  iUtilityListingContent,
+  iUtilityListingDoc,
+  iUtilityListingLink,
   type BitBadgesAddress,
   type ClaimIntegrationPluginCustomBodyType,
   type ClaimIntegrationPluginType,
@@ -226,6 +232,7 @@ export interface iGetSearchSuccessResponse<T extends NumberType> {
   maps: iMapWithValues<T>[];
   groups?: iGroupDoc<T>[];
   claims?: iClaimDetails<T>[];
+  utilityListings?: iUtilityListingDoc<T>[];
 }
 
 /**
@@ -246,6 +253,7 @@ export class GetSearchSuccessResponse<T extends NumberType>
   maps: MapWithValues<T>[];
   groups?: GroupDoc<T>[];
   claims?: ClaimDetails<T>[];
+  utilityListings?: UtilityListingDoc<T>[];
 
   constructor(data: iGetSearchSuccessResponse<T>) {
     super();
@@ -261,6 +269,7 @@ export class GetSearchSuccessResponse<T extends NumberType>
     this.maps = data.maps.map((map) => new MapWithValues(map));
     this.groups = data.groups?.map((group) => new GroupDoc(group));
     this.claims = data.claims?.map((claim) => new ClaimDetails(claim));
+    this.utilityListings = data.utilityListings?.map((utilityListing) => new UtilityListingDoc(utilityListing));
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetSearchSuccessResponse<U> {
@@ -277,13 +286,16 @@ export interface GetClaimsPayload {
   /** If the address list is private and viewable with the link only, you must also specify the address list ID to prove knowledge of the link. */
   listId?: string;
   /** If true, we will return all claims that were created by the signed in address. */
-  siwbbClaimsOnly?: boolean;
+  standaloneClaimsOnly?: boolean;
   /** Bookmark to start from. Obtained from previours request. Leave blank to start from the beginning. Only applicable when no additional criteria is specified. */
   bookmark?: string;
   /** Fetch private parameters for the claim. Only applicable if you are the creator / manager of the claim. */
   fetchPrivateParams?: boolean;
   /** If provided, we will only return claims with names that match the search value. Only applicable for fetching your own claims. */
   searchValue?: string;
+
+  /** Which private state instance IDs to fetch. claimId and instanceId are required and must match a claimId in claimIds and the claim must have the corresponding instanceId. */
+  privateStatesToFetch?: { claimId: string; instanceId: string }[];
 }
 
 /**
@@ -385,6 +397,61 @@ export class GetClaimAttemptStatusSuccessResponse
 
     this.code = data.code;
     this.bitbadgesAddress = data.bitbadgesAddress;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface GetClaimAttemptsPayload {
+  /** The bookmark to start from. */
+  bookmark?: string;
+  /** Whether to include errors or not. */
+  includeErrors?: boolean;
+  /** The specific address to fetch claims for. If blank, we fetch most recent claims. */
+  address?: NativeAddress;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetClaimAttemptsSuccessResponse<T extends NumberType> {
+  docs: {
+    success: boolean;
+    attemptedAt: UNIXMilliTimestamp<T>;
+    claimId: string;
+    bitbadgesAddress: NativeAddress;
+    claimAttemptId: string;
+    error?: string;
+  }[];
+  bookmark?: string;
+  total?: number;
+}
+
+/**
+ * @inheritDoc iGetClaimAttemptsSuccessResponse
+ * @category API Requests / Responses
+ */
+export class GetClaimAttemptsSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetClaimAttemptsSuccessResponse<T>>
+  implements iGetClaimAttemptsSuccessResponse<T>
+{
+  docs: {
+    success: boolean;
+    attemptedAt: UNIXMilliTimestamp<T>;
+    claimId: string;
+    bitbadgesAddress: NativeAddress;
+    claimAttemptId: string;
+    error?: string;
+  }[];
+  bookmark?: string;
+  total?: number;
+
+  constructor(data: iGetClaimAttemptsSuccessResponse<T>) {
+    super();
+    this.docs = data.docs;
+    this.bookmark = data.bookmark;
+    this.total = data.total;
   }
 }
 
@@ -1199,7 +1266,18 @@ export class SignOutSuccessResponse extends EmptyResponseClass {}
  * @category API Requests / Responses
  */
 export interface GetBrowsePayload {
-  type: 'collections' | 'badges' | 'addressLists' | 'maps' | 'attestations' | 'claims' | 'activity' | 'groups' | 'claimActivity' | 'pointsActivity';
+  type:
+    | 'collections'
+    | 'badges'
+    | 'addressLists'
+    | 'maps'
+    | 'attestations'
+    | 'claims'
+    | 'activity'
+    | 'utilityListings'
+    | 'groups'
+    | 'claimActivity'
+    | 'pointsActivity';
   filters?: {
     category?: string;
     sortBy?: string;
@@ -1238,6 +1316,7 @@ export interface iGetBrowseSuccessResponse<T extends NumberType> {
   claims?: { [category: string]: iClaimDetails<T>[] };
   claimActivity?: iClaimActivityDoc<T>[];
   pointsActivity?: iPointsActivityDoc<T>[];
+  utilityListings?: { [category: string]: iUtilityListingDoc<T>[] };
 }
 
 /**
@@ -1262,6 +1341,7 @@ export class GetBrowseSuccessResponse<T extends NumberType>
   claims?: { [category: string]: ClaimDetails<T>[] };
   claimActivity?: ClaimActivityDoc<T>[];
   pointsActivity?: PointsActivityDoc<T>[];
+  utilityListings?: { [category: string]: UtilityListingDoc<T>[] };
 
   constructor(data: iGetBrowseSuccessResponse<T>) {
     super();
@@ -1305,6 +1385,13 @@ export class GetBrowseSuccessResponse<T extends NumberType>
         return acc;
       },
       {} as { [category: string]: GroupDoc<T>[] }
+    );
+    this.utilityListings = Object.keys(data.utilityListings ?? {}).reduce(
+      (acc, category) => {
+        acc[category] = (data.utilityListings ?? {})[category].map((utilityListing) => new UtilityListingDoc(utilityListing));
+        return acc;
+      },
+      {} as { [category: string]: UtilityListingDoc<T>[] }
     );
     this.maps = Object.keys(data.maps).reduce(
       (acc, category) => {
@@ -2266,7 +2353,12 @@ export interface GetActiveAuthorizationsPayload {}
  */
 export interface iGetActiveAuthorizationsSuccessResponse {
   authorizations: iAccessTokenDoc[];
-  developerApps: iDeveloperAppDoc[];
+  /**
+   * Developer app docs for each authorization.
+   *
+   * Undefined if deleted.
+   */
+  developerApps: (iDeveloperAppDoc | undefined)[];
 }
 
 /**
@@ -2277,12 +2369,12 @@ export class GetActiveAuthorizationsSuccessResponse
   implements iGetActiveAuthorizationsSuccessResponse
 {
   authorizations: AccessTokenDoc[];
-  developerApps: DeveloperAppDoc[];
+  developerApps: (DeveloperAppDoc | undefined)[];
 
   constructor(data: iGetActiveAuthorizationsSuccessResponse) {
     super();
     this.authorizations = data.authorizations.map((authorization) => new AccessTokenDoc(authorization));
-    this.developerApps = data.developerApps.map((developerApp) => new DeveloperAppDoc(developerApp));
+    this.developerApps = data.developerApps.map((developerApp) => (developerApp ? new DeveloperAppDoc(developerApp) : undefined));
   }
 }
 
@@ -2709,7 +2801,7 @@ export class UpdateClaimSuccessResponse extends EmptyResponseClass {}
  */
 export type ManagePluginRequest = Omit<IntegrationPluginDetails<ClaimIntegrationPluginType>, 'publicState' | 'privateState'>;
 
-type IgnoredKeys = 'plugins' | 'version' | '_includesPrivateParams' | 'createdBy' | 'siwbbClaim' | 'lastUpdated';
+type IgnoredKeys = 'plugins' | 'version' | '_includesPrivateParams' | 'createdBy' | 'standaloneClaim' | 'lastUpdated';
 
 /**
  * @category Interfaces
@@ -2737,7 +2829,7 @@ export interface CreateClaimPayload {
 
   testClaims?: boolean;
 
-  siwbbClaim?: boolean;
+  standaloneClaim?: boolean;
 }
 
 /**
@@ -2850,7 +2942,7 @@ export interface GetDynamicDataBinsPayload {
  * @category API Requests / Responses
  */
 export interface iGetDynamicDataBinsSuccessResponse<Q extends DynamicDataHandlerType> {
-  docs: iDynamicDataDoc<Q>[];
+  docs: (iDynamicDataDoc<Q> | undefined)[];
   pagination: {
     bookmark: string;
     hasMore: boolean;
@@ -2864,7 +2956,7 @@ export class GetDynamicDataBinsSuccessResponse<Q extends DynamicDataHandlerType>
   extends CustomTypeClass<GetDynamicDataBinsSuccessResponse<Q>>
   implements iGetDynamicDataBinsSuccessResponse<Q>
 {
-  docs: DynamicDataDoc<Q>[];
+  docs: (DynamicDataDoc<Q> | undefined)[];
   pagination: {
     bookmark: string;
     hasMore: boolean;
@@ -2872,7 +2964,7 @@ export class GetDynamicDataBinsSuccessResponse<Q extends DynamicDataHandlerType>
 
   constructor(data: iGetDynamicDataBinsSuccessResponse<Q>) {
     super();
-    this.docs = data.docs.map((doc) => new DynamicDataDoc(doc));
+    this.docs = data.docs.map((doc) => (doc ? new DynamicDataDoc(doc) : undefined));
     this.pagination = data.pagination;
   }
 }
@@ -3004,9 +3096,6 @@ export interface PerformBinActionPayload {
  * @category API Requests / Responses
  */
 export interface PerformBinActionBodyAuthPayload {
-  /**
-   *
-   */
   /** The data secret to perform the action with */
   dataSecret: string;
 }
@@ -3131,6 +3220,117 @@ export class GetDynamicDataActivitySuccessResponse
 /**
  * @category API Requests / Responses
  */
+export interface GetApiKeysPayload {
+  /** The pagination bookmark to start from */
+  bookmark?: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetApiKeysSuccessResponse {
+  docs: iApiKeyDoc[];
+  pagination: {
+    bookmark: string;
+    hasMore: boolean;
+  };
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetApiKeysSuccessResponse extends CustomTypeClass<GetApiKeysSuccessResponse> implements iGetApiKeysSuccessResponse {
+  docs: ApiKeyDoc[];
+  pagination: {
+    bookmark: string;
+    hasMore: boolean;
+  };
+
+  constructor(data: iGetApiKeysSuccessResponse) {
+    super();
+    this.docs = data.docs.map((doc) => new ApiKeyDoc(doc));
+    this.pagination = data.pagination;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface CreateApiKeyPayload {
+  /** The label for the API key */
+  label: string;
+  /** The intended use for the API key */
+  intendedUse: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iCreateApiKeySuccessResponse {
+  key: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class CreateApiKeySuccessResponse extends CustomTypeClass<CreateApiKeySuccessResponse> implements iCreateApiKeySuccessResponse {
+  key: string;
+
+  constructor(data: iCreateApiKeySuccessResponse) {
+    super();
+    this.key = data.key;
+  }
+}
+/**
+ * @category API Requests / Responses
+ */
+export interface RotateApiKeyPayload {
+  /** The doc ID to rotate */
+  docId: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iRotateApiKeySuccessResponse {
+  key: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class RotateApiKeySuccessResponse extends CustomTypeClass<RotateApiKeySuccessResponse> implements iRotateApiKeySuccessResponse {
+  key: string;
+
+  constructor(data: iRotateApiKeySuccessResponse) {
+    super();
+    this.key = data.key;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface DeleteApiKeyPayload {
+  /** The API key to delete */
+  key?: string;
+  /** The doc ID to delete */
+  _docId?: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iDeleteApiKeySuccessResponse {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class DeleteApiKeySuccessResponse extends EmptyResponseClass {}
+
+/**
+ * @category API Requests / Responses
+ */
 export interface GetGroupsPayload {
   /** The pagination bookmark to start from */
   bookmark?: string;
@@ -3143,7 +3343,7 @@ export interface GetGroupsPayload {
  * @category API Requests / Responses
  */
 export interface iGetGroupsSuccessResponse<T extends NumberType> {
-  docs: iGroupDoc<T>[];
+  docs: (iGroupDoc<T> | undefined)[];
   pagination: {
     bookmark: string;
     hasMore: boolean;
@@ -3157,7 +3357,7 @@ export class GetGroupsSuccessResponse<T extends NumberType>
   extends BaseNumberTypeClass<GetGroupsSuccessResponse<T>>
   implements iGetGroupsSuccessResponse<T>
 {
-  docs: GroupDoc<T>[];
+  docs: (GroupDoc<T> | undefined)[];
   pagination: {
     bookmark: string;
     hasMore: boolean;
@@ -3165,7 +3365,7 @@ export class GetGroupsSuccessResponse<T extends NumberType>
 
   constructor(data: iGetGroupsSuccessResponse<T>) {
     super();
-    this.docs = data.docs.map((doc) => new GroupDoc<T>(doc));
+    this.docs = data.docs.map((doc) => (doc ? new GroupDoc<T>(doc) : undefined));
     this.pagination = data.pagination;
   }
 
@@ -3332,6 +3532,8 @@ export interface GetPointsActivityPayload {
   pageId: string;
   /** The pagination bookmark to start from */
   bookmark?: string;
+  /** The specific address to get points activity for */
+  address?: NativeAddress;
 }
 
 /**
@@ -3366,5 +3568,343 @@ export class GetPointsActivitySuccessResponse<T extends NumberType>
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetPointsActivitySuccessResponse<U> {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetPointsActivitySuccessResponse<U>;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface GetUtilityListingsPayload {
+  /** The pagination bookmark to start from */
+  bookmark?: string;
+  /** The specific IDs to fetch */
+  listingIds?: string[];
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetUtilityListingsSuccessResponse<T extends NumberType> {
+  docs: (iUtilityListingDoc<T> | undefined)[];
+  pagination: {
+    bookmark: string;
+    hasMore: boolean;
+  };
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetUtilityListingsSuccessResponse<T extends NumberType>
+  extends CustomTypeClass<GetUtilityListingsSuccessResponse<T>>
+  implements iGetUtilityListingsSuccessResponse<T>
+{
+  docs: (UtilityListingDoc<T> | undefined)[];
+  pagination: {
+    bookmark: string;
+    hasMore: boolean;
+  };
+
+  constructor(data: iGetUtilityListingsSuccessResponse<T>) {
+    super();
+    this.docs = data.docs.map((doc) => (doc ? new UtilityListingDoc<T>(doc) : undefined));
+    this.pagination = data.pagination;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface CreateUtilityListingPayload<T extends NumberType> {
+  /** The overall metadata for the listing */
+  metadata: iMetadata<T>;
+
+  /** The content for the listing */
+  content: iUtilityListingContent[];
+
+  /** The links for the listing */
+  links: iUtilityListingLink<T>[];
+
+  /** The type of the listing */
+  type: string;
+
+  /** The visibility of the listing */
+  visibility: 'public' | 'private' | 'unlisted';
+
+  /** The display times of the listing */
+  displayTimes?: iUintRange<T>;
+
+  /** The direct link for the listing. If specified, we will skip the entire content / listing page. Thus, content and links should be empty []. */
+  directLink?: string;
+
+  /** The categories of the listing */
+  categories: string[];
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iCreateUtilityListingSuccessResponse<T extends NumberType> {
+  doc: iUtilityListingDoc<T>;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class CreateUtilityListingSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<CreateUtilityListingSuccessResponse<T>>
+  implements iCreateUtilityListingSuccessResponse<T>
+{
+  doc: UtilityListingDoc<T>;
+
+  constructor(data: iCreateUtilityListingSuccessResponse<T>) {
+    super();
+    this.doc = new UtilityListingDoc<T>(data.doc);
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface UpdateUtilityListingPayload<T extends NumberType> {
+  /** The listing ID to update */
+  listingId: string;
+
+  /** The overall metadata for the listing */
+  metadata: iMetadata<T>;
+
+  /** The content for the listing */
+  content: iUtilityListingContent[];
+
+  /** The links for the listing */
+  links: iUtilityListingLink<T>[];
+
+  /** The visibility of the listing */
+  visibility: 'public' | 'private' | 'unlisted';
+
+  /** The display times of the listing */
+  displayTimes?: iUintRange<T>;
+
+  /** The direct link for the listing. If specified, we will skip the entire content / listing page. Thus, content and links should be empty []. */
+  directLink?: string;
+
+  /** The categories of the listing */
+  categories: string[];
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iUpdateUtilityListingSuccessResponse<T extends NumberType> {
+  doc: iUtilityListingDoc<T>;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class UpdateUtilityListingSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<UpdateUtilityListingSuccessResponse<T>>
+  implements iUpdateUtilityListingSuccessResponse<T>
+{
+  doc: UtilityListingDoc<T>;
+
+  constructor(data: iUpdateUtilityListingSuccessResponse<T>) {
+    super();
+    this.doc = new UtilityListingDoc<T>(data.doc);
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface DeleteUtilityListingPayload {
+  /** The listing ID to delete */
+  listingId: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iDeleteUtilityListingSuccessResponse {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class DeleteUtilityListingSuccessResponse extends EmptyResponseClass {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface GetPostActionStatusesPayload {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetPostActionStatusesSuccessResponse {
+  postActionStatuses: {
+    lastFetchedAt: UNIXMilliTimestamp<NumberType>;
+    claimId: string;
+    bitbadgesAddress: string;
+    pluginId: string;
+    claimAttemptId: string;
+    numRetries: NumberType;
+    nextFetchTime: UNIXMilliTimestamp<NumberType>;
+  }[];
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetPostActionStatusesSuccessResponse
+  extends CustomTypeClass<GetPostActionStatusesSuccessResponse>
+  implements iGetPostActionStatusesSuccessResponse
+{
+  postActionStatuses: {
+    lastFetchedAt: UNIXMilliTimestamp<NumberType>;
+    claimId: string;
+    bitbadgesAddress: string;
+    pluginId: string;
+    claimAttemptId: string;
+    numRetries: NumberType;
+    nextFetchTime: UNIXMilliTimestamp<NumberType>;
+  }[];
+
+  constructor(data: iGetPostActionStatusesSuccessResponse) {
+    super();
+    this.postActionStatuses = data.postActionStatuses;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface GetPluginErrorsPayload {
+  /** The plugin ID to get errors for */
+  pluginId: string;
+  /** The pagination bookmark to start from */
+  bookmark?: string;
+}
+
+export interface PluginErrorDoc {
+  _docId: string;
+  _id?: string;
+  pluginId: string;
+  timestamp: number;
+  error: string;
+  context?: Record<string, any>;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetPluginErrorsSuccessResponse {
+  docs: PluginErrorDoc[];
+  bookmark?: string;
+  total?: number;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetPluginErrorsSuccessResponse extends CustomTypeClass<GetPluginErrorsSuccessResponse> implements iGetPluginErrorsSuccessResponse {
+  docs: PluginErrorDoc[];
+  bookmark?: string;
+  total?: number;
+
+  constructor(data: iGetPluginErrorsSuccessResponse) {
+    super();
+    this.docs = data.docs;
+    this.bookmark = data.bookmark;
+    this.total = data.total;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface GetOrCreateEmbeddedWalletPayload {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetOrCreateEmbeddedWalletSuccessResponse {
+  address: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetOrCreateEmbeddedWalletSuccessResponse
+  extends CustomTypeClass<GetOrCreateEmbeddedWalletSuccessResponse>
+  implements iGetOrCreateEmbeddedWalletSuccessResponse
+{
+  address: string;
+
+  constructor(data: iGetOrCreateEmbeddedWalletSuccessResponse) {
+    super();
+    this.address = data.address;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface ScheduleTokenRefreshPayload {
+  provider: string;
+  claimId?: string;
+  instanceId?: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iScheduleTokenRefreshSuccessResponse {
+  message: string;
+  docId: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class ScheduleTokenRefreshSuccessResponse
+  extends CustomTypeClass<ScheduleTokenRefreshSuccessResponse>
+  implements iScheduleTokenRefreshSuccessResponse
+{
+  message: string;
+  docId: string;
+
+  constructor(data: iScheduleTokenRefreshSuccessResponse) {
+    super();
+    this.message = data.message;
+    this.docId = data.docId;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface SignWithEmbeddedWalletPayload {
+  message: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iSignWithEmbeddedWalletSuccessResponse {
+  signature: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class SignWithEmbeddedWalletSuccessResponse
+  extends CustomTypeClass<SignWithEmbeddedWalletSuccessResponse>
+  implements iSignWithEmbeddedWalletSuccessResponse
+{
+  signature: string;
+
+  constructor(data: iSignWithEmbeddedWalletSuccessResponse) {
+    super();
+    this.signature = data.signature;
   }
 }

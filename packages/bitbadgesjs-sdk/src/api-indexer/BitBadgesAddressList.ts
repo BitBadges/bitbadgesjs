@@ -95,7 +95,10 @@ export class BitBadgesAddressList<T extends NumberType>
     }
   ) {
     const collection = await BitBadgesAddressList.GetAddressLists(api, { listsToFetch: [options] });
-    return new BitBadgesAddressList(collection.addressLists[0]);
+    const list = collection.addressLists[0];
+    if (!list) throw new Error('No list found');
+
+    return new BitBadgesAddressList(list);
   }
 
   /**
@@ -113,7 +116,7 @@ export class BitBadgesAddressList<T extends NumberType>
     }[]
   ) {
     const collection = await BitBadgesAddressList.GetAddressLists(api, { listsToFetch: options });
-    return collection.addressLists.map((account) => new BitBadgesAddressList(account));
+    return collection.addressLists.map((account) => (account ? new BitBadgesAddressList(account) : undefined));
   }
 
   /**
@@ -158,16 +161,19 @@ export class BitBadgesAddressList<T extends NumberType>
         }
       ]
     });
+    const list = res.addressLists[0];
+    if (!list) throw new Error('No list found');
+
     if (!this.views[viewId]) {
       this.views[viewId] = {
-        ids: [...res.addressLists[0].views[viewId].ids],
+        ids: [...list.views[viewId].ids],
         type: 'listActivity',
-        pagination: res.addressLists[0].views[viewId].pagination
+        pagination: list.views[viewId].pagination
       };
     } else {
-      this.listsActivity.push(...res.addressLists[0].listsActivity);
-      this.views[viewId].ids.push(...res.addressLists[0].views[viewId].ids);
-      this.views[viewId].pagination = res.addressLists[0].views[viewId].pagination;
+      this.listsActivity.push(...list.listsActivity);
+      this.views[viewId].ids.push(...list.views[viewId].ids);
+      this.views[viewId].pagination = list.views[viewId].pagination;
     }
   }
 
@@ -376,7 +382,7 @@ export interface GetAddressListsPayload {
  * @category API Requests / Responses
  */
 export interface iGetAddressListsSuccessResponse<T extends NumberType> {
-  addressLists: iBitBadgesAddressList<T>[];
+  addressLists: (iBitBadgesAddressList<T> | undefined)[];
 }
 
 /**
@@ -386,11 +392,11 @@ export class GetAddressListsSuccessResponse<T extends NumberType>
   extends BaseNumberTypeClass<GetAddressListsSuccessResponse<T>>
   implements iGetAddressListsSuccessResponse<T>, CustomType<GetAddressListsSuccessResponse<T>>
 {
-  addressLists: BitBadgesAddressList<T>[];
+  addressLists: (BitBadgesAddressList<T> | undefined)[];
 
   constructor(data: iGetAddressListsSuccessResponse<T>) {
     super();
-    this.addressLists = data.addressLists.map((addressList) => new BitBadgesAddressList(addressList));
+    this.addressLists = data.addressLists.map((addressList) => (addressList ? new BitBadgesAddressList(addressList) : undefined));
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetAddressListsSuccessResponse<U> {

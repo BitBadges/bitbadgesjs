@@ -20,7 +20,7 @@ import {
 import { BalanceArray } from '@/core/balances.js';
 import { BatchBadgeDetailsArray } from '@/core/batch-utils.js';
 import { CosmosCoin } from '@/core/coin.js';
-import { AddressList, AttestationsProof, UintRangeArray, getValueAtTimeForTimeline } from '@/core/index.js';
+import { AddressList, AttestationsProof, UintRange, UintRangeArray, getValueAtTimeForTimeline } from '@/core/index.js';
 import {
   BadgeMetadataTimeline,
   CollectionMetadataTimeline,
@@ -89,10 +89,15 @@ import {
   type iUsedLeafStatus,
   DynamicDataHandlerData,
   iGroupDoc,
+  iUtilityListingDoc,
   iEvent,
   iGroupPage,
   iPointsDoc,
-  iTierWithOptionalWeight
+  iTierWithOptionalWeight,
+  iUtilityListingLink,
+  iUtilityListingContent,
+  iListingViewsDoc,
+  iApiKeyDoc
 } from './interfaces.js';
 
 /**
@@ -948,11 +953,6 @@ export class GroupPage<T extends NumberType> extends BaseNumberTypeClass<GroupPa
   points?: TierWithOptionalWeight<T>[];
   tiers?: TierWithOptionalWeight<T>[];
   quests?: TierWithOptionalWeight<T>[];
-  events?: Event<T>[];
-  collectionIds?: T[];
-  claimIds?: string[];
-  listIds?: string[];
-  mapIds?: string[];
 
   constructor(data: iGroupPage<T>) {
     super();
@@ -961,11 +961,6 @@ export class GroupPage<T extends NumberType> extends BaseNumberTypeClass<GroupPa
     this.tiers = data.tiers?.map((tier) => new TierWithOptionalWeight(tier));
     this.quests = data.quests?.map((quest) => new TierWithOptionalWeight(quest));
     this.points = data.points?.map((point) => new TierWithOptionalWeight(point));
-    this.events = data.events?.map((event) => new Event(event));
-    this.collectionIds = data.collectionIds;
-    this.claimIds = data.claimIds;
-    this.listIds = data.listIds;
-    this.mapIds = data.mapIds;
   }
 
   getNumberFieldNames(): string[] {
@@ -978,6 +973,47 @@ export class GroupPage<T extends NumberType> extends BaseNumberTypeClass<GroupPa
 
   clone(): GroupPage<T> {
     return super.clone() as GroupPage<T>;
+  }
+}
+
+/**
+ * @inheritDoc iApiKeyDoc
+ * @category Indexer
+ */
+export class ApiKeyDoc extends CustomTypeClass<ApiKeyDoc> implements iApiKeyDoc {
+  _docId: string;
+  _id?: string;
+  tier?: string;
+  label: string;
+  apiKey: string;
+  bitbadgesAddress: BitBadgesAddress;
+  numRequests: number;
+  lastRequest: number;
+  createdAt: number;
+  expiry: number;
+  intendedUse: string;
+  stripeSubscriptionId?: string;
+  subscriptionStatus?: string;
+  currentPeriodEnd?: number;
+  cancelAtPeriodEnd?: boolean;
+
+  constructor(data: iApiKeyDoc) {
+    super();
+    this._docId = data._docId;
+    this._id = data._id;
+    this.tier = data.tier;
+    this.label = data.label;
+    this.apiKey = data.apiKey;
+    this.bitbadgesAddress = data.bitbadgesAddress;
+    this.numRequests = data.numRequests;
+    this.lastRequest = data.lastRequest;
+    this.createdAt = data.createdAt;
+    this.expiry = data.expiry;
+    this.intendedUse = data.intendedUse;
+    this.stripeSubscriptionId = data.stripeSubscriptionId;
+    this.subscriptionStatus = data.subscriptionStatus;
+    this.currentPeriodEnd = data.currentPeriodEnd;
+    this.cancelAtPeriodEnd = data.cancelAtPeriodEnd;
   }
 }
 
@@ -1014,6 +1050,151 @@ export class GroupDoc<T extends NumberType> extends BaseNumberTypeClass<GroupDoc
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GroupDoc<U> {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GroupDoc<U>;
+  }
+}
+
+/**
+ * @inheritDoc iUtilityListingContent
+ * @category Indexer
+ */
+export class UtilityListingContent extends CustomTypeClass<UtilityListingContent> implements iUtilityListingContent {
+  label: string;
+  content: string;
+  type: string;
+
+  constructor(data: iUtilityListingContent) {
+    super();
+    this.label = data.label;
+    this.content = data.content;
+    this.type = data.type;
+  }
+
+  getNumberFieldNames(): string[] {
+    return [];
+  }
+
+  clone(): UtilityListingContent {
+    return super.clone() as UtilityListingContent;
+  }
+}
+
+/**
+ * @inheritDoc iUtilityListingLink
+ * @category Indexer
+ */
+export class UtilityListingLink<T extends NumberType> extends CustomTypeClass<UtilityListingLink<T>> implements iUtilityListingLink<T> {
+  url: string;
+  claimId?: string | undefined;
+  groupId?: string | undefined;
+  collectionId?: T | undefined;
+  listId?: string | undefined;
+  mapId?: string | undefined;
+  metadata?: iMetadata<T> | undefined;
+
+  constructor(data: iUtilityListingLink<T>) {
+    super();
+    this.url = data.url;
+    this.claimId = data.claimId;
+    this.groupId = data.groupId;
+    this.collectionId = data.collectionId;
+    this.listId = data.listId;
+    this.mapId = data.mapId;
+    this.metadata = data.metadata;
+  }
+
+  getNumberFieldNames(): string[] {
+    return [];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UtilityListingLink<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UtilityListingLink<U>;
+  }
+}
+
+/**
+ * @inheritDoc iListingViewsDoc
+ * @category Indexer
+ */
+export class ListingViewsDoc<T extends NumberType> extends BaseNumberTypeClass<ListingViewsDoc<T>> implements iListingViewsDoc<T> {
+  _docId: string;
+  _id?: string;
+  listingId: string;
+  viewCount: T;
+  lastUpdated: UNIXMilliTimestamp<T>;
+  viewsByPeriod?: { hourly: number; daily: number; weekly: number; monthly: number } | undefined;
+
+  constructor(data: iListingViewsDoc<T>) {
+    super();
+    this._docId = data._docId;
+    this._id = data._id;
+    this.listingId = data.listingId;
+    this.viewCount = data.viewCount;
+    this.lastUpdated = data.lastUpdated;
+    this.viewsByPeriod = data.viewsByPeriod;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['viewCount', 'lastUpdated'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ListingViewsDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ListingViewsDoc<U>;
+  }
+}
+
+/**
+ * @inheritDoc iUtilityListingDoc
+ * @category Indexer
+ */
+export class UtilityListingDoc<T extends NumberType> extends BaseNumberTypeClass<UtilityListingDoc<T>> implements iUtilityListingDoc<T> {
+  _docId: string;
+  _id?: string;
+  listingId: string;
+  type: string;
+  categories: string[];
+  directLink?: string | undefined;
+  createdBy: BitBadgesAddress;
+  createdAt: UNIXMilliTimestamp<T>;
+  content: UtilityListingContent[];
+  links: UtilityListingLink<T>[];
+  metadata: iMetadata<T>;
+  visibility: 'public' | 'private' | 'unlisted';
+  approvalStatus: {
+    isApproved: boolean;
+    rejected?: boolean;
+    reason?: string;
+    updatedBy?: BitBadgesAddress;
+  };
+  displayTimes?: UintRange<T> | undefined;
+  viewCount?: T | undefined;
+  viewsByPeriod?: { hourly: number; daily: number; weekly: number; monthly: number } | undefined;
+
+  constructor(data: iUtilityListingDoc<T>) {
+    super();
+    this._docId = data._docId;
+    this._id = data._id;
+    this.listingId = data.listingId;
+    this.type = data.type;
+    this.directLink = data.directLink;
+    this.categories = data.categories;
+    this.createdBy = data.createdBy;
+    this.createdAt = data.createdAt;
+    this.content = data.content.map((content) => new UtilityListingContent(content));
+    this.links = data.links.map((link) => new UtilityListingLink(link));
+    this.metadata = data.metadata;
+    this.visibility = data.visibility;
+    this.approvalStatus = data.approvalStatus;
+    this.displayTimes = data.displayTimes ? new UintRange(data.displayTimes) : undefined;
+    this.viewCount = data.viewCount;
+    this.viewsByPeriod = data.viewsByPeriod;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['createdAt', 'viewCount'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UtilityListingDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UtilityListingDoc<U>;
   }
 }
 
@@ -1366,6 +1547,10 @@ export class ComplianceDoc<T extends NumberType> extends BaseNumberTypeClass<Com
     nsfw: { claimId: string; reason: string }[];
     reported: { claimId: string; reason: string }[];
   };
+  maps?: {
+    nsfw: { mapId: string; reason: string }[];
+    reported: { mapId: string; reason: string }[];
+  };
 
   constructor(data: iComplianceDoc<T>) {
     super();
@@ -1379,6 +1564,7 @@ export class ComplianceDoc<T extends NumberType> extends BaseNumberTypeClass<Com
     this._docId = data._docId;
     this._id = data._id;
     this.claims = data.claims ?? { nsfw: [], reported: [] };
+    this.maps = data.maps ?? { nsfw: [], reported: [] };
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ComplianceDoc<U> {

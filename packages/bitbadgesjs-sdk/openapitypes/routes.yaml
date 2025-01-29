@@ -2074,49 +2074,58 @@ paths:
                   type: integer
                   minimum: 0
                   description: A non-negative integer index
-  # TODO: GetClaimAttemptsSuccessResponse doesnt exist
-  # /claims/{claimId}/attempts:
-  #   get:
-  #     operationId: getClaimAttempts
-  #     summary: Get Claim Attempts
-  #     tags:
-  #       - Claims
-  #     description: |
-  #       Retrieves the attempts for a claim.
-  #     responses:
-  #       '200':
-  #         description: Success response
-  #         content:
-  #           application/json:
-  #             schema:
-  #               $ref: '#/components/schemas/iGetClaimAttemptsSuccessResponse'
-  #       '400':
-  #         $ref: '#/components/responses/BadRequestResponse'
-  #       '500':
-  #         $ref: '#/components/responses/InternalServerErrorResponse'
-  #     parameters:
-  #       - name: claimId
-  #         in: path
-  #         description: The ID of the claim
-  #         required: true
-  #         schema:
-  #           type: string
-  #       - name: bookmark
-  #         in: query
-  #         description: Pagination bookmark
-  #         required: false
-  #         schema:
-  #           type: string
-  #       - name: includeErrors
-  #         in: query
-  #         description: Whether to include error details in the response
-  #         required: false
-  #         schema:
-  #           type: boolean
-  #     security:
-  #       - apiKey: []
-  #     x-internal: false
+  /claims/{claimId}/attempts:
+    post:
+      operationId: getClaimAttempts
+      summary: Get Claim Attempts
+      tags:
+        - Claims
+      description: |-
+        Retrieves the attempts for a claim in a paginated format.
 
+        ```tsx
+        const res = await BitBadgesApi.getClaimAttempts({
+          claimId: "...",
+          bookmark: "",
+          includeErrors: true
+        });
+        ```
+
+        Documentation References / Tutorials:
+        - **[Getting Claims](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/getting-claims)**
+        - **[Managing Claims](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/managing-claims)**
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetClaimAttemptsSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      parameters:
+        - name: claimId
+          in: path
+          description: The ID of the claim
+          required: true
+          schema:
+            type: string
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      security:
+        - apiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetClaimAttemptsPayload'
   /claims/gatedContent/{claimId}:
     post:
       operationId: getGatedContentForClaim
@@ -2789,6 +2798,191 @@ paths:
             schema:
               $ref: '#/components/schemas/GetPointsActivityPayload'
 
+  /utilityListings/fetch:
+    post:
+      operationId: getUtilityListings
+      summary: Get Utility Listings
+      tags:
+        - Utility Listings
+      description: |-
+        Fetches utility listings based on the provided criteria.
+
+        ```tsx
+        await BitBadgesApi.getUtilityListings(...);
+        ```
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetUtilityListingsSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      security:
+        - apiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetUtilityListingsPayload'
+
+  /utilityListings:
+    post:
+      operationId: createUtilityListing
+      summary: Create Utility Listing
+      tags:
+        - Utility Listings
+      description: |-
+        Creates a new utility listing.
+
+        ```tsx
+        await BitBadgesApi.createUtilityListing(...);
+        ```
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iCreateUtilityListingSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      security:
+        - apiKey: []
+          userSignedIn: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUtilityListingPayload'
+
+    put:
+      operationId: updateUtilityListing
+      summary: Update Utility Listing
+      tags:
+        - Utility Listings
+      description: |-
+        Updates an existing utility listing.
+
+        ```tsx
+        await BitBadgesApi.updateUtilityListing(...);
+        ```
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iUpdateUtilityListingSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      security:
+        - apiKey: []
+          userSignedIn: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUtilityListingPayload'
+
+    delete:
+      operationId: deleteUtilityListing
+      summary: Delete Utility Listing
+      tags:
+        - Utility Listings
+      description: |-
+        Deletes a utility listing.
+
+        ```tsx
+        await BitBadgesApi.deleteUtilityListing(...);
+        ```
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iDeleteUtilityListingSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      security:
+        - apiKey: []
+          userSignedIn: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteUtilityListingPayload'
+
+  /auth/status:
+    post:
+      operationId: checkSignInStatus
+      summary: Check Sign In Status
+      description: |
+        Checks if a user is currently signed in and returns their authentication status.
+      tags:
+        - Sign In with BitBadges
+      responses:
+        '200':
+          description: Successfully retrieved authentication status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iCheckSignInStatusSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckSignInStatusPayload'
+      security:
+        - userMaybeSignedIn: []
+      x-internal: false
 components:
   responses:
     ErrorResponse:

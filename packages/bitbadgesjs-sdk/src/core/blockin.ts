@@ -99,19 +99,20 @@ export class SiwbbChallenge<T extends NumberType> extends BaseNumberTypeClass<Si
  * @category SIWBB Authentication
  */
 export interface VerifySIWBBOptions {
-  /** The expected ownership requirements for the user */
+  /**
+   * The expected ownership requirements to check for the user.
+   *
+   * @deprecated Please do not use. Check requirements server-side via a claim or other means.
+   */
   ownershipRequirements?: AssetConditionGroup<NumberType>;
-
-  /** Claim ID to check for. */
-  claimId?: string;
-  /** If true, we will only check for the existence of the claim. */
-  checkClaimedMinOnce?: boolean;
-  /** If true, we will simulate the claim. Only compatible with non-indexed claims. */
-  simulateClaim?: boolean;
 
   /** How recent the challenge must be in milliseconds. Defaults to 10 minutes. If 0, we will not check the time. */
   issuedAtTimeWindowMs?: number;
-  /** Skip asset verification. This may be useful for simulations or testing */
+  /**
+   * Skip asset verification. This may be useful for simulations or testing.
+   *
+   * @deprecated Please do not use. Check requirements server-side via a claim or other means.
+   */
   skipAssetVerification?: boolean;
 }
 
@@ -119,24 +120,25 @@ export interface VerifySIWBBOptions {
  * @category SIWBB Authentication
  */
 export interface CodeGenQueryParams {
-  ownershipRequirements?: AssetConditionGroup<NumberType>;
-  expectVerifySuccess?: boolean;
-
-  name?: string;
-  description?: string;
-  image?: string;
-
-  otherSignIns?: ('discord' | 'twitter' | 'github' | 'google')[];
-
   redirect_uri?: string;
   client_id: string;
   state?: string;
   scope?: string;
 
-  expectAttestationsPresentations?: boolean;
-
+  // Display options
   claimId?: string;
   hideIfAlreadyClaimed?: boolean;
+  expectVerifySuccess?: boolean;
+  expectAttestations?: boolean;
+
+  /**
+   * @deprecated Please consider handling this with a claim instead.
+   */
+  otherSignIns?: ('discord' | 'twitter' | 'github' | 'google')[];
+  /**
+   * @deprecated Please consider handling this with a claim instead.
+   */
+  ownershipRequirements?: AssetConditionGroup<NumberType>;
 }
 
 /**

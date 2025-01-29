@@ -42,7 +42,7 @@ export interface iMetadata<T extends NumberType> {
     value: string | number | boolean;
   }[];
 
-  utility?: {
+  additionalInfo?: {
     name: string;
     image: string;
     description: string;
@@ -84,7 +84,7 @@ export class Metadata<T extends NumberType> extends BaseNumberTypeClass<Metadata
     value: string | number | boolean;
   }[];
 
-  utility?: {
+  additionalInfo?: {
     name: string;
     image: string;
     description: string;
@@ -112,7 +112,7 @@ export class Metadata<T extends NumberType> extends BaseNumberTypeClass<Metadata
     this.socials = data.socials;
     this.offChainTransferabilityInfo = data.offChainTransferabilityInfo;
     this.attributes = data.attributes;
-    this.utility = data.utility;
+    this.additionalInfo = data.additionalInfo;
   }
 
   getNumberFieldNames(): string[] {

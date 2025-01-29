@@ -2359,6 +2359,66 @@ paths:
                   type: integer
                   minimum: 0
                   description: A non-negative integer index
+  /claims/{claimId}/attempts:
+    post:
+      operationId: getClaimAttempts
+      summary: Get Claim Attempts
+      tags:
+        - Claims
+      description: >-
+        Retrieves the attempts for a claim in a paginated format.
+
+
+        ```tsx
+
+        const res = await BitBadgesApi.getClaimAttempts({
+          claimId: "...",
+          bookmark: "",
+          includeErrors: true
+        });
+
+        ```
+
+
+        Documentation References / Tutorials:
+
+        - **[Getting
+        Claims](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/getting-claims)**
+
+        - **[Managing
+        Claims](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/managing-claims)**
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetClaimAttemptsSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      parameters:
+        - name: claimId
+          in: path
+          description: The ID of the claim
+          required: true
+          schema:
+            type: string
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      security:
+        - apiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetClaimAttemptsPayload'
   /claims/gatedContent/{claimId}:
     post:
       operationId: getGatedContentForClaim
@@ -3105,6 +3165,188 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/GetPointsActivityPayload'
+  /utilityListings/fetch:
+    post:
+      operationId: getUtilityListings
+      summary: Get Utility Listings
+      tags:
+        - Utility Listings
+      description: |-
+        Fetches utility listings based on the provided criteria.
+
+        ```tsx
+        await BitBadgesApi.getUtilityListings(...);
+        ```
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetUtilityListingsSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      security:
+        - apiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetUtilityListingsPayload'
+  /utilityListings:
+    post:
+      operationId: createUtilityListing
+      summary: Create Utility Listing
+      tags:
+        - Utility Listings
+      description: |-
+        Creates a new utility listing.
+
+        ```tsx
+        await BitBadgesApi.createUtilityListing(...);
+        ```
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iCreateUtilityListingSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      security:
+        - apiKey: []
+          userSignedIn: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUtilityListingPayload'
+    put:
+      operationId: updateUtilityListing
+      summary: Update Utility Listing
+      tags:
+        - Utility Listings
+      description: |-
+        Updates an existing utility listing.
+
+        ```tsx
+        await BitBadgesApi.updateUtilityListing(...);
+        ```
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iUpdateUtilityListingSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      security:
+        - apiKey: []
+          userSignedIn: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUtilityListingPayload'
+    delete:
+      operationId: deleteUtilityListing
+      summary: Delete Utility Listing
+      tags:
+        - Utility Listings
+      description: |-
+        Deletes a utility listing.
+
+        ```tsx
+        await BitBadgesApi.deleteUtilityListing(...);
+        ```
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iDeleteUtilityListingSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      security:
+        - apiKey: []
+          userSignedIn: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteUtilityListingPayload'
+  /auth/status:
+    post:
+      operationId: checkSignInStatus
+      summary: Check Sign In Status
+      description: >
+        Checks if a user is currently signed in and returns their authentication
+        status.
+      tags:
+        - Sign In with BitBadges
+      responses:
+        '200':
+          description: Successfully retrieved authentication status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iCheckSignInStatusSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckSignInStatusPayload'
+      security:
+        - userMaybeSignedIn: []
+      x-internal: false
 components:
   responses:
     ErrorResponse:
@@ -5409,35 +5651,58 @@ components:
             $ref: '#/components/schemas/iTierWithOptionalWeight'
           description: Quests to display in the page
           type: array
-        events:
-          items:
-            $ref: '#/components/schemas/iEvent'
-          description: The events in the group
-          type: array
-        collectionIds:
-          items:
-            $ref: '#/components/schemas/NumberType'
-          description: The collection IDs in the group
-          type: array
-        claimIds:
-          items:
-            type: string
-          description: The claim IDs in the group
-          type: array
-        listIds:
-          items:
-            type: string
-          description: The address list IDs in the group
-          type: array
-        mapIds:
-          items:
-            type: string
-          description: Mapping IDs in the group
-          type: array
       required:
         - pageId
         - metadata
       additionalProperties: false
+      type: object
+    iApiKeyDoc:
+      properties:
+        _docId:
+          description: A unique stringified document ID
+          type: string
+        _id:
+          description: A unique document ID (Mongo DB ObjectID)
+          type: string
+        tier:
+          type: string
+        label:
+          type: string
+        apiKey:
+          type: string
+        bitbadgesAddress:
+          type: string
+          examples: *ref_8
+        numRequests:
+          type: number
+        lastRequest:
+          type: number
+        createdAt:
+          type: number
+        expiry:
+          type: number
+        intendedUse:
+          type: string
+        stripeSubscriptionId:
+          type: string
+        subscriptionStatus:
+          type: string
+        currentPeriodEnd:
+          type: number
+        cancelAtPeriodEnd:
+          type: boolean
+      required:
+        - _docId
+        - label
+        - apiKey
+        - bitbadgesAddress
+        - numRequests
+        - lastRequest
+        - createdAt
+        - expiry
+        - intendedUse
+      additionalProperties: false
+      description: ''
       type: object
     iGroupDoc:
       properties:
@@ -5477,6 +5742,216 @@ components:
         - pages
       additionalProperties: false
       description: '@cateogry Interfaces'
+      type: object
+    iUtilityListingDoc:
+      properties:
+        _docId:
+          description: A unique stringified document ID
+          type: string
+        _id:
+          description: A unique document ID (Mongo DB ObjectID)
+          type: string
+        listingId:
+          description: The listing ID
+          type: string
+        type:
+          description: Type of the listing
+          type: string
+        createdBy:
+          description: The BitBadges address of the user who created this listing
+          $ref: '#/components/schemas/BitBadgesAddress'
+        directLink:
+          description: >-
+            The direct link for the listing. If specified, we will skip the
+            entire content / listing page. Thus, content and links should be
+            empty [].
+          type: string
+        createdAt:
+          description: The time the listing was created
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
+        metadata:
+          description: The overall metadata for the listing
+          $ref: '#/components/schemas/iMetadata'
+        content:
+          items:
+            $ref: '#/components/schemas/iUtilityListingContent'
+          description: The paginated content for the listing
+          type: array
+        links:
+          items:
+            $ref: '#/components/schemas/iUtilityListingLink'
+          description: The relevant links for the listing
+          type: array
+        displayTimes:
+          description: Optional time range for when the listing should be shown
+          $ref: '#/components/schemas/iUintRange'
+        visibility:
+          enum:
+            - public
+            - private
+            - unlisted
+          description: Visibility state of the listing
+          type: string
+        categories:
+          items:
+            type: string
+          description: The categories of the listing
+          type: array
+        approvalStatus:
+          properties:
+            isApproved:
+              description: Whether the listing is approved
+              type: boolean
+            rejected:
+              description: Rejected or just pending
+              type: boolean
+            reason:
+              description: Optional reason if not approved
+              type: string
+            updatedBy:
+              $ref: '#/components/schemas/BitBadgesAddress'
+              description: Address of who last updated the approval status
+          required:
+            - isApproved
+          additionalProperties: false
+          description: Approval status - can be used for moderation
+          type: object
+        viewCount:
+          description: >-
+            The total view count for this listing. This is updated periodically
+            from the view tracking document.
+          $ref: '#/components/schemas/NumberType'
+        viewsByPeriod:
+          properties:
+            hourly:
+              description: Views in the last hour
+              type: number
+            daily:
+              description: Views in the last 24 hours
+              type: number
+            weekly:
+              description: Views in the last 7 days
+              type: number
+            monthly:
+              description: Views in the last 30 days
+              type: number
+          required:
+            - hourly
+            - daily
+            - weekly
+            - monthly
+          additionalProperties: false
+          description: Optional breakdown of views by time period for trending calculations
+          type: object
+      required:
+        - _docId
+        - listingId
+        - type
+        - createdBy
+        - createdAt
+        - metadata
+        - content
+        - links
+        - visibility
+        - categories
+        - approvalStatus
+      additionalProperties: false
+      description: ''
+      type: object
+    iUtilityListingContent:
+      properties:
+        type:
+          description: The type of content
+          type: string
+        label:
+          description: Label for the content page
+          type: string
+        content:
+          description: The content - markdown supported
+          type: string
+      required:
+        - type
+        - label
+        - content
+      additionalProperties: false
+      type: object
+    iUtilityListingLink:
+      properties:
+        url:
+          description: The URL of the link
+          type: string
+        claimId:
+          description: The claim ID to link to
+          type: string
+        groupId:
+          description: The group ID to link to
+          type: string
+        collectionId:
+          description: The collection ID to link to
+          $ref: '#/components/schemas/NumberType'
+        listId:
+          description: The address list ID to link to
+          type: string
+          examples: *ref_11
+        mapId:
+          description: The map ID to link to
+          type: string
+        metadata:
+          description: >-
+            Metadata for the link. Only applicable if the link is to a
+            non-BitBadges entity. In other words, not tied to a specific claim,
+            group, collection, etc.
+          $ref: '#/components/schemas/iMetadata'
+      required:
+        - url
+      additionalProperties: false
+      type: object
+    iListingViewsDoc:
+      properties:
+        _docId:
+          description: A unique stringified document ID
+          type: string
+        _id:
+          description: A unique document ID (Mongo DB ObjectID)
+          type: string
+        listingId:
+          description: The listing ID this view count is for
+          type: string
+        viewCount:
+          description: The total number of views
+          $ref: '#/components/schemas/NumberType'
+        lastUpdated:
+          description: The last time this view count was updated
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
+        viewsByPeriod:
+          properties:
+            hourly:
+              description: Views in the last hour
+              type: number
+            daily:
+              description: Views in the last 24 hours
+              type: number
+            weekly:
+              description: Views in the last 7 days
+              type: number
+            monthly:
+              description: Views in the last 30 days
+              type: number
+          required:
+            - hourly
+            - daily
+            - weekly
+            - monthly
+          additionalProperties: false
+          description: Optional breakdown of views by time period for trending calculations
+          type: object
+      required:
+        - _docId
+        - listingId
+        - viewCount
+        - lastUpdated
+      additionalProperties: false
+      description: ''
       type: object
     iClaimBuilderDoc:
       properties:
@@ -6083,6 +6558,39 @@ components:
                     type: string
                 required:
                   - claimId
+                  - reason
+                additionalProperties: false
+                type: object
+              type: array
+          required:
+            - nsfw
+            - reported
+          additionalProperties: false
+          type: object
+        maps:
+          properties:
+            nsfw:
+              items:
+                properties:
+                  mapId:
+                    type: string
+                  reason:
+                    type: string
+                required:
+                  - mapId
+                  - reason
+                additionalProperties: false
+                type: object
+              type: array
+            reported:
+              items:
+                properties:
+                  mapId:
+                    type: string
+                  reason:
+                    type: string
+                required:
+                  - mapId
                   - reason
                 additionalProperties: false
                 type: object
@@ -6971,7 +7479,7 @@ components:
         collectionId:
           description: Collection ID that the claim is for (if applicable).
           $ref: '#/components/schemas/NumberType'
-        siwbbClaim:
+        standaloneClaim:
           description: Is intended to be used for Sign In with BitBadges.
           type: boolean
         listId:
@@ -7197,7 +7705,7 @@ components:
             type: object
           description: The attributes of the badge or badge collection
           type: array
-        utility:
+        additionalInfo:
           items:
             properties:
               name:
@@ -7856,6 +8364,13 @@ components:
             A list of claim activity items for the account. Paginated and
             fetched as needed. To be used in conjunction with views.
           type: array
+        pointsActivity:
+          items:
+            $ref: '#/components/schemas/iPointsActivityDoc'
+          description: >-
+            A list of points activity items for the account. Paginated and
+            fetched as needed. To be used in conjunction with views.
+          type: array
         merkleChallenges:
           items:
             $ref: '#/components/schemas/iMerkleChallengeDoc'
@@ -7997,6 +8512,7 @@ components:
         - attestations
         - publicClaimActivity
         - allClaimActivity
+        - pointsActivity
       description: The supported view keys for fetching account details.
       type: string
     AccountFetchDetails:
@@ -8874,6 +9390,10 @@ components:
           items:
             $ref: '#/components/schemas/iClaimDetails'
           type: array
+        utilityListings:
+          items:
+            $ref: '#/components/schemas/iUtilityListingDoc'
+          type: array
       required:
         - collections
         - accounts
@@ -8896,7 +9416,7 @@ components:
             link.
           type: string
           examples: *ref_11
-        siwbbClaimsOnly:
+        standaloneClaimsOnly:
           description: >-
             If true, we will return all claims that were created by the signed
             in address.
@@ -8917,6 +9437,23 @@ components:
             If provided, we will only return claims with names that match the
             search value. Only applicable for fetching your own claims.
           type: string
+        privateStatesToFetch:
+          items:
+            properties:
+              claimId:
+                type: string
+              instanceId:
+                type: string
+            required:
+              - claimId
+              - instanceId
+            additionalProperties: false
+            type: object
+          description: >-
+            Which private state instance IDs to fetch. claimId and instanceId
+            are required and must match a claimId in claimIds and the claim must
+            have the corresponding instanceId.
+          type: array
       additionalProperties: false
       type: object
     iGetClaimsSuccessResponse:
@@ -8977,6 +9514,56 @@ components:
         - success
         - error
         - bitbadgesAddress
+      additionalProperties: false
+      type: object
+    GetClaimAttemptsPayload:
+      properties:
+        bookmark:
+          description: The bookmark to start from.
+          type: string
+        includeErrors:
+          description: Whether to include errors or not.
+          type: boolean
+        address:
+          description: >-
+            The specific address to fetch claims for. If blank, we fetch most
+            recent claims.
+          $ref: '#/components/schemas/NativeAddress'
+      additionalProperties: false
+      type: object
+    iGetClaimAttemptsSuccessResponse:
+      properties:
+        docs:
+          items:
+            properties:
+              success:
+                type: boolean
+              attemptedAt:
+                $ref: '#/components/schemas/UNIXMilliTimestamp'
+              claimId:
+                type: string
+              bitbadgesAddress:
+                $ref: '#/components/schemas/NativeAddress'
+                examples: *ref_8
+              claimAttemptId:
+                type: string
+              error:
+                type: string
+            required:
+              - success
+              - attemptedAt
+              - claimId
+              - bitbadgesAddress
+              - claimAttemptId
+            additionalProperties: false
+            type: object
+          type: array
+        bookmark:
+          type: string
+        total:
+          type: number
+      required:
+        - docs
       additionalProperties: false
       type: object
     SimulateClaimPayload:
@@ -9887,6 +10474,7 @@ components:
             - attestations
             - claims
             - activity
+            - utilityListings
             - groups
             - claimActivity
             - pointsActivity
@@ -9975,6 +10563,12 @@ components:
           items:
             $ref: '#/components/schemas/iPointsActivityDoc'
           type: array
+        utilityListings:
+          additionalProperties:
+            items:
+              $ref: '#/components/schemas/iUtilityListingDoc'
+            type: array
+          type: object
       required:
         - collections
         - addressLists
@@ -10993,6 +11587,10 @@ components:
         developerApps:
           items:
             $ref: '#/components/schemas/iDeveloperAppDoc'
+          description: |-
+            Developer app docs for each authorization.
+
+            Undefined if deleted.
           type: array
       required:
         - authorizations
@@ -11608,7 +12206,7 @@ components:
               collectionId:
                 description: Collection ID that the claim is for (if applicable).
                 $ref: '#/components/schemas/NumberType'
-              siwbbClaim:
+              standaloneClaim:
                 description: Is intended to be used for Sign In with BitBadges.
                 type: boolean
               listId:
@@ -11806,7 +12404,7 @@ components:
           type: array
         testClaims:
           type: boolean
-        siwbbClaim:
+        standaloneClaim:
           type: boolean
       required:
         - claims
@@ -11905,7 +12503,8 @@ components:
     iGetDynamicDataBinsSuccessResponse:
       properties:
         docs:
-          items: {}
+          items:
+            anyOf: []
           type: array
         pagination:
           properties:
@@ -12028,6 +12627,7 @@ components:
     PerformBinActionBodyAuthPayload:
       properties:
         dataSecret:
+          description: The data secret to perform the action with
           type: string
       required:
         - dataSecret
@@ -12161,6 +12761,86 @@ components:
       required:
         - pending
         - history
+      additionalProperties: false
+      type: object
+    GetApiKeysPayload:
+      properties:
+        bookmark:
+          description: The pagination bookmark to start from
+          type: string
+      additionalProperties: false
+      type: object
+    iGetApiKeysSuccessResponse:
+      properties:
+        docs:
+          items:
+            $ref: '#/components/schemas/iApiKeyDoc'
+          type: array
+        pagination:
+          properties:
+            bookmark:
+              type: string
+            hasMore:
+              type: boolean
+          required:
+            - bookmark
+            - hasMore
+          additionalProperties: false
+          type: object
+      required:
+        - docs
+        - pagination
+      additionalProperties: false
+      type: object
+    CreateApiKeyPayload:
+      properties:
+        label:
+          description: The label for the API key
+          type: string
+        intendedUse:
+          description: The intended use for the API key
+          type: string
+      required:
+        - label
+        - intendedUse
+      additionalProperties: false
+      type: object
+    iCreateApiKeySuccessResponse:
+      properties:
+        key:
+          type: string
+      required:
+        - key
+      additionalProperties: false
+      type: object
+    RotateApiKeyPayload:
+      properties:
+        docId:
+          description: The doc ID to rotate
+          type: string
+      required:
+        - docId
+      additionalProperties: false
+      type: object
+    iRotateApiKeySuccessResponse:
+      properties:
+        key:
+          type: string
+      required:
+        - key
+      additionalProperties: false
+      type: object
+    DeleteApiKeyPayload:
+      properties:
+        key:
+          description: The API key to delete
+          type: string
+        _docId:
+          description: The doc ID to delete
+          type: string
+      additionalProperties: false
+      type: object
+    iDeleteApiKeySuccessResponse:
       additionalProperties: false
       type: object
     GetGroupsPayload:
@@ -12328,6 +13008,9 @@ components:
         bookmark:
           description: The pagination bookmark to start from
           type: string
+        address:
+          description: The specific address to get points activity for
+          $ref: '#/components/schemas/NativeAddress'
       required:
         - groupId
         - pageId
@@ -12353,6 +13036,299 @@ components:
       required:
         - docs
         - pagination
+      additionalProperties: false
+      type: object
+    GetUtilityListingsPayload:
+      properties:
+        bookmark:
+          description: The pagination bookmark to start from
+          type: string
+        listingIds:
+          items:
+            type: string
+          description: The specific IDs to fetch
+          type: array
+      additionalProperties: false
+      type: object
+    iGetUtilityListingsSuccessResponse:
+      properties:
+        docs:
+          items:
+            $ref: '#/components/schemas/iUtilityListingDoc'
+          type: array
+        pagination:
+          properties:
+            bookmark:
+              type: string
+            hasMore:
+              type: boolean
+          required:
+            - bookmark
+            - hasMore
+          additionalProperties: false
+          type: object
+      required:
+        - docs
+        - pagination
+      additionalProperties: false
+      type: object
+    CreateUtilityListingPayload:
+      properties:
+        metadata:
+          description: The overall metadata for the listing
+          $ref: '#/components/schemas/iMetadata'
+        content:
+          items:
+            $ref: '#/components/schemas/iUtilityListingContent'
+          description: The content for the listing
+          type: array
+        links:
+          items:
+            $ref: '#/components/schemas/iUtilityListingLink'
+          description: The links for the listing
+          type: array
+        type:
+          description: The type of the listing
+          type: string
+        visibility:
+          enum:
+            - public
+            - private
+            - unlisted
+          description: The visibility of the listing
+          type: string
+        displayTimes:
+          description: The display times of the listing
+          $ref: '#/components/schemas/iUintRange'
+        directLink:
+          description: >-
+            The direct link for the listing. If specified, we will skip the
+            entire content / listing page. Thus, content and links should be
+            empty [].
+          type: string
+        categories:
+          items:
+            type: string
+          description: The categories of the listing
+          type: array
+      required:
+        - metadata
+        - content
+        - links
+        - type
+        - visibility
+        - categories
+      additionalProperties: false
+      type: object
+    iCreateUtilityListingSuccessResponse:
+      properties:
+        doc:
+          $ref: '#/components/schemas/iUtilityListingDoc'
+      required:
+        - doc
+      additionalProperties: false
+      type: object
+    UpdateUtilityListingPayload:
+      properties:
+        listingId:
+          description: The listing ID to update
+          type: string
+        metadata:
+          description: The overall metadata for the listing
+          $ref: '#/components/schemas/iMetadata'
+        content:
+          items:
+            $ref: '#/components/schemas/iUtilityListingContent'
+          description: The content for the listing
+          type: array
+        links:
+          items:
+            $ref: '#/components/schemas/iUtilityListingLink'
+          description: The links for the listing
+          type: array
+        visibility:
+          enum:
+            - public
+            - private
+            - unlisted
+          description: The visibility of the listing
+          type: string
+        displayTimes:
+          description: The display times of the listing
+          $ref: '#/components/schemas/iUintRange'
+        directLink:
+          description: >-
+            The direct link for the listing. If specified, we will skip the
+            entire content / listing page. Thus, content and links should be
+            empty [].
+          type: string
+        categories:
+          items:
+            type: string
+          description: The categories of the listing
+          type: array
+      required:
+        - listingId
+        - metadata
+        - content
+        - links
+        - visibility
+        - categories
+      additionalProperties: false
+      type: object
+    iUpdateUtilityListingSuccessResponse:
+      properties:
+        doc:
+          $ref: '#/components/schemas/iUtilityListingDoc'
+      required:
+        - doc
+      additionalProperties: false
+      type: object
+    DeleteUtilityListingPayload:
+      properties:
+        listingId:
+          description: The listing ID to delete
+          type: string
+      required:
+        - listingId
+      additionalProperties: false
+      type: object
+    iDeleteUtilityListingSuccessResponse:
+      additionalProperties: false
+      type: object
+    GetPostActionStatusesPayload:
+      additionalProperties: false
+      type: object
+    iGetPostActionStatusesSuccessResponse:
+      properties:
+        postActionStatuses:
+          items:
+            properties:
+              lastFetchedAt:
+                $ref: '#/components/schemas/UNIXMilliTimestamp'
+              claimId:
+                type: string
+              bitbadgesAddress:
+                type: string
+                examples: *ref_8
+              pluginId:
+                type: string
+              claimAttemptId:
+                type: string
+              numRetries:
+                $ref: '#/components/schemas/NumberType'
+              nextFetchTime:
+                $ref: '#/components/schemas/UNIXMilliTimestamp'
+            required:
+              - lastFetchedAt
+              - claimId
+              - bitbadgesAddress
+              - pluginId
+              - claimAttemptId
+              - numRetries
+              - nextFetchTime
+            additionalProperties: false
+            type: object
+          type: array
+      required:
+        - postActionStatuses
+      additionalProperties: false
+      type: object
+    GetPluginErrorsPayload:
+      properties:
+        pluginId:
+          description: The plugin ID to get errors for
+          type: string
+        bookmark:
+          description: The pagination bookmark to start from
+          type: string
+      required:
+        - pluginId
+      additionalProperties: false
+      type: object
+    PluginErrorDoc:
+      properties:
+        _docId:
+          type: string
+        _id:
+          type: string
+        pluginId:
+          type: string
+        timestamp:
+          type: number
+        error:
+          type: string
+        context: {}
+      required:
+        - _docId
+        - pluginId
+        - timestamp
+        - error
+      additionalProperties: false
+      type: object
+    iGetPluginErrorsSuccessResponse:
+      properties:
+        docs:
+          items:
+            $ref: '#/components/schemas/PluginErrorDoc'
+          type: array
+        bookmark:
+          type: string
+        total:
+          type: number
+      required:
+        - docs
+      additionalProperties: false
+      type: object
+    GetOrCreateEmbeddedWalletPayload:
+      additionalProperties: false
+      type: object
+    iGetOrCreateEmbeddedWalletSuccessResponse:
+      properties:
+        address:
+          type: string
+      required:
+        - address
+      additionalProperties: false
+      type: object
+    ScheduleTokenRefreshPayload:
+      properties:
+        provider:
+          type: string
+        claimId:
+          type: string
+        instanceId:
+          type: string
+      required:
+        - provider
+      additionalProperties: false
+      type: object
+    iScheduleTokenRefreshSuccessResponse:
+      properties:
+        message:
+          type: string
+        docId:
+          type: string
+      required:
+        - message
+        - docId
+      additionalProperties: false
+      type: object
+    SignWithEmbeddedWalletPayload:
+      properties:
+        message:
+          type: string
+      required:
+        - message
+      additionalProperties: false
+      type: object
+    iSignWithEmbeddedWalletSuccessResponse:
+      properties:
+        signature:
+          type: string
+          examples: *ref_16
+      required:
+        - signature
       additionalProperties: false
       type: object
     GetMapsPayload:
@@ -12897,19 +13873,12 @@ components:
     VerifySIWBBOptions:
       properties:
         ownershipRequirements:
-          description: The expected ownership requirements for the user
-          $ref: '#/components/schemas/AssetConditionGroup'
-        claimId:
-          description: Claim ID to check for.
-          type: string
-        checkClaimedMinOnce:
-          description: If true, we will only check for the existence of the claim.
-          type: boolean
-        simulateClaim:
           description: >-
-            If true, we will simulate the claim. Only compatible with
-            non-indexed claims.
-          type: boolean
+            The expected ownership requirements to check for the user.
+
+            @deprecated Please do not use. Check requirements server-side via a
+            claim or other means.
+          $ref: '#/components/schemas/AssetConditionGroup'
         issuedAtTimeWindowMs:
           description: >-
             How recent the challenge must be in milliseconds. Defaults to 10
@@ -12918,34 +13887,15 @@ components:
         skipAssetVerification:
           description: >-
             Skip asset verification. This may be useful for simulations or
-            testing
+            testing.
+
+            @deprecated Please do not use. Check requirements server-side via a
+            claim or other means.
           type: boolean
       additionalProperties: false
       type: object
     CodeGenQueryParams:
       properties:
-        ownershipRequirements:
-          $ref: '#/components/schemas/AssetConditionGroup'
-        expectVerifySuccess:
-          type: boolean
-        name:
-          type: string
-          examples: *ref_13
-        description:
-          type: string
-          examples: *ref_9
-        image:
-          type: string
-          examples: *ref_12
-        otherSignIns:
-          items:
-            enum:
-              - discord
-              - twitter
-              - github
-              - google
-            type: string
-          type: array
         redirect_uri:
           type: string
         client_id:
@@ -12954,12 +13904,27 @@ components:
           type: string
         scope:
           type: string
-        expectAttestationsPresentations:
-          type: boolean
         claimId:
           type: string
         hideIfAlreadyClaimed:
           type: boolean
+        expectVerifySuccess:
+          type: boolean
+        expectAttestations:
+          type: boolean
+        otherSignIns:
+          items:
+            enum:
+              - discord
+              - twitter
+              - github
+              - google
+            type: string
+          description: '@deprecated Please consider handling this with a claim instead.'
+          type: array
+        ownershipRequirements:
+          description: '@deprecated Please consider handling this with a claim instead.'
+          $ref: '#/components/schemas/AssetConditionGroup'
       required:
         - client_id
       additionalProperties: false
@@ -16376,7 +17341,6 @@ components:
         - googleCalendar
         - telegram
         - farcaster
-        - meetup
         - slack
         - linkedIn
         - shopify

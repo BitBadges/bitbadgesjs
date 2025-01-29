@@ -68,8 +68,7 @@ export interface BitBadgesProfile {
  */
 export default function BitBadges(
   config: OAuthUserConfig<BitBadgesProfile> & {
-    expectAttestationsPresentations?: boolean;
-    ownershipRequirements?: any;
+    expectAttestations?: boolean;
     expectVerifySuccess?: boolean;
     issuedAtTimeWindowMs?: number;
     name?: string;
@@ -78,8 +77,7 @@ export default function BitBadges(
   }
 ): OAuthConfig<BitBadgesProfile> {
   const frontendParams: Record<string, any> = {};
-  if (config.expectAttestationsPresentations) frontendParams.expectAttestationsPresentations = config.expectAttestationsPresentations;
-  if (config.ownershipRequirements) frontendParams.ownershipRequirements = JSON.stringify(config.ownershipRequirements);
+  if (config.expectAttestations) frontendParams.expectAttestations = config.expectAttestations;
   if (config.expectVerifySuccess) frontendParams.expectVerifySuccess = config.expectVerifySuccess;
   if (config.name) frontendParams.name = config.name;
   if (config.image) frontendParams.image = config.image;
@@ -99,7 +97,6 @@ export default function BitBadges(
       url: `${'https://api.bitbadges.io/api/v0/siwbb/token'}`,
       params: {
         options: JSON.stringify({
-          ownershipRequirements: config.ownershipRequirements,
           issuedAtTimeWindowMs: config.issuedAtTimeWindowMs
         })
       }

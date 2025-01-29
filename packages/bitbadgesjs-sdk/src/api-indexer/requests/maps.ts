@@ -17,7 +17,7 @@ export interface GetMapsPayload {
  * @category API Requests / Responses
  */
 export interface iGetMapsSuccessResponse<T extends NumberType> {
-  maps: iMapWithValues<T>[];
+  maps: (iMapWithValues<T> | undefined)[];
 }
 
 /**
@@ -27,11 +27,11 @@ export class GetMapsSuccessResponse<T extends NumberType>
   extends BaseNumberTypeClass<GetMapsSuccessResponse<T>>
   implements iGetMapsSuccessResponse<T>, CustomType<GetMapsSuccessResponse<T>>
 {
-  maps: MapWithValues<T>[];
+  maps: (MapWithValues<T> | undefined)[];
 
   constructor(data: iGetMapsSuccessResponse<T>) {
     super();
-    this.maps = data.maps.map((map) => new MapWithValues(map));
+    this.maps = data.maps.map((map) => (map ? new MapWithValues(map) : undefined));
   }
 
   getNumberFieldNames(): string[] {
@@ -55,7 +55,7 @@ export interface GetMapValuesPayload {
  * @category API Requests / Responses
  */
 export interface iGetMapValuesSuccessResponse {
-  values: { mapId: string; values: { [key: string]: iValueStore } }[];
+  values: ({ mapId: string; values: { [key: string]: iValueStore } } | undefined)[];
 }
 
 /**
@@ -65,14 +65,17 @@ export class GetMapValuesSuccessResponse
   extends BaseNumberTypeClass<GetMapValuesSuccessResponse>
   implements iGetMapValuesSuccessResponse, CustomType<GetMapValuesSuccessResponse>
 {
-  values: { mapId: string; values: { [key: string]: ValueStore } }[];
+  values: ({ mapId: string; values: { [key: string]: ValueStore } } | undefined)[];
 
   constructor(data: iGetMapValuesSuccessResponse) {
     super();
-    this.values = data.values.map((value) => ({
-      mapId: value.mapId,
-      values: Object.fromEntries(Object.entries(value.values).map(([key, value]) => [key, new ValueStore(value)]))
-    }));
+    this.values = data.values.map((value) => {
+      if (!value) return undefined;
+      return {
+        mapId: value.mapId,
+        values: Object.fromEntries(Object.entries(value.values).map(([key, value]) => [key, new ValueStore(value)]))
+      };
+    });
   }
 
   getNumberFieldNames(): string[] {

@@ -8,7 +8,13 @@ import {
   iSatisfyMethod
 } from '@/api-indexer/docs/interfaces.js';
 import { Metadata } from '@/api-indexer/metadata/metadata.js';
-import { BaseNumberTypeClass, ConvertOptions, CustomTypeClass, convertClassPropertiesAndMaintainNumberTypes, deepCopyPrimitives } from '@/common/base.js';
+import {
+  BaseNumberTypeClass,
+  ConvertOptions,
+  CustomTypeClass,
+  convertClassPropertiesAndMaintainNumberTypes,
+  deepCopyPrimitives
+} from '@/common/base.js';
 import type {
   iApprovalAmounts,
   iApprovalCriteria,
@@ -109,7 +115,7 @@ export class ClaimDetails<T extends NumberType> extends BaseNumberTypeClass<Clai
   lastUpdated?: T | undefined;
   version: T;
   collectionId?: T;
-  siwbbClaim?: boolean;
+  standaloneClaim?: boolean;
   listId?: string;
   rewards?: ClaimReward<T>[];
   estimatedCost?: string;
@@ -134,7 +140,7 @@ export class ClaimDetails<T extends NumberType> extends BaseNumberTypeClass<Clai
     this.lastUpdated = data.lastUpdated;
     this.version = data.version;
     this.collectionId = data.collectionId;
-    this.siwbbClaim = data.siwbbClaim;
+    this.standaloneClaim = data.standaloneClaim;
     this.listId = data.listId;
     this.rewards = data.rewards?.map((reward) => new ClaimReward(reward));
     this.estimatedCost = data.estimatedCost;
