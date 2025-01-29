@@ -411,14 +411,6 @@ export type iAddressListCreateObject<T extends NumberType> = iAddressList & {
   /** Flag to update addresses? */
   updateAddresses?: boolean;
 
-  /** Private lists will not show up in any search results. */
-  private?: boolean;
-  /**
-   * If the list is viewable with a link, anyone with the list ID can view details. Only applicable if private = true as well.
-   * If not viewable with a link, only the creator can view the list.
-   */
-  viewableWithLink?: boolean;
-
   /** The claims of the address list. Use resetState on updates for resetting individual plugin state (if applicable). */
   claims: {
     claimId: string;

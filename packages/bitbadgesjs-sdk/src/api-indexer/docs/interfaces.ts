@@ -633,10 +633,6 @@ export interface iAddressListDoc<T extends NumberType> extends iAddressList, Doc
   nsfw?: { reason: string };
   /** The reported reason if this list is reported */
   reported?: { reason: string };
-  /** True if this list is private and will not show up in search results */
-  private?: boolean;
-  /** True if this list is viewable if queried by the list ID directly */
-  viewableWithLink?: boolean;
 }
 
 /**
@@ -1175,6 +1171,10 @@ export interface iUtilityListingDoc<T extends NumberType> extends Doc {
   approvalStatus: {
     /** Whether the listing is approved */
     isApproved: boolean;
+    /** Is Featured */
+    isFeatured?: boolean;
+    /** Featured Priority */
+    featuredPriority?: number;
     /** Rejected or just pending */
     rejected?: boolean;
     /** Optional reason if not approved */

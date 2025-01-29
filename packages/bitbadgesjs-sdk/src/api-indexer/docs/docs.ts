@@ -707,8 +707,6 @@ export class AddressListDoc<T extends NumberType> extends AddressList implements
   lastUpdated: UNIXMilliTimestamp<T>;
   nsfw?: { reason: string };
   reported?: { reason: string };
-  private?: boolean;
-  viewableWithLink?: boolean;
   listId: string;
   addresses: string[];
   whitelist: boolean;
@@ -726,8 +724,6 @@ export class AddressListDoc<T extends NumberType> extends AddressList implements
     this.lastUpdated = data.lastUpdated;
     this.nsfw = data.nsfw;
     this.reported = data.reported;
-    this.private = data.private;
-    this.viewableWithLink = data.viewableWithLink;
     this.listId = data.listId;
     this.addresses = data.addresses;
     this.whitelist = data.whitelist;
@@ -1161,6 +1157,8 @@ export class UtilityListingDoc<T extends NumberType> extends BaseNumberTypeClass
   visibility: 'public' | 'private' | 'unlisted';
   approvalStatus: {
     isApproved: boolean;
+    isFeatured?: boolean;
+    featuredPriority?: number;
     rejected?: boolean;
     reason?: string;
     updatedBy?: BitBadgesAddress;

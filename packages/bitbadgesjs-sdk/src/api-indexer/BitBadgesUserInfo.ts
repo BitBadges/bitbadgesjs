@@ -441,8 +441,6 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     switch (viewType) {
       case 'createdLists':
         return this.getAccountAddressListsView(viewId) as AccountViewData<T>[KeyType];
-      case 'privateLists':
-        return this.getAccountAddressListsView(viewId) as AccountViewData<T>[KeyType];
       case 'siwbbRequests':
         return this.getSIWBBRequestsView(viewId) as AccountViewData<T>[KeyType];
       case 'transferActivity':
@@ -618,7 +616,6 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
 
 type AccountViewData<T extends NumberType> = {
   createdLists: BitBadgesAddressList<T>[];
-  privateLists: BitBadgesAddressList<T>[];
   siwbbRequests: SIWBBRequestDoc<T>[];
   transferActivity: TransferActivityDoc<T>[];
   badgesCollected: BalanceDocWithDetails<T>[];
@@ -746,7 +743,6 @@ function updateAccountWithResponse<T extends NumberType>(
  */
 export type AccountViewKey =
   | 'createdLists'
-  | 'privateLists'
   | 'siwbbRequests'
   | 'transferActivity'
   | 'badgesCollected'

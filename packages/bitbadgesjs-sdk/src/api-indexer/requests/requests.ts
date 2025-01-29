@@ -283,8 +283,6 @@ export class GetSearchSuccessResponse<T extends NumberType>
 export interface GetClaimsPayload {
   /** The claim IDs to fetch. */
   claimIds?: string[];
-  /** If the address list is private and viewable with the link only, you must also specify the address list ID to prove knowledge of the link. */
-  listId?: string;
   /** If true, we will return all claims that were created by the signed in address. */
   standaloneClaimsOnly?: boolean;
   /** Bookmark to start from. Obtained from previours request. Leave blank to start from the beginning. Only applicable when no additional criteria is specified. */
