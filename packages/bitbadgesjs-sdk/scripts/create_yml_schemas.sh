@@ -66,6 +66,7 @@ main() {
 
     replace_text_in_directory "$directory" ": NumberType" "$new_text"
     replace_text_in_directory "$directory" ": T;" ": string | number;"
+    replace_text_in_directory "$directory" ": Q;" ": string;"
     replace_text_in_directory "$directory" ": T\[" ": (string | number)\["
     replace_text_in_directory "$directory" "<JSPrimitiveNumberType>" ""
     replace_text_in_directory "$directory" "<bigint>" ""
@@ -77,6 +78,9 @@ main() {
     replace_text_in_directory "$directory" "ClaimIntegrationPrivateStateType;" "ClaimIntegrationPrivateStateType<T>;"
     replace_text_in_directory "$directory" " iBadgeMetadata<T>\[\];" " iBadgeMetadaataDetails<T>\[\];"
     replace_text_in_directory "$directory" " iCollectionMetadata<T>\[\];" " iCollectionMetadataDetails<T>\[\];"
+    replace_text_in_directory "$directory" "<Q extends DynamicDataHandlerType, T extends NumberType>" ""
+    replace_text_in_directory "$directory" "<Q extends DynamicDataHandlerType>" ""
+    replace_text_in_directory "$directory" "<Q, T>" ""
     replace_text_in_directory "$directory" "<T extends ClaimIntegrationPluginType>" ""
     replace_text_in_directory "$directory" "<T>" ""
     replace_text_in_directory "$directory" "<Q extends DynamicDataHandlerType>" ""

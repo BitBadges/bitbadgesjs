@@ -5470,10 +5470,7 @@ components:
         - type
       additionalProperties: false
       type: object
-    any:
-      description: >-
-        Private state is the current state of the claim integration that is
-        visible to only those who can fetch private parameters.
+    any: null
     IntegrationPluginParams:
       properties:
         instanceId:
@@ -6792,6 +6789,57 @@ components:
         - enum:
             - addresses
           type: string
+    ActionName:
+      type: string
+    DynamicDataHandlerActionRequest:
+      properties:
+        actionName:
+          examples: &ref_27
+            - add
+          $ref: '#/components/schemas/ActionName'
+        payload: {}
+      required:
+        - actionName
+        - payload
+      additionalProperties: false
+      type: object
+    iDynamicDataDoc:
+      properties:
+        _docId:
+          description: A unique stringified document ID
+          type: string
+        _id:
+          description: A unique document ID (Mongo DB ObjectID)
+          type: string
+        handlerId:
+          type: string
+          examples: &ref_26
+            - email
+            - addresses
+        dynamicDataId:
+          type: string
+        label:
+          type: string
+        dataSecret:
+          type: string
+        data: {}
+        createdBy:
+          type: string
+        createdAt:
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
+        lastUpdated:
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
+      required:
+        - _docId
+        - handlerId
+        - dynamicDataId
+        - label
+        - dataSecret
+        - data
+        - createdBy
+      additionalProperties: false
+      description: ''
+      type: object
     iAccessTokenDoc:
       properties:
         _docId:
@@ -12601,15 +12649,21 @@ components:
         handlerId:
           description: The handler ID for the dynamic data bin
           type: string
-          examples: &ref_27
-            - email
-            - addresses
+          examples: *ref_26
         label:
           description: The label of the dynamic data bin
           type: string
       required:
         - handlerId
         - label
+      additionalProperties: false
+      type: object
+    iCreateDynamicDataBinSuccessResponse:
+      properties:
+        doc:
+          $ref: '#/components/schemas/iDynamicDataDoc'
+      required:
+        - doc
       additionalProperties: false
       type: object
     GetDynamicDataBinsPayload:
@@ -12652,6 +12706,28 @@ components:
           type: object
       additionalProperties: false
       type: object
+    iGetDynamicDataBinsSuccessResponse:
+      properties:
+        docs:
+          items:
+            $ref: '#/components/schemas/iDynamicDataDoc'
+          type: array
+        pagination:
+          properties:
+            bookmark:
+              type: string
+            hasMore:
+              type: boolean
+          required:
+            - bookmark
+            - hasMore
+          additionalProperties: false
+          type: object
+      required:
+        - docs
+        - pagination
+      additionalProperties: false
+      type: object
     UpdateDynamicDataBinPayload:
       properties:
         dynamicDataId:
@@ -12665,6 +12741,14 @@ components:
           type: string
       required:
         - dynamicDataId
+      additionalProperties: false
+      type: object
+    iUpdateDynamicDataBinSuccessResponse:
+      properties:
+        doc:
+          $ref: '#/components/schemas/iDynamicDataDoc'
+      required:
+        - doc
       additionalProperties: false
       type: object
     DeleteDynamicDataBinPayload:
@@ -12695,8 +12779,7 @@ components:
         actionName:
           description: The name of the action to perform
           type: string
-          examples: &ref_26
-            - add
+          examples: *ref_27
         payload:
           description: The payload for this specific action
           $ref: '#/components/schemas/PerformBinActionPayload'
@@ -12724,7 +12807,7 @@ components:
               actionName:
                 description: The name of the action to perform
                 type: string
-                examples: *ref_26
+                examples: *ref_27
               payload:
                 $ref: '#/components/schemas/PerformBinActionPayload'
                 description: The payload for this specific action
@@ -12767,7 +12850,7 @@ components:
               actionName:
                 description: The name of the action to perform
                 type: string
-                examples: *ref_26
+                examples: *ref_27
               payload:
                 description: The payload for this specific action
             required:
@@ -12789,7 +12872,7 @@ components:
         actionName:
           description: The name of the action to perform
           type: string
-          examples: *ref_26
+          examples: *ref_27
         payload:
           description: The payload for this specific action
           $ref: '#/components/schemas/PerformBinActionPayload'
@@ -12823,7 +12906,7 @@ components:
                 type: string
               handlerId:
                 type: string
-                examples: *ref_27
+                examples: *ref_26
               actions:
                 items: {}
                 type: array
