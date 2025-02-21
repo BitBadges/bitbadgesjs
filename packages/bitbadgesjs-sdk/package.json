@@ -83,7 +83,7 @@
   },
   "dependencies": {
     "@bufbuild/protobuf": "^1.7.2",
-    "@keplr-wallet/cosmos": "^0.12.119",
+    "@keplr-wallet/cosmos": "^0.12.133",
     "@metamask/eth-sig-util": "^8.0.0",
     "@trevormil/bbs-signatures": "^1.0.1",
     "axios": "^1.7.7",
