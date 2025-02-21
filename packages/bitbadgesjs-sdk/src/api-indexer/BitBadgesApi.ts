@@ -229,7 +229,8 @@ import {
   ScheduleTokenRefreshSuccessResponse,
   ScheduleTokenRefreshPayload,
   SignWithEmbeddedWalletPayload,
-  SignWithEmbeddedWalletSuccessResponse
+  SignWithEmbeddedWalletSuccessResponse,
+  CheckClaimSuccessSuccessResponse
 } from './requests/requests.js';
 import { BitBadgesApiRoutes } from './requests/routes.js';
 
@@ -1608,20 +1609,20 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * - **API Route**: `POST /api/v0/dynamicData/fetch`
    * - **SDK Function Call**: `await BitBadgesApi.getDynamicDataBins(payload);`
    */
-  public async getDynamicDataBins<Q extends DynamicDataHandlerType>(
+  public async getDynamicDataBins<Q extends DynamicDataHandlerType, NumberType>(
     payload: GetDynamicDataBinsPayload
-  ): Promise<GetDynamicDataBinsSuccessResponse<Q>> {
+  ): Promise<GetDynamicDataBinsSuccessResponse<Q, T>> {
     try {
       const validateRes: typia.IValidation<GetDynamicDataBinsPayload> = typia.validate<GetDynamicDataBinsPayload>(payload ?? {});
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      const response = await this.axios.post<iGetDynamicDataBinsSuccessResponse<Q>>(
+      const response = await this.axios.post<iGetDynamicDataBinsSuccessResponse<Q, string>>(
         `${this.BACKEND_URL}${BitBadgesApiRoutes.GetDynamicDataBinsRoute()}`,
         payload
       );
-      return new GetDynamicDataBinsSuccessResponse<Q>(response.data);
+      return new GetDynamicDataBinsSuccessResponse(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -1872,6 +1873,25 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
+   * Checks if a claim has been successfully completed.
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/claims/success/:claimId/:address`
+   * - **SDK Function Call**: `await BitBadgesApi.checkClaimSuccess(claimId, address);`
+   */
+  public async checkClaimSuccess(claimId: string, address: NativeAddress): Promise<CheckClaimSuccessSuccessResponse> {
+    try {
+      const response = await this.axios.get<CheckClaimSuccessSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.CheckClaimSuccessRoute(claimId, address)}`
+      );
+      return new CheckClaimSuccessSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
    * Updates the user's seen activity.
    */
   public async updateUserSeenActivity() {
@@ -1898,18 +1918,18 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
    * console.log(res);
    * ```
    */
-  public async getActiveAuthorizations(payload: GetActiveAuthorizationsPayload): Promise<GetActiveAuthorizationsSuccessResponse> {
+  public async getActiveAuthorizations(payload: GetActiveAuthorizationsPayload): Promise<GetActiveAuthorizationsSuccessResponse<T>> {
     try {
       const validateRes: typia.IValidation<GetActiveAuthorizationsPayload> = typia.validate<GetActiveAuthorizationsPayload>(payload ?? {});
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      const response = await this.axios.post<GetActiveAuthorizationsSuccessResponse>(
+      const response = await this.axios.post<GetActiveAuthorizationsSuccessResponse<T>>(
         `${this.BACKEND_URL}${BitBadgesApiRoutes.GetActiveAuthorizationsRoute()}`,
         payload
       );
-      return new GetActiveAuthorizationsSuccessResponse(response.data);
+      return new GetActiveAuthorizationsSuccessResponse<T>(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -1994,14 +2014,14 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
    * - **API Route**: `POST /api/v0/developerApp`
    * - **SDK Function Call**: `await BitBadgesApi.getDeveloperApp(payload);`
    */
-  public async getDeveloperApps(payload: GetDeveloperAppPayload): Promise<GetDeveloperAppSuccessResponse> {
+  public async getDeveloperApps(payload: GetDeveloperAppPayload): Promise<GetDeveloperAppSuccessResponse<T>> {
     try {
       const validateRes: typia.IValidation<GetDeveloperAppPayload> = typia.validate<GetDeveloperAppPayload>(payload ?? {});
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      const response = await this.axios.post<GetDeveloperAppSuccessResponse>(
+      const response = await this.axios.post<GetDeveloperAppSuccessResponse<T>>(
         `${this.BACKEND_URL}${BitBadgesApiRoutes.GetDeveloperAppsRoute()}`,
         payload
       );
@@ -2334,20 +2354,20 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
    * - **API Route**: `POST /api/v0/dynamicData`
    * - **SDK Function Call**: `await BitBadgesApi.createDynamicDataBin(payload);`
    */
-  public async createDynamicDataBin<Q extends DynamicDataHandlerType>(
+  public async createDynamicDataBin<Q extends DynamicDataHandlerType, NumberType>(
     payload: CreateDynamicDataBinPayload
-  ): Promise<CreateDynamicDataBinSuccessResponse<Q>> {
+  ): Promise<CreateDynamicDataBinSuccessResponse<Q, T>> {
     try {
       const validateRes: typia.IValidation<CreateDynamicDataBinPayload> = typia.validate<CreateDynamicDataBinPayload>(payload ?? {});
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      const response = await this.axios.post<iCreateDynamicDataBinSuccessResponse<Q>>(
+      const response = await this.axios.post<iCreateDynamicDataBinSuccessResponse<Q, string>>(
         `${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDDynamicDataRoute()}`,
         payload
       );
-      return new CreateDynamicDataBinSuccessResponse<Q>(response.data);
+      return new CreateDynamicDataBinSuccessResponse(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -2361,20 +2381,20 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
    * - **API Route**: `PUT /api/v0/dynamicData`
    * - **SDK Function Call**: `await BitBadgesApi.updateDynamicDataBin(payload);`
    */
-  public async updateDynamicDataBin<Q extends DynamicDataHandlerType>(
+  public async updateDynamicDataBin<Q extends DynamicDataHandlerType, T extends NumberType>(
     payload: UpdateDynamicDataBinPayload
-  ): Promise<UpdateDynamicDataBinSuccessResponse<Q>> {
+  ): Promise<UpdateDynamicDataBinSuccessResponse<Q, T>> {
     try {
       const validateRes: typia.IValidation<UpdateDynamicDataBinPayload> = typia.validate<UpdateDynamicDataBinPayload>(payload ?? {});
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      const response = await this.axios.put<iUpdateDynamicDataBinSuccessResponse<Q>>(
+      const response = await this.axios.put<iUpdateDynamicDataBinSuccessResponse<Q, T>>(
         `${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDDynamicDataRoute()}`,
         payload
       );
-      return new UpdateDynamicDataBinSuccessResponse<Q>(response.data);
+      return new UpdateDynamicDataBinSuccessResponse<Q, T>(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);

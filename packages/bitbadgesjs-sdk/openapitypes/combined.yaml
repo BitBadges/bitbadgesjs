@@ -3347,6 +3347,43 @@ paths:
       security:
         - userMaybeSignedIn: []
       x-internal: false
+  /claims/success/{claimId}/{address}:
+    get:
+      operationId: checkClaimSuccess
+      summary: Check Claim Success
+      description: |
+        Checks if a claim has been successfully completed.
+
+        ```tsx
+        const res = await BitBadgesApi.checkClaimSuccess(...);
+        ```
+      tags:
+        - Claims
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iCheckClaimSuccessSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      parameters:
+        - name: claimId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: address
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - apiKey: []
+      x-internal: false
 components:
   responses:
     ErrorResponse:
@@ -3903,6 +3940,20 @@ components:
             - lastUpdated
           additionalProperties: false
           type: object
+        mailchimp:
+          properties:
+            username:
+              type: string
+            id:
+              type: string
+            lastUpdated:
+              $ref: '#/components/schemas/UNIXMilliTimestamp'
+          required:
+            - username
+            - id
+            - lastUpdated
+          additionalProperties: false
+          type: object
         facebook:
           properties:
             username:
@@ -3918,6 +3969,20 @@ components:
           additionalProperties: false
           type: object
         googleCalendar:
+          properties:
+            username:
+              type: string
+            id:
+              type: string
+            lastUpdated:
+              $ref: '#/components/schemas/UNIXMilliTimestamp'
+          required:
+            - username
+            - id
+            - lastUpdated
+          additionalProperties: false
+          type: object
+        youtube:
           properties:
             username:
               type: string
@@ -4322,6 +4387,13 @@ components:
           examples: &ref_8
             - bb1...
           $ref: '#/components/schemas/BitBadgesAddress'
+        claimType:
+          enum:
+            - standalone
+            - collection
+            - list
+          description: The claim type of the claim attempt
+          type: string
       required:
         - _docId
         - timestamp
@@ -4561,7 +4633,7 @@ components:
         ethAddress:
           description: The Eth address of the account
           type: string
-          examples: &ref_19
+          examples: &ref_20
             - 0x...
         solAddress:
           description: The Solana address of the account
@@ -4571,7 +4643,7 @@ components:
         btcAddress:
           description: The Bitcoin address of the account
           type: string
-          examples: &ref_20
+          examples: &ref_21
             - bc1...
         sequence:
           description: The sequence of the account
@@ -4761,13 +4833,13 @@ components:
         profilePicUrl:
           description: The profile picture URL of the account
           type: string
-          examples: &ref_21
+          examples: &ref_22
             - https://example.com
             - ipfs://Qm...
         bannerImage:
           description: The banner image URL of the account
           type: string
-          examples: &ref_18
+          examples: &ref_19
             - https://example.com
             - ipfs://Qm...
         username:
@@ -5073,12 +5145,12 @@ components:
         lastXGasAmounts:
           items:
             $ref: '#/components/schemas/NumberType'
-          description: The last X gas prices
+          description: The last X gas prices (internal use only)
           type: array
         lastXGasLimits:
           items:
             $ref: '#/components/schemas/NumberType'
-          description: The last X gas limits
+          description: The last X gas limits (internal use only)
           type: array
       required:
         - _docId
@@ -5175,12 +5247,6 @@ components:
           additionalProperties: false
           description: The reported reason if this list is reported
           type: object
-        private:
-          description: True if this list is private and will not show up in search results
-          type: boolean
-        viewableWithLink:
-          description: True if this list is viewable if queried by the list ID directly
-          type: boolean
       required:
         - listId
         - addresses
@@ -5724,6 +5790,9 @@ components:
         createdAt:
           description: The time the group was created
           $ref: '#/components/schemas/UNIXMilliTimestamp'
+        lastUpdated:
+          description: The last updated timestamp
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
         metadata:
           description: The overall metadata for the group
           $ref: '#/components/schemas/iMetadata'
@@ -5742,6 +5811,26 @@ components:
         - pages
       additionalProperties: false
       description: '@cateogry Interfaces'
+      type: object
+    iInheritMetadataFrom:
+      properties:
+        claimId:
+          description: The claim ID to link to
+          type: string
+        groupId:
+          description: The group ID to link to
+          type: string
+        collectionId:
+          description: The collection ID to link to
+          $ref: '#/components/schemas/NumberType'
+        listId:
+          description: The address list ID to link to
+          type: string
+          examples: *ref_11
+        mapId:
+          description: The map ID to link to
+          type: string
+      additionalProperties: false
       type: object
     iUtilityListingDoc:
       properties:
@@ -5769,9 +5858,15 @@ components:
         createdAt:
           description: The time the listing was created
           $ref: '#/components/schemas/UNIXMilliTimestamp'
+        lastUpdated:
+          description: The last updated timestamp
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
         metadata:
           description: The overall metadata for the listing
           $ref: '#/components/schemas/iMetadata'
+        inheritMetadataFrom:
+          description: Inherit metadata from?
+          $ref: '#/components/schemas/iInheritMetadataFrom'
         content:
           items:
             $ref: '#/components/schemas/iUtilityListingContent'
@@ -5802,6 +5897,12 @@ components:
             isApproved:
               description: Whether the listing is approved
               type: boolean
+            isFeatured:
+              description: Is Featured
+              type: boolean
+            featuredPriority:
+              description: Featured Priority
+              type: number
             rejected:
               description: Rejected or just pending
               type: boolean
@@ -5843,6 +5944,12 @@ components:
           additionalProperties: false
           description: Optional breakdown of views by time period for trending calculations
           type: object
+        linkedTo:
+          description: Linked details
+          $ref: '#/components/schemas/iLinkedTo'
+        locale:
+          description: 'Locale (ex: es, fr, etc.). If not specified, we assume en.'
+          type: string
       required:
         - _docId
         - listingId
@@ -5857,6 +5964,25 @@ components:
         - approvalStatus
       additionalProperties: false
       description: ''
+      type: object
+    iLinkedTo:
+      properties:
+        collectionId:
+          description: The collection ID
+          $ref: '#/components/schemas/NumberType'
+        badgeIds:
+          items:
+            $ref: '#/components/schemas/iUintRange'
+          description: The badge IDs
+          type: array
+          examples: &ref_18
+            - - start: '1'
+                end: '10'
+        listId:
+          description: The list ID
+          type: string
+          examples: *ref_11
+      additionalProperties: false
       type: object
     iUtilityListingContent:
       properties:
@@ -6642,6 +6768,12 @@ components:
             type: string
           description: The redirect URI of the app
           type: array
+        lastUpdated:
+          description: The last updated timestamp
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
+        createdAt:
+          description: The time the app was created
+          $ref: '#/components/schemas/UNIXMilliTimestamp'
       required:
         - _docId
         - createdBy
@@ -6897,6 +7029,8 @@ components:
               type: boolean
             passGoogle:
               type: boolean
+            passYoutube:
+              type: boolean
             passGithub:
               type: boolean
             passTwitch:
@@ -6918,6 +7052,8 @@ components:
             passSlack:
               type: boolean
             passMeetup:
+              type: boolean
+            passMailchimp:
               type: boolean
             postProcessingJs:
               type: string
@@ -7565,9 +7701,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The badge IDs that correspond to the metadata
           type: array
-          examples: &ref_24
-            - - start: '1'
-                end: '10'
+          examples: *ref_18
         metadata:
           description: The metadata fetched by the URI
           $ref: '#/components/schemas/iMetadata'
@@ -7644,7 +7778,7 @@ components:
         bannerImage:
           description: The banner image of the badge or badge collection.
           type: string
-          examples: *ref_18
+          examples: *ref_19
         video:
           description: >-
             The video of the badge or badge collection. If a standard video is
@@ -7809,12 +7943,6 @@ components:
           additionalProperties: false
           description: The reported reason if this list is reported
           type: object
-        private:
-          description: True if this list is private and will not show up in search results
-          type: boolean
-        viewableWithLink:
-          description: True if this list is viewable if queried by the list ID directly
-          type: boolean
         metadata:
           description: The metadata of the address list.
           $ref: '#/components/schemas/iMetadata'
@@ -7847,6 +7975,11 @@ components:
             $ref: '#/components/schemas/iClaimDetails'
           description: The claims of the address list.
           type: array
+        listings:
+          items:
+            $ref: '#/components/schemas/iUtilityListingDoc'
+          description: The listings of the address list.
+          type: array
       required:
         - listId
         - addresses
@@ -7876,13 +8009,14 @@ components:
                   properties:
                     viewId:
                       type: string
-                      examples: &ref_22
+                      examples: &ref_23
                         - viewKey
                     viewType:
                       enum:
                         - listActivity
+                        - listings
                       type: string
-                      examples: &ref_23
+                      examples: &ref_24
                         - viewKey
                     bookmark:
                       type: string
@@ -7954,16 +8088,6 @@ components:
           $ref: '#/components/schemas/BitBadgesAddress'
         updateAddresses:
           description: Flag to update addresses?
-          type: boolean
-        private:
-          description: Private lists will not show up in any search results.
-          type: boolean
-        viewableWithLink:
-          description: >-
-            If the list is viewable with a link, anyone with the list ID can
-            view details. Only applicable if private = true as well.
-
-            If not viewable with a link, only the creator can view the list.
           type: boolean
         claims:
           items:
@@ -8072,11 +8196,11 @@ components:
         ethAddress:
           description: The Eth address of the account
           type: string
-          examples: *ref_19
+          examples: *ref_20
         btcAddress:
           description: The Bitcoin address of the account
           type: string
-          examples: *ref_20
+          examples: *ref_21
         sequence:
           description: The sequence of the account
           $ref: '#/components/schemas/NumberType'
@@ -8180,11 +8304,11 @@ components:
         profilePicUrl:
           description: The profile picture URL of the account
           type: string
-          examples: *ref_21
+          examples: *ref_22
         bannerImage:
           description: The banner image URL of the account
           type: string
-          examples: *ref_18
+          examples: *ref_19
         username:
           description: The username of the account
           type: string
@@ -8495,7 +8619,6 @@ components:
     AccountViewKey:
       enum:
         - createdLists
-        - privateLists
         - siwbbRequests
         - transferActivity
         - badgesCollected
@@ -8557,11 +8680,11 @@ components:
                   Unique view ID. Used for pagination. All fetches w/ same ID
                   should be made with same criteria.
                 type: string
-                examples: *ref_22
+                examples: *ref_23
               viewType:
                 $ref: '#/components/schemas/AccountViewKey'
                 description: The base view type to fetch.
-                examples: *ref_23
+                examples: *ref_24
               specificCollections:
                 items:
                   $ref: '#/components/schemas/iBatchBadgeDetails'
@@ -8676,7 +8799,7 @@ components:
             Limit to specific badge IDs. Leave undefined to not filter by badge
             ID.
           type: array
-          examples: *ref_24
+          examples: *ref_18
         categories:
           items:
             type: string
@@ -8727,7 +8850,7 @@ components:
           items:
             $ref: '#/components/schemas/iUintRange'
           type: array
-          examples: *ref_24
+          examples: *ref_18
         pagination:
           $ref: '#/components/schemas/PaginationInfo'
       required:
@@ -8767,6 +8890,11 @@ components:
     GetBadgeBalanceByAddressPayload:
       properties:
         fetchPrivateParams:
+          type: boolean
+        forceful:
+          description: >-
+            If true, we will forcefully fetch the balance even if it is already
+            cached. Only applicable to non-indexed / on-demand collections.
           type: boolean
       additionalProperties: false
       type: object
@@ -8919,7 +9047,7 @@ components:
           description: >-
             If present, the metadata corresponding to the specified badge IDs
             will be fetched.
-          examples: *ref_24
+          examples: *ref_18
       additionalProperties: false
       description: Defines the options for fetching metadata.
       type: object
@@ -8929,6 +9057,7 @@ components:
         - owners
         - amountTrackers
         - challengeTrackers
+        - listings
       description: Supported view keys for fetching additional collection details.
       type: string
     GetAdditionalCollectionDetailsPayload:
@@ -8939,13 +9068,13 @@ components:
               viewType:
                 $ref: '#/components/schemas/CollectionViewKey'
                 description: The base view type to fetch.
-                examples: *ref_23
+                examples: *ref_24
               viewId:
                 description: >-
                   A unique view ID. This is used for pagination. All fetches w/
                   same ID should be made with same criteria.
                 type: string
-                examples: *ref_22
+                examples: *ref_23
               bookmark:
                 description: A bookmark to pass in for pagination. "" for first request.
                 type: string
@@ -8955,6 +9084,11 @@ components:
               address:
                 description: If specified, we will only fetch this users' activity.
                 type: string
+              badgeId:
+                description: >-
+                  IF specified, we will filter to this abdge ID (only applicable
+                  to utiity listings view currently)
+                $ref: '#/components/schemas/NumberType'
             required:
               - viewType
               - viewId
@@ -9046,13 +9180,13 @@ components:
               viewType:
                 $ref: '#/components/schemas/CollectionViewKey'
                 description: The base view type to fetch.
-                examples: *ref_23
+                examples: *ref_24
               viewId:
                 description: >-
                   A unique view ID. This is used for pagination. All fetches w/
                   same ID should be made with same criteria.
                 type: string
-                examples: *ref_22
+                examples: *ref_23
               bookmark:
                 description: A bookmark to pass in for pagination. "" for first request.
                 type: string
@@ -9062,6 +9196,11 @@ components:
               address:
                 description: If specified, we will only fetch this users' activity.
                 type: string
+              badgeId:
+                description: >-
+                  IF specified, we will filter to this abdge ID (only applicable
+                  to utiity listings view currently)
+                $ref: '#/components/schemas/NumberType'
             required:
               - viewType
               - viewId
@@ -9371,7 +9510,7 @@ components:
                 items:
                   $ref: '#/components/schemas/iUintRange'
                 type: array
-                examples: *ref_24
+                examples: *ref_18
             required:
               - collection
               - badgeIds
@@ -9409,13 +9548,6 @@ components:
             type: string
           description: The claim IDs to fetch.
           type: array
-        listId:
-          description: >-
-            If the address list is private and viewable with the link only, you
-            must also specify the address list ID to prove knowledge of the
-            link.
-          type: string
-          examples: *ref_11
         standaloneClaimsOnly:
           description: >-
             If true, we will return all claims that were created by the signed
@@ -9454,6 +9586,8 @@ components:
             are required and must match a claimId in claimIds and the claim must
             have the corresponding instanceId.
           type: array
+        fetchAllClaimedUsers:
+          type: boolean
       additionalProperties: false
       type: object
     iGetClaimsSuccessResponse:
@@ -9547,6 +9681,9 @@ components:
                 examples: *ref_8
               claimAttemptId:
                 type: string
+              claimNumber:
+                description: Zero-based index claim number
+                type: number
               error:
                 type: string
             required:
@@ -9555,6 +9692,7 @@ components:
               - claimId
               - bitbadgesAddress
               - claimAttemptId
+              - claimNumber
             additionalProperties: false
             type: object
           type: array
@@ -9693,11 +9831,11 @@ components:
         profilePicUrl:
           description: The profile picture URL.
           type: string
-          examples: *ref_21
+          examples: *ref_22
         bannerImage:
           description: The banner image URL.
           type: string
-          examples: *ref_18
+          examples: *ref_19
         username:
           description: The username.
           type: string
@@ -10295,6 +10433,18 @@ components:
           additionalProperties: false
           description: Signed in with Bluesky?
           type: object
+        mailchimp:
+          properties:
+            username:
+              type: string
+            id:
+              type: string
+          required:
+            - username
+            - id
+          additionalProperties: false
+          description: Signed in with Mailchimp?
+          type: object
         facebook:
           properties:
             username:
@@ -10432,6 +10582,9 @@ components:
         signOutBluesky:
           description: Sign out of Bluesky
           type: boolean
+        signOutMailchimp:
+          description: Sign out of Mailchimp
+          type: boolean
         signOutGoogleCalendar:
           description: Sign out of Google Calendar
           type: boolean
@@ -10489,6 +10642,8 @@ components:
               type: string
             searchTerm:
               type: string
+            locale:
+              type: string
           additionalProperties: false
           type: object
       required:
@@ -10529,7 +10684,7 @@ components:
                   items:
                     $ref: '#/components/schemas/iUintRange'
                   type: array
-                  examples: *ref_24
+                  examples: *ref_18
               required:
                 - collection
                 - badgeIds
@@ -11768,6 +11923,8 @@ components:
               type: boolean
             passGoogle:
               type: boolean
+            passYoutube:
+              type: boolean
             passGithub:
               type: boolean
             passStrava:
@@ -12039,6 +12196,8 @@ components:
                       passTwitter:
                         type: boolean
                       passGoogle:
+                        type: boolean
+                      passYoutube:
                         type: boolean
                       passGithub:
                         type: boolean
@@ -12453,13 +12612,6 @@ components:
         - label
       additionalProperties: false
       type: object
-    iCreateDynamicDataBinSuccessResponse:
-      properties:
-        doc: {}
-      required:
-        - doc
-      additionalProperties: false
-      type: object
     GetDynamicDataBinsPayload:
       properties:
         dynamicDataId:
@@ -12500,28 +12652,6 @@ components:
           type: object
       additionalProperties: false
       type: object
-    iGetDynamicDataBinsSuccessResponse:
-      properties:
-        docs:
-          items:
-            anyOf: []
-          type: array
-        pagination:
-          properties:
-            bookmark:
-              type: string
-            hasMore:
-              type: boolean
-          required:
-            - bookmark
-            - hasMore
-          additionalProperties: false
-          type: object
-      required:
-        - docs
-        - pagination
-      additionalProperties: false
-      type: object
     UpdateDynamicDataBinPayload:
       properties:
         dynamicDataId:
@@ -12535,13 +12665,6 @@ components:
           type: string
       required:
         - dynamicDataId
-      additionalProperties: false
-      type: object
-    iUpdateDynamicDataBinSuccessResponse:
-      properties:
-        doc: {}
-      required:
-        - doc
       additionalProperties: false
       type: object
     DeleteDynamicDataBinPayload:
@@ -13111,6 +13234,15 @@ components:
             type: string
           description: The categories of the listing
           type: array
+        linkedTo:
+          description: The linked to details
+          $ref: '#/components/schemas/iLinkedTo'
+        inheritMetadataFrom:
+          description: Inherit metadata from
+          $ref: '#/components/schemas/iInheritMetadataFrom'
+        locale:
+          description: 'Locale (ex: es, fr, etc.). If not specified, we assume en.'
+          type: string
       required:
         - metadata
         - content
@@ -13167,6 +13299,15 @@ components:
             type: string
           description: The categories of the listing
           type: array
+        linkedTo:
+          description: The linked to details. Note only badge IDs can be changed
+          $ref: '#/components/schemas/iLinkedTo'
+        inheritMetadataFrom:
+          description: Inherit metadata from
+          $ref: '#/components/schemas/iInheritMetadataFrom'
+        locale:
+          description: 'Locale (ex: es, fr, etc.). If not specified, we assume en.'
+          type: string
       required:
         - listingId
         - metadata
@@ -13329,6 +13470,24 @@ components:
           examples: *ref_16
       required:
         - signature
+      additionalProperties: false
+      type: object
+    CheckClaimSuccessPayload:
+      additionalProperties: false
+      type: object
+    iCheckClaimSuccessSuccessResponse:
+      properties:
+        successCount:
+          type: number
+        claimNumbers:
+          items:
+            type: number
+          description: >-
+            If indexed, the claim numbers that were successfully completed
+            (zero-based)
+          type: array
+      required:
+        - successCount
       additionalProperties: false
       type: object
     GetMapsPayload:
@@ -13543,13 +13702,18 @@ components:
             collections will only fetch the current page. Use the pagination to
             fetch more. To be used in conjunction with views.
           type: array
+        listings:
+          items:
+            $ref: '#/components/schemas/iUtilityListingDoc'
+          description: The listings for this collection.
+          type: array
         nsfw:
           properties:
             badgeIds:
               items:
                 $ref: '#/components/schemas/iUintRange'
               type: array
-              examples: *ref_24
+              examples: *ref_18
             reason:
               type: string
           required:
@@ -13564,7 +13728,7 @@ components:
               items:
                 $ref: '#/components/schemas/iUintRange'
               type: array
-              examples: *ref_24
+              examples: *ref_18
             reason:
               type: string
           required:
@@ -13635,6 +13799,7 @@ components:
         - owners
         - merkleChallenges
         - approvalTrackers
+        - listings
         - views
         - claims
       additionalProperties: false
@@ -13669,13 +13834,13 @@ components:
               viewType:
                 $ref: '#/components/schemas/CollectionViewKey'
                 description: The base view type to fetch.
-                examples: *ref_23
+                examples: *ref_24
               viewId:
                 description: >-
                   A unique view ID. This is used for pagination. All fetches w/
                   same ID should be made with same criteria.
                 type: string
-                examples: *ref_22
+                examples: *ref_23
               bookmark:
                 description: A bookmark to pass in for pagination. "" for first request.
                 type: string
@@ -13685,6 +13850,11 @@ components:
               address:
                 description: If specified, we will only fetch this users' activity.
                 type: string
+              badgeId:
+                description: >-
+                  IF specified, we will filter to this abdge ID (only applicable
+                  to utiity listings view currently)
+                $ref: '#/components/schemas/NumberType'
             required:
               - viewType
               - viewId
@@ -14032,7 +14202,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The corresponding badge IDs for this collection ID.
           type: array
-          examples: *ref_24
+          examples: *ref_18
       required:
         - collectionId
         - badgeIds
@@ -15467,7 +15637,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The badge IDs of the approved outgoing transfers.
           type: array
-          examples: *ref_24
+          examples: *ref_18
         ownershipTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
@@ -15546,7 +15716,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The badge IDs of the approved incoming transfers.
           type: array
-          examples: *ref_24
+          examples: *ref_18
         ownershipTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
@@ -15701,7 +15871,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The badge IDs that the permission applies to.
           type: array
-          examples: *ref_24
+          examples: *ref_18
         permanentlyPermittedTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
@@ -15733,7 +15903,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The badge IDs that the permission applies to.
           type: array
-          examples: *ref_24
+          examples: *ref_18
         permanentlyPermittedTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
@@ -15784,7 +15954,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The badge IDs of the approved transfers.
           type: array
-          examples: *ref_24
+          examples: *ref_18
         ownershipTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
@@ -15848,7 +16018,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The badge IDs corresponding to the URI.
           type: array
-          examples: *ref_24
+          examples: *ref_18
         customData:
           description: Arbitrary custom data that can be stored on-chain
           type: string
@@ -16337,7 +16507,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The range of the badge IDs that must be owned.
           type: array
-          examples: *ref_24
+          examples: *ref_18
         overrideWithCurrentTime:
           description: Whether or not to override the ownershipTimes with the current time.
           type: boolean
@@ -16365,7 +16535,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The badge IDs corresponding to the balance.
           type: array
-          examples: *ref_24
+          examples: *ref_18
         ownershipTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
@@ -16786,7 +16956,7 @@ components:
           items:
             $ref: '#/components/schemas/iUintRange'
           type: array
-          examples: *ref_24
+          examples: *ref_18
         ownershipTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
@@ -17073,7 +17243,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The badge IDs to be transferred.
           type: array
-          examples: *ref_24
+          examples: *ref_18
         ownershipTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
@@ -17182,7 +17352,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The badge IDs to be transferred.
           type: array
-          examples: *ref_24
+          examples: *ref_18
         ownershipTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
@@ -17337,6 +17507,7 @@ components:
         - youtube
         - reddit
         - facebook
+        - mailchimp
         - bluesky
         - googleCalendar
         - telegram

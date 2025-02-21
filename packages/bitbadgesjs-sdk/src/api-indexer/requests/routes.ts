@@ -126,4 +126,6 @@ export class BitBadgesApiRoutes {
   static SignWithEmbeddedWalletRoute = () => '/api/v0/embeddedWallets/signMessage';
 
   static ScheduleTokenRefreshRoute = () => '/api/v0/oauth-token-refresh-schedule';
+
+  static CheckClaimSuccessRoute = (claimId: string, address: NativeAddress) => `/api/v0/claims/success/${claimId}/${address}`;
 }

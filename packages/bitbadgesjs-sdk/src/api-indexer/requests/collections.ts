@@ -151,6 +151,11 @@ export class GetOwnersForBadgeSuccessResponse<T extends NumberType>
  */
 export interface GetBadgeBalanceByAddressPayload {
   fetchPrivateParams?: boolean;
+
+  /**
+   * If true, we will forcefully fetch the balance even if it is already cached. Only applicable to non-indexed / on-demand collections.
+   */
+  forceful?: boolean;
 }
 
 /**
@@ -242,7 +247,7 @@ export interface MetadataFetchOptions {
  *
  * @category API Requests / Responses
  */
-export type CollectionViewKey = 'transferActivity' | 'owners' | 'amountTrackers' | 'challengeTrackers';
+export type CollectionViewKey = 'transferActivity' | 'owners' | 'amountTrackers' | 'challengeTrackers' | 'listings';
 
 /**
  * Defines the options for fetching additional collection details.
@@ -281,6 +286,8 @@ export interface GetAdditionalCollectionDetailsPayload {
     oldestFirst?: boolean;
     /** If specified, we will only fetch this users' activity. */
     address?: string;
+    /** IF specified, we will filter to this abdge ID (only applicable to utiity listings view currently) */
+    badgeId?: NumberType;
   }[];
 
   /**

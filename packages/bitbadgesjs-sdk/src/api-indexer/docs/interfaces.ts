@@ -126,12 +126,22 @@ export interface iSocialConnections<T extends NumberType> {
     id: string;
     lastUpdated: UNIXMilliTimestamp<T>;
   };
+  mailchimp?: {
+    username: string;
+    id: string;
+    lastUpdated: UNIXMilliTimestamp<T>;
+  };
   facebook?: {
     username: string;
     id: string;
     lastUpdated: UNIXMilliTimestamp<T>;
   };
   googleCalendar?: {
+    username: string;
+    id: string;
+    lastUpdated: UNIXMilliTimestamp<T>;
+  };
+  youtube?: {
     username: string;
     id: string;
     lastUpdated: UNIXMilliTimestamp<T>;
@@ -287,6 +297,8 @@ export interface iClaimActivityDoc<T extends NumberType> extends iActivityDoc<T>
   claimAttemptId: string;
   /** The BitBadges address of the user who attempted the claim */
   bitbadgesAddress: BitBadgesAddress;
+  /** The claim type of the claim attempt */
+  claimType?: 'standalone' | 'collection' | 'list';
 }
 
 /**
@@ -599,9 +611,9 @@ export interface iStatusDoc<T extends NumberType> extends Doc {
   nextCollectionId: T;
   /** The current gas price based on the average of the lastXGasAmounts */
   gasPrice: number;
-  /** The last X gas prices */
+  /** The last X gas prices (internal use only) */
   lastXGasAmounts: T[];
-  /** The last X gas limits */
+  /** The last X gas limits (internal use only) */
   lastXGasLimits: T[];
 }
 
@@ -709,8 +721,10 @@ export type ClaimIntegrationPluginType =
   | 'twitter'
   | 'strava'
   | 'googleCalendar'
+  | 'youtube'
   | 'reddit'
   | 'bluesky'
+  | 'mailchimp'
   | 'facebook'
   | 'linkedIn'
   | 'telegram'
@@ -775,6 +789,7 @@ type OauthAppName =
   | 'youtube'
   | 'reddit'
   | 'facebook'
+  | 'mailchimp'
   | 'bluesky'
   | 'googleCalendar'
   | 'telegram'
@@ -864,6 +879,7 @@ export type ClaimIntegrationPublicParamsType<T extends ClaimIntegrationPluginTyp
                         passEmail?: boolean;
                         passTwitter?: boolean;
                         passGoogle?: boolean;
+                        passYoutube?: boolean;
                         passGithub?: boolean;
                         passTwitch?: boolean;
                         passStrava?: boolean;
@@ -875,6 +891,7 @@ export type ClaimIntegrationPublicParamsType<T extends ClaimIntegrationPluginTyp
                         passSlack?: boolean;
                         passFacebook?: boolean;
                         passShopify?: boolean;
+                        passMailchimp?: boolean;
                         userInputsSchema?: Array<JsonBodyInputSchema>;
                       }
                     : Record<string, any>;
@@ -1121,11 +1138,30 @@ export interface iGroupDoc<T extends NumberType> extends Doc {
   /** The time the group was created */
   createdAt: UNIXMilliTimestamp<T>;
 
+  /** The last updated timestamp */
+  lastUpdated?: UNIXMilliTimestamp<T>;
+
   /** The overall metadata for the group */
   metadata: iMetadata<T>;
 
   /** The pages for the group */
   pages: iGroupPage<T>[];
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iInheritMetadataFrom<T extends NumberType> {
+  /** The claim ID to link to */
+  claimId?: string;
+  /** The group ID to link to */
+  groupId?: string;
+  /** The collection ID to link to */
+  collectionId?: T;
+  /** The address list ID to link to */
+  listId?: string;
+  /** The map ID to link to */
+  mapId?: string;
 }
 
 /**
@@ -1149,8 +1185,14 @@ export interface iUtilityListingDoc<T extends NumberType> extends Doc {
   /** The time the listing was created */
   createdAt: UNIXMilliTimestamp<T>;
 
+  /** The last updated timestamp */
+  lastUpdated?: UNIXMilliTimestamp<T>;
+
   /** The overall metadata for the listing */
   metadata: iMetadata<T>;
+
+  /** Inherit metadata from? */
+  inheritMetadataFrom?: iInheritMetadataFrom<T>;
 
   /** The paginated content for the listing */
   content: iUtilityListingContent[];
@@ -1197,11 +1239,28 @@ export interface iUtilityListingDoc<T extends NumberType> extends Doc {
     /** Views in the last 30 days */
     monthly: number;
   };
+
+  /** Linked details */
+  linkedTo?: iLinkedTo<T>;
+
+  /** Locale (ex: es, fr, etc.). If not specified, we assume en. */
+  locale?: string;
 }
 
 /**
  * @category Interfaces
  */
+export interface iLinkedTo<T extends NumberType> {
+  /** The collection ID */
+  collectionId?: T;
+  /** The badge IDs */
+  badgeIds?: iUintRange<T>[];
+  /** The list ID */
+  listId?: string;
+}
+
+/**
+ * @category Interfaces */
 export interface iUtilityListingContent {
   /** The type of content */
   type: string;
@@ -1557,7 +1616,7 @@ export interface iComplianceDoc<T extends NumberType> extends Doc {
 /**
  * @category Interfaces
  */
-export interface iDeveloperAppDoc extends Doc {
+export interface iDeveloperAppDoc<T extends NumberType> extends Doc {
   /** Creator of the app */
   createdBy: BitBadgesAddress;
   /** The name of the app */
@@ -1572,6 +1631,10 @@ export interface iDeveloperAppDoc extends Doc {
   clientSecret: string;
   /** The redirect URI of the app */
   redirectUris: string[];
+  /** The last updated timestamp */
+  lastUpdated?: UNIXMilliTimestamp<T>;
+  /** The time the app was created */
+  createdAt?: UNIXMilliTimestamp<T>;
 }
 
 /**
@@ -1613,13 +1676,15 @@ export type DynamicDataHandlerActionRequest = { actionName: ActionName; payload:
 /**
  * @category Interfaces
  */
-export interface iDynamicDataDoc<Q extends DynamicDataHandlerType> extends Doc {
+export interface iDynamicDataDoc<Q extends DynamicDataHandlerType, T extends NumberType> extends Doc {
   handlerId: Q;
   dynamicDataId: string;
   label: string;
   dataSecret: string;
   data: DynamicDataHandlerData<Q>;
   createdBy: string;
+  createdAt?: UNIXMilliTimestamp<T>;
+  lastUpdated?: UNIXMilliTimestamp<T>;
 }
 
 /**
@@ -1767,6 +1832,7 @@ export interface iPluginVersionConfig<T extends NumberType> {
     passEmail?: boolean;
     passTwitter?: boolean;
     passGoogle?: boolean;
+    passYoutube?: boolean;
     passGithub?: boolean;
     passTwitch?: boolean;
     passStrava?: boolean;
@@ -1778,6 +1844,7 @@ export interface iPluginVersionConfig<T extends NumberType> {
     passFarcaster?: boolean;
     passSlack?: boolean;
     passMeetup?: boolean;
+    passMailchimp?: boolean;
     postProcessingJs: string;
   };
 

@@ -6,14 +6,15 @@ import typia from 'typia';
 import type { BaseBitBadgesApi, PaginationInfo } from './base.js';
 import { EmptyResponseClass } from './base.js';
 import { ListActivityDoc } from './docs/activity.js';
-import { AddressListDoc } from './docs/docs.js';
+import { AddressListDoc, UtilityListingDoc } from './docs/docs.js';
 import type {
   ClaimIntegrationPluginType,
   ClaimReward,
   IntegrationPluginDetails,
   iAddressListDoc,
   iClaimDetails,
-  iListActivityDoc
+  iListActivityDoc,
+  iUtilityListingDoc
 } from './docs/interfaces.js';
 import type { iMetadata } from './metadata/metadata.js';
 import { Metadata } from './metadata/metadata.js';
@@ -39,6 +40,8 @@ export interface iBitBadgesAddressList<T extends NumberType> extends iAddressLis
   };
   /** The claims of the address list. */
   claims: iClaimDetails<T>[];
+  /** The listings of the address list. */
+  listings?: iUtilityListingDoc<T>[];
 }
 
 /**
@@ -58,6 +61,7 @@ export class BitBadgesAddressList<T extends NumberType>
       pagination: PaginationInfo;
     };
   };
+  listings?: UtilityListingDoc<T>[];
   claims: ClaimDetails<T>[];
 
   constructor(data: iBitBadgesAddressList<T>) {
@@ -66,6 +70,7 @@ export class BitBadgesAddressList<T extends NumberType>
     this.listsActivity = data.listsActivity.map((activity) => new ListActivityDoc(activity));
     this.views = data.views;
     this.claims = data.claims.map((claim) => new ClaimDetails(claim));
+    this.listings = data.listings?.map((listing) => new UtilityListingDoc(listing));
   }
 
   getNumberFieldNames(): string[] {
@@ -144,7 +149,7 @@ export class BitBadgesAddressList<T extends NumberType>
    * Fetches the next batch of documents for a specific view. 25 documents are fetched at a time.
    * This updates the view in the class instance, as well as handling the pagination.
    */
-  async fetchNextForView(api: BaseBitBadgesApi<T>, viewType: 'listActivity', viewId: string) {
+  async fetchNextForView(api: BaseBitBadgesApi<T>, viewType: 'listActivity' | 'listings', viewId: string) {
     if (!this.viewHasMore(viewId)) return;
 
     const res = await BitBadgesAddressList.GetAddressLists(api, {
@@ -163,15 +168,20 @@ export class BitBadgesAddressList<T extends NumberType>
     });
     const list = res.addressLists[0];
     if (!list) throw new Error('No list found');
+    const type = viewType === 'listings' ? 'listings' : 'listActivity';
 
     if (!this.views[viewId]) {
       this.views[viewId] = {
         ids: [...list.views[viewId].ids],
-        type: 'listActivity',
+        type: type,
         pagination: list.views[viewId].pagination
       };
     } else {
-      this.listsActivity.push(...list.listsActivity);
+      if (viewType === 'listings') {
+        this.listings = [...(this.listings || []), ...(list.listings || [])];
+      } else {
+        this.listsActivity.push(...list.listsActivity);
+      }
       this.views[viewId].ids.push(...list.views[viewId].ids);
       this.views[viewId].pagination = list.views[viewId].pagination;
     }
@@ -190,8 +200,8 @@ export class BitBadgesAddressList<T extends NumberType>
   /**
    * Type safe method to get the documents array for a specific view.
    */
-  getView(viewType: 'listActivity', viewId: string): ListActivityDoc<T>[] {
-    return this.getActivityView(viewId);
+  getView(viewType: 'listActivity' | 'listings', viewId: string): ListActivityDoc<T>[] | UtilityListingDoc<T>[] {
+    return viewType === 'listActivity' ? this.getActivityView(viewId) : this.getListingsView(viewId);
   }
 
   /**
@@ -201,6 +211,12 @@ export class BitBadgesAddressList<T extends NumberType>
     return (this.views[viewId]?.ids.map((x) => {
       return this.listsActivity.find((y) => y._docId === x);
     }) ?? []) as ListActivityDoc<T>[];
+  }
+
+  getListingsView(viewId: string) {
+    return (this.views[viewId]?.ids.map((x) => {
+      return this.listings?.find((y) => y._docId === x);
+    }) ?? []) as UtilityListingDoc<T>[];
   }
 
   /**
@@ -348,11 +364,22 @@ const updateAddressListWithResponse = <T extends NumberType>(
     }
   }
 
+  const listings = cachedList.listings || [];
+  for (const newListing of newCollection.listings || []) {
+    const existingListing = listings.findIndex((x) => x._docId === newListing._docId);
+    if (existingListing !== -1) {
+      listings[existingListing] = newListing;
+    } else {
+      listings.push(newListing);
+    }
+  }
+
   //Update details accordingly. Note that there are certain fields which are always returned like collectionId, collectionUri, badgeUris, etc. We just ...spread these from the new response.
   cachedList = new BitBadgesAddressList({
     ...cachedList,
     ...newCollection,
     listsActivity: activity,
+    listings: listings,
     views: newViews
   });
 
@@ -370,7 +397,7 @@ export interface GetAddressListsPayload {
     listId: string;
     viewsToFetch?: {
       viewId: string;
-      viewType: 'listActivity';
+      viewType: 'listActivity' | 'listings';
       bookmark: string;
     }[];
     /** Certain views and details are private. If you are the creator of the list, you can fetch these details. By default, we do not fetch them. */

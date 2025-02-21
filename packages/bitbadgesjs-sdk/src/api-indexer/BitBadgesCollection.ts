@@ -38,7 +38,7 @@ import type { iCollectionPermissionsWithDetails } from '@/interfaces/badges/perm
 import type { iUserBalanceStoreWithDetails } from '@/interfaces/badges/userBalances.js';
 import type { BaseBitBadgesApi, PaginationInfo } from './base.js';
 import { TransferActivityDoc } from './docs/activity.js';
-import { ApprovalTrackerDoc, BalanceDocWithDetails, CollectionDoc, MapDoc, MerkleChallengeDoc } from './docs/docs.js';
+import { ApprovalTrackerDoc, BalanceDocWithDetails, CollectionDoc, MapDoc, MerkleChallengeDoc, UtilityListingDoc } from './docs/docs.js';
 import type {
   iApprovalTrackerDoc,
   iBalanceDocWithDetails,
@@ -47,6 +47,7 @@ import type {
   iMapDoc,
   iMerkleChallengeDoc,
   iTransferActivityDoc,
+  iUtilityListingDoc,
   NativeAddress
 } from './docs/interfaces.js';
 import { BadgeMetadataDetails, CollectionMetadataDetails } from './metadata/badgeMetadata.js';
@@ -109,6 +110,9 @@ export interface iBitBadgesCollection<T extends NumberType> extends iCollectionD
   /** The fetched approval trackers for this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views. */
   approvalTrackers: iApprovalTrackerDoc<T>[];
 
+  /** The listings for this collection. */
+  listings: iUtilityListingDoc<T>[];
+
   /** The badge IDs in this collection that are marked as NSFW. */
   nsfw?: { badgeIds: iUintRange<T>[]; reason: string };
   /** The badge IDs in this collection that have been reported. */
@@ -153,6 +157,8 @@ export class BitBadgesCollection<T extends NumberType>
   merkleChallenges: MerkleChallengeDoc<T>[];
   approvalTrackers: ApprovalTrackerDoc<T>[];
 
+  listings: UtilityListingDoc<T>[];
+
   claims: ClaimDetails<T>[];
 
   reservedMap?: MapDoc<T> | undefined;
@@ -183,6 +189,7 @@ export class BitBadgesCollection<T extends NumberType>
     this.owners = data.owners.map((balance) => new BalanceDocWithDetails(balance));
     this.merkleChallenges = data.merkleChallenges.map((merkleChallenge) => new MerkleChallengeDoc(merkleChallenge));
     this.approvalTrackers = data.approvalTrackers.map((approvalTracker) => new ApprovalTrackerDoc(approvalTracker));
+    this.listings = data.listings.map((listing) => new UtilityListingDoc(listing));
     this.nsfw = data.nsfw ? { ...data.nsfw, badgeIds: UintRangeArray.From(data.nsfw.badgeIds) } : undefined;
     this.reported = data.reported ? { ...data.reported, badgeIds: UintRangeArray.From(data.reported.badgeIds) } : undefined;
     this.views = data.views;
@@ -970,6 +977,8 @@ export class BitBadgesCollection<T extends NumberType>
         return this.getApprovalTrackersView(viewId) as CollectionViewData<T>[KeyType];
       case 'challengeTrackers':
         return this.getMerkleChallengesView(viewId) as CollectionViewData<T>[KeyType];
+      case 'listings':
+        return this.getListingsView(viewId) as CollectionViewData<T>[KeyType];
       default:
         throw new Error(`Unknown view type: ${viewType}`);
     }
@@ -1005,6 +1014,14 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Gets the documents for a specific view.
    */
+  getListingsView(viewId: string) {
+    return (this.views[viewId]?.ids.map((x) => {
+      return this.listings.find((y) => y._docId === x);
+    }) ?? []) as UtilityListingDoc<T>[];
+  }
+
+  /**
+   * Gets the documents for a specific view. */
   getApprovalTrackersView(viewId: string) {
     return (this.views[viewId]?.ids.map((x) => {
       return this.approvalTrackers.find((y) => y._docId === x);
@@ -1209,6 +1226,7 @@ type CollectionViewData<T extends NumberType> = {
   owners: BalanceDocWithDetails<T>[];
   amountTrackers: ApprovalTrackerDoc<T>[];
   challengeTrackers: MerkleChallengeDoc<T>[];
+  listings: UtilityListingDoc<T>[];
 };
 
 /**
@@ -1433,6 +1451,17 @@ function updateCollectionWithResponse<T extends NumberType>(
     }
   }
 
+  const listings = cachedCollection.listings || [];
+  for (const newListing of newCollection.listings || []) {
+    //If we already have the listing, replace it (we want newer data)
+    const existingListing = listings.findIndex((x) => x._docId === newListing._docId);
+    if (existingListing !== -1) {
+      listings[existingListing] = newListing;
+    } else {
+      listings.push(newListing);
+    }
+  }
+
   const newCollectionMetadata = newCollection.getCollectionMetadata() || cachedCollection?.getCollectionMetadata();
   const newCollectionMetadataTimeline = newCollection.collectionMetadataTimeline || cachedCollection?.collectionMetadataTimeline;
   for (const timelineTime of newCollectionMetadataTimeline) {
@@ -1458,6 +1487,7 @@ function updateCollectionWithResponse<T extends NumberType>(
     owners,
     merkleChallenges,
     approvalTrackers,
+    listings,
     views: newViews
   });
 

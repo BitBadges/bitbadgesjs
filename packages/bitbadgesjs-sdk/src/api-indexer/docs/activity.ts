@@ -143,6 +143,7 @@ export class ClaimActivityDoc<T extends NumberType> extends ActivityDoc<T> imple
   bitbadgesAddress: BitBadgesAddress;
   claimAttemptId: string;
   private?: boolean;
+  claimType?: 'standalone' | 'collection' | 'list';
 
   constructor(data: iClaimActivityDoc<T>) {
     super(data);
@@ -151,6 +152,7 @@ export class ClaimActivityDoc<T extends NumberType> extends ActivityDoc<T> imple
     this.bitbadgesAddress = data.bitbadgesAddress;
     this.claimAttemptId = data.claimAttemptId;
     this.private = data.private;
+    this.claimType = data.claimType;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ClaimActivityDoc<U> {

@@ -97,7 +97,9 @@ import {
   iUtilityListingLink,
   iUtilityListingContent,
   iListingViewsDoc,
-  iApiKeyDoc
+  iApiKeyDoc,
+  iLinkedTo,
+  iInheritMetadataFrom
 } from './interfaces.js';
 
 /**
@@ -325,8 +327,10 @@ export class SocialConnections<T extends NumberType> extends BaseNumberTypeClass
   reddit?: SocialConnectionInfo<T> | undefined;
   meetup?: SocialConnectionInfo<T> | undefined;
   bluesky?: SocialConnectionInfo<T> | undefined;
+  mailchimp?: SocialConnectionInfo<T> | undefined;
   facebook?: SocialConnectionInfo<T> | undefined;
   googleCalendar?: SocialConnectionInfo<T> | undefined;
+  youtube?: SocialConnectionInfo<T> | undefined;
   linkedIn?: SocialConnectionInfo<T> | undefined;
   shopify?: SocialConnectionInfo<T> | undefined;
   telegram?: SocialConnectionInfo<T> | undefined;
@@ -343,8 +347,10 @@ export class SocialConnections<T extends NumberType> extends BaseNumberTypeClass
     this.strava = data.strava ? new SocialConnectionInfo(data.strava) : undefined;
     this.reddit = data.reddit ? new SocialConnectionInfo(data.reddit) : undefined;
     this.bluesky = data.bluesky ? new SocialConnectionInfo(data.bluesky) : undefined;
+    this.mailchimp = data.mailchimp ? new SocialConnectionInfo(data.mailchimp) : undefined;
     this.facebook = data.facebook ? new SocialConnectionInfo(data.facebook) : undefined;
     this.telegram = data.telegram ? new SocialConnectionInfo(data.telegram) : undefined;
+    this.youtube = data.youtube ? new SocialConnectionInfo(data.youtube) : undefined;
     this.meetup = data.meetup ? new SocialConnectionInfo(data.meetup) : undefined;
     this.farcaster = data.farcaster ? new SocialConnectionInfo(data.farcaster) : undefined;
     this.slack = data.slack ? new SocialConnectionInfo(data.slack) : undefined;
@@ -1022,6 +1028,7 @@ export class GroupDoc<T extends NumberType> extends BaseNumberTypeClass<GroupDoc
   _id?: string;
   groupId: string;
   createdAt: UNIXMilliTimestamp<T>;
+  lastUpdated?: UNIXMilliTimestamp<T>;
   createdBy: BitBadgesAddress;
   metadata: iMetadata<T>;
   type: string;
@@ -1034,6 +1041,7 @@ export class GroupDoc<T extends NumberType> extends BaseNumberTypeClass<GroupDoc
     this._id = data._id;
     this.groupId = data.groupId;
     this.createdAt = data.createdAt;
+    this.lastUpdated = data.lastUpdated;
     this.createdBy = data.createdBy;
     this.metadata = data.metadata;
     this.pages = data.pages.map((page) => new GroupPage(page));
@@ -1041,7 +1049,7 @@ export class GroupDoc<T extends NumberType> extends BaseNumberTypeClass<GroupDoc
   }
 
   getNumberFieldNames(): string[] {
-    return ['createdAt'];
+    return ['createdAt', 'lastUpdated'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GroupDoc<U> {
@@ -1139,6 +1147,60 @@ export class ListingViewsDoc<T extends NumberType> extends BaseNumberTypeClass<L
 }
 
 /**
+ * @inheritDoc iLinkedTo
+ * @category Indexer
+ */
+export class LinkedTo<T extends NumberType> extends CustomTypeClass<LinkedTo<T>> implements iLinkedTo<T> {
+  collectionId?: T;
+  badgeIds?: UintRangeArray<T>;
+  listId?: string;
+
+  constructor(data: iLinkedTo<T>) {
+    super();
+    this.collectionId = data.collectionId;
+    this.badgeIds = data.badgeIds ? UintRangeArray.From(data.badgeIds) : undefined;
+    this.listId = data.listId;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['collectionId'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): LinkedTo<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as LinkedTo<U>;
+  }
+}
+
+/**
+ * @inheritDoc iInheritMetadataFrom
+ * @category Indexer
+ */
+export class InheritMetadataFrom<T extends NumberType> extends CustomTypeClass<InheritMetadataFrom<T>> implements iInheritMetadataFrom<T> {
+  claimId?: string;
+  groupId?: string;
+  collectionId?: T;
+  listId?: string;
+  mapId?: string;
+
+  constructor(data: iInheritMetadataFrom<T>) {
+    super();
+    this.claimId = data.claimId;
+    this.groupId = data.groupId;
+    this.collectionId = data.collectionId;
+    this.listId = data.listId;
+    this.mapId = data.mapId;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['collectionId'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): InheritMetadataFrom<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as InheritMetadataFrom<U>;
+  }
+}
+
+/**
  * @inheritDoc iUtilityListingDoc
  * @category Indexer
  */
@@ -1155,6 +1217,7 @@ export class UtilityListingDoc<T extends NumberType> extends BaseNumberTypeClass
   links: UtilityListingLink<T>[];
   metadata: iMetadata<T>;
   visibility: 'public' | 'private' | 'unlisted';
+  lastUpdated?: UNIXMilliTimestamp<T>;
   approvalStatus: {
     isApproved: boolean;
     isFeatured?: boolean;
@@ -1166,6 +1229,9 @@ export class UtilityListingDoc<T extends NumberType> extends BaseNumberTypeClass
   displayTimes?: UintRange<T> | undefined;
   viewCount?: T | undefined;
   viewsByPeriod?: { hourly: number; daily: number; weekly: number; monthly: number } | undefined;
+  linkedTo?: LinkedTo<T>;
+  inheritMetadataFrom?: InheritMetadataFrom<T>;
+  locale?: string;
 
   constructor(data: iUtilityListingDoc<T>) {
     super();
@@ -1185,10 +1251,14 @@ export class UtilityListingDoc<T extends NumberType> extends BaseNumberTypeClass
     this.displayTimes = data.displayTimes ? new UintRange(data.displayTimes) : undefined;
     this.viewCount = data.viewCount;
     this.viewsByPeriod = data.viewsByPeriod;
+    this.linkedTo = data.linkedTo ? new LinkedTo(data.linkedTo) : undefined;
+    this.inheritMetadataFrom = data.inheritMetadataFrom ? new InheritMetadataFrom(data.inheritMetadataFrom) : undefined;
+    this.lastUpdated = data.lastUpdated;
+    this.locale = data.locale;
   }
 
   getNumberFieldNames(): string[] {
-    return ['createdAt', 'viewCount'];
+    return ['createdAt', 'viewCount', 'lastUpdated'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UtilityListingDoc<U> {
@@ -1615,7 +1685,10 @@ export class AccessTokenDoc extends CustomTypeClass<AccessTokenDoc> implements i
  * @inheritDoc iDynamicDataDoc
  * @category Hook Bins
  */
-export class DynamicDataDoc<Q extends DynamicDataHandlerType> extends CustomTypeClass<DynamicDataDoc<Q>> implements iDynamicDataDoc<Q> {
+export class DynamicDataDoc<Q extends DynamicDataHandlerType, T extends NumberType>
+  extends BaseNumberTypeClass<DynamicDataDoc<Q, T>>
+  implements iDynamicDataDoc<Q, T>
+{
   _docId: string;
   _id?: string;
   handlerId: Q;
@@ -1624,8 +1697,10 @@ export class DynamicDataDoc<Q extends DynamicDataHandlerType> extends CustomType
   dataSecret: string;
   data: DynamicDataHandlerData<Q>;
   createdBy: string;
+  createdAt?: UNIXMilliTimestamp<T>;
+  lastUpdated?: UNIXMilliTimestamp<T>;
 
-  constructor(data: iDynamicDataDoc<Q>) {
+  constructor(data: iDynamicDataDoc<Q, T>) {
     super();
     this._docId = data._docId;
     this._id = data._id;
@@ -1635,10 +1710,20 @@ export class DynamicDataDoc<Q extends DynamicDataHandlerType> extends CustomType
     this.dataSecret = data.dataSecret;
     this.data = data.data;
     this.createdBy = data.createdBy;
+    this.createdAt = data.createdAt;
+    this.lastUpdated = data.lastUpdated;
   }
 
-  clone(): DynamicDataDoc<Q> {
-    return super.clone() as DynamicDataDoc<Q>;
+  getNumberFieldNames(): string[] {
+    return ['createdAt', 'lastUpdated'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): DynamicDataDoc<Q, U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as DynamicDataDoc<Q, U>;
+  }
+
+  clone(): DynamicDataDoc<Q, T> {
+    return super.clone() as DynamicDataDoc<Q, T>;
   }
 }
 
@@ -1646,7 +1731,7 @@ export class DynamicDataDoc<Q extends DynamicDataHandlerType> extends CustomType
  * @inheritDoc iDeveloperAppDoc
  * @category SIWBB
  */
-export class DeveloperAppDoc extends CustomTypeClass<DeveloperAppDoc> implements iDeveloperAppDoc {
+export class DeveloperAppDoc<T extends NumberType> extends BaseNumberTypeClass<DeveloperAppDoc<T>> implements iDeveloperAppDoc<T> {
   _docId: string;
   _id?: string | undefined;
   name: string;
@@ -1656,8 +1741,10 @@ export class DeveloperAppDoc extends CustomTypeClass<DeveloperAppDoc> implements
   createdBy: string;
   description: string;
   image: string;
+  lastUpdated?: UNIXMilliTimestamp<T>;
+  createdAt?: UNIXMilliTimestamp<T>;
 
-  constructor(data: iDeveloperAppDoc) {
+  constructor(data: iDeveloperAppDoc<T>) {
     super();
     this.description = data.description;
     this.image = data.image;
@@ -1668,14 +1755,20 @@ export class DeveloperAppDoc extends CustomTypeClass<DeveloperAppDoc> implements
     this._docId = data._docId;
     this.createdBy = data.createdBy;
     this._id = data._id;
+    this.lastUpdated = data.lastUpdated;
+    this.createdAt = data.createdAt;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): DeveloperAppDoc {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as DeveloperAppDoc;
+  getNumberFieldNames(): string[] {
+    return ['lastUpdated', 'createdAt'];
   }
 
-  clone(): DeveloperAppDoc {
-    return super.clone() as DeveloperAppDoc;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): DeveloperAppDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as DeveloperAppDoc<U>;
+  }
+
+  clone(): DeveloperAppDoc<T> {
+    return super.clone() as DeveloperAppDoc<T>;
   }
 }
 
@@ -1736,6 +1829,7 @@ export class PluginVersionConfig<T extends NumberType> extends BaseNumberTypeCla
     passEmail?: boolean;
     passTwitter?: boolean;
     passGoogle?: boolean;
+    passYoutube?: boolean;
     passGithub?: boolean;
     passTwitch?: boolean;
     passStrava?: boolean;
@@ -1747,6 +1841,7 @@ export class PluginVersionConfig<T extends NumberType> extends BaseNumberTypeCla
     passTelegram?: boolean;
     passFarcaster?: boolean;
     passSlack?: boolean;
+    passMailchimp?: boolean;
     postProcessingJs: string;
   };
   claimCreatorRedirect?: { toolUri?: string; tutorialUri?: string; testerUri?: string };

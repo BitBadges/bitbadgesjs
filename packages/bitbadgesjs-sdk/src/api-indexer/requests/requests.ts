@@ -28,6 +28,8 @@ import {
   iEvent,
   iGroupDoc,
   iGroupPage,
+  iInheritMetadataFrom,
+  iLinkedTo,
   iPointsActivityDoc,
   iUtilityListingContent,
   iUtilityListingDoc,
@@ -293,7 +295,12 @@ export interface GetClaimsPayload {
   searchValue?: string;
 
   /** Which private state instance IDs to fetch. claimId and instanceId are required and must match a claimId in claimIds and the claim must have the corresponding instanceId. */
-  privateStatesToFetch?: { claimId: string; instanceId: string }[];
+  privateStatesToFetch?: {
+    claimId: string;
+    instanceId: string;
+  }[];
+
+  fetchAllClaimedUsers?: boolean;
 }
 
 /**
@@ -420,6 +427,8 @@ export interface iGetClaimAttemptsSuccessResponse<T extends NumberType> {
     claimId: string;
     bitbadgesAddress: NativeAddress;
     claimAttemptId: string;
+    /** Zero-based index claim number */
+    claimNumber: number;
     error?: string;
   }[];
   bookmark?: string;
@@ -440,6 +449,7 @@ export class GetClaimAttemptsSuccessResponse<T extends NumberType>
     claimId: string;
     bitbadgesAddress: NativeAddress;
     claimAttemptId: string;
+    claimNumber: number;
     error?: string;
   }[];
   bookmark?: string;
@@ -1077,6 +1087,14 @@ export interface iCheckSignInStatusSuccessResponse {
   };
 
   /**
+   * Signed in with Mailchimp?
+   */
+  mailchimp?: {
+    username: string;
+    id: string;
+  };
+
+  /**
    * Signed in with Facebook?
    */
   facebook?: {
@@ -1173,6 +1191,7 @@ export class CheckSignInStatusSuccessResponse extends CustomTypeClass<CheckSignI
   reddit?: { username: string; id: string } | undefined;
   meetup?: { username: string; id: string } | undefined;
   bluesky?: { username: string; id: string } | undefined;
+  mailchimp?: { username: string; id: string } | undefined;
   facebook?: { username: string; id: string } | undefined;
   telegram?: { username: string; id: string } | undefined;
   farcaster?: { username: string; id: string } | undefined;
@@ -1197,7 +1216,9 @@ export class CheckSignInStatusSuccessResponse extends CustomTypeClass<CheckSignI
     this.meetup = data.meetup;
     this.facebook = data.facebook;
     this.bluesky = data.bluesky;
+    this.mailchimp = data.mailchimp;
     this.googleCalendar = data.googleCalendar;
+
     this.telegram = data.telegram;
     this.farcaster = data.farcaster;
     this.slack = data.slack;
@@ -1233,6 +1254,8 @@ export interface SignOutPayload {
   signOutMeetup?: boolean;
   /** Sign out of Bluesky */
   signOutBluesky?: boolean;
+  /** Sign out of Mailchimp */
+  signOutMailchimp?: boolean;
   /** Sign out of Google Calendar */
   signOutGoogleCalendar?: boolean;
   /** Sign out of Telegram */
@@ -1281,6 +1304,7 @@ export interface GetBrowsePayload {
     sortBy?: string;
     timeFrame?: string;
     searchTerm?: string;
+    locale?: string;
   };
 }
 
@@ -2349,27 +2373,27 @@ export interface GetActiveAuthorizationsPayload {}
 /**
  * @category API Requests / Responses
  */
-export interface iGetActiveAuthorizationsSuccessResponse {
+export interface iGetActiveAuthorizationsSuccessResponse<T extends NumberType> {
   authorizations: iAccessTokenDoc[];
   /**
    * Developer app docs for each authorization.
    *
    * Undefined if deleted.
    */
-  developerApps: (iDeveloperAppDoc | undefined)[];
+  developerApps: (iDeveloperAppDoc<T> | undefined)[];
 }
 
 /**
  * @category API Requests / Responses
  */
-export class GetActiveAuthorizationsSuccessResponse
-  extends CustomTypeClass<GetActiveAuthorizationsSuccessResponse>
-  implements iGetActiveAuthorizationsSuccessResponse
+export class GetActiveAuthorizationsSuccessResponse<T extends NumberType>
+  extends CustomTypeClass<GetActiveAuthorizationsSuccessResponse<T>>
+  implements iGetActiveAuthorizationsSuccessResponse<T>
 {
   authorizations: AccessTokenDoc[];
-  developerApps: (DeveloperAppDoc | undefined)[];
+  developerApps: (DeveloperAppDoc<T> | undefined)[];
 
-  constructor(data: iGetActiveAuthorizationsSuccessResponse) {
+  constructor(data: iGetActiveAuthorizationsSuccessResponse<T>) {
     super();
     this.authorizations = data.authorizations.map((authorization) => new AccessTokenDoc(authorization));
     this.developerApps = data.developerApps.map((developerApp) => (developerApp ? new DeveloperAppDoc(developerApp) : undefined));
@@ -2389,19 +2413,22 @@ export interface GetDeveloperAppPayload {
 /**
  * @category API Requests / Responses
  */
-export interface iGetDeveloperAppSuccessResponse {
-  developerApps: iDeveloperAppDoc[];
+export interface iGetDeveloperAppSuccessResponse<T extends NumberType> {
+  developerApps: iDeveloperAppDoc<T>[];
   pagination: PaginationInfo;
 }
 
 /**
  * @category API Requests / Responses
  */
-export class GetDeveloperAppSuccessResponse extends CustomTypeClass<GetDeveloperAppSuccessResponse> implements iGetDeveloperAppSuccessResponse {
-  developerApps: DeveloperAppDoc[];
+export class GetDeveloperAppSuccessResponse<T extends NumberType>
+  extends CustomTypeClass<GetDeveloperAppSuccessResponse<T>>
+  implements iGetDeveloperAppSuccessResponse<T>
+{
+  developerApps: DeveloperAppDoc<T>[];
   pagination: PaginationInfo;
 
-  constructor(data: iGetDeveloperAppSuccessResponse) {
+  constructor(data: iGetDeveloperAppSuccessResponse<T>) {
     super();
     this.developerApps = data.developerApps.map((developerApp) => new DeveloperAppDoc(developerApp));
     this.pagination = data.pagination;
@@ -2528,6 +2555,7 @@ export interface PluginVersionConfigPayload {
     passEmail?: boolean;
     passTwitter?: boolean;
     passGoogle?: boolean;
+    passYoutube?: boolean;
     passGithub?: boolean;
     passStrava?: boolean;
     passTwitch?: boolean;
@@ -2898,22 +2926,26 @@ export interface CreateDynamicDataBinPayload {
 /**
  * @category API Requests / Responses
  */
-export interface iCreateDynamicDataBinSuccessResponse<Q extends DynamicDataHandlerType> {
-  doc: iDynamicDataDoc<Q>;
+export interface iCreateDynamicDataBinSuccessResponse<Q extends DynamicDataHandlerType, T extends NumberType> {
+  doc: iDynamicDataDoc<Q, T>;
 }
 
 /**
  * @category API Requests / Responses
  */
-export class CreateDynamicDataBinSuccessResponse<Q extends DynamicDataHandlerType>
-  extends CustomTypeClass<CreateDynamicDataBinSuccessResponse<Q>>
-  implements iCreateDynamicDataBinSuccessResponse<Q>
+export class CreateDynamicDataBinSuccessResponse<Q extends DynamicDataHandlerType, T extends NumberType>
+  extends BaseNumberTypeClass<CreateDynamicDataBinSuccessResponse<Q, T>>
+  implements iCreateDynamicDataBinSuccessResponse<Q, T>
 {
-  doc: DynamicDataDoc<Q>;
+  doc: DynamicDataDoc<Q, T>;
 
-  constructor(data: iCreateDynamicDataBinSuccessResponse<Q>) {
+  constructor(data: iCreateDynamicDataBinSuccessResponse<Q, T>) {
     super();
-    this.doc = new DynamicDataDoc(data.doc);
+    this.doc = new DynamicDataDoc<Q, T>(data.doc);
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CreateDynamicDataBinSuccessResponse<Q, U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CreateDynamicDataBinSuccessResponse<Q, U>;
   }
 }
 
@@ -2939,8 +2971,8 @@ export interface GetDynamicDataBinsPayload {
 /**
  * @category API Requests / Responses
  */
-export interface iGetDynamicDataBinsSuccessResponse<Q extends DynamicDataHandlerType> {
-  docs: (iDynamicDataDoc<Q> | undefined)[];
+export interface iGetDynamicDataBinsSuccessResponse<Q extends DynamicDataHandlerType, T extends NumberType> {
+  docs: (iDynamicDataDoc<Q, T> | undefined)[];
   pagination: {
     bookmark: string;
     hasMore: boolean;
@@ -2950,20 +2982,24 @@ export interface iGetDynamicDataBinsSuccessResponse<Q extends DynamicDataHandler
 /**
  * @category API Requests / Responses
  */
-export class GetDynamicDataBinsSuccessResponse<Q extends DynamicDataHandlerType>
-  extends CustomTypeClass<GetDynamicDataBinsSuccessResponse<Q>>
-  implements iGetDynamicDataBinsSuccessResponse<Q>
+export class GetDynamicDataBinsSuccessResponse<Q extends DynamicDataHandlerType, T extends NumberType>
+  extends BaseNumberTypeClass<GetDynamicDataBinsSuccessResponse<Q, T>>
+  implements iGetDynamicDataBinsSuccessResponse<Q, T>
 {
-  docs: (DynamicDataDoc<Q> | undefined)[];
+  docs: (DynamicDataDoc<Q, T> | undefined)[];
   pagination: {
     bookmark: string;
     hasMore: boolean;
   };
 
-  constructor(data: iGetDynamicDataBinsSuccessResponse<Q>) {
+  constructor(data: iGetDynamicDataBinsSuccessResponse<Q, T>) {
     super();
-    this.docs = data.docs.map((doc) => (doc ? new DynamicDataDoc(doc) : undefined));
+    this.docs = data.docs.map((doc) => (doc ? new DynamicDataDoc<Q, T>(doc) : undefined));
     this.pagination = data.pagination;
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetDynamicDataBinsSuccessResponse<Q, U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetDynamicDataBinsSuccessResponse<Q, U>;
   }
 }
 
@@ -2982,22 +3018,26 @@ export interface UpdateDynamicDataBinPayload {
 /**
  * @category API Requests / Responses
  */
-export interface iUpdateDynamicDataBinSuccessResponse<Q extends DynamicDataHandlerType> {
-  doc: iDynamicDataDoc<Q>;
+export interface iUpdateDynamicDataBinSuccessResponse<Q extends DynamicDataHandlerType, T extends NumberType> {
+  doc: iDynamicDataDoc<Q, T>;
 }
 
 /**
  * @category API Requests / Responses
  */
-export class UpdateDynamicDataBinSuccessResponse<Q extends DynamicDataHandlerType>
-  extends CustomTypeClass<UpdateDynamicDataBinSuccessResponse<Q>>
-  implements iUpdateDynamicDataBinSuccessResponse<Q>
+export class UpdateDynamicDataBinSuccessResponse<Q extends DynamicDataHandlerType, T extends NumberType>
+  extends BaseNumberTypeClass<UpdateDynamicDataBinSuccessResponse<Q, T>>
+  implements iUpdateDynamicDataBinSuccessResponse<Q, T>
 {
-  doc: DynamicDataDoc<Q>;
+  doc: DynamicDataDoc<Q, T>;
 
-  constructor(data: iUpdateDynamicDataBinSuccessResponse<Q>) {
+  constructor(data: iUpdateDynamicDataBinSuccessResponse<Q, T>) {
     super();
-    this.doc = new DynamicDataDoc<Q>(data.doc);
+    this.doc = new DynamicDataDoc<Q, T>(data.doc);
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UpdateDynamicDataBinSuccessResponse<Q, U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UpdateDynamicDataBinSuccessResponse<Q, U>;
   }
 }
 
@@ -3637,6 +3677,15 @@ export interface CreateUtilityListingPayload<T extends NumberType> {
 
   /** The categories of the listing */
   categories: string[];
+
+  /** The linked to details */
+  linkedTo?: iLinkedTo<T>;
+
+  /** Inherit metadata from */
+  inheritMetadataFrom?: iInheritMetadataFrom<T>;
+
+  /** Locale (ex: es, fr, etc.). If not specified, we assume en. */
+  locale?: string;
 }
 
 /**
@@ -3688,6 +3737,15 @@ export interface UpdateUtilityListingPayload<T extends NumberType> {
 
   /** The categories of the listing */
   categories: string[];
+
+  /** The linked to details. Note only badge IDs can be changed */
+  linkedTo?: iLinkedTo<T>;
+
+  /** Inherit metadata from */
+  inheritMetadataFrom?: iInheritMetadataFrom<T>;
+
+  /** Locale (ex: es, fr, etc.). If not specified, we assume en. */
+  locale?: string;
 }
 
 /**
@@ -3904,5 +3962,33 @@ export class SignWithEmbeddedWalletSuccessResponse
   constructor(data: iSignWithEmbeddedWalletSuccessResponse) {
     super();
     this.signature = data.signature;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface CheckClaimSuccessPayload {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iCheckClaimSuccessSuccessResponse {
+  successCount: number;
+  /** If indexed, the claim numbers that were successfully completed (zero-based) */
+  claimNumbers?: number[];
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class CheckClaimSuccessSuccessResponse extends CustomTypeClass<CheckClaimSuccessSuccessResponse> implements iCheckClaimSuccessSuccessResponse {
+  successCount: number;
+  claimNumbers?: number[];
+
+  constructor(data: iCheckClaimSuccessSuccessResponse) {
+    super();
+    this.successCount = data.successCount;
+    this.claimNumbers = data.claimNumbers;
   }
 }

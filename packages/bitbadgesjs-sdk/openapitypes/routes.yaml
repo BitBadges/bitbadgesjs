@@ -2983,6 +2983,43 @@ paths:
       security:
         - userMaybeSignedIn: []
       x-internal: false
+  /claims/success/{claimId}/{address}:
+    get:
+      operationId: checkClaimSuccess
+      summary: Check Claim Success
+      description: |
+        Checks if a claim has been successfully completed.
+
+        ```tsx
+        const res = await BitBadgesApi.checkClaimSuccess(...);
+        ```
+      tags:
+        - Claims
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iCheckClaimSuccessSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      parameters:
+        - name: claimId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: address
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - apiKey: []
+      x-internal: false
 components:
   responses:
     ErrorResponse:
