@@ -3634,7 +3634,7 @@ export interface iGetUtilityListingsSuccessResponse<T extends NumberType> {
  * @category API Requests / Responses
  */
 export class GetUtilityListingsSuccessResponse<T extends NumberType>
-  extends CustomTypeClass<GetUtilityListingsSuccessResponse<T>>
+  extends BaseNumberTypeClass<GetUtilityListingsSuccessResponse<T>>
   implements iGetUtilityListingsSuccessResponse<T>
 {
   docs: (UtilityListingDoc<T> | undefined)[];
@@ -3647,6 +3647,10 @@ export class GetUtilityListingsSuccessResponse<T extends NumberType>
     super();
     this.docs = data.docs.map((doc) => (doc ? new UtilityListingDoc<T>(doc) : undefined));
     this.pagination = data.pagination;
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetUtilityListingsSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetUtilityListingsSuccessResponse<U>;
   }
 }
 
@@ -3708,6 +3712,10 @@ export class CreateUtilityListingSuccessResponse<T extends NumberType>
     super();
     this.doc = new UtilityListingDoc<T>(data.doc);
   }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CreateUtilityListingSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CreateUtilityListingSuccessResponse<U>;
+  }
 }
 
 /**
@@ -3767,6 +3775,10 @@ export class UpdateUtilityListingSuccessResponse<T extends NumberType>
   constructor(data: iUpdateUtilityListingSuccessResponse<T>) {
     super();
     this.doc = new UtilityListingDoc<T>(data.doc);
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UpdateUtilityListingSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UpdateUtilityListingSuccessResponse<U>;
   }
 }
 

@@ -1780,7 +1780,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
         `${this.BACKEND_URL}${BitBadgesApiRoutes.GetUtilityListingsRoute()}`,
         payload
       );
-      return new GetUtilityListingsSuccessResponse<T>(response.data);
+      return new GetUtilityListingsSuccessResponse<T>(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -1800,7 +1800,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
         `${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDUtilityListingsRoute()}`,
         payload
       );
-      return new CreateUtilityListingSuccessResponse<T>(response.data);
+      return new CreateUtilityListingSuccessResponse<T>(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -1820,7 +1820,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
         `${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDUtilityListingsRoute()}`,
         payload
       );
-      return new UpdateUtilityListingSuccessResponse<T>(response.data);
+      return new UpdateUtilityListingSuccessResponse<T>(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
