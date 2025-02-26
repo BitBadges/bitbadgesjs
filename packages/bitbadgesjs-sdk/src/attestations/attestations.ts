@@ -51,7 +51,12 @@ export const verifyAttestation = async (body: VerifyAttestationsPresentationSign
  *
  * @category SIWBB Authentication
  */
-export const verifyAttestationsPresentationSignatures = async (body: VerifyAttestationsPresentationSignaturesPayload) => {
+export const verifyAttestationsPresentationSignatures = async (
+  body: VerifyAttestationsPresentationSignaturesPayload,
+  options?: {
+    getSignerFromProofOfIssuance?: (proofOfIssuance: { message: string; signature: string; signer: string; publicKey?: string }) => string;
+  }
+) => {
   if (body.scheme !== 'bbs' && body.scheme !== 'standard') {
     throw new Error('Invalid scheme. Only BitBadges native schemes are supported (scheme = bbs, standard)');
   }
@@ -96,10 +101,13 @@ export const verifyAttestationsPresentationSignatures = async (body: VerifyAttes
       //Make sure the signer is the same as the proof signer
       //Note this may be different if you have a custom implementation
       //For BitBadges, we do this with the following message: "message": "I approve the issuance of attestations signed with BBS+ a5159099a24a8993b5eb8e62d04f6309bbcf360ae03135d42a89b3d94cbc2bc678f68926373b9ded9b8b9a27348bc755177209bf2074caea9a007a6c121655cd4dda5a6618bfc9cb38052d32807c6d5288189913aa76f6d49844c3648d4e6167 as my own.\n\n",
-      const bbsSigner = body.proofOfIssuance.message.split(' ')[9];
+      const bbsSigner = options?.getSignerFromProofOfIssuance
+        ? options.getSignerFromProofOfIssuance(body.proofOfIssuance)
+        : body.proofOfIssuance.message.split(' ')[9];
       if (bbsSigner !== body.dataIntegrityProof.signer) {
         throw new Error('Proof signer does not match proof of issuance');
       }
+
       const address = body.proofOfIssuance.signer;
       const chain = getChainForAddress(address);
 

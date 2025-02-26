@@ -790,9 +790,17 @@ export type AccountFetchDetails = {
   address?: NativeAddress;
   /** The username of the user. Only one of address or username should be specified. */
   username?: string;
-  /** If true, we will fetch the sequence from the blockchain. */
+  /**
+   * If true, we will fetch the sequence from the blockchain.
+   *
+   * @deprecated We always return sequence in the response now.
+   */
   fetchSequence?: boolean;
-  /** If true, we will fetch the $BADGE balance from the blockchain. */
+  /**
+   * If true, we will fetch the $BADGE balance from the blockchain.
+   *
+   * @deprecated We always return balance in the response now.
+   */
   fetchBalance?: boolean;
   /** If true, we will avoid external API calls. */
   noExternalCalls?: boolean;

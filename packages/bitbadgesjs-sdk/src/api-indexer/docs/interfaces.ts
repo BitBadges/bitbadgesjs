@@ -635,6 +635,8 @@ export interface iAddressListEditKey<T extends NumberType> {
 export interface iAddressListDoc<T extends NumberType> extends iAddressList, Doc {
   /** The BitBadges address of the user who created this list */
   createdBy: BitBadgesAddress;
+  /** The BitBadges address of the user who is currently managing this */
+  managedBy: BitBadgesAddress;
   /** The update history of this list */
   updateHistory: iUpdateHistory<T>[];
   /** The block number when this list was created */
@@ -1135,6 +1137,9 @@ export interface iGroupDoc<T extends NumberType> extends Doc {
   /** The BitBadges address of the user who created this group */
   createdBy: BitBadgesAddress;
 
+  /** The BitBadges address of the user who is currently managing this */
+  managedBy: BitBadgesAddress;
+
   /** The time the group was created */
   createdAt: UNIXMilliTimestamp<T>;
 
@@ -1162,6 +1167,8 @@ export interface iInheritMetadataFrom<T extends NumberType> {
   listId?: string;
   /** The map ID to link to */
   mapId?: string;
+  /** The badge ID to link to "collectionId:badgeId" */
+  badgeId?: string;
 }
 
 /**
@@ -1178,6 +1185,9 @@ export interface iUtilityListingDoc<T extends NumberType> extends Doc {
 
   /** The BitBadges address of the user who created this listing */
   createdBy: BitBadgesAddress;
+
+  /** The BitBadges address of the user who is currently managing this */
+  managedBy: BitBadgesAddress;
 
   /** The direct link for the listing. If specified, we will skip the entire content / listing page. Thus, content and links should be empty []. */
   directLink?: string | undefined;
@@ -1329,6 +1339,9 @@ export interface iClaimBuilderDoc<T extends NumberType> extends Doc {
   docClaimed: boolean;
   /** The collection ID of the document */
   collectionId: T;
+
+  /** The BitBadges address of the user who is currently managing this */
+  managedBy: BitBadgesAddress;
 
   /** Which challenge tracker is it tied to */
   trackerDetails?: iChallengeTrackerIdDetails<T>;
@@ -1619,6 +1632,8 @@ export interface iComplianceDoc<T extends NumberType> extends Doc {
 export interface iDeveloperAppDoc<T extends NumberType> extends Doc {
   /** Creator of the app */
   createdBy: BitBadgesAddress;
+  /** The BitBadges address of the user who is currently managing this */
+  managedBy: BitBadgesAddress;
   /** The name of the app */
   name: string;
   /** The description of the app */
@@ -1682,7 +1697,8 @@ export interface iDynamicDataDoc<Q extends DynamicDataHandlerType, T extends Num
   label: string;
   dataSecret: string;
   data: DynamicDataHandlerData<Q>;
-  createdBy: string;
+  createdBy: BitBadgesAddress;
+  managedBy: BitBadgesAddress;
   createdAt?: UNIXMilliTimestamp<T>;
   lastUpdated?: UNIXMilliTimestamp<T>;
 }
@@ -1722,6 +1738,9 @@ export interface iPluginDoc<T extends NumberType> extends Doc {
   /** The BitBadges address who created the plugin doc */
   createdBy: BitBadgesAddress;
 
+  /** The BitBadges address of the user who is currently managing this */
+  managedBy: BitBadgesAddress;
+
   /** The unique plugin ID */
   pluginId: string;
 
@@ -1755,6 +1774,9 @@ export interface iPluginDoc<T extends NumberType> extends Doc {
     /** Support link for the plugin */
     supportLink?: string;
   };
+
+  /** Locale that is supported by the plugin. By default, we assume 'en' is supported if not specified. */
+  locale?: string;
 
   lastUpdated: UNIXMilliTimestamp<T>;
 
@@ -1967,6 +1989,8 @@ export interface iClaimDetails<T extends NumberType> {
   claimId: string;
   /** The original creator of the claim */
   createdBy?: BitBadgesAddress;
+  /** The BitBadges address of the user who is currently managing this */
+  managedBy?: BitBadgesAddress;
   /** Collection ID that the claim is for (if applicable). */
   collectionId?: T;
   /** Is intended to be used for Sign In with BitBadges. */

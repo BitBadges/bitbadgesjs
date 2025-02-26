@@ -708,6 +708,7 @@ export class AddressListDoc<T extends NumberType> extends AddressList implements
   _docId: string;
   _id?: string;
   createdBy: BitBadgesAddress;
+  managedBy: BitBadgesAddress;
   updateHistory: iUpdateHistory<T>[];
   createdBlock: T;
   lastUpdated: UNIXMilliTimestamp<T>;
@@ -725,6 +726,7 @@ export class AddressListDoc<T extends NumberType> extends AddressList implements
     this._docId = data._docId;
     this._id = data._id;
     this.createdBy = data.createdBy;
+    this.managedBy = data.managedBy;
     this.updateHistory = data.updateHistory;
     this.createdBlock = data.createdBlock;
     this.lastUpdated = data.lastUpdated;
@@ -1030,6 +1032,7 @@ export class GroupDoc<T extends NumberType> extends BaseNumberTypeClass<GroupDoc
   createdAt: UNIXMilliTimestamp<T>;
   lastUpdated?: UNIXMilliTimestamp<T>;
   createdBy: BitBadgesAddress;
+  managedBy: BitBadgesAddress;
   metadata: iMetadata<T>;
   type: string;
 
@@ -1043,6 +1046,7 @@ export class GroupDoc<T extends NumberType> extends BaseNumberTypeClass<GroupDoc
     this.createdAt = data.createdAt;
     this.lastUpdated = data.lastUpdated;
     this.createdBy = data.createdBy;
+    this.managedBy = data.managedBy;
     this.metadata = data.metadata;
     this.pages = data.pages.map((page) => new GroupPage(page));
     this.type = data.type;
@@ -1181,6 +1185,7 @@ export class InheritMetadataFrom<T extends NumberType> extends CustomTypeClass<I
   collectionId?: T;
   listId?: string;
   mapId?: string;
+  badgeId?: string;
 
   constructor(data: iInheritMetadataFrom<T>) {
     super();
@@ -1189,6 +1194,7 @@ export class InheritMetadataFrom<T extends NumberType> extends CustomTypeClass<I
     this.collectionId = data.collectionId;
     this.listId = data.listId;
     this.mapId = data.mapId;
+    this.badgeId = data.badgeId;
   }
 
   getNumberFieldNames(): string[] {
@@ -1212,6 +1218,7 @@ export class UtilityListingDoc<T extends NumberType> extends BaseNumberTypeClass
   categories: string[];
   directLink?: string | undefined;
   createdBy: BitBadgesAddress;
+  managedBy: BitBadgesAddress;
   createdAt: UNIXMilliTimestamp<T>;
   content: UtilityListingContent[];
   links: UtilityListingLink<T>[];
@@ -1242,6 +1249,7 @@ export class UtilityListingDoc<T extends NumberType> extends BaseNumberTypeClass
     this.directLink = data.directLink;
     this.categories = data.categories;
     this.createdBy = data.createdBy;
+    this.managedBy = data.managedBy;
     this.createdAt = data.createdAt;
     this.content = data.content.map((content) => new UtilityListingContent(content));
     this.links = data.links.map((link) => new UtilityListingLink(link));
@@ -1275,6 +1283,7 @@ export class ClaimBuilderDoc<T extends NumberType> extends BaseNumberTypeClass<C
   _id?: string;
   cid: string;
   createdBy: BitBadgesAddress;
+  managedBy: BitBadgesAddress;
   docClaimed: boolean;
   collectionId: T;
   deletedAt?: T | undefined;
@@ -1337,6 +1346,7 @@ export class ClaimBuilderDoc<T extends NumberType> extends BaseNumberTypeClass<C
     this.estimatedTime = data.estimatedTime;
     this.assignMethod = data.assignMethod;
     this.satisfyMethod = data.satisfyMethod ? new SatisfyMethod(data.satisfyMethod) : undefined;
+    this.managedBy = data.managedBy;
   }
 
   getNumberFieldNames(): string[] {
@@ -1696,7 +1706,8 @@ export class DynamicDataDoc<Q extends DynamicDataHandlerType, T extends NumberTy
   dynamicDataId: string;
   dataSecret: string;
   data: DynamicDataHandlerData<Q>;
-  createdBy: string;
+  createdBy: BitBadgesAddress;
+  managedBy: BitBadgesAddress;
   createdAt?: UNIXMilliTimestamp<T>;
   lastUpdated?: UNIXMilliTimestamp<T>;
 
@@ -1710,6 +1721,7 @@ export class DynamicDataDoc<Q extends DynamicDataHandlerType, T extends NumberTy
     this.dataSecret = data.dataSecret;
     this.data = data.data;
     this.createdBy = data.createdBy;
+    this.managedBy = data.managedBy;
     this.createdAt = data.createdAt;
     this.lastUpdated = data.lastUpdated;
   }
@@ -1738,7 +1750,8 @@ export class DeveloperAppDoc<T extends NumberType> extends BaseNumberTypeClass<D
   clientId: string;
   clientSecret: string;
   redirectUris: string[];
-  createdBy: string;
+  createdBy: BitBadgesAddress;
+  managedBy: BitBadgesAddress;
   description: string;
   image: string;
   lastUpdated?: UNIXMilliTimestamp<T>;
@@ -1754,6 +1767,7 @@ export class DeveloperAppDoc<T extends NumberType> extends BaseNumberTypeClass<D
     this.redirectUris = data.redirectUris;
     this._docId = data._docId;
     this.createdBy = data.createdBy;
+    this.managedBy = data.managedBy;
     this._id = data._id;
     this.lastUpdated = data.lastUpdated;
     this.createdAt = data.createdAt;
@@ -1901,6 +1915,7 @@ export class PluginDoc<T extends NumberType> extends BaseNumberTypeClass<PluginD
   inviteCode?: string | undefined;
   approvedUsers: NativeAddress[];
   createdBy: BitBadgesAddress;
+  managedBy: BitBadgesAddress;
   metadata: {
     createdBy: string;
     name: string;
@@ -1915,6 +1930,7 @@ export class PluginDoc<T extends NumberType> extends BaseNumberTypeClass<PluginD
   createdAt: UNIXMilliTimestamp<T>;
   deletedAt?: UNIXMilliTimestamp<T>;
   versions: PluginVersionConfig<T>[];
+  locale?: string;
 
   constructor(data: iPluginDoc<T>) {
     super();
@@ -1927,6 +1943,7 @@ export class PluginDoc<T extends NumberType> extends BaseNumberTypeClass<PluginD
     this.inviteCode = data.inviteCode;
     this.approvedUsers = data.approvedUsers;
     this.createdBy = data.createdBy;
+    this.managedBy = data.managedBy;
     this.metadata = {
       createdBy: data.metadata.createdBy,
       name: data.metadata.name,
@@ -1941,6 +1958,7 @@ export class PluginDoc<T extends NumberType> extends BaseNumberTypeClass<PluginD
     this.createdAt = data.createdAt;
     this.deletedAt = data.deletedAt;
     this.versions = data.versions.map((version) => new PluginVersionConfig(version));
+    this.locale = data.locale;
   }
 
   getNumberFieldNames(): string[] {
@@ -2029,7 +2047,7 @@ export class AttestationDoc<T extends NumberType> extends BaseNumberTypeClass<At
   messageFormat: 'plaintext' | 'json';
   updateHistory: UpdateHistory<T>[];
 
-  createdBy: string;
+  createdBy: BitBadgesAddress;
   createdAt: UNIXMilliTimestamp<T>;
 
   proofOfIssuance?: {

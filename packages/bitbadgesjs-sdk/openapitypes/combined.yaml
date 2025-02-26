@@ -5216,6 +5216,9 @@ components:
         _id:
           description: A unique document ID (Mongo DB ObjectID)
           type: string
+        managedBy:
+          description: The BitBadges address of the user who is currently managing this
+          $ref: '#/components/schemas/BitBadgesAddress'
         updateHistory:
           items:
             $ref: '#/components/schemas/iUpdateHistory'
@@ -5254,6 +5257,7 @@ components:
         - uri
         - customData
         - _docId
+        - managedBy
         - updateHistory
         - createdBlock
         - lastUpdated
@@ -5784,6 +5788,9 @@ components:
         createdBy:
           description: The BitBadges address of the user who created this group
           $ref: '#/components/schemas/BitBadgesAddress'
+        managedBy:
+          description: The BitBadges address of the user who is currently managing this
+          $ref: '#/components/schemas/BitBadgesAddress'
         createdAt:
           description: The time the group was created
           $ref: '#/components/schemas/UNIXMilliTimestamp'
@@ -5803,6 +5810,7 @@ components:
         - groupId
         - type
         - createdBy
+        - managedBy
         - createdAt
         - metadata
         - pages
@@ -5827,6 +5835,9 @@ components:
         mapId:
           description: The map ID to link to
           type: string
+        badgeId:
+          description: The badge ID to link to "collectionId:badgeId"
+          type: string
       additionalProperties: false
       type: object
     iUtilityListingDoc:
@@ -5845,6 +5856,9 @@ components:
           type: string
         createdBy:
           description: The BitBadges address of the user who created this listing
+          $ref: '#/components/schemas/BitBadgesAddress'
+        managedBy:
+          description: The BitBadges address of the user who is currently managing this
           $ref: '#/components/schemas/BitBadgesAddress'
         directLink:
           description: >-
@@ -5952,6 +5966,7 @@ components:
         - listingId
         - type
         - createdBy
+        - managedBy
         - createdAt
         - metadata
         - content
@@ -6098,6 +6113,9 @@ components:
         collectionId:
           description: The collection ID of the document
           $ref: '#/components/schemas/NumberType'
+        managedBy:
+          description: The BitBadges address of the user who is currently managing this
+          $ref: '#/components/schemas/BitBadgesAddress'
         trackerDetails:
           description: Which challenge tracker is it tied to
           $ref: '#/components/schemas/iChallengeTrackerIdDetails'
@@ -6188,6 +6206,7 @@ components:
         - createdBy
         - docClaimed
         - collectionId
+        - managedBy
         - plugins
         - state
         - action
@@ -6742,6 +6761,9 @@ components:
         createdBy:
           description: Creator of the app
           $ref: '#/components/schemas/BitBadgesAddress'
+        managedBy:
+          description: The BitBadges address of the user who is currently managing this
+          $ref: '#/components/schemas/BitBadgesAddress'
         name:
           description: The name of the app
           type: string
@@ -6774,6 +6796,7 @@ components:
       required:
         - _docId
         - createdBy
+        - managedBy
         - name
         - description
         - image
@@ -6824,7 +6847,9 @@ components:
           type: string
         data: {}
         createdBy:
-          type: string
+          $ref: '#/components/schemas/BitBadgesAddress'
+        managedBy:
+          $ref: '#/components/schemas/BitBadgesAddress'
         createdAt:
           $ref: '#/components/schemas/UNIXMilliTimestamp'
         lastUpdated:
@@ -6837,6 +6862,7 @@ components:
         - dataSecret
         - data
         - createdBy
+        - managedBy
       additionalProperties: false
       description: ''
       type: object
@@ -6894,6 +6920,9 @@ components:
         createdBy:
           description: The BitBadges address who created the plugin doc
           $ref: '#/components/schemas/BitBadgesAddress'
+        managedBy:
+          description: The BitBadges address of the user who is currently managing this
+          $ref: '#/components/schemas/BitBadgesAddress'
         pluginId:
           description: The unique plugin ID
           type: string
@@ -6947,6 +6976,11 @@ components:
             - image
           additionalProperties: false
           type: object
+        locale:
+          description: >-
+            Locale that is supported by the plugin. By default, we assume 'en'
+            is supported if not specified.
+          type: string
         lastUpdated:
           $ref: '#/components/schemas/UNIXMilliTimestamp'
         createdAt:
@@ -6965,6 +6999,7 @@ components:
       required:
         - _docId
         - createdBy
+        - managedBy
         - pluginId
         - toPublish
         - reviewCompleted
@@ -7660,6 +7695,9 @@ components:
         createdBy:
           description: The original creator of the claim
           $ref: '#/components/schemas/BitBadgesAddress'
+        managedBy:
+          description: The BitBadges address of the user who is currently managing this
+          $ref: '#/components/schemas/BitBadgesAddress'
         collectionId:
           description: Collection ID that the claim is for (if applicable).
           $ref: '#/components/schemas/NumberType'
@@ -7960,6 +7998,9 @@ components:
         _id:
           description: A unique document ID (Mongo DB ObjectID)
           type: string
+        managedBy:
+          description: The BitBadges address of the user who is currently managing this
+          $ref: '#/components/schemas/BitBadgesAddress'
         updateHistory:
           items:
             $ref: '#/components/schemas/iUpdateHistory'
@@ -8035,6 +8076,7 @@ components:
         - uri
         - customData
         - _docId
+        - managedBy
         - updateHistory
         - createdBlock
         - lastUpdated
@@ -8699,10 +8741,14 @@ components:
             specified.
           type: string
         fetchSequence:
-          description: If true, we will fetch the sequence from the blockchain.
+          description: |-
+            If true, we will fetch the sequence from the blockchain.
+            @deprecated We always return sequence in the response now.
           type: boolean
         fetchBalance:
-          description: If true, we will fetch the $BADGE balance from the blockchain.
+          description: |-
+            If true, we will fetch the $BADGE balance from the blockchain.
+            @deprecated We always return balance in the response now.
           type: boolean
         noExternalCalls:
           description: If true, we will avoid external API calls.
@@ -12081,6 +12127,11 @@ components:
         initialVersion:
           description: The initial version configuration
           $ref: '#/components/schemas/PluginVersionConfigPayload'
+        locale:
+          description: >-
+            Locale that is supported by the plugin. By default, we assume 'en'
+            is supported if not specified.
+          type: string
       required:
         - pluginId
         - metadata
@@ -12301,6 +12352,11 @@ components:
         versionCreate:
           description: Create a new version
           $ref: '#/components/schemas/PluginVersionConfigPayload'
+        locale:
+          description: >-
+            Locale that is supported by the plugin. By default, we assume 'en'
+            is supported if not specified.
+          type: string
       required:
         - pluginId
       additionalProperties: false
@@ -12342,6 +12398,12 @@ components:
           type: string
         searchValue:
           description: Search value
+          type: string
+        locale:
+          description: >-
+            Locale to fetch the plugin in. By default, we assume 'en'. This is
+            not applicable if you specify createdPluginsOnly, speciifc
+            pluginIds, or an invite code.
           type: string
       additionalProperties: false
       type: object
@@ -12410,6 +12472,11 @@ components:
               createdBy:
                 $ref: '#/components/schemas/BitBadgesAddress'
                 description: The original creator of the claim
+              managedBy:
+                $ref: '#/components/schemas/BitBadgesAddress'
+                description: >-
+                  The BitBadges address of the user who is currently managing
+                  this
               collectionId:
                 description: Collection ID that the claim is for (if applicable).
                 $ref: '#/components/schemas/NumberType'

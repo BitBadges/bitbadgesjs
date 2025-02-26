@@ -2614,6 +2614,9 @@ export interface CreatePluginPayload {
 
   /** The initial version configuration */
   initialVersion: PluginVersionConfigPayload;
+
+  /** Locale that is supported by the plugin. By default, we assume 'en' is supported if not specified. */
+  locale?: string;
 }
 
 /**
@@ -2677,6 +2680,9 @@ export interface UpdatePluginPayload {
 
   /** Create a new version */
   versionCreate?: PluginVersionConfigPayload;
+
+  /** Locale that is supported by the plugin. By default, we assume 'en' is supported if not specified. */
+  locale?: string;
 }
 
 /**
@@ -2721,6 +2727,8 @@ export interface GetPluginPayload {
   bookmark?: string;
   /** Search value */
   searchValue?: string;
+  /** Locale to fetch the plugin in. By default, we assume 'en'. This is not applicable if you specify createdPluginsOnly, speciifc pluginIds, or an invite code. */
+  locale?: string;
 }
 
 /**
