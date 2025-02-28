@@ -6,9 +6,24 @@ on:
       - main # or your default branch name
     paths:
       - 'packages/bitbadgesjs-sdk/**' # Only trigger when SDK changes
+  workflow_dispatch:
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment
+concurrency:
+  group: 'pages'
+  cancel-in-progress: false
 
 jobs:
   build-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -17,7 +32,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18' # or your preferred Node.js version
+          node-version: '18'
 
       - name: Install dependencies
         working-directory: packages/bitbadgesjs-sdk
@@ -31,6 +46,6 @@ jobs:
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: packages/bitbadgesjs-sdk/docs # Path to your generated docs
-          branch: gh-pages # The branch to deploy to
-          clean: true # Automatically remove deleted files from the deployment
+          folder: packages/bitbadgesjs-sdk/docs
+          branch: gh-pages
+          clean: true
