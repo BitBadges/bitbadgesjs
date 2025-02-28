@@ -4,8 +4,7 @@ import type { IChainDriver } from 'blockin';
 import type { AssetConditionGroup, NumberType } from 'blockin/dist/types/verify.types';
 
 /**
- * Ethereum implementation of the IChainDriver interface. This implementation is based off the Moralis API
- * and ethers.js library.
+ * Ethereum implementation of the IChainDriver interface.
  *
  * For documentation regarding what each function does, see the IChainDriver interface.
  *
