@@ -216,9 +216,9 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   /**
    * Gets accounts by address or username from the API.
    */
-  static async GetAccounts<T extends NumberType>(api: BaseBitBadgesApi<T>, params: GetAccountsPayload) {
+  static async GetAccounts<T extends NumberType>(api: BaseBitBadgesApi<T>, params: iGetAccountsPayload) {
     try {
-      const validateRes: typia.IValidation<GetAccountsPayload> = typia.validate<GetAccountsPayload>(params ?? {});
+      const validateRes: typia.IValidation<iGetAccountsPayload> = typia.validate<iGetAccountsPayload>(params ?? {});
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
@@ -327,8 +327,6 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
 
     //Check if we need to fetch anything at all
     const needToFetch =
-      (options.fetchSequence && (this.sequence === undefined || BigInt(this.sequence) < 0)) ||
-      (options.fetchBalance && this.balance === undefined) ||
       options.viewsToFetch?.length ||
       (isFullRequest && this.fetchedProfile !== 'full') || //Fetch full if we havent already
       (isPartialRequest && !this.fetchedProfile); //Fetch partial if we havent fetched anything yet
@@ -348,8 +346,6 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     return {
       ...options,
       address: this.address,
-      fetchSequence: options.fetchSequence && (this.sequence === undefined || BigInt(this.sequence) < 0),
-      fetchBalance: options.fetchBalance && this.balance === undefined,
       viewsToFetch
     } as AccountFetchDetails;
   }
@@ -791,20 +787,6 @@ export type AccountFetchDetails = {
   /** The username of the user. Only one of address or username should be specified. */
   username?: string;
   /**
-   * If true, we will fetch the sequence from the blockchain.
-   *
-   * @deprecated We always return sequence in the response now.
-   */
-  fetchSequence?: boolean;
-  /**
-   * If true, we will fetch the $BADGE balance from the blockchain.
-   *
-   * @deprecated We always return balance in the response now.
-   */
-  fetchBalance?: boolean;
-  /** If true, we will avoid external API calls. */
-  noExternalCalls?: boolean;
-  /**
    * If true, we will only fetch a partial set of the document for the user.
    *
    * Currently includes: solAddress, username, profile pic, and latest signed in chain
@@ -833,7 +815,7 @@ export type AccountFetchDetails = {
 /**
  * @category API Requests / Responses
  */
-export interface GetAccountsPayload {
+export interface iGetAccountsPayload {
   accountsToFetch: AccountFetchDetails[];
 }
 

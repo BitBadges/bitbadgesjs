@@ -1,16 +1,34 @@
 import type { ConvertOptions, CustomType } from '@/common/base.js';
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, CustomTypeClass, parseArrayString, ParsedQs } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
-import { ValueStore, iValueStore } from '@/transactions/messages/bitbadges/maps/index.js';
+import { iValueStore, ValueStore } from '@/transactions/messages/bitbadges/maps/index.js';
 import { MapWithValues } from '../docs/docs.js';
 import { iMapWithValues } from '../docs/interfaces.js';
 
 /**
  * @category API Requests / Responses
  */
-export interface GetMapsPayload {
+export interface iGetMapsPayload {
   /** The IDs of the maps to fetch. */
   mapIds: string[];
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetMapsPayload extends CustomTypeClass<GetMapsPayload> implements iGetMapsPayload {
+  mapIds: string[];
+
+  constructor(payload: iGetMapsPayload) {
+    super();
+    this.mapIds = payload.mapIds;
+  }
+
+  static FromQuery(query: ParsedQs): GetMapsPayload {
+    return new GetMapsPayload({
+      mapIds: parseArrayString(query.mapIds) ?? []
+    });
+  }
 }
 
 /**
@@ -46,9 +64,32 @@ export class GetMapsSuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export interface GetMapValuesPayload {
+export interface iGetMapValuesPayload {
+  /** The map ID to fetch. */
+  mapId: string;
   /** The values to fetch for each map. */
-  valuesToFetch: { mapId: string; keys: string[] }[];
+  keys: string[];
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetMapValuesPayload extends CustomTypeClass<GetMapValuesPayload> implements iGetMapValuesPayload {
+  mapId: string;
+  keys: string[];
+
+  constructor(payload: iGetMapValuesPayload) {
+    super();
+    this.mapId = payload.mapId;
+    this.keys = payload.keys;
+  }
+
+  static FromQuery(query: ParsedQs): GetMapValuesPayload {
+    return new GetMapValuesPayload({
+      mapId: query.mapId?.toString() ?? '',
+      keys: parseArrayString(query.keys) ?? []
+    });
+  }
 }
 
 /**

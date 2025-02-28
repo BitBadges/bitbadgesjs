@@ -54,34 +54,34 @@ import { BadgeMetadataDetails, CollectionMetadataDetails } from './metadata/badg
 
 import { convertToBitBadgesAddress } from '@/address-converter/converter.js';
 import { GO_MAX_UINT_64 } from '@/common/math.js';
+import { ClaimDetails } from '@/core/approvals.js';
 import { getCurrentValueForTimeline } from '@/core/timelines.js';
 import typia from 'typia';
 import {
   CollectionViewKey,
-  FilterBadgesInCollectionPayload,
+  FilterBadgesInCollectionSuccessResponse,
   GetAdditionalCollectionDetailsPayload,
-  GetBadgeActivityPayload,
-  GetBadgeBalanceByAddressPayload,
+  GetBadgeActivitySuccessResponse,
+  GetBadgeBalanceByAddressSuccessResponse,
+  GetCollectionRequestBody,
   GetMetadataForCollectionPayload,
-  GetOwnersForBadgePayload,
+  GetOwnersForBadgeSuccessResponse,
+  iFilterBadgesInCollectionPayload,
   iFilterBadgesInCollectionSuccessResponse,
+  iGetBadgeActivityPayload,
   iGetBadgeActivitySuccessResponse,
+  iGetBadgeBalanceByAddressPayload,
   iGetBadgeBalanceByAddressSuccessResponse,
+  iGetOwnersForBadgePayload,
   iGetOwnersForBadgeSuccessResponse,
+  iRefreshMetadataPayload,
   iRefreshMetadataSuccessResponse,
   iRefreshStatusSuccessResponse,
   MetadataFetchOptions,
-  RefreshMetadataPayload,
-  FilterBadgesInCollectionSuccessResponse,
-  GetBadgeActivitySuccessResponse,
-  GetBadgeBalanceByAddressSuccessResponse,
-  GetOwnersForBadgeSuccessResponse,
   RefreshMetadataSuccessResponse,
-  RefreshStatusSuccessResponse,
-  GetCollectionRequestBody
+  RefreshStatusSuccessResponse
 } from './requests/collections.js';
 import { BitBadgesApiRoutes } from './requests/routes.js';
-import { ClaimDetails } from '@/core/approvals.js';
 
 const NEW_COLLECTION_ID = 0n;
 
@@ -702,9 +702,9 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Gets collections from the API. Must pass in a valid API instance.
    */
-  static async GetCollections<T extends NumberType>(api: BaseBitBadgesApi<T>, body: GetCollectionsPayload) {
+  static async GetCollections<T extends NumberType>(api: BaseBitBadgesApi<T>, body: iGetCollectionsPayload) {
     try {
-      const validateRes: typia.IValidation<GetCollectionsPayload> = typia.validate<GetCollectionsPayload>(body ?? {});
+      const validateRes: typia.IValidation<iGetCollectionsPayload> = typia.validate<iGetCollectionsPayload>(body ?? {});
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
@@ -727,10 +727,10 @@ export class BitBadgesCollection<T extends NumberType>
     api: BaseBitBadgesApi<T>,
     collectionId: NumberType,
     address: string,
-    body?: GetBadgeBalanceByAddressPayload
+    body?: iGetBadgeBalanceByAddressPayload
   ): Promise<GetBadgeBalanceByAddressSuccessResponse<T>> {
     try {
-      const validateRes: typia.IValidation<GetBadgeBalanceByAddressPayload> = typia.validate<GetBadgeBalanceByAddressPayload>(body ?? {});
+      const validateRes: typia.IValidation<iGetBadgeBalanceByAddressPayload> = typia.validate<iGetBadgeBalanceByAddressPayload>(body ?? {});
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
@@ -1093,9 +1093,9 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Trigger a refresh for the collection via the API. Note there is a cooldown period for refreshing.
    */
-  static async RefreshMetadata<T extends NumberType>(api: BaseBitBadgesApi<T>, collectionId: T, body?: RefreshMetadataPayload) {
+  static async RefreshMetadata<T extends NumberType>(api: BaseBitBadgesApi<T>, collectionId: T, body?: iRefreshMetadataPayload) {
     try {
-      const validateRes: typia.IValidation<RefreshMetadataPayload> = typia.validate<RefreshMetadataPayload>(body ?? {});
+      const validateRes: typia.IValidation<iRefreshMetadataPayload> = typia.validate<iRefreshMetadataPayload>(body ?? {});
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
@@ -1127,10 +1127,10 @@ export class BitBadgesCollection<T extends NumberType>
     api: BaseBitBadgesApi<T>,
     collectionId: NumberType,
     badgeId: NumberType,
-    body: GetBadgeActivityPayload
+    body: iGetBadgeActivityPayload
   ) {
     try {
-      const validateRes: typia.IValidation<GetBadgeActivityPayload> = typia.validate<GetBadgeActivityPayload>(body ?? {});
+      const validateRes: typia.IValidation<iGetBadgeActivityPayload> = typia.validate<iGetBadgeActivityPayload>(body ?? {});
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
@@ -1152,7 +1152,7 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Get the badge activity for a specific badge ID. You have to handle the pagination yourself.
    */
-  async getBadgeActivity(api: BaseBitBadgesApi<T>, badgeId: T, body: GetBadgeActivityPayload) {
+  async getBadgeActivity(api: BaseBitBadgesApi<T>, badgeId: T, body: iGetBadgeActivityPayload) {
     return await BitBadgesCollection.GetBadgeActivity(api, this.collectionId, badgeId, body);
   }
 
@@ -1163,10 +1163,10 @@ export class BitBadgesCollection<T extends NumberType>
     api: BaseBitBadgesApi<T>,
     collectionId: NumberType,
     badgeId: NumberType,
-    body: GetOwnersForBadgePayload
+    body: iGetOwnersForBadgePayload
   ) {
     try {
-      const validateRes: typia.IValidation<GetOwnersForBadgePayload> = typia.validate<GetOwnersForBadgePayload>(body ?? {});
+      const validateRes: typia.IValidation<iGetOwnersForBadgePayload> = typia.validate<iGetOwnersForBadgePayload>(body ?? {});
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
@@ -1188,16 +1188,16 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Gets the owners for a specific badge. You have to handle the pagination yourself.
    */
-  async getOwnersForBadge(api: BaseBitBadgesApi<T>, badgeId: T, body: GetOwnersForBadgePayload) {
+  async getOwnersForBadge(api: BaseBitBadgesApi<T>, badgeId: T, body: iGetOwnersForBadgePayload) {
     return await BitBadgesCollection.GetOwnersForBadge(api, this.collectionId, badgeId, body);
   }
 
   /**
    * Execute a filter query for the collection. You have to handle the pagination yourself.
    */
-  static async FilterBadgesInCollection<T extends NumberType>(api: BaseBitBadgesApi<T>, collectionId: T, body: FilterBadgesInCollectionPayload) {
+  static async FilterBadgesInCollection<T extends NumberType>(api: BaseBitBadgesApi<T>, collectionId: T, body: iFilterBadgesInCollectionPayload) {
     try {
-      const validateRes: typia.IValidation<FilterBadgesInCollectionPayload> = typia.validate<FilterBadgesInCollectionPayload>(body ?? {});
+      const validateRes: typia.IValidation<iFilterBadgesInCollectionPayload> = typia.validate<iFilterBadgesInCollectionPayload>(body ?? {});
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
@@ -1216,7 +1216,7 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Execute a filter query for the collection. You have to handle the pagination yourself.
    */
-  async filterBadgesInCollection(api: BaseBitBadgesApi<T>, bodyOptions: Omit<FilterBadgesInCollectionPayload, 'collectionId'>) {
+  async filterBadgesInCollection(api: BaseBitBadgesApi<T>, bodyOptions: Omit<iFilterBadgesInCollectionPayload, 'collectionId'>) {
     return await BitBadgesCollection.FilterBadgesInCollection(api, this.collectionId, bodyOptions);
   }
 }
@@ -1511,7 +1511,7 @@ function updateCollectionWithResponse<T extends NumberType>(
 /**
  * @category API Requests / Responses
  */
-export interface GetCollectionsPayload {
+export interface iGetCollectionsPayload {
   collectionsToFetch: GetCollectionRequestBody[];
 }
 

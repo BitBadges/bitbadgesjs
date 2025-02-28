@@ -9,6 +9,8 @@ else
     # set package.json type to module
     sed -i 's/"sideEffects": false,/"sideEffects": false,\n  "type": "module",/' package.json
 
+    nvm use 18
+
     ts-node ./scripts/check_routes_consistency.ts ../../../bitbadges-indexer/src/indexer.ts  ./openapitypes/routes.yaml
     if [ $? -ne 0 ]; then
         echo "Route consistency check failed!"
@@ -31,4 +33,6 @@ else
     cd ./packages/bitbadgesjs-sdk
 
     git add .
+
+    nvm use 20
 fi

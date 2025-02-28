@@ -39,11 +39,9 @@ export class BitBadgesApiRoutes {
 
   static GetPluginErrorsRoute = () => `/api/v0/plugins/errors`;
 
-  static GetClaimsRoute = () => '/api/v0/claims/fetch';
+  static GetClaimsRoute = () => '/api/v1/claims/fetch';
+  static SearchClaimsRoute = () => '/api/v0/claims/search';
   static CRUDClaimsRoute = () => `/api/v0/claims`;
-
-  static AddReviewRoute = () => '/api/v0/reviews/add';
-  static DeleteReviewRoute = (reviewId: string) => `/api/v0/reviews/delete/${reviewId}`;
 
   static GetAddressListsRoute = () => '/api/v0/addressLists/fetch';
   static CRUDAddressListsRoute = () => '/api/v0/addressLists';
@@ -81,14 +79,16 @@ export class BitBadgesApiRoutes {
   static GenerateAppleWalletPassRoute = () => '/api/v0/siwbbRequest/appleWalletPass';
   static GenerateGoogleWalletPassRoute = () => '/api/v0/siwbbRequest/googleWalletPass';
 
-  static GetAttestationsRoute = () => '/api/v0/attestation/fetch';
-  static CRUDAttestationRoute = () => '/api/v0/attestation';
+  static GetAttestationsRoute = () => '/api/v0/attestations/fetch';
+  static CRUDAttestationRoute = () => '/api/v0/attestations';
 
-  static GetDeveloperAppsRoute = () => '/api/v0/developerApp/fetch';
-  static CRUDDeveloperAppRoute = () => '/api/v0/developerApp';
-  static GetSIWBBRequestsForDeveloperAppRoute = () => '/api/v0/developerApp/siwbbRequests';
+  static GetDeveloperAppsRoute = () => '/api/v0/developerApps/fetch';
+  static SearchDeveloperAppsRoute = () => '/api/v0/developerApps/search';
+  static CRUDDeveloperAppRoute = () => '/api/v0/developerApps';
+  static GetSIWBBRequestsForDeveloperAppRoute = () => '/api/v0/developerApps/siwbbRequests';
 
   static GetPluginRoute = () => '/api/v0/plugins/fetch';
+  static SearchPluginsRoute = () => '/api/v0/plugins/search';
   static CRUDPluginRoute = () => '/api/v0/plugins';
 
   static GetMapsRoute = () => '/api/v0/maps';
@@ -99,27 +99,31 @@ export class BitBadgesApiRoutes {
 
   static CreatePaymentIntentRoute = () => '/api/v0/stripe/createPaymentIntent';
 
-  static VerifyAttestationRoute = () => '/api/v0/attestation/verify';
+  static VerifyAttestationRoute = () => '/api/v0/attestations/verify';
 
   static GetCodesFromSeedHelperRoute = () => '/api/v0/codes';
 
-  static GetDynamicDataBinsRoute = () => '/api/v0/bins/fetch';
-  static CRUDDynamicDataRoute = () => '/api/v0/bins';
-  static GetDynamicDataActivityRoute = () => `/api/v0/bins/activity`;
+  static GetDynamicDataStoresRoute = () => '/api/v0/dynamicStores/fetch';
+  static SearchDynamicDataStoresRoute = () => '/api/v0/dynamicStores/search';
+  static CRUDDynamicDataStoreRoute = () => '/api/v0/dynamicStores';
+  static GetDynamicDataStoreActivityRoute = () => `/api/v0/dynamicStores/activity`;
 
-  static PerformBinActionSingleRoute = (actionName: string, binId: string, binSecret: string) =>
-    `/api/v0/bin-actions/${actionName}/${binId}/${binSecret}`;
-  static PerformBinActionBatchRoute = (binId: string, binSecret: string) => `/api/v0/bin-actions/batch/${binId}/${binSecret}`;
+  static PerformStoreActionSingleRoute = (actionName: string, dynamicDataId: string, dynamicDataSecret: string) =>
+    `/api/v0/storeActions/${actionName}/${dynamicDataId}/${dynamicDataSecret}`;
+  static PerformStoreActionBatchRoute = (dynamicDataId: string, dynamicDataSecret: string) =>
+    `/api/v0/storeActions/batch/${dynamicDataId}/${dynamicDataSecret}`;
 
-  static PerformBinActionSingleWithBodyAuthRoute = () => `/api/v0/bin-actions/single`;
-  static PerformBinActionBatchWithBodyAuthRoute = () => `/api/v0/bin-actions/batch`;
+  static PerformStoreActionSingleWithBodyAuthRoute = () => `/api/v0/storeActions/single`;
+  static PerformStoreActionBatchWithBodyAuthRoute = () => `/api/v0/storeActions/batch`;
 
-  static GetGroupsRoute = () => '/api/v0/groups/fetch';
-  static CRUDGroupsRoute = () => '/api/v0/groups';
-  static CalculatePointsRoute = () => '/api/v0/groups/points';
-  static GetPointsActivityRoute = () => '/api/v0/groups/points/activity';
+  static GetApplicationsRoute = () => '/api/v0/applications/fetch';
+  static SearchApplicationsRoute = () => '/api/v0/applications/search';
+  static CRUDApplicationsRoute = () => '/api/v0/applications';
+  static CalculatePointsRoute = () => '/api/v0/applications/points';
+  static GetPointsActivityRoute = () => '/api/v0/applications/points/activity';
 
   static GetUtilityListingsRoute = () => '/api/v0/utilityListings/fetch';
+  static SearchUtilityListingsRoute = () => '/api/v0/utilityListings/search';
   static CRUDUtilityListingsRoute = () => '/api/v0/utilityListings';
 
   static GetEmbeddedWalletRoute = () => '/api/v0/embeddedWallets';

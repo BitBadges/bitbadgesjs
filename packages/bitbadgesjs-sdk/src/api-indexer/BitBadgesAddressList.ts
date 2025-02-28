@@ -245,9 +245,9 @@ export class BitBadgesAddressList<T extends NumberType>
   /**
    * Gets address lists from the API.
    */
-  static async GetAddressLists<T extends NumberType>(api: BaseBitBadgesApi<T>, payload: GetAddressListsPayload) {
+  static async GetAddressLists<T extends NumberType>(api: BaseBitBadgesApi<T>, payload: iGetAddressListsPayload) {
     try {
-      const validateRes: typia.IValidation<GetAddressListsPayload> = typia.validate<GetAddressListsPayload>(payload ?? {});
+      const validateRes: typia.IValidation<iGetAddressListsPayload> = typia.validate<iGetAddressListsPayload>(payload ?? {});
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
@@ -268,9 +268,9 @@ export class BitBadgesAddressList<T extends NumberType>
    *
    * Behind the scenes, this is just an alias for UpdateAddressList.
    */
-  static async CreateAddressList<T extends NumberType>(api: BaseBitBadgesApi<T>, payload: CreateAddressListsPayload<T>) {
+  static async CreateAddressList<T extends NumberType>(api: BaseBitBadgesApi<T>, payload: iCreateAddressListsPayload<T>) {
     try {
-      const validateRes: typia.IValidation<CreateAddressListsPayload<T>> = typia.validate<CreateAddressListsPayload<T>>(payload ?? {});
+      const validateRes: typia.IValidation<iCreateAddressListsPayload<T>> = typia.validate<iCreateAddressListsPayload<T>>(payload ?? {});
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
@@ -289,9 +289,9 @@ export class BitBadgesAddressList<T extends NumberType>
   /**
    * Updates an off-chain address list. On-chain lists are updated through blockchain transactions.
    */
-  static async UpdateAddressList<T extends NumberType>(api: BaseBitBadgesApi<T>, payload: UpdateAddressListsPayload<T>) {
+  static async UpdateAddressList<T extends NumberType>(api: BaseBitBadgesApi<T>, payload: iUpdateAddressListsPayload<T>) {
     try {
-      const validateRes: typia.IValidation<UpdateAddressListsPayload<T>> = typia.validate<UpdateAddressListsPayload<T>>(payload ?? {});
+      const validateRes: typia.IValidation<iUpdateAddressListsPayload<T>> = typia.validate<iUpdateAddressListsPayload<T>>(payload ?? {});
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
@@ -310,9 +310,9 @@ export class BitBadgesAddressList<T extends NumberType>
   /**
    * Deletes an off-chain address list. On-chain lists are deleted through blockchain transactions.
    */
-  static async DeleteAddressList<T extends NumberType>(api: BaseBitBadgesApi<T>, payload: DeleteAddressListsPayload) {
+  static async DeleteAddressList<T extends NumberType>(api: BaseBitBadgesApi<T>, payload: iDeleteAddressListsPayload) {
     try {
-      const validateRes: typia.IValidation<DeleteAddressListsPayload> = typia.validate<DeleteAddressListsPayload>(payload ?? {});
+      const validateRes: typia.IValidation<iDeleteAddressListsPayload> = typia.validate<iDeleteAddressListsPayload>(payload ?? {});
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
@@ -389,7 +389,7 @@ const updateAddressListWithResponse = <T extends NumberType>(
 /**
  * @category API Requests / Responses
  */
-export interface GetAddressListsPayload {
+export interface iGetAddressListsPayload {
   /**
    * The lists and accompanyin details to fetch. Supports on-chain, off-chain, and reserved lists.
    */
@@ -454,7 +454,7 @@ export type iAddressListCreateObject<T extends NumberType> = iAddressList & {
 /**
  * @category API Requests / Responses
  */
-export interface UpdateAddressListsPayload<T extends NumberType> {
+export interface iUpdateAddressListsPayload<T extends NumberType> {
   addressLists: iAddressListCreateObject<T>[];
 }
 
@@ -470,7 +470,7 @@ export class UpdateAddressListsSuccessResponse extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export interface CreateAddressListsPayload<T extends NumberType> extends UpdateAddressListsPayload<T> {}
+export interface iCreateAddressListsPayload<T extends NumberType> extends iUpdateAddressListsPayload<T> {}
 
 /**
  * @category API Requests / Responses
@@ -485,12 +485,13 @@ export class CreateAddressListsSuccessResponse extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export interface DeleteAddressListsPayload {
+export interface iDeleteAddressListsPayload {
   /**
    * The list IDs to delete.
    */
   listIds: string[];
 }
+
 /**
  * @category API Requests / Responses
  */

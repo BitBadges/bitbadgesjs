@@ -3,6 +3,36 @@ import type { NumberType } from './string-numbers.js';
 import { BigIntify, Numberify, Stringify } from './string-numbers.js';
 
 /**
+ * @category API Requests / Responses
+ */
+export interface ParsedQs {
+  [key: string]: undefined | string | string[] | ParsedQs | ParsedQs[];
+}
+
+/**
+ * @category Utils
+ */
+export const parseArrayString = (str: undefined | string | string[] | ParsedQs | ParsedQs[]): undefined | string[] => {
+  if (str === undefined) {
+    return undefined;
+  }
+
+  if (typeof str === 'string') {
+    try {
+      return JSON.parse(str);
+    } catch {
+      return str.split(',');
+    }
+  }
+
+  if (Array.isArray(str)) {
+    return str.map((item) => item.toString());
+  }
+
+  return undefined;
+};
+
+/**
  * The CustomType interface is the base interface for all custom types in the SDK. It provides methods for comparing, converting, and cloning objects.
  *
  * @category Utils

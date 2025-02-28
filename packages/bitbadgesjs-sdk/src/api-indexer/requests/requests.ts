@@ -25,7 +25,6 @@ import {
   iApiKeyDoc,
   iClaimActivityDoc,
   iDynamicDataDoc,
-  iEvent,
   iGroupDoc,
   iGroupPage,
   iInheritMetadataFrom,
@@ -62,8 +61,15 @@ import {
 import type { iBadgeMetadataDetails, iCollectionMetadataDetails } from '@/api-indexer/metadata/badgeMetadata.js';
 import type { iMetadata } from '@/api-indexer/metadata/metadata.js';
 import { Metadata } from '@/api-indexer/metadata/metadata.js';
-import { BaseNumberTypeClass, ConvertOptions, CustomTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
-import type { NumberType } from '@/common/string-numbers.js';
+import {
+  BaseNumberTypeClass,
+  ConvertOptions,
+  CustomTypeClass,
+  ParsedQs,
+  convertClassPropertiesAndMaintainNumberTypes,
+  parseArrayString
+} from '@/common/base.js';
+import { type NumberType } from '@/common/string-numbers.js';
 import type { SupportedChain } from '@/common/types.js';
 import { ClaimDetails, iChallengeDetails, iChallengeInfoDetails } from '@/core/approvals.js';
 import type { iBatchBadgeDetails } from '@/core/batch-utils.js';
@@ -154,9 +160,29 @@ export interface CosmosEvent {
 /**
  * @category API Requests / Responses
  */
-export interface GetStatusPayload {
-  /** If true, we will check if the indexer is out of sync with the blockchain. */
+export interface iGetStatusPayload {
+  /**
+   * If true, we will check if the indexer is out of sync with the blockchain.
+   */
   withOutOfSyncCheck?: boolean;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetStatusPayload extends CustomTypeClass<GetStatusPayload> implements iGetStatusPayload {
+  withOutOfSyncCheck?: boolean;
+
+  constructor(payload: iGetStatusPayload) {
+    super();
+    this.withOutOfSyncCheck = payload.withOutOfSyncCheck;
+  }
+
+  static FromQuery(query: ParsedQs): GetStatusPayload {
+    return new GetStatusPayload({
+      withOutOfSyncCheck: query.withOutOfSyncCheck === 'true'
+    });
+  }
 }
 
 /**
@@ -200,7 +226,7 @@ export class GetStatusSuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export interface GetSearchPayload {
+export interface iGetSearchPayload<T extends NumberType> {
   /** If true, we will skip all collection queries. */
   noCollections?: boolean;
   /** If true, we will skip all account queries. */
@@ -215,11 +241,58 @@ export interface GetSearchPayload {
   noGroups?: boolean;
   /** If true, we will skip all claim queries. */
   noClaims?: boolean;
-  /** If true, we will limit collection results to a single collection. */
-  specificCollectionId?: NumberType;
+  /** If true, we will limit collection-based results to a single collection. */
+  specificCollectionId?: T;
 }
 
 /**
+ * @category API Requests / Responses
+ */
+export class GetSearchPayload<T extends NumberType> extends BaseNumberTypeClass<GetSearchPayload<T>> implements iGetSearchPayload<T> {
+  noCollections?: boolean;
+  noAccounts?: boolean;
+  noAddressLists?: boolean;
+  noBadges?: boolean;
+  noMaps?: boolean;
+  noGroups?: boolean;
+  noClaims?: boolean;
+  specificCollectionId?: T;
+
+  constructor(payload: iGetSearchPayload<T>) {
+    super();
+    this.noCollections = payload.noCollections;
+    this.noAccounts = payload.noAccounts;
+    this.noAddressLists = payload.noAddressLists;
+    this.noBadges = payload.noBadges;
+    this.noMaps = payload.noMaps;
+    this.noGroups = payload.noGroups;
+    this.noClaims = payload.noClaims;
+    this.specificCollectionId = payload.specificCollectionId;
+  }
+
+  static FromQuery(query: ParsedQs): GetSearchPayload<NumberType> {
+    return new GetSearchPayload<NumberType>({
+      noCollections: query.noCollections === 'true',
+      noAccounts: query.noAccounts === 'true',
+      noAddressLists: query.noAddressLists === 'true',
+      noBadges: query.noBadges === 'true',
+      noMaps: query.noMaps === 'true',
+      noGroups: query.noGroups === 'true',
+      noClaims: query.noClaims === 'true',
+      specificCollectionId: query.specificCollectionId?.toString()
+    });
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetSearchPayload<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetSearchPayload<U>;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['specificCollectionId'];
+  }
+}
+
+/*
  *
  * @category API Requests / Responses
  */
@@ -282,9 +355,7 @@ export class GetSearchSuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export interface GetClaimsPayload {
-  /** The claim IDs to fetch. */
-  claimIds?: string[];
+export interface iSearchClaimsPayload {
   /** If true, we will return all claims that were created by the signed in address. */
   standaloneClaimsOnly?: boolean;
   /** Bookmark to start from. Obtained from previours request. Leave blank to start from the beginning. Only applicable when no additional criteria is specified. */
@@ -293,6 +364,17 @@ export interface GetClaimsPayload {
   fetchPrivateParams?: boolean;
   /** If provided, we will only return claims with names that match the search value. Only applicable for fetching your own claims. */
   searchValue?: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetClaimsPayload {
+  /** The claim IDs to fetch. */
+  claimIds: string[];
+
+  /** Fetch private parameters for the claim. Only applicable if you are the creator / manager of the claim. */
+  fetchPrivateParams?: boolean;
 
   /** Which private state instance IDs to fetch. claimId and instanceId are required and must match a claimId in claimIds and the claim must have the corresponding instanceId. */
   privateStatesToFetch?: {
@@ -301,6 +383,23 @@ export interface GetClaimsPayload {
   }[];
 
   fetchAllClaimedUsers?: boolean;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetClaimsPayloadV1 {
+  /** The claims to fetch. */
+  claimsToFetch: {
+    /** The claim ID to fetch. */
+    claimId: string;
+    /** The private state instance IDs to fetch. */
+    privateStatesToFetch?: string[];
+    /** Fetch all claimed users for the claim. */
+    fetchAllClaimedUsers?: boolean;
+    /** Fetch private parameters for the claim. Only applicable if you are the creator / manager of the claim. */
+    fetchPrivateParams?: boolean;
+  }[];
 }
 
 /**
@@ -337,7 +436,21 @@ export class GetClaimsSuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export interface CompleteClaimPayload {
+export interface iSearchClaimsSuccessResponse<T extends NumberType> extends iGetClaimsSuccessResponse<T> {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class SearchClaimsSuccessResponse<T extends NumberType> extends GetClaimsSuccessResponse<T> implements iSearchClaimsSuccessResponse<T> {
+  constructor(data: iSearchClaimsSuccessResponse<T>) {
+    super(data);
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iCompleteClaimPayload {
   /** Needs to be provided so we check that no plugins or claims have been updated since the claim was fetched. */
   _expectedVersion: number;
 
@@ -345,7 +458,7 @@ export interface CompleteClaimPayload {
   _specificInstanceIds?: string[];
 
   /** The claim body for each unique plugin. */
-  [customPluginId: string]: ClaimIntegrationPluginCustomBodyType<ClaimIntegrationPluginType> | any | undefined;
+  [customInstanceId: string]: ClaimIntegrationPluginCustomBodyType<ClaimIntegrationPluginType> | any | undefined;
 }
 
 /**
@@ -371,7 +484,12 @@ export class CompleteClaimSuccessResponse extends CustomTypeClass<CompleteClaimS
 /**
  * @category API Requests / Responses
  */
-export interface GetClaimAttemptStatusPayload {}
+export interface iGetClaimAttemptStatusPayload {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetClaimAttemptStatusPayload extends EmptyResponseClass {}
 
 /**
  * @category API Requests / Responses
@@ -408,13 +526,37 @@ export class GetClaimAttemptStatusSuccessResponse
 /**
  * @category API Requests / Responses
  */
-export interface GetClaimAttemptsPayload {
+export interface iGetClaimAttemptsPayload {
   /** The bookmark to start from. */
   bookmark?: string;
   /** Whether to include errors or not. */
   includeErrors?: boolean;
   /** The specific address to fetch claims for. If blank, we fetch most recent claims. */
   address?: NativeAddress;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetClaimAttemptsPayload extends CustomTypeClass<GetClaimAttemptsPayload> implements iGetClaimAttemptsPayload {
+  bookmark?: string;
+  includeErrors?: boolean;
+  address?: NativeAddress;
+
+  constructor(payload: iGetClaimAttemptsPayload) {
+    super();
+    this.bookmark = payload.bookmark;
+    this.includeErrors = payload.includeErrors;
+    this.address = payload.address;
+  }
+
+  static FromQuery(query: ParsedQs): GetClaimAttemptsPayload {
+    return new GetClaimAttemptsPayload({
+      bookmark: query.bookmark?.toString(),
+      includeErrors: query.includeErrors === 'true',
+      address: query.address?.toString()
+    });
+  }
 }
 
 /**
@@ -436,6 +578,50 @@ export interface iGetClaimAttemptsSuccessResponse<T extends NumberType> {
 }
 
 /**
+ * @category API Requests / Responses
+ */
+export interface iClaimAttempt<T extends NumberType> {
+  success: boolean;
+  attemptedAt: UNIXMilliTimestamp<T>;
+  claimId: string;
+  bitbadgesAddress: NativeAddress;
+  claimAttemptId: string;
+  claimNumber: number;
+  error?: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class ClaimAttempt<T extends NumberType> extends BaseNumberTypeClass<ClaimAttempt<T>> implements iClaimAttempt<T> {
+  success: boolean;
+  attemptedAt: UNIXMilliTimestamp<T>;
+  claimId: string;
+  bitbadgesAddress: NativeAddress;
+  claimAttemptId: string;
+  claimNumber: number;
+  error?: string;
+
+  constructor(data: iClaimAttempt<T>) {
+    super();
+    this.success = data.success;
+    this.attemptedAt = data.attemptedAt;
+    this.claimId = data.claimId;
+    this.bitbadgesAddress = data.bitbadgesAddress;
+    this.claimAttemptId = data.claimAttemptId;
+    this.claimNumber = data.claimNumber;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['attemptedAt'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ClaimAttempt<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ClaimAttempt<U>;
+  }
+}
+
+/**
  * @inheritDoc iGetClaimAttemptsSuccessResponse
  * @category API Requests / Responses
  */
@@ -443,30 +629,26 @@ export class GetClaimAttemptsSuccessResponse<T extends NumberType>
   extends BaseNumberTypeClass<GetClaimAttemptsSuccessResponse<T>>
   implements iGetClaimAttemptsSuccessResponse<T>
 {
-  docs: {
-    success: boolean;
-    attemptedAt: UNIXMilliTimestamp<T>;
-    claimId: string;
-    bitbadgesAddress: NativeAddress;
-    claimAttemptId: string;
-    claimNumber: number;
-    error?: string;
-  }[];
+  docs: ClaimAttempt<T>[];
   bookmark?: string;
   total?: number;
 
   constructor(data: iGetClaimAttemptsSuccessResponse<T>) {
     super();
-    this.docs = data.docs;
+    this.docs = data.docs.map((doc) => new ClaimAttempt(doc));
     this.bookmark = data.bookmark;
     this.total = data.total;
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetClaimAttemptsSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetClaimAttemptsSuccessResponse<U>;
   }
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface SimulateClaimPayload {
+export interface iSimulateClaimPayload {
   /** Will fail if the claim version is not the expected version.*/
   _expectedVersion: number;
 
@@ -474,7 +656,7 @@ export interface SimulateClaimPayload {
   _specificInstanceIds?: string[];
 
   /** The claim body for each unique plugin. */
-  [customPluginId: string]: ClaimIntegrationPluginCustomBodyType<ClaimIntegrationPluginType> | any | undefined;
+  [customInstanceId: string]: ClaimIntegrationPluginCustomBodyType<ClaimIntegrationPluginType> | any | undefined;
 }
 
 /**
@@ -501,7 +683,12 @@ export class SimulateClaimSuccessResponse extends CustomTypeClass<SimulateClaimS
 /**
  * @category API Requests / Responses
  */
-export interface GetReservedClaimCodesPayload {}
+export interface iGetReservedClaimCodesPayload {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetReservedClaimCodesPayload extends EmptyResponseClass {}
 
 /**
  * @category API Requests / Responses
@@ -533,7 +720,7 @@ export class GetReservedClaimCodesSuccessResponse
 /**
  * @category API Requests / Responses
  */
-export interface UpdateAccountInfoPayload {
+export interface iUpdateAccountInfoPayload {
   /**
    * The Discord username.
    */
@@ -687,7 +874,7 @@ export class UpdateAccountInfoSuccessResponse extends CustomTypeClass<UpdateAcco
 /**
  * @category API Requests / Responses
  */
-export interface AddBalancesToOffChainStoragePayload {
+export interface iAddBalancesToOffChainStoragePayload {
   /**
    * A map of BitBadges addresses or list IDs -> Balance<NumberType>[].
    * This will be set first. If undefined, we leave the existing balances map as is.
@@ -765,7 +952,7 @@ export class AddBalancesToOffChainStorageSuccessResponse
 /**
  * @category API Requests / Responses
  */
-export interface AddToIpfsPayload {
+export interface iAddToIpfsPayload {
   /**
    * The stuff to add to IPFS
    */
@@ -807,7 +994,7 @@ export class AddToIpfsSuccessResponse extends CustomTypeClass<AddToIpfsSuccessRe
 /**
  * @category API Requests / Responses
  */
-export interface AddApprovalDetailsToOffChainStoragePayload {
+export interface iAddApprovalDetailsToOffChainStoragePayload {
   approvalDetails: {
     /**
      * The name of the approval.
@@ -877,11 +1064,10 @@ export class AddApprovalDetailsToOffChainStorageSuccessResponse
     });
   }
 }
-
 /**
  * @category API Requests / Responses
  */
-export interface GetSignInChallengePayload {
+export interface iGetSignInChallengePayload {
   /**
    * The blockchain to be signed in with.
    */
@@ -891,6 +1077,27 @@ export interface GetSignInChallengePayload {
    * The user's blockchain address. This can be their native address.
    */
   address: NativeAddress;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetSignInChallengePayload extends CustomTypeClass<GetSignInChallengePayload> implements iGetSignInChallengePayload {
+  chain: SupportedChain;
+  address: NativeAddress;
+
+  constructor(payload: iGetSignInChallengePayload) {
+    super();
+    this.chain = payload.chain;
+    this.address = payload.address;
+  }
+
+  static FromQuery(query: ParsedQs): GetSignInChallengePayload {
+    return new GetSignInChallengePayload({
+      chain: (query.chain?.toString() ?? '') as SupportedChain,
+      address: (query.address?.toString() ?? '') as NativeAddress
+    });
+  }
 }
 
 /**
@@ -940,7 +1147,7 @@ export class GetSignInChallengeSuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export interface VerifySignInPayload {
+export interface iVerifySignInPayload {
   /**
    * The original message that was signed.
    */
@@ -985,7 +1192,7 @@ export class VerifySignInSuccessResponse extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export interface CheckSignInStatusPayload {
+export interface iCheckSignInStatusPayload {
   validateAccessTokens?: boolean;
 }
 
@@ -1231,7 +1438,7 @@ export class CheckSignInStatusSuccessResponse extends CustomTypeClass<CheckSignI
 /**
  * @category API Requests / Responses
  */
-export interface SignOutPayload {
+export interface iSignOutPayload {
   /** Sign out of Blockin, and thus the entire API. */
   signOutBlockin: boolean;
   /** Sign out of Discord. */
@@ -1282,11 +1489,10 @@ export interface iSignOutSuccessResponse {}
  * @category API Requests / Responses
  */
 export class SignOutSuccessResponse extends EmptyResponseClass {}
-
 /**
  * @category API Requests / Responses
  */
-export interface GetBrowsePayload {
+export interface iGetBrowsePayload {
   type:
     | 'collections'
     | 'badges'
@@ -1299,24 +1505,55 @@ export interface GetBrowsePayload {
     | 'groups'
     | 'claimActivity'
     | 'pointsActivity';
-  filters?: {
-    category?: string;
-    sortBy?: string;
-    timeFrame?: string;
-    searchTerm?: string;
-    locale?: string;
-  };
+  category?: string;
+  sortBy?: string;
+  timeFrame?: string;
+  searchTerm?: string;
+  locale?: string;
 }
 
 /**
  * @category API Requests / Responses
  */
-interface ClaimAttempt {
-  success: boolean;
-  attemptedAt: number;
-  claimId: string;
-  bitbadgesAddress: string;
-  claimAttemptId: string;
+export class GetBrowsePayload extends CustomTypeClass<GetBrowsePayload> implements iGetBrowsePayload {
+  type:
+    | 'collections'
+    | 'badges'
+    | 'addressLists'
+    | 'maps'
+    | 'attestations'
+    | 'claims'
+    | 'activity'
+    | 'utilityListings'
+    | 'groups'
+    | 'claimActivity'
+    | 'pointsActivity';
+  category?: string;
+  sortBy?: string;
+  timeFrame?: string;
+  searchTerm?: string;
+  locale?: string;
+
+  constructor(payload: iGetBrowsePayload) {
+    super();
+    this.type = payload.type;
+    this.category = payload.category;
+    this.sortBy = payload.sortBy;
+    this.timeFrame = payload.timeFrame;
+    this.searchTerm = payload.searchTerm;
+    this.locale = payload.locale;
+  }
+
+  static FromQuery(query: ParsedQs): GetBrowsePayload {
+    return new GetBrowsePayload({
+      type: query.type?.toString() as any,
+      category: query.category?.toString(),
+      sortBy: query.sortBy?.toString(),
+      timeFrame: query.timeFrame?.toString(),
+      searchTerm: query.searchTerm?.toString(),
+      locale: query.locale?.toString()
+    });
+  }
 }
 
 /**
@@ -1445,7 +1682,7 @@ export class GetBrowseSuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export type BroadcastTxPayload = BroadcastPostBody;
+export type iBroadcastTxPayload = BroadcastPostBody;
 
 /**
  * @category API Requests / Responses
@@ -1502,7 +1739,7 @@ export class BroadcastTxSuccessResponse extends CustomTypeClass<BroadcastTxSucce
 /**
  * @category API Requests / Responses
  */
-export type SimulateTxPayload = BroadcastPostBody;
+export type iSimulateTxPayload = BroadcastPostBody;
 
 /**
  * @category API Requests / Responses
@@ -1544,7 +1781,7 @@ export class SimulateTxSuccessResponse extends CustomTypeClass<SimulateTxSuccess
 /**
  * @category API Requests / Responses
  */
-export interface FetchMetadataDirectlyPayload {
+export interface iFetchMetadataDirectlyPayload {
   uris: string[];
 }
 
@@ -1578,7 +1815,12 @@ export class FetchMetadataDirectlySuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export interface GetTokensFromFaucetPayload {}
+export interface iGetTokensFromFaucetPayload {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetTokensFromFaucetPayload extends EmptyResponseClass {}
 
 /**
  * @category API Requests / Responses
@@ -1593,7 +1835,7 @@ export class GetTokensFromFaucetSuccessResponse extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export interface SendClaimAlertsPayload {
+export interface iSendClaimAlertsPayload {
   /** The claim alerts to send to users. */
   claimAlerts: {
     /** The collection ID to associate with the claim alert. If specified, you (the sender) must be the manager of the collection. This is typically used
@@ -1637,7 +1879,7 @@ export interface CosmosAccountResponse {
  *
  * @category API Requests / Responses
  */
-export interface GenericVerifyAssetsPayload {
+export interface iGenericVerifyAssetsPayload {
   /**
    * The address to check
    */
@@ -1685,7 +1927,7 @@ export class GenericVerifyAssetsSuccessResponse
  *
  * @category API Requests / Responses
  */
-export interface GenericBlockinVerifyPayload extends VerifySignInPayload {
+export interface iGenericBlockinVerifyPayload extends iVerifySignInPayload {
   /**
    * Additional options for verifying the challenge.
    */
@@ -1712,7 +1954,7 @@ export class GenericBlockinVerifySuccessResponse extends VerifySignInSuccessResp
 /**
  * @category API Requests / Responses
  */
-export interface CreateAttestationPayload
+export interface iCreateAttestationPayload
   extends Pick<
     AttestationDoc<NumberType>,
     | 'originalProvider'
@@ -1762,12 +2004,33 @@ export class CreateAttestationSuccessResponse extends CustomTypeClass<CreateAtte
 /**
  * @category API Requests / Responses
  */
-export interface GetAttestationsPayload {
+export interface iGetAttestationsPayload {
   /** The attestation key received from the original attestation creation.  */
   inviteCode?: string;
 
   /** The attestation ID. You can use this if you are the creator or a holder of the attestation. */
   attestationIds?: string[];
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetAttestationsPayload extends CustomTypeClass<GetAttestationsPayload> implements iGetAttestationsPayload {
+  inviteCode?: string;
+  attestationIds?: string[];
+
+  constructor(payload: iGetAttestationsPayload) {
+    super();
+    this.inviteCode = payload.inviteCode;
+    this.attestationIds = payload.attestationIds;
+  }
+
+  static FromQuery(query: ParsedQs): GetAttestationsPayload {
+    return new GetAttestationsPayload({
+      inviteCode: query.inviteCode?.toString(),
+      attestationIds: parseArrayString(query.attestationIds)
+    });
+  }
 }
 
 /**
@@ -1799,7 +2062,7 @@ export class GetAttestationsSuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export interface DeleteAttestationPayload {
+export interface iDeleteAttestationPayload {
   /** The attestation ID. This is the ID that is given to the user to query the attestation. Anyone with the ID can query it, so keep this safe and secure. */
   attestationId: string;
 }
@@ -1817,7 +2080,7 @@ export class DeleteAttestationSuccessResponse extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export interface UpdateAttestationPayload {
+export interface iUpdateAttestationPayload {
   /** The attestation ID. If you are the owner, you can simply use the attestationId to update the attestation. One of inviteCode or attestationId must be provided. */
   attestationId?: string;
 
@@ -1917,7 +2180,7 @@ export class UpdateAttestationSuccessResponse extends CustomTypeClass<UpdateAtte
 /**
  * @category API Requests / Responses
  */
-export interface VerifyAttestationPayload {
+export interface iVerifyAttestationPayload {
   attestation: AttestationDoc<NumberType>;
 }
 
@@ -1943,7 +2206,7 @@ export class VerifyAttestationSuccessResponse extends CustomTypeClass<VerifyAtte
 /**
  * @category API Requests / Responses
  */
-export interface CreateSIWBBRequestPayload {
+export interface iCreateSIWBBRequestPayload {
   /** The response type for the SIWBB request. */
   response_type: string;
   /** The scopes to request. */
@@ -1986,7 +2249,7 @@ export interface iCreateSIWBBRequestSuccessResponse {
 /**
  * @category API Requests / Responses
  */
-export interface RotateSIWBBRequestPayload {
+export interface iRotateSIWBBRequestPayload {
   /** The code of the SIWBB request to rotate. */
   code: string;
 }
@@ -2032,13 +2295,37 @@ export class CreateSIWBBRequestSuccessResponse
 /**
  * @category API Requests / Responses
  */
-export interface GetSIWBBRequestsForDeveloperAppPayload {
+export interface iGetSIWBBRequestsForDeveloperAppPayload {
   /** The bookmark for pagination. */
   bookmark?: string;
   /** The client ID to fetch for */
   clientId: string;
 
   //TODO: Add client secret to allow non-creator to fetch it?
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetSIWBBRequestsForDeveloperAppPayload
+  extends CustomTypeClass<GetSIWBBRequestsForDeveloperAppPayload>
+  implements iGetSIWBBRequestsForDeveloperAppPayload
+{
+  bookmark?: string;
+  clientId: string;
+
+  constructor(payload: iGetSIWBBRequestsForDeveloperAppPayload) {
+    super();
+    this.bookmark = payload.bookmark;
+    this.clientId = payload.clientId;
+  }
+
+  static FromQuery(query: ParsedQs): GetSIWBBRequestsForDeveloperAppPayload {
+    return new GetSIWBBRequestsForDeveloperAppPayload({
+      bookmark: query.bookmark?.toString(),
+      clientId: query.clientId?.toString() ?? ''
+    });
+  }
 }
 
 /**
@@ -2077,7 +2364,7 @@ export class GetSIWBBRequestsForDeveloperAppSuccessResponse<T extends NumberType
 /**
  * @category API Requests / Responses
  */
-export interface ExchangeSIWBBAuthorizationCodePayload {
+export interface iExchangeSIWBBAuthorizationCodePayload {
   /** The SIWBB request. */
   code?: string;
   /** We attempt to verify the current status with each request. You can provide additional options for verification here. */
@@ -2185,7 +2472,7 @@ export interface iExchangeSIWBBAuthorizationCodeSuccessResponse<T extends Number
 /**
  * @category API Requests / Responses
  */
-export interface DeleteSIWBBRequestPayload {
+export interface iDeleteSIWBBRequestPayload {
   code: string;
 }
 
@@ -2202,7 +2489,7 @@ export class DeleteSIWBBRequestSuccessResponse extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export interface GenerateAppleWalletPassPayload {
+export interface iGenerateAppleWalletPassPayload {
   /** The authentication code. */
   code: string;
 }
@@ -2233,7 +2520,7 @@ export class GenerateAppleWalletPassSuccessResponse
 /**
  * @category API Requests / Responses
  */
-export interface GenerateGoogleWalletPayload {
+export interface iGenerateGoogleWalletPayload {
   /** The authentication code. */
   code: string;
 }
@@ -2261,11 +2548,43 @@ export class GenerateGoogleWalletSuccessResponse
 /**
  * @category API Requests / Responses
  */
-export interface GetClaimAlertsForCollectionPayload {
+export interface iGetClaimAlertsForCollectionPayload<T extends NumberType> {
   /** The collection ID to get claim alerts for. */
-  collectionId: NumberType;
+  collectionId: T;
   /** The pagination bookmark obtained from the previous request. Leave blank for the first request. */
   bookmark: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetClaimAlertsForCollectionPayload<T extends NumberType>
+  extends BaseNumberTypeClass<GetClaimAlertsForCollectionPayload<T>>
+  implements iGetClaimAlertsForCollectionPayload<T>
+{
+  collectionId: T;
+  bookmark: string;
+
+  constructor(payload: iGetClaimAlertsForCollectionPayload<T>) {
+    super();
+    this.collectionId = payload.collectionId;
+    this.bookmark = payload.bookmark;
+  }
+
+  static FromQuery(query: ParsedQs): GetClaimAlertsForCollectionPayload<NumberType> {
+    return new GetClaimAlertsForCollectionPayload({
+      collectionId: query.collectionId?.toString() ?? '',
+      bookmark: query.bookmark?.toString() ?? ''
+    });
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetClaimAlertsForCollectionPayload<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetClaimAlertsForCollectionPayload<U>;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['collectionId'];
+  }
 }
 
 /**
@@ -2297,37 +2616,7 @@ export class GetClaimAlertsForCollectionSuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export interface GetExternalCallPayload {
-  uri: string;
-  key: string;
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iGetExternalCallSuccessResponse {
-  key: string;
-  timestamp: number;
-}
-
-/**
- * @category API Requests / Responses
- */
-export class GetExternalCallSuccessResponse extends CustomTypeClass<GetExternalCallSuccessResponse> implements iGetExternalCallSuccessResponse {
-  key: string;
-  timestamp: number;
-
-  constructor(data: iGetExternalCallSuccessResponse) {
-    super();
-    this.key = data.key;
-    this.timestamp = data.timestamp;
-  }
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface CreateDeveloperAppPayload {
+export interface iCreateDeveloperAppPayload {
   /** Metadata for the secret for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
   name: string;
   /** Description of the app. */
@@ -2368,7 +2657,12 @@ export class CreateDeveloperAppSuccessResponse
 /**
  * @category API Requests / Responses
  */
-export interface GetActiveAuthorizationsPayload {}
+export interface iGetActiveAuthorizationsPayload {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetActiveAuthorizationsPayload extends EmptyResponseClass {}
 
 /**
  * @category API Requests / Responses
@@ -2403,11 +2697,17 @@ export class GetActiveAuthorizationsSuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export interface GetDeveloperAppPayload {
-  /** If you want to get a specific app, specify the client ID here (will not return the client secret). */
-  clientId?: string;
+export interface iSearchDeveloperAppsPayload {
   /** Bookmark for pagination of the apps. Not compatible with clientId. */
   bookmark?: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetDeveloperAppsPayload {
+  /** If you want to get a specific app, specify the client ID here (will not return the client secret). */
+  clientId: string;
 }
 
 /**
@@ -2438,7 +2738,24 @@ export class GetDeveloperAppSuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export interface DeleteDeveloperAppPayload {
+export interface iSearchDeveloperAppsSuccessResponse<T extends NumberType> extends iGetDeveloperAppSuccessResponse<T> {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class SearchDeveloperAppsSuccessResponse<T extends NumberType>
+  extends GetDeveloperAppSuccessResponse<T>
+  implements iSearchDeveloperAppsSuccessResponse<T>
+{
+  constructor(data: iSearchDeveloperAppsSuccessResponse<T>) {
+    super(data);
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iDeleteDeveloperAppPayload {
   /** The client ID of the app to delete. */
   clientId: string;
   /**
@@ -2461,7 +2778,7 @@ export class DeleteDeveloperAppSuccessResponse extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export interface UpdateDeveloperAppPayload {
+export interface iUpdateDeveloperAppPayload {
   /** Client ID for the app to update. */
   clientId: string;
   /** Metadata for for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
@@ -2580,7 +2897,7 @@ export interface PluginVersionConfigPayload {
 /**
  * @category API Requests / Responses
  */
-export interface CreatePluginPayload {
+export interface iCreatePluginPayload {
   /** The unique plugin ID */
   pluginId: string;
 
@@ -2632,7 +2949,7 @@ export class CreatePluginSuccessResponse extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export interface UpdatePluginPayload {
+export interface iUpdatePluginPayload {
   /** The unique plugin ID */
   pluginId: string;
 
@@ -2698,7 +3015,7 @@ export class UpdatePluginSuccessResponse extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export interface DeletePluginPayload {
+export interface iDeletePluginPayload {
   /** The unique plugin ID */
   pluginId: string;
 }
@@ -2716,13 +3033,9 @@ export class DeletePluginSuccessResponse extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export interface GetPluginPayload {
+export interface iSearchPluginsPayload {
   /** If true, we will fetch all plugins for the authenticated user (with plugin secrets). */
   createdPluginsOnly?: boolean;
-  /** If true, we will fetch only the specific plugin with the plugin ID (no secrets). */
-  pluginIds?: string[];
-  /** Invite code to fetch the plugin with. */
-  inviteCode?: string;
   /** Bookmark for pagination of the plugins. */
   bookmark?: string;
   /** Search value */
@@ -2734,7 +3047,17 @@ export interface GetPluginPayload {
 /**
  * @category API Requests / Responses
  */
-export interface CreatePaymentIntentPayload {
+export interface iGetPluginsPayload {
+  /** If true, we will fetch only the specific plugin with the plugin ID (no secrets). */
+  pluginIds: string[];
+  /** Invite code to fetch the plugin with.  */
+  inviteCode?: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iCreatePaymentIntentPayload {
   /** The amount in USD to pay */
   amount: number;
   /** Purpose of the payment */
@@ -2798,7 +3121,21 @@ export class GetPluginSuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export interface DeleteClaimPayload {
+export interface iSearchPluginsSuccessResponse<T extends NumberType> extends iGetPluginSuccessResponse<T> {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class SearchPluginsSuccessResponse<T extends NumberType> extends GetPluginSuccessResponse<T> implements iSearchPluginsSuccessResponse<T> {
+  constructor(data: iSearchPluginsSuccessResponse<T>) {
+    super(data);
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iDeleteClaimPayload {
   /** The claim ID to delete. */
   claimIds: string[];
 }
@@ -2816,7 +3153,7 @@ export class DeleteClaimSuccessResponse extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export interface UpdateClaimPayload {
+export interface iUpdateClaimPayload {
   claims: Omit<iClaimDetails<NumberType>, '_includesPrivateParams' | 'seedCode' | 'version'>[];
 }
 
@@ -2858,7 +3195,7 @@ export type UpdateClaimRequest<T extends NumberType> = Omit<iClaimDetails<T>, 's
 /**
  * @category API Requests / Responses
  */
-export interface CreateClaimPayload {
+export interface iCreateClaimPayload {
   claims: CreateClaimRequest<NumberType>[];
 
   testClaims?: boolean;
@@ -2880,7 +3217,7 @@ export class CreateClaimSuccessResponse extends EmptyResponseClass {}
  *
  * @category API Requests / Responses
  */
-export interface OauthRevokePayload {
+export interface iOauthRevokePayload {
   token: string;
 }
 
@@ -2897,7 +3234,12 @@ export class OauthRevokeSuccessResponse extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export interface GetGatedContentForClaimPayload {}
+export interface iGetGatedContentForClaimPayload {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetGatedContentForClaimPayload extends EmptyResponseClass {}
 
 /**
  * @category API Requests / Responses
@@ -2924,7 +3266,7 @@ export class GetGatedContentForClaimSuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export interface CreateDynamicDataBinPayload {
+export interface iCreateDynamicDataStorePayload {
   /** The handler ID for the dynamic data bin */
   handlerId: string;
   /** The label of the dynamic data bin */
@@ -2934,53 +3276,67 @@ export interface CreateDynamicDataBinPayload {
 /**
  * @category API Requests / Responses
  */
-export interface iCreateDynamicDataBinSuccessResponse<Q extends DynamicDataHandlerType, T extends NumberType> {
+export interface iCreateDynamicDataStoreSuccessResponse<Q extends DynamicDataHandlerType, T extends NumberType> {
   doc: iDynamicDataDoc<Q, T>;
 }
 
 /**
  * @category API Requests / Responses
  */
-export class CreateDynamicDataBinSuccessResponse<Q extends DynamicDataHandlerType, T extends NumberType>
-  extends BaseNumberTypeClass<CreateDynamicDataBinSuccessResponse<Q, T>>
-  implements iCreateDynamicDataBinSuccessResponse<Q, T>
+export class CreateDynamicDataStoreSuccessResponse<Q extends DynamicDataHandlerType, T extends NumberType>
+  extends BaseNumberTypeClass<CreateDynamicDataStoreSuccessResponse<Q, T>>
+  implements iCreateDynamicDataStoreSuccessResponse<Q, T>
 {
   doc: DynamicDataDoc<Q, T>;
 
-  constructor(data: iCreateDynamicDataBinSuccessResponse<Q, T>) {
+  constructor(data: iCreateDynamicDataStoreSuccessResponse<Q, T>) {
     super();
     this.doc = new DynamicDataDoc<Q, T>(data.doc);
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CreateDynamicDataBinSuccessResponse<Q, U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CreateDynamicDataBinSuccessResponse<Q, U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CreateDynamicDataStoreSuccessResponse<Q, U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CreateDynamicDataStoreSuccessResponse<Q, U>;
   }
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface GetDynamicDataBinsPayload {
+export interface iSearchDynamicDataStoresPayload {
+  /** The pagination bookmark to start from */
+  bookmark?: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetDynamicDataStoresPayload {
   /** The IDs to fetch. If not provided, all dynamic data stores will be fetched for the current signed in address without any data populated. */
-  dynamicDataId?: string;
+  dynamicDataId: string;
   /** The data secret to fetch. Only needed if you are not signed in as creator. */
   dataSecret?: string;
-  /** The pagination bookmark to start from. Only applicable if a single dynamic data ID is provided. */
+  /** Fetch all data for the dynamic data store. Not compatible with lookupKeys and will override bookmark. */
+  fetchAllData?: boolean;
+  /** The pagination bookmark to start from for fetching the data in this store. Not compatible with lookupKeys. */
   bookmark?: string;
-  /** The options for the lookup. Only usable if you specify a dynamic data ID. */
-  options?: {
-    /** The type of lookup to perform (if applicable). Otherwise, leave blank. */
-    lookupType?: 'id' | 'username';
-    /** The item to search for. */
+  /** Keys to lookup by. Not compatible with bookmark. */
+  lookupKeys?: {
     key: string;
-  };
+    /** The type of lookup to perform (if applicable). Otherwise, leave blank. Only applicable if dynamic data ID is provided. */
+    lookupType?: 'id' | 'username';
+  }[];
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface iGetDynamicDataBinsSuccessResponse<Q extends DynamicDataHandlerType, T extends NumberType> {
+export interface iGetDynamicDataStoresSuccessResponse<Q extends DynamicDataHandlerType, T extends NumberType> {
   docs: (iDynamicDataDoc<Q, T> | undefined)[];
+  lookupValues: {
+    key: string;
+    lookupType?: 'id' | 'username';
+    inStore: boolean;
+  }[];
   pagination: {
     bookmark: string;
     hasMore: boolean;
@@ -2990,31 +3346,51 @@ export interface iGetDynamicDataBinsSuccessResponse<Q extends DynamicDataHandler
 /**
  * @category API Requests / Responses
  */
-export class GetDynamicDataBinsSuccessResponse<Q extends DynamicDataHandlerType, T extends NumberType>
-  extends BaseNumberTypeClass<GetDynamicDataBinsSuccessResponse<Q, T>>
-  implements iGetDynamicDataBinsSuccessResponse<Q, T>
+export class GetDynamicDataStoresSuccessResponse<Q extends DynamicDataHandlerType, T extends NumberType>
+  extends BaseNumberTypeClass<GetDynamicDataStoresSuccessResponse<Q, T>>
+  implements iGetDynamicDataStoresSuccessResponse<Q, T>
 {
   docs: (DynamicDataDoc<Q, T> | undefined)[];
+  lookupValues: { key: string; lookupType?: 'id' | 'username'; inStore: boolean }[];
   pagination: {
     bookmark: string;
     hasMore: boolean;
   };
 
-  constructor(data: iGetDynamicDataBinsSuccessResponse<Q, T>) {
+  constructor(data: iGetDynamicDataStoresSuccessResponse<Q, T>) {
     super();
     this.docs = data.docs.map((doc) => (doc ? new DynamicDataDoc<Q, T>(doc) : undefined));
+    this.lookupValues = data.lookupValues;
     this.pagination = data.pagination;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetDynamicDataBinsSuccessResponse<Q, U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetDynamicDataBinsSuccessResponse<Q, U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetDynamicDataStoresSuccessResponse<Q, U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetDynamicDataStoresSuccessResponse<Q, U>;
   }
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface UpdateDynamicDataBinPayload {
+export interface iSearchDynamicDataStoresSuccessResponse<Q extends DynamicDataHandlerType, T extends NumberType>
+  extends iGetDynamicDataStoresSuccessResponse<Q, T> {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class SearchDynamicDataStoresSuccessResponse<Q extends DynamicDataHandlerType, T extends NumberType>
+  extends GetDynamicDataStoresSuccessResponse<Q, T>
+  implements iSearchDynamicDataStoresSuccessResponse<Q, T>
+{
+  constructor(data: iSearchDynamicDataStoresSuccessResponse<Q, T>) {
+    super(data);
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iUpdateDynamicDataStorePayload {
   /** The dynamic data ID to update */
   dynamicDataId: string;
   /** Whether to rotate the data secret */
@@ -3026,33 +3402,33 @@ export interface UpdateDynamicDataBinPayload {
 /**
  * @category API Requests / Responses
  */
-export interface iUpdateDynamicDataBinSuccessResponse<Q extends DynamicDataHandlerType, T extends NumberType> {
+export interface iUpdateDynamicDataStoreSuccessResponse<Q extends DynamicDataHandlerType, T extends NumberType> {
   doc: iDynamicDataDoc<Q, T>;
 }
 
 /**
  * @category API Requests / Responses
  */
-export class UpdateDynamicDataBinSuccessResponse<Q extends DynamicDataHandlerType, T extends NumberType>
-  extends BaseNumberTypeClass<UpdateDynamicDataBinSuccessResponse<Q, T>>
-  implements iUpdateDynamicDataBinSuccessResponse<Q, T>
+export class UpdateDynamicDataStoreSuccessResponse<Q extends DynamicDataHandlerType, T extends NumberType>
+  extends BaseNumberTypeClass<UpdateDynamicDataStoreSuccessResponse<Q, T>>
+  implements iUpdateDynamicDataStoreSuccessResponse<Q, T>
 {
   doc: DynamicDataDoc<Q, T>;
 
-  constructor(data: iUpdateDynamicDataBinSuccessResponse<Q, T>) {
+  constructor(data: iUpdateDynamicDataStoreSuccessResponse<Q, T>) {
     super();
     this.doc = new DynamicDataDoc<Q, T>(data.doc);
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UpdateDynamicDataBinSuccessResponse<Q, U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UpdateDynamicDataBinSuccessResponse<Q, U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UpdateDynamicDataStoreSuccessResponse<Q, U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UpdateDynamicDataStoreSuccessResponse<Q, U>;
   }
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface DeleteDynamicDataBinPayload {
+export interface iDeleteDynamicDataStorePayload {
   /** The dynamic data ID to delete */
   dynamicDataId: string;
 }
@@ -3060,20 +3436,20 @@ export interface DeleteDynamicDataBinPayload {
 /**
  * @category API Requests / Responses
  */
-export interface iDeleteDynamicDataBinSuccessResponse {
+export interface iDeleteDynamicDataStoreSuccessResponse {
   message: string;
 }
 
 /**
  * @category API Requests / Responses
  */
-export class DeleteDynamicDataBinSuccessResponse
-  extends CustomTypeClass<DeleteDynamicDataBinSuccessResponse>
-  implements iDeleteDynamicDataBinSuccessResponse
+export class DeleteDynamicDataStoreSuccessResponse
+  extends CustomTypeClass<DeleteDynamicDataStoreSuccessResponse>
+  implements iDeleteDynamicDataStoreSuccessResponse
 {
   message: string;
 
-  constructor(data: iDeleteDynamicDataBinSuccessResponse) {
+  constructor(data: iDeleteDynamicDataStoreSuccessResponse) {
     super();
     this.message = data.message;
   }
@@ -3082,7 +3458,7 @@ export class DeleteDynamicDataBinSuccessResponse
 /**
  * @category API Requests / Responses
  */
-export interface PerformBinActionSingleWithBodyAuthPayload {
+export interface iPerformStoreActionSingleWithBodyAuthPayload {
   /** The dynamic data ID */
   dynamicDataId: string;
   /** The data secret */
@@ -3090,23 +3466,23 @@ export interface PerformBinActionSingleWithBodyAuthPayload {
   /** The name of the action to perform */
   actionName: string;
   /** The payload for this specific action */
-  payload: PerformBinActionPayload;
+  payload: iPerformStoreActionPayload;
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface iPerformBinActionSingleWithBodyAuthSuccessResponse {}
+export interface iPerformStoreActionSingleWithBodyAuthSuccessResponse {}
 
 /**
  * @category API Requests / Responses
  */
-export class PerformBinActionSingleWithBodyAuthSuccessResponse extends EmptyResponseClass {}
+export class PerformStoreActionSingleWithBodyAuthSuccessResponse extends EmptyResponseClass {}
 
 /**
  * @category API Requests / Responses
  */
-export interface PerformBinActionBatchWithBodyAuthPayload {
+export interface iPerformStoreActionBatchWithBodyAuthPayload {
   /** The dynamic data ID */
   dynamicDataId: string;
   /** The data secret */
@@ -3116,24 +3492,24 @@ export interface PerformBinActionBatchWithBodyAuthPayload {
     /** The name of the action to perform */
     actionName: string;
     /** The payload for this specific action */
-    payload: PerformBinActionPayload;
+    payload: iPerformStoreActionPayload;
   }[];
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface iPerformBinActionBatchWithBodyAuthSuccessResponse {}
+export interface iPerformStoreActionBatchWithBodyAuthSuccessResponse {}
 
 /**
  * @category API Requests / Responses
  */
-export class PerformBinActionBatchWithBodyAuthSuccessResponse extends EmptyResponseClass {}
+export class PerformStoreActionBatchWithBodyAuthSuccessResponse extends EmptyResponseClass {}
 
 /**
  * @category API Requests / Responses
  */
-export interface PerformBinActionPayload {
+export interface iPerformStoreActionPayload {
   /** Any custom payload data needed for the action */
   [key: string]: any;
 }
@@ -3141,7 +3517,7 @@ export interface PerformBinActionPayload {
 /**
  * @category API Requests / Responses
  */
-export interface PerformBinActionBodyAuthPayload {
+export interface iPerformStoreActionBodyAuthPayload {
   /** The data secret to perform the action with */
   dataSecret: string;
 }
@@ -3149,17 +3525,17 @@ export interface PerformBinActionBodyAuthPayload {
 /**
  * @category API Requests / Responses
  */
-export interface iPerformBinActionSuccessResponse {}
+export interface iPerformStoreActionSuccessResponse {}
 
 /**
  * @category API Requests / Responses
  */
-export class PerformBinActionSuccessResponse extends EmptyResponseClass {}
+export class PerformStoreActionSuccessResponse extends EmptyResponseClass {}
 
 /**
  * @category API Requests / Responses
  */
-export interface BatchBinActionPayload {
+export interface iBatchStoreActionPayload {
   /** Array of actions to perform */
   actions: {
     /** The name of the action to perform */
@@ -3172,12 +3548,12 @@ export interface BatchBinActionPayload {
 /**
  * @category API Requests / Responses
  */
-export interface iBatchBinActionSuccessResponse {}
+export interface iBatchStoreActionSuccessResponse {}
 
 /**
  * @category API Requests / Responses
  */
-export class BatchBinActionSuccessResponse extends EmptyResponseClass {}
+export class BatchStoreActionSuccessResponse extends EmptyResponseClass {}
 
 // You might also want to add a type for individual actions in the batch
 /**
@@ -3187,19 +3563,43 @@ export interface BinAction {
   /** The name of the action to perform */
   actionName: string;
   /** The payload for this specific action */
-  payload: PerformBinActionPayload;
+  payload: iPerformStoreActionPayload;
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface GetDynamicDataActivityPayload {
+export interface iGetDynamicDataActivityPayload {
   /** The dynamic data ID to fetch activity for */
   dynamicDataId: string;
   /** The pagination bookmark to start from */
   bookmark?: string;
   /** The data secret to fetch activity for */
   dataSecret: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetDynamicDataActivityPayload extends CustomTypeClass<GetDynamicDataActivityPayload> implements iGetDynamicDataActivityPayload {
+  dynamicDataId: string;
+  bookmark?: string;
+  dataSecret: string;
+
+  constructor(payload: iGetDynamicDataActivityPayload) {
+    super();
+    this.dynamicDataId = payload.dynamicDataId;
+    this.bookmark = payload.bookmark;
+    this.dataSecret = payload.dataSecret;
+  }
+
+  static FromQuery(query: ParsedQs): GetDynamicDataActivityPayload {
+    return new GetDynamicDataActivityPayload({
+      dynamicDataId: query.dynamicDataId?.toString() ?? '',
+      bookmark: query.bookmark?.toString(),
+      dataSecret: query.dataSecret?.toString() ?? ''
+    });
+  }
 }
 
 /**
@@ -3266,9 +3666,27 @@ export class GetDynamicDataActivitySuccessResponse
 /**
  * @category API Requests / Responses
  */
-export interface GetApiKeysPayload {
+export interface iGetApiKeysPayload {
   /** The pagination bookmark to start from */
   bookmark?: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetApiKeysPayload extends CustomTypeClass<GetApiKeysPayload> implements iGetApiKeysPayload {
+  bookmark?: string;
+
+  constructor(payload: iGetApiKeysPayload) {
+    super();
+    this.bookmark = payload.bookmark;
+  }
+
+  static FromQuery(query: ParsedQs): GetApiKeysPayload {
+    return new GetApiKeysPayload({
+      bookmark: query.bookmark?.toString()
+    });
+  }
 }
 
 /**
@@ -3302,7 +3720,7 @@ export class GetApiKeysSuccessResponse extends CustomTypeClass<GetApiKeysSuccess
 /**
  * @category API Requests / Responses
  */
-export interface CreateApiKeyPayload {
+export interface iCreateApiKeyPayload {
   /** The label for the API key */
   label: string;
   /** The intended use for the API key */
@@ -3330,7 +3748,7 @@ export class CreateApiKeySuccessResponse extends CustomTypeClass<CreateApiKeySuc
 /**
  * @category API Requests / Responses
  */
-export interface RotateApiKeyPayload {
+export interface iRotateApiKeyPayload {
   /** The doc ID to rotate */
   docId: string;
 }
@@ -3357,7 +3775,7 @@ export class RotateApiKeySuccessResponse extends CustomTypeClass<RotateApiKeySuc
 /**
  * @category API Requests / Responses
  */
-export interface DeleteApiKeyPayload {
+export interface iDeleteApiKeyPayload {
   /** The API key to delete */
   key?: string;
   /** The doc ID to delete */
@@ -3377,18 +3795,23 @@ export class DeleteApiKeySuccessResponse extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export interface GetGroupsPayload {
-  /** The pagination bookmark to start from */
+export interface iSearchApplicationsPayload {
+  /** The search value to search for */
   bookmark?: string;
-
-  /** The specific IDs to fetch */
-  groupIds?: string[];
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface iGetGroupsSuccessResponse<T extends NumberType> {
+export interface iGetApplicationsPayload {
+  /** The specific IDs to fetch */
+  groupIds: string[];
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetApplicationsSuccessResponse<T extends NumberType> {
   docs: (iGroupDoc<T> | undefined)[];
   pagination: {
     bookmark: string;
@@ -3399,9 +3822,9 @@ export interface iGetGroupsSuccessResponse<T extends NumberType> {
 /**
  * @category API Requests / Responses
  */
-export class GetGroupsSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetGroupsSuccessResponse<T>>
-  implements iGetGroupsSuccessResponse<T>
+export class GetApplicationsSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetApplicationsSuccessResponse<T>>
+  implements iGetApplicationsSuccessResponse<T>
 {
   docs: (GroupDoc<T> | undefined)[];
   pagination: {
@@ -3409,21 +3832,38 @@ export class GetGroupsSuccessResponse<T extends NumberType>
     hasMore: boolean;
   };
 
-  constructor(data: iGetGroupsSuccessResponse<T>) {
+  constructor(data: iGetApplicationsSuccessResponse<T>) {
     super();
     this.docs = data.docs.map((doc) => (doc ? new GroupDoc<T>(doc) : undefined));
     this.pagination = data.pagination;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetGroupsSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetGroupsSuccessResponse<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetApplicationsSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetApplicationsSuccessResponse<U>;
   }
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface CreateGroupPayload {
+export interface iSearchApplicationsSuccessResponse<T extends NumberType> extends iGetApplicationsSuccessResponse<T> {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class SearchApplicationsSuccessResponse<T extends NumberType>
+  extends GetApplicationsSuccessResponse<T>
+  implements iSearchApplicationsSuccessResponse<T>
+{
+  constructor(data: iSearchApplicationsSuccessResponse<T>) {
+    super(data);
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iCreateApplicationPayload {
   /** The overall metadata for the group */
   metadata: iMetadata<NumberType>;
 
@@ -3434,33 +3874,33 @@ export interface CreateGroupPayload {
 /**
  * @category API Requests / Responses
  */
-export interface iCreateGroupSuccessResponse<T extends NumberType> {
+export interface iCreateApplicationSuccessResponse<T extends NumberType> {
   doc: iGroupDoc<T>;
 }
 
 /**
  * @category API Requests / Responses
  */
-export class CreateGroupSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<CreateGroupSuccessResponse<T>>
-  implements iCreateGroupSuccessResponse<T>
+export class CreateApplicationSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<CreateApplicationSuccessResponse<T>>
+  implements iCreateApplicationSuccessResponse<T>
 {
   doc: GroupDoc<T>;
 
-  constructor(data: iCreateGroupSuccessResponse<T>) {
+  constructor(data: iCreateApplicationSuccessResponse<T>) {
     super();
     this.doc = new GroupDoc<T>(data.doc);
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CreateGroupSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CreateGroupSuccessResponse<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CreateApplicationSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CreateApplicationSuccessResponse<U>;
   }
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface UpdateGroupPayload {
+export interface iUpdateApplicationPayload {
   /** The group ID to update */
   groupId: string;
 
@@ -3474,33 +3914,33 @@ export interface UpdateGroupPayload {
 /**
  * @category API Requests / Responses
  */
-export interface iUpdateGroupSuccessResponse<T extends NumberType> {
+export interface iUpdateApplicationSuccessResponse<T extends NumberType> {
   doc: iGroupDoc<T>;
 }
 
 /**
  * @category API Requests / Responses
  */
-export class UpdateGroupSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<UpdateGroupSuccessResponse<T>>
-  implements iUpdateGroupSuccessResponse<T>
+export class UpdateApplicationSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<UpdateApplicationSuccessResponse<T>>
+  implements iUpdateApplicationSuccessResponse<T>
 {
   doc: GroupDoc<T>;
 
-  constructor(data: iUpdateGroupSuccessResponse<T>) {
+  constructor(data: iUpdateApplicationSuccessResponse<T>) {
     super();
     this.doc = new GroupDoc<T>(data.doc);
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UpdateGroupSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UpdateGroupSuccessResponse<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UpdateApplicationSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UpdateApplicationSuccessResponse<U>;
   }
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface DeleteGroupPayload {
+export interface iDeleteApplicationPayload {
   /** The group ID to delete */
   groupId: string;
 }
@@ -3508,17 +3948,17 @@ export interface DeleteGroupPayload {
 /**
  * @category API Requests / Responses
  */
-export interface iDeleteGroupSuccessResponse {}
+export interface iDeleteApplicationSuccessResponse {}
 
 /**
  * @category API Requests / Responses
  */
-export class DeleteGroupSuccessResponse extends EmptyResponseClass {}
+export class DeleteApplicationSuccessResponse extends EmptyResponseClass {}
 
 /**
  * @category API Requests / Responses
  */
-export interface CalculatePointsPayload {
+export interface iCalculatePointsPayload {
   /** The group ID to calculate points for */
   groupId: string;
   /** The page ID to calculate points for */
@@ -3571,7 +4011,7 @@ export class CalculatePointsSuccessResponse extends CustomTypeClass<CalculatePoi
 /**
  * @category API Requests / Responses
  */
-export interface GetPointsActivityPayload {
+export interface iGetPointsActivityPayload {
   /** The group ID to get points activity for */
   groupId: string;
   /** The page ID to get points activity for */
@@ -3580,6 +4020,33 @@ export interface GetPointsActivityPayload {
   bookmark?: string;
   /** The specific address to get points activity for */
   address?: NativeAddress;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetPointsActivityPayload extends CustomTypeClass<GetPointsActivityPayload> implements iGetPointsActivityPayload {
+  groupId: string;
+  pageId: string;
+  bookmark?: string;
+  address?: NativeAddress;
+
+  constructor(payload: iGetPointsActivityPayload) {
+    super();
+    this.groupId = payload.groupId;
+    this.pageId = payload.pageId;
+    this.bookmark = payload.bookmark;
+    this.address = payload.address;
+  }
+
+  static FromQuery(query: ParsedQs): GetPointsActivityPayload {
+    return new GetPointsActivityPayload({
+      groupId: query.groupId?.toString() ?? '',
+      pageId: query.pageId?.toString() ?? '',
+      bookmark: query.bookmark?.toString(),
+      address: (query.address?.toString() ?? '') as NativeAddress
+    });
+  }
 }
 
 /**
@@ -3620,11 +4087,17 @@ export class GetPointsActivitySuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export interface GetUtilityListingsPayload {
+export interface iSearchUtilityListingsPayload {
   /** The pagination bookmark to start from */
   bookmark?: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetUtilityListingsPayload {
   /** The specific IDs to fetch */
-  listingIds?: string[];
+  listingIds: string[];
 }
 
 /**
@@ -3665,7 +4138,24 @@ export class GetUtilityListingsSuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export interface CreateUtilityListingPayload<T extends NumberType> {
+export interface iSearchUtilityListingsSuccessResponse<T extends NumberType> extends iGetUtilityListingsSuccessResponse<T> {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class SearchUtilityListingsSuccessResponse<T extends NumberType>
+  extends GetUtilityListingsSuccessResponse<T>
+  implements iSearchUtilityListingsSuccessResponse<T>
+{
+  constructor(data: iSearchUtilityListingsSuccessResponse<T>) {
+    super(data);
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iCreateUtilityListingPayload<T extends NumberType> {
   /** The overall metadata for the listing */
   metadata: iMetadata<T>;
 
@@ -3729,7 +4219,7 @@ export class CreateUtilityListingSuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export interface UpdateUtilityListingPayload<T extends NumberType> {
+export interface iUpdateUtilityListingPayload<T extends NumberType> {
   /** The listing ID to update */
   listingId: string;
 
@@ -3793,7 +4283,7 @@ export class UpdateUtilityListingSuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export interface DeleteUtilityListingPayload {
+export interface iDeleteUtilityListingPayload {
   /** The listing ID to delete */
   listingId: string;
 }
@@ -3811,7 +4301,12 @@ export class DeleteUtilityListingSuccessResponse extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export interface GetPostActionStatusesPayload {}
+export interface iGetPostActionStatusesPayload {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetPostActionStatusesPayload extends EmptyResponseClass {}
 
 /**
  * @category API Requests / Responses
@@ -3854,11 +4349,32 @@ export class GetPostActionStatusesSuccessResponse
 /**
  * @category API Requests / Responses
  */
-export interface GetPluginErrorsPayload {
+export interface iGetPluginErrorsPayload {
   /** The plugin ID to get errors for */
   pluginId: string;
   /** The pagination bookmark to start from */
   bookmark?: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetPluginErrorsPayload extends CustomTypeClass<GetPluginErrorsPayload> implements iGetPluginErrorsPayload {
+  pluginId: string;
+  bookmark?: string;
+
+  constructor(payload: iGetPluginErrorsPayload) {
+    super();
+    this.pluginId = payload.pluginId;
+    this.bookmark = payload.bookmark;
+  }
+
+  static FromQuery(query: ParsedQs): GetPluginErrorsPayload {
+    return new GetPluginErrorsPayload({
+      pluginId: query.pluginId?.toString() ?? '',
+      bookmark: query.bookmark?.toString()
+    });
+  }
 }
 
 export interface PluginErrorDoc {
@@ -3898,7 +4414,12 @@ export class GetPluginErrorsSuccessResponse extends CustomTypeClass<GetPluginErr
 /**
  * @category API Requests / Responses
  */
-export interface GetOrCreateEmbeddedWalletPayload {}
+export interface iGetOrCreateEmbeddedWalletPayload {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetOrCreateEmbeddedWalletPayload extends EmptyResponseClass {}
 
 /**
  * @category API Requests / Responses
@@ -3925,7 +4446,7 @@ export class GetOrCreateEmbeddedWalletSuccessResponse
 /**
  * @category API Requests / Responses
  */
-export interface ScheduleTokenRefreshPayload {
+export interface iScheduleTokenRefreshPayload {
   provider: string;
   claimId?: string;
   instanceId?: string;
@@ -3959,7 +4480,7 @@ export class ScheduleTokenRefreshSuccessResponse
 /**
  * @category API Requests / Responses
  */
-export interface SignWithEmbeddedWalletPayload {
+export interface iSignWithEmbeddedWalletPayload {
   message: string;
 }
 
@@ -3988,7 +4509,12 @@ export class SignWithEmbeddedWalletSuccessResponse
 /**
  * @category API Requests / Responses
  */
-export interface CheckClaimSuccessPayload {}
+export interface iCheckClaimSuccessPayload {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class CheckClaimSuccessPayload extends EmptyResponseClass {}
 
 /**
  * @category API Requests / Responses

@@ -3,15 +3,22 @@ import type { iAmountTrackerIdDetails, iUintRange } from '@/interfaces/badges/co
 import type { PaginationInfo } from '../base.js';
 import { EmptyResponseClass } from '../base.js';
 import { UintRangeArray } from '@/core/uintRanges.js';
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions, deepCopyPrimitives } from '@/common/base.js';
+import {
+  BaseNumberTypeClass,
+  convertClassPropertiesAndMaintainNumberTypes,
+  ConvertOptions,
+  CustomTypeClass,
+  deepCopyPrimitives
+} from '@/common/base.js';
 import { BalanceDocWithDetails, QueueDoc, RefreshDoc } from '../docs/docs.js';
 import { TransferActivityDoc } from '../docs/activity.js';
 import type { iBalanceDocWithDetails, iChallengeTrackerIdDetails, iQueueDoc, iRefreshDoc, iTransferActivityDoc } from '../docs/interfaces.js';
+import { ParsedQs } from '@/common/base.js';
 
 /**
  * @category API Requests / Responses
  */
-export interface FilterSuggestionsPayload {}
+export interface iFilterSuggestionsPayload {}
 
 /**
  * @category API Requests / Responses
@@ -43,7 +50,7 @@ export class FilterSuggestionsSuccessResponse
 /**
  * @category API Requests / Responses
  */
-export interface FilterBadgesInCollectionPayload {
+export interface iFilterBadgesInCollectionPayload {
   /** Limit to specific badge IDs. Leave undefined to not filter by badge ID. */
   badgeIds?: iUintRange<NumberType>[];
   /** Limit to specific lists. Leave undefined to not filter by list. */
@@ -95,7 +102,7 @@ export class FilterBadgesInCollectionSuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export interface GetOwnersForBadgePayload {
+export interface iGetOwnersForBadgePayload {
   /**
    * The pagination bookmark for where to start the request. Bookmarks are obtained via the previous response. "" for first request.
    */
@@ -104,6 +111,27 @@ export interface GetOwnersForBadgePayload {
    * Sort by amount descending.
    */
   sortBy?: 'amount';
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetOwnersForBadgePayload extends CustomTypeClass<GetOwnersForBadgePayload> implements iGetOwnersForBadgePayload {
+  bookmark?: string;
+  sortBy?: 'amount';
+
+  constructor(payload: iGetOwnersForBadgePayload) {
+    super();
+    this.bookmark = payload.bookmark;
+    this.sortBy = payload.sortBy;
+  }
+
+  static FromQuery(query: ParsedQs): GetOwnersForBadgePayload {
+    return new GetOwnersForBadgePayload({
+      bookmark: query.bookmark?.toString(),
+      sortBy: query.sortBy === 'amount' ? 'amount' : undefined
+    });
+  }
 }
 
 /**
@@ -145,17 +173,37 @@ export class GetOwnersForBadgeSuccessResponse<T extends NumberType>
     );
   }
 }
-
 /**
  * @category API Requests / Responses
  */
-export interface GetBadgeBalanceByAddressPayload {
+export interface iGetBadgeBalanceByAddressPayload {
   fetchPrivateParams?: boolean;
 
   /**
    * If true, we will forcefully fetch the balance even if it is already cached. Only applicable to non-indexed / on-demand collections.
    */
   forceful?: boolean;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetBadgeBalanceByAddressPayload extends CustomTypeClass<GetBadgeBalanceByAddressPayload> implements iGetBadgeBalanceByAddressPayload {
+  fetchPrivateParams?: boolean;
+  forceful?: boolean;
+
+  constructor(payload: iGetBadgeBalanceByAddressPayload) {
+    super();
+    this.fetchPrivateParams = payload.fetchPrivateParams;
+    this.forceful = payload.forceful;
+  }
+
+  static FromQuery(query: ParsedQs): GetBadgeBalanceByAddressPayload {
+    return new GetBadgeBalanceByAddressPayload({
+      fetchPrivateParams: query.fetchPrivateParams === 'true',
+      forceful: query.forceful === 'true'
+    });
+  }
 }
 
 /**
@@ -168,7 +216,7 @@ export class GetBadgeBalanceByAddressSuccessResponse<T extends NumberType> exten
 /**
  * @category API Requests / Responses
  */
-export interface GetBadgeActivityPayload {
+export interface iGetBadgeActivityPayload {
   /**
    * An optional bookmark for pagination. Bookmarks are obtained via the previous response. "" for first request.
    */
@@ -177,6 +225,27 @@ export interface GetBadgeActivityPayload {
    * Specific address to filter by. If not present, all activity will be returned.
    */
   bitbadgesAddress?: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetBadgeActivityPayload extends CustomTypeClass<GetBadgeActivityPayload> implements iGetBadgeActivityPayload {
+  bookmark?: string;
+  bitbadgesAddress?: string;
+
+  constructor(payload: iGetBadgeActivityPayload) {
+    super();
+    this.bookmark = payload.bookmark;
+    this.bitbadgesAddress = payload.bitbadgesAddress;
+  }
+
+  static FromQuery(query: ParsedQs): GetBadgeActivityPayload {
+    return new GetBadgeActivityPayload({
+      bookmark: query.bookmark?.toString(),
+      bitbadgesAddress: query.bitbadgesAddress?.toString()
+    });
+  }
 }
 
 /**
@@ -334,7 +403,12 @@ export type GetCollectionRequestBody = GetAdditionalCollectionDetailsPayload & G
 /**
  * @category API Requests / Responses
  */
-export interface RefreshMetadataPayload {}
+export interface iRefreshMetadataPayload {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class RefreshMetadataPayload extends EmptyResponseClass {}
 
 /**
  * @category API Requests / Responses
@@ -348,7 +422,12 @@ export class RefreshMetadataSuccessResponse extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export interface RefreshStatusPayload {}
+export interface iRefreshStatusPayload {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class RefreshStatusPayload extends EmptyResponseClass {}
 
 /**
  * @category API Requests / Responses
