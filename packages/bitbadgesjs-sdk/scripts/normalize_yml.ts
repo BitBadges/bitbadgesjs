@@ -84,7 +84,7 @@ fs.readFile(filePath, 'utf8', (err, data) => {
     // We now have all schemas
     const schemaYamlContent = yaml.load(modifiedYamlContent) as any;
 
-    const routesYamlFile = './openapitypes/routes.yaml';
+    const routesYamlFile = './openapitypes-helpers/routes.yaml';
     const routesYamlContent = fs.readFileSync(routesYamlFile, 'utf8');
     const routesYamlData = yaml.load(routesYamlContent) as any;
 

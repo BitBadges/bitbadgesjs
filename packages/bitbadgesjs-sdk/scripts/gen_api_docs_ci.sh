@@ -11,7 +11,7 @@ else
 
     nvm use 18
 
-    ts-node ./scripts/check_routes_consistency.ts ../../../bitbadges-indexer/src/indexer.ts  ./openapitypes/routes.yaml
+    ts-node ./scripts/check_routes_consistency.ts ../../../bitbadges-indexer/src/indexer.ts  ./openapitypes-helpers/routes.yaml
     if [ $? -ne 0 ]; then
         echo "Route consistency check failed!"
         # exit 0

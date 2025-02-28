@@ -87,7 +87,7 @@ function arePathsEquivalent(path1: string, path2: string): boolean {
 
 // Main execution
 const indexerPath = process.argv[2] || './indexer.ts';
-const yamlPath = process.argv[3] || './routes.yaml';
+const yamlPath = process.argv[3] || '../openapitypes-helpers/routes.yaml';
 
 const expressRoutes = parseExpressRoutes(indexerPath);
 const openAPIRoutes = parseOpenAPIRoutes(yamlPath);
