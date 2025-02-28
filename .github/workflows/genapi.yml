@@ -1,0 +1,41 @@
+name: Generate API Documentation
+
+on:
+  push:
+    paths:
+      - 'packages/bitbadgesjs-sdk/**'
+
+jobs:
+  generate-docs:
+    runs-on: ubuntu-latest
+    environment: main
+
+    defaults:
+      run:
+        working-directory: packages/bitbadgesjs-sdk
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js with NVM
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: |
+          npm install
+          npm install -g @stoplight/cli
+
+      - name: Generate API documentation
+        run: |
+          chmod +x ./scripts/gen_api_docs_ci.sh
+          ./scripts/gen_api_docs_ci.sh
+
+      - name: Push to Stoplight
+        env:
+          STOPLIGHT_TOKEN: ${{ secrets.STOPLIGHT_TOKEN }}
+        run: |
+          stoplight push --token "$STOPLIGHT_TOKEN" --url https://api.stoplight.io --branch main ./openapitypes/combined.yaml
