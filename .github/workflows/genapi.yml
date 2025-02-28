@@ -38,4 +38,4 @@ jobs:
         env:
           STOPLIGHT_TOKEN: ${{ secrets.STOPLIGHT_TOKEN }}
         run: |
-          stoplight push --token "$STOPLIGHT_TOKEN" --url https://api.stoplight.io --branch main ./openapitypes/combined.yaml
+          npx @stoplight/cli@6 push --ci-token "$STOPLIGHT_TOKEN" --branch main ./openapitypes/combined.yaml
