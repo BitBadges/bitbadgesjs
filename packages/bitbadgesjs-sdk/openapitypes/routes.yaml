@@ -769,7 +769,7 @@ paths:
 
 
         Documentation References / Tutorials:
-        - **[Create, Genereate, and Sign Txs](https://docs.bitbadges.io/for-developers/create-and-broadcast-txs)**
+        - **[Create, Generate, and Sign Txs](https://docs.bitbadges.io/for-developers/create-and-broadcast-txs)**
       requestBody:
         required: true
         content:
@@ -811,7 +811,7 @@ paths:
         ```
 
         Documentation References / Tutorials:
-        - **[Create, Genereate, and Sign Txs](https://docs.bitbadges.io/for-developers/create-and-broadcast-txs)**
+        - **[Create, Generate, and Sign Txs](https://docs.bitbadges.io/for-developers/create-and-broadcast-txs)**
       tags:
         - Transactions
       requestBody:
