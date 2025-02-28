@@ -88,10 +88,10 @@ import {
   type iUpdateHistory,
   type iUsedLeafStatus,
   DynamicDataHandlerData,
-  iGroupDoc,
+  iApplicationDoc,
   iUtilityListingDoc,
   iEvent,
-  iGroupPage,
+  iApplicationPage,
   iPointsDoc,
   iTierWithOptionalWeight,
   iUtilityListingLink,
@@ -869,7 +869,7 @@ export class PointsDoc<T extends NumberType> extends BaseNumberTypeClass<PointsD
   address: BitBadgesAddress;
   points: T;
   lastCalculatedAt: UNIXMilliTimestamp<T>;
-  groupId: string;
+  applicationId: string;
   pageId: string;
 
   constructor(data: iPointsDoc<T>) {
@@ -879,7 +879,7 @@ export class PointsDoc<T extends NumberType> extends BaseNumberTypeClass<PointsD
     this.address = data.address;
     this.points = data.points;
     this.lastCalculatedAt = data.lastCalculatedAt;
-    this.groupId = data.groupId;
+    this.applicationId = data.applicationId;
     this.pageId = data.pageId;
   }
 
@@ -948,17 +948,17 @@ export class TierWithOptionalWeight<T extends NumberType>
 }
 
 /**
- * @inheritDoc iGroupPage
+ * @inheritDoc iApplicationPage
  * @category Indexer
  */
-export class GroupPage<T extends NumberType> extends BaseNumberTypeClass<GroupPage<T>> implements iGroupPage<T> {
+export class ApplicationPage<T extends NumberType> extends BaseNumberTypeClass<ApplicationPage<T>> implements iApplicationPage<T> {
   metadata: Metadata<T>;
   pageId: string;
   points?: TierWithOptionalWeight<T>[];
   tiers?: TierWithOptionalWeight<T>[];
   quests?: TierWithOptionalWeight<T>[];
 
-  constructor(data: iGroupPage<T>) {
+  constructor(data: iApplicationPage<T>) {
     super();
     this.metadata = new Metadata(data.metadata);
     this.pageId = data.pageId;
@@ -971,12 +971,12 @@ export class GroupPage<T extends NumberType> extends BaseNumberTypeClass<GroupPa
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GroupPage<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GroupPage<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ApplicationPage<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ApplicationPage<U>;
   }
 
-  clone(): GroupPage<T> {
-    return super.clone() as GroupPage<T>;
+  clone(): ApplicationPage<T> {
+    return super.clone() as ApplicationPage<T>;
   }
 }
 
@@ -1022,13 +1022,13 @@ export class ApiKeyDoc extends CustomTypeClass<ApiKeyDoc> implements iApiKeyDoc 
 }
 
 /**
- * @inheritDoc iGroupDoc
+ * @inheritDoc iApplicationDoc
  * @category Indexer
  */
-export class GroupDoc<T extends NumberType> extends BaseNumberTypeClass<GroupDoc<T>> implements iGroupDoc<T> {
+export class ApplicationDoc<T extends NumberType> extends BaseNumberTypeClass<ApplicationDoc<T>> implements iApplicationDoc<T> {
   _docId: string;
   _id?: string;
-  groupId: string;
+  applicationId: string;
   createdAt: UNIXMilliTimestamp<T>;
   lastUpdated?: UNIXMilliTimestamp<T>;
   createdBy: BitBadgesAddress;
@@ -1036,19 +1036,19 @@ export class GroupDoc<T extends NumberType> extends BaseNumberTypeClass<GroupDoc
   metadata: iMetadata<T>;
   type: string;
 
-  pages: GroupPage<T>[];
+  pages: ApplicationPage<T>[];
 
-  constructor(data: iGroupDoc<T>) {
+  constructor(data: iApplicationDoc<T>) {
     super();
     this._docId = data._docId;
     this._id = data._id;
-    this.groupId = data.groupId;
+    this.applicationId = data.applicationId;
     this.createdAt = data.createdAt;
     this.lastUpdated = data.lastUpdated;
     this.createdBy = data.createdBy;
     this.managedBy = data.managedBy;
     this.metadata = data.metadata;
-    this.pages = data.pages.map((page) => new GroupPage(page));
+    this.pages = data.pages.map((page) => new ApplicationPage(page));
     this.type = data.type;
   }
 
@@ -1056,8 +1056,8 @@ export class GroupDoc<T extends NumberType> extends BaseNumberTypeClass<GroupDoc
     return ['createdAt', 'lastUpdated'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GroupDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GroupDoc<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ApplicationDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ApplicationDoc<U>;
   }
 }
 
@@ -1093,7 +1093,7 @@ export class UtilityListingContent extends CustomTypeClass<UtilityListingContent
 export class UtilityListingLink<T extends NumberType> extends CustomTypeClass<UtilityListingLink<T>> implements iUtilityListingLink<T> {
   url: string;
   claimId?: string | undefined;
-  groupId?: string | undefined;
+  applicationId?: string | undefined;
   collectionId?: T | undefined;
   listId?: string | undefined;
   mapId?: string | undefined;
@@ -1103,7 +1103,7 @@ export class UtilityListingLink<T extends NumberType> extends CustomTypeClass<Ut
     super();
     this.url = data.url;
     this.claimId = data.claimId;
-    this.groupId = data.groupId;
+    this.applicationId = data.applicationId;
     this.collectionId = data.collectionId;
     this.listId = data.listId;
     this.mapId = data.mapId;
@@ -1181,7 +1181,7 @@ export class LinkedTo<T extends NumberType> extends CustomTypeClass<LinkedTo<T>>
  */
 export class InheritMetadataFrom<T extends NumberType> extends CustomTypeClass<InheritMetadataFrom<T>> implements iInheritMetadataFrom<T> {
   claimId?: string;
-  groupId?: string;
+  applicationId?: string;
   collectionId?: T;
   listId?: string;
   mapId?: string;
@@ -1190,7 +1190,7 @@ export class InheritMetadataFrom<T extends NumberType> extends CustomTypeClass<I
   constructor(data: iInheritMetadataFrom<T>) {
     super();
     this.claimId = data.claimId;
-    this.groupId = data.groupId;
+    this.applicationId = data.applicationId;
     this.collectionId = data.collectionId;
     this.listId = data.listId;
     this.mapId = data.mapId;
@@ -1617,9 +1617,9 @@ export class ComplianceDoc<T extends NumberType> extends BaseNumberTypeClass<Com
     nsfw: { bitbadgesAddress: BitBadgesAddress; reason: string }[];
     reported: { bitbadgesAddress: BitBadgesAddress; reason: string }[];
   };
-  groups: {
-    nsfw: { groupId: string; reason: string }[];
-    reported: { groupId: string; reason: string }[];
+  applications: {
+    nsfw: { applicationId: string; reason: string }[];
+    reported: { applicationId: string; reason: string }[];
   };
   claims?: {
     nsfw: { claimId: string; reason: string }[];
@@ -1638,7 +1638,7 @@ export class ComplianceDoc<T extends NumberType> extends BaseNumberTypeClass<Com
     };
     this.addressLists = data.addressLists;
     this.accounts = data.accounts;
-    this.groups = data.groups ?? { nsfw: [], reported: [] };
+    this.applications = data.applications ?? { nsfw: [], reported: [] };
     this._docId = data._docId;
     this._id = data._id;
     this.claims = data.claims ?? { nsfw: [], reported: [] };

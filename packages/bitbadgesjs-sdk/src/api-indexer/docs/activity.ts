@@ -168,7 +168,7 @@ export class PointsActivityDoc<T extends NumberType> extends ActivityDoc<T> impl
   bitbadgesAddress: BitBadgesAddress;
   oldPoints: T;
   newPoints: T;
-  groupId: string;
+  applicationId: string;
   pageId: string;
 
   constructor(data: iPointsActivityDoc<T>) {
@@ -176,7 +176,7 @@ export class PointsActivityDoc<T extends NumberType> extends ActivityDoc<T> impl
     this.bitbadgesAddress = data.bitbadgesAddress;
     this.oldPoints = data.oldPoints;
     this.newPoints = data.newPoints;
-    this.groupId = data.groupId;
+    this.applicationId = data.applicationId;
     this.pageId = data.pageId;
   }
 

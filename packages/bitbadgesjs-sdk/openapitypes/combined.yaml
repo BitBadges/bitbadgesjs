@@ -1976,7 +1976,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/iGetClaimsPayload'
+              $ref: '#/components/schemas/iGetClaimsPayloadV1'
   /claims:
     post:
       operationId: createClaim
@@ -2565,7 +2565,7 @@ paths:
   /storeActions/{actionName}/{dynamicDataId}/{dynamicDataSecret}:
     post:
       operationId: performStoreActionSingle
-      summary: Perform Single Bin Action (URL Auth)
+      summary: Perform Single Store Action (URL Auth)
       tags:
         - Dynamic Stores
       description: >-
@@ -2644,7 +2644,7 @@ paths:
   /storeActions/single:
     post:
       operationId: performStoreActionSingleWithBodyAuth
-      summary: Perform Single Bin Action (Body Auth)
+      summary: Perform Single Store Action (Body Auth)
       tags:
         - Dynamic Stores
       description: >-
@@ -2710,7 +2710,7 @@ paths:
   /storeActions/batch/{dynamicDataId}/{dynamicDataSecret}:
     post:
       operationId: performStoreActionBatch
-      summary: Perform Batch Bin Actions (URL Auth)
+      summary: Perform Batch Store Actions (URL Auth)
       tags:
         - Dynamic Stores
       description: >-
@@ -2783,7 +2783,7 @@ paths:
   /storeActions/batch:
     post:
       operationId: performStoreActionBatchWithBodyAuth
-      summary: Perform Batch Bin Actions (Body Auth)
+      summary: Perform Batch Store Actions (Body Auth)
       tags:
         - Dynamic Stores
       description: >-
@@ -3027,11 +3027,11 @@ paths:
   /applications/search:
     post:
       operationId: searchApplications
-      summary: Search Groups
+      summary: Search Applications
       tags:
-        - Groups
+        - Applications
       description: >-
-        Searches for groups based on the provided criteria.
+        Searches for applications based on the provided criteria.
 
 
         ```typescript
@@ -3087,11 +3087,11 @@ paths:
   /applications/fetch:
     post:
       operationId: getApplications
-      summary: Get Groups
+      summary: Get Applications
       tags:
-        - Groups
+        - Applications
       description: >-
-        Fetches groups based on the provided criteria.
+        Fetches applications based on the provided criteria.
 
 
         ```typescript
@@ -3147,11 +3147,11 @@ paths:
   /applications:
     post:
       operationId: createApplication
-      summary: Create Group
+      summary: Create Application
       tags:
-        - Groups
+        - Applications
       description: |-
-        Creates a group.
+        Creates an application.
 
         ```tsx
         await BitBadgesApi.createApplication(...);
@@ -3185,11 +3185,11 @@ paths:
               $ref: '#/components/schemas/iCreateApplicationPayload'
     put:
       operationId: updateApplication
-      summary: Update Group
+      summary: Update Application
       tags:
-        - Groups
+        - Applications
       description: |-
-        Updates a group.
+        Updates an application.
 
         ```tsx
         await BitBadgesApi.updateApplication(...);
@@ -3223,11 +3223,11 @@ paths:
               $ref: '#/components/schemas/iUpdateApplicationPayload'
     delete:
       operationId: deleteApplication
-      summary: Delete Group
+      summary: Delete Application
       tags:
-        - Groups
+        - Applications
       description: |-
-        Deletes a group.
+        Deletes an application.
 
         ```tsx
         await BitBadgesApi.deleteApplication(...);
@@ -3264,9 +3264,9 @@ paths:
       operationId: calculatePoints
       summary: Calculate Points
       tags:
-        - Groups
+        - Applications
       description: |-
-        Calculates points for a group and page.
+        Calculates points for an application and page.
 
         ```tsx
         await BitBadgesApi.calculatePoints(...);
@@ -3303,9 +3303,9 @@ paths:
       operationId: getPointsActivity
       summary: Get Points Activity
       tags:
-        - Groups
+        - Applications
       description: |-
-        Fetches points activity for a group.
+        Fetches points activity for an application.
 
         ```tsx
         await BitBadgesApi.getPointsActivity(...);
@@ -4725,8 +4725,8 @@ components:
         newPoints:
           description: The amount of points after the activity
           $ref: '#/components/schemas/NumberType'
-        groupId:
-          description: The group ID of the points activity
+        applicationId:
+          description: The application ID of the points activity
           type: string
         pageId:
           description: The page ID of the points activity
@@ -4738,7 +4738,7 @@ components:
         - bitbadgesAddress
         - oldPoints
         - newPoints
-        - groupId
+        - applicationId
         - pageId
       additionalProperties: false
       description: ''
@@ -5666,8 +5666,8 @@ components:
             The timestamp of when the points were last calculated (milliseconds
             since epoch)
           $ref: '#/components/schemas/UNIXMilliTimestamp'
-        groupId:
-          description: The group ID
+        applicationId:
+          description: The application ID
           type: string
         pageId:
           description: The page ID
@@ -5677,7 +5677,7 @@ components:
         - address
         - points
         - lastCalculatedAt
-        - groupId
+        - applicationId
         - pageId
       additionalProperties: false
       description: ''
@@ -5983,7 +5983,7 @@ components:
         - claimId
       additionalProperties: false
       type: object
-    iGroupPage:
+    iApplicationPage:
       properties:
         pageId:
           description: The page ID
@@ -6059,7 +6059,7 @@ components:
       additionalProperties: false
       description: ''
       type: object
-    iGroupDoc:
+    iApplicationDoc:
       properties:
         _docId:
           description: A unique stringified document ID
@@ -6067,35 +6067,35 @@ components:
         _id:
           description: A unique document ID (Mongo DB ObjectID)
           type: string
-        groupId:
-          description: The group ID
+        applicationId:
+          description: The application ID
           type: string
         type:
-          description: Type of the group
+          description: Type of the application
           type: string
         createdBy:
-          description: The BitBadges address of the user who created this group
+          description: The BitBadges address of the user who created this application
           $ref: '#/components/schemas/BitBadgesAddress'
         managedBy:
           description: The BitBadges address of the user who is currently managing this
           $ref: '#/components/schemas/BitBadgesAddress'
         createdAt:
-          description: The time the group was created
+          description: The time the application was created
           $ref: '#/components/schemas/UNIXMilliTimestamp'
         lastUpdated:
           description: The last updated timestamp
           $ref: '#/components/schemas/UNIXMilliTimestamp'
         metadata:
-          description: The overall metadata for the group
+          description: The overall metadata for the application
           $ref: '#/components/schemas/iMetadata'
         pages:
           items:
-            $ref: '#/components/schemas/iGroupPage'
-          description: The pages for the group
+            $ref: '#/components/schemas/iApplicationPage'
+          description: The pages for the application
           type: array
       required:
         - _docId
-        - groupId
+        - applicationId
         - type
         - createdBy
         - managedBy
@@ -6110,8 +6110,8 @@ components:
         claimId:
           description: The claim ID to link to
           type: string
-        groupId:
-          description: The group ID to link to
+        applicationId:
+          description: The application ID to link to
           type: string
         collectionId:
           description: The collection ID to link to
@@ -6309,8 +6309,8 @@ components:
         claimId:
           description: The claim ID to link to
           type: string
-        groupId:
-          description: The group ID to link to
+        applicationId:
+          description: The application ID to link to
           type: string
         collectionId:
           description: The collection ID to link to
@@ -6326,7 +6326,7 @@ components:
           description: >-
             Metadata for the link. Only applicable if the link is to a
             non-BitBadges entity. In other words, not tied to a specific claim,
-            group, collection, etc.
+            application, collection, etc.
           $ref: '#/components/schemas/iMetadata'
       required:
         - url
@@ -6931,17 +6931,17 @@ components:
             - reported
           additionalProperties: false
           type: object
-        groups:
+        applications:
           properties:
             nsfw:
               items:
                 properties:
-                  groupId:
+                  applicationId:
                     type: string
                   reason:
                     type: string
                 required:
-                  - groupId
+                  - applicationId
                   - reason
                 additionalProperties: false
                 type: object
@@ -6949,12 +6949,12 @@ components:
             reported:
               items:
                 properties:
-                  groupId:
+                  applicationId:
                     type: string
                   reason:
                     type: string
                 required:
-                  - groupId
+                  - applicationId
                   - reason
                 additionalProperties: false
                 type: object
@@ -9845,8 +9845,8 @@ components:
         noMaps:
           description: If true, we will skip all map queries.
           type: boolean
-        noGroups:
-          description: If true, we will skip all group queries.
+        noApplications:
+          description: If true, we will skip all application queries.
           type: boolean
         noClaims:
           description: If true, we will skip all claim queries.
@@ -9892,9 +9892,9 @@ components:
           items:
             $ref: '#/components/schemas/iMapWithValues'
           type: array
-        groups:
+        applications:
           items:
-            $ref: '#/components/schemas/iGroupDoc'
+            $ref: '#/components/schemas/iApplicationDoc'
           type: array
         claims:
           items:
@@ -11080,7 +11080,7 @@ components:
             - claims
             - activity
             - utilityListings
-            - groups
+            - applications
             - claimActivity
             - pointsActivity
           type: string
@@ -11140,10 +11140,10 @@ components:
               type: object
             type: array
           type: object
-        groups:
+        applications:
           additionalProperties:
             items:
-              $ref: '#/components/schemas/iGroupDoc'
+              $ref: '#/components/schemas/iApplicationDoc'
             type: array
           type: object
         maps:
@@ -13085,11 +13085,11 @@ components:
     iCreateDynamicDataStorePayload:
       properties:
         handlerId:
-          description: The handler ID for the dynamic data bin
+          description: The handler ID for the dynamic data store
           type: string
           examples: *ref_26
         label:
-          description: The label of the dynamic data bin
+          description: The label of the dynamic data store
           type: string
       required:
         - handlerId
@@ -13248,7 +13248,7 @@ components:
           description: Whether to rotate the data secret
           type: boolean
         label:
-          description: The label of the dynamic data bin to update
+          description: The new label
           type: string
       required:
         - dynamicDataId
@@ -13569,20 +13569,20 @@ components:
       type: object
     iGetApplicationsPayload:
       properties:
-        groupIds:
+        applicationIds:
           items:
             type: string
           description: The specific IDs to fetch
           type: array
       required:
-        - groupIds
+        - applicationIds
       additionalProperties: false
       type: object
     iGetApplicationsSuccessResponse:
       properties:
         docs:
           items:
-            $ref: '#/components/schemas/iGroupDoc'
+            $ref: '#/components/schemas/iApplicationDoc'
           type: array
         pagination:
           properties:
@@ -13604,7 +13604,7 @@ components:
       properties:
         docs:
           items:
-            $ref: '#/components/schemas/iGroupDoc'
+            $ref: '#/components/schemas/iApplicationDoc'
           type: array
         pagination:
           properties:
@@ -13625,12 +13625,12 @@ components:
     iCreateApplicationPayload:
       properties:
         metadata:
-          description: The overall metadata for the group
+          description: The overall metadata for the application
           $ref: '#/components/schemas/iMetadata'
         pages:
           items:
-            $ref: '#/components/schemas/iGroupPage'
-          description: The pages in the group
+            $ref: '#/components/schemas/iApplicationPage'
+          description: The pages in the application
           type: array
       required:
         - metadata
@@ -13640,26 +13640,26 @@ components:
     iCreateApplicationSuccessResponse:
       properties:
         doc:
-          $ref: '#/components/schemas/iGroupDoc'
+          $ref: '#/components/schemas/iApplicationDoc'
       required:
         - doc
       additionalProperties: false
       type: object
     iUpdateApplicationPayload:
       properties:
-        groupId:
-          description: The group ID to update
+        applicationId:
+          description: The application ID to update
           type: string
         metadata:
-          description: The overall metadata for the group
+          description: The overall metadata for the application
           $ref: '#/components/schemas/iMetadata'
         pages:
           items:
-            $ref: '#/components/schemas/iGroupPage'
-          description: The pages in the group
+            $ref: '#/components/schemas/iApplicationPage'
+          description: The pages in the application
           type: array
       required:
-        - groupId
+        - applicationId
         - metadata
         - pages
       additionalProperties: false
@@ -13667,18 +13667,18 @@ components:
     iUpdateApplicationSuccessResponse:
       properties:
         doc:
-          $ref: '#/components/schemas/iGroupDoc'
+          $ref: '#/components/schemas/iApplicationDoc'
       required:
         - doc
       additionalProperties: false
       type: object
     iDeleteApplicationPayload:
       properties:
-        groupId:
-          description: The group ID to delete
+        applicationId:
+          description: The application ID to delete
           type: string
       required:
-        - groupId
+        - applicationId
       additionalProperties: false
       type: object
     iDeleteApplicationSuccessResponse:
@@ -13686,8 +13686,8 @@ components:
       type: object
     iCalculatePointsPayload:
       properties:
-        groupId:
-          description: The group ID to calculate points for
+        applicationId:
+          description: The application ID to calculate points for
           type: string
         pageId:
           description: The page ID to calculate points for
@@ -13702,7 +13702,7 @@ components:
           description: Skip the cache and calculate points from scratch
           type: boolean
       required:
-        - groupId
+        - applicationId
         - pageId
       additionalProperties: false
       type: object
@@ -13744,8 +13744,8 @@ components:
       type: object
     iGetPointsActivityPayload:
       properties:
-        groupId:
-          description: The group ID to get points activity for
+        applicationId:
+          description: The application ID to get points activity for
           type: string
         pageId:
           description: The page ID to get points activity for
@@ -13757,7 +13757,7 @@ components:
           description: The specific address to get points activity for
           $ref: '#/components/schemas/NativeAddress'
       required:
-        - groupId
+        - applicationId
         - pageId
       additionalProperties: false
       type: object

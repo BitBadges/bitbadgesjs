@@ -1627,7 +1627,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
-   * Get dynamic data bin activity
+   * Get dynamic data store activity
    */
   public async getDynamicDataActivity(payload: iGetDynamicDataActivityPayload): Promise<GetDynamicDataActivitySuccessResponse> {
     try {
@@ -1773,7 +1773,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
-   * Updates a group.
+   * Updates an application.
    *
    * @remarks
    * - **API Route**: `PUT /api/v0/applications`
@@ -1799,7 +1799,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
-   * Deletes a group.
+   * Deletes an application.
    *
    * @remarks
    * - **API Route**: `DELETE /api/v0/applications`
@@ -1824,10 +1824,10 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
-   * Calculates points for a page in a group and caches the result.
+   * Calculates points for a page in an application and caches the result.
    *
    * @remarks
-   * - **API Route**: `POST /api/v0/groups/points`
+   * - **API Route**: `POST /api/v0/applications/points`
    * - **SDK Function Call**: `await BitBadgesApi.calculatePoints(payload);`
    */
   public async calculatePoints(payload: iCalculatePointsPayload): Promise<CalculatePointsSuccessResponse> {
@@ -1844,10 +1844,10 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
-   * Gets points activity for a group.
+   * Gets points activity for an application.
    *
    * @remarks
-   * - **API Route**: `POST /api/v0/groups/points/activity`
+   * - **API Route**: `POST /api/v0/applications/points/activity`
    * - **SDK Function Call**: `await BitBadgesApi.getPointsActivity(payload);`
    */
   public async getPointsActivity<T extends NumberType>(payload: iGetPointsActivityPayload): Promise<GetPointsActivitySuccessResponse<T>> {

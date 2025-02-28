@@ -311,8 +311,8 @@ export interface iPointsActivityDoc<T extends NumberType> extends iActivityDoc<T
   oldPoints: T;
   /** The amount of points after the activity */
   newPoints: T;
-  /** The group ID of the points activity */
-  groupId: string;
+  /** The application ID of the points activity */
+  applicationId: string;
   /** The page ID of the points activity */
   pageId: string;
 }
@@ -691,8 +691,8 @@ export interface iPointsDoc<T extends NumberType> extends Doc {
   points: T;
   /** The timestamp of when the points were last calculated (milliseconds since epoch) */
   lastCalculatedAt: UNIXMilliTimestamp<T>;
-  /** The group ID */
-  groupId: string;
+  /** The application ID */
+  applicationId: string;
   /** The page ID */
   pageId: string;
 }
@@ -1084,7 +1084,7 @@ export interface iTierWithOptionalWeight<T extends NumberType> {
 /**
  * @category Interfaces
  */
-export interface iGroupPage<T extends NumberType> {
+export interface iApplicationPage<T extends NumberType> {
   /** The page ID */
   pageId: string;
 
@@ -1125,32 +1125,32 @@ export interface iApiKeyDoc extends Doc {
 /**
  * @cateogry Interfaces
  */
-export interface iGroupDoc<T extends NumberType> extends Doc {
-  /** The group ID */
-  groupId: string;
+export interface iApplicationDoc<T extends NumberType> extends Doc {
+  /** The application ID */
+  applicationId: string;
 
   /**
-   * Type of the group
+   * Type of the application
    */
   type: string;
 
-  /** The BitBadges address of the user who created this group */
+  /** The BitBadges address of the user who created this application */
   createdBy: BitBadgesAddress;
 
   /** The BitBadges address of the user who is currently managing this */
   managedBy: BitBadgesAddress;
 
-  /** The time the group was created */
+  /** The time the application was created */
   createdAt: UNIXMilliTimestamp<T>;
 
   /** The last updated timestamp */
   lastUpdated?: UNIXMilliTimestamp<T>;
 
-  /** The overall metadata for the group */
+  /** The overall metadata for the application */
   metadata: iMetadata<T>;
 
-  /** The pages for the group */
-  pages: iGroupPage<T>[];
+  /** The pages for the application */
+  pages: iApplicationPage<T>[];
 }
 
 /**
@@ -1159,8 +1159,8 @@ export interface iGroupDoc<T extends NumberType> extends Doc {
 export interface iInheritMetadataFrom<T extends NumberType> {
   /** The claim ID to link to */
   claimId?: string;
-  /** The group ID to link to */
-  groupId?: string;
+  /** The application ID to link to */
+  applicationId?: string;
   /** The collection ID to link to */
   collectionId?: T;
   /** The address list ID to link to */
@@ -1288,15 +1288,15 @@ export interface iUtilityListingLink<T extends NumberType> {
   url: string;
   /** The claim ID to link to */
   claimId?: string;
-  /** The group ID to link to */
-  groupId?: string;
+  /** The application ID to link to */
+  applicationId?: string;
   /** The collection ID to link to */
   collectionId?: T;
   /** The address list ID to link to */
   listId?: string;
   /** The map ID to link to */
   mapId?: string;
-  /** Metadata for the link. Only applicable if the link is to a non-BitBadges entity. In other words, not tied to a specific claim, group, collection, etc. */
+  /** Metadata for the link. Only applicable if the link is to a non-BitBadges entity. In other words, not tied to a specific claim, application, collection, etc. */
   metadata?: iMetadata<T>;
 }
 
@@ -1612,9 +1612,9 @@ export interface iComplianceDoc<T extends NumberType> extends Doc {
     nsfw: { bitbadgesAddress: BitBadgesAddress; reason: string }[];
     reported: { bitbadgesAddress: BitBadgesAddress; reason: string }[];
   };
-  groups?: {
-    nsfw: { groupId: string; reason: string }[];
-    reported: { groupId: string; reason: string }[];
+  applications?: {
+    nsfw: { applicationId: string; reason: string }[];
+    reported: { applicationId: string; reason: string }[];
   };
   claims?: {
     nsfw: { claimId: string; reason: string }[];

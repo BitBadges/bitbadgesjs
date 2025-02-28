@@ -1,0 +1,36 @@
+name: Generate and Deploy Docs
+
+on:
+  push:
+    branches:
+      - main # or your default branch name
+    paths:
+      - 'packages/bitbadgesjs-sdk/**' # Only trigger when SDK changes
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18' # or your preferred Node.js version
+
+      - name: Install dependencies
+        working-directory: packages/bitbadgesjs-sdk
+        run: npm install
+
+      - name: Generate documentation
+        run: |
+          chmod +x ./scripts/gendocs.sh
+          ./scripts/gendocs.sh
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: packages/bitbadgesjs-sdk/docs # Path to your generated docs
+          branch: gh-pages # The branch to deploy to
+          clean: true # Automatically remove deleted files from the deployment

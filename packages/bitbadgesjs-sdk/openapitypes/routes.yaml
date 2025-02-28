@@ -1751,7 +1751,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/iGetClaimsPayload'
+              $ref: '#/components/schemas/iGetClaimsPayloadV1'
   /claims:
     post:
       operationId: createClaim
@@ -2250,7 +2250,7 @@ paths:
   /storeActions/{actionName}/{dynamicDataId}/{dynamicDataSecret}:
     post:
       operationId: performStoreActionSingle
-      summary: Perform Single Bin Action (URL Auth)
+      summary: Perform Single Store Action (URL Auth)
       tags:
         - Dynamic Stores
       description: |-
@@ -2319,7 +2319,7 @@ paths:
   /storeActions/single:
     post:
       operationId: performStoreActionSingleWithBodyAuth
-      summary: Perform Single Bin Action (Body Auth)
+      summary: Perform Single Store Action (Body Auth)
       tags:
         - Dynamic Stores
       description: |-
@@ -2375,7 +2375,7 @@ paths:
   /storeActions/batch/{dynamicDataId}/{dynamicDataSecret}:
     post:
       operationId: performStoreActionBatch
-      summary: Perform Batch Bin Actions (URL Auth)
+      summary: Perform Batch Store Actions (URL Auth)
       tags:
         - Dynamic Stores
       description: |-
@@ -2438,7 +2438,7 @@ paths:
   /storeActions/batch:
     post:
       operationId: performStoreActionBatchWithBodyAuth
-      summary: Perform Batch Bin Actions (Body Auth)
+      summary: Perform Batch Store Actions (Body Auth)
       tags:
         - Dynamic Stores
       description: |-
@@ -2646,11 +2646,11 @@ paths:
   /applications/search:
     post:
       operationId: searchApplications
-      summary: Search Groups
+      summary: Search Applications
       tags:
-        - Groups
+        - Applications
       description: |-
-        Searches for groups based on the provided criteria.
+        Searches for applications based on the provided criteria.
 
         ```typescript
         const response = await fetch('https://api.bitbadges.io/api/v0/applications/search', {
@@ -2697,11 +2697,11 @@ paths:
   /applications/fetch:
     post:
       operationId: getApplications
-      summary: Get Groups
+      summary: Get Applications
       tags:
-        - Groups
+        - Applications
       description: |-
-        Fetches groups based on the provided criteria.
+        Fetches applications based on the provided criteria.
 
         ```typescript
         const response = await fetch('https://api.bitbadges.io/api/v0/applications/fetch', {
@@ -2748,11 +2748,11 @@ paths:
   /applications:
     post:
       operationId: createApplication
-      summary: Create Group
+      summary: Create Application
       tags:
-        - Groups
+        - Applications
       description: |-
-        Creates a group.
+        Creates an application.
 
         ```tsx
         await BitBadgesApi.createApplication(...);
@@ -2786,11 +2786,11 @@ paths:
               $ref: '#/components/schemas/iCreateApplicationPayload'
     put:
       operationId: updateApplication
-      summary: Update Group
+      summary: Update Application
       tags:
-        - Groups
+        - Applications
       description: |-
-        Updates a group.
+        Updates an application.
 
         ```tsx
         await BitBadgesApi.updateApplication(...);
@@ -2824,11 +2824,11 @@ paths:
               $ref: '#/components/schemas/iUpdateApplicationPayload'
     delete:
       operationId: deleteApplication
-      summary: Delete Group
+      summary: Delete Application
       tags:
-        - Groups
+        - Applications
       description: |-
-        Deletes a group.
+        Deletes an application.
 
         ```tsx
         await BitBadgesApi.deleteApplication(...);
@@ -2865,9 +2865,9 @@ paths:
       operationId: calculatePoints
       summary: Calculate Points
       tags:
-        - Groups
+        - Applications
       description: |-
-        Calculates points for a group and page.
+        Calculates points for an application and page.
 
         ```tsx
         await BitBadgesApi.calculatePoints(...);
@@ -2904,9 +2904,9 @@ paths:
       operationId: getPointsActivity
       summary: Get Points Activity
       tags:
-        - Groups
+        - Applications
       description: |-
-        Fetches points activity for a group.
+        Fetches points activity for an application.
 
         ```tsx
         await BitBadgesApi.getPointsActivity(...);

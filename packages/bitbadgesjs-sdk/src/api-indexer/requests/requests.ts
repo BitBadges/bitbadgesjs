@@ -13,7 +13,7 @@ import {
   AttestationDoc,
   DeveloperAppDoc,
   DynamicDataDoc,
-  GroupDoc,
+  ApplicationDoc,
   MapWithValues,
   PluginDoc,
   StatusDoc,
@@ -25,8 +25,8 @@ import {
   iApiKeyDoc,
   iClaimActivityDoc,
   iDynamicDataDoc,
-  iGroupDoc,
-  iGroupPage,
+  iApplicationDoc,
+  iApplicationPage,
   iInheritMetadataFrom,
   iLinkedTo,
   iPointsActivityDoc,
@@ -237,8 +237,8 @@ export interface iGetSearchPayload<T extends NumberType> {
   noBadges?: boolean;
   /** If true, we will skip all map queries. */
   noMaps?: boolean;
-  /** If true, we will skip all group queries. */
-  noGroups?: boolean;
+  /** If true, we will skip all application queries. */
+  noApplications?: boolean;
   /** If true, we will skip all claim queries. */
   noClaims?: boolean;
   /** If true, we will limit collection-based results to a single collection. */
@@ -254,7 +254,7 @@ export class GetSearchPayload<T extends NumberType> extends BaseNumberTypeClass<
   noAddressLists?: boolean;
   noBadges?: boolean;
   noMaps?: boolean;
-  noGroups?: boolean;
+  noApplications?: boolean;
   noClaims?: boolean;
   specificCollectionId?: T;
 
@@ -265,7 +265,7 @@ export class GetSearchPayload<T extends NumberType> extends BaseNumberTypeClass<
     this.noAddressLists = payload.noAddressLists;
     this.noBadges = payload.noBadges;
     this.noMaps = payload.noMaps;
-    this.noGroups = payload.noGroups;
+    this.noApplications = payload.noApplications;
     this.noClaims = payload.noClaims;
     this.specificCollectionId = payload.specificCollectionId;
   }
@@ -277,7 +277,7 @@ export class GetSearchPayload<T extends NumberType> extends BaseNumberTypeClass<
       noAddressLists: query.noAddressLists === 'true',
       noBadges: query.noBadges === 'true',
       noMaps: query.noMaps === 'true',
-      noGroups: query.noGroups === 'true',
+      noApplications: query.noApplications === 'true',
       noClaims: query.noClaims === 'true',
       specificCollectionId: query.specificCollectionId?.toString()
     });
@@ -305,7 +305,7 @@ export interface iGetSearchSuccessResponse<T extends NumberType> {
     badgeIds: iUintRange<T>[];
   }[];
   maps: iMapWithValues<T>[];
-  groups?: iGroupDoc<T>[];
+  applications?: iApplicationDoc<T>[];
   claims?: iClaimDetails<T>[];
   utilityListings?: iUtilityListingDoc<T>[];
 }
@@ -326,7 +326,7 @@ export class GetSearchSuccessResponse<T extends NumberType>
     badgeIds: UintRangeArray<T>;
   }[];
   maps: MapWithValues<T>[];
-  groups?: GroupDoc<T>[];
+  applications?: ApplicationDoc<T>[];
   claims?: ClaimDetails<T>[];
   utilityListings?: UtilityListingDoc<T>[];
 
@@ -342,7 +342,7 @@ export class GetSearchSuccessResponse<T extends NumberType>
       };
     });
     this.maps = data.maps.map((map) => new MapWithValues(map));
-    this.groups = data.groups?.map((group) => new GroupDoc(group));
+    this.applications = data.applications?.map((group) => new ApplicationDoc(group));
     this.claims = data.claims?.map((claim) => new ClaimDetails(claim));
     this.utilityListings = data.utilityListings?.map((utilityListing) => new UtilityListingDoc(utilityListing));
   }
@@ -1502,7 +1502,7 @@ export interface iGetBrowsePayload {
     | 'claims'
     | 'activity'
     | 'utilityListings'
-    | 'groups'
+    | 'applications'
     | 'claimActivity'
     | 'pointsActivity';
   category?: string;
@@ -1525,7 +1525,7 @@ export class GetBrowsePayload extends CustomTypeClass<GetBrowsePayload> implemen
     | 'claims'
     | 'activity'
     | 'utilityListings'
-    | 'groups'
+    | 'applications'
     | 'claimActivity'
     | 'pointsActivity';
   category?: string;
@@ -1570,7 +1570,7 @@ export interface iGetBrowseSuccessResponse<T extends NumberType> {
       badgeIds: iUintRange<T>[];
     }[];
   };
-  groups?: { [category: string]: iGroupDoc<T>[] };
+  applications?: { [category: string]: iApplicationDoc<T>[] };
   maps: { [category: string]: iMapWithValues<T>[] };
   claims?: { [category: string]: iClaimDetails<T>[] };
   claimActivity?: iClaimActivityDoc<T>[];
@@ -1595,7 +1595,7 @@ export class GetBrowseSuccessResponse<T extends NumberType>
       badgeIds: UintRangeArray<T>;
     }[];
   };
-  groups?: { [category: string]: GroupDoc<T>[] };
+  applications?: { [category: string]: ApplicationDoc<T>[] };
   maps: { [category: string]: MapWithValues<T>[] };
   claims?: { [category: string]: ClaimDetails<T>[] };
   claimActivity?: ClaimActivityDoc<T>[];
@@ -1638,12 +1638,12 @@ export class GetBrowseSuccessResponse<T extends NumberType>
       },
       {} as { [category: string]: { collection: BitBadgesCollection<T>; badgeIds: UintRangeArray<T> }[] }
     );
-    this.groups = Object.keys(data.groups ?? {}).reduce(
+    this.applications = Object.keys(data.applications ?? {}).reduce(
       (acc, category) => {
-        acc[category] = (data.groups ?? {})[category].map((group) => new GroupDoc(group));
+        acc[category] = (data.applications ?? {})[category].map((group) => new ApplicationDoc(group));
         return acc;
       },
-      {} as { [category: string]: GroupDoc<T>[] }
+      {} as { [category: string]: ApplicationDoc<T>[] }
     );
     this.utilityListings = Object.keys(data.utilityListings ?? {}).reduce(
       (acc, category) => {
@@ -3267,9 +3267,9 @@ export class GetGatedContentForClaimSuccessResponse<T extends NumberType>
  * @category API Requests / Responses
  */
 export interface iCreateDynamicDataStorePayload {
-  /** The handler ID for the dynamic data bin */
+  /** The handler ID for the dynamic data store */
   handlerId: string;
-  /** The label of the dynamic data bin */
+  /** The label of the dynamic data store */
   label: string;
 }
 
@@ -3395,7 +3395,7 @@ export interface iUpdateDynamicDataStorePayload {
   dynamicDataId: string;
   /** Whether to rotate the data secret */
   rotateDataSecret?: boolean;
-  /** The label of the dynamic data bin to update */
+  /** The new label */
   label?: string;
 }
 
@@ -3805,14 +3805,14 @@ export interface iSearchApplicationsPayload {
  */
 export interface iGetApplicationsPayload {
   /** The specific IDs to fetch */
-  groupIds: string[];
+  applicationIds: string[];
 }
 
 /**
  * @category API Requests / Responses
  */
 export interface iGetApplicationsSuccessResponse<T extends NumberType> {
-  docs: (iGroupDoc<T> | undefined)[];
+  docs: (iApplicationDoc<T> | undefined)[];
   pagination: {
     bookmark: string;
     hasMore: boolean;
@@ -3826,7 +3826,7 @@ export class GetApplicationsSuccessResponse<T extends NumberType>
   extends BaseNumberTypeClass<GetApplicationsSuccessResponse<T>>
   implements iGetApplicationsSuccessResponse<T>
 {
-  docs: (GroupDoc<T> | undefined)[];
+  docs: (ApplicationDoc<T> | undefined)[];
   pagination: {
     bookmark: string;
     hasMore: boolean;
@@ -3834,7 +3834,7 @@ export class GetApplicationsSuccessResponse<T extends NumberType>
 
   constructor(data: iGetApplicationsSuccessResponse<T>) {
     super();
-    this.docs = data.docs.map((doc) => (doc ? new GroupDoc<T>(doc) : undefined));
+    this.docs = data.docs.map((doc) => (doc ? new ApplicationDoc<T>(doc) : undefined));
     this.pagination = data.pagination;
   }
 
@@ -3864,18 +3864,18 @@ export class SearchApplicationsSuccessResponse<T extends NumberType>
  * @category API Requests / Responses
  */
 export interface iCreateApplicationPayload {
-  /** The overall metadata for the group */
+  /** The overall metadata for the application */
   metadata: iMetadata<NumberType>;
 
-  /** The pages in the group */
-  pages: iGroupPage<NumberType>[];
+  /** The pages in the application */
+  pages: iApplicationPage<NumberType>[];
 }
 
 /**
  * @category API Requests / Responses
  */
 export interface iCreateApplicationSuccessResponse<T extends NumberType> {
-  doc: iGroupDoc<T>;
+  doc: iApplicationDoc<T>;
 }
 
 /**
@@ -3885,11 +3885,11 @@ export class CreateApplicationSuccessResponse<T extends NumberType>
   extends BaseNumberTypeClass<CreateApplicationSuccessResponse<T>>
   implements iCreateApplicationSuccessResponse<T>
 {
-  doc: GroupDoc<T>;
+  doc: ApplicationDoc<T>;
 
   constructor(data: iCreateApplicationSuccessResponse<T>) {
     super();
-    this.doc = new GroupDoc<T>(data.doc);
+    this.doc = new ApplicationDoc<T>(data.doc);
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CreateApplicationSuccessResponse<U> {
@@ -3901,21 +3901,21 @@ export class CreateApplicationSuccessResponse<T extends NumberType>
  * @category API Requests / Responses
  */
 export interface iUpdateApplicationPayload {
-  /** The group ID to update */
-  groupId: string;
+  /** The application ID to update */
+  applicationId: string;
 
-  /** The overall metadata for the group */
+  /** The overall metadata for the application */
   metadata: iMetadata<NumberType>;
 
-  /** The pages in the group */
-  pages: iGroupPage<NumberType>[];
+  /** The pages in the application */
+  pages: iApplicationPage<NumberType>[];
 }
 
 /**
  * @category API Requests / Responses
  */
 export interface iUpdateApplicationSuccessResponse<T extends NumberType> {
-  doc: iGroupDoc<T>;
+  doc: iApplicationDoc<T>;
 }
 
 /**
@@ -3925,11 +3925,11 @@ export class UpdateApplicationSuccessResponse<T extends NumberType>
   extends BaseNumberTypeClass<UpdateApplicationSuccessResponse<T>>
   implements iUpdateApplicationSuccessResponse<T>
 {
-  doc: GroupDoc<T>;
+  doc: ApplicationDoc<T>;
 
   constructor(data: iUpdateApplicationSuccessResponse<T>) {
     super();
-    this.doc = new GroupDoc<T>(data.doc);
+    this.doc = new ApplicationDoc<T>(data.doc);
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UpdateApplicationSuccessResponse<U> {
@@ -3941,8 +3941,8 @@ export class UpdateApplicationSuccessResponse<T extends NumberType>
  * @category API Requests / Responses
  */
 export interface iDeleteApplicationPayload {
-  /** The group ID to delete */
-  groupId: string;
+  /** The application ID to delete */
+  applicationId: string;
 }
 
 /**
@@ -3959,8 +3959,8 @@ export class DeleteApplicationSuccessResponse extends EmptyResponseClass {}
  * @category API Requests / Responses
  */
 export interface iCalculatePointsPayload {
-  /** The group ID to calculate points for */
-  groupId: string;
+  /** The application ID to calculate points for */
+  applicationId: string;
   /** The page ID to calculate points for */
   pageId: string;
   /** The address to calculate points for */
@@ -4012,8 +4012,8 @@ export class CalculatePointsSuccessResponse extends CustomTypeClass<CalculatePoi
  * @category API Requests / Responses
  */
 export interface iGetPointsActivityPayload {
-  /** The group ID to get points activity for */
-  groupId: string;
+  /** The application ID to get points activity for */
+  applicationId: string;
   /** The page ID to get points activity for */
   pageId: string;
   /** The pagination bookmark to start from */
@@ -4026,14 +4026,14 @@ export interface iGetPointsActivityPayload {
  * @category API Requests / Responses
  */
 export class GetPointsActivityPayload extends CustomTypeClass<GetPointsActivityPayload> implements iGetPointsActivityPayload {
-  groupId: string;
+  applicationId: string;
   pageId: string;
   bookmark?: string;
   address?: NativeAddress;
 
   constructor(payload: iGetPointsActivityPayload) {
     super();
-    this.groupId = payload.groupId;
+    this.applicationId = payload.applicationId;
     this.pageId = payload.pageId;
     this.bookmark = payload.bookmark;
     this.address = payload.address;
@@ -4041,7 +4041,7 @@ export class GetPointsActivityPayload extends CustomTypeClass<GetPointsActivityP
 
   static FromQuery(query: ParsedQs): GetPointsActivityPayload {
     return new GetPointsActivityPayload({
-      groupId: query.groupId?.toString() ?? '',
+      applicationId: query.applicationId?.toString() ?? '',
       pageId: query.pageId?.toString() ?? '',
       bookmark: query.bookmark?.toString(),
       address: (query.address?.toString() ?? '') as NativeAddress
