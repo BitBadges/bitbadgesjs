@@ -2493,11 +2493,11 @@ paths:
   /dynamicStores/fetch:
     post:
       operationId: getDynamicDataStores
-      summary: Fetch Dynamic Data Bins
+      summary: Fetch Dynamic Data Stores
       tags:
         - Dynamic Stores
       description: |-
-        Fetches dynamic data bins based on the provided criteria.
+        Fetches Dynamic Data Stores based on the provided criteria.
 
         ```typescript
         const response = await fetch('https://api.bitbadges.io/api/v0/dynamicStores', {
@@ -2544,11 +2544,11 @@ paths:
   /dynamicStores/search:
     post:
       operationId: searchDynamicDataStores
-      summary: Search Dynamic Data Bins
+      summary: Search Dynamic Data Stores
       tags:
         - Dynamic Stores
       description: |-
-        Searches for dynamic data bins based on the provided criteria.
+        Searches for Dynamic Data Stores based on the provided criteria.
 
         ```typescript
         const response = await fetch('https://api.bitbadges.io/api/v0/dynamicStores/search', {
@@ -2599,7 +2599,7 @@ paths:
       tags:
         - Dynamic Stores
       description: |-
-        Fetches activity history for dynamic data bins.
+        Fetches activity history for Dynamic Data Stores.
 
         ```typescript
         const response = await fetch('https://api.bitbadges.io/api/v0/dynamicStores/activity', {

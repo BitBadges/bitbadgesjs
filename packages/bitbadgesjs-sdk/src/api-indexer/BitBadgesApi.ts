@@ -1643,7 +1643,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
-   * Gets dynamic data bins.
+   * Gets dynamic data stores.
    *
    * @remarks
    * - **API Route**: `POST /api/v0/dynamicStores/fetch`
