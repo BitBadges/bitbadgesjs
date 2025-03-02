@@ -2737,18 +2737,6 @@ paths:
       description: |-
         Performs a single action on a dynamic store using URL authentication.
 
-        ```typescript
-        const response = await fetch('https://api.bitbadges.io/api/v0/storeActions/:actionName/:dynamicDataId/:dynamicDataSecret', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: payload
-        });
-        const data = await response.json();
-        console.log(data);
-        ```
-
         ```tsx
         await BitBadgesApi.performStoreAction(...);
         ```
@@ -2815,23 +2803,6 @@ paths:
       description: |-
         Performs a single action on a dynamic store using body authentication.
 
-        ```typescript
-        const response = await fetch('https://api.bitbadges.io/api/v0/storeActions/single', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: {
-            dynamicDataId: dynamicDataId,
-            dataSecret: dynamicDataSecret,
-            actionName: actionName,
-            payload: payload
-          }
-        });
-        const data = await response.json();
-        console.log(data);
-        ```
-
         ```tsx
         await BitBadgesApi.performStoreAction(...);
         ```
@@ -2880,17 +2851,6 @@ paths:
       description: |-
         Performs multiple actions on a dynamic store using URL authentication.
 
-        ```typescript
-        const response = await fetch('https://api.bitbadges.io/api/v0/storeActions/batch/:dynamicDataId/:dynamicDataSecret', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: payload
-        });
-        const data = await response.json();
-        console.log(data);
-        ```
 
         ```tsx
         await BitBadgesApi.performBatchStoreAction(...);
@@ -2952,21 +2912,6 @@ paths:
       description: |-
         Performs multiple actions on a dynamic store using body authentication.
 
-        ```typescript
-        const response = await fetch('https://api.bitbadges.io/api/v0/storeActions/batch', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: {
-            dynamicDataId: dynamicDataId,
-            dataSecret: dynamicDataSecret,
-            actions: actions
-          }
-        });
-        const data = await response.json();
-        console.log(data);
-        ```
 
         ```tsx
         await BitBadgesApi.performBatchStoreAction(...);
@@ -3016,18 +2961,6 @@ paths:
       description: |-
         Fetches dynamic stores by ID(s).
 
-        ```typescript
-        const response = await fetch('https://api.bitbadges.io/api/v0/dynamicStores', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: payload
-        });
-        const data = await response.json();
-        console.log(data);
-        ```
-
         ```tsx
         await BitBadgesApi.getDynamicDataStores(...);
         ```
@@ -3076,17 +3009,6 @@ paths:
       description: |-
         Searches for dynamic stores based on the provided criteria.
 
-        ```typescript
-        const response = await fetch('https://api.bitbadges.io/api/v0/dynamicStores/search', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: payload
-        });
-        const data = await response.json();
-        console.log(data);
-        ```
 
         ```tsx
         await BitBadgesApi.searchDynamicDataStores(...);
@@ -3136,17 +3058,6 @@ paths:
       description: |-
         Fetches activity history for dynamic stores.
 
-        ```typescript
-        const response = await fetch('https://api.bitbadges.io/api/v0/dynamicStores/activity', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: payload
-        });
-        const data = await response.json();
-        console.log(data);
-        ```
 
         ```tsx
         await BitBadgesApi.getDynamicDataActivity(...);
@@ -3198,17 +3109,6 @@ paths:
         This is to search user-created applications. For a public search, use
         the search endpoint.
 
-        ```typescript
-        const response = await fetch('https://api.bitbadges.io/api/v0/applications/search', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: payload
-        });
-        const data = await response.json();
-        console.log(data);
-        ```
 
         ```tsx
         await BitBadgesApi.searchApplications(...);
@@ -3254,18 +3154,6 @@ paths:
         - Applications
       description: |-
         Fetches applications based on the provided criteria.
-
-        ```typescript
-        const response = await fetch('https://api.bitbadges.io/api/v0/applications/fetch', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: payload
-        });
-        const data = await response.json();
-        console.log(data);
-        ```
 
         ```tsx
         await BitBadgesApi.getApplications(...);
