@@ -2,21 +2,134 @@ openapi: 3.1.0
 info:
   title: BitBadges API
   description: |-
-    The BitBadges API is a RESTful API that allows developers to interact with the BitBadges blockchain and indexer. The API provides endpoints for retrieving account details, collections, badges, and more. The API requires an API key for authentication.
+    # Introduction
+    The BitBadges API is a RESTful API that enables developers to interact with the BitBadges blockchain and indexer. This API provides comprehensive access to the BitBadges ecosystem, allowing you to query and interact with digital badges, collections, accounts, blockchain data, and more.
 
-    ```tsx
-    import { BigIntify, Stringify, Numberify, BitBadgesAPI } from "bitbadgesjs-sdk";
-    const BitBadgesApi = new BitBadgesAPI({ convertFunction: BigIntify, ....})
-    const collections = await BitBadgesApi.getCollections(...);
+    # Getting Started
+
+    ## Authentication
+    All API requests require an API key for authentication. You can obtain your API key from the [BitBadges Developer Portal](https://bitbadges.io/developer).
+
+    ### API Key Authentication
+    Include your API key in the `x-api-key` header:
+    ```
+    x-api-key: your-api-key-here
     ```
 
-    See the [documentation](https://docs.bitbadges.io/for-developers/bitbadges-api/api) for information on how to use the API.
+    ## SDK Integration
+    The recommended way to interact with the API is through our TypeScript/JavaScript SDK:
 
-    You can go to [the developer portal](https://bitbadges.io/developer) to create your API key.
+    ```typescript
+    import { BigIntify, BitBadgesAPI } from "bitbadgesjs-sdk";
+
+    // Initialize the API client
+    const api = new BitBadgesAPI({
+      convertFunction: BigIntify,
+      apiKey: 'your-api-key-here'
+    });
+
+    // Example: Fetch collections
+    const collections = await api.getCollections({
+      collectionsToFetch: [{
+        collectionId: 1n,
+        metadataToFetch: {
+          badgeIds: [{ start: 1n, end: 10n }]
+        }
+      }]
+    });
+    ```
+
+    # Tiers
+    There are 3 tiers of API keys, each with different rate limits and permissions. See the pricing page for more details: https://bitbadges.io/pricing
+    - Free tier
+    - Premium tier
+    - Enterprise tier
+
+    Rate limit headers included in responses:
+    - `X-RateLimit-Limit`: Total requests allowed per window
+    - `X-RateLimit-Remaining`: Remaining requests in current window
+    - `X-RateLimit-Reset`: Time until rate limit resets (UTC timestamp)
+
+    # Response Formats
+
+    ## Error Response
+
+    All API errors follow a consistent format:
+
+    ```typescript
+    {
+      // Serialized error object for debugging purposes
+      // Advanced users can use this to debug issues
+      error?: any;
+
+      // UX-friendly error message that can be displayed to the user
+      // Always present if error occurs
+      errorMessage: string;
+
+      // Authentication error flag
+      // Present if the user is not authenticated
+      unauthorized?: boolean;
+    }
+    ```
+
+    ## Pagination
+    Cursor-based pagination is used for list endpoints:
+    ```typescript
+    {
+      items: T[],
+      bookmark: string, // Use this for the next page
+      hasMore: boolean
+    }
+    ```
+
+    # Best Practices
+    1. **Rate Limiting**: Implement proper rate limit handling
+    2. **Caching**: Cache responses when appropriate
+    3. **Error Handling**: Handle API errors gracefully
+    4. **Batch Operations**: Use batch endpoints when possible
+
+    # Additional Resources
+    - [Official Documentation](https://docs.bitbadges.io/for-developers/bitbadges-api/api)
+    - [SDK Documentation](https://docs.bitbadges.io/for-developers/bitbadges-sdk/overview)
+    - [Developer Portal](https://bitbadges.io/developer)
+    - [GitHub SDK Repository](https://github.com/bitbadges/bitbadgesjs)
+
+    # Support
+    - [Contact Page](https://bitbadges.io/contact)
   version: '0.1'
+  license:
+    name: MIT
+    url: https://github.com/bitbadges/bitbadgesjs/blob/main/LICENSE
+  termsOfService: https://bitbadges.io/policies
 servers:
   - url: 'https://api.bitbadges.io/api/v0'
-    description: Official API
+    description: Production API Server
+  - url: 'https://api.bitbadges.io/testnet/api/v0'
+    description: Testnet API Server
+security:
+  - apiKey: []
+tags:
+  - name: Accounts
+    description: Endpoints for managing user accounts and profiles
+  - name: Badges
+    description: Endpoints for badge and collection operations
+  - name: Claims
+    description: Endpoints for managing claims
+  - name: Address Lists
+    description: Endpoints for managing address lists
+  - name: Transactions
+    description: Endpoints for submitting and simulating blockchain transactions
+  - name: Applications
+    description: Endpoints for managing applications (points, tiers, quests)
+  - name: Plugins
+    description: Endpoints for the plugins for claims
+  - name: Dynamic Stores
+    description: Endpoints for managing dynamic data stores
+  - name: Utility Listings
+    description: Endpoints for managing utility listings
+  - name: Sign In with BitBadges
+    description: Authentication and authorization endpoints for Sign In with BitBadges
+  - name: Miscellaneous
 paths:
   /users:
     post:
@@ -31,8 +144,6 @@ paths:
             {
               //example
               address: 'bb1...',
-              fetchSequence: true,
-              fetchBalance: true,
               viewsToFetch: [
                 {
                   viewType: 'badgesCollected',
@@ -45,6 +156,7 @@ paths:
         })
         const account = accountsRes.accounts[0]
         ```
+
         Documentation References / Tutorials:
         - **[Fetching Accounts](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/fetching-accounts)**
       tags:
