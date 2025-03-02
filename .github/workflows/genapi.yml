@@ -34,7 +34,7 @@ jobs:
       - name: Generate API documentation
         run: |
           chmod +x ./scripts/gen_api_docs_ci.sh
-          ts-node --esm ./scripts/gen_api_docs_ci.sh
+          source ./scripts/gen_api_docs_ci.sh
 
       - name: Push to Stoplight
         env:
