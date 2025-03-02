@@ -28,12 +28,13 @@ jobs:
       - name: Install dependencies
         run: |
           npm install
-          npm install -g ts-node @stoplight/cli
+          npm install -g typescript ts-node @stoplight/cli
+          npm install -D @types/node
 
       - name: Generate API documentation
         run: |
           chmod +x ./scripts/gen_api_docs_ci.sh
-          ./scripts/gen_api_docs_ci.sh
+          ts-node --esm ./scripts/gen_api_docs_ci.sh
 
       - name: Push to Stoplight
         env:
