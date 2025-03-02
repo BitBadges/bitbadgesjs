@@ -102,7 +102,7 @@ const solanaToBitBadges = (solanaAddress: string) => {
 };
 
 /**
- * Converts an address from any supported chain to a Cosmos formatted address.
+ * Converts an address from any supported chain to a bech32 formatted address prefixed with `bb`.
  * If we are unable to convert the address, we return an empty string ('').
  *
  * @category Address Utils

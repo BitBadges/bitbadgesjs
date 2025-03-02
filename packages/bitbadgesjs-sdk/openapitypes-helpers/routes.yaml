@@ -47,6 +47,11 @@ info:
 
     Note: This method uses HTTP session cookies. Ensure your requests support credentials (e.g. axios: { withCredentials: true }).
 
+    ### Scopes
+    Note that for proper authentication, you must have the proper scopes set.
+
+    See https://bitbadges.io/auth/linkgen for all available scopes. These will be included in
+    the `scope` parameter of the SIWBB URL or set in your approved sign in settings.
 
     <br />
 
@@ -215,9 +220,9 @@ paths:
         - **[Fetching Accounts](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/fetching-accounts)**
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetAccountsPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetAccountsSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getAccounts)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetAccountsPayload)****
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetAccountsSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getAccounts)****
       tags:
         - Accounts
       responses:
@@ -286,9 +291,9 @@ paths:
         - **[Fetching Collections](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/fetching-collections)**
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetCollectionsPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetCollectionsSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getCollections)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetCollectionsPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetCollectionsSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getCollections)**
       responses:
         '200':
           description: Success response
@@ -334,9 +339,9 @@ paths:
         - **[Fetching Balances](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/fetching-balances)**
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBadgeBalanceByAddressPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBadgeBalanceByAddressSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getBadgeBalanceByAddress)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBadgeBalanceByAddressPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBadgeBalanceByAddressSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getBadgeBalanceByAddress)**
       tags:
         - Badges
       parameters:
@@ -393,9 +398,9 @@ paths:
         - **[BitBadges Documentation](https://docs.bitbadges.io)**
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetStatusPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetStatusSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getStatus)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetStatusPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetStatusSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getStatus)**
       tags:
         - Miscellanous
       responses:
@@ -442,9 +447,9 @@ paths:
         - **[BitBadges Documentation](https://docs.bitbadges.io)**
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetSearchPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetSearchSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getSearchResults)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetSearchPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetSearchSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getSearchResults)**
       tags:
         - Miscellanous
       parameters:
@@ -501,9 +506,9 @@ paths:
         - **[Fetching Balances](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/fetching-balances)**
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetOwnersForBadgePayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetOwnersForBadgeSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getOwnersForBadge)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetOwnersForBadgePayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetOwnersForBadgeSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getOwnersForBadge)**
       parameters:
         - name: collectionId
           in: path
@@ -565,9 +570,9 @@ paths:
         - **[BitBadges Documentation](https://docs.bitbadges.io)**
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBadgeActivityPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBadgeActivitySuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getBadgeActivity)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBadgeActivityPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBadgeActivitySuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getBadgeActivity)**
       tags:
         - Badges
       parameters:
@@ -630,9 +635,9 @@ paths:
         - **[BitBadges Documentation](https://docs.bitbadges.io)**
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iRefreshMetadataPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iRefreshMetadataSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#refreshMetadata)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iRefreshMetadataPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iRefreshMetadataSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#refreshMetadata)**
       parameters:
         - name: collectionId
           in: path
@@ -710,9 +715,9 @@ paths:
         - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claim-builder)**
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCompleteClaimPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCompleteClaimSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#completeClaim)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCompleteClaimPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCompleteClaimSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#completeClaim)**
       parameters:
         - name: claimId
           in: path
@@ -792,9 +797,9 @@ paths:
         - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claim-builder)**
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSimulateClaimPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSimulateClaimSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#simulateClaim)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSimulateClaimPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSimulateClaimSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#simulateClaim)**
       parameters:
         - name: claimId
           in: path
@@ -859,9 +864,9 @@ paths:
         - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claim-builder)**
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetReservedClaimCodesPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetReservedClaimCodesSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getReservedCodes)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetReservedClaimCodesPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetReservedClaimCodesSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getReservedCodes)**
       parameters:
         - name: claimId
           in: path
@@ -923,9 +928,9 @@ paths:
         - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claim-builder)**
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetClaimAttemptStatusPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetClaimAttemptStatusSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getClaimAttemptStatus)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetClaimAttemptStatusPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetClaimAttemptStatusSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getClaimAttemptStatus)**
       parameters:
         - name: claimAttemptId
           in: path
@@ -976,9 +981,9 @@ paths:
         ```
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateAccountInfoPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateAccountInfoSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#updateAccountInfo)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateAccountInfoPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateAccountInfoSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#updateAccountInfo)**
       requestBody:
         required: true
         content:
@@ -1023,9 +1028,9 @@ paths:
         ```
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBrowsePayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBrowseSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getBrowse)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBrowsePayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBrowseSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getBrowse)**
       responses:
         '200':
           description: Success response
@@ -1073,9 +1078,9 @@ paths:
         - **[Create, Generate, and Sign Txs](https://docs.bitbadges.io/for-developers/create-and-broadcast-txs)**
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/types/iBroadcastTxPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iBroadcastTxSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#broadcastTx)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/types/iBroadcastTxPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iBroadcastTxSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#broadcastTx)**
       requestBody:
         required: true
         content:
@@ -1122,9 +1127,9 @@ paths:
         - **[Create, Generate, and Sign Txs](https://docs.bitbadges.io/for-developers/create-and-broadcast-txs)**
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/types/iSimulateTxPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSimulateTxSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#simulateTx)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/types/iSimulateTxPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSimulateTxSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#simulateTx)**
       tags:
         - Transactions
       requestBody:
@@ -1171,9 +1176,9 @@ paths:
         ```
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateAddressListsPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateAddressListsSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#updateAddressLists)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateAddressListsPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateAddressListsSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#updateAddressLists)**
       requestBody:
         required: true
         content:
@@ -1217,9 +1222,9 @@ paths:
         ```
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateAddressListsPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateAddressListsSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#updateAddressLists)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateAddressListsPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateAddressListsSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#updateAddressLists)**
       requestBody:
         required: true
         content:
@@ -1263,9 +1268,9 @@ paths:
         ```
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteAddressListsPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteAddressListsSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#deleteAddressLists)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteAddressListsPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteAddressListsSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#deleteAddressLists)**
       requestBody:
         required: true
         content:
@@ -1324,9 +1329,9 @@ paths:
         - **[Fetching Lists](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/fetching-lists)**
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetAddressListsPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetAddressListsSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getAddressLists)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetAddressListsPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetAddressListsSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getAddressLists)**
       responses:
         '200':
           description: Success response
@@ -1373,9 +1378,9 @@ paths:
         - **[Sign In with BitBadges](https://docs.bitbadges.io/for-developers/authenticating-with-bitbadges)**
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iRotateSIWBBRequestPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iRotateSIWBBRequestSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#rotateSIWBBRequest)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iRotateSIWBBRequestPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iRotateSIWBBRequestSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#rotateSIWBBRequest)**
       requestBody:
         required: true
         content:
@@ -1421,9 +1426,9 @@ paths:
         - **[Sign In with BitBadges](https://docs.bitbadges.io/for-developers/authenticating-with-bitbadges)**
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteSIWBBRequestPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteSIWBBRequestSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#deleteSIWBBRequest)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteSIWBBRequestPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteSIWBBRequestSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#deleteSIWBBRequest)**
       requestBody:
         required: false
         content:
@@ -1469,9 +1474,9 @@ paths:
         - **[Sign In with BitBadges](https://docs.bitbadges.io/for-developers/authenticating-with-bitbadges)**
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateSIWBBRequestPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateSIWBBRequestSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#createSIWBBRequest)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateSIWBBRequestPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateSIWBBRequestSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#createSIWBBRequest)**
       requestBody:
         required: false
         content:
@@ -1522,9 +1527,9 @@ paths:
         - **[Sign In with BitBadges](https://docs.bitbadges.io/for-developers/authenticating-with-bitbadges)**
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetSIWBBRequestsForDeveloperAppPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetSIWBBRequestsForDeveloperAppSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getSIWBBRequestsForDeveloperApp)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetSIWBBRequestsForDeveloperAppPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetSIWBBRequestsForDeveloperAppSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getSIWBBRequestsForDeveloperApp)**
       responses:
         '200':
           description: Success response
@@ -1570,9 +1575,9 @@ paths:
         ```
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGenericBlockinVerifyPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGenericBlockinVerifySuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#verifySIWBBRequest)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGenericBlockinVerifyPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGenericBlockinVerifySuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#verifySIWBB**Request)
 
         Documentation References / Tutorials:
         - **[Sign In with BitBadges](https://docs.bitbadges.io/for-developers/authenticating-with-bitbadges)**
@@ -1618,9 +1623,9 @@ paths:
         ```
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGenericVerifyAssetsPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGenericVerifyAssetsSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#verifyOwnershipRequirements)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGenericVerifyAssetsPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGenericVerifyAssetsSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#verifyOwnershipRequi**rements)
 
         Documentation References / Tutorials:
         - **[Sign In with BitBadges](https://docs.bitbadges.io/for-developers/authenticating-with-bitbadges)**
@@ -1666,9 +1671,9 @@ paths:
         ```
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSendClaimAlertsPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSendClaimAlertsSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#sendClaimAlert)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSendClaimAlertsPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSendClaimAlertsSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#sendClaimAlert)**
       requestBody:
         required: true
         content:
@@ -1712,9 +1717,9 @@ paths:
         ```
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetClaimAlertsForCollectionPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetClaimAlertsForCollectionSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getClaimAlerts)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetClaimAlertsForCollectionPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetClaimAlertsForCollectionSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getClaimAlerts)**
       responses:
         '200':
           description: Success response
@@ -1752,9 +1757,9 @@ paths:
         ```
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetRefreshStatusPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetRefreshStatusSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getRefreshStatus)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetRefreshStatusPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetRefreshStatusSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getRefreshStatus)**
       parameters:
         - name: collectionId
           in: path
@@ -1792,9 +1797,9 @@ paths:
         ```
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetMapsPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetMapsSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getMaps)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetMapsPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetMapsSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getMaps)**
       responses:
         '200':
           description: Success response
@@ -1830,9 +1835,9 @@ paths:
         ```
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetMapValuesPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetMapValuesSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getMapValues)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetMapValuesPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetMapValuesSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getMapValues)**
       requestBody:
         required: true
         content:
@@ -1873,9 +1878,9 @@ paths:
         - **[Attestations](https://docs.bitbadges.io/for-developers/core-concepts/verifiable-attestations)**
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetAttestationsPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetAttestationsSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getAttestations)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetAttestationsPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetAttestationsSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getAttestations)**
       responses:
         '200':
           description: Success response
@@ -1912,9 +1917,9 @@ paths:
         - **[Attestations](https://docs.bitbadges.io/for-developers/core-concepts/verifiable-attestations)**
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateAttestationPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateAttestationSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#createAttestation)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateAttestationPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateAttestationSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#createAttestation)**
       requestBody:
         required: true
         content:
@@ -1947,9 +1952,9 @@ paths:
         ```
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateAttestationPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateAttestationSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#updateAttestation)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateAttestationPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateAttestationSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#updateAttestation)**
       requestBody:
         required: true
         content:
@@ -1982,9 +1987,9 @@ paths:
         ```
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteAttestationPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteAttestationSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#deleteAttestation)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteAttestationPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteAttestationSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#deleteAttestation)**
       requestBody:
         required: true
         content:
@@ -2018,9 +2023,9 @@ paths:
         ```
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iFilterBadgesInCollectionPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iFilterBadgesInCollectionSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#filterBadgesInCollection)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iFilterBadgesInCollectionPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iFilterBadgesInCollectionSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#filterBadgesInCollection)**
       responses:
         '200':
           description: Success response
@@ -2069,9 +2074,9 @@ paths:
         - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claim-builder)**
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchClaimsPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchClaimsSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#searchClaims)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchClaimsPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchClaimsSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#searchClaims)**
       responses:
         '200':
           description: Success response
@@ -2124,9 +2129,9 @@ paths:
         - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claim-builder)**
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetClaimsPayloadV1)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetClaimsSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getClaims)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetClaimsPayloadV1)
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetClaimsSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getClaims)**
       responses:
         '200':
           description: Success response
@@ -2169,9 +2174,9 @@ paths:
         - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claim-builder)**
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateClaimPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateClaimSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#createClaim)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateClaimPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateClaimSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#createClaim)**
       requestBody:
         required: true
         content:
@@ -2221,9 +2226,9 @@ paths:
         - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claim-builder)**
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateClaimPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateClaimSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#updateClaim)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateClaimPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateClaimSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#updateClaim)**
       requestBody:
         required: true
         content:
@@ -2274,9 +2279,9 @@ paths:
         - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claim-builder)**
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteClaimPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteClaimSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#deleteClaim)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteClaimPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteClaimSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#deleteClaim)**
       requestBody:
         required: true
         content:
@@ -2336,9 +2341,9 @@ paths:
         ```
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGenerateAppleWalletPassPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGenerateAppleWalletPassSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#generateAppleWalletPass)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGenerateAppleWalletPassPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGenerateAppleWalletPassSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#generateAppleWalletPass)**
       responses:
         '200':
           description: Success response
@@ -2373,9 +2378,9 @@ paths:
         ```
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGenerateGoogleWalletPassPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGenerateGoogleWalletPassSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#generateGoogleWalletPass)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGenerateGoogleWalletPassPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGenerateGoogleWalletPassSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#generateGoogleWalletPass)**
       responses:
         '200':
           description: Success response
@@ -2411,9 +2416,9 @@ paths:
         - **[API Authorization](https://docs.bitbadges.io/for-developers/sign-in-with-bitbadges)**
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iExchangeSIWBBAuthorizationCodePayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iExchangeSIWBBAuthorizationCodeSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#exchangeSIWBBAuthorizationCode)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iExchangeSIWBBAuthorizationCodePayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iExchangeSIWBBAuthorizationCodeSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#exchangeSIWBBAuthorizationCode)**
       responses:
         '200':
           description: Success response
@@ -2456,9 +2461,9 @@ paths:
         - **[API Authorization](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/authentication)**
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iOauthRevokePayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iOauthRevokeSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#revokeOauthAuthorization)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iOauthRevokePayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iOauthRevokeSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#revokeOauthAuthorization)**
       requestBody:
         required: true
         content:
@@ -2506,9 +2511,9 @@ paths:
         - **[Codes Plugin](https://docs.bitbadges.io/for-developers/claim-builder/universal-approach-claim-codes)**
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGenerateCodePayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGenerateCodeSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#generateCode)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGenerateCodePayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGenerateCodeSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#generateCode)**
       tags:
         - Claims
       responses:
@@ -2576,9 +2581,9 @@ paths:
         - **[Managing Claims](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/managing-claims)**
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetClaimAttemptsPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetClaimAttemptsSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getClaimAttempts)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetClaimAttemptsPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetClaimAttemptsSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getClaimAttempts)**
       responses:
         '200':
           description: Success response
@@ -2628,9 +2633,9 @@ paths:
         ```
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetGatedContentForClaimPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetGatedContentForClaimSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getGatedContentForClaim)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetGatedContentForClaimPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetGatedContentForClaimSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getGatedContentForClaim)**
       responses:
         '200':
           description: Success response
@@ -2685,9 +2690,9 @@ paths:
         ```
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iVerifyAttestationPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iVerifyAttestationSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#verifyAttestation)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iVerifyAttestationPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iVerifyAttestationSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#verifyAttestation)**
       responses:
         '200':
           description: Success response
@@ -2736,9 +2741,9 @@ paths:
         - **[Dynamic Stores](https://docs.bitbadges.io/for-developers/claim-builder/dynamic-stores)**
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iPerformStoreActionPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iPerformStoreActionSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#performStoreAction)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iPerformStoreActionPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iPerformStoreActionSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#performStoreAction)**
       responses:
         '200':
           description: Success response
@@ -2818,9 +2823,9 @@ paths:
         - **[Dynamic Stores](https://docs.bitbadges.io/for-developers/claim-builder/dynamic-stores)**
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iPerformStoreActionPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iPerformStoreActionSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#performStoreAction)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iPerformStoreActionPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iPerformStoreActionSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#performStoreAction)**
       responses:
         '200':
           description: Success response
@@ -2877,9 +2882,9 @@ paths:
         - **[Dynamic Stores](https://docs.bitbadges.io/for-developers/claim-builder/dynamic-stores)**
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iPerformStoreActionPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iPerformStoreActionSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#performStoreAction)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iPerformStoreActionPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iPerformStoreActionSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#performStoreAction)**
       responses:
         '200':
           description: Success response
@@ -2952,9 +2957,9 @@ paths:
         - **[Dynamic Stores](https://docs.bitbadges.io/for-developers/claim-builder/dynamic-stores)**
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iPerformStoreActionPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iPerformStoreActionSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#performStoreAction)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iPerformStoreActionPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iPerformStoreActionSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#performStoreAction)**
       responses:
         '200':
           description: Success response
@@ -3011,9 +3016,9 @@ paths:
         - **[Dynamic Stores](https://docs.bitbadges.io/for-developers/claim-builder/dynamic-stores)**
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetDynamicDataStoresPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetDynamicDataStoresSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getDynamicDataStores)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetDynamicDataStoresPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetDynamicDataStoresSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getDynamicDataStores)**
       responses:
         '200':
           description: Success response
@@ -3070,9 +3075,9 @@ paths:
         - **[Dynamic Stores](https://docs.bitbadges.io/for-developers/claim-builder/dynamic-stores)**
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchDynamicDataStoresPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchDynamicDataStoresSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#searchDynamicDataStores)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchDynamicDataStoresPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchDynamicDataStoresSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#searchDynamicDataStores)**
       responses:
         '200':
           description: Success response
@@ -3129,9 +3134,9 @@ paths:
         - **[Dynamic Stores](https://docs.bitbadges.io/for-developers/claim-builder/dynamic-stores)**
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetDynamicDataActivityPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetDynamicDataActivitySuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getDynamicDataActivity)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetDynamicDataActivityPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetDynamicDataActivitySuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getDynamicDataActivity)**
       responses:
         '200':
           description: Success response
@@ -3185,9 +3190,9 @@ paths:
         ```
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchApplicationsPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchApplicationsSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#searchApplications)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchApplicationsPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchApplicationsSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#searchApplications)**
       responses:
         '200':
           description: Success response
@@ -3241,9 +3246,9 @@ paths:
         ```
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetApplicationsPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetApplicationsSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getApplications)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetApplicationsPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetApplicationsSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getApplications)**
       responses:
         '200':
           description: Success response
@@ -3285,9 +3290,9 @@ paths:
         ```
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateApplicationPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateApplicationSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#createApplication)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateApplicationPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateApplicationSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#createApplication)**
       responses:
         '200':
           description: Success response
@@ -3328,9 +3333,9 @@ paths:
         ```
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateApplicationPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateApplicationSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#updateApplication)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateApplicationPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateApplicationSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#updateApplication)**
       responses:
         '200':
           description: Success response
@@ -3371,9 +3376,9 @@ paths:
         ```
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteApplicationPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteApplicationSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#deleteApplication)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteApplicationPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteApplicationSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#deleteApplication)**
       responses:
         '200':
           description: Success response
@@ -3418,9 +3423,9 @@ paths:
         ```
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCalculatePointsPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCalculatePointsSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#calculatePoints)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCalculatePointsPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCalculatePointsSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#calculatePoints)**
       responses:
         '200':
           description: Success response
@@ -3462,9 +3467,9 @@ paths:
         ```
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetPointsActivityPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetPointsActivitySuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getPointsActivity)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetPointsActivityPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetPointsActivitySuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getPointsActivity)**
       responses:
         '200':
           description: Success response
@@ -3506,9 +3511,9 @@ paths:
         ```
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetPluginsPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetPluginSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getPlugins)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetPluginsPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetPluginSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getPlugins)**
       responses:
         '200':
           description: Success response
@@ -3550,9 +3555,9 @@ paths:
         ```
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchPluginsPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchPluginsSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#searchPlugins)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchPluginsPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchPluginsSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#searchPlugins)**
       responses:
         '200':
           description: Success response
@@ -3594,9 +3599,9 @@ paths:
         ```
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetUtilityListingsPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetUtilityListingsSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getUtilityListings)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetUtilityListingsPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetUtilityListingsSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getUtilityListings)**
       responses:
         '200':
           description: Success response
@@ -3637,9 +3642,9 @@ paths:
         ```
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchUtilityListingsPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchUtilityListingsSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#searchUtilityListings)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchUtilityListingsPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchUtilityListingsSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#searchUtilityListings)**
       responses:
         '200':
           description: Success response
@@ -3680,9 +3685,9 @@ paths:
         ```
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateUtilityListingPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateUtilityListingSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#createUtilityListing)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateUtilityListingPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateUtilityListingSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#createUtilityListing)**
       responses:
         '200':
           description: Success response
@@ -3723,9 +3728,9 @@ paths:
         ```
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateUtilityListingPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateUtilityListingSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#updateUtilityListing)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateUtilityListingPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateUtilityListingSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#updateUtilityListing)**
       responses:
         '200':
           description: Success response
@@ -3767,9 +3772,9 @@ paths:
         ```
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteUtilityListingPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteUtilityListingSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#deleteUtilityListing)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteUtilityListingPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteUtilityListingSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#deleteUtilityListing)**
       responses:
         '200':
           description: Success response
@@ -3811,9 +3816,9 @@ paths:
         ```
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCheckIfSignedInPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCheckIfSignedInSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#checkIfSignedIn)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCheckIfSignedInPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCheckIfSignedInSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#checkIfSignedIn)**
       tags:
         - Sign In with BitBadges
       responses:
@@ -3852,9 +3857,9 @@ paths:
         ```
 
         SDK Links:
-        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCheckClaimSuccessPayload)
-        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCheckClaimSuccessSuccessResponse)
-        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#checkClaimSuccess)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCheckClaimSuccessPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCheckClaimSuccessSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#checkClaimSuccess)**
       tags:
         - Claims
       responses:
