@@ -4,6 +4,8 @@ info:
   description: |-
     # Introduction
     The BitBadges API is a RESTful API that enables developers to interact with the BitBadges blockchain and indexer. This API provides comprehensive access to the BitBadges ecosystem, allowing you to query and interact with digital badges, collections, accounts, blockchain data, and more.
+    For complete documentation, see the [BitBadges Documentation](https://docs.bitbadges.io/for-developers/bitbadges-api/api)
+    and use along with this reference.
 
     # Getting Started
 
@@ -15,6 +17,38 @@ info:
     ```
     x-api-key: your-api-key-here
     ```
+
+    <br />
+
+    ## User Authentication
+    Most read-only applications can function with just an API key. However, if you need to access private user data or perform actions on behalf of users, you have two options:
+
+    ### OAuth 2.0 (Sign In with BitBadges)
+    For performing actions on behalf of other users, use the standard OAuth 2.0 flow via Sign In with BitBadges.
+    See the [Sign In with BitBadges documentation](https://docs.bitbadges.io/for-developers/authenticating-with-bitbadges) for details.
+
+    You will pass the access token in the Authorization header:
+    ```
+    Authorization: Bearer your-access-token-here
+    ```
+
+    ### Password Self-Approve Method
+    For automating actions for your own account:
+    1. Set up an approved password sign in in your account settings tab on https://bitbadges.io with desired scopes
+    2. Sign in using:
+    ```typescript
+    const { message } = await BitBadgesApi.getSignInChallenge(...);
+    const verificationRes = await BitBadgesApi.verifySignIn({
+        message,
+        signature: '', //Empty string
+        password: '...'
+    })
+    ```
+
+    Note: This method uses HTTP session cookies. Ensure your requests support credentials (e.g. axios: { withCredentials: true }).
+
+
+    <br />
 
     ## SDK Integration
     The recommended way to interact with the API is through our TypeScript/JavaScript SDK:
@@ -38,6 +72,8 @@ info:
       }]
     });
     ```
+
+    <br />
 
     # Tiers
     There are 3 tiers of API keys, each with different rate limits and permissions. See the pricing page for more details: https://bitbadges.io/pricing
@@ -72,6 +108,8 @@ info:
     }
     ```
 
+    <br />
+
     ## Pagination
     Cursor-based pagination is used for list endpoints:
     ```typescript
@@ -81,6 +119,8 @@ info:
       hasMore: boolean
     }
     ```
+
+    <br />
 
     # Best Practices
     1. **Rate Limiting**: Implement proper rate limit handling
@@ -93,6 +133,7 @@ info:
     - [SDK Documentation](https://docs.bitbadges.io/for-developers/bitbadges-sdk/overview)
     - [Developer Portal](https://bitbadges.io/developer)
     - [GitHub SDK Repository](https://github.com/bitbadges/bitbadgesjs)
+    - [Quickstarter Repository](https://github.com/bitbadges/bitbadges-quickstart)
 
     # Support
     - [Contact Page](https://bitbadges.io/contact)
@@ -136,7 +177,7 @@ paths:
       operationId: getAccounts
       summary: Get Accounts
       description: |
-        Retrieves accounts and accompanying details.
+        Retrieves accounts and accompanying details. This route is all-inclusive and uses a view-based approach to fetch specific data about the account. See more in the tutorial below.
 
         ```tsx
         const accountsRes = await BitBadgesApi.getAccounts({
@@ -157,8 +198,26 @@ paths:
         const account = accountsRes.accounts[0]
         ```
 
+        ## Authentication Details
+        - **Public Data**: Available with API key only
+          - Basic profile information
+          - Public badge balances
+          - Public activity
+          - Etc
+
+        - **Private Data** (requires user authentication):
+          - Notification preferences
+          - Private Attestations
+          - Private activity, etc
+          - Etc
+
         Documentation References / Tutorials:
         - **[Fetching Accounts](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/fetching-accounts)**
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetAccountsPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetAccountsSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getAccounts)
       tags:
         - Accounts
       responses:
@@ -197,9 +256,10 @@ paths:
       summary: Get Collections
       tags:
         - Badges
-      description: |-
-        Retrieves badge collections and associated details.
-          ```tsx
+      description: |
+        Retrieves badge collections and associated details. This route is all-inclusive and uses a view-based approach to fetch specific data about collections, including metadata, balances, owners, and more.
+
+        ```tsx
         const res = await BitBadgesApi.getCollections({
           collectionsToFetch: [
             {
@@ -218,10 +278,17 @@ paths:
             },
           ],
         })
+
         const collection = res.collections[0]
         ```
+
         Documentation References / Tutorials:
         - **[Fetching Collections](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/fetching-collections)**
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetCollectionsPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetCollectionsSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getCollections)
       responses:
         '200':
           description: Success response
@@ -255,15 +322,21 @@ paths:
     post:
       operationId: getBadgeBalanceByAddress
       summary: Get Badge Balances
-      description: |-
+      description: |
         Retrieves the balance of a specific address for a collection.
 
         ```tsx
-        const res = await BitBadgesApi.getBadgeBalanceByAddress(...);
+        const res = await BitBadgesApi.getBadgeBalanceByAddress(collectionId, address, { ...options });
+        console.log(res);
         ```
 
         Documentation References / Tutorials:
         - **[Fetching Balances](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/fetching-balances)**
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBadgeBalanceByAddressPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBadgeBalanceByAddressSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getBadgeBalanceByAddress)
       tags:
         - Badges
       parameters:
@@ -310,11 +383,19 @@ paths:
     post:
       operationId: getStatus
       summary: Get Status
-      description: |-
+      description: |
         Gets the current status details about the blockchain / indexer (gas, block height, etc).
-          ```tsx
-          const res = await BitBadgesApi.getStatus();
-          ```
+        ```tsx
+        const res = await BitBadgesApi.getStatus();
+        ```
+
+        Documentation References / Tutorials:
+        - **[BitBadges Documentation](https://docs.bitbadges.io)**
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetStatusPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetStatusSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getStatus)
       tags:
         - Miscellanous
       responses:
@@ -349,12 +430,21 @@ paths:
     post:
       operationId: searchByValue
       summary: Search
-      description: |-
-        description: |
-          Searches for collections, badges, accounts, and address lists based on the provided search value.
-          ```tsx
-          const res = await BitBadgesApi.getSearchResults(searchValue, { ... });
+      description: |
+        Searches for collections, badges, accounts, applications, maps, and address lists based on the provided search value.
+        This endpoint provides a unified search across multiple BitBadges resources.
+
+        ```tsx
+        const res = await BitBadgesApi.getSearchResults(searchValue, { ...options });
         ```
+
+        Documentation References / Tutorials:
+        - **[BitBadges Documentation](https://docs.bitbadges.io)**
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetSearchPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetSearchSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getSearchResults)
       tags:
         - Miscellanous
       parameters:
@@ -393,15 +483,27 @@ paths:
       summary: Get Badge Owners
       tags:
         - Badges
-      description: |-
+      description: |
         Retrieves the owners in a paginated format for a specific badge in a collection.
+        Returns a list of addresses and their corresponding balances for the specified badge ID.
 
         ```tsx
-        const res = await BitBadgesApi.getOwnersForBadge(...);
+        const res = await BitBadgesApi.getOwnersForBadge(
+          collectionId,
+          badgeId,
+          {
+            bookmark: '...'
+          }
+        );
         ```
 
         Documentation References / Tutorials:
         - **[Fetching Balances](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/fetching-balances)**
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetOwnersForBadgePayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetOwnersForBadgeSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getOwnersForBadge)
       parameters:
         - name: collectionId
           in: path
@@ -446,11 +548,26 @@ paths:
     post:
       operationId: getBadgeActivity
       summary: Get Badge Activity
-      description: |-
+      description: |
         Retrieves the activity in a paginated format for a specific badge in a collection.
+
         ```tsx
-        const res = await BitBadgesApi.getBadgeActivity(...);
+        const res = await BitBadgesApi.getBadgeActivity(
+          collectionId,
+          badgeId,
+          {
+            bookmark: '...'
+          }
+        );
         ```
+
+        Documentation References / Tutorials:
+        - **[BitBadges Documentation](https://docs.bitbadges.io)**
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBadgeActivityPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBadgeActivitySuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getBadgeActivity)
       tags:
         - Badges
       parameters:
@@ -499,14 +616,23 @@ paths:
       summary: Refresh Metadata
       tags:
         - Badges
-      description: |-
+      description: |
         Triggers a metadata refresh for a specific collection. BitBadges API uses a refresh queue system for fetching anything off-chain.
-        This will refetch any details for the collection (such as metadata, balances, approval details, etc). Note it will reject if recently refreshed.
-        Uses a cooldown of 5 minutes.
+        This will refetch any details for the collection (such as metadata, balances if applicable, approval details, etc).
+
+        Note it will reject if recently refreshed to prevent abuse.
 
         ```tsx
-        const res = await BitBadgesApi.refreshMetadata(...);
+        const res = await BitBadgesApi.refreshMetadata(collectionId, { ...options });
         ```
+
+        Documentation References / Tutorials:
+        - **[BitBadges Documentation](https://docs.bitbadges.io)**
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iRefreshMetadataPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iRefreshMetadataSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#refreshMetadata)
       parameters:
         - name: collectionId
           in: path
@@ -548,14 +674,27 @@ paths:
       summary: Complete Claim
       tags:
         - Claims
-      description: |-
-        Completes a claim for a specific address. First, we simulate the claim and fail immediately if simulation does not pass.
-        If simulation is successful, we put the claim attempt into the queue amd return its ID.
-        You can then fetch its status via the claim attempt status endpoint.
+      description: |
+        Completes a claim for a specific address. This triggers a complete claim request to be sent to the queue.
+        Note, this route returning a success code does not mean the claim has been completed. You will need to
+        fetch its status via the attempt ID.
 
+        If you want to simulate the claim first, you can use the simulate claim endpoint.
+
+        _expectedVersion is required and must match the version of the claim. If you want to override this check,
+        specify -1.
+
+        The rest of the body should look like:
+        ```typescript
+        {
+          _expectedVersion: 1,
+          [pluginInstanceId1]: { ..bodyForPluginInstanceId1 },
+          [pluginInstanceId2]: { ..bodyForPluginInstanceId2 },
+        }
+        ```
 
         ```tsx
-        const res = await BitBadgesApi.completeClaim(claimId, address, { ...body }); //This route
+        const res = await BitBadgesApi.completeClaim(claimId, address, { _expectedVersion: 1, ...body });
         console.log(res.claimAttemptId);
 
         //Sleep 2 seconds
@@ -569,6 +708,11 @@ paths:
         - **[Managing Claims](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/managing-claims)**
         - **[Completing Claims](https://docs.bitbadges.io/for-developers/claim-builder/auto-complete-claims-w-bitbadges-api)**
         - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claim-builder)**
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCompleteClaimPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCompleteClaimSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#completeClaim)
       parameters:
         - name: claimId
           in: path
@@ -617,19 +761,40 @@ paths:
       tags:
         - Claims
       description: |-
-        Simulates a claim for a user. This will check if the claim is valid and that all criteria is satisfied. Note that it returns a fake ID for compatibility
-        with certain integrations. A successful response means simulation passed.
+        Simulates a claim for a user. This will check if the claim is valid and that all criteria is satisfied. This returns a fake ID for compatibility with certain integrations.
+        A successful response means simulation passed. This is instant and does not use the queue.
+
+        Note: There may be cases where the simulation passes but the claim fails. This may happen if state changes
+        between the simulation and the claim. It is always best practice to simulate first, but do not rely on the simulation
+        response for the final result.
 
         ```tsx
-        const res = await BitBadgesApi.simulateClaim(...);
+        const res = await BitBadgesApi.simulateClaim(claimId, address, { ...body });
         ```
 
+        _expectedVersion is required and must match the version of the claim. If you want to override this check,
+        specify -1.
+
+        The rest of the body should look like:
+        ```typescript
+        {
+          _expectedVersion: 1,
+          _specificInstanceIds: [pluginInstanceId1, pluginInstanceId2], //Optional: simulate only specific instances
+          [pluginInstanceId1]: { ..bodyForPluginInstanceId1 },
+          [pluginInstanceId2]: { ..bodyForPluginInstanceId2 },
+        }
+        ```
 
         Documentation References / Tutorials:
         - **[Getting Claims](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/getting-claims)**
         - **[Managing Claims](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/managing-claims)**
         - **[Completing Claims](https://docs.bitbadges.io/for-developers/claim-builder/auto-complete-claims-w-bitbadges-api)**
         - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claim-builder)**
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSimulateClaimPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSimulateClaimSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#simulateClaim)
       parameters:
         - name: claimId
           in: path
@@ -678,20 +843,25 @@ paths:
       tags:
         - Claims
       description: |-
-        Retrieves the reserved codes for a claim. For on-chain approvals, we use a claim code reserve
-        system where the claim code is to be used in the eventual blockchain transaction.
+        Retrieves the reserved codes for a claim.
+
+        For on-chain claims / approvals, we use a code reservation system where the claim code is to be used in the eventual blockchain transaction.
         This is used to bridge the gap between the off-chain claim and on-chain approval / transfer.
 
         ```tsx
-        const res = await BitBadgesApi.getReservedCodes(...);
+        const res = await BitBadgesApi.getReservedCodes(claimId, address);
         ```
-
 
         Documentation References / Tutorials:
         - **[Getting Claims](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/getting-claims)**
         - **[Managing Claims](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/managing-claims)**
         - **[Completing Claims](https://docs.bitbadges.io/for-developers/claim-builder/auto-complete-claims-w-bitbadges-api)**
         - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claim-builder)**
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetReservedClaimCodesPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetReservedClaimCodesSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getReservedCodes)
       parameters:
         - name: claimId
           in: path
@@ -743,7 +913,7 @@ paths:
         Retrieves the status of a claim attempt by the ID received when submitting.
 
         ```tsx
-        const res = await BitBadgesApi.getClaimAttemptStatus(...);
+        const res = await BitBadgesApi.getClaimAttemptStatus(claimAttemptId);
         ```
 
         Documentation References / Tutorials:
@@ -751,6 +921,11 @@ paths:
         - **[Managing Claims](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/managing-claims)**
         - **[Completing Claims](https://docs.bitbadges.io/for-developers/claim-builder/auto-complete-claims-w-bitbadges-api)**
         - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claim-builder)**
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetClaimAttemptStatusPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetClaimAttemptStatusSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getClaimAttemptStatus)
       parameters:
         - name: claimAttemptId
           in: path
@@ -793,9 +968,17 @@ paths:
         - Accounts
       description: |-
         Updates the profile/account information for a user. Only the provided fields will be updated.
+
+        This is what is used in the account settings tab.
+
         ```tsx
         const res = await BitBadgesApi.updateAccountInfo(...);
         ```
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateAccountInfoPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateAccountInfoSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#updateAccountInfo)
       requestBody:
         required: true
         content:
@@ -833,10 +1016,16 @@ paths:
       tags:
         - Miscellanous
       description: |-
-        Gets details for a browse/explore page.
+        Gets results for the Explore page.
+
         ```tsx
-        const res = await BitBadgesApi.GetBrowse(...);
+        const res = await BitBadgesApi.getBrowse(...);
         ```
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBrowsePayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBrowseSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getBrowse)
       responses:
         '200':
           description: Success response
@@ -873,15 +1062,20 @@ paths:
         - Transactions
       summary: Broadcast Transaction
       description: |-
-        Broadcasts a transaction to the blockchain.
+        Broadcasts a transaction to the blockchain. This will broadcast the transaction to the blockchain
+        via the BitBadges blockchain node.
 
         ```tsx
         const res = await BitBadgesApi.broadcastTx(...);
         ```
 
-
         Documentation References / Tutorials:
         - **[Create, Generate, and Sign Txs](https://docs.bitbadges.io/for-developers/create-and-broadcast-txs)**
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/types/iBroadcastTxPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iBroadcastTxSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#broadcastTx)
       requestBody:
         required: true
         content:
@@ -917,13 +1111,20 @@ paths:
       operationId: simulateTx
       summary: Simulate Transaction
       description: |-
-        Simulates a transaction on the blockchain.
+        Simulates a transaction on the blockchain. This will simulate the transaction on the blockchain
+        via the BitBadges blockchain node.
+
         ```tsx
         const res = await BitBadgesApi.simulateTx(...);
         ```
 
         Documentation References / Tutorials:
         - **[Create, Generate, and Sign Txs](https://docs.bitbadges.io/for-developers/create-and-broadcast-txs)**
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/types/iSimulateTxPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSimulateTxSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#simulateTx)
       tags:
         - Transactions
       requestBody:
@@ -963,11 +1164,16 @@ paths:
         - Address Lists
       summary: Update Address Lists
       description: |-
-        Updates off-chain address lists.
+        Updates address lists for the user.
 
         ```tsx
         const res = await BitBadgesApi.updateAddressLists(...);
         ```
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateAddressListsPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateAddressListsSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#updateAddressLists)
       requestBody:
         required: true
         content:
@@ -1009,6 +1215,11 @@ paths:
         ```tsx
         const res = await BitBadgesApi.createAddressLists(...);
         ```
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateAddressListsPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateAddressListsSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#updateAddressLists)
       requestBody:
         required: true
         content:
@@ -1046,10 +1257,15 @@ paths:
         - Address Lists
       description: |-
         Deletes address lists. Must be created off-chain.
+
         ```tsx
         const res = await BitBadgesApi.deleteAddressLists(...);
-
         ```
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteAddressListsPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteAddressListsSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#deleteAddressLists)
       requestBody:
         required: true
         content:
@@ -1087,7 +1303,9 @@ paths:
       tags:
         - Address Lists
       description: |-
-        Gets address lists. Can be on-chain or off-chain.
+        Gets address lists. Can be on-chain or off-chain. This uses an all-in-one approach with views and paginations
+        to fetch details about the list all in one place.
+
         ```tsx
         const listsRes = await BitBadgesApi.getAddressLists([{
             //example
@@ -1102,9 +1320,13 @@ paths:
         const list = listsRes[0];
         ```
 
-
         Documentation References / Tutorials:
         - **[Fetching Lists](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/fetching-lists)**
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetAddressListsPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetAddressListsSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getAddressLists)
       responses:
         '200':
           description: Success response
@@ -1141,11 +1363,19 @@ paths:
       tags:
         - Sign In with BitBadges
       description: |-
-        Rotates a Sign In with BitBadges request.
+        Rotates a Sign In with BitBadges request. This is typically used to rotate a QR code to a new value.
 
         ```tsx
         const res = await BitBadgesApi.rotateSIWBBRequest(...);
         ```
+
+        Documentation References / Tutorials:
+        - **[Sign In with BitBadges](https://docs.bitbadges.io/for-developers/authenticating-with-bitbadges)**
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iRotateSIWBBRequestPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iRotateSIWBBRequestSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#rotateSIWBBRequest)
       requestBody:
         required: true
         content:
@@ -1181,11 +1411,19 @@ paths:
       tags:
         - Sign In with BitBadges
       description: |-
-        Deletes a authentication code from the user's account.
+        Deletes an authentication code from the user's account.
 
         ```tsx
         const res = await BitBadgesApi.deleteSIWBBRequest(...);
         ```
+
+        Documentation References / Tutorials:
+        - **[Sign In with BitBadges](https://docs.bitbadges.io/for-developers/authenticating-with-bitbadges)**
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteSIWBBRequestPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteSIWBBRequestSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#deleteSIWBBRequest)
       requestBody:
         required: false
         content:
@@ -1226,6 +1464,14 @@ paths:
         ```tsx
         const res = await BitBadgesApi.createSIWBBRequest(...);
         ```
+
+        Documentation References / Tutorials:
+        - **[Sign In with BitBadges](https://docs.bitbadges.io/for-developers/authenticating-with-bitbadges)**
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateSIWBBRequestPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateSIWBBRequestSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#createSIWBBRequest)
       requestBody:
         required: false
         content:
@@ -1265,11 +1511,20 @@ paths:
         if you are authenticating in-person and want to pre-fetch all authentication details
         to avoid doing it at verification time.
 
-        This will return the actual authentication details, not just the codes.
+        This will return the actual authentication details, not just the codes. You will still have to exchange
+        the code for the access token / confirmations.
 
         ```tsx
         const res = await BitBadgesApi.getSIWBBRequestsForDeveloperApp(...);
         ```
+
+        Documentation References / Tutorials:
+        - **[Sign In with BitBadges](https://docs.bitbadges.io/for-developers/authenticating-with-bitbadges)**
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetSIWBBRequestsForDeveloperAppPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetSIWBBRequestsForDeveloperAppSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getSIWBBRequestsForDeveloperApp)
       responses:
         '200':
           description: Success response
@@ -1310,11 +1565,14 @@ paths:
         that will handle verification + checking asset ownership requirements for you.
         Note that you can also implement this yourself or use the getAndVerifySIWBBRequest route.
 
-
         ```tsx
         const res = await BitBadgesApi.verifySIWBBRequest(...);
         ```
 
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGenericBlockinVerifyPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGenericBlockinVerifySuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#verifySIWBBRequest)
 
         Documentation References / Tutorials:
         - **[Sign In with BitBadges](https://docs.bitbadges.io/for-developers/authenticating-with-bitbadges)**
@@ -1359,6 +1617,11 @@ paths:
         const res = await BitBadgesApi.verifyOwnershipRequirements(...);
         ```
 
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGenericVerifyAssetsPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGenericVerifyAssetsSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#verifyOwnershipRequirements)
+
         Documentation References / Tutorials:
         - **[Sign In with BitBadges](https://docs.bitbadges.io/for-developers/authenticating-with-bitbadges)**
       responses:
@@ -1401,6 +1664,11 @@ paths:
         ```tsx
         const res = await BitBadgesApi.sendClaimAlert(...);
         ```
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSendClaimAlertsPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSendClaimAlertsSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#sendClaimAlert)
       requestBody:
         required: true
         content:
@@ -1437,10 +1705,16 @@ paths:
       tags:
         - Claim Alerts
       description: |-
-        Gets claim alerts for a collection.
+        Gets claim alerts for a collection. Must be the manager of the collection to get alerts.
+
         ```tsx
         const res = await BitBadgesApi.getClaimAlerts(...);
         ```
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetClaimAlertsForCollectionPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetClaimAlertsForCollectionSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getClaimAlerts)
       responses:
         '200':
           description: Success response
@@ -1476,6 +1750,11 @@ paths:
         ```tsx
         const res = await BitBadgesApi.getRefreshStatus(...);
         ```
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetRefreshStatusPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetRefreshStatusSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getRefreshStatus)
       parameters:
         - name: collectionId
           in: path
@@ -1503,11 +1782,19 @@ paths:
       tags:
         - Maps and Protocols
       description: |-
-        Gets maps for a collection.
+        Gets map data. Maps are created and stored on-chain. They are key-value objects which can have certain properties
+        like restricting who sets which values, expected formatting, and more.
+
+        For getting actual values, use the getMapValues endpoint.
 
         ```tsx
         const res = await BitBadgesApi.getMaps(...);
         ```
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetMapsPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetMapsSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getMaps)
       responses:
         '200':
           description: Success response
@@ -1541,6 +1828,11 @@ paths:
         ```tsx
         const res = await BitBadgesApi.getMapValues(...);
         ```
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetMapValuesPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetMapValuesSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getMapValues)
       requestBody:
         required: true
         content:
@@ -1567,15 +1859,23 @@ paths:
       tags:
         - Attestations
       description: |-
-        Gets a verifiable attestation.
+        Gets a verifiable attestation. Attestations are private-by-default credentials that can be used to verify
+        anything. If you are a provider, you can request attestations via the Sign In with BitBadges flow, claim flow,
+        or directly.
+
+        Attestations are private by default but can be showcased on profiles or selectively revealed to others.
 
         ```tsx
-        const res = await BitBadgesApi.getAttestation(...);
+        const res = await BitBadgesApi.getAttestations(...);
         ```
-
 
         Documentation References / Tutorials:
         - **[Attestations](https://docs.bitbadges.io/for-developers/core-concepts/verifiable-attestations)**
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetAttestationsPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetAttestationsSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getAttestations)
       responses:
         '200':
           description: Success response
@@ -1602,13 +1902,19 @@ paths:
         - Attestations
       summary: Create Attestation
       description: |-
-        Creates a attestation.
+        Creates an attestation.
+
         ```tsx
         const res = await BitBadgesApi.createAttestation(...);
         ```
 
         Documentation References / Tutorials:
         - **[Attestations](https://docs.bitbadges.io/for-developers/core-concepts/verifiable-attestations)**
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateAttestationPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateAttestationSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#createAttestation)
       requestBody:
         required: true
         content:
@@ -1634,10 +1940,16 @@ paths:
         - Attestations
       summary: Update Attestation
       description: |-
-        Updates a attestation.
+        Updates an attestation.
+
         ```tsx
         const res = await BitBadgesApi.updateAttestation(...);
         ```
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateAttestationPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateAttestationSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#updateAttestation)
       requestBody:
         required: true
         content:
@@ -1663,10 +1975,16 @@ paths:
       operationId: deleteAttestation
       summary: Delete Attestation
       description: |-
-        Deletes a attestation.
+        Deletes an attestation.
+
         ```tsx
         const res = await BitBadgesApi.deleteAttestation(...);
         ```
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteAttestationPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteAttestationSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#deleteAttestation)
       requestBody:
         required: true
         content:
@@ -1693,11 +2011,16 @@ paths:
       operationId: filterBadgesInCollection
       summary: Custom Filter Badges
       description: |-
-        Filter badges in a collection based on filter values.
+        Filter badges in a collection.
 
         ```tsx
         const res = await BitBadgesApi.filterBadgesInCollection(...);
         ```
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iFilterBadgesInCollectionPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iFilterBadgesInCollectionSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#filterBadgesInCollection)
       responses:
         '200':
           description: Success response
@@ -1719,73 +2042,12 @@ paths:
             description: The collection ID to filter.
             $ref: '#/components/schemas/NumberType'
           required: true
-        - name: badgeIds
-          in: query
-          schema:
-            items:
-              $ref: '#/components/schemas/iUintRange'
-            description: Limit to specific badge IDs. Leave undefined to not filter by badge ID.
-            type: array
-            examples:
-              - - start: '1'
-                  end: '10'
-          required: false
-        - name: categories
-          in: query
-          schema:
-            items:
-              type: string
-            description: Limit to specific lists. Leave undefined to not filter by list.
-            type: array
-          required: false
-        - name: tags
-          in: query
-          schema:
-            items:
-              type: string
-            description: Limit to specific lists. Leave undefined to not filter by list.
-            type: array
-          required: false
-        - name: mostViewed
-          in: query
-          schema:
-            enum:
-              - daily
-              - allTime
-              - weekly
-              - monthly
-              - yearly
-            description: mostViewed is a special view that sorts by most viewed badges. May be incompatible with other filters.
-            type: string
-          required: false
-        - name: bookmark
-          in: query
-          schema:
-            description: Pagination bookmark. Leave undefined or "" for first request.
-            type: string
-          required: false
-        - name: attributes
-          in: query
-          schema:
-            items:
-              properties:
-                name:
-                  type: string
-                  examples:
-                    - Name
-                value:
-                  anyOf:
-                    - type: string
-                    - type: number
-                    - type: boolean
-              required:
-                - name
-                - value
-              additionalProperties: false
-              type: object
-            description: Attribute queries
-            type: array
-          required: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/iFilterBadgesInCollectionPayload'
   /claims/search:
     post:
       operationId: searchClaims
@@ -1793,7 +2055,8 @@ paths:
       tags:
         - Claims
       description: |-
-        Search for claims.
+        Search through your claims you are currently managing. This is what is used in the developer portal. For
+        public searches, use the main search endpoint.
 
         ```tsx
         const res = await BitBadgesApi.searchClaims(...);
@@ -1804,6 +2067,11 @@ paths:
         - **[Managing Claims](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/managing-claims)**
         - **[Completing Claims](https://docs.bitbadges.io/for-developers/claim-builder/auto-complete-claims-w-bitbadges-api)**
         - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claim-builder)**
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchClaimsPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchClaimsSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#searchClaims)
       responses:
         '200':
           description: Success response
@@ -1832,10 +2100,21 @@ paths:
       tags:
         - Claims
       description: |-
-        Retrieve claims by ID(s). If the claim is for a private list, you must also prove knowledge of the list ID.
+        Retrieve claims by ID(s). Certain state is not made available by default for scalability reasons and must
+        be requested explicitly.
+
+        To fetch private parameters and state, you must be the manager of the claim, signed in, and request it.
 
         ```tsx
-        const res = await BitBadgesApi.getClaims(...);
+        const res = await BitBadgesApi.getClaims({
+          claimsToFetch: [
+            {
+              claimId: '123',
+              fetchPrivateParams: true,
+              privateStatesToFetch: [instanceId1, instanceId2],
+            },
+          ],
+        });
         ```
 
         Documentation References / Tutorials:
@@ -1843,6 +2122,11 @@ paths:
         - **[Managing Claims](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/managing-claims)**
         - **[Completing Claims](https://docs.bitbadges.io/for-developers/claim-builder/auto-complete-claims-w-bitbadges-api)**
         - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claim-builder)**
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetClaimsPayloadV1)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetClaimsSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getClaims)
       responses:
         '200':
           description: Success response
@@ -1883,6 +2167,11 @@ paths:
         - **[Managing Claims](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/managing-claims)**
         - **[Completing Claims](https://docs.bitbadges.io/for-developers/claim-builder/auto-complete-claims-w-bitbadges-api)**
         - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claim-builder)**
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateClaimPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateClaimSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#createClaim)
       requestBody:
         required: true
         content:
@@ -1930,6 +2219,11 @@ paths:
         - **[Managing Claims](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/managing-claims)**
         - **[Completing Claims](https://docs.bitbadges.io/for-developers/claim-builder/auto-complete-claims-w-bitbadges-api)**
         - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claim-builder)**
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateClaimPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateClaimSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#updateClaim)
       requestBody:
         required: true
         content:
@@ -1978,6 +2272,11 @@ paths:
         - **[Managing Claims](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/managing-claims)**
         - **[Completing Claims](https://docs.bitbadges.io/for-developers/claim-builder/auto-complete-claims-w-bitbadges-api)**
         - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claim-builder)**
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteClaimPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteClaimSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#deleteClaim)
       requestBody:
         required: true
         content:
@@ -2016,7 +2315,7 @@ paths:
       description: |
         Generate an Apple Wallet pass based on the provided request body.
         ```tsx
-         <a
+          <a
               onClick={async () => {
                 const res = await BitBadgesApi.generateAppleWalletPass({
                   ...
@@ -2035,6 +2334,11 @@ paths:
               <img src="/images/add_to_apple_wallet.svg" style={{ width: 150 }} />
             </a>
         ```
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGenerateAppleWalletPassPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGenerateAppleWalletPassSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#generateAppleWalletPass)
       responses:
         '200':
           description: Success response
@@ -2063,6 +2367,15 @@ paths:
         - Sign In with BitBadges
       description: |
         Generate a Google Wallet pass based on the provided request body.
+
+        ```tsx
+        const res = await BitBadgesApi.generateGoogleWalletPass(...);
+        ```
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGenerateGoogleWalletPassPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGenerateGoogleWalletPassSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#generateGoogleWalletPass)
       responses:
         '200':
           description: Success response
@@ -2090,12 +2403,17 @@ paths:
       tags:
         - Sign In with BitBadges
       description: |-
-        Exchange either a refresh token or OAuth authorization code for a new access token.
+        Exchange either a refresh token or OAuth authorization code for an access token.
 
         IMPORTANT: Keep your client secret safe and secure.
 
         Documentation References / Tutorials:
         - **[API Authorization](https://docs.bitbadges.io/for-developers/sign-in-with-bitbadges)**
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iExchangeSIWBBAuthorizationCodePayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iExchangeSIWBBAuthorizationCodeSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#exchangeSIWBBAuthorizationCode)
       responses:
         '200':
           description: Success response
@@ -2136,6 +2454,11 @@ paths:
 
         Documentation References / Tutorials:
         - **[API Authorization](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/authentication)**
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iOauthRevokePayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iOauthRevokeSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#revokeOauthAuthorization)
       requestBody:
         required: true
         content:
@@ -2178,8 +2501,14 @@ paths:
         const data = await response.json();
         console.log(data.code); // The generated code
         ```
+
         Documentation References / Tutorials:
         - **[Codes Plugin](https://docs.bitbadges.io/for-developers/claim-builder/universal-approach-claim-codes)**
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGenerateCodePayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGenerateCodeSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#generateCode)
       tags:
         - Claims
       responses:
@@ -2231,7 +2560,8 @@ paths:
       tags:
         - Claims
       description: |-
-        Retrieves the attempts for a claim in a paginated format.
+        Retrieves the attempts for a claim in a paginated format. If you are the manager and authenticated, you
+        can also request failed attempts and view the errors.
 
         ```tsx
         const res = await BitBadgesApi.getClaimAttempts({
@@ -2244,6 +2574,11 @@ paths:
         Documentation References / Tutorials:
         - **[Getting Claims](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/getting-claims)**
         - **[Managing Claims](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/managing-claims)**
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetClaimAttemptsPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetClaimAttemptsSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getClaimAttempts)
       responses:
         '200':
           description: Success response
@@ -2284,19 +2619,18 @@ paths:
       tags:
         - Claims
       description: |-
-        Generates a unique code based on a seed and a zero-based index. This is used for the Codes plugin with claims.
+        If claims implement the rewards tab with in-site delivery, there may be gated URLs or content that is only
+        accessible to users who have completed the claim. This endpoint allows you to retrieve the gated content for a claim
+        if you are authenticated and meet the claim's gated content requirements.
 
         ```typescript
-        const response = await fetch('https://api.bitbadges.io/api/v0/claims/gatedContent/:claimId', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: {}
-        });
-        const data = await response.json();
-        console.log(data);
+        const res = await BitBadgesApi.getGatedContentForClaim(claimId);
         ```
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetGatedContentForClaimPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetGatedContentForClaimSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getGatedContentForClaim)
       responses:
         '200':
           description: Success response
@@ -2338,8 +2672,22 @@ paths:
         - Attestations
       description: |
         Verifies the attestation proofs well-formedness and signatures.
+
         This is a helper route for the verifyAttestation SDK function to outsource the verification logic
         to the server. Only supports BitBadges native schemes (bbs, standard).
+
+        NOTE: This is a helper route but should not be used as the final verification logic. This will check
+        cryptographic signatures, but you are responsible for checking the attestation's content, issuer, or
+        anything else.
+
+        ```tsx
+        const res = await BitBadgesApi.verifyAttestation(...);
+        ```
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iVerifyAttestationPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iVerifyAttestationSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#verifyAttestation)
       responses:
         '200':
           description: Success response
@@ -2383,6 +2731,14 @@ paths:
         ```tsx
         await BitBadgesApi.performStoreAction(...);
         ```
+
+        Documentation References / Tutorials:
+        - **[Dynamic Stores](https://docs.bitbadges.io/for-developers/claim-builder/dynamic-stores)**
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iPerformStoreActionPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iPerformStoreActionSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#performStoreAction)
       responses:
         '200':
           description: Success response
@@ -2457,6 +2813,14 @@ paths:
         ```tsx
         await BitBadgesApi.performStoreAction(...);
         ```
+
+        Documentation References / Tutorials:
+        - **[Dynamic Stores](https://docs.bitbadges.io/for-developers/claim-builder/dynamic-stores)**
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iPerformStoreActionPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iPerformStoreActionSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#performStoreAction)
       responses:
         '200':
           description: Success response
@@ -2508,6 +2872,14 @@ paths:
         ```tsx
         await BitBadgesApi.performBatchStoreAction(...);
         ```
+
+        Documentation References / Tutorials:
+        - **[Dynamic Stores](https://docs.bitbadges.io/for-developers/claim-builder/dynamic-stores)**
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iPerformStoreActionPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iPerformStoreActionSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#performStoreAction)
       responses:
         '200':
           description: Success response
@@ -2575,6 +2947,14 @@ paths:
         ```tsx
         await BitBadgesApi.performBatchStoreAction(...);
         ```
+
+        Documentation References / Tutorials:
+        - **[Dynamic Stores](https://docs.bitbadges.io/for-developers/claim-builder/dynamic-stores)**
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iPerformStoreActionPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iPerformStoreActionSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#performStoreAction)
       responses:
         '200':
           description: Success response
@@ -2609,7 +2989,7 @@ paths:
       tags:
         - Dynamic Stores
       description: |-
-        Fetches Dynamic Data Stores based on the provided criteria.
+        Fetches dynamic stores by ID(s).
 
         ```typescript
         const response = await fetch('https://api.bitbadges.io/api/v0/dynamicStores', {
@@ -2626,6 +3006,14 @@ paths:
         ```tsx
         await BitBadgesApi.getDynamicDataStores(...);
         ```
+
+        Documentation References / Tutorials:
+        - **[Dynamic Stores](https://docs.bitbadges.io/for-developers/claim-builder/dynamic-stores)**
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetDynamicDataStoresPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetDynamicDataStoresSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getDynamicDataStores)
       responses:
         '200':
           description: Success response
@@ -2660,7 +3048,7 @@ paths:
       tags:
         - Dynamic Stores
       description: |-
-        Searches for Dynamic Data Stores based on the provided criteria.
+        Searches for dynamic stores based on the provided criteria.
 
         ```typescript
         const response = await fetch('https://api.bitbadges.io/api/v0/dynamicStores/search', {
@@ -2677,6 +3065,14 @@ paths:
         ```tsx
         await BitBadgesApi.searchDynamicDataStores(...);
         ```
+
+        Documentation References / Tutorials:
+        - **[Dynamic Stores](https://docs.bitbadges.io/for-developers/claim-builder/dynamic-stores)**
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchDynamicDataStoresPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchDynamicDataStoresSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#searchDynamicDataStores)
       responses:
         '200':
           description: Success response
@@ -2711,7 +3107,7 @@ paths:
       tags:
         - Dynamic Stores
       description: |-
-        Fetches activity history for Dynamic Data Stores.
+        Fetches activity history for dynamic stores.
 
         ```typescript
         const response = await fetch('https://api.bitbadges.io/api/v0/dynamicStores/activity', {
@@ -2728,6 +3124,14 @@ paths:
         ```tsx
         await BitBadgesApi.getDynamicDataActivity(...);
         ```
+
+        Documentation References / Tutorials:
+        - **[Dynamic Stores](https://docs.bitbadges.io/for-developers/claim-builder/dynamic-stores)**
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetDynamicDataActivityPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetDynamicDataActivitySuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getDynamicDataActivity)
       responses:
         '200':
           description: Success response
@@ -2779,6 +3183,11 @@ paths:
         ```tsx
         await BitBadgesApi.searchApplications(...);
         ```
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchApplicationsPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchApplicationsSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#searchApplications)
       responses:
         '200':
           description: Success response
@@ -2830,6 +3239,11 @@ paths:
         ```tsx
         await BitBadgesApi.getApplications(...);
         ```
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetApplicationsPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetApplicationsSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getApplications)
       responses:
         '200':
           description: Success response
@@ -2869,6 +3283,11 @@ paths:
         ```tsx
         await BitBadgesApi.createApplication(...);
         ```
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateApplicationPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateApplicationSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#createApplication)
       responses:
         '200':
           description: Success response
@@ -2907,6 +3326,11 @@ paths:
         ```tsx
         await BitBadgesApi.updateApplication(...);
         ```
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateApplicationPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateApplicationSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#updateApplication)
       responses:
         '200':
           description: Success response
@@ -2945,6 +3369,11 @@ paths:
         ```tsx
         await BitBadgesApi.deleteApplication(...);
         ```
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteApplicationPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteApplicationSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#deleteApplication)
       responses:
         '200':
           description: Success response
@@ -2979,11 +3408,19 @@ paths:
       tags:
         - Applications
       description: |-
-        Calculates points for an application and page.
+        Calculates points for an application, page, and user.
+
+        Note: We use a heavy caching system, so you may not see the results immediately and may be rejected if
+        recently calculated.
 
         ```tsx
         await BitBadgesApi.calculatePoints(...);
         ```
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCalculatePointsPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCalculatePointsSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#calculatePoints)
       responses:
         '200':
           description: Success response
@@ -3023,6 +3460,11 @@ paths:
         ```tsx
         await BitBadgesApi.getPointsActivity(...);
         ```
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetPointsActivityPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetPointsActivitySuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getPointsActivity)
       responses:
         '200':
           description: Success response
@@ -3062,6 +3504,11 @@ paths:
         ```tsx
         await BitBadgesApi.getPlugins(...);
         ```
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetPluginsPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetPluginSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getPlugins)
       responses:
         '200':
           description: Success response
@@ -3101,6 +3548,11 @@ paths:
         ```tsx
         await BitBadgesApi.searchPlugins(...);
         ```
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchPluginsPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchPluginsSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#searchPlugins)
       responses:
         '200':
           description: Success response
@@ -3140,6 +3592,11 @@ paths:
         ```tsx
         await BitBadgesApi.getUtilityListings(...);
         ```
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetUtilityListingsPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetUtilityListingsSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getUtilityListings)
       responses:
         '200':
           description: Success response
@@ -3178,6 +3635,11 @@ paths:
         ```tsx
           await BitBadgesApi.searchUtilityListings(...);
         ```
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchUtilityListingsPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchUtilityListingsSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#searchUtilityListings)
       responses:
         '200':
           description: Success response
@@ -3216,6 +3678,11 @@ paths:
         ```tsx
         await BitBadgesApi.createUtilityListing(...);
         ```
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateUtilityListingPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateUtilityListingSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#createUtilityListing)
       responses:
         '200':
           description: Success response
@@ -3254,6 +3721,11 @@ paths:
         ```tsx
         await BitBadgesApi.updateUtilityListing(...);
         ```
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateUtilityListingPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateUtilityListingSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#updateUtilityListing)
       responses:
         '200':
           description: Success response
@@ -3293,6 +3765,11 @@ paths:
         ```tsx
         await BitBadgesApi.deleteUtilityListing(...);
         ```
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteUtilityListingPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteUtilityListingSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#deleteUtilityListing)
       responses:
         '200':
           description: Success response
@@ -3327,6 +3804,16 @@ paths:
       summary: Check Sign In Status
       description: |
         Checks if a user is currently signed in and returns their authentication status.
+
+        ```tsx
+        const res = await BitBadgesApi.checkIfSignedIn(...);
+        console.log(res.signedIn);
+        ```
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCheckIfSignedInPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCheckIfSignedInSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#checkIfSignedIn)
       tags:
         - Sign In with BitBadges
       responses:
@@ -3356,9 +3843,18 @@ paths:
       description: |
         Checks if a claim has been successfully completed.
 
+        This returns a success count based on how many times the user has completed the claim.
+
+        For on-demand, this will return 1 if the user has completed the claim. For indexed, this will return the number of times the user has completed the claim.
+
         ```tsx
         const res = await BitBadgesApi.checkClaimSuccess(...);
         ```
+
+        SDK Links:
+        - [Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCheckClaimSuccessPayload)
+        - [Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCheckClaimSuccessSuccessResponse)
+        - [SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#checkClaimSuccess)
       tags:
         - Claims
       responses:
@@ -3427,11 +3923,11 @@ components:
     userSignedIn:
       type: http
       scheme: cookie
-      description: User must be signed in with a valid session and correct scopes.
+      description: User must be signed in with a valid session and correct scopes. This can be done with OAuth 2.0 or an approved sign in.
     userMaybeSignedIn:
       type: http
       scheme: cookie
-      description: 'User must be signed in for certain requests that fetch sensitive information, but certain requests can be made without being signed in.'
+      description: 'User must be signed in for certain requests that fetch sensitive information, but certain requests can be made without being signed in. This can be done with OAuth 2.0 or an approved sign in.'
     userIsManager:
       type: http
       scheme: cookie
