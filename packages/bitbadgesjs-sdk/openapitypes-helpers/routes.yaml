@@ -218,11 +218,12 @@ paths:
 
         Documentation References / Tutorials:
         - **[Fetching Accounts](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/fetching-accounts)**
+        - **[Managing Views](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/managing-views)**
 
         SDK Links:
-        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetAccountsPayload)****
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetAccountsPayload)**
         - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetAccountsSuccessResponse)**
-        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getAccounts)****
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getAccounts)**
       tags:
         - Accounts
       responses:
@@ -289,6 +290,7 @@ paths:
 
         Documentation References / Tutorials:
         - **[Fetching Collections](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/fetching-collections)**
+        - **[Managing Views](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/managing-views)**
 
         SDK Links:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetCollectionsPayload)**
@@ -1327,6 +1329,7 @@ paths:
 
         Documentation References / Tutorials:
         - **[Fetching Lists](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/fetching-lists)**
+        - **[Managing Views](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/managing-views)**
 
         SDK Links:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetAddressListsPayload)**
