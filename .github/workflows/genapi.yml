@@ -5,6 +5,7 @@ on:
     paths:
       - 'packages/bitbadgesjs-sdk/**'
   workflow_dispatch:
+
 jobs:
   generate-docs:
     runs-on: ubuntu-latest
@@ -19,7 +20,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Node.js with NVM
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
@@ -27,7 +28,7 @@ jobs:
       - name: Install dependencies
         run: |
           npm install
-          npm install -g @stoplight/cli
+          npm install -g ts-node @stoplight/cli
 
       - name: Generate API documentation
         run: |
