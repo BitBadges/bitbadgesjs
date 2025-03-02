@@ -18,8 +18,6 @@ info:
     const collections = await BitBadgesApi.getCollections(...);
 
     ```
-
-
     See the
     [documentation](https://docs.bitbadges.io/for-developers/bitbadges-api/api)
     for information on how to use the API.
