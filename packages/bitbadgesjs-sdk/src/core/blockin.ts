@@ -120,9 +120,21 @@ export interface VerifySIWBBOptions {
  * @category SIWBB Authentication
  */
 export interface CodeGenQueryParams {
+  /**
+   * The redirect URI to redirect to after the user signs in. Must match the one in developer portal.
+   */
   redirect_uri?: string;
+  /**
+   * The client ID to use for the SIWBB request. Must match the one in developer portal.
+   */
   client_id: string;
+  /**
+   * The state to use for the SIWBB request.
+   */
   state?: string;
+  /**
+   * The scopes to request.
+   */
   scope?: string;
 
   // Display options
