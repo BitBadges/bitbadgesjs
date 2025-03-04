@@ -34,7 +34,7 @@ info:
 
     ### Password Self-Approve Method
     For automating actions for your own account:
-    1. Set up an approved password sign in in your account settings tab on https://bitbadges.io with desired scopes
+    1. Set up an approved password sign in in your account settings tab on https://bitbadges.io with desired scopes (e.g. `completeClaims`)
     2. Sign in using:
     ```typescript
     const { message } = await BitBadgesApi.getSignInChallenge(...);
@@ -50,8 +50,61 @@ info:
     ### Scopes
     Note that for proper authentication, you must have the proper scopes set.
 
-    See https://bitbadges.io/auth/linkgen for all available scopes. These will be included in
+    See [https://bitbadges.io/auth/linkgen](https://bitbadges.io/auth/linkgen) for a helper URL generation tool. The scopes will be included in
     the `scope` parameter of the SIWBB URL or set in your approved sign in settings.
+
+    ### Available Scopes
+
+    - **Report** (`report`)
+      Report users or collections.
+
+    - **Read Profile** (`readProfile`)
+      Read your private profile information. This includes your email, approved sign-in methods, connections, and other private information.
+
+    - **Read Address Lists** (`readAddressLists`)
+      Read private address lists on behalf of the user.
+
+    - **Manage Address Lists** (`manageAddressLists`)
+      Create, update, and delete address lists on behalf of the user (private or public).
+
+    - **Manage Applications** (`manageApplications`)
+      Create, update, and delete applications on behalf of the user.
+
+    - **Manage Utility Listings** (`manageUtilityListings`)
+      Create, update, and delete utility listings on behalf of the user.
+
+    - **Approve Sign In with BitBadges Requests** (`approveSiwbbRequests`)
+      Sign In with BitBadges on behalf of the user.
+
+    - **Read Authentication Codes** (`readAuthCodes`)
+      Read Authentication Codes on behalf of the user.
+
+    - **Delete Authentication Codes** (`deleteAuthCodes`)
+      Delete Authentication Codes on behalf of the user.
+
+    - **Send Claim Alerts** (`sendClaimAlerts`)
+      Send claim alerts on behalf of the user.
+
+    - **Read Claim Alerts** (`readClaimAlerts`)
+      Read claim alerts on behalf of the user. Note that claim alerts may contain sensitive information like claim codes, attestation IDs, etc.
+
+    - **Manage Attestations** (`manageAttestations`)
+      Manage attestations on behalf of the user. This includes creating, updating, and deleting attestations.
+
+    - **Read Attestations** (`readAttestations`)
+      Read attestations on behalf of the user.
+
+    - **Read Private Claim Data** (`readPrivateClaimData`)
+      Read private claim data on behalf of the user (e.g. codes, passwords, private user lists, etc.).
+
+    - **Complete Claims** (`completeClaims`)
+      Complete claims on behalf of the user.
+
+    - **Manage Off-Chain Balances** (`manageOffChainBalances`)
+      Manage off-chain balances on behalf of the user.
+
+    - **Embedded Wallet** (`embeddedWallet`)
+      Sign transactions on behalf of the user with their embedded wallet.
 
     <br />
 
