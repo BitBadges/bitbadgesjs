@@ -379,7 +379,7 @@ paths:
             schema:
               $ref: '#/components/schemas/iGetCollectionsPayload'
   '/collection/{collectionId}/balance/{address}':
-    post:
+    get:
       operationId: getBadgeBalanceByAddress
       summary: Get Badge Balances
       description: |
@@ -397,48 +397,48 @@ paths:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBadgeBalanceByAddressPayload)**
         - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBadgeBalanceByAddressSuccessResponse)**
         - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getBadgeBalanceByAddress)**
-      tags:
-        - Badges
-      parameters:
-        - name: collectionId
-          in: path
-          description: The ID of the collection containing the badge.
-          required: true
-          schema:
-            type: integer
-        - name: address
-          in: path
-          description: The address for which the badge balance is to be retrieved.
-          required: true
-          schema:
-            type: string
-        - name: x-api-key
-          in: header
-          description: BitBadges API Key for authentication
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Success response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/iGetBadgeBalanceByAddressSuccessResponse'
-        '400':
-          $ref: '#/components/responses/BadRequestResponse'
-        '401':
-          $ref: '#/components/responses/UnauthorizedResponse'
-        '500':
-          $ref: '#/components/responses/InternalServerErrorResponse'
-      security:
-        - apiKey: []
-      requestBody:
+    tags:
+      - Badges
+    parameters:
+      - name: collectionId
+        in: path
+        description: The ID of the collection containing the badge.
         required: true
+        schema:
+          type: integer
+      - name: address
+        in: path
+        description: The address for which the badge balance is to be retrieved.
+        required: true
+        schema:
+          type: string
+      - name: x-api-key
+        in: header
+        description: BitBadges API Key for authentication
+        required: true
+        schema:
+          type: string
+      - in: query
+        name: payload
+        style: form
+        explode: true
+        schema:
+          $ref: '#/components/schemas/iGetBadgeBalanceByAddressPayload'
+    responses:
+      '200':
+        description: Success response
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/iGetBadgeBalanceByAddressPayload'
+              $ref: '#/components/schemas/iGetBadgeBalanceByAddressSuccessResponse'
+      '400':
+        $ref: '#/components/responses/BadRequestResponse'
+      '401':
+        $ref: '#/components/responses/UnauthorizedResponse'
+      '500':
+        $ref: '#/components/responses/InternalServerErrorResponse'
+    security:
+      - apiKey: []
   /status:
     post:
       operationId: getStatus
@@ -3779,7 +3779,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/iDeleteUtilityListingPayload'
-
   /auth/status:
     post:
       operationId: checkSignInStatus
