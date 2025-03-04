@@ -379,7 +379,7 @@ paths:
             schema:
               $ref: '#/components/schemas/iGetCollectionsPayload'
   '/collection/{collectionId}/balance/{address}':
-    get:
+    post:
       operationId: getBadgeBalanceByAddress
       summary: Get Badge Balances
       description: |
@@ -418,12 +418,7 @@ paths:
         required: true
         schema:
           type: string
-      - in: query
-        name: payload
-        style: form
-        explode: true
-        schema:
-          $ref: '#/components/schemas/iGetBadgeBalanceByAddressPayload'
+
     responses:
       '200':
         description: Success response
@@ -437,6 +432,12 @@ paths:
         $ref: '#/components/responses/UnauthorizedResponse'
       '500':
         $ref: '#/components/responses/InternalServerErrorResponse'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/iGetBadgeBalanceByAddressPayload'
     security:
       - apiKey: []
   /status:
