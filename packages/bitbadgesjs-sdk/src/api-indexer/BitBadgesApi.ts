@@ -18,8 +18,9 @@ import { BitBadgesUserInfo } from './BitBadgesUserInfo.js';
 import type { iBitBadgesApi } from './base.js';
 import { BaseBitBadgesApi } from './base.js';
 import type { DynamicDataHandlerType, NativeAddress } from './docs/interfaces.js';
-import type {
+import {
   FilterBadgesInCollectionSuccessResponse,
+  FilterSuggestionsSuccessResponse,
   GetBadgeActivitySuccessResponse,
   GetBadgeBalanceByAddressSuccessResponse,
   GetOwnersForBadgeSuccessResponse,
@@ -30,10 +31,10 @@ import type {
   iFilterSuggestionsSuccessResponse,
   iGetBadgeActivityPayload,
   iGetBadgeBalanceByAddressPayload,
+  iGetBadgeBalanceByAddressSuccessResponse,
   iGetOwnersForBadgePayload,
   iRefreshMetadataPayload
 } from './requests/collections.js';
-import { FilterSuggestionsSuccessResponse } from './requests/collections.js';
 import {
   GetMapValuesSuccessResponse,
   GetMapsSuccessResponse,
@@ -184,7 +185,7 @@ import {
   iGetClaimAlertsForCollectionSuccessResponse,
   iGetClaimAttemptStatusSuccessResponse,
   iGetClaimAttemptsPayload,
-  iGetClaimsPayload,
+  iGetClaimsPayloadV1,
   iGetClaimsSuccessResponse,
   iGetDeveloperAppsPayload,
   iGetDynamicDataActivityPayload,
@@ -219,8 +220,8 @@ import {
   iSearchClaimsPayload,
   iSearchDeveloperAppsPayload,
   iSearchDynamicDataStoresPayload,
-  iSearchUtilityListingsPayload,
   iSearchPluginsPayload,
+  iSearchUtilityListingsPayload,
   iSendClaimAlertsPayload,
   iSendClaimAlertsSuccessResponse,
   iSignOutPayload,
@@ -242,8 +243,7 @@ import {
   iUpdateUtilityListingPayload,
   iVerifyAttestationPayload,
   iVerifySignInPayload,
-  iVerifySignInSuccessResponse,
-  iGetClaimsPayloadV1
+  iVerifySignInSuccessResponse
 } from './requests/requests.js';
 import { BitBadgesApiRoutes } from './requests/routes.js';
 
@@ -386,6 +386,42 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
     payload?: iGetBadgeBalanceByAddressPayload
   ): Promise<GetBadgeBalanceByAddressSuccessResponse<T>> {
     return await BitBadgesCollection.GetBadgeBalanceByAddress(this, collectionId, address, payload);
+  }
+
+  /**
+   * Gets the badge balance for an address at the current time. This is a streamlined version of
+   * getBadgeBalanceByAddress.
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/collection/:collectionId/:badgeId/balance/:address`
+   * - **SDK Function Call**: `await BitBadgesApi.getBadgeBalanceByAddress(collectionId, badgeId, address);`
+   *
+   * @example
+   * ```typescript
+   * const res = await BitBadgesApi.getBadgeBalanceByAddress(collectionId, badgeId, address);
+   * console.log(res);
+   * ```
+   */
+  public async getBadgeBalanceByAddressSpecificBadge(
+    collectionId: NumberType,
+    badgeId: NumberType,
+    address: NativeAddress,
+    payload?: iGetBadgeBalanceByAddressPayload
+  ): Promise<GetBadgeBalanceByAddressSuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<iGetBadgeBalanceByAddressPayload> = typia.validate<iGetBadgeBalanceByAddressPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<iGetBadgeBalanceByAddressSuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetBadgeBalanceByAddressSpecificBadgeRoute(collectionId, address, badgeId)}`
+      );
+      return new GetBadgeBalanceByAddressSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
   }
 
   /**

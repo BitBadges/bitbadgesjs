@@ -1983,6 +1983,16 @@ export interface iMapWithValues<T extends NumberType> extends iMap<T> {
  * @category Interfaces
  */
 export interface iClaimDetails<T extends NumberType> {
+  /**
+   * For internal use by the frontend.
+   *
+   * @internal
+   */
+  _templateInfo?: {
+    supportedApproaches?: string[];
+    pluginId?: string;
+    completedTemplateStep?: boolean;
+  };
   /** Whether the claim fetch includes private params */
   _includesPrivateParams: boolean;
   /** Unique claim ID. */

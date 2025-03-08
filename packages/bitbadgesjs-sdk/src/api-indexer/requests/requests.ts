@@ -610,6 +610,7 @@ export class ClaimAttempt<T extends NumberType> extends BaseNumberTypeClass<Clai
     this.bitbadgesAddress = data.bitbadgesAddress;
     this.claimAttemptId = data.claimAttemptId;
     this.claimNumber = data.claimNumber;
+    this.error = data.error;
   }
 
   getNumberFieldNames(): string[] {

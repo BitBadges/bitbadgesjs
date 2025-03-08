@@ -1,19 +1,19 @@
-import type { NumberType } from '@/common/string-numbers.js';
-import type { iAmountTrackerIdDetails, iUintRange } from '@/interfaces/badges/core.js';
-import type { PaginationInfo } from '../base.js';
-import { EmptyResponseClass } from '../base.js';
-import { UintRangeArray } from '@/core/uintRanges.js';
 import {
   BaseNumberTypeClass,
   convertClassPropertiesAndMaintainNumberTypes,
   ConvertOptions,
   CustomTypeClass,
-  deepCopyPrimitives
+  deepCopyPrimitives,
+  ParsedQs
 } from '@/common/base.js';
-import { BalanceDocWithDetails, QueueDoc, RefreshDoc } from '../docs/docs.js';
+import type { NumberType } from '@/common/string-numbers.js';
+import { UintRangeArray } from '@/core/uintRanges.js';
+import type { iAmountTrackerIdDetails, iUintRange } from '@/interfaces/badges/core.js';
+import type { PaginationInfo } from '../base.js';
+import { EmptyResponseClass } from '../base.js';
 import { TransferActivityDoc } from '../docs/activity.js';
+import { BalanceDocWithDetails, QueueDoc, RefreshDoc } from '../docs/docs.js';
 import type { iBalanceDocWithDetails, iChallengeTrackerIdDetails, iQueueDoc, iRefreshDoc, iTransferActivityDoc } from '../docs/interfaces.js';
-import { ParsedQs } from '@/common/base.js';
 
 /**
  * @category API Requests / Responses
@@ -173,6 +173,44 @@ export class GetOwnersForBadgeSuccessResponse<T extends NumberType>
     );
   }
 }
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetBadgeBalanceByAddressSpecificBadgePayload {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetBadgeBalanceByAddressSpecificBadgeSuccessResponse<T extends NumberType> {
+  balance: T;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetBadgeBalanceByAddressSpecificBadgeSuccessResponse<T extends NumberType> extends BaseNumberTypeClass<
+  GetBadgeBalanceByAddressSpecificBadgeSuccessResponse<T>
+> {
+  balance: T;
+
+  constructor(data: iGetBadgeBalanceByAddressSpecificBadgeSuccessResponse<T>) {
+    super();
+    this.balance = data.balance;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['balance'];
+  }
+
+  convert<U extends NumberType>(
+    convertFunction: (item: NumberType) => U,
+    options?: ConvertOptions
+  ): GetBadgeBalanceByAddressSpecificBadgeSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetBadgeBalanceByAddressSpecificBadgeSuccessResponse<U>;
+  }
+}
+
 /**
  * @category API Requests / Responses
  */

@@ -126,9 +126,15 @@ export class ClaimDetails<T extends NumberType> extends BaseNumberTypeClass<Clai
   createdBy?: BitBadgesAddress;
   managedBy?: BitBadgesAddress;
   _includesPrivateParams: boolean;
+  _templateInfo?: {
+    supportedApproaches?: string[];
+    pluginId?: string;
+    completedTemplateStep?: boolean;
+  };
 
   constructor(data: iClaimDetails<T>) {
     super();
+    this._templateInfo = data._templateInfo;
     this._includesPrivateParams = data._includesPrivateParams;
     this.claimId = data.claimId;
     this.balancesToSet = data.balancesToSet ? new PredeterminedBalances(data.balancesToSet) : undefined;
