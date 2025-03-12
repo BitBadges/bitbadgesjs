@@ -7,6 +7,8 @@ info:
     For complete documentation, see the [BitBadges Documentation](https://docs.bitbadges.io/for-developers/bitbadges-api/api)
     and use along with this reference.
 
+    Note: The API + documentation is new and may contain bugs. If you find any issues, please let us know via Discord or another contact method (https://bitbadges.io/contact).
+
     # Getting Started
 
     ## Authentication
@@ -53,6 +55,9 @@ info:
     See [https://bitbadges.io/auth/linkgen](https://bitbadges.io/auth/linkgen) for a helper URL generation tool. The scopes will be included in
     the `scope` parameter of the SIWBB URL or set in your approved sign in settings.
 
+    Note that stuff marked as Full Access is typically reserved for the official site. If you think you may need this,
+    contact us.
+
     ### Available Scopes
 
     - **Report** (`report`)
@@ -69,6 +74,15 @@ info:
 
     - **Manage Applications** (`manageApplications`)
       Create, update, and delete applications on behalf of the user.
+
+    - **Manage Claims** (`manageClaims`)
+      Create, update, and delete claims on behalf of the user.
+
+    - **Manage Developer Apps** (`manageDeveloperApps`)
+      Create, update, and delete developer apps on behalf of the user.
+
+    - **Manage Dynamic Stores** (`manageDynamicStores`)
+      Create, update, and delete dynamic stores on behalf of the user.
 
     - **Manage Utility Listings** (`manageUtilityListings`)
       Create, update, and delete utility listings on behalf of the user.
@@ -454,6 +468,8 @@ paths:
   '/collection/{collectionId}/balance/{address}':
     post:
       operationId: getBadgeBalanceByAddress
+      tags:
+        - Badges
       summary: Get Badge Balances
       description: |
         Retrieves the balance of a specific address for a collection.
@@ -1074,9 +1090,6 @@ paths:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetClaimAttemptStatusPayload)**
         - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetClaimAttemptStatusSuccessResponse)**
         - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getClaimAttemptStatus)**
-
-        Scopes:
-          - Full Access - Required if you are fetching errors
       parameters:
         - name: claimAttemptId
           in: path
@@ -1111,58 +1124,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/iGetClaimAttemptStatusPayload'
-  /user/updateAccount:
-    post:
-      operationId: updateAccountInfo
-      summary: Update Profile
-      tags:
-        - Accounts
-      description: |-
-        Updates the profile/account information for a user. Only the provided fields will be updated.
-
-        This is what is used in the account settings tab.
-
-        ```tsx
-        const res = await BitBadgesApi.updateAccountInfo(...);
-        ```
-
-        SDK Links:
-        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateAccountInfoPayload)**
-        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateAccountInfoSuccessResponse)**
-        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#updateAccountInfo)**
-
-        Scopes:
-          - Full Access - Required if you are updating the account info
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/iUpdateAccountInfoPayload'
-      responses:
-        '200':
-          description: Success response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/iUpdateAccountInfoSuccessResponse'
-        '400':
-          $ref: '#/components/responses/BadRequestResponse'
-        '401':
-          $ref: '#/components/responses/UnauthorizedResponse'
-        '500':
-          $ref: '#/components/responses/InternalServerErrorResponse'
-      parameters:
-        - name: x-api-key
-          in: header
-          description: BitBadges API Key for authentication
-          required: true
-          schema:
-            type: string
-      security:
-        - apiKey: []
-          userSignedIn: []
-      x-internal: true
   /browse:
     post:
       operationId: GetBrowse
@@ -1705,7 +1666,7 @@ paths:
         - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getSIWBBRequestsForDeveloperApp)**
 
         Scopes:
-          - Full Access - Required
+          - `manageDeveloperApps` - Required
       responses:
         '200':
           description: Success response
@@ -2382,7 +2343,7 @@ paths:
         - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#createClaim)**
 
         Scopes:
-          - Full Access - Required
+          - `manageClaims` - Required
       requestBody:
         required: true
         content:
@@ -2437,7 +2398,7 @@ paths:
         - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#updateClaim)**
 
         Scopes:
-          - Full Access - Required
+          - `manageClaims` - Required
       requestBody:
         required: true
         content:
@@ -2493,7 +2454,7 @@ paths:
         - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#deleteClaim)**
 
         Scopes:
-          - Full Access - Required
+          - `manageClaims` - Required
       requestBody:
         required: true
         content:
@@ -2955,6 +2916,9 @@ paths:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iPerformStoreActionPayload)**
         - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iPerformStoreActionSuccessResponse)**
         - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#performStoreAction)**
+
+        Scopes:
+          - `manageDynamicStores` - Required if you do not specify the data secret
       responses:
         '200':
           description: Success response
@@ -3021,6 +2985,9 @@ paths:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iPerformStoreActionPayload)**
         - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iPerformStoreActionSuccessResponse)**
         - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#performStoreAction)**
+
+        Scopes:
+          - `manageDynamicStores` - Required if you do not specify the data secret
       responses:
         '200':
           description: Success response
@@ -3070,6 +3037,9 @@ paths:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iPerformStoreActionPayload)**
         - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iPerformStoreActionSuccessResponse)**
         - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#performStoreAction)**
+
+        Scopes:
+          - `manageDynamicStores` - Required if you do not specify the data secret
       responses:
         '200':
           description: Success response
@@ -3131,6 +3101,9 @@ paths:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iPerformStoreActionPayload)**
         - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iPerformStoreActionSuccessResponse)**
         - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#performStoreAction)**
+
+        Scopes:
+          - `manageDynamicStores` - Required if you do not specify the data secret
       responses:
         '200':
           description: Success response
@@ -3181,7 +3154,7 @@ paths:
         - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getDynamicDataStores)**
 
         Scopes:
-        - Full Access - Required (or specify the valid data secret)
+        - `manageDynamicStores` - Required (or specify the valid data secret)
       responses:
         '200':
           description: Success response
@@ -3233,7 +3206,7 @@ paths:
         - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#searchDynamicDataStores)**
 
         Scopes:
-        - Full Access - Required
+        - `manageDynamicStores` - Required
       responses:
         '200':
           description: Success response
@@ -3285,7 +3258,7 @@ paths:
         - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getDynamicDataActivity)**
 
         Scopes:
-        - Full Access - Required (or specify the valid data secret)
+        - `manageDynamicStores` - Required (or specify the valid data secret)
       responses:
         '200':
           description: Success response

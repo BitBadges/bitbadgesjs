@@ -8,3 +8,4 @@ export * from './BitBadgesApi.js';
 export * from './BitBadgesCollection.js';
 export * from './BitBadgesUserInfo.js';
 export * from './requests/index.js';
+export * from './responses/index.js';

@@ -3460,10 +3460,12 @@ export class DeleteDynamicDataStoreSuccessResponse
  * @category API Requests / Responses
  */
 export interface iPerformStoreActionSingleWithBodyAuthPayload {
+  /** Whether to simulate the action */
+  _isSimulation?: boolean;
   /** The dynamic data ID */
   dynamicDataId: string;
-  /** The data secret */
-  dataSecret: string;
+  /** The data secret. Needed if you are not signed in as creator. */
+  dataSecret?: string;
   /** The name of the action to perform */
   actionName: string;
   /** The payload for this specific action */
@@ -3484,10 +3486,12 @@ export class PerformStoreActionSingleWithBodyAuthSuccessResponse extends EmptyRe
  * @category API Requests / Responses
  */
 export interface iPerformStoreActionBatchWithBodyAuthPayload {
+  /** Whether to simulate the action */
+  _isSimulation?: boolean;
   /** The dynamic data ID */
   dynamicDataId: string;
-  /** The data secret */
-  dataSecret: string;
+  /** The data secret. Needed if you are not signed in as creator. */
+  dataSecret?: string;
   /** The actions to perform */
   actions: {
     /** The name of the action to perform */
@@ -3511,6 +3515,8 @@ export class PerformStoreActionBatchWithBodyAuthSuccessResponse extends EmptyRes
  * @category API Requests / Responses
  */
 export interface iPerformStoreActionPayload {
+  /** Whether to simulate the action */
+  _isSimulation?: boolean;
   /** Any custom payload data needed for the action */
   [key: string]: any;
 }
@@ -3519,8 +3525,8 @@ export interface iPerformStoreActionPayload {
  * @category API Requests / Responses
  */
 export interface iPerformStoreActionBodyAuthPayload {
-  /** The data secret to perform the action with */
-  dataSecret: string;
+  /** The data secret to perform the action with. Needed if you are not signed in as creator. */
+  dataSecret?: string;
 }
 
 /**
@@ -3537,6 +3543,8 @@ export class PerformStoreActionSuccessResponse extends EmptyResponseClass {}
  * @category API Requests / Responses
  */
 export interface iBatchStoreActionPayload {
+  /** Whether to simulate the action */
+  _isSimulation?: boolean;
   /** Array of actions to perform */
   actions: {
     /** The name of the action to perform */
@@ -3575,8 +3583,8 @@ export interface iGetDynamicDataActivityPayload {
   dynamicDataId: string;
   /** The pagination bookmark to start from */
   bookmark?: string;
-  /** The data secret to fetch activity for */
-  dataSecret: string;
+  /** The data secret to fetch activity for. Needed if you are not signed in as creator. */
+  dataSecret?: string;
 }
 
 /**
@@ -3585,7 +3593,7 @@ export interface iGetDynamicDataActivityPayload {
 export class GetDynamicDataActivityPayload extends CustomTypeClass<GetDynamicDataActivityPayload> implements iGetDynamicDataActivityPayload {
   dynamicDataId: string;
   bookmark?: string;
-  dataSecret: string;
+  dataSecret?: string;
 
   constructor(payload: iGetDynamicDataActivityPayload) {
     super();
