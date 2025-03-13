@@ -99,7 +99,8 @@ import {
   iListingViewsDoc,
   iApiKeyDoc,
   iLinkedTo,
-  iInheritMetadataFrom
+  iInheritMetadataFrom,
+  iEstimatedCost
 } from './interfaces.js';
 
 /**
@@ -1207,6 +1208,29 @@ export class InheritMetadataFrom<T extends NumberType> extends CustomTypeClass<I
 }
 
 /**
+ * @inheritDoc iEstimatedCost
+ * @category Indexer
+ */
+export class EstimatedCost<T extends NumberType> extends CustomTypeClass<EstimatedCost<T>> implements iEstimatedCost<T> {
+  amount: T;
+  denom: string;
+
+  constructor(data: iEstimatedCost<T>) {
+    super();
+    this.amount = data.amount;
+    this.denom = data.denom;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['amount'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): EstimatedCost<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as EstimatedCost<U>;
+  }
+}
+
+/**
  * @inheritDoc iUtilityListingDoc
  * @category Indexer
  */
@@ -1239,6 +1263,8 @@ export class UtilityListingDoc<T extends NumberType> extends BaseNumberTypeClass
   linkedTo?: LinkedTo<T>;
   inheritMetadataFrom?: InheritMetadataFrom<T>;
   locale?: string;
+  estimatedCost?: EstimatedCost<T>;
+  estimatedTime?: string;
 
   constructor(data: iUtilityListingDoc<T>) {
     super();
@@ -1263,6 +1289,8 @@ export class UtilityListingDoc<T extends NumberType> extends BaseNumberTypeClass
     this.inheritMetadataFrom = data.inheritMetadataFrom ? new InheritMetadataFrom(data.inheritMetadataFrom) : undefined;
     this.lastUpdated = data.lastUpdated;
     this.locale = data.locale;
+    this.estimatedCost = data.estimatedCost ? new EstimatedCost(data.estimatedCost) : undefined;
+    this.estimatedTime = data.estimatedTime;
   }
 
   getNumberFieldNames(): string[] {
@@ -1859,7 +1887,7 @@ export class PluginVersionConfig<T extends NumberType> extends BaseNumberTypeCla
     postProcessingJs: string;
   };
   claimCreatorRedirect?: { toolUri?: string; tutorialUri?: string; testerUri?: string };
-  userInputRedirect?: { baseUri: string };
+  userInputRedirect?: { baseUri?: string; tutorialUri?: string; };
   createdAt: UNIXMilliTimestamp<T>;
   lastUpdated: UNIXMilliTimestamp<T>;
   requireSignIn?: boolean;

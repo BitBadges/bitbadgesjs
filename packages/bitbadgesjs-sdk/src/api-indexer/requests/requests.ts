@@ -10,10 +10,10 @@ import { ClaimActivityDoc, ClaimAlertDoc, PointsActivityDoc, TransferActivityDoc
 import {
   AccessTokenDoc,
   ApiKeyDoc,
+  ApplicationDoc,
   AttestationDoc,
   DeveloperAppDoc,
   DynamicDataDoc,
-  ApplicationDoc,
   MapWithValues,
   PluginDoc,
   StatusDoc,
@@ -23,10 +23,11 @@ import {
   ClaimReward,
   DynamicDataHandlerType,
   iApiKeyDoc,
-  iClaimActivityDoc,
-  iDynamicDataDoc,
   iApplicationDoc,
   iApplicationPage,
+  iClaimActivityDoc,
+  iDynamicDataDoc,
+  iEstimatedCost,
   iInheritMetadataFrom,
   iLinkedTo,
   iPointsActivityDoc,
@@ -2847,15 +2848,23 @@ export interface PluginVersionConfigPayload {
   /** This is a flag for being compatible with auto-triggered claims, meaning no user interaction is needed. */
   requiresUserInputs: boolean;
 
+  /** The redirect URI for user inputs. */
   userInputRedirect?: {
-    baseUri: string;
+    /** The base URI for user inputs. Note: This is experimental and not fully supported yet. */
+    baseUri?: string;
+    /** The tutorial URI for user inputs. */
+    tutorialUri?: string;
   };
 
   userInputsSchema?: Array<JsonBodyInputSchema>;
 
+  /** The redirect URI for claim creators. */
   claimCreatorRedirect?: {
+    /** The tool URI for claim creators. Note: This is experimental and not fully supported yet. */
     toolUri?: string;
+    /** The tutorial URI for claim creators. */
     tutorialUri?: string;
+    /** The tester URI for claim creators. Note: This is experimental and not fully supported yet. */
     testerUri?: string;
   };
 
@@ -4197,6 +4206,12 @@ export interface iCreateUtilityListingPayload<T extends NumberType> {
 
   /** Locale (ex: es, fr, etc.). If not specified, we assume en. */
   locale?: string;
+
+  /** The estimated cost for this utility/service */
+  estimatedCost?: iEstimatedCost<T>;
+
+  /** The estimated time to complete or deliver this utility/service */
+  estimatedTime?: string;
 }
 
 /**
@@ -4261,6 +4276,12 @@ export interface iUpdateUtilityListingPayload<T extends NumberType> {
 
   /** Locale (ex: es, fr, etc.). If not specified, we assume en. */
   locale?: string;
+
+  /** The estimated cost for this utility/service */
+  estimatedCost?: iEstimatedCost<T>;
+
+  /** The estimated time to complete or deliver this utility/service */
+  estimatedTime?: string;
 }
 
 /**

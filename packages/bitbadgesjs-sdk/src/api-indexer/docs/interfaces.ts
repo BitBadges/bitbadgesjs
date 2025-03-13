@@ -1238,6 +1238,12 @@ export interface iUtilityListingDoc<T extends NumberType> extends Doc {
   /** The total view count for this listing. This is updated periodically from the view tracking document. */
   viewCount?: T;
 
+  /** The estimated cost for this utility/service */
+  estimatedCost?: iEstimatedCost<T>;
+
+  /** The estimated time to complete or deliver this utility/service */
+  estimatedTime?: string;
+
   /** Optional breakdown of views by time period for trending calculations */
   viewsByPeriod?: {
     /** Views in the last hour */
@@ -1833,13 +1839,21 @@ export interface iPluginVersionConfig<T extends NumberType> {
   publicParamsSchema: Array<JsonBodyInputSchema>;
   privateParamsSchema: Array<JsonBodyInputSchema>;
 
+  /** The redirect URI for user inputs. */
   userInputRedirect?: {
-    baseUri: string;
+    /** The base URI for user inputs. Note: This is experimental and not fully supported yet. */
+    baseUri?: string;
+    /** The tutorial URI for user inputs. */
+    tutorialUri?: string;
   };
 
+  /** The redirect URI for claim creators. */
   claimCreatorRedirect?: {
+    /** The tool URI for claim creators. Note: This is experimental and not fully supported yet. */
     toolUri?: string;
+    /** The tutorial URI for claim creators. */
     tutorialUri?: string;
+    /** The tester URI for claim creators. Note: This is experimental and not fully supported yet. */
     testerUri?: string;
   };
 
@@ -2039,4 +2053,16 @@ export interface iClaimDetails<T extends NumberType> {
   version: T;
   /** Custom satisfaction logic */
   satisfyMethod?: iSatisfyMethod;
+}
+
+/**
+ * A cost estimate with an amount and denomination, similar to CosmosCoin but for display purposes only.
+ *
+ * @category Interfaces
+ */
+export interface iEstimatedCost<T extends NumberType> {
+  /** The amount of the cost */
+  amount: T;
+  /** The denomination of the cost (e.g. 'USD', 'ETH', etc.) */
+  denom: string;
 }
