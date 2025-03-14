@@ -123,7 +123,11 @@ const createCosmosPayload = (context: LegacyTxContext, cosmosPayload: any | any[
     fee.amount,
     fee.denom,
     parseInt(fee.gas, 10),
-    chain.chain === SupportedChain.ETH ? 'ethsecp256' : chain.chain === SupportedChain.SOLANA ? 'ed25519' : 'secp256k1',
+    chain.chain === SupportedChain.ETH
+      ? 'ethsecp256'
+      : chain.chain === SupportedChain.SOLANA || chain.chain === SupportedChain.TON
+        ? 'ed25519'
+        : 'secp256k1',
     sender.pubkey,
     sender.sequence,
     sender.accountNumber,
@@ -303,7 +307,7 @@ function createTxRawBitcoin(
  *
  * @category Transactions
  */
-export function createTxBroadcastBody(txContext: TxContext, messages: Message | Message[], signature: string, solAddress?: string) {
+export function createTxBroadcastBody(txContext: TxContext, messages: Message | Message[], signature: string, solOrTonAddress?: string) {
   const context = wrapExternalTxContext(txContext);
   const chain = context.chain.chain;
 
@@ -314,11 +318,11 @@ export function createTxBroadcastBody(txContext: TxContext, messages: Message | 
 
   if (chain === SupportedChain.BTC) {
     return createTxBroadcastBodyBitcoin(context, messages, signature);
-  } else if (chain === SupportedChain.SOLANA) {
-    if (!solAddress) {
-      throw new Error('Solana address must be provided');
+  } else if (chain === SupportedChain.SOLANA || chain === SupportedChain.TON) {
+    if (!solOrTonAddress) {
+      throw new Error('Address must be provided');
     }
-    return createTxBroadcastBodySolana(context, messages, signature, solAddress);
+    return createTxBroadcastBodySolana(context, messages, signature, solOrTonAddress);
   } else if (chain === SupportedChain.ETH) {
     return createTxBroadcastBodyEthereum(context, messages, signature);
   } else {

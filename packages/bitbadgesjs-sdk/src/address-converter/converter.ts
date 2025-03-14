@@ -4,6 +4,7 @@ import { bech32 } from 'bech32';
 import bs58 from 'bs58';
 import { isValidChecksumAddress, stripHexPrefix, toChecksumAddress } from 'crypto-addr-codec';
 import { isAddress } from 'web3-validator';
+import { Address } from '@ton/core';
 
 const sha256 = (data: Uint8Array): Uint8Array => {
   const hash = nobleSha256.create();
@@ -101,6 +102,12 @@ const solanaToBitBadges = (solanaAddress: string) => {
   return bech32Address;
 };
 
+const tonToBitBadges = (tonAddress: string) => {
+  const address = Address.parse(tonAddress);
+  const hexData = Buffer.from(address.hash.slice(0, 20));
+  return BITBADGES.encoder(hexData);
+};
+
 /**
  * Converts an address from any supported chain to a bech32 formatted address prefixed with `bb`.
  * If we are unable to convert the address, we return an empty string ('').
@@ -124,6 +131,12 @@ export function convertToBitBadgesAddress(address: string) {
       }
     } else if (address.startsWith('bc')) {
       bech32Address = btcToBitBadges(address);
+    } else if (address.includes(':')) {
+      try {
+        bech32Address = tonToBitBadges(address);
+      } catch {
+        bech32Address = '';
+      }
     }
   }
 
@@ -209,6 +222,8 @@ export function getChainForAddress(address: string) {
     return SupportedChain.SOLANA;
   } else if (address.startsWith('bc')) {
     return SupportedChain.BTC;
+  } else if (address.startsWith('EQ') || address.startsWith('UQ')) {
+    return SupportedChain.TON;
   }
 
   return SupportedChain.UNKNOWN;
@@ -275,6 +290,14 @@ export function isAddressValid(address: string, chain?: SupportedChain) {
         isValidAddress = false;
       }
 
+      break;
+    case SupportedChain.TON:
+      try {
+        Address.parse(address);
+        isValidAddress = true;
+      } catch {
+        isValidAddress = false;
+      }
       break;
     default:
       break;

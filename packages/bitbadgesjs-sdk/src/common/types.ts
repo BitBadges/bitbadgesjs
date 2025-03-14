@@ -10,10 +10,11 @@ export enum SupportedChain {
   ETH = 'Ethereum',
   COSMOS = 'Cosmos',
   SOLANA = 'Solana',
+  TON = 'Ton',
   UNKNOWN = 'Unknown' //If unknown address, we don't officially know the chain yet.
 }
 
 /**
  * @category Address Utils
  */
-export type SupportedChainType = 'Bitcoin' | 'Ethereum' | 'Cosmos' | 'Solana' | 'Unknown';
+export type SupportedChainType = 'Bitcoin' | 'Ethereum' | 'Cosmos' | 'Solana' | 'Ton' | 'Unknown';

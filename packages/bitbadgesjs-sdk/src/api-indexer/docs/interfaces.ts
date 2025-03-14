@@ -389,6 +389,8 @@ export interface iAccountDoc<T extends NumberType> extends Doc {
   ethAddress: string;
   /** The Solana address of the account */
   solAddress: string;
+  /** The Ton address of the account */
+  tonAddress: string;
   /** The Bitcoin address of the account */
   btcAddress: string;
   /** The sequence of the account */
@@ -500,6 +502,9 @@ export interface iProfileDoc<T extends NumberType> extends Doc {
 
   /** The Solana address of the profile, if applicable (bc we need it to convert) */
   solAddress?: string;
+
+  /** The Ton address of the profile, if applicable */
+  tonAddress?: string;
 
   /** The notifications of the account */
   notifications?: iNotificationPreferences<T>;

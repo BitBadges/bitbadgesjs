@@ -260,6 +260,7 @@ export class AccountDoc<T extends NumberType> extends BaseNumberTypeClass<Accoun
   bitbadgesAddress: BitBadgesAddress;
   ethAddress: string;
   solAddress: string;
+  tonAddress: string;
   btcAddress: string;
   sequence?: T;
   balance?: CosmosCoin<T>;
@@ -274,6 +275,7 @@ export class AccountDoc<T extends NumberType> extends BaseNumberTypeClass<Accoun
     this.bitbadgesAddress = data.bitbadgesAddress;
     this.ethAddress = data.ethAddress;
     this.solAddress = data.solAddress;
+    this.tonAddress = data.tonAddress;
     this.btcAddress = data.btcAddress;
     this.sequence = data.sequence;
     this.balance = data.balance ? new CosmosCoin(data.balance) : undefined;
@@ -501,6 +503,7 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
   username?: string;
   latestSignedInChain?: SupportedChain;
   solAddress?: string;
+  tonAddress?: string;
   notifications?: NotificationPreferences<T>;
   socialConnections?: SocialConnections<T>;
   publicSocialConnections?: SocialConnections<T>;
@@ -559,6 +562,7 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
     this.username = data.username;
     this.latestSignedInChain = data.latestSignedInChain;
     this.solAddress = data.solAddress;
+    this.tonAddress = data.tonAddress;
     this.notifications = data.notifications ? new NotificationPreferences(data.notifications) : undefined;
     this.approvedSignInMethods = data.approvedSignInMethods;
     this.socialConnections = data.socialConnections ? new SocialConnections(data.socialConnections) : undefined;

@@ -42,6 +42,8 @@ export interface iBitBadgesUserInfo<T extends NumberType> extends iProfileDoc<T>
   avatar?: string;
   /** The Solana address of the account. */
   solAddress: string;
+  /** The Ton address of the account. */
+  tonAddress: string;
   /** The chain of the account. */
   chain: SupportedChain;
   /** Indicates whether the account has claimed their airdrop. */
@@ -111,6 +113,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   ethAddress: string;
   btcAddress: string;
   solAddress: string;
+  tonAddress: string;
   accountNumber: T;
   sequence?: T;
   balance?: CosmosCoin<T>;
@@ -157,6 +160,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     this.ethAddress = data.ethAddress;
     this.btcAddress = data.btcAddress;
     this.solAddress = data.solAddress;
+    this.tonAddress = data.tonAddress;
     this.accountNumber = data.accountNumber;
     this.sequence = data.sequence;
     this.balance = data.balance ? new CosmosCoin(data.balance) : undefined;
@@ -548,6 +552,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
       bitbadgesAddress: 'Mint',
       ethAddress: 'Mint',
       solAddress: 'Mint',
+      tonAddress: 'Mint',
       btcAddress: 'Mint',
       address: 'Mint',
       chain: SupportedChain.COSMOS,
@@ -585,6 +590,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
       bitbadgesAddress: '',
       ethAddress: '',
       solAddress: '',
+      tonAddress: '',
       btcAddress: '',
       address: '',
       chain: SupportedChain.UNKNOWN,

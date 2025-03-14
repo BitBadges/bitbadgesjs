@@ -190,6 +190,7 @@ function removeImportLinesFromFile(filePath: string): void {
 
     modifiedContent = modifiedContent.replace(new RegExp('createdBy?: string;', 'g'), 'createdBy: string;');
     modifiedContent = modifiedContent.replace(new RegExp('solAddress?: string;', 'g'), 'solAddress: string;');
+    modifiedContent = modifiedContent.replace(new RegExp('tonAddress?: string;', 'g'), 'tonAddress: string;');
     modifiedContent = modifiedContent.replace(new RegExp('toListId: string;', 'g'), 'toListId: string;\ntoList: iAddressList;');
     modifiedContent = modifiedContent.replace(new RegExp('fromListId: string;', 'g'), 'fromListId: string;\nfromList: iAddressList;');
     modifiedContent = modifiedContent.replace(
@@ -316,10 +317,10 @@ function removeImportLinesFromFile(filePath: string): void {
       .join('\n');
 
     const accountDocLines = getInBetweenBraces('export interface iAccountDoc', modifiedContent.split('\n')).filter(
-      (x) => !(x.includes('solAddress') || x.includes('Solana address'))
+      (x) => !(x.includes('solAddress') || x.includes('Solana address') || x.includes('tonAddress') || x.includes('Ton address'))
     );
     const profileDocLines = getInBetweenBraces('export interface iProfileDoc', modifiedContent.split('\n')).filter(
-      (x) => !(x.includes('solAddress') || x.includes('Solana address'))
+      (x) => !(x.includes('solAddress') || x.includes('Solana address') || x.includes('tonAddress') || x.includes('Ton address'))
     );
 
     const bitbadgesuserInfoIdx = modifiedContent.split('\n').findIndex((line) => line.includes('export interface iBitBadgesUserInfo'));

@@ -3,11 +3,13 @@ import EthDriver from '@/chain-drivers/EthDriver.js';
 import SolDriver from '@/chain-drivers/SolDriver.js';
 import { SupportedChain } from '@/common/types.js';
 import BtcDriver from '@/chain-drivers/BtcDriver.js';
+import TonDriver from '@/chain-drivers/TonDriver.js';
 
 const ethDriver = new EthDriver('0x1', undefined);
 const solDriver = new SolDriver('');
 const cosmosDriver = new CosmosDriver('bitbadges-1');
 const btcDriver = new BtcDriver('Bitcoin');
+const tonDriver = new TonDriver('TON');
 
 /**
  * @category Address Utils
@@ -22,6 +24,8 @@ export const getChainDriver = (chain: string) => {
       return solDriver;
     case 'Bitcoin':
       return btcDriver;
+    case 'Ton':
+      return tonDriver;
     default:
       return ethDriver;
   }

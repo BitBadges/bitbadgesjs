@@ -200,6 +200,7 @@ function addExamples(obj: any) {
   addExamples(obj, 'bitbadgesAddress', ['bb1...']);
   addExamples(obj, 'btcAddress', ['bc1...']);
   addExamples(obj, 'solAddress', ['6H2af6...']);
+  addExamples(obj, 'tonAddress', ['EQC...']);
   //iso8601
   addExamples(obj, 'expirationDate', ['2022-01-01T00:00:00Z']);
   addExamples(obj, 'notBefore', ['2022-01-01T00:00:00Z']);
