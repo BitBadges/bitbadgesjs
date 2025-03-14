@@ -1265,6 +1265,10 @@ export class UtilityListingDoc<T extends NumberType> extends BaseNumberTypeClass
   locale?: string;
   estimatedCost?: EstimatedCost<T>;
   estimatedTime?: string;
+  homePageView?: {
+    type: 'badges' | 'lists' | 'claims' | 'applications';
+    category: string;
+  };
 
   constructor(data: iUtilityListingDoc<T>) {
     super();
@@ -1291,6 +1295,7 @@ export class UtilityListingDoc<T extends NumberType> extends BaseNumberTypeClass
     this.locale = data.locale;
     this.estimatedCost = data.estimatedCost ? new EstimatedCost(data.estimatedCost) : undefined;
     this.estimatedTime = data.estimatedTime;
+    this.homePageView = data.homePageView;
   }
 
   getNumberFieldNames(): string[] {
@@ -1887,7 +1892,7 @@ export class PluginVersionConfig<T extends NumberType> extends BaseNumberTypeCla
     postProcessingJs: string;
   };
   claimCreatorRedirect?: { toolUri?: string; tutorialUri?: string; testerUri?: string };
-  userInputRedirect?: { baseUri?: string; tutorialUri?: string; };
+  userInputRedirect?: { baseUri?: string; tutorialUri?: string };
   createdAt: UNIXMilliTimestamp<T>;
   lastUpdated: UNIXMilliTimestamp<T>;
   requireSignIn?: boolean;

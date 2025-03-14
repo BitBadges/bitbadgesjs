@@ -1263,6 +1263,12 @@ export interface iUtilityListingDoc<T extends NumberType> extends Doc {
 
   /** Locale (ex: es, fr, etc.). If not specified, we assume en. */
   locale?: string;
+
+  /** Home page view */
+  homePageView?: {
+    type: 'badges' | 'lists' | 'claims' | 'applications';
+    category: string;
+  };
 }
 
 /**
