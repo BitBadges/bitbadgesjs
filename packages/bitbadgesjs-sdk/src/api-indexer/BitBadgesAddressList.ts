@@ -149,7 +149,7 @@ export class BitBadgesAddressList<T extends NumberType>
    * Fetches the next batch of documents for a specific view. 25 documents are fetched at a time.
    * This updates the view in the class instance, as well as handling the pagination.
    */
-  async fetchNextForView(api: BaseBitBadgesApi<T>, viewType: 'listActivity' | 'listings', viewId: string) {
+  async fetchNextForView(api: BaseBitBadgesApi<T>, viewType: AddressListViewKey, viewId: string) {
     if (!this.viewHasMore(viewId)) return;
 
     const res = await BitBadgesAddressList.GetAddressLists(api, {
@@ -190,7 +190,7 @@ export class BitBadgesAddressList<T extends NumberType>
   /**
    * Fetches all the documents for a specific view. 1 second delay between each fetch to avoid rate limiting.
    */
-  async fetchAllForView(api: BaseBitBadgesApi<T>, viewType: 'listActivity', viewId: string) {
+  async fetchAllForView(api: BaseBitBadgesApi<T>, viewType: AddressListViewKey, viewId: string) {
     while (this.viewHasMore(viewId)) {
       await this.fetchNextForView(api, viewType, viewId);
       await new Promise((r) => setTimeout(r, 1000));
@@ -200,7 +200,7 @@ export class BitBadgesAddressList<T extends NumberType>
   /**
    * Type safe method to get the documents array for a specific view.
    */
-  getView(viewType: 'listActivity' | 'listings', viewId: string): ListActivityDoc<T>[] | UtilityListingDoc<T>[] {
+  getView(viewType: AddressListViewKey, viewId: string): ListActivityDoc<T>[] | UtilityListingDoc<T>[] {
     return viewType === 'listActivity' ? this.getActivityView(viewId) : this.getListingsView(viewId);
   }
 
@@ -389,6 +389,11 @@ const updateAddressListWithResponse = <T extends NumberType>(
 /**
  * @category API Requests / Responses
  */
+export type AddressListViewKey = 'listActivity' | 'listings';
+
+/**
+ * @category API Requests / Responses
+ */
 export interface iGetAddressListsPayload {
   /**
    * The lists and accompanyin details to fetch. Supports on-chain, off-chain, and reserved lists.
@@ -397,7 +402,7 @@ export interface iGetAddressListsPayload {
     listId: string;
     viewsToFetch?: {
       viewId: string;
-      viewType: 'listActivity' | 'listings';
+      viewType: AddressListViewKey;
       bookmark: string;
     }[];
     /** Certain views and details are private. If you are the creator of the list, you can fetch these details. By default, we do not fetch them. */

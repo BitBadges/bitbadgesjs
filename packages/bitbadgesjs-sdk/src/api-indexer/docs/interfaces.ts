@@ -876,6 +876,8 @@ export type ClaimIntegrationPublicParamsType<T extends ClaimIntegrationPluginTyp
                     }
                   : T extends 'webhooks' | 'successWebhooks'
                     ? {
+                        tutorialUri?: string;
+                        ignoreSimulations?: boolean;
                         passAddress?: boolean;
                         passDiscord?: boolean;
                         passEmail?: boolean;

@@ -1,7 +1,7 @@
 {
   "name": "bitbadgesjs-sdk",
   "description": "SDK for BitBadges development",
-  "version": "0.7.11",
+  "version": "0.7.12",
   "license": "MIT",
   "eslintIgnore": [
     "src/proto/**/*.ts"
@@ -85,6 +85,8 @@
     "@bufbuild/protobuf": "^1.7.2",
     "@keplr-wallet/cosmos": "^0.12.133",
     "@metamask/eth-sig-util": "^8.0.0",
+    "@ton/core": "^0.60.1",
+    "@ton/crypto": "^3.3.0",
     "@trevormil/bbs-signatures": "^1.0.1",
     "axios": "^1.8.2",
     "bech32": "^2.0.0",
