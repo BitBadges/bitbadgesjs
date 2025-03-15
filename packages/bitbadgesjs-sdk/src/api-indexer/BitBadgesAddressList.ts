@@ -1,6 +1,7 @@
 import type { ConvertOptions, CustomType } from '@/common/base.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, getConverterFunction } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
+import { ClaimDetails } from '@/core/approvals.js';
 import type { iAddressList } from '@/interfaces/badges/core.js';
 import typia from 'typia';
 import type { BaseBitBadgesApi, PaginationInfo } from './base.js';
@@ -19,7 +20,6 @@ import type {
 import type { iMetadata } from './metadata/metadata.js';
 import { Metadata } from './metadata/metadata.js';
 import { BitBadgesApiRoutes } from './requests/routes.js';
-import { ClaimDetails } from '@/core/approvals.js';
 
 /**
  * @inheritDoc iAddressListDoc
@@ -390,6 +390,37 @@ const updateAddressListWithResponse = <T extends NumberType>(
  * @category API Requests / Responses
  */
 export type AddressListViewKey = 'listActivity' | 'listings';
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetAddressListPayload {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetAddressListSuccessResponse<T extends NumberType> {
+  addressList: iBitBadgesAddressList<T>;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetAddressListSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetAddressListSuccessResponse<T>>
+  implements iGetAddressListSuccessResponse<T>, CustomType<GetAddressListSuccessResponse<T>>
+{
+  addressList: BitBadgesAddressList<T>;
+
+  constructor(data: iGetAddressListSuccessResponse<T>) {
+    super();
+    this.addressList = new BitBadgesAddressList(data.addressList);
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetAddressListSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetAddressListSuccessResponse<U>;
+  }
+}
 
 /**
  * @category API Requests / Responses

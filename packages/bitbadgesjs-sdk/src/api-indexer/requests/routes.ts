@@ -39,14 +39,17 @@ export class BitBadgesApiRoutes {
 
   static GetPluginErrorsRoute = () => `/api/v0/plugins/errors`;
 
+  static GetClaimRoute = (claimId: string) => `/api/v0/claim/${claimId.toString()}`;
   static GetClaimsRoute = () => '/api/v1/claims/fetch';
   static SearchClaimsRoute = () => '/api/v0/claims/search';
   static CRUDClaimsRoute = () => `/api/v0/claims`;
 
+  static GetAddressListRoute = (addressListId: string) => `/api/v0/addressList/${addressListId.toString()}`;
   static GetAddressListsRoute = () => '/api/v0/addressLists/fetch';
   static CRUDAddressListsRoute = () => '/api/v0/addressLists';
 
   static GetAccountsRoute = () => '/api/v0/users';
+  static GetAccountRoute = () => '/api/v0/user';
   static UpdateAccountInfoRoute = () => '/api/v0/user/updateAccount';
 
   static GetApiKeysRoute = () => '/api/v0/apiKeys/fetch';
@@ -78,15 +81,18 @@ export class BitBadgesApiRoutes {
   static GenerateAppleWalletPassRoute = () => '/api/v0/siwbbRequest/appleWalletPass';
   static GenerateGoogleWalletPassRoute = () => '/api/v0/siwbbRequest/googleWalletPass';
 
+  static GetAttestationRoute = (attestationId: string) => `/api/v0/attestation/${attestationId.toString()}`;
   static GetAttestationsRoute = () => '/api/v0/attestations/fetch';
   static CRUDAttestationRoute = () => '/api/v0/attestations';
 
+  static GetDeveloperAppRoute = (developerAppId: string) => `/api/v0/developerApp/${developerAppId.toString()}`;
   static GetDeveloperAppsRoute = () => '/api/v0/developerApps/fetch';
   static SearchDeveloperAppsRoute = () => '/api/v0/developerApps/search';
   static CRUDDeveloperAppRoute = () => '/api/v0/developerApps';
   static GetSIWBBRequestsForDeveloperAppRoute = () => '/api/v0/developerApps/siwbbRequests';
 
-  static GetPluginRoute = () => '/api/v0/plugins/fetch';
+  static GetPluginRoute = (pluginId: string) => `/api/v0/plugins/${pluginId.toString()}`;
+  static GetPluginsRoute = () => '/api/v0/plugins/fetch';
   static SearchPluginsRoute = () => '/api/v0/plugins/search';
   static CRUDPluginRoute = () => '/api/v0/plugins';
 
@@ -105,6 +111,7 @@ export class BitBadgesApiRoutes {
 
   static GetCodesFromSeedHelperRoute = () => '/api/v0/codes';
 
+  static GetDynamicDataStoreRoute = (dynamicStoreId: string) => `/api/v0/dynamicStore/${dynamicStoreId.toString()}`;
   static GetDynamicDataStoresRoute = () => '/api/v0/dynamicStores/fetch';
   static SearchDynamicDataStoresRoute = () => '/api/v0/dynamicStores/search';
   static CRUDDynamicDataStoreRoute = () => '/api/v0/dynamicStores';
@@ -118,12 +125,14 @@ export class BitBadgesApiRoutes {
   static PerformStoreActionSingleWithBodyAuthRoute = () => `/api/v0/storeActions/single`;
   static PerformStoreActionBatchWithBodyAuthRoute = () => `/api/v0/storeActions/batch`;
 
+  static GetApplicationRoute = (applicationId: string) => `/api/v0/application/${applicationId.toString()}`;
   static GetApplicationsRoute = () => '/api/v0/applications/fetch';
   static SearchApplicationsRoute = () => '/api/v0/applications/search';
   static CRUDApplicationsRoute = () => '/api/v0/applications';
   static CalculatePointsRoute = () => '/api/v0/applications/points';
   static GetPointsActivityRoute = () => '/api/v0/applications/points/activity';
 
+  static GetUtilityListingRoute = (utilityListingId: string) => `/api/v0/utilityListing/${utilityListingId.toString()}`;
   static GetUtilityListingsRoute = () => '/api/v0/utilityListings/fetch';
   static SearchUtilityListingsRoute = () => '/api/v0/utilityListings/search';
   static CRUDUtilityListingsRoute = () => '/api/v0/utilityListings';

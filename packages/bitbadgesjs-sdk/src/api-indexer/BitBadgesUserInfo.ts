@@ -229,6 +229,27 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     }
   }
 
+  /**
+   * Gets an account by address or username from the API.
+   */
+  static async GetAccount<T extends NumberType>(api: BaseBitBadgesApi<T>, params: iGetAccountPayload) {
+    try {
+      const validateRes: typia.IValidation<iGetAccountPayload> = typia.validate<iGetAccountPayload>(params ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await api.axios.post<iGetAccountSuccessResponse<string>>(
+        `${api.BACKEND_URL}${BitBadgesApiRoutes.GetAccountRoute()}`,
+        params
+      );
+      return new GetAccountSuccessResponse(response.data).convert(api.ConvertFunction);
+    } catch (error) {
+      await api.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
   private getBalanceInfo(collectionId: T, throwIfNotFound?: boolean) {
     const balance = this.collected.find((x) => x.collectionId === collectionId);
     if (!balance && throwIfNotFound) throw new Error('Balance not found');
@@ -806,6 +827,47 @@ export type AccountFetchDetails = {
     bookmark: string;
   }[];
 };
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetAccountPayload {
+  address?: NativeAddress;
+  username?: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetAccountSuccessResponse<T extends NumberType> {
+  account: iBitBadgesUserInfo<T>;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetAccountSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetAccountSuccessResponse<T>>
+  implements iGetAccountSuccessResponse<T>
+{
+  account: BitBadgesUserInfo<T>;
+
+  constructor(data: iGetAccountSuccessResponse<T>) {
+    super();
+    this.account = new BitBadgesUserInfo(data.account);
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetAccountSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetAccountSuccessResponse<U>;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetAccountSuccessResponse<T extends NumberType> {
+  account: iBitBadgesUserInfo<T>;
+}
 
 /**
  * @category API Requests / Responses
