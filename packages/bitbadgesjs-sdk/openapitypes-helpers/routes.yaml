@@ -1025,7 +1025,7 @@ paths:
             schema:
               $ref: '#/components/schemas/iGetReservedClaimCodesPayload'
   '/claims/status/{claimAttemptId}':
-    post:
+    get:
       operationId: getClaimAttemptStatus
       tags:
         - Claims
@@ -1060,6 +1060,13 @@ paths:
           required: true
           schema:
             type: string
+        - name: payload
+          in: query
+          description: The payload for the request.
+          explode: true
+          required: false
+          schema:
+            $ref: '#/components/schemas/iGetClaimAttemptStatusPayload'
       responses:
         '200':
           description: Success response
@@ -1075,12 +1082,6 @@ paths:
           $ref: '#/components/responses/InternalServerErrorResponse'
       security:
         - apiKey: []
-      requestBody:
-        required: false
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/iGetClaimAttemptStatusPayload'
   '/broadcast':
     post:
       operationId: broadcastTx
@@ -2397,7 +2398,7 @@ paths:
   /codes:
     get:
       operationId: generateCode
-      summary: Generate Code (Codes Plugin)
+      summary: Get Code (Codes Plugin)
       description: |
         Generates a unique code based on a seed and a zero-based index. This is used for the Codes plugin with claims.
 
@@ -4106,7 +4107,7 @@ paths:
         Gets activity for a specific address list.
 
         ```tsx
-        await BitBadgesApi.getAddressListActivity({ addressListId: "list123" });
+        await BitBadgesApi.getAddressListActivity("list123", { ... });
         ```
 
         SDK Links:
@@ -4158,7 +4159,7 @@ paths:
         Gets listings for a specific address list.
 
         ```tsx
-        await BitBadgesApi.getAddressListListings({ addressListId: "list123" });
+        await BitBadgesApi.getAddressListListings("list123", { ... });
         ```
 
         SDK Links:
@@ -4205,12 +4206,12 @@ paths:
       operationId: getCollectionOwners
       summary: Get Collection Owners
       tags:
-        - Collections
+        - Badges
       description: |-
         Gets owners for a specific collection.
 
         ```tsx
-        await BitBadgesApi.getCollectionOwners({ collectionId: "123" });
+        await BitBadgesApi.getCollectionOwners("123");
         ```
 
         SDK Links:
@@ -4257,12 +4258,12 @@ paths:
       operationId: getCollection
       summary: Get Collection
       tags:
-        - Collections
+        - Badges
       description: |-
         Gets a specific collection.
 
         ```tsx
-        await BitBadgesApi.getCollection({ collectionId: "123" });
+        await BitBadgesApi.getCollection("123", { ... });
         ```
 
         SDK Links:
@@ -4301,12 +4302,12 @@ paths:
       operationId: getBadgeMetadata
       summary: Get Badge Metadata
       tags:
-        - Collections
+        - Badges
       description: |-
         Gets metadata for a specific badge in a collection.
 
         ```tsx
-        await BitBadgesApi.getBadgeMetadata({ collectionId: "123", badgeId: "456" });
+        await BitBadgesApi.getBadgeMetadata("123", "1");
         ```
 
         SDK Links:
@@ -4351,12 +4352,12 @@ paths:
       operationId: getCollectionTransferActivity
       summary: Get Collection Transfer Activity
       tags:
-        - Collections
+        - Badges
       description: |-
         Gets transfer activity for a specific collection.
 
         ```tsx
-        await BitBadgesApi.getCollectionTransferActivity({ collectionId: "123" });
+        await BitBadgesApi.getCollectionTransferActivity("123", { ... });
         ```
 
         SDK Links:
@@ -4403,12 +4404,12 @@ paths:
       operationId: getCollectionChallengeTrackers
       summary: Get Collection Challenge Trackers
       tags:
-        - Collections
+        - Badges
       description: |-
         Gets challenge trackers for a specific collection.
 
         ```tsx
-        await BitBadgesApi.getCollectionChallengeTrackers({ collectionId: "123" });
+        await BitBadgesApi.getCollectionChallengeTrackers("123", { ... });
         ```
 
         SDK Links:
@@ -4454,12 +4455,12 @@ paths:
       operationId: getCollectionAmountTrackers
       summary: Get Collection Amount Trackers
       tags:
-        - Collections
+        - Badges
       description: |-
         Gets amount trackers for a specific collection.
 
         ```tsx
-        await BitBadgesApi.getCollectionAmountTrackers({ collectionId: "123" });
+        await BitBadgesApi.getCollectionAmountTrackers("123", { ... });
         ```
 
         SDK Links:
@@ -4506,12 +4507,12 @@ paths:
       operationId: getCollectionListings
       summary: Get Collection Listings
       tags:
-        - Collections
+        - Badges
       description: |-
         Gets listings for a specific collection.
 
         ```tsx
-        await BitBadgesApi.getCollectionListings({ collectionId: "123" });
+        await BitBadgesApi.getCollectionListings("123", { ... });
         ```
 
         SDK Links:
@@ -4558,12 +4559,12 @@ paths:
       operationId: getCollectionClaims
       summary: Get Collection Claims
       tags:
-        - Collections
+        - Badges
       description: |-
         Gets claims for a specific collection.
 
         ```tsx
-        await BitBadgesApi.getCollectionClaims({ collectionId: "123" });
+        await BitBadgesApi.getCollectionClaims("123", { ... });
         ```
 
         SDK Links:
@@ -4610,7 +4611,7 @@ paths:
         Gets claims for a specific address list.
 
         ```tsx
-        await BitBadgesApi.getAddressListClaims({ addressListId: "list123" });
+        await BitBadgesApi.getAddressListClaims("list123", { ... });
         ```
 
         SDK Links:
