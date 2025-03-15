@@ -15,7 +15,7 @@ import {
   iGetAddressListsPayload,
   iUpdateAddressListsPayload
 } from './BitBadgesAddressList.js';
-import type { GetAccountsSuccessResponse, GetAccountSuccessResponse, iGetAccountPayload, iGetAccountsPayload } from './BitBadgesUserInfo.js';
+import type { GetAccountSuccessResponse, GetAccountsSuccessResponse, iGetAccountPayload, iGetAccountsPayload } from './BitBadgesUserInfo.js';
 import { BitBadgesUserInfo } from './BitBadgesUserInfo.js';
 import type { iBitBadgesApi } from './base.js';
 import { BaseBitBadgesApi } from './base.js';
@@ -91,6 +91,7 @@ import {
   GetClaimSuccessResponse,
   GetClaimsSuccessResponse,
   GetDeveloperAppSuccessResponse,
+  GetDeveloperAppsSuccessResponse,
   GetDynamicDataActivitySuccessResponse,
   GetDynamicDataStoreSuccessResponse,
   GetDynamicDataStoresSuccessResponse,
@@ -98,6 +99,7 @@ import {
   GetOrCreateEmbeddedWalletSuccessResponse,
   GetPluginErrorsSuccessResponse,
   GetPluginSuccessResponse,
+  GetPluginsSuccessResponse,
   GetPointsActivitySuccessResponse,
   GetReservedClaimCodesSuccessResponse,
   GetSIWBBRequestsForDeveloperAppSuccessResponse,
@@ -2787,15 +2789,15 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * - **API Route**: `POST /api/v0/plugins`
    * - **SDK Function Call**: `await BitBadgesApi.getPlugins(payload);`
    */
-  public async getPlugins(payload: iGetPluginsPayload): Promise<GetPluginSuccessResponse<T>> {
+  public async getPlugins(payload: iGetPluginsPayload): Promise<GetPluginsSuccessResponse<T>> {
     try {
       const validateRes: typia.IValidation<iGetPluginsPayload> = typia.validate<iGetPluginsPayload>(payload ?? {});
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      const response = await this.axios.post<GetPluginSuccessResponse<T>>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetPluginsRoute()}`, payload);
-      return new GetPluginSuccessResponse(response.data).convert(this.ConvertFunction);
+      const response = await this.axios.post<GetPluginsSuccessResponse<T>>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetPluginsRoute()}`, payload);
+      return new GetPluginsSuccessResponse(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -3003,18 +3005,18 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
    * - **API Route**: `POST /api/v0/developerApps`
    * - **SDK Function Call**: `await BitBadgesApi.getDeveloperApp(payload);`
    */
-  public async getDeveloperApps(payload: iGetDeveloperAppsPayload): Promise<GetDeveloperAppSuccessResponse<T>> {
+  public async getDeveloperApps(payload: iGetDeveloperAppsPayload): Promise<GetDeveloperAppsSuccessResponse<T>> {
     try {
       const validateRes: typia.IValidation<iGetDeveloperAppsPayload> = typia.validate<iGetDeveloperAppsPayload>(payload ?? {});
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      const response = await this.axios.post<GetDeveloperAppSuccessResponse<T>>(
+      const response = await this.axios.post<GetDeveloperAppsSuccessResponse<T>>(
         `${this.BACKEND_URL}${BitBadgesApiRoutes.GetDeveloperAppsRoute()}`,
         payload
       );
-      return new GetDeveloperAppSuccessResponse(response.data);
+      return new GetDeveloperAppsSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);

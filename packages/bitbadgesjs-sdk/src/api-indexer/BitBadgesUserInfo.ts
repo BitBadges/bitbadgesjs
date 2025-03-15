@@ -40,7 +40,7 @@ export interface iBitBadgesUserInfo<T extends NumberType> extends iProfileDoc<T>
   resolvedName?: string;
   /** The avatar of the account. */
   avatar?: string;
-  /** The Solana address of the account. */
+  /** The Solana address of the account. Note: This may be empty if we do not have it yet. Solana -> BitBadges address conversions are one-way, and we cannot convert a BitBadges address to a Solana address without prior knowledge. */
   solAddress: string;
   /** The chain of the account. */
   chain: SupportedChain;
@@ -239,10 +239,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      const response = await api.axios.post<iGetAccountSuccessResponse<string>>(
-        `${api.BACKEND_URL}${BitBadgesApiRoutes.GetAccountRoute()}`,
-        params
-      );
+      const response = await api.axios.post<iGetAccountSuccessResponse<string>>(`${api.BACKEND_URL}${BitBadgesApiRoutes.GetAccountRoute()}`, params);
       return new GetAccountSuccessResponse(response.data).convert(api.ConvertFunction);
     } catch (error) {
       await api.handleApiError(error);

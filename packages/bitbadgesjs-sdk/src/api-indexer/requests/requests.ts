@@ -384,6 +384,10 @@ export interface iGetClaimsPayload {
     instanceId: string;
   }[];
 
+  /**
+   * Fetch all claimed users for the claim. If true, you will be able to find all { [bitbadgesAddress]: [...zeroIndexedClaimNumbers] }
+   * on the numUses plugin's publicState.
+   */
   fetchAllClaimedUsers?: boolean;
 }
 
@@ -397,7 +401,10 @@ export interface iGetClaimsPayloadV1 {
     claimId: string;
     /** The private state instance IDs to fetch. */
     privateStatesToFetch?: string[];
-    /** Fetch all claimed users for the claim. */
+    /**
+     * Fetch all claimed users for the claim. If true, you will be able to find all { [bitbadgesAddress]: [...zeroIndexedClaimNumbers] }
+     * on the numUses plugin's publicState.
+     */
     fetchAllClaimedUsers?: boolean;
     /** Fetch private parameters for the claim. Only applicable if you are the creator / manager of the claim. */
     fetchPrivateParams?: boolean;

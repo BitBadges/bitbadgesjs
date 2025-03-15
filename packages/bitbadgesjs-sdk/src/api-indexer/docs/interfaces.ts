@@ -383,7 +383,7 @@ export interface iCollectionDoc<T extends NumberType> extends Doc {
 export interface iAccountDoc<T extends NumberType> extends Doc {
   /** The public key of the account */
   publicKey: string;
-  /** The account number of the account */
+  /** The account number of the account. This is the account number registered on the BitBadges blockchain.*/
   accountNumber: T;
   /** The public key type of the account */
   pubKeyType: string;
@@ -391,13 +391,13 @@ export interface iAccountDoc<T extends NumberType> extends Doc {
   bitbadgesAddress: BitBadgesAddress;
   /** The Eth address of the account */
   ethAddress: string;
-  /** The Solana address of the account */
+  /** The Solana address of the account. Note: This may be empty if we do not have it yet. Solana -> BitBadges address conversions are one-way, and we cannot convert a BitBadges address to a Solana address without prior knowledge. */
   solAddress: string;
   /** The Bitcoin address of the account */
   btcAddress: string;
-  /** The sequence of the account */
+  /** The sequence of the account. This is the nonce for the blockchain for this account */
   sequence?: T;
-  /** The balance of the account */
+  /** The $BADGE balance of the account */
   balance?: iCosmosCoin<T>;
 }
 

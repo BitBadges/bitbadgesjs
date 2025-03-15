@@ -275,6 +275,9 @@ paths:
 
         Scopes
         - `readProfile` - Required for private profile information like notification preferences, social connections, etc.
+
+        Couple Notes:
+        - **[Native Chain Algorithm](https://docs.bitbadges.io/for-developers/bitbadges-api/concepts/native-chain-algorithm)**
       tags:
         - Accounts
       responses:
@@ -353,7 +356,6 @@ paths:
         - `readAttestations` - Required if fetching private attestations
 
         Documentation References / Tutorials:
-        - **[Fetching Accounts](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/fetching-accounts)**
         - **[Managing Views](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/managing-views)**
 
         SDK Links:
@@ -522,7 +524,6 @@ paths:
         - `readPrivateClaimData` - Required if fetching private claim data (must also be the manager)
 
         Documentation References / Tutorials:
-        - **[Fetching Collections](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/fetching-collections)**
         - **[Managing Views](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/managing-views)**
 
         SDK Links:
@@ -575,13 +576,12 @@ paths:
         console.log(res);
         ```
 
-        Documentation References / Tutorials:
-        - **[Fetching Balances](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/fetching-balances)**
-
         SDK Links:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBadgeBalanceByAddressSpecificBadgePayload)**
         - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBadgeBalanceByAddressSpecificBadgeSuccessResponse)**
         - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getBadgeBalanceByAddressSpecificBadge)**
+
+        Alternative Flow: Note that you can also set up a claim that checks badge ownership and check the success per user of that claim as well
       tags:
         - Badges
       parameters:
@@ -639,8 +639,6 @@ paths:
         console.log(res);
         ```
 
-        Documentation References / Tutorials:
-        - **[Fetching Balances](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/fetching-balances)**
 
         SDK Links:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBadgeBalanceByAddressPayload)**
@@ -649,6 +647,8 @@ paths:
 
         Scopes:
         - `readPrivateClaimData` - Required if fetching private claim data (user-level approvals)
+
+        Alternative Flow: Note that you can also set up a claim that checks badge ownership and check the success per user of that claim as well
       parameters:
         - name: collectionId
           in: path
@@ -1126,9 +1126,6 @@ paths:
         const res = await BitBadgesApi.getStatus();
         ```
 
-        Documentation References / Tutorials:
-        - **[BitBadges Documentation](https://docs.bitbadges.io)**
-
         SDK Links:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetStatusPayload)**
         - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetStatusSuccessResponse)**
@@ -1184,8 +1181,6 @@ paths:
         );
         ```
 
-        Documentation References / Tutorials:
-        - **[Fetching Balances](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/fetching-balances)**
 
         SDK Links:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetOwnersForBadgePayload)**
@@ -1250,9 +1245,6 @@ paths:
         );
         ```
 
-        Documentation References / Tutorials:
-        - **[BitBadges Documentation](https://docs.bitbadges.io)**
-
         SDK Links:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBadgeActivityPayload)**
         - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBadgeActivitySuccessResponse)**
@@ -1315,9 +1307,6 @@ paths:
         ```tsx
         const res = await BitBadgesApi.refreshMetadata(collectionId, { ...options });
         ```
-
-        Documentation References / Tutorials:
-        - **[BitBadges Documentation](https://docs.bitbadges.io)**
 
         SDK Links:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iRefreshMetadataPayload)**
@@ -1394,8 +1383,6 @@ paths:
         ```
 
         Documentation References / Tutorials:
-        - **[Getting Claims](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/getting-claims)**
-        - **[Managing Claims](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/managing-claims)**
         - **[Completing Claims](https://docs.bitbadges.io/for-developers/claim-builder/auto-complete-claims-w-bitbadges-api)**
         - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claim-builder)**
 
@@ -1480,8 +1467,6 @@ paths:
         ```
 
         Documentation References / Tutorials:
-        - **[Getting Claims](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/getting-claims)**
-        - **[Managing Claims](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/managing-claims)**
         - **[Completing Claims](https://docs.bitbadges.io/for-developers/claim-builder/auto-complete-claims-w-bitbadges-api)**
         - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claim-builder)**
 
@@ -1551,8 +1536,6 @@ paths:
         ```
 
         Documentation References / Tutorials:
-        - **[Getting Claims](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/getting-claims)**
-        - **[Managing Claims](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/managing-claims)**
         - **[Completing Claims](https://docs.bitbadges.io/for-developers/claim-builder/auto-complete-claims-w-bitbadges-api)**
         - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claim-builder)**
 
@@ -1618,8 +1601,6 @@ paths:
         ```
 
         Documentation References / Tutorials:
-        - **[Getting Claims](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/getting-claims)**
-        - **[Managing Claims](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/managing-claims)**
         - **[Completing Claims](https://docs.bitbadges.io/for-developers/claim-builder/auto-complete-claims-w-bitbadges-api)**
         - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claim-builder)**
 
@@ -1937,7 +1918,6 @@ paths:
         ```
 
         Documentation References / Tutorials:
-        - **[Fetching Lists](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/fetching-lists)**
         - **[Managing Views](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/managing-views)**
 
         SDK Links:
@@ -2037,7 +2017,7 @@ paths:
 
 
         Documentation References / Tutorials:
-        - **[API Authorization](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/authentication)**
+        - **[API Authorization](https://docs.bitbadges.io/for-developers/sign-in-with-bitbadges)**
 
         SDK Links:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iOauthRevokePayload)**
@@ -2625,8 +2605,6 @@ paths:
         ```
 
         Documentation References / Tutorials:
-        - **[Getting Claims](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/getting-claims)**
-        - **[Managing Claims](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/managing-claims)**
         - **[Completing Claims](https://docs.bitbadges.io/for-developers/claim-builder/auto-complete-claims-w-bitbadges-api)**
         - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claim-builder)**
 
@@ -2683,8 +2661,6 @@ paths:
         ```
 
         Documentation References / Tutorials:
-        - **[Getting Claims](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/getting-claims)**
-        - **[Managing Claims](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/managing-claims)**
         - **[Completing Claims](https://docs.bitbadges.io/for-developers/claim-builder/auto-complete-claims-w-bitbadges-api)**
         - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claim-builder)**
 
@@ -2731,8 +2707,6 @@ paths:
         ```
 
         Documentation References / Tutorials:
-        - **[Getting Claims](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/getting-claims)**
-        - **[Managing Claims](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/managing-claims)**
         - **[Completing Claims](https://docs.bitbadges.io/for-developers/claim-builder/auto-complete-claims-w-bitbadges-api)**
         - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claim-builder)**
 
@@ -2786,8 +2760,6 @@ paths:
         ```
 
         Documentation References / Tutorials:
-        - **[Getting Claims](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/getting-claims)**
-        - **[Managing Claims](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/managing-claims)**
         - **[Completing Claims](https://docs.bitbadges.io/for-developers/claim-builder/auto-complete-claims-w-bitbadges-api)**
         - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claim-builder)**
 
@@ -2842,8 +2814,6 @@ paths:
         ```
 
         Documentation References / Tutorials:
-        - **[Getting Claims](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/getting-claims)**
-        - **[Managing Claims](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/managing-claims)**
         - **[Completing Claims](https://docs.bitbadges.io/for-developers/claim-builder/auto-complete-claims-w-bitbadges-api)**
         - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claim-builder)**
 
@@ -5014,6 +4984,8 @@ paths:
 
         Scopes:
           - `readPrivateClaimData` - Required if fetching private claim data (also must be manager of collection)
+
+        Note: For fetching more advanced information like private claim data, you can do so with the get claim routes. Use the IDs from these responses.
       responses:
         '200':
           description: Success response
@@ -5061,6 +5033,8 @@ paths:
 
         Scopes:
           - `readPrivateClaimData` - Required if fetching private claim data (also must be manager of address list)
+
+        Note: For fetching more advanced information like private claim data, you can do so with the get claim routes. Use the IDs from these responses.
       responses:
         '200':
           description: Success response
