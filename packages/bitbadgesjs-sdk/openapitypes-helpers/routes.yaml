@@ -300,7 +300,7 @@ paths:
         - name: payload
           in: query
           explode: true
-          description: The payload for the request.
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
           required: false
           schema:
             $ref: '#/components/schemas/iGetAccountPayload'
@@ -310,7 +310,7 @@ paths:
   /users:
     post:
       operationId: getAccounts
-      summary: Get Accounts
+      summary: Get Accounts - Batch
       description: |
         Retrieves accounts and accompanying details. This route is all-inclusive and uses a view-based approach to fetch specific data about the account. See more in the tutorial below.
 
@@ -649,50 +649,47 @@ paths:
 
         Scopes:
         - `readPrivateClaimData` - Required if fetching private claim data (user-level approvals)
-    tags:
-      - Badges
-    parameters:
-      - name: collectionId
-        in: path
-        description: The ID of the collection containing the badge.
-        required: true
-        schema:
-          type: integer
-      - name: address
-        in: path
-        description: The address for which the badge balance is to be retrieved. Can be "Total" for the circulating supply.
-        required: true
-        schema:
-          type: string
-      - name: x-api-key
-        in: header
-        description: BitBadges API Key for authentication
-        required: true
-        schema:
-          type: string
-      - in: query
-        explode: true
-        name: payload
-        description: The payload for the request.
-        required: false
-        schema:
-          $ref: '#/components/schemas/iGetBadgeBalanceByAddressPayload'
-    responses:
-      '200':
-        description: Success response
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/iGetBadgeBalanceByAddressSuccessResponse'
-      '400':
-        $ref: '#/components/responses/BadRequestResponse'
-      '401':
-        $ref: '#/components/responses/UnauthorizedResponse'
-      '500':
-        $ref: '#/components/responses/InternalServerErrorResponse'
-
-    security:
-      - apiKey: []
+      parameters:
+        - name: collectionId
+          in: path
+          description: The ID of the collection containing the badge.
+          required: true
+          schema:
+            type: integer
+        - name: address
+          in: path
+          description: The address for which the badge balance is to be retrieved. Can be "Total" for the circulating supply.
+          required: true
+          schema:
+            type: string
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+        - in: query
+          explode: true
+          name: payload
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
+          required: false
+          schema:
+            $ref: '#/components/schemas/iGetBadgeBalanceByAddressPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetBadgeBalanceByAddressSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
   /claim/{claimId}:
     get:
       operationId: getClaim
@@ -734,7 +731,7 @@ paths:
         - in: query
           explode: true
           name: payload
-          description: The payload for the request.
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
           required: false
           schema:
             $ref: '#/components/schemas/iGetClaimPayload'
@@ -744,7 +741,7 @@ paths:
   /claims/success/{claimId}/{address}:
     get:
       operationId: checkClaimSuccess
-      summary: Check Claim Success
+      summary: Check Claim Successes By User
       description: |
         Checks if a claim has been successfully completed.
 
@@ -830,7 +827,7 @@ paths:
         - in: query
           explode: true
           name: payload
-          description: The payload for the request.
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
           required: false
           schema:
             $ref: '#/components/schemas/iGetAttestationPayload'
@@ -878,7 +875,7 @@ paths:
         - in: query
           explode: true
           name: payload
-          description: The payload for the request.
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
           required: false
           schema:
             $ref: '#/components/schemas/iGetDeveloperAppPayload'
@@ -926,7 +923,7 @@ paths:
         - in: query
           explode: true
           name: payload
-          description: The payload for the request.
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
           required: false
           schema:
             $ref: '#/components/schemas/iGetPluginPayload'
@@ -974,7 +971,7 @@ paths:
         - in: query
           explode: true
           name: payload
-          description: The payload for the request.
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
           required: false
           schema:
             $ref: '#/components/schemas/iGetUtilityListingPayload'
@@ -986,7 +983,7 @@ paths:
       operationId: getDynamicDataStore
       summary: Get Dynamic Data Store
       tags:
-        - Dynamic Data Stores
+        - Dynamic Stores
       description: |-
         Gets a dynamic data store by specific ID.
 
@@ -1022,7 +1019,7 @@ paths:
         - in: query
           explode: true
           name: payload
-          description: The payload for the request.
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
           required: false
           schema:
             $ref: '#/components/schemas/iGetDynamicDataStorePayload'
@@ -1067,7 +1064,7 @@ paths:
         - in: query
           explode: true
           name: payload
-          description: The payload for the request.
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
           required: false
           schema:
             $ref: '#/components/schemas/iGetApplicationPayload'
@@ -1112,7 +1109,7 @@ paths:
         - in: query
           explode: true
           name: payload
-          description: The payload for the request.
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
           required: false
           schema:
             $ref: '#/components/schemas/iGetAddressListPayload'
@@ -1161,7 +1158,7 @@ paths:
         - in: query
           explode: true
           name: payload
-          description: The payload for the request.
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
           required: false
           schema:
             $ref: '#/components/schemas/iGetStatusPayload'
@@ -1216,7 +1213,7 @@ paths:
         - in: query
           explode: true
           name: payload
-          description: The payload for the request.
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
           required: false
           schema:
             $ref: '#/components/schemas/iGetOwnersForBadgePayload'
@@ -1284,7 +1281,7 @@ paths:
         - in: query
           explode: true
           name: payload
-          description: The payload for the request.
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
           required: false
           schema:
             $ref: '#/components/schemas/iGetBadgeActivityPayload'
@@ -1645,7 +1642,7 @@ paths:
             type: string
         - name: payload
           in: query
-          description: The payload for the request.
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
           explode: true
           required: false
           schema:
@@ -1922,7 +1919,7 @@ paths:
       tags:
         - Address Lists
       description: |-
-        Gets address lists. Can be on-chain or off-chain. This uses an all-in-one approach with views and paginations
+        Gets address lists. This uses an all-in-one approach with views and paginations
         to fetch details about the list all in one place.
 
         ```tsx
@@ -2273,7 +2270,7 @@ paths:
             type: string
         - name: payload
           in: query
-          description: The payload for the request.
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
           required: true
           explode: true
           schema:
@@ -3141,7 +3138,7 @@ paths:
         - in: query
           explode: true
           name: payload
-          description: The payload for the request.
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
           required: false
           schema:
             $ref: '#/components/schemas/iGetGatedContentForClaimPayload'
@@ -3441,7 +3438,7 @@ paths:
         - in: query
           explode: true
           name: payload
-          description: The payload for the request.
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
           required: false
           schema:
             $ref: '#/components/schemas/iGetDynamicDataActivityPayload'
@@ -3771,7 +3768,7 @@ paths:
         - in: query
           explode: true
           name: payload
-          description: The payload for the request.
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
           required: false
           schema:
             $ref: '#/components/schemas/iGetPointsActivityPayload'
@@ -4196,7 +4193,7 @@ paths:
         - in: query
           explode: true
           name: payload
-          description: The payload for the request.
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
           required: false
           schema:
             $ref: '#/components/schemas/iGetAddressListsForUserPayload'
@@ -4250,7 +4247,7 @@ paths:
         - in: query
           explode: true
           name: payload
-          description: The payload for the request.
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
           required: false
           schema:
             $ref: '#/components/schemas/iGetSiwbbRequestsForUserPayload'
@@ -4301,7 +4298,7 @@ paths:
         - in: query
           explode: true
           name: payload
-          description: The payload for the request.
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
           required: false
           schema:
             $ref: '#/components/schemas/iGetTransferActivityForUserPayload'
@@ -4354,7 +4351,7 @@ paths:
         - in: query
           explode: true
           name: payload
-          description: The payload for the request.
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
           required: false
           schema:
             $ref: '#/components/schemas/iGetBadgesViewForUserPayload'
@@ -4406,7 +4403,7 @@ paths:
         - in: query
           explode: true
           name: payload
-          description: The payload for the request.
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
           required: false
           schema:
             $ref: '#/components/schemas/iGetListsActivityForUserPayload'
@@ -4462,7 +4459,7 @@ paths:
         - in: query
           explode: true
           name: payload
-          description: The payload for the request.
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
           required: false
           schema:
             $ref: '#/components/schemas/iGetAttestationsForUserPayload'
@@ -4521,7 +4518,7 @@ paths:
         - in: query
           explode: true
           name: payload
-          description: The payload for the request.
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
           required: false
           schema:
             $ref: '#/components/schemas/iGetClaimActivityForUserPayload'
@@ -4573,7 +4570,7 @@ paths:
         - in: query
           explode: true
           name: payload
-          description: The payload for the request.
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
           required: false
           schema:
             $ref: '#/components/schemas/iGetPointsActivityForUserPayload'
@@ -4628,7 +4625,7 @@ paths:
         - in: query
           explode: true
           name: payload
-          description: The payload for the request.
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
           required: false
           schema:
             $ref: '#/components/schemas/iGetClaimAlertsForUserPayload'
@@ -4679,7 +4676,7 @@ paths:
         - in: query
           explode: true
           name: payload
-          description: The payload for the request.
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
           required: false
           schema:
             $ref: '#/components/schemas/iGetAddressListActivityPayload'
@@ -4731,7 +4728,7 @@ paths:
         - in: query
           explode: true
           name: payload
-          description: The payload for the request.
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
           required: false
           schema:
             $ref: '#/components/schemas/iGetAddressListListingsPayload'
@@ -4783,7 +4780,7 @@ paths:
         - in: query
           explode: true
           name: payload
-          description: The payload for the request.
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
           required: false
           schema:
             $ref: '#/components/schemas/iGetCollectionOwnersPayload'
@@ -4835,7 +4832,7 @@ paths:
         - in: query
           explode: true
           name: payload
-          description: The payload for the request.
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
           required: false
           schema:
             $ref: '#/components/schemas/iGetCollectionTransferActivityPayload'
@@ -4887,7 +4884,7 @@ paths:
         - in: query
           explode: true
           name: payload
-          description: The payload for the request.
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
           required: false
           schema:
             $ref: '#/components/schemas/iGetCollectionChallengeTrackersPayload'
@@ -4938,7 +4935,7 @@ paths:
         - in: query
           explode: true
           name: payload
-          description: The payload for the request.
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
           required: false
           schema:
             $ref: '#/components/schemas/iGetCollectionAmountTrackersPayload'
@@ -4990,7 +4987,7 @@ paths:
         - in: query
           explode: true
           name: payload
-          description: The payload for the request.
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
           required: false
           schema:
             $ref: '#/components/schemas/iGetCollectionListingsPayload'

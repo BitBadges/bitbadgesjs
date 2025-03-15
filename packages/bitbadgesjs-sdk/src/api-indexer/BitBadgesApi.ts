@@ -2779,6 +2779,106 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
       return Promise.reject(error);
     }
   }
+
+  /**
+   * Get all developer apps for a user.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/plugins`
+   * - **SDK Function Call**: `await BitBadgesApi.getPlugins(payload);`
+   */
+  public async getPlugins(payload: iGetPluginsPayload): Promise<GetPluginSuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<iGetPluginsPayload> = typia.validate<iGetPluginsPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.post<GetPluginSuccessResponse<T>>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetPluginsRoute()}`, payload);
+      return new GetPluginSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Generates an Google wallet pass for a code. Returns a saveUrl to be opened.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/siwbbRequest/googleWalletPass`
+   * - **SDK Function Call**: `await BitBadgesApi.generateGoogleWallet(payload);`
+   *
+   * @example
+   * ```typescript
+   * const res = await BitBadgesApi.generateGoogleWallet(payload);
+   * console.log(res);
+   * ```
+   */
+  public async generateGoogleWallet(payload: iGenerateGoogleWalletPayload): Promise<GenerateGoogleWalletSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<iGenerateGoogleWalletPayload> = typia.validate<iGenerateGoogleWalletPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.post<GenerateGoogleWalletSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GenerateGoogleWalletPassRoute()}`,
+        payload
+      );
+      return new GenerateGoogleWalletSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Generates an Apple wallet pass for a code.
+   *
+   * Returns application/vnd.apple.pkpass content type.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/siwbbRequest/appleWalletPass`
+   * - **SDK Function Call**: `await BitBadgesApi.generateAppleWalletPass(payload);`
+   *
+   * @example
+   * ```typescript
+   * const res = await BitBadgesApi.generateAppleWalletPass(payload);
+   * console.log(res);
+   * ```
+   *
+   * @example
+   * ```typescript
+   * const pass = Buffer.from(res.data);
+   *
+   * const blob = new Blob([pass], { type: 'application/vnd.apple.pkpass' });
+   * const url = window.URL.createObjectURL(blob);
+   * if (url) {
+   *    const link = document.createElement('a');
+   *    link.href = url;
+   *    link.download = 'bitbadges.pkpass';
+   *    link.click()
+   * }
+   * ```
+   */
+  public async generateAppleWalletPass(payload: iGenerateAppleWalletPassPayload): Promise<GenerateAppleWalletPassSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<iGenerateAppleWalletPassPayload> = typia.validate<iGenerateAppleWalletPassPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.post<GenerateAppleWalletPassSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GenerateAppleWalletPassRoute()}`,
+        payload
+      );
+      return new GenerateAppleWalletPassSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
 }
 
 export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
@@ -3025,28 +3125,6 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
   }
 
   /**
-   * Get all developer apps for a user.
-   *
-   * @remarks
-   * - **API Route**: `POST /api/v0/plugins`
-   * - **SDK Function Call**: `await BitBadgesApi.getPlugins(payload);`
-   */
-  public async getPlugins(payload: iGetPluginsPayload): Promise<GetPluginSuccessResponse<T>> {
-    try {
-      const validateRes: typia.IValidation<iGetPluginsPayload> = typia.validate<iGetPluginsPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.post<GetPluginSuccessResponse<T>>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetPluginsRoute()}`, payload);
-      return new GetPluginSuccessResponse(response.data).convert(this.ConvertFunction);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
    * Searches for plugins.
    *
    * @remarks
@@ -3065,84 +3143,6 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
         payload
       );
       return new SearchPluginsSuccessResponse<T>(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Generates an Google wallet pass for a code. Returns a saveUrl to be opened.
-   *
-   * @remarks
-   * - **API Route**: `POST /api/v0/siwbbRequest/googleWalletPass`
-   * - **SDK Function Call**: `await BitBadgesApi.generateGoogleWallet(payload);`
-   *
-   * @example
-   * ```typescript
-   * const res = await BitBadgesApi.generateGoogleWallet(payload);
-   * console.log(res);
-   * ```
-   */
-  public async generateGoogleWallet(payload: iGenerateGoogleWalletPayload): Promise<GenerateGoogleWalletSuccessResponse> {
-    try {
-      const validateRes: typia.IValidation<iGenerateGoogleWalletPayload> = typia.validate<iGenerateGoogleWalletPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.post<GenerateGoogleWalletSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GenerateGoogleWalletPassRoute()}`,
-        payload
-      );
-      return new GenerateGoogleWalletSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Generates an Apple wallet pass for a code.
-   *
-   * Returns application/vnd.apple.pkpass content type.
-   *
-   * @remarks
-   * - **API Route**: `POST /api/v0/siwbbRequest/appleWalletPass`
-   * - **SDK Function Call**: `await BitBadgesApi.generateAppleWalletPass(payload);`
-   *
-   * @example
-   * ```typescript
-   * const res = await BitBadgesApi.generateAppleWalletPass(payload);
-   * console.log(res);
-   * ```
-   *
-   * @example
-   * ```typescript
-   * const pass = Buffer.from(res.data);
-   *
-   * const blob = new Blob([pass], { type: 'application/vnd.apple.pkpass' });
-   * const url = window.URL.createObjectURL(blob);
-   * if (url) {
-   *    const link = document.createElement('a');
-   *    link.href = url;
-   *    link.download = 'bitbadges.pkpass';
-   *    link.click()
-   * }
-   * ```
-   */
-  public async generateAppleWalletPass(payload: iGenerateAppleWalletPassPayload): Promise<GenerateAppleWalletPassSuccessResponse> {
-    try {
-      const validateRes: typia.IValidation<iGenerateAppleWalletPassPayload> = typia.validate<iGenerateAppleWalletPassPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.post<GenerateAppleWalletPassSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GenerateAppleWalletPassRoute()}`,
-        payload
-      );
-      return new GenerateAppleWalletPassSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);

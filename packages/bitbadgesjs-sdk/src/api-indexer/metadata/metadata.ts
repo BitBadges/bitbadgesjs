@@ -7,35 +7,35 @@ import { UNIXMilliTimestamp } from '../docs/interfaces.js';
  * @category Interfaces
  */
 export interface iMetadata<T extends NumberType> {
-  /** The name of the badge or badge collection. */
+  /** The name of this item. */
   name: string;
-  /** The description of the badge or badge collection. Supports markdown. */
+  /** The description of this item. Supports markdown. */
   description: string;
-  /** The image of the badge or badge collection. */
+  /** The image of this item. */
   image: string;
-  /** The banner image of the badge or badge collection. */
+  /** The banner image of this item. */
   bannerImage?: string;
-  /** The video of the badge or badge collection. If a standard video is used, this should be a link to the video. We will use image as the poster image. If a youtube video is used, we embed it as an iframe. */
+  /** The video of this item. If a standard video is used, this should be a link to the video. We will use image as the poster image. If a youtube video is used, we embed it as an iframe. */
   video?: string;
-  /** The category of the badge or badge collection (e.g. "Education", "Attendance"). */
+  /** The category of this item (e.g. "Education", "Attendance"). */
   category?: string;
-  /** The external URL of the badge or badge collection. */
+  /** The external URL of this item. */
   externalUrl?: string;
-  /** The tags of the badge or badge collection */
+  /** The tags of this item */
   tags?: string[];
 
-  /** The socials of the badge or badge collection */
+  /** The socials of this item */
   socials?: {
     [key: string]: string;
   };
 
-  /** The off-chain transferability info of the badge or badge collection */
+  /** The off-chain transferability info of this item */
   offChainTransferabilityInfo?: {
     host: string;
     assignMethod: string;
   };
 
-  /** The attributes of the badge or badge collection */
+  /** The attributes of this item */
   attributes?: {
     type: string;
     name: string;

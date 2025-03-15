@@ -443,7 +443,7 @@ export interface iGetClaimPayload {
   fetchPrivateParams?: boolean;
   /** Fetch all claimed users for the claim. */
   fetchAllClaimedUsers?: boolean;
-  /** The private state instance IDs to fetch. claimId and instanceId are required and must match a claimId in claimIds and the claim must have the corresponding instanceId. */
+  /** The private state instance IDs to fetch. */
   privateStatesToFetch?: string[];
 }
 
