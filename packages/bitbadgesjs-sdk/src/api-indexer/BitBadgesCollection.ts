@@ -117,8 +117,6 @@ export interface iBitBadgesCollection<T extends NumberType> extends iCollectionD
   nsfw?: { badgeIds: iUintRange<T>[]; reason: string };
   /** The badge IDs in this collection that have been reported. */
   reported?: { badgeIds: iUintRange<T>[]; reason: string };
-  /** The reserved map for the account. This is created and managed on-chain through the x/maps module. */
-  reservedMap?: iMapDoc<T>;
 
   /** The views for this collection and their pagination Doc. Views will only include the doc _ids. Use the pagination to fetch more. To be used in conjunction with activity, announcements, reviews, owners, merkleChallenges, and approvalTrackers. For example, if you want to fetch the activity for a view, you would use the view's pagination to fetch the doc _ids, then use the corresponding activity array to find the matching docs. */
   views: {
@@ -161,8 +159,6 @@ export class BitBadgesCollection<T extends NumberType>
 
   claims: ClaimDetails<T>[];
 
-  reservedMap?: MapDoc<T> | undefined;
-
   nsfw?: { badgeIds: UintRangeArray<T>; reason: string };
   reported?: { badgeIds: UintRangeArray<T>; reason: string };
 
@@ -194,7 +190,6 @@ export class BitBadgesCollection<T extends NumberType>
     this.reported = data.reported ? { ...data.reported, badgeIds: UintRangeArray.From(data.reported.badgeIds) } : undefined;
     this.views = data.views;
     this.claims = data.claims.map((x) => new ClaimDetails(x));
-    this.reservedMap = data.reservedMap ? new MapDoc(data.reservedMap) : undefined;
   }
 
   getNumberFieldNames(): string[] {
@@ -727,19 +722,19 @@ export class BitBadgesCollection<T extends NumberType>
     api: BaseBitBadgesApi<T>,
     collectionId: NumberType,
     address: string,
-    body?: iGetBadgeBalanceByAddressPayload
+    payload?: iGetBadgeBalanceByAddressPayload
   ): Promise<GetBadgeBalanceByAddressSuccessResponse<T>> {
     try {
-      const validateRes: typia.IValidation<iGetBadgeBalanceByAddressPayload> = typia.validate<iGetBadgeBalanceByAddressPayload>(body ?? {});
+      const validateRes: typia.IValidation<iGetBadgeBalanceByAddressPayload> = typia.validate<iGetBadgeBalanceByAddressPayload>(payload ?? {});
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
       api.assertPositiveInteger(collectionId);
 
-      const response = await api.axios.post<iGetBadgeBalanceByAddressSuccessResponse<string>>(
+      const response = await api.axios.get<iGetBadgeBalanceByAddressSuccessResponse<string>>(
         `${api.BACKEND_URL}${BitBadgesApiRoutes.GetBadgeBalanceByAddressRoute(collectionId, address)}`,
-        body
+        { params: payload }
       );
       return new GetBadgeBalanceByAddressSuccessResponse(response.data).convert(api.ConvertFunction);
     } catch (error) {
@@ -1073,7 +1068,7 @@ export class BitBadgesCollection<T extends NumberType>
     try {
       api.assertPositiveInteger(collectionId);
 
-      const response = await api.axios.post<iRefreshStatusSuccessResponse<string>>(
+      const response = await api.axios.get<iRefreshStatusSuccessResponse<string>>(
         `${api.BACKEND_URL}${BitBadgesApiRoutes.GetRefreshStatusRoute(collectionId)}`
       );
       return new RefreshStatusSuccessResponse(response.data).convert(api.ConvertFunction);
@@ -1127,10 +1122,10 @@ export class BitBadgesCollection<T extends NumberType>
     api: BaseBitBadgesApi<T>,
     collectionId: NumberType,
     badgeId: NumberType,
-    body: iGetBadgeActivityPayload
+    payload?: iGetBadgeActivityPayload
   ) {
     try {
-      const validateRes: typia.IValidation<iGetBadgeActivityPayload> = typia.validate<iGetBadgeActivityPayload>(body ?? {});
+      const validateRes: typia.IValidation<iGetBadgeActivityPayload> = typia.validate<iGetBadgeActivityPayload>(payload ?? {});
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
@@ -1138,9 +1133,9 @@ export class BitBadgesCollection<T extends NumberType>
       api.assertPositiveInteger(collectionId);
       api.assertPositiveInteger(badgeId);
 
-      const response = await api.axios.post<iGetBadgeActivitySuccessResponse<string>>(
+      const response = await api.axios.get<iGetBadgeActivitySuccessResponse<string>>(
         `${api.BACKEND_URL}${BitBadgesApiRoutes.GetBadgeActivityRoute(collectionId, badgeId)}`,
-        body
+        { params: payload }
       );
       return new GetBadgeActivitySuccessResponse(response.data).convert(api.ConvertFunction);
     } catch (error) {
@@ -1163,10 +1158,10 @@ export class BitBadgesCollection<T extends NumberType>
     api: BaseBitBadgesApi<T>,
     collectionId: NumberType,
     badgeId: NumberType,
-    body: iGetOwnersForBadgePayload
+    payload?: iGetOwnersForBadgePayload
   ) {
     try {
-      const validateRes: typia.IValidation<iGetOwnersForBadgePayload> = typia.validate<iGetOwnersForBadgePayload>(body ?? {});
+      const validateRes: typia.IValidation<iGetOwnersForBadgePayload> = typia.validate<iGetOwnersForBadgePayload>(payload ?? {});
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
@@ -1174,9 +1169,9 @@ export class BitBadgesCollection<T extends NumberType>
       api.assertPositiveInteger(collectionId);
       api.assertPositiveInteger(badgeId);
 
-      const response = await api.axios.post<iGetOwnersForBadgeSuccessResponse<string>>(
+      const response = await api.axios.get<iGetOwnersForBadgeSuccessResponse<string>>(
         `${api.BACKEND_URL}${BitBadgesApiRoutes.GetOwnersForBadgeRoute(collectionId, badgeId)}`,
-        body
+        { params: payload }
       );
       return new GetOwnersForBadgeSuccessResponse(response.data).convert(api.ConvertFunction);
     } catch (error) {

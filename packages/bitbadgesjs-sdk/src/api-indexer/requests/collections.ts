@@ -408,13 +408,13 @@ export interface GetAdditionalCollectionDetailsPayload {
    */
   challengeTrackersToFetch?: iChallengeTrackerIdDetails<NumberType>[];
   /**
+   * Disable appending default approvals.
+   */
+  disableDefaults?: boolean;
+  /**
    * If present, the approvals trackers corresponding to the specified approvals tracker IDs will be fetched.
    */
   approvalTrackersToFetch?: iAmountTrackerIdDetails<NumberType>[];
-  /**
-   * If true, we will append defaults with empty values.
-   */
-  handleAllAndAppendDefaults?: boolean;
   /**
    * Fetches private parameters for any claims in addition to public parameters.
    */

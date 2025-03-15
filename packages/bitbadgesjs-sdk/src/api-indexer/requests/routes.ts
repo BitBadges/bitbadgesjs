@@ -30,8 +30,6 @@ export class BitBadgesApiRoutes {
   static FilterBadgesInCollectionRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/filter`;
   static FilterSuggestionsRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/filterSuggestions`;
 
-  static GenericVerifyAssetsRoute = () => '/api/v0/verifyOwnershipRequirements';
-
   static CompleteClaimRoute = (claimId: string, address: NativeAddress) => `/api/v0/claims/complete/${claimId.toString()}/${address}`;
   static SimulateClaimRoute = (claimId: string, address: NativeAddress) => `/api/v0/claims/simulate/${claimId.toString()}/${address}`;
   static GetReservedClaimCodesRoute = (claimId: string, address: NativeAddress) => `/api/v0/claims/reserved/${claimId.toString()}/${address}`;
@@ -71,7 +69,6 @@ export class BitBadgesApiRoutes {
   static GetTokensFromFaucetRoute = () => '/api/v0/faucet';
 
   static SendClaimAlertRoute = () => '/api/v0/claimAlerts/send';
-  static GetClaimAlertsRoute = () => '/api/v0/claimAlerts';
 
   static ExchangeSIWBBAuthorizationCodesRoute = () => '/api/v0/siwbb/token';
   static CRUDSIWBBRequestRoute = () => '/api/v0/siwbbRequest';
@@ -137,4 +134,29 @@ export class BitBadgesApiRoutes {
   static ScheduleTokenRefreshRoute = () => '/api/v0/oauth-token-refresh-schedule';
 
   static CheckClaimSuccessRoute = (claimId: string, address: NativeAddress) => `/api/v0/claims/success/${claimId}/${address}`;
+
+  static GetAddressListsForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/lists`;
+  static GetSiwbbRequestsForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/requests/siwbb`;
+  static GetTransferActivityForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/activity/badges`;
+  static GetBadgesByTypeForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/badges`;
+  static GetListsActivityForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/activity/lists`;
+  static GetAttestationsByTypeForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/attestations`;
+  static GetClaimActivityByTypeForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/activity/claims`;
+  static GetPointsActivityForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/activity/points`;
+  static GetClaimAlertsForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/claimAlerts`;
+
+  static GetAddressListActivityRoute = (addressListId: string) => `/api/v0/addressLists/${addressListId}/activity`;
+  static GetAddressListListingsRoute = (addressListId: string) => `/api/v0/addressLists/${addressListId}/listings`;
+  static GetAddressListClaimsRoute = (addressListId: string) => `/api/v0/addressLists/${addressListId}/claims`;
+
+  static GetCollectionOwnersRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/owners`;
+  static GetCollectionRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}`;
+  static GetBadgeMetadataRoute = (collectionId: NumberType, badgeId: NumberType) =>
+    `/api/v0/collection/${collectionId.toString()}/${badgeId.toString()}/metadata`;
+  static GetCollectionClaimsRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/claims`;
+
+  static GetCollectionTransferActivityRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/activity`;
+  static GetCollectionChallengeTrackersRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/challengeTrackers`;
+  static GetCollectionAmountTrackersRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/amountTrackers`;
+  static GetCollectionListingsRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/listings`;
 }

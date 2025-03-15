@@ -1,7 +1,7 @@
 {
   "name": "bitbadgesjs-sdk",
   "description": "SDK for BitBadges development",
-  "version": "0.7.13",
+  "version": "0.8.0",
   "license": "MIT",
   "eslintIgnore": [
     "src/proto/**/*.ts"
@@ -74,12 +74,12 @@
     "ts-jest-resolver": "^2.0.1",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^1.1.8",
-    "ts-patch": "^3.2.1",
+    "ts-patch": "^3.3.0",
     "tsconfig-paths": "^3.11.0",
     "tsoa": "^6.1.5",
     "tsup": "^8.1.0",
     "typedoc": "^0.26.5",
-    "typescript": "^5.4.2"
+    "typescript": "~5.8.2"
   },
   "dependencies": {
     "@bufbuild/protobuf": "^1.7.2",
@@ -98,7 +98,7 @@
     "ethers": "^6.13.2",
     "next-auth": "^5.0.0-beta.19",
     "tweetnacl": "^1.0.3",
-    "typia": "^6.9.0",
+    "typia": "^8.0.2",
     "web3-validator": "^2.0.6"
   }
 }

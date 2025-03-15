@@ -69,9 +69,6 @@ export interface iBitBadgesUserInfo<T extends NumberType> extends iProfileDoc<T>
   /** A list of user attestations for the account. Paginated and fetched as needed. To be used in conjunction with views. */
   attestations: iAttestationDoc<T>[];
 
-  /** The reserved map for the account. This is created and managed on-chain through the x/maps module. */
-  reservedMap?: iMapDoc<T>;
-
   /** The native address of the account */
   address: NativeAddress;
 
@@ -149,7 +146,6 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     collectionId?: T;
     listId?: string;
   };
-  reservedMap?: MapDoc<T> | undefined;
 
   constructor(data: iBitBadgesUserInfo<T>) {
     super(data);
@@ -182,7 +178,6 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     this.reported = data.reported;
     this.views = data.views;
     this.alias = data.alias;
-    this.reservedMap = data.reservedMap ? new MapDoc(data.reservedMap) : undefined;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): BitBadgesUserInfo<U> {

@@ -325,7 +325,11 @@ export interface iClaimAlertDoc<T extends NumberType> extends iActivityDoc<T> {
   from: string;
   /** The BitBadges addresses of the users that have been alerted. */
   bitbadgesAddresses: BitBadgesAddress[];
-  /** The collection ID of the claim alert. */
+  /**
+   * The collection ID of the claim alert.
+   *
+   * @deprecated Not supported anymore.
+   */
   collectionId: T;
   /** The message of the claim alert. */
   message?: string;
@@ -1225,7 +1229,7 @@ export interface iUtilityListingDoc<T extends NumberType> extends Doc {
   approvalStatus: {
     /** Whether the listing is approved */
     isApproved: boolean;
-    /** Is Featured */
+    /** Is  Featured */
     isFeatured?: boolean;
     /** Featured Priority */
     featuredPriority?: number;

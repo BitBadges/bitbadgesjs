@@ -696,9 +696,11 @@ export class GetReservedClaimCodesPayload extends EmptyResponseClass {}
  * @category API Requests / Responses
  */
 export interface iGetReservedClaimCodesSuccessResponse {
-  /** The new claim code for the user if the claim was successful. */
-  code?: string;
-  /** The previous claim codes for the user. */
+  /**
+   * The previously reserved claim codes for the user. These are
+   * what are used in the eventual on-chain merkle proof to complete
+   * the transaction.
+   */
   prevCodes?: string[];
 }
 
@@ -710,12 +712,10 @@ export class GetReservedClaimCodesSuccessResponse
   extends CustomTypeClass<GetReservedClaimCodesSuccessResponse>
   implements iGetReservedClaimCodesSuccessResponse
 {
-  code?: string;
   prevCodes?: string[] | undefined;
 
   constructor(data: iGetReservedClaimCodesSuccessResponse) {
     super();
-    this.code = data.code;
     this.prevCodes = data.prevCodes;
   }
 }
@@ -1840,11 +1840,8 @@ export class GetTokensFromFaucetSuccessResponse extends EmptyResponseClass {}
 export interface iSendClaimAlertsPayload {
   /** The claim alerts to send to users. */
   claimAlerts: {
-    /** The collection ID to associate with the claim alert. If specified, you (the sender) must be the manager of the collection. This is typically used
-     * for sending claim codes. Set to 0 for unspecified. */
-    collectionId: NumberType;
     /** The message to send to the user. */
-    message?: string;
+    message: string;
     /** The addresses to send the claim alert to. */
     bitbadgesAddresses: BitBadgesAddress[];
   }[];
@@ -2550,74 +2547,6 @@ export class GenerateGoogleWalletSuccessResponse
 /**
  * @category API Requests / Responses
  */
-export interface iGetClaimAlertsForCollectionPayload<T extends NumberType> {
-  /** The collection ID to get claim alerts for. */
-  collectionId: T;
-  /** The pagination bookmark obtained from the previous request. Leave blank for the first request. */
-  bookmark: string;
-}
-
-/**
- * @category API Requests / Responses
- */
-export class GetClaimAlertsForCollectionPayload<T extends NumberType>
-  extends BaseNumberTypeClass<GetClaimAlertsForCollectionPayload<T>>
-  implements iGetClaimAlertsForCollectionPayload<T>
-{
-  collectionId: T;
-  bookmark: string;
-
-  constructor(payload: iGetClaimAlertsForCollectionPayload<T>) {
-    super();
-    this.collectionId = payload.collectionId;
-    this.bookmark = payload.bookmark;
-  }
-
-  static FromQuery(query: ParsedQs): GetClaimAlertsForCollectionPayload<NumberType> {
-    return new GetClaimAlertsForCollectionPayload({
-      collectionId: query.collectionId?.toString() ?? '',
-      bookmark: query.bookmark?.toString() ?? ''
-    });
-  }
-
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetClaimAlertsForCollectionPayload<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetClaimAlertsForCollectionPayload<U>;
-  }
-
-  getNumberFieldNames(): string[] {
-    return ['collectionId'];
-  }
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iGetClaimAlertsForCollectionSuccessResponse<T extends NumberType> {
-  claimAlerts: iClaimAlertDoc<T>[];
-  pagination: PaginationInfo;
-}
-
-export class GetClaimAlertsForCollectionSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetClaimAlertsForCollectionSuccessResponse<T>>
-  implements iGetClaimAlertsForCollectionSuccessResponse<T>
-{
-  claimAlerts: ClaimAlertDoc<T>[];
-  pagination: PaginationInfo;
-
-  constructor(data: iGetClaimAlertsForCollectionSuccessResponse<T>) {
-    super();
-    this.claimAlerts = data.claimAlerts.map((claimAlert) => new ClaimAlertDoc(claimAlert));
-    this.pagination = data.pagination;
-  }
-
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetClaimAlertsForCollectionSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetClaimAlertsForCollectionSuccessResponse<U>;
-  }
-}
-
-/**
- * @category API Requests / Responses
- */
 export interface iCreateDeveloperAppPayload {
   /** Metadata for the secret for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
   name: string;
@@ -2664,7 +2593,11 @@ export interface iGetActiveAuthorizationsPayload {}
 /**
  * @category API Requests / Responses
  */
-export class GetActiveAuthorizationsPayload extends EmptyResponseClass {}
+export class GetActiveAuthorizationsPayload extends EmptyResponseClass {
+  static FromQuery(query: ParsedQs): GetActiveAuthorizationsPayload {
+    return new GetActiveAuthorizationsPayload({});
+  }
+}
 
 /**
  * @category API Requests / Responses

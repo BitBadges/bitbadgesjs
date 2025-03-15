@@ -111,16 +111,16 @@ export class ListActivityDoc<T extends NumberType> extends ActivityDoc<T> implem
  * @category Indexer
  */
 export class ClaimAlertDoc<T extends NumberType> extends ActivityDoc<T> implements iClaimAlertDoc<T> {
+  collectionId: T;
   from: BitBadgesAddress;
   bitbadgesAddresses: BitBadgesAddress[];
-  collectionId: T;
   message?: string;
 
   constructor(data: iClaimAlertDoc<T>) {
     super(data);
+    this.collectionId = data.collectionId;
     this.from = data.from;
     this.bitbadgesAddresses = data.bitbadgesAddresses;
-    this.collectionId = data.collectionId;
     this.message = data.message;
   }
 

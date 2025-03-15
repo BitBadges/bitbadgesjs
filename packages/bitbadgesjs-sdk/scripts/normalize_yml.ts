@@ -35,7 +35,6 @@ fs.readFile(filePath, 'utf8', (err, data) => {
       { route: '/developerApps/siwbbRequests', schema: 'iGetSIWBBRequestsForDeveloperAppPayload' },
       { route: '/siwbbRequest/verify', schema: 'iGenericBlockinVerifyPayload' },
       { route: '/verifyOwnershipRequirements', schema: 'iGenericVerifyAssetsPayload' },
-      { route: '/claimAlerts', schema: 'iGetClaimAlertsForCollectionPayload' },
       { route: '/collection/{collectionId}/refreshStatus', schema: '' },
       { route: '/maps', schema: 'iGetMapsPayload' },
       { route: '/attestations/fetch', schema: 'iGetAttestationPayload' },

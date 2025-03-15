@@ -77,13 +77,11 @@ import {
   GenerateAppleWalletPassSuccessResponse,
   GenerateGoogleWalletSuccessResponse,
   GenericBlockinVerifySuccessResponse,
-  GenericVerifyAssetsSuccessResponse,
   GetActiveAuthorizationsSuccessResponse,
   GetApiKeysSuccessResponse,
   GetApplicationsSuccessResponse,
   GetAttestationsSuccessResponse,
   GetBrowseSuccessResponse,
-  GetClaimAlertsForCollectionSuccessResponse,
   GetClaimAttemptStatusSuccessResponse,
   GetClaimAttemptsSuccessResponse,
   GetClaimsSuccessResponse,
@@ -173,16 +171,12 @@ import {
   iGenerateGoogleWalletPayload,
   iGenericBlockinVerifyPayload,
   iGenericBlockinVerifySuccessResponse,
-  iGenericVerifyAssetsPayload,
-  iGenericVerifyAssetsSuccessResponse,
   iGetActiveAuthorizationsPayload,
   iGetApiKeysPayload,
   iGetApplicationsPayload,
   iGetAttestationsPayload,
   iGetBrowsePayload,
   iGetBrowseSuccessResponse,
-  iGetClaimAlertsForCollectionPayload,
-  iGetClaimAlertsForCollectionSuccessResponse,
   iGetClaimAttemptStatusSuccessResponse,
   iGetClaimAttemptsPayload,
   iGetClaimsPayloadV1,
@@ -246,8 +240,65 @@ import {
   iVerifySignInSuccessResponse
 } from './requests/requests.js';
 import { BitBadgesApiRoutes } from './requests/routes.js';
-import { DeleteConnectedAccountSuccessResponse } from './responses/stripe.js';
-import { GetConnectedAccountsSuccessResponse } from './responses/stripe.js';
+import {
+  GetAddressListActivitySuccessResponse,
+  GetAddressListClaimsSuccessResponse,
+  GetAddressListListingsSuccessResponse,
+  GetAddressListsForUserSuccessResponse,
+  GetAttestationsForUserSuccessResponse,
+  GetBadgeMetadataSuccessResponse,
+  GetBadgesViewForUserSuccessResponse,
+  GetClaimActivityForUserSuccessResponse,
+  GetClaimAlertsForUserSuccessResponse,
+  GetCollectionAmountTrackersSuccessResponse,
+  GetCollectionChallengeTrackersSuccessResponse,
+  GetCollectionClaimsSuccessResponse,
+  GetCollectionListingsSuccessResponse,
+  GetCollectionOwnersSuccessResponse,
+  GetCollectionSuccessResponse,
+  GetCollectionTransferActivitySuccessResponse,
+  GetListsActivityForUserSuccessResponse,
+  GetPointsActivityForUserSuccessResponse,
+  GetSiwbbRequestsForUserSuccessResponse,
+  GetTransferActivityForUserSuccessResponse,
+  iGetAddressListActivityPayload,
+  iGetAddressListActivitySuccessResponse,
+  iGetAddressListClaimsSuccessResponse,
+  iGetAddressListListingsPayload,
+  iGetAddressListListingsSuccessResponse,
+  iGetAddressListsForUserPayload,
+  iGetAddressListsForUserSuccessResponse,
+  iGetAttestationsForUserPayload,
+  iGetAttestationsForUserSuccessResponse,
+  iGetBadgeMetadataSuccessResponse,
+  iGetBadgesViewForUserPayload,
+  iGetBadgesViewForUserSuccessResponse,
+  iGetClaimActivityForUserPayload,
+  iGetClaimAlertsForUserPayload,
+  iGetClaimActivityForUserSuccessResponse,
+  iGetClaimAlertsForUserSuccessResponse,
+  iGetCollectionAmountTrackersPayload,
+  iGetCollectionAmountTrackersSuccessResponse,
+  iGetCollectionChallengeTrackersPayload,
+  iGetCollectionChallengeTrackersSuccessResponse,
+  iGetCollectionClaimsSuccessResponse,
+  iGetCollectionListingsPayload,
+  iGetCollectionListingsSuccessResponse,
+  iGetCollectionOwnersPayload,
+  iGetCollectionOwnersSuccessResponse,
+  iGetCollectionSuccessResponse,
+  iGetCollectionTransferActivityPayload,
+  iGetCollectionTransferActivitySuccessResponse,
+  iGetListsActivityForUserPayload,
+  iGetListsActivityForUserSuccessResponse,
+  iGetPointsActivityForUserPayload,
+  iGetPointsActivityForUserSuccessResponse,
+  iGetSiwbbRequestsForUserPayload,
+  iGetSiwbbRequestsForUserSuccessResponse,
+  iGetTransferActivityForUserPayload,
+  iGetTransferActivityForUserSuccessResponse
+} from './requests/wrappers.js';
+import { DeleteConnectedAccountSuccessResponse, GetConnectedAccountsSuccessResponse } from './responses/stripe.js';
 
 /**
  * This is the BitBadgesAPI class which provides all typed API calls to the BitBadges API.
@@ -276,7 +327,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * Gets the current status details about the blockchain / indexer (gas, block height, etc).
    *
    * @remarks
-   * - **API Route**: `POST /api/v0/status`
+   * - **API Route**: `GET /api/v0/status`
    * - **SDK Function Call**: `await BitBadgesApi.getStatus();`
    *
    * @example
@@ -292,7 +343,9 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      const response = await this.axios.post<iGetStatusSuccessResponse<string>>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetStatusRoute()}`, payload);
+      const response = await this.axios.get<iGetStatusSuccessResponse<string>>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetStatusRoute()}`, {
+        params: payload
+      });
       return new GetStatusSuccessResponse(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
@@ -352,7 +405,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * Gets the owners for a specific badge in a collection
    *
    * @remarks
-   * - **API Route**: `POST /api/v0/collection/:collectionId/:badgeId/owners`
+   * - **API Route**: `GET /api/v0/collection/:collectionId/:badgeId/owners`
    * - **SDK Function Call**: `await BitBadgesApi.getOwnersForBadge(collectionId, badgeId, payload);`
    *
    * @example
@@ -430,7 +483,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * Gets the activity for a specific badge in a collection
    *
    * @remarks
-   * - **API Route**: `POST /api/v0/collection/:collectionId/:badgeId/activity`
+   * - **API Route**: `GET /api/v0/collection/:collectionId/:badgeId/activity`
    * - **SDK Function Call**: `await BitBadgesApi.getBadgeActivity(collectionId, badgeId, payload);`
    *
    * @example
@@ -635,38 +688,6 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
-   * Updates the profile / account information for a user. We will only update the provided fields.
-   *
-   * @remarks
-   * - **API Route**: `POST /api/v0/user/updateAccount`
-   * - **SDK Function Call**: `await BitBadgesApi.updateAccountInfo(payload);`
-   * - **Authentication**: Must be signed in.
-   *
-   * @example
-   * ```typescript
-   * const res = await BitBadgesApi.updateAccountInfo(payload);
-   * console.log(res);
-   * ```
-   */
-  public async updateAccountInfo(payload: iUpdateAccountInfoPayload): Promise<UpdateAccountInfoSuccessResponse> {
-    try {
-      const validateRes: typia.IValidation<iUpdateAccountInfoPayload> = typia.validate<iUpdateAccountInfoPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.post<iUpdateAccountInfoSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.UpdateAccountInfoRoute()}`,
-        payload
-      );
-      return new UpdateAccountInfoSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
    * Checks if the user is signed in.
    *
    * @remarks
@@ -686,28 +707,6 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
         payload
       );
       return new CheckSignInStatusSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Gets details for a browse / explore page.
-   *
-   * @remarks
-   * - **API Route**: `POST /api/v0/browse`
-   * - **SDK Function Call**: `await BitBadgesApi.GetBrowse(payload);`
-   */
-  public async getBrowse(payload: iGetBrowsePayload): Promise<GetBrowseSuccessResponse<T>> {
-    try {
-      const validateRes: typia.IValidation<iGetBrowsePayload> = typia.validate<iGetBrowsePayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.post<iGetBrowseSuccessResponse<string>>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetBrowseRoute()}`, payload);
-      return new GetBrowseSuccessResponse(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -847,7 +846,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * Gets the SIWBB requests for a specific developer app.
    *
    * @remarks
-   * - **API Route**: `POST /api/v0/developerApps/siwbbRequests`
+   * - **API Route**: `GET /api/v0/developerApps/siwbbRequests`
    * - **SDK Function Call**: `await BitBadgesApi.getSIWBBRequestsForDeveloperApp(payload);`
    */
   public async getSIWBBRequestsForDeveloperApp(
@@ -861,9 +860,9 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      const response = await this.axios.post<iGetSIWBBRequestsForDeveloperAppSuccessResponse<string>>(
+      const response = await this.axios.get<iGetSIWBBRequestsForDeveloperAppSuccessResponse<string>>(
         `${this.BACKEND_URL}${BitBadgesApiRoutes.GetSIWBBRequestsForDeveloperAppRoute()}`,
-        payload
+        { params: payload }
       );
       return new GetSIWBBRequestsForDeveloperAppSuccessResponse(response.data).convert(this.ConvertFunction);
     } catch (error) {
@@ -949,56 +948,6 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
-   * A generic route for verifying SIWBB requests. Used as a helper if implementing on your own.
-   *
-   * @remarks
-   * - **API Route**: `POST /api/v0/siwbbRequest/verify`
-   * - **SDK Function Call**: `await BitBadgesApi.verifySIWBBRequest(payload);`
-   */
-  public async verifySIWBBRequest(payload: iGenericBlockinVerifyPayload): Promise<GenericBlockinVerifySuccessResponse> {
-    try {
-      const validateRes: typia.IValidation<iGenericBlockinVerifyPayload> = typia.validate<iGenericBlockinVerifyPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.post<iGenericBlockinVerifySuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GenericVerifyRoute()}`,
-        payload
-      );
-      return new GenericBlockinVerifySuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * A generic route for verifying asset ownership requirements. Asset requirements support AND / OR / NOT logic.
-   *
-   * @remarks
-   * - **API Route**: `POST /api/v0/verifyOwnershipRequirements`
-   * - **SDK Function Call**: `await BitBadgesApi.verifyOwnershipRequirements(payload);`
-   */
-  public async verifyOwnershipRequirements(payload: iGenericVerifyAssetsPayload): Promise<GenericVerifyAssetsSuccessResponse> {
-    try {
-      const validateRes: typia.IValidation<iGenericVerifyAssetsPayload> = typia.validate<iGenericVerifyAssetsPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.post<iGenericVerifyAssetsSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GenericVerifyAssetsRoute()}`,
-        payload
-      );
-      return new GenericVerifyAssetsSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
    * Sends claim alert notifications out.
    *
    * @remarks
@@ -1026,38 +975,10 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
-   * Gets claim alerts for a collection.
-   *
-   * @remarks
-   * - **API Route**: `POST /api/v0/claimAlerts`
-   * - **SDK Function Call**: `await BitBadgesApi.getClaimAlerts(payload);`
-   * - **Authentication**: Must be signed in and the manager of the collection.
-   */
-  public async getClaimAlerts(payload: iGetClaimAlertsForCollectionPayload<NumberType>): Promise<GetClaimAlertsForCollectionSuccessResponse<T>> {
-    try {
-      const validateRes: typia.IValidation<iGetClaimAlertsForCollectionPayload<NumberType>> = typia.validate<
-        iGetClaimAlertsForCollectionPayload<NumberType>
-      >(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.post<iGetClaimAlertsForCollectionSuccessResponse<string>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetClaimAlertsRoute()}`,
-        payload
-      );
-      return new GetClaimAlertsForCollectionSuccessResponse(response.data).convert(this.ConvertFunction);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
    * Gets the refresh status for a collection. Used to track if any errors occur during a refresh, or if it is in the queue or not.
    *
    * @remarks
-   * - **API Route**: `POST /api/v0/collection/:collectionId/refreshStatus`
+   * - **API Route**: `GET /api/v0/collection/:collectionId/refreshStatus`
    * - **SDK Function Call**: `await BitBadgesApi.getRefreshStatus(payload);`
    */
   public async getRefreshStatus(collectionId: NumberType): Promise<RefreshStatusSuccessResponse<NumberType>> {
@@ -1120,31 +1041,6 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
     payload: iFilterBadgesInCollectionPayload
   ): Promise<FilterBadgesInCollectionSuccessResponse<T>> {
     return await BitBadgesCollection.FilterBadgesInCollection(this, collectionId, payload);
-  }
-
-  /**
-   * Gets the filter suggestions based on attributes in a collection.
-   *
-   * @remarks
-   * - **API Route**: `POST /api/v0/collection/:collectionId/filterSuggestions`
-   * - **SDK Function Call**: `await BitBadgesApi.filterSuggestions(collectionId, payload);`
-   */
-  public async filterSuggestions(collectionId: T, payload?: iFilterSuggestionsPayload): Promise<FilterSuggestionsSuccessResponse> {
-    try {
-      const validateRes: typia.IValidation<iFilterSuggestionsPayload> = typia.validate<iFilterSuggestionsPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.post<iFilterSuggestionsSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.FilterSuggestionsRoute(collectionId)}`,
-        payload
-      );
-      return new FilterSuggestionsSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
   }
 
   /**
@@ -1418,142 +1314,28 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
-   * Adds a balance map to off-chain storage. Mode can either be 'ipfs" for storing on IPFS or 'centralized' for storing on DigitalOcean.
-   *
-   * @remarks
-   * - **API Route**: `POST /api/v0/addBalancesToOffChainStorage`
-   * - **SDK Function Call**: `await BitBadgesApi.addBalancesToOffChainStorage(payload);`
-   * - **CORS**: Restricted to only BitBadges official site. Otherwise, you will need to self-host.
-   *
-   * @example
-   * ```typescript
-   * const res = await BitBadgesApi.addBalancesToOffChainStorage(payload);
-   * console.log(res);
-   * ```
-   */
-  public async addBalancesToOffChainStorage(payload: iAddBalancesToOffChainStoragePayload): Promise<AddBalancesToOffChainStorageSuccessResponse> {
-    try {
-      const validateRes: typia.IValidation<iAddBalancesToOffChainStoragePayload> = typia.validate<iAddBalancesToOffChainStoragePayload>(
-        payload ?? {}
-      );
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.post<iAddBalancesToOffChainStorageSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.AddBalancesToOffChainStorageRoute()}`,
-        payload
-      );
-      return new AddBalancesToOffChainStorageSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
    * Get the gated content for a claim.
    *
    * @remarks
-   * - **API Route**: `POST /api/v0/claims/gatedContent/{claimId}`
+   * - **API Route**: `GET /api/v0/claims/gatedContent/{claimId}`
    * - **SDK Function Call**: `await BitBadgesApi.getGatedContentForClaim(payload);`
    * - **Authentication**: Must be signed in.
    */
-  public async getGatedContentForClaim(claimId: string): Promise<GetGatedContentForClaimSuccessResponse<T>> {
+  public async getGatedContentForClaim(
+    claimId: string,
+    payload?: iGetGatedContentForClaimPayload
+  ): Promise<GetGatedContentForClaimSuccessResponse<T>> {
     try {
       const validateRes: typia.IValidation<iGetGatedContentForClaimPayload> = typia.validate<iGetGatedContentForClaimPayload>({});
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      const response = await this.axios.post<GetGatedContentForClaimSuccessResponse<T>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetGatedContentForClaimRoute(claimId)}`
+      const response = await this.axios.get<GetGatedContentForClaimSuccessResponse<T>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetGatedContentForClaimRoute(claimId)}`,
+        { params: payload }
       );
       return new GetGatedContentForClaimSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Gets the sign in challenge to be signed for authentication. The returned is the message to be signed by the user.
-   *
-   * @remarks
-   * - **API Route**: `POST /api/v0/auth/getChallenge`
-   * - **SDK Function Call**: `await BitBadgesApi.getSignInChallenge(payload);`
-   * - **Tutorial**: See Authentication tutorial on the official docs.
-   *
-   * @example
-   * ```typescript
-   * const res = await BitBadgesApi.getSignInChallenge(payload);
-   * console.log(res);
-   * ```
-   */
-  public async getSignInChallenge(payload: iGetSignInChallengePayload): Promise<GetSignInChallengeSuccessResponse<T>> {
-    try {
-      const validateRes: typia.IValidation<iGetSignInChallengePayload> = typia.validate<iGetSignInChallengePayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.post<iGetSignInChallengeSuccessResponse<string>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetSignInChallengeRoute()}`,
-        payload
-      );
-      return new GetSignInChallengeSuccessResponse(response.data).convert(this.ConvertFunction);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Verifies the user signed challenge and grants them a valid session if everything checks out.
-   *
-   * @remarks
-   * - **API Route**: `POST /api/v0/auth/verify`
-   * - **SDK Function Call**: `await BitBadgesApi.verifySignIn(payload);`
-   * - **Tutorial**: See Authentication tutorial on the official docs.
-   *
-   * @example
-   * ```typescript
-   * const res = await BitBadgesApi.verifySignIn(payload);
-   * console.log(res);
-   * ```
-   */
-  public async verifySignIn(payload: iVerifySignInPayload): Promise<VerifySignInSuccessResponse> {
-    try {
-      const validateRes: typia.IValidation<iVerifySignInPayload> = typia.validate<iVerifySignInPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.post<iVerifySignInSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.VerifySignInRoute()}`, payload);
-      return new VerifySignInSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Signs the user out.
-   *
-   * @remarks
-   * - **API Route**: `POST /api/v0/auth/logout`
-   * - **SDK Function Call**: `await BitBadgesApi.signOut(payload);`
-   * - **Tutorial**: See Authentication tutorial on the official docs.
-   */
-  public async signOut(payload?: iSignOutPayload): Promise<SignOutSuccessResponse> {
-    try {
-      const validateRes: typia.IValidation<iSignOutPayload> = typia.validate<iSignOutPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.post<iSignOutSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.SignOutRoute()}`, payload);
-      return new SignOutSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -1666,12 +1448,16 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
 
   /**
    * Get dynamic data store activity
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/dynamicStores/activity`
+   * - **SDK Function Call**: `await BitBadgesApi.getDynamicDataActivity(payload);`
    */
   public async getDynamicDataActivity(payload: iGetDynamicDataActivityPayload): Promise<GetDynamicDataActivitySuccessResponse> {
     try {
-      const response = await this.axios.post<GetDynamicDataActivitySuccessResponse>(
+      const response = await this.axios.get<GetDynamicDataActivitySuccessResponse>(
         `${this.BACKEND_URL}${BitBadgesApiRoutes.GetDynamicDataStoreActivityRoute()}`,
-        payload
+        { params: payload }
       );
       return new GetDynamicDataActivitySuccessResponse(response.data);
     } catch (error) {
@@ -1885,7 +1671,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * Gets points activity for an application.
    *
    * @remarks
-   * - **API Route**: `POST /api/v0/applications/points/activity`
+   * - **API Route**: `GET /api/v0/applications/points/activity`
    * - **SDK Function Call**: `await BitBadgesApi.getPointsActivity(payload);`
    */
   public async getPointsActivity<T extends NumberType>(payload: iGetPointsActivityPayload): Promise<GetPointsActivitySuccessResponse<T>> {
@@ -1895,9 +1681,9 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      const response = await this.axios.post<iGetPointsActivitySuccessResponse<T>>(
+      const response = await this.axios.get<iGetPointsActivitySuccessResponse<T>>(
         `${this.BACKEND_URL}${BitBadgesApiRoutes.GetPointsActivityRoute()}`,
-        payload
+        { params: payload }
       );
       return new GetPointsActivitySuccessResponse<T>(response.data);
     } catch (error) {
@@ -2011,7 +1797,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @remarks
    * - **API Route**: `GET /api/v0/claims/:claimId/attempts`
-   * - **SDK Function Call**: `await BitBadgesApi.getClaimAttempts(payload);`
+   * - **SDK Function Call**: `await BitBadgesApi.getClaimAttempts(claimId, payload);`
    */
   public async getClaimAttempts(claimId: string, payload: iGetClaimAttemptsPayload): Promise<GetClaimAttemptsSuccessResponse<T>> {
     try {
@@ -2051,10 +1837,671 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
-   * Updates the user's seen activity.
-   */
-  public async updateUserSeenActivity() {
-    return await this.updateAccountInfo({ seenActivity: Date.now() }); //Authenticated route so no need to pass in address
+   * Get address lists for a specific account. Specify the viewType to determine what
+   * address lists to retrieve.
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/account/:address/lists`
+   * - **SDK Function Call**: `await BitBadgesApi.getAddressListsForUser(address, { viewType });`
+   *
+   * @example
+   * ```typescript
+   * const res = await BitBadgesApi.getAddressListsForUser("bb1...", { viewType: "all" });
+   * console.log(res);
+   * ```
+   * */
+  public async getAddressListsForUser(
+    address: NativeAddress,
+    payload: iGetAddressListsForUserPayload
+  ): Promise<GetAddressListsForUserSuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<iGetAddressListsForUserPayload> = typia.validate<iGetAddressListsForUserPayload>(payload);
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<iGetAddressListsForUserSuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetAddressListsForUserRoute(address)}`,
+        {
+          params: payload
+        }
+      );
+      return new GetAddressListsForUserSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Gets Sign-In with BitBadges (SIWBB) requests (authentication requests)
+   * for a user.
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/account/:address/requests/siwbb`
+   * - **SDK Function Call**: `await BitBadgesApi.getSiwbbRequestsForUser(address, {  });`
+   *
+   * @example
+   * ```typescript
+   * const res = await BitBadgesApi.getSiwbbRequestsForUser("bb1...", { });
+   * console.log(res);
+   * ```
+   * */
+  public async getSiwbbRequestsForUser(
+    address: NativeAddress,
+    payload: iGetSiwbbRequestsForUserPayload
+  ): Promise<GetSiwbbRequestsForUserSuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<iGetSiwbbRequestsForUserPayload> = typia.validate<iGetSiwbbRequestsForUserPayload>(payload);
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<iGetSiwbbRequestsForUserSuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetSiwbbRequestsForUserRoute(address)}`,
+        {
+          params: payload
+        }
+      );
+      return new GetSiwbbRequestsForUserSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Gets transfer activity for a specific user.
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/account/:address/activity/badges`
+   * - **SDK Function Call**: `await BitBadgesApi.getTransferActivityForUser(address, { });`
+   *
+   * @example
+   * ```typescript
+   * const res = await BitBadgesApi.getTransferActivityForUser("bb1...", { });
+   * console.log(res);
+   * ```
+   * */
+  public async getTransferActivityForUser(
+    address: NativeAddress,
+    payload: iGetTransferActivityForUserPayload
+  ): Promise<GetTransferActivityForUserSuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<iGetTransferActivityForUserPayload> = typia.validate<iGetTransferActivityForUserPayload>(payload);
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<iGetTransferActivityForUserSuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetTransferActivityForUserRoute(address)}`,
+        {
+          params: payload
+        }
+      );
+      return new GetTransferActivityForUserSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Gets badges for a specific user. Specify the viewType to determine what
+   * badges to retrieve.
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/account/:address/badges`
+   * - **SDK Function Call**: `await BitBadgesApi.getBadgesViewForUser(address, { viewType });`
+   *
+   * @example
+   * ```typescript
+   * const res = await BitBadgesApi.getBadgesViewForUser("bb1...", { viewType: "collected" });
+   * console.log(res);
+   * ```
+   * */
+  public async getBadgesViewForUser(address: NativeAddress, payload: iGetBadgesViewForUserPayload): Promise<GetBadgesViewForUserSuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<iGetBadgesViewForUserPayload> = typia.validate<iGetBadgesViewForUserPayload>(payload);
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<iGetBadgesViewForUserSuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetBadgesByTypeForUserRoute(address)}`,
+        {
+          params: payload
+        }
+      );
+      return new GetBadgesViewForUserSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Gets lists activity for a specific user.
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/account/:address/activity/lists`
+   * - **SDK Function Call**: `await BitBadgesApi.getListsActivityForUser(address, { ... });`
+   *
+   * @example
+   * ```typescript
+   * const res = await BitBadgesApi.getListsActivityForUser("bb1...", { ... });
+   * console.log(res);
+   * ```
+   * */
+  public async getListsActivityForUser(
+    address: NativeAddress,
+    payload: iGetListsActivityForUserPayload
+  ): Promise<GetListsActivityForUserSuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<iGetListsActivityForUserPayload> = typia.validate<iGetListsActivityForUserPayload>(payload);
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<iGetListsActivityForUserSuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetListsActivityForUserRoute(address)}`,
+        {
+          params: payload
+        }
+      );
+      return new GetListsActivityForUserSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Gets attestations by type for a specific user. Specify the viewType to determine what
+   * attestations to retrieve.
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/account/:address/attestations`
+   * - **SDK Function Call**: `await BitBadgesApi.getAttestationsForUser(address, { viewType });`
+   *
+   * @example
+   * ```typescript
+   * const res = await BitBadgesApi.getAttestationsForUser("bb1...", { viewType: "received" });
+   * console.log(res);
+   * ```
+   * */
+  public async getAttestationsForUser(
+    address: NativeAddress,
+    payload: iGetAttestationsForUserPayload
+  ): Promise<GetAttestationsForUserSuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<iGetAttestationsForUserPayload> = typia.validate<iGetAttestationsForUserPayload>(payload);
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<iGetAttestationsForUserSuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetAttestationsByTypeForUserRoute(address)}`,
+        { params: payload }
+      );
+      return new GetAttestationsForUserSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Gets claim activity by type for a specific user. Specify the viewType to determine what
+   * claim activity to retrieve.
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/account/:address/activity/claims`
+   * - **SDK Function Call**: `await BitBadgesApi.getClaimActivityForUser(address, { viewType });`
+   *
+   * @example
+   * ```typescript
+   * const res = await BitBadgesApi.getClaimActivityForUser("bb1...", { viewType: "public" });
+   * console.log(res);
+   * ```
+   * */
+  public async getClaimActivityForUser(
+    address: NativeAddress,
+    payload: iGetClaimActivityForUserPayload
+  ): Promise<GetClaimActivityForUserSuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<iGetClaimActivityForUserPayload> = typia.validate<iGetClaimActivityForUserPayload>(payload);
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<iGetClaimActivityForUserSuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetClaimActivityByTypeForUserRoute(address)}`,
+        { params: payload }
+      );
+      return new GetClaimActivityForUserSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Gets points activity for a specific user.
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/account/:address/activity/points`
+   * - **SDK Function Call**: `await BitBadgesApi.getPointsActivityForUser(address, { ... });`
+   *
+   * @example
+   * ```typescript
+   * const res = await BitBadgesApi.getPointsActivityForUser("bb1...", { ... });
+   * console.log(res);
+   * ```
+   * */
+  public async getPointsActivityForUser(
+    address: NativeAddress,
+    payload: iGetPointsActivityForUserPayload
+  ): Promise<GetPointsActivityForUserSuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<iGetPointsActivityForUserPayload> = typia.validate<iGetPointsActivityForUserPayload>(payload);
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<iGetPointsActivityForUserSuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetPointsActivityForUserRoute(address)}`,
+        { params: payload }
+      );
+      return new GetPointsActivityForUserSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Gets claim alerts for a specific user. Specify viewType 'received' or 'sent' to determine what
+   * claim alerts to retrieve.
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/account/:address/claimAlerts`
+   * - **SDK Function Call**: `await BitBadgesApi.getClaimAlertsForUser(address, { viewType: 'received' });`
+   *
+   * @example
+   * ```typescript
+   * const res = await BitBadgesApi.getClaimAlertsForUser("bb1...", { viewType: 'received' });
+   * console.log(res);
+   * ```
+   * */
+  public async getClaimAlertsForUser(
+    address: NativeAddress,
+    payload: iGetClaimAlertsForUserPayload
+  ): Promise<GetClaimAlertsForUserSuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<iGetClaimAlertsForUserPayload> = typia.validate<iGetClaimAlertsForUserPayload>(payload);
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<iGetClaimAlertsForUserSuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetClaimAlertsForUserRoute(address)}`,
+        { params: payload }
+      );
+      return new GetClaimAlertsForUserSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Gets activity for a specific address list.
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/addressLists/:addressListId/activity`
+   * - **SDK Function Call**: `await BitBadgesApi.getAddressListActivity(addressListId, { ... });`
+   *
+   * @example
+   * ```typescript
+   * const res = await BitBadgesApi.getAddressListActivity("list123", { ... });
+   * console.log(res);
+   * ```
+   * */
+  public async getAddressListActivity(
+    addressListId: string,
+    payload: iGetAddressListActivityPayload
+  ): Promise<GetAddressListActivitySuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<iGetAddressListActivityPayload> = typia.validate<iGetAddressListActivityPayload>(payload);
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<iGetAddressListActivitySuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetAddressListActivityRoute(addressListId)}`,
+        {
+          params: payload
+        }
+      );
+      return new GetAddressListActivitySuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Gets listings for a specific address list.
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/addressLists/:addressListId/listings`
+   * - **SDK Function Call**: `await BitBadgesApi.getAddressListListings(addressListId, { bookmark });`
+   *
+   * @example
+   * ```typescript
+   * const res = await BitBadgesApi.getAddressListListings("list123", { bookmark: "123" });
+   * console.log(res);
+   * ```
+   * */
+  public async getAddressListListings(
+    addressListId: string,
+    payload: iGetAddressListListingsPayload
+  ): Promise<GetAddressListListingsSuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<iGetAddressListListingsPayload> = typia.validate<iGetAddressListListingsPayload>(payload);
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<iGetAddressListListingsSuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetAddressListListingsRoute(addressListId)}`,
+        {
+          params: payload
+        }
+      );
+      return new GetAddressListListingsSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Gets owners for a specific collection.
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/collection/:collectionId/owners`
+   * - **SDK Function Call**: `await BitBadgesApi.getCollectionOwners(collectionId, { bookmark });`
+   *
+   * @example
+   * ```typescript
+   * const res = await BitBadgesApi.getCollectionOwners("123", { bookmark: "123" });
+   * console.log(res);
+   * ```
+   * */
+  public async getCollectionOwners(collectionId: NumberType, payload: iGetCollectionOwnersPayload): Promise<GetCollectionOwnersSuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<iGetCollectionOwnersPayload> = typia.validate<iGetCollectionOwnersPayload>(payload);
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<iGetCollectionOwnersSuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetCollectionOwnersRoute(collectionId)}`,
+        {
+          params: payload
+        }
+      );
+      return new GetCollectionOwnersSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Gets a specific collection.
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/collection/:collectionId`
+   * - **SDK Function Call**: `await BitBadgesApi.getCollection(collectionId);`
+   *
+   * @example
+   * ```typescript
+   * const res = await BitBadgesApi.getCollection("123");
+   * console.log(res);
+   * ```
+   * */
+  public async getCollection(collectionId: NumberType): Promise<GetCollectionSuccessResponse<T>> {
+    try {
+      const response = await this.axios.get<iGetCollectionSuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetCollectionRoute(collectionId)}`
+      );
+      return new GetCollectionSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Gets metadata for a specific badge in a collection.
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/collection/:collectionId/:badgeId/metadata`
+   * - **SDK Function Call**: `await BitBadgesApi.getBadgeMetadata(collectionId, badgeId);`
+   *
+   * @example
+   * ```typescript
+   * const res = await BitBadgesApi.getBadgeMetadata("123", "456");
+   * console.log(res);
+   * ```
+   * */
+  public async getBadgeMetadata(collectionId: NumberType, badgeId: NumberType): Promise<GetBadgeMetadataSuccessResponse<T>> {
+    try {
+      const response = await this.axios.get<iGetBadgeMetadataSuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetBadgeMetadataRoute(collectionId, badgeId)}`
+      );
+      return new GetBadgeMetadataSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Gets transfer activity for a specific collection.
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/collection/:collectionId/activity`
+   * - **SDK Function Call**: `await BitBadgesApi.getCollectionTransferActivity(collectionId, { bookmark });`
+   *
+   * @example
+   * ```typescript
+   * const res = await BitBadgesApi.getCollectionTransferActivity("123", { bookmark: "123" });
+   * console.log(res);
+   * ```
+   * */
+  public async getCollectionTransferActivity(
+    collectionId: NumberType,
+    payload: iGetCollectionTransferActivityPayload
+  ): Promise<GetCollectionTransferActivitySuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<iGetCollectionTransferActivityPayload> = typia.validate<iGetCollectionTransferActivityPayload>(payload);
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<iGetCollectionTransferActivitySuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetCollectionTransferActivityRoute(collectionId)}`,
+        {
+          params: payload
+        }
+      );
+      return new GetCollectionTransferActivitySuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Gets challenge trackers for a specific collection.
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/collection/:collectionId/challengeTrackers`
+   * - **SDK Function Call**: `await BitBadgesApi.getCollectionChallengeTrackers(collectionId, { bookmark });`
+   *
+   * @example
+   * ```typescript
+   * const res = await BitBadgesApi.getCollectionChallengeTrackers("123", { bookmark: "123" });
+   * console.log(res);
+   * ```
+   * */
+  public async getCollectionChallengeTrackers(
+    collectionId: NumberType,
+    payload: iGetCollectionChallengeTrackersPayload
+  ): Promise<GetCollectionChallengeTrackersSuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<iGetCollectionChallengeTrackersPayload> = typia.validate<iGetCollectionChallengeTrackersPayload>(payload);
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<iGetCollectionChallengeTrackersSuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetCollectionChallengeTrackersRoute(collectionId)}`,
+        {
+          params: payload
+        }
+      );
+      return new GetCollectionChallengeTrackersSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Gets amount trackers for a specific collection.
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/collection/:collectionId/amountTrackers`
+   * - **SDK Function Call**: `await BitBadgesApi.getCollectionAmountTrackers(collectionId, { bookmark });`
+   *
+   * @example
+   * ```typescript
+   * const res = await BitBadgesApi.getCollectionAmountTrackers("123", { bookmark: "123" });
+   * console.log(res);
+   * ```
+   * */
+  public async getCollectionAmountTrackers(
+    collectionId: NumberType,
+    payload: iGetCollectionAmountTrackersPayload
+  ): Promise<GetCollectionAmountTrackersSuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<iGetCollectionAmountTrackersPayload> = typia.validate<iGetCollectionAmountTrackersPayload>(payload);
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<iGetCollectionAmountTrackersSuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetCollectionAmountTrackersRoute(collectionId)}`,
+        {
+          params: payload
+        }
+      );
+      return new GetCollectionAmountTrackersSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Gets listings for a specific collection.
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/collection/:collectionId/listings`
+   * - **SDK Function Call**: `await BitBadgesApi.getCollectionListings(collectionId, { bookmark });`
+   *
+   * @example
+   * ```typescript
+   * const res = await BitBadgesApi.getCollectionListings("123", { bookmark: "123" });
+   * console.log(res);
+   * ```
+   * */
+  public async getCollectionListings(
+    collectionId: NumberType,
+    payload: iGetCollectionListingsPayload
+  ): Promise<GetCollectionListingsSuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<iGetCollectionListingsPayload> = typia.validate<iGetCollectionListingsPayload>(payload);
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<iGetCollectionListingsSuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetCollectionListingsRoute(collectionId)}`,
+        {
+          params: payload
+        }
+      );
+      return new GetCollectionListingsSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Gets claims for a specific collection.
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/collection/:collectionId/claims`
+   * - **SDK Function Call**: `await BitBadgesApi.getCollectionClaims(collectionId);`
+   *
+   * @example
+   * ```typescript
+   * const res = await BitBadgesApi.getCollectionClaims("123");
+   * console.log(res);
+   * ```
+   * */
+  public async getCollectionClaims(collectionId: NumberType): Promise<GetCollectionClaimsSuccessResponse<T>> {
+    try {
+      const response = await this.axios.get<iGetCollectionClaimsSuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetCollectionClaimsRoute(collectionId)}`
+      );
+      return new GetCollectionClaimsSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Gets claims for a specific address list.
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/addressLists/:addressListId/claims`
+   * - **SDK Function Call**: `await BitBadgesApi.getAddressListClaims(addressListId);`
+   *
+   * @example
+   * ```typescript
+   * const res = await BitBadgesApi.getAddressListClaims("list123");
+   * console.log(res);
+   * ```
+   * */
+  public async getAddressListClaims(addressListId: string): Promise<GetAddressListClaimsSuccessResponse<T>> {
+    try {
+      const response = await this.axios.get<iGetAddressListClaimsSuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetAddressListClaimsRoute(addressListId)}`
+      );
+      return new GetAddressListClaimsSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
   }
 }
 
@@ -2064,10 +2511,17 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
   }
 
   /**
+   * Updates the user's seen activity.
+   */
+  public async updateUserSeenActivity() {
+    return await this.updateAccountInfo({ seenActivity: Date.now() }); //Authenticated route so no need to pass in address
+  }
+
+  /**
    * Gets all active authorizations for a user.
    *
    * @remarks
-   * - **API Route**: `POST /api/v0/oauth/authorizations`
+   * - **API Route**: `GET /api/v0/oauth/authorizations`
    * - **SDK Function Call**: `await BitBadgesApi.getActiveAuthorizations(payload);`
    * - **Authentication**: Must be signed in.
    *
@@ -2077,16 +2531,16 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
    * console.log(res);
    * ```
    */
-  public async getActiveAuthorizations(payload: iGetActiveAuthorizationsPayload): Promise<GetActiveAuthorizationsSuccessResponse<T>> {
+  public async getActiveAuthorizations(payload?: iGetActiveAuthorizationsPayload): Promise<GetActiveAuthorizationsSuccessResponse<T>> {
     try {
       const validateRes: typia.IValidation<iGetActiveAuthorizationsPayload> = typia.validate<iGetActiveAuthorizationsPayload>(payload ?? {});
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      const response = await this.axios.post<GetActiveAuthorizationsSuccessResponse<T>>(
+      const response = await this.axios.get<GetActiveAuthorizationsSuccessResponse<T>>(
         `${this.BACKEND_URL}${BitBadgesApiRoutes.GetActiveAuthorizationsRoute()}`,
-        payload
+        { params: payload }
       );
       return new GetActiveAuthorizationsSuccessResponse<T>(response.data);
     } catch (error) {
@@ -2791,6 +3245,228 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
         `${this.BACKEND_URL}${BitBadgesApiRoutes.DeleteConnectedAccountRoute(accountId)}`
       );
       return new DeleteConnectedAccountSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Adds a balance map to off-chain storage. Mode can either be 'ipfs" for storing on IPFS or 'centralized' for storing on DigitalOcean.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/addBalancesToOffChainStorage`
+   * - **SDK Function Call**: `await BitBadgesApi.addBalancesToOffChainStorage(payload);`
+   * - **CORS**: Restricted to only BitBadges official site. Otherwise, you will need to self-host.
+   *
+   * @example
+   * ```typescript
+   * const res = await BitBadgesApi.addBalancesToOffChainStorage(payload);
+   * console.log(res);
+   * ```
+   */
+  public async addBalancesToOffChainStorage(payload: iAddBalancesToOffChainStoragePayload): Promise<AddBalancesToOffChainStorageSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<iAddBalancesToOffChainStoragePayload> = typia.validate<iAddBalancesToOffChainStoragePayload>(
+        payload ?? {}
+      );
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.post<iAddBalancesToOffChainStorageSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.AddBalancesToOffChainStorageRoute()}`,
+        payload
+      );
+      return new AddBalancesToOffChainStorageSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Gets the sign in challenge to be signed for authentication. The returned is the message to be signed by the user.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/auth/getChallenge`
+   * - **SDK Function Call**: `await BitBadgesApi.getSignInChallenge(payload);`
+   * - **Tutorial**: See Authentication tutorial on the official docs.
+   *
+   * @example
+   * ```typescript
+   * const res = await BitBadgesApi.getSignInChallenge(payload);
+   * console.log(res);
+   * ```
+   */
+  public async getSignInChallenge(payload: iGetSignInChallengePayload): Promise<GetSignInChallengeSuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<iGetSignInChallengePayload> = typia.validate<iGetSignInChallengePayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.post<iGetSignInChallengeSuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetSignInChallengeRoute()}`,
+        payload
+      );
+      return new GetSignInChallengeSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Verifies the user signed challenge and grants them a valid session if everything checks out.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/auth/verify`
+   * - **SDK Function Call**: `await BitBadgesApi.verifySignIn(payload);`
+   * - **Tutorial**: See Authentication tutorial on the official docs.
+   *
+   * @example
+   * ```typescript
+   * const res = await BitBadgesApi.verifySignIn(payload);
+   * console.log(res);
+   * ```
+   */
+  public async verifySignIn(payload: iVerifySignInPayload): Promise<VerifySignInSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<iVerifySignInPayload> = typia.validate<iVerifySignInPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.post<iVerifySignInSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.VerifySignInRoute()}`, payload);
+      return new VerifySignInSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Signs the user out.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/auth/logout`
+   * - **SDK Function Call**: `await BitBadgesApi.signOut(payload);`
+   * - **Tutorial**: See Authentication tutorial on the official docs.
+   */
+  public async signOut(payload?: iSignOutPayload): Promise<SignOutSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<iSignOutPayload> = typia.validate<iSignOutPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.post<iSignOutSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.SignOutRoute()}`, payload);
+      return new SignOutSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Gets the filter suggestions based on attributes in a collection.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/collection/:collectionId/filterSuggestions`
+   * - **SDK Function Call**: `await BitBadgesApi.filterSuggestions(collectionId, payload);`
+   */
+  public async filterSuggestions(collectionId: T, payload?: iFilterSuggestionsPayload): Promise<FilterSuggestionsSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<iFilterSuggestionsPayload> = typia.validate<iFilterSuggestionsPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.post<iFilterSuggestionsSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.FilterSuggestionsRoute(collectionId)}`,
+        payload
+      );
+      return new FilterSuggestionsSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Gets details for a browse / explore page.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/browse`
+   * - **SDK Function Call**: `await BitBadgesApi.GetBrowse(payload);`
+   */
+  public async getBrowse(payload: iGetBrowsePayload): Promise<GetBrowseSuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<iGetBrowsePayload> = typia.validate<iGetBrowsePayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.post<iGetBrowseSuccessResponse<string>>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetBrowseRoute()}`, payload);
+      return new GetBrowseSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Updates the profile / account information for a user. We will only update the provided fields.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/user/updateAccount`
+   * - **SDK Function Call**: `await BitBadgesApi.updateAccountInfo(payload);`
+   * - **Authentication**: Must be signed in.
+   *
+   * @example
+   * ```typescript
+   * const res = await BitBadgesApi.updateAccountInfo(payload);
+   * console.log(res);
+   * ```
+   */
+  public async updateAccountInfo(payload: iUpdateAccountInfoPayload): Promise<UpdateAccountInfoSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<iUpdateAccountInfoPayload> = typia.validate<iUpdateAccountInfoPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.post<iUpdateAccountInfoSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.UpdateAccountInfoRoute()}`,
+        payload
+      );
+      return new UpdateAccountInfoSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * A generic route for verifying SIWBB requests. Used as a helper if implementing on your own.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/siwbbRequest/verify`
+   * - **SDK Function Call**: `await BitBadgesApi.verifySIWBBRequest(payload);`
+   */
+  public async verifySIWBBRequest(payload: iGenericBlockinVerifyPayload): Promise<GenericBlockinVerifySuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<iGenericBlockinVerifyPayload> = typia.validate<iGenericBlockinVerifyPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.post<iGenericBlockinVerifySuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GenericVerifyRoute()}`,
+        payload
+      );
+      return new GenericBlockinVerifySuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
