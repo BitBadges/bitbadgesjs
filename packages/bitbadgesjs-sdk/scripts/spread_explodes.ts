@@ -82,7 +82,9 @@ function processYaml() {
         const newYaml = yaml.dump(document, { lineWidth: -1 });
         writeFileSync(outputPath, newYaml);
         console.log('Successfully processed YAML file');
-        console.log(`Output written to: ${outputPath}`);
+        console.log(`Ou tput written to: ${outputPath}`);
+        //Print the entire file
+        console.log(newYaml)
     } catch (error) {
         console.error('Error processing YAML:', error);
     }
