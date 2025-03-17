@@ -10,5 +10,8 @@ tsx ./scripts/normalize_combined.ts ./src/combined.ts
 npm run format || echo "Format failed, continuing anyway..."
 source ./scripts/create_yml_schemas.sh
 npm run format || echo "Format failed, continuing anyway..."
-tsx ./scripts/normalize_yml.ts ./openapitypes/combined.yaml
+
+tsx ./scripts/spread_explodes.ts ./openapitypes/combined.yaml
+tsx ./scripts/normalize_yml.ts ./openapitypes/combined_processed.yaml
+rm ./openapitypes/combined.yaml
 rm ./src/combined.ts
