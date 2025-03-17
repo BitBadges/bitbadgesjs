@@ -1990,7 +1990,7 @@ schemas:
     title: iChallengeTrackerIdDetails
     description: '@category Interfaces'
     type: object
-  iMerkleChallengeDoc:
+  iMerkleChallengeTrackerDoc:
     properties:
       _docId:
         title: Doc._docId
@@ -2001,17 +2001,17 @@ schemas:
         description: A unique document ID (Mongo DB ObjectID)
         type: string
       collectionId:
-        title: iMerkleChallengeDoc.collectionId
+        title: iMerkleChallengeTrackerDoc.collectionId
         description: The collection ID
         anyOf:
           - type: string
           - type: number
       challengeTrackerId:
-        title: iMerkleChallengeDoc.challengeTrackerId
+        title: iMerkleChallengeTrackerDoc.challengeTrackerId
         description: The challenge ID
         type: string
       approvalId:
-        title: iMerkleChallengeDoc.approvalId
+        title: iMerkleChallengeTrackerDoc.approvalId
         description: The approval ID
         type: string
       challengeLevel:
@@ -2020,20 +2020,20 @@ schemas:
           - incoming
           - outgoing
           - ''
-        title: iMerkleChallengeDoc.challengeLevel
+        title: iMerkleChallengeTrackerDoc.challengeLevel
         description: The challenge level (i.e. "collection", "incoming", "outgoing")
         type: string
       approverAddress:
         $ref: '#/components/schemas/BitBadgesAddress'
-        title: iMerkleChallengeDoc.approverAddress
+        title: iMerkleChallengeTrackerDoc.approverAddress
         description: The approver address (leave blank if challengeLevel = "collection")
       usedLeafIndices:
         items:
-          title: iMerkleChallengeDoc.usedLeafIndices.[]
+          title: iMerkleChallengeTrackerDoc.usedLeafIndices.[]
           anyOf:
             - type: string
             - type: number
-        title: iMerkleChallengeDoc.usedLeafIndices
+        title: iMerkleChallengeTrackerDoc.usedLeafIndices
         description: >-
           The used leaf indices for each challenge. A leaf index is the leaf
           location in the bottommost layer of the Merkle tree
@@ -2047,7 +2047,7 @@ schemas:
       - approverAddress
       - usedLeafIndices
     additionalProperties: false
-    title: iMerkleChallengeDoc, Doc
+    title: iMerkleChallengeTrackerDoc, Doc
     description: |-
       @category Interfaces
       @category Indexer
@@ -3566,7 +3566,7 @@ schemas:
         type: array
       merkleChallenges:
         items:
-          $ref: '#/components/schemas/iMerkleChallengeDoc'
+          $ref: '#/components/schemas/iMerkleChallengeTrackerDoc'
           title: iBitBadgesUserInfo.merkleChallenges.[]
         title: iBitBadgesUserInfo.merkleChallenges
         description: >-
@@ -7083,7 +7083,7 @@ schemas:
         type: array
       merkleChallenges:
         items:
-          $ref: '#/components/schemas/iMerkleChallengeDoc'
+          $ref: '#/components/schemas/iMerkleChallengeTrackerDoc'
           title: iBitBadgesCollection.merkleChallenges.[]
         title: iBitBadgesCollection.merkleChallenges
         description: >-

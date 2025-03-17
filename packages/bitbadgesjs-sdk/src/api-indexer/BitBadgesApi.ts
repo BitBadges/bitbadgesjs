@@ -141,7 +141,6 @@ import {
   iAddBalancesToOffChainStorageSuccessResponse,
   iAddToIpfsPayload,
   iAddToIpfsSuccessResponse,
-  iBatchStoreActionPayload,
   iBroadcastTxPayload,
   iBroadcastTxSuccessResponse,
   iCalculatePointsPayload,
@@ -221,7 +220,9 @@ import {
   iGetUtilityListingPayload,
   iGetUtilityListingsPayload,
   iOauthRevokePayload,
+  iPerformStoreActionBatchWithBodyAuthPayload,
   iPerformStoreActionPayload,
+  iPerformStoreActionSingleWithBodyAuthPayload,
   iRotateApiKeyPayload,
   iRotateSIWBBRequestPayload,
   iRotateSIWBBRequestSuccessResponse,
@@ -1379,49 +1380,24 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * Performs an action for a dynamicStore.
    *
    * @remarks
-   * - **API Route**: `POST /api/v0/storeActions/{actionName}/{dynamicDataId}/{dynamicDataSecret}`
-   * - **API Route (Body Auth)**: `POST /api/v0/storeActions/single`
+   * - **API Route**: `POST /api/v0/storeActions/single`
    * - **SDK Function Call**: `await BitBadgesApi.performStoreAction(payload);`
    * - **Authentication**: Must be signed in.
    */
   public async performStoreAction(
-    payload: iPerformStoreActionPayload,
-    actionName: string,
-    dynamicDataId: string,
-    dynamicDataSecret: string,
-    /**
-     * There are two ways to pass in the payload.
-     * 1. Body Auth: `POST /api/v0/storeActions/single`
-     * 2. Path Auth: `POST /api/v0/storeActions/{actionName}/{dynamicDataId}/{dynamicDataSecret}`
-     *
-     * Since you are calling from the API and have control over the payload, we always recommend the body auth for more security.
-     */
-    bodyAuth = true
+    payload: iPerformStoreActionSingleWithBodyAuthPayload
   ): Promise<PerformStoreActionSuccessResponse> {
     try {
-      const validateRes: typia.IValidation<iPerformStoreActionPayload> = typia.validate<iPerformStoreActionPayload>(payload ?? {});
+      const validateRes: typia.IValidation<iPerformStoreActionSingleWithBodyAuthPayload> = typia.validate<iPerformStoreActionSingleWithBodyAuthPayload>(payload ?? {});
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      if (bodyAuth) {
-        const response = await this.axios.post<PerformStoreActionSuccessResponse>(
-          `${this.BACKEND_URL}${BitBadgesApiRoutes.PerformStoreActionSingleWithBodyAuthRoute()}`,
-          {
-            dynamicDataId: dynamicDataId,
-            dataSecret: dynamicDataSecret,
-            actionName: actionName,
-            payload: payload
-          }
-        );
-        return new PerformStoreActionSuccessResponse(response.data);
-      } else {
-        const response = await this.axios.post<PerformStoreActionSuccessResponse>(
-          `${this.BACKEND_URL}${BitBadgesApiRoutes.PerformStoreActionSingleRoute(actionName, dynamicDataId, dynamicDataSecret)}`,
+      const response = await this.axios.post<PerformStoreActionSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.PerformStoreActionSingleWithBodyAuthRoute()}`,
           payload
-        );
-        return new PerformStoreActionSuccessResponse(response.data);
-      }
+      );
+      return new PerformStoreActionSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -1432,47 +1408,26 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * Performs multiple actions for a dynamicStore in batch.
    *
    * @remarks
-   * - **API Route**: `POST /api/v0/storeActions/batch/{dynamicDataId}/{dynamicDataSecret}`
-   * - **API Route (Body Auth)**: `POST /api/v0/storeActions/batch`
+   * - **API Route**: `POST /api/v0/storeActions/batch`
    * - **SDK Function Call**: `await BitBadgesApi.performBatchStoreAction(payload);`
    * - **Authentication**: Must be signed in.
    */
   public async performBatchStoreAction(
-    payload: iBatchStoreActionPayload,
-    dynamicDataId: string,
-    dynamicDataSecret: string,
-    /**
-     * There are two ways to pass in the payload.
-     * 1. Body Auth: `POST /api/v0/storeActions/batch`
-     * 2. Path Auth: `POST /api/v0/storeActions/batch/{dynamicDataId}/{dynamicDataSecret}`
-     *
-     * Since you are calling from the API and have control over the payload, we always recommend the body auth for more security.
-     */
-    bodyAuth = true
+    payload: iPerformStoreActionBatchWithBodyAuthPayload
   ): Promise<BatchStoreActionSuccessResponse> {
     try {
-      const validateRes: typia.IValidation<iBatchStoreActionPayload> = typia.validate<iBatchStoreActionPayload>(payload ?? {});
+      const validateRes: typia.IValidation<iPerformStoreActionBatchWithBodyAuthPayload> = typia.validate<iPerformStoreActionBatchWithBodyAuthPayload>(payload ?? {});
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      if (bodyAuth) {
-        const response = await this.axios.post<BatchStoreActionSuccessResponse>(
-          `${this.BACKEND_URL}${BitBadgesApiRoutes.PerformStoreActionBatchWithBodyAuthRoute()}`,
-          {
-            ...payload,
-            dynamicDataId: dynamicDataId,
-            dataSecret: dynamicDataSecret
-          }
-        );
-        return new BatchStoreActionSuccessResponse(response.data);
-      } else {
-        const response = await this.axios.post<BatchStoreActionSuccessResponse>(
-          `${this.BACKEND_URL}${BitBadgesApiRoutes.PerformStoreActionBatchRoute(dynamicDataId, dynamicDataSecret)}`,
-          payload
-        );
-        return new BatchStoreActionSuccessResponse(response.data);
-      }
+      const response = await this.axios.post<PerformStoreActionSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.PerformStoreActionBatchWithBodyAuthRoute()}`,
+        {
+          ...payload
+        }
+      );
+      return new BatchStoreActionSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -2881,6 +2836,213 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
       return Promise.reject(error);
     }
   }
+
+  /**
+   * Creates an developer app.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/developerApps`
+   * - **SDK Function Call**: `await BitBadgesApi.createDeveloperApp(payload);`
+   * - **Authentication**: Must be signed in.
+   */
+  public async createDeveloperApp(payload: iCreateDeveloperAppPayload): Promise<CreateDeveloperAppSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<iCreateDeveloperAppPayload> = typia.validate<iCreateDeveloperAppPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.post<CreateDeveloperAppSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDDeveloperAppRoute()}`,
+        payload
+      );
+      return new CreateDeveloperAppSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Deletes an developer app.
+   *
+   * @remarks
+   * - **API Route**: `DELETE /api/v0/developerApps`
+   * - **SDK Function Call**: `await BitBadgesApi.deleteDeveloperApp(payload);`
+   * - **Authentication**: Must be signed in.
+   */
+  public async deleteDeveloperApp(payload: iDeleteDeveloperAppPayload): Promise<DeleteDeveloperAppSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<iDeleteDeveloperAppPayload> = typia.validate<iDeleteDeveloperAppPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.delete<DeleteDeveloperAppSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDDeveloperAppRoute()}`,
+        { data: payload }
+      );
+      return new DeleteDeveloperAppSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Update an developer app.
+   *
+   * @remarks
+   * - **API Route**: `PUT /api/v0/developerApps
+   * - **SDK Function Call**: `await BitBadgesApi.updateUserDeveloperApps(payload);`
+   * - **Authentication**: Must be signed in.
+   */
+  public async updateDeveloperApp(payload: iUpdateDeveloperAppPayload): Promise<UpdateDeveloperAppSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<iUpdateDeveloperAppPayload> = typia.validate<iUpdateDeveloperAppPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.put<UpdateDeveloperAppSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDDeveloperAppRoute()}`,
+        payload
+      );
+      return new UpdateDeveloperAppSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+   /**
+   * Creates a dynamic data bin.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/dynamicStores`
+   * - **SDK Function Call**: `await BitBadgesApi.createDynamicDataStore(payload);`
+   */
+   public async createDynamicDataStore<Q extends DynamicDataHandlerType, NumberType>(
+    payload: iCreateDynamicDataStorePayload
+  ): Promise<CreateDynamicDataStoreSuccessResponse<Q, T>> {
+    try {
+      const validateRes: typia.IValidation<iCreateDynamicDataStorePayload> = typia.validate<iCreateDynamicDataStorePayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.post<iCreateDynamicDataStoreSuccessResponse<Q, string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDDynamicDataStoreRoute()}`,
+        payload
+      );
+      return new CreateDynamicDataStoreSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Updates a dynamic data bin.
+   *
+   * @remarks
+   * - **API Route**: `PUT /api/v0/dynamicStores`
+   * - **SDK Function Call**: `await BitBadgesApi.updateDynamicDataStore(payload);`
+   */
+  public async updateDynamicDataStore<Q extends DynamicDataHandlerType, T extends NumberType>(
+    payload: iUpdateDynamicDataStorePayload
+  ): Promise<UpdateDynamicDataStoreSuccessResponse<Q, T>> {
+    try {
+      const validateRes: typia.IValidation<iUpdateDynamicDataStorePayload> = typia.validate<iUpdateDynamicDataStorePayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.put<iUpdateDynamicDataStoreSuccessResponse<Q, T>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDDynamicDataStoreRoute()}`,
+        payload
+      );
+      return new UpdateDynamicDataStoreSuccessResponse<Q, T>(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Deletes a dynamic data bin.
+   *
+   * @remarks
+   * - **API Route**: `DELETE /api/v0/dynamicStores`
+   * - **SDK Function Call**: `await BitBadgesApi.deleteDynamicDataStore(payload);`
+   */
+  public async deleteDynamicDataStore(payload: iDeleteDynamicDataStorePayload): Promise<DeleteDynamicDataStoreSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<iDeleteDynamicDataStorePayload> = typia.validate<iDeleteDynamicDataStorePayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.delete<DeleteDynamicDataStoreSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDDynamicDataStoreRoute()}`,
+        { data: payload }
+      );
+      return new DeleteDynamicDataStoreSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Get all developer apps for a user.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/developerApps`
+   * - **SDK Function Call**: `await BitBadgesApi.getDeveloperApp(payload);`
+   */
+  public async getDeveloperApps(payload: iGetDeveloperAppsPayload): Promise<GetDeveloperAppsSuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<iGetDeveloperAppsPayload> = typia.validate<iGetDeveloperAppsPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.post<GetDeveloperAppsSuccessResponse<T>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetDeveloperAppsRoute()}`,
+        payload
+      );
+      return new GetDeveloperAppsSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Searches for developer apps.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/developerApps/search`
+   * - **SDK Function Call**: `await BitBadgesApi.searchDeveloperApps(payload);`
+   */
+  public async searchDeveloperApps(payload: iSearchDeveloperAppsPayload): Promise<SearchDeveloperAppsSuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<iSearchDeveloperAppsPayload> = typia.validate<iSearchDeveloperAppsPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.post<SearchDeveloperAppsSuccessResponse<T>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.SearchDeveloperAppsRoute()}`,
+        payload
+      );
+      return new SearchDeveloperAppsSuccessResponse<T>(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
 }
 
 export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
@@ -2998,133 +3160,7 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
     }
   }
 
-  /**
-   * Get all developer apps for a user.
-   *
-   * @remarks
-   * - **API Route**: `POST /api/v0/developerApps`
-   * - **SDK Function Call**: `await BitBadgesApi.getDeveloperApp(payload);`
-   */
-  public async getDeveloperApps(payload: iGetDeveloperAppsPayload): Promise<GetDeveloperAppsSuccessResponse<T>> {
-    try {
-      const validateRes: typia.IValidation<iGetDeveloperAppsPayload> = typia.validate<iGetDeveloperAppsPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
 
-      const response = await this.axios.post<GetDeveloperAppsSuccessResponse<T>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetDeveloperAppsRoute()}`,
-        payload
-      );
-      return new GetDeveloperAppsSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Searches for developer apps.
-   *
-   * @remarks
-   * - **API Route**: `POST /api/v0/developerApps/search`
-   * - **SDK Function Call**: `await BitBadgesApi.searchDeveloperApps(payload);`
-   */
-  public async searchDeveloperApps(payload: iSearchDeveloperAppsPayload): Promise<SearchDeveloperAppsSuccessResponse<T>> {
-    try {
-      const validateRes: typia.IValidation<iSearchDeveloperAppsPayload> = typia.validate<iSearchDeveloperAppsPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.post<SearchDeveloperAppsSuccessResponse<T>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.SearchDeveloperAppsRoute()}`,
-        payload
-      );
-      return new SearchDeveloperAppsSuccessResponse<T>(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Creates an developer app.
-   *
-   * @remarks
-   * - **API Route**: `POST /api/v0/developerApps`
-   * - **SDK Function Call**: `await BitBadgesApi.createDeveloperApp(payload);`
-   * - **Authentication**: Must be signed in.
-   */
-  public async createDeveloperApp(payload: iCreateDeveloperAppPayload): Promise<CreateDeveloperAppSuccessResponse> {
-    try {
-      const validateRes: typia.IValidation<iCreateDeveloperAppPayload> = typia.validate<iCreateDeveloperAppPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.post<CreateDeveloperAppSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDDeveloperAppRoute()}`,
-        payload
-      );
-      return new CreateDeveloperAppSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Deletes an developer app.
-   *
-   * @remarks
-   * - **API Route**: `DELETE /api/v0/developerApps`
-   * - **SDK Function Call**: `await BitBadgesApi.deleteDeveloperApp(payload);`
-   * - **Authentication**: Must be signed in.
-   */
-  public async deleteDeveloperApp(payload: iDeleteDeveloperAppPayload): Promise<DeleteDeveloperAppSuccessResponse> {
-    try {
-      const validateRes: typia.IValidation<iDeleteDeveloperAppPayload> = typia.validate<iDeleteDeveloperAppPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.delete<DeleteDeveloperAppSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDDeveloperAppRoute()}`,
-        { data: payload }
-      );
-      return new DeleteDeveloperAppSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Update an developer app.
-   *
-   * @remarks
-   * - **API Route**: `PUT /api/v0/developerApps
-   * - **SDK Function Call**: `await BitBadgesApi.updateUserDeveloperApps(payload);`
-   * - **Authentication**: Must be signed in.
-   */
-  public async updateDeveloperApp(payload: iUpdateDeveloperAppPayload): Promise<UpdateDeveloperAppSuccessResponse> {
-    try {
-      const validateRes: typia.IValidation<iUpdateDeveloperAppPayload> = typia.validate<iUpdateDeveloperAppPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.put<UpdateDeveloperAppSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDDeveloperAppRoute()}`,
-        payload
-      );
-      return new UpdateDeveloperAppSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
 
   /**
    * Searches for plugins.
@@ -3288,84 +3324,6 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
     }
   }
 
-  /**
-   * Creates a dynamic data bin.
-   *
-   * @remarks
-   * - **API Route**: `POST /api/v0/dynamicStores`
-   * - **SDK Function Call**: `await BitBadgesApi.createDynamicDataStore(payload);`
-   */
-  public async createDynamicDataStore<Q extends DynamicDataHandlerType, NumberType>(
-    payload: iCreateDynamicDataStorePayload
-  ): Promise<CreateDynamicDataStoreSuccessResponse<Q, T>> {
-    try {
-      const validateRes: typia.IValidation<iCreateDynamicDataStorePayload> = typia.validate<iCreateDynamicDataStorePayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.post<iCreateDynamicDataStoreSuccessResponse<Q, string>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDDynamicDataStoreRoute()}`,
-        payload
-      );
-      return new CreateDynamicDataStoreSuccessResponse(response.data).convert(this.ConvertFunction);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Updates a dynamic data bin.
-   *
-   * @remarks
-   * - **API Route**: `PUT /api/v0/dynamicStores`
-   * - **SDK Function Call**: `await BitBadgesApi.updateDynamicDataStore(payload);`
-   */
-  public async updateDynamicDataStore<Q extends DynamicDataHandlerType, T extends NumberType>(
-    payload: iUpdateDynamicDataStorePayload
-  ): Promise<UpdateDynamicDataStoreSuccessResponse<Q, T>> {
-    try {
-      const validateRes: typia.IValidation<iUpdateDynamicDataStorePayload> = typia.validate<iUpdateDynamicDataStorePayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.put<iUpdateDynamicDataStoreSuccessResponse<Q, T>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDDynamicDataStoreRoute()}`,
-        payload
-      );
-      return new UpdateDynamicDataStoreSuccessResponse<Q, T>(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Deletes a dynamic data bin.
-   *
-   * @remarks
-   * - **API Route**: `DELETE /api/v0/dynamicStores`
-   * - **SDK Function Call**: `await BitBadgesApi.deleteDynamicDataStore(payload);`
-   */
-  public async deleteDynamicDataStore(payload: iDeleteDynamicDataStorePayload): Promise<DeleteDynamicDataStoreSuccessResponse> {
-    try {
-      const validateRes: typia.IValidation<iDeleteDynamicDataStorePayload> = typia.validate<iDeleteDynamicDataStorePayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.delete<DeleteDynamicDataStoreSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDDynamicDataStoreRoute()}`,
-        { data: payload }
-      );
-      return new DeleteDynamicDataStoreSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
 
   /**
    * Gets the API keys.

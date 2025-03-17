@@ -777,7 +777,7 @@ export interface iGetReservedClaimCodesSuccessResponse {
    * what are used in the eventual on-chain merkle proof to complete
    * the transaction.
    */
-  prevCodes?: string[];
+  reservedCodes?: string[];
 }
 
 /**
@@ -788,11 +788,11 @@ export class GetReservedClaimCodesSuccessResponse
   extends CustomTypeClass<GetReservedClaimCodesSuccessResponse>
   implements iGetReservedClaimCodesSuccessResponse
 {
-  prevCodes?: string[] | undefined;
+  reservedCodes?: string[] | undefined;
 
   constructor(data: iGetReservedClaimCodesSuccessResponse) {
     super();
-    this.prevCodes = data.prevCodes;
+    this.reservedCodes = data.reservedCodes;
   }
 }
 /**
@@ -1270,9 +1270,7 @@ export class VerifySignInSuccessResponse extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export interface iCheckSignInStatusPayload {
-  validateAccessTokens?: boolean;
-}
+export interface iCheckSignInStatusPayload {}
 
 /**
  * @category API Requests / Responses
@@ -2296,7 +2294,13 @@ export class UpdateAttestationSuccessResponse extends CustomTypeClass<UpdateAtte
  * @category API Requests / Responses
  */
 export interface iVerifyAttestationPayload {
-  attestation: AttestationDoc<NumberType>;
+  /**
+   * The attestation to verify.
+   *
+   * This is a replacement for the verifyAttestation(attestation) SDK function to outsource the logic
+   * to the server. Pass the attestation here in the body as you would in the SDK.
+  */
+  attestation: iAttestationDoc<NumberType>;
 }
 
 /**
@@ -2342,9 +2346,6 @@ export interface iCreateSIWBBRequestPayload {
 
   /** Client ID for the SIWBB request. */
   client_id: string;
-
-  /** If defined, we will store the current sign-in details for these web2 connections along with the code */
-  otherSignIns?: ('discord' | 'twitter' | 'google' | 'github')[];
 
   /** Redirect URI if redirected after successful sign-in. */
   redirect_uri?: string;
@@ -2505,19 +2506,12 @@ export class ExchangeSIWBBAuthorizationCodeSuccessResponse<T extends NumberType>
 > {
   address: string;
   chain: SupportedChain;
-  ownershipRequirements?: SiwbbAssetConditionGroup<T>;
   bitbadgesAddress: BitBadgesAddress;
   verificationResponse?: {
     success: boolean;
     errorMessage?: string;
   };
   attestationsPresentations?: AttestationsProof<T>[];
-  otherSignIns?: {
-    discord?: { username: string; discriminator?: string | undefined; id: string } | undefined;
-    github?: { username: string; id: string } | undefined;
-    google?: { username: string; id: string } | undefined;
-    twitter?: { username: string; id: string } | undefined;
-  };
 
   access_token: string;
   token_type: string = 'Bearer';
@@ -2538,16 +2532,6 @@ export class ExchangeSIWBBAuthorizationCodeSuccessResponse<T extends NumberType>
     this.bitbadgesAddress = data.bitbadgesAddress;
     this.verificationResponse = data.verificationResponse;
     this.attestationsPresentations = data.attestationsPresentations?.map((proof) => new AttestationsProof(proof));
-    if (data.ownershipRequirements) {
-      if ((data.ownershipRequirements as AndGroup<T>)['$and']) {
-        this.ownershipRequirements = new SiwbbAndGroup(data.ownershipRequirements as AndGroup<T>);
-      } else if ((data.ownershipRequirements as OrGroup<T>)['$or']) {
-        this.ownershipRequirements = new SiwbbOrGroup(data.ownershipRequirements as OrGroup<T>);
-      } else {
-        this.ownershipRequirements = new OwnershipRequirements(data.ownershipRequirements as OwnershipRequirements<T>);
-      }
-    }
-    this.otherSignIns = data.otherSignIns;
   }
 
   getNumberFieldNames(): string[] {
@@ -3669,18 +3653,8 @@ export class PerformStoreActionBatchWithBodyAuthSuccessResponse extends EmptyRes
  * @category API Requests / Responses
  */
 export interface iPerformStoreActionPayload {
-  /** Whether to simulate the action */
-  _isSimulation?: boolean;
   /** Any custom payload data needed for the action */
   [key: string]: any;
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iPerformStoreActionBodyAuthPayload {
-  /** The data secret to perform the action with. Needed if you are not signed in as creator. */
-  dataSecret?: string;
 }
 
 /**
@@ -3693,20 +3667,6 @@ export interface iPerformStoreActionSuccessResponse {}
  */
 export class PerformStoreActionSuccessResponse extends EmptyResponseClass {}
 
-/**
- * @category API Requests / Responses
- */
-export interface iBatchStoreActionPayload {
-  /** Whether to simulate the action */
-  _isSimulation?: boolean;
-  /** Array of actions to perform */
-  actions: {
-    /** The name of the action to perform */
-    actionName: string;
-    /** The payload for this specific action */
-    payload: any;
-  }[];
-}
 
 /**
  * @category API Requests / Responses
@@ -3717,17 +3677,6 @@ export interface iBatchStoreActionSuccessResponse {}
  * @category API Requests / Responses
  */
 export class BatchStoreActionSuccessResponse extends EmptyResponseClass {}
-
-// You might also want to add a type for individual actions in the batch
-/**
- * @category API Requests / Responses
- */
-export interface BinAction {
-  /** The name of the action to perform */
-  actionName: string;
-  /** The payload for this specific action */
-  payload: iPerformStoreActionPayload;
-}
 
 /**
  * @category API Requests / Responses

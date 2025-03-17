@@ -562,13 +562,16 @@ export interface iQueueDoc<T extends NumberType> extends Doc {
   emailMessage?: string;
   recipientAddress?: string;
   activityDocId?: string;
+  /** Type of the doc / purpose */
   notificationType?: string;
 
   /** The BitBadges address of the user who initiated this fetch */
   initiatedBy?: BitBadgesAddress;
 
+  /** For use for post-claim actions */
   actionConfig?: any;
 
+  /** For use for claim completion */
   claimInfo?: {
     session: any;
     body: any;
@@ -578,6 +581,7 @@ export interface iQueueDoc<T extends NumberType> extends Doc {
     [key: string]: any;
   };
 
+  /** For use for airdrops */
   faucetInfo?: {
     txHash: string;
     amount: NumberType;
@@ -1428,9 +1432,10 @@ export interface iClaimBuilderDoc<T extends NumberType> extends Doc {
  * @category Interfaces
  */
 export interface iClaimReward<T extends NumberType> {
-  /** The ID of the reward (either a pre-configured one or "custom") */
+  /** The ID of the reward (either a pre-configured one or "custom"). Currently, this is not used for anything. */
   rewardId: string;
-  /** The instance ID of the reward */
+
+  /** The instance ID of the reward. A unique identifier for the reward. */
   instanceId: string;
 
   /** Metadata for the reward. This is public-facing, so do not include any gated content here. By default, we use the associated rewardId. */
@@ -1541,7 +1546,7 @@ export interface iChallengeTrackerIdDetails<T extends NumberType> {
 /**
  * @category Interfaces
  */
-export interface iMerkleChallengeDoc<T extends NumberType> extends Doc {
+export interface iMerkleChallengeTrackerDoc<T extends NumberType> extends Doc {
   /** The collection ID */
   collectionId: T;
   /** The challenge ID */
@@ -1962,14 +1967,6 @@ export interface iSIWBBRequestDoc<T extends NumberType> extends Doc {
 
   /** The client ID of the app that requested the signature */
   clientId: string;
-
-  /** Other approved sign-ins at the time of this sign-in */
-  otherSignIns?: {
-    discord?: { username: string; discriminator?: string | undefined; id: string } | undefined;
-    github?: { username: string; id: string } | undefined;
-    google?: { username: string; id: string } | undefined;
-    twitter?: { username: string; id: string } | undefined;
-  };
 
   /** The redirect URI of the app  */
   redirectUri?: string;

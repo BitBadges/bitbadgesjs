@@ -15,7 +15,7 @@ import {
   iClaimAlertDoc,
   iClaimDetails,
   iListActivityDoc,
-  iMerkleChallengeDoc,
+  iMerkleChallengeTrackerDoc,
   iPointsActivityDoc,
   iTransferActivityDoc,
   iUtilityListingDoc
@@ -25,7 +25,7 @@ import {
   AttestationDoc,
   BalanceDoc,
   BalanceDocWithDetails,
-  MerkleChallengeDoc,
+  MerkleChallengeTrackerDoc,
   SIWBBRequestDoc,
   UtilityListingDoc
 } from '../docs/docs.js';
@@ -127,7 +127,7 @@ export interface iGetCollectionChallengeTrackersPayload {
  * @category API Requests / Responses
  */
 export interface iGetCollectionChallengeTrackersSuccessResponse<T extends NumberType> {
-  challengeTrackers: Array<iMerkleChallengeDoc<T>>;
+  challengeTrackers: Array<iMerkleChallengeTrackerDoc<T>>;
   pagination: PaginationInfo;
 }
 
@@ -138,12 +138,12 @@ export class GetCollectionChallengeTrackersSuccessResponse<T extends NumberType>
   extends BaseNumberTypeClass<GetCollectionChallengeTrackersSuccessResponse<T>>
   implements iGetCollectionChallengeTrackersSuccessResponse<T>
 {
-  challengeTrackers: MerkleChallengeDoc<T>[];
+  challengeTrackers: MerkleChallengeTrackerDoc<T>[];
   pagination: PaginationInfo;
 
   constructor(data: iGetCollectionChallengeTrackersSuccessResponse<T>) {
     super();
-    this.challengeTrackers = data.challengeTrackers.map((challengeTracker) => new MerkleChallengeDoc(challengeTracker));
+    this.challengeTrackers = data.challengeTrackers.map((challengeTracker) => new MerkleChallengeTrackerDoc(challengeTracker));
     this.pagination = data.pagination;
   }
 

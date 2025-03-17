@@ -6433,7 +6433,7 @@ components:
         - approverAddress
       additionalProperties: false
       type: object
-    iMerkleChallengeDoc:
+    iMerkleChallengeTrackerDoc:
       properties:
         _docId:
           description: A unique stringified document ID
@@ -8641,7 +8641,7 @@ components:
           type: array
         merkleChallenges:
           items:
-            $ref: '#/components/schemas/iMerkleChallengeDoc'
+            $ref: '#/components/schemas/iMerkleChallengeTrackerDoc'
           description: >-
             A list of merkle challenge activity items for the account. Paginated
             and fetched as needed. To be used in conjunction with views.
@@ -14097,7 +14097,7 @@ components:
           type: array
         merkleChallenges:
           items:
-            $ref: '#/components/schemas/iMerkleChallengeDoc'
+            $ref: '#/components/schemas/iMerkleChallengeTrackerDoc'
           description: >-
             The fetched merkle challenges for this collection. Returned
             collections will only fetch the current page. Use the pagination to

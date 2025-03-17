@@ -38,14 +38,14 @@ import type { iCollectionPermissionsWithDetails } from '@/interfaces/badges/perm
 import type { iUserBalanceStoreWithDetails } from '@/interfaces/badges/userBalances.js';
 import type { BaseBitBadgesApi, PaginationInfo } from './base.js';
 import { TransferActivityDoc } from './docs/activity.js';
-import { ApprovalTrackerDoc, BalanceDocWithDetails, CollectionDoc, MapDoc, MerkleChallengeDoc, UtilityListingDoc } from './docs/docs.js';
+import { ApprovalTrackerDoc, BalanceDocWithDetails, CollectionDoc, MapDoc, MerkleChallengeTrackerDoc, UtilityListingDoc } from './docs/docs.js';
 import type {
   iApprovalTrackerDoc,
   iBalanceDocWithDetails,
   iClaimDetails,
   iCollectionDoc,
   iMapDoc,
-  iMerkleChallengeDoc,
+  iMerkleChallengeTrackerDoc,
   iTransferActivityDoc,
   iUtilityListingDoc,
   NativeAddress
@@ -106,7 +106,7 @@ export interface iBitBadgesCollection<T extends NumberType> extends iCollectionD
   /** The fetched owners of this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views. */
   owners: iBalanceDocWithDetails<T>[];
   /** The fetched merkle challenge trackers for this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views. */
-  merkleChallenges: iMerkleChallengeDoc<T>[];
+  merkleChallenges: iMerkleChallengeTrackerDoc<T>[];
   /** The fetched approval trackers for this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views. */
   approvalTrackers: iApprovalTrackerDoc<T>[];
 
@@ -114,9 +114,9 @@ export interface iBitBadgesCollection<T extends NumberType> extends iCollectionD
   listings: iUtilityListingDoc<T>[];
 
   /** The badge IDs in this collection that are marked as NSFW. */
-  nsfw?: { badgeIds: iUintRange<T>[]; reason: string };
+  nsfw?: iCollectionNSFW<T>;
   /** The badge IDs in this collection that have been reported. */
-  reported?: { badgeIds: iUintRange<T>[]; reason: string };
+  reported?: iCollectionNSFW<T>;
 
   /** The views for this collection and their pagination Doc. Views will only include the doc _ids. Use the pagination to fetch more. To be used in conjunction with activity, announcements, reviews, owners, merkleChallenges, and approvalTrackers. For example, if you want to fetch the activity for a view, you would use the view's pagination to fetch the doc _ids, then use the corresponding activity array to find the matching docs. */
   views: {
@@ -131,6 +131,14 @@ export interface iBitBadgesCollection<T extends NumberType> extends iCollectionD
 
   /** Details about any off-chain claims for this collection. Only applicable when outsourced to BitBadges. */
   claims: iClaimDetails<T>[];
+}
+
+/**
+ * @category Collections
+ */
+export interface iCollectionNSFW<T extends NumberType> {
+  badgeIds: UintRangeArray<T>;
+  reason: string;
 }
 
 /**
@@ -152,7 +160,7 @@ export class BitBadgesCollection<T extends NumberType>
 
   activity: TransferActivityDoc<T>[];
   owners: BalanceDocWithDetails<T>[];
-  merkleChallenges: MerkleChallengeDoc<T>[];
+  merkleChallenges: MerkleChallengeTrackerDoc<T>[];
   approvalTrackers: ApprovalTrackerDoc<T>[];
 
   listings: UtilityListingDoc<T>[];
@@ -183,7 +191,7 @@ export class BitBadgesCollection<T extends NumberType>
     this.badgeMetadataTimeline = data.badgeMetadataTimeline.map((badgeMetadata) => new BadgeMetadataTimelineWithDetails(badgeMetadata));
     this.activity = data.activity.map((activityItem) => new TransferActivityDoc(activityItem));
     this.owners = data.owners.map((balance) => new BalanceDocWithDetails(balance));
-    this.merkleChallenges = data.merkleChallenges.map((merkleChallenge) => new MerkleChallengeDoc(merkleChallenge));
+    this.merkleChallenges = data.merkleChallenges.map((merkleChallenge) => new MerkleChallengeTrackerDoc(merkleChallenge));
     this.approvalTrackers = data.approvalTrackers.map((approvalTracker) => new ApprovalTrackerDoc(approvalTracker));
     this.listings = data.listings.map((listing) => new UtilityListingDoc(listing));
     this.nsfw = data.nsfw ? { ...data.nsfw, badgeIds: UintRangeArray.From(data.nsfw.badgeIds) } : undefined;
@@ -1003,7 +1011,7 @@ export class BitBadgesCollection<T extends NumberType>
   getMerkleChallengesView(viewId: string) {
     return (this.views[viewId]?.ids.map((x) => {
       return this.merkleChallenges.find((y) => y._docId === x);
-    }) ?? []) as MerkleChallengeDoc<T>[];
+    }) ?? []) as MerkleChallengeTrackerDoc<T>[];
   }
 
   /**
@@ -1220,7 +1228,7 @@ type CollectionViewData<T extends NumberType> = {
   transferActivity: TransferActivityDoc<T>[];
   owners: BalanceDocWithDetails<T>[];
   amountTrackers: ApprovalTrackerDoc<T>[];
-  challengeTrackers: MerkleChallengeDoc<T>[];
+  challengeTrackers: MerkleChallengeTrackerDoc<T>[];
   listings: UtilityListingDoc<T>[];
 };
 

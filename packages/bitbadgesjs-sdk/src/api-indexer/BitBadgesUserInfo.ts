@@ -12,7 +12,7 @@ import { BitBadgesAddressList } from './BitBadgesAddressList.js';
 import { BitBadgesCollection } from './BitBadgesCollection.js';
 import type { BaseBitBadgesApi, PaginationInfo } from './base.js';
 import { ClaimActivityDoc, ClaimAlertDoc, ListActivityDoc, PointsActivityDoc, TransferActivityDoc } from './docs/activity.js';
-import { ApprovalTrackerDoc, AttestationDoc, BalanceDocWithDetails, MapDoc, MerkleChallengeDoc, ProfileDoc, SIWBBRequestDoc } from './docs/docs.js';
+import { ApprovalTrackerDoc, AttestationDoc, BalanceDocWithDetails, MapDoc, MerkleChallengeTrackerDoc, ProfileDoc, SIWBBRequestDoc } from './docs/docs.js';
 import type {
   BitBadgesAddress,
   NativeAddress,
@@ -24,7 +24,7 @@ import type {
   iClaimAlertDoc,
   iListActivityDoc,
   iMapDoc,
-  iMerkleChallengeDoc,
+  iMerkleChallengeTrackerDoc,
   iPointsActivityDoc,
   iProfileDoc,
   iSIWBBRequestDoc,
@@ -57,7 +57,7 @@ export interface iBitBadgesUserInfo<T extends NumberType> extends iProfileDoc<T>
   /** A list of points activity items for the account. Paginated and fetched as needed. To be used in conjunction with views. */
   pointsActivity?: iPointsActivityDoc<T>[];
   /** A list of merkle challenge activity items for the account. Paginated and fetched as needed. To be used in conjunction with views. */
-  merkleChallenges: iMerkleChallengeDoc<T>[];
+  merkleChallenges: iMerkleChallengeTrackerDoc<T>[];
   /** A list of approvals tracker activity items for the account. Paginated and fetched as needed. To be used in conjunction with views. */
   approvalTrackers: iApprovalTrackerDoc<T>[];
   /** A list of address lists for the account. Paginated and fetched as needed. To be used in conjunction with views. */
@@ -73,9 +73,9 @@ export interface iBitBadgesUserInfo<T extends NumberType> extends iProfileDoc<T>
   address: NativeAddress;
 
   /** Indicates whether the account is NSFW. */
-  nsfw?: { [badgeId: string]: string };
+  nsfw?: { reason: string };
   /** Indicates whether the account has been reported. */
-  reported?: { [badgeId: string]: string };
+  reported?: { reason: string };
 
   /** The views for this collection and their pagination Doc. Views will only include the doc _ids. Use the pagination to fetch more. To be used in conjunction with activity, announcements, reviews, owners, merkleChallenges, and approvalTrackers. For example, if you want to fetch the activity for a view, you would use the view's pagination to fetch the doc _ids, then use the corresponding activity array to find the matching docs. */
   views: {
@@ -88,7 +88,11 @@ export interface iBitBadgesUserInfo<T extends NumberType> extends iProfileDoc<T>
       | undefined;
   };
 
-  /** The alias for the account. */
+  /**
+   * For advanced cases where you want a custom address or account for a collection or list. We map it to an account.
+   *
+   * Experimental - For example, if you want to send a badge to a collection, you can transfer it to the alias account.
+  */
   alias?: {
     collectionId?: T;
     listId?: string;
@@ -123,7 +127,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   listsActivity: ListActivityDoc<T>[];
   claimActivity?: ClaimActivityDoc<T>[];
   pointsActivity?: PointsActivityDoc<T>[];
-  merkleChallenges: MerkleChallengeDoc<T>[];
+  merkleChallenges: MerkleChallengeTrackerDoc<T>[];
   approvalTrackers: ApprovalTrackerDoc<T>[];
   addressLists: BitBadgesAddressList<T>[];
   claimAlerts: ClaimAlertDoc<T>[];
@@ -131,8 +135,8 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   attestations: iAttestationDoc<T>[];
 
   address: NativeAddress;
-  nsfw?: { [badgeId: string]: string };
-  reported?: { [badgeId: string]: string };
+  nsfw?: { reason: string };
+  reported?: { reason: string };
   views: {
     [viewId: string]:
       | {
@@ -167,7 +171,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     this.listsActivity = data.listsActivity.map((activity) => new ListActivityDoc(activity));
     this.claimActivity = data.claimActivity?.map((activity) => new ClaimActivityDoc(activity));
     this.pointsActivity = data.pointsActivity?.map((activity) => new PointsActivityDoc(activity));
-    this.merkleChallenges = data.merkleChallenges.map((challenge) => new MerkleChallengeDoc(challenge));
+    this.merkleChallenges = data.merkleChallenges.map((challenge) => new MerkleChallengeTrackerDoc(challenge));
     this.approvalTrackers = data.approvalTrackers.map((tracker) => new ApprovalTrackerDoc(tracker));
     this.addressLists = data.addressLists.map((list) => new BitBadgesAddressList(list));
     this.claimAlerts = data.claimAlerts.map((alert) => new ClaimAlertDoc(alert));

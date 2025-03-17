@@ -41,14 +41,6 @@ export interface iSiwbbChallenge<T extends NumberType> {
    * Derived data integrity proofs for any attestations requested.
    */
   attestationsPresentations?: iAttestationsProof<T>[];
-
-  /** Other sign-ins that were requested */
-  otherSignIns?: {
-    discord?: { username: string; discriminator?: string | undefined; id: string } | undefined;
-    github?: { username: string; id: string } | undefined;
-    google?: { username: string; id: string } | undefined;
-    twitter?: { username: string; id: string } | undefined;
-  };
 }
 
 /**
@@ -64,12 +56,6 @@ export class SiwbbChallenge<T extends NumberType> extends BaseNumberTypeClass<Si
     errorMessage?: string;
   };
   attestationsPresentations?: AttestationsProof<T>[];
-  otherSignIns?: {
-    discord?: { username: string; discriminator?: string | undefined; id: string } | undefined;
-    github?: { username: string; id: string } | undefined;
-    google?: { username: string; id: string } | undefined;
-    twitter?: { username: string; id: string } | undefined;
-  };
 
   constructor(data: iSiwbbChallenge<T>) {
     super();
@@ -77,7 +63,6 @@ export class SiwbbChallenge<T extends NumberType> extends BaseNumberTypeClass<Si
     this.bitbadgesAddress = data.bitbadgesAddress;
     this.chain = data.chain;
     this.verificationResponse = data.verificationResponse;
-    this.otherSignIns = data.otherSignIns;
     this.attestationsPresentations = data.attestationsPresentations?.map((proof) => new AttestationsProof(proof));
     if (data.ownershipRequirements) {
       if ((data.ownershipRequirements as AndGroup<T>)['$and']) {
@@ -99,13 +84,6 @@ export class SiwbbChallenge<T extends NumberType> extends BaseNumberTypeClass<Si
  * @category SIWBB Authentication
  */
 export interface VerifySIWBBOptions {
-  /**
-   * The expected ownership requirements to check for the user.
-   *
-   * @deprecated Please do not use. Check requirements server-side via a claim or other means.
-   */
-  ownershipRequirements?: AssetConditionGroup<NumberType>;
-
   /** How recent the challenge must be in milliseconds. Defaults to 10 minutes. If 0, we will not check the time. */
   issuedAtTimeWindowMs?: number;
   /**
@@ -142,15 +120,6 @@ export interface CodeGenQueryParams {
   hideIfAlreadyClaimed?: boolean;
   expectVerifySuccess?: boolean;
   expectAttestations?: boolean;
-
-  /**
-   * @deprecated Please consider handling this with a claim instead.
-   */
-  otherSignIns?: ('discord' | 'twitter' | 'github' | 'google')[];
-  /**
-   * @deprecated Please consider handling this with a claim instead.
-   */
-  ownershipRequirements?: AssetConditionGroup<NumberType>;
 }
 
 /**

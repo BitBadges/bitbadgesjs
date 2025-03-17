@@ -75,7 +75,7 @@ import {
   type iLatestBlockStatus,
   type iMapDoc,
   type iMapWithValues,
-  type iMerkleChallengeDoc,
+  type iMerkleChallengeTrackerDoc,
   type iNotificationPreferences,
   type iPluginDoc,
   type iPluginVersionConfig,
@@ -1433,7 +1433,7 @@ export class ApprovalTrackerDoc<T extends NumberType> extends BaseNumberTypeClas
 }
 
 /**
- * @inheritDoc iMerkleChallengeDoc
+ * @inheritDoc iMerkleChallengeTrackerDoc
  * @category Approvals / Transferability
  */
 export class UsedLeafStatus<T extends NumberType> extends BaseNumberTypeClass<UsedLeafStatus<T>> implements iUsedLeafStatus<T> {
@@ -1456,10 +1456,10 @@ export class UsedLeafStatus<T extends NumberType> extends BaseNumberTypeClass<Us
 }
 
 /**
- * @inheritDoc iMerkleChallengeDoc
+ * @inheritDoc iMerkleChallengeTrackerDoc
  * @category Approvals / Transferability
  */
-export class MerkleChallengeDoc<T extends NumberType> extends BaseNumberTypeClass<MerkleChallengeDoc<T>> implements iMerkleChallengeDoc<T> {
+export class MerkleChallengeTrackerDoc<T extends NumberType> extends BaseNumberTypeClass<MerkleChallengeTrackerDoc<T>> implements iMerkleChallengeTrackerDoc<T> {
   _docId: string;
   _id?: string;
   collectionId: T;
@@ -1469,7 +1469,7 @@ export class MerkleChallengeDoc<T extends NumberType> extends BaseNumberTypeClas
   usedLeafIndices: UsedLeafStatus<T>[];
   approvalId: string;
 
-  constructor(data: iMerkleChallengeDoc<T>) {
+  constructor(data: iMerkleChallengeTrackerDoc<T>) {
     super();
     this._docId = data._docId;
     this._id = data._id;
@@ -1485,8 +1485,8 @@ export class MerkleChallengeDoc<T extends NumberType> extends BaseNumberTypeClas
     return ['collectionId'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MerkleChallengeDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MerkleChallengeDoc<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MerkleChallengeTrackerDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MerkleChallengeTrackerDoc<U>;
   }
 }
 
@@ -2029,13 +2029,6 @@ export class SIWBBRequestDoc<T extends NumberType> extends BaseNumberTypeClass<S
   scopes: OAuthScopeDetails[];
   expiresAt: UNIXMilliTimestamp<T>;
   deletedAt?: UNIXMilliTimestamp<T>;
-  otherSignIns?: {
-    discord?: { username: string; discriminator?: string | undefined; id: string } | undefined;
-    github?: { username: string; id: string } | undefined;
-    google?: { username: string; id: string } | undefined;
-    twitch?: { username: string; id: string } | undefined;
-    twitter?: { username: string; id: string } | undefined;
-  };
   redirectUri?: string | undefined;
   address: string;
   chain: SupportedChain;
@@ -2056,7 +2049,6 @@ export class SIWBBRequestDoc<T extends NumberType> extends BaseNumberTypeClass<S
     this.clientId = data.clientId;
     this.scopes = data.scopes;
     this.expiresAt = data.expiresAt;
-    this.otherSignIns = data.otherSignIns;
     this.bitbadgesAddress = data.bitbadgesAddress;
     this.redirectUri = data.redirectUri;
   }
