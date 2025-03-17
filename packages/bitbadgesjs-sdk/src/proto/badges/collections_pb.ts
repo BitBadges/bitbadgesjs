@@ -12,7 +12,7 @@ import { UintRange } from "./balances_pb.js";
 
 /**
  *
- * A BadgeCollection is the top-level object for a collection of badges. 
+ * A BadgeCollection is the top-level object for a collection of badges.
  * It defines everything about the collection, such as the manager, metadata, etc.
  *
  * All collections are identified by a collectionId assigned by the blockchain, which is a uint64 that increments (i.e. the first collection has ID 1).
@@ -20,7 +20,7 @@ import { UintRange } from "./balances_pb.js";
  * All collections can have a manager who is responsible for managing the collection and can be granted certain admin
  * permissions, such as the ability to mint new badges.
  *
- * Certain fields are timeline-based, which means they may have different values at different block heights. 
+ * Certain fields are timeline-based, which means they may have different values at different block heights.
  * We fetch the value according to the current time.
  * For example, we may set the manager to be Alice from Time1 to Time2, and then set the manager to be Bob from Time2 to Time3.
  *
@@ -181,4 +181,3 @@ export class BadgeCollection extends Message<BadgeCollection> {
     return proto3.util.equals(BadgeCollection, a, b);
   }
 }
-

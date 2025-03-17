@@ -215,6 +215,11 @@ export class GetBadgeBalanceByAddressSpecificBadgeSuccessResponse<T extends Numb
  * @category API Requests / Responses
  */
 export interface iGetBadgeBalanceByAddressPayload {
+  /**
+   * If true, we will fetch private parameters for any claims / approvals. Must be creator.
+   *
+   * This is only applicable to incoming / outgoing approvals with claims.
+   */
   fetchPrivateParams?: boolean;
 
   /**
@@ -363,18 +368,10 @@ export type CollectionViewKey = 'transferActivity' | 'owners' | 'amountTrackers'
  * Each view has a bookmark that is used for pagination and must be supplied to get the next page.
  * If the bookmark is not supplied, the first page will be returned.
  *
- * We support the following views:
- * - `transferActivity` - Fetches the latest activity for the collection.
- * - `latestAnnouncements` - Fetches the latest announcements for the collection.
- * - `reviews` - Fetches the latest reviews for the collection.
- * - `owners` - Fetches the owners of the collection sequentially in random order.
- * - `merkleChallenges` - Fetches the merkle challenges for the collection in random order.
- * - `approvalTrackers` - Fetches the approvals trackers for the collection in random order.
- *
  * @typedef {Object} GetAdditionalCollectionDetailsBody
  * @property {{ viewType: string, bookmark: string }[]} [viewsToFetch] - If present, the specified views will be fetched.
  * @property {boolean} [fetchTotalBalances] - If true, the total and mint balances will be fetched.
- * @property {string[]} [challengeTrackersToFetch] - If present, the merkle challenges corresponding to the specified merkle challenge IDs will be fetched.
+ * @property {string[]} [challengeTrackersToFetch] - If present, the merkle challenge trackers corresponding to the specified merkle challenge IDs will be fetched.
  * @property {AmountTrackerIdDetails<NumberType>[]} [approvalTrackersToFetch] - If present, the approvals trackers corresponding to the specified approvals tracker IDs will be fetched.
  * @category API Requests / Responses
  */
@@ -404,7 +401,7 @@ export interface GetAdditionalCollectionDetailsPayload {
    */
   fetchTotalBalances?: boolean;
   /**
-   * If present, the merkle challenges corresponding to the specified merkle challenge IDs will be fetched.
+   * If present, the merkle challenge trackers corresponding to the specified merkle challenge IDs will be fetched.
    */
   challengeTrackersToFetch?: iChallengeTrackerIdDetails<NumberType>[];
   /**

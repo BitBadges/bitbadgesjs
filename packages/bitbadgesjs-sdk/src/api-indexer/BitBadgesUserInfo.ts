@@ -777,12 +777,6 @@ export type AccountViewKey =
  *
  * Each view has a bookmark that is used for pagination and must be supplied to get the next page.
  *
- * We support the following views:
- * - `transferActivity` - Fetches the latest activity for the account.
- * - `latestAnnouncements` - Fetches the latest announcements for the account.
- * - `reviews` - Fetches the latest reviews for the account.
- * - `badgesCollected` - Fetches the badges collected by the account sequentially in random order.
- *
  * @typedef {Object} AccountFetchDetails
  *
  * @property {string} [address] - If present, the account corresponding to the specified address will be fetched. Please only specify one of `address` or `username`.

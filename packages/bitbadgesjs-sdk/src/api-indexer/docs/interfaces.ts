@@ -669,10 +669,10 @@ export interface iBalanceDoc<T extends NumberType> extends iUserBalanceStore<T>,
   /** The URI of the off-chain balances */
   uri?: string;
 
-  /** The timestamp of when the off-chain balances were fetched (milliseconds since epoch). For BitBadges indexer, we only populate this for Mint and Total docs. */
+  /** The timestamp of when the off-chain balances were fetched (milliseconds since epoch). For BitBadges indexer, we only populate this for the Total docs. */
   fetchedAt?: UNIXMilliTimestamp<T>;
 
-  /** The block number of when the off-chain balances were fetched. For BitBadges indexer, we only populate this for Mint and Total docs. */
+  /** The block number of when the off-chain balances were fetched. For BitBadges indexer, we only populate this for the Total docs. */
   fetchedAtBlock?: T;
 
   /** True if the off-chain balances are using permanent storage */
@@ -998,13 +998,13 @@ export interface IntegrationPluginParams<T extends ClaimIntegrationPluginType> {
    * will have the same pluginId.
    */
   instanceId: string;
-  /** The type of the plugin */
+  /** The ID of the plugin (e.g. "numUses") */
   pluginId: T;
   /** The version of the plugin */
   version: string;
-  /** The parameters of the plugin that are visible to the public */
+  /** The parameters of the plugin that are visible to the public. These are custom per plugin type. */
   publicParams: ClaimIntegrationPublicParamsType<T>;
-  /** The parameters of the plugin that are not visible to the public */
+  /** The parameters of the plugin that are not visible to the public. These are custom per plugin type. */
   privateParams: ClaimIntegrationPrivateParamsType<T>;
   /** Custom display metadata for the plugin */
   metadata?: { name: string; description: string; image?: string };
@@ -1014,9 +1014,9 @@ export interface IntegrationPluginParams<T extends ClaimIntegrationPluginType> {
  * @category Claims
  */
 export interface IntegrationPluginDetails<T extends ClaimIntegrationPluginType> extends IntegrationPluginParams<T> {
-  /** The current state of the plugin */
+  /** The current state of the plugin. This is returned by BitBadges for information purposes. This is altered to not reveal sensitive information. */
   publicState: ClaimIntegrationPublicStateType<T>;
-  /** The private state of the plugin */
+  /** The private state of the plugin. This is the exact state used by BitBadges behind the scenes. */
   privateState?: ClaimIntegrationPrivateStateType<T>;
   /** If resetState = true, we will reset the state of the plugin back to default. If false, we will keep the current state. Incompatible with newState. */
   resetState?: boolean;
@@ -1052,7 +1052,7 @@ export interface iSatisfyMethod {
 }
 
 /**
- * @cateogry Interfaces
+ * @category Interfaces
  */
 export interface iEvent<T extends NumberType> {
   /** The event ID */
@@ -1129,7 +1129,7 @@ export interface iApiKeyDoc extends Doc {
 }
 
 /**
- * @cateogry Interfaces
+ * @category Interfaces
  */
 export interface iApplicationDoc<T extends NumberType> extends Doc {
   /** The application ID */
@@ -1710,14 +1710,23 @@ export type DynamicDataHandlerActionRequest = { actionName: ActionName; payload:
  * @category Interfaces
  */
 export interface iDynamicDataDoc<Q extends DynamicDataHandlerType, T extends NumberType> extends Doc {
+  /** The handler ID. Can also be thought of as the type of dynamic data ("addresses", "email", ...) */
   handlerId: Q;
+  /** The dynamic data ID. The ID of the store. */
   dynamicDataId: string;
+  /** The label of the data store */
   label: string;
+  /** The data secret. Used in cases where you are not signed in as creator. This authenticates the request. */
   dataSecret: string;
+  /** The data itself. */
   data: DynamicDataHandlerData<Q>;
+  /** The creator of the dynamic data store */
   createdBy: BitBadgesAddress;
+  /** The manager of the dynamic data store */
   managedBy: BitBadgesAddress;
+  /** The time the dynamic data store was created */
   createdAt?: UNIXMilliTimestamp<T>;
+  /** The time the dynamic data store was last updated */
   lastUpdated?: UNIXMilliTimestamp<T>;
 }
 
@@ -1762,7 +1771,7 @@ export interface iPluginDoc<T extends NumberType> extends Doc {
   /** The unique plugin ID */
   pluginId: string;
 
-  /** The secret of the plugin */
+  /** The secret of the plugin. Used to verify BitBadges as origin of request. */
   pluginSecret?: string;
 
   /** Invite code for the plugin */
@@ -2029,7 +2038,7 @@ export interface iClaimDetails<T extends NumberType> {
   managedBy?: BitBadgesAddress;
   /** Collection ID that the claim is for (if applicable). */
   collectionId?: T;
-  /** Is intended to be used for Sign In with BitBadges. */
+  /** Standalone claims are nor linked with a badge or list. */
   standaloneClaim?: boolean;
   /** Address list ID that the claim is for (if applicable). */
   listId?: string;

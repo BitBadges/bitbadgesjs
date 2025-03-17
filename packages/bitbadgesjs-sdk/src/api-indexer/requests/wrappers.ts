@@ -750,7 +750,9 @@ export interface GetCollectionPayload {}
  * @category API Requests / Responses
  */
 export interface iGetCollectionSuccessResponse<T extends NumberType> {
+  /** The collection details */
   collection: iBitBadgesCollection<T>;
+  /** The current collection metadata */
   metadata: iMetadata<T>;
 }
 

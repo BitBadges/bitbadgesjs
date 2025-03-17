@@ -2319,7 +2319,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
-   * Gets metadata for a specific badge in a collection.
+   * Gets current metadata for a specific badge in a collection.
    *
    * @remarks
    * - **API Route**: `GET /api/v0/collection/:collectionId/:badgeId/metadata`

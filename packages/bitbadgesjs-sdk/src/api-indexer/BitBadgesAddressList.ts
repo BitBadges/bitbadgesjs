@@ -427,7 +427,7 @@ export class GetAddressListSuccessResponse<T extends NumberType>
  */
 export interface iGetAddressListsPayload {
   /**
-   * The lists and accompanyin details to fetch. Supports on-chain, off-chain, and reserved lists.
+   * The lists and accompanying details to fetch. Supports on-chain, off-chain, and reserved lists.
    */
   listsToFetch: {
     listId: string;
@@ -471,7 +471,12 @@ export class GetAddressListsSuccessResponse<T extends NumberType>
  * @category Interfaces
  */
 export type iAddressListCreateObject<T extends NumberType> = iAddressList & {
-  /** Flag to update addresses? */
+  /**
+   * Flag to update addresses?. Because w/ claims there can be race conditions,
+   * we have this flag.
+   *
+   * If true, we overwrite with provided addresses. If false, we leave addresses untouched.
+   */
   updateAddresses?: boolean;
 
   /** The claims of the address list. Use resetState on updates for resetting individual plugin state (if applicable). */

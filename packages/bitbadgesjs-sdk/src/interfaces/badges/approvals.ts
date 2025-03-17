@@ -6,14 +6,23 @@ import type { iApprovalInfoDetails, iIncomingApprovalCriteriaWithDetails } from 
  * @category Interfaces
  */
 export interface iUserOutgoingApproval<T extends NumberType> {
+  /** The list ID for the user(s) who is sending the badges. The ID is either registered on-chain for reusability or follows the reserved ID system. */
   toListId: string;
+  /** The list ID for the user(s) who initiate the transfer. The ID is either registered on-chain for reusability or follows the reserved ID system. */
   initiatedByListId: string;
+  /** The times allowed for the transfer transaction. */
   transferTimes: iUintRange<T>[];
+  /** The badge IDs to be transferred. */
   badgeIds: iUintRange<T>[];
+  /** The ownership times of the badges being transferred. */
   ownershipTimes: iUintRange<T>[];
+  /** The ID of the approval. Must not be a duplicate of another approval ID in the same timeline. */
   approvalId: string;
+  /** The URI of the approval. */
   uri?: string;
+  /** Arbitrary custom data of the approval */
   customData?: string;
+  /** The criteria to be met. These represent the restrictions that must be obeyed such as the total amount approved, max num transfers, merkle challenges, must own badges, etc. */
   approvalCriteria?: iOutgoingApprovalCriteria<T>;
 }
 
@@ -21,7 +30,7 @@ export interface iUserOutgoingApproval<T extends NumberType> {
  * @category Interfaces
  */
 export interface iOutgoingApprovalCriteria<T extends NumberType> {
-  /** The list of must own badges to be approved. */
+  /** The list of badges to be owned to be approved. Must have on-chain balances. */
   mustOwnBadges?: iMustOwnBadges<T>[];
   /** The list of ZK proofs that need to be satisfied. One use per proof solution. */
   zkProofs?: iZkProof[];
@@ -30,7 +39,7 @@ export interface iOutgoingApprovalCriteria<T extends NumberType> {
 
   /** The list of merkle challenges that need valid proofs to be approved. */
   merkleChallenges?: iMerkleChallenge<T>[];
-  /** The predetermined balances for each transfer. */
+  /** The predetermined balances for each transfer. These allow approvals to use predetermined balance amounts rather than an incrementing tally system. */
   predeterminedBalances?: iPredeterminedBalances<T>;
   /** The maximum approved amounts for this approval. */
   approvalAmounts?: iApprovalAmounts<T>;
@@ -38,7 +47,7 @@ export interface iOutgoingApprovalCriteria<T extends NumberType> {
   maxNumTransfers?: iMaxNumTransfers<T>;
   /** Whether the to address must equal the initiatedBy address. */
   requireToEqualsInitiatedBy?: boolean;
-  /** Whether the to address must not equal the initiatedBy address. */
+  /** Whether the to address must not equal the initiatedBy  address. */
   requireToDoesNotEqualInitiatedBy?: boolean;
 }
 
@@ -128,11 +137,11 @@ export interface iMaxNumTransfers<T extends NumberType> {
  * @category Interfaces
  */
 export interface iUserIncomingApproval<T extends NumberType> {
-  /** The list ID for the user(s) who is sending the badges. */
+  /** The list ID for the user(s) who is sending the badges. The ID is either registered on-chain for reusability or follows the reserved ID system. */
   fromListId: string;
-  /** The list ID for the user(s) who initiate the transfer. */
+  /** The list ID for the user(s) who initiate the transfer. The ID is either registered on-chain for reusability or follows the reserved ID system. */
   initiatedByListId: string;
-  /** The times of the transfer transaction. */
+  /** The times allowed for the transfer transaction. */
   transferTimes: iUintRange<T>[];
   /** The badge IDs to be transferred. */
   badgeIds: iUintRange<T>[];
@@ -144,7 +153,7 @@ export interface iUserIncomingApproval<T extends NumberType> {
   uri?: string;
   /** Arbitrary custom data of the approval */
   customData?: string;
-  /** For allowed combinations, we also must check the details of the approval. These represent the restrictions that must be obeyed such as the total amount approved, max num transfers, merkle challenges, must own badges, etc. */
+  /** The criteria to be met. These represent the restrictions that must be obeyed such as the total amount approved, max num transfers, merkle challenges, must own badges, etc. */
   approvalCriteria?: iIncomingApprovalCriteria<T>;
 }
 
@@ -152,7 +161,7 @@ export interface iUserIncomingApproval<T extends NumberType> {
  * @category Interfaces
  */
 export interface iIncomingApprovalCriteria<T extends NumberType> {
-  /** The list of must own badges to be approved. */
+  /** The list of badges to be owned to be approved. Must have on-chain balances. */
   mustOwnBadges?: iMustOwnBadges<T>[];
   /** The list of ZK proofs that need to be satisfied. One use per proof solution. */
   zkProofs?: iZkProof[];
@@ -176,13 +185,13 @@ export interface iIncomingApprovalCriteria<T extends NumberType> {
  * @category Interfaces
  */
 export interface iCollectionApproval<T extends NumberType> {
-  /** The list ID for the user(s) who is receiving the badges. */
+  /** The list ID for the user(s) who is receiving the badges. The ID is either registered on-chain for reusability or follows the reserved ID system. */
   toListId: string;
-  /** The list ID for the user(s) who is sending the badges. */
+  /** The list ID for the user(s) who is sending the badges. The ID is either registered on-chain for reusability or follows the reserved ID system. */
   fromListId: string;
-  /** The list ID for the user(s) who initiate the transfer. */
+  /** The list ID for the user(s) who initiate the transfer. The ID is either registered on-chain for reusability or follows the reserved ID system. */
   initiatedByListId: string;
-  /** The times of the transfer transaction. */
+  /** The times allowed for the transfer transaction. */
   transferTimes: iUintRange<T>[];
   /** The badge IDs to be transferred. */
   badgeIds: iUintRange<T>[];
@@ -194,7 +203,7 @@ export interface iCollectionApproval<T extends NumberType> {
   uri?: string;
   /** Arbitrary custom data of the approval */
   customData?: string;
-  /** For allowed combinations, we also must check the details of the approval. These represent the restrictions that must be obeyed such as the total amount approved, max num transfers, merkle challenges, must own badges, etc. */
+  /** The criteria to be met. These represent the restrictions that must be obeyed such as the total amount approved, max num transfers, merkle challenges, must own badges, etc. */
   approvalCriteria?: iApprovalCriteria<T>;
 }
 
@@ -202,7 +211,7 @@ export interface iCollectionApproval<T extends NumberType> {
  * @category Interfaces
  */
 export interface iApprovalCriteria<T extends NumberType> {
-  /** The list of must own badges to be approved. */
+  /** The list of badges to be owned to be approved. Must have on-chain balances. */
   mustOwnBadges?: iMustOwnBadges<T>[];
   /** The list of ZK proofs that need to be satisfied. One use per proof solution. */
   zkProofs?: iZkProof[];
@@ -210,7 +219,7 @@ export interface iApprovalCriteria<T extends NumberType> {
   coinTransfers?: iCoinTransfer<T>[];
   /** The list of merkle challenges that need valid proofs to be approved. */
   merkleChallenges?: iMerkleChallenge<T>[];
-  /** The predetermined balances for each transfer. */
+  /** The predetermined balances for each transfer. These allow approvals to use predetermined balance amounts rather than an incrementing tally system. */
   predeterminedBalances?: iPredeterminedBalances<T>;
   /** The maximum approved amounts for this approval. */
   approvalAmounts?: iApprovalAmounts<T>;

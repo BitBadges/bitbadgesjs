@@ -446,7 +446,7 @@ paths:
       tags:
         - Badges
       description: |-
-        Gets metadata for a specific badge in a collection.
+        Gets current metadata for a specific badge in a collection.
 
         ```tsx
         await BitBadgesApi.getBadgeMetadata("123", "1");
@@ -1901,7 +1901,8 @@ paths:
         - Address Lists
       description: |-
         Gets address lists. This uses an all-in-one approach with views and paginations
-        to fetch details about the list all in one place.
+        to fetch details about the list all in one place. Note: Fetching views via this
+        route is not supported. Use the other GET simpler routes. This may be deprecated soon.
 
         ```tsx
         const listsRes = await BitBadgesApi.getAddressLists([{
@@ -2665,7 +2666,7 @@ paths:
         - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claim-builder)**
 
         SDK Links:
-        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetClaimsPayloadV1)
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetClaimsPayloadV1)**
         - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetClaimsSuccessResponse)**
         - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getClaims)**
 
@@ -2807,7 +2808,6 @@ paths:
       description: |-
         Deletes a claim. Creating and maintaining claims are typically recommended
         to be done through the site, not the API, because they require special configuration.
-        Claim deletion is a soft delete (i.e. the claim will become inactive and not displayed but can be reinstated with same ID later on).
 
         ```tsx
         const res = await BitBadgesApi.deleteClaim(...);

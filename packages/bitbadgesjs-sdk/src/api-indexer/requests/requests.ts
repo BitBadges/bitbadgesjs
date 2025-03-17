@@ -358,9 +358,9 @@ export class GetSearchSuccessResponse<T extends NumberType>
  * @category API Requests / Responses
  */
 export interface iSearchClaimsPayload {
-  /** If true, we will return all claims that were created by the signed in address. */
+  /** If true, we will return all claims that were created by the signed in address. and standalone */
   standaloneClaimsOnly?: boolean;
-  /** Bookmark to start from. Obtained from previours request. Leave blank to start from the beginning. Only applicable when no additional criteria is specified. */
+  /** Bookmark to start from. Obtained from previous request. Leave blank to start from the beginning. Only applicable when no additional criteria is specified. */
   bookmark?: string;
   /** Fetch private parameters for the claim. Only applicable if you are the creator / manager of the claim. */
   fetchPrivateParams?: boolean;
@@ -399,7 +399,7 @@ export interface iGetClaimsPayloadV1 {
   claimsToFetch: {
     /** The claim ID to fetch. */
     claimId: string;
-    /** The private state instance IDs to fetch. */
+    /** The private state instance IDs to fetch. By default, we do not fetch any private states. */
     privateStatesToFetch?: string[];
     /**
      * Fetch all claimed users for the claim. If true, you will be able to find all { [bitbadgesAddress]: [...zeroIndexedClaimNumbers] }
@@ -448,9 +448,10 @@ export class GetClaimsSuccessResponse<T extends NumberType>
 export interface iGetClaimPayload {
   /** Fetch private parameters for the claim. Only applicable if you are the creator / manager of the claim. */
   fetchPrivateParams?: boolean;
-  /** Fetch all claimed users for the claim. */
+  /** Fetch all claimed users for the claim.  If true, you will be able to find all { [bitbadgesAddress]: [...zeroIndexedClaimNumbers] }
+   * on the numUses plugin's publicState. */
   fetchAllClaimedUsers?: boolean;
-  /** The private state instance IDs to fetch. */
+  /** The private state instance IDs to fetch. By default, we do not fetch any private states. */
   privateStatesToFetch?: string[];
 }
 
@@ -527,7 +528,7 @@ export class SearchClaimsSuccessResponse<T extends NumberType> extends GetClaims
  * @category API Requests / Responses
  */
 export interface iCompleteClaimPayload {
-  /** Needs to be provided so we check that no plugins or claims have been updated since the claim was fetched. */
+  /** Needs to be provided so we check that no plugins or claims have been updated since the claim was fetched. To override, set to -1. */
   _expectedVersion: number;
 
   /** If provided, we will only complete the claim for the specific plugins w/ the provided instance IDs. Must be compatible with the satisfaction logic. */
@@ -726,7 +727,7 @@ export class GetClaimAttemptsSuccessResponse<T extends NumberType>
  * @category API Requests / Responses
  */
 export interface iSimulateClaimPayload {
-  /** Will fail if the claim version is not the expected version.*/
+  /** Will fail if the claim version is not the expected version. To override, set to -1. */
   _expectedVersion: number;
 
   /** If provided, we will only simulate the claim for the specific plugins w/ the provided instance IDs. */

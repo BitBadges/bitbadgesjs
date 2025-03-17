@@ -105,7 +105,7 @@ export interface iBitBadgesCollection<T extends NumberType> extends iCollectionD
   activity: iTransferActivityDoc<T>[];
   /** The fetched owners of this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views. */
   owners: iBalanceDocWithDetails<T>[];
-  /** The fetched merkle challenges for this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views. */
+  /** The fetched merkle challenge trackers for this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views. */
   merkleChallenges: iMerkleChallengeDoc<T>[];
   /** The fetched approval trackers for this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views. */
   approvalTrackers: iApprovalTrackerDoc<T>[];
@@ -1225,8 +1225,6 @@ type CollectionViewData<T extends NumberType> = {
 };
 
 /**
-  Used by the frontend for dynamically fetching data from the DB as needed
-
   @category Indexer
 */
 export interface CollectionMap<T extends NumberType> {
@@ -1532,38 +1530,6 @@ export class GetCollectionsSuccessResponse<T extends NumberType>
     return new GetCollectionsSuccessResponse(
       deepCopyPrimitives({
         collections: this.collections.map((collection) => (collection ? collection.convert(convertFunction) : undefined))
-      })
-    );
-  }
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface GetCollectionByIdBody extends GetAdditionalCollectionDetailsPayload, GetMetadataForCollectionPayload {}
-
-/**
- * @category API Requests / Responses
- */
-export interface iGetCollectionByIdSuccessResponse<T extends NumberType> {
-  collection: iBitBadgesCollection<T>;
-}
-
-export class GetCollectionByIdSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetCollectionByIdSuccessResponse<T>>
-  implements iGetCollectionByIdSuccessResponse<T>
-{
-  collection: BitBadgesCollection<T>;
-
-  constructor(data: iGetCollectionByIdSuccessResponse<T>) {
-    super();
-    this.collection = new BitBadgesCollection(data.collection);
-  }
-
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetCollectionByIdSuccessResponse<U> {
-    return new GetCollectionByIdSuccessResponse(
-      deepCopyPrimitives({
-        collection: this.collection.convert(convertFunction)
       })
     );
   }

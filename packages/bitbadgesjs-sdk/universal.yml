@@ -3156,7 +3156,7 @@ schemas:
           type: object
         title: GetAddressListsRouteRequestBody.listsToFetch
         description: >-
-          The lists and accompanyin details to fetch. Supports on-chain,
+          The lists and accompanying details to fetch. Supports on-chain,
           off-chain, and reserved lists.
         type: array
     required:
