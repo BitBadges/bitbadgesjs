@@ -36,8 +36,8 @@ function expandParameter(param: Parameter, document: any): Parameter[] {
     }
 
     const referencedSchema = resolveReference(param.schema.$ref, document);
-    if (!referencedSchema.properties) {
-        return [param];
+    if (!referencedSchema.properties || Object.keys(referencedSchema.properties).length === 0) {
+        return [];
     }
 
     return Object.entries(referencedSchema.properties).map(([propName, propSchema]) => ({
@@ -67,7 +67,10 @@ function processYaml() {
 
                     for (const param of method.parameters) {
                         if (param.explode && param.in === 'query') {
-                            newParameters.push(...expandParameter(param, document));
+                            const expanded = expandParameter(param, document);
+                            if (expanded.length > 0) {
+                                newParameters.push(...expanded);
+                            }
                         } else {
                             newParameters.push(param);
                         }

@@ -16,6 +16,3 @@ tsx ./scripts/spread_explodes.ts ./openapitypes/combined.yaml
 
 rm ./openapitypes/combined.yaml
 rm ./src/combined.ts
-
-# Print the entire file
-cat ./openapitypes/combined_processed.yaml
