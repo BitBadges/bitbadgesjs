@@ -228,6 +228,8 @@ tags:
     description: Endpoints for badge and collection operations
   - name: Claims
     description: Endpoints for managing claims
+  - name: Sign In with BitBadges
+    description: Authentication and authorization endpoints for Sign In with BitBadges
   - name: Address Lists
     description: Endpoints for managing address lists
   - name: Transactions
@@ -240,8 +242,6 @@ tags:
     description: Endpoints for managing dynamic data stores
   - name: Utility Listings
     description: Endpoints for managing utility listings
-  - name: Sign In with BitBadges
-    description: Authentication and authorization endpoints for Sign In with BitBadges
   - name: Miscellaneous
 paths:
   /user:
@@ -882,6 +882,151 @@ paths:
       security:
         - apiKey: []
       x-internal: false
+  /developerApps:
+    post:
+      operationId: createDeveloperApp
+      summary: Create OAuth App
+      tags:
+        - Sign In with BitBadges
+      description: |-
+        Creates a new OAuth app.
+
+        ```tsx
+        await BitBadgesApi.createDeveloperApp(...);
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateDeveloperAppPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateDeveloperAppSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#createDeveloperApp)**
+
+        Scopes:
+          - `manageDeveloperApps` - Required to create a new app
+
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iCreateDeveloperAppSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+        - in: query
+          explode: true
+          name: payload
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
+          required: false
+          schema:
+            $ref: '#/components/schemas/iCreateDeveloperAppPayload'
+      security:
+        - apiKey: []
+      x-internal: false
+    put:
+      operationId: updateDeveloperApp
+      summary: Update OAuth App
+      tags:
+        - Sign In with BitBadges
+      description: |-
+        Updates an existing OAuth app.
+
+        ```tsx
+        await BitBadgesApi.updateDeveloperApp(...);
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateDeveloperAppPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateDeveloperAppSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#updateDeveloperApp)**
+
+        Scopes:
+          - `manageDeveloperApps` - Required to update an app
+
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iUpdateDeveloperAppSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      parameters:
+        - name: clientId
+          in: path
+          description: Client ID
+          required: true
+          schema:
+            type: string
+        - in: query
+          explode: true
+          name: payload
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
+          required: false
+          schema:
+            $ref: '#/components/schemas/iUpdateDeveloperAppPayload'
+      security:
+        - apiKey: []
+      x-internal: false
+    delete:
+      operationId: deleteDeveloperApp
+      summary: Delete OAuth App
+      tags:
+        - Sign In with BitBadges
+      description: |-
+        Deletes an existing OAuth app.
+
+        ```tsx
+        await BitBadgesApi.deleteDeveloperApp(...);
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteDeveloperAppPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteDeveloperAppSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#deleteDeveloperApp)**
+
+        Scopes:
+          - `manageDeveloperApps` - Required to delete an app
+
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iDeleteDeveloperAppSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      parameters:
+        - name: clientId
+          in: path
+          description: Client ID
+          required: true
+          schema:
+            type: string
+        - in: query
+          explode: true
+          name: payload
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
+          required: false
+          schema:
+            $ref: '#/components/schemas/iDeleteDeveloperAppPayload'
+      security:
+        - apiKey: []
+      x-internal: false
   /plugin/{pluginId}:
     get:
       operationId: getPlugin
@@ -1023,6 +1168,149 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/iGetDynamicDataStorePayload'
+      security:
+        - apiKey: []
+      x-internal: false
+  /dynamicStores:
+    post:
+      operationId: createDynamicDataStore
+      summary: Create Dynamic Data Store
+      tags:
+        - Dynamic Stores
+      description: |-
+        Creates a new dynamic data store.
+
+        ```tsx
+        await BitBadgesApi.createDynamicDataStore(...);
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateDynamicDataStorePayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateDynamicDataStoreSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#createDynamicDataStore)**
+
+        Scopes:
+          - `manageDynamicDataStores` - Required and must be owner.
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iCreateDynamicDataStoreSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+        - in: query
+          explode: true
+          name: payload
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
+          required: false
+          schema:
+            $ref: '#/components/schemas/iCreateDynamicDataStorePayload'
+      security:
+        - apiKey: []
+      x-internal: false
+    put:
+      operationId: updateDynamicDataStore
+      summary: Update Dynamic Data Store
+      tags:
+        - Dynamic Stores
+      description: |-
+        Updates a dynamic data store.
+
+        ```tsx
+        await BitBadgesApi.updateDynamicDataStore(...);
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateDynamicDataStorePayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateDynamicDataStoreSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#updateDynamicDataStore)**
+
+        Scopes:
+          - `manageDynamicDataStores` - Required and must be owner.
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iUpdateDynamicDataStoreSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      parameters:
+        - name: dynamicStoreId
+          in: path
+          description: Dynamic data store ID
+          required: true
+          schema:
+            type: string
+        - in: query
+          explode: true
+          name: payload
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
+          required: false
+          schema:
+            $ref: '#/components/schemas/iUpdateDynamicDataStorePayload'
+      security:
+        - apiKey: []
+      x-internal: false
+    delete:
+      operationId: deleteDynamicDataStore
+      summary: Delete Dynamic Data Store
+      tags:
+        - Dynamic Stores
+      description: |-
+        Deletes a dynamic data store.
+
+        ```tsx
+        await BitBadgesApi.deleteDynamicDataStore(...);
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteDynamicDataStorePayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteDynamicDataStoreSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#deleteDynamicDataStore)**
+
+        Scopes:
+          - `manageDynamicDataStores` - Required and must be owner.
+
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iDeleteDynamicDataStoreSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      parameters:
+        - name: dynamicStoreId
+          in: path
+          description: Dynamic data store ID
+          required: true
+          schema:
+            type: string
+        - in: query
+          explode: true
+          name: payload
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
+          required: false
+          schema:
+            $ref: '#/components/schemas/iDeleteDynamicDataStorePayload'
       security:
         - apiKey: []
       x-internal: false
