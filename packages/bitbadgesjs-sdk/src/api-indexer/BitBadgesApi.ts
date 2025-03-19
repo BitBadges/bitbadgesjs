@@ -274,7 +274,7 @@ import {
   GetCollectionOwnersSuccessResponse,
   GetCollectionSuccessResponse,
   GetCollectionTransferActivitySuccessResponse,
-  GetListsActivityForUserSuccessResponse,
+  GetListActivityForUserSuccessResponse,
   GetPointsActivityForUserSuccessResponse,
   GetSiwbbRequestsForUserSuccessResponse,
   GetTransferActivityForUserSuccessResponse,
@@ -306,8 +306,8 @@ import {
   iGetCollectionSuccessResponse,
   iGetCollectionTransferActivityPayload,
   iGetCollectionTransferActivitySuccessResponse,
-  iGetListsActivityForUserPayload,
-  iGetListsActivityForUserSuccessResponse,
+  iGetListActivityForUserPayload,
+  iGetListActivityForUserSuccessResponse,
   iGetPointsActivityForUserPayload,
   iGetPointsActivityForUserSuccessResponse,
   iGetSiwbbRequestsForUserPayload,
@@ -1973,31 +1973,31 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @remarks
    * - **API Route**: `GET /api/v0/account/:address/activity/lists`
-   * - **SDK Function Call**: `await BitBadgesApi.getListsActivityForUser(address, { ... });`
+   * - **SDK Function Call**: `await BitBadgesApi.getListActivityForUser(address, { ... });`
    *
    * @example
    * ```typescript
-   * const res = await BitBadgesApi.getListsActivityForUser("bb1...", { ... });
+   * const res = await BitBadgesApi.getListActivityForUser("bb1...", { ... });
    * console.log(res);
    * ```
    * */
-  public async getListsActivityForUser(
+  public async getListActivityForUser(
     address: NativeAddress,
-    payload: iGetListsActivityForUserPayload
-  ): Promise<GetListsActivityForUserSuccessResponse<T>> {
+    payload: iGetListActivityForUserPayload
+  ): Promise<GetListActivityForUserSuccessResponse<T>> {
     try {
-      const validateRes: typia.IValidation<iGetListsActivityForUserPayload> = typia.validate<iGetListsActivityForUserPayload>(payload);
+      const validateRes: typia.IValidation<iGetListActivityForUserPayload> = typia.validate<iGetListActivityForUserPayload>(payload);
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      const response = await this.axios.get<iGetListsActivityForUserSuccessResponse<string>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetListsActivityForUserRoute(address)}`,
+      const response = await this.axios.get<iGetListActivityForUserSuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetListActivityForUserRoute(address)}`,
         {
           params: payload
         }
       );
-      return new GetListsActivityForUserSuccessResponse(response.data).convert(this.ConvertFunction);
+      return new GetListActivityForUserSuccessResponse(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);

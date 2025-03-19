@@ -2024,7 +2024,7 @@ export class SIWBBRequestDoc<T extends NumberType> extends BaseNumberTypeClass<S
   description?: string;
   image?: string;
   bitbadgesAddress: BitBadgesAddress;
-  attestationsPresentations: AttestationsProof<T>[];
+  attestations: AttestationsProof<T>[];
   createdAt: UNIXMilliTimestamp<T>;
   scopes: OAuthScopeDetails[];
   expiresAt: UNIXMilliTimestamp<T>;
@@ -2045,7 +2045,7 @@ export class SIWBBRequestDoc<T extends NumberType> extends BaseNumberTypeClass<S
     this.image = data.image;
     this._docId = data._docId;
     this._id = data._id;
-    this.attestationsPresentations = data.attestationsPresentations.map((attestationsProof) => new AttestationsProof(attestationsProof));
+    this.attestations = data.attestations.map((attestationsProof) => new AttestationsProof(attestationsProof));
     this.clientId = data.clientId;
     this.scopes = data.scopes;
     this.expiresAt = data.expiresAt;

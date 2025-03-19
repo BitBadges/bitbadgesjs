@@ -4619,7 +4619,7 @@ paths:
 
   /account/{address}/activity/lists:
     get:
-      operationId: getListsActivityForUser
+      operationId: getListActivityForUser
       summary: Get Lists Activity For User
       tags:
         - Accounts
@@ -4627,20 +4627,20 @@ paths:
         Gets lists activity for a specific user.
 
         ```tsx
-        await BitBadgesApi.getListsActivityForUser({ address: "bb1..." });
+        await BitBadgesApi.getListActivityForUser({ address: "bb1..." });
         ```
 
         SDK Links:
-        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetListsActivityForUserPayload)**
-        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetListsActivityForUserSuccessResponse)**
-        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getlistsactivityforuser)**
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetListActivityForUserPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetListActivityForUserSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getlistActivityforuser)**
       responses:
         '200':
           description: Success response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/iGetListsActivityForUserSuccessResponse'
+                $ref: '#/components/schemas/iGetListActivityForUserSuccessResponse'
         '400':
           $ref: '#/components/responses/BadRequestResponse'
         '500':
@@ -4664,7 +4664,7 @@ paths:
           description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
           required: false
           schema:
-            $ref: '#/components/schemas/iGetListsActivityForUserPayload'
+            $ref: '#/components/schemas/iGetListActivityForUserPayload'
       security:
         - apiKey: []
       x-internal: false

@@ -148,7 +148,7 @@ export class BitBadgesApiRoutes {
   static GetSiwbbRequestsForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/requests/siwbb`;
   static GetTransferActivityForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/activity/badges`;
   static GetBadgesByTypeForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/badges`;
-  static GetListsActivityForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/activity/lists`;
+  static GetListActivityForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/activity/lists`;
   static GetAttestationsByTypeForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/attestations`;
   static GetClaimActivityByTypeForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/activity/claims`;
   static GetPointsActivityForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/activity/points`;

@@ -106,7 +106,7 @@ export interface iBitBadgesCollection<T extends NumberType> extends iCollectionD
   /** The fetched owners of this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views. */
   owners: iBalanceDocWithDetails<T>[];
   /** The fetched merkle challenge trackers for this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views. */
-  merkleChallenges: iMerkleChallengeTrackerDoc<T>[];
+  challengeTrackers: iMerkleChallengeTrackerDoc<T>[];
   /** The fetched approval trackers for this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views. */
   approvalTrackers: iApprovalTrackerDoc<T>[];
 
@@ -118,7 +118,7 @@ export interface iBitBadgesCollection<T extends NumberType> extends iCollectionD
   /** The badge IDs in this collection that have been reported. */
   reported?: iCollectionNSFW<T>;
 
-  /** The views for this collection and their pagination Doc. Views will only include the doc _ids. Use the pagination to fetch more. To be used in conjunction with activity, announcements, reviews, owners, merkleChallenges, and approvalTrackers. For example, if you want to fetch the activity for a view, you would use the view's pagination to fetch the doc _ids, then use the corresponding activity array to find the matching docs. */
+  /** The views for this collection and their pagination Doc. Views will only include the doc _ids. Use the pagination to fetch more. For example, if you want to fetch the activity for a view, you would use the view's pagination to fetch the doc _ids, then use the corresponding activity array to find the matching docs. */
   views: {
     [viewId: string]:
       | {
@@ -160,7 +160,7 @@ export class BitBadgesCollection<T extends NumberType>
 
   activity: TransferActivityDoc<T>[];
   owners: BalanceDocWithDetails<T>[];
-  merkleChallenges: MerkleChallengeTrackerDoc<T>[];
+  challengeTrackers: MerkleChallengeTrackerDoc<T>[];
   approvalTrackers: ApprovalTrackerDoc<T>[];
 
   listings: UtilityListingDoc<T>[];
@@ -191,7 +191,7 @@ export class BitBadgesCollection<T extends NumberType>
     this.badgeMetadataTimeline = data.badgeMetadataTimeline.map((badgeMetadata) => new BadgeMetadataTimelineWithDetails(badgeMetadata));
     this.activity = data.activity.map((activityItem) => new TransferActivityDoc(activityItem));
     this.owners = data.owners.map((balance) => new BalanceDocWithDetails(balance));
-    this.merkleChallenges = data.merkleChallenges.map((merkleChallenge) => new MerkleChallengeTrackerDoc(merkleChallenge));
+    this.challengeTrackers = data.challengeTrackers.map((merkleChallenge) => new MerkleChallengeTrackerDoc(merkleChallenge));
     this.approvalTrackers = data.approvalTrackers.map((approvalTracker) => new ApprovalTrackerDoc(approvalTracker));
     this.listings = data.listings.map((listing) => new UtilityListingDoc(listing));
     this.nsfw = data.nsfw ? { ...data.nsfw, badgeIds: UintRangeArray.From(data.nsfw.badgeIds) } : undefined;
@@ -794,7 +794,7 @@ export class BitBadgesCollection<T extends NumberType>
 
     const shouldFetchMerklechallengeTrackerIds =
       (options.challengeTrackersToFetch ?? []).find((x) => {
-        const match = cachedCollection.merkleChallenges.find(
+        const match = cachedCollection.challengeTrackers.find(
           (y) =>
             y.challengeTrackerId === x.challengeTrackerId &&
             x.approverAddress === y.approverAddress &&
@@ -833,7 +833,7 @@ export class BitBadgesCollection<T extends NumberType>
     const prunedMetadataToFetch: MetadataFetchOptions = pruneMetadataToFetch(this.convert(BigIntify), options.metadataToFetch);
     const prunedViewsToFetch = (options.viewsToFetch || []).filter((x) => this.viewHasMore(x.viewId));
     const prunedChallengeTrackersToFetch = (options.challengeTrackersToFetch || []).filter((x) => {
-      return !this.merkleChallenges.find(
+      return !this.challengeTrackers.find(
         (y) =>
           y.challengeTrackerId === x.challengeTrackerId &&
           x.approverAddress === y.approverAddress &&
@@ -979,7 +979,7 @@ export class BitBadgesCollection<T extends NumberType>
       case 'amountTrackers':
         return this.getApprovalTrackersView(viewId) as CollectionViewData<T>[KeyType];
       case 'challengeTrackers':
-        return this.getMerkleChallengesView(viewId) as CollectionViewData<T>[KeyType];
+        return this.getChallengeTrackersView(viewId) as CollectionViewData<T>[KeyType];
       case 'listings':
         return this.getListingsView(viewId) as CollectionViewData<T>[KeyType];
       default:
@@ -1008,9 +1008,9 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Gets the documents for a specific view.
    */
-  getMerkleChallengesView(viewId: string) {
+  getChallengeTrackersView(viewId: string) {
     return (this.views[viewId]?.ids.map((x) => {
-      return this.merkleChallenges.find((y) => y._docId === x);
+      return this.challengeTrackers.find((y) => y._docId === x);
     }) ?? []) as MerkleChallengeTrackerDoc<T>[];
   }
 
@@ -1430,14 +1430,14 @@ function updateCollectionWithResponse<T extends NumberType>(
     }
   }
 
-  const merkleChallenges = cachedCollection.merkleChallenges || [];
-  for (const newMerkleChallenge of newCollection.merkleChallenges || []) {
-    //If we already have the merkleChallenge, replace it (we want newer data)
-    const existingMerkleChallenge = merkleChallenges.findIndex((x) => x._docId === newMerkleChallenge._docId);
-    if (existingMerkleChallenge !== -1) {
-      merkleChallenges[existingMerkleChallenge] = newMerkleChallenge;
+  const challengeTrackers = cachedCollection.challengeTrackers || [];
+  for (const newChallengeTracker of newCollection.challengeTrackers || []) {
+    //If we already have the challengeTracker, replace it (we want newer data)
+    const existingChallengeTracker = challengeTrackers.findIndex((x) => x._docId === newChallengeTracker._docId);
+    if (existingChallengeTracker !== -1) {
+      challengeTrackers[existingChallengeTracker] = newChallengeTracker;
     } else {
-      merkleChallenges.push(newMerkleChallenge);
+      challengeTrackers.push(newChallengeTracker);
     }
   }
 
@@ -1486,7 +1486,7 @@ function updateCollectionWithResponse<T extends NumberType>(
     badgeMetadataTimeline: newBadgeMetadataTimeline,
     activity,
     owners,
-    merkleChallenges,
+    challengeTrackers,
     approvalTrackers,
     listings,
     views: newViews

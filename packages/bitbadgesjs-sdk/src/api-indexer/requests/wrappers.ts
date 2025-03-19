@@ -404,7 +404,7 @@ export class GetTransferActivityForUserSuccessResponse<T extends NumberType>
  * @category API Requests / Responses
  */
 export interface iGetListActivityForUserSuccessResponse<T extends NumberType> extends iBaseSuccessResponse {
-  listsActivity: Array<iListActivityDoc<T>>;
+  listActivity: Array<iListActivityDoc<T>>;
 }
 
 /**
@@ -414,12 +414,12 @@ export class GetListActivityForUserSuccessResponse<T extends NumberType>
   extends BaseNumberTypeClass<GetListActivityForUserSuccessResponse<T>>
   implements iGetListActivityForUserSuccessResponse<T>
 {
-  listsActivity: ListActivityDoc<T>[];
+  listActivity: ListActivityDoc<T>[];
   pagination: PaginationInfo;
 
   constructor(data: iGetListActivityForUserSuccessResponse<T>) {
     super();
-    this.listsActivity = data.listsActivity.map((activity) => new ListActivityDoc(activity));
+    this.listActivity = data.listActivity.map((activity) => new ListActivityDoc(activity));
     this.pagination = data.pagination;
   }
 
@@ -626,28 +626,28 @@ export class GetSiwbbRequestsForUserSuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export interface iGetListsActivityForUserPayload extends iBaseQueryParams {}
+export interface iGetListActivityForUserPayload extends iBaseQueryParams {}
 
 /**
  * @category API Requests / Responses
  */
-export interface iGetListsActivityForUserSuccessResponse<T extends NumberType> extends iBaseSuccessResponse {
-  listsActivity: Array<iListActivityDoc<T>>;
+export interface iGetListActivityForUserSuccessResponse<T extends NumberType> extends iBaseSuccessResponse {
+  listActivity: Array<iListActivityDoc<T>>;
 }
 
 /**
  * @category API Requests / Responses
  */
-export class GetListsActivityForUserSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetListsActivityForUserSuccessResponse<T>>
-  implements iGetListsActivityForUserSuccessResponse<T>
+export class GetListActivityForUserSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetListActivityForUserSuccessResponse<T>>
+  implements iGetListActivityForUserSuccessResponse<T>
 {
-  listsActivity: ListActivityDoc<T>[];
+  listActivity: ListActivityDoc<T>[];
   pagination: PaginationInfo;
 
-  constructor(data: iGetListsActivityForUserSuccessResponse<T>) {
+  constructor(data: iGetListActivityForUserSuccessResponse<T>) {
     super();
-    this.listsActivity = data.listsActivity.map((activity) => new ListActivityDoc(activity));
+    this.listActivity = data.listActivity.map((activity) => new ListActivityDoc(activity));
     this.pagination = data.pagination;
   }
 
@@ -655,8 +655,8 @@ export class GetListsActivityForUserSuccessResponse<T extends NumberType>
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetListsActivityForUserSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetListsActivityForUserSuccessResponse<U>;
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetListActivityForUserSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetListActivityForUserSuccessResponse<U>;
   }
 }
 

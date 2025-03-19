@@ -3033,11 +3033,11 @@ schemas:
         $ref: '#/components/schemas/iMetadata'
         title: iBitBadgesAddressList.metadata
         description: The metadata of the address list.
-      listsActivity:
+      listActivity:
         items:
           $ref: '#/components/schemas/iListActivityDoc'
-          title: iBitBadgesAddressList.listsActivity.[]
-        title: iBitBadgesAddressList.listsActivity
+          title: iBitBadgesAddressList.listActivity.[]
+        title: iBitBadgesAddressList.listActivity
         description: The activity of the address list.
         type: array
       views:
@@ -3095,7 +3095,7 @@ schemas:
       - updateHistory
       - createdBlock
       - lastUpdated
-      - listsActivity
+      - listActivity
       - views
       - claims
     additionalProperties: false
@@ -3546,11 +3546,11 @@ schemas:
           A list of transfer activity items for the account. Paginated and
           fetched as needed. To be used in conjunction with views.
         type: array
-      listsActivity:
+      listActivity:
         items:
           $ref: '#/components/schemas/iListActivityDoc'
-          title: iBitBadgesUserInfo.listsActivity.[]
-        title: iBitBadgesUserInfo.listsActivity
+          title: iBitBadgesUserInfo.listActivity.[]
+        title: iBitBadgesUserInfo.listActivity
         description: >-
           A list of list activity items for the account. Paginated and fetched
           as needed. To be used in conjunction with views.
@@ -3698,7 +3698,7 @@ schemas:
       - chain
       - collected
       - activity
-      - listsActivity
+      - listActivity
       - reviews
       - merkleChallenges
       - approvalTrackers
@@ -3728,7 +3728,7 @@ schemas:
       - blacklists
       - createdBadges
       - managingBadges
-      - listsActivity
+      - listActivity
       - createdSecrets
       - receivedSecrets
     title: AccountViewKey

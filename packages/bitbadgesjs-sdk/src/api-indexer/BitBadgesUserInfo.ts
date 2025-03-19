@@ -51,13 +51,13 @@ export interface iBitBadgesUserInfo<T extends NumberType> extends iProfileDoc<T>
   /** A list of transfer activity items for the account. Paginated and fetched as needed. To be used in conjunction with views. */
   activity: iTransferActivityDoc<T>[];
   /** A list of list activity items for the account. Paginated and fetched as needed. To be used in conjunction with views. */
-  listsActivity: iListActivityDoc<T>[];
+  listActivity: iListActivityDoc<T>[];
   /** A list of claim activity items for the account. Paginated and fetched as needed. To be used in conjunction with views. */
   claimActivity?: iClaimActivityDoc<T>[];
   /** A list of points activity items for the account. Paginated and fetched as needed. To be used in conjunction with views. */
   pointsActivity?: iPointsActivityDoc<T>[];
   /** A list of merkle challenge activity items for the account. Paginated and fetched as needed. To be used in conjunction with views. */
-  merkleChallenges: iMerkleChallengeTrackerDoc<T>[];
+  challengeTrackers: iMerkleChallengeTrackerDoc<T>[];
   /** A list of approvals tracker activity items for the account. Paginated and fetched as needed. To be used in conjunction with views. */
   approvalTrackers: iApprovalTrackerDoc<T>[];
   /** A list of address lists for the account. Paginated and fetched as needed. To be used in conjunction with views. */
@@ -77,7 +77,7 @@ export interface iBitBadgesUserInfo<T extends NumberType> extends iProfileDoc<T>
   /** Indicates whether the account has been reported. */
   reported?: { reason: string };
 
-  /** The views for this collection and their pagination Doc. Views will only include the doc _ids. Use the pagination to fetch more. To be used in conjunction with activity, announcements, reviews, owners, merkleChallenges, and approvalTrackers. For example, if you want to fetch the activity for a view, you would use the view's pagination to fetch the doc _ids, then use the corresponding activity array to find the matching docs. */
+  /** The views for this collection and their pagination Doc. Views will only include the doc _ids. Use the pagination to fetch more.  For example, if you want to fetch the activity for a view, you would use the view's pagination to fetch the doc _ids, then use the corresponding activity array to find the matching docs. */
   views: {
     [viewId: string]:
       | {
@@ -124,10 +124,10 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   airdropped?: boolean;
   collected: BalanceDocWithDetails<T>[];
   activity: TransferActivityDoc<T>[];
-  listsActivity: ListActivityDoc<T>[];
+  listActivity: ListActivityDoc<T>[];
   claimActivity?: ClaimActivityDoc<T>[];
   pointsActivity?: PointsActivityDoc<T>[];
-  merkleChallenges: MerkleChallengeTrackerDoc<T>[];
+  challengeTrackers: MerkleChallengeTrackerDoc<T>[];
   approvalTrackers: ApprovalTrackerDoc<T>[];
   addressLists: BitBadgesAddressList<T>[];
   claimAlerts: ClaimAlertDoc<T>[];
@@ -168,10 +168,10 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     this.airdropped = data.airdropped;
     this.collected = data.collected.map((balance) => new BalanceDocWithDetails(balance));
     this.activity = data.activity.map((activity) => new TransferActivityDoc(activity));
-    this.listsActivity = data.listsActivity.map((activity) => new ListActivityDoc(activity));
+    this.listActivity = data.listActivity.map((activity) => new ListActivityDoc(activity));
     this.claimActivity = data.claimActivity?.map((activity) => new ClaimActivityDoc(activity));
     this.pointsActivity = data.pointsActivity?.map((activity) => new PointsActivityDoc(activity));
-    this.merkleChallenges = data.merkleChallenges.map((challenge) => new MerkleChallengeTrackerDoc(challenge));
+    this.challengeTrackers = data.challengeTrackers.map((challenge) => new MerkleChallengeTrackerDoc(challenge));
     this.approvalTrackers = data.approvalTrackers.map((tracker) => new ApprovalTrackerDoc(tracker));
     this.addressLists = data.addressLists.map((list) => new BitBadgesAddressList(list));
     this.claimAlerts = data.claimAlerts.map((alert) => new ClaimAlertDoc(alert));
@@ -474,8 +474,8 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
         return this.getAccountBalancesView(viewId) as AccountViewData<T>[KeyType];
       case 'managingBadges':
         return this.getAccountBalancesView(viewId) as AccountViewData<T>[KeyType];
-      case 'listsActivity':
-        return this.getAccountListsActivityView(viewId) as AccountViewData<T>[KeyType];
+      case 'listActivity':
+        return this.getAccountListActivityView(viewId) as AccountViewData<T>[KeyType];
       case 'createdAttestations':
         return this.getAttestationsView(viewId) as AccountViewData<T>[KeyType];
       case 'receivedAttestations':
@@ -523,9 +523,9 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     }) ?? []) as TransferActivityDoc<T>[];
   }
 
-  getAccountListsActivityView(viewId: string) {
+  getAccountListActivityView(viewId: string) {
     return (this.views[viewId]?.ids.map((x) => {
-      return this.listsActivity.find((y) => y._docId === x);
+      return this.listActivity.find((y) => y._docId === x);
     }) ?? []) as ListActivityDoc<T>[];
   }
 
@@ -574,11 +574,11 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
       sequence: 0n,
       collected: [],
       activity: [],
-      listsActivity: [],
+      listActivity: [],
       attestations: [],
       addressLists: [],
       claimAlerts: [],
-      merkleChallenges: [],
+      challengeTrackers: [],
       approvalTrackers: [],
       siwbbRequests: [],
       seenActivity: 0n,
@@ -613,10 +613,10 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
       activity: [],
       attestations: [],
       claimAlerts: [],
-      merkleChallenges: [],
+      challengeTrackers: [],
       approvalTrackers: [],
       addressLists: [],
-      listsActivity: [],
+      listActivity: [],
       siwbbRequests: [],
       seenActivity: 0n,
       createdAt: 0n,
@@ -639,7 +639,7 @@ type AccountViewData<T extends NumberType> = {
   blacklists: BitBadgesAddressList<T>[];
   createdBadges: BalanceDocWithDetails<T>[];
   managingBadges: BalanceDocWithDetails<T>[];
-  listsActivity: ListActivityDoc<T>[];
+  listActivity: ListActivityDoc<T>[];
   createdAttestations: AttestationDoc<T>[];
   receivedAttestations: AttestationDoc<T>[];
   attestations: AttestationDoc<T>[];
@@ -706,7 +706,7 @@ function updateAccountWithResponse<T extends NumberType>(
     addressLists: [...(cachedAccount?.addressLists || []), ...(account.addressLists || [])],
     claimAlerts: [...(cachedAccount?.claimAlerts || []), ...(account.claimAlerts || [])],
     siwbbRequests: [...(cachedAccount?.siwbbRequests || []), ...(account.siwbbRequests || [])],
-    listsActivity: [...(cachedAccount?.listsActivity || []), ...(account.listsActivity || [])],
+    listActivity: [...(cachedAccount?.listActivity || []), ...(account.listActivity || [])],
     pointsActivity: [...(cachedAccount?.pointsActivity || []), ...(account.pointsActivity || [])],
     claimActivity: [...(cachedAccount?.claimActivity || []), ...(account.claimActivity || [])],
     attestations: [...(cachedAccount?.attestations || []), ...(account.attestations || [])],
@@ -734,7 +734,7 @@ function updateAccountWithResponse<T extends NumberType>(
   newAccount.addressLists = newAccount.addressLists.filter((x, index, self) => index === self.findIndex((t) => t.listId === x.listId));
   newAccount.claimAlerts = newAccount.claimAlerts.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
   newAccount.siwbbRequests = newAccount.siwbbRequests.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
-  newAccount.listsActivity = newAccount.listsActivity.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
+  newAccount.listActivity = newAccount.listActivity.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
   newAccount.attestations = newAccount.attestations.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
   newAccount.claimActivity = newAccount.claimActivity?.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
   newAccount.pointsActivity = newAccount.pointsActivity?.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
@@ -743,7 +743,7 @@ function updateAccountWithResponse<T extends NumberType>(
   newAccount.activity = newAccount.activity.sort((a, b) => (BigInt(b.timestamp) - BigInt(a.timestamp) > 0 ? -1 : 1));
   newAccount.claimAlerts = newAccount.claimAlerts.sort((a, b) => (BigInt(b.timestamp) - BigInt(a.timestamp) > 0 ? -1 : 1));
   newAccount.siwbbRequests = newAccount.siwbbRequests.sort((a, b) => (BigInt(b.createdAt) - BigInt(a.createdAt) > 0 ? -1 : 1));
-  newAccount.listsActivity = newAccount.listsActivity.sort((a, b) => (BigInt(b.timestamp) - BigInt(a.timestamp) > 0 ? -1 : 1));
+  newAccount.listActivity = newAccount.listActivity.sort((a, b) => (BigInt(b.timestamp) - BigInt(a.timestamp) > 0 ? -1 : 1));
   newAccount.claimActivity = newAccount.claimActivity?.sort((a, b) => (BigInt(b.timestamp) - BigInt(a.timestamp) > 0 ? -1 : 1));
   newAccount.pointsActivity = newAccount.pointsActivity?.sort((a, b) => (BigInt(b.timestamp) - BigInt(a.timestamp) > 0 ? -1 : 1));
   return newAccount;
@@ -766,7 +766,7 @@ export type AccountViewKey =
   | 'blacklists'
   | 'createdBadges'
   | 'managingBadges'
-  | 'listsActivity'
+  | 'listActivity'
   | 'createdAttestations'
   | 'receivedAttestations'
   | 'attestations'

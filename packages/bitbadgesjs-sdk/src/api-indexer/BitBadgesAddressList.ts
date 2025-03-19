@@ -480,16 +480,9 @@ export type iAddressListCreateObject<T extends NumberType> = iAddressList & {
   updateAddresses?: boolean;
 
   /** The claims of the address list. Use resetState on updates for resetting individual plugin state (if applicable). */
-  claims: {
-    claimId: string;
+  claims: (Pick<iClaimDetails<T>, 'claimId' | 'rewards' | 'estimatedCost' | 'showInSearchResults' | 'categories' | 'estimatedTime' | 'approach'> & {
     plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
-    rewards?: ClaimReward<T>[];
-    estimatedCost?: string;
-    showInSearchResults?: boolean;
-    categories?: string[];
-    estimatedTime?: string;
-    approach?: string;
-  }[];
+  })[];
 };
 
 /**

@@ -40,7 +40,7 @@ export interface iSiwbbChallenge<T extends NumberType> {
   /**
    * Derived data integrity proofs for any attestations requested.
    */
-  attestationsPresentations?: iAttestationsProof<T>[];
+  attestations?: iAttestationsProof<T>[];
 }
 
 /**
@@ -55,7 +55,7 @@ export class SiwbbChallenge<T extends NumberType> extends BaseNumberTypeClass<Si
     success: boolean;
     errorMessage?: string;
   };
-  attestationsPresentations?: AttestationsProof<T>[];
+  attestations?: AttestationsProof<T>[];
 
   constructor(data: iSiwbbChallenge<T>) {
     super();
@@ -63,7 +63,7 @@ export class SiwbbChallenge<T extends NumberType> extends BaseNumberTypeClass<Si
     this.bitbadgesAddress = data.bitbadgesAddress;
     this.chain = data.chain;
     this.verificationResponse = data.verificationResponse;
-    this.attestationsPresentations = data.attestationsPresentations?.map((proof) => new AttestationsProof(proof));
+    this.attestations = data.attestations?.map((proof) => new AttestationsProof(proof));
     if (data.ownershipRequirements) {
       if ((data.ownershipRequirements as AndGroup<T>)['$and']) {
         this.ownershipRequirements = new SiwbbAndGroup(data.ownershipRequirements as AndGroup<T>);
@@ -89,7 +89,7 @@ export interface VerifySIWBBOptions {
   /**
    * Skip asset verification. This may be useful for simulations or testing.
    *
-   * @deprecated Please do not use. Check requirements server-side via a claim or other means.
+   * @deprecated Please do not use. Check requirements a claim or other means.
    */
   skipAssetVerification?: boolean;
 }
@@ -115,10 +115,20 @@ export interface CodeGenQueryParams {
    */
   scope?: string;
 
-  // Display options
+  /** We will display this claim on the authorize screen. Just for display purpses. This is still to be checked by you post-authentication. */
   claimId?: string;
+  /** For the claimId, we will hide the claim if the user has already completed it (successCount >= 1). */
   hideIfAlreadyClaimed?: boolean;
+  /**
+   * We will expect the claim verification to succeed. If false, we will not let user attempt to sign in.
+   *
+   * Note: This is not a replacement for checking the claim on your side because users can manipulate the client-side URL parameters.
+  */
   expectVerifySuccess?: boolean;
+  /**
+   * We will expect the user to provide attestations. Consider adding an additional instructions to the user for which ones
+   * to present. You still need to check the attestations on your side.
+   */
   expectAttestations?: boolean;
 }
 

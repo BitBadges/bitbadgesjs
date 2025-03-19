@@ -9,7 +9,7 @@ import { blsCreateProof, blsVerify, blsVerifyProof } from '@trevormil/bbs-signat
  */
 export const createAttestationsProof = blsCreateProof;
 
-interface VerifyAttestationsPresentationSignaturesPayload {
+interface VerifyAttestationsignaturesPayload {
   scheme: 'bbs' | 'standard' | string;
   messages: string[];
   messageFormat: 'json' | 'plaintext';
@@ -33,12 +33,12 @@ interface VerifyAttestationsPresentationSignaturesPayload {
  *
  * Note this only works if scheme = 'bbs' or 'standard' (the BitBadges native ones).
  *
- * Alias of `verifyAttestationsPresentationSignatures`
+ * Alias of `verifyAttestationsignatures`
  *
  * @category SIWBB Authentication
  */
-export const verifyAttestation = async (body: VerifyAttestationsPresentationSignaturesPayload) => {
-  await verifyAttestationsPresentationSignatures(body);
+export const verifyAttestation = async (body: VerifyAttestationsignaturesPayload) => {
+  await verifyAttestationsignatures(body);
 };
 
 /**
@@ -51,8 +51,8 @@ export const verifyAttestation = async (body: VerifyAttestationsPresentationSign
  *
  * @category SIWBB Authentication
  */
-export const verifyAttestationsPresentationSignatures = async (
-  body: VerifyAttestationsPresentationSignaturesPayload,
+export const verifyAttestationsignatures = async (
+  body: VerifyAttestationsignaturesPayload,
   options?: {
     getSignerFromProofOfIssuance?: (proofOfIssuance: { message: string; signature: string; signer: string; publicKey?: string }) => string;
   }

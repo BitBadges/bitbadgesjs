@@ -7297,7 +7297,7 @@ components:
           type: array
         expiresAt:
           $ref: '#/components/schemas/UNIXMilliTimestamp'
-        attestationsPresentations:
+        attestations:
           items:
             $ref: '#/components/schemas/iAttestationsProof'
           description: >-
@@ -7380,7 +7380,7 @@ components:
         - chain
         - scopes
         - expiresAt
-        - attestationsPresentations
+        - attestations
         - createdAt
         - clientId
       additionalProperties: false
@@ -8089,7 +8089,7 @@ components:
         metadata:
           description: The metadata of the address list.
           $ref: '#/components/schemas/iMetadata'
-        listsActivity:
+        listActivity:
           items:
             $ref: '#/components/schemas/iListActivityDoc'
           description: The activity of the address list.
@@ -8134,7 +8134,7 @@ components:
         - updateHistory
         - createdBlock
         - lastUpdated
-        - listsActivity
+        - listActivity
         - views
         - claims
       additionalProperties: false
@@ -8618,7 +8618,7 @@ components:
             A list of transfer activity items for the account. Paginated and
             fetched as needed. To be used in conjunction with views.
           type: array
-        listsActivity:
+        listActivity:
           items:
             $ref: '#/components/schemas/iListActivityDoc'
           description: >-
@@ -8748,7 +8748,7 @@ components:
         - chain
         - collected
         - activity
-        - listsActivity
+        - listActivity
         - merkleChallenges
         - approvalTrackers
         - addressLists
@@ -8773,7 +8773,7 @@ components:
         - blacklists
         - createdBadges
         - managingBadges
-        - listsActivity
+        - listActivity
         - createdAttestations
         - receivedAttestations
         - attestations
@@ -11267,7 +11267,7 @@ components:
         options:
           description: Additional options for verifying the challenge.
           $ref: '#/components/schemas/VerifyChallengeOptions'
-        attestationsPresentations:
+        attestations:
           items:
             $ref: '#/components/schemas/iAttestationsProof'
           description: Additional attestations to verify in the challenge.
@@ -11568,7 +11568,7 @@ components:
           description: The image of the SIWBB request for display purposes.
           type: string
           examples: *ref_12
-        attestationsPresentations:
+        attestations:
           items:
             $ref: '#/components/schemas/iAttestationsProof'
           description: >-
@@ -11724,7 +11724,7 @@ components:
           additionalProperties: false
           description: Verification response
           type: object
-        attestationsPresentations:
+        attestations:
           items:
             $ref: '#/components/schemas/iAttestationsProof'
           description: Derived data integrity proofs for any attestations requested.
@@ -14387,7 +14387,7 @@ components:
           additionalProperties: false
           description: Verification response
           type: object
-        attestationsPresentations:
+        attestations:
           items:
             $ref: '#/components/schemas/iAttestationsProof'
           description: Derived data integrity proofs for any attestations requested.

@@ -1883,7 +1883,7 @@ export interface iPluginVersionConfig<T extends NumberType> {
     testerUri?: string;
   };
 
-  /** The verification URL */
+  /** The verification URL config. This lets us know what should be passed to the plugin payload. */
   verificationCall?: {
     uri: string;
     method: 'POST' | 'GET' | 'PUT' | 'DELETE';
@@ -1958,7 +1958,7 @@ export interface iSIWBBRequestDoc<T extends NumberType> extends Doc {
   expiresAt: UNIXMilliTimestamp<T>;
 
   /** If required, you can additionally attach proof of attestations ot the auth flow. These can be used to prove sensitive information to verifiers. */
-  attestationsPresentations: iAttestationsProof<T>[];
+  attestations: iAttestationsProof<T>[];
 
   /** The timestamp of when the signature was created (milliseconds since epoch) */
   createdAt: UNIXMilliTimestamp<T>;

@@ -16,6 +16,7 @@ import {
   DynamicDataDoc,
   MapWithValues,
   PluginDoc,
+  SIWBBRequestDoc,
   StatusDoc,
   UtilityListingDoc
 } from '@/api-indexer/docs/docs.js';
@@ -32,6 +33,7 @@ import {
   iInheritMetadataFrom,
   iLinkedTo,
   iPointsActivityDoc,
+  iSIWBBRequestDoc,
   iUtilityListingContent,
   iUtilityListingDoc,
   iUtilityListingLink,
@@ -1284,7 +1286,10 @@ export interface iCheckSignInStatusSuccessResponse {
   /**
    * Approved scopes
    */
-  scopes: OAuthScopeDetails[];
+  scopes: (OAuthScopeDetails & {
+    /**  Camel case version of the scope name. */
+    scopeId: string;
+  })[];
 
   /**
    * The message that was signed.
@@ -1449,7 +1454,10 @@ export interface iCheckSignInStatusSuccessResponse {
 export class CheckSignInStatusSuccessResponse extends CustomTypeClass<CheckSignInStatusSuccessResponse> implements iCheckSignInStatusSuccessResponse {
   signedIn: boolean;
   message: SiwbbMessage;
-  scopes: OAuthScopeDetails[];
+  scopes: (OAuthScopeDetails & {
+    /**  Camel case version of the scope name. */
+    scopeId: string;
+  })[];
   discord?: {
     username: string;
     discriminator: string;
@@ -2009,7 +2017,7 @@ export interface iGenericBlockinVerifyPayload extends iVerifySignInPayload {
   /**
    * Additional attestations to verify in the challenge.
    */
-  attestationsPresentations?: iAttestationsProof<NumberType>[];
+  attestations?: iAttestationsProof<NumberType>[];
 }
 
 /**
@@ -2342,7 +2350,7 @@ export interface iCreateSIWBBRequestPayload {
    * If required, you can additionally add proof of attestations to the authentication flow.
    * This proves sensitive information (e.g. GPAs, SAT scores, etc.) without revealing the information itself.
    */
-  attestationsPresentations?: iAttestationsProof<NumberType>[];
+  attestations?: iAttestationsProof<NumberType>[];
 
   /** Client ID for the SIWBB request. */
   client_id: string;
@@ -2448,8 +2456,7 @@ export class GetSIWBBRequestsForDeveloperAppPayload
  * @category API Requests / Responses
  */
 export interface iGetSIWBBRequestsForDeveloperAppSuccessResponse<T extends NumberType> {
-  siwbbRequests: iSiwbbChallenge<T>[];
-
+  siwbbRequests: iSIWBBRequestDoc<T>[];
   pagination: PaginationInfo;
 }
 
@@ -2460,12 +2467,12 @@ export class GetSIWBBRequestsForDeveloperAppSuccessResponse<T extends NumberType
   extends BaseNumberTypeClass<GetSIWBBRequestsForDeveloperAppSuccessResponse<T>>
   implements iGetSIWBBRequestsForDeveloperAppSuccessResponse<T>
 {
-  siwbbRequests: SiwbbChallenge<T>[];
+  siwbbRequests: SIWBBRequestDoc<T>[];
   pagination: PaginationInfo;
 
   constructor(data: iGetSIWBBRequestsForDeveloperAppSuccessResponse<T>) {
     super();
-    this.siwbbRequests = data.siwbbRequests.map((SIWBBRequest) => new SiwbbChallenge<T>(SIWBBRequest));
+    this.siwbbRequests = data.siwbbRequests.map((SIWBBRequest) => new SIWBBRequestDoc(SIWBBRequest));
     this.pagination = data.pagination;
   }
 
@@ -2511,7 +2518,7 @@ export class ExchangeSIWBBAuthorizationCodeSuccessResponse<T extends NumberType>
     success: boolean;
     errorMessage?: string;
   };
-  attestationsPresentations?: AttestationsProof<T>[];
+  attestations?: AttestationsProof<T>[];
 
   access_token: string;
   token_type: string = 'Bearer';
@@ -2531,7 +2538,7 @@ export class ExchangeSIWBBAuthorizationCodeSuccessResponse<T extends NumberType>
     this.chain = data.chain;
     this.bitbadgesAddress = data.bitbadgesAddress;
     this.verificationResponse = data.verificationResponse;
-    this.attestationsPresentations = data.attestationsPresentations?.map((proof) => new AttestationsProof(proof));
+    this.attestations = data.attestations?.map((proof) => new AttestationsProof(proof));
   }
 
   getNumberFieldNames(): string[] {
@@ -3303,8 +3310,10 @@ export type UpdateClaimRequest<T extends NumberType> = Omit<iClaimDetails<T>, 's
 export interface iCreateClaimPayload {
   claims: CreateClaimRequest<NumberType>[];
 
+  /** Whether to create test claims (e.g. the claim tester). Used for frontend testing. */
   testClaims?: boolean;
 
+  /** Whether to create standalone claims. */
   standaloneClaim?: boolean;
 }
 
