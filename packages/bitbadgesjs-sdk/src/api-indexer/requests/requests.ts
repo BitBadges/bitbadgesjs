@@ -1286,10 +1286,7 @@ export interface iCheckSignInStatusSuccessResponse {
   /**
    * Approved scopes
    */
-  scopes: (OAuthScopeDetails & {
-    /**  Camel case version of the scope name. */
-    scopeId: string;
-  })[];
+  scopes: OAuthScopeDetailsWithId[];
 
   /**
    * The message that was signed.
@@ -1448,16 +1445,21 @@ export interface iCheckSignInStatusSuccessResponse {
 }
 
 /**
+ * @category API Requests / Responses
+ */
+export interface OAuthScopeDetailsWithId extends OAuthScopeDetails {
+  /**  Camel case version of the scope name. */
+  scopeId: string;
+}
+
+/**
  * @inheritDoc iCheckSignInStatusSuccessResponse
  * @category API Requests / Responses
  */
 export class CheckSignInStatusSuccessResponse extends CustomTypeClass<CheckSignInStatusSuccessResponse> implements iCheckSignInStatusSuccessResponse {
   signedIn: boolean;
   message: SiwbbMessage;
-  scopes: (OAuthScopeDetails & {
-    /**  Camel case version of the scope name. */
-    scopeId: string;
-  })[];
+  scopes: OAuthScopeDetailsWithId[];
   discord?: {
     username: string;
     discriminator: string;
