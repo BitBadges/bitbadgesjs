@@ -2446,6 +2446,8 @@ paths:
       description: |-
         Creates an authentication code. This is used for the Sign In wtih BitBadges flow.
 
+        Note: This is typically not recommended to be called directly. Instead, direct the user to use the frontend authorization flow.
+
         ```tsx
         const res = await BitBadgesApi.createSIWBBRequest(...);
         ```

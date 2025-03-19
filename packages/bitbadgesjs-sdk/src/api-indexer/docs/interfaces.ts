@@ -34,7 +34,15 @@ import type { iMap, iValueStore } from '@/transactions/messages/bitbadges/maps/i
  * @category API Requests / Responses
  */
 export interface OAuthScopeDetails {
+  /**
+   * The name of the scope. Note: For this, we use the capitalized version of the scope name with spaces.
+   *
+   * For example, "completeClaims" becomes "Complete Claims"
+   */
   scopeName: string;
+  /**
+   * The options for the scope. Currently, this is not used.
+   */
   options?: object;
 }
 
