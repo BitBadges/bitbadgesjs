@@ -3268,7 +3268,7 @@ export class DeleteClaimSuccessResponse extends EmptyResponseClass {}
  * @category API Requests / Responses
  */
 export interface iUpdateClaimPayload {
-  claims: Omit<iClaimDetails<NumberType>, '_includesPrivateParams' | 'seedCode' | 'version'>[];
+  claims: Omit<iClaimDetails<NumberType>, '_includesPrivateParams' | '_templateInfo' | 'seedCode' | 'version'>[];
 }
 
 /**
@@ -3292,15 +3292,6 @@ type IgnoredKeys = 'plugins' | 'version' | '_includesPrivateParams' | 'createdBy
  * @category Interfaces
  */
 export type CreateClaimRequest<T extends NumberType> = Omit<iClaimDetails<T>, IgnoredKeys> & {
-  cid?: string;
-} & {
-  plugins: ManagePluginRequest[];
-};
-
-/**
- * @category Interfaces
- */
-export type UpdateClaimRequest<T extends NumberType> = Omit<iClaimDetails<T>, 'seedCode' | IgnoredKeys> & {
   cid?: string;
 } & {
   plugins: ManagePluginRequest[];

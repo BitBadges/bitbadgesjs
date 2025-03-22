@@ -2041,7 +2041,7 @@ export interface iClaimDetails<T extends NumberType> {
   trackerDetails?: iChallengeTrackerIdDetails<T>;
   /** The balances to set for the claim. Only used for claims for collections that have off-chain indexed balances and are assigning balances based on the claim. */
   balancesToSet?: iPredeterminedBalances<T>;
-  /** Claim plugins. These are the criteria that must pass for a user to claim the badge. */
+  /** Claim plugins. These are the criteria that must pass for a user to claim. */
   plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
   /** Rewards for the claim. */
   rewards?: iClaimReward<T>[];
