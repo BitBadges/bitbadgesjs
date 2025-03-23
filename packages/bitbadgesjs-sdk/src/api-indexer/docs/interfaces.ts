@@ -1057,6 +1057,27 @@ export interface IntegrationPluginDetailsUpdate<T extends ClaimIntegrationPlugin
 }
 
 /**
+ * @category Interfaces
+ */
+export type ManagePluginRequest = IntegrationPluginDetailsUpdate<ClaimIntegrationPluginType>;
+
+/**
+ * @category Interfaces
+ */
+export type CreateClaimRequest<T extends NumberType> = Omit<
+  iClaimDetails<T>,
+  'plugins' | 'version' | '_includesPrivateParams' | '_templateInfo' | 'managedBy' | 'createdBy' | 'standaloneClaim' | 'lastUpdated'
+> & {
+  cid?: string;
+  plugins: ManagePluginRequest[];
+};
+
+/**
+ * @category Interfaces
+ */
+export type UpdateClaimRequest<T extends NumberType> = Omit<CreateClaimRequest<T>, 'seedCode'>;
+
+/**
  * @category Indexer
  */
 export interface iSatisfyMethod {
@@ -2037,15 +2058,19 @@ export interface iClaimDetails<T extends NumberType> {
   createdBy?: BitBadgesAddress;
   /** The BitBadges address of the user who is currently managing this */
   managedBy?: BitBadgesAddress;
-  /** Collection ID that the claim is for (if applicable). */
+  /** Collection ID that the claim is for (if applicable - collection claims). */
   collectionId?: T;
-  /** Standalone claims are nor linked with a badge or list. */
+  /** Standalone claims are not linked with a badge or list. */
   standaloneClaim?: boolean;
-  /** Address list ID that the claim is for (if applicable). */
+  /** Address list ID that the claim is for (if applicable - list claims). */
   listId?: string;
-  /** The tracker details for the claim. */
+  /** The tracker details for the claim (if applicable - collection claims). */
   trackerDetails?: iChallengeTrackerIdDetails<T>;
-  /** The balances to set for the claim. Only used for claims for collections that have off-chain indexed balances and are assigning balances based on the claim. */
+  /**
+   * The balances to set for the claim.
+   *
+   * Only used for claims for collections that have off-chain indexed balances and are assigning balances based on the claim.
+   */
   balancesToSet?: iPredeterminedBalances<T>;
   /** Claim plugins. These are the criteria that must pass for a user to claim. */
   plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
@@ -2063,7 +2088,7 @@ export interface iClaimDetails<T extends NumberType> {
   manualDistribution?: boolean;
   /** Whether the claim is expected to be automatically triggered by someone (not the user). */
   approach?: string; // 'in-site' | 'api' | 'zapier';
-  /** Seed code for the claim. */
+  /** Seed code for the claim. Only used for on-chain badge claims. */
   seedCode?: string;
   /** Metadata for the claim. */
   metadata?: iMetadata<T>;

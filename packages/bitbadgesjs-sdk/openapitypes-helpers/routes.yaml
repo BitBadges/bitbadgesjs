@@ -2636,6 +2636,59 @@ paths:
       security:
         - apiKey: []
           userIsManager: []
+  /maps/{mapId}:
+    get:
+      operationId: getMap
+      summary: Get Map
+      tags:
+        - Maps and Protocols
+      description: |-
+        Gets map data. Maps are created and stored on-chain. They are key-value objects which can have certain properties
+        like restricting who sets which values, expected formatting, and more.
+
+        For getting actual values, use the getMapValues endpoint(s).
+
+        ```tsx
+        const res = await BitBadgesApi.getMap(...);
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetMapPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetMapSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getmap)**
+      parameters:
+        - name: mapId
+          in: path
+          description: The map ID
+          required: true
+          schema:
+            type: string
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+        - name: payload
+          in: query
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
+          required: true
+          explode: true
+          schema:
+            $ref: '#/components/schemas/iGetMapPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetMapSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
   /maps:
     post:
       operationId: getMaps
@@ -2706,6 +2759,55 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/iGetMapValuesSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+  /mapValue/{mapId}/{key}:
+    get:
+      operationId: getMapValue
+      summary: Get Map Value
+      tags:
+        - Maps and Protocols
+      description: |-
+        Gets a map iValueStore.value
+
+        ```tsx
+        const res = await BitBadgesApi.getMapValue(...);
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetMapValuePayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetMapValueSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getmapvalue)**
+      parameters:
+        - name: mapId
+          in: path
+          description: The map ID
+          required: true
+          schema:
+            type: string
+        - name: key
+          in: path
+          description: The key to get the value for
+          required: true
+          schema:
+            type: string
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetMapValueSuccessResponse'
         '400':
           $ref: '#/components/responses/BadRequestResponse'
         '500':

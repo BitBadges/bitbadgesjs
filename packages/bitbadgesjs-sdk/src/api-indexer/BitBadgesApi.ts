@@ -38,8 +38,13 @@ import {
   iRefreshMetadataPayload
 } from './requests/collections.js';
 import {
+  GetMapSuccessResponse,
+  GetMapValueSuccessResponse,
   GetMapValuesSuccessResponse,
   GetMapsSuccessResponse,
+  iGetMapPayload,
+  iGetMapSuccessResponse,
+  iGetMapValueSuccessResponse,
   iGetMapValuesPayload,
   iGetMapValuesSuccessResponse,
   iGetMapsPayload,
@@ -1042,6 +1047,30 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
+   * Get map by ID
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/map/{mapId}`
+   * - **SDK Function Call**: `await BitBadgesApi.getMap(payload);`
+   */
+  public async getMap(mapId: string, payload?: iGetMapPayload): Promise<GetMapSuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<iGetMapPayload> = typia.validate<iGetMapPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<iGetMapSuccessResponse<string>>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetMapRoute(mapId)}`, {
+        params: payload
+      });
+      return new GetMapSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
    * Get map values
    *
    * @remarks
@@ -1057,6 +1086,23 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
 
       const response = await this.axios.post<iGetMapValuesSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetMapValuesRoute()}`, payload);
       return new GetMapValuesSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Get map value by ID
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/mapValue/{mapId}/{key}`
+   * - **SDK Function Call**: `await BitBadgesApi.getMapValue(mapId, key);`
+   */
+  public async getMapValue(mapId: string, key: string): Promise<GetMapValueSuccessResponse> {
+    try {
+      const response = await this.axios.get<iGetMapValueSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetMapValueRoute(mapId, key)}`);
+      return new GetMapValueSuccessResponse(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -1384,18 +1430,17 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * - **SDK Function Call**: `await BitBadgesApi.performStoreAction(payload);`
    * - **Authentication**: Must be signed in.
    */
-  public async performStoreAction(
-    payload: iPerformStoreActionSingleWithBodyAuthPayload
-  ): Promise<PerformStoreActionSuccessResponse> {
+  public async performStoreAction(payload: iPerformStoreActionSingleWithBodyAuthPayload): Promise<PerformStoreActionSuccessResponse> {
     try {
-      const validateRes: typia.IValidation<iPerformStoreActionSingleWithBodyAuthPayload> = typia.validate<iPerformStoreActionSingleWithBodyAuthPayload>(payload ?? {});
+      const validateRes: typia.IValidation<iPerformStoreActionSingleWithBodyAuthPayload> =
+        typia.validate<iPerformStoreActionSingleWithBodyAuthPayload>(payload ?? {});
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
       const response = await this.axios.post<PerformStoreActionSuccessResponse>(
         `${this.BACKEND_URL}${BitBadgesApiRoutes.PerformStoreActionSingleWithBodyAuthRoute()}`,
-          payload
+        payload
       );
       return new PerformStoreActionSuccessResponse(response.data);
     } catch (error) {
@@ -1412,11 +1457,11 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * - **SDK Function Call**: `await BitBadgesApi.performBatchStoreAction(payload);`
    * - **Authentication**: Must be signed in.
    */
-  public async performBatchStoreAction(
-    payload: iPerformStoreActionBatchWithBodyAuthPayload
-  ): Promise<BatchStoreActionSuccessResponse> {
+  public async performBatchStoreAction(payload: iPerformStoreActionBatchWithBodyAuthPayload): Promise<BatchStoreActionSuccessResponse> {
     try {
-      const validateRes: typia.IValidation<iPerformStoreActionBatchWithBodyAuthPayload> = typia.validate<iPerformStoreActionBatchWithBodyAuthPayload>(payload ?? {});
+      const validateRes: typia.IValidation<iPerformStoreActionBatchWithBodyAuthPayload> = typia.validate<iPerformStoreActionBatchWithBodyAuthPayload>(
+        payload ?? {}
+      );
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
@@ -2915,14 +2960,14 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
     }
   }
 
-   /**
+  /**
    * Creates a dynamic data bin.
    *
    * @remarks
    * - **API Route**: `POST /api/v0/dynamicStores`
    * - **SDK Function Call**: `await BitBadgesApi.createDynamicDataStore(payload);`
    */
-   public async createDynamicDataStore<Q extends DynamicDataHandlerType, NumberType>(
+  public async createDynamicDataStore<Q extends DynamicDataHandlerType, NumberType>(
     payload: iCreateDynamicDataStorePayload
   ): Promise<CreateDynamicDataStoreSuccessResponse<Q, T>> {
     try {
@@ -3160,8 +3205,6 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
     }
   }
 
-
-
   /**
    * Searches for plugins.
    *
@@ -3323,7 +3366,6 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
       return Promise.reject(error);
     }
   }
-
 
   /**
    * Gets the API keys.

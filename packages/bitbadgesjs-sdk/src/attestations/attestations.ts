@@ -38,7 +38,7 @@ interface VerifyAttestationsignaturesPayload {
  * @category SIWBB Authentication
  */
 export const verifyAttestation = async (body: VerifyAttestationsignaturesPayload) => {
-  await verifyAttestationsignatures(body);
+  await verifyAttestationSignatures(body);
 };
 
 /**
@@ -51,7 +51,7 @@ export const verifyAttestation = async (body: VerifyAttestationsignaturesPayload
  *
  * @category SIWBB Authentication
  */
-export const verifyAttestationsignatures = async (
+export const verifyAttestationSignatures = async (
   body: VerifyAttestationsignaturesPayload,
   options?: {
     getSignerFromProofOfIssuance?: (proofOfIssuance: { message: string; signature: string; signer: string; publicKey?: string }) => string;

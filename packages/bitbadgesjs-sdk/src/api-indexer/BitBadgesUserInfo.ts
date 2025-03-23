@@ -12,7 +12,7 @@ import { BitBadgesAddressList } from './BitBadgesAddressList.js';
 import { BitBadgesCollection } from './BitBadgesCollection.js';
 import type { BaseBitBadgesApi, PaginationInfo } from './base.js';
 import { ClaimActivityDoc, ClaimAlertDoc, ListActivityDoc, PointsActivityDoc, TransferActivityDoc } from './docs/activity.js';
-import { ApprovalTrackerDoc, AttestationDoc, BalanceDocWithDetails, MapDoc, MerkleChallengeTrackerDoc, ProfileDoc, SIWBBRequestDoc } from './docs/docs.js';
+import { ApprovalTrackerDoc, AttestationDoc, BalanceDocWithDetails, MerkleChallengeTrackerDoc, ProfileDoc, SIWBBRequestDoc } from './docs/docs.js';
 import type {
   BitBadgesAddress,
   NativeAddress,
@@ -23,7 +23,6 @@ import type {
   iClaimActivityDoc,
   iClaimAlertDoc,
   iListActivityDoc,
-  iMapDoc,
   iMerkleChallengeTrackerDoc,
   iPointsActivityDoc,
   iProfileDoc,

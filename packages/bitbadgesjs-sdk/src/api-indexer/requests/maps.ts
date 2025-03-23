@@ -127,3 +127,96 @@ export class GetMapValuesSuccessResponse
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetMapValuesSuccessResponse;
   }
 }
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetMapPayload {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetMapPayload extends CustomTypeClass<GetMapPayload> implements iGetMapPayload {
+  constructor(payload: iGetMapPayload) {
+    super();
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetMapSuccessResponse<T extends NumberType> {
+  map: iMapWithValues<T> | undefined;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetMapSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetMapSuccessResponse<T>>
+  implements iGetMapSuccessResponse<T>, CustomType<GetMapSuccessResponse<T>>
+{
+  map: MapWithValues<T> | undefined;
+
+  constructor(data: iGetMapSuccessResponse<T>) {
+    super();
+    this.map = data.map ? new MapWithValues(data.map) : undefined;
+  }
+
+  getNumberFieldNames(): string[] {
+    return [];
+  }
+
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetMapSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetMapSuccessResponse<U>;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetMapValuePayload {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetMapValuePayload extends CustomTypeClass<GetMapValuePayload> implements iGetMapValuePayload {
+  constructor(payload: iGetMapValuePayload) {
+    super();
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetMapValueSuccessResponse {
+  value: { mapId: string; value: iValueStore } | undefined;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetMapValueSuccessResponse
+  extends BaseNumberTypeClass<GetMapValueSuccessResponse>
+  implements iGetMapValueSuccessResponse, CustomType<GetMapValueSuccessResponse>
+{
+  value: { mapId: string; value: ValueStore } | undefined;
+
+  constructor(data: iGetMapValueSuccessResponse) {
+    super();
+    this.value = data.value
+      ? {
+          mapId: data.value.mapId,
+          value: new ValueStore(data.value.value)
+        }
+      : undefined;
+  }
+
+  getNumberFieldNames(): string[] {
+    return [];
+  }
+
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetMapValueSuccessResponse {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetMapValueSuccessResponse;
+  }
+}

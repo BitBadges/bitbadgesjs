@@ -22,6 +22,7 @@ import {
 } from '@/api-indexer/docs/docs.js';
 import {
   ClaimReward,
+  CreateClaimRequest,
   DynamicDataHandlerType,
   IntegrationPluginDetailsUpdate,
   iApiKeyDoc,
@@ -41,7 +42,6 @@ import {
   type BitBadgesAddress,
   type ClaimIntegrationPluginCustomBodyType,
   type ClaimIntegrationPluginType,
-  type IntegrationPluginDetails,
   type JsonBodyInputSchema,
   type JsonBodyInputWithValue,
   type NativeAddress,
@@ -75,7 +75,7 @@ import {
 } from '@/common/base.js';
 import { type NumberType } from '@/common/string-numbers.js';
 import type { SupportedChain } from '@/common/types.js';
-import { ClaimDetails, iChallengeDetails, iChallengeInfoDetails } from '@/core/approvals.js';
+import { ClaimDetails, iChallengeDetails, iChallengeInfoDetailsUpdate } from '@/core/approvals.js';
 import type { iBatchBadgeDetails } from '@/core/batch-utils.js';
 import { VerifySIWBBOptions, iSiwbbChallenge } from '@/core/blockin.js';
 import { AttestationsProof } from '@/core/secrets.js';
@@ -1092,7 +1092,7 @@ export interface iAddApprovalDetailsToOffChainStoragePayload {
     image: string;
 
     /** For any merkle challenge claims that we are implementing */
-    challengeInfoDetails?: iChallengeInfoDetails<NumberType>[];
+    challengeInfoDetails?: iChallengeInfoDetailsUpdate<NumberType>[];
   }[];
 }
 
@@ -3280,22 +3280,6 @@ export interface iUpdateClaimSuccessResponse {}
  * @category API Requests / Responses
  */
 export class UpdateClaimSuccessResponse extends EmptyResponseClass {}
-
-/**
- * @category Interfaces
- */
-export type ManagePluginRequest = IntegrationPluginDetailsUpdate<ClaimIntegrationPluginType>;
-
-/**
- * @category Interfaces
- */
-export type CreateClaimRequest<T extends NumberType> = Omit<
-  iClaimDetails<T>,
-  'plugins' | 'version' | '_includesPrivateParams' | '_templateInfo' | 'managedBy' | 'createdBy' | 'standaloneClaim' | 'lastUpdated'
-> & {
-  cid?: string;
-  plugins: ManagePluginRequest[];
-};
 
 /**
  * @category API Requests / Responses

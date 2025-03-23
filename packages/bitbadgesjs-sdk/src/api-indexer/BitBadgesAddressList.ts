@@ -8,19 +8,10 @@ import type { BaseBitBadgesApi, PaginationInfo } from './base.js';
 import { EmptyResponseClass } from './base.js';
 import { ListActivityDoc } from './docs/activity.js';
 import { AddressListDoc, UtilityListingDoc } from './docs/docs.js';
-import type {
-  ClaimIntegrationPluginType,
-  IntegrationPluginDetailsUpdate,
-  iAddressListDoc,
-  iClaimDetails,
-  iListActivityDoc,
-  iUtilityListingDoc
-} from './docs/interfaces.js';
+import type { CreateClaimRequest, iAddressListDoc, iClaimDetails, iListActivityDoc, iUtilityListingDoc } from './docs/interfaces.js';
 import type { iMetadata } from './metadata/metadata.js';
 import { Metadata } from './metadata/metadata.js';
 import { BitBadgesApiRoutes } from './requests/routes.js';
-import { CreateClaimRequest } from './requests/requests.js';
-
 /**
  * @inheritDoc iAddressListDoc
  * @category Interfaces
@@ -29,7 +20,7 @@ export interface iBitBadgesAddressList<T extends NumberType> extends iAddressLis
   /** The metadata of the address list. */
   metadata?: iMetadata<T>;
   /** The activity of the address list. */
-  listsActivity: iListActivityDoc<T>[];
+  listActivity: iListActivityDoc<T>[];
   /** The views of the address list. */
   views: {
     [viewId: string]: {
@@ -53,7 +44,7 @@ export class BitBadgesAddressList<T extends NumberType>
   implements iBitBadgesAddressList<T>, CustomType<BitBadgesAddressList<T>>
 {
   metadata?: Metadata<T>;
-  listsActivity: ListActivityDoc<T>[];
+  listActivity: ListActivityDoc<T>[];
   views: {
     [viewId: string]: {
       ids: string[];
@@ -67,7 +58,7 @@ export class BitBadgesAddressList<T extends NumberType>
   constructor(data: iBitBadgesAddressList<T>) {
     super(data);
     this.metadata = data.metadata ? new Metadata(data.metadata) : undefined;
-    this.listsActivity = data.listsActivity.map((activity) => new ListActivityDoc(activity));
+    this.listActivity = data.listActivity.map((activity) => new ListActivityDoc(activity));
     this.views = data.views;
     this.claims = data.claims.map((claim) => new ClaimDetails(claim));
     this.listings = data.listings?.map((listing) => new UtilityListingDoc(listing));
@@ -180,7 +171,7 @@ export class BitBadgesAddressList<T extends NumberType>
       if (viewType === 'listings') {
         this.listings = [...(this.listings || []), ...(list.listings || [])];
       } else {
-        this.listsActivity.push(...list.listsActivity);
+        this.listActivity.push(...list.listActivity);
       }
       this.views[viewId].ids.push(...list.views[viewId].ids);
       this.views[viewId].pagination = list.views[viewId].pagination;
@@ -209,7 +200,7 @@ export class BitBadgesAddressList<T extends NumberType>
    */
   getActivityView(viewId: string) {
     return (this.views[viewId]?.ids.map((x) => {
-      return this.listsActivity.find((y) => y._docId === x);
+      return this.listActivity.find((y) => y._docId === x);
     }) ?? []) as ListActivityDoc<T>[];
   }
 
@@ -353,8 +344,8 @@ const updateAddressListWithResponse = <T extends NumberType>(
     }
   }
 
-  const activity = cachedList.listsActivity || [];
-  for (const newActivity of newCollection.listsActivity || []) {
+  const activity = cachedList.listActivity || [];
+  for (const newActivity of newCollection.listActivity || []) {
     //If we already have the activity, replace it (we want newer data)
     const existingActivity = activity.findIndex((x) => x._docId === newActivity._docId);
     if (existingActivity !== -1) {
@@ -378,7 +369,7 @@ const updateAddressListWithResponse = <T extends NumberType>(
   cachedList = new BitBadgesAddressList({
     ...cachedList,
     ...newCollection,
-    listsActivity: activity,
+    listActivity: activity,
     listings: listings,
     views: newViews
   });

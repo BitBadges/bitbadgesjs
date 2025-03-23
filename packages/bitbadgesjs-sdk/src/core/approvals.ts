@@ -5,7 +5,8 @@ import {
   IntegrationPluginDetails,
   iChallengeTrackerIdDetails,
   iClaimDetails,
-  iSatisfyMethod
+  iSatisfyMethod,
+  CreateClaimRequest
 } from '@/api-indexer/docs/interfaces.js';
 import { Metadata } from '@/api-indexer/metadata/metadata.js';
 import {
@@ -1258,6 +1259,16 @@ export interface iChallengeInfoDetails<T extends NumberType> {
   challengeDetails: iChallengeDetails<T>;
 
   claim?: iClaimDetails<T>;
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iChallengeInfoDetailsUpdate<T extends NumberType> {
+  /** The challenge details of the claim / approval */
+  challengeDetails: iChallengeDetails<T>;
+
+  claim?: CreateClaimRequest<T>;
 }
 
 /**
