@@ -1246,7 +1246,7 @@ export interface iUtilityListingDoc<T extends NumberType> extends Doc {
   /** The overall metadata for the listing */
   metadata: iMetadata<T>;
 
-  /** Inherit metadata from? */
+  /** Where to inherit metadata from? Only one can be specified. */
   inheritMetadataFrom?: iInheritMetadataFrom<T>;
 
   /** The paginated content for the listing */

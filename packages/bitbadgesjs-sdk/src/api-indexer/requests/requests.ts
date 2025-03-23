@@ -65,7 +65,7 @@ import {
   type iTransferActivityDoc
 } from '@/api-indexer/docs/interfaces.js';
 import type { iBadgeMetadataDetails, iCollectionMetadataDetails } from '@/api-indexer/metadata/badgeMetadata.js';
-import type { iMetadata } from '@/api-indexer/metadata/metadata.js';
+import type { iMetadata, iMetadataWithoutInternals } from '@/api-indexer/metadata/metadata.js';
 import { Metadata } from '@/api-indexer/metadata/metadata.js';
 import {
   BaseNumberTypeClass,
@@ -366,7 +366,7 @@ export interface iSearchClaimsPayload {
   bookmark?: string;
   /** Fetch private parameters for the claim. Only applicable if you are the creator / manager of the claim. Otherwise, it will be the public read-only view. */
   fetchPrivateParams?: boolean;
-  /** If provided, we will only return claims with names that match the search value. Only applicable for fetching your own claims. */
+  /** If provided, we will only return claims with names that regex match the search value. */
   searchValue?: string;
 }
 
@@ -3393,6 +3393,7 @@ export class CreateClaimSuccessResponse extends EmptyResponseClass {}
  * @category API Requests / Responses
  */
 export interface iOauthRevokePayload {
+  /** The OAuth token to revoke. */
   token: string;
 }
 
@@ -4190,7 +4191,7 @@ export class SearchApplicationsSuccessResponse<T extends NumberType>
  */
 export interface iCreateApplicationPayload {
   /** The overall metadata for the application */
-  metadata: iMetadata<NumberType>;
+  metadata: iMetadataWithoutInternals<NumberType>;
 
   /** The pages in the application */
   pages: iApplicationPage<NumberType>[];
@@ -4230,7 +4231,7 @@ export interface iUpdateApplicationPayload {
   applicationId: string;
 
   /** The overall metadata for the application */
-  metadata: iMetadata<NumberType>;
+  metadata: iMetadataWithoutInternals<NumberType>;
 
   /** The pages in the application */
   pages: iApplicationPage<NumberType>[];
@@ -4531,7 +4532,7 @@ export class SearchUtilityListingsSuccessResponse<T extends NumberType>
  */
 export interface iCreateUtilityListingPayload<T extends NumberType> {
   /** The overall metadata for the listing */
-  metadata: iMetadata<T>;
+  metadata: iMetadataWithoutInternals<T>;
 
   /** The content for the listing */
   content: iUtilityListingContent[];
@@ -4545,7 +4546,7 @@ export interface iCreateUtilityListingPayload<T extends NumberType> {
   /** The visibility of the listing */
   visibility: 'public' | 'private' | 'unlisted';
 
-  /** The display times of the listing */
+  /** The display times of the listing. Optionally specify when to show vs not show the listing. */
   displayTimes?: iUintRange<T>;
 
   /** The direct link for the listing. If specified, we will skip the entire content / listing page. Thus, content and links should be empty []. */
@@ -4554,10 +4555,10 @@ export interface iCreateUtilityListingPayload<T extends NumberType> {
   /** The categories of the listing */
   categories: string[];
 
-  /** The linked to details */
+  /** The details for if this listing is linked to a specific collection or list (displayed in Utility tab) */
   linkedTo?: iLinkedTo<T>;
 
-  /** Inherit metadata from */
+  /** Where to inherit metadata from? Only one can be specified. */
   inheritMetadataFrom?: iInheritMetadataFrom<T>;
 
   /** Locale (ex: es, fr, etc.). If not specified, we assume en. */
@@ -4604,33 +4605,44 @@ export interface iUpdateUtilityListingPayload<T extends NumberType> {
   listingId: string;
 
   /** The overall metadata for the listing */
-  metadata: iMetadata<T>;
+  metadata: iMetadataWithoutInternals<T>;
 
-  /** The content for the listing */
+  /** The content for the listing. This is only used for a dedicated listing page (not compatible with direct link or inherited metadata). */
   content: iUtilityListingContent[];
 
-  /** The links for the listing */
+  /** The links for the listing. This is only used for a dedicated listing page (not compatible with direct link or inherited metadata). */
   links: iUtilityListingLink<T>[];
 
   /** The visibility of the listing */
   visibility: 'public' | 'private' | 'unlisted';
 
-  /** The display times of the listing */
+  /** The display times of the listing. Optionally specify when to show vs not show the listing. */
   displayTimes?: iUintRange<T>;
 
-  /** The direct link for the listing. If specified, we will skip the entire content / listing page. Thus, content and links should be empty []. */
+  /**
+   * The direct link for the listing. If specified, we will skip the entire content / listing page. Thus, content and links should be empty [].
+   *
+   * This is incompatible with inherited metadata.
+   */
   directLink?: string;
 
   /** The categories of the listing */
   categories: string[];
 
-  /** The linked to details. Note only badge IDs can be changed */
+  /** The details for if this listing is linked to a specific collection or list (displayed in Utility tab) */
   linkedTo?: iLinkedTo<T>;
 
-  /** Inherit metadata from */
+  /**
+   * Where to inherit metadata from? Only one can be specified.
+   *
+   * If specified, we automatically override the metadata from what is specified and
+   * automatically set a direct link to the page.
+   *
+   * Ex: Inherit claim metadata and direct link to the claim page.
+   */
   inheritMetadataFrom?: iInheritMetadataFrom<T>;
 
-  /** Locale (ex: es, fr, etc.). If not specified, we assume en. */
+  /** Locale (ex: es, fr, etc.). If not specified, we assume "en" (English). */
   locale?: string;
 
   /** The estimated cost for this utility/service */

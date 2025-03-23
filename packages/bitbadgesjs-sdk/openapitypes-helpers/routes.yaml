@@ -921,12 +921,11 @@ paths:
           required: true
           schema:
             type: string
-        - in: query
-          explode: true
-          name: payload
-          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
-          required: false
-          schema:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
             $ref: '#/components/schemas/iCreateDeveloperAppPayload'
       security:
         - apiKey: []
@@ -969,12 +968,11 @@ paths:
           required: true
           schema:
             type: string
-        - in: query
-          explode: true
-          name: payload
-          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
-          required: false
-          schema:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
             $ref: '#/components/schemas/iUpdateDeveloperAppPayload'
       security:
         - apiKey: []
@@ -1017,12 +1015,11 @@ paths:
           required: true
           schema:
             type: string
-        - in: query
-          explode: true
-          name: payload
-          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
-          required: false
-          schema:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
             $ref: '#/components/schemas/iDeleteDeveloperAppPayload'
       security:
         - apiKey: []
@@ -1311,13 +1308,12 @@ paths:
           required: true
           schema:
             type: string
-        - in: query
-          explode: true
-          name: payload
-          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
-          required: false
-          schema:
-            $ref: '#/components/schemas/iCreateDynamicDataStorePayload'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/iCreateDynamicDataStorePayload'
       security:
         - apiKey: []
       x-internal: false
@@ -1358,13 +1354,12 @@ paths:
           required: true
           schema:
             type: string
-        - in: query
-          explode: true
-          name: payload
-          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
-          required: false
-          schema:
-            $ref: '#/components/schemas/iUpdateDynamicDataStorePayload'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/iUpdateDynamicDataStorePayload'
       security:
         - apiKey: []
       x-internal: false
@@ -1406,13 +1401,12 @@ paths:
           required: true
           schema:
             type: string
-        - in: query
-          explode: true
-          name: payload
-          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
-          required: false
-          schema:
-            $ref: '#/components/schemas/iDeleteDynamicDataStorePayload'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/iDeleteDynamicDataStorePayload'
       security:
         - apiKey: []
       x-internal: false
@@ -2664,6 +2658,7 @@ paths:
         - Claim Alerts
       description: |-
         Sends claim alert notifications out. Claim alerts are in-app notifications to alert a user.
+        You can send from an address or anonymously (no sender).
 
         ```tsx
         const res = await BitBadgesApi.sendClaimAlert(...);
@@ -3666,6 +3661,8 @@ paths:
       description: |-
         Performs a single action on a dynamic store using body authentication.
 
+        For more information on this route, see the Dynamic Stores > Manage tab in the developer portal.
+
         ```tsx
         await BitBadgesApi.performStoreAction(...);
         ```
@@ -3717,6 +3714,7 @@ paths:
       description: |-
         Performs multiple actions on a dynamic store using body authentication.
 
+        For more information on this route, see the Dynamic Stores > Manage tab in the developer portal.
 
         ```tsx
         await BitBadgesApi.performBatchStoreAction(...);

@@ -11,37 +11,38 @@ export interface iMetadata<T extends NumberType> {
   name: string;
   /** The description of this item. Supports markdown. */
   description: string;
-  /** The image of this item. */
+  /** The image for this item. */
   image: string;
-  /** The banner image of this item. */
+  /** The banner image for this item. */
   bannerImage?: string;
-  /** The video of this item. If a standard video is used, this should be a link to the video. We will use image as the poster image. If a youtube video is used, we embed it as an iframe. */
+  /** The video for this item. If a standard video is used, this should be a link to the video. We will use image as the poster image. If a youtube video is used, we embed it as an iframe. */
   video?: string;
-  /** The category of this item (e.g. "Education", "Attendance"). */
+  /** The category for this item (e.g. "Education", "Attendance"). */
   category?: string;
-  /** The external URL of this item. */
+  /** The external URL for this item. */
   externalUrl?: string;
-  /** The tags of this item */
+  /** The tags for this item */
   tags?: string[];
 
-  /** The socials of this item */
+  /** The socials for this item */
   socials?: {
     [key: string]: string;
   };
 
-  /** The off-chain transferability info of this item (used for badges - off-chain, disregard for others) */
+  /** The off-chain transferability info for this item (used for badges - off-chain, disregard for others) */
   offChainTransferabilityInfo?: {
     host: string;
     assignMethod: string;
   };
 
-  /** The attributes of this item */
+  /** The attributes for this item */
   attributes?: {
     type: string;
     name: string;
     value: string | number | boolean;
   }[];
 
+  /** Header links for this item displayed right under the title */
   additionalInfo?: {
     name: string;
     image: string;
@@ -56,6 +57,11 @@ export interface iMetadata<T extends NumberType> {
   /** Whether the metadata is currently being updated. */
   _isUpdating?: boolean;
 }
+
+/**
+ * @category Interfaces
+ */
+export type iMetadataWithoutInternals<T extends NumberType> = Omit<iMetadata<T>, '_isUpdating' | 'fetchedAt' | 'fetchedAtBlock'>;
 
 /**
  * @inheritDoc iMetadata

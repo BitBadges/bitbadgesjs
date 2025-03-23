@@ -291,7 +291,7 @@ export interface iAddressList {
   uri: string;
 
   /**
-   * Arbitrary custom data that can be stored.
+   * Arbitrary custom data that can be stored. Leave blank for no custom data.
    */
   customData: string;
 
