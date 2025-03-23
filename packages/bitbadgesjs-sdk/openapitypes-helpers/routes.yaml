@@ -3096,8 +3096,7 @@ paths:
       tags:
         - Claims
       description: |-
-        Search through your claims you are currently managing. This is what is used in the developer portal. For
-        public searches, use the main search endpoint.
+        Search through the signed in user's claims they have created / are managing.
 
         ```tsx
         const res = await BitBadgesApi.searchClaims(...);
@@ -3857,6 +3856,7 @@ paths:
           in: query
           description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
           required: false
+          explode: true
           schema:
             $ref: '#/components/schemas/iSearchDynamicDataStoresPayload'
       security:
@@ -3956,6 +3956,7 @@ paths:
             type: string
         - name: payload
           in: query
+          explode: true
           description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
           required: false
           schema:

@@ -362,11 +362,9 @@ export class GetSearchSuccessResponse<T extends NumberType>
  * @category API Requests / Responses
  */
 export interface iSearchClaimsPayload {
-  /** If true, we will return all claims that were created by the signed in address. and standalone */
-  standaloneClaimsOnly?: boolean;
   /** Bookmark to start from. Obtained from previous request. Leave blank to start from the beginning. Only applicable when no additional criteria is specified. */
   bookmark?: string;
-  /** Fetch private parameters for the claim. Only applicable if you are the creator / manager of the claim. */
+  /** Fetch private parameters for the claim. Only applicable if you are the creator / manager of the claim. Otherwise, it will be the public read-only view. */
   fetchPrivateParams?: boolean;
   /** If provided, we will only return claims with names that match the search value. Only applicable for fetching your own claims. */
   searchValue?: string;
@@ -376,14 +374,12 @@ export interface iSearchClaimsPayload {
  * @category API Requests / Responses
  */
 export class SearchClaimsPayload extends CustomTypeClass<SearchClaimsPayload> implements iSearchClaimsPayload {
-  standaloneClaimsOnly?: boolean;
   bookmark?: string;
   fetchPrivateParams?: boolean;
   searchValue?: string;
 
   constructor(payload: iSearchClaimsPayload) {
     super();
-    this.standaloneClaimsOnly = payload.standaloneClaimsOnly;
     this.bookmark = payload.bookmark;
     this.fetchPrivateParams = payload.fetchPrivateParams;
     this.searchValue = payload.searchValue;
@@ -391,7 +387,6 @@ export class SearchClaimsPayload extends CustomTypeClass<SearchClaimsPayload> im
 
   static FromQuery(query: ParsedQs): SearchClaimsPayload {
     return new SearchClaimsPayload({
-      standaloneClaimsOnly: query.standaloneClaimsOnly === 'true',
       bookmark: query.bookmark?.toString(),
       fetchPrivateParams: query.fetchPrivateParams === 'true',
       searchValue: query.searchValue?.toString()
@@ -3164,13 +3159,17 @@ export class DeletePluginSuccessResponse extends EmptyResponseClass {}
  * @category API Requests / Responses
  */
 export interface iSearchPluginsPayload {
-  /** If true, we will fetch all plugins for the authenticated user (with plugin secrets). */
-  createdPluginsOnly?: boolean;
-  /** Bookmark for pagination of the plugins. */
+  /**
+   * If true, we will fetch all plugins for the authenticated user (with plugin secrets).
+   *
+   * This will include plugins created by the signed in user and also those where they are explicitly approved / invited.
+   */
+  pluginsForSignedInUser?: boolean;
+  /** Bookmark for pagination of the plugins (obtained from a previous call to this endpoint). */
   bookmark?: string;
   /** Search value */
   searchValue?: string;
-  /** Locale to fetch the plugin in. By default, we assume 'en'. This is not applicable if you specify createdPluginsOnly, speciifc pluginIds, or an invite code. */
+  /** Locale to restrict results to. By default, we assume 'en'. This is not applicable if you specify createdPluginsOnly, speciifc pluginIds, or an invite code. */
   locale?: string;
 }
 
@@ -3178,14 +3177,14 @@ export interface iSearchPluginsPayload {
  * @category API Requests / Responses
  */
 export class SearchPluginsPayload extends CustomTypeClass<SearchPluginsPayload> implements iSearchPluginsPayload {
-  createdPluginsOnly?: boolean;
+  pluginsForSignedInUser?: boolean;
   bookmark?: string;
   searchValue?: string;
   locale?: string;
 
   constructor(payload: iSearchPluginsPayload) {
     super();
-    this.createdPluginsOnly = payload.createdPluginsOnly;
+    this.pluginsForSignedInUser = payload.pluginsForSignedInUser;
     this.bookmark = payload.bookmark;
     this.searchValue = payload.searchValue;
     this.locale = payload.locale;
@@ -3193,7 +3192,7 @@ export class SearchPluginsPayload extends CustomTypeClass<SearchPluginsPayload> 
 
   static FromQuery(query: ParsedQs): SearchPluginsPayload {
     return new SearchPluginsPayload({
-      createdPluginsOnly: query.createdPluginsOnly === 'true',
+      pluginsForSignedInUser: query.pluginsForSignedInUser === 'true',
       bookmark: query.bookmark?.toString(),
       searchValue: query.searchValue?.toString(),
       locale: query.locale?.toString()
