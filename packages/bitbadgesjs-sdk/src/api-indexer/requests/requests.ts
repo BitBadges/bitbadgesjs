@@ -600,6 +600,7 @@ export class GetClaimAttemptStatusPayload extends EmptyResponseClass {}
 export interface iGetClaimAttemptStatusSuccessResponse {
   success: boolean;
   error: string;
+  /** The code for the on-chain transaction. Only provided if you have permissions and this is an on-chain badge claim. */
   code?: string;
   bitbadgesAddress: string;
 }
