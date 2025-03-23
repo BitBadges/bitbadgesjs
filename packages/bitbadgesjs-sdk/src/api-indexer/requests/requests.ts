@@ -11,6 +11,7 @@ import {
   AccessTokenDoc,
   ApiKeyDoc,
   ApplicationDoc,
+  ApprovalTrackerDoc,
   AttestationDoc,
   DeveloperAppDoc,
   DynamicDataDoc,
@@ -28,7 +29,9 @@ import {
   iApiKeyDoc,
   iApplicationDoc,
   iApplicationPage,
+  iApprovalTrackerDoc,
   iAttestationDoc,
+  iChallengeTrackerIdDetails,
   iClaimActivityDoc,
   iDynamicDataDoc,
   iEstimatedCost,
@@ -81,7 +84,7 @@ import { VerifySIWBBOptions, iSiwbbChallenge } from '@/core/blockin.js';
 import { AttestationsProof } from '@/core/secrets.js';
 import type { iOffChainBalancesMap } from '@/core/transfers.js';
 import { UintRangeArray } from '@/core/uintRanges.js';
-import type { iAttestationsProof, iPredeterminedBalances, iUintRange } from '@/interfaces/index.js';
+import type { iAmountTrackerIdDetails, iAttestationsProof, iPredeterminedBalances, iUintRange } from '@/interfaces/index.js';
 import { BroadcastPostBody } from '@/node-rest-api/index.js';
 import { type AssetConditionGroup, type ChallengeParams, type VerifyChallengeOptions } from 'blockin';
 import { SiwbbChallengeParams } from './blockin.js';
@@ -4718,5 +4721,70 @@ export class CheckClaimSuccessSuccessResponse extends CustomTypeClass<CheckClaim
     super();
     this.successCount = data.successCount;
     this.claimNumbers = data.claimNumbers;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetCollectionAmountTrackerByIdPayload {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetCollectionAmountTrackerByIdSuccessResponse<T extends NumberType> {
+  amountTracker: iApprovalTrackerDoc<T>;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetCollectionAmountTrackerByIdSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetCollectionAmountTrackerByIdSuccessResponse<T>>
+  implements iGetCollectionAmountTrackerByIdSuccessResponse<T>
+{
+  amountTracker: ApprovalTrackerDoc<T>;
+
+  constructor(data: iGetCollectionAmountTrackerByIdSuccessResponse<T>) {
+    super();
+    this.amountTracker = new ApprovalTrackerDoc(data.amountTracker);
+  }
+
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetCollectionAmountTrackerByIdSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetCollectionAmountTrackerByIdSuccessResponse<U>;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetCollectionChallengeTrackerByIdPayload {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetCollectionChallengeTrackerByIdSuccessResponse<T extends NumberType> {
+  challengeTracker: iApprovalTrackerDoc<T>;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetCollectionChallengeTrackerByIdSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetCollectionChallengeTrackerByIdSuccessResponse<T>>
+  implements iGetCollectionChallengeTrackerByIdSuccessResponse<T>
+{
+  challengeTracker: ApprovalTrackerDoc<T>;
+
+  constructor(data: iGetCollectionChallengeTrackerByIdSuccessResponse<T>) {
+    super();
+    this.challengeTracker = new ApprovalTrackerDoc(data.challengeTracker);
+  }
+
+  convert<U extends NumberType>(
+    convertFunction: (val: NumberType) => U,
+    options?: ConvertOptions
+  ): GetCollectionChallengeTrackerByIdSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetCollectionChallengeTrackerByIdSuccessResponse<U>;
   }
 }

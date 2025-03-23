@@ -19,7 +19,7 @@ import type { GetAccountSuccessResponse, GetAccountsSuccessResponse, iGetAccount
 import { BitBadgesUserInfo } from './BitBadgesUserInfo.js';
 import type { iBitBadgesApi } from './base.js';
 import { BaseBitBadgesApi } from './base.js';
-import type { DynamicDataHandlerType, NativeAddress } from './docs/interfaces.js';
+import type { DynamicDataHandlerType, iChallengeTrackerIdDetails, NativeAddress } from './docs/interfaces.js';
 import {
   FilterBadgesInCollectionSuccessResponse,
   FilterSuggestionsSuccessResponse,
@@ -95,6 +95,8 @@ import {
   GetClaimAttemptsSuccessResponse,
   GetClaimSuccessResponse,
   GetClaimsSuccessResponse,
+  GetCollectionAmountTrackerByIdSuccessResponse,
+  GetCollectionChallengeTrackerByIdSuccessResponse,
   GetDeveloperAppSuccessResponse,
   GetDeveloperAppsSuccessResponse,
   GetDynamicDataActivitySuccessResponse,
@@ -197,6 +199,10 @@ import {
   iGetClaimPayload,
   iGetClaimsPayloadV1,
   iGetClaimsSuccessResponse,
+  iGetCollectionAmountTrackerByIdPayload,
+  iGetCollectionAmountTrackerByIdSuccessResponse,
+  iGetCollectionChallengeTrackerByIdPayload,
+  iGetCollectionChallengeTrackerByIdSuccessResponse,
   iGetDeveloperAppPayload,
   iGetDeveloperAppsPayload,
   iGetDynamicDataActivityPayload,
@@ -321,6 +327,7 @@ import {
   iGetTransferActivityForUserSuccessResponse
 } from './requests/wrappers.js';
 import { DeleteConnectedAccountSuccessResponse, GetConnectedAccountsSuccessResponse } from './responses/stripe.js';
+import { iAmountTrackerIdDetails } from '@/interfaces/index.js';
 
 /**
  * This is the BitBadgesAPI class which provides all typed API calls to the BitBadges API.
@@ -814,6 +821,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   public async createAddressLists(payload: iCreateAddressListsPayload<T>): Promise<CreateAddressListsSuccessResponse> {
     return await BitBadgesAddressList.CreateAddressList(this, payload);
   }
+
   /**
    * Updates address lists stored by BitBadges centralized servers.
    *
@@ -3083,6 +3091,50 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
         payload
       );
       return new SearchDeveloperAppsSuccessResponse<T>(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Gets a specific amount tracker by ID for a collection
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/collection/{collectionId}/amountTracker`
+   * - **SDK Function Call**: `await BitBadgesApi.getCollectionAmountTrackerById(...);`
+   */
+  public async getCollectionAmountTrackerById<T extends NumberType>(
+    trackerDetails: iAmountTrackerIdDetails<T>
+  ): Promise<GetCollectionAmountTrackerByIdSuccessResponse<T>> {
+    try {
+      const response = await this.axios.get<iGetCollectionAmountTrackerByIdSuccessResponse<T>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetCollectionAmountTrackerByIdRoute()}`,
+        { params: trackerDetails }
+      );
+      return new GetCollectionAmountTrackerByIdSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Gets a specific challenge tracker by ID for a collection
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/collection/{collectionId}/challengeTracker`
+   * - **SDK Function Call**: `await BitBadgesApi.getCollectionChallengeTrackerById(...);`
+   */
+  public async getCollectionChallengeTrackerById<T extends NumberType>(
+    trackerDetails: iChallengeTrackerIdDetails<T>
+  ): Promise<GetCollectionChallengeTrackerByIdSuccessResponse<T>> {
+    try {
+      const response = await this.axios.get<iGetCollectionChallengeTrackerByIdSuccessResponse<T>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetCollectionChallengeTrackerByIdRoute()}`,
+        { params: trackerDetails }
+      );
+      return new GetCollectionChallengeTrackerByIdSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);

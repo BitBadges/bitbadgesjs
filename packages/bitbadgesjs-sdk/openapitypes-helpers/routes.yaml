@@ -5304,7 +5304,83 @@ paths:
       security:
         - apiKey: []
       x-internal: false
+  /api/v0/collection/amountTracker:
+    get:
+      operationId: getCollectionAmountTrackerById
+      summary: Get Collection Amount Tracker By ID
+      tags:
+        - Badges
+      description: |-
+        Gets an amount tracker by ID for a collection.
 
+        ```tsx
+        await BitBadgesApi.getCollectionAmountTrackerById({ ... });
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iAmountTrackerIdDetails)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetCollectionAmountTrackerByIdSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getcollectionamounttrackerbyid)**
+      parameters:
+        - name: payload
+          in: query
+          explode: true
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
+          required: false
+          schema:
+            $ref: '#/components/schemas/iAmountTrackerIdDetails'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetCollectionAmountTrackerByIdSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+  /api/v0/collection/challengeTracker:
+    get:
+      operationId: getCollectionChallengeTrackerById
+      summary: Get Collection Challenge Tracker By ID
+      tags:
+        - Badges
+      description: |-
+        Gets a challenge tracker by ID for a collection.
+
+        ```tsx
+        await BitBadgesApi.getCollectionChallengeTrackerById({ ... });
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iChallengeTrackerIdDetails)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetCollectionChallengeTrackerByIdSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getcollectionchallengetrackerbyid)**
+      parameters:
+        - name: payload
+          in: query
+          explode: true
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
+          required: false
+          schema:
+            $ref: '#/components/schemas/iChallengeTrackerIdDetails'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetCollectionChallengeTrackerByIdSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
   /collection/{collectionId}/listings:
     get:
       operationId: getCollectionListings

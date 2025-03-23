@@ -170,4 +170,7 @@ export class BitBadgesApiRoutes {
   static GetCollectionChallengeTrackersRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/challengeTrackers`;
   static GetCollectionAmountTrackersRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/amountTrackers`;
   static GetCollectionListingsRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/listings`;
+
+  static GetCollectionAmountTrackerByIdRoute = () => `/api/v0/collection/amountTracker`;
+  static GetCollectionChallengeTrackerByIdRoute = () => `/api/v0/collection/challengeTracker`;
 }
