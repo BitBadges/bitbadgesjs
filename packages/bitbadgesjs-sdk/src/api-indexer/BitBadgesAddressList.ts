@@ -461,7 +461,7 @@ export class GetAddressListsSuccessResponse<T extends NumberType>
 /**
  * @category Interfaces
  */
-export type iAddressListCreateObject<T extends NumberType> = iAddressList & {
+export type iAddressListCreateObject<T extends NumberType> = Omit<iAddressList, 'createdBy' | 'aliasAddress'> & {
   /**
    * Flag to update addresses?. Because w/ claims there can be race conditions,
    * we have this flag.

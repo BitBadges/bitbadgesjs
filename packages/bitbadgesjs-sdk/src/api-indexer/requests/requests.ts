@@ -1471,10 +1471,10 @@ export interface iCheckSignInStatusSuccessResponse {
 /**
  * @category API Requests / Responses
  */
-export interface OAuthScopeDetailsWithId extends OAuthScopeDetails {
+export type OAuthScopeDetailsWithId = OAuthScopeDetails & {
   /**  Camel case version of the scope name. */
   scopeId: string;
-}
+};
 
 /**
  * @inheritDoc iCheckSignInStatusSuccessResponse

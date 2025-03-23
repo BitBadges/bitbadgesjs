@@ -5680,16 +5680,16 @@ components:
     userSignedIn:
       type: http
       scheme: cookie
-      description: User must be signed in with correct scopes with a valid session and correct scopes. This can be done with OAuth 2.0 or an approved sign in.
+      description: User must be signed in with correct OAuth scopes with a valid session and correct OAuth scopes. This can be done with OAuth 2.0 or an approved sign in.
     userMaybeSignedIn:
       type: http
       scheme: cookie
-      description: 'User must be signed in with correct scopes for certain requests that fetch sensitive information, but certain requests can be made without being signed in. This can be done with OAuth 2.0 or an approved sign in.'
+      description: 'User must be signed in with correct OAuth scopes for certain requests that fetch sensitive information, but certain requests can be made without being signed in. This can be done with OAuth 2.0 or an approved sign in.'
     userIsManager:
       type: http
       scheme: cookie
-      description: User must be signed in with correct scopes and be the manager of the requested collection.
+      description: User must be signed in with correct OAuth scopes and be the manager of the requested collection.
     userIsOwner:
       type: http
       scheme: cookie
-      description: User must be signed in with correct scopes and must be the owner of the requested object.
+      description: User must be signed in with correct OAuth scopes and must be the owner of the requested object.
