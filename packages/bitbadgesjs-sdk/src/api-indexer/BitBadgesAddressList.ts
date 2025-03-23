@@ -19,6 +19,7 @@ import type {
 import type { iMetadata } from './metadata/metadata.js';
 import { Metadata } from './metadata/metadata.js';
 import { BitBadgesApiRoutes } from './requests/routes.js';
+import { CreateClaimRequest } from './requests/requests.js';
 
 /**
  * @inheritDoc iAddressListDoc
@@ -37,7 +38,7 @@ export interface iBitBadgesAddressList<T extends NumberType> extends iAddressLis
       pagination: PaginationInfo;
     };
   };
-  /** The claims of the address list. */
+  /** The linked claims of the address list. */
   claims: iClaimDetails<T>[];
   /** The listings of the address list. */
   listings?: iUtilityListingDoc<T>[];
@@ -478,10 +479,8 @@ export type iAddressListCreateObject<T extends NumberType> = iAddressList & {
    */
   updateAddresses?: boolean;
 
-  /** The claims of the address list. Use resetState on updates for resetting individual plugin state (if applicable). */
-  claims: (Pick<iClaimDetails<T>, 'claimId' | 'rewards' | 'estimatedCost' | 'showInSearchResults' | 'categories' | 'estimatedTime' | 'approach'> & {
-    plugins: IntegrationPluginDetailsUpdate<ClaimIntegrationPluginType>[];
-  })[];
+  /** The linked claims of the address list. */
+  claims: CreateClaimRequest<NumberType>[];
 };
 
 /**

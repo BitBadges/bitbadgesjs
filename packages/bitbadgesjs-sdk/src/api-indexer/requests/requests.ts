@@ -3291,7 +3291,7 @@ export type ManagePluginRequest = IntegrationPluginDetailsUpdate<ClaimIntegratio
  */
 export type CreateClaimRequest<T extends NumberType> = Omit<
   iClaimDetails<T>,
-  'plugins' | 'version' | '_includesPrivateParams' | 'createdBy' | 'standaloneClaim' | 'lastUpdated'
+  'plugins' | 'version' | '_includesPrivateParams' | '_templateInfo' | 'managedBy' | 'createdBy' | 'standaloneClaim' | 'lastUpdated'
 > & {
   cid?: string;
   plugins: ManagePluginRequest[];
@@ -3301,13 +3301,24 @@ export type CreateClaimRequest<T extends NumberType> = Omit<
  * @category API Requests / Responses
  */
 export interface iCreateClaimPayload {
+  /**
+   * The claims to create.
+   *
+   * By default, it will create standalone (non-test claims) or list / collection linked claims if the
+   * corresponding fields are specified in the claim (listId, collectionId, ...).
+   *
+   * Note that collection / list linked claims require the proper permissions and have special setup
+   * required.
+   *
+   * For test claims, you must specify the `testClaims` field to be true.
+   */
   claims: CreateClaimRequest<NumberType>[];
 
-  /** Whether to create test claims (e.g. the claim tester). Used for frontend testing. */
+  /**
+   * Create test claims (e.g. the claim tester). Used for frontend testing. Test claims are auto-deleted
+   * after the browser session is terminated and do not show up in search results.
+   */
   testClaims?: boolean;
-
-  /** Whether to create standalone claims. */
-  standaloneClaim?: boolean;
 }
 
 /**
