@@ -1164,7 +1164,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * Searches for claims.
    *
    * @remarks
-   * - **API Route**: `POST /api/v0/claims/search`
+   * - **API Route**: `GET /api/v0/claims/search`
    * - **SDK Function Call**: `await BitBadgesApi.searchClaims(payload);`
    */
   public async searchClaims(payload: iSearchClaimsPayload): Promise<SearchClaimsSuccessResponse<T>> {
@@ -1174,7 +1174,9 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      const response = await this.axios.post<SearchClaimsSuccessResponse<T>>(`${this.BACKEND_URL}${BitBadgesApiRoutes.SearchClaimsRoute()}`, payload);
+      const response = await this.axios.get<SearchClaimsSuccessResponse<T>>(`${this.BACKEND_URL}${BitBadgesApiRoutes.SearchClaimsRoute()}`, {
+        params: payload
+      });
       return new SearchClaimsSuccessResponse<T>(response.data);
     } catch (error) {
       await this.handleApiError(error);
@@ -1539,7 +1541,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * Searches dynamic data stores.
    *
    * @remarks
-   * - **API Route**: `POST /api/v0/dynamicStores/search`
+   * - **API Route**: `GET /api/v0/dynamicStores/search`
    * - **SDK Function Call**: `await BitBadgesApi.searchDynamicDataStores(payload);`
    */
   public async searchDynamicDataStores<Q extends DynamicDataHandlerType>(
@@ -1551,9 +1553,9 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      const response = await this.axios.post<SearchDynamicDataStoresSuccessResponse<Q, NumberType>>(
+      const response = await this.axios.get<SearchDynamicDataStoresSuccessResponse<Q, NumberType>>(
         `${this.BACKEND_URL}${BitBadgesApiRoutes.SearchDynamicDataStoresRoute()}`,
-        payload
+        { params: payload }
       );
       return new SearchDynamicDataStoresSuccessResponse<Q, NumberType>(response.data).convert(this.ConvertFunction);
     } catch (error) {
@@ -1591,7 +1593,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * Searches for applications.
    *
    * @remarks
-   * - **API Route**: `POST /api/v0/applications/search`
+   * - **API Route**: `GET /api/v0/applications/search`
    * - **SDK Function Call**: `await BitBadgesApi.searchApplications(payload);`
    */
   public async searchApplications(payload: iSearchApplicationsPayload): Promise<SearchApplicationsSuccessResponse<T>> {
@@ -1601,9 +1603,9 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      const response = await this.axios.post<SearchApplicationsSuccessResponse<T>>(
+      const response = await this.axios.get<SearchApplicationsSuccessResponse<T>>(
         `${this.BACKEND_URL}${BitBadgesApiRoutes.SearchApplicationsRoute()}`,
-        payload
+        { params: payload }
       );
       return new SearchApplicationsSuccessResponse<T>(response.data);
     } catch (error) {
@@ -1758,14 +1760,14 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * Searches for utility listings.
    *
    * @remarks
-   * - **API Route**: `POST /api/v0/utilityListings/search`
+   * - **API Route**: `GET /api/v0/utilityListings/search`
    * - **SDK Function Call**: `await BitBadgesApi.searchUtilityListings(payload);`
    */
   public async searchUtilityListings(payload: iSearchUtilityListingsPayload): Promise<SearchUtilityListingsSuccessResponse<T>> {
     try {
-      const response = await this.axios.post<SearchUtilityListingsSuccessResponse<T>>(
+      const response = await this.axios.get<SearchUtilityListingsSuccessResponse<T>>(
         `${this.BACKEND_URL}${BitBadgesApiRoutes.SearchUtilityListingsRoute()}`,
-        payload
+        { params: payload }
       );
       return new SearchUtilityListingsSuccessResponse<T>(response.data).convert(this.ConvertFunction);
     } catch (error) {
@@ -3136,7 +3138,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * Searches for developer apps.
    *
    * @remarks
-   * - **API Route**: `POST /api/v0/developerApps/search`
+   * - **API Route**: `GET /api/v0/developerApps/search`
    * - **SDK Function Call**: `await BitBadgesApi.searchDeveloperApps(payload);`
    */
   public async searchDeveloperApps(payload: iSearchDeveloperAppsPayload): Promise<SearchDeveloperAppsSuccessResponse<T>> {
@@ -3146,9 +3148,9 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      const response = await this.axios.post<SearchDeveloperAppsSuccessResponse<T>>(
+      const response = await this.axios.get<SearchDeveloperAppsSuccessResponse<T>>(
         `${this.BACKEND_URL}${BitBadgesApiRoutes.SearchDeveloperAppsRoute()}`,
-        payload
+        { params: payload }
       );
       return new SearchDeveloperAppsSuccessResponse<T>(response.data);
     } catch (error) {
@@ -3321,7 +3323,7 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
    * Searches for plugins.
    *
    * @remarks
-   * - **API Route**: `POST /api/v0/plugins/search`
+   * - **API Route**: `GET /api/v0/plugins/search`
    * - **SDK Function Call**: `await BitBadgesApi.searchPlugins(payload);`
    */
   public async searchPlugins(payload: iSearchPluginsPayload): Promise<SearchPluginsSuccessResponse<T>> {
@@ -3331,10 +3333,9 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      const response = await this.axios.post<SearchPluginsSuccessResponse<T>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.SearchPluginsRoute()}`,
-        payload
-      );
+      const response = await this.axios.get<SearchPluginsSuccessResponse<T>>(`${this.BACKEND_URL}${BitBadgesApiRoutes.SearchPluginsRoute()}`, {
+        params: payload
+      });
       return new SearchPluginsSuccessResponse<T>(response.data);
     } catch (error) {
       await this.handleApiError(error);

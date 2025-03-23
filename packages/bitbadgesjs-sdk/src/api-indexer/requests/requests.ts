@@ -375,6 +375,33 @@ export interface iSearchClaimsPayload {
 /**
  * @category API Requests / Responses
  */
+export class SearchClaimsPayload extends CustomTypeClass<SearchClaimsPayload> implements iSearchClaimsPayload {
+  standaloneClaimsOnly?: boolean;
+  bookmark?: string;
+  fetchPrivateParams?: boolean;
+  searchValue?: string;
+
+  constructor(payload: iSearchClaimsPayload) {
+    super();
+    this.standaloneClaimsOnly = payload.standaloneClaimsOnly;
+    this.bookmark = payload.bookmark;
+    this.fetchPrivateParams = payload.fetchPrivateParams;
+    this.searchValue = payload.searchValue;
+  }
+
+  static FromQuery(query: ParsedQs): SearchClaimsPayload {
+    return new SearchClaimsPayload({
+      standaloneClaimsOnly: query.standaloneClaimsOnly === 'true',
+      bookmark: query.bookmark?.toString(),
+      fetchPrivateParams: query.fetchPrivateParams === 'true',
+      searchValue: query.searchValue?.toString()
+    });
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
 export interface iGetClaimsPayload {
   /** The claim IDs to fetch. */
   claimIds: string[];
@@ -2751,6 +2778,24 @@ export interface iSearchDeveloperAppsPayload {
 /**
  * @category API Requests / Responses
  */
+export class SearchDeveloperAppsPayload extends CustomTypeClass<SearchDeveloperAppsPayload> implements iSearchDeveloperAppsPayload {
+  bookmark?: string;
+
+  constructor(payload: iSearchDeveloperAppsPayload) {
+    super();
+    this.bookmark = payload.bookmark;
+  }
+
+  static FromQuery(query: ParsedQs): SearchDeveloperAppsPayload {
+    return new SearchDeveloperAppsPayload({
+      bookmark: query.bookmark?.toString()
+    });
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
 export interface iGetDeveloperAppPayload {}
 
 /**
@@ -3132,6 +3177,33 @@ export interface iSearchPluginsPayload {
 /**
  * @category API Requests / Responses
  */
+export class SearchPluginsPayload extends CustomTypeClass<SearchPluginsPayload> implements iSearchPluginsPayload {
+  createdPluginsOnly?: boolean;
+  bookmark?: string;
+  searchValue?: string;
+  locale?: string;
+
+  constructor(payload: iSearchPluginsPayload) {
+    super();
+    this.createdPluginsOnly = payload.createdPluginsOnly;
+    this.bookmark = payload.bookmark;
+    this.searchValue = payload.searchValue;
+    this.locale = payload.locale;
+  }
+
+  static FromQuery(query: ParsedQs): SearchPluginsPayload {
+    return new SearchPluginsPayload({
+      createdPluginsOnly: query.createdPluginsOnly === 'true',
+      bookmark: query.bookmark?.toString(),
+      searchValue: query.searchValue?.toString(),
+      locale: query.locale?.toString()
+    });
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
 export interface iGetPluginsPayload {
   /** If true, we will fetch only the specific plugin with the plugin ID (no secrets). */
   pluginIds: string[];
@@ -3409,6 +3481,24 @@ export class CreateDynamicDataStoreSuccessResponse<Q extends DynamicDataHandlerT
 export interface iSearchDynamicDataStoresPayload {
   /** The pagination bookmark to start from */
   bookmark?: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class SearchDynamicDataStoresPayload extends CustomTypeClass<SearchDynamicDataStoresPayload> implements iSearchDynamicDataStoresPayload {
+  bookmark?: string;
+
+  constructor(payload: iSearchDynamicDataStoresPayload) {
+    super();
+    this.bookmark = payload.bookmark;
+  }
+
+  static FromQuery(query: ParsedQs): SearchDynamicDataStoresPayload {
+    return new SearchDynamicDataStoresPayload({
+      bookmark: query.bookmark?.toString()
+    });
+  }
 }
 
 /**
@@ -3990,6 +4080,24 @@ export interface iSearchApplicationsPayload {
 /**
  * @category API Requests / Responses
  */
+export class SearchApplicationsPayload extends CustomTypeClass<SearchApplicationsPayload> implements iSearchApplicationsPayload {
+  bookmark?: string;
+
+  constructor(payload: iSearchApplicationsPayload) {
+    super();
+    this.bookmark = payload.bookmark;
+  }
+
+  static FromQuery(query: ParsedQs): SearchApplicationsPayload {
+    return new SearchApplicationsPayload({
+      bookmark: query.bookmark?.toString()
+    });
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
 export interface iGetApplicationPayload {}
 
 /**
@@ -4308,6 +4416,24 @@ export class GetPointsActivitySuccessResponse<T extends NumberType>
 export interface iSearchUtilityListingsPayload {
   /** The pagination bookmark to start from */
   bookmark?: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class SearchUtilityListingsPayload extends CustomTypeClass<SearchUtilityListingsPayload> implements iSearchUtilityListingsPayload {
+  bookmark?: string;
+
+  constructor(payload: iSearchUtilityListingsPayload) {
+    super();
+    this.bookmark = payload.bookmark;
+  }
+
+  static FromQuery(query: ParsedQs): SearchUtilityListingsPayload {
+    return new SearchUtilityListingsPayload({
+      bookmark: query.bookmark?.toString()
+    });
+  }
 }
 
 /**

@@ -3090,7 +3090,7 @@ paths:
         - apiKey: []
           userIsOwner: []
   /claims/search:
-    post:
+    get:
       operationId: searchClaims
       summary: Search Claims
       tags:
@@ -3113,7 +3113,15 @@ paths:
         - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#searchclaims)**
 
         Scopes:
-          - `readPrivateClaimData` - Required
+          - `readPrivateClaimData` - Required for fetching private claim data
+      parameters:
+        - in: query
+          name: payload
+          required: true
+          schema:
+            $ref: '#/components/schemas/iSearchClaimsPayload'
+          style: form
+          explode: true
       responses:
         '200':
           description: Success response
@@ -3128,13 +3136,7 @@ paths:
       security:
         - apiKey: []
           userMaybeSignedIn: []
-      parameters: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/iSearchClaimsPayload'
+
   /claims/fetch:
     post:
       operationId: getClaims
@@ -3811,14 +3813,13 @@ paths:
             schema:
               $ref: '#/components/schemas/iGetDynamicDataStoresPayload'
   /dynamicStores/search:
-    post:
+    get:
       operationId: searchDynamicDataStores
-      summary: Search Dynamic Data Stores
+      summary: Search Dynamic Data Stores For User
       tags:
         - Dynamic Stores
       description: |-
-        Searches for dynamic stores based on the provided criteria.
-
+        Searches for dynamic stores based on the provided criteria. Currently, this only gets the signed in user's dynamic stores.
 
         ```tsx
         await BitBadgesApi.searchDynamicDataStores(...);
@@ -3852,16 +3853,16 @@ paths:
           required: true
           schema:
             type: string
+        - name: payload
+          in: query
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
+          required: false
+          schema:
+            $ref: '#/components/schemas/iSearchDynamicDataStoresPayload'
       security:
         - apiKey: []
           userIsOwner: []
       x-internal: false
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/iSearchDynamicDataStoresPayload'
   /dynamicStores/activity:
     get:
       operationId: getDynamicDataActivity
@@ -3915,16 +3916,14 @@ paths:
           userSignedIn: []
       x-internal: false
   /applications/search:
-    post:
+    get:
       operationId: searchApplications
       summary: Search Applications
       tags:
         - Applications
       description: |-
-        Searches for applications based on the provided criteria.
-        This is to search user-created applications. For a public search, use
-        the search endpoint.
-
+        Searches for applications based on the provided criteria. Currently,
+        this only gets the signed in user's applications.
 
         ```tsx
         await BitBadgesApi.searchApplications(...);
@@ -3955,16 +3954,15 @@ paths:
           required: true
           schema:
             type: string
+        - name: payload
+          in: query
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
+          required: false
+          schema:
+            $ref: '#/components/schemas/iSearchApplicationsPayload'
       security:
         - apiKey: []
-          userSignedIn: []
       x-internal: false
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/iSearchApplicationsPayload'
   /applications/fetch:
     post:
       operationId: getApplications
@@ -4293,7 +4291,7 @@ paths:
             schema:
               $ref: '#/components/schemas/iGetPluginsPayload'
   /plugins/search:
-    post:
+    get:
       operationId: searchPlugins
       summary: Search Plugins
       tags:
@@ -4330,16 +4328,17 @@ paths:
           required: true
           schema:
             type: string
+        - in: query
+          explode: true
+          name: payload
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
+          required: false
+          schema:
+            $ref: '#/components/schemas/iSearchPluginsPayload'
       security:
         - apiKey: []
           userMaybeSignedIn: []
       x-internal: false
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/iSearchPluginsPayload'
   /utilityListings/fetch:
     post:
       operationId: getUtilityListings
@@ -4390,14 +4389,14 @@ paths:
             schema:
               $ref: '#/components/schemas/iGetUtilityListingsPayload'
   /utilityListings/search:
-    post:
+    get:
       operationId: searchUtilityListings
       summary: Search Utility Listings
       tags:
         - Utility Listings
       description: |-
-        Searches for utility listings based on the provided criteria. Note this is for
-        searching utility listings created by the signed in user.
+        Searches for utility listings based on the provided criteria. Currently,
+        this only gets the signed in user's utility listings.
 
         ```tsx
           await BitBadgesApi.searchUtilityListings(...);
@@ -4428,15 +4427,17 @@ paths:
           required: true
           schema:
             type: string
+        - in: query
+          explode: true
+          name: payload
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
+          required: false
+          schema:
+            $ref: '#/components/schemas/iSearchUtilityListingsPayload'
       security:
         - apiKey: []
           userSignedIn: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/iSearchUtilityListingsPayload'
+      x-internal: false
   /utilityListings:
     post:
       operationId: createUtilityListing
