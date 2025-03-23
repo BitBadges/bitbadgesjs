@@ -67,6 +67,7 @@ import {
 import type { iBadgeMetadataDetails, iCollectionMetadataDetails } from '@/api-indexer/metadata/badgeMetadata.js';
 import type { iMetadata, iMetadataWithoutInternals } from '@/api-indexer/metadata/metadata.js';
 import { Metadata } from '@/api-indexer/metadata/metadata.js';
+import { VerifyAttestationSignaturesParameters } from '@/attestations/attestations.js';
 import {
   BaseNumberTypeClass,
   ConvertOptions,
@@ -2327,15 +2328,7 @@ export class UpdateAttestationSuccessResponse extends CustomTypeClass<UpdateAtte
 /**
  * @category API Requests / Responses
  */
-export interface iVerifyAttestationPayload {
-  /**
-   * The attestation to verify.
-   *
-   * This is a replacement for the verifyAttestation(attestation) SDK function to outsource the logic
-   * to the server. Pass the attestation here in the body as you would in the SDK.
-   */
-  attestation: iAttestationDoc<NumberType>;
-}
+export interface iVerifyAttestationPayload extends VerifyAttestationSignaturesParameters {}
 
 /**
  * @category API Requests / Responses

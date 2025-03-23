@@ -123,11 +123,6 @@ export class BitBadgesApiRoutes {
   static CRUDDynamicDataStoreRoute = () => '/api/v0/dynamicStores';
   static GetDynamicDataStoreActivityRoute = () => `/api/v0/dynamicStores/activity`;
 
-  static PerformStoreActionSingleRoute = (actionName: string, dynamicDataId: string, dynamicDataSecret: string) =>
-    `/api/v0/storeActions/${actionName}/${dynamicDataId}/${dynamicDataSecret}`;
-  static PerformStoreActionBatchRoute = (dynamicDataId: string, dynamicDataSecret: string) =>
-    `/api/v0/storeActions/batch/${dynamicDataId}/${dynamicDataSecret}`;
-
   static PerformStoreActionSingleWithBodyAuthRoute = () => `/api/v0/storeActions/single`;
   static PerformStoreActionBatchWithBodyAuthRoute = () => `/api/v0/storeActions/batch`;
 

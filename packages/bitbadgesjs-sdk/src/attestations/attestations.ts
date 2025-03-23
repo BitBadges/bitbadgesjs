@@ -9,7 +9,7 @@ import { blsCreateProof, blsVerify, blsVerifyProof } from '@trevormil/bbs-signat
  */
 export const createAttestationsProof = blsCreateProof;
 
-interface VerifyAttestationsignaturesPayload {
+export interface VerifyAttestationSignaturesParameters {
   scheme: 'bbs' | 'standard' | string;
   messages: string[];
   messageFormat: 'json' | 'plaintext';
@@ -37,7 +37,7 @@ interface VerifyAttestationsignaturesPayload {
  *
  * @category SIWBB Authentication
  */
-export const verifyAttestation = async (body: VerifyAttestationsignaturesPayload) => {
+export const verifyAttestation = async (body: VerifyAttestationSignaturesParameters) => {
   await verifyAttestationSignatures(body);
 };
 
@@ -52,7 +52,7 @@ export const verifyAttestation = async (body: VerifyAttestationsignaturesPayload
  * @category SIWBB Authentication
  */
 export const verifyAttestationSignatures = async (
-  body: VerifyAttestationsignaturesPayload,
+  body: VerifyAttestationSignaturesParameters,
   options?: {
     getSignerFromProofOfIssuance?: (proofOfIssuance: { message: string; signature: string; signer: string; publicKey?: string }) => string;
   }
