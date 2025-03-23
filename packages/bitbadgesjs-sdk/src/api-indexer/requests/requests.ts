@@ -3286,12 +3286,13 @@ export class UpdateClaimSuccessResponse extends EmptyResponseClass {}
  */
 export type ManagePluginRequest = IntegrationPluginDetailsUpdate<ClaimIntegrationPluginType>;
 
-type IgnoredKeys = 'plugins' | 'version' | '_includesPrivateParams' | 'createdBy' | 'standaloneClaim' | 'lastUpdated';
-
 /**
  * @category Interfaces
  */
-export type CreateClaimRequest<T extends NumberType> = Omit<iClaimDetails<T>, IgnoredKeys> & {
+export type CreateClaimRequest<T extends NumberType> = Omit<
+  iClaimDetails<T>,
+  'plugins' | 'version' | '_includesPrivateParams' | 'createdBy' | 'standaloneClaim' | 'lastUpdated'
+> & {
   cid?: string;
   plugins: ManagePluginRequest[];
 };
