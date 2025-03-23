@@ -88,7 +88,7 @@
     "@ton/core": "^0.60.1",
     "@ton/crypto": "^3.3.0",
     "@trevormil/bbs-signatures": "^1.0.1",
-    "axios": "^1.8.2",
+    "axios": "^1.8.3",
     "bech32": "^2.0.0",
     "bip322-js": "^2.0.0",
     "blockin": "^1.3.11",
