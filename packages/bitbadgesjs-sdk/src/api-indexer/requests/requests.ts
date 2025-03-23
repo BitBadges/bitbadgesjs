@@ -6,7 +6,7 @@ import type { iBitBadgesUserInfo } from '@/api-indexer/BitBadgesUserInfo.js';
 import { BitBadgesUserInfo } from '@/api-indexer/BitBadgesUserInfo.js';
 import type { PaginationInfo } from '@/api-indexer/base.js';
 import { EmptyResponseClass } from '@/api-indexer/base.js';
-import { ClaimActivityDoc, ClaimAlertDoc, PointsActivityDoc, TransferActivityDoc } from '@/api-indexer/docs/activity.js';
+import { ClaimActivityDoc, PointsActivityDoc, TransferActivityDoc } from '@/api-indexer/docs/activity.js';
 import {
   AccessTokenDoc,
   ApiKeyDoc,
@@ -23,6 +23,7 @@ import {
 import {
   ClaimReward,
   DynamicDataHandlerType,
+  IntegrationPluginDetailsUpdate,
   iApiKeyDoc,
   iApplicationDoc,
   iApplicationPage,
@@ -49,7 +50,6 @@ import {
   type SiwbbMessage,
   type UNIXMilliTimestamp,
   type iAccessTokenDoc,
-  type iClaimAlertDoc,
   type iClaimDetails,
   type iClaimReward,
   type iCustomLink,
@@ -77,14 +77,14 @@ import { type NumberType } from '@/common/string-numbers.js';
 import type { SupportedChain } from '@/common/types.js';
 import { ClaimDetails, iChallengeDetails, iChallengeInfoDetails } from '@/core/approvals.js';
 import type { iBatchBadgeDetails } from '@/core/batch-utils.js';
-import { SiwbbChallenge, VerifySIWBBOptions, iSiwbbChallenge } from '@/core/blockin.js';
+import { VerifySIWBBOptions, iSiwbbChallenge } from '@/core/blockin.js';
 import { AttestationsProof } from '@/core/secrets.js';
 import type { iOffChainBalancesMap } from '@/core/transfers.js';
 import { UintRangeArray } from '@/core/uintRanges.js';
 import type { iAttestationsProof, iPredeterminedBalances, iUintRange } from '@/interfaces/index.js';
 import { BroadcastPostBody } from '@/node-rest-api/index.js';
-import { AndGroup, OrGroup, type AssetConditionGroup, type ChallengeParams, type VerifyChallengeOptions } from 'blockin';
-import { OwnershipRequirements, SiwbbAndGroup, SiwbbAssetConditionGroup, SiwbbChallengeParams, SiwbbOrGroup } from './blockin.js';
+import { type AssetConditionGroup, type ChallengeParams, type VerifyChallengeOptions } from 'blockin';
+import { SiwbbChallengeParams } from './blockin.js';
 
 /**
  * The response after successfully broadcasting a transaction.
@@ -977,7 +977,7 @@ export interface iAddBalancesToOffChainStoragePayload {
    */
   claims?: {
     claimId: string;
-    plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
+    plugins: IntegrationPluginDetailsUpdate<ClaimIntegrationPluginType>[];
     rewards?: iClaimReward<NumberType>[];
     estimatedCost?: string;
     estimatedTime?: string;
@@ -2309,7 +2309,7 @@ export interface iVerifyAttestationPayload {
    *
    * This is a replacement for the verifyAttestation(attestation) SDK function to outsource the logic
    * to the server. Pass the attestation here in the body as you would in the SDK.
-  */
+   */
   attestation: iAttestationDoc<NumberType>;
 }
 
@@ -3284,7 +3284,7 @@ export class UpdateClaimSuccessResponse extends EmptyResponseClass {}
 /**
  * @category Interfaces
  */
-export type ManagePluginRequest = Omit<IntegrationPluginDetails<ClaimIntegrationPluginType>, 'publicState' | 'privateState'>;
+export type ManagePluginRequest = IntegrationPluginDetailsUpdate<ClaimIntegrationPluginType>;
 
 type IgnoredKeys = 'plugins' | 'version' | '_includesPrivateParams' | 'createdBy' | 'standaloneClaim' | 'lastUpdated';
 
@@ -3293,7 +3293,6 @@ type IgnoredKeys = 'plugins' | 'version' | '_includesPrivateParams' | 'createdBy
  */
 export type CreateClaimRequest<T extends NumberType> = Omit<iClaimDetails<T>, IgnoredKeys> & {
   cid?: string;
-} & {
   plugins: ManagePluginRequest[];
 };
 
@@ -3668,7 +3667,6 @@ export interface iPerformStoreActionSuccessResponse {}
  * @category API Requests / Responses
  */
 export class PerformStoreActionSuccessResponse extends EmptyResponseClass {}
-
 
 /**
  * @category API Requests / Responses

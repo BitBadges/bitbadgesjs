@@ -1030,6 +1030,12 @@ export interface IntegrationPluginDetails<T extends ClaimIntegrationPluginType> 
   publicState: ClaimIntegrationPublicStateType<T>;
   /** The private state of the plugin. This is the exact state used by BitBadges behind the scenes. */
   privateState?: ClaimIntegrationPrivateStateType<T>;
+}
+
+/**
+ * @category Claims
+ */
+export interface IntegrationPluginDetailsUpdate<T extends ClaimIntegrationPluginType> extends IntegrationPluginParams<T> {
   /** If resetState = true, we will reset the state of the plugin back to default. If false, we will keep the current state. Incompatible with newState. */
   resetState?: boolean;
   /**

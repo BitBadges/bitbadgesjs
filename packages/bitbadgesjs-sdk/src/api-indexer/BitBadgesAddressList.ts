@@ -10,8 +10,7 @@ import { ListActivityDoc } from './docs/activity.js';
 import { AddressListDoc, UtilityListingDoc } from './docs/docs.js';
 import type {
   ClaimIntegrationPluginType,
-  ClaimReward,
-  IntegrationPluginDetails,
+  IntegrationPluginDetailsUpdate,
   iAddressListDoc,
   iClaimDetails,
   iListActivityDoc,
@@ -481,7 +480,7 @@ export type iAddressListCreateObject<T extends NumberType> = iAddressList & {
 
   /** The claims of the address list. Use resetState on updates for resetting individual plugin state (if applicable). */
   claims: (Pick<iClaimDetails<T>, 'claimId' | 'rewards' | 'estimatedCost' | 'showInSearchResults' | 'categories' | 'estimatedTime' | 'approach'> & {
-    plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
+    plugins: IntegrationPluginDetailsUpdate<ClaimIntegrationPluginType>[];
   })[];
 };
 

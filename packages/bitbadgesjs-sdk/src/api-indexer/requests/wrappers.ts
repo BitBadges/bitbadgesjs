@@ -401,38 +401,6 @@ export class GetTransferActivityForUserSuccessResponse<T extends NumberType>
 }
 
 /**
- * @category API Requests / Responses
- */
-export interface iGetListActivityForUserSuccessResponse<T extends NumberType> extends iBaseSuccessResponse {
-  listActivity: Array<iListActivityDoc<T>>;
-}
-
-/**
- * @category API Requests / Responses
- */
-export class GetListActivityForUserSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetListActivityForUserSuccessResponse<T>>
-  implements iGetListActivityForUserSuccessResponse<T>
-{
-  listActivity: ListActivityDoc<T>[];
-  pagination: PaginationInfo;
-
-  constructor(data: iGetListActivityForUserSuccessResponse<T>) {
-    super();
-    this.listActivity = data.listActivity.map((activity) => new ListActivityDoc(activity));
-    this.pagination = data.pagination;
-  }
-
-  getNumberFieldNames(): string[] {
-    return [];
-  }
-
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetListActivityForUserSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetListActivityForUserSuccessResponse<U>;
-  }
-}
-
-/**
  * @category API Requests / Responses */
 export interface iGetBadgesViewForUserSuccessResponse<T extends NumberType> extends iBaseSuccessResponse {
   badges: Array<iBalanceDocWithDetails<T>>;
