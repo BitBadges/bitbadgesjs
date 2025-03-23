@@ -2062,33 +2062,32 @@ export class GenericBlockinVerifySuccessResponse extends VerifySignInSuccessResp
 /**
  * @category API Requests / Responses
  */
-export interface iCreateAttestationPayload
-  extends Pick<
-    AttestationDoc<NumberType>,
-    | 'originalProvider'
-    | 'proofOfIssuance'
-    | 'messageFormat'
-    | 'scheme'
-    | 'messages'
-    | 'dataIntegrityProof'
-    | 'name'
-    | 'image'
-    | 'description'
-    | 'publicVisibility'
-  > {
+export type iCreateAttestationPayload = Pick<
+  AttestationDoc<NumberType>,
+  | 'originalProvider'
+  | 'proofOfIssuance'
+  | 'messageFormat'
+  | 'scheme'
+  | 'messages'
+  | 'dataIntegrityProof'
+  | 'name'
+  | 'image'
+  | 'description'
+  | 'publicVisibility'
+> & {
   /** Blockchain anchors to add to the attestation. These are on-chain transactions that can be used to prove stuff about the attestation, like
    * existence at a certain point in time or to maintain data integrity. */
   anchors?: {
     txHash?: string;
     message?: string;
   }[];
-}
+};
 
 /**
  * @category API Requests / Responses
  */
 export interface iCreateAttestationSuccessResponse {
-  /** The attestation invite code. This is the code that is given to the user to query the attestation. Anyone with the code can query it, so keep this safe and secure. */
+  /** The attestation invite code to give to others to add / view / query (where applicable) */
   inviteCode: string;
 
   /** The attestation ID. */
@@ -3635,7 +3634,7 @@ export class GetDynamicDataStoreSuccessResponse<Q extends DynamicDataHandlerType
  */
 export interface iGetDynamicDataStoresPayload {
   /** The IDs to fetch. If not provided, all dynamic data stores will be fetched for the current signed in address without any data populated. */
-  dynamicDataId: string;
+  dynamicDataIds: string[];
   /** The data secret to fetch. Only needed if you are not signed in as creator. */
   dataSecret?: string;
 }
