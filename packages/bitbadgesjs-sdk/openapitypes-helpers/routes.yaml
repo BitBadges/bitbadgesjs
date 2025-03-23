@@ -1171,6 +1171,108 @@ paths:
       security:
         - apiKey: []
       x-internal: false
+  /dynamicStore/{dynamicStoreId}/{key}:
+    get:
+      operationId: getDynamicDataStoreValue
+      summary: Get Dynamic Data Store Value
+      tags:
+        - Dynamic Stores
+      description: |-
+        Gets a value from a dynamic data store by specific ID and key.
+
+        ```tsx
+        await BitBadgesApi.getDynamicDataStoreValue("dynamicStore123", "key123", { ... });
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetDynamicDataStoreValuePayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetDynamicDataStoreValueSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getdynamicDataStoreValue)**
+
+        Scopes:
+          - `manageDynamicDataStores` - Required and must be owner. You can also specify the dataSecret.
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetDynamicDataStoreValueSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      parameters:
+        - name: dynamicStoreId
+          in: path
+          description: Dynamic data store ID
+          required: true
+          schema:
+            type: string
+        - name: key
+          in: path
+          description: Key
+          required: true
+          schema:
+            type: string
+        - in: query
+          explode: true
+          name: payload
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
+          required: false
+          schema:
+            $ref: '#/components/schemas/iGetDynamicDataStoreValuePayload'
+      security:
+        - apiKey: []
+      x-internal: false
+  /dynamicStore/{dynamicStoreId}/values:
+    get:
+      operationId: getDynamicDataStoreValuesPaginated
+      summary: Get Dynamic Data Store Values Paginated
+      tags:
+        - Dynamic Stores
+      description: |-
+        Gets a paginated list of values from a dynamic data store by specific ID.
+
+        ```tsx
+        await BitBadgesApi.getDynamicDataStoreValuesPaginated("dynamicStore123", { ... });
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetDynamicDataStoreValuesPaginatedPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetDynamicDataStoreValuesPaginatedSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getdynamicDataStoreValuesPaginated)**
+
+        Scopes:
+          - `manageDynamicDataStores` - Required and must be owner.
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetDynamicDataStoreValuesPaginatedSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      parameters:
+        - name: dynamicStoreId
+          in: path
+          description: Dynamic data store ID
+          required: true
+          schema:
+            type: string
+        - in: query
+          explode: true
+          name: payload
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
+          required: false
+          schema:
+            $ref: '#/components/schemas/iGetDynamicDataStoreValuesPaginatedPayload'
+      security:
+        - apiKey: []
+      x-internal: false
   /dynamicStores:
     post:
       operationId: createDynamicDataStore
@@ -2053,6 +2155,11 @@ paths:
 
         Scopes:
           - `manageAddressLists` - Required
+
+        Warning: The claims object expects all claims to be provided. If any are not provided, they will not be included moving forward and will
+        be deleted. To update an individual claim, you can use the update claim endpoint.
+
+        Note: This is legacy. Please use the simpler update functions for more fine-grained updates.
       requestBody:
         required: true
         content:
@@ -2643,8 +2750,7 @@ paths:
       tags:
         - Maps and Protocols
       description: |-
-        Gets map data. Maps are created and stored on-chain. They are key-value objects which can have certain properties
-        like restricting who sets which values, expected formatting, and more.
+        Gets the core details of a map.
 
         For getting actual values, use the getMapValues endpoint(s).
 
@@ -2692,7 +2798,7 @@ paths:
   /maps:
     post:
       operationId: getMaps
-      summary: Get Maps
+      summary: Get Maps - Batch
       tags:
         - Maps and Protocols
       description: |-
@@ -2732,7 +2838,7 @@ paths:
   /mapValues:
     post:
       operationId: getMapValues
-      summary: Get Map Values
+      summary: Get Map Values - Batch
       tags:
         - Maps and Protocols
       description: |-
@@ -2772,7 +2878,7 @@ paths:
       tags:
         - Maps and Protocols
       description: |-
-        Gets a map iValueStore.value
+        Gets a map value.
 
         ```tsx
         const res = await BitBadgesApi.getMapValue(...);

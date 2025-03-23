@@ -1,6 +1,7 @@
 import type { NumberType } from '@/common/string-numbers.js';
 import { BitBadgesCollection, GetCollectionsSuccessResponse, iGetCollectionsPayload } from './BitBadgesCollection.js';
 
+import { iAmountTrackerIdDetails } from '@/interfaces/index.js';
 import typia from 'typia';
 import {
   BitBadgesAddressList,
@@ -19,7 +20,7 @@ import type { GetAccountSuccessResponse, GetAccountsSuccessResponse, iGetAccount
 import { BitBadgesUserInfo } from './BitBadgesUserInfo.js';
 import type { iBitBadgesApi } from './base.js';
 import { BaseBitBadgesApi } from './base.js';
-import type { DynamicDataHandlerType, iChallengeTrackerIdDetails, NativeAddress } from './docs/interfaces.js';
+import type { DynamicDataHandlerType, NativeAddress, iChallengeTrackerIdDetails } from './docs/interfaces.js';
 import {
   FilterBadgesInCollectionSuccessResponse,
   FilterSuggestionsSuccessResponse,
@@ -101,6 +102,8 @@ import {
   GetDeveloperAppsSuccessResponse,
   GetDynamicDataActivitySuccessResponse,
   GetDynamicDataStoreSuccessResponse,
+  GetDynamicDataStoreValueSuccessResponse,
+  GetDynamicDataStoreValuesPaginatedSuccessResponse,
   GetDynamicDataStoresSuccessResponse,
   GetGatedContentForClaimSuccessResponse,
   GetOrCreateEmbeddedWalletSuccessResponse,
@@ -199,14 +202,14 @@ import {
   iGetClaimPayload,
   iGetClaimsPayloadV1,
   iGetClaimsSuccessResponse,
-  iGetCollectionAmountTrackerByIdPayload,
   iGetCollectionAmountTrackerByIdSuccessResponse,
-  iGetCollectionChallengeTrackerByIdPayload,
   iGetCollectionChallengeTrackerByIdSuccessResponse,
   iGetDeveloperAppPayload,
   iGetDeveloperAppsPayload,
   iGetDynamicDataActivityPayload,
   iGetDynamicDataStorePayload,
+  iGetDynamicDataStoreValuePayload,
+  iGetDynamicDataStoreValuesPaginatedPayload,
   iGetDynamicDataStoresPayload,
   iGetDynamicDataStoresSuccessResponse,
   iGetGatedContentForClaimPayload,
@@ -232,7 +235,6 @@ import {
   iGetUtilityListingsPayload,
   iOauthRevokePayload,
   iPerformStoreActionBatchWithBodyAuthPayload,
-  iPerformStoreActionPayload,
   iPerformStoreActionSingleWithBodyAuthPayload,
   iRotateApiKeyPayload,
   iRotateSIWBBRequestPayload,
@@ -327,7 +329,6 @@ import {
   iGetTransferActivityForUserSuccessResponse
 } from './requests/wrappers.js';
 import { DeleteConnectedAccountSuccessResponse, GetConnectedAccountsSuccessResponse } from './responses/stripe.js';
-import { iAmountTrackerIdDetails } from '@/interfaces/index.js';
 
 /**
  * This is the BitBadgesAPI class which provides all typed API calls to the BitBadges API.
@@ -2672,6 +2673,65 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
+   * Get a dynamic data store value by ID.
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/dynamicStore/:dynamicStoreId/:key`
+   * - **SDK Function Call**: `await BitBadgesApi.getDynamicDataStoreValue(dynamicStoreId, { ... });`
+   */
+  public async getDynamicDataStoreValue(
+    dynamicStoreId: string,
+    key: string,
+    payload?: iGetDynamicDataStoreValuePayload
+  ): Promise<GetDynamicDataStoreValueSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<iGetDynamicDataStoreValuePayload> = typia.validate<iGetDynamicDataStoreValuePayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<GetDynamicDataStoreValueSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetDynamicDataStoreValueRoute(dynamicStoreId, key)}`,
+        { params: payload }
+      );
+      return new GetDynamicDataStoreValueSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Get a dynamic data store values paginated by ID.
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/dynamicStore/:dynamicStoreId/values`
+   * - **SDK Function Call**: `await BitBadgesApi.getDynamicDataStoreValuesPaginated(dynamicStoreId, { ... });`
+   */
+  public async getDynamicDataStoreValuesPaginated<Q extends DynamicDataHandlerType>(
+    dynamicStoreId: string,
+    payload?: iGetDynamicDataStoreValuesPaginatedPayload
+  ): Promise<GetDynamicDataStoreValuesPaginatedSuccessResponse<Q, T>> {
+    try {
+      const validateRes: typia.IValidation<iGetDynamicDataStoreValuesPaginatedPayload> = typia.validate<iGetDynamicDataStoreValuesPaginatedPayload>(
+        payload ?? {}
+      );
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<GetDynamicDataStoreValuesPaginatedSuccessResponse<Q, T>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetDynamicDataStoreValuesPaginatedRoute(dynamicStoreId)}`,
+        { params: payload }
+      );
+      return new GetDynamicDataStoreValuesPaginatedSuccessResponse<Q, T>(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
    * Get plugin by ID.
    *
    * @remarks
@@ -3101,7 +3161,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * Gets a specific amount tracker by ID for a collection
    *
    * @remarks
-   * - **API Route**: `GET /api/v0/collection/{collectionId}/amountTracker`
+   * - **API Route**: `GET /api/v0/collection/amountTracker`
    * - **SDK Function Call**: `await BitBadgesApi.getCollectionAmountTrackerById(...);`
    */
   public async getCollectionAmountTrackerById<T extends NumberType>(
@@ -3123,7 +3183,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * Gets a specific challenge tracker by ID for a collection
    *
    * @remarks
-   * - **API Route**: `GET /api/v0/collection/{collectionId}/challengeTracker`
+   * - **API Route**: `GET /api/v0/collection/challengeTracker`
    * - **SDK Function Call**: `await BitBadgesApi.getCollectionChallengeTrackerById(...);`
    */
   public async getCollectionChallengeTrackerById<T extends NumberType>(

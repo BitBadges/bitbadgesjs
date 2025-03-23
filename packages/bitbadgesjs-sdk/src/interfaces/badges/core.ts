@@ -291,17 +291,17 @@ export interface iAddressList {
   uri: string;
 
   /**
-   * Arbitrary custom data that can be stored on-chain.
+   * Arbitrary custom data that can be stored.
    */
   customData: string;
 
   /**
-   * The address that created the address list.
+   * The address that created the address list. Handled internally.
    */
   createdBy?: BitBadgesAddress;
 
   /**
-   * The alias BitBadges address of the address list.
+   * The alias BitBadges address of the address list. Handled internally.
    */
   aliasAddress?: BitBadgesAddress;
 }

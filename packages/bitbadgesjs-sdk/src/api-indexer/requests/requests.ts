@@ -31,7 +31,6 @@ import {
   iApplicationPage,
   iApprovalTrackerDoc,
   iAttestationDoc,
-  iChallengeTrackerIdDetails,
   iClaimActivityDoc,
   iDynamicDataDoc,
   iEstimatedCost,
@@ -84,7 +83,7 @@ import { VerifySIWBBOptions, iSiwbbChallenge } from '@/core/blockin.js';
 import { AttestationsProof } from '@/core/secrets.js';
 import type { iOffChainBalancesMap } from '@/core/transfers.js';
 import { UintRangeArray } from '@/core/uintRanges.js';
-import type { iAmountTrackerIdDetails, iAttestationsProof, iPredeterminedBalances, iUintRange } from '@/interfaces/index.js';
+import type { iAttestationsProof, iPredeterminedBalances, iUintRange } from '@/interfaces/index.js';
 import { BroadcastPostBody } from '@/node-rest-api/index.js';
 import { type AssetConditionGroup, type ChallengeParams, type VerifyChallengeOptions } from 'blockin';
 import { SiwbbChallengeParams } from './blockin.js';
@@ -3415,6 +3414,100 @@ export interface iSearchDynamicDataStoresPayload {
 /**
  * @category API Requests / Responses
  */
+export interface iGetDynamicDataStoreValuesPaginatedPayload {
+  /** The data secret to fetch. Only needed if you are not signed in as creator. */
+  dataSecret?: string;
+  /** The pagination bookmark to start from */
+  bookmark?: string;
+  /** The lookup type to fetch (if you need to specify). */
+  lookupType?: 'id' | 'username';
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetDynamicDataStoreValuesPaginatedSuccessResponse<Q extends DynamicDataHandlerType, T extends NumberType> {
+  /** The lookup values for the dynamic data store */
+  lookupValues: {
+    /** The key of the lookup value */
+    key: string;
+    /** The lookup type of the lookup value */
+    lookupType?: 'id' | 'username';
+    /** Whether the lookup value is in the store */
+    inStore: boolean;
+  }[];
+
+  pagination: PaginationInfo;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetDynamicDataStoreValuesPaginatedSuccessResponse<Q extends DynamicDataHandlerType, T extends NumberType>
+  extends BaseNumberTypeClass<GetDynamicDataStoreValuesPaginatedSuccessResponse<Q, T>>
+  implements iGetDynamicDataStoreValuesPaginatedSuccessResponse<Q, T>
+{
+  lookupValues: {
+    key: string;
+    lookupType?: 'id' | 'username';
+    inStore: boolean;
+  }[];
+
+  pagination: PaginationInfo;
+
+  constructor(data: iGetDynamicDataStoreValuesPaginatedSuccessResponse<Q, T>) {
+    super();
+    this.lookupValues = data.lookupValues;
+    this.pagination = data.pagination;
+  }
+
+  convert<U extends NumberType>(
+    convertFunction: (item: NumberType) => U,
+    options?: ConvertOptions
+  ): GetDynamicDataStoreValuesPaginatedSuccessResponse<Q, U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetDynamicDataStoreValuesPaginatedSuccessResponse<Q, U>;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetDynamicDataStoreValuePayload {
+  /** The data secret to fetch. Only needed if you are not signed in as creator. */
+  dataSecret?: string;
+  /** The lookup type to fetch (if you need to specify). */
+  lookupType?: 'id' | 'username';
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetDynamicDataStoreValueSuccessResponse {
+  lookupValue: {
+    key: string;
+    lookupType?: 'id' | 'username';
+    inStore: boolean;
+  };
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetDynamicDataStoreValueSuccessResponse
+  extends CustomTypeClass<GetDynamicDataStoreValueSuccessResponse>
+  implements iGetDynamicDataStoreValueSuccessResponse
+{
+  lookupValue: { key: string; lookupType?: 'id' | 'username'; inStore: boolean };
+
+  constructor(data: iGetDynamicDataStoreValueSuccessResponse) {
+    super();
+    this.lookupValue = data.lookupValue;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
 export interface iGetDynamicDataStorePayload {
   /** The data secret to fetch. Only needed if you are not signed in as creator. */
   dataSecret?: string;
@@ -3454,16 +3547,6 @@ export interface iGetDynamicDataStoresPayload {
   dynamicDataId: string;
   /** The data secret to fetch. Only needed if you are not signed in as creator. */
   dataSecret?: string;
-  /** Fetch all data for the dynamic data store. Not compatible with lookupKeys and will override bookmark. */
-  fetchAllData?: boolean;
-  /** The pagination bookmark to start from for fetching the data in this store. Not compatible with lookupKeys. */
-  bookmark?: string;
-  /** Keys to lookup by. Not compatible with bookmark. */
-  lookupKeys?: {
-    key: string;
-    /** The type of lookup to perform (if applicable). Otherwise, leave blank. Only applicable if dynamic data ID is provided. */
-    lookupType?: 'id' | 'username';
-  }[];
 }
 
 /**
@@ -3471,11 +3554,6 @@ export interface iGetDynamicDataStoresPayload {
  */
 export interface iGetDynamicDataStoresSuccessResponse<Q extends DynamicDataHandlerType, T extends NumberType> {
   docs: (iDynamicDataDoc<Q, T> | undefined)[];
-  lookupValues: {
-    key: string;
-    lookupType?: 'id' | 'username';
-    inStore: boolean;
-  }[];
   pagination: {
     bookmark: string;
     hasMore: boolean;
@@ -3490,7 +3568,6 @@ export class GetDynamicDataStoresSuccessResponse<Q extends DynamicDataHandlerTyp
   implements iGetDynamicDataStoresSuccessResponse<Q, T>
 {
   docs: (DynamicDataDoc<Q, T> | undefined)[];
-  lookupValues: { key: string; lookupType?: 'id' | 'username'; inStore: boolean }[];
   pagination: {
     bookmark: string;
     hasMore: boolean;
@@ -3499,7 +3576,6 @@ export class GetDynamicDataStoresSuccessResponse<Q extends DynamicDataHandlerTyp
   constructor(data: iGetDynamicDataStoresSuccessResponse<Q, T>) {
     super();
     this.docs = data.docs.map((doc) => (doc ? new DynamicDataDoc<Q, T>(doc) : undefined));
-    this.lookupValues = data.lookupValues;
     this.pagination = data.pagination;
   }
 

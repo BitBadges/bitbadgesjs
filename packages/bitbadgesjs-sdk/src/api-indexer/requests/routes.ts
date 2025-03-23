@@ -114,6 +114,10 @@ export class BitBadgesApiRoutes {
   static GetCodesFromSeedHelperRoute = () => '/api/v0/codes';
 
   static GetDynamicDataStoreRoute = (dynamicStoreId: string) => `/api/v0/dynamicStore/${dynamicStoreId.toString()}`;
+  static GetDynamicDataStoreValueRoute = (dynamicStoreId: string, key: string) =>
+    `/api/v0/dynamicStore/${dynamicStoreId.toString()}/${key.toString()}`;
+  static GetDynamicDataStoreValuesPaginatedRoute = (dynamicStoreId: string) => `/api/v0/dynamicStore/${dynamicStoreId.toString()}/values`;
+
   static GetDynamicDataStoresRoute = () => '/api/v0/dynamicStores/fetch';
   static SearchDynamicDataStoresRoute = () => '/api/v0/dynamicStores/search';
   static CRUDDynamicDataStoreRoute = () => '/api/v0/dynamicStores';
