@@ -5655,7 +5655,7 @@ paths:
         Gets the attempt data for a specific claim attempt from the requestBin plugin.
 
         Pre-Req: Your claim must be setup with a "requestBin" plugin. On the site, it will be titled
-        "Collect User Inputs".
+        "Collect User Inputs". If there is none, this will fail.
 
         ```tsx
         await BitBadgesApi.getAttemptDataFromRequestBin("claim123", "attempt123", { ... });

@@ -1060,12 +1060,15 @@ export class AddBalancesToOffChainStorageSuccessResponse
  */
 export interface iUploadBalancesPayload {
   /**
-   * A JSON map of BitBadges addresses or list IDs -> iBalance<NumberType>[]. This will overwrite ALL balances for the collection.
+   * A JSON map of BitBadges addresses or list IDs -> iBalance<NumberType>[].
+   * This will overwrite ALL balances for the collection.
+   *
+   * IMPORTANT: Ensure the keys are BitBadges converted addresses, not native addresses.
    */
   balances: iOffChainBalancesMap<NumberType>;
 
   /**
-   * The collection ID.
+   * The collection ID to update balances for.
    */
   collectionId: NumberType;
 }
