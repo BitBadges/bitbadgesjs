@@ -3550,6 +3550,8 @@ export class GetDynamicDataStoreValuesPaginatedSuccessResponse<Q extends Dynamic
  * @category API Requests / Responses
  */
 export interface iGetDynamicDataStoreValuePayload {
+  /** The key to fetch. */
+  key: string;
   /** The data secret to fetch. Only needed if you are not signed in as creator. */
   dataSecret?: string;
   /** The lookup type to fetch (if you need to specify). */
@@ -3560,11 +3562,9 @@ export interface iGetDynamicDataStoreValuePayload {
  * @category API Requests / Responses
  */
 export interface iGetDynamicDataStoreValueSuccessResponse {
-  lookupValue: {
-    key: string;
-    lookupType?: 'id' | 'username';
-    inStore: boolean;
-  };
+  key: string;
+  lookupType?: 'id' | 'username';
+  inStore: boolean;
 }
 
 /**
@@ -3574,11 +3574,15 @@ export class GetDynamicDataStoreValueSuccessResponse
   extends CustomTypeClass<GetDynamicDataStoreValueSuccessResponse>
   implements iGetDynamicDataStoreValueSuccessResponse
 {
-  lookupValue: { key: string; lookupType?: 'id' | 'username'; inStore: boolean };
+  key: string;
+  lookupType?: 'id' | 'username';
+  inStore: boolean;
 
   constructor(data: iGetDynamicDataStoreValueSuccessResponse) {
     super();
-    this.lookupValue = data.lookupValue;
+    this.key = data.key;
+    this.lookupType = data.lookupType;
+    this.inStore = data.inStore;
   }
 }
 

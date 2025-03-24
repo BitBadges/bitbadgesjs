@@ -94,10 +94,29 @@ export interface VerifySIWBBOptions {
   skipAssetVerification?: boolean;
 }
 
+/** @category SIWBB Authentication */
+export interface AdditionalQueryParams {
+  /** We will display this claim on the authorize screen. Just for display purpses. This is still to be checked by you post-authentication. */
+  claimId?: string;
+  /** For the claimId, we will hide the claim if the user has already completed it (successCount >= 1). */
+  hideIfAlreadyClaimed?: boolean;
+  /**
+   * We will expect the claim verification to succeed. If false, we will not let user attempt to sign in.
+   *
+   * Note: This is not a replacement for checking the claim on your side because users can manipulate the client-side URL parameters.
+   */
+  expectVerifySuccess?: boolean;
+  /**
+   * We will expect the user to provide attestations. Consider adding an additional instructions to the user for which ones
+   * to present. You still need to check the attestations on your side.
+   */
+  expectAttestations?: boolean;
+}
+
 /**
  * @category SIWBB Authentication
  */
-export interface CodeGenQueryParams {
+export interface CodeGenQueryParams extends AdditionalQueryParams {
   /**
    * The redirect URI to redirect to after the user signs in. Must match the one in developer portal.
    */
@@ -114,22 +133,6 @@ export interface CodeGenQueryParams {
    * The scopes to request (e.g. `completeClaims,approveSignInWithBitBadges`).
    */
   scope?: string;
-
-  /** We will display this claim on the authorize screen. Just for display purpses. This is still to be checked by you post-authentication. */
-  claimId?: string;
-  /** For the claimId, we will hide the claim if the user has already completed it (successCount >= 1). */
-  hideIfAlreadyClaimed?: boolean;
-  /**
-   * We will expect the claim verification to succeed. If false, we will not let user attempt to sign in.
-   *
-   * Note: This is not a replacement for checking the claim on your side because users can manipulate the client-side URL parameters.
-  */
-  expectVerifySuccess?: boolean;
-  /**
-   * We will expect the user to provide attestations. Consider adding an additional instructions to the user for which ones
-   * to present. You still need to check the attestations on your side.
-   */
-  expectAttestations?: boolean;
 }
 
 /**

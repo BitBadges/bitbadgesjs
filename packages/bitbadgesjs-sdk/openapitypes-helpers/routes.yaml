@@ -1176,7 +1176,7 @@ paths:
       security:
         - apiKey: []
       x-internal: false
-  /dynamicStore/{dynamicStoreId}/{key}:
+  /dynamicStore/{dynamicStoreId}/value:
     get:
       operationId: getDynamicDataStoreValue
       summary: Get Dynamic Data Store Value
@@ -1186,7 +1186,7 @@ paths:
         Gets a value from a dynamic data store by specific ID and key.
 
         ```tsx
-        await BitBadgesApi.getDynamicDataStoreValue("dynamicStore123", "key123", { ... });
+        await BitBadgesApi.getDynamicDataStoreValue("dynamicStore123", { key: "key123", ... });
         ```
 
         SDK Links:
@@ -1211,12 +1211,6 @@ paths:
         - name: dynamicStoreId
           in: path
           description: Dynamic data store ID
-          required: true
-          schema:
-            type: string
-        - name: key
-          in: path
-          description: Key
           required: true
           schema:
             type: string

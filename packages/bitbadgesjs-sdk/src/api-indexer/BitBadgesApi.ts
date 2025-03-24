@@ -85,6 +85,7 @@ import {
   GenerateAppleWalletPassSuccessResponse,
   GenerateGoogleWalletSuccessResponse,
   GenericBlockinVerifySuccessResponse,
+  GenericVerifyAssetsSuccessResponse,
   GetActiveAuthorizationsSuccessResponse,
   GetApiKeysSuccessResponse,
   GetApplicationSuccessResponse,
@@ -189,6 +190,8 @@ import {
   iGenerateGoogleWalletPayload,
   iGenericBlockinVerifyPayload,
   iGenericBlockinVerifySuccessResponse,
+  iGenericVerifyAssetsPayload,
+  iGenericVerifyAssetsSuccessResponse,
   iGetActiveAuthorizationsPayload,
   iGetApiKeysPayload,
   iGetApplicationPayload,
@@ -316,6 +319,7 @@ import {
   iGetCollectionListingsSuccessResponse,
   iGetCollectionOwnersPayload,
   iGetCollectionOwnersSuccessResponse,
+  iGetCollectionPayload,
   iGetCollectionSuccessResponse,
   iGetCollectionTransferActivityPayload,
   iGetCollectionTransferActivitySuccessResponse,
@@ -2317,10 +2321,11 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * console.log(res);
    * ```
    * */
-  public async getCollection(collectionId: NumberType): Promise<GetCollectionSuccessResponse<T>> {
+  public async getCollection(collectionId: NumberType, payload?: iGetCollectionPayload): Promise<GetCollectionSuccessResponse<T>> {
     try {
       const response = await this.axios.get<iGetCollectionSuccessResponse<string>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetCollectionRoute(collectionId)}`
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetCollectionRoute(collectionId)}`,
+        { params: payload }
       );
       return new GetCollectionSuccessResponse(response.data).convert(this.ConvertFunction);
     } catch (error) {
@@ -2683,7 +2688,6 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    */
   public async getDynamicDataStoreValue(
     dynamicStoreId: string,
-    key: string,
     payload?: iGetDynamicDataStoreValuePayload
   ): Promise<GetDynamicDataStoreValueSuccessResponse> {
     try {
@@ -2693,7 +2697,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
       }
 
       const response = await this.axios.get<GetDynamicDataStoreValueSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetDynamicDataStoreValueRoute(dynamicStoreId, key)}`,
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetDynamicDataStoreValueRoute(dynamicStoreId)}`,
         { params: payload }
       );
       return new GetDynamicDataStoreValueSuccessResponse(response.data);
@@ -2946,6 +2950,31 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
         payload
       );
       return new GenerateAppleWalletPassSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * A generic route for verifying asset ownership requirements. Asset requirements support AND / OR / NOT logic.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/verifyOwnershipRequirements`
+   * - **SDK Function Call**: `await BitBadgesApi.verifyOwnershipRequirements(payload);`
+   */
+  public async verifyOwnershipRequirements(payload: iGenericVerifyAssetsPayload): Promise<GenericVerifyAssetsSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<iGenericVerifyAssetsPayload> = typia.validate<iGenericVerifyAssetsPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.post<iGenericVerifyAssetsSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GenericVerifyAssetsRoute()}`,
+        payload
+      );
+      return new GenericVerifyAssetsSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);

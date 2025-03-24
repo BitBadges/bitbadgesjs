@@ -1,4 +1,4 @@
-import type { ConvertOptions, CustomType } from '@/common/base.js';
+import type { ConvertOptions, CustomType, ParsedQs } from '@/common/base.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, getConverterFunction } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import { AddressList } from '@/core/addressLists.js';
@@ -91,7 +91,7 @@ export interface iBitBadgesUserInfo<T extends NumberType> extends iProfileDoc<T>
    * For advanced cases where you want a custom address or account for a collection or list. We map it to an account.
    *
    * Experimental - For example, if you want to send a badge to a collection, you can transfer it to the alias account.
-  */
+   */
   alias?: {
     collectionId?: T;
     listId?: string;
@@ -242,7 +242,9 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      const response = await api.axios.post<iGetAccountSuccessResponse<string>>(`${api.BACKEND_URL}${BitBadgesApiRoutes.GetAccountRoute()}`, params);
+      const response = await api.axios.get<iGetAccountSuccessResponse<string>>(`${api.BACKEND_URL}${BitBadgesApiRoutes.GetAccountRoute()}`, {
+        params: new GetAccountPayload(params)
+      });
       return new GetAccountSuccessResponse(response.data).convert(api.ConvertFunction);
     } catch (error) {
       await api.handleApiError(error);
@@ -828,6 +830,26 @@ export type AccountFetchDetails = {
 export interface iGetAccountPayload {
   address?: NativeAddress;
   username?: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetAccountPayload {
+  address?: NativeAddress;
+  username?: string;
+
+  constructor(data: iGetAccountPayload) {
+    this.address = data.address;
+    this.username = data.username;
+  }
+
+  static FromQuery(query: ParsedQs): GetAccountPayload {
+    return new GetAccountPayload({
+      address: query.address as NativeAddress,
+      username: query.username as string
+    });
+  }
 }
 
 /**

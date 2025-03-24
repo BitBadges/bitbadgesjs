@@ -38,6 +38,7 @@ export class BitBadgesApiRoutes {
   static GetGatedContentForClaimRoute = (claimId: string) => `/api/v0/claims/gatedContent/${claimId.toString()}`;
 
   static GetPluginErrorsRoute = () => `/api/v0/plugins/errors`;
+  static GenericVerifyAssetsRoute = () => '/api/v0/verifyOwnershipRequirements';
 
   static GetClaimRoute = (claimId: string) => `/api/v0/claim/${claimId.toString()}`;
   static GetClaimsRoute = () => '/api/v1/claims/fetch';
@@ -114,8 +115,7 @@ export class BitBadgesApiRoutes {
   static GetCodesFromSeedHelperRoute = () => '/api/v0/codes';
 
   static GetDynamicDataStoreRoute = (dynamicStoreId: string) => `/api/v0/dynamicStore/${dynamicStoreId.toString()}`;
-  static GetDynamicDataStoreValueRoute = (dynamicStoreId: string, key: string) =>
-    `/api/v0/dynamicStore/${dynamicStoreId.toString()}/${key.toString()}`;
+  static GetDynamicDataStoreValueRoute = (dynamicStoreId: string) => `/api/v0/dynamicStore/${dynamicStoreId.toString()}/value`;
   static GetDynamicDataStoreValuesPaginatedRoute = (dynamicStoreId: string) => `/api/v0/dynamicStore/${dynamicStoreId.toString()}/values`;
 
   static GetDynamicDataStoresRoute = () => '/api/v0/dynamicStores/fetch';

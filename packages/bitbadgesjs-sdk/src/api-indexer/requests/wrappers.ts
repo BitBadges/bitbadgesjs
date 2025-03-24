@@ -1,11 +1,20 @@
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions, ParsedQs } from '@/common/base.js';
 import { NumberType } from '@/common/string-numbers.js';
 import { PaginationInfo } from '../base.js';
 import { BitBadgesAddressList, iBitBadgesAddressList } from '../BitBadgesAddressList.js';
 import { BitBadgesCollection, iBitBadgesCollection } from '../BitBadgesCollection.js';
 
-import { iMetadata, Metadata } from '../metadata/metadata.js';
 import { ClaimDetails } from '@/core/approvals.js';
+import { ClaimActivityDoc, ClaimAlertDoc, ListActivityDoc, PointsActivityDoc, TransferActivityDoc } from '../docs/activity.js';
+import {
+  ApprovalTrackerDoc,
+  AttestationDoc,
+  BalanceDoc,
+  BalanceDocWithDetails,
+  MerkleChallengeTrackerDoc,
+  SIWBBRequestDoc,
+  UtilityListingDoc
+} from '../docs/docs.js';
 import {
   iApprovalTrackerDoc,
   iAttestationDoc,
@@ -20,16 +29,8 @@ import {
   iTransferActivityDoc,
   iUtilityListingDoc
 } from '../docs/interfaces.js';
-import {
-  ApprovalTrackerDoc,
-  AttestationDoc,
-  BalanceDoc,
-  BalanceDocWithDetails,
-  MerkleChallengeTrackerDoc,
-  SIWBBRequestDoc,
-  UtilityListingDoc
-} from '../docs/docs.js';
-import { ClaimActivityDoc, ClaimAlertDoc, ListActivityDoc, PointsActivityDoc, TransferActivityDoc } from '../docs/activity.js';
+import { iMetadata, Metadata } from '../metadata/metadata.js';
+import { CollectionViewKey } from './collections.js';
 
 /**
  * @category API Requests / Responses
@@ -712,7 +713,18 @@ export class GetPointsActivityForUserSuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export interface GetCollectionPayload {}
+export interface iGetCollectionPayload {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetCollectionPayload {
+  constructor(data: iGetCollectionPayload) {}
+
+  static FromQuery(query: ParsedQs): GetCollectionPayload {
+    return new GetCollectionPayload({});
+  }
+}
 
 /**
  * @category API Requests / Responses

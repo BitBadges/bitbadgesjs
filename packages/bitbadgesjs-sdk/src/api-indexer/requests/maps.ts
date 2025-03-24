@@ -189,10 +189,7 @@ export class GetMapValuePayload extends CustomTypeClass<GetMapValuePayload> impl
 /**
  * @category API Requests / Responses
  */
-export interface iGetMapValueSuccessResponse {
-  value: iValueStore | undefined;
-}
-
+export interface iGetMapValueSuccessResponse extends iValueStore {}
 /**
  * @category API Requests / Responses
  */
@@ -200,11 +197,15 @@ export class GetMapValueSuccessResponse
   extends BaseNumberTypeClass<GetMapValueSuccessResponse>
   implements iGetMapValueSuccessResponse, CustomType<GetMapValueSuccessResponse>
 {
-  value: ValueStore | undefined;
+  lastSetBy: string;
+  key: string;
+  value: string;
 
   constructor(data: iGetMapValueSuccessResponse) {
     super();
-    this.value = data.value ? new ValueStore(data.value) : undefined;
+    this.lastSetBy = data.lastSetBy;
+    this.key = data.key;
+    this.value = data.value;
   }
 
   getNumberFieldNames(): string[] {

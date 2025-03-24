@@ -1,4 +1,4 @@
-import type { ConvertOptions, CustomType } from '@/common/base.js';
+import type { ConvertOptions, CustomType, ParsedQs } from '@/common/base.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, getConverterFunction } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import { ClaimDetails } from '@/core/approvals.js';
@@ -386,6 +386,18 @@ export type AddressListViewKey = 'listActivity' | 'listings';
  * @category API Requests / Responses
  */
 export interface iGetAddressListPayload {}
+
+/**
+ * @category API Requests / Responses
+ * @inheritDoc iGetAddressListPayload
+ */
+export class GetAddressListPayload implements iGetAddressListPayload {
+  constructor(data: iGetAddressListPayload) {}
+
+  static FromQuery(query: ParsedQs): GetAddressListPayload {
+    return new GetAddressListPayload({});
+  }
+}
 
 /**
  * @category API Requests / Responses
