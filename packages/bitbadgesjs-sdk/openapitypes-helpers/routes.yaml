@@ -278,6 +278,10 @@ paths:
 
         Couple Notes:
         - **[Native Chain Algorithm](https://docs.bitbadges.io/for-developers/bitbadges-api/concepts/native-chain-algorithm)**
+
+        Note: The `views` and corresponding fields like `badgesCollected`, `claimAlerts`, etc will be blank with this simple
+        GET but are provided in the response for compatibility with the SDK. To actually fetch these views, use the POST
+        batch route or the individual view routes.
       tags:
         - Accounts
       responses:
@@ -411,6 +415,10 @@ paths:
         SDK Links:
         - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetCollectionSuccessResponse)**
         - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getcollection)**
+
+        Note: The `views` and corresponding fields like `owners`, `approvalTrackers`, etc will be blank with this simple
+        GET but are provided in the response for compatibility with the SDK. To actually fetch these views, use the POST
+        batch route or the individual view routes.
       responses:
         '200':
           description: Success response
@@ -1472,6 +1480,10 @@ paths:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetAddressListPayload)**
         - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetAddressListSuccessResponse)**
         - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getaddresslist)**
+
+        Note: The `views` and corresponding fields like `listActivity`, etc will be blank with this simple
+        GET but are provided in the response for compatibility with the SDK. To actually fetch these views,
+        use the POST batch route or the individual view routes.
       responses:
         '200':
           description: Success response
