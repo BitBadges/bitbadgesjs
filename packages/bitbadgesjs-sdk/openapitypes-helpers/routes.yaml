@@ -3633,6 +3633,9 @@ paths:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iVerifyAttestationPayload)**
         - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iVerifyAttestationSuccessResponse)**
         - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#verifyattestation)**
+
+        Documentation References / Tutorials:
+        - **[Attestations](https://docs.bitbadges.io/for-developers/core-concepts/verifiable-attestations)**
       responses:
         '200':
           description: Success response

@@ -10,19 +10,36 @@ import { blsCreateProof, blsVerify, blsVerifyProof } from '@trevormil/bbs-signat
 export const createAttestationsProof = blsCreateProof;
 
 export interface VerifyAttestationSignaturesParameters {
+  /** Must be 'bbs' or 'standard' */
   scheme: 'bbs' | 'standard' | string;
+  /** The messages to attest to. Must be length 1 for standard */
   messages: string[];
   messageFormat: 'json' | 'plaintext';
+  /**
+   * The data integrity proof.
+   *
+   * For standard, this is the signature of the attestation.
+   * For BBS, this is the actual BBS signature.
+   */
   dataIntegrityProof?: {
+    /** The signature of the attestation. */
     signature: string;
+    /** The signer of the attestation. */
     signer: string;
+    /** The public key of the signer (if needed) */
     publicKey?: string;
+    /** Whether the proof is derived. Only applicable for BBS. */
     isDerived?: boolean;
   };
+  /** The proof of issuance. Must be provided for BBS. Leave blank for standard. */
   proofOfIssuance?: {
+    /** The message of the proof of issuance. */
     message: string;
+    /** The signature of the proof of issuance. */
     signature: string;
+    /** The signer of the proof of issuance. */
     signer: string;
+    /** The public key of the signer (if needed) */
     publicKey?: string;
   };
 }

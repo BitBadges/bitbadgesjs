@@ -2064,7 +2064,7 @@ export class GenericBlockinVerifySuccessResponse extends VerifySignInSuccessResp
  * @category API Requests / Responses
  */
 export type iCreateAttestationPayload = Pick<
-  AttestationDoc<NumberType>,
+  iAttestationDoc<NumberType>,
   | 'originalProvider'
   | 'proofOfIssuance'
   | 'messageFormat'
