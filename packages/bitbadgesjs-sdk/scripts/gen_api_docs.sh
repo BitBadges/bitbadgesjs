@@ -19,9 +19,9 @@ else
 
     source ./scripts/combine_ts_files.sh
     ts-node ./scripts/normalize_combined.ts ./src/combined.ts
-    npm run format
+    npm run format-ci
     source ./scripts/create_yml_schemas.sh
-    npm run format
+    npm run format-ci
     ts-node ./scripts/normalize_yml.ts ./openapitypes/combined.yaml
     rm ./src/combined.ts
     git add ./openapitypes/combined.yaml
