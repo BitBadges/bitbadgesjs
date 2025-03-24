@@ -84,7 +84,7 @@ import { VerifySIWBBOptions, iSiwbbChallenge } from '@/core/blockin.js';
 import { AttestationsProof } from '@/core/secrets.js';
 import type { iOffChainBalancesMap } from '@/core/transfers.js';
 import { UintRangeArray } from '@/core/uintRanges.js';
-import type { iAttestationsProof, iPredeterminedBalances, iUintRange } from '@/interfaces/index.js';
+import type { iAttestation, iAttestationsProof, iPredeterminedBalances, iUintRange } from '@/interfaces/index.js';
 import { BroadcastPostBody } from '@/node-rest-api/index.js';
 import { type AssetConditionGroup, type ChallengeParams, type VerifyChallengeOptions } from 'blockin';
 import { SiwbbChallengeParams } from './blockin.js';
@@ -2064,7 +2064,7 @@ export class GenericBlockinVerifySuccessResponse extends VerifySignInSuccessResp
  * @category API Requests / Responses
  */
 export type iCreateAttestationPayload = Pick<
-  iAttestationDoc<NumberType>,
+  iAttestation<NumberType>,
   | 'originalProvider'
   | 'proofOfIssuance'
   | 'messageFormat'
