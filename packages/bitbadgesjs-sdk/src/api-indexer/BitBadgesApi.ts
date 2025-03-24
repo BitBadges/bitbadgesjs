@@ -90,6 +90,7 @@ import {
   GetApiKeysSuccessResponse,
   GetApplicationSuccessResponse,
   GetApplicationsSuccessResponse,
+  GetAttemptDataFromRequestBinSuccessResponse,
   GetAttestationSuccessResponse,
   GetAttestationsSuccessResponse,
   GetBrowseSuccessResponse,
@@ -144,6 +145,7 @@ import {
   UpdateDynamicDataStoreSuccessResponse,
   UpdatePluginSuccessResponse,
   UpdateUtilityListingSuccessResponse,
+  UploadBalancesSuccessResponse,
   VerifyAttestationSuccessResponse,
   VerifySignInSuccessResponse,
   iAddApprovalDetailsToOffChainStoragePayload,
@@ -196,6 +198,7 @@ import {
   iGetApiKeysPayload,
   iGetApplicationPayload,
   iGetApplicationsPayload,
+  iGetAttemptDataFromRequestBinPayload,
   iGetAttestationPayload,
   iGetAttestationsPayload,
   iGetBrowsePayload,
@@ -268,6 +271,7 @@ import {
   iUpdateDynamicDataStoreSuccessResponse,
   iUpdatePluginPayload,
   iUpdateUtilityListingPayload,
+  iUploadBalancesPayload,
   iVerifyAttestationPayload,
   iVerifySignInPayload,
   iVerifySignInSuccessResponse
@@ -3226,6 +3230,50 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
         { params: trackerDetails }
       );
       return new GetCollectionChallengeTrackerByIdSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Gets the attempt data for a specific claim attempt from the request bin plugin.
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/requestBin/attemptData/{claimId}/{claimAttemptId}`
+   * - **SDK Function Call**: `await BitBadgesApi.getAttemptDataFromRequestBin(claimId, claimAttemptId, payload);`
+   */
+  public async getAttemptDataFromRequestBin(
+    claimId: string,
+    claimAttemptId: string,
+    payload?: iGetAttemptDataFromRequestBinPayload
+  ): Promise<GetAttemptDataFromRequestBinSuccessResponse> {
+    try {
+      const response = await this.axios.get<GetAttemptDataFromRequestBinSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetAttemptDataFromRequestBinRoute(claimId, claimAttemptId)}`,
+        { params: payload }
+      );
+      return new GetAttemptDataFromRequestBinSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Uploads balances for off-chain indexed balances managed by BitBadges.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/uploadBalances`
+   * - **SDK Function Call**: `await BitBadgesApi.uploadBalances(payload);`
+   */
+  public async uploadBalances(payload: iUploadBalancesPayload): Promise<UploadBalancesSuccessResponse> {
+    try {
+      const response = await this.axios.post<UploadBalancesSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.UploadBalancesRoute()}`,
+        payload
+      );
+      return new UploadBalancesSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);

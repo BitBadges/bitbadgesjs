@@ -1058,6 +1058,68 @@ export class AddBalancesToOffChainStorageSuccessResponse
 /**
  * @category API Requests / Responses
  */
+export interface iUploadBalancesPayload {
+  /**
+   * A JSON map of BitBadges addresses or list IDs -> iBalance<NumberType>[]. This will overwrite ALL balances for the collection.
+   */
+  balances: iOffChainBalancesMap<NumberType>;
+
+  /**
+   * The collection ID.
+   */
+  collectionId: NumberType;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iUploadBalancesSuccessResponse {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class UploadBalancesSuccessResponse extends EmptyResponseClass {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetAttemptDataFromRequestBinPayload {
+  /**
+   * The instance ID of the request bin plugin.
+   *
+   * Only needed if there are duplicates. Else, we default to first instance found.
+   */
+  instanceId?: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetAttemptDataFromRequestBinSuccessResponse {
+  /**
+   * The attempt data. This will be in the format configured for the request bin plugin.
+   */
+  attemptData: Record<string, any>;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetAttemptDataFromRequestBinSuccessResponse
+  extends CustomTypeClass<GetAttemptDataFromRequestBinSuccessResponse>
+  implements iGetAttemptDataFromRequestBinSuccessResponse
+{
+  attemptData: Record<string, any>;
+
+  constructor(data: iGetAttemptDataFromRequestBinSuccessResponse) {
+    super();
+    this.attemptData = data.attemptData;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
 export interface iAddToIpfsPayload {
   /**
    * The stuff to add to IPFS

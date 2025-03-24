@@ -60,6 +60,10 @@ export class BitBadgesApiRoutes {
   static AddApprovalDetailsToOffChainStorageRoute = () => '/api/v0/addApprovalDetailsToOffChainStorage';
   static AddBalancesToOffChainStorageRoute = () => '/api/v0/addBalancesToOffChainStorage';
 
+  static GetAttemptDataFromRequestBinRoute = (claimId: string, claimAttemptId: string) =>
+    `/api/v0/requestBin/attemptData/${claimId.toString()}/${claimAttemptId.toString()}`;
+  static UploadBalancesRoute = () => '/api/v0/uploadBalances';
+
   static GetSignInChallengeRoute = () => '/api/v0/auth/getChallenge';
   static VerifySignInRoute = () => '/api/v0/auth/verify';
   static SignOutRoute = () => '/api/v0/auth/logout';

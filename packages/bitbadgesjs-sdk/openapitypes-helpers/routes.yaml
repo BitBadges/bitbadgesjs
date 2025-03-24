@@ -5645,6 +5645,106 @@ paths:
       security:
         - apiKey: []
       x-internal: false
+  /api/v0/requestBin/attemptData/{claimId}/{claimAttemptId}:
+    get:
+      operationId: getAttemptDataFromRequestBin
+      summary: Get Attempt Data (Request Bin)
+      tags:
+        - Claims
+      description: |-
+        Gets the attempt data for a specific claim attempt from the requestBin plugin.
+
+        Pre-Req: Your claim must be setup with a "requestBin" plugin. On the site, it will be titled
+        "Collect User Inputs".
+
+        ```tsx
+        await BitBadgesApi.getAttemptDataFromRequestBin("claim123", "attempt123", { ... });
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetAttemptDataFromRequestBinPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetAttemptDataFromRequestBinSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getattemptdatafromrequestbin)**
+
+        Scopes:
+          - `readPrivateClaimData` - Required and must be the manager
+      parameters:
+        - name: claimId
+          in: path
+          description: Claim ID
+          required: true
+          schema:
+            type: string
+        - name: claimAttemptId
+          in: path
+          description: Claim attempt ID
+          required: true
+          schema:
+            type: string
+        - in: query
+          explode: true
+          name: payload
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
+          required: false
+          schema:
+            $ref: '#/components/schemas/iGetAttemptDataFromRequestBinPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetAttemptDataFromRequestBinSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+  /api/v0/uploadBalances:
+    post:
+      operationId: uploadBalances
+      summary: Upload Balances
+      tags:
+        - Badges
+      description: |-
+        Uploads balances for off-chain indexed balances managed by BitBadges. Note: This only applies to
+        collections with off-chain balances, and the badges must not be frozen / immutable yet.
+
+        This uses a queue-system, so it may take a few minutes to process and display in-site.
+
+        ```tsx
+        await BitBadgesApi.uploadBalances({ ... });
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUploadBalancesPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUploadBalancesSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#uploadbalances)**
+
+        Scopes:
+          - `manageOffChainBalances` - Required and also must be current manager
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iUploadBalancesSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/iUploadBalancesPayload'
+      security:
+        - apiKey: []
+      x-internal: false
 
 components:
   responses:
