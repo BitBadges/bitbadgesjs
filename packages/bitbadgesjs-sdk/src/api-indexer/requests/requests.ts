@@ -2075,14 +2075,8 @@ export type iCreateAttestationPayload = Pick<
   | 'image'
   | 'description'
   | 'publicVisibility'
-> & {
-  /** Blockchain anchors to add to the attestation. These are on-chain transactions that can be used to prove stuff about the attestation, like
-   * existence at a certain point in time or to maintain data integrity. */
-  anchors?: {
-    txHash?: string;
-    message?: string;
-  }[];
-};
+  | 'anchors'
+>;
 
 /**
  * @category API Requests / Responses
