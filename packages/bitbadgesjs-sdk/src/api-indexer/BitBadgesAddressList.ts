@@ -299,7 +299,7 @@ export class BitBadgesAddressList<T extends NumberType>
   }
 
   /**
-   * Updates the core details of an off-chain address list. On-chain lists are updated through blockchain transactions.
+   * Updates the core details of an off-chain address list.
    */
   static async UpdateAddressListCoreDetails<T extends NumberType>(api: BaseBitBadgesApi<T>, payload: iUpdateAddressListCoreDetailsPayload<T>) {
     try {

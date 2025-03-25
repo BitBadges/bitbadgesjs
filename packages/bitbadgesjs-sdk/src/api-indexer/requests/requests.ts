@@ -1374,6 +1374,10 @@ export interface iCheckSignInStatusSuccessResponse {
    */
   signedIn: boolean;
 
+  address: NativeAddress;
+  bitbadgesAddress: BitBadgesAddress;
+  chain: SupportedChain;
+
   /**
    * Approved scopes
    */
@@ -1583,6 +1587,9 @@ export class CheckSignInStatusSuccessResponse extends CustomTypeClass<CheckSignI
   linkedIn?: { username: string; id: string } | undefined;
   shopify?: { username: string; id: string } | undefined;
   email?: string | undefined;
+  address: string;
+  bitbadgesAddress: string;
+  chain: SupportedChain;
 
   constructor(data: iCheckSignInStatusSuccessResponse) {
     super();
@@ -1609,6 +1616,9 @@ export class CheckSignInStatusSuccessResponse extends CustomTypeClass<CheckSignI
     this.email = data.email;
     this.linkedIn = data.linkedIn;
     this.shopify = data.shopify;
+    this.address = data.address;
+    this.bitbadgesAddress = data.bitbadgesAddress;
+    this.chain = data.chain;
   }
 }
 

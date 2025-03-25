@@ -2295,7 +2295,7 @@ paths:
       tags:
         - Address Lists
       description: |-
-        Updates the core details of an off-chain address list. On-chain lists are updated through blockchain transactions.
+        Updates the core details of an off-chain address list. This does not include address updates or claim updates.
 
         ```tsx
         const res = await BitBadgesApi.updateAddressListCoreDetails(...);
@@ -2346,7 +2346,9 @@ paths:
       tags:
         - Address Lists
       description: |-
-        Updates the addresses of an off-chain address list. On-chain lists are updated through blockchain transactions.
+        Updates the addresses of an off-chain address list. This does not include claim updates or core details updates.
+
+        Note: This is a complete overwrite. If you have active claims, ensure no race conditions.
 
         ```tsx
         const res = await BitBadgesApi.updateAddressListAddresses(...);

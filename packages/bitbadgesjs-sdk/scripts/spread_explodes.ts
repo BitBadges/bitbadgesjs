@@ -7,90 +7,91 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 interface Schema {
-    type?: string;
-    properties?: Record<string, any>;
-    $ref?: string;
+  type?: string;
+  properties?: Record<string, any>;
+  $ref?: string;
+  required?: string[];
 }
 
 interface Parameter {
-    in?: string;
-    name?: string;
-    schema?: Schema;
-    explode?: boolean;
-    style?: string;
-    required?: boolean;
+  in?: string;
+  name?: string;
+  schema?: Schema;
+  explode?: boolean;
+  style?: string;
+  required?: boolean;
 }
 
 function resolveReference(ref: string, document: any): Schema {
-    const path = ref.replace('#/', '').split('/');
-    let current = document;
-    for (const segment of path) {
-        current = current[segment];
-    }
-    return current;
+  const path = ref.replace('#/', '').split('/');
+  let current = document;
+  for (const segment of path) {
+    current = current[segment];
+  }
+  return current;
 }
 
 function expandParameter(param: Parameter, document: any): Parameter[] {
-    if (!param.schema?.$ref || !param.explode) {
-        return [param];
-    }
+  if (!param.schema?.$ref || !param.explode) {
+    return [param];
+  }
 
-    const referencedSchema = resolveReference(param.schema.$ref, document);
-    if (!referencedSchema.properties || Object.keys(referencedSchema.properties).length === 0) {
-        return [];
-    }
+  const referencedSchema = resolveReference(param.schema.$ref, document);
+  if (!referencedSchema.properties || Object.keys(referencedSchema.properties).length === 0) {
+    return [];
+  }
 
-    return Object.entries(referencedSchema.properties).map(([propName, propSchema]) => ({
-        in: param.in,
-        name: propName,
-        required: param.required,
-        schema: propSchema,
-        style: param.style
-    }));
+  return Object.entries(referencedSchema.properties).map(([propName, propSchema]) => ({
+    in: param.in,
+    name: propName,
+    required: referencedSchema.required?.includes(propName) ?? false,
+    schema: propSchema,
+    style: param.style
+  }));
 }
 
 function processYaml() {
-    try {
-        // Specify the input and output paths relative to the script
-        const inputPath = join(__dirname, '..', 'openapitypes', 'combined.yaml');
-        const outputPath = join(__dirname, '..', 'openapitypes', 'combined_processed.yaml');
+  try {
+    // Specify the input and output paths relative to the script
+    const inputPath = join(__dirname, '..', 'openapitypes', 'combined.yaml');
+    const outputPath = join(__dirname, '..', 'openapitypes', 'combined_processed.yaml');
 
-        // Read and parse YAML
-        const fileContent = readFileSync(inputPath, 'utf8');
-        const document: any = yaml.load(fileContent);
+    // Read and parse YAML
+    const fileContent = readFileSync(inputPath, 'utf8');
+    const document: any = yaml.load(fileContent);
 
-        // Process all paths
-        for (const path of Object.values(document.paths)) {
-            for (const method of Object.values(path)) {
-                if (Array.isArray(method.parameters)) {
-                    const newParameters: Parameter[] = [];
+    // Process all paths
+    for (const path of Object.values(document.paths)) {
+      for (const method of Object.values(path)) {
+        if (Array.isArray(method.parameters)) {
+          const newParameters: Parameter[] = [];
 
-                    for (const param of method.parameters) {
-                        if (param.explode && param.in === 'query') {
-                            const expanded = expandParameter(param, document);
-                            if (expanded.length > 0) {
-                                newParameters.push(...expanded);
-                            }
-                        } else {
-                            newParameters.push(param);
-                        }
-                    }
-
-                    method.parameters = newParameters;
-                }
+          for (const param of method.parameters) {
+            if (param.explode && param.in === 'query') {
+              const expanded = expandParameter(param, document);
+              if (expanded.length > 0) {
+                newParameters.push(...expanded);
+              }
+            } else {
+              newParameters.push(param);
             }
-        }
+          }
 
-        // Write processed YAML
-        const newYaml = yaml.dump(document, { lineWidth: -1 });
-        writeFileSync(outputPath, newYaml);
-        console.log('Successfully processed YAML file');
-        console.log(`Ou tput written to: ${outputPath}`);
-        //Print the entire file
-        console.log(newYaml)
-    } catch (error) {
-        console.error('Error processing YAML:', error);
+          method.parameters = newParameters;
+        }
+      }
     }
+
+    // Write processed YAML
+    const newYaml = yaml.dump(document, { lineWidth: -1 });
+    writeFileSync(outputPath, newYaml);
+    console.log('Successfully processed YAML file');
+    console.log(`Output written to: ${outputPath}`);
+    //Print the entire file
+    console.log(newYaml);
+  } catch (error) {
+    console.error('Error processing YAML:', error);
+  }
 }
 
 // Execute the function

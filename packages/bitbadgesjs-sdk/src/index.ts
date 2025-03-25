@@ -25,5 +25,4 @@ export * from './attestations/index.js';
 
 export * from './transactions/index.js';
 export * from './address-converter/index.js';
-export * from './auth/index.js';
 export * from './node-rest-api/index.js';
