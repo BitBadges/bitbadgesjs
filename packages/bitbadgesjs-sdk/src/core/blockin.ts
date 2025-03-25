@@ -109,6 +109,8 @@ export interface AdditionalQueryParams {
   /**
    * We will expect the user to provide attestations. Consider adding an additional instructions to the user for which ones
    * to present. You still need to check the attestations on your side.
+   *
+   * @deprecated It is preferred to receive attestations via claims instead.
    */
   expectAttestations?: boolean;
 }

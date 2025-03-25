@@ -2136,60 +2136,60 @@ paths:
       security:
         - apiKey: []
   /addressLists:
-    put:
-      operationId: updateAddressLists
-      tags:
-        - Address Lists
-      summary: Update Address Lists
-      description: |-
-        Updates address lists for the user.
+    #   put:
+    #     operationId: updateAddressLists
+    #     tags:
+    #       - Address Lists
+    #     summary: Update Address Lists
+    #     description: |-
+    #       Updates address lists for the user.
 
-        ```tsx
-        const res = await BitBadgesApi.updateAddressLists(...);
-        ```
+    #       ```tsx
+    #       const res = await BitBadgesApi.updateAddressLists(...);
+    #       ```
 
-        SDK Links:
-        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateAddressListsPayload)**
-        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateAddressListsSuccessResponse)**
-        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#updateaddresslists)**
+    #       SDK Links:
+    #       - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateAddressListsPayload)**
+    #       - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateAddressListsSuccessResponse)**
+    #       - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#updateaddresslists)**
 
-        Scopes:
-          - `manageAddressLists` - Required
+    #       Scopes:
+    #         - `manageAddressLists` - Required
 
-        Warning: The claims object expects all claims to be provided. If any are not provided, they will not be included moving forward and will
-        be deleted. To update an individual claim, you can use the update claim endpoint.
+    #       Warning: The claims object expects all claims to be provided. If any are not provided, they will not be included moving forward and will
+    #       be deleted. To update an individual claim, you can use the update claim endpoint.
 
-        Note: This is legacy. Please use the simpler update functions for more fine-grained updates.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/iUpdateAddressListsPayload'
-      responses:
-        '200':
-          description: Success response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/iUpdateAddressListsSuccessResponse'
-        '400':
-          $ref: '#/components/responses/BadRequestResponse'
-        '401':
-          $ref: '#/components/responses/UnauthorizedResponse'
-        '500':
-          $ref: '#/components/responses/InternalServerErrorResponse'
-      parameters:
-        - name: x-api-key
-          in: header
-          description: BitBadges API Key for authentication
-          required: true
-          schema:
-            type: string
-      security:
-        - apiKey: []
-          userIsOwner: []
-          userSignedIn: []
+    #       Note: This is legacy and an all-inclusive endpoint. Please use the simpler update functions for more fine-grained updates.
+    #     requestBody:
+    #       required: true
+    #       content:
+    #         application/json:
+    #           schema:
+    #             $ref: '#/components/schemas/iUpdateAddressListsPayload'
+    #     responses:
+    #       '200':
+    #         description: Success response
+    #         content:
+    #           application/json:
+    #             schema:
+    #               $ref: '#/components/schemas/iUpdateAddressListsSuccessResponse'
+    #       '400':
+    #         $ref: '#/components/responses/BadRequestResponse'
+    #       '401':
+    #         $ref: '#/components/responses/UnauthorizedResponse'
+    #       '500':
+    #         $ref: '#/components/responses/InternalServerErrorResponse'
+    #     parameters:
+    #       - name: x-api-key
+    #         in: header
+    #         description: BitBadges API Key for authentication
+    #         required: true
+    #         schema:
+    #           type: string
+    #     security:
+    #       - apiKey: []
+    #         userIsOwner: []
+    #         userSignedIn: []
     post:
       operationId: createAddressLists
       summary: Creates Address Lists
@@ -2288,6 +2288,105 @@ paths:
         - apiKey: []
           userIsOwner: []
           userSignedIn: []
+  /addressLists/coreDetails:
+    put:
+      operationId: updateAddressListCoreDetails
+      summary: Update Address List Core Details
+      tags:
+        - Address Lists
+      description: |-
+        Updates the core details of an off-chain address list. On-chain lists are updated through blockchain transactions.
+
+        ```tsx
+        const res = await BitBadgesApi.updateAddressListCoreDetails(...);
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateAddressListCoreDetailsPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateAddressListCoreDetailsSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#updateaddresslistcoredetails)**
+
+        Scopes:
+          - `manageAddressLists` - Required
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/iUpdateAddressListCoreDetailsPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iUpdateAddressListCoreDetailsSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      security:
+        - apiKey: []
+          userIsOwner: []
+          userSignedIn: []
+  /addressLists/addresses:
+    put:
+      operationId: updateAddressListAddresses
+      summary: Update Address List Addresses
+      tags:
+        - Address Lists
+      description: |-
+        Updates the addresses of an off-chain address list. On-chain lists are updated through blockchain transactions.
+
+        ```tsx
+        const res = await BitBadgesApi.updateAddressListAddresses(...);
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateAddressListAddressesPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateAddressListAddressesSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#updateaddresslistaddresses)**
+
+        Scopes:
+          - `manageAddressLists` - Required
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/iUpdateAddressListAddressesPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iUpdateAddressListAddressesSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      security:
+        - apiKey: []
   /addressLists/fetch:
     post:
       operationId: getAddressLists

@@ -92,40 +92,49 @@ export default function BitBadges(
     name: 'BitBadges',
     type: 'oauth',
 
-    clientId: config.clientId ?? process.env.BITBADGES_CLIENT_ID, // from the provider's dashboard
-    clientSecret: config.clientSecret ?? process.env.BITBADGES_CLIENT_SECRET, // from the provider's dashboard
+    clientId: config.clientId ?? process.env.BITBADGES_CLIENT_ID,
+    clientSecret: config.clientSecret ?? process.env.BITBADGES_CLIENT_SECRET,
 
     authorization: {
-      url: `${'https://bitbadges.io/siwbb/authorize'}`,
-      params: frontendParams,
-      headers: {
-        'x-api-key': BITBADGES_API_KEY
-      }
+      url: 'https://bitbadges.io/siwbb/authorize',
+      params: frontendParams
     },
-    token: `${'https://api.bitbadges.io/api/v0/siwbb/token'}`,
+
+    token: {
+      url: 'https://api.bitbadges.io/api/v0/siwbb/token'
+    },
+
+    checks: ['state'],
+
+    profile(profile) {
+      return {
+        id: profile.address,
+        name: profile.name,
+        address: profile.address
+      };
+    },
+
     userinfo: {
       url: 'https://api.bitbadges.io/api/v0/auth/status',
-      async request({ tokens }: { tokens: Record<string, string> }) {
-        console.log('tokens', tokens);
-        const signInStatus = await fetch(`https://api.bitbadges.io/api/v0/auth/status`, {
-          headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': BITBADGES_API_KEY,
-            Authorization: `Bearer ${tokens.access_token}`
-          },
+      async request({ tokens }: { tokens: any }) {
+        const headers = {
+          'Content-Type': 'application/json',
+          'x-api-key': BITBADGES_API_KEY,
+          Authorization: `Bearer ${tokens.access_token}`
+        };
+
+        // Get sign in status
+        const signInStatus = await fetch('https://api.bitbadges.io/api/v0/auth/status', {
+          headers,
           method: 'POST'
         });
-
         const signInStatusResponse = await signInStatus.json();
         const address = signInStatusResponse.address;
 
-        //POST request to BitBadges API
+        // Get user details
         const res = await fetch('https://api.bitbadges.io/api/v0/users', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': BITBADGES_API_KEY
-          },
+          headers,
           body: JSON.stringify({
             accountsToFetch: [{ address }]
           })
@@ -133,15 +142,11 @@ export default function BitBadges(
         const accountsResponse = await res.json();
         const account = accountsResponse.accounts[0];
 
-        // If a claimId was specified, verify the claim status
-        // This is critical to be done server-side because users can manipulate the client-side URL parameters.
+        // Verify claim if specified
         if (config.claimId) {
           const claimRes = await fetch(`https://api.bitbadges.io/api/v0/claims/success/${config.claimId}/${address}`, {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-api-key': BITBADGES_API_KEY
-            }
+            headers
           });
 
           const claimStatus = await claimRes.json();

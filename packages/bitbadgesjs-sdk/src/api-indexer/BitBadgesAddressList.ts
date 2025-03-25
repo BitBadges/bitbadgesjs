@@ -9,7 +9,7 @@ import { EmptyResponseClass } from './base.js';
 import { ListActivityDoc } from './docs/activity.js';
 import { AddressListDoc, UtilityListingDoc } from './docs/docs.js';
 import type { CreateClaimRequest, iAddressListDoc, iClaimDetails, iListActivityDoc, iUtilityListingDoc } from './docs/interfaces.js';
-import type { iMetadata } from './metadata/metadata.js';
+import type { iMetadata, iMetadataWithoutInternals } from './metadata/metadata.js';
 import { Metadata } from './metadata/metadata.js';
 import { BitBadgesApiRoutes } from './requests/routes.js';
 /**
@@ -299,6 +299,50 @@ export class BitBadgesAddressList<T extends NumberType>
   }
 
   /**
+   * Updates the core details of an off-chain address list. On-chain lists are updated through blockchain transactions.
+   */
+  static async UpdateAddressListCoreDetails<T extends NumberType>(api: BaseBitBadgesApi<T>, payload: iUpdateAddressListCoreDetailsPayload<T>) {
+    try {
+      const validateRes: typia.IValidation<iUpdateAddressListCoreDetailsPayload<T>> = typia.validate<iUpdateAddressListCoreDetailsPayload<T>>(
+        payload ?? {}
+      );
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await api.axios.put<iUpdateAddressListCoreDetailsSuccessResponse>(
+        `${api.BACKEND_URL}${BitBadgesApiRoutes.UpdateAddressListCoreDetailsRoute()}`,
+        payload
+      );
+      return new UpdateAddressListCoreDetailsSuccessResponse(response.data);
+    } catch (error) {
+      await api.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Updates the addresses of an off-chain address list. On-chain lists are updated through blockchain transactions.
+   */
+  static async UpdateAddressListAddresses<T extends NumberType>(api: BaseBitBadgesApi<T>, payload: iUpdateAddressListAddressesPayload) {
+    try {
+      const validateRes: typia.IValidation<iUpdateAddressListAddressesPayload> = typia.validate<iUpdateAddressListAddressesPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await api.axios.put<iUpdateAddressListAddressesSuccessResponse>(
+        `${api.BACKEND_URL}${BitBadgesApiRoutes.UpdateAddressListAddressesRoute()}`,
+        payload
+      );
+      return new UpdateAddressListAddressesSuccessResponse(response.data);
+    } catch (error) {
+      await api.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
    * Deletes an off-chain address list. On-chain lists are deleted through blockchain transactions.
    */
   static async DeleteAddressList<T extends NumberType>(api: BaseBitBadgesApi<T>, payload: iDeleteAddressListsPayload) {
@@ -484,6 +528,9 @@ export type iAddressListCreateObject<T extends NumberType> = Omit<iAddressList, 
 
   /** The linked claims of the address list. */
   claims: CreateClaimRequest<NumberType>[];
+
+  /** Metadata of the address list to upload. This will override and set the uri parameter. */
+  metadata?: iMetadataWithoutInternals<T>;
 };
 
 /**
@@ -535,3 +582,51 @@ export interface iDeleteAddressListsSuccessResponse {}
  * @category API Requests / Responses
  */
 export class DeleteAddressListsSuccessResponse extends EmptyResponseClass {}
+
+/**
+ * @category API Requests / Responses
+ */
+export type iUpdateAddressListCoreDetailsPayload<T extends NumberType> = Omit<iAddressList, 'createdBy' | 'aliasAddress' | 'addresses'> & {
+  /**
+   * The new metadata of the address list.
+   *
+   * If provided, we upload this to our databases and this will override the uri parameter.
+   */
+  metadata?: iMetadataWithoutInternals<T>;
+};
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iUpdateAddressListCoreDetailsSuccessResponse {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class UpdateAddressListCoreDetailsSuccessResponse extends EmptyResponseClass {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iUpdateAddressListAddressesPayload {
+  /**
+   * The list ID to update.
+   */
+  listId: string;
+  /**
+   * The addresses to update. This is a full overwrite for ALL addresses.
+   *
+   * If you have active claims, ensure this does not conflict via race conditions.
+   */
+  addresses: string[];
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iUpdateAddressListAddressesSuccessResponse {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class UpdateAddressListAddressesSuccessResponse extends EmptyResponseClass {}

@@ -48,6 +48,8 @@ export class BitBadgesApiRoutes {
   static GetAddressListRoute = (addressListId: string) => `/api/v0/addressList/${addressListId.toString()}`;
   static GetAddressListsRoute = () => '/api/v0/addressLists/fetch';
   static CRUDAddressListsRoute = () => '/api/v0/addressLists';
+  static UpdateAddressListCoreDetailsRoute = () => '/api/v0/addressLists/coreDetails';
+  static UpdateAddressListAddressesRoute = () => '/api/v0/addressLists/addresses';
 
   static GetAccountsRoute = () => '/api/v0/users';
   static GetAccountRoute = () => '/api/v0/user';

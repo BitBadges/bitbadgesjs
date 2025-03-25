@@ -1,7 +1,7 @@
 {
   "name": "bitbadgesjs-sdk",
   "description": "SDK for BitBadges development",
-  "version": "0.9.5",
+  "version": "0.9.6",
   "license": "MIT",
   "eslintIgnore": [
     "src/proto/**/*.ts"
@@ -98,7 +98,7 @@
     "crypto-js": "^4.2.0",
     "elliptic": "^6.6.1",
     "ethers": "^6.13.2",
-    "next-auth": "^5.0.0-beta.19",
+    "next-auth": "^4.24.11",
     "tweetnacl": "^1.0.3",
     "typia": "^8.0.2",
     "web3-validator": "^2.0.6"

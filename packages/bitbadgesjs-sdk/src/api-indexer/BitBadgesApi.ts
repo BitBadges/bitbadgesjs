@@ -9,11 +9,15 @@ import {
   DeleteAddressListsSuccessResponse,
   GetAddressListSuccessResponse,
   GetAddressListsSuccessResponse,
+  UpdateAddressListAddressesSuccessResponse,
+  UpdateAddressListCoreDetailsSuccessResponse,
   UpdateAddressListsSuccessResponse,
   iCreateAddressListsPayload,
   iDeleteAddressListsPayload,
   iGetAddressListPayload,
   iGetAddressListsPayload,
+  iUpdateAddressListAddressesPayload,
+  iUpdateAddressListCoreDetailsPayload,
   iUpdateAddressListsPayload
 } from './BitBadgesAddressList.js';
 import type { GetAccountSuccessResponse, GetAccountsSuccessResponse, iGetAccountPayload, iGetAccountsPayload } from './BitBadgesUserInfo.js';
@@ -832,16 +836,27 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
-   * Updates address lists stored by BitBadges centralized servers.
+   * Updates the core details of an address list.
    *
    * @remarks
-   * - **API Route**: `PUT /api/v0/addressLists`
-   * - **SDK Function Call**: `await BitBadgesApi.updateAddressLists(payload);`
-   *
-   * Must be created off-chain. For on-chain, they must be created through MsgCreateAddressMappings. Creator can update their created lists with no restrictions. Else, requires an edit key.
+   * - **API Route**: `PUT /api/v0/addressLists/coreDetails`
+   * - **SDK Function Call**: `await BitBadgesApi.updateAddressListCoreDetails(payload);`
    */
-  public async updateAddressLists(payload: iUpdateAddressListsPayload<T>): Promise<UpdateAddressListsSuccessResponse> {
-    return await BitBadgesAddressList.UpdateAddressList(this, payload);
+  public async updateAddressListCoreDetails<T extends NumberType>(
+    payload: iUpdateAddressListCoreDetailsPayload<T>
+  ): Promise<UpdateAddressListCoreDetailsSuccessResponse> {
+    return await BitBadgesAddressList.UpdateAddressListCoreDetails(this, payload);
+  }
+
+  /**
+   * Updates the addresses of an address list.
+   *
+   * @remarks
+   * - **API Route**: `PUT /api/v0/addressLists/addresses`
+   * - **SDK Function Call**: `await BitBadgesApi.updateAddressListAddresses(payload);`
+   */
+  public async updateAddressListAddresses(payload: iUpdateAddressListAddressesPayload): Promise<UpdateAddressListAddressesSuccessResponse> {
+    return await BitBadgesAddressList.UpdateAddressListAddresses(this, payload);
   }
 
   /**
@@ -3939,6 +3954,24 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
       await this.handleApiError(error);
       return Promise.reject(error);
     }
+  }
+
+  /**
+   * Updates address lists stored by BitBadges centralized servers.
+   *
+   * Warning: This is legacy and an all-inclusive route used by the frontend. Please opt for more fine-grained routes/
+   *
+   * Warning: This route requires ALL claims to be provided. If any are not provided, they will not be included moving forward and will
+   * be deleted. To update an individual claim, you can use the update claim endpoint.
+   *
+   * @remarks
+   * - **API Route**: `PUT /api/v0/addressLists`
+   * - **SDK Function Call**: `await BitBadgesApi.updateAddressLists(payload);`
+   *
+   * @deprecated
+   */
+  public async updateAddressLists(payload: iUpdateAddressListsPayload<T>): Promise<UpdateAddressListsSuccessResponse> {
+    return await BitBadgesAddressList.UpdateAddressList(this, payload);
   }
 }
 
