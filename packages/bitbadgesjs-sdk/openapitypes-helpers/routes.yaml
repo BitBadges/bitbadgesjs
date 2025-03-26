@@ -3301,11 +3301,20 @@ paths:
       tags:
         - Claims
       description: |-
-        Creates a new claim. Creating and maintaining claims are typically recommended
-        to be done through the site, not the API, because they require special configuration.
+        Creates a new claim.
+
+        Note: Creating claims via the API is often overkill. Consider doing this in-site, using a plugin approach or another method first.
+        You may also opt to leave the creation in-site but update claims via the API instead.
+
+        There are a few categories of claims:
+        - Standalone (default) - Not attached to anything
+        - Test claims - Used for frontend claim tester
+        - Linked to address lists - Specify the valid `listId` within the request. Must be list creator.
+        - Linked to off-chain balances - Specify the valid `collectionId` + `balancesToSet` within the request. `balancesToSet` determine what badges are allocated.
+        - Linked to on-chain approvals (user or collection level) - This is advanced. If you need this, please reach out to us. Updates are fine, but creation uses an advanced processs that is undocumented currently.
 
         ```tsx
-        const res = await BitBadgesApi.createClaim(...);
+        const res = await BitBadgesApi.createClaims(...);
         ```
 
         Documentation References / Tutorials:
@@ -3315,10 +3324,11 @@ paths:
         SDK Links:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateClaimPayload)**
         - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateClaimSuccessResponse)**
-        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#createclaim)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#createclaims)**
 
         Scopes:
           - `manageClaims` - Required
+          - `manageAddressLists` - Required for linked address list claims
       requestBody:
         required: true
         content:
@@ -3354,8 +3364,16 @@ paths:
       tags:
         - Claims
       description: |-
-        Updates an existing claim. Creating and maintaining claims are typically recommended
-        to be done through the site, not the API, because they require special configuration.
+        Updates an existing claim.
+
+        Note: Updating claims via the API is often overkill. Consider doing this in-site, using a plugin approach or another method first.
+
+        There are a few categories of claims:
+        - Standalone (default) - Not attached to anything
+        - Test claims - Used for frontend claim tester
+        - Linked to address lists - Specify the valid `listId` within the request. Must be list creator.
+        - Linked to off-chain balances - Specify the valid `collectionId` + `balancesToSet` within the request. `balancesToSet` determine what badges are allocated per claim.
+        - Linked to on-chain approvals (user or collection level) - Specify the valid collectionId. Note: This is advanced. Please reach out if you need this.
 
         ```tsx
         const res = await BitBadgesApi.updateClaim(...);
@@ -3372,6 +3390,7 @@ paths:
 
         Scopes:
           - `manageClaims` - Required
+          - `manageAddressLists` - Required for updating link listed claims
       requestBody:
         required: true
         content:

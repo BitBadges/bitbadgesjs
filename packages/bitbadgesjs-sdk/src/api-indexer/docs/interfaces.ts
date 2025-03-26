@@ -1010,7 +1010,10 @@ export interface IntegrationPluginParams<T extends ClaimIntegrationPluginType> {
    * will have the same pluginId.
    */
   instanceId: string;
-  /** The ID of the plugin (e.g. "numUses") */
+  /**
+   * The ID of the plugin (e.g. "numUses"). This is the reusable plugin ID.
+   * Do not use this as a unique identifier for the plugin instance as there could be duplicate pluginIds. Use instanceId instead.
+   */
   pluginId: T;
   /** The version of the plugin */
   version: string;
