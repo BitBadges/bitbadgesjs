@@ -1,7 +1,7 @@
 //IMPORTANT: Keep all imports type-safe by using the `type` keyword. If not, this will mess up the circular dependency check.
 
 import type { Doc } from '@/api-indexer/base.js';
-import type { iMetadata } from '@/api-indexer/metadata/metadata.js';
+import type { iMetadata, iMetadataWithoutInternals } from '@/api-indexer/metadata/metadata.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
 import type { JSPrimitiveNumberType, NumberType } from '@/common/string-numbers.js';
 import type { SupportedChain } from '@/common/types.js';
@@ -1078,12 +1078,29 @@ export type CreateClaimRequest<T extends NumberType> = Omit<
 > & {
   cid?: string;
   plugins: ManagePluginRequest[];
+  metadata?: iMetadataWithoutInternals<T>;
 };
 
 /**
  * @category Interfaces
  */
-export type UpdateClaimRequest<T extends NumberType> = Omit<CreateClaimRequest<T>, 'seedCode'>;
+export type UpdateClaimRequest<T extends NumberType> = Omit<
+  iClaimDetails<T>,
+  | 'plugins'
+  | 'version'
+  | 'trackerDetails'
+  | '_includesPrivateParams'
+  | '_templateInfo'
+  | 'managedBy'
+  | 'createdBy'
+  | 'standaloneClaim'
+  | 'lastUpdated'
+  | 'seedCode'
+> & {
+  cid?: string;
+  plugins: ManagePluginRequest[];
+  metadata?: iMetadataWithoutInternals<T>;
+};
 
 /**
  * @category Indexer
