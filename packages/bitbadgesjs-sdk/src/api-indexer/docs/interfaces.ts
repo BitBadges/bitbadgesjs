@@ -1451,7 +1451,12 @@ export interface iClaimBuilderDoc<T extends NumberType> extends Doc {
   manualDistribution?: boolean;
 
   /**
-   * If the claim has been designated to be completed automatically for users.
+   * The expected approach for the claim. This is for display purposes for the frontend.
+   *
+   * Available options:
+   * - in-site: The claim is expected to be completed in-site.
+   * - api: The claim is expected to be completed via an API call.
+   * - zapier: The claim is expected to be completed via Zapier auto-completion.
    */
   approach?: string;
 
@@ -2131,13 +2136,13 @@ export interface iClaimDetails<T extends NumberType> {
    * How the claim is expected to be completed. This is for display purposes for the frontend.
    *
    * Available options:
-   * - in-site: The claim is expected to be completed in-site.
+   * - in-site (default): The claim is expected to be completed in-site.
    * - api: The claim is expected to be completed via an API call.
    * - zapier: The claim is expected to be completed via Zapier auto-completion.
    *
-   * Typically, you will use the in-site approach.
+   * Typically, you will use the in-site approach
    */
-  approach?: 'in-site' | 'api' | 'zapier';
+  approach?: string;
   /**
    * Seed code for the claim. Only used for on-chain badge claims.
    *
