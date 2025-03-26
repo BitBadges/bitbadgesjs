@@ -3376,7 +3376,7 @@ paths:
         - Linked to on-chain approvals (user or collection level) - Specify the valid collectionId. Note: This is advanced. Please reach out if you need this.
 
         ```tsx
-        const res = await BitBadgesApi.updateClaim(...);
+        const res = await BitBadgesApi.updateClaims(...);
         ```
 
         Documentation References / Tutorials:
@@ -3386,7 +3386,7 @@ paths:
         SDK Links:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateClaimPayload)**
         - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateClaimSuccessResponse)**
-        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#updateclaim)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#updateclaims)**
 
         Scopes:
           - `manageClaims` - Required
@@ -3430,7 +3430,7 @@ paths:
         to be done through the site, not the API, because they require special configuration.
 
         ```tsx
-        const res = await BitBadgesApi.deleteClaim(...);
+        const res = await BitBadgesApi.deleteClaims(...);
         ```
 
         Documentation References / Tutorials:
@@ -3440,10 +3440,11 @@ paths:
         SDK Links:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteClaimPayload)**
         - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteClaimSuccessResponse)**
-        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#deleteclaim)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#deleteclaims)**
 
         Scopes:
           - `manageClaims` - Required
+          - `manageAddressLists` - Required for linked address list claims
       requestBody:
         required: true
         content:
