@@ -26,6 +26,7 @@ import {
   CreateClaimRequest,
   DynamicDataHandlerType,
   IntegrationPluginDetailsUpdate,
+  UpdateClaimRequest,
   iApiKeyDoc,
   iApplicationDoc,
   iApplicationPage,
@@ -638,6 +639,12 @@ export interface iGetClaimAttemptsPayload {
   includeErrors?: boolean;
   /** The specific address to fetch claims for. If blank, we fetch most recent claims. */
   address?: NativeAddress;
+  /**
+   * Include the cached payload data for requestBin plugin. Must be claim creator to view.
+   *
+   * You can also use the individual GET route to fetch this data.
+   */
+  includeRequestBinAttemptData?: boolean;
 }
 
 /**
@@ -647,19 +654,22 @@ export class GetClaimAttemptsPayload extends CustomTypeClass<GetClaimAttemptsPay
   bookmark?: string;
   includeErrors?: boolean;
   address?: NativeAddress;
+  includeRequestBinAttemptData?: boolean;
 
   constructor(payload: iGetClaimAttemptsPayload) {
     super();
     this.bookmark = payload.bookmark;
     this.includeErrors = payload.includeErrors;
     this.address = payload.address;
+    this.includeRequestBinAttemptData = payload.includeRequestBinAttemptData;
   }
 
   static FromQuery(query: ParsedQs): GetClaimAttemptsPayload {
     return new GetClaimAttemptsPayload({
       bookmark: query.bookmark?.toString(),
       includeErrors: query.includeErrors === 'true',
-      address: query.address?.toString()
+      address: query.address?.toString(),
+      includeRequestBinAttemptData: query.includeRequestBinAttemptData === 'true'
     });
   }
 }
@@ -677,6 +687,13 @@ export interface iGetClaimAttemptsSuccessResponse<T extends NumberType> {
     /** Zero-based index claim number */
     claimNumber: number;
     error?: string;
+    /**
+     * This is in the format of { [instanceId: string]: Record<string, any> }
+     * where the object is what was configured via the plugin.
+     */
+    attemptData?: {
+      [instanceId: string]: Record<string, any>;
+    };
   }[];
   bookmark?: string;
   total?: number;
@@ -693,6 +710,14 @@ export interface iClaimAttempt<T extends NumberType> {
   claimAttemptId: string;
   claimNumber: number;
   error?: string;
+  /** This is in the format of { [instanceId: string]: Record<string, any> }
+   * where the object is what was configured via the plugin.
+   *
+   * The instanceId is for the requestBin plugin's instance ID.
+   */
+  attemptData?: {
+    [instanceId: string]: Record<string, any>;
+  };
 }
 
 /**
@@ -706,6 +731,9 @@ export class ClaimAttempt<T extends NumberType> extends BaseNumberTypeClass<Clai
   claimAttemptId: string;
   claimNumber: number;
   error?: string;
+  attemptData?: {
+    [instanceId: string]: Record<string, any>;
+  };
 
   constructor(data: iClaimAttempt<T>) {
     super();
@@ -716,6 +744,7 @@ export class ClaimAttempt<T extends NumberType> extends BaseNumberTypeClass<Clai
     this.claimAttemptId = data.claimAttemptId;
     this.claimNumber = data.claimNumber;
     this.error = data.error;
+    this.attemptData = data.attemptData;
   }
 
   getNumberFieldNames(): string[] {
@@ -1100,9 +1129,9 @@ export interface iGetAttemptDataFromRequestBinPayload {
  */
 export interface iGetAttemptDataFromRequestBinSuccessResponse {
   /**
-   * The attempt data. This will be in the format configured for the request bin plugin.
+   * The attempt payload we cached. This will be in the format configured for the request bin plugin.
    */
-  attemptData: Record<string, any>;
+  payload: Record<string, any>;
 }
 
 /**
@@ -1112,11 +1141,11 @@ export class GetAttemptDataFromRequestBinSuccessResponse
   extends CustomTypeClass<GetAttemptDataFromRequestBinSuccessResponse>
   implements iGetAttemptDataFromRequestBinSuccessResponse
 {
-  attemptData: Record<string, any>;
+  payload: Record<string, any>;
 
   constructor(data: iGetAttemptDataFromRequestBinSuccessResponse) {
     super();
-    this.attemptData = data.attemptData;
+    this.payload = data.payload;
   }
 }
 
@@ -3403,7 +3432,7 @@ export class DeleteClaimSuccessResponse extends EmptyResponseClass {}
  * @category API Requests / Responses
  */
 export interface iUpdateClaimPayload {
-  claims: Omit<iClaimDetails<NumberType>, '_includesPrivateParams' | '_templateInfo' | 'seedCode' | 'version'>[];
+  claims: UpdateClaimRequest<NumberType>[];
 }
 
 /**

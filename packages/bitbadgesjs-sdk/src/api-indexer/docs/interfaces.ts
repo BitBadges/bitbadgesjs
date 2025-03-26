@@ -1066,7 +1066,15 @@ export type ManagePluginRequest = IntegrationPluginDetailsUpdate<ClaimIntegratio
  */
 export type CreateClaimRequest<T extends NumberType> = Omit<
   iClaimDetails<T>,
-  'plugins' | 'version' | '_includesPrivateParams' | '_templateInfo' | 'managedBy' | 'createdBy' | 'standaloneClaim' | 'lastUpdated'
+  | 'plugins'
+  | 'version'
+  | 'trackerDetails'
+  | '_includesPrivateParams'
+  | '_templateInfo'
+  | 'managedBy'
+  | 'createdBy'
+  | 'standaloneClaim'
+  | 'lastUpdated'
 > & {
   cid?: string;
   plugins: ManagePluginRequest[];
@@ -1412,10 +1420,17 @@ export interface iClaimBuilderDoc<T extends NumberType> extends Doc {
   /** For query purposes, the plugin IDs */
   pluginIds?: string[];
 
-  /** If true, the claim codes are to be distributed manually. This doc will only be used for storage purposes. */
+  /**
+   * If true, the claim codes are to be distributed manually. This doc will only be used for storage purposes.
+   * Only in use for legacy on-chain claims.
+   *
+   * @deprecated
+   */
   manualDistribution?: boolean;
 
-  /** If the claim has been designated to be completed automatically for users. */
+  /**
+   * If the claim has been designated to be completed automatically for users.
+   */
   approach?: string;
 
   /** Metadata for the claim */
