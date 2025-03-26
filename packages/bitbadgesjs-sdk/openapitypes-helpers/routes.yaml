@@ -3326,6 +3326,8 @@ paths:
         - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateClaimSuccessResponse)**
         - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#createclaims)**
 
+        Tip: You can see the claim JSONs in-site. Click the info circle button > JSON tab. Use the claim tester, build your claim, and see how it works behind the scenes.
+
         Scopes:
           - `manageClaims` - Required
           - `manageAddressLists` - Required for linked address list claims
@@ -3387,6 +3389,8 @@ paths:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateClaimPayload)**
         - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateClaimSuccessResponse)**
         - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#updateclaims)**
+
+        Tip: You can see the claim JSONs in-site. Click the info circle button > JSON tab. Use the claim tester, build your claim, and see how it works behind the scenes.
 
         Scopes:
           - `manageClaims` - Required

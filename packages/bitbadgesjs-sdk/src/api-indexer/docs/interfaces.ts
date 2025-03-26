@@ -1021,7 +1021,7 @@ export interface IntegrationPluginParams<T extends ClaimIntegrationPluginType> {
   publicParams: ClaimIntegrationPublicParamsType<T>;
   /** The parameters of the plugin that are not visible to the public. These are custom per plugin type. */
   privateParams: ClaimIntegrationPrivateParamsType<T>;
-  /** Custom display metadata for the plugin */
+  /** Custom display metadata for the plugin. This will override the default metadata for the plugin. */
   metadata?: { name: string; description: string; image?: string };
 }
 
@@ -1046,6 +1046,8 @@ export interface IntegrationPluginDetailsUpdate<T extends ClaimIntegrationPlugin
    * By default, we will overwrite the whole state. If onlyUpdateProvidedNewState is true, we will only update the specific provided fields.
    *
    * Warning: This is an advanced feature and should be used with caution. Misconfiguring this can lead to unexpected behavior of this plugin.
+   *
+   * Note: Each plugin may have different state schemas. Please refer to the documentation of the plugin you are updating for more information.
    */
   newState?: ClaimIntegrationPublicStateType<T>;
   /**
@@ -2119,21 +2121,47 @@ export interface iClaimDetails<T extends NumberType> {
   categories?: string[];
   /** Estimated time to satisfy the claim's requirements. */
   estimatedTime?: string;
-  /** If manual distribution is enabled, we do not handle any distribution of claim codes. We leave that up to the claim creator. */
+  /** If manual distribution is enabled, we do not handle any distribution of claim codes.
+   * We leave that up to the claim creator.
+   *
+   * Only applicable for on-chain badge claims. This is only used in advanced self-hosted cases.
+   */
   manualDistribution?: boolean;
-  /** Whether the claim is expected to be automatically triggered by someone (not the user). */
-  approach?: string; // 'in-site' | 'api' | 'zapier';
-  /** Seed code for the claim. Only used for on-chain badge claims. */
+  /**
+   * How the claim is expected to be completed. This is for display purposes for the frontend.
+   *
+   * Available options:
+   * - in-site: The claim is expected to be completed in-site.
+   * - api: The claim is expected to be completed via an API call.
+   * - zapier: The claim is expected to be completed via Zapier auto-completion.
+   *
+   * Typically, you will use the in-site approach.
+   */
+  approach?: 'in-site' | 'api' | 'zapier';
+  /**
+   * Seed code for the claim. Only used for on-chain badge claims.
+   *
+   * This is how we produce all reserved codes for the on-chain merkle challenge / proofs.
+   */
   seedCode?: string;
   /** Metadata for the claim. */
   metadata?: iMetadata<T>;
-  /** Algorithm to determine the claim number order. Blank is just incrementing claim numbers. */
+  /**
+   * Algorithm to determine the claim number order. Blank is just incrementing claim numbers.
+   *
+   * For most cases, you will not need to specify this.
+   */
   assignMethod?: string;
   /** Last updated timestamp for the claim. */
   lastUpdated?: T;
   /** The version of the claim. */
   version: T;
-  /** Custom satisfaction logic */
+  /**
+   * Custom satisfaction logic.
+   *
+   * If left blank, all plugins must pass for the claim to be satisfied.
+   * Otherwise, you can specify a custom method to determine if the claim is satisfied.
+   */
   satisfyMethod?: iSatisfyMethod;
   /**
    * For internal use by the frontend.
