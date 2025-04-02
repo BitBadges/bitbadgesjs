@@ -81,10 +81,10 @@ setup(
 )
 EOF
 
-touch $PYTHON_OUTPUT_DIR/README.md
+touch README.md
 # Create README.md if it doesn't exist
-if [ ! -f "$PYTHON_OUTPUT_DIR/README.md" ]; then
-    cat > $PYTHON_OUTPUT_DIR/README.md << EOF
+if [ ! -f "README.md" ]; then
+    cat > README.md << EOF
 # BitBadgesPy SDK
 
 $DESCRIPTION
