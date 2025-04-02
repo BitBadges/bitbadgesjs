@@ -34,13 +34,14 @@ python -m build
 
 pytest
 
+echo $PYPI_TOKEN
 
 
 # Create .pypirc file with token authentication
 cat > "$HOME/.pypirc" << EOF
 [pypi]
-username = __token__
-password = ${PYPI_TOKEN}
+  username = __token__
+  password = ${PYPI_TOKEN}
 EOF
 
 # Upload to PyPI (now using .pypirc config)
