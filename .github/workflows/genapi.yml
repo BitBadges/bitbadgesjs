@@ -36,8 +36,10 @@ jobs:
 
       - name: Generate API documentation
         env:
-          PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+          PYPI_TOKEN: ${{ secrets.PYPI_PASSWORD }}
         run: |
+          echo "Starting documentation generation..."
+          echo "PYPI_TOKEN is set: $([[ ! -z "$PYPI_TOKEN" ]] && echo "true" || echo "false")"
           chmod +x ./scripts/gen_api_docs_ci.sh
           source ./scripts/gen_api_docs_ci.sh
 
