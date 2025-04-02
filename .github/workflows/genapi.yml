@@ -30,6 +30,9 @@ jobs:
           npm install
           npm install -g tsx typescript ts-node @stoplight/cli
           npm install -D @types/node
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade build twine setuptools wheel
+          pip install pydantic urllib3 python-dateutil requests pytest
 
       - name: Generate API documentation
         run: |

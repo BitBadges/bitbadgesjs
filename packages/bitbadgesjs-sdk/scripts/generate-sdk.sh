@@ -81,6 +81,7 @@ setup(
 )
 EOF
 
+touch $PYTHON_OUTPUT_DIR/README.md
 # Create README.md if it doesn't exist
 if [ ! -f "$PYTHON_OUTPUT_DIR/README.md" ]; then
     cat > $PYTHON_OUTPUT_DIR/README.md << EOF
