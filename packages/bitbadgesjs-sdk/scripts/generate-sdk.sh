@@ -6,7 +6,26 @@ PYTHON_OUTPUT_DIR="sdk-python"
 JS_OUTPUT_DIR="sdk-js"
 PACKAGE_NAME="bitbadgespy-sdk"
 PACKAGE_IMPORT_NAME="bitbadgespy_sdk"  # This is the Python-friendly name
-VERSION="0.1.8"
+
+# Function to increment version
+increment_version() {
+    local version=$1
+    IFS='.' read -ra parts <<< "$version"
+    parts[2]=$((parts[2] + 1))
+    echo "${parts[0]}.${parts[1]}.${parts[2]}"
+}
+
+# Get the latest version from PyPI and increment it
+LATEST_VERSION=$(pip index versions $PACKAGE_NAME 2>/dev/null | grep -m1 "$PACKAGE_NAME" | cut -d'(' -f2 | cut -d')' -f1 || echo "0.1.0")
+VERSION=$(increment_version "$LATEST_VERSION")
+
+# If pip command failed or version is empty, use default
+if [ -z "$VERSION" ]; then
+    VERSION="0.1.0"
+fi
+
+echo "Using version: $VERSION"
+
 DESCRIPTION="BitBadges Python SDK"
 AUTHOR="BitBadges"
 AUTHOR_EMAIL="support@bitbadges.io"
