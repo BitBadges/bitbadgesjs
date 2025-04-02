@@ -16,5 +16,6 @@ tsx ./scripts/spread_explodes.ts ./openapitypes/combined.yaml
 
 source ./scripts/bump_python_sdk.sh
 
+cd ..
 rm ./openapitypes/combined.yaml
 rm ./src/combined.ts
