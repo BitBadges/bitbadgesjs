@@ -35,6 +35,8 @@ jobs:
           pip install pydantic urllib3 python-dateutil requests pytest
 
       - name: Generate API documentation
+        env:
+          PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
           chmod +x ./scripts/gen_api_docs_ci.sh
           source ./scripts/gen_api_docs_ci.sh

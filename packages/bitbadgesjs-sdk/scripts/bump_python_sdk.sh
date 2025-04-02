@@ -30,12 +30,14 @@ python -m pip install --upgrade build twine
 pip install -e .
 python -m build
 
+
+pytest
+
 # Upload to PyPI using API token authentication
 python -m twine upload dist/* \
     --username "__token__" \
     --password "${PYPI_TOKEN}"
 
-pytest
 
 cd ../
 source ./scripts/test-sdk.sh
