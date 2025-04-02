@@ -6,7 +6,9 @@ import {
   iChallengeTrackerIdDetails,
   iClaimDetails,
   iSatisfyMethod,
-  CreateClaimRequest
+  CreateClaimRequest,
+  iClaimCachePolicy,
+  UNIXMilliTimestamp
 } from '@/api-indexer/docs/interfaces.js';
 import { Metadata } from '@/api-indexer/metadata/metadata.js';
 import {
@@ -48,6 +50,31 @@ import { UintRange, UintRangeArray } from './uintRanges.js';
 import { AllDefaultValues, getPotentialUpdatesForTimelineValues, getUpdateCombinationsToCheck } from './validate-utils.js';
 
 const { getReservedAddressList, getReservedTrackerList } = AddressList;
+
+/**
+ * @inheritDoc iClaimCachePolicy
+ * @category Indexer
+ */
+export class ClaimCachePolicy<T extends NumberType> extends BaseNumberTypeClass<ClaimCachePolicy<T>> implements iClaimCachePolicy<T> {
+  ttl?: T;
+  alwaysPermanent?: boolean;
+  permanentAfter?: UNIXMilliTimestamp<T>;
+
+  constructor(data: iClaimCachePolicy<T>) {
+    super();
+    this.ttl = data.ttl;
+    this.alwaysPermanent = data.alwaysPermanent;
+    this.permanentAfter = data.permanentAfter;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['ttl', 'permanentAfter'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ClaimCachePolicy<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ClaimCachePolicy<U>;
+  }
+}
 
 /**
  * @inheritDoc iChallengeTrackerIdDetails
@@ -132,6 +159,7 @@ export class ClaimDetails<T extends NumberType> extends BaseNumberTypeClass<Clai
     pluginId?: string;
     completedTemplateStep?: boolean;
   };
+  cachePolicy?: ClaimCachePolicy<T>;
 
   constructor(data: iClaimDetails<T>) {
     super();
@@ -159,6 +187,7 @@ export class ClaimDetails<T extends NumberType> extends BaseNumberTypeClass<Clai
     this.trackerDetails = data.trackerDetails ? new ChallengeTrackerIdDetails(data.trackerDetails) : undefined;
     this.createdBy = data.createdBy;
     this.managedBy = data.managedBy;
+    this.cachePolicy = data.cachePolicy ? new ClaimCachePolicy(data.cachePolicy) : undefined;
   }
 
   convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): ClaimDetails<U> {

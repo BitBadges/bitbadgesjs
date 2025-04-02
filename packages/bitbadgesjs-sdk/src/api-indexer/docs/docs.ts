@@ -7,6 +7,7 @@ import {
   ApprovalInfoDetails,
   ChallengeDetails,
   ChallengeTrackerIdDetails,
+  ClaimCachePolicy,
   CollectionApproval,
   PredeterminedBalances,
   SatisfyMethod,
@@ -34,7 +35,7 @@ import {
 import { CollectionPermissions, UserPermissions, UserPermissionsWithDetails } from '@/core/permissions.js';
 import type { iOffChainBalancesMap } from '@/core/transfers.js';
 import { UserBalanceStore } from '@/core/userBalances.js';
-import type { iAmountTrackerIdDetails, iUintRange } from '@/interfaces/badges/core.js';
+import type { iAmountTrackerIdDetails } from '@/interfaces/badges/core.js';
 import type { iUserBalanceStore } from '@/interfaces/badges/userBalances.js';
 import { Map, ValueStore } from '@/transactions/messages/bitbadges/maps/index.js';
 import type { Doc } from '../base.js';
@@ -42,8 +43,22 @@ import type { iMetadata } from '../metadata/metadata.js';
 import { Metadata } from '../metadata/metadata.js';
 import {
   ClaimReward,
-  iDynamicDataDoc,
+  DynamicDataHandlerData,
   DynamicDataHandlerType,
+  iApiKeyDoc,
+  iApplicationDoc,
+  iApplicationPage,
+  iDynamicDataDoc,
+  iEstimatedCost,
+  iEvent,
+  iInheritMetadataFrom,
+  iLinkedTo,
+  iListingViewsDoc,
+  iPointsDoc,
+  iTierWithOptionalWeight,
+  iUtilityListingContent,
+  iUtilityListingDoc,
+  iUtilityListingLink,
   type BitBadgesAddress,
   type ClaimIntegrationPluginType,
   type IntegrationPluginParams,
@@ -86,21 +101,7 @@ import {
   type iSocialConnections,
   type iStatusDoc,
   type iUpdateHistory,
-  type iUsedLeafStatus,
-  DynamicDataHandlerData,
-  iApplicationDoc,
-  iUtilityListingDoc,
-  iEvent,
-  iApplicationPage,
-  iPointsDoc,
-  iTierWithOptionalWeight,
-  iUtilityListingLink,
-  iUtilityListingContent,
-  iListingViewsDoc,
-  iApiKeyDoc,
-  iLinkedTo,
-  iInheritMetadataFrom,
-  iEstimatedCost
+  type iUsedLeafStatus
 } from './interfaces.js';
 
 /**
@@ -872,6 +873,7 @@ export class PointsDoc<T extends NumberType> extends BaseNumberTypeClass<PointsD
   lastCalculatedAt: UNIXMilliTimestamp<T>;
   applicationId: string;
   pageId: string;
+  claimSuccessCounts?: { [claimId: string]: number };
 
   constructor(data: iPointsDoc<T>) {
     super();
@@ -882,6 +884,7 @@ export class PointsDoc<T extends NumberType> extends BaseNumberTypeClass<PointsD
     this.lastCalculatedAt = data.lastCalculatedAt;
     this.applicationId = data.applicationId;
     this.pageId = data.pageId;
+    this.claimSuccessCounts = data.claimSuccessCounts;
   }
 
   getNumberFieldNames(): string[] {
@@ -1345,6 +1348,7 @@ export class ClaimBuilderDoc<T extends NumberType> extends BaseNumberTypeClass<C
   categories?: string[];
   estimatedTime?: string | undefined;
   satisfyMethod?: SatisfyMethod;
+  cachePolicy?: ClaimCachePolicy<T>;
 
   constructor(data: iClaimBuilderDoc<T>) {
     super();
@@ -1380,6 +1384,7 @@ export class ClaimBuilderDoc<T extends NumberType> extends BaseNumberTypeClass<C
     this.assignMethod = data.assignMethod;
     this.satisfyMethod = data.satisfyMethod ? new SatisfyMethod(data.satisfyMethod) : undefined;
     this.managedBy = data.managedBy;
+    this.cachePolicy = data.cachePolicy ? new ClaimCachePolicy(data.cachePolicy) : undefined;
   }
 
   getNumberFieldNames(): string[] {
@@ -1459,7 +1464,10 @@ export class UsedLeafStatus<T extends NumberType> extends BaseNumberTypeClass<Us
  * @inheritDoc iMerkleChallengeTrackerDoc
  * @category Approvals / Transferability
  */
-export class MerkleChallengeTrackerDoc<T extends NumberType> extends BaseNumberTypeClass<MerkleChallengeTrackerDoc<T>> implements iMerkleChallengeTrackerDoc<T> {
+export class MerkleChallengeTrackerDoc<T extends NumberType>
+  extends BaseNumberTypeClass<MerkleChallengeTrackerDoc<T>>
+  implements iMerkleChallengeTrackerDoc<T>
+{
   _docId: string;
   _id?: string;
   collectionId: T;
@@ -2032,6 +2040,8 @@ export class SIWBBRequestDoc<T extends NumberType> extends BaseNumberTypeClass<S
   redirectUri?: string | undefined;
   address: string;
   chain: SupportedChain;
+  codeChallenge?: string;
+  codeChallengeMethod?: 'S256' | 'plain';
 
   constructor(data: iSIWBBRequestDoc<T>) {
     super();
@@ -2051,6 +2061,8 @@ export class SIWBBRequestDoc<T extends NumberType> extends BaseNumberTypeClass<S
     this.expiresAt = data.expiresAt;
     this.bitbadgesAddress = data.bitbadgesAddress;
     this.redirectUri = data.redirectUri;
+    this.codeChallenge = data.codeChallenge;
+    this.codeChallengeMethod = data.codeChallengeMethod;
   }
 
   getNumberFieldNames(): string[] {

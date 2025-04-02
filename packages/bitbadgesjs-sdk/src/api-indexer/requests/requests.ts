@@ -2477,6 +2477,11 @@ export interface iCreateSIWBBRequestPayload {
 
   /** State to be passed back to the redirect URI. */
   state?: string;
+
+  /** The code challenge for the SIWBB request. */
+  code_challenge?: string;
+  /** The code challenge method for the SIWBB request. */
+  code_challenge_method?: 'S256' | 'plain';
 }
 
 /**
@@ -2620,6 +2625,9 @@ export interface iExchangeSIWBBAuthorizationCodePayload {
   grant_type?: 'authorization_code' | 'refresh_token';
   /** The refresh token to use for the SIWBB request. */
   refresh_token?: string;
+
+  /** The code verifier for the SIWBB request (if used with PKCE). */
+  code_verifier?: string;
 }
 
 /**
@@ -4399,6 +4407,7 @@ export interface iPointsValue {
   address: BitBadgesAddress;
   points: number;
   lastCalculatedAt: number;
+  claimSuccessCounts?: { [claimId: string]: number };
 }
 
 /**

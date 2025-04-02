@@ -711,6 +711,8 @@ export interface iPointsDoc<T extends NumberType> extends Doc {
   applicationId: string;
   /** The page ID */
   pageId: string;
+  /** Claim success counts. These were the claim success counts calculated for this points calculation. */
+  claimSuccessCounts?: { [claimId: string]: number };
 }
 
 /**
@@ -865,8 +867,7 @@ export type ClaimIntegrationPublicParamsType<T extends ClaimIntegrationPluginTyp
         }
       : T extends 'email'
         ? OAuthAppParams
-        : //  & { noVerification?: boolean }
-          T extends OauthAppName
+        : T extends OauthAppName
           ? OAuthAppParams
           : T extends 'transferTimes'
             ? {
@@ -885,36 +886,31 @@ export type ClaimIntegrationPublicParamsType<T extends ClaimIntegrationPluginTyp
                     allowedCountryCodes?: string[];
                     disallowedCountryCodes?: string[];
                   }
-                : T extends 'payments'
+                : T extends 'webhooks' | 'successWebhooks'
                   ? {
-                      usdAmount: number;
-                      paymentAddress: BitBadgesAddress;
+                      tutorialUri?: string;
+                      ignoreSimulations?: boolean;
+                      passAddress?: boolean;
+                      passDiscord?: boolean;
+                      passEmail?: boolean;
+                      passTwitter?: boolean;
+                      passGoogle?: boolean;
+                      passYoutube?: boolean;
+                      passGithub?: boolean;
+                      passTwitch?: boolean;
+                      passStrava?: boolean;
+                      passReddit?: boolean;
+                      passMeetup?: boolean;
+                      passBluesky?: boolean;
+                      passTelegram?: boolean;
+                      passFarcaster?: boolean;
+                      passSlack?: boolean;
+                      passFacebook?: boolean;
+                      passShopify?: boolean;
+                      passMailchimp?: boolean;
+                      userInputsSchema?: Array<JsonBodyInputSchema>;
                     }
-                  : T extends 'webhooks' | 'successWebhooks'
-                    ? {
-                        tutorialUri?: string;
-                        ignoreSimulations?: boolean;
-                        passAddress?: boolean;
-                        passDiscord?: boolean;
-                        passEmail?: boolean;
-                        passTwitter?: boolean;
-                        passGoogle?: boolean;
-                        passYoutube?: boolean;
-                        passGithub?: boolean;
-                        passTwitch?: boolean;
-                        passStrava?: boolean;
-                        passReddit?: boolean;
-                        passMeetup?: boolean;
-                        passBluesky?: boolean;
-                        passTelegram?: boolean;
-                        passFarcaster?: boolean;
-                        passSlack?: boolean;
-                        passFacebook?: boolean;
-                        passShopify?: boolean;
-                        passMailchimp?: boolean;
-                        userInputsSchema?: Array<JsonBodyInputSchema>;
-                      }
-                    : Record<string, any>;
+                  : Record<string, any>;
 
 /**
  * Private params are params that are not visible to the public. For example, the password for a claim code.
@@ -1503,11 +1499,39 @@ export interface iClaimBuilderDoc<T extends NumberType> extends Doc {
   version: T;
 
   testOnly?: boolean;
+
+  /**
+   * For on-demand claims, we cache the result per user for a short period.
+   *
+   * To help optimize performance, please provide a cache policy.
+   *
+   * This is only applicable to on-demand claims.
+   */
+  cachePolicy?: iClaimCachePolicy<T>;
 }
 
 /**
  * @category Interfaces
  */
+export interface iClaimCachePolicy<T extends NumberType> {
+  /**
+   * The number of seconds to cache the result. Default is 5 minutes (300 seconds) if none is specified.
+   *
+   * Note: This may be overridden by other options
+   */
+  ttl?: T;
+  /**
+   * Permanent once the claim is calculated once. We will cache results indefinitely.
+   */
+  alwaysPermanent?: boolean;
+  /**
+   * Permanent after a specific timestamp. Until then, we use the ttl. We will cache results indefinitely after this timestamp.
+   */
+  permanentAfter?: UNIXMilliTimestamp<T>;
+}
+
+/**
+ * @category Interfaces */
 export interface iClaimReward<T extends NumberType> {
   /** The ID of the reward (either a pre-configured one or "custom"). Currently, this is not used for anything. */
   rewardId: string;
@@ -2047,6 +2071,12 @@ export interface iSIWBBRequestDoc<T extends NumberType> extends Doc {
 
   /** The redirect URI of the app  */
   redirectUri?: string;
+
+  /** The code challenge for the SIWBB request (if used with PKCE). */
+  codeChallenge?: string;
+  
+  /** The code challenge method for the SIWBB request (if used with PKCE). */
+  codeChallengeMethod?: 'S256' | 'plain';
 }
 
 /**
@@ -2168,6 +2198,10 @@ export interface iClaimDetails<T extends NumberType> {
    * Otherwise, you can specify a custom method to determine if the claim is satisfied.
    */
   satisfyMethod?: iSatisfyMethod;
+  /**
+   * Cache policy for the claim. Only needed for on-demand claims.
+   */
+  cachePolicy?: iClaimCachePolicy<T>;
   /**
    * For internal use by the frontend.
    *
