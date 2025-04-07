@@ -3322,6 +3322,8 @@ export interface iCreatePaymentIntentPayload {
   amount: number;
   /** Purpose of the payment */
   purpose: 'credits' | 'deposit';
+  /** The affiliate code to use for the payment */
+  affiliateCode?: string;
 }
 
 /**
