@@ -83,7 +83,7 @@ export class MsgUpdateCollection<T extends NumberType> extends BaseNumberTypeCla
   }
 
   getNumberFieldNames(): string[] {
-    return ['collectionId'];
+    return [];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgUpdateCollection<U> {

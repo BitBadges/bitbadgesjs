@@ -60,7 +60,7 @@ export class MsgUpdateUserApprovals<T extends NumberType>
   }
 
   getNumberFieldNames(): string[] {
-    return ['collectionId'];
+    return [];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgUpdateUserApprovals<U> {

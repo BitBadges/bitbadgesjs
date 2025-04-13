@@ -94,7 +94,7 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
   }
 
   getNumberFieldNames(): string[] {
-    return ['collectionId'];
+    return [];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgUniversalUpdateCollection<U> {

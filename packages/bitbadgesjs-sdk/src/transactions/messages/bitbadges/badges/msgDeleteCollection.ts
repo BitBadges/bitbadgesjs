@@ -29,7 +29,7 @@ export class MsgDeleteCollection<T extends NumberType> extends BaseNumberTypeCla
   }
 
   getNumberFieldNames(): string[] {
-    return ['collectionId'];
+    return [];
   }
 
   toProto(): badges.MsgDeleteCollection {

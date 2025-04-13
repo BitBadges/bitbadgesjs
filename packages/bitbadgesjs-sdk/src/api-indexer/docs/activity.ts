@@ -12,6 +12,7 @@ import type {
   iPointsActivityDoc,
   iTransferActivityDoc
 } from './interfaces.js';
+import { CollectionId } from '@/interfaces/badges/core.js';
 
 /**
  * @inheritDoc iActivityDoc
@@ -50,12 +51,13 @@ export class TransferActivityDoc<T extends NumberType> extends ActivityDoc<T> im
   to: BitBadgesAddress[];
   from: BitBadgesAddress;
   balances: BalanceArray<T>;
-  collectionId: T;
+  collectionId: CollectionId;
   memo?: string;
   precalculateBalancesFromApproval?: ApprovalIdentifierDetails;
   prioritizedApprovals?: ApprovalIdentifierDetails[];
   initiatedBy: BitBadgesAddress;
   txHash?: string;
+  private?: boolean | undefined;
 
   constructor(data: iTransferActivityDoc<T>) {
     super(data);
@@ -70,10 +72,11 @@ export class TransferActivityDoc<T extends NumberType> extends ActivityDoc<T> im
     this.prioritizedApprovals = data.prioritizedApprovals ? data.prioritizedApprovals.map((x) => new ApprovalIdentifierDetails(x)) : undefined;
     this.initiatedBy = data.initiatedBy;
     this.txHash = data.txHash;
+    this.private = data.private;
   }
 
   getNumberFieldNames(): string[] {
-    return [...super.getNumberFieldNames(), 'collectionId'];
+    return [...super.getNumberFieldNames()];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): TransferActivityDoc<U> {
@@ -111,7 +114,7 @@ export class ListActivityDoc<T extends NumberType> extends ActivityDoc<T> implem
  * @category Indexer
  */
 export class ClaimAlertDoc<T extends NumberType> extends ActivityDoc<T> implements iClaimAlertDoc<T> {
-  collectionId: T;
+  collectionId: CollectionId;
   from: BitBadgesAddress;
   bitbadgesAddresses: BitBadgesAddress[];
   message?: string;
@@ -125,7 +128,7 @@ export class ClaimAlertDoc<T extends NumberType> extends ActivityDoc<T> implemen
   }
 
   getNumberFieldNames(): string[] {
-    return [...super.getNumberFieldNames(), 'collectionId'];
+    return [...super.getNumberFieldNames()];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ClaimAlertDoc<U> {

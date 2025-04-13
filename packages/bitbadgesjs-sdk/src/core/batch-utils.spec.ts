@@ -5,7 +5,7 @@ describe('BatchBadgeDetails', () => {
     expect(
       BatchBadgeDetailsArray.From<bigint>([
         {
-          collectionId: 1n,
+          collectionId: '1',
           badgeIds: [{ start: 1n, end: 10000n }]
         }
       ])
@@ -15,7 +15,7 @@ describe('BatchBadgeDetails', () => {
   it('should convert', () => {
     const batchBadgeDetails = BatchBadgeDetailsArray.From<bigint>([
       {
-        collectionId: 1n,
+        collectionId: '1',
         badgeIds: [{ start: 1n, end: 10000n }]
       }
     ]);
@@ -26,14 +26,14 @@ describe('BatchBadgeDetails', () => {
   it('should add', () => {
     const batchBadgeDetails = BatchBadgeDetailsArray.From<bigint>([
       {
-        collectionId: 1n,
+        collectionId: '1',
         badgeIds: [{ start: 1n, end: 10000n }]
       }
     ]);
 
     batchBadgeDetails.add([
       {
-        collectionId: 1n,
+        collectionId: '1',
         badgeIds: [{ start: 10001n, end: 20000n }]
       }
     ]);
@@ -47,14 +47,14 @@ describe('BatchBadgeDetails', () => {
   it('should remove', () => {
     const batchBadgeDetails = BatchBadgeDetailsArray.From<bigint>([
       {
-        collectionId: 1n,
+        collectionId: '1',
         badgeIds: [{ start: 1n, end: 10000n }]
       }
     ]);
 
     batchBadgeDetails.remove([
       {
-        collectionId: 1n,
+        collectionId: '1',
         badgeIds: [{ start: 1n, end: 10000n }]
       }
     ]);
@@ -62,13 +62,13 @@ describe('BatchBadgeDetails', () => {
     expect(batchBadgeDetails.length).toEqual(0);
 
     batchBadgeDetails.push({
-      collectionId: 1n,
+      collectionId: '1',
       badgeIds: [{ start: 1n, end: 10000n }]
     });
 
     batchBadgeDetails.remove([
       {
-        collectionId: 1n,
+        collectionId: '1',
         badgeIds: [{ start: 10001n, end: 20000n }]
       }
     ]);
@@ -79,7 +79,7 @@ describe('BatchBadgeDetails', () => {
   it('should isSubsetOf', () => {
     const batchBadgeDetails = BatchBadgeDetailsArray.From<bigint>([
       {
-        collectionId: 1n,
+        collectionId: '1',
         badgeIds: [{ start: 1n, end: 10000n }]
       }
     ]);
@@ -87,7 +87,7 @@ describe('BatchBadgeDetails', () => {
     expect(
       batchBadgeDetails.isSubsetOf([
         {
-          collectionId: 1n,
+          collectionId: '1',
           badgeIds: [{ start: 1n, end: 10000n }]
         }
       ])
@@ -97,7 +97,7 @@ describe('BatchBadgeDetails', () => {
   it('should is not SubsetOf', () => {
     const batchBadgeDetails = BatchBadgeDetailsArray.From<bigint>([
       {
-        collectionId: 1n,
+        collectionId: '1',
         badgeIds: [{ start: 1n, end: 10000n }]
       }
     ]);
@@ -105,7 +105,7 @@ describe('BatchBadgeDetails', () => {
     expect(
       batchBadgeDetails.isSubsetOf([
         {
-          collectionId: 1n,
+          collectionId: '1',
           badgeIds: [{ start: 10001n, end: 20000n }]
         }
       ])
@@ -115,7 +115,7 @@ describe('BatchBadgeDetails', () => {
   it('should noneIn', () => {
     const batchBadgeDetails = BatchBadgeDetailsArray.From<bigint>([
       {
-        collectionId: 1n,
+        collectionId: '1',
         badgeIds: [{ start: 1n, end: 10000n }]
       }
     ]);
@@ -123,7 +123,7 @@ describe('BatchBadgeDetails', () => {
     expect(
       batchBadgeDetails.noneIn([
         {
-          collectionId: 1n,
+          collectionId: '1',
           badgeIds: [{ start: 10001n, end: 20000n }]
         }
       ])
@@ -133,7 +133,7 @@ describe('BatchBadgeDetails', () => {
   it('should not noneIn', () => {
     const batchBadgeDetails = BatchBadgeDetailsArray.From<bigint>([
       {
-        collectionId: 1n,
+        collectionId: '1',
         badgeIds: [{ start: 1n, end: 10000n }]
       }
     ]);
@@ -141,7 +141,7 @@ describe('BatchBadgeDetails', () => {
     expect(
       batchBadgeDetails.noneIn([
         {
-          collectionId: 1n,
+          collectionId: '1',
           badgeIds: [{ start: 1n, end: 10000n }]
         }
       ])
@@ -151,7 +151,7 @@ describe('BatchBadgeDetails', () => {
   it('should getPage', () => {
     const batchBadgeDetails = BatchBadgeDetailsArray.From<bigint>([
       {
-        collectionId: 1n,
+        collectionId: '1',
         badgeIds: [{ start: 1n, end: 10000n }]
       }
     ]);
@@ -164,7 +164,7 @@ describe('BatchBadgeDetails', () => {
   it('should getPage - newest', () => {
     const batchBadgeDetails = BatchBadgeDetailsArray.From<bigint>([
       {
-        collectionId: 1n,
+        collectionId: '1',
         badgeIds: [{ start: 1n, end: 10000n }]
       }
     ]);

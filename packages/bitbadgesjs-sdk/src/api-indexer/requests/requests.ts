@@ -85,7 +85,7 @@ import { VerifySIWBBOptions, iSiwbbChallenge } from '@/core/blockin.js';
 import { AttestationsProof } from '@/core/secrets.js';
 import type { iOffChainBalancesMap } from '@/core/transfers.js';
 import { UintRangeArray } from '@/core/uintRanges.js';
-import type { iAttestation, iAttestationsProof, iPredeterminedBalances, iUintRange } from '@/interfaces/index.js';
+import type { CollectionId, iAttestation, iAttestationsProof, iPredeterminedBalances, iUintRange } from '@/interfaces/index.js';
 import { BroadcastPostBody } from '@/node-rest-api/index.js';
 import { type AssetConditionGroup, type ChallengeParams, type VerifyChallengeOptions } from 'blockin';
 import { SiwbbChallengeParams } from './blockin.js';
@@ -250,7 +250,7 @@ export interface iGetSearchPayload<T extends NumberType> {
   /** If true, we will skip all claim queries. */
   noClaims?: boolean;
   /** If true, we will limit collection-based results to a single collection. */
-  specificCollectionId?: T;
+  specificCollectionId?: CollectionId;
 }
 
 /**
@@ -264,7 +264,7 @@ export class GetSearchPayload<T extends NumberType> extends BaseNumberTypeClass<
   noMaps?: boolean;
   noApplications?: boolean;
   noClaims?: boolean;
-  specificCollectionId?: T;
+  specificCollectionId?: CollectionId;
 
   constructor(payload: iGetSearchPayload<T>) {
     super();
@@ -1050,7 +1050,7 @@ export interface iAddBalancesToOffChainStoragePayload {
   /**
    * The collection ID.
    */
-  collectionId: NumberType;
+  collectionId: CollectionId;
 
   /**
    * Whether this is for a non-indexed collection. Bypasses some validation.
@@ -1099,7 +1099,7 @@ export interface iUploadBalancesPayload {
   /**
    * The collection ID to update balances for.
    */
-  collectionId: NumberType;
+  collectionId: CollectionId;
 }
 
 /**

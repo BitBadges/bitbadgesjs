@@ -33,7 +33,7 @@ import type {
   iUserIncomingApprovalWithDetails,
   iUserOutgoingApproval
 } from '@/interfaces/badges/approvals.js';
-import type { iAddressList, iCoinTransfer, iMerkleChallenge } from '@/interfaces/badges/core.js';
+import type { CollectionId, iAddressList, iCoinTransfer, iMerkleChallenge } from '@/interfaces/badges/core.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 import type MerkleTree from 'merkletreejs';
 import type { Options as MerkleTreeJsOptions } from 'merkletreejs/dist/MerkleTree';
@@ -84,7 +84,7 @@ export class ChallengeTrackerIdDetails<T extends NumberType>
   extends BaseNumberTypeClass<ChallengeTrackerIdDetails<T>>
   implements iChallengeTrackerIdDetails<T>
 {
-  collectionId: T;
+  collectionId: CollectionId;
   approvalId: string;
   challengeTrackerId: string;
   approvalLevel: 'collection' | 'incoming' | 'outgoing' | '';
@@ -100,7 +100,7 @@ export class ChallengeTrackerIdDetails<T extends NumberType>
   }
 
   getNumberFieldNames(): string[] {
-    return ['collectionId'];
+    return [];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ChallengeTrackerIdDetails<U> {
@@ -142,7 +142,7 @@ export class ClaimDetails<T extends NumberType> extends BaseNumberTypeClass<Clai
   satisfyMethod?: SatisfyMethod;
   lastUpdated?: T | undefined;
   version: T;
-  collectionId?: T;
+  collectionId?: CollectionId;
   standaloneClaim?: boolean;
   listId?: string;
   rewards?: ClaimReward<T>[];
@@ -195,7 +195,7 @@ export class ClaimDetails<T extends NumberType> extends BaseNumberTypeClass<Clai
   }
 
   getNumberFieldNames(): string[] {
-    return ['lastUpdated', 'version', 'collectionId'];
+    return ['lastUpdated', 'version'];
   }
 }
 

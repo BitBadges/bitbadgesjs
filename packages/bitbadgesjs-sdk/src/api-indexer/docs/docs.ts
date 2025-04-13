@@ -35,7 +35,7 @@ import {
 import { CollectionPermissions, UserPermissions, UserPermissionsWithDetails } from '@/core/permissions.js';
 import type { iOffChainBalancesMap } from '@/core/transfers.js';
 import { UserBalanceStore } from '@/core/userBalances.js';
-import type { iAmountTrackerIdDetails } from '@/interfaces/badges/core.js';
+import type { CollectionId, iAmountTrackerIdDetails } from '@/interfaces/badges/core.js';
 import type { iUserBalanceStore } from '@/interfaces/badges/userBalances.js';
 import { Map, ValueStore } from '@/transactions/messages/bitbadges/maps/index.js';
 import type { Doc } from '../base.js';
@@ -114,7 +114,7 @@ export class CollectionDoc<T extends NumberType>
 {
   _docId: string;
   _id?: string;
-  collectionId: T;
+  collectionId: CollectionId;
   collectionMetadataTimeline: CollectionMetadataTimeline<T>[];
   badgeMetadataTimeline: BadgeMetadataTimeline<T>[];
   balancesType: 'Standard' | 'Off-Chain - Indexed' | 'Non-Public' | 'Off-Chain - Non-Indexed';
@@ -236,7 +236,7 @@ export class CollectionDoc<T extends NumberType>
   }
 
   getNumberFieldNames(): string[] {
-    return ['collectionId', 'createdBlock', 'createdTimestamp'];
+    return ['createdBlock', 'createdTimestamp'];
   }
 
   convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): CollectionDoc<U> {
@@ -584,7 +584,7 @@ export class QueueDoc<T extends NumberType> extends BaseNumberTypeClass<QueueDoc
   _docId: string;
   _id?: string;
   uri: string;
-  collectionId: T;
+  collectionId: CollectionId;
   loadBalanceId: T;
   pending?: boolean;
   refreshRequestTime: UNIXMilliTimestamp<T>;
@@ -636,7 +636,7 @@ export class QueueDoc<T extends NumberType> extends BaseNumberTypeClass<QueueDoc
   }
 
   getNumberFieldNames(): string[] {
-    return ['collectionId', 'loadBalanceId', 'refreshRequestTime', 'numRetries', 'lastFetchedAt', 'deletedAt', 'nextFetchTime'];
+    return ['loadBalanceId', 'refreshRequestTime', 'numRetries', 'lastFetchedAt', 'deletedAt', 'nextFetchTime'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): QueueDoc<U> {
@@ -762,7 +762,7 @@ export class AddressListDoc<T extends NumberType> extends AddressList implements
 export class BalanceDoc<T extends NumberType> extends BaseNumberTypeClass<BalanceDoc<T>> implements iBalanceDoc<T> {
   _docId: string;
   _id?: string;
-  collectionId: T;
+  collectionId: CollectionId;
   bitbadgesAddress: BitBadgesAddress;
   onChain: boolean;
   uri?: string;
@@ -800,7 +800,7 @@ export class BalanceDoc<T extends NumberType> extends BaseNumberTypeClass<Balanc
   }
 
   getNumberFieldNames(): string[] {
-    return ['fetchedAt', 'fetchedAtBlock', 'collectionId'];
+    return ['fetchedAt', 'fetchedAtBlock'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): BalanceDoc<U> {
@@ -818,7 +818,7 @@ export class BalanceDocWithDetails<T extends NumberType> extends BaseNumberTypeC
   userPermissions: UserPermissionsWithDetails<T>;
   _docId: string;
   _id?: string;
-  collectionId: T;
+  collectionId: CollectionId;
   bitbadgesAddress: BitBadgesAddress;
   onChain: boolean;
   uri?: string;
@@ -853,7 +853,7 @@ export class BalanceDocWithDetails<T extends NumberType> extends BaseNumberTypeC
   }
 
   getNumberFieldNames(): string[] {
-    return ['fetchedAt', 'fetchedAtBlock', 'collectionId'];
+    return ['fetchedAt', 'fetchedAtBlock'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): BalanceDocWithDetails<U> {
@@ -1098,7 +1098,7 @@ export class UtilityListingLink<T extends NumberType> extends CustomTypeClass<Ut
   url: string;
   claimId?: string | undefined;
   applicationId?: string | undefined;
-  collectionId?: T | undefined;
+  collectionId?: CollectionId | undefined;
   listId?: string | undefined;
   mapId?: string | undefined;
   metadata?: iMetadata<T> | undefined;
@@ -1159,7 +1159,7 @@ export class ListingViewsDoc<T extends NumberType> extends BaseNumberTypeClass<L
  * @category Indexer
  */
 export class LinkedTo<T extends NumberType> extends CustomTypeClass<LinkedTo<T>> implements iLinkedTo<T> {
-  collectionId?: T;
+  collectionId?: CollectionId;
   badgeIds?: UintRangeArray<T>;
   listId?: string;
 
@@ -1171,7 +1171,7 @@ export class LinkedTo<T extends NumberType> extends CustomTypeClass<LinkedTo<T>>
   }
 
   getNumberFieldNames(): string[] {
-    return ['collectionId'];
+    return [];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): LinkedTo<U> {
@@ -1186,7 +1186,7 @@ export class LinkedTo<T extends NumberType> extends CustomTypeClass<LinkedTo<T>>
 export class InheritMetadataFrom<T extends NumberType> extends CustomTypeClass<InheritMetadataFrom<T>> implements iInheritMetadataFrom<T> {
   claimId?: string;
   applicationId?: string;
-  collectionId?: T;
+  collectionId?: CollectionId;
   listId?: string;
   mapId?: string;
   badgeId?: string;
@@ -1202,7 +1202,7 @@ export class InheritMetadataFrom<T extends NumberType> extends CustomTypeClass<I
   }
 
   getNumberFieldNames(): string[] {
-    return ['collectionId'];
+    return [];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): InheritMetadataFrom<U> {
@@ -1321,7 +1321,7 @@ export class ClaimBuilderDoc<T extends NumberType> extends BaseNumberTypeClass<C
   createdBy: BitBadgesAddress;
   managedBy: BitBadgesAddress;
   docClaimed: boolean;
-  collectionId: T;
+  collectionId: CollectionId;
   deletedAt?: T | undefined;
   approach?: string;
   manualDistribution?: boolean;
@@ -1388,7 +1388,7 @@ export class ClaimBuilderDoc<T extends NumberType> extends BaseNumberTypeClass<C
   }
 
   getNumberFieldNames(): string[] {
-    return ['collectionId', 'deletedAt', 'lastUpdated', 'createdAt', 'version'];
+    return ['deletedAt', 'lastUpdated', 'createdAt', 'version'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ClaimBuilderDoc<U> {
@@ -1405,7 +1405,7 @@ export class ApprovalTrackerDoc<T extends NumberType> extends BaseNumberTypeClas
   _id?: string;
   numTransfers: T;
   amounts: BalanceArray<T>;
-  collectionId: T;
+  collectionId: CollectionId;
   approvalId: string;
   amountTrackerId: string;
   approvalLevel: string;
@@ -1429,7 +1429,7 @@ export class ApprovalTrackerDoc<T extends NumberType> extends BaseNumberTypeClas
   }
 
   getNumberFieldNames(): string[] {
-    return ['numTransfers', 'collectionId'];
+    return ['numTransfers'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ApprovalTrackerDoc<U> {
@@ -1470,7 +1470,7 @@ export class MerkleChallengeTrackerDoc<T extends NumberType>
 {
   _docId: string;
   _id?: string;
-  collectionId: T;
+  collectionId: CollectionId;
   challengeTrackerId: string;
   approvalLevel: 'collection' | 'incoming' | 'outgoing' | '';
   approverAddress: BitBadgesAddress;
@@ -1490,7 +1490,7 @@ export class MerkleChallengeTrackerDoc<T extends NumberType>
   }
 
   getNumberFieldNames(): string[] {
-    return ['collectionId'];
+    return [];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MerkleChallengeTrackerDoc<U> {
@@ -1563,7 +1563,7 @@ export class FetchDoc<T extends NumberType> extends BaseNumberTypeClass<FetchDoc
 export class RefreshDoc<T extends NumberType> extends BaseNumberTypeClass<RefreshDoc<T>> implements iRefreshDoc<T> {
   _docId: string;
   _id?: string;
-  collectionId: T;
+  collectionId: CollectionId;
   refreshRequestTime: UNIXMilliTimestamp<T>;
 
   constructor(data: iRefreshDoc<T>) {
@@ -1575,7 +1575,7 @@ export class RefreshDoc<T extends NumberType> extends BaseNumberTypeClass<Refres
   }
 
   getNumberFieldNames(): string[] {
-    return ['refreshRequestTime', 'collectionId'];
+    return ['refreshRequestTime'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): RefreshDoc<U> {

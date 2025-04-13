@@ -38,7 +38,7 @@ export class MsgTransferBadges<T extends NumberType> extends BaseNumberTypeClass
   }
 
   getNumberFieldNames(): string[] {
-    return ['collectionId'];
+    return [];
   }
 
   toProto(): badges.MsgTransferBadges {

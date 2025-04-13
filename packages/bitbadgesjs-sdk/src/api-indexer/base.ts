@@ -1,6 +1,7 @@
 import type { CustomType } from '@/common/base.js';
 import { CustomTypeClass } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
+import { CollectionId } from '@/interfaces/badges/core';
 
 import axios from 'axios';
 
@@ -115,6 +116,11 @@ export class BaseBitBadgesApi<T extends NumberType> {
     if (BigInt(num) <= 0) {
       throw new Error(`Number is not a positive integer: ${num}`);
     }
+  }
+
+  assertPositiveCollectionId(collectionId: CollectionId) {
+    const num = Number(collectionId.split('-')[0]);
+    this.assertPositiveInteger(num);
   }
 }
 

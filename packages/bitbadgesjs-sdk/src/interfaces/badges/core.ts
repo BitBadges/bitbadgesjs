@@ -218,7 +218,7 @@ export interface iMustOwnBadges<T extends NumberType> {
   /**
    * The collection ID of the badges to own.
    */
-  collectionId: T;
+  collectionId: CollectionId;
 
   /**
    * The min/max acceptable amount of badges that must be owned (can be any values, including 0-0).
@@ -406,6 +406,9 @@ export interface iCoinTransfer<T extends NumberType> {
   coins: iCosmosCoin<T>[];
 }
 
+/** @category Interfaces */
+export type CollectionId = string;
+
 /**
  * @category Interfaces
  */
@@ -413,7 +416,7 @@ export interface iAmountTrackerIdDetails<T extends NumberType> {
   /**
    * The collection ID for the approval.
    */
-  collectionId: T;
+  collectionId: CollectionId;
 
   /**
    * The approval ID
