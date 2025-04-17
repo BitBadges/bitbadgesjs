@@ -4,7 +4,7 @@ package badges;
 import "amino/amino.proto";
 import "gogoproto/gogo.proto";
 
-option go_package = "bitbadgeschain/x/badges/types";
+option go_package = "gitlab.com/thorchain/thornode/v3/x/badges/types";
 
 // Params defines the parameters for the module.
 message Params {

@@ -66,6 +66,7 @@ const bech32Chain = (name: string, prefix: string) => ({
   name
 });
 
+const THORCHAIN = bech32Chain('THORCHAIN', 'tthor');
 const BITBADGES = bech32Chain('BITBADGES', 'bb');
 
 const ethToBitBadges = (ethAddress: string) => {
@@ -76,6 +77,16 @@ const ethToBitBadges = (ethAddress: string) => {
 const bitbadgesToEth = (bitbadgesAddress: string) => {
   const data = BITBADGES.decoder(bitbadgesAddress);
   return ETH.encoder(data);
+};
+
+const bitbadgesToThorchain = (bitbadgesAddress: string) => {
+  const data = BITBADGES.decoder(bitbadgesAddress);
+  return THORCHAIN.encoder(data);
+};
+
+const thorchainToBitBadges = (thorchainAddress: string) => {
+  const data = THORCHAIN.decoder(thorchainAddress);
+  return BITBADGES.encoder(data);
 };
 
 const BTC = bech32Chain('BTC', 'bc');
@@ -115,6 +126,10 @@ export function convertToBitBadgesAddress(address: string) {
   } catch {
     if (isAddress(address, true)) {
       bech32Address = ethToBitBadges(address);
+    } else if (address.startsWith('bc')) {
+      bech32Address = btcToBitBadges(address);
+    } else if (address.startsWith('tthor')) {
+      bech32Address = thorchainToBitBadges(address);
     } else if (address.length == 44) {
       try {
         // Decode the base58 Solana public key
@@ -122,12 +137,30 @@ export function convertToBitBadgesAddress(address: string) {
       } catch {
         bech32Address = '';
       }
-    } else if (address.startsWith('bc')) {
-      bech32Address = btcToBitBadges(address);
     }
   }
 
   return bech32Address;
+}
+
+/**
+ * @category Address Utils
+ */
+export function getConvertFunctionFromPrefix(prefix: string, withAliasSupport = true) {
+  return (address: string) => {
+    if (withAliasSupport && ['Mint', 'All', 'Total'].includes(address)) {
+      return address;
+    }
+
+    switch (prefix) {
+      case 'bb':
+        return convertToBitBadgesAddress(address);
+      case 'tthor':
+        return convertToThorchainAddress(address);
+      default:
+        throw new Error(`Unsupported prefix: ${prefix}`);
+    }
+  };
 }
 
 /**
@@ -195,6 +228,31 @@ export function convertToBtcAddress(address: string) {
 }
 
 /**
+ * Converts an address from a supported chain to a Thorchain address
+ * If we are unable to convert the address, we return an empty string
+ *
+ * @category Address Utils
+ */
+export function convertToThorchainAddress(address: string) {
+  try {
+    return bitbadgesToThorchain(convertToBitBadgesAddress(address));
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * Must convert to a Thorchain address. Throws when cannot convert.
+ *
+ * @category Address Utils
+ */
+export function mustConvertToThorchainAddress(address: string) {
+  const bech32Address = convertToThorchainAddress(address);
+  if (!bech32Address) throw new Error('Could not convert. Please make sure inputted address is well-formed');
+
+  return bech32Address;
+}
+/**
  * Goes through the list of supported chains and returns the chain that the address belongs to.
  *
  * @category Address Utils
@@ -205,10 +263,12 @@ export function getChainForAddress(address: string) {
     return SupportedChain.ETH;
   } else if (addr.startsWith('bb')) {
     return SupportedChain.COSMOS;
-  } else if (address.length == 44) {
-    return SupportedChain.SOLANA;
+  } else if (address.startsWith('tthor')) {
+    return SupportedChain.THORCHAIN;
   } else if (address.startsWith('bc')) {
     return SupportedChain.BTC;
+  } else if (address.length == 44) {
+    return SupportedChain.SOLANA;
   }
 
   return SupportedChain.UNKNOWN;
@@ -250,6 +310,14 @@ export function isAddressValid(address: string, chain?: SupportedChain) {
     case SupportedChain.ETH:
     case SupportedChain.UNKNOWN:
       isValidAddress = isAddress(address);
+      break;
+    case SupportedChain.THORCHAIN:
+      try {
+        const thorAddress = convertToThorchainAddress(address);
+        isValidAddress = thorAddress.length > 0;
+      } catch {
+        isValidAddress = false;
+      }
       break;
     case SupportedChain.COSMOS:
       try {

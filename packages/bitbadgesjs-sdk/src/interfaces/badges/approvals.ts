@@ -1,6 +1,6 @@
 import type { NumberType } from '@/common/string-numbers.js';
-import type { iUintRange, iMustOwnBadges, iMerkleChallenge, iBalance, iAddressList, iZkProof, iCoinTransfer } from './core.js';
 import type { iApprovalInfoDetails, iIncomingApprovalCriteriaWithDetails } from '@/core/approvals.js';
+import type { iAddressList, iBalance, iCoinTransfer, iMerkleChallenge, iUintRange } from './core.js';
 
 /**
  * @category Interfaces
@@ -30,10 +30,6 @@ export interface iUserOutgoingApproval<T extends NumberType> {
  * @category Interfaces
  */
 export interface iOutgoingApprovalCriteria<T extends NumberType> {
-  /** The list of badges to be owned to be approved. Must have on-chain balances. */
-  mustOwnBadges?: iMustOwnBadges<T>[];
-  /** The list of ZK proofs that need to be satisfied. One use per proof solution. */
-  zkProofs?: iZkProof[];
   /** The $BADGE transfers to be executed upon every approval. */
   coinTransfers?: iCoinTransfer<T>[];
 
@@ -161,10 +157,6 @@ export interface iUserIncomingApproval<T extends NumberType> {
  * @category Interfaces
  */
 export interface iIncomingApprovalCriteria<T extends NumberType> {
-  /** The list of badges to be owned to be approved. Must have on-chain balances. */
-  mustOwnBadges?: iMustOwnBadges<T>[];
-  /** The list of ZK proofs that need to be satisfied. One use per proof solution. */
-  zkProofs?: iZkProof[];
   /** The $BADGE transfers to be executed upon every approval. */
   coinTransfers?: iCoinTransfer<T>[];
   /** The list of merkle challenges that need valid proofs to be approved. */
@@ -211,10 +203,6 @@ export interface iCollectionApproval<T extends NumberType> {
  * @category Interfaces
  */
 export interface iApprovalCriteria<T extends NumberType> {
-  /** The list of badges to be owned to be approved. Must have on-chain balances. */
-  mustOwnBadges?: iMustOwnBadges<T>[];
-  /** The list of ZK proofs that need to be satisfied. One use per proof solution. */
-  zkProofs?: iZkProof[];
   /** The $BADGE transfers to be executed upon every approval. */
   coinTransfers?: iCoinTransfer<T>[];
   /** The list of merkle challenges that need valid proofs to be approved. */

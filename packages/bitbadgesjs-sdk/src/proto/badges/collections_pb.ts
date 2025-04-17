@@ -12,7 +12,7 @@ import { UintRange } from "./balances_pb.js";
 
 /**
  *
- * A BadgeCollection is the top-level object for a collection of badges.
+ * A BadgeCollection is the top-level object for a collection of badges. 
  * It defines everything about the collection, such as the manager, metadata, etc.
  *
  * All collections are identified by a collectionId assigned by the blockchain, which is a uint64 that increments (i.e. the first collection has ID 1).
@@ -20,7 +20,7 @@ import { UintRange } from "./balances_pb.js";
  * All collections can have a manager who is responsible for managing the collection and can be granted certain admin
  * permissions, such as the ability to mint new badges.
  *
- * Certain fields are timeline-based, which means they may have different values at different block heights.
+ * Certain fields are timeline-based, which means they may have different values at different block heights. 
  * We fetch the value according to the current time.
  * For example, we may set the manager to be Alice from Time1 to Time2, and then set the manager to be Bob from Time2 to Time3.
  *
@@ -127,16 +127,9 @@ export class BadgeCollection extends Message<BadgeCollection> {
   createdBy = "";
 
   /**
-   * The generated address of the badge collection.
-   *
-   * @generated from field: string aliasAddress = 15;
-   */
-  aliasAddress = "";
-
-  /**
    * The valid badge IDs for this collection.
    *
-   * @generated from field: repeated badges.UintRange validBadgeIds = 16;
+   * @generated from field: repeated badges.UintRange validBadgeIds = 15;
    */
   validBadgeIds: UintRange[] = [];
 
@@ -161,8 +154,7 @@ export class BadgeCollection extends Message<BadgeCollection> {
     { no: 12, name: "isArchivedTimeline", kind: "message", T: IsArchivedTimeline, repeated: true },
     { no: 13, name: "defaultBalances", kind: "message", T: UserBalanceStore },
     { no: 14, name: "createdBy", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 15, name: "aliasAddress", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 16, name: "validBadgeIds", kind: "message", T: UintRange, repeated: true },
+    { no: 15, name: "validBadgeIds", kind: "message", T: UintRange, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BadgeCollection {
@@ -181,3 +173,4 @@ export class BadgeCollection extends Message<BadgeCollection> {
     return proto3.util.equals(BadgeCollection, a, b);
   }
 }
+

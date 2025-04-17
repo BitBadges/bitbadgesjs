@@ -380,8 +380,6 @@ export interface iCollectionDoc<T extends NumberType> extends Doc {
   createdTimestamp: UNIXMilliTimestamp<T>;
   /** The update history of this collection */
   updateHistory: iUpdateHistory<T>[];
-  /** The alias BitBadges address for the collection */
-  aliasAddress: BitBadgesAddress;
   /** Valid badge IDs for the collection */
   validBadgeIds: iUintRange<T>[];
 }
@@ -404,6 +402,8 @@ export interface iAccountDoc<T extends NumberType> extends Doc {
   solAddress: string;
   /** The Bitcoin address of the account */
   btcAddress: string;
+  /** The Thorchain address of the account */
+  thorAddress: string;
   /** The sequence of the account. This is the nonce for the blockchain for this account */
   sequence?: T;
   /** The $BADGE balance of the account */

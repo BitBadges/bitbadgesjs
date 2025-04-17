@@ -1,4 +1,5 @@
 import type { BitBadgesAddress, iUpdateHistory, UNIXMilliTimestamp } from '@/api-indexer/docs/interfaces.js';
+import { BadgeMetadataDetails, CollectionMetadataDetails } from '@/api-indexer/metadata/badgeMetadata.js';
 import {
   BaseNumberTypeClass,
   convertClassPropertiesAndMaintainNumberTypes,
@@ -6,6 +7,8 @@ import {
   CustomTypeClass,
   deepCopyPrimitives
 } from '@/common/base.js';
+import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
+import { BigIntify, Stringify, type NumberType } from '../common/string-numbers.js';
 import type {
   CollectionId,
   iAmountTrackerIdDetails,
@@ -27,13 +30,9 @@ import type {
   iOffChainBalancesMetadata,
   iOffChainBalancesMetadataTimeline,
   iStandardsTimeline,
-  iTimelineItem,
-  iZkProof,
-  iZkProofSolution
+  iTimelineItem
 } from '../interfaces/badges/core.js';
 import * as badges from '../proto/badges/index.js';
-import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
-import { BigIntify, Stringify, type NumberType } from '../common/string-numbers.js';
 import { AddressList } from './addressLists.js';
 import { CosmosCoin } from './coin.js';
 import type { UniversalPermission, UniversalPermissionDetails } from './overlaps.js';
@@ -41,7 +40,7 @@ import { GetFirstMatchOnly, getOverlapsAndNonOverlaps } from './overlaps.js';
 import { TimedUpdatePermission, TimedUpdateWithBadgeIdsPermission } from './permissions.js';
 import { UintRange, UintRangeArray } from './uintRanges.js';
 import { AllDefaultValues, getPotentialUpdatesForTimelineValues, getUpdateCombinationsToCheck } from './validate-utils.js';
-import { BadgeMetadataDetails, CollectionMetadataDetails } from '@/api-indexer/metadata/badgeMetadata.js';
+import { convertToBitBadgesAddress, getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
 
 /**
  * BadgeMetadata is used to represent the metadata for a range of badge IDs.
@@ -240,75 +239,6 @@ export class MustOwnBadges<T extends NumberType> extends BaseNumberTypeClass<Mus
       })
     );
   }
-
-  toProto(): badges.MustOwnBadges {
-    return new badges.MustOwnBadges(this.convert(Stringify));
-  }
-
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MustOwnBadges<U> {
-    return MustOwnBadges.fromProto(badges.MustOwnBadges.fromJson(jsonValue, options), convertFunction);
-  }
-
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MustOwnBadges<U> {
-    return MustOwnBadges.fromProto(badges.MustOwnBadges.fromJsonString(jsonString, options), convertFunction);
-  }
-
-  static fromProto<U extends NumberType>(item: badges.MustOwnBadges, convertFunction: (item: NumberType) => U): MustOwnBadges<U> {
-    if (!item.amountRange) {
-      throw new Error('amountRange is required');
-    }
-
-    return new MustOwnBadges<U>({
-      collectionId: item.collectionId,
-      amountRange: UintRange.fromProto(item.amountRange, convertFunction),
-      ownershipTimes: item.ownershipTimes.map((b) => UintRange.fromProto(b, convertFunction)),
-      badgeIds: item.badgeIds.map((b) => UintRange.fromProto(b, convertFunction)),
-      overrideWithCurrentTime: item.overrideWithCurrentTime,
-      mustSatisfyForAllAssets: item.mustSatisfyForAllAssets
-    });
-  }
-}
-
-/**
- * @category Approvals / Transferability
- */
-export class ZkProof extends CustomTypeClass<ZkProof> implements iZkProof {
-  verificationKey: string;
-  uri: string;
-  customData: string;
-  zkpTrackerId: string;
-
-  constructor(zkProof: iZkProof) {
-    super();
-    this.verificationKey = zkProof.verificationKey;
-    this.uri = zkProof.uri;
-    this.zkpTrackerId = zkProof.zkpTrackerId;
-    this.customData = zkProof.customData;
-  }
-
-  toProto(): badges.ZkProof {
-    return new badges.ZkProof(this.clone().toJson());
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ZkProof {
-    return ZkProof.fromProto(badges.ZkProof.fromJson(jsonValue, options));
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ZkProof {
-    return ZkProof.fromProto(badges.ZkProof.fromJsonString(jsonString, options));
-  }
-
-  static fromProto(item: badges.ZkProof): ZkProof {
-    return new ZkProof({ ...item });
-  }
 }
 
 /**
@@ -345,37 +275,12 @@ export class CoinTransfer<T extends NumberType> extends BaseNumberTypeClass<Coin
       coins: item.coins.map((b) => CosmosCoin.fromProto(b, convertFunction))
     });
   }
-}
 
-/**
- * ZK proof solutions for proof approvals
- *
- * @category Approvals / Transferability
- */
-export class ZkProofSolution extends CustomTypeClass<ZkProofSolution> implements iZkProofSolution {
-  proof: string;
-  publicInputs: string;
-
-  constructor(zkProofSolution: iZkProofSolution) {
-    super();
-    this.proof = zkProofSolution.proof;
-    this.publicInputs = zkProofSolution.publicInputs;
-  }
-
-  toProto(): badges.ZkProofSolution {
-    return new badges.ZkProofSolution(this.clone().toJson());
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ZkProofSolution {
-    return ZkProofSolution.fromProto(badges.ZkProofSolution.fromJson(jsonValue, options));
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ZkProofSolution {
-    return ZkProofSolution.fromProto(badges.ZkProofSolution.fromJsonString(jsonString, options));
-  }
-
-  static fromProto(item: badges.ZkProofSolution): ZkProofSolution {
-    return new ZkProofSolution({ ...item });
+  toBech32Addresses(prefix: string): CoinTransfer<T> {
+    return new CoinTransfer({
+      ...this,
+      to: getConvertFunctionFromPrefix(prefix)(this.to)
+    });
   }
 }
 
@@ -422,6 +327,13 @@ export class ApprovalIdentifierDetails extends CustomTypeClass<ApprovalIdentifie
 
   static fromProto(item: badges.ApprovalIdentifierDetails): ApprovalIdentifierDetails {
     return new ApprovalIdentifierDetails({ ...item });
+  }
+
+  toBech32Addresses(prefix: string): ApprovalIdentifierDetails {
+    return new ApprovalIdentifierDetails({
+      ...this,
+      approverAddress: getConvertFunctionFromPrefix(prefix)(this.approverAddress)
+    });
   }
 }
 
@@ -743,6 +655,13 @@ export class ManagerTimeline<T extends NumberType> extends BaseNumberTypeClass<M
       newManager.map((b) => b.convert(BigIntify)),
       canUpdateManager.map((b) => b.convert(BigIntify))
     );
+  }
+
+  toBech32Addresses(prefix: string): ManagerTimeline<T> {
+    return new ManagerTimeline({
+      ...this,
+      manager: getConvertFunctionFromPrefix(prefix)(this.manager)
+    });
   }
 }
 

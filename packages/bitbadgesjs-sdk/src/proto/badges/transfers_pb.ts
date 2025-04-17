@@ -5,7 +5,7 @@
 
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
 import { Message, proto3 } from "@bufbuild/protobuf";
-import { Balance, MustOwnBadges, UintRange } from "./balances_pb.js";
+import { Balance, UintRange } from "./balances_pb.js";
 import { UserPermissions } from "./permissions_pb.js";
 import { Coin } from "../cosmos/base/v1beta1/coin_pb.js";
 
@@ -854,116 +854,6 @@ export class ApprovalTracker extends Message<ApprovalTracker> {
 }
 
 /**
- * @generated from message badges.ZkProof
- */
-export class ZkProof extends Message<ZkProof> {
-  /**
-   * The verification key for the proof.
-   *
-   * @generated from field: string verificationKey = 1;
-   */
-  verificationKey = "";
-
-  /**
-   * The URI associated with this proof, optionally providing metadata about the proof.
-   *
-   * @generated from field: string uri = 2;
-   */
-  uri = "";
-
-  /**
-   * Arbitrary custom data associated with this proof.
-   *
-   * @generated from field: string customData = 3;
-   */
-  customData = "";
-
-  /**
-   * The ID of this proof
-   *
-   * @generated from field: string zkpTrackerId = 4;
-   */
-  zkpTrackerId = "";
-
-  constructor(data?: PartialMessage<ZkProof>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.ZkProof";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "verificationKey", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "customData", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "zkpTrackerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ZkProof {
-    return new ZkProof().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ZkProof {
-    return new ZkProof().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ZkProof {
-    return new ZkProof().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: ZkProof | PlainMessage<ZkProof> | undefined, b: ZkProof | PlainMessage<ZkProof> | undefined): boolean {
-    return proto3.util.equals(ZkProof, a, b);
-  }
-}
-
-/**
- * @generated from message badges.ZkProofSolution
- */
-export class ZkProofSolution extends Message<ZkProofSolution> {
-  /**
-   * The public inputs
-   *
-   * @generated from field: string publicInputs = 1;
-   */
-  publicInputs = "";
-
-  /**
-   * The proof
-   *
-   * @generated from field: string proof = 2;
-   */
-  proof = "";
-
-  constructor(data?: PartialMessage<ZkProofSolution>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.ZkProofSolution";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "publicInputs", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "proof", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ZkProofSolution {
-    return new ZkProofSolution().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ZkProofSolution {
-    return new ZkProofSolution().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ZkProofSolution {
-    return new ZkProofSolution().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: ZkProofSolution | PlainMessage<ZkProofSolution> | undefined, b: ZkProofSolution | PlainMessage<ZkProofSolution> | undefined): boolean {
-    return proto3.util.equals(ZkProofSolution, a, b);
-  }
-}
-
-/**
  * @generated from message badges.CoinTransfer
  */
 export class CoinTransfer extends Message<CoinTransfer> {
@@ -1017,93 +907,79 @@ export class CoinTransfer extends Message<CoinTransfer> {
  */
 export class ApprovalCriteria extends Message<ApprovalCriteria> {
   /**
-   * List of badges that the user must own for approval.
-   *
-   * @generated from field: repeated badges.MustOwnBadges mustOwnBadges = 1;
-   */
-  mustOwnBadges: MustOwnBadges[] = [];
-
-  /**
    * Merkle challenge that must be satisfied for approval.
    *
-   * @generated from field: repeated badges.MerkleChallenge merkleChallenges = 2;
+   * @generated from field: repeated badges.MerkleChallenge merkleChallenges = 1;
    */
   merkleChallenges: MerkleChallenge[] = [];
 
   /**
    * Predetermined balances for eeach approval.
    *
-   * @generated from field: badges.PredeterminedBalances predeterminedBalances = 3;
+   * @generated from field: badges.PredeterminedBalances predeterminedBalances = 2;
    */
   predeterminedBalances?: PredeterminedBalances;
 
   /**
    * Threshold limit of amounts that can be transferred using this approval.
    *
-   * @generated from field: badges.ApprovalAmounts approvalAmounts = 4;
+   * @generated from field: badges.ApprovalAmounts approvalAmounts = 3;
    */
   approvalAmounts?: ApprovalAmounts;
 
   /**
    * Maximum number of transfers that can be processed using this approval.
    *
-   * @generated from field: badges.MaxNumTransfers maxNumTransfers = 5;
+   * @generated from field: badges.MaxNumTransfers maxNumTransfers = 4;
    */
   maxNumTransfers?: MaxNumTransfers;
 
   /**
-   * The ZKPs that need to be solved for approval.
-   *
-   * @generated from field: repeated badges.ZkProof zkProofs = 6;
-   */
-  zkProofs: ZkProof[] = [];
-
-  /**
    * The sdk.Coins that need to be transferred for approval.
    *
-   * @generated from field: repeated badges.CoinTransfer coinTransfers = 7;
+   * @generated from field: repeated badges.CoinTransfer coinTransfers = 5;
    */
   coinTransfers: CoinTransfer[] = [];
 
   /**
    * Require the "to" address to be equal to the "initiated by" address for approval.
    *
-   * @generated from field: bool requireToEqualsInitiatedBy = 9;
+   * @generated from field: bool requireToEqualsInitiatedBy = 6;
    */
   requireToEqualsInitiatedBy = false;
 
   /**
    * Require the "from" address to be equal to the "initiated by" address for approval.
    *
-   * @generated from field: bool requireFromEqualsInitiatedBy = 10;
+   * @generated from field: bool requireFromEqualsInitiatedBy = 7;
    */
   requireFromEqualsInitiatedBy = false;
 
   /**
    * Require the "to" address to not be equal to the "initiated by" address for approval.
    *
-   * @generated from field: bool requireToDoesNotEqualInitiatedBy = 11;
+   * @generated from field: bool requireToDoesNotEqualInitiatedBy = 8;
    */
   requireToDoesNotEqualInitiatedBy = false;
 
   /**
    * Require the "from" address to not be equal to the "initiated by" address for approval.
    *
-   * @generated from field: bool requireFromDoesNotEqualInitiatedBy = 12;
+   * @generated from field: bool requireFromDoesNotEqualInitiatedBy = 9;
    */
   requireFromDoesNotEqualInitiatedBy = false;
 
   /**
    * Overrides the user's outgoing approvals for approval.
    *
-   * @generated from field: bool overridesFromOutgoingApprovals = 13;
+   * @generated from field: bool overridesFromOutgoingApprovals = 10;
    */
   overridesFromOutgoingApprovals = false;
 
   /**
    * Overrides the user's incoming approvals for approval.
    *
-   * @generated from field: bool overridesToIncomingApprovals = 14;
+   * @generated from field: bool overridesToIncomingApprovals = 11;
    */
   overridesToIncomingApprovals = false;
 
@@ -1115,19 +991,17 @@ export class ApprovalCriteria extends Message<ApprovalCriteria> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "badges.ApprovalCriteria";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "mustOwnBadges", kind: "message", T: MustOwnBadges, repeated: true },
-    { no: 2, name: "merkleChallenges", kind: "message", T: MerkleChallenge, repeated: true },
-    { no: 3, name: "predeterminedBalances", kind: "message", T: PredeterminedBalances },
-    { no: 4, name: "approvalAmounts", kind: "message", T: ApprovalAmounts },
-    { no: 5, name: "maxNumTransfers", kind: "message", T: MaxNumTransfers },
-    { no: 6, name: "zkProofs", kind: "message", T: ZkProof, repeated: true },
-    { no: 7, name: "coinTransfers", kind: "message", T: CoinTransfer, repeated: true },
-    { no: 9, name: "requireToEqualsInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 10, name: "requireFromEqualsInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 11, name: "requireToDoesNotEqualInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 12, name: "requireFromDoesNotEqualInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 13, name: "overridesFromOutgoingApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 14, name: "overridesToIncomingApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 1, name: "merkleChallenges", kind: "message", T: MerkleChallenge, repeated: true },
+    { no: 2, name: "predeterminedBalances", kind: "message", T: PredeterminedBalances },
+    { no: 3, name: "approvalAmounts", kind: "message", T: ApprovalAmounts },
+    { no: 4, name: "maxNumTransfers", kind: "message", T: MaxNumTransfers },
+    { no: 5, name: "coinTransfers", kind: "message", T: CoinTransfer, repeated: true },
+    { no: 6, name: "requireToEqualsInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 7, name: "requireFromEqualsInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 8, name: "requireToDoesNotEqualInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 9, name: "requireFromDoesNotEqualInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 10, name: "overridesFromOutgoingApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 11, name: "overridesToIncomingApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ApprovalCriteria {
@@ -1154,65 +1028,51 @@ export class ApprovalCriteria extends Message<ApprovalCriteria> {
  */
 export class OutgoingApprovalCriteria extends Message<OutgoingApprovalCriteria> {
   /**
-   * List of badges that the user must own for approval.
-   *
-   * @generated from field: repeated badges.MustOwnBadges mustOwnBadges = 1;
-   */
-  mustOwnBadges: MustOwnBadges[] = [];
-
-  /**
    * Merkle challenge that must be satisfied for approval.
    *
-   * @generated from field: repeated badges.MerkleChallenge merkleChallenges = 2;
+   * @generated from field: repeated badges.MerkleChallenge merkleChallenges = 1;
    */
   merkleChallenges: MerkleChallenge[] = [];
 
   /**
    * Predetermined balances for eeach approval.
    *
-   * @generated from field: badges.PredeterminedBalances predeterminedBalances = 3;
+   * @generated from field: badges.PredeterminedBalances predeterminedBalances = 2;
    */
   predeterminedBalances?: PredeterminedBalances;
 
   /**
    * Threshold limit of amounts that can be transferred using this approval.
    *
-   * @generated from field: badges.ApprovalAmounts approvalAmounts = 4;
+   * @generated from field: badges.ApprovalAmounts approvalAmounts = 3;
    */
   approvalAmounts?: ApprovalAmounts;
 
   /**
    * Maximum number of transfers that can be processed using this approval.
    *
-   * @generated from field: badges.MaxNumTransfers maxNumTransfers = 5;
+   * @generated from field: badges.MaxNumTransfers maxNumTransfers = 4;
    */
   maxNumTransfers?: MaxNumTransfers;
 
   /**
-   * The ZKPs that need to be solved for approval.
-   *
-   * @generated from field: repeated badges.ZkProof zkProofs = 6;
-   */
-  zkProofs: ZkProof[] = [];
-
-  /**
    * The sdk.Coins that need to be transferred for approval.
    *
-   * @generated from field: repeated badges.CoinTransfer coinTransfers = 7;
+   * @generated from field: repeated badges.CoinTransfer coinTransfers = 5;
    */
   coinTransfers: CoinTransfer[] = [];
 
   /**
    * Require the "to" address to be equal to the "initiated by" address for approval.
    *
-   * @generated from field: bool requireToEqualsInitiatedBy = 9;
+   * @generated from field: bool requireToEqualsInitiatedBy = 6;
    */
   requireToEqualsInitiatedBy = false;
 
   /**
    * Require the "to" address to not be equal to the "initiated by" address for approval.
    *
-   * @generated from field: bool requireToDoesNotEqualInitiatedBy = 11;
+   * @generated from field: bool requireToDoesNotEqualInitiatedBy = 7;
    */
   requireToDoesNotEqualInitiatedBy = false;
 
@@ -1224,15 +1084,13 @@ export class OutgoingApprovalCriteria extends Message<OutgoingApprovalCriteria> 
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "badges.OutgoingApprovalCriteria";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "mustOwnBadges", kind: "message", T: MustOwnBadges, repeated: true },
-    { no: 2, name: "merkleChallenges", kind: "message", T: MerkleChallenge, repeated: true },
-    { no: 3, name: "predeterminedBalances", kind: "message", T: PredeterminedBalances },
-    { no: 4, name: "approvalAmounts", kind: "message", T: ApprovalAmounts },
-    { no: 5, name: "maxNumTransfers", kind: "message", T: MaxNumTransfers },
-    { no: 6, name: "zkProofs", kind: "message", T: ZkProof, repeated: true },
-    { no: 7, name: "coinTransfers", kind: "message", T: CoinTransfer, repeated: true },
-    { no: 9, name: "requireToEqualsInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 11, name: "requireToDoesNotEqualInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 1, name: "merkleChallenges", kind: "message", T: MerkleChallenge, repeated: true },
+    { no: 2, name: "predeterminedBalances", kind: "message", T: PredeterminedBalances },
+    { no: 3, name: "approvalAmounts", kind: "message", T: ApprovalAmounts },
+    { no: 4, name: "maxNumTransfers", kind: "message", T: MaxNumTransfers },
+    { no: 5, name: "coinTransfers", kind: "message", T: CoinTransfer, repeated: true },
+    { no: 6, name: "requireToEqualsInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 7, name: "requireToDoesNotEqualInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): OutgoingApprovalCriteria {
@@ -1259,65 +1117,51 @@ export class OutgoingApprovalCriteria extends Message<OutgoingApprovalCriteria> 
  */
 export class IncomingApprovalCriteria extends Message<IncomingApprovalCriteria> {
   /**
-   * List of badges that the user must own for approval.
-   *
-   * @generated from field: repeated badges.MustOwnBadges mustOwnBadges = 1;
-   */
-  mustOwnBadges: MustOwnBadges[] = [];
-
-  /**
    * Merkle challenge that must be satisfied for approval.
    *
-   * @generated from field: repeated badges.MerkleChallenge merkleChallenges = 2;
+   * @generated from field: repeated badges.MerkleChallenge merkleChallenges = 1;
    */
   merkleChallenges: MerkleChallenge[] = [];
 
   /**
    * Predetermined balances for eeach approval.
    *
-   * @generated from field: badges.PredeterminedBalances predeterminedBalances = 3;
+   * @generated from field: badges.PredeterminedBalances predeterminedBalances = 2;
    */
   predeterminedBalances?: PredeterminedBalances;
 
   /**
    * Threshold limit of amounts that can be transferred using this approval.
    *
-   * @generated from field: badges.ApprovalAmounts approvalAmounts = 4;
+   * @generated from field: badges.ApprovalAmounts approvalAmounts = 3;
    */
   approvalAmounts?: ApprovalAmounts;
 
   /**
    * Maximum number of transfers that can be processed using this approval.
    *
-   * @generated from field: badges.MaxNumTransfers maxNumTransfers = 5;
+   * @generated from field: badges.MaxNumTransfers maxNumTransfers = 4;
    */
   maxNumTransfers?: MaxNumTransfers;
 
   /**
-   * The ZKPs that need to be solved for approval.
-   *
-   * @generated from field: repeated badges.ZkProof zkProofs = 6;
-   */
-  zkProofs: ZkProof[] = [];
-
-  /**
    * The sdk.Coins that need to be transferred for approval.
    *
-   * @generated from field: repeated badges.CoinTransfer coinTransfers = 7;
+   * @generated from field: repeated badges.CoinTransfer coinTransfers = 5;
    */
   coinTransfers: CoinTransfer[] = [];
 
   /**
    * Require the "from" address to be equal to the "initiated by" address for approval.
    *
-   * @generated from field: bool requireFromEqualsInitiatedBy = 10;
+   * @generated from field: bool requireFromEqualsInitiatedBy = 6;
    */
   requireFromEqualsInitiatedBy = false;
 
   /**
    * Require the "from" address to not be equal to the "initiated by" address for approval.
    *
-   * @generated from field: bool requireFromDoesNotEqualInitiatedBy = 12;
+   * @generated from field: bool requireFromDoesNotEqualInitiatedBy = 7;
    */
   requireFromDoesNotEqualInitiatedBy = false;
 
@@ -1329,15 +1173,13 @@ export class IncomingApprovalCriteria extends Message<IncomingApprovalCriteria> 
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "badges.IncomingApprovalCriteria";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "mustOwnBadges", kind: "message", T: MustOwnBadges, repeated: true },
-    { no: 2, name: "merkleChallenges", kind: "message", T: MerkleChallenge, repeated: true },
-    { no: 3, name: "predeterminedBalances", kind: "message", T: PredeterminedBalances },
-    { no: 4, name: "approvalAmounts", kind: "message", T: ApprovalAmounts },
-    { no: 5, name: "maxNumTransfers", kind: "message", T: MaxNumTransfers },
-    { no: 6, name: "zkProofs", kind: "message", T: ZkProof, repeated: true },
-    { no: 7, name: "coinTransfers", kind: "message", T: CoinTransfer, repeated: true },
-    { no: 10, name: "requireFromEqualsInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 12, name: "requireFromDoesNotEqualInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 1, name: "merkleChallenges", kind: "message", T: MerkleChallenge, repeated: true },
+    { no: 2, name: "predeterminedBalances", kind: "message", T: PredeterminedBalances },
+    { no: 3, name: "approvalAmounts", kind: "message", T: ApprovalAmounts },
+    { no: 4, name: "maxNumTransfers", kind: "message", T: MaxNumTransfers },
+    { no: 5, name: "coinTransfers", kind: "message", T: CoinTransfer, repeated: true },
+    { no: 6, name: "requireFromEqualsInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 7, name: "requireFromDoesNotEqualInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): IncomingApprovalCriteria {
@@ -1611,13 +1453,6 @@ export class Transfer extends Message<Transfer> {
    */
   onlyCheckPrioritizedOutgoingApprovals = false;
 
-  /**
-   * The ZKPs that need to be solved for approval.
-   *
-   * @generated from field: repeated badges.ZkProofSolution zkProofSolutions = 11;
-   */
-  zkProofSolutions: ZkProofSolution[] = [];
-
   constructor(data?: PartialMessage<Transfer>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1636,7 +1471,6 @@ export class Transfer extends Message<Transfer> {
     { no: 8, name: "onlyCheckPrioritizedCollectionApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 9, name: "onlyCheckPrioritizedIncomingApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 10, name: "onlyCheckPrioritizedOutgoingApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 11, name: "zkProofSolutions", kind: "message", T: ZkProofSolution, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Transfer {

@@ -26,6 +26,16 @@ export const TESTNET_CHAIN_DETAILS = {
 export const MAINNET_CHAIN_DETAILS = BETANET_CHAIN_DETAILS;
 
 /**
+ * Thorchain chain details.
+ *
+ * @category Chain Details
+ */
+export const THORCHAIN_CHAIN_DETAILS = {
+  chainId: 1,
+  cosmosChainId: 'thorchain'
+};
+
+/**
  * BitBadges Betanet chain details to suggest to Keplr.
  *
  * @category Chain Details

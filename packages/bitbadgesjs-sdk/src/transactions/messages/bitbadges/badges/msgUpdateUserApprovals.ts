@@ -1,13 +1,16 @@
 import * as badges from '@/proto/badges/tx_pb.js';
 
-import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
+import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import { Stringify } from '@/common/string-numbers.js';
-import { UserPermissions } from '@/core/permissions.js';
 import { UserIncomingApproval, UserOutgoingApproval } from '@/core/approvals.js';
+import { UserPermissions } from '@/core/permissions.js';
+import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 import type { iMsgUpdateUserApprovals } from './interfaces.js';
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
-import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
+import { getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
+import { CollectionId } from '@/interfaces/index.js';
+import { normalizeMessagesIfNecessary } from '../../base.js';
 
 /**
  * MsgUpdateUserApprovals represents the message for updating user approvals.
@@ -31,7 +34,7 @@ export class MsgUpdateUserApprovals<T extends NumberType>
   implements iMsgUpdateUserApprovals<T>
 {
   creator: BitBadgesAddress;
-  collectionId: T;
+  collectionId: CollectionId;
   updateOutgoingApprovals?: boolean;
   outgoingApprovals?: UserOutgoingApproval<T>[];
   updateIncomingApprovals?: boolean;
@@ -42,6 +45,7 @@ export class MsgUpdateUserApprovals<T extends NumberType>
   autoApproveSelfInitiatedIncomingTransfers?: boolean;
   updateUserPermissions?: boolean;
   userPermissions?: UserPermissions<T>;
+  creatorOverride: BitBadgesAddress;
 
   constructor(msg: iMsgUpdateUserApprovals<T>) {
     super();
@@ -57,6 +61,7 @@ export class MsgUpdateUserApprovals<T extends NumberType>
     this.autoApproveSelfInitiatedIncomingTransfers = msg.autoApproveSelfInitiatedIncomingTransfers;
     this.updateUserPermissions = msg.updateUserPermissions;
     this.userPermissions = msg.userPermissions ? new UserPermissions(msg.userPermissions) : undefined;
+    this.creatorOverride = msg.creatorOverride;
   }
 
   getNumberFieldNames(): string[] {
@@ -93,7 +98,7 @@ export class MsgUpdateUserApprovals<T extends NumberType>
   ): MsgUpdateUserApprovals<U> {
     return new MsgUpdateUserApprovals({
       creator: protoMsg.creator,
-      collectionId: convertFunction(protoMsg.collectionId),
+      collectionId: protoMsg.collectionId,
       updateOutgoingApprovals: protoMsg.updateOutgoingApprovals,
       outgoingApprovals: protoMsg.outgoingApprovals.map((x) => UserOutgoingApproval.fromProto(x, convertFunction)),
       updateIncomingApprovals: protoMsg.updateIncomingApprovals,
@@ -110,7 +115,29 @@ export class MsgUpdateUserApprovals<T extends NumberType>
             canUpdateAutoApproveSelfInitiatedOutgoingTransfers: [],
             canUpdateIncomingApprovals: [],
             canUpdateOutgoingApprovals: []
-          })
+          }),
+      creatorOverride: protoMsg.creatorOverride
     });
+  }
+
+  toBech32Addresses(prefix: string): MsgUpdateUserApprovals<T> {
+    return new MsgUpdateUserApprovals<T>({
+      ...this,
+      creator: getConvertFunctionFromPrefix(prefix)(this.creator),
+      collectionId: this.collectionId,
+      outgoingApprovals: this.outgoingApprovals?.map((x) => x.toBech32Addresses(prefix)),
+      incomingApprovals: this.incomingApprovals?.map((x) => x.toBech32Addresses(prefix)),
+      userPermissions: this.userPermissions?.toBech32Addresses(prefix),
+      creatorOverride: getConvertFunctionFromPrefix(prefix)(this.creatorOverride)
+    });
+  }
+
+  toCosmWasmPayloadString(): string {
+    return `{"updateUserApprovalsMsg":${normalizeMessagesIfNecessary([
+      {
+        message: this.toProto(),
+        path: this.toProto().getType().typeName
+      }
+    ])[0].message.toJsonString({ emitDefaultValues: true })} }`;
   }
 }

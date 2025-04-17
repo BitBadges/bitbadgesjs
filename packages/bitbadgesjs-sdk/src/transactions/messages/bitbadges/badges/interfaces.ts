@@ -15,7 +15,7 @@ import type {
 } from '../../../../interfaces/badges/core.js';
 import type { iCollectionPermissions, iUserPermissions } from '../../../../interfaces/badges/permissions.js';
 import type { iUserBalanceStore } from '../../../../interfaces/badges/userBalances.js';
-
+import { CollectionId } from '@/interfaces/index.js';
 /**
  * @category Interfaces
  */
@@ -24,6 +24,8 @@ export interface iMsgCreateAddressLists {
   creator: BitBadgesAddress;
   /** The address lists to create. */
   addressLists: iAddressList[];
+  /** Creator override. Internal only. Only used for CosmWasm purposes. */
+  creatorOverride: BitBadgesAddress;
 }
 
 /**
@@ -68,6 +70,9 @@ export interface iMsgCreateCollection<T extends NumberType> {
 
   /** The new is archived timeline. Must have the necessary permissions in future transactions to update. However, no restrictions in this genesis Msg. */
   isArchivedTimeline?: iIsArchivedTimeline<T>[];
+
+  /** Creator override. Internal only. Only used for CosmWasm purposes. */
+  creatorOverride: BitBadgesAddress;
 }
 
 /**
@@ -77,7 +82,10 @@ export interface iMsgDeleteCollection<T extends NumberType> {
   /** The creator of the transaction. */
   creator: BitBadgesAddress;
   /** The ID of the collection to delete. */
-  collectionId: T;
+  collectionId: CollectionId;
+
+  /** Creator override. Internal only. Only used for CosmWasm purposes. */
+  creatorOverride: BitBadgesAddress;
 }
 
 /**
@@ -87,9 +95,12 @@ export interface iMsgTransferBadges<T extends NumberType> {
   /** The creator of the transaction. */
   creator: BitBadgesAddress;
   /** The ID of the collection to transfer badges from. */
-  collectionId: T;
+  collectionId: CollectionId;
   /** The transfers to perform. */
   transfers: iTransfer<T>[];
+
+  /** Creator override. Internal only. Only used for CosmWasm purposes. */
+  creatorOverride: BitBadgesAddress;
 }
 
 /**
@@ -97,7 +108,7 @@ export interface iMsgTransferBadges<T extends NumberType> {
  */
 export interface iMsgUniversalUpdateCollection<T extends NumberType> extends iMsgCreateCollection<T> {
   /** The ID of the collection to update. */
-  collectionId: T;
+  collectionId: CollectionId;
   /** Whether or not to update the collection permissions. */
   updateCollectionPermissions?: boolean;
   /** Whether or not to update the manager timeline. */
@@ -116,6 +127,9 @@ export interface iMsgUniversalUpdateCollection<T extends NumberType> extends iMs
   updateStandardsTimeline?: boolean;
   /** Whether or not to update the is archived timeline. */
   updateIsArchivedTimeline?: boolean;
+
+  /** Creator override. Internal only. Only used for CosmWasm purposes. */
+  creatorOverride: BitBadgesAddress;
 }
 
 /**
@@ -130,7 +144,7 @@ export interface iMsgUpdateUserApprovals<T extends NumberType> {
   /** The creator of the transaction. */
   creator: BitBadgesAddress;
   /** The ID of the collection to transfer badges from. */
-  collectionId: T;
+  collectionId: CollectionId;
   /** Whether or not to update the outgoing approvals. */
   updateOutgoingApprovals?: boolean;
   /** The new outgoing approvals. Must have the necessary permissions to update.  */
@@ -151,4 +165,7 @@ export interface iMsgUpdateUserApprovals<T extends NumberType> {
   updateUserPermissions?: boolean;
   /** The new user permissions. Must have the necessary permissions to update. */
   userPermissions?: iUserPermissions<T>;
+
+  /** Creator override. Internal only. Only used for CosmWasm purposes. */
+  creatorOverride: BitBadgesAddress;
 }

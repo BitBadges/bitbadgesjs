@@ -9,8 +9,8 @@ import { Message, proto3 } from "@bufbuild/protobuf";
 /**
  *
  * The UintRange is a range of IDs from some start to some end (inclusive).
+ * uintRanges are one of the core types used.
  *
- * uintRanges are one of the core types used in the BitBadgesChain module.
  * They are used for everything from badge IDs to time ranges to min/max balance amounts.
  *
  * See the BitBadges documentation for more information.
@@ -121,96 +121,6 @@ export class Balance extends Message<Balance> {
 
   static equals(a: Balance | PlainMessage<Balance> | undefined, b: Balance | PlainMessage<Balance> | undefined): boolean {
     return proto3.util.equals(Balance, a, b);
-  }
-}
-
-/**
- *
- * MustOwnBadges represents a condition where a user must own specific badges
- * to be approved to transfer.
- *
- * - collectionId: The ID of the badge collection for the badges that must be owned
- * - amountRange: The range of badge amounts the user must own (min to max)
- * - ownershipTimes: The time ranges during which the user must own the badges.
- * - badgeIds: The badge IDs the user must own.
- * - overrideWithCurrentTime: If true, auto override ownershipTimes with the current time.
- * - mustSatisfyForAllAssets: If true, the user must own all specified badges; otherwise, owning any one for >= 1 millisecond is sufficient.
- *
- * @generated from message badges.MustOwnBadges
- */
-export class MustOwnBadges extends Message<MustOwnBadges> {
-  /**
-   * The ID of the badge collection.
-   *
-   * @generated from field: string collectionId = 1;
-   */
-  collectionId = "";
-
-  /**
-   * The range of badge amounts the user must own (min to max).
-   *
-   * @generated from field: badges.UintRange amountRange = 2;
-   */
-  amountRange?: UintRange;
-
-  /**
-   * The time ranges during which the user must own the badges.
-   *
-   * @generated from field: repeated badges.UintRange ownershipTimes = 3;
-   */
-  ownershipTimes: UintRange[] = [];
-
-  /**
-   * The badge IDs the user must own.
-   *
-   * @generated from field: repeated badges.UintRange badgeIds = 4;
-   */
-  badgeIds: UintRange[] = [];
-
-  /**
-   * If true, override ownershipTimes with the current time.
-   *
-   * @generated from field: bool overrideWithCurrentTime = 5;
-   */
-  overrideWithCurrentTime = false;
-
-  /**
-   * If true, the user must meet ownership requirements for all specified badges; else, must meet requirements for any single badge.
-   *
-   * @generated from field: bool mustSatisfyForAllAssets = 6;
-   */
-  mustSatisfyForAllAssets = false;
-
-  constructor(data?: PartialMessage<MustOwnBadges>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.MustOwnBadges";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "amountRange", kind: "message", T: UintRange },
-    { no: 3, name: "ownershipTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 4, name: "badgeIds", kind: "message", T: UintRange, repeated: true },
-    { no: 5, name: "overrideWithCurrentTime", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 6, name: "mustSatisfyForAllAssets", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MustOwnBadges {
-    return new MustOwnBadges().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MustOwnBadges {
-    return new MustOwnBadges().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MustOwnBadges {
-    return new MustOwnBadges().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: MustOwnBadges | PlainMessage<MustOwnBadges> | undefined, b: MustOwnBadges | PlainMessage<MustOwnBadges> | undefined): boolean {
-    return proto3.util.equals(MustOwnBadges, a, b);
   }
 }
 
