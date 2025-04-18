@@ -2,7 +2,8 @@ import type { NumberType } from '@/common/string-numbers.js';
 import { Stringify } from '@/common/string-numbers.js';
 import * as badges from '@/proto/badges/tx_pb.js';
 
-import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
+import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
 import { CollectionApproval } from '@/core/approvals.js';
 import {
   BadgeMetadataTimeline,
@@ -14,10 +15,10 @@ import {
   StandardsTimeline
 } from '@/core/misc.js';
 import { CollectionPermissions } from '@/core/permissions.js';
-import type { iMsgUpdateCollection } from './interfaces.js';
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
-import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
 import { UintRange, UintRangeArray } from '@/core/uintRanges.js';
+import { CollectionId } from '@/interfaces/index.js';
+import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
+import type { iMsgUpdateCollection } from './interfaces.js';
 
 /**
  * MsgUpdateCollection is a transaction that can be used to update any collection. It is only executable by the manager.
@@ -32,7 +33,7 @@ import { UintRange, UintRangeArray } from '@/core/uintRanges.js';
  */
 export class MsgUpdateCollection<T extends NumberType> extends BaseNumberTypeClass<MsgUpdateCollection<T>> implements iMsgUpdateCollection<T> {
   creator: BitBadgesAddress;
-  collectionId: T;
+  collectionId: CollectionId;
   badgeIdsToAdd?: UintRangeArray<T>;
   updateCollectionPermissions?: boolean;
   collectionPermissions?: CollectionPermissions<T>;
@@ -83,7 +84,7 @@ export class MsgUpdateCollection<T extends NumberType> extends BaseNumberTypeCla
   }
 
   getNumberFieldNames(): string[] {
-    return ['collectionId'];
+    return [];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgUpdateCollection<U> {
@@ -113,7 +114,7 @@ export class MsgUpdateCollection<T extends NumberType> extends BaseNumberTypeCla
   static fromProto<U extends NumberType>(protoMsg: badges.MsgUpdateCollection, convertFunction: (item: NumberType) => U): MsgUpdateCollection<U> {
     return new MsgUpdateCollection({
       creator: protoMsg.creator,
-      collectionId: convertFunction(protoMsg.collectionId),
+      collectionId: protoMsg.collectionId,
       badgeIdsToAdd: protoMsg.badgeIdsToAdd?.map((x) => UintRange.fromProto(x, convertFunction)),
       updateCollectionPermissions: protoMsg.updateCollectionPermissions,
       collectionPermissions: protoMsg.collectionPermissions

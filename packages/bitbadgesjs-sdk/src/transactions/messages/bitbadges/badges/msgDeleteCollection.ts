@@ -5,6 +5,7 @@ import * as badges from '@/proto/badges/tx_pb.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 import type { iMsgDeleteCollection } from './interfaces.js';
 import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
+import { CollectionId } from '@/interfaces/index.js';
 
 /**
  * MsgDeleteCollection represents the message for deleting a collection. Once deleted, the collection cannot be recovered.
@@ -16,7 +17,7 @@ import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
  */
 export class MsgDeleteCollection<T extends NumberType> extends BaseNumberTypeClass<MsgDeleteCollection<T>> implements iMsgDeleteCollection<T> {
   creator: BitBadgesAddress;
-  collectionId: T;
+  collectionId: CollectionId;
 
   constructor(msg: iMsgDeleteCollection<T>) {
     super();
@@ -29,7 +30,7 @@ export class MsgDeleteCollection<T extends NumberType> extends BaseNumberTypeCla
   }
 
   getNumberFieldNames(): string[] {
-    return ['collectionId'];
+    return [];
   }
 
   toProto(): badges.MsgDeleteCollection {
@@ -41,7 +42,7 @@ export class MsgDeleteCollection<T extends NumberType> extends BaseNumberTypeCla
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): MsgDeleteCollection<U> {
-    return MsgDeleteCollection.fromProto(badges.MsgDeleteCollection.fromJson(jsonValue, options), convertFunction);
+    return MsgDeleteCollection.fromProto(badges.MsgDeleteCollection.fromJson(jsonValue, options));
   }
 
   static fromJsonString<U extends NumberType>(
@@ -49,13 +50,13 @@ export class MsgDeleteCollection<T extends NumberType> extends BaseNumberTypeCla
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): MsgDeleteCollection<U> {
-    return MsgDeleteCollection.fromProto(badges.MsgDeleteCollection.fromJsonString(jsonString, options), convertFunction);
+    return MsgDeleteCollection.fromProto(badges.MsgDeleteCollection.fromJsonString(jsonString, options));
   }
 
-  static fromProto<U extends NumberType>(protoMsg: badges.MsgDeleteCollection, convertFunction: (item: NumberType) => U): MsgDeleteCollection<U> {
+  static fromProto<U extends NumberType>(protoMsg: badges.MsgDeleteCollection): MsgDeleteCollection<U> {
     return new MsgDeleteCollection({
       creator: protoMsg.creator,
-      collectionId: convertFunction(protoMsg.collectionId)
+      collectionId: protoMsg.collectionId
     });
   }
 }

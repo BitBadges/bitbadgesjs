@@ -20,6 +20,7 @@ import { Stringify } from '@/common/string-numbers.js';
 import { UintRange, UintRangeArray } from '@/core/uintRanges.js';
 import { UserBalanceStore } from '@/core/userBalances.js';
 import type { iMsgUniversalUpdateCollection } from './interfaces.js';
+import { CollectionId } from '@/interfaces/index.js';
 
 /**
  * MsgUniversalUpdateCollection is a universal transaction that can be used to create / update any collection. It is only executable by the manager.
@@ -43,7 +44,7 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
   implements iMsgUniversalUpdateCollection<T>
 {
   creator: BitBadgesAddress;
-  collectionId: T;
+  collectionId: CollectionId;
   balancesType?: string;
   defaultBalances?: UserBalanceStore<T>;
   badgeIdsToAdd?: UintRangeArray<T>;
@@ -94,7 +95,7 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
   }
 
   getNumberFieldNames(): string[] {
-    return ['collectionId'];
+    return [];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgUniversalUpdateCollection<U> {
@@ -127,7 +128,7 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
   ): MsgUniversalUpdateCollection<U> {
     return new MsgUniversalUpdateCollection({
       creator: protoMsg.creator,
-      collectionId: convertFunction(protoMsg.collectionId),
+      collectionId: protoMsg.collectionId,
       balancesType: protoMsg.balancesType,
       defaultBalances: protoMsg.defaultBalances ? UserBalanceStore.fromProto(protoMsg.defaultBalances, convertFunction) : undefined,
       badgeIdsToAdd: protoMsg.badgeIdsToAdd ? protoMsg.badgeIdsToAdd.map((x) => UintRange.fromProto(x, convertFunction)) : undefined,

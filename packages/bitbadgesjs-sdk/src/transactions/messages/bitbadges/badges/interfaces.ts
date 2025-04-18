@@ -2,6 +2,7 @@ import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import type { iCollectionApproval, iUserIncomingApproval, iUserOutgoingApproval } from '../../../../interfaces/badges/approvals.js';
 import type {
+  CollectionId,
   iAddressList,
   iBadgeMetadataTimeline,
   iCollectionMetadataTimeline,
@@ -77,7 +78,7 @@ export interface iMsgDeleteCollection<T extends NumberType> {
   /** The creator of the transaction. */
   creator: BitBadgesAddress;
   /** The ID of the collection to delete. */
-  collectionId: T;
+  collectionId: CollectionId;
 }
 
 /**
@@ -87,7 +88,7 @@ export interface iMsgTransferBadges<T extends NumberType> {
   /** The creator of the transaction. */
   creator: BitBadgesAddress;
   /** The ID of the collection to transfer badges from. */
-  collectionId: T;
+  collectionId: CollectionId;
   /** The transfers to perform. */
   transfers: iTransfer<T>[];
 }
@@ -97,7 +98,7 @@ export interface iMsgTransferBadges<T extends NumberType> {
  */
 export interface iMsgUniversalUpdateCollection<T extends NumberType> extends iMsgCreateCollection<T> {
   /** The ID of the collection to update. */
-  collectionId: T;
+  collectionId: CollectionId;
   /** Whether or not to update the collection permissions. */
   updateCollectionPermissions?: boolean;
   /** Whether or not to update the manager timeline. */
@@ -130,7 +131,7 @@ export interface iMsgUpdateUserApprovals<T extends NumberType> {
   /** The creator of the transaction. */
   creator: BitBadgesAddress;
   /** The ID of the collection to transfer badges from. */
-  collectionId: T;
+  collectionId: CollectionId;
   /** Whether or not to update the outgoing approvals. */
   updateOutgoingApprovals?: boolean;
   /** The new outgoing approvals. Must have the necessary permissions to update.  */

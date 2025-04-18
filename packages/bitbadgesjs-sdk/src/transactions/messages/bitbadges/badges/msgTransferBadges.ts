@@ -7,6 +7,7 @@ import * as badges from '@/proto/badges/tx_pb.js';
 import { Transfer } from '@/core/transfers.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
+import { CollectionId } from '@/interfaces/index.js';
 
 /**
  * MsgTransferBadges represents a message to transfer badges from one user to another.
@@ -23,7 +24,7 @@ import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
  */
 export class MsgTransferBadges<T extends NumberType> extends BaseNumberTypeClass<MsgTransferBadges<T>> implements iMsgTransferBadges<T> {
   creator: BitBadgesAddress;
-  collectionId: T;
+  collectionId: CollectionId;
   transfers: Transfer<T>[];
 
   constructor(msg: iMsgTransferBadges<T>) {
@@ -38,7 +39,7 @@ export class MsgTransferBadges<T extends NumberType> extends BaseNumberTypeClass
   }
 
   getNumberFieldNames(): string[] {
-    return ['collectionId'];
+    return [];
   }
 
   toProto(): badges.MsgTransferBadges {
@@ -64,7 +65,7 @@ export class MsgTransferBadges<T extends NumberType> extends BaseNumberTypeClass
   static fromProto<U extends NumberType>(protoMsg: badges.MsgTransferBadges, convertFunction: (item: NumberType) => U): MsgTransferBadges<U> {
     return new MsgTransferBadges({
       creator: protoMsg.creator,
-      collectionId: convertFunction(protoMsg.collectionId),
+      collectionId: protoMsg.collectionId,
       transfers: protoMsg.transfers.map((x) => Transfer.fromProto(x, convertFunction))
     });
   }

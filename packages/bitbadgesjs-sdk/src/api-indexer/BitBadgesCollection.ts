@@ -29,6 +29,7 @@ import {
 import { UintRange, UintRangeArray } from '@/core/uintRanges.js';
 import { UserBalanceStoreWithDetails } from '@/core/userBalances.js';
 import type {
+  CollectionId,
   iAddressList,
   iBadgeMetadataTimelineWithDetails,
   iCollectionMetadataTimelineWithDetails,
@@ -83,7 +84,7 @@ import {
 } from './requests/collections.js';
 import { BitBadgesApiRoutes } from './requests/routes.js';
 
-const NEW_COLLECTION_ID = 0n;
+const NEW_COLLECTION_ID = '0';
 
 /**
  * @category Interfaces
@@ -234,7 +235,7 @@ export class BitBadgesCollection<T extends NumberType>
    * Sets the collection metadata for certain times (defaults to all times).
    */
   setCollectionMetadataForTimes(metadata: CollectionMetadataDetails<T>, timelineTimesToSet?: iUintRange<T>[]) {
-    const converterFunction = getConverterFunction(this.collectionId);
+    const converterFunction = getConverterFunction(this.createdBlock);
     const fullTimeline: CollectionMetadataTimelineWithDetails<T>[] = timelineTimesToSet
       ? this.collectionMetadataTimeline
           .map((x) => x.clone())
@@ -262,7 +263,7 @@ export class BitBadgesCollection<T extends NumberType>
    * Sets the badge metadata for certain times (defaults to all times).
    */
   setBadgeMetadataForTimes(metadata: BadgeMetadataDetails<T>[], timelineTimesToSet?: iUintRange<T>[]) {
-    const converterFunction = getConverterFunction(this.collectionId);
+    const converterFunction = getConverterFunction(this.createdBlock);
     const fullTimeline: BadgeMetadataTimelineWithDetails<T>[] = timelineTimesToSet
       ? this.badgeMetadataTimeline
           .map((x) => x.clone())
@@ -695,7 +696,7 @@ export class BitBadgesCollection<T extends NumberType>
    */
   static async FetchAndInitialize<T extends NumberType>(
     api: BaseBitBadgesApi<T>,
-    options: { collectionId: NumberType } & GetMetadataForCollectionPayload & GetAdditionalCollectionDetailsPayload
+    options: { collectionId: CollectionId } & GetMetadataForCollectionPayload & GetAdditionalCollectionDetailsPayload
   ) {
     const collection = await BitBadgesCollection.GetCollections(api, { collectionsToFetch: [options] }).then((x) => x.collections[0]);
     if (!collection) throw new Error('No collection found');
@@ -728,7 +729,7 @@ export class BitBadgesCollection<T extends NumberType>
    */
   static async GetBadgeBalanceByAddress<T extends NumberType>(
     api: BaseBitBadgesApi<T>,
-    collectionId: NumberType,
+    collectionId: CollectionId,
     address: string,
     payload?: iGetBadgeBalanceByAddressPayload
   ): Promise<GetBadgeBalanceByAddressSuccessResponse<T>> {
@@ -738,7 +739,7 @@ export class BitBadgesCollection<T extends NumberType>
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      api.assertPositiveInteger(collectionId);
+      api.assertPositiveCollectionId(collectionId);
 
       const response = await api.axios.get<iGetBadgeBalanceByAddressSuccessResponse<string>>(
         `${api.BACKEND_URL}${BitBadgesApiRoutes.GetBadgeBalanceByAddressRoute(collectionId, address)}`,
@@ -756,7 +757,7 @@ export class BitBadgesCollection<T extends NumberType>
    */
   static async FetchAndInitializeBatch<T extends NumberType>(
     api: BaseBitBadgesApi<T>,
-    collectionsToFetch: ({ collectionId: NumberType } & GetMetadataForCollectionPayload & GetAdditionalCollectionDetailsPayload)[]
+    collectionsToFetch: ({ collectionId: CollectionId } & GetMetadataForCollectionPayload & GetAdditionalCollectionDetailsPayload)[]
   ) {
     const collection = await BitBadgesCollection.GetCollections(api, { collectionsToFetch: collectionsToFetch });
     return collection.collections.map((x) => (x ? new BitBadgesCollection(x) : undefined));
@@ -861,7 +862,7 @@ export class BitBadgesCollection<T extends NumberType>
       challengeTrackersToFetch: prunedChallengeTrackersToFetch,
       approvalTrackersToFetch: prunedApprovalTrackersToFetch,
       fetchTotalBalances: shouldFetchTotal
-    } as GetMetadataForCollectionPayload & GetAdditionalCollectionDetailsPayload & { collectionId: T };
+    } as GetMetadataForCollectionPayload & GetAdditionalCollectionDetailsPayload & { collectionId: CollectionId };
   }
 
   /**
@@ -1072,9 +1073,9 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Returns the status of this collection in the refresh queue.
    */
-  static async GetRefreshStatus<T extends NumberType>(api: BaseBitBadgesApi<T>, collectionId: T) {
+  static async GetRefreshStatus<T extends NumberType>(api: BaseBitBadgesApi<T>, collectionId: string) {
     try {
-      api.assertPositiveInteger(collectionId);
+      api.assertPositiveCollectionId(collectionId);
 
       const response = await api.axios.get<iRefreshStatusSuccessResponse<string>>(
         `${api.BACKEND_URL}${BitBadgesApiRoutes.GetRefreshStatusRoute(collectionId)}`
@@ -1096,14 +1097,14 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Trigger a refresh for the collection via the API. Note there is a cooldown period for refreshing.
    */
-  static async RefreshMetadata<T extends NumberType>(api: BaseBitBadgesApi<T>, collectionId: T, body?: iRefreshMetadataPayload) {
+  static async RefreshMetadata<T extends NumberType>(api: BaseBitBadgesApi<T>, collectionId: string, body?: iRefreshMetadataPayload) {
     try {
       const validateRes: typia.IValidation<iRefreshMetadataPayload> = typia.validate<iRefreshMetadataPayload>(body ?? {});
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      api.assertPositiveInteger(collectionId);
+      api.assertPositiveCollectionId(collectionId);
 
       const response = await api.axios.post<iRefreshMetadataSuccessResponse>(
         `${api.BACKEND_URL}${BitBadgesApiRoutes.RefreshMetadataRoute(collectionId)}`,
@@ -1128,7 +1129,7 @@ export class BitBadgesCollection<T extends NumberType>
    */
   static async GetBadgeActivity<T extends NumberType>(
     api: BaseBitBadgesApi<T>,
-    collectionId: NumberType,
+    collectionId: CollectionId,
     badgeId: NumberType,
     payload?: iGetBadgeActivityPayload
   ) {
@@ -1138,7 +1139,7 @@ export class BitBadgesCollection<T extends NumberType>
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      api.assertPositiveInteger(collectionId);
+      api.assertPositiveCollectionId(collectionId);
       api.assertPositiveInteger(badgeId);
 
       const response = await api.axios.get<iGetBadgeActivitySuccessResponse<string>>(
@@ -1164,7 +1165,7 @@ export class BitBadgesCollection<T extends NumberType>
    */
   static async GetOwnersForBadge<T extends NumberType>(
     api: BaseBitBadgesApi<T>,
-    collectionId: NumberType,
+    collectionId: CollectionId,
     badgeId: NumberType,
     payload?: iGetOwnersForBadgePayload
   ) {
@@ -1174,7 +1175,7 @@ export class BitBadgesCollection<T extends NumberType>
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      api.assertPositiveInteger(collectionId);
+      api.assertPositiveCollectionId(collectionId);
       api.assertPositiveInteger(badgeId);
 
       const response = await api.axios.get<iGetOwnersForBadgeSuccessResponse<string>>(
@@ -1198,7 +1199,11 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Execute a filter query for the collection. You have to handle the pagination yourself.
    */
-  static async FilterBadgesInCollection<T extends NumberType>(api: BaseBitBadgesApi<T>, collectionId: T, body: iFilterBadgesInCollectionPayload) {
+  static async FilterBadgesInCollection<T extends NumberType>(
+    api: BaseBitBadgesApi<T>,
+    collectionId: string,
+    body: iFilterBadgesInCollectionPayload
+  ) {
     try {
       const validateRes: typia.IValidation<iFilterBadgesInCollectionPayload> = typia.validate<iFilterBadgesInCollectionPayload>(body ?? {});
       if (!validateRes.success) {
@@ -1375,7 +1380,7 @@ function updateCollectionWithResponse<T extends NumberType>(
   //      One place to look: somehow, I think that the indivudal elements in .badgeIds are the same object (cached[0].badgeIds === new[0].badgeIds)
   //      I think the cachedCollection deepCopyPrimitives is the important one, but I'm not sure
 
-  const convertFunction = getConverterFunction(newCollectionResponse.collectionId);
+  const convertFunction = getConverterFunction(newCollectionResponse.createdBlock);
   let cachedCollection = oldCollection ? oldCollection.convert(convertFunction) : undefined;
   if (!cachedCollection) return newCollectionResponse;
 

@@ -11,6 +11,7 @@ import type { iCosmosCoin } from '@/core/coin.js';
 import type { iOffChainBalancesMap } from '@/core/transfers.js';
 import type { iCollectionApproval, iPredeterminedBalances, iUserIncomingApprovalWithDetails } from '@/interfaces/badges/approvals.js';
 import type {
+  CollectionId,
   iAddressList,
   iAmountTrackerIdDetails,
   iApprovalIdentifierDetails,
@@ -248,7 +249,7 @@ export interface iReviewDoc<T extends NumberType> extends iActivityDoc<T> {
   /** The user who gave the review. */
   from: BitBadgesAddress;
   /** The collection ID of the collection that was reviewed. Only applicable to collection reviews. */
-  collectionId?: T;
+  collectionId?: CollectionId;
   /** The BitBadges address of the user who the review is for. Only applicable to user reviews. */
   reviewedAddress?: BitBadgesAddress;
 }
@@ -264,7 +265,7 @@ export interface iTransferActivityDoc<T extends NumberType> extends iActivityDoc
   /** The list of balances and badge IDs that were transferred. */
   balances: iBalance<T>[];
   /** The collection ID for the badges that was transferred. */
-  collectionId: T;
+  collectionId: CollectionId;
   /** The memo of the transfer. */
   memo?: string;
   /** Which approval to use to precalculate the balances? */
@@ -338,7 +339,7 @@ export interface iClaimAlertDoc<T extends NumberType> extends iActivityDoc<T> {
    *
    * @deprecated Not supported anymore.
    */
-  collectionId: T;
+  collectionId: CollectionId;
   /** The message of the claim alert. */
   message?: string;
 }
@@ -348,7 +349,7 @@ export interface iClaimAlertDoc<T extends NumberType> extends iActivityDoc<T> {
  */
 export interface iCollectionDoc<T extends NumberType> extends Doc {
   /** The collection ID */
-  collectionId: T;
+  collectionId: CollectionId;
   /** The collection metadata timeline */
   collectionMetadataTimeline: iCollectionMetadataTimeline<T>[];
   /** The badge metadata timeline */
@@ -548,7 +549,7 @@ export interface iQueueDoc<T extends NumberType> extends Doc {
   /** The URI of the metadata to be fetched. If {id} is present, it will be replaced with each individual ID in badgeIds */
   uri: string;
   /** The collection ID of the metadata to be fetched */
-  collectionId: T;
+  collectionId: CollectionId;
   /** The load balance ID of the metadata to be fetched. Only the node with the same load balance ID will fetch this metadata */
   loadBalanceId: T;
   /** The timestamp of when this metadata was requested to be refreshed (milliseconds since epoch) */
@@ -670,7 +671,7 @@ export interface iAddressListDoc<T extends NumberType> extends iAddressList, Doc
  */
 export interface iBalanceDoc<T extends NumberType> extends iUserBalanceStore<T>, Doc {
   /** The collection ID */
-  collectionId: T;
+  collectionId: CollectionId;
 
   /** The BitBadges address of the user */
   bitbadgesAddress: BitBadgesAddress;
@@ -886,7 +887,7 @@ export type ClaimIntegrationPublicParamsType<T extends ClaimIntegrationPluginTyp
                     allowedCountryCodes?: string[];
                     disallowedCountryCodes?: string[];
                   }
-                : T extends 'webhooks' | 'successWebhooks'
+                : T extends 'webhooks' | 'successWebhooks' | 'zapierAiAction'
                   ? {
                       tutorialUri?: string;
                       ignoreSimulations?: boolean;
@@ -949,11 +950,17 @@ export type ClaimIntegrationPrivateParamsType<T extends ClaimIntegrationPluginTy
               webhookUrl: string;
               webhookSecret: string;
             }
-          : T extends 'claimAlerts'
+          : T extends 'zapierAiAction'
             ? {
-                message: string;
+                action: string;
+                instructions: string;
+                apiKey: string;
               }
-            : Record<string, any>;
+            : T extends 'claimAlerts'
+              ? {
+                  message: string;
+                }
+              : Record<string, any>;
 
 /**
  * Public state is the current state of the claim integration that is visible to the public. For example, the number of times a claim code has been used.
@@ -1233,12 +1240,12 @@ export interface iInheritMetadataFrom<T extends NumberType> {
   /** The application ID to link to */
   applicationId?: string;
   /** The collection ID to link to */
-  collectionId?: T;
+  collectionId?: CollectionId;
   /** The address list ID to link to */
   listId?: string;
   /** The map ID to link to */
   mapId?: string;
-  /** The badge ID to link to "collectionId:badgeId" */
+  /** The badge ID to link to "collectionId: CollectionId<T>dgeId" */
   badgeId?: string;
 }
 
@@ -1345,7 +1352,7 @@ export interface iUtilityListingDoc<T extends NumberType> extends Doc {
  */
 export interface iLinkedTo<T extends NumberType> {
   /** The collection ID */
-  collectionId?: T;
+  collectionId?: CollectionId;
   /** The badge IDs */
   badgeIds?: iUintRange<T>[];
   /** The list ID */
@@ -1374,7 +1381,7 @@ export interface iUtilityListingLink<T extends NumberType> {
   /** The application ID to link to */
   applicationId?: string;
   /** The collection ID to link to */
-  collectionId?: T;
+  collectionId?: CollectionId;
   /** The address list ID to link to */
   listId?: string;
   /** The map ID to link to */
@@ -1420,8 +1427,9 @@ export interface iClaimBuilderDoc<T extends NumberType> extends Doc {
   createdBy: BitBadgesAddress;
   /** True if the document is claimed by the collection */
   docClaimed: boolean;
+
   /** The collection ID of the document */
-  collectionId: T;
+  collectionId: CollectionId;
 
   /** The BitBadges address of the user who is currently managing this */
   managedBy: BitBadgesAddress;
@@ -1631,7 +1639,7 @@ export interface iApprovalTrackerDoc<T extends NumberType> extends iAmountTracke
  */
 export interface iChallengeTrackerIdDetails<T extends NumberType> {
   /** The collection ID */
-  collectionId: T;
+  collectionId: CollectionId;
   /**
    * The approval ID
    */
@@ -1649,7 +1657,7 @@ export interface iChallengeTrackerIdDetails<T extends NumberType> {
  */
 export interface iMerkleChallengeTrackerDoc<T extends NumberType> extends Doc {
   /** The collection ID */
-  collectionId: T;
+  collectionId: CollectionId;
   /** The challenge ID */
   challengeTrackerId: string;
   /** The approval ID */
@@ -1693,7 +1701,7 @@ export interface iFetchDoc<T extends NumberType> extends Doc {
  */
 export interface iRefreshDoc<T extends NumberType> extends Doc {
   /** The collection ID */
-  collectionId: T;
+  collectionId: CollectionId;
   /** The time the refresh was requested (Unix timestamp in milliseconds) */
   refreshRequestTime: UNIXMilliTimestamp<T>;
 }
@@ -2074,7 +2082,7 @@ export interface iSIWBBRequestDoc<T extends NumberType> extends Doc {
 
   /** The code challenge for the SIWBB request (if used with PKCE). */
   codeChallenge?: string;
-  
+
   /** The code challenge method for the SIWBB request (if used with PKCE). */
   codeChallengeMethod?: 'S256' | 'plain';
 }
@@ -2131,7 +2139,7 @@ export interface iClaimDetails<T extends NumberType> {
   /** The BitBadges address of the user who is currently managing this */
   managedBy?: BitBadgesAddress;
   /** Collection ID that the claim is for (if applicable - collection claims). */
-  collectionId?: T;
+  collectionId?: CollectionId;
   /** Standalone claims are not linked with a badge or list. */
   standaloneClaim?: boolean;
   /** Address list ID that the claim is for (if applicable - list claims). */

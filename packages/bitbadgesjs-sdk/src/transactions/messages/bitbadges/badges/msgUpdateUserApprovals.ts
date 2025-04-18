@@ -8,6 +8,7 @@ import { UserIncomingApproval, UserOutgoingApproval } from '@/core/approvals.js'
 import type { iMsgUpdateUserApprovals } from './interfaces.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
 import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
+import { CollectionId } from '@/interfaces/index.js';
 
 /**
  * MsgUpdateUserApprovals represents the message for updating user approvals.
@@ -31,7 +32,7 @@ export class MsgUpdateUserApprovals<T extends NumberType>
   implements iMsgUpdateUserApprovals<T>
 {
   creator: BitBadgesAddress;
-  collectionId: T;
+  collectionId: CollectionId;
   updateOutgoingApprovals?: boolean;
   outgoingApprovals?: UserOutgoingApproval<T>[];
   updateIncomingApprovals?: boolean;
@@ -60,7 +61,7 @@ export class MsgUpdateUserApprovals<T extends NumberType>
   }
 
   getNumberFieldNames(): string[] {
-    return ['collectionId'];
+    return [];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgUpdateUserApprovals<U> {
@@ -93,7 +94,7 @@ export class MsgUpdateUserApprovals<T extends NumberType>
   ): MsgUpdateUserApprovals<U> {
     return new MsgUpdateUserApprovals({
       creator: protoMsg.creator,
-      collectionId: convertFunction(protoMsg.collectionId),
+      collectionId: protoMsg.collectionId,
       updateOutgoingApprovals: protoMsg.updateOutgoingApprovals,
       outgoingApprovals: protoMsg.outgoingApprovals.map((x) => UserOutgoingApproval.fromProto(x, convertFunction)),
       updateIncomingApprovals: protoMsg.updateIncomingApprovals,

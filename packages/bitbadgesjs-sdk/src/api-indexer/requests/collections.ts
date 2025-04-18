@@ -8,7 +8,7 @@ import {
 } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import { UintRangeArray } from '@/core/uintRanges.js';
-import type { iAmountTrackerIdDetails, iUintRange } from '@/interfaces/badges/core.js';
+import type { CollectionId, iAmountTrackerIdDetails, iUintRange } from '@/interfaces/badges/core.js';
 import type { PaginationInfo } from '../base.js';
 import { EmptyResponseClass } from '../base.js';
 import { TransferActivityDoc } from '../docs/activity.js';
@@ -433,7 +433,7 @@ export interface GetMetadataForCollectionPayload {
 /**
  * @category Interfaces
  */
-export type GetCollectionRequestBody = GetAdditionalCollectionDetailsPayload & GetMetadataForCollectionPayload & { collectionId: NumberType };
+export type GetCollectionRequestBody = GetAdditionalCollectionDetailsPayload & GetMetadataForCollectionPayload & { collectionId: CollectionId };
 
 /**
  * @category API Requests / Responses

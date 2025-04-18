@@ -4,7 +4,7 @@ import type { NumberType } from '@/common/string-numbers.js';
 import { AddressList } from '@/core/addressLists.js';
 import type { BatchBadgeDetails, iBatchBadgeDetails } from '@/core/batch-utils.js';
 import { CosmosCoin } from '@/core/coin.js';
-import type { iAddressList } from '@/interfaces/badges/core.js';
+import type { CollectionId, iAddressList } from '@/interfaces/badges/core.js';
 import typia from 'typia';
 import { SupportedChain } from '../common/types.js';
 import type { iBitBadgesAddressList } from './BitBadgesAddressList.js';
@@ -93,7 +93,7 @@ export interface iBitBadgesUserInfo<T extends NumberType> extends iProfileDoc<T>
    * Experimental - For example, if you want to send a badge to a collection, you can transfer it to the alias account.
    */
   alias?: {
-    collectionId?: T;
+    collectionId?: CollectionId;
     listId?: string;
   };
 }
@@ -146,7 +146,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
       | undefined;
   };
   alias?: {
-    collectionId?: T;
+    collectionId?: CollectionId;
     listId?: string;
   };
 
@@ -252,7 +252,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     }
   }
 
-  private getBalanceInfo(collectionId: T, throwIfNotFound?: boolean) {
+  private getBalanceInfo(collectionId: CollectionId, throwIfNotFound?: boolean) {
     const balance = this.collected.find((x) => x.collectionId === collectionId);
     if (!balance && throwIfNotFound) throw new Error('Balance not found');
 
@@ -270,7 +270,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
    * console.log(res.balances);
    * ```
    */
-  getBadgeBalanceInfo(collectionId: T) {
+  getBadgeBalanceInfo(collectionId: CollectionId) {
     return this.getBalanceInfo(collectionId);
   }
 
@@ -283,7 +283,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
    * console.log(res.balances);
    * ```
    */
-  mustGetBadgeBalanceInfo(collectionId: T) {
+  mustGetBadgeBalanceInfo(collectionId: CollectionId) {
     const balance = this.getBalanceInfo(collectionId, true);
     return balance as BalanceDocWithDetails<T>;
   }
@@ -298,7 +298,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
    * const res = user.mustGetBadgeBalances(123n);
    * console.log(res); // [{ ... }] Balances
    */
-  mustGetBadgeBalances(collectionId: T) {
+  mustGetBadgeBalances(collectionId: CollectionId) {
     return this.mustGetBadgeBalanceInfo(collectionId).balances;
   }
 
@@ -311,7 +311,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
    * console.log(res.balances);
    * ```
    */
-  getBadgeBalances(collectionId: T) {
+  getBadgeBalances(collectionId: CollectionId) {
     return this.getBadgeBalanceInfo(collectionId)?.balances;
   }
 
@@ -319,7 +319,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
    * Fetch badge balances for a collection and updates the user's collected array. Must pass in a valid API instance.
    * If forceful is true, it will fetch regardless of if it is already fetched. Else, it will only fetch if it is not already cached.
    */
-  async fetchBadgeBalances(api: BaseBitBadgesApi<T>, collectionId: T, forceful?: boolean) {
+  async fetchBadgeBalances(api: BaseBitBadgesApi<T>, collectionId: CollectionId, forceful?: boolean) {
     const currOwnerInfo = this.collected.find((x) => x.collectionId === collectionId);
     if (currOwnerInfo && !forceful) return currOwnerInfo;
 

@@ -1,5 +1,6 @@
 import type { NumberType } from '@/common/string-numbers.js';
 import type { NativeAddress } from '../docs/index.js';
+import { CollectionId } from '@/interfaces/index.js';
 
 /**
  * Exports static methods that return the routes for the BitBadges API. Append this to the base URL of the API to get the full URL.
@@ -17,18 +18,18 @@ export class BitBadgesApiRoutes {
   static SearchRoute = (searchValue: string) => `/api/v0/search/${searchValue}`;
   static GetCollectionsRoute = () => '/api/v0/collections';
 
-  static GetOwnersForBadgeRoute = (collectionId: NumberType, badgeId: NumberType) =>
+  static GetOwnersForBadgeRoute = (collectionId: CollectionId, badgeId: NumberType) =>
     `/api/v0/collection/${collectionId.toString()}/${badgeId.toString()}/owners`;
-  static GetBadgeBalanceByAddressRoute = (collectionId: NumberType, bitbadgesAddress: string) =>
+  static GetBadgeBalanceByAddressRoute = (collectionId: CollectionId, bitbadgesAddress: string) =>
     `/api/v0/collection/${collectionId.toString()}/balance/${bitbadgesAddress}`;
-  static GetBadgeBalanceByAddressSpecificBadgeRoute = (collectionId: NumberType, bitbadgesAddress: string, badgeId: NumberType) =>
+  static GetBadgeBalanceByAddressSpecificBadgeRoute = (collectionId: CollectionId, bitbadgesAddress: string, badgeId: NumberType) =>
     `/api/v0/collection/${collectionId.toString()}/${badgeId.toString()}/balance/${bitbadgesAddress}`;
-  static GetBadgeActivityRoute = (collectionId: NumberType, badgeId: NumberType) =>
+  static GetBadgeActivityRoute = (collectionId: CollectionId, badgeId: NumberType) =>
     `/api/v0/collection/${collectionId.toString()}/${badgeId.toString()}/activity`;
-  static RefreshMetadataRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/refresh`;
-  static GetRefreshStatusRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/refreshStatus`;
-  static FilterBadgesInCollectionRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/filter`;
-  static FilterSuggestionsRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/filterSuggestions`;
+  static RefreshMetadataRoute = (collectionId: CollectionId) => `/api/v0/collection/${collectionId.toString()}/refresh`;
+  static GetRefreshStatusRoute = (collectionId: CollectionId) => `/api/v0/collection/${collectionId.toString()}/refreshStatus`;
+  static FilterBadgesInCollectionRoute = (collectionId: CollectionId) => `/api/v0/collection/${collectionId.toString()}/filter`;
+  static FilterSuggestionsRoute = (collectionId: CollectionId) => `/api/v0/collection/${collectionId.toString()}/filterSuggestions`;
 
   static CompleteClaimRoute = (claimId: string, address: NativeAddress) => `/api/v0/claims/complete/${claimId.toString()}/${address}`;
   static SimulateClaimRoute = (claimId: string, address: NativeAddress) => `/api/v0/claims/simulate/${claimId.toString()}/${address}`;
@@ -165,16 +166,16 @@ export class BitBadgesApiRoutes {
   static GetAddressListListingsRoute = (addressListId: string) => `/api/v0/addressLists/${addressListId}/listings`;
   static GetAddressListClaimsRoute = (addressListId: string) => `/api/v0/addressLists/${addressListId}/claims`;
 
-  static GetCollectionOwnersRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/owners`;
-  static GetCollectionRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}`;
-  static GetBadgeMetadataRoute = (collectionId: NumberType, badgeId: NumberType) =>
+  static GetCollectionOwnersRoute = (collectionId: CollectionId) => `/api/v0/collection/${collectionId.toString()}/owners`;
+  static GetCollectionRoute = (collectionId: CollectionId) => `/api/v0/collection/${collectionId.toString()}`;
+  static GetBadgeMetadataRoute = (collectionId: CollectionId, badgeId: NumberType) =>
     `/api/v0/collection/${collectionId.toString()}/${badgeId.toString()}/metadata`;
-  static GetCollectionClaimsRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/claims`;
+  static GetCollectionClaimsRoute = (collectionId: CollectionId) => `/api/v0/collection/${collectionId.toString()}/claims`;
 
-  static GetCollectionTransferActivityRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/activity`;
-  static GetCollectionChallengeTrackersRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/challengeTrackers`;
-  static GetCollectionAmountTrackersRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/amountTrackers`;
-  static GetCollectionListingsRoute = (collectionId: NumberType) => `/api/v0/collection/${collectionId.toString()}/listings`;
+  static GetCollectionTransferActivityRoute = (collectionId: CollectionId) => `/api/v0/collection/${collectionId.toString()}/activity`;
+  static GetCollectionChallengeTrackersRoute = (collectionId: CollectionId) => `/api/v0/collection/${collectionId.toString()}/challengeTrackers`;
+  static GetCollectionAmountTrackersRoute = (collectionId: CollectionId) => `/api/v0/collection/${collectionId.toString()}/amountTrackers`;
+  static GetCollectionListingsRoute = (collectionId: CollectionId) => `/api/v0/collection/${collectionId.toString()}/listings`;
 
   static GetCollectionAmountTrackerByIdRoute = () => `/api/v0/collection/amountTracker`;
   static GetCollectionChallengeTrackerByIdRoute = () => `/api/v0/collection/challengeTracker`;

@@ -1,7 +1,7 @@
 import type { NumberType } from '../common/string-numbers.js';
 import { BigIntify } from '../common/string-numbers.js';
 
-import type { iUintRange } from '@/interfaces/badges/core.js';
+import type { CollectionId, iUintRange } from '@/interfaces/badges/core.js';
 import { bigIntMin } from '../common/math.js';
 import { BaseNumberTypeClass, ConvertOptions, getConverterFunction } from '@/common/base.js';
 import { UintRangeArray, UintRange } from './uintRanges.js';
@@ -12,7 +12,7 @@ import { BaseTypedArray } from '@/common/typed-arrays.js';
  */
 export interface iBatchBadgeDetails<T extends NumberType> {
   /** The collection ID of this element's badge details. */
-  collectionId: T;
+  collectionId: CollectionId;
   /** The corresponding badge IDs for this collection ID. */
   badgeIds: iUintRange<T>[];
 }
@@ -21,7 +21,7 @@ export interface iBatchBadgeDetails<T extends NumberType> {
  * @category Batch Utils
  */
 export class BatchBadgeDetails<T extends NumberType> extends BaseNumberTypeClass<BatchBadgeDetails<T>> implements iBatchBadgeDetails<T> {
-  collectionId: T;
+  collectionId: CollectionId;
   badgeIds: UintRangeArray<T>;
 
   constructor(data: iBatchBadgeDetails<T>) {
@@ -31,13 +31,13 @@ export class BatchBadgeDetails<T extends NumberType> extends BaseNumberTypeClass
   }
 
   getNumberFieldNames(): string[] {
-    return ['collectionId'];
+    return [];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): BatchBadgeDetails<U> {
     return new BatchBadgeDetails<U>({
       ...this,
-      collectionId: convertFunction(this.collectionId),
+      collectionId: this.collectionId,
       badgeIds: this.badgeIds.map((x) => x.convert(convertFunction))
     });
   }
@@ -198,8 +198,9 @@ export class BatchBadgeDetailsArray<T extends NumberType> extends BaseTypedArray
    */
   getPage(_pageNumber: number, _pageSize: number, sortBy?: 'newest' | 'oldest' | undefined): BatchBadgeDetailsArray<T> {
     if (this.length === 0) return BatchBadgeDetailsArray.From<T>([]);
+    if (this[0].badgeIds.length === 0) return BatchBadgeDetailsArray.From<T>([]);
 
-    const converterFunction = getConverterFunction(this[0].collectionId);
+    const converterFunction = getConverterFunction(this[0].badgeIds[0].start);
 
     const collectionObjectsToDisplay = BatchBadgeDetailsArray.From(this.map((x) => x.convert(BigIntify)));
     const pageNumber = BigInt(_pageNumber);

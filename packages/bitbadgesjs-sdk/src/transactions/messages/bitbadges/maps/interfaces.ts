@@ -172,7 +172,7 @@ export class MapUpdateCriteria<T extends NumberType> extends BaseNumberTypeClass
   }
 
   getNumberFieldNames(): string[] {
-    return ['collectionId'];
+    return [];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MapUpdateCriteria<U> {

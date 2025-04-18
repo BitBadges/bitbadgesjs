@@ -1,7 +1,7 @@
 import type { NumberType } from '@/common/string-numbers.js';
 import { BitBadgesCollection, GetCollectionsSuccessResponse, iGetCollectionsPayload } from './BitBadgesCollection.js';
 
-import { iAmountTrackerIdDetails } from '@/interfaces/index.js';
+import { CollectionId, iAmountTrackerIdDetails } from '@/interfaces/index.js';
 import typia from 'typia';
 import {
   BitBadgesAddressList,
@@ -457,7 +457,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * ```
    */
   public async getOwnersForBadge(
-    collectionId: NumberType,
+    collectionId: CollectionId,
     badgeId: NumberType,
     payload: iGetOwnersForBadgePayload
   ): Promise<GetOwnersForBadgeSuccessResponse<T>> {
@@ -478,7 +478,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * ```
    */
   public async getBadgeBalanceByAddress(
-    collectionId: NumberType,
+    collectionId: CollectionId,
     address: NativeAddress,
     payload?: iGetBadgeBalanceByAddressPayload
   ): Promise<GetBadgeBalanceByAddressSuccessResponse<T>> {
@@ -500,7 +500,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * ```
    */
   public async getBadgeBalanceByAddressSpecificBadge(
-    collectionId: NumberType,
+    collectionId: CollectionId,
     badgeId: NumberType,
     address: NativeAddress,
     payload?: iGetBadgeBalanceByAddressPayload
@@ -535,7 +535,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * ```
    */
   public async getBadgeActivity(
-    collectionId: NumberType,
+    collectionId: CollectionId,
     badgeId: NumberType,
     payload: iGetBadgeActivityPayload
   ): Promise<GetBadgeActivitySuccessResponse<T>> {
@@ -557,7 +557,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * console.log(res);
    * ```
    */
-  public async refreshMetadata(collectionId: NumberType, payload?: iRefreshMetadataPayload): Promise<RefreshMetadataSuccessResponse> {
+  public async refreshMetadata(collectionId: CollectionId, payload?: iRefreshMetadataPayload): Promise<RefreshMetadataSuccessResponse> {
     return await BitBadgesCollection.RefreshMetadata(this, collectionId, payload);
   }
 
@@ -1052,7 +1052,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * - **API Route**: `GET /api/v0/collection/:collectionId/refreshStatus`
    * - **SDK Function Call**: `await BitBadgesApi.getRefreshStatus(payload);`
    */
-  public async getRefreshStatus(collectionId: NumberType): Promise<RefreshStatusSuccessResponse<NumberType>> {
+  public async getRefreshStatus(collectionId: CollectionId): Promise<RefreshStatusSuccessResponse<NumberType>> {
     return await BitBadgesCollection.GetRefreshStatus(this, collectionId);
   }
 
@@ -1149,7 +1149,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * - **SDK Function Call**: `await BitBadgesApi.filterBadgesInCollection(payload);`
    */
   public async filterBadgesInCollection(
-    collectionId: T,
+    collectionId: CollectionId,
     payload: iFilterBadgesInCollectionPayload
   ): Promise<FilterBadgesInCollectionSuccessResponse<T>> {
     return await BitBadgesCollection.FilterBadgesInCollection(this, collectionId, payload);
@@ -2307,7 +2307,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * console.log(res);
    * ```
    * */
-  public async getCollectionOwners(collectionId: NumberType, payload: iGetCollectionOwnersPayload): Promise<GetCollectionOwnersSuccessResponse<T>> {
+  public async getCollectionOwners(collectionId: CollectionId, payload: iGetCollectionOwnersPayload): Promise<GetCollectionOwnersSuccessResponse<T>> {
     try {
       const validateRes: typia.IValidation<iGetCollectionOwnersPayload> = typia.validate<iGetCollectionOwnersPayload>(payload);
       if (!validateRes.success) {
@@ -2340,7 +2340,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * console.log(res);
    * ```
    * */
-  public async getCollection(collectionId: NumberType, payload?: iGetCollectionPayload): Promise<GetCollectionSuccessResponse<T>> {
+  public async getCollection(collectionId: CollectionId, payload?: iGetCollectionPayload): Promise<GetCollectionSuccessResponse<T>> {
     try {
       const response = await this.axios.get<iGetCollectionSuccessResponse<string>>(
         `${this.BACKEND_URL}${BitBadgesApiRoutes.GetCollectionRoute(collectionId)}`,
@@ -2366,7 +2366,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * console.log(res);
    * ```
    * */
-  public async getBadgeMetadata(collectionId: NumberType, badgeId: NumberType): Promise<GetBadgeMetadataSuccessResponse<T>> {
+  public async getBadgeMetadata(collectionId: CollectionId, badgeId: NumberType): Promise<GetBadgeMetadataSuccessResponse<T>> {
     try {
       const response = await this.axios.get<iGetBadgeMetadataSuccessResponse<string>>(
         `${this.BACKEND_URL}${BitBadgesApiRoutes.GetBadgeMetadataRoute(collectionId, badgeId)}`
@@ -2392,7 +2392,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * ```
    * */
   public async getCollectionTransferActivity(
-    collectionId: NumberType,
+    collectionId: CollectionId,
     payload: iGetCollectionTransferActivityPayload
   ): Promise<GetCollectionTransferActivitySuccessResponse<T>> {
     try {
@@ -2428,7 +2428,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * ```
    * */
   public async getCollectionChallengeTrackers(
-    collectionId: NumberType,
+    collectionId: CollectionId,
     payload: iGetCollectionChallengeTrackersPayload
   ): Promise<GetCollectionChallengeTrackersSuccessResponse<T>> {
     try {
@@ -2464,7 +2464,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * ```
    * */
   public async getCollectionAmountTrackers(
-    collectionId: NumberType,
+    collectionId: CollectionId,
     payload: iGetCollectionAmountTrackersPayload
   ): Promise<GetCollectionAmountTrackersSuccessResponse<T>> {
     try {
@@ -2500,7 +2500,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * ```
    * */
   public async getCollectionListings(
-    collectionId: NumberType,
+    collectionId: CollectionId,
     payload: iGetCollectionListingsPayload
   ): Promise<GetCollectionListingsSuccessResponse<T>> {
     try {
@@ -2535,7 +2535,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * console.log(res);
    * ```
    * */
-  public async getCollectionClaims(collectionId: NumberType): Promise<GetCollectionClaimsSuccessResponse<T>> {
+  public async getCollectionClaims(collectionId: CollectionId): Promise<GetCollectionClaimsSuccessResponse<T>> {
     try {
       const response = await this.axios.get<iGetCollectionClaimsSuccessResponse<string>>(
         `${this.BACKEND_URL}${BitBadgesApiRoutes.GetCollectionClaimsRoute(collectionId)}`
@@ -3859,7 +3859,7 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
    * - **API Route**: `POST /api/v0/collection/:collectionId/filterSuggestions`
    * - **SDK Function Call**: `await BitBadgesApi.filterSuggestions(collectionId, payload);`
    */
-  public async filterSuggestions(collectionId: T, payload?: iFilterSuggestionsPayload): Promise<FilterSuggestionsSuccessResponse> {
+  public async filterSuggestions(collectionId: CollectionId, payload?: iFilterSuggestionsPayload): Promise<FilterSuggestionsSuccessResponse> {
     try {
       const validateRes: typia.IValidation<iFilterSuggestionsPayload> = typia.validate<iFilterSuggestionsPayload>(payload ?? {});
       if (!validateRes.success) {

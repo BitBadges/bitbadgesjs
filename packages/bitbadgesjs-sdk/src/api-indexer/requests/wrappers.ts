@@ -31,6 +31,7 @@ import {
 } from '../docs/interfaces.js';
 import { iMetadata, Metadata } from '../metadata/metadata.js';
 import { CollectionViewKey } from './collections.js';
+import { CollectionId } from '@/interfaces/index.js';
 
 /**
  * @category API Requests / Responses
@@ -339,7 +340,7 @@ export interface iGetTransferActivityForUserPayload extends iBaseQueryParams {}
  */
 export interface iGetBadgesViewForUserPayload extends iBaseQueryParams {
   /** Optional collection ID to filter by */
-  collectionId?: NumberType;
+  collectionId?: CollectionId;
   /**
    * The view type to search for. Default is 'collected'
    *

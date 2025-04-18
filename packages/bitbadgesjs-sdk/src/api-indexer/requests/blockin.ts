@@ -96,7 +96,7 @@ export class SiwbbAssetDetails<T extends NumberType> extends BaseNumberTypeClass
       }
 
       BigInt(this.collectionId as any);
-      return ['collectionId'];
+      return [];
     } catch (e) {
       return [];
     }

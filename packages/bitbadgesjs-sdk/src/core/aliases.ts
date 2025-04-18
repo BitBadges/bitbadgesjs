@@ -1,5 +1,6 @@
-import crypto from 'crypto';
+import { CollectionId } from '@/interfaces/index.js';
 import { bech32 } from 'bech32';
+import crypto from 'crypto';
 import type { NumberType } from '../common/string-numbers.js';
 
 const AddressGenerationPrefix = 0x09;
@@ -65,8 +66,10 @@ export function generateAlias(moduleName: string, derivationKeys: Buffer[]) {
  *
  * @category Aliases
  */
-export function getAliasDerivationKeysForBadge(collectionId: NumberType, badgeId: NumberType) {
-  const derivationKey = [Buffer.from([AccountGenerationPrefix]), uint64ToBufferBE(collectionId), uint64ToBufferBE(badgeId)];
+export function getAliasDerivationKeysForBadge(collectionId: CollectionId, badgeId: NumberType) {
+  const collectionIdNum = Number(collectionId.split('-')[0]);
+
+  const derivationKey = [Buffer.from([AccountGenerationPrefix]), uint64ToBufferBE(collectionIdNum), uint64ToBufferBE(badgeId)];
   return derivationKey;
 }
 
@@ -75,8 +78,9 @@ export function getAliasDerivationKeysForBadge(collectionId: NumberType, badgeId
  *
  * @category Aliases
  */
-export function getAliasDerivationKeysForCollection(collectionId: NumberType) {
-  const derivationKey = [Buffer.from([AccountGenerationPrefix]), uint64ToBufferBE(collectionId)];
+export function getAliasDerivationKeysForCollection(collectionId: CollectionId) {
+  const collectionIdNum = Number(collectionId.split('-')[0]);
+  const derivationKey = [Buffer.from([AccountGenerationPrefix]), uint64ToBufferBE(collectionIdNum)];
   return derivationKey;
 }
 

@@ -1,6 +1,13 @@
 import type { BitBadgesAddress, iUpdateHistory, UNIXMilliTimestamp } from '@/api-indexer/docs/interfaces.js';
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions, CustomTypeClass, deepCopyPrimitives } from '@/common/base.js';
+import {
+  BaseNumberTypeClass,
+  convertClassPropertiesAndMaintainNumberTypes,
+  ConvertOptions,
+  CustomTypeClass,
+  deepCopyPrimitives
+} from '@/common/base.js';
 import type {
+  CollectionId,
   iAmountTrackerIdDetails,
   iApprovalIdentifierDetails,
   iBadgeMetadata,
@@ -200,7 +207,7 @@ export class OffChainBalancesMetadata extends CustomTypeClass<OffChainBalancesMe
  * @category Approvals / Transferability
  */
 export class MustOwnBadges<T extends NumberType> extends BaseNumberTypeClass<MustOwnBadges<T>> implements iMustOwnBadges<T> {
-  collectionId: T;
+  collectionId: CollectionId;
   amountRange: UintRange<T>;
   ownershipTimes: UintRangeArray<T>;
   badgeIds: UintRangeArray<T>;
@@ -218,13 +225,13 @@ export class MustOwnBadges<T extends NumberType> extends BaseNumberTypeClass<Mus
   }
 
   getNumberFieldNames(): string[] {
-    return ['collectionId'];
+    return [];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MustOwnBadges<U> {
     return new MustOwnBadges<U>(
       deepCopyPrimitives({
-        collectionId: convertFunction(this.collectionId),
+        collectionId: this.collectionId,
         amountRange: this.amountRange.convert(convertFunction),
         ownershipTimes: this.ownershipTimes.map((b) => b.convert(convertFunction)),
         badgeIds: this.badgeIds.map((b) => b.convert(convertFunction)),
@@ -260,7 +267,7 @@ export class MustOwnBadges<T extends NumberType> extends BaseNumberTypeClass<Mus
     }
 
     return new MustOwnBadges<U>({
-      collectionId: convertFunction(BigInt(item.collectionId)),
+      collectionId: item.collectionId,
       amountRange: UintRange.fromProto(item.amountRange, convertFunction),
       ownershipTimes: item.ownershipTimes.map((b) => UintRange.fromProto(b, convertFunction)),
       badgeIds: item.badgeIds.map((b) => UintRange.fromProto(b, convertFunction)),
@@ -427,7 +434,7 @@ export class AmountTrackerIdDetails<T extends NumberType>
   extends BaseNumberTypeClass<AmountTrackerIdDetails<T>>
   implements iAmountTrackerIdDetails<T>
 {
-  collectionId: T;
+  collectionId: CollectionId;
   amountTrackerId: string;
   approvalId: string;
   approvalLevel: string;
@@ -447,13 +454,13 @@ export class AmountTrackerIdDetails<T extends NumberType>
   }
 
   getNumberFieldNames(): string[] {
-    return ['collectionId'];
+    return [];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): AmountTrackerIdDetails<U> {
     return new AmountTrackerIdDetails<U>(
       deepCopyPrimitives({
-        collectionId: convertFunction(this.collectionId),
+        collectionId: this.collectionId,
         amountTrackerId: this.amountTrackerId,
         approvalLevel: this.approvalLevel,
         approverAddress: this.approverAddress,
