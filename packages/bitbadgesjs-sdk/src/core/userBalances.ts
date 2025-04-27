@@ -54,6 +54,15 @@ export class UserBalanceStore<T extends NumberType> extends BaseNumberTypeClass<
       autoApproveSelfInitiatedIncomingTransfers: item.autoApproveSelfInitiatedIncomingTransfers
     });
   }
+
+  toBech32Addresses(prefix: string): UserBalanceStore<T> {
+    return new UserBalanceStore({
+      ...this,
+      incomingApprovals: this.incomingApprovals.map((x) => x.toBech32Addresses(prefix)),
+      outgoingApprovals: this.outgoingApprovals.map((x) => x.toBech32Addresses(prefix)),
+      userPermissions: this.userPermissions.toBech32Addresses(prefix)
+    });
+  }
 }
 
 /**

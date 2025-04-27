@@ -174,46 +174,6 @@ export interface iAttestation<T extends NumberType> {
 /**
  * @category Interfaces
  */
-export interface iZkProof {
-  /**
-   * The verification key of the zkProof.
-   */
-  verificationKey: string;
-
-  /**
-   * The URI where to fetch the zkProof metadata from.
-   */
-  uri: string;
-
-  /**
-   * Arbitrary custom data that can be stored on-chain.
-   */
-  customData: string;
-
-  /**
-   * ZKP tracker ID.
-   */
-  zkpTrackerId: string;
-}
-
-/**
- * @category Interfaces
- */
-export interface iZkProofSolution {
-  /**
-   * The proof of the zkProof.
-   */
-  proof: string;
-
-  /**
-   * The public inputs of the zkProof.
-   */
-  publicInputs: string;
-}
-
-/**
- * @category Interfaces
- */
 export interface iMustOwnBadges<T extends NumberType> {
   /**
    * The collection ID of the badges to own.
@@ -299,11 +259,6 @@ export interface iAddressList {
    * The address that created the address list. Handled internally.
    */
   createdBy?: BitBadgesAddress;
-
-  /**
-   * The alias BitBadges address of the address list. Handled internally.
-   */
-  aliasAddress?: BitBadgesAddress;
 }
 
 /**
@@ -365,11 +320,6 @@ export interface iTransfer<T extends NumberType> {
    * This only applies to the "outgoing" level approvals specified.
    */
   onlyCheckPrioritizedOutgoingApprovals?: boolean;
-
-  /**
-   * The zk proof solutions for approvals.
-   */
-  zkProofSolutions?: iZkProofSolution[];
 }
 
 /**

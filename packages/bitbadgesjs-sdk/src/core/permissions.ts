@@ -18,12 +18,13 @@ import type {
 import type { ConvertOptions, CustomType } from '@/common/base.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, deepCopyPrimitives } from '@/common/base.js';
 import * as badges from '../proto/badges/permissions_pb.js';
-import { AddressList } from './addressLists.js';
+import { AddressList, convertListIdToBech32 } from './addressLists.js';
 import type { UniversalPermission, UniversalPermissionDetails } from './overlaps.js';
 import { GetFirstMatchOnly, getOverlapsAndNonOverlaps, universalRemoveOverlaps } from './overlaps.js';
 import { BigIntify, Stringify, type NumberType } from '../common/string-numbers.js';
 import { UintRange, UintRangeArray } from './uintRanges.js';
 import { AllDefaultValues } from './validate-utils.js';
+import { convertToBitBadgesAddress, getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
 
 /**
  * UserPermissions represents the permissions of a user and what they can update about their approvals.
@@ -114,6 +115,14 @@ export class UserPermissions<T extends NumberType> extends BaseNumberTypeClass<U
       canUpdateIncomingApprovals: [],
       canUpdateAutoApproveSelfInitiatedOutgoingTransfers: [],
       canUpdateAutoApproveSelfInitiatedIncomingTransfers: []
+    });
+  }
+
+  toBech32Addresses(prefix: string): UserPermissions<T> {
+    return new UserPermissions({
+      ...this,
+      canUpdateOutgoingApprovals: this.canUpdateOutgoingApprovals.map((x) => x.toBech32Addresses(prefix)),
+      canUpdateIncomingApprovals: this.canUpdateIncomingApprovals.map((x) => x.toBech32Addresses(prefix))
     });
   }
 }
@@ -238,6 +247,14 @@ export class UserOutgoingApprovalPermission<T extends NumberType>
       time
     );
   }
+
+  toBech32Addresses(prefix: string): UserOutgoingApprovalPermission<T> {
+    return new UserOutgoingApprovalPermission({
+      ...this,
+      toListId: convertListIdToBech32(this.toListId, prefix),
+      initiatedByListId: convertListIdToBech32(this.initiatedByListId, prefix)
+    });
+  }
 }
 
 /**
@@ -354,6 +371,14 @@ export class UserIncomingApprovalPermission<T extends NumberType>
       permissions.map((x) => x.castToCollectionApprovalPermission(dummyAddress)),
       time
     );
+  }
+
+  toBech32Addresses(prefix: string): UserIncomingApprovalPermission<T> {
+    return new UserIncomingApprovalPermission({
+      ...this,
+      fromListId: convertListIdToBech32(this.fromListId, prefix),
+      initiatedByListId: convertListIdToBech32(this.initiatedByListId, prefix)
+    });
   }
 }
 
@@ -472,6 +497,13 @@ export class CollectionPermissions<T extends NumberType> extends BaseNumberTypeC
       canUpdateValidBadgeIds: [],
       canUpdateBadgeMetadata: [],
       canUpdateCollectionApprovals: []
+    });
+  }
+
+  toBech32Addresses(prefix: string): CollectionPermissions<T> {
+    return new CollectionPermissions({
+      ...this,
+      canUpdateCollectionApprovals: this.canUpdateCollectionApprovals.map((x) => x.toBech32Addresses(prefix))
     });
   }
 }
@@ -1022,6 +1054,15 @@ export class CollectionApprovalPermission<T extends NumberType>
     const castedPermissions = permissions.map((x) => x.castToUniversalPermission());
     const permissionDetails = GetFirstMatchOnly(castedPermissions);
     return checkNotForbiddenForAllOverlaps(permissionDetails, detailsToCheck, time ? BigInt(time) : undefined, true);
+  }
+
+  toBech32Addresses(prefix: string): CollectionApprovalPermission<T> {
+    return new CollectionApprovalPermission({
+      ...this,
+      fromListId: convertListIdToBech32(this.fromListId, prefix),
+      toListId: convertListIdToBech32(this.toListId, prefix),
+      initiatedByListId: convertListIdToBech32(this.initiatedByListId, prefix)
+    });
   }
 }
 

@@ -18,6 +18,9 @@ import type { iMsgUpdateCollection } from './interfaces.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
 import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
 import { UintRange, UintRangeArray } from '@/core/uintRanges.js';
+import { getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
+import { CollectionId } from '@/interfaces/index.js';
+import { normalizeMessagesIfNecessary } from '../../base.js';
 
 /**
  * MsgUpdateCollection is a transaction that can be used to update any collection. It is only executable by the manager.
@@ -32,7 +35,7 @@ import { UintRange, UintRangeArray } from '@/core/uintRanges.js';
  */
 export class MsgUpdateCollection<T extends NumberType> extends BaseNumberTypeClass<MsgUpdateCollection<T>> implements iMsgUpdateCollection<T> {
   creator: BitBadgesAddress;
-  collectionId: T;
+  collectionId: CollectionId;
   badgeIdsToAdd?: UintRangeArray<T>;
   updateCollectionPermissions?: boolean;
   collectionPermissions?: CollectionPermissions<T>;
@@ -52,6 +55,7 @@ export class MsgUpdateCollection<T extends NumberType> extends BaseNumberTypeCla
   standardsTimeline?: StandardsTimeline<T>[];
   updateIsArchivedTimeline?: boolean;
   isArchivedTimeline?: IsArchivedTimeline<T>[];
+  creatorOverride: BitBadgesAddress;
 
   constructor(msg: iMsgUpdateCollection<T>) {
     super();
@@ -80,6 +84,7 @@ export class MsgUpdateCollection<T extends NumberType> extends BaseNumberTypeCla
     this.standardsTimeline = msg.standardsTimeline ? msg.standardsTimeline.map((x) => new StandardsTimeline(x)) : undefined;
     this.updateIsArchivedTimeline = msg.updateIsArchivedTimeline;
     this.isArchivedTimeline = msg.isArchivedTimeline ? msg.isArchivedTimeline.map((x) => new IsArchivedTimeline(x)) : undefined;
+    this.creatorOverride = msg.creatorOverride;
   }
 
   getNumberFieldNames(): string[] {
@@ -113,7 +118,7 @@ export class MsgUpdateCollection<T extends NumberType> extends BaseNumberTypeCla
   static fromProto<U extends NumberType>(protoMsg: badges.MsgUpdateCollection, convertFunction: (item: NumberType) => U): MsgUpdateCollection<U> {
     return new MsgUpdateCollection({
       creator: protoMsg.creator,
-      collectionId: convertFunction(protoMsg.collectionId),
+      collectionId: protoMsg.collectionId,
       badgeIdsToAdd: protoMsg.badgeIdsToAdd?.map((x) => UintRange.fromProto(x, convertFunction)),
       updateCollectionPermissions: protoMsg.updateCollectionPermissions,
       collectionPermissions: protoMsg.collectionPermissions
@@ -136,7 +141,29 @@ export class MsgUpdateCollection<T extends NumberType> extends BaseNumberTypeCla
       updateStandardsTimeline: protoMsg.updateStandardsTimeline,
       standardsTimeline: protoMsg.standardsTimeline?.map((x) => StandardsTimeline.fromProto(x, convertFunction)),
       updateIsArchivedTimeline: protoMsg.updateIsArchivedTimeline,
-      isArchivedTimeline: protoMsg.isArchivedTimeline?.map((x) => IsArchivedTimeline.fromProto(x, convertFunction))
+      isArchivedTimeline: protoMsg.isArchivedTimeline?.map((x) => IsArchivedTimeline.fromProto(x, convertFunction)),
+      creatorOverride: protoMsg.creatorOverride
     });
+  }
+
+  toBech32Addresses(prefix: string): MsgUpdateCollection<T> {
+    return new MsgUpdateCollection<T>({
+      ...this,
+      creator: getConvertFunctionFromPrefix(prefix)(this.creator),
+      collectionId: this.collectionId,
+      collectionPermissions: this.collectionPermissions?.toBech32Addresses(prefix),
+      managerTimeline: this.managerTimeline?.map((x) => x.toBech32Addresses(prefix)),
+      collectionApprovals: this.collectionApprovals?.map((x) => x.toBech32Addresses(prefix)),
+      creatorOverride: getConvertFunctionFromPrefix(prefix)(this.creatorOverride)
+    });
+  }
+
+  toCosmWasmPayloadString(): string {
+    return `{"updateCollectionMsg":${normalizeMessagesIfNecessary([
+      {
+        message: this.toProto(),
+        path: this.toProto().getType().typeName
+      }
+    ])[0].message.toJsonString({ emitDefaultValues: true })} }`;
   }
 }

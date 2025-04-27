@@ -1,14 +1,14 @@
 import {
+  BitBadgesAddress,
   ClaimIntegrationPluginType,
   ClaimReward,
-  BitBadgesAddress,
-  IntegrationPluginDetails,
-  iChallengeTrackerIdDetails,
-  iClaimDetails,
-  iSatisfyMethod,
   CreateClaimRequest,
+  IntegrationPluginDetails,
+  UNIXMilliTimestamp,
+  iChallengeTrackerIdDetails,
   iClaimCachePolicy,
-  UNIXMilliTimestamp
+  iClaimDetails,
+  iSatisfyMethod
 } from '@/api-indexer/docs/interfaces.js';
 import { Metadata } from '@/api-indexer/metadata/metadata.js';
 import {
@@ -34,20 +34,21 @@ import type {
   iUserOutgoingApproval
 } from '@/interfaces/badges/approvals.js';
 import type { CollectionId, iAddressList, iCoinTransfer, iMerkleChallenge } from '@/interfaces/badges/core.js';
+import * as badges from '@/proto/badges/index.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 import type MerkleTree from 'merkletreejs';
 import type { Options as MerkleTreeJsOptions } from 'merkletreejs/dist/MerkleTree';
 import { BigIntify, Stringify, type NumberType } from '../common/string-numbers.js';
-import { AddressList } from './addressLists.js';
+import { AddressList, convertListIdToBech32 } from './addressLists.js';
 import { Balance, BalanceArray } from './balances.js';
-import { CoinTransfer, MerkleChallenge, MustOwnBadges, ZkProof } from './misc.js';
+import { CoinTransfer, MerkleChallenge } from './misc.js';
 import type { UniversalPermission, UniversalPermissionDetails } from './overlaps.js';
-import * as badges from '@/proto/badges/index.js';
 import { GetListIdWithOptions, GetListWithOptions, GetUintRangesWithOptions, getOverlapsAndNonOverlaps } from './overlaps.js';
 import type { CollectionApprovalPermissionWithDetails } from './permissions.js';
 import { CollectionApprovalPermission } from './permissions.js';
 import { UintRange, UintRangeArray } from './uintRanges.js';
 import { AllDefaultValues, getPotentialUpdatesForTimelineValues, getUpdateCombinationsToCheck } from './validate-utils.js';
+import { convertToBitBadgesAddress, getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
 
 const { getReservedAddressList, getReservedTrackerList } = AddressList;
 
@@ -265,6 +266,15 @@ export class UserOutgoingApproval<T extends NumberType> extends BaseNumberTypeCl
       approvalCriteria: item.approvalCriteria ? OutgoingApprovalCriteria.fromProto(item.approvalCriteria, convertFunction) : undefined
     });
   }
+
+  toBech32Addresses(prefix: string): UserOutgoingApproval<T> {
+    return new UserOutgoingApproval({
+      ...this,
+      toListId: convertListIdToBech32(this.toListId, prefix),
+      initiatedByListId: convertListIdToBech32(this.initiatedByListId, prefix),
+      approvalCriteria: this.approvalCriteria?.toBech32Addresses(prefix)
+    });
+  }
 }
 
 /**
@@ -276,19 +286,16 @@ export class OutgoingApprovalCriteria<T extends NumberType>
   extends BaseNumberTypeClass<OutgoingApprovalCriteria<T>>
   implements iOutgoingApprovalCriteria<T>
 {
-  mustOwnBadges?: MustOwnBadges<T>[];
   merkleChallenges?: MerkleChallenge<T>[];
   predeterminedBalances?: PredeterminedBalances<T>;
   approvalAmounts?: ApprovalAmounts<T>;
   maxNumTransfers?: MaxNumTransfers<T>;
   requireToEqualsInitiatedBy?: boolean;
   requireToDoesNotEqualInitiatedBy?: boolean;
-  zkProofs?: ZkProof[];
   coinTransfers?: CoinTransfer<T>[] | undefined;
 
   constructor(msg: iOutgoingApprovalCriteria<T>) {
     super();
-    this.mustOwnBadges = msg.mustOwnBadges?.map((x) => new MustOwnBadges(x));
     this.merkleChallenges = msg.merkleChallenges?.map((x) => new MerkleChallenge(x));
     this.predeterminedBalances = msg.predeterminedBalances ? new PredeterminedBalances(msg.predeterminedBalances) : undefined;
     this.approvalAmounts = msg.approvalAmounts ? new ApprovalAmounts(msg.approvalAmounts) : undefined;
@@ -296,20 +303,17 @@ export class OutgoingApprovalCriteria<T extends NumberType>
     this.requireToEqualsInitiatedBy = msg.requireToEqualsInitiatedBy;
     this.requireToDoesNotEqualInitiatedBy = msg.requireToDoesNotEqualInitiatedBy;
     this.coinTransfers = msg.coinTransfers ? msg.coinTransfers.map((x) => new CoinTransfer(x)) : undefined;
-    this.zkProofs = msg.zkProofs ? msg.zkProofs.map((x) => new ZkProof(x)) : undefined;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): OutgoingApprovalCriteria<U> {
     return new OutgoingApprovalCriteria(
       deepCopyPrimitives({
-        mustOwnBadges: this.mustOwnBadges?.map((x) => x.convert(convertFunction)),
         merkleChallenges: this.merkleChallenges?.map((x) => x.convert(convertFunction)),
         predeterminedBalances: this.predeterminedBalances?.convert(convertFunction),
         approvalAmounts: this.approvalAmounts?.convert(convertFunction),
         maxNumTransfers: this.maxNumTransfers?.convert(convertFunction),
         requireToEqualsInitiatedBy: this.requireToEqualsInitiatedBy,
         requireToDoesNotEqualInitiatedBy: this.requireToDoesNotEqualInitiatedBy,
-        zkProofs: this.zkProofs?.map((x) => x),
         coinTransfers: this.coinTransfers?.map((x) => x.convert(convertFunction))
       })
     );
@@ -340,14 +344,12 @@ export class OutgoingApprovalCriteria<T extends NumberType>
     convertFunction: (item: NumberType) => U
   ): OutgoingApprovalCriteria<U> {
     return new OutgoingApprovalCriteria<U>({
-      mustOwnBadges: item.mustOwnBadges.map((x) => MustOwnBadges.fromProto(x, convertFunction)),
       merkleChallenges: item.merkleChallenges.map((x) => MerkleChallenge.fromProto(x, convertFunction)),
       predeterminedBalances: item.predeterminedBalances ? PredeterminedBalances.fromProto(item.predeterminedBalances, convertFunction) : undefined,
       approvalAmounts: item.approvalAmounts ? ApprovalAmounts.fromProto(item.approvalAmounts, convertFunction) : undefined,
       maxNumTransfers: item.maxNumTransfers ? MaxNumTransfers.fromProto(item.maxNumTransfers, convertFunction) : undefined,
       requireToEqualsInitiatedBy: item.requireToEqualsInitiatedBy,
       requireToDoesNotEqualInitiatedBy: item.requireToDoesNotEqualInitiatedBy,
-      zkProofs: item.zkProofs,
       coinTransfers: item.coinTransfers ? item.coinTransfers.map((x) => CoinTransfer.fromProto(x, convertFunction)) : undefined
     });
   }
@@ -358,16 +360,20 @@ export class OutgoingApprovalCriteria<T extends NumberType>
       maxNumTransfers: this.maxNumTransfers,
       requireToEqualsInitiatedBy: this.requireToEqualsInitiatedBy,
       requireToDoesNotEqualInitiatedBy: this.requireToDoesNotEqualInitiatedBy,
-      predeterminedBalances: this.predeterminedBalances,
-      mustOwnBadges: this.mustOwnBadges,
       merkleChallenges: this.merkleChallenges,
-      zkProofs: this.zkProofs,
       coinTransfers: this.coinTransfers,
 
       requireFromEqualsInitiatedBy: false,
       requireFromDoesNotEqualInitiatedBy: false,
       overridesFromOutgoingApprovals: false,
       overridesToIncomingApprovals: false
+    });
+  }
+
+  toBech32Addresses(prefix: string): OutgoingApprovalCriteria<T> {
+    return new OutgoingApprovalCriteria({
+      ...this,
+      coinTransfers: this.coinTransfers?.map((x) => x.toBech32Addresses(prefix))
     });
   }
 }
@@ -829,6 +835,15 @@ export class UserIncomingApproval<T extends NumberType> extends BaseNumberTypeCl
       approvalCriteria: this.approvalCriteria?.castToCollectionApprovalCriteria()
     });
   }
+
+  toBech32Addresses(prefix: string): UserIncomingApproval<T> {
+    return new UserIncomingApproval({
+      ...this,
+      fromListId: convertListIdToBech32(this.fromListId, prefix),
+      initiatedByListId: convertListIdToBech32(this.initiatedByListId, prefix),
+      approvalCriteria: this.approvalCriteria?.toBech32Addresses(prefix)
+    });
+  }
 }
 
 /**
@@ -840,40 +855,34 @@ export class IncomingApprovalCriteria<T extends NumberType>
   extends BaseNumberTypeClass<IncomingApprovalCriteria<T>>
   implements iIncomingApprovalCriteria<T>
 {
-  mustOwnBadges?: MustOwnBadges<T>[];
   merkleChallenges?: MerkleChallenge<T>[];
   predeterminedBalances?: PredeterminedBalances<T>;
   approvalAmounts?: ApprovalAmounts<T>;
   maxNumTransfers?: MaxNumTransfers<T>;
   requireFromEqualsInitiatedBy?: boolean;
   requireFromDoesNotEqualInitiatedBy?: boolean;
-  zkProofs?: ZkProof[];
   coinTransfers?: CoinTransfer<T>[] | undefined;
 
   constructor(msg: iIncomingApprovalCriteria<T>) {
     super();
-    this.mustOwnBadges = msg.mustOwnBadges?.map((x) => new MustOwnBadges(x));
     this.merkleChallenges = msg.merkleChallenges?.map((x) => new MerkleChallenge(x));
     this.predeterminedBalances = msg.predeterminedBalances ? new PredeterminedBalances(msg.predeterminedBalances) : undefined;
     this.approvalAmounts = msg.approvalAmounts ? new ApprovalAmounts(msg.approvalAmounts) : undefined;
     this.maxNumTransfers = msg.maxNumTransfers ? new MaxNumTransfers(msg.maxNumTransfers) : undefined;
     this.requireFromEqualsInitiatedBy = msg.requireFromEqualsInitiatedBy;
     this.requireFromDoesNotEqualInitiatedBy = msg.requireFromDoesNotEqualInitiatedBy;
-    this.zkProofs = msg.zkProofs ? msg.zkProofs.map((x) => new ZkProof(x)) : undefined;
     this.coinTransfers = msg.coinTransfers ? msg.coinTransfers.map((x) => new CoinTransfer(x)) : undefined;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): IncomingApprovalCriteria<U> {
     return new IncomingApprovalCriteria(
       deepCopyPrimitives({
-        mustOwnBadges: this.mustOwnBadges?.map((x) => x.convert(convertFunction)),
         merkleChallenge: this.merkleChallenges?.map((x) => x.convert(convertFunction)),
         predeterminedBalances: this.predeterminedBalances ? this.predeterminedBalances.convert(convertFunction) : undefined,
         approvalAmounts: this.approvalAmounts ? this.approvalAmounts.convert(convertFunction) : undefined,
         maxNumTransfers: this.maxNumTransfers ? this.maxNumTransfers.convert(convertFunction) : undefined,
         requireFromEqualsInitiatedBy: this.requireFromEqualsInitiatedBy,
         requireFromDoesNotEqualInitiatedBy: this.requireFromDoesNotEqualInitiatedBy,
-        zkProofs: this.zkProofs?.map((x) => x),
         coinTransfers: this.coinTransfers?.map((x) => x.convert(convertFunction))
       })
     );
@@ -904,14 +913,13 @@ export class IncomingApprovalCriteria<T extends NumberType>
     convertFunction: (item: NumberType) => U
   ): IncomingApprovalCriteria<U> {
     return new IncomingApprovalCriteria<U>({
-      mustOwnBadges: item.mustOwnBadges.map((x) => MustOwnBadges.fromProto(x, convertFunction)),
       merkleChallenges: item.merkleChallenges.map((x) => MerkleChallenge.fromProto(x, convertFunction)),
       predeterminedBalances: item.predeterminedBalances ? PredeterminedBalances.fromProto(item.predeterminedBalances, convertFunction) : undefined,
       approvalAmounts: item.approvalAmounts ? ApprovalAmounts.fromProto(item.approvalAmounts, convertFunction) : undefined,
       maxNumTransfers: item.maxNumTransfers ? MaxNumTransfers.fromProto(item.maxNumTransfers, convertFunction) : undefined,
       requireFromEqualsInitiatedBy: item.requireFromEqualsInitiatedBy,
       requireFromDoesNotEqualInitiatedBy: item.requireFromDoesNotEqualInitiatedBy,
-      zkProofs: item.zkProofs?.map((x) => ZkProof.fromProto(x)),
+
       coinTransfers: item.coinTransfers ? item.coinTransfers.map((x) => CoinTransfer.fromProto(x, convertFunction)) : undefined
     });
   }
@@ -923,8 +931,6 @@ export class IncomingApprovalCriteria<T extends NumberType>
       requireFromEqualsInitiatedBy: this.requireFromEqualsInitiatedBy,
       requireFromDoesNotEqualInitiatedBy: this.requireFromDoesNotEqualInitiatedBy,
       predeterminedBalances: this.predeterminedBalances,
-      mustOwnBadges: this.mustOwnBadges,
-      zkProofs: this.zkProofs,
       merkleChallenges: this.merkleChallenges,
       coinTransfers: this.coinTransfers,
 
@@ -932,6 +938,13 @@ export class IncomingApprovalCriteria<T extends NumberType>
       requireToDoesNotEqualInitiatedBy: false,
       overridesFromOutgoingApprovals: false,
       overridesToIncomingApprovals: false
+    });
+  }
+
+  toBech32Addresses(prefix: string): IncomingApprovalCriteria<T> {
+    return new IncomingApprovalCriteria({
+      ...this,
+      coinTransfers: this.coinTransfers?.map((x) => x.toBech32Addresses(prefix))
     });
   }
 }
@@ -1041,6 +1054,16 @@ export class CollectionApproval<T extends NumberType> extends BaseNumberTypeClas
       approvalCriteria: this.approvalCriteria
     });
   }
+
+  toBech32Addresses(prefix: string): CollectionApproval<T> {
+    return new CollectionApproval({
+      ...this,
+      fromListId: convertListIdToBech32(this.fromListId, prefix),
+      toListId: convertListIdToBech32(this.toListId, prefix),
+      initiatedByListId: convertListIdToBech32(this.initiatedByListId, prefix),
+      approvalCriteria: this.approvalCriteria?.toBech32Addresses(prefix)
+    });
+  }
 }
 
 /**
@@ -1050,7 +1073,6 @@ export class CollectionApproval<T extends NumberType> extends BaseNumberTypeClas
  * @category Approvals / Transferability
  */
 export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<ApprovalCriteria<T>> implements iApprovalCriteria<T> {
-  mustOwnBadges?: MustOwnBadges<T>[];
   merkleChallenges?: MerkleChallenge<T>[];
   predeterminedBalances?: PredeterminedBalances<T>;
   approvalAmounts?: ApprovalAmounts<T>;
@@ -1061,12 +1083,10 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
   requireFromDoesNotEqualInitiatedBy?: boolean;
   overridesFromOutgoingApprovals?: boolean;
   overridesToIncomingApprovals?: boolean;
-  zkProofs?: ZkProof[];
-  coinTransfers?: iCoinTransfer<T>[] | undefined;
+  coinTransfers?: CoinTransfer<T>[] | undefined;
 
   constructor(msg: iApprovalCriteria<T>) {
     super();
-    this.mustOwnBadges = msg.mustOwnBadges?.map((x) => new MustOwnBadges(x));
     this.merkleChallenges = msg.merkleChallenges?.map((x) => new MerkleChallenge(x));
     this.predeterminedBalances = msg.predeterminedBalances ? new PredeterminedBalances(msg.predeterminedBalances) : undefined;
     this.approvalAmounts = msg.approvalAmounts ? new ApprovalAmounts(msg.approvalAmounts) : undefined;
@@ -1077,7 +1097,6 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
     this.requireFromDoesNotEqualInitiatedBy = msg.requireFromDoesNotEqualInitiatedBy;
     this.overridesFromOutgoingApprovals = msg.overridesFromOutgoingApprovals;
     this.overridesToIncomingApprovals = msg.overridesToIncomingApprovals;
-    this.zkProofs = msg.zkProofs ? msg.zkProofs.map((x) => new ZkProof(x)) : undefined;
     this.coinTransfers = msg.coinTransfers ? msg.coinTransfers.map((x) => new CoinTransfer(x)) : undefined;
   }
 
@@ -1107,12 +1126,10 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
 
   static fromProto<U extends NumberType>(item: badges.ApprovalCriteria, convertFunction: (item: NumberType) => U): ApprovalCriteria<U> {
     return new ApprovalCriteria<U>({
-      mustOwnBadges: item.mustOwnBadges.map((x) => MustOwnBadges.fromProto(x, convertFunction)),
       merkleChallenges: item.merkleChallenges.map((x) => MerkleChallenge.fromProto(x, convertFunction)),
       predeterminedBalances: item.predeterminedBalances ? PredeterminedBalances.fromProto(item.predeterminedBalances, convertFunction) : undefined,
       approvalAmounts: item.approvalAmounts ? ApprovalAmounts.fromProto(item.approvalAmounts, convertFunction) : undefined,
       maxNumTransfers: item.maxNumTransfers ? MaxNumTransfers.fromProto(item.maxNumTransfers, convertFunction) : undefined,
-      zkProofs: item.zkProofs.map((x) => ZkProof.fromProto(x)),
       coinTransfers: item.coinTransfers ? item.coinTransfers.map((x) => CoinTransfer.fromProto(x, convertFunction)) : undefined,
       requireToEqualsInitiatedBy: item.requireToEqualsInitiatedBy,
       requireFromEqualsInitiatedBy: item.requireFromEqualsInitiatedBy,
@@ -1120,6 +1137,13 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
       requireFromDoesNotEqualInitiatedBy: item.requireFromDoesNotEqualInitiatedBy,
       overridesFromOutgoingApprovals: item.overridesFromOutgoingApprovals,
       overridesToIncomingApprovals: item.overridesToIncomingApprovals
+    });
+  }
+
+  toBech32Addresses(prefix: string): ApprovalCriteria<T> {
+    return new ApprovalCriteria({
+      ...this,
+      coinTransfers: this.coinTransfers?.map((x) => x.toBech32Addresses(prefix))
     });
   }
 }
@@ -1450,8 +1474,6 @@ export class IncomingApprovalCriteriaWithDetails<T extends NumberType>
       approvalAmounts: this.approvalAmounts,
       maxNumTransfers: this.maxNumTransfers,
       predeterminedBalances: this.predeterminedBalances,
-      mustOwnBadges: this.mustOwnBadges,
-      zkProofs: this.zkProofs,
       merkleChallenges: this.merkleChallenges,
       coinTransfers: this.coinTransfers,
 
@@ -1497,8 +1519,6 @@ export class OutgoingApprovalCriteriaWithDetails<T extends NumberType>
       approvalAmounts: this.approvalAmounts,
       maxNumTransfers: this.maxNumTransfers,
       predeterminedBalances: this.predeterminedBalances,
-      mustOwnBadges: this.mustOwnBadges,
-      zkProofs: this.zkProofs,
       merkleChallenges: this.merkleChallenges,
       coinTransfers: this.coinTransfers,
 

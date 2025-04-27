@@ -2,7 +2,7 @@ import { CustomTypeClass } from '@/common/base.js';
 import type { iAddressList } from '@/interfaces/badges/core.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 import { AddressList as ProtoAddressList } from '@/proto/badges/address_lists_pb.js';
-import { convertToBitBadgesAddress, isAddressValid } from '../address-converter/converter.js';
+import { convertToBitBadgesAddress, getConvertFunctionFromPrefix, isAddressValid } from '../address-converter/converter.js';
 
 /**
  * AddressLists represent a list of addresses, identified by a unique ID.
@@ -24,7 +24,6 @@ export class AddressList extends CustomTypeClass<AddressList> implements iAddres
   uri: string;
   customData: string;
   createdBy?: string;
-  aliasAddress?: string;
 
   constructor(addressList: iAddressList) {
     super();
@@ -34,7 +33,6 @@ export class AddressList extends CustomTypeClass<AddressList> implements iAddres
     this.uri = addressList.uri;
     this.customData = addressList.customData;
     this.createdBy = addressList.createdBy;
-    this.aliasAddress = addressList.aliasAddress;
   }
 
   /**
@@ -410,3 +408,49 @@ export const getOverlapDetails = AddressList.getOverlapDetails;
  *
  */
 export const getReservedTrackerList = AddressList.getReservedTrackerList;
+
+/**
+ * Convert list IDs which may have shorthands to their full bech32 addresses.
+ *
+ * @category Address Utils
+ */
+export function convertListIdToBech32(listId: string, prefix: string) {
+  const convertFunction = getConvertFunctionFromPrefix(prefix);
+
+  let startStr = '';
+  let endStr = '';
+
+  // 1) Strip ! and !(...)
+  if (listId.startsWith('!')) {
+    startStr += '!';
+    listId = listId.slice(1);
+  }
+
+  if (listId.startsWith('(') && listId.endsWith(')')) {
+    startStr += '(';
+    endStr += ')';
+    listId = listId.slice(1, -1);
+  }
+
+  // 2) Handle AllWithout and AllWith
+  if (listId.startsWith('AllWithout')) {
+    listId = listId.slice(10);
+    startStr += 'AllWithout';
+  }
+
+  if (listId.startsWith('AllWith')) {
+    listId = listId.slice(7);
+    startStr += 'AllWith';
+  }
+
+  const addresses = listId.split(':');
+  const bech32Addresses = addresses.map((address) => convertFunction(address));
+  const allAreValid = bech32Addresses.every((address) => isAddressValid(address));
+
+  if (!allAreValid) {
+    // No need to convert
+    return listId;
+  }
+
+  return `${startStr}${bech32Addresses.join(':')}${endStr}`;
+}

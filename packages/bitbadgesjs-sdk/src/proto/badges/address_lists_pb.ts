@@ -9,10 +9,8 @@ import { Message, proto3 } from "@bufbuild/protobuf";
 /**
  *
  * An AddressList is a list of addresses that are referenced by an ID.
- * The list may include only the specified addresses, or it may include all addresses but
- * the specified addresses (depending on if whitelist is true (whitelist) or false (blacklist)).
- *
- * AddressLists are used for defining approvals, as well as being a simplified badge interface.
+ * AddressLists are used in defining approvals ia a reusbale identifier. 
+ * Note: We also support a reserved ID system by string ID; "Mint", "!Mint" 
  *
  * @generated from message badges.AddressList
  */
@@ -59,13 +57,6 @@ export class AddressList extends Message<AddressList> {
    */
   createdBy = "";
 
-  /**
-   * The alias BitBadges address for the list.
-   *
-   * @generated from field: string aliasAddress = 7;
-   */
-  aliasAddress = "";
-
   constructor(data?: PartialMessage<AddressList>) {
     super();
     proto3.util.initPartial(data, this);
@@ -80,7 +71,6 @@ export class AddressList extends Message<AddressList> {
     { no: 4, name: "uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 5, name: "customData", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 6, name: "createdBy", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 7, name: "aliasAddress", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AddressList {

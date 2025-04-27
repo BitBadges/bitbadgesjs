@@ -1,13 +1,19 @@
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions, deepCopyPrimitives, getConverterFunction } from '@/common/base.js';
+import {
+  BaseNumberTypeClass,
+  convertClassPropertiesAndMaintainNumberTypes,
+  ConvertOptions,
+  deepCopyPrimitives,
+  getConverterFunction
+} from '@/common/base.js';
 import type { iBalance, iTransfer } from '@/interfaces/badges/core.js';
 import * as badges from '@/proto/badges/transfers_pb.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
-import { convertToBitBadgesAddress } from '../address-converter/converter.js';
+import { convertToBitBadgesAddress, getConvertFunctionFromPrefix } from '../address-converter/converter.js';
 import { GO_MAX_UINT_64, safeAddKeepLeft, safeMultiplyKeepLeft } from '../common/math.js';
 import type { NumberType } from '../common/string-numbers.js';
 import { BigIntify, Stringify } from '../common/string-numbers.js';
 import { Balance, BalanceArray, cleanBalances } from './balances.js';
-import { ApprovalIdentifierDetails, MerkleProof, ZkProofSolution } from './misc.js';
+import { ApprovalIdentifierDetails, MerkleProof } from './misc.js';
 import { UintRangeArray } from './uintRanges.js';
 import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
 
@@ -27,7 +33,6 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
   onlyCheckPrioritizedCollectionApprovals?: boolean | undefined;
   onlyCheckPrioritizedIncomingApprovals?: boolean | undefined;
   onlyCheckPrioritizedOutgoingApprovals?: boolean | undefined;
-  zkProofSolutions?: ZkProofSolution[] | undefined;
 
   constructor(transfer: iTransfer<T>) {
     super();
@@ -46,7 +51,6 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
 
     this.onlyCheckPrioritizedIncomingApprovals = transfer.onlyCheckPrioritizedIncomingApprovals;
     this.onlyCheckPrioritizedOutgoingApprovals = transfer.onlyCheckPrioritizedOutgoingApprovals;
-    this.zkProofSolutions = transfer.zkProofSolutions ? transfer.zkProofSolutions.map((b) => new ZkProofSolution(b)) : undefined;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): Transfer<U> {
@@ -63,9 +67,7 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
           ? this.onlyCheckPrioritizedCollectionApprovals
           : undefined,
         onlyCheckPrioritizedIncomingApprovals: this.onlyCheckPrioritizedIncomingApprovals ? this.onlyCheckPrioritizedIncomingApprovals : undefined,
-        onlyCheckPrioritizedOutgoingApprovals: this.onlyCheckPrioritizedOutgoingApprovals ? this.onlyCheckPrioritizedOutgoingApprovals : undefined,
-
-        zkProofSolutions: this.zkProofSolutions ? this.zkProofSolutions : undefined
+        onlyCheckPrioritizedOutgoingApprovals: this.onlyCheckPrioritizedOutgoingApprovals ? this.onlyCheckPrioritizedOutgoingApprovals : undefined
       })
     );
   }
@@ -102,10 +104,19 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
       memo: item.memo ? item.memo : undefined,
       prioritizedApprovals: item.prioritizedApprovals ? item.prioritizedApprovals.map((b) => ApprovalIdentifierDetails.fromProto(b)) : undefined,
 
-      zkProofSolutions: item.zkProofSolutions ? item.zkProofSolutions.map((b) => ZkProofSolution.fromProto(b)) : undefined,
       onlyCheckPrioritizedCollectionApprovals: item.onlyCheckPrioritizedCollectionApprovals,
       onlyCheckPrioritizedIncomingApprovals: item.onlyCheckPrioritizedIncomingApprovals,
       onlyCheckPrioritizedOutgoingApprovals: item.onlyCheckPrioritizedOutgoingApprovals
+    });
+  }
+
+  toBech32Addresses(prefix: string): Transfer<T> {
+    return new Transfer({
+      ...this,
+      from: getConvertFunctionFromPrefix(prefix)(this.from),
+      toAddresses: this.toAddresses.map((x) => getConvertFunctionFromPrefix(prefix)(x)),
+      precalculateBalancesFromApproval: this.precalculateBalancesFromApproval?.toBech32Addresses(prefix),
+      prioritizedApprovals: this.prioritizedApprovals?.map((x) => x.toBech32Addresses(prefix))
     });
   }
 }
@@ -188,7 +199,6 @@ export class TransferWithIncrements<T extends NumberType>
   onlyCheckPrioritizedCollectionApprovals?: boolean | undefined;
   onlyCheckPrioritizedIncomingApprovals?: boolean | undefined;
   onlyCheckPrioritizedOutgoingApprovals?: boolean | undefined;
-  zkProofSolutions?: ZkProofSolution[] | undefined;
 
   constructor(data: iTransferWithIncrements<T>) {
     super();
@@ -207,7 +217,6 @@ export class TransferWithIncrements<T extends NumberType>
     this.onlyCheckPrioritizedCollectionApprovals = data.onlyCheckPrioritizedCollectionApprovals;
     this.onlyCheckPrioritizedCollectionApprovals = data.onlyCheckPrioritizedCollectionApprovals;
     this.onlyCheckPrioritizedCollectionApprovals = data.onlyCheckPrioritizedCollectionApprovals;
-    this.zkProofSolutions = data.zkProofSolutions ? data.zkProofSolutions.map((b) => new ZkProofSolution(b)) : undefined;
   }
 
   getNumberFieldNames(): string[] {

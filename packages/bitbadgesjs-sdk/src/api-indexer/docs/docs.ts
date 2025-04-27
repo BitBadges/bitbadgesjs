@@ -130,7 +130,6 @@ export class CollectionDoc<T extends NumberType>
   createdBlock: T;
   createdTimestamp: UNIXMilliTimestamp<T>;
   updateHistory: UpdateHistory<T>[];
-  aliasAddress: BitBadgesAddress;
   validBadgeIds: UintRangeArray<T>;
 
   constructor(data: iCollectionDoc<T>) {
@@ -157,7 +156,6 @@ export class CollectionDoc<T extends NumberType>
     this.createdBlock = data.createdBlock;
     this.createdTimestamp = data.createdTimestamp;
     this.updateHistory = data.updateHistory.map((updateHistory) => new UpdateHistory(updateHistory));
-    this.aliasAddress = data.aliasAddress;
 
     this.validBadgeIds = UintRangeArray.From(data.validBadgeIds);
   }
@@ -262,6 +260,7 @@ export class AccountDoc<T extends NumberType> extends BaseNumberTypeClass<Accoun
   ethAddress: string;
   solAddress: string;
   btcAddress: string;
+  thorAddress: string;
   sequence?: T;
   balance?: CosmosCoin<T>;
 
@@ -276,6 +275,7 @@ export class AccountDoc<T extends NumberType> extends BaseNumberTypeClass<Accoun
     this.ethAddress = data.ethAddress;
     this.solAddress = data.solAddress;
     this.btcAddress = data.btcAddress;
+    this.thorAddress = data.thorAddress;
     this.sequence = data.sequence;
     this.balance = data.balance ? new CosmosCoin(data.balance) : undefined;
   }
@@ -721,7 +721,6 @@ export class AddressListDoc<T extends NumberType> extends AddressList implements
   whitelist: boolean;
   uri: string;
   customData: string;
-  aliasAddress?: string | undefined;
 
   constructor(data: iAddressListDoc<T>) {
     super(data);
@@ -739,7 +738,6 @@ export class AddressListDoc<T extends NumberType> extends AddressList implements
     this.whitelist = data.whitelist;
     this.uri = data.uri;
     this.customData = data.customData;
-    this.aliasAddress = data.aliasAddress;
   }
 
   getNumberFieldNames(): string[] {
