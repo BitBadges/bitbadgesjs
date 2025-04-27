@@ -42,7 +42,7 @@ export interface iMsgCreateCollection<T extends NumberType> {
   defaultBalances?: iUserBalanceStore<T>;
 
   /** The badges to create. Newly created badges will be sent to the "Mint" address. Must have necessary permissions in future transactions to update. However, no restrictions in this genesis Msg. Only used if collection has "Standard" balance type. */
-  badgeIdsToAdd?: iUintRange<T>[];
+  validBadgeIds?: iUintRange<T>[];
 
   /** The new collection permissions. Must have the necessary permissions in future transactions to update. However, no restrictions in this genesis Msg. */
   collectionPermissions?: iCollectionPermissions<T>;
@@ -127,6 +127,8 @@ export interface iMsgUniversalUpdateCollection<T extends NumberType> extends iMs
   updateStandardsTimeline?: boolean;
   /** Whether or not to update the is archived timeline. */
   updateIsArchivedTimeline?: boolean;
+  /** Whether or not to update the valid badge IDs. */
+  updateValidBadgeIds?: boolean;
 
   /** Creator override. Internal only. Only used for CosmWasm purposes. */
   creatorOverride: BitBadgesAddress;
@@ -161,6 +163,10 @@ export interface iMsgUpdateUserApprovals<T extends NumberType> {
   updateAutoApproveSelfInitiatedIncomingTransfers?: boolean;
   /** The new auto approve self initiated incoming transfers. Must have the necessary permissions to update. */
   autoApproveSelfInitiatedIncomingTransfers?: boolean;
+  /** Whether or not to update the auto approve all incoming transfers. */
+  updateAutoApproveAllIncomingTransfers?: boolean;
+  /** The new auto approve all incoming transfers. Must have the necessary permissions to update. */
+  autoApproveAllIncomingTransfers?: boolean;
   /** Whether or not to update the user permissions. */
   updateUserPermissions?: boolean;
   /** The new user permissions. Must have the necessary permissions to update. */

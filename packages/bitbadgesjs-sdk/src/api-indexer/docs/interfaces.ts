@@ -269,9 +269,9 @@ export interface iTransferActivityDoc<T extends NumberType> extends iActivityDoc
   /** The memo of the transfer. */
   memo?: string;
   /** Which approval to use to precalculate the balances? */
-  precalculateBalancesFromApproval?: iApprovalIdentifierDetails;
+  precalculateBalancesFromApproval?: iApprovalIdentifierDetails<T>;
   /** The prioritized approvals of the transfer. This is used to check certain approvals before others to ensure intended behavior. */
-  prioritizedApprovals?: iApprovalIdentifierDetails[];
+  prioritizedApprovals?: iApprovalIdentifierDetails<T>[];
   /** The user who initiated the transfer transaction. */
   initiatedBy: BitBadgesAddress;
   /** The transaction hash of the activity. */

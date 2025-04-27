@@ -28,6 +28,7 @@ describe('Transfers', () => {
         ],
         toAddresses: [testAddress1, testAddress2], // replace with your address
         incrementBadgeIdsBy: 1n,
+        approvalDurationFromNow: 0n, // assuming this is 1 day in milliseconds in BigInt form
         incrementOwnershipTimesBy: 86400000n // assuming this is 1 day in milliseconds in BigInt form
       }
     ];
@@ -56,7 +57,8 @@ describe('Transfers', () => {
         toAddresses: [],
         toAddressesLength: 100n,
         incrementBadgeIdsBy: 1n,
-        incrementOwnershipTimesBy: 0n // assuming this is 1 day in milliseconds in BigInt form
+        incrementOwnershipTimesBy: 0n,
+        approvalDurationFromNow: 0n // assuming this is 1 day in milliseconds in BigInt form
       }
     ];
 
@@ -64,7 +66,7 @@ describe('Transfers', () => {
     expect(allBadgeIds[0].start == 1n).toBe(true);
     expect(allBadgeIds[0].end == 100n).toBe(true);
 
-    const allBalances = getAllBalancesToBeTransferred(transfersWithIncrements);
+    const allBalances = getAllBalancesToBeTransferred(transfersWithIncrements, 0n);
     expect(allBalances[0].amount == 100n).toBe(true);
     expect(allBalances[0].badgeIds[0].start == 1n).toBe(true);
     expect(allBalances[0].badgeIds[0].end == 100n).toBe(true);
@@ -93,11 +95,12 @@ describe('Transfers', () => {
         toAddresses: [], // this will be empty because we're using `toAddressesLength`
         toAddressesLength: 100n,
         incrementBadgeIdsBy: 1n,
-        incrementOwnershipTimesBy: 0n // assuming this is 1 day in milliseconds in BigInt form
+        incrementOwnershipTimesBy: 0n,
+        approvalDurationFromNow: 0n // assuming this is 1 day in milliseconds in BigInt form
       }
     ];
 
-    const balancesAfterTransfers = getBalancesAfterTransfers(startingBalances, transfersWithIncrements);
+    const balancesAfterTransfers = getBalancesAfterTransfers(startingBalances, transfersWithIncrements, 0n);
     expect(balancesAfterTransfers.filterZeroBalances().length == 0).toBe(true);
   });
 
@@ -123,11 +126,12 @@ describe('Transfers', () => {
         toAddresses: [], // this will be empty because we're using `toAddressesLength`
         toAddressesLength: 100n,
         incrementBadgeIdsBy: 1n,
-        incrementOwnershipTimesBy: 0n // assuming this is 1 day in milliseconds in BigInt form
+        incrementOwnershipTimesBy: 0n,
+        approvalDurationFromNow: 0n // assuming this is 1 day in milliseconds in BigInt form
       }
     ];
 
-    const balancesAfterTransfers = getBalancesAfterTransfers(startingBalances, transfersWithIncrements, true);
+    const balancesAfterTransfers = getBalancesAfterTransfers(startingBalances, transfersWithIncrements, 0n, true);
     console.log(JSON.stringify(balancesAfterTransfers));
     expect(balancesAfterTransfers[0].amount == -99n).toBe(true);
   });

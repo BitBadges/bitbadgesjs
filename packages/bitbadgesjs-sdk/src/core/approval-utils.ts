@@ -7,6 +7,33 @@ import { UintRange } from './uintRanges.js';
 const { generateReservedListId, getReservedAddressList } = AddressList;
 
 /**
+ * Appends the default approval (all incoming transfers are approved) to the front of the list.
+ * This will have "all-incoming-transfers" for IDs.
+ *
+ * @category Approvals / Transferability
+ */
+export function appendAllIncomingTransfersApproval(
+  currApprovals: UserIncomingApprovalWithDetails<bigint>[]
+): UserIncomingApprovalWithDetails<bigint>[] {
+  const defaultToAdd = new UserIncomingApprovalWithDetails({
+    fromListId: 'All', //everyone
+    fromList: AddressList.AllAddresses(),
+    initiatedByList: AddressList.AllAddresses(),
+    initiatedByListId: 'All',
+    transferTimes: [UintRange.FullRange()],
+    ownershipTimes: [UintRange.FullRange()],
+    badgeIds: [UintRange.FullRange()],
+    approvalId: 'all-incoming-transfers',
+    version: 0n
+  });
+
+  //append to front
+  currApprovals = [defaultToAdd].concat(currApprovals);
+
+  return currApprovals;
+}
+
+/**
  * Appends the default approval (self-initiated is approved) to the front of the list.
  * This will have "self-initiated-incoming" for IDs.
  *
@@ -29,6 +56,7 @@ export function appendSelfInitiatedIncomingApproval(
     ownershipTimes: [UintRange.FullRange()],
     badgeIds: [UintRange.FullRange()],
     approvalId: 'self-initiated-incoming',
+    version: 0n
   });
 
   //append to front
@@ -60,6 +88,7 @@ export function appendSelfInitiatedOutgoingApproval(
     ownershipTimes: [UintRange.FullRange()],
     badgeIds: [UintRange.FullRange()],
     approvalId: 'self-initiated-outgoing',
+    version: 0n
   });
 
   //append to front
@@ -98,7 +127,8 @@ export function getUnhandledCollectionApprovals(
       approvalId: '__disapproved__',
       transferTimes: [UintRange.FullRange()],
       badgeIds: [UintRange.FullRange()],
-      ownershipTimes: [UintRange.FullRange()]
+      ownershipTimes: [UintRange.FullRange()],
+      version: 0n
     })
   );
 
@@ -135,6 +165,7 @@ export function getUnhandledCollectionApprovals(
         badgeIds: match.badgeIds,
         transferTimes: match.transferTimes,
         ownershipTimes: match.ownershipTimes,
+        version: 0n,
 
         approvalId: match.arbitraryValue.approvalId,
         approvalCriteria: match.arbitraryValue.approvalCriteriaWithDetails

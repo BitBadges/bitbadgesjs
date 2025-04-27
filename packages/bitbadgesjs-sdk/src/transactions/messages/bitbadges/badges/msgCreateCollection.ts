@@ -33,7 +33,7 @@ export class MsgCreateCollection<T extends NumberType> extends BaseNumberTypeCla
   creator: BitBadgesAddress;
   balancesType?: string;
   defaultBalances?: UserBalanceStore<T>;
-  badgeIdsToAdd?: UintRangeArray<T>;
+  validBadgeIds?: UintRangeArray<T>;
   collectionPermissions?: CollectionPermissions<T>;
   managerTimeline?: ManagerTimeline<T>[];
   collectionMetadataTimeline?: CollectionMetadataTimeline<T>[];
@@ -50,7 +50,7 @@ export class MsgCreateCollection<T extends NumberType> extends BaseNumberTypeCla
     this.creator = msg.creator;
     this.balancesType = msg.balancesType;
     this.defaultBalances = msg.defaultBalances ? new UserBalanceStore(msg.defaultBalances) : undefined;
-    this.badgeIdsToAdd = msg.badgeIdsToAdd ? UintRangeArray.From(msg.badgeIdsToAdd) : undefined;
+    this.validBadgeIds = msg.validBadgeIds ? UintRangeArray.From(msg.validBadgeIds) : undefined;
     this.collectionPermissions = msg.collectionPermissions ? new CollectionPermissions(msg.collectionPermissions) : undefined;
     this.managerTimeline = msg.managerTimeline?.map((x) => new ManagerTimeline(x));
     this.collectionMetadataTimeline = msg.collectionMetadataTimeline?.map((x) => new CollectionMetadataTimeline(x));
@@ -92,7 +92,7 @@ export class MsgCreateCollection<T extends NumberType> extends BaseNumberTypeCla
       creator: protoMsg.creator,
       balancesType: protoMsg.balancesType,
       defaultBalances: protoMsg.defaultBalances ? UserBalanceStore.fromProto(protoMsg.defaultBalances, convertFunction) : undefined,
-      badgeIdsToAdd: protoMsg.badgeIdsToAdd?.map((x) => UintRange.fromProto(x, convertFunction)),
+      validBadgeIds: protoMsg.validBadgeIds?.map((x) => UintRange.fromProto(x, convertFunction)),
       collectionPermissions: protoMsg.collectionPermissions
         ? CollectionPermissions.fromProto(protoMsg.collectionPermissions, convertFunction)
         : undefined,

@@ -209,11 +209,18 @@ export class MsgUniversalUpdateCollection extends Message<MsgUniversalUpdateColl
   defaultBalances?: UserBalanceStore;
 
   /**
+   * Indicates if the valid badge IDs should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   *
+   * @generated from field: bool updateValidBadgeIds = 5;
+   */
+  updateValidBadgeIds = false;
+
+  /**
    * New badge IDs to add to this collection
    *
-   * @generated from field: repeated badges.UintRange badgeIdsToAdd = 6;
+   * @generated from field: repeated badges.UintRange validBadgeIds = 6;
    */
-  badgeIdsToAdd: UintRange[] = [];
+  validBadgeIds: UintRange[] = [];
 
   /**
    * Indicates if collection permissions should be updated. If true, we set to value in this Msg. If false, we keep existing value.
@@ -342,7 +349,7 @@ export class MsgUniversalUpdateCollection extends Message<MsgUniversalUpdateColl
   isArchivedTimeline: IsArchivedTimeline[] = [];
 
   /**
-   * Address of the original creator. Used for CosmWASM purposes.
+   * Address of the original creator. Used for CosmWASM purposes. 
    * IMPORTANT: We will override but we must trust the original creator address.
    *
    * @generated from field: string creatorOverride = 27;
@@ -361,7 +368,8 @@ export class MsgUniversalUpdateCollection extends Message<MsgUniversalUpdateColl
     { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "balancesType", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 4, name: "defaultBalances", kind: "message", T: UserBalanceStore },
-    { no: 6, name: "badgeIdsToAdd", kind: "message", T: UintRange, repeated: true },
+    { no: 5, name: "updateValidBadgeIds", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 6, name: "validBadgeIds", kind: "message", T: UintRange, repeated: true },
     { no: 7, name: "updateCollectionPermissions", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 8, name: "collectionPermissions", kind: "message", T: CollectionPermissions },
     { no: 9, name: "updateManagerTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
@@ -462,11 +470,18 @@ export class MsgUpdateCollection extends Message<MsgUpdateCollection> {
   collectionId = "";
 
   /**
+   * Indicates if the valid badge IDs should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   *
+   * @generated from field: bool updateValidBadgeIds = 3;
+   */
+  updateValidBadgeIds = false;
+
+  /**
    * New badge IDs to add to this collection
    *
-   * @generated from field: repeated badges.UintRange badgeIdsToAdd = 6;
+   * @generated from field: repeated badges.UintRange validBadgeIds = 4;
    */
-  badgeIdsToAdd: UintRange[] = [];
+  validBadgeIds: UintRange[] = [];
 
   /**
    * Indicates if collection permissions should be updated. If true, we set to value in this Msg. If false, we keep existing value.
@@ -595,7 +610,7 @@ export class MsgUpdateCollection extends Message<MsgUpdateCollection> {
   isArchivedTimeline: IsArchivedTimeline[] = [];
 
   /**
-   * Address of the original creator. Used for CosmWASM purposes.
+   * Address of the original creator. Used for CosmWASM purposes. 
    * IMPORTANT: We will override but we must trust the original creator address.
    *
    * @generated from field: string creatorOverride = 29;
@@ -612,7 +627,8 @@ export class MsgUpdateCollection extends Message<MsgUpdateCollection> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 6, name: "badgeIdsToAdd", kind: "message", T: UintRange, repeated: true },
+    { no: 3, name: "updateValidBadgeIds", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 4, name: "validBadgeIds", kind: "message", T: UintRange, repeated: true },
     { no: 7, name: "updateCollectionPermissions", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 8, name: "collectionPermissions", kind: "message", T: CollectionPermissions },
     { no: 9, name: "updateManagerTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
@@ -722,9 +738,9 @@ export class MsgCreateCollection extends Message<MsgCreateCollection> {
   /**
    * New badge IDs to add to this collection
    *
-   * @generated from field: repeated badges.UintRange badgeIdsToAdd = 5;
+   * @generated from field: repeated badges.UintRange validBadgeIds = 5;
    */
-  badgeIdsToAdd: UintRange[] = [];
+  validBadgeIds: UintRange[] = [];
 
   /**
    * Collection permissions.
@@ -790,7 +806,7 @@ export class MsgCreateCollection extends Message<MsgCreateCollection> {
   isArchivedTimeline: IsArchivedTimeline[] = [];
 
   /**
-   * Address of the original creator. Used for CosmWASM purposes.
+   * Address of the original creator. Used for CosmWASM purposes. 
    * IMPORTANT: We will override but we must trust the original creator address.
    *
    * @generated from field: string creatorOverride = 15;
@@ -808,7 +824,7 @@ export class MsgCreateCollection extends Message<MsgCreateCollection> {
     { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "balancesType", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 4, name: "defaultBalances", kind: "message", T: UserBalanceStore },
-    { no: 5, name: "badgeIdsToAdd", kind: "message", T: UintRange, repeated: true },
+    { no: 5, name: "validBadgeIds", kind: "message", T: UintRange, repeated: true },
     { no: 6, name: "collectionPermissions", kind: "message", T: CollectionPermissions },
     { no: 7, name: "managerTimeline", kind: "message", T: ManagerTimeline, repeated: true },
     { no: 8, name: "collectionMetadataTimeline", kind: "message", T: CollectionMetadataTimeline, repeated: true },
@@ -900,7 +916,7 @@ export class MsgCreateAddressLists extends Message<MsgCreateAddressLists> {
   addressLists: AddressList[] = [];
 
   /**
-   * Address of the original creator. Used for CosmWASM purposes.
+   * Address of the original creator. Used for CosmWASM purposes. 
    * IMPORTANT: We will override but we must trust the original creator address.
    *
    * @generated from field: string creatorOverride = 3;
@@ -998,7 +1014,7 @@ export class MsgTransferBadges extends Message<MsgTransferBadges> {
   transfers: Transfer[] = [];
 
   /**
-   * Address of the original creator. Used for CosmWASM purposes.
+   * Address of the original creator. Used for CosmWASM purposes. 
    * IMPORTANT: We will override but we must trust the original creator address.
    *
    * @generated from field: string creatorOverride = 4;
@@ -1090,7 +1106,7 @@ export class MsgDeleteCollection extends Message<MsgDeleteCollection> {
   collectionId = "";
 
   /**
-   * Address of the original creator. Used for CosmWASM purposes.
+   * Address of the original creator. Used for CosmWASM purposes. 
    * IMPORTANT: We will override but we must trust the original creator address.
    *
    * @generated from field: string creatorOverride = 3;
@@ -1188,7 +1204,7 @@ export class MsgUpdateUserApprovals extends Message<MsgUpdateUserApprovals> {
   updateOutgoingApprovals = false;
 
   /**
-   * New outgoing approvals to set.
+   * New outgoing approvals to set. 
    *
    * @generated from field: repeated badges.UserOutgoingApproval outgoingApprovals = 4;
    */
@@ -1237,24 +1253,38 @@ export class MsgUpdateUserApprovals extends Message<MsgUpdateUserApprovals> {
   autoApproveSelfInitiatedIncomingTransfers = false;
 
   /**
+   * Indicates if auto-approve settings for all incoming transfers should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   *
+   * @generated from field: bool updateAutoApproveAllIncomingTransfers = 11;
+   */
+  updateAutoApproveAllIncomingTransfers = false;
+
+  /**
+   * Auto-approve setting for all incoming transfers.
+   *
+   * @generated from field: bool autoApproveAllIncomingTransfers = 12;
+   */
+  autoApproveAllIncomingTransfers = false;
+
+  /**
    * Indicates if user permissions should be updated. If true, we set to value in this Msg. If false, we keep existing value.
    *
-   * @generated from field: bool updateUserPermissions = 11;
+   * @generated from field: bool updateUserPermissions = 13;
    */
   updateUserPermissions = false;
 
   /**
    * New user permissions to set.
    *
-   * @generated from field: badges.UserPermissions userPermissions = 12;
+   * @generated from field: badges.UserPermissions userPermissions = 14;
    */
   userPermissions?: UserPermissions;
 
   /**
-   * Address of the original creator. Used for CosmWASM purposes.
+   * Address of the original creator. Used for CosmWASM purposes. 
    * IMPORTANT: We will override but we must trust the original creator address.
    *
-   * @generated from field: string creatorOverride = 13;
+   * @generated from field: string creatorOverride = 15;
    */
   creatorOverride = "";
 
@@ -1276,9 +1306,11 @@ export class MsgUpdateUserApprovals extends Message<MsgUpdateUserApprovals> {
     { no: 8, name: "autoApproveSelfInitiatedOutgoingTransfers", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 9, name: "updateAutoApproveSelfInitiatedIncomingTransfers", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 10, name: "autoApproveSelfInitiatedIncomingTransfers", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 11, name: "updateUserPermissions", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 12, name: "userPermissions", kind: "message", T: UserPermissions },
-    { no: 13, name: "creatorOverride", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 11, name: "updateAutoApproveAllIncomingTransfers", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 12, name: "autoApproveAllIncomingTransfers", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 13, name: "updateUserPermissions", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 14, name: "userPermissions", kind: "message", T: UserPermissions },
+    { no: 15, name: "creatorOverride", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUpdateUserApprovals {

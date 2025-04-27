@@ -33,7 +33,7 @@ import type {
   iUserIncomingApprovalWithDetails,
   iUserOutgoingApproval
 } from '@/interfaces/badges/approvals.js';
-import type { CollectionId, iAddressList, iCoinTransfer, iMerkleChallenge } from '@/interfaces/badges/core.js';
+import type { CollectionId, iAddressList, iMerkleChallenge } from '@/interfaces/badges/core.js';
 import * as badges from '@/proto/badges/index.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 import type MerkleTree from 'merkletreejs';
@@ -48,7 +48,6 @@ import type { CollectionApprovalPermissionWithDetails } from './permissions.js';
 import { CollectionApprovalPermission } from './permissions.js';
 import { UintRange, UintRangeArray } from './uintRanges.js';
 import { AllDefaultValues, getPotentialUpdatesForTimelineValues, getUpdateCombinationsToCheck } from './validate-utils.js';
-import { convertToBitBadgesAddress, getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
 
 const { getReservedAddressList, getReservedTrackerList } = AddressList;
 
@@ -215,6 +214,7 @@ export class UserOutgoingApproval<T extends NumberType> extends BaseNumberTypeCl
   uri?: string;
   customData?: string;
   approvalCriteria?: OutgoingApprovalCriteria<T>;
+  version: T;
 
   constructor(msg: iUserOutgoingApproval<T>) {
     super();
@@ -227,6 +227,7 @@ export class UserOutgoingApproval<T extends NumberType> extends BaseNumberTypeCl
     this.uri = msg.uri;
     this.customData = msg.customData;
     this.approvalCriteria = msg.approvalCriteria ? new OutgoingApprovalCriteria(msg.approvalCriteria) : undefined;
+    this.version = msg.version;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UserOutgoingApproval<U> {
@@ -263,7 +264,8 @@ export class UserOutgoingApproval<T extends NumberType> extends BaseNumberTypeCl
       approvalId: item.approvalId,
       uri: item.uri,
       customData: item.customData,
-      approvalCriteria: item.approvalCriteria ? OutgoingApprovalCriteria.fromProto(item.approvalCriteria, convertFunction) : undefined
+      approvalCriteria: item.approvalCriteria ? OutgoingApprovalCriteria.fromProto(item.approvalCriteria, convertFunction) : undefined,
+      version: convertFunction(item.version)
     });
   }
 
@@ -437,7 +439,8 @@ export class PredeterminedBalances<T extends NumberType> extends BaseNumberTypeC
         : new IncrementedBalances({
             startBalances: [],
             incrementBadgeIdsBy: convertFunction(0),
-            incrementOwnershipTimesBy: convertFunction(0)
+            incrementOwnershipTimesBy: convertFunction(0),
+            approvalDurationFromNow: convertFunction(0)
           }),
       orderCalculationMethod: item.orderCalculationMethod
         ? PredeterminedOrderCalculationMethod.fromProto(item.orderCalculationMethod)
@@ -512,16 +515,18 @@ export class IncrementedBalances<T extends NumberType> extends BaseNumberTypeCla
   startBalances: BalanceArray<T>;
   incrementBadgeIdsBy: T;
   incrementOwnershipTimesBy: T;
+  approvalDurationFromNow: T;
 
   constructor(msg: iIncrementedBalances<T>) {
     super();
     this.startBalances = BalanceArray.From(msg.startBalances);
     this.incrementBadgeIdsBy = msg.incrementBadgeIdsBy;
     this.incrementOwnershipTimesBy = msg.incrementOwnershipTimesBy;
+    this.approvalDurationFromNow = msg.approvalDurationFromNow;
   }
 
   getNumberFieldNames(): string[] {
-    return ['incrementBadgeIdsBy', 'incrementOwnershipTimesBy'];
+    return ['incrementBadgeIdsBy', 'incrementOwnershipTimesBy', 'approvalDurationFromNow'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): IncrementedBalances<U> {
@@ -529,7 +534,8 @@ export class IncrementedBalances<T extends NumberType> extends BaseNumberTypeCla
       deepCopyPrimitives({
         startBalances: this.startBalances.map((x) => x.convert(convertFunction)),
         incrementBadgeIdsBy: convertFunction(this.incrementBadgeIdsBy),
-        incrementOwnershipTimesBy: convertFunction(this.incrementOwnershipTimesBy)
+        incrementOwnershipTimesBy: convertFunction(this.incrementOwnershipTimesBy),
+        approvalDurationFromNow: convertFunction(this.approvalDurationFromNow)
       })
     );
   }
@@ -558,7 +564,8 @@ export class IncrementedBalances<T extends NumberType> extends BaseNumberTypeCla
     return new IncrementedBalances<U>({
       startBalances: item.startBalances.map((x) => Balance.fromProto(x, convertFunction)),
       incrementBadgeIdsBy: convertFunction(item.incrementBadgeIdsBy),
-      incrementOwnershipTimesBy: convertFunction(item.incrementOwnershipTimesBy)
+      incrementOwnershipTimesBy: convertFunction(item.incrementOwnershipTimesBy),
+      approvalDurationFromNow: convertFunction(item.approvalDurationFromNow)
     });
   }
 }
@@ -776,6 +783,7 @@ export class UserIncomingApproval<T extends NumberType> extends BaseNumberTypeCl
   uri?: string;
   customData?: string;
   approvalCriteria?: IncomingApprovalCriteria<T>;
+  version: T;
 
   constructor(msg: iUserIncomingApproval<T>) {
     super();
@@ -788,6 +796,11 @@ export class UserIncomingApproval<T extends NumberType> extends BaseNumberTypeCl
     this.uri = msg.uri;
     this.customData = msg.customData;
     this.approvalCriteria = msg.approvalCriteria ? new IncomingApprovalCriteria(msg.approvalCriteria) : undefined;
+    this.version = msg.version;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['version'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UserIncomingApproval<U> {
@@ -824,7 +837,8 @@ export class UserIncomingApproval<T extends NumberType> extends BaseNumberTypeCl
       approvalId: item.approvalId,
       uri: item.uri,
       customData: item.customData,
-      approvalCriteria: item.approvalCriteria ? IncomingApprovalCriteria.fromProto(item.approvalCriteria, convertFunction) : undefined
+      approvalCriteria: item.approvalCriteria ? IncomingApprovalCriteria.fromProto(item.approvalCriteria, convertFunction) : undefined,
+      version: convertFunction(item.version)
     });
   }
 
@@ -965,6 +979,7 @@ export class CollectionApproval<T extends NumberType> extends BaseNumberTypeClas
   uri?: string;
   customData?: string;
   approvalCriteria?: ApprovalCriteria<T>;
+  version: T;
 
   constructor(msg: iCollectionApproval<T>) {
     super();
@@ -978,6 +993,7 @@ export class CollectionApproval<T extends NumberType> extends BaseNumberTypeClas
     this.uri = msg.uri;
     this.customData = msg.customData;
     this.approvalCriteria = msg.approvalCriteria ? new ApprovalCriteria(msg.approvalCriteria) : undefined;
+    this.version = msg.version;
   }
 
   static validateUpdate<U extends NumberType>(
@@ -990,6 +1006,10 @@ export class CollectionApproval<T extends NumberType> extends BaseNumberTypeClas
       newApprovals.map((x) => x.convert(BigIntify)),
       canUpdateCollectionApprovals.map((x) => x.convert(BigIntify))
     );
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['version'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CollectionApproval<U> {
@@ -1027,7 +1047,8 @@ export class CollectionApproval<T extends NumberType> extends BaseNumberTypeClas
       approvalId: item.approvalId,
       uri: item.uri,
       customData: item.customData,
-      approvalCriteria: item.approvalCriteria ? ApprovalCriteria.fromProto(item.approvalCriteria, convertFunction) : undefined
+      approvalCriteria: item.approvalCriteria ? ApprovalCriteria.fromProto(item.approvalCriteria, convertFunction) : undefined,
+      version: convertFunction(item.version)
     });
   }
 
@@ -1039,7 +1060,8 @@ export class CollectionApproval<T extends NumberType> extends BaseNumberTypeClas
       transferTimes: this.transferTimes,
       badgeIds: this.badgeIds,
       ownershipTimes: this.ownershipTimes,
-      approvalCriteria: this.approvalCriteria
+      approvalCriteria: this.approvalCriteria,
+      version: this.version
     });
   }
 
@@ -1051,7 +1073,8 @@ export class CollectionApproval<T extends NumberType> extends BaseNumberTypeClas
       transferTimes: this.transferTimes,
       badgeIds: this.badgeIds,
       ownershipTimes: this.ownershipTimes,
-      approvalCriteria: this.approvalCriteria
+      approvalCriteria: this.approvalCriteria,
+      version: this.version
     });
   }
 
@@ -1061,7 +1084,8 @@ export class CollectionApproval<T extends NumberType> extends BaseNumberTypeClas
       fromListId: convertListIdToBech32(this.fromListId, prefix),
       toListId: convertListIdToBech32(this.toListId, prefix),
       initiatedByListId: convertListIdToBech32(this.initiatedByListId, prefix),
-      approvalCriteria: this.approvalCriteria?.toBech32Addresses(prefix)
+      approvalCriteria: this.approvalCriteria?.toBech32Addresses(prefix),
+      version: this.version
     });
   }
 }

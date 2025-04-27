@@ -29,6 +29,7 @@ export type PermissionNameString =
   | 'canUpdateCollectionApprovals'
   | 'canUpdateAutoApproveSelfInitiatedIncomingTransfers'
   | 'canUpdateAutoApproveSelfInitiatedOutgoingTransfers'
+  | 'canUpdateAutoApproveAllIncomingTransfers'
   | 'canUpdateStandards'
   | 'canUpdateCustomData'
   | 'canUpdateManager';
@@ -70,6 +71,7 @@ export const getPermissionVariablesFromName = (permissionName: PermissionNameStr
     case 'canDeleteCollection':
     case 'canUpdateAutoApproveSelfInitiatedOutgoingTransfers':
     case 'canUpdateAutoApproveSelfInitiatedIncomingTransfers':
+    case 'canUpdateAutoApproveAllIncomingTransfers':
       validatePermissionUpdateFunction = ActionPermission.validateUpdate;
       break;
     case 'canArchiveCollection':
@@ -132,6 +134,9 @@ export const getPermissionVariablesFromName = (permissionName: PermissionNameStr
     case 'canUpdateAutoApproveSelfInitiatedIncomingTransfers':
       question = 'Can update auto approve self initiated incoming transfers?';
       break;
+    case 'canUpdateAutoApproveAllIncomingTransfers':
+      question = 'Can update auto approve all incoming transfers?';
+      break;
     // Add custom questions for other permissions as needed
   }
 
@@ -139,6 +144,7 @@ export const getPermissionVariablesFromName = (permissionName: PermissionNameStr
     case 'canDeleteCollection':
     case 'canUpdateAutoApproveSelfInitiatedOutgoingTransfers':
     case 'canUpdateAutoApproveSelfInitiatedIncomingTransfers':
+    case 'canUpdateAutoApproveAllIncomingTransfers':
       flags = ActionPermissionUsedFlags;
       break;
     case 'canArchiveCollection':

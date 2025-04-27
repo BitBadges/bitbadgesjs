@@ -43,6 +43,8 @@ export class MsgUpdateUserApprovals<T extends NumberType>
   autoApproveSelfInitiatedOutgoingTransfers?: boolean;
   updateAutoApproveSelfInitiatedIncomingTransfers?: boolean;
   autoApproveSelfInitiatedIncomingTransfers?: boolean;
+  updateAutoApproveAllIncomingTransfers?: boolean;
+  autoApproveAllIncomingTransfers?: boolean;
   updateUserPermissions?: boolean;
   userPermissions?: UserPermissions<T>;
   creatorOverride: BitBadgesAddress;
@@ -59,6 +61,8 @@ export class MsgUpdateUserApprovals<T extends NumberType>
     this.autoApproveSelfInitiatedOutgoingTransfers = msg.autoApproveSelfInitiatedOutgoingTransfers;
     this.updateAutoApproveSelfInitiatedIncomingTransfers = msg.updateAutoApproveSelfInitiatedIncomingTransfers;
     this.autoApproveSelfInitiatedIncomingTransfers = msg.autoApproveSelfInitiatedIncomingTransfers;
+    this.updateAutoApproveAllIncomingTransfers = msg.updateAutoApproveAllIncomingTransfers;
+    this.autoApproveAllIncomingTransfers = msg.autoApproveAllIncomingTransfers;
     this.updateUserPermissions = msg.updateUserPermissions;
     this.userPermissions = msg.userPermissions ? new UserPermissions(msg.userPermissions) : undefined;
     this.creatorOverride = msg.creatorOverride;
@@ -107,6 +111,8 @@ export class MsgUpdateUserApprovals<T extends NumberType>
       autoApproveSelfInitiatedOutgoingTransfers: protoMsg.autoApproveSelfInitiatedOutgoingTransfers,
       updateAutoApproveSelfInitiatedIncomingTransfers: protoMsg.updateAutoApproveSelfInitiatedIncomingTransfers,
       autoApproveSelfInitiatedIncomingTransfers: protoMsg.autoApproveSelfInitiatedIncomingTransfers,
+      updateAutoApproveAllIncomingTransfers: protoMsg.updateAutoApproveAllIncomingTransfers,
+      autoApproveAllIncomingTransfers: protoMsg.autoApproveAllIncomingTransfers,
       updateUserPermissions: protoMsg.updateUserPermissions,
       userPermissions: protoMsg.userPermissions
         ? UserPermissions.fromProto(protoMsg.userPermissions, convertFunction)
@@ -114,7 +120,8 @@ export class MsgUpdateUserApprovals<T extends NumberType>
             canUpdateAutoApproveSelfInitiatedIncomingTransfers: [],
             canUpdateAutoApproveSelfInitiatedOutgoingTransfers: [],
             canUpdateIncomingApprovals: [],
-            canUpdateOutgoingApprovals: []
+            canUpdateOutgoingApprovals: [],
+            canUpdateAutoApproveAllIncomingTransfers: []
           }),
       creatorOverride: protoMsg.creatorOverride
     });

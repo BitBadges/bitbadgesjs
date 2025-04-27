@@ -90,7 +90,9 @@ export const applyIncrementsToBalances = <T extends NumberType>(
   startBalances: iBalance<T>[],
   incrementBadgeIdsBy: T,
   incrementOwnershipTimesBy: T,
-  numIncrements: T
+  numIncrements: T,
+  approvalDurationFromNow: T,
+  blockTime: T
 ) => {
   let balancesToReturn = BalanceArray.From(startBalances).clone();
 
@@ -107,12 +109,20 @@ export const applyIncrementsToBalances = <T extends NumberType>(
             end: safeAdd(y.end, badgeIdsIncrement)
           };
         }),
-        ownershipTimes: x.ownershipTimes.map((y) => {
-          return {
-            start: safeAdd(y.start, ownershipTimesIncrement),
-            end: safeAdd(y.end, ownershipTimesIncrement)
-          };
-        })
+        ownershipTimes:
+          BigInt(approvalDurationFromNow) > 0n
+            ? x.ownershipTimes.map((y) => {
+                return {
+                  start: blockTime,
+                  end: safeAdd(blockTime, approvalDurationFromNow)
+                };
+              })
+            : x.ownershipTimes.map((y) => {
+                return {
+                  start: safeAdd(y.start, ownershipTimesIncrement),
+                  end: safeAdd(y.end, ownershipTimesIncrement)
+                };
+              })
       });
     })
   );
@@ -746,7 +756,7 @@ interface BalanceFunctions<T extends NumberType> {
   subtractBalances: (balancesToSubtract: iBalance<T>[], allowUnderflow: boolean) => void;
   subtractBalance: (balanceToSubtract: iBalance<T>, allowUnderflow: boolean) => void;
   sortBalancesByAmount: () => void;
-  applyIncrements: (incrementBadgeIdsBy: T, incrementOwnershipTimesBy: T, numIncrements: T) => void;
+  applyIncrements: (incrementBadgeIdsBy: T, incrementOwnershipTimesBy: T, numIncrements: T, approvalDurationFromNow: T, blockTime: T) => void;
 }
 
 /**
@@ -907,8 +917,15 @@ export class BalanceArray<T extends NumberType> extends BaseTypedArray<BalanceAr
   /**
    * {@inheritDoc applyIncrementsToBalances}
    */
-  applyIncrements(incrementBadgeIdsBy: T, incrementOwnershipTimesBy: T, numIncrements: T) {
-    const newBalances = applyIncrementsToBalances(this, incrementBadgeIdsBy, incrementOwnershipTimesBy, numIncrements);
+  applyIncrements(incrementBadgeIdsBy: T, incrementOwnershipTimesBy: T, numIncrements: T, approvalDurationFromNow: T, blockTime: T) {
+    const newBalances = applyIncrementsToBalances(
+      this,
+      incrementBadgeIdsBy,
+      incrementOwnershipTimesBy,
+      numIncrements,
+      approvalDurationFromNow,
+      blockTime
+    );
     this.length = 0;
     this.push(...newBalances);
     return this;
