@@ -13,6 +13,8 @@ export interface iUserPermissions<T extends NumberType> {
   canUpdateAutoApproveSelfInitiatedOutgoingTransfers: iActionPermission<T>[];
   /** The permissions for updating auto-approving self-initiated incoming transfers. If auto-approve is enabled, then the user will be approved by default for all incoming transfers that are self-initiated. */
   canUpdateAutoApproveSelfInitiatedIncomingTransfers: iActionPermission<T>[];
+  /** The permissions for updating auto-approving all incoming transfers. If auto-approve is enabled, then the user will be approved by default for all incoming transfers. */
+  canUpdateAutoApproveAllIncomingTransfers: iActionPermission<T>[];
 }
 
 /**

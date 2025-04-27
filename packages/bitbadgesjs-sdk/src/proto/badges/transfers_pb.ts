@@ -70,9 +70,18 @@ export class UserBalanceStore extends Message<UserBalanceStore> {
   autoApproveSelfInitiatedIncomingTransfers = false;
 
   /**
+   * Whether to auto-approve all incoming transfers by default. 
+   * This is just shorthand for adding an accept everything incoming approval
+   * with no restrictions.
+   *
+   * @generated from field: bool autoApproveAllIncomingTransfers = 6;
+   */
+  autoApproveAllIncomingTransfers = false;
+
+  /**
    * The permissions for this user's actions and transfers.
    *
-   * @generated from field: badges.UserPermissions userPermissions = 6;
+   * @generated from field: badges.UserPermissions userPermissions = 7;
    */
   userPermissions?: UserPermissions;
 
@@ -89,7 +98,8 @@ export class UserBalanceStore extends Message<UserBalanceStore> {
     { no: 3, name: "incomingApprovals", kind: "message", T: UserIncomingApproval, repeated: true },
     { no: 4, name: "autoApproveSelfInitiatedOutgoingTransfers", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 5, name: "autoApproveSelfInitiatedIncomingTransfers", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 6, name: "userPermissions", kind: "message", T: UserPermissions },
+    { no: 6, name: "autoApproveAllIncomingTransfers", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 7, name: "userPermissions", kind: "message", T: UserPermissions },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UserBalanceStore {
@@ -277,6 +287,13 @@ export class UserOutgoingApproval extends Message<UserOutgoingApproval> {
    */
   approvalCriteria?: OutgoingApprovalCriteria;
 
+  /**
+   * Version of the approval. Maintained internally.
+   *
+   * @generated from field: string version = 12;
+   */
+  version = "";
+
   constructor(data?: PartialMessage<UserOutgoingApproval>) {
     super();
     proto3.util.initPartial(data, this);
@@ -294,6 +311,7 @@ export class UserOutgoingApproval extends Message<UserOutgoingApproval> {
     { no: 9, name: "customData", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 10, name: "approvalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 11, name: "approvalCriteria", kind: "message", T: OutgoingApprovalCriteria },
+    { no: 12, name: "version", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UserOutgoingApproval {
@@ -382,6 +400,13 @@ export class UserIncomingApproval extends Message<UserIncomingApproval> {
    */
   approvalCriteria?: IncomingApprovalCriteria;
 
+  /**
+   * Version of the approval. Maintained internally.
+   *
+   * @generated from field: string version = 12;
+   */
+  version = "";
+
   constructor(data?: PartialMessage<UserIncomingApproval>) {
     super();
     proto3.util.initPartial(data, this);
@@ -399,6 +424,7 @@ export class UserIncomingApproval extends Message<UserIncomingApproval> {
     { no: 9, name: "customData", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 10, name: "approvalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 11, name: "approvalCriteria", kind: "message", T: IncomingApprovalCriteria },
+    { no: 12, name: "version", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UserIncomingApproval {
@@ -476,11 +502,18 @@ export class IncrementedBalances extends Message<IncrementedBalances> {
   incrementBadgeIdsBy = "";
 
   /**
-   * The amount by which to increment ownership times.
+   * The amount by which to increment ownership times. Incompatible with approveStartingFromNowBy.
    *
    * @generated from field: string incrementOwnershipTimesBy = 3;
    */
   incrementOwnershipTimesBy = "";
+
+  /**
+   * The amount of unix milliseconds to approve starting from now. Incompatible with incrementOwnershipTimesBy.
+   *
+   * @generated from field: string approvalDurationFromNow = 4;
+   */
+  approvalDurationFromNow = "";
 
   constructor(data?: PartialMessage<IncrementedBalances>) {
     super();
@@ -493,6 +526,7 @@ export class IncrementedBalances extends Message<IncrementedBalances> {
     { no: 1, name: "startBalances", kind: "message", T: Balance, repeated: true },
     { no: 2, name: "incrementBadgeIdsBy", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "incrementOwnershipTimesBy", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "approvalDurationFromNow", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): IncrementedBalances {
@@ -871,6 +905,23 @@ export class CoinTransfer extends Message<CoinTransfer> {
    */
   coins: Coin[] = [];
 
+  /**
+   * By default, the from address is the initiator of the transaction.
+   * If this is set to true, we will override the from address with the approver address.
+   * Note: This is not applicable for collection approvals (since approverAddress == '').
+   *
+   * @generated from field: bool overrideFromWithApproverAddress = 3;
+   */
+  overrideFromWithApproverAddress = false;
+
+  /**
+   * By default, the to address is what is specified in the coin transfer.
+   * If this is set to true, we will override the to address with the initiator of the transaction.
+   *
+   * @generated from field: bool overrideToWithInitiator = 4;
+   */
+  overrideToWithInitiator = false;
+
   constructor(data?: PartialMessage<CoinTransfer>) {
     super();
     proto3.util.initPartial(data, this);
@@ -881,6 +932,8 @@ export class CoinTransfer extends Message<CoinTransfer> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "to", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "coins", kind: "message", T: Coin, repeated: true },
+    { no: 3, name: "overrideFromWithApproverAddress", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 4, name: "overrideToWithInitiator", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CoinTransfer {
@@ -1275,6 +1328,13 @@ export class CollectionApproval extends Message<CollectionApproval> {
    */
   approvalCriteria?: ApprovalCriteria;
 
+  /**
+   * Version of the approval. Maintained internally.
+   *
+   * @generated from field: string version = 13;
+   */
+  version = "";
+
   constructor(data?: PartialMessage<CollectionApproval>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1293,6 +1353,7 @@ export class CollectionApproval extends Message<CollectionApproval> {
     { no: 10, name: "customData", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 11, name: "approvalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 12, name: "approvalCriteria", kind: "message", T: ApprovalCriteria },
+    { no: 13, name: "version", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CollectionApproval {
@@ -1339,6 +1400,13 @@ export class ApprovalIdentifierDetails extends Message<ApprovalIdentifierDetails
    */
   approverAddress = "";
 
+  /**
+   * The version of the approval.
+   *
+   * @generated from field: string version = 4;
+   */
+  version = "";
+
   constructor(data?: PartialMessage<ApprovalIdentifierDetails>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1350,6 +1418,7 @@ export class ApprovalIdentifierDetails extends Message<ApprovalIdentifierDetails
     { no: 1, name: "approvalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "approvalLevel", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "approverAddress", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "version", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ApprovalIdentifierDetails {

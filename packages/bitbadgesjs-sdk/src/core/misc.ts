@@ -247,11 +247,15 @@ export class MustOwnBadges<T extends NumberType> extends BaseNumberTypeClass<Mus
 export class CoinTransfer<T extends NumberType> extends BaseNumberTypeClass<CoinTransfer<T>> implements iCoinTransfer<T> {
   to: BitBadgesAddress;
   coins: CosmosCoin<T>[];
+  overrideFromWithApproverAddress: boolean;
+  overrideToWithInitiator: boolean;
 
   constructor(coinTransfer: iCoinTransfer<T>) {
     super();
     this.to = coinTransfer.to;
     this.coins = coinTransfer.coins.map((b) => new CosmosCoin(b));
+    this.overrideFromWithApproverAddress = coinTransfer.overrideFromWithApproverAddress;
+    this.overrideToWithInitiator = coinTransfer.overrideToWithInitiator;
   }
 
   getNumberFieldNames(): string[] {
@@ -261,7 +265,9 @@ export class CoinTransfer<T extends NumberType> extends BaseNumberTypeClass<Coin
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CoinTransfer<U> {
     return new CoinTransfer<U>({
       to: this.to,
-      coins: this.coins.map((b) => b.convert(convertFunction))
+      coins: this.coins.map((b) => b.convert(convertFunction)),
+      overrideFromWithApproverAddress: this.overrideFromWithApproverAddress,
+      overrideToWithInitiator: this.overrideToWithInitiator
     });
   }
 
@@ -272,7 +278,9 @@ export class CoinTransfer<T extends NumberType> extends BaseNumberTypeClass<Coin
   static fromProto<U extends NumberType>(item: badges.CoinTransfer, convertFunction: (item: NumberType) => U): CoinTransfer<U> {
     return new CoinTransfer<U>({
       to: item.to,
-      coins: item.coins.map((b) => CosmosCoin.fromProto(b, convertFunction))
+      coins: item.coins.map((b) => CosmosCoin.fromProto(b, convertFunction)),
+      overrideFromWithApproverAddress: item.overrideFromWithApproverAddress,
+      overrideToWithInitiator: item.overrideToWithInitiator
     });
   }
 
@@ -289,23 +297,32 @@ export class CoinTransfer<T extends NumberType> extends BaseNumberTypeClass<Coin
  *
  * @category Approvals / Transferability
  */
-export class ApprovalIdentifierDetails extends CustomTypeClass<ApprovalIdentifierDetails> implements ApprovalIdentifierDetails {
+export class ApprovalIdentifierDetails<T extends NumberType>
+  extends BaseNumberTypeClass<ApprovalIdentifierDetails<T>>
+  implements iApprovalIdentifierDetails<T>
+{
   approvalId: string;
   approvalLevel: string;
   approverAddress: BitBadgesAddress;
-
-  constructor(approvalIdDetails: iApprovalIdentifierDetails) {
+  version: T;
+  constructor(approvalIdDetails: iApprovalIdentifierDetails<T>) {
     super();
     this.approvalId = approvalIdDetails.approvalId;
     this.approvalLevel = approvalIdDetails.approvalLevel;
     this.approverAddress = approvalIdDetails.approverAddress;
+    this.version = approvalIdDetails.version;
   }
 
-  static required(): ApprovalIdentifierDetails {
+  getNumberFieldNames(): string[] {
+    return ['version'];
+  }
+
+  static required(): ApprovalIdentifierDetails<NumberType> {
     return new ApprovalIdentifierDetails({
       approvalId: '',
       approvalLevel: '',
-      approverAddress: ''
+      approverAddress: '',
+      version: '0'
     });
   }
 
@@ -313,24 +330,40 @@ export class ApprovalIdentifierDetails extends CustomTypeClass<ApprovalIdentifie
     return new badges.ApprovalIdentifierDetails(this.clone().toJson());
   }
 
-  clone(): ApprovalIdentifierDetails {
-    return new ApprovalIdentifierDetails({ ...this });
+  clone(): ApprovalIdentifierDetails<T> {
+    return new ApprovalIdentifierDetails<T>({ ...this });
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ApprovalIdentifierDetails {
-    return ApprovalIdentifierDetails.fromProto(badges.ApprovalIdentifierDetails.fromJson(jsonValue, options));
+  static fromJson<U extends NumberType>(
+    jsonValue: JsonValue,
+    convertFunction: (item: NumberType) => U,
+    options?: Partial<JsonReadOptions>
+  ): ApprovalIdentifierDetails<U> {
+    return ApprovalIdentifierDetails.fromProto(badges.ApprovalIdentifierDetails.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ApprovalIdentifierDetails {
-    return ApprovalIdentifierDetails.fromProto(badges.ApprovalIdentifierDetails.fromJsonString(jsonString, options));
+  static fromJsonString<U extends NumberType>(
+    jsonString: string,
+    convertFunction: (item: NumberType) => U,
+    options?: Partial<JsonReadOptions>
+  ): ApprovalIdentifierDetails<U> {
+    return ApprovalIdentifierDetails.fromProto(badges.ApprovalIdentifierDetails.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto(item: badges.ApprovalIdentifierDetails): ApprovalIdentifierDetails {
-    return new ApprovalIdentifierDetails({ ...item });
+  static fromProto<U extends NumberType>(
+    item: badges.ApprovalIdentifierDetails,
+    convertFunction: (item: NumberType) => U
+  ): ApprovalIdentifierDetails<U> {
+    return new ApprovalIdentifierDetails<U>({
+      approvalId: item.approvalId,
+      approvalLevel: item.approvalLevel,
+      approverAddress: item.approverAddress,
+      version: convertFunction(item.version)
+    });
   }
 
-  toBech32Addresses(prefix: string): ApprovalIdentifierDetails {
-    return new ApprovalIdentifierDetails({
+  toBech32Addresses(prefix: string): ApprovalIdentifierDetails<T> {
+    return new ApprovalIdentifierDetails<T>({
       ...this,
       approverAddress: getConvertFunctionFromPrefix(prefix)(this.approverAddress)
     });

@@ -24,6 +24,8 @@ export interface iUserOutgoingApproval<T extends NumberType> {
   customData?: string;
   /** The criteria to be met. These represent the restrictions that must be obeyed such as the total amount approved, max num transfers, merkle challenges, must own badges, etc. */
   approvalCriteria?: iOutgoingApprovalCriteria<T>;
+  /** The version of the approval. */
+  version: T;
 }
 
 /**
@@ -75,8 +77,10 @@ export interface iIncrementedBalances<T extends NumberType> {
   startBalances: iBalance<T>[];
   /** The amount to increment the badge IDs by after each transfer. */
   incrementBadgeIdsBy: T;
-  /** The amount to increment the owned times by after each transfer. */
+  /** The amount to increment the owned times by after each transfer. Incompatible with approvalDurationFromNow. */
   incrementOwnershipTimesBy: T;
+  /** The number of unix milliseconds to approve starting from now. Incompatible with incrementOwnershipTimesBy. */
+  approvalDurationFromNow: T;
 }
 
 /**
@@ -151,6 +155,8 @@ export interface iUserIncomingApproval<T extends NumberType> {
   customData?: string;
   /** The criteria to be met. These represent the restrictions that must be obeyed such as the total amount approved, max num transfers, merkle challenges, must own badges, etc. */
   approvalCriteria?: iIncomingApprovalCriteria<T>;
+  /** The version of the approval. */
+  version: T;
 }
 
 /**
@@ -197,6 +203,8 @@ export interface iCollectionApproval<T extends NumberType> {
   customData?: string;
   /** The criteria to be met. These represent the restrictions that must be obeyed such as the total amount approved, max num transfers, merkle challenges, must own badges, etc. */
   approvalCriteria?: iApprovalCriteria<T>;
+  /** The version of the approval.0 */
+  version: T;
 }
 
 /**

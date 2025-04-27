@@ -36,6 +36,7 @@ export class UserPermissions<T extends NumberType> extends BaseNumberTypeClass<U
   canUpdateIncomingApprovals: UserIncomingApprovalPermission<T>[];
   canUpdateAutoApproveSelfInitiatedOutgoingTransfers: ActionPermission<T>[];
   canUpdateAutoApproveSelfInitiatedIncomingTransfers: ActionPermission<T>[];
+  canUpdateAutoApproveAllIncomingTransfers: ActionPermission<T>[];
 
   constructor(msg: iUserPermissions<T>) {
     super();
@@ -47,6 +48,7 @@ export class UserPermissions<T extends NumberType> extends BaseNumberTypeClass<U
     this.canUpdateAutoApproveSelfInitiatedIncomingTransfers = msg.canUpdateAutoApproveSelfInitiatedIncomingTransfers.map(
       (x) => new ActionPermission(x)
     );
+    this.canUpdateAutoApproveAllIncomingTransfers = msg.canUpdateAutoApproveAllIncomingTransfers.map((x) => new ActionPermission(x));
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UserPermissions<U> {
@@ -82,6 +84,9 @@ export class UserPermissions<T extends NumberType> extends BaseNumberTypeClass<U
       ),
       canUpdateAutoApproveSelfInitiatedIncomingTransfers: protoMsg.canUpdateAutoApproveSelfInitiatedIncomingTransfers.map((x) =>
         ActionPermission.fromProto(x, convertFunction)
+      ),
+      canUpdateAutoApproveAllIncomingTransfers: protoMsg.canUpdateAutoApproveAllIncomingTransfers.map((x) =>
+        ActionPermission.fromProto(x, convertFunction)
       )
     });
   }
@@ -103,6 +108,10 @@ export class UserPermissions<T extends NumberType> extends BaseNumberTypeClass<U
       ActionPermission.validateUpdate(
         oldPermissions.canUpdateAutoApproveSelfInitiatedIncomingTransfers,
         newPermissions.canUpdateAutoApproveSelfInitiatedIncomingTransfers
+      ),
+      ActionPermission.validateUpdate(
+        oldPermissions.canUpdateAutoApproveAllIncomingTransfers,
+        newPermissions.canUpdateAutoApproveAllIncomingTransfers
       )
     ];
 
@@ -114,7 +123,8 @@ export class UserPermissions<T extends NumberType> extends BaseNumberTypeClass<U
       canUpdateOutgoingApprovals: [],
       canUpdateIncomingApprovals: [],
       canUpdateAutoApproveSelfInitiatedOutgoingTransfers: [],
-      canUpdateAutoApproveSelfInitiatedIncomingTransfers: []
+      canUpdateAutoApproveSelfInitiatedIncomingTransfers: [],
+      canUpdateAutoApproveAllIncomingTransfers: []
     });
   }
 
@@ -1223,6 +1233,7 @@ export class UserPermissionsWithDetails<T extends NumberType> extends UserPermis
   canUpdateOutgoingApprovals: UserOutgoingApprovalPermissionWithDetails<T>[];
   canUpdateAutoApproveSelfInitiatedOutgoingTransfers: ActionPermission<T>[];
   canUpdateAutoApproveSelfInitiatedIncomingTransfers: ActionPermission<T>[];
+  canUpdateAutoApproveAllIncomingTransfers: ActionPermission<T>[];
 
   constructor(data: iUserPermissionsWithDetails<T>) {
     super(data);
@@ -1238,7 +1249,10 @@ export class UserPermissionsWithDetails<T extends NumberType> extends UserPermis
     this.canUpdateAutoApproveSelfInitiatedIncomingTransfers = data.canUpdateAutoApproveSelfInitiatedIncomingTransfers.map(
       (actionPermission) => new ActionPermission(actionPermission)
     );
-  }
+    this.canUpdateAutoApproveAllIncomingTransfers = data.canUpdateAutoApproveAllIncomingTransfers.map(
+      (actionPermission) => new ActionPermission(actionPermission)
+    );
+    }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UserPermissionsWithDetails<U> {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserPermissionsWithDetails<U>;

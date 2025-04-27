@@ -49,7 +49,8 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
   collectionId: CollectionId;
   balancesType?: string;
   defaultBalances?: UserBalanceStore<T>;
-  badgeIdsToAdd?: UintRangeArray<T>;
+  updateValidBadgeIds?: boolean;
+  validBadgeIds?: UintRangeArray<T>;
   updateCollectionPermissions?: boolean;
   collectionPermissions?: CollectionPermissions<T>;
   updateManagerTimeline?: boolean;
@@ -76,7 +77,8 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
     this.collectionId = msg.collectionId;
     this.balancesType = msg.balancesType;
     this.defaultBalances = msg.defaultBalances ? new UserBalanceStore(msg.defaultBalances) : undefined;
-    this.badgeIdsToAdd = msg.badgeIdsToAdd ? UintRangeArray.From(msg.badgeIdsToAdd) : undefined;
+    this.updateValidBadgeIds = msg.updateValidBadgeIds;
+    this.validBadgeIds = msg.validBadgeIds ? UintRangeArray.From(msg.validBadgeIds) : undefined;
     this.updateCollectionPermissions = msg.updateCollectionPermissions;
     this.collectionPermissions = msg.collectionPermissions ? new CollectionPermissions(msg.collectionPermissions) : undefined;
     this.updateManagerTimeline = msg.updateManagerTimeline;
@@ -135,7 +137,8 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
       collectionId: protoMsg.collectionId,
       balancesType: protoMsg.balancesType,
       defaultBalances: protoMsg.defaultBalances ? UserBalanceStore.fromProto(protoMsg.defaultBalances, convertFunction) : undefined,
-      badgeIdsToAdd: protoMsg.badgeIdsToAdd ? protoMsg.badgeIdsToAdd.map((x) => UintRange.fromProto(x, convertFunction)) : undefined,
+      validBadgeIds: protoMsg.validBadgeIds ? protoMsg.validBadgeIds.map((x) => UintRange.fromProto(x, convertFunction)) : undefined,
+      updateValidBadgeIds: protoMsg.updateValidBadgeIds,
       updateCollectionPermissions: protoMsg.updateCollectionPermissions,
       collectionPermissions: protoMsg.collectionPermissions
         ? CollectionPermissions.fromProto(protoMsg.collectionPermissions, convertFunction)

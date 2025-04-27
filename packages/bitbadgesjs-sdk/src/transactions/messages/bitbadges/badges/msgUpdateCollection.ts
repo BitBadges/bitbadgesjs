@@ -36,7 +36,8 @@ import { normalizeMessagesIfNecessary } from '../../base.js';
 export class MsgUpdateCollection<T extends NumberType> extends BaseNumberTypeClass<MsgUpdateCollection<T>> implements iMsgUpdateCollection<T> {
   creator: BitBadgesAddress;
   collectionId: CollectionId;
-  badgeIdsToAdd?: UintRangeArray<T>;
+  updateValidBadgeIds?: boolean;
+  validBadgeIds?: UintRangeArray<T>;
   updateCollectionPermissions?: boolean;
   collectionPermissions?: CollectionPermissions<T>;
   updateManagerTimeline?: boolean;
@@ -61,7 +62,8 @@ export class MsgUpdateCollection<T extends NumberType> extends BaseNumberTypeCla
     super();
     this.creator = msg.creator;
     this.collectionId = msg.collectionId;
-    this.badgeIdsToAdd = msg.badgeIdsToAdd ? UintRangeArray.From(msg.badgeIdsToAdd) : undefined;
+    this.updateValidBadgeIds = msg.updateValidBadgeIds;
+    this.validBadgeIds = msg.validBadgeIds ? UintRangeArray.From(msg.validBadgeIds) : undefined;
     this.updateCollectionPermissions = msg.updateCollectionPermissions;
     this.collectionPermissions = msg.collectionPermissions ? new CollectionPermissions(msg.collectionPermissions) : undefined;
     this.updateManagerTimeline = msg.updateManagerTimeline;
@@ -119,7 +121,8 @@ export class MsgUpdateCollection<T extends NumberType> extends BaseNumberTypeCla
     return new MsgUpdateCollection({
       creator: protoMsg.creator,
       collectionId: protoMsg.collectionId,
-      badgeIdsToAdd: protoMsg.badgeIdsToAdd?.map((x) => UintRange.fromProto(x, convertFunction)),
+      updateValidBadgeIds: protoMsg.updateValidBadgeIds,
+      validBadgeIds: protoMsg.validBadgeIds?.map((x) => UintRange.fromProto(x, convertFunction)),
       updateCollectionPermissions: protoMsg.updateCollectionPermissions,
       collectionPermissions: protoMsg.collectionPermissions
         ? CollectionPermissions.fromProto(protoMsg.collectionPermissions, convertFunction)

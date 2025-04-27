@@ -67,11 +67,21 @@ export class GenesisState extends Message<GenesisState> {
   approvalTrackers: ApprovalTracker[] = [];
 
   /**
-   * this line is used by starport scaffolding # genesis/proto/state
-   *
    * @generated from field: repeated string approvalTrackerStoreKeys = 11;
    */
   approvalTrackerStoreKeys: string[] = [];
+
+  /**
+   * @generated from field: repeated string approvalTrackerVersions = 12;
+   */
+  approvalTrackerVersions: string[] = [];
+
+  /**
+   * this line is used by starport scaffolding # genesis/proto/state
+   *
+   * @generated from field: repeated string approvalTrackerVersionsStoreKeys = 13;
+   */
+  approvalTrackerVersionsStoreKeys: string[] = [];
 
   constructor(data?: PartialMessage<GenesisState>) {
     super();
@@ -92,6 +102,8 @@ export class GenesisState extends Message<GenesisState> {
     { no: 9, name: "addressLists", kind: "message", T: AddressList, repeated: true },
     { no: 10, name: "approvalTrackers", kind: "message", T: ApprovalTracker, repeated: true },
     { no: 11, name: "approvalTrackerStoreKeys", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 12, name: "approvalTrackerVersions", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 13, name: "approvalTrackerVersionsStoreKeys", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GenesisState {

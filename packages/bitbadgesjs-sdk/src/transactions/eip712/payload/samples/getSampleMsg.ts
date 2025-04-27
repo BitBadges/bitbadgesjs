@@ -74,7 +74,9 @@ const approvalCriteria = new OutgoingApprovalCriteria({
           denom: '',
           amount: '0'
         }
-      ]
+      ],
+      overrideFromWithApproverAddress: false,
+      overrideToWithInitiator: false
     })
   ],
   merkleChallenges: [
@@ -103,7 +105,8 @@ const approvalCriteria = new OutgoingApprovalCriteria({
         })
       ],
       incrementOwnershipTimesBy: '0',
-      incrementBadgeIdsBy: '0'
+      incrementBadgeIdsBy: '0',
+      approvalDurationFromNow: '0'
     })
   }),
   approvalAmounts: new ApprovalAmounts({
@@ -126,7 +129,8 @@ const approvalCriteriaForPopulatingUndefined = new OutgoingApprovalCriteria({
     incrementedBalances: new IncrementedBalances({
       startBalances: [],
       incrementBadgeIdsBy: '0',
-      incrementOwnershipTimesBy: '0'
+      incrementOwnershipTimesBy: '0',
+      approvalDurationFromNow: '0'
     })
   }),
   approvalAmounts: new ApprovalAmounts({
@@ -160,7 +164,8 @@ function populatePredeterminedBalances(predeterminedBalances?: PredeterminedBala
       incrementedBalances: new IncrementedBalances({
         startBalances: [],
         incrementBadgeIdsBy: '0',
-        incrementOwnershipTimesBy: '0'
+        incrementOwnershipTimesBy: '0',
+        approvalDurationFromNow: '0'
       })
     });
   }
@@ -198,7 +203,9 @@ function populateMaxNumTransfers(maxNumTransfers?: MaxNumTransfers) {
 export function populateUndefinedForMsgTransferBadges(msg: MsgTransferBadges) {
   for (const transfer of msg.transfers) {
     if (!transfer.precalculateBalancesFromApproval) {
-      transfer.precalculateBalancesFromApproval = new ApprovalIdentifierDetails();
+      transfer.precalculateBalancesFromApproval = new ApprovalIdentifierDetails({
+        version: '0'
+      });
     }
   }
 
@@ -346,7 +353,8 @@ const universalParams = {
         ownershipTimes: [new UintRange()],
         approvalCriteria: new OutgoingApprovalCriteria({
           ...approvalCriteria
-        })
+        }),
+        version: '0'
       })
     ],
     incomingApprovals: [
@@ -356,7 +364,8 @@ const universalParams = {
         ownershipTimes: [new UintRange()],
         approvalCriteria: new IncomingApprovalCriteria({
           ...approvalCriteria
-        })
+        }),
+        version: '0'
       })
     ],
     userPermissions: new UserPermissions({
@@ -385,6 +394,12 @@ const universalParams = {
         })
       ],
       canUpdateAutoApproveSelfInitiatedOutgoingTransfers: [
+        new ActionPermission({
+          permanentlyPermittedTimes: [new UintRange()],
+          permanentlyForbiddenTimes: [new UintRange()]
+        })
+      ],
+      canUpdateAutoApproveAllIncomingTransfers: [
         new ActionPermission({
           permanentlyPermittedTimes: [new UintRange()],
           permanentlyForbiddenTimes: [new UintRange()]
@@ -449,7 +464,8 @@ const universalParams = {
       ownershipTimes: [new UintRange()],
       approvalCriteria: new ApprovalCriteria({
         ...approvalCriteria
-      })
+      }),
+      version: '0'
     })
   ],
   collectionPermissions: new CollectionPermissions({
@@ -581,8 +597,14 @@ export function getSampleMsg(msgType: string, currMsg: any) {
                   badgeIds: [new UintRange()]
                 })
               ],
-              precalculateBalancesFromApproval: new ApprovalIdentifierDetails(),
-              prioritizedApprovals: [new ApprovalIdentifierDetails()],
+              precalculateBalancesFromApproval: new ApprovalIdentifierDetails({
+                version: '0'
+              }),
+              prioritizedApprovals: [
+                new ApprovalIdentifierDetails({
+                  version: '0'
+                })
+              ],
               merkleProofs: [
                 new MerkleProof({
                   aunts: [new MerklePathItem()]
@@ -603,7 +625,8 @@ export function getSampleMsg(msgType: string, currMsg: any) {
               ownershipTimes: [new UintRange()],
               approvalCriteria: new OutgoingApprovalCriteria({
                 ...approvalCriteria
-              })
+              }),
+              version: '0'
             })
           ],
           incomingApprovals: [
@@ -613,7 +636,8 @@ export function getSampleMsg(msgType: string, currMsg: any) {
               ownershipTimes: [new UintRange()],
               approvalCriteria: new IncomingApprovalCriteria({
                 ...approvalCriteria
-              })
+              }),
+              version: '0'
             })
           ],
           userPermissions: new UserPermissions({
@@ -642,6 +666,12 @@ export function getSampleMsg(msgType: string, currMsg: any) {
               })
             ],
             canUpdateAutoApproveSelfInitiatedOutgoingTransfers: [
+              new ActionPermission({
+                permanentlyPermittedTimes: [new UintRange()],
+                permanentlyForbiddenTimes: [new UintRange()]
+              })
+            ],
+            canUpdateAutoApproveAllIncomingTransfers: [
               new ActionPermission({
                 permanentlyPermittedTimes: [new UintRange()],
                 permanentlyForbiddenTimes: [new UintRange()]

@@ -283,7 +283,7 @@ export interface iTransfer<T extends NumberType> {
   /**
    * If specified, we will precalculate from this approval and override the balances. This can only be used when the specified approval has predeterminedBalances set.
    */
-  precalculateBalancesFromApproval?: iApprovalIdentifierDetails;
+  precalculateBalancesFromApproval?: iApprovalIdentifierDetails<T>;
 
   /**
    * The merkle proofs that satisfy the mkerkle challenges in the approvals. If the transfer deducts from multiple approvals, we check all the merkle proofs and assert at least one is valid for every challenge.
@@ -298,7 +298,7 @@ export interface iTransfer<T extends NumberType> {
   /**
    * The prioritized approvals to use for the transfer. If specified, we will check these first.
    */
-  prioritizedApprovals?: iApprovalIdentifierDetails[];
+  prioritizedApprovals?: iApprovalIdentifierDetails<T>[];
 
   /**
    * Whether or not to only check the prioritized approvals. If false, we will check all approvals with any prioritized first.
@@ -325,7 +325,7 @@ export interface iTransfer<T extends NumberType> {
 /**
  * @category Interfaces
  */
-export interface iApprovalIdentifierDetails {
+export interface iApprovalIdentifierDetails<T extends NumberType> {
   /**
    * The approval ID of the approval.
    */
@@ -340,6 +340,11 @@ export interface iApprovalIdentifierDetails {
    * The address of the approval to check. If approvalLevel is "collection", this is blank "".
    */
   approverAddress: BitBadgesAddress;
+
+  /**
+   * The version of the approval.
+   */
+  version: T;
 }
 
 /**
@@ -354,6 +359,14 @@ export interface iCoinTransfer<T extends NumberType> {
    * The coins
    */
   coins: iCosmosCoin<T>[];
+  /**
+   * Whether or not to override the from address with the approver address.
+   */
+  overrideFromWithApproverAddress: boolean;
+  /**
+   * Whether or not to override the to address with the initiator of the transaction.
+   */
+  overrideToWithInitiator: boolean;
 }
 
 /** @category Interfaces */
