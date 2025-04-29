@@ -230,6 +230,10 @@ export class UserOutgoingApproval<T extends NumberType> extends BaseNumberTypeCl
     this.version = msg.version;
   }
 
+  getNumberFieldNames(): string[] {
+    return ['version'];
+  }
+
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UserOutgoingApproval<U> {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserOutgoingApproval<U>;
   }
