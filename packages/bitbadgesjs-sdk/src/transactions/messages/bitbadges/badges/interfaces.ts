@@ -129,9 +129,6 @@ export interface iMsgUniversalUpdateCollection<T extends NumberType> extends iMs
   updateIsArchivedTimeline?: boolean;
   /** Whether or not to update the valid badge IDs. */
   updateValidBadgeIds?: boolean;
-
-  /** Creator override. Internal only. Only used for CosmWasm purposes. */
-  creatorOverride: BitBadgesAddress;
 }
 
 /**
