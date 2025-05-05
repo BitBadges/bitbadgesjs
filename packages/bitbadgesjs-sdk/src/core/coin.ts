@@ -36,7 +36,7 @@ export class CosmosCoin<T extends NumberType> extends BaseNumberTypeClass<Cosmos
 
   static fromProto<T extends NumberType>(data: { amount: string; denom: string }, convertFunction: (val: NumberType) => T): CosmosCoin<T> {
     return new CosmosCoin({
-      amount: data.amount as any,
+      amount: convertFunction(data.amount as any),
       denom: data.denom
     });
   }
