@@ -23,6 +23,8 @@ export interface iUserBalanceStore<T extends NumberType> {
   autoApproveSelfInitiatedOutgoingTransfers: boolean;
   /** Whether the user's self-initiated incoming transfers are auto-approved. If not, they must be explicitly approved using the incoming approvals. */
   autoApproveSelfInitiatedIncomingTransfers: boolean;
+  /** Whether the user's all incoming transfers are auto-approved. If not, they must be explicitly approved using the incoming approvals. */
+  autoApproveAllIncomingTransfers: boolean;
 }
 
 /**
@@ -36,4 +38,5 @@ export interface iUserBalanceStoreWithDetails<T extends NumberType> extends iUse
   balances: iBalance<T>[];
   autoApproveSelfInitiatedOutgoingTransfers: boolean;
   autoApproveSelfInitiatedIncomingTransfers: boolean;
+  autoApproveAllIncomingTransfers: boolean;
 }

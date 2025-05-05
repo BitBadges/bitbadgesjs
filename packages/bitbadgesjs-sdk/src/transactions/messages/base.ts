@@ -4,7 +4,9 @@ import { MAINNET_CHAIN_DETAILS, TESTNET_CHAIN_DETAILS } from '@/common/constants
 import { SupportedChain } from '@/common/types.js';
 import { generatePostBodyBroadcast } from '@/node-rest-api/broadcast.js';
 import {
+  MsgCreateAddressLists,
   MsgCreateCollection,
+  MsgDeleteCollection,
   MsgTransferBadges,
   MsgUniversalUpdateCollection,
   MsgUpdateCollection,
@@ -13,7 +15,9 @@ import {
 import { type AuthInfo, type TxBody, type TxRaw, SignDoc } from '@/proto/cosmos/tx/v1beta1/tx_pb.js';
 import { createTypedData } from '@/transactions/eip712/payload/createTypedData.js';
 import {
+  populateUndefinedForMsgCreateAddressLists,
   populateUndefinedForMsgCreateCollection,
+  populateUndefinedForMsgDeleteCollection,
   populateUndefinedForMsgTransferBadges,
   populateUndefinedForMsgUniversalUpdateCollection,
   populateUndefinedForMsgUpdateCollection,
@@ -250,7 +254,7 @@ const createTransactionPayloadFromTxContext = (txContext: LegacyTxContext, messa
 
 //Because the current and other code doesn't support Msgs with optional / empty fields,
 //we need to populate undefined fields with empty default values
-const normalizeMessagesIfNecessary = (messages: MessageGenerated[]) => {
+export const normalizeMessagesIfNecessary = (messages: MessageGenerated[]) => {
   const newMessages = messages.map((msg) => {
     const msgVal = msg.message;
 
@@ -264,6 +268,10 @@ const normalizeMessagesIfNecessary = (messages: MessageGenerated[]) => {
       msg = createProtoMsg(populateUndefinedForMsgCreateCollection(msgVal as MsgCreateCollection));
     } else if (msgVal.getType().typeName === MsgUniversalUpdateCollection.typeName) {
       msg = createProtoMsg(populateUndefinedForMsgUniversalUpdateCollection(msgVal as MsgUniversalUpdateCollection));
+    } else if (msgVal.getType().typeName === MsgCreateAddressLists.typeName) {
+      msg = createProtoMsg(populateUndefinedForMsgCreateAddressLists(msgVal as MsgCreateAddressLists));
+    } else if (msgVal.getType().typeName === MsgDeleteCollection.typeName) {
+      msg = createProtoMsg(populateUndefinedForMsgDeleteCollection(msgVal as MsgDeleteCollection));
     }
 
     //MsgCreateAddressLists and MsgDeleteCollection should be fine bc they are all primitive types and required

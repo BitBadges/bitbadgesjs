@@ -16,7 +16,7 @@ import "badges/address_lists.proto";
 import "badges/timelines.proto";
 
 
-option go_package = "bitbadgeschain/x/badges/types";
+option go_package = "github.com/bitbadges/bitbadgeschain/x/badges/types";
 
 // Msg defines the Msg service.
 service Msg {
@@ -32,7 +32,6 @@ service Msg {
   rpc DeleteCollection(MsgDeleteCollection) returns (MsgDeleteCollectionResponse);
   rpc UpdateCollection      (MsgUpdateCollection) returns (MsgUpdateCollectionResponse);
   rpc CreateCollection      (MsgCreateCollection) returns (MsgCreateCollectionResponse);
-  rpc GlobalArchive(MsgGlobalArchive) returns (MsgGlobalArchiveResponse);
 }
 
 // MsgUpdateParams is the Msg/UpdateParams request type.
@@ -67,7 +66,6 @@ message BadgeCustomMsgType {
   MsgUpdateUserApprovals updateUserApprovalsMsg = 5;
   MsgUpdateCollection updateCollectionMsg = 6;
   MsgCreateCollection createCollectionMsg = 7;
-  MsgGlobalArchive globalArchiveMsg = 8;
 }
 
 // MsgUniversalUpdateCollection is used to define MsgServer types for all requests and responses for Msgs of the badges module.
@@ -89,8 +87,11 @@ message MsgUniversalUpdateCollection {
   //The default balances for the user
   UserBalanceStore defaultBalances = 4;
 
+  // Indicates if the valid badge IDs should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+  bool updateValidBadgeIds = 5;
+
   // New badge IDs to add to this collection
-  repeated UintRange badgeIdsToAdd = 6; 
+  repeated UintRange validBadgeIds = 6; 
 
   // Indicates if collection permissions should be updated. If true, we set to value in this Msg. If false, we keep existing value.
   bool updateCollectionPermissions = 7;
@@ -145,6 +146,10 @@ message MsgUniversalUpdateCollection {
   
   // New isArchived timeline to set.
   repeated IsArchivedTimeline isArchivedTimeline = 26;
+
+  // Address of the original creator. Used for CosmWASM purposes. 
+  // IMPORTANT: We will override but we must trust the original creator address.
+  string creatorOverride = 27;
 }
 
 // MsgUniversalUpdateCollectionResponse is the response to MsgUniversalUpdateCollection.
@@ -164,8 +169,11 @@ message MsgUpdateCollection {
   // ID of the collection (0 for new collection).
   string collectionId = 2 [(gogoproto.customtype) = "Uint", (gogoproto.nullable) = false];
   
+  // Indicates if the valid badge IDs should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+  bool updateValidBadgeIds = 3;
+
   // New badge IDs to add to this collection
-  repeated UintRange badgeIdsToAdd = 6;
+  repeated UintRange validBadgeIds = 4;
   
   // Indicates if collection permissions should be updated. If true, we set to value in this Msg. If false, we keep existing value.
   bool updateCollectionPermissions = 7;
@@ -220,6 +228,10 @@ message MsgUpdateCollection {
   
   // New isArchived timeline to set.
   repeated IsArchivedTimeline isArchivedTimeline = 28;
+
+  // Address of the original creator. Used for CosmWASM purposes. 
+  // IMPORTANT: We will override but we must trust the original creator address.
+  string creatorOverride = 29;
 }
 
 // MsgUpdateCollectionResponse is the response to MsgUpdateCollection.
@@ -243,7 +255,7 @@ message MsgCreateCollection {
   UserBalanceStore defaultBalances = 4;
 
   // New badge IDs to add to this collection
-  repeated UintRange badgeIdsToAdd = 5; 
+  repeated UintRange validBadgeIds = 5; 
   
   // Collection permissions.
   CollectionPermissions collectionPermissions = 6;
@@ -271,6 +283,10 @@ message MsgCreateCollection {
   
   // isArchived timeline entries.
   repeated IsArchivedTimeline isArchivedTimeline = 14;
+
+  // Address of the original creator. Used for CosmWASM purposes. 
+  // IMPORTANT: We will override but we must trust the original creator address.
+  string creatorOverride = 15;
 }
 
 // MsgCreateCollectionResponse is the response to MsgCreateCollection.
@@ -289,6 +305,10 @@ message MsgCreateAddressLists {
   
   // Address lists to create.
   repeated AddressList addressLists = 2;
+
+  // Address of the original creator. Used for CosmWASM purposes. 
+  // IMPORTANT: We will override but we must trust the original creator address.
+  string creatorOverride = 3;
 }
 
 // MsgCreateAddressListsResponse is the response to MsgCreateAddressLists.
@@ -307,6 +327,10 @@ message MsgTransferBadges {
   
   // Transfers to execute.
   repeated Transfer transfers = 3;
+
+  // Address of the original creator. Used for CosmWASM purposes. 
+  // IMPORTANT: We will override but we must trust the original creator address.
+  string creatorOverride = 4;
 }
 
 // MsgTransferBadgesResponse is the response to MsgTransferBadges.
@@ -322,19 +346,14 @@ message MsgDeleteCollection {
   
   // ID of the collection.
   string collectionId = 2  [(gogoproto.customtype) = "Uint", (gogoproto.nullable) = false];
+
+  // Address of the original creator. Used for CosmWASM purposes. 
+  // IMPORTANT: We will override but we must trust the original creator address.
+  string creatorOverride = 3;
 }
 
 // MsgDeleteCollectionResponse is the response to MsgDeleteCollection.
 message MsgDeleteCollectionResponse {}
-
-message MsgGlobalArchive {
-  option (cosmos.msg.v1.signer) = "creator";
-
-  string creator = 1;
-  bool archive = 2;
-}
-
-message MsgGlobalArchiveResponse {}
 
 // MsgUpdateUserApprovals is used to update user approvals.
 message MsgUpdateUserApprovals {
@@ -370,12 +389,22 @@ message MsgUpdateUserApprovals {
   
   // Auto-approve setting for self-initiated incoming transfers.
   bool autoApproveSelfInitiatedIncomingTransfers = 10;
-  
+
+  // Indicates if auto-approve settings for all incoming transfers should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+  bool updateAutoApproveAllIncomingTransfers = 11;
+
+  // Auto-approve setting for all incoming transfers.
+  bool autoApproveAllIncomingTransfers = 12;
+
   // Indicates if user permissions should be updated. If true, we set to value in this Msg. If false, we keep existing value.
-  bool updateUserPermissions = 11;
+  bool updateUserPermissions = 13;
   
   // New user permissions to set.
-  UserPermissions userPermissions = 12;
+  UserPermissions userPermissions = 14;
+
+  // Address of the original creator. Used for CosmWASM purposes. 
+  // IMPORTANT: We will override but we must trust the original creator address.
+  string creatorOverride = 15;
 }
 
 // MsgUpdateUserApprovalsResponse is the response to MsgUpdateUserApprovals.

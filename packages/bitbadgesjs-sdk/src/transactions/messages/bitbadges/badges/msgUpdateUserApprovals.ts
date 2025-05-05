@@ -1,14 +1,16 @@
 import * as badges from '@/proto/badges/tx_pb.js';
 
-import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
+import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import { Stringify } from '@/common/string-numbers.js';
-import { UserPermissions } from '@/core/permissions.js';
 import { UserIncomingApproval, UserOutgoingApproval } from '@/core/approvals.js';
+import { UserPermissions } from '@/core/permissions.js';
+import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 import type { iMsgUpdateUserApprovals } from './interfaces.js';
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
-import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
+import { getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
 import { CollectionId } from '@/interfaces/index.js';
+import { normalizeMessagesIfNecessary } from '../../base.js';
 
 /**
  * MsgUpdateUserApprovals represents the message for updating user approvals.
@@ -41,8 +43,11 @@ export class MsgUpdateUserApprovals<T extends NumberType>
   autoApproveSelfInitiatedOutgoingTransfers?: boolean;
   updateAutoApproveSelfInitiatedIncomingTransfers?: boolean;
   autoApproveSelfInitiatedIncomingTransfers?: boolean;
+  updateAutoApproveAllIncomingTransfers?: boolean;
+  autoApproveAllIncomingTransfers?: boolean;
   updateUserPermissions?: boolean;
   userPermissions?: UserPermissions<T>;
+  creatorOverride: BitBadgesAddress;
 
   constructor(msg: iMsgUpdateUserApprovals<T>) {
     super();
@@ -56,8 +61,11 @@ export class MsgUpdateUserApprovals<T extends NumberType>
     this.autoApproveSelfInitiatedOutgoingTransfers = msg.autoApproveSelfInitiatedOutgoingTransfers;
     this.updateAutoApproveSelfInitiatedIncomingTransfers = msg.updateAutoApproveSelfInitiatedIncomingTransfers;
     this.autoApproveSelfInitiatedIncomingTransfers = msg.autoApproveSelfInitiatedIncomingTransfers;
+    this.updateAutoApproveAllIncomingTransfers = msg.updateAutoApproveAllIncomingTransfers;
+    this.autoApproveAllIncomingTransfers = msg.autoApproveAllIncomingTransfers;
     this.updateUserPermissions = msg.updateUserPermissions;
     this.userPermissions = msg.userPermissions ? new UserPermissions(msg.userPermissions) : undefined;
+    this.creatorOverride = msg.creatorOverride;
   }
 
   getNumberFieldNames(): string[] {
@@ -103,6 +111,8 @@ export class MsgUpdateUserApprovals<T extends NumberType>
       autoApproveSelfInitiatedOutgoingTransfers: protoMsg.autoApproveSelfInitiatedOutgoingTransfers,
       updateAutoApproveSelfInitiatedIncomingTransfers: protoMsg.updateAutoApproveSelfInitiatedIncomingTransfers,
       autoApproveSelfInitiatedIncomingTransfers: protoMsg.autoApproveSelfInitiatedIncomingTransfers,
+      updateAutoApproveAllIncomingTransfers: protoMsg.updateAutoApproveAllIncomingTransfers,
+      autoApproveAllIncomingTransfers: protoMsg.autoApproveAllIncomingTransfers,
       updateUserPermissions: protoMsg.updateUserPermissions,
       userPermissions: protoMsg.userPermissions
         ? UserPermissions.fromProto(protoMsg.userPermissions, convertFunction)
@@ -110,8 +120,31 @@ export class MsgUpdateUserApprovals<T extends NumberType>
             canUpdateAutoApproveSelfInitiatedIncomingTransfers: [],
             canUpdateAutoApproveSelfInitiatedOutgoingTransfers: [],
             canUpdateIncomingApprovals: [],
-            canUpdateOutgoingApprovals: []
-          })
+            canUpdateOutgoingApprovals: [],
+            canUpdateAutoApproveAllIncomingTransfers: []
+          }),
+      creatorOverride: protoMsg.creatorOverride
     });
+  }
+
+  toBech32Addresses(prefix: string): MsgUpdateUserApprovals<T> {
+    return new MsgUpdateUserApprovals<T>({
+      ...this,
+      creator: getConvertFunctionFromPrefix(prefix)(this.creator),
+      collectionId: this.collectionId,
+      outgoingApprovals: this.outgoingApprovals?.map((x) => x.toBech32Addresses(prefix)),
+      incomingApprovals: this.incomingApprovals?.map((x) => x.toBech32Addresses(prefix)),
+      userPermissions: this.userPermissions?.toBech32Addresses(prefix),
+      creatorOverride: getConvertFunctionFromPrefix(prefix)(this.creatorOverride)
+    });
+  }
+
+  toCosmWasmPayloadString(): string {
+    return `{"updateUserApprovalsMsg":${normalizeMessagesIfNecessary([
+      {
+        message: this.toProto(),
+        path: this.toProto().getType().typeName
+      }
+    ])[0].message.toJsonString({ emitDefaultValues: true })} }`;
   }
 }

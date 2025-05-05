@@ -111,6 +111,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   ethAddress: string;
   btcAddress: string;
   solAddress: string;
+  thorAddress: string;
   accountNumber: T;
   sequence?: T;
   balance?: CosmosCoin<T>;
@@ -156,6 +157,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     this.ethAddress = data.ethAddress;
     this.btcAddress = data.btcAddress;
     this.solAddress = data.solAddress;
+    this.thorAddress = data.thorAddress;
     this.accountNumber = data.accountNumber;
     this.sequence = data.sequence;
     this.balance = data.balance ? new CosmosCoin(data.balance) : undefined;
@@ -567,6 +569,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
       ethAddress: 'Mint',
       solAddress: 'Mint',
       btcAddress: 'Mint',
+      thorAddress: 'Mint',
       address: 'Mint',
       chain: SupportedChain.COSMOS,
       pubKeyType: 'secp256k1',
@@ -604,6 +607,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
       ethAddress: '',
       solAddress: '',
       btcAddress: '',
+      thorAddress: '',
       address: '',
       chain: SupportedChain.UNKNOWN,
       pubKeyType: '',

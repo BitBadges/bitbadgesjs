@@ -19,6 +19,41 @@ export class Module extends Message<Module> {
    */
   authority = "";
 
+  /**
+   * approved_contract_addresses defines the list of contract addresses that are approved to override the creator.
+   *
+   * @generated from field: repeated string approved_contract_addresses = 2;
+   */
+  approvedContractAddresses: string[] = [];
+
+  /**
+   * payout_address defines where to send the revenue from the module
+   *
+   * @generated from field: string payout_address = 3;
+   */
+  payoutAddress = "";
+
+  /**
+   * whether to allow coin_transfers in the approval interface
+   *
+   * @generated from field: bool enable_coin_transfers = 4;
+   */
+  enableCoinTransfers = false;
+
+  /**
+   * allowed_denoms defines the list of denoms that are allowed to be used in coin_transfers
+   *
+   * @generated from field: repeated string allowed_denoms = 5;
+   */
+  allowedDenoms: string[] = [];
+
+  /**
+   * fixed_cost_per_transfer defines the fixed cost per transfer
+   *
+   * @generated from field: string fixed_cost_per_transfer = 6;
+   */
+  fixedCostPerTransfer = "";
+
   constructor(data?: PartialMessage<Module>) {
     super();
     proto3.util.initPartial(data, this);
@@ -28,6 +63,11 @@ export class Module extends Message<Module> {
   static readonly typeName = "badges.module.Module";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "authority", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "approved_contract_addresses", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 3, name: "payout_address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "enable_coin_transfers", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 5, name: "allowed_denoms", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 6, name: "fixed_cost_per_transfer", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Module {

@@ -1,15 +1,20 @@
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions, deepCopyPrimitives, getConverterFunction } from '@/common/base.js';
+import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
+import {
+  BaseNumberTypeClass,
+  convertClassPropertiesAndMaintainNumberTypes,
+  ConvertOptions,
+  getConverterFunction
+} from '@/common/base.js';
 import type { iBalance, iTransfer } from '@/interfaces/badges/core.js';
 import * as badges from '@/proto/badges/transfers_pb.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
-import { convertToBitBadgesAddress } from '../address-converter/converter.js';
+import { convertToBitBadgesAddress, getConvertFunctionFromPrefix } from '../address-converter/converter.js';
 import { GO_MAX_UINT_64, safeAddKeepLeft, safeMultiplyKeepLeft } from '../common/math.js';
 import type { NumberType } from '../common/string-numbers.js';
 import { BigIntify, Stringify } from '../common/string-numbers.js';
 import { Balance, BalanceArray, cleanBalances } from './balances.js';
-import { ApprovalIdentifierDetails, MerkleProof, ZkProofSolution } from './misc.js';
+import { ApprovalIdentifierDetails, MerkleProof } from './misc.js';
 import { UintRangeArray } from './uintRanges.js';
-import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
 
 /**
  * Transfer is used to represent a transfer of badges. This is compatible with the MsgTransferBadges message.
@@ -20,14 +25,13 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
   from: BitBadgesAddress;
   toAddresses: BitBadgesAddress[];
   balances: BalanceArray<T>;
-  precalculateBalancesFromApproval?: ApprovalIdentifierDetails;
+  precalculateBalancesFromApproval?: ApprovalIdentifierDetails<T>;
   merkleProofs?: MerkleProof[];
   memo?: string;
-  prioritizedApprovals?: ApprovalIdentifierDetails[];
+  prioritizedApprovals?: ApprovalIdentifierDetails<T>[];
   onlyCheckPrioritizedCollectionApprovals?: boolean | undefined;
   onlyCheckPrioritizedIncomingApprovals?: boolean | undefined;
   onlyCheckPrioritizedOutgoingApprovals?: boolean | undefined;
-  zkProofSolutions?: ZkProofSolution[] | undefined;
 
   constructor(transfer: iTransfer<T>) {
     super();
@@ -46,28 +50,10 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
 
     this.onlyCheckPrioritizedIncomingApprovals = transfer.onlyCheckPrioritizedIncomingApprovals;
     this.onlyCheckPrioritizedOutgoingApprovals = transfer.onlyCheckPrioritizedOutgoingApprovals;
-    this.zkProofSolutions = transfer.zkProofSolutions ? transfer.zkProofSolutions.map((b) => new ZkProofSolution(b)) : undefined;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): Transfer<U> {
-    return new Transfer<U>(
-      deepCopyPrimitives({
-        from: this.from,
-        toAddresses: this.toAddresses,
-        balances: this.balances.map((b) => b.convert(convertFunction)),
-        precalculateBalancesFromApproval: this.precalculateBalancesFromApproval ? this.precalculateBalancesFromApproval : undefined,
-        merkleProofs: this.merkleProofs ? this.merkleProofs : undefined,
-        memo: this.memo ? this.memo : undefined,
-        prioritizedApprovals: this.prioritizedApprovals ? this.prioritizedApprovals : undefined,
-        onlyCheckPrioritizedCollectionApprovals: this.onlyCheckPrioritizedCollectionApprovals
-          ? this.onlyCheckPrioritizedCollectionApprovals
-          : undefined,
-        onlyCheckPrioritizedIncomingApprovals: this.onlyCheckPrioritizedIncomingApprovals ? this.onlyCheckPrioritizedIncomingApprovals : undefined,
-        onlyCheckPrioritizedOutgoingApprovals: this.onlyCheckPrioritizedOutgoingApprovals ? this.onlyCheckPrioritizedOutgoingApprovals : undefined,
-
-        zkProofSolutions: this.zkProofSolutions ? this.zkProofSolutions : undefined
-      })
-    );
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as Transfer<U>;
   }
 
   toProto(): badges.Transfer {
@@ -96,16 +82,27 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
       toAddresses: item.toAddresses,
       balances: item.balances.map((b) => Balance.fromProto(b, convertFunction)),
       precalculateBalancesFromApproval: item.precalculateBalancesFromApproval
-        ? ApprovalIdentifierDetails.fromProto(item.precalculateBalancesFromApproval)
+        ? ApprovalIdentifierDetails.fromProto(item.precalculateBalancesFromApproval, convertFunction)
         : undefined,
       merkleProofs: item.merkleProofs ? item.merkleProofs.map((b) => MerkleProof.fromProto(b)) : undefined,
       memo: item.memo ? item.memo : undefined,
-      prioritizedApprovals: item.prioritizedApprovals ? item.prioritizedApprovals.map((b) => ApprovalIdentifierDetails.fromProto(b)) : undefined,
+      prioritizedApprovals: item.prioritizedApprovals
+        ? item.prioritizedApprovals.map((b) => ApprovalIdentifierDetails.fromProto(b, convertFunction))
+        : undefined,
 
-      zkProofSolutions: item.zkProofSolutions ? item.zkProofSolutions.map((b) => ZkProofSolution.fromProto(b)) : undefined,
       onlyCheckPrioritizedCollectionApprovals: item.onlyCheckPrioritizedCollectionApprovals,
       onlyCheckPrioritizedIncomingApprovals: item.onlyCheckPrioritizedIncomingApprovals,
       onlyCheckPrioritizedOutgoingApprovals: item.onlyCheckPrioritizedOutgoingApprovals
+    });
+  }
+
+  toBech32Addresses(prefix: string): Transfer<T> {
+    return new Transfer({
+      ...this,
+      from: getConvertFunctionFromPrefix(prefix)(this.from),
+      toAddresses: this.toAddresses.map((x) => getConvertFunctionFromPrefix(prefix)(x)),
+      precalculateBalancesFromApproval: this.precalculateBalancesFromApproval?.toBech32Addresses(prefix),
+      prioritizedApprovals: this.prioritizedApprovals?.map((x) => x.toBech32Addresses(prefix))
     });
   }
 }
@@ -156,6 +153,9 @@ export interface iTransferWithIncrements<T extends NumberType> extends iTransfer
 
   /** The number to increment the ownershipTimes by for each transfer. */
   incrementOwnershipTimesBy?: T;
+
+  /** The number of unix milliseconds to approve starting from now. */
+  approvalDurationFromNow?: T;
 }
 
 /**
@@ -178,23 +178,24 @@ export class TransferWithIncrements<T extends NumberType>
   toAddressesLength?: T;
   incrementBadgeIdsBy?: T;
   incrementOwnershipTimesBy?: T;
+  approvalDurationFromNow?: T;
   from: BitBadgesAddress;
   toAddresses: BitBadgesAddress[];
   balances: BalanceArray<T>;
-  precalculateBalancesFromApproval?: ApprovalIdentifierDetails;
+  precalculateBalancesFromApproval?: ApprovalIdentifierDetails<T>;
   merkleProofs?: MerkleProof[];
   memo?: string;
-  prioritizedApprovals?: ApprovalIdentifierDetails[];
+  prioritizedApprovals?: ApprovalIdentifierDetails<T>[];
   onlyCheckPrioritizedCollectionApprovals?: boolean | undefined;
   onlyCheckPrioritizedIncomingApprovals?: boolean | undefined;
   onlyCheckPrioritizedOutgoingApprovals?: boolean | undefined;
-  zkProofSolutions?: ZkProofSolution[] | undefined;
 
   constructor(data: iTransferWithIncrements<T>) {
     super();
     this.toAddressesLength = data.toAddressesLength;
     this.incrementBadgeIdsBy = data.incrementBadgeIdsBy;
     this.incrementOwnershipTimesBy = data.incrementOwnershipTimesBy;
+    this.approvalDurationFromNow = data.approvalDurationFromNow;
     this.from = data.from;
     this.toAddresses = data.toAddresses;
     this.balances = BalanceArray.From(data.balances);
@@ -207,11 +208,10 @@ export class TransferWithIncrements<T extends NumberType>
     this.onlyCheckPrioritizedCollectionApprovals = data.onlyCheckPrioritizedCollectionApprovals;
     this.onlyCheckPrioritizedCollectionApprovals = data.onlyCheckPrioritizedCollectionApprovals;
     this.onlyCheckPrioritizedCollectionApprovals = data.onlyCheckPrioritizedCollectionApprovals;
-    this.zkProofSolutions = data.zkProofSolutions ? data.zkProofSolutions.map((b) => new ZkProofSolution(b)) : undefined;
   }
 
   getNumberFieldNames(): string[] {
-    return ['toAddressesLength', 'incrementBadgeIdsBy', 'incrementOwnershipTimesBy'];
+    return ['toAddressesLength', 'incrementBadgeIdsBy', 'incrementOwnershipTimesBy', 'approvalDurationFromNow'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): TransferWithIncrements<U> {
@@ -227,7 +227,11 @@ export class TransferWithIncrements<T extends NumberType>
 export const createBalanceMapForOffChainBalances = <T extends NumberType>(transfersWithIncrements: iTransferWithIncrements<T>[]) => {
   const balanceMap: OffChainBalancesMap<T> = {};
 
-  const transfers = getTransfersFromTransfersWithIncrements(transfersWithIncrements);
+  if (transfersWithIncrements.some((x) => x.approvalDurationFromNow)) {
+    throw new Error('approvalDurationFromNow is not supported in createBalanceMapForOffChainBalances');
+  }
+
+  const transfers = getTransfersFromTransfersWithIncrements(transfersWithIncrements, 0n as T);
   //Calculate new balances of the toAddresses
   for (let idx = 0; idx < transfers.length; idx++) {
     const transfer = transfers[idx];
@@ -254,6 +258,8 @@ export const createBalanceMapForOffChainBalances = <T extends NumberType>(transf
  * @category Balances
  */
 export const getAllBadgeIdsToBeTransferred = <T extends NumberType>(transfers: iTransferWithIncrements<T>[]) => {
+  //NOTE: We do not support approvalDurationFromNow in this function since we just return the badgeIds
+
   const allBadgeIds: UintRangeArray<T> = UintRangeArray.From([]);
   const transfersConverted = transfers.map((transfer) => new TransferWithIncrements(transfer));
 
@@ -303,7 +309,7 @@ export const getAllBadgeIdsToBeTransferred = <T extends NumberType>(transfers: i
  *
  * @category Balances
  */
-export const getAllBalancesToBeTransferred = <T extends NumberType>(transfers: iTransferWithIncrements<T>[]) => {
+export const getAllBalancesToBeTransferred = <T extends NumberType>(transfers: iTransferWithIncrements<T>[], blockTime: T) => {
   const allBalances = BalanceArray.From([
     {
       amount: GO_MAX_UINT_64,
@@ -314,7 +320,7 @@ export const getAllBalancesToBeTransferred = <T extends NumberType>(transfers: i
   const allBalancesCopy = allBalances.clone();
 
   const transfersConverted = transfers.map((transfer) => new TransferWithIncrements(transfer).convert(BigIntify));
-  const remainingBalances = getBalancesAfterTransfers(allBalances, transfersConverted, true);
+  const remainingBalances = getBalancesAfterTransfers(allBalances, transfersConverted, BigIntify(blockTime), true);
 
   allBalancesCopy.subtractBalances(remainingBalances, true);
   return allBalancesCopy;
@@ -329,17 +335,20 @@ export const getAllBalancesToBeTransferred = <T extends NumberType>(transfers: i
  *
  * @category Balances
  */
-export const getTransfersFromTransfersWithIncrements = <T extends NumberType>(transfersWithIncrements: iTransferWithIncrements<T>[]) => {
+export const getTransfersFromTransfersWithIncrements = <T extends NumberType>(
+  transfersWithIncrements: iTransferWithIncrements<T>[],
+  blockTime: T
+) => {
   const transfers: Transfer<T>[] = [];
 
   const transfersConverted = transfersWithIncrements.map((transfer) => new TransferWithIncrements(transfer));
   for (const transferExtended of transfersConverted) {
-    const { toAddressesLength, incrementBadgeIdsBy, incrementOwnershipTimesBy, ...transfer } = transferExtended;
+    const { toAddressesLength, incrementBadgeIdsBy, incrementOwnershipTimesBy, approvalDurationFromNow, ...transfer } = transferExtended;
     const length = toAddressesLength ? Number(toAddressesLength) : transfer.toAddresses.length;
 
     //If badges are incremented, we create N unique transfers (one to each address).
     //Else, we can create one transfer with N addresses
-    if (incrementBadgeIdsBy || incrementOwnershipTimesBy) {
+    if (incrementBadgeIdsBy || incrementOwnershipTimesBy || approvalDurationFromNow) {
       const currBalances = transfer.balances.clone();
       for (let i = 0; i < length; i++) {
         transfers.push(
@@ -356,9 +365,13 @@ export const getTransfersFromTransfersWithIncrements = <T extends NumberType>(tr
             badgeId.end = safeAddKeepLeft(badgeId.end, incrementBadgeIdsBy || 0n);
           }
 
-          for (const ownershipTime of balance.ownershipTimes) {
-            ownershipTime.start = safeAddKeepLeft(ownershipTime.start, incrementOwnershipTimesBy || 0n);
-            ownershipTime.end = safeAddKeepLeft(ownershipTime.end, incrementOwnershipTimesBy || 0n);
+          if (approvalDurationFromNow) {
+            balance.ownershipTimes = UintRangeArray.From([{ start: blockTime, end: safeAddKeepLeft(blockTime, approvalDurationFromNow || 0n) }]);
+          } else {
+            for (const ownershipTime of balance.ownershipTimes) {
+              ownershipTime.start = safeAddKeepLeft(ownershipTime.start, incrementOwnershipTimesBy || 0n);
+              ownershipTime.end = safeAddKeepLeft(ownershipTime.end, incrementOwnershipTimesBy || 0n);
+            }
           }
         }
       }
@@ -418,6 +431,7 @@ export const getBalanceAfterTransfer = <T extends NumberType>(
 export const getBalancesAfterTransfers = <T extends NumberType>(
   startBalance: iBalance<T>[],
   transfersArr: iTransferWithIncrements<T>[],
+  blockTime: T,
   allowUnderflow?: boolean
 ) => {
   let endBalances = BalanceArray.From(startBalance.map((balance) => new Balance(balance))).clone();
@@ -429,10 +443,10 @@ export const getBalancesAfterTransfers = <T extends NumberType>(
       const numRecipients = BigInt(_numRecipients);
 
       const badgeIds = balance.badgeIds.clone();
-      const ownershipTimes = balance.ownershipTimes.clone();
+      let ownershipTimes = balance.ownershipTimes.clone();
 
       //If incrementIdsBy is not set, then we are not incrementing badgeIds and we can just batch calculate the balance
-      if (!transfer.incrementBadgeIdsBy && !transfer.incrementOwnershipTimesBy) {
+      if (!transfer.incrementBadgeIdsBy && !transfer.incrementOwnershipTimesBy && !transfer.approvalDurationFromNow) {
         for (const badgeId of badgeIds) {
           for (const ownershipTime of ownershipTimes) {
             endBalances = getBalanceAfterTransfer(
@@ -450,7 +464,9 @@ export const getBalancesAfterTransfers = <T extends NumberType>(
       } else {
         const fastIncrementBadges = !transfer.incrementBadgeIdsBy || badgeIds.every((x) => x.size() === transfer.incrementBadgeIdsBy);
         const fastIncrementOwnershipTimes =
-          !transfer.incrementOwnershipTimesBy || ownershipTimes.every((x) => x.size() === transfer.incrementOwnershipTimesBy);
+          !transfer.incrementOwnershipTimesBy ||
+          BigInt(transfer.approvalDurationFromNow || 0n) > 0n ||
+          ownershipTimes.every((x) => x.size() === transfer.incrementOwnershipTimesBy);
 
         //If we are incrementing with no gaps (e.g. end IDs will be 1-1000 or start with x1 and increment x1 10000 times)
         if (fastIncrementBadges && fastIncrementOwnershipTimes) {
@@ -458,11 +474,15 @@ export const getBalancesAfterTransfers = <T extends NumberType>(
             badgeId.end = safeAddKeepLeft(badgeId.end, safeMultiplyKeepLeft(transfer.incrementBadgeIdsBy || 0n, numRecipients - 1n));
           }
 
-          for (const ownershipTime of ownershipTimes) {
-            ownershipTime.end = safeAddKeepLeft(
-              ownershipTime.end,
-              safeMultiplyKeepLeft(transfer.incrementOwnershipTimesBy || 0n, numRecipients - 1n)
-            );
+          if (transfer.approvalDurationFromNow) {
+            ownershipTimes = UintRangeArray.From([{ start: blockTime, end: safeAddKeepLeft(blockTime, transfer.approvalDurationFromNow || 0n) }]);
+          } else {
+            for (const ownershipTime of ownershipTimes) {
+              ownershipTime.end = safeAddKeepLeft(
+                ownershipTime.end,
+                safeMultiplyKeepLeft(transfer.incrementOwnershipTimesBy || 0n, numRecipients - 1n)
+              );
+            }
           }
 
           for (const badgeId of badgeIds) {
@@ -510,6 +530,8 @@ export const getBalancesAfterTransfers = <T extends NumberType>(
                 ownershipTime.start = safeAddKeepLeft(ownershipTime.start, transfer.incrementOwnershipTimesBy || 0n);
                 ownershipTime.end = safeAddKeepLeft(ownershipTime.end, transfer.incrementOwnershipTimesBy || 0n);
               }
+            } else if (transfer.approvalDurationFromNow) {
+              ownershipTimes = UintRangeArray.From([{ start: blockTime, end: safeAddKeepLeft(blockTime, transfer.approvalDurationFromNow || 0n) }]);
             }
           }
         }

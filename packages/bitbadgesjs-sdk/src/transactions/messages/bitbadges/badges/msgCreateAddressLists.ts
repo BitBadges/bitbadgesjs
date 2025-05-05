@@ -5,6 +5,8 @@ import { CustomTypeClass } from '@/common/base.js';
 import { AddressList } from '@/core/addressLists.js';
 import type { iMsgCreateAddressLists } from './interfaces.js';
 import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
+import { getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
+import { normalizeMessagesIfNecessary } from '../../base.js';
 
 /**
  * MsgCreateAddressLists defines address lists on-chain. For off-chain lists, use the API, not this Msg.
@@ -16,11 +18,13 @@ import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
 export class MsgCreateAddressLists extends CustomTypeClass<MsgCreateAddressLists> implements MsgCreateAddressLists {
   creator: BitBadgesAddress;
   addressLists: AddressList[];
+  creatorOverride: BitBadgesAddress;
 
   constructor(msg: iMsgCreateAddressLists) {
     super();
     this.creator = msg.creator;
     this.addressLists = msg.addressLists.map((x) => new AddressList(x));
+    this.creatorOverride = msg.creatorOverride;
   }
 
   toProto(): badges.MsgCreateAddressLists {
@@ -38,7 +42,32 @@ export class MsgCreateAddressLists extends CustomTypeClass<MsgCreateAddressLists
   static fromProto(protoMsg: badges.MsgCreateAddressLists): MsgCreateAddressLists {
     return new MsgCreateAddressLists({
       creator: protoMsg.creator,
-      addressLists: protoMsg.addressLists.map((x) => AddressList.fromProto(x))
+      addressLists: protoMsg.addressLists.map((x) => AddressList.fromProto(x)),
+      creatorOverride: protoMsg.creatorOverride
     });
+  }
+
+  toBech32Addresses(prefix: string): MsgCreateAddressLists {
+    return new MsgCreateAddressLists({
+      creator: getConvertFunctionFromPrefix(prefix)(this.creator),
+      addressLists: this.addressLists.map(
+        (x) =>
+          new AddressList({
+            ...x,
+            createdBy: getConvertFunctionFromPrefix(prefix)(x.createdBy ?? ''),
+            addresses: x.addresses.map((y) => getConvertFunctionFromPrefix(prefix)(y))
+          })
+      ),
+      creatorOverride: getConvertFunctionFromPrefix(prefix)(this.creatorOverride)
+    });
+  }
+
+  toCosmWasmPayloadString(): string {
+    return `{"createAddressListsMsg":${normalizeMessagesIfNecessary([
+      {
+        message: this.toProto(),
+        path: this.toProto().getType().typeName
+      }
+    ])[0].message.toJsonString({ emitDefaultValues: true })} }`;
   }
 }

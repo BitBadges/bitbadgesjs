@@ -1,6 +1,6 @@
 import type { NumberType } from '@/common/string-numbers.js';
-import type { iUintRange, iMustOwnBadges, iMerkleChallenge, iBalance, iAddressList, iZkProof, iCoinTransfer } from './core.js';
 import type { iApprovalInfoDetails, iIncomingApprovalCriteriaWithDetails } from '@/core/approvals.js';
+import type { iAddressList, iBalance, iCoinTransfer, iMerkleChallenge, iUintRange } from './core.js';
 
 /**
  * @category Interfaces
@@ -24,16 +24,14 @@ export interface iUserOutgoingApproval<T extends NumberType> {
   customData?: string;
   /** The criteria to be met. These represent the restrictions that must be obeyed such as the total amount approved, max num transfers, merkle challenges, must own badges, etc. */
   approvalCriteria?: iOutgoingApprovalCriteria<T>;
+  /** The version of the approval. */
+  version: T;
 }
 
 /**
  * @category Interfaces
  */
 export interface iOutgoingApprovalCriteria<T extends NumberType> {
-  /** The list of badges to be owned to be approved. Must have on-chain balances. */
-  mustOwnBadges?: iMustOwnBadges<T>[];
-  /** The list of ZK proofs that need to be satisfied. One use per proof solution. */
-  zkProofs?: iZkProof[];
   /** The $BADGE transfers to be executed upon every approval. */
   coinTransfers?: iCoinTransfer<T>[];
 
@@ -79,8 +77,10 @@ export interface iIncrementedBalances<T extends NumberType> {
   startBalances: iBalance<T>[];
   /** The amount to increment the badge IDs by after each transfer. */
   incrementBadgeIdsBy: T;
-  /** The amount to increment the owned times by after each transfer. */
+  /** The amount to increment the owned times by after each transfer. Incompatible with approvalDurationFromNow. */
   incrementOwnershipTimesBy: T;
+  /** The number of unix milliseconds to approve starting from now. Incompatible with incrementOwnershipTimesBy. */
+  approvalDurationFromNow: T;
 }
 
 /**
@@ -155,16 +155,14 @@ export interface iUserIncomingApproval<T extends NumberType> {
   customData?: string;
   /** The criteria to be met. These represent the restrictions that must be obeyed such as the total amount approved, max num transfers, merkle challenges, must own badges, etc. */
   approvalCriteria?: iIncomingApprovalCriteria<T>;
+  /** The version of the approval. */
+  version: T;
 }
 
 /**
  * @category Interfaces
  */
 export interface iIncomingApprovalCriteria<T extends NumberType> {
-  /** The list of badges to be owned to be approved. Must have on-chain balances. */
-  mustOwnBadges?: iMustOwnBadges<T>[];
-  /** The list of ZK proofs that need to be satisfied. One use per proof solution. */
-  zkProofs?: iZkProof[];
   /** The $BADGE transfers to be executed upon every approval. */
   coinTransfers?: iCoinTransfer<T>[];
   /** The list of merkle challenges that need valid proofs to be approved. */
@@ -205,16 +203,14 @@ export interface iCollectionApproval<T extends NumberType> {
   customData?: string;
   /** The criteria to be met. These represent the restrictions that must be obeyed such as the total amount approved, max num transfers, merkle challenges, must own badges, etc. */
   approvalCriteria?: iApprovalCriteria<T>;
+  /** The version of the approval.0 */
+  version: T;
 }
 
 /**
  * @category Interfaces
  */
 export interface iApprovalCriteria<T extends NumberType> {
-  /** The list of badges to be owned to be approved. Must have on-chain balances. */
-  mustOwnBadges?: iMustOwnBadges<T>[];
-  /** The list of ZK proofs that need to be satisfied. One use per proof solution. */
-  zkProofs?: iZkProof[];
   /** The $BADGE transfers to be executed upon every approval. */
   coinTransfers?: iCoinTransfer<T>[];
   /** The list of merkle challenges that need valid proofs to be approved. */

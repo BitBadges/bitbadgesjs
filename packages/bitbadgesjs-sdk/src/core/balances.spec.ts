@@ -102,6 +102,7 @@ describe('BalancesWithTimesFuzz', () => {
         autoApproveSelfInitiatedOutgoingTransfers: true,
         outgoingApprovals: [],
         incomingApprovals: [],
+        autoApproveAllIncomingTransfers: true,
         userPermissions: UserPermissions.InitEmpty()
       });
       const balances = Array.from({ length: NUM_IDS }, () => Array.from({ length: NUM_IDS }, () => 0));
@@ -152,7 +153,7 @@ describe('BalancesWithTimesFuzz', () => {
       }
     ]);
 
-    startBalances.applyIncrements(1n, 0n, 1000n);
+    startBalances.applyIncrements(1n, 0n, 1000n, 0n, 0n);
 
     console.log(JSON.stringify(startBalances));
     expect(

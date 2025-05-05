@@ -138,11 +138,6 @@ export class BadgeCustomMsgType extends Message<BadgeCustomMsgType> {
    */
   createCollectionMsg?: MsgCreateCollection;
 
-  /**
-   * @generated from field: badges.MsgGlobalArchive globalArchiveMsg = 8;
-   */
-  globalArchiveMsg?: MsgGlobalArchive;
-
   constructor(data?: PartialMessage<BadgeCustomMsgType>) {
     super();
     proto3.util.initPartial(data, this);
@@ -158,7 +153,6 @@ export class BadgeCustomMsgType extends Message<BadgeCustomMsgType> {
     { no: 5, name: "updateUserApprovalsMsg", kind: "message", T: MsgUpdateUserApprovals },
     { no: 6, name: "updateCollectionMsg", kind: "message", T: MsgUpdateCollection },
     { no: 7, name: "createCollectionMsg", kind: "message", T: MsgCreateCollection },
-    { no: 8, name: "globalArchiveMsg", kind: "message", T: MsgGlobalArchive },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BadgeCustomMsgType {
@@ -215,11 +209,18 @@ export class MsgUniversalUpdateCollection extends Message<MsgUniversalUpdateColl
   defaultBalances?: UserBalanceStore;
 
   /**
+   * Indicates if the valid badge IDs should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   *
+   * @generated from field: bool updateValidBadgeIds = 5;
+   */
+  updateValidBadgeIds = false;
+
+  /**
    * New badge IDs to add to this collection
    *
-   * @generated from field: repeated badges.UintRange badgeIdsToAdd = 6;
+   * @generated from field: repeated badges.UintRange validBadgeIds = 6;
    */
-  badgeIdsToAdd: UintRange[] = [];
+  validBadgeIds: UintRange[] = [];
 
   /**
    * Indicates if collection permissions should be updated. If true, we set to value in this Msg. If false, we keep existing value.
@@ -347,6 +348,14 @@ export class MsgUniversalUpdateCollection extends Message<MsgUniversalUpdateColl
    */
   isArchivedTimeline: IsArchivedTimeline[] = [];
 
+  /**
+   * Address of the original creator. Used for CosmWASM purposes. 
+   * IMPORTANT: We will override but we must trust the original creator address.
+   *
+   * @generated from field: string creatorOverride = 27;
+   */
+  creatorOverride = "";
+
   constructor(data?: PartialMessage<MsgUniversalUpdateCollection>) {
     super();
     proto3.util.initPartial(data, this);
@@ -359,7 +368,8 @@ export class MsgUniversalUpdateCollection extends Message<MsgUniversalUpdateColl
     { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "balancesType", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 4, name: "defaultBalances", kind: "message", T: UserBalanceStore },
-    { no: 6, name: "badgeIdsToAdd", kind: "message", T: UintRange, repeated: true },
+    { no: 5, name: "updateValidBadgeIds", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 6, name: "validBadgeIds", kind: "message", T: UintRange, repeated: true },
     { no: 7, name: "updateCollectionPermissions", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 8, name: "collectionPermissions", kind: "message", T: CollectionPermissions },
     { no: 9, name: "updateManagerTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
@@ -378,6 +388,7 @@ export class MsgUniversalUpdateCollection extends Message<MsgUniversalUpdateColl
     { no: 24, name: "standardsTimeline", kind: "message", T: StandardsTimeline, repeated: true },
     { no: 25, name: "updateIsArchivedTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 26, name: "isArchivedTimeline", kind: "message", T: IsArchivedTimeline, repeated: true },
+    { no: 27, name: "creatorOverride", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUniversalUpdateCollection {
@@ -459,11 +470,18 @@ export class MsgUpdateCollection extends Message<MsgUpdateCollection> {
   collectionId = "";
 
   /**
+   * Indicates if the valid badge IDs should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   *
+   * @generated from field: bool updateValidBadgeIds = 3;
+   */
+  updateValidBadgeIds = false;
+
+  /**
    * New badge IDs to add to this collection
    *
-   * @generated from field: repeated badges.UintRange badgeIdsToAdd = 6;
+   * @generated from field: repeated badges.UintRange validBadgeIds = 4;
    */
-  badgeIdsToAdd: UintRange[] = [];
+  validBadgeIds: UintRange[] = [];
 
   /**
    * Indicates if collection permissions should be updated. If true, we set to value in this Msg. If false, we keep existing value.
@@ -591,6 +609,14 @@ export class MsgUpdateCollection extends Message<MsgUpdateCollection> {
    */
   isArchivedTimeline: IsArchivedTimeline[] = [];
 
+  /**
+   * Address of the original creator. Used for CosmWASM purposes. 
+   * IMPORTANT: We will override but we must trust the original creator address.
+   *
+   * @generated from field: string creatorOverride = 29;
+   */
+  creatorOverride = "";
+
   constructor(data?: PartialMessage<MsgUpdateCollection>) {
     super();
     proto3.util.initPartial(data, this);
@@ -601,7 +627,8 @@ export class MsgUpdateCollection extends Message<MsgUpdateCollection> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 6, name: "badgeIdsToAdd", kind: "message", T: UintRange, repeated: true },
+    { no: 3, name: "updateValidBadgeIds", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 4, name: "validBadgeIds", kind: "message", T: UintRange, repeated: true },
     { no: 7, name: "updateCollectionPermissions", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 8, name: "collectionPermissions", kind: "message", T: CollectionPermissions },
     { no: 9, name: "updateManagerTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
@@ -620,6 +647,7 @@ export class MsgUpdateCollection extends Message<MsgUpdateCollection> {
     { no: 24, name: "standardsTimeline", kind: "message", T: StandardsTimeline, repeated: true },
     { no: 27, name: "updateIsArchivedTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 28, name: "isArchivedTimeline", kind: "message", T: IsArchivedTimeline, repeated: true },
+    { no: 29, name: "creatorOverride", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUpdateCollection {
@@ -710,9 +738,9 @@ export class MsgCreateCollection extends Message<MsgCreateCollection> {
   /**
    * New badge IDs to add to this collection
    *
-   * @generated from field: repeated badges.UintRange badgeIdsToAdd = 5;
+   * @generated from field: repeated badges.UintRange validBadgeIds = 5;
    */
-  badgeIdsToAdd: UintRange[] = [];
+  validBadgeIds: UintRange[] = [];
 
   /**
    * Collection permissions.
@@ -777,6 +805,14 @@ export class MsgCreateCollection extends Message<MsgCreateCollection> {
    */
   isArchivedTimeline: IsArchivedTimeline[] = [];
 
+  /**
+   * Address of the original creator. Used for CosmWASM purposes. 
+   * IMPORTANT: We will override but we must trust the original creator address.
+   *
+   * @generated from field: string creatorOverride = 15;
+   */
+  creatorOverride = "";
+
   constructor(data?: PartialMessage<MsgCreateCollection>) {
     super();
     proto3.util.initPartial(data, this);
@@ -788,7 +824,7 @@ export class MsgCreateCollection extends Message<MsgCreateCollection> {
     { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "balancesType", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 4, name: "defaultBalances", kind: "message", T: UserBalanceStore },
-    { no: 5, name: "badgeIdsToAdd", kind: "message", T: UintRange, repeated: true },
+    { no: 5, name: "validBadgeIds", kind: "message", T: UintRange, repeated: true },
     { no: 6, name: "collectionPermissions", kind: "message", T: CollectionPermissions },
     { no: 7, name: "managerTimeline", kind: "message", T: ManagerTimeline, repeated: true },
     { no: 8, name: "collectionMetadataTimeline", kind: "message", T: CollectionMetadataTimeline, repeated: true },
@@ -798,6 +834,7 @@ export class MsgCreateCollection extends Message<MsgCreateCollection> {
     { no: 12, name: "collectionApprovals", kind: "message", T: CollectionApproval, repeated: true },
     { no: 13, name: "standardsTimeline", kind: "message", T: StandardsTimeline, repeated: true },
     { no: 14, name: "isArchivedTimeline", kind: "message", T: IsArchivedTimeline, repeated: true },
+    { no: 15, name: "creatorOverride", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgCreateCollection {
@@ -878,6 +915,14 @@ export class MsgCreateAddressLists extends Message<MsgCreateAddressLists> {
    */
   addressLists: AddressList[] = [];
 
+  /**
+   * Address of the original creator. Used for CosmWASM purposes. 
+   * IMPORTANT: We will override but we must trust the original creator address.
+   *
+   * @generated from field: string creatorOverride = 3;
+   */
+  creatorOverride = "";
+
   constructor(data?: PartialMessage<MsgCreateAddressLists>) {
     super();
     proto3.util.initPartial(data, this);
@@ -888,6 +933,7 @@ export class MsgCreateAddressLists extends Message<MsgCreateAddressLists> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "addressLists", kind: "message", T: AddressList, repeated: true },
+    { no: 3, name: "creatorOverride", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgCreateAddressLists {
@@ -967,6 +1013,14 @@ export class MsgTransferBadges extends Message<MsgTransferBadges> {
    */
   transfers: Transfer[] = [];
 
+  /**
+   * Address of the original creator. Used for CosmWASM purposes. 
+   * IMPORTANT: We will override but we must trust the original creator address.
+   *
+   * @generated from field: string creatorOverride = 4;
+   */
+  creatorOverride = "";
+
   constructor(data?: PartialMessage<MsgTransferBadges>) {
     super();
     proto3.util.initPartial(data, this);
@@ -978,6 +1032,7 @@ export class MsgTransferBadges extends Message<MsgTransferBadges> {
     { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "transfers", kind: "message", T: Transfer, repeated: true },
+    { no: 4, name: "creatorOverride", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgTransferBadges {
@@ -1050,6 +1105,14 @@ export class MsgDeleteCollection extends Message<MsgDeleteCollection> {
    */
   collectionId = "";
 
+  /**
+   * Address of the original creator. Used for CosmWASM purposes. 
+   * IMPORTANT: We will override but we must trust the original creator address.
+   *
+   * @generated from field: string creatorOverride = 3;
+   */
+  creatorOverride = "";
+
   constructor(data?: PartialMessage<MsgDeleteCollection>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1060,6 +1123,7 @@ export class MsgDeleteCollection extends Message<MsgDeleteCollection> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "creatorOverride", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgDeleteCollection {
@@ -1109,80 +1173,6 @@ export class MsgDeleteCollectionResponse extends Message<MsgDeleteCollectionResp
 
   static equals(a: MsgDeleteCollectionResponse | PlainMessage<MsgDeleteCollectionResponse> | undefined, b: MsgDeleteCollectionResponse | PlainMessage<MsgDeleteCollectionResponse> | undefined): boolean {
     return proto3.util.equals(MsgDeleteCollectionResponse, a, b);
-  }
-}
-
-/**
- * @generated from message badges.MsgGlobalArchive
- */
-export class MsgGlobalArchive extends Message<MsgGlobalArchive> {
-  /**
-   * @generated from field: string creator = 1;
-   */
-  creator = "";
-
-  /**
-   * @generated from field: bool archive = 2;
-   */
-  archive = false;
-
-  constructor(data?: PartialMessage<MsgGlobalArchive>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.MsgGlobalArchive";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "archive", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgGlobalArchive {
-    return new MsgGlobalArchive().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgGlobalArchive {
-    return new MsgGlobalArchive().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgGlobalArchive {
-    return new MsgGlobalArchive().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: MsgGlobalArchive | PlainMessage<MsgGlobalArchive> | undefined, b: MsgGlobalArchive | PlainMessage<MsgGlobalArchive> | undefined): boolean {
-    return proto3.util.equals(MsgGlobalArchive, a, b);
-  }
-}
-
-/**
- * @generated from message badges.MsgGlobalArchiveResponse
- */
-export class MsgGlobalArchiveResponse extends Message<MsgGlobalArchiveResponse> {
-  constructor(data?: PartialMessage<MsgGlobalArchiveResponse>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.MsgGlobalArchiveResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgGlobalArchiveResponse {
-    return new MsgGlobalArchiveResponse().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgGlobalArchiveResponse {
-    return new MsgGlobalArchiveResponse().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgGlobalArchiveResponse {
-    return new MsgGlobalArchiveResponse().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: MsgGlobalArchiveResponse | PlainMessage<MsgGlobalArchiveResponse> | undefined, b: MsgGlobalArchiveResponse | PlainMessage<MsgGlobalArchiveResponse> | undefined): boolean {
-    return proto3.util.equals(MsgGlobalArchiveResponse, a, b);
   }
 }
 
@@ -1263,18 +1253,40 @@ export class MsgUpdateUserApprovals extends Message<MsgUpdateUserApprovals> {
   autoApproveSelfInitiatedIncomingTransfers = false;
 
   /**
+   * Indicates if auto-approve settings for all incoming transfers should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   *
+   * @generated from field: bool updateAutoApproveAllIncomingTransfers = 11;
+   */
+  updateAutoApproveAllIncomingTransfers = false;
+
+  /**
+   * Auto-approve setting for all incoming transfers.
+   *
+   * @generated from field: bool autoApproveAllIncomingTransfers = 12;
+   */
+  autoApproveAllIncomingTransfers = false;
+
+  /**
    * Indicates if user permissions should be updated. If true, we set to value in this Msg. If false, we keep existing value.
    *
-   * @generated from field: bool updateUserPermissions = 11;
+   * @generated from field: bool updateUserPermissions = 13;
    */
   updateUserPermissions = false;
 
   /**
    * New user permissions to set.
    *
-   * @generated from field: badges.UserPermissions userPermissions = 12;
+   * @generated from field: badges.UserPermissions userPermissions = 14;
    */
   userPermissions?: UserPermissions;
+
+  /**
+   * Address of the original creator. Used for CosmWASM purposes. 
+   * IMPORTANT: We will override but we must trust the original creator address.
+   *
+   * @generated from field: string creatorOverride = 15;
+   */
+  creatorOverride = "";
 
   constructor(data?: PartialMessage<MsgUpdateUserApprovals>) {
     super();
@@ -1294,8 +1306,11 @@ export class MsgUpdateUserApprovals extends Message<MsgUpdateUserApprovals> {
     { no: 8, name: "autoApproveSelfInitiatedOutgoingTransfers", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 9, name: "updateAutoApproveSelfInitiatedIncomingTransfers", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 10, name: "autoApproveSelfInitiatedIncomingTransfers", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 11, name: "updateUserPermissions", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 12, name: "userPermissions", kind: "message", T: UserPermissions },
+    { no: 11, name: "updateAutoApproveAllIncomingTransfers", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 12, name: "autoApproveAllIncomingTransfers", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 13, name: "updateUserPermissions", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 14, name: "userPermissions", kind: "message", T: UserPermissions },
+    { no: 15, name: "creatorOverride", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUpdateUserApprovals {

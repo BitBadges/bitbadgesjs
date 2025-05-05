@@ -517,7 +517,7 @@ export class GetAddressListsSuccessResponse<T extends NumberType>
 /**
  * @category Interfaces
  */
-export type iAddressListCreateObject<T extends NumberType> = Omit<iAddressList, 'createdBy' | 'aliasAddress'> & {
+export type iAddressListCreateObject<T extends NumberType> = Omit<iAddressList, 'createdBy'> & {
   /**
    * Flag to update addresses?. Because w/ claims there can be race conditions,
    * we have this flag.
@@ -586,7 +586,7 @@ export class DeleteAddressListsSuccessResponse extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export type iUpdateAddressListCoreDetailsPayload<T extends NumberType> = Omit<iAddressList, 'createdBy' | 'aliasAddress' | 'addresses'> & {
+export type iUpdateAddressListCoreDetailsPayload<T extends NumberType> = Omit<iAddressList, 'createdBy' | 'addresses'> & {
   /**
    * The new metadata of the address list.
    *

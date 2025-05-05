@@ -1,4 +1,5 @@
-import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
+import type { ConvertOptions, CustomType } from '@/common/base.js';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, deepCopyPrimitives } from '@/common/base.js';
 import type {
   iActionPermission,
   iBadgeIdsActionPermission,
@@ -15,13 +16,12 @@ import type {
   iUserPermissions,
   iUserPermissionsWithDetails
 } from '@/interfaces/badges/permissions.js';
-import type { ConvertOptions, CustomType } from '@/common/base.js';
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, deepCopyPrimitives } from '@/common/base.js';
+import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
+import { BigIntify, Stringify, type NumberType } from '../common/string-numbers.js';
 import * as badges from '../proto/badges/permissions_pb.js';
-import { AddressList } from './addressLists.js';
+import { AddressList, convertListIdToBech32 } from './addressLists.js';
 import type { UniversalPermission, UniversalPermissionDetails } from './overlaps.js';
 import { GetFirstMatchOnly, getOverlapsAndNonOverlaps, universalRemoveOverlaps } from './overlaps.js';
-import { BigIntify, Stringify, type NumberType } from '../common/string-numbers.js';
 import { UintRange, UintRangeArray } from './uintRanges.js';
 import { AllDefaultValues } from './validate-utils.js';
 
@@ -35,6 +35,7 @@ export class UserPermissions<T extends NumberType> extends BaseNumberTypeClass<U
   canUpdateIncomingApprovals: UserIncomingApprovalPermission<T>[];
   canUpdateAutoApproveSelfInitiatedOutgoingTransfers: ActionPermission<T>[];
   canUpdateAutoApproveSelfInitiatedIncomingTransfers: ActionPermission<T>[];
+  canUpdateAutoApproveAllIncomingTransfers: ActionPermission<T>[];
 
   constructor(msg: iUserPermissions<T>) {
     super();
@@ -46,6 +47,7 @@ export class UserPermissions<T extends NumberType> extends BaseNumberTypeClass<U
     this.canUpdateAutoApproveSelfInitiatedIncomingTransfers = msg.canUpdateAutoApproveSelfInitiatedIncomingTransfers.map(
       (x) => new ActionPermission(x)
     );
+    this.canUpdateAutoApproveAllIncomingTransfers = msg.canUpdateAutoApproveAllIncomingTransfers.map((x) => new ActionPermission(x));
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UserPermissions<U> {
@@ -81,6 +83,9 @@ export class UserPermissions<T extends NumberType> extends BaseNumberTypeClass<U
       ),
       canUpdateAutoApproveSelfInitiatedIncomingTransfers: protoMsg.canUpdateAutoApproveSelfInitiatedIncomingTransfers.map((x) =>
         ActionPermission.fromProto(x, convertFunction)
+      ),
+      canUpdateAutoApproveAllIncomingTransfers: protoMsg.canUpdateAutoApproveAllIncomingTransfers.map((x) =>
+        ActionPermission.fromProto(x, convertFunction)
       )
     });
   }
@@ -102,6 +107,10 @@ export class UserPermissions<T extends NumberType> extends BaseNumberTypeClass<U
       ActionPermission.validateUpdate(
         oldPermissions.canUpdateAutoApproveSelfInitiatedIncomingTransfers,
         newPermissions.canUpdateAutoApproveSelfInitiatedIncomingTransfers
+      ),
+      ActionPermission.validateUpdate(
+        oldPermissions.canUpdateAutoApproveAllIncomingTransfers,
+        newPermissions.canUpdateAutoApproveAllIncomingTransfers
       )
     ];
 
@@ -113,7 +122,16 @@ export class UserPermissions<T extends NumberType> extends BaseNumberTypeClass<U
       canUpdateOutgoingApprovals: [],
       canUpdateIncomingApprovals: [],
       canUpdateAutoApproveSelfInitiatedOutgoingTransfers: [],
-      canUpdateAutoApproveSelfInitiatedIncomingTransfers: []
+      canUpdateAutoApproveSelfInitiatedIncomingTransfers: [],
+      canUpdateAutoApproveAllIncomingTransfers: []
+    });
+  }
+
+  toBech32Addresses(prefix: string): UserPermissions<T> {
+    return new UserPermissions({
+      ...this,
+      canUpdateOutgoingApprovals: this.canUpdateOutgoingApprovals.map((x) => x.toBech32Addresses(prefix)),
+      canUpdateIncomingApprovals: this.canUpdateIncomingApprovals.map((x) => x.toBech32Addresses(prefix))
     });
   }
 }
@@ -238,6 +256,14 @@ export class UserOutgoingApprovalPermission<T extends NumberType>
       time
     );
   }
+
+  toBech32Addresses(prefix: string): UserOutgoingApprovalPermission<T> {
+    return new UserOutgoingApprovalPermission({
+      ...this,
+      toListId: convertListIdToBech32(this.toListId, prefix),
+      initiatedByListId: convertListIdToBech32(this.initiatedByListId, prefix)
+    });
+  }
 }
 
 /**
@@ -354,6 +380,14 @@ export class UserIncomingApprovalPermission<T extends NumberType>
       permissions.map((x) => x.castToCollectionApprovalPermission(dummyAddress)),
       time
     );
+  }
+
+  toBech32Addresses(prefix: string): UserIncomingApprovalPermission<T> {
+    return new UserIncomingApprovalPermission({
+      ...this,
+      fromListId: convertListIdToBech32(this.fromListId, prefix),
+      initiatedByListId: convertListIdToBech32(this.initiatedByListId, prefix)
+    });
   }
 }
 
@@ -472,6 +506,13 @@ export class CollectionPermissions<T extends NumberType> extends BaseNumberTypeC
       canUpdateValidBadgeIds: [],
       canUpdateBadgeMetadata: [],
       canUpdateCollectionApprovals: []
+    });
+  }
+
+  toBech32Addresses(prefix: string): CollectionPermissions<T> {
+    return new CollectionPermissions({
+      ...this,
+      canUpdateCollectionApprovals: this.canUpdateCollectionApprovals.map((x) => x.toBech32Addresses(prefix))
     });
   }
 }
@@ -1023,6 +1064,15 @@ export class CollectionApprovalPermission<T extends NumberType>
     const permissionDetails = GetFirstMatchOnly(castedPermissions);
     return checkNotForbiddenForAllOverlaps(permissionDetails, detailsToCheck, time ? BigInt(time) : undefined, true);
   }
+
+  toBech32Addresses(prefix: string): CollectionApprovalPermission<T> {
+    return new CollectionApprovalPermission({
+      ...this,
+      fromListId: convertListIdToBech32(this.fromListId, prefix),
+      toListId: convertListIdToBech32(this.toListId, prefix),
+      initiatedByListId: convertListIdToBech32(this.initiatedByListId, prefix)
+    });
+  }
 }
 
 const { getReservedAddressList, getReservedTrackerList } = AddressList;
@@ -1182,6 +1232,7 @@ export class UserPermissionsWithDetails<T extends NumberType> extends UserPermis
   canUpdateOutgoingApprovals: UserOutgoingApprovalPermissionWithDetails<T>[];
   canUpdateAutoApproveSelfInitiatedOutgoingTransfers: ActionPermission<T>[];
   canUpdateAutoApproveSelfInitiatedIncomingTransfers: ActionPermission<T>[];
+  canUpdateAutoApproveAllIncomingTransfers: ActionPermission<T>[];
 
   constructor(data: iUserPermissionsWithDetails<T>) {
     super(data);
@@ -1197,7 +1248,10 @@ export class UserPermissionsWithDetails<T extends NumberType> extends UserPermis
     this.canUpdateAutoApproveSelfInitiatedIncomingTransfers = data.canUpdateAutoApproveSelfInitiatedIncomingTransfers.map(
       (actionPermission) => new ActionPermission(actionPermission)
     );
-  }
+    this.canUpdateAutoApproveAllIncomingTransfers = data.canUpdateAutoApproveAllIncomingTransfers.map(
+      (actionPermission) => new ActionPermission(actionPermission)
+    );
+    }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UserPermissionsWithDetails<U> {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserPermissionsWithDetails<U>;

@@ -1,13 +1,15 @@
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import { Stringify } from '@/common/string-numbers.js';
-import type { iMsgTransferBadges } from './interfaces.js';
-import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
 import * as badges from '@/proto/badges/tx_pb.js';
+import type { iMsgTransferBadges } from './interfaces.js';
 
-import { Transfer } from '@/core/transfers.js';
-import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
+import { getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
 import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
+import { Transfer } from '@/core/transfers.js';
 import { CollectionId } from '@/interfaces/index.js';
+import { normalizeMessagesIfNecessary } from '../../base.js';
+import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 
 /**
  * MsgTransferBadges represents a message to transfer badges from one user to another.
@@ -26,12 +28,14 @@ export class MsgTransferBadges<T extends NumberType> extends BaseNumberTypeClass
   creator: BitBadgesAddress;
   collectionId: CollectionId;
   transfers: Transfer<T>[];
+  creatorOverride: BitBadgesAddress;
 
   constructor(msg: iMsgTransferBadges<T>) {
     super();
     this.creator = msg.creator;
     this.collectionId = msg.collectionId;
     this.transfers = msg.transfers.map((x) => new Transfer(x));
+    this.creatorOverride = msg.creatorOverride;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgTransferBadges<U> {
@@ -66,7 +70,26 @@ export class MsgTransferBadges<T extends NumberType> extends BaseNumberTypeClass
     return new MsgTransferBadges({
       creator: protoMsg.creator,
       collectionId: protoMsg.collectionId,
-      transfers: protoMsg.transfers.map((x) => Transfer.fromProto(x, convertFunction))
+      transfers: protoMsg.transfers.map((x) => Transfer.fromProto(x, convertFunction)),
+      creatorOverride: protoMsg.creatorOverride
     });
+  }
+
+  toBech32Addresses(prefix: string): MsgTransferBadges<T> {
+    return new MsgTransferBadges({
+      creator: getConvertFunctionFromPrefix(prefix)(this.creator),
+      collectionId: this.collectionId,
+      transfers: this.transfers.map((x) => x.toBech32Addresses(prefix)),
+      creatorOverride: getConvertFunctionFromPrefix(prefix)(this.creatorOverride)
+    });
+  }
+
+  toCosmWasmPayloadString(): string {
+    return `{"transferBadgesMsg":${normalizeMessagesIfNecessary([
+      {
+        message: this.toProto(),
+        path: this.toProto().getType().typeName
+      }
+    ])[0].message.toJsonString({ emitDefaultValues: true })} }`;
   }
 }

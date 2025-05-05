@@ -5,7 +5,9 @@ import * as badges from '@/proto/badges/tx_pb.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 import type { iMsgDeleteCollection } from './interfaces.js';
 import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
+import { getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
 import { CollectionId } from '@/interfaces/index.js';
+import { normalizeMessagesIfNecessary } from '../../base.js';
 
 /**
  * MsgDeleteCollection represents the message for deleting a collection. Once deleted, the collection cannot be recovered.
@@ -18,11 +20,13 @@ import { CollectionId } from '@/interfaces/index.js';
 export class MsgDeleteCollection<T extends NumberType> extends BaseNumberTypeClass<MsgDeleteCollection<T>> implements iMsgDeleteCollection<T> {
   creator: BitBadgesAddress;
   collectionId: CollectionId;
+  creatorOverride: BitBadgesAddress;
 
   constructor(msg: iMsgDeleteCollection<T>) {
     super();
     this.creator = msg.creator;
     this.collectionId = msg.collectionId;
+    this.creatorOverride = msg.creatorOverride;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgDeleteCollection<U> {
@@ -56,7 +60,25 @@ export class MsgDeleteCollection<T extends NumberType> extends BaseNumberTypeCla
   static fromProto<U extends NumberType>(protoMsg: badges.MsgDeleteCollection): MsgDeleteCollection<U> {
     return new MsgDeleteCollection({
       creator: protoMsg.creator,
-      collectionId: protoMsg.collectionId
+      collectionId: protoMsg.collectionId,
+      creatorOverride: protoMsg.creatorOverride
     });
+  }
+
+  toBech32Addresses(prefix: string): MsgDeleteCollection<T> {
+    return new MsgDeleteCollection({
+      creator: getConvertFunctionFromPrefix(prefix)(this.creator),
+      collectionId: this.collectionId,
+      creatorOverride: getConvertFunctionFromPrefix(prefix)(this.creatorOverride)
+    });
+  }
+
+  toCosmWasmPayloadString(): string {
+    return `{"deleteCollectionMsg":${normalizeMessagesIfNecessary([
+      {
+        message: this.toProto(),
+        path: this.toProto().getType().typeName
+      }
+    ])[0].message.toJsonString({ emitDefaultValues: true })} }`;
   }
 }

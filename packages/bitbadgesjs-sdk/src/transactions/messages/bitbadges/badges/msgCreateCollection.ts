@@ -1,3 +1,4 @@
+import { getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
 import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
@@ -18,6 +19,7 @@ import { UserBalanceStore } from '@/core/userBalances.js';
 import * as badges from '@/proto/badges/tx_pb.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 import type { iMsgCreateCollection } from './interfaces.js';
+import { normalizeMessagesIfNecessary } from '../../base.js';
 
 /**
  * MsgCreateCollection is a transaction that can be used to create a collection.
@@ -31,7 +33,7 @@ export class MsgCreateCollection<T extends NumberType> extends BaseNumberTypeCla
   creator: BitBadgesAddress;
   balancesType?: string;
   defaultBalances?: UserBalanceStore<T>;
-  badgeIdsToAdd?: UintRangeArray<T>;
+  validBadgeIds?: UintRangeArray<T>;
   collectionPermissions?: CollectionPermissions<T>;
   managerTimeline?: ManagerTimeline<T>[];
   collectionMetadataTimeline?: CollectionMetadataTimeline<T>[];
@@ -41,13 +43,14 @@ export class MsgCreateCollection<T extends NumberType> extends BaseNumberTypeCla
   collectionApprovals?: CollectionApproval<T>[];
   standardsTimeline?: StandardsTimeline<T>[];
   isArchivedTimeline?: IsArchivedTimeline<T>[];
+  creatorOverride: BitBadgesAddress;
 
   constructor(msg: iMsgCreateCollection<T>) {
     super();
     this.creator = msg.creator;
     this.balancesType = msg.balancesType;
     this.defaultBalances = msg.defaultBalances ? new UserBalanceStore(msg.defaultBalances) : undefined;
-    this.badgeIdsToAdd = msg.badgeIdsToAdd ? UintRangeArray.From(msg.badgeIdsToAdd) : undefined;
+    this.validBadgeIds = msg.validBadgeIds ? UintRangeArray.From(msg.validBadgeIds) : undefined;
     this.collectionPermissions = msg.collectionPermissions ? new CollectionPermissions(msg.collectionPermissions) : undefined;
     this.managerTimeline = msg.managerTimeline?.map((x) => new ManagerTimeline(x));
     this.collectionMetadataTimeline = msg.collectionMetadataTimeline?.map((x) => new CollectionMetadataTimeline(x));
@@ -57,6 +60,7 @@ export class MsgCreateCollection<T extends NumberType> extends BaseNumberTypeCla
     this.collectionApprovals = msg.collectionApprovals?.map((x) => new CollectionApproval(x));
     this.standardsTimeline = msg.standardsTimeline?.map((x) => new StandardsTimeline(x));
     this.isArchivedTimeline = msg.isArchivedTimeline?.map((x) => new IsArchivedTimeline(x));
+    this.creatorOverride = msg.creatorOverride;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgCreateCollection<U> {
@@ -88,7 +92,7 @@ export class MsgCreateCollection<T extends NumberType> extends BaseNumberTypeCla
       creator: protoMsg.creator,
       balancesType: protoMsg.balancesType,
       defaultBalances: protoMsg.defaultBalances ? UserBalanceStore.fromProto(protoMsg.defaultBalances, convertFunction) : undefined,
-      badgeIdsToAdd: protoMsg.badgeIdsToAdd?.map((x) => UintRange.fromProto(x, convertFunction)),
+      validBadgeIds: protoMsg.validBadgeIds?.map((x) => UintRange.fromProto(x, convertFunction)),
       collectionPermissions: protoMsg.collectionPermissions
         ? CollectionPermissions.fromProto(protoMsg.collectionPermissions, convertFunction)
         : undefined,
@@ -101,7 +105,29 @@ export class MsgCreateCollection<T extends NumberType> extends BaseNumberTypeCla
       customDataTimeline: protoMsg.customDataTimeline?.map((x) => CustomDataTimeline.fromProto(x, convertFunction)),
       collectionApprovals: protoMsg.collectionApprovals?.map((x) => CollectionApproval.fromProto(x, convertFunction)),
       standardsTimeline: protoMsg.standardsTimeline?.map((x) => StandardsTimeline.fromProto(x, convertFunction)),
-      isArchivedTimeline: protoMsg.isArchivedTimeline?.map((x) => IsArchivedTimeline.fromProto(x, convertFunction))
+      isArchivedTimeline: protoMsg.isArchivedTimeline?.map((x) => IsArchivedTimeline.fromProto(x, convertFunction)),
+      creatorOverride: protoMsg.creatorOverride
     });
+  }
+
+  toBech32Addresses(prefix: string): MsgCreateCollection<T> {
+    return new MsgCreateCollection<T>({
+      ...this,
+      creator: getConvertFunctionFromPrefix(prefix)(this.creator),
+      defaultBalances: this.defaultBalances?.toBech32Addresses(prefix),
+      collectionPermissions: this.collectionPermissions?.toBech32Addresses(prefix),
+      managerTimeline: this.managerTimeline?.map((x) => x.toBech32Addresses(prefix)),
+      collectionApprovals: this.collectionApprovals?.map((x) => x.toBech32Addresses(prefix)),
+      creatorOverride: getConvertFunctionFromPrefix(prefix)(this.creatorOverride)
+    });
+  }
+
+  toCosmWasmPayloadString(): string {
+    return `{"createCollectionMsg":${normalizeMessagesIfNecessary([
+      {
+        message: this.toProto(),
+        path: this.toProto().getType().typeName
+      }
+    ])[0].message.toJsonString({ emitDefaultValues: true })} }`;
   }
 }

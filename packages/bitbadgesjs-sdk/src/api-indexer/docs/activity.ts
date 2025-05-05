@@ -1,7 +1,6 @@
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import { BalanceArray } from '@/core/balances.js';
-import { ApprovalIdentifierDetails } from '@/proto/badges/transfers_pb.js';
 import type {
   BitBadgesAddress,
   UNIXMilliTimestamp,
@@ -13,6 +12,7 @@ import type {
   iTransferActivityDoc
 } from './interfaces.js';
 import { CollectionId } from '@/interfaces/badges/core.js';
+import { ApprovalIdentifierDetails } from '@/core/misc.js';
 
 /**
  * @inheritDoc iActivityDoc
@@ -53,8 +53,8 @@ export class TransferActivityDoc<T extends NumberType> extends ActivityDoc<T> im
   balances: BalanceArray<T>;
   collectionId: CollectionId;
   memo?: string;
-  precalculateBalancesFromApproval?: ApprovalIdentifierDetails;
-  prioritizedApprovals?: ApprovalIdentifierDetails[];
+  precalculateBalancesFromApproval?: ApprovalIdentifierDetails<T>;
+  prioritizedApprovals?: ApprovalIdentifierDetails<T>[];
   initiatedBy: BitBadgesAddress;
   txHash?: string;
   private?: boolean | undefined;

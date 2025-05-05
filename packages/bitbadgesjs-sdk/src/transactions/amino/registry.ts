@@ -3,7 +3,6 @@ import {
   MsgCreateAddressLists,
   MsgCreateCollection,
   MsgDeleteCollection,
-  MsgGlobalArchive,
   MsgTransferBadges,
   MsgUniversalUpdateCollection,
   MsgUpdateCollection,
@@ -178,8 +177,7 @@ export function createBadgesAminoConverters(): AminoConverters {
     ...createAminoConverter(MsgUpdateUserApprovals, 'badges/UpdateUserApprovals'),
     ...createAminoConverter(MsgCreateAddressLists, 'badges/CreateAddressLists'),
     ...createAminoConverter(MsgCreateCollection, 'badges/CreateCollection'),
-    ...createAminoConverter(MsgUniversalUpdateCollection, 'badges/UniversalUpdateCollection'),
-    ...createAminoConverter(MsgGlobalArchive, 'badges/GlobalArchive')
+    ...createAminoConverter(MsgUniversalUpdateCollection, 'badges/UniversalUpdateCollection')
   };
 }
 

@@ -4434,7 +4434,7 @@ paths:
           name: locale
           required: false
           schema:
-            description: 'Locale to restrict results to. By default, we assume ''en''. This is not applicable if you specify createdPluginsOnly, speciifc pluginIds, or an invite code.'
+            description: "Locale to restrict results to. By default, we assume 'en'. This is not applicable if you specify createdPluginsOnly, speciifc pluginIds, or an invite code."
             type: string
       security:
         - apiKey: []
@@ -6811,7 +6811,7 @@ components:
               - pagination
             additionalProperties: false
             type: object
-          description: 'The views for this collection and their pagination Doc. Views will only include the doc _ids. Use the pagination to fetch more.  For example, if you want to fetch the activity for a view, you would use the view''s pagination to fetch the doc _ids, then use the corresponding activity array to find the matching docs.'
+          description: "The views for this collection and their pagination Doc. Views will only include the doc _ids. Use the pagination to fetch more.  For example, if you want to fetch the activity for a view, you would use the view's pagination to fetch the doc _ids, then use the corresponding activity array to find the matching docs."
           type: object
         alias:
           properties:
@@ -7640,7 +7640,7 @@ components:
               - pagination
             additionalProperties: false
             type: object
-          description: 'The views for this collection and their pagination Doc. Views will only include the doc _ids. Use the pagination to fetch more. For example, if you want to fetch the activity for a view, you would use the view''s pagination to fetch the doc _ids, then use the corresponding activity array to find the matching docs.'
+          description: "The views for this collection and their pagination Doc. Views will only include the doc _ids. Use the pagination to fetch more. For example, if you want to fetch the activity for a view, you would use the view's pagination to fetch the doc _ids, then use the corresponding activity array to find the matching docs."
           type: object
         claims:
           items:
@@ -7884,10 +7884,10 @@ components:
           description: The user's permissions.
           $ref: '#/components/schemas/iUserPermissions'
         autoApproveSelfInitiatedOutgoingTransfers:
-          description: 'Whether the user''s self-initiated outgoing transfers are auto-approved. If not, they must be explicitly approved using the outgoing approvals.'
+          description: "Whether the user's self-initiated outgoing transfers are auto-approved. If not, they must be explicitly approved using the outgoing approvals."
           type: boolean
         autoApproveSelfInitiatedIncomingTransfers:
-          description: 'Whether the user''s self-initiated incoming transfers are auto-approved. If not, they must be explicitly approved using the incoming approvals.'
+          description: "Whether the user's self-initiated incoming transfers are auto-approved. If not, they must be explicitly approved using the incoming approvals."
           type: boolean
         _docId:
           description: A unique stringified document ID
@@ -8030,7 +8030,7 @@ components:
                 description: 'If defined, we will return the oldest items first.'
                 type: boolean
               address:
-                description: 'If specified, we will only fetch this users'' activity.'
+                description: "If specified, we will only fetch this users' activity."
                 type: string
               badgeId:
                 description: 'IF specified, we will filter to this abdge ID (only applicable to utiity listings view currently)'
@@ -8105,7 +8105,7 @@ components:
                 description: 'If defined, we will return the oldest items first.'
                 type: boolean
               address:
-                description: 'If specified, we will only fetch this users'' activity.'
+                description: "If specified, we will only fetch this users' activity."
                 type: string
               badgeId:
                 description: 'IF specified, we will filter to this abdge ID (only applicable to utiity listings view currently)'
@@ -9301,7 +9301,7 @@ components:
             - lists
             - attestations
           additionalProperties: false
-          description: 'An array of custom pages on the user''s portolio. Used to customize, sort, and group badges / lists into pages.'
+          description: "An array of custom pages on the user's portolio. Used to customize, sort, and group badges / lists into pages."
           type: object
         watchlists:
           properties:
@@ -10617,7 +10617,7 @@ components:
           description: The message format of the messages.
           type: string
         publicVisibility:
-          description: 'Whether or not the attestation is displayable on the user''s profile. if true, the attestation can be queried by anyone with the ID.'
+          description: "Whether or not the attestation is displayable on the user's profile. if true, the attestation can be queried by anyone with the ID."
           type: boolean
         proofOfIssuance:
           properties:
@@ -10921,7 +10921,7 @@ components:
             This should match the expected scheme. For example, if the scheme is BBS+, the signature should be a BBS+ signature and signer should be a BBS+ public key.
           type: object
         publicVisibility:
-          description: 'Whether or not the attestation is displayable on the user''s profile. if true, the attestation can be queried by anyone with the ID.'
+          description: "Whether or not the attestation is displayable on the user's profile. if true, the attestation can be queried by anyone with the ID."
           type: boolean
         name:
           description: Metadata for the attestation for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers.
@@ -11653,7 +11653,7 @@ components:
           description: The initial version configuration
           $ref: '#/components/schemas/PluginVersionConfigPayload'
         locale:
-          description: 'Locale that is supported by the plugin. By default, we assume ''en'' is supported if not specified.'
+          description: "Locale that is supported by the plugin. By default, we assume 'en' is supported if not specified."
           type: string
       required:
         - pluginId
@@ -11876,7 +11876,7 @@ components:
           description: Create a new version
           $ref: '#/components/schemas/PluginVersionConfigPayload'
         locale:
-          description: 'Locale that is supported by the plugin. By default, we assume ''en'' is supported if not specified.'
+          description: "Locale that is supported by the plugin. By default, we assume 'en' is supported if not specified."
           type: string
       required:
         - pluginId
@@ -11912,7 +11912,7 @@ components:
           description: Search value
           type: string
         locale:
-          description: 'Locale to restrict results to. By default, we assume ''en''. This is not applicable if you specify createdPluginsOnly, speciifc pluginIds, or an invite code.'
+          description: "Locale to restrict results to. By default, we assume 'en'. This is not applicable if you specify createdPluginsOnly, speciifc pluginIds, or an invite code."
           type: string
       additionalProperties: false
       type: object
@@ -14670,10 +14670,10 @@ components:
           description: The user's permissions.
           $ref: '#/components/schemas/iUserPermissions'
         autoApproveSelfInitiatedOutgoingTransfers:
-          description: 'Whether the user''s self-initiated outgoing transfers are auto-approved. If not, they must be explicitly approved using the outgoing approvals.'
+          description: "Whether the user's self-initiated outgoing transfers are auto-approved. If not, they must be explicitly approved using the outgoing approvals."
           type: boolean
         autoApproveSelfInitiatedIncomingTransfers:
-          description: 'Whether the user''s self-initiated incoming transfers are auto-approved. If not, they must be explicitly approved using the incoming approvals.'
+          description: "Whether the user's self-initiated incoming transfers are auto-approved. If not, they must be explicitly approved using the incoming approvals."
           type: boolean
         _docId:
           description: A unique stringified document ID
@@ -16605,7 +16605,7 @@ components:
           additionalProperties: false
           type: object
         locale:
-          description: 'Locale that is supported by the plugin. By default, we assume ''en'' is supported if not specified.'
+          description: "Locale that is supported by the plugin. By default, we assume 'en' is supported if not specified."
           type: string
         lastUpdated:
           $ref: '#/components/schemas/UNIXMilliTimestamp'
@@ -16923,7 +16923,7 @@ components:
           description: Entropies used for certain data integrity proofs on-chain (e.g. HASH(message + entropy) = on-chain value)
           type: array
         publicVisibility:
-          description: 'Whether or not the attestation is displayable on the user''s profile. if true, the attestation can be queried by anyone with the ID.'
+          description: "Whether or not the attestation is displayable on the user's profile. if true, the attestation can be queried by anyone with the ID."
           type: boolean
         proofOfIssuance:
           properties:
@@ -16959,7 +16959,7 @@ components:
           description: The attestation ID. This is the constant ID that is given to the attestation.
           type: string
         inviteCode:
-          description: 'The inviteCode is used to add the attestation to the user''s wallet. Anyone with the key can query it, so keep this safe and secure.'
+          description: "The inviteCode is used to add the attestation to the user's wallet. Anyone with the key can query it, so keep this safe and secure."
           type: string
         scheme:
           description: |-
@@ -17343,7 +17343,7 @@ components:
           description: The amount of the cost
           $ref: '#/components/schemas/NumberType'
         denom:
-          description: 'The denomination of the cost (e.g. ''USD'', ''ETH'', etc.)'
+          description: "The denomination of the cost (e.g. 'USD', 'ETH', etc.)"
           type: string
       required:
         - amount
@@ -17395,7 +17395,7 @@ components:
       properties:
         account:
           properties:
-            '''@type''':
+            "'@type'":
               type: string
             base_account:
               properties:
@@ -17403,12 +17403,12 @@ components:
                   type: string
                 pub_key:
                   properties:
-                    '''@type''':
+                    "'@type'":
                       type: string
                     key:
                       type: string
                   required:
-                    - '''@type'''
+                    - "'@type'"
                     - key
                   additionalProperties: false
                   type: object
@@ -17423,7 +17423,7 @@ components:
               additionalProperties: false
               type: object
           required:
-            - '''@type'''
+            - "'@type'"
             - base_account
           additionalProperties: false
           type: object
@@ -17530,12 +17530,12 @@ components:
           type: object
         consensus_pubkey:
           properties:
-            '''@type''':
+            "'@type'":
               type: string
             key:
               type: string
           required:
-            - '''@type'''
+            - "'@type'"
             - key
           additionalProperties: false
           type: object
@@ -18896,7 +18896,7 @@ components:
           description: Entropies used for certain data integrity proofs on-chain (e.g. HASH(message + entropy) = on-chain value)
           type: array
         publicVisibility:
-          description: 'Whether or not the attestation is displayable on the user''s profile. if true, the attestation can be queried by anyone with the ID.'
+          description: "Whether or not the attestation is displayable on the user's profile. if true, the attestation can be queried by anyone with the ID."
           type: boolean
         proofOfIssuance:
           properties:
@@ -18932,7 +18932,7 @@ components:
           description: The attestation ID. This is the constant ID that is given to the attestation.
           type: string
         inviteCode:
-          description: 'The inviteCode is used to add the attestation to the user''s wallet. Anyone with the key can query it, so keep this safe and secure.'
+          description: "The inviteCode is used to add the attestation to the user's wallet. Anyone with the key can query it, so keep this safe and secure."
           type: string
         scheme:
           description: |-
@@ -19069,7 +19069,7 @@ components:
           description: Entropies used for certain data integrity proofs on-chain (e.g. HASH(message + entropy) = on-chain value)
           type: array
         publicVisibility:
-          description: 'Whether or not the attestation is displayable on the user''s profile. if true, the attestation can be queried by anyone with the ID.'
+          description: "Whether or not the attestation is displayable on the user's profile. if true, the attestation can be queried by anyone with the ID."
           type: boolean
         proofOfIssuance:
           properties:
@@ -19105,7 +19105,7 @@ components:
           description: The attestation ID. This is the constant ID that is given to the attestation.
           type: string
         inviteCode:
-          description: 'The inviteCode is used to add the attestation to the user''s wallet. Anyone with the key can query it, so keep this safe and secure.'
+          description: "The inviteCode is used to add the attestation to the user's wallet. Anyone with the key can query it, so keep this safe and secure."
           type: string
         scheme:
           description: |-
@@ -20684,7 +20684,7 @@ components:
           items:
             $ref: '#/components/schemas/iMustOwnBadges'
           description: The list of badges to be owned to be approved. Must have on-chain balances.
-          type: array
+          type: array 
         zkProofs:
           items:
             $ref: '#/components/schemas/iZkProof'
@@ -20750,10 +20750,10 @@ components:
           description: The user's permissions.
           $ref: '#/components/schemas/iUserPermissions'
         autoApproveSelfInitiatedOutgoingTransfers:
-          description: 'Whether the user''s self-initiated outgoing transfers are auto-approved. If not, they must be explicitly approved using the outgoing approvals.'
+          description: "Whether the user's self-initiated outgoing transfers are auto-approved. If not, they must be explicitly approved using the outgoing approvals."
           type: boolean
         autoApproveSelfInitiatedIncomingTransfers:
-          description: 'Whether the user''s self-initiated incoming transfers are auto-approved. If not, they must be explicitly approved using the incoming approvals.'
+          description: "Whether the user's self-initiated incoming transfers are auto-approved. If not, they must be explicitly approved using the incoming approvals."
           type: boolean
       required:
         - balances

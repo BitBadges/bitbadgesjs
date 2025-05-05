@@ -19,8 +19,10 @@ import type { NumberType } from '@/common/string-numbers.js';
 import { Stringify } from '@/common/string-numbers.js';
 import { UintRange, UintRangeArray } from '@/core/uintRanges.js';
 import { UserBalanceStore } from '@/core/userBalances.js';
+import { getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
 import type { iMsgUniversalUpdateCollection } from './interfaces.js';
 import { CollectionId } from '@/interfaces/index.js';
+import { normalizeMessagesIfNecessary } from '../../base.js';
 
 /**
  * MsgUniversalUpdateCollection is a universal transaction that can be used to create / update any collection. It is only executable by the manager.
@@ -47,7 +49,8 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
   collectionId: CollectionId;
   balancesType?: string;
   defaultBalances?: UserBalanceStore<T>;
-  badgeIdsToAdd?: UintRangeArray<T>;
+  updateValidBadgeIds?: boolean;
+  validBadgeIds?: UintRangeArray<T>;
   updateCollectionPermissions?: boolean;
   collectionPermissions?: CollectionPermissions<T>;
   updateManagerTimeline?: boolean;
@@ -66,6 +69,7 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
   standardsTimeline?: StandardsTimeline<T>[];
   updateIsArchivedTimeline?: boolean;
   isArchivedTimeline?: IsArchivedTimeline<T>[];
+  creatorOverride: BitBadgesAddress;
 
   constructor(msg: iMsgUniversalUpdateCollection<T>) {
     super();
@@ -73,7 +77,8 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
     this.collectionId = msg.collectionId;
     this.balancesType = msg.balancesType;
     this.defaultBalances = msg.defaultBalances ? new UserBalanceStore(msg.defaultBalances) : undefined;
-    this.badgeIdsToAdd = msg.badgeIdsToAdd ? UintRangeArray.From(msg.badgeIdsToAdd) : undefined;
+    this.updateValidBadgeIds = msg.updateValidBadgeIds;
+    this.validBadgeIds = msg.validBadgeIds ? UintRangeArray.From(msg.validBadgeIds) : undefined;
     this.updateCollectionPermissions = msg.updateCollectionPermissions;
     this.collectionPermissions = msg.collectionPermissions ? new CollectionPermissions(msg.collectionPermissions) : undefined;
     this.updateManagerTimeline = msg.updateManagerTimeline;
@@ -92,6 +97,7 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
     this.standardsTimeline = msg.standardsTimeline?.map((x) => new StandardsTimeline(x));
     this.updateIsArchivedTimeline = msg.updateIsArchivedTimeline;
     this.isArchivedTimeline = msg.isArchivedTimeline?.map((x) => new IsArchivedTimeline(x));
+    this.creatorOverride = msg.creatorOverride;
   }
 
   getNumberFieldNames(): string[] {
@@ -131,7 +137,8 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
       collectionId: protoMsg.collectionId,
       balancesType: protoMsg.balancesType,
       defaultBalances: protoMsg.defaultBalances ? UserBalanceStore.fromProto(protoMsg.defaultBalances, convertFunction) : undefined,
-      badgeIdsToAdd: protoMsg.badgeIdsToAdd ? protoMsg.badgeIdsToAdd.map((x) => UintRange.fromProto(x, convertFunction)) : undefined,
+      validBadgeIds: protoMsg.validBadgeIds ? protoMsg.validBadgeIds.map((x) => UintRange.fromProto(x, convertFunction)) : undefined,
+      updateValidBadgeIds: protoMsg.updateValidBadgeIds,
       updateCollectionPermissions: protoMsg.updateCollectionPermissions,
       collectionPermissions: protoMsg.collectionPermissions
         ? CollectionPermissions.fromProto(protoMsg.collectionPermissions, convertFunction)
@@ -165,7 +172,29 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
       updateIsArchivedTimeline: protoMsg.updateIsArchivedTimeline,
       isArchivedTimeline: protoMsg.isArchivedTimeline
         ? protoMsg.isArchivedTimeline.map((x) => IsArchivedTimeline.fromProto(x, convertFunction))
-        : undefined
+        : undefined,
+      creatorOverride: protoMsg.creatorOverride
     });
+  }
+
+  toBech32Addresses(prefix: string): MsgUniversalUpdateCollection<T> {
+    return new MsgUniversalUpdateCollection<T>({
+      ...this,
+      creator: getConvertFunctionFromPrefix(prefix)(this.creator),
+      defaultBalances: this.defaultBalances?.toBech32Addresses(prefix),
+      collectionPermissions: this.collectionPermissions?.toBech32Addresses(prefix),
+      managerTimeline: this.managerTimeline?.map((x) => x.toBech32Addresses(prefix)),
+      collectionApprovals: this.collectionApprovals?.map((x) => x.toBech32Addresses(prefix)),
+      creatorOverride: getConvertFunctionFromPrefix(prefix)(this.creatorOverride)
+    });
+  }
+
+  toCosmWasmPayloadString(): string {
+    return `{"universalUpdateCollectionMsg":${normalizeMessagesIfNecessary([
+      {
+        message: this.toProto(),
+        path: this.toProto().getType().typeName
+      }
+    ])[0].message.toJsonString({ emitDefaultValues: true })} }`;
   }
 }

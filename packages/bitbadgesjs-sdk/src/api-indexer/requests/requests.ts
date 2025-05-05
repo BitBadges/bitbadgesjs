@@ -173,6 +173,9 @@ export interface iGetStatusPayload {
    * If true, we will check if the indexer is out of sync with the blockchain.
    */
   withOutOfSyncCheck?: boolean;
+
+  /** Chain to check? Defaults to BitBadges poller. */
+  chain?: 'Thorchain' | 'BitBadges';
 }
 
 /**
@@ -180,15 +183,18 @@ export interface iGetStatusPayload {
  */
 export class GetStatusPayload extends CustomTypeClass<GetStatusPayload> implements iGetStatusPayload {
   withOutOfSyncCheck?: boolean;
+  chain?: 'Thorchain' | 'BitBadges';
 
   constructor(payload: iGetStatusPayload) {
     super();
     this.withOutOfSyncCheck = payload.withOutOfSyncCheck;
+    this.chain = payload.chain;
   }
 
   static FromQuery(query: ParsedQs): GetStatusPayload {
     return new GetStatusPayload({
-      withOutOfSyncCheck: query.withOutOfSyncCheck === 'true'
+      withOutOfSyncCheck: query.withOutOfSyncCheck === 'true',
+      chain: query.chain?.toString() as 'Thorchain' | 'BitBadges'
     });
   }
 }

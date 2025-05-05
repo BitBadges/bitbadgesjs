@@ -183,6 +183,13 @@ export class UserPermissions extends Message<UserPermissions> {
    */
   canUpdateAutoApproveSelfInitiatedIncomingTransfers: ActionPermission[] = [];
 
+  /**
+   * Permissions related to updating auto-approval settings for all incoming transfers (whether they are allowed by default).
+   *
+   * @generated from field: repeated badges.ActionPermission canUpdateAutoApproveAllIncomingTransfers = 5;
+   */
+  canUpdateAutoApproveAllIncomingTransfers: ActionPermission[] = [];
+
   constructor(data?: PartialMessage<UserPermissions>) {
     super();
     proto3.util.initPartial(data, this);
@@ -195,6 +202,7 @@ export class UserPermissions extends Message<UserPermissions> {
     { no: 2, name: "canUpdateIncomingApprovals", kind: "message", T: UserIncomingApprovalPermission, repeated: true },
     { no: 3, name: "canUpdateAutoApproveSelfInitiatedOutgoingTransfers", kind: "message", T: ActionPermission, repeated: true },
     { no: 4, name: "canUpdateAutoApproveSelfInitiatedIncomingTransfers", kind: "message", T: ActionPermission, repeated: true },
+    { no: 5, name: "canUpdateAutoApproveAllIncomingTransfers", kind: "message", T: ActionPermission, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UserPermissions {

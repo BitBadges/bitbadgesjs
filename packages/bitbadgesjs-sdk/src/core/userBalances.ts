@@ -18,6 +18,7 @@ export class UserBalanceStore<T extends NumberType> extends BaseNumberTypeClass<
   userPermissions: UserPermissions<T>;
   autoApproveSelfInitiatedOutgoingTransfers: boolean;
   autoApproveSelfInitiatedIncomingTransfers: boolean;
+  autoApproveAllIncomingTransfers: boolean;
 
   constructor(data: iUserBalanceStore<T>) {
     super();
@@ -27,6 +28,7 @@ export class UserBalanceStore<T extends NumberType> extends BaseNumberTypeClass<
     this.userPermissions = new UserPermissions(data.userPermissions);
     this.autoApproveSelfInitiatedOutgoingTransfers = data.autoApproveSelfInitiatedOutgoingTransfers;
     this.autoApproveSelfInitiatedIncomingTransfers = data.autoApproveSelfInitiatedIncomingTransfers;
+    this.autoApproveAllIncomingTransfers = data.autoApproveAllIncomingTransfers;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UserBalanceStore<U> {
@@ -48,10 +50,21 @@ export class UserBalanceStore<T extends NumberType> extends BaseNumberTypeClass<
             canUpdateAutoApproveSelfInitiatedIncomingTransfers: [],
             canUpdateAutoApproveSelfInitiatedOutgoingTransfers: [],
             canUpdateIncomingApprovals: [],
-            canUpdateOutgoingApprovals: []
+            canUpdateOutgoingApprovals: [],
+            canUpdateAutoApproveAllIncomingTransfers: []
           }),
       autoApproveSelfInitiatedOutgoingTransfers: item.autoApproveSelfInitiatedOutgoingTransfers,
-      autoApproveSelfInitiatedIncomingTransfers: item.autoApproveSelfInitiatedIncomingTransfers
+      autoApproveSelfInitiatedIncomingTransfers: item.autoApproveSelfInitiatedIncomingTransfers,
+      autoApproveAllIncomingTransfers: item.autoApproveAllIncomingTransfers
+    });
+  }
+
+  toBech32Addresses(prefix: string): UserBalanceStore<T> {
+    return new UserBalanceStore({
+      ...this,
+      incomingApprovals: this.incomingApprovals.map((x) => x.toBech32Addresses(prefix)),
+      outgoingApprovals: this.outgoingApprovals.map((x) => x.toBech32Addresses(prefix)),
+      userPermissions: this.userPermissions.toBech32Addresses(prefix)
     });
   }
 }
