@@ -27,7 +27,7 @@
     "routes-check": "ts-node ./scripts/check_routes_consistency.ts ../../../bitbadges-indexer/src/indexer.ts  ./openapitypes-helpers/routes.yaml",
     "clean": "tsc --build tsconfig.build.json --clean  && shx rm -rf coverage *.log junit.xml dist && jest --clearCache",
     "fixup": "./scripts/fixup.sh",
-    "test": "jest ./src/**/*.spec.ts",
+    "test": "jest ./src/**/*.spec.ts --setupFiles ./jest.setup.js",
     "test:unit": "jest test/unit",
     "test:integration": "jest test/unit",
     "test:watch": "jest --watch",

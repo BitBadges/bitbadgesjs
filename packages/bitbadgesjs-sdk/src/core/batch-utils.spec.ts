@@ -1,5 +1,12 @@
 import { BatchBadgeDetailsArray } from './batch-utils.js';
 
+// Setup BigInt serialization for Jest
+if (typeof BigInt !== 'undefined') {
+  BigInt.prototype.toJSON = function () {
+    return this.toString();
+  };
+}
+
 describe('BatchBadgeDetails', () => {
   it('should create an instance', () => {
     expect(
@@ -156,9 +163,9 @@ describe('BatchBadgeDetails', () => {
       }
     ]);
 
-    expect(batchBadgeDetails.getPage(1, 25)[0].badgeIds[0].start).toEqual(1n);
-    expect(batchBadgeDetails.getPage(1, 25)[0].badgeIds[0].end).toEqual(25n);
-    expect(batchBadgeDetails.getPage(1, 25)[0].collectionId).toEqual(1n);
+    expect(batchBadgeDetails.getPage(1, 25)[0].badgeIds[0].start === 1n).toBeTruthy();
+    expect(batchBadgeDetails.getPage(1, 25)[0].badgeIds[0].end === 25n).toBeTruthy();
+    expect(batchBadgeDetails.getPage(1, 25)[0].collectionId === '1').toBeTruthy();
   });
 
   it('should getPage - newest', () => {
@@ -169,8 +176,8 @@ describe('BatchBadgeDetails', () => {
       }
     ]);
 
-    expect(batchBadgeDetails.getPage(1, 25, 'newest')[0].badgeIds[0].start).toEqual(9976n);
-    expect(batchBadgeDetails.getPage(1, 25, 'newest')[0].badgeIds[0].end).toEqual(10000n);
-    expect(batchBadgeDetails.getPage(1, 25, 'newest')[0].collectionId).toEqual(1n);
+    expect(batchBadgeDetails.getPage(1, 25, 'newest')[0].badgeIds[0].start === 9976n).toBeTruthy();
+    expect(batchBadgeDetails.getPage(1, 25, 'newest')[0].badgeIds[0].end === 10000n).toBeTruthy();
+    expect(batchBadgeDetails.getPage(1, 25, 'newest')[0].collectionId === '1').toBeTruthy();
   });
 });
