@@ -21,7 +21,6 @@ import {
 import { BalanceArray } from '@/core/balances.js';
 import { BatchBadgeDetailsArray } from '@/core/batch-utils.js';
 import { CosmosCoin } from '@/core/coin.js';
-import { AddressList, AttestationsProof, UintRange, UintRangeArray, getValueAtTimeForTimeline } from '@/core/index.js';
 import {
   BadgeMetadataTimeline,
   CollectionMetadataTimeline,
@@ -103,6 +102,10 @@ import {
   type iUpdateHistory,
   type iUsedLeafStatus
 } from './interfaces.js';
+import { UintRange, UintRangeArray } from '@/core/uintRanges.js';
+import { getValueAtTimeForTimeline } from '@/core/timelines.js';
+import { AddressList } from '@/core/addressLists.js';
+import { AttestationsProof } from '@/core/secrets.js';
 
 /**
  * @inheritDoc iCollectionDoc
@@ -1414,6 +1417,7 @@ export class ApprovalTrackerDoc<T extends NumberType> extends BaseNumberTypeClas
   approverAddress: BitBadgesAddress;
   trackerType: string;
   approvedAddress: BitBadgesAddress;
+  lastUpdatedAt: UNIXMilliTimestamp<T>;
 
   constructor(data: iApprovalTrackerDoc<T> & Doc & iAmountTrackerIdDetails<T>) {
     super();
@@ -1428,10 +1432,11 @@ export class ApprovalTrackerDoc<T extends NumberType> extends BaseNumberTypeClas
     this.approverAddress = data.approverAddress;
     this.trackerType = data.trackerType;
     this.approvedAddress = data.approvedAddress;
+    this.lastUpdatedAt = data.lastUpdatedAt;
   }
 
   getNumberFieldNames(): string[] {
-    return ['numTransfers'];
+    return ['numTransfers', 'lastUpdatedAt'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ApprovalTrackerDoc<U> {

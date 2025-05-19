@@ -27,7 +27,7 @@ import { Coin } from "../cosmos/base/v1beta1/coin_pb.js";
  * and autoApproveSelfInitiatedIncomingTransfers is set to true.
  *
  * Note that the user approved transfers are only checked if the collection approved transfers do not specify to override
- * the user approved transfers. 
+ * the user approved transfers.
  *
  * The permissions are used to determine whether the user can update the approved incoming/outgoing transfers and auto approvals.
  *
@@ -70,7 +70,7 @@ export class UserBalanceStore extends Message<UserBalanceStore> {
   autoApproveSelfInitiatedIncomingTransfers = false;
 
   /**
-   * Whether to auto-approve all incoming transfers by default. 
+   * Whether to auto-approve all incoming transfers by default.
    * This is just shorthand for adding an accept everything incoming approval
    * with no restrictions.
    *
@@ -445,7 +445,7 @@ export class UserIncomingApproval extends Message<UserIncomingApproval> {
 }
 
 /**
- * ManualBalances represents a list of manual balances entered for the predetermined balances criteria. Order is calculated according to the calculation method set. 
+ * ManualBalances represents a list of manual balances entered for the predetermined balances criteria. Order is calculated according to the calculation method set.
  *
  * @generated from message badges.ManualBalances
  */
@@ -484,6 +484,63 @@ export class ManualBalances extends Message<ManualBalances> {
 }
 
 /**
+ * RecurringOwnershipTimes represents a list of recurring ownership times.
+ *
+ * @generated from message badges.RecurringOwnershipTimes
+ */
+export class RecurringOwnershipTimes extends Message<RecurringOwnershipTimes> {
+  /**
+   * The original start time of the first interval.
+   *
+   * @generated from field: string startTime = 1;
+   */
+  startTime = "";
+
+  /**
+   * The interval length in unix milliseconds.
+   *
+   * @generated from field: string intervalLength = 2;
+   */
+  intervalLength = "";
+
+  /**
+   * Grace period length where you can charge the next interval (nextStartTime - chargePeriodLength) until (nextStartTime) = charge period
+   *
+   * @generated from field: string chargePeriodLength = 3;
+   */
+  chargePeriodLength = "";
+
+  constructor(data?: PartialMessage<RecurringOwnershipTimes>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.RecurringOwnershipTimes";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "startTime", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "intervalLength", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "chargePeriodLength", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RecurringOwnershipTimes {
+    return new RecurringOwnershipTimes().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): RecurringOwnershipTimes {
+    return new RecurringOwnershipTimes().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): RecurringOwnershipTimes {
+    return new RecurringOwnershipTimes().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: RecurringOwnershipTimes | PlainMessage<RecurringOwnershipTimes> | undefined, b: RecurringOwnershipTimes | PlainMessage<RecurringOwnershipTimes> | undefined): boolean {
+    return proto3.util.equals(RecurringOwnershipTimes, a, b);
+  }
+}
+
+/**
  * IncrementedBalances represents balances that are incremented by specific amounts, according to the order calculation method.
  *
  * @generated from message badges.IncrementedBalances
@@ -511,9 +568,23 @@ export class IncrementedBalances extends Message<IncrementedBalances> {
   /**
    * The amount of unix milliseconds to approve starting from now. Incompatible with incrementOwnershipTimesBy.
    *
-   * @generated from field: string approvalDurationFromNow = 4;
+   * @generated from field: string durationFromTimestamp = 4;
    */
-  approvalDurationFromNow = "";
+  durationFromTimestamp = "";
+
+  /**
+   * Whether to allow overriding the timestamp for the balances (only applicable with durationFromTimestamp set).
+   *
+   * @generated from field: bool allowOverrideTimestamp = 5;
+   */
+  allowOverrideTimestamp = false;
+
+  /**
+   * Recurring ownership times.
+   *
+   * @generated from field: badges.RecurringOwnershipTimes recurringOwnershipTimes = 6;
+   */
+  recurringOwnershipTimes?: RecurringOwnershipTimes;
 
   constructor(data?: PartialMessage<IncrementedBalances>) {
     super();
@@ -526,7 +597,9 @@ export class IncrementedBalances extends Message<IncrementedBalances> {
     { no: 1, name: "startBalances", kind: "message", T: Balance, repeated: true },
     { no: 2, name: "incrementBadgeIdsBy", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "incrementOwnershipTimesBy", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "approvalDurationFromNow", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "durationFromTimestamp", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: "allowOverrideTimestamp", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 6, name: "recurringOwnershipTimes", kind: "message", T: RecurringOwnershipTimes },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): IncrementedBalances {
@@ -687,7 +760,7 @@ export class PredeterminedBalances extends Message<PredeterminedBalances> {
 /**
  * ApprovalAmounts defines approval amounts per unique "from," "to," and/or "initiated by" address.
  * If any of these are nil or "0", we assume unlimited approvals.
- * If they are set to a value, then the running tally of the amounts transferred for the specified badge IDs and ownership times 
+ * If they are set to a value, then the running tally of the amounts transferred for the specified badge IDs and ownership times
  * must not exceed the corresponding value.
  *
  * @generated from message badges.ApprovalAmounts
@@ -729,6 +802,13 @@ export class ApprovalAmounts extends Message<ApprovalAmounts> {
    */
   amountTrackerId = "";
 
+  /**
+   * Time intervals to reset the trackers at.
+   *
+   * @generated from field: badges.ResetTimeIntervals resetTimeIntervals = 7;
+   */
+  resetTimeIntervals?: ResetTimeIntervals;
+
   constructor(data?: PartialMessage<ApprovalAmounts>) {
     super();
     proto3.util.initPartial(data, this);
@@ -742,6 +822,7 @@ export class ApprovalAmounts extends Message<ApprovalAmounts> {
     { no: 3, name: "perFromAddressApprovalAmount", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 4, name: "perInitiatedByAddressApprovalAmount", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 6, name: "amountTrackerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 7, name: "resetTimeIntervals", kind: "message", T: ResetTimeIntervals },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ApprovalAmounts {
@@ -758,6 +839,55 @@ export class ApprovalAmounts extends Message<ApprovalAmounts> {
 
   static equals(a: ApprovalAmounts | PlainMessage<ApprovalAmounts> | undefined, b: ApprovalAmounts | PlainMessage<ApprovalAmounts> | undefined): boolean {
     return proto3.util.equals(ApprovalAmounts, a, b);
+  }
+}
+
+/**
+ * Time intervals to reset the trackers at.
+ *
+ * @generated from message badges.ResetTimeIntervals
+ */
+export class ResetTimeIntervals extends Message<ResetTimeIntervals> {
+  /**
+   * Original start time of the first interval.
+   *
+   * @generated from field: string startTime = 1;
+   */
+  startTime = "";
+
+  /**
+   * Interval length in unix milliseconds.
+   *
+   * @generated from field: string intervalLength = 2;
+   */
+  intervalLength = "";
+
+  constructor(data?: PartialMessage<ResetTimeIntervals>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.ResetTimeIntervals";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "startTime", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "intervalLength", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ResetTimeIntervals {
+    return new ResetTimeIntervals().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ResetTimeIntervals {
+    return new ResetTimeIntervals().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ResetTimeIntervals {
+    return new ResetTimeIntervals().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ResetTimeIntervals | PlainMessage<ResetTimeIntervals> | undefined, b: ResetTimeIntervals | PlainMessage<ResetTimeIntervals> | undefined): boolean {
+    return proto3.util.equals(ResetTimeIntervals, a, b);
   }
 }
 
@@ -806,6 +936,13 @@ export class MaxNumTransfers extends Message<MaxNumTransfers> {
    */
   amountTrackerId = "";
 
+  /**
+   * Time intervals to reset the trackers at.
+   *
+   * @generated from field: badges.ResetTimeIntervals resetTimeIntervals = 7;
+   */
+  resetTimeIntervals?: ResetTimeIntervals;
+
   constructor(data?: PartialMessage<MaxNumTransfers>) {
     super();
     proto3.util.initPartial(data, this);
@@ -819,6 +956,7 @@ export class MaxNumTransfers extends Message<MaxNumTransfers> {
     { no: 3, name: "perFromAddressMaxNumTransfers", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 4, name: "perInitiatedByAddressMaxNumTransfers", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 6, name: "amountTrackerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 7, name: "resetTimeIntervals", kind: "message", T: ResetTimeIntervals },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MaxNumTransfers {
@@ -858,6 +996,13 @@ export class ApprovalTracker extends Message<ApprovalTracker> {
    */
   amounts: Balance[] = [];
 
+  /**
+   * Last updated at time.
+   *
+   * @generated from field: string lastUpdatedAt = 3;
+   */
+  lastUpdatedAt = "";
+
   constructor(data?: PartialMessage<ApprovalTracker>) {
     super();
     proto3.util.initPartial(data, this);
@@ -868,6 +1013,7 @@ export class ApprovalTracker extends Message<ApprovalTracker> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "numTransfers", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "amounts", kind: "message", T: Balance, repeated: true },
+    { no: 3, name: "lastUpdatedAt", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ApprovalTracker {
@@ -1496,31 +1642,39 @@ export class Transfer extends Message<Transfer> {
   prioritizedApprovals: ApprovalIdentifierDetails[] = [];
 
   /**
-   * Whether to only check prioritized approvals for the transfer. 
+   * Whether to only check prioritized approvals for the transfer.
    * If true, we will only check the prioritized approvals and fail if none of them match (i.e. do not check any non-prioritized approvals).
-   * If false, we will check the prioritized approvals first and then scan through the rest of the approvals. 
+   * If false, we will check the prioritized approvals first and then scan through the rest of the approvals.
    *
    * @generated from field: bool onlyCheckPrioritizedCollectionApprovals = 8;
    */
   onlyCheckPrioritizedCollectionApprovals = false;
 
   /**
-   * Whether to only check prioritized approvals for the transfer. 
+   * Whether to only check prioritized approvals for the transfer.
    * If true, we will only check the prioritized approvals and fail if none of them match (i.e. do not check any non-prioritized approvals).
-   * If false, we will check the prioritized approvals first and then scan through the rest of the approvals. 
+   * If false, we will check the prioritized approvals first and then scan through the rest of the approvals.
    *
    * @generated from field: bool onlyCheckPrioritizedIncomingApprovals = 9;
    */
   onlyCheckPrioritizedIncomingApprovals = false;
 
   /**
-   * Whether to only check prioritized approvals for the transfer. 
+   * Whether to only check prioritized approvals for the transfer.
    * If true, we will only check the prioritized approvals and fail if none of them match (i.e. do not check any non-prioritized approvals).
-   * If false, we will check the prioritized approvals first and then scan through the rest of the approvals. 
+   * If false, we will check the prioritized approvals first and then scan through the rest of the approvals.
    *
    * @generated from field: bool onlyCheckPrioritizedOutgoingApprovals = 10;
    */
   onlyCheckPrioritizedOutgoingApprovals = false;
+
+  /**
+   * The timestamp to override with when calculating the balances.
+   * Only applicable for approvals with predeterminedBalances set that allow setting a custom timestamp for the transfer.
+   *
+   * @generated from field: string overrideTimestamp = 11;
+   */
+  overrideTimestamp = "";
 
   constructor(data?: PartialMessage<Transfer>) {
     super();
@@ -1540,6 +1694,7 @@ export class Transfer extends Message<Transfer> {
     { no: 8, name: "onlyCheckPrioritizedCollectionApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 9, name: "onlyCheckPrioritizedIncomingApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 10, name: "onlyCheckPrioritizedOutgoingApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 11, name: "overrideTimestamp", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Transfer {

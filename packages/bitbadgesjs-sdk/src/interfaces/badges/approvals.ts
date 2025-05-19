@@ -72,15 +72,31 @@ export interface iManualBalances<T extends NumberType> {
 /**
  * @category Interfaces
  */
+export interface iRecurringOwnershipTimes<T extends NumberType> {
+  /** The start time of the recurring ownership times. */
+  startTime: T;
+  /** The interval length of the recurring ownership times. */
+  intervalLength: T;
+  /** Grace period length of when this is valid. */
+  chargePeriodLength: T;
+}
+
+/**
+ * @category Interfaces
+ */
 export interface iIncrementedBalances<T extends NumberType> {
   /** The starting balances for each transfer. Order number corresponds to the number of times we increment. */
   startBalances: iBalance<T>[];
   /** The amount to increment the badge IDs by after each transfer. */
   incrementBadgeIdsBy: T;
-  /** The amount to increment the owned times by after each transfer. Incompatible with approvalDurationFromNow. */
+  /** The amount to increment the owned times by after each transfer. Incompatible with durationFromTimestamp. */
   incrementOwnershipTimesBy: T;
   /** The number of unix milliseconds to approve starting from now. Incompatible with incrementOwnershipTimesBy. */
-  approvalDurationFromNow: T;
+  durationFromTimestamp: T;
+  /** Whether to allow the override timestamp to be used. */
+  allowOverrideTimestamp: boolean;
+  /** The recurring ownership times for the approval. */
+  recurringOwnershipTimes: iRecurringOwnershipTimes<T>;
 }
 
 /**
@@ -104,6 +120,16 @@ export interface iPredeterminedOrderCalculationMethod {
 /**
  * @category Interfaces
  */
+export interface iResetTimeIntervals<T extends NumberType> {
+  /** The start time of the first interval. */
+  startTime: T;
+  /** The length of the interval. */
+  intervalLength: T;
+}
+
+/**
+ * @category Interfaces
+ */
 export interface iApprovalAmounts<T extends NumberType> {
   /** The overall maximum amount approved for the badgeIDs and ownershipTimes. Running tally that includes all transfers that match this approval. */
   overallApprovalAmount: T;
@@ -115,6 +141,8 @@ export interface iApprovalAmounts<T extends NumberType> {
   perInitiatedByAddressApprovalAmount: T;
   /** The ID of the approval tracker. This is the key used to track tallies. */
   amountTrackerId: string;
+  /** The time intervals to reset the tracker at. */
+  resetTimeIntervals: iResetTimeIntervals<T>;
 }
 
 /**
@@ -131,6 +159,8 @@ export interface iMaxNumTransfers<T extends NumberType> {
   perInitiatedByAddressMaxNumTransfers: T;
   /** The ID of the approval tracker. This is the key used to track tallies. */
   amountTrackerId: string;
+  /** The time intervals to reset the tracker at. */
+  resetTimeIntervals: iResetTimeIntervals<T>;
 }
 
 /**

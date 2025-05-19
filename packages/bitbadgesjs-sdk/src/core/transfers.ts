@@ -1,15 +1,10 @@
-import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
-import {
-  BaseNumberTypeClass,
-  convertClassPropertiesAndMaintainNumberTypes,
-  ConvertOptions,
-  getConverterFunction
-} from '@/common/base.js';
+import type { BitBadgesAddress, UNIXMilliTimestamp } from '@/api-indexer/docs/interfaces.js';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions, getConverterFunction } from '@/common/base.js';
 import type { iBalance, iTransfer } from '@/interfaces/badges/core.js';
 import * as badges from '@/proto/badges/transfers_pb.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 import { convertToBitBadgesAddress, getConvertFunctionFromPrefix } from '../address-converter/converter.js';
-import { GO_MAX_UINT_64, safeAddKeepLeft, safeMultiplyKeepLeft } from '../common/math.js';
+import { GO_MAX_UINT_64, safeAddKeepLeft, safeMultiplyKeepLeft, safeSubtractKeepLeft } from '../common/math.js';
 import type { NumberType } from '../common/string-numbers.js';
 import { BigIntify, Stringify } from '../common/string-numbers.js';
 import { Balance, BalanceArray, cleanBalances } from './balances.js';
@@ -32,6 +27,7 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
   onlyCheckPrioritizedCollectionApprovals?: boolean | undefined;
   onlyCheckPrioritizedIncomingApprovals?: boolean | undefined;
   onlyCheckPrioritizedOutgoingApprovals?: boolean | undefined;
+  overrideTimestamp?: UNIXMilliTimestamp<T>;
 
   constructor(transfer: iTransfer<T>) {
     super();
@@ -50,6 +46,11 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
 
     this.onlyCheckPrioritizedIncomingApprovals = transfer.onlyCheckPrioritizedIncomingApprovals;
     this.onlyCheckPrioritizedOutgoingApprovals = transfer.onlyCheckPrioritizedOutgoingApprovals;
+    this.overrideTimestamp = transfer.overrideTimestamp;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['overrideTimestamp'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): Transfer<U> {
@@ -92,7 +93,8 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
 
       onlyCheckPrioritizedCollectionApprovals: item.onlyCheckPrioritizedCollectionApprovals,
       onlyCheckPrioritizedIncomingApprovals: item.onlyCheckPrioritizedIncomingApprovals,
-      onlyCheckPrioritizedOutgoingApprovals: item.onlyCheckPrioritizedOutgoingApprovals
+      onlyCheckPrioritizedOutgoingApprovals: item.onlyCheckPrioritizedOutgoingApprovals,
+      overrideTimestamp: convertFunction(item.overrideTimestamp)
     });
   }
 
@@ -102,7 +104,8 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
       from: getConvertFunctionFromPrefix(prefix)(this.from),
       toAddresses: this.toAddresses.map((x) => getConvertFunctionFromPrefix(prefix)(x)),
       precalculateBalancesFromApproval: this.precalculateBalancesFromApproval?.toBech32Addresses(prefix),
-      prioritizedApprovals: this.prioritizedApprovals?.map((x) => x.toBech32Addresses(prefix))
+      prioritizedApprovals: this.prioritizedApprovals?.map((x) => x.toBech32Addresses(prefix)),
+      overrideTimestamp: this.overrideTimestamp
     });
   }
 }
@@ -155,7 +158,7 @@ export interface iTransferWithIncrements<T extends NumberType> extends iTransfer
   incrementOwnershipTimesBy?: T;
 
   /** The number of unix milliseconds to approve starting from now. */
-  approvalDurationFromNow?: T;
+  durationFromTimestamp?: T;
 }
 
 /**
@@ -178,7 +181,7 @@ export class TransferWithIncrements<T extends NumberType>
   toAddressesLength?: T;
   incrementBadgeIdsBy?: T;
   incrementOwnershipTimesBy?: T;
-  approvalDurationFromNow?: T;
+  durationFromTimestamp?: T;
   from: BitBadgesAddress;
   toAddresses: BitBadgesAddress[];
   balances: BalanceArray<T>;
@@ -189,13 +192,14 @@ export class TransferWithIncrements<T extends NumberType>
   onlyCheckPrioritizedCollectionApprovals?: boolean | undefined;
   onlyCheckPrioritizedIncomingApprovals?: boolean | undefined;
   onlyCheckPrioritizedOutgoingApprovals?: boolean | undefined;
+  overrideTimestamp?: UNIXMilliTimestamp<T>;
 
   constructor(data: iTransferWithIncrements<T>) {
     super();
     this.toAddressesLength = data.toAddressesLength;
     this.incrementBadgeIdsBy = data.incrementBadgeIdsBy;
     this.incrementOwnershipTimesBy = data.incrementOwnershipTimesBy;
-    this.approvalDurationFromNow = data.approvalDurationFromNow;
+    this.durationFromTimestamp = data.durationFromTimestamp;
     this.from = data.from;
     this.toAddresses = data.toAddresses;
     this.balances = BalanceArray.From(data.balances);
@@ -206,12 +210,13 @@ export class TransferWithIncrements<T extends NumberType>
     this.memo = data.memo;
     this.prioritizedApprovals = data.prioritizedApprovals ? data.prioritizedApprovals.map((b) => new ApprovalIdentifierDetails(b)) : undefined;
     this.onlyCheckPrioritizedCollectionApprovals = data.onlyCheckPrioritizedCollectionApprovals;
-    this.onlyCheckPrioritizedCollectionApprovals = data.onlyCheckPrioritizedCollectionApprovals;
-    this.onlyCheckPrioritizedCollectionApprovals = data.onlyCheckPrioritizedCollectionApprovals;
+    this.onlyCheckPrioritizedIncomingApprovals = data.onlyCheckPrioritizedIncomingApprovals;
+    this.onlyCheckPrioritizedOutgoingApprovals = data.onlyCheckPrioritizedOutgoingApprovals;
+    this.overrideTimestamp = data.overrideTimestamp;
   }
 
   getNumberFieldNames(): string[] {
-    return ['toAddressesLength', 'incrementBadgeIdsBy', 'incrementOwnershipTimesBy', 'approvalDurationFromNow'];
+    return ['toAddressesLength', 'incrementBadgeIdsBy', 'incrementOwnershipTimesBy', 'durationFromTimestamp', 'overrideTimestamp'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): TransferWithIncrements<U> {
@@ -227,8 +232,8 @@ export class TransferWithIncrements<T extends NumberType>
 export const createBalanceMapForOffChainBalances = <T extends NumberType>(transfersWithIncrements: iTransferWithIncrements<T>[]) => {
   const balanceMap: OffChainBalancesMap<T> = {};
 
-  if (transfersWithIncrements.some((x) => x.approvalDurationFromNow)) {
-    throw new Error('approvalDurationFromNow is not supported in createBalanceMapForOffChainBalances');
+  if (transfersWithIncrements.some((x) => x.durationFromTimestamp)) {
+    throw new Error('durationFromTimestamp is not supported in createBalanceMapForOffChainBalances');
   }
 
   const transfers = getTransfersFromTransfersWithIncrements(transfersWithIncrements, 0n as T);
@@ -258,7 +263,7 @@ export const createBalanceMapForOffChainBalances = <T extends NumberType>(transf
  * @category Balances
  */
 export const getAllBadgeIdsToBeTransferred = <T extends NumberType>(transfers: iTransferWithIncrements<T>[]) => {
-  //NOTE: We do not support approvalDurationFromNow in this function since we just return the badgeIds
+  //NOTE: We do not support durationFromTimestamp in this function since we just return the badgeIds
 
   const allBadgeIds: UintRangeArray<T> = UintRangeArray.From([]);
   const transfersConverted = transfers.map((transfer) => new TransferWithIncrements(transfer));
@@ -343,12 +348,12 @@ export const getTransfersFromTransfersWithIncrements = <T extends NumberType>(
 
   const transfersConverted = transfersWithIncrements.map((transfer) => new TransferWithIncrements(transfer));
   for (const transferExtended of transfersConverted) {
-    const { toAddressesLength, incrementBadgeIdsBy, incrementOwnershipTimesBy, approvalDurationFromNow, ...transfer } = transferExtended;
+    const { toAddressesLength, incrementBadgeIdsBy, incrementOwnershipTimesBy, durationFromTimestamp, ...transfer } = transferExtended;
     const length = toAddressesLength ? Number(toAddressesLength) : transfer.toAddresses.length;
 
     //If badges are incremented, we create N unique transfers (one to each address).
     //Else, we can create one transfer with N addresses
-    if (incrementBadgeIdsBy || incrementOwnershipTimesBy || approvalDurationFromNow) {
+    if (incrementBadgeIdsBy || incrementOwnershipTimesBy || durationFromTimestamp) {
       const currBalances = transfer.balances.clone();
       for (let i = 0; i < length; i++) {
         transfers.push(
@@ -365,8 +370,11 @@ export const getTransfersFromTransfersWithIncrements = <T extends NumberType>(
             badgeId.end = safeAddKeepLeft(badgeId.end, incrementBadgeIdsBy || 0n);
           }
 
-          if (approvalDurationFromNow) {
-            balance.ownershipTimes = UintRangeArray.From([{ start: blockTime, end: safeAddKeepLeft(blockTime, approvalDurationFromNow || 0n) }]);
+          if (durationFromTimestamp) {
+            let endTime = safeAddKeepLeft(blockTime, durationFromTimestamp || 0n);
+            endTime = safeSubtractKeepLeft(endTime, 1n);
+
+            balance.ownershipTimes = UintRangeArray.From([{ start: blockTime, end: endTime }]);
           } else {
             for (const ownershipTime of balance.ownershipTimes) {
               ownershipTime.start = safeAddKeepLeft(ownershipTime.start, incrementOwnershipTimesBy || 0n);
@@ -446,7 +454,7 @@ export const getBalancesAfterTransfers = <T extends NumberType>(
       let ownershipTimes = balance.ownershipTimes.clone();
 
       //If incrementIdsBy is not set, then we are not incrementing badgeIds and we can just batch calculate the balance
-      if (!transfer.incrementBadgeIdsBy && !transfer.incrementOwnershipTimesBy && !transfer.approvalDurationFromNow) {
+      if (!transfer.incrementBadgeIdsBy && !transfer.incrementOwnershipTimesBy && !transfer.durationFromTimestamp) {
         for (const badgeId of badgeIds) {
           for (const ownershipTime of ownershipTimes) {
             endBalances = getBalanceAfterTransfer(
@@ -465,7 +473,7 @@ export const getBalancesAfterTransfers = <T extends NumberType>(
         const fastIncrementBadges = !transfer.incrementBadgeIdsBy || badgeIds.every((x) => x.size() === transfer.incrementBadgeIdsBy);
         const fastIncrementOwnershipTimes =
           !transfer.incrementOwnershipTimesBy ||
-          BigInt(transfer.approvalDurationFromNow || 0n) > 0n ||
+          BigInt(transfer.durationFromTimestamp || 0n) > 0n ||
           ownershipTimes.every((x) => x.size() === transfer.incrementOwnershipTimesBy);
 
         //If we are incrementing with no gaps (e.g. end IDs will be 1-1000 or start with x1 and increment x1 10000 times)
@@ -474,8 +482,11 @@ export const getBalancesAfterTransfers = <T extends NumberType>(
             badgeId.end = safeAddKeepLeft(badgeId.end, safeMultiplyKeepLeft(transfer.incrementBadgeIdsBy || 0n, numRecipients - 1n));
           }
 
-          if (transfer.approvalDurationFromNow) {
-            ownershipTimes = UintRangeArray.From([{ start: blockTime, end: safeAddKeepLeft(blockTime, transfer.approvalDurationFromNow || 0n) }]);
+          if (transfer.durationFromTimestamp) {
+            let endTime = safeAddKeepLeft(blockTime, transfer.durationFromTimestamp || 0n);
+            endTime = safeSubtractKeepLeft(endTime, 1n);
+
+            ownershipTimes = UintRangeArray.From([{ start: blockTime, end: endTime }]);
           } else {
             for (const ownershipTime of ownershipTimes) {
               ownershipTime.end = safeAddKeepLeft(
@@ -530,8 +541,8 @@ export const getBalancesAfterTransfers = <T extends NumberType>(
                 ownershipTime.start = safeAddKeepLeft(ownershipTime.start, transfer.incrementOwnershipTimesBy || 0n);
                 ownershipTime.end = safeAddKeepLeft(ownershipTime.end, transfer.incrementOwnershipTimesBy || 0n);
               }
-            } else if (transfer.approvalDurationFromNow) {
-              ownershipTimes = UintRangeArray.From([{ start: blockTime, end: safeAddKeepLeft(blockTime, transfer.approvalDurationFromNow || 0n) }]);
+            } else if (transfer.durationFromTimestamp) {
+              ownershipTimes = UintRangeArray.From([{ start: blockTime, end: safeAddKeepLeft(blockTime, transfer.durationFromTimestamp || 0n) }]);
             }
           }
         }

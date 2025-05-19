@@ -29,6 +29,8 @@ import type {
   iOutgoingApprovalCriteria,
   iPredeterminedBalances,
   iPredeterminedOrderCalculationMethod,
+  iRecurringOwnershipTimes,
+  iResetTimeIntervals,
   iUserIncomingApproval,
   iUserIncomingApprovalWithDetails,
   iUserOutgoingApproval
@@ -444,7 +446,11 @@ export class PredeterminedBalances<T extends NumberType> extends BaseNumberTypeC
             startBalances: [],
             incrementBadgeIdsBy: convertFunction(0),
             incrementOwnershipTimesBy: convertFunction(0),
-            approvalDurationFromNow: convertFunction(0)
+            durationFromTimestamp: convertFunction(0),
+            allowOverrideTimestamp: false,
+            recurringOwnershipTimes: new RecurringOwnershipTimes({ startTime: 0n, intervalLength: 0n, chargePeriodLength: 0n }).convert(
+              convertFunction
+            )
           }),
       orderCalculationMethod: item.orderCalculationMethod
         ? PredeterminedOrderCalculationMethod.fromProto(item.orderCalculationMethod)
@@ -510,6 +516,63 @@ export class ManualBalances<T extends NumberType> extends BaseNumberTypeClass<Ma
 }
 
 /**
+ * RecurringOwnershipTimes represents the recurring ownership times for an approval.
+ *
+ * @category Approvals / Transferability
+ */
+export class RecurringOwnershipTimes<T extends NumberType>
+  extends BaseNumberTypeClass<RecurringOwnershipTimes<T>>
+  implements iRecurringOwnershipTimes<T>
+{
+  startTime: T;
+  intervalLength: T;
+  chargePeriodLength: T;
+
+  constructor(msg: iRecurringOwnershipTimes<T>) {
+    super();
+    this.startTime = msg.startTime;
+    this.intervalLength = msg.intervalLength;
+    this.chargePeriodLength = msg.chargePeriodLength;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['startTime', 'intervalLength', 'chargePeriodLength'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): RecurringOwnershipTimes<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as RecurringOwnershipTimes<U>;
+  }
+
+  toProto(): badges.RecurringOwnershipTimes {
+    return new badges.RecurringOwnershipTimes(this.convert(Stringify));
+  }
+
+  static fromJson<U extends NumberType>(
+    jsonValue: JsonValue,
+    convertFunction: (item: NumberType) => U,
+    options?: Partial<JsonReadOptions>
+  ): RecurringOwnershipTimes<U> {
+    return RecurringOwnershipTimes.fromProto(badges.RecurringOwnershipTimes.fromJson(jsonValue, options), convertFunction);
+  }
+
+  static fromJsonString<U extends NumberType>(
+    jsonString: string,
+    convertFunction: (item: NumberType) => U,
+    options?: Partial<JsonReadOptions>
+  ): RecurringOwnershipTimes<U> {
+    return RecurringOwnershipTimes.fromProto(badges.RecurringOwnershipTimes.fromJsonString(jsonString, options), convertFunction);
+  }
+
+  static fromProto<U extends NumberType>(item: badges.RecurringOwnershipTimes, convertFunction: (item: NumberType) => U): RecurringOwnershipTimes<U> {
+    return new RecurringOwnershipTimes<U>({
+      startTime: convertFunction(item.startTime),
+      intervalLength: convertFunction(item.intervalLength),
+      chargePeriodLength: convertFunction(item.chargePeriodLength)
+    });
+  }
+}
+
+/**
  * IncrementedBalances represents predetermined incremented balances for transfers of an approval.
  * You can define a starting balance and increment the badge IDs and owned times by a certain amount.
  *
@@ -519,18 +582,22 @@ export class IncrementedBalances<T extends NumberType> extends BaseNumberTypeCla
   startBalances: BalanceArray<T>;
   incrementBadgeIdsBy: T;
   incrementOwnershipTimesBy: T;
-  approvalDurationFromNow: T;
+  durationFromTimestamp: T;
+  allowOverrideTimestamp: boolean;
+  recurringOwnershipTimes: RecurringOwnershipTimes<T>;
 
   constructor(msg: iIncrementedBalances<T>) {
     super();
     this.startBalances = BalanceArray.From(msg.startBalances);
     this.incrementBadgeIdsBy = msg.incrementBadgeIdsBy;
     this.incrementOwnershipTimesBy = msg.incrementOwnershipTimesBy;
-    this.approvalDurationFromNow = msg.approvalDurationFromNow;
+    this.durationFromTimestamp = msg.durationFromTimestamp;
+    this.allowOverrideTimestamp = msg.allowOverrideTimestamp;
+    this.recurringOwnershipTimes = new RecurringOwnershipTimes(msg.recurringOwnershipTimes);
   }
 
   getNumberFieldNames(): string[] {
-    return ['incrementBadgeIdsBy', 'incrementOwnershipTimesBy', 'approvalDurationFromNow'];
+    return ['incrementBadgeIdsBy', 'incrementOwnershipTimesBy', 'durationFromTimestamp'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): IncrementedBalances<U> {
@@ -539,7 +606,9 @@ export class IncrementedBalances<T extends NumberType> extends BaseNumberTypeCla
         startBalances: this.startBalances.map((x) => x.convert(convertFunction)),
         incrementBadgeIdsBy: convertFunction(this.incrementBadgeIdsBy),
         incrementOwnershipTimesBy: convertFunction(this.incrementOwnershipTimesBy),
-        approvalDurationFromNow: convertFunction(this.approvalDurationFromNow)
+        durationFromTimestamp: convertFunction(this.durationFromTimestamp),
+        allowOverrideTimestamp: this.allowOverrideTimestamp,
+        recurringOwnershipTimes: this.recurringOwnershipTimes.convert(convertFunction)
       })
     );
   }
@@ -569,7 +638,11 @@ export class IncrementedBalances<T extends NumberType> extends BaseNumberTypeCla
       startBalances: item.startBalances.map((x) => Balance.fromProto(x, convertFunction)),
       incrementBadgeIdsBy: convertFunction(item.incrementBadgeIdsBy),
       incrementOwnershipTimesBy: convertFunction(item.incrementOwnershipTimesBy),
-      approvalDurationFromNow: convertFunction(item.approvalDurationFromNow)
+      durationFromTimestamp: convertFunction(item.durationFromTimestamp),
+      allowOverrideTimestamp: item.allowOverrideTimestamp,
+      recurringOwnershipTimes: item.recurringOwnershipTimes
+        ? new RecurringOwnershipTimes(item.recurringOwnershipTimes).convert(convertFunction)
+        : new RecurringOwnershipTimes({ startTime: 0n, intervalLength: 0n, chargePeriodLength: 0n }).convert(convertFunction)
     });
   }
 }
@@ -642,6 +715,7 @@ export class ApprovalAmounts<T extends NumberType> extends BaseNumberTypeClass<A
   perFromAddressApprovalAmount: T;
   perInitiatedByAddressApprovalAmount: T;
   amountTrackerId: string;
+  resetTimeIntervals: ResetTimeIntervals<T>;
 
   constructor(msg: iApprovalAmounts<T>) {
     super();
@@ -650,7 +724,9 @@ export class ApprovalAmounts<T extends NumberType> extends BaseNumberTypeClass<A
     this.perFromAddressApprovalAmount = msg.perFromAddressApprovalAmount;
     this.perInitiatedByAddressApprovalAmount = msg.perInitiatedByAddressApprovalAmount;
     this.amountTrackerId = msg.amountTrackerId;
+    this.resetTimeIntervals = new ResetTimeIntervals(msg.resetTimeIntervals);
   }
+
   getNumberFieldNames(): string[] {
     return ['overallApprovalAmount', 'perToAddressApprovalAmount', 'perFromAddressApprovalAmount', 'perInitiatedByAddressApprovalAmount'];
   }
@@ -662,7 +738,8 @@ export class ApprovalAmounts<T extends NumberType> extends BaseNumberTypeClass<A
         perToAddressApprovalAmount: convertFunction(this.perToAddressApprovalAmount),
         perFromAddressApprovalAmount: convertFunction(this.perFromAddressApprovalAmount),
         perInitiatedByAddressApprovalAmount: convertFunction(this.perInitiatedByAddressApprovalAmount),
-        amountTrackerId: this.amountTrackerId
+        amountTrackerId: this.amountTrackerId,
+        resetTimeIntervals: this.resetTimeIntervals.convert(convertFunction, options)
       })
     );
   }
@@ -693,7 +770,61 @@ export class ApprovalAmounts<T extends NumberType> extends BaseNumberTypeClass<A
       perToAddressApprovalAmount: convertFunction(item.perToAddressApprovalAmount),
       perFromAddressApprovalAmount: convertFunction(item.perFromAddressApprovalAmount),
       perInitiatedByAddressApprovalAmount: convertFunction(item.perInitiatedByAddressApprovalAmount),
-      amountTrackerId: item.amountTrackerId
+      amountTrackerId: item.amountTrackerId,
+      resetTimeIntervals: item.resetTimeIntervals
+        ? new ResetTimeIntervals(item.resetTimeIntervals).convert(convertFunction)
+        : new ResetTimeIntervals({ startTime: 0n, intervalLength: 0n }).convert(convertFunction)
+    });
+  }
+}
+
+/**
+ * ResetTimeIntervals represents the time intervals to reset the tracker at.
+ *
+ * @category Approvals / Transferability
+ */
+export class ResetTimeIntervals<T extends NumberType> extends BaseNumberTypeClass<ResetTimeIntervals<T>> implements iResetTimeIntervals<T> {
+  startTime: T;
+  intervalLength: T;
+
+  constructor(msg: iResetTimeIntervals<T>) {
+    super();
+    this.startTime = msg.startTime;
+    this.intervalLength = msg.intervalLength;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['startTime', 'intervalLength'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ResetTimeIntervals<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ResetTimeIntervals<U>;
+  }
+
+  toProto(): badges.ResetTimeIntervals {
+    return new badges.ResetTimeIntervals(this.convert(Stringify));
+  }
+
+  static fromJson<U extends NumberType>(
+    jsonValue: JsonValue,
+    convertFunction: (item: NumberType) => U,
+    options?: Partial<JsonReadOptions>
+  ): ResetTimeIntervals<U> {
+    return ResetTimeIntervals.fromProto(badges.ResetTimeIntervals.fromJson(jsonValue, options), convertFunction);
+  }
+
+  static fromJsonString<U extends NumberType>(
+    jsonString: string,
+    convertFunction: (item: NumberType) => U,
+    options?: Partial<JsonReadOptions>
+  ): ResetTimeIntervals<U> {
+    return ResetTimeIntervals.fromProto(badges.ResetTimeIntervals.fromJsonString(jsonString, options), convertFunction);
+  }
+
+  static fromProto<U extends NumberType>(item: badges.ResetTimeIntervals, convertFunction: (item: NumberType) => U): ResetTimeIntervals<U> {
+    return new ResetTimeIntervals<U>({
+      startTime: convertFunction(item.startTime),
+      intervalLength: convertFunction(item.intervalLength)
     });
   }
 }
@@ -715,6 +846,7 @@ export class MaxNumTransfers<T extends NumberType> extends BaseNumberTypeClass<M
   perFromAddressMaxNumTransfers: T;
   perInitiatedByAddressMaxNumTransfers: T;
   amountTrackerId: string;
+  resetTimeIntervals: ResetTimeIntervals<T>;
 
   constructor(msg: iMaxNumTransfers<T>) {
     super();
@@ -723,6 +855,7 @@ export class MaxNumTransfers<T extends NumberType> extends BaseNumberTypeClass<M
     this.perFromAddressMaxNumTransfers = msg.perFromAddressMaxNumTransfers;
     this.perInitiatedByAddressMaxNumTransfers = msg.perInitiatedByAddressMaxNumTransfers;
     this.amountTrackerId = msg.amountTrackerId;
+    this.resetTimeIntervals = new ResetTimeIntervals(msg.resetTimeIntervals);
   }
 
   getNumberFieldNames(): string[] {
@@ -730,15 +863,7 @@ export class MaxNumTransfers<T extends NumberType> extends BaseNumberTypeClass<M
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MaxNumTransfers<U> {
-    return new MaxNumTransfers(
-      deepCopyPrimitives({
-        overallMaxNumTransfers: convertFunction(this.overallMaxNumTransfers),
-        perToAddressMaxNumTransfers: convertFunction(this.perToAddressMaxNumTransfers),
-        perFromAddressMaxNumTransfers: convertFunction(this.perFromAddressMaxNumTransfers),
-        perInitiatedByAddressMaxNumTransfers: convertFunction(this.perInitiatedByAddressMaxNumTransfers),
-        amountTrackerId: this.amountTrackerId
-      })
-    );
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MaxNumTransfers<U>;
   }
 
   toProto(): badges.MaxNumTransfers {
@@ -767,7 +892,10 @@ export class MaxNumTransfers<T extends NumberType> extends BaseNumberTypeClass<M
       perToAddressMaxNumTransfers: convertFunction(item.perToAddressMaxNumTransfers),
       perFromAddressMaxNumTransfers: convertFunction(item.perFromAddressMaxNumTransfers),
       perInitiatedByAddressMaxNumTransfers: convertFunction(item.perInitiatedByAddressMaxNumTransfers),
-      amountTrackerId: item.amountTrackerId
+      amountTrackerId: item.amountTrackerId,
+      resetTimeIntervals: item.resetTimeIntervals
+        ? new ResetTimeIntervals(item.resetTimeIntervals).convert(convertFunction)
+        : new ResetTimeIntervals({ startTime: 0n, intervalLength: 0n }).convert(convertFunction)
     });
   }
 }

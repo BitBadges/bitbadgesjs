@@ -58,6 +58,7 @@ export class TransferActivityDoc<T extends NumberType> extends ActivityDoc<T> im
   initiatedBy: BitBadgesAddress;
   txHash?: string;
   private?: boolean | undefined;
+  overrideTimestamp?: T;
 
   constructor(data: iTransferActivityDoc<T>) {
     super(data);
@@ -73,10 +74,11 @@ export class TransferActivityDoc<T extends NumberType> extends ActivityDoc<T> im
     this.initiatedBy = data.initiatedBy;
     this.txHash = data.txHash;
     this.private = data.private;
+    this.overrideTimestamp = data.overrideTimestamp;
   }
 
   getNumberFieldNames(): string[] {
-    return [...super.getNumberFieldNames()];
+    return [...super.getNumberFieldNames(), 'overrideTimestamp'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): TransferActivityDoc<U> {

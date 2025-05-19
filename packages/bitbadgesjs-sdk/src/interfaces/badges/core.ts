@@ -320,6 +320,9 @@ export interface iTransfer<T extends NumberType> {
    * This only applies to the "outgoing" level approvals specified.
    */
   onlyCheckPrioritizedOutgoingApprovals?: boolean;
+
+  /** Override timestamp. Only to be used in conjunction if you can override the durationFromTimestamp. */
+  overrideTimestamp?: UNIXMilliTimestamp<T>;
 }
 
 /**

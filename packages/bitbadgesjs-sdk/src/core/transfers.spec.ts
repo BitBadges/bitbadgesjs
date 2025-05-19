@@ -28,7 +28,7 @@ describe('Transfers', () => {
         ],
         toAddresses: [testAddress1, testAddress2], // replace with your address
         incrementBadgeIdsBy: 1n,
-        approvalDurationFromNow: 0n, // assuming this is 1 day in milliseconds in BigInt form
+        durationFromTimestamp: 0n, // assuming this is 1 day in milliseconds in BigInt form
         incrementOwnershipTimesBy: 86400000n // assuming this is 1 day in milliseconds in BigInt form
       }
     ];
@@ -58,7 +58,7 @@ describe('Transfers', () => {
         toAddressesLength: 100n,
         incrementBadgeIdsBy: 1n,
         incrementOwnershipTimesBy: 0n,
-        approvalDurationFromNow: 0n // assuming this is 1 day in milliseconds in BigInt form
+        durationFromTimestamp: 0n // assuming this is 1 day in milliseconds in BigInt form
       }
     ];
 
@@ -96,7 +96,7 @@ describe('Transfers', () => {
         toAddressesLength: 100n,
         incrementBadgeIdsBy: 1n,
         incrementOwnershipTimesBy: 0n,
-        approvalDurationFromNow: 0n // assuming this is 1 day in milliseconds in BigInt form
+        durationFromTimestamp: 0n // assuming this is 1 day in milliseconds in BigInt form
       }
     ];
 
@@ -127,7 +127,7 @@ describe('Transfers', () => {
         toAddressesLength: 100n,
         incrementBadgeIdsBy: 1n,
         incrementOwnershipTimesBy: 0n,
-        approvalDurationFromNow: 0n // assuming this is 1 day in milliseconds in BigInt form
+        durationFromTimestamp: 0n // assuming this is 1 day in milliseconds in BigInt form
       }
     ];
 

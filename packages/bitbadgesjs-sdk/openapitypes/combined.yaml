@@ -19825,7 +19825,7 @@ components:
         incrementOwnershipTimesBy:
           description: The number to increment the ownershipTimes by for each transfer.
           $ref: '#/components/schemas/NumberType'
-        approvalDurationFromNow:
+        durationFromTimestamp:
           description: The number of unix milliseconds to approve starting from now.
           $ref: '#/components/schemas/NumberType'
       required:
@@ -20095,12 +20095,12 @@ components:
           type: object
         consensus_pubkey:
           properties:
-            '''@type''':
+            "'@type'":
               type: string
             key:
               type: string
           required:
-            - '''@type'''
+            - "'@type'"
             - key
           additionalProperties: false
           type: object
@@ -20331,7 +20331,7 @@ components:
       properties:
         account:
           properties:
-            '''@type''':
+            "'@type'":
               type: string
             base_account:
               properties:
@@ -20339,12 +20339,12 @@ components:
                   type: string
                 pub_key:
                   properties:
-                    '''@type''':
+                    "'@type'":
                       type: string
                     key:
                       type: string
                   required:
-                    - '''@type'''
+                    - "'@type'"
                     - key
                   additionalProperties: false
                   type: object
@@ -20359,7 +20359,7 @@ components:
               additionalProperties: false
               type: object
           required:
-            - '''@type'''
+            - "'@type'"
             - base_account
           additionalProperties: false
           type: object
@@ -22814,9 +22814,9 @@ components:
         incrementOwnershipTimesBy:
           description: >-
             The amount to increment the owned times by after each transfer.
-            Incompatible with approvalDurationFromNow.
+            Incompatible with durationFromTimestamp.
           $ref: '#/components/schemas/NumberType'
-        approvalDurationFromNow:
+        durationFromTimestamp:
           description: >-
             The number of unix milliseconds to approve starting from now.
             Incompatible with incrementOwnershipTimesBy.
@@ -22825,7 +22825,7 @@ components:
         - startBalances
         - incrementBadgeIdsBy
         - incrementOwnershipTimesBy
-        - approvalDurationFromNow
+        - durationFromTimestamp
       additionalProperties: false
       type: object
     iPredeterminedOrderCalculationMethod:

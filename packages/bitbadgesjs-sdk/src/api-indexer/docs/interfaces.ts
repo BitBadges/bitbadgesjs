@@ -276,6 +276,8 @@ export interface iTransferActivityDoc<T extends NumberType> extends iActivityDoc
   initiatedBy: BitBadgesAddress;
   /** The transaction hash of the activity. */
   txHash?: string;
+  /** Override timestamp? */
+  overrideTimestamp?: T;
 }
 
 /**
@@ -1632,6 +1634,8 @@ export interface iApprovalTrackerDoc<T extends NumberType> extends iAmountTracke
   numTransfers: T;
   /** A tally of the amounts transferred for this approval. */
   amounts: iBalance<T>[];
+  /** Last updated timestamp */
+  lastUpdatedAt: UNIXMilliTimestamp<T>;
 }
 
 /**

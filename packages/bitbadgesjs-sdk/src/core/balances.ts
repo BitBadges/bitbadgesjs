@@ -91,7 +91,7 @@ export const applyIncrementsToBalances = <T extends NumberType>(
   incrementBadgeIdsBy: T,
   incrementOwnershipTimesBy: T,
   numIncrements: T,
-  approvalDurationFromNow: T,
+  durationFromTimestamp: T,
   blockTime: T
 ) => {
   let balancesToReturn = BalanceArray.From(startBalances).clone();
@@ -110,11 +110,11 @@ export const applyIncrementsToBalances = <T extends NumberType>(
           };
         }),
         ownershipTimes:
-          BigInt(approvalDurationFromNow) > 0n
+          BigInt(durationFromTimestamp) > 0n
             ? [
                 {
                   start: blockTime,
-                  end: safeAdd(blockTime, approvalDurationFromNow)
+                  end: safeSubtract(safeAdd(blockTime, durationFromTimestamp), castNumberType(blockTime, 1n))
                 }
               ]
             : x.ownershipTimes.map((y) => {
@@ -756,7 +756,7 @@ interface BalanceFunctions<T extends NumberType> {
   subtractBalances: (balancesToSubtract: iBalance<T>[], allowUnderflow: boolean) => void;
   subtractBalance: (balanceToSubtract: iBalance<T>, allowUnderflow: boolean) => void;
   sortBalancesByAmount: () => void;
-  applyIncrements: (incrementBadgeIdsBy: T, incrementOwnershipTimesBy: T, numIncrements: T, approvalDurationFromNow: T, blockTime: T) => void;
+  applyIncrements: (incrementBadgeIdsBy: T, incrementOwnershipTimesBy: T, numIncrements: T, durationFromTimestamp: T, blockTime: T) => void;
 }
 
 /**
@@ -917,13 +917,13 @@ export class BalanceArray<T extends NumberType> extends BaseTypedArray<BalanceAr
   /**
    * {@inheritDoc applyIncrementsToBalances}
    */
-  applyIncrements(incrementBadgeIdsBy: T, incrementOwnershipTimesBy: T, numIncrements: T, approvalDurationFromNow: T, blockTime: T) {
+  applyIncrements(incrementBadgeIdsBy: T, incrementOwnershipTimesBy: T, numIncrements: T, durationFromTimestamp: T, blockTime: T) {
     const newBalances = applyIncrementsToBalances(
       this,
       incrementBadgeIdsBy,
       incrementOwnershipTimesBy,
       numIncrements,
-      approvalDurationFromNow,
+      durationFromTimestamp,
       blockTime
     );
     this.length = 0;

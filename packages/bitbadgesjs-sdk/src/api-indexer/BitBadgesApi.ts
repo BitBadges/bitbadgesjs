@@ -1,7 +1,7 @@
 import type { NumberType } from '@/common/string-numbers.js';
 import { BitBadgesCollection, GetCollectionsSuccessResponse, iGetCollectionsPayload } from './BitBadgesCollection.js';
 
-import { CollectionId, iAmountTrackerIdDetails } from '@/interfaces/index.js';
+import type { CollectionId, iAmountTrackerIdDetails } from '@/interfaces/index.js';
 import typia from 'typia';
 import {
   BitBadgesAddressList,

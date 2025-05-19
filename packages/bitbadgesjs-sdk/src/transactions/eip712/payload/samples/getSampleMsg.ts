@@ -50,6 +50,8 @@ import {
   OutgoingApprovalCriteria,
   PredeterminedBalances,
   PredeterminedOrderCalculationMethod,
+  RecurringOwnershipTimes,
+  ResetTimeIntervals,
   StandardsTimeline,
   TimedUpdatePermission,
   TimedUpdateWithBadgeIdsPermission,
@@ -106,20 +108,33 @@ const approvalCriteria = new OutgoingApprovalCriteria({
       ],
       incrementOwnershipTimesBy: '0',
       incrementBadgeIdsBy: '0',
-      approvalDurationFromNow: '0'
+      durationFromTimestamp: '0',
+      recurringOwnershipTimes: new RecurringOwnershipTimes({
+        startTime: '0',
+        intervalLength: '0',
+        chargePeriodLength: '0'
+      })
     })
   }),
   approvalAmounts: new ApprovalAmounts({
     overallApprovalAmount: '0',
     perFromAddressApprovalAmount: '0',
     perInitiatedByAddressApprovalAmount: '0',
-    perToAddressApprovalAmount: '0'
+    perToAddressApprovalAmount: '0',
+    resetTimeIntervals: new ResetTimeIntervals({
+      startTime: '0',
+      intervalLength: '0'
+    })
   }),
   maxNumTransfers: new MaxNumTransfers({
     overallMaxNumTransfers: '0',
     perFromAddressMaxNumTransfers: '0',
     perInitiatedByAddressMaxNumTransfers: '0',
-    perToAddressMaxNumTransfers: '0'
+    perToAddressMaxNumTransfers: '0',
+    resetTimeIntervals: new ResetTimeIntervals({
+      startTime: '0',
+      intervalLength: '0'
+    })
   })
 }).toJson({ emitDefaultValues: true }) as object;
 
@@ -130,20 +145,33 @@ const approvalCriteriaForPopulatingUndefined = new OutgoingApprovalCriteria({
       startBalances: [],
       incrementBadgeIdsBy: '0',
       incrementOwnershipTimesBy: '0',
-      approvalDurationFromNow: '0'
+      durationFromTimestamp: '0',
+      recurringOwnershipTimes: new RecurringOwnershipTimes({
+        startTime: '0',
+        intervalLength: '0',
+        chargePeriodLength: '0'
+      })
     })
   }),
   approvalAmounts: new ApprovalAmounts({
     overallApprovalAmount: '0',
     perFromAddressApprovalAmount: '0',
     perInitiatedByAddressApprovalAmount: '0',
-    perToAddressApprovalAmount: '0'
+    perToAddressApprovalAmount: '0',
+    resetTimeIntervals: new ResetTimeIntervals({
+      startTime: '0',
+      intervalLength: '0'
+    })
   }),
   maxNumTransfers: new MaxNumTransfers({
     overallMaxNumTransfers: '0',
     perFromAddressMaxNumTransfers: '0',
     perInitiatedByAddressMaxNumTransfers: '0',
-    perToAddressMaxNumTransfers: '0'
+    perToAddressMaxNumTransfers: '0',
+    resetTimeIntervals: new ResetTimeIntervals({
+      startTime: '0',
+      intervalLength: '0'
+    })
   })
 }).toJson({ emitDefaultValues: true }) as object;
 
@@ -165,8 +193,41 @@ function populatePredeterminedBalances(predeterminedBalances?: PredeterminedBala
         startBalances: [],
         incrementBadgeIdsBy: '0',
         incrementOwnershipTimesBy: '0',
-        approvalDurationFromNow: '0'
+        durationFromTimestamp: '0',
+        allowOverrideTimestamp: false,
+        recurringOwnershipTimes: new RecurringOwnershipTimes({
+          startTime: '0',
+          intervalLength: '0',
+          chargePeriodLength: '0'
+        })
       })
+    });
+  }
+
+  if (!predeterminedBalances.orderCalculationMethod) {
+    predeterminedBalances.orderCalculationMethod = new PredeterminedOrderCalculationMethod();
+  }
+
+  if (!predeterminedBalances.incrementedBalances) {
+    predeterminedBalances.incrementedBalances = new IncrementedBalances({
+      startBalances: [],
+      incrementBadgeIdsBy: '0',
+      incrementOwnershipTimesBy: '0',
+      durationFromTimestamp: '0',
+      allowOverrideTimestamp: false,
+      recurringOwnershipTimes: new RecurringOwnershipTimes({
+        startTime: '0',
+        intervalLength: '0',
+        chargePeriodLength: '0'
+      })
+    });
+  }
+
+  if (!predeterminedBalances.incrementedBalances.recurringOwnershipTimes) {
+    predeterminedBalances.incrementedBalances.recurringOwnershipTimes = new RecurringOwnershipTimes({
+      startTime: '0',
+      intervalLength: '0',
+      chargePeriodLength: '0'
     });
   }
 
@@ -180,7 +241,18 @@ function populateApprovalAmounts(approvalAmounts?: ApprovalAmounts) {
       perFromAddressApprovalAmount: '0',
       perInitiatedByAddressApprovalAmount: '0',
       perToAddressApprovalAmount: '0',
-      amountTrackerId: ''
+      amountTrackerId: '',
+      resetTimeIntervals: new ResetTimeIntervals({
+        startTime: '0',
+        intervalLength: '0'
+      })
+    });
+  }
+
+  if (!approvalAmounts.resetTimeIntervals) {
+    approvalAmounts.resetTimeIntervals = new ResetTimeIntervals({
+      startTime: '0',
+      intervalLength: '0'
     });
   }
 
@@ -193,7 +265,18 @@ function populateMaxNumTransfers(maxNumTransfers?: MaxNumTransfers) {
       overallMaxNumTransfers: '0',
       perFromAddressMaxNumTransfers: '0',
       perInitiatedByAddressMaxNumTransfers: '0',
-      perToAddressMaxNumTransfers: '0'
+      perToAddressMaxNumTransfers: '0',
+      resetTimeIntervals: new ResetTimeIntervals({
+        startTime: '0',
+        intervalLength: '0'
+      })
+    });
+  }
+
+  if (!maxNumTransfers.resetTimeIntervals) {
+    maxNumTransfers.resetTimeIntervals = new ResetTimeIntervals({
+      startTime: '0',
+      intervalLength: '0'
     });
   }
 
@@ -609,7 +692,8 @@ export function getSampleMsg(msgType: string, currMsg: any) {
                 new MerkleProof({
                   aunts: [new MerklePathItem()]
                 })
-              ]
+              ],
+              overrideTimestamp: '0'
             })
           ]
         }).toJson({ emitDefaultValues: true })

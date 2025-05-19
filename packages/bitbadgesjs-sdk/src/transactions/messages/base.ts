@@ -25,8 +25,8 @@ import {
 } from '@/transactions/eip712/payload/samples/getSampleMsg.js';
 import type { AnyMessage, Message } from '@bufbuild/protobuf';
 import bs58 from 'bs58';
-import CryptoJS from 'crypto-js';
 import elliptic from 'elliptic';
+import CryptoJS from 'crypto-js';
 import { SigningKey, getBytes, hashMessage, sha256 } from 'ethers';
 import type { Chain, Fee, Sender } from './common.js';
 import { createStdFee, createStdSignDocFromProto, createTransactionWithMultipleMessages } from './transaction.js';
