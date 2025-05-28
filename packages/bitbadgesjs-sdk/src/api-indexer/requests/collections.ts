@@ -68,6 +68,9 @@ export interface iFilterBadgesInCollectionPayload {
     name: string;
     value: string | number | boolean;
   }[];
+
+  /** The listing prices ($BADGE) */
+  priceRange?: iUintRange<NumberType>;
 }
 
 /**
@@ -359,7 +362,7 @@ export interface MetadataFetchOptions {
  *
  * @category API Requests / Responses
  */
-export type CollectionViewKey = 'transferActivity' | 'owners' | 'amountTrackers' | 'challengeTrackers' | 'listings';
+export type CollectionViewKey = 'transferActivity' | 'owners' | 'amountTrackers' | 'challengeTrackers' | 'listings' | 'badgeFloorPrices';
 
 /**
  * Defines the options for fetching additional collection details.
@@ -428,6 +431,11 @@ export interface GetMetadataForCollectionPayload {
    * Consider using pruneMetadataToFetch for filtering out previously fetched metadata.
    */
   metadataToFetch?: MetadataFetchOptions;
+
+  /**
+   * If present, we will fetch the floor price for the specified badge IDs.
+   */
+  badgeFloorPricesToFetch?: NumberType[] | iUintRange<NumberType>[];
 }
 
 /**

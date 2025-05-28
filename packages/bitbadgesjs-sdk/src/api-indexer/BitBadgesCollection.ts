@@ -39,12 +39,23 @@ import type { iCollectionPermissionsWithDetails } from '@/interfaces/badges/perm
 import type { iUserBalanceStoreWithDetails } from '@/interfaces/badges/userBalances.js';
 import type { BaseBitBadgesApi, PaginationInfo } from './base.js';
 import { TransferActivityDoc } from './docs/activity.js';
-import { ApprovalTrackerDoc, BalanceDocWithDetails, CollectionDoc, MapDoc, MerkleChallengeTrackerDoc, UtilityListingDoc } from './docs/docs.js';
+import {
+  ApprovalTrackerDoc,
+  BadgeFloorPriceDoc,
+  BalanceDocWithDetails,
+  CollectionDoc,
+  CollectionStatsDoc,
+  MapDoc,
+  MerkleChallengeTrackerDoc,
+  UtilityListingDoc
+} from './docs/docs.js';
 import type {
   iApprovalTrackerDoc,
+  iBadgeFloorPriceDoc,
   iBalanceDocWithDetails,
   iClaimDetails,
   iCollectionDoc,
+  iCollectionStatsDoc,
   iMapDoc,
   iMerkleChallengeTrackerDoc,
   iTransferActivityDoc,
@@ -132,6 +143,12 @@ export interface iBitBadgesCollection<T extends NumberType> extends iCollectionD
 
   /** Details about any off-chain claims for this collection. Only applicable when outsourced to BitBadges. */
   claims: iClaimDetails<T>[];
+
+  /** The stats for this collection. */
+  stats?: iCollectionStatsDoc<T>;
+
+  /** The floor prices for this collection. */
+  badgeFloorPrices?: iBadgeFloorPriceDoc<T>[];
 }
 
 /**
@@ -181,6 +198,10 @@ export class BitBadgesCollection<T extends NumberType>
       | undefined;
   };
 
+  stats?: CollectionStatsDoc<T>;
+
+  badgeFloorPrices?: iBadgeFloorPriceDoc<T>[] | undefined;
+
   constructor(data: iBitBadgesCollection<T>) {
     super(data);
     this.collectionApprovals = data.collectionApprovals.map((collectionApproval) => new CollectionApprovalWithDetails(collectionApproval));
@@ -199,6 +220,8 @@ export class BitBadgesCollection<T extends NumberType>
     this.reported = data.reported ? { ...data.reported, badgeIds: UintRangeArray.From(data.reported.badgeIds) } : undefined;
     this.views = data.views;
     this.claims = data.claims.map((x) => new ClaimDetails(x));
+    this.stats = data.stats ? new CollectionStatsDoc(data.stats) : undefined;
+    this.badgeFloorPrices = data.badgeFloorPrices?.map((x) => new BadgeFloorPriceDoc(x));
   }
 
   getNumberFieldNames(): string[] {
@@ -823,7 +846,8 @@ export class BitBadgesCollection<T extends NumberType>
       shouldFetchTotal ||
       shouldFetchMerklechallengeTrackerIds ||
       shouldFetchAmountTrackerIds ||
-      options.fetchPrivateParams
+      options.fetchPrivateParams ||
+      options.badgeFloorPricesToFetch
     );
   }
 
@@ -983,6 +1007,8 @@ export class BitBadgesCollection<T extends NumberType>
         return this.getChallengeTrackersView(viewId) as CollectionViewData<T>[KeyType];
       case 'listings':
         return this.getListingsView(viewId) as CollectionViewData<T>[KeyType];
+      case 'badgeFloorPrices':
+        return this.getBadgeFloorPricesView(viewId) as CollectionViewData<T>[KeyType];
       default:
         throw new Error(`Unknown view type: ${viewType}`);
     }
@@ -1030,6 +1056,15 @@ export class BitBadgesCollection<T extends NumberType>
     return (this.views[viewId]?.ids.map((x) => {
       return this.approvalTrackers.find((y) => y._docId === x);
     }) ?? []) as ApprovalTrackerDoc<T>[];
+  }
+
+  /**
+   * Gets the documents for a specific view.
+   */
+  getBadgeFloorPricesView(viewId: string) {
+    return (this.views[viewId]?.ids.map((x) => {
+      return this.badgeFloorPrices?.find((y) => y._docId === x);
+    }) ?? []) as BadgeFloorPriceDoc<T>[];
   }
 
   /**
@@ -1235,6 +1270,7 @@ type CollectionViewData<T extends NumberType> = {
   amountTrackers: ApprovalTrackerDoc<T>[];
   challengeTrackers: MerkleChallengeTrackerDoc<T>[];
   listings: UtilityListingDoc<T>[];
+  badgeFloorPrices: BadgeFloorPriceDoc<T>[];
 };
 
 /**
@@ -1468,6 +1504,17 @@ function updateCollectionWithResponse<T extends NumberType>(
     }
   }
 
+  const badgeFloorPrices = cachedCollection.badgeFloorPrices || [];
+  for (const newBadgeFloorPrice of newCollection.badgeFloorPrices || []) {
+    //If we already have the badgeFloorPrice, replace it (we want newer data)
+    const existingBadgeFloorPrice = badgeFloorPrices.findIndex((x) => x._docId === newBadgeFloorPrice._docId);
+    if (existingBadgeFloorPrice !== -1) {
+      badgeFloorPrices[existingBadgeFloorPrice] = newBadgeFloorPrice;
+    } else {
+      badgeFloorPrices.push(newBadgeFloorPrice);
+    }
+  }
+
   const newCollectionMetadata = newCollection.getCollectionMetadata() || cachedCollection?.getCollectionMetadata();
   const newCollectionMetadataTimeline = newCollection.collectionMetadataTimeline || cachedCollection?.collectionMetadataTimeline;
   for (const timelineTime of newCollectionMetadataTimeline) {
@@ -1494,7 +1541,8 @@ function updateCollectionWithResponse<T extends NumberType>(
     challengeTrackers,
     approvalTrackers,
     listings,
-    views: newViews
+    views: newViews,
+    badgeFloorPrices
   });
 
   if (cachedCollection.collectionId === NEW_COLLECTION_ID) {

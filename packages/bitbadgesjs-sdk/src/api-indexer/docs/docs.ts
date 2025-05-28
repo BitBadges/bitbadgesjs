@@ -3,6 +3,7 @@ import { BaseNumberTypeClass, CustomTypeClass, convertClassPropertiesAndMaintain
 import type { NumberType } from '@/common/string-numbers.js';
 import { BigIntify } from '@/common/string-numbers.js';
 import type { SupportedChain } from '@/common/types.js';
+import { AddressList } from '@/core/addressLists.js';
 import {
   ApprovalInfoDetails,
   ChallengeDetails,
@@ -32,8 +33,12 @@ import {
   UpdateHistory
 } from '@/core/misc.js';
 import { CollectionPermissions, UserPermissions, UserPermissionsWithDetails } from '@/core/permissions.js';
+import { AttestationsProof } from '@/core/secrets.js';
+import { getValueAtTimeForTimeline } from '@/core/timelines.js';
 import type { iOffChainBalancesMap } from '@/core/transfers.js';
+import { UintRange, UintRangeArray } from '@/core/uintRanges.js';
 import { UserBalanceStore } from '@/core/userBalances.js';
+import { iCollectionApproval } from '@/interfaces/badges/approvals.js';
 import type { CollectionId, iAmountTrackerIdDetails } from '@/interfaces/badges/core.js';
 import type { iUserBalanceStore } from '@/interfaces/badges/userBalances.js';
 import { Map, ValueStore } from '@/transactions/messages/bitbadges/maps/index.js';
@@ -47,9 +52,14 @@ import {
   iApiKeyDoc,
   iApplicationDoc,
   iApplicationPage,
+  iApprovalItemDoc,
+  iBadgeFloorPriceDoc,
+  iBaseStats,
+  iCollectionStatsDoc,
   iDynamicDataDoc,
   iEstimatedCost,
   iEvent,
+  iFloorPriceHistory,
   iInheritMetadataFrom,
   iLinkedTo,
   iListingViewsDoc,
@@ -102,10 +112,181 @@ import {
   type iUpdateHistory,
   type iUsedLeafStatus
 } from './interfaces.js';
-import { UintRange, UintRangeArray } from '@/core/uintRanges.js';
-import { getValueAtTimeForTimeline } from '@/core/timelines.js';
-import { AddressList } from '@/core/addressLists.js';
-import { AttestationsProof } from '@/core/secrets.js';
+
+/**
+ * @inheritDoc iBaseStats
+ * @category Collections
+ */
+export class BaseStatsDoc<T extends NumberType> extends BaseNumberTypeClass<BaseStatsDoc<T>> implements iBaseStats<T> {
+  _docId: string;
+  _id?: string;
+  /** The overall volume of the collection */
+  overallVolume: CosmosCoin<T>;
+  /** The daily volume of the collection */
+  dailyVolume: CosmosCoin<T>;
+  /** The weekly volume of the collection */
+  weeklyVolume: CosmosCoin<T>;
+  /** The monthly volume of the collection */
+  monthlyVolume: CosmosCoin<T>;
+  /** The yearly volume of the collection */
+  yearlyVolume: CosmosCoin<T>;
+  /** Last set timestamp */
+  lastUpdatedAt: UNIXMilliTimestamp<T>;
+
+  constructor(data: iBaseStats<T>) {
+    super();
+    this._docId = data._docId;
+    this._id = data._id;
+    this.overallVolume = new CosmosCoin(data.overallVolume);
+    this.dailyVolume = new CosmosCoin(data.dailyVolume);
+    this.weeklyVolume = new CosmosCoin(data.weeklyVolume);
+    this.monthlyVolume = new CosmosCoin(data.monthlyVolume);
+    this.yearlyVolume = new CosmosCoin(data.yearlyVolume);
+    this.lastUpdatedAt = data.lastUpdatedAt;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['lastUpdatedAt'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): BaseStatsDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as BaseStatsDoc<U>;
+  }
+}
+
+/**
+ * @inheritDoc iCollectionStatsDoc
+ * @category Collections
+ */
+export class CollectionStatsDoc<T extends NumberType> extends BaseStatsDoc<T> implements iCollectionStatsDoc<T> {
+  collectionId: CollectionId;
+  floorPrice?: CosmosCoin<T>;
+  uniqueOwners: BalanceArray<T>;
+  floorPriceHistory?: FloorPriceHistory<T>[];
+
+  constructor(data: iCollectionStatsDoc<T>) {
+    super(data);
+    this.collectionId = data.collectionId;
+    this.floorPrice = data.floorPrice ? new CosmosCoin(data.floorPrice) : undefined;
+    this.uniqueOwners = BalanceArray.From(data.uniqueOwners);
+    this.floorPriceHistory = data.floorPriceHistory
+      ? data.floorPriceHistory.map((floorPriceHistory) => new FloorPriceHistory(floorPriceHistory))
+      : undefined;
+  }
+
+  getNumberFieldNames(): string[] {
+    return [];
+  }
+
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): CollectionStatsDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CollectionStatsDoc<U>;
+  }
+}
+
+/**
+ * @inheritDoc iFloorPriceHistory
+ * @category Collections
+ */
+export class FloorPriceHistory<T extends NumberType> extends BaseNumberTypeClass<FloorPriceHistory<T>> implements iFloorPriceHistory<T> {
+  updatedAt: UNIXMilliTimestamp<T>;
+  floorPrice?: CosmosCoin<T>;
+
+  constructor(data: iFloorPriceHistory<T>) {
+    super();
+    this.updatedAt = data.updatedAt;
+    this.floorPrice = data.floorPrice ? new CosmosCoin(data.floorPrice) : undefined;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['updatedAt'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): FloorPriceHistory<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as FloorPriceHistory<U>;
+  }
+}
+
+/**
+ * @inheritDoc iApprovalItemDoc
+ * @category Approvals
+ */
+export class BadgeFloorPriceDoc<T extends NumberType> extends BaseNumberTypeClass<BadgeFloorPriceDoc<T>> implements iBadgeFloorPriceDoc<T> {
+  collectionId: CollectionId;
+  badgeId: T;
+  _docId: string;
+  _id?: string | undefined;
+  floorPrice?: CosmosCoin<T>;
+  floorPriceHistory?: iFloorPriceHistory<T>[] | undefined;
+
+  constructor(data: iBadgeFloorPriceDoc<T>) {
+    super();
+    this._docId = data._docId;
+    this._id = data._id;
+    this.collectionId = data.collectionId;
+    this.badgeId = data.badgeId;
+    this.floorPrice = data.floorPrice ? new CosmosCoin(data.floorPrice) : undefined;
+    this.floorPriceHistory = data.floorPriceHistory
+      ? data.floorPriceHistory.map((floorPriceHistory) => new FloorPriceHistory(floorPriceHistory))
+      : undefined;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['badgeId'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): BadgeFloorPriceDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as BadgeFloorPriceDoc<U>;
+  }
+}
+
+/**
+ * @inheritDoc iApprovalItemDoc
+ * @category Approvals
+ */
+export class ApprovalItemDoc<T extends NumberType> extends BaseNumberTypeClass<ApprovalItemDoc<T>> implements iApprovalItemDoc<T> {
+  _docId: string;
+  _id?: string;
+  collectionId: CollectionId;
+  approvalId: string;
+  approvalLevel: 'incoming' | 'outgoing';
+  approverAddress: BitBadgesAddress;
+  approvalType: string;
+  price?: T;
+  badgeId?: T;
+  used?: boolean;
+  sufficientBalances?: boolean;
+  deletedAt?: UNIXMilliTimestamp<T>;
+  approval: CollectionApproval<T>;
+  isActive?: boolean | undefined;
+  nextCheckTime?: UNIXMilliTimestamp<T>;
+
+  constructor(data: iApprovalItemDoc<T>) {
+    super();
+    this._docId = data._docId;
+    this._id = data._id;
+    this.collectionId = data.collectionId;
+    this.approvalId = data.approvalId;
+    this.approvalLevel = data.approvalLevel;
+    this.approverAddress = data.approverAddress;
+    this.approvalType = data.approvalType;
+    this.price = data.price;
+    this.badgeId = data.badgeId;
+    this.deletedAt = data.deletedAt;
+    this.approval = new CollectionApproval<T>(data.approval);
+    this.used = data.used;
+    this.isActive = data.isActive;
+    this.sufficientBalances = data.sufficientBalances;
+    this.nextCheckTime = data.nextCheckTime;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['price', 'badgeId', 'deletedAt'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): ApprovalItemDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ApprovalItemDoc<U>;
+  }
+}
 
 /**
  * @inheritDoc iCollectionDoc

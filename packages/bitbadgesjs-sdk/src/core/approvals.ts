@@ -283,6 +283,14 @@ export class UserOutgoingApproval<T extends NumberType> extends BaseNumberTypeCl
       approvalCriteria: this.approvalCriteria?.toBech32Addresses(prefix)
     });
   }
+
+  castToCollectionTransfer(fromListId: string): CollectionApproval<T> {
+    return new CollectionApproval({
+      ...this,
+      fromListId,
+      approvalCriteria: this.approvalCriteria?.castToCollectionApprovalCriteria()
+    });
+  }
 }
 
 /**
@@ -364,6 +372,7 @@ export class OutgoingApprovalCriteria<T extends NumberType>
 
   castToCollectionApprovalCriteria(): ApprovalCriteria<T> {
     return new ApprovalCriteria({
+      predeterminedBalances: this.predeterminedBalances,
       approvalAmounts: this.approvalAmounts,
       maxNumTransfers: this.maxNumTransfers,
       requireToEqualsInitiatedBy: this.requireToEqualsInitiatedBy,

@@ -349,6 +349,95 @@ export interface iClaimAlertDoc<T extends NumberType> extends iActivityDoc<T> {
 /**
  * @category Interfaces
  */
+export interface iBaseStats<T extends NumberType> extends Doc {
+  /** The overall volume of the collection */
+  overallVolume: iCosmosCoin<T>;
+  /** The daily volume of the collection */
+  dailyVolume: iCosmosCoin<T>;
+  /** The weekly volume of the collection */
+  weeklyVolume: iCosmosCoin<T>;
+  /** The monthly volume of the collection */
+  monthlyVolume: iCosmosCoin<T>;
+  /** The yearly volume of the collection */
+  yearlyVolume: iCosmosCoin<T>;
+  /** Last set timestamp */
+  lastUpdatedAt: UNIXMilliTimestamp<T>;
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iCollectionStatsDoc<T extends NumberType> extends iBaseStats<T> {
+  /** The collection ID */
+  collectionId: CollectionId;
+  /** Floor price of the collection */
+  floorPrice?: iCosmosCoin<T>;
+  /** Number of unique owners by time */
+  uniqueOwners: iBalance<T>[];
+  /** Floor price history */
+  floorPriceHistory?: iFloorPriceHistory<T>[];
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iFloorPriceHistory<T extends NumberType> {
+  /** The floor price */
+  floorPrice?: iCosmosCoin<T>;
+  /** Updated at tiemstamp */
+  updatedAt: UNIXMilliTimestamp<T>;
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iBadgeFloorPriceDoc<T extends NumberType> extends Doc {
+  /** The collection ID */
+  collectionId: CollectionId;
+  /** The badge ID */
+  badgeId: T;
+  /** The floor price */
+  floorPrice?: iCosmosCoin<T>;
+  /** Floor price history */
+  floorPriceHistory?: iFloorPriceHistory<T>[];
+}
+
+/**
+ * @category Interfaces */
+export interface iApprovalItemDoc<T extends NumberType> extends Doc {
+  /** The collection ID */
+  collectionId: CollectionId;
+  /** The approval ID */
+  approvalId: string;
+  /** The approval level */
+  approvalLevel: 'incoming' | 'outgoing';
+  /** The approver address */
+  approverAddress: string;
+  /** The approval type */
+  approvalType: string;
+
+  /** Explicitly marked as used or expired */
+  used?: boolean;
+  /** Owner has sufficient balances */
+  sufficientBalances?: boolean;
+  /** The price of the listing */
+  price?: T;
+  /** Is active currently */
+  isActive?: boolean;
+
+  /** The badge ID */
+  badgeId?: T;
+  /** Approval itself */
+  approval: iCollectionApproval<T>;
+  /** Deleted at timestamp */
+  deletedAt?: UNIXMilliTimestamp<T>;
+  /** Next check time */
+  nextCheckTime?: UNIXMilliTimestamp<T>;
+}
+
+/**
+ * @category Interfaces
+ */
 export interface iCollectionDoc<T extends NumberType> extends Doc {
   /** The collection ID */
   collectionId: CollectionId;
