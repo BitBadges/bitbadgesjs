@@ -45,7 +45,6 @@ import {
   BalanceDocWithDetails,
   CollectionDoc,
   CollectionStatsDoc,
-  MapDoc,
   MerkleChallengeTrackerDoc,
   UtilityListingDoc
 } from './docs/docs.js';
@@ -56,7 +55,6 @@ import type {
   iClaimDetails,
   iCollectionDoc,
   iCollectionStatsDoc,
-  iMapDoc,
   iMerkleChallengeTrackerDoc,
   iTransferActivityDoc,
   iUtilityListingDoc,

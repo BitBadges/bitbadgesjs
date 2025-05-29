@@ -7,12 +7,13 @@ import type {
   iActivityDoc,
   iClaimActivityDoc,
   iClaimAlertDoc,
+  iCoinTransferItem,
   iListActivityDoc,
   iPointsActivityDoc,
   iTransferActivityDoc
 } from './interfaces.js';
 import { CollectionId } from '@/interfaces/badges/core.js';
-import { ApprovalIdentifierDetails } from '@/core/misc.js';
+import { ApprovalIdentifierDetails, CoinTransfer } from '@/core/misc.js';
 
 /**
  * @inheritDoc iActivityDoc
@@ -44,6 +45,32 @@ export class ActivityDoc<T extends NumberType> extends BaseNumberTypeClass<Activ
 }
 
 /**
+ * @category Indexer
+ */
+export class CoinTransferItem<T extends NumberType> extends BaseNumberTypeClass<CoinTransferItem<T>> implements iCoinTransferItem<T> {
+  amount: T;
+  denom: string;
+  from: BitBadgesAddress;
+  to: BitBadgesAddress;
+
+  constructor(data: iCoinTransferItem<T>) {
+    super();
+    this.amount = data.amount;
+    this.denom = data.denom;
+    this.from = data.from;
+    this.to = data.to;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['amount'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CoinTransferItem<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CoinTransferItem<U>;
+  }
+}
+
+/**
  * @inheritDoc iTransferActivityDoc
  * @category Indexer
  */
@@ -52,13 +79,17 @@ export class TransferActivityDoc<T extends NumberType> extends ActivityDoc<T> im
   from: BitBadgesAddress;
   balances: BalanceArray<T>;
   collectionId: CollectionId;
+  initiatedBy: BitBadgesAddress;
+  txHash?: string;
+
   memo?: string;
   precalculateBalancesFromApproval?: ApprovalIdentifierDetails<T>;
   prioritizedApprovals?: ApprovalIdentifierDetails<T>[];
-  initiatedBy: BitBadgesAddress;
-  txHash?: string;
+
   private?: boolean | undefined;
   overrideTimestamp?: T;
+  coinTransfers?: CoinTransferItem<T>[];
+  approvalsUsed?: ApprovalIdentifierDetails<T>[];
 
   constructor(data: iTransferActivityDoc<T>) {
     super(data);
@@ -75,6 +106,8 @@ export class TransferActivityDoc<T extends NumberType> extends ActivityDoc<T> im
     this.txHash = data.txHash;
     this.private = data.private;
     this.overrideTimestamp = data.overrideTimestamp;
+    this.coinTransfers = data.coinTransfers ? data.coinTransfers.map((x) => new CoinTransferItem(x)) : undefined;
+    this.approvalsUsed = data.approvalsUsed ? data.approvalsUsed.map((x) => new ApprovalIdentifierDetails(x)) : undefined;
   }
 
   getNumberFieldNames(): string[] {

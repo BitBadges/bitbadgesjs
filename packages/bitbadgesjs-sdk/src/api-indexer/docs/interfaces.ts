@@ -257,6 +257,20 @@ export interface iReviewDoc<T extends NumberType> extends iActivityDoc<T> {
 /**
  * @category Interfaces
  */
+export interface iCoinTransferItem<T extends NumberType> {
+  /** The type of the coin transfer. */
+  from: BitBadgesAddress;
+  /** The type of the coin transfer. */
+  to: BitBadgesAddress;
+  /** The amount of the coin transfer. */
+  amount: T;
+  /** The denom of the coin transfer. */
+  denom: string;
+}
+
+/**
+ * @category Interfaces
+ */
 export interface iTransferActivityDoc<T extends NumberType> extends iActivityDoc<T> {
   /** The list of recipients. */
   to: BitBadgesAddress[];
@@ -278,6 +292,10 @@ export interface iTransferActivityDoc<T extends NumberType> extends iActivityDoc
   txHash?: string;
   /** Override timestamp? */
   overrideTimestamp?: T;
+  /** Coin transfers details */
+  coinTransfers?: iCoinTransferItem<T>[];
+  /** Approvals used for the transfer */
+  approvalsUsed?: iApprovalIdentifierDetails<T>[];
 }
 
 /**
