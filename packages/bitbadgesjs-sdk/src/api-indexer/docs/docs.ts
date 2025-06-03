@@ -163,6 +163,7 @@ export class CollectionStatsDoc<T extends NumberType> extends BaseStatsDoc<T> im
   floorPrice?: CosmosCoin<T>;
   uniqueOwners: BalanceArray<T>;
   floorPriceHistory?: FloorPriceHistory<T>[];
+  payoutReward?: CosmosCoin<T>;
 
   constructor(data: iCollectionStatsDoc<T>) {
     super(data);
@@ -172,6 +173,7 @@ export class CollectionStatsDoc<T extends NumberType> extends BaseStatsDoc<T> im
     this.floorPriceHistory = data.floorPriceHistory
       ? data.floorPriceHistory.map((floorPriceHistory) => new FloorPriceHistory(floorPriceHistory))
       : undefined;
+    this.payoutReward = data.payoutReward ? new CosmosCoin(data.payoutReward) : undefined;
   }
 
   getNumberFieldNames(): string[] {
@@ -217,6 +219,7 @@ export class BadgeFloorPriceDoc<T extends NumberType> extends BaseNumberTypeClas
   _id?: string | undefined;
   floorPrice?: CosmosCoin<T>;
   floorPriceHistory?: iFloorPriceHistory<T>[] | undefined;
+  payoutReward?: CosmosCoin<T>;
 
   constructor(data: iBadgeFloorPriceDoc<T>) {
     super();
@@ -228,6 +231,7 @@ export class BadgeFloorPriceDoc<T extends NumberType> extends BaseNumberTypeClas
     this.floorPriceHistory = data.floorPriceHistory
       ? data.floorPriceHistory.map((floorPriceHistory) => new FloorPriceHistory(floorPriceHistory))
       : undefined;
+    this.payoutReward = data.payoutReward ? new CosmosCoin(data.payoutReward) : undefined;
   }
 
   getNumberFieldNames(): string[] {

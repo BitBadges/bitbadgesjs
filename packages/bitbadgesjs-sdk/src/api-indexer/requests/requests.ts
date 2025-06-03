@@ -841,6 +841,11 @@ export interface iGetReservedClaimCodesSuccessResponse {
    * the transaction.
    */
   reservedCodes?: string[];
+
+  /**
+   * The leaf signatures for the reserved claim codes to prove address <-> leaf mapping.
+   */
+  leafSignatures?: string[];
 }
 
 /**
@@ -852,12 +857,15 @@ export class GetReservedClaimCodesSuccessResponse
   implements iGetReservedClaimCodesSuccessResponse
 {
   reservedCodes?: string[] | undefined;
+  leafSignatures?: string[] | undefined;
 
   constructor(data: iGetReservedClaimCodesSuccessResponse) {
     super();
     this.reservedCodes = data.reservedCodes;
+    this.leafSignatures = data.leafSignatures;
   }
 }
+
 /**
  * @category API Requests / Responses
  */

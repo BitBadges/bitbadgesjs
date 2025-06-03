@@ -394,6 +394,8 @@ export interface iCollectionStatsDoc<T extends NumberType> extends iBaseStats<T>
   uniqueOwners: iBalance<T>[];
   /** Floor price history */
   floorPriceHistory?: iFloorPriceHistory<T>[];
+  /** The payout reward */
+  payoutReward?: iCosmosCoin<T>;
 }
 
 /**
@@ -418,6 +420,8 @@ export interface iBadgeFloorPriceDoc<T extends NumberType> extends Doc {
   floorPrice?: iCosmosCoin<T>;
   /** Floor price history */
   floorPriceHistory?: iFloorPriceHistory<T>[];
+  /** The payout reward */
+  payoutReward?: iCosmosCoin<T>;
 }
 
 /**
