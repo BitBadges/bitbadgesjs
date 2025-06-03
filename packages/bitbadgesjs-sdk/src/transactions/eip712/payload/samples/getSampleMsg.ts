@@ -18,6 +18,7 @@ import {
   ApprovalAmounts,
   ApprovalCriteria,
   ApprovalIdentifierDetails,
+  AutoDeletionOptions,
   BadgeIdsActionPermission,
   BadgeMetadata,
   BadgeMetadataTimeline,
@@ -135,7 +136,8 @@ const approvalCriteria = new OutgoingApprovalCriteria({
       startTime: '0',
       intervalLength: '0'
     })
-  })
+  }),
+  autoDeletionOptions: new AutoDeletionOptions({})
 }).toJson({ emitDefaultValues: true }) as object;
 
 const approvalCriteriaForPopulatingUndefined = new OutgoingApprovalCriteria({
@@ -172,7 +174,8 @@ const approvalCriteriaForPopulatingUndefined = new OutgoingApprovalCriteria({
       startTime: '0',
       intervalLength: '0'
     })
-  })
+  }),
+  autoDeletionOptions: new AutoDeletionOptions({})
 }).toJson({ emitDefaultValues: true }) as object;
 
 function populateMerkleChallenges(merkleChallenges?: MerkleChallenge[]) {
@@ -259,6 +262,14 @@ function populateApprovalAmounts(approvalAmounts?: ApprovalAmounts) {
   return approvalAmounts;
 }
 
+function populateAutoDeletionOptions(autoDeletionOptions?: AutoDeletionOptions) {
+  if (!autoDeletionOptions) {
+    return new AutoDeletionOptions({});
+  }
+
+  return autoDeletionOptions;
+}
+
 function populateMaxNumTransfers(maxNumTransfers?: MaxNumTransfers) {
   if (!maxNumTransfers) {
     return new MaxNumTransfers({
@@ -304,6 +315,7 @@ export function populateUndefinedForMsgUpdateUserApprovals(msg: MsgUpdateUserApp
     approval.approvalCriteria.predeterminedBalances = populatePredeterminedBalances(approval.approvalCriteria.predeterminedBalances);
     approval.approvalCriteria.approvalAmounts = populateApprovalAmounts(approval.approvalCriteria.approvalAmounts);
     approval.approvalCriteria.maxNumTransfers = populateMaxNumTransfers(approval.approvalCriteria.maxNumTransfers);
+    approval.approvalCriteria.autoDeletionOptions = populateAutoDeletionOptions(approval.approvalCriteria.autoDeletionOptions);
   }
   for (const approval of msg.incomingApprovals) {
     if (!approval.approvalCriteria) {
@@ -313,6 +325,7 @@ export function populateUndefinedForMsgUpdateUserApprovals(msg: MsgUpdateUserApp
     approval.approvalCriteria.predeterminedBalances = populatePredeterminedBalances(approval.approvalCriteria.predeterminedBalances);
     approval.approvalCriteria.approvalAmounts = populateApprovalAmounts(approval.approvalCriteria.approvalAmounts);
     approval.approvalCriteria.maxNumTransfers = populateMaxNumTransfers(approval.approvalCriteria.maxNumTransfers);
+    approval.approvalCriteria.autoDeletionOptions = populateAutoDeletionOptions(approval.approvalCriteria.autoDeletionOptions);
   }
   return msg;
 }
@@ -384,6 +397,7 @@ export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUnivers
       approval.approvalCriteria.predeterminedBalances = populatePredeterminedBalances(approval.approvalCriteria.predeterminedBalances);
       approval.approvalCriteria.approvalAmounts = populateApprovalAmounts(approval.approvalCriteria.approvalAmounts);
       approval.approvalCriteria.maxNumTransfers = populateMaxNumTransfers(approval.approvalCriteria.maxNumTransfers);
+      approval.approvalCriteria.autoDeletionOptions = populateAutoDeletionOptions(approval.approvalCriteria.autoDeletionOptions);
     }
   }
   for (const approval of msg.defaultBalances.incomingApprovals) {
@@ -394,6 +408,7 @@ export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUnivers
     approval.approvalCriteria.predeterminedBalances = populatePredeterminedBalances(approval.approvalCriteria.predeterminedBalances);
     approval.approvalCriteria.approvalAmounts = populateApprovalAmounts(approval.approvalCriteria.approvalAmounts);
     approval.approvalCriteria.maxNumTransfers = populateMaxNumTransfers(approval.approvalCriteria.maxNumTransfers);
+    approval.approvalCriteria.autoDeletionOptions = populateAutoDeletionOptions(approval.approvalCriteria.autoDeletionOptions);
   }
 
   for (const approval of msg.collectionApprovals) {
@@ -404,6 +419,7 @@ export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUnivers
     approval.approvalCriteria.predeterminedBalances = populatePredeterminedBalances(approval.approvalCriteria.predeterminedBalances);
     approval.approvalCriteria.approvalAmounts = populateApprovalAmounts(approval.approvalCriteria.approvalAmounts);
     approval.approvalCriteria.maxNumTransfers = populateMaxNumTransfers(approval.approvalCriteria.maxNumTransfers);
+    approval.approvalCriteria.autoDeletionOptions = populateAutoDeletionOptions(approval.approvalCriteria.autoDeletionOptions);
   }
 
   for (const metadata of msg.collectionMetadataTimeline) {

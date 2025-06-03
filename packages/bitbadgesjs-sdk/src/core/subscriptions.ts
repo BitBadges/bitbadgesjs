@@ -88,21 +88,26 @@ export const isSubscriptionFaucetApproval = (approval: iCollectionApproval<bigin
   }
 
   const approvalCriteria = approval.approvalCriteria;
-  if (approvalCriteria?.coinTransfers?.length !== 1) {
+  if (!approvalCriteria?.coinTransfers) {
     return false;
   }
 
-  const coinTransfer = approvalCriteria.coinTransfers[0];
-  if (coinTransfer.coins.length !== 1) {
+  if (approvalCriteria.coinTransfers.length < 1) {
     return false;
   }
 
-  if (coinTransfer.coins[0].denom !== 'ubadge') {
-    return false;
-  }
+  for (const coinTransfer of approvalCriteria.coinTransfers) {
+    if (coinTransfer.coins.length !== 1) {
+      return false;
+    }
 
-  if (coinTransfer.overrideFromWithApproverAddress || coinTransfer.overrideToWithInitiator) {
-    return false;
+    if (coinTransfer.coins[0].denom !== 'ubadge') {
+      return false;
+    }
+
+    if (coinTransfer.overrideFromWithApproverAddress || coinTransfer.overrideToWithInitiator) {
+      return false;
+    }
   }
 
   const incrementedBalances = approvalCriteria.predeterminedBalances?.incrementedBalances;

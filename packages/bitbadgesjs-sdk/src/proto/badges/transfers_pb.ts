@@ -758,6 +758,47 @@ export class PredeterminedBalances extends Message<PredeterminedBalances> {
 }
 
 /**
+ * AutoDeletionOptions defines the options for auto-deletion of approvals.
+ *
+ * @generated from message badges.AutoDeletionOptions
+ */
+export class AutoDeletionOptions extends Message<AutoDeletionOptions> {
+  /**
+   * After one use?
+   *
+   * @generated from field: bool afterOneUse = 1;
+   */
+  afterOneUse = false;
+
+  constructor(data?: PartialMessage<AutoDeletionOptions>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.AutoDeletionOptions";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "afterOneUse", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AutoDeletionOptions {
+    return new AutoDeletionOptions().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): AutoDeletionOptions {
+    return new AutoDeletionOptions().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): AutoDeletionOptions {
+    return new AutoDeletionOptions().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: AutoDeletionOptions | PlainMessage<AutoDeletionOptions> | undefined, b: AutoDeletionOptions | PlainMessage<AutoDeletionOptions> | undefined): boolean {
+    return proto3.util.equals(AutoDeletionOptions, a, b);
+  }
+}
+
+/**
  * ApprovalAmounts defines approval amounts per unique "from," "to," and/or "initiated by" address.
  * If any of these are nil or "0", we assume unlimited approvals.
  * If they are set to a value, then the running tally of the amounts transferred for the specified badge IDs and ownership times
@@ -1182,6 +1223,13 @@ export class ApprovalCriteria extends Message<ApprovalCriteria> {
    */
   overridesToIncomingApprovals = false;
 
+  /**
+   * Auto-deletion options.
+   *
+   * @generated from field: badges.AutoDeletionOptions autoDeletionOptions = 12;
+   */
+  autoDeletionOptions?: AutoDeletionOptions;
+
   constructor(data?: PartialMessage<ApprovalCriteria>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1201,6 +1249,7 @@ export class ApprovalCriteria extends Message<ApprovalCriteria> {
     { no: 9, name: "requireFromDoesNotEqualInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 10, name: "overridesFromOutgoingApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 11, name: "overridesToIncomingApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 12, name: "autoDeletionOptions", kind: "message", T: AutoDeletionOptions },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ApprovalCriteria {
@@ -1275,6 +1324,13 @@ export class OutgoingApprovalCriteria extends Message<OutgoingApprovalCriteria> 
    */
   requireToDoesNotEqualInitiatedBy = false;
 
+  /**
+   * Auto-deletion options.
+   *
+   * @generated from field: badges.AutoDeletionOptions autoDeletionOptions = 8;
+   */
+  autoDeletionOptions?: AutoDeletionOptions;
+
   constructor(data?: PartialMessage<OutgoingApprovalCriteria>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1290,6 +1346,7 @@ export class OutgoingApprovalCriteria extends Message<OutgoingApprovalCriteria> 
     { no: 5, name: "coinTransfers", kind: "message", T: CoinTransfer, repeated: true },
     { no: 6, name: "requireToEqualsInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 7, name: "requireToDoesNotEqualInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 8, name: "autoDeletionOptions", kind: "message", T: AutoDeletionOptions },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): OutgoingApprovalCriteria {
@@ -1364,6 +1421,13 @@ export class IncomingApprovalCriteria extends Message<IncomingApprovalCriteria> 
    */
   requireFromDoesNotEqualInitiatedBy = false;
 
+  /**
+   * Auto-deletion options.
+   *
+   * @generated from field: badges.AutoDeletionOptions autoDeletionOptions = 8;
+   */
+  autoDeletionOptions?: AutoDeletionOptions;
+
   constructor(data?: PartialMessage<IncomingApprovalCriteria>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1379,6 +1443,7 @@ export class IncomingApprovalCriteria extends Message<IncomingApprovalCriteria> 
     { no: 5, name: "coinTransfers", kind: "message", T: CoinTransfer, repeated: true },
     { no: 6, name: "requireFromEqualsInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 7, name: "requireFromDoesNotEqualInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 8, name: "autoDeletionOptions", kind: "message", T: AutoDeletionOptions },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): IncomingApprovalCriteria {

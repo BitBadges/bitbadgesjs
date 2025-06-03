@@ -21,6 +21,7 @@ import {
 import type {
   iApprovalAmounts,
   iApprovalCriteria,
+  iAutoDeletionOptions,
   iCollectionApproval,
   iIncomingApprovalCriteria,
   iIncrementedBalances,
@@ -306,6 +307,8 @@ export class OutgoingApprovalCriteria<T extends NumberType>
   predeterminedBalances?: PredeterminedBalances<T>;
   approvalAmounts?: ApprovalAmounts<T>;
   maxNumTransfers?: MaxNumTransfers<T>;
+  autoDeletionOptions?: AutoDeletionOptions<T>;
+
   requireToEqualsInitiatedBy?: boolean;
   requireToDoesNotEqualInitiatedBy?: boolean;
   coinTransfers?: CoinTransfer<T>[] | undefined;
@@ -316,6 +319,7 @@ export class OutgoingApprovalCriteria<T extends NumberType>
     this.predeterminedBalances = msg.predeterminedBalances ? new PredeterminedBalances(msg.predeterminedBalances) : undefined;
     this.approvalAmounts = msg.approvalAmounts ? new ApprovalAmounts(msg.approvalAmounts) : undefined;
     this.maxNumTransfers = msg.maxNumTransfers ? new MaxNumTransfers(msg.maxNumTransfers) : undefined;
+    this.autoDeletionOptions = msg.autoDeletionOptions ? new AutoDeletionOptions(msg.autoDeletionOptions) : undefined;
     this.requireToEqualsInitiatedBy = msg.requireToEqualsInitiatedBy;
     this.requireToDoesNotEqualInitiatedBy = msg.requireToDoesNotEqualInitiatedBy;
     this.coinTransfers = msg.coinTransfers ? msg.coinTransfers.map((x) => new CoinTransfer(x)) : undefined;
@@ -328,6 +332,7 @@ export class OutgoingApprovalCriteria<T extends NumberType>
         predeterminedBalances: this.predeterminedBalances?.convert(convertFunction),
         approvalAmounts: this.approvalAmounts?.convert(convertFunction),
         maxNumTransfers: this.maxNumTransfers?.convert(convertFunction),
+        autoDeletionOptions: this.autoDeletionOptions?.convert(convertFunction),
         requireToEqualsInitiatedBy: this.requireToEqualsInitiatedBy,
         requireToDoesNotEqualInitiatedBy: this.requireToDoesNotEqualInitiatedBy,
         coinTransfers: this.coinTransfers?.map((x) => x.convert(convertFunction))
@@ -364,6 +369,7 @@ export class OutgoingApprovalCriteria<T extends NumberType>
       predeterminedBalances: item.predeterminedBalances ? PredeterminedBalances.fromProto(item.predeterminedBalances, convertFunction) : undefined,
       approvalAmounts: item.approvalAmounts ? ApprovalAmounts.fromProto(item.approvalAmounts, convertFunction) : undefined,
       maxNumTransfers: item.maxNumTransfers ? MaxNumTransfers.fromProto(item.maxNumTransfers, convertFunction) : undefined,
+      autoDeletionOptions: item.autoDeletionOptions ? AutoDeletionOptions.fromProto(item.autoDeletionOptions, convertFunction) : undefined,
       requireToEqualsInitiatedBy: item.requireToEqualsInitiatedBy,
       requireToDoesNotEqualInitiatedBy: item.requireToDoesNotEqualInitiatedBy,
       coinTransfers: item.coinTransfers ? item.coinTransfers.map((x) => CoinTransfer.fromProto(x, convertFunction)) : undefined
@@ -375,6 +381,7 @@ export class OutgoingApprovalCriteria<T extends NumberType>
       predeterminedBalances: this.predeterminedBalances,
       approvalAmounts: this.approvalAmounts,
       maxNumTransfers: this.maxNumTransfers,
+      autoDeletionOptions: this.autoDeletionOptions,
       requireToEqualsInitiatedBy: this.requireToEqualsInitiatedBy,
       requireToDoesNotEqualInitiatedBy: this.requireToDoesNotEqualInitiatedBy,
       merkleChallenges: this.merkleChallenges,
@@ -910,6 +917,52 @@ export class MaxNumTransfers<T extends NumberType> extends BaseNumberTypeClass<M
 }
 
 /**
+ * @category Approvals / Transferability
+ */
+export class AutoDeletionOptions<T extends NumberType> extends BaseNumberTypeClass<AutoDeletionOptions<T>> implements iAutoDeletionOptions {
+  afterOneUse: boolean;
+
+  constructor(msg: iAutoDeletionOptions) {
+    super();
+    this.afterOneUse = msg.afterOneUse;
+  }
+
+  getNumberFieldNames(): string[] {
+    return [];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): AutoDeletionOptions<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as AutoDeletionOptions<U>;
+  }
+
+  toProto(): badges.AutoDeletionOptions {
+    return new badges.AutoDeletionOptions(this.convert(Stringify));
+  }
+
+  static fromJson<U extends NumberType>(
+    jsonValue: JsonValue,
+    convertFunction: (item: NumberType) => U,
+    options?: Partial<JsonReadOptions>
+  ): AutoDeletionOptions<U> {
+    return AutoDeletionOptions.fromProto(badges.AutoDeletionOptions.fromJson(jsonValue, options), convertFunction);
+  }
+
+  static fromJsonString<U extends NumberType>(
+    jsonString: string,
+    convertFunction: (item: NumberType) => U,
+    options?: Partial<JsonReadOptions>
+  ): AutoDeletionOptions<U> {
+    return AutoDeletionOptions.fromProto(badges.AutoDeletionOptions.fromJsonString(jsonString, options), convertFunction);
+  }
+
+  static fromProto<U extends NumberType>(item: badges.AutoDeletionOptions, convertFunction: (item: NumberType) => U): AutoDeletionOptions<U> {
+    return new AutoDeletionOptions<U>({
+      afterOneUse: item.afterOneUse
+    });
+  }
+}
+
+/**
  * UserIncomingApproval represents a user's approved incoming transfer.
  *
  * @category Approvals / Transferability
@@ -1014,6 +1067,7 @@ export class IncomingApprovalCriteria<T extends NumberType>
   predeterminedBalances?: PredeterminedBalances<T>;
   approvalAmounts?: ApprovalAmounts<T>;
   maxNumTransfers?: MaxNumTransfers<T>;
+  autoDeletionOptions?: AutoDeletionOptions<T>;
   requireFromEqualsInitiatedBy?: boolean;
   requireFromDoesNotEqualInitiatedBy?: boolean;
   coinTransfers?: CoinTransfer<T>[] | undefined;
@@ -1024,6 +1078,7 @@ export class IncomingApprovalCriteria<T extends NumberType>
     this.predeterminedBalances = msg.predeterminedBalances ? new PredeterminedBalances(msg.predeterminedBalances) : undefined;
     this.approvalAmounts = msg.approvalAmounts ? new ApprovalAmounts(msg.approvalAmounts) : undefined;
     this.maxNumTransfers = msg.maxNumTransfers ? new MaxNumTransfers(msg.maxNumTransfers) : undefined;
+    this.autoDeletionOptions = msg.autoDeletionOptions ? new AutoDeletionOptions(msg.autoDeletionOptions) : undefined;
     this.requireFromEqualsInitiatedBy = msg.requireFromEqualsInitiatedBy;
     this.requireFromDoesNotEqualInitiatedBy = msg.requireFromDoesNotEqualInitiatedBy;
     this.coinTransfers = msg.coinTransfers ? msg.coinTransfers.map((x) => new CoinTransfer(x)) : undefined;
@@ -1036,6 +1091,7 @@ export class IncomingApprovalCriteria<T extends NumberType>
         predeterminedBalances: this.predeterminedBalances ? this.predeterminedBalances.convert(convertFunction) : undefined,
         approvalAmounts: this.approvalAmounts ? this.approvalAmounts.convert(convertFunction) : undefined,
         maxNumTransfers: this.maxNumTransfers ? this.maxNumTransfers.convert(convertFunction) : undefined,
+        autoDeletionOptions: this.autoDeletionOptions ? this.autoDeletionOptions.convert(convertFunction) : undefined,
         requireFromEqualsInitiatedBy: this.requireFromEqualsInitiatedBy,
         requireFromDoesNotEqualInitiatedBy: this.requireFromDoesNotEqualInitiatedBy,
         coinTransfers: this.coinTransfers?.map((x) => x.convert(convertFunction))
@@ -1074,7 +1130,7 @@ export class IncomingApprovalCriteria<T extends NumberType>
       maxNumTransfers: item.maxNumTransfers ? MaxNumTransfers.fromProto(item.maxNumTransfers, convertFunction) : undefined,
       requireFromEqualsInitiatedBy: item.requireFromEqualsInitiatedBy,
       requireFromDoesNotEqualInitiatedBy: item.requireFromDoesNotEqualInitiatedBy,
-
+      autoDeletionOptions: item.autoDeletionOptions ? AutoDeletionOptions.fromProto(item.autoDeletionOptions, convertFunction) : undefined,
       coinTransfers: item.coinTransfers ? item.coinTransfers.map((x) => CoinTransfer.fromProto(x, convertFunction)) : undefined
     });
   }
@@ -1088,6 +1144,7 @@ export class IncomingApprovalCriteria<T extends NumberType>
       predeterminedBalances: this.predeterminedBalances,
       merkleChallenges: this.merkleChallenges,
       coinTransfers: this.coinTransfers,
+      autoDeletionOptions: this.autoDeletionOptions,
 
       requireToEqualsInitiatedBy: false,
       requireToDoesNotEqualInitiatedBy: false,
@@ -1242,6 +1299,7 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
   predeterminedBalances?: PredeterminedBalances<T>;
   approvalAmounts?: ApprovalAmounts<T>;
   maxNumTransfers?: MaxNumTransfers<T>;
+  autoDeletionOptions?: AutoDeletionOptions<T>;
   requireToEqualsInitiatedBy?: boolean;
   requireFromEqualsInitiatedBy?: boolean;
   requireToDoesNotEqualInitiatedBy?: boolean;
@@ -1256,6 +1314,7 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
     this.predeterminedBalances = msg.predeterminedBalances ? new PredeterminedBalances(msg.predeterminedBalances) : undefined;
     this.approvalAmounts = msg.approvalAmounts ? new ApprovalAmounts(msg.approvalAmounts) : undefined;
     this.maxNumTransfers = msg.maxNumTransfers ? new MaxNumTransfers(msg.maxNumTransfers) : undefined;
+    this.autoDeletionOptions = msg.autoDeletionOptions ? new AutoDeletionOptions(msg.autoDeletionOptions) : undefined;
     this.requireToEqualsInitiatedBy = msg.requireToEqualsInitiatedBy;
     this.requireFromEqualsInitiatedBy = msg.requireFromEqualsInitiatedBy;
     this.requireToDoesNotEqualInitiatedBy = msg.requireToDoesNotEqualInitiatedBy;
@@ -1295,6 +1354,7 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
       predeterminedBalances: item.predeterminedBalances ? PredeterminedBalances.fromProto(item.predeterminedBalances, convertFunction) : undefined,
       approvalAmounts: item.approvalAmounts ? ApprovalAmounts.fromProto(item.approvalAmounts, convertFunction) : undefined,
       maxNumTransfers: item.maxNumTransfers ? MaxNumTransfers.fromProto(item.maxNumTransfers, convertFunction) : undefined,
+      autoDeletionOptions: item.autoDeletionOptions ? AutoDeletionOptions.fromProto(item.autoDeletionOptions, convertFunction) : undefined,
       coinTransfers: item.coinTransfers ? item.coinTransfers.map((x) => CoinTransfer.fromProto(x, convertFunction)) : undefined,
       requireToEqualsInitiatedBy: item.requireToEqualsInitiatedBy,
       requireFromEqualsInitiatedBy: item.requireFromEqualsInitiatedBy,
@@ -1641,6 +1701,7 @@ export class IncomingApprovalCriteriaWithDetails<T extends NumberType>
       predeterminedBalances: this.predeterminedBalances,
       merkleChallenges: this.merkleChallenges,
       coinTransfers: this.coinTransfers,
+      autoDeletionOptions: this.autoDeletionOptions,
 
       requireFromEqualsInitiatedBy: false,
       requireFromDoesNotEqualInitiatedBy: false,
@@ -1686,7 +1747,7 @@ export class OutgoingApprovalCriteriaWithDetails<T extends NumberType>
       predeterminedBalances: this.predeterminedBalances,
       merkleChallenges: this.merkleChallenges,
       coinTransfers: this.coinTransfers,
-
+      autoDeletionOptions: this.autoDeletionOptions,
       requireToEqualsInitiatedBy: false,
       requireToDoesNotEqualInitiatedBy: false,
       overridesFromOutgoingApprovals: false,

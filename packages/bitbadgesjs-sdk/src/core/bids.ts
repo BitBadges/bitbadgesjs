@@ -1,7 +1,15 @@
 import { iCollectionApproval } from '@/interfaces/badges/approvals.js';
 import { UintRangeArray } from './uintRanges.js';
 
-export const isBidOrListingApproval = (approval: iCollectionApproval<bigint>, approvalLevel: 'incoming' | 'outgoing') => {
+export const isOrderbookBidOrListingApproval = (approval: iCollectionApproval<bigint>, approvalLevel: 'incoming' | 'outgoing') => {
+  return isBidOrListingApproval(approval, approvalLevel, { isFungibleCheck: true, fungibleOrNonFungibleAllowed: true });
+};
+
+export const isBidOrListingApproval = (
+  approval: iCollectionApproval<bigint>,
+  approvalLevel: 'incoming' | 'outgoing',
+  options?: { isFungibleCheck?: boolean; fungibleOrNonFungibleAllowed?: boolean }
+) => {
   const approvalCriteria = approval.approvalCriteria;
   if (approvalCriteria?.coinTransfers?.length !== 1) {
     return false;
@@ -58,8 +66,11 @@ export const isBidOrListingApproval = (approval: iCollectionApproval<bigint>, ap
   }
 
   const amount = incrementedBalances.startBalances[0].amount;
-  if (amount !== 1n) {
-    return false;
+  const toCheckAmountOne = !options || (!options.isFungibleCheck && !options.fungibleOrNonFungibleAllowed);
+  if (toCheckAmountOne) {
+    if (amount !== 1n) {
+      return false;
+    }
   }
 
   if (!UintRangeArray.From(incrementedBalances.startBalances[0].ownershipTimes).isFull()) {

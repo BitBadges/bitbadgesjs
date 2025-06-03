@@ -47,6 +47,8 @@ export interface iOutgoingApprovalCriteria<T extends NumberType> {
   requireToEqualsInitiatedBy?: boolean;
   /** Whether the to address must not equal the initiatedBy  address. */
   requireToDoesNotEqualInitiatedBy?: boolean;
+  /** Whether the approval should be deleted after one use. */
+  autoDeletionOptions?: iAutoDeletionOptions;
 }
 
 /**
@@ -148,6 +150,14 @@ export interface iApprovalAmounts<T extends NumberType> {
 /**
  * @category Interfaces
  */
+export interface iAutoDeletionOptions {
+  /** Whether the approval should be deleted after one use. */
+  afterOneUse: boolean;
+}
+
+/**
+ * @category Interfaces
+ */
 export interface iMaxNumTransfers<T extends NumberType> {
   /** The overall maximum number of transfers for the badgeIDs and ownershipTimes. Running tally that includes all transfers that match this approval. */
   overallMaxNumTransfers: T;
@@ -203,6 +213,8 @@ export interface iIncomingApprovalCriteria<T extends NumberType> {
   approvalAmounts?: iApprovalAmounts<T>;
   /** The max num transfers for this approval. */
   maxNumTransfers?: iMaxNumTransfers<T>;
+  /** Whether the approval should be deleted after one use. */
+  autoDeletionOptions?: iAutoDeletionOptions;
   /** Whether the from address must equal the initiatedBy address. */
   requireFromEqualsInitiatedBy?: boolean;
   /** Whether the from address must not equal the initiatedBy address. */
@@ -251,6 +263,8 @@ export interface iApprovalCriteria<T extends NumberType> {
   approvalAmounts?: iApprovalAmounts<T>;
   /** The max num transfers for this approval. */
   maxNumTransfers?: iMaxNumTransfers<T>;
+  /** Whether the approval should be deleted after one use. */
+  autoDeletionOptions?: iAutoDeletionOptions;
   /** Whether the to address must equal the initiatedBy address. */
   requireToEqualsInitiatedBy?: boolean;
   /** Whether the from address must equal the initiatedBy address. */
