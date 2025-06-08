@@ -5,7 +5,7 @@ import type { iMetadata, iMetadataWithoutInternals } from '@/api-indexer/metadat
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
 import type { JSPrimitiveNumberType, NumberType } from '@/common/string-numbers.js';
 import type { SupportedChain } from '@/common/types.js';
-import type { iApprovalInfoDetails, iChallengeDetails, iUserOutgoingApprovalWithDetails } from '@/core/approvals.js';
+import type { iApprovalInfoDetails, iChallengeDetails, iCollectionApprovalWithDetails, iUserOutgoingApprovalWithDetails } from '@/core/approvals.js';
 import type { iBatchBadgeDetails } from '@/core/batch-utils.js';
 import type { iCosmosCoin } from '@/core/coin.js';
 import type { iOffChainBalancesMap } from '@/core/transfers.js';
@@ -266,6 +266,18 @@ export interface iCoinTransferItem<T extends NumberType> {
   amount: T;
   /** The denom of the coin transfer. */
   denom: string;
+  /** Is protocol fee? */
+  isProtocolFee: boolean;
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iPrecalculationOptions<T extends NumberType> {
+  /** The timestamp to use for the transfer. */
+  overrideTimestamp?: T;
+  /** The badge IDs to use for the transfer. */
+  badgeIdsOverride?: iUintRange<T>[];
 }
 
 /**
@@ -290,8 +302,8 @@ export interface iTransferActivityDoc<T extends NumberType> extends iActivityDoc
   initiatedBy: BitBadgesAddress;
   /** The transaction hash of the activity. */
   txHash?: string;
-  /** Override timestamp? */
-  overrideTimestamp?: T;
+  /** Precalculation options */
+  precalculationOptions?: iPrecalculationOptions<T>;
   /** Coin transfers details */
   coinTransfers?: iCoinTransferItem<T>[];
   /** Approvals used for the transfer */
@@ -495,6 +507,8 @@ export interface iCollectionDoc<T extends NumberType> extends Doc {
   updateHistory: iUpdateHistory<T>[];
   /** Valid badge IDs for the collection */
   validBadgeIds: iUintRange<T>[];
+  /** Mint escrow address */
+  mintEscrowAddress: string;
 }
 
 /**
@@ -1279,17 +1293,14 @@ export interface iApplicationPage<T extends NumberType> {
   /** The page ID */
   pageId: string;
 
+  /** The type of the page */
+  type?: string;
+
   /** Metadata for the page */
   metadata: iMetadata<T>;
 
   /** Points to display in the page */
   points?: iTierWithOptionalWeight<T>[];
-
-  /** Tiers to display in the page */
-  tiers?: iTierWithOptionalWeight<T>[];
-
-  /** Quests to display in the page */
-  quests?: iTierWithOptionalWeight<T>[];
 }
 
 /**
@@ -1841,6 +1852,16 @@ export interface iAirdropDoc<T extends NumberType> extends Doc {
 export interface iIPFSTotalsDoc<T extends NumberType> extends Doc {
   /** The total bytes uploaded */
   bytesUploaded: T;
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iCreatorCreditsDoc<T extends NumberType> extends Doc {
+  /** The total credits */
+  credits: T;
+  /** The limit of credits */
+  creditsLimit?: T;
 }
 
 /**

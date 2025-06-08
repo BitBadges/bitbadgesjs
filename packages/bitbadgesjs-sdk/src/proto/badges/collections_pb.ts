@@ -12,7 +12,7 @@ import { UintRange } from "./balances_pb.js";
 
 /**
  *
- * A BadgeCollection is the top-level object for a collection of badges. 
+ * A BadgeCollection is the top-level object for a collection of badges.
  * It defines everything about the collection, such as the manager, metadata, etc.
  *
  * All collections are identified by a collectionId assigned by the blockchain, which is a uint64 that increments (i.e. the first collection has ID 1).
@@ -20,7 +20,7 @@ import { UintRange } from "./balances_pb.js";
  * All collections can have a manager who is responsible for managing the collection and can be granted certain admin
  * permissions, such as the ability to mint new badges.
  *
- * Certain fields are timeline-based, which means they may have different values at different block heights. 
+ * Certain fields are timeline-based, which means they may have different values at different block heights.
  * We fetch the value according to the current time.
  * For example, we may set the manager to be Alice from Time1 to Time2, and then set the manager to be Bob from Time2 to Time3.
  *
@@ -133,6 +133,13 @@ export class BadgeCollection extends Message<BadgeCollection> {
    */
   validBadgeIds: UintRange[] = [];
 
+  /**
+   * The generated address of the badge collection. Also used to escrow Mint balances.
+   *
+   * @generated from field: string mintEscrowAddress = 16;
+   */
+  mintEscrowAddress = "";
+
   constructor(data?: PartialMessage<BadgeCollection>) {
     super();
     proto3.util.initPartial(data, this);
@@ -155,6 +162,7 @@ export class BadgeCollection extends Message<BadgeCollection> {
     { no: 13, name: "defaultBalances", kind: "message", T: UserBalanceStore },
     { no: 14, name: "createdBy", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 15, name: "validBadgeIds", kind: "message", T: UintRange, repeated: true },
+    { no: 16, name: "mintEscrowAddress", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BadgeCollection {

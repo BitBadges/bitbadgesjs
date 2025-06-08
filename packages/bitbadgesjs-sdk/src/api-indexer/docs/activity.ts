@@ -1,19 +1,23 @@
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import { BalanceArray } from '@/core/balances.js';
+import { ApprovalIdentifierDetails } from '@/core/misc.js';
+import { UintRangeArray } from '@/core/uintRanges.js';
+import { CollectionId } from '@/interfaces/badges/core.js';
+import { badges } from '@/proto/index.js';
 import type {
   BitBadgesAddress,
-  UNIXMilliTimestamp,
   iActivityDoc,
   iClaimActivityDoc,
   iClaimAlertDoc,
   iCoinTransferItem,
   iListActivityDoc,
   iPointsActivityDoc,
-  iTransferActivityDoc
+  iPrecalculationOptions,
+  iTransferActivityDoc,
+  UNIXMilliTimestamp
 } from './interfaces.js';
-import { CollectionId } from '@/interfaces/badges/core.js';
-import { ApprovalIdentifierDetails, CoinTransfer } from '@/core/misc.js';
+import { CollectionApprovalWithDetails, iCollectionApprovalWithDetails } from '@/core/approvals.js';
 
 /**
  * @inheritDoc iActivityDoc
@@ -52,6 +56,7 @@ export class CoinTransferItem<T extends NumberType> extends BaseNumberTypeClass<
   denom: string;
   from: BitBadgesAddress;
   to: BitBadgesAddress;
+  isProtocolFee: boolean;
 
   constructor(data: iCoinTransferItem<T>) {
     super();
@@ -59,6 +64,7 @@ export class CoinTransferItem<T extends NumberType> extends BaseNumberTypeClass<
     this.denom = data.denom;
     this.from = data.from;
     this.to = data.to;
+    this.isProtocolFee = data.isProtocolFee;
   }
 
   getNumberFieldNames(): string[] {
@@ -67,6 +73,36 @@ export class CoinTransferItem<T extends NumberType> extends BaseNumberTypeClass<
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CoinTransferItem<U> {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CoinTransferItem<U>;
+  }
+}
+
+/**
+ * @inheritDoc iPrecalculationOptions
+ * @category Indexer
+ */
+export class PrecalculationOptions<T extends NumberType> extends BaseNumberTypeClass<PrecalculationOptions<T>> implements iPrecalculationOptions<T> {
+  overrideTimestamp?: T;
+  badgeIdsOverride?: UintRangeArray<T>;
+
+  constructor(data: iPrecalculationOptions<T>) {
+    super();
+    this.overrideTimestamp = data.overrideTimestamp;
+    this.badgeIdsOverride = data.badgeIdsOverride ? UintRangeArray.From(data.badgeIdsOverride) : undefined;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['overrideTimestamp'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): PrecalculationOptions<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as PrecalculationOptions<U>;
+  }
+
+  static fromProto<U extends NumberType>(proto: badges.PrecalculationOptions, convertFunction: (item: NumberType) => U): PrecalculationOptions<U> {
+    return new PrecalculationOptions({
+      overrideTimestamp: convertFunction(proto.overrideTimestamp),
+      badgeIdsOverride: proto.badgeIdsOverride ? UintRangeArray.From(proto.badgeIdsOverride).convert(convertFunction) : undefined
+    });
   }
 }
 
@@ -87,7 +123,7 @@ export class TransferActivityDoc<T extends NumberType> extends ActivityDoc<T> im
   prioritizedApprovals?: ApprovalIdentifierDetails<T>[];
 
   private?: boolean | undefined;
-  overrideTimestamp?: T;
+  precalculationOptions?: PrecalculationOptions<T>;
   coinTransfers?: CoinTransferItem<T>[];
   approvalsUsed?: ApprovalIdentifierDetails<T>[];
 
@@ -105,13 +141,13 @@ export class TransferActivityDoc<T extends NumberType> extends ActivityDoc<T> im
     this.initiatedBy = data.initiatedBy;
     this.txHash = data.txHash;
     this.private = data.private;
-    this.overrideTimestamp = data.overrideTimestamp;
+    this.precalculationOptions = data.precalculationOptions ? new PrecalculationOptions(data.precalculationOptions) : undefined;
     this.coinTransfers = data.coinTransfers ? data.coinTransfers.map((x) => new CoinTransferItem(x)) : undefined;
     this.approvalsUsed = data.approvalsUsed ? data.approvalsUsed.map((x) => new ApprovalIdentifierDetails(x)) : undefined;
   }
 
   getNumberFieldNames(): string[] {
-    return [...super.getNumberFieldNames(), 'overrideTimestamp'];
+    return [...super.getNumberFieldNames()];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): TransferActivityDoc<U> {

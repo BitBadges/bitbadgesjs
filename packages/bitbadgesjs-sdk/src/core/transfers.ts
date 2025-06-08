@@ -10,6 +10,7 @@ import { BigIntify, Stringify } from '../common/string-numbers.js';
 import { Balance, BalanceArray, cleanBalances } from './balances.js';
 import { ApprovalIdentifierDetails, MerkleProof } from './misc.js';
 import { UintRangeArray } from './uintRanges.js';
+import { PrecalculationOptions } from '@/api-indexer/docs/activity.js';
 
 /**
  * Transfer is used to represent a transfer of badges. This is compatible with the MsgTransferBadges message.
@@ -27,7 +28,8 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
   onlyCheckPrioritizedCollectionApprovals?: boolean | undefined;
   onlyCheckPrioritizedIncomingApprovals?: boolean | undefined;
   onlyCheckPrioritizedOutgoingApprovals?: boolean | undefined;
-  overrideTimestamp?: UNIXMilliTimestamp<T>;
+  precalculationOptions?: PrecalculationOptions<T>;
+  affiliateAddress?: string;
 
   constructor(transfer: iTransfer<T>) {
     super();
@@ -46,11 +48,12 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
 
     this.onlyCheckPrioritizedIncomingApprovals = transfer.onlyCheckPrioritizedIncomingApprovals;
     this.onlyCheckPrioritizedOutgoingApprovals = transfer.onlyCheckPrioritizedOutgoingApprovals;
-    this.overrideTimestamp = transfer.overrideTimestamp;
+    this.precalculationOptions = transfer.precalculationOptions ? new PrecalculationOptions(transfer.precalculationOptions) : undefined;
+    this.affiliateAddress = transfer.affiliateAddress;
   }
 
   getNumberFieldNames(): string[] {
-    return ['overrideTimestamp'];
+    return [];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): Transfer<U> {
@@ -94,7 +97,8 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
       onlyCheckPrioritizedCollectionApprovals: item.onlyCheckPrioritizedCollectionApprovals,
       onlyCheckPrioritizedIncomingApprovals: item.onlyCheckPrioritizedIncomingApprovals,
       onlyCheckPrioritizedOutgoingApprovals: item.onlyCheckPrioritizedOutgoingApprovals,
-      overrideTimestamp: convertFunction(item.overrideTimestamp)
+      precalculationOptions: item.precalculationOptions ? PrecalculationOptions.fromProto(item.precalculationOptions, convertFunction) : undefined,
+      affiliateAddress: item.affiliateAddress
     });
   }
 
@@ -105,7 +109,8 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
       toAddresses: this.toAddresses.map((x) => getConvertFunctionFromPrefix(prefix)(x)),
       precalculateBalancesFromApproval: this.precalculateBalancesFromApproval?.toBech32Addresses(prefix),
       prioritizedApprovals: this.prioritizedApprovals?.map((x) => x.toBech32Addresses(prefix)),
-      overrideTimestamp: this.overrideTimestamp
+      precalculationOptions: this.precalculationOptions ? new PrecalculationOptions(this.precalculationOptions) : undefined,
+      affiliateAddress: this.affiliateAddress
     });
   }
 }
@@ -192,7 +197,7 @@ export class TransferWithIncrements<T extends NumberType>
   onlyCheckPrioritizedCollectionApprovals?: boolean | undefined;
   onlyCheckPrioritizedIncomingApprovals?: boolean | undefined;
   onlyCheckPrioritizedOutgoingApprovals?: boolean | undefined;
-  overrideTimestamp?: UNIXMilliTimestamp<T>;
+  precalculationOptions?: PrecalculationOptions<T>;
 
   constructor(data: iTransferWithIncrements<T>) {
     super();
@@ -212,11 +217,11 @@ export class TransferWithIncrements<T extends NumberType>
     this.onlyCheckPrioritizedCollectionApprovals = data.onlyCheckPrioritizedCollectionApprovals;
     this.onlyCheckPrioritizedIncomingApprovals = data.onlyCheckPrioritizedIncomingApprovals;
     this.onlyCheckPrioritizedOutgoingApprovals = data.onlyCheckPrioritizedOutgoingApprovals;
-    this.overrideTimestamp = data.overrideTimestamp;
+    this.precalculationOptions = data.precalculationOptions ? new PrecalculationOptions(data.precalculationOptions) : undefined;
   }
 
   getNumberFieldNames(): string[] {
-    return ['toAddressesLength', 'incrementBadgeIdsBy', 'incrementOwnershipTimesBy', 'durationFromTimestamp', 'overrideTimestamp'];
+    return ['toAddressesLength', 'incrementBadgeIdsBy', 'incrementOwnershipTimesBy', 'durationFromTimestamp'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): TransferWithIncrements<U> {

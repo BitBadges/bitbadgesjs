@@ -1,6 +1,6 @@
 //IMPORTANT: Keep all imports type-safe by using the `type` keyword. If not, this will mess up the circular dependency check.
 
-import type { iAttestationDoc } from '@/api-indexer/docs/interfaces.js';
+import type { iAttestationDoc, iPrecalculationOptions } from '@/api-indexer/docs/interfaces.js';
 import type { BitBadgesAddress, UNIXMilliTimestamp, iBadgeMetadataDetails, iCollectionMetadataDetails } from '@/api-indexer/index.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import type { iCosmosCoin } from '@/core/coin.js';
@@ -321,8 +321,15 @@ export interface iTransfer<T extends NumberType> {
    */
   onlyCheckPrioritizedOutgoingApprovals?: boolean;
 
-  /** Override timestamp. Only to be used in conjunction if you can override the durationFromTimestamp. */
-  overrideTimestamp?: UNIXMilliTimestamp<T>;
+  /**
+   * The precalculation options for the transfer.
+   */
+  precalculationOptions?: iPrecalculationOptions<T>;
+
+  /**
+   * The affiliate address for the transfer.
+   */
+  affiliateAddress?: BitBadgesAddress;
 }
 
 /**
@@ -453,6 +460,11 @@ export interface iMerkleChallenge<T extends NumberType> {
    * Tracker ID details for the merkle challenge.
    */
   challengeTrackerId: string;
+
+  /**
+   * The signer of the leaf. Currently only supports ETH addresses.
+   */
+  leafSigner: string;
 }
 
 /**
@@ -483,6 +495,11 @@ export interface iMerkleProof {
    * The leaf of the merkle proof. If useCreatorAddressAsLeaf is true, this will be populated with the creator BitBadges address.
    */
   leaf: string;
+
+  /**
+   * The signature for the leaf. With an ETH message signature, sign(leaf + "-" + intendedBitBadgesAddress).
+   */
+  leafSignature: string;
 }
 
 /**

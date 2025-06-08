@@ -2,7 +2,7 @@ import { iCollectionDoc } from '@/api-indexer/docs/interfaces.js';
 import type { iCollectionApproval, iUserOutgoingApproval } from '@/interfaces/badges/approvals.js';
 import { UintRangeArray } from './uintRanges.js';
 
-export const doesCollectionFollowQuestProtocol = (collection?: Readonly<iCollectionDoc<bigint>>) => {
+export const doesCollectionFollowProductProtocol = (collection?: Readonly<iCollectionDoc<bigint>>) => {
   if (!collection) {
     return false;
   }
@@ -14,7 +14,7 @@ export const doesCollectionFollowQuestProtocol = (collection?: Readonly<iCollect
       continue;
     }
 
-    if (!standard.standards.includes('Quests')) {
+    if (!standard.standards.includes('Products')) {
       continue;
     }
 
@@ -38,7 +38,7 @@ export const doesCollectionFollowQuestProtocol = (collection?: Readonly<iCollect
   return true;
 };
 
-export const isQuestApproval = (approval: iCollectionApproval<bigint>) => {
+export const isProductApproval = (approval: iCollectionApproval<bigint>) => {
   const approvalCriteria = approval.approvalCriteria;
   if (!approvalCriteria?.coinTransfers) {
     return false;
@@ -48,26 +48,14 @@ export const isQuestApproval = (approval: iCollectionApproval<bigint>) => {
     return false;
   }
 
-  if (!approvalCriteria.merkleChallenges || approvalCriteria.merkleChallenges.length !== 1) {
-    return false;
-  }
+  for (const challenge of approvalCriteria.merkleChallenges ?? []) {
+    if (challenge.maxUsesPerLeaf !== 1n) {
+      return false;
+    }
 
-  let merkleChallenge = approvalCriteria.merkleChallenges?.[0];
-  if (merkleChallenge.maxUsesPerLeaf !== 1n) {
-    return false;
-  }
-
-  if (merkleChallenge.useCreatorAddressAsLeaf) {
-    return false;
-  }
-
-  const maxNumTransfers = approvalCriteria.maxNumTransfers?.overallMaxNumTransfers;
-  if (!maxNumTransfers) {
-    return false;
-  }
-
-  if (maxNumTransfers <= 0n) {
-    return false;
+    if (challenge.useCreatorAddressAsLeaf) {
+      return false;
+    }
   }
 
   if (approvalCriteria.coinTransfers.length !== 1) {
@@ -83,7 +71,7 @@ export const isQuestApproval = (approval: iCollectionApproval<bigint>) => {
       return false;
     }
 
-    if (!coinTransfer.overrideFromWithApproverAddress || !coinTransfer.overrideToWithInitiator) {
+    if (coinTransfer.overrideFromWithApproverAddress || coinTransfer.overrideToWithInitiator) {
       return false;
     }
   }

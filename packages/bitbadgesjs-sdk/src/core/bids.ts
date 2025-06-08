@@ -8,7 +8,7 @@ export const isOrderbookBidOrListingApproval = (approval: iCollectionApproval<bi
 export const isBidOrListingApproval = (
   approval: iCollectionApproval<bigint>,
   approvalLevel: 'incoming' | 'outgoing',
-  options?: { isFungibleCheck?: boolean; fungibleOrNonFungibleAllowed?: boolean }
+  options?: { isFungibleCheck?: boolean; fungibleOrNonFungibleAllowed?: boolean; isCollectionBid?: boolean }
 ) => {
   const approvalCriteria = approval.approvalCriteria;
   if (approvalCriteria?.coinTransfers?.length !== 1) {
@@ -60,9 +60,19 @@ export const isBidOrListingApproval = (
     return false;
   }
 
-  const allBadgeIds = UintRangeArray.From(incrementedBalances.startBalances[0].badgeIds).sortAndMerge().convert(BigInt);
-  if (allBadgeIds.length !== 1 || allBadgeIds.size() !== 1n) {
-    return false;
+  if (options?.isCollectionBid) {
+    if (!incrementedBalances.allowOverrideWithAnyValidBadge) {
+      return false;
+    }
+  } else {
+    const allBadgeIds = UintRangeArray.From(incrementedBalances.startBalances[0].badgeIds).sortAndMerge().convert(BigInt);
+    if (allBadgeIds.length !== 1 || allBadgeIds.size() !== 1n) {
+      return false;
+    }
+
+    if (incrementedBalances.allowOverrideWithAnyValidBadge) {
+      return false;
+    }
   }
 
   const amount = incrementedBalances.startBalances[0].amount;
@@ -127,4 +137,8 @@ export const isBidOrListingApproval = (
   }
 
   return true;
+};
+
+export const isCollectionBid = (approval: iCollectionApproval<bigint>) => {
+  return isBidOrListingApproval(approval, 'incoming', { isCollectionBid: true });
 };

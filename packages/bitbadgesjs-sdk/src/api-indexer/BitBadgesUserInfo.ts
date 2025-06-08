@@ -12,7 +12,15 @@ import { BitBadgesAddressList } from './BitBadgesAddressList.js';
 import { BitBadgesCollection } from './BitBadgesCollection.js';
 import type { BaseBitBadgesApi, PaginationInfo } from './base.js';
 import { ClaimActivityDoc, ClaimAlertDoc, ListActivityDoc, PointsActivityDoc, TransferActivityDoc } from './docs/activity.js';
-import { ApprovalTrackerDoc, AttestationDoc, BalanceDocWithDetails, MerkleChallengeTrackerDoc, ProfileDoc, SIWBBRequestDoc } from './docs/docs.js';
+import {
+  ApprovalTrackerDoc,
+  AttestationDoc,
+  BalanceDocWithDetails,
+  CreatorCreditsDoc,
+  MerkleChallengeTrackerDoc,
+  ProfileDoc,
+  SIWBBRequestDoc
+} from './docs/docs.js';
 import type {
   BitBadgesAddress,
   NativeAddress,
@@ -22,6 +30,7 @@ import type {
   iBalanceDocWithDetails,
   iClaimActivityDoc,
   iClaimAlertDoc,
+  iCreatorCreditsDoc,
   iListActivityDoc,
   iMerkleChallengeTrackerDoc,
   iPointsActivityDoc,
@@ -96,6 +105,9 @@ export interface iBitBadgesUserInfo<T extends NumberType> extends iProfileDoc<T>
     collectionId?: CollectionId;
     listId?: string;
   };
+
+  /** The credits for the account. */
+  creatorCredits?: iCreatorCreditsDoc<T>;
 }
 
 /**
@@ -150,6 +162,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     collectionId?: CollectionId;
     listId?: string;
   };
+  creatorCredits?: CreatorCreditsDoc<T>;
 
   constructor(data: iBitBadgesUserInfo<T>) {
     super(data);
@@ -183,6 +196,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     this.reported = data.reported;
     this.views = data.views;
     this.alias = data.alias;
+    this.creatorCredits = data.creatorCredits ? new CreatorCreditsDoc(data.creatorCredits) : undefined;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): BitBadgesUserInfo<U> {

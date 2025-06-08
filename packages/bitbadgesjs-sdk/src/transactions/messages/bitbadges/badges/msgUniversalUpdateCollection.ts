@@ -14,15 +14,16 @@ import {
 import { CollectionPermissions } from '@/core/permissions.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 
+import { getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
 import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import { Stringify } from '@/common/string-numbers.js';
+import { CosmosCoin } from '@/core/coin.js';
 import { UintRange, UintRangeArray } from '@/core/uintRanges.js';
 import { UserBalanceStore } from '@/core/userBalances.js';
-import { getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
-import type { iMsgUniversalUpdateCollection } from './interfaces.js';
 import { CollectionId } from '@/interfaces/index.js';
 import { normalizeMessagesIfNecessary } from '../../base.js';
+import type { iMsgUniversalUpdateCollection } from './interfaces.js';
 
 /**
  * MsgUniversalUpdateCollection is a universal transaction that can be used to create / update any collection. It is only executable by the manager.
@@ -70,6 +71,7 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
   updateIsArchivedTimeline?: boolean;
   isArchivedTimeline?: IsArchivedTimeline<T>[];
   creatorOverride: BitBadgesAddress;
+  mintEscrowCoinsToTransfer?: CosmosCoin<T>[];
 
   constructor(msg: iMsgUniversalUpdateCollection<T>) {
     super();
@@ -98,6 +100,7 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
     this.updateIsArchivedTimeline = msg.updateIsArchivedTimeline;
     this.isArchivedTimeline = msg.isArchivedTimeline?.map((x) => new IsArchivedTimeline(x));
     this.creatorOverride = msg.creatorOverride;
+    this.mintEscrowCoinsToTransfer = msg.mintEscrowCoinsToTransfer ? msg.mintEscrowCoinsToTransfer.map((x) => new CosmosCoin(x)) : undefined;
   }
 
   getNumberFieldNames(): string[] {
@@ -173,7 +176,8 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
       isArchivedTimeline: protoMsg.isArchivedTimeline
         ? protoMsg.isArchivedTimeline.map((x) => IsArchivedTimeline.fromProto(x, convertFunction))
         : undefined,
-      creatorOverride: protoMsg.creatorOverride
+      creatorOverride: protoMsg.creatorOverride,
+      mintEscrowCoinsToTransfer: protoMsg.mintEscrowCoinsToTransfer?.map((x) => CosmosCoin.fromProto(x, convertFunction))
     });
   }
 

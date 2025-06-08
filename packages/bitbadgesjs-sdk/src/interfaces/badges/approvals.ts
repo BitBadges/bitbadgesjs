@@ -99,6 +99,8 @@ export interface iIncrementedBalances<T extends NumberType> {
   allowOverrideTimestamp: boolean;
   /** The recurring ownership times for the approval. */
   recurringOwnershipTimes: iRecurringOwnershipTimes<T>;
+  /** Whether to allow the override with any valid badge. */
+  allowOverrideWithAnyValidBadge: boolean;
 }
 
 /**
