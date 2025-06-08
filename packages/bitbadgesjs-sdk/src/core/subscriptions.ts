@@ -58,6 +58,7 @@ export const doesCollectionFollowSubscriptionProtocol = (collection?: Readonly<i
     return false;
   }
 
+  let found = false;
   for (const standard of collection.standardsTimeline) {
     const isCurrentTime = UintRangeArray.From(standard.timelineTimes).searchIfExists(BigInt(Date.now()));
     if (!isCurrentTime) {
@@ -65,8 +66,14 @@ export const doesCollectionFollowSubscriptionProtocol = (collection?: Readonly<i
     }
 
     if (!standard.standards.includes('Subscriptions')) {
-      return false;
+      continue;
     }
+
+    found = true;
+  }
+
+  if (!found) {
+    return false;
   }
 
   // Assert valid badge IDs are only 1n-1n

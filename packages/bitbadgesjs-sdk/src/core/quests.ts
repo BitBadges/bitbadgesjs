@@ -7,6 +7,7 @@ export const doesCollectionFollowQuestProtocol = (collection?: Readonly<iCollect
     return false;
   }
 
+  let found = false;
   for (const standard of collection.standardsTimeline) {
     const isCurrentTime = UintRangeArray.From(standard.timelineTimes).searchIfExists(BigInt(Date.now()));
     if (!isCurrentTime) {
@@ -14,8 +15,14 @@ export const doesCollectionFollowQuestProtocol = (collection?: Readonly<iCollect
     }
 
     if (!standard.standards.includes('Quests')) {
-      return false;
+      continue;
     }
+
+    found = true;
+  }
+
+  if (!found) {
+    return false;
   }
 
   // Assert valid badge IDs are only 1n-1n
@@ -31,9 +38,13 @@ export const doesCollectionFollowQuestProtocol = (collection?: Readonly<iCollect
   return true;
 };
 
-export const isQuestApproval = (approval: iCollectionApproval<bigint> | iUserOutgoingApproval<bigint>) => {
+export const isQuestApproval = (approval: iCollectionApproval<bigint>) => {
   const approvalCriteria = approval.approvalCriteria;
   if (!approvalCriteria?.coinTransfers) {
+    return false;
+  }
+
+  if (approval.fromListId !== 'Mint') {
     return false;
   }
 
