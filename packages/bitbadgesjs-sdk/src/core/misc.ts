@@ -430,6 +430,7 @@ export class MerkleChallenge<T extends NumberType> extends BaseNumberTypeClass<M
   uri: string;
   customData: string;
   challengeTrackerId: string;
+  leafSigner: string;
 
   constructor(merkleChallenge: iMerkleChallenge<T>) {
     super();
@@ -440,6 +441,7 @@ export class MerkleChallenge<T extends NumberType> extends BaseNumberTypeClass<M
     this.uri = merkleChallenge.uri;
     this.customData = merkleChallenge.customData;
     this.challengeTrackerId = merkleChallenge.challengeTrackerId;
+    this.leafSigner = merkleChallenge.leafSigner;
   }
 
   static required(): MerkleChallenge<NumberType> {
@@ -450,7 +452,8 @@ export class MerkleChallenge<T extends NumberType> extends BaseNumberTypeClass<M
       maxUsesPerLeaf: 0,
       uri: '',
       customData: '',
-      challengeTrackerId: ''
+      challengeTrackerId: '',
+      leafSigner: ''
     });
   }
 
@@ -467,7 +470,8 @@ export class MerkleChallenge<T extends NumberType> extends BaseNumberTypeClass<M
         maxUsesPerLeaf: convertFunction(this.maxUsesPerLeaf),
         uri: this.uri,
         customData: this.customData,
-        challengeTrackerId: this.challengeTrackerId
+        challengeTrackerId: this.challengeTrackerId,
+        leafSigner: this.leafSigner
       })
     );
   }
@@ -500,7 +504,8 @@ export class MerkleChallenge<T extends NumberType> extends BaseNumberTypeClass<M
       maxUsesPerLeaf: convertFunction(BigInt(item.maxUsesPerLeaf)),
       uri: item.uri,
       customData: item.customData,
-      challengeTrackerId: item.challengeTrackerId
+      challengeTrackerId: item.challengeTrackerId,
+      leafSigner: item.leafSigner
     });
   }
 }
@@ -557,17 +562,20 @@ export class MerklePathItem extends CustomTypeClass<MerklePathItem> {
 export class MerkleProof extends CustomTypeClass<MerkleProof> implements MerkleProof {
   aunts: MerklePathItem[];
   leaf: string;
+  leafSignature: string;
 
   constructor(merkleProof: iMerkleProof) {
     super();
     this.aunts = merkleProof.aunts.map((b) => new MerklePathItem(b));
     this.leaf = merkleProof.leaf;
+    this.leafSignature = merkleProof.leafSignature;
   }
 
   static required(): MerkleProof {
     return new MerkleProof({
       aunts: [],
-      leaf: ''
+      leaf: '',
+      leafSignature: ''
     });
   }
 
@@ -590,7 +598,8 @@ export class MerkleProof extends CustomTypeClass<MerkleProof> implements MerkleP
   static fromProto(item: badges.MerkleProof): MerkleProof {
     return new MerkleProof({
       aunts: item.aunts.map((b) => MerklePathItem.fromProto(b)),
-      leaf: item.leaf
+      leaf: item.leaf,
+      leafSignature: item.leafSignature
     });
   }
 }

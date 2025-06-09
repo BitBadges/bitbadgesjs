@@ -12,6 +12,7 @@
  * For Msgs without optional fields, we don't need to do anything.
  */
 import { deepCopyPrimitives } from '@/common/base.js';
+import { CosmosCoin } from '@/core/coin.js';
 import {
   ActionPermission,
   AddressList,
@@ -49,6 +50,7 @@ import {
   OffChainBalancesMetadata,
   OffChainBalancesMetadataTimeline,
   OutgoingApprovalCriteria,
+  PrecalculationOptions,
   PredeterminedBalances,
   PredeterminedOrderCalculationMethod,
   RecurringOwnershipTimes,
@@ -640,7 +642,13 @@ const universalParams = {
         permanentlyForbiddenTimes: [new UintRange()]
       })
     ]
-  })
+  }),
+  mintEscrowCoinsToTransfer: [
+    new CosmosCoin({
+      amount: '0',
+      denom: 'ubadge'
+    })
+  ]
 };
 
 export function getSampleMsg(msgType: string, currMsg: any) {
@@ -709,7 +717,10 @@ export function getSampleMsg(msgType: string, currMsg: any) {
                   aunts: [new MerklePathItem()]
                 })
               ],
-              overrideTimestamp: '0'
+              precalculationOptions: new PrecalculationOptions({
+                overrideTimestamp: '0',
+                badgeIdsOverride: [new UintRange()]
+              })
             })
           ]
         }).toJson({ emitDefaultValues: true })

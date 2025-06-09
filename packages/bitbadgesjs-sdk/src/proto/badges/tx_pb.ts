@@ -10,6 +10,7 @@ import { CollectionApproval, Transfer, UserBalanceStore, UserIncomingApproval, U
 import { UintRange } from "./balances_pb.js";
 import { CollectionPermissions, UserPermissions } from "./permissions_pb.js";
 import { BadgeMetadataTimeline, CollectionMetadataTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadataTimeline, StandardsTimeline } from "./timelines_pb.js";
+import { Coin } from "../cosmos/base/v1beta1/coin_pb.js";
 import { AddressList } from "./address_lists_pb.js";
 
 /**
@@ -349,12 +350,19 @@ export class MsgUniversalUpdateCollection extends Message<MsgUniversalUpdateColl
   isArchivedTimeline: IsArchivedTimeline[] = [];
 
   /**
-   * Address of the original creator. Used for CosmWASM purposes. 
+   * Address of the original creator. Used for CosmWASM purposes.
    * IMPORTANT: We will override but we must trust the original creator address.
    *
    * @generated from field: string creatorOverride = 27;
    */
   creatorOverride = "";
+
+  /**
+   * Coins to be transferred to the mint escrow address.
+   *
+   * @generated from field: repeated cosmos.base.v1beta1.Coin mintEscrowCoinsToTransfer = 28;
+   */
+  mintEscrowCoinsToTransfer: Coin[] = [];
 
   constructor(data?: PartialMessage<MsgUniversalUpdateCollection>) {
     super();
@@ -389,6 +397,7 @@ export class MsgUniversalUpdateCollection extends Message<MsgUniversalUpdateColl
     { no: 25, name: "updateIsArchivedTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 26, name: "isArchivedTimeline", kind: "message", T: IsArchivedTimeline, repeated: true },
     { no: 27, name: "creatorOverride", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 28, name: "mintEscrowCoinsToTransfer", kind: "message", T: Coin, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUniversalUpdateCollection {
@@ -610,12 +619,19 @@ export class MsgUpdateCollection extends Message<MsgUpdateCollection> {
   isArchivedTimeline: IsArchivedTimeline[] = [];
 
   /**
-   * Address of the original creator. Used for CosmWASM purposes. 
+   * Address of the original creator. Used for CosmWASM purposes.
    * IMPORTANT: We will override but we must trust the original creator address.
    *
    * @generated from field: string creatorOverride = 29;
    */
   creatorOverride = "";
+
+  /**
+   * Coins to be transferred to the mint escrow address.
+   *
+   * @generated from field: repeated cosmos.base.v1beta1.Coin mintEscrowCoinsToTransfer = 30;
+   */
+  mintEscrowCoinsToTransfer: Coin[] = [];
 
   constructor(data?: PartialMessage<MsgUpdateCollection>) {
     super();
@@ -648,6 +664,7 @@ export class MsgUpdateCollection extends Message<MsgUpdateCollection> {
     { no: 27, name: "updateIsArchivedTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 28, name: "isArchivedTimeline", kind: "message", T: IsArchivedTimeline, repeated: true },
     { no: 29, name: "creatorOverride", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 30, name: "mintEscrowCoinsToTransfer", kind: "message", T: Coin, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUpdateCollection {
@@ -806,12 +823,19 @@ export class MsgCreateCollection extends Message<MsgCreateCollection> {
   isArchivedTimeline: IsArchivedTimeline[] = [];
 
   /**
-   * Address of the original creator. Used for CosmWASM purposes. 
+   * Address of the original creator. Used for CosmWASM purposes.
    * IMPORTANT: We will override but we must trust the original creator address.
    *
    * @generated from field: string creatorOverride = 15;
    */
   creatorOverride = "";
+
+  /**
+   * Coins to be transferred to the mint escrow address.
+   *
+   * @generated from field: repeated cosmos.base.v1beta1.Coin mintEscrowCoinsToTransfer = 16;
+   */
+  mintEscrowCoinsToTransfer: Coin[] = [];
 
   constructor(data?: PartialMessage<MsgCreateCollection>) {
     super();
@@ -835,6 +859,7 @@ export class MsgCreateCollection extends Message<MsgCreateCollection> {
     { no: 13, name: "standardsTimeline", kind: "message", T: StandardsTimeline, repeated: true },
     { no: 14, name: "isArchivedTimeline", kind: "message", T: IsArchivedTimeline, repeated: true },
     { no: 15, name: "creatorOverride", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 16, name: "mintEscrowCoinsToTransfer", kind: "message", T: Coin, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgCreateCollection {
@@ -916,7 +941,7 @@ export class MsgCreateAddressLists extends Message<MsgCreateAddressLists> {
   addressLists: AddressList[] = [];
 
   /**
-   * Address of the original creator. Used for CosmWASM purposes. 
+   * Address of the original creator. Used for CosmWASM purposes.
    * IMPORTANT: We will override but we must trust the original creator address.
    *
    * @generated from field: string creatorOverride = 3;
@@ -1014,7 +1039,7 @@ export class MsgTransferBadges extends Message<MsgTransferBadges> {
   transfers: Transfer[] = [];
 
   /**
-   * Address of the original creator. Used for CosmWASM purposes. 
+   * Address of the original creator. Used for CosmWASM purposes.
    * IMPORTANT: We will override but we must trust the original creator address.
    *
    * @generated from field: string creatorOverride = 4;
@@ -1106,7 +1131,7 @@ export class MsgDeleteCollection extends Message<MsgDeleteCollection> {
   collectionId = "";
 
   /**
-   * Address of the original creator. Used for CosmWASM purposes. 
+   * Address of the original creator. Used for CosmWASM purposes.
    * IMPORTANT: We will override but we must trust the original creator address.
    *
    * @generated from field: string creatorOverride = 3;
@@ -1204,7 +1229,7 @@ export class MsgUpdateUserApprovals extends Message<MsgUpdateUserApprovals> {
   updateOutgoingApprovals = false;
 
   /**
-   * New outgoing approvals to set. 
+   * New outgoing approvals to set.
    *
    * @generated from field: repeated badges.UserOutgoingApproval outgoingApprovals = 4;
    */
@@ -1281,7 +1306,7 @@ export class MsgUpdateUserApprovals extends Message<MsgUpdateUserApprovals> {
   userPermissions?: UserPermissions;
 
   /**
-   * Address of the original creator. Used for CosmWASM purposes. 
+   * Address of the original creator. Used for CosmWASM purposes.
    * IMPORTANT: We will override but we must trust the original creator address.
    *
    * @generated from field: string creatorOverride = 15;

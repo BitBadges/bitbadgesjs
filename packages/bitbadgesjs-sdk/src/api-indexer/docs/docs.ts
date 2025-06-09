@@ -56,6 +56,7 @@ import {
   iBadgeFloorPriceDoc,
   iBaseStats,
   iCollectionStatsDoc,
+  iCreatorCreditsDoc,
   iDynamicDataDoc,
   iEstimatedCost,
   iEvent,
@@ -319,6 +320,7 @@ export class CollectionDoc<T extends NumberType>
   createdTimestamp: UNIXMilliTimestamp<T>;
   updateHistory: UpdateHistory<T>[];
   validBadgeIds: UintRangeArray<T>;
+  mintEscrowAddress: string;
 
   constructor(data: iCollectionDoc<T>) {
     super();
@@ -345,6 +347,7 @@ export class CollectionDoc<T extends NumberType>
     this.createdTimestamp = data.createdTimestamp;
     this.updateHistory = data.updateHistory.map((updateHistory) => new UpdateHistory(updateHistory));
 
+    this.mintEscrowAddress = data.mintEscrowAddress;
     this.validBadgeIds = UintRangeArray.From(data.validBadgeIds);
   }
 
@@ -1148,16 +1151,14 @@ export class TierWithOptionalWeight<T extends NumberType>
 export class ApplicationPage<T extends NumberType> extends BaseNumberTypeClass<ApplicationPage<T>> implements iApplicationPage<T> {
   metadata: Metadata<T>;
   pageId: string;
+  type?: string;
   points?: TierWithOptionalWeight<T>[];
-  tiers?: TierWithOptionalWeight<T>[];
-  quests?: TierWithOptionalWeight<T>[];
 
   constructor(data: iApplicationPage<T>) {
     super();
     this.metadata = new Metadata(data.metadata);
     this.pageId = data.pageId;
-    this.tiers = data.tiers?.map((tier) => new TierWithOptionalWeight(tier));
-    this.quests = data.quests?.map((quest) => new TierWithOptionalWeight(quest));
+    this.type = data.type;
     this.points = data.points?.map((point) => new TierWithOptionalWeight(point));
   }
 
@@ -1803,6 +1804,33 @@ export class AirdropDoc<T extends NumberType> extends BaseNumberTypeClass<Airdro
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): AirdropDoc<U> {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as AirdropDoc<U>;
+  }
+}
+
+/**
+ * @inheritDoc iCreatorCreditsDoc
+ * @category Indexer
+ */
+export class CreatorCreditsDoc<T extends NumberType> extends BaseNumberTypeClass<CreatorCreditsDoc<T>> implements iCreatorCreditsDoc<T> {
+  _docId: string;
+  _id?: string;
+  credits: T;
+  creditsLimit?: T;
+
+  constructor(data: iCreatorCreditsDoc<T>) {
+    super();
+    this.credits = data.credits;
+    this.creditsLimit = data.creditsLimit;
+    this._docId = data._docId;
+    this._id = data._id;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['credits', 'creditsLimit'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CreatorCreditsDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CreatorCreditsDoc<U>;
   }
 }
 

@@ -184,6 +184,14 @@ export class MerkleChallenge extends Message<MerkleChallenge> {
    */
   challengeTrackerId = "";
 
+  /**
+   * Leaf must be signed by. Used to protect against man in the middle attacks.`
+   * Scheme we use is sign(leaf + "-" +
+   *
+   * @generated from field: string leafSigner = 8;
+   */
+  leafSigner = "";
+
   constructor(data?: PartialMessage<MerkleChallenge>) {
     super();
     proto3.util.initPartial(data, this);
@@ -199,6 +207,7 @@ export class MerkleChallenge extends Message<MerkleChallenge> {
     { no: 5, name: "uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 6, name: "customData", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 7, name: "challengeTrackerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 8, name: "leafSigner", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MerkleChallenge {
@@ -586,6 +595,13 @@ export class IncrementedBalances extends Message<IncrementedBalances> {
    */
   recurringOwnershipTimes?: RecurringOwnershipTimes;
 
+  /**
+   * Allow override of any valid badge
+   *
+   * @generated from field: bool allowOverrideWithAnyValidBadge = 7;
+   */
+  allowOverrideWithAnyValidBadge = false;
+
   constructor(data?: PartialMessage<IncrementedBalances>) {
     super();
     proto3.util.initPartial(data, this);
@@ -600,6 +616,7 @@ export class IncrementedBalances extends Message<IncrementedBalances> {
     { no: 4, name: "durationFromTimestamp", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 5, name: "allowOverrideTimestamp", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 6, name: "recurringOwnershipTimes", kind: "message", T: RecurringOwnershipTimes },
+    { no: 7, name: "allowOverrideWithAnyValidBadge", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): IncrementedBalances {
@@ -1734,12 +1751,18 @@ export class Transfer extends Message<Transfer> {
   onlyCheckPrioritizedOutgoingApprovals = false;
 
   /**
-   * The timestamp to override with when calculating the balances.
-   * Only applicable for approvals with predeterminedBalances set that allow setting a custom timestamp for the transfer.
+   * The options for precalculating the balances.
    *
-   * @generated from field: string overrideTimestamp = 11;
+   * @generated from field: badges.PrecalculationOptions precalculationOptions = 11;
    */
-  overrideTimestamp = "";
+  precalculationOptions?: PrecalculationOptions;
+
+  /**
+   * Affiliate address for the transfer.
+   *
+   * @generated from field: string affiliateAddress = 12;
+   */
+  affiliateAddress = "";
 
   constructor(data?: PartialMessage<Transfer>) {
     super();
@@ -1759,7 +1782,8 @@ export class Transfer extends Message<Transfer> {
     { no: 8, name: "onlyCheckPrioritizedCollectionApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 9, name: "onlyCheckPrioritizedIncomingApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 10, name: "onlyCheckPrioritizedOutgoingApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 11, name: "overrideTimestamp", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 11, name: "precalculationOptions", kind: "message", T: PrecalculationOptions },
+    { no: 12, name: "affiliateAddress", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Transfer {
@@ -1776,6 +1800,55 @@ export class Transfer extends Message<Transfer> {
 
   static equals(a: Transfer | PlainMessage<Transfer> | undefined, b: Transfer | PlainMessage<Transfer> | undefined): boolean {
     return proto3.util.equals(Transfer, a, b);
+  }
+}
+
+/**
+ * PrecalculationOptions defines the options for precalculating the balances.
+ *
+ * @generated from message badges.PrecalculationOptions
+ */
+export class PrecalculationOptions extends Message<PrecalculationOptions> {
+  /**
+   * The timestamp to override with when calculating the balances.
+   *
+   * @generated from field: string overrideTimestamp = 1;
+   */
+  overrideTimestamp = "";
+
+  /**
+   * The badgeIdsOverride to use for the transfer.
+   *
+   * @generated from field: repeated badges.UintRange badgeIdsOverride = 2;
+   */
+  badgeIdsOverride: UintRange[] = [];
+
+  constructor(data?: PartialMessage<PrecalculationOptions>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.PrecalculationOptions";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "overrideTimestamp", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "badgeIdsOverride", kind: "message", T: UintRange, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PrecalculationOptions {
+    return new PrecalculationOptions().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): PrecalculationOptions {
+    return new PrecalculationOptions().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): PrecalculationOptions {
+    return new PrecalculationOptions().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: PrecalculationOptions | PlainMessage<PrecalculationOptions> | undefined, b: PrecalculationOptions | PlainMessage<PrecalculationOptions> | undefined): boolean {
+    return proto3.util.equals(PrecalculationOptions, a, b);
   }
 }
 
@@ -1848,6 +1921,13 @@ export class MerkleProof extends Message<MerkleProof> {
    */
   aunts: MerklePathItem[] = [];
 
+  /**
+   * The signature of the leaf node tying the address to the leaf node.
+   *
+   * @generated from field: string leafSignature = 3;
+   */
+  leafSignature = "";
+
   constructor(data?: PartialMessage<MerkleProof>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1858,6 +1938,7 @@ export class MerkleProof extends Message<MerkleProof> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "leaf", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "aunts", kind: "message", T: MerklePathItem, repeated: true },
+    { no: 3, name: "leafSignature", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MerkleProof {

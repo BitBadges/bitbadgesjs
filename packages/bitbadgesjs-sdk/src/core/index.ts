@@ -19,3 +19,4 @@ export * from './blockin.js';
 export * from './subscriptions.js';
 export * from './bids.js';
 export * from './quests.js';
+export * from './products.js';

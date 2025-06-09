@@ -466,7 +466,8 @@ export class PredeterminedBalances<T extends NumberType> extends BaseNumberTypeC
             allowOverrideTimestamp: false,
             recurringOwnershipTimes: new RecurringOwnershipTimes({ startTime: 0n, intervalLength: 0n, chargePeriodLength: 0n }).convert(
               convertFunction
-            )
+            ),
+            allowOverrideWithAnyValidBadge: false
           }),
       orderCalculationMethod: item.orderCalculationMethod
         ? PredeterminedOrderCalculationMethod.fromProto(item.orderCalculationMethod)
@@ -601,6 +602,7 @@ export class IncrementedBalances<T extends NumberType> extends BaseNumberTypeCla
   durationFromTimestamp: T;
   allowOverrideTimestamp: boolean;
   recurringOwnershipTimes: RecurringOwnershipTimes<T>;
+  allowOverrideWithAnyValidBadge: boolean;
 
   constructor(msg: iIncrementedBalances<T>) {
     super();
@@ -610,6 +612,7 @@ export class IncrementedBalances<T extends NumberType> extends BaseNumberTypeCla
     this.durationFromTimestamp = msg.durationFromTimestamp;
     this.allowOverrideTimestamp = msg.allowOverrideTimestamp;
     this.recurringOwnershipTimes = new RecurringOwnershipTimes(msg.recurringOwnershipTimes);
+    this.allowOverrideWithAnyValidBadge = msg.allowOverrideWithAnyValidBadge;
   }
 
   getNumberFieldNames(): string[] {
@@ -624,7 +627,8 @@ export class IncrementedBalances<T extends NumberType> extends BaseNumberTypeCla
         incrementOwnershipTimesBy: convertFunction(this.incrementOwnershipTimesBy),
         durationFromTimestamp: convertFunction(this.durationFromTimestamp),
         allowOverrideTimestamp: this.allowOverrideTimestamp,
-        recurringOwnershipTimes: this.recurringOwnershipTimes.convert(convertFunction)
+        recurringOwnershipTimes: this.recurringOwnershipTimes.convert(convertFunction),
+        allowOverrideWithAnyValidBadge: this.allowOverrideWithAnyValidBadge
       })
     );
   }
@@ -656,6 +660,7 @@ export class IncrementedBalances<T extends NumberType> extends BaseNumberTypeCla
       incrementOwnershipTimesBy: convertFunction(item.incrementOwnershipTimesBy),
       durationFromTimestamp: convertFunction(item.durationFromTimestamp),
       allowOverrideTimestamp: item.allowOverrideTimestamp,
+      allowOverrideWithAnyValidBadge: item.allowOverrideWithAnyValidBadge,
       recurringOwnershipTimes: item.recurringOwnershipTimes
         ? new RecurringOwnershipTimes(item.recurringOwnershipTimes).convert(convertFunction)
         : new RecurringOwnershipTimes({ startTime: 0n, intervalLength: 0n, chargePeriodLength: 0n }).convert(convertFunction)

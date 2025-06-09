@@ -1,5 +1,6 @@
 import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
 import type { NumberType } from '@/common/string-numbers.js';
+import { iCosmosCoin } from '@/core/coin.js';
 import type { iCollectionApproval, iUserIncomingApproval, iUserOutgoingApproval } from '../../../../interfaces/badges/approvals.js';
 import type {
   CollectionId,
@@ -74,6 +75,9 @@ export interface iMsgCreateCollection<T extends NumberType> {
 
   /** Creator override. Internal only. Only used for CosmWasm purposes. */
   creatorOverride: BitBadgesAddress;
+
+  /** The coins to mint to the transfer address. Only used if collection has "Non-Public" balance type. */
+  mintEscrowCoinsToTransfer?: iCosmosCoin<T>[];
 }
 
 /**

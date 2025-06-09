@@ -20,6 +20,7 @@ import * as badges from '@/proto/badges/tx_pb.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 import type { iMsgCreateCollection } from './interfaces.js';
 import { normalizeMessagesIfNecessary } from '../../base.js';
+import { CosmosCoin } from '@/core/coin.js';
 
 /**
  * MsgCreateCollection is a transaction that can be used to create a collection.
@@ -44,6 +45,7 @@ export class MsgCreateCollection<T extends NumberType> extends BaseNumberTypeCla
   standardsTimeline?: StandardsTimeline<T>[];
   isArchivedTimeline?: IsArchivedTimeline<T>[];
   creatorOverride: BitBadgesAddress;
+  mintEscrowCoinsToTransfer?: CosmosCoin<T>[];
 
   constructor(msg: iMsgCreateCollection<T>) {
     super();
@@ -61,6 +63,7 @@ export class MsgCreateCollection<T extends NumberType> extends BaseNumberTypeCla
     this.standardsTimeline = msg.standardsTimeline?.map((x) => new StandardsTimeline(x));
     this.isArchivedTimeline = msg.isArchivedTimeline?.map((x) => new IsArchivedTimeline(x));
     this.creatorOverride = msg.creatorOverride;
+    this.mintEscrowCoinsToTransfer = msg.mintEscrowCoinsToTransfer ? msg.mintEscrowCoinsToTransfer.map((x) => new CosmosCoin(x)) : undefined;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgCreateCollection<U> {
@@ -106,7 +109,8 @@ export class MsgCreateCollection<T extends NumberType> extends BaseNumberTypeCla
       collectionApprovals: protoMsg.collectionApprovals?.map((x) => CollectionApproval.fromProto(x, convertFunction)),
       standardsTimeline: protoMsg.standardsTimeline?.map((x) => StandardsTimeline.fromProto(x, convertFunction)),
       isArchivedTimeline: protoMsg.isArchivedTimeline?.map((x) => IsArchivedTimeline.fromProto(x, convertFunction)),
-      creatorOverride: protoMsg.creatorOverride
+      creatorOverride: protoMsg.creatorOverride,
+      mintEscrowCoinsToTransfer: protoMsg.mintEscrowCoinsToTransfer?.map((x) => CosmosCoin.fromProto(x, convertFunction))
     });
   }
 
