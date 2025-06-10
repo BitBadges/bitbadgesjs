@@ -38,7 +38,6 @@ import { getValueAtTimeForTimeline } from '@/core/timelines.js';
 import type { iOffChainBalancesMap } from '@/core/transfers.js';
 import { UintRange, UintRangeArray } from '@/core/uintRanges.js';
 import { UserBalanceStore } from '@/core/userBalances.js';
-import { iCollectionApproval } from '@/interfaces/badges/approvals.js';
 import type { CollectionId, iAmountTrackerIdDetails } from '@/interfaces/badges/core.js';
 import type { iUserBalanceStore } from '@/interfaces/badges/userBalances.js';
 import { Map, ValueStore } from '@/transactions/messages/bitbadges/maps/index.js';
