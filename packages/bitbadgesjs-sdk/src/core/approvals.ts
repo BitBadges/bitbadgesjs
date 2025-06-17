@@ -34,7 +34,8 @@ import type {
   iResetTimeIntervals,
   iUserIncomingApproval,
   iUserIncomingApprovalWithDetails,
-  iUserOutgoingApproval
+  iUserOutgoingApproval,
+  iUserRoyalties
 } from '@/interfaces/badges/approvals.js';
 import type { CollectionId, iAddressList, iMerkleChallenge } from '@/interfaces/badges/core.js';
 import * as badges from '@/proto/badges/index.js';
@@ -44,7 +45,7 @@ import type { Options as MerkleTreeJsOptions } from 'merkletreejs/dist/MerkleTre
 import { BigIntify, Stringify, type NumberType } from '../common/string-numbers.js';
 import { AddressList, convertListIdToBech32 } from './addressLists.js';
 import { Balance, BalanceArray } from './balances.js';
-import { CoinTransfer, MerkleChallenge } from './misc.js';
+import { CoinTransfer, MerkleChallenge, MustOwnBadges } from './misc.js';
 import type { UniversalPermission, UniversalPermissionDetails } from './overlaps.js';
 import { GetListIdWithOptions, GetListWithOptions, GetUintRangesWithOptions, getOverlapsAndNonOverlaps } from './overlaps.js';
 import type { CollectionApprovalPermissionWithDetails } from './permissions.js';
@@ -304,6 +305,7 @@ export class OutgoingApprovalCriteria<T extends NumberType>
   implements iOutgoingApprovalCriteria<T>
 {
   merkleChallenges?: MerkleChallenge<T>[];
+  mustOwnBadges?: MustOwnBadges<T>[];
   predeterminedBalances?: PredeterminedBalances<T>;
   approvalAmounts?: ApprovalAmounts<T>;
   maxNumTransfers?: MaxNumTransfers<T>;
@@ -316,6 +318,7 @@ export class OutgoingApprovalCriteria<T extends NumberType>
   constructor(msg: iOutgoingApprovalCriteria<T>) {
     super();
     this.merkleChallenges = msg.merkleChallenges?.map((x) => new MerkleChallenge(x));
+    this.mustOwnBadges = msg.mustOwnBadges?.map((x) => new MustOwnBadges(x));
     this.predeterminedBalances = msg.predeterminedBalances ? new PredeterminedBalances(msg.predeterminedBalances) : undefined;
     this.approvalAmounts = msg.approvalAmounts ? new ApprovalAmounts(msg.approvalAmounts) : undefined;
     this.maxNumTransfers = msg.maxNumTransfers ? new MaxNumTransfers(msg.maxNumTransfers) : undefined;
@@ -329,6 +332,7 @@ export class OutgoingApprovalCriteria<T extends NumberType>
     return new OutgoingApprovalCriteria(
       deepCopyPrimitives({
         merkleChallenges: this.merkleChallenges?.map((x) => x.convert(convertFunction)),
+        mustOwnBadges: this.mustOwnBadges?.map((x) => x.convert(convertFunction)),
         predeterminedBalances: this.predeterminedBalances?.convert(convertFunction),
         approvalAmounts: this.approvalAmounts?.convert(convertFunction),
         maxNumTransfers: this.maxNumTransfers?.convert(convertFunction),
@@ -366,6 +370,7 @@ export class OutgoingApprovalCriteria<T extends NumberType>
   ): OutgoingApprovalCriteria<U> {
     return new OutgoingApprovalCriteria<U>({
       merkleChallenges: item.merkleChallenges.map((x) => MerkleChallenge.fromProto(x, convertFunction)),
+      mustOwnBadges: item.mustOwnBadges.map((x) => MustOwnBadges.fromProto(x, convertFunction)),
       predeterminedBalances: item.predeterminedBalances ? PredeterminedBalances.fromProto(item.predeterminedBalances, convertFunction) : undefined,
       approvalAmounts: item.approvalAmounts ? ApprovalAmounts.fromProto(item.approvalAmounts, convertFunction) : undefined,
       maxNumTransfers: item.maxNumTransfers ? MaxNumTransfers.fromProto(item.maxNumTransfers, convertFunction) : undefined,
@@ -385,6 +390,7 @@ export class OutgoingApprovalCriteria<T extends NumberType>
       requireToEqualsInitiatedBy: this.requireToEqualsInitiatedBy,
       requireToDoesNotEqualInitiatedBy: this.requireToDoesNotEqualInitiatedBy,
       merkleChallenges: this.merkleChallenges,
+      mustOwnBadges: this.mustOwnBadges,
       coinTransfers: this.coinTransfers,
 
       requireFromEqualsInitiatedBy: false,
@@ -1069,6 +1075,7 @@ export class IncomingApprovalCriteria<T extends NumberType>
   implements iIncomingApprovalCriteria<T>
 {
   merkleChallenges?: MerkleChallenge<T>[];
+  mustOwnBadges?: MustOwnBadges<T>[];
   predeterminedBalances?: PredeterminedBalances<T>;
   approvalAmounts?: ApprovalAmounts<T>;
   maxNumTransfers?: MaxNumTransfers<T>;
@@ -1080,6 +1087,7 @@ export class IncomingApprovalCriteria<T extends NumberType>
   constructor(msg: iIncomingApprovalCriteria<T>) {
     super();
     this.merkleChallenges = msg.merkleChallenges?.map((x) => new MerkleChallenge(x));
+    this.mustOwnBadges = msg.mustOwnBadges?.map((x) => new MustOwnBadges(x));
     this.predeterminedBalances = msg.predeterminedBalances ? new PredeterminedBalances(msg.predeterminedBalances) : undefined;
     this.approvalAmounts = msg.approvalAmounts ? new ApprovalAmounts(msg.approvalAmounts) : undefined;
     this.maxNumTransfers = msg.maxNumTransfers ? new MaxNumTransfers(msg.maxNumTransfers) : undefined;
@@ -1093,6 +1101,7 @@ export class IncomingApprovalCriteria<T extends NumberType>
     return new IncomingApprovalCriteria(
       deepCopyPrimitives({
         merkleChallenge: this.merkleChallenges?.map((x) => x.convert(convertFunction)),
+        mustOwnBadges: this.mustOwnBadges?.map((x) => x.convert(convertFunction)),
         predeterminedBalances: this.predeterminedBalances ? this.predeterminedBalances.convert(convertFunction) : undefined,
         approvalAmounts: this.approvalAmounts ? this.approvalAmounts.convert(convertFunction) : undefined,
         maxNumTransfers: this.maxNumTransfers ? this.maxNumTransfers.convert(convertFunction) : undefined,
@@ -1130,6 +1139,7 @@ export class IncomingApprovalCriteria<T extends NumberType>
   ): IncomingApprovalCriteria<U> {
     return new IncomingApprovalCriteria<U>({
       merkleChallenges: item.merkleChallenges.map((x) => MerkleChallenge.fromProto(x, convertFunction)),
+      mustOwnBadges: item.mustOwnBadges.map((x) => MustOwnBadges.fromProto(x, convertFunction)),
       predeterminedBalances: item.predeterminedBalances ? PredeterminedBalances.fromProto(item.predeterminedBalances, convertFunction) : undefined,
       approvalAmounts: item.approvalAmounts ? ApprovalAmounts.fromProto(item.approvalAmounts, convertFunction) : undefined,
       maxNumTransfers: item.maxNumTransfers ? MaxNumTransfers.fromProto(item.maxNumTransfers, convertFunction) : undefined,
@@ -1150,6 +1160,7 @@ export class IncomingApprovalCriteria<T extends NumberType>
       merkleChallenges: this.merkleChallenges,
       coinTransfers: this.coinTransfers,
       autoDeletionOptions: this.autoDeletionOptions,
+      mustOwnBadges: this.mustOwnBadges,
 
       requireToEqualsInitiatedBy: false,
       requireToDoesNotEqualInitiatedBy: false,
@@ -1294,6 +1305,52 @@ export class CollectionApproval<T extends NumberType> extends BaseNumberTypeClas
 }
 
 /**
+ * @category Approvals / Transferability
+ */
+export class UserRoyalties<T extends NumberType> extends BaseNumberTypeClass<UserRoyalties<T>> implements iUserRoyalties<T> {
+  percentage: T;
+  payoutAddress: string;
+
+  constructor(msg: iUserRoyalties<T>) {
+    super();
+    this.percentage = msg.percentage;
+    this.payoutAddress = msg.payoutAddress;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['percentage'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UserRoyalties<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserRoyalties<U>;
+  }
+
+  toProto(): badges.UserRoyalties {
+    return new badges.UserRoyalties(this.convert(Stringify));
+  }
+
+  static fromJson<U extends NumberType>(
+    jsonValue: JsonValue,
+    convertFunction: (item: NumberType) => U,
+    options?: Partial<JsonReadOptions>
+  ): UserRoyalties<U> {
+    return UserRoyalties.fromProto(badges.UserRoyalties.fromJson(jsonValue, options), convertFunction);
+  }
+
+  static fromJsonString<U extends NumberType>(
+    jsonString: string,
+    convertFunction: (item: NumberType) => U,
+    options?: Partial<JsonReadOptions>
+  ): UserRoyalties<U> {
+    return UserRoyalties.fromProto(badges.UserRoyalties.fromJsonString(jsonString, options), convertFunction);
+  }
+
+  static fromProto<U extends NumberType>(item: badges.UserRoyalties, convertFunction: (item: NumberType) => U): UserRoyalties<U> {
+    return new UserRoyalties({ percentage: convertFunction(item.percentage), payoutAddress: item.payoutAddress });
+  }
+}
+
+/**
  *
  * ApprovalCriteria represents the criteria for an approval. The approvee must satisfy all of the criteria to be approved.
  *
@@ -1301,6 +1358,7 @@ export class CollectionApproval<T extends NumberType> extends BaseNumberTypeClas
  */
 export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<ApprovalCriteria<T>> implements iApprovalCriteria<T> {
   merkleChallenges?: MerkleChallenge<T>[];
+  mustOwnBadges?: MustOwnBadges<T>[];
   predeterminedBalances?: PredeterminedBalances<T>;
   approvalAmounts?: ApprovalAmounts<T>;
   maxNumTransfers?: MaxNumTransfers<T>;
@@ -1312,10 +1370,12 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
   overridesFromOutgoingApprovals?: boolean;
   overridesToIncomingApprovals?: boolean;
   coinTransfers?: CoinTransfer<T>[] | undefined;
+  userRoyalties?: UserRoyalties<T>;
 
   constructor(msg: iApprovalCriteria<T>) {
     super();
     this.merkleChallenges = msg.merkleChallenges?.map((x) => new MerkleChallenge(x));
+    this.mustOwnBadges = msg.mustOwnBadges?.map((x) => new MustOwnBadges(x));
     this.predeterminedBalances = msg.predeterminedBalances ? new PredeterminedBalances(msg.predeterminedBalances) : undefined;
     this.approvalAmounts = msg.approvalAmounts ? new ApprovalAmounts(msg.approvalAmounts) : undefined;
     this.maxNumTransfers = msg.maxNumTransfers ? new MaxNumTransfers(msg.maxNumTransfers) : undefined;
@@ -1327,6 +1387,7 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
     this.overridesFromOutgoingApprovals = msg.overridesFromOutgoingApprovals;
     this.overridesToIncomingApprovals = msg.overridesToIncomingApprovals;
     this.coinTransfers = msg.coinTransfers ? msg.coinTransfers.map((x) => new CoinTransfer(x)) : undefined;
+    this.userRoyalties = msg.userRoyalties ? new UserRoyalties(msg.userRoyalties) : undefined;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ApprovalCriteria<U> {
@@ -1356,6 +1417,7 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
   static fromProto<U extends NumberType>(item: badges.ApprovalCriteria, convertFunction: (item: NumberType) => U): ApprovalCriteria<U> {
     return new ApprovalCriteria<U>({
       merkleChallenges: item.merkleChallenges.map((x) => MerkleChallenge.fromProto(x, convertFunction)),
+      mustOwnBadges: item.mustOwnBadges.map((x) => MustOwnBadges.fromProto(x, convertFunction)),
       predeterminedBalances: item.predeterminedBalances ? PredeterminedBalances.fromProto(item.predeterminedBalances, convertFunction) : undefined,
       approvalAmounts: item.approvalAmounts ? ApprovalAmounts.fromProto(item.approvalAmounts, convertFunction) : undefined,
       maxNumTransfers: item.maxNumTransfers ? MaxNumTransfers.fromProto(item.maxNumTransfers, convertFunction) : undefined,
@@ -1366,7 +1428,8 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
       requireToDoesNotEqualInitiatedBy: item.requireToDoesNotEqualInitiatedBy,
       requireFromDoesNotEqualInitiatedBy: item.requireFromDoesNotEqualInitiatedBy,
       overridesFromOutgoingApprovals: item.overridesFromOutgoingApprovals,
-      overridesToIncomingApprovals: item.overridesToIncomingApprovals
+      overridesToIncomingApprovals: item.overridesToIncomingApprovals,
+      userRoyalties: item.userRoyalties ? UserRoyalties.fromProto(item.userRoyalties, convertFunction) : undefined
     });
   }
 
@@ -1705,6 +1768,7 @@ export class IncomingApprovalCriteriaWithDetails<T extends NumberType>
       maxNumTransfers: this.maxNumTransfers,
       predeterminedBalances: this.predeterminedBalances,
       merkleChallenges: this.merkleChallenges,
+      mustOwnBadges: this.mustOwnBadges,
       coinTransfers: this.coinTransfers,
       autoDeletionOptions: this.autoDeletionOptions,
 
@@ -1751,6 +1815,7 @@ export class OutgoingApprovalCriteriaWithDetails<T extends NumberType>
       maxNumTransfers: this.maxNumTransfers,
       predeterminedBalances: this.predeterminedBalances,
       merkleChallenges: this.merkleChallenges,
+      mustOwnBadges: this.mustOwnBadges,
       coinTransfers: this.coinTransfers,
       autoDeletionOptions: this.autoDeletionOptions,
       requireToEqualsInitiatedBy: false,

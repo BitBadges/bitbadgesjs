@@ -57,6 +57,10 @@ export const isQuestApproval = (approval: iCollectionApproval<bigint>) => {
     return false;
   }
 
+  if (approvalCriteria.mustOwnBadges?.length) {
+    return false;
+  }
+
   if (merkleChallenge.useCreatorAddressAsLeaf) {
     return false;
   }

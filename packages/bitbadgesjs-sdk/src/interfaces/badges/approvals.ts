@@ -1,6 +1,6 @@
 import type { NumberType } from '@/common/string-numbers.js';
 import type { iApprovalInfoDetails, iIncomingApprovalCriteriaWithDetails } from '@/core/approvals.js';
-import type { iAddressList, iBalance, iCoinTransfer, iMerkleChallenge, iUintRange } from './core.js';
+import type { iAddressList, iBalance, iCoinTransfer, iMerkleChallenge, iMustOwnBadge, iUintRange } from './core.js';
 
 /**
  * @category Interfaces
@@ -34,7 +34,8 @@ export interface iUserOutgoingApproval<T extends NumberType> {
 export interface iOutgoingApprovalCriteria<T extends NumberType> {
   /** The $BADGE transfers to be executed upon every approval. */
   coinTransfers?: iCoinTransfer<T>[];
-
+  /** The list of must own badges that need valid proofs to be approved. */
+  mustOwnBadges?: iMustOwnBadge<T>[];
   /** The list of merkle challenges that need valid proofs to be approved. */
   merkleChallenges?: iMerkleChallenge<T>[];
   /** The predetermined balances for each transfer. These allow approvals to use predetermined balance amounts rather than an incrementing tally system. */
@@ -209,6 +210,8 @@ export interface iIncomingApprovalCriteria<T extends NumberType> {
   coinTransfers?: iCoinTransfer<T>[];
   /** The list of merkle challenges that need valid proofs to be approved. */
   merkleChallenges?: iMerkleChallenge<T>[];
+  /** The list of must own badges that need valid proofs to be approved. */
+  mustOwnBadges?: iMustOwnBadge<T>[];
   /** The predetermined balances for each transfer using this approval. */
   predeterminedBalances?: iPredeterminedBalances<T>;
   /** The maximum approved amounts for this approval. */
@@ -259,6 +262,8 @@ export interface iApprovalCriteria<T extends NumberType> {
   coinTransfers?: iCoinTransfer<T>[];
   /** The list of merkle challenges that need valid proofs to be approved. */
   merkleChallenges?: iMerkleChallenge<T>[];
+  /** The list of must own badges that need valid proofs to be approved. */
+  mustOwnBadges?: iMustOwnBadge<T>[];
   /** The predetermined balances for each transfer. These allow approvals to use predetermined balance amounts rather than an incrementing tally system. */
   predeterminedBalances?: iPredeterminedBalances<T>;
   /** The maximum approved amounts for this approval. */
@@ -279,6 +284,18 @@ export interface iApprovalCriteria<T extends NumberType> {
   overridesFromOutgoingApprovals?: boolean;
   /** Whether this approval overrides the to address's approved incoming transfers. */
   overridesToIncomingApprovals?: boolean;
+  /** The royalties to apply to the transfer. */
+  userRoyalties?: iUserRoyalties<T>;
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iUserRoyalties<T extends NumberType> {
+  /** The percentage of the transfer amount to apply as royalties. 1 to 10000 represents basis points. */
+  percentage: T;
+  /** The payout address for the royalties. */
+  payoutAddress: string;
 }
 
 /**

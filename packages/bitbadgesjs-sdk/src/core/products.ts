@@ -132,5 +132,9 @@ export const isProductApproval = (approval: iCollectionApproval<bigint>) => {
     return false;
   }
 
+  if (approvalCriteria.mustOwnBadges?.length) {
+    return false;
+  }
+
   return true;
 };

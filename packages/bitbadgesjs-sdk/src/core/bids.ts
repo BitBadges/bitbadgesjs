@@ -132,6 +132,10 @@ export const isBidOrListingApproval = (
     return false;
   }
 
+  if (approvalCriteria.mustOwnBadges?.length) {
+    return false;
+  }
+
   if (approvalCriteria.maxNumTransfers?.overallMaxNumTransfers !== 1n) {
     return false;
   }

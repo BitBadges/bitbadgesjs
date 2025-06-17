@@ -1158,6 +1158,96 @@ export class CoinTransfer extends Message<CoinTransfer> {
 }
 
 /**
+ *
+ * MustOwnBadges represents a condition where a user must own specific badges
+ * to be approved to transfer.
+ *
+ * - collectionId: The ID of the badge collection for the badges that must be owned
+ * - amountRange: The range of badge amounts the user must own (min to max)
+ * - ownershipTimes: The time ranges during which the user must own the badges.
+ * - badgeIds: The badge IDs the user must own.
+ * - overrideWithCurrentTime: If true, auto override ownershipTimes with the current time.
+ * - mustSatisfyForAllAssets: If true, the user must own all specified badges; otherwise, owning any one for >= 1 millisecond is sufficient.
+ *
+ * @generated from message badges.MustOwnBadges
+ */
+export class MustOwnBadges extends Message<MustOwnBadges> {
+  /**
+   * The ID of the badge collection.
+   *
+   * @generated from field: string collectionId = 1;
+   */
+  collectionId = "";
+
+  /**
+   * The range of badge amounts the user must own (min to max).
+   *
+   * @generated from field: badges.UintRange amountRange = 2;
+   */
+  amountRange?: UintRange;
+
+  /**
+   * The time ranges during which the user must own the badges.
+   *
+   * @generated from field: repeated badges.UintRange ownershipTimes = 3;
+   */
+  ownershipTimes: UintRange[] = [];
+
+  /**
+   * The badge IDs the user must own.
+   *
+   * @generated from field: repeated badges.UintRange badgeIds = 4;
+   */
+  badgeIds: UintRange[] = [];
+
+  /**
+   * If true, override ownershipTimes with the current time.
+   *
+   * @generated from field: bool overrideWithCurrentTime = 5;
+   */
+  overrideWithCurrentTime = false;
+
+  /**
+   * If true, the user must meet ownership requirements for all specified badges; else, must meet requirements for any single badge.
+   *
+   * @generated from field: bool mustSatisfyForAllAssets = 6;
+   */
+  mustSatisfyForAllAssets = false;
+
+  constructor(data?: PartialMessage<MustOwnBadges>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MustOwnBadges";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "amountRange", kind: "message", T: UintRange },
+    { no: 3, name: "ownershipTimes", kind: "message", T: UintRange, repeated: true },
+    { no: 4, name: "badgeIds", kind: "message", T: UintRange, repeated: true },
+    { no: 5, name: "overrideWithCurrentTime", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 6, name: "mustSatisfyForAllAssets", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MustOwnBadges {
+    return new MustOwnBadges().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MustOwnBadges {
+    return new MustOwnBadges().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MustOwnBadges {
+    return new MustOwnBadges().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MustOwnBadges | PlainMessage<MustOwnBadges> | undefined, b: MustOwnBadges | PlainMessage<MustOwnBadges> | undefined): boolean {
+    return proto3.util.equals(MustOwnBadges, a, b);
+  }
+}
+
+/**
  * ApprovalCriteria defines the criteria for approving transfers.
  *
  * @generated from message badges.ApprovalCriteria
@@ -1247,6 +1337,20 @@ export class ApprovalCriteria extends Message<ApprovalCriteria> {
    */
   autoDeletionOptions?: AutoDeletionOptions;
 
+  /**
+   * User level royalties to apply to the transfer.
+   *
+   * @generated from field: badges.UserRoyalties userRoyalties = 13;
+   */
+  userRoyalties?: UserRoyalties;
+
+  /**
+   * Must own badges for approval.
+   *
+   * @generated from field: repeated badges.MustOwnBadges mustOwnBadges = 14;
+   */
+  mustOwnBadges: MustOwnBadges[] = [];
+
   constructor(data?: PartialMessage<ApprovalCriteria>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1267,6 +1371,8 @@ export class ApprovalCriteria extends Message<ApprovalCriteria> {
     { no: 10, name: "overridesFromOutgoingApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 11, name: "overridesToIncomingApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 12, name: "autoDeletionOptions", kind: "message", T: AutoDeletionOptions },
+    { no: 13, name: "userRoyalties", kind: "message", T: UserRoyalties },
+    { no: 14, name: "mustOwnBadges", kind: "message", T: MustOwnBadges, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ApprovalCriteria {
@@ -1283,6 +1389,55 @@ export class ApprovalCriteria extends Message<ApprovalCriteria> {
 
   static equals(a: ApprovalCriteria | PlainMessage<ApprovalCriteria> | undefined, b: ApprovalCriteria | PlainMessage<ApprovalCriteria> | undefined): boolean {
     return proto3.util.equals(ApprovalCriteria, a, b);
+  }
+}
+
+/**
+ * UserRoyalties defines the royalties for a user.
+ *
+ * @generated from message badges.UserRoyalties
+ */
+export class UserRoyalties extends Message<UserRoyalties> {
+  /**
+   * Percentage of the transfer amount to apply as royalties. 1 to 10000 represents basis points.
+   *
+   * @generated from field: string percentage = 1;
+   */
+  percentage = "";
+
+  /**
+   * Payout address for the royalties.
+   *
+   * @generated from field: string payoutAddress = 2;
+   */
+  payoutAddress = "";
+
+  constructor(data?: PartialMessage<UserRoyalties>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.UserRoyalties";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "percentage", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "payoutAddress", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UserRoyalties {
+    return new UserRoyalties().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UserRoyalties {
+    return new UserRoyalties().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UserRoyalties {
+    return new UserRoyalties().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: UserRoyalties | PlainMessage<UserRoyalties> | undefined, b: UserRoyalties | PlainMessage<UserRoyalties> | undefined): boolean {
+    return proto3.util.equals(UserRoyalties, a, b);
   }
 }
 
@@ -1348,6 +1503,13 @@ export class OutgoingApprovalCriteria extends Message<OutgoingApprovalCriteria> 
    */
   autoDeletionOptions?: AutoDeletionOptions;
 
+  /**
+   * Must own badges for approval.
+   *
+   * @generated from field: repeated badges.MustOwnBadges mustOwnBadges = 9;
+   */
+  mustOwnBadges: MustOwnBadges[] = [];
+
   constructor(data?: PartialMessage<OutgoingApprovalCriteria>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1364,6 +1526,7 @@ export class OutgoingApprovalCriteria extends Message<OutgoingApprovalCriteria> 
     { no: 6, name: "requireToEqualsInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 7, name: "requireToDoesNotEqualInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 8, name: "autoDeletionOptions", kind: "message", T: AutoDeletionOptions },
+    { no: 9, name: "mustOwnBadges", kind: "message", T: MustOwnBadges, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): OutgoingApprovalCriteria {
@@ -1445,6 +1608,13 @@ export class IncomingApprovalCriteria extends Message<IncomingApprovalCriteria> 
    */
   autoDeletionOptions?: AutoDeletionOptions;
 
+  /**
+   * Must own badges for approval.
+   *
+   * @generated from field: repeated badges.MustOwnBadges mustOwnBadges = 9;
+   */
+  mustOwnBadges: MustOwnBadges[] = [];
+
   constructor(data?: PartialMessage<IncomingApprovalCriteria>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1461,6 +1631,7 @@ export class IncomingApprovalCriteria extends Message<IncomingApprovalCriteria> 
     { no: 6, name: "requireFromEqualsInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 7, name: "requireFromDoesNotEqualInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 8, name: "autoDeletionOptions", kind: "message", T: AutoDeletionOptions },
+    { no: 9, name: "mustOwnBadges", kind: "message", T: MustOwnBadges, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): IncomingApprovalCriteria {

@@ -1,3 +1,4 @@
+import { getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
 import type { BitBadgesAddress, iUpdateHistory, UNIXMilliTimestamp } from '@/api-indexer/docs/interfaces.js';
 import { BadgeMetadataDetails, CollectionMetadataDetails } from '@/api-indexer/metadata/badgeMetadata.js';
 import {
@@ -26,6 +27,7 @@ import type {
   iMerkleChallenge,
   iMerklePathItem,
   iMerkleProof,
+  iMustOwnBadge,
   iMustOwnBadges,
   iOffChainBalancesMetadata,
   iOffChainBalancesMetadataTimeline,
@@ -40,7 +42,6 @@ import { GetFirstMatchOnly, getOverlapsAndNonOverlaps } from './overlaps.js';
 import { TimedUpdatePermission, TimedUpdateWithBadgeIdsPermission } from './permissions.js';
 import { UintRange, UintRangeArray } from './uintRanges.js';
 import { AllDefaultValues, getPotentialUpdatesForTimelineValues, getUpdateCombinationsToCheck } from './validate-utils.js';
-import { convertToBitBadgesAddress, getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
 
 /**
  * BadgeMetadata is used to represent the metadata for a range of badge IDs.
@@ -195,49 +196,6 @@ export class OffChainBalancesMetadata extends CustomTypeClass<OffChainBalancesMe
       uri: item.uri,
       customData: item.customData
     });
-  }
-}
-
-/**
- * MustOwnBadges are used to represent a challenge for an approved transfer where a user
- * must own min-max (amountRange) of the badges (badgeIds) from a specific collection (collectionId)
- * to be able to transfer the badges and be approved.
- *
- * @category Approvals / Transferability
- */
-export class MustOwnBadges<T extends NumberType> extends BaseNumberTypeClass<MustOwnBadges<T>> implements iMustOwnBadges<T> {
-  collectionId: CollectionId;
-  amountRange: UintRange<T>;
-  ownershipTimes: UintRangeArray<T>;
-  badgeIds: UintRangeArray<T>;
-  overrideWithCurrentTime: boolean;
-  mustSatisfyForAllAssets: boolean;
-
-  constructor(mustOwn: iMustOwnBadges<T>) {
-    super();
-    this.collectionId = mustOwn.collectionId;
-    this.amountRange = new UintRange(mustOwn.amountRange);
-    this.ownershipTimes = UintRangeArray.From(mustOwn.ownershipTimes);
-    this.badgeIds = UintRangeArray.From(mustOwn.badgeIds);
-    this.overrideWithCurrentTime = mustOwn.overrideWithCurrentTime;
-    this.mustSatisfyForAllAssets = mustOwn.mustSatisfyForAllAssets;
-  }
-
-  getNumberFieldNames(): string[] {
-    return [];
-  }
-
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MustOwnBadges<U> {
-    return new MustOwnBadges<U>(
-      deepCopyPrimitives({
-        collectionId: this.collectionId,
-        amountRange: this.amountRange.convert(convertFunction),
-        ownershipTimes: this.ownershipTimes.map((b) => b.convert(convertFunction)),
-        badgeIds: this.badgeIds.map((b) => b.convert(convertFunction)),
-        overrideWithCurrentTime: this.overrideWithCurrentTime,
-        mustSatisfyForAllAssets: this.mustSatisfyForAllAssets
-      })
-    );
   }
 }
 
@@ -414,6 +372,71 @@ export class AmountTrackerIdDetails<T extends NumberType>
         approvalId: this.approvalId
       })
     );
+  }
+}
+
+/**
+ * MustOwnBadge is used to represent a must own badge for an approval.
+ *
+ * @category Approvals / Transferability
+ */
+export class MustOwnBadges<T extends NumberType> extends BaseNumberTypeClass<MustOwnBadges<T>> implements iMustOwnBadges<T> {
+  amountRange: UintRange<T>;
+  badgeIds: UintRangeArray<T>;
+  overrideWithCurrentTime: boolean;
+  mustSatisfyForAllAssets: boolean;
+  ownershipTimes: UintRangeArray<T>;
+
+  collectionId: string;
+  constructor(mustOwnBadge: iMustOwnBadge<T>) {
+    super();
+    this.amountRange = new UintRange<T>(mustOwnBadge.amountRange);
+    this.badgeIds = UintRangeArray.From(mustOwnBadge.badgeIds);
+    this.overrideWithCurrentTime = mustOwnBadge.overrideWithCurrentTime;
+    this.mustSatisfyForAllAssets = mustOwnBadge.mustSatisfyForAllAssets;
+    this.ownershipTimes = UintRangeArray.From(mustOwnBadge.ownershipTimes);
+    this.collectionId = mustOwnBadge.collectionId;
+  }
+
+  getNumberFieldNames(): string[] {
+    return [];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MustOwnBadges<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MustOwnBadges<U>;
+  }
+
+  toProto(): badges.MustOwnBadges {
+    return new badges.MustOwnBadges(this.convert(Stringify));
+  }
+
+  static fromJson<U extends NumberType>(
+    jsonValue: JsonValue,
+    convertFunction: (item: NumberType) => U,
+    options?: Partial<JsonReadOptions>
+  ): MustOwnBadges<U> {
+    return MustOwnBadges.fromProto(badges.MustOwnBadges.fromJson(jsonValue, options), convertFunction);
+  }
+
+  static fromJsonString<U extends NumberType>(
+    jsonString: string,
+    convertFunction: (item: NumberType) => U,
+    options?: Partial<JsonReadOptions>
+  ): MustOwnBadges<U> {
+    return MustOwnBadges.fromProto(badges.MustOwnBadges.fromJsonString(jsonString, options), convertFunction);
+  }
+
+  static fromProto<U extends NumberType>(item: badges.MustOwnBadges, convertFunction: (item: NumberType) => U): MustOwnBadges<U> {
+    return new MustOwnBadges<U>({
+      amountRange: item.amountRange
+        ? new UintRange(item.amountRange).convert(convertFunction)
+        : new UintRange({ start: 0n, end: 0n }).convert(convertFunction),
+      badgeIds: item.badgeIds ? UintRangeArray.From(item.badgeIds).convert(convertFunction) : new UintRangeArray<U>(),
+      overrideWithCurrentTime: item.overrideWithCurrentTime,
+      mustSatisfyForAllAssets: item.mustSatisfyForAllAssets,
+      ownershipTimes: item.ownershipTimes ? UintRangeArray.From(item.ownershipTimes).convert(convertFunction) : new UintRangeArray<U>(),
+      collectionId: item.collectionId
+    });
   }
 }
 

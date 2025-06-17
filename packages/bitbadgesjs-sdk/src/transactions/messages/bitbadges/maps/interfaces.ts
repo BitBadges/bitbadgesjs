@@ -22,7 +22,7 @@ export interface iValueStore {
  */
 export interface iMapUpdateCriteria<T extends NumberType> {
   managerOnly: boolean;
-  collectionId: T;
+  collectionId: string;
   creatorOnly: boolean;
   firstComeFirstServe: boolean;
 }
@@ -159,7 +159,7 @@ export class ValueStore extends CustomTypeClass<ValueStore> implements iValueSto
  */
 export class MapUpdateCriteria<T extends NumberType> extends BaseNumberTypeClass<MapUpdateCriteria<T>> implements iMapUpdateCriteria<T> {
   managerOnly: boolean;
-  collectionId: T;
+  collectionId: string;
   creatorOnly: boolean;
   firstComeFirstServe: boolean;
 

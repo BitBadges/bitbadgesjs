@@ -185,6 +185,10 @@ export const isSubscriptionFaucetApproval = (approval: iCollectionApproval<bigin
     return false;
   }
 
+  if (approvalCriteria.mustOwnBadges?.length) {
+    return false;
+  }
+
   return true;
 };
 
@@ -292,6 +296,10 @@ export const isUserRecurringApproval = (approval: iUserIncomingApproval<bigint>,
   }
 
   if (approvalCriteria.merkleChallenges?.length) {
+    return false;
+  }
+
+  if (approvalCriteria.mustOwnBadges?.length) {
     return false;
   }
 

@@ -47,6 +47,7 @@ import {
   MsgUniversalUpdateCollection,
   MsgUpdateCollection,
   MsgUpdateUserApprovals,
+  MustOwnBadges,
   OffChainBalancesMetadata,
   OffChainBalancesMetadataTimeline,
   OutgoingApprovalCriteria,
@@ -65,7 +66,8 @@ import {
   UserIncomingApprovalPermission,
   UserOutgoingApproval,
   UserOutgoingApprovalPermission,
-  UserPermissions
+  UserPermissions,
+  UserRoyalties
 } from '@/proto/badges/index.js';
 import { MapPermissions, MapUpdateCriteria, MsgCreateMap, MsgDeleteMap, MsgSetValue, MsgUpdateMap, ValueOptions } from '@/proto/maps/tx_pb.js';
 import { MsgCreateProtocol, MsgDeleteProtocol, MsgSetCollectionForProtocol, MsgUpdateProtocol } from '@/proto/protocols/tx_pb.js';
@@ -84,10 +86,18 @@ const approvalCriteria = new OutgoingApprovalCriteria({
       overrideToWithInitiator: false
     })
   ],
+
   merkleChallenges: [
     new MerkleChallenge({
       expectedProofLength: '0',
       maxUsesPerLeaf: '0'
+    })
+  ],
+  mustOwnBadges: [
+    new MustOwnBadges({
+      badgeIds: [new UintRange()],
+      amountRange: new UintRange(),
+      ownershipTimes: [new UintRange()]
     })
   ],
   predeterminedBalances: new PredeterminedBalances({
@@ -190,6 +200,17 @@ function populateMerkleChallenges(merkleChallenges?: MerkleChallenge[]) {
   );
 }
 
+function populateMustOwnBadges(mustOwnBadges?: MustOwnBadges[]) {
+  return (
+    mustOwnBadges?.map((mustOwnBadge) => {
+      mustOwnBadge.badgeIds = mustOwnBadge.badgeIds || [new UintRange()];
+      mustOwnBadge.amountRange = mustOwnBadge.amountRange || new UintRange();
+      mustOwnBadge.ownershipTimes = mustOwnBadge.ownershipTimes || [new UintRange()];
+      return mustOwnBadge;
+    }) || []
+  );
+}
+
 function populatePredeterminedBalances(predeterminedBalances?: PredeterminedBalances) {
   if (!predeterminedBalances) {
     return new PredeterminedBalances({
@@ -264,6 +285,25 @@ function populateApprovalAmounts(approvalAmounts?: ApprovalAmounts) {
   return approvalAmounts;
 }
 
+function populateUserRoyalties(userRoyalties?: UserRoyalties) {
+  if (!userRoyalties) {
+    return new UserRoyalties({
+      percentage: '0',
+      payoutAddress: ''
+    });
+  }
+
+  if (!userRoyalties.percentage) {
+    userRoyalties.percentage = '0';
+  }
+
+  if (!userRoyalties.payoutAddress) {
+    userRoyalties.payoutAddress = '';
+  }
+
+  return userRoyalties;
+}
+
 function populateAutoDeletionOptions(autoDeletionOptions?: AutoDeletionOptions) {
   if (!autoDeletionOptions) {
     return new AutoDeletionOptions({});
@@ -318,6 +358,7 @@ export function populateUndefinedForMsgUpdateUserApprovals(msg: MsgUpdateUserApp
     approval.approvalCriteria.approvalAmounts = populateApprovalAmounts(approval.approvalCriteria.approvalAmounts);
     approval.approvalCriteria.maxNumTransfers = populateMaxNumTransfers(approval.approvalCriteria.maxNumTransfers);
     approval.approvalCriteria.autoDeletionOptions = populateAutoDeletionOptions(approval.approvalCriteria.autoDeletionOptions);
+    approval.approvalCriteria.mustOwnBadges = populateMustOwnBadges(approval.approvalCriteria.mustOwnBadges);
   }
   for (const approval of msg.incomingApprovals) {
     if (!approval.approvalCriteria) {
@@ -328,6 +369,7 @@ export function populateUndefinedForMsgUpdateUserApprovals(msg: MsgUpdateUserApp
     approval.approvalCriteria.approvalAmounts = populateApprovalAmounts(approval.approvalCriteria.approvalAmounts);
     approval.approvalCriteria.maxNumTransfers = populateMaxNumTransfers(approval.approvalCriteria.maxNumTransfers);
     approval.approvalCriteria.autoDeletionOptions = populateAutoDeletionOptions(approval.approvalCriteria.autoDeletionOptions);
+    approval.approvalCriteria.mustOwnBadges = populateMustOwnBadges(approval.approvalCriteria.mustOwnBadges);
   }
   return msg;
 }
@@ -400,6 +442,7 @@ export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUnivers
       approval.approvalCriteria.approvalAmounts = populateApprovalAmounts(approval.approvalCriteria.approvalAmounts);
       approval.approvalCriteria.maxNumTransfers = populateMaxNumTransfers(approval.approvalCriteria.maxNumTransfers);
       approval.approvalCriteria.autoDeletionOptions = populateAutoDeletionOptions(approval.approvalCriteria.autoDeletionOptions);
+      approval.approvalCriteria.mustOwnBadges = populateMustOwnBadges(approval.approvalCriteria.mustOwnBadges);
     }
   }
   for (const approval of msg.defaultBalances.incomingApprovals) {
@@ -411,6 +454,7 @@ export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUnivers
     approval.approvalCriteria.approvalAmounts = populateApprovalAmounts(approval.approvalCriteria.approvalAmounts);
     approval.approvalCriteria.maxNumTransfers = populateMaxNumTransfers(approval.approvalCriteria.maxNumTransfers);
     approval.approvalCriteria.autoDeletionOptions = populateAutoDeletionOptions(approval.approvalCriteria.autoDeletionOptions);
+    approval.approvalCriteria.mustOwnBadges = populateMustOwnBadges(approval.approvalCriteria.mustOwnBadges);
   }
 
   for (const approval of msg.collectionApprovals) {
@@ -422,6 +466,8 @@ export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUnivers
     approval.approvalCriteria.approvalAmounts = populateApprovalAmounts(approval.approvalCriteria.approvalAmounts);
     approval.approvalCriteria.maxNumTransfers = populateMaxNumTransfers(approval.approvalCriteria.maxNumTransfers);
     approval.approvalCriteria.autoDeletionOptions = populateAutoDeletionOptions(approval.approvalCriteria.autoDeletionOptions);
+    approval.approvalCriteria.mustOwnBadges = populateMustOwnBadges(approval.approvalCriteria.mustOwnBadges);
+    approval.approvalCriteria.userRoyalties = populateUserRoyalties(approval.approvalCriteria.userRoyalties);
   }
 
   for (const metadata of msg.collectionMetadataTimeline) {

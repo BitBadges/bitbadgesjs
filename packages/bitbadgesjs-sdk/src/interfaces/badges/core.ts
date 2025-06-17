@@ -4,6 +4,7 @@ import type { iAttestationDoc, iPrecalculationOptions } from '@/api-indexer/docs
 import type { BitBadgesAddress, UNIXMilliTimestamp, iBadgeMetadataDetails, iCollectionMetadataDetails } from '@/api-indexer/index.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import type { iCosmosCoin } from '@/core/coin.js';
+import { UintRange } from '@/proto/badges/balances_pb';
 
 /**
  * @category Interfaces
@@ -420,6 +421,41 @@ export interface iAmountTrackerIdDetails<T extends NumberType> {
    * The address to check for the approval.
    */
   approvedAddress: BitBadgesAddress;
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iMustOwnBadge<T extends NumberType> {
+  /**
+   * The ID of the badge collection.
+   */
+  collectionId: CollectionId;
+
+  /**
+   * The range of badge amounts the user must own (min to max).
+   */
+  amountRange: iUintRange<T>;
+
+  /**
+   * The time ranges during which the user must own the badges.
+   */
+  ownershipTimes: iUintRange<T>[];
+
+  /**
+   * The badge IDs the user must own.
+   */
+  badgeIds: iUintRange<T>[];
+
+  /**
+   * If true, override ownershipTimes with the current time.
+   */
+  overrideWithCurrentTime: boolean;
+
+  /**
+   * If true, the user must meet ownership requirements for all specified badges; else, must meet requirements for any single badge.
+   */
+  mustSatisfyForAllAssets: boolean;
 }
 
 /**
