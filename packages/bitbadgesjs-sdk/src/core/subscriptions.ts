@@ -54,7 +54,7 @@ export const doesCollectionFollowSubscriptionProtocol = (collection?: Readonly<i
   }
 
   const subscriptionApprovals = collection.collectionApprovals.filter((approval) => isSubscriptionFaucetApproval(approval));
-  if (subscriptionApprovals.length !== 1) {
+  if (subscriptionApprovals.length < 1) {
     return false;
   }
 
@@ -77,13 +77,32 @@ export const doesCollectionFollowSubscriptionProtocol = (collection?: Readonly<i
   }
 
   // Assert valid badge IDs are only 1n-1n
-  const badgeIds = UintRangeArray.From(collection.validBadgeIds).sortAndMerge().convert(BigInt);
-  if (badgeIds.length !== 1 || badgeIds.size() !== 1n) {
+  const allSubscriptionBadgeIds = [];
+  for (const approval of subscriptionApprovals) {
+    const badgeIds = UintRangeArray.From(approval.badgeIds).sortAndMerge().convert(BigInt);
+    allSubscriptionBadgeIds.push(...badgeIds);
+  }
+  const allSubscriptionBadgeIdsSorted = UintRangeArray.From(allSubscriptionBadgeIds).sortAndMerge().convert(BigInt);
+
+  if (allSubscriptionBadgeIdsSorted.length !== 1) {
     return false;
   }
 
-  if (badgeIds[0].start !== 1n || badgeIds[0].end !== 1n) {
+  if (collection.validBadgeIds.length !== 1) {
     return false;
+  }
+
+  if (collection.validBadgeIds.length !== allSubscriptionBadgeIdsSorted.length) {
+    return false;
+  }
+
+  for (let i = 0; i < collection.validBadgeIds.length; i++) {
+    if (
+      collection.validBadgeIds[i].start !== allSubscriptionBadgeIdsSorted[i].start ||
+      collection.validBadgeIds[i].end !== allSubscriptionBadgeIdsSorted[i].end
+    ) {
+      return false;
+    }
   }
 
   return true;
@@ -126,12 +145,13 @@ export const isSubscriptionFaucetApproval = (approval: iCollectionApproval<bigin
     return false;
   }
 
-  const allBadgeIds = UintRangeArray.From(incrementedBalances.startBalances[0].badgeIds).sortAndMerge().convert(BigInt);
-  if (allBadgeIds.length !== 1 || allBadgeIds.size() !== 1n) {
+  const approvalBadgeIds = approval.badgeIds;
+  if (approvalBadgeIds.length !== 1 || UintRangeArray.From(approvalBadgeIds).sortAndMerge().convert(BigInt).size() !== 1n) {
     return false;
   }
 
-  if (allBadgeIds[0].start !== 1n || allBadgeIds[0].end !== 1n) {
+  const allBadgeIds = UintRangeArray.From(incrementedBalances.startBalances[0].badgeIds).sortAndMerge().convert(BigInt);
+  if (allBadgeIds.length !== 1 || allBadgeIds.size() !== 1n) {
     return false;
   }
 
@@ -202,11 +222,25 @@ export const isUserRecurringApproval = (approval: iUserIncomingApproval<bigint>,
   const subscriptionAmount = subscriptionApproval.approvalCriteria?.coinTransfers?.[0]?.coins?.[0]?.amount ?? 0n;
   const approvalAmount = approval.approvalCriteria?.coinTransfers?.[0]?.coins?.[0]?.amount ?? 0n;
 
+  //Ensure badge IDs match
+  const approvalBadgeIds = UintRangeArray.From(approval.badgeIds).sortAndMerge().convert(BigInt);
+  const subscriptionBadgeIds = UintRangeArray.From(subscriptionApproval.badgeIds).sortAndMerge().convert(BigInt);
+
+  if (approvalBadgeIds.length !== subscriptionBadgeIds.length) {
+    return false;
+  }
+
+  for (let i = 0; i < approvalBadgeIds.length; i++) {
+    if (approvalBadgeIds[i].start !== subscriptionBadgeIds[i].start || approvalBadgeIds[i].end !== subscriptionBadgeIds[i].end) {
+      return false;
+    }
+  }
+
   if (approvalAmount < subscriptionAmount) {
     return false;
   }
 
-  if (approval.badgeIds.length !== 1 || approval.badgeIds[0].start !== 1n || approval.badgeIds[0].end !== 1n) {
+  if (approval.badgeIds.length !== 1 || UintRangeArray.From(approval.badgeIds).sortAndMerge().convert(BigInt).size() !== 1n) {
     return false;
   }
 
@@ -243,8 +277,7 @@ export const isUserRecurringApproval = (approval: iUserIncomingApproval<bigint>,
 
   if (
     incrementedBalances.startBalances[0].badgeIds.length !== 1 ||
-    incrementedBalances.startBalances[0].badgeIds[0].start !== 1n ||
-    incrementedBalances.startBalances[0].badgeIds[0].end !== 1n
+    UintRangeArray.From(incrementedBalances.startBalances[0].badgeIds).sortAndMerge().convert(BigInt).size() !== 1n
   ) {
     return false;
   }
