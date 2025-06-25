@@ -30,6 +30,7 @@ import {
   CollectionMetadata,
   CollectionMetadataTimeline,
   CollectionPermissions,
+  CosmosCoinWrapperPathAddObject,
   CustomDataTimeline,
   IncomingApprovalCriteria,
   IncrementedBalances,
@@ -693,6 +694,13 @@ const universalParams = {
     new CosmosCoin({
       amount: '0',
       denom: 'ubadge'
+    })
+  ],
+  cosmosCoinWrapperPathsToAdd: [
+    new CosmosCoinWrapperPathAddObject({
+      denom: 'ibc:1234567890',
+      badgeIds: [new UintRange()],
+      ownershipTimes: [new UintRange()]
     })
   ]
 };

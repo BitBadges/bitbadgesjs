@@ -12,3 +12,4 @@ export * as solana from './solana/index.js';
 export * as tendermint from './tendermint/index.js';
 export * as wasmx from './wasmx/index.js';
 export * as maps from './maps/index.js';
+export * as ibc from './ibc/index.js';

@@ -509,6 +509,18 @@ export interface iCollectionDoc<T extends NumberType> extends Doc {
   validBadgeIds: iUintRange<T>[];
   /** Mint escrow address */
   mintEscrowAddress: string;
+  /** The IBC wrapper paths for the collection */
+  cosmosCoinWrapperPaths: iCosmosCoinWrapperPath<T>[];
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iCosmosCoinWrapperPath<T extends NumberType> {
+  address: string;
+  denom: string;
+  ownershipTimes: iUintRange<T>[];
+  badgeIds: iUintRange<T>[];
 }
 
 /**

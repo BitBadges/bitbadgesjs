@@ -461,6 +461,7 @@ function createTxBroadcastBodyEthereum(context: LegacyTxContext, messages: Messa
     const base64PubKey = Buffer.from(compressedPublicKey).toString('base64');
     publicKey = base64PubKey;
   }
+
   context.sender.pubkey = publicKey;
 
   return generatePostBodyBroadcast(createTxRawEthereum(context, createTransactionPayloadFromTxContext(context, messages), signature));

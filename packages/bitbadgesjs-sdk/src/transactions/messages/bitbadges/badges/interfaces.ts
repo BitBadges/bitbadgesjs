@@ -6,7 +6,9 @@ import type {
   CollectionId,
   iAddressList,
   iBadgeMetadataTimeline,
+  iBalance,
   iCollectionMetadataTimeline,
+  iCosmosCoinWrapperPathAddObject,
   iCustomDataTimeline,
   iIsArchivedTimeline,
   iManagerTimeline,
@@ -26,8 +28,6 @@ export interface iMsgCreateAddressLists {
   creator: BitBadgesAddress;
   /** The address lists to create. */
   addressLists: iAddressList[];
-  /** Creator override. Internal only. Only used for CosmWasm purposes. */
-  creatorOverride: BitBadgesAddress;
 }
 
 /**
@@ -73,11 +73,11 @@ export interface iMsgCreateCollection<T extends NumberType> {
   /** The new is archived timeline. Must have the necessary permissions in future transactions to update. However, no restrictions in this genesis Msg. */
   isArchivedTimeline?: iIsArchivedTimeline<T>[];
 
-  /** Creator override. Internal only. Only used for CosmWasm purposes. */
-  creatorOverride: BitBadgesAddress;
-
   /** The coins to mint to the transfer address. Only used if collection has "Non-Public" balance type. */
   mintEscrowCoinsToTransfer?: iCosmosCoin<T>[];
+
+  /** The IBC wrapper paths to add. */
+  cosmosCoinWrapperPathsToAdd?: iCosmosCoinWrapperPathAddObject<T>[];
 }
 
 /**
@@ -88,9 +88,6 @@ export interface iMsgDeleteCollection<T extends NumberType> {
   creator: BitBadgesAddress;
   /** The ID of the collection to delete. */
   collectionId: CollectionId;
-
-  /** Creator override. Internal only. Only used for CosmWasm purposes. */
-  creatorOverride: BitBadgesAddress;
 }
 
 /**
@@ -103,9 +100,6 @@ export interface iMsgTransferBadges<T extends NumberType> {
   collectionId: CollectionId;
   /** The transfers to perform. */
   transfers: iTransfer<T>[];
-
-  /** Creator override. Internal only. Only used for CosmWasm purposes. */
-  creatorOverride: BitBadgesAddress;
 }
 
 /**
@@ -173,7 +167,4 @@ export interface iMsgUpdateUserApprovals<T extends NumberType> {
   updateUserPermissions?: boolean;
   /** The new user permissions. Must have the necessary permissions to update. */
   userPermissions?: iUserPermissions<T>;
-
-  /** Creator override. Internal only. Only used for CosmWasm purposes. */
-  creatorOverride: BitBadgesAddress;
 }

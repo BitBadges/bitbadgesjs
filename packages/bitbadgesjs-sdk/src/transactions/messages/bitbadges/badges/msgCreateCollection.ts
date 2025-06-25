@@ -21,6 +21,7 @@ import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 import type { iMsgCreateCollection } from './interfaces.js';
 import { normalizeMessagesIfNecessary } from '../../base.js';
 import { CosmosCoin } from '@/core/coin.js';
+import { CosmosCoinWrapperPathAddObject } from '@/core/ibc-wrappers.js';
 
 /**
  * MsgCreateCollection is a transaction that can be used to create a collection.
@@ -44,8 +45,8 @@ export class MsgCreateCollection<T extends NumberType> extends BaseNumberTypeCla
   collectionApprovals?: CollectionApproval<T>[];
   standardsTimeline?: StandardsTimeline<T>[];
   isArchivedTimeline?: IsArchivedTimeline<T>[];
-  creatorOverride: BitBadgesAddress;
   mintEscrowCoinsToTransfer?: CosmosCoin<T>[];
+  cosmosCoinWrapperPathsToAdd?: CosmosCoinWrapperPathAddObject<T>[];
 
   constructor(msg: iMsgCreateCollection<T>) {
     super();
@@ -62,7 +63,6 @@ export class MsgCreateCollection<T extends NumberType> extends BaseNumberTypeCla
     this.collectionApprovals = msg.collectionApprovals?.map((x) => new CollectionApproval(x));
     this.standardsTimeline = msg.standardsTimeline?.map((x) => new StandardsTimeline(x));
     this.isArchivedTimeline = msg.isArchivedTimeline?.map((x) => new IsArchivedTimeline(x));
-    this.creatorOverride = msg.creatorOverride;
     this.mintEscrowCoinsToTransfer = msg.mintEscrowCoinsToTransfer ? msg.mintEscrowCoinsToTransfer.map((x) => new CosmosCoin(x)) : undefined;
   }
 
@@ -109,8 +109,8 @@ export class MsgCreateCollection<T extends NumberType> extends BaseNumberTypeCla
       collectionApprovals: protoMsg.collectionApprovals?.map((x) => CollectionApproval.fromProto(x, convertFunction)),
       standardsTimeline: protoMsg.standardsTimeline?.map((x) => StandardsTimeline.fromProto(x, convertFunction)),
       isArchivedTimeline: protoMsg.isArchivedTimeline?.map((x) => IsArchivedTimeline.fromProto(x, convertFunction)),
-      creatorOverride: protoMsg.creatorOverride,
-      mintEscrowCoinsToTransfer: protoMsg.mintEscrowCoinsToTransfer?.map((x) => CosmosCoin.fromProto(x, convertFunction))
+      mintEscrowCoinsToTransfer: protoMsg.mintEscrowCoinsToTransfer?.map((x) => CosmosCoin.fromProto(x, convertFunction)),
+      cosmosCoinWrapperPathsToAdd: protoMsg.cosmosCoinWrapperPathsToAdd?.map((x) => CosmosCoinWrapperPathAddObject.fromProto(x, convertFunction))
     });
   }
 
@@ -121,8 +121,7 @@ export class MsgCreateCollection<T extends NumberType> extends BaseNumberTypeCla
       defaultBalances: this.defaultBalances?.toBech32Addresses(prefix),
       collectionPermissions: this.collectionPermissions?.toBech32Addresses(prefix),
       managerTimeline: this.managerTimeline?.map((x) => x.toBech32Addresses(prefix)),
-      collectionApprovals: this.collectionApprovals?.map((x) => x.toBech32Addresses(prefix)),
-      creatorOverride: getConvertFunctionFromPrefix(prefix)(this.creatorOverride)
+      collectionApprovals: this.collectionApprovals?.map((x) => x.toBech32Addresses(prefix))
     });
   }
 

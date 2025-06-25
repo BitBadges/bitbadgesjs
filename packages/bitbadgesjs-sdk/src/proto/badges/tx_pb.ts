@@ -6,8 +6,8 @@
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
 import { Message, proto3 } from "@bufbuild/protobuf";
 import { Params } from "./params_pb.js";
-import { CollectionApproval, Transfer, UserBalanceStore, UserIncomingApproval, UserOutgoingApproval } from "./transfers_pb.js";
 import { UintRange } from "./balances_pb.js";
+import { CollectionApproval, Transfer, UserBalanceStore, UserIncomingApproval, UserOutgoingApproval } from "./transfers_pb.js";
 import { CollectionPermissions, UserPermissions } from "./permissions_pb.js";
 import { BadgeMetadataTimeline, CollectionMetadataTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadataTimeline, StandardsTimeline } from "./timelines_pb.js";
 import { Coin } from "../cosmos/base/v1beta1/coin_pb.js";
@@ -99,77 +99,51 @@ export class MsgUpdateParamsResponse extends Message<MsgUpdateParamsResponse> {
 }
 
 /**
- * Used for WASM bindings and JSON parsing
- *
- * @generated from message badges.BadgeCustomMsgType
+ * @generated from message badges.CosmosCoinWrapperPathAddObject
  */
-export class BadgeCustomMsgType extends Message<BadgeCustomMsgType> {
+export class CosmosCoinWrapperPathAddObject extends Message<CosmosCoinWrapperPathAddObject> {
   /**
-   * @generated from field: badges.MsgCreateAddressLists createAddressListsMsg = 1;
+   * @generated from field: string denom = 1;
    */
-  createAddressListsMsg?: MsgCreateAddressLists;
+  denom = "";
 
   /**
-   * @generated from field: badges.MsgUniversalUpdateCollection universalUpdateCollectionMsg = 2;
+   * @generated from field: repeated badges.UintRange ownershipTimes = 2;
    */
-  universalUpdateCollectionMsg?: MsgUniversalUpdateCollection;
+  ownershipTimes: UintRange[] = [];
 
   /**
-   * @generated from field: badges.MsgDeleteCollection deleteCollectionMsg = 3;
+   * @generated from field: repeated badges.UintRange badgeIds = 3;
    */
-  deleteCollectionMsg?: MsgDeleteCollection;
+  badgeIds: UintRange[] = [];
 
-  /**
-   * @generated from field: badges.MsgTransferBadges transferBadgesMsg = 4;
-   */
-  transferBadgesMsg?: MsgTransferBadges;
-
-  /**
-   * @generated from field: badges.MsgUpdateUserApprovals updateUserApprovalsMsg = 5;
-   */
-  updateUserApprovalsMsg?: MsgUpdateUserApprovals;
-
-  /**
-   * @generated from field: badges.MsgUpdateCollection updateCollectionMsg = 6;
-   */
-  updateCollectionMsg?: MsgUpdateCollection;
-
-  /**
-   * @generated from field: badges.MsgCreateCollection createCollectionMsg = 7;
-   */
-  createCollectionMsg?: MsgCreateCollection;
-
-  constructor(data?: PartialMessage<BadgeCustomMsgType>) {
+  constructor(data?: PartialMessage<CosmosCoinWrapperPathAddObject>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.BadgeCustomMsgType";
+  static readonly typeName = "badges.CosmosCoinWrapperPathAddObject";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "createAddressListsMsg", kind: "message", T: MsgCreateAddressLists },
-    { no: 2, name: "universalUpdateCollectionMsg", kind: "message", T: MsgUniversalUpdateCollection },
-    { no: 3, name: "deleteCollectionMsg", kind: "message", T: MsgDeleteCollection },
-    { no: 4, name: "transferBadgesMsg", kind: "message", T: MsgTransferBadges },
-    { no: 5, name: "updateUserApprovalsMsg", kind: "message", T: MsgUpdateUserApprovals },
-    { no: 6, name: "updateCollectionMsg", kind: "message", T: MsgUpdateCollection },
-    { no: 7, name: "createCollectionMsg", kind: "message", T: MsgCreateCollection },
+    { no: 1, name: "denom", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "ownershipTimes", kind: "message", T: UintRange, repeated: true },
+    { no: 3, name: "badgeIds", kind: "message", T: UintRange, repeated: true },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BadgeCustomMsgType {
-    return new BadgeCustomMsgType().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CosmosCoinWrapperPathAddObject {
+    return new CosmosCoinWrapperPathAddObject().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): BadgeCustomMsgType {
-    return new BadgeCustomMsgType().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CosmosCoinWrapperPathAddObject {
+    return new CosmosCoinWrapperPathAddObject().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): BadgeCustomMsgType {
-    return new BadgeCustomMsgType().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CosmosCoinWrapperPathAddObject {
+    return new CosmosCoinWrapperPathAddObject().fromJsonString(jsonString, options);
   }
 
-  static equals(a: BadgeCustomMsgType | PlainMessage<BadgeCustomMsgType> | undefined, b: BadgeCustomMsgType | PlainMessage<BadgeCustomMsgType> | undefined): boolean {
-    return proto3.util.equals(BadgeCustomMsgType, a, b);
+  static equals(a: CosmosCoinWrapperPathAddObject | PlainMessage<CosmosCoinWrapperPathAddObject> | undefined, b: CosmosCoinWrapperPathAddObject | PlainMessage<CosmosCoinWrapperPathAddObject> | undefined): boolean {
+    return proto3.util.equals(CosmosCoinWrapperPathAddObject, a, b);
   }
 }
 
@@ -350,19 +324,18 @@ export class MsgUniversalUpdateCollection extends Message<MsgUniversalUpdateColl
   isArchivedTimeline: IsArchivedTimeline[] = [];
 
   /**
-   * Address of the original creator. Used for CosmWASM purposes.
-   * IMPORTANT: We will override but we must trust the original creator address.
-   *
-   * @generated from field: string creatorOverride = 27;
-   */
-  creatorOverride = "";
-
-  /**
    * Coins to be transferred to the mint escrow address.
    *
-   * @generated from field: repeated cosmos.base.v1beta1.Coin mintEscrowCoinsToTransfer = 28;
+   * @generated from field: repeated cosmos.base.v1beta1.Coin mintEscrowCoinsToTransfer = 27;
    */
   mintEscrowCoinsToTransfer: Coin[] = [];
+
+  /**
+   * IBC wrapper paths to add.
+   *
+   * @generated from field: repeated badges.CosmosCoinWrapperPathAddObject cosmosCoinWrapperPathsToAdd = 28;
+   */
+  cosmosCoinWrapperPathsToAdd: CosmosCoinWrapperPathAddObject[] = [];
 
   constructor(data?: PartialMessage<MsgUniversalUpdateCollection>) {
     super();
@@ -396,8 +369,8 @@ export class MsgUniversalUpdateCollection extends Message<MsgUniversalUpdateColl
     { no: 24, name: "standardsTimeline", kind: "message", T: StandardsTimeline, repeated: true },
     { no: 25, name: "updateIsArchivedTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 26, name: "isArchivedTimeline", kind: "message", T: IsArchivedTimeline, repeated: true },
-    { no: 27, name: "creatorOverride", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 28, name: "mintEscrowCoinsToTransfer", kind: "message", T: Coin, repeated: true },
+    { no: 27, name: "mintEscrowCoinsToTransfer", kind: "message", T: Coin, repeated: true },
+    { no: 28, name: "cosmosCoinWrapperPathsToAdd", kind: "message", T: CosmosCoinWrapperPathAddObject, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUniversalUpdateCollection {
@@ -619,19 +592,18 @@ export class MsgUpdateCollection extends Message<MsgUpdateCollection> {
   isArchivedTimeline: IsArchivedTimeline[] = [];
 
   /**
-   * Address of the original creator. Used for CosmWASM purposes.
-   * IMPORTANT: We will override but we must trust the original creator address.
-   *
-   * @generated from field: string creatorOverride = 29;
-   */
-  creatorOverride = "";
-
-  /**
    * Coins to be transferred to the mint escrow address.
    *
-   * @generated from field: repeated cosmos.base.v1beta1.Coin mintEscrowCoinsToTransfer = 30;
+   * @generated from field: repeated cosmos.base.v1beta1.Coin mintEscrowCoinsToTransfer = 29;
    */
   mintEscrowCoinsToTransfer: Coin[] = [];
+
+  /**
+   * IBC wrapper paths to add.
+   *
+   * @generated from field: repeated badges.CosmosCoinWrapperPathAddObject cosmosCoinWrapperPathsToAdd = 30;
+   */
+  cosmosCoinWrapperPathsToAdd: CosmosCoinWrapperPathAddObject[] = [];
 
   constructor(data?: PartialMessage<MsgUpdateCollection>) {
     super();
@@ -663,8 +635,8 @@ export class MsgUpdateCollection extends Message<MsgUpdateCollection> {
     { no: 24, name: "standardsTimeline", kind: "message", T: StandardsTimeline, repeated: true },
     { no: 27, name: "updateIsArchivedTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 28, name: "isArchivedTimeline", kind: "message", T: IsArchivedTimeline, repeated: true },
-    { no: 29, name: "creatorOverride", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 30, name: "mintEscrowCoinsToTransfer", kind: "message", T: Coin, repeated: true },
+    { no: 29, name: "mintEscrowCoinsToTransfer", kind: "message", T: Coin, repeated: true },
+    { no: 30, name: "cosmosCoinWrapperPathsToAdd", kind: "message", T: CosmosCoinWrapperPathAddObject, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUpdateCollection {
@@ -823,19 +795,18 @@ export class MsgCreateCollection extends Message<MsgCreateCollection> {
   isArchivedTimeline: IsArchivedTimeline[] = [];
 
   /**
-   * Address of the original creator. Used for CosmWASM purposes.
-   * IMPORTANT: We will override but we must trust the original creator address.
-   *
-   * @generated from field: string creatorOverride = 15;
-   */
-  creatorOverride = "";
-
-  /**
    * Coins to be transferred to the mint escrow address.
    *
    * @generated from field: repeated cosmos.base.v1beta1.Coin mintEscrowCoinsToTransfer = 16;
    */
   mintEscrowCoinsToTransfer: Coin[] = [];
+
+  /**
+   * IBC wrapper paths to add.
+   *
+   * @generated from field: repeated badges.CosmosCoinWrapperPathAddObject cosmosCoinWrapperPathsToAdd = 17;
+   */
+  cosmosCoinWrapperPathsToAdd: CosmosCoinWrapperPathAddObject[] = [];
 
   constructor(data?: PartialMessage<MsgCreateCollection>) {
     super();
@@ -858,8 +829,8 @@ export class MsgCreateCollection extends Message<MsgCreateCollection> {
     { no: 12, name: "collectionApprovals", kind: "message", T: CollectionApproval, repeated: true },
     { no: 13, name: "standardsTimeline", kind: "message", T: StandardsTimeline, repeated: true },
     { no: 14, name: "isArchivedTimeline", kind: "message", T: IsArchivedTimeline, repeated: true },
-    { no: 15, name: "creatorOverride", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 16, name: "mintEscrowCoinsToTransfer", kind: "message", T: Coin, repeated: true },
+    { no: 17, name: "cosmosCoinWrapperPathsToAdd", kind: "message", T: CosmosCoinWrapperPathAddObject, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgCreateCollection {
@@ -940,14 +911,6 @@ export class MsgCreateAddressLists extends Message<MsgCreateAddressLists> {
    */
   addressLists: AddressList[] = [];
 
-  /**
-   * Address of the original creator. Used for CosmWASM purposes.
-   * IMPORTANT: We will override but we must trust the original creator address.
-   *
-   * @generated from field: string creatorOverride = 3;
-   */
-  creatorOverride = "";
-
   constructor(data?: PartialMessage<MsgCreateAddressLists>) {
     super();
     proto3.util.initPartial(data, this);
@@ -958,7 +921,6 @@ export class MsgCreateAddressLists extends Message<MsgCreateAddressLists> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "addressLists", kind: "message", T: AddressList, repeated: true },
-    { no: 3, name: "creatorOverride", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgCreateAddressLists {
@@ -1038,14 +1000,6 @@ export class MsgTransferBadges extends Message<MsgTransferBadges> {
    */
   transfers: Transfer[] = [];
 
-  /**
-   * Address of the original creator. Used for CosmWASM purposes.
-   * IMPORTANT: We will override but we must trust the original creator address.
-   *
-   * @generated from field: string creatorOverride = 4;
-   */
-  creatorOverride = "";
-
   constructor(data?: PartialMessage<MsgTransferBadges>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1057,7 +1011,6 @@ export class MsgTransferBadges extends Message<MsgTransferBadges> {
     { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "transfers", kind: "message", T: Transfer, repeated: true },
-    { no: 4, name: "creatorOverride", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgTransferBadges {
@@ -1130,14 +1083,6 @@ export class MsgDeleteCollection extends Message<MsgDeleteCollection> {
    */
   collectionId = "";
 
-  /**
-   * Address of the original creator. Used for CosmWASM purposes.
-   * IMPORTANT: We will override but we must trust the original creator address.
-   *
-   * @generated from field: string creatorOverride = 3;
-   */
-  creatorOverride = "";
-
   constructor(data?: PartialMessage<MsgDeleteCollection>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1148,7 +1093,6 @@ export class MsgDeleteCollection extends Message<MsgDeleteCollection> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "creatorOverride", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgDeleteCollection {
@@ -1305,14 +1249,6 @@ export class MsgUpdateUserApprovals extends Message<MsgUpdateUserApprovals> {
    */
   userPermissions?: UserPermissions;
 
-  /**
-   * Address of the original creator. Used for CosmWASM purposes.
-   * IMPORTANT: We will override but we must trust the original creator address.
-   *
-   * @generated from field: string creatorOverride = 15;
-   */
-  creatorOverride = "";
-
   constructor(data?: PartialMessage<MsgUpdateUserApprovals>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1335,7 +1271,6 @@ export class MsgUpdateUserApprovals extends Message<MsgUpdateUserApprovals> {
     { no: 12, name: "autoApproveAllIncomingTransfers", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 13, name: "updateUserPermissions", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 14, name: "userPermissions", kind: "message", T: UserPermissions },
-    { no: 15, name: "creatorOverride", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUpdateUserApprovals {

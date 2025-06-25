@@ -35,6 +35,8 @@ import { GenericAuthorization } from '@/proto/cosmos/authz/v1beta1/authz_pb.js';
 import { MsgExec, MsgGrant, MsgRevoke } from '@/proto/cosmos/authz/v1beta1/tx_pb.js';
 import { MsgCreateVestingAccount } from '@/proto/cosmos/vesting/v1beta1/index.js';
 
+import { MsgTransfer } from '@/proto/ibc/index.js';
+
 export interface EncodeObject {
   readonly typeUrl: string;
   readonly value: any;
@@ -64,7 +66,8 @@ export function createDefaultCosmosAminoConverters(): AminoConverters {
 
     ...createAminoConverter(GenericAuthorization, 'cosmos-sdk/GenericAuthorization'),
     ...createAminoConverter(SendAuthorization, 'cosmos-sdk/SendAuthorization'),
-    ...createAminoConverter(StakeAuthorization, 'cosmos-sdk/StakeAuthorization')
+    ...createAminoConverter(StakeAuthorization, 'cosmos-sdk/StakeAuthorization'),
+    ...createAminoConverter(MsgTransfer, 'ibc/MsgTransfer')
   };
 }
 
@@ -206,13 +209,20 @@ export function createAnchorAminoConverters(): AminoConverters {
   };
 }
 
+export function createIBCAminoConverters(): AminoConverters {
+  return {
+    ...createAminoConverter(MsgTransfer, 'ibc/MsgTransfer')
+  };
+}
+
 export function createDefaultAminoConverters() {
   return {
     ...createDefaultCosmosAminoConverters(),
     ...createBadgesAminoConverters(),
     ...createWasmXAminoConverters(),
     ...createAnchorAminoConverters(),
-    ...createMapsAminoConverters()
+    ...createMapsAminoConverters(),
+    ...createIBCAminoConverters()
   };
 }
 

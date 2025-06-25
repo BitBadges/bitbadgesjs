@@ -140,6 +140,13 @@ export class BadgeCollection extends Message<BadgeCollection> {
    */
   mintEscrowAddress = "";
 
+  /**
+   * The IBC wrapper paths for the collection.
+   *
+   * @generated from field: repeated badges.CosmosCoinWrapperPath cosmosCoinWrapperPaths = 17;
+   */
+  cosmosCoinWrapperPaths: CosmosCoinWrapperPath[] = [];
+
   constructor(data?: PartialMessage<BadgeCollection>) {
     super();
     proto3.util.initPartial(data, this);
@@ -163,6 +170,7 @@ export class BadgeCollection extends Message<BadgeCollection> {
     { no: 14, name: "createdBy", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 15, name: "validBadgeIds", kind: "message", T: UintRange, repeated: true },
     { no: 16, name: "mintEscrowAddress", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 17, name: "cosmosCoinWrapperPaths", kind: "message", T: CosmosCoinWrapperPath, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BadgeCollection {
@@ -179,6 +187,61 @@ export class BadgeCollection extends Message<BadgeCollection> {
 
   static equals(a: BadgeCollection | PlainMessage<BadgeCollection> | undefined, b: BadgeCollection | PlainMessage<BadgeCollection> | undefined): boolean {
     return proto3.util.equals(BadgeCollection, a, b);
+  }
+}
+
+/**
+ * @generated from message badges.CosmosCoinWrapperPath
+ */
+export class CosmosCoinWrapperPath extends Message<CosmosCoinWrapperPath> {
+  /**
+   * @generated from field: string address = 1;
+   */
+  address = "";
+
+  /**
+   * @generated from field: string denom = 2;
+   */
+  denom = "";
+
+  /**
+   * @generated from field: repeated badges.UintRange ownershipTimes = 3;
+   */
+  ownershipTimes: UintRange[] = [];
+
+  /**
+   * @generated from field: repeated badges.UintRange badgeIds = 4;
+   */
+  badgeIds: UintRange[] = [];
+
+  constructor(data?: PartialMessage<CosmosCoinWrapperPath>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.CosmosCoinWrapperPath";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "denom", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "ownershipTimes", kind: "message", T: UintRange, repeated: true },
+    { no: 4, name: "badgeIds", kind: "message", T: UintRange, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CosmosCoinWrapperPath {
+    return new CosmosCoinWrapperPath().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CosmosCoinWrapperPath {
+    return new CosmosCoinWrapperPath().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CosmosCoinWrapperPath {
+    return new CosmosCoinWrapperPath().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: CosmosCoinWrapperPath | PlainMessage<CosmosCoinWrapperPath> | undefined, b: CosmosCoinWrapperPath | PlainMessage<CosmosCoinWrapperPath> | undefined): boolean {
+    return proto3.util.equals(CosmosCoinWrapperPath, a, b);
   }
 }
 

@@ -265,6 +265,20 @@ export interface iAddressList {
 /**
  * @category Interfaces
  */
+export interface iCosmosCoinWrapperPathAddObject<T extends NumberType> {
+  /** The denom of the IBC wrapper path. */
+  denom: string;
+
+  /** The path of the IBC wrapper path. */
+  badgeIds: iUintRange<T>[];
+
+  /** The times of the IBC wrapper path. */
+  ownershipTimes: iUintRange<T>[];
+}
+
+/**
+ * @category Interfaces
+ */
 export interface iTransfer<T extends NumberType> {
   /**
    * The address to transfer from.

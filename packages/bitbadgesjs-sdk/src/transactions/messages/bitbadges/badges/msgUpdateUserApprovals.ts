@@ -47,7 +47,6 @@ export class MsgUpdateUserApprovals<T extends NumberType>
   autoApproveAllIncomingTransfers?: boolean;
   updateUserPermissions?: boolean;
   userPermissions?: UserPermissions<T>;
-  creatorOverride: BitBadgesAddress;
 
   constructor(msg: iMsgUpdateUserApprovals<T>) {
     super();
@@ -65,7 +64,6 @@ export class MsgUpdateUserApprovals<T extends NumberType>
     this.autoApproveAllIncomingTransfers = msg.autoApproveAllIncomingTransfers;
     this.updateUserPermissions = msg.updateUserPermissions;
     this.userPermissions = msg.userPermissions ? new UserPermissions(msg.userPermissions) : undefined;
-    this.creatorOverride = msg.creatorOverride;
   }
 
   getNumberFieldNames(): string[] {
@@ -122,8 +120,7 @@ export class MsgUpdateUserApprovals<T extends NumberType>
             canUpdateIncomingApprovals: [],
             canUpdateOutgoingApprovals: [],
             canUpdateAutoApproveAllIncomingTransfers: []
-          }),
-      creatorOverride: protoMsg.creatorOverride
+          })
     });
   }
 
@@ -134,8 +131,7 @@ export class MsgUpdateUserApprovals<T extends NumberType>
       collectionId: this.collectionId,
       outgoingApprovals: this.outgoingApprovals?.map((x) => x.toBech32Addresses(prefix)),
       incomingApprovals: this.incomingApprovals?.map((x) => x.toBech32Addresses(prefix)),
-      userPermissions: this.userPermissions?.toBech32Addresses(prefix),
-      creatorOverride: getConvertFunctionFromPrefix(prefix)(this.creatorOverride)
+      userPermissions: this.userPermissions?.toBech32Addresses(prefix)
     });
   }
 

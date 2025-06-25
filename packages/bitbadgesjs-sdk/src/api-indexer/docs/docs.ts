@@ -26,6 +26,7 @@ import {
   BadgeMetadataTimeline,
   CollectionMetadataTimeline,
   CustomDataTimeline,
+  CosmosCoinWrapperPath,
   IsArchivedTimeline,
   ManagerTimeline,
   OffChainBalancesMetadataTimeline,
@@ -320,6 +321,7 @@ export class CollectionDoc<T extends NumberType>
   updateHistory: UpdateHistory<T>[];
   validBadgeIds: UintRangeArray<T>;
   mintEscrowAddress: string;
+  cosmosCoinWrapperPaths: CosmosCoinWrapperPath<T>[];
 
   constructor(data: iCollectionDoc<T>) {
     super();
@@ -348,6 +350,7 @@ export class CollectionDoc<T extends NumberType>
 
     this.mintEscrowAddress = data.mintEscrowAddress;
     this.validBadgeIds = UintRangeArray.From(data.validBadgeIds);
+    this.cosmosCoinWrapperPaths = data.cosmosCoinWrapperPaths.map((cosmosCoinWrapperPaths) => new CosmosCoinWrapperPath(cosmosCoinWrapperPaths));
   }
 
   private getTimelineValuesAtTime(time?: NumberType) {

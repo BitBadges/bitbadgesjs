@@ -5,6 +5,7 @@ import type { NumberType } from '../common/string-numbers.js';
 
 const AddressGenerationPrefix = 0x09;
 const AccountGenerationPrefix = 0x08;
+const DenomGenerationPrefix = 0x0c;
 
 function Module(moduleName: string, ...derivationKeys: Buffer[]) {
   let mKey = Buffer.from(moduleName);
@@ -94,4 +95,24 @@ export function getAliasDerivationKeysForCollection(collectionId: CollectionId) 
 export function getAliasDerivationKeysForList(id: NumberType) {
   const derivationKey = [Buffer.from([AddressGenerationPrefix]), uint64ToBufferBE(id)];
   return derivationKey;
+}
+
+/**
+ * Generate denom alias address for account
+ *
+ * @category Aliases
+ */
+export function getAliasDerivationKeysForDenom(denom: string) {
+  const derivationKey = [Buffer.from([DenomGenerationPrefix]), Buffer.from(denom, 'utf8')];
+  return derivationKey;
+}
+
+/**
+ * Generate denom alias address for account
+ *
+ * @category Aliases
+ */
+export function generateAliasAddressForDenom(denom: string) {
+  const derivationKey = getAliasDerivationKeysForDenom(denom);
+  return generateAlias('badges', derivationKey);
 }

@@ -18,13 +18,11 @@ import { normalizeMessagesIfNecessary } from '../../base.js';
 export class MsgCreateAddressLists extends CustomTypeClass<MsgCreateAddressLists> implements MsgCreateAddressLists {
   creator: BitBadgesAddress;
   addressLists: AddressList[];
-  creatorOverride: BitBadgesAddress;
 
   constructor(msg: iMsgCreateAddressLists) {
     super();
     this.creator = msg.creator;
     this.addressLists = msg.addressLists.map((x) => new AddressList(x));
-    this.creatorOverride = msg.creatorOverride;
   }
 
   toProto(): badges.MsgCreateAddressLists {
@@ -42,8 +40,7 @@ export class MsgCreateAddressLists extends CustomTypeClass<MsgCreateAddressLists
   static fromProto(protoMsg: badges.MsgCreateAddressLists): MsgCreateAddressLists {
     return new MsgCreateAddressLists({
       creator: protoMsg.creator,
-      addressLists: protoMsg.addressLists.map((x) => AddressList.fromProto(x)),
-      creatorOverride: protoMsg.creatorOverride
+      addressLists: protoMsg.addressLists.map((x) => AddressList.fromProto(x))
     });
   }
 
@@ -57,8 +54,7 @@ export class MsgCreateAddressLists extends CustomTypeClass<MsgCreateAddressLists
             createdBy: getConvertFunctionFromPrefix(prefix)(x.createdBy ?? ''),
             addresses: x.addresses.map((y) => getConvertFunctionFromPrefix(prefix)(y))
           })
-      ),
-      creatorOverride: getConvertFunctionFromPrefix(prefix)(this.creatorOverride)
+      )
     });
   }
 

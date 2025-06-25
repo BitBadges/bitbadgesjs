@@ -2,9 +2,12 @@ import type { NumberType } from '@/common/string-numbers.js';
 import { Stringify } from '@/common/string-numbers.js';
 import * as badges from '@/proto/badges/tx_pb.js';
 
+import { getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
 import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
 import { CollectionApproval } from '@/core/approvals.js';
+import { CosmosCoin } from '@/core/coin.js';
+import { CosmosCoinWrapperPathAddObject } from '@/core/ibc-wrappers.js';
 import {
   BadgeMetadataTimeline,
   CollectionMetadataTimeline,
@@ -16,13 +19,10 @@ import {
 } from '@/core/misc.js';
 import { CollectionPermissions } from '@/core/permissions.js';
 import { UintRange, UintRangeArray } from '@/core/uintRanges.js';
-import { getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
 import { CollectionId } from '@/interfaces/index.js';
+import { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 import { normalizeMessagesIfNecessary } from '../../base.js';
 import type { iMsgUpdateCollection } from './interfaces.js';
-import { JsonValue, JsonReadOptions } from '@bufbuild/protobuf';
-import { CosmosCoin } from '@/core/coin.js';
-
 /**
  * MsgUpdateCollection is a transaction that can be used to update any collection. It is only executable by the manager.
  *
@@ -57,8 +57,8 @@ export class MsgUpdateCollection<T extends NumberType> extends BaseNumberTypeCla
   standardsTimeline?: StandardsTimeline<T>[];
   updateIsArchivedTimeline?: boolean;
   isArchivedTimeline?: IsArchivedTimeline<T>[];
-  creatorOverride: BitBadgesAddress;
   mintEscrowCoinsToTransfer?: CosmosCoin<T>[];
+  cosmosCoinWrapperPathsToAdd?: CosmosCoinWrapperPathAddObject<T>[];
 
   constructor(msg: iMsgUpdateCollection<T>) {
     super();
@@ -88,8 +88,10 @@ export class MsgUpdateCollection<T extends NumberType> extends BaseNumberTypeCla
     this.standardsTimeline = msg.standardsTimeline ? msg.standardsTimeline.map((x) => new StandardsTimeline(x)) : undefined;
     this.updateIsArchivedTimeline = msg.updateIsArchivedTimeline;
     this.isArchivedTimeline = msg.isArchivedTimeline ? msg.isArchivedTimeline.map((x) => new IsArchivedTimeline(x)) : undefined;
-    this.creatorOverride = msg.creatorOverride;
     this.mintEscrowCoinsToTransfer = msg.mintEscrowCoinsToTransfer ? msg.mintEscrowCoinsToTransfer.map((x) => new CosmosCoin(x)) : undefined;
+    this.cosmosCoinWrapperPathsToAdd = msg.cosmosCoinWrapperPathsToAdd
+      ? msg.cosmosCoinWrapperPathsToAdd.map((x) => new CosmosCoinWrapperPathAddObject(x))
+      : undefined;
   }
 
   getNumberFieldNames(): string[] {
@@ -148,8 +150,8 @@ export class MsgUpdateCollection<T extends NumberType> extends BaseNumberTypeCla
       standardsTimeline: protoMsg.standardsTimeline?.map((x) => StandardsTimeline.fromProto(x, convertFunction)),
       updateIsArchivedTimeline: protoMsg.updateIsArchivedTimeline,
       isArchivedTimeline: protoMsg.isArchivedTimeline?.map((x) => IsArchivedTimeline.fromProto(x, convertFunction)),
-      creatorOverride: protoMsg.creatorOverride,
-      mintEscrowCoinsToTransfer: protoMsg.mintEscrowCoinsToTransfer?.map((x) => CosmosCoin.fromProto(x, convertFunction))
+      mintEscrowCoinsToTransfer: protoMsg.mintEscrowCoinsToTransfer?.map((x) => CosmosCoin.fromProto(x, convertFunction)),
+      cosmosCoinWrapperPathsToAdd: protoMsg.cosmosCoinWrapperPathsToAdd?.map((x) => CosmosCoinWrapperPathAddObject.fromProto(x, convertFunction))
     });
   }
 
@@ -160,8 +162,7 @@ export class MsgUpdateCollection<T extends NumberType> extends BaseNumberTypeCla
       collectionId: this.collectionId,
       collectionPermissions: this.collectionPermissions?.toBech32Addresses(prefix),
       managerTimeline: this.managerTimeline?.map((x) => x.toBech32Addresses(prefix)),
-      collectionApprovals: this.collectionApprovals?.map((x) => x.toBech32Addresses(prefix)),
-      creatorOverride: getConvertFunctionFromPrefix(prefix)(this.creatorOverride)
+      collectionApprovals: this.collectionApprovals?.map((x) => x.toBech32Addresses(prefix))
     });
   }
 

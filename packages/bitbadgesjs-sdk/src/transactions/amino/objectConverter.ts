@@ -31,6 +31,7 @@ import {
 import { MsgExecuteContract, MsgInstantiateContract, MsgStoreCode } from '@/proto/cosmwasm/wasm/v1/index.js';
 import { MsgCreateMap, MsgDeleteMap, MsgSetValue, MsgUpdateMap } from '@/proto/maps/index.js';
 import { MsgExecuteContractCompat, MsgInstantiateContractCompat } from '@/proto/wasmx/index.js';
+import { MsgTransfer } from '@/proto/ibc/index.js';
 
 export const ProtoTypeRegistry = createRegistry(
   MsgSend,
@@ -71,7 +72,8 @@ export const ProtoTypeRegistry = createRegistry(
   MsgRevoke,
   GenericAuthorization,
   SendAuthorization,
-  StakeAuthorization
+  StakeAuthorization,
+  MsgTransfer
 );
 
 /**

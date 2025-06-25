@@ -28,14 +28,12 @@ export class MsgTransferBadges<T extends NumberType> extends BaseNumberTypeClass
   creator: BitBadgesAddress;
   collectionId: CollectionId;
   transfers: Transfer<T>[];
-  creatorOverride: BitBadgesAddress;
 
   constructor(msg: iMsgTransferBadges<T>) {
     super();
     this.creator = msg.creator;
     this.collectionId = msg.collectionId;
     this.transfers = msg.transfers.map((x) => new Transfer(x));
-    this.creatorOverride = msg.creatorOverride;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgTransferBadges<U> {
@@ -70,8 +68,7 @@ export class MsgTransferBadges<T extends NumberType> extends BaseNumberTypeClass
     return new MsgTransferBadges({
       creator: protoMsg.creator,
       collectionId: protoMsg.collectionId,
-      transfers: protoMsg.transfers.map((x) => Transfer.fromProto(x, convertFunction)),
-      creatorOverride: protoMsg.creatorOverride
+      transfers: protoMsg.transfers.map((x) => Transfer.fromProto(x, convertFunction))
     });
   }
 
@@ -79,8 +76,7 @@ export class MsgTransferBadges<T extends NumberType> extends BaseNumberTypeClass
     return new MsgTransferBadges({
       creator: getConvertFunctionFromPrefix(prefix)(this.creator),
       collectionId: this.collectionId,
-      transfers: this.transfers.map((x) => x.toBech32Addresses(prefix)),
-      creatorOverride: getConvertFunctionFromPrefix(prefix)(this.creatorOverride)
+      transfers: this.transfers.map((x) => x.toBech32Addresses(prefix))
     });
   }
 

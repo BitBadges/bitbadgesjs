@@ -20,13 +20,11 @@ import { normalizeMessagesIfNecessary } from '../../base.js';
 export class MsgDeleteCollection<T extends NumberType> extends BaseNumberTypeClass<MsgDeleteCollection<T>> implements iMsgDeleteCollection<T> {
   creator: BitBadgesAddress;
   collectionId: CollectionId;
-  creatorOverride: BitBadgesAddress;
 
   constructor(msg: iMsgDeleteCollection<T>) {
     super();
     this.creator = msg.creator;
     this.collectionId = msg.collectionId;
-    this.creatorOverride = msg.creatorOverride;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgDeleteCollection<U> {
@@ -60,16 +58,14 @@ export class MsgDeleteCollection<T extends NumberType> extends BaseNumberTypeCla
   static fromProto<U extends NumberType>(protoMsg: badges.MsgDeleteCollection): MsgDeleteCollection<U> {
     return new MsgDeleteCollection({
       creator: protoMsg.creator,
-      collectionId: protoMsg.collectionId,
-      creatorOverride: protoMsg.creatorOverride
+      collectionId: protoMsg.collectionId
     });
   }
 
   toBech32Addresses(prefix: string): MsgDeleteCollection<T> {
     return new MsgDeleteCollection({
       creator: getConvertFunctionFromPrefix(prefix)(this.creator),
-      collectionId: this.collectionId,
-      creatorOverride: getConvertFunctionFromPrefix(prefix)(this.creatorOverride)
+      collectionId: this.collectionId
     });
   }
 

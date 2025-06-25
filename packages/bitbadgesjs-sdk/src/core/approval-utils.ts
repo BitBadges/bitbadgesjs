@@ -237,11 +237,11 @@ export const getNonMintApprovals = <T extends NumberType>(collectionApprovals: C
     .map((x) => {
       if (x.fromList.checkAddress('Mint')) {
         if (x.fromListId === 'All') {
-          return {
+          return new CollectionApprovalWithDetails({
             ...x,
             fromList: getReservedAddressList('!Mint'),
             fromListId: '!Mint'
-          };
+          });
         }
 
         const remaining = x.fromList.clone().remove(AddressList.Reserved('Mint'));
@@ -249,11 +249,11 @@ export const getNonMintApprovals = <T extends NumberType>(collectionApprovals: C
           return undefined;
         }
 
-        return {
+        return new CollectionApprovalWithDetails({
           ...x,
           fromList: remaining,
           fromListId: generateReservedListId(remaining)
-        };
+        });
       } else {
         return x;
       }

@@ -1,5 +1,5 @@
 import { getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
-import type { BitBadgesAddress, iUpdateHistory, UNIXMilliTimestamp } from '@/api-indexer/docs/interfaces.js';
+import type { BitBadgesAddress, iCosmosCoinWrapperPath, iUpdateHistory, UNIXMilliTimestamp } from '@/api-indexer/docs/interfaces.js';
 import { BadgeMetadataDetails, CollectionMetadataDetails } from '@/api-indexer/metadata/badgeMetadata.js';
 import {
   BaseNumberTypeClass,
@@ -1853,6 +1853,42 @@ export function getStandardsTimesAndValues<T extends NumberType>(
   }
 
   return { times, values };
+}
+
+/**
+ * @inheritDoc iCosmosCoinWrapperPath
+ * @category Indexer
+ */
+export class CosmosCoinWrapperPath<T extends NumberType> extends CustomTypeClass<CosmosCoinWrapperPath<T>> implements iCosmosCoinWrapperPath<T> {
+  address: string;
+  denom: string;
+  ownershipTimes: UintRangeArray<T>;
+  badgeIds: UintRangeArray<T>;
+
+  constructor(data: iCosmosCoinWrapperPath<T>) {
+    super();
+    this.address = data.address;
+    this.denom = data.denom;
+    this.ownershipTimes = UintRangeArray.From(data.ownershipTimes);
+    this.badgeIds = UintRangeArray.From(data.badgeIds);
+  }
+
+  getNumberFieldNames(): string[] {
+    return [];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CosmosCoinWrapperPath<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CosmosCoinWrapperPath<U>;
+  }
+
+  static fromProto<U extends NumberType>(protoMsg: badges.CosmosCoinWrapperPath, convertFunction: (item: NumberType) => U): CosmosCoinWrapperPath<U> {
+    return new CosmosCoinWrapperPath({
+      address: protoMsg.address,
+      denom: protoMsg.denom,
+      ownershipTimes: UintRangeArray.From(protoMsg.ownershipTimes),
+      badgeIds: UintRangeArray.From(protoMsg.badgeIds)
+    }).convert(convertFunction);
+  }
 }
 
 /**

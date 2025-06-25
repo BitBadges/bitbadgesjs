@@ -20,3 +20,6 @@ export * from './subscriptions.js';
 export * from './bids.js';
 export * from './quests.js';
 export * from './products.js';
+export * from './ibc-wrappers.js';
+
+export * from './cosmos-wrappers.js';
