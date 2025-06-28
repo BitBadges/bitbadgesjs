@@ -308,6 +308,12 @@ export interface iTransferActivityDoc<T extends NumberType> extends iActivityDoc
   coinTransfers?: iCoinTransferItem<T>[];
   /** Approvals used for the transfer */
   approvalsUsed?: iApprovalIdentifierDetails<T>[];
+  /** The badge ID for the transfer */
+  badgeId?: T;
+  /** The price of the transfer */
+  price?: T;
+  /** The volume of the transfer */
+  volume?: T;
 }
 
 /**

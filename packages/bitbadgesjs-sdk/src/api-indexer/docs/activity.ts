@@ -126,6 +126,9 @@ export class TransferActivityDoc<T extends NumberType> extends ActivityDoc<T> im
   precalculationOptions?: PrecalculationOptions<T>;
   coinTransfers?: CoinTransferItem<T>[];
   approvalsUsed?: ApprovalIdentifierDetails<T>[];
+  badgeId?: T;
+  price?: T;
+  volume?: T;
 
   constructor(data: iTransferActivityDoc<T>) {
     super(data);
@@ -144,10 +147,13 @@ export class TransferActivityDoc<T extends NumberType> extends ActivityDoc<T> im
     this.precalculationOptions = data.precalculationOptions ? new PrecalculationOptions(data.precalculationOptions) : undefined;
     this.coinTransfers = data.coinTransfers ? data.coinTransfers.map((x) => new CoinTransferItem(x)) : undefined;
     this.approvalsUsed = data.approvalsUsed ? data.approvalsUsed.map((x) => new ApprovalIdentifierDetails(x)) : undefined;
+    this.badgeId = data.badgeId;
+    this.price = data.price;
+    this.volume = data.volume;
   }
 
   getNumberFieldNames(): string[] {
-    return [...super.getNumberFieldNames()];
+    return [...super.getNumberFieldNames(), 'badgeId', 'price', 'volume'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): TransferActivityDoc<U> {
